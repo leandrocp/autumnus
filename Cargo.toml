@@ -2,6 +2,7 @@
 name = "autumnus"
 version = "0.0.0"
 edition = "2021"
+description = "reserved"
 license = "MIT"
 
 [dependencies]
