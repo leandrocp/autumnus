@@ -17,7 +17,7 @@ pub struct Options {
     debug: bool,
 }
 
-pub fn highlight(lang_or_path: &str, source: &str, options: Options) -> String {
+pub fn highlight_to_html_inline(lang_or_path: &str, source: &str, options: Options) -> String {
     let lang = Language::guess(lang_or_path, source);
     let formatter = HtmlInline::new(lang, options);
     format(&formatter, lang, source)
@@ -75,7 +75,7 @@ end
         let path = Path::new("themes/catppuccin_frappe.json");
         let theme = Theme::from_file(path).unwrap();
 
-        let result = highlight(
+        let result = highlight_to_html_inline(
             "elixir",
             code,
             Options {
@@ -92,19 +92,19 @@ end
 
     #[test]
     fn test_guess_language_by_file_name() {
-        let result = highlight("app.ex", "foo = 1", Options::default());
+        let result = highlight_to_html_inline("app.ex", "foo = 1", Options::default());
         assert!(result.as_str().contains("language-elixir"))
     }
 
     #[test]
     fn test_guess_language_by_shebang() {
-        let result = highlight("test", "#!/usr/bin/env elixir", Options::default());
+        let result = highlight_to_html_inline("test", "#!/usr/bin/env elixir", Options::default());
         assert!(result.as_str().contains("language-elixir"))
     }
 
     #[test]
     fn test_fallback_to_plain_text() {
-        let result = highlight("none", "source code", Options::default());
+        let result = highlight_to_html_inline("none", "source code", Options::default());
         assert!(result.as_str().contains("language-plaintext"))
     }
 }
