@@ -1,6 +1,5 @@
 pub mod constants;
 pub mod formatter;
-pub mod guess_language;
 pub mod languages;
 pub mod themes;
 
