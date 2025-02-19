@@ -12,14 +12,15 @@ use tree_sitter_highlight::Highlighter;
 
 #[derive(Debug, Default)]
 pub struct Options {
+    theme: Theme,
     pre_class: Option<String>,
     italic: bool,
     debug: bool,
 }
 
-pub fn highlight(lang_or_path: &str, source: &str, theme: Theme, options: Options) -> String {
+pub fn highlight(lang_or_path: &str, source: &str, options: Options) -> String {
     let lang = Language::guess(lang_or_path, source);
-    let formatter = HtmlInline::new(lang, theme, options);
+    let formatter = HtmlInline::new(lang, options);
     format(&formatter, lang, source)
 }
 
@@ -75,7 +76,14 @@ end
         let path = Path::new("themes/catppuccin_frappe.json");
         let theme = Theme::from_file(path).unwrap();
 
-        let result = highlight("elixir", code, theme, Options::default());
+        let result = highlight(
+            "elixir",
+            code,
+            Options {
+                theme,
+                ..Options::default()
+            },
+        );
 
         // println!("{}", result);
         // std::fs::write("result.html", result).unwrap();
@@ -85,29 +93,19 @@ end
 
     #[test]
     fn test_guess_language_by_file_name() {
-        let path = Path::new("themes/catppuccin_frappe.json");
-        let theme = Theme::from_file(path).unwrap();
-        let result = highlight("app.ex", "foo = 1", theme, Options::default());
-
+        let result = highlight("app.ex", "foo = 1", Options::default());
         assert!(result.as_str().contains("language-elixir"))
     }
 
     #[test]
     fn test_guess_language_by_shebang() {
-        let path = Path::new("themes/catppuccin_frappe.json");
-        let theme = Theme::from_file(path).unwrap();
-        let result = highlight("test", "#!/usr/bin/env elixir", theme, Options::default());
-
+        let result = highlight("test", "#!/usr/bin/env elixir", Options::default());
         assert!(result.as_str().contains("language-elixir"))
     }
 
     #[test]
     fn test_fallback_to_plain_text() {
-        let path = Path::new("themes/catppuccin_frappe.json");
-        let theme = Theme::from_file(path).unwrap();
-
-        let result = highlight("none", "source code", theme, Options::default());
-
+        let result = highlight("none", "source code", Options::default());
         assert!(result.as_str().contains("language-plaintext"))
     }
 }

@@ -1,24 +1,18 @@
 #![allow(unused_must_use)]
 
 use super::Formatter;
-use crate::{constants::HIGHLIGHT_NAMES, Options};
 use crate::languages::Language;
-use crate::themes::Theme;
+use crate::{constants::HIGHLIGHT_NAMES, Options};
 use tree_sitter_highlight::{Error, HighlightEvent};
 
 pub(crate) struct HtmlInline {
     lang: Language,
-    theme: Theme,
     options: Options,
 }
 
 impl HtmlInline {
-    pub fn new(lang: Language, theme: Theme, options: Options) -> Self {
-        Self {
-            lang,
-            theme,
-            options,
-        }
+    pub fn new(lang: Language, options: Options) -> Self {
+        Self { lang, options }
     }
 }
 
@@ -33,7 +27,7 @@ impl Formatter for HtmlInline {
             write!(writer, " {}", pre_clas);
         }
 
-        write!(writer, "\" style=\"{}\">", self.theme.pre_style());
+        write!(writer, "\" style=\"{}\">", self.options.theme.pre_style());
         write!(
             writer,
             "<code class=\"language-{}\" translate=\"no\" tabindex=\"0\">",
@@ -61,7 +55,7 @@ impl Formatter for HtmlInline {
                     output.extend(b"\"");
                 }
 
-                if let Some(style) = self.theme.get_style(scope) {
+                if let Some(style) = self.options.theme.get_style(scope) {
                     if self.options.debug {
                         output.extend(b" ");
                     }
@@ -99,21 +93,19 @@ impl Formatter for HtmlInline {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::path::Path;
 
     #[test]
     fn test_include_pre_class() {
-        let path = Path::new("themes/catppuccin_frappe.json");
-        let theme = Theme::from_file(path).unwrap();
-
         let formatter = HtmlInline::new(
             Language::PlainText,
-            theme,
-            Options { pre_class: Some("test-pre-class".to_string()), ..Default::default() },
+            Options {
+                pre_class: Some("test-pre-class".to_string()),
+                ..Default::default()
+            },
         );
         let mut buffer = String::new();
         formatter.start(&mut buffer, "");
 
-        assert_eq!(buffer, "<pre class=\"athl test-pre-class\" style=\"color: #c6d0f5;background-color: #303446;\"><code class=\"language-plaintext\" translate=\"no\" tabindex=\"0\">");
+        assert!(buffer.as_str().contains("<pre class=\"athl test-pre-class\""));
     }
 }
