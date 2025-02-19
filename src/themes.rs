@@ -86,7 +86,7 @@ impl Theme {
 }
 
 impl Style {
-    pub fn css(&self) -> String {
+    pub fn css(&self, enable_italic: bool) -> String {
         let fg = self
             .fg
             .as_ref()
@@ -107,7 +107,8 @@ impl Style {
         };
 
         let bold = if self.bold { "font-weight: bold;" } else { "" };
-        let italic = if self.italic {
+
+        let italic = if enable_italic && self.italic  {
             "font-style: italic;"
         } else {
             ""

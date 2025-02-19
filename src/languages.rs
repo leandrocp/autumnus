@@ -36,11 +36,11 @@ impl Language {
         self.name().to_ascii_lowercase().replace(" ", "")
     }
 
-    pub fn config(&self) -> &LazyLock<HighlightConfiguration> {
+    pub fn config(&self) -> &'static HighlightConfiguration {
         match self {
-            Language::Diff => &DIFF_CONFIG,
-            Language::Elixir => &ELIXIR_CONFIG,
-            _ => &PLAIN_TEXT_CONFIG,
+            Language::Diff => &*DIFF_CONFIG,
+            Language::Elixir => &*ELIXIR_CONFIG,
+            _ => &*PLAIN_TEXT_CONFIG,
         }
     }
 }

@@ -10,15 +10,16 @@ use crate::languages::Language;
 use themes::Theme;
 use tree_sitter_highlight::Highlighter;
 
-pub fn highlight(
-    lang_or_path: &str,
-    source: &str,
-    theme: Theme,
+#[derive(Debug, Default)]
+pub struct Options {
     pre_class: Option<String>,
+    italic: bool,
     debug: bool,
-) -> String {
+}
+
+pub fn highlight(lang_or_path: &str, source: &str, theme: Theme, options: Options) -> String {
     let lang = Language::guess(lang_or_path, source);
-    let formatter = HtmlInline::new(lang, theme, pre_class, debug);
+    let formatter = HtmlInline::new(lang, theme, options);
     format(&formatter, lang, source)
 }
 
@@ -28,12 +29,12 @@ where
 {
     let mut buffer = String::new();
     let mut highlighter = Highlighter::new();
-    let hl_config = lang.config();
 
-    // TODO: sub lang
     let events = highlighter
-        .highlight(hl_config, source.as_bytes(), None, |_| None)
-        .unwrap();
+        .highlight(lang.config(), source.as_bytes(), None, |injected| {
+            Some(Language::guess(injected, "").config())
+        })
+        .expect("failed to generate highlight events");
 
     formatter.start(&mut buffer, source);
     formatter.write(&mut buffer, source, events);
@@ -60,10 +61,10 @@ mod tests {
 end
 "#;
 
-        let expected = r#"<pre class="athl" style="color: #c6d0f5;background-color: #303446;"><code class="language-elixir" translate="no" tabindex="0"><span class="line" data-athl-no="1"><span style="color: #ca9ee6;">defmodule</span> <span style="color: #babbf1;font-style: italic;">Foo</span> <span style="color: #ca9ee6;">do</span>
-</span><span class="line" data-athl-no="2">  <span style="color: #949cbb;font-style: italic;">@</span><span style="color: #949cbb;font-style: italic;">moduledoc</span> <span style="color: #949cbb;font-style: italic;">&quot;&quot;&quot;</span>
-</span><span class="line" data-athl-no="3"><span style="color: #949cbb;font-style: italic;">  Test Module</span>
-</span><span class="line" data-athl-no="4"><span style="color: #949cbb;font-style: italic;">  &quot;&quot;&quot;</span>
+        let expected = r#"<pre class="athl" style="color: #c6d0f5;background-color: #303446;"><code class="language-elixir" translate="no" tabindex="0"><span class="line" data-athl-no="1"><span style="color: #ca9ee6;">defmodule</span> <span style="color: #babbf1;">Foo</span> <span style="color: #ca9ee6;">do</span>
+</span><span class="line" data-athl-no="2">  <span style="color: #949cbb;">@</span><span style="color: #949cbb;">moduledoc</span> <span style="color: #949cbb;">&quot;&quot;&quot;</span>
+</span><span class="line" data-athl-no="3"><span style="color: #949cbb;">  Test Module</span>
+</span><span class="line" data-athl-no="4"><span style="color: #949cbb;">  &quot;&quot;&quot;</span>
 </span><span class="line" data-athl-no="5">
 </span><span class="line" data-athl-no="6">  <span style="color: #ef9f76;">@</span><span style="color: #ef9f76;">projects</span> <span style="color: #949cbb;">[</span><span style="color: #a6d189;">&quot;Phoenix&quot;</span><span style="color: #949cbb;">,</span> <span style="color: #a6d189;">&quot;MDEx&quot;</span><span style="color: #949cbb;">]</span>
 </span><span class="line" data-athl-no="7">
@@ -74,7 +75,7 @@ end
         let path = Path::new("themes/catppuccin_frappe.json");
         let theme = Theme::from_file(path).unwrap();
 
-        let result = highlight("elixir", code, theme, None, false);
+        let result = highlight("elixir", code, theme, Options::default());
 
         // println!("{}", result);
         // std::fs::write("result.html", result).unwrap();
@@ -87,9 +88,8 @@ end
         let path = Path::new("themes/catppuccin_frappe.json");
         let theme = Theme::from_file(path).unwrap();
 
-        let result = highlight("none", "source code", theme, None, false);
-        
+        let result = highlight("none", "source code", theme, Options::default());
+
         assert!(result.as_str().contains("language-plaintext"))
     }
-
 }

@@ -1,7 +1,7 @@
 #![allow(unused_must_use)]
 
 use super::Formatter;
-use crate::constants::HIGHLIGHT_NAMES;
+use crate::{constants::HIGHLIGHT_NAMES, Options};
 use crate::languages::Language;
 use crate::themes::Theme;
 use tree_sitter_highlight::{Error, HighlightEvent};
@@ -9,17 +9,15 @@ use tree_sitter_highlight::{Error, HighlightEvent};
 pub(crate) struct HtmlInline {
     lang: Language,
     theme: Theme,
-    pre_class: Option<String>,
-    debug: bool,
+    options: Options,
 }
 
 impl HtmlInline {
-    pub fn new(lang: Language, theme: Theme, pre_class: Option<String>, debug: bool) -> Self {
+    pub fn new(lang: Language, theme: Theme, options: Options) -> Self {
         Self {
             lang,
             theme,
-            pre_class,
-            debug,
+            options,
         }
     }
 }
@@ -31,7 +29,7 @@ impl Formatter for HtmlInline {
     {
         write!(writer, "<pre class=\"athl");
 
-        if let Some(pre_clas) = &self.pre_class {
+        if let Some(pre_clas) = &self.options.pre_class {
             write!(writer, " {}", pre_clas);
         }
 
@@ -57,19 +55,19 @@ impl Formatter for HtmlInline {
             .render(events, source.as_bytes(), &move |highlight, output| {
                 let scope = HIGHLIGHT_NAMES[highlight.0];
 
-                if self.debug {
+                if self.options.debug {
                     output.extend(b"data-athl-hl=\"");
                     output.extend(scope.as_bytes());
                     output.extend(b"\"");
                 }
 
                 if let Some(style) = self.theme.get_style(scope) {
-                    if self.debug {
+                    if self.options.debug {
                         output.extend(b" ");
                     }
 
                     output.extend(b"style=\"");
-                    output.extend(style.css().as_bytes());
+                    output.extend(style.css(self.options.italic).as_bytes());
                     output.extend(b"\"");
                 }
             })
@@ -111,8 +109,7 @@ mod tests {
         let formatter = HtmlInline::new(
             Language::PlainText,
             theme,
-            Some("test-pre-class".to_string()),
-            false,
+            Options { pre_class: Some("test-pre-class".to_string()), ..Default::default() },
         );
         let mut buffer = String::new();
         formatter.start(&mut buffer, "");
