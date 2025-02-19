@@ -75,6 +75,11 @@ impl Formatter for HtmlInline {
             })
             .expect("TODO");
 
+        // TODO: escape { }
+        //             let span = v_htmlescape::escape(span)
+        //                 .to_string()
+        //                 .replace('{', "&lbrace;")
+        //                 .replace('}', "&rbrace;");
         for (i, line) in renderer.lines().enumerate() {
             write!(
                 writer,
@@ -83,39 +88,6 @@ impl Formatter for HtmlInline {
                 line
             );
         }
-
-        // for event in events {
-        //     let event = event.expect("error formatting");
-        //
-        //     match event {
-        //         HighlightEvent::HighlightStart(idx) => {
-        //             let scope = HIGHLIGHT_NAMES[idx.0];
-        //
-        //             write!(writer, "<span");
-        //
-        //             if self.debug {
-        //                 write!(writer, " data-athl-hl=\"{}\"", scope);
-        //             }
-        //
-        //             if let Some(style) = self.theme.get_style(scope) {
-        //                 write!(writer, " style=\"{}\"", style.css());
-        //             }
-        //
-        //             write!(writer, ">");
-        //         }
-        //         HighlightEvent::Source { start, end } => {
-        //             let span = source.get(start..end).expect("failed to get source bounds");
-        //             let span = v_htmlescape::escape(span)
-        //                 .to_string()
-        //                 .replace('{', "&lbrace;")
-        //                 .replace('}', "&rbrace;");
-        //             writer.write_str(&span);
-        //         }
-        //         HighlightEvent::HighlightEnd => {
-        //             writer.write_str("</span>");
-        //         }
-        //     }
-        // }
     }
 
     fn finish<W>(&self, writer: &mut W, _: &str)
@@ -123,5 +95,28 @@ impl Formatter for HtmlInline {
         W: std::fmt::Write,
     {
         writer.write_str("</code></pre>");
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::Path;
+
+    #[test]
+    fn test_include_pre_class() {
+        let path = Path::new("themes/catppuccin_frappe.json");
+        let theme = Theme::from_file(path).unwrap();
+
+        let formatter = HtmlInline::new(
+            Language::PlainText,
+            theme,
+            Some("test-pre-class".to_string()),
+            false,
+        );
+        let mut buffer = String::new();
+        formatter.start(&mut buffer, "");
+
+        assert_eq!(buffer, "<pre class=\"athl test-pre-class\" style=\"color: #c6d0f5;background-color: #303446;\"><code class=\"language-plaintext\" translate=\"no\" tabindex=\"0\">");
     }
 }
