@@ -84,6 +84,24 @@ end
     }
 
     #[test]
+    fn test_guess_language_by_file_name() {
+        let path = Path::new("themes/catppuccin_frappe.json");
+        let theme = Theme::from_file(path).unwrap();
+        let result = highlight("app.ex", "foo = 1", theme, Options::default());
+
+        assert!(result.as_str().contains("language-elixir"))
+    }
+
+    #[test]
+    fn test_guess_language_by_shebang() {
+        let path = Path::new("themes/catppuccin_frappe.json");
+        let theme = Theme::from_file(path).unwrap();
+        let result = highlight("test", "#!/usr/bin/env elixir", theme, Options::default());
+
+        assert!(result.as_str().contains("language-elixir"))
+    }
+
+    #[test]
     fn test_fallback_to_plain_text() {
         let path = Path::new("themes/catppuccin_frappe.json");
         let theme = Theme::from_file(path).unwrap();

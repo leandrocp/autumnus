@@ -1,8 +1,14 @@
+// Guess Language copied from https://github.com/Wilfred/difftastic/blob/f34a9014760efbaed01b972caba8b73754da16c9/src/parse/guess_language.rs
+
 use crate::constants::HIGHLIGHT_NAMES;
-use std::sync::LazyLock;
+use lazy_static::lazy_static;
+use regex::Regex;
+use std::borrow::Borrow;
+use std::{path::Path, sync::LazyLock};
+use strum::{EnumIter, IntoEnumIterator};
 use tree_sitter_highlight::HighlightConfiguration;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter)]
 pub(crate) enum Language {
     PlainText,
     Diff,
@@ -10,7 +16,7 @@ pub(crate) enum Language {
 }
 
 impl Language {
-    pub fn guess(lang_or_path: &str, _source: &str) -> Self {
+    pub fn guess(lang_or_path: &str, source: &str) -> Self {
         let exact = match lang_or_path {
             "elixir" => Some(Language::Elixir),
             "diff" => Some(Language::Diff),
@@ -19,9 +25,84 @@ impl Language {
 
         match exact {
             Some(lang) => lang,
-            // TODO: try to guess by path or source, otherwise fallback to PlainText
-            None => Language::PlainText,
+            None => {
+                // TODO: guess by looks_like, xml, emacs header
+
+                let path = Path::new(lang_or_path);
+
+                if let Some(lang) = Language::from_glob(path) {
+                    return lang;
+                }
+
+                if let Some(lang) = Language::from_shebang(source) {
+                    return lang;
+                }
+
+                Language::PlainText
+            }
         }
+    }
+
+    fn from_glob(path: &Path) -> Option<Self> {
+        match path.file_name() {
+            Some(name) => {
+                let name = name.to_string_lossy().into_owned();
+                for language in Language::iter() {
+                    for glob in Language::language_globs(language) {
+                        if glob.matches(&name) {
+                            return Some(language);
+                        }
+                    }
+                }
+
+                None
+            }
+            None => None,
+        }
+    }
+
+    fn language_globs(language: Language) -> Vec<glob::Pattern> {
+        let glob_strs: &'static [&'static str] = match language {
+            Language::PlainText => &[],
+            Language::Diff => &["*.diff"],
+            Language::Elixir => &["*.ex", "*.exs"],
+        };
+
+        glob_strs
+            .iter()
+            .map(|name| {
+                glob::Pattern::new(name).expect("failed to guess language by path")
+            })
+            .collect()
+    }
+
+    fn from_shebang(src: &str) -> Option<Language> {
+        lazy_static! {
+            static ref RE: Regex = Regex::new(r"#! *(?:/usr/bin/env )?([^ ]+)").unwrap();
+        }
+        if let Some(first_line) = Language::split_on_newlines(src).next() {
+            if let Some(cap) = RE.captures(first_line) {
+                let interpreter_path = Path::new(&cap[1]);
+                if let Some(name) = interpreter_path.file_name() {
+                    match name.to_string_lossy().borrow() {
+                        "elixir" => return Some(Language::Elixir),
+                        _ => {}
+                    }
+                }
+            }
+        }
+
+        None
+    }
+
+    fn split_on_newlines(s: &str) -> impl Iterator<Item = &str> {
+        s.split('\n').map(|l| {
+            if let Some(l) = l.strip_suffix('\r') {
+                l
+            } else {
+                l
+            }
+        })
     }
 
     pub fn name(&self) -> &'static str {
