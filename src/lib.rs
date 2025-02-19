@@ -5,6 +5,7 @@ pub mod themes;
 
 use crate::formatter::Formatter;
 use crate::formatter::HtmlInline;
+use crate::formatter::HtmlLinked;
 use crate::languages::Language;
 use themes::Theme;
 use tree_sitter_highlight::Highlighter;
@@ -20,6 +21,12 @@ pub struct Options {
 pub fn highlight_to_html_inline(lang_or_path: &str, source: &str, options: Options) -> String {
     let lang = Language::guess(lang_or_path, source);
     let formatter = HtmlInline::new(lang, options);
+    format(&formatter, lang, source)
+}
+
+pub fn highlight_to_html_linked(lang_or_path: &str, source: &str, options: Options) -> String {
+    let lang = Language::guess(lang_or_path, source);
+    let formatter = HtmlLinked::new(lang, options);
     format(&formatter, lang, source)
 }
 
@@ -49,7 +56,7 @@ mod tests {
     use std::path::Path;
 
     #[test]
-    fn test_highlight() {
+    fn test_highlight_html_inline() {
         let code = r#"defmodule Foo do
   @moduledoc """
   Test Module
@@ -61,15 +68,15 @@ mod tests {
 end
 "#;
 
-        let expected = r#"<pre class="athl" style="color: #c6d0f5;background-color: #303446;"><code class="language-elixir" translate="no" tabindex="0"><span class="line" data-athl-no="1"><span style="color: #ca9ee6;">defmodule</span> <span style="color: #babbf1;">Foo</span> <span style="color: #ca9ee6;">do</span>
-</span><span class="line" data-athl-no="2">  <span style="color: #949cbb;">@</span><span style="color: #949cbb;">moduledoc</span> <span style="color: #949cbb;">&quot;&quot;&quot;</span>
-</span><span class="line" data-athl-no="3"><span style="color: #949cbb;">  Test Module</span>
-</span><span class="line" data-athl-no="4"><span style="color: #949cbb;">  &quot;&quot;&quot;</span>
-</span><span class="line" data-athl-no="5">
-</span><span class="line" data-athl-no="6">  <span style="color: #ef9f76;">@</span><span style="color: #ef9f76;">projects</span> <span style="color: #949cbb;">[</span><span style="color: #a6d189;">&quot;Phoenix&quot;</span><span style="color: #949cbb;">,</span> <span style="color: #a6d189;">&quot;MDEx&quot;</span><span style="color: #949cbb;">]</span>
-</span><span class="line" data-athl-no="7">
-</span><span class="line" data-athl-no="8">  <span style="color: #ca9ee6;">def</span> <span style="color: #8caaee;">projects</span><span style="color: #949cbb;">,</span> <span style="color: #eebebe;">do: </span><span style="color: #ef9f76;">@</span><span style="color: #ef9f76;">projects</span>
-</span><span class="line" data-athl-no="9"><span style="color: #ca9ee6;">end</span>
+        let expected = r#"<pre class="athl" style="color: #c6d0f5;background-color: #303446;"><code class="language-elixir" translate="no" tabindex="0"><span class="athl-line" data-athl-line="1"><span style="color: #ca9ee6;">defmodule</span> <span style="color: #babbf1;">Foo</span> <span style="color: #ca9ee6;">do</span>
+</span><span class="athl-line" data-athl-line="2">  <span style="color: #949cbb;">@</span><span style="color: #949cbb;">moduledoc</span> <span style="color: #949cbb;">&quot;&quot;&quot;</span>
+</span><span class="athl-line" data-athl-line="3"><span style="color: #949cbb;">  Test Module</span>
+</span><span class="athl-line" data-athl-line="4"><span style="color: #949cbb;">  &quot;&quot;&quot;</span>
+</span><span class="athl-line" data-athl-line="5">
+</span><span class="athl-line" data-athl-line="6">  <span style="color: #ef9f76;">@</span><span style="color: #ef9f76;">projects</span> <span style="color: #949cbb;">[</span><span style="color: #a6d189;">&quot;Phoenix&quot;</span><span style="color: #949cbb;">,</span> <span style="color: #a6d189;">&quot;MDEx&quot;</span><span style="color: #949cbb;">]</span>
+</span><span class="athl-line" data-athl-line="7">
+</span><span class="athl-line" data-athl-line="8">  <span style="color: #ca9ee6;">def</span> <span style="color: #8caaee;">projects</span><span style="color: #949cbb;">,</span> <span style="color: #eebebe;">do: </span><span style="color: #ef9f76;">@</span><span style="color: #ef9f76;">projects</span>
+</span><span class="athl-line" data-athl-line="9"><span style="color: #ca9ee6;">end</span>
 </span></code></pre>"#;
 
         let path = Path::new("themes/catppuccin_frappe.json");
@@ -86,6 +93,45 @@ end
 
         // println!("{}", result);
         // std::fs::write("result.html", result).unwrap();
+
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_highlight_html_linked() {
+        let code = r#"defmodule Foo do
+  @moduledoc """
+  Test Module
+  """
+
+  @projects ["Phoenix", "MDEx"]
+
+  def projects, do: @projects
+end
+"#;
+
+        let expected = r#"<pre class="athl"><code class="language-elixir" translate="no" tabindex="0"><span class="athl-line" data-athl-line="1"><span class="keyword">defmodule</span> <span class="module">Foo</span> <span class="keyword">do</span>
+</span><span class="athl-line" data-athl-line="2">  <span class="comment-doc">@</span><span class="comment-doc">moduledoc</span> <span class="comment-doc">&quot;&quot;&quot;</span>
+</span><span class="athl-line" data-athl-line="3"><span class="comment-doc">  Test Module</span>
+</span><span class="athl-line" data-athl-line="4"><span class="comment-doc">  &quot;&quot;&quot;</span>
+</span><span class="athl-line" data-athl-line="5">
+</span><span class="athl-line" data-athl-line="6">  <span class="attribute">@</span><span class="attribute">projects</span> <span class="punctuation-bracket">[</span><span class="string">&quot;Phoenix&quot;</span><span class="punctuation-delimiter">,</span> <span class="string">&quot;MDEx&quot;</span><span class="punctuation-bracket">]</span>
+</span><span class="athl-line" data-athl-line="7">
+</span><span class="athl-line" data-athl-line="8">  <span class="keyword">def</span> <span class="function">projects</span><span class="punctuation-delimiter">,</span> <span class="string-special-symbol">do: </span><span class="attribute">@</span><span class="attribute">projects</span>
+</span><span class="athl-line" data-athl-line="9"><span class="keyword">end</span>
+</span></code></pre>"#;
+
+        let path = Path::new("themes/catppuccin_frappe.json");
+        let theme = Theme::from_file(path).unwrap();
+
+        let result = highlight_to_html_linked(
+            "elixir",
+            code,
+            Options {
+                theme,
+                ..Options::default()
+            },
+        );
 
         assert_eq!(result, expected);
     }

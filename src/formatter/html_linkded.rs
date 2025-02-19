@@ -2,21 +2,21 @@
 
 use super::Formatter;
 use crate::languages::Language;
-use crate::{constants::HIGHLIGHT_NAMES, Options};
+use crate::{constants::HIGHLIGHT_NAMES, constants::CLASSES, Options};
 use tree_sitter_highlight::{Error, HighlightEvent};
 
-pub(crate) struct HtmlInline {
+pub(crate) struct HtmlLinked {
     lang: Language,
     options: Options,
 }
 
-impl HtmlInline {
+impl HtmlLinked {
     pub fn new(lang: Language, options: Options) -> Self {
         Self { lang, options }
     }
 }
 
-impl Formatter for HtmlInline {
+impl Formatter for HtmlLinked {
     fn start<W>(&self, writer: &mut W, _: &str)
     where
         W: std::fmt::Write,
@@ -27,10 +27,9 @@ impl Formatter for HtmlInline {
             write!(writer, " {}", pre_clas);
         }
 
-        write!(writer, "\" style=\"{}\">", self.options.theme.pre_style());
         write!(
             writer,
-            "<code class=\"language-{}\" translate=\"no\" tabindex=\"0\">",
+            "\"><code class=\"language-{}\" translate=\"no\" tabindex=\"0\">",
             self.lang.id_name()
         );
     }
@@ -48,6 +47,7 @@ impl Formatter for HtmlInline {
         renderer
             .render(events, source.as_bytes(), &move |highlight, output| {
                 let scope = HIGHLIGHT_NAMES[highlight.0];
+                let class = CLASSES[highlight.0];
 
                 if self.options.debug {
                     output.extend(b"data-athl-hl=\"");
@@ -55,15 +55,10 @@ impl Formatter for HtmlInline {
                     output.extend(b"\"");
                 }
 
-                if let Some(style) = self.options.theme.get_style(scope) {
-                    if self.options.debug {
-                        output.extend(b" ");
-                    }
-
-                    output.extend(b"style=\"");
-                    output.extend(style.css(self.options.italic).as_bytes());
-                    output.extend(b"\"");
-                }
+                // TODO: add all ancestors
+                output.extend(b"class=\"");
+                output.extend(class.as_bytes());
+                output.extend(b"\"");
             })
             .expect("TODO");
 
@@ -87,25 +82,5 @@ impl Formatter for HtmlInline {
         W: std::fmt::Write,
     {
         writer.write_str("</code></pre>");
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_include_pre_class() {
-        let formatter = HtmlInline::new(
-            Language::PlainText,
-            Options {
-                pre_class: Some("test-pre-class".to_string()),
-                ..Default::default()
-            },
-        );
-        let mut buffer = String::new();
-        formatter.start(&mut buffer, "");
-
-        assert!(buffer.as_str().contains("<pre class=\"athl test-pre-class\""));
     }
 }

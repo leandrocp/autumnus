@@ -3,6 +3,9 @@
 mod html_inline;
 pub(crate) use html_inline::*;
 
+mod html_linkded;
+pub(crate) use html_linkded::*;
+
 use tree_sitter_highlight::{Error, HighlightEvent};
 
 pub trait Formatter {
