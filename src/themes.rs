@@ -40,31 +40,26 @@ impl Theme {
     }
 
     pub fn css(&self, enable_italic: bool) -> String {
-        let mut css = String::with_capacity(self.highlights.len() * 50 + 100);
-        use std::fmt::Write;
+        let mut rules = Vec::new();
 
-        if let Some(pre_style) = &self.pre_style() {
-            write!(css, "pre.athl {{ {} }}\n", pre_style);
+        rules.push("pre.athl".to_string());
+
+        if let Some(pre_style) = &self.pre_style("\n  ") {
+            rules.push(format!(" {{\n  {}\n}}\n", pre_style));
+            // write!(css, "pre.athl {{ {} }}\n", pre_style);
         } else {
-            write!(css, "pre.athl {{}}\n");
+            rules.push(" {}\n".to_string());
         }
 
         for (scope, style) in &self.highlights {
-            let style_css = style.css(enable_italic);
+            let style_css = style.css(enable_italic, "\n  ");
+
             if !style_css.is_empty() {
-                write!(
-                    css,
-                    ".athl-{} {{ {} }}\n",
-                    scope.replace('.', "-"),
-                    style_css
-                )
-                .unwrap();
-            }
+                rules.push(format!(".athl-{} {{\n  {}\n}}\n", scope, style_css))
+            };
         }
 
-        println!("{}", css);
-
-        css
+        rules.join("")
     }
 
     pub fn get_style(&self, scope: &str) -> Option<&Style> {
@@ -99,55 +94,53 @@ impl Theme {
         }
     }
 
-    pub fn pre_style(&self) -> Option<String> {
-        let mut css = String::new();
+    pub fn pre_style(&self, separator: &str) -> Option<String> {
+        let mut rules = Vec::new();
 
-        if let Some(fg) = self.fg() {
-            css.push_str(&format!("color: {};", fg));
+        if let Some(fg) = &self.fg() {
+            rules.push(format!("color: {};", fg));
         }
 
-        if let Some(bg) = self.bg() {
-            css.push_str(&format!("background-color: {};", bg));
+        if let Some(bg) = &self.bg() {
+            rules.push(format!("background-color: {};", bg));
         }
 
-        if css.is_empty() {
+        if rules.is_empty() {
             None
         } else {
-            Some(css)
+            Some(rules.join(separator))
         }
     }
 }
 
 impl Style {
-    pub fn css(&self, enable_italic: bool) -> String {
-        let fg = self
-            .fg
-            .as_ref()
-            .map(|fg| format!("color: {};", fg))
-            .unwrap_or_default();
+    pub fn css(&self, enable_italic: bool, separator: &str) -> String {
+        let mut rules = Vec::new();
 
-        let bg = self
-            .bg
-            .as_ref()
-            .map(|bg| format!("background-color: {};", bg))
-            .unwrap_or_default();
-
-        let text_decoration = match (self.underline, self.strikethrough) {
-            (true, true) => "text-decoration: underline line-through;",
-            (true, false) => "text-decoration: underline;",
-            (false, true) => "text-decoration: line-through;",
-            (false, false) => "",
+        if let Some(fg) = &self.fg {
+            rules.push(format!("color: {};", fg))
         };
 
-        let bold = if self.bold { "font-weight: bold;" } else { "" };
-
-        let italic = if enable_italic && self.italic {
-            "font-style: italic;"
-        } else {
-            ""
+        if let Some(bg) = &self.bg {
+            rules.push(format!("background-color: {};", bg))
         };
 
-        format!("{}{}{}{}{}", fg, bg, text_decoration, bold, italic)
+        if self.bold {
+            rules.push("font-weight: bold;".to_string())
+        }
+
+        if enable_italic && self.italic {
+            rules.push("font-style: italic;".to_string())
+        };
+
+        match (self.underline, self.strikethrough) {
+            (true, true) => rules.push("text-decoration: underline line-through;".to_string()),
+            (true, false) => rules.push("text-decoration: underline;".to_string()),
+            (false, true) => rules.push("text-decoration: line-through;".to_string()),
+            (false, false) => (),
+        };
+
+        rules.join(separator)
     }
 }
 
@@ -190,14 +183,41 @@ mod tests {
     }
 
     #[test]
+    fn test_style_css() {
+        let style = Style {
+            fg: Some("blue".to_string()),
+            underline: true,
+            italic: true,
+            ..Default::default()
+        };
+
+        assert_eq!(
+            style.css(true, " "),
+            "color: blue; font-style: italic; text-decoration: underline;"
+        );
+    }
+
+    #[test]
     fn test_theme_css() {
-        let json = r#"{"highlights": {"normal": {"fg": "red"}, "keyword": {"fg": "blue", "italic": true}, "tag.attribute": {"bg": "gray", "bold": true}}, "name": "test"}"#;
+        let json = r#"{"highlights": {"normal": {"fg": "red", "bg": "green"}, "keyword": {"fg": "blue", "italic": true}, "tag.attribute": {"bg": "gray", "bold": true}}, "name": "test"}"#;
         let theme = Theme::from_json(json).unwrap();
 
-        let expected = r#"pre.athl { color: red; }
-.athl-keyword { color: blue;font-style: italic; }
-.athl-normal { color: red; }
-.athl-tag-attribute { background-color: gray;font-weight: bold; }
+        let expected = r#"pre.athl {
+  color: red;
+  background-color: green;
+}
+.athl-keyword {
+  color: blue;
+  font-style: italic;
+}
+.athl-normal {
+  color: red;
+  background-color: green;
+}
+.athl-tag.attribute {
+  background-color: gray;
+  font-weight: bold;
+}
 "#;
 
         assert_eq!(theme.css(true), expected);

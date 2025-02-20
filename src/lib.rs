@@ -68,7 +68,7 @@ mod tests {
 end
 "#;
 
-        let expected = r#"<pre class="athl" style="color: #c6d0f5;background-color: #303446;"><code class="language-elixir" translate="no" tabindex="0"><span class="athl-line" data-athl-line="1"><span style="color: #ca9ee6;">defmodule</span> <span style="color: #babbf1;">Foo</span> <span style="color: #ca9ee6;">do</span>
+        let expected = r#"<pre class="athl" style="color: #c6d0f5; background-color: #303446;"><code class="language-elixir" translate="no" tabindex="0"><span class="athl-line" data-athl-line="1"><span style="color: #ca9ee6;">defmodule</span> <span style="color: #babbf1;">Foo</span> <span style="color: #ca9ee6;">do</span>
 </span><span class="athl-line" data-athl-line="2">  <span style="color: #949cbb;">@</span><span style="color: #949cbb;">moduledoc</span> <span style="color: #949cbb;">&quot;&quot;&quot;</span>
 </span><span class="athl-line" data-athl-line="3"><span style="color: #949cbb;">  Test Module</span>
 </span><span class="athl-line" data-athl-line="4"><span style="color: #949cbb;">  &quot;&quot;&quot;</span>

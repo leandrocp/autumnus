@@ -27,7 +27,7 @@ impl Formatter for HtmlInline {
             write!(writer, " {}", pre_clas);
         }
 
-        if let Some(pre_style) = &self.options.theme.pre_style() {
+        if let Some(pre_style) = &self.options.theme.pre_style(" ") {
             write!(writer, "\" style=\"{}\">", pre_style);
         } else {
             write!(writer, "\">");
@@ -66,7 +66,7 @@ impl Formatter for HtmlInline {
                     }
 
                     output.extend(b"style=\"");
-                    output.extend(style.css(self.options.italic).as_bytes());
+                    output.extend(style.css(self.options.italic, " ").as_bytes());
                     output.extend(b"\"");
                 }
             })
