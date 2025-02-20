@@ -70,9 +70,7 @@ impl Language {
 
         glob_strs
             .iter()
-            .map(|name| {
-                glob::Pattern::new(name).expect("failed to guess language by path")
-            })
+            .map(|name| glob::Pattern::new(name).expect("failed to guess language by path"))
             .collect()
     }
 
@@ -174,26 +172,7 @@ static ELIXIR_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn test_diff() {
-        let mut parser = tree_sitter::Parser::new();
-        let lang = tree_sitter::Language::new(tree_sitter_diff::LANGUAGE);
-        parser
-            .set_language(&lang)
-            .expect("failed to set language diff");
-        parser.parse(b"test", None).expect("failed to parse diff");
-    }
-
-    #[test]
-    fn test_elixir() {
-        let mut parser = tree_sitter::Parser::new();
-        let lang = tree_sitter::Language::new(tree_sitter_elixir::LANGUAGE);
-        parser
-            .set_language(&lang)
-            .expect("failed to set language elixir");
-        parser.parse(b"test", None).expect("failed to parse elixir");
-    }
+    use tree_sitter_highlight::Highlighter;
 
     #[test]
     fn test_match_exact_name() {
@@ -205,5 +184,25 @@ mod tests {
     fn test_no_match_fallbacks_to_plain_text() {
         let lang = Language::guess("none", "");
         assert_eq!(lang.name(), "Plain Text");
+    }
+
+    #[test]
+    fn test_diff() {
+        let lang = Language::guess("diff", "");
+        let mut highlighter = Highlighter::new();
+
+        let _ = highlighter
+            .highlight(lang.config(), "".as_bytes(), None, |_| None)
+            .unwrap();
+    }
+
+    #[test]
+    fn test_elixir() {
+        let lang = Language::guess("elixir", "");
+        let mut highlighter = Highlighter::new();
+
+        let _ = highlighter
+            .highlight(lang.config(), "".as_bytes(), None, |_| None)
+            .unwrap();
     }
 }
