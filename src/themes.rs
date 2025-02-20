@@ -1,3 +1,5 @@
+#![allow(unused_must_use)]
+
 use serde::{Deserialize, Serialize};
 use std::{collections::BTreeMap, fs, path::Path};
 
@@ -37,6 +39,34 @@ impl Theme {
         Ok(serde_json::from_str(json)?)
     }
 
+    pub fn css(&self, enable_italic: bool) -> String {
+        let mut css = String::with_capacity(self.highlights.len() * 50 + 100);
+        use std::fmt::Write;
+
+        if let Some(pre_style) = &self.pre_style() {
+            write!(css, "pre.athl {{ {} }}\n", pre_style);
+        } else {
+            write!(css, "pre.athl {{}}\n");
+        }
+
+        for (scope, style) in &self.highlights {
+            let style_css = style.css(enable_italic);
+            if !style_css.is_empty() {
+                write!(
+                    css,
+                    ".athl-{} {{ {} }}\n",
+                    scope.replace('.', "-"),
+                    style_css
+                )
+                .unwrap();
+            }
+        }
+
+        println!("{}", css);
+
+        css
+    }
+
     pub fn get_style(&self, scope: &str) -> Option<&Style> {
         match self.highlights.get(scope) {
             Some(syntax) => Some(syntax),
@@ -67,10 +97,9 @@ impl Theme {
         } else {
             None
         }
-
     }
 
-    pub fn pre_style(&self) -> String {
+    pub fn pre_style(&self) -> Option<String> {
         let mut css = String::new();
 
         if let Some(fg) = self.fg() {
@@ -81,7 +110,11 @@ impl Theme {
             css.push_str(&format!("background-color: {};", bg));
         }
 
-        css
+        if css.is_empty() {
+            None
+        } else {
+            Some(css)
+        }
     }
 }
 
@@ -108,7 +141,7 @@ impl Style {
 
         let bold = if self.bold { "font-weight: bold;" } else { "" };
 
-        let italic = if enable_italic && self.italic  {
+        let italic = if enable_italic && self.italic {
             "font-style: italic;"
         } else {
             ""
@@ -154,5 +187,19 @@ mod tests {
                 ..Default::default()
             })
         );
+    }
+
+    #[test]
+    fn test_theme_css() {
+        let json = r#"{"highlights": {"normal": {"fg": "red"}, "keyword": {"fg": "blue", "italic": true}, "tag.attribute": {"bg": "gray", "bold": true}}, "name": "test"}"#;
+        let theme = Theme::from_json(json).unwrap();
+
+        let expected = r#"pre.athl { color: red; }
+.athl-keyword { color: blue;font-style: italic; }
+.athl-normal { color: red; }
+.athl-tag-attribute { background-color: gray;font-weight: bold; }
+"#;
+
+        assert_eq!(theme.css(true), expected);
     }
 }

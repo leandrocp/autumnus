@@ -27,7 +27,12 @@ impl Formatter for HtmlInline {
             write!(writer, " {}", pre_clas);
         }
 
-        write!(writer, "\" style=\"{}\">", self.options.theme.pre_style());
+        if let Some(pre_style) = &self.options.theme.pre_style() {
+            write!(writer, "\" style=\"{}\">", pre_style);
+        } else {
+            write!(writer, "\">");
+        }
+
         write!(
             writer,
             "<code class=\"language-{}\" translate=\"no\" tabindex=\"0\">",
@@ -95,6 +100,15 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_do_not_append_pre_style_if_missing_theme_style() {
+        let formatter = HtmlInline::new(Language::PlainText, Options::default());
+        let mut buffer = String::new();
+        formatter.start(&mut buffer, "");
+
+        assert!(buffer.as_str().contains("<pre class=\"athl\">"));
+    }
+
+    #[test]
     fn test_include_pre_class() {
         let formatter = HtmlInline::new(
             Language::PlainText,
@@ -106,6 +120,8 @@ mod tests {
         let mut buffer = String::new();
         formatter.start(&mut buffer, "");
 
-        assert!(buffer.as_str().contains("<pre class=\"athl test-pre-class\""));
+        assert!(buffer
+            .as_str()
+            .contains("<pre class=\"athl test-pre-class\">"));
     }
 }
