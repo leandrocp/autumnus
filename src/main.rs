@@ -134,7 +134,6 @@ fn gen_samples() -> Result<()> {
             .unwrap();
         let contents = fs::read_to_string(&path)
             .with_context(|| format!("failed to read sample file: {}", file_name))?;
-
         let highlighted = autumnus::highlight_html_inline(
             file_name,
             &contents,
@@ -144,22 +143,18 @@ fn gen_samples() -> Result<()> {
             },
         );
 
-        let html_filename = file_name
-            .split('.')
-            .next()
-            .expect("failed to generate output name");
-        let html_path = samples_path.join(format!("{}.{}.html", html_filename, theme_name));
+        let base_name = file_name.split('.').next().unwrap_or(file_name);
+        let html_path = samples_path.join(format!("{}.{}.html", base_name, theme_name));
 
         let html = HTML_TEMPLATE
-            .replace("{lang}", html_filename)
+            .replace("{lang}", base_name)
             .replace("{theme}", theme_name);
         let full_html = html.replace("<body>", &format!("<body>\n{}", highlighted));
 
         fs::write(&html_path, full_html)
             .with_context(|| format!("failed to write output file: {}", html_path.display()))?;
 
-        println!("generated: {}", html_path.display());
+        println!("Generated: {}", html_path.display());
     }
-
     Ok(())
 }
