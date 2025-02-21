@@ -11,7 +11,6 @@ fn main() {
 
     let themes_dir = Path::new("themes");
 
-    // Collect theme names
     let theme_names: Vec<String> = fs::read_dir(themes_dir)
         .unwrap()
         .filter_map(|entry| {
@@ -25,7 +24,6 @@ fn main() {
         })
         .collect();
 
-    // Generate theme constants
     let theme_constants = theme_names.iter().map(|name| {
         let constant_name = format_ident!("{}", name.to_uppercase());
         let json_path = format!("../../../../../themes/{}.json", name); // Changed to use relative path from OUT_DIR
@@ -33,18 +31,16 @@ fn main() {
         quote! {
             pub static #constant_name: LazyLock<Theme> = LazyLock::new(|| {
                 let theme_str = include_str!(#json_path);
-                crate::themes::from_json(theme_str).expect("failed to load theme")
+                crate::themes::from_json(theme_str).expect(&format!("failed to load theme: {}", #name))
             });
         }
     });
 
-    // Generate ALL_THEMES
     let theme_refs = theme_names.iter().map(|name| {
         let constant_name = format_ident!("{}", name.to_uppercase());
         quote! { &#constant_name }
     });
 
-    // Combine everything into final output
     let output = quote! {
         use std::sync::LazyLock;
 
@@ -55,6 +51,5 @@ fn main() {
         ]);
     };
 
-    // Write to file
     fs::write(dest_path, output.to_string()).unwrap();
 }

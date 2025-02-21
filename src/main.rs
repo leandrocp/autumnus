@@ -1,6 +1,5 @@
 use anyhow::Result;
 use clap::{Parser, Subcommand, ValueEnum};
-use std::path::Path;
 
 #[derive(Parser)]
 #[command(version)]

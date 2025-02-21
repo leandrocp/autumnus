@@ -165,6 +165,8 @@ mod tests {
         for theme in ALL_THEMES.iter() {
             assert!(!theme.name.is_empty());
         }
+
+        assert_eq!(ALL_THEMES.len(), 19);
     }
 
     #[test]
