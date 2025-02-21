@@ -99,62 +99,154 @@ const HTML_TEMPLATE: &str = r#"<!DOCTYPE html>
 </body>
 </html>"#;
 
+#[cfg(feature = "dev")]
 fn gen_samples() -> Result<()> {
-    let theme_path = Path::new("themes/catppuccin_frappe.json");
-    let theme_name = theme_path
-        .file_stem()
-        .and_then(|s| s.to_str())
-        .expect("failed to extract theme name");
+    let theme_paths = [
+        Path::new("themes/catppuccin_frappe.json"),
+        Path::new("themes/github_light.json"),
+        Path::new("themes/tokyonight_day.json"),
+        Path::new("themes/tokyonight_night.json"),
+    ];
 
     let samples_path = PathBuf::from("./samples");
-    let entries = fs::read_dir(&samples_path)
+    let entries = collect_sample_entries(&samples_path)?;
+
+    gen_samples_entries(&theme_paths, &samples_path, &entries)?;
+    gen_samples_index(&theme_paths, &samples_path, &entries)?;
+
+    Ok(())
+}
+
+#[cfg(feature = "dev")]
+fn collect_sample_entries(samples_path: &Path) -> Result<Vec<fs::DirEntry>> {
+    let entries = fs::read_dir(samples_path)
         .context("failed to read samples")?
         .filter_map(|entry| {
-            entry.ok().and_then(|e| {
-                let path = e.path();
-                let file_name = path.file_name().and_then(|n| n.to_str())?;
+            let e = entry.ok()?;
+            let path = e.path();
+            let file_name = path.file_name().and_then(|n| n.to_str())?;
 
-                if file_name == "html.html"
-                    || path.extension().and_then(|ext| ext.to_str()) != Some("html")
-                {
-                    Some(e)
-                } else {
-                    None
-                }
-            })
-        });
+            if file_name == "html.html"
+                || path.extension().and_then(|ext| ext.to_str()) != Some("html")
+            {
+                Some(e)
+            } else {
+                None
+            }
+        })
+        .collect::<Vec<_>>();
+    Ok(entries)
+}
 
-    for entry in entries {
-        let theme = autumnus::themes::Theme::from_file(theme_path).unwrap();
-        let path = entry.path();
-        let file_name = path
-            .file_name()
-            .expect("failed to read sample file name")
-            .to_str()
-            .unwrap();
-        let contents = fs::read_to_string(&path)
-            .with_context(|| format!("failed to read sample file: {}", file_name))?;
-        let highlighted = autumnus::highlight_html_inline(
-            file_name,
-            &contents,
-            autumnus::Options {
-                theme,
-                ..autumnus::Options::default()
-            },
-        );
+#[cfg(feature = "dev")]
+fn gen_samples_entries(
+    theme_paths: &[&Path],
+    samples_path: &Path,
+    entries: &[fs::DirEntry],
+) -> Result<()> {
+    for theme_path in theme_paths {
+        let theme_name = theme_path
+            .file_stem()
+            .and_then(|s| s.to_str())
+            .expect("failed to extract theme name");
 
-        let base_name = file_name.split('.').next().unwrap_or(file_name);
-        let html_path = samples_path.join(format!("{}.{}.html", base_name, theme_name));
+        for entry in entries {
+            let theme = autumnus::themes::Theme::from_file(theme_path).unwrap();
+            let path = entry.path();
+            let file_name = path
+                .file_name()
+                .expect("failed to read sample file name")
+                .to_str()
+                .unwrap();
+            let contents = fs::read_to_string(&path)
+                .with_context(|| format!("failed to read sample file: {}", file_name))?;
+            let highlighted = autumnus::highlight_html_inline(
+                file_name,
+                &contents,
+                autumnus::Options {
+                    theme,
+                    ..autumnus::Options::default()
+                },
+            );
 
-        let html = HTML_TEMPLATE
-            .replace("{lang}", base_name)
-            .replace("{theme}", theme_name);
-        let full_html = html.replace("<body>", &format!("<body>\n{}", highlighted));
+            let base_name = file_name.split('.').next().unwrap_or(file_name);
+            let html_path = samples_path.join(format!("{}.{}.html", base_name, theme_name));
 
-        fs::write(&html_path, full_html)
-            .with_context(|| format!("failed to write output file: {}", html_path.display()))?;
+            let html = HTML_TEMPLATE
+                .replace("{lang}", base_name)
+                .replace("{theme}", theme_name);
+            let full_html = html.replace("<body>", &format!("<body>\n{}", highlighted));
 
-        println!("Generated: {}", html_path.display());
+            fs::write(&html_path, full_html)
+                .with_context(|| format!("failed to write output file: {}", html_path.display()))?;
+
+            println!("Generated: {}", html_path.display());
+        }
     }
+    Ok(())
+}
+
+#[cfg(feature = "dev")]
+fn gen_samples_index(
+    theme_paths: &[&Path],
+    samples_path: &Path,
+    entries: &[fs::DirEntry],
+) -> Result<()> {
+    let mut index_content = String::from(
+        r#"<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autumnus Samples</title>
+    <style>
+        body { font-family: system, -apple-system, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { margin-bottom: 30px; }
+        .theme-section { margin-bottom: 40px; }
+        h2 { margin-bottom: 20px; }
+        .sample-list { list-style: none; padding: 0; }
+        .sample-list li { margin-bottom: 10px; }
+        a { color: #0366d6; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <h1>Autumnus Samples</h1>
+"#,
+    );
+
+    for theme_path in theme_paths {
+        let theme_name = theme_path
+            .file_stem()
+            .and_then(|s| s.to_str())
+            .expect("failed to extract theme name");
+
+        index_content.push_str(&format!("    <div class=\"theme-section\">\n        <h2>{}</h2>\n        <ul class=\"sample-list\">\n", theme_name));
+
+        for entry in entries {
+            let path = entry.path();
+            let file_name = path
+                .file_name()
+                .expect("failed to read sample file name")
+                .to_str()
+                .unwrap();
+            let base_name = file_name.split('.').next().unwrap_or(file_name);
+            let html_path = format!("{}.{}.html", base_name, theme_name);
+
+            index_content.push_str(&format!(
+                "            <li><a href=\"{}\">{} - {}</a></li>\n",
+                html_path, base_name, theme_name
+            ));
+        }
+
+        index_content.push_str("        </ul>\n    </div>\n");
+    }
+
+    index_content.push_str("</body>\n</html>");
+
+    fs::write(samples_path.join("index.html"), index_content)
+        .context("failed to write index.html")?;
+    println!("Generated: index.html");
+
     Ok(())
 }
