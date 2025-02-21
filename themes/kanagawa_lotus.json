@@ -1,1 +1,311 @@
-{"highlights": {"tag": {"fg": "#6693bf"}, "attribute.builtin": {"fg": "#6693bf"}, "function.builtin": {"fg": "#6693bf"}, "keyword.debug": {"fg": "#624c83", "italic": true}, "string.escape": {"bold": true, "fg": "#836f4a"}, "punctuation.special": {"fg": "#6693bf"}, "boolean": {"bold": true, "fg": "#cc6d00"}, "markup.strikethrough": {"strikethrough": true}, "markup.link.label": {"underline": true, "fg": "#6693bf"}, "punctuation.delimiter": {"fg": "#4e8ca2"}, "keyword": {"fg": "#624c83", "italic": true}, "comment.todo": {"bg": "#5a7785", "fg": "#dcd7ba", "bold": true}, "keyword.import": {"fg": "#c84053"}, "markup.underline": {"underline": true}, "keyword.directive": {"fg": "#624c83", "italic": true}, "comment.warning": {"bg": "#e98a00", "fg": "#dcd7ba", "bold": true}, "markup.link": {"underline": true, "fg": "#6693bf"}, "tag.delimiter": {"fg": "#4e8ca2"}, "markup.list": {"fg": "#6693bf"}, "markup.heading.1": {"fg": "#4d699b"}, "markup.heading.2": {"fg": "#4d699b"}, "markup.heading.3": {"fg": "#4d699b"}, "markup.heading.4": {"fg": "#4d699b"}, "markup.heading.5": {"fg": "#4d699b"}, "markup.heading.6": {"fg": "#4d699b"}, "variable.parameter": {"fg": "#5d57a3"}, "tag.attribute": {"fg": "#77713f"}, "comment": {"fg": "#8a8980", "italic": true}, "property": {"fg": "#77713f"}, "string.special": {"fg": "#6693bf"}, "variable.builtin": {"fg": "#c84053", "italic": true}, "keyword.exception": {"bold": true, "fg": "#c84053"}, "constant.builtin": {"fg": "#6693bf"}, "module.builtin": {"fg": "#6693bf"}, "function.method": {"fg": "#4d699b"}, "string": {"fg": "#6f894e"}, "function.method.call": {"fg": "#4d699b"}, "markup.quote": {"fg": "#5d57a3"}, "number": {"fg": "#b35b79"}, "keyword.operator": {"bold": true, "fg": "#836f4a"}, "markup.math": {"fg": "#cc6d00"}, "function.macro": {"fg": "#4d699b"}, "punctuation.bracket": {"fg": "#4e8ca2"}, "constant": {"fg": "#cc6d00"}, "string.special.url": {"undercurl": true, "fg": "#6693bf"}, "string.special.path": {"fg": "#6693bf"}, "keyword.directive.define": {"fg": "#624c83", "italic": true}, "comment.error": {"bg": "#e82424", "fg": "#545464", "bold": true}, "operator": {"fg": "#836f4a"}, "label": {"bold": true, "fg": "#624c83"}, "number.float": {"fg": "#b35b79"}, "comment.note": {"bg": "#5e857a", "fg": "#dcd7ba", "bold": true}, "normal": {"bg": "#f2ecbc", "fg": "#545464"}, "keyword.function": {"fg": "#624c83", "italic": true}, "markup.raw": {"fg": "#6f894e"}, "diff.delta": {"fg": "#de9800"}, "function.call": {"fg": "#4d699b"}, "constant.macro": {"fg": "#cc6d00"}, "diff.plus": {"fg": "#6e915f"}, "constructor": {"fg": "#6693bf"}, "type": {"fg": "#597b75"}, "keyword.type": {"fg": "#624c83", "italic": true}, "function": {"fg": "#4d699b"}, "diff.minus": {"fg": "#d7474b"}, "character.special": {"fg": "#6693bf"}, "tag.builtin": {"fg": "#6693bf"}, "markup.strong": {"bold": true}, "type.builtin": {"fg": "#6693bf"}, "markup.heading": {"fg": "#4d699b"}, "keyword.conditional": {"fg": "#624c83", "italic": true}, "keyword.repeat": {"fg": "#624c83", "italic": true}, "keyword.coroutine": {"fg": "#624c83", "italic": true}, "variable.member": {"fg": "#77713f"}, "markup.link.url": {"undercurl": true, "fg": "#6693bf"}, "keyword.modifier": {"fg": "#624c83", "italic": true}, "type.definition": {"fg": "#597b75"}, "markup.raw.block": {"fg": "#6f894e"}, "string.documentation": {"fg": "#6f894e"}, "variable.parameter.builtin": {"fg": "#6693bf"}, "markup.list.checked": {"fg": "#6693bf"}, "markup.list.unchecked": {"fg": "#6693bf"}, "string.special.symbol": {"fg": "#77713f"}, "attribute": {"fg": "#cc6d00"}, "markup.italic": {"italic": true}, "keyword.return": {"fg": "#c84053", "italic": true}, "variable": {"fg": "#545464"}, "comment.documentation": {"fg": "#8a8980", "italic": true}, "module": {"fg": "#597b75"}, "character": {"fg": "#6f894e"}, "keyword.conditional.ternary": {"fg": "#624c83", "italic": true}, "string.regexp": {"fg": "#836f4a"}}, "name": "kanagawa_lotus"}
+{
+  "name": "kanagawa_lotus",
+  "highlights": {
+    "attribute": {
+      "fg": "#cc6d00"
+    },
+    "attribute.builtin": {
+      "fg": "#6693bf"
+    },
+    "boolean": {
+      "bold": true,
+      "fg": "#cc6d00"
+    },
+    "character": {
+      "fg": "#6f894e"
+    },
+    "character.special": {
+      "fg": "#6693bf"
+    },
+    "comment": {
+      "fg": "#8a8980",
+      "italic": true
+    },
+    "comment.documentation": {
+      "fg": "#8a8980",
+      "italic": true
+    },
+    "comment.error": {
+      "bg": "#e82424",
+      "bold": true,
+      "fg": "#545464"
+    },
+    "comment.note": {
+      "bg": "#5e857a",
+      "bold": true,
+      "fg": "#dcd7ba"
+    },
+    "comment.todo": {
+      "bg": "#5a7785",
+      "bold": true,
+      "fg": "#dcd7ba"
+    },
+    "comment.warning": {
+      "bg": "#e98a00",
+      "bold": true,
+      "fg": "#dcd7ba"
+    },
+    "constant": {
+      "fg": "#cc6d00"
+    },
+    "constant.builtin": {
+      "fg": "#6693bf"
+    },
+    "constant.macro": {
+      "fg": "#cc6d00"
+    },
+    "constructor": {
+      "fg": "#6693bf"
+    },
+    "diff.delta": {
+      "fg": "#de9800"
+    },
+    "diff.minus": {
+      "fg": "#d7474b"
+    },
+    "diff.plus": {
+      "fg": "#6e915f"
+    },
+    "function": {
+      "fg": "#4d699b"
+    },
+    "function.builtin": {
+      "fg": "#6693bf"
+    },
+    "function.call": {
+      "fg": "#4d699b"
+    },
+    "function.macro": {
+      "fg": "#4d699b"
+    },
+    "function.method": {
+      "fg": "#4d699b"
+    },
+    "function.method.call": {
+      "fg": "#4d699b"
+    },
+    "keyword": {
+      "fg": "#624c83",
+      "italic": true
+    },
+    "keyword.conditional": {
+      "fg": "#624c83",
+      "italic": true
+    },
+    "keyword.conditional.ternary": {
+      "fg": "#624c83",
+      "italic": true
+    },
+    "keyword.coroutine": {
+      "fg": "#624c83",
+      "italic": true
+    },
+    "keyword.debug": {
+      "fg": "#624c83",
+      "italic": true
+    },
+    "keyword.directive": {
+      "fg": "#624c83",
+      "italic": true
+    },
+    "keyword.directive.define": {
+      "fg": "#624c83",
+      "italic": true
+    },
+    "keyword.exception": {
+      "bold": true,
+      "fg": "#c84053"
+    },
+    "keyword.function": {
+      "fg": "#624c83",
+      "italic": true
+    },
+    "keyword.import": {
+      "fg": "#c84053"
+    },
+    "keyword.modifier": {
+      "fg": "#624c83",
+      "italic": true
+    },
+    "keyword.operator": {
+      "bold": true,
+      "fg": "#836f4a"
+    },
+    "keyword.repeat": {
+      "fg": "#624c83",
+      "italic": true
+    },
+    "keyword.return": {
+      "fg": "#c84053",
+      "italic": true
+    },
+    "keyword.type": {
+      "fg": "#624c83",
+      "italic": true
+    },
+    "label": {
+      "bold": true,
+      "fg": "#624c83"
+    },
+    "markup.heading": {
+      "fg": "#4d699b"
+    },
+    "markup.heading.1": {
+      "fg": "#4d699b"
+    },
+    "markup.heading.2": {
+      "fg": "#4d699b"
+    },
+    "markup.heading.3": {
+      "fg": "#4d699b"
+    },
+    "markup.heading.4": {
+      "fg": "#4d699b"
+    },
+    "markup.heading.5": {
+      "fg": "#4d699b"
+    },
+    "markup.heading.6": {
+      "fg": "#4d699b"
+    },
+    "markup.italic": {
+      "italic": true
+    },
+    "markup.link": {
+      "fg": "#6693bf",
+      "underline": true
+    },
+    "markup.link.label": {
+      "fg": "#6693bf",
+      "underline": true
+    },
+    "markup.link.url": {
+      "fg": "#6693bf",
+      "undercurl": true
+    },
+    "markup.list": {
+      "fg": "#6693bf"
+    },
+    "markup.list.checked": {
+      "fg": "#6693bf"
+    },
+    "markup.list.unchecked": {
+      "fg": "#6693bf"
+    },
+    "markup.math": {
+      "fg": "#cc6d00"
+    },
+    "markup.quote": {
+      "fg": "#5d57a3"
+    },
+    "markup.raw": {
+      "fg": "#6f894e"
+    },
+    "markup.raw.block": {
+      "fg": "#6f894e"
+    },
+    "markup.strikethrough": {
+      "strikethrough": true
+    },
+    "markup.strong": {
+      "bold": true
+    },
+    "markup.underline": {
+      "underline": true
+    },
+    "module": {
+      "fg": "#597b75"
+    },
+    "module.builtin": {
+      "fg": "#6693bf"
+    },
+    "normal": {
+      "bg": "#f2ecbc",
+      "fg": "#545464"
+    },
+    "number": {
+      "fg": "#b35b79"
+    },
+    "number.float": {
+      "fg": "#b35b79"
+    },
+    "operator": {
+      "fg": "#836f4a"
+    },
+    "property": {
+      "fg": "#77713f"
+    },
+    "punctuation.bracket": {
+      "fg": "#4e8ca2"
+    },
+    "punctuation.delimiter": {
+      "fg": "#4e8ca2"
+    },
+    "punctuation.special": {
+      "fg": "#6693bf"
+    },
+    "string": {
+      "fg": "#6f894e"
+    },
+    "string.documentation": {
+      "fg": "#6f894e"
+    },
+    "string.escape": {
+      "bold": true,
+      "fg": "#836f4a"
+    },
+    "string.regexp": {
+      "fg": "#836f4a"
+    },
+    "string.special": {
+      "fg": "#6693bf"
+    },
+    "string.special.path": {
+      "fg": "#6693bf"
+    },
+    "string.special.symbol": {
+      "fg": "#77713f"
+    },
+    "string.special.url": {
+      "fg": "#6693bf",
+      "undercurl": true
+    },
+    "tag": {
+      "fg": "#6693bf"
+    },
+    "tag.attribute": {
+      "fg": "#77713f"
+    },
+    "tag.builtin": {
+      "fg": "#6693bf"
+    },
+    "tag.delimiter": {
+      "fg": "#4e8ca2"
+    },
+    "type": {
+      "fg": "#597b75"
+    },
+    "type.builtin": {
+      "fg": "#6693bf"
+    },
+    "type.definition": {
+      "fg": "#597b75"
+    },
+    "variable": {
+      "fg": "#545464"
+    },
+    "variable.builtin": {
+      "fg": "#c84053",
+      "italic": true
+    },
+    "variable.member": {
+      "fg": "#77713f"
+    },
+    "variable.parameter": {
+      "fg": "#5d57a3"
+    },
+    "variable.parameter.builtin": {
+      "fg": "#6693bf"
+    }
+  }
+}

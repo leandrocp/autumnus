@@ -39,5 +39,9 @@ COLORSCHEMES=(
 
 for scheme in "${COLORSCHEMES[@]}"; do
   echo $scheme
-  nvim --headless -u init.lua -l nvim_theme.lua "$scheme" 2>&1 | jq -S >"${scheme//-/_}.json"
+  FILE="${scheme//-/_}.json"
+  nvim --headless -u init.lua -l nvim_theme.lua "$scheme" 2>&1 | jq >$FILE
+  NAME=$(cat $FILE | jq '.name')
+  HIGHLIGHTS=$(cat $FILE | jq '.highlights' -S)
+  echo '{}' | jq ". + {\"name\": $NAME, \"highlights\": $HIGHLIGHTS}" >$FILE
 done
