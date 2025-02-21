@@ -17,6 +17,7 @@ pub(crate) enum Language {
     Html,
     Lua,
     Bash,
+    Ruby,
 }
 
 impl Language {
@@ -27,6 +28,7 @@ impl Language {
             "html" => Some(Language::Html),
             "lua" => Some(Language::Lua),
             "bash" => Some(Language::Bash),
+            "ruby" => Some(Language::Ruby),
             "diff" => Some(Language::Diff),
             _ => None,
         };
@@ -125,6 +127,14 @@ impl Language {
                 "zshenv",
                 "zshrc",
             ],
+            Language::Ruby => &[
+                "*.rb",
+                "*.builder",
+                "*.spec",
+                "*.rake",
+                "Gemfile",
+                "Rakefile",
+            ],
         };
 
         glob_strs
@@ -145,6 +155,9 @@ impl Language {
                         "ash" | "bash" | "dash" | "ksh" | "mksh" | "pdksh" | "rc" | "sh"
                         | "zsh" => return Some(Language::Bash),
                         "elixir" => return Some(Language::Elixir),
+                        "ruby" | "macruby" | "rake" | "jruby" | "rbx" => {
+                            return Some(Language::Ruby)
+                        }
                         _ => {}
                     }
                 }
@@ -173,6 +186,7 @@ impl Language {
             Language::Html => "HTML",
             Language::Lua => "Lua",
             Language::Bash => "Bash",
+            Language::Ruby => "Ruby",
         }
     }
 
@@ -187,6 +201,7 @@ impl Language {
             Language::Rust => &RUST_CONFIG,
             Language::Lua => &LUA_CONFIG,
             Language::Bash => &BASH_CONFIG,
+            Language::Ruby => &RUBY_CONFIG,
             _ => &PLAIN_TEXT_CONFIG,
         }
     }
@@ -297,6 +312,21 @@ static BASH_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     config
 });
 
+static RUBY_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = tree_sitter_ruby::LANGUAGE;
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "ruby",
+        tree_sitter_ruby::HIGHLIGHTS_QUERY,
+        "",
+        tree_sitter_ruby::LOCALS_QUERY,
+    )
+    .expect("failed to create ruby highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -367,6 +397,16 @@ mod tests {
     #[test]
     fn test_bash() {
         let lang = Language::guess("bash", "");
+        let mut highlighter = Highlighter::new();
+
+        let _ = highlighter
+            .highlight(lang.config(), "".as_bytes(), None, |_| None)
+            .unwrap();
+    }
+
+    #[test]
+    fn test_ruby() {
+        let lang = Language::guess("ruby", "");
         let mut highlighter = Highlighter::new();
 
         let _ = highlighter
