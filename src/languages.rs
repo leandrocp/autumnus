@@ -14,6 +14,7 @@ pub(crate) enum Language {
     Diff,
     Elixir,
     Rust,
+    Html,
 }
 
 impl Language {
@@ -21,6 +22,7 @@ impl Language {
         let exact = match lang_or_path {
             "elixir" => Some(Language::Elixir),
             "rust" => Some(Language::Rust),
+            "html" => Some(Language::Html),
             "diff" => Some(Language::Diff),
             _ => None,
         };
@@ -69,6 +71,7 @@ impl Language {
             Language::Diff => &["*.diff"],
             Language::Elixir => &["*.ex", "*.exs"],
             Language::Rust => &["*.rs"],
+            Language::Html => &["*.html", "*.htm", "*.xhtml"],
         };
 
         glob_strs
@@ -112,6 +115,7 @@ impl Language {
             Language::Diff => "Diff",
             Language::Elixir => "Elixir",
             Language::Rust => "Rust",
+            Language::Html => "HTML",
         }
     }
 
@@ -124,6 +128,7 @@ impl Language {
             Language::Diff => &DIFF_CONFIG,
             Language::Elixir => &ELIXIR_CONFIG,
             Language::Rust => &RUST_CONFIG,
+            Language::Html => &HTML_CONFIG,
             _ => &PLAIN_TEXT_CONFIG,
         }
     }
@@ -189,6 +194,21 @@ static RUST_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     config
 });
 
+static HTML_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = tree_sitter_html::LANGUAGE;
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "html",
+        tree_sitter_html::HIGHLIGHTS_QUERY,
+        tree_sitter_html::INJECTIONS_QUERY,
+        "",
+    )
+    .expect("failed to create html highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -229,6 +249,16 @@ mod tests {
     #[test]
     fn test_rust() {
         let lang = Language::guess("rust", "");
+        let mut highlighter = Highlighter::new();
+
+        let _ = highlighter
+            .highlight(lang.config(), "".as_bytes(), None, |_| None)
+            .unwrap();
+    }
+
+    #[test]
+    fn test_html() {
+        let lang = Language::guess("html", "");
         let mut highlighter = Highlighter::new();
 
         let _ = highlighter
