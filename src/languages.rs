@@ -15,6 +15,7 @@ pub(crate) enum Language {
     Elixir,
     Rust,
     Html,
+    Lua,
 }
 
 impl Language {
@@ -23,6 +24,7 @@ impl Language {
             "elixir" => Some(Language::Elixir),
             "rust" => Some(Language::Rust),
             "html" => Some(Language::Html),
+            "lua" => Some(Language::Lua),
             "diff" => Some(Language::Diff),
             _ => None,
         };
@@ -72,6 +74,7 @@ impl Language {
             Language::Elixir => &["*.ex", "*.exs"],
             Language::Rust => &["*.rs"],
             Language::Html => &["*.html", "*.htm", "*.xhtml"],
+            Language::Lua => &["*.lua"],
         };
 
         glob_strs
@@ -116,6 +119,7 @@ impl Language {
             Language::Elixir => "Elixir",
             Language::Rust => "Rust",
             Language::Html => "HTML",
+            Language::Lua => "Lua",
         }
     }
 
@@ -128,7 +132,7 @@ impl Language {
             Language::Diff => &DIFF_CONFIG,
             Language::Elixir => &ELIXIR_CONFIG,
             Language::Rust => &RUST_CONFIG,
-            Language::Html => &HTML_CONFIG,
+            Language::Lua => &LUA_CONFIG,
             _ => &PLAIN_TEXT_CONFIG,
         }
     }
@@ -209,6 +213,21 @@ static HTML_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     config
 });
 
+static LUA_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = tree_sitter_lua::LANGUAGE;
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "lua",
+        tree_sitter_lua::HIGHLIGHTS_QUERY,
+        tree_sitter_lua::INJECTIONS_QUERY,
+        tree_sitter_lua::LOCALS_QUERY,
+    )
+    .expect("failed to create lua highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -259,6 +278,16 @@ mod tests {
     #[test]
     fn test_html() {
         let lang = Language::guess("html", "");
+        let mut highlighter = Highlighter::new();
+
+        let _ = highlighter
+            .highlight(lang.config(), "".as_bytes(), None, |_| None)
+            .unwrap();
+    }
+
+    #[test]
+    fn test_lua() {
+        let lang = Language::guess("lua", "");
         let mut highlighter = Highlighter::new();
 
         let _ = highlighter

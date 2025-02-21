@@ -126,7 +126,9 @@ fn collect_sample_entries(samples_path: &Path) -> Result<Vec<fs::DirEntry>> {
             let path = e.path();
             let file_name = path.file_name().and_then(|n| n.to_str())?;
 
-            if file_name == "html.html"
+            if file_name == "README.md" {
+                None
+            } else if file_name == "html.html"
                 || path.extension().and_then(|ext| ext.to_str()) != Some("html")
             {
                 Some(e)
