@@ -55,7 +55,7 @@ fn highlight(source: &str, language: Option<&str>, _formatter: Option<Formatter>
     let path = Path::new("themes/catppuccin_frappe.json");
     let theme = autumnus::themes::Theme::from_file(path).unwrap();
 
-    let highlighted = autumnus::highlight_to_html_inline(
+    let highlighted = autumnus::highlight_html_inline(
         language.unwrap_or_default(),
         source,
         autumnus::Options {
