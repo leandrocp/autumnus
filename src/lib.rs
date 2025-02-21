@@ -12,10 +12,10 @@ use tree_sitter_highlight::Highlighter;
 
 #[derive(Debug, Default)]
 pub struct Options {
-    theme: Theme,
-    pre_class: Option<String>,
-    italic: bool,
-    debug: bool,
+    pub theme: Theme,
+    pub pre_class: Option<String>,
+    pub italic: bool,
+    pub debug: bool,
 }
 
 pub fn highlight_to_html_inline(lang_or_path: &str, source: &str, options: Options) -> String {
