@@ -75,6 +75,8 @@ dependencies = [
  "clap",
  "glob",
  "lazy_static",
+ "proc-macro2",
+ "quote",
  "regex",
  "serde",
  "serde_json",

@@ -26,5 +26,9 @@ strum = { version = "0.26", features = ["derive"] }
 termcolor = "1.4"
 v_htmlescape = "0.15"
 
+[build-dependencies]
+quote = "1.0"
+proc-macro2 = "1.0"
+
 [features]
 dev = []

@@ -19,6 +19,9 @@ enum Commands {
 
         #[arg(short = 'f', long)]
         formatter: Option<Formatter>,
+
+        #[arg(short = 't', long)]
+        theme: Option<String>,
     },
 
     #[cfg(feature = "dev")]
@@ -47,18 +50,23 @@ fn main() -> Result<()> {
             source,
             language,
             formatter,
-        } => highlight(&source, language.as_deref(), formatter),
+            theme,
+        } => highlight(&source, language.as_deref(), formatter, theme),
 
         #[cfg(feature = "dev")]
         Commands::GenSamples => gen_samples(),
     }
 }
 
-fn highlight(source: &str, language: Option<&str>, formatter: Option<Formatter>) -> Result<()> {
-    // TODO: options
-
-    let theme_path = Path::new("themes/catppuccin_frappe.json");
-    let theme = autumnus::themes::Theme::from_file(theme_path).unwrap();
+fn highlight(
+    source: &str,
+    language: Option<&str>,
+    formatter: Option<Formatter>,
+    theme: Option<String>,
+) -> Result<()> {
+    let theme = autumnus::themes::get(&theme.unwrap_or("catppuccin_frappe".to_string()))
+        .cloned()
+        .unwrap_or_default();
 
     match formatter.unwrap_or_default() {
         Formatter::HtmlInline => {
@@ -186,7 +194,7 @@ fn gen_samples_entries(
             .expect("failed to extract theme name");
 
         for entry in entries {
-            let theme = autumnus::themes::Theme::from_file(theme_path).unwrap();
+            let theme = autumnus::themes::from_file(theme_path).unwrap();
             let path = entry.path();
             let file_name = path
                 .file_name()

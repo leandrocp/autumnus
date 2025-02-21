@@ -87,7 +87,7 @@ end
 </span></code></pre>"#;
 
         let path = Path::new("themes/catppuccin_frappe.json");
-        let theme = Theme::from_file(path).unwrap();
+        let theme = themes::from_file(path).unwrap();
 
         let result = highlight_html_inline(
             "elixir",
@@ -129,7 +129,7 @@ end
 </span></code></pre>"#;
 
         let path = Path::new("themes/catppuccin_frappe.json");
-        let theme = Theme::from_file(path).unwrap();
+        let theme = themes::from_file(path).unwrap();
 
         let result = highlight_html_linked(
             "elixir",
