@@ -1,9 +1,6 @@
-use anyhow::{Context, Result};
+use anyhow::Result;
 use clap::{Parser, Subcommand, ValueEnum};
-use std::{
-    fs,
-    path::{Path, PathBuf},
-};
+use std::path::Path;
 
 #[derive(Parser)]
 #[command(version)]
@@ -20,7 +17,7 @@ enum Commands {
         #[arg(short = 'l', long)]
         language: Option<String>,
 
-        #[arg(short, long)]
+        #[arg(short = 'f', long)]
         formatter: Option<Formatter>,
     },
 
@@ -35,6 +32,11 @@ enum Formatter {
     Terminal,
 }
 
+impl Default for Formatter {
+    fn default() -> Self {
+        Formatter::Terminal
+    }
+}
 // cargo run --features=dev -- gen-samples
 // cargo run -- highlight "code" --formatter terminal
 fn main() -> Result<()> {
@@ -52,26 +54,56 @@ fn main() -> Result<()> {
     }
 }
 
-fn highlight(source: &str, language: Option<&str>, _formatter: Option<Formatter>) -> Result<()> {
+fn highlight(source: &str, language: Option<&str>, formatter: Option<Formatter>) -> Result<()> {
     // TODO: options
 
     let theme_path = Path::new("themes/catppuccin_frappe.json");
     let theme = autumnus::themes::Theme::from_file(theme_path).unwrap();
 
-    let highlighted = autumnus::highlight_html_inline(
-        language.unwrap_or_default(),
-        source,
-        autumnus::Options {
-            theme,
-            ..autumnus::Options::default()
-        },
-    );
+    match formatter.unwrap_or_default() {
+        Formatter::HtmlInline => {
+            let highlighted = autumnus::highlight_html_inline(
+                language.unwrap_or_default(),
+                source,
+                autumnus::Options {
+                    theme,
+                    ..autumnus::Options::default()
+                },
+            );
 
-    println!("{}", highlighted);
+            println!("{}", highlighted);
+        }
+
+        Formatter::HtmlLinked => {
+            let highlighted = autumnus::highlight_html_linked(
+                language.unwrap_or_default(),
+                source,
+                autumnus::Options {
+                    theme,
+                    ..autumnus::Options::default()
+                },
+            );
+
+            println!("{}", highlighted);
+        }
+
+        Formatter::Terminal => {
+            let highlighted = autumnus::highlight_terminal(
+                language.unwrap_or_default(),
+                source,
+                autumnus::Options {
+                    theme,
+                    ..autumnus::Options::default()
+                },
+            );
+            println!("{}", x);
+        }
+    }
 
     Ok(())
 }
 
+#[cfg(feature = "dev")]
 const HTML_TEMPLATE: &str = r#"<!DOCTYPE html>
 <html lang="en">
 <head>

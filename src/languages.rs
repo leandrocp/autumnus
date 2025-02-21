@@ -202,6 +202,7 @@ impl Language {
             Language::Lua => &LUA_CONFIG,
             Language::Bash => &BASH_CONFIG,
             Language::Ruby => &RUBY_CONFIG,
+            Language::Html => &HTML_CONFIG,
             _ => &PLAIN_TEXT_CONFIG,
         }
     }

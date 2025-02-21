@@ -7,6 +7,7 @@ use crate::formatter::Formatter;
 use crate::formatter::HtmlInline;
 use crate::formatter::HtmlLinked;
 use crate::languages::Language;
+use formatter::Terminal;
 use themes::Theme;
 use tree_sitter_highlight::Highlighter;
 
@@ -27,6 +28,12 @@ pub fn highlight_html_inline(lang_or_path: &str, source: &str, options: Options)
 pub fn highlight_html_linked(lang_or_path: &str, source: &str, options: Options) -> String {
     let lang = Language::guess(lang_or_path, source);
     let formatter = HtmlLinked::new(lang, options);
+    format(&formatter, lang, source)
+}
+
+pub fn highlight_terminal(lang_or_path: &str, source: &str, options: Options) -> String {
+    let lang = Language::guess(lang_or_path, source);
+    let formatter = Terminal::new(options);
     format(&formatter, lang, source)
 }
 
