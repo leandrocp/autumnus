@@ -32,6 +32,9 @@ COLORSCHEMES=(
   "github_light_high_contrast"
   "github_light_colorblind"
   "github_light_tritanopia"
+  "kanagawa-wave"
+  "kanagawa-dragon"
+  "kanagawa-lotus"
 )
 
 for scheme in "${COLORSCHEMES[@]}"; do
