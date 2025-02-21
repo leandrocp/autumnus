@@ -2,7 +2,7 @@
 
 use super::Formatter;
 use crate::languages::Language;
-use crate::{constants::HIGHLIGHT_NAMES, constants::CLASSES, Options};
+use crate::{constants::CLASSES, constants::HIGHLIGHT_NAMES, Options};
 use tree_sitter_highlight::{Error, HighlightEvent};
 
 pub(crate) struct HtmlLinked {

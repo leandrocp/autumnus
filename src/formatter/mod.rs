@@ -16,8 +16,12 @@ pub trait Formatter {
     {
     }
 
-    fn write<W>(&self, _writer: &mut W, _source: &str, events: impl Iterator<Item = Result<HighlightEvent, Error>>)
-    where
+    fn write<W>(
+        &self,
+        _writer: &mut W,
+        _source: &str,
+        events: impl Iterator<Item = Result<HighlightEvent, Error>>,
+    ) where
         W: std::fmt::Write;
 
     #[inline]

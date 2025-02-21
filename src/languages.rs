@@ -13,12 +13,14 @@ pub(crate) enum Language {
     PlainText,
     Diff,
     Elixir,
+    Rust,
 }
 
 impl Language {
     pub fn guess(lang_or_path: &str, source: &str) -> Self {
         let exact = match lang_or_path {
             "elixir" => Some(Language::Elixir),
+            "rust" => Some(Language::Rust),
             "diff" => Some(Language::Diff),
             _ => None,
         };
@@ -66,6 +68,7 @@ impl Language {
             Language::PlainText => &[],
             Language::Diff => &["*.diff"],
             Language::Elixir => &["*.ex", "*.exs"],
+            Language::Rust => &["*.rs"],
         };
 
         glob_strs
@@ -108,6 +111,7 @@ impl Language {
             Language::PlainText => "Plain Text",
             Language::Diff => "Diff",
             Language::Elixir => "Elixir",
+            Language::Rust => "Rust",
         }
     }
 
@@ -119,6 +123,7 @@ impl Language {
         match self {
             Language::Diff => &DIFF_CONFIG,
             Language::Elixir => &ELIXIR_CONFIG,
+            Language::Rust => &RUST_CONFIG,
             _ => &PLAIN_TEXT_CONFIG,
         }
     }
@@ -169,6 +174,21 @@ static ELIXIR_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     config
 });
 
+static RUST_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = tree_sitter_rust::LANGUAGE;
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "rust",
+        tree_sitter_rust::HIGHLIGHTS_QUERY,
+        tree_sitter_rust::INJECTIONS_QUERY,
+        "",
+    )
+    .expect("failed to create rust highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -199,6 +219,16 @@ mod tests {
     #[test]
     fn test_elixir() {
         let lang = Language::guess("elixir", "");
+        let mut highlighter = Highlighter::new();
+
+        let _ = highlighter
+            .highlight(lang.config(), "".as_bytes(), None, |_| None)
+            .unwrap();
+    }
+
+    #[test]
+    fn test_rust() {
+        let lang = Language::guess("rust", "");
         let mut highlighter = Highlighter::new();
 
         let _ = highlighter
