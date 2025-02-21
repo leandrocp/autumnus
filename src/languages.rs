@@ -16,6 +16,7 @@ pub(crate) enum Language {
     Rust,
     Html,
     Lua,
+    Bash,
 }
 
 impl Language {
@@ -25,6 +26,7 @@ impl Language {
             "rust" => Some(Language::Rust),
             "html" => Some(Language::Html),
             "lua" => Some(Language::Lua),
+            "bash" => Some(Language::Bash),
             "diff" => Some(Language::Diff),
             _ => None,
         };
@@ -75,6 +77,54 @@ impl Language {
             Language::Rust => &["*.rs"],
             Language::Html => &["*.html", "*.htm", "*.xhtml"],
             Language::Lua => &["*.lua"],
+            Language::Bash => &[
+                "*.bash",
+                "*.bats",
+                "*.cgi",
+                "*.command",
+                "*.env",
+                "*.fcgi",
+                "*.ksh",
+                "*.sh",
+                "*.sh.in",
+                "*.tmux",
+                "*.tool",
+                "*.zsh",
+                ".bash_aliases",
+                ".bash_history",
+                ".bash_logout",
+                ".bash_profile",
+                ".bashrc",
+                ".cshrc",
+                ".env",
+                ".env.example",
+                ".flaskenv",
+                ".kshrc",
+                ".login",
+                ".profile",
+                ".zlogin",
+                ".zlogout",
+                ".zprofile",
+                ".zshenv",
+                ".zshrc",
+                "9fs",
+                "PKGBUILD",
+                "bash_aliases",
+                "bash_logout",
+                "bash_profile",
+                "bashrc",
+                "cshrc",
+                "gradlew",
+                "kshrc",
+                "login",
+                "man",
+                "profile",
+                "zlogin",
+                "zlogout",
+                "zprofile",
+                "zshenv",
+                "zshrc",
+            ],
         };
 
         glob_strs
@@ -92,6 +142,8 @@ impl Language {
                 let interpreter_path = Path::new(&cap[1]);
                 if let Some(name) = interpreter_path.file_name() {
                     match name.to_string_lossy().borrow() {
+                        "ash" | "bash" | "dash" | "ksh" | "mksh" | "pdksh" | "rc" | "sh"
+                        | "zsh" => return Some(Language::Bash),
                         "elixir" => return Some(Language::Elixir),
                         _ => {}
                     }
@@ -120,6 +172,7 @@ impl Language {
             Language::Rust => "Rust",
             Language::Html => "HTML",
             Language::Lua => "Lua",
+            Language::Bash => "Bash",
         }
     }
 
@@ -133,6 +186,7 @@ impl Language {
             Language::Elixir => &ELIXIR_CONFIG,
             Language::Rust => &RUST_CONFIG,
             Language::Lua => &LUA_CONFIG,
+            Language::Bash => &BASH_CONFIG,
             _ => &PLAIN_TEXT_CONFIG,
         }
     }
@@ -228,6 +282,21 @@ static LUA_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     config
 });
 
+static BASH_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = tree_sitter_bash::LANGUAGE;
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "bash",
+        tree_sitter_bash::HIGHLIGHT_QUERY,
+        "",
+        "",
+    )
+    .expect("failed to create bash highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -288,6 +357,16 @@ mod tests {
     #[test]
     fn test_lua() {
         let lang = Language::guess("lua", "");
+        let mut highlighter = Highlighter::new();
+
+        let _ = highlighter
+            .highlight(lang.config(), "".as_bytes(), None, |_| None)
+            .unwrap();
+    }
+
+    #[test]
+    fn test_bash() {
+        let lang = Language::guess("bash", "");
         let mut highlighter = Highlighter::new();
 
         let _ = highlighter
