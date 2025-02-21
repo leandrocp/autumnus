@@ -96,7 +96,8 @@ fn highlight(source: &str, language: Option<&str>, formatter: Option<Formatter>)
                     ..autumnus::Options::default()
                 },
             );
-            println!("{}", x);
+
+            println!("{}", highlighted);
         }
     }
 
