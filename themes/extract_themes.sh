@@ -21,8 +21,20 @@ COLORSCHEMES=(
   "catppuccin-frappe"
   "catppuccin-macchiato"
   "catppuccin-mocha"
+  "github_dark"
+  "github_dark_default"
+  "github_dark_dimmed"
+  "github_dark_high_contrast"
+  "github_dark_colorblind"
+  "github_dark_tritanopia"
+  "github_light"
+  "github_light_default"
+  "github_light_high_contrast"
+  "github_light_colorblind"
+  "github_light_tritanopia"
 )
 
 for scheme in "${COLORSCHEMES[@]}"; do
+  echo $scheme
   nvim --headless -u init.lua -l nvim_theme.lua "$scheme" 2>&1 | jq -S >"${scheme//-/_}.json"
 done

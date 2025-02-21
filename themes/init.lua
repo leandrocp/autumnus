@@ -20,6 +20,7 @@ require("lazy").setup({
 	spec = {
 		{
 			"catppuccin/nvim",
+			lazy = false,
 			name = "catppuccin",
 			priority = 1000,
 		},
@@ -28,6 +29,12 @@ require("lazy").setup({
 			lazy = false,
 			priority = 1000,
 			opts = {},
+		},
+		{
+			"projekt0n/github-nvim-theme",
+			name = "github-theme",
+			lazy = false,
+			priority = 1000,
 		},
 	},
 	checker = { enabled = true },
