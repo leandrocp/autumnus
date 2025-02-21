@@ -72,6 +72,33 @@ fn highlight(source: &str, language: Option<&str>, _formatter: Option<Formatter>
     Ok(())
 }
 
+const HTML_TEMPLATE: &str = r#"<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{lang} - {theme} - Autumnus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'JetBrains Mono', monospace;
+            line-height: 1.5;
+        }
+        pre {
+            font-size: 15px;
+            margin: 20px;
+            padding: 50px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+</body>
+</html>"#;
+
 fn gen_samples() -> Result<()> {
     let theme_path = Path::new("themes/catppuccin_frappe.json");
     let theme_name = theme_path
@@ -123,7 +150,12 @@ fn gen_samples() -> Result<()> {
             .expect("failed to generate output name");
         let html_path = samples_path.join(format!("{}.{}.html", html_filename, theme_name));
 
-        fs::write(&html_path, highlighted)
+        let html = HTML_TEMPLATE
+            .replace("{lang}", html_filename)
+            .replace("{theme}", theme_name);
+        let full_html = html.replace("<body>", &format!("<body>\n{}", highlighted));
+
+        fs::write(&html_path, full_html)
             .with_context(|| format!("failed to write output file: {}", html_path.display()))?;
 
         println!("generated: {}", html_path.display());
