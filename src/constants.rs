@@ -1,4 +1,4 @@
-pub const HIGHLIGHT_NAMES: [&str; 176] = [
+pub const HIGHLIGHT_NAMES: [&str; 177] = [
     "attribute",
     "attribute.builtin",
     "boolean",
@@ -113,6 +113,7 @@ pub const HIGHLIGHT_NAMES: [&str; 176] = [
     "punctuation.delimiter",
     "punctuation.special",
     "repeat",
+    "spell",
     "storageclass",
     "string",
     "string.documentation",
@@ -177,7 +178,7 @@ pub const HIGHLIGHT_NAMES: [&str; 176] = [
     "variable.parameter.builtin",
 ];
 
-pub const CLASSES: [&str; 176] = [
+pub const CLASSES: [&str; 177] = [
     "attribute",
     "attribute-builtin",
     "boolean",
@@ -292,6 +293,7 @@ pub const CLASSES: [&str; 176] = [
     "punctuation-delimiter",
     "punctuation-special",
     "repeat",
+    "spell",
     "storageclass",
     "string",
     "string-documentation",

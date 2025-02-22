@@ -22,118 +22,118 @@
     </style>
 </head>
 <body>
-<pre class="athl" style="color: #1f2328; background-color: #ffffff;"><code class="language-rust" translate="no" tabindex="0"><span class="athl-line" data-athl-line="1">// This is a comment. Line comments look like this...
-</span><span class="athl-line" data-athl-line="2">// and extend multiple lines like this.
+<pre class="athl" style="color: #1f2328; background-color: #ffffff;"><code class="language-rust" translate="no" tabindex="0"><span class="athl-line" data-athl-line="1"><span >// This is a comment. Line comments look like this...</span>
+</span><span class="athl-line" data-athl-line="2"><span >// and extend multiple lines like this.</span>
 </span><span class="athl-line" data-athl-line="3">
-</span><span class="athl-line" data-athl-line="4">/* Block comments
-</span><span class="athl-line" data-athl-line="5">  /* can be nested. */ */
+</span><span class="athl-line" data-athl-line="4"><span >/* Block comments</span>
+</span><span class="athl-line" data-athl-line="5"><span >  /* can be nested. */ */</span>
 </span><span class="athl-line" data-athl-line="6">
-</span><span class="athl-line" data-athl-line="7"><span style="color: #57606a;">//<span style="color: #0550ae;">/</span> Documentation comments look like this and support markdown notation.</span>
-</span><span class="athl-line" data-athl-line="8"><span style="color: #57606a;"></span><span style="color: #57606a;">//<span style="color: #0550ae;">/</span> # Examples</span>
-</span><span class="athl-line" data-athl-line="9"><span style="color: #57606a;"></span><span style="color: #57606a;">//<span style="color: #0550ae;">/</span></span>
-</span><span class="athl-line" data-athl-line="10"><span style="color: #57606a;"></span><span style="color: #57606a;">//<span style="color: #0550ae;">/</span> ```</span>
-</span><span class="athl-line" data-athl-line="11"><span style="color: #57606a;"></span><span style="color: #57606a;">//<span style="color: #0550ae;">/</span> let five = 5</span>
-</span><span class="athl-line" data-athl-line="12"><span style="color: #57606a;"></span><span style="color: #57606a;">//<span style="color: #0550ae;">/</span> ```</span>
+</span><span class="athl-line" data-athl-line="7"><span style="color: #57606a;">//<span style="color: #0550ae;"><span >/</span></span> Documentation comments look like this and support markdown notation.</span>
+</span><span class="athl-line" data-athl-line="8"><span style="color: #57606a;"></span><span style="color: #57606a;">//<span style="color: #0550ae;"><span >/</span></span> # Examples</span>
+</span><span class="athl-line" data-athl-line="9"><span style="color: #57606a;"></span><span style="color: #57606a;">//<span style="color: #0550ae;"><span >/</span></span></span>
+</span><span class="athl-line" data-athl-line="10"><span style="color: #57606a;"></span><span style="color: #57606a;">//<span style="color: #0550ae;"><span >/</span></span> ```</span>
+</span><span class="athl-line" data-athl-line="11"><span style="color: #57606a;"></span><span style="color: #57606a;">//<span style="color: #0550ae;"><span >/</span></span> let five = 5</span>
+</span><span class="athl-line" data-athl-line="12"><span style="color: #57606a;"></span><span style="color: #57606a;">//<span style="color: #0550ae;"><span >/</span></span> ```</span>
 </span><span class="athl-line" data-athl-line="13"><span style="color: #57606a;"></span>
-</span><span class="athl-line" data-athl-line="14">///////////////
-</span><span class="athl-line" data-athl-line="15">// 1. Basics //
-</span><span class="athl-line" data-athl-line="16">///////////////
+</span><span class="athl-line" data-athl-line="14"><span >///////////////</span>
+</span><span class="athl-line" data-athl-line="15"><span >// 1. Basics //</span>
+</span><span class="athl-line" data-athl-line="16"><span >///////////////</span>
 </span><span class="athl-line" data-athl-line="17">
 </span><span class="athl-line" data-athl-line="18"><span style="color: #1f2328;">#</span><span style="color: #1f2328;">[</span><span style="color: #6639ba;">allow</span><span style="color: #1f2328;">(</span><span style="color: #0550ae;">dead_code</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">]</span>
-</span><span class="athl-line" data-athl-line="19">// Functions
-</span><span class="athl-line" data-athl-line="20">// `i32` is the type for 32-bit signed integers
+</span><span class="athl-line" data-athl-line="19"><span >// Functions</span>
+</span><span class="athl-line" data-athl-line="20"><span >// `i32` is the type for 32-bit signed integers</span>
 </span><span class="athl-line" data-athl-line="21"><span style="color: #cf222e;">fn</span> <span style="color: #6639ba;">add2</span><span style="color: #1f2328;">(</span><span style="color: #1f2328;">x</span><span style="color: #1f2328;">:</span> <span style="color: #cf222e;">i32</span><span style="color: #1f2328;">,</span> <span style="color: #1f2328;">y</span><span style="color: #1f2328;">:</span> <span style="color: #cf222e;">i32</span><span style="color: #1f2328;">)</span> <span style="color: #1f2328;">-&gt;</span> <span style="color: #cf222e;">i32</span> <span style="color: #1f2328;">{</span>
-</span><span class="athl-line" data-athl-line="22">    // Implicit return (no semicolon)
+</span><span class="athl-line" data-athl-line="22">    <span >// Implicit return (no semicolon)</span>
 </span><span class="athl-line" data-athl-line="23">    <span style="color: #0550ae;">x</span> <span style="color: #0550ae;">+</span> <span style="color: #0550ae;">y</span>
 </span><span class="athl-line" data-athl-line="24"><span style="color: #1f2328;">}</span>
 </span><span class="athl-line" data-athl-line="25">
 </span><span class="athl-line" data-athl-line="26"><span style="color: #1f2328;">#</span><span style="color: #1f2328;">[</span><span style="color: #6639ba;">allow</span><span style="color: #1f2328;">(</span><span style="color: #0550ae;">unused_variables</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">]</span>
 </span><span class="athl-line" data-athl-line="27"><span style="color: #1f2328;">#</span><span style="color: #1f2328;">[</span><span style="color: #6639ba;">allow</span><span style="color: #1f2328;">(</span><span style="color: #0550ae;">unused_assignments</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">]</span>
 </span><span class="athl-line" data-athl-line="28"><span style="color: #1f2328;">#</span><span style="color: #1f2328;">[</span><span style="color: #6639ba;">allow</span><span style="color: #1f2328;">(</span><span style="color: #0550ae;">dead_code</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">]</span>
-</span><span class="athl-line" data-athl-line="29">// Main function
+</span><span class="athl-line" data-athl-line="29"><span >// Main function</span>
 </span><span class="athl-line" data-athl-line="30"><span style="color: #cf222e;">fn</span> <span style="color: #6639ba;">main</span><span style="color: #1f2328;">(</span><span style="color: #1f2328;">)</span> <span style="color: #1f2328;">{</span>
-</span><span class="athl-line" data-athl-line="31">    // Numbers //
+</span><span class="athl-line" data-athl-line="31">    <span >// Numbers //</span>
 </span><span class="athl-line" data-athl-line="32">
-</span><span class="athl-line" data-athl-line="33">    // Immutable bindings
+</span><span class="athl-line" data-athl-line="33">    <span >// Immutable bindings</span>
 </span><span class="athl-line" data-athl-line="34">    <span style="color: #cf222e;">let</span> <span style="color: #0550ae;">x</span><span style="color: #1f2328;">:</span> <span style="color: #cf222e;">i32</span> <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">1</span><span style="color: #1f2328;">;</span>
 </span><span class="athl-line" data-athl-line="35">
-</span><span class="athl-line" data-athl-line="36">    // Integer/float suffixes
+</span><span class="athl-line" data-athl-line="36">    <span >// Integer/float suffixes</span>
 </span><span class="athl-line" data-athl-line="37">    <span style="color: #cf222e;">let</span> <span style="color: #0550ae;">y</span><span style="color: #1f2328;">:</span> <span style="color: #cf222e;">i32</span> <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">13i32</span><span style="color: #1f2328;">;</span>
 </span><span class="athl-line" data-athl-line="38">    <span style="color: #cf222e;">let</span> <span style="color: #0550ae;">f</span><span style="color: #1f2328;">:</span> <span style="color: #cf222e;">f64</span> <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">1.3f64</span><span style="color: #1f2328;">;</span>
 </span><span class="athl-line" data-athl-line="39">
-</span><span class="athl-line" data-athl-line="40">    // Type inference
-</span><span class="athl-line" data-athl-line="41">    // Most of the time, the Rust compiler can infer what type a variable is, so
-</span><span class="athl-line" data-athl-line="42">    // you don’t have to write an explicit type annotation.
-</span><span class="athl-line" data-athl-line="43">    // Throughout this tutorial, types are explicitly annotated in many places,
-</span><span class="athl-line" data-athl-line="44">    // but only for demonstrative purposes. Type inference can handle this for
-</span><span class="athl-line" data-athl-line="45">    // you most of the time.
+</span><span class="athl-line" data-athl-line="40">    <span >// Type inference</span>
+</span><span class="athl-line" data-athl-line="41">    <span >// Most of the time, the Rust compiler can infer what type a variable is, so</span>
+</span><span class="athl-line" data-athl-line="42">    <span >// you don’t have to write an explicit type annotation.</span>
+</span><span class="athl-line" data-athl-line="43">    <span >// Throughout this tutorial, types are explicitly annotated in many places,</span>
+</span><span class="athl-line" data-athl-line="44">    <span >// but only for demonstrative purposes. Type inference can handle this for</span>
+</span><span class="athl-line" data-athl-line="45">    <span >// you most of the time.</span>
 </span><span class="athl-line" data-athl-line="46">    <span style="color: #cf222e;">let</span> <span style="color: #0550ae;">implicit_x</span> <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">1</span><span style="color: #1f2328;">;</span>
 </span><span class="athl-line" data-athl-line="47">    <span style="color: #cf222e;">let</span> <span style="color: #0550ae;">implicit_f</span> <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">1.3</span><span style="color: #1f2328;">;</span>
 </span><span class="athl-line" data-athl-line="48">
-</span><span class="athl-line" data-athl-line="49">    // Arithmetic
+</span><span class="athl-line" data-athl-line="49">    <span >// Arithmetic</span>
 </span><span class="athl-line" data-athl-line="50">    <span style="color: #cf222e;">let</span> <span style="color: #0550ae;">sum</span> <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">x</span> <span style="color: #0550ae;">+</span> <span style="color: #0550ae;">y</span> <span style="color: #0550ae;">+</span> <span style="color: #0550ae;">13</span><span style="color: #1f2328;">;</span>
 </span><span class="athl-line" data-athl-line="51">
-</span><span class="athl-line" data-athl-line="52">    // Mutable variable
+</span><span class="athl-line" data-athl-line="52">    <span >// Mutable variable</span>
 </span><span class="athl-line" data-athl-line="53">    <span style="color: #cf222e;">let</span> <span style="color: #cf222e;">mut</span> <span style="color: #0550ae;">mutable</span> <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">1</span><span style="color: #1f2328;">;</span>
 </span><span class="athl-line" data-athl-line="54">    <span style="color: #0550ae;">mutable</span> <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">4</span><span style="color: #1f2328;">;</span>
 </span><span class="athl-line" data-athl-line="55">    <span style="color: #0550ae;">mutable</span> <span style="color: #0550ae;">+=</span> <span style="color: #0550ae;">2</span><span style="color: #1f2328;">;</span>
 </span><span class="athl-line" data-athl-line="56">
-</span><span class="athl-line" data-athl-line="57">    // Strings //
+</span><span class="athl-line" data-athl-line="57">    <span >// Strings //</span>
 </span><span class="athl-line" data-athl-line="58">
-</span><span class="athl-line" data-athl-line="59">    // String literals
+</span><span class="athl-line" data-athl-line="59">    <span >// String literals</span>
 </span><span class="athl-line" data-athl-line="60">    <span style="color: #cf222e;">let</span> <span style="color: #0550ae;">x</span><span style="color: #1f2328;">:</span> <span style="color: #0550ae;">&amp;</span><span style="color: #cf222e;">str</span> <span style="color: #0550ae;">=</span> <span style="color: #0a3069;">&quot;hello world!&quot;</span><span style="color: #1f2328;">;</span>
 </span><span class="athl-line" data-athl-line="61">
-</span><span class="athl-line" data-athl-line="62">    // Printing
-</span><span class="athl-line" data-athl-line="63">    <span style="color: #0550ae;">println</span><span style="color: #6639ba;">!</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&quot;{} {}&quot;</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">f</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">x</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span> // 1.3 hello world!
+</span><span class="athl-line" data-athl-line="62">    <span >// Printing</span>
+</span><span class="athl-line" data-athl-line="63">    <span style="color: #0550ae;">println</span><span style="color: #6639ba;">!</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&quot;{} {}&quot;</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">f</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">x</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span> <span >// 1.3 hello world!</span>
 </span><span class="athl-line" data-athl-line="64">
-</span><span class="athl-line" data-athl-line="65">    // A `String` – a heap-allocated string
-</span><span class="athl-line" data-athl-line="66">    // Stored as a `Vec&lt;u8&gt;` and always holds a valid UTF-8 sequence, 
-</span><span class="athl-line" data-athl-line="67">    // which is not null terminated.
+</span><span class="athl-line" data-athl-line="65">    <span >// A `String` – a heap-allocated string</span>
+</span><span class="athl-line" data-athl-line="66">    <span >// Stored as a `Vec&lt;u8&gt;` and always holds a valid UTF-8 sequence, </span>
+</span><span class="athl-line" data-athl-line="67">    <span >// which is not null terminated.</span>
 </span><span class="athl-line" data-athl-line="68">    <span style="color: #cf222e;">let</span> <span style="color: #0550ae;">s</span><span style="color: #1f2328;">:</span> <span style="color: #953800;">String</span> <span style="color: #0550ae;">=</span> <span style="color: #0a3069;">&quot;hello world&quot;</span><span style="color: #1f2328;">.</span><span style="color: #0550ae;">to_string</span><span style="color: #1f2328;">(</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span>
 </span><span class="athl-line" data-athl-line="69">
-</span><span class="athl-line" data-athl-line="70">    // A string slice – an immutable view into another string
-</span><span class="athl-line" data-athl-line="71">    // This is basically an immutable pointer and length of a string – it
-</span><span class="athl-line" data-athl-line="72">    // doesn’t actually contain the contents of a string, just a pointer to
-</span><span class="athl-line" data-athl-line="73">    // the beginning and a length of a string buffer,
-</span><span class="athl-line" data-athl-line="74">    // statically allocated or contained in another object (in this case, `s`).
-</span><span class="athl-line" data-athl-line="75">    // The string slice is like a view `&amp;[u8]` into `Vec&lt;T&gt;`.
+</span><span class="athl-line" data-athl-line="70">    <span >// A string slice – an immutable view into another string</span>
+</span><span class="athl-line" data-athl-line="71">    <span >// This is basically an immutable pointer and length of a string – it</span>
+</span><span class="athl-line" data-athl-line="72">    <span >// doesn’t actually contain the contents of a string, just a pointer to</span>
+</span><span class="athl-line" data-athl-line="73">    <span >// the beginning and a length of a string buffer,</span>
+</span><span class="athl-line" data-athl-line="74">    <span >// statically allocated or contained in another object (in this case, `s`).</span>
+</span><span class="athl-line" data-athl-line="75">    <span >// The string slice is like a view `&amp;[u8]` into `Vec&lt;T&gt;`.</span>
 </span><span class="athl-line" data-athl-line="76">    <span style="color: #cf222e;">let</span> <span style="color: #0550ae;">s_slice</span><span style="color: #1f2328;">:</span> <span style="color: #0550ae;">&amp;</span><span style="color: #cf222e;">str</span> <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">&amp;</span><span style="color: #0550ae;">s</span><span style="color: #1f2328;">;</span>
 </span><span class="athl-line" data-athl-line="77">
-</span><span class="athl-line" data-athl-line="78">    <span style="color: #0550ae;">println</span><span style="color: #6639ba;">!</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&quot;{} {}&quot;</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">s</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">s_slice</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span> // hello world hello world
+</span><span class="athl-line" data-athl-line="78">    <span style="color: #0550ae;">println</span><span style="color: #6639ba;">!</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&quot;{} {}&quot;</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">s</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">s_slice</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span> <span >// hello world hello world</span>
 </span><span class="athl-line" data-athl-line="79">
-</span><span class="athl-line" data-athl-line="80">    // Vectors/arrays //
+</span><span class="athl-line" data-athl-line="80">    <span >// Vectors/arrays //</span>
 </span><span class="athl-line" data-athl-line="81">
-</span><span class="athl-line" data-athl-line="82">    // A fixed-size array
+</span><span class="athl-line" data-athl-line="82">    <span >// A fixed-size array</span>
 </span><span class="athl-line" data-athl-line="83">    <span style="color: #cf222e;">let</span> <span style="color: #0550ae;">four_ints</span><span style="color: #1f2328;">:</span> <span style="color: #1f2328;">[</span><span style="color: #cf222e;">i32</span><span style="color: #1f2328;">;</span> <span style="color: #0550ae;">4</span><span style="color: #1f2328;">]</span> <span style="color: #0550ae;">=</span> <span style="color: #1f2328;">[</span><span style="color: #0550ae;">1</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">2</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">3</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">4</span><span style="color: #1f2328;">]</span><span style="color: #1f2328;">;</span>
 </span><span class="athl-line" data-athl-line="84">
-</span><span class="athl-line" data-athl-line="85">    // A dynamic array (vector)
+</span><span class="athl-line" data-athl-line="85">    <span >// A dynamic array (vector)</span>
 </span><span class="athl-line" data-athl-line="86">    <span style="color: #cf222e;">let</span> <span style="color: #cf222e;">mut</span> <span style="color: #0550ae;">vector</span><span style="color: #1f2328;">:</span> <span style="color: #953800;">Vec</span><span style="color: #1f2328;">&lt;</span><span style="color: #cf222e;">i32</span><span style="color: #1f2328;">&gt;</span> <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">vec</span><span style="color: #6639ba;">!</span><span style="color: #1f2328;">[</span><span style="color: #0550ae;">1</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">2</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">3</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">4</span><span style="color: #1f2328;">]</span><span style="color: #1f2328;">;</span>
 </span><span class="athl-line" data-athl-line="87">    <span style="color: #0550ae;">vector</span><span style="color: #1f2328;">.</span><span style="color: #0550ae;">push</span><span style="color: #1f2328;">(</span><span style="color: #0550ae;">5</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span>
 </span><span class="athl-line" data-athl-line="88">
-</span><span class="athl-line" data-athl-line="89">    // A slice – an immutable view into a vector or array
-</span><span class="athl-line" data-athl-line="90">    // This is much like a string slice, but for vectors
+</span><span class="athl-line" data-athl-line="89">    <span >// A slice – an immutable view into a vector or array</span>
+</span><span class="athl-line" data-athl-line="90">    <span >// This is much like a string slice, but for vectors</span>
 </span><span class="athl-line" data-athl-line="91">    <span style="color: #cf222e;">let</span> <span style="color: #0550ae;">slice</span><span style="color: #1f2328;">:</span> <span style="color: #0550ae;">&amp;</span><span style="color: #1f2328;">[</span><span style="color: #cf222e;">i32</span><span style="color: #1f2328;">]</span> <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">&amp;</span><span style="color: #0550ae;">vector</span><span style="color: #1f2328;">;</span>
 </span><span class="athl-line" data-athl-line="92">
-</span><span class="athl-line" data-athl-line="93">    // Use `{:?}` to print something debug-style
-</span><span class="athl-line" data-athl-line="94">    <span style="color: #0550ae;">println</span><span style="color: #6639ba;">!</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&quot;{:?} {:?}&quot;</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">vector</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">slice</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span> // [1, 2, 3, 4, 5] [1, 2, 3, 4, 5]
+</span><span class="athl-line" data-athl-line="93">    <span >// Use `{:?}` to print something debug-style</span>
+</span><span class="athl-line" data-athl-line="94">    <span style="color: #0550ae;">println</span><span style="color: #6639ba;">!</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&quot;{:?} {:?}&quot;</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">vector</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">slice</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span> <span >// [1, 2, 3, 4, 5] [1, 2, 3, 4, 5]</span>
 </span><span class="athl-line" data-athl-line="95">
-</span><span class="athl-line" data-athl-line="96">    // Tuples //
+</span><span class="athl-line" data-athl-line="96">    <span >// Tuples //</span>
 </span><span class="athl-line" data-athl-line="97">
-</span><span class="athl-line" data-athl-line="98">    // A tuple is a fixed-size set of values of possibly different types
+</span><span class="athl-line" data-athl-line="98">    <span >// A tuple is a fixed-size set of values of possibly different types</span>
 </span><span class="athl-line" data-athl-line="99">    <span style="color: #cf222e;">let</span> <span style="color: #0550ae;">x</span><span style="color: #1f2328;">:</span> <span style="color: #1f2328;">(</span><span style="color: #cf222e;">i32</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">&amp;</span><span style="color: #cf222e;">str</span><span style="color: #1f2328;">,</span> <span style="color: #cf222e;">f64</span><span style="color: #1f2328;">)</span> <span style="color: #0550ae;">=</span> <span style="color: #1f2328;">(</span><span style="color: #0550ae;">1</span><span style="color: #1f2328;">,</span> <span style="color: #0a3069;">&quot;hello&quot;</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">3.4</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span>
 </span><span class="athl-line" data-athl-line="100">
-</span><span class="athl-line" data-athl-line="101">    // Destructuring `let`
+</span><span class="athl-line" data-athl-line="101">    <span >// Destructuring `let`</span>
 </span><span class="athl-line" data-athl-line="102">    <span style="color: #cf222e;">let</span> <span style="color: #1f2328;">(</span><span style="color: #0550ae;">a</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">b</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">c</span><span style="color: #1f2328;">)</span> <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">x</span><span style="color: #1f2328;">;</span>
-</span><span class="athl-line" data-athl-line="103">    <span style="color: #0550ae;">println</span><span style="color: #6639ba;">!</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&quot;{} {} {}&quot;</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">a</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">b</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">c</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span> // 1 hello 3.4
+</span><span class="athl-line" data-athl-line="103">    <span style="color: #0550ae;">println</span><span style="color: #6639ba;">!</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&quot;{} {} {}&quot;</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">a</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">b</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">c</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span> <span >// 1 hello 3.4</span>
 </span><span class="athl-line" data-athl-line="104">
-</span><span class="athl-line" data-athl-line="105">    // Indexing
-</span><span class="athl-line" data-athl-line="106">    <span style="color: #0550ae;">println</span><span style="color: #6639ba;">!</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&quot;{}&quot;</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">x</span><span style="color: #1f2328;">.</span><span style="color: #0550ae;">1</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span> // hello
+</span><span class="athl-line" data-athl-line="105">    <span >// Indexing</span>
+</span><span class="athl-line" data-athl-line="106">    <span style="color: #0550ae;">println</span><span style="color: #6639ba;">!</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&quot;{}&quot;</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">x</span><span style="color: #1f2328;">.</span><span style="color: #0550ae;">1</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span> <span >// hello</span>
 </span><span class="athl-line" data-athl-line="107">
-</span><span class="athl-line" data-athl-line="108">    //////////////
-</span><span class="athl-line" data-athl-line="109">    // 2. Types //
-</span><span class="athl-line" data-athl-line="110">    //////////////
+</span><span class="athl-line" data-athl-line="108">    <span >//////////////</span>
+</span><span class="athl-line" data-athl-line="109">    <span >// 2. Types //</span>
+</span><span class="athl-line" data-athl-line="110">    <span >//////////////</span>
 </span><span class="athl-line" data-athl-line="111">
-</span><span class="athl-line" data-athl-line="112">    // Struct
+</span><span class="athl-line" data-athl-line="112">    <span >// Struct</span>
 </span><span class="athl-line" data-athl-line="113">    <span style="color: #cf222e;">struct</span> <span style="color: #953800;">Point</span> <span style="color: #1f2328;">{</span>
 </span><span class="athl-line" data-athl-line="114">        <span style="color: #0550ae;">x</span><span style="color: #1f2328;">:</span> <span style="color: #cf222e;">i32</span><span style="color: #1f2328;">,</span>
 </span><span class="athl-line" data-athl-line="115">        <span style="color: #0550ae;">y</span><span style="color: #1f2328;">:</span> <span style="color: #cf222e;">i32</span><span style="color: #1f2328;">,</span>
@@ -141,12 +141,12 @@
 </span><span class="athl-line" data-athl-line="117">
 </span><span class="athl-line" data-athl-line="118">    <span style="color: #cf222e;">let</span> <span style="color: #0550ae;">origin</span><span style="color: #1f2328;">:</span> <span style="color: #953800;">Point</span> <span style="color: #0550ae;">=</span> <span style="color: #953800;">Point</span> <span style="color: #1f2328;">{</span> <span style="color: #0550ae;">x</span><span style="color: #1f2328;">:</span> <span style="color: #0550ae;">0</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">y</span><span style="color: #1f2328;">:</span> <span style="color: #0550ae;">0</span> <span style="color: #1f2328;">}</span><span style="color: #1f2328;">;</span>
 </span><span class="athl-line" data-athl-line="119">
-</span><span class="athl-line" data-athl-line="120">    // A struct with unnamed fields, called a ‘tuple struct’
+</span><span class="athl-line" data-athl-line="120">    <span >// A struct with unnamed fields, called a ‘tuple struct’</span>
 </span><span class="athl-line" data-athl-line="121">    <span style="color: #cf222e;">struct</span> <span style="color: #953800;">Point2</span><span style="color: #1f2328;">(</span><span style="color: #cf222e;">i32</span><span style="color: #1f2328;">,</span> <span style="color: #cf222e;">i32</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span>
 </span><span class="athl-line" data-athl-line="122">
 </span><span class="athl-line" data-athl-line="123">    <span style="color: #cf222e;">let</span> <span style="color: #0550ae;">origin2</span> <span style="color: #0550ae;">=</span> <span style="color: #6639ba;">Point2</span><span style="color: #1f2328;">(</span><span style="color: #0550ae;">0</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">0</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span>
 </span><span class="athl-line" data-athl-line="124">
-</span><span class="athl-line" data-athl-line="125">    // Basic C-like enum
+</span><span class="athl-line" data-athl-line="125">    <span >// Basic C-like enum</span>
 </span><span class="athl-line" data-athl-line="126">    <span style="color: #cf222e;">enum</span> <span style="color: #953800;">Direction</span> <span style="color: #1f2328;">{</span>
 </span><span class="athl-line" data-athl-line="127">        <span style="color: #0550ae;">Left</span><span style="color: #1f2328;">,</span>
 </span><span class="athl-line" data-athl-line="128">        <span style="color: #0550ae;">Right</span><span style="color: #1f2328;">,</span>
@@ -156,9 +156,9 @@
 </span><span class="athl-line" data-athl-line="132">
 </span><span class="athl-line" data-athl-line="133">    <span style="color: #cf222e;">let</span> <span style="color: #0550ae;">up</span> <span style="color: #0550ae;">=</span> <span style="color: #953800;">Direction</span><span style="color: #1f2328;">::</span><span style="color: #0550ae;">Up</span><span style="color: #1f2328;">;</span>
 </span><span class="athl-line" data-athl-line="134">
-</span><span class="athl-line" data-athl-line="135">    // Enum with fields
-</span><span class="athl-line" data-athl-line="136">    // If you want to make something optional, the standard
-</span><span class="athl-line" data-athl-line="137">    // library has `Option`
+</span><span class="athl-line" data-athl-line="135">    <span >// Enum with fields</span>
+</span><span class="athl-line" data-athl-line="136">    <span >// If you want to make something optional, the standard</span>
+</span><span class="athl-line" data-athl-line="137">    <span >// library has `Option`</span>
 </span><span class="athl-line" data-athl-line="138">    <span style="color: #cf222e;">enum</span> <span style="color: #953800;">OptionalI32</span> <span style="color: #1f2328;">{</span>
 </span><span class="athl-line" data-athl-line="139">        <span style="color: #0550ae;">AnI32</span><span style="color: #1f2328;">(</span><span style="color: #cf222e;">i32</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">,</span>
 </span><span class="athl-line" data-athl-line="140">        <span style="color: #0550ae;">Nothing</span><span style="color: #1f2328;">,</span>
@@ -167,37 +167,37 @@
 </span><span class="athl-line" data-athl-line="143">    <span style="color: #cf222e;">let</span> <span style="color: #0550ae;">two</span><span style="color: #1f2328;">:</span> <span style="color: #953800;">OptionalI32</span> <span style="color: #0550ae;">=</span> <span style="color: #953800;">OptionalI32</span><span style="color: #1f2328;">::</span><span style="color: #0550ae;">AnI32</span><span style="color: #1f2328;">(</span><span style="color: #0550ae;">2</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span>
 </span><span class="athl-line" data-athl-line="144">    <span style="color: #cf222e;">let</span> <span style="color: #0550ae;">nothing</span> <span style="color: #0550ae;">=</span> <span style="color: #953800;">OptionalI32</span><span style="color: #1f2328;">::</span><span style="color: #0550ae;">Nothing</span><span style="color: #1f2328;">;</span>
 </span><span class="athl-line" data-athl-line="145">
-</span><span class="athl-line" data-athl-line="146">    // Generics //
+</span><span class="athl-line" data-athl-line="146">    <span >// Generics //</span>
 </span><span class="athl-line" data-athl-line="147">
 </span><span class="athl-line" data-athl-line="148">    <span style="color: #cf222e;">struct</span> <span style="color: #953800;">Foo</span><span style="color: #1f2328;">&lt;</span><span style="color: #953800;">T</span><span style="color: #1f2328;">&gt;</span> <span style="color: #1f2328;">{</span> <span style="color: #0550ae;">bar</span><span style="color: #1f2328;">:</span> <span style="color: #953800;">T</span> <span style="color: #1f2328;">}</span>
 </span><span class="athl-line" data-athl-line="149">
-</span><span class="athl-line" data-athl-line="150">    // This is defined in the standard library as `Option`
-</span><span class="athl-line" data-athl-line="151">    // `Option` is used in place of where a null pointer
-</span><span class="athl-line" data-athl-line="152">    // would normally be used.
+</span><span class="athl-line" data-athl-line="150">    <span >// This is defined in the standard library as `Option`</span>
+</span><span class="athl-line" data-athl-line="151">    <span >// `Option` is used in place of where a null pointer</span>
+</span><span class="athl-line" data-athl-line="152">    <span >// would normally be used.</span>
 </span><span class="athl-line" data-athl-line="153">    <span style="color: #cf222e;">enum</span> <span style="color: #953800;">Optional</span><span style="color: #1f2328;">&lt;</span><span style="color: #953800;">T</span><span style="color: #1f2328;">&gt;</span> <span style="color: #1f2328;">{</span>
 </span><span class="athl-line" data-athl-line="154">        <span style="color: #0550ae;">SomeVal</span><span style="color: #1f2328;">(</span><span style="color: #953800;">T</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">,</span>
 </span><span class="athl-line" data-athl-line="155">        <span style="color: #0550ae;">NoVal</span><span style="color: #1f2328;">,</span>
 </span><span class="athl-line" data-athl-line="156">    <span style="color: #1f2328;">}</span>
 </span><span class="athl-line" data-athl-line="157">
-</span><span class="athl-line" data-athl-line="158">    // Methods //
+</span><span class="athl-line" data-athl-line="158">    <span >// Methods //</span>
 </span><span class="athl-line" data-athl-line="159">
 </span><span class="athl-line" data-athl-line="160">    <span style="color: #cf222e;">impl</span><span style="color: #1f2328;">&lt;</span><span style="color: #953800;">T</span><span style="color: #1f2328;">&gt;</span> <span style="color: #953800;">Foo</span><span style="color: #1f2328;">&lt;</span><span style="color: #953800;">T</span><span style="color: #1f2328;">&gt;</span> <span style="color: #1f2328;">{</span>
-</span><span class="athl-line" data-athl-line="161">        // Methods take an explicit `self` parameter
-</span><span class="athl-line" data-athl-line="162">        <span style="color: #cf222e;">fn</span> <span style="color: #6639ba;">bar</span><span style="color: #1f2328;">(</span><span style="color: #0550ae;">&amp;</span><span style="color: #0550ae;">self</span><span style="color: #1f2328;">)</span> <span style="color: #1f2328;">-&gt;</span> <span style="color: #0550ae;">&amp;</span><span style="color: #953800;">T</span> <span style="color: #1f2328;">{</span> // self is borrowed
+</span><span class="athl-line" data-athl-line="161">        <span >// Methods take an explicit `self` parameter</span>
+</span><span class="athl-line" data-athl-line="162">        <span style="color: #cf222e;">fn</span> <span style="color: #6639ba;">bar</span><span style="color: #1f2328;">(</span><span style="color: #0550ae;">&amp;</span><span style="color: #0550ae;">self</span><span style="color: #1f2328;">)</span> <span style="color: #1f2328;">-&gt;</span> <span style="color: #0550ae;">&amp;</span><span style="color: #953800;">T</span> <span style="color: #1f2328;">{</span> <span >// self is borrowed</span>
 </span><span class="athl-line" data-athl-line="163">            <span style="color: #0550ae;">&amp;</span><span style="color: #0550ae;">self</span><span style="color: #1f2328;">.</span><span style="color: #0550ae;">bar</span>
 </span><span class="athl-line" data-athl-line="164">        <span style="color: #1f2328;">}</span>
-</span><span class="athl-line" data-athl-line="165">        <span style="color: #cf222e;">fn</span> <span style="color: #6639ba;">bar_mut</span><span style="color: #1f2328;">(</span><span style="color: #0550ae;">&amp;</span><span style="color: #cf222e;">mut</span> <span style="color: #0550ae;">self</span><span style="color: #1f2328;">)</span> <span style="color: #1f2328;">-&gt;</span> <span style="color: #0550ae;">&amp;</span><span style="color: #cf222e;">mut</span> <span style="color: #953800;">T</span> <span style="color: #1f2328;">{</span> // self is mutably borrowed
+</span><span class="athl-line" data-athl-line="165">        <span style="color: #cf222e;">fn</span> <span style="color: #6639ba;">bar_mut</span><span style="color: #1f2328;">(</span><span style="color: #0550ae;">&amp;</span><span style="color: #cf222e;">mut</span> <span style="color: #0550ae;">self</span><span style="color: #1f2328;">)</span> <span style="color: #1f2328;">-&gt;</span> <span style="color: #0550ae;">&amp;</span><span style="color: #cf222e;">mut</span> <span style="color: #953800;">T</span> <span style="color: #1f2328;">{</span> <span >// self is mutably borrowed</span>
 </span><span class="athl-line" data-athl-line="166">            <span style="color: #0550ae;">&amp;</span><span style="color: #cf222e;">mut</span> <span style="color: #0550ae;">self</span><span style="color: #1f2328;">.</span><span style="color: #0550ae;">bar</span>
 </span><span class="athl-line" data-athl-line="167">        <span style="color: #1f2328;">}</span>
-</span><span class="athl-line" data-athl-line="168">        <span style="color: #cf222e;">fn</span> <span style="color: #6639ba;">into_bar</span><span style="color: #1f2328;">(</span><span style="color: #0550ae;">self</span><span style="color: #1f2328;">)</span> <span style="color: #1f2328;">-&gt;</span> <span style="color: #953800;">T</span> <span style="color: #1f2328;">{</span> // here self is consumed
+</span><span class="athl-line" data-athl-line="168">        <span style="color: #cf222e;">fn</span> <span style="color: #6639ba;">into_bar</span><span style="color: #1f2328;">(</span><span style="color: #0550ae;">self</span><span style="color: #1f2328;">)</span> <span style="color: #1f2328;">-&gt;</span> <span style="color: #953800;">T</span> <span style="color: #1f2328;">{</span> <span >// here self is consumed</span>
 </span><span class="athl-line" data-athl-line="169">            <span style="color: #0550ae;">self</span><span style="color: #1f2328;">.</span><span style="color: #0550ae;">bar</span>
 </span><span class="athl-line" data-athl-line="170">        <span style="color: #1f2328;">}</span>
 </span><span class="athl-line" data-athl-line="171">    <span style="color: #1f2328;">}</span>
 </span><span class="athl-line" data-athl-line="172">
 </span><span class="athl-line" data-athl-line="173">    <span style="color: #cf222e;">let</span> <span style="color: #0550ae;">a_foo</span> <span style="color: #0550ae;">=</span> <span style="color: #953800;">Foo</span> <span style="color: #1f2328;">{</span> <span style="color: #0550ae;">bar</span><span style="color: #1f2328;">:</span> <span style="color: #0550ae;">1</span> <span style="color: #1f2328;">}</span><span style="color: #1f2328;">;</span>
-</span><span class="athl-line" data-athl-line="174">    <span style="color: #0550ae;">println</span><span style="color: #6639ba;">!</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&quot;{}&quot;</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">a_foo</span><span style="color: #1f2328;">.</span><span style="color: #0550ae;">bar</span><span style="color: #1f2328;">(</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span> // 1
+</span><span class="athl-line" data-athl-line="174">    <span style="color: #0550ae;">println</span><span style="color: #6639ba;">!</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&quot;{}&quot;</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">a_foo</span><span style="color: #1f2328;">.</span><span style="color: #0550ae;">bar</span><span style="color: #1f2328;">(</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span> <span >// 1</span>
 </span><span class="athl-line" data-athl-line="175">
-</span><span class="athl-line" data-athl-line="176">    // Traits (known as interfaces or typeclasses in other languages) //
+</span><span class="athl-line" data-athl-line="176">    <span >// Traits (known as interfaces or typeclasses in other languages) //</span>
 </span><span class="athl-line" data-athl-line="177">
 </span><span class="athl-line" data-athl-line="178">    <span style="color: #cf222e;">trait</span> <span style="color: #953800;">Frobnicate</span><span style="color: #1f2328;">&lt;</span><span style="color: #953800;">T</span><span style="color: #1f2328;">&gt;</span> <span style="color: #1f2328;">{</span>
 </span><span class="athl-line" data-athl-line="179">        <span style="color: #cf222e;">fn</span> <span style="color: #6639ba;">frobnicate</span><span style="color: #1f2328;">(</span><span style="color: #0550ae;">self</span><span style="color: #1f2328;">)</span> <span style="color: #1f2328;">-&gt;</span> <span style="color: #953800;">Option</span><span style="color: #1f2328;">&lt;</span><span style="color: #953800;">T</span><span style="color: #1f2328;">&gt;</span><span style="color: #1f2328;">;</span>
@@ -210,9 +210,9 @@
 </span><span class="athl-line" data-athl-line="186">    <span style="color: #1f2328;">}</span>
 </span><span class="athl-line" data-athl-line="187">
 </span><span class="athl-line" data-athl-line="188">    <span style="color: #cf222e;">let</span> <span style="color: #0550ae;">another_foo</span> <span style="color: #0550ae;">=</span> <span style="color: #953800;">Foo</span> <span style="color: #1f2328;">{</span> <span style="color: #0550ae;">bar</span><span style="color: #1f2328;">:</span> <span style="color: #0550ae;">1</span> <span style="color: #1f2328;">}</span><span style="color: #1f2328;">;</span>
-</span><span class="athl-line" data-athl-line="189">    <span style="color: #0550ae;">println</span><span style="color: #6639ba;">!</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&quot;{:?}&quot;</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">another_foo</span><span style="color: #1f2328;">.</span><span style="color: #0550ae;">frobnicate</span><span style="color: #1f2328;">(</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span> // Some(1)
+</span><span class="athl-line" data-athl-line="189">    <span style="color: #0550ae;">println</span><span style="color: #6639ba;">!</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&quot;{:?}&quot;</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">another_foo</span><span style="color: #1f2328;">.</span><span style="color: #0550ae;">frobnicate</span><span style="color: #1f2328;">(</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span> <span >// Some(1)</span>
 </span><span class="athl-line" data-athl-line="190">
-</span><span class="athl-line" data-athl-line="191">    // Function pointer types // 
+</span><span class="athl-line" data-athl-line="191">    <span >// Function pointer types // </span>
 </span><span class="athl-line" data-athl-line="192">
 </span><span class="athl-line" data-athl-line="193">    <span style="color: #cf222e;">fn</span> <span style="color: #6639ba;">fibonacci</span><span style="color: #1f2328;">(</span><span style="color: #1f2328;">n</span><span style="color: #1f2328;">:</span> <span style="color: #cf222e;">u32</span><span style="color: #1f2328;">)</span> <span style="color: #1f2328;">-&gt;</span> <span style="color: #cf222e;">u32</span> <span style="color: #1f2328;">{</span>
 </span><span class="athl-line" data-athl-line="194">        <span style="color: #cf222e;">match</span> <span style="color: #0550ae;">n</span> <span style="color: #1f2328;">{</span>
@@ -225,11 +225,11 @@
 </span><span class="athl-line" data-athl-line="201">    <span style="color: #cf222e;">type</span> <span style="color: #953800;">FunctionPointer</span> <span style="color: #0550ae;">=</span> <span style="color: #cf222e;">fn</span><span style="color: #1f2328;">(</span><span style="color: #cf222e;">u32</span><span style="color: #1f2328;">)</span> <span style="color: #1f2328;">-&gt;</span> <span style="color: #cf222e;">u32</span><span style="color: #1f2328;">;</span>
 </span><span class="athl-line" data-athl-line="202">
 </span><span class="athl-line" data-athl-line="203">    <span style="color: #cf222e;">let</span> <span style="color: #0550ae;">fib</span> <span style="color: #1f2328;">:</span> <span style="color: #953800;">FunctionPointer</span> <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">fibonacci</span><span style="color: #1f2328;">;</span>
-</span><span class="athl-line" data-athl-line="204">    <span style="color: #0550ae;">println</span><span style="color: #6639ba;">!</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&quot;Fib: {}&quot;</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">fib</span><span style="color: #1f2328;">(</span><span style="color: #0550ae;">4</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span> // 5
+</span><span class="athl-line" data-athl-line="204">    <span style="color: #0550ae;">println</span><span style="color: #6639ba;">!</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&quot;Fib: {}&quot;</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">fib</span><span style="color: #1f2328;">(</span><span style="color: #0550ae;">4</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span> <span >// 5</span>
 </span><span class="athl-line" data-athl-line="205">
-</span><span class="athl-line" data-athl-line="206">    /////////////////////////
-</span><span class="athl-line" data-athl-line="207">    // 3. Pattern matching //
-</span><span class="athl-line" data-athl-line="208">    /////////////////////////
+</span><span class="athl-line" data-athl-line="206">    <span >/////////////////////////</span>
+</span><span class="athl-line" data-athl-line="207">    <span >// 3. Pattern matching //</span>
+</span><span class="athl-line" data-athl-line="208">    <span >/////////////////////////</span>
 </span><span class="athl-line" data-athl-line="209">
 </span><span class="athl-line" data-athl-line="210">    <span style="color: #cf222e;">let</span> <span style="color: #0550ae;">foo</span> <span style="color: #0550ae;">=</span> <span style="color: #953800;">OptionalI32</span><span style="color: #1f2328;">::</span><span style="color: #0550ae;">AnI32</span><span style="color: #1f2328;">(</span><span style="color: #0550ae;">1</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span>
 </span><span class="athl-line" data-athl-line="211">    <span style="color: #cf222e;">match</span> <span style="color: #0550ae;">foo</span> <span style="color: #1f2328;">{</span>
@@ -237,7 +237,7 @@
 </span><span class="athl-line" data-athl-line="213">        <span style="color: #953800;">OptionalI32</span><span style="color: #1f2328;">::</span><span style="color: #0550ae;">Nothing</span>  <span style="color: #1f2328;">=&gt;</span> <span style="color: #0550ae;">println</span><span style="color: #6639ba;">!</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&quot;it’s nothing!&quot;</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">,</span>
 </span><span class="athl-line" data-athl-line="214">    <span style="color: #1f2328;">}</span>
 </span><span class="athl-line" data-athl-line="215">
-</span><span class="athl-line" data-athl-line="216">    // Advanced pattern matching
+</span><span class="athl-line" data-athl-line="216">    <span >// Advanced pattern matching</span>
 </span><span class="athl-line" data-athl-line="217">    <span style="color: #cf222e;">struct</span> <span style="color: #953800;">FooBar</span> <span style="color: #1f2328;">{</span> <span style="color: #0550ae;">x</span><span style="color: #1f2328;">:</span> <span style="color: #cf222e;">i32</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">y</span><span style="color: #1f2328;">:</span> <span style="color: #953800;">OptionalI32</span> <span style="color: #1f2328;">}</span>
 </span><span class="athl-line" data-athl-line="218">    <span style="color: #cf222e;">let</span> <span style="color: #0550ae;">bar</span> <span style="color: #0550ae;">=</span> <span style="color: #953800;">FooBar</span> <span style="color: #1f2328;">{</span> <span style="color: #0550ae;">x</span><span style="color: #1f2328;">:</span> <span style="color: #0550ae;">15</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">y</span><span style="color: #1f2328;">:</span> <span style="color: #953800;">OptionalI32</span><span style="color: #1f2328;">::</span><span style="color: #0550ae;">AnI32</span><span style="color: #1f2328;">(</span><span style="color: #0550ae;">32</span><span style="color: #1f2328;">)</span> <span style="color: #1f2328;">}</span><span style="color: #1f2328;">;</span>
 </span><span class="athl-line" data-athl-line="219">
@@ -252,92 +252,92 @@
 </span><span class="athl-line" data-athl-line="228">            <span style="color: #0550ae;">println</span><span style="color: #6639ba;">!</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&quot;The second number is Nothing!&quot;</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">,</span>
 </span><span class="athl-line" data-athl-line="229">    <span style="color: #1f2328;">}</span>
 </span><span class="athl-line" data-athl-line="230">
-</span><span class="athl-line" data-athl-line="231">    /////////////////////
-</span><span class="athl-line" data-athl-line="232">    // 4. Control flow //
-</span><span class="athl-line" data-athl-line="233">    /////////////////////
+</span><span class="athl-line" data-athl-line="231">    <span >/////////////////////</span>
+</span><span class="athl-line" data-athl-line="232">    <span >// 4. Control flow //</span>
+</span><span class="athl-line" data-athl-line="233">    <span >/////////////////////</span>
 </span><span class="athl-line" data-athl-line="234">
-</span><span class="athl-line" data-athl-line="235">    // `for` loops/iteration
+</span><span class="athl-line" data-athl-line="235">    <span >// `for` loops/iteration</span>
 </span><span class="athl-line" data-athl-line="236">    <span style="color: #cf222e;">let</span> <span style="color: #0550ae;">array</span> <span style="color: #0550ae;">=</span> <span style="color: #1f2328;">[</span><span style="color: #0550ae;">1</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">2</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">3</span><span style="color: #1f2328;">]</span><span style="color: #1f2328;">;</span>
 </span><span class="athl-line" data-athl-line="237">    <span style="color: #cf222e;">for</span> <span style="color: #0550ae;">i</span> <span style="color: #cf222e;">in</span> <span style="color: #0550ae;">array</span> <span style="color: #1f2328;">{</span>
 </span><span class="athl-line" data-athl-line="238">        <span style="color: #0550ae;">println</span><span style="color: #6639ba;">!</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&quot;{}&quot;</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">i</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span>
 </span><span class="athl-line" data-athl-line="239">    <span style="color: #1f2328;">}</span>
 </span><span class="athl-line" data-athl-line="240">
-</span><span class="athl-line" data-athl-line="241">    // Ranges
+</span><span class="athl-line" data-athl-line="241">    <span >// Ranges</span>
 </span><span class="athl-line" data-athl-line="242">    <span style="color: #cf222e;">for</span> <span style="color: #0550ae;">i</span> <span style="color: #cf222e;">in</span> <span style="color: #0550ae;">0u32</span><span style="color: #0550ae;">..</span><span style="color: #0550ae;">10</span> <span style="color: #1f2328;">{</span>
 </span><span class="athl-line" data-athl-line="243">        <span style="color: #0550ae;">print</span><span style="color: #6639ba;">!</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&quot;{} &quot;</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">i</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span>
 </span><span class="athl-line" data-athl-line="244">    <span style="color: #1f2328;">}</span>
 </span><span class="athl-line" data-athl-line="245">    <span style="color: #0550ae;">println</span><span style="color: #6639ba;">!</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&quot;&quot;</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span>
-</span><span class="athl-line" data-athl-line="246">    // prints `0 1 2 3 4 5 6 7 8 9 `
+</span><span class="athl-line" data-athl-line="246">    <span >// prints `0 1 2 3 4 5 6 7 8 9 `</span>
 </span><span class="athl-line" data-athl-line="247">
-</span><span class="athl-line" data-athl-line="248">    // `if`
+</span><span class="athl-line" data-athl-line="248">    <span >// `if`</span>
 </span><span class="athl-line" data-athl-line="249">    <span style="color: #cf222e;">if</span> <span style="color: #0550ae;">1</span> <span style="color: #0550ae;">==</span> <span style="color: #0550ae;">1</span> <span style="color: #1f2328;">{</span>
 </span><span class="athl-line" data-athl-line="250">        <span style="color: #0550ae;">println</span><span style="color: #6639ba;">!</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&quot;Maths is working!&quot;</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span>
 </span><span class="athl-line" data-athl-line="251">    <span style="color: #1f2328;">}</span> <span style="color: #cf222e;">else</span> <span style="color: #1f2328;">{</span>
 </span><span class="athl-line" data-athl-line="252">        <span style="color: #0550ae;">println</span><span style="color: #6639ba;">!</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&quot;Oh no...&quot;</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span>
 </span><span class="athl-line" data-athl-line="253">    <span style="color: #1f2328;">}</span>
 </span><span class="athl-line" data-athl-line="254">
-</span><span class="athl-line" data-athl-line="255">    // `if` as expression
+</span><span class="athl-line" data-athl-line="255">    <span >// `if` as expression</span>
 </span><span class="athl-line" data-athl-line="256">    <span style="color: #cf222e;">let</span> <span style="color: #0550ae;">value</span> <span style="color: #0550ae;">=</span> <span style="color: #cf222e;">if</span> <span style="color: #0550ae;">true</span> <span style="color: #1f2328;">{</span>
 </span><span class="athl-line" data-athl-line="257">        <span style="color: #0a3069;">&quot;good&quot;</span>
 </span><span class="athl-line" data-athl-line="258">    <span style="color: #1f2328;">}</span> <span style="color: #cf222e;">else</span> <span style="color: #1f2328;">{</span>
 </span><span class="athl-line" data-athl-line="259">        <span style="color: #0a3069;">&quot;bad&quot;</span>
 </span><span class="athl-line" data-athl-line="260">    <span style="color: #1f2328;">}</span><span style="color: #1f2328;">;</span>
 </span><span class="athl-line" data-athl-line="261">
-</span><span class="athl-line" data-athl-line="262">    // `while` loop
+</span><span class="athl-line" data-athl-line="262">    <span >// `while` loop</span>
 </span><span class="athl-line" data-athl-line="263">    <span style="color: #cf222e;">while</span> <span style="color: #0550ae;">1</span> <span style="color: #0550ae;">==</span> <span style="color: #0550ae;">1</span> <span style="color: #1f2328;">{</span>
 </span><span class="athl-line" data-athl-line="264">        <span style="color: #0550ae;">println</span><span style="color: #6639ba;">!</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&quot;The universe is operating normally.&quot;</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span>
-</span><span class="athl-line" data-athl-line="265">        // break statement gets out of the while loop.
-</span><span class="athl-line" data-athl-line="266">        //  It avoids useless iterations.
+</span><span class="athl-line" data-athl-line="265">        <span >// break statement gets out of the while loop.</span>
+</span><span class="athl-line" data-athl-line="266">        <span >//  It avoids useless iterations.</span>
 </span><span class="athl-line" data-athl-line="267">        <span style="color: #cf222e;">break</span>
 </span><span class="athl-line" data-athl-line="268">    <span style="color: #1f2328;">}</span>
 </span><span class="athl-line" data-athl-line="269">
-</span><span class="athl-line" data-athl-line="270">    // Infinite loop
+</span><span class="athl-line" data-athl-line="270">    <span >// Infinite loop</span>
 </span><span class="athl-line" data-athl-line="271">    <span style="color: #cf222e;">loop</span> <span style="color: #1f2328;">{</span>
 </span><span class="athl-line" data-athl-line="272">        <span style="color: #0550ae;">println</span><span style="color: #6639ba;">!</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&quot;Hello!&quot;</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span>
-</span><span class="athl-line" data-athl-line="273">        // break statement gets out of the loop
+</span><span class="athl-line" data-athl-line="273">        <span >// break statement gets out of the loop</span>
 </span><span class="athl-line" data-athl-line="274">        <span style="color: #cf222e;">break</span>
 </span><span class="athl-line" data-athl-line="275">    <span style="color: #1f2328;">}</span>
 </span><span class="athl-line" data-athl-line="276">
-</span><span class="athl-line" data-athl-line="277">    /////////////////////////////////
-</span><span class="athl-line" data-athl-line="278">    // 5. Memory safety &amp; pointers //
-</span><span class="athl-line" data-athl-line="279">    /////////////////////////////////
+</span><span class="athl-line" data-athl-line="277">    <span >/////////////////////////////////</span>
+</span><span class="athl-line" data-athl-line="278">    <span >// 5. Memory safety &amp; pointers //</span>
+</span><span class="athl-line" data-athl-line="279">    <span >/////////////////////////////////</span>
 </span><span class="athl-line" data-athl-line="280">
-</span><span class="athl-line" data-athl-line="281">    // Owned pointer – only one thing can ‘own’ this pointer at a time
-</span><span class="athl-line" data-athl-line="282">    // This means that when the `Box` leaves its scope, it will be automatically deallocated safely.
+</span><span class="athl-line" data-athl-line="281">    <span >// Owned pointer – only one thing can ‘own’ this pointer at a time</span>
+</span><span class="athl-line" data-athl-line="282">    <span >// This means that when the `Box` leaves its scope, it will be automatically deallocated safely.</span>
 </span><span class="athl-line" data-athl-line="283">    <span style="color: #cf222e;">let</span> <span style="color: #cf222e;">mut</span> <span style="color: #0550ae;">mine</span><span style="color: #1f2328;">:</span> <span style="color: #953800;">Box</span><span style="color: #1f2328;">&lt;</span><span style="color: #cf222e;">i32</span><span style="color: #1f2328;">&gt;</span> <span style="color: #0550ae;">=</span> <span style="color: #953800;">Box</span><span style="color: #1f2328;">::</span><span style="color: #0550ae;">new</span><span style="color: #1f2328;">(</span><span style="color: #0550ae;">3</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span>
-</span><span class="athl-line" data-athl-line="284">    <span style="color: #0550ae;">*</span><span style="color: #0550ae;">mine</span> <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">5</span><span style="color: #1f2328;">;</span> // dereference
-</span><span class="athl-line" data-athl-line="285">    // Here, `now_its_mine` takes ownership of `mine`. In other words, `mine` is moved.
+</span><span class="athl-line" data-athl-line="284">    <span style="color: #0550ae;">*</span><span style="color: #0550ae;">mine</span> <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">5</span><span style="color: #1f2328;">;</span> <span >// dereference</span>
+</span><span class="athl-line" data-athl-line="285">    <span >// Here, `now_its_mine` takes ownership of `mine`. In other words, `mine` is moved.</span>
 </span><span class="athl-line" data-athl-line="286">    <span style="color: #cf222e;">let</span> <span style="color: #cf222e;">mut</span> <span style="color: #0550ae;">now_its_mine</span> <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">mine</span><span style="color: #1f2328;">;</span>
 </span><span class="athl-line" data-athl-line="287">    <span style="color: #0550ae;">*</span><span style="color: #0550ae;">now_its_mine</span> <span style="color: #0550ae;">+=</span> <span style="color: #0550ae;">2</span><span style="color: #1f2328;">;</span>
 </span><span class="athl-line" data-athl-line="288">
-</span><span class="athl-line" data-athl-line="289">    <span style="color: #0550ae;">println</span><span style="color: #6639ba;">!</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&quot;{}&quot;</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">now_its_mine</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span> // 7
-</span><span class="athl-line" data-athl-line="290">    // println!(&quot;{}&quot;, mine); // this would not compile because `now_its_mine` now owns the pointer
+</span><span class="athl-line" data-athl-line="289">    <span style="color: #0550ae;">println</span><span style="color: #6639ba;">!</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&quot;{}&quot;</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">now_its_mine</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span> <span >// 7</span>
+</span><span class="athl-line" data-athl-line="290">    <span >// println!(&quot;{}&quot;, mine); // this would not compile because `now_its_mine` now owns the pointer</span>
 </span><span class="athl-line" data-athl-line="291">
-</span><span class="athl-line" data-athl-line="292">    // Reference – an immutable pointer that refers to other data
-</span><span class="athl-line" data-athl-line="293">    // When a reference is taken to a value, we say that the value has been ‘borrowed’.
-</span><span class="athl-line" data-athl-line="294">    // While a value is borrowed immutably, it cannot be mutated or moved.
-</span><span class="athl-line" data-athl-line="295">    // A borrow is active until the last use of the borrowing variable.
+</span><span class="athl-line" data-athl-line="292">    <span >// Reference – an immutable pointer that refers to other data</span>
+</span><span class="athl-line" data-athl-line="293">    <span >// When a reference is taken to a value, we say that the value has been ‘borrowed’.</span>
+</span><span class="athl-line" data-athl-line="294">    <span >// While a value is borrowed immutably, it cannot be mutated or moved.</span>
+</span><span class="athl-line" data-athl-line="295">    <span >// A borrow is active until the last use of the borrowing variable.</span>
 </span><span class="athl-line" data-athl-line="296">    <span style="color: #cf222e;">let</span> <span style="color: #cf222e;">mut</span> <span style="color: #0550ae;">var</span> <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">4</span><span style="color: #1f2328;">;</span>
 </span><span class="athl-line" data-athl-line="297">    <span style="color: #0550ae;">var</span> <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">3</span><span style="color: #1f2328;">;</span>
 </span><span class="athl-line" data-athl-line="298">    <span style="color: #cf222e;">let</span> <span style="color: #0550ae;">ref_var</span><span style="color: #1f2328;">:</span> <span style="color: #0550ae;">&amp;</span><span style="color: #cf222e;">i32</span> <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">&amp;</span><span style="color: #0550ae;">var</span><span style="color: #1f2328;">;</span>
 </span><span class="athl-line" data-athl-line="299">
-</span><span class="athl-line" data-athl-line="300">    <span style="color: #0550ae;">println</span><span style="color: #6639ba;">!</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&quot;{}&quot;</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">var</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span> // Unlike `mine`, `var` can still be used
+</span><span class="athl-line" data-athl-line="300">    <span style="color: #0550ae;">println</span><span style="color: #6639ba;">!</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&quot;{}&quot;</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">var</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span> <span >// Unlike `mine`, `var` can still be used</span>
 </span><span class="athl-line" data-athl-line="301">    <span style="color: #0550ae;">println</span><span style="color: #6639ba;">!</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&quot;{}&quot;</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">*</span><span style="color: #0550ae;">ref_var</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span>
-</span><span class="athl-line" data-athl-line="302">    // var = 5; // this would not compile because `var` is borrowed
-</span><span class="athl-line" data-athl-line="303">    // *ref_var = 6; // this would not either, because `ref_var` is an immutable reference
-</span><span class="athl-line" data-athl-line="304">    <span style="color: #0550ae;">ref_var</span><span style="color: #1f2328;">;</span> // no-op, but counts as a use and keeps the borrow active
-</span><span class="athl-line" data-athl-line="305">    <span style="color: #0550ae;">var</span> <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">2</span><span style="color: #1f2328;">;</span> // ref_var is no longer used after the line above, so the borrow has ended
+</span><span class="athl-line" data-athl-line="302">    <span >// var = 5; // this would not compile because `var` is borrowed</span>
+</span><span class="athl-line" data-athl-line="303">    <span >// *ref_var = 6; // this would not either, because `ref_var` is an immutable reference</span>
+</span><span class="athl-line" data-athl-line="304">    <span style="color: #0550ae;">ref_var</span><span style="color: #1f2328;">;</span> <span >// no-op, but counts as a use and keeps the borrow active</span>
+</span><span class="athl-line" data-athl-line="305">    <span style="color: #0550ae;">var</span> <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">2</span><span style="color: #1f2328;">;</span> <span >// ref_var is no longer used after the line above, so the borrow has ended</span>
 </span><span class="athl-line" data-athl-line="306">
-</span><span class="athl-line" data-athl-line="307">    // Mutable reference
-</span><span class="athl-line" data-athl-line="308">    // While a value is mutably borrowed, it cannot be accessed at all.
+</span><span class="athl-line" data-athl-line="307">    <span >// Mutable reference</span>
+</span><span class="athl-line" data-athl-line="308">    <span >// While a value is mutably borrowed, it cannot be accessed at all.</span>
 </span><span class="athl-line" data-athl-line="309">    <span style="color: #cf222e;">let</span> <span style="color: #cf222e;">mut</span> <span style="color: #0550ae;">var2</span> <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">4</span><span style="color: #1f2328;">;</span>
 </span><span class="athl-line" data-athl-line="310">    <span style="color: #cf222e;">let</span> <span style="color: #0550ae;">ref_var2</span><span style="color: #1f2328;">:</span> <span style="color: #0550ae;">&amp;</span><span style="color: #cf222e;">mut</span> <span style="color: #cf222e;">i32</span> <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">&amp;</span><span style="color: #cf222e;">mut</span> <span style="color: #0550ae;">var2</span><span style="color: #1f2328;">;</span>
-</span><span class="athl-line" data-athl-line="311">    <span style="color: #0550ae;">*</span><span style="color: #0550ae;">ref_var2</span> <span style="color: #0550ae;">+=</span> <span style="color: #0550ae;">2</span><span style="color: #1f2328;">;</span>         // &#39;*&#39; is used to point to the mutably borrowed var2
+</span><span class="athl-line" data-athl-line="311">    <span style="color: #0550ae;">*</span><span style="color: #0550ae;">ref_var2</span> <span style="color: #0550ae;">+=</span> <span style="color: #0550ae;">2</span><span style="color: #1f2328;">;</span>         <span >// &#39;*&#39; is used to point to the mutably borrowed var2</span>
 </span><span class="athl-line" data-athl-line="312">
-</span><span class="athl-line" data-athl-line="313">    <span style="color: #0550ae;">println</span><span style="color: #6639ba;">!</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&quot;{}&quot;</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">*</span><span style="color: #0550ae;">ref_var2</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span> // 6 , // var2 would not compile.
-</span><span class="athl-line" data-athl-line="314">    // ref_var2 is of type &amp;mut i32, so stores a reference to an i32, not the value.
-</span><span class="athl-line" data-athl-line="315">    // var2 = 2; // this would not compile because `var2` is borrowed.
-</span><span class="athl-line" data-athl-line="316">    <span style="color: #0550ae;">ref_var2</span><span style="color: #1f2328;">;</span> // no-op, but counts as a use and keeps the borrow active until here
+</span><span class="athl-line" data-athl-line="313">    <span style="color: #0550ae;">println</span><span style="color: #6639ba;">!</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&quot;{}&quot;</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">*</span><span style="color: #0550ae;">ref_var2</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span> <span >// 6 , // var2 would not compile.</span>
+</span><span class="athl-line" data-athl-line="314">    <span >// ref_var2 is of type &amp;mut i32, so stores a reference to an i32, not the value.</span>
+</span><span class="athl-line" data-athl-line="315">    <span >// var2 = 2; // this would not compile because `var2` is borrowed.</span>
+</span><span class="athl-line" data-athl-line="316">    <span style="color: #0550ae;">ref_var2</span><span style="color: #1f2328;">;</span> <span >// no-op, but counts as a use and keeps the borrow active until here</span>
 </span><span class="athl-line" data-athl-line="317"><span style="color: #1f2328;">}</span>
 </span></code></pre>
 </body>

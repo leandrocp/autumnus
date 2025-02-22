@@ -125,6 +125,7 @@ local highlight_groups = {
 	"@punctuation.delimiter",
 	"@punctuation.special",
 	"@repeat",
+  "@spell",
 	"@storageclass",
 	"@string",
 	"@string.documentation",
