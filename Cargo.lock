@@ -89,6 +89,7 @@ dependencies = [
  "tree-sitter-highlight",
  "tree-sitter-html",
  "tree-sitter-lua",
+ "tree-sitter-php",
  "tree-sitter-ruby",
  "tree-sitter-rust",
  "v_htmlescape",
@@ -462,6 +463,16 @@ name = "tree-sitter-lua"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5cdb9adf0965fec58e7660cbb3a059dbb12ebeec9459e6dcbae3db004739641e"
+dependencies = [
+ "cc",
+ "tree-sitter-language",
+]
+
+[[package]]
+name = "tree-sitter-php"
+version = "0.23.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f066e94e9272cfe4f1dcb07a1c50c66097eca648f2d7233d299c8ae9ed8c130c"
 dependencies = [
  "cc",
  "tree-sitter-language",

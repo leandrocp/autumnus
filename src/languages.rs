@@ -18,6 +18,7 @@ pub(crate) enum Language {
     Lua,
     Bash,
     Ruby,
+    Php,
 }
 
 impl Language {
@@ -29,6 +30,7 @@ impl Language {
             "lua" => Some(Language::Lua),
             "bash" => Some(Language::Bash),
             "ruby" => Some(Language::Ruby),
+            "php" => Some(Language::Php),
             "diff" => Some(Language::Diff),
             _ => None,
         };
@@ -135,6 +137,9 @@ impl Language {
                 "Gemfile",
                 "Rakefile",
             ],
+            Language::Php => &[
+                "*.php", "*.phtml", "*.php3", "*.php4", "*.php5", "*.php7", "*.phps",
+            ],
         };
 
         glob_strs
@@ -187,6 +192,7 @@ impl Language {
             Language::Lua => "Lua",
             Language::Bash => "Bash",
             Language::Ruby => "Ruby",
+            Language::Php => "PHP",
         }
     }
 
@@ -202,6 +208,7 @@ impl Language {
             Language::Lua => &LUA_CONFIG,
             Language::Bash => &BASH_CONFIG,
             Language::Ruby => &RUBY_CONFIG,
+            Language::Php => &PHP_CONFIG,
             Language::Html => &HTML_CONFIG,
             _ => &PLAIN_TEXT_CONFIG,
         }
@@ -328,6 +335,21 @@ static RUBY_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     config
 });
 
+static PHP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = tree_sitter_php::LANGUAGE_PHP;
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "php",
+        tree_sitter_php::HIGHLIGHTS_QUERY,
+        tree_sitter_php::INJECTIONS_QUERY,
+        "",
+    )
+    .expect("failed to create php highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -408,6 +430,16 @@ mod tests {
     #[test]
     fn test_ruby() {
         let lang = Language::guess("ruby", "");
+        let mut highlighter = Highlighter::new();
+
+        let _ = highlighter
+            .highlight(lang.config(), "".as_bytes(), None, |_| None)
+            .unwrap();
+    }
+
+    #[test]
+    fn test_php() {
+        let lang = Language::guess("php", "");
         let mut highlighter = Highlighter::new();
 
         let _ = highlighter

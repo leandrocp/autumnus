@@ -182,7 +182,8 @@ mod tests {
 
     #[test]
     fn test_from_json() {
-        let json = r#"{"name": "test", "appearance": "dark", "highlights": {"keyword": {"fg": "blue"}}}"#;
+        let json =
+            r#"{"name": "test", "appearance": "dark", "highlights": {"keyword": {"fg": "blue"}}}"#;
         let theme = from_json(json).unwrap();
 
         assert_eq!(theme.name, "test");
