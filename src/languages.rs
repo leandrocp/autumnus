@@ -19,6 +19,7 @@ pub(crate) enum Language {
     Bash,
     Ruby,
     Php,
+    Swift,
 }
 
 impl Language {
@@ -31,6 +32,7 @@ impl Language {
             "bash" => Some(Language::Bash),
             "ruby" => Some(Language::Ruby),
             "php" => Some(Language::Php),
+            "swift" => Some(Language::Swift),
             "diff" => Some(Language::Diff),
             _ => None,
         };
@@ -140,6 +142,7 @@ impl Language {
             Language::Php => &[
                 "*.php", "*.phtml", "*.php3", "*.php4", "*.php5", "*.php7", "*.phps",
             ],
+            Language::Swift => &["*.swift"],
         };
 
         glob_strs
@@ -163,6 +166,7 @@ impl Language {
                         "ruby" | "macruby" | "rake" | "jruby" | "rbx" => {
                             return Some(Language::Ruby)
                         }
+                        "swift" => return Some(Language::Swift),
                         _ => {}
                     }
                 }
@@ -193,6 +197,7 @@ impl Language {
             Language::Bash => "Bash",
             Language::Ruby => "Ruby",
             Language::Php => "PHP",
+            Language::Swift => "Swift",
         }
     }
 
@@ -209,6 +214,7 @@ impl Language {
             Language::Bash => &BASH_CONFIG,
             Language::Ruby => &RUBY_CONFIG,
             Language::Php => &PHP_CONFIG,
+            Language::Swift => &SWIFT_CONFIG,
             Language::Html => &HTML_CONFIG,
             _ => &PLAIN_TEXT_CONFIG,
         }
@@ -350,6 +356,21 @@ static PHP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     config
 });
 
+static SWIFT_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = tree_sitter_swift::LANGUAGE;
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "swift",
+        tree_sitter_swift::HIGHLIGHTS_QUERY,
+        tree_sitter_swift::INJECTIONS_QUERY,
+        tree_sitter_swift::LOCALS_QUERY,
+    )
+    .expect("failed to create swift highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -440,6 +461,16 @@ mod tests {
     #[test]
     fn test_php() {
         let lang = Language::guess("php", "");
+        let mut highlighter = Highlighter::new();
+
+        let _ = highlighter
+            .highlight(lang.config(), "".as_bytes(), None, |_| None)
+            .unwrap();
+    }
+
+    #[test]
+    fn test_swift() {
+        let lang = Language::guess("swift", "");
         let mut highlighter = Highlighter::new();
 
         let _ = highlighter
