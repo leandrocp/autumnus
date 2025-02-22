@@ -1,6 +1,15 @@
 use anyhow::Result;
 use clap::{Parser, Subcommand, ValueEnum};
 
+#[cfg(feature = "dev")]
+use std::fs;
+
+#[cfg(feature = "dev")]
+use anyhow::Context;
+
+#[cfg(feature = "dev")]
+use std::path::{Path, PathBuf};
+
 #[derive(Parser)]
 #[command(version)]
 struct Cli {
@@ -63,7 +72,7 @@ fn highlight(
     formatter: Option<Formatter>,
     theme: Option<String>,
 ) -> Result<()> {
-    let theme = autumnus::themes::get(&theme.unwrap_or("catppuccin_frappe".to_string()))
+    let theme = autumnus::themes::get(&theme.unwrap_or("dracula".to_string()))
         .cloned()
         .unwrap_or_default();
 
