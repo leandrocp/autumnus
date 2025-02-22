@@ -14,7 +14,7 @@ themes=(
   "catppuccin-latte:light@catppuccin_latte"
   "catppuccin-macchiato:dark@catppuccin_macchiato"
   "catppuccin-mocha:dark@catppuccin_mocha"
-  "dracula-soft:light@dracula_soft"
+  "dracula-soft:dark@dracula_soft"
   "dracula:dark@dracula"
   "github_dark:dark@github_dark"
   "github_dark_colorblind:dark@github_dark_colorblind"

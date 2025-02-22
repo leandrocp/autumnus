@@ -321,12 +321,6 @@ end
 -- 4. Modules.
 ----------------------------------------------------
 
-
---[[ I'm commenting out this section so the rest of
---   this script remains runnable.
-```
-
-```lua
 -- Suppose the file mod.lua looks like this:
 local M = {}
 
@@ -376,5 +370,3 @@ f = loadfile('mod2.lua')  -- Call f() to run it.
 -- (loadstring is deprecated, use load instead)
 g = load('print(343)')  -- Returns a function.
 g()  -- Prints out 343; nothing printed before now.
-
---]]

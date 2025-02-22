@@ -345,63 +345,55 @@
 </span><span class="athl-line" data-athl-line="321"><span style="color: #57606a;">-- 4. Modules.</span>
 </span><span class="athl-line" data-athl-line="322"><span style="color: #57606a;">----------------------------------------------------</span>
 </span><span class="athl-line" data-athl-line="323">
-</span><span class="athl-line" data-athl-line="324">
-</span><span class="athl-line" data-athl-line="325"><span style="color: #57606a;">--[[ I&#39;m commenting out this section so the rest of</span>
-</span><span class="athl-line" data-athl-line="326"><span style="color: #57606a;">--   this script remains runnable.</span>
-</span><span class="athl-line" data-athl-line="327"><span style="color: #57606a;">```</span>
-</span><span class="athl-line" data-athl-line="328"><span style="color: #57606a;"></span>
-</span><span class="athl-line" data-athl-line="329"><span style="color: #57606a;">```lua</span>
-</span><span class="athl-line" data-athl-line="330"><span style="color: #57606a;">-- Suppose the file mod.lua looks like this:</span>
-</span><span class="athl-line" data-athl-line="331"><span style="color: #57606a;">local M = {}</span>
-</span><span class="athl-line" data-athl-line="332"><span style="color: #57606a;"></span>
-</span><span class="athl-line" data-athl-line="333"><span style="color: #57606a;">local function sayMyName()</span>
-</span><span class="athl-line" data-athl-line="334"><span style="color: #57606a;">  print(&#39;Hrunkner&#39;)</span>
-</span><span class="athl-line" data-athl-line="335"><span style="color: #57606a;">end</span>
-</span><span class="athl-line" data-athl-line="336"><span style="color: #57606a;"></span>
-</span><span class="athl-line" data-athl-line="337"><span style="color: #57606a;">function M.sayHello()</span>
-</span><span class="athl-line" data-athl-line="338"><span style="color: #57606a;">  print(&#39;Why hello there&#39;)</span>
-</span><span class="athl-line" data-athl-line="339"><span style="color: #57606a;">  sayMyName()</span>
-</span><span class="athl-line" data-athl-line="340"><span style="color: #57606a;">end</span>
-</span><span class="athl-line" data-athl-line="341"><span style="color: #57606a;"></span>
-</span><span class="athl-line" data-athl-line="342"><span style="color: #57606a;">return M</span>
-</span><span class="athl-line" data-athl-line="343"><span style="color: #57606a;"></span>
-</span><span class="athl-line" data-athl-line="344"><span style="color: #57606a;">-- Another file can use mod.lua&#39;s functionality:</span>
-</span><span class="athl-line" data-athl-line="345"><span style="color: #57606a;">local mod = require(&#39;mod&#39;)  -- Run the file mod.lua.</span>
-</span><span class="athl-line" data-athl-line="346"><span style="color: #57606a;"></span>
-</span><span class="athl-line" data-athl-line="347"><span style="color: #57606a;">-- require is the standard way to include modules.</span>
-</span><span class="athl-line" data-athl-line="348"><span style="color: #57606a;">-- require acts like:     (if not cached; see below)</span>
-</span><span class="athl-line" data-athl-line="349"><span style="color: #57606a;">local mod = (function ()</span>
-</span><span class="athl-line" data-athl-line="350"><span style="color: #57606a;">  &lt;contents of mod.lua&gt;</span>
-</span><span class="athl-line" data-athl-line="351"><span style="color: #57606a;">end)()</span>
-</span><span class="athl-line" data-athl-line="352"><span style="color: #57606a;">-- It&#39;s like mod.lua is a function body, so that</span>
-</span><span class="athl-line" data-athl-line="353"><span style="color: #57606a;">-- locals inside mod.lua are invisible outside it.</span>
-</span><span class="athl-line" data-athl-line="354"><span style="color: #57606a;"></span>
-</span><span class="athl-line" data-athl-line="355"><span style="color: #57606a;">-- This works because mod here = M in mod.lua:</span>
-</span><span class="athl-line" data-athl-line="356"><span style="color: #57606a;">mod.sayHello() -- Prints: Why hello there Hrunkner</span>
-</span><span class="athl-line" data-athl-line="357"><span style="color: #57606a;"></span>
-</span><span class="athl-line" data-athl-line="358"><span style="color: #57606a;">-- This is wrong; sayMyName only exists in mod.lua:</span>
-</span><span class="athl-line" data-athl-line="359"><span style="color: #57606a;">mod.sayMyName()  -- error</span>
-</span><span class="athl-line" data-athl-line="360"><span style="color: #57606a;"></span>
-</span><span class="athl-line" data-athl-line="361"><span style="color: #57606a;">-- require&#39;s return values are cached so a file is</span>
-</span><span class="athl-line" data-athl-line="362"><span style="color: #57606a;">-- run at most once, even when require&#39;d many times.</span>
-</span><span class="athl-line" data-athl-line="363"><span style="color: #57606a;"></span>
-</span><span class="athl-line" data-athl-line="364"><span style="color: #57606a;">-- Suppose mod2.lua contains &quot;print(&#39;Hi!&#39;)&quot;.</span>
-</span><span class="athl-line" data-athl-line="365"><span style="color: #57606a;">local a = require(&#39;mod2&#39;)  -- Prints Hi!</span>
-</span><span class="athl-line" data-athl-line="366"><span style="color: #57606a;">local b = require(&#39;mod2&#39;)  -- Doesn&#39;t print; a=b.</span>
-</span><span class="athl-line" data-athl-line="367"><span style="color: #57606a;"></span>
-</span><span class="athl-line" data-athl-line="368"><span style="color: #57606a;">-- dofile is like require without caching:</span>
-</span><span class="athl-line" data-athl-line="369"><span style="color: #57606a;">dofile(&#39;mod2.lua&#39;)  --&gt; Hi!</span>
-</span><span class="athl-line" data-athl-line="370"><span style="color: #57606a;">dofile(&#39;mod2.lua&#39;)  --&gt; Hi! (runs it again)</span>
-</span><span class="athl-line" data-athl-line="371"><span style="color: #57606a;"></span>
-</span><span class="athl-line" data-athl-line="372"><span style="color: #57606a;">-- loadfile loads a lua file but doesn&#39;t run it yet.</span>
-</span><span class="athl-line" data-athl-line="373"><span style="color: #57606a;">f = loadfile(&#39;mod2.lua&#39;)  -- Call f() to run it.</span>
-</span><span class="athl-line" data-athl-line="374"><span style="color: #57606a;"></span>
-</span><span class="athl-line" data-athl-line="375"><span style="color: #57606a;">-- load is loadfile for strings.</span>
-</span><span class="athl-line" data-athl-line="376"><span style="color: #57606a;">-- (loadstring is deprecated, use load instead)</span>
-</span><span class="athl-line" data-athl-line="377"><span style="color: #57606a;">g = load(&#39;print(343)&#39;)  -- Returns a function.</span>
-</span><span class="athl-line" data-athl-line="378"><span style="color: #57606a;">g()  -- Prints out 343; nothing printed before now.</span>
-</span><span class="athl-line" data-athl-line="379"><span style="color: #57606a;"></span>
-</span><span class="athl-line" data-athl-line="380"><span style="color: #57606a;">--]]</span>
+</span><span class="athl-line" data-athl-line="324"><span style="color: #57606a;">-- Suppose the file mod.lua looks like this:</span>
+</span><span class="athl-line" data-athl-line="325"><span style="color: #cf222e;">local</span> <span style="color: #0550ae;">M</span> <span style="color: #0550ae;">=</span> <span style="color: #953800;">{</span><span style="color: #953800;">}</span>
+</span><span class="athl-line" data-athl-line="326">
+</span><span class="athl-line" data-athl-line="327"><span style="color: #cf222e;">local</span> <span style="color: #cf222e;">function</span> <span style="color: #6639ba;">sayMyName</span><span style="color: #1f2328;">(</span><span style="color: #1f2328;">)</span>
+</span><span class="athl-line" data-athl-line="328">  <span style="color: #6639ba;">print</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&#39;Hrunkner&#39;</span><span style="color: #1f2328;">)</span>
+</span><span class="athl-line" data-athl-line="329"><span style="color: #cf222e;">end</span>
+</span><span class="athl-line" data-athl-line="330">
+</span><span class="athl-line" data-athl-line="331"><span style="color: #cf222e;">function</span> <span style="color: #0550ae;">M</span><span style="color: #1f2328;">.</span><span style="color: #6639ba;">sayHello</span><span style="color: #1f2328;">(</span><span style="color: #1f2328;">)</span>
+</span><span class="athl-line" data-athl-line="332">  <span style="color: #6639ba;">print</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&#39;Why hello there&#39;</span><span style="color: #1f2328;">)</span>
+</span><span class="athl-line" data-athl-line="333">  <span style="color: #6639ba;">sayMyName</span><span style="color: #1f2328;">(</span><span style="color: #1f2328;">)</span>
+</span><span class="athl-line" data-athl-line="334"><span style="color: #cf222e;">end</span>
+</span><span class="athl-line" data-athl-line="335">
+</span><span class="athl-line" data-athl-line="336"><span style="color: #cf222e;">return</span> <span style="color: #0550ae;">M</span>
+</span><span class="athl-line" data-athl-line="337">
+</span><span class="athl-line" data-athl-line="338"><span style="color: #57606a;">-- Another file can use mod.lua&#39;s functionality:</span>
+</span><span class="athl-line" data-athl-line="339"><span style="color: #cf222e;">local</span> <span style="color: #1f2328;">mod</span> <span style="color: #0550ae;">=</span> <span style="color: #6639ba;">require</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&#39;mod&#39;</span><span style="color: #1f2328;">)</span>  <span style="color: #57606a;">-- Run the file mod.lua.</span>
+</span><span class="athl-line" data-athl-line="340">
+</span><span class="athl-line" data-athl-line="341"><span style="color: #57606a;">-- require is the standard way to include modules.</span>
+</span><span class="athl-line" data-athl-line="342"><span style="color: #57606a;">-- require acts like:     (if not cached; see below)</span>
+</span><span class="athl-line" data-athl-line="343"><span style="color: #cf222e;">local</span> <span style="color: #1f2328;">mod</span> <span style="color: #0550ae;">=</span> <span style="color: #1f2328;">(</span><span style="color: #cf222e;">function</span> <span style="color: #1f2328;">(</span><span style="color: #1f2328;">)</span>
+</span><span class="athl-line" data-athl-line="344">  <span style="color: #0550ae;">&lt;</span><span style="color: #1f2328;">contents</span> <span style="color: #1f2328;">of</span> <span style="color: #1f2328;">mod</span><span style="color: #1f2328;">.</span><span >lua</span><span style="color: #0550ae;">&gt;</span>
+</span><span class="athl-line" data-athl-line="345"><span style="color: #cf222e;">end</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">(</span><span style="color: #1f2328;">)</span>
+</span><span class="athl-line" data-athl-line="346"><span style="color: #57606a;">-- It&#39;s like mod.lua is a function body, so that</span>
+</span><span class="athl-line" data-athl-line="347"><span style="color: #57606a;">-- locals inside mod.lua are invisible outside it.</span>
+</span><span class="athl-line" data-athl-line="348">
+</span><span class="athl-line" data-athl-line="349"><span style="color: #57606a;">-- This works because mod here = M in mod.lua:</span>
+</span><span class="athl-line" data-athl-line="350"><span style="color: #1f2328;">mod</span><span style="color: #1f2328;">.</span><span style="color: #6639ba;">sayHello</span><span style="color: #1f2328;">(</span><span style="color: #1f2328;">)</span> <span style="color: #57606a;">-- Prints: Why hello there Hrunkner</span>
+</span><span class="athl-line" data-athl-line="351">
+</span><span class="athl-line" data-athl-line="352"><span style="color: #57606a;">-- This is wrong; sayMyName only exists in mod.lua:</span>
+</span><span class="athl-line" data-athl-line="353"><span style="color: #1f2328;">mod</span><span style="color: #1f2328;">.</span><span style="color: #6639ba;">sayMyName</span><span style="color: #1f2328;">(</span><span style="color: #1f2328;">)</span>  <span style="color: #57606a;">-- error</span>
+</span><span class="athl-line" data-athl-line="354">
+</span><span class="athl-line" data-athl-line="355"><span style="color: #57606a;">-- require&#39;s return values are cached so a file is</span>
+</span><span class="athl-line" data-athl-line="356"><span style="color: #57606a;">-- run at most once, even when require&#39;d many times.</span>
+</span><span class="athl-line" data-athl-line="357">
+</span><span class="athl-line" data-athl-line="358"><span style="color: #57606a;">-- Suppose mod2.lua contains &quot;print(&#39;Hi!&#39;)&quot;.</span>
+</span><span class="athl-line" data-athl-line="359"><span style="color: #cf222e;">local</span> <span style="color: #1f2328;">a</span> <span style="color: #0550ae;">=</span> <span style="color: #6639ba;">require</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&#39;mod2&#39;</span><span style="color: #1f2328;">)</span>  <span style="color: #57606a;">-- Prints Hi!</span>
+</span><span class="athl-line" data-athl-line="360"><span style="color: #cf222e;">local</span> <span style="color: #1f2328;">b</span> <span style="color: #0550ae;">=</span> <span style="color: #6639ba;">require</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&#39;mod2&#39;</span><span style="color: #1f2328;">)</span>  <span style="color: #57606a;">-- Doesn&#39;t print; a=b.</span>
+</span><span class="athl-line" data-athl-line="361">
+</span><span class="athl-line" data-athl-line="362"><span style="color: #57606a;">-- dofile is like require without caching:</span>
+</span><span class="athl-line" data-athl-line="363"><span style="color: #6639ba;">dofile</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&#39;mod2.lua&#39;</span><span style="color: #1f2328;">)</span>  <span style="color: #57606a;">--&gt; Hi!</span>
+</span><span class="athl-line" data-athl-line="364"><span style="color: #6639ba;">dofile</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&#39;mod2.lua&#39;</span><span style="color: #1f2328;">)</span>  <span style="color: #57606a;">--&gt; Hi! (runs it again)</span>
+</span><span class="athl-line" data-athl-line="365">
+</span><span class="athl-line" data-athl-line="366"><span style="color: #57606a;">-- loadfile loads a lua file but doesn&#39;t run it yet.</span>
+</span><span class="athl-line" data-athl-line="367"><span style="color: #1f2328;">f</span> <span style="color: #0550ae;">=</span> <span style="color: #6639ba;">loadfile</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&#39;mod2.lua&#39;</span><span style="color: #1f2328;">)</span>  <span style="color: #57606a;">-- Call f() to run it.</span>
+</span><span class="athl-line" data-athl-line="368">
+</span><span class="athl-line" data-athl-line="369"><span style="color: #57606a;">-- load is loadfile for strings.</span>
+</span><span class="athl-line" data-athl-line="370"><span style="color: #57606a;">-- (loadstring is deprecated, use load instead)</span>
+</span><span class="athl-line" data-athl-line="371"><span style="color: #1f2328;">g</span> <span style="color: #0550ae;">=</span> <span style="color: #6639ba;">load</span><span style="color: #1f2328;">(</span><span style="color: #0a3069;">&#39;print(343)&#39;</span><span style="color: #1f2328;">)</span>  <span style="color: #57606a;">-- Returns a function.</span>
+</span><span class="athl-line" data-athl-line="372"><span style="color: #1f2328;">g</span><span style="color: #1f2328;">(</span><span style="color: #1f2328;">)</span>  <span style="color: #57606a;">-- Prints out 343; nothing printed before now.</span>
 </span></code></pre>
 </body>
 </html>

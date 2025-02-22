@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>ruby - dracula_soft - Autumnus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'JetBrains Mono', monospace;
+            line-height: 1.5;
+        }
+        pre {
+            font-size: 15px;
+            margin: 20px;
+            padding: 50px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+<pre class="athl" style="color: #f6f6f5; background-color: #292a35;"><code class="language-ruby" translate="no" tabindex="0"><span class="athl-line" data-athl-line="1"><span style="color: #70747f;"># This is a comment</span>
+</span><span class="athl-line" data-athl-line="2">
+</span><span class="athl-line" data-athl-line="3"><span style="color: #70747f;">=begin</span>
+</span><span class="athl-line" data-athl-line="4"><span style="color: #70747f;">This is a multi-line comment.</span>
+</span><span class="athl-line" data-athl-line="5"><span style="color: #70747f;">The beginning line must start with &quot;=begin&quot;</span>
+</span><span class="athl-line" data-athl-line="6"><span style="color: #70747f;">and the ending line must start with &quot;=end&quot;.</span>
+</span><span class="athl-line" data-athl-line="7">
+</span><span class="athl-line" data-athl-line="8"><span style="color: #87e58e;">You</span> <span style="color: #87e58e;">can</span> <span style="color: #e48cc1;">do</span> <span style="color: #f6f6f5;">this</span><span style="color: #f6f6f5;">,</span> <span style="color: #87e58e;">or</span> <span style="color: #87e58e;">start</span> <span style="color: #87e58e;">each</span> <span style="color: #f6f6f5;">line</span> <span style="color: #e48cc1;">in</span>
+</span><span class="athl-line" data-athl-line="9"><span style="color: #87e58e;">a</span> <span style="color: #87e58e;">multi</span>-<span style="color: #f6f6f5;">line</span> <span style="color: #87e58e;">comment</span> <span style="color: #87e58e;">with</span> <span style="color: #87e58e;">the</span> <span style="color: #70747f;"># character.</span>
+</span><span class="athl-line" data-athl-line="10"><span style="color: #e48cc1;">=</span><span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="11">
+</span><span class="athl-line" data-athl-line="12"><span style="color: #70747f;"># In Ruby, (almost) everything is an object.</span>
+</span><span class="athl-line" data-athl-line="13"><span style="color: #70747f;"># This includes numbers...</span>
+</span><span class="athl-line" data-athl-line="14"><span style="color: #baa0e8;">3</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">class</span> <span style="color: #70747f;">#=&gt; Integer</span>
+</span><span class="athl-line" data-athl-line="15">
+</span><span class="athl-line" data-athl-line="16"><span style="color: #70747f;"># ...and strings...</span>
+</span><span class="athl-line" data-athl-line="17"><span style="color: #e8eda2;">&quot;Hello&quot;</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">class</span> <span style="color: #70747f;">#=&gt; String</span>
+</span><span class="athl-line" data-athl-line="18">
+</span><span class="athl-line" data-athl-line="19"><span style="color: #70747f;"># ...and even methods!</span>
+</span><span class="athl-line" data-athl-line="20"><span style="color: #e8eda2;">&quot;Hello&quot;</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">method</span><span style="color: #f6f6f5;">(</span><span style="color: #baa0e8;">:class</span><span style="color: #f6f6f5;">)</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">class</span> <span style="color: #70747f;">#=&gt; Method</span>
+</span><span class="athl-line" data-athl-line="21">
+</span><span class="athl-line" data-athl-line="22"><span style="color: #70747f;"># Some basic arithmetic</span>
+</span><span class="athl-line" data-athl-line="23"><span style="color: #baa0e8;">1</span> + <span style="color: #baa0e8;">1</span> <span style="color: #70747f;">#=&gt; 2</span>
+</span><span class="athl-line" data-athl-line="24"><span style="color: #baa0e8;">8</span> - <span style="color: #baa0e8;">1</span> <span style="color: #70747f;">#=&gt; 7</span>
+</span><span class="athl-line" data-athl-line="25"><span style="color: #baa0e8;">10</span> * <span style="color: #baa0e8;">2</span> <span style="color: #70747f;">#=&gt; 20</span>
+</span><span class="athl-line" data-athl-line="26"><span style="color: #baa0e8;">35</span> / <span style="color: #baa0e8;">5</span> <span style="color: #70747f;">#=&gt; 7</span>
+</span><span class="athl-line" data-athl-line="27"><span style="color: #baa0e8;">2</span> ** <span style="color: #baa0e8;">5</span> <span style="color: #70747f;">#=&gt; 32</span>
+</span><span class="athl-line" data-athl-line="28"><span style="color: #baa0e8;">5</span> % <span style="color: #baa0e8;">3</span> <span style="color: #70747f;">#=&gt; 2</span>
+</span><span class="athl-line" data-athl-line="29">
+</span><span class="athl-line" data-athl-line="30"><span style="color: #70747f;"># Bitwise operators</span>
+</span><span class="athl-line" data-athl-line="31"><span style="color: #baa0e8;">3</span> &amp; <span style="color: #baa0e8;">5</span> <span style="color: #70747f;">#=&gt; 1</span>
+</span><span class="athl-line" data-athl-line="32"><span style="color: #baa0e8;">3</span> | <span style="color: #baa0e8;">5</span> <span style="color: #70747f;">#=&gt; 7</span>
+</span><span class="athl-line" data-athl-line="33"><span style="color: #baa0e8;">3</span> ^ <span style="color: #baa0e8;">5</span> <span style="color: #70747f;">#=&gt; 6</span>
+</span><span class="athl-line" data-athl-line="34">
+</span><span class="athl-line" data-athl-line="35"><span style="color: #70747f;"># Arithmetic is just syntactic sugar</span>
+</span><span class="athl-line" data-athl-line="36"><span style="color: #70747f;"># for calling a method on an object</span>
+</span><span class="athl-line" data-athl-line="37"><span style="color: #baa0e8;">1</span><span style="color: #f6f6f5;">.</span>+<span style="color: #f6f6f5;">(</span><span style="color: #baa0e8;">3</span><span style="color: #f6f6f5;">)</span> <span style="color: #70747f;">#=&gt; 4</span>
+</span><span class="athl-line" data-athl-line="38"><span style="color: #baa0e8;">10</span><span style="color: #f6f6f5;">.</span>* <span style="color: #baa0e8;">5</span> <span style="color: #70747f;">#=&gt; 50</span>
+</span><span class="athl-line" data-athl-line="39"><span style="color: #baa0e8;">100</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">methods</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">include?</span><span style="color: #f6f6f5;">(</span><span style="color: #baa0e8;">:/</span><span style="color: #f6f6f5;">)</span> <span style="color: #70747f;">#=&gt; true</span>
+</span><span class="athl-line" data-athl-line="40">
+</span><span class="athl-line" data-athl-line="41"><span style="color: #70747f;"># Special values are objects</span>
+</span><span class="athl-line" data-athl-line="42"><span style="color: #baa0e8;">nil</span> <span style="color: #70747f;"># equivalent to null in other languages</span>
+</span><span class="athl-line" data-athl-line="43"><span style="color: #baa0e8;">true</span> <span style="color: #70747f;"># truth</span>
+</span><span class="athl-line" data-athl-line="44"><span style="color: #baa0e8;">false</span> <span style="color: #70747f;"># falsehood</span>
+</span><span class="athl-line" data-athl-line="45">
+</span><span class="athl-line" data-athl-line="46"><span style="color: #baa0e8;">nil</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">class</span> <span style="color: #70747f;">#=&gt; NilClass</span>
+</span><span class="athl-line" data-athl-line="47"><span style="color: #baa0e8;">true</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">class</span> <span style="color: #70747f;">#=&gt; TrueClass</span>
+</span><span class="athl-line" data-athl-line="48"><span style="color: #baa0e8;">false</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">class</span> <span style="color: #70747f;">#=&gt; FalseClass</span>
+</span><span class="athl-line" data-athl-line="49">
+</span><span class="athl-line" data-athl-line="50"><span style="color: #70747f;"># Equality</span>
+</span><span class="athl-line" data-athl-line="51"><span style="color: #baa0e8;">1</span> == <span style="color: #baa0e8;">1</span> <span style="color: #70747f;">#=&gt; true</span>
+</span><span class="athl-line" data-athl-line="52"><span style="color: #baa0e8;">2</span> == <span style="color: #baa0e8;">1</span> <span style="color: #70747f;">#=&gt; false</span>
+</span><span class="athl-line" data-athl-line="53">
+</span><span class="athl-line" data-athl-line="54"><span style="color: #70747f;"># Inequality</span>
+</span><span class="athl-line" data-athl-line="55"><span style="color: #baa0e8;">1</span> != <span style="color: #baa0e8;">1</span> <span style="color: #70747f;">#=&gt; false</span>
+</span><span class="athl-line" data-athl-line="56"><span style="color: #baa0e8;">2</span> != <span style="color: #baa0e8;">1</span> <span style="color: #70747f;">#=&gt; true</span>
+</span><span class="athl-line" data-athl-line="57">
+</span><span class="athl-line" data-athl-line="58"><span style="color: #70747f;"># Apart from false itself, nil is the only other &#39;falsey&#39; value</span>
+</span><span class="athl-line" data-athl-line="59">
+</span><span class="athl-line" data-athl-line="60">!!<span style="color: #baa0e8;">nil</span>   <span style="color: #70747f;">#=&gt; false</span>
+</span><span class="athl-line" data-athl-line="61">!!<span style="color: #baa0e8;">false</span> <span style="color: #70747f;">#=&gt; false</span>
+</span><span class="athl-line" data-athl-line="62">!!<span style="color: #baa0e8;">0</span>     <span style="color: #70747f;">#=&gt; true</span>
+</span><span class="athl-line" data-athl-line="63">!!<span style="color: #e8eda2;">&quot;&quot;</span>    <span style="color: #70747f;">#=&gt; true</span>
+</span><span class="athl-line" data-athl-line="64">
+</span><span class="athl-line" data-athl-line="65"><span style="color: #70747f;"># More comparisons</span>
+</span><span class="athl-line" data-athl-line="66"><span style="color: #baa0e8;">1</span> &lt; <span style="color: #baa0e8;">10</span> <span style="color: #70747f;">#=&gt; true</span>
+</span><span class="athl-line" data-athl-line="67"><span style="color: #baa0e8;">1</span> &gt; <span style="color: #baa0e8;">10</span> <span style="color: #70747f;">#=&gt; false</span>
+</span><span class="athl-line" data-athl-line="68"><span style="color: #baa0e8;">2</span> &lt;= <span style="color: #baa0e8;">2</span> <span style="color: #70747f;">#=&gt; true</span>
+</span><span class="athl-line" data-athl-line="69"><span style="color: #baa0e8;">2</span> &gt;= <span style="color: #baa0e8;">2</span> <span style="color: #70747f;">#=&gt; true</span>
+</span><span class="athl-line" data-athl-line="70">
+</span><span class="athl-line" data-athl-line="71"><span style="color: #70747f;"># Combined comparison operator (returns `1` when the first argument is greater,</span>
+</span><span class="athl-line" data-athl-line="72"><span style="color: #70747f;"># `-1` when the second argument is greater, and `0` otherwise)</span>
+</span><span class="athl-line" data-athl-line="73"><span style="color: #baa0e8;">1</span> &lt;=&gt; <span style="color: #baa0e8;">10</span> <span style="color: #70747f;">#=&gt; -1 (1 &lt; 10)</span>
+</span><span class="athl-line" data-athl-line="74"><span style="color: #baa0e8;">10</span> &lt;=&gt; <span style="color: #baa0e8;">1</span> <span style="color: #70747f;">#=&gt; 1 (10 &gt; 1)</span>
+</span><span class="athl-line" data-athl-line="75"><span style="color: #baa0e8;">1</span> &lt;=&gt; <span style="color: #baa0e8;">1</span> <span style="color: #70747f;">#=&gt; 0 (1 == 1)</span>
+</span><span class="athl-line" data-athl-line="76">
+</span><span class="athl-line" data-athl-line="77"><span style="color: #70747f;"># Logical operators</span>
+</span><span class="athl-line" data-athl-line="78"><span style="color: #baa0e8;">true</span> &amp;&amp; <span style="color: #baa0e8;">false</span> <span style="color: #70747f;">#=&gt; false</span>
+</span><span class="athl-line" data-athl-line="79"><span style="color: #baa0e8;">true</span> || <span style="color: #baa0e8;">false</span> <span style="color: #70747f;">#=&gt; true</span>
+</span><span class="athl-line" data-athl-line="80">
+</span><span class="athl-line" data-athl-line="81"><span style="color: #70747f;"># There are alternate versions of the logical operators with much lower</span>
+</span><span class="athl-line" data-athl-line="82"><span style="color: #70747f;"># precedence. These are meant to be used as flow-control constructs to chain</span>
+</span><span class="athl-line" data-athl-line="83"><span style="color: #70747f;"># statements together until one of them returns true or false.</span>
+</span><span class="athl-line" data-athl-line="84">
+</span><span class="athl-line" data-athl-line="85"><span style="color: #70747f;"># `do_something_else` only called if `do_something` succeeds.</span>
+</span><span class="athl-line" data-athl-line="86"><span style="color: #87e58e;">do_something</span><span style="color: #f6f6f5;">(</span><span style="color: #f6f6f5;">)</span> <span style="color: #e48cc1;">and</span> <span style="color: #87e58e;">do_something_else</span><span style="color: #f6f6f5;">(</span><span style="color: #f6f6f5;">)</span>
+</span><span class="athl-line" data-athl-line="87"><span style="color: #70747f;"># `log_error` only called if `do_something` fails.</span>
+</span><span class="athl-line" data-athl-line="88"><span style="color: #87e58e;">do_something</span><span style="color: #f6f6f5;">(</span><span style="color: #f6f6f5;">)</span> <span style="color: #e48cc1;">or</span> <span style="color: #87e58e;">log_error</span><span style="color: #f6f6f5;">(</span><span style="color: #f6f6f5;">)</span>
+</span><span class="athl-line" data-athl-line="89">
+</span><span class="athl-line" data-athl-line="90"><span style="color: #70747f;"># String interpolation</span>
+</span><span class="athl-line" data-athl-line="91">
+</span><span class="athl-line" data-athl-line="92"><span style="color: #f6f6f5;">placeholder</span> <span style="color: #e48cc1;">=</span> <span style="color: #e8eda2;">&#39;use string interpolation&#39;</span>
+</span><span class="athl-line" data-athl-line="93"><span style="color: #e8eda2;">&quot;I can <span ><span style="color: #87e58e;">#{</span><span style="color: #f6f6f5;">placeholder</span><span style="color: #f6f6f5;">}</span></span> when using double quoted strings&quot;</span>
+</span><span class="athl-line" data-athl-line="94"><span style="color: #70747f;">#=&gt; &quot;I can use string interpolation when using double quoted strings&quot;</span>
+</span><span class="athl-line" data-athl-line="95">
+</span><span class="athl-line" data-athl-line="96"><span style="color: #70747f;"># You can combine strings using `+`, but not with other types</span>
+</span><span class="athl-line" data-athl-line="97"><span style="color: #e8eda2;">&#39;hello &#39;</span> + <span style="color: #e8eda2;">&#39;world&#39;</span>  <span style="color: #70747f;">#=&gt; &quot;hello world&quot;</span>
+</span><span class="athl-line" data-athl-line="98"><span style="color: #e8eda2;">&#39;hello &#39;</span> + <span style="color: #baa0e8;">3</span> <span style="color: #70747f;">#=&gt; TypeError: can&#39;t convert Fixnum into String</span>
+</span><span class="athl-line" data-athl-line="99"><span style="color: #e8eda2;">&#39;hello &#39;</span> + <span style="color: #baa0e8;">3</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">to_s</span> <span style="color: #70747f;">#=&gt; &quot;hello 3&quot;</span>
+</span><span class="athl-line" data-athl-line="100"><span style="color: #e8eda2;">&quot;hello <span ><span style="color: #87e58e;">#{</span><span style="color: #baa0e8;">3</span><span style="color: #f6f6f5;">}</span></span>&quot;</span> <span style="color: #70747f;">#=&gt; &quot;hello 3&quot;</span>
+</span><span class="athl-line" data-athl-line="101">
+</span><span class="athl-line" data-athl-line="102"><span style="color: #70747f;"># ...or combine strings and operators</span>
+</span><span class="athl-line" data-athl-line="103"><span style="color: #e8eda2;">&#39;hello &#39;</span> * <span style="color: #baa0e8;">3</span> <span style="color: #70747f;">#=&gt; &quot;hello hello hello &quot;</span>
+</span><span class="athl-line" data-athl-line="104">
+</span><span class="athl-line" data-athl-line="105"><span style="color: #70747f;"># ...or append to string</span>
+</span><span class="athl-line" data-athl-line="106"><span style="color: #e8eda2;">&#39;hello&#39;</span> &lt;&lt; <span style="color: #e8eda2;">&#39; world&#39;</span> <span style="color: #70747f;">#=&gt; &quot;hello world&quot;</span>
+</span><span class="athl-line" data-athl-line="107">
+</span><span class="athl-line" data-athl-line="108"><span style="color: #70747f;"># You can print to the output with a newline at the end</span>
+</span><span class="athl-line" data-athl-line="109"><span style="color: #87e58e;">puts</span> <span style="color: #e8eda2;">&quot;I&#39;m printing!&quot;</span>
+</span><span class="athl-line" data-athl-line="110"><span style="color: #70747f;">#=&gt; I&#39;m printing!</span>
+</span><span class="athl-line" data-athl-line="111"><span style="color: #70747f;">#=&gt; nil</span>
+</span><span class="athl-line" data-athl-line="112">
+</span><span class="athl-line" data-athl-line="113"><span style="color: #70747f;"># ...or print to the output without a newline</span>
+</span><span class="athl-line" data-athl-line="114"><span style="color: #87e58e;">print</span> <span style="color: #e8eda2;">&quot;I&#39;m printing!&quot;</span>
+</span><span class="athl-line" data-athl-line="115"><span style="color: #70747f;">#=&gt; &quot;I&#39;m printing!&quot; =&gt; nil</span>
+</span><span class="athl-line" data-athl-line="116">
+</span><span class="athl-line" data-athl-line="117"><span style="color: #70747f;"># Variables</span>
+</span><span class="athl-line" data-athl-line="118"><span style="color: #f6f6f5;">x</span> <span style="color: #e48cc1;">=</span> <span style="color: #baa0e8;">25</span> <span style="color: #70747f;">#=&gt; 25</span>
+</span><span class="athl-line" data-athl-line="119"><span style="color: #f6f6f5;">x</span> <span style="color: #70747f;">#=&gt; 25</span>
+</span><span class="athl-line" data-athl-line="120">
+</span><span class="athl-line" data-athl-line="121"><span style="color: #70747f;"># Note that assignment returns the value assigned.</span>
+</span><span class="athl-line" data-athl-line="122"><span style="color: #70747f;"># This means you can do multiple assignment.</span>
+</span><span class="athl-line" data-athl-line="123">
+</span><span class="athl-line" data-athl-line="124"><span style="color: #f6f6f5;">x</span> <span style="color: #e48cc1;">=</span> <span style="color: #f6f6f5;">y</span> <span style="color: #e48cc1;">=</span> <span style="color: #baa0e8;">10</span> <span style="color: #70747f;">#=&gt; 10</span>
+</span><span class="athl-line" data-athl-line="125"><span style="color: #f6f6f5;">x</span> <span style="color: #70747f;">#=&gt; 10</span>
+</span><span class="athl-line" data-athl-line="126"><span style="color: #f6f6f5;">y</span> <span style="color: #70747f;">#=&gt; 10</span>
+</span><span class="athl-line" data-athl-line="127">
+</span><span class="athl-line" data-athl-line="128"><span style="color: #70747f;"># By convention, use snake_case for variable names.</span>
+</span><span class="athl-line" data-athl-line="129"><span style="color: #f6f6f5;">snake_case</span> <span style="color: #e48cc1;">=</span> <span style="color: #baa0e8;">true</span>
+</span><span class="athl-line" data-athl-line="130">
+</span><span class="athl-line" data-athl-line="131"><span style="color: #70747f;"># Use descriptive variable names</span>
+</span><span class="athl-line" data-athl-line="132"><span style="color: #f6f6f5;">path_to_project_root</span> <span style="color: #e48cc1;">=</span> <span style="color: #e8eda2;">&#39;/good/name/&#39;</span>
+</span><span class="athl-line" data-athl-line="133"><span style="color: #f6f6f5;">m</span> <span style="color: #e48cc1;">=</span> <span style="color: #e8eda2;">&#39;/bad/name/&#39;</span>
+</span><span class="athl-line" data-athl-line="134">
+</span><span class="athl-line" data-athl-line="135"><span style="color: #70747f;"># Symbols are immutable, reusable constants represented internally by an</span>
+</span><span class="athl-line" data-athl-line="136"><span style="color: #70747f;"># integer value. They&#39;re often used instead of strings to efficiently convey</span>
+</span><span class="athl-line" data-athl-line="137"><span style="color: #70747f;"># specific, meaningful values.</span>
+</span><span class="athl-line" data-athl-line="138">
+</span><span class="athl-line" data-athl-line="139"><span style="color: #baa0e8;">:pending</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">class</span> <span style="color: #70747f;">#=&gt; Symbol</span>
+</span><span class="athl-line" data-athl-line="140">
+</span><span class="athl-line" data-athl-line="141"><span style="color: #f6f6f5;">status</span> <span style="color: #e48cc1;">=</span> <span style="color: #baa0e8;">:pending</span>
+</span><span class="athl-line" data-athl-line="142">
+</span><span class="athl-line" data-athl-line="143"><span style="color: #f6f6f5;">status</span> == <span style="color: #baa0e8;">:pending</span> <span style="color: #70747f;">#=&gt; true</span>
+</span><span class="athl-line" data-athl-line="144">
+</span><span class="athl-line" data-athl-line="145"><span style="color: #f6f6f5;">status</span> == <span style="color: #e8eda2;">&#39;pending&#39;</span> <span style="color: #70747f;">#=&gt; false</span>
+</span><span class="athl-line" data-athl-line="146">
+</span><span class="athl-line" data-athl-line="147"><span style="color: #f6f6f5;">status</span> == <span style="color: #baa0e8;">:approved</span> <span style="color: #70747f;">#=&gt; false</span>
+</span><span class="athl-line" data-athl-line="148">
+</span><span class="athl-line" data-athl-line="149"><span style="color: #70747f;"># Strings can be converted into symbols and vice versa.</span>
+</span><span class="athl-line" data-athl-line="150"><span style="color: #f6f6f5;">status</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">to_s</span> <span style="color: #70747f;">#=&gt; &quot;pending&quot;</span>
+</span><span class="athl-line" data-athl-line="151"><span style="color: #e8eda2;">&quot;argon&quot;</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">to_sym</span> <span style="color: #70747f;">#=&gt; :argon</span>
+</span><span class="athl-line" data-athl-line="152">
+</span><span class="athl-line" data-athl-line="153"><span style="color: #70747f;"># Arrays</span>
+</span><span class="athl-line" data-athl-line="154">
+</span><span class="athl-line" data-athl-line="155"><span style="color: #70747f;"># This is an array.</span>
+</span><span class="athl-line" data-athl-line="156"><span style="color: #f6f6f5;">array</span> <span style="color: #e48cc1;">=</span> <span style="color: #f6f6f5;">[</span><span style="color: #baa0e8;">1</span><span style="color: #f6f6f5;">,</span> <span style="color: #baa0e8;">2</span><span style="color: #f6f6f5;">,</span> <span style="color: #baa0e8;">3</span><span style="color: #f6f6f5;">,</span> <span style="color: #baa0e8;">4</span><span style="color: #f6f6f5;">,</span> <span style="color: #baa0e8;">5</span><span style="color: #f6f6f5;">]</span> <span style="color: #70747f;">#=&gt; [1, 2, 3, 4, 5]</span>
+</span><span class="athl-line" data-athl-line="157">
+</span><span class="athl-line" data-athl-line="158"><span style="color: #70747f;"># Arrays can contain different types of items.</span>
+</span><span class="athl-line" data-athl-line="159"><span style="color: #f6f6f5;">[</span><span style="color: #baa0e8;">1</span><span style="color: #f6f6f5;">,</span> <span style="color: #e8eda2;">&#39;hello&#39;</span><span style="color: #f6f6f5;">,</span> <span style="color: #baa0e8;">false</span><span style="color: #f6f6f5;">]</span> <span style="color: #70747f;">#=&gt; [1, &quot;hello&quot;, false]</span>
+</span><span class="athl-line" data-athl-line="160">
+</span><span class="athl-line" data-athl-line="161"><span style="color: #70747f;"># You might prefer %w instead of quotes</span>
+</span><span class="athl-line" data-athl-line="162"><span style="color: #f6f6f5;">%w[</span><span style="color: #e8eda2;">foo</span> <span style="color: #e8eda2;">bar</span> <span style="color: #e8eda2;">baz</span><span style="color: #f6f6f5;">]</span> <span style="color: #70747f;">#=&gt; [&quot;foo&quot;, &quot;bar&quot;, &quot;baz&quot;]</span>
+</span><span class="athl-line" data-athl-line="163">
+</span><span class="athl-line" data-athl-line="164"><span style="color: #70747f;"># Arrays can be indexed.</span>
+</span><span class="athl-line" data-athl-line="165"><span style="color: #70747f;"># From the front...</span>
+</span><span class="athl-line" data-athl-line="166"><span style="color: #f6f6f5;">array</span><span style="color: #f6f6f5;">[</span><span style="color: #baa0e8;">0</span><span style="color: #f6f6f5;">]</span> <span style="color: #70747f;">#=&gt; 1</span>
+</span><span class="athl-line" data-athl-line="167"><span style="color: #f6f6f5;">array</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">first</span> <span style="color: #70747f;">#=&gt; 1</span>
+</span><span class="athl-line" data-athl-line="168"><span style="color: #f6f6f5;">array</span><span style="color: #f6f6f5;">[</span><span style="color: #baa0e8;">12</span><span style="color: #f6f6f5;">]</span> <span style="color: #70747f;">#=&gt; nil</span>
+</span><span class="athl-line" data-athl-line="169">
+</span><span class="athl-line" data-athl-line="170"><span style="color: #70747f;"># ...or from the back...</span>
+</span><span class="athl-line" data-athl-line="171"><span style="color: #f6f6f5;">array</span><span style="color: #f6f6f5;">[</span>-<span style="color: #baa0e8;">1</span><span style="color: #f6f6f5;">]</span> <span style="color: #70747f;">#=&gt; 5</span>
+</span><span class="athl-line" data-athl-line="172"><span style="color: #f6f6f5;">array</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">last</span> <span style="color: #70747f;">#=&gt; 5</span>
+</span><span class="athl-line" data-athl-line="173">
+</span><span class="athl-line" data-athl-line="174"><span style="color: #70747f;"># ...or with a start index and length...</span>
+</span><span class="athl-line" data-athl-line="175"><span style="color: #f6f6f5;">array</span><span style="color: #f6f6f5;">[</span><span style="color: #baa0e8;">2</span><span style="color: #f6f6f5;">,</span> <span style="color: #baa0e8;">3</span><span style="color: #f6f6f5;">]</span> <span style="color: #70747f;">#=&gt; [3, 4, 5]</span>
+</span><span class="athl-line" data-athl-line="176">
+</span><span class="athl-line" data-athl-line="177"><span style="color: #70747f;"># ...or with a range...</span>
+</span><span class="athl-line" data-athl-line="178"><span style="color: #f6f6f5;">array</span><span style="color: #f6f6f5;">[</span><span style="color: #baa0e8;">1</span>..<span style="color: #baa0e8;">3</span><span style="color: #f6f6f5;">]</span> <span style="color: #70747f;">#=&gt; [2, 3, 4]</span>
+</span><span class="athl-line" data-athl-line="179">
+</span><span class="athl-line" data-athl-line="180"><span style="color: #70747f;"># You can reverse an Array.</span>
+</span><span class="athl-line" data-athl-line="181"><span style="color: #70747f;"># Return a new array with reversed values</span>
+</span><span class="athl-line" data-athl-line="182"><span style="color: #f6f6f5;">[</span><span style="color: #baa0e8;">1</span><span style="color: #f6f6f5;">,</span><span style="color: #baa0e8;">2</span><span style="color: #f6f6f5;">,</span><span style="color: #baa0e8;">3</span><span style="color: #f6f6f5;">]</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">reverse</span> <span style="color: #70747f;">#=&gt; [3,2,1]</span>
+</span><span class="athl-line" data-athl-line="183"><span style="color: #70747f;"># Reverse an array in place to update variable with reversed values</span>
+</span><span class="athl-line" data-athl-line="184"><span style="color: #f6f6f5;">a</span> <span style="color: #e48cc1;">=</span> <span style="color: #f6f6f5;">[</span><span style="color: #baa0e8;">1</span><span style="color: #f6f6f5;">,</span><span style="color: #baa0e8;">2</span><span style="color: #f6f6f5;">,</span><span style="color: #baa0e8;">3</span><span style="color: #f6f6f5;">]</span>
+</span><span class="athl-line" data-athl-line="185"><span style="color: #f6f6f5;">a</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">reverse!</span> <span style="color: #70747f;">#=&gt; a==[3,2,1] because of the bang (&#39;!&#39;) call to reverse</span>
+</span><span class="athl-line" data-athl-line="186">
+</span><span class="athl-line" data-athl-line="187"><span style="color: #70747f;"># Like arithmetic, [var] access is just syntactic sugar</span>
+</span><span class="athl-line" data-athl-line="188"><span style="color: #70747f;"># for calling a method &#39;[]&#39; on an object.</span>
+</span><span class="athl-line" data-athl-line="189"><span style="color: #f6f6f5;">array</span><span style="color: #f6f6f5;">.</span>[] <span style="color: #baa0e8;">0</span> <span style="color: #70747f;">#=&gt; 1</span>
+</span><span class="athl-line" data-athl-line="190"><span style="color: #f6f6f5;">array</span><span style="color: #f6f6f5;">.</span>[] <span style="color: #baa0e8;">12</span> <span style="color: #70747f;">#=&gt; nil</span>
+</span><span class="athl-line" data-athl-line="191">
+</span><span class="athl-line" data-athl-line="192"><span style="color: #70747f;"># You can add to an array...</span>
+</span><span class="athl-line" data-athl-line="193"><span style="color: #f6f6f5;">array</span> &lt;&lt; <span style="color: #baa0e8;">6</span> <span style="color: #70747f;">#=&gt; [1, 2, 3, 4, 5, 6]</span>
+</span><span class="athl-line" data-athl-line="194"><span style="color: #70747f;"># Or like this</span>
+</span><span class="athl-line" data-athl-line="195"><span style="color: #f6f6f5;">array</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">push</span><span style="color: #f6f6f5;">(</span><span style="color: #baa0e8;">6</span><span style="color: #f6f6f5;">)</span> <span style="color: #70747f;">#=&gt; [1, 2, 3, 4, 5, 6]</span>
+</span><span class="athl-line" data-athl-line="196">
+</span><span class="athl-line" data-athl-line="197"><span style="color: #70747f;"># ...and check if an item exists in an array</span>
+</span><span class="athl-line" data-athl-line="198"><span style="color: #f6f6f5;">array</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">include?</span><span style="color: #f6f6f5;">(</span><span style="color: #baa0e8;">1</span><span style="color: #f6f6f5;">)</span> <span style="color: #70747f;">#=&gt; true</span>
+</span><span class="athl-line" data-athl-line="199">
+</span><span class="athl-line" data-athl-line="200"><span style="color: #70747f;"># Hashes are Ruby&#39;s primary dictionary with key/value pairs.</span>
+</span><span class="athl-line" data-athl-line="201"><span style="color: #70747f;"># Hashes are denoted with curly braces.</span>
+</span><span class="athl-line" data-athl-line="202"><span style="color: #f6f6f5;">hash</span> <span style="color: #e48cc1;">=</span> <span style="color: #f6f6f5;">{</span> <span style="color: #e8eda2;">&#39;color&#39;</span> <span style="color: #e48cc1;">=&gt;</span> <span style="color: #e8eda2;">&#39;green&#39;</span><span style="color: #f6f6f5;">,</span> <span style="color: #e8eda2;">&#39;number&#39;</span> <span style="color: #e48cc1;">=&gt;</span> <span style="color: #baa0e8;">5</span> <span style="color: #f6f6f5;">}</span>
+</span><span class="athl-line" data-athl-line="203">
+</span><span class="athl-line" data-athl-line="204"><span style="color: #f6f6f5;">hash</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">keys</span> <span style="color: #70747f;">#=&gt; [&#39;color&#39;, &#39;number&#39;]</span>
+</span><span class="athl-line" data-athl-line="205">
+</span><span class="athl-line" data-athl-line="206"><span style="color: #70747f;"># Hashes can be quickly looked up by key.</span>
+</span><span class="athl-line" data-athl-line="207"><span style="color: #f6f6f5;">hash</span><span style="color: #f6f6f5;">[</span><span style="color: #e8eda2;">&#39;color&#39;</span><span style="color: #f6f6f5;">]</span> <span style="color: #70747f;">#=&gt; &quot;green&quot;</span>
+</span><span class="athl-line" data-athl-line="208"><span style="color: #f6f6f5;">hash</span><span style="color: #f6f6f5;">[</span><span style="color: #e8eda2;">&#39;number&#39;</span><span style="color: #f6f6f5;">]</span> <span style="color: #70747f;">#=&gt; 5</span>
+</span><span class="athl-line" data-athl-line="209">
+</span><span class="athl-line" data-athl-line="210"><span style="color: #70747f;"># Asking a hash for a key that doesn&#39;t exist returns nil.</span>
+</span><span class="athl-line" data-athl-line="211"><span style="color: #f6f6f5;">hash</span><span style="color: #f6f6f5;">[</span><span style="color: #e8eda2;">&#39;nothing here&#39;</span><span style="color: #f6f6f5;">]</span> <span style="color: #70747f;">#=&gt; nil</span>
+</span><span class="athl-line" data-athl-line="212">
+</span><span class="athl-line" data-athl-line="213"><span style="color: #70747f;"># When using symbols for keys in a hash, you can use an alternate syntax.</span>
+</span><span class="athl-line" data-athl-line="214">
+</span><span class="athl-line" data-athl-line="215"><span style="color: #f6f6f5;">hash</span> <span style="color: #e48cc1;">=</span> <span style="color: #f6f6f5;">{</span> <span style="color: #baa0e8;">:defcon</span> <span style="color: #e48cc1;">=&gt;</span> <span style="color: #baa0e8;">3</span><span style="color: #f6f6f5;">,</span> <span style="color: #baa0e8;">:action</span> <span style="color: #e48cc1;">=&gt;</span> <span style="color: #baa0e8;">true</span> <span style="color: #f6f6f5;">}</span>
+</span><span class="athl-line" data-athl-line="216"><span style="color: #f6f6f5;">hash</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">keys</span> <span style="color: #70747f;">#=&gt; [:defcon, :action]</span>
+</span><span class="athl-line" data-athl-line="217">
+</span><span class="athl-line" data-athl-line="218"><span style="color: #f6f6f5;">hash</span> <span style="color: #e48cc1;">=</span> <span style="color: #f6f6f5;">{</span> <span style="color: #baa0e8;">defcon</span>: <span style="color: #baa0e8;">3</span><span style="color: #f6f6f5;">,</span> <span style="color: #baa0e8;">action</span>: <span style="color: #baa0e8;">true</span> <span style="color: #f6f6f5;">}</span>
+</span><span class="athl-line" data-athl-line="219"><span style="color: #f6f6f5;">hash</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">keys</span> <span style="color: #70747f;">#=&gt; [:defcon, :action]</span>
+</span><span class="athl-line" data-athl-line="220">
+</span><span class="athl-line" data-athl-line="221"><span style="color: #70747f;"># Check existence of keys and values in hash</span>
+</span><span class="athl-line" data-athl-line="222"><span style="color: #f6f6f5;">hash</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">key?</span><span style="color: #f6f6f5;">(</span><span style="color: #baa0e8;">:defcon</span><span style="color: #f6f6f5;">)</span> <span style="color: #70747f;">#=&gt; true</span>
+</span><span class="athl-line" data-athl-line="223"><span style="color: #f6f6f5;">hash</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">value?</span><span style="color: #f6f6f5;">(</span><span style="color: #baa0e8;">3</span><span style="color: #f6f6f5;">)</span> <span style="color: #70747f;">#=&gt; true</span>
+</span><span class="athl-line" data-athl-line="224">
+</span><span class="athl-line" data-athl-line="225"><span style="color: #70747f;"># Tip: Both Arrays and Hashes are Enumerable!</span>
+</span><span class="athl-line" data-athl-line="226"><span style="color: #70747f;"># They share a lot of useful methods such as each, map, count, and more.</span>
+</span><span class="athl-line" data-athl-line="227">
+</span><span class="athl-line" data-athl-line="228"><span style="color: #70747f;"># Control structures</span>
+</span><span class="athl-line" data-athl-line="229">
+</span><span class="athl-line" data-athl-line="230"><span style="color: #70747f;"># Conditionals</span>
+</span><span class="athl-line" data-athl-line="231"><span style="color: #e48cc1;">if</span> <span style="color: #baa0e8;">true</span>
+</span><span class="athl-line" data-athl-line="232">  <span style="color: #e8eda2;">&#39;if statement&#39;</span>
+</span><span class="athl-line" data-athl-line="233"><span style="color: #e48cc1;">elsif</span> <span style="color: #baa0e8;">false</span>
+</span><span class="athl-line" data-athl-line="234">  <span style="color: #e8eda2;">&#39;else if, optional&#39;</span>
+</span><span class="athl-line" data-athl-line="235"><span style="color: #e48cc1;">else</span>
+</span><span class="athl-line" data-athl-line="236">  <span style="color: #e8eda2;">&#39;else, also optional&#39;</span>
+</span><span class="athl-line" data-athl-line="237"><span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="238">
+</span><span class="athl-line" data-athl-line="239"><span style="color: #70747f;"># If a condition controls invocation of a single statement rather than a block</span>
+</span><span class="athl-line" data-athl-line="240"><span style="color: #70747f;"># of code you can use postfix-if notation</span>
+</span><span class="athl-line" data-athl-line="241"><span style="color: #f6f6f5;">warnings</span> <span style="color: #e48cc1;">=</span> <span style="color: #f6f6f5;">[</span><span style="color: #e8eda2;">&#39;Patronimic is missing&#39;</span><span style="color: #f6f6f5;">,</span> <span style="color: #e8eda2;">&#39;Address too short&#39;</span><span style="color: #f6f6f5;">]</span>
+</span><span class="athl-line" data-athl-line="242"><span style="color: #87e58e;">puts</span><span style="color: #f6f6f5;">(</span><span style="color: #e8eda2;">&quot;Some warnings occurred:<span >\n</span>&quot;</span> + <span style="color: #f6f6f5;">warnings</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">join</span><span style="color: #f6f6f5;">(</span><span style="color: #e8eda2;">&quot;<span >\n</span>&quot;</span><span style="color: #f6f6f5;">)</span><span style="color: #f6f6f5;">)</span>  <span style="color: #e48cc1;">if</span> !<span style="color: #f6f6f5;">warnings</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">empty?</span>
+</span><span class="athl-line" data-athl-line="243">
+</span><span class="athl-line" data-athl-line="244"><span style="color: #70747f;"># Rephrase condition if `unless` sounds better than `if`</span>
+</span><span class="athl-line" data-athl-line="245"><span style="color: #87e58e;">puts</span><span style="color: #f6f6f5;">(</span><span style="color: #e8eda2;">&quot;Some warnings occurred:<span >\n</span>&quot;</span> + <span style="color: #f6f6f5;">warnings</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">join</span><span style="color: #f6f6f5;">(</span><span style="color: #e8eda2;">&quot;<span >\n</span>&quot;</span><span style="color: #f6f6f5;">)</span><span style="color: #f6f6f5;">)</span>  <span style="color: #e48cc1;">unless</span> <span style="color: #f6f6f5;">warnings</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">empty?</span>
+</span><span class="athl-line" data-athl-line="246">
+</span><span class="athl-line" data-athl-line="247"><span style="color: #70747f;"># Loops</span>
+</span><span class="athl-line" data-athl-line="248"><span style="color: #70747f;"># In Ruby, traditional `for` loops aren&#39;t very common. Instead, these</span>
+</span><span class="athl-line" data-athl-line="249"><span style="color: #70747f;"># basic loops are implemented using enumerable, which hinges on `each`.</span>
+</span><span class="athl-line" data-athl-line="250"><span style="color: #f6f6f5;">(</span><span style="color: #baa0e8;">1</span>..<span style="color: #baa0e8;">5</span><span style="color: #f6f6f5;">)</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">each</span> <span style="color: #e48cc1;">do</span> |<span style="color: #fdc38e;">counter</span>|
+</span><span class="athl-line" data-athl-line="251">  <span style="color: #87e58e;">puts</span> <span style="color: #e8eda2;">&quot;iteration <span ><span style="color: #87e58e;">#{</span><span style="color: #fdc38e;">counter</span><span style="color: #f6f6f5;">}</span></span>&quot;</span>
+</span><span class="athl-line" data-athl-line="252"><span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="253">
+</span><span class="athl-line" data-athl-line="254"><span style="color: #70747f;"># Which is roughly equivalent to the following, which is unusual to see in Ruby.</span>
+</span><span class="athl-line" data-athl-line="255"><span style="color: #e48cc1;">for</span> <span style="color: #87e58e;">counter</span> <span style="color: #e48cc1;">in</span> <span style="color: #baa0e8;">1</span>..<span style="color: #baa0e8;">5</span>
+</span><span class="athl-line" data-athl-line="256">  <span style="color: #87e58e;">puts</span> <span style="color: #e8eda2;">&quot;iteration <span ><span style="color: #87e58e;">#{</span><span style="color: #87e58e;">counter</span><span style="color: #f6f6f5;">}</span></span>&quot;</span>
+</span><span class="athl-line" data-athl-line="257"><span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="258">
+</span><span class="athl-line" data-athl-line="259"><span style="color: #70747f;"># The `do |variable| ... end` construct above is called a &#39;block&#39;. Blocks are</span>
+</span><span class="athl-line" data-athl-line="260"><span style="color: #70747f;"># similar to lambdas, anonymous functions or closures in other programming</span>
+</span><span class="athl-line" data-athl-line="261"><span style="color: #70747f;"># languages. They can be passed around as objects, called, or attached as</span>
+</span><span class="athl-line" data-athl-line="262"><span style="color: #70747f;"># methods.</span>
+</span><span class="athl-line" data-athl-line="263"><span style="color: #70747f;">#</span>
+</span><span class="athl-line" data-athl-line="264"><span style="color: #70747f;"># The &#39;each&#39; method of a range runs the block once for each element of the range.</span>
+</span><span class="athl-line" data-athl-line="265"><span style="color: #70747f;"># The block is passed a counter as a parameter.</span>
+</span><span class="athl-line" data-athl-line="266">
+</span><span class="athl-line" data-athl-line="267"><span style="color: #70747f;"># You can also surround blocks in curly brackets.</span>
+</span><span class="athl-line" data-athl-line="268"><span style="color: #f6f6f5;">(</span><span style="color: #baa0e8;">1</span>..<span style="color: #baa0e8;">5</span><span style="color: #f6f6f5;">)</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">each</span> <span style="color: #f6f6f5;">{</span> |<span style="color: #fdc38e;">counter</span>| <span style="color: #87e58e;">puts</span> <span style="color: #e8eda2;">&quot;iteration <span ><span style="color: #87e58e;">#{</span><span style="color: #fdc38e;">counter</span><span style="color: #f6f6f5;">}</span></span>&quot;</span> <span style="color: #f6f6f5;">}</span>
+</span><span class="athl-line" data-athl-line="269">
+</span><span class="athl-line" data-athl-line="270"><span style="color: #70747f;"># The contents of data structures can also be iterated using each.</span>
+</span><span class="athl-line" data-athl-line="271"><span style="color: #f6f6f5;">array</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">each</span> <span style="color: #e48cc1;">do</span> |<span style="color: #fdc38e;">element</span>|
+</span><span class="athl-line" data-athl-line="272">  <span style="color: #87e58e;">puts</span> <span style="color: #e8eda2;">&quot;<span ><span style="color: #87e58e;">#{</span><span style="color: #fdc38e;">element</span><span style="color: #f6f6f5;">}</span></span> is part of the array&quot;</span>
+</span><span class="athl-line" data-athl-line="273"><span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="274"><span style="color: #f6f6f5;">hash</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">each</span> <span style="color: #e48cc1;">do</span> |<span style="color: #fdc38e;">key</span><span style="color: #f6f6f5;">,</span> <span style="color: #fdc38e;">value</span>|
+</span><span class="athl-line" data-athl-line="275">  <span style="color: #87e58e;">puts</span> <span style="color: #e8eda2;">&quot;<span ><span style="color: #87e58e;">#{</span><span style="color: #fdc38e;">key</span><span style="color: #f6f6f5;">}</span></span> is <span ><span style="color: #87e58e;">#{</span><span style="color: #fdc38e;">value</span><span style="color: #f6f6f5;">}</span></span>&quot;</span>
+</span><span class="athl-line" data-athl-line="276"><span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="277">
+</span><span class="athl-line" data-athl-line="278"><span style="color: #70747f;"># If you still need an index you can use &#39;each_with_index&#39; and define an index</span>
+</span><span class="athl-line" data-athl-line="279"><span style="color: #70747f;"># variable.</span>
+</span><span class="athl-line" data-athl-line="280"><span style="color: #f6f6f5;">array</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">each_with_index</span> <span style="color: #e48cc1;">do</span> |<span style="color: #fdc38e;">element</span><span style="color: #f6f6f5;">,</span> <span style="color: #fdc38e;">index</span>|
+</span><span class="athl-line" data-athl-line="281">  <span style="color: #87e58e;">puts</span> <span style="color: #e8eda2;">&quot;<span ><span style="color: #87e58e;">#{</span><span style="color: #fdc38e;">element</span><span style="color: #f6f6f5;">}</span></span> is number <span ><span style="color: #87e58e;">#{</span><span style="color: #fdc38e;">index</span><span style="color: #f6f6f5;">}</span></span> in the array&quot;</span>
+</span><span class="athl-line" data-athl-line="282"><span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="283">
+</span><span class="athl-line" data-athl-line="284"><span style="color: #f6f6f5;">counter</span> <span style="color: #e48cc1;">=</span> <span style="color: #baa0e8;">1</span>
+</span><span class="athl-line" data-athl-line="285"><span style="color: #e48cc1;">while</span> <span style="color: #f6f6f5;">counter</span> &lt;= <span style="color: #baa0e8;">5</span> <span style="color: #e48cc1;">do</span>
+</span><span class="athl-line" data-athl-line="286">  <span style="color: #87e58e;">puts</span> <span style="color: #e8eda2;">&quot;iteration <span ><span style="color: #87e58e;">#{</span><span style="color: #f6f6f5;">counter</span><span style="color: #f6f6f5;">}</span></span>&quot;</span>
+</span><span class="athl-line" data-athl-line="287">  <span style="color: #f6f6f5;">counter</span> += <span style="color: #baa0e8;">1</span>
+</span><span class="athl-line" data-athl-line="288"><span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="289"><span style="color: #70747f;">#=&gt; iteration 1</span>
+</span><span class="athl-line" data-athl-line="290"><span style="color: #70747f;">#=&gt; iteration 2</span>
+</span><span class="athl-line" data-athl-line="291"><span style="color: #70747f;">#=&gt; iteration 3</span>
+</span><span class="athl-line" data-athl-line="292"><span style="color: #70747f;">#=&gt; iteration 4</span>
+</span><span class="athl-line" data-athl-line="293"><span style="color: #70747f;">#=&gt; iteration 5</span>
+</span><span class="athl-line" data-athl-line="294">
+</span><span class="athl-line" data-athl-line="295"><span style="color: #70747f;"># There are a bunch of other helpful looping functions in Ruby.</span>
+</span><span class="athl-line" data-athl-line="296"><span style="color: #70747f;"># For example: &#39;map&#39;, &#39;reduce&#39;, &#39;inject&#39;, the list goes on.</span>
+</span><span class="athl-line" data-athl-line="297"><span style="color: #70747f;"># Map, for instance, takes the array it&#39;s looping over, does something</span>
+</span><span class="athl-line" data-athl-line="298"><span style="color: #70747f;"># to it as defined in your block, and returns an entirely new array.</span>
+</span><span class="athl-line" data-athl-line="299"><span style="color: #f6f6f5;">array</span> <span style="color: #e48cc1;">=</span> <span style="color: #f6f6f5;">[</span><span style="color: #baa0e8;">1</span><span style="color: #f6f6f5;">,</span><span style="color: #baa0e8;">2</span><span style="color: #f6f6f5;">,</span><span style="color: #baa0e8;">3</span><span style="color: #f6f6f5;">,</span><span style="color: #baa0e8;">4</span><span style="color: #f6f6f5;">,</span><span style="color: #baa0e8;">5</span><span style="color: #f6f6f5;">]</span>
+</span><span class="athl-line" data-athl-line="300"><span style="color: #f6f6f5;">doubled</span> <span style="color: #e48cc1;">=</span> <span style="color: #f6f6f5;">array</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">map</span> <span style="color: #e48cc1;">do</span> |<span style="color: #fdc38e;">element</span>|
+</span><span class="athl-line" data-athl-line="301">  <span style="color: #fdc38e;">element</span> * <span style="color: #baa0e8;">2</span>
+</span><span class="athl-line" data-athl-line="302"><span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="303"><span style="color: #87e58e;">puts</span> <span style="color: #f6f6f5;">doubled</span>
+</span><span class="athl-line" data-athl-line="304"><span style="color: #70747f;">#=&gt; [2,4,6,8,10]</span>
+</span><span class="athl-line" data-athl-line="305"><span style="color: #87e58e;">puts</span> <span style="color: #f6f6f5;">array</span>
+</span><span class="athl-line" data-athl-line="306"><span style="color: #70747f;">#=&gt; [1,2,3,4,5]</span>
+</span><span class="athl-line" data-athl-line="307">
+</span><span class="athl-line" data-athl-line="308"><span style="color: #70747f;"># another useful syntax is .map(&amp;:method)</span>
+</span><span class="athl-line" data-athl-line="309"><span style="color: #f6f6f5;">a</span> <span style="color: #e48cc1;">=</span> <span style="color: #f6f6f5;">[</span><span style="color: #e8eda2;">&quot;FOO&quot;</span><span style="color: #f6f6f5;">,</span> <span style="color: #e8eda2;">&quot;BAR&quot;</span><span style="color: #f6f6f5;">,</span> <span style="color: #e8eda2;">&quot;BAZ&quot;</span><span style="color: #f6f6f5;">]</span>
+</span><span class="athl-line" data-athl-line="310"><span style="color: #f6f6f5;">a</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">map</span> <span style="color: #f6f6f5;">{</span> |<span style="color: #fdc38e;">s</span>| <span style="color: #fdc38e;">s</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">downcase</span> <span style="color: #f6f6f5;">}</span> <span style="color: #70747f;">#=&gt; [&quot;foo&quot;, &quot;bar&quot;, &quot;baz&quot;]</span>
+</span><span class="athl-line" data-athl-line="311"><span style="color: #f6f6f5;">a</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">map</span><span style="color: #f6f6f5;">(</span>&amp;<span style="color: #baa0e8;">:downcase</span><span style="color: #f6f6f5;">)</span> <span style="color: #70747f;">#=&gt; [&quot;foo&quot;, &quot;bar&quot;, &quot;baz&quot;]</span>
+</span><span class="athl-line" data-athl-line="312">
+</span><span class="athl-line" data-athl-line="313"><span style="color: #70747f;"># Case construct</span>
+</span><span class="athl-line" data-athl-line="314"><span style="color: #f6f6f5;">grade</span> <span style="color: #e48cc1;">=</span> <span style="color: #e8eda2;">&#39;B&#39;</span>
+</span><span class="athl-line" data-athl-line="315">
+</span><span class="athl-line" data-athl-line="316"><span style="color: #e48cc1;">case</span> <span style="color: #f6f6f5;">grade</span>
+</span><span class="athl-line" data-athl-line="317"><span style="color: #e48cc1;">when</span> <span style="color: #e8eda2;">&#39;A&#39;</span>
+</span><span class="athl-line" data-athl-line="318">  <span style="color: #87e58e;">puts</span> <span style="color: #e8eda2;">&#39;Way to go kiddo&#39;</span>
+</span><span class="athl-line" data-athl-line="319"><span style="color: #e48cc1;">when</span> <span style="color: #e8eda2;">&#39;B&#39;</span>
+</span><span class="athl-line" data-athl-line="320">  <span style="color: #87e58e;">puts</span> <span style="color: #e8eda2;">&#39;Better luck next time&#39;</span>
+</span><span class="athl-line" data-athl-line="321"><span style="color: #e48cc1;">when</span> <span style="color: #e8eda2;">&#39;C&#39;</span>
+</span><span class="athl-line" data-athl-line="322">  <span style="color: #87e58e;">puts</span> <span style="color: #e8eda2;">&#39;You can do better&#39;</span>
+</span><span class="athl-line" data-athl-line="323"><span style="color: #e48cc1;">when</span> <span style="color: #e8eda2;">&#39;D&#39;</span>
+</span><span class="athl-line" data-athl-line="324">  <span style="color: #87e58e;">puts</span> <span style="color: #e8eda2;">&#39;Scraping through&#39;</span>
+</span><span class="athl-line" data-athl-line="325"><span style="color: #e48cc1;">when</span> <span style="color: #e8eda2;">&#39;F&#39;</span>
+</span><span class="athl-line" data-athl-line="326">  <span style="color: #87e58e;">puts</span> <span style="color: #e8eda2;">&#39;You failed!&#39;</span>
+</span><span class="athl-line" data-athl-line="327"><span style="color: #e48cc1;">else</span>
+</span><span class="athl-line" data-athl-line="328">  <span style="color: #87e58e;">puts</span> <span style="color: #e8eda2;">&#39;Alternative grading system, eh?&#39;</span>
+</span><span class="athl-line" data-athl-line="329"><span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="330"><span style="color: #70747f;">#=&gt; &quot;Better luck next time&quot;</span>
+</span><span class="athl-line" data-athl-line="331">
+</span><span class="athl-line" data-athl-line="332"><span style="color: #70747f;"># Cases can also use ranges</span>
+</span><span class="athl-line" data-athl-line="333"><span style="color: #f6f6f5;">grade</span> <span style="color: #e48cc1;">=</span> <span style="color: #baa0e8;">82</span>
+</span><span class="athl-line" data-athl-line="334"><span style="color: #e48cc1;">case</span> <span style="color: #f6f6f5;">grade</span>
+</span><span class="athl-line" data-athl-line="335"><span style="color: #e48cc1;">when</span> <span style="color: #baa0e8;">90</span>..<span style="color: #baa0e8;">100</span>
+</span><span class="athl-line" data-athl-line="336">  <span style="color: #87e58e;">puts</span> <span style="color: #e8eda2;">&#39;Hooray!&#39;</span>
+</span><span class="athl-line" data-athl-line="337"><span style="color: #e48cc1;">when</span> <span style="color: #baa0e8;">80</span>...<span style="color: #baa0e8;">90</span>
+</span><span class="athl-line" data-athl-line="338">  <span style="color: #87e58e;">puts</span> <span style="color: #e8eda2;">&#39;OK job&#39;</span>
+</span><span class="athl-line" data-athl-line="339"><span style="color: #e48cc1;">else</span>
+</span><span class="athl-line" data-athl-line="340">  <span style="color: #87e58e;">puts</span> <span style="color: #e8eda2;">&#39;You failed!&#39;</span>
+</span><span class="athl-line" data-athl-line="341"><span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="342"><span style="color: #70747f;">#=&gt; &quot;OK job&quot;</span>
+</span><span class="athl-line" data-athl-line="343">
+</span><span class="athl-line" data-athl-line="344"><span style="color: #70747f;"># Exception handling</span>
+</span><span class="athl-line" data-athl-line="345"><span style="color: #e48cc1;">begin</span>
+</span><span class="athl-line" data-athl-line="346">  <span style="color: #70747f;"># Code here that might raise an exception</span>
+</span><span class="athl-line" data-athl-line="347">  <span style="color: #87e58e;">raise</span> <span style="color: #a7dfef;">NoMemoryError</span><span style="color: #f6f6f5;">,</span> <span style="color: #e8eda2;">&#39;You ran out of memory.&#39;</span>
+</span><span class="athl-line" data-athl-line="348"><span style="color: #e48cc1;">rescue</span> <span style="color: #a7dfef;">NoMemoryError</span> <span style="color: #e48cc1;">=&gt;</span> <span style="color: #87e58e;">exception_variable</span>
+</span><span class="athl-line" data-athl-line="349">  <span style="color: #87e58e;">puts</span> <span style="color: #e8eda2;">&#39;NoMemoryError was raised&#39;</span><span style="color: #f6f6f5;">,</span> <span style="color: #87e58e;">exception_variable</span>
+</span><span class="athl-line" data-athl-line="350"><span style="color: #e48cc1;">rescue</span> <span style="color: #a7dfef;">RuntimeError</span> <span style="color: #e48cc1;">=&gt;</span> <span style="color: #87e58e;">other_exception_variable</span>
+</span><span class="athl-line" data-athl-line="351">  <span style="color: #87e58e;">puts</span> <span style="color: #e8eda2;">&#39;RuntimeError was raised now&#39;</span>
+</span><span class="athl-line" data-athl-line="352"><span style="color: #e48cc1;">else</span>
+</span><span class="athl-line" data-athl-line="353">  <span style="color: #87e58e;">puts</span> <span style="color: #e8eda2;">&#39;This runs if no exceptions were thrown at all&#39;</span>
+</span><span class="athl-line" data-athl-line="354"><span style="color: #e48cc1;">ensure</span>
+</span><span class="athl-line" data-athl-line="355">  <span style="color: #87e58e;">puts</span> <span style="color: #e8eda2;">&#39;This code always runs no matter what&#39;</span>
+</span><span class="athl-line" data-athl-line="356"><span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="357">
+</span><span class="athl-line" data-athl-line="358"><span style="color: #70747f;"># Methods</span>
+</span><span class="athl-line" data-athl-line="359">
+</span><span class="athl-line" data-athl-line="360"><span style="color: #e48cc1;">def</span> <span style="color: #87e58e;">double</span><span style="color: #f6f6f5;">(</span><span style="color: #fdc38e;">x</span><span style="color: #f6f6f5;">)</span>
+</span><span class="athl-line" data-athl-line="361">  <span style="color: #fdc38e;">x</span> * <span style="color: #baa0e8;">2</span>
+</span><span class="athl-line" data-athl-line="362"><span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="363">
+</span><span class="athl-line" data-athl-line="364"><span style="color: #70747f;"># Methods (and blocks) implicitly return the value of the last statement.</span>
+</span><span class="athl-line" data-athl-line="365"><span style="color: #87e58e;">double</span><span style="color: #f6f6f5;">(</span><span style="color: #baa0e8;">2</span><span style="color: #f6f6f5;">)</span> <span style="color: #70747f;">#=&gt; 4</span>
+</span><span class="athl-line" data-athl-line="366">
+</span><span class="athl-line" data-athl-line="367"><span style="color: #70747f;"># Parentheses are optional where the interpretation is unambiguous.</span>
+</span><span class="athl-line" data-athl-line="368"><span style="color: #87e58e;">double</span> <span style="color: #baa0e8;">3</span> <span style="color: #70747f;">#=&gt; 6</span>
+</span><span class="athl-line" data-athl-line="369">
+</span><span class="athl-line" data-athl-line="370"><span style="color: #87e58e;">double</span> <span style="color: #87e58e;">double</span> <span style="color: #baa0e8;">3</span> <span style="color: #70747f;">#=&gt; 12</span>
+</span><span class="athl-line" data-athl-line="371">
+</span><span class="athl-line" data-athl-line="372"><span style="color: #e48cc1;">def</span> <span style="color: #87e58e;">sum</span><span style="color: #f6f6f5;">(</span><span style="color: #fdc38e;">x</span><span style="color: #f6f6f5;">,</span> <span style="color: #fdc38e;">y</span><span style="color: #f6f6f5;">)</span>
+</span><span class="athl-line" data-athl-line="373">  <span style="color: #fdc38e;">x</span> + <span style="color: #fdc38e;">y</span>
+</span><span class="athl-line" data-athl-line="374"><span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="375">
+</span><span class="athl-line" data-athl-line="376"><span style="color: #70747f;"># Method arguments are separated by a comma.</span>
+</span><span class="athl-line" data-athl-line="377"><span style="color: #87e58e;">sum</span> <span style="color: #baa0e8;">3</span><span style="color: #f6f6f5;">,</span> <span style="color: #baa0e8;">4</span> <span style="color: #70747f;">#=&gt; 7</span>
+</span><span class="athl-line" data-athl-line="378">
+</span><span class="athl-line" data-athl-line="379"><span style="color: #87e58e;">sum</span> <span style="color: #87e58e;">sum</span><span style="color: #f6f6f5;">(</span><span style="color: #baa0e8;">3</span><span style="color: #f6f6f5;">,</span> <span style="color: #baa0e8;">4</span><span style="color: #f6f6f5;">)</span><span style="color: #f6f6f5;">,</span> <span style="color: #baa0e8;">5</span> <span style="color: #70747f;">#=&gt; 12</span>
+</span><span class="athl-line" data-athl-line="380">
+</span><span class="athl-line" data-athl-line="381"><span style="color: #70747f;"># yield</span>
+</span><span class="athl-line" data-athl-line="382"><span style="color: #70747f;"># All methods have an implicit, optional block parameter.</span>
+</span><span class="athl-line" data-athl-line="383"><span style="color: #70747f;"># It can be called with the &#39;yield&#39; keyword.</span>
+</span><span class="athl-line" data-athl-line="384"><span style="color: #e48cc1;">def</span> <span style="color: #87e58e;">surround</span>
+</span><span class="athl-line" data-athl-line="385">  <span style="color: #87e58e;">puts</span> <span style="color: #e8eda2;">&#39;{&#39;</span>
+</span><span class="athl-line" data-athl-line="386">  <span style="color: #e48cc1;">yield</span>
+</span><span class="athl-line" data-athl-line="387">  <span style="color: #87e58e;">puts</span> <span style="color: #e8eda2;">&#39;}&#39;</span>
+</span><span class="athl-line" data-athl-line="388"><span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="389">
+</span><span class="athl-line" data-athl-line="390"><span style="color: #87e58e;">surround</span> <span style="color: #f6f6f5;">{</span> <span style="color: #87e58e;">puts</span> <span style="color: #e8eda2;">&#39;hello world&#39;</span> <span style="color: #f6f6f5;">}</span>
+</span><span class="athl-line" data-athl-line="391">
+</span><span class="athl-line" data-athl-line="392"><span style="color: #70747f;">#=&gt; {</span>
+</span><span class="athl-line" data-athl-line="393"><span style="color: #70747f;">#=&gt; hello world</span>
+</span><span class="athl-line" data-athl-line="394"><span style="color: #70747f;">#=&gt; }</span>
+</span><span class="athl-line" data-athl-line="395">
+</span><span class="athl-line" data-athl-line="396"><span style="color: #70747f;"># Blocks can be converted into a &#39;proc&#39; object, which wraps the block and allows</span>
+</span><span class="athl-line" data-athl-line="397"><span style="color: #70747f;"># it to be passed to another method, bound to a different scope, or manipulated</span>
+</span><span class="athl-line" data-athl-line="398"><span style="color: #70747f;"># otherwise. This is most common in method parameter lists, where you frequently</span>
+</span><span class="athl-line" data-athl-line="399"><span style="color: #70747f;"># see a trailing &#39;&amp;block&#39; parameter that will accept the block, if one is given,</span>
+</span><span class="athl-line" data-athl-line="400"><span style="color: #70747f;"># and convert it to a &#39;Proc&#39;. The naming here is convention; it would work just</span>
+</span><span class="athl-line" data-athl-line="401"><span style="color: #70747f;"># as well with &#39;&amp;pineapple&#39;.</span>
+</span><span class="athl-line" data-athl-line="402"><span style="color: #e48cc1;">def</span> <span style="color: #87e58e;">guests</span><span style="color: #f6f6f5;">(</span>&amp;<span style="color: #fdc38e;">block</span><span style="color: #f6f6f5;">)</span>
+</span><span class="athl-line" data-athl-line="403">  <span style="color: #fdc38e;">block</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">class</span> <span style="color: #70747f;">#=&gt; Proc</span>
+</span><span class="athl-line" data-athl-line="404">  <span style="color: #fdc38e;">block</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">call</span><span style="color: #f6f6f5;">(</span><span style="color: #baa0e8;">4</span><span style="color: #f6f6f5;">)</span>
+</span><span class="athl-line" data-athl-line="405"><span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="406">
+</span><span class="athl-line" data-athl-line="407"><span style="color: #70747f;"># The &#39;call&#39; method on the Proc is similar to calling &#39;yield&#39; when a block is</span>
+</span><span class="athl-line" data-athl-line="408"><span style="color: #70747f;"># present. The arguments passed to &#39;call&#39; will be forwarded to the block as</span>
+</span><span class="athl-line" data-athl-line="409"><span style="color: #70747f;"># arguments.</span>
+</span><span class="athl-line" data-athl-line="410">
+</span><span class="athl-line" data-athl-line="411"><span style="color: #87e58e;">guests</span> <span style="color: #f6f6f5;">{</span> |<span style="color: #fdc38e;">n</span>| <span style="color: #e8eda2;">&quot;You have <span ><span style="color: #87e58e;">#{</span><span style="color: #fdc38e;">n</span><span style="color: #f6f6f5;">}</span></span> guests.&quot;</span> <span style="color: #f6f6f5;">}</span>
+</span><span class="athl-line" data-athl-line="412"><span style="color: #70747f;"># =&gt; &quot;You have 4 guests.&quot;</span>
+</span><span class="athl-line" data-athl-line="413">
+</span><span class="athl-line" data-athl-line="414"><span style="color: #70747f;"># You can pass a list of arguments, which will be converted into an array.</span>
+</span><span class="athl-line" data-athl-line="415"><span style="color: #70747f;"># That&#39;s what splat operator (&quot;*&quot;) is for.</span>
+</span><span class="athl-line" data-athl-line="416"><span style="color: #e48cc1;">def</span> <span style="color: #87e58e;">guests</span><span style="color: #f6f6f5;">(</span>*<span style="color: #fdc38e;">array</span><span style="color: #f6f6f5;">)</span>
+</span><span class="athl-line" data-athl-line="417">  <span style="color: #fdc38e;">array</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">each</span> <span style="color: #f6f6f5;">{</span> |<span style="color: #fdc38e;">guest</span>| <span style="color: #87e58e;">puts</span> <span style="color: #fdc38e;">guest</span> <span style="color: #f6f6f5;">}</span>
+</span><span class="athl-line" data-athl-line="418"><span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="419">
+</span><span class="athl-line" data-athl-line="420"><span style="color: #70747f;"># There is also the shorthand block syntax. It&#39;s most useful when you need</span>
+</span><span class="athl-line" data-athl-line="421"><span style="color: #70747f;"># to call a simple method on all array items.</span>
+</span><span class="athl-line" data-athl-line="422"><span style="color: #f6f6f5;">upcased</span> <span style="color: #e48cc1;">=</span> <span style="color: #f6f6f5;">[</span><span style="color: #e8eda2;">&#39;Watch&#39;</span><span style="color: #f6f6f5;">,</span> <span style="color: #e8eda2;">&#39;these&#39;</span><span style="color: #f6f6f5;">,</span> <span style="color: #e8eda2;">&#39;words&#39;</span><span style="color: #f6f6f5;">,</span> <span style="color: #e8eda2;">&#39;get&#39;</span><span style="color: #f6f6f5;">,</span> <span style="color: #e8eda2;">&#39;upcased&#39;</span><span style="color: #f6f6f5;">]</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">map</span><span style="color: #f6f6f5;">(</span>&amp;<span style="color: #baa0e8;">:upcase</span><span style="color: #f6f6f5;">)</span>
+</span><span class="athl-line" data-athl-line="423"><span style="color: #87e58e;">puts</span> <span style="color: #f6f6f5;">upcased</span>
+</span><span class="athl-line" data-athl-line="424"><span style="color: #70747f;">#=&gt; [&quot;WATCH&quot;, &quot;THESE&quot;, &quot;WORDS&quot;, &quot;GET&quot;, &quot;UPCASED&quot;]</span>
+</span><span class="athl-line" data-athl-line="425">
+</span><span class="athl-line" data-athl-line="426"><span style="color: #f6f6f5;">sum</span> <span style="color: #e48cc1;">=</span> <span style="color: #f6f6f5;">[</span><span style="color: #baa0e8;">1</span><span style="color: #f6f6f5;">,</span> <span style="color: #baa0e8;">2</span><span style="color: #f6f6f5;">,</span> <span style="color: #baa0e8;">3</span><span style="color: #f6f6f5;">,</span> <span style="color: #baa0e8;">4</span><span style="color: #f6f6f5;">,</span> <span style="color: #baa0e8;">5</span><span style="color: #f6f6f5;">]</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">reduce</span><span style="color: #f6f6f5;">(</span>&amp;<span style="color: #baa0e8;">:+</span><span style="color: #f6f6f5;">)</span>
+</span><span class="athl-line" data-athl-line="427"><span style="color: #87e58e;">puts</span> <span style="color: #f6f6f5;">sum</span>
+</span><span class="athl-line" data-athl-line="428"><span style="color: #70747f;">#=&gt; 15</span>
+</span><span class="athl-line" data-athl-line="429">
+</span><span class="athl-line" data-athl-line="430"><span style="color: #70747f;"># Destructuring</span>
+</span><span class="athl-line" data-athl-line="431">
+</span><span class="athl-line" data-athl-line="432"><span style="color: #70747f;"># Ruby will automatically destructure arrays on assignment to multiple variables.</span>
+</span><span class="athl-line" data-athl-line="433"><span style="color: #f6f6f5;">a</span><span style="color: #f6f6f5;">,</span> <span style="color: #f6f6f5;">b</span><span style="color: #f6f6f5;">,</span> <span style="color: #f6f6f5;">c</span> <span style="color: #e48cc1;">=</span> <span style="color: #f6f6f5;">[</span><span style="color: #baa0e8;">1</span><span style="color: #f6f6f5;">,</span> <span style="color: #baa0e8;">2</span><span style="color: #f6f6f5;">,</span> <span style="color: #baa0e8;">3</span><span style="color: #f6f6f5;">]</span>
+</span><span class="athl-line" data-athl-line="434"><span style="color: #f6f6f5;">a</span> <span style="color: #70747f;">#=&gt; 1</span>
+</span><span class="athl-line" data-athl-line="435"><span style="color: #f6f6f5;">b</span> <span style="color: #70747f;">#=&gt; 2</span>
+</span><span class="athl-line" data-athl-line="436"><span style="color: #f6f6f5;">c</span> <span style="color: #70747f;">#=&gt; 3</span>
+</span><span class="athl-line" data-athl-line="437">
+</span><span class="athl-line" data-athl-line="438"><span style="color: #70747f;"># In some cases, you will want to use the splat operator: `*` to prompt destructuring</span>
+</span><span class="athl-line" data-athl-line="439"><span style="color: #70747f;"># of an array into a list.</span>
+</span><span class="athl-line" data-athl-line="440"><span style="color: #f6f6f5;">ranked_competitors</span> <span style="color: #e48cc1;">=</span> <span style="color: #f6f6f5;">[</span><span style="color: #e8eda2;">&quot;John&quot;</span><span style="color: #f6f6f5;">,</span> <span style="color: #e8eda2;">&quot;Sally&quot;</span><span style="color: #f6f6f5;">,</span> <span style="color: #e8eda2;">&quot;Dingus&quot;</span><span style="color: #f6f6f5;">,</span> <span style="color: #e8eda2;">&quot;Moe&quot;</span><span style="color: #f6f6f5;">,</span> <span style="color: #e8eda2;">&quot;Marcy&quot;</span><span style="color: #f6f6f5;">]</span>
+</span><span class="athl-line" data-athl-line="441">
+</span><span class="athl-line" data-athl-line="442"><span style="color: #e48cc1;">def</span> <span style="color: #87e58e;">best</span><span style="color: #f6f6f5;">(</span><span style="color: #fdc38e;">first</span><span style="color: #f6f6f5;">,</span> <span style="color: #fdc38e;">second</span><span style="color: #f6f6f5;">,</span> <span style="color: #fdc38e;">third</span><span style="color: #f6f6f5;">)</span>
+</span><span class="athl-line" data-athl-line="443">  <span style="color: #87e58e;">puts</span> <span style="color: #e8eda2;">&quot;Winners are <span ><span style="color: #87e58e;">#{</span><span style="color: #fdc38e;">first</span><span style="color: #f6f6f5;">}</span></span>, <span ><span style="color: #87e58e;">#{</span><span style="color: #fdc38e;">second</span><span style="color: #f6f6f5;">}</span></span>, and <span ><span style="color: #87e58e;">#{</span><span style="color: #fdc38e;">third</span><span style="color: #f6f6f5;">}</span></span>.&quot;</span>
+</span><span class="athl-line" data-athl-line="444"><span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="445">
+</span><span class="athl-line" data-athl-line="446"><span style="color: #87e58e;">best</span> *<span style="color: #f6f6f5;">ranked_competitors</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">first</span><span style="color: #f6f6f5;">(</span><span style="color: #baa0e8;">3</span><span style="color: #f6f6f5;">)</span> <span style="color: #70747f;">#=&gt; Winners are John, Sally, and Dingus.</span>
+</span><span class="athl-line" data-athl-line="447">
+</span><span class="athl-line" data-athl-line="448"><span style="color: #70747f;"># The splat operator can also be used in parameters.</span>
+</span><span class="athl-line" data-athl-line="449"><span style="color: #e48cc1;">def</span> <span style="color: #87e58e;">best</span><span style="color: #f6f6f5;">(</span><span style="color: #fdc38e;">first</span><span style="color: #f6f6f5;">,</span> <span style="color: #fdc38e;">second</span><span style="color: #f6f6f5;">,</span> <span style="color: #fdc38e;">third</span><span style="color: #f6f6f5;">,</span> *<span style="color: #fdc38e;">others</span><span style="color: #f6f6f5;">)</span>
+</span><span class="athl-line" data-athl-line="450">  <span style="color: #87e58e;">puts</span> <span style="color: #e8eda2;">&quot;Winners are <span ><span style="color: #87e58e;">#{</span><span style="color: #fdc38e;">first</span><span style="color: #f6f6f5;">}</span></span>, <span ><span style="color: #87e58e;">#{</span><span style="color: #fdc38e;">second</span><span style="color: #f6f6f5;">}</span></span>, and <span ><span style="color: #87e58e;">#{</span><span style="color: #fdc38e;">third</span><span style="color: #f6f6f5;">}</span></span>.&quot;</span>
+</span><span class="athl-line" data-athl-line="451">  <span style="color: #87e58e;">puts</span> <span style="color: #e8eda2;">&quot;There were <span ><span style="color: #87e58e;">#{</span><span style="color: #fdc38e;">others</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">count</span><span style="color: #f6f6f5;">}</span></span> other participants.&quot;</span>
+</span><span class="athl-line" data-athl-line="452"><span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="453">
+</span><span class="athl-line" data-athl-line="454"><span style="color: #87e58e;">best</span> *<span style="color: #f6f6f5;">ranked_competitors</span>
+</span><span class="athl-line" data-athl-line="455"><span style="color: #70747f;">#=&gt; Winners are John, Sally, and Dingus.</span>
+</span><span class="athl-line" data-athl-line="456"><span style="color: #70747f;">#=&gt; There were 2 other participants.</span>
+</span><span class="athl-line" data-athl-line="457">
+</span><span class="athl-line" data-athl-line="458"><span style="color: #70747f;"># By convention, all methods that return booleans end with a question mark.</span>
+</span><span class="athl-line" data-athl-line="459"><span style="color: #baa0e8;">5</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">even?</span> <span style="color: #70747f;">#=&gt; false</span>
+</span><span class="athl-line" data-athl-line="460"><span style="color: #baa0e8;">5</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">odd?</span> <span style="color: #70747f;">#=&gt; true</span>
+</span><span class="athl-line" data-athl-line="461">
+</span><span class="athl-line" data-athl-line="462"><span style="color: #70747f;"># By convention, if a method name ends with an exclamation mark, it does</span>
+</span><span class="athl-line" data-athl-line="463"><span style="color: #70747f;"># something destructive like mutate the receiver. Many methods have a ! version</span>
+</span><span class="athl-line" data-athl-line="464"><span style="color: #70747f;"># to make a change, and a non-! version to just return a new changed version.</span>
+</span><span class="athl-line" data-athl-line="465"><span style="color: #f6f6f5;">company_name</span> <span style="color: #e48cc1;">=</span> <span style="color: #e8eda2;">&quot;Dunder Mifflin&quot;</span>
+</span><span class="athl-line" data-athl-line="466"><span style="color: #f6f6f5;">company_name</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">upcase</span> <span style="color: #70747f;">#=&gt; &quot;DUNDER MIFFLIN&quot;</span>
+</span><span class="athl-line" data-athl-line="467"><span style="color: #f6f6f5;">company_name</span> <span style="color: #70747f;">#=&gt; &quot;Dunder Mifflin&quot;</span>
+</span><span class="athl-line" data-athl-line="468"><span style="color: #70747f;"># We&#39;re mutating company_name this time.</span>
+</span><span class="athl-line" data-athl-line="469"><span style="color: #f6f6f5;">company_name</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">upcase!</span> <span style="color: #70747f;">#=&gt; &quot;DUNDER MIFFLIN&quot;</span>
+</span><span class="athl-line" data-athl-line="470"><span style="color: #f6f6f5;">company_name</span> <span style="color: #70747f;">#=&gt; &quot;DUNDER MIFFLIN&quot;</span>
+</span><span class="athl-line" data-athl-line="471">
+</span><span class="athl-line" data-athl-line="472"><span style="color: #70747f;"># Classes</span>
+</span><span class="athl-line" data-athl-line="473">
+</span><span class="athl-line" data-athl-line="474"><span style="color: #70747f;"># You can define a class with the &#39;class&#39; keyword.</span>
+</span><span class="athl-line" data-athl-line="475"><span style="color: #e48cc1;">class</span> <span style="color: #a7dfef;">Human</span>
+</span><span class="athl-line" data-athl-line="476">
+</span><span class="athl-line" data-athl-line="477">  <span style="color: #70747f;"># A class variable. It is shared by all instances of this class.</span>
+</span><span class="athl-line" data-athl-line="478">  <span style="color: #baa0e8;">@@species</span> <span style="color: #e48cc1;">=</span> <span style="color: #e8eda2;">&#39;H. sapiens&#39;</span>
+</span><span class="athl-line" data-athl-line="479">
+</span><span class="athl-line" data-athl-line="480">  <span style="color: #70747f;"># Basic initializer</span>
+</span><span class="athl-line" data-athl-line="481">  <span style="color: #e48cc1;">def</span> <span style="color: #87e58e;">initialize</span><span style="color: #f6f6f5;">(</span><span style="color: #fdc38e;">name</span><span style="color: #f6f6f5;">,</span> <span style="color: #fdc38e;">age</span> <span style="color: #e48cc1;">=</span> <span style="color: #baa0e8;">0</span><span style="color: #f6f6f5;">)</span>
+</span><span class="athl-line" data-athl-line="482">    <span style="color: #70747f;"># Assign the argument to the &#39;name&#39; instance variable for the instance.</span>
+</span><span class="athl-line" data-athl-line="483">    <span style="color: #baa0e8;">@name</span> <span style="color: #e48cc1;">=</span> <span style="color: #fdc38e;">name</span>
+</span><span class="athl-line" data-athl-line="484">    <span style="color: #70747f;"># If no age given, we will fall back to the default in the arguments list.</span>
+</span><span class="athl-line" data-athl-line="485">    <span style="color: #baa0e8;">@age</span> <span style="color: #e48cc1;">=</span> <span style="color: #fdc38e;">age</span>
+</span><span class="athl-line" data-athl-line="486">  <span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="487">
+</span><span class="athl-line" data-athl-line="488">  <span style="color: #70747f;"># Basic setter method</span>
+</span><span class="athl-line" data-athl-line="489">  <span style="color: #e48cc1;">def</span> <span style="color: #87e58e;">name</span><span style="color: #e48cc1;">=</span><span style="color: #f6f6f5;">(</span><span style="color: #fdc38e;">name</span><span style="color: #f6f6f5;">)</span>
+</span><span class="athl-line" data-athl-line="490">    <span style="color: #baa0e8;">@name</span> <span style="color: #e48cc1;">=</span> <span style="color: #fdc38e;">name</span>
+</span><span class="athl-line" data-athl-line="491">  <span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="492">
+</span><span class="athl-line" data-athl-line="493">  <span style="color: #70747f;"># Basic getter method</span>
+</span><span class="athl-line" data-athl-line="494">  <span style="color: #e48cc1;">def</span> <span style="color: #87e58e;">name</span>
+</span><span class="athl-line" data-athl-line="495">    <span style="color: #baa0e8;">@name</span>
+</span><span class="athl-line" data-athl-line="496">  <span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="497">
+</span><span class="athl-line" data-athl-line="498">  <span style="color: #70747f;"># The above functionality can be encapsulated using the attr_accessor method</span>
+</span><span class="athl-line" data-athl-line="499">  <span style="color: #70747f;"># as follows.</span>
+</span><span class="athl-line" data-athl-line="500">  <span style="color: #87e58e;">attr_accessor</span> <span style="color: #baa0e8;">:name</span>
+</span><span class="athl-line" data-athl-line="501">
+</span><span class="athl-line" data-athl-line="502">  <span style="color: #70747f;"># Getter/setter methods can also be created individually like this.</span>
+</span><span class="athl-line" data-athl-line="503">  <span style="color: #87e58e;">attr_reader</span> <span style="color: #baa0e8;">:name</span>
+</span><span class="athl-line" data-athl-line="504">  <span style="color: #87e58e;">attr_writer</span> <span style="color: #baa0e8;">:name</span>
+</span><span class="athl-line" data-athl-line="505">
+</span><span class="athl-line" data-athl-line="506">  <span style="color: #70747f;"># A class method uses self to distinguish from instance methods.</span>
+</span><span class="athl-line" data-athl-line="507">  <span style="color: #70747f;"># It can only be called on the class, not an instance.</span>
+</span><span class="athl-line" data-athl-line="508">  <span style="color: #e48cc1;">def</span> <span style="color: #baa0e8;">self</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">say</span><span style="color: #f6f6f5;">(</span><span style="color: #fdc38e;">msg</span><span style="color: #f6f6f5;">)</span>
+</span><span class="athl-line" data-athl-line="509">    <span style="color: #87e58e;">puts</span> <span style="color: #fdc38e;">msg</span>
+</span><span class="athl-line" data-athl-line="510">  <span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="511">
+</span><span class="athl-line" data-athl-line="512">  <span style="color: #e48cc1;">def</span> <span style="color: #87e58e;">species</span>
+</span><span class="athl-line" data-athl-line="513">    <span style="color: #baa0e8;">@@species</span>
+</span><span class="athl-line" data-athl-line="514">  <span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="515"><span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="516">
+</span><span class="athl-line" data-athl-line="517"><span style="color: #70747f;"># Instantiating of a class</span>
+</span><span class="athl-line" data-athl-line="518"><span style="color: #f6f6f5;">jim</span> <span style="color: #e48cc1;">=</span> <span style="color: #a7dfef;">Human</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">new</span><span style="color: #f6f6f5;">(</span><span style="color: #e8eda2;">&#39;Jim Halpert&#39;</span><span style="color: #f6f6f5;">)</span>
+</span><span class="athl-line" data-athl-line="519"><span style="color: #f6f6f5;">dwight</span> <span style="color: #e48cc1;">=</span> <span style="color: #a7dfef;">Human</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">new</span><span style="color: #f6f6f5;">(</span><span style="color: #e8eda2;">&#39;Dwight K. Schrute&#39;</span><span style="color: #f6f6f5;">)</span>
+</span><span class="athl-line" data-athl-line="520">
+</span><span class="athl-line" data-athl-line="521"><span style="color: #70747f;"># You can call the methods of the generated object.</span>
+</span><span class="athl-line" data-athl-line="522"><span style="color: #f6f6f5;">jim</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">species</span> <span style="color: #70747f;">#=&gt; &quot;H. sapiens&quot;</span>
+</span><span class="athl-line" data-athl-line="523"><span style="color: #f6f6f5;">jim</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">name</span> <span style="color: #70747f;">#=&gt; &quot;Jim Halpert&quot;</span>
+</span><span class="athl-line" data-athl-line="524"><span style="color: #f6f6f5;">jim</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">name</span> <span style="color: #e48cc1;">=</span> <span style="color: #e8eda2;">&quot;Jim Halpert II&quot;</span> <span style="color: #70747f;">#=&gt; &quot;Jim Halpert II&quot;</span>
+</span><span class="athl-line" data-athl-line="525"><span style="color: #f6f6f5;">jim</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">name</span> <span style="color: #70747f;">#=&gt; &quot;Jim Halpert II&quot;</span>
+</span><span class="athl-line" data-athl-line="526"><span style="color: #f6f6f5;">dwight</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">species</span> <span style="color: #70747f;">#=&gt; &quot;H. sapiens&quot;</span>
+</span><span class="athl-line" data-athl-line="527"><span style="color: #f6f6f5;">dwight</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">name</span> <span style="color: #70747f;">#=&gt; &quot;Dwight K. Schrute&quot;</span>
+</span><span class="athl-line" data-athl-line="528">
+</span><span class="athl-line" data-athl-line="529"><span style="color: #70747f;"># Calling of a class method</span>
+</span><span class="athl-line" data-athl-line="530"><span style="color: #a7dfef;">Human</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">say</span><span style="color: #f6f6f5;">(</span><span style="color: #e8eda2;">&#39;Hi&#39;</span><span style="color: #f6f6f5;">)</span> <span style="color: #70747f;">#=&gt; &quot;Hi&quot;</span>
+</span><span class="athl-line" data-athl-line="531">
+</span><span class="athl-line" data-athl-line="532"><span style="color: #70747f;"># Variable&#39;s scopes are defined by the way we name them.</span>
+</span><span class="athl-line" data-athl-line="533"><span style="color: #70747f;"># Variables that start with $ have global scope.</span>
+</span><span class="athl-line" data-athl-line="534">$var <span style="color: #e48cc1;">=</span> <span style="color: #e8eda2;">&quot;I&#39;m a global var&quot;</span>
+</span><span class="athl-line" data-athl-line="535"><span style="color: #87e58e;">defined?</span> $var <span style="color: #70747f;">#=&gt; &quot;global-variable&quot;</span>
+</span><span class="athl-line" data-athl-line="536">
+</span><span class="athl-line" data-athl-line="537"><span style="color: #70747f;"># Variables that start with @ have instance scope.</span>
+</span><span class="athl-line" data-athl-line="538"><span style="color: #baa0e8;">@var</span> <span style="color: #e48cc1;">=</span> <span style="color: #e8eda2;">&quot;I&#39;m an instance var&quot;</span>
+</span><span class="athl-line" data-athl-line="539"><span style="color: #87e58e;">defined?</span> <span style="color: #baa0e8;">@var</span> <span style="color: #70747f;">#=&gt; &quot;instance-variable&quot;</span>
+</span><span class="athl-line" data-athl-line="540">
+</span><span class="athl-line" data-athl-line="541"><span style="color: #70747f;"># Variables that start with @@ have class scope.</span>
+</span><span class="athl-line" data-athl-line="542"><span style="color: #baa0e8;">@@var</span> <span style="color: #e48cc1;">=</span> <span style="color: #e8eda2;">&quot;I&#39;m a class var&quot;</span>
+</span><span class="athl-line" data-athl-line="543"><span style="color: #87e58e;">defined?</span> <span style="color: #baa0e8;">@@var</span> <span style="color: #70747f;">#=&gt; &quot;class variable&quot;</span>
+</span><span class="athl-line" data-athl-line="544">
+</span><span class="athl-line" data-athl-line="545"><span style="color: #70747f;"># Variables that start with a capital letter are constants.</span>
+</span><span class="athl-line" data-athl-line="546"><span style="color: #a7dfef;">Var</span> <span style="color: #e48cc1;">=</span> <span style="color: #e8eda2;">&quot;I&#39;m a constant&quot;</span>
+</span><span class="athl-line" data-athl-line="547"><span style="color: #87e58e;">defined?</span> <span style="color: #a7dfef;">Var</span> <span style="color: #70747f;">#=&gt; &quot;constant&quot;</span>
+</span><span class="athl-line" data-athl-line="548">
+</span><span class="athl-line" data-athl-line="549"><span style="color: #70747f;"># Class is also an object in ruby. So a class can have instance variables.</span>
+</span><span class="athl-line" data-athl-line="550"><span style="color: #70747f;"># A class variable is shared among the class and all of its descendants.</span>
+</span><span class="athl-line" data-athl-line="551">
+</span><span class="athl-line" data-athl-line="552"><span style="color: #70747f;"># Base class</span>
+</span><span class="athl-line" data-athl-line="553"><span style="color: #e48cc1;">class</span> <span style="color: #a7dfef;">Human</span>
+</span><span class="athl-line" data-athl-line="554">  <span style="color: #baa0e8;">@@foo</span> <span style="color: #e48cc1;">=</span> <span style="color: #baa0e8;">0</span>
+</span><span class="athl-line" data-athl-line="555">
+</span><span class="athl-line" data-athl-line="556">  <span style="color: #e48cc1;">def</span> <span style="color: #baa0e8;">self</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">foo</span>
+</span><span class="athl-line" data-athl-line="557">    <span style="color: #baa0e8;">@@foo</span>
+</span><span class="athl-line" data-athl-line="558">  <span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="559">
+</span><span class="athl-line" data-athl-line="560">  <span style="color: #e48cc1;">def</span> <span style="color: #baa0e8;">self</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">foo</span><span style="color: #e48cc1;">=</span><span style="color: #f6f6f5;">(</span><span style="color: #fdc38e;">value</span><span style="color: #f6f6f5;">)</span>
+</span><span class="athl-line" data-athl-line="561">    <span style="color: #baa0e8;">@@foo</span> <span style="color: #e48cc1;">=</span> <span style="color: #fdc38e;">value</span>
+</span><span class="athl-line" data-athl-line="562">  <span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="563"><span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="564">
+</span><span class="athl-line" data-athl-line="565"><span style="color: #70747f;"># Derived class</span>
+</span><span class="athl-line" data-athl-line="566"><span style="color: #e48cc1;">class</span> <span style="color: #a7dfef;">Worker</span> &lt; <span style="color: #a7dfef;">Human</span>
+</span><span class="athl-line" data-athl-line="567"><span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="568">
+</span><span class="athl-line" data-athl-line="569"><span style="color: #a7dfef;">Human</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">foo</span> <span style="color: #70747f;">#=&gt; 0</span>
+</span><span class="athl-line" data-athl-line="570"><span style="color: #a7dfef;">Worker</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">foo</span> <span style="color: #70747f;">#=&gt; 0</span>
+</span><span class="athl-line" data-athl-line="571">
+</span><span class="athl-line" data-athl-line="572"><span style="color: #a7dfef;">Human</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">foo</span> <span style="color: #e48cc1;">=</span> <span style="color: #baa0e8;">2</span>
+</span><span class="athl-line" data-athl-line="573"><span style="color: #a7dfef;">Worker</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">foo</span> <span style="color: #70747f;">#=&gt; 2</span>
+</span><span class="athl-line" data-athl-line="574">
+</span><span class="athl-line" data-athl-line="575"><span style="color: #70747f;"># A class instance variable is not shared by the class&#39;s descendants.</span>
+</span><span class="athl-line" data-athl-line="576"><span style="color: #e48cc1;">class</span> <span style="color: #a7dfef;">Human</span>
+</span><span class="athl-line" data-athl-line="577">  <span style="color: #baa0e8;">@bar</span> <span style="color: #e48cc1;">=</span> <span style="color: #baa0e8;">0</span>
+</span><span class="athl-line" data-athl-line="578">
+</span><span class="athl-line" data-athl-line="579">  <span style="color: #e48cc1;">def</span> <span style="color: #baa0e8;">self</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">bar</span>
+</span><span class="athl-line" data-athl-line="580">    <span style="color: #baa0e8;">@bar</span>
+</span><span class="athl-line" data-athl-line="581">  <span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="582">
+</span><span class="athl-line" data-athl-line="583">  <span style="color: #e48cc1;">def</span> <span style="color: #baa0e8;">self</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">bar</span><span style="color: #e48cc1;">=</span><span style="color: #f6f6f5;">(</span><span style="color: #fdc38e;">value</span><span style="color: #f6f6f5;">)</span>
+</span><span class="athl-line" data-athl-line="584">    <span style="color: #baa0e8;">@bar</span> <span style="color: #e48cc1;">=</span> <span style="color: #fdc38e;">value</span>
+</span><span class="athl-line" data-athl-line="585">  <span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="586"><span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="587">
+</span><span class="athl-line" data-athl-line="588"><span style="color: #e48cc1;">class</span> <span style="color: #a7dfef;">Doctor</span> &lt; <span style="color: #a7dfef;">Human</span>
+</span><span class="athl-line" data-athl-line="589"><span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="590">
+</span><span class="athl-line" data-athl-line="591"><span style="color: #a7dfef;">Human</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">bar</span> <span style="color: #70747f;">#=&gt; 0</span>
+</span><span class="athl-line" data-athl-line="592"><span style="color: #a7dfef;">Doctor</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">bar</span> <span style="color: #70747f;">#=&gt; nil</span>
+</span><span class="athl-line" data-athl-line="593">
+</span><span class="athl-line" data-athl-line="594"><span style="color: #e48cc1;">module</span> <span style="color: #a7dfef;">ModuleExample</span>
+</span><span class="athl-line" data-athl-line="595">  <span style="color: #e48cc1;">def</span> <span style="color: #87e58e;">foo</span>
+</span><span class="athl-line" data-athl-line="596">    <span style="color: #e8eda2;">&#39;foo&#39;</span>
+</span><span class="athl-line" data-athl-line="597">  <span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="598"><span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="599">
+</span><span class="athl-line" data-athl-line="600"><span style="color: #70747f;"># Including modules binds their methods to the class instances.</span>
+</span><span class="athl-line" data-athl-line="601"><span style="color: #70747f;"># Extending modules binds their methods to the class itself.</span>
+</span><span class="athl-line" data-athl-line="602"><span style="color: #e48cc1;">class</span> <span style="color: #a7dfef;">Person</span>
+</span><span class="athl-line" data-athl-line="603">  <span style="color: #87e58e;">include</span> <span style="color: #a7dfef;">ModuleExample</span>
+</span><span class="athl-line" data-athl-line="604"><span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="605">
+</span><span class="athl-line" data-athl-line="606"><span style="color: #e48cc1;">class</span> <span style="color: #a7dfef;">Book</span>
+</span><span class="athl-line" data-athl-line="607">  <span style="color: #87e58e;">extend</span> <span style="color: #a7dfef;">ModuleExample</span>
+</span><span class="athl-line" data-athl-line="608"><span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="609">
+</span><span class="athl-line" data-athl-line="610"><span style="color: #a7dfef;">Person</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">foo</span>     <span style="color: #70747f;">#=&gt; NoMethodError: undefined method `foo&#39; for Person:Class</span>
+</span><span class="athl-line" data-athl-line="611"><span style="color: #a7dfef;">Person</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">new</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">foo</span> <span style="color: #70747f;">#=&gt; &quot;foo&quot;</span>
+</span><span class="athl-line" data-athl-line="612"><span style="color: #a7dfef;">Book</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">foo</span>       <span style="color: #70747f;">#=&gt; &quot;foo&quot;</span>
+</span><span class="athl-line" data-athl-line="613"><span style="color: #a7dfef;">Book</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">new</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">foo</span>   <span style="color: #70747f;">#=&gt; NoMethodError: undefined method `foo&#39;</span>
+</span><span class="athl-line" data-athl-line="614">
+</span><span class="athl-line" data-athl-line="615"><span style="color: #70747f;"># Callbacks are executed when including and extending a module</span>
+</span><span class="athl-line" data-athl-line="616"><span style="color: #e48cc1;">module</span> <span style="color: #a7dfef;">ConcernExample</span>
+</span><span class="athl-line" data-athl-line="617">  <span style="color: #e48cc1;">def</span> <span style="color: #baa0e8;">self</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">included</span><span style="color: #f6f6f5;">(</span><span style="color: #fdc38e;">base</span><span style="color: #f6f6f5;">)</span>
+</span><span class="athl-line" data-athl-line="618">    <span style="color: #fdc38e;">base</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">extend</span><span style="color: #f6f6f5;">(</span><span style="color: #a7dfef;">ClassMethods</span><span style="color: #f6f6f5;">)</span>
+</span><span class="athl-line" data-athl-line="619">    <span style="color: #fdc38e;">base</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">send</span><span style="color: #f6f6f5;">(</span><span style="color: #baa0e8;">:include</span><span style="color: #f6f6f5;">,</span> <span style="color: #a7dfef;">InstanceMethods</span><span style="color: #f6f6f5;">)</span>
+</span><span class="athl-line" data-athl-line="620">  <span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="621">
+</span><span class="athl-line" data-athl-line="622">  <span style="color: #e48cc1;">module</span> <span style="color: #a7dfef;">ClassMethods</span>
+</span><span class="athl-line" data-athl-line="623">    <span style="color: #e48cc1;">def</span> <span style="color: #87e58e;">bar</span>
+</span><span class="athl-line" data-athl-line="624">      <span style="color: #e8eda2;">&#39;bar&#39;</span>
+</span><span class="athl-line" data-athl-line="625">    <span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="626">  <span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="627">
+</span><span class="athl-line" data-athl-line="628">  <span style="color: #e48cc1;">module</span> <span style="color: #a7dfef;">InstanceMethods</span>
+</span><span class="athl-line" data-athl-line="629">    <span style="color: #e48cc1;">def</span> <span style="color: #87e58e;">qux</span>
+</span><span class="athl-line" data-athl-line="630">      <span style="color: #e8eda2;">&#39;qux&#39;</span>
+</span><span class="athl-line" data-athl-line="631">    <span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="632">  <span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="633"><span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="634">
+</span><span class="athl-line" data-athl-line="635"><span style="color: #e48cc1;">class</span> <span style="color: #a7dfef;">Something</span>
+</span><span class="athl-line" data-athl-line="636">  <span style="color: #87e58e;">include</span> <span style="color: #a7dfef;">ConcernExample</span>
+</span><span class="athl-line" data-athl-line="637"><span style="color: #e48cc1;">end</span>
+</span><span class="athl-line" data-athl-line="638">
+</span><span class="athl-line" data-athl-line="639"><span style="color: #a7dfef;">Something</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">bar</span>     <span style="color: #70747f;">#=&gt; &quot;bar&quot;</span>
+</span><span class="athl-line" data-athl-line="640"><span style="color: #a7dfef;">Something</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">qux</span>     <span style="color: #70747f;">#=&gt; NoMethodError: undefined method `qux&#39;</span>
+</span><span class="athl-line" data-athl-line="641"><span style="color: #a7dfef;">Something</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">new</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">bar</span> <span style="color: #70747f;">#=&gt; NoMethodError: undefined method `bar&#39;</span>
+</span><span class="athl-line" data-athl-line="642"><span style="color: #a7dfef;">Something</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">new</span><span style="color: #f6f6f5;">.</span><span style="color: #87e58e;">qux</span> <span style="color: #70747f;">#=&gt; &quot;qux&quot;</span>
+</span></code></pre>
+</body>
+</html>

@@ -31,19 +31,24 @@
         const [theme, setTheme] = React.useState("catppuccin_frappe");
         const [content, setContent] = React.useState("");
 
-        const languages = ["lua", "html", "ruby", "rust", "bash", "elixir", "php", "swift"];
+        const languages = ["lua", "html", "ruby", "rust", "bash", "elixir", "php", "swift", "c"];
 
         const themes = [
           "catppuccin_frappe",
           "catppuccin_latte",
+          "dracula",
           "github_dark",
           "github_light",
           "gruvbox_dark",
           "gruvbox_light",
           "kanagawa_lotus",
           "kanagawa_wave",
+          "solarized_dark",
+          "solarized_light",
           "tokyonight_day",
           "tokyonight_night",
+          "vscode_dark",
+          "vscode_light",
         ];
 
         const loadContent = async () => {

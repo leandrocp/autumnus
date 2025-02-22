@@ -151,14 +151,19 @@ fn gen_samples() -> Result<()> {
     let themes = [
         "catppuccin_frappe",
         "catppuccin_latte",
+        "dracula",
         "github_dark",
         "github_light",
         "gruvbox_dark",
         "gruvbox_light",
         "kanagawa_lotus",
         "kanagawa_wave",
+        "solarized_dark",
+        "solarized_light",
         "tokyonight_day",
         "tokyonight_night",
+        "vscode_dark",
+        "vscode_light",
     ];
 
     let entries = collect_sample_entries(&samples_path)?;

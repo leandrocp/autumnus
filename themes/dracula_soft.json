@@ -1,6 +1,6 @@
 {
   "name": "dracula_soft",
-  "appearance": "light",
+  "appearance": "dark",
   "highlights": {
     "attribute": {
       "fg": "#a7dfef"

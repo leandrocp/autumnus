@@ -20,6 +20,7 @@ pub(crate) enum Language {
     Ruby,
     Php,
     Swift,
+    C,
 }
 
 impl Language {
@@ -33,6 +34,7 @@ impl Language {
             "ruby" => Some(Language::Ruby),
             "php" => Some(Language::Php),
             "swift" => Some(Language::Swift),
+            "c" => Some(Language::C),
             "diff" => Some(Language::Diff),
             _ => None,
         };
@@ -143,6 +145,7 @@ impl Language {
                 "*.php", "*.phtml", "*.php3", "*.php4", "*.php5", "*.php7", "*.phps",
             ],
             Language::Swift => &["*.swift"],
+            Language::C => &["*.c"],
         };
 
         glob_strs
@@ -167,6 +170,7 @@ impl Language {
                             return Some(Language::Ruby)
                         }
                         "swift" => return Some(Language::Swift),
+                        "tcc" => return Some(Language::C),
                         _ => {}
                     }
                 }
@@ -198,6 +202,7 @@ impl Language {
             Language::Ruby => "Ruby",
             Language::Php => "PHP",
             Language::Swift => "Swift",
+            Language::C => "C",
         }
     }
 
@@ -215,6 +220,7 @@ impl Language {
             Language::Ruby => &RUBY_CONFIG,
             Language::Php => &PHP_CONFIG,
             Language::Swift => &SWIFT_CONFIG,
+            Language::C => &C_CONFIG,
             Language::Html => &HTML_CONFIG,
             _ => &PLAIN_TEXT_CONFIG,
         }
@@ -371,6 +377,21 @@ static SWIFT_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     config
 });
 
+static C_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = tree_sitter_c::LANGUAGE;
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "c",
+        tree_sitter_c::HIGHLIGHT_QUERY,
+        "",
+        "",
+    )
+    .expect("failed to create c highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -471,6 +492,16 @@ mod tests {
     #[test]
     fn test_swift() {
         let lang = Language::guess("swift", "");
+        let mut highlighter = Highlighter::new();
+
+        let _ = highlighter
+            .highlight(lang.config(), "".as_bytes(), None, |_| None)
+            .unwrap();
+    }
+
+    #[test]
+    fn test_c() {
+        let lang = Language::guess("c", "");
         let mut highlighter = Highlighter::new();
 
         let _ = highlighter
