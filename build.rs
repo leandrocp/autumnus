@@ -31,7 +31,7 @@ fn main() {
         quote! {
             pub static #constant_name: LazyLock<Theme> = LazyLock::new(|| {
                 let theme_str = include_str!(#json_path);
-                crate::themes::from_json(theme_str).expect(&format!("failed to load theme: {}", #name))
+                 crate::themes::from_json(theme_str).unwrap_or_else(|_| panic!("failed to load theme: {}", #name))
             });
         }
     });

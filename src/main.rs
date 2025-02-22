@@ -36,18 +36,14 @@ enum Commands {
     GenSamples,
 }
 
-#[derive(Clone, ValueEnum)]
+#[derive(Clone, ValueEnum, Default)]
 enum Formatter {
     HtmlInline,
     HtmlLinked,
+    #[default]
     Terminal,
 }
 
-impl Default for Formatter {
-    fn default() -> Self {
-        Formatter::Terminal
-    }
-}
 // cargo run --features=dev -- gen-samples
 // cargo run -- highlight "code" --formatter terminal
 fn main() -> Result<()> {
