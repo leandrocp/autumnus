@@ -1,65 +1,160 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Autumnus Samples</title>
+<!doctype html>
+<html>
+  <head>
+    <title>Code Samples - Autumnus Syntax Highlighter</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: system, -apple-system, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-        h1 { margin-bottom: 30px; }
-        .theme-section { margin-bottom: 40px; }
-        h2 { margin-bottom: 20px; }
-        .sample-list { list-style: none; padding: 0; }
-        .sample-list li { margin-bottom: 10px; }
-        a { color: #0366d6; text-decoration: none; }
-        a:hover { text-decoration: underline; }
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+      * {
+        font-family: "Inter", sans-serif;
+      }
     </style>
-</head>
-<body>
-    <h1>Autumnus Samples</h1>
-    <div class="theme-section">
-        <h2>catppuccin_frappe</h2>
-        <ul class="sample-list">
-            <li><a href="lua.catppuccin_frappe.html">lua - catppuccin_frappe</a></li>
-            <li><a href="html.catppuccin_frappe.html">html - catppuccin_frappe</a></li>
-            <li><a href="ruby.catppuccin_frappe.html">ruby - catppuccin_frappe</a></li>
-            <li><a href="rust.catppuccin_frappe.html">rust - catppuccin_frappe</a></li>
-            <li><a href="bash.catppuccin_frappe.html">bash - catppuccin_frappe</a></li>
-            <li><a href="elixir.catppuccin_frappe.html">elixir - catppuccin_frappe</a></li>
-        </ul>
-    </div>
-    <div class="theme-section">
-        <h2>github_light</h2>
-        <ul class="sample-list">
-            <li><a href="lua.github_light.html">lua - github_light</a></li>
-            <li><a href="html.github_light.html">html - github_light</a></li>
-            <li><a href="ruby.github_light.html">ruby - github_light</a></li>
-            <li><a href="rust.github_light.html">rust - github_light</a></li>
-            <li><a href="bash.github_light.html">bash - github_light</a></li>
-            <li><a href="elixir.github_light.html">elixir - github_light</a></li>
-        </ul>
-    </div>
-    <div class="theme-section">
-        <h2>tokyonight_day</h2>
-        <ul class="sample-list">
-            <li><a href="lua.tokyonight_day.html">lua - tokyonight_day</a></li>
-            <li><a href="html.tokyonight_day.html">html - tokyonight_day</a></li>
-            <li><a href="ruby.tokyonight_day.html">ruby - tokyonight_day</a></li>
-            <li><a href="rust.tokyonight_day.html">rust - tokyonight_day</a></li>
-            <li><a href="bash.tokyonight_day.html">bash - tokyonight_day</a></li>
-            <li><a href="elixir.tokyonight_day.html">elixir - tokyonight_day</a></li>
-        </ul>
-    </div>
-    <div class="theme-section">
-        <h2>tokyonight_night</h2>
-        <ul class="sample-list">
-            <li><a href="lua.tokyonight_night.html">lua - tokyonight_night</a></li>
-            <li><a href="html.tokyonight_night.html">html - tokyonight_night</a></li>
-            <li><a href="ruby.tokyonight_night.html">ruby - tokyonight_night</a></li>
-            <li><a href="rust.tokyonight_night.html">rust - tokyonight_night</a></li>
-            <li><a href="bash.tokyonight_night.html">bash - tokyonight_night</a></li>
-            <li><a href="elixir.tokyonight_night.html">elixir - tokyonight_night</a></li>
-        </ul>
-    </div>
-</body>
+  </head>
+  <body class="bg-gray-50 min-h-screen">
+    <div id="root"></div>
+    <script type="text/babel">
+      const Select = React.forwardRef(({ children, ...props }, ref) => (
+        <select
+          ref={ref}
+          className="flex h-10 w-full items-center justify-between rounded-md border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          {...props}
+        >
+          {children}
+        </select>
+      ));
+
+      function App() {
+        const [language, setLanguage] = React.useState("lua");
+        const [theme, setTheme] = React.useState("catppuccin_frappe");
+        const [content, setContent] = React.useState("");
+
+        const languages = ["lua", "html", "ruby", "rust", "bash", "elixir"];
+
+        const themes = [
+          "catppuccin_frappe",
+          "catppuccin_latte",
+          "github_dark",
+          "github_light",
+          "gruvbox_dark",
+          "gruvbox_light",
+          "kanagawa_lotus",
+          "kanagawa_wave",
+          "tokyonight_day",
+          "tokyonight_night",
+        ];
+
+        const loadContent = async () => {
+          try {
+            const response = await fetch(`${language}.${theme}.html`);
+            const text = await response.text();
+            setContent(text);
+          } catch (error) {
+            console.error("Error:", error);
+            setContent("Error loading content");
+          }
+        };
+
+        React.useEffect(() => {
+          loadContent();
+        }, [language, theme]);
+
+        return (
+          <div className="container mx-auto py-8 px-4">
+            <div className="rounded-lg border bg-white shadow-sm p-6">
+              <div className="space-y-1.5 mb-6">
+                <h2 className="text-2xl font-semibold tracking-tight">
+                  Autumnus Syntax Highlighter
+                </h2>
+                <p className="text-sm text-gray-500">
+                  Select a language and theme to preview the code sample.
+                </p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                <div className="flex-1 space-y-1.5">
+                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    Language
+                  </label>
+                  <Select
+                    value={language}
+                    onChange={(e) => setLanguage(e.target.value)}
+                  >
+                    {languages.map((lang) => (
+                      <option key={lang} value={lang}>
+                        {lang.charAt(0).toUpperCase() + lang.slice(1)}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+                <div className="flex-1 space-y-1.5">
+                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    Theme
+                  </label>
+                  <Select
+                    value={theme}
+                    onChange={(e) => setTheme(e.target.value)}
+                  >
+                    {themes.map((t) => (
+                      <option key={t} value={t}>
+                        {t
+                          .split("_")
+                          .map(
+                            (word) =>
+                              word.charAt(0).toUpperCase() + word.slice(1),
+                          )
+                          .join(" ")}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+              </div>
+
+              <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+                <div
+                  className="p-6"
+                  dangerouslySetInnerHTML={{ __html: content }}
+                />
+              </div>
+            </div>
+            <footer className="mt-8 text-sm text-gray-500 text-center">
+              <p className="mb-2">
+                Sample code extracted from{" "}
+                <a
+                  href="https://github.com/adambard/learnxinyminutes-docs"
+                  className="text-blue-600 hover:underline"
+                  target="_blank"
+                >
+                  Learn X in Y Minutes
+                </a>
+              </p>
+              <p>
+                Powered by{" "}
+                <a
+                  href="https://crates.io/crates/autumnus"
+                  className="text-blue-600 hover:underline"
+                  target="_blank"
+                >
+                  Autumnus
+                </a>{" "}
+                (
+                <a
+                  href="https://github.com/leandrocp/autumnus"
+                  className="text-blue-600 hover:underline"
+                  target="_blank"
+                >
+                  GitHub
+                </a>
+                )
+              </p>
+            </footer>
+          </div>
+        );
+      }
+
+      ReactDOM.render(<App />, document.getElementById("root"));
+    </script>
+  </body>
 </html>
