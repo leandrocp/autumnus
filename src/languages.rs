@@ -25,12 +25,14 @@ pub(crate) enum Language {
     C,
     Cpp,
     CSharp,
+    Css,
 }
 
 impl Language {
     pub fn guess(lang_or_path: &str, source: &str) -> Self {
         let exact = match lang_or_path {
             "elixir" => Some(Language::Elixir),
+            "css" => Some(Language::Css),
             "rust" => Some(Language::Rust),
             "html" => Some(Language::Html),
             "lua" => Some(Language::Lua),
@@ -92,6 +94,7 @@ impl Language {
             Language::Diff => &["*.diff"],
             Language::Heex => &["*.heex", "*.neex"],
             Language::Elixir => &["*.ex", "*.exs"],
+            Language::Css => &["*.css"],
             Language::Rust => &["*.rs"],
             Language::Html => &["*.html", "*.htm", "*.xhtml"],
             Language::Lua => &["*.lua"],
@@ -219,6 +222,7 @@ impl Language {
             Language::PlainText => "Plain Text",
             Language::Diff => "Diff",
             Language::Elixir => "Elixir",
+            Language::Css => "CSS",
             Language::Heex => "HEEx",
             Language::Rust => "Rust",
             Language::Html => "HTML",
@@ -242,6 +246,7 @@ impl Language {
         match self {
             Language::Diff => &DIFF_CONFIG,
             Language::Elixir => &ELIXIR_CONFIG,
+            Language::Css => &CSS_CONFIG,
             Language::Heex => &HEEX_CONFIG,
             Language::Rust => &RUST_CONFIG,
             Language::Lua => &LUA_CONFIG,
@@ -484,6 +489,21 @@ static HEEX_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     config
 });
 
+static CSS_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = tree_sitter_css::LANGUAGE;
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "css",
+        include_str!("../queries/css/highlights.scm"),
+        include_str!("../queries/css/injections.scm"),
+        "",
+    )
+    .expect("failed to create css highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -634,6 +654,16 @@ mod tests {
     #[test]
     fn test_heex() {
         let lang = Language::guess("heex", "");
+        let mut highlighter = Highlighter::new();
+
+        let _ = highlighter
+            .highlight(lang.config(), "".as_bytes(), None, |_| None)
+            .unwrap();
+    }
+
+    #[test]
+    fn test_css() {
+        let lang = Language::guess("css", "");
         let mut highlighter = Highlighter::new();
 
         let _ = highlighter

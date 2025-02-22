@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>css - gruvbox_dark - Autumnus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'JetBrains Mono', monospace;
+            line-height: 1.5;
+        }
+        pre {
+            font-size: 15px;
+            margin: 20px;
+            padding: 50px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+<pre class="athl" style="color: #ebdbb2; background-color: #282828;"><code class="language-css" translate="no" tabindex="0"><span class="athl-line" data-athl-line="1"><span style="color: #928374;">/* comments appear inside slash-asterisk, just like this line!</span>
+</span><span class="athl-line" data-athl-line="2"><span style="color: #928374;">   there are no &quot;one-line comments&quot;; this is the only comment style */</span>
+</span><span class="athl-line" data-athl-line="3">
+</span><span class="athl-line" data-athl-line="4"><span style="color: #928374;">/* ####################</span>
+</span><span class="athl-line" data-athl-line="5"><span style="color: #928374;">   ## SELECTORS</span>
+</span><span class="athl-line" data-athl-line="6"><span style="color: #928374;">   #################### */</span>
+</span><span class="athl-line" data-athl-line="7">
+</span><span class="athl-line" data-athl-line="8"><span style="color: #928374;">/* the selector is used to target an element on a page. */</span>
+</span><span class="athl-line" data-athl-line="9"><span style="color: #fe8019;">selector</span> <span style="color: #fe8019;">{</span> <span style="color: #ebdbb2;">property</span><span style="color: #fe8019;">:</span> <span style="color: #ebdbb2;">value</span><span style="color: #fe8019;">;</span> <span style="color: #928374;">/* more properties...*/</span> <span style="color: #fe8019;">}</span>
+</span><span class="athl-line" data-athl-line="10">
+</span><span class="athl-line" data-athl-line="11"><span style="color: #928374;">/*</span>
+</span><span class="athl-line" data-athl-line="12"><span style="color: #928374;">Here is an example element:</span>
+</span><span class="athl-line" data-athl-line="13"><span style="color: #928374;"></span>
+</span><span class="athl-line" data-athl-line="14"><span style="color: #928374;">&lt;div class=&#39;class1 class2&#39; id=&#39;anID&#39; attr=&#39;value&#39; otherAttr=&#39;en-us foo bar&#39; /&gt;</span>
+</span><span class="athl-line" data-athl-line="15"><span style="color: #928374;">*/</span>
+</span><span class="athl-line" data-athl-line="16">
+</span><span class="athl-line" data-athl-line="17"><span style="color: #928374;">/* You can target it using one of its CSS classes */</span>
+</span><span class="athl-line" data-athl-line="18"><span style="color: #fe8019;">.</span><span style="color: #fabd2f;">class1</span> <span style="color: #fe8019;">{</span> <span style="color: #fe8019;">}</span>
+</span><span class="athl-line" data-athl-line="19">
+</span><span class="athl-line" data-athl-line="20"><span style="color: #928374;">/* or both classes! */</span>
+</span><span class="athl-line" data-athl-line="21"><span style="color: #fe8019;">.</span><span style="color: #fabd2f;">class1</span><span style="color: #fe8019;">.</span><span style="color: #fabd2f;">class2</span> <span style="color: #fe8019;">{</span> <span style="color: #fe8019;">}</span>
+</span><span class="athl-line" data-athl-line="22">
+</span><span class="athl-line" data-athl-line="23"><span style="color: #928374;">/* or its name */</span>
+</span><span class="athl-line" data-athl-line="24"><span style="color: #fe8019;">div</span> <span style="color: #fe8019;">{</span> <span style="color: #fe8019;">}</span>
+</span><span class="athl-line" data-athl-line="25">
+</span><span class="athl-line" data-athl-line="26"><span style="color: #928374;">/* or its id */</span>
+</span><span class="athl-line" data-athl-line="27"><span style="color: #fe8019;">#</span><span style="color: #d3869b;">anID</span> <span style="color: #fe8019;">{</span> <span style="color: #fe8019;">}</span>
+</span><span class="athl-line" data-athl-line="28">
+</span><span class="athl-line" data-athl-line="29"><span style="color: #928374;">/* or using the fact that it has an attribute! */</span>
+</span><span class="athl-line" data-athl-line="30"><span style="color: #fe8019;">[</span><span style="color: #83a598;">attr</span><span style="color: #fe8019;">]</span> <span style="color: #fe8019;">{</span> <span style="color: #ebdbb2;">font-size</span><span style="color: #fe8019;">:</span><span style="color: #ebdbb2;">smaller</span><span style="color: #fe8019;">;</span> <span style="color: #fe8019;">}</span>
+</span><span class="athl-line" data-athl-line="31">
+</span><span class="athl-line" data-athl-line="32"><span style="color: #928374;">/* or that the attribute has a specific value */</span>
+</span><span class="athl-line" data-athl-line="33"><span style="color: #fe8019;">[</span><span style="color: #83a598;">attr</span><span style="color: #fe8019;">=</span><span style="color: #b8bb26;">&#39;value&#39;</span><span style="color: #fe8019;">]</span> <span style="color: #fe8019;">{</span> <span style="color: #ebdbb2;">font-size</span><span style="color: #fe8019;">:</span><span style="color: #ebdbb2;">smaller</span><span style="color: #fe8019;">;</span> <span style="color: #fe8019;">}</span>
+</span><span class="athl-line" data-athl-line="34">
+</span><span class="athl-line" data-athl-line="35"><span style="color: #928374;">/* starts with a value (CSS 3) */</span>
+</span><span class="athl-line" data-athl-line="36"><span style="color: #fe8019;">[</span><span style="color: #83a598;">attr</span><span style="color: #fe8019;">^=</span><span style="color: #b8bb26;">&#39;val&#39;</span><span style="color: #fe8019;">]</span> <span style="color: #fe8019;">{</span> <span style="color: #ebdbb2;">font-size</span><span style="color: #fe8019;">:</span><span style="color: #ebdbb2;">smaller</span><span style="color: #fe8019;">;</span> <span style="color: #fe8019;">}</span>
+</span><span class="athl-line" data-athl-line="37">
+</span><span class="athl-line" data-athl-line="38"><span style="color: #928374;">/* or ends with a value (CSS 3) */</span>
+</span><span class="athl-line" data-athl-line="39"><span style="color: #fe8019;">[</span><span style="color: #83a598;">attr</span><span style="color: #fe8019;">$=</span><span style="color: #b8bb26;">&#39;ue&#39;</span><span style="color: #fe8019;">]</span> <span style="color: #fe8019;">{</span> <span style="color: #ebdbb2;">font-size</span><span style="color: #fe8019;">:</span><span style="color: #ebdbb2;">smaller</span><span style="color: #fe8019;">;</span> <span style="color: #fe8019;">}</span>
+</span><span class="athl-line" data-athl-line="40">
+</span><span class="athl-line" data-athl-line="41"><span style="color: #928374;">/* or contains a value (CSS 3) */</span>
+</span><span class="athl-line" data-athl-line="42"><span style="color: #fe8019;">[</span><span style="color: #83a598;">attr</span><span style="color: #fe8019;">*=</span><span style="color: #b8bb26;">&#39;foo&#39;</span><span style="color: #fe8019;">]</span> <span style="color: #fe8019;">{</span> <span style="color: #fe8019;">}</span>
+</span><span class="athl-line" data-athl-line="43">
+</span><span class="athl-line" data-athl-line="44"><span style="color: #928374;">/* or contains a value in a space-separated list */</span>
+</span><span class="athl-line" data-athl-line="45"><span style="color: #fe8019;">[</span><span style="color: #83a598;">otherAttr</span><span style="color: #fe8019;">~=</span><span style="color: #b8bb26;">&#39;foo&#39;</span><span style="color: #fe8019;">]</span> <span style="color: #fe8019;">{</span> <span style="color: #fe8019;">}</span>
+</span><span class="athl-line" data-athl-line="46"><span style="color: #fe8019;">[</span><span style="color: #83a598;">otherAttr</span><span style="color: #fe8019;">~=</span><span style="color: #b8bb26;">&#39;bar&#39;</span><span style="color: #fe8019;">]</span> <span style="color: #fe8019;">{</span> <span style="color: #fe8019;">}</span>
+</span><span class="athl-line" data-athl-line="47">
+</span><span class="athl-line" data-athl-line="48"><span style="color: #928374;">/* or contains a value in a dash-separated list, e.g., &quot;-&quot; (U+002D) */</span>
+</span><span class="athl-line" data-athl-line="49"><span style="color: #fe8019;">[</span><span style="color: #83a598;">otherAttr</span><span style="color: #fe8019;">|=</span><span style="color: #b8bb26;">&#39;en&#39;</span><span style="color: #fe8019;">]</span> <span style="color: #fe8019;">{</span> <span style="color: #ebdbb2;">font-size</span><span style="color: #fe8019;">:</span><span style="color: #ebdbb2;">smaller</span><span style="color: #fe8019;">;</span> <span style="color: #fe8019;">}</span>
+</span><span class="athl-line" data-athl-line="50">
+</span><span class="athl-line" data-athl-line="51">
+</span><span class="athl-line" data-athl-line="52"><span style="color: #928374;">/* You can combine different selectors to create a more focused selector. Don&#39;t</span>
+</span><span class="athl-line" data-athl-line="53"><span style="color: #928374;">   put spaces between them. */</span>
+</span><span class="athl-line" data-athl-line="54"><span style="color: #fe8019;">div</span><span style="color: #fe8019;">.</span><span style="color: #fabd2f;">some-class</span><span style="color: #fe8019;">[</span><span style="color: #83a598;">attr</span><span style="color: #fe8019;">$=</span><span style="color: #b8bb26;">&#39;ue&#39;</span><span style="color: #fe8019;">]</span> <span style="color: #fe8019;">{</span> <span style="color: #fe8019;">}</span>
+</span><span class="athl-line" data-athl-line="55">
+</span><span class="athl-line" data-athl-line="56"><span style="color: #928374;">/* You can select an element which is a child of another element */</span>
+</span><span class="athl-line" data-athl-line="57"><span style="color: #fe8019;">div</span><span style="color: #fe8019;">.</span><span style="color: #fabd2f;">some-parent</span> <span style="color: #fe8019;">&gt;</span> <span style="color: #fe8019;">.</span><span style="color: #fabd2f;">class-name</span> <span style="color: #fe8019;">{</span> <span style="color: #fe8019;">}</span>
+</span><span class="athl-line" data-athl-line="58">
+</span><span class="athl-line" data-athl-line="59"><span style="color: #928374;">/* or a descendant of another element. Children are the direct descendants of</span>
+</span><span class="athl-line" data-athl-line="60"><span style="color: #928374;">   their parent element, only one level down the tree. Descendants can be any</span>
+</span><span class="athl-line" data-athl-line="61"><span style="color: #928374;">   level down the tree. */</span>
+</span><span class="athl-line" data-athl-line="62"><span style="color: #fe8019;">div</span><span style="color: #fe8019;">.</span><span style="color: #fabd2f;">some-parent</span> <span style="color: #fe8019;">.</span><span style="color: #fabd2f;">class-name</span> <span style="color: #fe8019;">{</span> <span style="color: #fe8019;">}</span>
+</span><span class="athl-line" data-athl-line="63">
+</span><span class="athl-line" data-athl-line="64"><span style="color: #928374;">/* Warning: the same selector without a space has another meaning.</span>
+</span><span class="athl-line" data-athl-line="65"><span style="color: #928374;">   Can you guess what? */</span>
+</span><span class="athl-line" data-athl-line="66"><span style="color: #fe8019;">div</span><span style="color: #fe8019;">.</span><span style="color: #fabd2f;">some-parent</span><span style="color: #fe8019;">.</span><span style="color: #fabd2f;">class-name</span> <span style="color: #fe8019;">{</span> <span style="color: #fe8019;">}</span>
+</span><span class="athl-line" data-athl-line="67">
+</span><span class="athl-line" data-athl-line="68"><span style="color: #928374;">/* You may also select an element based on its adjacent sibling */</span>
+</span><span class="athl-line" data-athl-line="69"><span style="color: #fe8019;">.</span><span style="color: #fabd2f;">i-am-just-before</span> <span style="color: #fe8019;">+</span> <span style="color: #fe8019;">.</span><span style="color: #fabd2f;">this-element</span> <span style="color: #fe8019;">{</span> <span style="color: #fe8019;">}</span>
+</span><span class="athl-line" data-athl-line="70">
+</span><span class="athl-line" data-athl-line="71"><span style="color: #928374;">/* or any sibling preceding it */</span>
+</span><span class="athl-line" data-athl-line="72"><span style="color: #fe8019;">.</span><span style="color: #fabd2f;">i-am-any-element-before</span> <span style="color: #fe8019;">~</span> <span style="color: #fe8019;">.</span><span style="color: #fabd2f;">this-element</span> <span style="color: #fe8019;">{</span> <span style="color: #fe8019;">}</span>
+</span><span class="athl-line" data-athl-line="73">
+</span><span class="athl-line" data-athl-line="74"><span style="color: #928374;">/* There are some selectors called pseudo classes that can be used to select an</span>
+</span><span class="athl-line" data-athl-line="75"><span style="color: #928374;">   element only when it is in a particular state */</span>
+</span><span class="athl-line" data-athl-line="76">
+</span><span class="athl-line" data-athl-line="77"><span style="color: #928374;">/* for example, when a link hasn&#39;t been visited */</span>
+</span><span class="athl-line" data-athl-line="78"><span style="color: #fe8019;">selected</span><span style="color: #fe8019;">:</span><span style="color: #8ec07c;">link</span> <span style="color: #fe8019;">{</span> <span style="color: #fe8019;">}</span>
+</span><span class="athl-line" data-athl-line="79">
+</span><span class="athl-line" data-athl-line="80"><span style="color: #928374;">/* or a link has been visited */</span>
+</span><span class="athl-line" data-athl-line="81"><span style="color: #fe8019;">selector</span><span style="color: #fe8019;">:</span><span style="color: #8ec07c;">visited</span> <span style="color: #fe8019;">{</span> <span style="color: #fe8019;">}</span>
+</span><span class="athl-line" data-athl-line="82">
+</span><span class="athl-line" data-athl-line="83"><span style="color: #928374;">/* or an element is in focus */</span>
+</span><span class="athl-line" data-athl-line="84"><span style="color: #fe8019;">selected</span><span style="color: #fe8019;">:</span><span style="color: #8ec07c;">focus</span> <span style="color: #fe8019;">{</span> <span style="color: #fe8019;">}</span>
+</span><span class="athl-line" data-athl-line="85">
+</span><span class="athl-line" data-athl-line="86"><span style="color: #928374;">/* or when the cursor hovers over an element */</span>
+</span><span class="athl-line" data-athl-line="87"><span style="color: #fe8019;">selector</span><span style="color: #fe8019;">:</span><span style="color: #8ec07c;">hover</span> <span style="color: #fe8019;">{</span> <span style="color: #fe8019;">}</span>
+</span><span class="athl-line" data-athl-line="88">
+</span><span class="athl-line" data-athl-line="89"><span style="color: #928374;">/* or when a link is clicked on */</span>
+</span><span class="athl-line" data-athl-line="90"><span style="color: #fe8019;">selector</span><span style="color: #fe8019;">:</span><span style="color: #8ec07c;">active</span> <span style="color: #fe8019;">{</span> <span style="color: #fe8019;">}</span>
+</span><span class="athl-line" data-athl-line="91">
+</span><span class="athl-line" data-athl-line="92"><span style="color: #928374;">/* These pseudo classes regarding links should always be written in the above order or the code might not work as expected */</span>
+</span><span class="athl-line" data-athl-line="93">
+</span><span class="athl-line" data-athl-line="94"><span style="color: #928374;">/* Any element that is the first child of its parent */</span>
+</span><span class="athl-line" data-athl-line="95"><span style="color: #fe8019;">selector</span><span style="color: #fe8019;">:</span><span style="color: #8ec07c;">first-child</span> <span style="color: #fe8019;">{</span><span style="color: #fe8019;">}</span>
+</span><span class="athl-line" data-athl-line="96">
+</span><span class="athl-line" data-athl-line="97"><span style="color: #928374;">/* any element that is the last child of its parent */</span>
+</span><span class="athl-line" data-athl-line="98"><span style="color: #fe8019;">selector</span><span style="color: #fe8019;">:</span><span style="color: #8ec07c;">last-child</span> <span style="color: #fe8019;">{</span><span style="color: #fe8019;">}</span>
+</span><span class="athl-line" data-athl-line="99">
+</span><span class="athl-line" data-athl-line="100"><span style="color: #928374;">/* Select the nth child of selector parent (CSS 3) */</span>
+</span><span class="athl-line" data-athl-line="101"><span style="color: #fe8019;">selector</span><span style="color: #fe8019;">:</span><span style="color: #8ec07c;">nth-child</span><span style="color: #fe8019;">(</span><span style="color: #ebdbb2;">n</span><span style="color: #fe8019;">)</span> <span style="color: #fe8019;">{</span> <span style="color: #fe8019;">}</span>
+</span><span class="athl-line" data-athl-line="102">
+</span><span class="athl-line" data-athl-line="103"><span style="color: #928374;">/* Just like pseudo classes, pseudo elements allow you to style certain parts of</span>
+</span><span class="athl-line" data-athl-line="104"><span style="color: #928374;">    a document  */</span>
+</span><span class="athl-line" data-athl-line="105">
+</span><span class="athl-line" data-athl-line="106"><span style="color: #928374;">/* matches a virtual first child of the selected element */</span>
+</span><span class="athl-line" data-athl-line="107"><span style="color: #fe8019;">selector</span><span style="color: #fe8019;">::</span><span style="color: #8ec07c;">before</span> <span style="color: #fe8019;">{</span><span style="color: #fe8019;">}</span>
+</span><span class="athl-line" data-athl-line="108">
+</span><span class="athl-line" data-athl-line="109"><span style="color: #928374;">/* matches a virtual last child of the selected element */</span>
+</span><span class="athl-line" data-athl-line="110"><span style="color: #fe8019;">selector</span><span style="color: #fe8019;">::</span><span style="color: #8ec07c;">after</span> <span style="color: #fe8019;">{</span><span style="color: #fe8019;">}</span>
+</span><span class="athl-line" data-athl-line="111">
+</span><span class="athl-line" data-athl-line="112"><span style="color: #928374;">/* At appropriate places, an asterisk may be used as a wildcard to select every</span>
+</span><span class="athl-line" data-athl-line="113"><span style="color: #928374;">   element */</span>
+</span><span class="athl-line" data-athl-line="114"><span style="color: #fe8019;"><span style="color: #fe8019;">*</span></span> <span style="color: #fe8019;">{</span> <span style="color: #fe8019;">}</span> <span style="color: #928374;">/* all elements */</span>
+</span><span class="athl-line" data-athl-line="115"><span style="color: #fe8019;">.</span><span style="color: #fabd2f;">parent</span> <span style="color: #fe8019;"><span style="color: #fe8019;">*</span></span> <span style="color: #fe8019;">{</span> <span style="color: #fe8019;">}</span> <span style="color: #928374;">/* all descendants */</span>
+</span><span class="athl-line" data-athl-line="116"><span style="color: #fe8019;">.</span><span style="color: #fabd2f;">parent</span> <span style="color: #fe8019;">&gt;</span> <span style="color: #fe8019;"><span style="color: #fe8019;">*</span></span> <span style="color: #fe8019;">{</span> <span style="color: #fe8019;">}</span> <span style="color: #928374;">/* all children */</span>
+</span><span class="athl-line" data-athl-line="117">
+</span><span class="athl-line" data-athl-line="118"><span style="color: #928374;">/* Group any number of selectors to define styles that affect all selectors</span>
+</span><span class="athl-line" data-athl-line="119"><span style="color: #928374;">   in the group */</span>
+</span><span class="athl-line" data-athl-line="120"><span style="color: #fe8019;">selector1</span><span style="color: #fe8019;">,</span> <span style="color: #fe8019;">selector2</span> <span style="color: #fe8019;">{</span> <span style="color: #fe8019;">}</span>
+</span><span class="athl-line" data-athl-line="121">
+</span><span class="athl-line" data-athl-line="122"><span style="color: #928374;">/* Select elements that do not have a certain state (CSS 3) */</span>
+</span><span class="athl-line" data-athl-line="123"><span style="color: #928374;">/* Here, we select div with no id attribute. */</span>
+</span><span class="athl-line" data-athl-line="124"><span style="color: #fe8019;">div</span><span style="color: #fe8019;">:</span><span style="color: #8ec07c;">not</span><span style="color: #fe8019;">(</span><span style="color: #fe8019;">[</span><span style="color: #83a598;">id</span><span style="color: #fe8019;">]</span><span style="color: #fe8019;">)</span> <span style="color: #fe8019;">{</span>
+</span><span class="athl-line" data-athl-line="125">   <span style="color: #ebdbb2;">background-color</span><span style="color: #fe8019;">:</span> <span style="color: #ebdbb2;">red</span><span style="color: #fe8019;">;</span>
+</span><span class="athl-line" data-athl-line="126"><span style="color: #fe8019;">}</span>
+</span><span class="athl-line" data-athl-line="127">
+</span><span class="athl-line" data-athl-line="128"><span style="color: #928374;">/* ####################</span>
+</span><span class="athl-line" data-athl-line="129"><span style="color: #928374;">   ## PROPERTIES</span>
+</span><span class="athl-line" data-athl-line="130"><span style="color: #928374;">   #################### */</span>
+</span><span class="athl-line" data-athl-line="131">
+</span><span class="athl-line" data-athl-line="132"><span style="color: #fe8019;">selector</span> <span style="color: #fe8019;">{</span>
+</span><span class="athl-line" data-athl-line="133">
+</span><span class="athl-line" data-athl-line="134">    <span style="color: #928374;">/* Units of length can be absolute or relative. */</span>
+</span><span class="athl-line" data-athl-line="135">
+</span><span class="athl-line" data-athl-line="136">    <span style="color: #928374;">/* Relative units */</span>
+</span><span class="athl-line" data-athl-line="137">    <span style="color: #ebdbb2;">width</span><span style="color: #fe8019;">:</span> <span style="color: #d3869b;">50<span style="color: #b8bb26;">%</span></span><span style="color: #fe8019;">;</span>       <span style="color: #928374;">/* percentage of parent element width */</span>
+</span><span class="athl-line" data-athl-line="138">    <span style="color: #ebdbb2;">font-size</span><span style="color: #fe8019;">:</span> <span style="color: #d3869b;">2<span style="color: #b8bb26;">em</span></span><span style="color: #fe8019;">;</span>   <span style="color: #928374;">/* multiples of element&#39;s original font-size */</span>
+</span><span class="athl-line" data-athl-line="139">    <span style="color: #ebdbb2;">font-size</span><span style="color: #fe8019;">:</span> <span style="color: #d3869b;">2<span style="color: #b8bb26;">rem</span></span><span style="color: #fe8019;">;</span>  <span style="color: #928374;">/* or the root element&#39;s font-size */</span>
+</span><span class="athl-line" data-athl-line="140">    <span style="color: #ebdbb2;">font-size</span><span style="color: #fe8019;">:</span> <span style="color: #d3869b;">2<span style="color: #b8bb26;">vw</span></span><span style="color: #fe8019;">;</span>   <span style="color: #928374;">/* multiples of 1% of the viewport&#39;s width (CSS 3) */</span>
+</span><span class="athl-line" data-athl-line="141">    <span style="color: #ebdbb2;">font-size</span><span style="color: #fe8019;">:</span> <span style="color: #d3869b;">2<span style="color: #b8bb26;">vh</span></span><span style="color: #fe8019;">;</span>   <span style="color: #928374;">/* or its height */</span>
+</span><span class="athl-line" data-athl-line="142">    <span style="color: #ebdbb2;">font-size</span><span style="color: #fe8019;">:</span> <span style="color: #d3869b;">2<span style="color: #b8bb26;">vmin</span></span><span style="color: #fe8019;">;</span> <span style="color: #928374;">/* whichever of a vh or a vw is smaller */</span>
+</span><span class="athl-line" data-athl-line="143">    <span style="color: #ebdbb2;">font-size</span><span style="color: #fe8019;">:</span> <span style="color: #d3869b;">2<span style="color: #b8bb26;">vmax</span></span><span style="color: #fe8019;">;</span> <span style="color: #928374;">/* or greater */</span>
+</span><span class="athl-line" data-athl-line="144">
+</span><span class="athl-line" data-athl-line="145">    <span style="color: #928374;">/* Absolute units */</span>
+</span><span class="athl-line" data-athl-line="146">    <span style="color: #ebdbb2;">width</span><span style="color: #fe8019;">:</span> <span style="color: #d3869b;">200<span style="color: #b8bb26;">px</span></span><span style="color: #fe8019;">;</span>     <span style="color: #928374;">/* pixels */</span>
+</span><span class="athl-line" data-athl-line="147">    <span style="color: #ebdbb2;">font-size</span><span style="color: #fe8019;">:</span> <span style="color: #d3869b;">20<span style="color: #b8bb26;">pt</span></span><span style="color: #fe8019;">;</span>  <span style="color: #928374;">/* points */</span>
+</span><span class="athl-line" data-athl-line="148">    <span style="color: #ebdbb2;">width</span><span style="color: #fe8019;">:</span> <span style="color: #d3869b;">5<span style="color: #b8bb26;">cm</span></span><span style="color: #fe8019;">;</span>       <span style="color: #928374;">/* centimeters */</span>
+</span><span class="athl-line" data-athl-line="149">    <span style="color: #ebdbb2;">min-width</span><span style="color: #fe8019;">:</span> <span style="color: #d3869b;">50<span style="color: #b8bb26;">mm</span></span><span style="color: #fe8019;">;</span>  <span style="color: #928374;">/* millimeters */</span>
+</span><span class="athl-line" data-athl-line="150">    <span style="color: #ebdbb2;">max-width</span><span style="color: #fe8019;">:</span> <span style="color: #d3869b;">5<span style="color: #b8bb26;">in</span></span><span style="color: #fe8019;">;</span>   <span style="color: #928374;">/* inches */</span>
+</span><span class="athl-line" data-athl-line="151">
+</span><span class="athl-line" data-athl-line="152">    <span style="color: #928374;">/* Colors */</span>
+</span><span class="athl-line" data-athl-line="153">    <span style="color: #ebdbb2;">color</span><span style="color: #fe8019;">:</span> <span style="color: #b8bb26;"><span style="color: #fe8019;">#</span>F6E</span><span style="color: #fe8019;">;</span>                    <span style="color: #928374;">/* short hex format */</span>
+</span><span class="athl-line" data-athl-line="154">    <span style="color: #ebdbb2;">color</span><span style="color: #fe8019;">:</span> <span style="color: #b8bb26;"><span style="color: #fe8019;">#</span>FF66EE</span><span style="color: #fe8019;">;</span>                 <span style="color: #928374;">/* long hex format */</span>
+</span><span class="athl-line" data-athl-line="155">    <span style="color: #ebdbb2;">color</span><span style="color: #fe8019;">:</span> <span style="color: #ebdbb2;">tomato</span><span style="color: #fe8019;">;</span>                  <span style="color: #928374;">/* a named color */</span>
+</span><span class="athl-line" data-athl-line="156">    <span style="color: #ebdbb2;">color</span><span style="color: #fe8019;">:</span> <span style="color: #b8bb26; font-weight: bold;">rgb</span><span style="color: #fe8019;">(</span><span style="color: #d3869b;">255</span><span style="color: #fe8019;">,</span> <span style="color: #d3869b;">255</span><span style="color: #fe8019;">,</span> <span style="color: #d3869b;">255</span><span style="color: #fe8019;">)</span><span style="color: #fe8019;">;</span>      <span style="color: #928374;">/* as rgb values */</span>
+</span><span class="athl-line" data-athl-line="157">    <span style="color: #ebdbb2;">color</span><span style="color: #fe8019;">:</span> <span style="color: #b8bb26; font-weight: bold;">rgb</span><span style="color: #fe8019;">(</span><span style="color: #d3869b;">10<span style="color: #b8bb26;">%</span></span><span style="color: #fe8019;">,</span> <span style="color: #d3869b;">20<span style="color: #b8bb26;">%</span></span><span style="color: #fe8019;">,</span> <span style="color: #d3869b;">50<span style="color: #b8bb26;">%</span></span><span style="color: #fe8019;">)</span><span style="color: #fe8019;">;</span>      <span style="color: #928374;">/* as rgb percentages */</span>
+</span><span class="athl-line" data-athl-line="158">    <span style="color: #ebdbb2;">color</span><span style="color: #fe8019;">:</span> <span style="color: #b8bb26; font-weight: bold;">rgba</span><span style="color: #fe8019;">(</span><span style="color: #d3869b;">255</span><span style="color: #fe8019;">,</span> <span style="color: #d3869b;">0</span><span style="color: #fe8019;">,</span> <span style="color: #d3869b;">0</span><span style="color: #fe8019;">,</span> <span style="color: #d3869b;">0.3</span><span style="color: #fe8019;">)</span><span style="color: #fe8019;">;</span>    <span style="color: #928374;">/* as rgba values (CSS 3) Note: 0 &lt;= a &lt;= 1 */</span>
+</span><span class="athl-line" data-athl-line="159">    <span style="color: #ebdbb2;">color</span><span style="color: #fe8019;">:</span> <span style="color: #ebdbb2;">transparent</span><span style="color: #fe8019;">;</span>             <span style="color: #928374;">/* equivalent to setting the alpha to 0 */</span>
+</span><span class="athl-line" data-athl-line="160">    <span style="color: #ebdbb2;">color</span><span style="color: #fe8019;">:</span> <span style="color: #b8bb26; font-weight: bold;">hsl</span><span style="color: #fe8019;">(</span><span style="color: #d3869b;">0</span><span style="color: #fe8019;">,</span> <span style="color: #d3869b;">100<span style="color: #b8bb26;">%</span></span><span style="color: #fe8019;">,</span> <span style="color: #d3869b;">50<span style="color: #b8bb26;">%</span></span><span style="color: #fe8019;">)</span><span style="color: #fe8019;">;</span>       <span style="color: #928374;">/* as hsl percentages (CSS 3) */</span>
+</span><span class="athl-line" data-athl-line="161">    <span style="color: #ebdbb2;">color</span><span style="color: #fe8019;">:</span> <span style="color: #b8bb26; font-weight: bold;">hsla</span><span style="color: #fe8019;">(</span><span style="color: #d3869b;">0</span><span style="color: #fe8019;">,</span> <span style="color: #d3869b;">100<span style="color: #b8bb26;">%</span></span><span style="color: #fe8019;">,</span> <span style="color: #d3869b;">50<span style="color: #b8bb26;">%</span></span><span style="color: #fe8019;">,</span> <span style="color: #d3869b;">0.3</span><span style="color: #fe8019;">)</span><span style="color: #fe8019;">;</span> <span style="color: #928374;">/* as hsl percentages with alpha */</span>
+</span><span class="athl-line" data-athl-line="162">
+</span><span class="athl-line" data-athl-line="163">    <span style="color: #928374;">/* Borders */</span>
+</span><span class="athl-line" data-athl-line="164">    <span style="color: #ebdbb2;">border-width</span><span style="color: #fe8019;">:</span><span style="color: #d3869b;">5<span style="color: #b8bb26;">px</span></span><span style="color: #fe8019;">;</span>
+</span><span class="athl-line" data-athl-line="165">    <span style="color: #ebdbb2;">border-style</span><span style="color: #fe8019;">:</span><span style="color: #ebdbb2;">solid</span><span style="color: #fe8019;">;</span>
+</span><span class="athl-line" data-athl-line="166">    <span style="color: #ebdbb2;">border-color</span><span style="color: #fe8019;">:</span><span style="color: #ebdbb2;">red</span><span style="color: #fe8019;">;</span>      <span style="color: #928374;">/* similar to how background-color is set */</span>
+</span><span class="athl-line" data-athl-line="167">    <span style="color: #ebdbb2;">border</span><span style="color: #fe8019;">:</span> <span style="color: #d3869b;">5<span style="color: #b8bb26;">px</span></span> <span style="color: #ebdbb2;">solid</span> <span style="color: #ebdbb2;">red</span><span style="color: #fe8019;">;</span> <span style="color: #928374;">/* this is a short hand approach for the same */</span>
+</span><span class="athl-line" data-athl-line="168">    <span style="color: #ebdbb2;">border-radius</span><span style="color: #fe8019;">:</span><span style="color: #d3869b;">20<span style="color: #b8bb26;">px</span></span><span style="color: #fe8019;">;</span>    <span style="color: #928374;">/* this is a CSS3 property */</span>
+</span><span class="athl-line" data-athl-line="169">
+</span><span class="athl-line" data-athl-line="170">    <span style="color: #928374;">/* Images as backgrounds of elements */</span>
+</span><span class="athl-line" data-athl-line="171">    <span style="color: #ebdbb2;">background-image</span><span style="color: #fe8019;">:</span> <span style="color: #b8bb26; font-weight: bold;">url</span><span style="color: #fe8019;">(</span><span style="color: #ebdbb2;">/img-path/img.jpg</span><span style="color: #fe8019;">)</span><span style="color: #fe8019;">;</span> <span style="color: #928374;">/* quotes inside url() optional */</span>
+</span><span class="athl-line" data-athl-line="172">
+</span><span class="athl-line" data-athl-line="173">    <span style="color: #928374;">/* Fonts */</span>
+</span><span class="athl-line" data-athl-line="174">    <span style="color: #ebdbb2;">font-family</span><span style="color: #fe8019;">:</span> <span style="color: #ebdbb2;">Arial</span><span style="color: #fe8019;">;</span>
+</span><span class="athl-line" data-athl-line="175">    <span style="color: #928374;">/* if the font family name has a space, it must be quoted */</span>
+</span><span class="athl-line" data-athl-line="176">    <span style="color: #ebdbb2;">font-family</span><span style="color: #fe8019;">:</span> <span style="color: #b8bb26;">&quot;Courier New&quot;</span><span style="color: #fe8019;">;</span>
+</span><span class="athl-line" data-athl-line="177">    <span style="color: #928374;">/* if the first one is not found, the browser uses the next, and so on */</span>
+</span><span class="athl-line" data-athl-line="178">    <span style="color: #ebdbb2;">font-family</span><span style="color: #fe8019;">:</span> <span style="color: #b8bb26;">&quot;Courier New&quot;</span><span style="color: #fe8019;">,</span> <span style="color: #ebdbb2;">Trebuchet</span><span style="color: #fe8019;">,</span> <span style="color: #ebdbb2;">Arial</span><span style="color: #fe8019;">,</span> <span style="color: #ebdbb2;">sans-serif</span><span style="color: #fe8019;">;</span>
+</span><span class="athl-line" data-athl-line="179"><span style="color: #fe8019;">}</span>
+</span><span class="athl-line" data-athl-line="180">
+</span><span class="athl-line" data-athl-line="181"><span style="color: #928374;">/* Custom CSS properties using variables (CSS 3) */</span>
+</span><span class="athl-line" data-athl-line="182"><span style="color: #fe8019;">:</span><span style="color: #8ec07c;">root</span> <span style="color: #fe8019;">{</span>
+</span><span class="athl-line" data-athl-line="183">   <span style="color: #ebdbb2;">--main-bg-color</span><span style="color: #fe8019;">:</span> <span style="color: #ebdbb2;">whitesmoke</span><span style="color: #fe8019;">;</span>
+</span><span class="athl-line" data-athl-line="184"><span style="color: #fe8019;">}</span>
+</span><span class="athl-line" data-athl-line="185"><span style="color: #fe8019;">body</span> <span style="color: #fe8019;">{</span>
+</span><span class="athl-line" data-athl-line="186">   <span style="color: #ebdbb2;">background-color</span><span style="color: #fe8019;">:</span> <span style="color: #b8bb26; font-weight: bold;">var</span><span style="color: #fe8019;">(</span><span style="color: #ebdbb2;">--main-bg-color</span><span style="color: #fe8019;">)</span>
+</span><span class="athl-line" data-athl-line="187"><span style="color: #fe8019;">}</span>
+</span><span class="athl-line" data-athl-line="188">
+</span><span class="athl-line" data-athl-line="189"><span style="color: #928374;">/* Perfom a calculation (CSS 3) */</span>
+</span><span class="athl-line" data-athl-line="190"><span style="color: #fe8019;">body</span> <span style="color: #fe8019;">{</span>
+</span><span class="athl-line" data-athl-line="191">   <span style="color: #ebdbb2;">width</span><span style="color: #fe8019;">:</span> <span style="color: #b8bb26; font-weight: bold;">calc</span><span style="color: #fe8019;">(</span><span style="color: #d3869b;">100<span style="color: #b8bb26;">vw</span></span> <span style="color: #fe8019;">-</span> <span style="color: #d3869b;">100<span style="color: #b8bb26;">px</span></span><span style="color: #fe8019;">)</span>
+</span><span class="athl-line" data-athl-line="192"><span style="color: #fe8019;">}</span>
+</span><span class="athl-line" data-athl-line="193">
+</span><span class="athl-line" data-athl-line="194"><span style="color: #928374;">/* Nest style rule inside another (CSS 3) */</span>
+</span><span class="athl-line" data-athl-line="195"><span style="color: #fe8019;">.</span><span style="color: #fabd2f;">main</span> <span style="color: #fe8019;">{</span>
+</span><span class="athl-line" data-athl-line="196">   <span style="color: #fe8019;">.</span><span style="color: #fabd2f;">bgred</span> <span style="color: #fe8019;">{</span> <span style="color: #928374;">/* same as: .main .bgred { } */</span>
+</span><span class="athl-line" data-athl-line="197">      <span style="color: #ebdbb2;">background</span><span style="color: #fe8019;">:</span> <span style="color: #ebdbb2;">red</span><span style="color: #fe8019;">;</span>
+</span><span class="athl-line" data-athl-line="198">   <span style="color: #fe8019;">}</span>
+</span><span class="athl-line" data-athl-line="199">   <span style="color: #fe8019;">&amp;</span> <span style="color: #fe8019;">.</span><span style="color: #fabd2f;">bggreen</span> <span style="color: #fe8019;">{</span> <span style="color: #928374;">/* same as: .main .bggreen { } */</span>
+</span><span class="athl-line" data-athl-line="200">      <span style="color: #ebdbb2;">background</span><span style="color: #fe8019;">:</span> <span style="color: #ebdbb2;">green</span><span style="color: #fe8019;">;</span>
+</span><span class="athl-line" data-athl-line="201">   <span style="color: #fe8019;">}</span>
+</span><span class="athl-line" data-athl-line="202">   <span style="color: #fe8019;">&amp;</span><span style="color: #fe8019;">.</span><span style="color: #fabd2f;">bgblue</span> <span style="color: #fe8019;">{</span> <span style="color: #928374;">/* (without space) same as: .main.bgblue { } */</span>
+</span><span class="athl-line" data-athl-line="203">      <span style="color: #ebdbb2;">background</span><span style="color: #fe8019;">:</span> <span style="color: #ebdbb2;">blue</span><span style="color: #fe8019;">;</span>
+</span><span class="athl-line" data-athl-line="204">   <span style="color: #fe8019;">}</span>
+</span><span class="athl-line" data-athl-line="205"><span style="color: #fe8019;">}</span>
+</span><span class="athl-line" data-athl-line="206">
+</span><span class="athl-line" data-athl-line="207"><span style="color: #928374;">/* Design responsive layout using flexbox (CSS 3) */</span>
+</span><span class="athl-line" data-athl-line="208"><span style="color: #fe8019;">.</span><span style="color: #fabd2f;">container</span> <span style="color: #fe8019;">{</span>
+</span><span class="athl-line" data-athl-line="209">   <span style="color: #ebdbb2;">display</span><span style="color: #fe8019;">:</span> <span style="color: #ebdbb2;">flex</span><span style="color: #fe8019;">;</span>
+</span><span class="athl-line" data-athl-line="210">   <span style="color: #ebdbb2;">flex-direction</span><span style="color: #fe8019;">:</span> <span style="color: #ebdbb2;">row</span><span style="color: #fe8019;">;</span>      <span style="color: #928374;">/* in which direction stack the flex items */</span>
+</span><span class="athl-line" data-athl-line="211">   <span style="color: #ebdbb2;">flex-wrap</span><span style="color: #fe8019;">:</span> <span style="color: #ebdbb2;">wrap</span><span style="color: #fe8019;">;</span>          <span style="color: #928374;">/* whether or not flex items should wrap */</span>
+</span><span class="athl-line" data-athl-line="212">   <span style="color: #ebdbb2;">justify-content</span><span style="color: #fe8019;">:</span> <span style="color: #ebdbb2;">center</span><span style="color: #fe8019;">;</span>  <span style="color: #928374;">/* how to align flex items horizontally */</span>
+</span><span class="athl-line" data-athl-line="213">   <span style="color: #ebdbb2;">align-items</span><span style="color: #fe8019;">:</span> <span style="color: #ebdbb2;">center</span><span style="color: #fe8019;">;</span>      <span style="color: #928374;">/* how to align flex items vertically */</span>
+</span><span class="athl-line" data-athl-line="214"><span style="color: #fe8019;">}</span>
+</span></code></pre>
+</body>
+</html>
