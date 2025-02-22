@@ -10,43 +10,43 @@ use tree_sitter_highlight::HighlightConfiguration;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter)]
 pub(crate) enum Language {
-    PlainText,
+    Bash,
+    C,
+    CSharp,
+    Cpp,
+    Css,
     Diff,
     Elixir,
-    Rust,
-    Heex,
     Erlang,
+    Heex,
     Html,
     Lua,
-    Bash,
-    Ruby,
     Php,
+    PlainText,
+    Ruby,
+    Rust,
     Swift,
-    C,
-    Cpp,
-    CSharp,
-    Css,
 }
 
 impl Language {
     pub fn guess(lang_or_path: &str, source: &str) -> Self {
         let exact = match lang_or_path {
-            "elixir" => Some(Language::Elixir),
-            "css" => Some(Language::Css),
-            "rust" => Some(Language::Rust),
-            "html" => Some(Language::Html),
-            "lua" => Some(Language::Lua),
             "bash" => Some(Language::Bash),
-            "ruby" => Some(Language::Ruby),
-            "php" => Some(Language::Php),
-            "swift" => Some(Language::Swift),
             "c" => Some(Language::C),
+            "c#" => Some(Language::CSharp),
             "cpp" => Some(Language::Cpp),
             "csharp" => Some(Language::CSharp),
-            "c#" => Some(Language::CSharp),
-            "erlang" => Some(Language::Erlang),
+            "css" => Some(Language::Css),
             "diff" => Some(Language::Diff),
+            "elixir" => Some(Language::Elixir),
+            "erlang" => Some(Language::Erlang),
             "heex" => Some(Language::Heex),
+            "html" => Some(Language::Html),
+            "lua" => Some(Language::Lua),
+            "php" => Some(Language::Php),
+            "ruby" => Some(Language::Ruby),
+            "rust" => Some(Language::Rust),
+            "swift" => Some(Language::Swift),
             _ => None,
         };
 
@@ -90,14 +90,6 @@ impl Language {
 
     fn language_globs(language: Language) -> Vec<glob::Pattern> {
         let glob_strs: &'static [&'static str] = match language {
-            Language::PlainText => &[],
-            Language::Diff => &["*.diff"],
-            Language::Heex => &["*.heex", "*.neex"],
-            Language::Elixir => &["*.ex", "*.exs"],
-            Language::Css => &["*.css"],
-            Language::Rust => &["*.rs"],
-            Language::Html => &["*.html", "*.htm", "*.xhtml"],
-            Language::Lua => &["*.lua"],
             Language::Bash => &[
                 "*.bash",
                 "*.bats",
@@ -146,23 +138,14 @@ impl Language {
                 "zshenv",
                 "zshrc",
             ],
-            Language::Ruby => &[
-                "*.rb",
-                "*.builder",
-                "*.spec",
-                "*.rake",
-                "Gemfile",
-                "Rakefile",
-            ],
-            Language::Php => &[
-                "*.php", "*.phtml", "*.php3", "*.php4", "*.php5", "*.php7", "*.phps",
-            ],
-            Language::Swift => &["*.swift"],
             Language::C => &["*.c"],
+            Language::CSharp => &["*.cs"],
             Language::Cpp => &[
                 "*.cc", "*.cpp", "*.h", "*.hh", "*.hpp", "*.ino", "*.cxx", "*.cu",
             ],
-            Language::CSharp => &["*.cs"],
+            Language::Css => &["*.css"],
+            Language::Diff => &["*.diff"],
+            Language::Elixir => &["*.ex", "*.exs"],
             Language::Erlang => &[
                 "*.erl",
                 "*.app.src",
@@ -173,6 +156,23 @@ impl Language {
                 "*.yrl",
                 "Emakefile",
             ],
+            Language::Heex => &["*.heex", "*.neex"],
+            Language::Html => &["*.html", "*.htm", "*.xhtml"],
+            Language::Lua => &["*.lua"],
+            Language::Php => &[
+                "*.php", "*.phtml", "*.php3", "*.php4", "*.php5", "*.php7", "*.phps",
+            ],
+            Language::PlainText => &[],
+            Language::Ruby => &[
+                "*.rb",
+                "*.builder",
+                "*.spec",
+                "*.rake",
+                "Gemfile",
+                "Rakefile",
+            ],
+            Language::Rust => &["*.rs"],
+            Language::Swift => &["*.swift"],
         };
 
         glob_strs
@@ -219,22 +219,22 @@ impl Language {
 
     pub fn name(&self) -> &'static str {
         match self {
-            Language::PlainText => "Plain Text",
+            Language::Bash => "Bash",
+            Language::C => "C",
+            Language::CSharp => "C#",
+            Language::Cpp => "C++",
+            Language::Css => "CSS",
             Language::Diff => "Diff",
             Language::Elixir => "Elixir",
-            Language::Css => "CSS",
+            Language::Erlang => "Erlang",
             Language::Heex => "HEEx",
-            Language::Rust => "Rust",
             Language::Html => "HTML",
             Language::Lua => "Lua",
-            Language::Bash => "Bash",
-            Language::Ruby => "Ruby",
             Language::Php => "PHP",
+            Language::PlainText => "Plain Text",
+            Language::Ruby => "Ruby",
+            Language::Rust => "Rust",
             Language::Swift => "Swift",
-            Language::C => "C",
-            Language::Cpp => "C++",
-            Language::CSharp => "C#",
-            Language::Erlang => "Erlang",
         }
     }
 
@@ -244,37 +244,97 @@ impl Language {
 
     pub fn config(&self) -> &'static HighlightConfiguration {
         match self {
+            Language::Bash => &BASH_CONFIG,
+            Language::C => &C_CONFIG,
+            Language::CSharp => &CSHARP_CONFIG,
+            Language::Cpp => &CPP_CONFIG,
+            Language::Css => &CSS_CONFIG,
             Language::Diff => &DIFF_CONFIG,
             Language::Elixir => &ELIXIR_CONFIG,
-            Language::Css => &CSS_CONFIG,
-            Language::Heex => &HEEX_CONFIG,
-            Language::Rust => &RUST_CONFIG,
-            Language::Lua => &LUA_CONFIG,
-            Language::Bash => &BASH_CONFIG,
-            Language::Ruby => &RUBY_CONFIG,
-            Language::Php => &PHP_CONFIG,
-            Language::Swift => &SWIFT_CONFIG,
-            Language::C => &C_CONFIG,
-            Language::Cpp => &CPP_CONFIG,
-            Language::CSharp => &CSHARP_CONFIG,
             Language::Erlang => &ERLANG_CONFIG,
+            Language::Heex => &HEEX_CONFIG,
             Language::Html => &HTML_CONFIG,
+            Language::Lua => &LUA_CONFIG,
+            Language::Php => &PHP_CONFIG,
+            Language::Ruby => &RUBY_CONFIG,
+            Language::Rust => &RUST_CONFIG,
+            Language::Swift => &SWIFT_CONFIG,
             _ => &PLAIN_TEXT_CONFIG,
         }
     }
 }
 
-static PLAIN_TEXT_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = tree_sitter_diff::LANGUAGE;
+static BASH_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = tree_sitter_bash::LANGUAGE;
 
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
-        "plaintext",
-        "",
-        "",
+        "bash",
+        include_str!("../queries/bash/highlights.scm"),
+        include_str!("../queries/bash/injections.scm"),
+        include_str!("../queries/bash/locals.scm"),
+    )
+    .expect("failed to create bash highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static C_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = tree_sitter_c::LANGUAGE;
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "c",
+        include_str!("../queries/c/highlights.scm"),
+        include_str!("../queries/c/injections.scm"),
+        include_str!("../queries/c/locals.scm"),
+    )
+    .expect("failed to create c highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static CSHARP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = tree_sitter_c_sharp::LANGUAGE;
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "csharp",
+        include_str!("../queries/c_sharp/highlights.scm"),
+        include_str!("../queries/c_sharp/injections.scm"),
+        include_str!("../queries/c_sharp/locals.scm"),
+    )
+    .expect("failed to create csharp highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static CPP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = tree_sitter_cpp::LANGUAGE;
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "cpp",
+        include_str!("../queries/cpp/highlights.scm"),
+        include_str!("../queries/cpp/injections.scm"),
+        include_str!("../queries/cpp/locals.scm"),
+    )
+    .expect("failed to create cpp highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static CSS_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = tree_sitter_css::LANGUAGE;
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "css",
+        include_str!("../queries/css/highlights.scm"),
+        include_str!("../queries/css/injections.scm"),
         "",
     )
-    .expect("failed to create plaintext highlight configuration");
+    .expect("failed to create css highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
@@ -309,17 +369,32 @@ static ELIXIR_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     config
 });
 
-static RUST_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = tree_sitter_rust::LANGUAGE;
+static ERLANG_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = tree_sitter_erlang::LANGUAGE;
 
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
-        "rust",
-        include_str!("../queries/rust/highlights.scm"),
-        include_str!("../queries/rust/injections.scm"),
-        include_str!("../queries/rust/locals.scm"),
+        "erlang",
+        include_str!("../queries/erlang/highlights.scm"),
+        include_str!("../queries/erlang/injections.scm"),
+        "",
     )
-    .expect("failed to create rust highlight configuration");
+    .expect("failed to create erlang highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static HEEX_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = tree_sitter_heex::LANGUAGE;
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "heex",
+        include_str!("../queries/heex/highlights.scm"),
+        include_str!("../queries/heex/injections.scm"),
+        include_str!("../queries/heex/locals.scm"),
+    )
+    .expect("failed to create heex highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
@@ -354,17 +429,32 @@ static LUA_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     config
 });
 
-static BASH_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = tree_sitter_bash::LANGUAGE;
+static PHP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = tree_sitter_php::LANGUAGE_PHP;
 
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
-        "bash",
-        include_str!("../queries/bash/highlights.scm"),
-        include_str!("../queries/bash/injections.scm"),
-        include_str!("../queries/bash/locals.scm"),
+        "php",
+        include_str!("../queries/php/highlights.scm"),
+        include_str!("../queries/php/injections.scm"),
+        include_str!("../queries/php/locals.scm"),
     )
-    .expect("failed to create bash highlight configuration");
+    .expect("failed to create php highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static PLAIN_TEXT_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = tree_sitter_diff::LANGUAGE;
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "plaintext",
+        "",
+        "",
+        "",
+    )
+    .expect("failed to create plaintext highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
@@ -384,17 +474,17 @@ static RUBY_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     config
 });
 
-static PHP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = tree_sitter_php::LANGUAGE_PHP;
+static RUST_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = tree_sitter_rust::LANGUAGE;
 
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
-        "php",
-        include_str!("../queries/php/highlights.scm"),
-        include_str!("../queries/php/injections.scm"),
-        include_str!("../queries/php/locals.scm"),
+        "rust",
+        include_str!("../queries/rust/highlights.scm"),
+        include_str!("../queries/rust/injections.scm"),
+        include_str!("../queries/rust/locals.scm"),
     )
-    .expect("failed to create php highlight configuration");
+    .expect("failed to create rust highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
@@ -410,96 +500,6 @@ static SWIFT_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         include_str!("../queries/swift/locals.scm"),
     )
     .expect("failed to create swift highlight configuration");
-    config.configure(&HIGHLIGHT_NAMES);
-    config
-});
-
-static C_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = tree_sitter_c::LANGUAGE;
-
-    let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
-        "c",
-        include_str!("../queries/c/highlights.scm"),
-        include_str!("../queries/c/injections.scm"),
-        include_str!("../queries/c/locals.scm"),
-    )
-    .expect("failed to create c highlight configuration");
-    config.configure(&HIGHLIGHT_NAMES);
-    config
-});
-
-static CPP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = tree_sitter_cpp::LANGUAGE;
-
-    let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
-        "cpp",
-        include_str!("../queries/cpp/highlights.scm"),
-        include_str!("../queries/cpp/injections.scm"),
-        include_str!("../queries/cpp/locals.scm"),
-    )
-    .expect("failed to create cpp highlight configuration");
-    config.configure(&HIGHLIGHT_NAMES);
-    config
-});
-
-static CSHARP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = tree_sitter_c_sharp::LANGUAGE;
-
-    let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
-        "csharp",
-        include_str!("../queries/c_sharp/highlights.scm"),
-        include_str!("../queries/c_sharp/injections.scm"),
-        include_str!("../queries/c_sharp/locals.scm"),
-    )
-    .expect("failed to create csharp highlight configuration");
-    config.configure(&HIGHLIGHT_NAMES);
-    config
-});
-
-static ERLANG_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = tree_sitter_erlang::LANGUAGE;
-
-    let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
-        "erlang",
-        include_str!("../queries/erlang/highlights.scm"),
-        include_str!("../queries/erlang/injections.scm"),
-        "",
-    )
-    .expect("failed to create erlang highlight configuration");
-    config.configure(&HIGHLIGHT_NAMES);
-    config
-});
-
-static HEEX_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = tree_sitter_heex::LANGUAGE;
-
-    let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
-        "heex",
-        include_str!("../queries/heex/highlights.scm"),
-        include_str!("../queries/heex/injections.scm"),
-        include_str!("../queries/heex/locals.scm"),
-    )
-    .expect("failed to create heex highlight configuration");
-    config.configure(&HIGHLIGHT_NAMES);
-    config
-});
-
-static CSS_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = tree_sitter_css::LANGUAGE;
-
-    let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
-        "css",
-        include_str!("../queries/css/highlights.scm"),
-        include_str!("../queries/css/injections.scm"),
-        "",
-    )
-    .expect("failed to create css highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
