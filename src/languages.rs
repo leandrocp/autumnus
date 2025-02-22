@@ -22,6 +22,7 @@ pub(crate) enum Language {
     Swift,
     C,
     Cpp,
+    CSharp,
 }
 
 impl Language {
@@ -37,6 +38,8 @@ impl Language {
             "swift" => Some(Language::Swift),
             "c" => Some(Language::C),
             "cpp" => Some(Language::Cpp),
+            "csharp" => Some(Language::CSharp),
+            "c#" => Some(Language::CSharp),
             "diff" => Some(Language::Diff),
             _ => None,
         };
@@ -151,6 +154,7 @@ impl Language {
             Language::Cpp => &[
                 "*.cc", "*.cpp", "*.h", "*.hh", "*.hpp", "*.ino", "*.cxx", "*.cu",
             ],
+            Language::CSharp => &["*.cs"],
         };
 
         glob_strs
@@ -209,6 +213,7 @@ impl Language {
             Language::Swift => "Swift",
             Language::C => "C",
             Language::Cpp => "C++",
+            Language::CSharp => "C#",
         }
     }
 
@@ -228,6 +233,7 @@ impl Language {
             Language::Swift => &SWIFT_CONFIG,
             Language::C => &C_CONFIG,
             Language::Cpp => &CPP_CONFIG,
+            Language::CSharp => &CSHARP_CONFIG,
             Language::Html => &HTML_CONFIG,
             _ => &PLAIN_TEXT_CONFIG,
         }
@@ -414,6 +420,21 @@ static CPP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     config
 });
 
+static CSHARP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = tree_sitter_c_sharp::LANGUAGE;
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "csharp",
+        include_str!("../queries/c_sharp/highlights.scm"),
+        include_str!("../queries/c_sharp/injections.scm"),
+        include_str!("../queries/c_sharp/locals.scm"),
+    )
+    .expect("failed to create csharp highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -534,6 +555,16 @@ mod tests {
     #[test]
     fn test_cpp() {
         let lang = Language::guess("cpp", "");
+        let mut highlighter = Highlighter::new();
+
+        let _ = highlighter
+            .highlight(lang.config(), "".as_bytes(), None, |_| None)
+            .unwrap();
+    }
+
+    #[test]
+    fn test_csharp() {
+        let lang = Language::guess("csharp", "");
         let mut highlighter = Highlighter::new();
 
         let _ = highlighter
