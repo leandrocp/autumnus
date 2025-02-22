@@ -6,6 +6,7 @@ use std::{collections::BTreeMap, fs, path::Path};
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct Theme {
     pub name: String,
+    pub appearance: String,
     pub highlights: BTreeMap<String, Style>,
 }
 
@@ -46,8 +47,12 @@ pub fn from_json(json: &str) -> Result<Theme, Box<dyn std::error::Error>> {
 }
 
 impl Theme {
-    pub fn new(name: String, highlights: BTreeMap<String, Style>) -> Self {
-        Theme { name, highlights }
+    pub fn new(name: String, appearance: String, highlights: BTreeMap<String, Style>) -> Self {
+        Theme {
+            name,
+            appearance,
+            highlights,
+        }
     }
 
     pub fn css(&self, enable_italic: bool) -> String {
@@ -177,7 +182,7 @@ mod tests {
 
     #[test]
     fn test_from_json() {
-        let json = r#"{"highlights": {"keyword": {"fg": "blue"}}, "name": "test"}"#;
+        let json = r#"{"name": "test", "appearance": "dark", "highlights": {"keyword": {"fg": "blue"}}}"#;
         let theme = from_json(json).unwrap();
 
         assert_eq!(theme.name, "test");
@@ -225,7 +230,7 @@ mod tests {
 
     #[test]
     fn test_theme_css() {
-        let json = r#"{"highlights": {"normal": {"fg": "red", "bg": "green"}, "keyword": {"fg": "blue", "italic": true}, "tag.attribute": {"bg": "gray", "bold": true}}, "name": "test"}"#;
+        let json = r#"{"name": "test", "appearance": "dark", "highlights": {"normal": {"fg": "red", "bg": "green"}, "keyword": {"fg": "blue", "italic": true}, "tag.attribute": {"bg": "gray", "bold": true}}}"#;
         let theme = from_json(json).unwrap();
 
         let expected = r#"pre.athl {
