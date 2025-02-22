@@ -1,5 +1,6 @@
 {
   "name": "kanagawa_lotus",
+  "appearance": "light",
   "highlights": {
     "attribute": {
       "fg": "#cc6d00"

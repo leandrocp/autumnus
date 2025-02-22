@@ -1,5 +1,6 @@
 {
   "name": "kanagawa_wave",
+  "appearance": "dark",
   "highlights": {
     "attribute": {
       "fg": "#ffa066"

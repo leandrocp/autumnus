@@ -1,5 +1,6 @@
 {
   "name": "github_dark_default",
+  "appearance": "dark",
   "highlights": {
     "attribute": {
       "fg": "#79c0ff"

@@ -1,5 +1,6 @@
 {
   "name": "kanagawa_dragon",
+  "appearance": "dark",
   "highlights": {
     "attribute": {
       "fg": "#b6927b"

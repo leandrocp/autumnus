@@ -1,5 +1,6 @@
 {
   "name": "catppuccin_frappe",
+  "appearance": "dark",
   "highlights": {
     "attribute": {
       "fg": "#ef9f76"

@@ -1,5 +1,6 @@
 {
   "name": "catppuccin_mocha",
+  "appearance": "dark",
   "highlights": {
     "attribute": {
       "fg": "#fab387"

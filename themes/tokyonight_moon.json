@@ -1,5 +1,6 @@
 {
   "name": "tokyonight_moon",
+  "appearance": "dark",
   "highlights": {
     "attribute": {
       "fg": "#86e1fc"

@@ -1,5 +1,6 @@
 {
   "name": "catppuccin_macchiato",
+  "appearance": "dark",
   "highlights": {
     "attribute": {
       "fg": "#f5a97f"

@@ -1,5 +1,6 @@
 {
   "name": "github_dark_dimmed",
+  "appearance": "dark",
   "highlights": {
     "attribute": {
       "fg": "#6cb6ff"

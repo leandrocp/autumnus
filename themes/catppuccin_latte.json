@@ -1,5 +1,6 @@
 {
   "name": "catppuccin_latte",
+  "appearance": "light",
   "highlights": {
     "attribute": {
       "fg": "#fe640b"

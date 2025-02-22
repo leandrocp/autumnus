@@ -1,5 +1,6 @@
 {
   "name": "github_light_colorblind",
+  "appearance": "light",
   "highlights": {
     "attribute": {
       "fg": "#0550ae"

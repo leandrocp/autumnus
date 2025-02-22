@@ -42,6 +42,31 @@ require("lazy").setup({
 			lazy = false,
 			priority = 1000,
 		},
+		{
+			"ellisonleao/gruvbox.nvim",
+			lazy = false,
+			priority = 1000,
+		},
+		{
+			"Mofiqul/dracula.nvim",
+			lazy = false,
+			priority = 1000,
+		},
+		{
+			"Mofiqul/vscode.nvim",
+			lazy = false,
+			priority = 1000,
+		},
+		{
+			"navarasu/onedark.nvim",
+			lazy = false,
+			priority = 1000,
+		},
+		{
+			"maxmx03/solarized.nvim",
+			lazy = false,
+			priority = 1000,
+		},
 	},
 	checker = { enabled = true },
 })

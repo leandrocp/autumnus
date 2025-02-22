@@ -1,6 +1,8 @@
-local colorscheme = arg[1]
-local name = string.gsub(colorscheme, "-", "_")
+local appearance = arg[1]
+local colorscheme = arg[2]
 
+vim.o.termguicolors = true
+vim.o.background = appearance
 vim.cmd.colorscheme(colorscheme)
 
 local highlight_groups = {
@@ -133,13 +135,16 @@ for _, group in ipairs(highlight_groups) do
 	end
 end
 
-local output_data = {
-	name = name,
-	highlights = highlights,
-}
+local json_highlights = vim.fn.json_encode(highlights)
+print(json_highlights)
 
-local output_file = string.format("%s.json", name)
-local file = io.open(output_file, "w")
-local json_str = vim.fn.json_encode(output_data)
-file:write(json_str)
-file:close()
+-- local output_data = {
+-- 	name = name,
+-- 	highlights = highlights,
+-- }
+--
+-- local output_file = string.format("%s.json", name)
+-- local file = io.open(output_file, "w")
+-- local json_str = vim.fn.json_encode(output_data)
+-- file:write(json_str)
+-- file:close()
