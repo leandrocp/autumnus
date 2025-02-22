@@ -300,9 +300,9 @@ static HTML_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "html",
-        tree_sitter_html::HIGHLIGHTS_QUERY,
-        tree_sitter_html::INJECTIONS_QUERY,
-        "",
+        include_str!("../queries/html/highlights.scm"),
+        include_str!("../queries/html/injections.scm"),
+        include_str!("../queries/html/locals.scm"),
     )
     .expect("failed to create html highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
@@ -315,9 +315,9 @@ static LUA_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "lua",
-        tree_sitter_lua::HIGHLIGHTS_QUERY,
-        tree_sitter_lua::INJECTIONS_QUERY,
-        tree_sitter_lua::LOCALS_QUERY,
+        include_str!("../queries/lua/highlights.scm"),
+        include_str!("../queries/lua/injections.scm"),
+        include_str!("../queries/lua/locals.scm"),
     )
     .expect("failed to create lua highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
@@ -330,9 +330,9 @@ static BASH_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "bash",
-        tree_sitter_bash::HIGHLIGHT_QUERY,
-        "",
-        "",
+        include_str!("../queries/bash/highlights.scm"),
+        include_str!("../queries/bash/injections.scm"),
+        include_str!("../queries/bash/locals.scm"),
     )
     .expect("failed to create bash highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
@@ -345,9 +345,9 @@ static RUBY_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "ruby",
-        tree_sitter_ruby::HIGHLIGHTS_QUERY,
-        "",
-        tree_sitter_ruby::LOCALS_QUERY,
+        include_str!("../queries/ruby/highlights.scm"),
+        include_str!("../queries/ruby/injections.scm"),
+        include_str!("../queries/ruby/locals.scm"),
     )
     .expect("failed to create ruby highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);

@@ -1,4 +1,4 @@
-pub const HIGHLIGHT_NAMES: [&str; 177] = [
+pub const HIGHLIGHT_NAMES: [&str; 179] = [
     "attribute",
     "attribute.builtin",
     "boolean",
@@ -35,6 +35,7 @@ pub const HIGHLIGHT_NAMES: [&str; 177] = [
     "function.builtin",
     "function.builtin.bash",
     "function.call",
+    "function.call.ruby",
     "function.macro",
     "function.method",
     "function.method.call",
@@ -176,9 +177,10 @@ pub const HIGHLIGHT_NAMES: [&str; 177] = [
     "variable.member.yaml",
     "variable.parameter",
     "variable.parameter.builtin",
+    "variable.ruby",
 ];
 
-pub const CLASSES: [&str; 177] = [
+pub const CLASSES: [&str; 179] = [
     "attribute",
     "attribute-builtin",
     "boolean",
@@ -215,6 +217,7 @@ pub const CLASSES: [&str; 177] = [
     "function-builtin",
     "function-builtin-bash",
     "function-call",
+    "function-call-ruby",
     "function-macro",
     "function-method",
     "function-method-call",
@@ -356,4 +359,5 @@ pub const CLASSES: [&str; 177] = [
     "variable-member-yaml",
     "variable-parameter",
     "variable-parameter-builtin",
+    "variable-ruby",
 ];

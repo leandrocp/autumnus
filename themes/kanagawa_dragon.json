@@ -108,6 +108,9 @@
     "function.call": {
       "fg": "#8ba4b0"
     },
+    "function.call.ruby": {
+      "fg": "#8ba4b0"
+    },
     "function.macro": {
       "fg": "#8ba4b0"
     },
@@ -437,6 +440,9 @@
     },
     "variable.parameter.builtin": {
       "fg": "#949fb5"
+    },
+    "variable.ruby": {
+      "fg": "#c5c9c5"
     }
   }
 }

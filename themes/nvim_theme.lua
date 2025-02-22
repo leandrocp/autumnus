@@ -47,6 +47,7 @@ local highlight_groups = {
 	"@function.builtin",
 	"@function.builtin.bash",
 	"@function.call",
+	"@function.call.ruby",
 	"@function.macro",
 	"@function.method",
 	"@function.method.call",
@@ -187,6 +188,7 @@ local highlight_groups = {
 	"@variable.member.yaml",
 	"@variable.parameter",
 	"@variable.parameter.builtin",
+  "@variable.ruby",
 }
 
 local highlights = {}
