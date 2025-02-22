@@ -23,7 +23,7 @@
 </head>
 <body>
 <pre class="athl" style="color: #3760bf; background-color: #e1e2e7;"><code class="language-swift" translate="no" tabindex="0"><span class="athl-line" data-athl-line="1">// import a module
-</span><span class="athl-line" data-athl-line="2">import Foundation
+</span><span class="athl-line" data-athl-line="2"><span >import</span> Foundation
 </span><span class="athl-line" data-athl-line="3">
 </span><span class="athl-line" data-athl-line="4">// Single-line comments are prefixed with //
 </span><span class="athl-line" data-athl-line="5">// Multi-line comments start with /* and end with */
@@ -842,11 +842,11 @@
 </span><span class="athl-line" data-athl-line="818">// MARK: Conditional Compilation, Compile-Time Diagnostics, &amp; Availability Conditions
 </span><span class="athl-line" data-athl-line="819">
 </span><span class="athl-line" data-athl-line="820">// Conditional Compilation
-</span><span class="athl-line" data-athl-line="821"><span style="color: #2e7de9;">#if false</span>
+</span><span class="athl-line" data-athl-line="821"><span style="color: #007197;">#if false</span>
 </span><span class="athl-line" data-athl-line="822"><span style="color: #2e7de9;">print</span><span style="color: #6172b0;">(</span><span style="color: #587539;">&quot;</span><span style="color: #587539;">This code will not be compiled</span><span style="color: #587539;">&quot;</span><span style="color: #6172b0;">)</span>
-</span><span class="athl-line" data-athl-line="823"><span style="color: #2e7de9;">#else</span>
+</span><span class="athl-line" data-athl-line="823"><span style="color: #007197;">#else</span>
 </span><span class="athl-line" data-athl-line="824"><span style="color: #2e7de9;">print</span><span style="color: #6172b0;">(</span><span style="color: #587539;">&quot;</span><span style="color: #587539;">This code will be compiled</span><span style="color: #587539;">&quot;</span><span style="color: #6172b0;">)</span>
-</span><span class="athl-line" data-athl-line="825"><span style="color: #2e7de9;">#endif</span>
+</span><span class="athl-line" data-athl-line="825"><span style="color: #007197;">#endif</span>
 </span><span class="athl-line" data-athl-line="826">/*
 </span><span class="athl-line" data-athl-line="827"> Options are:
 </span><span class="athl-line" data-athl-line="828"> os()                   macOS, iOS, watchOS, tvOS, Linux
@@ -856,13 +856,13 @@
 </span><span class="athl-line" data-athl-line="832"> canImport()            A module name
 </span><span class="athl-line" data-athl-line="833"> targetEnvironment()    simulator
 </span><span class="athl-line" data-athl-line="834"> */
-</span><span class="athl-line" data-athl-line="835"><span style="color: #2e7de9;">#if swift(&lt;3)</span>
+</span><span class="athl-line" data-athl-line="835"><span style="color: #007197;">#if swift(&lt;3)</span>
 </span><span class="athl-line" data-athl-line="836"><span style="color: #2e7de9;">println</span><span style="color: #6172b0;">(</span><span style="color: #6172b0;">)</span>
-</span><span class="athl-line" data-athl-line="837"><span style="color: #2e7de9;">#endif</span>
+</span><span class="athl-line" data-athl-line="837"><span style="color: #007197;">#endif</span>
 </span><span class="athl-line" data-athl-line="838">
 </span><span class="athl-line" data-athl-line="839">// Compile-Time Diagnostics
 </span><span class="athl-line" data-athl-line="840">// You can use #warning(message) and #error(message) to have the compiler emit warnings and/or errors
-</span><span class="athl-line" data-athl-line="841"><span style="color: #2e7de9;">#warning(&quot;This will be a compile-time warning&quot;)</span>
+</span><span class="athl-line" data-athl-line="841"><span style="color: #007197;">#warning(&quot;This will be a compile-time warning&quot;)</span>
 </span><span class="athl-line" data-athl-line="842">//  #error(&quot;This would be a compile-time error&quot;)
 </span><span class="athl-line" data-athl-line="843">
 </span><span class="athl-line" data-athl-line="844">//Availability Conditions

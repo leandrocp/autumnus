@@ -20,11 +20,18 @@
     "comment": {
       "fg": "#768390"
     },
+    "comment.doc": {
+      "fg": "#768390"
+    },
     "comment.documentation": {
       "fg": "#768390"
     },
     "comment.error": {
       "bg": "#e5534b",
+      "fg": "#22272e"
+    },
+    "comment.hint": {
+      "bg": "#768390",
       "fg": "#22272e"
     },
     "comment.note": {
@@ -34,7 +41,14 @@
       "bg": "#768390",
       "fg": "#22272e"
     },
+    "comment.unused": {
+      "fg": "#768390"
+    },
     "comment.warning": {
+      "bg": "#c69026",
+      "fg": "#22272e"
+    },
+    "comment.warning.gitcommit": {
       "bg": "#c69026",
       "fg": "#22272e"
     },
@@ -44,10 +58,22 @@
     "constant.builtin": {
       "fg": "#6cb6ff"
     },
+    "constant.java": {
+      "fg": "#6cb6ff"
+    },
     "constant.macro": {
       "fg": "#f47067"
     },
     "constructor": {
+      "fg": "#f69d50"
+    },
+    "constructor.lua": {
+      "fg": "#adbac7"
+    },
+    "constructor.tsx": {
+      "fg": "#f69d50"
+    },
+    "constructor.typescript": {
       "fg": "#f69d50"
     },
     "diff.delta": {
@@ -65,6 +91,9 @@
     "function": {
       "fg": "#dcbdfb"
     },
+    "function.builtin.bash": {
+      "fg": "#f47067"
+    },
     "function.call": {
       "fg": "#dcbdfb"
     },
@@ -75,6 +104,12 @@
       "fg": "#dcbdfb"
     },
     "function.method.call": {
+      "fg": "#dcbdfb"
+    },
+    "function.method.call.php": {
+      "fg": "#dcbdfb"
+    },
+    "function.method.php": {
       "fg": "#dcbdfb"
     },
     "keyword": {
@@ -101,6 +136,9 @@
     "keyword.exception": {
       "fg": "#6cb6ff"
     },
+    "keyword.export": {
+      "fg": "#f47067"
+    },
     "keyword.function": {
       "fg": "#f47067"
     },
@@ -119,11 +157,23 @@
     "keyword.return": {
       "fg": "#f47067"
     },
+    "keyword.storage": {
+      "fg": "#f47067"
+    },
     "keyword.type": {
       "fg": "#f47067"
     },
     "label": {
       "fg": "#8ddb8c"
+    },
+    "label.json": {
+      "fg": "#8ddb8c"
+    },
+    "markup.environment": {
+      "fg": "#f47067"
+    },
+    "markup.environment.name": {
+      "fg": "#dcbdfb"
     },
     "markup.heading": {
       "bold": true,
@@ -133,7 +183,15 @@
       "bold": true,
       "fg": "#6cb6ff"
     },
+    "markup.heading.1.markdown": {
+      "bold": true,
+      "fg": "#6cb6ff"
+    },
     "markup.heading.2": {
+      "bold": true,
+      "fg": "#6cb6ff"
+    },
+    "markup.heading.2.markdown": {
       "bold": true,
       "fg": "#6cb6ff"
     },
@@ -141,7 +199,15 @@
       "bold": true,
       "fg": "#6cb6ff"
     },
+    "markup.heading.3.markdown": {
+      "bold": true,
+      "fg": "#6cb6ff"
+    },
     "markup.heading.4": {
+      "bold": true,
+      "fg": "#6cb6ff"
+    },
+    "markup.heading.4.markdown": {
       "bold": true,
       "fg": "#6cb6ff"
     },
@@ -149,7 +215,15 @@
       "bold": true,
       "fg": "#6cb6ff"
     },
+    "markup.heading.5.markdown": {
+      "bold": true,
+      "fg": "#6cb6ff"
+    },
     "markup.heading.6": {
+      "bold": true,
+      "fg": "#6cb6ff"
+    },
+    "markup.heading.6.markdown": {
       "bold": true,
       "fg": "#6cb6ff"
     },
@@ -215,6 +289,9 @@
     "number": {
       "fg": "#6cb6ff"
     },
+    "number.css": {
+      "fg": "#6cb6ff"
+    },
     "number.float": {
       "fg": "#6cb6ff"
     },
@@ -222,6 +299,24 @@
       "fg": "#6cb6ff"
     },
     "property": {
+      "fg": "#6cb6ff"
+    },
+    "property.class.css": {
+      "fg": "#6cb6ff"
+    },
+    "property.cpp": {
+      "fg": "#6cb6ff"
+    },
+    "property.css": {
+      "fg": "#6cb6ff"
+    },
+    "property.id.css": {
+      "fg": "#6cb6ff"
+    },
+    "property.toml": {
+      "fg": "#6cb6ff"
+    },
+    "property.typescript": {
       "fg": "#6cb6ff"
     },
     "punctuation.bracket": {
@@ -243,6 +338,12 @@
       "bold": true,
       "fg": "#96d0ff"
     },
+    "string.plain.css": {
+      "fg": "#96d0ff"
+    },
+    "string.regex": {
+      "fg": "#96d0ff"
+    },
     "string.regexp": {
       "fg": "#96d0ff"
     },
@@ -252,7 +353,13 @@
     "string.special.path": {
       "fg": "#adbac7"
     },
+    "string.special.php.gitignore": {
+      "fg": "#adbac7"
+    },
     "string.special.symbol": {
+      "fg": "#6cb6ff"
+    },
+    "string.special.symbol.ruby": {
       "fg": "#6cb6ff"
     },
     "string.special.url": {
@@ -266,6 +373,9 @@
     "tag.attribute": {
       "fg": "#6cb6ff"
     },
+    "tag.attribute.tsx": {
+      "fg": "#6cb6ff"
+    },
     "tag.builtin": {
       "fg": "#8ddb8c"
     },
@@ -275,10 +385,22 @@
     "type.builtin": {
       "fg": "#f47067"
     },
+    "type.builtin.c": {
+      "fg": "#f47067"
+    },
     "type.builtin.cpp": {
       "fg": "#f47067"
     },
+    "type.css": {
+      "fg": "#8ddb8c"
+    },
     "type.definition": {
+      "fg": "#f69d50"
+    },
+    "type.qualifier": {
+      "fg": "#f47067"
+    },
+    "type.tag.css": {
       "fg": "#f69d50"
     },
     "variable": {
@@ -288,6 +410,9 @@
       "fg": "#6cb6ff"
     },
     "variable.member": {
+      "fg": "#6cb6ff"
+    },
+    "variable.member.yaml": {
       "fg": "#6cb6ff"
     },
     "variable.parameter": {

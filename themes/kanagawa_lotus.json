@@ -22,6 +22,10 @@
       "fg": "#8a8980",
       "italic": true
     },
+    "comment.doc": {
+      "fg": "#8a8980",
+      "italic": true
+    },
     "comment.documentation": {
       "fg": "#8a8980",
       "italic": true
@@ -30,6 +34,10 @@
       "bg": "#e82424",
       "bold": true,
       "fg": "#545464"
+    },
+    "comment.hint": {
+      "fg": "#8a8980",
+      "italic": true
     },
     "comment.note": {
       "bg": "#5e857a",
@@ -41,7 +49,16 @@
       "bold": true,
       "fg": "#dcd7ba"
     },
+    "comment.unused": {
+      "fg": "#8a8980",
+      "italic": true
+    },
     "comment.warning": {
+      "bg": "#e98a00",
+      "bold": true,
+      "fg": "#dcd7ba"
+    },
+    "comment.warning.gitcommit": {
       "bg": "#e98a00",
       "bold": true,
       "fg": "#dcd7ba"
@@ -52,10 +69,22 @@
     "constant.builtin": {
       "fg": "#6693bf"
     },
+    "constant.java": {
+      "fg": "#cc6d00"
+    },
     "constant.macro": {
       "fg": "#cc6d00"
     },
     "constructor": {
+      "fg": "#6693bf"
+    },
+    "constructor.lua": {
+      "fg": "#624c83"
+    },
+    "constructor.tsx": {
+      "fg": "#6693bf"
+    },
+    "constructor.typescript": {
       "fg": "#6693bf"
     },
     "diff.delta": {
@@ -73,6 +102,9 @@
     "function.builtin": {
       "fg": "#6693bf"
     },
+    "function.builtin.bash": {
+      "fg": "#6693bf"
+    },
     "function.call": {
       "fg": "#4d699b"
     },
@@ -83,6 +115,12 @@
       "fg": "#4d699b"
     },
     "function.method.call": {
+      "fg": "#4d699b"
+    },
+    "function.method.call.php": {
+      "fg": "#4d699b"
+    },
+    "function.method.php": {
       "fg": "#4d699b"
     },
     "keyword": {
@@ -117,6 +155,10 @@
       "bold": true,
       "fg": "#c84053"
     },
+    "keyword.export": {
+      "fg": "#624c83",
+      "italic": true
+    },
     "keyword.function": {
       "fg": "#624c83",
       "italic": true
@@ -140,6 +182,10 @@
       "fg": "#c84053",
       "italic": true
     },
+    "keyword.storage": {
+      "fg": "#624c83",
+      "italic": true
+    },
     "keyword.type": {
       "fg": "#624c83",
       "italic": true
@@ -148,25 +194,55 @@
       "bold": true,
       "fg": "#624c83"
     },
+    "label.json": {
+      "bold": true,
+      "fg": "#624c83"
+    },
+    "markup.environment": {
+      "fg": "#624c83",
+      "italic": true
+    },
+    "markup.environment.name": {
+      "fg": "#624c83",
+      "italic": true
+    },
     "markup.heading": {
       "fg": "#4d699b"
     },
     "markup.heading.1": {
       "fg": "#4d699b"
     },
+    "markup.heading.1.markdown": {
+      "fg": "#4d699b"
+    },
     "markup.heading.2": {
+      "fg": "#4d699b"
+    },
+    "markup.heading.2.markdown": {
       "fg": "#4d699b"
     },
     "markup.heading.3": {
       "fg": "#4d699b"
     },
+    "markup.heading.3.markdown": {
+      "fg": "#4d699b"
+    },
     "markup.heading.4": {
+      "fg": "#4d699b"
+    },
+    "markup.heading.4.markdown": {
       "fg": "#4d699b"
     },
     "markup.heading.5": {
       "fg": "#4d699b"
     },
+    "markup.heading.5.markdown": {
+      "fg": "#4d699b"
+    },
     "markup.heading.6": {
+      "fg": "#4d699b"
+    },
+    "markup.heading.6.markdown": {
       "fg": "#4d699b"
     },
     "markup.italic": {
@@ -227,6 +303,9 @@
     "number": {
       "fg": "#b35b79"
     },
+    "number.css": {
+      "fg": "#b35b79"
+    },
     "number.float": {
       "fg": "#b35b79"
     },
@@ -234,6 +313,24 @@
       "fg": "#836f4a"
     },
     "property": {
+      "fg": "#77713f"
+    },
+    "property.class.css": {
+      "fg": "#77713f"
+    },
+    "property.cpp": {
+      "fg": "#77713f"
+    },
+    "property.css": {
+      "fg": "#77713f"
+    },
+    "property.id.css": {
+      "fg": "#77713f"
+    },
+    "property.toml": {
+      "fg": "#77713f"
+    },
+    "property.typescript": {
       "fg": "#77713f"
     },
     "punctuation.bracket": {
@@ -255,6 +352,12 @@
       "bold": true,
       "fg": "#836f4a"
     },
+    "string.plain.css": {
+      "fg": "#6f894e"
+    },
+    "string.regex": {
+      "fg": "#6f894e"
+    },
     "string.regexp": {
       "fg": "#836f4a"
     },
@@ -264,7 +367,13 @@
     "string.special.path": {
       "fg": "#6693bf"
     },
+    "string.special.php.gitignore": {
+      "fg": "#6693bf"
+    },
     "string.special.symbol": {
+      "fg": "#77713f"
+    },
+    "string.special.symbol.ruby": {
       "fg": "#77713f"
     },
     "string.special.url": {
@@ -275,6 +384,9 @@
       "fg": "#6693bf"
     },
     "tag.attribute": {
+      "fg": "#77713f"
+    },
+    "tag.attribute.tsx": {
       "fg": "#77713f"
     },
     "tag.builtin": {
@@ -289,10 +401,22 @@
     "type.builtin": {
       "fg": "#6693bf"
     },
+    "type.builtin.c": {
+      "fg": "#6693bf"
+    },
     "type.builtin.cpp": {
       "fg": "#6693bf"
     },
+    "type.css": {
+      "fg": "#597b75"
+    },
     "type.definition": {
+      "fg": "#597b75"
+    },
+    "type.qualifier": {
+      "fg": "#597b75"
+    },
+    "type.tag.css": {
       "fg": "#597b75"
     },
     "variable": {
@@ -303,6 +427,9 @@
       "italic": true
     },
     "variable.member": {
+      "fg": "#77713f"
+    },
+    "variable.member.yaml": {
       "fg": "#77713f"
     },
     "variable.parameter": {

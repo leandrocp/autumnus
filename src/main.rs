@@ -79,6 +79,7 @@ fn highlight(
                 source,
                 autumnus::Options {
                     theme,
+                    debug: false,
                     ..autumnus::Options::default()
                 },
             );
@@ -92,6 +93,7 @@ fn highlight(
                 source,
                 autumnus::Options {
                     theme,
+                    debug: false,
                     ..autumnus::Options::default()
                 },
             );

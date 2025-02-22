@@ -255,8 +255,8 @@ static DIFF_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "diff",
-        tree_sitter_diff::HIGHLIGHTS_QUERY,
-        "",
+        include_str!("../queries/diff/highlights.scm"),
+        include_str!("../queries/diff/injections.scm"),
         "",
     )
     .expect("failed to create plaintext highlight configuration");
@@ -270,9 +270,9 @@ static ELIXIR_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "elixir",
-        tree_sitter_elixir::HIGHLIGHTS_QUERY,
-        tree_sitter_elixir::INJECTIONS_QUERY,
-        "",
+        include_str!("../queries/elixir/highlights.scm"),
+        include_str!("../queries/elixir/injections.scm"),
+        include_str!("../queries/elixir/locals.scm"),
     )
     .expect("failed to create elixir highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);

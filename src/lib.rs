@@ -76,13 +76,13 @@ end
 "#;
 
         let expected = r#"<pre class="athl" style="color: #c6d0f5; background-color: #303446;"><code class="language-elixir" translate="no" tabindex="0"><span class="athl-line" data-athl-line="1"><span style="color: #ca9ee6;">defmodule</span> <span style="color: #babbf1;">Foo</span> <span style="color: #ca9ee6;">do</span>
-</span><span class="athl-line" data-athl-line="2">  <span style="color: #949cbb;">@</span><span style="color: #949cbb;">moduledoc</span> <span style="color: #949cbb;">&quot;&quot;&quot;</span>
-</span><span class="athl-line" data-athl-line="3"><span style="color: #949cbb;">  Test Module</span>
-</span><span class="athl-line" data-athl-line="4"><span style="color: #949cbb;">  &quot;&quot;&quot;</span>
+</span><span class="athl-line" data-athl-line="2">  <span style="color: #99d1db;"><span style="color: #949cbb;">@<span style="color: #949cbb;">moduledoc</span> <span style="color: #a6d189;">&quot;&quot;&quot;</span></span></span>
+</span><span class="athl-line" data-athl-line="3"><span style="color: #99d1db;"><span style="color: #949cbb;"><span style="color: #a6d189;">  Test Module</span></span></span>
+</span><span class="athl-line" data-athl-line="4"><span style="color: #99d1db;"><span style="color: #949cbb;"><span style="color: #a6d189;">  &quot;&quot;&quot;</span></span></span>
 </span><span class="athl-line" data-athl-line="5">
-</span><span class="athl-line" data-athl-line="6">  <span style="color: #ef9f76;">@</span><span style="color: #ef9f76;">projects</span> <span style="color: #949cbb;">[</span><span style="color: #a6d189;">&quot;Phoenix&quot;</span><span style="color: #949cbb;">,</span> <span style="color: #a6d189;">&quot;MDEx&quot;</span><span style="color: #949cbb;">]</span>
+</span><span class="athl-line" data-athl-line="6">  <span style="color: #99d1db;"><span style="color: #ef9f76;">@<span style="color: #8caaee;"><span style="color: #ef9f76;">projects <span style="color: #949cbb;">[</span><span style="color: #a6d189;">&quot;Phoenix&quot;</span><span style="color: #949cbb;">,</span> <span style="color: #a6d189;">&quot;MDEx&quot;</span><span style="color: #949cbb;">]</span></span></span></span></span>
 </span><span class="athl-line" data-athl-line="7">
-</span><span class="athl-line" data-athl-line="8">  <span style="color: #ca9ee6;">def</span> <span style="color: #8caaee;">projects</span><span style="color: #949cbb;">,</span> <span style="color: #eebebe;">do: </span><span style="color: #ef9f76;">@</span><span style="color: #ef9f76;">projects</span>
+</span><span class="athl-line" data-athl-line="8">  <span style="color: #ca9ee6;">def</span> <span style="color: #8caaee;">projects</span><span style="color: #949cbb;">,</span> <span style="color: #eebebe;">do: </span><span style="color: #99d1db;"><span style="color: #ef9f76;">@<span style="color: #ef9f76;">projects</span></span></span>
 </span><span class="athl-line" data-athl-line="9"><span style="color: #ca9ee6;">end</span>
 </span></code></pre>"#;
 
@@ -117,14 +117,14 @@ end
 end
 "#;
 
-        let expected = r#"<pre class="athl"><code class="language-elixir" translate="no" tabindex="0"><span class="athl-line" data-athl-line="1"><span class="keyword">defmodule</span> <span class="module">Foo</span> <span class="keyword">do</span>
-</span><span class="athl-line" data-athl-line="2">  <span class="comment-doc">@</span><span class="comment-doc">moduledoc</span> <span class="comment-doc">&quot;&quot;&quot;</span>
-</span><span class="athl-line" data-athl-line="3"><span class="comment-doc">  Test Module</span>
-</span><span class="athl-line" data-athl-line="4"><span class="comment-doc">  &quot;&quot;&quot;</span>
+        let expected = r#"<pre class="athl"><code class="language-elixir" translate="no" tabindex="0"><span class="athl-line" data-athl-line="1"><span class="keyword-function">defmodule</span> <span class="module">Foo</span> <span class="keyword">do</span>
+</span><span class="athl-line" data-athl-line="2">  <span class="operator"><span class="comment-documentation">@<span class="comment-documentation">moduledoc</span> <span class="string">&quot;&quot;&quot;</span></span></span>
+</span><span class="athl-line" data-athl-line="3"><span class="operator"><span class="comment-documentation"><span class="string">  Test Module</span></span></span>
+</span><span class="athl-line" data-athl-line="4"><span class="operator"><span class="comment-documentation"><span class="string">  &quot;&quot;&quot;</span></span></span>
 </span><span class="athl-line" data-athl-line="5">
-</span><span class="athl-line" data-athl-line="6">  <span class="attribute">@</span><span class="attribute">projects</span> <span class="punctuation-bracket">[</span><span class="string">&quot;Phoenix&quot;</span><span class="punctuation-delimiter">,</span> <span class="string">&quot;MDEx&quot;</span><span class="punctuation-bracket">]</span>
+</span><span class="athl-line" data-athl-line="6">  <span class="operator"><span class="constant">@<span class="function-call"><span class="constant">projects <span class="punctuation-bracket">[</span><span class="string">&quot;Phoenix&quot;</span><span class="punctuation-delimiter">,</span> <span class="string">&quot;MDEx&quot;</span><span class="punctuation-bracket">]</span></span></span></span></span>
 </span><span class="athl-line" data-athl-line="7">
-</span><span class="athl-line" data-athl-line="8">  <span class="keyword">def</span> <span class="function">projects</span><span class="punctuation-delimiter">,</span> <span class="string-special-symbol">do: </span><span class="attribute">@</span><span class="attribute">projects</span>
+</span><span class="athl-line" data-athl-line="8">  <span class="keyword-function">def</span> <span class="function">projects</span><span class="punctuation-delimiter">,</span> <span class="string-special-symbol">do: </span><span class="operator"><span class="constant">@<span class="constant">projects</span></span></span>
 </span><span class="athl-line" data-athl-line="9"><span class="keyword">end</span>
 </span></code></pre>"#;
 
@@ -139,6 +139,9 @@ end
                 ..Options::default()
             },
         );
+
+        // println!("{}", result);
+        // std::fs::write("result.html", result).unwrap();
 
         assert_eq!(result, expected);
     }
