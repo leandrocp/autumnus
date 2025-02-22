@@ -283,6 +283,9 @@
     "type.builtin": {
       "fg": "#e5c890"
     },
+    "type.builtin.cpp": {
+      "fg": "#e5c890"
+    },
     "type.definition": {
       "fg": "#e5c890"
     },

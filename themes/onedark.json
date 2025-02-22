@@ -272,6 +272,9 @@
     "type.builtin": {
       "fg": "#d19a66"
     },
+    "type.builtin.cpp": {
+      "fg": "#d19a66"
+    },
     "type.definition": {
       "fg": "#e5c07b"
     },

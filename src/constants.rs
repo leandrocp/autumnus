@@ -1,4 +1,4 @@
-pub const HIGHLIGHT_NAMES: [&str; 90] = [
+pub const HIGHLIGHT_NAMES: [&str; 91] = [
     "attribute",
     "attribute.function",
     "attribute.special",
@@ -79,6 +79,7 @@ pub const HIGHLIGHT_NAMES: [&str; 90] = [
     "title",
     "type",
     "type.builtin",
+    "type.builtin.cpp",
     "type.definition",
     "type.qualifier",
     "type.super",
@@ -91,7 +92,7 @@ pub const HIGHLIGHT_NAMES: [&str; 90] = [
     "warning",
 ];
 
-pub const CLASSES: [&str; 90] = [
+pub const CLASSES: [&str; 91] = [
     "attribute",
     "attribute-function",
     "attribute-special",
@@ -172,6 +173,7 @@ pub const CLASSES: [&str; 90] = [
     "title",
     "type",
     "type-builtin",
+    "type-builtin-cpp",
     "type-definition",
     "type-qualifier",
     "type-super",

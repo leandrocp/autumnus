@@ -274,6 +274,10 @@
       "bold": true,
       "fg": "#586e75"
     },
+    "type.builtin.cpp": {
+      "bold": true,
+      "fg": "#586e75"
+    },
     "type.definition": {
       "fg": "#b58900"
     },

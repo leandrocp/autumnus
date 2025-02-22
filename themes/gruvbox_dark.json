@@ -286,6 +286,9 @@
     "type.builtin": {
       "fg": "#fabd2f"
     },
+    "type.builtin.cpp": {
+      "fg": "#fabd2f"
+    },
     "type.definition": {
       "fg": "#fabd2f"
     },

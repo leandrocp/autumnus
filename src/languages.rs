@@ -21,6 +21,7 @@ pub(crate) enum Language {
     Php,
     Swift,
     C,
+    Cpp,
 }
 
 impl Language {
@@ -35,6 +36,7 @@ impl Language {
             "php" => Some(Language::Php),
             "swift" => Some(Language::Swift),
             "c" => Some(Language::C),
+            "cpp" => Some(Language::Cpp),
             "diff" => Some(Language::Diff),
             _ => None,
         };
@@ -146,6 +148,9 @@ impl Language {
             ],
             Language::Swift => &["*.swift"],
             Language::C => &["*.c"],
+            Language::Cpp => &[
+                "*.cc", "*.cpp", "*.h", "*.hh", "*.hpp", "*.ino", "*.cxx", "*.cu",
+            ],
         };
 
         glob_strs
@@ -203,6 +208,7 @@ impl Language {
             Language::Php => "PHP",
             Language::Swift => "Swift",
             Language::C => "C",
+            Language::Cpp => "C++",
         }
     }
 
@@ -221,6 +227,7 @@ impl Language {
             Language::Php => &PHP_CONFIG,
             Language::Swift => &SWIFT_CONFIG,
             Language::C => &C_CONFIG,
+            Language::Cpp => &CPP_CONFIG,
             Language::Html => &HTML_CONFIG,
             _ => &PLAIN_TEXT_CONFIG,
         }
@@ -392,6 +399,21 @@ static C_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     config
 });
 
+static CPP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = tree_sitter_cpp::LANGUAGE;
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "cpp",
+        tree_sitter_cpp::HIGHLIGHT_QUERY,
+        "",
+        "",
+    )
+    .expect("failed to create cpp highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -502,6 +524,16 @@ mod tests {
     #[test]
     fn test_c() {
         let lang = Language::guess("c", "");
+        let mut highlighter = Highlighter::new();
+
+        let _ = highlighter
+            .highlight(lang.config(), "".as_bytes(), None, |_| None)
+            .unwrap();
+    }
+
+    #[test]
+    fn test_cpp() {
+        let lang = Language::guess("cpp", "");
         let mut highlighter = Highlighter::new();
 
         let _ = highlighter

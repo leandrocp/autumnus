@@ -34,6 +34,7 @@ local highlight_groups = {
 	"@number.float",
 	"@type",
 	"@type.builtin",
+	"@type.builtin.cpp",
 	"@type.definition",
 	"@attribute",
 	"@attribute.builtin",

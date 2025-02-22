@@ -28,6 +28,7 @@ termcolor = "1.4"
 v_htmlescape = "0.15"
 tree-sitter-swift = "0.7.0"
 tree-sitter-c = "0.23.4"
+tree-sitter-cpp = "0.23.4"
 
 [build-dependencies]
 quote = "1.0"

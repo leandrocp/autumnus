@@ -283,6 +283,9 @@
     "type.builtin": {
       "fg": "#eed49f"
     },
+    "type.builtin.cpp": {
+      "fg": "#eed49f"
+    },
     "type.definition": {
       "fg": "#eed49f"
     },

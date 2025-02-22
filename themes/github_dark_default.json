@@ -275,6 +275,9 @@
     "type.builtin": {
       "fg": "#ff7b72"
     },
+    "type.builtin.cpp": {
+      "fg": "#ff7b72"
+    },
     "type.definition": {
       "fg": "#ffa657"
     },

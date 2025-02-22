@@ -283,6 +283,9 @@
     "type.builtin": {
       "fg": "#df8e1d"
     },
+    "type.builtin.cpp": {
+      "fg": "#df8e1d"
+    },
     "type.definition": {
       "fg": "#df8e1d"
     },

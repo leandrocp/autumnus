@@ -280,6 +280,10 @@
       "fg": "#a7dfef",
       "italic": true
     },
+    "type.builtin.cpp": {
+      "fg": "#a7dfef",
+      "italic": true
+    },
     "type.definition": {
       "fg": "#bcf4f5"
     },
