@@ -14,6 +14,7 @@ pub(crate) enum Language {
     Diff,
     Elixir,
     Rust,
+    Erlang,
     Html,
     Lua,
     Bash,
@@ -40,6 +41,7 @@ impl Language {
             "cpp" => Some(Language::Cpp),
             "csharp" => Some(Language::CSharp),
             "c#" => Some(Language::CSharp),
+            "erlang" => Some(Language::Erlang),
             "diff" => Some(Language::Diff),
             _ => None,
         };
@@ -155,6 +157,16 @@ impl Language {
                 "*.cc", "*.cpp", "*.h", "*.hh", "*.hpp", "*.ino", "*.cxx", "*.cu",
             ],
             Language::CSharp => &["*.cs"],
+            Language::Erlang => &[
+                "*.erl",
+                "*.app.src",
+                "*.es",
+                "*.escript",
+                "*.hrl",
+                "*.xrl",
+                "*.yrl",
+                "Emakefile",
+            ],
         };
 
         glob_strs
@@ -214,6 +226,7 @@ impl Language {
             Language::C => "C",
             Language::Cpp => "C++",
             Language::CSharp => "C#",
+            Language::Erlang => "Erlang",
         }
     }
 
@@ -234,6 +247,7 @@ impl Language {
             Language::C => &C_CONFIG,
             Language::Cpp => &CPP_CONFIG,
             Language::CSharp => &CSHARP_CONFIG,
+            Language::Erlang => &ERLANG_CONFIG,
             Language::Html => &HTML_CONFIG,
             _ => &PLAIN_TEXT_CONFIG,
         }
@@ -435,6 +449,21 @@ static CSHARP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     config
 });
 
+static ERLANG_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = tree_sitter_erlang::LANGUAGE;
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "erlang",
+        include_str!("../queries/erlang/highlights.scm"),
+        include_str!("../queries/erlang/injections.scm"),
+        "",
+    )
+    .expect("failed to create erlang highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -565,6 +594,16 @@ mod tests {
     #[test]
     fn test_csharp() {
         let lang = Language::guess("csharp", "");
+        let mut highlighter = Highlighter::new();
+
+        let _ = highlighter
+            .highlight(lang.config(), "".as_bytes(), None, |_| None)
+            .unwrap();
+    }
+
+    #[test]
+    fn test_erlang() {
+        let lang = Language::guess("erlang", "");
         let mut highlighter = Highlighter::new();
 
         let _ = highlighter
