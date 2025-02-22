@@ -14,6 +14,7 @@ pub(crate) enum Language {
     Diff,
     Elixir,
     Rust,
+    Heex,
     Erlang,
     Html,
     Lua,
@@ -43,6 +44,7 @@ impl Language {
             "c#" => Some(Language::CSharp),
             "erlang" => Some(Language::Erlang),
             "diff" => Some(Language::Diff),
+            "heex" => Some(Language::Heex),
             _ => None,
         };
 
@@ -88,6 +90,7 @@ impl Language {
         let glob_strs: &'static [&'static str] = match language {
             Language::PlainText => &[],
             Language::Diff => &["*.diff"],
+            Language::Heex => &["*.heex", "*.neex"],
             Language::Elixir => &["*.ex", "*.exs"],
             Language::Rust => &["*.rs"],
             Language::Html => &["*.html", "*.htm", "*.xhtml"],
@@ -216,6 +219,7 @@ impl Language {
             Language::PlainText => "Plain Text",
             Language::Diff => "Diff",
             Language::Elixir => "Elixir",
+            Language::Heex => "HEEx",
             Language::Rust => "Rust",
             Language::Html => "HTML",
             Language::Lua => "Lua",
@@ -238,6 +242,7 @@ impl Language {
         match self {
             Language::Diff => &DIFF_CONFIG,
             Language::Elixir => &ELIXIR_CONFIG,
+            Language::Heex => &HEEX_CONFIG,
             Language::Rust => &RUST_CONFIG,
             Language::Lua => &LUA_CONFIG,
             Language::Bash => &BASH_CONFIG,
@@ -464,6 +469,21 @@ static ERLANG_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     config
 });
 
+static HEEX_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = tree_sitter_heex::LANGUAGE;
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "heex",
+        include_str!("../queries/heex/highlights.scm"),
+        include_str!("../queries/heex/injections.scm"),
+        include_str!("../queries/heex/locals.scm"),
+    )
+    .expect("failed to create heex highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -604,6 +624,16 @@ mod tests {
     #[test]
     fn test_erlang() {
         let lang = Language::guess("erlang", "");
+        let mut highlighter = Highlighter::new();
+
+        let _ = highlighter
+            .highlight(lang.config(), "".as_bytes(), None, |_| None)
+            .unwrap();
+    }
+
+    #[test]
+    fn test_heex() {
+        let lang = Language::guess("heex", "");
         let mut highlighter = Highlighter::new();
 
         let _ = highlighter

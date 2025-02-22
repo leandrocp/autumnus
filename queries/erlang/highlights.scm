@@ -9,7 +9,7 @@
 
 (float) @number.float
 
-(comment) @comment @spell
+(comment) @comment
 
 ((comment) @comment.documentation
   (#lua-match? @comment.documentation "^[%%][%%]"))
