@@ -285,9 +285,9 @@ static RUST_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "rust",
-        tree_sitter_rust::HIGHLIGHTS_QUERY,
-        tree_sitter_rust::INJECTIONS_QUERY,
-        "",
+        include_str!("../queries/rust/highlights.scm"),
+        include_str!("../queries/rust/injections.scm"),
+        include_str!("../queries/rust/locals.scm"),
     )
     .expect("failed to create rust highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);

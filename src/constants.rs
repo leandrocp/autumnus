@@ -1,4 +1,4 @@
-pub const HIGHLIGHT_NAMES: [&str; 177] = [
+pub const HIGHLIGHT_NAMES: [&str; 176] = [
     "attribute",
     "attribute.builtin",
     "boolean",
@@ -9,7 +9,6 @@ pub const HIGHLIGHT_NAMES: [&str; 177] = [
     "comment.documentation",
     "comment.error",
     "comment.hint",
-    "comment.note",
     "comment.note",
     "comment.todo",
     "comment.unused",
@@ -178,7 +177,7 @@ pub const HIGHLIGHT_NAMES: [&str; 177] = [
     "variable.parameter.builtin",
 ];
 
-pub const CLASSES: [&str; 177] = [
+pub const CLASSES: [&str; 176] = [
     "attribute",
     "attribute-builtin",
     "boolean",
@@ -189,7 +188,6 @@ pub const CLASSES: [&str; 177] = [
     "comment-documentation",
     "comment-error",
     "comment-hint",
-    "comment-note",
     "comment-note",
     "comment-todo",
     "comment-unused",

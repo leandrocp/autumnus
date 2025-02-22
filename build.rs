@@ -4,6 +4,7 @@ use std::fs;
 use std::path::Path;
 
 fn main() {
+    println!("cargo:rerun-if-changed=queries/");
     println!("cargo:rerun-if-changed=themes/");
 
     let out_dir = env::var("OUT_DIR").unwrap();

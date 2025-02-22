@@ -22,7 +22,6 @@ local highlight_groups = {
 	"@comment.error",
 	"@comment.hint",
 	"@comment.note",
-	"@comment.note",
 	"@comment.todo",
 	"@comment.unused",
 	"@comment.warning",
