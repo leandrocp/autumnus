@@ -360,9 +360,9 @@ static PHP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "php",
-        tree_sitter_php::HIGHLIGHTS_QUERY,
-        tree_sitter_php::INJECTIONS_QUERY,
-        "",
+        include_str!("../queries/php/highlights.scm"),
+        include_str!("../queries/php/injections.scm"),
+        include_str!("../queries/php/locals.scm"),
     )
     .expect("failed to create php highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
@@ -375,9 +375,9 @@ static SWIFT_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "swift",
-        tree_sitter_swift::HIGHLIGHTS_QUERY,
-        tree_sitter_swift::INJECTIONS_QUERY,
-        tree_sitter_swift::LOCALS_QUERY,
+        include_str!("../queries/swift/highlights.scm"),
+        include_str!("../queries/swift/injections.scm"),
+        include_str!("../queries/swift/locals.scm"),
     )
     .expect("failed to create swift highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
@@ -390,9 +390,9 @@ static C_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "c",
-        tree_sitter_c::HIGHLIGHT_QUERY,
-        "",
-        "",
+        include_str!("../queries/c/highlights.scm"),
+        include_str!("../queries/c/injections.scm"),
+        include_str!("../queries/c/locals.scm"),
     )
     .expect("failed to create c highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
@@ -405,9 +405,9 @@ static CPP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "cpp",
-        tree_sitter_cpp::HIGHLIGHT_QUERY,
-        "",
-        "",
+        include_str!("../queries/cpp/highlights.scm"),
+        include_str!("../queries/cpp/injections.scm"),
+        include_str!("../queries/cpp/locals.scm"),
     )
     .expect("failed to create cpp highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);

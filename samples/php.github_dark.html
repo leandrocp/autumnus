@@ -22,870 +22,870 @@
     </style>
 </head>
 <body>
-<pre class="athl" style="color: #e6edf3; background-color: #30363d;"><code class="language-php" translate="no" tabindex="0"><span class="athl-line" data-athl-line="1"><span style="color: #7ee787;">&lt;?php</span> <span style="color: #8b949e;">// PHP code must be enclosed with &lt;?php tags</span>
+<pre class="athl" style="color: #e6edf3; background-color: #30363d;"><code class="language-php" translate="no" tabindex="0"><span class="athl-line" data-athl-line="1">&lt;?php // PHP code must be enclosed with &lt;?php tags
 </span><span class="athl-line" data-athl-line="2">
-</span><span class="athl-line" data-athl-line="3"><span style="color: #8b949e;">// If your php file only contains PHP code, it is best practice</span>
-</span><span class="athl-line" data-athl-line="4"><span style="color: #8b949e;">// to omit the php closing tag to prevent accidental output.</span>
+</span><span class="athl-line" data-athl-line="3">// If your php file only contains PHP code, it is best practice
+</span><span class="athl-line" data-athl-line="4">// to omit the php closing tag to prevent accidental output.
 </span><span class="athl-line" data-athl-line="5">
-</span><span class="athl-line" data-athl-line="6"><span style="color: #8b949e;">// Two forward slashes start a one-line comment.</span>
+</span><span class="athl-line" data-athl-line="6">// Two forward slashes start a one-line comment.
 </span><span class="athl-line" data-athl-line="7">
-</span><span class="athl-line" data-athl-line="8"><span style="color: #8b949e;"># So will a hash (aka pound symbol) but // is more common</span>
+</span><span class="athl-line" data-athl-line="8"># So will a hash (aka pound symbol) but // is more common
 </span><span class="athl-line" data-athl-line="9">
-</span><span class="athl-line" data-athl-line="10"><span style="color: #8b949e;">/*</span>
-</span><span class="athl-line" data-athl-line="11"><span style="color: #8b949e;">     Surrounding text in slash-asterisk and asterisk-slash</span>
-</span><span class="athl-line" data-athl-line="12"><span style="color: #8b949e;">     makes it a multi-line comment.</span>
-</span><span class="athl-line" data-athl-line="13"><span style="color: #8b949e;">*/</span>
+</span><span class="athl-line" data-athl-line="10">/*
+</span><span class="athl-line" data-athl-line="11">     Surrounding text in slash-asterisk and asterisk-slash
+</span><span class="athl-line" data-athl-line="12">     makes it a multi-line comment.
+</span><span class="athl-line" data-athl-line="13">*/
 </span><span class="athl-line" data-athl-line="14">
-</span><span class="athl-line" data-athl-line="15"><span style="color: #8b949e;">// Use &quot;echo&quot; or &quot;print&quot; to print output</span>
-</span><span class="athl-line" data-athl-line="16"><span style="color: #ff7b72;">print</span>(<span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">Hello </span>&#39;</span>); <span style="color: #8b949e;">// Prints &quot;Hello &quot; with no line break</span>
+</span><span class="athl-line" data-athl-line="15">// Use &quot;echo&quot; or &quot;print&quot; to print output
+</span><span class="athl-line" data-athl-line="16">print(&#39;Hello &#39;); // Prints &quot;Hello &quot; with no line break
 </span><span class="athl-line" data-athl-line="17">
-</span><span class="athl-line" data-athl-line="18"><span style="color: #8b949e;">// () are optional for print and echo</span>
-</span><span class="athl-line" data-athl-line="19"><span style="color: #ff7b72;">echo</span> <span style="color: #a5d6ff;">&quot;<span style="color: #a5d6ff;">World</span>\n&quot;</span>; <span style="color: #8b949e;">// Prints &quot;World&quot; with a line break</span>
-</span><span class="athl-line" data-athl-line="20"><span style="color: #8b949e;">// (all statements must end with a semicolon)</span>
+</span><span class="athl-line" data-athl-line="18">// () are optional for print and echo
+</span><span class="athl-line" data-athl-line="19">echo &quot;World\n&quot;; // Prints &quot;World&quot; with a line break
+</span><span class="athl-line" data-athl-line="20">// (all statements must end with a semicolon)
 </span><span class="athl-line" data-athl-line="21">
-</span><span class="athl-line" data-athl-line="22"><span style="color: #8b949e;">// Anything outside &lt;?php tags is echoed automatically</span>
-</span><span class="athl-line" data-athl-line="23"><span style="color: #7ee787;">?&gt;</span>
+</span><span class="athl-line" data-athl-line="22">// Anything outside &lt;?php tags is echoed automatically
+</span><span class="athl-line" data-athl-line="23">?&gt;
 </span><span class="athl-line" data-athl-line="24">Hello World Again!
-</span><span class="athl-line" data-athl-line="25"><span style="color: #7ee787;">&lt;?php</span>
-</span><span class="athl-line" data-athl-line="26"><span style="color: #8b949e;">// That is because historically PHP started as a Template engine</span>
+</span><span class="athl-line" data-athl-line="25">&lt;?php
+</span><span class="athl-line" data-athl-line="26">// That is because historically PHP started as a Template engine
 </span><span class="athl-line" data-athl-line="27">
 </span><span class="athl-line" data-athl-line="28">
-</span><span class="athl-line" data-athl-line="29"><span style="color: #8b949e;">/************************************</span>
-</span><span class="athl-line" data-athl-line="30"><span style="color: #8b949e;"> * Types &amp; Variables</span>
-</span><span class="athl-line" data-athl-line="31"><span style="color: #8b949e;"> */</span>
+</span><span class="athl-line" data-athl-line="29">/************************************
+</span><span class="athl-line" data-athl-line="30"> * Types &amp; Variables
+</span><span class="athl-line" data-athl-line="31"> */
 </span><span class="athl-line" data-athl-line="32">
-</span><span class="athl-line" data-athl-line="33"><span style="color: #8b949e;">// Variables begin with the $ symbol.</span>
-</span><span class="athl-line" data-athl-line="34"><span style="color: #8b949e;">// A valid variable name starts with a letter or an underscore,</span>
-</span><span class="athl-line" data-athl-line="35"><span style="color: #8b949e;">// followed by any number of letters, numbers, or underscores.</span>
+</span><span class="athl-line" data-athl-line="33">// Variables begin with the $ symbol.
+</span><span class="athl-line" data-athl-line="34">// A valid variable name starts with a letter or an underscore,
+</span><span class="athl-line" data-athl-line="35">// followed by any number of letters, numbers, or underscores.
 </span><span class="athl-line" data-athl-line="36">
-</span><span class="athl-line" data-athl-line="37"><span style="color: #8b949e;">// You don&#39;t have to (and cannot) declare variables.</span>
-</span><span class="athl-line" data-athl-line="38"><span style="color: #8b949e;">// Once you assign a value, PHP will create the variable with the right type.</span>
+</span><span class="athl-line" data-athl-line="37">// You don&#39;t have to (and cannot) declare variables.
+</span><span class="athl-line" data-athl-line="38">// Once you assign a value, PHP will create the variable with the right type.
 </span><span class="athl-line" data-athl-line="39">
-</span><span class="athl-line" data-athl-line="40"><span style="color: #8b949e;">// Boolean values are case-insensitive</span>
-</span><span class="athl-line" data-athl-line="41"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>boolean</span> = <span style="color: #79c0ff;">true</span>;  <span style="color: #8b949e;">// or TRUE or True</span>
-</span><span class="athl-line" data-athl-line="42"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>boolean</span> = <span style="color: #79c0ff;">FALSE</span>; <span style="color: #8b949e;">// or false or False</span>
+</span><span class="athl-line" data-athl-line="40">// Boolean values are case-insensitive
+</span><span class="athl-line" data-athl-line="41">$boolean = true;  // or TRUE or True
+</span><span class="athl-line" data-athl-line="42">$boolean = FALSE; // or false or False
 </span><span class="athl-line" data-athl-line="43">
-</span><span class="athl-line" data-athl-line="44"><span style="color: #8b949e;">// Integers</span>
-</span><span class="athl-line" data-athl-line="45"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>int1</span> = <span style="color: #79c0ff;">12</span>;   <span style="color: #8b949e;">// =&gt; 12</span>
-</span><span class="athl-line" data-athl-line="46"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>int2</span> = -<span style="color: #79c0ff;">12</span>;  <span style="color: #8b949e;">// =&gt; -12</span>
-</span><span class="athl-line" data-athl-line="47"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>int3</span> = <span style="color: #79c0ff;">012</span>;  <span style="color: #8b949e;">// =&gt; 10 (a leading 0 denotes an octal number)</span>
-</span><span class="athl-line" data-athl-line="48"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>int4</span> = <span style="color: #79c0ff;">0x0F</span>; <span style="color: #8b949e;">// =&gt; 15 (a leading 0x denotes a hex literal)</span>
-</span><span class="athl-line" data-athl-line="49"><span style="color: #8b949e;">// Binary integer literals are available since PHP 5.4.0.</span>
-</span><span class="athl-line" data-athl-line="50"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>int5</span> = <span style="color: #79c0ff;">0b11111111</span>; <span style="color: #8b949e;">// 255 (a leading 0b denotes a binary number)</span>
+</span><span class="athl-line" data-athl-line="44">// Integers
+</span><span class="athl-line" data-athl-line="45">$int1 = 12;   // =&gt; 12
+</span><span class="athl-line" data-athl-line="46">$int2 = -12;  // =&gt; -12
+</span><span class="athl-line" data-athl-line="47">$int3 = 012;  // =&gt; 10 (a leading 0 denotes an octal number)
+</span><span class="athl-line" data-athl-line="48">$int4 = 0x0F; // =&gt; 15 (a leading 0x denotes a hex literal)
+</span><span class="athl-line" data-athl-line="49">// Binary integer literals are available since PHP 5.4.0.
+</span><span class="athl-line" data-athl-line="50">$int5 = 0b11111111; // 255 (a leading 0b denotes a binary number)
 </span><span class="athl-line" data-athl-line="51">
-</span><span class="athl-line" data-athl-line="52"><span style="color: #8b949e;">// Floats (aka doubles)</span>
-</span><span class="athl-line" data-athl-line="53"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>float</span> = <span style="color: #79c0ff;">1.234</span>;
-</span><span class="athl-line" data-athl-line="54"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>float</span> = <span style="color: #79c0ff;">1.2e3</span>;
-</span><span class="athl-line" data-athl-line="55"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>float</span> = <span style="color: #79c0ff;">7E-10</span>;
+</span><span class="athl-line" data-athl-line="52">// Floats (aka doubles)
+</span><span class="athl-line" data-athl-line="53">$float = 1.234;
+</span><span class="athl-line" data-athl-line="54">$float = 1.2e3;
+</span><span class="athl-line" data-athl-line="55">$float = 7E-10;
 </span><span class="athl-line" data-athl-line="56">
-</span><span class="athl-line" data-athl-line="57"><span style="color: #8b949e;">// Delete variable</span>
-</span><span class="athl-line" data-athl-line="58">unset(<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>int1</span>);
+</span><span class="athl-line" data-athl-line="57">// Delete variable
+</span><span class="athl-line" data-athl-line="58">unset($int1);
 </span><span class="athl-line" data-athl-line="59">
-</span><span class="athl-line" data-athl-line="60"><span style="color: #8b949e;">// Arithmetic</span>
-</span><span class="athl-line" data-athl-line="61"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>sum</span>        = <span style="color: #79c0ff;">1</span> + <span style="color: #79c0ff;">1</span>; <span style="color: #8b949e;">// 2</span>
-</span><span class="athl-line" data-athl-line="62"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>difference</span> = <span style="color: #79c0ff;">2</span> - <span style="color: #79c0ff;">1</span>; <span style="color: #8b949e;">// 1</span>
-</span><span class="athl-line" data-athl-line="63"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>product</span>    = <span style="color: #79c0ff;">2</span> * <span style="color: #79c0ff;">2</span>; <span style="color: #8b949e;">// 4</span>
-</span><span class="athl-line" data-athl-line="64"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>quotient</span>   = <span style="color: #79c0ff;">2</span> / <span style="color: #79c0ff;">1</span>; <span style="color: #8b949e;">// 2</span>
+</span><span class="athl-line" data-athl-line="60">// Arithmetic
+</span><span class="athl-line" data-athl-line="61">$sum        = 1 + 1; // 2
+</span><span class="athl-line" data-athl-line="62">$difference = 2 - 1; // 1
+</span><span class="athl-line" data-athl-line="63">$product    = 2 * 2; // 4
+</span><span class="athl-line" data-athl-line="64">$quotient   = 2 / 1; // 2
 </span><span class="athl-line" data-athl-line="65">
-</span><span class="athl-line" data-athl-line="66"><span style="color: #8b949e;">// Shorthand arithmetic</span>
-</span><span class="athl-line" data-athl-line="67"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>number</span> = <span style="color: #79c0ff;">0</span>;
-</span><span class="athl-line" data-athl-line="68"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>number</span> += <span style="color: #79c0ff;">1</span>;      <span style="color: #8b949e;">// Increment $number by 1</span>
-</span><span class="athl-line" data-athl-line="69"><span style="color: #ff7b72;">echo</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>number</span>++;    <span style="color: #8b949e;">// Prints 1 (increments after evaluation)</span>
-</span><span class="athl-line" data-athl-line="70"><span style="color: #ff7b72;">echo</span> ++<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>number</span>;    <span style="color: #8b949e;">// Prints 3 (increments before evaluation)</span>
-</span><span class="athl-line" data-athl-line="71"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>number</span> /= <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>float</span>; <span style="color: #8b949e;">// Divide and assign the quotient to $number</span>
+</span><span class="athl-line" data-athl-line="66">// Shorthand arithmetic
+</span><span class="athl-line" data-athl-line="67">$number = 0;
+</span><span class="athl-line" data-athl-line="68">$number += 1;      // Increment $number by 1
+</span><span class="athl-line" data-athl-line="69">echo $number++;    // Prints 1 (increments after evaluation)
+</span><span class="athl-line" data-athl-line="70">echo ++$number;    // Prints 3 (increments before evaluation)
+</span><span class="athl-line" data-athl-line="71">$number /= $float; // Divide and assign the quotient to $number
 </span><span class="athl-line" data-athl-line="72">
-</span><span class="athl-line" data-athl-line="73"><span style="color: #8b949e;">// Strings should be enclosed in single quotes;</span>
-</span><span class="athl-line" data-athl-line="74"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>sgl_quotes</span> = <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">$String</span>&#39;</span>; <span style="color: #8b949e;">// =&gt; &#39;$String&#39;</span>
+</span><span class="athl-line" data-athl-line="73">// Strings should be enclosed in single quotes;
+</span><span class="athl-line" data-athl-line="74">$sgl_quotes = &#39;$String&#39;; // =&gt; &#39;$String&#39;
 </span><span class="athl-line" data-athl-line="75">
-</span><span class="athl-line" data-athl-line="76"><span style="color: #8b949e;">// Avoid using double quotes except to embed other variables</span>
-</span><span class="athl-line" data-athl-line="77"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>dbl_quotes</span> = <span style="color: #a5d6ff;">&quot;<span style="color: #a5d6ff;">This is a </span><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>sgl_quotes</span><span style="color: #a5d6ff;">.</span>&quot;</span>; <span style="color: #8b949e;">// =&gt; &#39;This is a $String.&#39;</span>
+</span><span class="athl-line" data-athl-line="76">// Avoid using double quotes except to embed other variables
+</span><span class="athl-line" data-athl-line="77">$dbl_quotes = &quot;This is a $sgl_quotes.&quot;; // =&gt; &#39;This is a $String.&#39;
 </span><span class="athl-line" data-athl-line="78">
-</span><span class="athl-line" data-athl-line="79"><span style="color: #8b949e;">// Special characters are only escaped in double quotes</span>
-</span><span class="athl-line" data-athl-line="80"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>escaped</span>   = <span style="color: #a5d6ff;">&quot;<span style="color: #a5d6ff;">This contains a </span>\t<span style="color: #a5d6ff;"> tab character.</span>&quot;</span>;
-</span><span class="athl-line" data-athl-line="81"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>unescaped</span> = <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">This just contains a slash and a t: \t</span>&#39;</span>;
+</span><span class="athl-line" data-athl-line="79">// Special characters are only escaped in double quotes
+</span><span class="athl-line" data-athl-line="80">$escaped   = &quot;This contains a \t tab character.&quot;;
+</span><span class="athl-line" data-athl-line="81">$unescaped = &#39;This just contains a slash and a t: \t&#39;;
 </span><span class="athl-line" data-athl-line="82">
-</span><span class="athl-line" data-athl-line="83"><span style="color: #8b949e;">// Enclose a variable in curly braces if needed</span>
-</span><span class="athl-line" data-athl-line="84"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>number</span> = <span style="color: #79c0ff;">23</span>;
-</span><span class="athl-line" data-athl-line="85"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>apples</span> = <span style="color: #a5d6ff;">&quot;<span style="color: #a5d6ff;">I have </span>{<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>number</span>}<span style="color: #a5d6ff;"> apples to eat.</span>&quot;</span>;   <span style="color: #8b949e;">// =&gt; I have 23 apples to eat.</span>
-</span><span class="athl-line" data-athl-line="86"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>oranges</span> = <span style="color: #a5d6ff;">&quot;<span style="color: #a5d6ff;">I have </span><span style="color: #79c0ff;">$</span>{number}<span style="color: #a5d6ff;"> oranges to eat.</span>&quot;</span>; <span style="color: #8b949e;">// =&gt; I have 23 oranges to eat.</span>
-</span><span class="athl-line" data-athl-line="87"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>money</span> = <span style="color: #a5d6ff;">&quot;<span style="color: #a5d6ff;">I have $</span><span style="color: #79c0ff;">$</span>{number}<span style="color: #a5d6ff;"> in the bank.</span>&quot;</span>;     <span style="color: #8b949e;">// =&gt; I have $23 in the bank.</span>
+</span><span class="athl-line" data-athl-line="83">// Enclose a variable in curly braces if needed
+</span><span class="athl-line" data-athl-line="84">$number = 23;
+</span><span class="athl-line" data-athl-line="85">$apples = &quot;I have {$number} apples to eat.&quot;;   // =&gt; I have 23 apples to eat.
+</span><span class="athl-line" data-athl-line="86">$oranges = &quot;I have ${number} oranges to eat.&quot;; // =&gt; I have 23 oranges to eat.
+</span><span class="athl-line" data-athl-line="87">$money = &quot;I have $${number} in the bank.&quot;;     // =&gt; I have $23 in the bank.
 </span><span class="athl-line" data-athl-line="88">
-</span><span class="athl-line" data-athl-line="89"><span style="color: #8b949e;">// Since PHP 5.3, nowdocs can be used for uninterpolated multi-liners</span>
-</span><span class="athl-line" data-athl-line="90"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>nowdoc</span> = &lt;&lt;&lt;&#39;END&#39;<span style="color: #a5d6ff;"></span>
-</span><span class="athl-line" data-athl-line="91"><span style="color: #a5d6ff;">Multi line</span>
-</span><span class="athl-line" data-athl-line="92"><span style="color: #a5d6ff;">string</span>
+</span><span class="athl-line" data-athl-line="89">// Since PHP 5.3, nowdocs can be used for uninterpolated multi-liners
+</span><span class="athl-line" data-athl-line="90">$nowdoc = &lt;&lt;&lt;&#39;END&#39;
+</span><span class="athl-line" data-athl-line="91">Multi line
+</span><span class="athl-line" data-athl-line="92">string
 </span><span class="athl-line" data-athl-line="93">END;
 </span><span class="athl-line" data-athl-line="94">
-</span><span class="athl-line" data-athl-line="95"><span style="color: #8b949e;">// Heredocs will do string interpolation</span>
-</span><span class="athl-line" data-athl-line="96"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>heredoc</span> = <span style="color: #a5d6ff;">&lt;&lt;&lt;END<span style="color: #a5d6ff;"></span></span>
-</span><span class="athl-line" data-athl-line="97"><span style="color: #a5d6ff;"><span style="color: #a5d6ff;"><span style="color: #a5d6ff;">Multi line</span></span></span>
-</span><span class="athl-line" data-athl-line="98"><span style="color: #a5d6ff;"><span style="color: #a5d6ff;"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>sgl_quotes</span></span></span>
-</span><span class="athl-line" data-athl-line="99"><span style="color: #a5d6ff;">END</span>;
+</span><span class="athl-line" data-athl-line="95">// Heredocs will do string interpolation
+</span><span class="athl-line" data-athl-line="96">$heredoc = &lt;&lt;&lt;END
+</span><span class="athl-line" data-athl-line="97">Multi line
+</span><span class="athl-line" data-athl-line="98">$sgl_quotes
+</span><span class="athl-line" data-athl-line="99">END;
 </span><span class="athl-line" data-athl-line="100">
-</span><span class="athl-line" data-athl-line="101"><span style="color: #8b949e;">// String concatenation is done with .</span>
-</span><span class="athl-line" data-athl-line="102"><span style="color: #ff7b72;">echo</span> <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">This string </span>&#39;</span> . <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">is concatenated</span>&#39;</span>;  <span style="color: #8b949e;">// Returns &#39;This string is concatenated&#39;</span>
+</span><span class="athl-line" data-athl-line="101">// String concatenation is done with .
+</span><span class="athl-line" data-athl-line="102">echo &#39;This string &#39; . &#39;is concatenated&#39;;  // Returns &#39;This string is concatenated&#39;
 </span><span class="athl-line" data-athl-line="103">
-</span><span class="athl-line" data-athl-line="104"><span style="color: #8b949e;">// Strings can be passed in as parameters to echo</span>
-</span><span class="athl-line" data-athl-line="105"><span style="color: #ff7b72;">echo</span> <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">Multiple</span>&#39;</span>, <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">Parameters</span>&#39;</span>, <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">Valid</span>&#39;</span>;  <span style="color: #8b949e;">// Returns &#39;MultipleParametersValid&#39;</span>
+</span><span class="athl-line" data-athl-line="104">// Strings can be passed in as parameters to echo
+</span><span class="athl-line" data-athl-line="105">echo &#39;Multiple&#39;, &#39;Parameters&#39;, &#39;Valid&#39;;  // Returns &#39;MultipleParametersValid&#39;
 </span><span class="athl-line" data-athl-line="106">
 </span><span class="athl-line" data-athl-line="107">
-</span><span class="athl-line" data-athl-line="108"><span style="color: #8b949e;">/********************************</span>
-</span><span class="athl-line" data-athl-line="109"><span style="color: #8b949e;"> * Constants</span>
-</span><span class="athl-line" data-athl-line="110"><span style="color: #8b949e;"> */</span>
+</span><span class="athl-line" data-athl-line="108">/********************************
+</span><span class="athl-line" data-athl-line="109"> * Constants
+</span><span class="athl-line" data-athl-line="110"> */
 </span><span class="athl-line" data-athl-line="111">
-</span><span class="athl-line" data-athl-line="112"><span style="color: #8b949e;">// A constant is defined by using define()</span>
-</span><span class="athl-line" data-athl-line="113"><span style="color: #8b949e;">// and can never be changed during runtime!</span>
+</span><span class="athl-line" data-athl-line="112">// A constant is defined by using define()
+</span><span class="athl-line" data-athl-line="113">// and can never be changed during runtime!
 </span><span class="athl-line" data-athl-line="114">
-</span><span class="athl-line" data-athl-line="115"><span style="color: #8b949e;">// a valid constant name starts with a letter or underscore,</span>
-</span><span class="athl-line" data-athl-line="116"><span style="color: #8b949e;">// followed by any number of letters, numbers, or underscores.</span>
-</span><span class="athl-line" data-athl-line="117"><span style="color: #d2a8ff;">define</span>(<span style="color: #a5d6ff;">&quot;<span style="color: #a5d6ff;">FOO</span>&quot;</span>, <span style="color: #a5d6ff;">&quot;<span style="color: #a5d6ff;">something</span>&quot;</span>);
+</span><span class="athl-line" data-athl-line="115">// a valid constant name starts with a letter or underscore,
+</span><span class="athl-line" data-athl-line="116">// followed by any number of letters, numbers, or underscores.
+</span><span class="athl-line" data-athl-line="117">define(&quot;FOO&quot;, &quot;something&quot;);
 </span><span class="athl-line" data-athl-line="118">
-</span><span class="athl-line" data-athl-line="119"><span style="color: #8b949e;">// access to a constant is possible by calling the chosen name without a $</span>
-</span><span class="athl-line" data-athl-line="120"><span style="color: #ff7b72;">echo</span> <span style="color: #79c0ff;">FOO</span>; <span style="color: #8b949e;">// Returns &#39;something&#39;</span>
-</span><span class="athl-line" data-athl-line="121"><span style="color: #ff7b72;">echo</span> <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">This outputs </span>&#39;</span> . <span style="color: #79c0ff;">FOO</span>;  <span style="color: #8b949e;">// Returns &#39;This outputs something&#39;</span>
+</span><span class="athl-line" data-athl-line="119">// access to a constant is possible by calling the chosen name without a $
+</span><span class="athl-line" data-athl-line="120">echo FOO; // Returns &#39;something&#39;
+</span><span class="athl-line" data-athl-line="121">echo &#39;This outputs &#39; . FOO;  // Returns &#39;This outputs something&#39;
 </span><span class="athl-line" data-athl-line="122">
 </span><span class="athl-line" data-athl-line="123">
 </span><span class="athl-line" data-athl-line="124">
-</span><span class="athl-line" data-athl-line="125"><span style="color: #8b949e;">/********************************</span>
-</span><span class="athl-line" data-athl-line="126"><span style="color: #8b949e;"> * Arrays</span>
-</span><span class="athl-line" data-athl-line="127"><span style="color: #8b949e;"> */</span>
+</span><span class="athl-line" data-athl-line="125">/********************************
+</span><span class="athl-line" data-athl-line="126"> * Arrays
+</span><span class="athl-line" data-athl-line="127"> */
 </span><span class="athl-line" data-athl-line="128">
-</span><span class="athl-line" data-athl-line="129"><span style="color: #8b949e;">// All arrays in PHP are associative arrays (hashmaps in some languages)</span>
+</span><span class="athl-line" data-athl-line="129">// All arrays in PHP are associative arrays (hashmaps in some languages)
 </span><span class="athl-line" data-athl-line="130">
-</span><span class="athl-line" data-athl-line="131"><span style="color: #8b949e;">// Works with all PHP versions</span>
-</span><span class="athl-line" data-athl-line="132"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>associative</span> = <span style="color: #d2a8ff;">array</span>(<span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">One</span>&#39;</span> =&gt; <span style="color: #79c0ff;">1</span>, <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">Two</span>&#39;</span> =&gt; <span style="color: #79c0ff;">2</span>, <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">Three</span>&#39;</span> =&gt; <span style="color: #79c0ff;">3</span>);
+</span><span class="athl-line" data-athl-line="131">// Works with all PHP versions
+</span><span class="athl-line" data-athl-line="132">$associative = array(&#39;One&#39; =&gt; 1, &#39;Two&#39; =&gt; 2, &#39;Three&#39; =&gt; 3);
 </span><span class="athl-line" data-athl-line="133">
-</span><span class="athl-line" data-athl-line="134"><span style="color: #8b949e;">// PHP 5.4 introduced a new syntax</span>
-</span><span class="athl-line" data-athl-line="135"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>associative</span> = [<span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">One</span>&#39;</span> =&gt; <span style="color: #79c0ff;">1</span>, <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">Two</span>&#39;</span> =&gt; <span style="color: #79c0ff;">2</span>, <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">Three</span>&#39;</span> =&gt; <span style="color: #79c0ff;">3</span>];
+</span><span class="athl-line" data-athl-line="134">// PHP 5.4 introduced a new syntax
+</span><span class="athl-line" data-athl-line="135">$associative = [&#39;One&#39; =&gt; 1, &#39;Two&#39; =&gt; 2, &#39;Three&#39; =&gt; 3];
 </span><span class="athl-line" data-athl-line="136">
-</span><span class="athl-line" data-athl-line="137"><span style="color: #ff7b72;">echo</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>associative</span>[<span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">One</span>&#39;</span>]; <span style="color: #8b949e;">// prints 1</span>
+</span><span class="athl-line" data-athl-line="137">echo $associative[&#39;One&#39;]; // prints 1
 </span><span class="athl-line" data-athl-line="138">
-</span><span class="athl-line" data-athl-line="139"><span style="color: #8b949e;">// Add an element to an associative array</span>
-</span><span class="athl-line" data-athl-line="140"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>associative</span>[<span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">Four</span>&#39;</span>] = <span style="color: #79c0ff;">4</span>;
+</span><span class="athl-line" data-athl-line="139">// Add an element to an associative array
+</span><span class="athl-line" data-athl-line="140">$associative[&#39;Four&#39;] = 4;
 </span><span class="athl-line" data-athl-line="141">
-</span><span class="athl-line" data-athl-line="142"><span style="color: #8b949e;">// List literals implicitly assign integer keys</span>
-</span><span class="athl-line" data-athl-line="143"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>array</span> = [<span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">One</span>&#39;</span>, <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">Two</span>&#39;</span>, <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">Three</span>&#39;</span>];
-</span><span class="athl-line" data-athl-line="144"><span style="color: #ff7b72;">echo</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>array</span>[<span style="color: #79c0ff;">0</span>]; <span style="color: #8b949e;">// =&gt; &quot;One&quot;</span>
+</span><span class="athl-line" data-athl-line="142">// List literals implicitly assign integer keys
+</span><span class="athl-line" data-athl-line="143">$array = [&#39;One&#39;, &#39;Two&#39;, &#39;Three&#39;];
+</span><span class="athl-line" data-athl-line="144">echo $array[0]; // =&gt; &quot;One&quot;
 </span><span class="athl-line" data-athl-line="145">
-</span><span class="athl-line" data-athl-line="146"><span style="color: #8b949e;">// Add an element to the end of an array</span>
-</span><span class="athl-line" data-athl-line="147"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>array</span>[] = <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">Four</span>&#39;</span>;
-</span><span class="athl-line" data-athl-line="148"><span style="color: #8b949e;">// or</span>
-</span><span class="athl-line" data-athl-line="149"><span style="color: #d2a8ff;">array_push</span>(<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>array</span>, <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">Five</span>&#39;</span>);
+</span><span class="athl-line" data-athl-line="146">// Add an element to the end of an array
+</span><span class="athl-line" data-athl-line="147">$array[] = &#39;Four&#39;;
+</span><span class="athl-line" data-athl-line="148">// or
+</span><span class="athl-line" data-athl-line="149">array_push($array, &#39;Five&#39;);
 </span><span class="athl-line" data-athl-line="150">
-</span><span class="athl-line" data-athl-line="151"><span style="color: #8b949e;">// Remove element from array</span>
-</span><span class="athl-line" data-athl-line="152">unset(<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>array</span>[<span style="color: #79c0ff;">3</span>]);
+</span><span class="athl-line" data-athl-line="151">// Remove element from array
+</span><span class="athl-line" data-athl-line="152">unset($array[3]);
 </span><span class="athl-line" data-athl-line="153">
-</span><span class="athl-line" data-athl-line="154"><span style="color: #8b949e;">/********************************</span>
-</span><span class="athl-line" data-athl-line="155"><span style="color: #8b949e;"> * Output</span>
-</span><span class="athl-line" data-athl-line="156"><span style="color: #8b949e;"> */</span>
+</span><span class="athl-line" data-athl-line="154">/********************************
+</span><span class="athl-line" data-athl-line="155"> * Output
+</span><span class="athl-line" data-athl-line="156"> */
 </span><span class="athl-line" data-athl-line="157">
-</span><span class="athl-line" data-athl-line="158"><span style="color: #ff7b72;">echo</span>(<span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">Hello World!</span>&#39;</span>);
-</span><span class="athl-line" data-athl-line="159"><span style="color: #8b949e;">// Prints Hello World! to stdout.</span>
-</span><span class="athl-line" data-athl-line="160"><span style="color: #8b949e;">// Stdout is the web page if running in a browser.</span>
+</span><span class="athl-line" data-athl-line="158">echo(&#39;Hello World!&#39;);
+</span><span class="athl-line" data-athl-line="159">// Prints Hello World! to stdout.
+</span><span class="athl-line" data-athl-line="160">// Stdout is the web page if running in a browser.
 </span><span class="athl-line" data-athl-line="161">
-</span><span class="athl-line" data-athl-line="162"><span style="color: #ff7b72;">print</span>(<span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">Hello World!</span>&#39;</span>); <span style="color: #8b949e;">// The same as echo</span>
+</span><span class="athl-line" data-athl-line="162">print(&#39;Hello World!&#39;); // The same as echo
 </span><span class="athl-line" data-athl-line="163">
-</span><span class="athl-line" data-athl-line="164"><span style="color: #8b949e;">// echo and print are language constructs too, so you can drop the parentheses</span>
-</span><span class="athl-line" data-athl-line="165"><span style="color: #ff7b72;">echo</span> <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">Hello World!</span>&#39;</span>;
-</span><span class="athl-line" data-athl-line="166"><span style="color: #ff7b72;">print</span> <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">Hello World!</span>&#39;</span>;
+</span><span class="athl-line" data-athl-line="164">// echo and print are language constructs too, so you can drop the parentheses
+</span><span class="athl-line" data-athl-line="165">echo &#39;Hello World!&#39;;
+</span><span class="athl-line" data-athl-line="166">print &#39;Hello World!&#39;;
 </span><span class="athl-line" data-athl-line="167">
-</span><span class="athl-line" data-athl-line="168"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>paragraph</span> = <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">paragraph</span>&#39;</span>;
+</span><span class="athl-line" data-athl-line="168">$paragraph = &#39;paragraph&#39;;
 </span><span class="athl-line" data-athl-line="169">
-</span><span class="athl-line" data-athl-line="170"><span style="color: #ff7b72;">echo</span> <span style="color: #79c0ff;">100</span>;        <span style="color: #8b949e;">// Echo scalar variables directly</span>
-</span><span class="athl-line" data-athl-line="171"><span style="color: #ff7b72;">echo</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>paragraph</span>; <span style="color: #8b949e;">// or variables</span>
+</span><span class="athl-line" data-athl-line="170">echo 100;        // Echo scalar variables directly
+</span><span class="athl-line" data-athl-line="171">echo $paragraph; // or variables
 </span><span class="athl-line" data-athl-line="172">
-</span><span class="athl-line" data-athl-line="173"><span style="color: #8b949e;">// If short open tags are configured, or your PHP version is</span>
-</span><span class="athl-line" data-athl-line="174"><span style="color: #8b949e;">// 5.4.0 or greater, you can use the short echo syntax</span>
-</span><span class="athl-line" data-athl-line="175"><span style="color: #7ee787;">?&gt;</span>
-</span><span class="athl-line" data-athl-line="176">&lt;p&gt;<span style="color: #7ee787;">&lt;?=</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>paragraph</span> <span style="color: #7ee787;">?&gt;</span>&lt;/p&gt;
-</span><span class="athl-line" data-athl-line="177"><span style="color: #7ee787;">&lt;?php</span>
+</span><span class="athl-line" data-athl-line="173">// If short open tags are configured, or your PHP version is
+</span><span class="athl-line" data-athl-line="174">// 5.4.0 or greater, you can use the short echo syntax
+</span><span class="athl-line" data-athl-line="175">?&gt;
+</span><span class="athl-line" data-athl-line="176">&lt;p&gt;&lt;?= $paragraph ?&gt;&lt;/p&gt;
+</span><span class="athl-line" data-athl-line="177">&lt;?php
 </span><span class="athl-line" data-athl-line="178">
-</span><span class="athl-line" data-athl-line="179"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>x</span> = <span style="color: #79c0ff;">1</span>;
-</span><span class="athl-line" data-athl-line="180"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>y</span> = <span style="color: #79c0ff;">2</span>;
-</span><span class="athl-line" data-athl-line="181"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>x</span> = <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>y</span>; <span style="color: #8b949e;">// $x now contains the same value as $y</span>
-</span><span class="athl-line" data-athl-line="182"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>z</span> = &amp;<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>y</span>;
-</span><span class="athl-line" data-athl-line="183"><span style="color: #8b949e;">// $z now contains a reference to $y. Changing the value of</span>
-</span><span class="athl-line" data-athl-line="184"><span style="color: #8b949e;">// $z will change the value of $y also, and vice-versa.</span>
-</span><span class="athl-line" data-athl-line="185"><span style="color: #8b949e;">// $x will remain unchanged as the original value of $y</span>
+</span><span class="athl-line" data-athl-line="179">$x = 1;
+</span><span class="athl-line" data-athl-line="180">$y = 2;
+</span><span class="athl-line" data-athl-line="181">$x = $y; // $x now contains the same value as $y
+</span><span class="athl-line" data-athl-line="182">$z = &amp;$y;
+</span><span class="athl-line" data-athl-line="183">// $z now contains a reference to $y. Changing the value of
+</span><span class="athl-line" data-athl-line="184">// $z will change the value of $y also, and vice-versa.
+</span><span class="athl-line" data-athl-line="185">// $x will remain unchanged as the original value of $y
 </span><span class="athl-line" data-athl-line="186">
-</span><span class="athl-line" data-athl-line="187"><span style="color: #ff7b72;">echo</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>x</span>; <span style="color: #8b949e;">// =&gt; 2</span>
-</span><span class="athl-line" data-athl-line="188"><span style="color: #ff7b72;">echo</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>z</span>; <span style="color: #8b949e;">// =&gt; 2</span>
-</span><span class="athl-line" data-athl-line="189"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>y</span> = <span style="color: #79c0ff;">0</span>;
-</span><span class="athl-line" data-athl-line="190"><span style="color: #ff7b72;">echo</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>x</span>; <span style="color: #8b949e;">// =&gt; 2</span>
-</span><span class="athl-line" data-athl-line="191"><span style="color: #ff7b72;">echo</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>z</span>; <span style="color: #8b949e;">// =&gt; 0</span>
+</span><span class="athl-line" data-athl-line="187">echo $x; // =&gt; 2
+</span><span class="athl-line" data-athl-line="188">echo $z; // =&gt; 2
+</span><span class="athl-line" data-athl-line="189">$y = 0;
+</span><span class="athl-line" data-athl-line="190">echo $x; // =&gt; 2
+</span><span class="athl-line" data-athl-line="191">echo $z; // =&gt; 0
 </span><span class="athl-line" data-athl-line="192">
-</span><span class="athl-line" data-athl-line="193"><span style="color: #8b949e;">// Dumps type and value of variable to stdout</span>
-</span><span class="athl-line" data-athl-line="194"><span style="color: #d2a8ff;">var_dump</span>(<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>z</span>); <span style="color: #8b949e;">// prints int(0)</span>
+</span><span class="athl-line" data-athl-line="193">// Dumps type and value of variable to stdout
+</span><span class="athl-line" data-athl-line="194">var_dump($z); // prints int(0)
 </span><span class="athl-line" data-athl-line="195">
-</span><span class="athl-line" data-athl-line="196"><span style="color: #8b949e;">// Prints variable to stdout in human-readable format</span>
-</span><span class="athl-line" data-athl-line="197"><span style="color: #d2a8ff;">print_r</span>(<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>array</span>); <span style="color: #8b949e;">// prints: Array ( [0] =&gt; One [1] =&gt; Two [2] =&gt; Three )</span>
+</span><span class="athl-line" data-athl-line="196">// Prints variable to stdout in human-readable format
+</span><span class="athl-line" data-athl-line="197">print_r($array); // prints: Array ( [0] =&gt; One [1] =&gt; Two [2] =&gt; Three )
 </span><span class="athl-line" data-athl-line="198">
-</span><span class="athl-line" data-athl-line="199"><span style="color: #8b949e;">/********************************</span>
-</span><span class="athl-line" data-athl-line="200"><span style="color: #8b949e;"> * Logic</span>
-</span><span class="athl-line" data-athl-line="201"><span style="color: #8b949e;"> */</span>
-</span><span class="athl-line" data-athl-line="202"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>a</span> = <span style="color: #79c0ff;">0</span>;
-</span><span class="athl-line" data-athl-line="203"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>b</span> = <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">0</span>&#39;</span>;
-</span><span class="athl-line" data-athl-line="204"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>c</span> = <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">1</span>&#39;</span>;
-</span><span class="athl-line" data-athl-line="205"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>d</span> = <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">1</span>&#39;</span>;
+</span><span class="athl-line" data-athl-line="199">/********************************
+</span><span class="athl-line" data-athl-line="200"> * Logic
+</span><span class="athl-line" data-athl-line="201"> */
+</span><span class="athl-line" data-athl-line="202">$a = 0;
+</span><span class="athl-line" data-athl-line="203">$b = &#39;0&#39;;
+</span><span class="athl-line" data-athl-line="204">$c = &#39;1&#39;;
+</span><span class="athl-line" data-athl-line="205">$d = &#39;1&#39;;
 </span><span class="athl-line" data-athl-line="206">
-</span><span class="athl-line" data-athl-line="207"><span style="color: #8b949e;">// assert throws a warning if its argument is not true</span>
+</span><span class="athl-line" data-athl-line="207">// assert throws a warning if its argument is not true
 </span><span class="athl-line" data-athl-line="208">
-</span><span class="athl-line" data-athl-line="209"><span style="color: #8b949e;">// These comparisons will always be true, even if the types aren&#39;t the same.</span>
-</span><span class="athl-line" data-athl-line="210"><span style="color: #d2a8ff;">assert</span>(<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>a</span> == <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>b</span>); <span style="color: #8b949e;">// equality</span>
-</span><span class="athl-line" data-athl-line="211"><span style="color: #d2a8ff;">assert</span>(<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>c</span> != <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>a</span>); <span style="color: #8b949e;">// inequality</span>
-</span><span class="athl-line" data-athl-line="212"><span style="color: #d2a8ff;">assert</span>(<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>c</span> &lt;&gt; <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>a</span>); <span style="color: #8b949e;">// alternative inequality</span>
-</span><span class="athl-line" data-athl-line="213"><span style="color: #d2a8ff;">assert</span>(<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>a</span> &lt; <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>c</span>);
-</span><span class="athl-line" data-athl-line="214"><span style="color: #d2a8ff;">assert</span>(<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>c</span> &gt; <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>b</span>);
-</span><span class="athl-line" data-athl-line="215"><span style="color: #d2a8ff;">assert</span>(<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>a</span> &lt;= <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>b</span>);
-</span><span class="athl-line" data-athl-line="216"><span style="color: #d2a8ff;">assert</span>(<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>c</span> &gt;= <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>d</span>);
+</span><span class="athl-line" data-athl-line="209">// These comparisons will always be true, even if the types aren&#39;t the same.
+</span><span class="athl-line" data-athl-line="210">assert($a == $b); // equality
+</span><span class="athl-line" data-athl-line="211">assert($c != $a); // inequality
+</span><span class="athl-line" data-athl-line="212">assert($c &lt;&gt; $a); // alternative inequality
+</span><span class="athl-line" data-athl-line="213">assert($a &lt; $c);
+</span><span class="athl-line" data-athl-line="214">assert($c &gt; $b);
+</span><span class="athl-line" data-athl-line="215">assert($a &lt;= $b);
+</span><span class="athl-line" data-athl-line="216">assert($c &gt;= $d);
 </span><span class="athl-line" data-athl-line="217">
-</span><span class="athl-line" data-athl-line="218"><span style="color: #8b949e;">// The following will only be true if the values match and are the same type.</span>
-</span><span class="athl-line" data-athl-line="219"><span style="color: #d2a8ff;">assert</span>(<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>c</span> === <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>d</span>);
-</span><span class="athl-line" data-athl-line="220"><span style="color: #d2a8ff;">assert</span>(<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>a</span> !== <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>d</span>);
-</span><span class="athl-line" data-athl-line="221"><span style="color: #d2a8ff;">assert</span>(<span style="color: #79c0ff;">1</span> === <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">1</span>&#39;</span>);
-</span><span class="athl-line" data-athl-line="222"><span style="color: #d2a8ff;">assert</span>(<span style="color: #79c0ff;">1</span> !== <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">1</span>&#39;</span>);
+</span><span class="athl-line" data-athl-line="218">// The following will only be true if the values match and are the same type.
+</span><span class="athl-line" data-athl-line="219">assert($c === $d);
+</span><span class="athl-line" data-athl-line="220">assert($a !== $d);
+</span><span class="athl-line" data-athl-line="221">assert(1 === &#39;1&#39;);
+</span><span class="athl-line" data-athl-line="222">assert(1 !== &#39;1&#39;);
 </span><span class="athl-line" data-athl-line="223">
-</span><span class="athl-line" data-athl-line="224"><span style="color: #8b949e;">// &#39;Spaceship&#39; operator (since PHP 7)</span>
-</span><span class="athl-line" data-athl-line="225"><span style="color: #8b949e;">// Returns 0 if values on either side are equal</span>
-</span><span class="athl-line" data-athl-line="226"><span style="color: #8b949e;">// Returns 1 if value on the left is greater</span>
-</span><span class="athl-line" data-athl-line="227"><span style="color: #8b949e;">// Returns -1 if the value on the right is greater</span>
+</span><span class="athl-line" data-athl-line="224">// &#39;Spaceship&#39; operator (since PHP 7)
+</span><span class="athl-line" data-athl-line="225">// Returns 0 if values on either side are equal
+</span><span class="athl-line" data-athl-line="226">// Returns 1 if value on the left is greater
+</span><span class="athl-line" data-athl-line="227">// Returns -1 if the value on the right is greater
 </span><span class="athl-line" data-athl-line="228">
-</span><span class="athl-line" data-athl-line="229"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>a</span> = <span style="color: #79c0ff;">100</span>;
-</span><span class="athl-line" data-athl-line="230"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>b</span> = <span style="color: #79c0ff;">1000</span>;
+</span><span class="athl-line" data-athl-line="229">$a = 100;
+</span><span class="athl-line" data-athl-line="230">$b = 1000;
 </span><span class="athl-line" data-athl-line="231">
-</span><span class="athl-line" data-athl-line="232"><span style="color: #ff7b72;">echo</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>a</span> &lt;=&gt; <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>a</span>; <span style="color: #8b949e;">// 0 since they are equal</span>
-</span><span class="athl-line" data-athl-line="233"><span style="color: #ff7b72;">echo</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>a</span> &lt;=&gt; <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>b</span>; <span style="color: #8b949e;">// -1 since $a &lt; $b</span>
-</span><span class="athl-line" data-athl-line="234"><span style="color: #ff7b72;">echo</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>b</span> &lt;=&gt; <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>a</span>; <span style="color: #8b949e;">// 1 since $b &gt; $a</span>
+</span><span class="athl-line" data-athl-line="232">echo $a &lt;=&gt; $a; // 0 since they are equal
+</span><span class="athl-line" data-athl-line="233">echo $a &lt;=&gt; $b; // -1 since $a &lt; $b
+</span><span class="athl-line" data-athl-line="234">echo $b &lt;=&gt; $a; // 1 since $b &gt; $a
 </span><span class="athl-line" data-athl-line="235">
-</span><span class="athl-line" data-athl-line="236"><span style="color: #8b949e;">// Variables can be converted between types, depending on their usage.</span>
+</span><span class="athl-line" data-athl-line="236">// Variables can be converted between types, depending on their usage.
 </span><span class="athl-line" data-athl-line="237">
-</span><span class="athl-line" data-athl-line="238"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>integer</span> = <span style="color: #79c0ff;">1</span>;
-</span><span class="athl-line" data-athl-line="239"><span style="color: #ff7b72;">echo</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>integer</span> + <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>integer</span>; <span style="color: #8b949e;">// =&gt; 2</span>
+</span><span class="athl-line" data-athl-line="238">$integer = 1;
+</span><span class="athl-line" data-athl-line="239">echo $integer + $integer; // =&gt; 2
 </span><span class="athl-line" data-athl-line="240">
-</span><span class="athl-line" data-athl-line="241"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>string</span> = <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">1</span>&#39;</span>;
-</span><span class="athl-line" data-athl-line="242"><span style="color: #ff7b72;">echo</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>string</span> + <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>string</span>; <span style="color: #8b949e;">// =&gt; 2 (strings are coerced to integers)</span>
+</span><span class="athl-line" data-athl-line="241">$string = &#39;1&#39;;
+</span><span class="athl-line" data-athl-line="242">echo $string + $string; // =&gt; 2 (strings are coerced to integers)
 </span><span class="athl-line" data-athl-line="243">
-</span><span class="athl-line" data-athl-line="244"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>string</span> = <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">one</span>&#39;</span>;
-</span><span class="athl-line" data-athl-line="245"><span style="color: #ff7b72;">echo</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>string</span> + <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>string</span>; <span style="color: #8b949e;">// =&gt; 0</span>
-</span><span class="athl-line" data-athl-line="246"><span style="color: #8b949e;">// Outputs 0 because the + operator cannot cast the string &#39;one&#39; to a number</span>
+</span><span class="athl-line" data-athl-line="244">$string = &#39;one&#39;;
+</span><span class="athl-line" data-athl-line="245">echo $string + $string; // =&gt; 0
+</span><span class="athl-line" data-athl-line="246">// Outputs 0 because the + operator cannot cast the string &#39;one&#39; to a number
 </span><span class="athl-line" data-athl-line="247">
-</span><span class="athl-line" data-athl-line="248"><span style="color: #8b949e;">// Type casting can be used to treat a variable as another type</span>
+</span><span class="athl-line" data-athl-line="248">// Type casting can be used to treat a variable as another type
 </span><span class="athl-line" data-athl-line="249">
-</span><span class="athl-line" data-athl-line="250"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>boolean</span> = (<span style="color: #ff7b72;">boolean</span>) <span style="color: #79c0ff;">1</span>; <span style="color: #8b949e;">// =&gt; true</span>
+</span><span class="athl-line" data-athl-line="250">$boolean = (boolean) 1; // =&gt; true
 </span><span class="athl-line" data-athl-line="251">
-</span><span class="athl-line" data-athl-line="252"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>zero</span> = <span style="color: #79c0ff;">0</span>;
-</span><span class="athl-line" data-athl-line="253"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>boolean</span> = (<span style="color: #ff7b72;">boolean</span>) <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>zero</span>; <span style="color: #8b949e;">// =&gt; false</span>
+</span><span class="athl-line" data-athl-line="252">$zero = 0;
+</span><span class="athl-line" data-athl-line="253">$boolean = (boolean) $zero; // =&gt; false
 </span><span class="athl-line" data-athl-line="254">
-</span><span class="athl-line" data-athl-line="255"><span style="color: #8b949e;">// There are also dedicated functions for casting most types</span>
-</span><span class="athl-line" data-athl-line="256"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>integer</span> = <span style="color: #79c0ff;">5</span>;
-</span><span class="athl-line" data-athl-line="257"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>string</span> = <span style="color: #d2a8ff;">strval</span>(<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>integer</span>);
+</span><span class="athl-line" data-athl-line="255">// There are also dedicated functions for casting most types
+</span><span class="athl-line" data-athl-line="256">$integer = 5;
+</span><span class="athl-line" data-athl-line="257">$string = strval($integer);
 </span><span class="athl-line" data-athl-line="258">
-</span><span class="athl-line" data-athl-line="259"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>var</span> = <span style="color: #79c0ff;">null</span>; <span style="color: #8b949e;">// Null value</span>
+</span><span class="athl-line" data-athl-line="259">$var = null; // Null value
 </span><span class="athl-line" data-athl-line="260">
 </span><span class="athl-line" data-athl-line="261">
-</span><span class="athl-line" data-athl-line="262"><span style="color: #8b949e;">/********************************</span>
-</span><span class="athl-line" data-athl-line="263"><span style="color: #8b949e;"> * Control Structures</span>
-</span><span class="athl-line" data-athl-line="264"><span style="color: #8b949e;"> */</span>
+</span><span class="athl-line" data-athl-line="262">/********************************
+</span><span class="athl-line" data-athl-line="263"> * Control Structures
+</span><span class="athl-line" data-athl-line="264"> */
 </span><span class="athl-line" data-athl-line="265">
-</span><span class="athl-line" data-athl-line="266"><span style="color: #ff7b72;">if</span> (<span style="color: #79c0ff;">true</span>) {
-</span><span class="athl-line" data-athl-line="267">    <span style="color: #ff7b72;">print</span> <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">I get printed</span>&#39;</span>;
+</span><span class="athl-line" data-athl-line="266">if (true) {
+</span><span class="athl-line" data-athl-line="267">    print &#39;I get printed&#39;;
 </span><span class="athl-line" data-athl-line="268">}
 </span><span class="athl-line" data-athl-line="269">
-</span><span class="athl-line" data-athl-line="270"><span style="color: #ff7b72;">if</span> (<span style="color: #79c0ff;">false</span>) {
-</span><span class="athl-line" data-athl-line="271">    <span style="color: #ff7b72;">print</span> <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">I don</span>\&#39;<span style="color: #a5d6ff;">t</span>&#39;</span>;
-</span><span class="athl-line" data-athl-line="272">} <span style="color: #ff7b72;">else</span> {
-</span><span class="athl-line" data-athl-line="273">    <span style="color: #ff7b72;">print</span> <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">I get printed</span>&#39;</span>;
+</span><span class="athl-line" data-athl-line="270">if (false) {
+</span><span class="athl-line" data-athl-line="271">    print &#39;I don\&#39;t&#39;;
+</span><span class="athl-line" data-athl-line="272">} else {
+</span><span class="athl-line" data-athl-line="273">    print &#39;I get printed&#39;;
 </span><span class="athl-line" data-athl-line="274">}
 </span><span class="athl-line" data-athl-line="275">
-</span><span class="athl-line" data-athl-line="276"><span style="color: #ff7b72;">if</span> (<span style="color: #79c0ff;">false</span>) {
-</span><span class="athl-line" data-athl-line="277">    <span style="color: #ff7b72;">print</span> <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">Does not get printed</span>&#39;</span>;
-</span><span class="athl-line" data-athl-line="278">} <span style="color: #ff7b72;">elseif</span> (<span style="color: #79c0ff;">true</span>) {
-</span><span class="athl-line" data-athl-line="279">    <span style="color: #ff7b72;">print</span> <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">Does</span>&#39;</span>;
+</span><span class="athl-line" data-athl-line="276">if (false) {
+</span><span class="athl-line" data-athl-line="277">    print &#39;Does not get printed&#39;;
+</span><span class="athl-line" data-athl-line="278">} elseif (true) {
+</span><span class="athl-line" data-athl-line="279">    print &#39;Does&#39;;
 </span><span class="athl-line" data-athl-line="280">}
 </span><span class="athl-line" data-athl-line="281">
-</span><span class="athl-line" data-athl-line="282"><span style="color: #8b949e;">// ternary operator</span>
-</span><span class="athl-line" data-athl-line="283"><span style="color: #ff7b72;">print</span> (<span style="color: #79c0ff;">false</span> ? <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">Does not get printed</span>&#39;</span> : <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">Does</span>&#39;</span>);
+</span><span class="athl-line" data-athl-line="282">// ternary operator
+</span><span class="athl-line" data-athl-line="283">print (false ? &#39;Does not get printed&#39; : &#39;Does&#39;);
 </span><span class="athl-line" data-athl-line="284">
-</span><span class="athl-line" data-athl-line="285"><span style="color: #8b949e;">// ternary shortcut operator since PHP 5.3</span>
-</span><span class="athl-line" data-athl-line="286"><span style="color: #8b949e;">// equivalent of &quot;$x ? $x : &#39;Does&#39;&quot;</span>
-</span><span class="athl-line" data-athl-line="287"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>x</span> = <span style="color: #79c0ff;">false</span>;
-</span><span class="athl-line" data-athl-line="288"><span style="color: #ff7b72;">print</span>(<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>x</span> ?: <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">Does</span>&#39;</span>);
+</span><span class="athl-line" data-athl-line="285">// ternary shortcut operator since PHP 5.3
+</span><span class="athl-line" data-athl-line="286">// equivalent of &quot;$x ? $x : &#39;Does&#39;&quot;
+</span><span class="athl-line" data-athl-line="287">$x = false;
+</span><span class="athl-line" data-athl-line="288">print($x ?: &#39;Does&#39;);
 </span><span class="athl-line" data-athl-line="289">
-</span><span class="athl-line" data-athl-line="290"><span style="color: #8b949e;">// null coalesce operator since php 7</span>
-</span><span class="athl-line" data-athl-line="291"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>a</span> = <span style="color: #79c0ff;">null</span>;
-</span><span class="athl-line" data-athl-line="292"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>b</span> = <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">Does print</span>&#39;</span>;
-</span><span class="athl-line" data-athl-line="293"><span style="color: #ff7b72;">echo</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>a</span> ?? <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">a is not set</span>&#39;</span>; <span style="color: #8b949e;">// prints &#39;a is not set&#39;</span>
-</span><span class="athl-line" data-athl-line="294"><span style="color: #ff7b72;">echo</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>b</span> ?? <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">b is not set</span>&#39;</span>; <span style="color: #8b949e;">// prints &#39;Does print&#39;</span>
+</span><span class="athl-line" data-athl-line="290">// null coalesce operator since php 7
+</span><span class="athl-line" data-athl-line="291">$a = null;
+</span><span class="athl-line" data-athl-line="292">$b = &#39;Does print&#39;;
+</span><span class="athl-line" data-athl-line="293">echo $a ?? &#39;a is not set&#39;; // prints &#39;a is not set&#39;
+</span><span class="athl-line" data-athl-line="294">echo $b ?? &#39;b is not set&#39;; // prints &#39;Does print&#39;
 </span><span class="athl-line" data-athl-line="295">
 </span><span class="athl-line" data-athl-line="296">
-</span><span class="athl-line" data-athl-line="297"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>x</span> = <span style="color: #79c0ff;">0</span>;
-</span><span class="athl-line" data-athl-line="298"><span style="color: #ff7b72;">if</span> (<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>x</span> === <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">0</span>&#39;</span>) {
-</span><span class="athl-line" data-athl-line="299">    <span style="color: #ff7b72;">print</span> <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">Does not print</span>&#39;</span>;
-</span><span class="athl-line" data-athl-line="300">} <span style="color: #ff7b72;">elseif</span> (<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>x</span> == <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">1</span>&#39;</span>) {
-</span><span class="athl-line" data-athl-line="301">    <span style="color: #ff7b72;">print</span> <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">Does not print</span>&#39;</span>;
-</span><span class="athl-line" data-athl-line="302">} <span style="color: #ff7b72;">else</span> {
-</span><span class="athl-line" data-athl-line="303">    <span style="color: #ff7b72;">print</span> <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">Does print</span>&#39;</span>;
+</span><span class="athl-line" data-athl-line="297">$x = 0;
+</span><span class="athl-line" data-athl-line="298">if ($x === &#39;0&#39;) {
+</span><span class="athl-line" data-athl-line="299">    print &#39;Does not print&#39;;
+</span><span class="athl-line" data-athl-line="300">} elseif ($x == &#39;1&#39;) {
+</span><span class="athl-line" data-athl-line="301">    print &#39;Does not print&#39;;
+</span><span class="athl-line" data-athl-line="302">} else {
+</span><span class="athl-line" data-athl-line="303">    print &#39;Does print&#39;;
 </span><span class="athl-line" data-athl-line="304">}
 </span><span class="athl-line" data-athl-line="305">
 </span><span class="athl-line" data-athl-line="306">
 </span><span class="athl-line" data-athl-line="307">
-</span><span class="athl-line" data-athl-line="308"><span style="color: #8b949e;">// This alternative syntax is useful for templates:</span>
-</span><span class="athl-line" data-athl-line="309"><span style="color: #7ee787;">?&gt;</span>
+</span><span class="athl-line" data-athl-line="308">// This alternative syntax is useful for templates:
+</span><span class="athl-line" data-athl-line="309">?&gt;
 </span><span class="athl-line" data-athl-line="310">
-</span><span class="athl-line" data-athl-line="311"><span style="color: #7ee787;">&lt;?php</span> <span style="color: #ff7b72;">if</span> (<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>x</span>): <span style="color: #7ee787;">?&gt;</span>
+</span><span class="athl-line" data-athl-line="311">&lt;?php if ($x): ?&gt;
 </span><span class="athl-line" data-athl-line="312">This is displayed if the test is truthy.
-</span><span class="athl-line" data-athl-line="313"><span style="color: #7ee787;">&lt;?php</span> <span style="color: #ff7b72;">else</span>: <span style="color: #7ee787;">?&gt;</span>
+</span><span class="athl-line" data-athl-line="313">&lt;?php else: ?&gt;
 </span><span class="athl-line" data-athl-line="314">This is displayed otherwise.
-</span><span class="athl-line" data-athl-line="315"><span style="color: #7ee787;">&lt;?php</span> <span style="color: #ff7b72;">endif</span>; <span style="color: #7ee787;">?&gt;</span>
+</span><span class="athl-line" data-athl-line="315">&lt;?php endif; ?&gt;
 </span><span class="athl-line" data-athl-line="316">
-</span><span class="athl-line" data-athl-line="317"><span style="color: #7ee787;">&lt;?php</span>
+</span><span class="athl-line" data-athl-line="317">&lt;?php
 </span><span class="athl-line" data-athl-line="318">
-</span><span class="athl-line" data-athl-line="319"><span style="color: #8b949e;">// Use switch to save some logic.</span>
-</span><span class="athl-line" data-athl-line="320"><span style="color: #ff7b72;">switch</span> (<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>x</span>) {
-</span><span class="athl-line" data-athl-line="321">    <span style="color: #ff7b72;">case</span> <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">0</span>&#39;</span>:
-</span><span class="athl-line" data-athl-line="322">        <span style="color: #ff7b72;">print</span> <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">Switch does type coercion</span>&#39;</span>;
-</span><span class="athl-line" data-athl-line="323">        <span style="color: #ff7b72;">break</span>; <span style="color: #8b949e;">// You must include a break, or you will fall through</span>
-</span><span class="athl-line" data-athl-line="324">               <span style="color: #8b949e;">// to cases &#39;two&#39; and &#39;three&#39;</span>
-</span><span class="athl-line" data-athl-line="325">    <span style="color: #ff7b72;">case</span> <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">two</span>&#39;</span>:
-</span><span class="athl-line" data-athl-line="326">    <span style="color: #ff7b72;">case</span> <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">three</span>&#39;</span>:
-</span><span class="athl-line" data-athl-line="327">        <span style="color: #8b949e;">// Do something if $variable is either &#39;two&#39; or &#39;three&#39;</span>
-</span><span class="athl-line" data-athl-line="328">        <span style="color: #ff7b72;">break</span>;
-</span><span class="athl-line" data-athl-line="329">    <span style="color: #ff7b72;">default</span>:
-</span><span class="athl-line" data-athl-line="330">        <span style="color: #8b949e;">// Do something by default</span>
+</span><span class="athl-line" data-athl-line="319">// Use switch to save some logic.
+</span><span class="athl-line" data-athl-line="320">switch ($x) {
+</span><span class="athl-line" data-athl-line="321">    case &#39;0&#39;:
+</span><span class="athl-line" data-athl-line="322">        print &#39;Switch does type coercion&#39;;
+</span><span class="athl-line" data-athl-line="323">        break; // You must include a break, or you will fall through
+</span><span class="athl-line" data-athl-line="324">               // to cases &#39;two&#39; and &#39;three&#39;
+</span><span class="athl-line" data-athl-line="325">    case &#39;two&#39;:
+</span><span class="athl-line" data-athl-line="326">    case &#39;three&#39;:
+</span><span class="athl-line" data-athl-line="327">        // Do something if $variable is either &#39;two&#39; or &#39;three&#39;
+</span><span class="athl-line" data-athl-line="328">        break;
+</span><span class="athl-line" data-athl-line="329">    default:
+</span><span class="athl-line" data-athl-line="330">        // Do something by default
 </span><span class="athl-line" data-athl-line="331">}
 </span><span class="athl-line" data-athl-line="332">
-</span><span class="athl-line" data-athl-line="333"><span style="color: #8b949e;">// While, do...while and for loops are probably familiar</span>
-</span><span class="athl-line" data-athl-line="334"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>i</span> = <span style="color: #79c0ff;">0</span>;
-</span><span class="athl-line" data-athl-line="335"><span style="color: #ff7b72;">while</span> (<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>i</span> &lt; <span style="color: #79c0ff;">5</span>) {
-</span><span class="athl-line" data-athl-line="336">    <span style="color: #ff7b72;">echo</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>i</span>++;
-</span><span class="athl-line" data-athl-line="337">} <span style="color: #8b949e;">// Prints &quot;01234&quot;</span>
+</span><span class="athl-line" data-athl-line="333">// While, do...while and for loops are probably familiar
+</span><span class="athl-line" data-athl-line="334">$i = 0;
+</span><span class="athl-line" data-athl-line="335">while ($i &lt; 5) {
+</span><span class="athl-line" data-athl-line="336">    echo $i++;
+</span><span class="athl-line" data-athl-line="337">} // Prints &quot;01234&quot;
 </span><span class="athl-line" data-athl-line="338">
-</span><span class="athl-line" data-athl-line="339"><span style="color: #ff7b72;">echo</span> <span style="color: #a5d6ff;">&quot;\n&quot;</span>;
+</span><span class="athl-line" data-athl-line="339">echo &quot;\n&quot;;
 </span><span class="athl-line" data-athl-line="340">
-</span><span class="athl-line" data-athl-line="341"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>i</span> = <span style="color: #79c0ff;">0</span>;
-</span><span class="athl-line" data-athl-line="342"><span style="color: #ff7b72;">do</span> {
-</span><span class="athl-line" data-athl-line="343">    <span style="color: #ff7b72;">echo</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>i</span>++;
-</span><span class="athl-line" data-athl-line="344">} <span style="color: #ff7b72;">while</span> (<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>i</span> &lt; <span style="color: #79c0ff;">5</span>); <span style="color: #8b949e;">// Prints &quot;01234&quot;</span>
+</span><span class="athl-line" data-athl-line="341">$i = 0;
+</span><span class="athl-line" data-athl-line="342">do {
+</span><span class="athl-line" data-athl-line="343">    echo $i++;
+</span><span class="athl-line" data-athl-line="344">} while ($i &lt; 5); // Prints &quot;01234&quot;
 </span><span class="athl-line" data-athl-line="345">
-</span><span class="athl-line" data-athl-line="346"><span style="color: #ff7b72;">echo</span> <span style="color: #a5d6ff;">&quot;\n&quot;</span>;
+</span><span class="athl-line" data-athl-line="346">echo &quot;\n&quot;;
 </span><span class="athl-line" data-athl-line="347">
-</span><span class="athl-line" data-athl-line="348"><span style="color: #ff7b72;">for</span> (<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>x</span> = <span style="color: #79c0ff;">0</span>; <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>x</span> &lt; <span style="color: #79c0ff;">10</span>; <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>x</span>++) {
-</span><span class="athl-line" data-athl-line="349">    <span style="color: #ff7b72;">echo</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>x</span>;
-</span><span class="athl-line" data-athl-line="350">} <span style="color: #8b949e;">// Prints &quot;0123456789&quot;</span>
+</span><span class="athl-line" data-athl-line="348">for ($x = 0; $x &lt; 10; $x++) {
+</span><span class="athl-line" data-athl-line="349">    echo $x;
+</span><span class="athl-line" data-athl-line="350">} // Prints &quot;0123456789&quot;
 </span><span class="athl-line" data-athl-line="351">
-</span><span class="athl-line" data-athl-line="352"><span style="color: #ff7b72;">echo</span> <span style="color: #a5d6ff;">&quot;\n&quot;</span>;
+</span><span class="athl-line" data-athl-line="352">echo &quot;\n&quot;;
 </span><span class="athl-line" data-athl-line="353">
-</span><span class="athl-line" data-athl-line="354"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>wheels</span> = [<span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">bicycle</span>&#39;</span> =&gt; <span style="color: #79c0ff;">2</span>, <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">car</span>&#39;</span> =&gt; <span style="color: #79c0ff;">4</span>];
+</span><span class="athl-line" data-athl-line="354">$wheels = [&#39;bicycle&#39; =&gt; 2, &#39;car&#39; =&gt; 4];
 </span><span class="athl-line" data-athl-line="355">
-</span><span class="athl-line" data-athl-line="356"><span style="color: #8b949e;">// Foreach loops can iterate over arrays</span>
-</span><span class="athl-line" data-athl-line="357"><span style="color: #ff7b72;">foreach</span> (<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>wheels</span> <span style="color: #ff7b72;">as</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>wheel_count</span>) {
-</span><span class="athl-line" data-athl-line="358">    <span style="color: #ff7b72;">echo</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>wheel_count</span>;
-</span><span class="athl-line" data-athl-line="359">} <span style="color: #8b949e;">// Prints &quot;24&quot;</span>
+</span><span class="athl-line" data-athl-line="356">// Foreach loops can iterate over arrays
+</span><span class="athl-line" data-athl-line="357">foreach ($wheels as $wheel_count) {
+</span><span class="athl-line" data-athl-line="358">    echo $wheel_count;
+</span><span class="athl-line" data-athl-line="359">} // Prints &quot;24&quot;
 </span><span class="athl-line" data-athl-line="360">
-</span><span class="athl-line" data-athl-line="361"><span style="color: #ff7b72;">echo</span> <span style="color: #a5d6ff;">&quot;\n&quot;</span>;
+</span><span class="athl-line" data-athl-line="361">echo &quot;\n&quot;;
 </span><span class="athl-line" data-athl-line="362">
-</span><span class="athl-line" data-athl-line="363"><span style="color: #8b949e;">// You can iterate over the keys as well as the values</span>
-</span><span class="athl-line" data-athl-line="364"><span style="color: #ff7b72;">foreach</span> (<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>wheels</span> <span style="color: #ff7b72;">as</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>vehicle</span> =&gt; <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>wheel_count</span>) {
-</span><span class="athl-line" data-athl-line="365">    <span style="color: #ff7b72;">echo</span> <span style="color: #a5d6ff;">&quot;<span style="color: #a5d6ff;">A </span><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>vehicle</span><span style="color: #a5d6ff;"> has </span><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>wheel_count</span><span style="color: #a5d6ff;"> wheels</span>&quot;</span>;
+</span><span class="athl-line" data-athl-line="363">// You can iterate over the keys as well as the values
+</span><span class="athl-line" data-athl-line="364">foreach ($wheels as $vehicle =&gt; $wheel_count) {
+</span><span class="athl-line" data-athl-line="365">    echo &quot;A $vehicle has $wheel_count wheels&quot;;
 </span><span class="athl-line" data-athl-line="366">}
 </span><span class="athl-line" data-athl-line="367">
-</span><span class="athl-line" data-athl-line="368"><span style="color: #ff7b72;">echo</span> <span style="color: #a5d6ff;">&quot;\n&quot;</span>;
+</span><span class="athl-line" data-athl-line="368">echo &quot;\n&quot;;
 </span><span class="athl-line" data-athl-line="369">
-</span><span class="athl-line" data-athl-line="370"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>i</span> = <span style="color: #79c0ff;">0</span>;
-</span><span class="athl-line" data-athl-line="371"><span style="color: #ff7b72;">while</span> (<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>i</span> &lt; <span style="color: #79c0ff;">5</span>) {
-</span><span class="athl-line" data-athl-line="372">    <span style="color: #ff7b72;">if</span> (<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>i</span> === <span style="color: #79c0ff;">3</span>) {
-</span><span class="athl-line" data-athl-line="373">        <span style="color: #ff7b72;">break</span>; <span style="color: #8b949e;">// Exit out of the while loop</span>
+</span><span class="athl-line" data-athl-line="370">$i = 0;
+</span><span class="athl-line" data-athl-line="371">while ($i &lt; 5) {
+</span><span class="athl-line" data-athl-line="372">    if ($i === 3) {
+</span><span class="athl-line" data-athl-line="373">        break; // Exit out of the while loop
 </span><span class="athl-line" data-athl-line="374">    }
-</span><span class="athl-line" data-athl-line="375">    <span style="color: #ff7b72;">echo</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>i</span>++;
-</span><span class="athl-line" data-athl-line="376">} <span style="color: #8b949e;">// Prints &quot;012&quot;</span>
+</span><span class="athl-line" data-athl-line="375">    echo $i++;
+</span><span class="athl-line" data-athl-line="376">} // Prints &quot;012&quot;
 </span><span class="athl-line" data-athl-line="377">
-</span><span class="athl-line" data-athl-line="378"><span style="color: #ff7b72;">for</span> (<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>i</span> = <span style="color: #79c0ff;">0</span>; <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>i</span> &lt; <span style="color: #79c0ff;">5</span>; <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>i</span>++) {
-</span><span class="athl-line" data-athl-line="379">    <span style="color: #ff7b72;">if</span> (<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>i</span> === <span style="color: #79c0ff;">3</span>) {
-</span><span class="athl-line" data-athl-line="380">        <span style="color: #ff7b72;">continue</span>; <span style="color: #8b949e;">// Skip this iteration of the loop</span>
+</span><span class="athl-line" data-athl-line="378">for ($i = 0; $i &lt; 5; $i++) {
+</span><span class="athl-line" data-athl-line="379">    if ($i === 3) {
+</span><span class="athl-line" data-athl-line="380">        continue; // Skip this iteration of the loop
 </span><span class="athl-line" data-athl-line="381">    }
-</span><span class="athl-line" data-athl-line="382">    <span style="color: #ff7b72;">echo</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>i</span>;
-</span><span class="athl-line" data-athl-line="383">} <span style="color: #8b949e;">// Prints &quot;0124&quot;</span>
+</span><span class="athl-line" data-athl-line="382">    echo $i;
+</span><span class="athl-line" data-athl-line="383">} // Prints &quot;0124&quot;
 </span><span class="athl-line" data-athl-line="384">
 </span><span class="athl-line" data-athl-line="385">
-</span><span class="athl-line" data-athl-line="386"><span style="color: #8b949e;">/********************************</span>
-</span><span class="athl-line" data-athl-line="387"><span style="color: #8b949e;"> * Functions</span>
-</span><span class="athl-line" data-athl-line="388"><span style="color: #8b949e;"> */</span>
+</span><span class="athl-line" data-athl-line="386">/********************************
+</span><span class="athl-line" data-athl-line="387"> * Functions
+</span><span class="athl-line" data-athl-line="388"> */
 </span><span class="athl-line" data-athl-line="389">
-</span><span class="athl-line" data-athl-line="390"><span style="color: #8b949e;">// Define a function with &quot;function&quot;:</span>
-</span><span class="athl-line" data-athl-line="391"><span style="color: #ff7b72;">function</span> <span style="color: #d2a8ff;">my_function</span> () {
-</span><span class="athl-line" data-athl-line="392">    <span style="color: #ff7b72;">return</span> <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">Hello</span>&#39;</span>;
+</span><span class="athl-line" data-athl-line="390">// Define a function with &quot;function&quot;:
+</span><span class="athl-line" data-athl-line="391">function my_function () {
+</span><span class="athl-line" data-athl-line="392">    return &#39;Hello&#39;;
 </span><span class="athl-line" data-athl-line="393">}
 </span><span class="athl-line" data-athl-line="394">
-</span><span class="athl-line" data-athl-line="395"><span style="color: #ff7b72;">echo</span> <span style="color: #d2a8ff;">my_function</span>(); <span style="color: #8b949e;">// =&gt; &quot;Hello&quot;</span>
+</span><span class="athl-line" data-athl-line="395">echo my_function(); // =&gt; &quot;Hello&quot;
 </span><span class="athl-line" data-athl-line="396">
-</span><span class="athl-line" data-athl-line="397"><span style="color: #8b949e;">// A valid function name starts with a letter or underscore, followed by any</span>
-</span><span class="athl-line" data-athl-line="398"><span style="color: #8b949e;">// number of letters, numbers, or underscores.</span>
+</span><span class="athl-line" data-athl-line="397">// A valid function name starts with a letter or underscore, followed by any
+</span><span class="athl-line" data-athl-line="398">// number of letters, numbers, or underscores.
 </span><span class="athl-line" data-athl-line="399">
-</span><span class="athl-line" data-athl-line="400"><span style="color: #ff7b72;">function</span> <span style="color: #d2a8ff;">add</span> (<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>x</span>, <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>y</span> = <span style="color: #79c0ff;">1</span>) { <span style="color: #8b949e;">// $y is optional and defaults to 1</span>
-</span><span class="athl-line" data-athl-line="401">    <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>result</span> = <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>x</span> + <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>y</span>;
-</span><span class="athl-line" data-athl-line="402">    <span style="color: #ff7b72;">return</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>result</span>;
+</span><span class="athl-line" data-athl-line="400">function add ($x, $y = 1) { // $y is optional and defaults to 1
+</span><span class="athl-line" data-athl-line="401">    $result = $x + $y;
+</span><span class="athl-line" data-athl-line="402">    return $result;
 </span><span class="athl-line" data-athl-line="403">}
 </span><span class="athl-line" data-athl-line="404">
-</span><span class="athl-line" data-athl-line="405"><span style="color: #ff7b72;">echo</span> <span style="color: #d2a8ff;">add</span>(<span style="color: #79c0ff;">4</span>); <span style="color: #8b949e;">// =&gt; 5</span>
-</span><span class="athl-line" data-athl-line="406"><span style="color: #ff7b72;">echo</span> <span style="color: #d2a8ff;">add</span>(<span style="color: #79c0ff;">4</span>, <span style="color: #79c0ff;">2</span>); <span style="color: #8b949e;">// =&gt; 6</span>
+</span><span class="athl-line" data-athl-line="405">echo add(4); // =&gt; 5
+</span><span class="athl-line" data-athl-line="406">echo add(4, 2); // =&gt; 6
 </span><span class="athl-line" data-athl-line="407">
-</span><span class="athl-line" data-athl-line="408"><span style="color: #8b949e;">// $result is not accessible outside the function</span>
-</span><span class="athl-line" data-athl-line="409"><span style="color: #8b949e;">// print $result; // Gives a warning.</span>
+</span><span class="athl-line" data-athl-line="408">// $result is not accessible outside the function
+</span><span class="athl-line" data-athl-line="409">// print $result; // Gives a warning.
 </span><span class="athl-line" data-athl-line="410">
-</span><span class="athl-line" data-athl-line="411"><span style="color: #8b949e;">// Since PHP 5.3 you can declare anonymous functions;</span>
-</span><span class="athl-line" data-athl-line="412"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>inc</span> = <span style="color: #ff7b72;">function</span> (<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>x</span>) {
-</span><span class="athl-line" data-athl-line="413">    <span style="color: #ff7b72;">return</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>x</span> + <span style="color: #79c0ff;">1</span>;
+</span><span class="athl-line" data-athl-line="411">// Since PHP 5.3 you can declare anonymous functions;
+</span><span class="athl-line" data-athl-line="412">$inc = function ($x) {
+</span><span class="athl-line" data-athl-line="413">    return $x + 1;
 </span><span class="athl-line" data-athl-line="414">};
 </span><span class="athl-line" data-athl-line="415">
-</span><span class="athl-line" data-athl-line="416"><span style="color: #ff7b72;">echo</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>inc</span>(<span style="color: #79c0ff;">2</span>); <span style="color: #8b949e;">// =&gt; 3</span>
+</span><span class="athl-line" data-athl-line="416">echo $inc(2); // =&gt; 3
 </span><span class="athl-line" data-athl-line="417">
-</span><span class="athl-line" data-athl-line="418"><span style="color: #ff7b72;">function</span> <span style="color: #d2a8ff;">foo</span> (<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>x</span>, <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>y</span>, <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>z</span>) {
-</span><span class="athl-line" data-athl-line="419">    <span style="color: #ff7b72;">echo</span> <span style="color: #a5d6ff;">&quot;<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>x</span><span style="color: #a5d6ff;"> - </span><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>y</span><span style="color: #a5d6ff;"> - </span><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>z</span>&quot;</span>;
+</span><span class="athl-line" data-athl-line="418">function foo ($x, $y, $z) {
+</span><span class="athl-line" data-athl-line="419">    echo &quot;$x - $y - $z&quot;;
 </span><span class="athl-line" data-athl-line="420">}
 </span><span class="athl-line" data-athl-line="421">
-</span><span class="athl-line" data-athl-line="422"><span style="color: #8b949e;">// Functions can return functions</span>
-</span><span class="athl-line" data-athl-line="423"><span style="color: #ff7b72;">function</span> <span style="color: #d2a8ff;">bar</span> (<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>x</span>, <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>y</span>) {
-</span><span class="athl-line" data-athl-line="424">    <span style="color: #8b949e;">// Use &#39;use&#39; to bring in outside variables</span>
-</span><span class="athl-line" data-athl-line="425">    <span style="color: #ff7b72;">return</span> <span style="color: #ff7b72;">function</span> (<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>z</span>) <span style="color: #ff7b72;">use</span> (<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>x</span>, <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>y</span>) {
-</span><span class="athl-line" data-athl-line="426">        <span style="color: #d2a8ff;">foo</span>(<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>x</span>, <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>y</span>, <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>z</span>);
+</span><span class="athl-line" data-athl-line="422">// Functions can return functions
+</span><span class="athl-line" data-athl-line="423">function bar ($x, $y) {
+</span><span class="athl-line" data-athl-line="424">    // Use &#39;use&#39; to bring in outside variables
+</span><span class="athl-line" data-athl-line="425">    return function ($z) use ($x, $y) {
+</span><span class="athl-line" data-athl-line="426">        foo($x, $y, $z);
 </span><span class="athl-line" data-athl-line="427">    };
 </span><span class="athl-line" data-athl-line="428">}
 </span><span class="athl-line" data-athl-line="429">
-</span><span class="athl-line" data-athl-line="430"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>bar</span> = <span style="color: #d2a8ff;">bar</span>(<span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">A</span>&#39;</span>, <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">B</span>&#39;</span>);
-</span><span class="athl-line" data-athl-line="431"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>bar</span>(<span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">C</span>&#39;</span>); <span style="color: #8b949e;">// Prints &quot;A - B - C&quot;</span>
+</span><span class="athl-line" data-athl-line="430">$bar = bar(&#39;A&#39;, &#39;B&#39;);
+</span><span class="athl-line" data-athl-line="431">$bar(&#39;C&#39;); // Prints &quot;A - B - C&quot;
 </span><span class="athl-line" data-athl-line="432">
-</span><span class="athl-line" data-athl-line="433"><span style="color: #8b949e;">// You can call named functions using strings</span>
-</span><span class="athl-line" data-athl-line="434"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>function_name</span> = <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">add</span>&#39;</span>;
-</span><span class="athl-line" data-athl-line="435"><span style="color: #ff7b72;">echo</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>function_name</span>(<span style="color: #79c0ff;">1</span>, <span style="color: #79c0ff;">2</span>); <span style="color: #8b949e;">// =&gt; 3</span>
-</span><span class="athl-line" data-athl-line="436"><span style="color: #8b949e;">// Useful for programmatically determining which function to run.</span>
-</span><span class="athl-line" data-athl-line="437"><span style="color: #8b949e;">// Or, use call_user_func(callable $callback [, $parameter [, ... ]]);</span>
+</span><span class="athl-line" data-athl-line="433">// You can call named functions using strings
+</span><span class="athl-line" data-athl-line="434">$function_name = &#39;add&#39;;
+</span><span class="athl-line" data-athl-line="435">echo $function_name(1, 2); // =&gt; 3
+</span><span class="athl-line" data-athl-line="436">// Useful for programmatically determining which function to run.
+</span><span class="athl-line" data-athl-line="437">// Or, use call_user_func(callable $callback [, $parameter [, ... ]]);
 </span><span class="athl-line" data-athl-line="438">
 </span><span class="athl-line" data-athl-line="439">
-</span><span class="athl-line" data-athl-line="440"><span style="color: #8b949e;">// You can get all the parameters passed to a function</span>
-</span><span class="athl-line" data-athl-line="441"><span style="color: #ff7b72;">function</span> <span style="color: #d2a8ff;">parameters</span>() {
-</span><span class="athl-line" data-athl-line="442">    <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>numargs</span> = <span style="color: #d2a8ff;">func_num_args</span>();
-</span><span class="athl-line" data-athl-line="443">    <span style="color: #ff7b72;">if</span> (<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>numargs</span> &gt; <span style="color: #79c0ff;">0</span>) {
-</span><span class="athl-line" data-athl-line="444">        <span style="color: #ff7b72;">echo</span> <span style="color: #d2a8ff;">func_get_arg</span>(<span style="color: #79c0ff;">0</span>) . <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;"> | </span>&#39;</span>;
+</span><span class="athl-line" data-athl-line="440">// You can get all the parameters passed to a function
+</span><span class="athl-line" data-athl-line="441">function parameters() {
+</span><span class="athl-line" data-athl-line="442">    $numargs = func_num_args();
+</span><span class="athl-line" data-athl-line="443">    if ($numargs &gt; 0) {
+</span><span class="athl-line" data-athl-line="444">        echo func_get_arg(0) . &#39; | &#39;;
 </span><span class="athl-line" data-athl-line="445">    }
-</span><span class="athl-line" data-athl-line="446">    <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>args_array</span> = <span style="color: #d2a8ff;">func_get_args</span>();
-</span><span class="athl-line" data-athl-line="447">    <span style="color: #ff7b72;">foreach</span> (<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>args_array</span> <span style="color: #ff7b72;">as</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>key</span> =&gt; <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>arg</span>) {
-</span><span class="athl-line" data-athl-line="448">        <span style="color: #ff7b72;">echo</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>key</span> . <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;"> - </span>&#39;</span> . <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>arg</span> . <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;"> | </span>&#39;</span>;
+</span><span class="athl-line" data-athl-line="446">    $args_array = func_get_args();
+</span><span class="athl-line" data-athl-line="447">    foreach ($args_array as $key =&gt; $arg) {
+</span><span class="athl-line" data-athl-line="448">        echo $key . &#39; - &#39; . $arg . &#39; | &#39;;
 </span><span class="athl-line" data-athl-line="449">    }
 </span><span class="athl-line" data-athl-line="450">}
 </span><span class="athl-line" data-athl-line="451">
-</span><span class="athl-line" data-athl-line="452"><span style="color: #d2a8ff;">parameters</span>(<span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">Hello</span>&#39;</span>, <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">World</span>&#39;</span>); <span style="color: #8b949e;">// Hello | 0 - Hello | 1 - World |</span>
+</span><span class="athl-line" data-athl-line="452">parameters(&#39;Hello&#39;, &#39;World&#39;); // Hello | 0 - Hello | 1 - World |
 </span><span class="athl-line" data-athl-line="453">
-</span><span class="athl-line" data-athl-line="454"><span style="color: #8b949e;">// Since PHP 5.6 you can get a variable number of arguments</span>
-</span><span class="athl-line" data-athl-line="455"><span style="color: #ff7b72;">function</span> <span style="color: #d2a8ff;">variable</span>(<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>word</span>, ...<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>list</span>) {
-</span><span class="athl-line" data-athl-line="456">	<span style="color: #ff7b72;">echo</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>word</span> . <span style="color: #a5d6ff;">&quot;<span style="color: #a5d6ff;"> || </span>&quot;</span>;
-</span><span class="athl-line" data-athl-line="457">	<span style="color: #ff7b72;">foreach</span> (<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>list</span> <span style="color: #ff7b72;">as</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>item</span>) {
-</span><span class="athl-line" data-athl-line="458">		<span style="color: #ff7b72;">echo</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>item</span> . <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;"> | </span>&#39;</span>;
+</span><span class="athl-line" data-athl-line="454">// Since PHP 5.6 you can get a variable number of arguments
+</span><span class="athl-line" data-athl-line="455">function variable($word, ...$list) {
+</span><span class="athl-line" data-athl-line="456">	echo $word . &quot; || &quot;;
+</span><span class="athl-line" data-athl-line="457">	foreach ($list as $item) {
+</span><span class="athl-line" data-athl-line="458">		echo $item . &#39; | &#39;;
 </span><span class="athl-line" data-athl-line="459">	}
 </span><span class="athl-line" data-athl-line="460">}
 </span><span class="athl-line" data-athl-line="461">
-</span><span class="athl-line" data-athl-line="462"><span style="color: #d2a8ff;">variable</span>(<span style="color: #a5d6ff;">&quot;<span style="color: #a5d6ff;">Separate</span>&quot;</span>, <span style="color: #a5d6ff;">&quot;<span style="color: #a5d6ff;">Hello</span>&quot;</span>, <span style="color: #a5d6ff;">&quot;<span style="color: #a5d6ff;">World</span>&quot;</span>); <span style="color: #8b949e;">// Separate || Hello | World |</span>
+</span><span class="athl-line" data-athl-line="462">variable(&quot;Separate&quot;, &quot;Hello&quot;, &quot;World&quot;); // Separate || Hello | World |
 </span><span class="athl-line" data-athl-line="463">
-</span><span class="athl-line" data-athl-line="464"><span style="color: #8b949e;">/********************************</span>
-</span><span class="athl-line" data-athl-line="465"><span style="color: #8b949e;"> * Includes</span>
-</span><span class="athl-line" data-athl-line="466"><span style="color: #8b949e;"> */</span>
+</span><span class="athl-line" data-athl-line="464">/********************************
+</span><span class="athl-line" data-athl-line="465"> * Includes
+</span><span class="athl-line" data-athl-line="466"> */
 </span><span class="athl-line" data-athl-line="467">
-</span><span class="athl-line" data-athl-line="468"><span style="color: #7ee787;">&lt;?php</span>
-</span><span class="athl-line" data-athl-line="469"><span style="color: #8b949e;">// PHP within included files must also begin with a PHP open tag.</span>
+</span><span class="athl-line" data-athl-line="468">&lt;?php
+</span><span class="athl-line" data-athl-line="469">// PHP within included files must also begin with a PHP open tag.
 </span><span class="athl-line" data-athl-line="470">
-</span><span class="athl-line" data-athl-line="471"><span style="color: #ff7b72;">include</span> <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">my-file.php</span>&#39;</span>;
-</span><span class="athl-line" data-athl-line="472"><span style="color: #8b949e;">// The code in my-file.php is now available in the current scope.</span>
-</span><span class="athl-line" data-athl-line="473"><span style="color: #8b949e;">// If the file cannot be included (e.g. file not found), a warning is emitted.</span>
+</span><span class="athl-line" data-athl-line="471">include &#39;my-file.php&#39;;
+</span><span class="athl-line" data-athl-line="472">// The code in my-file.php is now available in the current scope.
+</span><span class="athl-line" data-athl-line="473">// If the file cannot be included (e.g. file not found), a warning is emitted.
 </span><span class="athl-line" data-athl-line="474">
-</span><span class="athl-line" data-athl-line="475"><span style="color: #ff7b72;">include_once</span> <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">my-file.php</span>&#39;</span>;
-</span><span class="athl-line" data-athl-line="476"><span style="color: #8b949e;">// If the code in my-file.php has been included elsewhere, it will</span>
-</span><span class="athl-line" data-athl-line="477"><span style="color: #8b949e;">// not be included again. This prevents multiple class declaration errors</span>
+</span><span class="athl-line" data-athl-line="475">include_once &#39;my-file.php&#39;;
+</span><span class="athl-line" data-athl-line="476">// If the code in my-file.php has been included elsewhere, it will
+</span><span class="athl-line" data-athl-line="477">// not be included again. This prevents multiple class declaration errors
 </span><span class="athl-line" data-athl-line="478">
-</span><span class="athl-line" data-athl-line="479"><span style="color: #ff7b72;">require</span> <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">my-file.php</span>&#39;</span>;
-</span><span class="athl-line" data-athl-line="480"><span style="color: #ff7b72;">require_once</span> <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">my-file.php</span>&#39;</span>;
-</span><span class="athl-line" data-athl-line="481"><span style="color: #8b949e;">// Same as include(), except require() will cause a fatal error if the</span>
-</span><span class="athl-line" data-athl-line="482"><span style="color: #8b949e;">// file cannot be included.</span>
+</span><span class="athl-line" data-athl-line="479">require &#39;my-file.php&#39;;
+</span><span class="athl-line" data-athl-line="480">require_once &#39;my-file.php&#39;;
+</span><span class="athl-line" data-athl-line="481">// Same as include(), except require() will cause a fatal error if the
+</span><span class="athl-line" data-athl-line="482">// file cannot be included.
 </span><span class="athl-line" data-athl-line="483">
-</span><span class="athl-line" data-athl-line="484"><span style="color: #8b949e;">// Contents of my-include.php:</span>
-</span><span class="athl-line" data-athl-line="485"><span style="color: #7ee787;">&lt;?php</span>
+</span><span class="athl-line" data-athl-line="484">// Contents of my-include.php:
+</span><span class="athl-line" data-athl-line="485">&lt;?php
 </span><span class="athl-line" data-athl-line="486">
-</span><span class="athl-line" data-athl-line="487"><span style="color: #ff7b72;">return</span> <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">Anything you like.</span>&#39;</span>;
-</span><span class="athl-line" data-athl-line="488"><span style="color: #8b949e;">// End file</span>
+</span><span class="athl-line" data-athl-line="487">return &#39;Anything you like.&#39;;
+</span><span class="athl-line" data-athl-line="488">// End file
 </span><span class="athl-line" data-athl-line="489">
-</span><span class="athl-line" data-athl-line="490"><span style="color: #8b949e;">// Includes and requires may also return a value.</span>
-</span><span class="athl-line" data-athl-line="491"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>value</span> = <span style="color: #ff7b72;">include</span> <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">my-include.php</span>&#39;</span>;
+</span><span class="athl-line" data-athl-line="490">// Includes and requires may also return a value.
+</span><span class="athl-line" data-athl-line="491">$value = include &#39;my-include.php&#39;;
 </span><span class="athl-line" data-athl-line="492">
-</span><span class="athl-line" data-athl-line="493"><span style="color: #8b949e;">// Files are included based on the file path given or, if none is given,</span>
-</span><span class="athl-line" data-athl-line="494"><span style="color: #8b949e;">// the include_path configuration directive. If the file isn&#39;t found in</span>
-</span><span class="athl-line" data-athl-line="495"><span style="color: #8b949e;">// the include_path, include will finally check in the calling script&#39;s</span>
-</span><span class="athl-line" data-athl-line="496"><span style="color: #8b949e;">// own directory and the current working directory before failing.</span>
-</span><span class="athl-line" data-athl-line="497"><span style="color: #8b949e;">/* */</span>
+</span><span class="athl-line" data-athl-line="493">// Files are included based on the file path given or, if none is given,
+</span><span class="athl-line" data-athl-line="494">// the include_path configuration directive. If the file isn&#39;t found in
+</span><span class="athl-line" data-athl-line="495">// the include_path, include will finally check in the calling script&#39;s
+</span><span class="athl-line" data-athl-line="496">// own directory and the current working directory before failing.
+</span><span class="athl-line" data-athl-line="497">/* */
 </span><span class="athl-line" data-athl-line="498">
-</span><span class="athl-line" data-athl-line="499"><span style="color: #8b949e;">/********************************</span>
-</span><span class="athl-line" data-athl-line="500"><span style="color: #8b949e;"> * Classes</span>
-</span><span class="athl-line" data-athl-line="501"><span style="color: #8b949e;"> */</span>
+</span><span class="athl-line" data-athl-line="499">/********************************
+</span><span class="athl-line" data-athl-line="500"> * Classes
+</span><span class="athl-line" data-athl-line="501"> */
 </span><span class="athl-line" data-athl-line="502">
-</span><span class="athl-line" data-athl-line="503"><span style="color: #8b949e;">// Classes are defined with the class keyword</span>
+</span><span class="athl-line" data-athl-line="503">// Classes are defined with the class keyword
 </span><span class="athl-line" data-athl-line="504">
-</span><span class="athl-line" data-athl-line="505"><span style="color: #ff7b72;">class</span> MyClass
+</span><span class="athl-line" data-athl-line="505">class MyClass
 </span><span class="athl-line" data-athl-line="506">{
-</span><span class="athl-line" data-athl-line="507">    <span style="color: #ff7b72;">const</span> <span style="color: #79c0ff;">MY_CONST</span>      = <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">value</span>&#39;</span>; <span style="color: #8b949e;">// A constant</span>
+</span><span class="athl-line" data-athl-line="507">    const MY_CONST      = &#39;value&#39;; // A constant
 </span><span class="athl-line" data-athl-line="508">
-</span><span class="athl-line" data-athl-line="509">    <span style="color: #ff7b72;">static</span> <span style="color: #79c0ff;"><span style="color: #79c0ff;">$</span>staticVar</span>   = <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">static</span>&#39;</span>;
+</span><span class="athl-line" data-athl-line="509">    static $staticVar   = &#39;static&#39;;
 </span><span class="athl-line" data-athl-line="510">
-</span><span class="athl-line" data-athl-line="511">    <span style="color: #8b949e;">// Static variables and their visibility</span>
-</span><span class="athl-line" data-athl-line="512">    <span style="color: #ff7b72;">public</span> <span style="color: #ff7b72;">static</span> <span style="color: #79c0ff;"><span style="color: #79c0ff;">$</span>publicStaticVar</span> = <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">publicStatic</span>&#39;</span>;
-</span><span class="athl-line" data-athl-line="513">    <span style="color: #8b949e;">// Accessible within the class only</span>
-</span><span class="athl-line" data-athl-line="514">    <span style="color: #ff7b72;">private</span> <span style="color: #ff7b72;">static</span> <span style="color: #79c0ff;"><span style="color: #79c0ff;">$</span>privateStaticVar</span> = <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">privateStatic</span>&#39;</span>;
-</span><span class="athl-line" data-athl-line="515">    <span style="color: #8b949e;">// Accessible from the class and subclasses</span>
-</span><span class="athl-line" data-athl-line="516">    <span style="color: #ff7b72;">protected</span> <span style="color: #ff7b72;">static</span> <span style="color: #79c0ff;"><span style="color: #79c0ff;">$</span>protectedStaticVar</span> = <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">protectedStatic</span>&#39;</span>;
+</span><span class="athl-line" data-athl-line="511">    // Static variables and their visibility
+</span><span class="athl-line" data-athl-line="512">    public static $publicStaticVar = &#39;publicStatic&#39;;
+</span><span class="athl-line" data-athl-line="513">    // Accessible within the class only
+</span><span class="athl-line" data-athl-line="514">    private static $privateStaticVar = &#39;privateStatic&#39;;
+</span><span class="athl-line" data-athl-line="515">    // Accessible from the class and subclasses
+</span><span class="athl-line" data-athl-line="516">    protected static $protectedStaticVar = &#39;protectedStatic&#39;;
 </span><span class="athl-line" data-athl-line="517">
-</span><span class="athl-line" data-athl-line="518">    <span style="color: #8b949e;">// Properties must declare their visibility</span>
-</span><span class="athl-line" data-athl-line="519">    <span style="color: #ff7b72;">public</span> <span style="color: #79c0ff;"><span style="color: #79c0ff;">$</span>property</span>    = <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">public</span>&#39;</span>;
-</span><span class="athl-line" data-athl-line="520">    <span style="color: #ff7b72;">public</span> <span style="color: #79c0ff;"><span style="color: #79c0ff;">$</span>instanceProp</span>;
-</span><span class="athl-line" data-athl-line="521">    <span style="color: #ff7b72;">protected</span> <span style="color: #79c0ff;"><span style="color: #79c0ff;">$</span>prot</span> = <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">protected</span>&#39;</span>; <span style="color: #8b949e;">// Accessible from the class and subclasses</span>
-</span><span class="athl-line" data-athl-line="522">    <span style="color: #ff7b72;">private</span> <span style="color: #79c0ff;"><span style="color: #79c0ff;">$</span>priv</span>   = <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">private</span>&#39;</span>;   <span style="color: #8b949e;">// Accessible within the class only</span>
+</span><span class="athl-line" data-athl-line="518">    // Properties must declare their visibility
+</span><span class="athl-line" data-athl-line="519">    public $property    = &#39;public&#39;;
+</span><span class="athl-line" data-athl-line="520">    public $instanceProp;
+</span><span class="athl-line" data-athl-line="521">    protected $prot = &#39;protected&#39;; // Accessible from the class and subclasses
+</span><span class="athl-line" data-athl-line="522">    private $priv   = &#39;private&#39;;   // Accessible within the class only
 </span><span class="athl-line" data-athl-line="523">
-</span><span class="athl-line" data-athl-line="524">    <span style="color: #8b949e;">// Create a constructor with __construct</span>
-</span><span class="athl-line" data-athl-line="525">    <span style="color: #ff7b72;">public</span> <span style="color: #ff7b72;">function</span> <span style="color: #d2a8ff;">__construct</span>(<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>instanceProp</span>)
+</span><span class="athl-line" data-athl-line="524">    // Create a constructor with __construct
+</span><span class="athl-line" data-athl-line="525">    public function __construct($instanceProp)
 </span><span class="athl-line" data-athl-line="526">    {
-</span><span class="athl-line" data-athl-line="527">        <span style="color: #8b949e;">// Access instance variables with $this</span>
-</span><span class="athl-line" data-athl-line="528">        <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span><span style="color: #79c0ff;">this</span></span>-&gt;<span style="color: #79c0ff;">instanceProp</span> = <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>instanceProp</span>;
+</span><span class="athl-line" data-athl-line="527">        // Access instance variables with $this
+</span><span class="athl-line" data-athl-line="528">        $this-&gt;instanceProp = $instanceProp;
 </span><span class="athl-line" data-athl-line="529">    }
 </span><span class="athl-line" data-athl-line="530">
-</span><span class="athl-line" data-athl-line="531">    <span style="color: #8b949e;">// Methods are declared as functions inside a class</span>
-</span><span class="athl-line" data-athl-line="532">    <span style="color: #ff7b72;">public</span> <span style="color: #ff7b72;">function</span> <span style="color: #d2a8ff;">myMethod</span>()
+</span><span class="athl-line" data-athl-line="531">    // Methods are declared as functions inside a class
+</span><span class="athl-line" data-athl-line="532">    public function myMethod()
 </span><span class="athl-line" data-athl-line="533">    {
-</span><span class="athl-line" data-athl-line="534">        <span style="color: #ff7b72;">print</span> <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">MyClass</span>&#39;</span>;
+</span><span class="athl-line" data-athl-line="534">        print &#39;MyClass&#39;;
 </span><span class="athl-line" data-athl-line="535">    }
 </span><span class="athl-line" data-athl-line="536">
-</span><span class="athl-line" data-athl-line="537">    <span style="color: #8b949e;">// final keyword would make a function unoverridable</span>
-</span><span class="athl-line" data-athl-line="538">    <span style="color: #ff7b72;">final</span> <span style="color: #ff7b72;">function</span> <span style="color: #d2a8ff;">youCannotOverrideMe</span>()
+</span><span class="athl-line" data-athl-line="537">    // final keyword would make a function unoverridable
+</span><span class="athl-line" data-athl-line="538">    final function youCannotOverrideMe()
 </span><span class="athl-line" data-athl-line="539">    {
 </span><span class="athl-line" data-athl-line="540">    }
 </span><span class="athl-line" data-athl-line="541">
-</span><span class="athl-line" data-athl-line="542">    <span style="color: #8b949e;">// Magic Methods</span>
+</span><span class="athl-line" data-athl-line="542">    // Magic Methods
 </span><span class="athl-line" data-athl-line="543">
-</span><span class="athl-line" data-athl-line="544">    <span style="color: #8b949e;">// what to do if Object is treated as a String</span>
-</span><span class="athl-line" data-athl-line="545">    <span style="color: #ff7b72;">public</span> <span style="color: #ff7b72;">function</span> <span style="color: #d2a8ff;">__toString</span>()
+</span><span class="athl-line" data-athl-line="544">    // what to do if Object is treated as a String
+</span><span class="athl-line" data-athl-line="545">    public function __toString()
 </span><span class="athl-line" data-athl-line="546">    {
-</span><span class="athl-line" data-athl-line="547">        <span style="color: #ff7b72;">return</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>property</span>;
+</span><span class="athl-line" data-athl-line="547">        return $property;
 </span><span class="athl-line" data-athl-line="548">    }
 </span><span class="athl-line" data-athl-line="549">
-</span><span class="athl-line" data-athl-line="550">    <span style="color: #8b949e;">// opposite to __construct()</span>
-</span><span class="athl-line" data-athl-line="551">    <span style="color: #8b949e;">// called when object is no longer referenced</span>
-</span><span class="athl-line" data-athl-line="552">    <span style="color: #ff7b72;">public</span> <span style="color: #ff7b72;">function</span> <span style="color: #d2a8ff;">__destruct</span>()
+</span><span class="athl-line" data-athl-line="550">    // opposite to __construct()
+</span><span class="athl-line" data-athl-line="551">    // called when object is no longer referenced
+</span><span class="athl-line" data-athl-line="552">    public function __destruct()
 </span><span class="athl-line" data-athl-line="553">    {
-</span><span class="athl-line" data-athl-line="554">        <span style="color: #ff7b72;">print</span> <span style="color: #a5d6ff;">&quot;<span style="color: #a5d6ff;">Destroying</span>&quot;</span>;
+</span><span class="athl-line" data-athl-line="554">        print &quot;Destroying&quot;;
 </span><span class="athl-line" data-athl-line="555">    }
 </span><span class="athl-line" data-athl-line="556">
-</span><span class="athl-line" data-athl-line="557"><span style="color: #8b949e;">/*</span>
-</span><span class="athl-line" data-athl-line="558"><span style="color: #8b949e;"> * Declaring class properties or methods as static makes them accessible without</span>
-</span><span class="athl-line" data-athl-line="559"><span style="color: #8b949e;"> * needing an instantiation of the class. A property declared as static can not</span>
-</span><span class="athl-line" data-athl-line="560"><span style="color: #8b949e;"> * be accessed with an instantiated class object (though a static method can).</span>
-</span><span class="athl-line" data-athl-line="561"><span style="color: #8b949e;"> */</span>
+</span><span class="athl-line" data-athl-line="557">/*
+</span><span class="athl-line" data-athl-line="558"> * Declaring class properties or methods as static makes them accessible without
+</span><span class="athl-line" data-athl-line="559"> * needing an instantiation of the class. A property declared as static can not
+</span><span class="athl-line" data-athl-line="560"> * be accessed with an instantiated class object (though a static method can).
+</span><span class="athl-line" data-athl-line="561"> */
 </span><span class="athl-line" data-athl-line="562">
-</span><span class="athl-line" data-athl-line="563">    <span style="color: #ff7b72;">public</span> <span style="color: #ff7b72;">static</span> <span style="color: #ff7b72;">function</span> <span style="color: #d2a8ff;">myStaticMethod</span>()
+</span><span class="athl-line" data-athl-line="563">    public static function myStaticMethod()
 </span><span class="athl-line" data-athl-line="564">    {
-</span><span class="athl-line" data-athl-line="565">        <span style="color: #ff7b72;">print</span> <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">I am static</span>&#39;</span>;
+</span><span class="athl-line" data-athl-line="565">        print &#39;I am static&#39;;
 </span><span class="athl-line" data-athl-line="566">    }
 </span><span class="athl-line" data-athl-line="567">}
 </span><span class="athl-line" data-athl-line="568">
-</span><span class="athl-line" data-athl-line="569"><span style="color: #8b949e;">// Class constants can always be accessed statically</span>
-</span><span class="athl-line" data-athl-line="570"><span style="color: #ff7b72;">echo</span> MyClass::<span style="color: #79c0ff;">MY_CONST</span>;    <span style="color: #8b949e;">// Outputs &#39;value&#39;;</span>
+</span><span class="athl-line" data-athl-line="569">// Class constants can always be accessed statically
+</span><span class="athl-line" data-athl-line="570">echo MyClass::MY_CONST;    // Outputs &#39;value&#39;;
 </span><span class="athl-line" data-athl-line="571">
-</span><span class="athl-line" data-athl-line="572"><span style="color: #ff7b72;">echo</span> MyClass::<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>staticVar</span>;  <span style="color: #8b949e;">// Outputs &#39;static&#39;;</span>
-</span><span class="athl-line" data-athl-line="573">MyClass::<span style="color: #d2a8ff;">myStaticMethod</span>(); <span style="color: #8b949e;">// Outputs &#39;I am static&#39;;</span>
+</span><span class="athl-line" data-athl-line="572">echo MyClass::$staticVar;  // Outputs &#39;static&#39;;
+</span><span class="athl-line" data-athl-line="573">MyClass::myStaticMethod(); // Outputs &#39;I am static&#39;;
 </span><span class="athl-line" data-athl-line="574">
-</span><span class="athl-line" data-athl-line="575"><span style="color: #8b949e;">// Instantiate classes using new</span>
-</span><span class="athl-line" data-athl-line="576"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>my_class</span> = <span style="color: #ff7b72;">new</span> <span style="color: #ffa657;">MyClass</span>(<span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">An instance property</span>&#39;</span>);
-</span><span class="athl-line" data-athl-line="577"><span style="color: #8b949e;">// The parentheses are optional if not passing in an argument.</span>
+</span><span class="athl-line" data-athl-line="575">// Instantiate classes using new
+</span><span class="athl-line" data-athl-line="576">$my_class = new MyClass(&#39;An instance property&#39;);
+</span><span class="athl-line" data-athl-line="577">// The parentheses are optional if not passing in an argument.
 </span><span class="athl-line" data-athl-line="578">
-</span><span class="athl-line" data-athl-line="579"><span style="color: #8b949e;">// Access class members using -&gt;</span>
-</span><span class="athl-line" data-athl-line="580"><span style="color: #ff7b72;">echo</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>my_class</span>-&gt;<span style="color: #79c0ff;">property</span>;     <span style="color: #8b949e;">// =&gt; &quot;public&quot;</span>
-</span><span class="athl-line" data-athl-line="581"><span style="color: #ff7b72;">echo</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>my_class</span>-&gt;<span style="color: #79c0ff;">instanceProp</span>; <span style="color: #8b949e;">// =&gt; &quot;An instance property&quot;</span>
-</span><span class="athl-line" data-athl-line="582"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>my_class</span>-&gt;<span style="color: #d2a8ff;">myMethod</span>();        <span style="color: #8b949e;">// =&gt; &quot;MyClass&quot;</span>
+</span><span class="athl-line" data-athl-line="579">// Access class members using -&gt;
+</span><span class="athl-line" data-athl-line="580">echo $my_class-&gt;property;     // =&gt; &quot;public&quot;
+</span><span class="athl-line" data-athl-line="581">echo $my_class-&gt;instanceProp; // =&gt; &quot;An instance property&quot;
+</span><span class="athl-line" data-athl-line="582">$my_class-&gt;myMethod();        // =&gt; &quot;MyClass&quot;
 </span><span class="athl-line" data-athl-line="583">
-</span><span class="athl-line" data-athl-line="584"><span style="color: #8b949e;">// Nullsafe operators since PHP 8</span>
-</span><span class="athl-line" data-athl-line="585"><span style="color: #8b949e;">// You can use this when you&#39;re unsure if the abstraction of $my_class contains has a property/method</span>
-</span><span class="athl-line" data-athl-line="586"><span style="color: #8b949e;">// it can be used in conjunction with the nullish coalesce operator to ensure proper value</span>
-</span><span class="athl-line" data-athl-line="587"><span style="color: #ff7b72;">echo</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>my_class</span>-&gt;invalid_property <span style="color: #8b949e;">// An error is thrown</span>
-</span><span class="athl-line" data-athl-line="588">echo <span style="color: #79c0ff;"><span style="color: #79c0ff;">$</span>my_class</span>?-&gt;invalid_property <span style="color: #8b949e;">// =&gt; NULL</span>
-</span><span class="athl-line" data-athl-line="589">echo <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>my_class</span>?-&gt;invalid_property ?? <span style="color: #a5d6ff;">&quot;<span style="color: #a5d6ff;">public</span>&quot;</span> <span style="color: #8b949e;">// =&gt; &quot;public&quot;</span>
+</span><span class="athl-line" data-athl-line="584">// Nullsafe operators since PHP 8
+</span><span class="athl-line" data-athl-line="585">// You can use this when you&#39;re unsure if the abstraction of $my_class contains has a property/method
+</span><span class="athl-line" data-athl-line="586">// it can be used in conjunction with the nullish coalesce operator to ensure proper value
+</span><span class="athl-line" data-athl-line="587">echo $my_class-&gt;invalid_property // An error is thrown
+</span><span class="athl-line" data-athl-line="588">echo $my_class?-&gt;invalid_property // =&gt; NULL
+</span><span class="athl-line" data-athl-line="589">echo $my_class?-&gt;invalid_property ?? &quot;public&quot; // =&gt; &quot;public&quot;
 </span><span class="athl-line" data-athl-line="590">
-</span><span class="athl-line" data-athl-line="591"><span style="color: #8b949e;">// Extend classes using &quot;extends&quot;</span>
-</span><span class="athl-line" data-athl-line="592">class MyOtherClass <span style="color: #ff7b72;">extends</span> MyClass
+</span><span class="athl-line" data-athl-line="591">// Extend classes using &quot;extends&quot;
+</span><span class="athl-line" data-athl-line="592">class MyOtherClass extends MyClass
 </span><span class="athl-line" data-athl-line="593">{
-</span><span class="athl-line" data-athl-line="594">    <span style="color: #ff7b72;">function</span> <span style="color: #d2a8ff;">printProtectedProperty</span>()
+</span><span class="athl-line" data-athl-line="594">    function printProtectedProperty()
 </span><span class="athl-line" data-athl-line="595">    {
-</span><span class="athl-line" data-athl-line="596">        <span style="color: #ff7b72;">echo</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span><span style="color: #79c0ff;">this</span></span>-&gt;<span style="color: #79c0ff;">prot</span>;
+</span><span class="athl-line" data-athl-line="596">        echo $this-&gt;prot;
 </span><span class="athl-line" data-athl-line="597">    }
 </span><span class="athl-line" data-athl-line="598">
-</span><span class="athl-line" data-athl-line="599">    <span style="color: #8b949e;">// Override a method</span>
-</span><span class="athl-line" data-athl-line="600">    <span style="color: #ff7b72;">function</span> <span style="color: #d2a8ff;">myMethod</span>()
+</span><span class="athl-line" data-athl-line="599">    // Override a method
+</span><span class="athl-line" data-athl-line="600">    function myMethod()
 </span><span class="athl-line" data-athl-line="601">    {
-</span><span class="athl-line" data-athl-line="602">        <span style="color: #79c0ff;">parent</span>::<span style="color: #d2a8ff;">myMethod</span>();
-</span><span class="athl-line" data-athl-line="603">        <span style="color: #ff7b72;">print</span> <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;"> &gt; MyOtherClass</span>&#39;</span>;
+</span><span class="athl-line" data-athl-line="602">        parent::myMethod();
+</span><span class="athl-line" data-athl-line="603">        print &#39; &gt; MyOtherClass&#39;;
 </span><span class="athl-line" data-athl-line="604">    }
 </span><span class="athl-line" data-athl-line="605">}
 </span><span class="athl-line" data-athl-line="606">
-</span><span class="athl-line" data-athl-line="607"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>my_other_class</span> = <span style="color: #ff7b72;">new</span> <span style="color: #ffa657;">MyOtherClass</span>(<span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">Instance prop</span>&#39;</span>);
-</span><span class="athl-line" data-athl-line="608"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>my_other_class</span>-&gt;<span style="color: #d2a8ff;">printProtectedProperty</span>(); <span style="color: #8b949e;">// =&gt; Prints &quot;protected&quot;</span>
-</span><span class="athl-line" data-athl-line="609"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>my_other_class</span>-&gt;<span style="color: #d2a8ff;">myMethod</span>();               <span style="color: #8b949e;">// Prints &quot;MyClass &gt; MyOtherClass&quot;</span>
+</span><span class="athl-line" data-athl-line="607">$my_other_class = new MyOtherClass(&#39;Instance prop&#39;);
+</span><span class="athl-line" data-athl-line="608">$my_other_class-&gt;printProtectedProperty(); // =&gt; Prints &quot;protected&quot;
+</span><span class="athl-line" data-athl-line="609">$my_other_class-&gt;myMethod();               // Prints &quot;MyClass &gt; MyOtherClass&quot;
 </span><span class="athl-line" data-athl-line="610">
-</span><span class="athl-line" data-athl-line="611"><span style="color: #ff7b72;">final</span> <span style="color: #ff7b72;">class</span> YouCannotExtendMe
+</span><span class="athl-line" data-athl-line="611">final class YouCannotExtendMe
 </span><span class="athl-line" data-athl-line="612">{
 </span><span class="athl-line" data-athl-line="613">}
 </span><span class="athl-line" data-athl-line="614">
-</span><span class="athl-line" data-athl-line="615"><span style="color: #8b949e;">// You can use &quot;magic methods&quot; to create getters and setters</span>
-</span><span class="athl-line" data-athl-line="616"><span style="color: #ff7b72;">class</span> MyMapClass
+</span><span class="athl-line" data-athl-line="615">// You can use &quot;magic methods&quot; to create getters and setters
+</span><span class="athl-line" data-athl-line="616">class MyMapClass
 </span><span class="athl-line" data-athl-line="617">{
-</span><span class="athl-line" data-athl-line="618">    <span style="color: #ff7b72;">private</span> <span style="color: #79c0ff;"><span style="color: #79c0ff;">$</span>property</span>;
+</span><span class="athl-line" data-athl-line="618">    private $property;
 </span><span class="athl-line" data-athl-line="619">
-</span><span class="athl-line" data-athl-line="620">    <span style="color: #ff7b72;">public</span> <span style="color: #ff7b72;">function</span> <span style="color: #d2a8ff;">__get</span>(<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>key</span>)
+</span><span class="athl-line" data-athl-line="620">    public function __get($key)
 </span><span class="athl-line" data-athl-line="621">    {
-</span><span class="athl-line" data-athl-line="622">        <span style="color: #ff7b72;">return</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span><span style="color: #79c0ff;">this</span></span>-&gt;<span style="color: #79c0ff;"><span style="color: #79c0ff;">$</span>key</span>;
+</span><span class="athl-line" data-athl-line="622">        return $this-&gt;$key;
 </span><span class="athl-line" data-athl-line="623">    }
 </span><span class="athl-line" data-athl-line="624">
-</span><span class="athl-line" data-athl-line="625">    <span style="color: #ff7b72;">public</span> <span style="color: #ff7b72;">function</span> <span style="color: #d2a8ff;">__set</span>(<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>key</span>, <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>value</span>)
+</span><span class="athl-line" data-athl-line="625">    public function __set($key, $value)
 </span><span class="athl-line" data-athl-line="626">    {
-</span><span class="athl-line" data-athl-line="627">        <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span><span style="color: #79c0ff;">this</span></span>-&gt;<span style="color: #79c0ff;"><span style="color: #79c0ff;">$</span>key</span> = <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>value</span>;
+</span><span class="athl-line" data-athl-line="627">        $this-&gt;$key = $value;
 </span><span class="athl-line" data-athl-line="628">    }
 </span><span class="athl-line" data-athl-line="629">}
 </span><span class="athl-line" data-athl-line="630">
-</span><span class="athl-line" data-athl-line="631"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>x</span> = <span style="color: #ff7b72;">new</span> <span style="color: #ffa657;">MyMapClass</span>();
-</span><span class="athl-line" data-athl-line="632"><span style="color: #ff7b72;">echo</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>x</span>-&gt;<span style="color: #79c0ff;">property</span>; <span style="color: #8b949e;">// Will use the __get() method</span>
-</span><span class="athl-line" data-athl-line="633"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>x</span>-&gt;<span style="color: #79c0ff;">property</span> = <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">Something</span>&#39;</span>; <span style="color: #8b949e;">// Will use the __set() method</span>
+</span><span class="athl-line" data-athl-line="631">$x = new MyMapClass();
+</span><span class="athl-line" data-athl-line="632">echo $x-&gt;property; // Will use the __get() method
+</span><span class="athl-line" data-athl-line="633">$x-&gt;property = &#39;Something&#39;; // Will use the __set() method
 </span><span class="athl-line" data-athl-line="634">
-</span><span class="athl-line" data-athl-line="635"><span style="color: #8b949e;">// Classes can be abstract (using the abstract keyword) or</span>
-</span><span class="athl-line" data-athl-line="636"><span style="color: #8b949e;">// implement interfaces (using the implements keyword).</span>
-</span><span class="athl-line" data-athl-line="637"><span style="color: #8b949e;">// An interface is declared with the interface keyword.</span>
+</span><span class="athl-line" data-athl-line="635">// Classes can be abstract (using the abstract keyword) or
+</span><span class="athl-line" data-athl-line="636">// implement interfaces (using the implements keyword).
+</span><span class="athl-line" data-athl-line="637">// An interface is declared with the interface keyword.
 </span><span class="athl-line" data-athl-line="638">
-</span><span class="athl-line" data-athl-line="639"><span style="color: #ff7b72;">interface</span> InterfaceOne
+</span><span class="athl-line" data-athl-line="639">interface InterfaceOne
 </span><span class="athl-line" data-athl-line="640">{
-</span><span class="athl-line" data-athl-line="641">    <span style="color: #ff7b72;">public</span> <span style="color: #ff7b72;">function</span> <span style="color: #d2a8ff;">doSomething</span>();
+</span><span class="athl-line" data-athl-line="641">    public function doSomething();
 </span><span class="athl-line" data-athl-line="642">}
 </span><span class="athl-line" data-athl-line="643">
-</span><span class="athl-line" data-athl-line="644"><span style="color: #ff7b72;">interface</span> InterfaceTwo
+</span><span class="athl-line" data-athl-line="644">interface InterfaceTwo
 </span><span class="athl-line" data-athl-line="645">{
-</span><span class="athl-line" data-athl-line="646">    <span style="color: #ff7b72;">public</span> <span style="color: #ff7b72;">function</span> <span style="color: #d2a8ff;">doSomethingElse</span>();
+</span><span class="athl-line" data-athl-line="646">    public function doSomethingElse();
 </span><span class="athl-line" data-athl-line="647">}
 </span><span class="athl-line" data-athl-line="648">
-</span><span class="athl-line" data-athl-line="649"><span style="color: #8b949e;">// interfaces can be extended</span>
-</span><span class="athl-line" data-athl-line="650"><span style="color: #ff7b72;">interface</span> InterfaceThree <span style="color: #ff7b72;">extends</span> InterfaceTwo
+</span><span class="athl-line" data-athl-line="649">// interfaces can be extended
+</span><span class="athl-line" data-athl-line="650">interface InterfaceThree extends InterfaceTwo
 </span><span class="athl-line" data-athl-line="651">{
-</span><span class="athl-line" data-athl-line="652">    <span style="color: #ff7b72;">public</span> <span style="color: #ff7b72;">function</span> <span style="color: #d2a8ff;">doAnotherContract</span>();
+</span><span class="athl-line" data-athl-line="652">    public function doAnotherContract();
 </span><span class="athl-line" data-athl-line="653">}
 </span><span class="athl-line" data-athl-line="654">
-</span><span class="athl-line" data-athl-line="655"><span style="color: #ff7b72;">abstract</span> <span style="color: #ff7b72;">class</span> MyAbstractClass <span style="color: #ff7b72;">implements</span> InterfaceOne
+</span><span class="athl-line" data-athl-line="655">abstract class MyAbstractClass implements InterfaceOne
 </span><span class="athl-line" data-athl-line="656">{
-</span><span class="athl-line" data-athl-line="657">    <span style="color: #ff7b72;">public</span> <span style="color: #79c0ff;"><span style="color: #79c0ff;">$</span>x</span> = <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">doSomething</span>&#39;</span>;
+</span><span class="athl-line" data-athl-line="657">    public $x = &#39;doSomething&#39;;
 </span><span class="athl-line" data-athl-line="658">}
 </span><span class="athl-line" data-athl-line="659">
-</span><span class="athl-line" data-athl-line="660"><span style="color: #ff7b72;">class</span> MyConcreteClass <span style="color: #ff7b72;">extends</span> MyAbstractClass <span style="color: #ff7b72;">implements</span> InterfaceTwo
+</span><span class="athl-line" data-athl-line="660">class MyConcreteClass extends MyAbstractClass implements InterfaceTwo
 </span><span class="athl-line" data-athl-line="661">{
-</span><span class="athl-line" data-athl-line="662">    <span style="color: #ff7b72;">public</span> <span style="color: #ff7b72;">function</span> <span style="color: #d2a8ff;">doSomething</span>()
+</span><span class="athl-line" data-athl-line="662">    public function doSomething()
 </span><span class="athl-line" data-athl-line="663">    {
-</span><span class="athl-line" data-athl-line="664">        <span style="color: #ff7b72;">echo</span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>x</span>;
+</span><span class="athl-line" data-athl-line="664">        echo $x;
 </span><span class="athl-line" data-athl-line="665">    }
 </span><span class="athl-line" data-athl-line="666">
-</span><span class="athl-line" data-athl-line="667">    <span style="color: #ff7b72;">public</span> <span style="color: #ff7b72;">function</span> <span style="color: #d2a8ff;">doSomethingElse</span>()
+</span><span class="athl-line" data-athl-line="667">    public function doSomethingElse()
 </span><span class="athl-line" data-athl-line="668">    {
-</span><span class="athl-line" data-athl-line="669">        <span style="color: #ff7b72;">echo</span> <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">doSomethingElse</span>&#39;</span>;
+</span><span class="athl-line" data-athl-line="669">        echo &#39;doSomethingElse&#39;;
 </span><span class="athl-line" data-athl-line="670">    }
 </span><span class="athl-line" data-athl-line="671">}
 </span><span class="athl-line" data-athl-line="672">
 </span><span class="athl-line" data-athl-line="673">
-</span><span class="athl-line" data-athl-line="674"><span style="color: #8b949e;">// Classes can implement more than one interface</span>
-</span><span class="athl-line" data-athl-line="675"><span style="color: #ff7b72;">class</span> SomeOtherClass <span style="color: #ff7b72;">implements</span> InterfaceOne, InterfaceTwo
+</span><span class="athl-line" data-athl-line="674">// Classes can implement more than one interface
+</span><span class="athl-line" data-athl-line="675">class SomeOtherClass implements InterfaceOne, InterfaceTwo
 </span><span class="athl-line" data-athl-line="676">{
-</span><span class="athl-line" data-athl-line="677">    <span style="color: #ff7b72;">public</span> <span style="color: #ff7b72;">function</span> <span style="color: #d2a8ff;">doSomething</span>()
+</span><span class="athl-line" data-athl-line="677">    public function doSomething()
 </span><span class="athl-line" data-athl-line="678">    {
-</span><span class="athl-line" data-athl-line="679">        <span style="color: #ff7b72;">echo</span> <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">doSomething</span>&#39;</span>;
+</span><span class="athl-line" data-athl-line="679">        echo &#39;doSomething&#39;;
 </span><span class="athl-line" data-athl-line="680">    }
 </span><span class="athl-line" data-athl-line="681">
-</span><span class="athl-line" data-athl-line="682">    <span style="color: #ff7b72;">public</span> <span style="color: #ff7b72;">function</span> <span style="color: #d2a8ff;">doSomethingElse</span>()
+</span><span class="athl-line" data-athl-line="682">    public function doSomethingElse()
 </span><span class="athl-line" data-athl-line="683">    {
-</span><span class="athl-line" data-athl-line="684">        <span style="color: #ff7b72;">echo</span> <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">doSomethingElse</span>&#39;</span>;
+</span><span class="athl-line" data-athl-line="684">        echo &#39;doSomethingElse&#39;;
 </span><span class="athl-line" data-athl-line="685">    }
 </span><span class="athl-line" data-athl-line="686">}
 </span><span class="athl-line" data-athl-line="687">
 </span><span class="athl-line" data-athl-line="688">
-</span><span class="athl-line" data-athl-line="689"><span style="color: #8b949e;">/********************************</span>
-</span><span class="athl-line" data-athl-line="690"><span style="color: #8b949e;"> * Traits</span>
-</span><span class="athl-line" data-athl-line="691"><span style="color: #8b949e;"> */</span>
+</span><span class="athl-line" data-athl-line="689">/********************************
+</span><span class="athl-line" data-athl-line="690"> * Traits
+</span><span class="athl-line" data-athl-line="691"> */
 </span><span class="athl-line" data-athl-line="692">
-</span><span class="athl-line" data-athl-line="693"><span style="color: #8b949e;">// Traits are available from PHP 5.4.0 and are declared using &quot;trait&quot;</span>
+</span><span class="athl-line" data-athl-line="693">// Traits are available from PHP 5.4.0 and are declared using &quot;trait&quot;
 </span><span class="athl-line" data-athl-line="694">
-</span><span class="athl-line" data-athl-line="695"><span style="color: #ff7b72;">trait</span> MyTrait
+</span><span class="athl-line" data-athl-line="695">trait MyTrait
 </span><span class="athl-line" data-athl-line="696">{
-</span><span class="athl-line" data-athl-line="697">    <span style="color: #ff7b72;">public</span> <span style="color: #ff7b72;">function</span> <span style="color: #d2a8ff;">myTraitMethod</span>()
+</span><span class="athl-line" data-athl-line="697">    public function myTraitMethod()
 </span><span class="athl-line" data-athl-line="698">    {
-</span><span class="athl-line" data-athl-line="699">        <span style="color: #ff7b72;">print</span> <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">I have MyTrait</span>&#39;</span>;
+</span><span class="athl-line" data-athl-line="699">        print &#39;I have MyTrait&#39;;
 </span><span class="athl-line" data-athl-line="700">    }
 </span><span class="athl-line" data-athl-line="701">}
 </span><span class="athl-line" data-athl-line="702">
-</span><span class="athl-line" data-athl-line="703"><span style="color: #ff7b72;">class</span> MyTraitfulClass
+</span><span class="athl-line" data-athl-line="703">class MyTraitfulClass
 </span><span class="athl-line" data-athl-line="704">{
-</span><span class="athl-line" data-athl-line="705">    <span style="color: #ff7b72;">use</span> MyTrait;
+</span><span class="athl-line" data-athl-line="705">    use MyTrait;
 </span><span class="athl-line" data-athl-line="706">}
 </span><span class="athl-line" data-athl-line="707">
-</span><span class="athl-line" data-athl-line="708"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>cls</span> = <span style="color: #ff7b72;">new</span> <span style="color: #ffa657;">MyTraitfulClass</span>();
-</span><span class="athl-line" data-athl-line="709"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>cls</span>-&gt;<span style="color: #d2a8ff;">myTraitMethod</span>(); <span style="color: #8b949e;">// Prints &quot;I have MyTrait&quot;</span>
+</span><span class="athl-line" data-athl-line="708">$cls = new MyTraitfulClass();
+</span><span class="athl-line" data-athl-line="709">$cls-&gt;myTraitMethod(); // Prints &quot;I have MyTrait&quot;
 </span><span class="athl-line" data-athl-line="710">
 </span><span class="athl-line" data-athl-line="711">
-</span><span class="athl-line" data-athl-line="712"><span style="color: #8b949e;">/********************************</span>
-</span><span class="athl-line" data-athl-line="713"><span style="color: #8b949e;"> * Namespaces</span>
-</span><span class="athl-line" data-athl-line="714"><span style="color: #8b949e;"> */</span>
+</span><span class="athl-line" data-athl-line="712">/********************************
+</span><span class="athl-line" data-athl-line="713"> * Namespaces
+</span><span class="athl-line" data-athl-line="714"> */
 </span><span class="athl-line" data-athl-line="715">
-</span><span class="athl-line" data-athl-line="716"><span style="color: #8b949e;">// This section is separate, because a namespace declaration</span>
-</span><span class="athl-line" data-athl-line="717"><span style="color: #8b949e;">// must be the first statement in a file. Let&#39;s pretend that is not the case</span>
+</span><span class="athl-line" data-athl-line="716">// This section is separate, because a namespace declaration
+</span><span class="athl-line" data-athl-line="717">// must be the first statement in a file. Let&#39;s pretend that is not the case
 </span><span class="athl-line" data-athl-line="718">
-</span><span class="athl-line" data-athl-line="719"><span style="color: #7ee787;">&lt;?php</span>
+</span><span class="athl-line" data-athl-line="719">&lt;?php
 </span><span class="athl-line" data-athl-line="720">
-</span><span class="athl-line" data-athl-line="721"><span style="color: #8b949e;">// By default, classes exist in the global namespace, and can</span>
-</span><span class="athl-line" data-athl-line="722"><span style="color: #8b949e;">// be explicitly called with a backslash.</span>
+</span><span class="athl-line" data-athl-line="721">// By default, classes exist in the global namespace, and can
+</span><span class="athl-line" data-athl-line="722">// be explicitly called with a backslash.
 </span><span class="athl-line" data-athl-line="723">
-</span><span class="athl-line" data-athl-line="724"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>cls</span> = <span style="color: #ff7b72;">new</span> \<span style="color: #ffa657;">MyClass</span>();
+</span><span class="athl-line" data-athl-line="724">$cls = new \MyClass();
 </span><span class="athl-line" data-athl-line="725">
 </span><span class="athl-line" data-athl-line="726">
 </span><span class="athl-line" data-athl-line="727">
-</span><span class="athl-line" data-athl-line="728"><span style="color: #8b949e;">// Set the namespace for a file</span>
-</span><span class="athl-line" data-athl-line="729"><span style="color: #ff7b72;">namespace</span> <span style="color: #ff7b72;">My</span>\<span style="color: #ff7b72;">Namespace</span>;
+</span><span class="athl-line" data-athl-line="728">// Set the namespace for a file
+</span><span class="athl-line" data-athl-line="729">namespace My\Namespace;
 </span><span class="athl-line" data-athl-line="730">
-</span><span class="athl-line" data-athl-line="731"><span style="color: #ff7b72;">class</span> MyClass
+</span><span class="athl-line" data-athl-line="731">class MyClass
 </span><span class="athl-line" data-athl-line="732">{
 </span><span class="athl-line" data-athl-line="733">}
 </span><span class="athl-line" data-athl-line="734">
-</span><span class="athl-line" data-athl-line="735"><span style="color: #8b949e;">// (from another file)</span>
-</span><span class="athl-line" data-athl-line="736"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>cls</span> = <span style="color: #ff7b72;">new</span> <span style="color: #ff7b72;">My</span>\<span style="color: #ff7b72;">Namespace</span>\<span style="color: #ffa657;">MyClass</span>;
+</span><span class="athl-line" data-athl-line="735">// (from another file)
+</span><span class="athl-line" data-athl-line="736">$cls = new My\Namespace\MyClass;
 </span><span class="athl-line" data-athl-line="737">
-</span><span class="athl-line" data-athl-line="738"><span style="color: #8b949e;">//Or from within another namespace.</span>
-</span><span class="athl-line" data-athl-line="739"><span style="color: #ff7b72;">namespace</span> <span style="color: #ff7b72;">My</span>\<span style="color: #ff7b72;">Other</span>\<span style="color: #ff7b72;">Namespace</span>;
+</span><span class="athl-line" data-athl-line="738">//Or from within another namespace.
+</span><span class="athl-line" data-athl-line="739">namespace My\Other\Namespace;
 </span><span class="athl-line" data-athl-line="740">
-</span><span class="athl-line" data-athl-line="741"><span style="color: #ff7b72;">use</span> <span style="color: #ff7b72;">My</span>\<span style="color: #ff7b72;">Namespace</span>\<span style="color: #ffa657;">MyClass</span>;
+</span><span class="athl-line" data-athl-line="741">use My\Namespace\MyClass;
 </span><span class="athl-line" data-athl-line="742">
-</span><span class="athl-line" data-athl-line="743"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>cls</span> = <span style="color: #ff7b72;">new</span> <span style="color: #ffa657;">MyClass</span>();
+</span><span class="athl-line" data-athl-line="743">$cls = new MyClass();
 </span><span class="athl-line" data-athl-line="744">
-</span><span class="athl-line" data-athl-line="745"><span style="color: #8b949e;">// Or you can alias the namespace;</span>
+</span><span class="athl-line" data-athl-line="745">// Or you can alias the namespace;
 </span><span class="athl-line" data-athl-line="746">
-</span><span class="athl-line" data-athl-line="747"><span style="color: #ff7b72;">namespace</span> <span style="color: #ff7b72;">My</span>\<span style="color: #ff7b72;">Other</span>\<span style="color: #ff7b72;">Namespace</span>;
+</span><span class="athl-line" data-athl-line="747">namespace My\Other\Namespace;
 </span><span class="athl-line" data-athl-line="748">
-</span><span class="athl-line" data-athl-line="749"><span style="color: #ff7b72;">use</span> <span style="color: #ff7b72;">My</span>\<span style="color: #ffa657;">Namespace</span> <span style="color: #ff7b72;">as</span> <span style="color: #ffa657;">SomeOtherNamespace</span>;
+</span><span class="athl-line" data-athl-line="749">use My\Namespace as SomeOtherNamespace;
 </span><span class="athl-line" data-athl-line="750">
-</span><span class="athl-line" data-athl-line="751"><span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>cls</span> = <span style="color: #ff7b72;">new</span> <span style="color: #ff7b72;">SomeOtherNamespace</span>\<span style="color: #ffa657;">MyClass</span>();
+</span><span class="athl-line" data-athl-line="751">$cls = new SomeOtherNamespace\MyClass();
 </span><span class="athl-line" data-athl-line="752">
 </span><span class="athl-line" data-athl-line="753">
-</span><span class="athl-line" data-athl-line="754"><span style="color: #8b949e;">/**********************</span>
-</span><span class="athl-line" data-athl-line="755"><span style="color: #8b949e;">* Late Static Binding</span>
-</span><span class="athl-line" data-athl-line="756"><span style="color: #8b949e;">*</span>
-</span><span class="athl-line" data-athl-line="757"><span style="color: #8b949e;">*/</span>
+</span><span class="athl-line" data-athl-line="754">/**********************
+</span><span class="athl-line" data-athl-line="755">* Late Static Binding
+</span><span class="athl-line" data-athl-line="756">*
+</span><span class="athl-line" data-athl-line="757">*/
 </span><span class="athl-line" data-athl-line="758">
-</span><span class="athl-line" data-athl-line="759"><span style="color: #ff7b72;">class</span> ParentClass
+</span><span class="athl-line" data-athl-line="759">class ParentClass
 </span><span class="athl-line" data-athl-line="760">{
-</span><span class="athl-line" data-athl-line="761">    <span style="color: #ff7b72;">public</span> <span style="color: #ff7b72;">static</span> <span style="color: #ff7b72;">function</span> <span style="color: #d2a8ff;">who</span>()
+</span><span class="athl-line" data-athl-line="761">    public static function who()
 </span><span class="athl-line" data-athl-line="762">    {
-</span><span class="athl-line" data-athl-line="763">        <span style="color: #ff7b72;">echo</span> <span style="color: #a5d6ff;">&quot;<span style="color: #a5d6ff;">I&#39;m a </span>&quot;</span> . <span style="color: #79c0ff;">__CLASS__</span> . <span style="color: #a5d6ff;">&quot;\n&quot;</span>;
+</span><span class="athl-line" data-athl-line="763">        echo &quot;I&#39;m a &quot; . __CLASS__ . &quot;\n&quot;;
 </span><span class="athl-line" data-athl-line="764">    }
 </span><span class="athl-line" data-athl-line="765">
-</span><span class="athl-line" data-athl-line="766">    <span style="color: #ff7b72;">public</span> <span style="color: #ff7b72;">static</span> <span style="color: #ff7b72;">function</span> <span style="color: #d2a8ff;">test</span>()
+</span><span class="athl-line" data-athl-line="766">    public static function test()
 </span><span class="athl-line" data-athl-line="767">    {
-</span><span class="athl-line" data-athl-line="768">        <span style="color: #8b949e;">// self references the class the method is defined within</span>
-</span><span class="athl-line" data-athl-line="769">        <span style="color: #79c0ff;">self</span>::<span style="color: #d2a8ff;">who</span>();
-</span><span class="athl-line" data-athl-line="770">        <span style="color: #8b949e;">// static references the class the method was invoked on</span>
-</span><span class="athl-line" data-athl-line="771">        <span style="color: #79c0ff;">static</span>::<span style="color: #d2a8ff;">who</span>();
+</span><span class="athl-line" data-athl-line="768">        // self references the class the method is defined within
+</span><span class="athl-line" data-athl-line="769">        self::who();
+</span><span class="athl-line" data-athl-line="770">        // static references the class the method was invoked on
+</span><span class="athl-line" data-athl-line="771">        static::who();
 </span><span class="athl-line" data-athl-line="772">    }
 </span><span class="athl-line" data-athl-line="773">}
 </span><span class="athl-line" data-athl-line="774">
-</span><span class="athl-line" data-athl-line="775">ParentClass::<span style="color: #d2a8ff;">test</span>();
-</span><span class="athl-line" data-athl-line="776"><span style="color: #8b949e;">/*</span>
-</span><span class="athl-line" data-athl-line="777"><span style="color: #8b949e;">I&#39;m a ParentClass</span>
-</span><span class="athl-line" data-athl-line="778"><span style="color: #8b949e;">I&#39;m a ParentClass</span>
-</span><span class="athl-line" data-athl-line="779"><span style="color: #8b949e;">*/</span>
+</span><span class="athl-line" data-athl-line="775">ParentClass::test();
+</span><span class="athl-line" data-athl-line="776">/*
+</span><span class="athl-line" data-athl-line="777">I&#39;m a ParentClass
+</span><span class="athl-line" data-athl-line="778">I&#39;m a ParentClass
+</span><span class="athl-line" data-athl-line="779">*/
 </span><span class="athl-line" data-athl-line="780">
-</span><span class="athl-line" data-athl-line="781"><span style="color: #ff7b72;">class</span> ChildClass <span style="color: #ff7b72;">extends</span> ParentClass
+</span><span class="athl-line" data-athl-line="781">class ChildClass extends ParentClass
 </span><span class="athl-line" data-athl-line="782">{
-</span><span class="athl-line" data-athl-line="783">    <span style="color: #ff7b72;">public</span> <span style="color: #ff7b72;">static</span> <span style="color: #ff7b72;">function</span> <span style="color: #d2a8ff;">who</span>()
+</span><span class="athl-line" data-athl-line="783">    public static function who()
 </span><span class="athl-line" data-athl-line="784">    {
-</span><span class="athl-line" data-athl-line="785">        <span style="color: #ff7b72;">echo</span> <span style="color: #a5d6ff;">&quot;<span style="color: #a5d6ff;">But I&#39;m </span>&quot;</span> . <span style="color: #79c0ff;">__CLASS__</span> . <span style="color: #a5d6ff;">&quot;\n&quot;</span>;
+</span><span class="athl-line" data-athl-line="785">        echo &quot;But I&#39;m &quot; . __CLASS__ . &quot;\n&quot;;
 </span><span class="athl-line" data-athl-line="786">    }
 </span><span class="athl-line" data-athl-line="787">}
 </span><span class="athl-line" data-athl-line="788">
-</span><span class="athl-line" data-athl-line="789">ChildClass::<span style="color: #d2a8ff;">test</span>();
-</span><span class="athl-line" data-athl-line="790"><span style="color: #8b949e;">/*</span>
-</span><span class="athl-line" data-athl-line="791"><span style="color: #8b949e;">I&#39;m a ParentClass</span>
-</span><span class="athl-line" data-athl-line="792"><span style="color: #8b949e;">But I&#39;m ChildClass</span>
-</span><span class="athl-line" data-athl-line="793"><span style="color: #8b949e;">*/</span>
+</span><span class="athl-line" data-athl-line="789">ChildClass::test();
+</span><span class="athl-line" data-athl-line="790">/*
+</span><span class="athl-line" data-athl-line="791">I&#39;m a ParentClass
+</span><span class="athl-line" data-athl-line="792">But I&#39;m ChildClass
+</span><span class="athl-line" data-athl-line="793">*/
 </span><span class="athl-line" data-athl-line="794">
-</span><span class="athl-line" data-athl-line="795"><span style="color: #8b949e;">/**********************</span>
-</span><span class="athl-line" data-athl-line="796"><span style="color: #8b949e;">*  Magic constants</span>
-</span><span class="athl-line" data-athl-line="797"><span style="color: #8b949e;">*</span>
-</span><span class="athl-line" data-athl-line="798"><span style="color: #8b949e;">*/</span>
+</span><span class="athl-line" data-athl-line="795">/**********************
+</span><span class="athl-line" data-athl-line="796">*  Magic constants
+</span><span class="athl-line" data-athl-line="797">*
+</span><span class="athl-line" data-athl-line="798">*/
 </span><span class="athl-line" data-athl-line="799">
-</span><span class="athl-line" data-athl-line="800"><span style="color: #8b949e;">// Get current class name. Must be used inside a class declaration.</span>
-</span><span class="athl-line" data-athl-line="801"><span style="color: #ff7b72;">echo</span> <span style="color: #a5d6ff;">&quot;<span style="color: #a5d6ff;">Current class name is </span>&quot;</span> . <span style="color: #79c0ff;">__CLASS__</span>;
+</span><span class="athl-line" data-athl-line="800">// Get current class name. Must be used inside a class declaration.
+</span><span class="athl-line" data-athl-line="801">echo &quot;Current class name is &quot; . __CLASS__;
 </span><span class="athl-line" data-athl-line="802">
-</span><span class="athl-line" data-athl-line="803"><span style="color: #8b949e;">// Get full path directory of a file</span>
-</span><span class="athl-line" data-athl-line="804"><span style="color: #ff7b72;">echo</span> <span style="color: #a5d6ff;">&quot;<span style="color: #a5d6ff;">Current directory is </span>&quot;</span> . <span style="color: #79c0ff;">__DIR__</span>;
+</span><span class="athl-line" data-athl-line="803">// Get full path directory of a file
+</span><span class="athl-line" data-athl-line="804">echo &quot;Current directory is &quot; . __DIR__;
 </span><span class="athl-line" data-athl-line="805">
-</span><span class="athl-line" data-athl-line="806">    <span style="color: #8b949e;">// Typical usage</span>
-</span><span class="athl-line" data-athl-line="807">    <span style="color: #ff7b72;">require</span> <span style="color: #79c0ff;">__DIR__</span> . <span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">/vendor/autoload.php</span>&#39;</span>;
+</span><span class="athl-line" data-athl-line="806">    // Typical usage
+</span><span class="athl-line" data-athl-line="807">    require __DIR__ . &#39;/vendor/autoload.php&#39;;
 </span><span class="athl-line" data-athl-line="808">
-</span><span class="athl-line" data-athl-line="809"><span style="color: #8b949e;">// Get full path of a file</span>
-</span><span class="athl-line" data-athl-line="810"><span style="color: #ff7b72;">echo</span> <span style="color: #a5d6ff;">&quot;<span style="color: #a5d6ff;">Current file path is </span>&quot;</span> . <span style="color: #79c0ff;">__FILE__</span>;
+</span><span class="athl-line" data-athl-line="809">// Get full path of a file
+</span><span class="athl-line" data-athl-line="810">echo &quot;Current file path is &quot; . __FILE__;
 </span><span class="athl-line" data-athl-line="811">
-</span><span class="athl-line" data-athl-line="812"><span style="color: #8b949e;">// Get current function name</span>
-</span><span class="athl-line" data-athl-line="813"><span style="color: #ff7b72;">echo</span> <span style="color: #a5d6ff;">&quot;<span style="color: #a5d6ff;">Current function name is </span>&quot;</span> . <span style="color: #79c0ff;">__FUNCTION__</span>;
+</span><span class="athl-line" data-athl-line="812">// Get current function name
+</span><span class="athl-line" data-athl-line="813">echo &quot;Current function name is &quot; . __FUNCTION__;
 </span><span class="athl-line" data-athl-line="814">
-</span><span class="athl-line" data-athl-line="815"><span style="color: #8b949e;">// Get current line number</span>
-</span><span class="athl-line" data-athl-line="816"><span style="color: #ff7b72;">echo</span> <span style="color: #a5d6ff;">&quot;<span style="color: #a5d6ff;">Current line number is </span>&quot;</span> . <span style="color: #79c0ff;">__LINE__</span>;
+</span><span class="athl-line" data-athl-line="815">// Get current line number
+</span><span class="athl-line" data-athl-line="816">echo &quot;Current line number is &quot; . __LINE__;
 </span><span class="athl-line" data-athl-line="817">
-</span><span class="athl-line" data-athl-line="818"><span style="color: #8b949e;">// Get the name of the current method. Only returns a value when used inside a trait or object declaration.</span>
-</span><span class="athl-line" data-athl-line="819"><span style="color: #ff7b72;">echo</span> <span style="color: #a5d6ff;">&quot;<span style="color: #a5d6ff;">Current method is </span>&quot;</span> . <span style="color: #79c0ff;">__METHOD__</span>;
+</span><span class="athl-line" data-athl-line="818">// Get the name of the current method. Only returns a value when used inside a trait or object declaration.
+</span><span class="athl-line" data-athl-line="819">echo &quot;Current method is &quot; . __METHOD__;
 </span><span class="athl-line" data-athl-line="820">
-</span><span class="athl-line" data-athl-line="821"><span style="color: #8b949e;">// Get the name of the current namespace</span>
-</span><span class="athl-line" data-athl-line="822"><span style="color: #ff7b72;">echo</span> <span style="color: #a5d6ff;">&quot;<span style="color: #a5d6ff;">Current namespace is </span>&quot;</span> . <span style="color: #79c0ff;">__NAMESPACE__</span>;
+</span><span class="athl-line" data-athl-line="821">// Get the name of the current namespace
+</span><span class="athl-line" data-athl-line="822">echo &quot;Current namespace is &quot; . __NAMESPACE__;
 </span><span class="athl-line" data-athl-line="823">
-</span><span class="athl-line" data-athl-line="824"><span style="color: #8b949e;">// Get the name of the current trait. Only returns a value when used inside a trait or object declaration.</span>
-</span><span class="athl-line" data-athl-line="825"><span style="color: #ff7b72;">echo</span> <span style="color: #a5d6ff;">&quot;<span style="color: #a5d6ff;">Current trait is </span>&quot;</span> . <span style="color: #79c0ff;">__TRAIT__</span>;
+</span><span class="athl-line" data-athl-line="824">// Get the name of the current trait. Only returns a value when used inside a trait or object declaration.
+</span><span class="athl-line" data-athl-line="825">echo &quot;Current trait is &quot; . __TRAIT__;
 </span><span class="athl-line" data-athl-line="826">
-</span><span class="athl-line" data-athl-line="827"><span style="color: #8b949e;">/**********************</span>
-</span><span class="athl-line" data-athl-line="828"><span style="color: #8b949e;">*  Error Handling</span>
-</span><span class="athl-line" data-athl-line="829"><span style="color: #8b949e;">*</span>
-</span><span class="athl-line" data-athl-line="830"><span style="color: #8b949e;">*/</span>
+</span><span class="athl-line" data-athl-line="827">/**********************
+</span><span class="athl-line" data-athl-line="828">*  Error Handling
+</span><span class="athl-line" data-athl-line="829">*
+</span><span class="athl-line" data-athl-line="830">*/
 </span><span class="athl-line" data-athl-line="831">
-</span><span class="athl-line" data-athl-line="832"><span style="color: #8b949e;">// Simple error handling can be done with try catch block</span>
+</span><span class="athl-line" data-athl-line="832">// Simple error handling can be done with try catch block
 </span><span class="athl-line" data-athl-line="833">
-</span><span class="athl-line" data-athl-line="834"><span style="color: #ff7b72;">try</span> {
-</span><span class="athl-line" data-athl-line="835">    <span style="color: #8b949e;">// Do something</span>
-</span><span class="athl-line" data-athl-line="836">} <span style="color: #ff7b72;">catch</span> (<span style="color: #ffa657;"><span style="color: #ffa657;">Exception</span></span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>e</span>) {
-</span><span class="athl-line" data-athl-line="837">    <span style="color: #8b949e;">// Handle exception</span>
+</span><span class="athl-line" data-athl-line="834">try {
+</span><span class="athl-line" data-athl-line="835">    // Do something
+</span><span class="athl-line" data-athl-line="836">} catch (Exception $e) {
+</span><span class="athl-line" data-athl-line="837">    // Handle exception
 </span><span class="athl-line" data-athl-line="838">}
 </span><span class="athl-line" data-athl-line="839">
-</span><span class="athl-line" data-athl-line="840"><span style="color: #8b949e;">// When using try catch blocks in a namespaced environment it is important to</span>
-</span><span class="athl-line" data-athl-line="841"><span style="color: #8b949e;">// escape to the global namespace, because Exceptions are classes, and the</span>
-</span><span class="athl-line" data-athl-line="842"><span style="color: #8b949e;">// Exception class exists in the global namespace. This can be done using a</span>
-</span><span class="athl-line" data-athl-line="843"><span style="color: #8b949e;">// leading backslash to catch the Exception.</span>
+</span><span class="athl-line" data-athl-line="840">// When using try catch blocks in a namespaced environment it is important to
+</span><span class="athl-line" data-athl-line="841">// escape to the global namespace, because Exceptions are classes, and the
+</span><span class="athl-line" data-athl-line="842">// Exception class exists in the global namespace. This can be done using a
+</span><span class="athl-line" data-athl-line="843">// leading backslash to catch the Exception.
 </span><span class="athl-line" data-athl-line="844">
-</span><span class="athl-line" data-athl-line="845"><span style="color: #ff7b72;">try</span> {
-</span><span class="athl-line" data-athl-line="846">    <span style="color: #8b949e;">// Do something</span>
-</span><span class="athl-line" data-athl-line="847">} <span style="color: #ff7b72;">catch</span> (<span style="color: #ffa657;">\<span style="color: #ffa657;">Exception</span></span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>e</span>) {
-</span><span class="athl-line" data-athl-line="848">    <span style="color: #8b949e;">// Handle exception</span>
+</span><span class="athl-line" data-athl-line="845">try {
+</span><span class="athl-line" data-athl-line="846">    // Do something
+</span><span class="athl-line" data-athl-line="847">} catch (\Exception $e) {
+</span><span class="athl-line" data-athl-line="848">    // Handle exception
 </span><span class="athl-line" data-athl-line="849">}
 </span><span class="athl-line" data-athl-line="850">
-</span><span class="athl-line" data-athl-line="851"><span style="color: #8b949e;">// Custom exceptions</span>
+</span><span class="athl-line" data-athl-line="851">// Custom exceptions
 </span><span class="athl-line" data-athl-line="852">
-</span><span class="athl-line" data-athl-line="853"><span style="color: #ff7b72;">class</span> MyException <span style="color: #ff7b72;">extends</span> Exception {}
+</span><span class="athl-line" data-athl-line="853">class MyException extends Exception {}
 </span><span class="athl-line" data-athl-line="854">
-</span><span class="athl-line" data-athl-line="855"><span style="color: #ff7b72;">try</span> {
+</span><span class="athl-line" data-athl-line="855">try {
 </span><span class="athl-line" data-athl-line="856">
-</span><span class="athl-line" data-athl-line="857">    <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>condition</span> = <span style="color: #79c0ff;">true</span>;
+</span><span class="athl-line" data-athl-line="857">    $condition = true;
 </span><span class="athl-line" data-athl-line="858">
-</span><span class="athl-line" data-athl-line="859">    <span style="color: #ff7b72;">if</span> (<span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>condition</span>) {
-</span><span class="athl-line" data-athl-line="860">        <span style="color: #ff7b72;">throw</span> <span style="color: #ff7b72;">new</span> <span style="color: #ffa657;">MyException</span>(<span style="color: #a5d6ff;">&#39;<span style="color: #a5d6ff;">Something just happened</span>&#39;</span>);
+</span><span class="athl-line" data-athl-line="859">    if ($condition) {
+</span><span class="athl-line" data-athl-line="860">        throw new MyException(&#39;Something just happened&#39;);
 </span><span class="athl-line" data-athl-line="861">    }
 </span><span class="athl-line" data-athl-line="862">
-</span><span class="athl-line" data-athl-line="863">} <span style="color: #ff7b72;">catch</span> (<span style="color: #ffa657;"><span style="color: #ffa657;">MyException</span></span> <span style="color: #e6edf3;"><span style="color: #79c0ff;">$</span>e</span>) {
-</span><span class="athl-line" data-athl-line="864">    <span style="color: #8b949e;">// Handle my exception</span>
+</span><span class="athl-line" data-athl-line="863">} catch (MyException $e) {
+</span><span class="athl-line" data-athl-line="864">    // Handle my exception
 </span><span class="athl-line" data-athl-line="865">}
 </span></code></pre>
 </body>
