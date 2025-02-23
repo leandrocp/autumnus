@@ -1,179 +1,155 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-  <head>
-    <title>Code Samples - Autumnus Syntax Highlighter</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<head>
+    <title>Autumnus Syntax Highlighter</title>
+    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
-      * {
-        font-family: "Inter", sans-serif;
-      }
+        * { font-family: 'Inter', sans-serif; }
     </style>
-  </head>
-  <body class="bg-gray-50 min-h-screen">
-    <div id="root"></div>
-    <script type="text/babel">
-      const Select = React.forwardRef(({ children, ...props }, ref) => (
-        <select
-          ref={ref}
-          className="flex h-10 w-full items-center justify-between rounded-md border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          {...props}
-        >
-          {children}
-        </select>
-      ));
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto py-8 px-4">
+        <div class="rounded-lg border bg-white shadow-sm p-6">
+            <div class="space-y-1.5 mb-6">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-2xl font-semibold tracking-tight">Autumnus Syntax Highlighter</h2>
+                    <div class="flex gap-6 text-sm">
+                        <div class="flex items-center gap-2">
+                            <span class="font-medium">Rust:</span>
+                            <a href="https://crates.io/crates/autumnus" class="text-blue-600 hover:underline inline-flex items-center gap-1" target="_blank">
+                                <svg class="w-4 h-4" viewBox="0 0 512 512" fill="currentColor">
+                                    <path d="M239.1 6.3l-208 78c-18.7 7-31.1 25-31.1 45v225.1c0 18.2 10.3 34.8 26.5 42.9l208 104c13.5 6.8 29.4 6.8 42.9 0l208-104c16.3-8.1 26.5-24.8 26.5-42.9V129.3c0-20-12.4-37.9-31.1-44.9l-208-78C262 2.2 250 2.2 239.1 6.3zM256 68.4l192 72v1.1l-192 78-192-78v-1.1l192-72zm32 356V275.5l160-65v133.9l-160 80z"/>
+                                </svg>
+                                crates.io
+                            </a>
+                            <a href="https://github.com/leandrocp/autumnus" class="text-blue-600 hover:underline inline-flex items-center gap-1" target="_blank">
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                                </svg>
+                                GitHub
+                            </a>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-medium">Elixir:</span>
+                            <a href="https://hex.pm/packages/autumn" class="text-blue-600 hover:underline inline-flex items-center gap-1" target="_blank">
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 0c1.714 0 3.316.317 4.808.95L12 5.757 7.192.95A12.003 12.003 0 0112 0zM1.082 7.616L5.757 12l-4.675 4.384A11.966 11.966 0 010 12c0-1.532.372-2.975 1.082-4.384zM22.918 7.616C23.628 9.025 24 10.468 24 12s-.372 2.975-1.082 4.384L18.243 12l4.675-4.384zM12 18.243l4.808 4.807A12.003 12.003 0 0112 24a12.003 12.003 0 01-4.808-.95L12 18.243z"/>
+                                </svg>
+                                hex.pm
+                            </a>
+                            <a href="https://github.com/leandrocp/autumn" class="text-blue-600 hover:underline inline-flex items-center gap-1" target="_blank">
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                                </svg>
+                                GitHub
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-500">Select a language and theme to preview the code sample.</p>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row gap-4 mb-6">
+                <div class="flex-1 space-y-1.5">
+                    <label class="text-sm font-medium leading-none">
+                        Language
+                    </label>
+                    <select id="language" class="flex h-10 w-full items-center justify-between rounded-md border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                    </select>
+                </div>
+                <div class="flex-1 space-y-1.5">
+                    <label class="text-sm font-medium leading-none">
+                        Theme
+                    </label>
+                    <select id="theme" class="flex h-10 w-full items-center justify-between rounded-md border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                    </select>
+                </div>
+            </div>
 
-      function App() {
-        const [language, setLanguage] = React.useState("rust");
-        const [theme, setTheme] = React.useState("catppuccin_frappe");
-        const [content, setContent] = React.useState("");
+            <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+                <div id="content" class="p-6"></div>
+            </div>
+        </div>
+        <footer class="mt-8 text-sm text-gray-500 text-center">
+            <p>Sample code extracted from <a href="https://github.com/adambard/learnxinyminutes-docs" class="text-blue-600 hover:underline" target="_blank">Learn X in Y Minutes</a></p>
+        </footer>
+    </div>
 
-        const languages = [
-          "bash",
-          "css",
-          "c",
-          "cpp",
-          "csharp",
-          "elixir",
-          "html",
-          "erlang",
-          "lua",
-          "php",
-          "ruby",
-          "rust",
-          "swift",
-        ];
-
-        const themes = [
-          "catppuccin_frappe",
-          "catppuccin_latte",
-          "dracula",
-          "github_dark",
-          "github_light",
-          "gruvbox_dark",
-          "gruvbox_light",
-          "kanagawa_lotus",
-          "kanagawa_wave",
-          "solarized_dark",
-          "solarized_light",
-          "tokyonight_day",
-          "tokyonight_night",
-          "vscode_dark",
-          "vscode_light",
-        ];
-
-        const loadContent = async () => {
-          try {
-            const response = await fetch(`${language}.${theme}.html`);
-            const text = await response.text();
-            setContent(text);
-          } catch (error) {
-            console.error("Error:", error);
-            setContent("Error loading content");
-          }
+    <script>
+        const languages = {
+            bash: 'Bash',
+            c: 'C',
+            cpp: 'C++',
+            csharp: 'C#',
+            css: 'CSS',
+            elixir: 'Elixir',
+            erlang: 'Erlang',
+            html: 'HTML',
+            lua: 'Lua',
+            php: 'PHP',
+            ruby: 'Ruby',
+            rust: 'Rust',
+            swift: 'Swift'
         };
 
-        React.useEffect(() => {
-          loadContent();
-        }, [language, theme]);
+        const themes = [
+            "catppuccin_frappe",
+            "catppuccin_latte",
+            "github_dark",
+            "github_light",
+            "gruvbox_dark",
+            "gruvbox_light",
+            "kanagawa_lotus",
+            "kanagawa_wave",
+            "tokyonight_day",
+            "tokyonight_night"
+        ].sort();
 
-        return (
-          <div className="container mx-auto py-8 px-4">
-            <div className="rounded-lg border bg-white shadow-sm p-6">
-              <div className="space-y-1.5 mb-6">
-                <h2 className="text-2xl font-semibold tracking-tight">
-                  Autumnus Syntax Highlighter
-                </h2>
-                <p className="text-sm text-gray-500">
-                  Select a language and theme to preview the code sample.
-                </p>
-              </div>
+        // Populate language select
+        const languageSelect = document.getElementById('language');
+        for (const [value, label] of Object.entries(languages)) {
+            const option = document.createElement('option');
+            option.value = value;
+            option.textContent = label;
+            languageSelect.appendChild(option);
+        }
 
-              <div className="flex flex-col sm:flex-row gap-4 mb-6">
-                <div className="flex-1 space-y-1.5">
-                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                    Language
-                  </label>
-                  <Select
-                    value={language}
-                    onChange={(e) => setLanguage(e.target.value)}
-                  >
-                    {languages.map((lang) => (
-                      <option key={lang} value={lang}>
-                        {lang.charAt(0).toUpperCase() + lang.slice(1)}
-                      </option>
-                    ))}
-                  </Select>
-                </div>
-                <div className="flex-1 space-y-1.5">
-                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                    Theme
-                  </label>
-                  <Select
-                    value={theme}
-                    onChange={(e) => setTheme(e.target.value)}
-                  >
-                    {themes.map((t) => (
-                      <option key={t} value={t}>
-                        {t
-                          .split("_")
-                          .map(
-                            (word) =>
-                              word.charAt(0).toUpperCase() + word.slice(1),
-                          )
-                          .join(" ")}
-                      </option>
-                    ))}
-                  </Select>
-                </div>
-              </div>
+        // Populate theme select
+        const themeSelect = document.getElementById('theme');
+        for (const theme of themes) {
+            const option = document.createElement('option');
+            option.value = theme;
+            option.textContent = theme.split('_').map(word => 
+                word.charAt(0).toUpperCase() + word.slice(1)
+            ).join(' ');
+            themeSelect.appendChild(option);
+        }
 
-              <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-                <div
-                  className="p-6"
-                  dangerouslySetInnerHTML={{ __html: content }}
-                />
-              </div>
-            </div>
-            <footer className="mt-8 text-sm text-gray-500 text-center">
-              <p className="mb-2">
-                Sample code extracted from{" "}
-                <a
-                  href="https://github.com/adambard/learnxinyminutes-docs"
-                  className="text-blue-600 hover:underline"
-                  target="_blank"
-                >
-                  Learn X in Y Minutes
-                </a>
-              </p>
-              <p>
-                Powered by{" "}
-                <a
-                  href="https://crates.io/crates/autumnus"
-                  className="text-blue-600 hover:underline"
-                  target="_blank"
-                >
-                  Autumnus
-                </a>{" "}
-                (
-                <a
-                  href="https://github.com/leandrocp/autumnus"
-                  className="text-blue-600 hover:underline"
-                  target="_blank"
-                >
-                  GitHub
-                </a>
-                )
-              </p>
-            </footer>
-          </div>
-        );
-      }
+        // Set default values
+        languageSelect.value = 'rust';
+        themeSelect.value = 'catppuccin_frappe';
 
-      ReactDOM.render(<App />, document.getElementById("root"));
+        // Load content function
+        async function loadContent() {
+            const language = languageSelect.value;
+            const theme = themeSelect.value;
+            try {
+                const response = await fetch(`${language}.${theme}.html`);
+                const text = await response.text();
+                document.getElementById('content').innerHTML = text;
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('content').innerHTML = 'Error loading content';
+            }
+        }
+
+        // Add event listeners
+        languageSelect.addEventListener('change', loadContent);
+        themeSelect.addEventListener('change', loadContent);
+
+        // Initial load
+        loadContent();
     </script>
-  </body>
+</body>
 </html>
