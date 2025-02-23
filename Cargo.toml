@@ -4,6 +4,14 @@ version = "0.0.0"
 edition = "2021"
 description = "reserved"
 license = "MIT"
+include = [
+  "/build.rs",
+  "/src/",
+  "/queries/tree-sitter-*/*scm",
+  "/themes/*.json",
+  "/LICENSE",
+  "/README.md",
+]
 
 [dependencies]
 tree-sitter = "0.25.1"
@@ -40,3 +48,10 @@ proc-macro2 = "1.0"
 
 [features]
 dev = []
+
+[profile.release]
+lto = "thin"
+
+[[bin]]
+name = "athl"
+path = "src/main.rs"
