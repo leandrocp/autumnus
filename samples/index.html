@@ -57,6 +57,7 @@
                     </label>
                     <select id="language" class="flex h-10 w-full items-center justify-between rounded-md border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
                     </select>
+                    <p class="text-xs text-gray-500 mt-1">Value: <code class="bg-gray-100 px-1 py-0.5 rounded" id="language-value"></code></p>
                 </div>
                 <div class="flex-1 space-y-1.5">
                     <label class="text-sm font-medium leading-none">
@@ -64,6 +65,7 @@
                     </label>
                     <select id="theme" class="flex h-10 w-full items-center justify-between rounded-md border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
                     </select>
+                    <p class="text-xs text-gray-500 mt-1">Value: <code class="bg-gray-100 px-1 py-0.5 rounded" id="theme-value"></code></p>
                 </div>
             </div>
 
@@ -145,8 +147,18 @@
         }
 
         // Add event listeners
-        languageSelect.addEventListener('change', loadContent);
-        themeSelect.addEventListener('change', loadContent);
+        languageSelect.addEventListener('change', () => {
+            document.getElementById('language-value').textContent = languageSelect.value;
+            loadContent();
+        });
+        themeSelect.addEventListener('change', () => {
+            document.getElementById('theme-value').textContent = themeSelect.value;
+            loadContent();
+        });
+
+        // Set initial values
+        document.getElementById('language-value').textContent = languageSelect.value;
+        document.getElementById('theme-value').textContent = themeSelect.value;
 
         // Initial load
         loadContent();
