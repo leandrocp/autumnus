@@ -2,8 +2,8 @@ use anyhow::Result;
 use autumnus::languages::Language;
 use clap::{Parser, Subcommand, ValueEnum};
 use std::fmt::Display;
-use std::path::{Path, PathBuf};
 use std::fs;
+use std::path::{Path, PathBuf};
 use strum::IntoEnumIterator;
 
 #[cfg(feature = "dev")]
@@ -19,6 +19,7 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     ListLanguages,
+    ListThemes,
 
     Highlight {
         path: String,
@@ -63,6 +64,8 @@ fn main() -> Result<()> {
     match cli.command {
         Commands::ListLanguages => list_languages(),
 
+        Commands::ListThemes => list_themes(),
+
         Commands::Highlight {
             path,
             formatter,
@@ -79,6 +82,17 @@ fn main() -> Result<()> {
         #[cfg(feature = "dev")]
         Commands::GenSamples => gen_samples(),
     }
+}
+
+fn list_themes() -> Result<()> {
+    let mut themes: Vec<_> = autumnus::themes::ALL_THEMES.iter().collect();
+    themes.sort_by(|a, b| a.name.cmp(&b.name));
+
+    for theme in themes {
+        println!("{}", theme.name);
+    }
+
+    Ok(())
 }
 
 fn list_languages() -> Result<()> {
