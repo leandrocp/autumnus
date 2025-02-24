@@ -5,10 +5,27 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 fn main() {
-    println!("cargo:rerun-if-changed=queries/");
-
+    vendored_parsers();
+    queries();
     themes();
-    vendored_parsers()
+}
+
+fn vendored_parsers() {
+    let parsers = vec![TreeSitterParser {
+        name: "tree-sitter-dockerfile",
+        src_dir: "vendored_parsers/tree-sitter-dockerfile/src",
+        extra_files: vec!["scanner.c"],
+    }];
+
+    for parser in &parsers {
+        println!("cargo:rerun-if-changed={}", parser.src_dir);
+    }
+
+    parsers.par_iter().for_each(|p| p.build());
+}
+
+fn queries() {
+    println!("cargo:rerun-if-changed=queries/");
 }
 
 fn themes() {
@@ -117,18 +134,4 @@ impl TreeSitterParser {
 
         build.compile(self.name);
     }
-}
-
-fn vendored_parsers() {
-    let parsers = vec![TreeSitterParser {
-        name: "tree-sitter-dockerfile",
-        src_dir: "vendored_parsers/tree-sitter-dockerfile/src",
-        extra_files: vec!["scanner.c"],
-    }];
-
-    for parser in &parsers {
-        println!("cargo:rerun-if-changed={}", parser.src_dir);
-    }
-
-    parsers.par_iter().for_each(|p| p.build());
 }
