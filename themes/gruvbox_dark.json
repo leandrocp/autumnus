@@ -198,6 +198,10 @@
       "fg": "#b8bb26",
       "italic": true
     },
+    "string.documentation": {
+      "fg": "#b8bb26",
+      "italic": true
+    },
     "string.escape": {
       "fg": "#fe8019"
     },

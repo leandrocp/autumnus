@@ -201,6 +201,9 @@
     "string": {
       "fg": "#a6e3a1"
     },
+    "string.documentation": {
+      "fg": "#94e2d5"
+    },
     "string.escape": {
       "fg": "#f5c2e7"
     },

@@ -123,6 +123,7 @@ local highlight_groups = {
 	"@punctuation.delimiter",
 	"@punctuation.special",
 	"@string",
+	"@string.documentation",
 	"@string.escape",
 	"@string.regexp",
 	"@string.special",

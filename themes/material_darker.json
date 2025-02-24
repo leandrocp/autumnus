@@ -85,6 +85,9 @@
     "keyword.directive.define": {
       "fg": "#89ddff"
     },
+    "keyword.exception": {
+      "fg": "#f07178"
+    },
     "keyword.function": {
       "fg": "#89ddff"
     },
@@ -190,6 +193,9 @@
       "fg": "#89ddff"
     },
     "string": {
+      "fg": "#c3e88d"
+    },
+    "string.documentation": {
       "fg": "#c3e88d"
     },
     "string.escape": {

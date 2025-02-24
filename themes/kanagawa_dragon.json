@@ -199,6 +199,9 @@
     "string": {
       "fg": "#8a9a7b"
     },
+    "string.documentation": {
+      "fg": "#8a9a7b"
+    },
     "string.escape": {
       "bold": true,
       "fg": "#c4746e"

@@ -190,6 +190,9 @@
     "string": {
       "fg": "#032563"
     },
+    "string.documentation": {
+      "fg": "#032563"
+    },
     "string.escape": {
       "bold": true,
       "fg": "#032563"

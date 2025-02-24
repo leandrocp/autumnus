@@ -224,6 +224,10 @@
       "fg": "#a3be8c",
       "italic": true
     },
+    "string.documentation": {
+      "fg": "#a3be8c",
+      "italic": true
+    },
     "string.escape": {
       "fg": "#b48ead",
       "italic": true
