@@ -335,6 +335,8 @@ fn gen_samples() -> Result<()> {
         "material_oceanic",
         "nord",
         "onedark_dark",
+        "onedark_pro_dark",
+        "onelight",
         "solarized_dark",
         "solarized_light",
         "tokyonight_day",

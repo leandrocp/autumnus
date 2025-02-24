@@ -77,6 +77,11 @@ require("lazy").setup({
 			lazy = false,
 			priority = 1000,
 		},
+		{
+      "olimorris/onedarkpro.nvim",
+			lazy = false,
+			priority = 1000,
+		},
 	},
 	checker = { enabled = true },
 })
