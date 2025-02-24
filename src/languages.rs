@@ -393,7 +393,7 @@ static DOCKERFILE_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_dockerfile) };
 
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn.into()),
+        tree_sitter::Language::new(language_fn),
         "dockerfile",
         include_str!("../queries/dockerfile/highlights.scm"),
         include_str!("../queries/dockerfile/injections.scm"),

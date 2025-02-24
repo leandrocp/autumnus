@@ -1,21 +1,13 @@
 use anyhow::Result;
 use autumnus::languages::Language;
 use clap::{Parser, Subcommand, ValueEnum};
+use std::fmt::Display;
+use std::path::{Path, PathBuf};
+use std::fs;
 use strum::IntoEnumIterator;
 
 #[cfg(feature = "dev")]
-use std::fs;
-use std::{
-    fmt::Display,
-    fs,
-    path::{Path, PathBuf},
-};
-
-#[cfg(feature = "dev")]
 use anyhow::Context;
-
-#[cfg(feature = "dev")]
-use std::path::{Path, PathBuf};
 
 #[derive(Parser)]
 #[command(version)]
