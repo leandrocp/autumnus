@@ -9,6 +9,7 @@ for cmd in nvim jq; do
   fi
 done
 
+# colorscheme:background@theme_name
 themes=(
   "catppuccin-frappe:dark@catppuccin_frappe"
   "catppuccin-latte:light@catppuccin_latte"
@@ -31,6 +32,7 @@ themes=(
   "kanagawa-dragon:dark@kanagawa_dragon"
   "kanagawa-lotus:light@kanagawa_lotus"
   "kanagawa-wave:dark@kanagawa_wave"
+  "material:dark@material"
   "onedark:dark@onedark"
   "solarized:dark@solarized_dark light@solarized_light"
   "tokyonight-day:light@tokyonight_day"

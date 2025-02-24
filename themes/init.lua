@@ -67,6 +67,11 @@ require("lazy").setup({
 			lazy = false,
 			priority = 1000,
 		},
+		{
+			"marko-cerovac/material.nvim",
+			lazy = false,
+			priority = 1000,
+		},
 	},
 	checker = { enabled = true },
 })
