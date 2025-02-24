@@ -8,6 +8,10 @@ use std::{path::Path, sync::LazyLock};
 use strum::{EnumIter, IntoEnumIterator};
 use tree_sitter_highlight::HighlightConfiguration;
 
+extern "C" {
+    fn tree_sitter_dockerfile() -> *const ();
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter)]
 pub(crate) enum Language {
     Bash,
@@ -16,6 +20,7 @@ pub(crate) enum Language {
     Cpp,
     Css,
     Diff,
+    Dockerfile,
     Elixir,
     Erlang,
     Heex,
@@ -39,6 +44,8 @@ impl Language {
             "csharp" => Some(Language::CSharp),
             "css" => Some(Language::Css),
             "diff" => Some(Language::Diff),
+            "dockerfile" => Some(Language::Dockerfile),
+            "docker" => Some(Language::Dockerfile),
             "elixir" => Some(Language::Elixir),
             "erlang" => Some(Language::Erlang),
             "heex" => Some(Language::Heex),
@@ -147,6 +154,16 @@ impl Language {
             ],
             Language::Css => &["*.css"],
             Language::Diff => &["*.diff"],
+            Language::Dockerfile => &[
+                "Dockerfile",
+                "dockerfile",
+                "docker",
+                "Containerfile",
+                "container",
+                "*.dockerfile",
+                "*.docker",
+                "*.container",
+            ],
             Language::Elixir => &["*.ex", "*.exs"],
             Language::Erlang => &[
                 "*.erl",
@@ -229,6 +246,7 @@ impl Language {
             Language::Cpp => "C++",
             Language::Css => "CSS",
             Language::Diff => "Diff",
+            Language::Dockerfile => "Dockerfile",
             Language::Elixir => "Elixir",
             Language::Erlang => "Erlang",
             Language::Heex => "HEEx",
@@ -255,6 +273,7 @@ impl Language {
             Language::Cpp => &CPP_CONFIG,
             Language::Css => &CSS_CONFIG,
             Language::Diff => &DIFF_CONFIG,
+            Language::Dockerfile => &DOCKERFILE_CONFIG,
             Language::Elixir => &ELIXIR_CONFIG,
             Language::Erlang => &ERLANG_CONFIG,
             Language::Heex => &HEEX_CONFIG,
@@ -321,9 +340,19 @@ static CPP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "cpp",
-        format!("{}\n{}", include_str!("../queries/c/highlights.scm"), include_str!("../queries/cpp/highlights.scm")).as_str(),
+        format!(
+            "{}\n{}",
+            include_str!("../queries/c/highlights.scm"),
+            include_str!("../queries/cpp/highlights.scm")
+        )
+        .as_str(),
         include_str!("../queries/cpp/injections.scm"),
-        format!("{}\n{}", include_str!("../queries/c/locals.scm"), include_str!("../queries/cpp/locals.scm")).as_str(),
+        format!(
+            "{}\n{}",
+            include_str!("../queries/c/locals.scm"),
+            include_str!("../queries/cpp/locals.scm")
+        )
+        .as_str(),
     )
     .expect("failed to create cpp highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
@@ -355,7 +384,22 @@ static DIFF_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         include_str!("../queries/diff/injections.scm"),
         "",
     )
-    .expect("failed to create plaintext highlight configuration");
+    .expect("failed to create diff highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static DOCKERFILE_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_dockerfile) };
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn.into()),
+        "dockerfile",
+        include_str!("../queries/dockerfile/highlights.scm"),
+        include_str!("../queries/dockerfile/injections.scm"),
+        "",
+    )
+    .expect("failed to create dockerfile highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
@@ -411,7 +455,12 @@ static HTML_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "html",
-        format!("{}\n{}", include_str!("../queries/html_tags/highlights.scm"), include_str!("../queries/html/highlights.scm")).as_str(),
+        format!(
+            "{}\n{}",
+            include_str!("../queries/html_tags/highlights.scm"),
+            include_str!("../queries/html/highlights.scm")
+        )
+        .as_str(),
         include_str!("../queries/html/injections.scm"),
         include_str!("../queries/html/locals.scm"),
     )
@@ -441,9 +490,24 @@ static PHP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "php",
-        format!("{}\n{}", include_str!("../queries/php_only/highlights.scm"), include_str!("../queries/php/highlights.scm")).as_str(),
-        format!("{}\n{}", include_str!("../queries/php_only/injections.scm"), include_str!("../queries/php/injections.scm")).as_str(),
-        format!("{}\n{}", include_str!("../queries/php_only/locals.scm"), include_str!("../queries/php/locals.scm")).as_str(),
+        format!(
+            "{}\n{}",
+            include_str!("../queries/php_only/highlights.scm"),
+            include_str!("../queries/php/highlights.scm")
+        )
+        .as_str(),
+        format!(
+            "{}\n{}",
+            include_str!("../queries/php_only/injections.scm"),
+            include_str!("../queries/php/injections.scm")
+        )
+        .as_str(),
+        format!(
+            "{}\n{}",
+            include_str!("../queries/php_only/locals.scm"),
+            include_str!("../queries/php/locals.scm")
+        )
+        .as_str(),
     )
     .expect("failed to create php highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);

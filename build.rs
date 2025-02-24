@@ -1,12 +1,14 @@
 use quote::{format_ident, quote};
+use rayon::prelude::*;
 use std::env;
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 fn main() {
     println!("cargo:rerun-if-changed=queries/");
 
     themes();
+    vendored_parsers()
 }
 
 fn themes() {
@@ -58,4 +60,75 @@ fn themes() {
     };
 
     fs::write(dest_path, output.to_string()).unwrap();
+}
+
+// Build vendored tree-sitter parsers
+// https://github.com/Wilfred/difftastic/blob/8953c55cf854ceac2ccb6ece004d6a94a5bfa122/build.rs
+
+struct TreeSitterParser {
+    name: &'static str,
+    src_dir: &'static str,
+    extra_files: Vec<&'static str>,
+}
+
+impl TreeSitterParser {
+    fn build(&self) {
+        let dir = PathBuf::from(&self.src_dir);
+
+        let mut c_files = vec!["parser.c"];
+        let mut cpp_files = vec![];
+
+        for file in &self.extra_files {
+            if file.ends_with(".c") {
+                c_files.push(file);
+            } else {
+                cpp_files.push(file);
+            }
+        }
+
+        if !cpp_files.is_empty() {
+            let mut cpp_build = cc::Build::new();
+            cpp_build
+                .include(&dir)
+                .cpp(true)
+                .std("c++14")
+                .flag_if_supported("-Wno-implicit-fallthrough")
+                .flag_if_supported("-Wno-unused-parameter")
+                .flag_if_supported("-Wno-ignored-qualifiers")
+                .link_lib_modifier("+whole-archive");
+
+            for file in cpp_files {
+                cpp_build.file(dir.join(file));
+            }
+
+            cpp_build.compile(&format!("{}-cpp", self.name));
+        }
+
+        let mut build = cc::Build::new();
+        if cfg!(target_env = "msvc") {
+            build.flag("/utf-8");
+        }
+        build.include(&dir).warnings(false); // ignore unused parameter warnings
+        for file in c_files {
+            build.file(dir.join(file));
+        }
+
+        build.link_lib_modifier("+whole-archive");
+
+        build.compile(self.name);
+    }
+}
+
+fn vendored_parsers() {
+    let parsers = vec![TreeSitterParser {
+        name: "tree-sitter-dockerfile",
+        src_dir: "vendored_parsers/tree-sitter-dockerfile/src",
+        extra_files: vec!["scanner.c"],
+    }];
+
+    for parser in &parsers {
+        println!("cargo:rerun-if-changed={}", parser.src_dir);
+    }
+
+    parsers.par_iter().for_each(|p| p.build());
 }
