@@ -1,0 +1,14 @@
+==================
+Simple
+==================
+
+SHELL ["powershell","-command"]
+
+---
+
+(source_file
+	(shell_instruction
+		(json_string_array
+			(json_string)
+			(json_string))))
+

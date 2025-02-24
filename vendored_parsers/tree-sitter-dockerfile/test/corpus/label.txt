@@ -1,0 +1,109 @@
+==================
+Single key-value
+==================
+
+LABEL key="value"
+
+---
+
+(source_file
+	(label_instruction
+		(label_pair
+			key: (unquoted_string)
+			value: (double_quoted_string))))
+
+==================
+Multi key-value
+==================
+
+LABEL key.1="value1" key.2="value2"
+
+---
+
+(source_file
+	(label_instruction
+		(label_pair
+			key: (unquoted_string)
+			value: (double_quoted_string))
+		(label_pair
+			key: (unquoted_string)
+			value: (double_quoted_string))))
+
+==================
+Multiline
+==================
+
+LABEL key.1="value1" \
+	  key.2="value2"
+
+---
+
+(source_file
+	(label_instruction
+		(label_pair
+			key: (unquoted_string)
+			value: (double_quoted_string))
+		(line_continuation)
+		(label_pair
+			key: (unquoted_string)
+			value: (double_quoted_string))))
+
+==================
+Label
+==================
+
+LABEL key="value${FOO}"
+
+---
+
+(source_file
+	(label_instruction
+		(label_pair
+			key: (unquoted_string)
+			value: (double_quoted_string
+				(expansion
+					(variable))))))
+
+==================
+Stopsignal
+==================
+
+STOPSIGNAL $FOO
+
+---
+
+(source_file
+	(stopsignal_instruction
+		(expansion
+			(variable))))
+
+==================
+User
+==================
+
+USER foo$FOO:bar$BAR
+
+---
+
+(source_file
+	(user_instruction
+		user: (unquoted_string
+			(expansion
+				(variable)))
+		group: (unquoted_string
+			(expansion
+				(variable)))))
+
+==================
+Quoted key
+==================
+
+LABEL "key"="value"
+
+---
+
+(source_file
+	(label_instruction
+		(label_pair
+			key: (double_quoted_string)
+			value: (double_quoted_string))))

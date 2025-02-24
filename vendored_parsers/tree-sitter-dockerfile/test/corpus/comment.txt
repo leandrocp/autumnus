@@ -1,0 +1,10 @@
+==================
+Full line comment
+==================
+
+# Test comment
+
+---
+
+(source_file
+	(comment))

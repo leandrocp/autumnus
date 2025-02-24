@@ -1,0 +1,73 @@
+==================
+Integer
+==================
+
+STOPSIGNAL 9
+
+---
+
+(source_file
+	(stopsignal_instruction))
+
+==================
+Signal name
+==================
+
+STOPSIGNAL SIGKILL
+
+---
+
+(source_file
+	(stopsignal_instruction))
+
+=========================================================
+Signal value with expansions
+=========================================================
+
+STOPSIGNAL A$BC${DE}F
+
+---
+
+(source_file
+  (stopsignal_instruction
+    (expansion
+      (variable))
+    (expansion
+      (variable))))
+
+=========================================================
+No space in signal value
+=========================================================
+
+STOPSIGNAL A B
+
+---
+
+(source_file
+  (ERROR
+    (stopsignal_instruction)))
+
+=========================================================
+No space in signal value before expansion
+=========================================================
+
+STOPSIGNAL A $B
+
+---
+
+(source_file
+  (stopsignal_instruction
+    (ERROR)
+    (expansion
+      (variable))))
+
+=========================================================
+No space in signal value within expansion
+=========================================================
+
+STOPSIGNAL A$ B
+
+---
+
+(source_file
+  (ERROR))

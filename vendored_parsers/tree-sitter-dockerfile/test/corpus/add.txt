@@ -1,0 +1,55 @@
+==================
+No param
+==================
+
+ADD /src ./dst
+
+---
+
+(source_file
+	(add_instruction
+		(path)
+		(path)))
+
+==================
+With param
+==================
+
+ADD --chown=a:b /src ./dst
+
+---
+
+(source_file
+	(add_instruction
+		(param)
+		(path)
+		(path)))
+
+==================
+Multiple files
+==================
+
+ADD src1 src2 dst
+
+---
+
+(source_file
+  (add_instruction
+    (path)
+    (path)
+    (path)))
+
+==================
+Multiple params
+==================
+
+ADD --chown=a:b --chmod=644 src dst
+
+---
+
+(source_file
+  (add_instruction
+    (param)
+    (param)
+    (path)
+    (path)))

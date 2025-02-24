@@ -1,0 +1,151 @@
+==========================
+JSON string arrays
+==========================
+
+CMD ["a", "bcd"]
+CMD ["\"\\"]
+CMD ["\b\f\n\r\t\u0ABC\u12Cd"]
+
+---
+
+(source_file
+  (cmd_instruction
+    (json_string_array
+      (json_string)
+      (json_string)))
+  (cmd_instruction
+    (json_string_array
+      (json_string
+        (escape_sequence)
+        (escape_sequence))))
+  (cmd_instruction
+    (json_string_array
+      (json_string
+        (escape_sequence)
+        (escape_sequence)
+        (escape_sequence)
+        (escape_sequence)
+        (escape_sequence)
+        (escape_sequence)
+        (escape_sequence)))))
+
+==========================
+Double-quoted strings
+==========================
+
+ENV KEY "value"
+ENV KEY "conti\
+nue"
+ENV KEY "quotes: \" '"
+ENV KEY "backslash: \\"
+ENV KEY "not escape sequences: \a \n"
+ENV KEY "expansions: $FOO ${BAR}"
+
+---
+
+(source_file
+  (env_instruction
+    (env_pair
+      (unquoted_string)
+      (double_quoted_string)))
+  (env_instruction
+    (env_pair
+      (unquoted_string)
+      (double_quoted_string
+        (line_continuation))))
+  (env_instruction
+    (env_pair
+      (unquoted_string)
+      (double_quoted_string
+        (escape_sequence))))
+  (env_instruction
+    (env_pair
+      (unquoted_string)
+      (double_quoted_string
+        (escape_sequence))))
+  (env_instruction
+    (env_pair
+      (unquoted_string)
+      (double_quoted_string)))
+  (env_instruction
+    (env_pair
+      (unquoted_string)
+      (double_quoted_string
+        (expansion
+          (variable))
+        (expansion
+          (variable))))))
+
+==========================
+Single-quoted strings
+==========================
+
+ENV KEY 'value'
+ENV KEY 'conti\
+nue'
+ENV KEY 'quotes: \' \''
+ENV KEY 'backslash: \\'
+ENV KEY 'not escape sequences: \a \n'
+
+---
+
+(source_file
+  (env_instruction
+    (env_pair
+      (unquoted_string)
+      (single_quoted_string)))
+  (env_instruction
+    (env_pair
+      (unquoted_string)
+      (single_quoted_string
+        (line_continuation))))
+  (env_instruction
+    (env_pair
+      (unquoted_string)
+      (single_quoted_string
+        (escape_sequence)
+        (escape_sequence))))
+  (env_instruction
+    (env_pair
+      (unquoted_string)
+      (single_quoted_string
+        (escape_sequence))))
+  (env_instruction
+    (env_pair
+      (unquoted_string)
+      (single_quoted_string))))
+
+==========================
+Unquoted strings
+==========================
+
+ENV KEY value
+ENV KEY two\ words
+ENV KEY conti\
+nue
+ENV KEY $FOO${BAR}baz
+
+---
+
+(source_file
+  (env_instruction
+    (env_pair
+      (unquoted_string)
+      (unquoted_string)))
+  (env_instruction
+    (env_pair
+      (unquoted_string)
+      (unquoted_string)))
+  (env_instruction
+    (env_pair
+      (unquoted_string)
+      (unquoted_string
+        (line_continuation))))
+  (env_instruction
+    (env_pair
+      (unquoted_string)
+      (unquoted_string
+        (expansion
+          (variable))
+        (expansion
+          (variable))))))

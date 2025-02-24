@@ -1,0 +1,270 @@
+================================================================================
+Add
+================================================================================
+
+ADD /$FOO ./${bar}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (add_instruction
+    (path
+      (expansion
+        (variable)))
+    (path
+      (expansion
+        (variable)))))
+
+================================================================================
+Copy
+================================================================================
+
+COPY $FOO ./${bar}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (copy_instruction
+    (path
+      (expansion
+        (variable)))
+    (path
+      (expansion
+        (variable)))))
+
+================================================================================
+Special chars
+================================================================================
+
+COPY $FOO ./${bar:-abc}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (copy_instruction
+    (path
+      (expansion
+        (variable)))
+    (path
+      (expansion
+        (variable)))))
+
+================================================================================
+Env
+================================================================================
+
+ENV TEST="foo$BAR" \
+	TEST_2=foo\ bar$BAZ \
+	TEST_3="foo${bar}" \
+	TEST_4=foo\ ${baz}bar 
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (env_instruction
+    (env_pair
+      name: (unquoted_string)
+      value: (double_quoted_string
+        (expansion
+          (variable))))
+    (line_continuation)
+    (env_pair
+      name: (unquoted_string)
+      value: (unquoted_string
+        (expansion
+          (variable))))
+    (line_continuation)
+    (env_pair
+      name: (unquoted_string)
+      value: (double_quoted_string
+        (expansion
+          (variable))))
+    (line_continuation)
+    (env_pair
+      name: (unquoted_string)
+      value: (unquoted_string
+        (expansion
+          (variable))))))
+
+================================================================================
+Variables can begin or end with underscores
+================================================================================
+
+ENV TEST="$_foo${bar_}" 
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (env_instruction
+    (env_pair
+      (unquoted_string)
+      (double_quoted_string
+        (expansion
+          (variable))
+        (expansion
+          (variable))))))
+
+================================================================================
+Empty Env
+================================================================================
+
+ENV TEST= \
+	TEST_2= \
+	TEST_3="foo${bar}" \
+	TEST_4= 
+ENV FOO=
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (env_instruction
+    (env_pair
+      (unquoted_string))
+    (line_continuation)
+    (env_pair
+      (unquoted_string))
+    (line_continuation)
+    (env_pair
+      (unquoted_string)
+      (double_quoted_string
+        (expansion
+          (variable))))
+    (line_continuation)
+    (env_pair
+      (unquoted_string)))
+  (env_instruction
+    (env_pair
+      (unquoted_string))))
+
+================================================================================
+Expose
+================================================================================
+
+EXPOSE $FOO
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (expose_instruction
+    (expansion
+      (variable))))
+
+================================================================================
+From
+================================================================================
+
+FROM foo/$FOO:$BAR@sha256:$BAZ AS baz$QUX
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (from_instruction
+    (image_spec
+      name: (image_name
+        (expansion
+          (variable)))
+      tag: (image_tag
+        (expansion
+          (variable)))
+      digest: (image_digest
+        (expansion
+          (variable))))
+    as: (image_alias
+      (expansion
+        (variable)))))
+
+================================================================================
+Label
+================================================================================
+
+LABEL key="value$FOO"
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (label_instruction
+    (label_pair
+      key: (unquoted_string)
+      value: (double_quoted_string
+        (expansion
+          (variable))))))
+
+================================================================================
+Stopsignal
+================================================================================
+
+STOPSIGNAL $FOO
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (stopsignal_instruction
+    (expansion
+      (variable))))
+
+================================================================================
+User
+================================================================================
+
+USER foo$FOO:bar${bar}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (user_instruction
+    user: (unquoted_string
+      (expansion
+        (variable)))
+    group: (unquoted_string
+      (expansion
+        (variable)))))
+
+================================================================================
+Volume
+================================================================================
+
+volume /my$FOO /my${bar}
+
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (volume_instruction
+    (path
+      (expansion
+        (variable)))
+    (path
+      (expansion
+        (variable)))))
+
+================================================================================
+Workdir
+================================================================================
+
+WORKDIR /tmp/$FOO
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (workdir_instruction
+    (path
+      (expansion
+        (variable)))))
+
+================================================================================
+Onbuild
+================================================================================
+
+ONBUILD ADD /$FOO ./${bar}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (onbuild_instruction
+    (add_instruction
+      (path
+        (expansion
+          (variable)))
+      (path
+        (expansion
+          (variable))))))

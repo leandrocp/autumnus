@@ -1,0 +1,63 @@
+==================
+No group
+==================
+
+USER foo
+USER FooBar
+USER Foo-Bar
+
+---
+
+(source_file
+	(user_instruction
+		user: (unquoted_string))
+	(user_instruction
+		user: (unquoted_string))
+	(user_instruction
+		user: (unquoted_string)))
+
+==================
+With group
+==================
+
+USER foo:bar
+USER foo:Bar
+USER foo:Bar-Bar
+
+---
+
+(source_file
+	(user_instruction
+		user: (unquoted_string)
+		group: (unquoted_string))
+	(user_instruction
+		user: (unquoted_string)
+		group: (unquoted_string))
+	(user_instruction
+		user: (unquoted_string)
+		group: (unquoted_string)))
+
+==================
+Numerical
+==================
+
+USER 1004:1004
+
+---
+
+(source_file
+	(user_instruction
+		user: (unquoted_string)
+		group: (unquoted_string)))
+
+===========================
+No spaces in user:group
+===========================
+
+USER a: b
+
+---
+
+(source_file
+  (ERROR
+    (unquoted_string)))

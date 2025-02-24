@@ -1,0 +1,12 @@
+==================
+Simple
+==================
+
+WORKDIR /tmp/test
+
+---
+
+(source_file
+	(workdir_instruction
+		(path)))
+

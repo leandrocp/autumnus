@@ -1,0 +1,69 @@
+==================
+Single volume
+==================
+
+VOLUME /myvol
+
+---
+
+(source_file
+	(volume_instruction
+		(path)))
+
+==================
+Multiple volumes
+==================
+
+volume /myvol1 /myvol2
+
+
+---
+
+(source_file
+	(volume_instruction
+		(path)
+		(path)))
+
+==================
+Multiline volumes
+==================
+
+VOLUME /myvol1 \
+	/myvol2
+
+---
+
+(source_file
+	(volume_instruction
+		(path)
+		(line_continuation)
+		(path)))
+
+==================
+Array
+==================
+
+VOLUME ["/test/myvol"]
+
+---
+
+(source_file
+	(volume_instruction
+	    (json_string_array
+			(json_string))))
+
+==================
+Multiline array
+==================
+
+VOLUME ["/test/myvol", \
+		"/test/myvol2"]
+
+---
+
+(source_file
+	(volume_instruction
+	    (json_string_array
+			(json_string)
+			(line_continuation)
+			(json_string))))

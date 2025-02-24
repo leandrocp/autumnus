@@ -1,0 +1,196 @@
+==================
+Only image
+==================
+
+FROM testimage
+
+---
+
+(source_file
+	(from_instruction
+		(image_spec
+			name: (image_name))))
+
+==================
+Image with tag
+==================
+
+FROM testimage:tag
+
+---
+
+(source_file
+	(from_instruction
+		(image_spec
+			name: (image_name)
+		    tag: (image_tag))))
+
+==================
+Image with digest
+==================
+
+FROM testimage@sha256:skgshlshg
+
+---
+
+(source_file
+	(from_instruction
+		(image_spec
+			name: (image_name)
+		    digest: (image_digest))))
+
+==================
+Image with tag and digest
+==================
+
+FROM testimage:tag@sha256:452525
+
+---
+
+(source_file
+	(from_instruction
+		(image_spec
+			name: (image_name)
+		    tag: (image_tag)
+		    digest: (image_digest))))
+
+
+==================
+Tag and digest with as
+==================
+
+FROM sourcegraph/alpine:3.12@sha256:ce099fbcd3cf70b338fc4cb2a4e1fa9ae847de21afdb0a849a393b87d94fb174 AS monitoring_builder
+
+---
+
+(source_file
+	(from_instruction
+		(image_spec
+			name: (image_name)
+		    tag: (image_tag)
+		    digest: (image_digest))
+		as: (image_alias)))
+
+==================
+From with param
+==================
+
+FROM --platform=linux/arm64 alpine-${VERSION}-z
+
+---
+
+(source_file
+  (from_instruction
+    (param)
+    (image_spec
+      (image_name
+        (expansion
+          (variable))))))
+
+======================================================
+No spaces in image name
+======================================================
+
+FROM a b c
+
+---
+
+(source_file
+  (ERROR
+    (from_instruction
+      (image_spec
+	(image_name)))))
+
+======================================================
+No spaces in image name before expansion
+======================================================
+
+FROM a $b
+
+---
+
+(source_file
+  (from_instruction
+    (ERROR)
+    (image_spec
+      (image_name
+	(expansion
+	  (variable))))))
+
+======================================================
+No spaces in image name expansion
+======================================================
+
+FROM $ X
+
+---
+
+(source_file
+  (ERROR))
+
+======================================================
+No spaces in image tag expansion
+======================================================
+
+FROM a: $B
+
+---
+
+(source_file
+  (from_instruction
+    (ERROR
+      (image_name))
+    (image_spec
+      (image_name
+	(expansion
+	  (variable))))))
+
+======================================================
+No spaces in image digest
+======================================================
+
+FROM a:b@ $c
+
+---
+
+(source_file
+  (from_instruction
+    (ERROR
+      (image_name)
+      (image_tag))
+    (image_spec
+      (image_name
+	(expansion
+	  (variable))))))
+
+======================================================
+No spaces in image alias
+======================================================
+
+FROM a AS b c
+
+---
+
+(source_file
+  (ERROR
+    (from_instruction
+      (image_spec
+	(image_name))
+      (image_alias))))
+
+======================================================
+No spaces in image alias expansion
+======================================================
+
+FROM a AS b $C
+
+---
+
+(source_file
+  (from_instruction
+    (image_spec
+      (image_name))
+    (ERROR)
+    (image_alias
+      (expansion
+	(variable)))))

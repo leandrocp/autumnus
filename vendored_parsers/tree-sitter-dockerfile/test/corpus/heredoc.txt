@@ -1,0 +1,435 @@
+==================
+Basic heredoc
+==================
+
+FROM busybox AS build
+
+RUN <<EOF
+echo "i am" >> /dest
+whoami >> /dest
+EOF
+
+FROM scratch
+COPY --from=build /dest /dest
+
+---
+
+(source_file
+  (from_instruction
+    (image_spec
+      (image_name))
+    (image_alias))
+  (run_instruction
+    (shell_command
+      (shell_fragment
+        (heredoc_marker)))
+    (heredoc_block
+      (heredoc_line)
+      (heredoc_line)
+      (heredoc_end)))
+  (from_instruction
+    (image_spec
+      (image_name)))
+  (copy_instruction
+    (param)
+    (path)
+    (path)))
+
+==================
+Basic heredoc with space after marker
+==================
+
+FROM busybox AS build
+
+RUN <<EOF 
+echo "i am" >> /dest
+whoami >> /dest
+EOF
+
+FROM scratch
+COPY --from=build /dest /dest
+
+---
+
+(source_file
+  (from_instruction
+    (image_spec
+      (image_name))
+    (image_alias))
+  (run_instruction
+    (shell_command
+      (shell_fragment
+        (heredoc_marker)))
+    (heredoc_block
+      (heredoc_line)
+      (heredoc_line)
+      (heredoc_end)))
+  (from_instruction
+    (image_spec
+      (image_name)))
+  (copy_instruction
+    (param)
+    (path)
+    (path)))
+
+==================
+Run heredoc
+==================
+
+FROM busybox AS build
+
+SHELL ["/bin/awk"]
+RUN <<EOF
+BEGIN {
+	print "foo" > "/dest"
+}
+EOF
+
+FROM scratch
+COPY --from=build /dest /dest
+
+---
+
+(source_file
+  (from_instruction
+    (image_spec
+      (image_name))
+    (image_alias))
+  (shell_instruction
+    (json_string_array
+      (json_string)))
+  (run_instruction
+    (shell_command
+      (shell_fragment
+        (heredoc_marker)))
+    (heredoc_block
+      (heredoc_line)
+      (heredoc_line)
+      (heredoc_line)
+      (heredoc_end)))
+  (from_instruction
+    (image_spec
+      (image_name)))
+  (copy_instruction
+    (param)
+    (path)
+    (path)))
+
+==================
+Run heredoc with shebang
+==================
+
+FROM busybox AS build
+
+RUN <<EOF
+#!/bin/awk -f
+BEGIN {
+	print "hello" >> "/dest"
+	print "world" >> "/dest"
+}
+EOF
+
+FROM scratch
+COPY --from=build /dest /dest
+
+---
+
+(source_file
+  (from_instruction
+    (image_spec
+      (image_name))
+    (image_alias))
+  (run_instruction
+    (shell_command
+      (shell_fragment
+        (heredoc_marker)))
+    (heredoc_block
+      (heredoc_line)
+      (heredoc_line)
+      (heredoc_line)
+      (heredoc_line)
+      (heredoc_line)
+      (heredoc_end)))
+  (from_instruction
+    (image_spec
+      (image_name)))
+  (copy_instruction
+    (param)
+    (path)
+    (path)))
+
+==================
+Run complex heredoc
+==================
+
+FROM busybox AS build
+
+WORKDIR /dest
+
+RUN cat <<EOF1 | tr '[:upper:]' '[:lower:]' > ./out1; \
+	cat <<EOF2 | tr '[:lower:]' '[:upper:]' > ./out2
+hello WORLD
+EOF1
+HELLO world
+EOF2
+
+RUN <<EOF 3<<IN1 4<<IN2 awk -f -
+BEGIN {
+	while ((getline line < "/proc/self/fd/3") > 0)
+		print tolower(line) > "./fd3"
+	while ((getline line < "/proc/self/fd/4") > 0)
+		print toupper(line) > "./fd4"
+}
+EOF
+hello WORLD
+IN1
+HELLO world
+IN2
+
+FROM scratch
+COPY --from=build /dest /
+
+---
+
+(source_file
+  (from_instruction
+    (image_spec
+      (image_name))
+    (image_alias))
+  (workdir_instruction
+    (path))
+  (run_instruction
+    (shell_command
+      (shell_fragment
+        (heredoc_marker))
+      (line_continuation)
+      (shell_fragment
+        (heredoc_marker)))
+    (heredoc_block
+      (heredoc_line)
+      (heredoc_end))
+    (heredoc_block
+      (heredoc_line)
+      (heredoc_end)))
+  (run_instruction
+    (shell_command
+      (shell_fragment
+        (heredoc_marker)
+        (heredoc_marker)
+        (heredoc_marker)))
+    (heredoc_block
+      (heredoc_line)
+      (heredoc_line)
+      (heredoc_line)
+      (heredoc_line)
+      (heredoc_line)
+      (heredoc_line)
+      (heredoc_end))
+    (heredoc_block
+      (heredoc_line)
+      (heredoc_end))
+    (heredoc_block
+      (heredoc_line)
+      (heredoc_end)))
+  (from_instruction
+    (image_spec
+      (image_name)))
+  (copy_instruction
+    (param)
+    (path)
+    (path)))
+
+=================================
+Copy with heredoc
+=================================
+
+FROM busybox AS build
+
+RUN adduser -D user
+WORKDIR /dest
+
+COPY <<EOF single
+single file
+EOF
+
+COPY <<EOF <<EOF2 double/
+first file
+EOF
+second file
+EOF2
+
+RUN mkdir -p /permfiles
+COPY --chmod=777 <<EOF /permfiles/all
+dummy content
+EOF
+COPY --chmod=0644 <<EOF /permfiles/rw
+dummy content
+EOF
+COPY --chown=user:user <<EOF /permfiles/owned
+dummy content
+EOF
+RUN stat -c "%04a" /permfiles/all >> perms && \
+  stat -c "%04a" /permfiles/rw >> perms && \
+  stat -c "%U:%G" /permfiles/owned >> perms
+
+FROM scratch
+COPY --from=build /dest /
+
+---
+
+(source_file
+  (from_instruction
+    (image_spec
+      (image_name))
+    (image_alias))
+  (run_instruction
+    (shell_command
+      (shell_fragment)))
+  (workdir_instruction
+    (path))
+  (copy_instruction
+    (path
+      (heredoc_marker))
+    (path)
+    (heredoc_block
+      (heredoc_line)
+      (heredoc_end)))
+  (copy_instruction
+    (path
+      (heredoc_marker))
+    (path
+      (heredoc_marker))
+    (path)
+    (heredoc_block
+      (heredoc_line)
+      (heredoc_end))
+    (heredoc_block
+      (heredoc_line)
+      (heredoc_end)))
+  (run_instruction
+    (shell_command
+      (shell_fragment)))
+  (copy_instruction
+    (param)
+    (path
+      (heredoc_marker))
+    (path)
+    (heredoc_block
+      (heredoc_line)
+      (heredoc_end)))
+  (copy_instruction
+    (param)
+    (path
+      (heredoc_marker))
+    (path)
+    (heredoc_block
+      (heredoc_line)
+      (heredoc_end)))
+  (copy_instruction
+    (param)
+    (path
+      (heredoc_marker))
+    (path)
+    (heredoc_block
+      (heredoc_line)
+      (heredoc_end)))
+  (run_instruction
+    (shell_command
+      (shell_fragment)
+      (line_continuation)
+      (shell_fragment)
+      (line_continuation)
+      (shell_fragment)))
+  (from_instruction
+    (image_spec
+      (image_name)))
+  (copy_instruction
+    (param)
+    (path)
+    (path)))
+
+==================
+Heredoc with special symbols
+==================
+
+FROM scratch
+
+COPY <<EOF quotefile
+"quotes in file"
+EOF
+
+COPY <<EOF slashfile1
+\
+EOF
+COPY <<EOF slashfile2
+\\
+EOF
+COPY <<EOF slashfile3
+\$
+EOF
+
+COPY <<"EOF" rawslashfile1
+\
+EOF
+COPY <<"EOF" rawslashfile2
+\\
+EOF
+COPY <<"EOF" rawslashfile3
+\$
+EOF
+
+---
+
+(source_file
+  (from_instruction
+    (image_spec
+      (image_name)))
+  (copy_instruction
+    (path
+      (heredoc_marker))
+    (path)
+    (heredoc_block
+      (heredoc_line)
+      (heredoc_end)))
+  (copy_instruction
+    (path
+      (heredoc_marker))
+    (path)
+    (heredoc_block
+      (heredoc_line)
+      (heredoc_end)))
+  (copy_instruction
+    (path
+      (heredoc_marker))
+    (path)
+    (heredoc_block
+      (heredoc_line)
+      (heredoc_end)))
+  (copy_instruction
+    (path
+      (heredoc_marker))
+    (path)
+    (heredoc_block
+      (heredoc_line)
+      (heredoc_end)))
+  (copy_instruction
+    (path
+      (heredoc_marker))
+    (path)
+    (heredoc_block
+      (heredoc_line)
+      (heredoc_end)))
+  (copy_instruction
+    (path
+      (heredoc_marker))
+    (path)
+    (heredoc_block
+      (heredoc_line)
+      (heredoc_end)))
+  (copy_instruction
+    (path
+      (heredoc_marker))
+    (path)
+    (heredoc_block
+      (heredoc_line)
+      (heredoc_end))))

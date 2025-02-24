@@ -1,0 +1,55 @@
+==================
+No param
+==================
+
+COPY /src ./dst
+
+---
+
+(source_file
+	(copy_instruction
+		(path)
+		(path)))
+
+==================
+With param
+==================
+
+COPY --chown=a:b /src ./dst
+
+---
+
+(source_file
+	(copy_instruction
+		(param)
+		(path)
+		(path)))
+
+==================
+Multiple files
+==================
+
+COPY src1 src2 dst
+
+---
+
+(source_file
+  (copy_instruction
+    (path)
+    (path)
+    (path)))
+
+==================
+Multiple params
+==================
+
+COPY --chown=a:b --chmod=644 src dst
+
+---
+
+(source_file
+  (copy_instruction
+    (param)
+    (param)
+    (path)
+    (path)))
