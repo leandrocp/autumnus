@@ -37,10 +37,17 @@ fn queries() {
 
     let mut token_stream = TokenStream::new();
 
-    // First, build a cache of all language files
-    let mut highlights_cache: HashMap<String, String> = HashMap::new();
-    let mut injections_cache: HashMap<String, String> = HashMap::new();
-    let mut locals_cache: HashMap<String, String> = HashMap::new();
+    // Cache for all language files
+    let mut file_cache: HashMap<String, HashMap<String, String>> = HashMap::new();
+    file_cache.insert("highlights".to_string(), HashMap::new());
+    file_cache.insert("injections".to_string(), HashMap::new());
+    file_cache.insert("locals".to_string(), HashMap::new());
+
+    // File types to process
+    let file_types = ["highlights", "injections", "locals"];
+
+    // Track which languages exist
+    let mut languages = Vec::new();
 
     // Pre-load all files into cache
     if let Ok(entries) = fs::read_dir(queries_dir) {
@@ -48,109 +55,73 @@ fn queries() {
             let path = entry.path();
             if path.is_dir() {
                 let language = path.file_name().unwrap().to_string_lossy().to_string();
+                languages.push(language.clone());
 
-                // Cache highlights.scm
-                let highlights_path = path.join("highlights.scm");
-                if highlights_path.exists() {
-                    if let Ok(content) = fs::read_to_string(&highlights_path) {
-                        highlights_cache.insert(language.clone(), content);
-                    }
-                }
-
-                // Cache injections.scm
-                let injections_path = path.join("injections.scm");
-                if injections_path.exists() {
-                    if let Ok(content) = fs::read_to_string(&injections_path) {
-                        injections_cache.insert(language.clone(), content);
-                    }
-                }
-
-                // Cache locals.scm
-                let locals_path = path.join("locals.scm");
-                if locals_path.exists() {
-                    if let Ok(content) = fs::read_to_string(&locals_path) {
-                        locals_cache.insert(language.clone(), content);
+                // Process each file type
+                for file_type in &file_types {
+                    let file_path = path.join(format!("{}.scm", file_type));
+                    if file_path.exists() {
+                        if let Ok(content) = fs::read_to_string(&file_path) {
+                            file_cache
+                                .get_mut(*file_type)
+                                .unwrap()
+                                .insert(language.clone(), content);
+                        }
                     }
                 }
             }
         }
     }
 
-    // Process the inheritance for each file type
-    let processed_highlights = process_inheritance(&highlights_cache);
-    let processed_injections = process_inheritance(&injections_cache);
-    let processed_locals = process_inheritance(&locals_cache);
+    // Process inheritance for each file type
+    let mut processed_cache: HashMap<String, HashMap<String, String>> = HashMap::new();
+    for file_type in &file_types {
+        if let Some(cache) = file_cache.get(*file_type) {
+            processed_cache.insert(file_type.to_string(), process_inheritance(cache));
+        }
+    }
 
     // Now generate constants for each language
-    if let Ok(entries) = fs::read_dir(queries_dir) {
-        for entry in entries.filter_map(Result::ok) {
-            let path = entry.path();
-            if path.is_dir() {
-                let language = path.file_name().unwrap().to_string_lossy().to_string();
-                let language_upper = language.to_uppercase();
+    for language in languages {
+        let language_upper = language.to_uppercase();
 
-                // Skip languages without highlights.scm
-                if !processed_highlights.contains_key(&language) {
-                    println!(
-                        "cargo:warning=No highlights.scm found for language: {}",
-                        language
-                    );
-                    continue;
-                }
+        // Process each file type for this language
+        for file_type in &file_types {
+            let constant_name = format_ident!("{}_{}", language_upper, file_type.to_uppercase());
 
-                // Generate HIGHLIGHTS constant
-                let highlights_constant_name = format_ident!("{}_{}", language_upper, "HIGHLIGHTS");
-                if let Some(content) = processed_highlights.get(&language) {
-                    // Process content to remove specific annotations (only for highlights.scm)
-                    let processed_content = content
-                        .replace("@spell", "")
-                        .replace("@none", "")
-                        .replace("@conceal", "")
-                        .replace("@nospell", "");
+            if let Some(content) = processed_cache.get(*file_type).unwrap().get(&language) {
+                let mut processed_content = content.clone();
 
-                    let constant_def = quote! {
-                        pub const #highlights_constant_name: &str = #processed_content;
-                    };
+                // Apply annotation removal to all files
+                processed_content = processed_content
+                    .replace("@spell", "")
+                    .replace("@none", "")
+                    .replace("@conceal", "")
+                    .replace("@nospell", "");
 
-                    token_stream.extend(constant_def);
-                }
+                // Convert Lua patterns to Regex for all file types
+                processed_content = convert_lua_patterns(&processed_content);
 
-                // Generate INJECTIONS constant
-                let injections_constant_name = format_ident!("{}_{}", language_upper, "INJECTIONS");
-                if let Some(content) = processed_injections.get(&language) {
-                    let constant_def = quote! {
-                        pub const #injections_constant_name: &str = #content;
-                    };
+                let constant_def = quote! {
+                    pub const #constant_name: &str = #processed_content;
+                };
 
-                    token_stream.extend(constant_def);
-                } else {
-                    let constant_def = quote! {
-                        pub const #injections_constant_name: &str = "";
-                    };
+                token_stream.extend(constant_def);
+            } else {
+                // Create empty constants for missing files
+                let constant_def = quote! {
+                    pub const #constant_name: &str = "";
+                };
 
-                    token_stream.extend(constant_def);
-                }
+                token_stream.extend(constant_def);
+            }
 
-                // Generate LOCALS constant
-                let locals_constant_name = format_ident!("{}_{}", language_upper, "LOCALS");
-                if let Some(content) = processed_locals.get(&language) {
-                    let constant_def = quote! {
-                        pub const #locals_constant_name: &str = #content;
-                    };
-
-                    token_stream.extend(constant_def);
-                } else {
-                    let constant_def = quote! {
-                        pub const #locals_constant_name: &str = "";
-                    };
-
-                    token_stream.extend(constant_def);
-                }
-
-                // Add files to rerun-if-changed
-                println!("cargo:rerun-if-changed=queries/{}/highlights.scm", language);
-                println!("cargo:rerun-if-changed=queries/{}/injections.scm", language);
-                println!("cargo:rerun-if-changed=queries/{}/locals.scm", language);
+            // Add file to rerun-if-changed (if it exists)
+            let file_path = Path::new("queries")
+                .join(&language)
+                .join(format!("{}.scm", file_type));
+            if file_path.exists() {
+                println!("cargo:rerun-if-changed={}", file_path.display());
             }
         }
     }
@@ -240,6 +211,81 @@ fn process_file(
 
     // If no inheritance or parent not found, return the original content
     content.to_string()
+}
+
+// Convert Lua patterns to Regex patterns in a string
+fn convert_lua_patterns(content: &str) -> String {
+    let mut result = String::new();
+
+    for line in content.lines() {
+        let mut processed_line = line.to_string();
+
+        // Process pattern directives
+        for (directive, replacement) in [
+            ("#lua-match?", "#match?"),
+            ("#not-lua-match?", "#not-match?"),
+        ] {
+            if let Some(match_pos) = processed_line.find(directive) {
+                processed_line = processed_line.replace(directive, replacement);
+
+                // Find the pattern string (assuming it's enclosed in quotes)
+                if let Some(pattern_start) = processed_line[match_pos..].find("\"") {
+                    let pattern_start = match_pos + pattern_start + 1; // +1 to skip the opening quote
+
+                    if let Some(pattern_end) = processed_line[pattern_start..].find("\"") {
+                        let pattern_end = pattern_start + pattern_end;
+                        let lua_pattern = &processed_line[pattern_start..pattern_end];
+
+                        // Convert the Lua pattern to Regex
+                        let regex_pattern = lua_pattern_to_regex(lua_pattern);
+
+                        // Replace the pattern in the line (without adding extra quotes)
+                        processed_line = format!(
+                            "{}{}{}",
+                            &processed_line[..pattern_start],
+                            regex_pattern,
+                            &processed_line[pattern_end..]
+                        );
+                    }
+                }
+            }
+        }
+
+        result.push_str(&processed_line);
+        result.push('\n');
+    }
+
+    result
+}
+
+// Convert a Lua pattern to a Regex pattern using string replacements
+fn lua_pattern_to_regex(lua_pattern: &str) -> String {
+    lua_pattern
+        .replace('\\', r"\\")
+        .replace("%.", r"\.")
+        .replace("%%", r"%")
+        .replace("%a", r"[a-zA-Z]")
+        .replace("%A", r"[^a-zA-Z]")
+        .replace("%c", r"[\0-\31]")
+        .replace("%C", r"[^\0-\31]")
+        .replace("%d", r"[0-9]")
+        .replace("%D", r"[^0-9]")
+        .replace("%g", r"[\33-\126]")
+        .replace("%G", r"[^\33-\126]")
+        .replace("%l", r"[a-z]")
+        .replace("%L", r"[^a-z]")
+        .replace("%p", r##"[!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]"##)
+        .replace("%P", r##"[^!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]"##)
+        .replace("%s", r"[ \t\n\v\f\r]")
+        .replace("%S", r"[^ \t\n\v\f\r]")
+        .replace("%u", r"[A-Z]")
+        .replace("%U", r"[^A-Z]")
+        .replace("%w", r"[a-zA-Z0-9]")
+        .replace("%W", r"[^a-zA-Z0-9]")
+        .replace("%x", r"[0-9a-fA-F]")
+        .replace("%X", r"[^0-9a-fA-F]")
+        .replace("%z", r"\0")
+        .replace("%Z", r"[^\0]")
 }
 
 fn themes() {
