@@ -16,13 +16,18 @@ fn main() {
 fn vendored_parsers() {
     let parsers = vec![
         TreeSitterParser {
+            name: "tree-sitter-clojure",
+            src_dir: "vendored_parsers/tree-sitter-clojure/src",
+            extra_files: vec![],
+        },
+        TreeSitterParser {
             name: "tree-sitter-dockerfile",
             src_dir: "vendored_parsers/tree-sitter-dockerfile/src",
             extra_files: vec!["scanner.c"],
         },
         TreeSitterParser {
-            name: "tree-sitter-clojure",
-            src_dir: "vendored_parsers/tree-sitter-clojure/src",
+            name: "tree-sitter-eex",
+            src_dir: "vendored_parsers/tree-sitter-eex/src",
             extra_files: vec![],
         },
     ];

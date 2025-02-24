@@ -11,6 +11,7 @@ use tree_sitter_highlight::HighlightConfiguration;
 extern "C" {
     fn tree_sitter_clojure() -> *const ();
     fn tree_sitter_dockerfile() -> *const ();
+    fn tree_sitter_eex() -> *const ();
 }
 
 mod generated {
@@ -28,6 +29,7 @@ pub enum Language {
     Css,
     Diff,
     Dockerfile,
+    Eex,
     Elixir,
     Erlang,
     Heex,
@@ -54,6 +56,7 @@ impl Language {
             "diff" => Some(Language::Diff),
             "dockerfile" => Some(Language::Dockerfile),
             "docker" => Some(Language::Dockerfile),
+            "eex" => Some(Language::Eex),
             "elixir" => Some(Language::Elixir),
             "erlang" => Some(Language::Erlang),
             "heex" => Some(Language::Heex),
@@ -176,6 +179,7 @@ impl Language {
                 "*.docker",
                 "*.container",
             ],
+            Language::Eex => &["*.eex"],
             Language::Elixir => &["*.ex", "*.exs"],
             Language::Erlang => &[
                 "*.erl",
@@ -260,6 +264,7 @@ impl Language {
             Language::Css => "CSS",
             Language::Diff => "Diff",
             Language::Dockerfile => "Dockerfile",
+            Language::Eex => "Eex",
             Language::Elixir => "Elixir",
             Language::Erlang => "Erlang",
             Language::Heex => "HEEx",
@@ -288,6 +293,7 @@ impl Language {
             Language::Css => &CSS_CONFIG,
             Language::Diff => &DIFF_CONFIG,
             Language::Dockerfile => &DOCKERFILE_CONFIG,
+            Language::Eex => &EEX_CONFIG,
             Language::Elixir => &ELIXIR_CONFIG,
             Language::Erlang => &ERLANG_CONFIG,
             Language::Heex => &HEEX_CONFIG,
@@ -419,6 +425,21 @@ static DOCKERFILE_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         DOCKERFILE_LOCALS,
     )
     .expect("failed to create dockerfile highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static EEX_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_eex) };
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "eex",
+        EEX_HIGHLIGHTS,
+        EEX_INJECTIONS,
+        EEX_LOCALS,
+    )
+    .expect("failed to create eex highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
