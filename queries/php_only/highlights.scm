@@ -173,10 +173,10 @@
 
 ; Constants
 ((name) @constant
-  (#lua-match? @constant "^_?[A-Z][A-Z%d_]*$"))
+  (#match? @constant "^_?[A-Z][A-Z%d_]*$"))
 
 ((name) @constant.builtin
-  (#lua-match? @constant.builtin "^__[A-Z][A-Z%d_]+__$"))
+  (#match? @constant.builtin "^__[A-Z][A-Z%d_]+__$"))
 
 (const_declaration
   (const_element

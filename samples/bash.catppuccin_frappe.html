@@ -36,22 +36,22 @@
 </span><span class="athl-line" data-athl-line="12"><span style="color: #949cbb;"># =&gt; This is the second command</span>
 </span><span class="athl-line" data-athl-line="13">
 </span><span class="athl-line" data-athl-line="14"><span style="color: #949cbb;"># Declaring a variable looks like this:</span>
-</span><span class="athl-line" data-athl-line="15"><span style="color: #ef9f76;">variable</span><span style="color: #99d1db;">=</span><span style="color: #a6d189;">&quot;Some string&quot;</span>
+</span><span class="athl-line" data-athl-line="15"><span style="color: #c6d0f5;">variable</span><span style="color: #99d1db;">=</span><span style="color: #a6d189;">&quot;Some string&quot;</span>
 </span><span class="athl-line" data-athl-line="16">
 </span><span class="athl-line" data-athl-line="17"><span style="color: #949cbb;"># But not like this:</span>
-</span><span class="athl-line" data-athl-line="18"><span style="color: #ef9f76;">variable</span> <span style="color: #ef9f76;">=</span> <span style="color: #a6d189;">&quot;Some string&quot;</span> <span style="color: #949cbb;"># =&gt; returns error &quot;variable: command not found&quot;</span>
+</span><span class="athl-line" data-athl-line="18"><span style="color: #8caaee;">variable</span> <span style="color: #ea999c;">=</span> <span style="color: #a6d189;">&quot;Some string&quot;</span> <span style="color: #949cbb;"># =&gt; returns error &quot;variable: command not found&quot;</span>
 </span><span class="athl-line" data-athl-line="19"><span style="color: #949cbb;"># Bash will decide that `variable` is a command it must execute and give an error</span>
 </span><span class="athl-line" data-athl-line="20"><span style="color: #949cbb;"># because it can&#39;t be found.</span>
 </span><span class="athl-line" data-athl-line="21">
 </span><span class="athl-line" data-athl-line="22"><span style="color: #949cbb;"># Nor like this:</span>
-</span><span class="athl-line" data-athl-line="23"><span style="color: #ef9f76;">variable</span><span style="color: #99d1db;">=</span> <span style="color: #a6d189;">&quot;Some string&quot;</span> <span style="color: #949cbb;"># =&gt; returns error: &quot;Some string: command not found&quot;</span>
+</span><span class="athl-line" data-athl-line="23"><span style="color: #c6d0f5;">variable</span><span style="color: #99d1db;">=</span> <span style="color: #a6d189;">&quot;Some string&quot;</span> <span style="color: #949cbb;"># =&gt; returns error: &quot;Some string: command not found&quot;</span>
 </span><span class="athl-line" data-athl-line="24"><span style="color: #949cbb;"># Bash will decide that &quot;Some string&quot; is a command it must execute and give an</span>
 </span><span class="athl-line" data-athl-line="25"><span style="color: #949cbb;"># error because it can&#39;t be found. In this case the &quot;variable=&quot; part is seen</span>
 </span><span class="athl-line" data-athl-line="26"><span style="color: #949cbb;"># as a variable assignment valid only for the scope of the &quot;Some string&quot;</span>
 </span><span class="athl-line" data-athl-line="27"><span style="color: #949cbb;"># command.</span>
 </span><span class="athl-line" data-athl-line="28">
 </span><span class="athl-line" data-athl-line="29"><span style="color: #949cbb;"># Using the variable:</span>
-</span><span class="athl-line" data-athl-line="30"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">$</span><span style="color: #ef9f76;">variable</span></span>&quot;</span> <span style="color: #949cbb;"># =&gt; Some string</span>
+</span><span class="athl-line" data-athl-line="30"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">$</span><span style="color: #c6d0f5;">variable</span></span>&quot;</span> <span style="color: #949cbb;"># =&gt; Some string</span>
 </span><span class="athl-line" data-athl-line="31"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&#39;$variable&#39;</span> <span style="color: #949cbb;"># =&gt; $variable</span>
 </span><span class="athl-line" data-athl-line="32"><span style="color: #949cbb;"># When you use a variable itself — assign it, export it, or else — you write</span>
 </span><span class="athl-line" data-athl-line="33"><span style="color: #949cbb;"># its name without $. If you want to use the variable&#39;s value, you should use $.</span>
@@ -60,7 +60,7 @@
 </span><span class="athl-line" data-athl-line="36"><span style="color: #949cbb;"># recommended due to how Bash handles variables with spaces in them.</span>
 </span><span class="athl-line" data-athl-line="37">
 </span><span class="athl-line" data-athl-line="38"><span style="color: #949cbb;"># Parameter expansion ${...}:</span>
-</span><span class="athl-line" data-athl-line="39"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">${</span><span style="color: #ef9f76;">variable</span><span style="color: #f4b8e4;">}</span></span>&quot;</span> <span style="color: #949cbb;"># =&gt; Some string</span>
+</span><span class="athl-line" data-athl-line="39"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">${</span><span style="color: #c6d0f5;">variable</span><span style="color: #f4b8e4;">}</span></span>&quot;</span> <span style="color: #949cbb;"># =&gt; Some string</span>
 </span><span class="athl-line" data-athl-line="40"><span style="color: #949cbb;"># This is a simple usage of parameter expansion such as two examples above.</span>
 </span><span class="athl-line" data-athl-line="41"><span style="color: #949cbb;"># Parameter expansion gets a value from a variable.</span>
 </span><span class="athl-line" data-athl-line="42"><span style="color: #949cbb;"># It &quot;expands&quot; or prints the value.</span>
@@ -68,46 +68,46 @@
 </span><span class="athl-line" data-athl-line="44"><span style="color: #949cbb;"># Below are other modifications that add onto this expansion.</span>
 </span><span class="athl-line" data-athl-line="45">
 </span><span class="athl-line" data-athl-line="46"><span style="color: #949cbb;"># String substitution in variables:</span>
-</span><span class="athl-line" data-athl-line="47"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">${</span><span style="color: #ef9f76;">variable</span><span style="color: #f4b8e4;">/</span><span style="color: #ef9f76;">Some</span><span style="color: #f4b8e4;">/</span><span style="color: #ef9f76;">A</span><span style="color: #f4b8e4;">}</span></span>&quot;</span> <span style="color: #949cbb;"># =&gt; A string</span>
+</span><span class="athl-line" data-athl-line="47"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">${</span><span style="color: #c6d0f5;">variable</span><span style="color: #f4b8e4;">/</span><span style="color: #ef9f76;">Some</span><span style="color: #f4b8e4;">/</span>A<span style="color: #f4b8e4;">}</span></span>&quot;</span> <span style="color: #949cbb;"># =&gt; A string</span>
 </span><span class="athl-line" data-athl-line="48"><span style="color: #949cbb;"># This will substitute the first occurrence of &quot;Some&quot; with &quot;A&quot;.</span>
 </span><span class="athl-line" data-athl-line="49">
 </span><span class="athl-line" data-athl-line="50"><span style="color: #949cbb;"># Substring from a variable:</span>
-</span><span class="athl-line" data-athl-line="51"><span style="color: #ef9f76;">length</span><span style="color: #99d1db;">=</span><span style="color: #ef9f76;">7</span>
-</span><span class="athl-line" data-athl-line="52"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">${</span><span style="color: #ef9f76;">variable</span><span style="color: #f4b8e4;">:</span><span style="color: #ef9f76;">0</span><span style="color: #f4b8e4;">:</span><span style="color: #ef9f76;">length</span><span style="color: #f4b8e4;">}</span></span>&quot;</span> <span style="color: #949cbb;"># =&gt; Some st</span>
+</span><span class="athl-line" data-athl-line="51"><span style="color: #c6d0f5;">length</span><span style="color: #99d1db;">=</span><span style="color: #ef9f76;">7</span>
+</span><span class="athl-line" data-athl-line="52"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">${</span><span style="color: #c6d0f5;">variable</span><span style="color: #f4b8e4;">:</span><span style="color: #ef9f76;">0</span><span style="color: #f4b8e4;">:</span><span style="color: #c6d0f5;">length</span><span style="color: #f4b8e4;">}</span></span>&quot;</span> <span style="color: #949cbb;"># =&gt; Some st</span>
 </span><span class="athl-line" data-athl-line="53"><span style="color: #949cbb;"># This will return only the first 7 characters of the value</span>
-</span><span class="athl-line" data-athl-line="54"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">${</span><span style="color: #ef9f76;">variable</span><span style="color: #f4b8e4;">:</span> <span style="color: #ef9f76;">-5</span><span style="color: #f4b8e4;">}</span></span>&quot;</span> <span style="color: #949cbb;"># =&gt; tring</span>
+</span><span class="athl-line" data-athl-line="54"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">${</span><span style="color: #c6d0f5;">variable</span><span style="color: #f4b8e4;">:</span> <span style="color: #ef9f76;">-5</span><span style="color: #f4b8e4;">}</span></span>&quot;</span> <span style="color: #949cbb;"># =&gt; tring</span>
 </span><span class="athl-line" data-athl-line="55"><span style="color: #949cbb;"># This will return the last 5 characters (note the space before -5).</span>
 </span><span class="athl-line" data-athl-line="56"><span style="color: #949cbb;"># The space before minus is mandatory here.</span>
 </span><span class="athl-line" data-athl-line="57">
 </span><span class="athl-line" data-athl-line="58"><span style="color: #949cbb;"># String length:</span>
-</span><span class="athl-line" data-athl-line="59"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">${</span><span style="color: #f4b8e4;">#</span><span style="color: #ef9f76;">variable</span><span style="color: #f4b8e4;">}</span></span>&quot;</span> <span style="color: #949cbb;"># =&gt; 11</span>
+</span><span class="athl-line" data-athl-line="59"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">${</span><span style="color: #f4b8e4;">#</span><span style="color: #c6d0f5;">variable</span><span style="color: #f4b8e4;">}</span></span>&quot;</span> <span style="color: #949cbb;"># =&gt; 11</span>
 </span><span class="athl-line" data-athl-line="60">
 </span><span class="athl-line" data-athl-line="61"><span style="color: #949cbb;"># Indirect expansion:</span>
-</span><span class="athl-line" data-athl-line="62"><span style="color: #ef9f76;">other_variable</span><span style="color: #99d1db;">=</span><span style="color: #a6d189;">&quot;variable&quot;</span>
-</span><span class="athl-line" data-athl-line="63"><span style="color: #ef9f76;">echo</span> <span ><span style="color: #f4b8e4;">${</span><span style="color: #f4b8e4;">!</span><span style="color: #ef9f76;">other_variable</span><span style="color: #f4b8e4;">}</span></span> <span style="color: #949cbb;"># =&gt; Some string</span>
+</span><span class="athl-line" data-athl-line="62"><span style="color: #c6d0f5;">other_variable</span><span style="color: #99d1db;">=</span><span style="color: #a6d189;">&quot;variable&quot;</span>
+</span><span class="athl-line" data-athl-line="63"><span style="color: #ef9f76;">echo</span> <span ><span style="color: #f4b8e4;">${</span><span style="color: #f4b8e4;">!</span><span style="color: #c6d0f5;">other_variable</span><span style="color: #f4b8e4;">}</span></span> <span style="color: #949cbb;"># =&gt; Some string</span>
 </span><span class="athl-line" data-athl-line="64"><span style="color: #949cbb;"># This will expand the value of `other_variable`.</span>
 </span><span class="athl-line" data-athl-line="65">
 </span><span class="athl-line" data-athl-line="66"><span style="color: #949cbb;"># The default value for variable:</span>
-</span><span class="athl-line" data-athl-line="67"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">${</span><span style="color: #ef9f76;">foo</span><span style="color: #f4b8e4;">:-</span><span style="color: #a6d189;">&quot;DefaultValueIfFooIsMissingOrEmpty&quot;</span><span style="color: #f4b8e4;">}</span></span>&quot;</span>
+</span><span class="athl-line" data-athl-line="67"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">${</span><span style="color: #c6d0f5;">foo</span><span style="color: #f4b8e4;">:-</span><span style="color: #a6d189;">&quot;DefaultValueIfFooIsMissingOrEmpty&quot;</span><span style="color: #f4b8e4;">}</span></span>&quot;</span>
 </span><span class="athl-line" data-athl-line="68"><span style="color: #949cbb;"># =&gt; DefaultValueIfFooIsMissingOrEmpty</span>
 </span><span class="athl-line" data-athl-line="69"><span style="color: #949cbb;"># This works for null (foo=) and empty string (foo=&quot;&quot;); zero (foo=0) returns 0.</span>
 </span><span class="athl-line" data-athl-line="70"><span style="color: #949cbb;"># Note that it only returns default value and doesn&#39;t change variable value.</span>
 </span><span class="athl-line" data-athl-line="71">
 </span><span class="athl-line" data-athl-line="72"><span style="color: #949cbb;"># Declare an array with 6 elements:</span>
-</span><span class="athl-line" data-athl-line="73"><span style="color: #ef9f76;">array</span><span style="color: #99d1db;">=</span><span style="color: #949cbb;">(</span><span style="color: #ef9f76;">one</span> <span style="color: #ef9f76;">two</span> <span style="color: #ef9f76;">three</span> <span style="color: #ef9f76;">four</span> <span style="color: #ef9f76;">five</span> <span style="color: #ef9f76;">six</span><span style="color: #949cbb;">)</span>
+</span><span class="athl-line" data-athl-line="73"><span style="color: #c6d0f5;">array</span><span style="color: #99d1db;">=</span><span style="color: #949cbb;">(</span>one two three four five six<span style="color: #949cbb;">)</span>
 </span><span class="athl-line" data-athl-line="74"><span style="color: #949cbb;"># Print the first element:</span>
-</span><span class="athl-line" data-athl-line="75"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">${</span><span style="color: #ef9f76;">array</span><span style="color: #949cbb;">[</span><span style="color: #ef9f76;">0</span><span style="color: #949cbb;">]</span><span style="color: #f4b8e4;">}</span></span>&quot;</span> <span style="color: #949cbb;"># =&gt; &quot;one&quot;</span>
+</span><span class="athl-line" data-athl-line="75"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">${</span><span style="color: #c6d0f5;">array</span><span style="color: #949cbb;">[</span><span style="color: #ef9f76;">0</span><span style="color: #949cbb;">]</span><span style="color: #f4b8e4;">}</span></span>&quot;</span> <span style="color: #949cbb;"># =&gt; &quot;one&quot;</span>
 </span><span class="athl-line" data-athl-line="76"><span style="color: #949cbb;"># Print all elements:</span>
-</span><span class="athl-line" data-athl-line="77"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">${</span><span style="color: #ef9f76;">array</span><span style="color: #949cbb;">[</span><span style="color: #f4b8e4;">@</span><span style="color: #949cbb;">]</span><span style="color: #f4b8e4;">}</span></span>&quot;</span> <span style="color: #949cbb;"># =&gt; &quot;one two three four five six&quot;</span>
+</span><span class="athl-line" data-athl-line="77"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">${</span><span style="color: #c6d0f5;">array</span><span style="color: #949cbb;">[</span><span style="color: #f4b8e4;">@</span><span style="color: #949cbb;">]</span><span style="color: #f4b8e4;">}</span></span>&quot;</span> <span style="color: #949cbb;"># =&gt; &quot;one two three four five six&quot;</span>
 </span><span class="athl-line" data-athl-line="78"><span style="color: #949cbb;"># Print the number of elements:</span>
-</span><span class="athl-line" data-athl-line="79"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">${</span><span style="color: #f4b8e4;">#</span><span style="color: #ef9f76;">array</span><span style="color: #949cbb;">[</span><span style="color: #f4b8e4;">@</span><span style="color: #949cbb;">]</span><span style="color: #f4b8e4;">}</span></span>&quot;</span> <span style="color: #949cbb;"># =&gt; &quot;6&quot;</span>
+</span><span class="athl-line" data-athl-line="79"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">${</span><span style="color: #f4b8e4;">#</span><span style="color: #c6d0f5;">array</span><span style="color: #949cbb;">[</span><span style="color: #f4b8e4;">@</span><span style="color: #949cbb;">]</span><span style="color: #f4b8e4;">}</span></span>&quot;</span> <span style="color: #949cbb;"># =&gt; &quot;6&quot;</span>
 </span><span class="athl-line" data-athl-line="80"><span style="color: #949cbb;"># Print the number of characters in third element</span>
-</span><span class="athl-line" data-athl-line="81"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">${</span><span style="color: #f4b8e4;">#</span><span style="color: #ef9f76;">array</span><span style="color: #949cbb;">[</span><span style="color: #ef9f76;">2</span><span style="color: #949cbb;">]</span><span style="color: #f4b8e4;">}</span></span>&quot;</span> <span style="color: #949cbb;"># =&gt; &quot;5&quot;</span>
+</span><span class="athl-line" data-athl-line="81"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">${</span><span style="color: #f4b8e4;">#</span><span style="color: #c6d0f5;">array</span><span style="color: #949cbb;">[</span><span style="color: #ef9f76;">2</span><span style="color: #949cbb;">]</span><span style="color: #f4b8e4;">}</span></span>&quot;</span> <span style="color: #949cbb;"># =&gt; &quot;5&quot;</span>
 </span><span class="athl-line" data-athl-line="82"><span style="color: #949cbb;"># Print 2 elements starting from fourth:</span>
-</span><span class="athl-line" data-athl-line="83"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">${</span><span style="color: #ef9f76;">array</span><span style="color: #949cbb;">[</span><span style="color: #f4b8e4;">@</span><span style="color: #949cbb;">]</span><span style="color: #f4b8e4;">:</span><span style="color: #ef9f76;">3</span><span style="color: #f4b8e4;">:</span><span style="color: #ef9f76;">2</span><span style="color: #f4b8e4;">}</span></span>&quot;</span> <span style="color: #949cbb;"># =&gt; &quot;four five&quot;</span>
+</span><span class="athl-line" data-athl-line="83"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">${</span><span style="color: #c6d0f5;">array</span><span style="color: #949cbb;">[</span><span style="color: #f4b8e4;">@</span><span style="color: #949cbb;">]</span><span style="color: #f4b8e4;">:</span><span style="color: #ef9f76;">3</span><span style="color: #f4b8e4;">:</span><span style="color: #ef9f76;">2</span><span style="color: #f4b8e4;">}</span></span>&quot;</span> <span style="color: #949cbb;"># =&gt; &quot;four five&quot;</span>
 </span><span class="athl-line" data-athl-line="84"><span style="color: #949cbb;"># Print all elements each of them on new line.</span>
-</span><span class="athl-line" data-athl-line="85"><span style="color: #ca9ee6;">for</span> <span style="color: #ef9f76;">item</span> <span style="color: #ca9ee6;">in</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">${</span><span style="color: #ef9f76;">array</span><span style="color: #949cbb;">[</span><span style="color: #f4b8e4;">@</span><span style="color: #949cbb;">]</span><span style="color: #f4b8e4;">}</span></span>&quot;</span><span style="color: #949cbb;">;</span> <span style="color: #ca9ee6;">do</span>
-</span><span class="athl-line" data-athl-line="86">    <span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">$</span><span style="color: #ef9f76;">item</span></span>&quot;</span>
+</span><span class="athl-line" data-athl-line="85"><span style="color: #ca9ee6;">for</span> <span style="color: #c6d0f5;">item</span> <span style="color: #ca9ee6;">in</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">${</span><span style="color: #c6d0f5;">array</span><span style="color: #949cbb;">[</span><span style="color: #f4b8e4;">@</span><span style="color: #949cbb;">]</span><span style="color: #f4b8e4;">}</span></span>&quot;</span><span style="color: #949cbb;">;</span> <span style="color: #ca9ee6;">do</span>
+</span><span class="athl-line" data-athl-line="86">    <span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">$</span><span style="color: #c6d0f5;">item</span></span>&quot;</span>
 </span><span class="athl-line" data-athl-line="87"><span style="color: #ca9ee6;">done</span>
 </span><span class="athl-line" data-athl-line="88">
 </span><span class="athl-line" data-athl-line="89"><span style="color: #949cbb;"># Built-in variables:</span>
@@ -116,17 +116,17 @@
 </span><span class="athl-line" data-athl-line="92"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;Script&#39;s PID: <span ><span style="color: #f4b8e4;">$</span><span style="color: #ef9f76;">$</span></span>&quot;</span>
 </span><span class="athl-line" data-athl-line="93"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;Number of arguments passed to script: <span ><span style="color: #f4b8e4;">$</span><span style="color: #ef9f76;">#</span></span>&quot;</span>
 </span><span class="athl-line" data-athl-line="94"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;All arguments passed to script: <span ><span style="color: #f4b8e4;">$</span><span style="color: #ef9f76;">@</span></span>&quot;</span>
-</span><span class="athl-line" data-athl-line="95"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;Script&#39;s arguments separated into different variables: <span ><span style="color: #f4b8e4;">$</span><span style="color: #ef9f76;">1</span></span><span ><span style="color: #f4b8e4;"> $</span><span style="color: #ef9f76;">2</span></span>...&quot;</span>
+</span><span class="athl-line" data-athl-line="95"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;Script&#39;s arguments separated into different variables: <span ><span style="color: #f4b8e4;">$</span><span style="color: #c6d0f5;">1</span></span><span ><span style="color: #f4b8e4;"> $</span><span style="color: #c6d0f5;">2</span></span>...&quot;</span>
 </span><span class="athl-line" data-athl-line="96">
 </span><span class="athl-line" data-athl-line="97"><span style="color: #949cbb;"># Brace Expansion {...}</span>
 </span><span class="athl-line" data-athl-line="98"><span style="color: #949cbb;"># used to generate arbitrary strings:</span>
 </span><span class="athl-line" data-athl-line="99"><span style="color: #ef9f76;">echo</span> <span style="color: #949cbb;">{</span><span style="color: #ef9f76;">1</span><span style="color: #99d1db;">..</span><span style="color: #ef9f76;">10</span><span style="color: #949cbb;">}</span> <span style="color: #949cbb;"># =&gt; 1 2 3 4 5 6 7 8 9 10</span>
-</span><span class="athl-line" data-athl-line="100"><span style="color: #ef9f76;">echo</span> <span style="color: #ef9f76;">{</span><span style="color: #ef9f76;">a..z</span><span style="color: #ef9f76;">}</span> <span style="color: #949cbb;"># =&gt; a b c d e f g h i j k l m n o p q r s t u v w x y z</span>
+</span><span class="athl-line" data-athl-line="100"><span style="color: #ef9f76;">echo</span> <span style="color: #ea999c;">{</span><span style="color: #ea999c;">a..z</span><span style="color: #ea999c;">}</span> <span style="color: #949cbb;"># =&gt; a b c d e f g h i j k l m n o p q r s t u v w x y z</span>
 </span><span class="athl-line" data-athl-line="101"><span style="color: #949cbb;"># This will output the range from the start value to the end value.</span>
 </span><span class="athl-line" data-athl-line="102"><span style="color: #949cbb;"># Note that you can&#39;t use variables here:</span>
-</span><span class="athl-line" data-athl-line="103"><span style="color: #ef9f76;">from</span><span style="color: #99d1db;">=</span><span style="color: #ef9f76;">1</span>
-</span><span class="athl-line" data-athl-line="104"><span style="color: #ef9f76;">to</span><span style="color: #99d1db;">=</span><span style="color: #ef9f76;">10</span>
-</span><span class="athl-line" data-athl-line="105"><span style="color: #ef9f76;">echo</span> <span style="color: #ef9f76;">{</span><span ><span style="color: #f4b8e4;">$</span><span style="color: #ef9f76;">from</span></span><span style="color: #ef9f76;">..</span><span ><span style="color: #f4b8e4;">$</span><span style="color: #ef9f76;">to</span></span><span style="color: #ef9f76;">}</span> <span style="color: #949cbb;"># =&gt; {$from..$to}</span>
+</span><span class="athl-line" data-athl-line="103"><span style="color: #c6d0f5;">from</span><span style="color: #99d1db;">=</span><span style="color: #ef9f76;">1</span>
+</span><span class="athl-line" data-athl-line="104"><span style="color: #c6d0f5;">to</span><span style="color: #99d1db;">=</span><span style="color: #ef9f76;">10</span>
+</span><span class="athl-line" data-athl-line="105"><span style="color: #ef9f76;">echo</span> <span style="color: #ea999c;">{</span><span ><span style="color: #f4b8e4;">$</span><span style="color: #c6d0f5;">from</span></span><span style="color: #ea999c;">..</span><span ><span style="color: #f4b8e4;">$</span><span style="color: #c6d0f5;">to</span></span><span style="color: #ea999c;">}</span> <span style="color: #949cbb;"># =&gt; {$from..$to}</span>
 </span><span class="athl-line" data-athl-line="106">
 </span><span class="athl-line" data-athl-line="107"><span style="color: #949cbb;"># Now that we know how to echo and use variables,</span>
 </span><span class="athl-line" data-athl-line="108"><span style="color: #949cbb;"># let&#39;s learn some of the other basics of Bash!</span>
@@ -140,31 +140,31 @@
 </span><span class="athl-line" data-athl-line="116">
 </span><span class="athl-line" data-athl-line="117"><span style="color: #949cbb;"># If you get too much output in your terminal, or from a script, the command</span>
 </span><span class="athl-line" data-athl-line="118"><span style="color: #949cbb;"># `clear` clears your screen:</span>
-</span><span class="athl-line" data-athl-line="119"><span style="color: #ef9f76;">clear</span>
+</span><span class="athl-line" data-athl-line="119"><span style="color: #8caaee;">clear</span>
 </span><span class="athl-line" data-athl-line="120"><span style="color: #949cbb;"># Ctrl-L also works for clearing output.</span>
 </span><span class="athl-line" data-athl-line="121">
 </span><span class="athl-line" data-athl-line="122"><span style="color: #949cbb;"># Reading a value from input:</span>
 </span><span class="athl-line" data-athl-line="123"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;What&#39;s your name?&quot;</span>
-</span><span class="athl-line" data-athl-line="124"><span style="color: #ef9f76;">read</span> <span style="color: #ef9f76;">name</span>
+</span><span class="athl-line" data-athl-line="124"><span style="color: #ef9f76;">read</span> <span style="color: #ea999c;">name</span>
 </span><span class="athl-line" data-athl-line="125"><span style="color: #949cbb;"># Note that we didn&#39;t need to declare a new variable.</span>
-</span><span class="athl-line" data-athl-line="126"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;Hello, <span ><span style="color: #f4b8e4;">$</span><span style="color: #ef9f76;">name</span></span>!&quot;</span>
+</span><span class="athl-line" data-athl-line="126"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;Hello, <span ><span style="color: #f4b8e4;">$</span><span style="color: #c6d0f5;">name</span></span>!&quot;</span>
 </span><span class="athl-line" data-athl-line="127">
 </span><span class="athl-line" data-athl-line="128"><span style="color: #949cbb;"># We have the usual if structure.</span>
 </span><span class="athl-line" data-athl-line="129"><span style="color: #949cbb;"># Condition is true if the value of $name is not equal to the current user&#39;s login username:</span>
-</span><span class="athl-line" data-athl-line="130"><span style="color: #ca9ee6;">if</span> <span style="color: #949cbb;">[[</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">$</span><span style="color: #ef9f76;">name</span></span>&quot;</span> <span style="color: #99d1db;">!=</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">$</span><span style="color: #ef9f76;">USER</span></span>&quot;</span> <span style="color: #949cbb;">]]</span><span style="color: #949cbb;">;</span> <span style="color: #ca9ee6;">then</span>
+</span><span class="athl-line" data-athl-line="130"><span style="color: #ca9ee6;">if</span> <span style="color: #949cbb;">[[</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">$</span><span style="color: #c6d0f5;">name</span></span>&quot;</span> <span style="color: #99d1db;">!=</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">$</span><span style="color: #ef9f76;">USER</span></span>&quot;</span> <span style="color: #949cbb;">]]</span><span style="color: #949cbb;">;</span> <span style="color: #ca9ee6;">then</span>
 </span><span class="athl-line" data-athl-line="131">    <span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;Your name isn&#39;t your username&quot;</span>
 </span><span class="athl-line" data-athl-line="132"><span style="color: #ca9ee6;">else</span>
 </span><span class="athl-line" data-athl-line="133">    <span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;Your name is your username&quot;</span>
 </span><span class="athl-line" data-athl-line="134"><span style="color: #ca9ee6;">fi</span>
 </span><span class="athl-line" data-athl-line="135">
 </span><span class="athl-line" data-athl-line="136"><span style="color: #949cbb;"># To use &amp;&amp; and || with if statements, you need multiple pairs of square brackets:</span>
-</span><span class="athl-line" data-athl-line="137"><span style="color: #ef9f76;">read</span> <span style="color: #ef9f76;">age</span>
-</span><span class="athl-line" data-athl-line="138"><span style="color: #ca9ee6;">if</span> <span style="color: #949cbb;">[[</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">$</span><span style="color: #ef9f76;">name</span></span>&quot;</span> <span style="color: #99d1db;">==</span> <span style="color: #a6d189;">&quot;Steve&quot;</span> <span style="color: #949cbb;">]]</span> <span style="color: #99d1db;">&amp;&amp;</span> <span style="color: #949cbb;">[[</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">$</span><span style="color: #ef9f76;">age</span></span>&quot;</span> <span style="color: #99d1db;">-eq</span> <span style="color: #ef9f76;">15</span> <span style="color: #949cbb;">]]</span><span style="color: #949cbb;">;</span> <span style="color: #ca9ee6;">then</span>
-</span><span class="athl-line" data-athl-line="139">    <span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;This will run if <span ><span style="color: #f4b8e4;">$</span><span style="color: #ef9f76;">name</span></span> is Steve AND <span ><span style="color: #f4b8e4;">$</span><span style="color: #ef9f76;">age</span></span> is 15.&quot;</span>
+</span><span class="athl-line" data-athl-line="137"><span style="color: #ef9f76;">read</span> <span style="color: #ea999c;">age</span>
+</span><span class="athl-line" data-athl-line="138"><span style="color: #ca9ee6;">if</span> <span style="color: #949cbb;">[[</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">$</span><span style="color: #c6d0f5;">name</span></span>&quot;</span> <span style="color: #99d1db;">==</span> <span style="color: #a6d189;">&quot;Steve&quot;</span> <span style="color: #949cbb;">]]</span> <span style="color: #99d1db;">&amp;&amp;</span> <span style="color: #949cbb;">[[</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">$</span><span style="color: #c6d0f5;">age</span></span>&quot;</span> <span style="color: #99d1db;">-eq</span> <span style="color: #ef9f76;">15</span> <span style="color: #949cbb;">]]</span><span style="color: #949cbb;">;</span> <span style="color: #ca9ee6;">then</span>
+</span><span class="athl-line" data-athl-line="139">    <span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;This will run if <span ><span style="color: #f4b8e4;">$</span><span style="color: #c6d0f5;">name</span></span> is Steve AND <span ><span style="color: #f4b8e4;">$</span><span style="color: #c6d0f5;">age</span></span> is 15.&quot;</span>
 </span><span class="athl-line" data-athl-line="140"><span style="color: #ca9ee6;">fi</span>
 </span><span class="athl-line" data-athl-line="141">
-</span><span class="athl-line" data-athl-line="142"><span style="color: #ca9ee6;">if</span> <span style="color: #949cbb;">[[</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">$</span><span style="color: #ef9f76;">name</span></span>&quot;</span> <span style="color: #99d1db;">==</span> <span style="color: #a6d189;">&quot;Daniya&quot;</span> <span style="color: #949cbb;">]]</span> <span style="color: #99d1db;">||</span> <span style="color: #949cbb;">[[</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">$</span><span style="color: #ef9f76;">name</span></span>&quot;</span> <span style="color: #99d1db;">==</span> <span style="color: #a6d189;">&quot;Zach&quot;</span> <span style="color: #949cbb;">]]</span><span style="color: #949cbb;">;</span> <span style="color: #ca9ee6;">then</span>
-</span><span class="athl-line" data-athl-line="143">    <span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;This will run if <span ><span style="color: #f4b8e4;">$</span><span style="color: #ef9f76;">name</span></span> is Daniya OR Zach.&quot;</span>
+</span><span class="athl-line" data-athl-line="142"><span style="color: #ca9ee6;">if</span> <span style="color: #949cbb;">[[</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">$</span><span style="color: #c6d0f5;">name</span></span>&quot;</span> <span style="color: #99d1db;">==</span> <span style="color: #a6d189;">&quot;Daniya&quot;</span> <span style="color: #949cbb;">]]</span> <span style="color: #99d1db;">||</span> <span style="color: #949cbb;">[[</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">$</span><span style="color: #c6d0f5;">name</span></span>&quot;</span> <span style="color: #99d1db;">==</span> <span style="color: #a6d189;">&quot;Zach&quot;</span> <span style="color: #949cbb;">]]</span><span style="color: #949cbb;">;</span> <span style="color: #ca9ee6;">then</span>
+</span><span class="athl-line" data-athl-line="143">    <span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;This will run if <span ><span style="color: #f4b8e4;">$</span><span style="color: #c6d0f5;">name</span></span> is Daniya OR Zach.&quot;</span>
 </span><span class="athl-line" data-athl-line="144"><span style="color: #ca9ee6;">fi</span>
 </span><span class="athl-line" data-athl-line="145"><span style="color: #949cbb;"># There are other comparison operators for numbers listed below:</span>
 </span><span class="athl-line" data-athl-line="146"><span style="color: #949cbb;"># -ne - not equal</span>
@@ -174,8 +174,8 @@
 </span><span class="athl-line" data-athl-line="150"><span style="color: #949cbb;"># -ge - greater than or equal to</span>
 </span><span class="athl-line" data-athl-line="151">
 </span><span class="athl-line" data-athl-line="152"><span style="color: #949cbb;"># There is also the `=~` operator, which tests a string against the Regex pattern:</span>
-</span><span class="athl-line" data-athl-line="153"><span style="color: #ef9f76;">email</span><span style="color: #99d1db;">=</span><span style="color: #ef9f76;">me@example.com</span>
-</span><span class="athl-line" data-athl-line="154"><span style="color: #ca9ee6;">if</span> <span style="color: #949cbb;">[[</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">$</span><span style="color: #ef9f76;">email</span></span>&quot;</span> <span style="color: #99d1db;">=~</span> <span style="color: #ef9f76;">[a-z]+@[a-z]{2,}\.(com|net|org)</span> <span style="color: #949cbb;">]]</span>
+</span><span class="athl-line" data-athl-line="153"><span style="color: #c6d0f5;">email</span><span style="color: #99d1db;">=</span><span style="color: #a6d189;">me@example.com</span>
+</span><span class="athl-line" data-athl-line="154"><span style="color: #ca9ee6;">if</span> <span style="color: #949cbb;">[[</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">$</span><span style="color: #c6d0f5;">email</span></span>&quot;</span> <span style="color: #99d1db;">=~</span> <span style="color: #ef9f76;">[a-z]+@[a-z]{2,}\.(com|net|org)</span> <span style="color: #949cbb;">]]</span>
 </span><span class="athl-line" data-athl-line="155"><span style="color: #ca9ee6;">then</span>
 </span><span class="athl-line" data-athl-line="156">    <span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;Valid email!&quot;</span>
 </span><span class="athl-line" data-athl-line="157"><span style="color: #ca9ee6;">fi</span>
@@ -189,7 +189,7 @@
 </span><span class="athl-line" data-athl-line="165">
 </span><span class="athl-line" data-athl-line="166"><span style="color: #949cbb;"># A single ampersand &amp; after a command runs it in the background. A background command&#39;s</span>
 </span><span class="athl-line" data-athl-line="167"><span style="color: #949cbb;"># output is printed to the terminal, but it cannot read from the input.</span>
-</span><span class="athl-line" data-athl-line="168"><span style="color: #ef9f76;">sleep</span> <span style="color: #ef9f76;">30</span> <span style="color: #949cbb;">&amp;</span>
+</span><span class="athl-line" data-athl-line="168"><span style="color: #8caaee;">sleep</span> <span style="color: #ef9f76;">30</span> <span style="color: #949cbb;">&amp;</span>
 </span><span class="athl-line" data-athl-line="169"><span style="color: #949cbb;"># List background jobs</span>
 </span><span class="athl-line" data-athl-line="170"><span style="color: #ef9f76;">jobs</span> <span style="color: #949cbb;"># =&gt; [1]+  Running                 sleep 30 &amp;</span>
 </span><span class="athl-line" data-athl-line="171"><span style="color: #949cbb;"># Bring the background job to the foreground</span>
@@ -198,15 +198,15 @@
 </span><span class="athl-line" data-athl-line="174"><span style="color: #949cbb;"># Resume a background process after it has been paused with Ctrl-Z</span>
 </span><span class="athl-line" data-athl-line="175"><span style="color: #ef9f76;">bg</span>
 </span><span class="athl-line" data-athl-line="176"><span style="color: #949cbb;"># Kill job number 2</span>
-</span><span class="athl-line" data-athl-line="177"><span style="color: #ef9f76;">kill</span> <span style="color: #ef9f76;">%2</span>
+</span><span class="athl-line" data-athl-line="177"><span style="color: #ef9f76;">kill</span> <span style="color: #ea999c;">%2</span>
 </span><span class="athl-line" data-athl-line="178"><span style="color: #949cbb;"># %1, %2, etc. can be used for fg and bg as well</span>
 </span><span class="athl-line" data-athl-line="179">
 </span><span class="athl-line" data-athl-line="180"><span style="color: #949cbb;"># Redefine command `ping` as alias to send only 5 packets</span>
-</span><span class="athl-line" data-athl-line="181"><span style="color: #ef9f76;">alias</span> <span style="color: #ef9f76;">ping=</span><span style="color: #a6d189;">&#39;ping -c 5&#39;</span>
+</span><span class="athl-line" data-athl-line="181"><span style="color: #ef9f76;">alias</span> <span style="color: #ea999c;">ping=</span><span style="color: #a6d189;">&#39;ping -c 5&#39;</span>
 </span><span class="athl-line" data-athl-line="182"><span style="color: #949cbb;"># Escape the alias and use command with this name instead</span>
-</span><span class="athl-line" data-athl-line="183"><span style="color: #ef9f76;">\ping</span> <span style="color: #ef9f76;">192.168.1.1</span>
+</span><span class="athl-line" data-athl-line="183"><span style="color: #8caaee;">\ping</span> <span style="color: #ea999c;">192.168.1.1</span>
 </span><span class="athl-line" data-athl-line="184"><span style="color: #949cbb;"># Print all aliases</span>
-</span><span class="athl-line" data-athl-line="185"><span style="color: #ef9f76;">alias</span> <span style="color: #ef9f76;">-p</span>
+</span><span class="athl-line" data-athl-line="185"><span style="color: #ef9f76;">alias</span> <span style="color: #ea999c;">-p</span>
 </span><span class="athl-line" data-athl-line="186">
 </span><span class="athl-line" data-athl-line="187"><span style="color: #949cbb;"># Expressions are denoted with the following format:</span>
 </span><span class="athl-line" data-athl-line="188"><span style="color: #ef9f76;">echo</span> <span style="color: #f4b8e4;">$((</span> <span style="color: #ef9f76;">10</span> <span style="color: #99d1db;">+</span> <span style="color: #ef9f76;">5</span> <span style="color: #f4b8e4;">))</span> <span style="color: #949cbb;"># =&gt; 15</span>
@@ -214,27 +214,27 @@
 </span><span class="athl-line" data-athl-line="190"><span style="color: #949cbb;"># Unlike other programming languages, bash is a shell so it works in the context</span>
 </span><span class="athl-line" data-athl-line="191"><span style="color: #949cbb;"># of a current directory. You can list files and directories in the current</span>
 </span><span class="athl-line" data-athl-line="192"><span style="color: #949cbb;"># directory with the ls command:</span>
-</span><span class="athl-line" data-athl-line="193"><span style="color: #ef9f76;">ls</span> <span style="color: #949cbb;"># Lists the files and subdirectories contained in the current directory</span>
+</span><span class="athl-line" data-athl-line="193"><span style="color: #8caaee;">ls</span> <span style="color: #949cbb;"># Lists the files and subdirectories contained in the current directory</span>
 </span><span class="athl-line" data-athl-line="194">
 </span><span class="athl-line" data-athl-line="195"><span style="color: #949cbb;"># This command has options that control its execution:</span>
-</span><span class="athl-line" data-athl-line="196"><span style="color: #ef9f76;">ls</span> <span style="color: #ef9f76;">-l</span> <span style="color: #949cbb;"># Lists every file and directory on a separate line</span>
-</span><span class="athl-line" data-athl-line="197"><span style="color: #ef9f76;">ls</span> <span style="color: #ef9f76;">-t</span> <span style="color: #949cbb;"># Sorts the directory contents by last-modified date (descending)</span>
-</span><span class="athl-line" data-athl-line="198"><span style="color: #ef9f76;">ls</span> <span style="color: #ef9f76;">-R</span> <span style="color: #949cbb;"># Recursively `ls` this directory and all of its subdirectories</span>
+</span><span class="athl-line" data-athl-line="196"><span style="color: #8caaee;">ls</span> <span style="color: #ea999c;">-l</span> <span style="color: #949cbb;"># Lists every file and directory on a separate line</span>
+</span><span class="athl-line" data-athl-line="197"><span style="color: #8caaee;">ls</span> <span style="color: #ea999c;">-t</span> <span style="color: #949cbb;"># Sorts the directory contents by last-modified date (descending)</span>
+</span><span class="athl-line" data-athl-line="198"><span style="color: #8caaee;">ls</span> <span style="color: #ea999c;">-R</span> <span style="color: #949cbb;"># Recursively `ls` this directory and all of its subdirectories</span>
 </span><span class="athl-line" data-athl-line="199">
 </span><span class="athl-line" data-athl-line="200"><span style="color: #949cbb;"># Results (stdout) of the previous command can be passed as input (stdin) to the next command</span>
 </span><span class="athl-line" data-athl-line="201"><span style="color: #949cbb;"># using a pipe |. Commands chained in this way are called a &quot;pipeline&quot;, and are run concurrently.</span>
 </span><span class="athl-line" data-athl-line="202"><span style="color: #949cbb;"># The `grep` command filters the input with provided patterns.</span>
 </span><span class="athl-line" data-athl-line="203"><span style="color: #949cbb;"># That&#39;s how we can list .txt files in the current directory:</span>
-</span><span class="athl-line" data-athl-line="204"><span style="color: #ef9f76;">ls</span> <span style="color: #ef9f76;">-l</span> <span style="color: #99d1db;">|</span> <span style="color: #ef9f76;">grep</span> <span style="color: #a6d189;">&quot;\.txt&quot;</span>
+</span><span class="athl-line" data-athl-line="204"><span style="color: #8caaee;">ls</span> <span style="color: #ea999c;">-l</span> <span style="color: #99d1db;">|</span> <span style="color: #8caaee;">grep</span> <span style="color: #a6d189;">&quot;\.txt&quot;</span>
 </span><span class="athl-line" data-athl-line="205">
 </span><span class="athl-line" data-athl-line="206"><span style="color: #949cbb;"># Use `cat` to print files to stdout:</span>
-</span><span class="athl-line" data-athl-line="207"><span style="color: #ef9f76;">cat</span> <span style="color: #ef9f76;">file.txt</span>
+</span><span class="athl-line" data-athl-line="207"><span style="color: #8caaee;">cat</span> <span style="color: #ea999c;">file.txt</span>
 </span><span class="athl-line" data-athl-line="208">
 </span><span class="athl-line" data-athl-line="209"><span style="color: #949cbb;"># We can also read the file using `cat`:</span>
-</span><span class="athl-line" data-athl-line="210"><span style="color: #ef9f76;">Contents</span><span style="color: #99d1db;">=</span><span style="color: #f4b8e4;">$(</span><span style="color: #ef9f76;">cat</span> <span style="color: #ef9f76;">file.txt</span><span style="color: #f4b8e4;">)</span>
+</span><span class="athl-line" data-athl-line="210"><span style="color: #c6d0f5;">Contents</span><span style="color: #99d1db;">=</span><span style="color: #f4b8e4;">$(</span><span style="color: #8caaee;">cat</span> <span style="color: #ea999c;">file.txt</span><span style="color: #f4b8e4;">)</span>
 </span><span class="athl-line" data-athl-line="211"><span style="color: #949cbb;"># &quot;\n&quot; prints a new line character</span>
 </span><span class="athl-line" data-athl-line="212"><span style="color: #949cbb;"># &quot;-e&quot; to interpret the newline escape characters as escape characters</span>
-</span><span class="athl-line" data-athl-line="213"><span style="color: #ef9f76;">echo</span> <span style="color: #ef9f76;">-e</span> <span style="color: #a6d189;">&quot;START OF FILE\n<span ><span style="color: #f4b8e4;">$</span><span style="color: #ef9f76;">Contents</span></span>\nEND OF FILE&quot;</span>
+</span><span class="athl-line" data-athl-line="213"><span style="color: #ef9f76;">echo</span> <span style="color: #ea999c;">-e</span> <span style="color: #a6d189;">&quot;START OF FILE\n<span ><span style="color: #f4b8e4;">$</span><span style="color: #c6d0f5;">Contents</span></span>\nEND OF FILE&quot;</span>
 </span><span class="athl-line" data-athl-line="214"><span style="color: #949cbb;"># =&gt; START OF FILE</span>
 </span><span class="athl-line" data-athl-line="215"><span style="color: #949cbb;"># =&gt; [contents of file.txt]</span>
 </span><span class="athl-line" data-athl-line="216"><span style="color: #949cbb;"># =&gt; END OF FILE</span>
@@ -243,8 +243,8 @@
 </span><span class="athl-line" data-athl-line="219"><span style="color: #949cbb;"># `cp` creates NEW versions of the sources,</span>
 </span><span class="athl-line" data-athl-line="220"><span style="color: #949cbb;"># so editing the copy won&#39;t affect the original (and vice versa).</span>
 </span><span class="athl-line" data-athl-line="221"><span style="color: #949cbb;"># Note that it will overwrite the destination if it already exists.</span>
-</span><span class="athl-line" data-athl-line="222"><span style="color: #ef9f76;">cp</span> <span style="color: #ef9f76;">srcFile.txt</span> <span style="color: #ef9f76;">clone.txt</span>
-</span><span class="athl-line" data-athl-line="223"><span style="color: #ef9f76;">cp</span> <span style="color: #ef9f76;">-r</span> <span style="color: #ef9f76;">srcDirectory/</span> <span style="color: #ef9f76;">dst/</span> <span style="color: #949cbb;"># recursively copy</span>
+</span><span class="athl-line" data-athl-line="222"><span style="color: #8caaee;">cp</span> <span style="color: #ea999c;">srcFile.txt</span> <span style="color: #ea999c;">clone.txt</span>
+</span><span class="athl-line" data-athl-line="223"><span style="color: #8caaee;">cp</span> <span style="color: #ea999c;">-r</span> <span style="color: #ea999c;">srcDirectory/</span> <span style="color: #ea999c;">dst/</span> <span style="color: #949cbb;"># recursively copy</span>
 </span><span class="athl-line" data-athl-line="224">
 </span><span class="athl-line" data-athl-line="225"><span style="color: #949cbb;"># Look into `scp` or `sftp` if you plan on exchanging files between computers.</span>
 </span><span class="athl-line" data-athl-line="226"><span style="color: #949cbb;"># `scp` behaves very similarly to `cp`.</span>
@@ -253,27 +253,27 @@
 </span><span class="athl-line" data-athl-line="229"><span style="color: #949cbb;"># Use `mv` to move files or directories from one place to another.</span>
 </span><span class="athl-line" data-athl-line="230"><span style="color: #949cbb;"># `mv` is similar to `cp`, but it deletes the source.</span>
 </span><span class="athl-line" data-athl-line="231"><span style="color: #949cbb;"># `mv` is also useful for renaming files!</span>
-</span><span class="athl-line" data-athl-line="232"><span style="color: #ef9f76;">mv</span> <span style="color: #ef9f76;">s0urc3.txt</span> <span style="color: #ef9f76;">dst.txt</span> <span style="color: #949cbb;"># sorry, l33t hackers...</span>
+</span><span class="athl-line" data-athl-line="232"><span style="color: #8caaee;">mv</span> <span style="color: #ea999c;">s0urc3.txt</span> <span style="color: #ea999c;">dst.txt</span> <span style="color: #949cbb;"># sorry, l33t hackers...</span>
 </span><span class="athl-line" data-athl-line="233">
 </span><span class="athl-line" data-athl-line="234"><span style="color: #949cbb;"># Since bash works in the context of a current directory, you might want to</span>
 </span><span class="athl-line" data-athl-line="235"><span style="color: #949cbb;"># run your command in some other directory. We have cd for changing location:</span>
-</span><span class="athl-line" data-athl-line="236"><span style="color: #ef9f76;">cd</span> <span style="color: #ef9f76;">~</span>    <span style="color: #949cbb;"># change to home directory</span>
+</span><span class="athl-line" data-athl-line="236"><span style="color: #ef9f76;">cd</span> <span style="color: #ea999c;">~</span>    <span style="color: #949cbb;"># change to home directory</span>
 </span><span class="athl-line" data-athl-line="237"><span style="color: #ef9f76;">cd</span>      <span style="color: #949cbb;"># also goes to home directory</span>
-</span><span class="athl-line" data-athl-line="238"><span style="color: #ef9f76;">cd</span> <span style="color: #ef9f76;">..</span>   <span style="color: #949cbb;"># go up one directory</span>
+</span><span class="athl-line" data-athl-line="238"><span style="color: #ef9f76;">cd</span> <span style="color: #ea999c;">..</span>   <span style="color: #949cbb;"># go up one directory</span>
 </span><span class="athl-line" data-athl-line="239">        <span style="color: #949cbb;"># (^^say, from /home/username/Downloads to /home/username)</span>
-</span><span class="athl-line" data-athl-line="240"><span style="color: #ef9f76;">cd</span> <span style="color: #ef9f76;">/home/username/Documents</span>   <span style="color: #949cbb;"># change to specified directory</span>
-</span><span class="athl-line" data-athl-line="241"><span style="color: #ef9f76;">cd</span> <span style="color: #ef9f76;">~/Documents/..</span>    <span style="color: #949cbb;"># now in home directory (if ~/Documents exists)</span>
-</span><span class="athl-line" data-athl-line="242"><span style="color: #ef9f76;">cd</span> <span style="color: #ef9f76;">-</span>    <span style="color: #949cbb;"># change to last directory</span>
+</span><span class="athl-line" data-athl-line="240"><span style="color: #ef9f76;">cd</span> <span style="color: #ea999c;">/home/username/Documents</span>   <span style="color: #949cbb;"># change to specified directory</span>
+</span><span class="athl-line" data-athl-line="241"><span style="color: #ef9f76;">cd</span> <span style="color: #ea999c;">~/Documents/..</span>    <span style="color: #949cbb;"># now in home directory (if ~/Documents exists)</span>
+</span><span class="athl-line" data-athl-line="242"><span style="color: #ef9f76;">cd</span> <span style="color: #ea999c;">-</span>    <span style="color: #949cbb;"># change to last directory</span>
 </span><span class="athl-line" data-athl-line="243"><span style="color: #949cbb;"># =&gt; /home/username/Documents</span>
 </span><span class="athl-line" data-athl-line="244">
 </span><span class="athl-line" data-athl-line="245"><span style="color: #949cbb;"># Use subshells to work across directories</span>
-</span><span class="athl-line" data-athl-line="246"><span style="color: #949cbb;">(</span><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;First, I&#39;m here: <span ><span style="color: #f4b8e4;">$</span><span style="color: #e78284;">PWD</span></span>&quot;</span><span style="color: #949cbb;">)</span> <span style="color: #99d1db;">&amp;&amp;</span> <span style="color: #949cbb;">(</span><span style="color: #ef9f76;">cd</span> <span style="color: #ef9f76;">someDir</span><span style="color: #949cbb;">;</span> <span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;Then, I&#39;m here: <span ><span style="color: #f4b8e4;">$</span><span style="color: #e78284;">PWD</span></span>&quot;</span><span style="color: #949cbb;">)</span>
+</span><span class="athl-line" data-athl-line="246"><span style="color: #949cbb;">(</span><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;First, I&#39;m here: <span ><span style="color: #f4b8e4;">$</span><span style="color: #e78284;">PWD</span></span>&quot;</span><span style="color: #949cbb;">)</span> <span style="color: #99d1db;">&amp;&amp;</span> <span style="color: #949cbb;">(</span><span style="color: #ef9f76;">cd</span> <span style="color: #ea999c;">someDir</span><span style="color: #949cbb;">;</span> <span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;Then, I&#39;m here: <span ><span style="color: #f4b8e4;">$</span><span style="color: #e78284;">PWD</span></span>&quot;</span><span style="color: #949cbb;">)</span>
 </span><span class="athl-line" data-athl-line="247"><span style="color: #ef9f76;">pwd</span> <span style="color: #949cbb;"># still in first directory</span>
 </span><span class="athl-line" data-athl-line="248">
 </span><span class="athl-line" data-athl-line="249"><span style="color: #949cbb;"># Use `mkdir` to create new directories.</span>
-</span><span class="athl-line" data-athl-line="250"><span style="color: #ef9f76;">mkdir</span> <span style="color: #ef9f76;">myNewDir</span>
+</span><span class="athl-line" data-athl-line="250"><span style="color: #8caaee;">mkdir</span> <span style="color: #ea999c;">myNewDir</span>
 </span><span class="athl-line" data-athl-line="251"><span style="color: #949cbb;"># The `-p` flag causes new intermediate directories to be created as necessary.</span>
-</span><span class="athl-line" data-athl-line="252"><span style="color: #ef9f76;">mkdir</span> <span style="color: #ef9f76;">-p</span> <span style="color: #ef9f76;">myNewDir/with/intermediate/directories</span>
+</span><span class="athl-line" data-athl-line="252"><span style="color: #8caaee;">mkdir</span> <span style="color: #ea999c;">-p</span> <span style="color: #ea999c;">myNewDir/with/intermediate/directories</span>
 </span><span class="athl-line" data-athl-line="253"><span style="color: #949cbb;"># if the intermediate directories didn&#39;t already exist, running the above</span>
 </span><span class="athl-line" data-athl-line="254"><span style="color: #949cbb;"># command without the `-p` flag would return an error</span>
 </span><span class="athl-line" data-athl-line="255">
@@ -284,7 +284,7 @@
 </span><span class="athl-line" data-athl-line="260">
 </span><span class="athl-line" data-athl-line="261"><span style="color: #949cbb;"># Read from stdin until ^EOF$ and overwrite hello.py with the lines</span>
 </span><span class="athl-line" data-athl-line="262"><span style="color: #949cbb;"># between &quot;EOF&quot; (which are called a &quot;here document&quot;):</span>
-</span><span class="athl-line" data-athl-line="263"><span style="color: #ef9f76;">cat</span> <span style="color: #99d1db;">&gt;</span> <span style="color: #f4b8e4;">hello.py</span> <span style="color: #99d1db;">&lt;&lt;</span> <span style="color: #85c1dc;">EOF</span>
+</span><span class="athl-line" data-athl-line="263"><span style="color: #8caaee;">cat</span> <span style="color: #99d1db;">&gt;</span> <span style="color: #f4b8e4;">hello.py</span> <span style="color: #99d1db;">&lt;&lt;</span> <span style="color: #85c1dc;">EOF</span>
 </span><span class="athl-line" data-athl-line="264"><span style="color: #a6d189;">#!/usr/bin/env python</span>
 </span><span class="athl-line" data-athl-line="265"><span style="color: #a6d189;">from __future__ import print_function</span>
 </span><span class="athl-line" data-athl-line="266"><span style="color: #a6d189;">import sys</span>
@@ -297,42 +297,42 @@
 </span><span class="athl-line" data-athl-line="273">
 </span><span class="athl-line" data-athl-line="274"><span style="color: #949cbb;"># Run the hello.py Python script with various stdin, stdout, and</span>
 </span><span class="athl-line" data-athl-line="275"><span style="color: #949cbb;"># stderr redirections:</span>
-</span><span class="athl-line" data-athl-line="276"><span style="color: #ef9f76;">python</span> <span style="color: #ef9f76;">hello.py</span> <span style="color: #99d1db;">&lt;</span> <span style="color: #a6d189;">&quot;input.in&quot;</span> <span style="color: #949cbb;"># pass input.in as input to the script</span>
+</span><span class="athl-line" data-athl-line="276"><span style="color: #8caaee;">python</span> <span style="color: #ea999c;">hello.py</span> <span style="color: #99d1db;">&lt;</span> <span style="color: #a6d189;">&quot;input.in&quot;</span> <span style="color: #949cbb;"># pass input.in as input to the script</span>
 </span><span class="athl-line" data-athl-line="277">
-</span><span class="athl-line" data-athl-line="278"><span style="color: #ef9f76;">python</span> <span style="color: #ef9f76;">hello.py</span> <span style="color: #99d1db;">&gt;</span> <span style="color: #a6d189;">&quot;output.out&quot;</span> <span style="color: #949cbb;"># redirect output from the script to output.out</span>
+</span><span class="athl-line" data-athl-line="278"><span style="color: #8caaee;">python</span> <span style="color: #ea999c;">hello.py</span> <span style="color: #99d1db;">&gt;</span> <span style="color: #a6d189;">&quot;output.out&quot;</span> <span style="color: #949cbb;"># redirect output from the script to output.out</span>
 </span><span class="athl-line" data-athl-line="279">
-</span><span class="athl-line" data-athl-line="280"><span style="color: #ef9f76;">python</span> <span style="color: #ef9f76;">hello.py</span> <span style="color: #99d1db;">2</span><span style="color: #99d1db;">&gt;</span> <span style="color: #a6d189;">&quot;error.err&quot;</span> <span style="color: #949cbb;"># redirect error output to error.err</span>
+</span><span class="athl-line" data-athl-line="280"><span style="color: #8caaee;">python</span> <span style="color: #ea999c;">hello.py</span> <span style="color: #99d1db;">2</span><span style="color: #99d1db;">&gt;</span> <span style="color: #a6d189;">&quot;error.err&quot;</span> <span style="color: #949cbb;"># redirect error output to error.err</span>
 </span><span class="athl-line" data-athl-line="281">
-</span><span class="athl-line" data-athl-line="282"><span style="color: #ef9f76;">python</span> <span style="color: #ef9f76;">hello.py</span> <span style="color: #99d1db;">&gt;</span> <span style="color: #a6d189;">&quot;output-and-error.log&quot;</span> <span style="color: #99d1db;">2</span><span style="color: #99d1db;">&gt;&amp;</span><span style="color: #ef9f76;">1</span>
+</span><span class="athl-line" data-athl-line="282"><span style="color: #8caaee;">python</span> <span style="color: #ea999c;">hello.py</span> <span style="color: #99d1db;">&gt;</span> <span style="color: #a6d189;">&quot;output-and-error.log&quot;</span> <span style="color: #99d1db;">2</span><span style="color: #99d1db;">&gt;&amp;</span><span style="color: #ef9f76;">1</span>
 </span><span class="athl-line" data-athl-line="283"><span style="color: #949cbb;"># redirect both output and errors to output-and-error.log</span>
 </span><span class="athl-line" data-athl-line="284"><span style="color: #949cbb;"># &amp;1 means file descriptor 1 (stdout), so 2&gt;&amp;1 redirects stderr (2) to the current</span>
 </span><span class="athl-line" data-athl-line="285"><span style="color: #949cbb;"># destination of stdout (1), which has been redirected to output-and-error.log.</span>
 </span><span class="athl-line" data-athl-line="286">
-</span><span class="athl-line" data-athl-line="287"><span style="color: #ef9f76;">python</span> <span style="color: #ef9f76;">hello.py</span> <span style="color: #99d1db;">&gt;</span> <span style="color: #f4b8e4;">/dev/null</span> <span style="color: #99d1db;">2</span><span style="color: #99d1db;">&gt;&amp;</span><span style="color: #ef9f76;">1</span>
+</span><span class="athl-line" data-athl-line="287"><span style="color: #8caaee;">python</span> <span style="color: #ea999c;">hello.py</span> <span style="color: #99d1db;">&gt;</span> <span style="color: #f4b8e4;">/dev/null</span> <span style="color: #99d1db;">2</span><span style="color: #99d1db;">&gt;&amp;</span><span style="color: #ef9f76;">1</span>
 </span><span class="athl-line" data-athl-line="288"><span style="color: #949cbb;"># redirect all output and errors to the black hole, /dev/null, i.e., no output</span>
 </span><span class="athl-line" data-athl-line="289">
 </span><span class="athl-line" data-athl-line="290"><span style="color: #949cbb;"># The output error will overwrite the file if it exists,</span>
 </span><span class="athl-line" data-athl-line="291"><span style="color: #949cbb;"># if you want to append instead, use &quot;&gt;&gt;&quot;:</span>
-</span><span class="athl-line" data-athl-line="292"><span style="color: #ef9f76;">python</span> <span style="color: #ef9f76;">hello.py</span> <span style="color: #99d1db;">&gt;&gt;</span> <span style="color: #a6d189;">&quot;output.out&quot;</span> <span style="color: #99d1db;">2</span><span style="color: #99d1db;">&gt;&gt;</span> <span style="color: #a6d189;">&quot;error.err&quot;</span>
+</span><span class="athl-line" data-athl-line="292"><span style="color: #8caaee;">python</span> <span style="color: #ea999c;">hello.py</span> <span style="color: #99d1db;">&gt;&gt;</span> <span style="color: #a6d189;">&quot;output.out&quot;</span> <span style="color: #99d1db;">2</span><span style="color: #99d1db;">&gt;&gt;</span> <span style="color: #a6d189;">&quot;error.err&quot;</span>
 </span><span class="athl-line" data-athl-line="293">
 </span><span class="athl-line" data-athl-line="294"><span style="color: #949cbb;"># Overwrite output.out, append to error.err, and count lines:</span>
-</span><span class="athl-line" data-athl-line="295"><span style="color: #ef9f76;">info</span> <span style="color: #ef9f76;">bash</span> <span style="color: #a6d189;">&#39;Basic Shell Features&#39;</span> <span style="color: #a6d189;">&#39;Redirections&#39;</span> <span style="color: #99d1db;">&gt;</span> <span style="color: #f4b8e4;">output.out</span> <span style="color: #99d1db;">2</span><span style="color: #99d1db;">&gt;&gt;</span> <span style="color: #f4b8e4;">error.err</span>
-</span><span class="athl-line" data-athl-line="296"><span style="color: #ef9f76;">wc</span> <span style="color: #ef9f76;">-l</span> <span style="color: #ef9f76;">output.out</span> <span style="color: #ef9f76;">error.err</span>
+</span><span class="athl-line" data-athl-line="295"><span style="color: #8caaee;">info</span> <span style="color: #ea999c;">bash</span> <span style="color: #a6d189;">&#39;Basic Shell Features&#39;</span> <span style="color: #a6d189;">&#39;Redirections&#39;</span> <span style="color: #99d1db;">&gt;</span> <span style="color: #f4b8e4;">output.out</span> <span style="color: #99d1db;">2</span><span style="color: #99d1db;">&gt;&gt;</span> <span style="color: #f4b8e4;">error.err</span>
+</span><span class="athl-line" data-athl-line="296"><span style="color: #8caaee;">wc</span> <span style="color: #ea999c;">-l</span> <span style="color: #ea999c;">output.out</span> <span style="color: #ea999c;">error.err</span>
 </span><span class="athl-line" data-athl-line="297">
 </span><span class="athl-line" data-athl-line="298"><span style="color: #949cbb;"># Run a command and print its file descriptor (e.g. /dev/fd/123)</span>
 </span><span class="athl-line" data-athl-line="299"><span style="color: #949cbb;"># see: man fd</span>
 </span><span class="athl-line" data-athl-line="300"><span style="color: #ef9f76;">echo</span> <span style="color: #f4b8e4;">&lt;(</span><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;#helloworld&quot;</span><span style="color: #f4b8e4;">)</span>
 </span><span class="athl-line" data-athl-line="301">
 </span><span class="athl-line" data-athl-line="302"><span style="color: #949cbb;"># Overwrite output.out with &quot;#helloworld&quot;:</span>
-</span><span class="athl-line" data-athl-line="303"><span style="color: #ef9f76;">cat</span> <span style="color: #99d1db;">&gt;</span> <span style="color: #f4b8e4;">output.out</span> <span style="color: #f4b8e4;">&lt;(</span><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;#helloworld&quot;</span><span style="color: #f4b8e4;">)</span>
+</span><span class="athl-line" data-athl-line="303"><span style="color: #8caaee;">cat</span> <span style="color: #99d1db;">&gt;</span> <span style="color: #f4b8e4;">output.out</span> <span style="color: #f4b8e4;">&lt;(</span><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;#helloworld&quot;</span><span style="color: #f4b8e4;">)</span>
 </span><span class="athl-line" data-athl-line="304"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;#helloworld&quot;</span> <span style="color: #99d1db;">&gt;</span> <span style="color: #f4b8e4;">output.out</span>
-</span><span class="athl-line" data-athl-line="305"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;#helloworld&quot;</span> <span style="color: #99d1db;">|</span> <span style="color: #ef9f76;">cat</span> <span style="color: #99d1db;">&gt;</span> <span style="color: #f4b8e4;">output.out</span>
-</span><span class="athl-line" data-athl-line="306"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;#helloworld&quot;</span> <span style="color: #99d1db;">|</span> <span style="color: #ef9f76;">tee</span> <span style="color: #ef9f76;">output.out</span> <span style="color: #99d1db;">&gt;</span><span style="color: #f4b8e4;">/dev/null</span>
+</span><span class="athl-line" data-athl-line="305"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;#helloworld&quot;</span> <span style="color: #99d1db;">|</span> <span style="color: #8caaee;">cat</span> <span style="color: #99d1db;">&gt;</span> <span style="color: #f4b8e4;">output.out</span>
+</span><span class="athl-line" data-athl-line="306"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;#helloworld&quot;</span> <span style="color: #99d1db;">|</span> <span style="color: #8caaee;">tee</span> <span style="color: #ea999c;">output.out</span> <span style="color: #99d1db;">&gt;</span><span style="color: #f4b8e4;">/dev/null</span>
 </span><span class="athl-line" data-athl-line="307">
 </span><span class="athl-line" data-athl-line="308"><span style="color: #949cbb;"># Cleanup temporary files verbosely (add &#39;-i&#39; for interactive)</span>
 </span><span class="athl-line" data-athl-line="309"><span style="color: #949cbb;"># WARNING: `rm` commands cannot be undone</span>
-</span><span class="athl-line" data-athl-line="310"><span style="color: #ef9f76;">rm</span> <span style="color: #ef9f76;">-v</span> <span style="color: #ef9f76;">output.out</span> <span style="color: #ef9f76;">error.err</span> <span style="color: #ef9f76;">output-and-error.log</span>
-</span><span class="athl-line" data-athl-line="311"><span style="color: #ef9f76;">rm</span> <span style="color: #ef9f76;">-r</span> <span style="color: #ef9f76;">tempDir/</span> <span style="color: #949cbb;"># recursively delete</span>
+</span><span class="athl-line" data-athl-line="310"><span style="color: #8caaee;">rm</span> <span style="color: #ea999c;">-v</span> <span style="color: #ea999c;">output.out</span> <span style="color: #ea999c;">error.err</span> <span style="color: #ea999c;">output-and-error.log</span>
+</span><span class="athl-line" data-athl-line="311"><span style="color: #8caaee;">rm</span> <span style="color: #ea999c;">-r</span> <span style="color: #ea999c;">tempDir/</span> <span style="color: #949cbb;"># recursively delete</span>
 </span><span class="athl-line" data-athl-line="312"><span style="color: #949cbb;"># You can install the `trash-cli` Python package to have `trash`</span>
 </span><span class="athl-line" data-athl-line="313"><span style="color: #949cbb;"># which puts files in the system trash and doesn&#39;t delete them directly</span>
 </span><span class="athl-line" data-athl-line="314"><span style="color: #949cbb;"># see https://pypi.org/project/trash-cli/ if you want to be careful</span>
@@ -340,14 +340,14 @@
 </span><span class="athl-line" data-athl-line="316"><span style="color: #949cbb;"># Commands can be substituted within other commands using $( ):</span>
 </span><span class="athl-line" data-athl-line="317"><span style="color: #949cbb;"># The following command displays the number of files and directories in the</span>
 </span><span class="athl-line" data-athl-line="318"><span style="color: #949cbb;"># current directory.</span>
-</span><span class="athl-line" data-athl-line="319"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;There are <span style="color: #f4b8e4;">$(</span><span style="color: #ef9f76;">ls</span> <span style="color: #99d1db;">|</span> <span style="color: #ef9f76;">wc</span> <span style="color: #ef9f76;">-l</span><span style="color: #f4b8e4;">)</span> items here.&quot;</span>
+</span><span class="athl-line" data-athl-line="319"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;There are <span style="color: #f4b8e4;">$(</span><span style="color: #8caaee;">ls</span> <span style="color: #99d1db;">|</span> <span style="color: #8caaee;">wc</span> <span style="color: #ea999c;">-l</span><span style="color: #f4b8e4;">)</span> items here.&quot;</span>
 </span><span class="athl-line" data-athl-line="320">
 </span><span class="athl-line" data-athl-line="321"><span style="color: #949cbb;"># The same can be done using backticks `` but they can&#39;t be nested -</span>
 </span><span class="athl-line" data-athl-line="322"><span style="color: #949cbb;"># the preferred way is to use $( ).</span>
-</span><span class="athl-line" data-athl-line="323"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;There are `<span style="color: #ef9f76;">ls</span> <span style="color: #99d1db;">|</span> <span style="color: #ef9f76;">wc</span> <span style="color: #ef9f76;">-l</span>` items here.&quot;</span>
+</span><span class="athl-line" data-athl-line="323"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;There are `<span style="color: #8caaee;">ls</span> <span style="color: #99d1db;">|</span> <span style="color: #8caaee;">wc</span> <span style="color: #ea999c;">-l</span>` items here.&quot;</span>
 </span><span class="athl-line" data-athl-line="324">
 </span><span class="athl-line" data-athl-line="325"><span style="color: #949cbb;"># Bash uses a `case` statement that works similarly to switch in Java and C++:</span>
-</span><span class="athl-line" data-athl-line="326"><span style="color: #ca9ee6;">case</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">$</span><span style="color: #ef9f76;">Variable</span></span>&quot;</span> <span style="color: #ca9ee6;">in</span>
+</span><span class="athl-line" data-athl-line="326"><span style="color: #ca9ee6;">case</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">$</span><span style="color: #c6d0f5;">Variable</span></span>&quot;</span> <span style="color: #ca9ee6;">in</span>
 </span><span class="athl-line" data-athl-line="327">    <span style="color: #949cbb;"># List patterns for the conditions you want to meet</span>
 </span><span class="athl-line" data-athl-line="328">    <span style="color: #ef9f76;">0</span><span style="color: #949cbb;">)</span> <span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;There is a zero.&quot;</span><span style="color: #949cbb;">;;</span>
 </span><span class="athl-line" data-athl-line="329">    <span style="color: #ef9f76;">1</span><span style="color: #949cbb;">)</span> <span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;There is a one.&quot;</span><span style="color: #949cbb;">;;</span>
@@ -356,9 +356,9 @@
 </span><span class="athl-line" data-athl-line="332">
 </span><span class="athl-line" data-athl-line="333"><span style="color: #949cbb;"># `for` loops iterate for as many arguments given:</span>
 </span><span class="athl-line" data-athl-line="334"><span style="color: #949cbb;"># The contents of $Variable is printed three times.</span>
-</span><span class="athl-line" data-athl-line="335"><span style="color: #ca9ee6;">for</span> <span style="color: #ef9f76;">Variable</span> <span style="color: #ca9ee6;">in</span> <span style="color: #949cbb;">{</span><span style="color: #ef9f76;">1</span><span style="color: #99d1db;">..</span><span style="color: #ef9f76;">3</span><span style="color: #949cbb;">}</span>
+</span><span class="athl-line" data-athl-line="335"><span style="color: #ca9ee6;">for</span> <span style="color: #c6d0f5;">Variable</span> <span style="color: #ca9ee6;">in</span> <span style="color: #949cbb;">{</span><span style="color: #ef9f76;">1</span><span style="color: #99d1db;">..</span><span style="color: #ef9f76;">3</span><span style="color: #949cbb;">}</span>
 </span><span class="athl-line" data-athl-line="336"><span style="color: #ca9ee6;">do</span>
-</span><span class="athl-line" data-athl-line="337">    <span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">$</span><span style="color: #ef9f76;">Variable</span></span>&quot;</span>
+</span><span class="athl-line" data-athl-line="337">    <span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">$</span><span style="color: #c6d0f5;">Variable</span></span>&quot;</span>
 </span><span class="athl-line" data-athl-line="338"><span style="color: #ca9ee6;">done</span>
 </span><span class="athl-line" data-athl-line="339"><span style="color: #949cbb;"># =&gt; 1</span>
 </span><span class="athl-line" data-athl-line="340"><span style="color: #949cbb;"># =&gt; 2</span>
@@ -366,9 +366,9 @@
 </span><span class="athl-line" data-athl-line="342">
 </span><span class="athl-line" data-athl-line="343">
 </span><span class="athl-line" data-athl-line="344"><span style="color: #949cbb;"># Or write it the &quot;traditional for loop&quot; way:</span>
-</span><span class="athl-line" data-athl-line="345"><span style="color: #ca9ee6;">for</span> <span style="color: #949cbb;">((</span><span style="color: #ef9f76;">a</span><span style="color: #99d1db;">=</span><span style="color: #ef9f76;">1</span><span style="color: #949cbb;">;</span> <span style="color: #ef9f76;">a</span> <span style="color: #99d1db;">&lt;=</span> <span style="color: #ef9f76;">3</span><span style="color: #949cbb;">;</span> <span style="color: #ef9f76;">a</span><span style="color: #99d1db;">++</span><span style="color: #949cbb;">))</span>
+</span><span class="athl-line" data-athl-line="345"><span style="color: #ca9ee6;">for</span> <span style="color: #949cbb;">((</span><span style="color: #c6d0f5;">a</span><span style="color: #99d1db;">=</span><span style="color: #ef9f76;">1</span><span style="color: #949cbb;">;</span> a <span style="color: #99d1db;">&lt;=</span> <span style="color: #ef9f76;">3</span><span style="color: #949cbb;">;</span> a<span style="color: #99d1db;">++</span><span style="color: #949cbb;">))</span>
 </span><span class="athl-line" data-athl-line="346"><span style="color: #ca9ee6;">do</span>
-</span><span class="athl-line" data-athl-line="347">    <span style="color: #ef9f76;">echo</span> <span ><span style="color: #f4b8e4;">$</span><span style="color: #ef9f76;">a</span></span>
+</span><span class="athl-line" data-athl-line="347">    <span style="color: #ef9f76;">echo</span> <span ><span style="color: #f4b8e4;">$</span><span style="color: #c6d0f5;">a</span></span>
 </span><span class="athl-line" data-athl-line="348"><span style="color: #ca9ee6;">done</span>
 </span><span class="athl-line" data-athl-line="349"><span style="color: #949cbb;"># =&gt; 1</span>
 </span><span class="athl-line" data-athl-line="350"><span style="color: #949cbb;"># =&gt; 2</span>
@@ -376,23 +376,23 @@
 </span><span class="athl-line" data-athl-line="352">
 </span><span class="athl-line" data-athl-line="353"><span style="color: #949cbb;"># They can also be used to act on files..</span>
 </span><span class="athl-line" data-athl-line="354"><span style="color: #949cbb;"># This will run the command `cat` on file1 and file2</span>
-</span><span class="athl-line" data-athl-line="355"><span style="color: #ca9ee6;">for</span> <span style="color: #ef9f76;">Variable</span> <span style="color: #ca9ee6;">in</span> <span style="color: #ef9f76;">file1</span> <span style="color: #ef9f76;">file2</span>
+</span><span class="athl-line" data-athl-line="355"><span style="color: #ca9ee6;">for</span> <span style="color: #c6d0f5;">Variable</span> <span style="color: #ca9ee6;">in</span> file1 file2
 </span><span class="athl-line" data-athl-line="356"><span style="color: #ca9ee6;">do</span>
-</span><span class="athl-line" data-athl-line="357">    <span style="color: #ef9f76;">cat</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">$</span><span style="color: #ef9f76;">Variable</span></span>&quot;</span>
+</span><span class="athl-line" data-athl-line="357">    <span style="color: #8caaee;">cat</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">$</span><span style="color: #c6d0f5;">Variable</span></span>&quot;</span>
 </span><span class="athl-line" data-athl-line="358"><span style="color: #ca9ee6;">done</span>
 </span><span class="athl-line" data-athl-line="359">
 </span><span class="athl-line" data-athl-line="360"><span style="color: #949cbb;"># ..or the output from a command</span>
 </span><span class="athl-line" data-athl-line="361"><span style="color: #949cbb;"># This will `cat` the output from `ls`.</span>
-</span><span class="athl-line" data-athl-line="362"><span style="color: #ca9ee6;">for</span> <span style="color: #ef9f76;">Output</span> <span style="color: #ca9ee6;">in</span> <span style="color: #f4b8e4;">$(</span><span style="color: #ef9f76;">ls</span><span style="color: #f4b8e4;">)</span>
+</span><span class="athl-line" data-athl-line="362"><span style="color: #ca9ee6;">for</span> <span style="color: #c6d0f5;">Output</span> <span style="color: #ca9ee6;">in</span> <span style="color: #f4b8e4;">$(</span><span style="color: #8caaee;">ls</span><span style="color: #f4b8e4;">)</span>
 </span><span class="athl-line" data-athl-line="363"><span style="color: #ca9ee6;">do</span>
-</span><span class="athl-line" data-athl-line="364">    <span style="color: #ef9f76;">cat</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">$</span><span style="color: #ef9f76;">Output</span></span>&quot;</span>
+</span><span class="athl-line" data-athl-line="364">    <span style="color: #8caaee;">cat</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">$</span><span style="color: #c6d0f5;">Output</span></span>&quot;</span>
 </span><span class="athl-line" data-athl-line="365"><span style="color: #ca9ee6;">done</span>
 </span><span class="athl-line" data-athl-line="366">
 </span><span class="athl-line" data-athl-line="367"><span style="color: #949cbb;"># Bash can also accept patterns, like this to `cat`</span>
 </span><span class="athl-line" data-athl-line="368"><span style="color: #949cbb;"># all the Markdown files in current directory</span>
-</span><span class="athl-line" data-athl-line="369"><span style="color: #ca9ee6;">for</span> <span style="color: #ef9f76;">Output</span> <span style="color: #ca9ee6;">in</span> <span style="color: #ef9f76;">./*.markdown</span>
+</span><span class="athl-line" data-athl-line="369"><span style="color: #ca9ee6;">for</span> <span style="color: #c6d0f5;">Output</span> <span style="color: #ca9ee6;">in</span> ./*.markdown
 </span><span class="athl-line" data-athl-line="370"><span style="color: #ca9ee6;">do</span>
-</span><span class="athl-line" data-athl-line="371">    <span style="color: #ef9f76;">cat</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">$</span><span style="color: #ef9f76;">Output</span></span>&quot;</span>
+</span><span class="athl-line" data-athl-line="371">    <span style="color: #8caaee;">cat</span> <span style="color: #a6d189;">&quot;<span ><span style="color: #f4b8e4;">$</span><span style="color: #c6d0f5;">Output</span></span>&quot;</span>
 </span><span class="athl-line" data-athl-line="372"><span style="color: #ca9ee6;">done</span>
 </span><span class="athl-line" data-athl-line="373">
 </span><span class="athl-line" data-athl-line="374"><span style="color: #949cbb;"># while loop:</span>
@@ -405,111 +405,111 @@
 </span><span class="athl-line" data-athl-line="381">
 </span><span class="athl-line" data-athl-line="382"><span style="color: #949cbb;"># You can also define functions</span>
 </span><span class="athl-line" data-athl-line="383"><span style="color: #949cbb;"># Definition:</span>
-</span><span class="athl-line" data-athl-line="384"><span style="color: #ca9ee6;">function</span> <span style="color: #ef9f76;">foo</span> <span style="color: #949cbb;">(</span><span style="color: #949cbb;">)</span>
+</span><span class="athl-line" data-athl-line="384"><span style="color: #ca9ee6;">function</span> <span style="color: #8caaee;">foo</span> <span style="color: #949cbb;">(</span><span style="color: #949cbb;">)</span>
 </span><span class="athl-line" data-athl-line="385"><span style="color: #949cbb;">{</span>
 </span><span class="athl-line" data-athl-line="386">    <span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;Arguments work just like script arguments: <span ><span style="color: #f4b8e4;">$</span><span style="color: #ef9f76;">@</span></span>&quot;</span>
-</span><span class="athl-line" data-athl-line="387">    <span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;And: <span ><span style="color: #f4b8e4;">$</span><span style="color: #ef9f76;">1</span></span><span ><span style="color: #f4b8e4;"> $</span><span style="color: #ef9f76;">2</span></span>...&quot;</span>
+</span><span class="athl-line" data-athl-line="387">    <span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;And: <span ><span style="color: #f4b8e4;">$</span><span style="color: #c6d0f5;">1</span></span><span ><span style="color: #f4b8e4;"> $</span><span style="color: #c6d0f5;">2</span></span>...&quot;</span>
 </span><span class="athl-line" data-athl-line="388">    <span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;This is a function&quot;</span>
-</span><span class="athl-line" data-athl-line="389">    <span style="color: #ef9f76;">returnValue</span><span style="color: #99d1db;">=</span><span style="color: #ef9f76;">0</span>    <span style="color: #949cbb;"># Variable values can be returned</span>
-</span><span class="athl-line" data-athl-line="390">    <span style="color: #ef9f76;">return</span> <span ><span style="color: #f4b8e4;">$</span><span style="color: #ef9f76;">returnValue</span></span>
+</span><span class="athl-line" data-athl-line="389">    <span style="color: #c6d0f5;">returnValue</span><span style="color: #99d1db;">=</span><span style="color: #ef9f76;">0</span>    <span style="color: #949cbb;"># Variable values can be returned</span>
+</span><span class="athl-line" data-athl-line="390">    <span style="color: #ef9f76;">return</span> <span ><span style="color: #f4b8e4;">$</span><span style="color: #c6d0f5;">returnValue</span></span>
 </span><span class="athl-line" data-athl-line="391"><span style="color: #949cbb;">}</span>
 </span><span class="athl-line" data-athl-line="392"><span style="color: #949cbb;"># Call the function `foo` with two arguments, arg1 and arg2:</span>
-</span><span class="athl-line" data-athl-line="393"><span style="color: #ef9f76;">foo</span> <span style="color: #ef9f76;">arg1</span> <span style="color: #ef9f76;">arg2</span>
+</span><span class="athl-line" data-athl-line="393"><span style="color: #8caaee;">foo</span> <span style="color: #ea999c;">arg1</span> <span style="color: #ea999c;">arg2</span>
 </span><span class="athl-line" data-athl-line="394"><span style="color: #949cbb;"># =&gt; Arguments work just like script arguments: arg1 arg2</span>
 </span><span class="athl-line" data-athl-line="395"><span style="color: #949cbb;"># =&gt; And: arg1 arg2...</span>
 </span><span class="athl-line" data-athl-line="396"><span style="color: #949cbb;"># =&gt; This is a function</span>
 </span><span class="athl-line" data-athl-line="397"><span style="color: #949cbb;"># Return values can be obtained with $?</span>
-</span><span class="athl-line" data-athl-line="398"><span style="color: #ef9f76;">resultValue</span><span style="color: #99d1db;">=</span><span ><span style="color: #f4b8e4;">$</span><span style="color: #ef9f76;">?</span></span>
+</span><span class="athl-line" data-athl-line="398"><span style="color: #c6d0f5;">resultValue</span><span style="color: #99d1db;">=</span><span ><span style="color: #f4b8e4;">$</span><span style="color: #ef9f76;">?</span></span>
 </span><span class="athl-line" data-athl-line="399"><span style="color: #949cbb;"># More than 9 arguments are also possible by using braces, e.g. ${10}, ${11}, ...</span>
 </span><span class="athl-line" data-athl-line="400">
 </span><span class="athl-line" data-athl-line="401"><span style="color: #949cbb;"># or simply</span>
-</span><span class="athl-line" data-athl-line="402"><span style="color: #ef9f76;">bar</span> <span style="color: #949cbb;">(</span><span style="color: #949cbb;">)</span>
+</span><span class="athl-line" data-athl-line="402"><span style="color: #8caaee;">bar</span> <span style="color: #949cbb;">(</span><span style="color: #949cbb;">)</span>
 </span><span class="athl-line" data-athl-line="403"><span style="color: #949cbb;">{</span>
 </span><span class="athl-line" data-athl-line="404">    <span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;Another way to declare functions!&quot;</span>
 </span><span class="athl-line" data-athl-line="405">    <span style="color: #ef9f76;">return</span> <span style="color: #ef9f76;">0</span>
 </span><span class="athl-line" data-athl-line="406"><span style="color: #949cbb;">}</span>
 </span><span class="athl-line" data-athl-line="407"><span style="color: #949cbb;"># Call the function `bar` with no arguments:</span>
-</span><span class="athl-line" data-athl-line="408"><span style="color: #ef9f76;">bar</span> <span style="color: #949cbb;"># =&gt; Another way to declare functions!</span>
+</span><span class="athl-line" data-athl-line="408"><span style="color: #8caaee;">bar</span> <span style="color: #949cbb;"># =&gt; Another way to declare functions!</span>
 </span><span class="athl-line" data-athl-line="409">
 </span><span class="athl-line" data-athl-line="410"><span style="color: #949cbb;"># Calling your function</span>
-</span><span class="athl-line" data-athl-line="411"><span style="color: #ef9f76;">foo</span> <span style="color: #a6d189;">&quot;My name is&quot;</span> <span ><span style="color: #f4b8e4;">$</span><span style="color: #ef9f76;">Name</span></span>
+</span><span class="athl-line" data-athl-line="411"><span style="color: #8caaee;">foo</span> <span style="color: #a6d189;">&quot;My name is&quot;</span> <span ><span style="color: #f4b8e4;">$</span><span style="color: #c6d0f5;">Name</span></span>
 </span><span class="athl-line" data-athl-line="412">
 </span><span class="athl-line" data-athl-line="413"><span style="color: #949cbb;"># There are a lot of useful commands you should learn:</span>
 </span><span class="athl-line" data-athl-line="414"><span style="color: #949cbb;"># prints last 10 lines of file.txt</span>
-</span><span class="athl-line" data-athl-line="415"><span style="color: #ef9f76;">tail</span> <span style="color: #ef9f76;">-n</span> <span style="color: #ef9f76;">10</span> <span style="color: #ef9f76;">file.txt</span>
+</span><span class="athl-line" data-athl-line="415"><span style="color: #8caaee;">tail</span> <span style="color: #ea999c;">-n</span> <span style="color: #ef9f76;">10</span> <span style="color: #ea999c;">file.txt</span>
 </span><span class="athl-line" data-athl-line="416">
 </span><span class="athl-line" data-athl-line="417"><span style="color: #949cbb;"># prints first 10 lines of file.txt</span>
-</span><span class="athl-line" data-athl-line="418"><span style="color: #ef9f76;">head</span> <span style="color: #ef9f76;">-n</span> <span style="color: #ef9f76;">10</span> <span style="color: #ef9f76;">file.txt</span>
+</span><span class="athl-line" data-athl-line="418"><span style="color: #8caaee;">head</span> <span style="color: #ea999c;">-n</span> <span style="color: #ef9f76;">10</span> <span style="color: #ea999c;">file.txt</span>
 </span><span class="athl-line" data-athl-line="419">
 </span><span class="athl-line" data-athl-line="420"><span style="color: #949cbb;"># print file.txt&#39;s lines in sorted order</span>
-</span><span class="athl-line" data-athl-line="421"><span style="color: #ef9f76;">sort</span> <span style="color: #ef9f76;">file.txt</span>
+</span><span class="athl-line" data-athl-line="421"><span style="color: #8caaee;">sort</span> <span style="color: #ea999c;">file.txt</span>
 </span><span class="athl-line" data-athl-line="422">
 </span><span class="athl-line" data-athl-line="423"><span style="color: #949cbb;"># report or omit repeated lines, with -d it reports them</span>
-</span><span class="athl-line" data-athl-line="424"><span style="color: #ef9f76;">uniq</span> <span style="color: #ef9f76;">-d</span> <span style="color: #ef9f76;">file.txt</span>
+</span><span class="athl-line" data-athl-line="424"><span style="color: #8caaee;">uniq</span> <span style="color: #ea999c;">-d</span> <span style="color: #ea999c;">file.txt</span>
 </span><span class="athl-line" data-athl-line="425">
 </span><span class="athl-line" data-athl-line="426"><span style="color: #949cbb;"># prints only the first column before the &#39;,&#39; character</span>
-</span><span class="athl-line" data-athl-line="427"><span style="color: #ef9f76;">cut</span> <span style="color: #ef9f76;">-d</span> <span style="color: #a6d189;">&#39;,&#39;</span> <span style="color: #ef9f76;">-f</span> <span style="color: #ef9f76;">1</span> <span style="color: #ef9f76;">file.txt</span>
+</span><span class="athl-line" data-athl-line="427"><span style="color: #8caaee;">cut</span> <span style="color: #ea999c;">-d</span> <span style="color: #a6d189;">&#39;,&#39;</span> <span style="color: #ea999c;">-f</span> <span style="color: #ef9f76;">1</span> <span style="color: #ea999c;">file.txt</span>
 </span><span class="athl-line" data-athl-line="428">
 </span><span class="athl-line" data-athl-line="429"><span style="color: #949cbb;"># replaces every occurrence of &#39;okay&#39; with &#39;great&#39; in file.txt</span>
 </span><span class="athl-line" data-athl-line="430"><span style="color: #949cbb;"># (regex compatible)</span>
-</span><span class="athl-line" data-athl-line="431"><span style="color: #ef9f76;">sed</span> <span style="color: #ef9f76;">-i</span> <span style="color: #a6d189;">&#39;s/okay/great/g&#39;</span> <span style="color: #ef9f76;">file.txt</span>
+</span><span class="athl-line" data-athl-line="431"><span style="color: #8caaee;">sed</span> <span style="color: #ea999c;">-i</span> <span style="color: #a6d189;">&#39;s/okay/great/g&#39;</span> <span style="color: #ea999c;">file.txt</span>
 </span><span class="athl-line" data-athl-line="432"><span style="color: #949cbb;"># be aware that this -i flag means that file.txt will be changed</span>
 </span><span class="athl-line" data-athl-line="433"><span style="color: #949cbb;"># -i or --in-place erase the input file (use --in-place=.backup to keep a back-up)</span>
 </span><span class="athl-line" data-athl-line="434">
 </span><span class="athl-line" data-athl-line="435"><span style="color: #949cbb;"># print to stdout all lines of file.txt which match some regex</span>
 </span><span class="athl-line" data-athl-line="436"><span style="color: #949cbb;"># The example prints lines which begin with &quot;foo&quot; and end in &quot;bar&quot;</span>
-</span><span class="athl-line" data-athl-line="437"><span style="color: #ef9f76;">grep</span> <span style="color: #a6d189;">&quot;^foo.*bar$&quot;</span> <span style="color: #ef9f76;">file.txt</span>
+</span><span class="athl-line" data-athl-line="437"><span style="color: #8caaee;">grep</span> <span style="color: #a6d189;">&quot;^foo.*bar$&quot;</span> <span style="color: #ea999c;">file.txt</span>
 </span><span class="athl-line" data-athl-line="438">
 </span><span class="athl-line" data-athl-line="439"><span style="color: #949cbb;"># pass the option &quot;-c&quot; to instead print the number of lines matching the regex</span>
-</span><span class="athl-line" data-athl-line="440"><span style="color: #ef9f76;">grep</span> <span style="color: #ef9f76;">-c</span> <span style="color: #a6d189;">&quot;^foo.*bar$&quot;</span> <span style="color: #ef9f76;">file.txt</span>
+</span><span class="athl-line" data-athl-line="440"><span style="color: #8caaee;">grep</span> <span style="color: #ea999c;">-c</span> <span style="color: #a6d189;">&quot;^foo.*bar$&quot;</span> <span style="color: #ea999c;">file.txt</span>
 </span><span class="athl-line" data-athl-line="441">
 </span><span class="athl-line" data-athl-line="442"><span style="color: #949cbb;"># Other useful options are:</span>
-</span><span class="athl-line" data-athl-line="443"><span style="color: #ef9f76;">grep</span> <span style="color: #ef9f76;">-r</span> <span style="color: #a6d189;">&quot;^foo.*bar$&quot;</span> <span style="color: #ef9f76;">someDir/</span> <span style="color: #949cbb;"># recursively `grep`</span>
-</span><span class="athl-line" data-athl-line="444"><span style="color: #ef9f76;">grep</span> <span style="color: #ef9f76;">-n</span> <span style="color: #a6d189;">&quot;^foo.*bar$&quot;</span> <span style="color: #ef9f76;">file.txt</span> <span style="color: #949cbb;"># give line numbers</span>
-</span><span class="athl-line" data-athl-line="445"><span style="color: #ef9f76;">grep</span> <span style="color: #ef9f76;">-rI</span> <span style="color: #a6d189;">&quot;^foo.*bar$&quot;</span> <span style="color: #ef9f76;">someDir/</span> <span style="color: #949cbb;"># recursively `grep`, but ignore binary files</span>
+</span><span class="athl-line" data-athl-line="443"><span style="color: #8caaee;">grep</span> <span style="color: #ea999c;">-r</span> <span style="color: #a6d189;">&quot;^foo.*bar$&quot;</span> <span style="color: #ea999c;">someDir/</span> <span style="color: #949cbb;"># recursively `grep`</span>
+</span><span class="athl-line" data-athl-line="444"><span style="color: #8caaee;">grep</span> <span style="color: #ea999c;">-n</span> <span style="color: #a6d189;">&quot;^foo.*bar$&quot;</span> <span style="color: #ea999c;">file.txt</span> <span style="color: #949cbb;"># give line numbers</span>
+</span><span class="athl-line" data-athl-line="445"><span style="color: #8caaee;">grep</span> <span style="color: #ea999c;">-rI</span> <span style="color: #a6d189;">&quot;^foo.*bar$&quot;</span> <span style="color: #ea999c;">someDir/</span> <span style="color: #949cbb;"># recursively `grep`, but ignore binary files</span>
 </span><span class="athl-line" data-athl-line="446">
 </span><span class="athl-line" data-athl-line="447"><span style="color: #949cbb;"># perform the same initial search, but filter out the lines containing &quot;baz&quot;</span>
-</span><span class="athl-line" data-athl-line="448"><span style="color: #ef9f76;">grep</span> <span style="color: #a6d189;">&quot;^foo.*bar$&quot;</span> <span style="color: #ef9f76;">file.txt</span> <span style="color: #99d1db;">|</span> <span style="color: #ef9f76;">grep</span> <span style="color: #ef9f76;">-v</span> <span style="color: #a6d189;">&quot;baz&quot;</span>
+</span><span class="athl-line" data-athl-line="448"><span style="color: #8caaee;">grep</span> <span style="color: #a6d189;">&quot;^foo.*bar$&quot;</span> <span style="color: #ea999c;">file.txt</span> <span style="color: #99d1db;">|</span> <span style="color: #8caaee;">grep</span> <span style="color: #ea999c;">-v</span> <span style="color: #a6d189;">&quot;baz&quot;</span>
 </span><span class="athl-line" data-athl-line="449">
 </span><span class="athl-line" data-athl-line="450"><span style="color: #949cbb;"># if you literally want to search for the string,</span>
 </span><span class="athl-line" data-athl-line="451"><span style="color: #949cbb;"># and not the regex, use `fgrep` (or `grep -F`)</span>
-</span><span class="athl-line" data-athl-line="452"><span style="color: #ef9f76;">fgrep</span> <span style="color: #a6d189;">&quot;foobar&quot;</span> <span style="color: #ef9f76;">file.txt</span>
+</span><span class="athl-line" data-athl-line="452"><span style="color: #8caaee;">fgrep</span> <span style="color: #a6d189;">&quot;foobar&quot;</span> <span style="color: #ea999c;">file.txt</span>
 </span><span class="athl-line" data-athl-line="453">
 </span><span class="athl-line" data-athl-line="454"><span style="color: #949cbb;"># The `trap` command allows you to execute a command whenever your script</span>
 </span><span class="athl-line" data-athl-line="455"><span style="color: #949cbb;"># receives a signal. Here, `trap` will execute `rm` if it receives any of the</span>
 </span><span class="athl-line" data-athl-line="456"><span style="color: #949cbb;"># three listed signals.</span>
-</span><span class="athl-line" data-athl-line="457"><span style="color: #ef9f76;">trap</span> <span style="color: #a6d189;">&quot;rm <span ><span style="color: #f4b8e4;">$</span><span style="color: #ef9f76;">TEMP_FILE</span></span>; exit&quot;</span> <span style="color: #ef9f76;">SIGHUP</span> <span style="color: #ef9f76;">SIGINT</span> <span style="color: #ef9f76;">SIGTERM</span>
+</span><span class="athl-line" data-athl-line="457"><span style="color: #ef9f76;">trap</span> <span style="color: #a6d189;">&quot;rm <span ><span style="color: #f4b8e4;">$</span><span style="color: #ef9f76;">TEMP_FILE</span></span>; exit&quot;</span> <span style="color: #ea999c;">SIGHUP</span> <span style="color: #ea999c;">SIGINT</span> <span style="color: #ea999c;">SIGTERM</span>
 </span><span class="athl-line" data-athl-line="458">
 </span><span class="athl-line" data-athl-line="459"><span style="color: #949cbb;"># `sudo` is used to perform commands as the superuser</span>
 </span><span class="athl-line" data-athl-line="460"><span style="color: #949cbb;"># usually it will ask interactively the password of superuser</span>
-</span><span class="athl-line" data-athl-line="461"><span style="color: #ef9f76;">NAME1</span><span style="color: #99d1db;">=</span><span style="color: #f4b8e4;">$(</span><span style="color: #ef9f76;">whoami</span><span style="color: #f4b8e4;">)</span>
-</span><span class="athl-line" data-athl-line="462"><span style="color: #ef9f76;">NAME2</span><span style="color: #99d1db;">=</span><span style="color: #f4b8e4;">$(</span><span style="color: #ef9f76;">sudo</span> <span style="color: #ef9f76;">whoami</span><span style="color: #f4b8e4;">)</span>
+</span><span class="athl-line" data-athl-line="461"><span style="color: #ef9f76;">NAME1</span><span style="color: #99d1db;">=</span><span style="color: #f4b8e4;">$(</span><span style="color: #8caaee;">whoami</span><span style="color: #f4b8e4;">)</span>
+</span><span class="athl-line" data-athl-line="462"><span style="color: #ef9f76;">NAME2</span><span style="color: #99d1db;">=</span><span style="color: #f4b8e4;">$(</span><span style="color: #8caaee;">sudo</span> <span style="color: #ea999c;">whoami</span><span style="color: #f4b8e4;">)</span>
 </span><span class="athl-line" data-athl-line="463"><span style="color: #ef9f76;">echo</span> <span style="color: #a6d189;">&quot;Was <span ><span style="color: #f4b8e4;">$</span><span style="color: #ef9f76;">NAME1</span></span>, then became more powerful <span ><span style="color: #f4b8e4;">$</span><span style="color: #ef9f76;">NAME2</span></span>&quot;</span>
 </span><span class="athl-line" data-athl-line="464">
 </span><span class="athl-line" data-athl-line="465"><span style="color: #949cbb;"># Read Bash shell built-ins documentation with the bash `help` built-in:</span>
 </span><span class="athl-line" data-athl-line="466"><span style="color: #ef9f76;">help</span>
-</span><span class="athl-line" data-athl-line="467"><span style="color: #ef9f76;">help</span> <span style="color: #ef9f76;">help</span>
-</span><span class="athl-line" data-athl-line="468"><span style="color: #ef9f76;">help</span> <span style="color: #ef9f76;">for</span>
-</span><span class="athl-line" data-athl-line="469"><span style="color: #ef9f76;">help</span> <span style="color: #ef9f76;">return</span>
-</span><span class="athl-line" data-athl-line="470"><span style="color: #ef9f76;">help</span> <span style="color: #ef9f76;">source</span>
-</span><span class="athl-line" data-athl-line="471"><span style="color: #ef9f76;">help</span> <span style="color: #ef9f76;">.</span>
+</span><span class="athl-line" data-athl-line="467"><span style="color: #ef9f76;">help</span> <span style="color: #ea999c;">help</span>
+</span><span class="athl-line" data-athl-line="468"><span style="color: #ef9f76;">help</span> <span style="color: #ea999c;">for</span>
+</span><span class="athl-line" data-athl-line="469"><span style="color: #ef9f76;">help</span> <span style="color: #ea999c;">return</span>
+</span><span class="athl-line" data-athl-line="470"><span style="color: #ef9f76;">help</span> <span style="color: #ea999c;">source</span>
+</span><span class="athl-line" data-athl-line="471"><span style="color: #ef9f76;">help</span> <span style="color: #ea999c;">.</span>
 </span><span class="athl-line" data-athl-line="472">
 </span><span class="athl-line" data-athl-line="473"><span style="color: #949cbb;"># Read Bash manpage documentation with `man`</span>
-</span><span class="athl-line" data-athl-line="474"><span style="color: #ef9f76;">apropos</span> <span style="color: #ef9f76;">bash</span>
-</span><span class="athl-line" data-athl-line="475"><span style="color: #ef9f76;">man</span> <span style="color: #ef9f76;">1</span> <span style="color: #ef9f76;">bash</span>
-</span><span class="athl-line" data-athl-line="476"><span style="color: #ef9f76;">man</span> <span style="color: #ef9f76;">bash</span>
+</span><span class="athl-line" data-athl-line="474"><span style="color: #8caaee;">apropos</span> <span style="color: #ea999c;">bash</span>
+</span><span class="athl-line" data-athl-line="475"><span style="color: #8caaee;">man</span> <span style="color: #ef9f76;">1</span> <span style="color: #ea999c;">bash</span>
+</span><span class="athl-line" data-athl-line="476"><span style="color: #8caaee;">man</span> <span style="color: #ea999c;">bash</span>
 </span><span class="athl-line" data-athl-line="477">
 </span><span class="athl-line" data-athl-line="478"><span style="color: #949cbb;"># Read info documentation with `info` (`?` for help)</span>
-</span><span class="athl-line" data-athl-line="479"><span style="color: #ef9f76;">apropos</span> <span style="color: #ef9f76;">info</span> <span style="color: #99d1db;">|</span> <span style="color: #ef9f76;">grep</span> <span style="color: #a6d189;">&#39;^info.*(&#39;</span>
-</span><span class="athl-line" data-athl-line="480"><span style="color: #ef9f76;">man</span> <span style="color: #ef9f76;">info</span>
-</span><span class="athl-line" data-athl-line="481"><span style="color: #ef9f76;">info</span> <span style="color: #ef9f76;">info</span>
-</span><span class="athl-line" data-athl-line="482"><span style="color: #ef9f76;">info</span> <span style="color: #ef9f76;">5</span> <span style="color: #ef9f76;">info</span>
+</span><span class="athl-line" data-athl-line="479"><span style="color: #8caaee;">apropos</span> <span style="color: #ea999c;">info</span> <span style="color: #99d1db;">|</span> <span style="color: #8caaee;">grep</span> <span style="color: #a6d189;">&#39;^info.*(&#39;</span>
+</span><span class="athl-line" data-athl-line="480"><span style="color: #8caaee;">man</span> <span style="color: #ea999c;">info</span>
+</span><span class="athl-line" data-athl-line="481"><span style="color: #8caaee;">info</span> <span style="color: #ea999c;">info</span>
+</span><span class="athl-line" data-athl-line="482"><span style="color: #8caaee;">info</span> <span style="color: #ef9f76;">5</span> <span style="color: #ea999c;">info</span>
 </span><span class="athl-line" data-athl-line="483">
 </span><span class="athl-line" data-athl-line="484"><span style="color: #949cbb;"># Read bash info documentation:</span>
-</span><span class="athl-line" data-athl-line="485"><span style="color: #ef9f76;">info</span> <span style="color: #ef9f76;">bash</span>
-</span><span class="athl-line" data-athl-line="486"><span style="color: #ef9f76;">info</span> <span style="color: #ef9f76;">bash</span> <span style="color: #a6d189;">&#39;Bash Features&#39;</span>
-</span><span class="athl-line" data-athl-line="487"><span style="color: #ef9f76;">info</span> <span style="color: #ef9f76;">bash</span> <span style="color: #ef9f76;">6</span>
-</span><span class="athl-line" data-athl-line="488"><span style="color: #ef9f76;">info</span> <span style="color: #ef9f76;">--apropos</span> <span style="color: #ef9f76;">bash</span>
+</span><span class="athl-line" data-athl-line="485"><span style="color: #8caaee;">info</span> <span style="color: #ea999c;">bash</span>
+</span><span class="athl-line" data-athl-line="486"><span style="color: #8caaee;">info</span> <span style="color: #ea999c;">bash</span> <span style="color: #a6d189;">&#39;Bash Features&#39;</span>
+</span><span class="athl-line" data-athl-line="487"><span style="color: #8caaee;">info</span> <span style="color: #ea999c;">bash</span> <span style="color: #ef9f76;">6</span>
+</span><span class="athl-line" data-athl-line="488"><span style="color: #8caaee;">info</span> <span style="color: #ea999c;">--apropos</span> <span style="color: #ea999c;">bash</span>
 </span></code></pre>
 </body>
 </html>

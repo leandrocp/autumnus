@@ -214,7 +214,7 @@
 ((program
   .
   (comment) @keyword.directive)
-  (#lua-match? @keyword.directive "^#!/"))
+  (#match? @keyword.directive "^#!/"))
 
 (program
   (comment)+ @comment.documentation

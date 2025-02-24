@@ -12,7 +12,7 @@
 (comment) @comment
 
 ((comment) @comment.documentation
-  (#lua-match? @comment.documentation "^[%%][%%]"))
+  (#match? @comment.documentation "^[%%][%%]"))
 
 ; keyword
 [

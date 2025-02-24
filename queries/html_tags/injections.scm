@@ -57,13 +57,13 @@
 ((attribute
   (quoted_attribute_value
     (attribute_value) @injection.content))
-  (#lua-match? @injection.content "%${")
+  (#match? @injection.content "%${")
   (#offset! @injection.content 0 2 0 -1)
   (#set! injection.language "javascript"))
 
 ((attribute
   (attribute_value) @injection.content)
-  (#lua-match? @injection.content "%${")
+  (#match? @injection.content "%${")
   (#offset! @injection.content 0 2 0 -2)
   (#set! injection.language "javascript"))
 
@@ -85,7 +85,7 @@
 ; <input type="checkbox" onchange="this.closest('form').elements.output.value = this.checked">
 (attribute
   (attribute_name) @_name
-  (#lua-match? @_name "^on[a-z]+$")
+  (#match? @_name "^on[a-z]+$")
   (quoted_attribute_value
     (attribute_value) @injection.content)
   (#set! injection.language "javascript"))
