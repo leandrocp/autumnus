@@ -300,9 +300,9 @@ static BASH_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "bash",
-        HIGHLIGHTS_BASH,
-        include_str!("../queries/bash/injections.scm"),
-        include_str!("../queries/bash/locals.scm"),
+        BASH_HIGHLIGHTS,
+        BASH_INJECTIONS,
+        BASH_LOCALS,
     )
     .expect("failed to create bash highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
@@ -315,9 +315,9 @@ static C_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "c",
-        HIGHLIGHTS_C,
-        include_str!("../queries/c/injections.scm"),
-        include_str!("../queries/c/locals.scm"),
+        C_HIGHLIGHTS,
+        C_INJECTIONS,
+        C_LOCALS,
     )
     .expect("failed to create c highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
@@ -330,9 +330,9 @@ static CSHARP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "csharp",
-        HIGHLIGHTS_C_SHARP,
-        include_str!("../queries/c_sharp/injections.scm"),
-        include_str!("../queries/c_sharp/locals.scm"),
+        C_SHARP_HIGHLIGHTS,
+        C_SHARP_INJECTIONS,
+        C_SHARP_LOCALS,
     )
     .expect("failed to create csharp highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
@@ -345,14 +345,9 @@ static CPP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "cpp",
-        HIGHLIGHTS_CPP,
-        include_str!("../queries/cpp/injections.scm"),
-        format!(
-            "{}\n{}",
-            include_str!("../queries/c/locals.scm"),
-            include_str!("../queries/cpp/locals.scm")
-        )
-        .as_str(),
+        CPP_HIGHLIGHTS,
+        CPP_INJECTIONS,
+        CPP_LOCALS,
     )
     .expect("failed to create cpp highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
@@ -365,9 +360,9 @@ static CSS_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "css",
-        HIGHLIGHTS_CSS,
-        include_str!("../queries/css/injections.scm"),
-        "",
+        CSS_HIGHLIGHTS,
+        CSS_INJECTIONS,
+        CSS_LOCALS,
     )
     .expect("failed to create css highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
@@ -380,9 +375,9 @@ static DIFF_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "diff",
-        HIGHLIGHTS_DIFF,
-        include_str!("../queries/diff/injections.scm"),
-        "",
+        DIFF_HIGHLIGHTS,
+        DIFF_INJECTIONS,
+        DIFF_LOCALS,
     )
     .expect("failed to create diff highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
@@ -395,9 +390,9 @@ static DOCKERFILE_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "dockerfile",
-        HIGHLIGHTS_DOCKERFILE,
-        include_str!("../queries/dockerfile/injections.scm"),
-        "",
+        DOCKERFILE_HIGHLIGHTS,
+        DOCKERFILE_INJECTIONS,
+        DOCKERFILE_LOCALS,
     )
     .expect("failed to create dockerfile highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
@@ -410,9 +405,9 @@ static ELIXIR_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "elixir",
-        HIGHLIGHTS_ELIXIR,
-        include_str!("../queries/elixir/injections.scm"),
-        include_str!("../queries/elixir/locals.scm"),
+        ELIXIR_HIGHLIGHTS,
+        ELIXIR_INJECTIONS,
+        ELIXIR_LOCALS,
     )
     .expect("failed to create elixir highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
@@ -425,9 +420,9 @@ static ERLANG_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "erlang",
-        HIGHLIGHTS_ERLANG,
-        include_str!("../queries/erlang/injections.scm"),
-        "",
+        ERLANG_HIGHLIGHTS,
+        ERLANG_INJECTIONS,
+        ERLANG_LOCALS,
     )
     .expect("failed to create erlang highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
@@ -440,9 +435,9 @@ static HEEX_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "heex",
-        HIGHLIGHTS_HEEX,
-        include_str!("../queries/heex/injections.scm"),
-        include_str!("../queries/heex/locals.scm"),
+        HEEX_HIGHLIGHTS,
+        HEEX_INJECTIONS,
+        HEEX_LOCALS,
     )
     .expect("failed to create heex highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
@@ -455,9 +450,9 @@ static HTML_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "html",
-        HIGHLIGHTS_HTML,
-        include_str!("../queries/html/injections.scm"),
-        include_str!("../queries/html/locals.scm"),
+        HTML_HIGHLIGHTS,
+        HTML_INJECTIONS,
+        HTML_LOCALS,
     )
     .expect("failed to create html highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
@@ -470,9 +465,9 @@ static LUA_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "lua",
-        HIGHLIGHTS_LUA,
-        include_str!("../queries/lua/injections.scm"),
-        include_str!("../queries/lua/locals.scm"),
+        LUA_HIGHLIGHTS,
+        LUA_INJECTIONS,
+        LUA_LOCALS,
     )
     .expect("failed to create lua highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
@@ -485,19 +480,9 @@ static PHP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "php",
-        HIGHLIGHTS_PHP,
-        format!(
-            "{}\n{}",
-            include_str!("../queries/php_only/injections.scm"),
-            include_str!("../queries/php/injections.scm")
-        )
-        .as_str(),
-        format!(
-            "{}\n{}",
-            include_str!("../queries/php_only/locals.scm"),
-            include_str!("../queries/php/locals.scm")
-        )
-        .as_str(),
+        PHP_HIGHLIGHTS,
+        PHP_INJECTIONS,
+        PHP_LOCALS,
     )
     .expect("failed to create php highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
@@ -525,9 +510,9 @@ static PYTHON_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "python",
-        HIGHLIGHTS_PYTHON,
-        include_str!("../queries/python/injections.scm"),
-        include_str!("../queries/python/locals.scm"),
+        PYTHON_HIGHLIGHTS,
+        PYTHON_INJECTIONS,
+        PYTHON_LOCALS,
     )
     .expect("failed to create python highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
@@ -540,9 +525,9 @@ static RUBY_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "ruby",
-        HIGHLIGHTS_RUBY,
-        include_str!("../queries/ruby/injections.scm"),
-        include_str!("../queries/ruby/locals.scm"),
+        RUBY_HIGHLIGHTS,
+        RUBY_INJECTIONS,
+        RUBY_LOCALS,
     )
     .expect("failed to create ruby highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
@@ -555,9 +540,9 @@ static RUST_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "rust",
-        HIGHLIGHTS_RUST,
-        include_str!("../queries/rust/injections.scm"),
-        include_str!("../queries/rust/locals.scm"),
+        RUST_HIGHLIGHTS,
+        RUST_INJECTIONS,
+        RUST_LOCALS,
     )
     .expect("failed to create rust highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
@@ -570,9 +555,9 @@ static SWIFT_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "swift",
-        HIGHLIGHTS_SWIFT,
-        include_str!("../queries/swift/injections.scm"),
-        include_str!("../queries/swift/locals.scm"),
+        SWIFT_HIGHLIGHTS,
+        SWIFT_INJECTIONS,
+        SWIFT_LOCALS,
     )
     .expect("failed to create swift highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);

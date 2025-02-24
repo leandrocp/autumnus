@@ -42,23 +42,26 @@ fn queries() {
             let path = entry.path();
             if path.is_dir() {
                 let language = path.file_name().unwrap().to_string_lossy();
+                let language_upper = language.to_uppercase();
 
-                // Look for highlights.scm only
-                let highlight_path = path.join("highlights.scm");
+                // HIGHLIGHTS
+                let highlights_path = path.join("highlights.scm");
 
-                if !highlight_path.exists() {
+                if !highlights_path.exists() {
+                    // Print a warning if highlights.scm doesn't exist
                     println!(
                         "cargo:warning=No highlights.scm found for language: {}",
                         language
                     );
-                    continue; // No highlights.scm file found, skip this language
+                    continue; // Skip this language if highlights.scm doesn't exist
                 }
 
-                // Generate constant name
-                let constant_name = format_ident!("HIGHLIGHTS_{}", language.to_uppercase());
+                // Generate constant name for highlights with language as prefix
+                let highlights_constant_name = format_ident!("{}_{}", language_upper, "HIGHLIGHTS");
 
                 // Read file content to process it
-                if let Ok(content) = fs::read_to_string(&highlight_path) {
+                if let Ok(content) = fs::read_to_string(&highlights_path) {
+                    // Process content to remove specific annotations (only for highlights.scm)
                     let processed_content = content
                         .replace("@spell", "")
                         .replace("@none", "")
@@ -67,13 +70,59 @@ fn queries() {
 
                     // Create constant definition with the processed content directly
                     let constant_def = quote! {
-                        pub const #constant_name: &str = #processed_content;
+                        pub const #highlights_constant_name: &str = #processed_content;
                     };
 
                     token_stream.extend(constant_def);
 
                     // Also add the file to rerun-if-changed
-                    println!("cargo:rerun-if-changed={}", highlight_path.display());
+                    println!("cargo:rerun-if-changed={}", highlights_path.display());
+                }
+
+                // INJECTIONS
+                let injections_path = path.join("injections.scm");
+                let injections_constant_name = format_ident!("{}_{}", language_upper, "INJECTIONS");
+
+                if injections_path.exists() {
+                    if let Ok(content) = fs::read_to_string(&injections_path) {
+                        // Use the original content for injections (no processing)
+                        let constant_def = quote! {
+                            pub const #injections_constant_name: &str = #content;
+                        };
+
+                        token_stream.extend(constant_def);
+                        println!("cargo:rerun-if-changed={}", injections_path.display());
+                    }
+                } else {
+                    // Create empty constant if file doesn't exist
+                    let constant_def = quote! {
+                        pub const #injections_constant_name: &str = "";
+                    };
+
+                    token_stream.extend(constant_def);
+                }
+
+                // LOCALS
+                let locals_path = path.join("locals.scm");
+                let locals_constant_name = format_ident!("{}_{}", language_upper, "LOCALS");
+
+                if locals_path.exists() {
+                    if let Ok(content) = fs::read_to_string(&locals_path) {
+                        // Use the original content for locals (no processing)
+                        let constant_def = quote! {
+                            pub const #locals_constant_name: &str = #content;
+                        };
+
+                        token_stream.extend(constant_def);
+                        println!("cargo:rerun-if-changed={}", locals_path.display());
+                    }
+                } else {
+                    // Create empty constant if file doesn't exist
+                    let constant_def = quote! {
+                        pub const #locals_constant_name: &str = "";
+                    };
+
+                    token_stream.extend(constant_def);
                 }
             }
         }
