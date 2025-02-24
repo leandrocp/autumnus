@@ -5,6 +5,11 @@ use strum::IntoEnumIterator;
 
 #[cfg(feature = "dev")]
 use std::fs;
+use std::{
+    fmt::Display,
+    fs,
+    path::{Path, PathBuf},
+};
 
 #[cfg(feature = "dev")]
 use anyhow::Context;
@@ -22,6 +27,16 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     ListLanguages,
+
+    Highlight {
+        path: String,
+
+        #[arg(short = 'f', long)]
+        formatter: Option<Formatter>,
+
+        #[arg(short = 't', long)]
+        theme: Option<String>,
+    },
 
     HighlightSource {
         source: String,
@@ -56,6 +71,12 @@ fn main() -> Result<()> {
     match cli.command {
         Commands::ListLanguages => list_languages(),
 
+        Commands::Highlight {
+            path,
+            formatter,
+            theme,
+        } => highlight(&path, formatter, theme),
+
         Commands::HighlightSource {
             source,
             language,
@@ -81,6 +102,125 @@ fn list_languages() -> Result<()> {
     }
 
     Ok(())
+}
+
+fn highlight(path: &str, formatter: Option<Formatter>, theme: Option<String>) -> Result<()> {
+    let theme = autumnus::themes::get(&theme.unwrap_or("dracula".to_string()))
+        .cloned()
+        .unwrap_or_default();
+
+    let bytes = read_or_die(Path::new(&path));
+    let source = std::str::from_utf8(&bytes).unwrap();
+
+    match formatter.unwrap_or_default() {
+        Formatter::HtmlInline => {
+            let highlighted = autumnus::highlight_html_inline(
+                path,
+                source,
+                autumnus::Options {
+                    theme,
+                    debug: false,
+                    ..autumnus::Options::default()
+                },
+            );
+
+            println!("{}", highlighted);
+        }
+
+        Formatter::HtmlLinked => {
+            let highlighted = autumnus::highlight_html_linked(
+                path,
+                source,
+                autumnus::Options {
+                    theme,
+                    debug: false,
+                    ..autumnus::Options::default()
+                },
+            );
+
+            println!("{}", highlighted);
+        }
+
+        Formatter::Terminal => {
+            let highlighted = autumnus::highlight_terminal(
+                path,
+                source,
+                autumnus::Options {
+                    theme,
+                    ..autumnus::Options::default()
+                },
+            );
+
+            println!("{}", highlighted);
+        }
+    }
+
+    Ok(())
+}
+
+const EXIT_BAD_ARGUMENTS: i32 = 2;
+
+fn read_or_die(path: &Path) -> Vec<u8> {
+    match fs::read(path) {
+        Ok(src) => src,
+        Err(e) => {
+            eprint_read_error(&FileArgument::NamedPath(path.to_path_buf()), &e);
+            std::process::exit(EXIT_BAD_ARGUMENTS);
+        }
+    }
+}
+
+fn eprint_read_error(file_arg: &FileArgument, e: &std::io::Error) {
+    match e.kind() {
+        std::io::ErrorKind::NotFound => {
+            eprintln!("No such file: {}", file_arg);
+        }
+        std::io::ErrorKind::PermissionDenied => {
+            eprintln!("Permission denied when reading file: {}", file_arg);
+        }
+        _ => match file_arg {
+            FileArgument::NamedPath(path) if path.is_dir() => {
+                eprintln!("Expected a file, got a directory: {}", path.display());
+            }
+            _ => eprintln!("Could not read file: {} (error {:?})", file_arg, e.kind()),
+        },
+    };
+}
+
+#[allow(dead_code)]
+enum FileArgument {
+    NamedPath(std::path::PathBuf),
+    Stdin,
+    DevNull,
+}
+
+impl Display for FileArgument {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            FileArgument::NamedPath(path) => {
+                write!(f, "{}", relative_to_current(path).display())
+            }
+            FileArgument::Stdin => write!(f, "(stdin)"),
+            FileArgument::DevNull => write!(f, "/dev/null"),
+        }
+    }
+}
+
+fn relative_to_current(path: &Path) -> PathBuf {
+    if let Ok(current_path) = std::env::current_dir() {
+        let path = try_canonicalize(path);
+        let current_path = try_canonicalize(&current_path);
+
+        if let Ok(rel_path) = path.strip_prefix(current_path) {
+            return rel_path.into();
+        }
+    }
+
+    path.into()
+}
+
+fn try_canonicalize(path: &Path) -> PathBuf {
+    path.canonicalize().unwrap_or_else(|_| path.into())
 }
 
 fn highlight_source(
