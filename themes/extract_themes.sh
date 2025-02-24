@@ -45,6 +45,7 @@ themes=(
   "onedark@dark:onedark_warm:onedark_config.style=warm"
   "onedark@dark:onedark_warmer:onedark_config.style=warmer"
   "solarized@dark:solarized_dark"
+  "nord@dark:nord"
   "solarized@light:solarized_light"
   "tokyonight-day@light:tokyonight_day"
   "tokyonight-moon@dark:tokyonight_moon"

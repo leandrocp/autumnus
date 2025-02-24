@@ -333,6 +333,7 @@ fn gen_samples() -> Result<()> {
         "kanagawa_wave",
         "material_lighter",
         "material_oceanic",
+        "nord",
         "onedark_dark",
         "solarized_dark",
         "solarized_light",
