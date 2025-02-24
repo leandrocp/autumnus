@@ -23,6 +23,7 @@ pub(crate) enum Language {
     Lua,
     Php,
     PlainText,
+    Python,
     Ruby,
     Rust,
     Swift,
@@ -44,6 +45,7 @@ impl Language {
             "html" => Some(Language::Html),
             "lua" => Some(Language::Lua),
             "php" => Some(Language::Php),
+            "python" => Some(Language::Python),
             "ruby" => Some(Language::Ruby),
             "rust" => Some(Language::Rust),
             "swift" => Some(Language::Swift),
@@ -163,6 +165,7 @@ impl Language {
                 "*.php", "*.phtml", "*.php3", "*.php4", "*.php5", "*.php7", "*.phps",
             ],
             Language::PlainText => &[],
+            Language::Python => &["*.py", "*.py3", "*.pyi", "*.bzl", "TARGETS", "BUCK", "DEPS"],
             Language::Ruby => &[
                 "*.rb",
                 "*.builder",
@@ -193,6 +196,7 @@ impl Language {
                         "ash" | "bash" | "dash" | "ksh" | "mksh" | "pdksh" | "rc" | "sh"
                         | "zsh" => return Some(Language::Bash),
                         "elixir" => return Some(Language::Elixir),
+                        "python" | "python2" | "python3" => return Some(Language::Python),
                         "ruby" | "macruby" | "rake" | "jruby" | "rbx" => {
                             return Some(Language::Ruby)
                         }
@@ -232,6 +236,7 @@ impl Language {
             Language::Lua => "Lua",
             Language::Php => "PHP",
             Language::PlainText => "Plain Text",
+            Language::Python => "Python",
             Language::Ruby => "Ruby",
             Language::Rust => "Rust",
             Language::Swift => "Swift",
@@ -256,6 +261,7 @@ impl Language {
             Language::Html => &HTML_CONFIG,
             Language::Lua => &LUA_CONFIG,
             Language::Php => &PHP_CONFIG,
+            Language::Python => &PYTHON_CONFIG,
             Language::Ruby => &RUBY_CONFIG,
             Language::Rust => &RUST_CONFIG,
             Language::Swift => &SWIFT_CONFIG,
@@ -455,6 +461,21 @@ static PLAIN_TEXT_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         "",
     )
     .expect("failed to create plaintext highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static PYTHON_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = tree_sitter_python::LANGUAGE;
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "python",
+        include_str!("../queries/python/highlights.scm"),
+        include_str!("../queries/python/injections.scm"),
+        include_str!("../queries/python/locals.scm"),
+    )
+    .expect("failed to create python highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
