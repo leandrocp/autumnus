@@ -23,7 +23,7 @@ struct Cli {
 enum Commands {
     ListLanguages,
 
-    Highlight {
+    HighlightSource {
         source: String,
 
         #[arg(short = 'l', long)]
@@ -49,19 +49,19 @@ enum Formatter {
 }
 
 // cargo run --features=dev -- gen-samples
-// cargo run -- highlight "code" --formatter terminal
+// cargo run -- highlight-source "code" --formatter terminal
 fn main() -> Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
         Commands::ListLanguages => list_languages(),
 
-        Commands::Highlight {
+        Commands::HighlightSource {
             source,
             language,
             formatter,
             theme,
-        } => highlight(&source, language.as_deref(), formatter, theme),
+        } => highlight_source(&source, language.as_deref(), formatter, theme),
 
         #[cfg(feature = "dev")]
         Commands::GenSamples => gen_samples(),
@@ -76,14 +76,14 @@ fn list_languages() -> Result<()> {
         for glob in Language::language_globs(language) {
             print!(" {}", glob.as_str());
         }
-        
+
         println!();
     }
 
     Ok(())
 }
 
-fn highlight(
+fn highlight_source(
     source: &str,
     language: Option<&str>,
     formatter: Option<Formatter>,
