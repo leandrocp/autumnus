@@ -152,9 +152,9 @@
         html: "HTML",
         lua: "Lua",
         php: "PHP",
+        python: "Python",
         ruby: "Ruby",
         rust: "Rust",
-        python: "Python",
         swift: "Swift",
       };
 
@@ -218,7 +218,15 @@
         try {
           const response = await fetch(`${language}.${theme}.html`);
           const text = await response.text();
-          document.getElementById("content").innerHTML = text;
+          const contentDiv = document.getElementById("content");
+          contentDiv.innerHTML = text;
+
+          // Ensure any code blocks are responsive
+          const preElements = contentDiv.querySelectorAll("pre");
+          preElements.forEach((pre) => {
+            pre.style.maxWidth = "100%";
+            pre.style.overflowX = "auto";
+          });
         } catch (error) {
           console.error("Error:", error);
           document.getElementById("content").innerHTML =
