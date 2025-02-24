@@ -9,6 +9,7 @@ use strum::{EnumIter, IntoEnumIterator};
 use tree_sitter_highlight::HighlightConfiguration;
 
 extern "C" {
+    fn tree_sitter_clojure() -> *const ();
     fn tree_sitter_dockerfile() -> *const ();
 }
 
@@ -21,6 +22,7 @@ pub use generated::*;
 pub enum Language {
     Bash,
     C,
+    Clojure,
     CSharp,
     Cpp,
     Css,
@@ -44,6 +46,7 @@ impl Language {
         let exact = match lang_or_path {
             "bash" => Some(Language::Bash),
             "c" => Some(Language::C),
+            "clojure" => Some(Language::Clojure),
             "c#" => Some(Language::CSharp),
             "cpp" => Some(Language::Cpp),
             "csharp" => Some(Language::CSharp),
@@ -153,6 +156,10 @@ impl Language {
                 "zshrc",
             ],
             Language::C => &["*.c"],
+            Language::Clojure => &[
+                "*.bb", "*.boot", "*.clj", "*.cljc", "*.clje", "*.cljs", "*.cljx", "*.edn",
+                "*.joke", "*.joker",
+            ],
             Language::CSharp => &["*.cs"],
             Language::Cpp => &[
                 "*.cc", "*.cpp", "*.h", "*.hh", "*.hpp", "*.ino", "*.cxx", "*.cu",
@@ -247,6 +254,7 @@ impl Language {
         match self {
             Language::Bash => "Bash",
             Language::C => "C",
+            Language::Clojure => "Clojure",
             Language::CSharp => "C#",
             Language::Cpp => "C++",
             Language::Css => "CSS",
@@ -274,6 +282,7 @@ impl Language {
         match self {
             Language::Bash => &BASH_CONFIG,
             Language::C => &C_CONFIG,
+            Language::Clojure => &CLOJURE_CONFIG,
             Language::CSharp => &CSHARP_CONFIG,
             Language::Cpp => &CPP_CONFIG,
             Language::Css => &CSS_CONFIG,
@@ -320,6 +329,21 @@ static C_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         C_LOCALS,
     )
     .expect("failed to create c highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static CLOJURE_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_clojure) };
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "clojure",
+        CLOJURE_HIGHLIGHTS,
+        CLOJURE_INJECTIONS,
+        CLOJURE_LOCALS,
+    )
+    .expect("failed to create clojure highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });

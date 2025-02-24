@@ -14,11 +14,18 @@ fn main() {
 }
 
 fn vendored_parsers() {
-    let parsers = vec![TreeSitterParser {
-        name: "tree-sitter-dockerfile",
-        src_dir: "vendored_parsers/tree-sitter-dockerfile/src",
-        extra_files: vec!["scanner.c"],
-    }];
+    let parsers = vec![
+        TreeSitterParser {
+            name: "tree-sitter-dockerfile",
+            src_dir: "vendored_parsers/tree-sitter-dockerfile/src",
+            extra_files: vec!["scanner.c"],
+        },
+        TreeSitterParser {
+            name: "tree-sitter-clojure",
+            src_dir: "vendored_parsers/tree-sitter-clojure/src",
+            extra_files: vec![],
+        },
+    ];
 
     for parser in &parsers {
         println!("cargo:rerun-if-changed={}", parser.src_dir);
@@ -28,6 +35,8 @@ fn vendored_parsers() {
 }
 
 fn queries() {
+    println!("cargo:rerun-if-changed=queries/");
+
     let out_dir = env::var("OUT_DIR").unwrap();
     let dest_path = Path::new(&out_dir).join("queries_data.rs");
     let mut file = File::create(&dest_path).unwrap();
