@@ -224,6 +224,7 @@ fn gen_samples_entries(
                 &contents,
                 autumnus::Options {
                     theme: theme.clone(),
+                    debug: false,
                     ..autumnus::Options::default()
                 },
             );

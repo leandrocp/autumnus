@@ -257,5 +257,5 @@
 
 ((program
   .
-  (comment) @keyword.directive @nospell)
+  (comment) @keyword.directive)
   (#lua-match? @keyword.directive "^#!/"))
