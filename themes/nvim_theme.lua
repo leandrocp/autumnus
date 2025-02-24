@@ -3,13 +3,26 @@
 
 local appearance = arg[1]
 local colorscheme = arg[2]
+local variables = arg[3]
+
+-- Set up global variables if they were passed
+if variables then
+	for var_assignment in variables:gmatch("([^,]+)") do
+		local var_name, var_value = var_assignment:match("(.+)=(.+)")
+		if var_name and var_value then
+			-- Remove any quotes if present
+			var_value = var_value:gsub('"', ""):gsub("'", "")
+			-- Set the global variable
+			vim.g[var_name] = var_value
+		end
+	end
+end
 
 vim.o.termguicolors = true
 vim.o.background = appearance
 vim.cmd.colorscheme(colorscheme)
 
 local highlight_groups = {
-
 	"Normal",
 	"Comment",
 	"@attribute",
@@ -154,14 +167,3 @@ end
 
 local json_highlights = vim.fn.json_encode(highlights)
 print(json_highlights)
-
--- local output_data = {
--- 	name = name,
--- 	highlights = highlights,
--- }
---
--- local output_file = string.format("%s.json", name)
--- local file = io.open(output_file, "w")
--- local json_str = vim.fn.json_encode(output_data)
--- file:write(json_str)
--- file:close()
