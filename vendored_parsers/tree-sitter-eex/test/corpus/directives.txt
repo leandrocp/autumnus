@@ -1,0 +1,142 @@
+================================================================================
+Empty Directive
+================================================================================
+
+<% %>
+
+--------------------------------------------------------------------------------
+
+(fragment
+  (directive)
+  (text))
+
+================================================================================
+Directive with just an assign
+================================================================================
+
+I am some text!
+<%= @x %>
+I am more some text!
+
+--------------------------------------------------------------------------------
+
+(fragment
+  (text)
+  (directive
+    (expression))
+  (text))
+
+================================================================================
+Directive with a conditional block
+================================================================================
+
+<%= if @x do %>
+Hello, tree-sitter!
+<% end %>
+
+--------------------------------------------------------------------------------
+
+(fragment
+  (directive
+    (partial_expression))
+  (text)
+  (directive
+    (partial_expression))
+  (text))
+
+================================================================================
+Directive with multiple case stanzas
+================================================================================
+
+<%= case @x do %>
+  <% 0 -> %> Zero
+  <% func when is_function(func) -> %> Function
+  <% _ -> %> Something else...
+<% end %>
+
+--------------------------------------------------------------------------------
+
+(fragment
+  (directive
+    (partial_expression))
+  (directive
+    (partial_expression))
+  (text)
+  (directive
+    (partial_expression))
+  (text)
+  (directive
+    (partial_expression))
+  (text)
+  (directive
+    (partial_expression))
+  (text))
+
+================================================================================
+Directive with parenthesized anonymous function
+================================================================================
+
+<%= f = form_for(fn -> %>
+  <%= text_input f, :name %>
+<% end) %>
+
+--------------------------------------------------------------------------------
+
+(fragment
+  (directive
+    (partial_expression))
+  (directive
+    (expression))
+  (directive
+    (partial_expression))
+  (text))
+
+================================================================================
+Directive with unparenthesized anonymous function
+================================================================================
+
+<%= f = form_for fn -> %>
+  <%= text_input f, :name %>
+<% end %>
+
+--------------------------------------------------------------------------------
+
+(fragment
+  (directive
+    (partial_expression))
+  (directive
+    (expression))
+  (directive
+    (partial_expression))
+  (text))
+
+================================================================================
+Directive containing an anonymous function is not marked as a partial expression
+================================================================================
+
+<%= evens = Enum.filter(@numbers, &Integer.is_even/1) %>
+
+--------------------------------------------------------------------------------
+
+(fragment
+  (directive
+    (expression))
+  (text))
+
+================================================================================
+Directive with partial expression and trailing comment
+================================================================================
+
+<%= if @x do # this should always be true %>
+  It's true!
+<% end %>
+
+--------------------------------------------------------------------------------
+
+(fragment
+  (directive
+    (partial_expression))
+  (text)
+  (directive
+    (partial_expression))
+  (text))

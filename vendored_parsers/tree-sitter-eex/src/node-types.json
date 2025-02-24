@@ -1,0 +1,107 @@
+[
+  {
+    "type": "comment",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "expression",
+          "named": true
+        },
+        {
+          "type": "partial_expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "expression",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "fragment",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "comment",
+          "named": true
+        },
+        {
+          "type": "directive",
+          "named": true
+        },
+        {
+          "type": "text",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "partial_expression",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "#",
+    "named": false
+  },
+  {
+    "type": "%>",
+    "named": false
+  },
+  {
+    "type": "--%>",
+    "named": false
+  },
+  {
+    "type": "->",
+    "named": false
+  },
+  {
+    "type": "<%",
+    "named": false
+  },
+  {
+    "type": "<%!--",
+    "named": false
+  },
+  {
+    "type": "<%#",
+    "named": false
+  },
+  {
+    "type": "<%%",
+    "named": false
+  },
+  {
+    "type": "<%%=",
+    "named": false
+  },
+  {
+    "type": "<%=",
+    "named": false
+  },
+  {
+    "type": "do",
+    "named": false
+  },
+  {
+    "type": "text",
+    "named": true
+  }
+]

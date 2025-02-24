@@ -1,0 +1,24 @@
+{
+  "name": "tree-sitter-eex",
+  "version": "0.1.0",
+  "description": "Tree-sitter grammar for EEx files (eex)",
+  "main": "bindings/node",
+  "scripts": {
+    "test": "npx tree-sitter generate && npx tree-sitter test",
+    "update_test": "npx tree-sitter generate && npx tree-sitter test -u",
+    "playground": "npx tree-sitter build-wasm && npx tree-sitter playground"
+  },
+  "author": "Clay",
+  "license": "MIT",
+  "devDependencies": {
+    "tree-sitter-cli": "^0.20.0",
+    "nan": "^2.15.0"
+  },
+  "tree-sitter": [
+    {
+      "file-types": [
+        "eex"
+      ]
+    }
+  ]
+}

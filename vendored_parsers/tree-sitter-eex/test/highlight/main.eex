@@ -1,0 +1,16 @@
+<%= if true do %>
+<%# <- keyword %>
+yes
+<% end %>
+
+<%= case @x do %>
+<%# <- keyword %>
+
+<% 0 -> %> Zero
+<%# <- keyword %>
+
+<% _ -> %> Something else...
+<%#     ^ keyword %>
+
+<% end %>
+<%#    ^ keyword %>
