@@ -21,6 +21,10 @@ enum Commands {
     ListLanguages,
     ListThemes,
 
+    DumpTreeSitter {
+        path: String,
+    },
+
     Highlight {
         path: String,
 
@@ -66,6 +70,8 @@ fn main() -> Result<()> {
 
         Commands::ListThemes => list_themes(),
 
+        Commands::DumpTreeSitter { path } => dump_tree_sitter(&path),
+
         Commands::Highlight {
             path,
             formatter,
@@ -108,6 +114,61 @@ fn list_languages() -> Result<()> {
     }
 
     Ok(())
+}
+
+// https://github.com/Wilfred/difftastic/blob/8953c55cf854ceac2ccb6ece004d6a94a5bfa122/src/main.rs#L121
+fn dump_tree_sitter(path: &str) -> Result<()> {
+    let bytes = read_or_die(Path::new(&path));
+    let source = String::from_utf8_lossy(&bytes).to_string();
+    let language = autumnus::languages::Language::guess(path, &source);
+    let config = language.config();
+    let tree = to_tree(&source, &config.language);
+    print_tree(&source, &tree);
+    Ok(())
+}
+
+fn to_tree(src: &str, language: &tree_sitter::Language) -> tree_sitter::Tree {
+    let mut parser = tree_sitter::Parser::new();
+
+    parser
+        .set_language(language)
+        .expect("Incompatible tree-sitter version");
+
+    parser.parse(src, None).unwrap()
+}
+
+fn print_tree(src: &str, tree: &tree_sitter::Tree) {
+    let mut cursor = tree.walk();
+    print_cursor(src, &mut cursor, 0);
+}
+
+fn print_cursor(src: &str, cursor: &mut tree_sitter::TreeCursor, depth: usize) {
+    loop {
+        let node = cursor.node();
+
+        let formatted_node = format!(
+            "{} {} - {}",
+            node.kind().replace('\n', "\\n"),
+            node.start_position(),
+            node.end_position()
+        );
+
+        if node.child_count() == 0 {
+            let node_src = &src[node.start_byte()..node.end_byte()];
+            println!("{}{} {:?}", "  ".repeat(depth), formatted_node, node_src);
+        } else {
+            println!("{}{}", "  ".repeat(depth), formatted_node,);
+        }
+
+        if cursor.goto_first_child() {
+            print_cursor(src, cursor, depth + 1);
+            cursor.goto_parent();
+        }
+
+        if !cursor.goto_next_sibling() {
+            break;
+        }
+    }
 }
 
 fn highlight(path: &str, formatter: Option<Formatter>, theme: Option<String>) -> Result<()> {
