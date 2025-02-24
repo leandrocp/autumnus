@@ -25,7 +25,7 @@
   (#lua-match? @comment "^_"))
 
 ; Comments
-(comment) @comment
+(comment) @comment @spell
 
 ; Strings
 (string) @string
