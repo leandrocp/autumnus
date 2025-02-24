@@ -209,12 +209,12 @@
 
 (nil) @constant.builtin
 
-(comment) @comment
+(comment) @comment @spell
 
 ((program
   .
-  (comment) @keyword.directive)
-  (#match? @keyword.directive "^#!/"))
+  (comment) @keyword.directive @nospell)
+  (#lua-match? @keyword.directive "^#!/"))
 
 (program
   (comment)+ @comment.documentation

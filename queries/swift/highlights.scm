@@ -151,7 +151,7 @@
 
 ((navigation_expression
   (simple_identifier) @type) ; SomeType.method(): highlight SomeType as a type
-  (#match? @type "^[A-Z]"))
+  (#lua-match? @type "^[A-Z]"))
 
 (directive) @keyword.directive
 
@@ -231,16 +231,16 @@
 [
   (comment)
   (multiline_comment)
-] @comment
+] @comment @spell
 
 ((comment) @comment.documentation
-  (#match? @comment.documentation "^///[^/]"))
+  (#lua-match? @comment.documentation "^///[^/]"))
 
 ((comment) @comment.documentation
-  (#match? @comment.documentation "^///$"))
+  (#lua-match? @comment.documentation "^///$"))
 
 ((multiline_comment) @comment.documentation
-  (#match? @comment.documentation "^/[*][*][^*].*[*]/$"))
+  (#lua-match? @comment.documentation "^/[*][*][^*].*[*]/$"))
 
 ; String literals
 (line_str_text) @string

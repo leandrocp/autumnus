@@ -26,7 +26,7 @@
   "@"
 ] @operator
 
-(comment) @comment
+(comment) @comment @spell
 
 (image_spec
   (image_tag
@@ -53,7 +53,7 @@
   ] @punctuation.special)
 
 ((variable) @constant
-  (#match? @constant "^[A-Z][A-Z_0-9]*$"))
+  (#lua-match? @constant "^[A-Z][A-Z_0-9]*$"))
 
 (arg_instruction
   .

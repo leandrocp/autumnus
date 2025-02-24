@@ -14,7 +14,7 @@
   (from)
 ] @keyword
 
-(comment) @comment
+(comment) @comment @spell
 
 (tag_name) @tag
 
@@ -75,10 +75,10 @@
 (keyframes_name) @variable
 
 ((property_name) @variable
-  (#match? @variable "^[-][-]"))
+  (#lua-match? @variable "^[-][-]"))
 
 ((plain_value) @variable
-  (#match? @variable "^[-][-]"))
+  (#lua-match? @variable "^[-][-]"))
 
 [
   (string_value)

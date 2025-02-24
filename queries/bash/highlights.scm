@@ -120,7 +120,7 @@
 ((word) @boolean
   (#any-of? @boolean "true" "false"))
 
-(comment) @comment
+(comment) @comment @spell
 
 (test_operator) @operator
 
@@ -191,7 +191,7 @@
 (number) @number
 
 ((word) @number
-  (#match? @number "^[0-9]+$"))
+  (#lua-match? @number "^[0-9]+$"))
 
 (file_redirect
   (word) @string.special.path)
@@ -226,7 +226,7 @@
 (variable_name) @variable
 
 ((variable_name) @constant
-  (#match? @constant "^[A-Z][A-Z_0-9]*$"))
+  (#lua-match? @constant "^[A-Z][A-Z_0-9]*$"))
 
 ((variable_name) @variable.builtin
   (#any-of? @variable.builtin
@@ -257,5 +257,5 @@
 
 ((program
   .
-  (comment) @keyword.directive)
-  (#match? @keyword.directive "^#!/"))
+  (comment) @keyword.directive @nospell)
+  (#lua-match? @keyword.directive "^#!/"))

@@ -190,11 +190,11 @@
   type: _?)
 
 ((identifier) @constant
-  (#match? @constant "^[A-Z][A-Z0-9_]+$"))
+  (#lua-match? @constant "^[A-Z][A-Z0-9_]+$"))
 
 (preproc_def
   (preproc_arg) @constant
-  (#match? @constant "^[A-Z][A-Z0-9_]+$"))
+  (#lua-match? @constant "^[A-Z][A-Z0-9_]+$"))
 
 (enumerator
   name: (identifier) @constant)
@@ -244,7 +244,7 @@
 
 ((call_expression
   function: (identifier) @function.builtin)
-  (#match? @function.builtin "^__builtin_"))
+  (#lua-match? @function.builtin "^__builtin_"))
 
 ((call_expression
   function: (identifier) @function.builtin)
@@ -286,10 +286,10 @@
 (preproc_function_def
   name: (identifier) @function.macro)
 
-(comment) @comment
+(comment) @comment @spell
 
 ((comment) @comment.documentation
-  (#match? @comment.documentation "^/[*][*][^*].*[*]/$"))
+  (#lua-match? @comment.documentation "^/[*][*][^*].*[*]/$"))
 
 ; Parameters
 (parameter_declaration

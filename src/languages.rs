@@ -12,6 +12,11 @@ extern "C" {
     fn tree_sitter_dockerfile() -> *const ();
 }
 
+mod generated {
+    include!(concat!(env!("OUT_DIR"), "/queries_data.rs"));
+}
+pub use generated::*;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter)]
 pub enum Language {
     Bash,
@@ -295,7 +300,7 @@ static BASH_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "bash",
-        include_str!("../queries/bash/highlights.scm"),
+        HIGHLIGHTS_BASH,
         include_str!("../queries/bash/injections.scm"),
         include_str!("../queries/bash/locals.scm"),
     )
@@ -310,7 +315,7 @@ static C_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "c",
-        include_str!("../queries/c/highlights.scm"),
+        HIGHLIGHTS_C,
         include_str!("../queries/c/injections.scm"),
         include_str!("../queries/c/locals.scm"),
     )
@@ -325,7 +330,7 @@ static CSHARP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "csharp",
-        include_str!("../queries/c_sharp/highlights.scm"),
+        HIGHLIGHTS_C_SHARP,
         include_str!("../queries/c_sharp/injections.scm"),
         include_str!("../queries/c_sharp/locals.scm"),
     )
@@ -340,12 +345,7 @@ static CPP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "cpp",
-        format!(
-            "{}\n{}",
-            include_str!("../queries/c/highlights.scm"),
-            include_str!("../queries/cpp/highlights.scm")
-        )
-        .as_str(),
+        HIGHLIGHTS_CPP,
         include_str!("../queries/cpp/injections.scm"),
         format!(
             "{}\n{}",
@@ -365,7 +365,7 @@ static CSS_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "css",
-        include_str!("../queries/css/highlights.scm"),
+        HIGHLIGHTS_CSS,
         include_str!("../queries/css/injections.scm"),
         "",
     )
@@ -380,7 +380,7 @@ static DIFF_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "diff",
-        include_str!("../queries/diff/highlights.scm"),
+        HIGHLIGHTS_DIFF,
         include_str!("../queries/diff/injections.scm"),
         "",
     )
@@ -395,7 +395,7 @@ static DOCKERFILE_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "dockerfile",
-        include_str!("../queries/dockerfile/highlights.scm"),
+        HIGHLIGHTS_DOCKERFILE,
         include_str!("../queries/dockerfile/injections.scm"),
         "",
     )
@@ -410,7 +410,7 @@ static ELIXIR_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "elixir",
-        include_str!("../queries/elixir/highlights.scm"),
+        HIGHLIGHTS_ELIXIR,
         include_str!("../queries/elixir/injections.scm"),
         include_str!("../queries/elixir/locals.scm"),
     )
@@ -425,7 +425,7 @@ static ERLANG_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "erlang",
-        include_str!("../queries/erlang/highlights.scm"),
+        HIGHLIGHTS_ERLANG,
         include_str!("../queries/erlang/injections.scm"),
         "",
     )
@@ -440,7 +440,7 @@ static HEEX_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "heex",
-        include_str!("../queries/heex/highlights.scm"),
+        HIGHLIGHTS_HEEX,
         include_str!("../queries/heex/injections.scm"),
         include_str!("../queries/heex/locals.scm"),
     )
@@ -455,12 +455,7 @@ static HTML_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "html",
-        format!(
-            "{}\n{}",
-            include_str!("../queries/html_tags/highlights.scm"),
-            include_str!("../queries/html/highlights.scm")
-        )
-        .as_str(),
+        HIGHLIGHTS_HTML,
         include_str!("../queries/html/injections.scm"),
         include_str!("../queries/html/locals.scm"),
     )
@@ -475,7 +470,7 @@ static LUA_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "lua",
-        include_str!("../queries/lua/highlights.scm"),
+        HIGHLIGHTS_LUA,
         include_str!("../queries/lua/injections.scm"),
         include_str!("../queries/lua/locals.scm"),
     )
@@ -490,12 +485,7 @@ static PHP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "php",
-        format!(
-            "{}\n{}",
-            include_str!("../queries/php_only/highlights.scm"),
-            include_str!("../queries/php/highlights.scm")
-        )
-        .as_str(),
+        HIGHLIGHTS_PHP,
         format!(
             "{}\n{}",
             include_str!("../queries/php_only/injections.scm"),
@@ -535,7 +525,7 @@ static PYTHON_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "python",
-        include_str!("../queries/python/highlights.scm"),
+        HIGHLIGHTS_PYTHON,
         include_str!("../queries/python/injections.scm"),
         include_str!("../queries/python/locals.scm"),
     )
@@ -550,7 +540,7 @@ static RUBY_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "ruby",
-        include_str!("../queries/ruby/highlights.scm"),
+        HIGHLIGHTS_RUBY,
         include_str!("../queries/ruby/injections.scm"),
         include_str!("../queries/ruby/locals.scm"),
     )
@@ -565,7 +555,7 @@ static RUST_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "rust",
-        include_str!("../queries/rust/highlights.scm"),
+        HIGHLIGHTS_RUST,
         include_str!("../queries/rust/injections.scm"),
         include_str!("../queries/rust/locals.scm"),
     )
@@ -580,7 +570,7 @@ static SWIFT_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "swift",
-        include_str!("../queries/swift/highlights.scm"),
+        HIGHLIGHTS_SWIFT,
         include_str!("../queries/swift/injections.scm"),
         include_str!("../queries/swift/locals.scm"),
     )

@@ -149,7 +149,7 @@
 
 ; Constants
 ((identifier) @constant
-  (#match? @constant "^[A-Z][A-Z_0-9]*$"))
+  (#lua-match? @constant "^[A-Z][A-Z_0-9]*$"))
 
 (nil) @constant.builtin
 
@@ -226,13 +226,13 @@
     "__pow" "__shl" "__shr" "__sub" "__tostring" "__unm"))
 
 ; Others
-(comment) @comment
+(comment) @comment @spell
 
 ((comment) @comment.documentation
-  (#match? @comment.documentation "^[-][-][-]"))
+  (#lua-match? @comment.documentation "^[-][-][-]"))
 
 ((comment) @comment.documentation
-  (#match? @comment.documentation "^[-][-](%s?)@"))
+  (#lua-match? @comment.documentation "^[-][-](%s?)@"))
 
 (hash_bang_line) @keyword.directive
 

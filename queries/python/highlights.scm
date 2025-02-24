@@ -8,13 +8,13 @@
 
 ; Identifier naming conventions
 ((identifier) @type
-  (#match? @type "^[A-Z].*[a-z]"))
+  (#lua-match? @type "^[A-Z].*[a-z]"))
 
 ((identifier) @constant
-  (#match? @constant "^[A-Z][A-Z_0-9]*$"))
+  (#lua-match? @constant "^[A-Z][A-Z_0-9]*$"))
 
 ((identifier) @constant.builtin
-  (#match? @constant.builtin "^__[a-zA-Z0-9_]*__$"))
+  (#lua-match? @constant.builtin "^__[a-zA-Z0-9_]*__$"))
 
 ((identifier) @constant.builtin
   (#any-of? @constant.builtin
@@ -25,7 +25,7 @@
 
 ((attribute
   attribute: (identifier) @variable.member)
-  (#match? @variable.member "^[%l_].*$"))
+  (#lua-match? @variable.member "^[%l_].*$"))
 
 ((assignment
   left: (identifier) @type.definition
@@ -49,12 +49,12 @@
 
 ((call
   function: (identifier) @constructor)
-  (#match? @constructor "^%u"))
+  (#lua-match? @constructor "^%u"))
 
 ((call
   function: (attribute
     attribute: (identifier) @constructor))
-  (#match? @constructor "^%u"))
+  (#lua-match? @constructor "^%u"))
 
 ; Decorators
 ((decorator
@@ -184,12 +184,12 @@
 
 (float) @number.float
 
-(comment) @comment
+(comment) @comment @spell
 
 ((module
   .
   (comment) @keyword.directive @nospell)
-  (#match? @keyword.directive "^#!/"))
+  (#lua-match? @keyword.directive "^#!/"))
 
 (string) @string
 
@@ -205,21 +205,21 @@
   .
   (expression_statement
     (string
-      (string_content) @string.documentation) @string.documentation))
+      (string_content) @spell) @string.documentation))
 
 (class_definition
   body: (block
     .
     (expression_statement
       (string
-        (string_content) @string.documentation) @string.documentation)))
+        (string_content) @spell) @string.documentation)))
 
 (function_definition
   body: (block
     .
     (expression_statement
       (string
-        (string_content) @string.documentation) @string.documentation)))
+        (string_content) @spell) @string.documentation)))
 
 ; Tokens
 [
@@ -413,7 +413,7 @@
     (expression_statement
       (assignment
         left: (identifier) @variable.member))))
-  (#match? @variable.member "^[%l_].*$"))
+  (#lua-match? @variable.member "^[%l_].*$"))
 
 ((class_definition
   body: (block
@@ -421,7 +421,7 @@
       (assignment
         left: (_
           (identifier) @variable.member)))))
-  (#match? @variable.member "^[%l_].*$"))
+  (#lua-match? @variable.member "^[%l_].*$"))
 
 ((class_definition
   (block

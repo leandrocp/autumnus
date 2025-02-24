@@ -1,7 +1,9 @@
+use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use rayon::prelude::*;
 use std::env;
-use std::fs;
+use std::fs::{self, File};
+use std::io::Write;
 use std::path::{Path, PathBuf};
 
 fn main() {
@@ -25,7 +27,60 @@ fn vendored_parsers() {
 }
 
 fn queries() {
-    println!("cargo:rerun-if-changed=queries/");
+    let out_dir = env::var("OUT_DIR").unwrap();
+    let dest_path = Path::new(&out_dir).join("queries_data.rs");
+    let mut file = File::create(&dest_path).unwrap();
+
+    // Path to queries directory
+    let queries_dir = Path::new("queries");
+
+    let mut token_stream = TokenStream::new();
+
+    // Process each language directory
+    if let Ok(entries) = fs::read_dir(queries_dir) {
+        for entry in entries.filter_map(Result::ok) {
+            let path = entry.path();
+            if path.is_dir() {
+                let language = path.file_name().unwrap().to_string_lossy();
+
+                // Look for highlights.scm only
+                let highlight_path = path.join("highlights.scm");
+
+                if !highlight_path.exists() {
+                    println!(
+                        "cargo:warning=No highlights.scm found for language: {}",
+                        language
+                    );
+                    continue; // No highlights.scm file found, skip this language
+                }
+
+                // Generate constant name
+                let constant_name = format_ident!("HIGHLIGHTS_{}", language.to_uppercase());
+
+                // Read file content to process it
+                if let Ok(content) = fs::read_to_string(&highlight_path) {
+                    let processed_content = content
+                        .replace("@spell", "")
+                        .replace("@none", "")
+                        .replace("@conceal", "")
+                        .replace("@nospell", "");
+
+                    // Create constant definition with the processed content directly
+                    let constant_def = quote! {
+                        pub const #constant_name: &str = #processed_content;
+                    };
+
+                    token_stream.extend(constant_def);
+
+                    // Also add the file to rerun-if-changed
+                    println!("cargo:rerun-if-changed={}", highlight_path.display());
+                }
+            }
+        }
+    }
+
+    // Write all generated constants to the output file
+    write!(file, "{}", token_stream).unwrap();
 }
 
 fn themes() {

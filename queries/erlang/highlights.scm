@@ -9,10 +9,10 @@
 
 (float) @number.float
 
-(comment) @comment
+(comment) @comment @spell
 
 ((comment) @comment.documentation
-  (#match? @comment.documentation "^[%%][%%]"))
+  (#lua-match? @comment.documentation "^[%%][%%]"))
 
 ; keyword
 [
