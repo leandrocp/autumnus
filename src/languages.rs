@@ -321,9 +321,9 @@ static CPP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "cpp",
-        include_str!("../queries/cpp/highlights.scm"),
+        format!("{}\n{}", include_str!("../queries/c/highlights.scm"), include_str!("../queries/cpp/highlights.scm")).as_str(),
         include_str!("../queries/cpp/injections.scm"),
-        include_str!("../queries/cpp/locals.scm"),
+        format!("{}\n{}", include_str!("../queries/c/locals.scm"), include_str!("../queries/cpp/locals.scm")).as_str(),
     )
     .expect("failed to create cpp highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
@@ -411,7 +411,7 @@ static HTML_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "html",
-        include_str!("../queries/html/highlights.scm"),
+        format!("{}\n{}", include_str!("../queries/html_tags/highlights.scm"), include_str!("../queries/html/highlights.scm")).as_str(),
         include_str!("../queries/html/injections.scm"),
         include_str!("../queries/html/locals.scm"),
     )
@@ -441,9 +441,9 @@ static PHP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "php",
-        include_str!("../queries/php/highlights.scm"),
-        include_str!("../queries/php/injections.scm"),
-        include_str!("../queries/php/locals.scm"),
+        format!("{}\n{}", include_str!("../queries/php_only/highlights.scm"), include_str!("../queries/php/highlights.scm")).as_str(),
+        format!("{}\n{}", include_str!("../queries/php_only/injections.scm"), include_str!("../queries/php/injections.scm")).as_str(),
+        format!("{}\n{}", include_str!("../queries/php_only/locals.scm"), include_str!("../queries/php/locals.scm")).as_str(),
     )
     .expect("failed to create php highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
