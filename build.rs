@@ -1,6 +1,7 @@
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use rayon::prelude::*;
+use std::collections::HashMap;
 use std::env;
 use std::fs::{self, File};
 use std::io::Write;
@@ -36,31 +37,70 @@ fn queries() {
 
     let mut token_stream = TokenStream::new();
 
-    // Process each language directory
+    // First, build a cache of all language files
+    let mut highlights_cache: HashMap<String, String> = HashMap::new();
+    let mut injections_cache: HashMap<String, String> = HashMap::new();
+    let mut locals_cache: HashMap<String, String> = HashMap::new();
+
+    // Pre-load all files into cache
     if let Ok(entries) = fs::read_dir(queries_dir) {
         for entry in entries.filter_map(Result::ok) {
             let path = entry.path();
             if path.is_dir() {
-                let language = path.file_name().unwrap().to_string_lossy();
+                let language = path.file_name().unwrap().to_string_lossy().to_string();
+
+                // Cache highlights.scm
+                let highlights_path = path.join("highlights.scm");
+                if highlights_path.exists() {
+                    if let Ok(content) = fs::read_to_string(&highlights_path) {
+                        highlights_cache.insert(language.clone(), content);
+                    }
+                }
+
+                // Cache injections.scm
+                let injections_path = path.join("injections.scm");
+                if injections_path.exists() {
+                    if let Ok(content) = fs::read_to_string(&injections_path) {
+                        injections_cache.insert(language.clone(), content);
+                    }
+                }
+
+                // Cache locals.scm
+                let locals_path = path.join("locals.scm");
+                if locals_path.exists() {
+                    if let Ok(content) = fs::read_to_string(&locals_path) {
+                        locals_cache.insert(language.clone(), content);
+                    }
+                }
+            }
+        }
+    }
+
+    // Process the inheritance for each file type
+    let processed_highlights = process_inheritance(&highlights_cache);
+    let processed_injections = process_inheritance(&injections_cache);
+    let processed_locals = process_inheritance(&locals_cache);
+
+    // Now generate constants for each language
+    if let Ok(entries) = fs::read_dir(queries_dir) {
+        for entry in entries.filter_map(Result::ok) {
+            let path = entry.path();
+            if path.is_dir() {
+                let language = path.file_name().unwrap().to_string_lossy().to_string();
                 let language_upper = language.to_uppercase();
 
-                // HIGHLIGHTS
-                let highlights_path = path.join("highlights.scm");
-
-                if !highlights_path.exists() {
-                    // Print a warning if highlights.scm doesn't exist
+                // Skip languages without highlights.scm
+                if !processed_highlights.contains_key(&language) {
                     println!(
                         "cargo:warning=No highlights.scm found for language: {}",
                         language
                     );
-                    continue; // Skip this language if highlights.scm doesn't exist
+                    continue;
                 }
 
-                // Generate constant name for highlights with language as prefix
+                // Generate HIGHLIGHTS constant
                 let highlights_constant_name = format_ident!("{}_{}", language_upper, "HIGHLIGHTS");
-
-                // Read file content to process it
-                if let Ok(content) = fs::read_to_string(&highlights_path) {
+                if let Some(content) = processed_highlights.get(&language) {
                     // Process content to remove specific annotations (only for highlights.scm)
                     let processed_content = content
                         .replace("@spell", "")
@@ -68,33 +108,22 @@ fn queries() {
                         .replace("@conceal", "")
                         .replace("@nospell", "");
 
-                    // Create constant definition with the processed content directly
                     let constant_def = quote! {
                         pub const #highlights_constant_name: &str = #processed_content;
                     };
 
                     token_stream.extend(constant_def);
-
-                    // Also add the file to rerun-if-changed
-                    println!("cargo:rerun-if-changed={}", highlights_path.display());
                 }
 
-                // INJECTIONS
-                let injections_path = path.join("injections.scm");
+                // Generate INJECTIONS constant
                 let injections_constant_name = format_ident!("{}_{}", language_upper, "INJECTIONS");
+                if let Some(content) = processed_injections.get(&language) {
+                    let constant_def = quote! {
+                        pub const #injections_constant_name: &str = #content;
+                    };
 
-                if injections_path.exists() {
-                    if let Ok(content) = fs::read_to_string(&injections_path) {
-                        // Use the original content for injections (no processing)
-                        let constant_def = quote! {
-                            pub const #injections_constant_name: &str = #content;
-                        };
-
-                        token_stream.extend(constant_def);
-                        println!("cargo:rerun-if-changed={}", injections_path.display());
-                    }
+                    token_stream.extend(constant_def);
                 } else {
-                    // Create empty constant if file doesn't exist
                     let constant_def = quote! {
                         pub const #injections_constant_name: &str = "";
                     };
@@ -102,34 +131,115 @@ fn queries() {
                     token_stream.extend(constant_def);
                 }
 
-                // LOCALS
-                let locals_path = path.join("locals.scm");
+                // Generate LOCALS constant
                 let locals_constant_name = format_ident!("{}_{}", language_upper, "LOCALS");
+                if let Some(content) = processed_locals.get(&language) {
+                    let constant_def = quote! {
+                        pub const #locals_constant_name: &str = #content;
+                    };
 
-                if locals_path.exists() {
-                    if let Ok(content) = fs::read_to_string(&locals_path) {
-                        // Use the original content for locals (no processing)
-                        let constant_def = quote! {
-                            pub const #locals_constant_name: &str = #content;
-                        };
-
-                        token_stream.extend(constant_def);
-                        println!("cargo:rerun-if-changed={}", locals_path.display());
-                    }
+                    token_stream.extend(constant_def);
                 } else {
-                    // Create empty constant if file doesn't exist
                     let constant_def = quote! {
                         pub const #locals_constant_name: &str = "";
                     };
 
                     token_stream.extend(constant_def);
                 }
+
+                // Add files to rerun-if-changed
+                println!("cargo:rerun-if-changed=queries/{}/highlights.scm", language);
+                println!("cargo:rerun-if-changed=queries/{}/injections.scm", language);
+                println!("cargo:rerun-if-changed=queries/{}/locals.scm", language);
             }
         }
     }
 
     // Write all generated constants to the output file
     write!(file, "{}", token_stream).unwrap();
+}
+
+// Process inheritance in a set of files
+fn process_inheritance(files: &HashMap<String, String>) -> HashMap<String, String> {
+    let mut processed = HashMap::new();
+
+    // First pass: Detect inheritance relationships
+    let mut inheritance: HashMap<String, String> = HashMap::new();
+    for (language, content) in files {
+        // Look for inheritance directive in the first line
+        if let Some(first_line) = content.lines().next() {
+            if first_line.starts_with("; inherits: ") {
+                let parent = first_line.trim_start_matches("; inherits: ").trim();
+                inheritance.insert(language.clone(), parent.to_string());
+            }
+        }
+    }
+
+    // Second pass: Process each file with inheritance
+    for (language, content) in files {
+        let processed_content =
+            process_file(language, content, files, &inheritance, &mut Vec::new());
+        processed.insert(language.clone(), processed_content);
+    }
+
+    processed
+}
+
+// Process a single file, resolving its inheritance
+fn process_file(
+    language: &str,
+    content: &str,
+    files: &HashMap<String, String>,
+    inheritance: &HashMap<String, String>,
+    visited: &mut Vec<String>,
+) -> String {
+    // Check for circular inheritance
+    if visited.contains(&language.to_string()) {
+        println!(
+            "cargo:warning=Circular inheritance detected for language: {}",
+            language
+        );
+        return content.to_string();
+    }
+
+    // Track visited languages to detect cycles
+    visited.push(language.to_string());
+
+    // Check if this language inherits from another
+    if let Some(parent) = inheritance.get(language) {
+        if let Some(parent_content) = files.get(parent) {
+            // Process the parent content first (recursive handling of multi-level inheritance)
+            let processed_parent =
+                process_file(parent, parent_content, files, inheritance, visited);
+
+            // Replace the inheritance directive with the parent content
+            let mut result = String::new();
+            let mut lines = content.lines();
+
+            // Skip the first line (inheritance directive)
+            lines.next();
+
+            // Add the parent content
+            result.push_str(&processed_parent);
+            result.push('\n');
+
+            // Add the rest of the current file
+            for line in lines {
+                result.push_str(line);
+                result.push('\n');
+            }
+
+            return result;
+        } else {
+            println!(
+                "cargo:warning=Parent language not found for {}: {}",
+                language, parent
+            );
+        }
+    }
+
+    // If no inheritance or parent not found, return the original content
+    content.to_string()
 }
 
 fn themes() {
