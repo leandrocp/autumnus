@@ -13,7 +13,7 @@ extern "C" {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter)]
-pub(crate) enum Language {
+pub enum Language {
     Bash,
     C,
     CSharp,
@@ -97,7 +97,7 @@ impl Language {
         }
     }
 
-    fn language_globs(language: Language) -> Vec<glob::Pattern> {
+    pub fn language_globs(language: Language) -> Vec<glob::Pattern> {
         let glob_strs: &'static [&'static str] = match language {
             Language::Bash => &[
                 "*.bash",

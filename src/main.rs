@@ -1,5 +1,7 @@
 use anyhow::Result;
+use autumnus::languages::Language;
 use clap::{Parser, Subcommand, ValueEnum};
+use strum::IntoEnumIterator;
 
 #[cfg(feature = "dev")]
 use std::fs;
@@ -19,6 +21,8 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
+    ListLanguages,
+
     Highlight {
         source: String,
 
@@ -50,6 +54,8 @@ fn main() -> Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
+        Commands::ListLanguages => list_languages(),
+
         Commands::Highlight {
             source,
             language,
@@ -60,6 +66,21 @@ fn main() -> Result<()> {
         #[cfg(feature = "dev")]
         Commands::GenSamples => gen_samples(),
     }
+}
+
+fn list_languages() -> Result<()> {
+    for language in Language::iter() {
+        let name = Language::id_name(&language);
+        println!("{}", name);
+
+        for glob in Language::language_globs(language) {
+            print!(" {}", glob.as_str());
+        }
+        
+        println!();
+    }
+
+    Ok(())
 }
 
 fn highlight(
