@@ -8,12 +8,25 @@ local variables = arg[3]
 -- Set up global variables if they were passed
 if variables then
 	for var_assignment in variables:gmatch("([^,]+)") do
-		local var_name, var_value = var_assignment:match("(.+)=(.+)")
-		if var_name and var_value then
+		-- Check for table assignment with format: table_name.key=value
+		if var_assignment:match("(.+)%.(.+)=(.+)") then
+			local table_name, key, value = var_assignment:match("(.+)%.(.+)=(.+)")
 			-- Remove any quotes if present
-			var_value = var_value:gsub('"', ""):gsub("'", "")
-			-- Set the global variable
-			vim.g[var_name] = var_value
+			value = value:gsub('"', ""):gsub("'", "")
+
+			-- Initialize the table if it doesn't exist
+			vim.g[table_name] = vim.g[table_name] or {}
+			-- Set the key-value in the table
+			vim.g[table_name][key] = value
+		else
+			-- Handle simple variable assignment with format: name=value
+			local var_name, var_value = var_assignment:match("(.+)=(.+)")
+			if var_name and var_value then
+				-- Remove any quotes if present
+				var_value = var_value:gsub('"', ""):gsub("'", "")
+				-- Set the global variable
+				vim.g[var_name] = var_value
+			end
 		end
 	end
 end

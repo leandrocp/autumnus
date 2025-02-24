@@ -34,11 +34,17 @@ themes=(
   "kanagawa-lotus@light:kanagawa_lotus"
   "kanagawa-wave@dark:kanagawa_wave"
   "material@dark:material_darker:material_style=darker"
-  "material@dark:material_deep_ocean:material_style=deep ocean"
   "material@dark:material_lighter:material_style=lighter"
   "material@dark:material_oceanic:material_style=oceanic"
   "material@dark:material_palenight:material_style=palenight"
-  "onedark@dark:onedark"
+  "material@dark:material_deep_ocean:material_style=deep ocean"
+  "onedark@dark:onedark_default"
+  "onedark@dark:onedark_dark:onedark_config.style=dark"
+  "onedark@dark:onedark_darker:onedark_config.style=darker"
+  "onedark@dark:onedark_cool:onedark_config.style=cool"
+  "onedark@dark:onedark_deep:onedark_config.style=deep"
+  "onedark@dark:onedark_warm:onedark_config.style=warm"
+  "onedark@dark:onedark_warmer:onedark_config.style=warmer"
   "solarized@dark:solarized_dark"
   "solarized@light:solarized_light"
   "tokyonight-day@light:tokyonight_day"
@@ -50,12 +56,11 @@ themes=(
 )
 
 for entry in "${themes[@]}"; do
-  # Parse the new format: colorscheme@appearance:theme_name[:variables]
   colorscheme=${entry%%@*}
   rest=${entry#*@}
   appearance=${rest%%:*}
   theme_part=${rest#*:}
-  
+
   # Check if there are variables
   if [[ $theme_part == *":"* ]]; then
     theme=${theme_part%%:*}
@@ -64,17 +69,16 @@ for entry in "${themes[@]}"; do
     theme=$theme_part
     variables=""
   fi
-  
+
   FILE="${theme}.json"
-  
-  # Pass the variables information to the Lua script if present
+
   if [[ -n "$variables" ]]; then
     HIGHLIGHTS=$(nvim --headless -u init.lua -l nvim_theme.lua "$appearance" "$colorscheme" "$variables" 2>&1 | jq -S)
-    echo '{}' | jq ". + {\"name\": \"$theme\", \"appearance\": \"$appearance\", \"highlights\": $HIGHLIGHTS}" > "$FILE"
+    echo '{}' | jq ". + {\"name\": \"$theme\", \"appearance\": \"$appearance\", \"highlights\": $HIGHLIGHTS}" >"$FILE"
     echo "$colorscheme ($appearance / $variables) -> $FILE"
   else
     HIGHLIGHTS=$(nvim --headless -u init.lua -l nvim_theme.lua "$appearance" "$colorscheme" 2>&1 | jq -S)
-    echo '{}' | jq ". + {\"name\": \"$theme\", \"appearance\": \"$appearance\", \"highlights\": $HIGHLIGHTS}" > "$FILE"
+    echo '{}' | jq ". + {\"name\": \"$theme\", \"appearance\": \"$appearance\", \"highlights\": $HIGHLIGHTS}" >"$FILE"
     echo "$colorscheme ($appearance) -> $FILE"
   fi
 done
