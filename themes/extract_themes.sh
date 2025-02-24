@@ -38,7 +38,6 @@ themes=(
   "material@dark:material_oceanic:material_style=oceanic"
   "material@dark:material_palenight:material_style=palenight"
   "material@dark:material_deep_ocean:material_style=deep ocean"
-  "onedark@dark:onedark_default"
   "onedark@dark:onedark_dark:onedark_config.style=dark"
   "onedark@dark:onedark_darker:onedark_config.style=darker"
   "onedark@dark:onedark_cool:onedark_config.style=cool"

@@ -1,169 +1,246 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
+  <head>
     <title>Autumnus Syntax Highlighter</title>
-    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700" rel="stylesheet" />
+    <link
+      href="https://fonts.bunny.net/css?family=inter:400,500,600,700"
+      rel="stylesheet"
+    />
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        * { font-family: 'Inter', sans-serif; }
+      * {
+        font-family: "Inter", sans-serif;
+      }
     </style>
-</head>
-<body class="bg-gray-50 min-h-screen">
+  </head>
+  <body class="bg-gray-50 min-h-screen">
     <div class="container mx-auto py-8 px-4">
-        <div class="rounded-lg border bg-white shadow-sm p-6">
-            <div class="space-y-1.5 mb-6">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-2xl font-semibold tracking-tight">Autumnus Syntax Highlighter</h2>
-                    <div class="flex gap-6 text-sm">
-                        <div class="flex items-center gap-2">
-                            <span class="font-medium">Rust:</span>
-                            <a href="https://crates.io/crates/autumnus" class="text-blue-600 hover:underline inline-flex items-center gap-1" target="_blank">
-                                <svg class="w-4 h-4" viewBox="0 0 512 512" fill="currentColor">
-                                    <path d="M239.1 6.3l-208 78c-18.7 7-31.1 25-31.1 45v225.1c0 18.2 10.3 34.8 26.5 42.9l208 104c13.5 6.8 29.4 6.8 42.9 0l208-104c16.3-8.1 26.5-24.8 26.5-42.9V129.3c0-20-12.4-37.9-31.1-44.9l-208-78C262 2.2 250 2.2 239.1 6.3zM256 68.4l192 72v1.1l-192 78-192-78v-1.1l192-72zm32 356V275.5l160-65v133.9l-160 80z"/>
-                                </svg>
-                                crates.io
-                            </a>
-                            <a href="https://github.com/leandrocp/autumnus" class="text-blue-600 hover:underline inline-flex items-center gap-1" target="_blank">
-                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
-                                </svg>
-                                GitHub
-                            </a>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span class="font-medium">Elixir:</span>
-                            <a href="https://hex.pm/packages/autumn" class="text-blue-600 hover:underline inline-flex items-center gap-1" target="_blank">
-                                <svg class="w-4 h-4" viewBox="0 0 220 220" fill="currentColor">
-                                    <path d="M110,0 L220,110 L110,220 L0,110 L110,0 z M159.939,117.061 L110,167 L60.061,117.061 L110,67.121 L159.939,117.061 z"/>
-                                </svg>
-                                hex.pm
-                            </a>
-                            <a href="https://github.com/leandrocp/autumn" class="text-blue-600 hover:underline inline-flex items-center gap-1" target="_blank">
-                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
-                                </svg>
-                                GitHub
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                <p class="text-sm text-gray-500">Select a language and theme to preview the code sample.</p>
+      <div class="rounded-lg border bg-white shadow-sm p-6">
+        <div class="space-y-1.5 mb-6">
+          <div class="flex items-center justify-between">
+            <h2 class="text-2xl font-semibold tracking-tight">
+              Autumnus Syntax Highlighter
+            </h2>
+            <div class="flex gap-6 text-sm">
+              <div class="flex items-center gap-2">
+                <span class="font-medium">Rust:</span>
+                <a
+                  href="https://crates.io/crates/autumnus"
+                  class="text-blue-600 hover:underline inline-flex items-center gap-1"
+                  target="_blank"
+                >
+                  <svg
+                    class="w-4 h-4"
+                    viewBox="0 0 512 512"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M239.1 6.3l-208 78c-18.7 7-31.1 25-31.1 45v225.1c0 18.2 10.3 34.8 26.5 42.9l208 104c13.5 6.8 29.4 6.8 42.9 0l208-104c16.3-8.1 26.5-24.8 26.5-42.9V129.3c0-20-12.4-37.9-31.1-44.9l-208-78C262 2.2 250 2.2 239.1 6.3zM256 68.4l192 72v1.1l-192 78-192-78v-1.1l192-72zm32 356V275.5l160-65v133.9l-160 80z"
+                    />
+                  </svg>
+                  crates.io
+                </a>
+                <a
+                  href="https://github.com/leandrocp/autumnus"
+                  class="text-blue-600 hover:underline inline-flex items-center gap-1"
+                  target="_blank"
+                >
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                      d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"
+                    />
+                  </svg>
+                  GitHub
+                </a>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="font-medium">Elixir:</span>
+                <a
+                  href="https://hex.pm/packages/autumn"
+                  class="text-blue-600 hover:underline inline-flex items-center gap-1"
+                  target="_blank"
+                >
+                  <svg
+                    class="w-4 h-4"
+                    viewBox="0 0 220 220"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M110,0 L220,110 L110,220 L0,110 L110,0 z M159.939,117.061 L110,167 L60.061,117.061 L110,67.121 L159.939,117.061 z"
+                    />
+                  </svg>
+                  hex.pm
+                </a>
+                <a
+                  href="https://github.com/leandrocp/autumn"
+                  class="text-blue-600 hover:underline inline-flex items-center gap-1"
+                  target="_blank"
+                >
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                      d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"
+                    />
+                  </svg>
+                  GitHub
+                </a>
+              </div>
             </div>
-            
-            <div class="flex flex-col sm:flex-row gap-4 mb-6">
-                <div class="flex-1 space-y-1.5">
-                    <label class="text-sm font-medium leading-none">
-                        Language
-                    </label>
-                    <select id="language" class="flex h-10 w-full items-center justify-between rounded-md border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
-                    </select>
-                    <p class="text-xs text-gray-500 mt-1">Value: <code class="bg-gray-100 px-1 py-0.5 rounded" id="language-value"></code></p>
-                </div>
-                <div class="flex-1 space-y-1.5">
-                    <label class="text-sm font-medium leading-none">
-                        Theme
-                    </label>
-                    <select id="theme" class="flex h-10 w-full items-center justify-between rounded-md border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
-                    </select>
-                    <p class="text-xs text-gray-500 mt-1">Value: <code class="bg-gray-100 px-1 py-0.5 rounded" id="theme-value"></code></p>
-                </div>
-            </div>
-
-            <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
-                <div id="content" class="p-6"></div>
-            </div>
+          </div>
+          <p class="text-sm text-gray-500">
+            Select a language and theme to preview the code sample.
+          </p>
         </div>
-        <footer class="mt-8 text-sm text-gray-500 text-center">
-            <p>Sample code extracted from <a href="https://github.com/adambard/learnxinyminutes-docs" class="text-blue-600 hover:underline" target="_blank">Learn X in Y Minutes</a></p>
-        </footer>
+
+        <div class="flex flex-col sm:flex-row gap-4 mb-6">
+          <div class="flex-1 space-y-1.5">
+            <label class="text-sm font-medium leading-none"> Language </label>
+            <select
+              id="language"
+              class="flex h-10 w-full items-center justify-between rounded-md border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            ></select>
+            <p class="text-xs text-gray-500 mt-1">
+              Value:
+              <code
+                class="bg-gray-100 px-1 py-0.5 rounded"
+                id="language-value"
+              ></code>
+            </p>
+          </div>
+          <div class="flex-1 space-y-1.5">
+            <label class="text-sm font-medium leading-none"> Theme </label>
+            <select
+              id="theme"
+              class="flex h-10 w-full items-center justify-between rounded-md border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            ></select>
+            <p class="text-xs text-gray-500 mt-1">
+              Value:
+              <code
+                class="bg-gray-100 px-1 py-0.5 rounded"
+                id="theme-value"
+              ></code>
+            </p>
+          </div>
+        </div>
+
+        <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+          <div id="content" class="p-6"></div>
+        </div>
+      </div>
+      <footer class="mt-8 text-sm text-gray-500 text-center">
+        <p>
+          Sample code extracted from
+          <a
+            href="https://github.com/adambard/learnxinyminutes-docs"
+            class="text-blue-600 hover:underline"
+            target="_blank"
+            >Learn X in Y Minutes</a
+          >
+        </p>
+      </footer>
     </div>
 
     <script>
-        const languages = {
-            bash: 'Bash',
-            c: 'C',
-            cpp: 'C++',
-            csharp: 'C#',
-            css: 'CSS',
-            dockerfile: 'Dockerfile',
-            elixir: 'Elixir',
-            erlang: 'Erlang',
-            html: 'HTML',
-            lua: 'Lua',
-            php: 'PHP',
-            ruby: 'Ruby',
-            rust: 'Rust',
-            python: 'Python',
-            swift: 'Swift'
-        };
+      const languages = {
+        bash: "Bash",
+        c: "C",
+        cpp: "C++",
+        csharp: "C#",
+        css: "CSS",
+        dockerfile: "Dockerfile",
+        elixir: "Elixir",
+        erlang: "Erlang",
+        html: "HTML",
+        lua: "Lua",
+        php: "PHP",
+        ruby: "Ruby",
+        rust: "Rust",
+        python: "Python",
+        swift: "Swift",
+      };
 
-        const themes = [
-            "catppuccin_frappe",
-            "catppuccin_latte",
-            "github_dark",
-            "github_light",
-            "gruvbox_dark",
-            "gruvbox_light",
-            "kanagawa_lotus",
-            "kanagawa_wave",
-            "tokyonight_day",
-            "tokyonight_night"
-        ].sort();
+      const themes = [
+        "catppuccin_frappe",
+        "catppuccin_latte",
+        "catppuccin_macchiato",
+        "catppuccin_mocha",
+        "dracula",
+        "dracula_soft",
+        "github_dark",
+        "github_light",
+        "gruvbox_dark",
+        "gruvbox_light",
+        "kanagawa_dragon",
+        "kanagawa_lotus",
+        "kanagawa_wave",
+        "material_lighter",
+        "material_oceanic",
+        "onedark_dark",
+        "solarized_dark",
+        "solarized_light",
+        "tokyonight_day",
+        "tokyonight_night",
+        "vscode_dark",
+        "vscode_light",
+      ].sort();
 
-        // Populate language select
-        const languageSelect = document.getElementById('language');
-        for (const [value, label] of Object.entries(languages)) {
-            const option = document.createElement('option');
-            option.value = value;
-            option.textContent = label;
-            languageSelect.appendChild(option);
+      // Populate language select
+      const languageSelect = document.getElementById("language");
+      for (const [value, label] of Object.entries(languages)) {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = label;
+        languageSelect.appendChild(option);
+      }
+
+      // Populate theme select
+      const themeSelect = document.getElementById("theme");
+      for (const theme of themes) {
+        const option = document.createElement("option");
+        option.value = theme;
+        option.textContent = theme
+          .split("_")
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" ");
+        themeSelect.appendChild(option);
+      }
+
+      // Set default values
+      languageSelect.value = "rust";
+      themeSelect.value = "catppuccin_frappe";
+
+      // Load content function
+      async function loadContent() {
+        const language = languageSelect.value;
+        const theme = themeSelect.value;
+        try {
+          const response = await fetch(`${language}.${theme}.html`);
+          const text = await response.text();
+          document.getElementById("content").innerHTML = text;
+        } catch (error) {
+          console.error("Error:", error);
+          document.getElementById("content").innerHTML =
+            "Error loading content";
         }
+      }
 
-        // Populate theme select
-        const themeSelect = document.getElementById('theme');
-        for (const theme of themes) {
-            const option = document.createElement('option');
-            option.value = theme;
-            option.textContent = theme.split('_').map(word => 
-                word.charAt(0).toUpperCase() + word.slice(1)
-            ).join(' ');
-            themeSelect.appendChild(option);
-        }
-
-        // Set default values
-        languageSelect.value = 'rust';
-        themeSelect.value = 'catppuccin_frappe';
-
-        // Load content function
-        async function loadContent() {
-            const language = languageSelect.value;
-            const theme = themeSelect.value;
-            try {
-                const response = await fetch(`${language}.${theme}.html`);
-                const text = await response.text();
-                document.getElementById('content').innerHTML = text;
-            } catch (error) {
-                console.error('Error:', error);
-                document.getElementById('content').innerHTML = 'Error loading content';
-            }
-        }
-
-        // Add event listeners
-        languageSelect.addEventListener('change', () => {
-            document.getElementById('language-value').textContent = languageSelect.value;
-            loadContent();
-        });
-        themeSelect.addEventListener('change', () => {
-            document.getElementById('theme-value').textContent = themeSelect.value;
-            loadContent();
-        });
-
-        // Set initial values
-        document.getElementById('language-value').textContent = languageSelect.value;
-        document.getElementById('theme-value').textContent = themeSelect.value;
-
-        // Initial load
+      // Add event listeners
+      languageSelect.addEventListener("change", () => {
+        document.getElementById("language-value").textContent =
+          languageSelect.value;
         loadContent();
+      });
+      themeSelect.addEventListener("change", () => {
+        document.getElementById("theme-value").textContent = themeSelect.value;
+        loadContent();
+      });
+
+      // Set initial values
+      document.getElementById("language-value").textContent =
+        languageSelect.value;
+      document.getElementById("theme-value").textContent = themeSelect.value;
+
+      // Initial load
+      loadContent();
     </script>
-</body>
+  </body>
 </html>
