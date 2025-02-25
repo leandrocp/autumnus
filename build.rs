@@ -30,6 +30,11 @@ fn vendored_parsers() {
             src_dir: "vendored_parsers/tree-sitter-eex/src",
             extra_files: vec![],
         },
+        TreeSitterParser {
+            name: "tree-sitter-elm",
+            src_dir: "vendored_parsers/tree-sitter-elm/src",
+            extra_files: vec!["scanner.c"],
+        },
     ];
 
     for parser in &parsers {

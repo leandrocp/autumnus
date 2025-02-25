@@ -12,6 +12,7 @@ extern "C" {
     fn tree_sitter_clojure() -> *const ();
     fn tree_sitter_dockerfile() -> *const ();
     fn tree_sitter_eex() -> *const ();
+    fn tree_sitter_elm() -> *const ();
 }
 
 mod generated {
@@ -31,6 +32,7 @@ pub enum Language {
     Dockerfile,
     Eex,
     Elixir,
+    Elm,
     Erlang,
     Heex,
     Html,
@@ -58,6 +60,7 @@ impl Language {
             "docker" => Some(Language::Dockerfile),
             "eex" => Some(Language::Eex),
             "elixir" => Some(Language::Elixir),
+            "elm" => Some(Language::Elm),
             "erlang" => Some(Language::Erlang),
             "heex" => Some(Language::Heex),
             "html" => Some(Language::Html),
@@ -181,6 +184,7 @@ impl Language {
             ],
             Language::Eex => &["*.eex"],
             Language::Elixir => &["*.ex", "*.exs"],
+            Language::Elm => &["*.elm"],
             Language::Erlang => &[
                 "*.erl",
                 "*.app.src",
@@ -266,6 +270,7 @@ impl Language {
             Language::Dockerfile => "Dockerfile",
             Language::Eex => "Eex",
             Language::Elixir => "Elixir",
+            Language::Elm => "Elm",
             Language::Erlang => "Erlang",
             Language::Heex => "HEEx",
             Language::Html => "HTML",
@@ -295,6 +300,7 @@ impl Language {
             Language::Dockerfile => &DOCKERFILE_CONFIG,
             Language::Eex => &EEX_CONFIG,
             Language::Elixir => &ELIXIR_CONFIG,
+            Language::Elm => &ELM_CONFIG,
             Language::Erlang => &ERLANG_CONFIG,
             Language::Heex => &HEEX_CONFIG,
             Language::Html => &HTML_CONFIG,
@@ -455,6 +461,21 @@ static ELIXIR_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         ELIXIR_LOCALS,
     )
     .expect("failed to create elixir highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static ELM_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_elm) };
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "elm",
+        ELM_HIGHLIGHTS,
+        ELM_INJECTIONS,
+        ELM_LOCALS,
+    )
+    .expect("failed to create elm highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
