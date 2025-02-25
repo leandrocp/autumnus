@@ -1,0 +1,2453 @@
+================================================================================
+Triple
+================================================================================
+target triple = "amdgcn-amd-amdhsa"
+--------------------------------------------------------------------------------
+
+(module
+  (target_definition
+    (target_triple
+      (string))))
+
+================================================================================
+Data Layout
+================================================================================
+target datalayout = ""
+--------------------------------------------------------------------------------
+
+(module
+  (target_definition
+    (data_layout
+      (string))))
+
+================================================================================
+Function Declaration
+================================================================================
+declare float @llvm.sqrt(float) nounwind readnone
+--------------------------------------------------------------------------------
+
+(module
+  (declare
+    (function_header
+      (type
+        (type_keyword))
+      (global_var)
+      (argument_list
+        (argument
+          (type
+            (type_keyword))))
+      (attribute
+        (attribute_name))
+      (attribute
+        (attribute_name)))))
+
+================================================================================
+Function Definition
+================================================================================
+define void @test() nounwind {
+  ret void
+}
+--------------------------------------------------------------------------------
+
+(module
+  (define
+    (function_header
+      (type
+        (type_keyword))
+      (global_var)
+      (argument_list)
+      (attribute
+        (attribute_name)))
+    (function_body
+      (instruction
+        (instruction_ret
+          (type_and_value
+            (type
+              (type_keyword))))))))
+
+================================================================================
+Global Assembly
+================================================================================
+module asm "inline asm code goes here"
+module asm "more can go here"
+--------------------------------------------------------------------------------
+
+(module
+  (module_asm
+    (asm
+      (string)))
+  (module_asm
+    (asm
+      (string))))
+
+================================================================================
+Global Variable
+================================================================================
+@G = addrspace(5) constant float 1.0, section "foo", align 4
+
+@G = external global i32
+
+@"complex@Name" = thread_local(initialexec) global i32 0, align 4
+--------------------------------------------------------------------------------
+
+(module
+  (global_global
+    (global_var)
+    (addrspace
+      (number))
+    (type_and_value
+      (type
+        (type_keyword))
+      (value
+        (float)))
+    (attribute
+      (string))
+    (attribute
+      (alignment
+        (number))))
+  (global_global
+    (global_var)
+    (linkage
+      (linkage_aux))
+    (type_and_value
+      (type
+        (type_keyword))))
+  (global_global
+    (global_var)
+    (thread_local)
+    (type_and_value
+      (type
+        (type_keyword))
+      (value
+        (number)))
+    (attribute
+      (alignment
+        (number)))))
+
+================================================================================
+Comdat
+================================================================================
+$foo = comdat largest
+@foo = global i32 2, comdat($foo)
+
+define void @bar() comdat($foo) {
+  ret void
+}
+--------------------------------------------------------------------------------
+
+(module
+  (comdat
+    (comdat_ref))
+  (global_global
+    (global_var)
+    (type_and_value
+      (type
+        (type_keyword))
+      (value
+        (number)))
+    (attribute
+      (comdat_ref)))
+  (define
+    (function_header
+      (type
+        (type_keyword))
+      (global_var)
+      (argument_list)
+      (attribute
+        (comdat_ref)))
+    (function_body
+      (instruction
+        (instruction_ret
+          (type_and_value
+            (type
+              (type_keyword))))))))
+
+================================================================================
+Metadata
+================================================================================
+!0 = distinct !{!"test\00", i32 10}
+
+!foo = !{!4, !3}
+
+define void @main() {
+  call void @llvm.dbg.value(metadata !24, metadata !25, metadata !26)
+  %indvar.next = add i64 %indvar, 1, !dbg !21
+}
+declare !dbg !22 void @f1()
+define void @f2() !dbg !22 {
+  ret void
+}
+
+@g1 = global i32 0, !dbg !22
+@g2 = external global i32, !dbg !22
+
+--------------------------------------------------------------------------------
+
+(module
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (metadata_tuple
+        (metadata
+          (specialized_md
+            (metadata_ref)))
+        (metadata
+          (type_and_value
+            (type
+              (type_keyword))
+            (value
+              (number)))))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (metadata_tuple
+        (metadata
+          (specialized_md
+            (metadata_ref)))
+        (metadata
+          (specialized_md
+            (metadata_ref))))))
+  (define
+    (function_header
+      (type
+        (type_keyword))
+      (global_var)
+      (argument_list))
+    (function_body
+      (instruction
+        (instruction_call
+          (type
+            (type_keyword))
+          (value
+            (var
+              (global_var)))
+          (argument_list
+            (argument
+              (metadata
+                (specialized_md
+                  (metadata_ref))))
+            (argument
+              (metadata
+                (specialized_md
+                  (metadata_ref))))
+            (argument
+              (metadata
+                (specialized_md
+                  (metadata_ref)))))))
+      (instruction
+        (local_var)
+        (instruction_bin_op
+          (bin_op_keyword
+            (atomic_bin_op_keyword))
+          (type_and_value
+            (type
+              (type_keyword))
+            (value
+              (var
+                (local_var))))
+          (value
+            (number)))
+        (metadata_refs
+          (metadata_name)
+          (metadata
+            (specialized_md
+              (metadata_ref)))))))
+  (declare
+    (metadata_attachment
+      (metadata_name)
+      (metadata
+        (specialized_md
+          (metadata_ref))))
+    (function_header
+      (type
+        (type_keyword))
+      (global_var)
+      (argument_list)))
+  (define
+    (function_header
+      (type
+        (type_keyword))
+      (global_var)
+      (argument_list))
+    (metadata_attachment
+      (metadata_name)
+      (metadata
+        (specialized_md
+          (metadata_ref))))
+    (function_body
+      (instruction
+        (instruction_ret
+          (type_and_value
+            (type
+              (type_keyword)))))))
+  (global_global
+    (global_var)
+    (type_and_value
+      (type
+        (type_keyword))
+      (value
+        (number)))
+    (metadata_refs
+      (metadata_name)
+      (metadata
+        (specialized_md
+          (metadata_ref)))))
+  (global_global
+    (global_var)
+    (linkage
+      (linkage_aux))
+    (type_and_value
+      (type
+        (type_keyword)))
+    (metadata_refs
+      (metadata_name)
+      (metadata
+        (specialized_md
+          (metadata_ref))))))
+
+================================================================================
+Debug Data
+================================================================================
+!0 = !DILocation(line: 2900, column: 42, scope: !1, inlinedAt: !2)
+
+!0 = !DICompileUnit(language: DW_LANG_C99, file: !1, producer: "clang",
+                    isOptimized: true, flags: "-O2", runtimeVersion: 2,
+                    splitDebugFilename: "abc.debug", emissionKind: FullDebug,
+                    enums: !2, retainedTypes: !3, globals: !4, imports: !5,
+                    macros: !6, dwoId: 0x0abcd)
+
+!0 = !DIFile(filename: "path/to/file", directory: "/path/to/dir",
+             checksumkind: CSK_MD5,
+             checksum: "000102030405060708090a0b0c0d0e0f")
+
+!0 = !DIBasicType(name: "unsigned char", size: 8, align: 8,
+                  encoding: DW_ATE_unsigned_char)
+!1 = !DIBasicType(tag: DW_TAG_unspecified_type, name: "decltype(nullptr)")
+
+!0 = !BasicType(name: "int", size: 32, align: 32, DW_ATE_signed)
+!1 = !BasicType(name: "char", size: 8, align: 8, DW_ATE_signed_char)
+!2 = !DISubroutineType(types: !{null, !0, !1}) ; void (int, char)
+
+!0 = !DIBasicType(name: "unsigned char", size: 8, align: 8,
+                  encoding: DW_ATE_unsigned_char)
+!1 = !DIDerivedType(tag: DW_TAG_pointer_type, baseType: !0, size: 32,
+                    align: 32)
+
+!0 = !DIEnumerator(name: "SixKind", value: 7)
+!1 = !DIEnumerator(name: "SevenKind", value: 7)
+!2 = !DIEnumerator(name: "NegEightKind", value: -8)
+!3 = !DICompositeType(tag: DW_TAG_enumeration_type, name: "Enum", file: !12,
+                      line: 2, size: 32, align: 32, identifier: "_M4Enum",
+                      elements: !{!0, !1, !2})
+
+!0 = !DISubrange(count: 5, lowerBound: 0) ; array counting from 0
+!1 = !DISubrange(count: 5, lowerBound: 1) ; array counting from 1
+!2 = !DISubrange(count: -1) ; empty array.
+
+--------------------------------------------------------------------------------
+
+(module
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref))))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number)))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string)))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string)))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (metadata_tuple
+            (metadata)
+            (metadata
+              (specialized_md
+                (metadata_ref)))
+            (metadata
+              (specialized_md
+                (metadata_ref))))))))
+  (comment)
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number)))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number)))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number)))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number)))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (metadata_tuple
+            (metadata
+              (specialized_md
+                (metadata_ref)))
+            (metadata
+              (specialized_md
+                (metadata_ref)))
+            (metadata
+              (specialized_md
+                (metadata_ref))))))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number)))))
+  (comment)
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number)))))
+  (comment)
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number)))))
+  (comment))
+
+================================================================================
+Debug Data 2
+================================================================================
+; Scopes used in rest of example
+!6 = !DIFile(filename: "vla.c", directory: "/path/to/file")
+!7 = distinct !DICompileUnit(language: DW_LANG_C99, file: !6)
+!8 = distinct !DISubprogram(name: "foo", scope: !7, file: !6, line: 5)
+
+; Use of local variable as count value
+!9 = !DIBasicType(name: "int", size: 32, encoding: DW_ATE_signed)
+!10 = !DILocalVariable(name: "count", scope: !8, file: !6, line: 42, type: !9)
+!11 = !DISubrange(count: !10, lowerBound: 0)
+
+; Use of global variable as count value
+!12 = !DIGlobalVariable(name: "count", scope: !8, file: !6, line: 22, type: !9)
+!13 = !DISubrange(count: !12, lowerBound: 0)
+
+!0 = !DIEnumerator(name: "SixKind", value: 7)
+!1 = !DIEnumerator(name: "SevenKind", value: 7)
+!2 = !DIEnumerator(name: "NegEightKind", value: -8)
+
+!0 = !DITemplateTypeParameter(name: "Ty", type: !1)
+
+!0 = !DITemplateValueParameter(name: "Ty", type: !1, value: i32 7)
+
+!0 = !DINamespace(name: "myawesomeproject", scope: !1, file: !2, line: 7)
+
+--------------------------------------------------------------------------------
+
+(module
+  (comment)
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string)))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref))))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number)))))
+  (comment)
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref))))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number)))))
+  (comment)
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref))))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number)))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number)))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number)))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number)))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref))))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (type_keyword))
+        (specialized_md_value
+          (number)))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))))))
+
+================================================================================
+Debug Data 3
+================================================================================
+@foo = global i32, !dbg !0
+!0 = !DIGlobalVariableExpression(var: !1, expr: !DIExpression())
+!1 = !DIGlobalVariable(name: "foo", linkageName: "foo", scope: !2,
+                       file: !3, line: 7, type: !4, isLocal: true,
+                       isDefinition: false, declaration: !5)
+
+@lower = global i32, !dbg !0
+@upper = global i32, !dbg !1
+!0 = !DIGlobalVariableExpression(
+         var: !2,
+         expr: !DIExpression(DW_OP_LLVM_fragment, 0, 32)
+         )
+!1 = !DIGlobalVariableExpression(
+         var: !2,
+         expr: !DIExpression(DW_OP_LLVM_fragment, 32, 32)
+         )
+!2 = !DIGlobalVariable(name: "split64", linkageName: "split64", scope: !3,
+                       file: !4, line: 8, type: !5, declaration: !6)
+
+!0 = distinct !DISubprogram(name: "foo", linkageName: "_Zfoov", scope: !1,
+                            file: !2, line: 7, type: !3, isLocal: true,
+                            isDefinition: true, scopeLine: 8,
+                            containingType: !4,
+                            virtuality: DW_VIRTUALITY_pure_virtual,
+                            virtualIndex: 10, flags: DIFlagPrototyped,
+                            isOptimized: true, unit: !5, templateParams: !6,
+                            declaration: !7, retainedNodes: !8,
+                            thrownTypes: !9)
+
+!0 = distinct !DILexicalBlock(scope: !1, file: !2, line: 7, column: 35)
+
+--------------------------------------------------------------------------------
+
+(module
+  (global_global
+    (global_var)
+    (type_and_value
+      (type
+        (type_keyword)))
+    (metadata_refs
+      (metadata_name)
+      (metadata
+        (specialized_md
+          (metadata_ref)))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref))))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref))))))
+  (global_global
+    (global_var)
+    (type_and_value
+      (type
+        (type_keyword)))
+    (metadata_refs
+      (metadata_name)
+      (metadata
+        (specialized_md
+          (metadata_ref)))))
+  (global_global
+    (global_var)
+    (type_and_value
+      (type
+        (type_keyword)))
+    (metadata_refs
+      (metadata_name)
+      (metadata
+        (specialized_md
+          (metadata_ref)))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)
+            (specialized_md_value)
+            (specialized_md_value)
+            (specialized_md_value
+              (number))
+            (specialized_md_value)
+            (specialized_md_value
+              (number)))))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)
+            (specialized_md_value)
+            (specialized_md_value)
+            (specialized_md_value
+              (number))
+            (specialized_md_value)
+            (specialized_md_value
+              (number)))))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref))))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref))))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))))))
+
+================================================================================
+Debug Data 4
+================================================================================
+!0 = !DILexicalBlock(scope: !3, file: !4, line: 7, column: 35)
+!1 = !DILexicalBlockFile(scope: !0, file: !4, discriminator: 0)
+!2 = !DILexicalBlockFile(scope: !0, file: !4, discriminator: 1)
+
+!0 = !DILocation(line: 2900, column: 42, scope: !1, inlinedAt: !2)
+
+!0 = !DILocalVariable(name: "this", arg: 1, scope: !3, file: !2, line: 7,
+                      type: !3, flags: DIFlagArtificial)
+!1 = !DILocalVariable(name: "x", arg: 2, scope: !4, file: !2, line: 7,
+                      type: !3)
+!2 = !DILocalVariable(name: "y", scope: !5, file: !2, line: 7, type: !3)
+--------------------------------------------------------------------------------
+
+(module
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number)))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number)))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number)))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref))))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref))))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))))))
+
+================================================================================
+Debug Data 5
+================================================================================
+!17 = !DILocalVariable(name: "ptr1", scope: !12, file: !3, line: 5,
+                       type: !18)
+!18 = !DIDerivedType(tag: DW_TAG_pointer_type, baseType: !19, size: 64)
+!19 = !DIBasicType(name: "int", size: 32, encoding: DW_ATE_signed)
+!20 = !DIExpression(DW_OP_LLVM_implicit_pointer)
+
+!0 = !DIExpression(DW_OP_deref)
+!1 = !DIExpression(DW_OP_plus_uconst, 3)
+!1 = !DIExpression(DW_OP_constu, 3, DW_OP_plus)
+!2 = !DIExpression(DW_OP_bit_piece, 3, 7)
+!3 = !DIExpression(DW_OP_deref, DW_OP_constu, 3, DW_OP_plus, DW_OP_LLVM_fragment, 3, 7)
+!4 = !DIExpression(DW_OP_constu, 2, DW_OP_swap, DW_OP_xderef)
+!5 = !DIExpression(DW_OP_constu, 42, DW_OP_stack_value)
+
+--------------------------------------------------------------------------------
+
+(module
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref))))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number)))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number)))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value
+          (number)))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value
+          (number)))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)))))
+
+================================================================================
+Debug Data 5
+================================================================================
+!3 = !DIObjCProperty(name: "foo", file: !1, line: 7, setter: "setFoo",
+                     getter: "getFoo", attributes: 7, type: !2)
+
+!2 = !DIImportedEntity(tag: DW_TAG_imported_module, name: "foo", scope: !0,
+                       entity: !1, line: 7, elements: !3)
+!3 = !{!4}
+!4 = !DIImportedEntity(tag: DW_TAG_imported_declaration, name: "bar", scope: !0,
+                       entity: !5, line: 7)
+
+!2 = !DIMacro(macinfo: DW_MACINFO_define, line: 7, name: "foo(x)",
+              value: "((x) + 1)")
+!3 = !DIMacro(macinfo: DW_MACINFO_undef, line: 30, name: "foo")
+
+!2 = !DIMacroFile(macinfo: DW_MACINFO_start_file, line: 7, file: !2,
+                  nodes: !3)
+
+!2 = !DILabel(scope: !0, name: "foo", file: !1, line: 7)
+--------------------------------------------------------------------------------
+
+(module
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref))))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref))))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (metadata_tuple
+        (metadata
+          (specialized_md
+            (metadata_ref))))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number)))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string)))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string)))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref))))))
+  (global_metadata
+    (metadata_ref)
+    (metadata
+      (specialized_md
+        (metadata_ref)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (string))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (specialized_md
+            (metadata_ref)))
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value)
+        (specialized_md_value
+          (number))))))
+
+================================================================================
+Summary
+================================================================================
+^0 = module: (path: "/path/to/file.o", hash: (2468601609, 1329373163, 1565878005, 638838075, 3148790418))
+^1 = gv: (name: "f") ; guid = 14740650423002898831
+^2 = variable: (module: ^0, flags: (linkage: external, notEligibleToImport: 0, live: 0, dsoLocal: 0))
+^3 = alias: (module: ^0, flags: (linkage: external, notEligibleToImport: 0, live: 0, dsoLocal: 0), aliasee: ^2)
+^4 = funcFlags: (readNone: 0, readOnly: 0, noRecurse: 0, returnDoesNotAlias: 0, noInline: 0, alwaysInline: 0, noUnwind: 1, mayThrow: 0, hasUnknownCall: 0)
+^5 = vFuncId: (TypeIdRef, offset: 16)
+^6 = typeid: (name: "_ZTS1A", summary: (typeTestRes: (kind: allOnes, sizeM1BitWidth: 7)))
+--------------------------------------------------------------------------------
+
+(module
+  (summary_entry
+    (summary_ref)
+    (summary_value)
+    (summary_value)
+    (summary_value
+      (string))
+    (summary_value)
+    (summary_value)
+    (summary_value)
+    (summary_value
+      (summary_value
+        (number))
+      (summary_value)
+      (summary_value
+        (number))
+      (summary_value)
+      (summary_value
+        (number))
+      (summary_value)
+      (summary_value
+        (number))
+      (summary_value)
+      (summary_value
+        (number))))
+  (summary_entry
+    (summary_ref)
+    (summary_value)
+    (summary_value)
+    (summary_value
+      (string)))
+  (comment)
+  (summary_entry
+    (summary_ref)
+    (summary_value)
+    (summary_value)
+    (summary_value
+      (summary_ref))
+    (summary_value)
+    (summary_value)
+    (summary_value)
+    (summary_value
+      (summary_value)
+      (summary_value)
+      (summary_value
+        (linkage_aux))
+      (summary_value)
+      (summary_value)
+      (summary_value)
+      (summary_value
+        (number))
+      (summary_value)
+      (summary_value)
+      (summary_value)
+      (summary_value
+        (number))
+      (summary_value)
+      (summary_value)
+      (summary_value)
+      (summary_value
+        (number))))
+  (summary_entry
+    (summary_ref)
+    (summary_value)
+    (summary_value)
+    (summary_value
+      (summary_ref))
+    (summary_value)
+    (summary_value)
+    (summary_value)
+    (summary_value
+      (summary_value)
+      (summary_value)
+      (summary_value
+        (linkage_aux))
+      (summary_value)
+      (summary_value)
+      (summary_value)
+      (summary_value
+        (number))
+      (summary_value)
+      (summary_value)
+      (summary_value)
+      (summary_value
+        (number))
+      (summary_value)
+      (summary_value)
+      (summary_value)
+      (summary_value
+        (number)))
+    (summary_value)
+    (summary_value)
+    (summary_value)
+    (summary_value
+      (summary_ref)))
+  (summary_entry
+    (summary_ref)
+    (summary_value)
+    (summary_value)
+    (summary_value
+      (number))
+    (summary_value)
+    (summary_value)
+    (summary_value)
+    (summary_value
+      (number))
+    (summary_value)
+    (summary_value)
+    (summary_value)
+    (summary_value
+      (number))
+    (summary_value)
+    (summary_value)
+    (summary_value)
+    (summary_value
+      (number))
+    (summary_value)
+    (summary_value)
+    (summary_value)
+    (summary_value
+      (number))
+    (summary_value)
+    (summary_value)
+    (summary_value)
+    (summary_value
+      (number))
+    (summary_value)
+    (summary_value)
+    (summary_value)
+    (summary_value
+      (number))
+    (summary_value)
+    (summary_value)
+    (summary_value)
+    (summary_value
+      (number))
+    (summary_value)
+    (summary_value)
+    (summary_value)
+    (summary_value
+      (number)))
+  (summary_entry
+    (summary_ref)
+    (summary_value)
+    (summary_value)
+    (summary_value)
+    (summary_value)
+    (summary_value
+      (number)))
+  (summary_entry
+    (summary_ref)
+    (summary_value)
+    (summary_value)
+    (summary_value
+      (string))
+    (summary_value)
+    (summary_value)
+    (summary_value)
+    (summary_value
+      (summary_value)
+      (summary_value)
+      (summary_value
+        (summary_value)
+        (summary_value)
+        (summary_value)
+        (summary_value)
+        (summary_value)
+        (summary_value)
+        (summary_value
+          (number))))))
+
+================================================================================
+Attribute Group
+================================================================================
+; Target-independent attributes:
+attributes #0 = { alwaysinline alignstack=4 }
+
+; Target-dependent attributes:
+attributes #1 = { "no-sse" }
+
+; Function @f has attributes: alwaysinline, alignstack=4, and "no-sse".
+define void @f() #0 #1 { }
+--------------------------------------------------------------------------------
+
+(module
+  (comment)
+  (unnamed_attr_grp
+    (attr_ref)
+    (attribute
+      (attribute_name))
+    (attribute
+      (attribute_name)
+      (number)))
+  (comment)
+  (unnamed_attr_grp
+    (attr_ref)
+    (attribute
+      (string)))
+  (comment)
+  (define
+    (function_header
+      (type
+        (type_keyword))
+      (global_var)
+      (argument_list)
+      (attribute
+        (attr_ref))
+      (attribute
+        (attr_ref)))
+    (function_body)))
+
+================================================================================
+Uselist order
+================================================================================
+define void @foo(i32 %arg1, i32 %arg2) {
+entry:
+  ; ... instructions ...
+bb:
+  ; ... instructions ...
+
+  ; At function scope.
+  uselistorder i32 %arg1, { 1, 0, 2 }
+  uselistorder label %bb, { 1, 0 }
+}
+
+; At global scope.
+uselistorder i32* @global, { 1, 2, 0 }
+uselistorder i32 7, { 1, 0 }
+uselistorder i32 (i32) @bar, { 1, 0 }
+uselistorder_bb @foo, %bb, { 5, 1, 3, 2, 0, 4 }
+--------------------------------------------------------------------------------
+
+(module
+  (define
+    (function_header
+      (type
+        (type_keyword))
+      (global_var)
+      (argument_list
+        (argument
+          (type
+            (type_keyword))
+          (value
+            (var
+              (local_var))))
+        (argument
+          (type
+            (type_keyword))
+          (value
+            (var
+              (local_var))))))
+    (function_body
+      (label)
+      (comment)
+      (label)
+      (comment)
+      (comment)
+      (use_list_order
+        (type_and_value
+          (type
+            (type_keyword))
+          (value
+            (var
+              (local_var))))
+        (number)
+        (number)
+        (number))
+      (use_list_order
+        (type_and_value
+          (type
+            (type_keyword))
+          (value
+            (var
+              (local_var))))
+        (number)
+        (number))))
+  (comment)
+  (use_list_order
+    (type_and_value
+      (type
+        (type_keyword))
+      (value
+        (var
+          (global_var))))
+    (number)
+    (number)
+    (number))
+  (use_list_order
+    (type_and_value
+      (type
+        (type_keyword))
+      (value
+        (number)))
+    (number)
+    (number))
+  (use_list_order
+    (type_and_value
+      (type
+        (type_keyword)
+        (argument_list
+          (argument
+            (type
+              (type_keyword)))))
+      (value
+        (var
+          (global_var))))
+    (number)
+    (number))
+  (use_list_order_bb
+    (global_var)
+    (local_var)
+    (number)
+    (number)
+    (number)
+    (number)
+    (number)
+    (number)))
+
+================================================================================
+alias
+================================================================================
+@nestedarray.1 = alias i8*, getelementptr inbounds ([2 x [4 x i8*]], [2 x [4 x i8*]]* @nestedarray, inrange i32 0, i32 0, i32 4)
+@bar2 = alias i8* (), i8* ()* @bar
+--------------------------------------------------------------------------------
+
+(module
+  (alias
+    (global_var)
+    (type
+      (type_keyword))
+    (constant_expr
+      (constant_getelementptr
+        (type_and_value
+          (type
+            (array_type
+              (array_vector_body
+                (number)
+                (type
+                  (array_type
+                    (array_vector_body
+                      (number)
+                      (type
+                        (type_keyword)))))))))
+        (type_and_value
+          (type
+            (array_type
+              (array_vector_body
+                (number)
+                (type
+                  (array_type
+                    (array_vector_body
+                      (number)
+                      (type
+                        (type_keyword))))))))
+          (value
+            (var
+              (global_var))))
+        (type_and_value
+          (type
+            (type_keyword))
+          (value
+            (number)))
+        (type_and_value
+          (type
+            (type_keyword))
+          (value
+            (number)))
+        (type_and_value
+          (type
+            (type_keyword))
+          (value
+            (number))))))
+  (alias
+    (global_var)
+    (type
+      (type_keyword)
+      (argument_list))
+    (type
+      (type_keyword)
+      (argument_list))
+    (global_var)))
+
+================================================================================
+ifunc
+================================================================================
+@bar = ifunc void (), void ()* ()* @bar_resolve
+--------------------------------------------------------------------------------
+
+(module
+  (ifunc
+    (global_var)
+    (type
+      (type_keyword)
+      (argument_list))
+    (type
+      (type_keyword)
+      (argument_list)
+      (argument_list))
+    (global_var)))
