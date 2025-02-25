@@ -45,7 +45,7 @@
 </span><span class="athl-line" data-athl-line="21">
 </span><span class="athl-line" data-athl-line="22"><span style="color: #546e7a;">// Anything outside &lt;?php tags is echoed automatically</span>
 </span><span class="athl-line" data-athl-line="23"><span style="color: #89ddff;">?&gt;</span>
-</span><span class="athl-line" data-athl-line="24"><span >Hello World Again!</span>
+</span><span class="athl-line" data-athl-line="24">Hello World Again!
 </span><span class="athl-line" data-athl-line="25"><span style="color: #89ddff;">&lt;?php</span>
 </span><span class="athl-line" data-athl-line="26"><span style="color: #546e7a;">// That is because historically PHP started as a Template engine</span>
 </span><span class="athl-line" data-athl-line="27">
@@ -333,9 +333,9 @@
 </span><span class="athl-line" data-athl-line="309"><span style="color: #89ddff;">?&gt;</span>
 </span><span class="athl-line" data-athl-line="310">
 </span><span class="athl-line" data-athl-line="311"><span style="color: #89ddff;">&lt;?php</span> <span style="color: #c792ea;">if</span> <span style="color: #89ddff;">(</span><span style="color: #b0bec5;">$x</span><span style="color: #89ddff;">)</span><span style="color: #89ddff;">:</span> <span style="color: #89ddff;">?&gt;</span>
-</span><span class="athl-line" data-athl-line="312"><span >This is displayed if the test is truthy.</span>
-</span><span class="athl-line" data-athl-line="313"><span ><span style="color: #89ddff;">&lt;?php</span> <span style="color: #c792ea;">else</span><span style="color: #89ddff;">:</span> <span style="color: #89ddff;">?&gt;</span></span>
-</span><span class="athl-line" data-athl-line="314"><span >This is displayed otherwise.</span>
+</span><span class="athl-line" data-athl-line="312">This is displayed if the test is truthy.
+</span><span class="athl-line" data-athl-line="313"><span style="color: #89ddff;">&lt;?php</span> <span style="color: #c792ea;">else</span><span style="color: #89ddff;">:</span> <span style="color: #89ddff;">?&gt;</span>
+</span><span class="athl-line" data-athl-line="314">This is displayed otherwise.
 </span><span class="athl-line" data-athl-line="315"><span style="color: #89ddff;">&lt;?php</span> <span style="color: #c792ea;">endif</span><span style="color: #89ddff;">;</span> <span style="color: #89ddff;">?&gt;</span>
 </span><span class="athl-line" data-athl-line="316">
 </span><span class="athl-line" data-athl-line="317"><span style="color: #89ddff;">&lt;?php</span>
@@ -855,9 +855,9 @@
 </span><span class="athl-line" data-athl-line="831">
 </span><span class="athl-line" data-athl-line="832"><span style="color: #546e7a;">// Simple error handling can be done with try catch block</span>
 </span><span class="athl-line" data-athl-line="833">
-</span><span class="athl-line" data-athl-line="834"><span style="color: #f07178;">try</span> <span style="color: #89ddff;">{</span>
+</span><span class="athl-line" data-athl-line="834"><span style="color: #89ddff;">try</span> <span style="color: #89ddff;">{</span>
 </span><span class="athl-line" data-athl-line="835">    <span style="color: #546e7a;">// Do something</span>
-</span><span class="athl-line" data-athl-line="836"><span style="color: #89ddff;">}</span> <span style="color: #f07178;">catch</span> <span style="color: #89ddff;">(</span><span style="color: #c792ea;">Exception</span> <span style="color: #b0bec5;">$e</span><span style="color: #89ddff;">)</span> <span style="color: #89ddff;">{</span>
+</span><span class="athl-line" data-athl-line="836"><span style="color: #89ddff;">}</span> <span style="color: #89ddff;">catch</span> <span style="color: #89ddff;">(</span><span style="color: #c792ea;">Exception</span> <span style="color: #b0bec5;">$e</span><span style="color: #89ddff;">)</span> <span style="color: #89ddff;">{</span>
 </span><span class="athl-line" data-athl-line="837">    <span style="color: #546e7a;">// Handle exception</span>
 </span><span class="athl-line" data-athl-line="838"><span style="color: #89ddff;">}</span>
 </span><span class="athl-line" data-athl-line="839">
@@ -866,9 +866,9 @@
 </span><span class="athl-line" data-athl-line="842"><span style="color: #546e7a;">// Exception class exists in the global namespace. This can be done using a</span>
 </span><span class="athl-line" data-athl-line="843"><span style="color: #546e7a;">// leading backslash to catch the Exception.</span>
 </span><span class="athl-line" data-athl-line="844">
-</span><span class="athl-line" data-athl-line="845"><span style="color: #f07178;">try</span> <span style="color: #89ddff;">{</span>
+</span><span class="athl-line" data-athl-line="845"><span style="color: #89ddff;">try</span> <span style="color: #89ddff;">{</span>
 </span><span class="athl-line" data-athl-line="846">    <span style="color: #546e7a;">// Do something</span>
-</span><span class="athl-line" data-athl-line="847"><span style="color: #89ddff;">}</span> <span style="color: #f07178;">catch</span> <span style="color: #89ddff;">(</span><span style="color: #89ddff;">\</span><span style="color: #c792ea;">Exception</span> <span style="color: #b0bec5;">$e</span><span style="color: #89ddff;">)</span> <span style="color: #89ddff;">{</span>
+</span><span class="athl-line" data-athl-line="847"><span style="color: #89ddff;">}</span> <span style="color: #89ddff;">catch</span> <span style="color: #89ddff;">(</span><span style="color: #89ddff;">\</span><span style="color: #c792ea;">Exception</span> <span style="color: #b0bec5;">$e</span><span style="color: #89ddff;">)</span> <span style="color: #89ddff;">{</span>
 </span><span class="athl-line" data-athl-line="848">    <span style="color: #546e7a;">// Handle exception</span>
 </span><span class="athl-line" data-athl-line="849"><span style="color: #89ddff;">}</span>
 </span><span class="athl-line" data-athl-line="850">
@@ -876,15 +876,15 @@
 </span><span class="athl-line" data-athl-line="852">
 </span><span class="athl-line" data-athl-line="853"><span style="color: #89ddff;">class</span> <span style="color: #c792ea;">MyException</span> <span style="color: #89ddff;">extends</span> <span style="color: #c792ea;">Exception</span> <span style="color: #89ddff;">{</span><span style="color: #89ddff;">}</span>
 </span><span class="athl-line" data-athl-line="854">
-</span><span class="athl-line" data-athl-line="855"><span style="color: #f07178;">try</span> <span style="color: #89ddff;">{</span>
+</span><span class="athl-line" data-athl-line="855"><span style="color: #89ddff;">try</span> <span style="color: #89ddff;">{</span>
 </span><span class="athl-line" data-athl-line="856">
 </span><span class="athl-line" data-athl-line="857">    <span style="color: #b0bec5;">$condition</span> <span style="color: #89ddff;">=</span> <span style="color: #f78c6c;">true</span><span style="color: #89ddff;">;</span>
 </span><span class="athl-line" data-athl-line="858">
 </span><span class="athl-line" data-athl-line="859">    <span style="color: #c792ea;">if</span> <span style="color: #89ddff;">(</span><span style="color: #b0bec5;">$condition</span><span style="color: #89ddff;">)</span> <span style="color: #89ddff;">{</span>
-</span><span class="athl-line" data-athl-line="860">        <span style="color: #f07178;">throw</span> <span style="color: #89ddff;">new</span> <span style="color: #82aaff;">MyException</span><span style="color: #89ddff;">(</span><span style="color: #c3e88d;">&#39;Something just happened&#39;</span><span style="color: #89ddff;">)</span><span style="color: #89ddff;">;</span>
+</span><span class="athl-line" data-athl-line="860">        <span style="color: #89ddff;">throw</span> <span style="color: #89ddff;">new</span> <span style="color: #82aaff;">MyException</span><span style="color: #89ddff;">(</span><span style="color: #c3e88d;">&#39;Something just happened&#39;</span><span style="color: #89ddff;">)</span><span style="color: #89ddff;">;</span>
 </span><span class="athl-line" data-athl-line="861">    <span style="color: #89ddff;">}</span>
 </span><span class="athl-line" data-athl-line="862">
-</span><span class="athl-line" data-athl-line="863"><span style="color: #89ddff;">}</span> <span style="color: #f07178;">catch</span> <span style="color: #89ddff;">(</span><span style="color: #c792ea;">MyException</span> <span style="color: #b0bec5;">$e</span><span style="color: #89ddff;">)</span> <span style="color: #89ddff;">{</span>
+</span><span class="athl-line" data-athl-line="863"><span style="color: #89ddff;">}</span> <span style="color: #89ddff;">catch</span> <span style="color: #89ddff;">(</span><span style="color: #c792ea;">MyException</span> <span style="color: #b0bec5;">$e</span><span style="color: #89ddff;">)</span> <span style="color: #89ddff;">{</span>
 </span><span class="athl-line" data-athl-line="864">    <span style="color: #546e7a;">// Handle my exception</span>
 </span><span class="athl-line" data-athl-line="865"><span style="color: #89ddff;">}</span>
 </span></code></pre>

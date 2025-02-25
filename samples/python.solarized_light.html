@@ -24,10 +24,10 @@
 <body>
 <pre class="athl" style="color: #657b83; background-color: #fdf6e3;"><code class="language-python" translate="no" tabindex="0"><span class="athl-line" data-athl-line="1"><span style="color: #93a1a1;"># Single line comments start with a number symbol.</span>
 </span><span class="athl-line" data-athl-line="2">
-</span><span class="athl-line" data-athl-line="3"><span style="color: #2aa198;">&quot;&quot;&quot;<span style="color: #2aa198;"> Multiline strings can be written</span></span>
-</span><span class="athl-line" data-athl-line="4"><span style="color: #2aa198;"><span style="color: #2aa198;">    using three &quot;s, and are often used</span></span>
-</span><span class="athl-line" data-athl-line="5"><span style="color: #2aa198;"><span style="color: #2aa198;">    as documentation.</span></span>
-</span><span class="athl-line" data-athl-line="6"><span style="color: #2aa198;"><span style="color: #2aa198;"></span>&quot;&quot;&quot;</span>
+</span><span class="athl-line" data-athl-line="3"><span style="color: #859900;">&quot;&quot;&quot; Multiline strings can be written</span>
+</span><span class="athl-line" data-athl-line="4"><span style="color: #859900;">    using three &quot;s, and are often used</span>
+</span><span class="athl-line" data-athl-line="5"><span style="color: #859900;">    as documentation.</span>
+</span><span class="athl-line" data-athl-line="6"><span style="color: #859900;">&quot;&quot;&quot;</span>
 </span><span class="athl-line" data-athl-line="7">
 </span><span class="athl-line" data-athl-line="8"><span style="color: #93a1a1;">####################################################</span>
 </span><span class="athl-line" data-athl-line="9"><span style="color: #93a1a1;">## 1. Primitive Datatypes and Operators</span>
@@ -156,9 +156,9 @@
 </span><span class="athl-line" data-athl-line="132">
 </span><span class="athl-line" data-athl-line="133"><span style="color: #93a1a1;"># Since Python 3.6, you can use f-strings or formatted string literals.</span>
 </span><span class="athl-line" data-athl-line="134"><span style="color: #268bd2;">name</span> <span style="color: #859900;">=</span> <span style="color: #2aa198;">&quot;Reiko&quot;</span>
-</span><span class="athl-line" data-athl-line="135"><span style="color: #2aa198;">f&quot;She said her name is <span ><span style="color: #586e75; font-weight: bold;">{</span><span style="color: #268bd2;">name</span><span style="color: #586e75; font-weight: bold;">}</span></span>.&quot;</span>  <span style="color: #93a1a1;"># =&gt; &quot;She said her name is Reiko&quot;</span>
+</span><span class="athl-line" data-athl-line="135"><span style="color: #2aa198;">f&quot;She said her name is <span style="color: #586e75; font-weight: bold;">{</span><span style="color: #268bd2;">name</span><span style="color: #586e75; font-weight: bold;">}</span>.&quot;</span>  <span style="color: #93a1a1;"># =&gt; &quot;She said her name is Reiko&quot;</span>
 </span><span class="athl-line" data-athl-line="136"><span style="color: #93a1a1;"># Any valid Python expression inside these braces is returned to the string.</span>
-</span><span class="athl-line" data-athl-line="137"><span style="color: #2aa198;">f&quot;<span ><span style="color: #586e75; font-weight: bold;">{</span><span style="color: #268bd2;">name</span><span style="color: #586e75; font-weight: bold;">}</span></span> is <span ><span style="color: #586e75; font-weight: bold;">{</span><span style="color: #268bd2;">len</span><span style="color: #657b83;">(</span><span style="color: #268bd2;">name</span><span style="color: #657b83;">)</span><span style="color: #586e75; font-weight: bold;">}</span></span> characters long.&quot;</span>  <span style="color: #93a1a1;"># =&gt; &quot;Reiko is 5 characters long.&quot;</span>
+</span><span class="athl-line" data-athl-line="137"><span style="color: #2aa198;">f&quot;<span style="color: #586e75; font-weight: bold;">{</span><span style="color: #268bd2;">name</span><span style="color: #586e75; font-weight: bold;">}</span> is <span style="color: #586e75; font-weight: bold;">{</span><span style="color: #268bd2;">len</span><span style="color: #657b83;">(</span><span style="color: #268bd2;">name</span><span style="color: #657b83;">)</span><span style="color: #586e75; font-weight: bold;">}</span> characters long.&quot;</span>  <span style="color: #93a1a1;"># =&gt; &quot;Reiko is 5 characters long.&quot;</span>
 </span><span class="athl-line" data-athl-line="138">
 </span><span class="athl-line" data-athl-line="139"><span style="color: #93a1a1;"># None is an object</span>
 </span><span class="athl-line" data-athl-line="140"><span style="color: #d33682;">None</span>  <span style="color: #93a1a1;"># =&gt; None</span>
@@ -792,9 +792,9 @@
 </span><span class="athl-line" data-athl-line="768"><span style="color: #93a1a1;"># module is the main program.</span>
 </span><span class="athl-line" data-athl-line="769"><span style="color: #859900;">if</span> <span style="color: #d33682;">__name__</span> <span style="color: #859900;">==</span> <span style="color: #2aa198;">&quot;__main__&quot;</span><span style="color: #657b83;">:</span>
 </span><span class="athl-line" data-athl-line="770">    <span style="color: #93a1a1;"># Instantiate a class</span>
-</span><span class="athl-line" data-athl-line="771">    <span style="color: #268bd2;">i</span> <span style="color: #859900;">=</span> <span style="color: #268bd2;">Human</span><span style="color: #657b83;">(</span><span style="color: #268bd2;">name</span><span style="color: #859900;">=</span><span style="color: #2aa198;">&quot;Ian&quot;</span><span style="color: #657b83;">)</span>
+</span><span class="athl-line" data-athl-line="771">    <span style="color: #268bd2;">i</span> <span style="color: #859900;">=</span> <span style="color: #b58900;">Human</span><span style="color: #657b83;">(</span><span style="color: #268bd2;">name</span><span style="color: #859900;">=</span><span style="color: #2aa198;">&quot;Ian&quot;</span><span style="color: #657b83;">)</span>
 </span><span class="athl-line" data-athl-line="772">    <span style="color: #268bd2;">i</span><span style="color: #657b83;">.</span><span style="color: #268bd2;">say</span><span style="color: #657b83;">(</span><span style="color: #2aa198;">&quot;hi&quot;</span><span style="color: #657b83;">)</span>                     <span style="color: #93a1a1;"># &quot;Ian: hi&quot;</span>
-</span><span class="athl-line" data-athl-line="773">    <span style="color: #268bd2;">j</span> <span style="color: #859900;">=</span> <span style="color: #268bd2;">Human</span><span style="color: #657b83;">(</span><span style="color: #2aa198;">&quot;Joel&quot;</span><span style="color: #657b83;">)</span>
+</span><span class="athl-line" data-athl-line="773">    <span style="color: #268bd2;">j</span> <span style="color: #859900;">=</span> <span style="color: #b58900;">Human</span><span style="color: #657b83;">(</span><span style="color: #2aa198;">&quot;Joel&quot;</span><span style="color: #657b83;">)</span>
 </span><span class="athl-line" data-athl-line="774">    <span style="color: #268bd2;">j</span><span style="color: #657b83;">.</span><span style="color: #268bd2;">say</span><span style="color: #657b83;">(</span><span style="color: #2aa198;">&quot;hello&quot;</span><span style="color: #657b83;">)</span>                  <span style="color: #93a1a1;"># &quot;Joel: hello&quot;</span>
 </span><span class="athl-line" data-athl-line="775">    <span style="color: #93a1a1;"># i and j are instances of type Human; i.e., they are Human objects.</span>
 </span><span class="athl-line" data-athl-line="776">
@@ -883,7 +883,7 @@
 </span><span class="athl-line" data-athl-line="859">
 </span><span class="athl-line" data-athl-line="860">
 </span><span class="athl-line" data-athl-line="861"><span style="color: #859900;">if</span> <span style="color: #d33682;">__name__</span> <span style="color: #859900;">==</span> <span style="color: #2aa198;">&quot;__main__&quot;</span><span style="color: #657b83;">:</span>
-</span><span class="athl-line" data-athl-line="862">    <span style="color: #268bd2;">sup</span> <span style="color: #859900;">=</span> <span style="color: #268bd2;">Superhero</span><span style="color: #657b83;">(</span><span style="color: #268bd2;">name</span><span style="color: #859900;">=</span><span style="color: #2aa198;">&quot;Tick&quot;</span><span style="color: #657b83;">)</span>
+</span><span class="athl-line" data-athl-line="862">    <span style="color: #268bd2;">sup</span> <span style="color: #859900;">=</span> <span style="color: #b58900;">Superhero</span><span style="color: #657b83;">(</span><span style="color: #268bd2;">name</span><span style="color: #859900;">=</span><span style="color: #2aa198;">&quot;Tick&quot;</span><span style="color: #657b83;">)</span>
 </span><span class="athl-line" data-athl-line="863">
 </span><span class="athl-line" data-athl-line="864">    <span style="color: #93a1a1;"># Instance type checks</span>
 </span><span class="athl-line" data-athl-line="865">    <span style="color: #859900;">if</span> isinstance<span style="color: #657b83;">(</span><span style="color: #268bd2;">sup</span><span style="color: #657b83;">,</span> <span style="color: #b58900;">Human</span><span style="color: #657b83;">)</span><span style="color: #657b83;">:</span>
@@ -942,7 +942,7 @@
 </span><span class="athl-line" data-athl-line="918">
 </span><span class="athl-line" data-athl-line="919">
 </span><span class="athl-line" data-athl-line="920"><span style="color: #859900;">if</span> <span style="color: #d33682;">__name__</span> <span style="color: #859900;">==</span> <span style="color: #2aa198;">&quot;__main__&quot;</span><span style="color: #657b83;">:</span>
-</span><span class="athl-line" data-athl-line="921">    <span style="color: #268bd2;">b</span> <span style="color: #859900;">=</span> <span style="color: #268bd2;">Bat</span><span style="color: #657b83;">(</span><span style="color: #657b83;">)</span>
+</span><span class="athl-line" data-athl-line="921">    <span style="color: #268bd2;">b</span> <span style="color: #859900;">=</span> <span style="color: #b58900;">Bat</span><span style="color: #657b83;">(</span><span style="color: #657b83;">)</span>
 </span><span class="athl-line" data-athl-line="922">    <span style="color: #268bd2;">print</span><span style="color: #657b83;">(</span><span style="color: #268bd2;">b</span><span style="color: #657b83;">.</span><span style="color: #268bd2;">say</span><span style="color: #657b83;">(</span><span style="color: #2aa198;">&quot;hello&quot;</span><span style="color: #657b83;">)</span><span style="color: #657b83;">)</span>
 </span><span class="athl-line" data-athl-line="923">    <span style="color: #268bd2;">print</span><span style="color: #657b83;">(</span><span style="color: #268bd2;">b</span><span style="color: #657b83;">.</span><span style="color: #268bd2;">fly</span><span style="color: #657b83;">)</span>
 </span><span class="athl-line" data-athl-line="924">
@@ -974,7 +974,7 @@
 </span><span class="athl-line" data-athl-line="950">
 </span><span class="athl-line" data-athl-line="951">
 </span><span class="athl-line" data-athl-line="952"><span style="color: #859900;">if</span> <span style="color: #d33682;">__name__</span> <span style="color: #859900;">==</span> <span style="color: #2aa198;">&quot;__main__&quot;</span><span style="color: #657b83;">:</span>
-</span><span class="athl-line" data-athl-line="953">    <span style="color: #268bd2;">sup</span> <span style="color: #859900;">=</span> <span style="color: #268bd2;">Batman</span><span style="color: #657b83;">(</span><span style="color: #657b83;">)</span>
+</span><span class="athl-line" data-athl-line="953">    <span style="color: #268bd2;">sup</span> <span style="color: #859900;">=</span> <span style="color: #b58900;">Batman</span><span style="color: #657b83;">(</span><span style="color: #657b83;">)</span>
 </span><span class="athl-line" data-athl-line="954">
 </span><span class="athl-line" data-athl-line="955">    <span style="color: #93a1a1;"># The Method Resolution Order</span>
 </span><span class="athl-line" data-athl-line="956">    <span style="color: #268bd2;">print</span><span style="color: #657b83;">(</span><span style="color: #b58900;">Batman</span><span style="color: #657b83;">.</span><span style="color: #268bd2;">__mro__</span><span style="color: #657b83;">)</span>     <span style="color: #93a1a1;"># =&gt; (&lt;class &#39;__main__.Batman&#39;&gt;,</span>
