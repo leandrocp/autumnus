@@ -36,6 +36,7 @@ pub enum Language {
     Erlang,
     Gleam,
     Go,
+    Haskell,
     Heex,
     Html,
     Lua,
@@ -66,6 +67,7 @@ impl Language {
             "erlang" => Some(Language::Erlang),
             "gleam" => Some(Language::Gleam),
             "go" => Some(Language::Go),
+            "haskell" => Some(Language::Haskell),
             "heex" => Some(Language::Heex),
             "html" => Some(Language::Html),
             "lua" => Some(Language::Lua),
@@ -201,6 +203,7 @@ impl Language {
             ],
             Language::Gleam => &["*.gleam"],
             Language::Go => &["*.go"],
+            Language::Haskell => &["*.hs"],
             Language::Heex => &["*.heex", "*.neex"],
             Language::Html => &["*.html", "*.htm", "*.xhtml"],
             Language::Lua => &["*.lua"],
@@ -236,6 +239,7 @@ impl Language {
                 let interpreter_path = Path::new(&cap[1]);
                 if let Some(name) = interpreter_path.file_name() {
                     match name.to_string_lossy().borrow() {
+                        "runghc" | "runhaskell" | "runhugs" => return Some(Language::Haskell),
                         "ash" | "bash" | "dash" | "ksh" | "mksh" | "pdksh" | "rc" | "sh"
                         | "zsh" => return Some(Language::Bash),
                         "elixir" => return Some(Language::Elixir),
@@ -280,6 +284,7 @@ impl Language {
             Language::Erlang => "Erlang",
             Language::Gleam => "Gleam",
             Language::Go => "Go",
+            Language::Haskell => "Haskell",
             Language::Heex => "HEEx",
             Language::Html => "HTML",
             Language::Lua => "Lua",
@@ -312,6 +317,7 @@ impl Language {
             Language::Erlang => &ERLANG_CONFIG,
             Language::Gleam => &GLEAM_CONFIG,
             Language::Go => &GO_CONFIG,
+            Language::Haskell => &HASKELL_CONFIG,
             Language::Heex => &HEEX_CONFIG,
             Language::Html => &HTML_CONFIG,
             Language::Lua => &LUA_CONFIG,
@@ -531,6 +537,21 @@ static GO_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         GO_LOCALS,
     )
     .expect("failed to create go highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static HASKELL_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = tree_sitter_haskell::LANGUAGE;
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "haskell",
+        HASKELL_HIGHLIGHTS,
+        HASKELL_INJECTIONS,
+        HASKELL_LOCALS,
+    )
+    .expect("failed to create haskell highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
