@@ -388,6 +388,7 @@ impl Language {
             Language::Java => &JAVA_CONFIG,
             Language::Javascript => &JAVASCRIPT_CONFIG,
             Language::Json => &JSON_CONFIG,
+            Language::Kotlin => &KOTLIN_CONFIG,
             Language::Llvm => &LLVM_CONFIG,
             Language::Lua => &LUA_CONFIG,
             Language::Php => &PHP_CONFIG,
