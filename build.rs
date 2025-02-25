@@ -51,6 +51,11 @@ fn vendored_parsers() {
         //     src_dir: "vendored_parsers/tree-sitter-latex/src",
         //     extra_files: vec!["scanner.c"],
         // },
+        TreeSitterParser {
+            name: "tree-sitter-llvm",
+            src_dir: "vendored_parsers/tree-sitter-llvm/src",
+            extra_files: vec![],
+        },
     ];
 
     for parser in &parsers {

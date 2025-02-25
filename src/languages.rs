@@ -15,6 +15,7 @@ extern "C" {
     fn tree_sitter_elm() -> *const ();
     fn tree_sitter_iex() -> *const ();
     fn tree_sitter_kotlin() -> *const ();
+    fn tree_sitter_llvm() -> *const ();
 }
 
 mod generated {
@@ -46,6 +47,7 @@ pub enum Language {
     Javascript,
     Json,
     Kotlin,
+    Llvm,
     Lua,
     Php,
     PlainText,
@@ -84,6 +86,7 @@ impl Language {
             "javascript" => Some(Language::Javascript),
             "json" => Some(Language::Json),
             "kotlin" => Some(Language::Kotlin),
+            "llvm" => Some(Language::Llvm),
             "lua" => Some(Language::Lua),
             "php" => Some(Language::Php),
             "python" => Some(Language::Python),
@@ -256,6 +259,7 @@ impl Language {
                 "flake.lock",
             ],
             Language::Kotlin => &["*.kt", "*.ktm", "*.kts"],
+            Language::Llvm => &["*.llvm", "*.ll"],
             Language::Lua => &["*.lua"],
             Language::Php => &[
                 "*.php", "*.phtml", "*.php3", "*.php4", "*.php5", "*.php7", "*.phps",
@@ -344,6 +348,7 @@ impl Language {
             Language::Javascript => "JavaScript",
             Language::Json => "JSON",
             Language::Kotlin => "Kotlin",
+            Language::Llvm => "LLVM",
             Language::Lua => "Lua",
             Language::Php => "PHP",
             Language::PlainText => "Plain Text",
@@ -383,7 +388,7 @@ impl Language {
             Language::Java => &JAVA_CONFIG,
             Language::Javascript => &JAVASCRIPT_CONFIG,
             Language::Json => &JSON_CONFIG,
-            Language::Kotlin => &KOTLIN_CONFIG,
+            Language::Llvm => &LLVM_CONFIG,
             Language::Lua => &LUA_CONFIG,
             Language::Php => &PHP_CONFIG,
             Language::Python => &PYTHON_CONFIG,
@@ -691,6 +696,21 @@ static KOTLIN_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         KOTLIN_LOCALS,
     )
     .expect("failed to create kotlin highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static LLVM_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_llvm) };
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "llvm",
+        LLVM_HIGHLIGHTS,
+        LLVM_INJECTIONS,
+        LLVM_LOCALS,
+    )
+    .expect("failed to create llvm highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
