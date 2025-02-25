@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>make - material_lighter - Autumnus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'JetBrains Mono', monospace;
+            line-height: 1.5;
+        }
+        pre {
+            font-size: 15px;
+            margin: 20px;
+            padding: 50px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+<pre class="athl" style="color: #546e7a; background-color: #fafafa;"><code class="language-make" translate="no" tabindex="0"><span class="athl-line" data-athl-line="1"><span style="color: #aabfc9;"># Comments can be written like this.</span>
+</span><span class="athl-line" data-athl-line="2">
+</span><span class="athl-line" data-athl-line="3"><span style="color: #aabfc9;"># File should be named Makefile and then can be run as `make &lt;target&gt;`.</span>
+</span><span class="athl-line" data-athl-line="4"><span style="color: #aabfc9;"># Otherwise we use `make -f &quot;filename&quot; &lt;target&gt;`.</span>
+</span><span class="athl-line" data-athl-line="5">
+</span><span class="athl-line" data-athl-line="6"><span style="color: #aabfc9;"># Warning - only use TABS to indent in Makefiles, never spaces!</span>
+</span><span class="athl-line" data-athl-line="7">
+</span><span class="athl-line" data-athl-line="8"><span style="color: #aabfc9;">#-----------------------------------------------------------------------</span>
+</span><span class="athl-line" data-athl-line="9"><span style="color: #aabfc9;"># Basics</span>
+</span><span class="athl-line" data-athl-line="10"><span style="color: #aabfc9;">#-----------------------------------------------------------------------</span>
+</span><span class="athl-line" data-athl-line="11">
+</span><span class="athl-line" data-athl-line="12"><span style="color: #aabfc9;"># Rules are of the format</span>
+</span><span class="athl-line" data-athl-line="13"><span style="color: #aabfc9;"># target: &lt;prerequisite&gt;</span>
+</span><span class="athl-line" data-athl-line="14"><span style="color: #aabfc9;"># where prerequisites are optional.</span>
+</span><span class="athl-line" data-athl-line="15">
+</span><span class="athl-line" data-athl-line="16"><span style="color: #aabfc9;"># A rule - this rule will only run if file0.txt doesn&#39;t exist.</span>
+</span><span class="athl-line" data-athl-line="17"><span style="color: #6182b8;">file0.txt</span><span style="color: #39adb5;">:</span>
+</span><span class="athl-line" data-athl-line="18">	<span style="color: #6182b8;">echo</span> <span style="color: #91b859;">&quot;foo&quot;</span> <span style="color: #39adb5;">&gt;</span> <span style="color: #94a7b0;">file0.txt</span>
+</span><span class="athl-line" data-athl-line="19">	<span style="color: #aabfc9;"># Even comments in these &#39;recipe&#39; sections get passed to the shell.</span>
+</span><span class="athl-line" data-athl-line="20">	<span style="color: #aabfc9;"># Try `make file0.txt` or simply `make` - first rule is the default.</span>
+</span><span class="athl-line" data-athl-line="21">
+</span><span class="athl-line" data-athl-line="22"><span style="color: #aabfc9;"># This rule will only run if file0.txt is newer than file1.txt.</span>
+</span><span class="athl-line" data-athl-line="23"><span style="color: #6182b8;">file1.txt</span><span style="color: #39adb5;">:</span> file0.txt
+</span><span class="athl-line" data-athl-line="24">	<span style="color: #6182b8;">cat</span> <span style="color: #546e7a;">file0.txt</span> <span style="color: #39adb5;">&gt;</span> <span style="color: #94a7b0;">file1.txt</span>
+</span><span class="athl-line" data-athl-line="25">	<span style="color: #aabfc9;"># use the same quoting rules as in the shell.</span>
+</span><span class="athl-line" data-athl-line="26">	<span style="color: #e53935;">@</span><span style="color: #6182b8;">cat</span> <span style="color: #546e7a;">file0.txt</span> <span style="color: #39adb5;">&gt;&gt;</span> <span style="color: #94a7b0;">file1.txt</span>
+</span><span class="athl-line" data-athl-line="27">	<span style="color: #aabfc9;"># @ stops the command from being echoed to stdout.</span>
+</span><span class="athl-line" data-athl-line="28">	-<span style="color: #6182b8;">@echo</span> <span style="color: #91b859;">&#39;hello&#39;</span>
+</span><span class="athl-line" data-athl-line="29">	<span style="color: #aabfc9;"># - means that make will keep going in the case of an error.</span>
+</span><span class="athl-line" data-athl-line="30">	<span style="color: #aabfc9;"># Try `make file1.txt` on the commandline.</span>
+</span><span class="athl-line" data-athl-line="31">
+</span><span class="athl-line" data-athl-line="32"><span style="color: #aabfc9;"># A rule can have multiple targets and multiple prerequisites</span>
+</span><span class="athl-line" data-athl-line="33"><span style="color: #6182b8;">file2.txt</span> <span style="color: #6182b8;">file3.txt</span><span style="color: #39adb5;">:</span> file0.txt file1.txt
+</span><span class="athl-line" data-athl-line="34">	<span style="color: #6182b8;">touch</span> <span style="color: #546e7a;">file2.txt</span>
+</span><span class="athl-line" data-athl-line="35">	<span style="color: #6182b8;">touch</span> <span style="color: #546e7a;">file3.txt</span>
+</span><span class="athl-line" data-athl-line="36">
+</span><span class="athl-line" data-athl-line="37"><span style="color: #aabfc9;"># Make will complain about multiple recipes for the same rule. Empty</span>
+</span><span class="athl-line" data-athl-line="38"><span style="color: #aabfc9;"># recipes don&#39;t count though and can be used to add new dependencies.</span>
+</span><span class="athl-line" data-athl-line="39">
+</span><span class="athl-line" data-athl-line="40"><span style="color: #aabfc9;">#-----------------------------------------------------------------------</span>
+</span><span class="athl-line" data-athl-line="41"><span style="color: #aabfc9;"># Phony Targets</span>
+</span><span class="athl-line" data-athl-line="42"><span style="color: #aabfc9;">#-----------------------------------------------------------------------</span>
+</span><span class="athl-line" data-athl-line="43">
+</span><span class="athl-line" data-athl-line="44"><span style="color: #aabfc9;"># A phony target. Any target that isn&#39;t a file.</span>
+</span><span class="athl-line" data-athl-line="45"><span style="color: #aabfc9;"># It will never be up to date so make will always try to run it.</span>
+</span><span class="athl-line" data-athl-line="46"><span style="color: #6182b8;">all</span><span style="color: #39adb5;">:</span> maker process
+</span><span class="athl-line" data-athl-line="47">
+</span><span class="athl-line" data-athl-line="48"><span style="color: #aabfc9;"># We can declare things out of order.</span>
+</span><span class="athl-line" data-athl-line="49"><span style="color: #6182b8;">maker</span><span style="color: #39adb5;">:</span>
+</span><span class="athl-line" data-athl-line="50">	<span style="color: #6182b8;">touch</span> <span style="color: #546e7a;">ex0.txt</span> <span style="color: #546e7a;">ex1.txt</span>
+</span><span class="athl-line" data-athl-line="51">
+</span><span class="athl-line" data-athl-line="52"><span style="color: #aabfc9;"># Can avoid phony rules breaking when a real file has the same name by</span>
+</span><span class="athl-line" data-athl-line="53"><span style="color: #6182b8;"><span style="color: #6182b8;">.PHONY</span></span><span style="color: #39adb5;">:</span> all maker <span style="color: #6182b8;">process</span>
+</span><span class="athl-line" data-athl-line="54"><span style="color: #aabfc9;"># This is a special target. There are several others.</span>
+</span><span class="athl-line" data-athl-line="55">
+</span><span class="athl-line" data-athl-line="56"><span style="color: #aabfc9;"># A rule with a dependency on a phony target will always run</span>
+</span><span class="athl-line" data-athl-line="57"><span style="color: #6182b8;">ex0.txt</span> <span style="color: #6182b8;">ex1.txt</span><span style="color: #39adb5;">:</span> maker
+</span><span class="athl-line" data-athl-line="58">
+</span><span class="athl-line" data-athl-line="59"><span style="color: #aabfc9;"># Common phony targets are: all make clean install ...</span>
+</span><span class="athl-line" data-athl-line="60">
+</span><span class="athl-line" data-athl-line="61"><span style="color: #aabfc9;">#-----------------------------------------------------------------------</span>
+</span><span class="athl-line" data-athl-line="62"><span style="color: #aabfc9;"># Automatic Variables &amp; Wildcards</span>
+</span><span class="athl-line" data-athl-line="63"><span style="color: #aabfc9;">#-----------------------------------------------------------------------</span>
+</span><span class="athl-line" data-athl-line="64">
+</span><span class="athl-line" data-athl-line="65"><span style="color: #6182b8;">process</span><span style="color: #39adb5;">:</span> file*.txt	<span style="color: #aabfc9;">#using a wildcard to match filenames</span>
+</span><span class="athl-line" data-athl-line="66">	<span style="color: #e53935;">@</span><span style="color: #6182b8;">echo</span> <span style="color: #39adb5;">$</span><span style="color: #e53935;">^</span>	<span style="color: #aabfc9;"># <span style="color: #39adb5;">$</span><span style="color: #e53935;">^</span> is a variable containing the list of prerequisites</span>
+</span><span class="athl-line" data-athl-line="67">	<span style="color: #e53935;">@</span><span style="color: #6182b8;">echo</span> <span style="color: #39adb5;">$</span><span style="color: #e53935;">@</span>	<span style="color: #aabfc9;"># prints the target name</span>
+</span><span class="athl-line" data-athl-line="68">	<span style="color: #aabfc9;">#(for multiple target rules, <span style="color: #39adb5;">$</span><span style="color: #e53935;">@</span> is whichever caused the rule to run)</span>
+</span><span class="athl-line" data-athl-line="69">	<span style="color: #e53935;">@</span><span style="color: #6182b8;">echo</span> <span style="color: #39adb5;">$</span><span style="color: #e53935;">&lt;</span>	<span style="color: #aabfc9;"># the first prerequisite listed</span>
+</span><span class="athl-line" data-athl-line="70">	<span style="color: #e53935;">@</span><span style="color: #6182b8;">echo</span> <span style="color: #39adb5;">$</span><span style="color: #e53935;">?</span>	<span style="color: #aabfc9;"># only the dependencies that are out of date</span>
+</span><span class="athl-line" data-athl-line="71">	<span style="color: #e53935;">@</span><span style="color: #6182b8;">echo</span> <span style="color: #39adb5;">$</span><span style="color: #e53935;">+</span>	<span style="color: #aabfc9;"># all dependencies including duplicates (unlike normal)</span>
+</span><span class="athl-line" data-athl-line="72">	<span style="color: #aabfc9;">#@echo <span style="color: #39adb5;">$<span style="color: #91b859;">|</span></span>	# all of the &#39;order only&#39; prerequisites</span>
+</span><span class="athl-line" data-athl-line="73">
+</span><span class="athl-line" data-athl-line="74"><span style="color: #aabfc9;"># Even if we split up the rule dependency definitions, $^ will find them</span>
+</span><span class="athl-line" data-athl-line="75"><span style="color: #6182b8;">process</span><span style="color: #39adb5;">:</span> ex1.txt file0.txt
+</span><span class="athl-line" data-athl-line="76"><span style="color: #aabfc9;"># ex1.txt will be found but file0.txt will be deduplicated.</span>
+</span><span class="athl-line" data-athl-line="77">
+</span><span class="athl-line" data-athl-line="78"><span style="color: #aabfc9;">#-----------------------------------------------------------------------</span>
+</span><span class="athl-line" data-athl-line="79"><span style="color: #aabfc9;"># Patterns</span>
+</span><span class="athl-line" data-athl-line="80"><span style="color: #aabfc9;">#-----------------------------------------------------------------------</span>
+</span><span class="athl-line" data-athl-line="81">
+</span><span class="athl-line" data-athl-line="82"><span style="color: #aabfc9;"># Can teach make how to convert certain files into other files.</span>
+</span><span class="athl-line" data-athl-line="83">
+</span><span class="athl-line" data-athl-line="84"><span style="color: #6182b8;">%.png</span><span style="color: #39adb5;">:</span> %.svg
+</span><span class="athl-line" data-athl-line="85">	<span style="color: #6182b8;">inkscape</span> <span style="color: #546e7a;">--export-png</span> <span style="color: #39adb5;">$</span><span style="color: #e53935;">^</span>
+</span><span class="athl-line" data-athl-line="86">
+</span><span class="athl-line" data-athl-line="87"><span style="color: #aabfc9;"># Pattern rules will only do anything if make decides to create the</span>
+</span><span class="athl-line" data-athl-line="88"><span style="color: #aabfc9;"># target.</span>
+</span><span class="athl-line" data-athl-line="89">
+</span><span class="athl-line" data-athl-line="90"><span style="color: #aabfc9;"># Directory paths are normally ignored when matching pattern rules. But</span>
+</span><span class="athl-line" data-athl-line="91"><span style="color: #aabfc9;"># make will try to use the most appropriate rule available.</span>
+</span><span class="athl-line" data-athl-line="92"><span style="color: #6182b8;">small/%.png</span><span style="color: #39adb5;">:</span> %.svg
+</span><span class="athl-line" data-athl-line="93">	<span style="color: #6182b8;">inkscape</span> <span style="color: #546e7a;">--export-png</span> <span style="color: #546e7a;">--export-dpi</span> <span style="color: #f76d47;">30</span> <span style="color: #39adb5;">$</span><span style="color: #e53935;">^</span>
+</span><span class="athl-line" data-athl-line="94">
+</span><span class="athl-line" data-athl-line="95"><span style="color: #aabfc9;"># make will use the last version for a pattern rule that it finds.</span>
+</span><span class="athl-line" data-athl-line="96"><span style="color: #6182b8;">%.png</span><span style="color: #39adb5;">:</span> %.svg
+</span><span class="athl-line" data-athl-line="97">	<span style="color: #e53935;">@</span><span style="color: #6182b8;">echo</span> <span style="color: #546e7a;">this</span> <span style="color: #546e7a;">rule</span> <span style="color: #546e7a;">is</span> <span style="color: #546e7a;">chosen</span>
+</span><span class="athl-line" data-athl-line="98">
+</span><span class="athl-line" data-athl-line="99"><span style="color: #aabfc9;"># However make will use the first pattern rule that can make the target</span>
+</span><span class="athl-line" data-athl-line="100"><span style="color: #6182b8;">%.png</span><span style="color: #39adb5;">:</span> %.ps
+</span><span class="athl-line" data-athl-line="101">	<span style="color: #e53935;">@</span><span style="color: #6182b8;">echo</span> <span style="color: #546e7a;">this</span> <span style="color: #546e7a;">rule</span> <span style="color: #546e7a;">is</span> <span style="color: #546e7a;">not</span> <span style="color: #546e7a;">chosen</span> <span style="color: #546e7a;">if</span> <span style="color: #546e7a;">*.svg</span> <span style="color: #546e7a;">and</span> <span style="color: #546e7a;">*.ps</span> <span style="color: #546e7a;">are</span> <span style="color: #546e7a;">both</span> <span style="color: #546e7a;">present</span>
+</span><span class="athl-line" data-athl-line="102">
+</span><span class="athl-line" data-athl-line="103"><span style="color: #aabfc9;"># make already has some pattern rules built-in. For instance, it knows</span>
+</span><span class="athl-line" data-athl-line="104"><span style="color: #aabfc9;"># how to turn *.c files into *.o files.</span>
+</span><span class="athl-line" data-athl-line="105">
+</span><span class="athl-line" data-athl-line="106"><span style="color: #aabfc9;"># Older makefiles might use suffix rules instead of pattern rules</span>
+</span><span class="athl-line" data-athl-line="107"><span style="color: #6182b8;">.png.ps</span><span style="color: #39adb5;">:</span>
+</span><span class="athl-line" data-athl-line="108">	<span style="color: #e53935;">@</span><span style="color: #6182b8;">echo</span> <span style="color: #546e7a;">this</span> <span style="color: #546e7a;">rule</span> <span style="color: #546e7a;">is</span> <span style="color: #546e7a;">similar</span> <span style="color: #546e7a;">to</span> <span style="color: #546e7a;">a</span> <span style="color: #546e7a;">pattern</span> <span style="color: #546e7a;">rule.</span>
+</span><span class="athl-line" data-athl-line="109">
+</span><span class="athl-line" data-athl-line="110"><span style="color: #aabfc9;"># Tell make about the suffix rule</span>
+</span><span class="athl-line" data-athl-line="111"><span style="color: #6182b8;">.SUFFIXES</span><span style="color: #39adb5;">:</span> .png
+</span><span class="athl-line" data-athl-line="112">
+</span><span class="athl-line" data-athl-line="113"><span style="color: #aabfc9;">#-----------------------------------------------------------------------</span>
+</span><span class="athl-line" data-athl-line="114"><span style="color: #aabfc9;"># Variables</span>
+</span><span class="athl-line" data-athl-line="115"><span style="color: #aabfc9;">#-----------------------------------------------------------------------</span>
+</span><span class="athl-line" data-athl-line="116"><span style="color: #aabfc9;"># aka. macros</span>
+</span><span class="athl-line" data-athl-line="117">
+</span><span class="athl-line" data-athl-line="118"><span style="color: #aabfc9;"># Variables are basically all string types</span>
+</span><span class="athl-line" data-athl-line="119">
+</span><span class="athl-line" data-athl-line="120"><span style="color: #f6a434;">name</span> <span style="color: #39adb5;">=</span> Ted
+</span><span class="athl-line" data-athl-line="121"><span style="color: #f6a434;">name2</span><span style="color: #39adb5;">=</span>&quot;Sarah&quot;
+</span><span class="athl-line" data-athl-line="122">
+</span><span class="athl-line" data-athl-line="123"><span style="color: #6182b8;">echo</span><span style="color: #39adb5;">:</span>
+</span><span class="athl-line" data-athl-line="124">	<span style="color: #e53935;">@</span><span style="color: #6182b8;">echo</span> <span style="color: #39adb5;">$(<span style="color: #91b859;">name</span>)</span>
+</span><span class="athl-line" data-athl-line="125">	<span style="color: #e53935;">@</span><span style="color: #6182b8;">echo</span> <span style="color: #39adb5;">${<span style="color: #91b859;">name2</span>}</span>
+</span><span class="athl-line" data-athl-line="126">	<span style="color: #e53935;">@</span><span style="color: #6182b8;">echo</span> <span style="color: #39adb5;">$<span style="color: #91b859;">n</span></span><span style="color: #546e7a;">ame</span>    <span style="color: #aabfc9;"># This won&#39;t work, treated as <span style="color: #39adb5;">$(<span style="color: #91b859;">n</span>)</span>ame.</span>
+</span><span class="athl-line" data-athl-line="127">	<span style="color: #e53935;">@</span><span style="color: #6182b8;">echo</span> <span style="color: #39adb5;">$(<span style="color: #91b859;">name3</span>)</span> <span style="color: #aabfc9;"># Unknown variables are treated as empty strings.</span>
+</span><span class="athl-line" data-athl-line="128">
+</span><span class="athl-line" data-athl-line="129"><span style="color: #aabfc9;"># There are 4 places to set variables.</span>
+</span><span class="athl-line" data-athl-line="130"><span style="color: #aabfc9;"># In order of priority from highest to lowest:</span>
+</span><span class="athl-line" data-athl-line="131"><span style="color: #aabfc9;"># 1: commandline arguments</span>
+</span><span class="athl-line" data-athl-line="132"><span style="color: #aabfc9;"># 2: Makefile</span>
+</span><span class="athl-line" data-athl-line="133"><span style="color: #aabfc9;"># 3: shell environment variables - make imports these automatically.</span>
+</span><span class="athl-line" data-athl-line="134"><span style="color: #aabfc9;"># 4: make has some predefined variables</span>
+</span><span class="athl-line" data-athl-line="135">
+</span><span class="athl-line" data-athl-line="136"><span style="color: #f6a434;">name4</span> <span style="color: #39adb5;">?=</span> Jean
+</span><span class="athl-line" data-athl-line="137"><span style="color: #aabfc9;"># Only set the variable if environment variable is not already defined.</span>
+</span><span class="athl-line" data-athl-line="138">
+</span><span class="athl-line" data-athl-line="139"><span style="color: #39adb5;">override</span> <span style="color: #f6a434;">name5</span> <span style="color: #39adb5;">=</span> David
+</span><span class="athl-line" data-athl-line="140"><span style="color: #aabfc9;"># Stops commandline arguments from changing this variable.</span>
+</span><span class="athl-line" data-athl-line="141">
+</span><span class="athl-line" data-athl-line="142"><span style="color: #f6a434;">name4</span> <span style="color: #39adb5;">+=</span>grey
+</span><span class="athl-line" data-athl-line="143"><span style="color: #aabfc9;"># Append values to variable (includes a space).</span>
+</span><span class="athl-line" data-athl-line="144">
+</span><span class="athl-line" data-athl-line="145"><span style="color: #aabfc9;"># Pattern-specific variable values (GNU extension).</span>
+</span><span class="athl-line" data-athl-line="146">echo: <span style="color: #f6a434;">name2</span> <span style="color: #39adb5;">=</span> Sara # True within the matching rule
+</span><span class="athl-line" data-athl-line="147">	<span style="color: #aabfc9;"># and also within its remade recursive dependencies</span>
+</span><span class="athl-line" data-athl-line="148">	<span style="color: #aabfc9;"># (except it can break when your graph gets too complicated!)</span>
+</span><span class="athl-line" data-athl-line="149">
+</span><span class="athl-line" data-athl-line="150"><span style="color: #aabfc9;"># Some variables defined automatically by make.</span>
+</span><span class="athl-line" data-athl-line="151"><span style="color: #6182b8;">echo_inbuilt</span><span style="color: #39adb5;">:</span>
+</span><span class="athl-line" data-athl-line="152">	<span style="color: #6182b8;">echo</span> <span style="color: #39adb5;">$(<span style="color: #91b859;">CC</span>)</span>
+</span><span class="athl-line" data-athl-line="153">	<span style="color: #6182b8;">echo</span> <span style="color: #39adb5;">${<span style="color: #91b859;">CXX</span>}</span>
+</span><span class="athl-line" data-athl-line="154">	<span style="color: #6182b8;">echo</span> <span style="color: #39adb5;">$(<span style="color: #91b859;">FC</span>)</span>
+</span><span class="athl-line" data-athl-line="155">	<span style="color: #6182b8;">echo</span> <span style="color: #39adb5;">${<span style="color: #91b859;">CFLAGS</span>}</span>
+</span><span class="athl-line" data-athl-line="156">	<span style="color: #6182b8;">echo</span> <span style="color: #39adb5;">$(<span style="color: #91b859;">CPPFLAGS</span>)</span>
+</span><span class="athl-line" data-athl-line="157">	<span style="color: #6182b8;">echo</span> <span style="color: #39adb5;">${<span style="color: #91b859;">CXXFLAGS</span>}</span>
+</span><span class="athl-line" data-athl-line="158">	<span style="color: #6182b8;">echo</span> <span style="color: #39adb5;">$(<span style="color: #91b859;">LDFLAGS</span>)</span>
+</span><span class="athl-line" data-athl-line="159">	<span style="color: #6182b8;">echo</span> <span style="color: #39adb5;">${<span style="color: #91b859;">LDLIBS</span>}</span>
+</span><span class="athl-line" data-athl-line="160">
+</span><span class="athl-line" data-athl-line="161"><span style="color: #aabfc9;">#-----------------------------------------------------------------------</span>
+</span><span class="athl-line" data-athl-line="162"><span style="color: #aabfc9;"># Variables 2</span>
+</span><span class="athl-line" data-athl-line="163"><span style="color: #aabfc9;">#-----------------------------------------------------------------------</span>
+</span><span class="athl-line" data-athl-line="164">
+</span><span class="athl-line" data-athl-line="165"><span style="color: #aabfc9;"># The first type of variables are evaluated each time they are used.</span>
+</span><span class="athl-line" data-athl-line="166"><span style="color: #aabfc9;"># This can be expensive, so a second type of variable exists which is</span>
+</span><span class="athl-line" data-athl-line="167"><span style="color: #aabfc9;"># only evaluated once. (This is a GNU make extension)</span>
+</span><span class="athl-line" data-athl-line="168">
+</span><span class="athl-line" data-athl-line="169"><span style="color: #f6a434;">var</span> <span style="color: #39adb5;">:=</span> hello
+</span><span class="athl-line" data-athl-line="170"><span style="color: #f6a434;">var2</span> <span style="color: #39adb5;">::=</span> <span style="color: #39adb5;">$(<span style="color: #91b859;">var</span>)</span> hello
+</span><span class="athl-line" data-athl-line="171"><span style="color: #aabfc9;">#:= and ::= are equivalent.</span>
+</span><span class="athl-line" data-athl-line="172">
+</span><span class="athl-line" data-athl-line="173"><span style="color: #aabfc9;"># These variables are evaluated procedurally (in the order that they</span>
+</span><span class="athl-line" data-athl-line="174"><span style="color: #aabfc9;"># appear), thus breaking with the rest of the language !</span>
+</span><span class="athl-line" data-athl-line="175">
+</span><span class="athl-line" data-athl-line="176"><span style="color: #aabfc9;"># This doesn&#39;t work</span>
+</span><span class="athl-line" data-athl-line="177"><span style="color: #f6a434;">var3</span> <span style="color: #39adb5;">::=</span> <span style="color: #39adb5;">$(<span style="color: #91b859;">var4</span>)</span> and good luck
+</span><span class="athl-line" data-athl-line="178"><span style="color: #f6a434;">var4</span> <span style="color: #39adb5;">::=</span> good night
+</span><span class="athl-line" data-athl-line="179">
+</span><span class="athl-line" data-athl-line="180"><span style="color: #aabfc9;">#-----------------------------------------------------------------------</span>
+</span><span class="athl-line" data-athl-line="181"><span style="color: #aabfc9;"># Functions</span>
+</span><span class="athl-line" data-athl-line="182"><span style="color: #aabfc9;">#-----------------------------------------------------------------------</span>
+</span><span class="athl-line" data-athl-line="183">
+</span><span class="athl-line" data-athl-line="184"><span style="color: #aabfc9;"># make has lots of functions available.</span>
+</span><span class="athl-line" data-athl-line="185">
+</span><span class="athl-line" data-athl-line="186"><span style="color: #f6a434;">sourcefiles</span> <span style="color: #39adb5;">=</span> <span style="color: #39adb5;">$</span><span style="color: #39adb5;">(</span><span style="color: #6182b8;">wildcard</span> *.c */*.c<span style="color: #39adb5;">)</span>
+</span><span class="athl-line" data-athl-line="187"><span style="color: #f6a434;">objectfiles</span> <span style="color: #39adb5;">=</span> <span style="color: #39adb5;">$</span><span style="color: #39adb5;">(</span><span style="color: #6182b8;">patsubst</span> %.c,%.o,<span style="color: #39adb5;">$(<span style="color: #91b859;">sourcefiles</span>)</span><span style="color: #39adb5;">)</span>
+</span><span class="athl-line" data-athl-line="188">
+</span><span class="athl-line" data-athl-line="189"><span style="color: #aabfc9;"># Format is $(func arg0,arg1,arg2...)</span>
+</span><span class="athl-line" data-athl-line="190">
+</span><span class="athl-line" data-athl-line="191"><span style="color: #aabfc9;"># Some examples</span>
+</span><span class="athl-line" data-athl-line="192"><span style="color: #6182b8;">ls</span><span style="color: #39adb5;">:</span>	* src/*
+</span><span class="athl-line" data-athl-line="193">	<span style="color: #e53935;">@</span><span style="color: #6182b8;">echo</span> <span style="color: #39adb5;">$</span><span style="color: #39adb5;">(</span><span style="color: #6182b8;">filter</span> %.txt, <span style="color: #39adb5;">$</span><span style="color: #e53935;">^</span><span style="color: #39adb5;">)</span>
+</span><span class="athl-line" data-athl-line="194">	<span style="color: #e53935;">@</span><span style="color: #6182b8;">echo</span> <span style="color: #39adb5;">$</span><span style="color: #39adb5;">(</span><span style="color: #6182b8;">notdir</span> <span style="color: #39adb5;">$</span><span style="color: #e53935;">^</span><span style="color: #39adb5;">)</span>
+</span><span class="athl-line" data-athl-line="195">	<span style="color: #e53935;">@</span><span style="color: #6182b8;">echo</span> <span style="color: #39adb5;">$</span><span style="color: #39adb5;">(</span><span style="color: #6182b8;">join</span> <span style="color: #39adb5;">$</span><span style="color: #39adb5;">(</span><span style="color: #6182b8;">dir</span> <span style="color: #39adb5;">$</span><span style="color: #e53935;">^</span><span style="color: #39adb5;">)</span>,<span style="color: #39adb5;">$</span><span style="color: #39adb5;">(</span><span style="color: #6182b8;">notdir</span> <span style="color: #39adb5;">$</span><span style="color: #e53935;">^</span><span style="color: #39adb5;">)</span><span style="color: #39adb5;">)</span>
+</span><span class="athl-line" data-athl-line="196">
+</span><span class="athl-line" data-athl-line="197"><span style="color: #aabfc9;">#-----------------------------------------------------------------------</span>
+</span><span class="athl-line" data-athl-line="198"><span style="color: #aabfc9;"># Directives</span>
+</span><span class="athl-line" data-athl-line="199"><span style="color: #aabfc9;">#-----------------------------------------------------------------------</span>
+</span><span class="athl-line" data-athl-line="200">
+</span><span class="athl-line" data-athl-line="201"><span style="color: #aabfc9;"># Include other makefiles, useful for platform specific code</span>
+</span><span class="athl-line" data-athl-line="202"><span style="color: #39adb5;">include</span> <span style="color: #94a7b0;">foo.mk</span>
+</span><span class="athl-line" data-athl-line="203">
+</span><span class="athl-line" data-athl-line="204"><span style="color: #f6a434;">sport</span> <span style="color: #39adb5;">=</span> tennis
+</span><span class="athl-line" data-athl-line="205"><span style="color: #aabfc9;"># Conditional compilation</span>
+</span><span class="athl-line" data-athl-line="206"><span style="color: #6182b8;">report</span><span style="color: #39adb5;">:</span>
+</span><span class="athl-line" data-athl-line="207"><span style="color: #7c4dff;">ifeq</span> (<span style="color: #39adb5;">$(<span style="color: #91b859;">sport</span>)</span>,tennis)
+</span><span class="athl-line" data-athl-line="208">	<span style="color: #e53935;">@</span><span style="color: #6182b8;">echo</span> <span style="color: #91b859;">&#39;game, set, match&#39;</span>
+</span><span class="athl-line" data-athl-line="209"><span style="color: #7c4dff;">else</span>
+</span><span class="athl-line" data-athl-line="210">	<span style="color: #e53935;">@</span><span style="color: #6182b8;">echo</span> <span style="color: #91b859;">&quot;They think it&#39;s all over; it is now&quot;</span>
+</span><span class="athl-line" data-athl-line="211"><span style="color: #7c4dff;">endif</span>
+</span><span class="athl-line" data-athl-line="212">
+</span><span class="athl-line" data-athl-line="213"><span style="color: #aabfc9;"># There are also ifneq, ifdef, ifndef</span>
+</span><span class="athl-line" data-athl-line="214">
+</span><span class="athl-line" data-athl-line="215"><span style="color: #f6a434;">foo</span> <span style="color: #39adb5;">=</span> true
+</span><span class="athl-line" data-athl-line="216">
+</span><span class="athl-line" data-athl-line="217"><span style="color: #7c4dff;">ifdef</span> <span style="color: #39adb5;">$(<span style="color: #91b859;">foo</span>)</span>
+</span><span class="athl-line" data-athl-line="218"><span style="color: #f6a434;">bar</span> <span style="color: #39adb5;">=</span> &#39;hello&#39;
+</span><span class="athl-line" data-athl-line="219"><span style="color: #7c4dff;">endif</span>
+</span></code></pre>
+</body>
+</html>

@@ -16,6 +16,7 @@ extern "C" {
     fn tree_sitter_iex() -> *const ();
     fn tree_sitter_kotlin() -> *const ();
     fn tree_sitter_llvm() -> *const ();
+    fn tree_sitter_make() -> *const ();
 }
 
 mod generated {
@@ -49,6 +50,7 @@ pub enum Language {
     Kotlin,
     Llvm,
     Lua,
+    Make,
     Php,
     PlainText,
     Python,
@@ -88,6 +90,7 @@ impl Language {
             "kotlin" => Some(Language::Kotlin),
             "llvm" => Some(Language::Llvm),
             "lua" => Some(Language::Lua),
+            "make" => Some(Language::Make),
             "php" => Some(Language::Php),
             "python" => Some(Language::Python),
             "ruby" => Some(Language::Ruby),
@@ -261,6 +264,27 @@ impl Language {
             Language::Kotlin => &["*.kt", "*.ktm", "*.kts"],
             Language::Llvm => &["*.llvm", "*.ll"],
             Language::Lua => &["*.lua"],
+            Language::Make => &[
+                "*.mak",
+                "*.d",
+                "*.make",
+                "*.makefile",
+                "*.mk",
+                "*.mkfile",
+                "BSDmakefile",
+                "GNUmakefile",
+                "Kbuild",
+                "Makefile",
+                "Makefile.am",
+                "Makefile.boot",
+                "Makefile.frag",
+                "Makefile*.in",
+                "Makefile.inc",
+                "Makefile.wat",
+                "makefile",
+                "makefile.sco",
+                "mkfile",
+            ],
             Language::Php => &[
                 "*.php", "*.phtml", "*.php3", "*.php4", "*.php5", "*.php7", "*.phps",
             ],
@@ -350,6 +374,7 @@ impl Language {
             Language::Kotlin => "Kotlin",
             Language::Llvm => "LLVM",
             Language::Lua => "Lua",
+            Language::Make => "Make",
             Language::Php => "PHP",
             Language::PlainText => "Plain Text",
             Language::Python => "Python",
@@ -391,6 +416,7 @@ impl Language {
             Language::Kotlin => &KOTLIN_CONFIG,
             Language::Llvm => &LLVM_CONFIG,
             Language::Lua => &LUA_CONFIG,
+            Language::Make => &MAKE_CONFIG,
             Language::Php => &PHP_CONFIG,
             Language::Python => &PYTHON_CONFIG,
             Language::Ruby => &RUBY_CONFIG,
@@ -725,6 +751,21 @@ static LUA_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         LUA_LOCALS,
     )
     .expect("failed to create lua highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static MAKE_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_make) };
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "make",
+        MAKE_HIGHLIGHTS,
+        MAKE_INJECTIONS,
+        MAKE_LOCALS,
+    )
+    .expect("failed to create make highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });

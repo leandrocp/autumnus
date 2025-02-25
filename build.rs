@@ -56,6 +56,11 @@ fn vendored_parsers() {
             src_dir: "vendored_parsers/tree-sitter-llvm/src",
             extra_files: vec![],
         },
+        TreeSitterParser {
+            name: "tree-sitter-make",
+            src_dir: "vendored_parsers/tree-sitter-make/src",
+            extra_files: vec![],
+        },
     ];
 
     for parser in &parsers {
