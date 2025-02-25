@@ -34,6 +34,7 @@ pub enum Language {
     Elixir,
     Elm,
     Erlang,
+    Gleam,
     Heex,
     Html,
     Lua,
@@ -62,6 +63,7 @@ impl Language {
             "elixir" => Some(Language::Elixir),
             "elm" => Some(Language::Elm),
             "erlang" => Some(Language::Erlang),
+            "gleam" => Some(Language::Gleam),
             "heex" => Some(Language::Heex),
             "html" => Some(Language::Html),
             "lua" => Some(Language::Lua),
@@ -195,6 +197,7 @@ impl Language {
                 "*.yrl",
                 "Emakefile",
             ],
+            Language::Gleam => &["*.gleam"],
             Language::Heex => &["*.heex", "*.neex"],
             Language::Html => &["*.html", "*.htm", "*.xhtml"],
             Language::Lua => &["*.lua"],
@@ -272,6 +275,7 @@ impl Language {
             Language::Elixir => "Elixir",
             Language::Elm => "Elm",
             Language::Erlang => "Erlang",
+            Language::Gleam => "Gleam",
             Language::Heex => "HEEx",
             Language::Html => "HTML",
             Language::Lua => "Lua",
@@ -302,6 +306,7 @@ impl Language {
             Language::Elixir => &ELIXIR_CONFIG,
             Language::Elm => &ELM_CONFIG,
             Language::Erlang => &ERLANG_CONFIG,
+            Language::Gleam => &GLEAM_CONFIG,
             Language::Heex => &HEEX_CONFIG,
             Language::Html => &HTML_CONFIG,
             Language::Lua => &LUA_CONFIG,
@@ -491,6 +496,21 @@ static ERLANG_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         ERLANG_LOCALS,
     )
     .expect("failed to create erlang highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static GLEAM_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = tree_sitter_gleam::LANGUAGE;
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "gleam",
+        GLEAM_HIGHLIGHTS,
+        GLEAM_INJECTIONS,
+        GLEAM_LOCALS,
+    )
+    .expect("failed to create gleam highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
