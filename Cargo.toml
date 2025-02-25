@@ -54,6 +54,7 @@ serde_json = "1.0"
 strum = { version = "0.26", features = ["derive"] }
 termcolor = "1.4"
 v_htmlescape = "0.15"
+tree-sitter-javascript = "0.23.1"
 
 [build-dependencies]
 cc = "1"

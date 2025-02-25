@@ -154,13 +154,19 @@ fn process_inheritance(files: &HashMap<String, String>) -> HashMap<String, Strin
     let mut processed = HashMap::new();
 
     // First pass: Detect inheritance relationships
-    let mut inheritance: HashMap<String, String> = HashMap::new();
+    let mut inheritance: HashMap<String, Vec<String>> = HashMap::new();
     for (language, content) in files {
         // Look for inheritance directive in the first line
         if let Some(first_line) = content.lines().next() {
             if first_line.starts_with("; inherits: ") {
-                let parent = first_line.trim_start_matches("; inherits: ").trim();
-                inheritance.insert(language.clone(), parent.to_string());
+                let parents_str = first_line.trim_start_matches("; inherits: ").trim();
+                // Split by comma to handle multiple parents
+                let parents: Vec<String> = parents_str
+                    .split(',')
+                    .map(|s| s.trim().to_string())
+                    .collect();
+
+                inheritance.insert(language.clone(), parents);
             }
         }
     }
@@ -180,7 +186,7 @@ fn process_file(
     language: &str,
     content: &str,
     files: &HashMap<String, String>,
-    inheritance: &HashMap<String, String>,
+    inheritance: &HashMap<String, Vec<String>>,
     visited: &mut Vec<String>,
 ) -> String {
     // Check for circular inheritance
@@ -195,12 +201,30 @@ fn process_file(
     // Track visited languages to detect cycles
     visited.push(language.to_string());
 
-    // Check if this language inherits from another
-    if let Some(parent) = inheritance.get(language) {
-        if let Some(parent_content) = files.get(parent) {
-            // Process the parent content first (recursive handling of multi-level inheritance)
-            let processed_parent =
-                process_file(parent, parent_content, files, inheritance, visited);
+    // Check if this language inherits from other languages
+    if let Some(parents) = inheritance.get(language) {
+        if !parents.is_empty() {
+            // Process each parent language and collect their content
+            let mut parent_contents = Vec::new();
+
+            for parent in parents {
+                if let Some(parent_content) = files.get(parent) {
+                    // Process the parent content first (recursive handling of multi-level inheritance)
+                    let processed_parent = process_file(
+                        parent,
+                        parent_content,
+                        files,
+                        inheritance,
+                        &mut visited.clone(),
+                    );
+                    parent_contents.push(processed_parent);
+                } else {
+                    println!(
+                        "cargo:warning=Parent language not found for {}: {}",
+                        language, parent
+                    );
+                }
+            }
 
             // Replace the inheritance directive with the parent content
             let mut result = String::new();
@@ -209,9 +233,11 @@ fn process_file(
             // Skip the first line (inheritance directive)
             lines.next();
 
-            // Add the parent content
-            result.push_str(&processed_parent);
-            result.push('\n');
+            // Add all parent contents
+            for parent_content in parent_contents {
+                result.push_str(&parent_content);
+                result.push('\n');
+            }
 
             // Add the rest of the current file
             for line in lines {
@@ -220,11 +246,6 @@ fn process_file(
             }
 
             return result;
-        } else {
-            println!(
-                "cargo:warning=Parent language not found for {}: {}",
-                language, parent
-            );
         }
     }
 

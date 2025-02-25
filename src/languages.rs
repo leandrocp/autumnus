@@ -40,6 +40,7 @@ pub enum Language {
     Heex,
     Html,
     Java,
+    Javascript,
     Lua,
     Php,
     PlainText,
@@ -74,6 +75,7 @@ impl Language {
             "heex" => Some(Language::Heex),
             "html" => Some(Language::Html),
             "java" => Some(Language::Java),
+            "javascript" => Some(Language::Javascript),
             "lua" => Some(Language::Lua),
             "php" => Some(Language::Php),
             "python" => Some(Language::Python),
@@ -123,6 +125,7 @@ impl Language {
         }
     }
 
+    // TODO: review tree-sitter.json file-types
     pub fn language_globs(language: Language) -> Vec<glob::Pattern> {
         let glob_strs: &'static [&'static str] = match language {
             Language::Bash => &[
@@ -213,6 +216,7 @@ impl Language {
             Language::Heex => &["*.heex", "*.neex"],
             Language::Html => &["*.html", "*.htm", "*.xhtml"],
             Language::Java => &["*.java"],
+            Language::Javascript => &["*.cjs", "*.js", "*.mjs", "*.snap"],
             Language::Lua => &["*.lua"],
             Language::Php => &[
                 "*.php", "*.phtml", "*.php3", "*.php4", "*.php5", "*.php7", "*.phps",
@@ -297,6 +301,7 @@ impl Language {
             Language::Heex => "HEEx",
             Language::Html => "HTML",
             Language::Java => "Java",
+            Language::Javascript => "JavaScript",
             Language::Lua => "Lua",
             Language::Php => "PHP",
             Language::PlainText => "Plain Text",
@@ -333,6 +338,7 @@ impl Language {
             Language::Heex => &HEEX_CONFIG,
             Language::Html => &HTML_CONFIG,
             Language::Java => &JAVA_CONFIG,
+            Language::Javascript => &JAVASCRIPT_CONFIG,
             Language::Lua => &LUA_CONFIG,
             Language::Php => &PHP_CONFIG,
             Language::Python => &PYTHON_CONFIG,
@@ -584,6 +590,19 @@ static JAVA_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         JAVA_LOCALS,
     )
     .expect("failed to create java highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static JAVASCRIPT_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(tree_sitter_javascript::LANGUAGE),
+        "javascript",
+        JAVASCRIPT_HIGHLIGHTS,
+        JAVASCRIPT_INJECTIONS,
+        JAVASCRIPT_LOCALS,
+    )
+    .expect("failed to create javascript highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
