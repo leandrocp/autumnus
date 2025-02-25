@@ -1,0 +1,241 @@
+================================================================================
+Empty prompt with parens
+================================================================================
+
+iex(1)>
+
+--------------------------------------------------------------------------------
+
+(source
+  (evaluation_block
+    (prompt_line
+      (prompt))))
+
+================================================================================
+Multiple empty prompts without parens
+================================================================================
+
+iex>
+iex>
+
+--------------------------------------------------------------------------------
+
+(source
+  (evaluation_block
+    (prompt_line
+      (prompt)))
+  (evaluation_block
+    (prompt_line
+      (prompt))))
+
+================================================================================
+Prompts with elixir expressions but no result
+================================================================================
+
+iex(1)> File.read("f.txt")
+iex> send self(), :hello
+
+--------------------------------------------------------------------------------
+
+(source
+  (evaluation_block
+    (prompt_line
+      (prompt)
+      (expression)))
+  (evaluation_block
+    (prompt_line
+      (prompt)
+      (expression))))
+
+================================================================================
+Prompts with elixir expressions and results
+================================================================================
+
+iex(1)> System.version()
+"1.13.1"
+iex(1)> System.otp_release()
+"24"
+
+--------------------------------------------------------------------------------
+
+(source
+  (evaluation_block
+    (prompt_line
+      (prompt)
+      (expression))
+    (result))
+  (evaluation_block
+    (prompt_line
+      (prompt)
+      (expression))
+    (result)))
+
+================================================================================
+Prompts with elixir expressions and one final results
+================================================================================
+
+iex(1)> System.version()
+iex(1)> System.otp_release()
+"24"
+
+--------------------------------------------------------------------------------
+
+(source
+  (evaluation_block
+    (prompt_line
+      (prompt)
+      (expression)))
+  (evaluation_block
+    (prompt_line
+      (prompt)
+      (expression))
+    (result)))
+
+================================================================================
+A continued prompt
+================================================================================
+
+iex> quote do
+...> end
+iex(1)> quote do
+...(1)> end
+
+--------------------------------------------------------------------------------
+
+(source
+  (evaluation_block
+    (prompt_line
+      (prompt)
+      (expression))
+    (prompt_line
+      (prompt)
+      (expression)))
+  (evaluation_block
+    (prompt_line
+      (prompt)
+      (expression))
+    (prompt_line
+      (prompt)
+      (expression))))
+
+================================================================================
+Continued prompts and results
+================================================================================
+
+iex> quote do
+...> end
+{:__block__, [], []}
+iex(1)> quote do
+...(1)> end
+{:__block__, [], []}
+
+--------------------------------------------------------------------------------
+
+(source
+  (evaluation_block
+    (prompt_line
+      (prompt)
+      (expression))
+    (prompt_line
+      (prompt)
+      (expression))
+    (result))
+  (evaluation_block
+    (prompt_line
+      (prompt)
+      (expression))
+    (prompt_line
+      (prompt)
+      (expression))
+    (result)))
+
+================================================================================
+Multi-line results
+================================================================================
+
+iex> quote do
+...>   Enum.map(x, &(&1 + 1))
+...> end
+{{:., [], [{:__aliases__, [alias: false], [:Enum]}, :map]}, [],
+ [
+   {:x, [if_undefined: :apply], Elixir},
+   {:&, [], [{:+, [context: Elixir, import: Kernel], [{:&, [], [1]}, 1]}]}
+ ]}
+iex(1)> IO.puts("Hello world")
+Hello world
+:ok
+
+--------------------------------------------------------------------------------
+
+(source
+  (evaluation_block
+    (prompt_line
+      (prompt)
+      (expression))
+    (prompt_line
+      (prompt)
+      (expression))
+    (prompt_line
+      (prompt)
+      (expression))
+    (result))
+  (evaluation_block
+    (prompt_line
+      (prompt)
+      (expression))
+    (result)))
+
+================================================================================
+Missing newline on a result
+================================================================================
+
+iex> x
+1
+--------------------------------------------------------------------------------
+
+(source
+  (evaluation_block
+    (prompt_line
+      (prompt)
+      (expression))
+    (result)))
+
+================================================================================
+Prompt with node name
+================================================================================
+
+iex(foo@127.0.0.1)1> "
+...(foo@127.0.0.1)1> "
+"\n"
+
+--------------------------------------------------------------------------------
+
+(source
+  (evaluation_block
+    (prompt_line
+      (prompt)
+      (expression))
+    (prompt_line
+      (prompt)
+      (expression))
+    (result)))
+
+================================================================================
+Prompt-like expression after prompt
+================================================================================
+iex(1)> abs(1)>1
+false
+iex(1)> #(1)>
+
+--------------------------------------------------------------------------------
+
+(source
+  (evaluation_block
+    (prompt_line
+      (prompt)
+      (expression))
+    (result))
+  (evaluation_block
+    (prompt_line
+      (prompt)
+      (expression))))

@@ -1,0 +1,36 @@
+{
+  "name": "tree-sitter-iex",
+  "version": "0.0.1",
+  "description": "Interactive Elixir (IEx) grammar for tree-sitter",
+  "main": "bindings/node",
+
+  "scripts": {
+    "test": "tree-sitter test",
+    "format": "prettier --trailing-comma es5 --write grammar.js",
+    "format-check": "prettier --trailing-comma es5 --check grammar.js"
+  },
+  "keywords": [
+    "parser",
+    "lexer",
+    "elixir",
+    "iex",
+    "tree-sitter"
+  ],
+  "license": "Apache-2.0",
+  "dependencies": {
+    "nan": "^2.15.0"
+  },
+  "devDependencies": {
+    "prettier": "^2.5.1",
+    "tree-sitter-cli": "^0.20.1"
+  },
+  "tree-sitter": [
+    {
+      "scope": "source.iex",
+      "file-types": [
+        "iex"
+      ],
+      "injection-regex": "^iex$"
+    }
+  ]
+}
