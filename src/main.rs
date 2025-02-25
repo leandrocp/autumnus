@@ -111,7 +111,6 @@ fn list_languages() -> Result<()> {
         }
 
         println!();
-        println!();
     }
 
     Ok(())
