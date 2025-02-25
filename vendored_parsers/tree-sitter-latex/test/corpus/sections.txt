@@ -1,0 +1,125 @@
+================================================================================
+Top level sections
+================================================================================
+
+\begin{document}
+
+1
+
+\section{Foo}
+
+2
+
+\section{Bar}
+
+3
+
+\end{document}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (generic_environment
+    (begin
+      (curly_group_text
+        (text
+          (word))))
+    (text
+      (word))
+    (section
+      (curly_group
+        (text
+          (word)))
+      (text
+        (word)))
+    (section
+      (curly_group
+        (text
+          (word)))
+      (text
+        (word)))
+    (end
+      (curly_group_text
+        (text
+          (word))))))
+
+================================================================================
+Nested sections
+================================================================================
+
+1
+
+\part{\Foo}
+
+2
+
+\chapter{Bar}
+
+3
+
+\chapter{{Baz}}
+
+4
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (text
+    (word))
+  (part
+    (curly_group
+      (generic_command
+        (command_name)))
+    (text
+      (word))
+    (chapter
+      (curly_group
+        (text
+          (word)))
+      (text
+        (word)))
+    (chapter
+      (curly_group
+        (curly_group
+          (text
+            (word))))
+      (text
+        (word)))))
+
+================================================================================
+Subsection with preceeding paragraph
+================================================================================
+
+\section{Foo}
+
+\paragraph{Par}
+
+\subsection{Bar}
+
+\paragraph{Par}
+
+\subsection{Bar}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (section
+    (curly_group
+      (text
+        (word)))
+    (paragraph
+      (curly_group
+        (text
+          (word))))
+    (subsection
+      (curly_group
+        (text
+          (word)))
+      (paragraph
+        (curly_group
+          (text
+            (word)))))
+    (subsection
+      (curly_group
+        (text
+          (word))))))
