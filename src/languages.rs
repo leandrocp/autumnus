@@ -50,6 +50,7 @@ pub enum Language {
     Kotlin,
     Llvm,
     Lua,
+    ObjC,
     Make,
     Php,
     PlainText,
@@ -90,6 +91,8 @@ impl Language {
             "kotlin" => Some(Language::Kotlin),
             "llvm" => Some(Language::Llvm),
             "lua" => Some(Language::Lua),
+            "objc" => Some(Language::ObjC),
+            "objective-c" => Some(Language::ObjC),
             "make" => Some(Language::Make),
             "php" => Some(Language::Php),
             "python" => Some(Language::Python),
@@ -108,12 +111,16 @@ impl Language {
 
                 let path = Path::new(lang_or_path);
 
-                if let Some(lang) = Language::from_glob(path) {
+                if let Some(lang) = Self::from_glob(path) {
                     return lang;
                 }
 
-                if let Some(lang) = Language::from_shebang(source) {
+                if let Some(lang) = Self::from_shebang(source) {
                     return lang;
+                }
+
+                if Self::looks_like_objc(path, source) {
+                    return Language::ObjC;
                 }
 
                 Language::PlainText
@@ -264,6 +271,7 @@ impl Language {
             Language::Kotlin => &["*.kt", "*.ktm", "*.kts"],
             Language::Llvm => &["*.llvm", "*.ll"],
             Language::Lua => &["*.lua"],
+            Language::ObjC => &["*.m"],
             Language::Make => &[
                 "*.mak",
                 "*.d",
@@ -348,6 +356,24 @@ impl Language {
         })
     }
 
+    /// Use a heuristic to determine if a '.h' file looks like Objective-C.
+    /// We look for a line starting with '#import', '@interface' or '@protocol'
+    /// near the top of the file.  These keywords are not valid C or C++, so this
+    /// should not produce false positives.
+    fn looks_like_objc(path: &Path, src: &str) -> bool {
+        if let Some(extension) = path.extension() {
+            if extension == "h" {
+                return Self::split_on_newlines(src).take(100).any(|line| {
+                    ["#import", "@interface", "@protocol"]
+                        .iter()
+                        .any(|keyword| line.starts_with(keyword))
+                });
+            }
+        }
+
+        false
+    }
+
     pub fn name(&self) -> &'static str {
         match self {
             Language::Bash => "Bash",
@@ -374,6 +400,7 @@ impl Language {
             Language::Kotlin => "Kotlin",
             Language::Llvm => "LLVM",
             Language::Lua => "Lua",
+            Language::ObjC => "Objective-C",
             Language::Make => "Make",
             Language::Php => "PHP",
             Language::PlainText => "Plain Text",
@@ -416,6 +443,7 @@ impl Language {
             Language::Kotlin => &KOTLIN_CONFIG,
             Language::Llvm => &LLVM_CONFIG,
             Language::Lua => &LUA_CONFIG,
+            Language::ObjC => &OBJC_CONFIG,
             Language::Make => &MAKE_CONFIG,
             Language::Php => &PHP_CONFIG,
             Language::Python => &PYTHON_CONFIG,
@@ -751,6 +779,19 @@ static LUA_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         LUA_LOCALS,
     )
     .expect("failed to create lua highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static OBJC_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(tree_sitter_objc::LANGUAGE),
+        "objc",
+        OBJC_HIGHLIGHTS,
+        OBJC_INJECTIONS,
+        OBJC_LOCALS,
+    )
+    .expect("failed to create objc highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
