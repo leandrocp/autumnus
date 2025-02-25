@@ -46,6 +46,7 @@ pub enum Language {
     Ruby,
     Rust,
     Swift,
+    Yaml,
     Zig,
 }
 
@@ -77,6 +78,7 @@ impl Language {
             "ruby" => Some(Language::Ruby),
             "rust" => Some(Language::Rust),
             "swift" => Some(Language::Swift),
+            "yaml" => Some(Language::Yaml),
             "zig" => Some(Language::Zig),
             _ => None,
         };
@@ -224,6 +226,7 @@ impl Language {
             ],
             Language::Rust => &["*.rs"],
             Language::Swift => &["*.swift"],
+            Language::Yaml => &["*.yaml", "*.yml"],
             Language::Zig => &["*.zig"],
         };
 
@@ -297,6 +300,7 @@ impl Language {
             Language::Ruby => "Ruby",
             Language::Rust => "Rust",
             Language::Swift => "Swift",
+            Language::Yaml => "YAML",
             Language::Zig => "Zig",
         }
     }
@@ -330,7 +334,8 @@ impl Language {
             Language::Ruby => &RUBY_CONFIG,
             Language::Rust => &RUST_CONFIG,
             Language::Swift => &SWIFT_CONFIG,
-            Language::Zig => &ZIP_CONFIG,
+            Language::Yaml => &YAML_CONFIG,
+            Language::Zig => &ZIG_CONFIG,
             _ => &PLAIN_TEXT_CONFIG,
         }
     }
@@ -696,7 +701,22 @@ static SWIFT_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     config
 });
 
-static ZIP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+static YAML_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = tree_sitter_yaml::LANGUAGE;
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "yaml",
+        YAML_HIGHLIGHTS,
+        YAML_INJECTIONS,
+        YAML_LOCALS,
+    )
+    .expect("failed to create yaml highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static ZIG_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let language_fn = tree_sitter_zig::LANGUAGE;
 
     let mut config = HighlightConfiguration::new(
