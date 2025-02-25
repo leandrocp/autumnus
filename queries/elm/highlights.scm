@@ -3,8 +3,9 @@
   (block_comment)
 ] @comment @spell
 
-((block_comment) @comment.documentation
-  (#lua-match? @comment.documentation "^{[-]|[^|]"))
+; FIXME: lua pattern to regex
+; ((block_comment) @comment.documentation
+;   (#lua-match? @comment.documentation "^{[-]|[^|]"))
 
 ; Keywords
 ;---------
