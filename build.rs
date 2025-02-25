@@ -298,34 +298,190 @@ fn convert_lua_patterns(content: &str) -> String {
     result
 }
 
-// Convert a Lua pattern to a Regex pattern using string replacements
-fn lua_pattern_to_regex(lua_pattern: &str) -> String {
-    lua_pattern
-        .replace('\\', r"\\")
-        .replace("%.", r"\.")
-        .replace("%%", r"%")
-        .replace("%a", r"[a-zA-Z]")
-        .replace("%A", r"[^a-zA-Z]")
-        .replace("%c", r"[\0-\31]")
-        .replace("%C", r"[^\0-\31]")
-        .replace("%d", r"[0-9]")
-        .replace("%D", r"[^0-9]")
-        .replace("%g", r"[\33-\126]")
-        .replace("%G", r"[^\33-\126]")
-        .replace("%l", r"[a-z]")
-        .replace("%L", r"[^a-z]")
-        .replace("%p", r##"[!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]"##)
-        .replace("%P", r##"[^!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]"##)
-        .replace("%s", r"[ \t\n\v\f\r]")
-        .replace("%S", r"[^ \t\n\v\f\r]")
-        .replace("%u", r"[A-Z]")
-        .replace("%U", r"[^A-Z]")
-        .replace("%w", r"[a-zA-Z0-9]")
-        .replace("%W", r"[^a-zA-Z0-9]")
-        .replace("%x", r"[0-9a-fA-F]")
-        .replace("%X", r"[^0-9a-fA-F]")
-        .replace("%z", r"\0")
-        .replace("%Z", r"[^\0]")
+pub fn lua_pattern_to_regex(lua_pattern: &str) -> String {
+    let mut regex = String::new();
+    let mut chars = lua_pattern.chars().peekable();
+    let mut in_char_class = false;
+
+    while let Some(c) = chars.next() {
+        match c {
+            // Handle start of line anchor
+            '^' => {
+                regex.push('^');
+            }
+
+            // Handle end of line anchor
+            '$' => {
+                if chars.peek().is_none() {
+                    regex.push('$');
+                } else {
+                    // Not at the end of the pattern, so escape it
+                    regex.push('\\');
+                    regex.push('$');
+                }
+            }
+
+            // Handle Lua's magic character %
+            '%' => {
+                if let Some(&next_char) = chars.peek() {
+                    chars.next(); // Consume the next character
+                    match next_char {
+                        // Character classes
+                        'a' => regex.push_str("[a-zA-Z]"),
+                        'c' => regex.push_str("[\\x00-\\x1F\\x7F]"),
+                        'd' => regex.push_str("\\d"),
+                        'g' => regex.push_str("[!-~]"),
+                        'l' => regex.push_str("[a-z]"),
+                        'p' => regex.push_str("[!-/:-@\\[-`{-~]"),
+                        's' => regex.push_str("\\s"),
+                        'S' => regex.push_str("\\S"),
+                        'u' => regex.push_str("[A-Z]"),
+                        'w' => regex.push_str("[a-zA-Z0-9_]"),
+                        'W' => regex.push_str("[^a-zA-Z0-9_]"),
+                        'x' => regex.push_str("[0-9a-fA-F]"),
+                        'z' => regex.push_str("\\0"),
+
+                        // Frontier pattern %f[set]
+                        'f' => {
+                            // Frontier patterns don't have direct regex equivalent
+                            // Using a lookahead as an approximation
+                            regex.push_str("(?=");
+
+                            // Skip the [set] part
+                            let mut bracket_content = String::new();
+                            let mut bracket_count = 0;
+                            let mut in_set = false;
+
+                            while let Some(&next) = chars.peek() {
+                                chars.next();
+                                if next == '[' && !in_set {
+                                    in_set = true;
+                                    bracket_count += 1;
+                                } else if next == ']' && in_set {
+                                    bracket_count -= 1;
+                                    if bracket_count == 0 {
+                                        // Removed the unused assignment to in_set here
+                                        break;
+                                    }
+                                    bracket_content.push(next);
+                                } else if in_set {
+                                    bracket_content.push(next);
+                                }
+                            }
+
+                            // Convert the content of the set
+                            let set_regex = lua_pattern_to_regex(&bracket_content);
+                            regex.push_str(&set_regex);
+                            regex.push(')');
+                        }
+
+                        // Backreferences
+                        '1'..='9' => {
+                            regex.push('\\');
+                            regex.push(next_char);
+                        }
+
+                        // Escape special regex characters
+                        c if ".+*?()[]{}|^$\\-".contains(c) => {
+                            regex.push('\\');
+                            regex.push(c);
+                        }
+
+                        // Any other character following % is treated literally
+                        _ => regex.push(next_char),
+                    }
+                } else {
+                    // If % is the last character, escape it
+                    regex.push('%');
+                }
+            }
+
+            // Handle character classes
+            '[' => {
+                in_char_class = true;
+                regex.push('[');
+            }
+            ']' => {
+                in_char_class = false;
+                regex.push(']');
+            }
+
+            // Handle dash in character class
+            '-' => {
+                if in_char_class {
+                    // Inside a character class, - is used for ranges (same in Lua and regex)
+                    regex.push('-');
+                } else {
+                    // Outside a character class, check if it's a non-greedy modifier
+                    if !regex.is_empty() {
+                        let last_char = regex.chars().last().unwrap();
+                        if last_char == '*' || last_char == '+' || last_char == '?' {
+                            // Replace the greedy quantifier with a non-greedy one
+                            regex.push('?');
+                        } else {
+                            // Just a hyphen
+                            regex.push('-');
+                        }
+                    } else {
+                        regex.push('-');
+                    }
+                }
+            }
+
+            // In Lua, . matches any character (same as in regex)
+            '.' => {
+                regex.push('.');
+                // Check for non-greedy modifier
+                if let Some(&next) = chars.peek() {
+                    if next == '-' {
+                        chars.next(); // consume the -
+                        regex.push('*');
+                        regex.push('?'); // .- in Lua is like .*? in regex
+                    }
+                }
+            }
+
+            // Handle escaping for regex special characters
+            '(' | ')' | '{' | '}' | '|' | '+' | '*' | '?' => {
+                if !in_char_class {
+                    // Only escape special regex characters if we're not in a character class
+                    match c {
+                        // For the quantifiers, check for non-greedy modifier
+                        '+' | '*' | '?' => {
+                            regex.push(c);
+                            if let Some(&next) = chars.peek() {
+                                if next == '-' {
+                                    chars.next(); // consume the -
+                                    regex.push('?'); // add ? to make it non-greedy
+                                }
+                            }
+                        }
+                        // For other special characters, escape them
+                        _ => {
+                            regex.push('\\');
+                            regex.push(c);
+                        }
+                    }
+                } else {
+                    // Inside character class, no need to escape most special characters
+                    regex.push(c);
+                }
+            }
+
+            // For other regex special characters
+            '\\' => {
+                regex.push('\\');
+                regex.push('\\');
+            }
+
+            // For any other character, just append it
+            _ => {
+                regex.push(c);
+            }
+        }
+    }
+
+    regex
 }
 
 fn themes() {
