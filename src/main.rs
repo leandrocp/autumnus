@@ -107,9 +107,10 @@ fn list_languages() -> Result<()> {
         println!("{}", name);
 
         for glob in Language::language_globs(language) {
-            print!(" {}", glob.as_str());
+            print!("  {}", glob.as_str());
         }
 
+        println!();
         println!();
     }
 
