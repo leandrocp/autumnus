@@ -35,6 +35,7 @@ pub enum Language {
     Elm,
     Erlang,
     Gleam,
+    Go,
     Heex,
     Html,
     Lua,
@@ -64,6 +65,7 @@ impl Language {
             "elm" => Some(Language::Elm),
             "erlang" => Some(Language::Erlang),
             "gleam" => Some(Language::Gleam),
+            "go" => Some(Language::Go),
             "heex" => Some(Language::Heex),
             "html" => Some(Language::Html),
             "lua" => Some(Language::Lua),
@@ -198,6 +200,7 @@ impl Language {
                 "Emakefile",
             ],
             Language::Gleam => &["*.gleam"],
+            Language::Go => &["*.go"],
             Language::Heex => &["*.heex", "*.neex"],
             Language::Html => &["*.html", "*.htm", "*.xhtml"],
             Language::Lua => &["*.lua"],
@@ -276,6 +279,7 @@ impl Language {
             Language::Elm => "Elm",
             Language::Erlang => "Erlang",
             Language::Gleam => "Gleam",
+            Language::Go => "Go",
             Language::Heex => "HEEx",
             Language::Html => "HTML",
             Language::Lua => "Lua",
@@ -307,6 +311,7 @@ impl Language {
             Language::Elm => &ELM_CONFIG,
             Language::Erlang => &ERLANG_CONFIG,
             Language::Gleam => &GLEAM_CONFIG,
+            Language::Go => &GO_CONFIG,
             Language::Heex => &HEEX_CONFIG,
             Language::Html => &HTML_CONFIG,
             Language::Lua => &LUA_CONFIG,
@@ -511,6 +516,21 @@ static GLEAM_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         GLEAM_LOCALS,
     )
     .expect("failed to create gleam highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static GO_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = tree_sitter_go::LANGUAGE;
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "go",
+        GO_HIGHLIGHTS,
+        GO_INJECTIONS,
+        GO_LOCALS,
+    )
+    .expect("failed to create go highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });

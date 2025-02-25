@@ -94,6 +94,7 @@ dependencies = [
  "tree-sitter-elixir",
  "tree-sitter-erlang",
  "tree-sitter-gleam",
+ "tree-sitter-go",
  "tree-sitter-heex",
  "tree-sitter-highlight",
  "tree-sitter-html",
@@ -548,6 +549,16 @@ name = "tree-sitter-gleam"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f0175c53793bda5d444360dd5add25463d18d66afb7f521d6791e2fc61bf2fb3"
+dependencies = [
+ "cc",
+ "tree-sitter-language",
+]
+
+[[package]]
+name = "tree-sitter-go"
+version = "0.23.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b13d476345220dbe600147dd444165c5791bf85ef53e28acbedd46112ee18431"
 dependencies = [
  "cc",
  "tree-sitter-language",
