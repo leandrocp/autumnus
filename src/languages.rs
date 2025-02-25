@@ -13,6 +13,7 @@ extern "C" {
     fn tree_sitter_dockerfile() -> *const ();
     fn tree_sitter_eex() -> *const ();
     fn tree_sitter_elm() -> *const ();
+    fn tree_sitter_iex() -> *const ();
 }
 
 mod generated {
@@ -39,6 +40,7 @@ pub enum Language {
     Haskell,
     Heex,
     Html,
+    Iex,
     Java,
     Javascript,
     Json,
@@ -75,6 +77,7 @@ impl Language {
             "haskell" => Some(Language::Haskell),
             "heex" => Some(Language::Heex),
             "html" => Some(Language::Html),
+            "iex" => Some(Language::Iex),
             "java" => Some(Language::Java),
             "javascript" => Some(Language::Javascript),
             "json" => Some(Language::Json),
@@ -217,6 +220,7 @@ impl Language {
             Language::Haskell => &["*.hs"],
             Language::Heex => &["*.heex", "*.neex"],
             Language::Html => &["*.html", "*.htm", "*.xhtml"],
+            Language::Iex => &["*.iex"],
             Language::Java => &["*.java"],
             Language::Javascript => &["*.cjs", "*.js", "*.mjs", "*.snap"],
             Language::Json => &[
@@ -331,6 +335,7 @@ impl Language {
             Language::Haskell => "Haskell",
             Language::Heex => "HEEx",
             Language::Html => "HTML",
+            Language::Iex => "IEx",
             Language::Java => "Java",
             Language::Javascript => "JavaScript",
             Language::Json => "JSON",
@@ -369,6 +374,7 @@ impl Language {
             Language::Haskell => &HASKELL_CONFIG,
             Language::Heex => &HEEX_CONFIG,
             Language::Html => &HTML_CONFIG,
+            Language::Iex => &IEX_CONFIG,
             Language::Java => &JAVA_CONFIG,
             Language::Javascript => &JAVASCRIPT_CONFIG,
             Language::Json => &JSON_CONFIG,
@@ -610,6 +616,21 @@ static HTML_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         HTML_LOCALS,
     )
     .expect("failed to create html highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static IEX_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_iex) };
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "iex",
+        IEX_HIGHLIGHTS,
+        IEX_INJECTIONS,
+        IEX_LOCALS,
+    )
+    .expect("failed to create iex highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
