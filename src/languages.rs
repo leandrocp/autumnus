@@ -41,6 +41,7 @@ pub enum Language {
     Html,
     Java,
     Javascript,
+    Json,
     Lua,
     Php,
     PlainText,
@@ -76,6 +77,7 @@ impl Language {
             "html" => Some(Language::Html),
             "java" => Some(Language::Java),
             "javascript" => Some(Language::Javascript),
+            "json" => Some(Language::Json),
             "lua" => Some(Language::Lua),
             "php" => Some(Language::Php),
             "python" => Some(Language::Python),
@@ -217,6 +219,35 @@ impl Language {
             Language::Html => &["*.html", "*.htm", "*.xhtml"],
             Language::Java => &["*.java"],
             Language::Javascript => &["*.cjs", "*.js", "*.mjs", "*.snap"],
+            Language::Json => &[
+                "*.json",
+                "*.avsc",
+                "*.geojson",
+                "*.gltf",
+                "*.har",
+                "*.ice",
+                "*.JSON-tmLanguage",
+                "*.jsonl",
+                "*.mcmeta",
+                "*.tfstate",
+                "*.tfstate.backup",
+                "*.topojson",
+                "*.webapp",
+                "*.webmanifest",
+                ".arcconfig",
+                ".auto-changelog",
+                ".c8rc",
+                ".htmlhintrc",
+                ".imgbotconfig",
+                ".nycrc",
+                ".tern-config",
+                ".tern-project",
+                ".watchmanconfig",
+                "Pipfile.lock",
+                "composer.lock",
+                "mcmod.info",
+                "flake.lock",
+            ],
             Language::Lua => &["*.lua"],
             Language::Php => &[
                 "*.php", "*.phtml", "*.php3", "*.php4", "*.php5", "*.php7", "*.phps",
@@ -302,6 +333,7 @@ impl Language {
             Language::Html => "HTML",
             Language::Java => "Java",
             Language::Javascript => "JavaScript",
+            Language::Json => "JSON",
             Language::Lua => "Lua",
             Language::Php => "PHP",
             Language::PlainText => "Plain Text",
@@ -339,6 +371,7 @@ impl Language {
             Language::Html => &HTML_CONFIG,
             Language::Java => &JAVA_CONFIG,
             Language::Javascript => &JAVASCRIPT_CONFIG,
+            Language::Json => &JSON_CONFIG,
             Language::Lua => &LUA_CONFIG,
             Language::Php => &PHP_CONFIG,
             Language::Python => &PYTHON_CONFIG,
@@ -603,6 +636,19 @@ static JAVASCRIPT_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         JAVASCRIPT_LOCALS,
     )
     .expect("failed to create javascript highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static JSON_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(tree_sitter_json::LANGUAGE),
+        "json",
+        JSON_HIGHLIGHTS,
+        JSON_INJECTIONS,
+        JSON_LOCALS,
+    )
+    .expect("failed to create json highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
