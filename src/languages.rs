@@ -342,10 +342,8 @@ impl Language {
 }
 
 static BASH_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = tree_sitter_bash::LANGUAGE;
-
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter::Language::new(tree_sitter_bash::LANGUAGE),
         "bash",
         BASH_HIGHLIGHTS,
         BASH_INJECTIONS,
@@ -357,10 +355,8 @@ static BASH_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 });
 
 static C_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = tree_sitter_c::LANGUAGE;
-
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter::Language::new(tree_sitter_c::LANGUAGE),
         "c",
         C_HIGHLIGHTS,
         C_INJECTIONS,
@@ -387,10 +383,8 @@ static CLOJURE_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 });
 
 static CSHARP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = tree_sitter_c_sharp::LANGUAGE;
-
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter::Language::new(tree_sitter_c_sharp::LANGUAGE),
         "csharp",
         C_SHARP_HIGHLIGHTS,
         C_SHARP_INJECTIONS,
@@ -402,10 +396,8 @@ static CSHARP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 });
 
 static CPP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = tree_sitter_cpp::LANGUAGE;
-
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter::Language::new(tree_sitter_cpp::LANGUAGE),
         "cpp",
         CPP_HIGHLIGHTS,
         CPP_INJECTIONS,
@@ -417,10 +409,8 @@ static CPP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 });
 
 static CSS_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = tree_sitter_css::LANGUAGE;
-
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter::Language::new(tree_sitter_css::LANGUAGE),
         "css",
         CSS_HIGHLIGHTS,
         CSS_INJECTIONS,
@@ -432,10 +422,8 @@ static CSS_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 });
 
 static DIFF_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = tree_sitter_diff::LANGUAGE;
-
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter::Language::new(tree_sitter_diff::LANGUAGE),
         "diff",
         DIFF_HIGHLIGHTS,
         DIFF_INJECTIONS,
@@ -477,10 +465,8 @@ static EEX_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 });
 
 static ELIXIR_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = tree_sitter_elixir::LANGUAGE;
-
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter::Language::new(tree_sitter_elixir::LANGUAGE),
         "elixir",
         ELIXIR_HIGHLIGHTS,
         ELIXIR_INJECTIONS,
@@ -507,10 +493,8 @@ static ELM_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 });
 
 static ERLANG_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = tree_sitter_erlang::LANGUAGE;
-
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter::Language::new(tree_sitter_erlang::LANGUAGE),
         "erlang",
         ERLANG_HIGHLIGHTS,
         ERLANG_INJECTIONS,
@@ -522,10 +506,8 @@ static ERLANG_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 });
 
 static GLEAM_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = tree_sitter_gleam::LANGUAGE;
-
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter::Language::new(tree_sitter_gleam::LANGUAGE),
         "gleam",
         GLEAM_HIGHLIGHTS,
         GLEAM_INJECTIONS,
@@ -537,10 +519,8 @@ static GLEAM_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 });
 
 static GO_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = tree_sitter_go::LANGUAGE;
-
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter::Language::new(tree_sitter_go::LANGUAGE),
         "go",
         GO_HIGHLIGHTS,
         GO_INJECTIONS,
@@ -552,10 +532,8 @@ static GO_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 });
 
 static HASKELL_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = tree_sitter_haskell::LANGUAGE;
-
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter::Language::new(tree_sitter_haskell::LANGUAGE),
         "haskell",
         HASKELL_HIGHLIGHTS,
         HASKELL_INJECTIONS,
@@ -567,10 +545,8 @@ static HASKELL_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 });
 
 static HEEX_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = tree_sitter_heex::LANGUAGE;
-
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter::Language::new(tree_sitter_heex::LANGUAGE),
         "heex",
         HEEX_HIGHLIGHTS,
         HEEX_INJECTIONS,
@@ -582,10 +558,8 @@ static HEEX_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 });
 
 static HTML_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = tree_sitter_html::LANGUAGE;
-
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter::Language::new(tree_sitter_html::LANGUAGE),
         "html",
         HTML_HIGHLIGHTS,
         HTML_INJECTIONS,
@@ -597,10 +571,8 @@ static HTML_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 });
 
 static LUA_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = tree_sitter_lua::LANGUAGE;
-
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter::Language::new(tree_sitter_lua::LANGUAGE),
         "lua",
         LUA_HIGHLIGHTS,
         LUA_INJECTIONS,
@@ -612,10 +584,8 @@ static LUA_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 });
 
 static PHP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = tree_sitter_php::LANGUAGE_PHP;
-
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter::Language::new(tree_sitter_php::LANGUAGE_PHP),
         "php",
         PHP_HIGHLIGHTS,
         PHP_INJECTIONS,
@@ -627,10 +597,8 @@ static PHP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 });
 
 static PLAIN_TEXT_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = tree_sitter_diff::LANGUAGE;
-
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter::Language::new(tree_sitter_diff::LANGUAGE),
         "plaintext",
         "",
         "",
@@ -642,10 +610,8 @@ static PLAIN_TEXT_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 });
 
 static PYTHON_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = tree_sitter_python::LANGUAGE;
-
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter::Language::new(tree_sitter_python::LANGUAGE),
         "python",
         PYTHON_HIGHLIGHTS,
         PYTHON_INJECTIONS,
@@ -657,10 +623,8 @@ static PYTHON_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 });
 
 static RUBY_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = tree_sitter_ruby::LANGUAGE;
-
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter::Language::new(tree_sitter_ruby::LANGUAGE),
         "ruby",
         RUBY_HIGHLIGHTS,
         RUBY_INJECTIONS,
@@ -672,10 +636,8 @@ static RUBY_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 });
 
 static RUST_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = tree_sitter_rust::LANGUAGE;
-
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter::Language::new(tree_sitter_rust::LANGUAGE),
         "rust",
         RUST_HIGHLIGHTS,
         RUST_INJECTIONS,
@@ -687,10 +649,8 @@ static RUST_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 });
 
 static SWIFT_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = tree_sitter_swift::LANGUAGE;
-
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter::Language::new(tree_sitter_swift::LANGUAGE),
         "swift",
         SWIFT_HIGHLIGHTS,
         SWIFT_INJECTIONS,
@@ -702,10 +662,8 @@ static SWIFT_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 });
 
 static YAML_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = tree_sitter_yaml::LANGUAGE;
-
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter::Language::new(tree_sitter_yaml::LANGUAGE),
         "yaml",
         YAML_HIGHLIGHTS,
         YAML_INJECTIONS,
@@ -717,10 +675,8 @@ static YAML_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 });
 
 static ZIG_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = tree_sitter_zig::LANGUAGE;
-
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter::Language::new(tree_sitter_zig::LANGUAGE),
         "zig",
         ZIG_HIGHLIGHTS,
         ZIG_INJECTIONS,
