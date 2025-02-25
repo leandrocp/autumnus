@@ -39,6 +39,7 @@ pub enum Language {
     Haskell,
     Heex,
     Html,
+    Java,
     Lua,
     Php,
     PlainText,
@@ -72,6 +73,7 @@ impl Language {
             "haskell" => Some(Language::Haskell),
             "heex" => Some(Language::Heex),
             "html" => Some(Language::Html),
+            "java" => Some(Language::Java),
             "lua" => Some(Language::Lua),
             "php" => Some(Language::Php),
             "python" => Some(Language::Python),
@@ -210,6 +212,7 @@ impl Language {
             Language::Haskell => &["*.hs"],
             Language::Heex => &["*.heex", "*.neex"],
             Language::Html => &["*.html", "*.htm", "*.xhtml"],
+            Language::Java => &["*.java"],
             Language::Lua => &["*.lua"],
             Language::Php => &[
                 "*.php", "*.phtml", "*.php3", "*.php4", "*.php5", "*.php7", "*.phps",
@@ -293,6 +296,7 @@ impl Language {
             Language::Haskell => "Haskell",
             Language::Heex => "HEEx",
             Language::Html => "HTML",
+            Language::Java => "Java",
             Language::Lua => "Lua",
             Language::Php => "PHP",
             Language::PlainText => "Plain Text",
@@ -328,6 +332,7 @@ impl Language {
             Language::Haskell => &HASKELL_CONFIG,
             Language::Heex => &HEEX_CONFIG,
             Language::Html => &HTML_CONFIG,
+            Language::Java => &JAVA_CONFIG,
             Language::Lua => &LUA_CONFIG,
             Language::Php => &PHP_CONFIG,
             Language::Python => &PYTHON_CONFIG,
@@ -566,6 +571,19 @@ static HTML_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         HTML_LOCALS,
     )
     .expect("failed to create html highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static JAVA_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(tree_sitter_java::LANGUAGE),
+        "java",
+        JAVA_HIGHLIGHTS,
+        JAVA_INJECTIONS,
+        JAVA_LOCALS,
+    )
+    .expect("failed to create java highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
