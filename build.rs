@@ -40,6 +40,11 @@ fn vendored_parsers() {
             src_dir: "vendored_parsers/tree-sitter-iex/src",
             extra_files: vec![],
         },
+        TreeSitterParser {
+            name: "tree-sitter-kotlin",
+            src_dir: "vendored_parsers/tree-sitter-kotlin/src",
+            extra_files: vec!["scanner.c"],
+        },
     ];
 
     for parser in &parsers {
