@@ -1,0 +1,24 @@
+ci-cd:
+  - changed-files:
+    - any-glob-to-any-file:
+        - .github/**/*
+
+grammar:
+  - changed-files:
+    - any-glob-to-any-file:
+        - grammar.js
+
+bindings:
+  - changed-files:
+    - any-glob-to-any-file:
+        - bindings/**/*
+
+examples:
+  - changed-files:
+    - any-glob-to-any-file:
+        - examples/**/*
+
+scanner:
+  - changed-files:
+    - any-glob-to-any-file:
+        - src/scanner.c
