@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>yaml - onedark_pro_dark - Autumnus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'JetBrains Mono', monospace;
+            line-height: 1.5;
+        }
+        pre {
+            font-size: 15px;
+            margin: 20px;
+            padding: 50px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+<pre class="athl" style="color: #abb2bf; background-color: #000000;"><code class="language-yaml" translate="no" tabindex="0"><span class="athl-line" data-athl-line="1"><span style="color: #abb2bf;">---</span>  <span style="color: #7f848e;"># document start</span>
+</span><span class="athl-line" data-athl-line="2">
+</span><span class="athl-line" data-athl-line="3"><span style="color: #7f848e;"># Comments in YAML look like this.</span>
+</span><span class="athl-line" data-athl-line="4"><span style="color: #7f848e;"># YAML supports single-line comments.</span>
+</span><span class="athl-line" data-athl-line="5">
+</span><span class="athl-line" data-athl-line="6"><span style="color: #7f848e;">################</span>
+</span><span class="athl-line" data-athl-line="7"><span style="color: #7f848e;"># SCALAR TYPES #</span>
+</span><span class="athl-line" data-athl-line="8"><span style="color: #7f848e;">################</span>
+</span><span class="athl-line" data-athl-line="9">
+</span><span class="athl-line" data-athl-line="10"><span style="color: #7f848e;"># Our root object (which continues for the entire document) will be a map,</span>
+</span><span class="athl-line" data-athl-line="11"><span style="color: #7f848e;"># which is equivalent to a dictionary, hash or object in other languages.</span>
+</span><span class="athl-line" data-athl-line="12"><span style="color: #ef596f;">key</span><span style="color: #abb2bf;">:</span> <span style="color: #89ca78;">value</span>
+</span><span class="athl-line" data-athl-line="13"><span style="color: #ef596f;">another_key</span><span style="color: #abb2bf;">:</span> <span style="color: #89ca78;">Another value goes here.</span>
+</span><span class="athl-line" data-athl-line="14"><span style="color: #ef596f;">a_number_value</span><span style="color: #abb2bf;">:</span> <span style="color: #d19a66;">100</span>
+</span><span class="athl-line" data-athl-line="15"><span style="color: #ef596f;">scientific_notation</span><span style="color: #abb2bf;">:</span> <span style="color: #d19a66;">1e+12</span>
+</span><span class="athl-line" data-athl-line="16"><span style="color: #ef596f;">hex_notation</span><span style="color: #abb2bf;">:</span> <span style="color: #d19a66;">0x123</span>  <span style="color: #7f848e;"># evaluates to 291</span>
+</span><span class="athl-line" data-athl-line="17"><span style="color: #ef596f;">octal_notation</span><span style="color: #abb2bf;">:</span> <span style="color: #d19a66;">0123</span> <span style="color: #7f848e;"># evaluates to 83</span>
+</span><span class="athl-line" data-athl-line="18">
+</span><span class="athl-line" data-athl-line="19"><span style="color: #7f848e;"># The number 1 will be interpreted as a number, not a boolean. </span>
+</span><span class="athl-line" data-athl-line="20"><span style="color: #7f848e;"># If you want it to be interpreted as a boolean, use true.</span>
+</span><span class="athl-line" data-athl-line="21"><span style="color: #ef596f;">boolean</span><span style="color: #abb2bf;">:</span> <span style="color: #d19a66;">true</span>
+</span><span class="athl-line" data-athl-line="22"><span style="color: #ef596f;">null_value</span><span style="color: #abb2bf;">:</span> <span style="color: #d55fde;">null</span>
+</span><span class="athl-line" data-athl-line="23"><span style="color: #ef596f;">another_null_value</span><span style="color: #abb2bf;">:</span> <span style="color: #d55fde;">~</span>
+</span><span class="athl-line" data-athl-line="24"><span style="color: #ef596f;">key with spaces</span><span style="color: #abb2bf;">:</span> <span style="color: #89ca78;">value</span>
+</span><span class="athl-line" data-athl-line="25">
+</span><span class="athl-line" data-athl-line="26"><span style="color: #7f848e;"># Yes and No (doesn&#39;t matter the case) will be evaluated to boolean </span>
+</span><span class="athl-line" data-athl-line="27"><span style="color: #7f848e;"># true and false values respectively.</span>
+</span><span class="athl-line" data-athl-line="28"><span style="color: #7f848e;"># To use the actual value use single or double quotes.</span>
+</span><span class="athl-line" data-athl-line="29"><span style="color: #ef596f;">no</span><span style="color: #abb2bf;">:</span> <span style="color: #89ca78;">no</span>            <span style="color: #7f848e;"># evaluates to &quot;no&quot;: false</span>
+</span><span class="athl-line" data-athl-line="30"><span style="color: #ef596f;">yes</span><span style="color: #abb2bf;">:</span> <span style="color: #89ca78;">No</span>           <span style="color: #7f848e;"># evaluates to &quot;yes&quot;: false</span>
+</span><span class="athl-line" data-athl-line="31"><span style="color: #ef596f;">not_enclosed</span><span style="color: #abb2bf;">:</span> <span style="color: #89ca78;">yes</span> <span style="color: #7f848e;"># evaluates to &quot;not_enclosed&quot;: true</span>
+</span><span class="athl-line" data-athl-line="32"><span style="color: #ef596f;">enclosed</span><span style="color: #abb2bf;">:</span> <span style="color: #89ca78;">&quot;yes&quot;</span>   <span style="color: #7f848e;"># evaluates to &quot;enclosed&quot;: yes</span>
+</span><span class="athl-line" data-athl-line="33">
+</span><span class="athl-line" data-athl-line="34"><span style="color: #7f848e;"># Notice that strings don&#39;t need to be quoted. However, they can be.</span>
+</span><span class="athl-line" data-athl-line="35"><span style="color: #ef596f;">however</span><span style="color: #abb2bf;">:</span> <span style="color: #89ca78;">&#39;A string, enclosed in quotes.&#39;</span>
+</span><span class="athl-line" data-athl-line="36"><span style="color: #ef596f;">&#39;Keys can be quoted too.&#39;</span><span style="color: #abb2bf;">:</span> <span style="color: #89ca78;">&quot;Useful if you want to put a &#39;:&#39; in your key.&quot;</span>
+</span><span class="athl-line" data-athl-line="37"><span style="color: #ef596f;">single quotes</span><span style="color: #abb2bf;">:</span> <span style="color: #89ca78;">&#39;have <span style="color: #2bbac5;">&#39;&#39;</span>one<span style="color: #2bbac5;">&#39;&#39;</span> escape pattern&#39;</span>
+</span><span class="athl-line" data-athl-line="38"><span style="color: #ef596f;">double quotes</span><span style="color: #abb2bf;">:</span> <span style="color: #89ca78;">&quot;have many: <span style="color: #2bbac5;">\&quot;</span>, <span style="color: #2bbac5;">\0</span>, <span style="color: #2bbac5;">\t</span>, <span style="color: #2bbac5;">\u263A</span>, <span style="color: #2bbac5;">\x0d</span><span style="color: #2bbac5;">\x0a</span> == <span style="color: #2bbac5;">\r</span><span style="color: #2bbac5;">\n</span>, and more.&quot;</span>
+</span><span class="athl-line" data-athl-line="39"><span style="color: #7f848e;"># UTF-8/16/32 characters need to be encoded</span>
+</span><span class="athl-line" data-athl-line="40"><span style="color: #ef596f;">Superscript two</span><span style="color: #abb2bf;">:</span> <span style="color: #89ca78;">\u00B2</span>
+</span><span class="athl-line" data-athl-line="41">
+</span><span class="athl-line" data-athl-line="42"><span style="color: #7f848e;"># Special characters must be enclosed in single or double quotes</span>
+</span><span class="athl-line" data-athl-line="43"><span style="color: #ef596f;">special_characters</span><span style="color: #abb2bf;">:</span> <span style="color: #89ca78;">&quot;[ John ] &amp; { Jane } - &lt;Doe&gt;&quot;</span>
+</span><span class="athl-line" data-athl-line="44">
+</span><span class="athl-line" data-athl-line="45"><span style="color: #7f848e;"># Multiple-line strings can be written either as a &#39;literal block&#39; (using |), </span>
+</span><span class="athl-line" data-athl-line="46"><span style="color: #7f848e;"># or a &#39;folded block&#39; (using &#39;&gt;&#39;).</span>
+</span><span class="athl-line" data-athl-line="47"><span style="color: #7f848e;"># Literal block turn every newline within the string into a literal newline (\n).</span>
+</span><span class="athl-line" data-athl-line="48"><span style="color: #7f848e;"># Folded block removes newlines within the string.</span>
+</span><span class="athl-line" data-athl-line="49"><span style="color: #ef596f;">literal_block</span><span style="color: #abb2bf;">:</span> <span style="color: #89ca78;"><span style="color: #abb2bf;">|</span></span>
+</span><span class="athl-line" data-athl-line="50"><span style="color: #89ca78;">  This entire block of text will be the value of the &#39;literal_block&#39; key,</span>
+</span><span class="athl-line" data-athl-line="51"><span style="color: #89ca78;">  with line breaks being preserved.</span>
+</span><span class="athl-line" data-athl-line="52"><span style="color: #89ca78;"></span>
+</span><span class="athl-line" data-athl-line="53"><span style="color: #89ca78;">  The literal continues until de-dented, and the leading indentation is</span>
+</span><span class="athl-line" data-athl-line="54"><span style="color: #89ca78;">  stripped.</span>
+</span><span class="athl-line" data-athl-line="55"><span style="color: #89ca78;"></span>
+</span><span class="athl-line" data-athl-line="56"><span style="color: #89ca78;">      Any lines that are &#39;more-indented&#39; keep the rest of their indentation -</span>
+</span><span class="athl-line" data-athl-line="57"><span style="color: #89ca78;">      these lines will be indented by 4 spaces.</span>
+</span><span class="athl-line" data-athl-line="58"><span style="color: #ef596f;">folded_style</span><span style="color: #abb2bf;">:</span> <span style="color: #89ca78;"><span style="color: #abb2bf;">&gt;</span></span>
+</span><span class="athl-line" data-athl-line="59"><span style="color: #89ca78;">  This entire block of text will be the value of &#39;folded_style&#39;, but this</span>
+</span><span class="athl-line" data-athl-line="60"><span style="color: #89ca78;">  time, all newlines will be replaced with a single space.</span>
+</span><span class="athl-line" data-athl-line="61"><span style="color: #89ca78;"></span>
+</span><span class="athl-line" data-athl-line="62"><span style="color: #89ca78;">  Blank lines, like above, are converted to a newline character.</span>
+</span><span class="athl-line" data-athl-line="63"><span style="color: #89ca78;"></span>
+</span><span class="athl-line" data-athl-line="64"><span style="color: #89ca78;">      &#39;More-indented&#39; lines keep their newlines, too -</span>
+</span><span class="athl-line" data-athl-line="65"><span style="color: #89ca78;">      this text will appear over two lines.</span>
+</span><span class="athl-line" data-athl-line="66">
+</span><span class="athl-line" data-athl-line="67"><span style="color: #7f848e;"># |- and &gt;- removes the trailing blank lines (also called literal/block &quot;strip&quot;)</span>
+</span><span class="athl-line" data-athl-line="68"><span style="color: #ef596f;">literal_strip</span><span style="color: #abb2bf;">:</span> <span style="color: #89ca78;"><span style="color: #abb2bf;">|-</span></span>
+</span><span class="athl-line" data-athl-line="69"><span style="color: #89ca78;">  This entire block of text will be the value of the &#39;literal_strip&#39; key,</span>
+</span><span class="athl-line" data-athl-line="70"><span style="color: #89ca78;">  with trailing blank line being stripped.</span>
+</span><span class="athl-line" data-athl-line="71"><span style="color: #ef596f;">block_strip</span><span style="color: #abb2bf;">:</span> <span style="color: #89ca78;"><span style="color: #abb2bf;">&gt;-</span></span>
+</span><span class="athl-line" data-athl-line="72"><span style="color: #89ca78;">  This entire block of text will be the value of &#39;block_strip&#39;, but this</span>
+</span><span class="athl-line" data-athl-line="73"><span style="color: #89ca78;">  time, all newlines will be replaced with a single space and </span>
+</span><span class="athl-line" data-athl-line="74"><span style="color: #89ca78;">  trailing blank line being stripped.</span>
+</span><span class="athl-line" data-athl-line="75">
+</span><span class="athl-line" data-athl-line="76"><span style="color: #7f848e;"># |+ and &gt;+ keeps trailing blank lines (also called literal/block &quot;keep&quot;)</span>
+</span><span class="athl-line" data-athl-line="77"><span style="color: #ef596f;">literal_keep</span><span style="color: #abb2bf;">:</span> <span style="color: #89ca78;"><span style="color: #abb2bf;">|+</span></span>
+</span><span class="athl-line" data-athl-line="78"><span style="color: #89ca78;">  This entire block of text will be the value of the &#39;literal_keep&#39; key,</span>
+</span><span class="athl-line" data-athl-line="79"><span style="color: #89ca78;">  with trailing blank line being kept.</span>
+</span><span class="athl-line" data-athl-line="80">
+</span><span class="athl-line" data-athl-line="81"><span style="color: #ef596f;">block_keep</span><span style="color: #abb2bf;">:</span> <span style="color: #89ca78;"><span style="color: #abb2bf;">&gt;+</span></span>
+</span><span class="athl-line" data-athl-line="82"><span style="color: #89ca78;">  This entire block of text will be the value of &#39;block_keep&#39;, but this</span>
+</span><span class="athl-line" data-athl-line="83"><span style="color: #89ca78;">  time, all newlines will be replaced with a single space and </span>
+</span><span class="athl-line" data-athl-line="84"><span style="color: #89ca78;">  trailing blank line being kept.</span>
+</span><span class="athl-line" data-athl-line="85">
+</span><span class="athl-line" data-athl-line="86"><span style="color: #7f848e;">####################</span>
+</span><span class="athl-line" data-athl-line="87"><span style="color: #7f848e;"># COLLECTION TYPES #</span>
+</span><span class="athl-line" data-athl-line="88"><span style="color: #7f848e;">####################</span>
+</span><span class="athl-line" data-athl-line="89">
+</span><span class="athl-line" data-athl-line="90"><span style="color: #7f848e;"># Nesting uses indentation. 2 space indent is preferred (but not required).</span>
+</span><span class="athl-line" data-athl-line="91"><span style="color: #ef596f;">a_nested_map</span><span style="color: #abb2bf;">:</span>
+</span><span class="athl-line" data-athl-line="92">  <span style="color: #ef596f;">key</span><span style="color: #abb2bf;">:</span> <span style="color: #89ca78;">value</span>
+</span><span class="athl-line" data-athl-line="93">  <span style="color: #ef596f;">another_key</span><span style="color: #abb2bf;">:</span> <span style="color: #89ca78;">Another Value</span>
+</span><span class="athl-line" data-athl-line="94">  <span style="color: #ef596f;">another_nested_map</span><span style="color: #abb2bf;">:</span>
+</span><span class="athl-line" data-athl-line="95">    <span style="color: #ef596f;">hello</span><span style="color: #abb2bf;">:</span> <span style="color: #89ca78;">hello</span>
+</span><span class="athl-line" data-athl-line="96">
+</span><span class="athl-line" data-athl-line="97"><span style="color: #7f848e;"># Maps don&#39;t have to have string keys.</span>
+</span><span class="athl-line" data-athl-line="98"><span style="color: #d19a66;">0.25</span><span style="color: #abb2bf;">:</span> <span style="color: #89ca78;">a float key</span>
+</span><span class="athl-line" data-athl-line="99">
+</span><span class="athl-line" data-athl-line="100"><span style="color: #7f848e;"># Keys can also be complex, like multi-line objects</span>
+</span><span class="athl-line" data-athl-line="101"><span style="color: #7f848e;"># We use ? followed by a space to indicate the start of a complex key.</span>
+</span><span class="athl-line" data-athl-line="102"><span style="color: #abb2bf;">?</span> <span style="color: #89ca78;"><span style="color: #abb2bf;">|</span></span>
+</span><span class="athl-line" data-athl-line="103"><span style="color: #89ca78;">  This is a key</span>
+</span><span class="athl-line" data-athl-line="104"><span style="color: #89ca78;">  that has multiple lines</span>
+</span><span class="athl-line" data-athl-line="105"><span style="color: #abb2bf;">:</span> <span style="color: #89ca78;">and this is its value</span>
+</span><span class="athl-line" data-athl-line="106">
+</span><span class="athl-line" data-athl-line="107"><span style="color: #7f848e;"># YAML also allows mapping between sequences with the complex key syntax</span>
+</span><span class="athl-line" data-athl-line="108"><span style="color: #7f848e;"># Some language parsers might complain</span>
+</span><span class="athl-line" data-athl-line="109"><span style="color: #7f848e;"># An example</span>
+</span><span class="athl-line" data-athl-line="110"><span style="color: #abb2bf;">?</span> <span style="color: #abb2bf;">-</span> <span style="color: #89ca78;">Manchester United</span>
+</span><span class="athl-line" data-athl-line="111">  <span style="color: #abb2bf;">-</span> <span style="color: #89ca78;">Real Madrid</span>
+</span><span class="athl-line" data-athl-line="112"><span style="color: #abb2bf;">:</span> <span style="color: #d55fde;">[</span> <span style="color: #89ca78;">2001-01-01</span><span style="color: #abb2bf;">,</span> <span style="color: #89ca78;">2002-02-02</span> <span style="color: #d55fde;">]</span>
+</span><span class="athl-line" data-athl-line="113">
+</span><span class="athl-line" data-athl-line="114"><span style="color: #7f848e;"># Sequences (equivalent to lists or arrays) look like this</span>
+</span><span class="athl-line" data-athl-line="115"><span style="color: #7f848e;"># (note that the &#39;-&#39; counts as indentation):</span>
+</span><span class="athl-line" data-athl-line="116"><span style="color: #ef596f;">a_sequence</span><span style="color: #abb2bf;">:</span>
+</span><span class="athl-line" data-athl-line="117">  <span style="color: #abb2bf;">-</span> <span style="color: #89ca78;">Item 1</span>
+</span><span class="athl-line" data-athl-line="118">  <span style="color: #abb2bf;">-</span> <span style="color: #89ca78;">Item 2</span>
+</span><span class="athl-line" data-athl-line="119">  <span style="color: #abb2bf;">-</span> <span style="color: #d19a66;">0.5</span>  <span style="color: #7f848e;"># sequences can contain disparate types.</span>
+</span><span class="athl-line" data-athl-line="120">  <span style="color: #abb2bf;">-</span> <span style="color: #89ca78;">Item 4</span>
+</span><span class="athl-line" data-athl-line="121">  <span style="color: #abb2bf;">-</span> <span style="color: #ef596f;">key</span><span style="color: #abb2bf;">:</span> <span style="color: #89ca78;">value</span>
+</span><span class="athl-line" data-athl-line="122">    <span style="color: #ef596f;">another_key</span><span style="color: #abb2bf;">:</span> <span style="color: #89ca78;">another_value</span>
+</span><span class="athl-line" data-athl-line="123">  <span style="color: #abb2bf;">-</span> <span style="color: #abb2bf;">-</span> <span style="color: #89ca78;">This is a sequence</span>
+</span><span class="athl-line" data-athl-line="124">    <span style="color: #abb2bf;">-</span> <span style="color: #89ca78;">inside another sequence</span>
+</span><span class="athl-line" data-athl-line="125">  <span style="color: #abb2bf;">-</span> <span style="color: #abb2bf;">-</span> <span style="color: #abb2bf;">-</span> <span style="color: #89ca78;">Nested sequence indicators</span>
+</span><span class="athl-line" data-athl-line="126">      <span style="color: #abb2bf;">-</span> <span style="color: #89ca78;">can be collapsed</span>
+</span><span class="athl-line" data-athl-line="127">
+</span><span class="athl-line" data-athl-line="128"><span style="color: #7f848e;"># Since YAML is a superset of JSON, you can also write JSON-style maps and</span>
+</span><span class="athl-line" data-athl-line="129"><span style="color: #7f848e;"># sequences:</span>
+</span><span class="athl-line" data-athl-line="130"><span style="color: #ef596f;">json_map</span><span style="color: #abb2bf;">:</span> <span style="color: #d55fde;">{</span> <span style="color: #ef596f;">&quot;key&quot;</span><span style="color: #abb2bf;">:</span> <span style="color: #89ca78;">&quot;value&quot;</span> <span style="color: #d55fde;">}</span>
+</span><span class="athl-line" data-athl-line="131"><span style="color: #ef596f;">json_seq</span><span style="color: #abb2bf;">:</span> <span style="color: #d55fde;">[</span> <span style="color: #d19a66;">3</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #89ca78;">&quot;takeoff&quot;</span> <span style="color: #d55fde;">]</span>
+</span><span class="athl-line" data-athl-line="132"><span style="color: #ef596f;">and quotes are optional</span><span style="color: #abb2bf;">:</span> <span style="color: #d55fde;">{</span> <span style="color: #ef596f;">key</span><span style="color: #abb2bf;">:</span> <span style="color: #d55fde;">[</span> <span style="color: #d19a66;">3</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #89ca78;">takeoff</span> <span style="color: #d55fde;">]</span> <span style="color: #d55fde;">}</span>
+</span><span class="athl-line" data-athl-line="133">
+</span><span class="athl-line" data-athl-line="134"><span style="color: #7f848e;">#######################</span>
+</span><span class="athl-line" data-athl-line="135"><span style="color: #7f848e;"># EXTRA YAML FEATURES #</span>
+</span><span class="athl-line" data-athl-line="136"><span style="color: #7f848e;">#######################</span>
+</span><span class="athl-line" data-athl-line="137">
+</span><span class="athl-line" data-athl-line="138"><span style="color: #7f848e;"># YAML also has a handy feature called &#39;anchors&#39;, which let you easily duplicate</span>
+</span><span class="athl-line" data-athl-line="139"><span style="color: #7f848e;"># content across your document.</span>
+</span><span class="athl-line" data-athl-line="140"><span style="color: #7f848e;"># Anchors identified by &amp; character which define the value.</span>
+</span><span class="athl-line" data-athl-line="141"><span style="color: #7f848e;"># Aliases identified by * character which acts as &quot;see above&quot; command.</span>
+</span><span class="athl-line" data-athl-line="142"><span style="color: #7f848e;"># Both of these keys will have the same value:</span>
+</span><span class="athl-line" data-athl-line="143"><span style="color: #ef596f;">anchored_content</span><span style="color: #abb2bf;">:</span> <span style="color: #abb2bf;">&amp;</span><span style="color: #d55fde;">anchor_name</span> <span style="color: #89ca78;">This string will appear as the value of two keys.</span>
+</span><span class="athl-line" data-athl-line="144"><span style="color: #ef596f;">other_anchor</span><span style="color: #abb2bf;">:</span> <span style="color: #abb2bf;">*</span><span style="color: #d55fde;">anchor_name</span>
+</span><span class="athl-line" data-athl-line="145">
+</span><span class="athl-line" data-athl-line="146"><span style="color: #7f848e;"># Anchors can be used to duplicate/inherit properties</span>
+</span><span class="athl-line" data-athl-line="147"><span style="color: #ef596f;">base</span><span style="color: #abb2bf;">:</span> <span style="color: #abb2bf;">&amp;</span><span style="color: #d55fde;">base</span>
+</span><span class="athl-line" data-athl-line="148">  <span style="color: #ef596f;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #89ca78;">Everyone has same name</span>
+</span><span class="athl-line" data-athl-line="149">
+</span><span class="athl-line" data-athl-line="150"><span style="color: #7f848e;"># The expression &lt;&lt; is called &#39;Merge Key Language-Independent Type&#39;. It is used to</span>
+</span><span class="athl-line" data-athl-line="151"><span style="color: #7f848e;"># indicate that all the keys of one or more specified maps should be inserted</span>
+</span><span class="athl-line" data-athl-line="152"><span style="color: #7f848e;"># into the current map.</span>
+</span><span class="athl-line" data-athl-line="153"><span style="color: #7f848e;"># NOTE: If key already exists alias will not be merged</span>
+</span><span class="athl-line" data-athl-line="154"><span style="color: #ef596f;">foo</span><span style="color: #abb2bf;">:</span>
+</span><span class="athl-line" data-athl-line="155">  <span style="color: #ef596f;">&lt;&lt;</span><span style="color: #abb2bf;">:</span> <span style="color: #abb2bf;">*</span><span style="color: #d55fde;">base</span> <span style="color: #7f848e;"># doesn&#39;t merge the anchor</span>
+</span><span class="athl-line" data-athl-line="156">  <span style="color: #ef596f;">age</span><span style="color: #abb2bf;">:</span> <span style="color: #d19a66;">10</span>
+</span><span class="athl-line" data-athl-line="157">  <span style="color: #ef596f;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #89ca78;">John</span>
+</span><span class="athl-line" data-athl-line="158"><span style="color: #ef596f;">bar</span><span style="color: #abb2bf;">:</span>
+</span><span class="athl-line" data-athl-line="159">  <span style="color: #ef596f;">&lt;&lt;</span><span style="color: #abb2bf;">:</span> <span style="color: #abb2bf;">*</span><span style="color: #d55fde;">base</span> <span style="color: #7f848e;"># base anchor will be merged</span>
+</span><span class="athl-line" data-athl-line="160">  <span style="color: #ef596f;">age</span><span style="color: #abb2bf;">:</span> <span style="color: #d19a66;">20</span>
+</span><span class="athl-line" data-athl-line="161">
+</span><span class="athl-line" data-athl-line="162"><span style="color: #7f848e;"># foo name won&#39;t be changed and it will be: John. On the other hand, bar&#39;s name will be changed to the base one: Everyone has same name</span>
+</span><span class="athl-line" data-athl-line="163">
+</span><span class="athl-line" data-athl-line="164"><span style="color: #7f848e;"># YAML also has tags, which you can use to explicitly declare types.</span>
+</span><span class="athl-line" data-athl-line="165"><span style="color: #7f848e;"># Syntax: !![typeName] [value]</span>
+</span><span class="athl-line" data-athl-line="166"><span style="color: #ef596f;">explicit_boolean</span><span style="color: #abb2bf;">:</span> <span style="color: #e5c07b;">!!bool</span> <span style="color: #d19a66;">true</span>
+</span><span class="athl-line" data-athl-line="167"><span style="color: #ef596f;">explicit_integer</span><span style="color: #abb2bf;">:</span> <span style="color: #e5c07b;">!!int</span> <span style="color: #d19a66;">42</span>
+</span><span class="athl-line" data-athl-line="168"><span style="color: #ef596f;">explicit_float</span><span style="color: #abb2bf;">:</span> <span style="color: #e5c07b;">!!float</span> <span style="color: #d19a66;">-42.24</span>
+</span><span class="athl-line" data-athl-line="169"><span style="color: #ef596f;">explicit_string</span><span style="color: #abb2bf;">:</span> <span style="color: #e5c07b;">!!str</span> <span style="color: #d19a66;">0.5</span>
+</span><span class="athl-line" data-athl-line="170"><span style="color: #ef596f;">explicit_datetime</span><span style="color: #abb2bf;">:</span> <span style="color: #e5c07b;">!!timestamp</span> <span style="color: #89ca78;">2022-11-17 12:34:56.78 +9</span>
+</span><span class="athl-line" data-athl-line="171"><span style="color: #ef596f;">explicit_null</span><span style="color: #abb2bf;">:</span> <span style="color: #e5c07b;">!!null</span> <span style="color: #d55fde;">null</span>
+</span><span class="athl-line" data-athl-line="172">
+</span><span class="athl-line" data-athl-line="173"><span style="color: #7f848e;"># Some parsers implement language specific tags, like this one for Python&#39;s</span>
+</span><span class="athl-line" data-athl-line="174"><span style="color: #7f848e;"># complex number type.</span>
+</span><span class="athl-line" data-athl-line="175"><span style="color: #ef596f;">python_complex_number</span><span style="color: #abb2bf;">:</span> <span style="color: #e5c07b;">!!python/complex</span> <span style="color: #89ca78;">1+2j</span>
+</span><span class="athl-line" data-athl-line="176">
+</span><span class="athl-line" data-athl-line="177"><span style="color: #7f848e;"># We can also use yaml complex keys with language specific tags</span>
+</span><span class="athl-line" data-athl-line="178"><span style="color: #abb2bf;">?</span> <span style="color: #e5c07b;">!!python/tuple</span> <span style="color: #d55fde;">[</span> <span style="color: #d19a66;">5</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">7</span> <span style="color: #d55fde;">]</span>
+</span><span class="athl-line" data-athl-line="179"><span style="color: #abb2bf;">:</span> <span style="color: #89ca78;">Fifty Seven</span>
+</span><span class="athl-line" data-athl-line="180"><span style="color: #7f848e;"># Would be {(5, 7): &#39;Fifty Seven&#39;} in Python</span>
+</span><span class="athl-line" data-athl-line="181">
+</span><span class="athl-line" data-athl-line="182"><span style="color: #7f848e;">####################</span>
+</span><span class="athl-line" data-athl-line="183"><span style="color: #7f848e;"># EXTRA YAML TYPES #</span>
+</span><span class="athl-line" data-athl-line="184"><span style="color: #7f848e;">####################</span>
+</span><span class="athl-line" data-athl-line="185">
+</span><span class="athl-line" data-athl-line="186"><span style="color: #7f848e;"># Strings and numbers aren&#39;t the only scalars that YAML can understand.</span>
+</span><span class="athl-line" data-athl-line="187"><span style="color: #7f848e;"># ISO-formatted date and datetime literals are also parsed.</span>
+</span><span class="athl-line" data-athl-line="188"><span style="color: #ef596f;">datetime_canonical</span><span style="color: #abb2bf;">:</span> <span style="color: #89ca78;">2001-12-15T02:59:43.1Z</span>
+</span><span class="athl-line" data-athl-line="189"><span style="color: #ef596f;">datetime_space_separated_with_time_zone</span><span style="color: #abb2bf;">:</span> <span style="color: #89ca78;">2001-12-14 21:59:43.10 -5</span>
+</span><span class="athl-line" data-athl-line="190"><span style="color: #ef596f;">date_implicit</span><span style="color: #abb2bf;">:</span> <span style="color: #89ca78;">2002-12-14</span>
+</span><span class="athl-line" data-athl-line="191"><span style="color: #ef596f;">date_explicit</span><span style="color: #abb2bf;">:</span> <span style="color: #e5c07b;">!!timestamp</span> <span style="color: #89ca78;">2002-12-14</span>
+</span><span class="athl-line" data-athl-line="192">
+</span><span class="athl-line" data-athl-line="193"><span style="color: #7f848e;"># The !!binary tag indicates that a string is actually a base64-encoded</span>
+</span><span class="athl-line" data-athl-line="194"><span style="color: #7f848e;"># representation of a binary blob.</span>
+</span><span class="athl-line" data-athl-line="195"><span style="color: #ef596f;">gif_file</span><span style="color: #abb2bf;">:</span> <span style="color: #e5c07b;">!!binary</span> <span style="color: #89ca78;"><span style="color: #abb2bf;">|</span></span>
+</span><span class="athl-line" data-athl-line="196"><span style="color: #89ca78;">  R0lGODlhDAAMAIQAAP//9/X17unp5WZmZgAAAOfn515eXvPz7Y6OjuDg4J+fn5</span>
+</span><span class="athl-line" data-athl-line="197"><span style="color: #89ca78;">  OTk6enp56enmlpaWNjY6Ojo4SEhP/++f/++f/++f/++f/++f/++f/++f/++f/+</span>
+</span><span class="athl-line" data-athl-line="198"><span style="color: #89ca78;">  +f/++f/++f/++f/++f/++SH+Dk1hZGUgd2l0aCBHSU1QACwAAAAADAAMAAAFLC</span>
+</span><span class="athl-line" data-athl-line="199"><span style="color: #89ca78;">  AgjoEwnuNAFOhpEMTRiggcz4BNJHrv/zCFcLiwMWYNG84BwwEeECcgggoBADs=</span>
+</span><span class="athl-line" data-athl-line="200">
+</span><span class="athl-line" data-athl-line="201"><span style="color: #7f848e;"># YAML also has a set type, which looks like this:</span>
+</span><span class="athl-line" data-athl-line="202"><span style="color: #ef596f;">set</span><span style="color: #abb2bf;">:</span>
+</span><span class="athl-line" data-athl-line="203">  <span style="color: #abb2bf;">?</span> <span style="color: #ef596f;">item1</span>
+</span><span class="athl-line" data-athl-line="204">  <span style="color: #abb2bf;">?</span> <span style="color: #ef596f;">item2</span>
+</span><span class="athl-line" data-athl-line="205">  <span style="color: #abb2bf;">?</span> <span style="color: #ef596f;">item3</span>
+</span><span class="athl-line" data-athl-line="206"><span style="color: #ef596f;">or</span><span style="color: #abb2bf;">:</span> <span style="color: #d55fde;">{</span> <span style="color: #89ca78;">item1</span><span style="color: #abb2bf;">,</span> <span style="color: #89ca78;">item2</span><span style="color: #abb2bf;">,</span> <span style="color: #89ca78;">item3</span> <span style="color: #d55fde;">}</span>
+</span><span class="athl-line" data-athl-line="207">
+</span><span class="athl-line" data-athl-line="208"><span style="color: #7f848e;"># Sets are just maps with null values; the above is equivalent to:</span>
+</span><span class="athl-line" data-athl-line="209"><span style="color: #ef596f;">set2</span><span style="color: #abb2bf;">:</span>
+</span><span class="athl-line" data-athl-line="210">  <span style="color: #ef596f;">item1</span><span style="color: #abb2bf;">:</span> <span style="color: #d55fde;">null</span>
+</span><span class="athl-line" data-athl-line="211">  <span style="color: #ef596f;">item2</span><span style="color: #abb2bf;">:</span> <span style="color: #d55fde;">null</span>
+</span><span class="athl-line" data-athl-line="212">  <span style="color: #ef596f;">item3</span><span style="color: #abb2bf;">:</span> <span style="color: #d55fde;">null</span>
+</span><span class="athl-line" data-athl-line="213">
+</span><span class="athl-line" data-athl-line="214"><span style="color: #abb2bf;">...</span>  <span style="color: #7f848e;"># document end</span>
+</span></code></pre>
+</body>
+</html>
