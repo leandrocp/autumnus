@@ -46,6 +46,7 @@ pub enum Language {
     Ruby,
     Rust,
     Swift,
+    Zig,
 }
 
 impl Language {
@@ -76,6 +77,7 @@ impl Language {
             "ruby" => Some(Language::Ruby),
             "rust" => Some(Language::Rust),
             "swift" => Some(Language::Swift),
+            "zig" => Some(Language::Zig),
             _ => None,
         };
 
@@ -222,6 +224,7 @@ impl Language {
             ],
             Language::Rust => &["*.rs"],
             Language::Swift => &["*.swift"],
+            Language::Zig => &["*.zig"],
         };
 
         glob_strs
@@ -294,6 +297,7 @@ impl Language {
             Language::Ruby => "Ruby",
             Language::Rust => "Rust",
             Language::Swift => "Swift",
+            Language::Zig => "Zig",
         }
     }
 
@@ -326,6 +330,7 @@ impl Language {
             Language::Ruby => &RUBY_CONFIG,
             Language::Rust => &RUST_CONFIG,
             Language::Swift => &SWIFT_CONFIG,
+            Language::Zig => &ZIP_CONFIG,
             _ => &PLAIN_TEXT_CONFIG,
         }
     }
@@ -687,6 +692,21 @@ static SWIFT_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         SWIFT_LOCALS,
     )
     .expect("failed to create swift highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static ZIP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = tree_sitter_zig::LANGUAGE;
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "zig",
+        ZIG_HIGHLIGHTS,
+        ZIG_INJECTIONS,
+        ZIG_LOCALS,
+    )
+    .expect("failed to create zig highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });

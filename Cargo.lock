@@ -106,6 +106,7 @@ dependencies = [
  "tree-sitter-ruby",
  "tree-sitter-rust",
  "tree-sitter-swift",
+ "tree-sitter-zig",
  "v_htmlescape",
 ]
 
@@ -668,6 +669,16 @@ name = "tree-sitter-swift"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bdc72ea9c62a6d188c9f7d64109a9b14b09231852b87229c68c44e8738b9e6b9"
+dependencies = [
+ "cc",
+ "tree-sitter-language",
+]
+
+[[package]]
+name = "tree-sitter-zig"
+version = "1.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ab11fc124851b0db4dd5e55983bbd9631192e93238389dcd44521715e5d53e28"
 dependencies = [
  "cc",
  "tree-sitter-language",
