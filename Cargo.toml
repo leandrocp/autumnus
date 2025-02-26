@@ -71,5 +71,5 @@ dev = []
 lto = "thin"
 
 [[bin]]
-name = "athl"
+name = "autumn"
 path = "src/main.rs"
