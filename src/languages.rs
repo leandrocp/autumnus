@@ -56,6 +56,8 @@ pub enum Language {
     Lua,
     Make,
     ObjC,
+    OCaml,
+    OCamlInterface,
     Php,
     PlainText,
     Python,
@@ -98,6 +100,8 @@ impl Language {
             "lua" => Some(Language::Lua),
             "objc" => Some(Language::ObjC),
             "objective-c" => Some(Language::ObjC),
+            "ocaml" => Some(Language::OCaml),
+            "ocaml_interface" => Some(Language::OCamlInterface),
             "make" => Some(Language::Make),
             "php" => Some(Language::Php),
             "python" => Some(Language::Python),
@@ -278,6 +282,8 @@ impl Language {
             Language::Llvm => &["*.llvm", "*.ll"],
             Language::Lua => &["*.lua"],
             Language::ObjC => &["*.m"],
+            Language::OCaml => &["*.ml"],
+            Language::OCamlInterface => &["*.mli"],
             Language::Make => &[
                 "*.mak",
                 "*.d",
@@ -333,6 +339,7 @@ impl Language {
                 let interpreter_path = Path::new(&cap[1]);
                 if let Some(name) = interpreter_path.file_name() {
                     match name.to_string_lossy().borrow() {
+                        "ocaml" | "ocamlrun" | "ocamlscript" => return Some(Language::OCaml),
                         "lisp" | "sbc" | "ccl" | "clisp" | "ecl" => {
                             return Some(Language::CommonLisp)
                         }
@@ -411,6 +418,8 @@ impl Language {
             Language::Llvm => "LLVM",
             Language::Lua => "Lua",
             Language::ObjC => "Objective-C",
+            Language::OCaml => "OCaml",
+            Language::OCamlInterface => "OCaml Interface",
             Language::Make => "Make",
             Language::Php => "PHP",
             Language::PlainText => "Plain Text",
@@ -455,6 +464,8 @@ impl Language {
             Language::Llvm => &LLVM_CONFIG,
             Language::Lua => &LUA_CONFIG,
             Language::ObjC => &OBJC_CONFIG,
+            Language::OCaml => &OCAML_CONFIG,
+            Language::OCamlInterface => &OCAML_INTERFACE_CONFIG,
             Language::Make => &MAKE_CONFIG,
             Language::Php => &PHP_CONFIG,
             Language::Python => &PYTHON_CONFIG,
@@ -818,6 +829,32 @@ static OBJC_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         OBJC_LOCALS,
     )
     .expect("failed to create objc highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static OCAML_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(tree_sitter_ocaml::LANGUAGE_OCAML),
+        "ocaml",
+        OCAML_HIGHLIGHTS,
+        OCAML_INJECTIONS,
+        OCAML_LOCALS,
+    )
+    .expect("failed to create ocaml highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static OCAML_INTERFACE_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(tree_sitter_ocaml::LANGUAGE_OCAML_INTERFACE),
+        "ocaml_interface",
+        OCAML_INTERFACE_HIGHLIGHTS,
+        OCAML_INTERFACE_INJECTIONS,
+        OCAML_INTERFACE_LOCALS,
+    )
+    .expect("failed to create ocam_interface highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
