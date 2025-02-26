@@ -10,6 +10,7 @@ use tree_sitter_highlight::HighlightConfiguration;
 
 extern "C" {
     fn tree_sitter_clojure() -> *const ();
+    fn tree_sitter_commonlisp() -> *const ();
     fn tree_sitter_dockerfile() -> *const ();
     fn tree_sitter_eex() -> *const ();
     fn tree_sitter_elm() -> *const ();
@@ -28,8 +29,9 @@ pub use generated::*;
 pub enum Language {
     Bash,
     C,
-    Clojure,
     CSharp,
+    Clojure,
+    CommonLisp,
     Cpp,
     Css,
     Diff,
@@ -50,8 +52,8 @@ pub enum Language {
     Kotlin,
     Llvm,
     Lua,
-    ObjC,
     Make,
+    ObjC,
     Php,
     PlainText,
     Python,
@@ -68,6 +70,7 @@ impl Language {
             "bash" => Some(Language::Bash),
             "c" => Some(Language::C),
             "clojure" => Some(Language::Clojure),
+            "commonlisp" => Some(Language::CommonLisp),
             "c#" => Some(Language::CSharp),
             "cpp" => Some(Language::Cpp),
             "csharp" => Some(Language::CSharp),
@@ -202,6 +205,7 @@ impl Language {
                 "*.bb", "*.boot", "*.clj", "*.cljc", "*.clje", "*.cljs", "*.cljx", "*.edn",
                 "*.joke", "*.joker",
             ],
+            Language::CommonLisp => &["*.lisp", "*.lsp", "*.asd"],
             Language::CSharp => &["*.cs"],
             Language::Cpp => &[
                 "*.cc", "*.cpp", "*.h", "*.hh", "*.hpp", "*.ino", "*.cxx", "*.cu",
@@ -327,6 +331,9 @@ impl Language {
                 let interpreter_path = Path::new(&cap[1]);
                 if let Some(name) = interpreter_path.file_name() {
                     match name.to_string_lossy().borrow() {
+                        "lisp" | "sbc" | "ccl" | "clisp" | "ecl" => {
+                            return Some(Language::CommonLisp)
+                        }
                         "runghc" | "runhaskell" | "runhugs" => return Some(Language::Haskell),
                         "ash" | "bash" | "dash" | "ksh" | "mksh" | "pdksh" | "rc" | "sh"
                         | "zsh" => return Some(Language::Bash),
@@ -379,6 +386,7 @@ impl Language {
             Language::Bash => "Bash",
             Language::C => "C",
             Language::Clojure => "Clojure",
+            Language::CommonLisp => "Common Lisp",
             Language::CSharp => "C#",
             Language::Cpp => "C++",
             Language::Css => "CSS",
@@ -422,6 +430,7 @@ impl Language {
             Language::Bash => &BASH_CONFIG,
             Language::C => &C_CONFIG,
             Language::Clojure => &CLOJURE_CONFIG,
+            Language::CommonLisp => &COMMONLISP_CONFIG,
             Language::CSharp => &CSHARP_CONFIG,
             Language::Cpp => &CPP_CONFIG,
             Language::Css => &CSS_CONFIG,
@@ -494,6 +503,21 @@ static CLOJURE_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         CLOJURE_LOCALS,
     )
     .expect("failed to create clojure highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static COMMONLISP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_commonlisp) };
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "common_lisp",
+        COMMONLISP_HIGHLIGHTS,
+        COMMONLISP_INJECTIONS,
+        COMMONLISP_LOCALS,
+    )
+    .expect("failed to create common_lisp highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
