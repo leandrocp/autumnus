@@ -63,6 +63,7 @@ pub enum Language {
     ProtoBuf,
     Python,
     R,
+    Regex,
     Ruby,
     Rust,
     Swift,
@@ -109,6 +110,7 @@ impl Language {
             "protobuf" => Some(Language::ProtoBuf),
             "python" => Some(Language::Python),
             "r" => Some(Language::R),
+            "regex" => Some(Language::Regex),
             "ruby" => Some(Language::Ruby),
             "rust" => Some(Language::Rust),
             "swift" => Some(Language::Swift),
@@ -316,6 +318,7 @@ impl Language {
             Language::PlainText => &[],
             Language::Python => &["*.py", "*.py3", "*.pyi", "*.bzl", "TARGETS", "BUCK", "DEPS"],
             Language::R => &["*.R", "*.r", "*.rd", "*.rsx", ".Rprofile", "expr-dist"],
+            Language::Regex => &[],
             Language::Ruby => &[
                 "*.rb",
                 "*.builder",
@@ -433,6 +436,7 @@ impl Language {
             Language::ProtoBuf => "Protocol Buffer",
             Language::Python => "Python",
             Language::R => "R",
+            Language::Regex => "Regex",
             Language::Ruby => "Ruby",
             Language::Rust => "Rust",
             Language::Swift => "Swift",
@@ -480,6 +484,7 @@ impl Language {
             Language::ProtoBuf => &PROTO_BUF_CONFIG,
             Language::Python => &PYTHON_CONFIG,
             Language::R => &R_CONFIG,
+            Language::Regex => &REGEX_CONFIG,
             Language::Ruby => &RUBY_CONFIG,
             Language::Rust => &RUST_CONFIG,
             Language::Swift => &SWIFT_CONFIG,
@@ -946,6 +951,19 @@ static R_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         R_LOCALS,
     )
     .expect("failed to create r highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static REGEX_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(tree_sitter_regex::LANGUAGE),
+        "regex",
+        REGEX_HIGHLIGHTS,
+        REGEX_INJECTIONS,
+        REGEX_LOCALS,
+    )
+    .expect("failed to create regex highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });

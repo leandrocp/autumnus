@@ -110,6 +110,7 @@ dependencies = [
  "tree-sitter-proto",
  "tree-sitter-python",
  "tree-sitter-r",
+ "tree-sitter-regex",
  "tree-sitter-ruby",
  "tree-sitter-rust",
  "tree-sitter-swift",
@@ -717,6 +718,16 @@ name = "tree-sitter-r"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "51759bc3400109e5e5e09e80745d9e787655634e9c3b6e736eeaef44e7bcec0b"
+dependencies = [
+ "cc",
+ "tree-sitter-language",
+]
+
+[[package]]
+name = "tree-sitter-regex"
+version = "0.24.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "712656f8c262a5a4b7d6026e6246950787d178d613864952554e1516a33ab0c1"
 dependencies = [
  "cc",
  "tree-sitter-language",
