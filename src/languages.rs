@@ -67,6 +67,7 @@ pub enum Language {
     Ruby,
     Rust,
     Scala,
+    SQL,
     Swift,
     Yaml,
     Zig,
@@ -115,6 +116,7 @@ impl Language {
             "ruby" => Some(Language::Ruby),
             "rust" => Some(Language::Rust),
             "scala" => Some(Language::Scala),
+            "sql" => Some(Language::SQL),
             "swift" => Some(Language::Swift),
             "yaml" => Some(Language::Yaml),
             "zig" => Some(Language::Zig),
@@ -331,6 +333,7 @@ impl Language {
             ],
             Language::Rust => &["*.rs"],
             Language::Scala => &["*.scala", "*.sbt", "*.sc"],
+            Language::SQL => &["*.sql", "*.pgsql"],
             Language::Swift => &["*.swift"],
             Language::Yaml => &["*.yaml", "*.yml"],
             Language::Zig => &["*.zig"],
@@ -443,6 +446,7 @@ impl Language {
             Language::Ruby => "Ruby",
             Language::Rust => "Rust",
             Language::Scala => "Scala",
+            Language::SQL => "SQL",
             Language::Swift => "Swift",
             Language::Yaml => "YAML",
             Language::Zig => "Zig",
@@ -492,6 +496,7 @@ impl Language {
             Language::Ruby => &RUBY_CONFIG,
             Language::Rust => &RUST_CONFIG,
             Language::Scala => &SCALA_CONFIG,
+            Language::SQL => &SQL_CONFIG,
             Language::Swift => &SWIFT_CONFIG,
             Language::Yaml => &YAML_CONFIG,
             Language::Zig => &ZIG_CONFIG,
@@ -1008,6 +1013,19 @@ static SCALA_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         SCALA_LOCALS,
     )
     .expect("failed to create scala highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static SQL_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(tree_sitter_sequel::LANGUAGE),
+        "sql",
+        SQL_HIGHLIGHTS,
+        SQL_INJECTIONS,
+        SQL_LOCALS,
+    )
+    .expect("failed to create sql highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
