@@ -62,6 +62,7 @@ pub enum Language {
     PlainText,
     ProtoBuf,
     Python,
+    R,
     Ruby,
     Rust,
     Swift,
@@ -107,6 +108,7 @@ impl Language {
             "php" => Some(Language::Php),
             "protobuf" => Some(Language::ProtoBuf),
             "python" => Some(Language::Python),
+            "r" => Some(Language::R),
             "ruby" => Some(Language::Ruby),
             "rust" => Some(Language::Rust),
             "swift" => Some(Language::Swift),
@@ -313,6 +315,7 @@ impl Language {
             Language::ProtoBuf => &["*.proto", "*.protobuf", "*.proto2", "*.proto3"],
             Language::PlainText => &[],
             Language::Python => &["*.py", "*.py3", "*.pyi", "*.bzl", "TARGETS", "BUCK", "DEPS"],
+            Language::R => &["*.R", "*.r", "*.rd", "*.rsx", ".Rprofile", "expr-dist"],
             Language::Ruby => &[
                 "*.rb",
                 "*.builder",
@@ -350,6 +353,7 @@ impl Language {
                         "ash" | "bash" | "dash" | "ksh" | "mksh" | "pdksh" | "rc" | "sh"
                         | "zsh" => return Some(Language::Bash),
                         "elixir" => return Some(Language::Elixir),
+                        "Rscript" => return Some(Language::R),
                         "python" | "python2" | "python3" => return Some(Language::Python),
                         "ruby" | "macruby" | "rake" | "jruby" | "rbx" => {
                             return Some(Language::Ruby)
@@ -428,6 +432,7 @@ impl Language {
             Language::PlainText => "Plain Text",
             Language::ProtoBuf => "Protocol Buffer",
             Language::Python => "Python",
+            Language::R => "R",
             Language::Ruby => "Ruby",
             Language::Rust => "Rust",
             Language::Swift => "Swift",
@@ -474,6 +479,7 @@ impl Language {
             Language::Php => &PHP_CONFIG,
             Language::ProtoBuf => &PROTO_BUF_CONFIG,
             Language::Python => &PYTHON_CONFIG,
+            Language::R => &R_CONFIG,
             Language::Ruby => &RUBY_CONFIG,
             Language::Rust => &RUST_CONFIG,
             Language::Swift => &SWIFT_CONFIG,
@@ -927,6 +933,19 @@ static PYTHON_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         PYTHON_LOCALS,
     )
     .expect("failed to create python highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static R_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(tree_sitter_r::LANGUAGE),
+        "r",
+        R_HIGHLIGHTS,
+        R_INJECTIONS,
+        R_LOCALS,
+    )
+    .expect("failed to create r highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
