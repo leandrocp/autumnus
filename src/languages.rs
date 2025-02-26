@@ -68,6 +68,7 @@ pub enum Language {
     Rust,
     Scala,
     SQL,
+    Svelte,
     Swift,
     Yaml,
     Zig,
@@ -117,6 +118,7 @@ impl Language {
             "rust" => Some(Language::Rust),
             "scala" => Some(Language::Scala),
             "sql" => Some(Language::SQL),
+            "svelte" => Some(Language::Svelte),
             "swift" => Some(Language::Swift),
             "yaml" => Some(Language::Yaml),
             "zig" => Some(Language::Zig),
@@ -334,6 +336,7 @@ impl Language {
             Language::Rust => &["*.rs"],
             Language::Scala => &["*.scala", "*.sbt", "*.sc"],
             Language::SQL => &["*.sql", "*.pgsql"],
+            Language::Svelte => &["*.svelte"],
             Language::Swift => &["*.swift"],
             Language::Yaml => &["*.yaml", "*.yml"],
             Language::Zig => &["*.zig"],
@@ -447,6 +450,7 @@ impl Language {
             Language::Rust => "Rust",
             Language::Scala => "Scala",
             Language::SQL => "SQL",
+            Language::Svelte => "Svelte",
             Language::Swift => "Swift",
             Language::Yaml => "YAML",
             Language::Zig => "Zig",
@@ -497,6 +501,7 @@ impl Language {
             Language::Rust => &RUST_CONFIG,
             Language::Scala => &SCALA_CONFIG,
             Language::SQL => &SQL_CONFIG,
+            Language::Svelte => &SVELTE_CONFIG,
             Language::Swift => &SWIFT_CONFIG,
             Language::Yaml => &YAML_CONFIG,
             Language::Zig => &ZIG_CONFIG,
@@ -1026,6 +1031,19 @@ static SQL_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         SQL_LOCALS,
     )
     .expect("failed to create sql highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static SVELTE_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(tree_sitter_svelte_ng::LANGUAGE),
+        "svelte",
+        SVELTE_HIGHLIGHTS,
+        SVELTE_INJECTIONS,
+        SVELTE_LOCALS,
+    )
+    .expect("failed to create svelte highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
