@@ -43,6 +43,7 @@ pub enum Language {
     Gleam,
     Go,
     Haskell,
+    // Hcl, TODO: repo is too large (too many files)
     Heex,
     Html,
     Iex,
@@ -50,6 +51,7 @@ pub enum Language {
     Javascript,
     Json,
     Kotlin,
+    // Latex, TODO: generate parser.c
     Llvm,
     Lua,
     Make,
