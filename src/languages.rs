@@ -60,6 +60,7 @@ pub enum Language {
     OCamlInterface,
     Php,
     PlainText,
+    ProtoBuf,
     Python,
     Ruby,
     Rust,
@@ -104,6 +105,7 @@ impl Language {
             "ocaml_interface" => Some(Language::OCamlInterface),
             "make" => Some(Language::Make),
             "php" => Some(Language::Php),
+            "protobuf" => Some(Language::ProtoBuf),
             "python" => Some(Language::Python),
             "ruby" => Some(Language::Ruby),
             "rust" => Some(Language::Rust),
@@ -308,6 +310,7 @@ impl Language {
             Language::Php => &[
                 "*.php", "*.phtml", "*.php3", "*.php4", "*.php5", "*.php7", "*.phps",
             ],
+            Language::ProtoBuf => &["*.proto", "*.protobuf", "*.proto2", "*.proto3"],
             Language::PlainText => &[],
             Language::Python => &["*.py", "*.py3", "*.pyi", "*.bzl", "TARGETS", "BUCK", "DEPS"],
             Language::Ruby => &[
@@ -423,6 +426,7 @@ impl Language {
             Language::Make => "Make",
             Language::Php => "PHP",
             Language::PlainText => "Plain Text",
+            Language::ProtoBuf => "Protocol Buffer",
             Language::Python => "Python",
             Language::Ruby => "Ruby",
             Language::Rust => "Rust",
@@ -468,6 +472,7 @@ impl Language {
             Language::OCamlInterface => &OCAML_INTERFACE_CONFIG,
             Language::Make => &MAKE_CONFIG,
             Language::Php => &PHP_CONFIG,
+            Language::ProtoBuf => &PROTO_BUF_CONFIG,
             Language::Python => &PYTHON_CONFIG,
             Language::Ruby => &RUBY_CONFIG,
             Language::Rust => &RUST_CONFIG,
@@ -883,6 +888,19 @@ static PHP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         PHP_LOCALS,
     )
     .expect("failed to create php highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static PROTO_BUF_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(tree_sitter_proto::LANGUAGE),
+        "protobuf",
+        PROTO_HIGHLIGHTS,
+        PROTO_INJECTIONS,
+        PROTO_LOCALS,
+    )
+    .expect("failed to create protobuf highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });

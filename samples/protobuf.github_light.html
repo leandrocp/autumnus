@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>protobuf - github_light - Autumnus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'JetBrains Mono', monospace;
+            line-height: 1.5;
+        }
+        pre {
+            font-size: 15px;
+            margin: 20px;
+            padding: 50px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+<pre class="athl" style="color: #1f2328; background-color: #ffffff;"><code class="language-protocolbuffer" translate="no" tabindex="0"><span class="athl-line" data-athl-line="1"><span style="color: #57606a;">/*</span>
+</span><span class="athl-line" data-athl-line="2"><span style="color: #57606a;">* Language Syntax</span>
+</span><span class="athl-line" data-athl-line="3"><span style="color: #57606a;">*/</span>
+</span><span class="athl-line" data-athl-line="4">
+</span><span class="athl-line" data-athl-line="5"><span style="color: #57606a;">/*</span>
+</span><span class="athl-line" data-athl-line="6"><span style="color: #57606a;">* Specifying Syntax Of Protocol Buffer Version</span>
+</span><span class="athl-line" data-athl-line="7"><span style="color: #57606a;">* Specifying Which Protocol Buffer Version To Use</span>
+</span><span class="athl-line" data-athl-line="8"><span style="color: #57606a;">* It can be usually proto3 or proto2</span>
+</span><span class="athl-line" data-athl-line="9"><span style="color: #57606a;">*/</span>
+</span><span class="athl-line" data-athl-line="10"><span style="color: #cf222e;">syntax</span> <span style="color: #0550ae;">=</span> <span style="color: #1f2328;">&quot;proto3&quot;</span><span style="color: #1f2328;">;</span>
+</span><span class="athl-line" data-athl-line="11">
+</span><span class="athl-line" data-athl-line="12"><span style="color: #57606a;">/*</span>
+</span><span class="athl-line" data-athl-line="13"><span style="color: #57606a;">* Declaring Message In Protocol Buffer:</span>
+</span><span class="athl-line" data-athl-line="14"><span style="color: #57606a;">* As you can see, each field in the message definition has a unique number.</span>
+</span><span class="athl-line" data-athl-line="15"><span style="color: #57606a;">* These field numbers are used to identify your fields in the message binary format,</span>
+</span><span class="athl-line" data-athl-line="16"><span style="color: #57606a;">* and should not be changed once your message type is in use.</span>
+</span><span class="athl-line" data-athl-line="17"><span style="color: #57606a;">* Note that field numbers in the range 1 through 15 take one byte to encode, including the field number and the field&#39;s type (you can find out more about this in Protocol Buffer Encoding).</span>
+</span><span class="athl-line" data-athl-line="18"><span style="color: #57606a;">* Field numbers in the range 16 through 2047 take two bytes. So you should reserve the numbers 1 through 15 for very frequently occurring message elements.</span>
+</span><span class="athl-line" data-athl-line="19"><span style="color: #57606a;">* Remember to leave some room for frequently occurring elements that might be added in the future.</span>
+</span><span class="athl-line" data-athl-line="20"><span style="color: #57606a;">* The smallest field number you can specify is 1, and the largest is 2^29 - 1, or 536,870,911.</span>
+</span><span class="athl-line" data-athl-line="21"><span style="color: #57606a;">* You also cannot use the numbers 19000 through 19999 (FieldDescriptor::kFirstReservedNumber through FieldDescriptor::kLastReservedNumber),</span>
+</span><span class="athl-line" data-athl-line="22"><span style="color: #57606a;">* as they are reserved for the Protocol Buffers implementation - the protocol buffer compiler will complain if you use one of these reserved numbers in your .proto.</span>
+</span><span class="athl-line" data-athl-line="23"><span style="color: #57606a;">* Similarly, you cannot use any previously reserved field numbers.</span>
+</span><span class="athl-line" data-athl-line="24"><span style="color: #57606a;">*</span>
+</span><span class="athl-line" data-athl-line="25"><span style="color: #57606a;">*/</span>
+</span><span class="athl-line" data-athl-line="26">
+</span><span class="athl-line" data-athl-line="27"><span style="color: #57606a;">/*</span>
+</span><span class="athl-line" data-athl-line="28"><span style="color: #57606a;">Syntax For Declaring Message:</span>
+</span><span class="athl-line" data-athl-line="29"><span style="color: #57606a;">    message ${MessageName} {</span>
+</span><span class="athl-line" data-athl-line="30"><span style="color: #57606a;">        ${Scalar Value Type} ${FieldName1} = ${Tag Number1};</span>
+</span><span class="athl-line" data-athl-line="31"><span style="color: #57606a;">                .</span>
+</span><span class="athl-line" data-athl-line="32"><span style="color: #57606a;">                .</span>
+</span><span class="athl-line" data-athl-line="33"><span style="color: #57606a;">                .</span>
+</span><span class="athl-line" data-athl-line="34"><span style="color: #57606a;">        ${Scalar Value Type} ${FieldNameN} = ${Tag NumberN};</span>
+</span><span class="athl-line" data-athl-line="35"><span style="color: #57606a;">    }</span>
+</span><span class="athl-line" data-athl-line="36"><span style="color: #57606a;"></span>
+</span><span class="athl-line" data-athl-line="37"><span style="color: #57606a;">Default Values Will be applied any case if the message doesn&#39;t contain a existing field defined</span>
+</span><span class="athl-line" data-athl-line="38"><span style="color: #57606a;">in the message definition</span>
+</span><span class="athl-line" data-athl-line="39"><span style="color: #57606a;">*/</span>
+</span><span class="athl-line" data-athl-line="40">
+</span><span class="athl-line" data-athl-line="41"><span style="color: #cf222e;">message</span> <span style="color: #953800;">MessageTypes</span> <span style="color: #1f2328;">{</span>
+</span><span class="athl-line" data-athl-line="42">    <span style="color: #57606a;">/*</span>
+</span><span class="athl-line" data-athl-line="43"><span style="color: #57606a;">    * Scalar Value Types</span>
+</span><span class="athl-line" data-athl-line="44"><span style="color: #57606a;">    */</span>
+</span><span class="athl-line" data-athl-line="45">    <span style="color: #953800;">string</span> stringType <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">1</span><span style="color: #1f2328;">;</span> <span style="color: #57606a;">// A string must always contain UTF-8 encoded or 7-bit ASCII text. Default value = &quot;&quot;</span>
+</span><span class="athl-line" data-athl-line="46">
+</span><span class="athl-line" data-athl-line="47">    <span style="color: #57606a;">// Number Types, Default Value = 0</span>
+</span><span class="athl-line" data-athl-line="48">    <span style="color: #953800;">int32</span> int32Type <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">2</span><span style="color: #1f2328;">;</span> <span style="color: #57606a;">// Uses Variable Length Encoding. Inefficient For Negative Numbers, Instead Use sint32.</span>
+</span><span class="athl-line" data-athl-line="49">    <span style="color: #953800;">int64</span> int64Type <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">3</span><span style="color: #1f2328;">;</span> <span style="color: #57606a;">// Uses Variable Length Encoding. Inefficient For Negative Numbers, Instead Use sint64.</span>
+</span><span class="athl-line" data-athl-line="50">    <span style="color: #953800;">uint32</span> uInt32Type <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">4</span><span style="color: #1f2328;">;</span> <span style="color: #57606a;">// Uses Variable Length Encoding</span>
+</span><span class="athl-line" data-athl-line="51">    <span style="color: #953800;">uint64</span> uInt64Type <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">5</span><span style="color: #1f2328;">;</span> <span style="color: #57606a;">// Uses Variable Length Encoding</span>
+</span><span class="athl-line" data-athl-line="52">    <span style="color: #953800;">sint32</span> sInt32Type <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">6</span><span style="color: #1f2328;">;</span> <span style="color: #57606a;">// Uses Variable Length Encoding. They are efficient in encoding for negative numbers.</span>
+</span><span class="athl-line" data-athl-line="53">                           <span style="color: #57606a;">// Use this instead of int32 for negative numbers</span>
+</span><span class="athl-line" data-athl-line="54">    <span style="color: #953800;">sint64</span> sInt64Type <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">7</span><span style="color: #1f2328;">;</span> <span style="color: #57606a;">// Uses Variable Length Encoding. They are efficient in encoding for negative numbers.</span>
+</span><span class="athl-line" data-athl-line="55">    <span style="color: #57606a;">// Use this instead of int64 for negative numbers.</span>
+</span><span class="athl-line" data-athl-line="56">
+</span><span class="athl-line" data-athl-line="57">    <span style="color: #953800;">fixed32</span> fixed32Type <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">8</span><span style="color: #1f2328;">;</span> <span style="color: #57606a;">// Always four bytes. More efficient than uint32 if values are often greater than 2^28.</span>
+</span><span class="athl-line" data-athl-line="58">    <span style="color: #953800;">fixed64</span> fixed64Type <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">9</span><span style="color: #1f2328;">;</span> <span style="color: #57606a;">// Always eight bytes. More efficient than uint64 if values are often greater than 2^56</span>
+</span><span class="athl-line" data-athl-line="59">
+</span><span class="athl-line" data-athl-line="60">    <span style="color: #953800;">sfixed32</span> sfixed32Type <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">10</span><span style="color: #1f2328;">;</span> <span style="color: #57606a;">// Always four bytes.</span>
+</span><span class="athl-line" data-athl-line="61">    <span style="color: #953800;">sfixed64</span> sfixed64Type <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">11</span><span style="color: #1f2328;">;</span> <span style="color: #57606a;">// Always Eight bytes.</span>
+</span><span class="athl-line" data-athl-line="62">
+</span><span class="athl-line" data-athl-line="63">    <span style="color: #953800;">bool</span> boolType <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">12</span><span style="color: #1f2328;">;</span> <span style="color: #57606a;">// Boolean Type. Default Value = false</span>
+</span><span class="athl-line" data-athl-line="64">
+</span><span class="athl-line" data-athl-line="65">    <span style="color: #953800;">bytes</span> bytesType <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">13</span><span style="color: #1f2328;">;</span> <span style="color: #57606a;">// May contain any arbitrary sequence of bytes. Default Value = Empty Bytes</span>
+</span><span class="athl-line" data-athl-line="66">
+</span><span class="athl-line" data-athl-line="67">    <span style="color: #953800;">double</span> doubleType <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">14</span><span style="color: #1f2328;">;</span>
+</span><span class="athl-line" data-athl-line="68">    <span style="color: #953800;">float</span> floatType <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">15</span><span style="color: #1f2328;">;</span>
+</span><span class="athl-line" data-athl-line="69">
+</span><span class="athl-line" data-athl-line="70">    <span style="color: #cf222e;">enum</span> <span style="color: #953800;">Week</span> <span style="color: #1f2328;">{</span>
+</span><span class="athl-line" data-athl-line="71">        <span style="color: #0550ae;">UNDEFINED</span> <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">0</span><span style="color: #1f2328;">;</span> <span style="color: #57606a;">// Tag 0 is always used as default in case of enum</span>
+</span><span class="athl-line" data-athl-line="72">        <span style="color: #0550ae;">SUNDAY</span> <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">1</span><span style="color: #1f2328;">;</span>
+</span><span class="athl-line" data-athl-line="73">        <span style="color: #0550ae;">MONDAY</span> <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">2</span><span style="color: #1f2328;">;</span>
+</span><span class="athl-line" data-athl-line="74">        <span style="color: #0550ae;">TUESDAY</span> <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">3</span><span style="color: #1f2328;">;</span>
+</span><span class="athl-line" data-athl-line="75">        <span style="color: #0550ae;">WEDNESDAY</span> <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">4</span><span style="color: #1f2328;">;</span>
+</span><span class="athl-line" data-athl-line="76">        <span style="color: #0550ae;">THURSDAY</span> <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">5</span><span style="color: #1f2328;">;</span>
+</span><span class="athl-line" data-athl-line="77">        <span style="color: #0550ae;">FRIDAY</span> <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">6</span><span style="color: #1f2328;">;</span>
+</span><span class="athl-line" data-athl-line="78">        <span style="color: #0550ae;">SATURDAY</span> <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">7</span><span style="color: #1f2328;">;</span>
+</span><span class="athl-line" data-athl-line="79">    <span style="color: #1f2328;">}</span>
+</span><span class="athl-line" data-athl-line="80">    <span style="color: #953800;"><span style="color: #953800;">Week</span></span> wkDayType <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">16</span><span style="color: #1f2328;">;</span>
+</span><span class="athl-line" data-athl-line="81">
+</span><span class="athl-line" data-athl-line="82">    <span style="color: #57606a;">/*</span>
+</span><span class="athl-line" data-athl-line="83"><span style="color: #57606a;">    * Defining Collection Of Scalar Value Type</span>
+</span><span class="athl-line" data-athl-line="84"><span style="color: #57606a;">    * Syntax: repeated ${ScalarType} ${name} = TagValue</span>
+</span><span class="athl-line" data-athl-line="85"><span style="color: #57606a;">    */</span>
+</span><span class="athl-line" data-athl-line="86">    <span style="color: #cf222e;">repeated</span> <span style="color: #953800;">string</span> listOfString <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">17</span><span style="color: #1f2328;">;</span> <span style="color: #57606a;">// List[String]</span>
+</span><span class="athl-line" data-athl-line="87"><span style="color: #1f2328;">}</span>
+</span><span class="athl-line" data-athl-line="88">
+</span><span class="athl-line" data-athl-line="89"><span style="color: #57606a;">/*</span>
+</span><span class="athl-line" data-athl-line="90"><span style="color: #57606a;">* Defining Defined Message Types In Other Message Definition</span>
+</span><span class="athl-line" data-athl-line="91"><span style="color: #57606a;">*/</span>
+</span><span class="athl-line" data-athl-line="92"><span style="color: #cf222e;">message</span> <span style="color: #953800;">Person</span> <span style="color: #1f2328;">{</span>
+</span><span class="athl-line" data-athl-line="93">    <span style="color: #953800;">string</span> fname <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">1</span><span style="color: #1f2328;">;</span>
+</span><span class="athl-line" data-athl-line="94">    <span style="color: #953800;">string</span> sname <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">2</span><span style="color: #1f2328;">;</span>
+</span><span class="athl-line" data-athl-line="95"><span style="color: #1f2328;">}</span>
+</span><span class="athl-line" data-athl-line="96">
+</span><span class="athl-line" data-athl-line="97"><span style="color: #cf222e;">message</span> <span style="color: #953800;">City</span> <span style="color: #1f2328;">{</span>
+</span><span class="athl-line" data-athl-line="98">    <span style="color: #953800;"><span style="color: #953800;">Person</span></span> p <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">1</span><span style="color: #1f2328;">;</span>
+</span><span class="athl-line" data-athl-line="99"><span style="color: #1f2328;">}</span>
+</span><span class="athl-line" data-athl-line="100">
+</span><span class="athl-line" data-athl-line="101"><span style="color: #57606a;">/*</span>
+</span><span class="athl-line" data-athl-line="102"><span style="color: #57606a;">* Nested Message Definitions</span>
+</span><span class="athl-line" data-athl-line="103"><span style="color: #57606a;">*/</span>
+</span><span class="athl-line" data-athl-line="104">
+</span><span class="athl-line" data-athl-line="105"><span style="color: #cf222e;">message</span> <span style="color: #953800;">NestedMessages</span> <span style="color: #1f2328;">{</span>
+</span><span class="athl-line" data-athl-line="106">    <span style="color: #cf222e;">message</span> <span style="color: #953800;">FirstLevelNestedMessage</span> <span style="color: #1f2328;">{</span>
+</span><span class="athl-line" data-athl-line="107">        <span style="color: #953800;">string</span> firstString <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">1</span><span style="color: #1f2328;">;</span>
+</span><span class="athl-line" data-athl-line="108">        <span style="color: #cf222e;">message</span> <span style="color: #953800;">SecondLevelNestedMessage</span> <span style="color: #1f2328;">{</span>
+</span><span class="athl-line" data-athl-line="109">            <span style="color: #953800;">string</span> secondString <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">2</span><span style="color: #1f2328;">;</span>
+</span><span class="athl-line" data-athl-line="110">        <span style="color: #1f2328;">}</span>
+</span><span class="athl-line" data-athl-line="111">    <span style="color: #1f2328;">}</span>
+</span><span class="athl-line" data-athl-line="112">    <span style="color: #953800;"><span style="color: #953800;">FirstLevelNestedMessage</span></span> msg <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">1</span><span style="color: #1f2328;">;</span>
+</span><span class="athl-line" data-athl-line="113">    <span style="color: #953800;"><span style="color: #953800;">FirstLevelNestedMessage.SecondLevelNestedMessage</span></span> msg2 <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">2</span><span style="color: #1f2328;">;</span>
+</span><span class="athl-line" data-athl-line="114"><span style="color: #1f2328;">}</span>
+</span><span class="athl-line" data-athl-line="115">
+</span><span class="athl-line" data-athl-line="116"><span style="color: #57606a;">/*</span>
+</span><span class="athl-line" data-athl-line="117"><span style="color: #57606a;">* Importing Message From A File</span>
+</span><span class="athl-line" data-athl-line="118"><span style="color: #57606a;">*/</span>
+</span><span class="athl-line" data-athl-line="119">
+</span><span class="athl-line" data-athl-line="120"><span style="color: #57606a;">// one.proto</span>
+</span><span class="athl-line" data-athl-line="121"><span style="color: #57606a;">// message One {</span>
+</span><span class="athl-line" data-athl-line="122"><span style="color: #57606a;">//     string oneMsg = 1;</span>
+</span><span class="athl-line" data-athl-line="123"><span style="color: #57606a;">// }</span>
+</span><span class="athl-line" data-athl-line="124">
+</span><span class="athl-line" data-athl-line="125"><span style="color: #57606a;">// two.proto</span>
+</span><span class="athl-line" data-athl-line="126"><span style="color: #57606a;">//  import &quot;myproject/one.proto&quot;</span>
+</span><span class="athl-line" data-athl-line="127"><span style="color: #57606a;">//  message Two {</span>
+</span><span class="athl-line" data-athl-line="128"><span style="color: #57606a;">//       string twoMsg = 2;</span>
+</span><span class="athl-line" data-athl-line="129"><span style="color: #57606a;">//  }</span>
+</span><span class="athl-line" data-athl-line="130">
+</span><span class="athl-line" data-athl-line="131">
+</span><span class="athl-line" data-athl-line="132"><span style="color: #57606a;">/*</span>
+</span><span class="athl-line" data-athl-line="133"><span style="color: #57606a;">* Advanced Topics</span>
+</span><span class="athl-line" data-athl-line="134"><span style="color: #57606a;">*/</span>
+</span><span class="athl-line" data-athl-line="135">
+</span><span class="athl-line" data-athl-line="136"><span style="color: #57606a;">/*</span>
+</span><span class="athl-line" data-athl-line="137"><span style="color: #57606a;">* Handling Message Type Changes:</span>
+</span><span class="athl-line" data-athl-line="138"><span style="color: #57606a;">* Never Change/Use The TagNumber Of A Message Field Which Was Removed</span>
+</span><span class="athl-line" data-athl-line="139"><span style="color: #57606a;">* We should use reserved in case of message definition update.</span>
+</span><span class="athl-line" data-athl-line="140"><span style="color: #57606a;">* (https://developers.google.com/protocol-buffers/docs/proto3#updating)</span>
+</span><span class="athl-line" data-athl-line="141"><span style="color: #57606a;">*/</span>
+</span><span class="athl-line" data-athl-line="142">
+</span><span class="athl-line" data-athl-line="143"><span style="color: #57606a;">/*</span>
+</span><span class="athl-line" data-athl-line="144"><span style="color: #57606a;">* Reserved Fields</span>
+</span><span class="athl-line" data-athl-line="145"><span style="color: #57606a;">* It&#39;s used in case if we need to add/remove new fields into message.</span>
+</span><span class="athl-line" data-athl-line="146"><span style="color: #57606a;">* Using Reserved Backward and Forward Compatibility Of Messages can be achieved</span>
+</span><span class="athl-line" data-athl-line="147"><span style="color: #57606a;">*/</span>
+</span><span class="athl-line" data-athl-line="148">
+</span><span class="athl-line" data-athl-line="149">
+</span><span class="athl-line" data-athl-line="150"><span style="color: #cf222e;">message</span> <span style="color: #953800;">ReservedMessage</span> <span style="color: #1f2328;">{</span>
+</span><span class="athl-line" data-athl-line="151">    <span style="color: #cf222e;">reserved</span> <span style="color: #0550ae;">0</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">1</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">2</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">3</span> <span style="color: #cf222e;">to</span> <span style="color: #0550ae;">10</span><span style="color: #1f2328;">;</span> <span style="color: #57606a;">// Set Of Tag Numbers Which Can&#39;t be reused.</span>
+</span><span class="athl-line" data-athl-line="152">    <span style="color: #cf222e;">reserved</span> &quot;firstMsg&quot;<span style="color: #1f2328;">,</span> &quot;secondMsg&quot;<span style="color: #1f2328;">,</span> &quot;thirdMsg&quot;<span style="color: #1f2328;">;</span> <span style="color: #57606a;">// Set Of Labels Which Can&#39;t Be reused.</span>
+</span><span class="athl-line" data-athl-line="153"><span style="color: #1f2328;">}</span>
+</span><span class="athl-line" data-athl-line="154">
+</span><span class="athl-line" data-athl-line="155"><span style="color: #57606a;">/*</span>
+</span><span class="athl-line" data-athl-line="156"><span style="color: #57606a;">* Any</span>
+</span><span class="athl-line" data-athl-line="157"><span style="color: #57606a;">* The Any message type lets you use messages as embedded types without having their .proto definition.</span>
+</span><span class="athl-line" data-athl-line="158"><span style="color: #57606a;">* An Any contains an arbitrary serialized message as bytes,</span>
+</span><span class="athl-line" data-athl-line="159"><span style="color: #57606a;">* along with a URL that acts as a globally unique identifier for and resolves to that message&#39;s type.</span>
+</span><span class="athl-line" data-athl-line="160"><span style="color: #57606a;">* For Any to work we need to import it as shown below.</span>
+</span><span class="athl-line" data-athl-line="161"><span style="color: #57606a;">*/</span>
+</span><span class="athl-line" data-athl-line="162"><span style="color: #57606a;">/*</span>
+</span><span class="athl-line" data-athl-line="163"><span style="color: #57606a;">    import &quot;google/protobuf/any.proto&quot;;</span>
+</span><span class="athl-line" data-athl-line="164"><span style="color: #57606a;">    message AnySampleMessage {</span>
+</span><span class="athl-line" data-athl-line="165"><span style="color: #57606a;">        repeated google.protobuf.Any.details = 1;</span>
+</span><span class="athl-line" data-athl-line="166"><span style="color: #57606a;">    }</span>
+</span><span class="athl-line" data-athl-line="167"><span style="color: #57606a;"></span>
+</span><span class="athl-line" data-athl-line="168"><span style="color: #57606a;">*/</span>
+</span><span class="athl-line" data-athl-line="169">
+</span><span class="athl-line" data-athl-line="170">
+</span><span class="athl-line" data-athl-line="171"><span style="color: #57606a;">/*</span>
+</span><span class="athl-line" data-athl-line="172"><span style="color: #57606a;">*  OneOf</span>
+</span><span class="athl-line" data-athl-line="173"><span style="color: #57606a;">* There are cases, wherein only one field at-most might be present as part of the message.</span>
+</span><span class="athl-line" data-athl-line="174"><span style="color: #57606a;">* Note: OneOf messages can&#39;t be repeated.</span>
+</span><span class="athl-line" data-athl-line="175"><span style="color: #57606a;">*/</span>
+</span><span class="athl-line" data-athl-line="176">
+</span><span class="athl-line" data-athl-line="177"><span style="color: #cf222e;">message</span> <span style="color: #953800;">OneOfMessage</span> <span style="color: #1f2328;">{</span>
+</span><span class="athl-line" data-athl-line="178">    <span style="color: #cf222e;">oneof</span> msg <span style="color: #1f2328;">{</span>
+</span><span class="athl-line" data-athl-line="179">        <span style="color: #953800;">string</span> fname <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">1</span><span style="color: #1f2328;">;</span>
+</span><span class="athl-line" data-athl-line="180">        <span style="color: #953800;">string</span> sname <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">2</span><span style="color: #1f2328;">;</span>
+</span><span class="athl-line" data-athl-line="181">    <span style="color: #1f2328;">}</span><span style="color: #1f2328;">;</span>
+</span><span class="athl-line" data-athl-line="182"><span style="color: #1f2328;">}</span>
+</span><span class="athl-line" data-athl-line="183">
+</span><span class="athl-line" data-athl-line="184"><span style="color: #57606a;">/*</span>
+</span><span class="athl-line" data-athl-line="185"><span style="color: #57606a;">* Maps</span>
+</span><span class="athl-line" data-athl-line="186"><span style="color: #57606a;">* Map fields cannot be repeated.</span>
+</span><span class="athl-line" data-athl-line="187"><span style="color: #57606a;">* Ordering Of A Map Is Not Guaranteed.</span>
+</span><span class="athl-line" data-athl-line="188"><span style="color: #57606a;">*/</span>
+</span><span class="athl-line" data-athl-line="189">
+</span><span class="athl-line" data-athl-line="190"><span style="color: #cf222e;">message</span> <span style="color: #953800;">MessageWithMaps</span> <span style="color: #1f2328;">{</span>
+</span><span class="athl-line" data-athl-line="191">    map<span style="color: #1f2328;">&lt;</span><span style="color: #953800;">string</span><span style="color: #1f2328;">,</span> <span style="color: #953800;">string</span><span style="color: #1f2328;">&gt;</span> mapOfMessages <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">1</span><span style="color: #1f2328;">;</span>
+</span><span class="athl-line" data-athl-line="192"><span style="color: #1f2328;">}</span>
+</span><span class="athl-line" data-athl-line="193">
+</span><span class="athl-line" data-athl-line="194">
+</span><span class="athl-line" data-athl-line="195"><span style="color: #57606a;">/*</span>
+</span><span class="athl-line" data-athl-line="196"><span style="color: #57606a;">* Packages</span>
+</span><span class="athl-line" data-athl-line="197"><span style="color: #57606a;">* Used for preventing name clashes between protocol message types</span>
+</span><span class="athl-line" data-athl-line="198"><span style="color: #57606a;">* Syntax:</span>
+</span><span class="athl-line" data-athl-line="199"><span style="color: #57606a;">    package ${packageName};</span>
+</span><span class="athl-line" data-athl-line="200"><span style="color: #57606a;"></span>
+</span><span class="athl-line" data-athl-line="201"><span style="color: #57606a;">    To Access the package;</span>
+</span><span class="athl-line" data-athl-line="202"><span style="color: #57606a;">    ${packageName}.${messageName} = ${tagNumber};</span>
+</span><span class="athl-line" data-athl-line="203"><span style="color: #57606a;">*/</span>
+</span><span class="athl-line" data-athl-line="204">
+</span><span class="athl-line" data-athl-line="205"><span style="color: #57606a;">/*</span>
+</span><span class="athl-line" data-athl-line="206"><span style="color: #57606a;">* Services</span>
+</span><span class="athl-line" data-athl-line="207"><span style="color: #57606a;">* Message Types Defined For Using In RPC system.</span>
+</span><span class="athl-line" data-athl-line="208"><span style="color: #57606a;">*  When protoc compiler generates for various languages it generates stub methods for the services.</span>
+</span><span class="athl-line" data-athl-line="209"><span style="color: #57606a;">*/</span>
+</span><span class="athl-line" data-athl-line="210">
+</span><span class="athl-line" data-athl-line="211"><span style="color: #cf222e;">message</span> <span style="color: #953800;">SearchRequest</span> <span style="color: #1f2328;">{</span>
+</span><span class="athl-line" data-athl-line="212">    <span style="color: #953800;">string</span> queryString <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">1</span><span style="color: #1f2328;">;</span>
+</span><span class="athl-line" data-athl-line="213"><span style="color: #1f2328;">}</span>
+</span><span class="athl-line" data-athl-line="214">
+</span><span class="athl-line" data-athl-line="215"><span style="color: #cf222e;">message</span> <span style="color: #953800;">SearchResponse</span> <span style="color: #1f2328;">{</span>
+</span><span class="athl-line" data-athl-line="216">    <span style="color: #953800;">string</span> queryResponse <span style="color: #0550ae;">=</span> <span style="color: #0550ae;">1</span><span style="color: #1f2328;">;</span>
+</span><span class="athl-line" data-athl-line="217"><span style="color: #1f2328;">}</span>
+</span><span class="athl-line" data-athl-line="218"><span style="color: #cf222e;">service</span> <span style="color: #953800;">SearchService</span> <span style="color: #1f2328;">{</span>
+</span><span class="athl-line" data-athl-line="219">    <span style="color: #cf222e;">rpc</span> <span style="color: #953800;">Search</span> <span style="color: #1f2328;">(</span><span style="color: #953800;">SearchRequest</span><span style="color: #1f2328;">)</span> <span style="color: #cf222e;">returns</span> <span style="color: #1f2328;">(</span><span style="color: #953800;">SearchResponse</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span>
+</span><span class="athl-line" data-athl-line="220"><span style="color: #1f2328;">}</span>
+</span></code></pre>
+</body>
+</html>
