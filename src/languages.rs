@@ -66,6 +66,7 @@ pub enum Language {
     Regex,
     Ruby,
     Rust,
+    Scala,
     Swift,
     Yaml,
     Zig,
@@ -113,6 +114,7 @@ impl Language {
             "regex" => Some(Language::Regex),
             "ruby" => Some(Language::Ruby),
             "rust" => Some(Language::Rust),
+            "scala" => Some(Language::Scala),
             "swift" => Some(Language::Swift),
             "yaml" => Some(Language::Yaml),
             "zig" => Some(Language::Zig),
@@ -328,6 +330,7 @@ impl Language {
                 "Rakefile",
             ],
             Language::Rust => &["*.rs"],
+            Language::Scala => &["*.scala", "*.sbt", "*.sc"],
             Language::Swift => &["*.swift"],
             Language::Yaml => &["*.yaml", "*.yml"],
             Language::Zig => &["*.zig"],
@@ -439,6 +442,7 @@ impl Language {
             Language::Regex => "Regex",
             Language::Ruby => "Ruby",
             Language::Rust => "Rust",
+            Language::Scala => "Scala",
             Language::Swift => "Swift",
             Language::Yaml => "YAML",
             Language::Zig => "Zig",
@@ -487,6 +491,7 @@ impl Language {
             Language::Regex => &REGEX_CONFIG,
             Language::Ruby => &RUBY_CONFIG,
             Language::Rust => &RUST_CONFIG,
+            Language::Scala => &SCALA_CONFIG,
             Language::Swift => &SWIFT_CONFIG,
             Language::Yaml => &YAML_CONFIG,
             Language::Zig => &ZIG_CONFIG,
@@ -990,6 +995,19 @@ static RUST_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         RUST_LOCALS,
     )
     .expect("failed to create rust highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static SCALA_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(tree_sitter_scala::LANGUAGE),
+        "scala",
+        SCALA_HIGHLIGHTS,
+        SCALA_INJECTIONS,
+        SCALA_LOCALS,
+    )
+    .expect("failed to create scala highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });

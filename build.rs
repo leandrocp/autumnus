@@ -13,6 +13,7 @@ fn main() {
     themes();
 }
 
+// TODO: remove vendored parsers in favor of crates as soon as they implement LanguageFn
 fn vendored_parsers() {
     let parsers = vec![
         TreeSitterParser {
