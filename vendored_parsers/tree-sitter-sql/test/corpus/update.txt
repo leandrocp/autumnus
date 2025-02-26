@@ -1,0 +1,305 @@
+================================================================================
+Simple update
+================================================================================
+
+UPDATE my_table
+SET for = foo + 1;
+
+--------------------------------------------------------------------------------
+
+(program
+  (statement
+    (update
+      (keyword_update)
+      (relation
+        (object_reference
+          name: (identifier)))
+      (keyword_set)
+      (assignment
+        left: (field
+          name: (identifier))
+        right: (binary_expression
+          left: (field
+            name: (identifier))
+          right: (literal))))))
+
+================================================================================
+Simple update with ONLY
+================================================================================
+
+UPDATE ONLY my_table
+SET for = foo + 1;
+
+--------------------------------------------------------------------------------
+
+(program
+  (statement
+    (update
+      (keyword_update)
+      (keyword_only)
+      (relation
+        (object_reference
+          name: (identifier)))
+      (keyword_set)
+      (assignment
+        left: (field
+          name: (identifier))
+        right: (binary_expression
+          left: (field
+            name: (identifier))
+          right: (literal))))))
+
+================================================================================
+update with multiple assignments
+================================================================================
+
+UPDATE my_table
+SET for = foo + 1, col2 = col1;
+
+--------------------------------------------------------------------------------
+
+(program
+  (statement
+    (update
+      (keyword_update)
+      (relation
+        (object_reference
+          name: (identifier)))
+      (keyword_set)
+      (assignment
+        left: (field
+          name: (identifier))
+        right: (binary_expression
+          left: (field
+            name: (identifier))
+          right: (literal)))
+      (assignment
+        left: (field
+          name: (identifier))
+        right: (field
+          name: (identifier))))))
+
+================================================================================
+update with multiple table references
+================================================================================
+
+UPDATE items, month
+SET items.price=month.price
+WHERE items.id=month.item_id;
+
+--------------------------------------------------------------------------------
+
+(program
+  (statement
+    (update
+      (keyword_update)
+      (relation
+        (object_reference
+          name: (identifier)))
+      (relation
+        (object_reference
+          name: (identifier)))
+      (keyword_set)
+      (assignment
+        left: (field
+          (object_reference
+            name: (identifier))
+          name: (identifier))
+        right: (field
+          (object_reference
+            name: (identifier))
+          name: (identifier)))
+      (where
+        (keyword_where)
+        predicate: (binary_expression
+          left: (field
+            (object_reference
+              name: (identifier))
+            name: (identifier))
+          right: (field
+            (object_reference
+              name: (identifier))
+            name: (identifier)))))))
+
+================================================================================
+update with function call
+================================================================================
+
+UPDATE my_table
+SET ts = now();
+
+--------------------------------------------------------------------------------
+
+(program
+  (statement
+    (update
+      (keyword_update)
+      (relation
+        (object_reference
+          name: (identifier)))
+      (keyword_set)
+      (assignment
+        left: (field
+          name: (identifier))
+        right: (invocation
+          (object_reference
+            name: (identifier)))))))
+
+================================================================================
+Update with a JOIN
+================================================================================
+
+UPDATE table_a a
+INNER JOIN table_b b ON b.a = a.uid
+INNER JOIN table_c c ON c.b = b.uid
+SET
+a.d = 5;
+
+--------------------------------------------------------------------------------
+
+(program
+  (statement
+    (update
+      (keyword_update)
+      (relation
+        (object_reference
+          (identifier))
+        (identifier))
+      (join
+        (keyword_inner)
+        (keyword_join)
+        (relation
+          (object_reference
+            (identifier))
+          (identifier))
+        (keyword_on)
+        (binary_expression
+          (field
+            (object_reference
+              (identifier))
+            (identifier))
+          (field
+            (object_reference
+              (identifier))
+            (identifier))))
+      (join
+        (keyword_inner)
+        (keyword_join)
+        (relation
+          (object_reference
+            (identifier))
+          (identifier))
+        (keyword_on)
+        (binary_expression
+          (field
+            (object_reference
+              (identifier))
+            (identifier))
+          (field
+            (object_reference
+              (identifier))
+            (identifier))))
+      (keyword_set)
+      (assignment
+        (field
+          (object_reference
+            (identifier))
+          (identifier))
+        (literal)))))
+
+================================================================================
+Postgres style update
+================================================================================
+
+UPDATE table_a as a
+SET d = 5
+WHERE b.a = a.uid;
+
+--------------------------------------------------------------------------------
+
+(program
+  (statement
+    (update
+      (keyword_update)
+      (relation
+        (object_reference
+          (identifier))
+        (keyword_as)
+        (identifier))
+      (keyword_set)
+      (assignment
+        (field
+          (identifier))
+        (literal))
+      (where
+        (keyword_where)
+        (binary_expression
+          (field
+            (object_reference
+              (identifier))
+            (identifier))
+          (field
+            (object_reference
+              (identifier))
+            (identifier)))))))
+
+================================================================================
+Postgres style update w/ join
+================================================================================
+
+UPDATE table_a as a
+SET d = 5
+FROM table_b b
+INNER JOIN table_c c ON c.b = b.uid
+WHERE b.a = a.uid;
+
+--------------------------------------------------------------------------------
+
+(program
+  (statement
+    (update
+      (keyword_update)
+      (relation
+        (object_reference
+          (identifier))
+        (keyword_as)
+        (identifier))
+      (keyword_set)
+      (assignment
+        (field
+          (identifier))
+        (literal))
+      (from
+        (keyword_from)
+        (relation
+          (object_reference
+            (identifier))
+          (identifier))
+        (join
+          (keyword_inner)
+          (keyword_join)
+          (relation
+            (object_reference
+              (identifier))
+            (identifier))
+          (keyword_on)
+          (binary_expression
+            (field
+              (object_reference
+                (identifier))
+              (identifier))
+            (field
+              (object_reference
+                (identifier))
+              (identifier))))
+        (where
+          (keyword_where)
+          (binary_expression
+            (field
+              (object_reference
+                (identifier))
+              (identifier))
+            (field
+              (object_reference
+                (identifier))
+              (identifier))))))))

@@ -1,0 +1,706 @@
+================================================================================
+Single Field Predicate
+================================================================================
+
+SELECT *
+FROM my_table m
+WHERE m.is_not_deleted;
+
+--------------------------------------------------------------------------------
+
+(program
+  (statement
+    (select
+      (keyword_select)
+      (select_expression
+        (term
+          value: (all_fields))))
+    (from
+      (keyword_from)
+      (relation
+        (object_reference
+          name: (identifier))
+        alias: (identifier))
+      (where
+        (keyword_where)
+        predicate: (field
+          (object_reference
+            name: (identifier))
+          name: (identifier))))))
+
+================================================================================
+Multiple Field Predicates
+================================================================================
+
+SELECT *
+FROM my_table m
+WHERE m.is_not_deleted AND m.is_visible;
+
+--------------------------------------------------------------------------------
+
+(program
+  (statement
+    (select
+      (keyword_select)
+      (select_expression
+        (term
+          value: (all_fields))))
+    (from
+      (keyword_from)
+      (relation
+        (object_reference
+          name: (identifier))
+        alias: (identifier))
+      (where
+        (keyword_where)
+        predicate: (binary_expression
+          left: (field
+            (object_reference
+              name: (identifier))
+            name: (identifier))
+          operator: (keyword_and)
+          right: (field
+            (object_reference
+              name: (identifier))
+            name: (identifier)))))))
+
+================================================================================
+Single Unary Predicate
+================================================================================
+
+SELECT *
+FROM my_table m
+WHERE NOT m.is_not_deleted;
+
+--------------------------------------------------------------------------------
+
+(program
+  (statement
+    (select
+      (keyword_select)
+      (select_expression
+        (term
+          value: (all_fields))))
+    (from
+      (keyword_from)
+      (relation
+        (object_reference
+          name: (identifier))
+        alias: (identifier))
+      (where
+        (keyword_where)
+        predicate: (unary_expression
+          operator: (keyword_not)
+          operand: (field
+            (object_reference
+              name: (identifier))
+            name: (identifier)))))))
+
+================================================================================
+Multiple Unary Predicates
+================================================================================
+
+SELECT *
+FROM my_table m
+WHERE NOT m.is_not_deleted
+  AND NOT m.is_visible;
+
+--------------------------------------------------------------------------------
+
+(program
+  (statement
+    (select
+      (keyword_select)
+      (select_expression
+        (term
+          value: (all_fields))))
+    (from
+      (keyword_from)
+      (relation
+        (object_reference
+          name: (identifier))
+        alias: (identifier))
+      (where
+        (keyword_where)
+        predicate: (binary_expression
+          left: (unary_expression
+            operator: (keyword_not)
+            operand: (field
+              (object_reference
+                name: (identifier))
+              name: (identifier)))
+          operator: (keyword_and)
+          right: (unary_expression
+            operator: (keyword_not)
+            operand: (field
+              (object_reference
+                name: (identifier))
+              name: (identifier))))))))
+
+================================================================================
+Mixed Predicate types
+================================================================================
+
+SELECT *
+FROM my_table m
+WHERE m.status = "success"
+  AND m.name = "foobar"
+  AND m.id = 5
+  AND m.is_not_deleted
+
+--------------------------------------------------------------------------------
+
+(program
+  (statement
+    (select
+      (keyword_select)
+      (select_expression
+        (term
+          value: (all_fields))))
+    (from
+      (keyword_from)
+      (relation
+        (object_reference
+          name: (identifier))
+        alias: (identifier))
+      (where
+        (keyword_where)
+        predicate: (binary_expression
+          left: (binary_expression
+            left: (binary_expression
+              left: (binary_expression
+                left: (field
+                  (object_reference
+                    name: (identifier))
+                  name: (identifier))
+                right: (literal))
+              operator: (keyword_and)
+              right: (binary_expression
+                left: (field
+                  (object_reference
+                    name: (identifier))
+                  name: (identifier))
+                right: (literal)))
+            operator: (keyword_and)
+            right: (binary_expression
+              left: (field
+                (object_reference
+                  name: (identifier))
+                name: (identifier))
+              right: (literal)))
+          operator: (keyword_and)
+          right: (field
+            (object_reference
+              name: (identifier))
+            name: (identifier)))))))
+
+================================================================================
+Disjunctive Predicate
+================================================================================
+
+SELECT *
+FROM my_table m
+WHERE m.status = "success"
+  AND m.name = "foobar"
+  OR m.id = 5
+  AND m.is_not_deleted
+
+--------------------------------------------------------------------------------
+
+(program
+  (statement
+    (select
+      (keyword_select)
+      (select_expression
+        (term
+          value: (all_fields))))
+    (from
+      (keyword_from)
+      (relation
+        (object_reference
+          name: (identifier))
+        alias: (identifier))
+      (where
+        (keyword_where)
+        predicate: (binary_expression
+          left: (binary_expression
+            left: (binary_expression
+              left: (field
+                (object_reference
+                  name: (identifier))
+                name: (identifier))
+              right: (literal))
+            operator: (keyword_and)
+            right: (binary_expression
+              left: (field
+                (object_reference
+                  name: (identifier))
+                name: (identifier))
+              right: (literal)))
+          operator: (keyword_or)
+          right: (binary_expression
+            left: (binary_expression
+              left: (field
+                (object_reference
+                  name: (identifier))
+                name: (identifier))
+              right: (literal))
+            operator: (keyword_and)
+            right: (field
+              (object_reference
+                name: (identifier))
+              name: (identifier))))))))
+
+================================================================================
+Field Predicate w/ unary predicate
+================================================================================
+
+SELECT *
+FROM my_table m
+WHERE NOT m.is_deleted;
+
+--------------------------------------------------------------------------------
+
+(program
+  (statement
+    (select
+      (keyword_select)
+      (select_expression
+        (term
+          value: (all_fields))))
+    (from
+      (keyword_from)
+      (relation
+        (object_reference
+          name: (identifier))
+        alias: (identifier))
+      (where
+        (keyword_where)
+        predicate: (unary_expression
+          operator: (keyword_not)
+          operand: (field
+            (object_reference
+              name: (identifier))
+            name: (identifier)))))))
+
+================================================================================
+Field Predicate w/ anonymous unary predicate
+================================================================================
+
+SELECT *
+FROM my_table m
+WHERE !m.is_deleted;
+
+--------------------------------------------------------------------------------
+
+(program
+  (statement
+    (select
+      (keyword_select)
+      (select_expression
+        (term
+          value: (all_fields))))
+    (from
+      (keyword_from)
+      (relation
+        (object_reference
+          name: (identifier))
+        alias: (identifier))
+      (where
+        (keyword_where)
+        predicate: (unary_expression
+          operator: (bang)
+          operand: (field
+            (object_reference
+              name: (identifier))
+            name: (identifier)))))))
+
+================================================================================
+Field Predicate w/ multiple unary predicate
+================================================================================
+
+SELECT *
+FROM my_table m
+WHERE NOT m.is_deleted
+  AND NOT m.is_invisible;
+
+--------------------------------------------------------------------------------
+
+(program
+  (statement
+    (select
+      (keyword_select)
+      (select_expression
+        (term
+          value: (all_fields))))
+    (from
+      (keyword_from)
+      (relation
+        (object_reference
+          name: (identifier))
+        alias: (identifier))
+      (where
+        (keyword_where)
+        predicate: (binary_expression
+          left: (unary_expression
+            operator: (keyword_not)
+            operand: (field
+              (object_reference
+                name: (identifier))
+              name: (identifier)))
+          operator: (keyword_and)
+          right: (unary_expression
+            operator: (keyword_not)
+            operand: (field
+              (object_reference
+                name: (identifier))
+              name: (identifier))))))))
+
+================================================================================
+IS DISTINCT FROM
+================================================================================
+
+SELECT *
+FROM my_table
+WHERE col IS DISTINCT FROM NULL;
+
+--------------------------------------------------------------------------------
+
+(program
+  (statement
+    (select
+      (keyword_select)
+      (select_expression
+        (term
+          value: (all_fields))))
+    (from
+      (keyword_from)
+      (relation
+        (object_reference
+          name: (identifier)))
+      (where
+        (keyword_where)
+        predicate: (binary_expression
+          left: (field
+            name: (identifier))
+          operator: (distinct_from
+            (keyword_is)
+            (keyword_distinct)
+            (keyword_from))
+          right: (literal
+            (keyword_null)))))))
+
+================================================================================
+IS NOT DISTINCT FROM
+================================================================================
+
+SELECT *
+FROM my_table
+WHERE col IS NOT DISTINCT FROM NULL;
+
+--------------------------------------------------------------------------------
+
+(program
+  (statement
+    (select
+      (keyword_select)
+      (select_expression
+        (term
+          value: (all_fields))))
+    (from
+      (keyword_from)
+      (relation
+        (object_reference
+          name: (identifier)))
+      (where
+        (keyword_where)
+        predicate: (binary_expression
+          left: (field
+            name: (identifier))
+          operator: (not_distinct_from
+            (keyword_is)
+            (keyword_not)
+            (keyword_distinct)
+            (keyword_from))
+          right: (literal
+            (keyword_null)))))))
+
+================================================================================
+Predicates with keywords
+================================================================================
+
+SELECT *
+FROM my_table
+WHERE id IS NOT NULL
+  AND name IS NULL;
+
+--------------------------------------------------------------------------------
+
+(program
+  (statement
+    (select
+      (keyword_select)
+      (select_expression
+        (term
+          value: (all_fields))))
+    (from
+      (keyword_from)
+      (relation
+        (object_reference
+          name: (identifier)))
+      (where
+        (keyword_where)
+        predicate: (binary_expression
+          left: (binary_expression
+            left: (field
+              name: (identifier))
+            operator: (is_not
+              (keyword_is)
+              (keyword_not))
+            right: (literal
+              (keyword_null)))
+          operator: (keyword_and)
+          right: (binary_expression
+            left: (field
+              name: (identifier))
+            operator: (keyword_is)
+            right: (literal
+              (keyword_null))))))))
+
+================================================================================
+Complex Predicates
+================================================================================
+
+SELECT id
+FROM my_table m
+WHERE m.id > 4 AND id < 3;
+
+--------------------------------------------------------------------------------
+
+(program
+  (statement
+    (select
+      (keyword_select)
+      (select_expression
+        (term
+          value: (field
+            name: (identifier)))))
+    (from
+      (keyword_from)
+      (relation
+        (object_reference
+          name: (identifier))
+        alias: (identifier))
+      (where
+        (keyword_where)
+        predicate: (binary_expression
+          left: (binary_expression
+            left: (field
+              (object_reference
+                name: (identifier))
+              name: (identifier))
+            right: (literal))
+          operator: (keyword_and)
+          right: (binary_expression
+            left: (field
+              name: (identifier))
+            right: (literal)))))))
+
+================================================================================
+Where with pattern matching
+================================================================================
+
+SELECT
+    *
+FROM
+    a
+WHERE
+        a LIKE '%a'
+    AND a NOT LIKE '%a'
+    AND a SIMILAR TO '%a'
+    AND a NOT SIMILAR TO '%a';
+
+
+--------------------------------------------------------------------------------
+
+(program
+  (statement
+    (select
+      (keyword_select)
+      (select_expression
+        (term
+          value: (all_fields))))
+    (from
+      (keyword_from)
+      (relation
+        (object_reference
+          name: (identifier)))
+      (where
+        (keyword_where)
+        predicate: (binary_expression
+          left: (binary_expression
+            left: (binary_expression
+              left: (binary_expression
+                left: (field
+                  name: (identifier))
+                operator: (keyword_like)
+                right: (literal))
+              operator: (keyword_and)
+              right: (binary_expression
+                left: (field
+                  name: (identifier))
+                operator: (not_like
+                  (keyword_not)
+                  (keyword_like))
+                right: (literal)))
+            operator: (keyword_and)
+            right: (binary_expression
+              left: (field
+                name: (identifier))
+              operator: (similar_to
+                (keyword_similar)
+                (keyword_to))
+              right: (literal)))
+          operator: (keyword_and)
+          right: (binary_expression
+            left: (field
+              name: (identifier))
+            operator: (not_similar_to
+              (keyword_not)
+              (keyword_similar)
+              (keyword_to))
+            right: (literal)))))))
+
+================================================================================
+NOT EQUAL <> OPERATOR
+================================================================================
+
+SELECT
+    *
+FROM
+    a
+WHERE
+    a <> '%a'
+
+--------------------------------------------------------------------------------
+
+(program
+  (statement
+    (select
+      (keyword_select)
+      (select_expression
+        (term
+          value: (all_fields))))
+    (from
+      (keyword_from)
+      (relation
+        (object_reference
+          name: (identifier)))
+      (where
+        (keyword_where)
+        predicate: (binary_expression
+          left: (field
+            name: (identifier))
+          right: (literal))))))
+
+================================================================================
+string operator concat and start with
+================================================================================
+
+SELECT 'abc' ^@ 'a' || 'z';
+
+--------------------------------------------------------------------------------
+
+(program
+  (statement
+    (select
+      (keyword_select)
+      (select_expression
+        (term
+          (binary_expression
+            (binary_expression
+              (literal)
+              (op_other)
+              (literal))
+            (op_other)
+            (literal)))))))
+
+================================================================================
+full text search operators
+================================================================================
+
+SELECT 'fat cats ate rats' @@ !! ('cat' <-> 'rat'::tsquery);
+
+--------------------------------------------------------------------------------
+
+(program
+  (statement
+    (select
+      (keyword_select)
+      (select_expression
+        (term
+          (binary_expression
+            (literal)
+            (op_other)
+            (unary_expression
+              (op_unary_other)
+              (parenthesized_expression
+                (cast
+                  (binary_expression
+                    (literal)
+                    (op_other)
+                    (literal))
+                  (object_reference
+                    (identifier)))))))))))
+
+================================================================================
+Array subscript
+================================================================================
+
+SELECT
+  (ARRAY[1, 4, 9])[1+1],
+  (ARRAY[1, 4, 9])[1:3 - 1],
+  (ARRAY[1, 4, 9])[1:2][3];
+
+--------------------------------------------------------------------------------
+
+(program
+  (statement
+    (select
+      (keyword_select)
+      (select_expression
+        (term
+          value: (subscript
+            expression: (parenthesized_expression
+              (array
+                (keyword_array)
+                (literal)
+                (literal)
+                (literal)))
+            subscript: (binary_expression
+              left: (literal)
+              right: (literal))))
+        (term
+          value: (subscript
+            expression: (parenthesized_expression
+              (array
+                (keyword_array)
+                (literal)
+                (literal)
+                (literal)))
+            lower: (literal)
+            upper: (binary_expression
+              left: (literal)
+              right: (literal))))
+        (term
+          value: (subscript
+            expression: (subscript
+              expression: (parenthesized_expression
+                (array
+                  (keyword_array)
+                  (literal)
+                  (literal)
+                  (literal)))
+              lower: (literal)
+              upper: (literal))
+            subscript: (literal)))))))

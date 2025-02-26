@@ -1,0 +1,113 @@
+================================================================================
+Create simple index
+================================================================================
+
+CREATE INDEX ON tab(col);
+
+--------------------------------------------------------------------------------
+
+(program
+  (statement
+    (create_index
+      (keyword_create)
+      (keyword_index)
+      (keyword_on)
+      (object_reference
+        (identifier))
+      (index_fields
+        (field
+          (identifier))))))
+
+================================================================================
+Create named index with options
+================================================================================
+
+CREATE UNIQUE INDEX CONCURRENTLY
+IF NOT EXISTS idx1
+ON tab USING HASH(col ASC)
+WHERE tab.col > 10;
+
+--------------------------------------------------------------------------------
+
+(program
+  (statement
+    (create_index
+      (keyword_create)
+      (keyword_unique)
+      (keyword_index)
+      (keyword_concurrently)
+      (keyword_if)
+      (keyword_not)
+      (keyword_exists)
+      (identifier)
+      (keyword_on)
+      (object_reference
+        (identifier))
+      (keyword_using)
+      (keyword_hash)
+      (index_fields
+        (field
+          (identifier)
+          (direction
+            (keyword_asc))))
+      (where
+        (keyword_where)
+        (binary_expression
+          (field
+            (object_reference
+              (identifier))
+            (identifier))
+          (literal))))))
+
+================================================================================
+Create unique index with complex index fields
+================================================================================
+
+CREATE UNIQUE INDEX foo_index ON foo (
+	md5(COALESCE(cat, '')) COLLATE some_collation ASC NULLS LAST,
+	dog some_operator_class(1),
+	(cow / 2)
+);
+
+--------------------------------------------------------------------------------
+
+(program
+  (statement
+    (create_index
+      (keyword_create)
+      (keyword_unique)
+      (keyword_index)
+      column: (identifier)
+      (keyword_on)
+      (object_reference
+        name: (identifier))
+      (index_fields
+        (field
+          function: (invocation
+            (object_reference
+              name: (identifier))
+            parameter: (term
+              value: (invocation
+                (object_reference
+                  name: (identifier))
+                parameter: (term
+                  value: (field
+                    name: (identifier)))
+                parameter: (term
+                  value: (literal)))))
+          (keyword_collate)
+          (identifier)
+          (direction
+            (keyword_asc))
+          (keyword_nulls)
+          (keyword_last))
+        (field
+          column: (identifier)
+          opclass: (identifier)
+          opclass_parameters: (term
+            value: (literal)))
+        (field
+          expression: (binary_expression
+            left: (field
+              name: (identifier))
+            right: (literal)))))))

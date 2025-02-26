@@ -1,0 +1,25 @@
+================================================================================
+Simple compound statement
+================================================================================
+
+BEGIN
+  CREATE TABLE FOO (bar INT);
+END;
+
+--------------------------------------------------------------------------------
+
+(program
+  (block
+    (keyword_begin)
+    (statement
+      (create_table
+        (keyword_create)
+        (keyword_table)
+        (object_reference
+          (identifier))
+        (column_definitions
+          (column_definition
+            (identifier)
+            (int
+              (keyword_int))))))
+    (keyword_end)))
