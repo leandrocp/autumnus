@@ -1,0 +1,306 @@
+==================
+Liquid Tag with If
+==================
+
+<html>
+  {% liquid
+    include "file"
+    assign product_type = product.type | downcase
+
+    if product_type != blank
+      product_type | trim
+      echo product_type
+    else
+      assign product_type = "type"
+    endif
+  %}
+</html>
+
+---
+  (program
+   (template_content)
+   (liquid_tag
+    (include_statement
+     (string))
+    (assignment_statement
+     variable_name: (identifier)
+     value: (filter
+       body: (access
+         receiver: (identifier)
+         property: (identifier))
+       name: (identifier)))
+    (if_statement
+     condition: (predicate
+       left: (identifier)
+       right: (identifier))
+     consequence: (block
+       (filter
+        body: (identifier)
+        name: (identifier))
+       (echo_statement
+        (identifier)))
+     alternative: (else_clause
+       (block
+        (assignment_statement
+         variable_name: (identifier)
+         value: (string))))))
+(template_content))
+
+==================
+Liquid Tag with Case
+==================
+
+<html>
+  {% liquid
+
+    assign product_type = product.type | downcase
+    assign message = ''
+
+    case product_type
+      when 'health'
+        assign message = 'This is a health potion!'
+        echo message | trim
+      when 'love'
+        assign message = 'This is a love potion!'
+      else
+        render "page"
+        product_type | json
+    endcase
+
+    echo message
+  %}
+</html>
+
+---
+  (program
+   (template_content)
+   (liquid_tag
+    (assignment_statement
+     variable_name: (identifier)
+     value: (filter
+       body: (access
+         receiver: (identifier)
+         property: (identifier))
+       name: (identifier)))
+    (assignment_statement
+     variable_name: (identifier)
+     value: (string))
+    (case_statement
+     receiver: (identifier)
+     conditions: (block
+       (when_clause
+        condition: (argument_list
+          (string))
+        consequence: (block
+          (assignment_statement
+           variable_name: (identifier)
+           value: (string))
+          (echo_statement
+           (filter
+            body: (identifier)
+            name: (identifier)))))
+       (when_clause
+        condition: (argument_list
+          (string))
+        consequence: (block
+          (assignment_statement
+           variable_name: (identifier)
+           value: (string)))))
+     alternative: (else_clause
+         (block
+          (render_statement
+           file: (string))
+          (filter
+           body: (identifier)
+           name: (identifier)))))
+  (echo_statement
+   (identifier)))
+(template_content))
+
+==================
+Liquid Tag with For Loop
+==================
+
+<html>
+  {% liquid
+    for product_type in product.types
+      assign data = product_type
+      cycle "group": "one", string, access.string
+      echo data
+      break
+    endfor
+  %}
+</html>
+
+---
+  (program
+   (template_content)
+   (liquid_tag
+    (for_loop_statement
+     item: (identifier)
+     iterator: (access
+       receiver: (identifier)
+       property: (identifier))
+     body: (block
+       (assignment_statement
+        variable_name: (identifier)
+        value: (identifier))
+       (cycle_statement
+        group_name: (string)
+        group_item: (string)
+        group_item: (identifier)
+        group_item: (access
+          receiver: (identifier)
+          property: (identifier)))
+       (echo_statement
+        (identifier))
+       (break_statement))))
+(template_content))
+
+==================
+Liquid Tag with Capture
+==================
+
+<html>
+  {% liquid
+    capture title
+      if show_up_title
+         up_title
+      else
+        down_title
+      endif
+    endcapture
+  %}
+</html>
+
+---
+  (program
+   (template_content)
+   (liquid_tag
+    (capture_statement
+     variable: (identifier)
+     value: (block
+       (if_statement
+        condition: (identifier)
+        consequence: (block
+          (identifier))
+        alternative: (else_clause
+          (block
+           (identifier)))))))
+   (template_content))
+
+==================
+Liquid Tag with Tablerow
+==================
+
+<html>
+  {% liquid
+    tablerow product_type in product.types
+      assign data = product_type
+      echo data
+    endtablerow
+  %}
+</html>
+
+---
+  (program
+   (template_content)
+   (liquid_tag
+    (tablerow_statement
+     item: (identifier)
+     iterator: (access
+       receiver: (identifier)
+       property: (identifier))
+     body: (block
+       (assignment_statement
+        variable_name: (identifier)
+        value: (identifier))
+       (echo_statement
+        (identifier)))))
+   (template_content))
+
+==================
+Liquid Tag with Form
+==================
+
+<html>
+  {% liquid
+    form "type"
+      echo "content"
+    endform
+  %}
+</html>
+
+---
+  (program
+   (template_content)
+   (liquid_tag
+    (form_statement
+     (string)
+     (echo_statement
+      (string))))
+   (template_content))
+
+==================
+Liquid Tag with Paginate
+==================
+
+<html>
+  {% liquid
+    paginate collection.products by 3, window_size: 1
+      echo "content"
+    endpaginate
+  %}
+</html>
+
+---
+  (program
+   (template_content)
+    (liquid_tag
+     (paginate_statement
+      (access
+       (identifier)
+       (identifier))
+      (number)
+      (argument_list
+       (argument
+        (identifier)
+        (number)))
+      (block
+       (echo_statement
+        (string)))))
+   (template_content))
+
+==================
+Liquid Custom Tag
+==================
+
+<html>
+  {% liquid
+    paginate collection.products by 3, window_size: 1
+      custom 'filename'
+      echo 'thing'
+    endpaginate
+  %}
+</html>
+
+---
+  (program
+   (template_content)
+    (liquid_tag
+     (paginate_statement
+      (access
+       (identifier)
+       (identifier))
+      (number)
+      (argument_list
+       (argument
+        (identifier)
+        (number)))
+      (block
+       (custom_unpaired_statement
+        (string))
+       (echo_statement
+        (string)))))
+   (template_content))
+

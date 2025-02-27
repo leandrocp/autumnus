@@ -1,0 +1,171 @@
+==================\\\
+Front Matter Only
+==================\\\
+---
+prop: value
+---
+---\\\
+(program
+  (front_matter))
+
+==================\\\
+Front Matter Empty
+==================\\\
+---
+---
+---\\\
+(program
+  (front_matter))
+
+==================\\\
+Front Matter With Value Staring Dashes
+==================\\\
+---
+--prop: value
+---
+---\\\
+(program
+  (front_matter))
+
+==================\\\
+Malformed Front Matter Start Less Dashes
+==================\\\
+--
+prop: 1
+---
+---\\\
+(program
+  (template_content))
+
+==================\\\
+Malformed Front Matter End Less Dashes
+==================\\\
+---
+prop: 1
+--
+---\\\
+(program
+  (template_content))
+
+==================\\\
+Front Matter With Three Dash Template Content
+==================\\\
+--- something
+prop: value
+---
+---\\\
+(program
+  (template_content))
+
+==================\\\
+Front Matter Trailing Dashes
+==================\\\
+---
+prop: value
+------
+<html>
+{{ hi }}
+---\\\
+(program
+ (template_content)
+ (identifier))
+
+==================\\\
+Front Matter First Line Starts With Space
+==================\\\
+ ---
+prop: value
+---
+---\\\
+(program
+  (template_content))
+
+==================\\\
+Front Matter Second Line Starts With Space
+==================\\\
+---
+prop: value
+ ---
+---\\\
+(program
+  (template_content))
+
+==================\\\
+Front Matter Followed By Template Content
+==================\\\
+---
+prop: 1
+prop: 2
+---
+<html>
+<html/>
+---\\\
+(program
+  (front_matter)
+  (template_content))
+
+==================\\\
+Front Matter After Template Content
+==================\\\
+<html>
+<html/>
+---
+prop: 1
+---
+---\\\
+(program
+  (template_content))
+
+
+==================\\\
+Front Matter After Liquid
+==================\\\
+{% render "file" %}
+---
+prop: 1
+---
+---\\\
+(program
+  (render_statement
+    (string))
+  (template_content))
+
+==================\\\
+Front Matter Followed By Liquid
+==================\\\
+---
+prop: value
+---
+{% liquid
+  form "type"
+    echo "content"
+  endform
+%}
+---\\\
+(program
+  (front_matter)
+ (liquid_tag
+  (form_statement
+   (string)
+   (echo_statement
+    (string)))))
+
+==================\\\
+Front Matter With Valid Yaml
+==================\\\
+---
+title:  'This is the title: it contains a colon'
+author:
+- Author One
+- Author Two
+keywords: [nothing, nothingness]
+abstract: |
+  This is the abstract.
+
+  It consists of two paragraphs.
+---
+
+---\\\
+
+(program
+  (front_matter))

@@ -1,0 +1,60 @@
+{
+  "name": "tree-sitter-liquid",
+  "description": "liquid grammar for tree-sitter",
+  "author": [
+    "derek stride",
+    "hank jackson"
+  ],
+  "license": "MIT",
+  "version": "0.1.0",
+  "main": "bindings/node",
+  "types": "bindings/node",
+  "keywords": [
+    "parser",
+    "parsing",
+    "lexer",
+    "incremental",
+    "liquid",
+    "tree-sitter"
+  ],
+  "files": [
+    "grammar.js",
+    "binding.gyp",
+    "prebuilds/**",
+    "bindings/node/*",
+    "queries/*",
+    "src/**"
+  ],
+  "dependencies": {
+    "node-addon-api": "^8.0.0",
+    "node-gyp-build": "^4.8.1"
+  },
+  "peerDependencies": {
+    "tree-sitter": "^0.21.1"
+  },
+  "peerDependenciesMeta": {
+    "tree_sitter": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "eslint-config-google": "^0.14.0",
+    "tree-sitter-cli": "0.22.6",
+    "prebuildify": "^6.0.1"
+  },
+  "scripts": {
+    "build": "tree-sitter generate",
+    "test": "tree-sitter test",
+    "lint": "eslint grammar.js",
+    "lint-fix": "eslint grammar.js --fix",
+    "install": "node-gyp-build",
+    "prebuildify": "prebuildify --napi --strip"
+  },
+  "tree-sitter": [
+    {
+      "scope": "source.liquid",
+      "injection-regex": "^liquid$"
+    }
+  ]
+}
