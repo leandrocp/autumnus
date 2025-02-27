@@ -1,6 +1,6 @@
 ## Queries
 
-cp queries from nvim-tree-sitter
+Copy the `.scm` files from [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter/tree/master/queries) into `queries/`.
 
 ## Parsers
 
