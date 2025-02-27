@@ -111,6 +111,11 @@ fn vendored_parsers() {
             src_dir: "vendored_parsers/tree-sitter-perl/src",
             extra_files: vec!["scanner.c"],
         },
+        TreeSitterParser {
+            name: "tree-sitter-powershell",
+            src_dir: "vendored_parsers/tree-sitter-powershell/src",
+            extra_files: vec!["scanner.c"],
+        },
     ];
 
     for parser in &parsers {

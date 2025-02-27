@@ -28,6 +28,7 @@ extern "C" {
     fn tree_sitter_llvm() -> *const ();
     fn tree_sitter_make() -> *const ();
     fn tree_sitter_perl() -> *const ();
+    fn tree_sitter_powershell() -> *const ();
 }
 
 mod generated {
@@ -81,7 +82,7 @@ pub enum Language {
     Perl,
     Php,
     PlainText,
-    // Powershell,
+    PowerShell,
     ProtoBuf,
     Python,
     R,
@@ -147,6 +148,7 @@ impl Language {
             "perl" => Some(Language::Perl),
             "make" => Some(Language::Make),
             "php" => Some(Language::Php),
+            "powershell" => Some(Language::PowerShell),
             "protobuf" => Some(Language::ProtoBuf),
             "python" => Some(Language::Python),
             "r" => Some(Language::R),
@@ -380,6 +382,7 @@ impl Language {
             Language::Php => &[
                 "*.php", "*.phtml", "*.php3", "*.php4", "*.php5", "*.php7", "*.phps",
             ],
+            Language::PowerShell => &["*.ps1", "*.psm1"],
             Language::ProtoBuf => &["*.proto", "*.protobuf", "*.proto2", "*.proto3"],
             Language::PlainText => &[],
             Language::Python => &["*.py", "*.py3", "*.pyi", "*.bzl", "TARGETS", "BUCK", "DEPS"],
@@ -607,6 +610,7 @@ impl Language {
             Language::Perl => "Perl",
             Language::Php => "PHP",
             Language::PlainText => "Plain Text",
+            Language::PowerShell => "PowerShell",
             Language::ProtoBuf => "Protocol Buffer",
             Language::Python => "Python",
             Language::R => "R",
@@ -671,6 +675,7 @@ impl Language {
             Language::Make => &MAKE_CONFIG,
             Language::Perl => &PERL_CONFIG,
             Language::Php => &PHP_CONFIG,
+            Language::PowerShell => &POWERSHELL_CONFIG,
             Language::ProtoBuf => &PROTO_BUF_CONFIG,
             Language::Python => &PYTHON_CONFIG,
             Language::R => &R_CONFIG,
@@ -1267,6 +1272,21 @@ static PHP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         PHP_LOCALS,
     )
     .expect("failed to create php highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static POWERSHELL_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_powershell) };
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "poweshell",
+        POWERSHELL_HIGHLIGHTS,
+        POWERSHELL_INJECTIONS,
+        POWERSHELL_LOCALS,
+    )
+    .expect("failed to create poweshell highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
