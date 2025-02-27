@@ -29,6 +29,7 @@ extern "C" {
     fn tree_sitter_make() -> *const ();
     fn tree_sitter_perl() -> *const ();
     fn tree_sitter_powershell() -> *const ();
+    fn tree_sitter_scss() -> *const ();
 }
 
 mod generated {
@@ -90,7 +91,7 @@ pub enum Language {
     Ruby,
     Rust,
     Scala,
-    // Scss,
+    SCSS,
     SQL,
     // Surface,
     Svelte,
@@ -156,6 +157,7 @@ impl Language {
             "ruby" => Some(Language::Ruby),
             "rust" => Some(Language::Rust),
             "scala" => Some(Language::Scala),
+            "scss" => Some(Language::SCSS),
             "sql" => Some(Language::SQL),
             "svelte" => Some(Language::Svelte),
             "swift" => Some(Language::Swift),
@@ -398,6 +400,7 @@ impl Language {
             ],
             Language::Rust => &["*.rs"],
             Language::Scala => &["*.scala", "*.sbt", "*.sc"],
+            Language::SCSS => &["*.scss"],
             Language::SQL => &["*.sql", "*.pgsql"],
             Language::Svelte => &["*.svelte"],
             Language::Swift => &["*.swift"],
@@ -487,7 +490,7 @@ impl Language {
                 "ruby" => Some(Language::Ruby),
                 "rust" => Some(Language::Rust),
                 "scala" => Some(Language::Scala),
-                // "scss" => Some(Language::Scss),
+                "scss" => Some(Language::SCSS),
                 "sh" => Some(Language::Bash),
                 "sql" => Some(Language::SQL),
                 "swift" => Some(Language::Swift),
@@ -618,6 +621,7 @@ impl Language {
             Language::Ruby => "Ruby",
             Language::Rust => "Rust",
             Language::Scala => "Scala",
+            Language::SCSS => "SCSS",
             Language::SQL => "SQL",
             Language::Svelte => "Svelte",
             Language::Swift => "Swift",
@@ -683,6 +687,7 @@ impl Language {
             Language::Ruby => &RUBY_CONFIG,
             Language::Rust => &RUST_CONFIG,
             Language::Scala => &SCALA_CONFIG,
+            Language::SCSS => &SCSS_CONFIG,
             Language::SQL => &SQL_CONFIG,
             Language::Svelte => &SVELTE_CONFIG,
             Language::Swift => &SWIFT_CONFIG,
@@ -1391,6 +1396,21 @@ static SCALA_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         SCALA_LOCALS,
     )
     .expect("failed to create scala highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static SCSS_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_scss) };
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "scss",
+        SCSS_HIGHLIGHTS,
+        SCSS_INJECTIONS,
+        SCSS_LOCALS,
+    )
+    .expect("failed to create scss highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
