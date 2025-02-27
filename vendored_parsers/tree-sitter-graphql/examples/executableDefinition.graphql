@@ -1,0 +1,41 @@
+query GetPeople($me: String!, $you: String!) {
+  getMe: getPerson(id: $me) {
+    username
+    contact {
+      email
+    }
+  }
+  getPerson(id: $you) {
+    ... on User {
+      username
+      password
+    }
+    ... on Contact {
+      ...ContactFragment
+    }
+  }
+}
+
+mutation CreatePerson($input: CreatePerson) {
+  createPerson(input: $input) {
+    username
+    password
+  }
+}
+
+subscription {
+  subscribeToNotification(input: { hello: "there", you: 1 }) {
+    username
+    notification {
+      content
+      timestamp
+    }
+  }
+}
+
+fragment ContactFragment on Contact {
+  name
+  contact {
+    email
+  }
+}

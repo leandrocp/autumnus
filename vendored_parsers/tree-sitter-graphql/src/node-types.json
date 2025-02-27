@@ -1,0 +1,1624 @@
+[
+  {
+    "type": "alias",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "argument",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "name",
+          "named": true
+        },
+        {
+          "type": "value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "arguments",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "argument",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "arguments_definition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "input_value_definition",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "boolean_value",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "default_value",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "definition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "executable_definition",
+          "named": true
+        },
+        {
+          "type": "type_system_definition",
+          "named": true
+        },
+        {
+          "type": "type_system_extension",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "description",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "string_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "arguments",
+          "named": true
+        },
+        {
+          "type": "name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "directive_definition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "arguments_definition",
+          "named": true
+        },
+        {
+          "type": "description",
+          "named": true
+        },
+        {
+          "type": "directive_locations",
+          "named": true
+        },
+        {
+          "type": "name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "directive_location",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "executable_directive_location",
+          "named": true
+        },
+        {
+          "type": "type_system_directive_location",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "directive_locations",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "directive_location",
+          "named": true
+        },
+        {
+          "type": "directive_locations",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "directives",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "directive",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "document",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "definition",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "enum_type_definition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "description",
+          "named": true
+        },
+        {
+          "type": "directives",
+          "named": true
+        },
+        {
+          "type": "enum_values_definition",
+          "named": true
+        },
+        {
+          "type": "name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "enum_type_extension",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "directives",
+          "named": true
+        },
+        {
+          "type": "enum_values_definition",
+          "named": true
+        },
+        {
+          "type": "name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "enum_value",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "enum_value_definition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "description",
+          "named": true
+        },
+        {
+          "type": "directives",
+          "named": true
+        },
+        {
+          "type": "enum_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "enum_values_definition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "enum_value_definition",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "executable_definition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "fragment_definition",
+          "named": true
+        },
+        {
+          "type": "operation_definition",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "executable_directive_location",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "field",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "alias",
+          "named": true
+        },
+        {
+          "type": "arguments",
+          "named": true
+        },
+        {
+          "type": "directive",
+          "named": true
+        },
+        {
+          "type": "name",
+          "named": true
+        },
+        {
+          "type": "selection_set",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "field_definition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "arguments_definition",
+          "named": true
+        },
+        {
+          "type": "description",
+          "named": true
+        },
+        {
+          "type": "directives",
+          "named": true
+        },
+        {
+          "type": "name",
+          "named": true
+        },
+        {
+          "type": "type",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "fields_definition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "field_definition",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "fragment_definition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "directives",
+          "named": true
+        },
+        {
+          "type": "fragment_name",
+          "named": true
+        },
+        {
+          "type": "selection_set",
+          "named": true
+        },
+        {
+          "type": "type_condition",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "fragment_name",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "fragment_spread",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "directives",
+          "named": true
+        },
+        {
+          "type": "fragment_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "implements_interfaces",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "implements_interfaces",
+          "named": true
+        },
+        {
+          "type": "named_type",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "inline_fragment",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "directives",
+          "named": true
+        },
+        {
+          "type": "selection_set",
+          "named": true
+        },
+        {
+          "type": "type_condition",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "input_fields_definition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "input_value_definition",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "input_object_type_definition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "description",
+          "named": true
+        },
+        {
+          "type": "directives",
+          "named": true
+        },
+        {
+          "type": "input_fields_definition",
+          "named": true
+        },
+        {
+          "type": "name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "input_object_type_extension",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "directives",
+          "named": true
+        },
+        {
+          "type": "input_fields_definition",
+          "named": true
+        },
+        {
+          "type": "name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "input_value_definition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "default_value",
+          "named": true
+        },
+        {
+          "type": "description",
+          "named": true
+        },
+        {
+          "type": "directives",
+          "named": true
+        },
+        {
+          "type": "name",
+          "named": true
+        },
+        {
+          "type": "type",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "interface_type_definition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "description",
+          "named": true
+        },
+        {
+          "type": "directives",
+          "named": true
+        },
+        {
+          "type": "fields_definition",
+          "named": true
+        },
+        {
+          "type": "implements_interfaces",
+          "named": true
+        },
+        {
+          "type": "name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "interface_type_extension",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "directives",
+          "named": true
+        },
+        {
+          "type": "fields_definition",
+          "named": true
+        },
+        {
+          "type": "implements_interfaces",
+          "named": true
+        },
+        {
+          "type": "name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "list_type",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "type",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "list_value",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "named_type",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "non_null_type",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "list_type",
+          "named": true
+        },
+        {
+          "type": "named_type",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "object_field",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "comma",
+          "named": true
+        },
+        {
+          "type": "name",
+          "named": true
+        },
+        {
+          "type": "value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "object_type_definition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "description",
+          "named": true
+        },
+        {
+          "type": "directives",
+          "named": true
+        },
+        {
+          "type": "fields_definition",
+          "named": true
+        },
+        {
+          "type": "implements_interfaces",
+          "named": true
+        },
+        {
+          "type": "name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "object_type_extension",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "directives",
+          "named": true
+        },
+        {
+          "type": "fields_definition",
+          "named": true
+        },
+        {
+          "type": "implements_interfaces",
+          "named": true
+        },
+        {
+          "type": "name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "object_value",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "object_field",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "operation_definition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "directives",
+          "named": true
+        },
+        {
+          "type": "name",
+          "named": true
+        },
+        {
+          "type": "operation_type",
+          "named": true
+        },
+        {
+          "type": "selection_set",
+          "named": true
+        },
+        {
+          "type": "variable_definitions",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "operation_type",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "root_operation_type_definition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "named_type",
+          "named": true
+        },
+        {
+          "type": "operation_type",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "scalar_type_definition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "description",
+          "named": true
+        },
+        {
+          "type": "directives",
+          "named": true
+        },
+        {
+          "type": "name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "scalar_type_extension",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "directives",
+          "named": true
+        },
+        {
+          "type": "name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "schema_definition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "description",
+          "named": true
+        },
+        {
+          "type": "directives",
+          "named": true
+        },
+        {
+          "type": "root_operation_type_definition",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "schema_extension",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "directives",
+          "named": true
+        },
+        {
+          "type": "root_operation_type_definition",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "selection",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "field",
+          "named": true
+        },
+        {
+          "type": "fragment_spread",
+          "named": true
+        },
+        {
+          "type": "inline_fragment",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "selection_set",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "selection",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "source_file",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "document",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "string_value",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "type",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "list_type",
+          "named": true
+        },
+        {
+          "type": "named_type",
+          "named": true
+        },
+        {
+          "type": "non_null_type",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "type_condition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "named_type",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "type_definition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "enum_type_definition",
+          "named": true
+        },
+        {
+          "type": "input_object_type_definition",
+          "named": true
+        },
+        {
+          "type": "interface_type_definition",
+          "named": true
+        },
+        {
+          "type": "object_type_definition",
+          "named": true
+        },
+        {
+          "type": "scalar_type_definition",
+          "named": true
+        },
+        {
+          "type": "union_type_definition",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "type_extension",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "enum_type_extension",
+          "named": true
+        },
+        {
+          "type": "input_object_type_extension",
+          "named": true
+        },
+        {
+          "type": "interface_type_extension",
+          "named": true
+        },
+        {
+          "type": "object_type_extension",
+          "named": true
+        },
+        {
+          "type": "scalar_type_extension",
+          "named": true
+        },
+        {
+          "type": "union_type_extension",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "type_system_definition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "directive_definition",
+          "named": true
+        },
+        {
+          "type": "schema_definition",
+          "named": true
+        },
+        {
+          "type": "type_definition",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "type_system_directive_location",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "type_system_extension",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "schema_extension",
+          "named": true
+        },
+        {
+          "type": "type_extension",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "union_member_types",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "named_type",
+          "named": true
+        },
+        {
+          "type": "union_member_types",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "union_type_definition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "description",
+          "named": true
+        },
+        {
+          "type": "directives",
+          "named": true
+        },
+        {
+          "type": "name",
+          "named": true
+        },
+        {
+          "type": "union_member_types",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "union_type_extension",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "directives",
+          "named": true
+        },
+        {
+          "type": "name",
+          "named": true
+        },
+        {
+          "type": "union_member_types",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "value",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "boolean_value",
+          "named": true
+        },
+        {
+          "type": "enum_value",
+          "named": true
+        },
+        {
+          "type": "float_value",
+          "named": true
+        },
+        {
+          "type": "int_value",
+          "named": true
+        },
+        {
+          "type": "list_value",
+          "named": true
+        },
+        {
+          "type": "null_value",
+          "named": true
+        },
+        {
+          "type": "object_value",
+          "named": true
+        },
+        {
+          "type": "string_value",
+          "named": true
+        },
+        {
+          "type": "variable",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "variable",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "variable_definition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "comma",
+          "named": true
+        },
+        {
+          "type": "default_value",
+          "named": true
+        },
+        {
+          "type": "directives",
+          "named": true
+        },
+        {
+          "type": "type",
+          "named": true
+        },
+        {
+          "type": "variable",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "variable_definitions",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "variable_definition",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "!",
+    "named": false
+  },
+  {
+    "type": "\"",
+    "named": false
+  },
+  {
+    "type": "\"\"\"",
+    "named": false
+  },
+  {
+    "type": "$",
+    "named": false
+  },
+  {
+    "type": "&",
+    "named": false
+  },
+  {
+    "type": "(",
+    "named": false
+  },
+  {
+    "type": ")",
+    "named": false
+  },
+  {
+    "type": "...",
+    "named": false
+  },
+  {
+    "type": ":",
+    "named": false
+  },
+  {
+    "type": "=",
+    "named": false
+  },
+  {
+    "type": "@",
+    "named": false
+  },
+  {
+    "type": "ARGUMENT_DEFINITION",
+    "named": false
+  },
+  {
+    "type": "ENUM",
+    "named": false
+  },
+  {
+    "type": "ENUM_VALUE",
+    "named": false
+  },
+  {
+    "type": "FIELD",
+    "named": false
+  },
+  {
+    "type": "FIELD_DEFINITION",
+    "named": false
+  },
+  {
+    "type": "FRAGMENT_DEFINITION",
+    "named": false
+  },
+  {
+    "type": "FRAGMENT_SPREAD",
+    "named": false
+  },
+  {
+    "type": "INLINE_FRAGMENT",
+    "named": false
+  },
+  {
+    "type": "INPUT_FIELD_DEFINITION",
+    "named": false
+  },
+  {
+    "type": "INPUT_OBJECT",
+    "named": false
+  },
+  {
+    "type": "INTERFACE",
+    "named": false
+  },
+  {
+    "type": "MUTATION",
+    "named": false
+  },
+  {
+    "type": "OBJECT",
+    "named": false
+  },
+  {
+    "type": "QUERY",
+    "named": false
+  },
+  {
+    "type": "SCALAR",
+    "named": false
+  },
+  {
+    "type": "SCHEMA",
+    "named": false
+  },
+  {
+    "type": "SUBSCRIPTION",
+    "named": false
+  },
+  {
+    "type": "UNION",
+    "named": false
+  },
+  {
+    "type": "VARIABLE_DEFINITION",
+    "named": false
+  },
+  {
+    "type": "[",
+    "named": false
+  },
+  {
+    "type": "]",
+    "named": false
+  },
+  {
+    "type": "comma",
+    "named": true
+  },
+  {
+    "type": "comment",
+    "named": true
+  },
+  {
+    "type": "directive",
+    "named": false
+  },
+  {
+    "type": "enum",
+    "named": false
+  },
+  {
+    "type": "extend",
+    "named": false
+  },
+  {
+    "type": "false",
+    "named": false
+  },
+  {
+    "type": "float_value",
+    "named": true
+  },
+  {
+    "type": "fragment",
+    "named": false
+  },
+  {
+    "type": "implements",
+    "named": false
+  },
+  {
+    "type": "input",
+    "named": false
+  },
+  {
+    "type": "int_value",
+    "named": true
+  },
+  {
+    "type": "interface",
+    "named": false
+  },
+  {
+    "type": "mutation",
+    "named": false
+  },
+  {
+    "type": "name",
+    "named": true
+  },
+  {
+    "type": "null_value",
+    "named": true
+  },
+  {
+    "type": "on",
+    "named": false
+  },
+  {
+    "type": "query",
+    "named": false
+  },
+  {
+    "type": "repeatable",
+    "named": false
+  },
+  {
+    "type": "scalar",
+    "named": false
+  },
+  {
+    "type": "schema",
+    "named": false
+  },
+  {
+    "type": "subscription",
+    "named": false
+  },
+  {
+    "type": "true",
+    "named": false
+  },
+  {
+    "type": "type",
+    "named": false
+  },
+  {
+    "type": "union",
+    "named": false
+  },
+  {
+    "type": "{",
+    "named": false
+  },
+  {
+    "type": "|",
+    "named": false
+  },
+  {
+    "type": "}",
+    "named": false
+  }
+]

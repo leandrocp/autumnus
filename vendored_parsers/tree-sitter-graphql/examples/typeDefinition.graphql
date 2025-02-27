@@ -1,0 +1,50 @@
+interface Entity {
+  """
+  The entity unique identifier
+  """
+  id: String!
+}
+
+directive @skip on FIELD_DEFINITION
+
+interface Person {
+  name: String! # TODO: deprecate
+}
+
+type Contact implements Person {
+  name: String!
+}
+
+type User implements Entity & Person {
+  name: String!
+  username: String!
+  password: String
+  createdAt: Date
+}
+
+union People = User | Contact
+
+scalar Date
+
+enum Status {
+  ACTIVE
+  INACTIVE
+}
+
+input CreateUser {
+  username: String!
+  password: String! = "supersecretpassword"
+}
+
+extend type Query {
+  listUsers: [User]
+  getUser(id: ID!): User
+}
+
+extend type Mutation {
+  createUser(input: CreateUser): User
+}
+
+directive @auth(scope: String) repeatable on QUERY | MUTATION
+
+directive @dateFormat(format: String = "YY-MM-DD") on FIELD

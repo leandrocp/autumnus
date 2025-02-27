@@ -1,0 +1,301 @@
+===
+Type Definitions
+===
+
+interface Entity {
+  """
+  The entity unique identifier
+  """
+  id: String!
+}
+
+interface Person {
+  name: String! # TODO: deprecate
+}
+
+type Contact implements Person {
+  name: String!
+}
+
+type User implements Entity & Person {
+  name: String!
+  username: String!
+  password: String
+  createdAt: Date
+}
+
+union People = User | Contact
+
+scalar Date
+
+enum Status {
+  ACTIVE
+  INACTIVE
+}
+
+input CreateUser {
+  username: String!
+  password: String! = "supersecretpassword"
+}
+
+extend type Query {
+  listUsers: [User]
+  getUser(id: ID!): User
+}
+
+extend type Mutation {
+  createUser(input: CreateUser): User
+}
+
+directive @auth(scope: String) repeatable on QUERY | MUTATION
+
+directive @dateFormat(format: String = "YY-MM-DD") on FIELD
+
+---
+(source_file (document
+  (definition (type_system_definition (type_definition (interface_type_definition
+    (name)
+    (fields_definition (field_definition
+      (description (string_value))
+      (name)
+      (type (non_null_type (named_type (name))))))))))
+  (definition (type_system_definition (type_definition (interface_type_definition
+    (name) (fields_definition
+      (field_definition
+        (name)
+        (type (non_null_type (named_type 
+          (name)))))
+      (comment))))))
+  (definition (type_system_definition (type_definition (object_type_definition 
+    (name)
+    (implements_interfaces (named_type (name)))
+    (fields_definition (field_definition 
+      (name)
+      (type (non_null_type (named_type 
+        (name))))))))))
+  (definition (type_system_definition (type_definition (object_type_definition 
+    (name)
+    (implements_interfaces (implements_interfaces (named_type 
+      (name)))
+    (named_type (name)))
+    (fields_definition (field_definition 
+      (name)
+      (type (non_null_type (named_type (name)))))
+    (field_definition 
+      (name)
+      (type (non_null_type (named_type (name)))))
+    (field_definition 
+      (name)
+      (type (named_type (name))))
+    (field_definition 
+      (name)
+      (type (named_type (name)))))))))
+  (definition (type_system_definition (type_definition (union_type_definition 
+    (name)
+    (union_member_types (union_member_types (named_type (name)))
+    (named_type (name)))))))
+  (definition (type_system_definition (type_definition (scalar_type_definition (name)))))
+  (definition (type_system_definition (type_definition (enum_type_definition 
+    (name)
+    (enum_values_definition (enum_value_definition (enum_value (name)))
+    (enum_value_definition (enum_value (name))))))))
+  (definition (type_system_definition (type_definition (input_object_type_definition 
+    (name)
+    (input_fields_definition (input_value_definition 
+      (name)
+      (type (non_null_type (named_type (name)))))
+    (input_value_definition 
+      (name)
+      (type (non_null_type (named_type (name))))
+      (default_value (value (string_value)))))))))
+  (definition (type_system_extension (type_extension (object_type_extension 
+    (name)
+    (fields_definition (field_definition 
+      (name)
+      (type (list_type (type (named_type (name))))))
+    (field_definition 
+      (name)
+      (arguments_definition (input_value_definition 
+        (name)
+        (type (non_null_type (named_type (name))))))
+      (type (named_type (name)))))))))
+  (definition (type_system_extension (type_extension (object_type_extension 
+    (name)
+    (fields_definition (field_definition 
+      (name)
+      (arguments_definition (input_value_definition 
+        (name)
+        (type (named_type (name)))))
+      (type (named_type (name)))))))))
+  (definition (type_system_definition (directive_definition
+    (name)
+    (arguments_definition (input_value_definition
+      (name)
+      (type (named_type (name)))))
+    (directive_locations (directive_locations
+      (directive_location (executable_directive_location)))
+      (directive_location (executable_directive_location))))))
+  (definition (type_system_definition (directive_definition
+    (name)
+    (arguments_definition (input_value_definition
+      (name)
+      (type (named_type (name)))
+      (default_value (value (string_value)))))
+    (directive_locations (directive_location (executable_directive_location))))))))
+
+===
+Executable Definitions
+===
+
+query GetPeople($me: String!, $you: String!) {
+  getMe: getPerson(id: $me) {
+    username
+    contact {
+      email
+    }
+  }
+  getPerson(id: $you) {
+    ... on User {
+      username
+      password
+    }
+    ... on Contact {
+      ...ContactFragment
+    }
+  }
+}
+
+mutation CreatePerson($input: CreatePerson) {
+  createPerson(input: $input) {
+    username
+    password
+  }
+}
+
+subscription {
+  subscribeToNotification(id: "12345") {
+    username
+    notification {
+      content
+      timestamp
+    }
+  }
+}
+
+fragment ContactFragment on Contact {
+  name
+  contact {
+    email
+  }
+}
+
+---
+(source_file (document 
+  (definition (executable_definition (operation_definition
+    (operation_type)
+    (name)
+    (variable_definitions
+      (variable_definition
+        (variable (name))
+        (type (non_null_type (named_type (name))))
+        (comma))
+      (variable_definition
+        (variable (name))
+        (type (non_null_type (named_type (name))))))
+    (selection_set
+      (selection (field
+        (alias (name))
+        (name)
+        (arguments (argument
+          (name)
+          (value (variable (name)))))
+        (selection_set
+          (selection (field (name)))
+          (selection (field
+            (name)
+            (selection_set (selection (field (name)))))))))
+      (selection (field
+        (name)
+        (arguments (argument
+          (name)
+          (value (variable (name))))) 
+        (selection_set
+          (selection (inline_fragment
+            (type_condition (named_type (name)))
+            (selection_set
+              (selection (field (name)))
+              (selection (field (name))))))
+          (selection (inline_fragment
+            (type_condition (named_type (name)))
+            (selection_set (selection (fragment_spread (fragment_name (name))))))))))))))
+
+  (definition (executable_definition (operation_definition
+    (operation_type)
+    (name)
+    (variable_definitions (variable_definition
+      (variable (name))
+      (type (named_type (name)))))
+    (selection_set
+      (selection
+        (field (name)
+        (arguments (argument
+          (name)
+          (value (variable (name)))))
+        (selection_set
+          (selection (field (name)))
+          (selection (field (name)))))))))) 
+  (definition (executable_definition (operation_definition
+    (operation_type)
+    (selection_set
+      (selection (field
+        (name)
+        (arguments (argument
+          (name)
+          (value (string_value))))
+        (selection_set
+          (selection (field (name)))
+          (selection (field 
+            (name)
+            (selection_set
+              (selection (field (name)))
+              (selection (field (name)))))))))))))
+  (definition (executable_definition (fragment_definition
+    (fragment_name (name))
+    (type_condition (named_type (name)))
+    (selection_set
+      (selection (field (name)))
+      (selection (field
+        (name)
+        (selection_set (selection (field (name))))))))))))
+
+===
+Schema Definition
+===
+
+schema {
+  query: MyQueryType
+  mutation: MyMutationType
+}
+
+schema @deprecated {
+  query: MyDeprecatedQueryType
+  mutation: MyDeprecatedMutationType
+}
+
+---
+(source_file (document
+  (definition (type_system_definition (schema_definition
+    (root_operation_type_definition
+      (operation_type)
+      (named_type (name)))
+    (root_operation_type_definition 
+      (operation_type)
+      (named_type (name))))))
+  (definition (type_system_definition (schema_definition
+    (directives (directive (name)))
+    (root_operation_type_definition
+      (operation_type)
+      (named_type (name)))
+    (root_operation_type_definition
+      (operation_type)
+      (named_type (name))))))))
