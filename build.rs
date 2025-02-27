@@ -126,6 +126,11 @@ fn vendored_parsers() {
             src_dir: "vendored_parsers/tree-sitter-surface/src",
             extra_files: vec![],
         },
+        TreeSitterParser {
+            name: "tree-sitter-vim",
+            src_dir: "vendored_parsers/tree-sitter-vim/src",
+            extra_files: vec!["scanner.c"],
+        },
     ];
 
     for parser in &parsers {

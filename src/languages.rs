@@ -31,6 +31,7 @@ extern "C" {
     fn tree_sitter_powershell() -> *const ();
     fn tree_sitter_scss() -> *const ();
     fn tree_sitter_surface() -> *const ();
+    fn tree_sitter_vim() -> *const ();
 }
 
 mod generated {
@@ -99,7 +100,7 @@ pub enum Language {
     Swift,
     Toml,
     // TypeScript,
-    // Vim,
+    Vim,
     // Vue,
     XML,
     YAML,
@@ -164,6 +165,7 @@ impl Language {
             "svelte" => Some(Language::Svelte),
             "swift" => Some(Language::Swift),
             "toml" => Some(Language::Toml),
+            "vim" => Some(Language::Vim),
             "xml" => Some(Language::XML),
             "yaml" => Some(Language::YAML),
             "zig" => Some(Language::Zig),
@@ -416,6 +418,7 @@ impl Language {
                 "poetry.lock",
                 "uv.lock",
             ],
+            Language::Vim => &["*.vim"],
             Language::XML => &[
                 "*.ant",
                 "*.csproj",
@@ -631,6 +634,7 @@ impl Language {
             Language::Svelte => "Svelte",
             Language::Swift => "Swift",
             Language::Toml => "TOML",
+            Language::Vim => "Vim",
             Language::XML => "XML",
             Language::YAML => "YAML",
             Language::Zig => "Zig",
@@ -698,6 +702,7 @@ impl Language {
             Language::Svelte => &SVELTE_CONFIG,
             Language::Swift => &SWIFT_CONFIG,
             Language::Toml => &TOML_CONFIG,
+            Language::Vim => &VIM_CONFIG,
             Language::XML => &XML_CONFIG,
             Language::YAML => &YAML_CONFIG,
             Language::Zig => &ZIG_CONFIG,
@@ -1484,6 +1489,21 @@ static TOML_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         TOML_LOCALS,
     )
     .expect("failed to create toml highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static VIM_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_vim) };
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "vim",
+        VIM_HIGHLIGHTS,
+        VIM_INJECTIONS,
+        VIM_LOCALS,
+    )
+    .expect("failed to create vim highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
