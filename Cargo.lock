@@ -117,6 +117,7 @@ dependencies = [
  "tree-sitter-sequel",
  "tree-sitter-svelte-ng",
  "tree-sitter-swift",
+ "tree-sitter-toml-ng",
  "tree-sitter-yaml",
  "tree-sitter-zig",
  "v_htmlescape",
@@ -791,6 +792,16 @@ name = "tree-sitter-swift"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bdc72ea9c62a6d188c9f7d64109a9b14b09231852b87229c68c44e8738b9e6b9"
+dependencies = [
+ "cc",
+ "tree-sitter-language",
+]
+
+[[package]]
+name = "tree-sitter-toml-ng"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e9adc2c898ae49730e857d75be403da3f92bb81d8e37a2f918a08dd10de5ebb1"
 dependencies = [
  "cc",
  "tree-sitter-language",

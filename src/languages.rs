@@ -70,6 +70,7 @@ pub enum Language {
     SQL,
     Svelte,
     Swift,
+    Toml,
     Yaml,
     Zig,
 }
@@ -120,6 +121,7 @@ impl Language {
             "sql" => Some(Language::SQL),
             "svelte" => Some(Language::Svelte),
             "swift" => Some(Language::Swift),
+            "toml" => Some(Language::Toml),
             "yaml" => Some(Language::Yaml),
             "zig" => Some(Language::Zig),
             _ => None,
@@ -338,6 +340,15 @@ impl Language {
             Language::SQL => &["*.sql", "*.pgsql"],
             Language::Svelte => &["*.svelte"],
             Language::Swift => &["*.swift"],
+            Language::Toml => &[
+                "*.toml",
+                "Cargo.lock",
+                "Gopkg.lock",
+                "Pipfile",
+                "pdm.lock",
+                "poetry.lock",
+                "uv.lock",
+            ],
             Language::Yaml => &["*.yaml", "*.yml"],
             Language::Zig => &["*.zig"],
         };
@@ -452,6 +463,7 @@ impl Language {
             Language::SQL => "SQL",
             Language::Svelte => "Svelte",
             Language::Swift => "Swift",
+            Language::Toml => "TOML",
             Language::Yaml => "YAML",
             Language::Zig => "Zig",
         }
@@ -503,6 +515,7 @@ impl Language {
             Language::SQL => &SQL_CONFIG,
             Language::Svelte => &SVELTE_CONFIG,
             Language::Swift => &SWIFT_CONFIG,
+            Language::Toml => &TOML_CONFIG,
             Language::Yaml => &YAML_CONFIG,
             Language::Zig => &ZIG_CONFIG,
             _ => &PLAIN_TEXT_CONFIG,
@@ -1057,6 +1070,19 @@ static SWIFT_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         SWIFT_LOCALS,
     )
     .expect("failed to create swift highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static TOML_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(tree_sitter_toml_ng::LANGUAGE),
+        "toml",
+        TOML_HIGHLIGHTS,
+        TOML_INJECTIONS,
+        TOML_LOCALS,
+    )
+    .expect("failed to create toml highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });

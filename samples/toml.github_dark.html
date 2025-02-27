@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>toml - github_dark - Autumnus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'JetBrains Mono', monospace;
+            line-height: 1.5;
+        }
+        pre {
+            font-size: 15px;
+            margin: 20px;
+            padding: 50px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+<pre class="athl" style="color: #e6edf3; background-color: #30363d;"><code class="language-toml" translate="no" tabindex="0"><span class="athl-line" data-athl-line="1"><span style="color: #8b949e;"># Comments in TOML look like this.</span>
+</span><span class="athl-line" data-athl-line="2">
+</span><span class="athl-line" data-athl-line="3"><span style="color: #8b949e;">################</span>
+</span><span class="athl-line" data-athl-line="4"><span style="color: #8b949e;"># SCALAR TYPES #</span>
+</span><span class="athl-line" data-athl-line="5"><span style="color: #8b949e;">################</span>
+</span><span class="athl-line" data-athl-line="6">
+</span><span class="athl-line" data-athl-line="7"><span style="color: #8b949e;"># Our root object (which continues for the entire document) will be a map,</span>
+</span><span class="athl-line" data-athl-line="8"><span style="color: #8b949e;"># which is equivalent to a dictionary, hash or object in other languages.</span>
+</span><span class="athl-line" data-athl-line="9">
+</span><span class="athl-line" data-athl-line="10"><span style="color: #8b949e;"># The key, equals sign, and value must be on the same line</span>
+</span><span class="athl-line" data-athl-line="11"><span style="color: #8b949e;"># (though some values can be broken over multiple lines).</span>
+</span><span class="athl-line" data-athl-line="12"><span style="color: #79c0ff;">key</span> <span style="color: #79c0ff;">=</span> <span style="color: #a5d6ff;">&quot;value&quot;</span>
+</span><span class="athl-line" data-athl-line="13"><span style="color: #79c0ff;">string</span> <span style="color: #79c0ff;">=</span> <span style="color: #a5d6ff;">&quot;hello&quot;</span>
+</span><span class="athl-line" data-athl-line="14"><span style="color: #79c0ff;">number</span> <span style="color: #79c0ff;">=</span> <span style="color: #79c0ff;">42</span>
+</span><span class="athl-line" data-athl-line="15"><span style="color: #79c0ff;">float</span> <span style="color: #79c0ff;">=</span> <span style="color: #79c0ff;">3.14</span>
+</span><span class="athl-line" data-athl-line="16"><span style="color: #79c0ff;">boolean</span> <span style="color: #79c0ff;">=</span> <span style="color: #79c0ff;">true</span>
+</span><span class="athl-line" data-athl-line="17"><span style="color: #79c0ff;">dateTime</span> <span style="color: #79c0ff;">=</span> <span style="color: #e6edf3;">1979-05-27T07:32:00-08:00</span>
+</span><span class="athl-line" data-athl-line="18"><span style="color: #79c0ff;">scientificNotation</span> <span style="color: #79c0ff;">=</span> <span style="color: #79c0ff;">1e+12</span>
+</span><span class="athl-line" data-athl-line="19"><span style="color: #a5d6ff;">&quot;key can be quoted&quot;</span> <span style="color: #79c0ff;">=</span> <span style="color: #79c0ff;">true</span> <span style="color: #8b949e;"># Both &quot; and &#39; are fine</span>
+</span><span class="athl-line" data-athl-line="20"><span style="color: #a5d6ff;">&quot;unquoted key may contain&quot;</span> <span style="color: #79c0ff;">=</span> <span style="color: #a5d6ff;">&quot;letters, numbers, underscores, and dashes&quot;</span>
+</span><span class="athl-line" data-athl-line="21"><span style="color: #79c0ff;">other_k</span>ê<span style="color: #79c0ff;">ys</span> <span style="color: #79c0ff;">=</span> <span style="color: #a5d6ff;">&quot;are permitted by spec but most implementations don&#39;t actually permit them&quot;</span>
+</span><span class="athl-line" data-athl-line="22">
+</span><span class="athl-line" data-athl-line="23"><span style="color: #8b949e;"># A bare key must be non-empty, but an empty quoted key is allowed</span>
+</span><span class="athl-line" data-athl-line="24"><span style="color: #a5d6ff;">&quot;&quot;</span> <span style="color: #79c0ff;">=</span> <span style="color: #a5d6ff;">&quot;blank&quot;</span>     <span style="color: #8b949e;"># VALID but discouraged</span>
+</span><span class="athl-line" data-athl-line="25"><span style="color: #a5d6ff;">&#39;&#39;</span> <span style="color: #79c0ff;">=</span> <span style="color: #a5d6ff;">&#39;blank&#39;</span>     <span style="color: #8b949e;"># VALID but discouraged</span>
+</span><span class="athl-line" data-athl-line="26">
+</span><span class="athl-line" data-athl-line="27"><span style="color: #8b949e;">##########</span>
+</span><span class="athl-line" data-athl-line="28"><span style="color: #8b949e;"># String #</span>
+</span><span class="athl-line" data-athl-line="29"><span style="color: #8b949e;">##########</span>
+</span><span class="athl-line" data-athl-line="30">
+</span><span class="athl-line" data-athl-line="31"><span style="color: #8b949e;"># All strings must contain only valid UTF-8 characters.</span>
+</span><span class="athl-line" data-athl-line="32"><span style="color: #8b949e;"># We can escape characters and some of them have a compact escape sequence.</span>
+</span><span class="athl-line" data-athl-line="33"><span style="color: #8b949e;"># For example, \t add a tabulation. Refers to the spec to get all of them.</span>
+</span><span class="athl-line" data-athl-line="34"><span style="color: #79c0ff;">basicString</span> <span style="color: #79c0ff;">=</span> <span style="color: #a5d6ff;">&quot;are surrounded by quotation marks. <span style="color: #a5d6ff; font-weight: bold;">\&quot;</span>I&#39;m quotable<span style="color: #a5d6ff; font-weight: bold;">\&quot;</span>. Name<span style="color: #a5d6ff; font-weight: bold;">\t</span>Jos&quot;</span>
+</span><span class="athl-line" data-athl-line="35">
+</span><span class="athl-line" data-athl-line="36"><span style="color: #79c0ff;">multiLineString</span> <span style="color: #79c0ff;">=</span> <span style="color: #a5d6ff;">&quot;&quot;&quot;</span>
+</span><span class="athl-line" data-athl-line="37"><span style="color: #a5d6ff;">are surrounded by three quotation marks</span>
+</span><span class="athl-line" data-athl-line="38"><span style="color: #a5d6ff;">on each side and allow newlines.&quot;&quot;&quot;</span>
+</span><span class="athl-line" data-athl-line="39">
+</span><span class="athl-line" data-athl-line="40"><span style="color: #79c0ff;">literalString</span> <span style="color: #79c0ff;">=</span> <span style="color: #a5d6ff;">&#39;are surrounded by single quotes. Escaping are not allowed.&#39;</span>
+</span><span class="athl-line" data-athl-line="41">
+</span><span class="athl-line" data-athl-line="42"><span style="color: #79c0ff;">multiLineLiteralString</span> <span style="color: #79c0ff;">=</span> <span style="color: #a5d6ff;">&#39;&#39;&#39;</span>
+</span><span class="athl-line" data-athl-line="43"><span style="color: #a5d6ff;">are surrounded by three single quotes on each side</span>
+</span><span class="athl-line" data-athl-line="44"><span style="color: #a5d6ff;">and allow newlines. Still no escaping.</span>
+</span><span class="athl-line" data-athl-line="45"><span style="color: #a5d6ff;">The first newline is trimmed in raw strings.</span>
+</span><span class="athl-line" data-athl-line="46"><span style="color: #a5d6ff;">   All other whitespace</span>
+</span><span class="athl-line" data-athl-line="47"><span style="color: #a5d6ff;">   is preserved. #! are preserved?</span>
+</span><span class="athl-line" data-athl-line="48"><span style="color: #a5d6ff;">&#39;&#39;&#39;</span>
+</span><span class="athl-line" data-athl-line="49">
+</span><span class="athl-line" data-athl-line="50"><span style="color: #8b949e;"># For binary data it is recommended that you use Base64, another ASCII or UTF8</span>
+</span><span class="athl-line" data-athl-line="51"><span style="color: #8b949e;"># encoding. The handling of that encoding will be application specific.</span>
+</span><span class="athl-line" data-athl-line="52">
+</span><span class="athl-line" data-athl-line="53"><span style="color: #8b949e;">###########</span>
+</span><span class="athl-line" data-athl-line="54"><span style="color: #8b949e;"># Integer #</span>
+</span><span class="athl-line" data-athl-line="55"><span style="color: #8b949e;">###########</span>
+</span><span class="athl-line" data-athl-line="56">
+</span><span class="athl-line" data-athl-line="57"><span style="color: #8b949e;">## Integers can start with a +, a - or nothing.</span>
+</span><span class="athl-line" data-athl-line="58"><span style="color: #8b949e;">## Leading zeros are not allowed.</span>
+</span><span class="athl-line" data-athl-line="59"><span style="color: #8b949e;">## Hex, octal, and binary forms are allowed.</span>
+</span><span class="athl-line" data-athl-line="60"><span style="color: #8b949e;">## Values that cannot be expressed as a series of digits are not allowed.</span>
+</span><span class="athl-line" data-athl-line="61"><span style="color: #79c0ff;">int1</span> <span style="color: #79c0ff;">=</span> <span style="color: #79c0ff;">+42</span>
+</span><span class="athl-line" data-athl-line="62"><span style="color: #79c0ff;">int2</span> <span style="color: #79c0ff;">=</span> <span style="color: #79c0ff;">0</span>
+</span><span class="athl-line" data-athl-line="63"><span style="color: #79c0ff;">int3</span> <span style="color: #79c0ff;">=</span> <span style="color: #79c0ff;">-21</span>
+</span><span class="athl-line" data-athl-line="64"><span style="color: #79c0ff;">int4</span> <span style="color: #79c0ff;">=</span> <span style="color: #79c0ff;">0xdeadbeef</span>
+</span><span class="athl-line" data-athl-line="65"><span style="color: #79c0ff;">int5</span> <span style="color: #79c0ff;">=</span> <span style="color: #79c0ff;">0o755</span>
+</span><span class="athl-line" data-athl-line="66"><span style="color: #79c0ff;">int6</span> <span style="color: #79c0ff;">=</span> <span style="color: #79c0ff;">0b11011100</span>
+</span><span class="athl-line" data-athl-line="67"><span style="color: #79c0ff;">integerRange</span> <span style="color: #79c0ff;">=</span> <span style="color: #79c0ff;">64</span>
+</span><span class="athl-line" data-athl-line="68">
+</span><span class="athl-line" data-athl-line="69"><span style="color: #8b949e;">## You can use underscores to enhance readability. Each</span>
+</span><span class="athl-line" data-athl-line="70"><span style="color: #8b949e;">## underscore must be surrounded by at least one digit.</span>
+</span><span class="athl-line" data-athl-line="71"><span style="color: #79c0ff;">int4</span> <span style="color: #79c0ff;">=</span> <span style="color: #79c0ff;">5_349_221</span>
+</span><span class="athl-line" data-athl-line="72"><span style="color: #79c0ff;">int5</span> <span style="color: #79c0ff;">=</span> <span style="color: #79c0ff;">1_2_3_4_5</span>     <span style="color: #8b949e;"># VALID but discouraged</span>
+</span><span class="athl-line" data-athl-line="73">
+</span><span class="athl-line" data-athl-line="74"><span style="color: #8b949e;">#########</span>
+</span><span class="athl-line" data-athl-line="75"><span style="color: #8b949e;"># Float #</span>
+</span><span class="athl-line" data-athl-line="76"><span style="color: #8b949e;">#########</span>
+</span><span class="athl-line" data-athl-line="77">
+</span><span class="athl-line" data-athl-line="78"><span style="color: #8b949e;"># Floats are an integer followed by a fractional and/or an exponent part.</span>
+</span><span class="athl-line" data-athl-line="79"><span style="color: #79c0ff;">flt1</span> <span style="color: #79c0ff;">=</span> <span style="color: #79c0ff;">3.1415</span>
+</span><span class="athl-line" data-athl-line="80"><span style="color: #79c0ff;">flt2</span> <span style="color: #79c0ff;">=</span> <span style="color: #79c0ff;">-5e6</span>
+</span><span class="athl-line" data-athl-line="81"><span style="color: #79c0ff;">flt3</span> <span style="color: #79c0ff;">=</span> <span style="color: #79c0ff;">6.626E-34</span>
+</span><span class="athl-line" data-athl-line="82">
+</span><span class="athl-line" data-athl-line="83"><span style="color: #8b949e;">###########</span>
+</span><span class="athl-line" data-athl-line="84"><span style="color: #8b949e;"># Boolean #</span>
+</span><span class="athl-line" data-athl-line="85"><span style="color: #8b949e;">###########</span>
+</span><span class="athl-line" data-athl-line="86">
+</span><span class="athl-line" data-athl-line="87"><span style="color: #79c0ff;">bool1</span> <span style="color: #79c0ff;">=</span> <span style="color: #79c0ff;">true</span>
+</span><span class="athl-line" data-athl-line="88"><span style="color: #79c0ff;">bool2</span> <span style="color: #79c0ff;">=</span> <span style="color: #79c0ff;">false</span>
+</span><span class="athl-line" data-athl-line="89"><span style="color: #79c0ff;">boolMustBeLowercase</span> <span style="color: #79c0ff;">=</span> <span style="color: #79c0ff;">true</span>
+</span><span class="athl-line" data-athl-line="90">
+</span><span class="athl-line" data-athl-line="91"><span style="color: #8b949e;">############</span>
+</span><span class="athl-line" data-athl-line="92"><span style="color: #8b949e;"># Datetime #</span>
+</span><span class="athl-line" data-athl-line="93"><span style="color: #8b949e;">############</span>
+</span><span class="athl-line" data-athl-line="94">
+</span><span class="athl-line" data-athl-line="95"><span style="color: #79c0ff;">date1</span> <span style="color: #79c0ff;">=</span> <span style="color: #e6edf3;">1979-05-27T07:32:00Z</span> <span style="color: #8b949e;"># UTC time, following RFC 3339/ISO 8601 spec</span>
+</span><span class="athl-line" data-athl-line="96"><span style="color: #79c0ff;">date2</span> <span style="color: #79c0ff;">=</span> <span style="color: #e6edf3;">1979-05-26T15:32:00+08:00</span> <span style="color: #8b949e;"># with RFC 3339/ISO 8601 offset</span>
+</span><span class="athl-line" data-athl-line="97"><span style="color: #79c0ff;">date3</span> <span style="color: #79c0ff;">=</span> <span style="color: #e6edf3;">1979-05-27T07:32:00</span> <span style="color: #8b949e;"># without offset</span>
+</span><span class="athl-line" data-athl-line="98"><span style="color: #79c0ff;">date4</span> <span style="color: #79c0ff;">=</span> <span style="color: #e6edf3;">1979-05-27</span> <span style="color: #8b949e;"># without offset or time</span>
+</span><span class="athl-line" data-athl-line="99">
+</span><span class="athl-line" data-athl-line="100"><span style="color: #8b949e;">####################</span>
+</span><span class="athl-line" data-athl-line="101"><span style="color: #8b949e;"># COLLECTION TYPES #</span>
+</span><span class="athl-line" data-athl-line="102"><span style="color: #8b949e;">####################</span>
+</span><span class="athl-line" data-athl-line="103">
+</span><span class="athl-line" data-athl-line="104"><span style="color: #8b949e;">#########</span>
+</span><span class="athl-line" data-athl-line="105"><span style="color: #8b949e;"># Array #</span>
+</span><span class="athl-line" data-athl-line="106"><span style="color: #8b949e;">#########</span>
+</span><span class="athl-line" data-athl-line="107">
+</span><span class="athl-line" data-athl-line="108"><span style="color: #79c0ff;">array1</span> <span style="color: #79c0ff;">=</span> <span style="color: #e6edf3;">[</span> <span style="color: #79c0ff;">1</span><span style="color: #e6edf3;">,</span> <span style="color: #79c0ff;">2</span><span style="color: #e6edf3;">,</span> <span style="color: #79c0ff;">3</span> <span style="color: #e6edf3;">]</span>
+</span><span class="athl-line" data-athl-line="109"><span style="color: #79c0ff;">array2</span> <span style="color: #79c0ff;">=</span> <span style="color: #e6edf3;">[</span> <span style="color: #a5d6ff;">&quot;Commas&quot;</span><span style="color: #e6edf3;">,</span> <span style="color: #a5d6ff;">&quot;are&quot;</span><span style="color: #e6edf3;">,</span> <span style="color: #a5d6ff;">&quot;delimiters&quot;</span> <span style="color: #e6edf3;">]</span>
+</span><span class="athl-line" data-athl-line="110"><span style="color: #79c0ff;">array3</span> <span style="color: #79c0ff;">=</span> <span style="color: #e6edf3;">[</span> <span style="color: #a5d6ff;">&quot;Don&#39;t mix&quot;</span><span style="color: #e6edf3;">,</span> <span style="color: #a5d6ff;">&quot;different&quot;</span><span style="color: #e6edf3;">,</span> <span style="color: #a5d6ff;">&quot;types&quot;</span> <span style="color: #e6edf3;">]</span>
+</span><span class="athl-line" data-athl-line="111"><span style="color: #79c0ff;">array4</span> <span style="color: #79c0ff;">=</span> <span style="color: #e6edf3;">[</span> <span style="color: #e6edf3;">[</span> <span style="color: #79c0ff;">1.2</span><span style="color: #e6edf3;">,</span> <span style="color: #79c0ff;">2.4</span> <span style="color: #e6edf3;">]</span><span style="color: #e6edf3;">,</span> <span style="color: #e6edf3;">[</span><span style="color: #a5d6ff;">&quot;all&quot;</span><span style="color: #e6edf3;">,</span> <span style="color: #a5d6ff;">&#39;strings&#39;</span><span style="color: #e6edf3;">,</span> <span style="color: #a5d6ff;">&quot;&quot;&quot;are the same&quot;&quot;&quot;</span><span style="color: #e6edf3;">,</span> <span style="color: #a5d6ff;">&#39;&#39;&#39;type&#39;&#39;&#39;</span><span style="color: #e6edf3;">]</span> <span style="color: #e6edf3;">]</span>
+</span><span class="athl-line" data-athl-line="112"><span style="color: #79c0ff;">array5</span> <span style="color: #79c0ff;">=</span> <span style="color: #e6edf3;">[</span>
+</span><span class="athl-line" data-athl-line="113">  <span style="color: #a5d6ff;">&quot;Whitespace&quot;</span><span style="color: #e6edf3;">,</span> <span style="color: #a5d6ff;">&quot;is&quot;</span><span style="color: #e6edf3;">,</span> <span style="color: #a5d6ff;">&quot;ignored&quot;</span>
+</span><span class="athl-line" data-athl-line="114"><span style="color: #e6edf3;">]</span>
+</span><span class="athl-line" data-athl-line="115">
+</span><span class="athl-line" data-athl-line="116"><span style="color: #8b949e;">#########</span>
+</span><span class="athl-line" data-athl-line="117"><span style="color: #8b949e;"># Table #</span>
+</span><span class="athl-line" data-athl-line="118"><span style="color: #8b949e;">#########</span>
+</span><span class="athl-line" data-athl-line="119">
+</span><span class="athl-line" data-athl-line="120"><span style="color: #8b949e;"># Tables (or hash tables or dictionaries) are collections of key/value</span>
+</span><span class="athl-line" data-athl-line="121"><span style="color: #8b949e;"># pairs. They appear in square brackets on a line by themselves.</span>
+</span><span class="athl-line" data-athl-line="122"><span style="color: #8b949e;"># Empty tables are allowed and simply have no key/value pairs within them.</span>
+</span><span class="athl-line" data-athl-line="123"><span style="color: #e6edf3;">[</span><span style="color: #79c0ff;">table</span><span style="color: #e6edf3;">]</span>
+</span><span class="athl-line" data-athl-line="124">
+</span><span class="athl-line" data-athl-line="125"><span style="color: #8b949e;"># Under that, and until the next table or EOF are the key/values of that table.</span>
+</span><span class="athl-line" data-athl-line="126"><span style="color: #8b949e;"># Key/value pairs within tables are not guaranteed to be in any specific order.</span>
+</span><span class="athl-line" data-athl-line="127"><span style="color: #e6edf3;">[</span><span style="color: #79c0ff;">table-1</span><span style="color: #e6edf3;">]</span>
+</span><span class="athl-line" data-athl-line="128"><span style="color: #79c0ff;">key1</span> <span style="color: #79c0ff;">=</span> <span style="color: #a5d6ff;">&quot;some string&quot;</span>
+</span><span class="athl-line" data-athl-line="129"><span style="color: #79c0ff;">key2</span> <span style="color: #79c0ff;">=</span> <span style="color: #79c0ff;">123</span>
+</span><span class="athl-line" data-athl-line="130">
+</span><span class="athl-line" data-athl-line="131"><span style="color: #e6edf3;">[</span><span style="color: #79c0ff;">table-2</span><span style="color: #e6edf3;">]</span>
+</span><span class="athl-line" data-athl-line="132"><span style="color: #79c0ff;">key1</span> <span style="color: #79c0ff;">=</span> <span style="color: #a5d6ff;">&quot;another string&quot;</span>
+</span><span class="athl-line" data-athl-line="133"><span style="color: #79c0ff;">key2</span> <span style="color: #79c0ff;">=</span> <span style="color: #79c0ff;">456</span>
+</span><span class="athl-line" data-athl-line="134">
+</span><span class="athl-line" data-athl-line="135"><span style="color: #8b949e;"># Dots are prohibited in bare keys because dots are used to signify nested tables.</span>
+</span><span class="athl-line" data-athl-line="136"><span style="color: #8b949e;"># Naming rules for each dot separated part are the same as for keys.</span>
+</span><span class="athl-line" data-athl-line="137"><span style="color: #e6edf3;">[</span><span style="color: #79c0ff;">dog</span><span style="color: #e6edf3;">.</span><span style="color: #a5d6ff;">&quot;tater.man&quot;</span><span style="color: #e6edf3;">]</span>
+</span><span class="athl-line" data-athl-line="138"><span style="color: #79c0ff;">type</span> <span style="color: #79c0ff;">=</span> <span style="color: #a5d6ff;">&quot;pug&quot;</span>
+</span><span class="athl-line" data-athl-line="139">
+</span><span class="athl-line" data-athl-line="140"><span style="color: #8b949e;"># In JSON land, that would give you the following structure:</span>
+</span><span class="athl-line" data-athl-line="141"><span style="color: #8b949e;"># { &quot;dog&quot;: { &quot;tater.man&quot;: { &quot;type&quot;: &quot;pug&quot; } } }</span>
+</span><span class="athl-line" data-athl-line="142">
+</span><span class="athl-line" data-athl-line="143"><span style="color: #8b949e;"># Whitespace around dot-separated parts is ignored, however, best practice is to</span>
+</span><span class="athl-line" data-athl-line="144"><span style="color: #8b949e;"># not use any extraneous whitespace.</span>
+</span><span class="athl-line" data-athl-line="145"><span style="color: #e6edf3;">[</span><span style="color: #79c0ff;">a</span><span style="color: #e6edf3;">.</span><span style="color: #79c0ff;">b</span><span style="color: #e6edf3;">.</span><span style="color: #79c0ff;">c</span><span style="color: #e6edf3;">]</span>            <span style="color: #8b949e;"># this is best practice</span>
+</span><span class="athl-line" data-athl-line="146"><span style="color: #e6edf3;">[</span> <span style="color: #79c0ff;">d</span><span style="color: #e6edf3;">.</span><span style="color: #79c0ff;">e</span><span style="color: #e6edf3;">.</span><span style="color: #79c0ff;">f</span> <span style="color: #e6edf3;">]</span>          <span style="color: #8b949e;"># same as [d.e.f]</span>
+</span><span class="athl-line" data-athl-line="147"><span style="color: #e6edf3;">[</span> <span style="color: #79c0ff;">j</span> <span style="color: #e6edf3;">.</span> <span style="color: #a5d6ff;">&quot;ʞ&quot;</span> <span style="color: #e6edf3;">.</span> <span style="color: #a5d6ff;">&#39;l&#39;</span> <span style="color: #e6edf3;">]</span>  <span style="color: #8b949e;"># same as [j.&quot;ʞ&quot;.&#39;l&#39;]</span>
+</span><span class="athl-line" data-athl-line="148">
+</span><span class="athl-line" data-athl-line="149"><span style="color: #8b949e;"># You don&#39;t need to specify all the super-tables if you don&#39;t want to. TOML knows</span>
+</span><span class="athl-line" data-athl-line="150"><span style="color: #8b949e;"># how to do it for you.</span>
+</span><span class="athl-line" data-athl-line="151"><span style="color: #8b949e;"># [x] you</span>
+</span><span class="athl-line" data-athl-line="152"><span style="color: #8b949e;"># [x.y] don&#39;t</span>
+</span><span class="athl-line" data-athl-line="153"><span style="color: #8b949e;"># [x.y.z] need these</span>
+</span><span class="athl-line" data-athl-line="154"><span style="color: #e6edf3;">[</span><span style="color: #79c0ff;">x</span><span style="color: #e6edf3;">.</span><span style="color: #79c0ff;">y</span><span style="color: #e6edf3;">.</span><span style="color: #79c0ff;">z</span><span style="color: #e6edf3;">.</span><span style="color: #79c0ff;">w</span><span style="color: #e6edf3;">]</span> <span style="color: #8b949e;"># for this to work</span>
+</span><span class="athl-line" data-athl-line="155">
+</span><span class="athl-line" data-athl-line="156"><span style="color: #8b949e;"># As long as a super-table hasn&#39;t been directly defined and hasn&#39;t defined a</span>
+</span><span class="athl-line" data-athl-line="157"><span style="color: #8b949e;"># specific key, you may still write to it.</span>
+</span><span class="athl-line" data-athl-line="158"><span style="color: #e6edf3;">[</span><span style="color: #79c0ff;">a</span><span style="color: #e6edf3;">.</span><span style="color: #79c0ff;">b</span><span style="color: #e6edf3;">]</span>
+</span><span class="athl-line" data-athl-line="159"><span style="color: #79c0ff;">c</span> <span style="color: #79c0ff;">=</span> <span style="color: #79c0ff;">1</span>
+</span><span class="athl-line" data-athl-line="160">
+</span><span class="athl-line" data-athl-line="161"><span style="color: #e6edf3;">[</span><span style="color: #79c0ff;">a</span><span style="color: #e6edf3;">]</span>
+</span><span class="athl-line" data-athl-line="162"><span style="color: #79c0ff;">d</span> <span style="color: #79c0ff;">=</span> <span style="color: #79c0ff;">2</span>
+</span><span class="athl-line" data-athl-line="163">
+</span><span class="athl-line" data-athl-line="164"><span style="color: #8b949e;"># Will generate the following in JSON:</span>
+</span><span class="athl-line" data-athl-line="165"><span style="color: #8b949e;"># { &quot;a&quot;: {&quot;b&quot;: {&quot;c&quot;: 1}, &quot;d&quot;: 2 } }</span>
+</span><span class="athl-line" data-athl-line="166">
+</span><span class="athl-line" data-athl-line="167"><span style="color: #8b949e;"># You cannot define any key or table more than once. Doing so is invalid.</span>
+</span><span class="athl-line" data-athl-line="168">
+</span><span class="athl-line" data-athl-line="169"><span style="color: #8b949e;"># DO NOT DO THIS</span>
+</span><span class="athl-line" data-athl-line="170"><span style="color: #e6edf3;">[</span><span style="color: #79c0ff;">a</span><span style="color: #e6edf3;">]</span>
+</span><span class="athl-line" data-athl-line="171"><span style="color: #79c0ff;">b</span> <span style="color: #79c0ff;">=</span> <span style="color: #79c0ff;">1</span>
+</span><span class="athl-line" data-athl-line="172">
+</span><span class="athl-line" data-athl-line="173"><span style="color: #e6edf3;">[</span><span style="color: #79c0ff;">a</span><span style="color: #e6edf3;">]</span>
+</span><span class="athl-line" data-athl-line="174"><span style="color: #79c0ff;">c</span> <span style="color: #79c0ff;">=</span> <span style="color: #79c0ff;">2</span>
+</span><span class="athl-line" data-athl-line="175">
+</span><span class="athl-line" data-athl-line="176"><span style="color: #8b949e;"># DO NOT DO THIS EITHER</span>
+</span><span class="athl-line" data-athl-line="177"><span style="color: #e6edf3;">[</span><span style="color: #79c0ff;">a</span><span style="color: #e6edf3;">]</span>
+</span><span class="athl-line" data-athl-line="178"><span style="color: #79c0ff;">b</span> <span style="color: #79c0ff;">=</span> <span style="color: #79c0ff;">1</span>
+</span><span class="athl-line" data-athl-line="179">
+</span><span class="athl-line" data-athl-line="180"><span style="color: #e6edf3;">[</span><span style="color: #79c0ff;">a</span><span style="color: #e6edf3;">.</span><span style="color: #79c0ff;">b</span><span style="color: #e6edf3;">]</span>
+</span><span class="athl-line" data-athl-line="181"><span style="color: #79c0ff;">c</span> <span style="color: #79c0ff;">=</span> <span style="color: #79c0ff;">2</span>
+</span><span class="athl-line" data-athl-line="182">
+</span><span class="athl-line" data-athl-line="183"><span style="color: #8b949e;"># All table names must be non-empty.</span>
+</span><span class="athl-line" data-athl-line="184"><span style="color: #e6edf3;">[</span><span style="color: #e6edf3;">]</span>     <span style="color: #8b949e;"># INVALID</span>
+</span><span class="athl-line" data-athl-line="185"><span style="color: #e6edf3;">[</span><span style="color: #79c0ff;">a</span><span style="color: #e6edf3;">.</span><span style="color: #79c0ff;"></span><span style="color: #e6edf3;">]</span>   <span style="color: #8b949e;"># INVALID</span>
+</span><span class="athl-line" data-athl-line="186"><span style="color: #e6edf3;">[</span><span style="color: #79c0ff;">a</span><span style="color: #e6edf3;">.</span><span style="color: #e6edf3;">.</span><span style="color: #79c0ff;">b</span><span style="color: #e6edf3;">]</span> <span style="color: #8b949e;"># INVALID</span>
+</span><span class="athl-line" data-athl-line="187"><span style="color: #e6edf3;">[</span><span style="color: #e6edf3;">.</span><span style="color: #79c0ff;">b</span><span style="color: #e6edf3;">]</span>   <span style="color: #8b949e;"># INVALID</span>
+</span><span class="athl-line" data-athl-line="188"><span style="color: #e6edf3;">[</span><span style="color: #e6edf3;">.</span><span style="color: #e6edf3;">]</span>    <span style="color: #8b949e;"># INVALID</span>
+</span><span class="athl-line" data-athl-line="189">
+</span><span class="athl-line" data-athl-line="190"><span style="color: #8b949e;">################</span>
+</span><span class="athl-line" data-athl-line="191"><span style="color: #8b949e;"># Inline table #</span>
+</span><span class="athl-line" data-athl-line="192"><span style="color: #8b949e;">################</span>
+</span><span class="athl-line" data-athl-line="193">
+</span><span class="athl-line" data-athl-line="194"><span style="color: #79c0ff;">inlineTables</span> <span style="color: #79c0ff;">=</span> <span style="color: #e6edf3;">{</span> <span style="color: #79c0ff;">areEnclosedWith</span> <span style="color: #79c0ff;">=</span> <span style="color: #a5d6ff;">&quot;{ and }&quot;</span><span style="color: #e6edf3;">,</span> <span style="color: #79c0ff;">a</span> <span style="color: #79c0ff;">=</span> <span style="color: #e6edf3;">{</span> <span style="color: #79c0ff;">b</span> <span style="color: #79c0ff;">=</span> <span style="color: #e6edf3;">{</span> <span style="color: #79c0ff;">c</span> <span style="color: #79c0ff;">=</span> <span style="color: #e6edf3;">{</span> <span style="color: #79c0ff;">d</span> <span style="color: #79c0ff;">=</span> <span style="color: #79c0ff;">1</span> <span style="color: #e6edf3;">}</span> <span style="color: #e6edf3;">}</span> <span style="color: #e6edf3;">}</span> <span style="color: #e6edf3;">}</span>
+</span><span class="athl-line" data-athl-line="195"><span style="color: #79c0ff;">point</span> <span style="color: #79c0ff;">=</span> <span style="color: #e6edf3;">{</span> <span style="color: #79c0ff;">x</span> <span style="color: #79c0ff;">=</span> <span style="color: #79c0ff;">1</span><span style="color: #e6edf3;">,</span> <span style="color: #79c0ff;">y</span> <span style="color: #79c0ff;">=</span> <span style="color: #79c0ff;">2</span> <span style="color: #e6edf3;">}</span>
+</span><span class="athl-line" data-athl-line="196"><span style="color: #79c0ff;">usingMultiple</span> <span style="color: #79c0ff;">=</span> <span style="color: #e6edf3;">{</span>
+</span><span class="athl-line" data-athl-line="197">  <span style="color: #79c0ff;">lines</span> <span style="color: #79c0ff;">=</span> <span style="color: #a5d6ff;">&quot;discouraged!&quot;</span><span style="color: #e6edf3;">,</span>
+</span><span class="athl-line" data-athl-line="198">  <span style="color: #79c0ff;">instead</span> <span style="color: #79c0ff;">=</span> <span style="color: #a5d6ff;">&quot;use normal TOML tables&quot;</span><span style="color: #e6edf3;">,</span>
+</span><span class="athl-line" data-athl-line="199"><span style="color: #e6edf3;">}</span>
+</span><span class="athl-line" data-athl-line="200">
+</span><span class="athl-line" data-athl-line="201"><span style="color: #8b949e;">###################</span>
+</span><span class="athl-line" data-athl-line="202"><span style="color: #8b949e;"># Array of Tables #</span>
+</span><span class="athl-line" data-athl-line="203"><span style="color: #8b949e;">###################</span>
+</span><span class="athl-line" data-athl-line="204">
+</span><span class="athl-line" data-athl-line="205"><span style="color: #8b949e;"># An array of tables can be expressed by using a table name in double brackets.</span>
+</span><span class="athl-line" data-athl-line="206"><span style="color: #8b949e;"># Each table with the same double bracketed name will be an item in the array.</span>
+</span><span class="athl-line" data-athl-line="207"><span style="color: #8b949e;"># The tables are inserted in the order encountered.</span>
+</span><span class="athl-line" data-athl-line="208">
+</span><span class="athl-line" data-athl-line="209"><span style="color: #e6edf3;">[[</span><span style="color: #79c0ff;">products</span><span style="color: #e6edf3;">]]</span>
+</span><span class="athl-line" data-athl-line="210"><span style="color: #79c0ff;">name</span> <span style="color: #79c0ff;">=</span> <span style="color: #a5d6ff;">&quot;array of table&quot;</span>
+</span><span class="athl-line" data-athl-line="211"><span style="color: #79c0ff;">sku</span> <span style="color: #79c0ff;">=</span> <span style="color: #79c0ff;">738594937</span>
+</span><span class="athl-line" data-athl-line="212"><span style="color: #79c0ff;">emptyTableAreAllowed</span> <span style="color: #79c0ff;">=</span> <span style="color: #79c0ff;">true</span>
+</span><span class="athl-line" data-athl-line="213">
+</span><span class="athl-line" data-athl-line="214"><span style="color: #e6edf3;">[[</span><span style="color: #79c0ff;">products</span><span style="color: #e6edf3;">]]</span>
+</span><span class="athl-line" data-athl-line="215">
+</span><span class="athl-line" data-athl-line="216"><span style="color: #e6edf3;">[[</span><span style="color: #79c0ff;">products</span><span style="color: #e6edf3;">]]</span>
+</span><span class="athl-line" data-athl-line="217"><span style="color: #79c0ff;">name</span> <span style="color: #79c0ff;">=</span> <span style="color: #a5d6ff;">&quot;Nail&quot;</span>
+</span><span class="athl-line" data-athl-line="218"><span style="color: #79c0ff;">sku</span> <span style="color: #79c0ff;">=</span> <span style="color: #79c0ff;">284758393</span>
+</span><span class="athl-line" data-athl-line="219"><span style="color: #79c0ff;">color</span> <span style="color: #79c0ff;">=</span> <span style="color: #a5d6ff;">&quot;gray&quot;</span>
+</span></code></pre>
+</body>
+</html>
