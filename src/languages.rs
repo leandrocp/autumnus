@@ -165,7 +165,7 @@ impl Language {
             "svelte" => Some(Language::Svelte),
             "swift" => Some(Language::Swift),
             "toml" => Some(Language::Toml),
-            "vim" => Some(Language::Vim),
+            "vim" | "viml" | "vimscript" => Some(Language::Vim),
             "xml" => Some(Language::XML),
             "yaml" => Some(Language::YAML),
             "zig" => Some(Language::Zig),
@@ -418,7 +418,7 @@ impl Language {
                 "poetry.lock",
                 "uv.lock",
             ],
-            Language::Vim => &["*.vim"],
+            Language::Vim => &["*.vim", "*.viml"],
             Language::XML => &[
                 "*.ant",
                 "*.csproj",
