@@ -38,12 +38,12 @@ pub enum Language {
     Clojure,
     Comment,
     CommonLisp,
-    Cpp,
-    Css,
+    CPlusPlus,
+    CSS,
     Diff,
     Dockerfile,
     // Dot,
-    Eex,
+    EEx,
     Elixir,
     Elm,
     // Ember,
@@ -55,14 +55,14 @@ pub enum Language {
     // GraphQL,
     Haskell,
     // Hcl, TODO: repo is too large (too many files)
-    Heex,
-    Html,
+    HEEx,
+    HTML,
     // Http,
-    Iex,
+    IEx,
     Java,
-    Javascript,
+    JavaScript,
     // JsDoc,
-    Json,
+    JSON,
     Kotlin,
     // Latex, TODO: generate parser.c
     // Liquid,
@@ -73,6 +73,7 @@ pub enum Language {
     ObjC,
     OCaml,
     OCamlInterface,
+    // Perl,
     Php,
     PlainText,
     // Powershell,
@@ -92,44 +93,41 @@ pub enum Language {
     // TypeScript,
     // Vim,
     // Vue,
-    Xml,
-    Yaml,
+    XML,
+    YAML,
     Zig,
 }
 
 impl Language {
-    pub fn guess(lang_or_path: &str, source: &str) -> Self {
+    pub fn guess(lang_or_path: &str, src: &str) -> Self {
         let exact = match lang_or_path {
             "bash" => Some(Language::Bash),
             "c" => Some(Language::C),
             "clojure" => Some(Language::Clojure),
             "comment" => Some(Language::Comment),
             "commonlisp" => Some(Language::CommonLisp),
-            "c#" => Some(Language::CSharp),
-            "cpp" => Some(Language::Cpp),
-            "csharp" => Some(Language::CSharp),
-            "css" => Some(Language::Css),
+            "c++" | "cpp" => Some(Language::CPlusPlus),
+            "c#" | "csharp" => Some(Language::CSharp),
+            "css" => Some(Language::CSS),
             "diff" => Some(Language::Diff),
-            "dockerfile" => Some(Language::Dockerfile),
-            "docker" => Some(Language::Dockerfile),
-            "eex" => Some(Language::Eex),
+            "dockerfile" | "docker" => Some(Language::Dockerfile),
+            "eex" => Some(Language::EEx),
             "elixir" => Some(Language::Elixir),
             "elm" => Some(Language::Elm),
             "erlang" => Some(Language::Erlang),
             "gleam" => Some(Language::Gleam),
             "go" => Some(Language::Go),
             "haskell" => Some(Language::Haskell),
-            "heex" => Some(Language::Heex),
-            "html" => Some(Language::Html),
-            "iex" => Some(Language::Iex),
+            "heex" => Some(Language::HEEx),
+            "html" => Some(Language::HTML),
+            "iex" => Some(Language::IEx),
             "java" => Some(Language::Java),
-            "javascript" => Some(Language::Javascript),
-            "json" => Some(Language::Json),
+            "jsx" | "javascript" => Some(Language::JavaScript),
+            "json" => Some(Language::JSON),
             "kotlin" => Some(Language::Kotlin),
             "llvm" => Some(Language::Llvm),
             "lua" => Some(Language::Lua),
-            "objc" => Some(Language::ObjC),
-            "objective-c" => Some(Language::ObjC),
+            "objc" | "objective-c" => Some(Language::ObjC),
             "ocaml" => Some(Language::OCaml),
             "ocaml_interface" => Some(Language::OCamlInterface),
             "make" => Some(Language::Make),
@@ -145,8 +143,8 @@ impl Language {
             "svelte" => Some(Language::Svelte),
             "swift" => Some(Language::Swift),
             "toml" => Some(Language::Toml),
-            "xml" => Some(Language::Xml),
-            "yaml" => Some(Language::Yaml),
+            "xml" => Some(Language::XML),
+            "yaml" => Some(Language::YAML),
             "zig" => Some(Language::Zig),
             _ => None,
         };
@@ -154,24 +152,30 @@ impl Language {
         match exact {
             Some(lang) => lang,
             None => {
-                // TODO: guess by looks_like, xml, emacs header
-
                 let path = Path::new(lang_or_path);
 
                 if let Some(lang) = Self::from_glob(path) {
                     return lang;
                 }
 
-                if let Some(lang) = Self::from_shebang(source) {
+                if let Some(lang) = Self::from_emacs_mode_header(src) {
                     return lang;
                 }
 
-                if Self::looks_like_objc(path, source) {
-                    return Language::ObjC;
+                if let Some(lang) = Self::from_shebang(src) {
+                    return lang;
                 }
 
-                if Self::looks_like_xml(source) {
-                    return Language::Xml;
+                if Self::looks_like_html(src) {
+                    return Language::HTML;
+                }
+
+                if Self::looks_like_xml(src) {
+                    return Language::XML;
+                }
+
+                if Self::looks_like_objc(path, src) {
+                    return Language::ObjC;
                 }
 
                 Language::PlainText
@@ -256,10 +260,10 @@ impl Language {
             Language::Comment => &[],
             Language::CommonLisp => &["*.lisp", "*.lsp", "*.asd"],
             Language::CSharp => &["*.cs"],
-            Language::Cpp => &[
+            Language::CPlusPlus => &[
                 "*.cc", "*.cpp", "*.h", "*.hh", "*.hpp", "*.ino", "*.cxx", "*.cu",
             ],
-            Language::Css => &["*.css"],
+            Language::CSS => &["*.css"],
             Language::Diff => &["*.diff"],
             Language::Dockerfile => &[
                 "Dockerfile",
@@ -271,7 +275,7 @@ impl Language {
                 "*.docker",
                 "*.container",
             ],
-            Language::Eex => &["*.eex"],
+            Language::EEx => &["*.eex"],
             Language::Elixir => &["*.ex", "*.exs"],
             Language::Elm => &["*.elm"],
             Language::Erlang => &[
@@ -287,12 +291,12 @@ impl Language {
             Language::Gleam => &["*.gleam"],
             Language::Go => &["*.go"],
             Language::Haskell => &["*.hs"],
-            Language::Heex => &["*.heex", "*.neex"],
-            Language::Html => &["*.html", "*.htm", "*.xhtml"],
-            Language::Iex => &["*.iex"],
+            Language::HEEx => &["*.heex", "*.neex"],
+            Language::HTML => &["*.html", "*.htm", "*.xhtml"],
+            Language::IEx => &["*.iex"],
             Language::Java => &["*.java"],
-            Language::Javascript => &["*.cjs", "*.js", "*.mjs", "*.snap"],
-            Language::Json => &[
+            Language::JavaScript => &["*.cjs", "*.js", "*.mjs", "*.snap"],
+            Language::JSON => &[
                 "*.json",
                 "*.avsc",
                 "*.geojson",
@@ -378,7 +382,7 @@ impl Language {
                 "poetry.lock",
                 "uv.lock",
             ],
-            Language::Xml => &[
+            Language::XML => &[
                 "*.ant",
                 "*.csproj",
                 // Following GitHub, treat MJML as XML.
@@ -402,7 +406,7 @@ impl Language {
                 ".cproject",
                 ".project",
             ],
-            Language::Yaml => &["*.yaml", "*.yml"],
+            Language::YAML => &["*.yaml", "*.yml"],
             Language::Zig => &["*.zig"],
         };
 
@@ -412,11 +416,71 @@ impl Language {
             .collect()
     }
 
+    /// Try to guess the language based on an Emacs mode comment at the
+    /// beginning of the file.
+    ///
+    /// <https://www.gnu.org/software/emacs/manual/html_node/emacs/Choosing-Modes.html>
+    /// <https://www.gnu.org/software/emacs/manual/html_node/emacs/Specifying-File-Variables.html>
+    fn from_emacs_mode_header(src: &str) -> Option<Language> {
+        lazy_static! {
+            static ref MODE_RE: Regex = Regex::new(r"-\*-.*mode:([^;]+?);.*-\*-").unwrap();
+            static ref SHORTHAND_RE: Regex = Regex::new(r"-\*-(.+)-\*-").unwrap();
+        }
+
+        // Emacs allows the mode header to occur on the second line if the
+        // first line is a shebang.
+        for line in split_on_newlines(src).take(2) {
+            let mode_name: String = match (MODE_RE.captures(line), SHORTHAND_RE.captures(line)) {
+                (Some(cap), _) | (_, Some(cap)) => cap[1].into(),
+                _ => "".into(),
+            };
+            let lang = match mode_name.to_ascii_lowercase().trim() {
+                "c" => Some(Language::C),
+                "clojure" => Some(Language::Clojure),
+                "csharp" => Some(Language::CSharp),
+                "css" => Some(Language::CSS),
+                "c++" => Some(Language::CPlusPlus),
+                "elixir" => Some(Language::Elixir),
+                "elm" => Some(Language::Elm),
+                "gleam" => Some(Language::Gleam),
+                "go" => Some(Language::Go),
+                "haskell" => Some(Language::Haskell),
+                // "hcl" => Some(Language::Hcl),
+                "html" => Some(Language::HTML),
+                "java" => Some(Language::Java),
+                "js" | "js2" => Some(Language::JavaScript),
+                "lisp" => Some(Language::CommonLisp),
+                "nxml" => Some(Language::XML),
+                "objc" => Some(Language::ObjC),
+                // "perl" => Some(Language::Perl),
+                "python" => Some(Language::Python),
+                "ruby" => Some(Language::Ruby),
+                "rust" => Some(Language::Rust),
+                "scala" => Some(Language::Scala),
+                // "scss" => Some(Language::Scss),
+                "sh" => Some(Language::Bash),
+                "sql" => Some(Language::SQL),
+                "swift" => Some(Language::Swift),
+                "toml" => Some(Language::Toml),
+                "tuareg" => Some(Language::OCaml),
+                // "typescript" => Some(Language::TypeScript),
+                "yaml" => Some(Language::YAML),
+                "zig" => Some(Language::Zig),
+                _ => None,
+            };
+            if lang.is_some() {
+                return lang;
+            }
+        }
+
+        None
+    }
+
     fn from_shebang(src: &str) -> Option<Language> {
         lazy_static! {
             static ref RE: Regex = Regex::new(r"#! *(?:/usr/bin/env )?([^ ]+)").unwrap();
         }
-        if let Some(first_line) = Language::split_on_newlines(src).next() {
+        if let Some(first_line) = split_on_newlines(src).next() {
             if let Some(cap) = RE.captures(first_line) {
                 let interpreter_path = Path::new(&cap[1]);
                 if let Some(name) = interpreter_path.file_name() {
@@ -445,16 +509,6 @@ impl Language {
         None
     }
 
-    fn split_on_newlines(s: &str) -> impl Iterator<Item = &str> {
-        s.split('\n').map(|l| {
-            if let Some(l) = l.strip_suffix('\r') {
-                l
-            } else {
-                l
-            }
-        })
-    }
-
     /// Use a heuristic to determine if a '.h' file looks like Objective-C.
     /// We look for a line starting with '#import', '@interface' or '@protocol'
     /// near the top of the file.  These keywords are not valid C or C++, so this
@@ -462,7 +516,7 @@ impl Language {
     fn looks_like_objc(path: &Path, src: &str) -> bool {
         if let Some(extension) = path.extension() {
             if extension == "h" {
-                return Self::split_on_newlines(src).take(100).any(|line| {
+                return split_on_newlines(src).take(100).any(|line| {
                     ["#import", "@interface", "@protocol"]
                         .iter()
                         .any(|keyword| line.starts_with(keyword))
@@ -474,7 +528,11 @@ impl Language {
     }
 
     fn looks_like_xml(src: &str) -> bool {
-        src.starts_with("<?xml")
+        src.to_lowercase().starts_with("<?xml")
+    }
+
+    fn looks_like_html(src: &str) -> bool {
+        src.to_lowercase().starts_with("<!doctype html")
     }
 
     pub fn name(&self) -> &'static str {
@@ -485,23 +543,23 @@ impl Language {
             Language::Comment => "Comment",
             Language::CommonLisp => "Common Lisp",
             Language::CSharp => "C#",
-            Language::Cpp => "C++",
-            Language::Css => "CSS",
+            Language::CPlusPlus => "C++",
+            Language::CSS => "CSS",
             Language::Diff => "Diff",
             Language::Dockerfile => "Dockerfile",
-            Language::Eex => "Eex",
+            Language::EEx => "Eex",
             Language::Elixir => "Elixir",
             Language::Elm => "Elm",
             Language::Erlang => "Erlang",
             Language::Gleam => "Gleam",
             Language::Go => "Go",
             Language::Haskell => "Haskell",
-            Language::Heex => "HEEx",
-            Language::Html => "HTML",
-            Language::Iex => "IEx",
+            Language::HEEx => "HEEx",
+            Language::HTML => "HTML",
+            Language::IEx => "IEx",
             Language::Java => "Java",
-            Language::Javascript => "JavaScript",
-            Language::Json => "JSON",
+            Language::JavaScript => "JavaScript",
+            Language::JSON => "JSON",
             Language::Kotlin => "Kotlin",
             Language::Llvm => "LLVM",
             Language::Lua => "Lua",
@@ -522,8 +580,8 @@ impl Language {
             Language::Svelte => "Svelte",
             Language::Swift => "Swift",
             Language::Toml => "TOML",
-            Language::Xml => "XML",
-            Language::Yaml => "YAML",
+            Language::XML => "XML",
+            Language::YAML => "YAML",
             Language::Zig => "Zig",
         }
     }
@@ -540,23 +598,23 @@ impl Language {
             Language::Comment => &COMMENT_CONFIG,
             Language::CommonLisp => &COMMONLISP_CONFIG,
             Language::CSharp => &CSHARP_CONFIG,
-            Language::Cpp => &CPP_CONFIG,
-            Language::Css => &CSS_CONFIG,
+            Language::CPlusPlus => &CPP_CONFIG,
+            Language::CSS => &CSS_CONFIG,
             Language::Diff => &DIFF_CONFIG,
             Language::Dockerfile => &DOCKERFILE_CONFIG,
-            Language::Eex => &EEX_CONFIG,
+            Language::EEx => &EEX_CONFIG,
             Language::Elixir => &ELIXIR_CONFIG,
             Language::Elm => &ELM_CONFIG,
             Language::Erlang => &ERLANG_CONFIG,
             Language::Gleam => &GLEAM_CONFIG,
             Language::Go => &GO_CONFIG,
             Language::Haskell => &HASKELL_CONFIG,
-            Language::Heex => &HEEX_CONFIG,
-            Language::Html => &HTML_CONFIG,
-            Language::Iex => &IEX_CONFIG,
+            Language::HEEx => &HEEX_CONFIG,
+            Language::HTML => &HTML_CONFIG,
+            Language::IEx => &IEX_CONFIG,
             Language::Java => &JAVA_CONFIG,
-            Language::Javascript => &JAVASCRIPT_CONFIG,
-            Language::Json => &JSON_CONFIG,
+            Language::JavaScript => &JAVASCRIPT_CONFIG,
+            Language::JSON => &JSON_CONFIG,
             Language::Kotlin => &KOTLIN_CONFIG,
             Language::Llvm => &LLVM_CONFIG,
             Language::Lua => &LUA_CONFIG,
@@ -576,12 +634,22 @@ impl Language {
             Language::Svelte => &SVELTE_CONFIG,
             Language::Swift => &SWIFT_CONFIG,
             Language::Toml => &TOML_CONFIG,
-            Language::Xml => &XML_CONFIG,
-            Language::Yaml => &YAML_CONFIG,
+            Language::XML => &XML_CONFIG,
+            Language::YAML => &YAML_CONFIG,
             Language::Zig => &ZIG_CONFIG,
             _ => &PLAIN_TEXT_CONFIG,
         }
     }
+}
+
+fn split_on_newlines(s: &str) -> impl Iterator<Item = &str> {
+    s.split('\n').map(|l| {
+        if let Some(l) = l.strip_suffix('\r') {
+            l
+        } else {
+            l
+        }
+    })
 }
 
 static BASH_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
