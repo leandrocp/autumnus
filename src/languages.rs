@@ -24,6 +24,7 @@ extern "C" {
     fn tree_sitter_iex() -> *const ();
     fn tree_sitter_kotlin() -> *const ();
     fn tree_sitter_latex() -> *const ();
+    fn tree_sitter_liquid() -> *const ();
     fn tree_sitter_llvm() -> *const ();
     fn tree_sitter_make() -> *const ();
     fn tree_sitter_perl() -> *const ();
@@ -69,7 +70,7 @@ pub enum Language {
     JSON,
     Kotlin,
     LaTeX,
-    // Liquid,
+    Liquid,
     Llvm,
     Lua,
     Make,
@@ -137,6 +138,7 @@ impl Language {
             "json" => Some(Language::JSON),
             "kotlin" => Some(Language::Kotlin),
             "latex" => Some(Language::LaTeX),
+            "liquid" => Some(Language::Liquid),
             "llvm" => Some(Language::Llvm),
             "lua" => Some(Language::Lua),
             "objc" | "objective-c" => Some(Language::ObjC),
@@ -347,6 +349,7 @@ impl Language {
             ],
             Language::Kotlin => &["*.kt", "*.ktm", "*.kts"],
             Language::LaTeX => &["*.aux", "*.cls", "*.sty", "*.tex"],
+            Language::Liquid => &["*liquid"],
             Language::Llvm => &["*.llvm", "*.ll"],
             Language::Lua => &["*.lua"],
             Language::Make => &[
@@ -594,6 +597,7 @@ impl Language {
             Language::JSON => "JSON",
             Language::Kotlin => "Kotlin",
             Language::LaTeX => "LaTeX",
+            Language::Liquid => "Liquid",
             Language::Llvm => "LLVM",
             Language::Lua => "Lua",
             Language::ObjC => "Objective-C",
@@ -658,6 +662,7 @@ impl Language {
             Language::JSON => &JSON_CONFIG,
             Language::Kotlin => &KOTLIN_CONFIG,
             Language::LaTeX => &LATEX_CONFIG,
+            Language::Liquid => &LIQUID_CONFIG,
             Language::Llvm => &LLVM_CONFIG,
             Language::Lua => &LUA_CONFIG,
             Language::ObjC => &OBJC_CONFIG,
@@ -1137,6 +1142,21 @@ static LATEX_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         LATEX_LOCALS,
     )
     .expect("failed to create latex highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static LIQUID_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_liquid) };
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "liquid",
+        LIQUID_HIGHLIGHTS,
+        LIQUID_INJECTIONS,
+        LIQUID_LOCALS,
+    )
+    .expect("failed to create liquid highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
