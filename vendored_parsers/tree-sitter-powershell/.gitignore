@@ -1,0 +1,10 @@
+node_modules
+build
+.vscode
+*.exp
+*.obj
+*.lib
+*.wasm
+package-lock.json
+Cargo.lock
+target

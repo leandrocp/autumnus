@@ -1,0 +1,234 @@
+===
+Class : empty declaration
+===
+
+class MyClass {}
+
+---
+
+(program
+  (statement_list
+    (class_statement
+      (simple_name))))
+
+===
+Class : string property
+===
+
+class MyClass
+{
+    [string]$Name
+}
+
+---
+
+(program
+  (statement_list
+    (class_statement
+      (simple_name)
+      (class_property_definition
+        (type_literal
+          (type_spec
+            (type_name
+              (type_identifier))))
+        (variable)))))
+
+
+===
+Class : string property with attributes
+===
+
+class MyClass
+{
+    static hidden [string]$Name
+}
+
+---
+
+(program
+  (statement_list
+    (class_statement
+      (simple_name)
+      (class_property_definition
+        (class_attribute)
+        (class_attribute)
+        (type_literal
+          (type_spec
+            (type_name
+              (type_identifier))))
+        (variable)))))
+
+===
+Class : method declaration
+===
+
+class MyClass
+{
+    [void]SayHi()
+    {
+        Write-Host "Hi"
+    }
+}
+
+---
+
+(program
+  (statement_list
+    (class_statement
+      (simple_name)
+      (class_method_definition
+        (type_literal
+          (type_spec
+            (type_name
+              (type_identifier))))
+        (simple_name)
+        (script_block
+          (script_block_body
+            (statement_list
+              (pipeline
+                (command
+                  (command_name)
+                  (command_elements
+                    (command_argument_sep)
+                    (array_literal_expression
+                      (unary_expression
+                        (string_literal 
+                          (expandable_string_literal))))))))))))))
+
+===
+Class : method declaration with parameters
+===
+
+class MyClass
+{
+    hidden static [void]SayHi($Greeting, $Title)
+    {
+        Write-Host "$Greeting, $Title"
+    }
+}
+
+---
+
+(program
+  (statement_list
+    (class_statement
+      (simple_name)
+      (class_method_definition
+        (class_attribute)
+        (class_attribute)
+        (type_literal
+          (type_spec
+            (type_name
+              (type_identifier))))
+        (simple_name)
+        (class_method_parameter_list
+          (class_method_parameter
+            (variable))
+          (class_method_parameter
+            (variable)))
+        (script_block
+          (script_block_body
+            (statement_list
+              (pipeline
+                (command
+                  (command_name)
+                  (command_elements
+                    (command_argument_sep)
+                    (array_literal_expression
+                      (unary_expression
+                        (string_literal
+                          (expandable_string_literal
+                            (variable)
+                            (variable)))))))))))))))
+
+
+===
+Class : mix method and properties declaration
+===
+
+class MyClass
+{
+    static [string]$Word
+
+    static [void]AnotherMethod()
+    {
+        Write-Host "Nothing"
+    }
+
+    [int]$Number
+
+    [void]SayHi($Greeting, $Title)
+    {
+        Write-Host "$Greeting, $Title"
+    }
+
+    MyClass() {
+
+    }
+}
+
+---
+
+(program
+  (statement_list
+    (class_statement
+      (simple_name)
+      (class_property_definition
+        (class_attribute)
+        (type_literal
+          (type_spec
+            (type_name
+              (type_identifier))))
+        (variable))
+      (class_method_definition
+        (class_attribute)
+        (type_literal
+          (type_spec
+            (type_name
+              (type_identifier))))
+        (simple_name)
+        (script_block
+          (script_block_body
+            (statement_list
+              (pipeline
+                (command
+                  (command_name)
+                  (command_elements
+                    (command_argument_sep)
+                    (array_literal_expression
+                      (unary_expression
+                        (string_literal
+                          (expandable_string_literal)))))))))))
+      (class_property_definition
+        (type_literal
+          (type_spec
+            (type_name
+              (type_identifier))))
+        (variable))
+      (class_method_definition
+        (type_literal
+          (type_spec
+            (type_name
+              (type_identifier))))
+        (simple_name)
+        (class_method_parameter_list
+          (class_method_parameter
+            (variable))
+          (class_method_parameter
+            (variable)))
+        (script_block
+          (script_block_body
+            (statement_list
+              (pipeline
+                (command
+                  (command_name)
+                  (command_elements
+                    (command_argument_sep)
+                    (array_literal_expression
+                      (unary_expression
+                        (string_literal
+                          (expandable_string_literal
+                            (variable)
+                            (variable))))))))))))
+      (class_method_definition
+        (simple_name)))))
