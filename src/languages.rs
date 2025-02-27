@@ -25,6 +25,7 @@ extern "C" {
     fn tree_sitter_kotlin() -> *const ();
     fn tree_sitter_llvm() -> *const ();
     fn tree_sitter_make() -> *const ();
+    fn tree_sitter_perl() -> *const ();
 }
 
 mod generated {
@@ -75,7 +76,7 @@ pub enum Language {
     ObjC,
     OCaml,
     OCamlInterface,
-    // Perl,
+    Perl,
     Php,
     PlainText,
     // Powershell,
@@ -139,6 +140,7 @@ impl Language {
             "objc" | "objective-c" => Some(Language::ObjC),
             "ocaml" => Some(Language::OCaml),
             "ocaml_interface" => Some(Language::OCamlInterface),
+            "perl" => Some(Language::Perl),
             "make" => Some(Language::Make),
             "php" => Some(Language::Php),
             "protobuf" => Some(Language::ProtoBuf),
@@ -344,9 +346,6 @@ impl Language {
             Language::Kotlin => &["*.kt", "*.ktm", "*.kts"],
             Language::Llvm => &["*.llvm", "*.ll"],
             Language::Lua => &["*.lua"],
-            Language::ObjC => &["*.m"],
-            Language::OCaml => &["*.ml"],
-            Language::OCamlInterface => &["*.mli"],
             Language::Make => &[
                 "*.mak",
                 "*.d",
@@ -368,6 +367,10 @@ impl Language {
                 "makefile.sco",
                 "mkfile",
             ],
+            Language::ObjC => &["*.m"],
+            Language::OCaml => &["*.ml"],
+            Language::OCamlInterface => &["*.mli"],
+            Language::Perl => &["*.pm", "*.pl"],
             Language::Php => &[
                 "*.php", "*.phtml", "*.php3", "*.php4", "*.php5", "*.php7", "*.phps",
             ],
@@ -513,6 +516,7 @@ impl Language {
                         "elixir" => return Some(Language::Elixir),
                         "Rscript" => return Some(Language::R),
                         "python" | "python2" | "python3" => return Some(Language::Python),
+                        "perl" => return Some(Language::Perl),
                         "ruby" | "macruby" | "rake" | "jruby" | "rbx" => {
                             return Some(Language::Ruby)
                         }
@@ -592,6 +596,7 @@ impl Language {
             Language::OCaml => "OCaml",
             Language::OCamlInterface => "OCaml Interface",
             Language::Make => "Make",
+            Language::Perl => "Perl",
             Language::Php => "PHP",
             Language::PlainText => "Plain Text",
             Language::ProtoBuf => "Protocol Buffer",
@@ -654,6 +659,7 @@ impl Language {
             Language::OCaml => &OCAML_CONFIG,
             Language::OCamlInterface => &OCAML_INTERFACE_CONFIG,
             Language::Make => &MAKE_CONFIG,
+            Language::Perl => &PERL_CONFIG,
             Language::Php => &PHP_CONFIG,
             Language::ProtoBuf => &PROTO_BUF_CONFIG,
             Language::Python => &PYTHON_CONFIG,
@@ -1193,6 +1199,21 @@ static MAKE_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         MAKE_LOCALS,
     )
     .expect("failed to create make highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static PERL_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_perl) };
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "perl",
+        PERL_HIGHLIGHTS,
+        PERL_INJECTIONS,
+        PERL_LOCALS,
+    )
+    .expect("failed to create perl highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
