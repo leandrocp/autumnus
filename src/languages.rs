@@ -51,8 +51,7 @@ pub enum Language {
     Elixir,
     Elm,
     Erlang,
-    // Fish,
-    // FSharp,
+    FSharp,
     Gleam,
     Glimmer,
     Go,
@@ -123,6 +122,7 @@ impl Language {
             "elixir" => Some(Language::Elixir),
             "elm" => Some(Language::Elm),
             "erlang" => Some(Language::Erlang),
+            "f#" | "fsharp" => Some(Language::FSharp),
             "gleam" => Some(Language::Gleam),
             "ember" | "glimmer" | "handlebars" => Some(Language::Glimmer),
             "go" => Some(Language::Go),
@@ -301,6 +301,7 @@ impl Language {
                 "*.yrl",
                 "Emakefile",
             ],
+            Language::FSharp => &["*.fs", "*.fsx", "*.fsi"],
             Language::Gleam => &["*.gleam"],
             Language::Glimmer => &["*.hbs", "*.handlebars", "*.html.handlebars", "*.glimmer"],
             Language::Go => &["*.go"],
@@ -457,6 +458,7 @@ impl Language {
                 "c++" => Some(Language::CPlusPlus),
                 "elixir" => Some(Language::Elixir),
                 "elm" => Some(Language::Elm),
+                "fsharp" => Some(Language::FSharp),
                 "gleam" => Some(Language::Gleam),
                 "go" => Some(Language::Go),
                 "haskell" => Some(Language::Haskell),
@@ -570,6 +572,7 @@ impl Language {
             Language::Elixir => "Elixir",
             Language::Elm => "Elm",
             Language::Erlang => "Erlang",
+            Language::FSharp => "F#",
             Language::Gleam => "Gleam",
             Language::Glimmer => "Glimmer",
             Language::Go => "Go",
@@ -630,6 +633,7 @@ impl Language {
             Language::Elixir => &ELIXIR_CONFIG,
             Language::Elm => &ELM_CONFIG,
             Language::Erlang => &ERLANG_CONFIG,
+            Language::FSharp => &FSHARP_CONFIG,
             Language::Gleam => &GLEAM_CONFIG,
             Language::Glimmer => &GLIMMER_CONFIG,
             Language::Go => &GO_CONFIG,
@@ -927,6 +931,19 @@ static ERLANG_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         ERLANG_LOCALS,
     )
     .expect("failed to create erlang highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static FSHARP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(tree_sitter_fsharp::LANGUAGE_FSHARP),
+        "fsharp",
+        FSHARP_HIGHLIGHTS,
+        FSHARP_INJECTIONS,
+        FSHARP_LOCALS,
+    )
+    .expect("failed to create fsharp highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
