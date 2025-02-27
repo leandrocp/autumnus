@@ -1,3 +1,120 @@
+//! Syntax highlighter powered by tree-sitter and nvim themes.
+//!
+//! ## Languages available
+//!
+//! | Name | Extensions |
+//! | ---- | ---------- |
+//! | Angular | *.angular, component.html |
+//! | Astro | *.astro |
+//! | Bash | *.bash, *.bats, *.cgi, *.command, *.env, *.fcgi, *.ksh, *.sh, *.sh.in, *.tmux, *.tool, *.zsh, .bash_aliases, .bash_history, .bash_logout, .bash_profile, .bashrc, .cshrc, .env, .env.example, .flaskenv, .kshrc, .login, .profile, .zlogin, .zlogout, .zprofile, .zshenv, .zshrc, 9fs, PKGBUILD, bash_aliases, bash_logout, bash_profile, bashrc, cshrc, gradlew, kshrc, login, man, profile, zlogin, zlogout, zprofile, zshenv, zshrc |
+//! | C | *.c |
+//! | CMake | *.cmake, *.cmake.in, CMakeLists.txt |
+//! | C# | *.cs |
+//! | CSV | *.csv |
+//! | Clojure | *.bb, *.boot, *.clj, *.cljc, *.clje, *.cljs, *.cljx, *.edn, *.joke, *.joker |
+//! | Common Lisp | *.lisp, *.lsp, *.asd |
+//! | C++ | *.cc, *.cpp, *.h, *.hh, *.hpp, *.ino, *.cxx, *.cu |
+//! | CSS | *.css |
+//! | Diff | *.diff |
+//! | Dockerfile | Dockerfile, dockerfile, docker, Containerfile, container, *.dockerfile, *.docker, *.container |
+//! | EEx | *.eex |
+//! | Elixir | *.ex, *.exs |
+//! | Elm | *.elm |
+//! | Erlang | *.erl, *.app.src, *.es, *.escript, *.hrl, *.xrl, *.yrl, Emakefile |
+//! | F# | *.fs, *.fsx, *.fsi |
+//! | Gleam | *.gleam |
+//! | Glimmer | *.hbs, *.handlebars, *.html.handlebars, *.glimmer |
+//! | Go | *.go |
+//! | GraphQL | |
+//! | Haskell | *.hs |
+//! | HEEx | *.heex, *.neex |
+//! | HTML | *.html, *.htm, *.xhtml |
+//! | IEx | *.iex |
+//! | Java | *.java |
+//! | JavaScript | *.cjs, *.js, *.mjs, *.snap |
+//! | JSON | *.json, *.avsc, *.geojson, *.gltf, *.har, *.ice, *.JSON-tmLanguage, *.jsonl, *.mcmeta, *.tfstate, *.tfstate.backup, *.topojson, *.webapp, *.webmanifest, .arcconfig, .auto-changelog, .c8rc, .htmlhintrc, .imgbotconfig, .nycrc, .tern-config, .tern-project, .watchmanconfig, Pipfile.lock, composer.lock, mcmod.info, flake.lock |
+//! | Kotlin | *.kt, *.ktm, *.kts |
+//! | LaTeX | *.aux, *.cls, *.sty, *.tex |
+//! | Liquid | *liquid |
+//! | LLVM | *.llvm, *.ll |
+//! | Lua | *.lua |
+//! | Make | *.mak, *.d, *.make, *.makefile, *.mk, *.mkfile, BSDmakefile, GNUmakefile, Kbuild, Makefile, Makefile.am, Makefile.boot, Makefile.frag, Makefile*.in, Makefile.inc, Makefile.wat, makefile, makefile.sco, mkfile |
+//! | Markdown | *.md, README |
+//! | Objective-C | *.m |
+//! | OCaml | *.ml |
+//! | OCaml Interface | *.mli |
+//! | Perl | *.pm, *.pl |
+//! | PHP | *.php, *.phtml, *.php3, *.php4, *.php5, *.php7, *.phps |
+//! | PowerShell | *.ps1, *.psm1 |
+//! | Protocol Buffer | *.proto, *.protobuf, *.proto2, *.proto3 |
+//! | Python | *.py, *.py3, *.pyi, *.bzl, TARGETS, BUCK, DEPS |
+//! | R | *.R, *.r, *.rd, *.rsx, .Rprofile, expr-dist |
+//! | Ruby | *.rb, *.builder, *.spec, *.rake, Gemfile, Rakefile |
+//! | Rust | *.rs |
+//! | Scala | *.scala, *.sbt, *.sc |
+//! | SCSS | *.scss |
+//! | SQL | *.sql, *.pgsql |
+//! | Surface | *.surface, *.sface |
+//! | Svelte | *.svelte |
+//! | Swift | *.swift |
+//! | TOML | *.toml, Cargo.lock, Gopkg.lock, Pipfile, pdm.lock, poetry.lock, uv.lock |
+//! | TypeScript | *.ts |
+//! | TSX | *.tsx |
+//! | Vim | *.vim, *.viml |
+//! | XML | *.ant, *.csproj, *.mjml, *.plist, *.resx, *.svg, *.ui, *.vbproj, *.xaml, *.xml, *.xsd, *.xsl, *.xslt, *.zcml, App.config, nuget.config, packages.config, .classpath, .cproject, .project |
+//! | YAML | *.yaml, *.yml |
+//! | Zig | *.zig |
+//!
+//! ## Themes available
+//!
+//! | Theme Name |
+//! | ---------- |
+//! | catppuccin_frappe |
+//! | catppuccin_latte |
+//! | catppuccin_macchiato |
+//! | catppuccin_mocha |
+//! | dracula |
+//! | dracula_soft |
+//! | github_dark |
+//! | github_dark_colorblind |
+//! | github_dark_default |
+//! | github_dark_dimmed |
+//! | github_dark_high_contrast |
+//! | github_dark_tritanopia |
+//! | github_light |
+//! | github_light_colorblind |
+//! | github_light_default |
+//! | github_light_tritanopia |
+//! | gruvbox_dark |
+//! | gruvbox_light |
+//! | kanagawa_dragon |
+//! | kanagawa_lotus |
+//! | kanagawa_wave |
+//! | material_darker |
+//! | material_deep_ocean |
+//! | material_lighter |
+//! | material_oceanic |
+//! | material_palenight |
+//! | nord |
+//! | onedark_cool |
+//! | onedark_dark |
+//! | onedark_darker |
+//! | onedark_deep |
+//! | onedark_pro |
+//! | onedark_pro_dark |
+//! | onedark_pro_vivid |
+//! | onedark_warm |
+//! | onedark_warmer |
+//! | onelight |
+//! | solarized_dark |
+//! | solarized_light |
+//! | tokyonight_day |
+//! | tokyonight_moon |
+//! | tokyonight_night |
+//! | tokyonight_storm |
+//! | vscode_dark |
+//! | vscode_light |
+
 pub mod constants;
 pub mod formatter;
 pub mod languages;
@@ -11,26 +128,90 @@ use formatter::Terminal;
 use themes::Theme;
 use tree_sitter_highlight::Highlighter;
 
+/// Options for the highlighter.
 #[derive(Debug, Default)]
 pub struct Options {
+    /// Theme to use for highlighting.
     pub theme: Theme,
+    /// Class to add to the `<pre>` tag.
     pub pre_class: Option<String>,
+    /// Whether to use italics for highlighting.
     pub italic: bool,
+    /// Whether to print debug information.
     pub debug: bool,
 }
 
+/// Highlights source code and returns it as an HTML string with inline styles.
+///
+/// This function takes the language or file path, source code, and options as input,
+/// and returns an HTML string with the source code highlighted using inline styles.
+///
+/// # Arguments
+///
+/// * `lang_or_path` - A string slice that represents the language or file path of the source code.
+///   If a file path is provided, the language will be guessed based on the file extension.
+/// * `source` - A string slice that represents the source code to be highlighted.
+/// * `options` - An `Options` struct that contains the configuration options for the highlighter.
+///
+/// # Returns
+///
+/// Highlights source code and returns it as an HTML string with inline styles.
+///
+/// This function takes the language or file path, source code, and options as input,
+/// and returns an HTML string with the source code highlighted using inline styles.
+///
+/// # Arguments
+///
+/// * `lang_or_path` - A string slice that represents the language or file path of the source code.
+///   If a file path is provided, the language will be guessed based on the file extension.
+/// * `source` - A string slice that represents the source code to be highlighted.
+/// * `options` - An `Options` struct that contains the configuration options for the highlighter.
+///
+/// # Returns
+///
+/// A string that contains the highlighted source code as an HTML string with inline styles.
 pub fn highlight_html_inline(lang_or_path: &str, source: &str, options: Options) -> String {
     let lang = Language::guess(lang_or_path, source);
     let formatter = HtmlInline::new(lang, options);
     format(&formatter, lang, source)
 }
 
+/// Highlights source code and returns it as an HTML string with linked styles.
+///
+/// This function takes the language or file path, source code, and options as input,
+/// and returns an HTML string with the source code highlighted using linked styles.
+///
+/// # Arguments
+///
+/// * `lang_or_path` - A string slice that represents the language or file path of the source code.
+///   If a file path is provided, the language will be guessed based on the file extension.
+/// * `source` - A string slice that represents the source code to be highlighted.
+/// * `options` - An `Options` struct that contains the configuration options for the highlighter.
+///
+/// # Returns
+///
+/// A string that contains the highlighted source code as an HTML string with linked styles.
 pub fn highlight_html_linked(lang_or_path: &str, source: &str, options: Options) -> String {
     let lang = Language::guess(lang_or_path, source);
     let formatter = HtmlLinked::new(lang, options);
     format(&formatter, lang, source)
 }
 
+/// Highlights source code and returns it as a string with terminal colors.
+///
+/// This function takes the language or file path, source code, and options as input,
+/// and returns a string with the source code highlighted using terminal colors.
+///
+/// # Arguments
+///
+/// * `lang_or_path` - A string slice that represents the language or file path of the source code.
+///   If a file path is provided, the language will be guessed based on the file extension.
+/// * `source` - A string slice that represents the source code to be highlighted.
+/// * `options` - An `Options` struct that contains the configuration options for the highlighter.
+///
+/// # Returns
+///
+/// A string that contains the highlighted source code as a string with terminal colors.
 pub fn highlight_terminal(lang_or_path: &str, source: &str, options: Options) -> String {
     let lang = Language::guess(lang_or_path, source);
     let formatter = Terminal::new(options);
