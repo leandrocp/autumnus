@@ -78,7 +78,8 @@ pub enum Language {
     Llvm,
     Lua,
     Make,
-    // Markdown,
+    Markdown,
+    MarkdownInline,
     ObjC,
     OCaml,
     OCamlInterface,
@@ -151,6 +152,8 @@ impl Language {
             "ocaml_interface" => Some(Language::OCamlInterface),
             "perl" => Some(Language::Perl),
             "make" => Some(Language::Make),
+            "markdown" => Some(Language::Markdown),
+            "markdown_inline" => Some(Language::MarkdownInline),
             "php" => Some(Language::Php),
             "powershell" => Some(Language::PowerShell),
             "protobuf" => Some(Language::ProtoBuf),
@@ -384,6 +387,8 @@ impl Language {
                 "makefile.sco",
                 "mkfile",
             ],
+            Language::Markdown => &["*.md", "README"],
+            Language::MarkdownInline => &[],
             Language::ObjC => &["*.m"],
             Language::OCaml => &["*.ml"],
             Language::OCamlInterface => &["*.mli"],
@@ -532,7 +537,7 @@ impl Language {
                 let interpreter_path = Path::new(&cap[1]);
                 if let Some(name) = interpreter_path.file_name() {
                     match name.to_string_lossy().borrow() {
-                         "deno" | "ts-node" => return Some(Language::TypeScript),
+                        "deno" | "ts-node" => return Some(Language::TypeScript),
                         "ocaml" | "ocamlrun" | "ocamlscript" => return Some(Language::OCaml),
                         "lisp" | "sbc" | "ccl" | "clisp" | "ecl" => {
                             return Some(Language::CommonLisp)
@@ -625,6 +630,8 @@ impl Language {
             Language::OCaml => "OCaml",
             Language::OCamlInterface => "OCaml Interface",
             Language::Make => "Make",
+            Language::Markdown => "Markdown",
+            Language::MarkdownInline => "Markdown Inline",
             Language::Perl => "Perl",
             Language::Php => "PHP",
             Language::PlainText => "Plain Text",
@@ -696,6 +703,8 @@ impl Language {
             Language::OCaml => &OCAML_CONFIG,
             Language::OCamlInterface => &OCAML_INTERFACE_CONFIG,
             Language::Make => &MAKE_CONFIG,
+            Language::Markdown => &MARKDOWN_CONFIG,
+            Language::MarkdownInline => &MARKDOWN_INLINE_CONFIG,
             Language::Perl => &PERL_CONFIG,
             Language::Php => &PHP_CONFIG,
             Language::PowerShell => &POWERSHELL_CONFIG,
@@ -1272,6 +1281,32 @@ static MAKE_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         MAKE_LOCALS,
     )
     .expect("failed to create make highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static MARKDOWN_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(tree_sitter_md::LANGUAGE),
+        "markdown",
+        MARKDOWN_HIGHLIGHTS,
+        MARKDOWN_INJECTIONS,
+        MARKDOWN_LOCALS,
+    )
+    .expect("failed to create markdown highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static MARKDOWN_INLINE_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(tree_sitter_md::INLINE_LANGUAGE),
+        "markdown_inline",
+        MARKDOWN_INLINE_HIGHLIGHTS,
+        MARKDOWN_INLINE_INJECTIONS,
+        MARKDOWN_INLINE_LOCALS,
+    )
+    .expect("failed to create markdown highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
