@@ -12,6 +12,7 @@ extern "C" {
     fn tree_sitter_angular() -> *const ();
     fn tree_sitter_astro() -> *const ();
     fn tree_sitter_clojure() -> *const ();
+    fn tree_sitter_cmake() -> *const ();
     fn tree_sitter_comment() -> *const ();
     fn tree_sitter_commonlisp() -> *const ();
     fn tree_sitter_dockerfile() -> *const ();
@@ -34,7 +35,7 @@ pub enum Language {
     Astro,
     Bash,
     C,
-    // CMake,
+    CMake,
     CSharp,
     // Csv,
     Clojure,
@@ -111,6 +112,7 @@ impl Language {
             "comment" => Some(Language::Comment),
             "commonlisp" => Some(Language::CommonLisp),
             "c++" | "cpp" => Some(Language::CPlusPlus),
+            "cmake" => Some(Language::CMake),
             "c#" | "csharp" => Some(Language::CSharp),
             "css" => Some(Language::CSS),
             "diff" => Some(Language::Diff),
@@ -265,6 +267,7 @@ impl Language {
             ],
             Language::Comment => &[],
             Language::CommonLisp => &["*.lisp", "*.lsp", "*.asd"],
+            Language::CMake => &["*.cmake", "*.cmake.in", "CMakeLists.txt"],
             Language::CSharp => &["*.cs"],
             Language::CPlusPlus => &[
                 "*.cc", "*.cpp", "*.h", "*.hh", "*.hpp", "*.ino", "*.cxx", "*.cu",
@@ -550,6 +553,7 @@ impl Language {
             Language::Clojure => "Clojure",
             Language::Comment => "Comment",
             Language::CommonLisp => "Common Lisp",
+            Language::CMake => "CMake",
             Language::CSharp => "C#",
             Language::CPlusPlus => "C++",
             Language::CSS => "CSS",
@@ -607,6 +611,7 @@ impl Language {
             Language::Clojure => &CLOJURE_CONFIG,
             Language::Comment => &COMMENT_CONFIG,
             Language::CommonLisp => &COMMONLISP_CONFIG,
+            Language::CMake => &CMAKE_CONFIG,
             Language::CSharp => &CSHARP_CONFIG,
             Language::CPlusPlus => &CPP_CONFIG,
             Language::CSS => &CSS_CONFIG,
@@ -759,6 +764,21 @@ static COMMONLISP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         COMMONLISP_LOCALS,
     )
     .expect("failed to create common_lisp highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static CMAKE_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_cmake) };
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "cmake",
+        CMAKE_HIGHLIGHTS,
+        CMAKE_INJECTIONS,
+        CMAKE_LOCALS,
+    )
+    .expect("failed to create cmake highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
