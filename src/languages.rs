@@ -23,6 +23,7 @@ extern "C" {
     fn tree_sitter_graphql() -> *const ();
     fn tree_sitter_iex() -> *const ();
     fn tree_sitter_kotlin() -> *const ();
+    fn tree_sitter_latex() -> *const ();
     fn tree_sitter_llvm() -> *const ();
     fn tree_sitter_make() -> *const ();
     fn tree_sitter_perl() -> *const ();
@@ -67,7 +68,7 @@ pub enum Language {
     JavaScript,
     JSON,
     Kotlin,
-    // Latex, TODO: generate parser.c
+    LaTeX,
     // Liquid,
     Llvm,
     Lua,
@@ -135,6 +136,7 @@ impl Language {
             "jsx" | "javascript" => Some(Language::JavaScript),
             "json" => Some(Language::JSON),
             "kotlin" => Some(Language::Kotlin),
+            "latex" => Some(Language::LaTeX),
             "llvm" => Some(Language::Llvm),
             "lua" => Some(Language::Lua),
             "objc" | "objective-c" => Some(Language::ObjC),
@@ -344,6 +346,7 @@ impl Language {
                 "flake.lock",
             ],
             Language::Kotlin => &["*.kt", "*.ktm", "*.kts"],
+            Language::LaTeX => &["*.aux", "*.cls", "*.sty", "*.tex"],
             Language::Llvm => &["*.llvm", "*.ll"],
             Language::Lua => &["*.lua"],
             Language::Make => &[
@@ -590,6 +593,7 @@ impl Language {
             Language::JavaScript => "JavaScript",
             Language::JSON => "JSON",
             Language::Kotlin => "Kotlin",
+            Language::LaTeX => "LaTeX",
             Language::Llvm => "LLVM",
             Language::Lua => "Lua",
             Language::ObjC => "Objective-C",
@@ -653,6 +657,7 @@ impl Language {
             Language::JavaScript => &JAVASCRIPT_CONFIG,
             Language::JSON => &JSON_CONFIG,
             Language::Kotlin => &KOTLIN_CONFIG,
+            Language::LaTeX => &LATEX_CONFIG,
             Language::Llvm => &LLVM_CONFIG,
             Language::Lua => &LUA_CONFIG,
             Language::ObjC => &OBJC_CONFIG,
@@ -1117,6 +1122,21 @@ static KOTLIN_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         KOTLIN_LOCALS,
     )
     .expect("failed to create kotlin highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static LATEX_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_latex) };
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "latex",
+        LATEX_HIGHLIGHTS,
+        LATEX_INJECTIONS,
+        LATEX_LOCALS,
+    )
+    .expect("failed to create latex highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
