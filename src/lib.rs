@@ -218,7 +218,6 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::path::Path;
 
     #[test]
     fn test_highlight_html_inline() {
@@ -244,14 +243,11 @@ end
 </span><span class="athl-line" data-athl-line="9"><span style="color: #ca9ee6;">end</span>
 </span></code></pre>"#;
 
-        let path = Path::new("themes/catppuccin_frappe.json");
-        let theme = themes::from_file(path).unwrap();
-
         let result = highlight_html_inline(
             "elixir",
             code,
             Options {
-                theme,
+                theme: themes::CATPPUCCIN_FRAPPE.clone(),
                 ..Options::default()
             },
         );
@@ -286,14 +282,11 @@ end
 </span><span class="athl-line" data-athl-line="9"><span class="keyword">end</span>
 </span></code></pre>"#;
 
-        let path = Path::new("themes/catppuccin_frappe.json");
-        let theme = themes::from_file(path).unwrap();
-
         let result = highlight_html_linked(
             "elixir",
             code,
             Options {
-                theme,
+                theme: themes::CATPPUCCIN_FRAPPE.clone(),
                 ..Options::default()
             },
         );
