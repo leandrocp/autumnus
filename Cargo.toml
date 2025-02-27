@@ -65,6 +65,7 @@ strum = { version = "0.26", features = ["derive"] }
 termcolor = "1.4"
 v_htmlescape = "0.15"
 tree-sitter-regex = "0.24.3"
+tree-sitter-xml = "0.7.0"
 
 [build-dependencies]
 cc = "1"

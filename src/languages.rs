@@ -78,7 +78,7 @@ pub enum Language {
     // TypeScript,
     // Vim,
     // Vue,
-    // Xml,
+    Xml,
     Yaml,
     Zig,
 }
@@ -130,6 +130,7 @@ impl Language {
             "svelte" => Some(Language::Svelte),
             "swift" => Some(Language::Swift),
             "toml" => Some(Language::Toml),
+            "xml" => Some(Language::Xml),
             "yaml" => Some(Language::Yaml),
             "zig" => Some(Language::Zig),
             _ => None,
@@ -152,6 +153,10 @@ impl Language {
 
                 if Self::looks_like_objc(path, source) {
                     return Language::ObjC;
+                }
+
+                if Self::looks_like_xml(source) {
+                    return Language::Xml;
                 }
 
                 Language::PlainText
@@ -357,6 +362,30 @@ impl Language {
                 "poetry.lock",
                 "uv.lock",
             ],
+            Language::Xml => &[
+                "*.ant",
+                "*.csproj",
+                // Following GitHub, treat MJML as XML.
+                // https://documentation.mjml.io/
+                "*.mjml",
+                "*.plist",
+                "*.resx",
+                "*.svg",
+                "*.ui",
+                "*.vbproj",
+                "*.xaml",
+                "*.xml",
+                "*.xsd",
+                "*.xsl",
+                "*.xslt",
+                "*.zcml",
+                "App.config",
+                "nuget.config",
+                "packages.config",
+                ".classpath",
+                ".cproject",
+                ".project",
+            ],
             Language::Yaml => &["*.yaml", "*.yml"],
             Language::Zig => &["*.zig"],
         };
@@ -428,6 +457,10 @@ impl Language {
         false
     }
 
+    fn looks_like_xml(src: &str) -> bool {
+        src.starts_with("<?xml")
+    }
+
     pub fn name(&self) -> &'static str {
         match self {
             Language::Bash => "Bash",
@@ -472,6 +505,7 @@ impl Language {
             Language::Svelte => "Svelte",
             Language::Swift => "Swift",
             Language::Toml => "TOML",
+            Language::Xml => "XML",
             Language::Yaml => "YAML",
             Language::Zig => "Zig",
         }
@@ -524,6 +558,7 @@ impl Language {
             Language::Svelte => &SVELTE_CONFIG,
             Language::Swift => &SWIFT_CONFIG,
             Language::Toml => &TOML_CONFIG,
+            Language::Xml => &XML_CONFIG,
             Language::Yaml => &YAML_CONFIG,
             Language::Zig => &ZIG_CONFIG,
             _ => &PLAIN_TEXT_CONFIG,
@@ -1091,6 +1126,19 @@ static TOML_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         TOML_LOCALS,
     )
     .expect("failed to create toml highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static XML_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(tree_sitter_xml::LANGUAGE_XML),
+        "xml",
+        XML_HIGHLIGHTS,
+        XML_INJECTIONS,
+        XML_LOCALS,
+    )
+    .expect("failed to create xml highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });

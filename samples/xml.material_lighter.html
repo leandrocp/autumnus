@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>xml - material_lighter - Autumnus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'JetBrains Mono', monospace;
+            line-height: 1.5;
+        }
+        pre {
+            font-size: 15px;
+            margin: 20px;
+            padding: 50px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+<pre class="athl" style="color: #546e7a; background-color: #fafafa;"><code class="language-xml" translate="no" tabindex="0"><span class="athl-line" data-athl-line="1"><span style="color: #aabfc9;">&lt;!-- This is a comment. It must not contain two consecutive hyphens (-). --&gt;</span>
+</span><span class="athl-line" data-athl-line="2"><span style="color: #aabfc9;">&lt;!-- Comments can span</span>
+</span><span class="athl-line" data-athl-line="3"><span style="color: #aabfc9;">  multiple lines --&gt;</span>
+</span><span class="athl-line" data-athl-line="4">
+</span><span class="athl-line" data-athl-line="5"><span style="color: #aabfc9;">&lt;!-- Elements --&gt;</span>
+</span><span class="athl-line" data-athl-line="6"><span style="color: #aabfc9;">&lt;!-- An element is a basic XML component. There are two types, empty: --&gt;</span>
+</span><span class="athl-line" data-athl-line="7"><span style="color: #39adb5;">&lt;</span><span style="color: #e53935;">element1</span> <span style="color: #7c4dff;">attribute</span><span style="color: #39adb5;">=</span><span style="color: #91b859;"><span style="color: #39adb5;">&quot;</span>value<span style="color: #39adb5;">&quot;</span></span> <span style="color: #39adb5;">/&gt;</span> <span style="color: #aabfc9;">&lt;!-- Empty elements do not hold any content --&gt;</span>
+</span><span class="athl-line" data-athl-line="8"><span style="color: #aabfc9;">&lt;!-- and non-empty: --&gt;</span>
+</span><span class="athl-line" data-athl-line="9"><span style="color: #39adb5;">&lt;</span><span style="color: #e53935;">element2</span> <span style="color: #7c4dff;">attribute</span><span style="color: #39adb5;">=</span><span style="color: #91b859;"><span style="color: #39adb5;">&quot;</span>value<span style="color: #39adb5;">&quot;</span></span><span style="color: #39adb5;">&gt;</span>Content<span style="color: #39adb5;">&lt;/</span><span style="color: #e53935;">element2</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="10"><span style="color: #aabfc9;">&lt;!-- Element names may only contain alphabets and numbers. --&gt;</span>
+</span><span class="athl-line" data-athl-line="11">
+</span><span class="athl-line" data-athl-line="12"><span style="color: #39adb5;">&lt;</span><span style="color: #e53935;">empty</span> <span style="color: #39adb5;">/&gt;</span> <span style="color: #aabfc9;">&lt;!-- An element either consists an empty element tag… --&gt;</span>
+</span><span class="athl-line" data-athl-line="13"><span style="color: #aabfc9;">&lt;!-- …which does not hold any content and is pure markup. --&gt;</span>
+</span><span class="athl-line" data-athl-line="14">
+</span><span class="athl-line" data-athl-line="15"><span style="color: #39adb5;">&lt;</span><span style="color: #e53935;">notempty</span><span style="color: #39adb5;">&gt;</span> <span style="color: #aabfc9;">&lt;!-- Or, it consists of a start tag… --&gt;</span>
+</span><span class="athl-line" data-athl-line="16">  <span style="color: #aabfc9;">&lt;!-- …some content… --&gt;</span>
+</span><span class="athl-line" data-athl-line="17"><span style="color: #39adb5;">&lt;/</span><span style="color: #e53935;">notempty</span><span style="color: #39adb5;">&gt;</span> <span style="color: #aabfc9;">&lt;!-- and an end tag. --&gt;</span>
+</span><span class="athl-line" data-athl-line="18">
+</span><span class="athl-line" data-athl-line="19"><span style="color: #aabfc9;">&lt;!-- Element names are case sensitive. --&gt;</span>
+</span><span class="athl-line" data-athl-line="20"><span style="color: #39adb5;">&lt;</span><span style="color: #e53935;">element</span> <span style="color: #39adb5;">/&gt;</span>
+</span><span class="athl-line" data-athl-line="21"><span style="color: #aabfc9;">&lt;!-- is not the same as --&gt;</span>
+</span><span class="athl-line" data-athl-line="22"><span style="color: #39adb5;">&lt;</span><span style="color: #e53935;">eLEMENT</span> <span style="color: #39adb5;">/&gt;</span>
+</span><span class="athl-line" data-athl-line="23">
+</span><span class="athl-line" data-athl-line="24"><span style="color: #aabfc9;">&lt;!-- Attributes --&gt;</span>
+</span><span class="athl-line" data-athl-line="25"><span style="color: #aabfc9;">&lt;!-- An attribute is a key-value pair and exists within an element. --&gt;</span>
+</span><span class="athl-line" data-athl-line="26"><span style="color: #39adb5;">&lt;</span><span style="color: #e53935;">element</span> <span style="color: #7c4dff;">attribute</span><span style="color: #39adb5;">=</span><span style="color: #91b859;"><span style="color: #39adb5;">&quot;</span>value<span style="color: #39adb5;">&quot;</span></span> <span style="color: #7c4dff;">another</span><span style="color: #39adb5;">=</span><span style="color: #91b859;"><span style="color: #39adb5;">&quot;</span>anotherValue<span style="color: #39adb5;">&quot;</span></span> <span style="color: #7c4dff;">many</span><span style="color: #39adb5;">=</span><span style="color: #91b859;"><span style="color: #39adb5;">&quot;</span>space-separated list<span style="color: #39adb5;">&quot;</span></span> <span style="color: #39adb5;">/&gt;</span>
+</span><span class="athl-line" data-athl-line="27"><span style="color: #aabfc9;">&lt;!-- An attribute may appear only once in an element. It holds just one value.</span>
+</span><span class="athl-line" data-athl-line="28"><span style="color: #aabfc9;">  Common workarounds to this involve the use of space-separated lists. --&gt;</span>
+</span><span class="athl-line" data-athl-line="29">
+</span><span class="athl-line" data-athl-line="30"><span style="color: #aabfc9;">&lt;!-- Nesting elements --&gt;</span>
+</span><span class="athl-line" data-athl-line="31"><span style="color: #aabfc9;">&lt;!-- An element&#39;s content may include other elements: --&gt;</span>
+</span><span class="athl-line" data-athl-line="32"><span style="color: #39adb5;">&lt;</span><span style="color: #e53935;">parent</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="33">  <span style="color: #39adb5;">&lt;</span><span style="color: #e53935;">child</span><span style="color: #39adb5;">&gt;</span>Text<span style="color: #39adb5;">&lt;/</span><span style="color: #e53935;">child</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="34">  <span style="color: #39adb5;">&lt;</span><span style="color: #e53935;">emptysibling</span> <span style="color: #39adb5;">/&gt;</span>
+</span><span class="athl-line" data-athl-line="35"><span style="color: #39adb5;">&lt;/</span><span style="color: #e53935;">parent</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="36"><span style="color: #aabfc9;">&lt;!-- Standard tree nomenclature is followed. Each element being called a node.</span>
+</span><span class="athl-line" data-athl-line="37"><span style="color: #aabfc9;">  An ancestor a level up is the parent, descendants a level down are children.</span>
+</span><span class="athl-line" data-athl-line="38"><span style="color: #aabfc9;">  Elements within the same parent element are siblings. --&gt;</span>
+</span><span class="athl-line" data-athl-line="39">
+</span><span class="athl-line" data-athl-line="40"><span style="color: #aabfc9;">&lt;!-- XML preserves whitespace. --&gt;</span>
+</span><span class="athl-line" data-athl-line="41"><span style="color: #39adb5;">&lt;</span><span style="color: #e53935;">child</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="42">  Text
+</span><span class="athl-line" data-athl-line="43"><span style="color: #39adb5;">&lt;/</span><span style="color: #e53935;">child</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="44"><span style="color: #aabfc9;">&lt;!-- is not the same as --&gt;</span>
+</span><span class="athl-line" data-athl-line="45"><span style="color: #39adb5;">&lt;</span><span style="color: #e53935;">child</span><span style="color: #39adb5;">&gt;</span>Text<span style="color: #39adb5;">&lt;/</span><span style="color: #e53935;">child</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="46">```
+</span><span class="athl-line" data-athl-line="47">
+</span><span class="athl-line" data-athl-line="48">## An XML document
+</span><span class="athl-line" data-athl-line="49">
+</span><span class="athl-line" data-athl-line="50">This is what makes XML versatile. It is human readable too. The following document tells us that it defines a bookstore which sells three books<span style="color: #39adb5;">,</span> one of which is Learning XML by Erik T. Ray. All this without having used an XML Parser yet.
+</span><span class="athl-line" data-athl-line="51">
+</span><span class="athl-line" data-athl-line="52">```xml
+</span><span class="athl-line" data-athl-line="53"><span style="color: #39adb5;">&lt;?</span>xml version<span style="color: #39adb5;">=</span><span style="color: #39adb5;">&quot;</span>1.0<span style="color: #39adb5;">&quot;</span> encoding<span style="color: #39adb5;">=</span><span style="color: #39adb5;">&quot;</span>UTF-8<span style="color: #39adb5;">&quot;</span><span style="color: #e53935;">?</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="54"><span style="color: #39adb5;">&lt;!</span>-- This is called an XML prolog. Optional<span style="color: #39adb5;">,</span> but recommended. --<span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="55"><span style="color: #39adb5;">&lt;</span><span style="color: #e53935;">bookstore</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="56">  <span style="color: #39adb5;">&lt;</span><span style="color: #e53935;">book</span> <span style="color: #7c4dff;">category</span><span style="color: #39adb5;">=</span><span style="color: #91b859;"><span style="color: #39adb5;">&quot;</span>COOKING<span style="color: #39adb5;">&quot;</span></span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="57">    <span style="color: #39adb5;">&lt;</span><span style="color: #e53935;">title</span> <span style="color: #7c4dff;">lang</span><span style="color: #39adb5;">=</span><span style="color: #91b859;"><span style="color: #39adb5;">&quot;</span>en<span style="color: #39adb5;">&quot;</span></span><span style="color: #39adb5;">&gt;</span>Everyday Italian<span style="color: #39adb5;">&lt;/</span><span style="color: #e53935;">title</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="58">    <span style="color: #39adb5;">&lt;</span><span style="color: #e53935;">author</span><span style="color: #39adb5;">&gt;</span>Giada De Laurentiis<span style="color: #39adb5;">&lt;/</span><span style="color: #e53935;">author</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="59">    <span style="color: #39adb5;">&lt;</span><span style="color: #e53935;">year</span><span style="color: #39adb5;">&gt;</span>2005<span style="color: #39adb5;">&lt;/</span><span style="color: #e53935;">year</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="60">    <span style="color: #39adb5;">&lt;</span><span style="color: #e53935;">price</span><span style="color: #39adb5;">&gt;</span>30.00<span style="color: #39adb5;">&lt;/</span><span style="color: #e53935;">price</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="61">  <span style="color: #39adb5;">&lt;/</span><span style="color: #e53935;">book</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="62">  <span style="color: #39adb5;">&lt;</span><span style="color: #e53935;">book</span> <span style="color: #7c4dff;">category</span><span style="color: #39adb5;">=</span><span style="color: #91b859;"><span style="color: #39adb5;">&quot;</span>CHILDREN<span style="color: #39adb5;">&quot;</span></span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="63">    <span style="color: #39adb5;">&lt;</span><span style="color: #e53935;">title</span> <span style="color: #7c4dff;">lang</span><span style="color: #39adb5;">=</span><span style="color: #91b859;"><span style="color: #39adb5;">&quot;</span>en<span style="color: #39adb5;">&quot;</span></span><span style="color: #39adb5;">&gt;</span>Harry Potter<span style="color: #39adb5;">&lt;/</span><span style="color: #e53935;">title</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="64">    <span style="color: #39adb5;">&lt;</span><span style="color: #e53935;">author</span><span style="color: #39adb5;">&gt;</span>J K. Rowling<span style="color: #39adb5;">&lt;/</span><span style="color: #e53935;">author</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="65">    <span style="color: #39adb5;">&lt;</span><span style="color: #e53935;">year</span><span style="color: #39adb5;">&gt;</span>2005<span style="color: #39adb5;">&lt;/</span><span style="color: #e53935;">year</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="66">    <span style="color: #39adb5;">&lt;</span><span style="color: #e53935;">price</span><span style="color: #39adb5;">&gt;</span>29.99<span style="color: #39adb5;">&lt;/</span><span style="color: #e53935;">price</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="67">  <span style="color: #39adb5;">&lt;/</span><span style="color: #e53935;">book</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="68">  <span style="color: #39adb5;">&lt;</span><span style="color: #e53935;">book</span> <span style="color: #7c4dff;">category</span><span style="color: #39adb5;">=</span><span style="color: #91b859;"><span style="color: #39adb5;">&quot;</span>WEB<span style="color: #39adb5;">&quot;</span></span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="69">    <span style="color: #39adb5;">&lt;</span><span style="color: #e53935;">title</span> <span style="color: #7c4dff;">lang</span><span style="color: #39adb5;">=</span><span style="color: #91b859;"><span style="color: #39adb5;">&quot;</span>en<span style="color: #39adb5;">&quot;</span></span><span style="color: #39adb5;">&gt;</span>Learning XML<span style="color: #39adb5;">&lt;/</span><span style="color: #e53935;">title</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="70">    <span style="color: #39adb5;">&lt;</span><span style="color: #e53935;">author</span><span style="color: #39adb5;">&gt;</span>Erik T. Ray<span style="color: #39adb5;">&lt;/</span><span style="color: #e53935;">author</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="71">    <span style="color: #39adb5;">&lt;</span><span style="color: #e53935;">year</span><span style="color: #39adb5;">&gt;</span>2003<span style="color: #39adb5;">&lt;/</span><span style="color: #e53935;">year</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="72">    <span style="color: #39adb5;">&lt;</span><span style="color: #e53935;">price</span><span style="color: #39adb5;">&gt;</span>39.95<span style="color: #39adb5;">&lt;/</span><span style="color: #e53935;">price</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="73">  <span style="color: #39adb5;">&lt;/</span><span style="color: #e53935;">book</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="74"><span style="color: #39adb5;">&lt;/</span><span style="color: #e53935;">bookstore</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="75">```
+</span><span class="athl-line" data-athl-line="76">
+</span><span class="athl-line" data-athl-line="77">## Well-formedness and Validation
+</span><span class="athl-line" data-athl-line="78">
+</span><span class="athl-line" data-athl-line="79">A XML document is <span style="color: #e53935;">*</span>well-formed<span style="color: #e53935;">*</span> if it is syntactically correct. However<span style="color: #39adb5;">,</span> it is possible to add more constraints to the document<span style="color: #39adb5;">,</span> using Document Type Definitions <span style="color: #39adb5;">(</span>DTDs<span style="color: #39adb5;">)</span>. A document whose elements are attributes are declared in a DTD and which follows the grammar specified in that DTD is called <span style="color: #e53935;">*</span>valid<span style="color: #e53935;">*</span> with respect to that DTD<span style="color: #39adb5;">,</span> in addition to being well-formed.
+</span><span class="athl-line" data-athl-line="80">
+</span><span class="athl-line" data-athl-line="81">Declaring a DTD externally:
+</span><span class="athl-line" data-athl-line="82">
+</span><span class="athl-line" data-athl-line="83">```xml
+</span><span class="athl-line" data-athl-line="84"><span style="color: #39adb5;">&lt;?</span>xml version<span style="color: #39adb5;">=</span><span style="color: #39adb5;">&quot;</span>1.0<span style="color: #39adb5;">&quot;</span> encoding<span style="color: #39adb5;">=</span><span style="color: #39adb5;">&quot;</span>UTF-8<span style="color: #39adb5;">&quot;</span><span style="color: #e53935;">?</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="85"><span style="color: #39adb5;">&lt;!</span><span style="color: #39adb5;">DOCTYPE</span> <span style="color: #7c4dff;">bookstore</span> <span style="color: #39adb5;">SYSTEM</span> <span style="color: #39adb5;">&quot;</span><span style="text-decoration: underline;">Bookstore.dtd</span><span style="color: #39adb5;">&quot;</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="86"><span style="color: #aabfc9;">&lt;!-- Declares that bookstore is our root element and &#39;Bookstore.dtd&#39; is the path</span>
+</span><span class="athl-line" data-athl-line="87"><span style="color: #aabfc9;">  to our DTD file. --&gt;</span>
+</span><span class="athl-line" data-athl-line="88"><span style="color: #39adb5;">&lt;</span><span style="color: #e53935;">bookstore</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="89">  <span style="color: #39adb5;">&lt;</span><span style="color: #e53935;">book</span> <span style="color: #7c4dff;">category</span><span style="color: #39adb5;">=</span><span style="color: #91b859;"><span style="color: #39adb5;">&quot;</span>COOKING<span style="color: #39adb5;">&quot;</span></span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="90">    <span style="color: #39adb5;">&lt;</span><span style="color: #e53935;">title</span> <span style="color: #7c4dff;">lang</span><span style="color: #39adb5;">=</span><span style="color: #91b859;"><span style="color: #39adb5;">&quot;</span>en<span style="color: #39adb5;">&quot;</span></span><span style="color: #39adb5;">&gt;</span>Everyday Italian<span style="color: #39adb5;">&lt;/</span><span style="color: #e53935;">title</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="91">    <span style="color: #39adb5;">&lt;</span><span style="color: #e53935;">author</span><span style="color: #39adb5;">&gt;</span>Giada De Laurentiis<span style="color: #39adb5;">&lt;/</span><span style="color: #e53935;">author</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="92">    <span style="color: #39adb5;">&lt;</span><span style="color: #e53935;">year</span><span style="color: #39adb5;">&gt;</span>2005<span style="color: #39adb5;">&lt;/</span><span style="color: #e53935;">year</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="93">    <span style="color: #39adb5;">&lt;</span><span style="color: #e53935;">price</span><span style="color: #39adb5;">&gt;</span>30.00<span style="color: #39adb5;">&lt;/</span><span style="color: #e53935;">price</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="94">  <span style="color: #39adb5;">&lt;/</span><span style="color: #e53935;">book</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="95"><span style="color: #39adb5;">&lt;/</span><span style="color: #e53935;">bookstore</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="96">```
+</span><span class="athl-line" data-athl-line="97">
+</span><span class="athl-line" data-athl-line="98">The DTD file <span style="color: #39adb5;">(</span>Bookstore.dtd<span style="color: #39adb5;">)</span>:
+</span><span class="athl-line" data-athl-line="99">
+</span><span class="athl-line" data-athl-line="100">```
+</span><span class="athl-line" data-athl-line="101"><span style="color: #39adb5;">&lt;!</span>ELEMENT bookstore <span style="color: #39adb5;">(</span>book<span style="color: #e53935;">+</span><span style="color: #39adb5;">)</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="102"><span style="color: #aabfc9;">&lt;!-- The bookstore element may contain one or more child book elements. --&gt;</span>
+</span><span class="athl-line" data-athl-line="103"><span style="color: #39adb5;">&lt;!</span>ELEMENT book <span style="color: #39adb5;">(</span>title<span style="color: #39adb5;">,</span> price<span style="color: #39adb5;">)</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="104"><span style="color: #aabfc9;">&lt;!-- Each book must have a title and a price as its children. --&gt;</span>
+</span><span class="athl-line" data-athl-line="105"><span style="color: #39adb5;">&lt;!</span>ATTLIST book category CDATA <span style="color: #39adb5;">&quot;</span>Literature<span style="color: #39adb5;">&quot;</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="106"><span style="color: #aabfc9;">&lt;!-- A book should have a category attribute. If it doesn&#39;t, its default value</span>
+</span><span class="athl-line" data-athl-line="107"><span style="color: #aabfc9;">  will be &#39;Literature&#39;. --&gt;</span>
+</span><span class="athl-line" data-athl-line="108"><span style="color: #39adb5;">&lt;!</span>ELEMENT title <span style="color: #39adb5;">(</span><span style="color: #7c4dff;">#PCDATA</span><span style="color: #39adb5;">)</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="109"><span style="color: #aabfc9;">&lt;!-- The element title must only contain parsed character data. That is, it may</span>
+</span><span class="athl-line" data-athl-line="110"><span style="color: #aabfc9;">  only contain text which is read by the parser and must not contain children.</span>
+</span><span class="athl-line" data-athl-line="111"><span style="color: #aabfc9;">  Compare with CDATA, or character data. --&gt;</span>
+</span><span class="athl-line" data-athl-line="112"><span style="color: #39adb5;">&lt;!</span>ELEMENT price <span style="color: #39adb5;">(</span><span style="color: #7c4dff;">#PCDATA</span><span style="color: #39adb5;">)</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="113">```
+</span><span class="athl-line" data-athl-line="114">
+</span><span class="athl-line" data-athl-line="115">The DTD could be declared inside the XML file itself:
+</span><span class="athl-line" data-athl-line="116">
+</span><span class="athl-line" data-athl-line="117">```xml
+</span><span class="athl-line" data-athl-line="118"><span style="color: #39adb5;">&lt;?</span>xml version<span style="color: #39adb5;">=</span><span style="color: #39adb5;">&quot;</span>1.0<span style="color: #39adb5;">&quot;</span> encoding<span style="color: #39adb5;">=</span><span style="color: #39adb5;">&quot;</span>UTF-8<span style="color: #39adb5;">&quot;</span><span style="color: #e53935;">?</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="119">
+</span><span class="athl-line" data-athl-line="120"><span style="color: #39adb5;">&lt;!</span><span style="color: #39adb5;">DOCTYPE</span> <span style="color: #7c4dff;">bookstore</span> <span style="color: #39adb5;">[</span>
+</span><span class="athl-line" data-athl-line="121"><span style="color: #39adb5;">&lt;!</span><span style="color: #39adb5;">ELEMENT</span> <span style="color: #e53935;">bookstore</span> <span style="color: #39adb5;">(</span><span style="color: #7c4dff;">book</span><span style="color: #e53935;">+</span><span style="color: #39adb5;">)</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="122"><span style="color: #39adb5;">&lt;!</span><span style="color: #39adb5;">ELEMENT</span> <span style="color: #e53935;">book</span> <span style="color: #39adb5;">(</span><span style="color: #7c4dff;">title</span><span style="color: #39adb5;">,</span> <span style="color: #7c4dff;">price</span><span style="color: #39adb5;">)</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="123"><span style="color: #39adb5;">&lt;!</span><span style="color: #39adb5;">ATTLIST</span> <span style="color: #e53935;">book</span> <span style="color: #7c4dff;">category</span> <span style="color: #7c4dff;">CDATA</span> <span style="color: #39adb5;">&quot;</span>Literature<span style="color: #39adb5;">&quot;</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="124"><span style="color: #39adb5;">&lt;!</span><span style="color: #39adb5;">ELEMENT</span> <span style="color: #e53935;">title</span> <span style="color: #39adb5;">(</span><span style="color: #7c4dff;">#PCDATA</span><span style="color: #39adb5;">)</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="125"><span style="color: #39adb5;">&lt;!</span><span style="color: #39adb5;">ELEMENT</span> <span style="color: #e53935;">price</span> <span style="color: #39adb5;">(</span><span style="color: #7c4dff;">#PCDATA</span><span style="color: #39adb5;">)</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="126"><span style="color: #39adb5;">]</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="127">
+</span><span class="athl-line" data-athl-line="128"><span style="color: #39adb5;">&lt;</span><span style="color: #e53935;">bookstore</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="129">  <span style="color: #39adb5;">&lt;</span><span style="color: #e53935;">book</span> <span style="color: #7c4dff;">category</span><span style="color: #39adb5;">=</span><span style="color: #91b859;"><span style="color: #39adb5;">&quot;</span>COOKING<span style="color: #39adb5;">&quot;</span></span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="130">    <span style="color: #39adb5;">&lt;</span><span style="color: #e53935;">title</span><span style="color: #39adb5;">&gt;</span>Everyday Italian<span style="color: #39adb5;">&lt;/</span><span style="color: #e53935;">title</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="131">    <span style="color: #39adb5;">&lt;</span><span style="color: #e53935;">price</span><span style="color: #39adb5;">&gt;</span>30.00<span style="color: #39adb5;">&lt;/</span><span style="color: #e53935;">price</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="132">  <span style="color: #39adb5;">&lt;/</span><span style="color: #e53935;">book</span><span style="color: #39adb5;">&gt;</span>
+</span><span class="athl-line" data-athl-line="133"><span style="color: #39adb5;">&lt;/</span><span style="color: #e53935;">bookstore</span><span style="color: #39adb5;">&gt;</span>
+</span></code></pre>
+</body>
+</html>
