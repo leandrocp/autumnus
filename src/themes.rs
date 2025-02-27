@@ -33,15 +33,76 @@ mod generated {
 
 pub use generated::*;
 
+/// Retrieves a theme by its name.
+///
+/// # Examples
+///
+/// ```
+/// use autumnus::themes;
+///
+/// let theme = themes::get("github_light");
+/// assert_eq!(theme.unwrap().name, "github_light");
+///
+/// let theme = themes::get("non_existent_theme");
+/// assert_eq!(theme.is_none());
+/// ```
 pub fn get(name: &str) -> Option<&'static Theme> {
     ALL_THEMES.iter().find(|theme| theme.name == name).copied()
 }
 
+static DEFAULT_THEME: Theme = Theme {
+    name: String::new(),
+    appearance: String::new(),
+    highlights: BTreeMap::new(),
+};
+
+/// Retrieves a theme by its name, or returns the default theme if not found.
+///
+/// # Examples
+///
+/// ```
+/// use autumnus::themes;
+///
+/// let theme = themes::get_or_default("github_light");
+/// assert_eq!(theme.name, "github_light");
+///
+/// let theme = themes::get_or_default("non_existent_theme");
+/// assert_eq!(theme.name, "");
+/// ```
+pub fn get_or_default(name: &str) -> &'static Theme {
+    get(name).unwrap_or(&DEFAULT_THEME)
+}
+
+/// Creates a `Theme` from a JSON file.
+///
+/// # Examples
+///
+/// ```
+/// use autumnus::themes;
+/// use std::path::Path;
+///
+/// let path = Path::new("catppuccin_frappe.json");
+/// let theme = themes::from_file(path).unwrap();
+///
+/// assert_eq!(theme.name, "catppuccin_frappe");
+/// ```
 pub fn from_file<P: AsRef<Path>>(path: P) -> Result<Theme, Box<dyn std::error::Error>> {
     let json = fs::read_to_string(path)?;
     Ok(serde_json::from_str(&json)?)
 }
 
+/// Creates a `Theme` from a JSON string.
+///
+/// # Examples
+///
+/// ```
+/// use autumnus::themes;
+///
+/// let json = r#"{"name": "My Theme", "appearance": "dark", "highlights": {"keyword": {"fg": "blue"}}}"#;
+/// let theme = themes::from_json(json).unwrap();
+///
+/// assert_eq!(theme.name, "My Theme");
+/// ```
 pub fn from_json(json: &str) -> Result<Theme, Box<dyn std::error::Error>> {
     Ok(serde_json::from_str(json)?)
 }
@@ -178,6 +239,15 @@ mod tests {
     fn test_get_by_name() {
         let theme = get("github_light");
         assert_eq!(theme.unwrap().name, "github_light")
+    }
+
+    #[test]
+    fn test_get_by_default() {
+        let theme_github_light = get_or_default("github_light");
+        assert_eq!(theme_github_light.name, "github_light");
+
+        let theme_other = get_or_default("other");
+        assert_eq!(theme_other.name, "");
     }
 
     #[test]

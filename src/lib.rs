@@ -1,4 +1,4 @@
-//! Syntax highlighter powered by tree-sitter and nvim themes.
+//! Syntax highlighter powered by tree-sitter and Neovim themes.
 //!
 //! ## Languages available
 //!
@@ -152,6 +152,31 @@ pub struct Options {
 ///   If a file path is provided, the language will be guessed based on the file extension.
 /// * `source` - A string slice that represents the source code to be highlighted.
 /// * `options` - An `Options` struct that contains the configuration options for the highlighter.
+///
+/// # Examples
+///
+/// Basic usage with explicit language specification:
+///
+/// ```
+/// use autumnus::highlight_html_inline;
+/// use autumnus:::Options;
+///
+/// let code = r#"
+/// fn main() {
+///     println!("Hello, world!");
+/// }
+/// "#;
+///
+/// let html = highlight_html_inline(
+///     "rust",
+///     code,
+///     Options::default()
+/// );
+/// ```
+///
+/// Or with a custom theme:
+///
+///
 ///
 pub fn highlight_html_inline(lang_or_path: &str, source: &str, options: Options) -> String {
     let lang = Language::guess(lang_or_path, source);
