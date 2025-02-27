@@ -1,0 +1,37 @@
+================================================================================
+Simple quickfix commands
+================================================================================
+
+cnext
+cn
+cprevious
+cp
+cN
+cNext
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (cnext_statement)
+  (cnext_statement)
+  (cprevious_statement)
+  (cprevious_statement)
+  (cprevious_statement)
+  (cprevious_statement))
+
+================================================================================
+Mapping with cnext #94
+================================================================================
+
+nnoremap <leader>cc <cmd>cnext<cr>
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (map_statement
+    (map_side
+      (keycode))
+    (map_side
+      (keycode)
+      (cnext_statement)
+      (keycode))))

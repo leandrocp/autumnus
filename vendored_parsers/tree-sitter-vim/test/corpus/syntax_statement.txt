@@ -1,0 +1,418 @@
+================================================================================
+Syntax enable and on
+================================================================================
+
+syntax enable
+syn enable
+syntax enable	" start highlighting, use 'background' to set colors
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (syntax_statement)
+  (syntax_statement)
+  (syntax_statement)
+  (comment))
+
+================================================================================
+Syntax case
+================================================================================
+
+sy case match
+sy case
+sy case ignore
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (syntax_statement)
+  (syntax_statement)
+  (syntax_statement))
+
+================================================================================
+Syntax spell
+================================================================================
+
+syn spell
+syn spell toplevel
+syn spell notoplevel
+syn spell default
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (syntax_statement)
+  (syntax_statement)
+  (syntax_statement)
+  (syntax_statement))
+
+================================================================================
+Syntax foldlevel
+================================================================================
+
+syntax foldlevel
+syntax foldlevel start
+syntax foldlevel minimum
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (syntax_statement)
+  (syntax_statement)
+  (syntax_statement))
+
+================================================================================
+Syntax keyword
+================================================================================
+
+syntax keyword   Type   int long char
+syntax keyword   vimCommand ab[breviate] n[ext]
+syntax keyword   Underscore one_keyword
+syn keyword vimCommand tag
+syn keyword vimSetting tag
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (syntax_statement
+    (hl_group)
+    (keyword)
+    (keyword)
+    (keyword))
+  (syntax_statement
+    (hl_group)
+    (keyword)
+    (keyword))
+  (syntax_statement
+    (hl_group)
+    (keyword))
+  (syntax_statement
+    (hl_group)
+    (keyword))
+  (syntax_statement
+    (hl_group)
+    (keyword)))
+
+================================================================================
+Syntax keyword options
+================================================================================
+
+syntax keyword   Type   conceal int long contained char cchar=.
+syntax keyword   Type   conceal int long3 contained char cchar=.
+syntax keyword   vimCommand containedin=Type,vimCommand ab[breviate] n[ext]
+syn keyword vimCommand tag nextgroup=vimSetting,@vimCommand
+syn keyword vimSetting transparent skipwhite skipnl skipempty tag
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (syntax_statement
+    (hl_group)
+    (syntax_argument)
+    (keyword)
+    (keyword)
+    (syntax_argument)
+    (keyword)
+    (syntax_argument))
+  (syntax_statement
+    (hl_group)
+    (syntax_argument)
+    (keyword)
+    (keyword)
+    (syntax_argument)
+    (keyword)
+    (syntax_argument))
+  (syntax_statement
+    (hl_group)
+    (syntax_argument
+      (hl_groups
+        (hl_group)
+        (hl_group)))
+    (keyword)
+    (keyword))
+  (syntax_statement
+    (hl_group)
+    (keyword)
+    (syntax_argument
+      (hl_groups
+        (hl_group)
+        (hl_group))))
+  (syntax_statement
+    (hl_group)
+    (syntax_argument)
+    (syntax_argument)
+    (syntax_argument)
+    (syntax_argument)
+    (keyword)))
+
+================================================================================
+Syntax match
+================================================================================
+
+syntax match  Type 'a'
+syntax match  Type 'a' keepend
+syntax match  Type /[]\// keepend
+syntax match  Type 'a'ms=e-1,me=s-1
+syntax match  Type '^[ab]\{1,3}\a\(pattern\)'
+syn match MatchGroup "this should be a string literal" skipwhite
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (syntax_statement
+    (hl_group)
+    (pattern))
+  (syntax_statement
+    (hl_group)
+    (pattern)
+    (syntax_argument))
+  (syntax_statement
+    (hl_group)
+    (pattern)
+    (syntax_argument))
+  (syntax_statement
+    (hl_group)
+    (pattern)
+    (pattern_offset)
+    (pattern_offset))
+  (syntax_statement
+    (hl_group)
+    (pattern
+      (pattern_multi)
+      (pattern)))
+  (syntax_statement
+    (hl_group)
+    (pattern)
+    (syntax_argument)))
+
+================================================================================
+Syntax region
+================================================================================
+
+syntax region  Type start='a' end='a'
+syntax region  Type start='a' skip='aa' end='a'
+syntax region  Type start='a'rs=s+1 skip='aa' end='a'
+syntax region  Type start=+"+ skip=+\\\\\|\\"+ end=+"+
+syntax region  Type start=+"+ skip=+\\\\\|\\"+ end=+"+ end=+'+
+syntax region  Type matchgroup=Type1 start='a'rs=s+1 skip='aa' end='a' concealends
+syntax region  Type start='a' skip='|' end='a'
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (syntax_statement
+    (hl_group)
+    (syntax_argument
+      (pattern))
+    (syntax_argument
+      (pattern)))
+  (syntax_statement
+    (hl_group)
+    (syntax_argument
+      (pattern))
+    (syntax_argument
+      (pattern))
+    (syntax_argument
+      (pattern)))
+  (syntax_statement
+    (hl_group)
+    (syntax_argument
+      (pattern)
+      (pattern_offset))
+    (syntax_argument
+      (pattern))
+    (syntax_argument
+      (pattern)))
+  (syntax_statement
+    (hl_group)
+    (syntax_argument
+      (pattern))
+    (syntax_argument
+      (pattern))
+    (syntax_argument
+      (pattern)))
+  (syntax_statement
+    (hl_group)
+    (syntax_argument
+      (pattern))
+    (syntax_argument
+      (pattern))
+    (syntax_argument
+      (pattern))
+    (syntax_argument
+      (pattern)))
+  (syntax_statement
+    (hl_group)
+    (syntax_argument
+      (hl_groups
+        (hl_group)))
+    (syntax_argument
+      (pattern)
+      (pattern_offset))
+    (syntax_argument
+      (pattern))
+    (syntax_argument
+      (pattern))
+    (syntax_argument))
+  (syntax_statement
+    (hl_group)
+    (syntax_argument
+      (pattern))
+    (syntax_argument
+      (pattern))
+    (syntax_argument
+      (pattern))))
+
+================================================================================
+Syntax cluster
+================================================================================
+
+syntax cluster group1
+syntax cluster group1 contains=@g1,g2,g3
+syntax cluster group1 add=g4 remove=@g1,g2
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (syntax_statement
+    (hl_group))
+  (syntax_statement
+    (hl_group)
+    (syntax_argument
+      (hl_groups
+        (hl_group)
+        (hl_group)
+        (hl_group))))
+  (syntax_statement
+    (hl_group)
+    (syntax_argument
+      (hl_groups
+        (hl_group)))
+    (syntax_argument
+      (hl_groups
+        (hl_group)
+        (hl_group)))))
+
+================================================================================
+Syntax sync
+================================================================================
+
+syntax sync linebreaks=1
+syntax sync fromstart
+syntax sync ccomment
+syntax sync ccomment hlgroup maxlines=1
+syntax sync minlines=22
+syntax sync lines=1
+syntax sync match g2 .*
+syntax sync region h2 groupthere h3 [^.]
+syntax sync linecont [n]\+
+syntax sync clear
+syntax sync clear g5
+
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (syntax_statement)
+  (syntax_statement)
+  (syntax_statement)
+  (syntax_statement
+    (hl_group))
+  (syntax_statement)
+  (syntax_statement)
+  (syntax_statement
+    (hl_group)
+    (pattern
+      (pattern_multi)))
+  (syntax_statement
+    (hl_group)
+    (hl_group)
+    (pattern))
+  (syntax_statement
+    (pattern
+      (pattern_multi)))
+  (syntax_statement)
+  (syntax_statement
+    (hl_group)))
+
+================================================================================
+Syntax list
+================================================================================
+
+syntax
+syntax list
+syntax list g1
+syntax list @g2
+
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (syntax_statement)
+  (syntax_statement)
+  (syntax_statement
+    (hl_group))
+  (syntax_statement
+    (hl_group)))
+
+================================================================================
+Syntax clear
+================================================================================
+
+syntax clear
+syntax clear g1
+syntax clear @g1
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (syntax_statement)
+  (syntax_statement
+    (hl_group))
+  (syntax_statement
+    (hl_group)))
+
+================================================================================
+Syntax include
+================================================================================
+
+syntax include /etc/vim/c.vim
+syntax include @Pod plugin/s.vim
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (syntax_statement
+    (filename))
+  (syntax_statement
+    (hl_group)
+    (filename)))
+
+================================================================================
+Syntax iskeyword
+================================================================================
+
+syntax iskeyword clear
+syntax iskeyword @,48-57,192-255,$,_
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (syntax_statement)
+  (syntax_statement
+    (value)))
+
+================================================================================
+Syntax conceal
+================================================================================
+
+syntax conceal
+syntax conceal on
+syntax conceal off
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (syntax_statement)
+  (syntax_statement)
+  (syntax_statement))

@@ -1,0 +1,58 @@
+================================================================================
+Filter
+================================================================================
+
+1,10!sort
+1!/usr/bin/make
+2!!/usr/bin/tree-sitter
+%!sh "one single argument" 'and another one' and\ one\ again
+1,$!sort -f --ignore-leading-blanks
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (bang_filter_statement
+    (range
+      (integer_literal)
+      (integer_literal))
+    (bangs
+      (bang))
+    (command
+      (filter_command)))
+  (bang_filter_statement
+    (range
+      (integer_literal))
+    (bangs
+      (bang))
+    (command
+      (filter_command)))
+  (bang_filter_statement
+    (range
+      (integer_literal))
+    (bangs
+      (bang)
+      (bang))
+    (command
+      (filter_command)))
+  (bang_filter_statement
+    (range
+      (file))
+    (bangs
+      (bang))
+    (command
+      (filter_command)
+      (command_argument
+        (string_literal))
+      (command_argument
+        (string_literal))
+      (command_argument)))
+  (bang_filter_statement
+    (range
+      (integer_literal)
+      (last_line))
+    (bangs
+      (bang))
+    (command
+      (filter_command)
+      (command_argument)
+      (command_argument))))

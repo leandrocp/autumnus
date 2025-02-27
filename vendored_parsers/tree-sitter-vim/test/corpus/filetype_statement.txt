@@ -1,0 +1,24 @@
+================================================================================
+Filetype
+================================================================================
+
+filetype on
+filetype off
+filetype plugin on
+filetype plugin off
+filetype indent on
+filetype indent off
+filetype plugin indent on
+filetype plugin indent off
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (filetype_statement)
+  (filetype_statement)
+  (filetype_statement)
+  (filetype_statement)
+  (filetype_statement)
+  (filetype_statement)
+  (filetype_statement)
+  (filetype_statement))

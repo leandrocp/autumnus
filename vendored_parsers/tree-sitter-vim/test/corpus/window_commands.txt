@@ -1,0 +1,94 @@
+================================================================================
+Wincmd basic
+================================================================================
+
+wincmd j
+wincmd r
+wincmd K
+wincmd =
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (wincmd_statement)
+  (wincmd_statement)
+  (wincmd_statement)
+  (wincmd_statement))
+
+================================================================================
+Wincmd count
+================================================================================
+
+4wincmd j
+3wincmd r
+12wincmd K
+15 wincmd =
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (wincmd_statement
+    (integer_literal))
+  (wincmd_statement
+    (integer_literal))
+  (wincmd_statement
+    (integer_literal))
+  (wincmd_statement
+    (integer_literal)))
+
+================================================================================
+Command modifiers for window placement
+================================================================================
+
+vertical echo foo
+leftabove echo foo
+aboveleft echo foo
+rightbelow echo foo
+belowright echo foo
+topleft echo foo
+botright echo foo
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (vertical_statement
+    (echo_statement
+      (identifier)))
+  (aboveleft_statement
+    (echo_statement
+      (identifier)))
+  (aboveleft_statement
+    (echo_statement
+      (identifier)))
+  (belowright_statement
+    (echo_statement
+      (identifier)))
+  (belowright_statement
+    (echo_statement
+      (identifier)))
+  (topleft_statement
+    (echo_statement
+      (identifier)))
+  (botright_statement
+    (echo_statement
+      (identifier))))
+
+================================================================================
+Mapping with window modifier
+================================================================================
+
+nnoremap <silent> <C-w><C-t> <cmd>belowright echo foo<CR>
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (map_statement
+    (map_side
+      (keycode)
+      (keycode))
+    (map_side
+      (keycode)
+      (belowright_statement
+        (echo_statement
+          (identifier)))
+      (keycode))))

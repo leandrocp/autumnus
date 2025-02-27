@@ -1,0 +1,93 @@
+================================================================================
+Letter register
+================================================================================
+
+@a
+@p
+@z
+@A
+@P
+@Z
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (register_statement
+    (register))
+  (register_statement
+    (register))
+  (register_statement
+    (register))
+  (register_statement
+    (register))
+  (register_statement
+    (register))
+  (register_statement
+    (register)))
+
+================================================================================
+Special registers
+================================================================================
+
+@"
+@_
+@:
+@%
+@#
+@=
+@*
+@+
+@_
+@/
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (register_statement
+    (register))
+  (register_statement
+    (register))
+  (register_statement
+    (register))
+  (register_statement
+    (register))
+  (register_statement
+    (register))
+  (register_statement
+    (register))
+  (register_statement
+    (register))
+  (register_statement
+    (register))
+  (register_statement
+    (register))
+  (register_statement
+    (register)))
+
+
+================================================================================
+Number register
+================================================================================
+
+@1
+@2
+@3
+@4
+@5
+@6
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (register_statement
+    (register))
+  (register_statement
+    (register))
+  (register_statement
+    (register))
+  (register_statement
+    (register))
+  (register_statement
+    (register))
+  (register_statement
+    (register)))

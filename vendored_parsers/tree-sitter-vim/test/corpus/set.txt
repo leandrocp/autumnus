@@ -1,0 +1,337 @@
+================================================================================
+Simple set
+================================================================================
+
+set number
+set number?
+setlocal number
+setlocal number?
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (set_statement
+    (set_item
+      option: (option_name)))
+  (set_statement
+    (set_item
+      option: (option_name)))
+  (setlocal_statement
+    (set_item
+      option: (option_name)))
+  (setlocal_statement
+    (set_item
+      option: (option_name))))
+
+================================================================================
+Set noopt
+================================================================================
+
+set nofoo
+setlocal nofoo
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (set_statement
+    (set_item
+      option: (no_option
+        (option_name))))
+  (setlocal_statement
+    (set_item
+      option: (no_option
+        (option_name)))))
+
+================================================================================
+Set opt?
+================================================================================
+
+set foo?
+setlocal foo?
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (set_statement
+    (set_item
+      option: (option_name)))
+  (setlocal_statement
+    (set_item
+      option: (option_name))))
+
+================================================================================
+Set invopt
+================================================================================
+
+set invfoo
+set foo!
+setlocal invfoo
+setlocal foo!
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (set_statement
+    (set_item
+      option: (inv_option
+        (option_name))))
+  (set_statement
+    (set_item
+      option: (inv_option
+        (option_name))))
+  (setlocal_statement
+    (set_item
+      option: (inv_option
+        (option_name))))
+  (setlocal_statement
+    (set_item
+      option: (inv_option
+        (option_name)))))
+
+================================================================================
+Set default
+================================================================================
+
+set foo&
+set foo&vi
+set foo&vim
+setlocal foo&
+setlocal foo&vi
+setlocal foo&vim
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (set_statement
+    (set_item
+      option: (default_option
+        (option_name))))
+  (set_statement
+    (set_item
+      option: (default_option
+        (option_name))))
+  (set_statement
+    (set_item
+      option: (default_option
+        (option_name))))
+  (setlocal_statement
+    (set_item
+      option: (default_option
+        (option_name))))
+  (setlocal_statement
+    (set_item
+      option: (default_option
+        (option_name))))
+  (setlocal_statement
+    (set_item
+      option: (default_option
+        (option_name)))))
+
+================================================================================
+Set value
+================================================================================
+
+set foo=val
+setlocal foo=val
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (set_statement
+    (set_item
+      option: (option_name)
+      value: (set_value)))
+  (setlocal_statement
+    (set_item
+      option: (option_name)
+      value: (set_value))))
+
+================================================================================
+Set value with spaces
+================================================================================
+
+set foo=bar\ baz
+set bar
+setlocal foo=bar\ baz
+setlocal bar
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (set_statement
+    (set_item
+      option: (option_name)
+      value: (set_value)))
+  (set_statement
+    (set_item
+      option: (option_name)))
+  (setlocal_statement
+    (set_item
+      option: (option_name)
+      value: (set_value)))
+  (setlocal_statement
+    (set_item
+      option: (option_name))))
+
+================================================================================
+Multiple set
+================================================================================
+
+set foo bar=3 baz
+setlocal foo bar=3 baz
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (set_statement
+    (set_item
+      (option_name))
+    (set_item
+      (option_name)
+      (set_value))
+    (set_item
+      (option_name)))
+  (setlocal_statement
+    (set_item
+      (option_name))
+    (set_item
+      (option_name)
+      (set_value))
+    (set_item
+      (option_name))))
+
+================================================================================
+Set empty value
+================================================================================
+
+set foo=
+setlocal foo=
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (set_statement
+    (set_item
+      (option_name)))
+  (setlocal_statement
+    (set_item
+      (option_name))))
+
+================================================================================
+Set with tabs (#24)
+================================================================================
+
+set scrolloff=7		" comment
+setlocal scrolloff=7		" comment
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (set_statement
+    (set_item
+      (option_name)
+      (set_value)))
+  (comment)
+  (setlocal_statement
+    (set_item
+      (option_name)
+      (set_value)))
+  (comment))
+
+================================================================================
+Set with backslash at the end
+================================================================================
+
+set abc=\
+set foo
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (set_statement
+    (set_item
+      (option_name)
+      (set_value)))
+  (set_statement
+    (set_item
+      (option_name))))
+
+================================================================================
+Set with no
+================================================================================
+
+set foo=no
+set bar
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (set_statement
+    (set_item
+      (option_name)
+      (set_value)))
+  (set_statement
+    (set_item
+      (option_name))))
+
+================================================================================
+Foldexpr complicated cases
+================================================================================
+
+set foldexpr=getline(v:lnum)[0]==\"\\t\"
+set foldexpr=MyFoldLevel(v:lnum)
+set foldexpr=getline(v:lnum)=~'^\\s*$'&&getline(v:lnum+1)=~'\\S'?'<1':1
+set foldexpr=getline(v:lnum-1)=~'^\\s*$'&&getline(v:lnum)=~'\\S'?'>1':1
+set foldexpr=foo#bar()
+set foldexpr=foo()
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (set_statement
+    (set_item
+      (option_name)
+      (set_value)))
+  (set_statement
+    (set_item
+      (option_name)
+      (set_value)))
+  (set_statement
+    (set_item
+      (option_name)
+      (set_value)))
+  (set_statement
+    (set_item
+      (option_name)
+      (set_value)))
+  (set_statement
+    (set_item
+      (option_name)
+      (set_value)))
+  (set_statement
+    (set_item
+      (option_name)
+      (set_value))))
+
+================================================================================
+Setfiletype
+================================================================================
+
+setfiletype c
+setfiletype c.doxygen
+setf FALLBACK d
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (setfiletype_statement
+    (filetypes
+      (filetype)))
+  (setfiletype_statement
+    (filetypes
+      (filetype)
+      (filetype)))
+  (setfiletype_statement
+    (fallback)
+    (filetypes
+      (filetype))))

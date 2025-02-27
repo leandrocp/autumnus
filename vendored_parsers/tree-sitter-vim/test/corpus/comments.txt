@@ -1,0 +1,122 @@
+================================================================================
+Basic comment
+================================================================================
+
+" Hello
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (comment))
+
+================================================================================
+Comment after statement
+================================================================================
+
+echo "bar" " Hello
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (echo_statement
+    (string_literal))
+  (comment))
+
+================================================================================
+Comment with inner quotes
+================================================================================
+
+" 'hello'
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (comment))
+
+================================================================================
+Comment with inner double quotes
+================================================================================
+
+" "hello"
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (comment))
+
+================================================================================
+Set then comment
+================================================================================
+
+set foobar " comment
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (set_statement
+    (set_item
+      (option_name)))
+  (comment))
+
+================================================================================
+Line continuation comments
+================================================================================
+
+echo
+"\ comment
+\ "hello, world"
+
+func foo(
+  "\ a ludicrously long but necessary description that won't fit
+  \ first_argument_with_a_long_name,
+  "\ another ludicrously long but necessary description that won't fit
+  \ second_argument_with_a_long_name)
+  "\ if you don't include this the function will run even after an error
+  \ abort
+  return first_argument_with_a_long_name + second_argument_with_a_long_name
+endfunc
+
+let x =<< END
+"\ this is not a comment
+END
+
+let array = [
+    "\ first entry comment
+    \ 'first',
+    "\ second entry comment
+    \ 'second',
+    \ ]
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (echo_statement
+    (line_continuation_comment)
+    (string_literal))
+  (function_definition
+    (function_declaration
+      name: (identifier)
+      parameters: (parameters
+        (line_continuation_comment)
+        (identifier)
+        (line_continuation_comment)
+        (identifier)))
+    (line_continuation_comment)
+    (body
+      (return_statement
+        (binary_operation
+          left: (identifier)
+          right: (identifier)))))
+  (let_statement
+    (identifier)
+    (heredoc
+      (marker_definition)
+      (body)
+      (endmarker)))
+  (let_statement
+    (identifier)
+    (list
+      (line_continuation_comment)
+      (string_literal)
+      (line_continuation_comment)
+      (string_literal))))

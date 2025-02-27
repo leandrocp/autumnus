@@ -1,0 +1,339 @@
+================================================================================
+Basic
+================================================================================
+
+au BufNewFile *.html echo "foo"
+au! BufNewFile *.html echo "foo"
+autocmd BufNewFile *.html echo "foo"
+autocmd! BufNewFile *.html echo "foo"
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (autocmd_statement
+    (au_event_list
+      (au_event))
+    (pattern)
+    (echo_statement
+      (string_literal)))
+  (autocmd_statement
+    (bang)
+    (au_event_list
+      (au_event))
+    (pattern)
+    (echo_statement
+      (string_literal)))
+  (autocmd_statement
+    (au_event_list
+      (au_event))
+    (pattern)
+    (echo_statement
+      (string_literal)))
+  (autocmd_statement
+    (bang)
+    (au_event_list
+      (au_event))
+    (pattern)
+    (echo_statement
+      (string_literal))))
+
+================================================================================
+No arguments
+================================================================================
+
+au
+autocmd
+au!
+autocmd!
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (autocmd_statement)
+  (autocmd_statement)
+  (autocmd_statement
+    (bang))
+  (autocmd_statement
+    (bang)))
+
+================================================================================
+Autocmd only group
+================================================================================
+
+au SingleGroup
+au! SingleGroup
+autocmd single_group
+autocmd! single_group
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (autocmd_statement
+    (augroup_name))
+  (autocmd_statement
+    (bang)
+    (augroup_name))
+  (autocmd_statement
+    (augroup_name))
+  (autocmd_statement
+    (bang)
+    (augroup_name)))
+
+================================================================================
+Autocmd with once and nested
+================================================================================
+
+au BufEnter *.html ++once echo "html or json"
+au! BufEnter *.html ++once echo "html or json"
+au BufEnter *.html ++nested echo "html or json"
+au! BufEnter *.html ++nested echo "html or json"
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (autocmd_statement
+    (au_event_list
+      (au_event))
+    (pattern)
+    (au_once)
+    (echo_statement
+      (string_literal)))
+  (autocmd_statement
+    (bang)
+    (au_event_list
+      (au_event))
+    (pattern)
+    (au_once)
+    (echo_statement
+      (string_literal)))
+  (autocmd_statement
+    (au_event_list
+      (au_event))
+    (pattern)
+    (au_nested)
+    (echo_statement
+      (string_literal)))
+  (autocmd_statement
+    (bang)
+    (au_event_list
+      (au_event))
+    (pattern)
+    (au_nested)
+    (echo_statement
+      (string_literal))))
+
+================================================================================
+Autocmd only event/pattern
+================================================================================
+
+au BufEnter html
+au! BufEnter html
+au bufENTER
+au! BufenTeR
+au html
+au! html
+au augroup BufEnter html
+au! augroup BufEnter html
+au augroup BufEnter
+au! augroup BufEnter
+au augroup html
+au! augroup html
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (autocmd_statement
+    (au_event_list
+      (au_event))
+    (pattern))
+  (autocmd_statement
+    (bang)
+    (au_event_list
+      (au_event))
+    (pattern))
+  (autocmd_statement
+    (au_event_list
+      (au_event)))
+  (autocmd_statement
+    (bang)
+    (au_event_list
+      (au_event)))
+  (autocmd_statement
+    (augroup_name))
+  (autocmd_statement
+    (bang)
+    (augroup_name))
+  (autocmd_statement
+    (augroup_name)
+    (au_event_list
+      (au_event))
+    (pattern))
+  (autocmd_statement
+    (bang)
+    (augroup_name)
+    (au_event_list
+      (au_event))
+    (pattern))
+  (autocmd_statement
+    (augroup_name)
+    (au_event_list
+      (au_event)))
+  (autocmd_statement
+    (bang)
+    (augroup_name)
+    (au_event_list
+      (au_event)))
+  (autocmd_statement
+    (augroup_name)
+    (pattern))
+  (autocmd_statement
+    (bang)
+    (augroup_name)
+    (pattern)))
+
+================================================================================
+Multiple events
+================================================================================
+
+au BufNewFile,BufEnter *.html echo "foo"
+au! BufNewFile,BufEnter *.html echo "foo"
+autocmd BufNewFile,BufEnter *.html echo "foo"
+autocmd! BufNewFile,BufEnter *.html echo "foo"
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (autocmd_statement
+    (au_event_list
+      (au_event)
+      (au_event))
+    (pattern)
+    (echo_statement
+      (string_literal)))
+  (autocmd_statement
+    (bang)
+    (au_event_list
+      (au_event)
+      (au_event))
+    (pattern)
+    (echo_statement
+      (string_literal)))
+  (autocmd_statement
+    (au_event_list
+      (au_event)
+      (au_event))
+    (pattern)
+    (echo_statement
+      (string_literal)))
+  (autocmd_statement
+    (bang)
+    (au_event_list
+      (au_event)
+      (au_event))
+    (pattern)
+    (echo_statement
+      (string_literal))))
+
+================================================================================
+Multiple patterns
+================================================================================
+
+au FileType json,js,html,c,cpp,h,hh setlocal tabstop=4
+au! FileType json,js,html,c,cpp,h,hh setlocal tabstop=4
+autocmd FileType json,js,html,c,cpp,h,hh setlocal tabstop=4
+autocmd! FileType json,js,html,c,cpp,h,hh setlocal tabstop=4
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (autocmd_statement
+    (au_event_list
+      (au_event))
+    (pattern)
+    (pattern)
+    (pattern)
+    (pattern)
+    (pattern)
+    (pattern)
+    (pattern)
+    (setlocal_statement
+      (set_item
+        (option_name)
+        (set_value))))
+  (autocmd_statement
+    (bang)
+    (au_event_list
+      (au_event))
+    (pattern)
+    (pattern)
+    (pattern)
+    (pattern)
+    (pattern)
+    (pattern)
+    (pattern)
+    (setlocal_statement
+      (set_item
+        (option_name)
+        (set_value))))
+  (autocmd_statement
+    (au_event_list
+      (au_event))
+    (pattern)
+    (pattern)
+    (pattern)
+    (pattern)
+    (pattern)
+    (pattern)
+    (pattern)
+    (setlocal_statement
+      (set_item
+        (option_name)
+        (set_value))))
+  (autocmd_statement
+    (bang)
+    (au_event_list
+      (au_event))
+    (pattern)
+    (pattern)
+    (pattern)
+    (pattern)
+    (pattern)
+    (pattern)
+    (pattern)
+    (setlocal_statement
+      (set_item
+        (option_name)
+        (set_value)))))
+
+================================================================================
+Autocommand term pattern
+================================================================================
+
+au BufWinEnter term://* echo "foo"
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (autocmd_statement
+    (au_event_list
+      (au_event))
+    (pattern)
+    (echo_statement
+      (string_literal))))
+
+================================================================================
+Autocommand with group
+================================================================================
+
+au augroup_name BufWinEnter term://* echo "foo"
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (autocmd_statement
+    (augroup_name)
+    (au_event_list
+      (au_event))
+    (pattern)
+    (echo_statement
+      (string_literal))))

@@ -1,0 +1,229 @@
+================================================================================
+simple edit
+================================================================================
+
+edit
+e
+e!
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (edit_statement)
+  (edit_statement)
+  (edit_statement
+    (bang)))
+
+================================================================================
+Edit with opts and cmd
+================================================================================
+
+edit ++ff=unix ++bin ++encoding=utf-8 ++bad=? ++nobinary ++bad=drop
+edit + +21 +/this\ is +set\ dir=c:\\\\temp
+edit +/this\ is\ a\ long\ pattern
+edit!
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (edit_statement
+    (plus_plus_opt
+      (file_format))
+    (plus_plus_opt)
+    (plus_plus_opt
+      (encoding))
+    (plus_plus_opt)
+    (plus_plus_opt)
+    (plus_plus_opt))
+  (edit_statement
+    (plus_cmd)
+    (plus_cmd
+      (integer_literal))
+    (plus_cmd
+      (pattern))
+    (plus_cmd
+      (command)))
+  (edit_statement
+    (plus_cmd
+      (pattern)))
+  (edit_statement
+    (bang)))
+
+================================================================================
+Edit with filename
+================================================================================
+
+edit /home/user/.config/nvim/init.lua
+edit! ~/Documents/dev/tree-sitter-viml/grammar.js
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (edit_statement
+    (filename))
+  (edit_statement
+    (bang)
+    (filename)))
+
+================================================================================
+Edit with bufnr
+================================================================================
+
+edit #1
+edit! #48
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (edit_statement
+    (integer_literal))
+  (edit_statement
+    (bang)
+    (integer_literal)))
+
+================================================================================
+Edit with args and filename or bufnr
+================================================================================
+
+edit ++fileformat=unix ++encoding=latin1 +/pat init.lua
+edit! ++bad=X ++bin +set\ ft=query ./queries/vim/highlight.scm
+edit! ++enc=utf-8 ++nobinary +2 #23
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (edit_statement
+    (plus_plus_opt
+      (file_format))
+    (plus_plus_opt
+      (encoding))
+    (plus_cmd
+      (pattern))
+    (filename))
+  (edit_statement
+    (bang)
+    (plus_plus_opt)
+    (plus_plus_opt)
+    (plus_cmd
+      (command))
+    (filename))
+  (edit_statement
+    (bang)
+    (plus_plus_opt
+      (encoding))
+    (plus_plus_opt)
+    (plus_cmd
+      (integer_literal))
+    (integer_literal)))
+
+================================================================================
+Enew command
+================================================================================
+
+enew
+enew!
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (enew_statement)
+  (enew_statement
+    (bang)))
+
+================================================================================
+Find command
+================================================================================
+
+find init.lua
+find! init.lua
+fin ++ff=mac init.lua
+find +/pat +echo\ "toto" init.lua
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (find_statement
+    (filename))
+  (find_statement
+    (bang)
+    (filename))
+  (find_statement
+    (plus_plus_opt
+      (file_format))
+    (filename))
+  (find_statement
+    (plus_cmd
+      (pattern))
+    (plus_cmd
+      (command))
+    (filename)))
+
+================================================================================
+Ex command
+================================================================================
+
+ex init.lua
+ex ++ff=unix
+ex ++enc=utf-8 + init.lua
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (ex_statement
+    (filename))
+  (ex_statement
+    (plus_plus_opt
+      (file_format)))
+  (ex_statement
+    (plus_plus_opt
+      (encoding))
+    (plus_cmd)
+    (filename)))
+
+================================================================================
+Visual command
+================================================================================
+
+visual
+vi ++fileformat=dos +2
+visual!
+visual +set\ ft=vim init.vim
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (visual_statement)
+  (visual_statement
+    (plus_plus_opt
+      (file_format))
+    (plus_cmd
+      (integer_literal)))
+  (visual_statement
+    (bang))
+  (visual_statement
+    (plus_cmd
+      (command))
+    (filename)))
+
+================================================================================
+View command
+================================================================================
+
+view first.txt
+vie anotherfile.txt
+view! bangfile.log
+view + another_weird_filename.brainfuck
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (view_statement
+    (filename))
+  (view_statement
+    (filename))
+  (view_statement
+    (bang)
+    (filename))
+  (view_statement
+    (plus_cmd)
+    (filename)))

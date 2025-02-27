@@ -1,0 +1,80 @@
+================================================================================
+for with identifier
+================================================================================
+
+for i in [1, 2]
+endfor
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (for_loop
+    (identifier)
+    (list
+      (integer_literal)
+      (integer_literal))))
+
+================================================================================
+for with list
+================================================================================
+
+for [a, b] in [[1, 2], [3, 4]]
+endfor
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (for_loop
+    (list_assignment
+      (identifier)
+      (identifier))
+    (list
+      (list
+        (integer_literal)
+        (integer_literal))
+      (list
+        (integer_literal)
+        (integer_literal)))))
+
+================================================================================
+for with list and rest
+================================================================================
+
+for [a, b; rest] in [[1, 2], [3, 4, 5]]
+endfor
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (for_loop
+    (list_assignment
+      (identifier)
+      (identifier)
+      (identifier))
+    (list
+      (list
+        (integer_literal)
+        (integer_literal))
+      (list
+        (integer_literal)
+        (integer_literal)
+        (integer_literal)))))
+
+================================================================================
+For with argument name
+================================================================================
+
+for name in a:method_names
+  echo "foo"
+endfor
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (for_loop
+    (identifier)
+    (argument
+      (identifier))
+    (body
+      (echo_statement
+        (string_literal)))))

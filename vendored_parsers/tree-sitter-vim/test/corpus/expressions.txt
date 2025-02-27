@@ -1,0 +1,596 @@
+================================================================================
+Call expression
+================================================================================
+
+call function(ab, bc, cd)
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (call_statement
+    (call_expression
+      (identifier)
+      (identifier)
+      (identifier)
+      (identifier))))
+
+================================================================================
+Method expression
+================================================================================
+
+call func(a->method(ab, bc, cd))
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (call_statement
+    (call_expression
+      (identifier)
+      (method_expression
+        (identifier)
+        (call_expression
+          (identifier)
+          (identifier)
+          (identifier)
+          (identifier))))))
+
+================================================================================
+Method expression chained
+================================================================================
+
+let a = mylist->filter(filterexpr)->map(mapexpr)->sort()->join()
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (let_statement
+    (identifier)
+    (method_expression
+      (method_expression
+        (method_expression
+          (method_expression
+            (identifier)
+            (call_expression
+              (identifier)
+              (identifier)))
+          (call_expression
+            (identifier)
+            (identifier)))
+        (call_expression
+          (identifier)))
+      (call_expression
+        (identifier)))))
+
+================================================================================
+Method expression chained newline
+================================================================================
+
+let mylist = mylist
+\ ->filter(filterexpr)
+\ ->map(mapexpr)
+\ ->sort()
+\ ->join()
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (let_statement
+    (identifier)
+    (method_expression
+      (method_expression
+        (method_expression
+          (method_expression
+            (identifier)
+            (call_expression
+              (identifier)
+              (identifier)))
+          (call_expression
+            (identifier)
+            (identifier)))
+        (call_expression
+          (identifier)))
+      (call_expression
+        (identifier)))))
+
+================================================================================
+lambda expression
+================================================================================
+
+let a = {a -> a + 1}(1)
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (let_statement
+    (identifier)
+    (call_expression
+      (lambda_expression
+        (identifier)
+        (binary_operation
+          (identifier)
+          (integer_literal)))
+      (integer_literal))))
+
+================================================================================
+Method lambda expression
+================================================================================
+
+let a = GetPercentage()->{x -> x * 100}()->printf('%d%%')
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (let_statement
+    (identifier)
+    (method_expression
+      (method_expression
+        (call_expression
+          (identifier))
+        (call_expression
+          (lambda_expression
+            (identifier)
+            (binary_operation
+              (identifier)
+              (integer_literal)))))
+      (call_expression
+        (identifier)
+        (string_literal)))))
+
+================================================================================
+Lambda expression with name expansion
+================================================================================
+
+call function_{{-> 'name'}()}(ab, bc, cd)
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (call_statement
+    (call_expression
+      (identifier
+        (curly_braces_name
+        (call_expression
+          (lambda_expression
+            (string_literal)))))
+      (identifier)
+      (identifier)
+      (identifier))))
+
+================================================================================
+Lambda expression with name expansion
+================================================================================
+
+let function_100 = {->'hi'}
+echo function_{GetPercentage()->{p-> p*100}()}()
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (let_statement
+    (identifier)
+    (lambda_expression
+      (string_literal)))
+  (echo_statement
+    (call_expression
+      (identifier
+        (curly_braces_name
+          (method_expression
+            (call_expression
+              (identifier))
+          (call_expression
+            (lambda_expression
+              (identifier)
+              (binary_operation
+              (identifier)
+              (integer_literal))))))))))
+
+================================================================================
+Call expression with curly-braces
+================================================================================
+
+call function_{name}(ab, bc, cd)
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (call_statement
+    (call_expression
+      (identifier
+        (curly_braces_name
+          (identifier)))
+      (identifier)
+      (identifier)
+      (identifier))))
+
+================================================================================
+Call statement with method call
+================================================================================
+
+call F()->G()
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (call_statement
+    (method_expression
+      (call_expression
+        (identifier))
+      (call_expression
+        (identifier)))))
+
+================================================================================
+String arguments
+================================================================================
+
+call foo('abc', 'efg')
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (call_statement
+    (call_expression
+      (identifier)
+      (string_literal)
+      (string_literal))))
+
+================================================================================
+Call expression with range
+================================================================================
+
+4,8call Cont()
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (call_statement
+    range: (range
+      start: (integer_literal)
+      end: (integer_literal))
+    (call_expression
+      function: (identifier))))
+
+================================================================================
+Or expression
+================================================================================
+
+let foo = bar || baz
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (let_statement
+    (identifier)
+    (binary_operation
+      (identifier)
+      (identifier))))
+
+================================================================================
+Scope dict
+================================================================================
+
+let foo = get(g:, "bar")
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (let_statement
+    (identifier)
+    (call_expression
+      (identifier)
+      (scope_dict)
+      (string_literal))))
+
+================================================================================
+Literal string
+================================================================================
+
+let foo = 'hello ''you'''
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (let_statement
+    (identifier)
+    (string_literal)))
+
+================================================================================
+Multiline string #31
+================================================================================
+
+let var = '
+\ long multiline string
+\ "with nested quotes" '
+let var = "
+\ long multiline string
+\ 'with nested quotes' "
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (let_statement
+    (identifier)
+    (string_literal))
+  (let_statement
+    (identifier)
+    (string_literal)))
+
+================================================================================
+Slice expression
+================================================================================
+
+let l = mylist[:3]
+let l = mylist[4:4]
+let l = mylist[:]
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (let_statement
+    (identifier)
+    (slice_expression
+      (identifier)
+      (integer_literal)))
+  (let_statement
+    (identifier)
+    (slice_expression
+      (identifier)
+      (integer_literal)
+      (integer_literal)))
+  (let_statement
+    (identifier)
+    (slice_expression
+      (identifier))))
+
+================================================================================
+String concatenation
+================================================================================
+
+let a = "abc" .. "def"
+let a = "abc" . "def"
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (let_statement
+    (identifier)
+    (binary_operation
+      (string_literal)
+      (string_literal)))
+  (let_statement
+    (identifier)
+    (binary_operation
+      (string_literal)
+      (string_literal))))
+
+================================================================================
+Packed string concatenation (#113)
+================================================================================
+
+let a = "abc"."abc"
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (let_statement
+    (identifier)
+    (binary_operation
+      (string_literal)
+      (string_literal))))
+
+================================================================================
+Dictionnary keys
+================================================================================
+
+let d.bar = 30
+let a = d.bar
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (let_statement
+    (field_expression
+      (identifier)
+      (identifier))
+    (integer_literal))
+  (let_statement
+    (identifier)
+    (field_expression
+      (identifier)
+      (identifier))))
+
+================================================================================
+Lists
+================================================================================
+
+let list = ['a', 'b']
+
+let list = [
+  \ 'a',
+  \ 'b'
+  \]
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (let_statement
+    (identifier)
+    (list
+      (string_literal)
+      (string_literal)))
+  (let_statement
+    (identifier)
+    (list
+      (string_literal)
+      (string_literal))))
+
+================================================================================
+Registers
+================================================================================
+
+let @a = "some text"
+let current_line = @.
+let unamed_register = @@
+let other_unamed_register = @@
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (let_statement
+    (register)
+    (string_literal))
+  (let_statement
+    (identifier)
+    (register))
+  (let_statement
+    (identifier)
+    (register))
+  (let_statement
+    (identifier)
+    (register)))
+
+================================================================================
+Literal dictionaries
+================================================================================
+
+let mydict = #{zero: 0, one_key: 1, two-key: 2, 333: 3}
+call extend(mydict, #{
+  \blue: "#0000ff",
+  \red: "#ff0000",
+\})
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (let_statement
+    (identifier)
+    (literal_dictionary
+      key: (literal_key)
+      value: (integer_literal)
+      key: (literal_key)
+      value: (integer_literal)
+      key: (literal_key)
+      value: (integer_literal)
+      key: (literal_key)
+      value: (integer_literal)))
+  (call_statement
+    (call_expression
+      function: (identifier)
+      (identifier)
+      (literal_dictionary
+        key: (literal_key)
+        value: (string_literal)
+        key: (literal_key)
+        value: (string_literal)))))
+
+================================================================================
+Calling a funcref returned by a function call
+================================================================================
+
+func Foo(cmd) abort
+	return function(a:cmd)
+endfunc
+
+echo Foo('printf')('hello, world')
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (function_definition
+    (function_declaration
+      name: (identifier)
+      parameters: (parameters
+        (identifier)))
+    (body
+      (return_statement
+        (call_expression
+          function: (identifier)
+          (argument
+            (identifier))))))
+  (echo_statement
+    (call_expression
+      function: (call_expression
+        function: (identifier)
+        (string_literal))
+      (string_literal))))
+
+================================================================================
+Calling a funcref contained in a list
+================================================================================
+
+echo foo[0]('bar')
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (echo_statement
+    (call_expression
+      function: (index_expression
+        value: (identifier)
+        index: (integer_literal))
+      (string_literal))))
+
+================================================================================
+Comparator matching case
+================================================================================
+
+let a = "a" is# "b"
+let b = 1 isnot? 3
+let foo = "a" =~? "b"
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (let_statement
+    (identifier)
+    (binary_operation
+      (string_literal)
+      (match_case)
+      (string_literal)))
+  (let_statement
+    (identifier)
+    (binary_operation
+      (integer_literal)
+      (match_case)
+      (integer_literal)))
+  (let_statement
+    (identifier)
+    (binary_operation
+      (string_literal)
+      (match_case)
+      (string_literal))))
+
+================================================================================
+Scoped identifier with brace expansion
+================================================================================
+
+let s:{a:foo} = 32
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (let_statement
+    (scoped_identifier
+      (scope)
+      (identifier
+        (curly_braces_name
+          (argument
+            (identifier)))))
+    (integer_literal)))
+
+================================================================================
+Eval statement
+================================================================================
+
+eval append(Filter(Getlist()), '$')
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (eval_statement
+    (call_expression
+      (identifier)
+      (call_expression
+        (identifier)
+        (call_expression
+          (identifier)))
+      (string_literal))))

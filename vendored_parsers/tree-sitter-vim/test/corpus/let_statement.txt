@@ -1,0 +1,353 @@
+================================================================================
+Let only
+================================================================================
+
+let
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (let_statement))
+
+================================================================================
+Let variable list
+================================================================================
+
+let vara varb
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (let_statement
+    (identifier)
+    (identifier)))
+
+================================================================================
+Let variable scope
+================================================================================
+
+let g:
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (let_statement
+    (scope_dict)))
+
+================================================================================
+Let variable all together
+================================================================================
+
+let vara g: varb l:
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (let_statement
+    (identifier)
+    (scope_dict)
+    (identifier)
+    (scope_dict)))
+
+================================================================================
+Let global
+================================================================================
+
+let g:foo = 1
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (let_statement
+    (scoped_identifier
+      (scope)
+      (identifier))
+    (integer_literal)))
+
+================================================================================
+Let arguments
+================================================================================
+
+let a:foo = 1
+let a:0 = 30
+let a:000 = {}
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (let_statement
+    (argument
+      (identifier))
+    (integer_literal))
+  (let_statement
+    (argument
+      (integer_literal))
+    (integer_literal))
+  (let_statement
+    (argument
+      (integer_literal))
+    (dictionnary)))
+
+================================================================================
+Let destructuring
+================================================================================
+
+let [a, b; rest] = ["aval", "bval", 1, 2]
+let [fleh, b, c] = [1, 2, 3]
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (let_statement
+    (list_assignment
+      (identifier)
+      (identifier)
+      (identifier))
+    (list
+      (string_literal)
+      (string_literal)
+      (integer_literal)
+      (integer_literal)))
+  (let_statement
+    (list_assignment
+      (identifier)
+      (identifier)
+      (identifier))
+    (list
+      (integer_literal)
+      (integer_literal)
+      (integer_literal))))
+
+================================================================================
+Let local variable
+================================================================================
+
+let l:foo = l:bar
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (let_statement
+    (scoped_identifier
+      (scope)
+      (identifier))
+    (scoped_identifier
+      (scope)
+      (identifier))))
+
+================================================================================
+Let variable named like scopes
+================================================================================
+
+let a = 1
+let b = 1
+let g = 1
+let l = 1
+let w = 1
+let t = 1
+let v = 1
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (let_statement
+    (identifier)
+    (integer_literal))
+  (let_statement
+    (identifier)
+    (integer_literal))
+  (let_statement
+    (identifier)
+    (integer_literal))
+  (let_statement
+    (identifier)
+    (integer_literal))
+  (let_statement
+    (identifier)
+    (integer_literal))
+  (let_statement
+    (identifier)
+    (integer_literal))
+  (let_statement
+    (identifier)
+    (integer_literal)))
+
+================================================================================
+Let options
+================================================================================
+
+let l:efm = &l:errorformat
+let l:efm = &g:errorformat
+let l:efm = &errorformat
+let &path = &path . ',/usr/local/include'
+let &l:path = &l:path . ',/usr/local/include'
+let &g:path = &g:path . ',/usr/local/include'
+let &t_8f = "\<Esc>[38:2:%lu:%lu:%lum"
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (let_statement
+    (scoped_identifier
+      (scope)
+      (identifier))
+    (option
+      (scope)
+      (option_name)))
+  (let_statement
+    (scoped_identifier
+      (scope)
+      (identifier))
+    (option
+      (scope)
+      (option_name)))
+  (let_statement
+    (scoped_identifier
+      (scope)
+      (identifier))
+    (option
+      (option_name)))
+  (let_statement
+    (option
+      (option_name))
+    (binary_operation
+      (option
+        (option_name))
+      (string_literal)))
+  (let_statement
+    (option
+      (scope)
+      (option_name))
+    (binary_operation
+      (option
+        (scope)
+        (option_name))
+      (string_literal)))
+  (let_statement
+    (option
+      (scope)
+      (option_name))
+    (binary_operation
+      (option
+        (scope)
+        (option_name))
+      (string_literal)))
+  (let_statement
+    (option
+      (option_name))
+    (string_literal)))
+
+================================================================================
+Let argument scope
+================================================================================
+
+let l:foo = get(a:, 3)
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (let_statement
+    (scoped_identifier
+      (scope)
+      (identifier))
+    (call_expression
+      (identifier)
+      (scope_dict)
+      (integer_literal))))
+
+================================================================================
+Let curly-braces identifier
+================================================================================
+
+let foo_{bar}_baz = "text"
+let foo_{bar}_baz_{buz} = "text"
+let nested_{iden{&opt}}_id = "text"
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (let_statement
+    (identifier
+      (curly_braces_name
+        (identifier)))
+    (string_literal))
+  (let_statement
+    (identifier
+      (curly_braces_name
+        (identifier))
+      (curly_braces_name
+        (identifier)))
+    (string_literal))
+  (let_statement
+    (identifier
+      (curly_braces_name
+        (identifier
+          (curly_braces_name
+            (option
+              (option_name))))))
+    (string_literal)))
+
+================================================================================
+Let heredoc
+================================================================================
+
+let var1 =<< END
+Sample text 1
+    Sample text 2
+Sample text 3
+END
+
+let data =<< trim DATA
+  1 2 3 4
+  5 6 7 8
+DATA
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (let_statement
+    (identifier)
+    (heredoc
+      (marker_definition)
+      (body)
+      (endmarker)))
+  (let_statement
+    (identifier)
+    (heredoc
+      (parameter)
+      (marker_definition)
+      (body)
+      (endmarker))))
+
+================================================================================
+Let heredoc with comment
+================================================================================
+
+let test =<< W " comment
+"Hello"
+World
+W
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (let_statement
+    (identifier)
+    (heredoc
+      (marker_definition)
+      (comment)
+      (body)
+      (endmarker))))
+
+================================================================================
+Let update
+================================================================================
+
+let a ..= "foo"
+
+--------------------------------------------------------------------------------
+
+(script_file
+  (let_statement
+    (identifier)
+    (string_literal)))
