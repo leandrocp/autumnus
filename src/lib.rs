@@ -153,23 +153,6 @@ pub struct Options {
 /// * `source` - A string slice that represents the source code to be highlighted.
 /// * `options` - An `Options` struct that contains the configuration options for the highlighter.
 ///
-/// # Returns
-///
-/// Highlights source code and returns it as an HTML string with inline styles.
-///
-/// This function takes the language or file path, source code, and options as input,
-/// and returns an HTML string with the source code highlighted using inline styles.
-///
-/// # Arguments
-///
-/// * `lang_or_path` - A string slice that represents the language or file path of the source code.
-///   If a file path is provided, the language will be guessed based on the file extension.
-/// * `source` - A string slice that represents the source code to be highlighted.
-/// * `options` - An `Options` struct that contains the configuration options for the highlighter.
-///
-/// # Returns
-///
-/// A string that contains the highlighted source code as an HTML string with inline styles.
 pub fn highlight_html_inline(lang_or_path: &str, source: &str, options: Options) -> String {
     let lang = Language::guess(lang_or_path, source);
     let formatter = HtmlInline::new(lang, options);
@@ -188,9 +171,6 @@ pub fn highlight_html_inline(lang_or_path: &str, source: &str, options: Options)
 /// * `source` - A string slice that represents the source code to be highlighted.
 /// * `options` - An `Options` struct that contains the configuration options for the highlighter.
 ///
-/// # Returns
-///
-/// A string that contains the highlighted source code as an HTML string with linked styles.
 pub fn highlight_html_linked(lang_or_path: &str, source: &str, options: Options) -> String {
     let lang = Language::guess(lang_or_path, source);
     let formatter = HtmlLinked::new(lang, options);
@@ -209,9 +189,6 @@ pub fn highlight_html_linked(lang_or_path: &str, source: &str, options: Options)
 /// * `source` - A string slice that represents the source code to be highlighted.
 /// * `options` - An `Options` struct that contains the configuration options for the highlighter.
 ///
-/// # Returns
-///
-/// A string that contains the highlighted source code as a string with terminal colors.
 pub fn highlight_terminal(lang_or_path: &str, source: &str, options: Options) -> String {
     let lang = Language::guess(lang_or_path, source);
     let formatter = Terminal::new(options);
