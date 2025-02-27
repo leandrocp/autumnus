@@ -47,6 +47,11 @@ fn vendored_parsers() {
             extra_files: vec![],
         },
         TreeSitterParser {
+            name: "tree-sitter-csv",
+            src_dir: "vendored_parsers/tree-sitter-csv/csv/src",
+            extra_files: vec![],
+        },
+        TreeSitterParser {
             name: "tree-sitter-dockerfile",
             src_dir: "vendored_parsers/tree-sitter-dockerfile/src",
             extra_files: vec!["scanner.c"],

@@ -15,6 +15,7 @@ extern "C" {
     fn tree_sitter_cmake() -> *const ();
     fn tree_sitter_comment() -> *const ();
     fn tree_sitter_commonlisp() -> *const ();
+    fn tree_sitter_csv() -> *const ();
     fn tree_sitter_dockerfile() -> *const ();
     fn tree_sitter_eex() -> *const ();
     fn tree_sitter_elm() -> *const ();
@@ -37,7 +38,7 @@ pub enum Language {
     C,
     CMake,
     CSharp,
-    // Csv,
+    CSV,
     Clojure,
     Comment,
     CommonLisp,
@@ -114,6 +115,7 @@ impl Language {
             "c++" | "cpp" => Some(Language::CPlusPlus),
             "cmake" => Some(Language::CMake),
             "c#" | "csharp" => Some(Language::CSharp),
+            "csv" => Some(Language::CSV),
             "css" => Some(Language::CSS),
             "diff" => Some(Language::Diff),
             "dockerfile" | "docker" => Some(Language::Dockerfile),
@@ -269,6 +271,7 @@ impl Language {
             Language::CommonLisp => &["*.lisp", "*.lsp", "*.asd"],
             Language::CMake => &["*.cmake", "*.cmake.in", "CMakeLists.txt"],
             Language::CSharp => &["*.cs"],
+            Language::CSV => &["*.csv"],
             Language::CPlusPlus => &[
                 "*.cc", "*.cpp", "*.h", "*.hh", "*.hpp", "*.ino", "*.cxx", "*.cu",
             ],
@@ -447,6 +450,7 @@ impl Language {
                 "c" => Some(Language::C),
                 "clojure" => Some(Language::Clojure),
                 "csharp" => Some(Language::CSharp),
+                "csv" => Some(Language::CSV),
                 "css" => Some(Language::CSS),
                 "c++" => Some(Language::CPlusPlus),
                 "elixir" => Some(Language::Elixir),
@@ -555,6 +559,7 @@ impl Language {
             Language::CommonLisp => "Common Lisp",
             Language::CMake => "CMake",
             Language::CSharp => "C#",
+            Language::CSV => "CSV",
             Language::CPlusPlus => "C++",
             Language::CSS => "CSS",
             Language::Diff => "Diff",
@@ -613,6 +618,7 @@ impl Language {
             Language::CommonLisp => &COMMONLISP_CONFIG,
             Language::CMake => &CMAKE_CONFIG,
             Language::CSharp => &CSHARP_CONFIG,
+            Language::CSV => &CSV_CONFIG,
             Language::CPlusPlus => &CPP_CONFIG,
             Language::CSS => &CSS_CONFIG,
             Language::Diff => &DIFF_CONFIG,
@@ -792,6 +798,21 @@ static CSHARP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         C_SHARP_LOCALS,
     )
     .expect("failed to create csharp highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static CSV_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_csv) };
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "csv",
+        CSV_HIGHLIGHTS,
+        CSV_INJECTIONS,
+        CSV_LOCALS,
+    )
+    .expect("failed to create csv highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
