@@ -20,6 +20,7 @@ extern "C" {
     fn tree_sitter_eex() -> *const ();
     fn tree_sitter_elm() -> *const ();
     fn tree_sitter_glimmer() -> *const ();
+    fn tree_sitter_graphql() -> *const ();
     fn tree_sitter_iex() -> *const ();
     fn tree_sitter_kotlin() -> *const ();
     fn tree_sitter_llvm() -> *const ();
@@ -55,7 +56,7 @@ pub enum Language {
     Gleam,
     Glimmer,
     Go,
-    // GraphQL,
+    GraphQL,
     Haskell,
     // Hcl, TODO: repo is too large (too many files)
     HEEx,
@@ -126,6 +127,7 @@ impl Language {
             "gleam" => Some(Language::Gleam),
             "ember" | "glimmer" | "handlebars" => Some(Language::Glimmer),
             "go" => Some(Language::Go),
+            "graphql" => Some(Language::GraphQL),
             "haskell" => Some(Language::Haskell),
             "heex" => Some(Language::HEEx),
             "html" => Some(Language::HTML),
@@ -305,6 +307,7 @@ impl Language {
             Language::Gleam => &["*.gleam"],
             Language::Glimmer => &["*.hbs", "*.handlebars", "*.html.handlebars", "*.glimmer"],
             Language::Go => &["*.go"],
+            Language::GraphQL => &[],
             Language::Haskell => &["*.hs"],
             Language::HEEx => &["*.heex", "*.neex"],
             Language::HTML => &["*.html", "*.htm", "*.xhtml"],
@@ -576,6 +579,7 @@ impl Language {
             Language::Gleam => "Gleam",
             Language::Glimmer => "Glimmer",
             Language::Go => "Go",
+            Language::GraphQL => "GraphQL",
             Language::Haskell => "Haskell",
             Language::HEEx => "HEEx",
             Language::HTML => "HTML",
@@ -637,6 +641,7 @@ impl Language {
             Language::Gleam => &GLEAM_CONFIG,
             Language::Glimmer => &GLIMMER_CONFIG,
             Language::Go => &GO_CONFIG,
+            Language::GraphQL => &GRAPHQL_CONFIG,
             Language::Haskell => &HASKELL_CONFIG,
             Language::HEEx => &HEEX_CONFIG,
             Language::HTML => &HTML_CONFIG,
@@ -985,6 +990,21 @@ static GO_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         GO_LOCALS,
     )
     .expect("failed to create go highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static GRAPHQL_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_graphql) };
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "graphql",
+        GRAPHQL_HIGHLIGHTS,
+        GRAPHQL_INJECTIONS,
+        GRAPHQL_LOCALS,
+    )
+    .expect("failed to create graphql highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });

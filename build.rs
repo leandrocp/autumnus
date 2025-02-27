@@ -72,6 +72,11 @@ fn vendored_parsers() {
             extra_files: vec!["scanner.c"],
         },
         TreeSitterParser {
+            name: "tree-sitter-graphql",
+            src_dir: "vendored_parsers/tree-sitter-graphql/src",
+            extra_files: vec![],
+        },
+        TreeSitterParser {
             name: "tree-sitter-iex",
             src_dir: "vendored_parsers/tree-sitter-iex/src",
             extra_files: vec![],
