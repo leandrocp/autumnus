@@ -1,0 +1,91 @@
+=========
+XML body with json inside
+=========
+
+POST example.com
+
+<?xml version="1.0" encoding="utf-8"?>
+{
+  "foo": "bar"
+}
+
+---
+
+(document
+  (section
+  request: (request
+    method: (method)
+    url: (target_url)
+    body: (xml_body))))
+
+=========
+Raw body wrapped with annotation comments
+=========
+
+POST example.com
+
+# @_RES
+raw body
+# @_END
+
+---
+
+(document
+  (section
+  request: (request
+    method: (method)
+    url: (target_url)
+    (comment
+      name: (identifier))
+    body: (raw_body)
+    (comment
+      name: (identifier)))))
+
+=========
+JSON body wrapped with annotation comments
+=========
+
+POST example.com
+
+# @_RES
+{
+  "foo": "bar"
+}
+# @_END
+
+---
+
+(document
+  (section
+  request: (request
+    method: (method)
+    url: (target_url)
+    (comment
+      name: (identifier))
+    body: (json_body)
+    (comment
+      name: (identifier)))))
+
+=========
+Request with multiple external bodies
+=========
+
+POST example.com
+
+< path/to/file
+
+
+< path/to/file
+
+---
+; this is semantically invalid but should be allowed as a syntax
+
+(document
+  (section
+  request: (request
+    method: (method)
+    url: (target_url)
+    body: (external_body
+      path: (path))
+    body: (external_body
+      path: (path)))))

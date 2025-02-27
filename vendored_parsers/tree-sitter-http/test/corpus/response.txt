@@ -1,0 +1,70 @@
+========================
+Standalone Response Node
+========================
+HTTP/1.1 200 OK
+Content-Length: 21
+Content-Type: application/json
+
+---
+(document
+  (section
+    response: (response
+      (http_version)
+      (status_code)
+      (status_text)
+      header: (header
+        name: (header_entity)
+        value: (value))
+      header: (header
+        name: (header_entity)
+        value: (value)))))
+
+========================
+Request and Response
+========================
+
+GET http://localhost:3000/api/v1/users/all
+User-Agent: neovim
+# these are raw body
+
+HTTP/1.1 200 OK
+Content-Length: 21
+Content-Type: application/json
+
+### These are response section
+HTTP/1.1 200 OK
+Content-Length: 21
+Content-Type: application/json
+
+{
+  "data": [],
+  "count": 0
+}
+
+
+---
+
+(document
+  (section
+    request: (request
+      method: (method)
+      url: (target_url)
+      header: (header
+        name: (header_entity)
+        value: (value))
+      (comment)
+      body: (raw_body)))
+  (section
+    (request_separator
+      value: (value))
+    response: (response
+      (http_version)
+      (status_code)
+      (status_text)
+      header: (header
+        name: (header_entity)
+        value: (value))
+      header: (header
+        name: (header_entity)
+        value: (value))
+      body: (json_body))))
