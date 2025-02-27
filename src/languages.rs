@@ -27,6 +27,7 @@ pub use generated::*;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter)]
 pub enum Language {
+    // Angular,
     Bash,
     C,
     CSharp,
@@ -39,9 +40,11 @@ pub enum Language {
     Eex,
     Elixir,
     Elm,
+    // Ember,
     Erlang,
     Gleam,
     Go,
+    // GraphQL,
     Haskell,
     // Hcl, TODO: repo is too large (too many files)
     Heex,
@@ -68,9 +71,14 @@ pub enum Language {
     Rust,
     Scala,
     SQL,
+    // Surface,
     Svelte,
     Swift,
     Toml,
+    // TypeScript,
+    // Vim,
+    // Vue,
+    // Xml,
     Yaml,
     Zig,
 }
