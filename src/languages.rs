@@ -99,7 +99,8 @@ pub enum Language {
     Svelte,
     Swift,
     Toml,
-    // TypeScript,
+    TypeScript,
+    Tsx,
     Vim,
     // Vue,
     XML,
@@ -165,6 +166,8 @@ impl Language {
             "svelte" => Some(Language::Svelte),
             "swift" => Some(Language::Swift),
             "toml" => Some(Language::Toml),
+            "typescript" => Some(Language::TypeScript),
+            "tsx" => Some(Language::Tsx),
             "vim" | "viml" | "vimscript" => Some(Language::Vim),
             "xml" => Some(Language::XML),
             "yaml" => Some(Language::YAML),
@@ -418,6 +421,8 @@ impl Language {
                 "poetry.lock",
                 "uv.lock",
             ],
+            Language::TypeScript => &["*.ts"],
+            Language::Tsx => &["*.tsx"],
             Language::Vim => &["*.vim", "*.viml"],
             Language::XML => &[
                 "*.ant",
@@ -502,6 +507,8 @@ impl Language {
                 "surface" => Some(Language::Surface),
                 "swift" => Some(Language::Swift),
                 "toml" => Some(Language::Toml),
+                "typescript" => Some(Language::TypeScript),
+                "tsx" => Some(Language::Tsx),
                 "tuareg" => Some(Language::OCaml),
                 // "typescript" => Some(Language::TypeScript),
                 "yaml" => Some(Language::YAML),
@@ -525,6 +532,7 @@ impl Language {
                 let interpreter_path = Path::new(&cap[1]);
                 if let Some(name) = interpreter_path.file_name() {
                     match name.to_string_lossy().borrow() {
+                         "deno" | "ts-node" => return Some(Language::TypeScript),
                         "ocaml" | "ocamlrun" | "ocamlscript" => return Some(Language::OCaml),
                         "lisp" | "sbc" | "ccl" | "clisp" | "ecl" => {
                             return Some(Language::CommonLisp)
@@ -634,6 +642,8 @@ impl Language {
             Language::Svelte => "Svelte",
             Language::Swift => "Swift",
             Language::Toml => "TOML",
+            Language::TypeScript => "TypeScript",
+            Language::Tsx => "TSX",
             Language::Vim => "Vim",
             Language::XML => "XML",
             Language::YAML => "YAML",
@@ -702,6 +712,8 @@ impl Language {
             Language::Svelte => &SVELTE_CONFIG,
             Language::Swift => &SWIFT_CONFIG,
             Language::Toml => &TOML_CONFIG,
+            Language::TypeScript => &TYPESCRIPT_CONFIG,
+            Language::Tsx => &TSX_CONFIG,
             Language::Vim => &VIM_CONFIG,
             Language::XML => &XML_CONFIG,
             Language::YAML => &YAML_CONFIG,
@@ -1489,6 +1501,32 @@ static TOML_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         TOML_LOCALS,
     )
     .expect("failed to create toml highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static TYPESCRIPT_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(tree_sitter_typescript::LANGUAGE_TYPESCRIPT),
+        "typescript",
+        TYPESCRIPT_HIGHLIGHTS,
+        TYPESCRIPT_INJECTIONS,
+        TYPESCRIPT_LOCALS,
+    )
+    .expect("failed to create typescript highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static TSX_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(tree_sitter_typescript::LANGUAGE_TSX),
+        "tsx",
+        TSX_HIGHLIGHTS,
+        TSX_INJECTIONS,
+        TSX_LOCALS,
+    )
+    .expect("failed to create tsx highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
