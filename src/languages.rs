@@ -30,6 +30,7 @@ extern "C" {
     fn tree_sitter_perl() -> *const ();
     fn tree_sitter_powershell() -> *const ();
     fn tree_sitter_scss() -> *const ();
+    fn tree_sitter_surface() -> *const ();
 }
 
 mod generated {
@@ -93,7 +94,7 @@ pub enum Language {
     Scala,
     SCSS,
     SQL,
-    // Surface,
+    Surface,
     Svelte,
     Swift,
     Toml,
@@ -159,6 +160,7 @@ impl Language {
             "scala" => Some(Language::Scala),
             "scss" => Some(Language::SCSS),
             "sql" => Some(Language::SQL),
+            "surface" => Some(Language::Surface),
             "svelte" => Some(Language::Svelte),
             "swift" => Some(Language::Swift),
             "toml" => Some(Language::Toml),
@@ -402,6 +404,7 @@ impl Language {
             Language::Scala => &["*.scala", "*.sbt", "*.sc"],
             Language::SCSS => &["*.scss"],
             Language::SQL => &["*.sql", "*.pgsql"],
+            Language::Surface => &["*.surface", "*.sface"],
             Language::Svelte => &["*.svelte"],
             Language::Swift => &["*.swift"],
             Language::Toml => &[
@@ -493,6 +496,7 @@ impl Language {
                 "scss" => Some(Language::SCSS),
                 "sh" => Some(Language::Bash),
                 "sql" => Some(Language::SQL),
+                "surface" => Some(Language::Surface),
                 "swift" => Some(Language::Swift),
                 "toml" => Some(Language::Toml),
                 "tuareg" => Some(Language::OCaml),
@@ -623,6 +627,7 @@ impl Language {
             Language::Scala => "Scala",
             Language::SCSS => "SCSS",
             Language::SQL => "SQL",
+            Language::Surface => "Surface",
             Language::Svelte => "Svelte",
             Language::Swift => "Swift",
             Language::Toml => "TOML",
@@ -689,6 +694,7 @@ impl Language {
             Language::Scala => &SCALA_CONFIG,
             Language::SCSS => &SCSS_CONFIG,
             Language::SQL => &SQL_CONFIG,
+            Language::Surface => &SURFACE_CONFIG,
             Language::Svelte => &SVELTE_CONFIG,
             Language::Swift => &SWIFT_CONFIG,
             Language::Toml => &TOML_CONFIG,
@@ -1424,6 +1430,21 @@ static SQL_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         SQL_LOCALS,
     )
     .expect("failed to create sql highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static SURFACE_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_surface) };
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "surface",
+        SURFACE_HIGHLIGHTS,
+        SURFACE_INJECTIONS,
+        SURFACE_LOCALS,
+    )
+    .expect("failed to create surface highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });

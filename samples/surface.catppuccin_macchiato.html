@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>surface - catppuccin_macchiato - Autumnus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'JetBrains Mono', monospace;
+            line-height: 1.5;
+        }
+        pre {
+            font-size: 15px;
+            margin: 20px;
+            padding: 50px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+<pre class="athl" style="color: #cad3f5; background-color: #24273a;"><code class="language-surface" translate="no" tabindex="0"><span class="athl-line" data-athl-line="1"><span style="color: #939ab7;"><span style="color: #91d7e3;">&lt;!--</span> This comment will be sent to the browser <span style="color: #91d7e3;">--&gt;</span></span>
+</span><span class="athl-line" data-athl-line="2"><span style="color: #939ab7;"><span style="color: #91d7e3;">{!--</span> This comment won&#39;t be sent to the browser <span style="color: #91d7e3;">--}</span></span>
+</span><span class="athl-line" data-athl-line="3">
+</span><span class="athl-line" data-athl-line="4"><span style="color: #91d7e3;">&lt;</span><span style="color: #c6a0f6;">div</span> <span style="color: #8bd5ca;">class</span><span style="color: #91d7e3;">=</span><span style="color: #91d7e3;">{</span><span style="color: #91d7e3;"><span style="color: #f5a97f;">@<span style="color: #f5a97f;">my_class</span></span></span><span style="color: #91d7e3;">}</span><span style="color: #91d7e3;">&gt;</span>
+</span><span class="athl-line" data-athl-line="5">  Name: <span style="color: #91d7e3;">{</span><span style="color: #b7bdf8;">String</span><span style="color: #91d7e3;">.</span><span style="color: #8aadf4;">upcase</span><span style="color: #939ab7;">(</span><span style="color: #91d7e3;"><span style="color: #f5a97f;">@<span style="color: #f5a97f;">name</span></span></span><span style="color: #939ab7;">)</span><span style="color: #91d7e3;">}</span>
+</span><span class="athl-line" data-athl-line="6"><span style="color: #91d7e3;">&lt;/</span><span style="color: #c6a0f6;">div</span><span style="color: #91d7e3;">&gt;</span>
+</span><span class="athl-line" data-athl-line="7">
+</span><span class="athl-line" data-athl-line="8"><span style="color: #91d7e3;">&lt;</span><span style="color: #c6a0f6;">button</span> <span style="color: #8bd5ca;">disabled</span><span style="color: #91d7e3;">=</span><span style="color: #91d7e3;">{</span><span style="color: #91d7e3;"><span style="color: #f5a97f;">@<span style="color: #f5a97f;">step</span></span></span> <span style="color: #91d7e3;">!=</span> <span style="color: #f0c6c6;">:finished</span><span style="color: #91d7e3;">}</span><span style="color: #91d7e3;">&gt;</span>
+</span><span class="athl-line" data-athl-line="9">
+</span><span class="athl-line" data-athl-line="10"><span style="color: #91d7e3;">&lt;</span><span style="color: #c6a0f6;">button</span> <span style="color: #8bd5ca;">type</span><span style="color: #91d7e3;">=</span><span style="color: #a6da95;">&quot;button&quot;</span> <span style="color: #8bd5ca;">class</span><span style="color: #91d7e3;">=</span><span style="color: #91d7e3;">{</span><span style="color: #a6da95;">&quot;button&quot;</span><span style="color: #939ab7;">,</span> <span style="color: #91d7e3;"><span style="color: #f5a97f;">@<span style="color: #f5a97f;">kind</span></span></span><span style="color: #91d7e3;">}</span> :<span style="color: #c6a0f6;">on-click</span><span style="color: #91d7e3;">=</span><span style="color: #91d7e3;">{</span><span style="color: #91d7e3;"><span style="color: #f5a97f;">@<span style="color: #f5a97f;">click</span></span></span><span style="color: #91d7e3;">}</span><span style="color: #91d7e3;">&gt;</span>
+</span><span class="athl-line" data-athl-line="11">  <span style="color: #91d7e3;">&lt;</span><span style="color: #939ab7;">#slot</span><span style="color: #91d7e3;">&gt;</span><span style="color: #91d7e3;">{</span><span style="color: #91d7e3;"><span style="color: #f5a97f;">@<span style="color: #f5a97f;">label</span></span></span><span style="color: #91d7e3;">}</span><span style="color: #91d7e3;">&lt;/</span><span style="color: #939ab7;">#slot</span><span style="color: #91d7e3;">&gt;</span>
+</span><span class="athl-line" data-athl-line="12"><span style="color: #91d7e3;">&lt;/</span><span style="color: #c6a0f6;">button</span><span style="color: #91d7e3;">&gt;</span>
+</span><span class="athl-line" data-athl-line="13">
+</span><span class="athl-line" data-athl-line="14"><span style="color: #91d7e3;">&lt;</span><span style="color: #c6a0f6;">section</span> <span style="color: #8bd5ca;">class</span><span style="color: #91d7e3;">=</span><span style="color: #a6da95;">&quot;hero is-info&quot;</span><span style="color: #91d7e3;">&gt;</span>
+</span><span class="athl-line" data-athl-line="15">  <span style="color: #91d7e3;">&lt;</span><span style="color: #c6a0f6;">div</span> <span style="color: #8bd5ca;">class</span><span style="color: #91d7e3;">=</span><span style="color: #a6da95;">&quot;hero-body&quot;</span><span style="color: #91d7e3;">&gt;</span>
+</span><span class="athl-line" data-athl-line="16">    <span style="color: #91d7e3;">&lt;</span><span style="color: #939ab7;">#slot</span> <span style="color: #91d7e3;">/&gt;</span>
+</span><span class="athl-line" data-athl-line="17">  <span style="color: #91d7e3;">&lt;/</span><span style="color: #c6a0f6;">div</span><span style="color: #91d7e3;">&gt;</span>
+</span><span class="athl-line" data-athl-line="18"><span style="color: #91d7e3;">&lt;/</span><span style="color: #c6a0f6;">section</span><span style="color: #91d7e3;">&gt;</span>
+</span><span class="athl-line" data-athl-line="19">
+</span><span class="athl-line" data-athl-line="20"><span style="color: #c6a0f6;">{#if <span style="color: #91d7e3;"><span style="color: #f5a97f;">@<span style="color: #f5a97f;">value</span></span></span> <span style="color: #91d7e3;">==</span> <span style="color: #f5a97f;">0</span><span style="color: #91d7e3;">}</span></span>
+</span><span class="athl-line" data-athl-line="21">  Value is 0
+</span><span class="athl-line" data-athl-line="22"><span style="color: #c6a0f6;">{#elseif <span style="color: #91d7e3;"><span style="color: #f5a97f;">@<span style="color: #f5a97f;">value</span></span></span> <span style="color: #91d7e3;">&gt;</span> <span style="color: #f5a97f;">0</span><span style="color: #91d7e3;">}</span></span>
+</span><span class="athl-line" data-athl-line="23">  Value is greater than 0
+</span><span class="athl-line" data-athl-line="24"><span style="color: #c6a0f6;">{#else<span style="color: #91d7e3;">}</span></span>
+</span><span class="athl-line" data-athl-line="25">  Value is lower than 0
+</span><span class="athl-line" data-athl-line="26"><span style="color: #c6a0f6;">{/if<span style="color: #91d7e3;">}</span></span>
+</span><span class="athl-line" data-athl-line="27">
+</span><span class="athl-line" data-athl-line="28"><span style="color: #c6a0f6;">{#case <span style="color: #91d7e3;"><span style="color: #f5a97f;">@<span style="color: #f5a97f;">value</span></span></span><span style="color: #91d7e3;">}</span></span>
+</span><span class="athl-line" data-athl-line="29">  <span style="color: #c6a0f6;">{#match <span style="color: #939ab7;">[</span><span style="color: #cad3f5;">first</span><span style="color: #91d7e3;">|</span><span style="color: #939ab7;">_</span><span style="color: #939ab7;">]</span><span style="color: #91d7e3;">}</span></span>
+</span><span class="athl-line" data-athl-line="30">    First <span style="color: #91d7e3;">{</span><span style="color: #cad3f5;">first</span><span style="color: #91d7e3;">}</span>
+</span><span class="athl-line" data-athl-line="31">  <span style="color: #c6a0f6;">{#match <span style="color: #939ab7;">[</span><span style="color: #939ab7;">]</span><span style="color: #91d7e3;">}</span></span>
+</span><span class="athl-line" data-athl-line="32">    Value is empty
+</span><span class="athl-line" data-athl-line="33">  <span style="color: #c6a0f6;">{#match <span style="color: #939ab7;">_</span><span style="color: #91d7e3;">}</span></span>
+</span><span class="athl-line" data-athl-line="34">    Value is something else
+</span><span class="athl-line" data-athl-line="35"><span style="color: #c6a0f6;">{/case<span style="color: #91d7e3;">}</span></span>
+</span><span class="athl-line" data-athl-line="36">
+</span><span class="athl-line" data-athl-line="37"><span style="color: #91d7e3;">&lt;</span><span style="color: #c6a0f6;">div</span> :<span style="color: #c6a0f6;">if</span><span style="color: #91d7e3;">=</span><span style="color: #91d7e3;">{</span><span style="color: #91d7e3;"><span style="color: #f5a97f;">@<span style="color: #f5a97f;">loading</span></span></span><span style="color: #91d7e3;">}</span><span style="color: #91d7e3;">&gt;</span>
+</span><span class="athl-line" data-athl-line="38">  Loading ...
+</span><span class="athl-line" data-athl-line="39"><span style="color: #91d7e3;">&lt;/</span><span style="color: #c6a0f6;">div</span><span style="color: #91d7e3;">&gt;</span>
+</span></code></pre>
+</body>
+</html>

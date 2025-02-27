@@ -1,0 +1,39 @@
+<!-- This comment will be sent to the browser -->
+{!-- This comment won't be sent to the browser --}
+
+<div class={@my_class}>
+  Name: {String.upcase(@name)}
+</div>
+
+<button disabled={@step != :finished}>
+
+<button type="button" class={"button", @kind} :on-click={@click}>
+  <#slot>{@label}</#slot>
+</button>
+
+<section class="hero is-info">
+  <div class="hero-body">
+    <#slot />
+  </div>
+</section>
+
+{#if @value == 0}
+  Value is 0
+{#elseif @value > 0}
+  Value is greater than 0
+{#else}
+  Value is lower than 0
+{/if}
+
+{#case @value}
+  {#match [first|_]}
+    First {first}
+  {#match []}
+    Value is empty
+  {#match _}
+    Value is something else
+{/case}
+
+<div :if={@loading}>
+  Loading ...
+</div>
