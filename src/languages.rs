@@ -10,6 +10,7 @@ use tree_sitter_highlight::HighlightConfiguration;
 
 extern "C" {
     fn tree_sitter_clojure() -> *const ();
+    fn tree_sitter_comment() -> *const ();
     fn tree_sitter_commonlisp() -> *const ();
     fn tree_sitter_dockerfile() -> *const ();
     fn tree_sitter_eex() -> *const ();
@@ -32,6 +33,7 @@ pub enum Language {
     C,
     CSharp,
     Clojure,
+    Comment,
     CommonLisp,
     Cpp,
     Css,
@@ -89,6 +91,7 @@ impl Language {
             "bash" => Some(Language::Bash),
             "c" => Some(Language::C),
             "clojure" => Some(Language::Clojure),
+            "comment" => Some(Language::Comment),
             "commonlisp" => Some(Language::CommonLisp),
             "c#" => Some(Language::CSharp),
             "cpp" => Some(Language::Cpp),
@@ -238,6 +241,7 @@ impl Language {
                 "*.bb", "*.boot", "*.clj", "*.cljc", "*.clje", "*.cljs", "*.cljx", "*.edn",
                 "*.joke", "*.joker",
             ],
+            Language::Comment => &[],
             Language::CommonLisp => &["*.lisp", "*.lsp", "*.asd"],
             Language::CSharp => &["*.cs"],
             Language::Cpp => &[
@@ -466,6 +470,7 @@ impl Language {
             Language::Bash => "Bash",
             Language::C => "C",
             Language::Clojure => "Clojure",
+            Language::Comment => "Comment",
             Language::CommonLisp => "Common Lisp",
             Language::CSharp => "C#",
             Language::Cpp => "C++",
@@ -520,6 +525,7 @@ impl Language {
             Language::Bash => &BASH_CONFIG,
             Language::C => &C_CONFIG,
             Language::Clojure => &CLOJURE_CONFIG,
+            Language::Comment => &COMMENT_CONFIG,
             Language::CommonLisp => &COMMONLISP_CONFIG,
             Language::CSharp => &CSHARP_CONFIG,
             Language::Cpp => &CPP_CONFIG,
@@ -603,6 +609,21 @@ static CLOJURE_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         CLOJURE_LOCALS,
     )
     .expect("failed to create clojure highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static COMMENT_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_comment) };
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "comment",
+        COMMENT_HIGHLIGHTS,
+        COMMENT_INJECTIONS,
+        COMMENT_LOCALS,
+    )
+    .expect("failed to create comment highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
