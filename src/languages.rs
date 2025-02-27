@@ -57,7 +57,7 @@ pub enum Language {
     // Hcl, TODO: repo is too large (too many files)
     Heex,
     Html,
-    Http,
+    // Http,
     Iex,
     Java,
     Javascript,
