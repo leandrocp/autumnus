@@ -1,0 +1,70 @@
+================
+Switch statement
+================
+
+@switch (condition) {
+  @case (a) {
+    <element-a/>
+  }
+  @case (b) {
+    <element-b/>
+  }
+}
+
+---
+
+(document
+  (switch_statement
+    (control_keyword)
+    value: (expression
+      (identifier))
+    body: (switch_body
+      (case_statement
+        (control_keyword)
+        value: (identifier)
+        body: (statement_block
+          (element
+            (self_closing_tag
+              (tag_name)))))
+      (case_statement
+        (control_keyword)
+        value: (identifier)
+        body: (statement_block
+          (element
+            (self_closing_tag
+              (tag_name))))))))
+
+==============
+Switch-default
+==============
+
+@switch (condition) {
+  @case (a) {
+    <element-a/>
+  }
+  @default {
+    <default />
+  }
+}
+
+---
+
+(document
+  (switch_statement
+    (control_keyword)
+    value: (expression
+      (identifier))
+    body: (switch_body
+      (case_statement
+        (control_keyword)
+        value: (identifier)
+        body: (statement_block
+          (element
+            (self_closing_tag
+              (tag_name)))))
+      (default_statement
+        (control_keyword)
+        body: (statement_block
+          (element
+            (self_closing_tag
+              (tag_name))))))))

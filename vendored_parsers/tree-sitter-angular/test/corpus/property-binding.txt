@@ -1,0 +1,558 @@
+================
+Property binding
+================
+
+<element [property]="value"/>
+
+---
+
+(document
+  (element
+    (self_closing_tag
+      (tag_name)
+      (attribute
+        (property_binding
+          (binding_name
+            (identifier))
+          (expression
+            (identifier)))))))
+
+======================
+Array Property binding
+======================
+
+<element [icon]="['fas', 'chevron']"/>
+
+---
+
+(document
+  (element
+    (self_closing_tag
+      (tag_name)
+      (attribute
+        (property_binding
+          (binding_name
+            (identifier))
+          (expression
+            (array
+              (expression
+                (string))
+              (expression
+                (string)))))))))
+
+========================
+Array Binding with pipes
+========================
+
+<element [values]="[(someValue | async), syncValue]"/>
+
+---
+
+(document
+  (element
+    (self_closing_tag
+      (tag_name)
+      (attribute
+        (property_binding
+          (binding_name
+            (identifier))
+          (expression
+            (array
+              (expression
+                (group
+                  (expression
+                    (identifier)
+                    (pipe_sequence
+                      (pipe_operator)
+                      (pipe_call
+                        (identifier))))))
+              (expression
+                (identifier)))))))))
+
+======================
+String literal binding
+======================
+
+<element [property]="'value' + obj.value" [other]="'200px'"/>
+
+---
+
+(document
+  (element
+    (self_closing_tag
+      (tag_name)
+      (attribute
+        (property_binding
+          (binding_name
+            (identifier))
+          (binary_expression
+            left: (expression
+              (string))
+            right: (expression
+              (member_expression
+                object: (identifier)
+                property: (identifier))))))
+      (attribute
+        (property_binding
+          (binding_name
+            (identifier))
+          (expression
+            (string)))))))
+
+===========
+Subproperty
+===========
+
+<element [attr.property]="value"/>
+
+---
+
+(document
+  (element
+    (self_closing_tag
+      (tag_name)
+      (attribute
+        (property_binding
+          (binding_name
+            (member_expression
+              (identifier)
+              (identifier)))
+          (expression
+            (identifier)))))))
+
+==========
+With pipes
+==========
+
+<element [property]="value$ | async"/>
+
+---
+
+(document
+  (element
+    (self_closing_tag
+      (tag_name)
+      (attribute
+        (property_binding
+          (binding_name
+              (identifier))
+          (expression
+            (identifier)
+            (pipe_sequence
+              (pipe_operator)
+              (pipe_call
+                (identifier)))))))))
+
+===============
+Two-way binding
+===============
+
+<element [(property)]="value"/>
+
+---
+
+(document
+  (element
+    (self_closing_tag
+      (tag_name)
+      (attribute
+        (two_way_binding
+          (binding_name
+            (identifier))
+          (expression
+            (identifier)))))))
+
+=============
+Event binding
+=============
+
+<element (click)="handle($event)"/>
+
+---
+
+(document
+  (element
+    (self_closing_tag
+      (tag_name)
+      (attribute
+        (event_binding
+          (binding_name
+            (identifier))
+          (expression
+            (call_expression
+              (identifier)
+              (arguments
+                (identifier)))))))))
+
+========================
+Event binding expression
+========================
+
+<element (click)="property = $event" />
+
+---
+
+(document
+  (element
+    (self_closing_tag
+      (tag_name)
+      (attribute
+        (event_binding
+          (binding_name
+            (identifier))
+          (assignment_expression
+            (identifier)
+            (expression
+              (identifier))))))))
+
+=================
+Regular attribute
+=================
+
+<element attr="value"/>
+
+---
+
+(document
+  (element
+    (self_closing_tag
+      (tag_name)
+      (attribute
+        (attribute_name)
+        (quoted_attribute_value
+         (attribute_value))))))
+
+=====================
+Empty attribute value
+=====================
+
+<span [property]=""></span>
+
+---
+
+(document
+  (element
+    (start_tag
+      (tag_name)
+      (attribute
+        (property_binding
+          (binding_name
+            (identifier)
+          )
+        )
+      )
+    )
+    (end_tag
+      (tag_name)
+    )
+  )
+)
+
+===================
+Map property binding
+====================
+
+<span [property]="form.controls[section].touched"></span>
+
+---
+
+(document
+  (element
+    (start_tag
+      (tag_name)
+      (attribute
+        (property_binding
+          (binding_name
+            (identifier))
+          (expression
+            (member_expression
+              (bracket_expression
+                (member_expression
+                  (identifier)
+                  (identifier))
+                (identifier))
+              (identifier))))))
+    (end_tag
+      (tag_name))))
+
+=======================================
+Binding with a static array access full
+=======================================
+
+<element
+  [variant]="obj.access['thing'].thing"
+></element>
+
+---
+
+(document
+  (element
+    (start_tag
+      (tag_name)
+      (attribute
+        (property_binding
+          (binding_name
+            (identifier))
+          (expression
+            (member_expression
+              (bracket_expression
+                (member_expression
+                  (identifier)
+                  (identifier))
+                (static_member_expression
+                  (identifier)))
+              (identifier))))))
+    (end_tag
+      (tag_name))))
+
+==================================
+Binding with a static array access
+==================================
+
+<element
+  [variant]="obj['thing']"
+></element>
+
+---
+
+(document
+  (element
+    (start_tag
+      (tag_name)
+      (attribute
+        (property_binding
+          (binding_name
+            (identifier))
+          (expression
+            (bracket_expression
+              (identifier)
+              (static_member_expression
+                (identifier)))))))
+    (end_tag
+      (tag_name))))
+
+===================================
+Binding with a dynamic array access
+===================================
+
+<element
+  [variant]="obj[variable]"
+></element>
+
+---
+
+(document
+  (element
+    (start_tag
+      (tag_name)
+      (attribute
+        (property_binding
+          (binding_name
+            (identifier))
+          (expression
+            (bracket_expression
+              (identifier)
+              (identifier))))))
+    (end_tag
+      (tag_name))))
+
+==================
+Nullish coalescing
+==================
+
+<span [property]="some?.optional ?? default"></span>
+
+---
+
+(document
+  (element
+    (start_tag
+      (tag_name)
+      (attribute
+        (property_binding
+          (binding_name
+            (identifier))
+          (nullish_coalescing_expression
+            (expression
+              (member_expression
+                (identifier)
+                (identifier)))
+            (coalescing_operator)
+            (identifier)))))
+    (end_tag
+      (tag_name))))
+
+
+==================
+Ternary expression
+==================
+
+<span [property]="condition ? true : false"></span>
+
+---
+
+(document
+  (element
+    (start_tag
+      (tag_name)
+      (attribute
+        (property_binding
+          (binding_name
+            (identifier))
+          (ternary_expression
+            (expression
+              (identifier))
+            (ternary_operator)
+            (identifier)
+            (ternary_operator)
+            (expression
+              (identifier))))))
+    (end_tag
+      (tag_name))))
+
+==================
+Nested ternary expression
+==================
+
+<span [property]="condition ? 'resultA' : otherCondition || elseCond ? 'resultB' : 'resultC'"></span>
+
+---
+
+(document
+  (element
+    (start_tag
+      (tag_name)
+      (attribute
+        (property_binding
+          (binding_name
+            (identifier))
+          (ternary_expression
+            (expression
+              (identifier))
+            (ternary_operator)
+            (string)
+            (ternary_operator)
+            (ternary_expression
+              (conditional_expression
+                (identifier)
+                (conditional_operator)
+                (identifier))
+              (ternary_operator)
+              (string)
+              (ternary_operator)
+              (expression
+                (string)))))))
+    (end_tag
+      (tag_name))))
+
+==================
+NgStyle simple
+==================
+
+<span [ngStyle]="objExpr"></span>
+
+---
+
+(document
+  (element
+    (start_tag
+      (tag_name)
+      (attribute
+        (property_binding
+          (binding_name
+            (identifier))
+          (expression
+            (identifier)))))
+    (end_tag
+      (tag_name))))
+
+==================
+NgStyle with object
+==================
+
+<span [ngStyle]="{ color: 'red', 'background-color': 'green' }"></span>
+
+---
+
+(document
+  (element
+    (start_tag
+      (tag_name)
+      (attribute
+        (property_binding
+          (binding_name
+            (identifier))
+          (expression
+            (object
+              (pair
+                key: (identifier)
+                value: (expression
+                  (string)))
+              (pair
+                key: (string)
+                value: (expression
+                  (string))))))))
+    (end_tag
+      (tag_name))))
+
+==================
+NgStyle with calculation
+==================
+
+<span [ngStyle]="{ width: someProp + '%' }"></span>
+
+---
+
+(document
+  (element
+    (start_tag
+      (tag_name)
+      (attribute
+        (property_binding
+          (binding_name
+            (identifier))
+          (expression
+            (object
+              (pair
+                key: (identifier)
+                value: (binary_expression
+                  left: (expression
+                   (identifier))
+                  right: (expression
+                    (string)))))))))
+    (end_tag
+      (tag_name))))
+
+==================
+NgStyle with complex calculation
+==================
+
+<span [ngStyle]="{ width: someVal / num * factor + '%' }"></span>
+
+---
+
+(document
+  (element
+    (start_tag
+      (tag_name)
+      (attribute
+        (property_binding
+          (binding_name
+            (identifier))
+          (expression
+            (object
+              (pair
+                key: (identifier)
+                value: (binary_expression
+                  left: (expression
+                    (identifier))
+                  right: (binary_expression
+                    left: (expression
+                      (identifier))
+                    right: (binary_expression
+                      left: (expression
+                        (identifier))
+                      right: (expression
+                        (string)))))))))))
+    (end_tag
+      (tag_name))))
