@@ -19,6 +19,7 @@ extern "C" {
     fn tree_sitter_dockerfile() -> *const ();
     fn tree_sitter_eex() -> *const ();
     fn tree_sitter_elm() -> *const ();
+    fn tree_sitter_glimmer() -> *const ();
     fn tree_sitter_iex() -> *const ();
     fn tree_sitter_kotlin() -> *const ();
     fn tree_sitter_llvm() -> *const ();
@@ -46,15 +47,14 @@ pub enum Language {
     CSS,
     Diff,
     Dockerfile,
-    // Dot,
     EEx,
     Elixir,
     Elm,
-    // Ember,
     Erlang,
     // Fish,
     // FSharp,
     Gleam,
+    Glimmer,
     Go,
     // GraphQL,
     Haskell,
@@ -124,6 +124,7 @@ impl Language {
             "elm" => Some(Language::Elm),
             "erlang" => Some(Language::Erlang),
             "gleam" => Some(Language::Gleam),
+            "ember" | "glimmer" | "handlebars" => Some(Language::Glimmer),
             "go" => Some(Language::Go),
             "haskell" => Some(Language::Haskell),
             "heex" => Some(Language::HEEx),
@@ -301,6 +302,7 @@ impl Language {
                 "Emakefile",
             ],
             Language::Gleam => &["*.gleam"],
+            Language::Glimmer => &["*.hbs", "*.handlebars", "*.html.handlebars", "*.glimmer"],
             Language::Go => &["*.go"],
             Language::Haskell => &["*.hs"],
             Language::HEEx => &["*.heex", "*.neex"],
@@ -569,6 +571,7 @@ impl Language {
             Language::Elm => "Elm",
             Language::Erlang => "Erlang",
             Language::Gleam => "Gleam",
+            Language::Glimmer => "Glimmer",
             Language::Go => "Go",
             Language::Haskell => "Haskell",
             Language::HEEx => "HEEx",
@@ -628,6 +631,7 @@ impl Language {
             Language::Elm => &ELM_CONFIG,
             Language::Erlang => &ERLANG_CONFIG,
             Language::Gleam => &GLEAM_CONFIG,
+            Language::Glimmer => &GLIMMER_CONFIG,
             Language::Go => &GO_CONFIG,
             Language::Haskell => &HASKELL_CONFIG,
             Language::HEEx => &HEEX_CONFIG,
@@ -936,6 +940,21 @@ static GLEAM_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         GLEAM_LOCALS,
     )
     .expect("failed to create gleam highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static GLIMMER_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_glimmer) };
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "glimmer",
+        GLIMMER_HIGHLIGHTS,
+        GLIMMER_INJECTIONS,
+        GLIMMER_LOCALS,
+    )
+    .expect("failed to create glimmer highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });

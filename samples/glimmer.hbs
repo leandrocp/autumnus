@@ -1,0 +1,225 @@
+{{! Header section with basic expressions }}
+<header class="dashboard-header">
+  <h1>{{@title}}</h1>
+  <p class="subtitle">{{@description}}</p>
+  
+  {{! Using helpers }}
+  <span class="last-updated">Last updated: {{format-date @lastUpdated}}</span>
+  
+  {{! Conditional rendering }}
+  {{#if @isAdmin}}
+    <div class="admin-controls">
+      <button type="button" {{on "click" this.toggleEditMode}}>
+        {{#if this.isEditing}}
+          Done Editing
+        {{else}}
+          Edit Dashboard
+        {{/if}}
+      </button>
+    </div>
+  {{/if}}
+</header>
+
+{{! Main content section }}
+<main class="dashboard-content {{if this.isLoading "loading"}}">
+  {{! Conditional loading state }}
+  {{#if this.isLoading}}
+    <div class="loading-spinner">
+      {{loading-spinner size="large"}}
+      <p>Loading dashboard data...</p>
+    </div>
+  {{else}}
+    {{! Handling lists with each }}
+    <section class="product-categories">
+      <h2>Product Categories ({{this.categories.length}})</h2>
+      
+      {{#each this.categories as |category index|}}
+        <div class="category-card {{if category.featured "featured"}}" data-category-id="{{category.id}}">
+          <h3>#{{inc index}} - {{category.name}}</h3>
+          
+          {{! Nested conditionals }}
+          {{#if category.products.length}}
+            <p>{{category.products.length}} products available</p>
+            
+            {{! Nested components with attributes }}
+            <ProductList 
+              @products={{category.products}} 
+              @maxDisplay={{5}} 
+              @showPrices={{true}} 
+              @onProductSelect={{this.selectProduct}}
+            />
+            
+            {{#if (gt category.products.length 5)}}
+              <button type="button" {{on "click" (fn this.viewAllProducts category.id)}}>
+                View all {{category.products.length}} products
+              </button>
+            {{/if}}
+          {{else}}
+            <p class="empty-state">No products in this category</p>
+            
+            {{! Using unless helper }}
+            {{#unless this.isReadOnly}}
+              <button type="button" {{on "click" (fn this.addProductToCategory category.id)}}>
+                Add Product
+              </button>
+            {{/unless}}
+          {{/if}}
+        </div>
+      {{else}}
+        {{! Empty state handling }}
+        <div class="empty-categories">
+          <p>No product categories found.</p>
+          <button type="button" {{on "click" this.createCategory}}>Create First Category</button>
+        </div>
+      {{/each}}
+    </section>
+    
+    {{! Using with helper to create a new scope }}
+    {{#with this.selectedProduct as |product|}}
+      <section class="product-details">
+        <h2>{{product.name}}</h2>
+        <div class="product-specs">
+          <p>SKU: {{product.sku}}</p>
+          <p>Price: {{currency-format product.price}}</p>
+          <p>In Stock: {{product.inventory}} units</p>
+          
+          {{! Custom helper with multiple parameters }}
+          <p>Status: {{product-status product.inventory product.minThreshold}}</p>
+        </div>
+        
+        {{! Component that yields to a block }}
+        <ProductTabs @product={{product}} as |tab|>
+          {{#if (eq tab.id "details")}}
+            <div class="product-description">
+              {{! Triple stash for unescaped HTML }}
+              {{{product.htmlDescription}}}
+            </div>
+          {{else if (eq tab.id "sales")}}
+            <div class="sales-chart">
+              {{sales-chart data=product.salesData}}
+            </div>
+          {{else}}
+            <div class="related-products">
+              {{#each product.relatedProducts as |related|}}
+                <ProductCard @product={{related}} @compact={{true}} />
+              {{/each}}
+            </div>
+          {{/if}}
+        </ProductTabs>
+      </section>
+    {{/with}}
+    
+    {{! Using partial templates }}
+    {{> dashboard/metrics metrics=this.dashboardMetrics}}
+    
+    {{! Dynamic partial paths }}
+    {{> (concat "dashboard/" this.currentView "-view") data=this.viewData}}
+  {{/if}}
+</main>
+
+{{! Footer section with modifiers }}
+<footer class="dashboard-footer">
+  {{! Modifier usage }}
+  <input 
+    type="search" 
+    placeholder="Search products..." 
+    value={{this.searchQuery}}
+    {{on "input" this.updateSearchQuery}} 
+    {{did-insert this.focusInput}}
+    {{did-update this.trackSearchChange this.searchQuery}}
+  />
+  
+  {{! Form handling }}
+  <form {{on "submit" this.saveChanges}}>
+    <div class="form-controls">
+      {{! Two-way binding with mut helper }}
+      <label>
+        Show archived:
+        <input 
+          type="checkbox" 
+          checked={{this.showArchived}} 
+          {{on "change" (fn this.toggleProperty "showArchived")}}
+        />
+      </label>
+      
+      <select {{on "change" this.changeViewMode}}>
+        {{#each this.availableViewModes as |mode|}}
+          <option value={{mode.id}} selected={{eq mode.id this.currentViewMode}}>
+            {{mode.label}}
+          </option>
+        {{/each}}
+      </select>
+      
+      <button type="submit" disabled={{not this.hasChanges}}>
+        Save Changes
+      </button>
+      
+      <button type="button" {{on "click" this.discardChanges}}>
+        Discard Changes
+      </button>
+    </div>
+  </form>
+
+  {{! Usage of component blocks with hash arguments }}
+  <PaginationControls 
+    @currentPage={{this.currentPage}}
+    @totalPages={{this.totalPages}}
+    @onPageChange={{this.changePage}}
+  >
+    <:previous as |disabled|>
+      <button type="button" disabled={{disabled}} {{on "click" (fn this.changePage (sub this.currentPage 1))}}>
+        Previous Page
+      </button>
+    </:previous>
+    
+    <:pageNumbers as |pageNum isActive|>
+      <span class="page-number {{if isActive "active"}}">
+        {{pageNum}}
+      </span>
+    </:pageNumbers>
+    
+    <:next as |disabled|>
+      <button type="button" disabled={{disabled}} {{on "click" (fn this.changePage (add this.currentPage 1))}}>
+        Next Page
+      </button>
+    </:next>
+  </PaginationControls>
+</footer>
+
+{{! Modal component with yield and positional parameters }}
+{{#if this.showModal}}
+  <Modal @title="Product Details" @size="large" @onClose={{this.closeModal}}>
+    <:header>
+      <h2>{{this.modalProduct.name}}</h2>
+    </:header>
+    
+    <:body>
+      <div class="modal-content">
+        {{! Using the log helper for debugging }}
+        {{log this.modalProduct "Modal product data"}}
+        
+        <img src={{this.modalProduct.imageUrl}} alt={{this.modalProduct.name}} />
+        <p>{{{this.modalProduct.htmlDescription}}}</p>
+        
+        {{! Component invocation with positional parameters }}
+        {{product-rating this.modalProduct.rating this.modalProduct.reviewCount}}
+      </div>
+    </:body>
+    
+    <:footer as |close|>
+      <button type="button" {{on "click" close}}>Close</button>
+      <button type="button" {{on "click" (fn this.editProduct this.modalProduct)}}>
+        Edit
+      </button>
+    </:footer>
+  </Modal>
+{{/if}}
+
+{{! Context menu component with hash arguments }}
+<ContextMenu @isVisible={{this.showContextMenu}} @position={{this.contextMenuPosition}} as |menu|>
+  <menu.Item @label="View Details" @onClick={{this.viewDetails}} />
+  <menu.Item @label="Quick Edit" @onClick={{this.quickEdit}} />
+  <menu.Item @label="Duplicate" @onClick={{this.duplicate}} />
+  <menu.Separator />
+  <menu.Item @label="Delete" @onClick={{this.delete}} @dangerous={{true}} />
+</ContextMenu>
