@@ -1,0 +1,720 @@
+[
+  {
+    "type": "attribute",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "attribute_name",
+          "named": true
+        },
+        {
+          "type": "attribute_value",
+          "named": true
+        },
+        {
+          "type": "expression",
+          "named": true
+        },
+        {
+          "type": "quoted_attribute_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "block",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "comment",
+          "named": true
+        },
+        {
+          "type": "component",
+          "named": true
+        },
+        {
+          "type": "end_block",
+          "named": true
+        },
+        {
+          "type": "expression",
+          "named": true
+        },
+        {
+          "type": "start_block",
+          "named": true
+        },
+        {
+          "type": "subblock",
+          "named": true
+        },
+        {
+          "type": "tag",
+          "named": true
+        },
+        {
+          "type": "text",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "block_name",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "comment",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "component",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "comment",
+          "named": true
+        },
+        {
+          "type": "component",
+          "named": true
+        },
+        {
+          "type": "end_component",
+          "named": true
+        },
+        {
+          "type": "end_markdown",
+          "named": true
+        },
+        {
+          "type": "expression",
+          "named": true
+        },
+        {
+          "type": "self_closing_component",
+          "named": true
+        },
+        {
+          "type": "start_component",
+          "named": true
+        },
+        {
+          "type": "start_markdown",
+          "named": true
+        },
+        {
+          "type": "tag",
+          "named": true
+        },
+        {
+          "type": "text",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "attribute_value",
+          "named": true
+        },
+        {
+          "type": "directive_name",
+          "named": true
+        },
+        {
+          "type": "expression",
+          "named": true
+        },
+        {
+          "type": "quoted_attribute_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "directive_name",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "end_block",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "block_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "end_component",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "component_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "end_markdown",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "component_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "end_tag",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "tag_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "expression",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "expression_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "expression_value",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "fragment",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "comment",
+          "named": true
+        },
+        {
+          "type": "component",
+          "named": true
+        },
+        {
+          "type": "expression",
+          "named": true
+        },
+        {
+          "type": "tag",
+          "named": true
+        },
+        {
+          "type": "text",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "quoted_attribute_value",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "attribute_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "self_closing_component",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "attribute",
+          "named": true
+        },
+        {
+          "type": "component_name",
+          "named": true
+        },
+        {
+          "type": "directive",
+          "named": true
+        },
+        {
+          "type": "expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "self_closing_tag",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "attribute",
+          "named": true
+        },
+        {
+          "type": "directive",
+          "named": true
+        },
+        {
+          "type": "expression",
+          "named": true
+        },
+        {
+          "type": "tag_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "start_block",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "block_name",
+          "named": true
+        },
+        {
+          "type": "expression_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "start_component",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "attribute",
+          "named": true
+        },
+        {
+          "type": "component_name",
+          "named": true
+        },
+        {
+          "type": "directive",
+          "named": true
+        },
+        {
+          "type": "expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "start_markdown",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "attribute",
+          "named": true
+        },
+        {
+          "type": "component_name",
+          "named": true
+        },
+        {
+          "type": "directive",
+          "named": true
+        },
+        {
+          "type": "expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "start_tag",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "attribute",
+          "named": true
+        },
+        {
+          "type": "directive",
+          "named": true
+        },
+        {
+          "type": "expression",
+          "named": true
+        },
+        {
+          "type": "tag_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "subblock",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "expression_value",
+          "named": true
+        },
+        {
+          "type": "subblock_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "subblock_name",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "tag",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "comment",
+          "named": true
+        },
+        {
+          "type": "component",
+          "named": true
+        },
+        {
+          "type": "end_tag",
+          "named": true
+        },
+        {
+          "type": "expression",
+          "named": true
+        },
+        {
+          "type": "self_closing_tag",
+          "named": true
+        },
+        {
+          "type": "start_tag",
+          "named": true
+        },
+        {
+          "type": "tag",
+          "named": true
+        },
+        {
+          "type": "text",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "\"",
+    "named": false
+  },
+  {
+    "type": "'",
+    "named": false
+  },
+  {
+    "type": "-->",
+    "named": false
+  },
+  {
+    "type": "--}",
+    "named": false
+  },
+  {
+    "type": "...",
+    "named": false
+  },
+  {
+    "type": "/>",
+    "named": false
+  },
+  {
+    "type": ":",
+    "named": false
+  },
+  {
+    "type": "<",
+    "named": false
+  },
+  {
+    "type": "<!--",
+    "named": false
+  },
+  {
+    "type": "</",
+    "named": false
+  },
+  {
+    "type": "=",
+    "named": false
+  },
+  {
+    "type": ">",
+    "named": false
+  },
+  {
+    "type": "^",
+    "named": false
+  },
+  {
+    "type": "args",
+    "named": false
+  },
+  {
+    "type": "attribute_name",
+    "named": true
+  },
+  {
+    "type": "attribute_value",
+    "named": true
+  },
+  {
+    "type": "case",
+    "named": false
+  },
+  {
+    "type": "component_name",
+    "named": true
+  },
+  {
+    "type": "else",
+    "named": false
+  },
+  {
+    "type": "elseif",
+    "named": false
+  },
+  {
+    "type": "for",
+    "named": false
+  },
+  {
+    "type": "hook",
+    "named": false
+  },
+  {
+    "type": "if",
+    "named": false
+  },
+  {
+    "type": "let",
+    "named": false
+  },
+  {
+    "type": "match",
+    "named": false
+  },
+  {
+    "type": "on-blur",
+    "named": false
+  },
+  {
+    "type": "on-capture-click",
+    "named": false
+  },
+  {
+    "type": "on-change",
+    "named": false
+  },
+  {
+    "type": "on-click",
+    "named": false
+  },
+  {
+    "type": "on-focus",
+    "named": false
+  },
+  {
+    "type": "on-keydown",
+    "named": false
+  },
+  {
+    "type": "on-keyup",
+    "named": false
+  },
+  {
+    "type": "on-submit",
+    "named": false
+  },
+  {
+    "type": "on-window-blur",
+    "named": false
+  },
+  {
+    "type": "on-window-focus",
+    "named": false
+  },
+  {
+    "type": "on-window-keydown",
+    "named": false
+  },
+  {
+    "type": "on-window-keyup",
+    "named": false
+  },
+  {
+    "type": "show",
+    "named": false
+  },
+  {
+    "type": "tag_name",
+    "named": true
+  },
+  {
+    "type": "text",
+    "named": true
+  },
+  {
+    "type": "unless",
+    "named": false
+  },
+  {
+    "type": "values",
+    "named": false
+  },
+  {
+    "type": "{",
+    "named": false
+  },
+  {
+    "type": "{!--",
+    "named": false
+  },
+  {
+    "type": "{#",
+    "named": false
+  },
+  {
+    "type": "{/",
+    "named": false
+  },
+  {
+    "type": "{}",
+    "named": false
+  },
+  {
+    "type": "}",
+    "named": false
+  }
+]

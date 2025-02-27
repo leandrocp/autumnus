@@ -1,0 +1,81 @@
+================================================================================
+Unquoted Attribute
+================================================================================
+
+<Root key=value />
+
+--------------------------------------------------------------------------------
+
+(fragment
+  (component
+    (self_closing_component
+      (component_name)
+      (attribute
+        (attribute_name)
+        (attribute_value)))))
+
+================================================================================
+Single-Quoted Attribute
+================================================================================
+
+<Root key='value' />
+
+--------------------------------------------------------------------------------
+
+(fragment
+  (component
+    (self_closing_component
+      (component_name)
+      (attribute
+        (attribute_name)
+        (quoted_attribute_value
+          (attribute_value))))))
+
+================================================================================
+Double-Quoted Attribute
+================================================================================
+
+<Root key="value" />
+
+--------------------------------------------------------------------------------
+
+(fragment
+  (component
+    (self_closing_component
+      (component_name)
+      (attribute
+        (attribute_name)
+        (quoted_attribute_value
+          (attribute_value))))))
+
+================================================================================
+Expression Attribute
+================================================================================
+
+<Root key={value} />
+
+--------------------------------------------------------------------------------
+
+(fragment
+  (component
+    (self_closing_component
+      (component_name)
+      (attribute
+        (attribute_name)
+        (expression
+          (expression_value))))))
+
+================================================================================
+Boolean Attribute
+================================================================================
+
+<Root value />
+
+--------------------------------------------------------------------------------
+
+(fragment
+  (component
+    (self_closing_component
+      (component_name)
+      (attribute
+        (attribute_name)))))

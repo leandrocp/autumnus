@@ -1,0 +1,167 @@
+================================================================================
+Component
+================================================================================
+
+<Root>
+</Root>
+
+--------------------------------------------------------------------------------
+
+(fragment
+  (component
+    (start_component
+      (component_name))
+    (end_component
+      (component_name))))
+
+================================================================================
+Self-Closing Component
+================================================================================
+
+<Root/>
+
+--------------------------------------------------------------------------------
+
+(fragment
+  (component
+    (self_closing_component
+      (component_name))))
+
+================================================================================
+Special Component
+================================================================================
+
+<#slot>
+</#slot>
+
+--------------------------------------------------------------------------------
+
+(fragment
+  (component
+    (start_component
+      (component_name))
+    (end_component
+      (component_name))))
+
+================================================================================
+Special Self-Closing Component
+================================================================================
+
+<#slot/>
+
+--------------------------------------------------------------------------------
+
+(fragment
+  (component
+    (self_closing_component
+      (component_name))))
+
+================================================================================
+Markdown Component
+================================================================================
+
+<#Markdown>
+  ### Heading 3
+
+  ## Heading 2
+
+  # Heading 1
+
+  ---
+
+  _This text is italic_
+
+  _**This text is itatic and bold**_
+
+  ---
+
+  ### Links
+
+  * [Source](https://github.com/surface-ui/surface)
+  * [Docs](https://surface-ui.org/documentation)
+
+  ### Tables
+
+  | Id     | Name           | Value      |
+  | -------|----------------| ----------:|
+  | 1      | The first item |     $10,00 |
+  | 2      | The second     |  $1.200,00 |
+  | 3      | The Third      |       $130 |
+
+  ---
+
+  ### Lists
+
+    1. Item 1
+    2. Item 2
+      * Subitem 1
+      * Subitem 2
+
+</#Markdown>
+
+--------------------------------------------------------------------------------
+
+(fragment
+  (component
+    (start_markdown
+      (component_name))
+    (text)
+    (end_markdown
+      (component_name))))
+
+================================================================================
+Raw Component
+================================================================================
+
+<#Raw>
+  <div class="section title">
+    {@user}
+  </div>
+</#Raw>
+
+--------------------------------------------------------------------------------
+
+(fragment
+  (component
+    (start_component
+      (component_name))
+    (tag
+      (start_tag
+        (tag_name)
+        (attribute
+          (attribute_name)
+          (quoted_attribute_value
+            (attribute_value))))
+      (expression
+        (expression_value))
+      (end_tag
+        (tag_name)))
+    (end_component
+      (component_name))))
+
+================================================================================
+Nested Components
+================================================================================
+
+<Root>
+  <Grid>
+    <Card />
+  </Card>
+</Root>
+
+--------------------------------------------------------------------------------
+
+(fragment
+  (component
+    (start_component
+      (component_name))
+    (component
+      (start_component
+        (component_name))
+      (component
+        (self_closing_component
+          (component_name)))
+      (end_component
+        (component_name)))
+    (end_component
+      (component_name))))
