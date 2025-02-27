@@ -131,6 +131,12 @@ fn vendored_parsers() {
             src_dir: "vendored_parsers/tree-sitter-vim/src",
             extra_files: vec!["scanner.c"],
         },
+        // FIXME: duplicate symbol '_TAG_TYPES_BY_TAG_NAME'
+        // TreeSitterParser {
+        //     name: "tree-sitter-vue",
+        //     src_dir: "vendored_parsers/tree-sitter-vue/src",
+        //     extra_files: vec!["scanner.c"],
+        // },
     ];
 
     for parser in &parsers {
