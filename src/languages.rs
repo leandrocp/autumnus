@@ -61,11 +61,9 @@ pub enum Language {
     // Hcl, TODO: repo is too large (too many files)
     HEEx,
     HTML,
-    // Http,
     IEx,
     Java,
     JavaScript,
-    // JsDoc,
     JSON,
     Kotlin,
     // Latex, TODO: generate parser.c
