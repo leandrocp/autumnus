@@ -1,0 +1,411 @@
+================================================================================
+basic vars
+================================================================================
+$s;
+$namespace::s;
+@a;
+$#a;
+%h;
+*g;
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (scalar
+      (varname)))
+  (expression_statement
+    (scalar
+      (varname)))
+  (expression_statement
+    (array
+      (varname)))
+  (expression_statement
+    (arraylen
+      (varname)))
+  (expression_statement
+    (hash
+      (varname)))
+  (expression_statement
+    (glob
+      (varname))))
+
+================================================================================
+vars in expressions
+================================================================================
+$one + $two;
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (binary_expression
+      (scalar
+        (varname))
+      (scalar
+        (varname)))))
+
+================================================================================
+variable declarations
+================================================================================
+my $s;
+my @a;
+my %h;
+my ($S, @A, %h);
+our $PackageVar;
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (variable_declaration
+      (scalar
+        (varname))))
+  (expression_statement
+    (variable_declaration
+      (array
+        (varname))))
+  (expression_statement
+    (variable_declaration
+      (hash
+        (varname))))
+  (expression_statement
+    (variable_declaration
+      (scalar
+        (varname))
+      (array
+        (varname))
+      (hash
+        (varname))))
+  (expression_statement
+    (variable_declaration
+      (scalar
+        (varname)))))
+
+================================================================================
+variable declarations including undef
+================================================================================
+my ($x, undef, $z);
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (variable_declaration
+      (scalar
+        (varname))
+      (undef_expression)
+      (scalar
+        (varname)))))
+
+================================================================================
+variable declarations with initialiser
+================================================================================
+my $s = 123;
+my @a = (4, 5);
+my %h = (6, 7);
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (assignment_expression
+      (variable_declaration
+        (scalar
+          (varname)))
+      (number)))
+  (expression_statement
+    (assignment_expression
+      (variable_declaration
+        (array
+          (varname)))
+      (list_expression
+        (number)
+        (number))))
+  (expression_statement
+    (assignment_expression
+      (variable_declaration
+        (hash
+          (varname)))
+      (list_expression
+        (number)
+        (number)))))
+
+================================================================================
+variable declarations with attributes
+================================================================================
+my $s :shared;
+my @a :lock;
+my ($S, @A, %h) :MyAttr(foo);
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (variable_declaration
+      (scalar
+        (varname))
+      (attrlist
+        (attribute
+          (attribute_name)))))
+  (expression_statement
+    (variable_declaration
+      (array
+        (varname))
+      (attrlist
+        (attribute
+          (attribute_name)))))
+  (expression_statement
+    (variable_declaration
+      (scalar
+        (varname))
+      (array
+        (varname))
+      (hash
+        (varname))
+      (attrlist
+        (attribute
+          (attribute_name)
+          (attribute_value))))))
+
+================================================================================
+array elements
+================================================================================
+$a[123];
+$aref->[123];
+$a[1][2][3];
+$a->$#*;
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (array_element_expression
+      array: (container_variable
+        (varname))
+      index: (number)))
+  (expression_statement
+    (array_element_expression
+      (scalar
+        (varname))
+      index: (number)))
+  (expression_statement
+    (array_element_expression
+      (array_element_expression
+        (array_element_expression
+          array: (container_variable
+            (varname))
+          index: (number))
+        index: (number))
+      index: (number)))
+  (expression_statement
+    (arraylen_deref_expression
+      (scalar
+        (varname)))))
+
+================================================================================
+hash elements
+================================================================================
+$h{123};
+$href->{123};
+$h{1}{2}{3};
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (hash_element_expression
+      hash: (container_variable
+        (varname))
+      key: (number)))
+  (expression_statement
+    (hash_element_expression
+      (scalar
+        (varname))
+      key: (number)))
+  (expression_statement
+    (hash_element_expression
+      (hash_element_expression
+        (hash_element_expression
+          hash: (container_variable
+            (varname))
+          key: (number))
+        key: (number))
+      key: (number))))
+
+================================================================================
+coderef calls
+================================================================================
+$code->();
+$code->('args');
+$code->('args')(1)("and again")
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (coderef_call_expression
+      (scalar
+        (varname))))
+  (expression_statement
+    (coderef_call_expression
+      (scalar
+        (varname))
+      (string_literal
+        (string_content))))
+  (expression_statement
+    (coderef_call_expression
+      (coderef_call_expression
+        (coderef_call_expression
+          (scalar
+            (varname))
+          (string_literal
+            (string_content)))
+        (number))
+      (interpolated_string_literal
+        (string_content)))))
+
+================================================================================
+special vars
+================================================================================
+$1;
+$^X;
+$!;
+$^_;
+${^_arbitrary_VAR};
+${^Foo};
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (scalar
+      (varname)))
+  (expression_statement
+    (scalar
+      (varname)))
+  (expression_statement
+    (scalar
+      (varname)))
+  (expression_statement
+    (scalar
+      (varname)))
+  (expression_statement
+    (scalar
+      (varname)))
+  (expression_statement
+    (scalar
+      (varname))))
+
+================================================================================
+Double dollar edge cases
+================================================================================
+$$;
+# symbols are invalid names
+$$:;
+$$';
+$[;
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (scalar
+      (varname)))
+  (comment)
+  (expression_statement
+    (scalar
+      (varname)))
+  (ERROR)
+  (expression_statement
+    (scalar
+      (varname)))
+  (ERROR
+    (UNEXPECTED '''))
+  (expression_statement
+    (scalar
+      (varname))))
+
+================================================================================
+crazy vars
+================================================================================
+$::application;
+$::::var;
+%overload::;
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (scalar
+      (varname)))
+  (expression_statement
+    (scalar
+      (varname)))
+  (expression_statement
+    (hash
+      (varname))))
+
+================================================================================
+hash parsing precedence
+================================================================================
+random_function %hash;
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (ambiguous_function_call_expression
+      (function)
+      (hash
+        (varname)))))
+
+================================================================================
+unicode vars!
+================================================================================
+$שלום;
+%こんにちは;
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (scalar
+      (varname)))
+  (expression_statement
+    (hash
+      (varname))))
+
+================================================================================
+amper subs
+================================================================================
+&function_call;
+\&function_ref;
+$amper_derefed->&*;
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (function_call_expression
+      (function
+        (varname))))
+  (expression_statement
+    (refgen_expression
+      (function
+        (varname))))
+  (expression_statement
+    (amper_deref_expression
+      (scalar
+        (varname)))))
+
+================================================================================
+glob access
+================================================================================
+*foo{THING}, *foo{$dynamic_thing}, $var->*{THING}, $var->**;
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (list_expression
+      (glob_slot_expression
+        (glob
+          (varname))
+        (autoquoted_bareword))
+      (glob_slot_expression
+        (glob
+          (varname))
+        (scalar
+          (varname)))
+      (glob_slot_expression
+        (scalar
+          (varname))
+        (autoquoted_bareword))
+      (glob_deref_expression
+        (scalar
+          (varname))))))

@@ -1,0 +1,15 @@
+-pbp               # Start with Perl Best Practices
+--maximum-line-length=120
+--maximum-consecutive-blank-lines=2
+--indent-columns=2
+--opening-brace-always-on-right
+--cuddled-else
+--vertical-tightness=0
+--paren-tightness=2
+--weld-nested-containers
+--weld-fat-comma
+--extended-continuation-indentation
+-bom     # keep method chain's linebreaks
+-isbc    # don't indent comments w/o leading space
+--nostandard-output
+--noblanks-before-comments
