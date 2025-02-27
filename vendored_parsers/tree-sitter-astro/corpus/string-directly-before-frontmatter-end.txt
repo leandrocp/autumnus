@@ -1,0 +1,20 @@
+====================
+Strings directly before the end marker should work
+====================
+
+---
+/* string directly before end marker */ "x"
+---
+<p> Hi! </p>
+
+--------------------
+
+(document
+  (frontmatter
+    (frontmatter_js_block))
+  (element
+    (start_tag
+      (tag_name))
+    (text)
+    (end_tag
+      (tag_name))))

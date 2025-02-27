@@ -1,0 +1,31 @@
+============================================================
+Eat the last curly brace of the interpolated attribute (#14)
+============================================================
+
+<div style={{ fontSize: '16px' }}>
+</div>
+
+<div style={{ fontSize: '16px' } }>
+</div>
+
+--------------------
+
+(document
+  (element
+    (start_tag
+      (tag_name)
+      (attribute
+        (attribute_name)
+        (attribute_interpolation
+          (attribute_js_expr))))
+    (end_tag
+      (tag_name)))
+  (element
+    (start_tag
+      (tag_name)
+      (attribute
+        (attribute_name)
+        (attribute_interpolation
+          (attribute_js_expr))))
+    (end_tag
+      (tag_name))))

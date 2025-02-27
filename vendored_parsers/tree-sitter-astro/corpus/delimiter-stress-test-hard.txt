@@ -1,0 +1,45 @@
+===============================
+Delimiter stress test #2 (hard)
+===============================
+
+---
+" --- invalid inside strings "
+' --- invalid inside strings '
+/*
+---
+invalid inside multiline comments
+*/
+'
+---
+invalid inside (fake) multiline strings
+'
+"
+---
+invalid inside (fake) multiline strings
+"
+// --- invalid inside single-line comments
+/*
+"
+---
+quotes inside a comment do not start a new string
+*/
+// " quotes inside a comment do not start a new string or end it
+/*/*/*/*/*/*/* this text is inside a comment
+---
+**/*/**/ this text is outside a comment
+// ' unterminated string... inside a comment 
+`${
+// the fake ending }
+} the real ending`
+---
+
+<html />
+
+-----------------------------
+
+(document
+    (frontmatter
+        (frontmatter_js_block))
+    (element
+        (self_closing_tag
+            (tag_name))))

@@ -1,0 +1,19 @@
+====================
+Empty frontmatter should parse correctly
+====================
+
+---
+---
+<div>
+</div>
+
+--------------------
+
+(document
+  (frontmatter
+    (frontmatter_js_block))
+  (element
+    (start_tag
+      (tag_name))
+    (end_tag
+      (tag_name))))

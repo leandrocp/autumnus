@@ -1,0 +1,50 @@
+====================
+Basic tests
+====================
+
+---
+let x = `
+---
+${`
+---
+`}
+---
+`;
+---
+<!-- Some basic tests -->
+<MyCustomElement someattr={(function() { return someexpr(like + this); })()}>
+    { 
+        someOtherExpr(null)
+    }
+</MyCustomElement>
+{ "should also work at top level" }
+{ array.map(x => <p> should also support JSX </p>) }
+
+--------------------
+
+(document
+  (frontmatter
+    (frontmatter_js_block))
+  (comment)
+  (element
+    (start_tag
+      (tag_name)
+      (attribute
+        (attribute_name)
+        (attribute_interpolation
+          (attribute_js_expr))))
+    (html_interpolation
+      (permissible_text))
+    (end_tag
+      (tag_name)))
+  (html_interpolation
+    (permissible_text))
+  (html_interpolation
+    (permissible_text)
+    (element
+      (start_tag
+        (tag_name))
+      (text)
+      (end_tag
+        (tag_name)))
+    (permissible_text)))

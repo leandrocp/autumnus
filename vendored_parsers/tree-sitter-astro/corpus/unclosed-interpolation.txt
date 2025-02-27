@@ -1,0 +1,12 @@
+===
+Unclosed interpolation should error
+===
+
+{ 
+
+----
+
+(document
+  (html_interpolation
+    (permissible_text)
+    (MISSING "}")))

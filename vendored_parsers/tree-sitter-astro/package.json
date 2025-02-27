@@ -1,0 +1,39 @@
+{
+  "name": "tree-sitter-astro",
+  "version": "0.0.1",
+  "description": "Astro grammar for tree-sitter",
+  "main": "bindings/node",
+  "scripts": {
+    "build": "tree-sitter generate && node-gyp build",
+    "parse": "tree-sitter parse",
+    "test": "tree-sitter test && script/parse-examples",
+    "test-windows": "tree-sitter test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/virchau13/tree-sitter-astro.git"
+  },
+  "author": "virchau13",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/virchau13/tree-sitter-astro/issues"
+  },
+  "homepage": "https://github.com/virchau13/tree-sitter-astro#readme",
+  "devDependencies": {
+    "eslint": "^8.44.0",
+    "eslint-config-google": "^0.14.0",
+    "tree-sitter-cli": "^0.20.8"
+  },
+  "dependencies": {
+    "nan": "^2.17.0",
+    "tree-sitter-html": "github:tree-sitter/tree-sitter-html"
+  },
+  "tree-sitter": [
+    {
+      "scope": "source.astro",
+      "file-types": [
+        "astro"
+      ]
+    }
+  ]
+}

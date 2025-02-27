@@ -1,0 +1,26 @@
+name: Fuzz parser
+
+on:
+  pull_request:
+    branches:
+      - "**"
+    paths:
+      - src/scanner.c
+  push:
+    branches:
+      - "master"
+    paths:
+      - src/scanner.c
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Parser fuzzing
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: tree-sitter/fuzz-action@v4
+        with:
+          language: astro
+          external-scanner: src/scanner.c
+          time: 60

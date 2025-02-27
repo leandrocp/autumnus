@@ -1,0 +1,37 @@
+===
+Fragment (empty) tags
+===
+
+<>
+<p> hi </p>
+{
+    <>
+        <p> hi </p>
+    </>
+}
+</>
+
+------
+
+(document
+  (element
+    (start_tag)
+    (element
+      (start_tag
+        (tag_name))
+      (text)
+      (end_tag
+        (tag_name)))
+    (html_interpolation
+      (permissible_text)
+      (element
+        (start_tag)
+        (element
+          (start_tag
+            (tag_name))
+          (text)
+          (end_tag
+            (tag_name)))
+        (end_tag))
+      (permissible_text))
+    (end_tag)))

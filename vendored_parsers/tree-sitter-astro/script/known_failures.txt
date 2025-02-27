@@ -1,0 +1,6 @@
+# </script> closing tag at EOF with no script opening tag
+examples/astro/packages/astro/e2e/fixtures/view-transitions/src/pages/404.astro
+# Interpolation does not have balanced brackets
+examples/astro/packages/astro/test/fixtures/astro-basic/src/pages/fileurl.astro
+# Self-closing <Image ... /> tag with regular closing tag </Image> after it
+examples/astro/packages/astro/test/fixtures/core-image-deletion/src/pages/index.astro

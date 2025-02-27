@@ -1,0 +1,20 @@
+========================================================================================
+Interpolated strings don't need to have balanced braces (if they're escaped by comments)
+========================================================================================
+
+---
+`${
+// the fake ending }
+} the real ending`
+---
+
+<html />
+
+------------------------
+
+(document
+   (frontmatter
+      (frontmatter_js_block))
+   (element
+      (self_closing_tag
+         (tag_name))))

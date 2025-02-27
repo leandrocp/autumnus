@@ -1,0 +1,18 @@
+===
+An element in a HTML interpolation
+===
+
+{ <p> it'll </p> }
+
+-------
+
+(document
+  (html_interpolation
+    (permissible_text)
+    (element
+      (start_tag
+        (tag_name))
+      (text)
+      (end_tag
+        (tag_name)))
+    (permissible_text)))

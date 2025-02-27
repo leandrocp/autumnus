@@ -1,0 +1,20 @@
+===
+Attribute backtick strings
+===
+
+<a href=`/pages/${nextPage + 
+// `
+`/buf`}`>link</a>
+
+----
+
+(document
+  (element
+    (start_tag
+      (tag_name)
+      (attribute
+        (attribute_name)
+        (attribute_backtick_string)))
+    (text)
+    (end_tag
+      (tag_name))))

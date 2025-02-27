@@ -1,0 +1,13 @@
+===
+Void tags in interpolation
+===
+
+{<meta>}
+
+-----
+
+(document
+  (html_interpolation
+    (element
+      (start_tag
+        (tag_name)))))
