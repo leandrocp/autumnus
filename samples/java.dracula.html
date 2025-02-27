@@ -240,13 +240,13 @@
 </span><span class="athl-line" data-athl-line="216">        <span style="color: #a4ffff;">System</span><span style="color: #f8f8f2;">.</span><span style="color: #ffb86c;">out</span><span style="color: #f8f8f2;">.</span><span style="color: #50fa7b;">println</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">bazString</span><span style="color: #f8f8f2;">)</span><span style="color: #f8f8f2;">;</span>
 </span><span class="athl-line" data-athl-line="217">
 </span><span class="athl-line" data-athl-line="218">        <span style="color: #6272a4;">// String Building</span>
-</span><span class="athl-line" data-athl-line="219">        <span style="color: #6272a4;">// #1 - with plus operator</span>
+</span><span class="athl-line" data-athl-line="219">        <span style="color: #6272a4;">// <span style="color: #bd93f9;">#1</span> - with plus operator</span>
 </span><span class="athl-line" data-athl-line="220">        <span style="color: #6272a4;">// That&#39;s the basic way to do it (optimized under the hood)</span>
 </span><span class="athl-line" data-athl-line="221">        <span style="color: #a4ffff;">String</span> <span style="color: #f8f8f2;">plusConcatenated</span> <span style="color: #ff79c6;">=</span> <span style="color: #f1fa8c;">&quot;Strings can &quot;</span> <span style="color: #ff79c6;">+</span> <span style="color: #f1fa8c;">&quot;be concatenated &quot;</span> <span style="color: #ff79c6;">+</span> <span style="color: #f1fa8c;">&quot;via + operator.&quot;</span><span style="color: #f8f8f2;">;</span>
 </span><span class="athl-line" data-athl-line="222">        <span style="color: #a4ffff;">System</span><span style="color: #f8f8f2;">.</span><span style="color: #ffb86c;">out</span><span style="color: #f8f8f2;">.</span><span style="color: #50fa7b;">println</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">plusConcatenated</span><span style="color: #f8f8f2;">)</span><span style="color: #f8f8f2;">;</span>
 </span><span class="athl-line" data-athl-line="223">        <span style="color: #6272a4;">// Output: Strings can be concatenated via + operator.</span>
 </span><span class="athl-line" data-athl-line="224">
-</span><span class="athl-line" data-athl-line="225">        <span style="color: #6272a4;">// #2 - with StringBuilder</span>
+</span><span class="athl-line" data-athl-line="225">        <span style="color: #6272a4;">// <span style="color: #bd93f9;">#2</span> - with StringBuilder</span>
 </span><span class="athl-line" data-athl-line="226">        <span style="color: #6272a4;">// This way doesn&#39;t create any intermediate strings. It just stores the string pieces, and ties them together</span>
 </span><span class="athl-line" data-athl-line="227">        <span style="color: #6272a4;">// when toString() is called.</span>
 </span><span class="athl-line" data-athl-line="228">        <span style="color: #6272a4;">// Hint: This class is not thread safe. A thread-safe alternative (with some impact on performance) is StringBuffer.</span>
@@ -270,7 +270,7 @@
 </span><span class="athl-line" data-athl-line="246">        <span style="color: #6272a4;">// Simple concatenation with + is compiled to a StringBuilder and toString()</span>
 </span><span class="athl-line" data-athl-line="247">        <span style="color: #6272a4;">// Avoid string concatenation in loops.</span>
 </span><span class="athl-line" data-athl-line="248">
-</span><span class="athl-line" data-athl-line="249">        <span style="color: #6272a4;">// #3 - with String formatter</span>
+</span><span class="athl-line" data-athl-line="249">        <span style="color: #6272a4;">// <span style="color: #bd93f9;">#3</span> - with String formatter</span>
 </span><span class="athl-line" data-athl-line="250">        <span style="color: #6272a4;">// Another alternative way to create strings. Fast and readable.</span>
 </span><span class="athl-line" data-athl-line="251">        <span style="color: #a4ffff;">String</span><span style="color: #f8f8f2;">.</span><span style="color: #50fa7b;">format</span><span style="color: #f8f8f2;">(</span><span style="color: #f1fa8c;">&quot;%s may prefer %s.&quot;</span><span style="color: #f8f8f2;">,</span> <span style="color: #f1fa8c;">&quot;Or you&quot;</span><span style="color: #f8f8f2;">,</span> <span style="color: #f1fa8c;">&quot;String.format()&quot;</span><span style="color: #f8f8f2;">)</span><span style="color: #f8f8f2;">;</span>
 </span><span class="athl-line" data-athl-line="252">        <span style="color: #6272a4;">// Output: Or you may prefer String.format().</span>
@@ -486,7 +486,7 @@
 </span><span class="athl-line" data-athl-line="462">        <span style="color: #6272a4;">// already closed. This can be used to avoid certain edge cases where</span>
 </span><span class="athl-line" data-athl-line="463">        <span style="color: #6272a4;">// a finally statement might not be called.</span>
 </span><span class="athl-line" data-athl-line="464">        <span style="color: #6272a4;">// To learn more:</span>
-</span><span class="athl-line" data-athl-line="465">        <span style="color: #6272a4;">// https://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html</span>
+</span><span class="athl-line" data-athl-line="465">        <span style="color: #6272a4;">// <span style="color: #8be9fd; text-decoration: underline;">https://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html</span></span>
 </span><span class="athl-line" data-athl-line="466">
 </span><span class="athl-line" data-athl-line="467">
 </span><span class="athl-line" data-athl-line="468">        <span style="color: #6272a4;">// Conditional Shorthand</span>
@@ -700,7 +700,7 @@
 </span><span class="athl-line" data-athl-line="676">
 </span><span class="athl-line" data-athl-line="677">    <span style="color: #6272a4;">// You should mark a method you&#39;re overriding with an @annotation.</span>
 </span><span class="athl-line" data-athl-line="678">    <span style="color: #6272a4;">// To learn more about what annotations are and their purpose check this</span>
-</span><span class="athl-line" data-athl-line="679">    <span style="color: #6272a4;">// out: http://docs.oracle.com/javase/tutorial/java/annotations/</span>
+</span><span class="athl-line" data-athl-line="679">    <span style="color: #6272a4;">// out: <span style="color: #8be9fd; text-decoration: underline;">http://docs.oracle.com/javase/tutorial/java/annotations/</span></span>
 </span><span class="athl-line" data-athl-line="680">    <span style="color: #8be9fd;">@</span><span style="color: #8be9fd;">Override</span>
 </span><span class="athl-line" data-athl-line="681">    <span style="color: #ff79c6;">public</span> <span style="color: #8be9fd;">void</span> <span style="color: #50fa7b;">setGear</span><span style="color: #f8f8f2;">(</span><span style="color: #8be9fd;">int</span> <span style="color: #ffb86c;">gear</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">{</span>
 </span><span class="athl-line" data-athl-line="682">        <span style="color: #bd93f9;">this</span><span style="color: #f8f8f2;">.</span><span style="color: #ffb86c;">gear</span> <span style="color: #ff79c6;">=</span> <span style="color: #bd93f9;">0</span><span style="color: #f8f8f2;">;</span>
@@ -713,7 +713,7 @@
 </span><span class="athl-line" data-athl-line="689"><span style="color: #6272a4;">// Bicycle bicycle = new PennyFarthing();</span>
 </span><span class="athl-line" data-athl-line="690"><span style="color: #6272a4;">// This is called object casting where an object is taken for another one. There</span>
 </span><span class="athl-line" data-athl-line="691"><span style="color: #6272a4;">// are lots of details and deals with some more intermediate concepts here:</span>
-</span><span class="athl-line" data-athl-line="692"><span style="color: #6272a4;">// https://docs.oracle.com/javase/tutorial/java/IandI/subclasses.html</span>
+</span><span class="athl-line" data-athl-line="692"><span style="color: #6272a4;">// <span style="color: #8be9fd; text-decoration: underline;">https://docs.oracle.com/javase/tutorial/java/IandI/subclasses.html</span></span>
 </span><span class="athl-line" data-athl-line="693">
 </span><span class="athl-line" data-athl-line="694"><span style="color: #6272a4;">// Interfaces</span>
 </span><span class="athl-line" data-athl-line="695"><span style="color: #6272a4;">// Interface declaration syntax</span>
@@ -781,7 +781,7 @@
 </span><span class="athl-line" data-athl-line="757"><span style="color: #6272a4;">// with customised behavior, but as Abstract classes require</span>
 </span><span class="athl-line" data-athl-line="758"><span style="color: #6272a4;">// inheritance, they violate &quot;Composition over inheritance&quot;</span>
 </span><span class="athl-line" data-athl-line="759"><span style="color: #6272a4;">// so consider other approaches using composition.</span>
-</span><span class="athl-line" data-athl-line="760"><span style="color: #6272a4;">// https://en.wikipedia.org/wiki/Composition_over_inheritance</span>
+</span><span class="athl-line" data-athl-line="760"><span style="color: #6272a4;">// <span style="color: #8be9fd; text-decoration: underline;">https://en.wikipedia.org/wiki/Composition_over_inheritance</span></span>
 </span><span class="athl-line" data-athl-line="761">
 </span><span class="athl-line" data-athl-line="762"><span style="color: #ff79c6;">public</span> <span style="color: #ff79c6;">abstract</span> <span style="color: #ff79c6;">class</span> <span style="color: #a4ffff;">Animal</span>
 </span><span class="athl-line" data-athl-line="763"><span style="color: #f8f8f2;">{</span>
@@ -817,14 +817,14 @@
 </span><span class="athl-line" data-athl-line="793">    <span style="color: #ff79c6;">public</span> <span style="color: #8be9fd;">void</span> <span style="color: #50fa7b;">makeSound</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">)</span>
 </span><span class="athl-line" data-athl-line="794">    <span style="color: #f8f8f2;">{</span>
 </span><span class="athl-line" data-athl-line="795">        <span style="color: #a4ffff;">System</span><span style="color: #f8f8f2;">.</span><span style="color: #ffb86c;">out</span><span style="color: #f8f8f2;">.</span><span style="color: #50fa7b;">println</span><span style="color: #f8f8f2;">(</span><span style="color: #f1fa8c;">&quot;Bark&quot;</span><span style="color: #f8f8f2;">)</span><span style="color: #f8f8f2;">;</span>
-</span><span class="athl-line" data-athl-line="796">        <span style="color: #6272a4;">// age = 30;    ==&gt; ERROR!    age is private to Animal</span>
+</span><span class="athl-line" data-athl-line="796">        <span style="color: #6272a4;">// age = 30;    ==&gt; <span style="color: #6272a4;">ERROR</span>!    age is private to Animal</span>
 </span><span class="athl-line" data-athl-line="797">    <span style="color: #f8f8f2;">}</span>
 </span><span class="athl-line" data-athl-line="798">
-</span><span class="athl-line" data-athl-line="799">    <span style="color: #6272a4;">// NOTE: You will get an error if you used the</span>
+</span><span class="athl-line" data-athl-line="799">    <span style="color: #6272a4;">// <span style="color: #6272a4;">NOTE</span><span style="color: #f8f8f2;">:</span> You will get an error if you used the</span>
 </span><span class="athl-line" data-athl-line="800">    <span style="color: #6272a4;">// @Override annotation here, since java doesn&#39;t allow</span>
 </span><span class="athl-line" data-athl-line="801">    <span style="color: #6272a4;">// overriding of static methods.</span>
 </span><span class="athl-line" data-athl-line="802">    <span style="color: #6272a4;">// What is happening here is called METHOD HIDING.</span>
-</span><span class="athl-line" data-athl-line="803">    <span style="color: #6272a4;">// Check out this SO post: http://stackoverflow.com/questions/16313649/</span>
+</span><span class="athl-line" data-athl-line="803">    <span style="color: #6272a4;">// Check out this SO post: <span style="color: #8be9fd; text-decoration: underline;">http://stackoverflow.com/questions/16313649/</span></span>
 </span><span class="athl-line" data-athl-line="804">    <span style="color: #ff79c6;">public</span> <span style="color: #ff79c6;">static</span> <span style="color: #8be9fd;">void</span> <span style="color: #50fa7b;">main</span><span style="color: #f8f8f2;">(</span><span style="color: #a4ffff;">String</span><span style="color: #f8f8f2;">[</span><span style="color: #f8f8f2;">]</span> <span style="color: #ffb86c;">args</span><span style="color: #f8f8f2;">)</span>
 </span><span class="athl-line" data-athl-line="805">    <span style="color: #f8f8f2;">{</span>
 </span><span class="athl-line" data-athl-line="806">        <span style="color: #a4ffff;">Dog</span> <span style="color: #f8f8f2;">pluto</span> <span style="color: #ff79c6;">=</span> <span style="color: #ff79c6;">new</span> <span style="color: #a4ffff;">Dog</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">)</span><span style="color: #f8f8f2;">;</span>
@@ -927,7 +927,7 @@
 </span><span class="athl-line" data-athl-line="903">
 </span><span class="athl-line" data-athl-line="904"><span style="color: #6272a4;">// Enum types are much more powerful than we show above.</span>
 </span><span class="athl-line" data-athl-line="905"><span style="color: #6272a4;">// The enum body can include methods and other fields.</span>
-</span><span class="athl-line" data-athl-line="906"><span style="color: #6272a4;">// You can see more at https://docs.oracle.com/javase/tutorial/java/javaOO/enum.html</span>
+</span><span class="athl-line" data-athl-line="906"><span style="color: #6272a4;">// You can see more at <span style="color: #8be9fd; text-decoration: underline;">https://docs.oracle.com/javase/tutorial/java/javaOO/enum.html</span></span>
 </span><span class="athl-line" data-athl-line="907">
 </span><span class="athl-line" data-athl-line="908"><span style="color: #6272a4;">// Getting Started with Lambda Expressions</span>
 </span><span class="athl-line" data-athl-line="909"><span style="color: #6272a4;">//</span>

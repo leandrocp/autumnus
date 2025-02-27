@@ -167,15 +167,15 @@
 </span><span class="athl-line" data-athl-line="143">  <span style="color: #b57614;">int</span> <span style="color: #3c3836;">my_array</span><span style="color: #af3a03;">[</span><span style="color: #8f3f71;">5</span><span style="color: #af3a03;">]</span> <span style="color: #af3a03;">=</span> <span style="color: #af3a03;">{</span><span style="color: #8f3f71;">1</span><span style="color: #af3a03;">,</span> <span style="color: #8f3f71;">2</span><span style="color: #af3a03;">}</span><span style="color: #af3a03;">;</span>
 </span><span class="athl-line" data-athl-line="144">  <span style="color: #928374;">// So my_array now has five elements, all but the first two of which are 0:</span>
 </span><span class="athl-line" data-athl-line="145">  <span style="color: #928374;">// [1, 2, 0, 0, 0]</span>
-</span><span class="athl-line" data-athl-line="146">  <span style="color: #928374;">// NOTE that you get away without explicitly declaring the size</span>
+</span><span class="athl-line" data-athl-line="146">  <span style="color: #928374;">// <span style="color: #928374;">NOTE</span> that you get away without explicitly declaring the size</span>
 </span><span class="athl-line" data-athl-line="147">  <span style="color: #928374;">// of the array IF you initialize the array on the same line:</span>
 </span><span class="athl-line" data-athl-line="148">  <span style="color: #b57614;">int</span> <span style="color: #3c3836;">my_array</span><span style="color: #af3a03;">[</span><span style="color: #af3a03;">]</span> <span style="color: #af3a03;">=</span> <span style="color: #af3a03;">{</span><span style="color: #8f3f71;">0</span><span style="color: #af3a03;">}</span><span style="color: #af3a03;">;</span>
-</span><span class="athl-line" data-athl-line="149">  <span style="color: #928374;">// NOTE that, when not declaring the size, the size of the array is the number</span>
+</span><span class="athl-line" data-athl-line="149">  <span style="color: #928374;">// <span style="color: #928374;">NOTE</span> that, when not declaring the size, the size of the array is the number</span>
 </span><span class="athl-line" data-athl-line="150">  <span style="color: #928374;">// of elements in the initializer. With &quot;{0}&quot;, my_array is now of size one: [0]</span>
 </span><span class="athl-line" data-athl-line="151">  <span style="color: #928374;">// To evaluate the size of the array at run-time, divide its byte size by the</span>
 </span><span class="athl-line" data-athl-line="152">  <span style="color: #928374;">// byte size of its element type:</span>
 </span><span class="athl-line" data-athl-line="153">  <span style="color: #b57614;">size_t</span> <span style="color: #3c3836;">my_array_size</span> <span style="color: #af3a03;">=</span> <span style="color: #9d0006;">sizeof</span><span style="color: #af3a03;">(</span><span style="color: #3c3836;">my_array</span><span style="color: #af3a03;">)</span> <span style="color: #af3a03;">/</span> <span style="color: #9d0006;">sizeof</span><span style="color: #af3a03;">(</span><span style="color: #3c3836;">my_array</span><span style="color: #af3a03;">[</span><span style="color: #8f3f71;">0</span><span style="color: #af3a03;">]</span><span style="color: #af3a03;">)</span><span style="color: #af3a03;">;</span>
-</span><span class="athl-line" data-athl-line="154">  <span style="color: #928374;">// WARNING You should evaluate the size *before* you begin passing the array</span>
+</span><span class="athl-line" data-athl-line="154">  <span style="color: #928374;">// <span style="color: #928374;">WARNING</span> You should evaluate the size *before* you begin passing the array</span>
 </span><span class="athl-line" data-athl-line="155">  <span style="color: #928374;">// to functions (see later discussion) because arrays get &quot;downgraded&quot; to</span>
 </span><span class="athl-line" data-athl-line="156">  <span style="color: #928374;">// raw pointers when they are passed to functions (so the statement above</span>
 </span><span class="athl-line" data-athl-line="157">  <span style="color: #928374;">// will produce the wrong result inside the function).</span>
@@ -209,7 +209,7 @@
 </span><span class="athl-line" data-athl-line="185">  <span style="color: #79740e; font-weight: bold;">printf</span><span style="color: #af3a03;">(</span><span style="color: #79740e;">&quot;%s<span style="color: #af3a03;">\n</span>&quot;</span><span style="color: #af3a03;">,</span> <span style="color: #3c3836;">a_string</span><span style="color: #af3a03;">)</span><span style="color: #af3a03;">;</span> <span style="color: #928374;">// %s formats a string</span>
 </span><span class="athl-line" data-athl-line="186">
 </span><span class="athl-line" data-athl-line="187">  <span style="color: #79740e; font-weight: bold;">printf</span><span style="color: #af3a03;">(</span><span style="color: #79740e;">&quot;%d<span style="color: #af3a03;">\n</span>&quot;</span><span style="color: #af3a03;">,</span> <span style="color: #3c3836;">a_string</span><span style="color: #af3a03;">[</span><span style="color: #8f3f71;">16</span><span style="color: #af3a03;">]</span><span style="color: #af3a03;">)</span><span style="color: #af3a03;">;</span> <span style="color: #928374;">// =&gt; 0</span>
-</span><span class="athl-line" data-athl-line="188">  <span style="color: #928374;">// i.e., byte #17 is 0 (as are 18, 19, and 20)</span>
+</span><span class="athl-line" data-athl-line="188">  <span style="color: #928374;">// i.e., byte <span style="color: #8f3f71;">#17</span> is 0 (as are 18, 19, and 20)</span>
 </span><span class="athl-line" data-athl-line="189">
 </span><span class="athl-line" data-athl-line="190">  <span style="color: #928374;">// If we have characters between single quotes, that&#39;s a character literal.</span>
 </span><span class="athl-line" data-athl-line="191">  <span style="color: #928374;">// It&#39;s of type `int`, and *not* `char` (for historical reasons).</span>
@@ -404,13 +404,13 @@
 </span><span class="athl-line" data-athl-line="380">  <span style="color: #9d0006;">error</span><span style="color: #af3a03;">:</span> <span style="color: #928374;">// this is a label that you can &quot;jump&quot; to with &quot;goto error;&quot;</span>
 </span><span class="athl-line" data-athl-line="381">  <span style="color: #79740e; font-weight: bold;">printf</span><span style="color: #af3a03;">(</span><span style="color: #79740e;">&quot;Error occurred at i = %d &amp; j = %d.<span style="color: #af3a03;">\n</span>&quot;</span><span style="color: #af3a03;">,</span> <span style="color: #3c3836;">i</span><span style="color: #af3a03;">,</span> <span style="color: #3c3836;">j</span><span style="color: #af3a03;">)</span><span style="color: #af3a03;">;</span>
 </span><span class="athl-line" data-athl-line="382">  <span style="color: #928374;">/*</span>
-</span><span class="athl-line" data-athl-line="383"><span style="color: #928374;">    https://ideone.com/GuPhd6</span>
+</span><span class="athl-line" data-athl-line="383"><span style="color: #928374;">    <span style="color: #076678; text-decoration: underline;">https://ideone.com/GuPhd6</span></span>
 </span><span class="athl-line" data-athl-line="384"><span style="color: #928374;">    this will print out &quot;Error occurred at i = 51 &amp; j = 99.&quot;</span>
 </span><span class="athl-line" data-athl-line="385"><span style="color: #928374;">  */</span>
 </span><span class="athl-line" data-athl-line="386">  <span style="color: #928374;">/*</span>
 </span><span class="athl-line" data-athl-line="387"><span style="color: #928374;">    it is generally considered bad practice to do so, except if</span>
 </span><span class="athl-line" data-athl-line="388"><span style="color: #928374;">    you really know what you are doing. See</span>
-</span><span class="athl-line" data-athl-line="389"><span style="color: #928374;">    https://en.wikipedia.org/wiki/Spaghetti_code#Meaning</span>
+</span><span class="athl-line" data-athl-line="389"><span style="color: #928374;">    <span style="color: #076678; text-decoration: underline;">https://en.wikipedia.org/wiki/Spaghetti_code#Meaning</span></span>
 </span><span class="athl-line" data-athl-line="390"><span style="color: #928374;">  */</span>
 </span><span class="athl-line" data-athl-line="391">
 </span><span class="athl-line" data-athl-line="392">  <span style="color: #928374;">///////////////////////////////////////</span>
@@ -588,7 +588,7 @@
 </span><span class="athl-line" data-athl-line="564">  <span style="color: #b57614;">char</span> <span style="color: #3c3836;">tmp</span><span style="color: #af3a03;">;</span>
 </span><span class="athl-line" data-athl-line="565">  <span style="color: #b57614;">size_t</span> <span style="color: #3c3836;">ii</span> <span style="color: #af3a03;">=</span> <span style="color: #8f3f71;">0</span><span style="color: #af3a03;">;</span>
 </span><span class="athl-line" data-athl-line="566">  <span style="color: #b57614;">size_t</span> <span style="color: #3c3836;">len</span> <span style="color: #af3a03;">=</span> <span style="color: #79740e; font-weight: bold;">strlen</span><span style="color: #af3a03;">(</span><span style="color: #3c3836;">str_in</span><span style="color: #af3a03;">)</span><span style="color: #af3a03;">;</span> <span style="color: #928374;">// `strlen()` is part of the c standard library</span>
-</span><span class="athl-line" data-athl-line="567">                               <span style="color: #928374;">// NOTE: length returned by `strlen` DOESN&#39;T</span>
+</span><span class="athl-line" data-athl-line="567">                               <span style="color: #928374;">// <span style="color: #928374;">NOTE</span><span style="color: #af3a03;">:</span> length returned by `strlen` DOESN&#39;T</span>
 </span><span class="athl-line" data-athl-line="568">                               <span style="color: #928374;">//       include the terminating NULL byte (&#39;\0&#39;)</span>
 </span><span class="athl-line" data-athl-line="569">  <span style="color: #928374;">// in C99 and newer versions, you can directly declare loop control variables</span>
 </span><span class="athl-line" data-athl-line="570">  <span style="color: #928374;">// in the loop&#39;s parentheses. e.g., `for (size_t ii = 0; ...`</span>
@@ -598,7 +598,7 @@
 </span><span class="athl-line" data-athl-line="574">    <span style="color: #3c3836;">str_in</span><span style="color: #af3a03;">[</span><span style="color: #3c3836;">len</span> <span style="color: #af3a03;">-</span> <span style="color: #3c3836;">ii</span> <span style="color: #af3a03;">-</span> <span style="color: #8f3f71;">1</span><span style="color: #af3a03;">]</span> <span style="color: #af3a03;">=</span> <span style="color: #3c3836;">tmp</span><span style="color: #af3a03;">;</span>
 </span><span class="athl-line" data-athl-line="575">  <span style="color: #af3a03;">}</span>
 </span><span class="athl-line" data-athl-line="576"><span style="color: #af3a03;">}</span>
-</span><span class="athl-line" data-athl-line="577"><span style="color: #928374;">//NOTE: string.h header file needs to be included to use strlen()</span>
+</span><span class="athl-line" data-athl-line="577"><span style="color: #928374;">//<span style="color: #928374;">NOTE</span><span style="color: #af3a03;">:</span> string.h header file needs to be included to use strlen()</span>
 </span><span class="athl-line" data-athl-line="578">
 </span><span class="athl-line" data-athl-line="579"><span style="color: #928374;">/*</span>
 </span><span class="athl-line" data-athl-line="580"><span style="color: #928374;">char c[] = &quot;This is a test.&quot;;</span>
@@ -811,7 +811,7 @@
 </span><span class="athl-line" data-athl-line="787"><span style="color: #928374;">&quot;%3.2f&quot;; // minimum 3 digits left and 2 digits right decimal float</span>
 </span><span class="athl-line" data-athl-line="788"><span style="color: #928374;">&quot;%7.4s&quot;; // (can do with strings too)</span>
 </span><span class="athl-line" data-athl-line="789"><span style="color: #928374;">&quot;%c&quot;;    // char</span>
-</span><span class="athl-line" data-athl-line="790"><span style="color: #928374;">&quot;%p&quot;;    // pointer. NOTE: need to (void *)-cast the pointer, before passing</span>
+</span><span class="athl-line" data-athl-line="790"><span style="color: #928374;">&quot;%p&quot;;    // pointer. <span style="color: #928374;">NOTE</span><span style="color: #af3a03;">:</span> need to (void *)-cast the pointer, before passing</span>
 </span><span class="athl-line" data-athl-line="791"><span style="color: #928374;">         //                it as an argument to `printf`.</span>
 </span><span class="athl-line" data-athl-line="792"><span style="color: #928374;">&quot;%x&quot;;    // hexadecimal</span>
 </span><span class="athl-line" data-athl-line="793"><span style="color: #928374;">&quot;%o&quot;;    // octal</span>

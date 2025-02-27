@@ -24,7 +24,7 @@
 <body>
 <pre class="athl" style="color: #d8dee9; background-color: #2e3440;"><code class="language-bash" translate="no" tabindex="0"><span class="athl-line" data-athl-line="1"><span style="color: #81a1c1;">#!/usr/bin/env bash</span>
 </span><span class="athl-line" data-athl-line="2"><span style="color: #616e88;"># First line of the script is the shebang which tells the system how to execute</span>
-</span><span class="athl-line" data-athl-line="3"><span style="color: #616e88;"># the script: https://en.wikipedia.org/wiki/Shebang_(Unix)</span>
+</span><span class="athl-line" data-athl-line="3"><span style="color: #616e88;"># the script: <span style="color: #a3be8c; text-decoration: underline;">https://en.wikipedia.org/wiki/Shebang_(Unix</span>)</span>
 </span><span class="athl-line" data-athl-line="4"><span style="color: #616e88;"># As you already figured, comments start with #. Shebang is also a comment.</span>
 </span><span class="athl-line" data-athl-line="5">
 </span><span class="athl-line" data-athl-line="6"><span style="color: #616e88;"># Simple hello world example:</span>
@@ -330,12 +330,12 @@
 </span><span class="athl-line" data-athl-line="306"><span style="color: #88c0d0;">echo</span> <span style="color: #a3be8c;">&quot;#helloworld&quot;</span> <span style="color: #81a1c1;">|</span> <span style="color: #88c0d0;">tee</span> <span style="color: #d8dee9; font-weight: bold;">output.out</span> <span style="color: #81a1c1;">&gt;</span><span style="color: #ebcb8b;">/dev/null</span>
 </span><span class="athl-line" data-athl-line="307">
 </span><span class="athl-line" data-athl-line="308"><span style="color: #616e88;"># Cleanup temporary files verbosely (add &#39;-i&#39; for interactive)</span>
-</span><span class="athl-line" data-athl-line="309"><span style="color: #616e88;"># WARNING: `rm` commands cannot be undone</span>
+</span><span class="athl-line" data-athl-line="309"><span style="color: #616e88;"># <span style="color: #616e88;">WARNING</span><span style="color: #88c0d0;">:</span> `rm` commands cannot be undone</span>
 </span><span class="athl-line" data-athl-line="310"><span style="color: #88c0d0;">rm</span> <span style="color: #d8dee9; font-weight: bold;">-v</span> <span style="color: #d8dee9; font-weight: bold;">output.out</span> <span style="color: #d8dee9; font-weight: bold;">error.err</span> <span style="color: #d8dee9; font-weight: bold;">output-and-error.log</span>
 </span><span class="athl-line" data-athl-line="311"><span style="color: #88c0d0;">rm</span> <span style="color: #d8dee9; font-weight: bold;">-r</span> <span style="color: #d8dee9; font-weight: bold;">tempDir/</span> <span style="color: #616e88;"># recursively delete</span>
 </span><span class="athl-line" data-athl-line="312"><span style="color: #616e88;"># You can install the `trash-cli` Python package to have `trash`</span>
 </span><span class="athl-line" data-athl-line="313"><span style="color: #616e88;"># which puts files in the system trash and doesn&#39;t delete them directly</span>
-</span><span class="athl-line" data-athl-line="314"><span style="color: #616e88;"># see https://pypi.org/project/trash-cli/ if you want to be careful</span>
+</span><span class="athl-line" data-athl-line="314"><span style="color: #616e88;"># see <span style="color: #a3be8c; text-decoration: underline;">https://pypi.org/project/trash-cli/</span> if you want to be careful</span>
 </span><span class="athl-line" data-athl-line="315">
 </span><span class="athl-line" data-athl-line="316"><span style="color: #616e88;"># Commands can be substituted within other commands using $( ):</span>
 </span><span class="athl-line" data-athl-line="317"><span style="color: #616e88;"># The following command displays the number of files and directories in the</span>

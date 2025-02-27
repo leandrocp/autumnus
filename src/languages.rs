@@ -9,6 +9,7 @@ use strum::{EnumIter, IntoEnumIterator};
 use tree_sitter_highlight::HighlightConfiguration;
 
 extern "C" {
+    fn tree_sitter_angular() -> *const ();
     fn tree_sitter_clojure() -> *const ();
     fn tree_sitter_comment() -> *const ();
     fn tree_sitter_commonlisp() -> *const ();
@@ -28,7 +29,7 @@ pub use generated::*;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter)]
 pub enum Language {
-    // Angular,
+    Angular,
     // Astro,
     Bash,
     C,
@@ -101,6 +102,7 @@ pub enum Language {
 impl Language {
     pub fn guess(lang_or_path: &str, src: &str) -> Self {
         let exact = match lang_or_path {
+            "angular" => Some(Language::Angular),
             "bash" => Some(Language::Bash),
             "c" => Some(Language::C),
             "clojure" => Some(Language::Clojure),
@@ -204,6 +206,7 @@ impl Language {
     // TODO: review tree-sitter.json file-types
     pub fn language_globs(language: Language) -> Vec<glob::Pattern> {
         let glob_strs: &'static [&'static str] = match language {
+            Language::Angular => &["*.angular", "component.html"],
             Language::Bash => &[
                 "*.bash",
                 "*.bats",
@@ -537,6 +540,7 @@ impl Language {
 
     pub fn name(&self) -> &'static str {
         match self {
+            Language::Angular => "Angular",
             Language::Bash => "Bash",
             Language::C => "C",
             Language::Clojure => "Clojure",
@@ -592,6 +596,7 @@ impl Language {
 
     pub fn config(&self) -> &'static HighlightConfiguration {
         match self {
+            Language::Angular => &ANGULAR_CONFIG,
             Language::Bash => &BASH_CONFIG,
             Language::C => &C_CONFIG,
             Language::Clojure => &CLOJURE_CONFIG,
@@ -651,6 +656,21 @@ fn split_on_newlines(s: &str) -> impl Iterator<Item = &str> {
         }
     })
 }
+
+static ANGULAR_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_angular) };
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "angular",
+        ANGULAR_HIGHLIGHTS,
+        ANGULAR_INJECTIONS,
+        ANGULAR_LOCALS,
+    )
+    .expect("failed to create angular highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
 
 static BASH_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
