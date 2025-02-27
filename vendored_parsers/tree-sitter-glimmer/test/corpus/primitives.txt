@@ -1,0 +1,51 @@
+==================
+Double-Quote String
+==================
+{{"foo"}}
+{{""}}
+---
+
+(template
+  (mustache_statement
+    (string_literal))
+  (text_node)
+  (mustache_statement
+    (string_literal)))
+
+==================
+Single-Quote String
+==================
+{{'foo'}}
+{{''}}
+---
+
+(template
+  (mustache_statement
+    (string_literal))
+  (text_node)
+  (mustache_statement
+    (string_literal)))
+
+==================
+Number
+==================
+{{12}}
+---
+
+(template
+  (mustache_statement
+    (number_literal)))
+
+==================
+Boolean
+==================
+{{true}}
+{{false}}
+---
+
+(template
+  (mustache_statement
+    (boolean_literal))
+  (text_node)
+  (mustache_statement
+    (boolean_literal)))

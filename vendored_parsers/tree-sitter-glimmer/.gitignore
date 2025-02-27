@@ -1,0 +1,22 @@
+# Local Building
+parser/*.so
+
+# Dependencies
+node_modules
+Cargo.lock
+
+# Build Output
+build
+target/
+
+# Generates Docs Output
+docs/*.html
+
+# Yarn 3 (w/o Zero-Installs)
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions

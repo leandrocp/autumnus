@@ -1,0 +1,42 @@
+name: Linting
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+      - main
+
+concurrency:
+  group: ${{github.workflow}}-${{github.ref}}
+  cancel-in-progress: true
+
+jobs:
+  js:
+    name: "JavaScript"
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+    - run: npm install
+    - run: npm exec prettier --check .
+
+  format-queries:
+    name: Queries
+    runs-on: ubuntu-latest
+    env:
+      NVIM_TAG: nightly
+      # NVIM_TAG: stable
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare
+        run: |
+          bash ./scripts/ci-install.sh
+
+      - name: Lint
+        run: |
+          nvim --version
+          nvim --headless -c "TSInstallSync query" -c "q"
+          nvim -l scripts/format-queries.lua
+          git diff --exit-code

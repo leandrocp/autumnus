@@ -1,0 +1,7 @@
+# Highlight test fixtures
+test/highlight/
+
+*.yml
+*.yaml
+*.md
+*.json

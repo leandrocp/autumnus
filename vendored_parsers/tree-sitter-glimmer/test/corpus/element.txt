@@ -1,0 +1,121 @@
+==================
+HTML Element
+==================
+<div></div>
+<h1></h1>
+---
+
+(template
+  (element_node
+    (element_node_start
+      (tag_name))
+    (element_node_end
+      (tag_name)))
+  (text_node)
+  (element_node
+    (element_node_start
+      (tag_name))
+    (element_node_end
+      (tag_name))))
+
+==================
+Web Components
+==================
+<my-web-component></my-web-component>
+---
+
+(template
+  (element_node
+    (element_node_start
+      (tag_name))
+    (element_node_end
+      (tag_name))))
+
+==================
+Glimmer components
+==================
+<MyCoolComponent></MyCoolComponent>
+---
+
+(template
+  (element_node
+    (element_node_start
+      (tag_name))
+    (element_node_end
+      (tag_name))))
+
+==================
+Nested Glimmer components
+==================
+<Parent::Child></Parent::Child>
+---
+
+(template
+  (element_node
+    (element_node_start
+      (tag_name))
+    (element_node_end
+      (tag_name))))
+
+==================
+Named Blocks
+==================
+<:header></:header>
+---
+
+(template
+  (element_node
+    (element_node_start
+      (tag_name))
+    (element_node_end
+      (tag_name))))
+
+==================
+Argument components
+==================
+<@item></@item>
+---
+
+(template
+  (element_node
+    (element_node_start
+      (tag_name))
+    (element_node_end
+      (tag_name))))
+
+==================
+Argument property components
+==================
+<@arg.item></@arg.item>
+---
+
+(template
+  (element_node
+    (element_node_start
+      (tag_name))
+    (element_node_end
+      (tag_name))))
+
+==================
+Yielded Contextual Component
+==================
+<d.Trigger></d.Trigger>
+---
+
+(template
+  (element_node
+    (element_node_start
+      (tag_name))
+    (element_node_end
+      (tag_name))))
+
+==================
+Void Elements
+==================
+<img />
+---
+
+(template
+  (element_node
+    (element_node_void
+      (tag_name))))

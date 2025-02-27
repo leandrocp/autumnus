@@ -1,0 +1,56 @@
+==================
+Text Content
+==================
+<div>
+  Foo
+</div>
+---
+
+(template
+  (element_node
+    (element_node_start
+      (tag_name))
+    (text_node)
+    (element_node_end
+      (tag_name))))
+
+==================
+Element Contents
+==================
+<div>
+  <div></div>
+</div>
+---
+
+(template
+  (element_node
+    (element_node_start
+      (tag_name))
+    (text_node)
+    (element_node
+      (element_node_start
+        (tag_name))
+      (element_node_end
+        (tag_name)))
+    (text_node)
+    (element_node_end
+      (tag_name))))
+
+==================
+Mustache Contents
+==================
+<div>
+  {{foo}}
+</div>
+---
+
+(template
+  (element_node
+    (element_node_start
+      (tag_name))
+    (text_node)
+    (mustache_statement
+      (identifier))
+    (text_node)
+    (element_node_end
+      (tag_name))))
