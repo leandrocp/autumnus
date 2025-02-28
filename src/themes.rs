@@ -33,23 +33,6 @@ mod generated {
 
 pub use generated::*;
 
-/// Retrieves a theme by its name.
-///
-/// # Examples
-///
-/// ```
-/// use autumnus::themes;
-///
-/// let theme = themes::get("github_light");
-/// assert_eq!(theme.unwrap().name, "github_light");
-///
-/// let theme = themes::get("non_existent_theme");
-/// assert_eq!(theme.is_none());
-/// ```
-pub fn get(name: &str) -> Option<&'static Theme> {
-    ALL_THEMES.iter().find(|theme| theme.name == name).copied()
-}
-
 static DEFAULT_THEME: Theme = Theme {
     name: String::new(),
     appearance: String::new(),
@@ -82,9 +65,7 @@ pub fn get_or_default(name: &str) -> &'static Theme {
 /// use std::path::Path;
 ///
 /// let path = Path::new("catppuccin_frappe.json");
-/// let theme = themes::from_file(path).unwrap();
-///
-/// assert_eq!(theme.name, "catppuccin_frappe");
+/// let theme = themes::from_file(path);
 /// ```
 pub fn from_file<P: AsRef<Path>>(path: P) -> Result<Theme, Box<dyn std::error::Error>> {
     let json = fs::read_to_string(path)?;

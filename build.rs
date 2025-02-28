@@ -609,7 +609,7 @@ fn themes() {
 
     let theme_constants = theme_names.iter().map(|name| {
         let constant_name = format_ident!("{}", name.to_uppercase());
-        let json_path = format!("../../../../../themes/{}.json", name); // Changed to use relative path from OUT_DIR
+        let json_path = format!("../../../../../themes/{}.json", name);
 
         quote! {
             pub static #constant_name: LazyLock<Theme> = LazyLock::new(|| {
@@ -624,6 +624,12 @@ fn themes() {
         quote! { &#constant_name }
     });
 
+    let theme_name_matches = theme_names.iter().map(|name| {
+        let constant_name = format_ident!("{}", name.to_uppercase());
+        let name_str = name.to_lowercase();
+        quote! { #name_str => Some(&#constant_name), }
+    });
+
     let output = quote! {
         use std::sync::LazyLock;
 
@@ -632,6 +638,26 @@ fn themes() {
         pub static ALL_THEMES: LazyLock<Vec<&'static Theme>> = LazyLock::new(|| vec![
             #(#theme_refs),*
         ]);
+
+        /// Retrieves a theme by its name.
+        ///
+        /// # Examples
+        ///
+        /// ```
+        /// use autumnus::themes;
+        ///
+        /// let theme = themes::get("github_light");
+        /// assert_eq!(theme.unwrap().name, "github_light");
+        ///
+        /// let theme = themes::get("non_existent_theme");
+        /// assert!(theme.is_none());
+        /// ```
+        pub fn get(name: &str) -> Option<&'static Theme> {
+            match name {
+                #(#theme_name_matches)*
+                _ => None,
+            }
+        }
     };
 
     fs::write(dest_path, output.to_string()).unwrap();

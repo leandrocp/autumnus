@@ -159,7 +159,7 @@ pub struct Options {
 ///
 /// ```
 /// use autumnus::highlight_html_inline;
-/// use autumnus:::Options;
+/// use autumnus::Options;
 ///
 /// let code = r#"
 /// fn main() {
