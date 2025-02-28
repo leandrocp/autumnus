@@ -80,7 +80,8 @@ rayon = "1"
 dev = []
 
 [profile.release]
-lto = "thin"
+lto = true
+strip = true
 
 [[bin]]
 name = "autumn"
