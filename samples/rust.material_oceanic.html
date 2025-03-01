@@ -10,12 +10,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
       * {
-        font-family: 'Fira Code', monospace;
+        font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
       }
     </style>
 </head>
 <body>
-<pre class="athl w-full overflow-auto subpixel-antialiased p-8 leading-6 text-sm rounded-lg" style="color: #b0bec5; background-color: #25363b;"><code class="language-rust" translate="no" tabindex="0"><span class="athl-line" data-athl-line="1"><span style="color: #546e7a;">// This is a comment. Line comments look like this...</span>
+<pre class="athl w-full overflow-auto rounded-lg p-8 text-sm antialiased leading-6" style="color: #b0bec5; background-color: #25363b;"><code class="language-rust" translate="no" tabindex="0"><span class="athl-line" data-athl-line="1"><span style="color: #546e7a;">// This is a comment. Line comments look like this...</span>
 </span><span class="athl-line" data-athl-line="2"><span style="color: #546e7a;">// and extend multiple lines like this.</span>
 </span><span class="athl-line" data-athl-line="3">
 </span><span class="athl-line" data-athl-line="4"><span style="color: #546e7a;">/* Block comments</span>
@@ -192,7 +192,7 @@
 </span><span class="athl-line" data-athl-line="175">
 </span><span class="athl-line" data-athl-line="176">    <span style="color: #546e7a;">// Traits (known as interfaces or typeclasses in other languages) //</span>
 </span><span class="athl-line" data-athl-line="177">
-</span><span class="athl-line" data-athl-line="178">    <span style="color: #89ddff;">trait</span> <span style="color: #c792ea;">Frobnicate</span><span style="color: #89ddff;">&lt;</span><span style="color: #c792ea;">T</span><span style="color: #89ddff;">&gt;</span> <span style="color: #89ddff;">{</span>
+</span><span class="athl-line" data-athl-line="178">    trait <span style="color: #c792ea;">Frobnicate</span><span style="color: #89ddff;">&lt;</span><span style="color: #c792ea;">T</span><span style="color: #89ddff;">&gt;</span> <span style="color: #89ddff;">{</span>
 </span><span class="athl-line" data-athl-line="179">        <span style="color: #89ddff;">fn</span> <span style="color: #82aaff;">frobnicate</span><span style="color: #89ddff;">(</span><span style="color: #89ddff;">self</span><span style="color: #89ddff;">)</span> <span style="color: #89ddff;">-&gt;</span> <span style="color: #c792ea;">Option</span><span style="color: #89ddff;">&lt;</span><span style="color: #c792ea;">T</span><span style="color: #89ddff;">&gt;</span><span style="color: #89ddff;">;</span>
 </span><span class="athl-line" data-athl-line="180">    <span style="color: #89ddff;">}</span>
 </span><span class="athl-line" data-athl-line="181">
@@ -215,7 +215,7 @@
 </span><span class="athl-line" data-athl-line="198">        <span style="color: #89ddff;">}</span>
 </span><span class="athl-line" data-athl-line="199">    <span style="color: #89ddff;">}</span>
 </span><span class="athl-line" data-athl-line="200">
-</span><span class="athl-line" data-athl-line="201">    <span style="color: #89ddff;">type</span> <span style="color: #c792ea;">FunctionPointer</span> <span style="color: #89ddff;">=</span> <span style="color: #89ddff;">fn</span><span style="color: #89ddff;">(</span><span style="color: #c792ea;">u32</span><span style="color: #89ddff;">)</span> <span style="color: #89ddff;">-&gt;</span> <span style="color: #c792ea;">u32</span><span style="color: #89ddff;">;</span>
+</span><span class="athl-line" data-athl-line="201">    type <span style="color: #c792ea;">FunctionPointer</span> <span style="color: #89ddff;">=</span> <span style="color: #89ddff;">fn</span><span style="color: #89ddff;">(</span><span style="color: #c792ea;">u32</span><span style="color: #89ddff;">)</span> <span style="color: #89ddff;">-&gt;</span> <span style="color: #c792ea;">u32</span><span style="color: #89ddff;">;</span>
 </span><span class="athl-line" data-athl-line="202">
 </span><span class="athl-line" data-athl-line="203">    <span style="color: #89ddff;">let</span> <span style="color: #b0bec5;">fib</span> <span style="color: #89ddff;">:</span> <span style="color: #c792ea;">FunctionPointer</span> <span style="color: #89ddff;">=</span> <span style="color: #b0bec5;">fibonacci</span><span style="color: #89ddff;">;</span>
 </span><span class="athl-line" data-athl-line="204">    <span style="color: #89ddff;">println</span><span style="color: #82aaff;">!</span><span style="color: #89ddff;">(</span><span style="color: #c3e88d;">&quot;Fib: {}&quot;</span><span style="color: #89ddff;">,</span> <span style="color: #b0bec5;">fib</span><span style="color: #89ddff;">(</span><span style="color: #f78c6c;">4</span><span style="color: #89ddff;">)</span><span style="color: #89ddff;">)</span><span style="color: #89ddff;">;</span> <span style="color: #546e7a;">// 5</span>

@@ -35,7 +35,7 @@ const HTML_TEMPLATE: &str = r#"<!DOCTYPE html>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
       * {
-        font-family: 'Fira Code', monospace;
+        font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
       }
     </style>
 </head>
@@ -129,7 +129,7 @@ fn gen_samples_entries(
                 autumnus::Options {
                     theme: theme.clone(),
                     debug: false,
-                    pre_class: Some("w-full overflow-auto subpixel-antialiased p-8 leading-6 text-sm rounded-lg".to_string()),
+                    pre_class: Some("w-full overflow-auto rounded-lg p-8 text-sm antialiased leading-6".to_string()),
                     ..autumnus::Options::default()
                 },
             );
