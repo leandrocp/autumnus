@@ -187,6 +187,10 @@ impl Language {
                     return lang;
                 }
 
+                if let Some(lang) = Self::from_extension(lang_or_path) {
+                    return lang;
+                }
+
                 if let Some(lang) = Self::from_emacs_mode_header(src) {
                     return lang;
                 }
@@ -228,6 +232,19 @@ impl Language {
             }
             None => None,
         }
+    }
+
+    fn from_extension(token: &str) -> Option<Self> {
+        let token_pattern = format!("*.{}", token);
+
+        for language in Language::iter() {
+            for glob in Language::language_globs(language) {
+                if glob.matches(&token_pattern) {
+                    return Some(language);
+                }
+            }
+        }
+        None
     }
 
     // TODO: review tree-sitter.json file-types

@@ -325,18 +325,27 @@ end
     #[test]
     fn test_guess_language_by_file_name() {
         let result = highlight_html_inline("app.ex", "foo = 1", Options::default());
-        assert!(result.as_str().contains("language-elixir"))
+        assert!(result.as_str().contains("language-elixir"));
+    }
+
+    #[test]
+    fn test_guess_language_by_file_extension() {
+        let result = highlight_html_inline("md", "# Title", Options::default());
+        assert!(result.as_str().contains("language-markdown"));
+
+        let result = highlight_html_inline("ex", "foo = 1", Options::default());
+        assert!(result.as_str().contains("language-elixir"));
     }
 
     #[test]
     fn test_guess_language_by_shebang() {
         let result = highlight_html_inline("test", "#!/usr/bin/env elixir", Options::default());
-        assert!(result.as_str().contains("language-elixir"))
+        assert!(result.as_str().contains("language-elixir"));
     }
 
     #[test]
     fn test_fallback_to_plain_text() {
         let result = highlight_html_inline("none", "source code", Options::default());
-        assert!(result.as_str().contains("language-plaintext"))
+        assert!(result.as_str().contains("language-plaintext"));
     }
 }
