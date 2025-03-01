@@ -30,20 +30,13 @@ const HTML_TEMPLATE: &str = r#"<!DOCTYPE html>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>{lang} - {theme} - Autumnus</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=fira-code:300,400,500,600,700" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        * {
-            font-family: 'JetBrains Mono', monospace;
-            line-height: 1.5;
-        }
-        pre {
-            font-size: 15px;
-            margin: 20px;
-            padding: 50px;
-            border-radius: 10px;
-        }
+      * {
+        font-family: 'Fira Code', monospace;
+      }
     </style>
 </head>
 <body>
@@ -136,6 +129,7 @@ fn gen_samples_entries(
                 autumnus::Options {
                     theme: theme.clone(),
                     debug: false,
+                    pre_class: Some("w-full overflow-auto subpixel-antialiased p-8 leading-6 text-base rounded-lg".to_string()),
                     ..autumnus::Options::default()
                 },
             );

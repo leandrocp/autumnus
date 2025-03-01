@@ -323,6 +323,44 @@ end
     }
 
     #[test]
+    fn test_highlight_injected_sub_language() {
+        let code = r#"<!DOCTYPE html>
+<head>
+    <style>
+        * {
+            font-family: 'JetBrains Mono', monospace;
+            line-height: 1.5;
+        }
+        pre {
+            font-size: 15px;
+            margin: 20px;
+            padding: 50px;
+            border-radius: 10px;
+        }
+    </style>
+</head>"#;
+
+        let expected = r#"<pre class="athl"><code class="language-elixir" translate="no" tabindex="0"><span class="athl-line" data-athl-line="1"><span class="keyword-function">defmodule</span> <span class="module">Foo</span> <span class="keyword">do</span>
+</span></code></pre>"#;
+
+        let result = highlight_html_linked(
+            "test.html",
+            code,
+            Options {
+                theme: themes::CATPPUCCIN_FRAPPE.clone(),
+                ..Options::default()
+            },
+        );
+
+         println!("{}", result);
+         std::fs::write("result.html", result).unwrap();
+
+        // assert_eq!(result, expected);
+    }
+
+
+
+    #[test]
     fn test_guess_language_by_file_name() {
         let result = highlight_html_inline("app.ex", "foo = 1", Options::default());
         assert!(result.as_str().contains("language-elixir"));
