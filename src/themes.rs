@@ -26,12 +26,7 @@ pub struct Style {
     pub strikethrough: bool,
 }
 
-mod generated {
-    use super::Theme;
-    include!(concat!(env!("OUT_DIR"), "/theme_data.rs"));
-}
-
-pub use generated::*;
+include!(concat!(env!("OUT_DIR"), "/theme_data.rs"));
 
 static DEFAULT_THEME: Theme = Theme {
     name: String::new(),

@@ -34,10 +34,7 @@ extern "C" {
     fn tree_sitter_vim() -> *const ();
 }
 
-mod generated {
-    include!(concat!(env!("OUT_DIR"), "/queries_data.rs"));
-}
-pub use generated::*;
+include!(concat!(env!("OUT_DIR"), "/queries_constants.rs"));
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter)]
 pub enum Language {

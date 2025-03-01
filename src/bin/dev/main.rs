@@ -129,7 +129,7 @@ fn gen_samples_entries(
                 autumnus::Options {
                     theme: theme.clone(),
                     debug: false,
-                    pre_class: Some("w-full overflow-auto subpixel-antialiased p-8 leading-6 text-base rounded-lg".to_string()),
+                    pre_class: Some("w-full overflow-auto subpixel-antialiased p-8 leading-6 text-sm rounded-lg".to_string()),
                     ..autumnus::Options::default()
                 },
             );

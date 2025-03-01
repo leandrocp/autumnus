@@ -1,16 +1,70 @@
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use rayon::prelude::*;
-use std::collections::HashMap;
 use std::env;
 use std::fs::{self, File};
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
 fn main() {
+    println!("cargo:rerun-if-changed=build.rs");
     vendored_parsers();
     queries();
     themes();
+}
+
+struct TreeSitterParser {
+    name: &'static str,
+    src_dir: &'static str,
+    extra_files: Vec<&'static str>,
+}
+
+impl TreeSitterParser {
+    fn build(&self) {
+        let dir = PathBuf::from(&self.src_dir);
+
+        let mut c_files = vec!["parser.c"];
+        let mut cpp_files = vec![];
+
+        for file in &self.extra_files {
+            if file.ends_with(".c") {
+                c_files.push(file);
+            } else {
+                cpp_files.push(file);
+            }
+        }
+
+        if !cpp_files.is_empty() {
+            let mut cpp_build = cc::Build::new();
+            cpp_build
+                .include(&dir)
+                .cpp(true)
+                .std("c++14")
+                .flag_if_supported("-Wno-implicit-fallthrough")
+                .flag_if_supported("-Wno-unused-parameter")
+                .flag_if_supported("-Wno-ignored-qualifiers")
+                .link_lib_modifier("+whole-archive");
+
+            for file in cpp_files {
+                cpp_build.file(dir.join(file));
+            }
+
+            cpp_build.compile(&format!("{}-cpp", self.name));
+        }
+
+        let mut build = cc::Build::new();
+        if cfg!(target_env = "msvc") {
+            build.flag("/utf-8");
+        }
+        build.include(&dir).warnings(false); // ignore unused parameter warnings
+        for file in c_files {
+            build.file(dir.join(file));
+        }
+
+        build.link_lib_modifier("+whole-archive");
+
+        build.compile(self.name);
+    }
 }
 
 // TODO: remove vendored parsers in favor of crates as soon as they implement LanguageFn
@@ -146,223 +200,102 @@ fn vendored_parsers() {
     parsers.par_iter().for_each(|p| p.build());
 }
 
+fn read_query_file(path: &Path, language: &str, query: &str) -> String {
+    if !path.exists() {
+        return String::new();
+    }
+
+    let mut query_content: Vec<String> = Vec::new();
+
+    let original_content = fs::read_to_string(path).expect("failed to ready query file");
+    let converted_patterns = convert_lua_patterns(&original_content);
+    let content = converted_patterns
+        .replace("#lua-match", "#match")
+        .replace("#not-lua-match", "#not-match")
+        .replace("@spell", "")
+        .replace("@nospell", "")
+        .replace("@none", "")
+        .replace("@conceal", "");
+
+    if let Some(first_line) = content.lines().next() {
+        if first_line.starts_with("; inherits: ") {
+            let inherits_str = first_line.trim_start_matches("; inherits: ").trim();
+
+            let parent_languages: Vec<String> = inherits_str
+                .split(',')
+                .map(|s| s.trim().to_string())
+                .collect();
+
+            for parent_language in parent_languages {
+                let parent_path =
+                    PathBuf::from(format!("queries/{}/{}.scm", parent_language, query));
+                let parent_content = read_query_file(&parent_path, &parent_language, &query);
+                query_content.push(parent_content.clone());
+            }
+        }
+    }
+
+    query_content.push(format!("\n; query: {}", language));
+    query_content.push(content.clone());
+    query_content.join("\n")
+}
+
 fn queries() {
-    println!("cargo:rerun-if-changed=queries/");
+    println!("cargo:rerun-if-changed=queries");
 
-    let out_dir = env::var("OUT_DIR").unwrap();
-    let dest_path = Path::new(&out_dir).join("queries_data.rs");
-    let mut file = File::create(&dest_path).unwrap();
+    let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
+    let dest_path = out_dir.join("queries_constants.rs");
 
-    // Path to queries directory
-    let queries_dir = Path::new("queries");
+    let queries_path = PathBuf::from("queries");
+    let mut generated_code = TokenStream::new();
 
-    let mut token_stream = TokenStream::new();
+    let entries = fs::read_dir(&queries_path).unwrap();
 
-    // Cache for all language files
-    let mut file_cache: HashMap<String, HashMap<String, String>> = HashMap::new();
-    file_cache.insert("highlights".to_string(), HashMap::new());
-    file_cache.insert("injections".to_string(), HashMap::new());
-    file_cache.insert("locals".to_string(), HashMap::new());
+    for entry in entries {
+        let entry = entry.unwrap();
+        let path = entry.path();
 
-    // File types to process
-    let file_types = ["highlights", "injections", "locals"];
-
-    // Track which languages exist
-    let mut languages = Vec::new();
-
-    // Pre-load all files into cache
-    if let Ok(entries) = fs::read_dir(queries_dir) {
-        for entry in entries.filter_map(Result::ok) {
-            let path = entry.path();
-            if path.is_dir() {
-                let language = path.file_name().unwrap().to_string_lossy().to_string();
-                languages.push(language.clone());
-
-                // Process each file type
-                for file_type in &file_types {
-                    let file_path = path.join(format!("{}.scm", file_type));
-                    if file_path.exists() {
-                        if let Ok(content) = fs::read_to_string(&file_path) {
-                            file_cache
-                                .get_mut(*file_type)
-                                .unwrap()
-                                .insert(language.clone(), content);
-                        }
-                    }
-                }
-            }
+        if !path.is_dir() {
+            continue;
         }
+
+        let language = path.file_name().unwrap().to_str().unwrap();
+        println!("cargo:rerun-if-changed=queries/{}", language);
+
+        let lang_upper = language.to_uppercase();
+        let queries = ["highlights", "injections", "locals"];
+
+        for query in queries {
+            let file_path = path.join(format!("{}.scm", query));
+            let const_name = format_ident!("{}_{}", lang_upper, query.to_uppercase());
+            let processed_content = read_query_file(&file_path, language, query);
+
+            generated_code.extend(quote! {
+                pub const #const_name: &str = #processed_content;
+            });
+
+            generated_code.extend(quote! {});
+        }
+
+        generated_code.extend(quote! {});
     }
 
-    // Process inheritance for each file type
-    let mut processed_cache: HashMap<String, HashMap<String, String>> = HashMap::new();
-    for file_type in &file_types {
-        if let Some(cache) = file_cache.get(*file_type) {
-            processed_cache.insert(file_type.to_string(), process_inheritance(cache));
-        }
-    }
+    let mut output_file = File::create(&dest_path).unwrap();
 
-    // Now generate constants for each language
-    for language in languages {
-        let language_upper = language.to_uppercase();
-
-        // Process each file type for this language
-        for file_type in &file_types {
-            let constant_name = format_ident!("{}_{}", language_upper, file_type.to_uppercase());
-
-            if let Some(content) = processed_cache.get(*file_type).unwrap().get(&language) {
-                let mut processed_content = content.clone();
-
-                // Apply annotation removal to all files
-                processed_content = processed_content
-                    .replace("@spell", "")
-                    .replace("@none", "")
-                    .replace("@conceal", "")
-                    .replace("@nospell", "");
-
-                // Convert Lua patterns to Regex for all file types
-                processed_content = convert_lua_patterns(&processed_content);
-
-                let constant_def = quote! {
-                    pub const #constant_name: &str = #processed_content;
-                };
-
-                token_stream.extend(constant_def);
-            } else {
-                // Create empty constants for missing files
-                let constant_def = quote! {
-                    pub const #constant_name: &str = "";
-                };
-
-                token_stream.extend(constant_def);
-            }
-
-            // Add file to rerun-if-changed (if it exists)
-            let file_path = Path::new("queries")
-                .join(&language)
-                .join(format!("{}.scm", file_type));
-            if file_path.exists() {
-                println!("cargo:rerun-if-changed={}", file_path.display());
-            }
-        }
-    }
-
-    // Write all generated constants to the output file
-    write!(file, "{}", token_stream).unwrap();
+    write!(
+        output_file,
+        "{}",
+        prettyplease::unparse(&syn::parse2::<syn::File>(generated_code).unwrap())
+    )
+    .unwrap();
 }
 
-// Process inheritance in a set of files
-fn process_inheritance(files: &HashMap<String, String>) -> HashMap<String, String> {
-    let mut processed = HashMap::new();
-
-    // First pass: Detect inheritance relationships
-    let mut inheritance: HashMap<String, Vec<String>> = HashMap::new();
-    for (language, content) in files {
-        // Look for inheritance directive in the first line
-        if let Some(first_line) = content.lines().next() {
-            if first_line.starts_with("; inherits: ") {
-                let parents_str = first_line.trim_start_matches("; inherits: ").trim();
-                // Split by comma to handle multiple parents
-                let parents: Vec<String> = parents_str
-                    .split(',')
-                    .map(|s| s.trim().to_string())
-                    .collect();
-
-                inheritance.insert(language.clone(), parents);
-            }
-        }
-    }
-
-    // Second pass: Process each file with inheritance
-    for (language, content) in files {
-        let processed_content =
-            process_file(language, content, files, &inheritance, &mut Vec::new());
-        processed.insert(language.clone(), processed_content);
-    }
-
-    processed
-}
-
-// Process a single file, resolving its inheritance
-fn process_file(
-    language: &str,
-    content: &str,
-    files: &HashMap<String, String>,
-    inheritance: &HashMap<String, Vec<String>>,
-    visited: &mut Vec<String>,
-) -> String {
-    // Check for circular inheritance
-    if visited.contains(&language.to_string()) {
-        println!(
-            "cargo:warning=Circular inheritance detected for language: {}",
-            language
-        );
-        return content.to_string();
-    }
-
-    // Track visited languages to detect cycles
-    visited.push(language.to_string());
-
-    // Check if this language inherits from other languages
-    if let Some(parents) = inheritance.get(language) {
-        if !parents.is_empty() {
-            // Process each parent language and collect their content
-            let mut parent_contents = Vec::new();
-
-            for parent in parents {
-                if let Some(parent_content) = files.get(parent) {
-                    // Process the parent content first (recursive handling of multi-level inheritance)
-                    let processed_parent = process_file(
-                        parent,
-                        parent_content,
-                        files,
-                        inheritance,
-                        &mut visited.clone(),
-                    );
-                    parent_contents.push(processed_parent);
-                } else {
-                    println!(
-                        "cargo:warning=Parent language not found for {}: {}",
-                        language, parent
-                    );
-                }
-            }
-
-            // Replace the inheritance directive with the parent content
-            let mut result = String::new();
-            let mut lines = content.lines();
-
-            // Skip the first line (inheritance directive)
-            lines.next();
-
-            // Add all parent contents
-            for parent_content in parent_contents {
-                result.push_str(&parent_content);
-                result.push('\n');
-            }
-
-            // Add the rest of the current file
-            for line in lines {
-                result.push_str(line);
-                result.push('\n');
-            }
-
-            return result;
-        }
-    }
-
-    // If no inheritance or parent not found, return the original content
-    content.to_string()
-}
-
-// Convert Lua patterns to Regex patterns in a string
 fn convert_lua_patterns(content: &str) -> String {
     let mut result = String::new();
 
     for line in content.lines() {
         let mut processed_line = line.to_string();
 
-        // Process pattern directives
         for (directive, replacement) in [
             ("#lua-match?", "#match?"),
             ("#not-lua-match?", "#not-match?"),
@@ -370,7 +303,6 @@ fn convert_lua_patterns(content: &str) -> String {
             if let Some(match_pos) = processed_line.find(directive) {
                 processed_line = processed_line.replace(directive, replacement);
 
-                // Find the pattern string (assuming it's enclosed in quotes)
                 if let Some(pattern_start) = processed_line[match_pos..].find("\"") {
                     let pattern_start = match_pos + pattern_start + 1; // +1 to skip the opening quote
 
@@ -378,10 +310,8 @@ fn convert_lua_patterns(content: &str) -> String {
                         let pattern_end = pattern_start + pattern_end;
                         let lua_pattern = &processed_line[pattern_start..pattern_end];
 
-                        // Convert the Lua pattern to Regex
                         let regex_pattern = lua_pattern_to_regex(lua_pattern);
 
-                        // Replace the pattern in the line (without adding extra quotes)
                         processed_line = format!(
                             "{}{}{}",
                             &processed_line[..pattern_start],
@@ -407,28 +337,23 @@ pub fn lua_pattern_to_regex(lua_pattern: &str) -> String {
 
     while let Some(c) = chars.next() {
         match c {
-            // Handle start of line anchor
             '^' => {
                 regex.push('^');
             }
 
-            // Handle end of line anchor
             '$' => {
                 if chars.peek().is_none() {
                     regex.push('$');
                 } else {
-                    // Not at the end of the pattern, so escape it
                     regex.push('\\');
                     regex.push('$');
                 }
             }
 
-            // Handle Lua's magic character %
             '%' => {
                 if let Some(&next_char) = chars.peek() {
-                    chars.next(); // Consume the next character
+                    chars.next();
                     match next_char {
-                        // Character classes
                         'a' => regex.push_str("[a-zA-Z]"),
                         'c' => regex.push_str("[\\x00-\\x1F\\x7F]"),
                         'd' => regex.push_str("\\d"),
@@ -443,13 +368,9 @@ pub fn lua_pattern_to_regex(lua_pattern: &str) -> String {
                         'x' => regex.push_str("[0-9a-fA-F]"),
                         'z' => regex.push_str("\\0"),
 
-                        // Frontier pattern %f[set]
                         'f' => {
-                            // Frontier patterns don't have direct regex equivalent
-                            // Using a lookahead as an approximation
                             regex.push_str("(?=");
 
-                            // Skip the [set] part
                             let mut bracket_content = String::new();
                             let mut bracket_count = 0;
                             let mut in_set = false;
@@ -462,7 +383,6 @@ pub fn lua_pattern_to_regex(lua_pattern: &str) -> String {
                                 } else if next == ']' && in_set {
                                     bracket_count -= 1;
                                     if bracket_count == 0 {
-                                        // Removed the unused assignment to in_set here
                                         break;
                                     }
                                     bracket_content.push(next);
@@ -471,34 +391,28 @@ pub fn lua_pattern_to_regex(lua_pattern: &str) -> String {
                                 }
                             }
 
-                            // Convert the content of the set
                             let set_regex = lua_pattern_to_regex(&bracket_content);
                             regex.push_str(&set_regex);
                             regex.push(')');
                         }
 
-                        // Backreferences
                         '1'..='9' => {
                             regex.push('\\');
                             regex.push(next_char);
                         }
 
-                        // Escape special regex characters
                         c if ".+*?()[]{}|^$\\-".contains(c) => {
                             regex.push('\\');
                             regex.push(c);
                         }
 
-                        // Any other character following % is treated literally
                         _ => regex.push(next_char),
                     }
                 } else {
-                    // If % is the last character, escape it
                     regex.push('%');
                 }
             }
 
-            // Handle character classes
             '[' => {
                 in_char_class = true;
                 regex.push('[');
@@ -508,20 +422,15 @@ pub fn lua_pattern_to_regex(lua_pattern: &str) -> String {
                 regex.push(']');
             }
 
-            // Handle dash in character class
             '-' => {
                 if in_char_class {
-                    // Inside a character class, - is used for ranges (same in Lua and regex)
                     regex.push('-');
                 } else {
-                    // Outside a character class, check if it's a non-greedy modifier
                     if !regex.is_empty() {
                         let last_char = regex.chars().last().unwrap();
                         if last_char == '*' || last_char == '+' || last_char == '?' {
-                            // Replace the greedy quantifier with a non-greedy one
                             regex.push('?');
                         } else {
-                            // Just a hyphen
                             regex.push('-');
                         }
                     } else {
@@ -530,53 +439,44 @@ pub fn lua_pattern_to_regex(lua_pattern: &str) -> String {
                 }
             }
 
-            // In Lua, . matches any character (same as in regex)
             '.' => {
                 regex.push('.');
-                // Check for non-greedy modifier
                 if let Some(&next) = chars.peek() {
                     if next == '-' {
-                        chars.next(); // consume the -
+                        chars.next();
                         regex.push('*');
-                        regex.push('?'); // .- in Lua is like .*? in regex
+                        regex.push('?');
                     }
                 }
             }
 
-            // Handle escaping for regex special characters
             '(' | ')' | '{' | '}' | '|' | '+' | '*' | '?' => {
                 if !in_char_class {
-                    // Only escape special regex characters if we're not in a character class
                     match c {
-                        // For the quantifiers, check for non-greedy modifier
                         '+' | '*' | '?' => {
                             regex.push(c);
                             if let Some(&next) = chars.peek() {
                                 if next == '-' {
-                                    chars.next(); // consume the -
-                                    regex.push('?'); // add ? to make it non-greedy
+                                    chars.next();
+                                    regex.push('?');
                                 }
                             }
                         }
-                        // For other special characters, escape them
                         _ => {
                             regex.push('\\');
                             regex.push(c);
                         }
                     }
                 } else {
-                    // Inside character class, no need to escape most special characters
                     regex.push(c);
                 }
             }
 
-            // For other regex special characters
             '\\' => {
                 regex.push('\\');
                 regex.push('\\');
             }
 
-            // For any other character, just append it
             _ => {
                 regex.push(c);
             }
@@ -587,7 +487,7 @@ pub fn lua_pattern_to_regex(lua_pattern: &str) -> String {
 }
 
 fn themes() {
-    println!("cargo:rerun-if-changed=themes/");
+    println!("cargo:rerun-if-changed=themes");
 
     let out_dir = env::var("OUT_DIR").unwrap();
     let dest_path = Path::new(&out_dir).join("theme_data.rs");
@@ -665,57 +565,3 @@ fn themes() {
 
 // Build vendored tree-sitter parsers
 // https://github.com/Wilfred/difftastic/blob/8953c55cf854ceac2ccb6ece004d6a94a5bfa122/build.rs
-
-struct TreeSitterParser {
-    name: &'static str,
-    src_dir: &'static str,
-    extra_files: Vec<&'static str>,
-}
-
-impl TreeSitterParser {
-    fn build(&self) {
-        let dir = PathBuf::from(&self.src_dir);
-
-        let mut c_files = vec!["parser.c"];
-        let mut cpp_files = vec![];
-
-        for file in &self.extra_files {
-            if file.ends_with(".c") {
-                c_files.push(file);
-            } else {
-                cpp_files.push(file);
-            }
-        }
-
-        if !cpp_files.is_empty() {
-            let mut cpp_build = cc::Build::new();
-            cpp_build
-                .include(&dir)
-                .cpp(true)
-                .std("c++14")
-                .flag_if_supported("-Wno-implicit-fallthrough")
-                .flag_if_supported("-Wno-unused-parameter")
-                .flag_if_supported("-Wno-ignored-qualifiers")
-                .link_lib_modifier("+whole-archive");
-
-            for file in cpp_files {
-                cpp_build.file(dir.join(file));
-            }
-
-            cpp_build.compile(&format!("{}-cpp", self.name));
-        }
-
-        let mut build = cc::Build::new();
-        if cfg!(target_env = "msvc") {
-            build.flag("/utf-8");
-        }
-        build.include(&dir).warnings(false); // ignore unused parameter warnings
-        for file in c_files {
-            build.file(dir.join(file));
-        }
-
-        build.link_lib_modifier("+whole-archive");
-
-        build.compile(self.name);
-    }
-}

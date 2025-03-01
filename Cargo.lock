@@ -76,6 +76,7 @@ dependencies = [
  "clap",
  "glob",
  "lazy_static",
+ "prettyplease",
  "proc-macro2",
  "quote",
  "rayon",
@@ -83,6 +84,7 @@ dependencies = [
  "serde",
  "serde_json",
  "strum",
+ "syn",
  "termcolor",
  "tree-sitter",
  "tree-sitter-bash",
@@ -276,6 +278,16 @@ name = "once_cell"
 version = "1.20.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "945462a4b81e43c4e3ba96bd7b49d834c6f61198356aa858733bc4acf3cbe62e"
+
+[[package]]
+name = "prettyplease"
+version = "0.2.29"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6924ced06e1f7dfe3fa48d57b9f74f55d8915f5036121bef647ef4b204895fac"
+dependencies = [
+ "proc-macro2",
+ "syn",
+]
 
 [[package]]
 name = "proc-macro2"
