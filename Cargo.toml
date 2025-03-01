@@ -10,6 +10,7 @@ include = [
   "/vendored_parsers/tree-sitter-*/**/*.c",
   "/vendored_parsers/tree-sitter-*/**/*.h",
   "/vendored_parsers/tree-sitter-*/**/*.cc",
+  "/queries/README.md",
   "/queries/**/highlights.scm",
   "/queries/**/injections.scm",
   "/queries/**/locals.scm",
@@ -77,6 +78,7 @@ quote = "1"
 rayon = "1"
 
 [features]
+default = []
 dev = []
 
 [profile.release]
@@ -85,4 +87,9 @@ strip = true
 
 [[bin]]
 name = "autumn"
-path = "src/main.rs"
+path = "src/bin/autumn/main.rs"
+
+[[bin]]
+name = "dev"
+path = "src/bin/dev/main.rs"
+required-features = ["dev"]
