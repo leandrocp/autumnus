@@ -239,9 +239,10 @@
     (_) @markup.strong))
   (#any-of? @_name "\\textbf" "\\mathbf"))
 
-(generic_command
-  (command_name) @keyword.conditional
-  (#lua-match? @keyword.conditional "^\\if[a-zA-Z@]+$"))
+; FIXME: QueryError { row: 281, column: 0, offset: 0, message: "Invalid regex '^\\if[a-zA-Z@]+$'", kind: Predicate }
+; (generic_command
+;   (command_name) @keyword.conditional
+;   (#lua-match? @keyword.conditional "^\\if[a-zA-Z@]+$"))
 
 (generic_command
   (command_name) @keyword.conditional

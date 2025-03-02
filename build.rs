@@ -208,10 +208,8 @@ fn read_query_file(path: &Path, language: &str, query: &str) -> String {
     let mut query_content: Vec<String> = Vec::new();
 
     let original_content = fs::read_to_string(path).expect("failed to ready query file");
-    let converted_patterns = convert_lua_patterns(&original_content);
+    let converted_patterns = convert_lua_matches(&original_content);
     let content = converted_patterns
-        .replace("#lua-match", "#match")
-        .replace("#not-lua-match", "#not-match")
         .replace("@spell", "")
         .replace("@nospell", "")
         .replace("@none", "")
@@ -290,201 +288,353 @@ fn queries() {
     .unwrap();
 }
 
-fn convert_lua_patterns(content: &str) -> String {
+fn convert_lua_matches(content: &str) -> String {
     let mut result = String::new();
+    let lines: Vec<&str> = content.lines().collect();
 
-    for line in content.lines() {
-        let mut processed_line = line.to_string();
+    for line in lines {
+        let line = line
+            .replace("#lua-match?", "#match?")
+            .replace("#not-lua-match?", "#not-match?");
 
-        for (directive, replacement) in [
-            ("#lua-match?", "#match?"),
-            ("#not-lua-match?", "#not-match?"),
-        ] {
-            if let Some(match_pos) = processed_line.find(directive) {
-                processed_line = processed_line.replace(directive, replacement);
+        if line.contains("#match?") || line.contains("#not-match?") {
+            if let Some(pattern_start) = line.find('"') {
+                if let Some(pattern_end) = line[pattern_start + 1..].find('"') {
+                    let pattern_end = pattern_start + 1 + pattern_end;
+                    let lua_pattern = &line[pattern_start + 1..pattern_end];
 
-                if let Some(pattern_start) = processed_line[match_pos..].find("\"") {
-                    let pattern_start = match_pos + pattern_start + 1; // +1 to skip the opening quote
+                    let rust_pattern = convert_lua_pattern_to_rust_regex(lua_pattern);
 
-                    if let Some(pattern_end) = processed_line[pattern_start..].find("\"") {
-                        let pattern_end = pattern_start + pattern_end;
-                        let lua_pattern = &processed_line[pattern_start..pattern_end];
+                    let mut new_line = line[..pattern_start + 1].to_string();
+                    new_line.push_str(&rust_pattern);
+                    new_line.push_str(&line[pattern_end..]);
 
-                        let regex_pattern = lua_pattern_to_regex(lua_pattern);
-
-                        processed_line = format!(
-                            "{}{}{}",
-                            &processed_line[..pattern_start],
-                            regex_pattern,
-                            &processed_line[pattern_end..]
-                        );
-                    }
+                    result.push_str(&new_line);
+                    result.push('\n');
+                    continue;
                 }
             }
         }
 
-        result.push_str(&processed_line);
+        result.push_str(&line);
         result.push('\n');
+    }
+
+    if !content.ends_with('\n') && result.ends_with('\n') {
+        result.pop();
     }
 
     result
 }
 
-pub fn lua_pattern_to_regex(lua_pattern: &str) -> String {
-    let mut regex = String::new();
+fn convert_lua_pattern_to_rust_regex(lua_pattern: &str) -> String {
+    let mut result = String::new();
     let mut chars = lua_pattern.chars().peekable();
-    let mut in_char_class = false;
 
     while let Some(c) = chars.next() {
-        match c {
-            '^' => {
-                regex.push('^');
-            }
-
-            '$' => {
-                if chars.peek().is_none() {
-                    regex.push('$');
-                } else {
-                    regex.push('\\');
-                    regex.push('$');
-                }
-            }
-
-            '%' => {
-                if let Some(&next_char) = chars.peek() {
-                    chars.next();
-                    match next_char {
-                        'a' => regex.push_str("[a-zA-Z]"),
-                        'c' => regex.push_str("[\\x00-\\x1F\\x7F]"),
-                        'd' => regex.push_str("\\d"),
-                        'g' => regex.push_str("[!-~]"),
-                        'l' => regex.push_str("[a-z]"),
-                        'p' => regex.push_str("[!-/:-@\\[-`{-~]"),
-                        's' => regex.push_str("\\s"),
-                        'S' => regex.push_str("\\S"),
-                        'u' => regex.push_str("[A-Z]"),
-                        'w' => regex.push_str("[a-zA-Z0-9_]"),
-                        'W' => regex.push_str("[^a-zA-Z0-9_]"),
-                        'x' => regex.push_str("[0-9a-fA-F]"),
-                        'z' => regex.push_str("\\0"),
-
-                        'f' => {
-                            regex.push_str("(?=");
-
-                            let mut bracket_content = String::new();
-                            let mut bracket_count = 0;
-                            let mut in_set = false;
-
-                            while let Some(&next) = chars.peek() {
-                                chars.next();
-                                if next == '[' && !in_set {
-                                    in_set = true;
-                                    bracket_count += 1;
-                                } else if next == ']' && in_set {
-                                    bracket_count -= 1;
-                                    if bracket_count == 0 {
-                                        break;
-                                    }
-                                    bracket_content.push(next);
-                                } else if in_set {
-                                    bracket_content.push(next);
-                                }
-                            }
-
-                            let set_regex = lua_pattern_to_regex(&bracket_content);
-                            regex.push_str(&set_regex);
-                            regex.push(')');
-                        }
-
-                        '1'..='9' => {
-                            regex.push('\\');
-                            regex.push(next_char);
-                        }
-
-                        c if ".+*?()[]{}|^$\\-".contains(c) => {
-                            regex.push('\\');
-                            regex.push(c);
-                        }
-
-                        _ => regex.push(next_char),
-                    }
-                } else {
-                    regex.push('%');
-                }
-            }
-
-            '[' => {
-                in_char_class = true;
-                regex.push('[');
-            }
-            ']' => {
-                in_char_class = false;
-                regex.push(']');
-            }
-
-            '-' => {
-                if in_char_class {
-                    regex.push('-');
-                } else {
-                    if !regex.is_empty() {
-                        let last_char = regex.chars().last().unwrap();
-                        if last_char == '*' || last_char == '+' || last_char == '?' {
-                            regex.push('?');
-                        } else {
-                            regex.push('-');
-                        }
-                    } else {
-                        regex.push('-');
-                    }
-                }
-            }
-
-            '.' => {
-                regex.push('.');
-                if let Some(&next) = chars.peek() {
-                    if next == '-' {
+        if c == '%' {
+            if let Some(&next_char) = chars.peek() {
+                match next_char {
+                    'd' => {
+                        result.push_str("\\d");
                         chars.next();
-                        regex.push('*');
-                        regex.push('?');
                     }
-                }
-            }
-
-            '(' | ')' | '{' | '}' | '|' | '+' | '*' | '?' => {
-                if !in_char_class {
-                    match c {
-                        '+' | '*' | '?' => {
-                            regex.push(c);
-                            if let Some(&next) = chars.peek() {
-                                if next == '-' {
-                                    chars.next();
-                                    regex.push('?');
-                                }
+                    's' => {
+                        result.push_str("\\s");
+                        chars.next();
+                    }
+                    'l' => {
+                        result.push_str("[a-z]");
+                        chars.next();
+                    }
+                    'u' => {
+                        result.push_str("[A-Z]");
+                        chars.next();
+                    }
+                    'A' => {
+                        result.push_str("[^a-zA-Z]");
+                        chars.next();
+                    }
+                    'S' => {
+                        result.push_str("\\S");
+                        chars.next();
+                    }
+                    '.' => {
+                        result.push_str("\\.");
+                        chars.next();
+                    }
+                    '%' => {
+                        result.push('%');
+                        chars.next();
+                    }
+                    '{' => {
+                        result.push_str("\\{");
+                        chars.next();
+                    }
+                    '}' => {
+                        result.push_str("\\}");
+                        chars.next();
+                    }
+                    '$' => {
+                        // Special handling for $
+                        result.push_str("\\$");
+                        chars.next();
+                        // Check if next char is {, which needs special handling in Rust regex
+                        if let Some(&next) = chars.peek() {
+                            if next == '{' {
+                                result.push_str("\\"); // Add extra escape for ${
                             }
                         }
-                        _ => {
-                            regex.push('\\');
-                            regex.push(c);
-                        }
                     }
-                } else {
-                    regex.push(c);
+                    '^' => {
+                        result.push_str("\\^");
+                        chars.next();
+                    }
+                    _ => {
+                        result.push('\\');
+                        result.push(next_char);
+                        chars.next();
+                    }
+                }
+            } else {
+                result.push('%');
+            }
+        } else if c == '\\' {
+            result.push('\\');
+            result.push('\\');
+            if let Some(&next_char) = chars.peek() {
+                result.push(next_char);
+                chars.next();
+            }
+        } else if c == '$' {
+            // Handle special $ character
+            result.push_str("\\$");
+            // Check if next char is {, which needs special handling in Rust regex
+            if let Some(&next) = chars.peek() {
+                if next == '{' {
+                    result.push_str("\\"); // Add extra escape for ${
                 }
             }
-
-            '\\' => {
-                regex.push('\\');
-                regex.push('\\');
-            }
-
-            _ => {
-                regex.push(c);
-            }
+        } else if c == '.'
+            || c == '*'
+            || c == '+'
+            || c == '?'
+            || c == '('
+            || c == ')'
+            || c == '['
+            || c == ']'
+            || c == '{'
+            || c == '}'
+            || c == '|'
+        {
+            result.push('\\');
+            result.push(c);
+        } else if c == '^' && result.len() > 0 {
+            result.push('\\');
+            result.push(c);
+        } else {
+            result.push(c);
         }
     }
 
-    regex
+    result
 }
+
+// fn convert_lua_patterns(content: &str) -> String {
+//     let mut result = String::new();
+//
+//     for line in content.lines() {
+//         let mut processed_line = line.to_string();
+//
+//         for (directive, replacement) in [
+//             ("#lua-match?", "#match?"),
+//             ("#not-lua-match?", "#not-match?"),
+//         ] {
+//             if let Some(match_pos) = processed_line.find(directive) {
+//                 processed_line = processed_line.replace(directive, replacement);
+//
+//                 if let Some(pattern_start) = processed_line[match_pos..].find("\"") {
+//                     let pattern_start = match_pos + pattern_start + 1;
+//
+//                     if let Some(pattern_end) = processed_line[pattern_start..].find("\"") {
+//                         let pattern_end = pattern_start + pattern_end;
+//                         let lua_pattern = &processed_line[pattern_start..pattern_end];
+//
+//                         let regex_pattern = lua_pattern_to_regex(lua_pattern);
+//
+//                         processed_line = format!(
+//                             "{}{}{}",
+//                             &processed_line[..pattern_start],
+//                             regex_pattern,
+//                             &processed_line[pattern_end..]
+//                         );
+//                     }
+//                 }
+//             }
+//         }
+//
+//         result.push_str(&processed_line);
+//         result.push('\n');
+//     }
+//
+//     result
+// }
+//
+// pub fn lua_pattern_to_regex(lua_pattern: &str) -> String {
+//     let mut regex = String::new();
+//     let mut chars = lua_pattern.chars().peekable();
+//     let mut in_char_class = false;
+//
+//     while let Some(c) = chars.next() {
+//         match c {
+//             '^' => {
+//                 regex.push('^');
+//             }
+//
+//             '$' => {
+//                 if chars.peek().is_none() {
+//                     regex.push('$');
+//                 } else {
+//                     regex.push('\\');
+//                     regex.push('$');
+//                 }
+//             }
+//
+//             '%' => {
+//                 if let Some(&next_char) = chars.peek() {
+//                     chars.next();
+//                     match next_char {
+//                         'a' => regex.push_str("[a-zA-Z]"),
+//                         'c' => regex.push_str("[\\x00-\\x1F\\x7F]"),
+//                         'd' => regex.push_str("\\d"),
+//                         'g' => regex.push_str("[!-~]"),
+//                         'l' => regex.push_str("[a-z]"),
+//                         'p' => regex.push_str("[!-/:-@\\[-`{-~]"),
+//                         's' => regex.push_str("\\s"),
+//                         'S' => regex.push_str("\\S"),
+//                         'u' => regex.push_str("[A-Z]"),
+//                         'w' => regex.push_str("[a-zA-Z0-9_]"),
+//                         'W' => regex.push_str("[^a-zA-Z0-9_]"),
+//                         'x' => regex.push_str("[0-9a-fA-F]"),
+//                         'z' => regex.push_str("\\0"),
+//
+//                         'f' => {
+//                             regex.push_str("(?=");
+//
+//                             let mut bracket_content = String::new();
+//                             let mut bracket_count = 0;
+//                             let mut in_set = false;
+//
+//                             while let Some(&next) = chars.peek() {
+//                                 chars.next();
+//                                 if next == '[' && !in_set {
+//                                     in_set = true;
+//                                     bracket_count += 1;
+//                                 } else if next == ']' && in_set {
+//                                     bracket_count -= 1;
+//                                     if bracket_count == 0 {
+//                                         break;
+//                                     }
+//                                     bracket_content.push(next);
+//                                 } else if in_set {
+//                                     bracket_content.push(next);
+//                                 }
+//                             }
+//
+//                             let set_regex = lua_pattern_to_regex(&bracket_content);
+//                             regex.push_str(&set_regex);
+//                             regex.push(')');
+//                         }
+//
+//                         '1'..='9' => {
+//                             regex.push('\\');
+//                             regex.push(next_char);
+//                         }
+//
+//                         c if ".+*?()[]{}|^$\\-".contains(c) => {
+//                             regex.push('\\');
+//                             regex.push(c);
+//                         }
+//
+//                         _ => regex.push(next_char),
+//                     }
+//                 } else {
+//                     regex.push('%');
+//                 }
+//             }
+//
+//             '[' => {
+//                 in_char_class = true;
+//                 regex.push('[');
+//             }
+//             ']' => {
+//                 in_char_class = false;
+//                 regex.push(']');
+//             }
+//
+//             '-' => {
+//                 if in_char_class {
+//                     regex.push('-');
+//                 } else {
+//                     if !regex.is_empty() {
+//                         let last_char = regex.chars().last().unwrap();
+//                         if last_char == '*' || last_char == '+' || last_char == '?' {
+//                             regex.push('?');
+//                         } else {
+//                             regex.push('-');
+//                         }
+//                     } else {
+//                         regex.push('-');
+//                     }
+//                 }
+//             }
+//
+//             '.' => {
+//                 regex.push('.');
+//                 if let Some(&next) = chars.peek() {
+//                     if next == '-' {
+//                         chars.next();
+//                         regex.push('*');
+//                         regex.push('?');
+//                     }
+//                 }
+//             }
+//
+//             '(' | ')' | '{' | '}' | '|' | '+' | '*' | '?' => {
+//                 if !in_char_class {
+//                     match c {
+//                         '+' | '*' | '?' => {
+//                             regex.push(c);
+//                             if let Some(&next) = chars.peek() {
+//                                 if next == '-' {
+//                                     chars.next();
+//                                     regex.push('?');
+//                                 }
+//                             }
+//                         }
+//                         _ => {
+//                             regex.push('\\');
+//                             regex.push(c);
+//                         }
+//                     }
+//                 } else {
+//                     regex.push(c);
+//                 }
+//             }
+//
+//             '\\' => {
+//                 regex.push('\\');
+//                 regex.push('\\');
+//             }
+//
+//             _ => {
+//                 regex.push(c);
+//             }
+//         }
+//     }
+//
+//     regex
+// }
 
 fn themes() {
     println!("cargo:rerun-if-changed=themes");
