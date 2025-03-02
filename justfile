@@ -54,41 +54,25 @@ update-queries:
     
     echo "Query update complete!"
 
-# List all languages that have queries in the project
-list-languages:
-    @find queries -maxdepth 1 -type d | grep -v "^queries$" | sed 's|queries/||' | sort
-
-# Check which languages in the project have queries in nvim-treesitter
-check-available-queries:
+# Update themes by running the extract_themes.sh script
+update-themes:
     #!/usr/bin/env bash
     set -euo pipefail
     
-    # Create a temporary directory for cloning
-    TEMP_DIR=$(mktemp -d)
-    echo "Created temporary directory: $TEMP_DIR"
+    echo "Updating themes using the extract_themes.sh script..."
+    echo "⚠️  This will regenerate theme files in the themes/ directory."
+    echo ""
     
-    # Clone the nvim-treesitter repository
-    echo "Cloning nvim-treesitter repository..."
-    git clone --depth 1 https://github.com/nvim-treesitter/nvim-treesitter.git "$TEMP_DIR/nvim-treesitter"
+    # Ask for confirmation
+    read -p "Do you want to proceed? (y/N) " -n 1 -r
+    echo ""
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo "Operation cancelled."
+        exit 0
+    fi
     
-    # Get the list of language directories in our queries folder
-    LANGUAGES=$(find queries -maxdepth 1 -type d | grep -v "^queries$" | sed 's|queries/||')
+    # Change to the themes directory and run the script
+    echo "Running extract_themes.sh in the themes directory..."
+    (cd themes && bash extract_themes.sh)
     
-    echo "Checking which languages have queries in nvim-treesitter..."
-    echo "Available in nvim-treesitter:"
-    for LANG in $LANGUAGES; do
-        if [ -d "$TEMP_DIR/nvim-treesitter/queries/$LANG" ]; then
-            echo "✓ $LANG"
-        fi
-    done
-    
-    echo -e "\nNot available in nvim-treesitter:"
-    for LANG in $LANGUAGES; do
-        if [ ! -d "$TEMP_DIR/nvim-treesitter/queries/$LANG" ]; then
-            echo "✗ $LANG"
-        fi
-    done
-    
-    # Clean up
-    echo -e "\nCleaning up..."
-    rm -rf "$TEMP_DIR" 
+    echo "Theme update complete!" 
