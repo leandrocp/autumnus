@@ -161,7 +161,7 @@
       "underline": true
     },
     "module": {
-      "fg": "#86e1fc"
+      "fg": "#82aaff"
     },
     "module.builtin": {
       "fg": "#ff757f"

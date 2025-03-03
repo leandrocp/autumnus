@@ -75,6 +75,116 @@ local themes = {
 			opts = {},
 		},
 	},
+	{
+		name = "github_dark",
+		colorscheme = "github_dark",
+		appearance = "dark",
+		plugin = {
+			"projekt0n/github-nvim-theme",
+			name = "github-theme",
+			opts = {},
+		},
+	},
+	{
+		name = "github_dark_default",
+		colorscheme = "github_dark_default",
+		appearance = "dark",
+		plugin = {
+			"projekt0n/github-nvim-theme",
+			name = "github-theme",
+			opts = {},
+		},
+	},
+	{
+		name = "github_dark_dimmed",
+		colorscheme = "github_dark_dimmed",
+		appearance = "dark",
+		plugin = {
+			"projekt0n/github-nvim-theme",
+			name = "github-theme",
+			opts = {},
+		},
+	},
+	{
+		name = "github_dark_high_contrast",
+		colorscheme = "github_dark_high_contrast",
+		appearance = "dark",
+		plugin = {
+			"projekt0n/github-nvim-theme",
+			name = "github-theme",
+			opts = {},
+		},
+	},
+	{
+		name = "github_dark_colorblind",
+		colorscheme = "github_dark_colorblind",
+		appearance = "dark",
+		plugin = {
+			"projekt0n/github-nvim-theme",
+			name = "github-theme",
+			opts = {},
+		},
+	},
+	{
+		name = "github_dark_tritanopia",
+		colorscheme = "github_dark_tritanopia",
+		appearance = "dark",
+		plugin = {
+			"projekt0n/github-nvim-theme",
+			name = "github-theme",
+			opts = {},
+		},
+	},
+	{
+		name = "github_light",
+		colorscheme = "github_light",
+		appearance = "light",
+		plugin = {
+			"projekt0n/github-nvim-theme",
+			name = "github-theme",
+			opts = {},
+		},
+	},
+	{
+		name = "github_light_default",
+		colorscheme = "github_light_default",
+		appearance = "light",
+		plugin = {
+			"projekt0n/github-nvim-theme",
+			name = "github-theme",
+			opts = {},
+		},
+	},
+	{
+		name = "github_light_high_contrast",
+		colorscheme = "github_light_high_contrast",
+		appearance = "light",
+		plugin = {
+			"projekt0n/github-nvim-theme",
+			name = "github-theme",
+			opts = {},
+		},
+	},
+	{
+		name = "github_light_colorblind",
+		colorscheme = "github_light_colorblind",
+		appearance = "light",
+		plugin = {
+			"projekt0n/github-nvim-theme",
+			name = "github-theme",
+			opts = {},
+		},
+	},
+	{
+		name = "github_light_tritanopia",
+		colorscheme = "github_light_tritanopia",
+		appearance = "light",
+		plugin = {
+			"projekt0n/github-nvim-theme",
+			name = "github-theme",
+			opts = {},
+		},
+	},
 }
 
 local highlight_groups = {
@@ -285,13 +395,13 @@ local function extract_colorscheme_colors(theme_def)
         highlights: (.highlights | to_entries | sort_by(.key) | map({
           key: .key,
           value: {
-            fg: .value.fg,
             bg: .value.bg,
             bold: .value.bold,
+            fg: .value.fg,
             italic: .value.italic,
+            strikethrough: .value.strikethrough,
             undercurl: .value.undercurl,
-            underline: .value.underline,
-            strikethrough: .value.strikethrough
+            underline: .value.underline
           } | with_entries(select(.value != null))
         }) | from_entries)
       }' ]] .. output_file .. " > " .. output_file .. ".tmp && mv " .. output_file .. ".tmp " .. output_file
