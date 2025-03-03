@@ -19,7 +19,7 @@
 </span><span class="athl-line" data-athl-line="2"><span style="color: #928374;"><span style="color: #af3a03;">{!--</span> This comment won&#39;t be sent to the browser <span style="color: #af3a03;">--}</span></span>
 </span><span class="athl-line" data-athl-line="3">
 </span><span class="athl-line" data-athl-line="4"><span style="color: #af3a03;">&lt;</span><span style="color: #af3a03;">div</span> <span style="color: #076678;">class</span><span style="color: #af3a03;">=</span><span style="color: #af3a03;">{</span><span style="color: #af3a03;"><span style="color: #8f3f71;">@<span style="color: #8f3f71;">my_class</span></span></span><span style="color: #af3a03;">}</span><span style="color: #af3a03;">&gt;</span>
-</span><span class="athl-line" data-athl-line="5">  Name: <span style="color: #af3a03;">{</span><span style="color: #3c3836;">String</span><span style="color: #af3a03;">.</span><span style="color: #79740e; font-weight: bold;">upcase</span><span style="color: #af3a03;">(</span><span style="color: #af3a03;"><span style="color: #8f3f71;">@<span style="color: #8f3f71;">name</span></span></span><span style="color: #af3a03;">)</span><span style="color: #af3a03;">}</span>
+</span><span class="athl-line" data-athl-line="5">  <span >Name:</span> <span style="color: #af3a03;">{</span><span style="color: #3c3836;">String</span><span style="color: #af3a03;">.</span><span style="color: #79740e; font-weight: bold;">upcase</span><span style="color: #af3a03;">(</span><span style="color: #af3a03;"><span style="color: #8f3f71;">@<span style="color: #8f3f71;">name</span></span></span><span style="color: #af3a03;">)</span><span style="color: #af3a03;">}</span>
 </span><span class="athl-line" data-athl-line="6"><span style="color: #af3a03;">&lt;/</span><span style="color: #af3a03;">div</span><span style="color: #af3a03;">&gt;</span>
 </span><span class="athl-line" data-athl-line="7">
 </span><span class="athl-line" data-athl-line="8"><span style="color: #af3a03;">&lt;</span><span style="color: #af3a03;">button</span> <span style="color: #076678;">disabled</span><span style="color: #af3a03;">=</span><span style="color: #af3a03;">{</span><span style="color: #af3a03;"><span style="color: #8f3f71;">@<span style="color: #8f3f71;">step</span></span></span> <span style="color: #af3a03;">!=</span> <span style="color: #076678;">:finished</span><span style="color: #af3a03;">}</span><span style="color: #af3a03;">&gt;</span>
@@ -35,24 +35,24 @@
 </span><span class="athl-line" data-athl-line="18"><span style="color: #af3a03;">&lt;/</span><span style="color: #af3a03;">section</span><span style="color: #af3a03;">&gt;</span>
 </span><span class="athl-line" data-athl-line="19">
 </span><span class="athl-line" data-athl-line="20"><span style="color: #9d0006;">{#if <span style="color: #af3a03;"><span style="color: #8f3f71;">@<span style="color: #8f3f71;">value</span></span></span> <span style="color: #af3a03;">==</span> <span style="color: #8f3f71;">0</span><span style="color: #af3a03;">}</span></span>
-</span><span class="athl-line" data-athl-line="21">  Value is 0
+</span><span class="athl-line" data-athl-line="21">  <span >Value is 0</span>
 </span><span class="athl-line" data-athl-line="22"><span style="color: #9d0006;">{#elseif <span style="color: #af3a03;"><span style="color: #8f3f71;">@<span style="color: #8f3f71;">value</span></span></span> <span style="color: #af3a03;">&gt;</span> <span style="color: #8f3f71;">0</span><span style="color: #af3a03;">}</span></span>
-</span><span class="athl-line" data-athl-line="23">  Value is greater than 0
+</span><span class="athl-line" data-athl-line="23">  <span >Value is greater than 0</span>
 </span><span class="athl-line" data-athl-line="24"><span style="color: #9d0006;">{#else<span style="color: #af3a03;">}</span></span>
-</span><span class="athl-line" data-athl-line="25">  Value is lower than 0
+</span><span class="athl-line" data-athl-line="25">  <span >Value is lower than 0</span>
 </span><span class="athl-line" data-athl-line="26"><span style="color: #9d0006;">{/if<span style="color: #af3a03;">}</span></span>
 </span><span class="athl-line" data-athl-line="27">
 </span><span class="athl-line" data-athl-line="28"><span style="color: #9d0006;">{#case <span style="color: #af3a03;"><span style="color: #8f3f71;">@<span style="color: #8f3f71;">value</span></span></span><span style="color: #af3a03;">}</span></span>
 </span><span class="athl-line" data-athl-line="29">  <span style="color: #9d0006;">{#match <span style="color: #af3a03;">[</span><span style="color: #3c3836;">first</span><span style="color: #af3a03;">|</span><span style="color: #928374;">_</span><span style="color: #af3a03;">]</span><span style="color: #af3a03;">}</span></span>
-</span><span class="athl-line" data-athl-line="30">    First <span style="color: #af3a03;">{</span><span style="color: #3c3836;">first</span><span style="color: #af3a03;">}</span>
+</span><span class="athl-line" data-athl-line="30">    <span >First</span> <span style="color: #af3a03;">{</span><span style="color: #3c3836;">first</span><span style="color: #af3a03;">}</span>
 </span><span class="athl-line" data-athl-line="31">  <span style="color: #9d0006;">{#match <span style="color: #af3a03;">[</span><span style="color: #af3a03;">]</span><span style="color: #af3a03;">}</span></span>
-</span><span class="athl-line" data-athl-line="32">    Value is empty
+</span><span class="athl-line" data-athl-line="32">    <span >Value is empty</span>
 </span><span class="athl-line" data-athl-line="33">  <span style="color: #9d0006;">{#match <span style="color: #928374;">_</span><span style="color: #af3a03;">}</span></span>
-</span><span class="athl-line" data-athl-line="34">    Value is something else
+</span><span class="athl-line" data-athl-line="34">    <span >Value is something else</span>
 </span><span class="athl-line" data-athl-line="35"><span style="color: #9d0006;">{/case<span style="color: #af3a03;">}</span></span>
 </span><span class="athl-line" data-athl-line="36">
 </span><span class="athl-line" data-athl-line="37"><span style="color: #af3a03;">&lt;</span><span style="color: #af3a03;">div</span> :<span style="color: #9d0006;">if</span><span style="color: #af3a03;">=</span><span style="color: #af3a03;">{</span><span style="color: #af3a03;"><span style="color: #8f3f71;">@<span style="color: #8f3f71;">loading</span></span></span><span style="color: #af3a03;">}</span><span style="color: #af3a03;">&gt;</span>
-</span><span class="athl-line" data-athl-line="38">  Loading ...
+</span><span class="athl-line" data-athl-line="38">  <span >Loading ...</span>
 </span><span class="athl-line" data-athl-line="39"><span style="color: #af3a03;">&lt;/</span><span style="color: #af3a03;">div</span><span style="color: #af3a03;">&gt;</span>
 </span></code></pre>
 </body>

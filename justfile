@@ -3,6 +3,21 @@
 default:
     @just --list
 
+list-languages:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cargo run --bin autumn list-languages
+
+list-themes:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cargo run --bin autumn list-themes
+
+extract-scopes:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    (cd queries && bash extract_scopes.sh)
+
 update-queries:
     #!/usr/bin/env bash
     set -euo pipefail

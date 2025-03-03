@@ -784,7 +784,7 @@ local themes = {
 		},
 	},
 	{
-		name = "monokai_pro_default",
+		name = "monokai_pro_dark",
 		colorscheme = "monokai-pro",
 		appearance = "dark",
 		plugin = {

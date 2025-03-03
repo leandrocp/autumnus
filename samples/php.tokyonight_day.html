@@ -38,7 +38,7 @@
 </span><span class="athl-line" data-athl-line="21">
 </span><span class="athl-line" data-athl-line="22"><span style="color: #848cb5;">// Anything outside &lt;?php tags is echoed automatically</span>
 </span><span class="athl-line" data-athl-line="23"><span style="color: #6172b0;">?&gt;</span>
-</span><span class="athl-line" data-athl-line="24">Hello World Again!
+</span><span class="athl-line" data-athl-line="24"><span >Hello World Again!</span>
 </span><span class="athl-line" data-athl-line="25"><span style="color: #6172b0;">&lt;?php</span>
 </span><span class="athl-line" data-athl-line="26"><span style="color: #848cb5;">// That is because historically PHP started as a Template engine</span>
 </span><span class="athl-line" data-athl-line="27">
@@ -326,9 +326,9 @@
 </span><span class="athl-line" data-athl-line="309"><span style="color: #6172b0;">?&gt;</span>
 </span><span class="athl-line" data-athl-line="310">
 </span><span class="athl-line" data-athl-line="311"><span style="color: #6172b0;">&lt;?php</span> <span style="color: #9854f1;">if</span> <span style="color: #6172b0;">(</span><span style="color: #3760bf;">$x</span><span style="color: #6172b0;">)</span><span style="color: #006a83;">:</span> <span style="color: #6172b0;">?&gt;</span>
-</span><span class="athl-line" data-athl-line="312">This is displayed if the test is truthy.
-</span><span class="athl-line" data-athl-line="313"><span style="color: #6172b0;">&lt;?php</span> <span style="color: #9854f1;">else</span><span style="color: #006a83;">:</span> <span style="color: #6172b0;">?&gt;</span>
-</span><span class="athl-line" data-athl-line="314">This is displayed otherwise.
+</span><span class="athl-line" data-athl-line="312"><span >This is displayed if the test is truthy.</span>
+</span><span class="athl-line" data-athl-line="313"><span ><span style="color: #6172b0;">&lt;?php</span> <span style="color: #9854f1;">else</span><span style="color: #006a83;">:</span> <span style="color: #6172b0;">?&gt;</span></span>
+</span><span class="athl-line" data-athl-line="314"><span >This is displayed otherwise.</span>
 </span><span class="athl-line" data-athl-line="315"><span style="color: #6172b0;">&lt;?php</span> <span style="color: #9854f1;">endif</span><span style="color: #006a83;">;</span> <span style="color: #6172b0;">?&gt;</span>
 </span><span class="athl-line" data-athl-line="316">
 </span><span class="athl-line" data-athl-line="317"><span style="color: #6172b0;">&lt;?php</span>
@@ -743,29 +743,29 @@
 </span><span class="athl-line" data-athl-line="726">
 </span><span class="athl-line" data-athl-line="727">
 </span><span class="athl-line" data-athl-line="728"><span style="color: #848cb5;">// Set the namespace for a file</span>
-</span><span class="athl-line" data-athl-line="729"><span style="color: #7847bd;">namespace</span> <span style="color: #007197;">My</span><span style="color: #006a83;">\</span><span style="color: #007197;">Namespace</span><span style="color: #006a83;">;</span>
+</span><span class="athl-line" data-athl-line="729"><span style="color: #7847bd;">namespace</span> <span style="color: #2e7de9;">My</span><span style="color: #006a83;">\</span><span style="color: #2e7de9;">Namespace</span><span style="color: #006a83;">;</span>
 </span><span class="athl-line" data-athl-line="730">
 </span><span class="athl-line" data-athl-line="731"><span style="color: #7847bd;">class</span> <span style="color: #188092;">MyClass</span>
 </span><span class="athl-line" data-athl-line="732"><span style="color: #6172b0;">{</span>
 </span><span class="athl-line" data-athl-line="733"><span style="color: #6172b0;">}</span>
 </span><span class="athl-line" data-athl-line="734">
 </span><span class="athl-line" data-athl-line="735"><span style="color: #848cb5;">// (from another file)</span>
-</span><span class="athl-line" data-athl-line="736"><span style="color: #3760bf;">$cls</span> <span style="color: #006a83;">=</span> <span style="color: #7847bd;">new</span> <span style="color: #007197;">My</span><span style="color: #006a83;">\</span><span style="color: #007197;">Namespace</span><span style="color: #006a83;">\</span><span style="color: #9854f1;">MyClass</span><span style="color: #006a83;">;</span>
+</span><span class="athl-line" data-athl-line="736"><span style="color: #3760bf;">$cls</span> <span style="color: #006a83;">=</span> <span style="color: #7847bd;">new</span> <span style="color: #2e7de9;">My</span><span style="color: #006a83;">\</span><span style="color: #2e7de9;">Namespace</span><span style="color: #006a83;">\</span><span style="color: #9854f1;">MyClass</span><span style="color: #006a83;">;</span>
 </span><span class="athl-line" data-athl-line="737">
 </span><span class="athl-line" data-athl-line="738"><span style="color: #848cb5;">//Or from within another namespace.</span>
-</span><span class="athl-line" data-athl-line="739"><span style="color: #7847bd;">namespace</span> <span style="color: #007197;">My</span><span style="color: #006a83;">\</span><span style="color: #007197;">Other</span><span style="color: #006a83;">\</span><span style="color: #007197;">Namespace</span><span style="color: #006a83;">;</span>
+</span><span class="athl-line" data-athl-line="739"><span style="color: #7847bd;">namespace</span> <span style="color: #2e7de9;">My</span><span style="color: #006a83;">\</span><span style="color: #2e7de9;">Other</span><span style="color: #006a83;">\</span><span style="color: #2e7de9;">Namespace</span><span style="color: #006a83;">;</span>
 </span><span class="athl-line" data-athl-line="740">
-</span><span class="athl-line" data-athl-line="741"><span style="color: #007197;">use</span> <span style="color: #007197;">My</span><span style="color: #006a83;">\</span><span style="color: #007197;">Namespace</span><span style="color: #006a83;">\</span><span style="color: #188092;">MyClass</span><span style="color: #006a83;">;</span>
+</span><span class="athl-line" data-athl-line="741"><span style="color: #007197;">use</span> <span style="color: #2e7de9;">My</span><span style="color: #006a83;">\</span><span style="color: #2e7de9;">Namespace</span><span style="color: #006a83;">\</span><span style="color: #188092;">MyClass</span><span style="color: #006a83;">;</span>
 </span><span class="athl-line" data-athl-line="742">
 </span><span class="athl-line" data-athl-line="743"><span style="color: #3760bf;">$cls</span> <span style="color: #006a83;">=</span> <span style="color: #7847bd;">new</span> <span style="color: #9854f1;">MyClass</span><span style="color: #6172b0;">(</span><span style="color: #6172b0;">)</span><span style="color: #006a83;">;</span>
 </span><span class="athl-line" data-athl-line="744">
 </span><span class="athl-line" data-athl-line="745"><span style="color: #848cb5;">// Or you can alias the namespace;</span>
 </span><span class="athl-line" data-athl-line="746">
-</span><span class="athl-line" data-athl-line="747"><span style="color: #7847bd;">namespace</span> <span style="color: #007197;">My</span><span style="color: #006a83;">\</span><span style="color: #007197;">Other</span><span style="color: #006a83;">\</span><span style="color: #007197;">Namespace</span><span style="color: #006a83;">;</span>
+</span><span class="athl-line" data-athl-line="747"><span style="color: #7847bd;">namespace</span> <span style="color: #2e7de9;">My</span><span style="color: #006a83;">\</span><span style="color: #2e7de9;">Other</span><span style="color: #006a83;">\</span><span style="color: #2e7de9;">Namespace</span><span style="color: #006a83;">;</span>
 </span><span class="athl-line" data-athl-line="748">
-</span><span class="athl-line" data-athl-line="749"><span style="color: #007197;">use</span> <span style="color: #007197;">My</span><span style="color: #006a83;">\</span><span style="color: #188092;">Namespace</span> <span style="color: #006a83;">as</span> <span style="color: #188092;">SomeOtherNamespace</span><span style="color: #006a83;">;</span>
+</span><span class="athl-line" data-athl-line="749"><span style="color: #007197;">use</span> <span style="color: #2e7de9;">My</span><span style="color: #006a83;">\</span><span style="color: #188092;">Namespace</span> <span style="color: #006a83;">as</span> <span style="color: #188092;">SomeOtherNamespace</span><span style="color: #006a83;">;</span>
 </span><span class="athl-line" data-athl-line="750">
-</span><span class="athl-line" data-athl-line="751"><span style="color: #3760bf;">$cls</span> <span style="color: #006a83;">=</span> <span style="color: #7847bd;">new</span> <span style="color: #007197;">SomeOtherNamespace</span><span style="color: #006a83;">\</span><span style="color: #9854f1;">MyClass</span><span style="color: #6172b0;">(</span><span style="color: #6172b0;">)</span><span style="color: #006a83;">;</span>
+</span><span class="athl-line" data-athl-line="751"><span style="color: #3760bf;">$cls</span> <span style="color: #006a83;">=</span> <span style="color: #7847bd;">new</span> <span style="color: #2e7de9;">SomeOtherNamespace</span><span style="color: #006a83;">\</span><span style="color: #9854f1;">MyClass</span><span style="color: #6172b0;">(</span><span style="color: #6172b0;">)</span><span style="color: #006a83;">;</span>
 </span><span class="athl-line" data-athl-line="752">
 </span><span class="athl-line" data-athl-line="753">
 </span><span class="athl-line" data-athl-line="754"><span style="color: #848cb5;">/**********************</span>
