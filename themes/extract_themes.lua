@@ -185,6 +185,36 @@ local themes = {
 			opts = {},
 		},
 	},
+	{
+		name = "kanagawa_wave",
+		colorscheme = "kanagawa",
+		appearance = "dark",
+		plugin = {
+			"rebelot/kanagawa.nvim",
+			name = "kanagawa",
+			opts = { theme = "wave" },
+		},
+	},
+	{
+		name = "kanagawa_dragon",
+		colorscheme = "kanagawa",
+		appearance = "dark",
+		plugin = {
+			"rebelot/kanagawa.nvim",
+			name = "kanagawa",
+			opts = { theme = "dragon" },
+		},
+	},
+	{
+		name = "kanagawa_lotus",
+		colorscheme = "kanagawa",
+		appearance = "light",
+		plugin = {
+			"rebelot/kanagawa.nvim",
+			name = "kanagawa",
+			opts = { theme = "lotus" },
+		},
+	},
 }
 
 local highlight_groups = {
