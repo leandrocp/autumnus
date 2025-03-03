@@ -295,6 +295,26 @@ local themes = {
 			opts = { theme = "dracula-soft" },
 		},
 	},
+	{
+		name = "vscode_dark",
+		colorscheme = "vscode",
+		appearance = "dark",
+		plugin = {
+			"Mofiqul/vscode.nvim",
+			name = "vscode",
+			opts = {},
+		},
+	},
+	{
+		name = "vscode_light",
+		colorscheme = "vscode",
+		appearance = "light",
+		plugin = {
+			"Mofiqul/vscode.nvim",
+			name = "vscode",
+			opts = {},
+		},
+	},
 }
 
 local highlight_groups = {
