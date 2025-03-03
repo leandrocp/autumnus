@@ -215,6 +215,66 @@ local themes = {
 			opts = { theme = "lotus" },
 		},
 	},
+	{
+		name = "gruvbox_dark",
+		colorscheme = "gruvbox",
+		appearance = "dark",
+		plugin = {
+			"ellisonleao/gruvbox.nvim",
+			name = "gruvbox",
+			opts = { contrast = "" },
+		},
+	},
+	{
+		name = "gruvbox_dark_hard",
+		colorscheme = "gruvbox",
+		appearance = "dark",
+		plugin = {
+			"ellisonleao/gruvbox.nvim",
+			name = "gruvbox",
+			opts = { contrast = "hard" },
+		},
+	},
+	{
+		name = "gruvbox_dark_soft",
+		colorscheme = "gruvbox",
+		appearance = "dark",
+		plugin = {
+			"ellisonleao/gruvbox.nvim",
+			name = "gruvbox",
+			opts = { contrast = "soft" },
+		},
+	},
+	{
+		name = "gruvbox_light",
+		colorscheme = "gruvbox",
+		appearance = "light",
+		plugin = {
+			"ellisonleao/gruvbox.nvim",
+			name = "gruvbox",
+			opts = { contrast = "" },
+		},
+	},
+	{
+		name = "gruvbox_light_hard",
+		colorscheme = "gruvbox",
+		appearance = "light",
+		plugin = {
+			"ellisonleao/gruvbox.nvim",
+			name = "gruvbox",
+			opts = { contrast = "hard" },
+		},
+	},
+	{
+		name = "gruvbox_light_soft",
+		colorscheme = "gruvbox",
+		appearance = "light",
+		plugin = {
+			"ellisonleao/gruvbox.nvim",
+			name = "gruvbox",
+			opts = { contrast = "soft" },
+		},
+	},
 }
 
 local highlight_groups = {
