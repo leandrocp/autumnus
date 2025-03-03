@@ -1,3 +1,6 @@
+-- https://github.com/rockerBOO/awesome-neovim/blob/main/README.md#tree-sitter-supported-colorscheme
+-- https://github.com/topics/neovim-theme
+
 local themes = {
 	{
 		name = "tokyonight_night",
@@ -321,7 +324,7 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"navarasu/onedark.nvim",
-			opts = { style = 'dark' },
+			opts = { style = "dark" },
 		},
 	},
 	{
@@ -330,7 +333,7 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"navarasu/onedark.nvim",
-			opts = { style = 'darker' },
+			opts = { style = "darker" },
 		},
 	},
 	{
@@ -339,7 +342,7 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"navarasu/onedark.nvim",
-			opts = { style = 'cool' },
+			opts = { style = "cool" },
 		},
 	},
 	{
@@ -348,7 +351,7 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"navarasu/onedark.nvim",
-			opts = { style = 'deep' },
+			opts = { style = "deep" },
 		},
 	},
 	{
@@ -357,7 +360,7 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"navarasu/onedark.nvim",
-			opts = { style = 'warm' },
+			opts = { style = "warm" },
 		},
 	},
 	{
@@ -366,7 +369,7 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"navarasu/onedark.nvim",
-			opts = { style = 'warmer' },
+			opts = { style = "warmer" },
 		},
 	},
 	{
@@ -375,7 +378,7 @@ local themes = {
 		appearance = "light",
 		plugin = {
 			"navarasu/onedark.nvim",
-			opts = { style = 'light' },
+			opts = { style = "light" },
 		},
 	},
 	{
@@ -543,7 +546,6 @@ local themes = {
 			opts = {},
 		},
 	},
-	-- Nightfox Collection
 	{
 		name = "nightfox",
 		colorscheme = "nightfox",
@@ -604,9 +606,8 @@ local themes = {
 			opts = {},
 		},
 	},
-	-- Rose Pine Collection
 	{
-		name = "rosepine",
+		name = "rosepine_dark",
 		colorscheme = "rose-pine",
 		appearance = "dark",
 		plugin = {
@@ -635,35 +636,18 @@ local themes = {
 			opts = { variant = "dawn" },
 		},
 	},
-	-- Everforest Collection
 	{
 		name = "everforest_dark",
 		colorscheme = "everforest",
 		appearance = "dark",
 		plugin = {
-			"sainnhe/everforest",
-			name = "everforest",
-			opts = {},
-		},
-	},
-	{
-		name = "everforest_dark_hard",
-		colorscheme = "everforest",
-		appearance = "dark",
-		plugin = {
-			"sainnhe/everforest",
-			name = "everforest",
-			opts = { background = "hard" },
-		},
-	},
-	{
-		name = "everforest_dark_soft",
-		colorscheme = "everforest",
-		appearance = "dark",
-		plugin = {
-			"sainnhe/everforest",
-			name = "everforest",
-			opts = { background = "soft" },
+			"neanias/everforest-nvim",
+			version = false,
+			config = function()
+				require("everforest").setup({
+					background = "medium",
+				})
+			end,
 		},
 	},
 	{
@@ -671,207 +655,244 @@ local themes = {
 		colorscheme = "everforest",
 		appearance = "light",
 		plugin = {
-			"sainnhe/everforest",
-			name = "everforest",
+			"neanias/everforest-nvim",
+			version = false,
+			config = function()
+				require("everforest").setup({
+					background = "medium",
+				})
+			end,
+		},
+	},
+	{
+		name = "edge_dark",
+		colorscheme = "edge",
+		appearance = "dark",
+		plugin = {
+			"sainnhe/edge",
+			opts = {
+				style = "default",
+				transparent = false,
+			},
+		},
+	},
+	{
+		name = "edge_light",
+		colorscheme = "edge",
+		appearance = "light",
+		plugin = {
+			"sainnhe/edge",
+			opts = {
+				style = "default",
+				transparent = false,
+			},
+		},
+	},
+	{
+		name = "edge_aura",
+		colorscheme = "edge",
+		appearance = "dark",
+		plugin = {
+			"sainnhe/edge",
+			opts = {
+				style = "aura",
+				transparent = false,
+			},
+		},
+	},
+	{
+		name = "edge_neon",
+		colorscheme = "edge",
+		appearance = "dark",
+		plugin = {
+			"sainnhe/edge",
+			opts = {
+				style = "neon",
+				transparent = false,
+			},
+		},
+	},
+	{
+		name = "gruvbox_material_dark",
+		colorscheme = "gruvbox-material",
+		appearance = "dark",
+		plugin = {
+			"sainnhe/gruvbox-material",
+			opts = {
+				background = "hard",
+				transparent_background = false,
+			},
+		},
+	},
+	{
+		name = "gruvbox_material_light",
+		colorscheme = "gruvbox-material",
+		appearance = "light",
+		plugin = {
+			"sainnhe/gruvbox-material",
+			opts = {
+				background = "hard",
+				transparent_background = false,
+			},
+		},
+	},
+	{
+		name = "modus_operandi",
+		colorscheme = "modus_operandi",
+		appearance = "light",
+		plugin = {
+			"miikanissi/modus-themes.nvim",
 			opts = {},
 		},
 	},
 	{
-		name = "everforest_light_hard",
-		colorscheme = "everforest",
-		appearance = "light",
+		name = "modus_vivendi",
+		colorscheme = "modus_vivendi",
+		appearance = "dark",
 		plugin = {
-			"sainnhe/everforest",
-			name = "everforest",
-			opts = { background = "hard" },
+			"miikanissi/modus-themes.nvim",
+			opts = {},
 		},
 	},
 	{
-		name = "everforest_light_soft",
-		colorscheme = "everforest",
-		appearance = "light",
+		name = "zephyr_dark",
+		colorscheme = "zephyr",
+		appearance = "dark",
 		plugin = {
-			"sainnhe/everforest",
-			name = "everforest",
-			opts = { background = "soft" },
+			"glepnir/zephyr-nvim",
+			opts = {},
 		},
 	},
-	-- Monokai Pro Collection
 	{
-		name = "monokai_pro",
+		name = "neosolarized_dark",
+		colorscheme = "neosolarized",
+		appearance = "dark",
+		plugin = {
+			"svrana/neosolarized.nvim",
+			dependencies = { "tjdevries/colorbuddy.nvim" },
+			opts = {},
+		},
+	},
+	{
+		name = "neosolarized_light",
+		colorscheme = "neosolarized",
+		appearance = "light",
+		plugin = {
+			"svrana/neosolarized.nvim",
+			dependencies = { "tjdevries/colorbuddy.nvim" },
+			opts = {},
+		},
+	},
+	{
+		name = "monokai_pro_default",
 		colorscheme = "monokai-pro",
 		appearance = "dark",
 		plugin = {
 			"loctvl842/monokai-pro.nvim",
-			name = "monokai-pro",
-			opts = {},
-		},
-	},
-	{
-		name = "monokai_pro_classic",
-		colorscheme = "monokai-pro-classic",
-		appearance = "dark",
-		plugin = {
-			"loctvl842/monokai-pro.nvim",
-			name = "monokai-pro",
-			opts = { filter = "classic" },
+			opts = {
+				filter = "pro",
+			},
 		},
 	},
 	{
 		name = "monokai_pro_machine",
-		colorscheme = "monokai-pro-machine",
+		colorscheme = "monokai-pro",
 		appearance = "dark",
 		plugin = {
 			"loctvl842/monokai-pro.nvim",
-			name = "monokai-pro",
-			opts = { filter = "machine" },
-		},
-	},
-	{
-		name = "monokai_pro_octagon",
-		colorscheme = "monokai-pro-octagon",
-		appearance = "dark",
-		plugin = {
-			"loctvl842/monokai-pro.nvim",
-			name = "monokai-pro",
-			opts = { filter = "octagon" },
+			opts = {
+				filter = "machine",
+			},
 		},
 	},
 	{
 		name = "monokai_pro_ristretto",
-		colorscheme = "monokai-pro-ristretto",
+		colorscheme = "monokai-pro",
 		appearance = "dark",
 		plugin = {
 			"loctvl842/monokai-pro.nvim",
-			name = "monokai-pro",
-			opts = { filter = "ristretto" },
+			opts = {
+				filter = "ristretto",
+			},
 		},
 	},
 	{
 		name = "monokai_pro_spectrum",
-		colorscheme = "monokai-pro-spectrum",
+		colorscheme = "monokai-pro",
 		appearance = "dark",
 		plugin = {
 			"loctvl842/monokai-pro.nvim",
-			name = "monokai-pro",
-			opts = { filter = "spectrum" },
+			opts = {
+				filter = "spectrum",
+			},
 		},
 	},
-	-- Oxocarbon Collection
 	{
-		name = "oxocarbon",
-		colorscheme = "oxocarbon",
+		name = "bamboo_dark",
+		colorscheme = "bamboo",
 		appearance = "dark",
 		plugin = {
-			"nyoom-engineering/oxocarbon.nvim",
-			name = "oxocarbon",
+			"ribru17/bamboo.nvim",
 			opts = {},
 		},
 	},
 	{
-		name = "oxocarbon_light",
-		colorscheme = "oxocarbon",
+		name = "bamboo_light",
+		colorscheme = "bamboo-light",
 		appearance = "light",
 		plugin = {
-			"nyoom-engineering/oxocarbon.nvim",
-			name = "oxocarbon",
-			opts = {},
-		},
-	},
-	-- Ayu Collection
-	{
-		name = "ayu_dark",
-		colorscheme = "ayu-dark",
-		appearance = "dark",
-		plugin = {
-			"Shatur/neovim-ayu",
-			name = "ayu",
+			"ribru17/bamboo.nvim",
 			opts = {},
 		},
 	},
 	{
-		name = "ayu_mirage",
-		colorscheme = "ayu-mirage",
+		name = "aura_dark",
+		colorscheme = "aura-dark",
 		appearance = "dark",
 		plugin = {
-			"Shatur/neovim-ayu",
-			name = "ayu",
-			opts = {},
+			"daltonmenezes/aura-theme",
+			name = "aura",
+			config = function(plugin)
+				vim.opt.rtp:append(plugin.dir .. "/packages/neovim")
+			end,
 		},
 	},
 	{
-		name = "ayu_light",
-		colorscheme = "ayu-light",
-		appearance = "light",
-		plugin = {
-			"Shatur/neovim-ayu",
-			name = "ayu",
-			opts = {},
-		},
-	},
-	-- Melange
-	{
-		name = "melange",
-		colorscheme = "melange",
+		name = "aura_dark_soft_text",
+		colorscheme = "aura-dark-soft-text",
 		appearance = "dark",
 		plugin = {
-			"savq/melange-nvim",
-			name = "melange",
-			opts = {},
-		},
-	},
-	-- Sonokai Collection
-	{
-		name = "sonokai",
-		colorscheme = "sonokai",
-		appearance = "dark",
-		plugin = {
-			"sainnhe/sonokai",
-			name = "sonokai",
-			opts = {},
+			"daltonmenezes/aura-theme",
+			name = "aura",
+			config = function(plugin)
+				vim.opt.rtp:append(plugin.dir .. "/packages/neovim")
+			end,
 		},
 	},
 	{
-		name = "sonokai_atlantis",
-		colorscheme = "sonokai",
+		name = "aura_soft_dark",
+		colorscheme = "aura-soft-dark",
 		appearance = "dark",
 		plugin = {
-			"sainnhe/sonokai",
-			name = "sonokai",
-			opts = { style = "atlantis" },
+			"daltonmenezes/aura-theme",
+			name = "aura",
+			config = function(plugin)
+				vim.opt.rtp:append(plugin.dir .. "/packages/neovim")
+			end,
 		},
 	},
 	{
-		name = "sonokai_andromeda",
-		colorscheme = "sonokai",
+		name = "aura_soft_dark_soft_text",
+		colorscheme = "aura-soft-dark-soft-text",
 		appearance = "dark",
 		plugin = {
-			"sainnhe/sonokai",
-			name = "sonokai",
-			opts = { style = "andromeda" },
+			"daltonmenezes/aura-theme",
+			name = "aura",
+			config = function(plugin)
+				vim.opt.rtp:append(plugin.dir .. "/packages/neovim")
+			end,
 		},
 	},
-	{
-		name = "sonokai_shusia",
-		colorscheme = "sonokai",
-		appearance = "dark",
-		plugin = {
-			"sainnhe/sonokai",
-			name = "sonokai",
-			opts = { style = "shusia" },
-		},
-	},
-	{
-		name = "sonokai_maia",
-		colorscheme = "sonokai",
-		appearance = "dark",
-		plugin = {
-			"sainnhe/sonokai",
-			name = "sonokai",
-			opts = { style = "maia" },
-		},
-	},
-	-- Moonfly
 	{
 		name = "moonfly",
 		colorscheme = "moonfly",
@@ -879,17 +900,6 @@ local themes = {
 		plugin = {
 			"bluz71/vim-moonfly-colors",
 			name = "moonfly",
-			opts = {},
-		},
-	},
-	-- Poimandres
-	{
-		name = "poimandres",
-		colorscheme = "poimandres",
-		appearance = "dark",
-		plugin = {
-			"olivercederborg/poimandres.nvim",
-			name = "poimandres",
 			opts = {},
 		},
 	},
@@ -1147,6 +1157,10 @@ require("lazy").setup(plugins, {
 		enabled = true,
 	},
 })
+
+table.sort(themes, function(a, b)
+	return a.name < b.name
+end)
 
 for _, theme_def in ipairs(themes) do
 	extract_colorscheme_colors(theme_def)

@@ -26,7 +26,7 @@
       "italic": true
     },
     "constant": {
-      "fg": "#d3c6aa"
+      "fg": "#83c092"
     },
     "constant.builtin": {
       "fg": "#d699b6"
@@ -95,7 +95,7 @@
       "fg": "#e67e80"
     },
     "keyword.modifier": {
-      "fg": "#e67e80"
+      "fg": "#e69875"
     },
     "keyword.operator": {
       "fg": "#e69875"
@@ -214,9 +214,10 @@
       "fg": "#dbbc7f"
     },
     "string.special.symbol": {
-      "fg": "#d3c6aa"
+      "fg": "#83c092"
     },
     "string.special.url": {
+      "fg": "#7fbbb3",
       "underline": true
     },
     "tag": {
