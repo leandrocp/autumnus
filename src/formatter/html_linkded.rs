@@ -70,7 +70,7 @@ impl Formatter for HtmlLinked {
         for (i, line) in renderer.lines().enumerate() {
             write!(
                 writer,
-                "<span class=\"athl-line\" data-athl-line=\"{}\">{}</span>",
+                "<span class=\"line\" data-line=\"{}\">{}</span>",
                 i + 1,
                 line
             );
