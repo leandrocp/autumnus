@@ -267,6 +267,7 @@ fn queries() {
             let processed_content = read_query_file(&file_path, language, query);
 
             generated_code.extend(quote! {
+                #[doc(hidden)]
                 pub const #const_name: &str = #processed_content;
             });
 

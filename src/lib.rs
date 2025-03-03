@@ -162,6 +162,7 @@
 //! | vscode_light |
 //! | zephyr_dark |
 
+#[doc(hidden)]
 pub mod constants;
 pub mod formatter;
 pub mod languages;

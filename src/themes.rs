@@ -4,24 +4,110 @@ use serde::{Deserialize, Serialize};
 use std::{collections::BTreeMap, fs, path::Path};
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
+/// A theme for syntax highlighting.
+///
+/// A theme consists of a name, appearance (light/dark), and a collection of highlight styles
+/// mapped to their scope names.
+///
+/// # Examples
+///
+/// Creating a theme programmatically:
+///
+/// ```
+/// use autumnus::themes::{Theme, Style};
+/// use std::collections::BTreeMap;
+///
+/// let mut highlights = BTreeMap::new();
+/// highlights.insert("keyword".to_string(), Style {
+///     fg: Some("#ff79c6".to_string()),
+///     bold: true,
+///     ..Default::default()
+/// });
+///
+/// let theme = Theme::new(
+///     "my_theme".to_string(),
+///     "dark".to_string(),
+///     highlights
+/// );
+/// ```
+///
+/// Loading a theme from a JSON file:
+///
+/// ```
+/// use autumnus::themes;
+/// use std::path::Path;
+///
+/// let theme = themes::from_file(Path::new("themes/dracula.json")).unwrap();
+/// ```
 pub struct Theme {
+    /// The name of the theme.
     pub name: String,
+    /// The appearance of the theme ("light" or "dark").
     pub appearance: String,
+    /// A map of highlight scope names to their styles.
     pub highlights: BTreeMap<String, Style>,
 }
 
 #[derive(Debug, Default, Clone, PartialEq, Serialize, Deserialize)]
+/// A style for syntax highlighting.
+///
+/// A style defines the visual appearance of a highlight scope, including colors,
+/// font weight, and text decoration.
+///
+/// # Examples
+///
+/// Creating a style with foreground color and bold text:
+///
+/// ```
+/// use autumnus::themes::Style;
+///
+/// let style = Style {
+///     fg: Some("#ff79c6".to_string()),
+///     bold: true,
+///     ..Default::default()
+/// };
+/// ```
+///
+/// Creating a style with background color and italic text:
+///
+/// ```
+/// use autumnus::themes::Style;
+///
+/// let style = Style {
+///     bg: Some("#282a36".to_string()),
+///     italic: true,
+///     ..Default::default()
+/// };
+/// ```
+///
+/// Creating a style with text decoration:
+///
+/// ```
+/// use autumnus::themes::Style;
+///
+/// let style = Style {
+///     underline: true,
+///     strikethrough: true,
+///     ..Default::default()
+/// };
+/// ```
 pub struct Style {
+    /// The foreground color in hex format (e.g., "#ff79c6").
     #[serde(default)]
     pub fg: Option<String>,
+    /// The background color in hex format (e.g., "#282a36").
     #[serde(default)]
     pub bg: Option<String>,
+    /// Whether to underline the text.
     #[serde(default)]
     pub underline: bool,
+    /// Whether to make the text bold.
     #[serde(default)]
     pub bold: bool,
+    /// Whether to make the text italic.
     #[serde(default)]
     pub italic: bool,
+    /// Whether to strikethrough the text.
     #[serde(default)]
     pub strikethrough: bool,
 }
