@@ -82,3 +82,8 @@ gen-samples:
     #!/usr/bin/env bash
     set -euo pipefail
     cargo run --features=dev --bin dev gen-samples
+
+dev-server:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    (cd samples && python -m http.server)

@@ -917,7 +917,7 @@ local themes = {
 	},
 	{
 		name = "cyberdream_light",
-		colorscheme = "cyberdream",
+		colorscheme = "cyberdream-light",
 		appearance = "light",
 		plugin = {
 			"scottmckendry/cyberdream.nvim",
