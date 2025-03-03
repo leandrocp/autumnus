@@ -12,6 +12,7 @@
 //! | C# | *.cs |
 //! | CSV | *.csv |
 //! | Clojure | *.bb, *.boot, *.clj, *.cljc, *.clje, *.cljs, *.cljx, *.edn, *.joke, *.joker |
+//! | Comment | |
 //! | Common Lisp | *.lisp, *.lsp, *.asd |
 //! | C++ | *.cc, *.cpp, *.h, *.hh, *.hpp, *.ino, *.cxx, *.cu |
 //! | CSS | *.css |
@@ -40,15 +41,18 @@
 //! | Lua | *.lua |
 //! | Make | *.mak, *.d, *.make, *.makefile, *.mk, *.mkfile, BSDmakefile, GNUmakefile, Kbuild, Makefile, Makefile.am, Makefile.boot, Makefile.frag, Makefile*.in, Makefile.inc, Makefile.wat, makefile, makefile.sco, mkfile |
 //! | Markdown | *.md, README |
+//! | Markdown Inline | |
 //! | Objective-C | *.m |
 //! | OCaml | *.ml |
 //! | OCaml Interface | *.mli |
 //! | Perl | *.pm, *.pl |
 //! | PHP | *.php, *.phtml, *.php3, *.php4, *.php5, *.php7, *.phps |
+//! | Plaintext | |
 //! | PowerShell | *.ps1, *.psm1 |
 //! | Protocol Buffer | *.proto, *.protobuf, *.proto2, *.proto3 |
 //! | Python | *.py, *.py3, *.pyi, *.bzl, TARGETS, BUCK, DEPS |
 //! | R | *.R, *.r, *.rd, *.rsx, .Rprofile, expr-dist |
+//! | Regex | |
 //! | Ruby | *.rb, *.builder, *.spec, *.rake, Gemfile, Rakefile |
 //! | Rust | *.rs |
 //! | Scala | *.scala, *.sbt, *.sc |
@@ -69,12 +73,30 @@
 //!
 //! | Theme Name |
 //! | ---------- |
+//! | aura_dark |
+//! | aura_dark_soft_text |
+//! | aura_soft_dark |
+//! | aura_soft_dark_soft_text |
+//! | bamboo_dark |
+//! | bamboo_light |
+//! | carbonfox |
 //! | catppuccin_frappe |
 //! | catppuccin_latte |
 //! | catppuccin_macchiato |
 //! | catppuccin_mocha |
+//! | cyberdream_dark |
+//! | cyberdream_light |
+//! | dawnfox |
+//! | dayfox |
 //! | dracula |
 //! | dracula_soft |
+//! | duskfox |
+//! | edge_aura |
+//! | edge_dark |
+//! | edge_light |
+//! | edge_neon |
+//! | everforest_dark |
+//! | everforest_light |
 //! | github_dark |
 //! | github_dark_colorblind |
 //! | github_dark_default |
@@ -84,9 +106,16 @@
 //! | github_light |
 //! | github_light_colorblind |
 //! | github_light_default |
+//! | github_light_high_contrast |
 //! | github_light_tritanopia |
 //! | gruvbox_dark |
+//! | gruvbox_dark_hard |
+//! | gruvbox_dark_soft |
 //! | gruvbox_light |
+//! | gruvbox_light_hard |
+//! | gruvbox_light_soft |
+//! | gruvbox_material_dark |
+//! | gruvbox_material_light |
 //! | kanagawa_dragon |
 //! | kanagawa_lotus |
 //! | kanagawa_wave |
@@ -95,25 +124,43 @@
 //! | material_lighter |
 //! | material_oceanic |
 //! | material_palenight |
+//! | modus_operandi |
+//! | modus_vivendi |
+//! | monokai_pro_dark |
+//! | monokai_pro_machine |
+//! | monokai_pro_ristretto |
+//! | monokai_pro_spectrum |
+//! | moonfly |
+//! | neosolarized_dark |
+//! | neosolarized_light |
+//! | nightfox |
 //! | nord |
 //! | onedark_cool |
 //! | onedark_dark |
 //! | onedark_darker |
 //! | onedark_deep |
-//! | onedark_pro |
-//! | onedark_pro_dark |
-//! | onedark_pro_vivid |
+//! | onedark_light |
 //! | onedark_warm |
 //! | onedark_warmer |
-//! | onelight |
-//! | solarized_dark |
-//! | solarized_light |
+//! | onedarkpro |
+//! | onedarkpro_dark |
+//! | onedarkpro_light |
+//! | onedarkpro_vivid |
+//! | rosepine_dark |
+//! | rosepine_dawn |
+//! | rosepine_moon |
+//! | solarized_autumn |
+//! | solarized_spring |
+//! | solarized_summer |
+//! | solarized_winter |
+//! | terafox |
 //! | tokyonight_day |
 //! | tokyonight_moon |
 //! | tokyonight_night |
 //! | tokyonight_storm |
 //! | vscode_dark |
 //! | vscode_light |
+//! | zephyr_dark |
 
 pub mod constants;
 pub mod formatter;
