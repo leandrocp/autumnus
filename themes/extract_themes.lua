@@ -315,6 +315,216 @@ local themes = {
 			opts = {},
 		},
 	},
+	{
+		name = "onedark",
+		colorscheme = "onedark",
+		appearance = "dark",
+		plugin = {
+			"navarasu/onedark.nvim",
+			name = "onedark",
+			opts = { style = "dark" },
+		},
+	},
+	{
+		name = "onedark_darker",
+		colorscheme = "onedark",
+		appearance = "dark",
+		plugin = {
+			"navarasu/onedark.nvim",
+			name = "onedark",
+			opts = { style = "darker" },
+		},
+	},
+	{
+		name = "onedark_cool",
+		colorscheme = "onedark",
+		appearance = "dark",
+		plugin = {
+			"navarasu/onedark.nvim",
+			name = "onedark",
+			opts = { style = "cool" },
+		},
+	},
+	{
+		name = "onedark_deep",
+		colorscheme = "onedark",
+		appearance = "dark",
+		plugin = {
+			"navarasu/onedark.nvim",
+			name = "onedark",
+			opts = { style = "deep" },
+		},
+	},
+	{
+		name = "onedark_warm",
+		colorscheme = "onedark",
+		appearance = "dark",
+		plugin = {
+			"navarasu/onedark.nvim",
+			name = "onedark",
+			opts = { style = "warm" },
+		},
+	},
+	{
+		name = "onedark_warmer",
+		colorscheme = "onedark",
+		appearance = "dark",
+		plugin = {
+			"navarasu/onedark.nvim",
+			name = "onedark",
+			opts = { style = "warmer" },
+		},
+	},
+	{
+		name = "onedark_light",
+		colorscheme = "onedark",
+		appearance = "light",
+		plugin = {
+			"navarasu/onedark.nvim",
+			name = "onedark",
+			opts = { style = "light" },
+		},
+	},
+	{
+		name = "solarized_winter",
+		colorscheme = "solarized",
+		appearance = "dark",
+		plugin = {
+			"maxmx03/solarized.nvim",
+			name = "solarized",
+			opts = { variant = "winter" },
+		},
+	},
+	{
+		name = "solarized_spring",
+		colorscheme = "solarized",
+		appearance = "dark",
+		plugin = {
+			"maxmx03/solarized.nvim",
+			name = "solarized",
+			opts = { variant = "spring" },
+		},
+	},
+	{
+		name = "solarized_summer",
+		colorscheme = "solarized",
+		appearance = "dark",
+		plugin = {
+			"maxmx03/solarized.nvim",
+			name = "solarized",
+			opts = { variant = "summer" },
+		},
+	},
+	{
+		name = "solarized_autumn",
+		colorscheme = "solarized",
+		appearance = "dark",
+		plugin = {
+			"maxmx03/solarized.nvim",
+			name = "solarized",
+			opts = { variant = "autumn" },
+		},
+	},
+	{
+		name = "material_darker",
+		colorscheme = "material-darker",
+		appearance = "dark",
+		plugin = {
+			"marko-cerovac/material.nvim",
+			name = "material",
+			opts = {},
+		},
+	},
+	{
+		name = "material_lighter",
+		colorscheme = "material-lighter",
+		appearance = "light",
+		plugin = {
+			"marko-cerovac/material.nvim",
+			name = "material",
+			opts = {},
+		},
+	},
+	{
+		name = "material_oceanic",
+		colorscheme = "material-oceanic",
+		appearance = "dark",
+		plugin = {
+			"marko-cerovac/material.nvim",
+			name = "material",
+			opts = {},
+		},
+	},
+	{
+		name = "material_palenight",
+		colorscheme = "material-palenight",
+		appearance = "dark",
+		plugin = {
+			"marko-cerovac/material.nvim",
+			name = "material",
+			opts = {},
+		},
+	},
+	{
+		name = "material_deep_ocean",
+		colorscheme = "material-deep-ocean",
+		appearance = "dark",
+		plugin = {
+			"marko-cerovac/material.nvim",
+			name = "material",
+			opts = {},
+		},
+	},
+	{
+		name = "nord",
+		colorscheme = "nord",
+		appearance = "dark",
+		plugin = {
+			"shaunsingh/nord.nvim",
+			name = "nord",
+			opts = {},
+		},
+	},
+	{
+		name = "onedarkpro",
+		colorscheme = "onedark",
+		appearance = "dark",
+		plugin = {
+			"olimorris/onedarkpro.nvim",
+			name = "onedarkpro",
+			opts = {},
+		},
+	},
+	{
+		name = "onedarkpro_light",
+		colorscheme = "onelight",
+		appearance = "light",
+		plugin = {
+			"olimorris/onedarkpro.nvim",
+			name = "onedarkpro",
+			opts = {},
+		},
+	},
+	{
+		name = "onedarkpro_vivid",
+		colorscheme = "onedark_vivid",
+		appearance = "dark",
+		plugin = {
+			"olimorris/onedarkpro.nvim",
+			name = "onedarkpro",
+			opts = {},
+		},
+	},
+	{
+		name = "onedarkpro_dark",
+		colorscheme = "onedark_dark",
+		appearance = "dark",
+		plugin = {
+			"olimorris/onedarkpro.nvim",
+			name = "onedarkpro",
+			opts = {},
+		},
+	},
 }
 
 local highlight_groups = {

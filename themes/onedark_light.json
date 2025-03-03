@@ -1,6 +1,6 @@
 {
-  "name": "onedark_warmer",
-  "appearance": "dark",
+  "name": "onedark_light",
+  "appearance": "light",
   "highlights": {
     "attribute": {
       "fg": "#0184bc"

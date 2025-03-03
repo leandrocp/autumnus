@@ -1,6 +1,6 @@
 {
   "name": "material_lighter",
-  "appearance": "dark",
+  "appearance": "light",
   "highlights": {
     "attribute": {
       "fg": "#6182b8"
