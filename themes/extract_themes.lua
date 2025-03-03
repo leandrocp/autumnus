@@ -316,13 +316,17 @@ local themes = {
 		},
 	},
 	{
-		name = "onedark",
+		name = "onedark_dark",
 		colorscheme = "onedark",
 		appearance = "dark",
 		plugin = {
 			"navarasu/onedark.nvim",
-			name = "onedark",
-			opts = { style = "dark" },
+			config = function()
+				require('onedark').setup {
+					style = 'dark'
+				}
+				require('onedark').load()
+			end,
 		},
 	},
 	{
@@ -331,8 +335,12 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"navarasu/onedark.nvim",
-			name = "onedark",
-			opts = { style = "darker" },
+			config = function()
+				require('onedark').setup {
+					style = 'darker'
+				}
+				require('onedark').load()
+			end,
 		},
 	},
 	{
@@ -341,8 +349,12 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"navarasu/onedark.nvim",
-			name = "onedark",
-			opts = { style = "cool" },
+			config = function()
+				require('onedark').setup {
+					style = 'cool'
+				}
+				require('onedark').load()
+			end,
 		},
 	},
 	{
@@ -351,8 +363,12 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"navarasu/onedark.nvim",
-			name = "onedark",
-			opts = { style = "deep" },
+			config = function()
+				require('onedark').setup {
+					style = 'deep'
+				}
+				require('onedark').load()
+			end,
 		},
 	},
 	{
@@ -361,8 +377,12 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"navarasu/onedark.nvim",
-			name = "onedark",
-			opts = { style = "warm" },
+			config = function()
+				require('onedark').setup {
+					style = 'warm'
+				}
+				require('onedark').load()
+			end,
 		},
 	},
 	{
@@ -371,8 +391,12 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"navarasu/onedark.nvim",
-			name = "onedark",
-			opts = { style = "warmer" },
+			config = function()
+				require('onedark').setup {
+					style = 'warmer'
+				}
+				require('onedark').load()
+			end,
 		},
 	},
 	{
@@ -381,8 +405,12 @@ local themes = {
 		appearance = "light",
 		plugin = {
 			"navarasu/onedark.nvim",
-			name = "onedark",
-			opts = { style = "light" },
+			config = function()
+				require('onedark').setup {
+					style = 'light'
+				}
+				require('onedark').load()
+			end,
 		},
 	},
 	{
