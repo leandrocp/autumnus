@@ -47,31 +47,30 @@ fn gen_samples() -> Result<()> {
     let samples_path = PathBuf::from("./samples");
 
     let themes = [
-        "catppuccin_frappe",
-        "catppuccin_latte",
-        "catppuccin_macchiato",
         "catppuccin_mocha",
-        "dracula",
-        "dracula_soft",
+        "catppuccin_latte",
+        "tokyonight_night",
+        "tokyonight_day",
         "github_dark",
         "github_light",
         "gruvbox_dark",
         "gruvbox_light",
-        "kanagawa_dragon",
-        "kanagawa_lotus",
-        "kanagawa_wave",
-        "material_lighter",
-        "material_oceanic",
+        "rosepine",
+        "rosepine_dawn",
         "nord",
-        "onedark_dark",
-        "onedark_pro_dark",
-        "onelight",
-        "solarized_dark",
-        "solarized_light",
-        "tokyonight_day",
-        "tokyonight_night",
-        "vscode_dark",
-        "vscode_light",
+        "dracula",
+        "solarized_winter",
+        "solarized_summer",
+        "onedark",
+        "onedark_light",
+        "everforest_dark",
+        "everforest_light",
+        "material_deep_ocean",
+        "kanagawa_wave",
+        "kanagawa_lotus",
+        "ayu_dark",
+        "ayu_light",
+        "monokai_pro",
     ];
 
     let entries = collect_sample_entries(&samples_path)?;
@@ -129,7 +128,10 @@ fn gen_samples_entries(
                 autumnus::Options {
                     theme: theme.clone(),
                     debug: false,
-                    pre_class: Some("w-full overflow-auto rounded-lg p-8 text-sm antialiased leading-6".to_string()),
+                    pre_class: Some(
+                        "w-full overflow-auto rounded-lg p-8 text-sm antialiased leading-6"
+                            .to_string(),
+                    ),
                     ..autumnus::Options::default()
                 },
             );
