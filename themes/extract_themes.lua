@@ -328,69 +328,69 @@ local themes = {
 			opts = {},
 		},
 	},
-	{
-		name = "onedark_dark",
-		colorscheme = "onedark",
-		appearance = "dark",
-		plugin = {
-			"navarasu/onedark.nvim",
-			opts = { style = "dark" },
-		},
-	},
-	{
-		name = "onedark_darker",
-		colorscheme = "onedark",
-		appearance = "dark",
-		plugin = {
-			"navarasu/onedark.nvim",
-			opts = { style = "darker" },
-		},
-	},
-	{
-		name = "onedark_cool",
-		colorscheme = "onedark",
-		appearance = "dark",
-		plugin = {
-			"navarasu/onedark.nvim",
-			opts = { style = "cool" },
-		},
-	},
-	{
-		name = "onedark_deep",
-		colorscheme = "onedark",
-		appearance = "dark",
-		plugin = {
-			"navarasu/onedark.nvim",
-			opts = { style = "deep" },
-		},
-	},
-	{
-		name = "onedark_warm",
-		colorscheme = "onedark",
-		appearance = "dark",
-		plugin = {
-			"navarasu/onedark.nvim",
-			opts = { style = "warm" },
-		},
-	},
-	{
-		name = "onedark_warmer",
-		colorscheme = "onedark",
-		appearance = "dark",
-		plugin = {
-			"navarasu/onedark.nvim",
-			opts = { style = "warmer" },
-		},
-	},
-	{
-		name = "onedark_light",
-		colorscheme = "onedark",
-		appearance = "light",
-		plugin = {
-			"navarasu/onedark.nvim",
-			opts = { style = "light" },
-		},
-	},
+	-- {
+	-- 	name = "onedark_dark",
+	-- 	colorscheme = "onedark",
+	-- 	appearance = "dark",
+	-- 	plugin = {
+	-- 		"navarasu/onedark.nvim",
+	-- 		opts = { style = "dark" },
+	-- 	},
+	-- },
+	-- {
+	-- 	name = "onedark_darker",
+	-- 	colorscheme = "onedark",
+	-- 	appearance = "dark",
+	-- 	plugin = {
+	-- 		"navarasu/onedark.nvim",
+	-- 		opts = { style = "darker" },
+	-- 	},
+	-- },
+	-- {
+	-- 	name = "onedark_cool",
+	-- 	colorscheme = "onedark",
+	-- 	appearance = "dark",
+	-- 	plugin = {
+	-- 		"navarasu/onedark.nvim",
+	-- 		opts = { style = "cool" },
+	-- 	},
+	-- },
+	-- {
+	-- 	name = "onedark_deep",
+	-- 	colorscheme = "onedark",
+	-- 	appearance = "dark",
+	-- 	plugin = {
+	-- 		"navarasu/onedark.nvim",
+	-- 		opts = { style = "deep" },
+	-- 	},
+	-- },
+	-- {
+	-- 	name = "onedark_warm",
+	-- 	colorscheme = "onedark",
+	-- 	appearance = "dark",
+	-- 	plugin = {
+	-- 		"navarasu/onedark.nvim",
+	-- 		opts = { style = "warm" },
+	-- 	},
+	-- },
+	-- {
+	-- 	name = "onedark_warmer",
+	-- 	colorscheme = "onedark",
+	-- 	appearance = "dark",
+	-- 	plugin = {
+	-- 		"navarasu/onedark.nvim",
+	-- 		opts = { style = "warmer" },
+	-- 	},
+	-- },
+	-- {
+	-- 	name = "onedark_light",
+	-- 	colorscheme = "onedark",
+	-- 	appearance = "light",
+	-- 	plugin = {
+	-- 		"navarasu/onedark.nvim",
+	-- 		opts = { style = "light" },
+	-- 	},
+	-- },
 	{
 		name = "solarized_winter",
 		colorscheme = "solarized",
@@ -431,81 +431,81 @@ local themes = {
 			opts = { variant = "autumn" },
 		},
 	},
-	{
-		name = "material_darker",
-		colorscheme = "material-darker",
-		appearance = "dark",
-		plugin = {
-			"marko-cerovac/material.nvim",
-			config = function()
-				vim.g.material_style = "darker"
-				require("material").setup({})
-			end,
-		},
-		after = function()
-			vim.g.material_style = nil
-		end,
-	},
-	{
-		name = "material_lighter",
-		colorscheme = "material-lighter",
-		appearance = "light",
-		plugin = {
-			"marko-cerovac/material.nvim",
-			config = function()
-				vim.g.material_style = "lighter"
-				require("material").setup({})
-			end,
-		},
-		after = function()
-			vim.g.material_style = nil
-		end,
-	},
-	{
-		name = "material_oceanic",
-		colorscheme = "material-oceanic",
-		appearance = "dark",
-		plugin = {
-			"marko-cerovac/material.nvim",
-			config = function()
-				vim.g.material_style = "oceanic"
-				require("material").setup({})
-			end,
-		},
-		after = function()
-			vim.g.material_style = nil
-		end,
-	},
-	{
-		name = "material_palenight",
-		colorscheme = "material-palenight",
-		appearance = "dark",
-		plugin = {
-			"marko-cerovac/material.nvim",
-			config = function()
-				vim.g.material_style = "palenight"
-				require("material").setup({})
-			end,
-		},
-		after = function()
-			vim.g.material_style = nil
-		end,
-	},
-	{
-		name = "material_deep_ocean",
-		colorscheme = "material-deep-ocean",
-		appearance = "dark",
-		plugin = {
-			"marko-cerovac/material.nvim",
-			config = function()
-				vim.g.material_style = "deep ocean"
-				require("material").setup({})
-			end,
-		},
-		after = function()
-			vim.g.material_style = nil
-		end,
-	},
+	-- {
+	-- 	name = "material_darker",
+	-- 	colorscheme = "material-darker",
+	-- 	appearance = "dark",
+	-- 	plugin = {
+	-- 		"marko-cerovac/material.nvim",
+	-- 		config = function()
+	-- 			vim.g.material_style = "darker"
+	-- 			require("material").setup({})
+	-- 		end,
+	-- 	},
+	-- 	after = function()
+	-- 		vim.g.material_style = nil
+	-- 	end,
+	-- },
+	-- {
+	-- 	name = "material_lighter",
+	-- 	colorscheme = "material-lighter",
+	-- 	appearance = "light",
+	-- 	plugin = {
+	-- 		"marko-cerovac/material.nvim",
+	-- 		config = function()
+	-- 			vim.g.material_style = "lighter"
+	-- 			require("material").setup({})
+	-- 		end,
+	-- 	},
+	-- 	after = function()
+	-- 		vim.g.material_style = nil
+	-- 	end,
+	-- },
+	-- {
+	-- 	name = "material_oceanic",
+	-- 	colorscheme = "material-oceanic",
+	-- 	appearance = "dark",
+	-- 	plugin = {
+	-- 		"marko-cerovac/material.nvim",
+	-- 		config = function()
+	-- 			vim.g.material_style = "oceanic"
+	-- 			require("material").setup({})
+	-- 		end,
+	-- 	},
+	-- 	after = function()
+	-- 		vim.g.material_style = nil
+	-- 	end,
+	-- },
+	-- {
+	-- 	name = "material_palenight",
+	-- 	colorscheme = "material-palenight",
+	-- 	appearance = "dark",
+	-- 	plugin = {
+	-- 		"marko-cerovac/material.nvim",
+	-- 		config = function()
+	-- 			vim.g.material_style = "palenight"
+	-- 			require("material").setup({})
+	-- 		end,
+	-- 	},
+	-- 	after = function()
+	-- 		vim.g.material_style = nil
+	-- 	end,
+	-- },
+	-- {
+	-- 	name = "material_deep_ocean",
+	-- 	colorscheme = "material-deep-ocean",
+	-- 	appearance = "dark",
+	-- 	plugin = {
+	-- 		"marko-cerovac/material.nvim",
+	-- 		config = function()
+	-- 			vim.g.material_style = "deep ocean"
+	-- 			require("material").setup({})
+	-- 		end,
+	-- 	},
+	-- 	after = function()
+	-- 		vim.g.material_style = nil
+	-- 	end,
+	-- },
 	{
 		name = "nord",
 		colorscheme = "nord",
@@ -516,16 +516,16 @@ local themes = {
 			opts = {},
 		},
 	},
-	{
-		name = "onedarkpro",
-		colorscheme = "onedark",
-		appearance = "dark",
-		plugin = {
-			"olimorris/onedarkpro.nvim",
-			name = "onedarkpro",
-			opts = {},
-		},
-	},
+	-- {
+	-- 	name = "onedarkpro",
+	-- 	colorscheme = "onedark",
+	-- 	appearance = "dark",
+	-- 	plugin = {
+	-- 		"olimorris/onedarkpro.nvim",
+	-- 		name = "onedarkpro",
+	-- 		opts = {},
+	-- 	},
+	-- },
 	{
 		name = "onedarkpro_light",
 		colorscheme = "onelight",
