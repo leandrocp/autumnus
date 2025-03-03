@@ -3,6 +3,16 @@
 
 local themes = {
 	{
+		name = "nightfly",
+		colorscheme = "nightfly",
+		appearance = "dark",
+		plugin = {
+			"bluz71/vim-nightfly-colors",
+			name = "nightfly",
+			opts = {},
+		},
+	},
+	{
 		name = "tokyonight_night",
 		colorscheme = "tokyonight-night",
 		appearance = "dark",
