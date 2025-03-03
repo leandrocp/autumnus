@@ -431,8 +431,11 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"marko-cerovac/material.nvim",
-			name = "material",
-			opts = {},
+			config = function()
+				vim.g.material_style = "darker"
+				require("material").setup({})
+				vim.g.material_style = nil
+			end,
 		},
 	},
 	{
@@ -441,8 +444,11 @@ local themes = {
 		appearance = "light",
 		plugin = {
 			"marko-cerovac/material.nvim",
-			name = "material",
-			opts = {},
+			config = function()
+				vim.g.material_style = "lighter"
+				require("material").setup({})
+				vim.g.material_style = nil
+			end,
 		},
 	},
 	{
@@ -451,8 +457,11 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"marko-cerovac/material.nvim",
-			name = "material",
-			opts = {},
+			config = function()
+				vim.g.material_style = "oceanic"
+				require("material").setup({})
+				vim.g.material_style = nil
+			end,
 		},
 	},
 	{
@@ -461,8 +470,11 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"marko-cerovac/material.nvim",
-			name = "material",
-			opts = {},
+			config = function()
+				vim.g.material_style = "palenight"
+				require("material").setup({})
+				vim.g.material_style = nil
+			end,
 		},
 	},
 	{
@@ -471,8 +483,11 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"marko-cerovac/material.nvim",
-			name = "material",
-			opts = {},
+			config = function()
+				vim.g.material_style = "deep ocean"
+				require("material").setup({})
+				vim.g.material_style = nil
+			end,
 		},
 	},
 	{
