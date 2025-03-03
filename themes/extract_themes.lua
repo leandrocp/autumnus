@@ -1,7 +1,59 @@
 -- https://github.com/rockerBOO/awesome-neovim/blob/main/README.md#tree-sitter-supported-colorscheme
+-- https://github.com/topics/neovim-colorscheme
 -- https://github.com/topics/neovim-theme
 
 local themes = {
+	{
+		name = "ayu_dark",
+		colorscheme = "ayu-dark",
+		appearance = "dark",
+		plugin = {
+			"Shatur/neovim-ayu"
+		},
+	},
+	{
+		name = "ayu_light",
+		colorscheme = "ayu-light",
+		appearance = "light",
+		plugin = {
+			"Shatur/neovim-ayu"
+		},
+	},
+	{
+		name = "ayu_mirage",
+		colorscheme = "ayu-mirage",
+		appearance = "dark",
+		plugin = {
+			"Shatur/neovim-ayu"
+		},
+	},
+	{
+		name = "nordic",
+		colorscheme = "nordic",
+		appearance = "dark",
+		plugin = {
+			"AlexvZyl/nordic.nvim",
+			config = function()
+				require('nordic').load()
+			end,
+		},
+	},
+	{
+		name = "melange_dark",
+		colorscheme = "melange",
+		appearance = "dark",
+		plugin = {
+			"savq/melange-nvim"
+		},
+	},
+	{
+		name = "melange_light",
+		colorscheme = "melange",
+		appearance = "light",
+		plugin = {
+			"savq/melange-nvim"
+		},
+	},
 	{
 		name = "nightfly",
 		colorscheme = "nightfly",
@@ -838,21 +890,36 @@ local themes = {
 		},
 	},
 	{
-		name = "bamboo_dark",
+		name = "bamboo_light",
+		colorscheme = "bamboo",
+		appearance = "light",
+		plugin = {
+			"ribru17/bamboo.nvim",
+			config = function()
+				require('bamboo').setup({ style = 'light' })
+			end,
+		},
+	},
+	{
+		name = "bamboo_vulgaris",
 		colorscheme = "bamboo",
 		appearance = "dark",
 		plugin = {
 			"ribru17/bamboo.nvim",
-			opts = {},
+			config = function()
+				require('bamboo').setup({ style = 'vulgaris' })
+			end,
 		},
 	},
 	{
-		name = "bamboo_light",
-		colorscheme = "bamboo-light",
-		appearance = "light",
+		name = "bamboo_multiplex",
+		colorscheme = "bamboo",
+		appearance = "dark",
 		plugin = {
 			"ribru17/bamboo.nvim",
-			opts = {},
+			config = function()
+				require('bamboo').setup({ style = 'multiplex' })
+			end,
 		},
 	},
 	{
@@ -935,6 +1002,52 @@ local themes = {
 			opts = {
 				variant = "light",
 			},
+		},
+	},
+	{
+		name = "bluloco_dark",
+		colorscheme = "bluloco-dark",
+		appearance = "dark",
+		plugin = {
+			"uloco/bluloco.nvim",
+			dependencies = { "rktjmp/lush.nvim" },
+			config = function()
+				require("bluloco").setup({
+					style = "dark"
+				})
+			end,
+		},
+	},
+	{
+		name = "bluloco_light",
+		colorscheme = "bluloco-light",
+		appearance = "light",
+		plugin = {
+			"uloco/bluloco.nvim",
+			dependencies = { "rktjmp/lush.nvim" },
+			config = function()
+				require("bluloco").setup({
+					style = "light"
+				})
+			end,
+		},
+	},
+	{
+		name = "flexoki_dark",
+		colorscheme = "flexoki-dark",
+		appearance = "dark",
+		plugin = {
+			"kepano/flexoki-neovim",
+			name = "flexoki",
+		},
+	},
+	{
+		name = "flexoki_light",
+		colorscheme = "flexoki-light",
+		appearance = "light",
+		plugin = {
+			"kepano/flexoki-neovim",
+			name = "flexoki",
 		},
 	},
 }
@@ -1083,6 +1196,7 @@ local function extract_colorscheme_colors(theme_def)
 		end
 	end
 
+	vim.api.nvim_command('hi clear')
 	vim.opt.termguicolors = true
 	vim.o.background = appearance
 

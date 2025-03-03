@@ -1,0 +1,247 @@
+{
+  "name": "flexoki_light",
+  "appearance": "light",
+  "highlights": {
+    "attribute": {
+      "fg": "#a02f6f"
+    },
+    "attribute.builtin": {
+      "fg": "#6f6e69"
+    },
+    "boolean": {
+      "fg": "#ad8301"
+    },
+    "character": {
+      "fg": "#24837b"
+    },
+    "character.special": {
+      "fg": "#a02f6f"
+    },
+    "comment": {
+      "fg": "#b7b5ac",
+      "italic": true
+    },
+    "comment.documentation": {
+      "fg": "#b7b5ac",
+      "italic": true
+    },
+    "constant": {
+      "fg": "#ad8301"
+    },
+    "constant.builtin": {
+      "fg": "#6f6e69"
+    },
+    "constant.macro": {
+      "fg": "#ad8301"
+    },
+    "constructor": {
+      "fg": "#6f6e69"
+    },
+    "diff.minus": {
+      "fg": "#590008"
+    },
+    "diff.plus": {
+      "fg": "#005523"
+    },
+    "function": {
+      "fg": "#bc5215"
+    },
+    "function.builtin": {
+      "fg": "#6f6e69"
+    },
+    "function.call": {
+      "fg": "#bc5215"
+    },
+    "function.macro": {
+      "fg": "#bc5215"
+    },
+    "function.method": {
+      "fg": "#bc5215"
+    },
+    "function.method.call": {
+      "fg": "#bc5215"
+    },
+    "keyword": {
+      "fg": "#66800b"
+    },
+    "keyword.conditional": {
+      "fg": "#66800b"
+    },
+    "keyword.conditional.ternary": {
+      "fg": "#66800b"
+    },
+    "keyword.coroutine": {
+      "fg": "#66800b"
+    },
+    "keyword.debug": {
+      "fg": "#66800b"
+    },
+    "keyword.directive": {
+      "fg": "#66800b"
+    },
+    "keyword.directive.define": {
+      "fg": "#66800b"
+    },
+    "keyword.exception": {
+      "fg": "#66800b"
+    },
+    "keyword.function": {
+      "fg": "#66800b"
+    },
+    "keyword.import": {
+      "fg": "#66800b"
+    },
+    "keyword.modifier": {
+      "fg": "#66800b"
+    },
+    "keyword.operator": {
+      "fg": "#66800b"
+    },
+    "keyword.repeat": {
+      "fg": "#66800b"
+    },
+    "keyword.return": {
+      "fg": "#66800b"
+    },
+    "keyword.type": {
+      "fg": "#66800b"
+    },
+    "label": {
+      "fg": "#66800b"
+    },
+    "markup.heading": {
+      "fg": "#205ea6",
+      "bold": true
+    },
+    "markup.heading.1": {
+      "fg": "#205ea6",
+      "bold": true
+    },
+    "markup.heading.2": {
+      "fg": "#205ea6",
+      "bold": true
+    },
+    "markup.heading.3": {
+      "fg": "#205ea6",
+      "bold": true
+    },
+    "markup.heading.4": {
+      "fg": "#205ea6",
+      "bold": true
+    },
+    "markup.heading.5": {
+      "fg": "#205ea6",
+      "bold": true
+    },
+    "markup.heading.6": {
+      "fg": "#205ea6",
+      "bold": true
+    },
+    "markup.italic": {
+      "italic": true
+    },
+    "markup.link.label": {
+      "underline": true
+    },
+    "markup.raw": {
+      "fg": "#6f6e69"
+    },
+    "markup.strikethrough": {
+      "strikethrough": true
+    },
+    "markup.strong": {
+      "bold": true
+    },
+    "markup.underline": {
+      "underline": true
+    },
+    "module": {
+      "fg": "#bc5215"
+    },
+    "module.builtin": {
+      "fg": "#6f6e69"
+    },
+    "normal": {
+      "fg": "#100f0f",
+      "bg": "#fffcf0"
+    },
+    "number": {
+      "fg": "#5e409d"
+    },
+    "number.float": {
+      "fg": "#5e409d"
+    },
+    "operator": {
+      "fg": "#6f6e69"
+    },
+    "property": {
+      "fg": "#205ea6"
+    },
+    "punctuation.bracket": {
+      "fg": "#6f6e69"
+    },
+    "punctuation.delimiter": {
+      "fg": "#6f6e69"
+    },
+    "punctuation.special": {
+      "fg": "#6f6e69"
+    },
+    "string": {
+      "fg": "#24837b"
+    },
+    "string.documentation": {
+      "fg": "#24837b"
+    },
+    "string.escape": {
+      "fg": "#a02f6f"
+    },
+    "string.regexp": {
+      "fg": "#a02f6f"
+    },
+    "string.special": {
+      "fg": "#a02f6f"
+    },
+    "string.special.path": {
+      "fg": "#a02f6f"
+    },
+    "string.special.symbol": {
+      "fg": "#a02f6f"
+    },
+    "string.special.url": {
+      "underline": true
+    },
+    "tag": {
+      "fg": "#24837b"
+    },
+    "tag.attribute": {
+      "fg": "#24837b"
+    },
+    "tag.delimiter": {
+      "fg": "#24837b"
+    },
+    "type": {
+      "fg": "#66800b"
+    },
+    "type.builtin": {
+      "fg": "#6f6e69"
+    },
+    "type.definition": {
+      "fg": "#66800b"
+    },
+    "variable": {
+      "fg": "#14161b"
+    },
+    "variable.builtin": {
+      "fg": "#6f6e69"
+    },
+    "variable.member": {
+      "fg": "#14161b"
+    },
+    "variable.parameter": {
+      "fg": "#14161b"
+    },
+    "variable.parameter.builtin": {
+      "fg": "#6f6e69"
+    }
+  }
+}
