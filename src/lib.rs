@@ -175,8 +175,19 @@ use formatter::Terminal;
 use themes::Theme;
 use tree_sitter_highlight::Highlighter;
 
+/// The type of formatter to use for syntax highlighting.
+#[derive(Debug, Clone)]
+pub enum FormatterOption {
+    /// HTML output with inline styles.
+    HtmlInline,
+    /// HTML output with linked styles.
+    HtmlLinked,
+    /// Terminal output with ANSI colors.
+    Terminal,
+}
+
 /// Options for the highlighter.
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct Options {
     /// Theme to use for highlighting.
     pub theme: Theme,
@@ -186,26 +197,41 @@ pub struct Options {
     pub italic: bool,
     /// Whether to print debug information.
     pub debug: bool,
+    /// The type of formatter to use for output.
+    pub formatter: FormatterOption,
 }
 
-/// Highlights source code and returns it as an HTML string with inline styles.
+impl Default for Options {
+    fn default() -> Self {
+        Self {
+            theme: Theme::default(),
+            pre_class: None,
+            italic: false,
+            debug: false,
+            formatter: FormatterOption::HtmlInline,
+        }
+    }
+}
+
+/// Highlights source code and returns it as a string with syntax highlighting.
 ///
 /// This function takes the language or file path, source code, and options as input,
-/// and returns an HTML string with the source code highlighted using inline styles.
+/// and returns a string with the source code highlighted according to the specified formatter.
 ///
 /// # Arguments
 ///
 /// * `lang_or_path` - A string slice that represents the language or file path of the source code.
 ///   If a file path is provided, the language will be guessed based on the file extension.
 /// * `source` - A string slice that represents the source code to be highlighted.
-/// * `options` - An `Options` struct that contains the configuration options for the highlighter.
+/// * `options` - An `Options` struct that contains the configuration options for the highlighter,
+///   including the formatter type to use.
 ///
 /// # Examples
 ///
-/// Basic usage with explicit language specification:
+/// Basic usage with HTML inline styles (default):
 ///
 /// ```
-/// use autumnus::highlight_html_inline;
+/// use autumnus::highlight;
 /// use autumnus::Options;
 ///
 /// let code = r#"
@@ -214,75 +240,89 @@ pub struct Options {
 /// }
 /// "#;
 ///
-/// let html = highlight_html_inline(
+/// let html = highlight(
 ///     "rust",
 ///     code,
 ///     Options::default()
 /// );
 /// ```
 ///
-/// Or with a custom theme:
+/// Using HTML with linked styles:
 ///
+/// ```
+/// use autumnus::highlight;
+/// use autumnus::Options;
+/// use autumnus::FormatterOption;
 ///
+/// let code = r#"
+/// fn main() {
+///     println!("Hello, world!");
+/// }
+/// "#;
 ///
-pub fn highlight_html_inline(lang_or_path: &str, source: &str, options: Options) -> String {
+/// let html = highlight(
+///     "rust",
+///     code,
+///     Options {
+///         formatter: FormatterOption::HtmlLinked,
+///         ..Options::default()
+///     }
+/// );
+/// ```
+///
+/// Using terminal output:
+///
+/// ```
+/// use autumnus::highlight;
+/// use autumnus::Options;
+/// use autumnus::FormatterOption;
+///
+/// let code = r#"
+/// fn main() {
+///     println!("Hello, world!");
+/// }
+/// "#;
+///
+/// let ansi = highlight(
+///     "rust",
+///     code,
+///     Options {
+///         formatter: FormatterOption::Terminal,
+///         ..Options::default()
+///     }
+/// );
+/// ```
+pub fn highlight(lang_or_path: &str, source: &str, options: Options) -> String {
     let lang = Language::guess(lang_or_path, source);
-    let formatter = HtmlInline::new(lang, options);
-    format(&formatter, lang, source)
-}
-
-/// Highlights source code and returns it as an HTML string with linked styles.
-///
-/// This function takes the language or file path, source code, and options as input,
-/// and returns an HTML string with the source code highlighted using linked styles.
-///
-/// # Arguments
-///
-/// * `lang_or_path` - A string slice that represents the language or file path of the source code.
-///   If a file path is provided, the language will be guessed based on the file extension.
-/// * `source` - A string slice that represents the source code to be highlighted.
-/// * `options` - An `Options` struct that contains the configuration options for the highlighter.
-///
-pub fn highlight_html_linked(lang_or_path: &str, source: &str, options: Options) -> String {
-    let lang = Language::guess(lang_or_path, source);
-    let formatter = HtmlLinked::new(lang, options);
-    format(&formatter, lang, source)
-}
-
-/// Highlights source code and returns it as a string with terminal colors.
-///
-/// This function takes the language or file path, source code, and options as input,
-/// and returns a string with the source code highlighted using terminal colors.
-///
-/// # Arguments
-///
-/// * `lang_or_path` - A string slice that represents the language or file path of the source code.
-///   If a file path is provided, the language will be guessed based on the file extension.
-/// * `source` - A string slice that represents the source code to be highlighted.
-/// * `options` - An `Options` struct that contains the configuration options for the highlighter.
-///
-pub fn highlight_terminal(lang_or_path: &str, source: &str, options: Options) -> String {
-    let lang = Language::guess(lang_or_path, source);
-    let formatter = Terminal::new(options);
-    format(&formatter, lang, source)
-}
-
-fn format<F>(formatter: &F, lang: Language, source: &str) -> String
-where
-    F: Formatter,
-{
     let mut buffer = String::new();
     let mut highlighter = Highlighter::new();
-
     let events = highlighter
         .highlight(lang.config(), source.as_bytes(), None, |injected| {
             Some(Language::guess(injected, "").config())
         })
         .expect("failed to generate highlight events");
 
-    formatter.start(&mut buffer, source);
-    formatter.write(&mut buffer, source, events);
-    formatter.finish(&mut buffer, source);
+    match options.formatter {
+        FormatterOption::HtmlInline => {
+            let formatter = HtmlInline::new(lang, options);
+            formatter.start(&mut buffer, source);
+            formatter.write(&mut buffer, source, events);
+            formatter.finish(&mut buffer, source);
+        }
+        FormatterOption::HtmlLinked => {
+            let formatter = HtmlLinked::new(lang, options);
+            formatter.start(&mut buffer, source);
+            formatter.write(&mut buffer, source, events);
+            formatter.finish(&mut buffer, source);
+        }
+
+        FormatterOption::Terminal => {
+            let formatter = Terminal::new(options);
+            formatter.start(&mut buffer, source);
+            formatter.write(&mut buffer, source, events);
+            formatter.finish(&mut buffer, source);
+        }
+    };
 
     buffer
 }
@@ -315,7 +355,7 @@ end
 </span><span class="athl-line" data-athl-line="9"><span style="color: #ca9ee6;">end</span>
 </span></code></pre>"#;
 
-        let result = highlight_html_inline(
+        let result = highlight(
             "elixir",
             code,
             Options {
@@ -354,10 +394,11 @@ end
 </span><span class="athl-line" data-athl-line="9"><span class="keyword">end</span>
 </span></code></pre>"#;
 
-        let result = highlight_html_linked(
+        let result = highlight(
             "elixir",
             code,
             Options {
+                formatter: FormatterOption::HtmlLinked,
                 theme: themes::CATPPUCCIN_FRAPPE.clone(),
                 ..Options::default()
             },
@@ -371,28 +412,28 @@ end
 
     #[test]
     fn test_guess_language_by_file_name() {
-        let result = highlight_html_inline("app.ex", "foo = 1", Options::default());
+        let result = highlight("app.ex", "foo = 1", Options::default());
         assert!(result.as_str().contains("language-elixir"));
     }
 
     #[test]
     fn test_guess_language_by_file_extension() {
-        let result = highlight_html_inline("md", "# Title", Options::default());
+        let result = highlight("md", "# Title", Options::default());
         assert!(result.as_str().contains("language-markdown"));
 
-        let result = highlight_html_inline("ex", "foo = 1", Options::default());
+        let result = highlight("ex", "foo = 1", Options::default());
         assert!(result.as_str().contains("language-elixir"));
     }
 
     #[test]
     fn test_guess_language_by_shebang() {
-        let result = highlight_html_inline("test", "#!/usr/bin/env elixir", Options::default());
+        let result = highlight("test", "#!/usr/bin/env elixir", Options::default());
         assert!(result.as_str().contains("language-elixir"));
     }
 
     #[test]
     fn test_fallback_to_plain_text() {
-        let result = highlight_html_inline("none", "source code", Options::default());
+        let result = highlight("none", "source code", Options::default());
         assert!(result.as_str().contains("language-plaintext"));
     }
 }

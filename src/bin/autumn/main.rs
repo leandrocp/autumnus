@@ -174,10 +174,11 @@ fn highlight(path: &str, formatter: Option<Formatter>, theme: Option<String>) ->
 
     match formatter.unwrap_or_default() {
         Formatter::HtmlInline => {
-            let highlighted = autumnus::highlight_html_inline(
+            let highlighted = autumnus::highlight(
                 path,
                 source,
                 autumnus::Options {
+                    formatter: autumnus::FormatterOption::HtmlInline,
                     theme,
                     debug: false,
                     ..autumnus::Options::default()
@@ -188,10 +189,11 @@ fn highlight(path: &str, formatter: Option<Formatter>, theme: Option<String>) ->
         }
 
         Formatter::HtmlLinked => {
-            let highlighted = autumnus::highlight_html_linked(
+            let highlighted = autumnus::highlight(
                 path,
                 source,
                 autumnus::Options {
+                    formatter: autumnus::FormatterOption::HtmlLinked,
                     theme,
                     debug: false,
                     ..autumnus::Options::default()
@@ -202,10 +204,11 @@ fn highlight(path: &str, formatter: Option<Formatter>, theme: Option<String>) ->
         }
 
         Formatter::Terminal => {
-            let highlighted = autumnus::highlight_terminal(
+            let highlighted = autumnus::highlight(
                 path,
                 source,
                 autumnus::Options {
+                    formatter: autumnus::FormatterOption::Terminal,
                     theme,
                     ..autumnus::Options::default()
                 },
@@ -295,10 +298,11 @@ fn highlight_source(
 
     match formatter.unwrap_or_default() {
         Formatter::HtmlInline => {
-            let highlighted = autumnus::highlight_html_inline(
+            let highlighted = autumnus::highlight(
                 language.unwrap_or_default(),
                 source,
                 autumnus::Options {
+                    formatter: autumnus::FormatterOption::HtmlInline,
                     theme,
                     debug: false,
                     ..autumnus::Options::default()
@@ -309,10 +313,11 @@ fn highlight_source(
         }
 
         Formatter::HtmlLinked => {
-            let highlighted = autumnus::highlight_html_linked(
+            let highlighted = autumnus::highlight(
                 language.unwrap_or_default(),
                 source,
                 autumnus::Options {
+                    formatter: autumnus::FormatterOption::HtmlLinked,
                     theme,
                     debug: false,
                     ..autumnus::Options::default()
@@ -323,10 +328,11 @@ fn highlight_source(
         }
 
         Formatter::Terminal => {
-            let highlighted = autumnus::highlight_terminal(
+            let highlighted = autumnus::highlight(
                 language.unwrap_or_default(),
                 source,
                 autumnus::Options {
+                    formatter: autumnus::FormatterOption::Terminal,
                     theme,
                     ..autumnus::Options::default()
                 },

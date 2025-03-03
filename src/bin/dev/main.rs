@@ -121,10 +121,11 @@ fn gen_samples_entries(
             let contents = fs::read_to_string(&path)
                 .with_context(|| format!("failed to read sample file: {}", file_name))?;
 
-            let highlighted = autumnus::highlight_html_inline(
+            let highlighted = autumnus::highlight(
                 file_name,
                 &contents,
                 autumnus::Options {
+                    formatter: autumnus::FormatterOption::HtmlInline,
                     theme: theme.clone(),
                     debug: false,
                     pre_class: Some(
