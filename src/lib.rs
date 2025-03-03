@@ -1,5 +1,67 @@
 //! Syntax highlighter powered by tree-sitter and Neovim themes.
 //!
+//! ## Examples
+//!
+//! Basic usage with default options (HTML inline styles):
+//!
+//! ```rust
+//! use autumnus::{highlight, Options};
+//!
+//! let code = r#"
+//!     function greet(name) {
+//!         console.log(`Hello ${name}!`);
+//!     }
+//! "#;
+//!
+//! let html = highlight("javascript", code, Options::default());
+//! ```
+//!
+//! Using a specific theme:
+//!
+//! ```rust
+//! use autumnus::{highlight, Options, themes};
+//!
+//! let code = "SELECT * FROM users WHERE active = true;";
+//! let html = highlight(
+//!     "sql",
+//!     code,
+//!     Options {
+//!         theme: themes::get("dracula").unwrap().clone(),
+//!         ..Options::default()
+//!     }
+//! );
+//! ```
+//!
+//! Highlighting with file path detection:
+//!
+//! ```rust
+//! use autumnus::{highlight, Options};
+//!
+//! let code = r#"
+//!     defmodule MyApp do
+//!       def hello, do: :world
+//!     end
+//! "#;
+//! // Language will be automatically detected as Elixir from the .ex extension
+//! let html = highlight("app.ex", code, Options::default());
+//! ```
+//!
+//! Terminal output with ANSI colors:
+//!
+//! ```rust
+//! use autumnus::{highlight, Options, FormatterOption};
+//!
+//! let code = "puts 'Hello from Ruby!'";
+//! let ansi = highlight(
+//!     "ruby",
+//!     code,
+//!     Options {
+//!         formatter: FormatterOption::Terminal,
+//!         ..Options::default()
+//!     }
+//! );
+//! ```
+//!
 //! ## Languages available
 //!
 //! | Name | Extensions |
@@ -336,7 +398,7 @@ impl Default for Options {
 ///
 /// Basic usage with HTML inline styles (default):
 ///
-/// ```
+/// ```rust
 /// use autumnus::highlight;
 /// use autumnus::Options;
 ///
@@ -353,9 +415,24 @@ impl Default for Options {
 /// );
 /// ```
 ///
+/// Output with HTML inline styles (default):
+/// ```html
+/// <pre class="athl" style="color: #c6d0f5; background-color: #303446;">
+///   <code class="language-rust" translate="no" tabindex="0">
+///     <span class="line" data-line="1">
+///       <span style="color: #ca9ee6;">fn</span> <span style="color: #8caaee;">main</span>() {
+///     </span>
+///     <span class="line" data-line="2">
+///       <span style="color: #8caaee;">println!</span>(<span style="color: #a6d189;">"Hello, world!"</span>);
+///     </span>
+///     <span class="line" data-line="3">}</span>
+///   </code>
+/// </pre>
+/// ```
+///
 /// Using HTML with linked styles:
 ///
-/// ```
+/// ```rust
 /// use autumnus::highlight;
 /// use autumnus::Options;
 /// use autumnus::FormatterOption;
@@ -376,9 +453,24 @@ impl Default for Options {
 /// );
 /// ```
 ///
+/// Output with HTML linked styles:
+/// ```html
+/// <pre class="athl">
+///   <code class="language-rust" translate="no" tabindex="0">
+///     <span class="line" data-line="1">
+///       <span class="keyword-function">fn</span> <span class="function">main</span>() {
+///     </span>
+///     <span class="line" data-line="2">
+///       <span class="function-macro">println!</span>(<span class="string">"Hello, world!"</span>);
+///     </span>
+///     <span class="line" data-line="3">}</span>
+///   </code>
+/// </pre>
+/// ```
+///
 /// Using terminal output:
 ///
-/// ```
+/// ```rust
 /// use autumnus::highlight;
 /// use autumnus::Options;
 /// use autumnus::FormatterOption;
@@ -397,6 +489,13 @@ impl Default for Options {
 ///         ..Options::default()
 ///     }
 /// );
+/// ```
+///
+/// Output with ANSI terminal colors:
+/// ```text
+/// [38;2;202;158;230mfn[0m [38;2;140;170;238mmain[0m() {
+///     [38;2;140;170;238mprintln![0m([38;2;166;209;137m"Hello, world!"[0m);
+/// }
 /// ```
 pub fn highlight(lang_or_path: &str, source: &str, options: Options) -> String {
     let lang = Language::guess(lang_or_path, source);
@@ -455,7 +554,7 @@ end
 </span><span class="line" data-line="3"><span style="color: #99d1db;"><span style="color: #949cbb;"><span style="color: #a6d189;">  Test Module</span></span></span>
 </span><span class="line" data-line="4"><span style="color: #99d1db;"><span style="color: #949cbb;"><span style="color: #a6d189;">  &quot;&quot;&quot;</span></span></span>
 </span><span class="line" data-line="5">
-</span><span class="line" data-line="6">  <span style="color: #99d1db;"><span style="color: #ef9f76;">@<span style="color: #8caaee;"><span style="color: #ef9f76;">projects <span style="color: #949cbb;">[</span><span style="color: #a6d189;">&quot;Phoenix&quot;</span><span style="color: #949cbb;">,</span> <span style="color: #a6d189;">&quot;MDEx&quot;</span><span style="color: #949cbb;">]</span></span></span></span></span>
+</span><span class="line" data-line="6">  <span style="color: #99d1db;"><span style="color: #ef9f76;">@<span style="color: #8caaee;"><span style="color: #ef9f76;">projects <span style="color: #949cbb;">[</span><span style="color: #a6d189;">&quot;Phoenix&quot;</span><span style="color: #949cbb;">,</span> <span style="color: #a6d189;">&quot;MDEx&quot;</span><span style="color: #949cbb;">]</span></span></span></span></span></span>
 </span><span class="line" data-line="7">
 </span><span class="line" data-line="8">  <span style="color: #ca9ee6;">def</span> <span style="color: #8caaee;">projects</span><span style="color: #949cbb;">,</span> <span style="color: #eebebe;">do: </span><span style="color: #99d1db;"><span style="color: #ef9f76;">@<span style="color: #ef9f76;">projects</span></span></span>
 </span><span class="line" data-line="9"><span style="color: #ca9ee6;">end</span>
@@ -494,7 +593,7 @@ end
 </span><span class="line" data-line="3"><span class="operator"><span class="comment-documentation"><span class="string">  Test Module</span></span></span>
 </span><span class="line" data-line="4"><span class="operator"><span class="comment-documentation"><span class="string">  &quot;&quot;&quot;</span></span></span>
 </span><span class="line" data-line="5">
-</span><span class="line" data-line="6">  <span class="operator"><span class="constant">@<span class="function-call"><span class="constant">projects <span class="punctuation-bracket">[</span><span class="string">&quot;Phoenix&quot;</span><span class="punctuation-delimiter">,</span> <span class="string">&quot;MDEx&quot;</span><span class="punctuation-bracket">]</span></span></span></span></span>
+</span><span class="line" data-line="6">  <span class="operator"><span class="constant">@<span class="function-call"><span class="constant">projects <span class="punctuation-bracket">[</span><span class="string">&quot;Phoenix&quot;</span><span class="punctuation-delimiter">,</span> <span class="string">&quot;MDEx&quot;</span><span class="punctuation-bracket">]</span></span></span></span></span></span></span>
 </span><span class="line" data-line="7">
 </span><span class="line" data-line="8">  <span class="keyword-function">def</span> <span class="function">projects</span><span class="punctuation-delimiter">,</span> <span class="string-special-symbol">do: </span><span class="operator"><span class="constant">@<span class="constant">projects</span></span></span>
 </span><span class="line" data-line="9"><span class="keyword">end</span>
