@@ -64,3 +64,8 @@ update-themes:
     (cd themes && nvim --clean --headless -u init.lua -l extract_themes.lua)
     
     echo "Theme update complete!" 
+
+gen-samples:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cargo run --features=dev --bin dev gen-samples
