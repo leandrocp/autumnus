@@ -62,8 +62,6 @@ update-themes:
     
     echo "Running extract_themes.lua in the themes directory..."
     (cd themes && nvim --clean --headless -u init.lua -l extract_themes.lua)
-    
-    echo "Theme update complete!" 
 
 gen-samples:
     #!/usr/bin/env bash

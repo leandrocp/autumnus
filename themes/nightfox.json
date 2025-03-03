@@ -1,247 +1,252 @@
 {
-  "name": "material_palenight",
+  "name": "nightfox",
   "appearance": "dark",
   "highlights": {
     "attribute": {
-      "fg": "#82aaff"
+      "fg": "#f6b079"
     },
     "attribute.builtin": {
-      "fg": "#89ddff"
+      "fg": "#86abdc"
     },
     "boolean": {
-      "fg": "#f78c6c"
+      "fg": "#f4a261"
     },
     "character": {
-      "fg": "#f78c6c"
+      "fg": "#81b29a"
     },
     "character.special": {
-      "fg": "#f07178"
+      "fg": "#86abdc"
     },
     "comment": {
-      "fg": "#676e95"
+      "fg": "#738091"
     },
     "comment.documentation": {
-      "fg": "#676e95"
+      "fg": "#738091"
     },
     "constant": {
-      "fg": "#ffcb6b"
+      "fg": "#f6b079"
     },
     "constant.builtin": {
-      "fg": "#ffcb6b"
+      "fg": "#f6b079"
     },
     "constant.macro": {
-      "fg": "#89ddff"
+      "fg": "#dc8ed9"
     },
     "constructor": {
-      "fg": "#82aaff"
+      "fg": "#63cdcf"
     },
     "diff.minus": {
-      "fg": "#f07178"
+      "fg": "#c94f6d"
     },
     "diff.plus": {
-      "fg": "#c3e88d"
-    },
-    "error": {
-      "bold": true,
-      "fg": "#ff5370"
+      "fg": "#81b29a"
     },
     "function": {
-      "fg": "#82aaff"
+      "fg": "#86abdc"
     },
     "function.builtin": {
-      "fg": "#82aaff"
+      "fg": "#c94f6d"
     },
     "function.call": {
-      "fg": "#82aaff"
+      "fg": "#86abdc"
     },
     "function.macro": {
-      "fg": "#82aaff"
+      "fg": "#c94f6d"
     },
     "function.method": {
-      "fg": "#82aaff"
+      "fg": "#86abdc"
     },
     "function.method.call": {
-      "fg": "#82aaff"
+      "fg": "#86abdc"
     },
     "keyword": {
-      "fg": "#89ddff"
+      "fg": "#9d79d6"
     },
     "keyword.conditional": {
-      "fg": "#c792ea"
+      "fg": "#baa1e2"
     },
     "keyword.conditional.ternary": {
-      "fg": "#c792ea"
+      "fg": "#baa1e2"
     },
     "keyword.coroutine": {
-      "fg": "#89ddff",
-      "italic": true
+      "fg": "#9d79d6"
     },
     "keyword.debug": {
-      "fg": "#89ddff"
+      "fg": "#9d79d6"
     },
     "keyword.directive": {
-      "fg": "#89ddff"
+      "fg": "#9d79d6"
     },
     "keyword.directive.define": {
-      "fg": "#89ddff"
+      "fg": "#9d79d6"
+    },
+    "keyword.exception": {
+      "fg": "#9d79d6"
     },
     "keyword.function": {
-      "fg": "#89ddff"
+      "fg": "#9d79d6"
     },
     "keyword.import": {
-      "fg": "#89ddff"
+      "fg": "#dc8ed9"
     },
     "keyword.modifier": {
-      "fg": "#89ddff"
+      "fg": "#9d79d6"
     },
     "keyword.operator": {
-      "fg": "#89ddff"
+      "fg": "#aeafb0"
     },
     "keyword.repeat": {
-      "fg": "#c792ea"
+      "fg": "#baa1e2"
     },
     "keyword.return": {
-      "fg": "#89ddff"
+      "fg": "#c94f6d"
     },
     "keyword.type": {
-      "fg": "#89ddff"
+      "fg": "#9d79d6"
     },
     "label": {
-      "fg": "#ffcb6b"
+      "fg": "#baa1e2"
     },
     "markup.heading": {
       "bold": true,
-      "fg": "#89ddff"
+      "fg": "#86abdc"
     },
     "markup.heading.1": {
       "bold": true,
-      "fg": "#89ddff"
+      "fg": "#86abdc"
     },
     "markup.heading.2": {
       "bold": true,
-      "fg": "#89ddff"
+      "fg": "#86abdc"
     },
     "markup.heading.3": {
       "bold": true,
-      "fg": "#89ddff"
+      "fg": "#86abdc"
     },
     "markup.heading.4": {
       "bold": true,
-      "fg": "#89ddff"
+      "fg": "#86abdc"
     },
     "markup.heading.5": {
       "bold": true,
-      "fg": "#89ddff"
+      "fg": "#86abdc"
     },
     "markup.heading.6": {
       "bold": true,
-      "fg": "#89ddff"
+      "fg": "#86abdc"
     },
     "markup.italic": {
       "italic": true
     },
     "markup.link.label": {
-      "fg": "#f07178"
+      "fg": "#86abdc"
     },
     "markup.raw": {
-      "fg": "#c792ea"
+      "fg": "#63cdcf",
+      "italic": true
     },
     "markup.strikethrough": {
+      "fg": "#cdcecf",
       "strikethrough": true
     },
     "markup.strong": {
-      "bold": true
-    },
-    "markup.underline": {
-      "underline": true
+      "bold": true,
+      "fg": "#ab435d"
     },
     "module": {
-      "fg": "#ffcb6b"
+      "fg": "#7ad5d6"
     },
     "module.builtin": {
-      "fg": "#89ddff"
+      "fg": "#86abdc"
     },
     "namespace": {
-      "fg": "#ffcb6b"
+      "fg": "#7ad5d6"
     },
     "normal": {
-      "bg": "#292d3e",
-      "fg": "#a6accd"
+      "bg": "#192330",
+      "fg": "#cdcecf"
     },
     "number": {
-      "fg": "#f78c6c"
+      "fg": "#f4a261"
     },
     "number.float": {
-      "fg": "#f78c6c"
+      "fg": "#f4a261"
     },
     "operator": {
-      "fg": "#89ddff"
+      "fg": "#aeafb0"
     },
     "property": {
-      "fg": "#717cb4"
+      "fg": "#719cd6"
     },
     "punctuation.bracket": {
-      "fg": "#89ddff"
+      "fg": "#aeafb0"
     },
     "punctuation.delimiter": {
-      "fg": "#89ddff"
+      "fg": "#aeafb0"
     },
     "punctuation.special": {
-      "fg": "#89ddff"
+      "fg": "#7ad5d6"
     },
     "string": {
-      "fg": "#c3e88d"
+      "fg": "#81b29a"
     },
     "string.documentation": {
-      "fg": "#c3e88d"
+      "fg": "#81b29a"
     },
     "string.escape": {
-      "fg": "#717cb4"
+      "bold": true,
+      "fg": "#e0c989"
     },
     "string.regexp": {
-      "fg": "#ffcb6b"
+      "fg": "#e0c989"
     },
     "string.special": {
-      "fg": "#717cb4"
+      "fg": "#86abdc"
     },
     "string.special.path": {
-      "fg": "#717cb4"
+      "fg": "#86abdc"
     },
     "string.special.symbol": {
-      "fg": "#ffcb6b"
+      "fg": "#86abdc"
     },
     "string.special.url": {
+      "fg": "#f6b079",
+      "italic": true,
       "underline": true
     },
     "tag": {
-      "fg": "#f07178"
+      "fg": "#9d79d6"
     },
     "tag.attribute": {
-      "fg": "#c792ea"
+      "fg": "#86abdc",
+      "italic": true
     },
     "tag.delimiter": {
-      "fg": "#89ddff"
+      "fg": "#7ad5d6"
     },
     "type": {
-      "fg": "#c792ea"
+      "fg": "#dbc074"
     },
     "type.builtin": {
-      "fg": "#c792ea"
+      "fg": "#7ad5d6"
+    },
+    "type.definition": {
+      "fg": "#dbc074"
     },
     "variable": {
-      "fg": "#a6accd"
+      "fg": "#dfdfe0"
     },
     "variable.builtin": {
-      "fg": "#89ddff"
+      "fg": "#c94f6d"
     },
     "variable.member": {
-      "fg": "#717cb4"
+      "fg": "#719cd6"
     },
     "variable.parameter": {
-      "fg": "#a6accd"
+      "fg": "#7ad5d6"
     },
     "variable.parameter.builtin": {
-      "fg": "#89ddff"
+      "fg": "#86abdc"
     }
   }
 }

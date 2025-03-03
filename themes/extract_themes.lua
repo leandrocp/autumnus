@@ -525,6 +525,356 @@ local themes = {
 			opts = {},
 		},
 	},
+	-- Nightfox Collection
+	{
+		name = "nightfox",
+		colorscheme = "nightfox",
+		appearance = "dark",
+		plugin = {
+			"EdenEast/nightfox.nvim",
+			name = "nightfox",
+			opts = {},
+		},
+	},
+	{
+		name = "dayfox",
+		colorscheme = "dayfox",
+		appearance = "light",
+		plugin = {
+			"EdenEast/nightfox.nvim",
+			name = "nightfox",
+			opts = {},
+		},
+	},
+	{
+		name = "duskfox",
+		colorscheme = "duskfox",
+		appearance = "dark",
+		plugin = {
+			"EdenEast/nightfox.nvim",
+			name = "nightfox",
+			opts = {},
+		},
+	},
+	{
+		name = "dawnfox",
+		colorscheme = "dawnfox",
+		appearance = "light",
+		plugin = {
+			"EdenEast/nightfox.nvim",
+			name = "nightfox",
+			opts = {},
+		},
+	},
+	{
+		name = "carbonfox",
+		colorscheme = "carbonfox",
+		appearance = "dark",
+		plugin = {
+			"EdenEast/nightfox.nvim",
+			name = "nightfox",
+			opts = {},
+		},
+	},
+	{
+		name = "terafox",
+		colorscheme = "terafox",
+		appearance = "dark",
+		plugin = {
+			"EdenEast/nightfox.nvim",
+			name = "nightfox",
+			opts = {},
+		},
+	},
+	-- Rose Pine Collection
+	{
+		name = "rosepine",
+		colorscheme = "rose-pine",
+		appearance = "dark",
+		plugin = {
+			"rose-pine/neovim",
+			name = "rose-pine",
+			opts = {},
+		},
+	},
+	{
+		name = "rosepine_moon",
+		colorscheme = "rose-pine-moon",
+		appearance = "dark",
+		plugin = {
+			"rose-pine/neovim",
+			name = "rose-pine",
+			opts = { variant = "moon" },
+		},
+	},
+	{
+		name = "rosepine_dawn",
+		colorscheme = "rose-pine-dawn",
+		appearance = "light",
+		plugin = {
+			"rose-pine/neovim",
+			name = "rose-pine",
+			opts = { variant = "dawn" },
+		},
+	},
+	-- Everforest Collection
+	{
+		name = "everforest_dark",
+		colorscheme = "everforest",
+		appearance = "dark",
+		plugin = {
+			"sainnhe/everforest",
+			name = "everforest",
+			opts = {},
+		},
+	},
+	{
+		name = "everforest_dark_hard",
+		colorscheme = "everforest",
+		appearance = "dark",
+		plugin = {
+			"sainnhe/everforest",
+			name = "everforest",
+			opts = { background = "hard" },
+		},
+	},
+	{
+		name = "everforest_dark_soft",
+		colorscheme = "everforest",
+		appearance = "dark",
+		plugin = {
+			"sainnhe/everforest",
+			name = "everforest",
+			opts = { background = "soft" },
+		},
+	},
+	{
+		name = "everforest_light",
+		colorscheme = "everforest",
+		appearance = "light",
+		plugin = {
+			"sainnhe/everforest",
+			name = "everforest",
+			opts = {},
+		},
+	},
+	{
+		name = "everforest_light_hard",
+		colorscheme = "everforest",
+		appearance = "light",
+		plugin = {
+			"sainnhe/everforest",
+			name = "everforest",
+			opts = { background = "hard" },
+		},
+	},
+	{
+		name = "everforest_light_soft",
+		colorscheme = "everforest",
+		appearance = "light",
+		plugin = {
+			"sainnhe/everforest",
+			name = "everforest",
+			opts = { background = "soft" },
+		},
+	},
+	-- Monokai Pro Collection
+	{
+		name = "monokai_pro",
+		colorscheme = "monokai-pro",
+		appearance = "dark",
+		plugin = {
+			"loctvl842/monokai-pro.nvim",
+			name = "monokai-pro",
+			opts = {},
+		},
+	},
+	{
+		name = "monokai_pro_classic",
+		colorscheme = "monokai-pro-classic",
+		appearance = "dark",
+		plugin = {
+			"loctvl842/monokai-pro.nvim",
+			name = "monokai-pro",
+			opts = { filter = "classic" },
+		},
+	},
+	{
+		name = "monokai_pro_machine",
+		colorscheme = "monokai-pro-machine",
+		appearance = "dark",
+		plugin = {
+			"loctvl842/monokai-pro.nvim",
+			name = "monokai-pro",
+			opts = { filter = "machine" },
+		},
+	},
+	{
+		name = "monokai_pro_octagon",
+		colorscheme = "monokai-pro-octagon",
+		appearance = "dark",
+		plugin = {
+			"loctvl842/monokai-pro.nvim",
+			name = "monokai-pro",
+			opts = { filter = "octagon" },
+		},
+	},
+	{
+		name = "monokai_pro_ristretto",
+		colorscheme = "monokai-pro-ristretto",
+		appearance = "dark",
+		plugin = {
+			"loctvl842/monokai-pro.nvim",
+			name = "monokai-pro",
+			opts = { filter = "ristretto" },
+		},
+	},
+	{
+		name = "monokai_pro_spectrum",
+		colorscheme = "monokai-pro-spectrum",
+		appearance = "dark",
+		plugin = {
+			"loctvl842/monokai-pro.nvim",
+			name = "monokai-pro",
+			opts = { filter = "spectrum" },
+		},
+	},
+	-- Oxocarbon Collection
+	{
+		name = "oxocarbon",
+		colorscheme = "oxocarbon",
+		appearance = "dark",
+		plugin = {
+			"nyoom-engineering/oxocarbon.nvim",
+			name = "oxocarbon",
+			opts = {},
+		},
+	},
+	{
+		name = "oxocarbon_light",
+		colorscheme = "oxocarbon",
+		appearance = "light",
+		plugin = {
+			"nyoom-engineering/oxocarbon.nvim",
+			name = "oxocarbon",
+			opts = {},
+		},
+	},
+	-- Ayu Collection
+	{
+		name = "ayu_dark",
+		colorscheme = "ayu-dark",
+		appearance = "dark",
+		plugin = {
+			"Shatur/neovim-ayu",
+			name = "ayu",
+			opts = {},
+		},
+	},
+	{
+		name = "ayu_mirage",
+		colorscheme = "ayu-mirage",
+		appearance = "dark",
+		plugin = {
+			"Shatur/neovim-ayu",
+			name = "ayu",
+			opts = {},
+		},
+	},
+	{
+		name = "ayu_light",
+		colorscheme = "ayu-light",
+		appearance = "light",
+		plugin = {
+			"Shatur/neovim-ayu",
+			name = "ayu",
+			opts = {},
+		},
+	},
+	-- Melange
+	{
+		name = "melange",
+		colorscheme = "melange",
+		appearance = "dark",
+		plugin = {
+			"savq/melange-nvim",
+			name = "melange",
+			opts = {},
+		},
+	},
+	-- Sonokai Collection
+	{
+		name = "sonokai",
+		colorscheme = "sonokai",
+		appearance = "dark",
+		plugin = {
+			"sainnhe/sonokai",
+			name = "sonokai",
+			opts = {},
+		},
+	},
+	{
+		name = "sonokai_atlantis",
+		colorscheme = "sonokai",
+		appearance = "dark",
+		plugin = {
+			"sainnhe/sonokai",
+			name = "sonokai",
+			opts = { style = "atlantis" },
+		},
+	},
+	{
+		name = "sonokai_andromeda",
+		colorscheme = "sonokai",
+		appearance = "dark",
+		plugin = {
+			"sainnhe/sonokai",
+			name = "sonokai",
+			opts = { style = "andromeda" },
+		},
+	},
+	{
+		name = "sonokai_shusia",
+		colorscheme = "sonokai",
+		appearance = "dark",
+		plugin = {
+			"sainnhe/sonokai",
+			name = "sonokai",
+			opts = { style = "shusia" },
+		},
+	},
+	{
+		name = "sonokai_maia",
+		colorscheme = "sonokai",
+		appearance = "dark",
+		plugin = {
+			"sainnhe/sonokai",
+			name = "sonokai",
+			opts = { style = "maia" },
+		},
+	},
+	-- Moonfly
+	{
+		name = "moonfly",
+		colorscheme = "moonfly",
+		appearance = "dark",
+		plugin = {
+			"bluz71/vim-moonfly-colors",
+			name = "moonfly",
+			opts = {},
+		},
+	},
+	-- Poimandres
+	{
+		name = "poimandres",
+		colorscheme = "poimandres",
+		appearance = "dark",
+		plugin = {
+			"olivercederborg/poimandres.nvim",
+			name = "poimandres",
+			opts = {},
+		},
+	},
 }
 
 local highlight_groups = {
