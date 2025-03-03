@@ -903,6 +903,30 @@ local themes = {
 			opts = {},
 		},
 	},
+	{
+		name = "cyberdream_dark",
+		colorscheme = "cyberdream",
+		appearance = "dark",
+		plugin = {
+			"scottmckendry/cyberdream.nvim",
+			name = "cyberdream",
+			opts = {
+				variant = "dark",
+			},
+		},
+	},
+	{
+		name = "cyberdream_light",
+		colorscheme = "cyberdream",
+		appearance = "light",
+		plugin = {
+			"scottmckendry/cyberdream.nvim",
+			name = "cyberdream",
+			opts = {
+				variant = "light",
+			},
+		},
+	},
 }
 
 local highlight_groups = {
