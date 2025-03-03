@@ -211,9 +211,7 @@ fn read_query_file(path: &Path, language: &str, query: &str) -> String {
     let converted_patterns = convert_lua_matches(&original_content);
     let content = converted_patterns
         .replace("@spell", "")
-        .replace("@nospell", "")
-        .replace("@none", "")
-        .replace("@conceal", "");
+        .replace("@nospell", "");
 
     if let Some(first_line) = content.lines().next() {
         if first_line.starts_with("; inherits: ") {

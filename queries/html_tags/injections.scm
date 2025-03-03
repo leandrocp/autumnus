@@ -86,7 +86,7 @@
 ; <input type="checkbox" onchange="this.closest('form').elements.output.value = this.checked">
 (attribute
   (attribute_name) @_name
-  (#match? @_name "^on[a-z]+$")
+  (#lua-match? @_name "^on[a-z]+$")
   (quoted_attribute_value
     (attribute_value) @injection.content)
   (#set! injection.language "javascript"))

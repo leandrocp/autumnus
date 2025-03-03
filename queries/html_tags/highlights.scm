@@ -1,7 +1,7 @@
 (tag_name) @tag
 
 ; (erroneous_end_tag_name) @error ; we do not lint syntax errors
-(comment) @comment
+(comment) @comment @spell
 
 (attribute_name) @tag.attribute
 
@@ -9,7 +9,7 @@
   (quoted_attribute_value) @string)
   (#set! priority 99))
 
-(text) @none
+(text) @none @spell
 
 ((element
   (start_tag
@@ -89,11 +89,13 @@
   (text) @markup.link.label)
   (#eq? @_tag "a"))
 
-((attribute
-  (attribute_name) @_attr
-  (quoted_attribute_value
-    (attribute_value) @string.special.url))
-  (#any-of? @_attr "href" "src"))
+; FIXME: QueryError { row: 198, column: 0, offset: 0, message: "Invalid arguments to set! predicate. Unexpected second capture name @string.special.url", kind: Predicate }
+; ((attribute
+;   (attribute_name) @_attr
+;   (quoted_attribute_value
+;     (attribute_value) @string.special.url))
+;   (#any-of? @_attr "href" "src")
+;   (#set! @string.special.url url @string.special.url))
 
 [
   "<"
