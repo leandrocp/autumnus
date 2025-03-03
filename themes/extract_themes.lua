@@ -641,7 +641,7 @@ local function extract_colorscheme_colors(theme_def)
 	local colorscheme_name = theme_def.colorscheme
 	local appearance = theme_def.appearance
 
-	print(string.format("Processing %s (colorscheme: %s, appearance: %s)...", theme_name, colorscheme_name, appearance))
+	print(string.format("%s (colorscheme: %s, appearance: %s)", theme_name, colorscheme_name, appearance))
 
 	vim.cmd("colorscheme default")
 
@@ -750,11 +750,8 @@ local function extract_colorscheme_colors(theme_def)
 
 		if vim.v.shell_error ~= 0 then
 			print("Warning: jq processing failed: " .. jq_result)
-		else
-			print("JSON file processed with jq (name field first, highlight keys and properties sorted)")
 		end
 
-		print(string.format("%s -> %s", theme_name, output_file))
 		return true
 	else
 		print(string.format("Error: Could not write to file %s", output_file))
@@ -762,7 +759,6 @@ local function extract_colorscheme_colors(theme_def)
 	end
 end
 
-print("Setting up plugins...")
 local plugins = {}
 for _, theme_def in ipairs(themes) do
 	local plugin = vim.deepcopy(theme_def.plugin)
@@ -801,5 +797,4 @@ for _, theme_def in ipairs(themes) do
 	extract_colorscheme_colors(theme_def)
 end
 
-print("All colorschemes processed successfully.")
 vim.cmd("quit!")
