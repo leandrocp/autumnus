@@ -49,8 +49,8 @@ impl Formatter for HtmlLinked {
                 let scope = HIGHLIGHT_NAMES[highlight.0];
                 let class = CLASSES[highlight.0];
 
-                if self.options.debug {
-                    output.extend(b"data-athl-hl=\"");
+                if self.options.include_highlight {
+                    output.extend(b"data-highlight=\"");
                     output.extend(scope.as_bytes());
                     output.extend(b"\"");
                 }

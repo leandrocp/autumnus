@@ -180,7 +180,7 @@ fn highlight(path: &str, formatter: Option<Formatter>, theme: Option<String>) ->
                 autumnus::Options {
                     formatter: autumnus::FormatterOption::HtmlInline,
                     theme,
-                    debug: false,
+                    include_highlight: false,
                     ..autumnus::Options::default()
                 },
             );
@@ -195,7 +195,7 @@ fn highlight(path: &str, formatter: Option<Formatter>, theme: Option<String>) ->
                 autumnus::Options {
                     formatter: autumnus::FormatterOption::HtmlLinked,
                     theme,
-                    debug: false,
+                    include_highlight: false,
                     ..autumnus::Options::default()
                 },
             );
@@ -304,7 +304,7 @@ fn highlight_source(
                 autumnus::Options {
                     formatter: autumnus::FormatterOption::HtmlInline,
                     theme,
-                    debug: false,
+                    include_highlight: false,
                     ..autumnus::Options::default()
                 },
             );
@@ -319,7 +319,7 @@ fn highlight_source(
                 autumnus::Options {
                     formatter: autumnus::FormatterOption::HtmlLinked,
                     theme,
-                    debug: false,
+                    include_highlight: false,
                     ..autumnus::Options::default()
                 },
             );

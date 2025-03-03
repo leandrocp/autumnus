@@ -195,8 +195,8 @@ pub struct Options {
     pub pre_class: Option<String>,
     /// Whether to use italics for highlighting.
     pub italic: bool,
-    /// Whether to print debug information.
-    pub debug: bool,
+    /// Whether to include the original highlight scope name in a `data` attribute.. Useful for debugging.
+    pub include_highlight: bool,
     /// The type of formatter to use for output.
     pub formatter: FormatterOption,
 }
@@ -207,7 +207,7 @@ impl Default for Options {
             theme: Theme::default(),
             pre_class: None,
             italic: false,
-            debug: false,
+            include_highlight: false,
             formatter: FormatterOption::HtmlInline,
         }
     }

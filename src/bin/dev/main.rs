@@ -127,7 +127,7 @@ fn gen_samples_entries(
                 autumnus::Options {
                     formatter: autumnus::FormatterOption::HtmlInline,
                     theme: theme.clone(),
-                    debug: false,
+                    include_highlight: false,
                     pre_class: Some(
                         "w-full overflow-auto rounded-lg p-8 text-sm antialiased leading-6"
                             .to_string(),

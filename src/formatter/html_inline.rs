@@ -54,14 +54,14 @@ impl Formatter for HtmlInline {
             .render(events, source.as_bytes(), &move |highlight, output| {
                 let scope = HIGHLIGHT_NAMES[highlight.0];
 
-                if self.options.debug {
-                    output.extend(b"data-athl-hl=\"");
+                if self.options.include_highlight {
+                    output.extend(b"data-highlight=\"");
                     output.extend(scope.as_bytes());
                     output.extend(b"\"");
                 }
 
                 if let Some(style) = self.options.theme.get_style(scope) {
-                    if self.options.debug {
+                    if self.options.include_highlight {
                         output.extend(b" ");
                     }
 
