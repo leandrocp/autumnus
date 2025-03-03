@@ -275,6 +275,26 @@ local themes = {
 			opts = { contrast = "soft" },
 		},
 	},
+	{
+		name = "dracula",
+		colorscheme = "dracula",
+		appearance = "dark",
+		plugin = {
+			"Mofiqul/dracula.nvim",
+			name = "dracula",
+			opts = {},
+		},
+	},
+	{
+		name = "dracula_soft",
+		colorscheme = "dracula-soft",
+		appearance = "dark",
+		plugin = {
+			"Mofiqul/dracula.nvim",
+			name = "dracula",
+			opts = { theme = "dracula-soft" },
+		},
+	},
 }
 
 local highlight_groups = {
