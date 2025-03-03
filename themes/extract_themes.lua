@@ -1,8 +1,3 @@
--- Script to extract TreeSitter highlight groups from Neovim themes
--- Usage: nvim --clean --headless -u init.lua -l extract_themes.lua
--- Current Date and Time (UTC - YYYY-MM-DD HH:MM:SS formatted): 2025-03-03 00:49:56
--- Current User's Login: leandrocp
-
 local themes = {
 	{
 		name = "tokyonight_night",
@@ -11,6 +6,24 @@ local themes = {
 		plugin = {
 			"folke/tokyonight.nvim",
 			opts = { style = "night" },
+		},
+	},
+	{
+		name = "tokyonight_moon",
+		colorscheme = "tokyonight-moon",
+		appearance = "dark",
+		plugin = {
+			"folke/tokyonight.nvim",
+			opts = { style = "moon" },
+		},
+	},
+	{
+		name = "tokyonight_storm",
+		colorscheme = "tokyonight-storm",
+		appearance = "dark",
+		plugin = {
+			"folke/tokyonight.nvim",
+			opts = { style = "storm" },
 		},
 	},
 	{
@@ -33,16 +46,6 @@ local themes = {
 		},
 	},
 	{
-		name = "catppuccin_latte",
-		colorscheme = "catppuccin-latte",
-		appearance = "light",
-		plugin = {
-			"catppuccin/nvim",
-			name = "catppuccin",
-			opts = {},
-		},
-	},
-	{
 		name = "catppuccin_macchiato",
 		colorscheme = "catppuccin-macchiato",
 		appearance = "dark",
@@ -56,6 +59,16 @@ local themes = {
 		name = "catppuccin_mocha",
 		colorscheme = "catppuccin-mocha",
 		appearance = "dark",
+		plugin = {
+			"catppuccin/nvim",
+			name = "catppuccin",
+			opts = {},
+		},
+	},
+	{
+		name = "catppuccin_latte",
+		colorscheme = "catppuccin-latte",
+		appearance = "light",
 		plugin = {
 			"catppuccin/nvim",
 			name = "catppuccin",
@@ -173,7 +186,6 @@ local highlight_groups = {
 	"@variable.parameter.builtin",
 }
 
--- Function to extract colors from a specific colorscheme
 local function extract_colorscheme_colors(theme_def)
 	local theme_name = theme_def.name
 	local colorscheme_name = theme_def.colorscheme
@@ -181,10 +193,8 @@ local function extract_colorscheme_colors(theme_def)
 
 	print(string.format("Processing %s (colorscheme: %s, appearance: %s)...", theme_name, colorscheme_name, appearance))
 
-	-- Reset Neovim state as much as possible
 	vim.cmd("colorscheme default")
 
-	-- Clear ALL package cache for theme-related modules
 	local preserved_modules = {
 		"_G",
 		"bit",
@@ -211,18 +221,15 @@ local function extract_colorscheme_colors(theme_def)
 		end
 	end
 
-	-- Set appearance
 	vim.opt.termguicolors = true
 	vim.o.background = appearance
 
-	-- Load the colorscheme
 	local success, err = pcall(vim.cmd, "colorscheme " .. colorscheme_name)
 	if not success then
 		print(string.format("Error loading colorscheme for %s: %s", theme_name, err))
 		return false
 	end
 
-	-- Extract specified highlight groups using the provided code
 	local highlights = {}
 
 	for _, group in ipairs(highlight_groups) do
@@ -258,7 +265,6 @@ local function extract_colorscheme_colors(theme_def)
 		end
 	end
 
-	-- Write to JSON file in the current directory
 	local output_file = theme_name .. ".json"
 	local theme_data = {
 		name = theme_name,
@@ -272,7 +278,6 @@ local function extract_colorscheme_colors(theme_def)
 		file:write(json_str)
 		file:close()
 
-		-- Use jq to order the fields and the properties within each highlight style
 		local jq_cmd = [[jq '
       {
         name,
@@ -307,27 +312,20 @@ local function extract_colorscheme_colors(theme_def)
 	end
 end
 
--- Setup plugins with lazy
 print("Setting up plugins...")
 local plugins = {}
 for _, theme_def in ipairs(themes) do
-	-- Make all plugins load immediately (not lazy-loaded)
 	local plugin = vim.deepcopy(theme_def.plugin)
 	plugin.lazy = false
 	plugin.priority = 1000
 	table.insert(plugins, plugin)
 end
 
--- Initialize lazy with all theme plugins
--- Configure lazy to work in headless mode
 require("lazy").setup(plugins, {
 	install = {
-		-- Don't change colorscheme during installation
 		colorscheme = { "default" },
 	},
-	-- Disable UI elements that don't work in headless mode
 	ui = {
-		-- Disable all UI features
 		border = "none",
 		icons = {
 			cmd = "",
@@ -342,15 +340,13 @@ require("lazy").setup(plugins, {
 			start = "",
 			task = "",
 		},
-		throttle = 99999999, -- Effectively disable UI updates
+		throttle = 99999999,
 	},
-	-- Don't check for updates
 	checker = {
 		enabled = false,
 	},
 })
 
--- Now process each theme
 for _, theme_def in ipairs(themes) do
 	extract_colorscheme_colors(theme_def)
 end
