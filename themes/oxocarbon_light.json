@@ -47,26 +47,26 @@
       "fg": "#0f62fe"
     },
     "function": {
-      "bold": true,
-      "fg": "#673ab7"
+      "fg": "#673ab7",
+      "bold": true
     },
     "function.builtin": {
       "fg": "#673ab7"
     },
     "function.call": {
-      "bold": true,
-      "fg": "#673ab7"
+      "fg": "#673ab7",
+      "bold": true
     },
     "function.macro": {
       "fg": "#08bdba"
     },
     "function.method": {
-      "bold": true,
-      "fg": "#673ab7"
+      "fg": "#673ab7",
+      "bold": true
     },
     "function.method.call": {
-      "bold": true,
-      "fg": "#673ab7"
+      "fg": "#673ab7",
+      "bold": true
     },
     "keyword": {
       "fg": "#ee5396"
@@ -165,8 +165,8 @@
       "fg": "#08bdba"
     },
     "normal": {
-      "bg": "#ffffff",
-      "fg": "#37474f"
+      "fg": "#37474f",
+      "bg": "#ffffff"
     },
     "number": {
       "fg": "#ffab91"

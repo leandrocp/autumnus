@@ -113,32 +113,32 @@
       "fg": "#fc5d7c"
     },
     "markup.heading": {
-      "bold": true,
-      "fg": "#fc5d7c"
+      "fg": "#fc5d7c",
+      "bold": true
     },
     "markup.heading.1": {
-      "bold": true,
-      "fg": "#fc5d7c"
+      "fg": "#fc5d7c",
+      "bold": true
     },
     "markup.heading.2": {
-      "bold": true,
-      "fg": "#fc5d7c"
+      "fg": "#fc5d7c",
+      "bold": true
     },
     "markup.heading.3": {
-      "bold": true,
-      "fg": "#fc5d7c"
+      "fg": "#fc5d7c",
+      "bold": true
     },
     "markup.heading.4": {
-      "bold": true,
-      "fg": "#fc5d7c"
+      "fg": "#fc5d7c",
+      "bold": true
     },
     "markup.heading.5": {
-      "bold": true,
-      "fg": "#fc5d7c"
+      "fg": "#fc5d7c",
+      "bold": true
     },
     "markup.heading.6": {
-      "bold": true,
-      "fg": "#fc5d7c"
+      "fg": "#fc5d7c",
+      "bold": true
     },
     "markup.italic": {
       "italic": true
@@ -171,8 +171,8 @@
       "fg": "#e2e2e3"
     },
     "normal": {
-      "bg": "#2c2e34",
-      "fg": "#e2e2e3"
+      "fg": "#e2e2e3",
+      "bg": "#2c2e34"
     },
     "number": {
       "fg": "#b39df3"

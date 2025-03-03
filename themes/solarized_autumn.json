@@ -3,8 +3,8 @@
   "appearance": "dark",
   "highlights": {
     "attribute": {
-      "bold": true,
-      "fg": "#93a1a1"
+      "fg": "#93a1a1",
+      "bold": true
     },
     "attribute.builtin": {
       "fg": "#6c71c4"
@@ -61,8 +61,8 @@
       "fg": "#268bd2"
     },
     "keyword": {
-      "bold": true,
-      "fg": "#93a1a1"
+      "fg": "#93a1a1",
+      "bold": true
     },
     "keyword.conditional": {
       "fg": "#859900"
@@ -74,8 +74,8 @@
       "fg": "#859900"
     },
     "keyword.debug": {
-      "bold": true,
-      "fg": "#93a1a1"
+      "fg": "#93a1a1",
+      "bold": true
     },
     "keyword.directive": {
       "fg": "#859900"
@@ -87,16 +87,16 @@
       "fg": "#859900"
     },
     "keyword.function": {
-      "bold": true,
-      "fg": "#93a1a1"
+      "fg": "#93a1a1",
+      "bold": true
     },
     "keyword.import": {
-      "bold": true,
-      "fg": "#93a1a1"
+      "fg": "#93a1a1",
+      "bold": true
     },
     "keyword.modifier": {
-      "bold": true,
-      "fg": "#93a1a1"
+      "fg": "#93a1a1",
+      "bold": true
     },
     "keyword.operator": {
       "fg": "#859900"
@@ -108,15 +108,15 @@
       "fg": "#859900"
     },
     "keyword.type": {
-      "bold": true,
-      "fg": "#93a1a1"
+      "fg": "#93a1a1",
+      "bold": true
     },
     "label": {
       "fg": "#859900"
     },
     "markup.heading": {
-      "bold": true,
-      "fg": "#268bd2"
+      "fg": "#268bd2",
+      "bold": true
     },
     "markup.heading.1": {
       "fg": "#268bd2"
@@ -151,8 +151,8 @@
       "strikethrough": true
     },
     "markup.strong": {
-      "bold": true,
-      "fg": "#d33682"
+      "fg": "#d33682",
+      "bold": true
     },
     "markup.underline": {
       "fg": "#d33682",
@@ -165,8 +165,8 @@
       "fg": "#6c71c4"
     },
     "normal": {
-      "bg": "#002b36",
-      "fg": "#839496"
+      "fg": "#839496",
+      "bg": "#002b36"
     },
     "number": {
       "fg": "#6c71c4"
@@ -187,8 +187,8 @@
       "fg": "#839496"
     },
     "punctuation.special": {
-      "bold": true,
-      "fg": "#93a1a1"
+      "fg": "#93a1a1",
+      "bold": true
     },
     "string": {
       "fg": "#2aa198"
@@ -228,8 +228,8 @@
       "fg": "#cb4b16"
     },
     "type.builtin": {
-      "bold": true,
-      "fg": "#93a1a1"
+      "fg": "#93a1a1",
+      "bold": true
     },
     "type.definition": {
       "fg": "#cb4b16"

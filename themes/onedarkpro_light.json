@@ -108,32 +108,32 @@
       "fg": "#9a77cf"
     },
     "markup.heading": {
-      "bold": true,
-      "fg": "#e05661"
+      "fg": "#e05661",
+      "bold": true
     },
     "markup.heading.1": {
-      "bold": true,
-      "fg": "#e05661"
+      "fg": "#e05661",
+      "bold": true
     },
     "markup.heading.2": {
-      "bold": true,
-      "fg": "#e05661"
+      "fg": "#e05661",
+      "bold": true
     },
     "markup.heading.3": {
-      "bold": true,
-      "fg": "#e05661"
+      "fg": "#e05661",
+      "bold": true
     },
     "markup.heading.4": {
-      "bold": true,
-      "fg": "#e05661"
+      "fg": "#e05661",
+      "bold": true
     },
     "markup.heading.5": {
-      "bold": true,
-      "fg": "#e05661"
+      "fg": "#e05661",
+      "bold": true
     },
     "markup.heading.6": {
-      "bold": true,
-      "fg": "#e05661"
+      "fg": "#e05661",
+      "bold": true
     },
     "markup.italic": {
       "italic": true
@@ -148,8 +148,8 @@
       "strikethrough": true
     },
     "markup.strong": {
-      "bold": true,
-      "fg": "#eea825"
+      "fg": "#eea825",
+      "bold": true
     },
     "markup.underline": {
       "underline": true
@@ -161,8 +161,8 @@
       "fg": "#118dc3"
     },
     "normal": {
-      "bg": "#fafafa",
-      "fg": "#6a6a6a"
+      "fg": "#6a6a6a",
+      "bg": "#fafafa"
     },
     "number": {
       "fg": "#ee9025"

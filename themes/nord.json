@@ -9,8 +9,8 @@
       "fg": "#d8dee9"
     },
     "boolean": {
-      "bold": true,
-      "fg": "#81a1c1"
+      "fg": "#81a1c1",
+      "bold": true
     },
     "character": {
       "fg": "#a3be8c",
@@ -31,12 +31,12 @@
       "fg": "#ebcb8b"
     },
     "constant.builtin": {
-      "bold": true,
-      "fg": "#8fbcbb"
+      "fg": "#8fbcbb",
+      "bold": true
     },
     "constant.macro": {
-      "bold": true,
-      "fg": "#8fbcbb"
+      "fg": "#8fbcbb",
+      "bold": true
     },
     "constructor": {
       "fg": "#81a1c1"
@@ -138,32 +138,32 @@
       "fg": "#b48ead"
     },
     "markup.heading": {
-      "bold": true,
-      "fg": "#a3be8c"
+      "fg": "#a3be8c",
+      "bold": true
     },
     "markup.heading.1": {
-      "bold": true,
-      "fg": "#a3be8c"
+      "fg": "#a3be8c",
+      "bold": true
     },
     "markup.heading.2": {
-      "bold": true,
-      "fg": "#a3be8c"
+      "fg": "#a3be8c",
+      "bold": true
     },
     "markup.heading.3": {
-      "bold": true,
-      "fg": "#a3be8c"
+      "fg": "#a3be8c",
+      "bold": true
     },
     "markup.heading.4": {
-      "bold": true,
-      "fg": "#a3be8c"
+      "fg": "#a3be8c",
+      "bold": true
     },
     "markup.heading.5": {
-      "bold": true,
-      "fg": "#a3be8c"
+      "fg": "#a3be8c",
+      "bold": true
     },
     "markup.heading.6": {
-      "bold": true,
-      "fg": "#a3be8c"
+      "fg": "#a3be8c",
+      "bold": true
     },
     "markup.italic": {
       "italic": true
@@ -195,8 +195,8 @@
       "italic": true
     },
     "normal": {
-      "bg": "#2e3440",
-      "fg": "#d8dee9"
+      "fg": "#d8dee9",
+      "bg": "#2e3440"
     },
     "number": {
       "fg": "#b48ead"
@@ -267,20 +267,20 @@
       "fg": "#81a1c1"
     },
     "variable": {
-      "bold": true,
-      "fg": "#d8dee9"
+      "fg": "#d8dee9",
+      "bold": true
     },
     "variable.builtin": {
-      "bold": true,
-      "fg": "#d8dee9"
+      "fg": "#d8dee9",
+      "bold": true
     },
     "variable.member": {
-      "bold": true,
-      "fg": "#d8dee9"
+      "fg": "#d8dee9",
+      "bold": true
     },
     "variable.parameter": {
-      "bold": true,
-      "fg": "#d8dee9"
+      "fg": "#d8dee9",
+      "bold": true
     },
     "variable.parameter.builtin": {
       "fg": "#d8dee9"

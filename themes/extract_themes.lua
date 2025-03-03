@@ -321,12 +321,7 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"navarasu/onedark.nvim",
-			config = function()
-				require('onedark').setup {
-					style = 'dark'
-				}
-				require('onedark').load()
-			end,
+			opts = { style = 'dark' },
 		},
 	},
 	{
@@ -335,12 +330,7 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"navarasu/onedark.nvim",
-			config = function()
-				require('onedark').setup {
-					style = 'darker'
-				}
-				require('onedark').load()
-			end,
+			opts = { style = 'darker' },
 		},
 	},
 	{
@@ -349,12 +339,7 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"navarasu/onedark.nvim",
-			config = function()
-				require('onedark').setup {
-					style = 'cool'
-				}
-				require('onedark').load()
-			end,
+			opts = { style = 'cool' },
 		},
 	},
 	{
@@ -363,12 +348,7 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"navarasu/onedark.nvim",
-			config = function()
-				require('onedark').setup {
-					style = 'deep'
-				}
-				require('onedark').load()
-			end,
+			opts = { style = 'deep' },
 		},
 	},
 	{
@@ -377,12 +357,7 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"navarasu/onedark.nvim",
-			config = function()
-				require('onedark').setup {
-					style = 'warm'
-				}
-				require('onedark').load()
-			end,
+			opts = { style = 'warm' },
 		},
 	},
 	{
@@ -391,12 +366,7 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"navarasu/onedark.nvim",
-			config = function()
-				require('onedark').setup {
-					style = 'warmer'
-				}
-				require('onedark').load()
-			end,
+			opts = { style = 'warmer' },
 		},
 	},
 	{
@@ -405,12 +375,7 @@ local themes = {
 		appearance = "light",
 		plugin = {
 			"navarasu/onedark.nvim",
-			config = function()
-				require('onedark').setup {
-					style = 'light'
-				}
-				require('onedark').load()
-			end,
+			opts = { style = 'light' },
 		},
 	},
 	{
@@ -462,9 +427,11 @@ local themes = {
 			config = function()
 				vim.g.material_style = "darker"
 				require("material").setup({})
-				vim.g.material_style = nil
 			end,
 		},
+		after = function()
+			vim.g.material_style = nil
+		end,
 	},
 	{
 		name = "material_lighter",
@@ -475,9 +442,11 @@ local themes = {
 			config = function()
 				vim.g.material_style = "lighter"
 				require("material").setup({})
-				vim.g.material_style = nil
 			end,
 		},
+		after = function()
+			vim.g.material_style = nil
+		end,
 	},
 	{
 		name = "material_oceanic",
@@ -488,9 +457,11 @@ local themes = {
 			config = function()
 				vim.g.material_style = "oceanic"
 				require("material").setup({})
-				vim.g.material_style = nil
 			end,
 		},
+		after = function()
+			vim.g.material_style = nil
+		end,
 	},
 	{
 		name = "material_palenight",
@@ -501,9 +472,11 @@ local themes = {
 			config = function()
 				vim.g.material_style = "palenight"
 				require("material").setup({})
-				vim.g.material_style = nil
 			end,
 		},
+		after = function()
+			vim.g.material_style = nil
+		end,
 	},
 	{
 		name = "material_deep_ocean",
@@ -514,9 +487,11 @@ local themes = {
 			config = function()
 				vim.g.material_style = "deep ocean"
 				require("material").setup({})
-				vim.g.material_style = nil
 			end,
 		},
+		after = function()
+			vim.g.material_style = nil
+		end,
 	},
 	{
 		name = "nord",
@@ -1108,6 +1083,10 @@ local function extract_colorscheme_colors(theme_def)
 		end
 	end
 
+	if theme_def.after then
+		theme_def.after()
+	end
+
 	local output_file = theme_name .. ".json"
 	local theme_data = {
 		name = theme_name,
@@ -1128,13 +1107,13 @@ local function extract_colorscheme_colors(theme_def)
         highlights: (.highlights | to_entries | sort_by(.key) | map({
           key: .key,
           value: {
+		    fg: .value.fg,
             bg: .value.bg,
             bold: .value.bold,
-            fg: .value.fg,
             italic: .value.italic,
-            strikethrough: .value.strikethrough,
             undercurl: .value.undercurl,
-            underline: .value.underline
+            underline: .value.underline,
+			strikethrough: .value.strikethrough
           } | with_entries(select(.value != null))
         }) | from_entries)
       }' ]] .. output_file .. " > " .. output_file .. ".tmp && mv " .. output_file .. ".tmp " .. output_file
@@ -1164,25 +1143,8 @@ require("lazy").setup(plugins, {
 	install = {
 		colorscheme = { "default" },
 	},
-	ui = {
-		border = "none",
-		icons = {
-			cmd = "",
-			config = "",
-			event = "",
-			ft = "",
-			init = "",
-			keys = "",
-			plugin = "",
-			runtime = "",
-			source = "",
-			start = "",
-			task = "",
-		},
-		throttle = 99999999,
-	},
 	checker = {
-		enabled = false,
+		enabled = true,
 	},
 })
 

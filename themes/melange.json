@@ -154,8 +154,8 @@
       "fg": "#ece1d7"
     },
     "normal": {
-      "bg": "#292522",
-      "fg": "#ece1d7"
+      "fg": "#ece1d7",
+      "bg": "#292522"
     },
     "number": {
       "fg": "#cf9bc2"

@@ -108,32 +108,32 @@
       "fg": "#c8a5ff"
     },
     "markup.heading": {
-      "bold": true,
-      "fg": "#8cb6ff"
+      "fg": "#8cb6ff",
+      "bold": true
     },
     "markup.heading.1": {
-      "bold": true,
-      "fg": "#8cb6ff"
+      "fg": "#8cb6ff",
+      "bold": true
     },
     "markup.heading.2": {
-      "bold": true,
-      "fg": "#8cb6ff"
+      "fg": "#8cb6ff",
+      "bold": true
     },
     "markup.heading.3": {
-      "bold": true,
-      "fg": "#8cb6ff"
+      "fg": "#8cb6ff",
+      "bold": true
     },
     "markup.heading.4": {
-      "bold": true,
-      "fg": "#8cb6ff"
+      "fg": "#8cb6ff",
+      "bold": true
     },
     "markup.heading.5": {
-      "bold": true,
-      "fg": "#8cb6ff"
+      "fg": "#8cb6ff",
+      "bold": true
     },
     "markup.heading.6": {
-      "bold": true,
-      "fg": "#8cb6ff"
+      "fg": "#8cb6ff",
+      "bold": true
     },
     "markup.italic": {
       "italic": true
@@ -150,8 +150,8 @@
       "strikethrough": true
     },
     "markup.strong": {
-      "bold": true,
-      "fg": "#ca4780"
+      "fg": "#ca4780",
+      "bold": true
     },
     "module": {
       "fg": "#52bdff"
@@ -163,8 +163,8 @@
       "fg": "#52bdff"
     },
     "normal": {
-      "bg": "#161616",
-      "fg": "#f2f4f8"
+      "fg": "#f2f4f8",
+      "bg": "#161616"
     },
     "number": {
       "fg": "#3ddbd9"
@@ -194,8 +194,8 @@
       "fg": "#25be6a"
     },
     "string.escape": {
-      "bold": true,
-      "fg": "#2dc7c4"
+      "fg": "#2dc7c4",
+      "bold": true
     },
     "string.regexp": {
       "fg": "#2dc7c4"

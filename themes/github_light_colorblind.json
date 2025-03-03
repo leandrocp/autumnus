@@ -36,12 +36,12 @@
       "fg": "#8a4600"
     },
     "diff.minus": {
-      "bg": "#dcc8b3",
-      "fg": "#d1242f"
+      "fg": "#d1242f",
+      "bg": "#dcc8b3"
     },
     "diff.plus": {
-      "bg": "#b4cbe7",
-      "fg": "#0969da"
+      "fg": "#0969da",
+      "bg": "#b4cbe7"
     },
     "function": {
       "fg": "#6639ba"
@@ -107,32 +107,32 @@
       "fg": "#0550ae"
     },
     "markup.heading": {
-      "bold": true,
-      "fg": "#0550ae"
+      "fg": "#0550ae",
+      "bold": true
     },
     "markup.heading.1": {
-      "bold": true,
-      "fg": "#0550ae"
+      "fg": "#0550ae",
+      "bold": true
     },
     "markup.heading.2": {
-      "bold": true,
-      "fg": "#0550ae"
+      "fg": "#0550ae",
+      "bold": true
     },
     "markup.heading.3": {
-      "bold": true,
-      "fg": "#0550ae"
+      "fg": "#0550ae",
+      "bold": true
     },
     "markup.heading.4": {
-      "bold": true,
-      "fg": "#0550ae"
+      "fg": "#0550ae",
+      "bold": true
     },
     "markup.heading.5": {
-      "bold": true,
-      "fg": "#0550ae"
+      "fg": "#0550ae",
+      "bold": true
     },
     "markup.heading.6": {
-      "bold": true,
-      "fg": "#0550ae"
+      "fg": "#0550ae",
+      "bold": true
     },
     "markup.italic": {
       "fg": "#1b1f24",
@@ -150,8 +150,8 @@
       "strikethrough": true
     },
     "markup.strong": {
-      "bold": true,
-      "fg": "#1b1f24"
+      "fg": "#1b1f24",
+      "bold": true
     },
     "markup.underline": {
       "underline": true
@@ -163,8 +163,8 @@
       "fg": "#0550ae"
     },
     "normal": {
-      "bg": "#ffffff",
-      "fg": "#1b1f24"
+      "fg": "#1b1f24",
+      "bg": "#ffffff"
     },
     "number": {
       "fg": "#0550ae"
@@ -194,8 +194,8 @@
       "fg": "#0a3069"
     },
     "string.escape": {
-      "bold": true,
-      "fg": "#0a3069"
+      "fg": "#0a3069",
+      "bold": true
     },
     "string.regexp": {
       "fg": "#0a3069"

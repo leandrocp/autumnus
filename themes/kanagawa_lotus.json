@@ -9,8 +9,8 @@
       "fg": "#6693bf"
     },
     "boolean": {
-      "bold": true,
-      "fg": "#cc6d00"
+      "fg": "#cc6d00",
+      "bold": true
     },
     "character": {
       "fg": "#6f894e"
@@ -91,8 +91,8 @@
       "italic": true
     },
     "keyword.exception": {
-      "bold": true,
-      "fg": "#c84053"
+      "fg": "#c84053",
+      "bold": true
     },
     "keyword.function": {
       "fg": "#624c83",
@@ -106,8 +106,8 @@
       "italic": true
     },
     "keyword.operator": {
-      "bold": true,
-      "fg": "#836f4a"
+      "fg": "#836f4a",
+      "bold": true
     },
     "keyword.repeat": {
       "fg": "#624c83",
@@ -122,8 +122,8 @@
       "italic": true
     },
     "label": {
-      "bold": true,
-      "fg": "#624c83"
+      "fg": "#624c83",
+      "bold": true
     },
     "markup.heading": {
       "fg": "#4d699b"
@@ -172,8 +172,8 @@
       "fg": "#6693bf"
     },
     "normal": {
-      "bg": "#f2ecbc",
-      "fg": "#545464"
+      "fg": "#545464",
+      "bg": "#f2ecbc"
     },
     "number": {
       "fg": "#b35b79"
@@ -203,8 +203,8 @@
       "fg": "#6f894e"
     },
     "string.escape": {
-      "bold": true,
-      "fg": "#836f4a"
+      "fg": "#836f4a",
+      "bold": true
     },
     "string.regexp": {
       "fg": "#836f4a"

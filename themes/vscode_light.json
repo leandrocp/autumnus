@@ -108,32 +108,32 @@
       "fg": "#0451a5"
     },
     "markup.heading": {
-      "bold": true,
-      "fg": "#800000"
+      "fg": "#800000",
+      "bold": true
     },
     "markup.heading.1": {
-      "bold": true,
-      "fg": "#800000"
+      "fg": "#800000",
+      "bold": true
     },
     "markup.heading.2": {
-      "bold": true,
-      "fg": "#800000"
+      "fg": "#800000",
+      "bold": true
     },
     "markup.heading.3": {
-      "bold": true,
-      "fg": "#800000"
+      "fg": "#800000",
+      "bold": true
     },
     "markup.heading.4": {
-      "bold": true,
-      "fg": "#800000"
+      "fg": "#800000",
+      "bold": true
     },
     "markup.heading.5": {
-      "bold": true,
-      "fg": "#800000"
+      "fg": "#800000",
+      "bold": true
     },
     "markup.heading.6": {
-      "bold": true,
-      "fg": "#800000"
+      "fg": "#800000",
+      "bold": true
     },
     "markup.italic": {
       "fg": "#343434",
@@ -150,8 +150,8 @@
       "strikethrough": true
     },
     "markup.strong": {
-      "bold": true,
-      "fg": "#000080"
+      "fg": "#000080",
+      "bold": true
     },
     "markup.underline": {
       "fg": "#800000",
@@ -167,8 +167,8 @@
       "fg": "#16825d"
     },
     "normal": {
-      "bg": "#ffffff",
-      "fg": "#343434"
+      "fg": "#343434",
+      "bg": "#ffffff"
     },
     "number": {
       "fg": "#098658"

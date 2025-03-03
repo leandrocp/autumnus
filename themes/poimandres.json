@@ -153,8 +153,8 @@
       "fg": "#767c9d"
     },
     "normal": {
-      "bg": "#1b1e28",
-      "fg": "#e4f0fb"
+      "fg": "#e4f0fb",
+      "bg": "#1b1e28"
     },
     "number": {
       "fg": "#5de4c7"
