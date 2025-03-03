@@ -28,29 +28,6 @@ pub struct Style {
 
 include!(concat!(env!("OUT_DIR"), "/theme_data.rs"));
 
-static DEFAULT_THEME: Theme = Theme {
-    name: String::new(),
-    appearance: String::new(),
-    highlights: BTreeMap::new(),
-};
-
-/// Retrieves a theme by its name, or returns the default theme if not found.
-///
-/// # Examples
-///
-/// ```
-/// use autumnus::themes;
-///
-/// let theme = themes::get_or_default("github_light");
-/// assert_eq!(theme.name, "github_light");
-///
-/// let theme = themes::get_or_default("non_existent_theme");
-/// assert_eq!(theme.name, "");
-/// ```
-pub fn get_or_default(name: &str) -> &'static Theme {
-    get(name).unwrap_or(&DEFAULT_THEME)
-}
-
 /// Creates a `Theme` from a JSON file.
 ///
 /// # Examples
@@ -215,15 +192,6 @@ mod tests {
     fn test_get_by_name() {
         let theme = get("github_light");
         assert_eq!(theme.unwrap().name, "github_light")
-    }
-
-    #[test]
-    fn test_get_by_default() {
-        let theme_github_light = get_or_default("github_light");
-        assert_eq!(theme_github_light.name, "github_light");
-
-        let theme_other = get_or_default("other");
-        assert_eq!(theme_other.name, "");
     }
 
     #[test]

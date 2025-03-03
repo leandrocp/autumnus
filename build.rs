@@ -464,7 +464,8 @@ fn themes() {
         let json_path = format!("../../../../../themes/{}.json", name);
 
         quote! {
-            pub static #constant_name: LazyLock<Theme> = LazyLock::new(|| {
+            #[doc(hidden)]
+            pub(crate) static #constant_name: LazyLock<Theme> = LazyLock::new(|| {
                 let theme_str = include_str!(#json_path);
                  crate::themes::from_json(theme_str).unwrap_or_else(|_| panic!("failed to load theme: {}", #name))
             });
@@ -487,6 +488,7 @@ fn themes() {
 
         #(#theme_constants)*
 
+        #[doc(hidden)]
         pub static ALL_THEMES: LazyLock<Vec<&'static Theme>> = LazyLock::new(|| vec![
             #(#theme_refs),*
         ]);

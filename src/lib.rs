@@ -190,14 +190,119 @@ pub enum FormatterOption {
 #[derive(Debug)]
 pub struct Options {
     /// Theme to use for highlighting.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use autumnus::{Options, themes, highlight};
+    ///
+    /// let options = Options {
+    ///     theme: themes::get("dracula").unwrap().clone(),
+    ///     ..Options::default()
+    /// };
+    ///
+    /// let code = r#"fn main() { println!("Hello"); }"#;
+    /// let html = highlight("rust", code, options);
+    /// // Output: <pre class="athl" style="color: #f8f8f2; background-color: #282a36;">
+    /// //   <code class="language-rust" translate="no" tabindex="0">
+    /// //     <span class="line" data-line="1">
+    /// //       <span style="color: #ff79c6;">fn</span> <span style="color: #f8f8f2;">main</span>() { 
+    /// //       <span style="color: #8be9fd;">println!</span>(<span style="color: #f1fa8c;">"Hello"</span>); }
+    /// //     </span>
+    /// //   </code>
+    /// // </pre>
+    /// ```
     pub theme: Theme,
+
     /// Class to add to the `<pre>` tag.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use autumnus::{Options, highlight};
+    ///
+    /// let options = Options {
+    ///     pre_class: Some("my-code-block".to_string()),
+    ///     ..Options::default()
+    /// };
+    ///
+    /// let code = r#"fn main() { println!("Hello"); }"#;
+    /// let html = highlight("rust", code, options);
+    /// // Output: <pre class="athl my-code-block">
+    /// ```
     pub pre_class: Option<String>,
+
     /// Whether to use italics for highlighting.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use autumnus::{Options, highlight};
+    ///
+    /// let options = Options {
+    ///     italic: true,
+    ///     ..Options::default()
+    /// };
+    ///
+    /// let code = r#"fn main() { println!("Hello"); }"#;
+    /// let html = highlight("rust", code, options);
+    /// // Output: <pre class="athl">
+    /// //   <code class="language-rust" translate="no" tabindex="0">
+    /// //     <span class="line" data-line="1">
+    /// //       <span style="color: #ff79c6; font-style: italic;">fn</span> ...
+    /// //     </span>
+    /// //   </code>
+    /// // </pre>
+    /// ```
     pub italic: bool,
-    /// Whether to include the original highlight scope name in a `data` attribute.. Useful for debugging.
+
+    /// Whether to include the original highlight scope name in a `data` attribute.
+    /// Useful for debugging.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use autumnus::{Options, highlight};
+    ///
+    /// let options = Options {
+    ///     include_highlight: true,
+    ///     ..Options::default()
+    /// };
+    ///
+    /// let code = r#"fn main() { println!("Hello"); }"#;
+    /// let html = highlight("rust", code, options);
+    /// // Output: <pre class="athl">
+    /// //   <code class="language-rust" translate="no" tabindex="0">
+    /// //     <span class="line" data-line="1">
+    /// //       <span style="color: #ff79c6;" data-highlight="keyword.function">fn</span> ...
+    /// //     </span>
+    /// //   </code>
+    /// // </pre>
+    /// ```
     pub include_highlight: bool,
+
     /// The type of formatter to use for output.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use autumnus::{Options, FormatterOption, highlight};
+    ///
+    /// let options = Options {
+    ///     formatter: FormatterOption::HtmlLinked,
+    ///     ..Options::default()
+    /// };
+    ///
+    /// let code = r#"fn main() { println!("Hello"); }"#;
+    /// let html = highlight("rust", code, options);
+    /// // Output: <pre class="athl">
+    /// //   <code class="language-rust" translate="no" tabindex="0">
+    /// //     <span class="line" data-line="1">
+    /// //       <span class="keyword-function">fn</span> ...
+    /// //     </span>
+    /// //   </code>
+    /// // </pre>
+    /// ```
     pub formatter: FormatterOption,
 }
 
