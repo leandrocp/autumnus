@@ -536,6 +536,9 @@ pub fn highlight(lang_or_path: &str, source: &str, options: Options) -> String {
 mod tests {
     use super::*;
 
+    // println!("{}", result);
+    // std::fs::write("result.html", result.clone()).unwrap();
+
     #[test]
     fn test_highlight_html_inline() {
         let code = r#"defmodule Foo do
@@ -569,8 +572,40 @@ end
             },
         );
 
-        // println!("{}", result);
-        // std::fs::write("result.html", result).unwrap();
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_highlight_html_inline_escape_curly_braces() {
+        let expected = r#"<pre class="athl" style="color: #c6d0f5; background-color: #303446;"><code class="language-elixir" translate="no" tabindex="0"><span class="line" data-line="1"><span style="color: #949cbb;">&lbrace;</span><span style="color: #eebebe;">:ok</span><span style="color: #949cbb;">,</span> <span style="color: #eebebe;">char: </span><span style="color: #81c8be;">&#39;&lbrace;&#39;</span><span style="color: #949cbb;">&rbrace;</span>
+</span></code></pre>"#;
+
+        let result = highlight(
+            "elixir",
+            "{:ok, char: '{'}",
+            Options {
+                theme: themes::CATPPUCCIN_FRAPPE.clone(),
+                ..Options::default()
+            },
+        );
+
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_highlight_html_linked_escape_curly_braces() {
+        let expected = r#"<pre class="athl"><code class="language-elixir" translate="no" tabindex="0"><span class="line" data-line="1"><span class=" punctuation-bracket">&lbrace;</span><span class=" string string-special string-special-symbol">:ok</span><span class=" punctuation-delimiter">,</span> <span class=" string string-special string-special-symbol">char: </span><span class=" character">&#39;&lbrace;&#39;</span><span class=" punctuation-bracket">&rbrace;</span>
+</span></code></pre>"#;
+
+        let result = highlight(
+            "elixir",
+            "{:ok, char: '{'}",
+            Options {
+                formatter: FormatterOption::HtmlLinked,
+                theme: themes::CATPPUCCIN_FRAPPE.clone(),
+                ..Options::default()
+            },
+        );
 
         assert_eq!(result, expected);
     }
@@ -608,9 +643,6 @@ end
                 ..Options::default()
             },
         );
-
-        // println!("{}", result);
-        // std::fs::write("result.html", result).unwrap();
 
         assert_eq!(result, expected);
     }

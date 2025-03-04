@@ -72,17 +72,12 @@ impl Formatter for HtmlInline {
             })
             .expect("TODO");
 
-        // TODO: escape { }
-        //             let span = v_htmlescape::escape(span)
-        //                 .to_string()
-        //                 .replace('{', "&lbrace;")
-        //                 .replace('}', "&rbrace;");
         for (i, line) in renderer.lines().enumerate() {
             write!(
                 writer,
                 "<span class=\"line\" data-line=\"{}\">{}</span>",
                 i + 1,
-                line
+                line.replace('{', "&lbrace;").replace('}', "&rbrace;")
             );
         }
     }
