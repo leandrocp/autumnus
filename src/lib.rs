@@ -244,6 +244,13 @@ pub enum FormatterOption {
     /// HTML output with inline styles.
     HtmlInline,
     /// HTML output with linked styles.
+    ///
+    /// When using this formatter, CSS files for all themes are available in the `css/` directory.
+    /// You need to include the corresponding CSS file for your chosen theme:
+    ///
+    /// ```html
+    /// <link rel="stylesheet" href="css/dracula.css">
+    /// ```
     HtmlLinked,
     /// Terminal output with ANSI colors.
     Terminal,
@@ -468,6 +475,13 @@ impl Default for Options {
 /// </pre>
 /// ```
 ///
+/// When using `FormatterOption::HtmlLinked`, you need to include the corresponding CSS file for your chosen theme.
+/// CSS files for all themes are available in the `css/` directory:
+///
+/// ```html
+/// <link rel="stylesheet" href="css/dracula.css">
+/// ```
+///
 /// Using terminal output:
 ///
 /// ```rust
@@ -571,6 +585,8 @@ end
                 ..Options::default()
             },
         );
+
+     std::fs::write("result.html", result.clone()).unwrap();
 
         assert_eq!(result, expected);
     }

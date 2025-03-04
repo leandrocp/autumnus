@@ -14,6 +14,7 @@ include = [
   "/queries/**/highlights.scm",
   "/queries/**/injections.scm",
   "/queries/**/locals.scm",
+  "/css/*.css",
   "/themes/*.json",
   "/LICENSE",
   "/README.md",

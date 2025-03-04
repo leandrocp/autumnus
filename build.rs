@@ -67,6 +67,7 @@ impl TreeSitterParser {
     }
 }
 
+// https://github.com/Wilfred/difftastic/blob/8953c55cf854ceac2ccb6ece004d6a94a5bfa122/build.rs
 // TODO: remove vendored parsers in favor of crates as soon as they implement LanguageFn
 fn vendored_parsers() {
     let parsers = vec![
@@ -225,7 +226,7 @@ fn read_query_file(path: &Path, language: &str, query: &str) -> String {
             for parent_language in parent_languages {
                 let parent_path =
                     PathBuf::from(format!("queries/{}/{}.scm", parent_language, query));
-                let parent_content = read_query_file(&parent_path, &parent_language, &query);
+                let parent_content = read_query_file(&parent_path, &parent_language, query);
                 query_content.push(parent_content.clone());
             }
         }
@@ -381,7 +382,7 @@ fn convert_lua_pattern_to_rust_regex(lua_pattern: &str) -> String {
                         // Check if next char is {, which needs special handling in Rust regex
                         if let Some(&next) = chars.peek() {
                             if next == '{' {
-                                result.push_str("\\"); // Add extra escape for ${
+                                result.push('\\'); // Add extra escape for ${
                             }
                         }
                     }
@@ -411,7 +412,7 @@ fn convert_lua_pattern_to_rust_regex(lua_pattern: &str) -> String {
             // Check if next char is {, which needs special handling in Rust regex
             if let Some(&next) = chars.peek() {
                 if next == '{' {
-                    result.push_str("\\"); // Add extra escape for ${
+                    result.push('\\'); // Add extra escape for ${
                 }
             }
         } else if c == '.'
@@ -428,7 +429,7 @@ fn convert_lua_pattern_to_rust_regex(lua_pattern: &str) -> String {
         {
             result.push('\\');
             result.push(c);
-        } else if c == '^' && result.len() > 0 {
+        } else if c == '^' && !result.is_empty() {
             result.push('\\');
             result.push(c);
         } else {
@@ -517,6 +518,3 @@ fn themes() {
 
     fs::write(dest_path, output.to_string()).unwrap();
 }
-
-// Build vendored tree-sitter parsers
-// https://github.com/Wilfred/difftastic/blob/8953c55cf854ceac2ccb6ece004d6a94a5bfa122/build.rs

@@ -162,7 +162,6 @@ impl Theme {
 
         if let Some(pre_style) = &self.pre_style("\n  ") {
             rules.push(format!(" {{\n  {}\n}}\n", pre_style));
-            // write!(css, "pre.athl {{ {} }}\n", pre_style);
         } else {
             rules.push(" {}\n".to_string());
         }
@@ -171,7 +170,7 @@ impl Theme {
             let style_css = style.css(enable_italic, "\n  ");
 
             if !style_css.is_empty() {
-                rules.push(format!(".athl-{} {{\n  {}\n}}\n", scope, style_css))
+                rules.push(format!(".{} {{\n  {}\n}}\n", scope.replace('.', "-"), style_css))
             };
         }
 
@@ -182,7 +181,6 @@ impl Theme {
         match self.highlights.get(scope) {
             Some(syntax) => Some(syntax),
             None => {
-                // try to match ancestor
                 if scope.contains('.') {
                     let split: Vec<&str> = scope.split('.').collect();
                     let joined = split[0..split.len() - 1].join(".");
@@ -338,15 +336,15 @@ mod tests {
   color: red;
   background-color: green;
 }
-.athl-keyword {
+.keyword {
   color: blue;
   font-style: italic;
 }
-.athl-normal {
+.normal {
   color: red;
   background-color: green;
 }
-.athl-tag.attribute {
+.tag-attribute {
   background-color: gray;
   font-weight: bold;
 }

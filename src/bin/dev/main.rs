@@ -13,6 +13,7 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     GenSamples,
+    GenCss,
 }
 
 fn main() -> Result<()> {
@@ -20,6 +21,7 @@ fn main() -> Result<()> {
 
     match cli.command {
         Commands::GenSamples => gen_samples(),
+        Commands::GenCss => gen_css(),
     }
 }
 
@@ -156,5 +158,22 @@ fn gen_samples_entries(
             println!("{}", html_path.display());
         }
     }
+    Ok(())
+}
+
+fn gen_css() -> Result<()> {
+    let css_dir = Path::new("css");
+    fs::create_dir_all(css_dir)?;
+
+    let mut themes: Vec<_> = autumnus::themes::ALL_THEMES.iter().collect();
+    themes.sort_by(|a, b| a.name.cmp(&b.name));
+
+    for theme in themes {
+        let css = theme.css(true);
+        let css_path = css_dir.join(format!("{}.css", theme.name));
+        fs::write(&css_path, css)?;
+        println!("{}", css_path.display());
+    }
+
     Ok(())
 }

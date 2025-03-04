@@ -65,6 +65,22 @@ gen-themes:
     find themes -type f -name "*.json" -delete
     (cd themes && nvim --clean --headless -u init.lua -l extract_themes.lua)
 
+gen-css:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    
+    echo "⚠️  This will regenerate files in the css/ directory."
+    echo ""
+    read -p "Are you sure you want to proceed? (y/N) " -n 1 -r
+    echo ""
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo "Operation cancelled."
+        exit 0
+    fi
+    
+    find css -type f -name "*.css" -delete
+    cargo run --release --features=dev --bin dev gen-css
+
 gen-samples:
     #!/usr/bin/env bash
     set -euo pipefail
