@@ -4,128 +4,145 @@
     <title>Autumnus Syntax Highlighter</title>
     <link rel="preconnect" href="https://fonts.bunny.net" />
     <link
-      href="https://fonts.bunny.net/css?family=fira-code:300,400,500,600,700"
+      href="https://fonts.bunny.net/css?family=inter:300,400,500,600,700|fira-code:300,400,500,600,700"
       rel="stylesheet"
     />
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'system-ui', 'sans-serif'],
+              mono: ['Fira Code', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+            },
+            keyframes: {
+              fadeIn: {
+                '0%': { opacity: '0', transform: 'translateY(10px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+              }
+            },
+            animation: {
+              fadeIn: 'fadeIn 0.3s ease-out',
+            }
+          }
+        }
+      }
+    </script>
     <style>
-      * {
-        font-family:
-          ui-monospace,
-          SFMono-Regular,
-          SF Mono,
-          Menlo,
-          Consolas,
-          Liberation Mono,
-          monospace;
+      @keyframes gradient {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+      .gradient-bg {
+        background: linear-gradient(-45deg, #ff7e5f, #feb47b, #ffcb8c, #fff1e6);
+        background-size: 400% 400%;
+        animation: gradient 15s ease infinite;
+      }
+      .transition-all {
+        transition-property: all;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 150ms;
       }
     </style>
   </head>
-  <body class="bg-gray-50 min-h-screen">
-    <div class="container mx-auto py-8 px-4">
-      <div class="rounded-lg border bg-white shadow-sm">
-        <div class="p-6">
-          <div class="space-y-2 mb-4">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6">
-              <h2 class="text-2xl font-semibold tracking-tight">
-                Autumnus Syntax Highlighter
-              </h2>
-              <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 text-sm">
-                <div class="flex items-center gap-2">
-                  <span class="font-medium">Rust:</span>
-                  <a
-                    href="https://crates.io/crates/autumnus"
-                    class="text-blue-600 hover:underline inline-flex items-center gap-1"
-                    target="_blank"
-                  >
-                    <svg
-                      class="w-4 h-4"
-                      viewBox="0 0 512 512"
-                      fill="currentColor"
-                    >
-                      <path
-                        d="M239.1 6.3l-208 78c-18.7 7-31.1 25-31.1 45v225.1c0 18.2 10.3 34.8 26.5 42.9l208 104c13.5 6.8 29.4 6.8 42.9 0l208-104c16.3-8.1 26.5-24.8 26.5-42.9V129.3c0-20-12.4-37.9-31.1-44.9l-208-78C262 2.2 250 2.2 239.1 6.3zM256 68.4l192 72v1.1l-192 78-192-78v-1.1l192-72zm32 356V275.5l160-65v133.9l-160 80z"
-                      />
-                    </svg>
-                    crates.io
-                  </a>
-                  <a
-                    href="https://github.com/leandrocp/autumnus"
-                    class="text-blue-600 hover:underline inline-flex items-center gap-1"
-                    target="_blank"
-                  >
-                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                      <path
-                        d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"
-                      />
-                    </svg>
-                    GitHub
-                  </a>
+  <body class="min-h-screen bg-slate-50/50">
+    <div class="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
+      <div class="rounded-xl border bg-white/80 backdrop-blur-sm shadow-lg animate-fadeIn">
+        <div class="p-6 sm:p-8">
+          <div class="mb-8">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 sm:gap-8">
+              <div class="flex items-center gap-3">
+                <div class="gradient-bg h-10 w-10 rounded-lg shadow-sm flex items-center justify-center">
+                  <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+                  </svg>
                 </div>
-                <div class="flex items-center gap-2">
-                  <span class="font-medium">Elixir:</span>
-                  <a
-                    href="https://hex.pm/packages/autumn"
-                    class="text-blue-600 hover:underline inline-flex items-center gap-1"
-                    target="_blank"
-                  >
-                    <svg
-                      class="w-4 h-4"
-                      viewBox="0 0 220 220"
-                      fill="currentColor"
+                <h2 class="text-2xl font-semibold tracking-tight bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+                  Autumnus
+                </h2>
+              </div>
+              <div class="flex flex-col sm:flex-row gap-4 sm:gap-8 text-sm">
+                <div class="flex items-center gap-3">
+                  <span class="font-medium text-gray-600">Rust</span>
+                  <div class="flex items-center gap-3">
+                    <a href="https://crates.io/crates/autumnus"
+                      class="text-gray-600 hover:text-gray-900 inline-flex items-center gap-1.5 transition-colors"
+                      target="_blank"
                     >
-                      <path
-                        d="M110,0 L220,110 L110,220 L0,110 L110,0 z M159.939,117.061 L110,167 L60.061,117.061 L110,67.121 L159.939,117.061 z"
-                      />
-                    </svg>
-                    hex.pm
-                  </a>
-                  <a
-                    href="https://github.com/leandrocp/autumn"
-                    class="text-blue-600 hover:underline inline-flex items-center gap-1"
-                    target="_blank"
-                  >
-                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                      <path
-                        d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"
-                      />
-                    </svg>
-                    GitHub
-                  </a>
+                      <svg class="w-4 h-4" viewBox="0 0 512 512" fill="currentColor">
+                        <path d="M239.1 6.3l-208 78c-18.7 7-31.1 25-31.1 45v225.1c0 18.2 10.3 34.8 26.5 42.9l208 104c13.5 6.8 29.4 6.8 42.9 0l208-104c16.3-8.1 26.5-24.8 26.5-42.9V129.3c0-20-12.4-37.9-31.1-44.9l-208-78C262 2.2 250 2.2 239.1 6.3zM256 68.4l192 72v1.1l-192 78-192-78v-1.1l192-72zm32 356V275.5l160-65v133.9l-160 80z"/>
+                      </svg>
+                      <span class="hover:underline decoration-2 underline-offset-2">crates.io</span>
+                    </a>
+                    <a href="https://github.com/leandrocp/autumnus"
+                      class="text-gray-600 hover:text-gray-900 inline-flex items-center gap-1.5 transition-colors"
+                      target="_blank"
+                    >
+                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                      </svg>
+                      <span class="hover:underline decoration-2 underline-offset-2">GitHub</span>
+                    </a>
+                  </div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="font-medium text-gray-600">Elixir</span>
+                  <div class="flex items-center gap-3">
+                    <a href="https://hex.pm/packages/autumn"
+                      class="text-gray-600 hover:text-gray-900 inline-flex items-center gap-1.5 transition-colors"
+                      target="_blank"
+                    >
+                      <svg class="w-4 h-4" viewBox="0 0 220 220" fill="currentColor">
+                        <path d="M110,0 L220,110 L110,220 L0,110 L110,0 z M159.939,117.061 L110,167 L60.061,117.061 L110,67.121 L159.939,117.061 z"/>
+                      </svg>
+                      <span class="hover:underline decoration-2 underline-offset-2">hex.pm</span>
+                    </a>
+                    <a href="https://github.com/leandrocp/autumn"
+                      class="text-gray-600 hover:text-gray-900 inline-flex items-center gap-1.5 transition-colors"
+                      target="_blank"
+                    >
+                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                      </svg>
+                      <span class="hover:underline decoration-2 underline-offset-2">GitHub</span>
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="sticky top-0 z-10 -mx-6 px-6 py-4 bg-white border-b">
+          <div class="sticky top-0 z-10 -mx-6 sm:-mx-8 px-6 sm:px-8 py-4 bg-white/95 backdrop-blur-sm border-b shadow-sm transition-all">
             <div class="flex flex-col sm:flex-row gap-6">
-              <div class="flex-1 space-y-2">
-                <label class="text-sm font-medium leading-none"> Language </label>
+              <div class="flex-1 space-y-2.5">
+                <label class="text-sm font-medium text-gray-700"> Language </label>
                 <select
                   id="language"
-                  class="flex h-10 w-full items-center justify-between rounded-md border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  class="flex h-10 w-full items-center justify-between rounded-lg border border-gray-200 bg-white px-3.5 py-2 text-sm text-gray-800 hover:bg-gray-50 ring-offset-white focus:outline-none focus:ring-2 focus:ring-gray-950/10 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
                 ></select>
-                <p class="text-xs text-gray-500">
-                  Value:
-                  <code class="bg-gray-100 px-1 py-0.5 rounded" id="language-value"></code>
+                <p class="text-xs text-gray-500 flex items-center gap-1.5">
+                  <span>Value:</span>
+                  <code class="bg-gray-100/80 px-1.5 py-0.5 rounded-md font-mono" id="language-value"></code>
                 </p>
               </div>
-              <div class="flex-1 space-y-2">
-                <label class="text-sm font-medium leading-none"> Theme </label>
+              <div class="flex-1 space-y-2.5">
+                <label class="text-sm font-medium text-gray-700"> Theme </label>
                 <select
                   id="theme"
-                  class="flex h-10 w-full items-center justify-between rounded-md border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  class="flex h-10 w-full items-center justify-between rounded-lg border border-gray-200 bg-white px-3.5 py-2 text-sm text-gray-800 hover:bg-gray-50 ring-offset-white focus:outline-none focus:ring-2 focus:ring-gray-950/10 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
                 ></select>
-                <p class="text-xs text-gray-500">
-                  Value:
-                  <code class="bg-gray-100 px-1 py-0.5 rounded" id="theme-value"></code>
+                <p class="text-xs text-gray-500 flex items-center gap-1.5">
+                  <span>Value:</span>
+                  <code class="bg-gray-100/80 px-1.5 py-0.5 rounded-md font-mono" id="theme-value"></code>
                 </p>
               </div>
             </div>
           </div>
 
           <div class="mt-8">
-            <div id="content"></div>
+            <div id="content" class="animate-fadeIn"></div>
           </div>
         </div>
       </div>
@@ -134,7 +151,7 @@
           Sample code extracted from
           <a
             href="https://github.com/adambard/learnxinyminutes-docs"
-            class="text-blue-600 hover:underline"
+            class="text-gray-600 hover:text-gray-900 hover:underline decoration-2 underline-offset-2 transition-colors"
             target="_blank"
             >Learn X in Y Minutes</a
           >
