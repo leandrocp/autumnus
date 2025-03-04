@@ -170,7 +170,11 @@ impl Theme {
             let style_css = style.css(enable_italic, "\n  ");
 
             if !style_css.is_empty() {
-                rules.push(format!(".{} {{\n  {}\n}}\n", scope.replace('.', "-"), style_css))
+                rules.push(format!(
+                    ".{} {{\n  {}\n}}\n",
+                    scope.replace('.', "-"),
+                    style_css
+                ))
             };
         }
 

@@ -56,25 +56,6 @@ impl Formatter for HtmlLinked {
                 }
 
                 output.extend(b"class=\"");
-
-                let mut current_scope = scope;
-                let mut ancestors = Vec::new();
-
-                while let Some(pos) = current_scope.rfind('.') {
-                    let ancestor = &current_scope[..pos];
-                    if let Some(ancestor_idx) = HIGHLIGHT_NAMES.iter().position(|&x| x == ancestor)
-                    {
-                        ancestors.push(CLASSES[ancestor_idx]);
-                    }
-                    current_scope = ancestor;
-                }
-
-                for ancestor in ancestors.iter().rev() {
-                    output.extend(b" ");
-                    output.extend(ancestor.as_bytes());
-                }
-
-                output.extend(b" ");
                 output.extend(class.as_bytes());
                 output.extend(b"\"");
             })

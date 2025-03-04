@@ -586,7 +586,7 @@ end
             },
         );
 
-     std::fs::write("result.html", result.clone()).unwrap();
+        std::fs::write("result.html", result.clone()).unwrap();
 
         assert_eq!(result, expected);
     }
@@ -610,7 +610,7 @@ end
 
     #[test]
     fn test_highlight_html_linked_escape_curly_braces() {
-        let expected = r#"<pre class="athl"><code class="language-elixir" translate="no" tabindex="0"><span class="line" data-line="1"><span class=" punctuation-bracket">&lbrace;</span><span class=" string string-special string-special-symbol">:ok</span><span class=" punctuation-delimiter">,</span> <span class=" string string-special string-special-symbol">char: </span><span class=" character">&#39;&lbrace;&#39;</span><span class=" punctuation-bracket">&rbrace;</span>
+        let expected = r#"<pre class="athl"><code class="language-elixir" translate="no" tabindex="0"><span class="line" data-line="1"><span class="punctuation-bracket">&lbrace;</span><span class="string-special-symbol">:ok</span><span class="punctuation-delimiter">,</span> <span class="string-special-symbol">char: </span><span class="character">&#39;&lbrace;&#39;</span><span class="punctuation-bracket">&rbrace;</span>
 </span></code></pre>"#;
 
         let result = highlight(
@@ -639,15 +639,15 @@ end
 end
 "#;
 
-        let expected = r#"<pre class="athl"><code class="language-elixir" translate="no" tabindex="0"><span class="line" data-line="1"><span class=" keyword keyword-function">defmodule</span> <span class=" module">Foo</span> <span class=" keyword">do</span>
-</span><span class="line" data-line="2">  <span class=" operator"><span class=" comment comment-documentation">@<span class=" comment comment-documentation">moduledoc</span> <span class=" string">&quot;&quot;&quot;</span></span></span>
-</span><span class="line" data-line="3"><span class=" operator"><span class=" comment comment-documentation"><span class=" string">  Test Module</span></span></span>
-</span><span class="line" data-line="4"><span class=" operator"><span class=" comment comment-documentation"><span class=" string">  &quot;&quot;&quot;</span></span></span>
+        let expected = r#"<pre class="athl"><code class="language-elixir" translate="no" tabindex="0"><span class="line" data-line="1"><span class="keyword-function">defmodule</span> <span class="module">Foo</span> <span class="keyword">do</span>
+</span><span class="line" data-line="2">  <span class="operator"><span class="comment-documentation">@<span class="comment-documentation">moduledoc</span> <span class="string">&quot;&quot;&quot;</span></span></span>
+</span><span class="line" data-line="3"><span class="operator"><span class="comment-documentation"><span class="string">  Test Module</span></span></span>
+</span><span class="line" data-line="4"><span class="operator"><span class="comment-documentation"><span class="string">  &quot;&quot;&quot;</span></span></span>
 </span><span class="line" data-line="5">
-</span><span class="line" data-line="6">  <span class=" operator"><span class=" constant">@<span class=" function function-call"><span class=" constant">projects <span class=" punctuation-bracket">[</span><span class=" string">&quot;Phoenix&quot;</span><span class=" punctuation-delimiter">,</span> <span class=" string">&quot;MDEx&quot;</span><span class=" punctuation-bracket">]</span></span></span></span></span>
+</span><span class="line" data-line="6">  <span class="operator"><span class="constant">@<span class="function-call"><span class="constant">projects <span class="punctuation-bracket">[</span><span class="string">&quot;Phoenix&quot;</span><span class="punctuation-delimiter">,</span> <span class="string">&quot;MDEx&quot;</span><span class="punctuation-bracket">]</span></span></span></span></span>
 </span><span class="line" data-line="7">
-</span><span class="line" data-line="8">  <span class=" keyword keyword-function">def</span> <span class=" function">projects</span><span class=" punctuation-delimiter">,</span> <span class=" string string-special string-special-symbol">do: </span><span class=" operator"><span class=" constant">@<span class=" constant">projects</span></span></span>
-</span><span class="line" data-line="9"><span class=" keyword">end</span>
+</span><span class="line" data-line="8">  <span class="keyword-function">def</span> <span class="function">projects</span><span class="punctuation-delimiter">,</span> <span class="string-special-symbol">do: </span><span class="operator"><span class="constant">@<span class="constant">projects</span></span></span>
+</span><span class="line" data-line="9"><span class="keyword">end</span>
 </span></code></pre>"#;
 
         let result = highlight(
