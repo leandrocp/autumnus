@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>css - flexoki_light - Autumnus</title>
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=fira-code:300,400,500,600,700" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      * {
+        font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+      }
+    </style>
+</head>
+<body>
+<pre class="athl w-full overflow-auto rounded-lg p-8 text-sm antialiased leading-6" style="color: #100f0f; background-color: #fffcf0;"><code class="language-css" translate="no" tabindex="0"><span class="line" data-line="1"><span style="color: #b7b5ac;">/* comments appear inside slash-asterisk, just like this line!</span>
+</span><span class="line" data-line="2"><span style="color: #b7b5ac;">   there are no &quot;one-line comments&quot;; this is the only comment style */</span>
+</span><span class="line" data-line="3">
+</span><span class="line" data-line="4"><span style="color: #b7b5ac;">/* ####################</span>
+</span><span class="line" data-line="5"><span style="color: #b7b5ac;">   ## SELECTORS</span>
+</span><span class="line" data-line="6"><span style="color: #b7b5ac;">   #################### */</span>
+</span><span class="line" data-line="7">
+</span><span class="line" data-line="8"><span style="color: #b7b5ac;">/* the selector is used to target an element on a page. */</span>
+</span><span class="line" data-line="9"><span style="color: #24837b;">selector</span> <span style="color: #6f6e69;">{</span> <span style="color: #205ea6;">property</span><span style="color: #6f6e69;">:</span> value<span style="color: #6f6e69;">;</span> <span style="color: #b7b5ac;">/* more properties...*/</span> <span style="color: #6f6e69;">}</span>
+</span><span class="line" data-line="10">
+</span><span class="line" data-line="11"><span style="color: #b7b5ac;">/*</span>
+</span><span class="line" data-line="12"><span style="color: #b7b5ac;">Here is an example element:</span>
+</span><span class="line" data-line="13"><span style="color: #b7b5ac;"></span>
+</span><span class="line" data-line="14"><span style="color: #b7b5ac;">&lt;div class=&#39;class1 class2&#39; id=&#39;anID&#39; attr=&#39;value&#39; otherAttr=&#39;en-us foo bar&#39; /&gt;</span>
+</span><span class="line" data-line="15"><span style="color: #b7b5ac;">*/</span>
+</span><span class="line" data-line="16">
+</span><span class="line" data-line="17"><span style="color: #b7b5ac;">/* You can target it using one of its CSS classes */</span>
+</span><span class="line" data-line="18"><span style="color: #6f6e69;">.</span><span style="color: #66800b;">class1</span> <span style="color: #6f6e69;">{</span> <span style="color: #6f6e69;">}</span>
+</span><span class="line" data-line="19">
+</span><span class="line" data-line="20"><span style="color: #b7b5ac;">/* or both classes! */</span>
+</span><span class="line" data-line="21"><span style="color: #6f6e69;">.</span><span style="color: #66800b;">class1</span><span style="color: #6f6e69;">.</span><span style="color: #66800b;">class2</span> <span style="color: #6f6e69;">{</span> <span style="color: #6f6e69;">}</span>
+</span><span class="line" data-line="22">
+</span><span class="line" data-line="23"><span style="color: #b7b5ac;">/* or its name */</span>
+</span><span class="line" data-line="24"><span style="color: #24837b;">div</span> <span style="color: #6f6e69;">{</span> <span style="color: #6f6e69;">}</span>
+</span><span class="line" data-line="25">
+</span><span class="line" data-line="26"><span style="color: #b7b5ac;">/* or its id */</span>
+</span><span class="line" data-line="27"><span style="color: #6f6e69;">#</span><span style="color: #ad8301;">anID</span> <span style="color: #6f6e69;">{</span> <span style="color: #6f6e69;">}</span>
+</span><span class="line" data-line="28">
+</span><span class="line" data-line="29"><span style="color: #b7b5ac;">/* or using the fact that it has an attribute! */</span>
+</span><span class="line" data-line="30"><span style="color: #6f6e69;">[</span><span style="color: #24837b;">attr</span><span style="color: #6f6e69;">]</span> <span style="color: #6f6e69;">{</span> <span style="color: #205ea6;">font-size</span><span style="color: #6f6e69;">:</span>smaller<span style="color: #6f6e69;">;</span> <span style="color: #6f6e69;">}</span>
+</span><span class="line" data-line="31">
+</span><span class="line" data-line="32"><span style="color: #b7b5ac;">/* or that the attribute has a specific value */</span>
+</span><span class="line" data-line="33"><span style="color: #6f6e69;">[</span><span style="color: #24837b;">attr</span><span style="color: #6f6e69;">=</span><span style="color: #24837b;">&#39;value&#39;</span><span style="color: #6f6e69;">]</span> <span style="color: #6f6e69;">{</span> <span style="color: #205ea6;">font-size</span><span style="color: #6f6e69;">:</span>smaller<span style="color: #6f6e69;">;</span> <span style="color: #6f6e69;">}</span>
+</span><span class="line" data-line="34">
+</span><span class="line" data-line="35"><span style="color: #b7b5ac;">/* starts with a value (CSS 3) */</span>
+</span><span class="line" data-line="36"><span style="color: #6f6e69;">[</span><span style="color: #24837b;">attr</span><span style="color: #6f6e69;">^=</span><span style="color: #24837b;">&#39;val&#39;</span><span style="color: #6f6e69;">]</span> <span style="color: #6f6e69;">{</span> <span style="color: #205ea6;">font-size</span><span style="color: #6f6e69;">:</span>smaller<span style="color: #6f6e69;">;</span> <span style="color: #6f6e69;">}</span>
+</span><span class="line" data-line="37">
+</span><span class="line" data-line="38"><span style="color: #b7b5ac;">/* or ends with a value (CSS 3) */</span>
+</span><span class="line" data-line="39"><span style="color: #6f6e69;">[</span><span style="color: #24837b;">attr</span><span style="color: #6f6e69;">$=</span><span style="color: #24837b;">&#39;ue&#39;</span><span style="color: #6f6e69;">]</span> <span style="color: #6f6e69;">{</span> <span style="color: #205ea6;">font-size</span><span style="color: #6f6e69;">:</span>smaller<span style="color: #6f6e69;">;</span> <span style="color: #6f6e69;">}</span>
+</span><span class="line" data-line="40">
+</span><span class="line" data-line="41"><span style="color: #b7b5ac;">/* or contains a value (CSS 3) */</span>
+</span><span class="line" data-line="42"><span style="color: #6f6e69;">[</span><span style="color: #24837b;">attr</span><span style="color: #6f6e69;">*=</span><span style="color: #24837b;">&#39;foo&#39;</span><span style="color: #6f6e69;">]</span> <span style="color: #6f6e69;">{</span> <span style="color: #6f6e69;">}</span>
+</span><span class="line" data-line="43">
+</span><span class="line" data-line="44"><span style="color: #b7b5ac;">/* or contains a value in a space-separated list */</span>
+</span><span class="line" data-line="45"><span style="color: #6f6e69;">[</span><span style="color: #24837b;">otherAttr</span><span style="color: #6f6e69;">~=</span><span style="color: #24837b;">&#39;foo&#39;</span><span style="color: #6f6e69;">]</span> <span style="color: #6f6e69;">{</span> <span style="color: #6f6e69;">}</span>
+</span><span class="line" data-line="46"><span style="color: #6f6e69;">[</span><span style="color: #24837b;">otherAttr</span><span style="color: #6f6e69;">~=</span><span style="color: #24837b;">&#39;bar&#39;</span><span style="color: #6f6e69;">]</span> <span style="color: #6f6e69;">{</span> <span style="color: #6f6e69;">}</span>
+</span><span class="line" data-line="47">
+</span><span class="line" data-line="48"><span style="color: #b7b5ac;">/* or contains a value in a dash-separated list, e.g., &quot;-&quot; (U+002D) */</span>
+</span><span class="line" data-line="49"><span style="color: #6f6e69;">[</span><span style="color: #24837b;">otherAttr</span><span style="color: #6f6e69;">|=</span><span style="color: #24837b;">&#39;en&#39;</span><span style="color: #6f6e69;">]</span> <span style="color: #6f6e69;">{</span> <span style="color: #205ea6;">font-size</span><span style="color: #6f6e69;">:</span>smaller<span style="color: #6f6e69;">;</span> <span style="color: #6f6e69;">}</span>
+</span><span class="line" data-line="50">
+</span><span class="line" data-line="51">
+</span><span class="line" data-line="52"><span style="color: #b7b5ac;">/* You can combine different selectors to create a more focused selector. Don&#39;t</span>
+</span><span class="line" data-line="53"><span style="color: #b7b5ac;">   put spaces between them. */</span>
+</span><span class="line" data-line="54"><span style="color: #24837b;">div</span><span style="color: #6f6e69;">.</span><span style="color: #66800b;">some-class</span><span style="color: #6f6e69;">[</span><span style="color: #24837b;">attr</span><span style="color: #6f6e69;">$=</span><span style="color: #24837b;">&#39;ue&#39;</span><span style="color: #6f6e69;">]</span> <span style="color: #6f6e69;">{</span> <span style="color: #6f6e69;">}</span>
+</span><span class="line" data-line="55">
+</span><span class="line" data-line="56"><span style="color: #b7b5ac;">/* You can select an element which is a child of another element */</span>
+</span><span class="line" data-line="57"><span style="color: #24837b;">div</span><span style="color: #6f6e69;">.</span><span style="color: #66800b;">some-parent</span> <span style="color: #6f6e69;">&gt;</span> <span style="color: #6f6e69;">.</span><span style="color: #66800b;">class-name</span> <span style="color: #6f6e69;">{</span> <span style="color: #6f6e69;">}</span>
+</span><span class="line" data-line="58">
+</span><span class="line" data-line="59"><span style="color: #b7b5ac;">/* or a descendant of another element. Children are the direct descendants of</span>
+</span><span class="line" data-line="60"><span style="color: #b7b5ac;">   their parent element, only one level down the tree. Descendants can be any</span>
+</span><span class="line" data-line="61"><span style="color: #b7b5ac;">   level down the tree. */</span>
+</span><span class="line" data-line="62"><span style="color: #24837b;">div</span><span style="color: #6f6e69;">.</span><span style="color: #66800b;">some-parent</span> <span style="color: #6f6e69;">.</span><span style="color: #66800b;">class-name</span> <span style="color: #6f6e69;">{</span> <span style="color: #6f6e69;">}</span>
+</span><span class="line" data-line="63">
+</span><span class="line" data-line="64"><span style="color: #b7b5ac;">/* Warning: the same selector without a space has another meaning.</span>
+</span><span class="line" data-line="65"><span style="color: #b7b5ac;">   Can you guess what? */</span>
+</span><span class="line" data-line="66"><span style="color: #24837b;">div</span><span style="color: #6f6e69;">.</span><span style="color: #66800b;">some-parent</span><span style="color: #6f6e69;">.</span><span style="color: #66800b;">class-name</span> <span style="color: #6f6e69;">{</span> <span style="color: #6f6e69;">}</span>
+</span><span class="line" data-line="67">
+</span><span class="line" data-line="68"><span style="color: #b7b5ac;">/* You may also select an element based on its adjacent sibling */</span>
+</span><span class="line" data-line="69"><span style="color: #6f6e69;">.</span><span style="color: #66800b;">i-am-just-before</span> <span style="color: #6f6e69;">+</span> <span style="color: #6f6e69;">.</span><span style="color: #66800b;">this-element</span> <span style="color: #6f6e69;">{</span> <span style="color: #6f6e69;">}</span>
+</span><span class="line" data-line="70">
+</span><span class="line" data-line="71"><span style="color: #b7b5ac;">/* or any sibling preceding it */</span>
+</span><span class="line" data-line="72"><span style="color: #6f6e69;">.</span><span style="color: #66800b;">i-am-any-element-before</span> <span style="color: #6f6e69;">~</span> <span style="color: #6f6e69;">.</span><span style="color: #66800b;">this-element</span> <span style="color: #6f6e69;">{</span> <span style="color: #6f6e69;">}</span>
+</span><span class="line" data-line="73">
+</span><span class="line" data-line="74"><span style="color: #b7b5ac;">/* There are some selectors called pseudo classes that can be used to select an</span>
+</span><span class="line" data-line="75"><span style="color: #b7b5ac;">   element only when it is in a particular state */</span>
+</span><span class="line" data-line="76">
+</span><span class="line" data-line="77"><span style="color: #b7b5ac;">/* for example, when a link hasn&#39;t been visited */</span>
+</span><span class="line" data-line="78"><span style="color: #24837b;">selected</span><span style="color: #6f6e69;">:</span><span style="color: #a02f6f;">link</span> <span style="color: #6f6e69;">{</span> <span style="color: #6f6e69;">}</span>
+</span><span class="line" data-line="79">
+</span><span class="line" data-line="80"><span style="color: #b7b5ac;">/* or a link has been visited */</span>
+</span><span class="line" data-line="81"><span style="color: #24837b;">selector</span><span style="color: #6f6e69;">:</span><span style="color: #a02f6f;">visited</span> <span style="color: #6f6e69;">{</span> <span style="color: #6f6e69;">}</span>
+</span><span class="line" data-line="82">
+</span><span class="line" data-line="83"><span style="color: #b7b5ac;">/* or an element is in focus */</span>
+</span><span class="line" data-line="84"><span style="color: #24837b;">selected</span><span style="color: #6f6e69;">:</span><span style="color: #a02f6f;">focus</span> <span style="color: #6f6e69;">{</span> <span style="color: #6f6e69;">}</span>
+</span><span class="line" data-line="85">
+</span><span class="line" data-line="86"><span style="color: #b7b5ac;">/* or when the cursor hovers over an element */</span>
+</span><span class="line" data-line="87"><span style="color: #24837b;">selector</span><span style="color: #6f6e69;">:</span><span style="color: #a02f6f;">hover</span> <span style="color: #6f6e69;">{</span> <span style="color: #6f6e69;">}</span>
+</span><span class="line" data-line="88">
+</span><span class="line" data-line="89"><span style="color: #b7b5ac;">/* or when a link is clicked on */</span>
+</span><span class="line" data-line="90"><span style="color: #24837b;">selector</span><span style="color: #6f6e69;">:</span><span style="color: #a02f6f;">active</span> <span style="color: #6f6e69;">{</span> <span style="color: #6f6e69;">}</span>
+</span><span class="line" data-line="91">
+</span><span class="line" data-line="92"><span style="color: #b7b5ac;">/* These pseudo classes regarding links should always be written in the above order or the code might not work as expected */</span>
+</span><span class="line" data-line="93">
+</span><span class="line" data-line="94"><span style="color: #b7b5ac;">/* Any element that is the first child of its parent */</span>
+</span><span class="line" data-line="95"><span style="color: #24837b;">selector</span><span style="color: #6f6e69;">:</span><span style="color: #a02f6f;">first-child</span> <span style="color: #6f6e69;">{</span><span style="color: #6f6e69;">}</span>
+</span><span class="line" data-line="96">
+</span><span class="line" data-line="97"><span style="color: #b7b5ac;">/* any element that is the last child of its parent */</span>
+</span><span class="line" data-line="98"><span style="color: #24837b;">selector</span><span style="color: #6f6e69;">:</span><span style="color: #a02f6f;">last-child</span> <span style="color: #6f6e69;">{</span><span style="color: #6f6e69;">}</span>
+</span><span class="line" data-line="99">
+</span><span class="line" data-line="100"><span style="color: #b7b5ac;">/* Select the nth child of selector parent (CSS 3) */</span>
+</span><span class="line" data-line="101"><span style="color: #24837b;">selector</span><span style="color: #6f6e69;">:</span><span style="color: #a02f6f;">nth-child</span><span style="color: #6f6e69;">(</span>n<span style="color: #6f6e69;">)</span> <span style="color: #6f6e69;">{</span> <span style="color: #6f6e69;">}</span>
+</span><span class="line" data-line="102">
+</span><span class="line" data-line="103"><span style="color: #b7b5ac;">/* Just like pseudo classes, pseudo elements allow you to style certain parts of</span>
+</span><span class="line" data-line="104"><span style="color: #b7b5ac;">    a document  */</span>
+</span><span class="line" data-line="105">
+</span><span class="line" data-line="106"><span style="color: #b7b5ac;">/* matches a virtual first child of the selected element */</span>
+</span><span class="line" data-line="107"><span style="color: #24837b;">selector</span><span style="color: #6f6e69;">::</span><span style="color: #a02f6f;">before</span> <span style="color: #6f6e69;">{</span><span style="color: #6f6e69;">}</span>
+</span><span class="line" data-line="108">
+</span><span class="line" data-line="109"><span style="color: #b7b5ac;">/* matches a virtual last child of the selected element */</span>
+</span><span class="line" data-line="110"><span style="color: #24837b;">selector</span><span style="color: #6f6e69;">::</span><span style="color: #a02f6f;">after</span> <span style="color: #6f6e69;">{</span><span style="color: #6f6e69;">}</span>
+</span><span class="line" data-line="111">
+</span><span class="line" data-line="112"><span style="color: #b7b5ac;">/* At appropriate places, an asterisk may be used as a wildcard to select every</span>
+</span><span class="line" data-line="113"><span style="color: #b7b5ac;">   element */</span>
+</span><span class="line" data-line="114"><span style="color: #a02f6f;"><span style="color: #6f6e69;">*</span></span> <span style="color: #6f6e69;">{</span> <span style="color: #6f6e69;">}</span> <span style="color: #b7b5ac;">/* all elements */</span>
+</span><span class="line" data-line="115"><span style="color: #6f6e69;">.</span><span style="color: #66800b;">parent</span> <span style="color: #a02f6f;"><span style="color: #6f6e69;">*</span></span> <span style="color: #6f6e69;">{</span> <span style="color: #6f6e69;">}</span> <span style="color: #b7b5ac;">/* all descendants */</span>
+</span><span class="line" data-line="116"><span style="color: #6f6e69;">.</span><span style="color: #66800b;">parent</span> <span style="color: #6f6e69;">&gt;</span> <span style="color: #a02f6f;"><span style="color: #6f6e69;">*</span></span> <span style="color: #6f6e69;">{</span> <span style="color: #6f6e69;">}</span> <span style="color: #b7b5ac;">/* all children */</span>
+</span><span class="line" data-line="117">
+</span><span class="line" data-line="118"><span style="color: #b7b5ac;">/* Group any number of selectors to define styles that affect all selectors</span>
+</span><span class="line" data-line="119"><span style="color: #b7b5ac;">   in the group */</span>
+</span><span class="line" data-line="120"><span style="color: #24837b;">selector1</span><span style="color: #6f6e69;">,</span> <span style="color: #24837b;">selector2</span> <span style="color: #6f6e69;">{</span> <span style="color: #6f6e69;">}</span>
+</span><span class="line" data-line="121">
+</span><span class="line" data-line="122"><span style="color: #b7b5ac;">/* Select elements that do not have a certain state (CSS 3) */</span>
+</span><span class="line" data-line="123"><span style="color: #b7b5ac;">/* Here, we select div with no id attribute. */</span>
+</span><span class="line" data-line="124"><span style="color: #24837b;">div</span><span style="color: #6f6e69;">:</span><span style="color: #a02f6f;">not</span><span style="color: #6f6e69;">(</span><span style="color: #6f6e69;">[</span><span style="color: #24837b;">id</span><span style="color: #6f6e69;">]</span><span style="color: #6f6e69;">)</span> <span style="color: #6f6e69;">{</span>
+</span><span class="line" data-line="125">   <span style="color: #205ea6;">background-color</span><span style="color: #6f6e69;">:</span> red<span style="color: #6f6e69;">;</span>
+</span><span class="line" data-line="126"><span style="color: #6f6e69;">}</span>
+</span><span class="line" data-line="127">
+</span><span class="line" data-line="128"><span style="color: #b7b5ac;">/* ####################</span>
+</span><span class="line" data-line="129"><span style="color: #b7b5ac;">   ## PROPERTIES</span>
+</span><span class="line" data-line="130"><span style="color: #b7b5ac;">   #################### */</span>
+</span><span class="line" data-line="131">
+</span><span class="line" data-line="132"><span style="color: #24837b;">selector</span> <span style="color: #6f6e69;">{</span>
+</span><span class="line" data-line="133">
+</span><span class="line" data-line="134">    <span style="color: #b7b5ac;">/* Units of length can be absolute or relative. */</span>
+</span><span class="line" data-line="135">
+</span><span class="line" data-line="136">    <span style="color: #b7b5ac;">/* Relative units */</span>
+</span><span class="line" data-line="137">    <span style="color: #205ea6;">width</span><span style="color: #6f6e69;">:</span> <span style="color: #5e409d;">50<span style="color: #24837b;">%</span></span><span style="color: #6f6e69;">;</span>       <span style="color: #b7b5ac;">/* percentage of parent element width */</span>
+</span><span class="line" data-line="138">    <span style="color: #205ea6;">font-size</span><span style="color: #6f6e69;">:</span> <span style="color: #5e409d;">2<span style="color: #24837b;">em</span></span><span style="color: #6f6e69;">;</span>   <span style="color: #b7b5ac;">/* multiples of element&#39;s original font-size */</span>
+</span><span class="line" data-line="139">    <span style="color: #205ea6;">font-size</span><span style="color: #6f6e69;">:</span> <span style="color: #5e409d;">2<span style="color: #24837b;">rem</span></span><span style="color: #6f6e69;">;</span>  <span style="color: #b7b5ac;">/* or the root element&#39;s font-size */</span>
+</span><span class="line" data-line="140">    <span style="color: #205ea6;">font-size</span><span style="color: #6f6e69;">:</span> <span style="color: #5e409d;">2<span style="color: #24837b;">vw</span></span><span style="color: #6f6e69;">;</span>   <span style="color: #b7b5ac;">/* multiples of 1% of the viewport&#39;s width (CSS 3) */</span>
+</span><span class="line" data-line="141">    <span style="color: #205ea6;">font-size</span><span style="color: #6f6e69;">:</span> <span style="color: #5e409d;">2<span style="color: #24837b;">vh</span></span><span style="color: #6f6e69;">;</span>   <span style="color: #b7b5ac;">/* or its height */</span>
+</span><span class="line" data-line="142">    <span style="color: #205ea6;">font-size</span><span style="color: #6f6e69;">:</span> <span style="color: #5e409d;">2<span style="color: #24837b;">vmin</span></span><span style="color: #6f6e69;">;</span> <span style="color: #b7b5ac;">/* whichever of a vh or a vw is smaller */</span>
+</span><span class="line" data-line="143">    <span style="color: #205ea6;">font-size</span><span style="color: #6f6e69;">:</span> <span style="color: #5e409d;">2<span style="color: #24837b;">vmax</span></span><span style="color: #6f6e69;">;</span> <span style="color: #b7b5ac;">/* or greater */</span>
+</span><span class="line" data-line="144">
+</span><span class="line" data-line="145">    <span style="color: #b7b5ac;">/* Absolute units */</span>
+</span><span class="line" data-line="146">    <span style="color: #205ea6;">width</span><span style="color: #6f6e69;">:</span> <span style="color: #5e409d;">200<span style="color: #24837b;">px</span></span><span style="color: #6f6e69;">;</span>     <span style="color: #b7b5ac;">/* pixels */</span>
+</span><span class="line" data-line="147">    <span style="color: #205ea6;">font-size</span><span style="color: #6f6e69;">:</span> <span style="color: #5e409d;">20<span style="color: #24837b;">pt</span></span><span style="color: #6f6e69;">;</span>  <span style="color: #b7b5ac;">/* points */</span>
+</span><span class="line" data-line="148">    <span style="color: #205ea6;">width</span><span style="color: #6f6e69;">:</span> <span style="color: #5e409d;">5<span style="color: #24837b;">cm</span></span><span style="color: #6f6e69;">;</span>       <span style="color: #b7b5ac;">/* centimeters */</span>
+</span><span class="line" data-line="149">    <span style="color: #205ea6;">min-width</span><span style="color: #6f6e69;">:</span> <span style="color: #5e409d;">50<span style="color: #24837b;">mm</span></span><span style="color: #6f6e69;">;</span>  <span style="color: #b7b5ac;">/* millimeters */</span>
+</span><span class="line" data-line="150">    <span style="color: #205ea6;">max-width</span><span style="color: #6f6e69;">:</span> <span style="color: #5e409d;">5<span style="color: #24837b;">in</span></span><span style="color: #6f6e69;">;</span>   <span style="color: #b7b5ac;">/* inches */</span>
+</span><span class="line" data-line="151">
+</span><span class="line" data-line="152">    <span style="color: #b7b5ac;">/* Colors */</span>
+</span><span class="line" data-line="153">    <span style="color: #205ea6;">color</span><span style="color: #6f6e69;">:</span> <span style="color: #24837b;"><span style="color: #6f6e69;">#</span>F6E</span><span style="color: #6f6e69;">;</span>                    <span style="color: #b7b5ac;">/* short hex format */</span>
+</span><span class="line" data-line="154">    <span style="color: #205ea6;">color</span><span style="color: #6f6e69;">:</span> <span style="color: #24837b;"><span style="color: #6f6e69;">#</span>FF66EE</span><span style="color: #6f6e69;">;</span>                 <span style="color: #b7b5ac;">/* long hex format */</span>
+</span><span class="line" data-line="155">    <span style="color: #205ea6;">color</span><span style="color: #6f6e69;">:</span> tomato<span style="color: #6f6e69;">;</span>                  <span style="color: #b7b5ac;">/* a named color */</span>
+</span><span class="line" data-line="156">    <span style="color: #205ea6;">color</span><span style="color: #6f6e69;">:</span> <span style="color: #bc5215;">rgb</span><span style="color: #6f6e69;">(</span><span style="color: #5e409d;">255</span><span style="color: #6f6e69;">,</span> <span style="color: #5e409d;">255</span><span style="color: #6f6e69;">,</span> <span style="color: #5e409d;">255</span><span style="color: #6f6e69;">)</span><span style="color: #6f6e69;">;</span>      <span style="color: #b7b5ac;">/* as rgb values */</span>
+</span><span class="line" data-line="157">    <span style="color: #205ea6;">color</span><span style="color: #6f6e69;">:</span> <span style="color: #bc5215;">rgb</span><span style="color: #6f6e69;">(</span><span style="color: #5e409d;">10<span style="color: #24837b;">%</span></span><span style="color: #6f6e69;">,</span> <span style="color: #5e409d;">20<span style="color: #24837b;">%</span></span><span style="color: #6f6e69;">,</span> <span style="color: #5e409d;">50<span style="color: #24837b;">%</span></span><span style="color: #6f6e69;">)</span><span style="color: #6f6e69;">;</span>      <span style="color: #b7b5ac;">/* as rgb percentages */</span>
+</span><span class="line" data-line="158">    <span style="color: #205ea6;">color</span><span style="color: #6f6e69;">:</span> <span style="color: #bc5215;">rgba</span><span style="color: #6f6e69;">(</span><span style="color: #5e409d;">255</span><span style="color: #6f6e69;">,</span> <span style="color: #5e409d;">0</span><span style="color: #6f6e69;">,</span> <span style="color: #5e409d;">0</span><span style="color: #6f6e69;">,</span> <span style="color: #5e409d;">0.3</span><span style="color: #6f6e69;">)</span><span style="color: #6f6e69;">;</span>    <span style="color: #b7b5ac;">/* as rgba values (CSS 3) Note: 0 &lt;= a &lt;= 1 */</span>
+</span><span class="line" data-line="159">    <span style="color: #205ea6;">color</span><span style="color: #6f6e69;">:</span> transparent<span style="color: #6f6e69;">;</span>             <span style="color: #b7b5ac;">/* equivalent to setting the alpha to 0 */</span>
+</span><span class="line" data-line="160">    <span style="color: #205ea6;">color</span><span style="color: #6f6e69;">:</span> <span style="color: #bc5215;">hsl</span><span style="color: #6f6e69;">(</span><span style="color: #5e409d;">0</span><span style="color: #6f6e69;">,</span> <span style="color: #5e409d;">100<span style="color: #24837b;">%</span></span><span style="color: #6f6e69;">,</span> <span style="color: #5e409d;">50<span style="color: #24837b;">%</span></span><span style="color: #6f6e69;">)</span><span style="color: #6f6e69;">;</span>       <span style="color: #b7b5ac;">/* as hsl percentages (CSS 3) */</span>
+</span><span class="line" data-line="161">    <span style="color: #205ea6;">color</span><span style="color: #6f6e69;">:</span> <span style="color: #bc5215;">hsla</span><span style="color: #6f6e69;">(</span><span style="color: #5e409d;">0</span><span style="color: #6f6e69;">,</span> <span style="color: #5e409d;">100<span style="color: #24837b;">%</span></span><span style="color: #6f6e69;">,</span> <span style="color: #5e409d;">50<span style="color: #24837b;">%</span></span><span style="color: #6f6e69;">,</span> <span style="color: #5e409d;">0.3</span><span style="color: #6f6e69;">)</span><span style="color: #6f6e69;">;</span> <span style="color: #b7b5ac;">/* as hsl percentages with alpha */</span>
+</span><span class="line" data-line="162">
+</span><span class="line" data-line="163">    <span style="color: #b7b5ac;">/* Borders */</span>
+</span><span class="line" data-line="164">    <span style="color: #205ea6;">border-width</span><span style="color: #6f6e69;">:</span><span style="color: #5e409d;">5<span style="color: #24837b;">px</span></span><span style="color: #6f6e69;">;</span>
+</span><span class="line" data-line="165">    <span style="color: #205ea6;">border-style</span><span style="color: #6f6e69;">:</span>solid<span style="color: #6f6e69;">;</span>
+</span><span class="line" data-line="166">    <span style="color: #205ea6;">border-color</span><span style="color: #6f6e69;">:</span>red<span style="color: #6f6e69;">;</span>      <span style="color: #b7b5ac;">/* similar to how background-color is set */</span>
+</span><span class="line" data-line="167">    <span style="color: #205ea6;">border</span><span style="color: #6f6e69;">:</span> <span style="color: #5e409d;">5<span style="color: #24837b;">px</span></span> solid red<span style="color: #6f6e69;">;</span> <span style="color: #b7b5ac;">/* this is a short hand approach for the same */</span>
+</span><span class="line" data-line="168">    <span style="color: #205ea6;">border-radius</span><span style="color: #6f6e69;">:</span><span style="color: #5e409d;">20<span style="color: #24837b;">px</span></span><span style="color: #6f6e69;">;</span>    <span style="color: #b7b5ac;">/* this is a CSS3 property */</span>
+</span><span class="line" data-line="169">
+</span><span class="line" data-line="170">    <span style="color: #b7b5ac;">/* Images as backgrounds of elements */</span>
+</span><span class="line" data-line="171">    <span style="color: #205ea6;">background-image</span><span style="color: #6f6e69;">:</span> <span style="color: #bc5215;">url</span><span style="color: #6f6e69;">(</span>/img-path/img.jpg<span style="color: #6f6e69;">)</span><span style="color: #6f6e69;">;</span> <span style="color: #b7b5ac;">/* quotes inside url() optional */</span>
+</span><span class="line" data-line="172">
+</span><span class="line" data-line="173">    <span style="color: #b7b5ac;">/* Fonts */</span>
+</span><span class="line" data-line="174">    <span style="color: #205ea6;">font-family</span><span style="color: #6f6e69;">:</span> Arial<span style="color: #6f6e69;">;</span>
+</span><span class="line" data-line="175">    <span style="color: #b7b5ac;">/* if the font family name has a space, it must be quoted */</span>
+</span><span class="line" data-line="176">    <span style="color: #205ea6;">font-family</span><span style="color: #6f6e69;">:</span> <span style="color: #24837b;">&quot;Courier New&quot;</span><span style="color: #6f6e69;">;</span>
+</span><span class="line" data-line="177">    <span style="color: #b7b5ac;">/* if the first one is not found, the browser uses the next, and so on */</span>
+</span><span class="line" data-line="178">    <span style="color: #205ea6;">font-family</span><span style="color: #6f6e69;">:</span> <span style="color: #24837b;">&quot;Courier New&quot;</span><span style="color: #6f6e69;">,</span> Trebuchet<span style="color: #6f6e69;">,</span> Arial<span style="color: #6f6e69;">,</span> sans-serif<span style="color: #6f6e69;">;</span>
+</span><span class="line" data-line="179"><span style="color: #6f6e69;">}</span>
+</span><span class="line" data-line="180">
+</span><span class="line" data-line="181"><span style="color: #b7b5ac;">/* Custom CSS properties using variables (CSS 3) */</span>
+</span><span class="line" data-line="182"><span style="color: #6f6e69;">:</span><span style="color: #a02f6f;">root</span> <span style="color: #6f6e69;">{</span>
+</span><span class="line" data-line="183">   <span style="color: #14161b;">--main-bg-color</span><span style="color: #6f6e69;">:</span> whitesmoke<span style="color: #6f6e69;">;</span>
+</span><span class="line" data-line="184"><span style="color: #6f6e69;">}</span>
+</span><span class="line" data-line="185"><span style="color: #24837b;">body</span> <span style="color: #6f6e69;">{</span>
+</span><span class="line" data-line="186">   <span style="color: #205ea6;">background-color</span><span style="color: #6f6e69;">:</span> <span style="color: #bc5215;">var</span><span style="color: #6f6e69;">(</span><span style="color: #14161b;">--main-bg-color</span><span style="color: #6f6e69;">)</span>
+</span><span class="line" data-line="187"><span style="color: #6f6e69;">}</span>
+</span><span class="line" data-line="188">
+</span><span class="line" data-line="189"><span style="color: #b7b5ac;">/* Perfom a calculation (CSS 3) */</span>
+</span><span class="line" data-line="190"><span style="color: #24837b;">body</span> <span style="color: #6f6e69;">{</span>
+</span><span class="line" data-line="191">   <span style="color: #205ea6;">width</span><span style="color: #6f6e69;">:</span> <span style="color: #bc5215;">calc</span><span style="color: #6f6e69;">(</span><span style="color: #5e409d;">100<span style="color: #24837b;">vw</span></span> <span style="color: #6f6e69;">-</span> <span style="color: #5e409d;">100<span style="color: #24837b;">px</span></span><span style="color: #6f6e69;">)</span>
+</span><span class="line" data-line="192"><span style="color: #6f6e69;">}</span>
+</span><span class="line" data-line="193">
+</span><span class="line" data-line="194"><span style="color: #b7b5ac;">/* Nest style rule inside another (CSS 3) */</span>
+</span><span class="line" data-line="195"><span style="color: #6f6e69;">.</span><span style="color: #66800b;">main</span> <span style="color: #6f6e69;">{</span>
+</span><span class="line" data-line="196">   <span style="color: #6f6e69;">.</span><span style="color: #66800b;">bgred</span> <span style="color: #6f6e69;">{</span> <span style="color: #b7b5ac;">/* same as: .main .bgred { } */</span>
+</span><span class="line" data-line="197">      <span style="color: #205ea6;">background</span><span style="color: #6f6e69;">:</span> red<span style="color: #6f6e69;">;</span>
+</span><span class="line" data-line="198">   <span style="color: #6f6e69;">}</span>
+</span><span class="line" data-line="199">   <span style="color: #a02f6f;">&amp;</span> <span style="color: #6f6e69;">.</span><span style="color: #66800b;">bggreen</span> <span style="color: #6f6e69;">{</span> <span style="color: #b7b5ac;">/* same as: .main .bggreen { } */</span>
+</span><span class="line" data-line="200">      <span style="color: #205ea6;">background</span><span style="color: #6f6e69;">:</span> green<span style="color: #6f6e69;">;</span>
+</span><span class="line" data-line="201">   <span style="color: #6f6e69;">}</span>
+</span><span class="line" data-line="202">   <span style="color: #a02f6f;">&amp;</span><span style="color: #6f6e69;">.</span><span style="color: #66800b;">bgblue</span> <span style="color: #6f6e69;">{</span> <span style="color: #b7b5ac;">/* (without space) same as: .main.bgblue { } */</span>
+</span><span class="line" data-line="203">      <span style="color: #205ea6;">background</span><span style="color: #6f6e69;">:</span> blue<span style="color: #6f6e69;">;</span>
+</span><span class="line" data-line="204">   <span style="color: #6f6e69;">}</span>
+</span><span class="line" data-line="205"><span style="color: #6f6e69;">}</span>
+</span><span class="line" data-line="206">
+</span><span class="line" data-line="207"><span style="color: #b7b5ac;">/* Design responsive layout using flexbox (CSS 3) */</span>
+</span><span class="line" data-line="208"><span style="color: #6f6e69;">.</span><span style="color: #66800b;">container</span> <span style="color: #6f6e69;">{</span>
+</span><span class="line" data-line="209">   <span style="color: #205ea6;">display</span><span style="color: #6f6e69;">:</span> flex<span style="color: #6f6e69;">;</span>
+</span><span class="line" data-line="210">   <span style="color: #205ea6;">flex-direction</span><span style="color: #6f6e69;">:</span> row<span style="color: #6f6e69;">;</span>      <span style="color: #b7b5ac;">/* in which direction stack the flex items */</span>
+</span><span class="line" data-line="211">   <span style="color: #205ea6;">flex-wrap</span><span style="color: #6f6e69;">:</span> wrap<span style="color: #6f6e69;">;</span>          <span style="color: #b7b5ac;">/* whether or not flex items should wrap */</span>
+</span><span class="line" data-line="212">   <span style="color: #205ea6;">justify-content</span><span style="color: #6f6e69;">:</span> center<span style="color: #6f6e69;">;</span>  <span style="color: #b7b5ac;">/* how to align flex items horizontally */</span>
+</span><span class="line" data-line="213">   <span style="color: #205ea6;">align-items</span><span style="color: #6f6e69;">:</span> center<span style="color: #6f6e69;">;</span>      <span style="color: #b7b5ac;">/* how to align flex items vertically */</span>
+</span><span class="line" data-line="214"><span style="color: #6f6e69;">}</span>
+</span></code></pre>
+</body>
+</html>

@@ -444,43 +444,115 @@ local themes = {
 	-- 	},
 	-- },
 	{
-		name = "solarized_winter",
+		name = "solarized_winter_dark",
 		colorscheme = "solarized",
 		appearance = "dark",
 		plugin = {
 			"maxmx03/solarized.nvim",
-			name = "solarized",
-			opts = { variant = "winter" },
+			config = function()
+				require("solarized").setup({
+					variant = "winter",
+					appearance = "dark"
+				})
+			end,
 		},
 	},
 	{
-		name = "solarized_spring",
+		name = "solarized_winter_light",
 		colorscheme = "solarized",
-		appearance = "dark",
+		appearance = "light",
 		plugin = {
 			"maxmx03/solarized.nvim",
-			name = "solarized",
-			opts = { variant = "spring" },
+			config = function()
+				require("solarized").setup({
+					variant = "winter",
+					appearance = "light"
+				})
+			end,
 		},
 	},
 	{
-		name = "solarized_summer",
+		name = "solarized_spring_dark",
 		colorscheme = "solarized",
 		appearance = "dark",
 		plugin = {
 			"maxmx03/solarized.nvim",
-			name = "solarized",
-			opts = { variant = "summer" },
+			config = function()
+				require("solarized").setup({
+					variant = "spring",
+					appearance = "dark"
+				})
+			end,
 		},
 	},
 	{
-		name = "solarized_autumn",
+		name = "solarized_spring_light",
+		colorscheme = "solarized",
+		appearance = "light",
+		plugin = {
+			"maxmx03/solarized.nvim",
+			config = function()
+				require("solarized").setup({
+					variant = "spring",
+					appearance = "light"
+				})
+			end,
+		},
+	},
+	{
+		name = "solarized_summer_dark",
 		colorscheme = "solarized",
 		appearance = "dark",
 		plugin = {
 			"maxmx03/solarized.nvim",
-			name = "solarized",
-			opts = { variant = "autumn" },
+			config = function()
+				require("solarized").setup({
+					variant = "summer",
+					appearance = "dark"
+				})
+			end,
+		},
+	},
+	{
+		name = "solarized_summer_light",
+		colorscheme = "solarized",
+		appearance = "light",
+		plugin = {
+			"maxmx03/solarized.nvim",
+			config = function()
+				require("solarized").setup({
+					variant = "summer",
+					appearance = "light"
+				})
+			end,
+		},
+	},
+	{
+		name = "solarized_autumn_dark",
+		colorscheme = "solarized",
+		appearance = "dark",
+		plugin = {
+			"maxmx03/solarized.nvim",
+			config = function()
+				require("solarized").setup({
+					variant = "autumn",
+					appearance = "dark"
+				})
+			end,
+		},
+	},
+	{
+		name = "solarized_autumn_light",
+		colorscheme = "solarized",
+		appearance = "light",
+		plugin = {
+			"maxmx03/solarized.nvim",
+			config = function()
+				require("solarized").setup({
+					variant = "autumn",
+					appearance = "light"
+				})
+			end,
 		},
 	},
 	-- {

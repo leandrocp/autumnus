@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>rust - cyberdream_light - Autumnus</title>
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=fira-code:300,400,500,600,700" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      * {
+        font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+      }
+    </style>
+</head>
+<body>
+<pre class="athl w-full overflow-auto rounded-lg p-8 text-sm antialiased leading-6" style="color: #16181a; background-color: #ffffff;"><code class="language-rust" translate="no" tabindex="0"><span class="line" data-line="1"><span style="color: #7b8496;">// This is a comment. Line comments look like this...</span>
+</span><span class="line" data-line="2"><span style="color: #7b8496;">// and extend multiple lines like this.</span>
+</span><span class="line" data-line="3">
+</span><span class="line" data-line="4"><span style="color: #7b8496;">/* Block comments</span>
+</span><span class="line" data-line="5"><span style="color: #7b8496;">  /* can be nested. */ */</span>
+</span><span class="line" data-line="6">
+</span><span class="line" data-line="7"><span style="color: #7b8496;">//<span style="color: #a018ff;"><span style="color: #7b8496;">/</span></span> Documentation comments look like this and support markdown notation.</span>
+</span><span class="line" data-line="8"><span style="color: #7b8496;"></span><span style="color: #7b8496;">//<span style="color: #a018ff;"><span style="color: #7b8496;">/</span></span> # Examples</span>
+</span><span class="line" data-line="9"><span style="color: #7b8496;"></span><span style="color: #7b8496;">//<span style="color: #a018ff;"><span style="color: #7b8496;">/</span></span></span>
+</span><span class="line" data-line="10"><span style="color: #7b8496;"></span><span style="color: #7b8496;">//<span style="color: #a018ff;"><span style="color: #7b8496;">/</span></span> ```</span>
+</span><span class="line" data-line="11"><span style="color: #7b8496;"></span><span style="color: #7b8496;">//<span style="color: #a018ff;"><span style="color: #7b8496;">/</span></span> let five = 5</span>
+</span><span class="line" data-line="12"><span style="color: #7b8496;"></span><span style="color: #7b8496;">//<span style="color: #a018ff;"><span style="color: #7b8496;">/</span></span> ```</span>
+</span><span class="line" data-line="13"><span style="color: #7b8496;"></span>
+</span><span class="line" data-line="14"><span style="color: #7b8496;">///////////////</span>
+</span><span class="line" data-line="15"><span style="color: #7b8496;">// 1. Basics //</span>
+</span><span class="line" data-line="16"><span style="color: #7b8496;">///////////////</span>
+</span><span class="line" data-line="17">
+</span><span class="line" data-line="18"><span style="color: #16181a;">#</span><span style="color: #16181a;">[</span><span style="color: #008c99;">allow</span><span style="color: #16181a;">(</span><span style="color: #16181a;">dead_code</span><span style="color: #16181a;">)</span><span style="color: #16181a;">]</span>
+</span><span class="line" data-line="19"><span style="color: #7b8496;">// Functions</span>
+</span><span class="line" data-line="20"><span style="color: #7b8496;">// `i32` is the type for 32-bit signed integers</span>
+</span><span class="line" data-line="21"><span style="color: #d17c00;">fn</span> <span style="color: #0057d1;">add2</span><span style="color: #16181a;">(</span><span style="color: #16181a;">x</span><span style="color: #16181a;">:</span> <span style="color: #bd0fc8;">i32</span><span style="color: #16181a;">,</span> <span style="color: #16181a;">y</span><span style="color: #16181a;">:</span> <span style="color: #bd0fc8;">i32</span><span style="color: #16181a;">)</span> <span style="color: #16181a;">-&gt;</span> <span style="color: #bd0fc8;">i32</span> <span style="color: #16181a;">{</span>
+</span><span class="line" data-line="22">    <span style="color: #7b8496;">// Implicit return (no semicolon)</span>
+</span><span class="line" data-line="23">    <span style="color: #16181a;">x</span> <span style="color: #a018ff;">+</span> <span style="color: #16181a;">y</span>
+</span><span class="line" data-line="24"><span style="color: #16181a;">}</span>
+</span><span class="line" data-line="25">
+</span><span class="line" data-line="26"><span style="color: #16181a;">#</span><span style="color: #16181a;">[</span><span style="color: #008c99;">allow</span><span style="color: #16181a;">(</span><span style="color: #16181a;">unused_variables</span><span style="color: #16181a;">)</span><span style="color: #16181a;">]</span>
+</span><span class="line" data-line="27"><span style="color: #16181a;">#</span><span style="color: #16181a;">[</span><span style="color: #008c99;">allow</span><span style="color: #16181a;">(</span><span style="color: #16181a;">unused_assignments</span><span style="color: #16181a;">)</span><span style="color: #16181a;">]</span>
+</span><span class="line" data-line="28"><span style="color: #16181a;">#</span><span style="color: #16181a;">[</span><span style="color: #008c99;">allow</span><span style="color: #16181a;">(</span><span style="color: #16181a;">dead_code</span><span style="color: #16181a;">)</span><span style="color: #16181a;">]</span>
+</span><span class="line" data-line="29"><span style="color: #7b8496;">// Main function</span>
+</span><span class="line" data-line="30"><span style="color: #d17c00;">fn</span> <span style="color: #0057d1;">main</span><span style="color: #16181a;">(</span><span style="color: #16181a;">)</span> <span style="color: #16181a;">{</span>
+</span><span class="line" data-line="31">    <span style="color: #7b8496;">// Numbers //</span>
+</span><span class="line" data-line="32">
+</span><span class="line" data-line="33">    <span style="color: #7b8496;">// Immutable bindings</span>
+</span><span class="line" data-line="34">    <span style="color: #d17c00;">let</span> <span style="color: #16181a;">x</span><span style="color: #16181a;">:</span> <span style="color: #bd0fc8;">i32</span> <span style="color: #a018ff;">=</span> <span style="color: #d17c00;">1</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="35">
+</span><span class="line" data-line="36">    <span style="color: #7b8496;">// Integer/float suffixes</span>
+</span><span class="line" data-line="37">    <span style="color: #d17c00;">let</span> <span style="color: #16181a;">y</span><span style="color: #16181a;">:</span> <span style="color: #bd0fc8;">i32</span> <span style="color: #a018ff;">=</span> <span style="color: #d17c00;">13i32</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="38">    <span style="color: #d17c00;">let</span> <span style="color: #16181a;">f</span><span style="color: #16181a;">:</span> <span style="color: #bd0fc8;">f64</span> <span style="color: #a018ff;">=</span> <span style="color: #d17c00;">1.3f64</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="39">
+</span><span class="line" data-line="40">    <span style="color: #7b8496;">// Type inference</span>
+</span><span class="line" data-line="41">    <span style="color: #7b8496;">// Most of the time, the Rust compiler can infer what type a variable is, so</span>
+</span><span class="line" data-line="42">    <span style="color: #7b8496;">// you don’t have to write an explicit type annotation.</span>
+</span><span class="line" data-line="43">    <span style="color: #7b8496;">// Throughout this tutorial, types are explicitly annotated in many places,</span>
+</span><span class="line" data-line="44">    <span style="color: #7b8496;">// but only for demonstrative purposes. Type inference can handle this for</span>
+</span><span class="line" data-line="45">    <span style="color: #7b8496;">// you most of the time.</span>
+</span><span class="line" data-line="46">    <span style="color: #d17c00;">let</span> <span style="color: #16181a;">implicit_x</span> <span style="color: #a018ff;">=</span> <span style="color: #d17c00;">1</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="47">    <span style="color: #d17c00;">let</span> <span style="color: #16181a;">implicit_f</span> <span style="color: #a018ff;">=</span> <span style="color: #d17c00;">1.3</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="48">
+</span><span class="line" data-line="49">    <span style="color: #7b8496;">// Arithmetic</span>
+</span><span class="line" data-line="50">    <span style="color: #d17c00;">let</span> <span style="color: #16181a;">sum</span> <span style="color: #a018ff;">=</span> <span style="color: #16181a;">x</span> <span style="color: #a018ff;">+</span> <span style="color: #16181a;">y</span> <span style="color: #a018ff;">+</span> <span style="color: #d17c00;">13</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="51">
+</span><span class="line" data-line="52">    <span style="color: #7b8496;">// Mutable variable</span>
+</span><span class="line" data-line="53">    <span style="color: #d17c00;">let</span> <span style="color: #d17c00;">mut</span> <span style="color: #16181a;">mutable</span> <span style="color: #a018ff;">=</span> <span style="color: #d17c00;">1</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="54">    <span style="color: #16181a;">mutable</span> <span style="color: #a018ff;">=</span> <span style="color: #d17c00;">4</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="55">    <span style="color: #16181a;">mutable</span> <span style="color: #a018ff;">+=</span> <span style="color: #d17c00;">2</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="56">
+</span><span class="line" data-line="57">    <span style="color: #7b8496;">// Strings //</span>
+</span><span class="line" data-line="58">
+</span><span class="line" data-line="59">    <span style="color: #7b8496;">// String literals</span>
+</span><span class="line" data-line="60">    <span style="color: #d17c00;">let</span> <span style="color: #16181a;">x</span><span style="color: #16181a;">:</span> <span style="color: #a018ff;">&amp;</span><span style="color: #bd0fc8;">str</span> <span style="color: #a018ff;">=</span> <span style="color: #008b0c;">&quot;hello world!&quot;</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="61">
+</span><span class="line" data-line="62">    <span style="color: #7b8496;">// Printing</span>
+</span><span class="line" data-line="63">    <span style="color: #d17c00;">println</span><span style="color: #008c99;">!</span><span style="color: #16181a;">(</span><span style="color: #008b0c;">&quot;{} {}&quot;</span><span style="color: #16181a;">,</span> <span style="color: #16181a;">f</span><span style="color: #16181a;">,</span> <span style="color: #16181a;">x</span><span style="color: #16181a;">)</span><span style="color: #16181a;">;</span> <span style="color: #7b8496;">// 1.3 hello world!</span>
+</span><span class="line" data-line="64">
+</span><span class="line" data-line="65">    <span style="color: #7b8496;">// A `String` – a heap-allocated string</span>
+</span><span class="line" data-line="66">    <span style="color: #7b8496;">// Stored as a `Vec&lt;u8&gt;` and always holds a valid UTF-8 sequence, </span>
+</span><span class="line" data-line="67">    <span style="color: #7b8496;">// which is not null terminated.</span>
+</span><span class="line" data-line="68">    <span style="color: #d17c00;">let</span> <span style="color: #16181a;">s</span><span style="color: #16181a;">:</span> <span style="color: #a018ff;">String</span> <span style="color: #a018ff;">=</span> <span style="color: #008b0c;">&quot;hello world&quot;</span><span style="color: #16181a;">.</span><span style="color: #0057d1;">to_string</span><span style="color: #16181a;">(</span><span style="color: #16181a;">)</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="69">
+</span><span class="line" data-line="70">    <span style="color: #7b8496;">// A string slice – an immutable view into another string</span>
+</span><span class="line" data-line="71">    <span style="color: #7b8496;">// This is basically an immutable pointer and length of a string – it</span>
+</span><span class="line" data-line="72">    <span style="color: #7b8496;">// doesn’t actually contain the contents of a string, just a pointer to</span>
+</span><span class="line" data-line="73">    <span style="color: #7b8496;">// the beginning and a length of a string buffer,</span>
+</span><span class="line" data-line="74">    <span style="color: #7b8496;">// statically allocated or contained in another object (in this case, `s`).</span>
+</span><span class="line" data-line="75">    <span style="color: #7b8496;">// The string slice is like a view `&amp;[u8]` into `Vec&lt;T&gt;`.</span>
+</span><span class="line" data-line="76">    <span style="color: #d17c00;">let</span> <span style="color: #16181a;">s_slice</span><span style="color: #16181a;">:</span> <span style="color: #a018ff;">&amp;</span><span style="color: #bd0fc8;">str</span> <span style="color: #a018ff;">=</span> <span style="color: #a018ff;">&amp;</span><span style="color: #16181a;">s</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="77">
+</span><span class="line" data-line="78">    <span style="color: #d17c00;">println</span><span style="color: #008c99;">!</span><span style="color: #16181a;">(</span><span style="color: #008b0c;">&quot;{} {}&quot;</span><span style="color: #16181a;">,</span> <span style="color: #16181a;">s</span><span style="color: #16181a;">,</span> <span style="color: #16181a;">s_slice</span><span style="color: #16181a;">)</span><span style="color: #16181a;">;</span> <span style="color: #7b8496;">// hello world hello world</span>
+</span><span class="line" data-line="79">
+</span><span class="line" data-line="80">    <span style="color: #7b8496;">// Vectors/arrays //</span>
+</span><span class="line" data-line="81">
+</span><span class="line" data-line="82">    <span style="color: #7b8496;">// A fixed-size array</span>
+</span><span class="line" data-line="83">    <span style="color: #d17c00;">let</span> <span style="color: #16181a;">four_ints</span><span style="color: #16181a;">:</span> <span style="color: #16181a;">[</span><span style="color: #bd0fc8;">i32</span><span style="color: #16181a;">;</span> <span style="color: #d17c00;">4</span><span style="color: #16181a;">]</span> <span style="color: #a018ff;">=</span> <span style="color: #16181a;">[</span><span style="color: #d17c00;">1</span><span style="color: #16181a;">,</span> <span style="color: #d17c00;">2</span><span style="color: #16181a;">,</span> <span style="color: #d17c00;">3</span><span style="color: #16181a;">,</span> <span style="color: #d17c00;">4</span><span style="color: #16181a;">]</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="84">
+</span><span class="line" data-line="85">    <span style="color: #7b8496;">// A dynamic array (vector)</span>
+</span><span class="line" data-line="86">    <span style="color: #d17c00;">let</span> <span style="color: #d17c00;">mut</span> <span style="color: #16181a;">vector</span><span style="color: #16181a;">:</span> <span style="color: #a018ff;">Vec</span><span style="color: #16181a;">&lt;</span><span style="color: #bd0fc8;">i32</span><span style="color: #16181a;">&gt;</span> <span style="color: #a018ff;">=</span> <span style="color: #d17c00;">vec</span><span style="color: #008c99;">!</span><span style="color: #16181a;">[</span><span style="color: #d17c00;">1</span><span style="color: #16181a;">,</span> <span style="color: #d17c00;">2</span><span style="color: #16181a;">,</span> <span style="color: #d17c00;">3</span><span style="color: #16181a;">,</span> <span style="color: #d17c00;">4</span><span style="color: #16181a;">]</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="87">    <span style="color: #16181a;">vector</span><span style="color: #16181a;">.</span><span style="color: #0057d1;">push</span><span style="color: #16181a;">(</span><span style="color: #d17c00;">5</span><span style="color: #16181a;">)</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="88">
+</span><span class="line" data-line="89">    <span style="color: #7b8496;">// A slice – an immutable view into a vector or array</span>
+</span><span class="line" data-line="90">    <span style="color: #7b8496;">// This is much like a string slice, but for vectors</span>
+</span><span class="line" data-line="91">    <span style="color: #d17c00;">let</span> <span style="color: #16181a;">slice</span><span style="color: #16181a;">:</span> <span style="color: #a018ff;">&amp;</span><span style="color: #16181a;">[</span><span style="color: #bd0fc8;">i32</span><span style="color: #16181a;">]</span> <span style="color: #a018ff;">=</span> <span style="color: #a018ff;">&amp;</span><span style="color: #16181a;">vector</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="92">
+</span><span class="line" data-line="93">    <span style="color: #7b8496;">// Use `{:?}` to print something debug-style</span>
+</span><span class="line" data-line="94">    <span style="color: #d17c00;">println</span><span style="color: #008c99;">!</span><span style="color: #16181a;">(</span><span style="color: #008b0c;">&quot;{:?} {:?}&quot;</span><span style="color: #16181a;">,</span> <span style="color: #16181a;">vector</span><span style="color: #16181a;">,</span> <span style="color: #16181a;">slice</span><span style="color: #16181a;">)</span><span style="color: #16181a;">;</span> <span style="color: #7b8496;">// [1, 2, 3, 4, 5] [1, 2, 3, 4, 5]</span>
+</span><span class="line" data-line="95">
+</span><span class="line" data-line="96">    <span style="color: #7b8496;">// Tuples //</span>
+</span><span class="line" data-line="97">
+</span><span class="line" data-line="98">    <span style="color: #7b8496;">// A tuple is a fixed-size set of values of possibly different types</span>
+</span><span class="line" data-line="99">    <span style="color: #d17c00;">let</span> <span style="color: #16181a;">x</span><span style="color: #16181a;">:</span> <span style="color: #16181a;">(</span><span style="color: #bd0fc8;">i32</span><span style="color: #16181a;">,</span> <span style="color: #a018ff;">&amp;</span><span style="color: #bd0fc8;">str</span><span style="color: #16181a;">,</span> <span style="color: #bd0fc8;">f64</span><span style="color: #16181a;">)</span> <span style="color: #a018ff;">=</span> <span style="color: #16181a;">(</span><span style="color: #d17c00;">1</span><span style="color: #16181a;">,</span> <span style="color: #008b0c;">&quot;hello&quot;</span><span style="color: #16181a;">,</span> <span style="color: #d17c00;">3.4</span><span style="color: #16181a;">)</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="100">
+</span><span class="line" data-line="101">    <span style="color: #7b8496;">// Destructuring `let`</span>
+</span><span class="line" data-line="102">    <span style="color: #d17c00;">let</span> <span style="color: #16181a;">(</span><span style="color: #16181a;">a</span><span style="color: #16181a;">,</span> <span style="color: #16181a;">b</span><span style="color: #16181a;">,</span> <span style="color: #16181a;">c</span><span style="color: #16181a;">)</span> <span style="color: #a018ff;">=</span> <span style="color: #16181a;">x</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="103">    <span style="color: #d17c00;">println</span><span style="color: #008c99;">!</span><span style="color: #16181a;">(</span><span style="color: #008b0c;">&quot;{} {} {}&quot;</span><span style="color: #16181a;">,</span> <span style="color: #16181a;">a</span><span style="color: #16181a;">,</span> <span style="color: #16181a;">b</span><span style="color: #16181a;">,</span> <span style="color: #16181a;">c</span><span style="color: #16181a;">)</span><span style="color: #16181a;">;</span> <span style="color: #7b8496;">// 1 hello 3.4</span>
+</span><span class="line" data-line="104">
+</span><span class="line" data-line="105">    <span style="color: #7b8496;">// Indexing</span>
+</span><span class="line" data-line="106">    <span style="color: #d17c00;">println</span><span style="color: #008c99;">!</span><span style="color: #16181a;">(</span><span style="color: #008b0c;">&quot;{}&quot;</span><span style="color: #16181a;">,</span> <span style="color: #16181a;">x</span><span style="color: #16181a;">.</span><span style="color: #d17c00;">1</span><span style="color: #16181a;">)</span><span style="color: #16181a;">;</span> <span style="color: #7b8496;">// hello</span>
+</span><span class="line" data-line="107">
+</span><span class="line" data-line="108">    <span style="color: #7b8496;">//////////////</span>
+</span><span class="line" data-line="109">    <span style="color: #7b8496;">// 2. Types //</span>
+</span><span class="line" data-line="110">    <span style="color: #7b8496;">//////////////</span>
+</span><span class="line" data-line="111">
+</span><span class="line" data-line="112">    <span style="color: #7b8496;">// Struct</span>
+</span><span class="line" data-line="113">    <span style="color: #d17c00;">struct</span> <span style="color: #a018ff;">Point</span> <span style="color: #16181a;">{</span>
+</span><span class="line" data-line="114">        <span style="color: #16181a;">x</span><span style="color: #16181a;">:</span> <span style="color: #bd0fc8;">i32</span><span style="color: #16181a;">,</span>
+</span><span class="line" data-line="115">        <span style="color: #16181a;">y</span><span style="color: #16181a;">:</span> <span style="color: #bd0fc8;">i32</span><span style="color: #16181a;">,</span>
+</span><span class="line" data-line="116">    <span style="color: #16181a;">}</span>
+</span><span class="line" data-line="117">
+</span><span class="line" data-line="118">    <span style="color: #d17c00;">let</span> <span style="color: #16181a;">origin</span><span style="color: #16181a;">:</span> <span style="color: #a018ff;">Point</span> <span style="color: #a018ff;">=</span> <span style="color: #a018ff;">Point</span> <span style="color: #16181a;">{</span> <span style="color: #16181a;">x</span><span style="color: #16181a;">:</span> <span style="color: #d17c00;">0</span><span style="color: #16181a;">,</span> <span style="color: #16181a;">y</span><span style="color: #16181a;">:</span> <span style="color: #d17c00;">0</span> <span style="color: #16181a;">}</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="119">
+</span><span class="line" data-line="120">    <span style="color: #7b8496;">// A struct with unnamed fields, called a ‘tuple struct’</span>
+</span><span class="line" data-line="121">    <span style="color: #d17c00;">struct</span> <span style="color: #a018ff;">Point2</span><span style="color: #16181a;">(</span><span style="color: #bd0fc8;">i32</span><span style="color: #16181a;">,</span> <span style="color: #bd0fc8;">i32</span><span style="color: #16181a;">)</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="122">
+</span><span class="line" data-line="123">    <span style="color: #d17c00;">let</span> <span style="color: #16181a;">origin2</span> <span style="color: #a018ff;">=</span> <span style="color: #0057d1;">Point2</span><span style="color: #16181a;">(</span><span style="color: #d17c00;">0</span><span style="color: #16181a;">,</span> <span style="color: #d17c00;">0</span><span style="color: #16181a;">)</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="124">
+</span><span class="line" data-line="125">    <span style="color: #7b8496;">// Basic C-like enum</span>
+</span><span class="line" data-line="126">    <span style="color: #d17c00;">enum</span> <span style="color: #a018ff;">Direction</span> <span style="color: #16181a;">{</span>
+</span><span class="line" data-line="127">        <span style="color: #f40064;">Left</span><span style="color: #16181a;">,</span>
+</span><span class="line" data-line="128">        <span style="color: #f40064;">Right</span><span style="color: #16181a;">,</span>
+</span><span class="line" data-line="129">        <span style="color: #f40064;">Up</span><span style="color: #16181a;">,</span>
+</span><span class="line" data-line="130">        <span style="color: #f40064;">Down</span><span style="color: #16181a;">,</span>
+</span><span class="line" data-line="131">    <span style="color: #16181a;">}</span>
+</span><span class="line" data-line="132">
+</span><span class="line" data-line="133">    <span style="color: #d17c00;">let</span> <span style="color: #16181a;">up</span> <span style="color: #a018ff;">=</span> <span style="color: #a018ff;">Direction</span><span style="color: #16181a;">::</span><span style="color: #f40064;">Up</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="134">
+</span><span class="line" data-line="135">    <span style="color: #7b8496;">// Enum with fields</span>
+</span><span class="line" data-line="136">    <span style="color: #7b8496;">// If you want to make something optional, the standard</span>
+</span><span class="line" data-line="137">    <span style="color: #7b8496;">// library has `Option`</span>
+</span><span class="line" data-line="138">    <span style="color: #d17c00;">enum</span> <span style="color: #a018ff;">OptionalI32</span> <span style="color: #16181a;">{</span>
+</span><span class="line" data-line="139">        <span style="color: #f40064;">AnI32</span><span style="color: #16181a;">(</span><span style="color: #bd0fc8;">i32</span><span style="color: #16181a;">)</span><span style="color: #16181a;">,</span>
+</span><span class="line" data-line="140">        <span style="color: #f40064;">Nothing</span><span style="color: #16181a;">,</span>
+</span><span class="line" data-line="141">    <span style="color: #16181a;">}</span>
+</span><span class="line" data-line="142">
+</span><span class="line" data-line="143">    <span style="color: #d17c00;">let</span> <span style="color: #16181a;">two</span><span style="color: #16181a;">:</span> <span style="color: #a018ff;">OptionalI32</span> <span style="color: #a018ff;">=</span> <span style="color: #a018ff;">OptionalI32</span><span style="color: #16181a;">::</span><span style="color: #f40064;">AnI32</span><span style="color: #16181a;">(</span><span style="color: #d17c00;">2</span><span style="color: #16181a;">)</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="144">    <span style="color: #d17c00;">let</span> <span style="color: #16181a;">nothing</span> <span style="color: #a018ff;">=</span> <span style="color: #a018ff;">OptionalI32</span><span style="color: #16181a;">::</span><span style="color: #f40064;">Nothing</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="145">
+</span><span class="line" data-line="146">    <span style="color: #7b8496;">// Generics //</span>
+</span><span class="line" data-line="147">
+</span><span class="line" data-line="148">    <span style="color: #d17c00;">struct</span> <span style="color: #a018ff;">Foo</span><span style="color: #16181a;">&lt;</span><span style="color: #a018ff;">T</span><span style="color: #16181a;">&gt;</span> <span style="color: #16181a;">{</span> <span style="color: #16181a;">bar</span><span style="color: #16181a;">:</span> <span style="color: #a018ff;">T</span> <span style="color: #16181a;">}</span>
+</span><span class="line" data-line="149">
+</span><span class="line" data-line="150">    <span style="color: #7b8496;">// This is defined in the standard library as `Option`</span>
+</span><span class="line" data-line="151">    <span style="color: #7b8496;">// `Option` is used in place of where a null pointer</span>
+</span><span class="line" data-line="152">    <span style="color: #7b8496;">// would normally be used.</span>
+</span><span class="line" data-line="153">    <span style="color: #d17c00;">enum</span> <span style="color: #a018ff;">Optional</span><span style="color: #16181a;">&lt;</span><span style="color: #a018ff;">T</span><span style="color: #16181a;">&gt;</span> <span style="color: #16181a;">{</span>
+</span><span class="line" data-line="154">        <span style="color: #f40064;">SomeVal</span><span style="color: #16181a;">(</span><span style="color: #a018ff;">T</span><span style="color: #16181a;">)</span><span style="color: #16181a;">,</span>
+</span><span class="line" data-line="155">        <span style="color: #f40064;">NoVal</span><span style="color: #16181a;">,</span>
+</span><span class="line" data-line="156">    <span style="color: #16181a;">}</span>
+</span><span class="line" data-line="157">
+</span><span class="line" data-line="158">    <span style="color: #7b8496;">// Methods //</span>
+</span><span class="line" data-line="159">
+</span><span class="line" data-line="160">    <span style="color: #d17c00;">impl</span><span style="color: #16181a;">&lt;</span><span style="color: #a018ff;">T</span><span style="color: #16181a;">&gt;</span> <span style="color: #a018ff;">Foo</span><span style="color: #16181a;">&lt;</span><span style="color: #a018ff;">T</span><span style="color: #16181a;">&gt;</span> <span style="color: #16181a;">{</span>
+</span><span class="line" data-line="161">        <span style="color: #7b8496;">// Methods take an explicit `self` parameter</span>
+</span><span class="line" data-line="162">        <span style="color: #d17c00;">fn</span> <span style="color: #0057d1;">bar</span><span style="color: #16181a;">(</span><span style="color: #a018ff;">&amp;</span><span style="color: #f40064;">self</span><span style="color: #16181a;">)</span> <span style="color: #16181a;">-&gt;</span> <span style="color: #a018ff;">&amp;</span><span style="color: #a018ff;">T</span> <span style="color: #16181a;">{</span> <span style="color: #7b8496;">// self is borrowed</span>
+</span><span class="line" data-line="163">            <span style="color: #a018ff;">&amp;</span><span style="color: #f40064;">self</span><span style="color: #16181a;">.</span><span style="color: #16181a;">bar</span>
+</span><span class="line" data-line="164">        <span style="color: #16181a;">}</span>
+</span><span class="line" data-line="165">        <span style="color: #d17c00;">fn</span> <span style="color: #0057d1;">bar_mut</span><span style="color: #16181a;">(</span><span style="color: #a018ff;">&amp;</span><span style="color: #d17c00;">mut</span> <span style="color: #f40064;">self</span><span style="color: #16181a;">)</span> <span style="color: #16181a;">-&gt;</span> <span style="color: #a018ff;">&amp;</span><span style="color: #d17c00;">mut</span> <span style="color: #a018ff;">T</span> <span style="color: #16181a;">{</span> <span style="color: #7b8496;">// self is mutably borrowed</span>
+</span><span class="line" data-line="166">            <span style="color: #a018ff;">&amp;</span><span style="color: #d17c00;">mut</span> <span style="color: #f40064;">self</span><span style="color: #16181a;">.</span><span style="color: #16181a;">bar</span>
+</span><span class="line" data-line="167">        <span style="color: #16181a;">}</span>
+</span><span class="line" data-line="168">        <span style="color: #d17c00;">fn</span> <span style="color: #0057d1;">into_bar</span><span style="color: #16181a;">(</span><span style="color: #f40064;">self</span><span style="color: #16181a;">)</span> <span style="color: #16181a;">-&gt;</span> <span style="color: #a018ff;">T</span> <span style="color: #16181a;">{</span> <span style="color: #7b8496;">// here self is consumed</span>
+</span><span class="line" data-line="169">            <span style="color: #f40064;">self</span><span style="color: #16181a;">.</span><span style="color: #16181a;">bar</span>
+</span><span class="line" data-line="170">        <span style="color: #16181a;">}</span>
+</span><span class="line" data-line="171">    <span style="color: #16181a;">}</span>
+</span><span class="line" data-line="172">
+</span><span class="line" data-line="173">    <span style="color: #d17c00;">let</span> <span style="color: #16181a;">a_foo</span> <span style="color: #a018ff;">=</span> <span style="color: #a018ff;">Foo</span> <span style="color: #16181a;">{</span> <span style="color: #16181a;">bar</span><span style="color: #16181a;">:</span> <span style="color: #d17c00;">1</span> <span style="color: #16181a;">}</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="174">    <span style="color: #d17c00;">println</span><span style="color: #008c99;">!</span><span style="color: #16181a;">(</span><span style="color: #008b0c;">&quot;{}&quot;</span><span style="color: #16181a;">,</span> <span style="color: #16181a;">a_foo</span><span style="color: #16181a;">.</span><span style="color: #16181a;">bar</span><span style="color: #16181a;">(</span><span style="color: #16181a;">)</span><span style="color: #16181a;">)</span><span style="color: #16181a;">;</span> <span style="color: #7b8496;">// 1</span>
+</span><span class="line" data-line="175">
+</span><span class="line" data-line="176">    <span style="color: #7b8496;">// Traits (known as interfaces or typeclasses in other languages) //</span>
+</span><span class="line" data-line="177">
+</span><span class="line" data-line="178">    <span style="color: #d17c00;">trait</span> <span style="color: #a018ff;">Frobnicate</span><span style="color: #16181a;">&lt;</span><span style="color: #a018ff;">T</span><span style="color: #16181a;">&gt;</span> <span style="color: #16181a;">{</span>
+</span><span class="line" data-line="179">        <span style="color: #d17c00;">fn</span> <span style="color: #0057d1;">frobnicate</span><span style="color: #16181a;">(</span><span style="color: #f40064;">self</span><span style="color: #16181a;">)</span> <span style="color: #16181a;">-&gt;</span> <span style="color: #a018ff;">Option</span><span style="color: #16181a;">&lt;</span><span style="color: #a018ff;">T</span><span style="color: #16181a;">&gt;</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="180">    <span style="color: #16181a;">}</span>
+</span><span class="line" data-line="181">
+</span><span class="line" data-line="182">    <span style="color: #d17c00;">impl</span><span style="color: #16181a;">&lt;</span><span style="color: #a018ff;">T</span><span style="color: #16181a;">&gt;</span> <span style="color: #a018ff;">Frobnicate</span><span style="color: #16181a;">&lt;</span><span style="color: #a018ff;">T</span><span style="color: #16181a;">&gt;</span> <span style="color: #d17c00;">for</span> <span style="color: #a018ff;">Foo</span><span style="color: #16181a;">&lt;</span><span style="color: #a018ff;">T</span><span style="color: #16181a;">&gt;</span> <span style="color: #16181a;">{</span>
+</span><span class="line" data-line="183">        <span style="color: #d17c00;">fn</span> <span style="color: #0057d1;">frobnicate</span><span style="color: #16181a;">(</span><span style="color: #f40064;">self</span><span style="color: #16181a;">)</span> <span style="color: #16181a;">-&gt;</span> <span style="color: #a018ff;">Option</span><span style="color: #16181a;">&lt;</span><span style="color: #a018ff;">T</span><span style="color: #16181a;">&gt;</span> <span style="color: #16181a;">{</span>
+</span><span class="line" data-line="184">            <span style="color: #f40064;">Some</span><span style="color: #16181a;">(</span><span style="color: #f40064;">self</span><span style="color: #16181a;">.</span><span style="color: #16181a;">bar</span><span style="color: #16181a;">)</span>
+</span><span class="line" data-line="185">        <span style="color: #16181a;">}</span>
+</span><span class="line" data-line="186">    <span style="color: #16181a;">}</span>
+</span><span class="line" data-line="187">
+</span><span class="line" data-line="188">    <span style="color: #d17c00;">let</span> <span style="color: #16181a;">another_foo</span> <span style="color: #a018ff;">=</span> <span style="color: #a018ff;">Foo</span> <span style="color: #16181a;">{</span> <span style="color: #16181a;">bar</span><span style="color: #16181a;">:</span> <span style="color: #d17c00;">1</span> <span style="color: #16181a;">}</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="189">    <span style="color: #d17c00;">println</span><span style="color: #008c99;">!</span><span style="color: #16181a;">(</span><span style="color: #008b0c;">&quot;{:?}&quot;</span><span style="color: #16181a;">,</span> <span style="color: #16181a;">another_foo</span><span style="color: #16181a;">.</span><span style="color: #16181a;">frobnicate</span><span style="color: #16181a;">(</span><span style="color: #16181a;">)</span><span style="color: #16181a;">)</span><span style="color: #16181a;">;</span> <span style="color: #7b8496;">// Some(1)</span>
+</span><span class="line" data-line="190">
+</span><span class="line" data-line="191">    <span style="color: #7b8496;">// Function pointer types // </span>
+</span><span class="line" data-line="192">
+</span><span class="line" data-line="193">    <span style="color: #d17c00;">fn</span> <span style="color: #0057d1;">fibonacci</span><span style="color: #16181a;">(</span><span style="color: #16181a;">n</span><span style="color: #16181a;">:</span> <span style="color: #bd0fc8;">u32</span><span style="color: #16181a;">)</span> <span style="color: #16181a;">-&gt;</span> <span style="color: #bd0fc8;">u32</span> <span style="color: #16181a;">{</span>
+</span><span class="line" data-line="194">        <span style="color: #d17c00;">match</span> <span style="color: #16181a;">n</span> <span style="color: #16181a;">{</span>
+</span><span class="line" data-line="195">            <span style="color: #d17c00;">0</span> <span style="color: #16181a;">=&gt;</span> <span style="color: #d17c00;">1</span><span style="color: #16181a;">,</span>
+</span><span class="line" data-line="196">            <span style="color: #d17c00;">1</span> <span style="color: #16181a;">=&gt;</span> <span style="color: #d17c00;">1</span><span style="color: #16181a;">,</span>
+</span><span class="line" data-line="197">            <span style="color: #f40064;">_</span> <span style="color: #16181a;">=&gt;</span> <span style="color: #0057d1;">fibonacci</span><span style="color: #16181a;">(</span><span style="color: #16181a;">n</span> <span style="color: #a018ff;">-</span> <span style="color: #d17c00;">1</span><span style="color: #16181a;">)</span> <span style="color: #a018ff;">+</span> <span style="color: #0057d1;">fibonacci</span><span style="color: #16181a;">(</span><span style="color: #16181a;">n</span> <span style="color: #a018ff;">-</span> <span style="color: #d17c00;">2</span><span style="color: #16181a;">)</span><span style="color: #16181a;">,</span>
+</span><span class="line" data-line="198">        <span style="color: #16181a;">}</span>
+</span><span class="line" data-line="199">    <span style="color: #16181a;">}</span>
+</span><span class="line" data-line="200">
+</span><span class="line" data-line="201">    <span style="color: #d17c00;">type</span> <span style="color: #a018ff;">FunctionPointer</span> <span style="color: #a018ff;">=</span> <span style="color: #d17c00;">fn</span><span style="color: #16181a;">(</span><span style="color: #bd0fc8;">u32</span><span style="color: #16181a;">)</span> <span style="color: #16181a;">-&gt;</span> <span style="color: #bd0fc8;">u32</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="202">
+</span><span class="line" data-line="203">    <span style="color: #d17c00;">let</span> <span style="color: #16181a;">fib</span> <span style="color: #16181a;">:</span> <span style="color: #a018ff;">FunctionPointer</span> <span style="color: #a018ff;">=</span> <span style="color: #16181a;">fibonacci</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="204">    <span style="color: #d17c00;">println</span><span style="color: #008c99;">!</span><span style="color: #16181a;">(</span><span style="color: #008b0c;">&quot;Fib: {}&quot;</span><span style="color: #16181a;">,</span> <span style="color: #16181a;">fib</span><span style="color: #16181a;">(</span><span style="color: #d17c00;">4</span><span style="color: #16181a;">)</span><span style="color: #16181a;">)</span><span style="color: #16181a;">;</span> <span style="color: #7b8496;">// 5</span>
+</span><span class="line" data-line="205">
+</span><span class="line" data-line="206">    <span style="color: #7b8496;">/////////////////////////</span>
+</span><span class="line" data-line="207">    <span style="color: #7b8496;">// 3. Pattern matching //</span>
+</span><span class="line" data-line="208">    <span style="color: #7b8496;">/////////////////////////</span>
+</span><span class="line" data-line="209">
+</span><span class="line" data-line="210">    <span style="color: #d17c00;">let</span> <span style="color: #16181a;">foo</span> <span style="color: #a018ff;">=</span> <span style="color: #a018ff;">OptionalI32</span><span style="color: #16181a;">::</span><span style="color: #f40064;">AnI32</span><span style="color: #16181a;">(</span><span style="color: #d17c00;">1</span><span style="color: #16181a;">)</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="211">    <span style="color: #d17c00;">match</span> <span style="color: #16181a;">foo</span> <span style="color: #16181a;">{</span>
+</span><span class="line" data-line="212">        <span style="color: #a018ff;">OptionalI32</span><span style="color: #16181a;">::</span><span style="color: #f40064;">AnI32</span><span style="color: #16181a;">(</span><span style="color: #16181a;">n</span><span style="color: #16181a;">)</span> <span style="color: #16181a;">=&gt;</span> <span style="color: #d17c00;">println</span><span style="color: #008c99;">!</span><span style="color: #16181a;">(</span><span style="color: #008b0c;">&quot;it’s an i32: {}&quot;</span><span style="color: #16181a;">,</span> <span style="color: #16181a;">n</span><span style="color: #16181a;">)</span><span style="color: #16181a;">,</span>
+</span><span class="line" data-line="213">        <span style="color: #a018ff;">OptionalI32</span><span style="color: #16181a;">::</span><span style="color: #f40064;">Nothing</span>  <span style="color: #16181a;">=&gt;</span> <span style="color: #d17c00;">println</span><span style="color: #008c99;">!</span><span style="color: #16181a;">(</span><span style="color: #008b0c;">&quot;it’s nothing!&quot;</span><span style="color: #16181a;">)</span><span style="color: #16181a;">,</span>
+</span><span class="line" data-line="214">    <span style="color: #16181a;">}</span>
+</span><span class="line" data-line="215">
+</span><span class="line" data-line="216">    <span style="color: #7b8496;">// Advanced pattern matching</span>
+</span><span class="line" data-line="217">    <span style="color: #d17c00;">struct</span> <span style="color: #a018ff;">FooBar</span> <span style="color: #16181a;">{</span> <span style="color: #16181a;">x</span><span style="color: #16181a;">:</span> <span style="color: #bd0fc8;">i32</span><span style="color: #16181a;">,</span> <span style="color: #16181a;">y</span><span style="color: #16181a;">:</span> <span style="color: #a018ff;">OptionalI32</span> <span style="color: #16181a;">}</span>
+</span><span class="line" data-line="218">    <span style="color: #d17c00;">let</span> <span style="color: #16181a;">bar</span> <span style="color: #a018ff;">=</span> <span style="color: #a018ff;">FooBar</span> <span style="color: #16181a;">{</span> <span style="color: #16181a;">x</span><span style="color: #16181a;">:</span> <span style="color: #d17c00;">15</span><span style="color: #16181a;">,</span> <span style="color: #16181a;">y</span><span style="color: #16181a;">:</span> <span style="color: #a018ff;">OptionalI32</span><span style="color: #16181a;">::</span><span style="color: #f40064;">AnI32</span><span style="color: #16181a;">(</span><span style="color: #d17c00;">32</span><span style="color: #16181a;">)</span> <span style="color: #16181a;">}</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="219">
+</span><span class="line" data-line="220">    <span style="color: #d17c00;">match</span> <span style="color: #16181a;">bar</span> <span style="color: #16181a;">{</span>
+</span><span class="line" data-line="221">        <span style="color: #a018ff;">FooBar</span> <span style="color: #16181a;">{</span> <span style="color: #16181a;">x</span><span style="color: #16181a;">:</span> <span style="color: #d17c00;">0</span><span style="color: #16181a;">,</span> <span style="color: #16181a;">y</span><span style="color: #16181a;">:</span> <span style="color: #a018ff;">OptionalI32</span><span style="color: #16181a;">::</span><span style="color: #f40064;">AnI32</span><span style="color: #16181a;">(</span><span style="color: #d17c00;">0</span><span style="color: #16181a;">)</span> <span style="color: #16181a;">}</span> <span style="color: #16181a;">=&gt;</span>
+</span><span class="line" data-line="222">            <span style="color: #d17c00;">println</span><span style="color: #008c99;">!</span><span style="color: #16181a;">(</span><span style="color: #008b0c;">&quot;The numbers are zero!&quot;</span><span style="color: #16181a;">)</span><span style="color: #16181a;">,</span>
+</span><span class="line" data-line="223">        <span style="color: #a018ff;">FooBar</span> <span style="color: #16181a;">{</span> <span style="color: #16181a;">x</span><span style="color: #16181a;">:</span> <span style="color: #16181a;">n</span><span style="color: #16181a;">,</span> <span style="color: #16181a;">y</span><span style="color: #16181a;">:</span> <span style="color: #a018ff;">OptionalI32</span><span style="color: #16181a;">::</span><span style="color: #f40064;">AnI32</span><span style="color: #16181a;">(</span><span style="color: #16181a;">m</span><span style="color: #16181a;">)</span> <span style="color: #16181a;">}</span> <span style="color: #d17c00;">if</span> <span style="color: #16181a;">n</span> <span style="color: #a018ff;">==</span> <span style="color: #16181a;">m</span> <span style="color: #16181a;">=&gt;</span>
+</span><span class="line" data-line="224">            <span style="color: #d17c00;">println</span><span style="color: #008c99;">!</span><span style="color: #16181a;">(</span><span style="color: #008b0c;">&quot;The numbers are the same&quot;</span><span style="color: #16181a;">)</span><span style="color: #16181a;">,</span>
+</span><span class="line" data-line="225">        <span style="color: #a018ff;">FooBar</span> <span style="color: #16181a;">{</span> <span style="color: #16181a;">x</span><span style="color: #16181a;">:</span> <span style="color: #16181a;">n</span><span style="color: #16181a;">,</span> <span style="color: #16181a;">y</span><span style="color: #16181a;">:</span> <span style="color: #a018ff;">OptionalI32</span><span style="color: #16181a;">::</span><span style="color: #f40064;">AnI32</span><span style="color: #16181a;">(</span><span style="color: #16181a;">m</span><span style="color: #16181a;">)</span> <span style="color: #16181a;">}</span> <span style="color: #16181a;">=&gt;</span>
+</span><span class="line" data-line="226">            <span style="color: #d17c00;">println</span><span style="color: #008c99;">!</span><span style="color: #16181a;">(</span><span style="color: #008b0c;">&quot;Different numbers: {} {}&quot;</span><span style="color: #16181a;">,</span> <span style="color: #16181a;">n</span><span style="color: #16181a;">,</span> <span style="color: #16181a;">m</span><span style="color: #16181a;">)</span><span style="color: #16181a;">,</span>
+</span><span class="line" data-line="227">        <span style="color: #a018ff;">FooBar</span> <span style="color: #16181a;">{</span> <span style="color: #16181a;">x</span><span style="color: #16181a;">:</span> <span style="color: #f40064;">_</span><span style="color: #16181a;">,</span> <span style="color: #16181a;">y</span><span style="color: #16181a;">:</span> <span style="color: #a018ff;">OptionalI32</span><span style="color: #16181a;">::</span><span style="color: #f40064;">Nothing</span> <span style="color: #16181a;">}</span> <span style="color: #16181a;">=&gt;</span>
+</span><span class="line" data-line="228">            <span style="color: #d17c00;">println</span><span style="color: #008c99;">!</span><span style="color: #16181a;">(</span><span style="color: #008b0c;">&quot;The second number is Nothing!&quot;</span><span style="color: #16181a;">)</span><span style="color: #16181a;">,</span>
+</span><span class="line" data-line="229">    <span style="color: #16181a;">}</span>
+</span><span class="line" data-line="230">
+</span><span class="line" data-line="231">    <span style="color: #7b8496;">/////////////////////</span>
+</span><span class="line" data-line="232">    <span style="color: #7b8496;">// 4. Control flow //</span>
+</span><span class="line" data-line="233">    <span style="color: #7b8496;">/////////////////////</span>
+</span><span class="line" data-line="234">
+</span><span class="line" data-line="235">    <span style="color: #7b8496;">// `for` loops/iteration</span>
+</span><span class="line" data-line="236">    <span style="color: #d17c00;">let</span> <span style="color: #16181a;">array</span> <span style="color: #a018ff;">=</span> <span style="color: #16181a;">[</span><span style="color: #d17c00;">1</span><span style="color: #16181a;">,</span> <span style="color: #d17c00;">2</span><span style="color: #16181a;">,</span> <span style="color: #d17c00;">3</span><span style="color: #16181a;">]</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="237">    <span style="color: #d17c00;">for</span> <span style="color: #16181a;">i</span> <span style="color: #d17c00;">in</span> <span style="color: #16181a;">array</span> <span style="color: #16181a;">{</span>
+</span><span class="line" data-line="238">        <span style="color: #d17c00;">println</span><span style="color: #008c99;">!</span><span style="color: #16181a;">(</span><span style="color: #008b0c;">&quot;{}&quot;</span><span style="color: #16181a;">,</span> <span style="color: #16181a;">i</span><span style="color: #16181a;">)</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="239">    <span style="color: #16181a;">}</span>
+</span><span class="line" data-line="240">
+</span><span class="line" data-line="241">    <span style="color: #7b8496;">// Ranges</span>
+</span><span class="line" data-line="242">    <span style="color: #d17c00;">for</span> <span style="color: #16181a;">i</span> <span style="color: #d17c00;">in</span> <span style="color: #d17c00;">0u32</span><span style="color: #a018ff;">..</span><span style="color: #d17c00;">10</span> <span style="color: #16181a;">{</span>
+</span><span class="line" data-line="243">        <span style="color: #d17c00;">print</span><span style="color: #008c99;">!</span><span style="color: #16181a;">(</span><span style="color: #008b0c;">&quot;{} &quot;</span><span style="color: #16181a;">,</span> <span style="color: #16181a;">i</span><span style="color: #16181a;">)</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="244">    <span style="color: #16181a;">}</span>
+</span><span class="line" data-line="245">    <span style="color: #d17c00;">println</span><span style="color: #008c99;">!</span><span style="color: #16181a;">(</span><span style="color: #008b0c;">&quot;&quot;</span><span style="color: #16181a;">)</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="246">    <span style="color: #7b8496;">// prints `0 1 2 3 4 5 6 7 8 9 `</span>
+</span><span class="line" data-line="247">
+</span><span class="line" data-line="248">    <span style="color: #7b8496;">// `if`</span>
+</span><span class="line" data-line="249">    <span style="color: #d17c00;">if</span> <span style="color: #d17c00;">1</span> <span style="color: #a018ff;">==</span> <span style="color: #d17c00;">1</span> <span style="color: #16181a;">{</span>
+</span><span class="line" data-line="250">        <span style="color: #d17c00;">println</span><span style="color: #008c99;">!</span><span style="color: #16181a;">(</span><span style="color: #008b0c;">&quot;Maths is working!&quot;</span><span style="color: #16181a;">)</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="251">    <span style="color: #16181a;">}</span> <span style="color: #d17c00;">else</span> <span style="color: #16181a;">{</span>
+</span><span class="line" data-line="252">        <span style="color: #d17c00;">println</span><span style="color: #008c99;">!</span><span style="color: #16181a;">(</span><span style="color: #008b0c;">&quot;Oh no...&quot;</span><span style="color: #16181a;">)</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="253">    <span style="color: #16181a;">}</span>
+</span><span class="line" data-line="254">
+</span><span class="line" data-line="255">    <span style="color: #7b8496;">// `if` as expression</span>
+</span><span class="line" data-line="256">    <span style="color: #d17c00;">let</span> <span style="color: #16181a;">value</span> <span style="color: #a018ff;">=</span> <span style="color: #d17c00;">if</span> <span style="color: #008c99;">true</span> <span style="color: #16181a;">{</span>
+</span><span class="line" data-line="257">        <span style="color: #008b0c;">&quot;good&quot;</span>
+</span><span class="line" data-line="258">    <span style="color: #16181a;">}</span> <span style="color: #d17c00;">else</span> <span style="color: #16181a;">{</span>
+</span><span class="line" data-line="259">        <span style="color: #008b0c;">&quot;bad&quot;</span>
+</span><span class="line" data-line="260">    <span style="color: #16181a;">}</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="261">
+</span><span class="line" data-line="262">    <span style="color: #7b8496;">// `while` loop</span>
+</span><span class="line" data-line="263">    <span style="color: #d17c00;">while</span> <span style="color: #d17c00;">1</span> <span style="color: #a018ff;">==</span> <span style="color: #d17c00;">1</span> <span style="color: #16181a;">{</span>
+</span><span class="line" data-line="264">        <span style="color: #d17c00;">println</span><span style="color: #008c99;">!</span><span style="color: #16181a;">(</span><span style="color: #008b0c;">&quot;The universe is operating normally.&quot;</span><span style="color: #16181a;">)</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="265">        <span style="color: #7b8496;">// break statement gets out of the while loop.</span>
+</span><span class="line" data-line="266">        <span style="color: #7b8496;">//  It avoids useless iterations.</span>
+</span><span class="line" data-line="267">        <span style="color: #d17c00;">break</span>
+</span><span class="line" data-line="268">    <span style="color: #16181a;">}</span>
+</span><span class="line" data-line="269">
+</span><span class="line" data-line="270">    <span style="color: #7b8496;">// Infinite loop</span>
+</span><span class="line" data-line="271">    <span style="color: #d17c00;">loop</span> <span style="color: #16181a;">{</span>
+</span><span class="line" data-line="272">        <span style="color: #d17c00;">println</span><span style="color: #008c99;">!</span><span style="color: #16181a;">(</span><span style="color: #008b0c;">&quot;Hello!&quot;</span><span style="color: #16181a;">)</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="273">        <span style="color: #7b8496;">// break statement gets out of the loop</span>
+</span><span class="line" data-line="274">        <span style="color: #d17c00;">break</span>
+</span><span class="line" data-line="275">    <span style="color: #16181a;">}</span>
+</span><span class="line" data-line="276">
+</span><span class="line" data-line="277">    <span style="color: #7b8496;">/////////////////////////////////</span>
+</span><span class="line" data-line="278">    <span style="color: #7b8496;">// 5. Memory safety &amp; pointers //</span>
+</span><span class="line" data-line="279">    <span style="color: #7b8496;">/////////////////////////////////</span>
+</span><span class="line" data-line="280">
+</span><span class="line" data-line="281">    <span style="color: #7b8496;">// Owned pointer – only one thing can ‘own’ this pointer at a time</span>
+</span><span class="line" data-line="282">    <span style="color: #7b8496;">// This means that when the `Box` leaves its scope, it will be automatically deallocated safely.</span>
+</span><span class="line" data-line="283">    <span style="color: #d17c00;">let</span> <span style="color: #d17c00;">mut</span> <span style="color: #16181a;">mine</span><span style="color: #16181a;">:</span> <span style="color: #a018ff;">Box</span><span style="color: #16181a;">&lt;</span><span style="color: #bd0fc8;">i32</span><span style="color: #16181a;">&gt;</span> <span style="color: #a018ff;">=</span> <span style="color: #a018ff;">Box</span><span style="color: #16181a;">::</span><span style="color: #0057d1;">new</span><span style="color: #16181a;">(</span><span style="color: #d17c00;">3</span><span style="color: #16181a;">)</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="284">    <span style="color: #a018ff;">*</span><span style="color: #16181a;">mine</span> <span style="color: #a018ff;">=</span> <span style="color: #d17c00;">5</span><span style="color: #16181a;">;</span> <span style="color: #7b8496;">// dereference</span>
+</span><span class="line" data-line="285">    <span style="color: #7b8496;">// Here, `now_its_mine` takes ownership of `mine`. In other words, `mine` is moved.</span>
+</span><span class="line" data-line="286">    <span style="color: #d17c00;">let</span> <span style="color: #d17c00;">mut</span> <span style="color: #16181a;">now_its_mine</span> <span style="color: #a018ff;">=</span> <span style="color: #16181a;">mine</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="287">    <span style="color: #a018ff;">*</span><span style="color: #16181a;">now_its_mine</span> <span style="color: #a018ff;">+=</span> <span style="color: #d17c00;">2</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="288">
+</span><span class="line" data-line="289">    <span style="color: #d17c00;">println</span><span style="color: #008c99;">!</span><span style="color: #16181a;">(</span><span style="color: #008b0c;">&quot;{}&quot;</span><span style="color: #16181a;">,</span> <span style="color: #16181a;">now_its_mine</span><span style="color: #16181a;">)</span><span style="color: #16181a;">;</span> <span style="color: #7b8496;">// 7</span>
+</span><span class="line" data-line="290">    <span style="color: #7b8496;">// println!(&quot;{}&quot;, mine); // this would not compile because `now_its_mine` now owns the pointer</span>
+</span><span class="line" data-line="291">
+</span><span class="line" data-line="292">    <span style="color: #7b8496;">// Reference – an immutable pointer that refers to other data</span>
+</span><span class="line" data-line="293">    <span style="color: #7b8496;">// When a reference is taken to a value, we say that the value has been ‘borrowed’.</span>
+</span><span class="line" data-line="294">    <span style="color: #7b8496;">// While a value is borrowed immutably, it cannot be mutated or moved.</span>
+</span><span class="line" data-line="295">    <span style="color: #7b8496;">// A borrow is active until the last use of the borrowing variable.</span>
+</span><span class="line" data-line="296">    <span style="color: #d17c00;">let</span> <span style="color: #d17c00;">mut</span> <span style="color: #16181a;">var</span> <span style="color: #a018ff;">=</span> <span style="color: #d17c00;">4</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="297">    <span style="color: #16181a;">var</span> <span style="color: #a018ff;">=</span> <span style="color: #d17c00;">3</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="298">    <span style="color: #d17c00;">let</span> <span style="color: #16181a;">ref_var</span><span style="color: #16181a;">:</span> <span style="color: #a018ff;">&amp;</span><span style="color: #bd0fc8;">i32</span> <span style="color: #a018ff;">=</span> <span style="color: #a018ff;">&amp;</span><span style="color: #16181a;">var</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="299">
+</span><span class="line" data-line="300">    <span style="color: #d17c00;">println</span><span style="color: #008c99;">!</span><span style="color: #16181a;">(</span><span style="color: #008b0c;">&quot;{}&quot;</span><span style="color: #16181a;">,</span> <span style="color: #16181a;">var</span><span style="color: #16181a;">)</span><span style="color: #16181a;">;</span> <span style="color: #7b8496;">// Unlike `mine`, `var` can still be used</span>
+</span><span class="line" data-line="301">    <span style="color: #d17c00;">println</span><span style="color: #008c99;">!</span><span style="color: #16181a;">(</span><span style="color: #008b0c;">&quot;{}&quot;</span><span style="color: #16181a;">,</span> <span style="color: #a018ff;">*</span><span style="color: #16181a;">ref_var</span><span style="color: #16181a;">)</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="302">    <span style="color: #7b8496;">// var = 5; // this would not compile because `var` is borrowed</span>
+</span><span class="line" data-line="303">    <span style="color: #7b8496;">// *ref_var = 6; // this would not either, because `ref_var` is an immutable reference</span>
+</span><span class="line" data-line="304">    <span style="color: #16181a;">ref_var</span><span style="color: #16181a;">;</span> <span style="color: #7b8496;">// no-op, but counts as a use and keeps the borrow active</span>
+</span><span class="line" data-line="305">    <span style="color: #16181a;">var</span> <span style="color: #a018ff;">=</span> <span style="color: #d17c00;">2</span><span style="color: #16181a;">;</span> <span style="color: #7b8496;">// ref_var is no longer used after the line above, so the borrow has ended</span>
+</span><span class="line" data-line="306">
+</span><span class="line" data-line="307">    <span style="color: #7b8496;">// Mutable reference</span>
+</span><span class="line" data-line="308">    <span style="color: #7b8496;">// While a value is mutably borrowed, it cannot be accessed at all.</span>
+</span><span class="line" data-line="309">    <span style="color: #d17c00;">let</span> <span style="color: #d17c00;">mut</span> <span style="color: #16181a;">var2</span> <span style="color: #a018ff;">=</span> <span style="color: #d17c00;">4</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="310">    <span style="color: #d17c00;">let</span> <span style="color: #16181a;">ref_var2</span><span style="color: #16181a;">:</span> <span style="color: #a018ff;">&amp;</span><span style="color: #d17c00;">mut</span> <span style="color: #bd0fc8;">i32</span> <span style="color: #a018ff;">=</span> <span style="color: #a018ff;">&amp;</span><span style="color: #d17c00;">mut</span> <span style="color: #16181a;">var2</span><span style="color: #16181a;">;</span>
+</span><span class="line" data-line="311">    <span style="color: #a018ff;">*</span><span style="color: #16181a;">ref_var2</span> <span style="color: #a018ff;">+=</span> <span style="color: #d17c00;">2</span><span style="color: #16181a;">;</span>         <span style="color: #7b8496;">// &#39;*&#39; is used to point to the mutably borrowed var2</span>
+</span><span class="line" data-line="312">
+</span><span class="line" data-line="313">    <span style="color: #d17c00;">println</span><span style="color: #008c99;">!</span><span style="color: #16181a;">(</span><span style="color: #008b0c;">&quot;{}&quot;</span><span style="color: #16181a;">,</span> <span style="color: #a018ff;">*</span><span style="color: #16181a;">ref_var2</span><span style="color: #16181a;">)</span><span style="color: #16181a;">;</span> <span style="color: #7b8496;">// 6 , // var2 would not compile.</span>
+</span><span class="line" data-line="314">    <span style="color: #7b8496;">// ref_var2 is of type &amp;mut i32, so stores a reference to an i32, not the value.</span>
+</span><span class="line" data-line="315">    <span style="color: #7b8496;">// var2 = 2; // this would not compile because `var2` is borrowed.</span>
+</span><span class="line" data-line="316">    <span style="color: #16181a;">ref_var2</span><span style="color: #16181a;">;</span> <span style="color: #7b8496;">// no-op, but counts as a use and keeps the borrow active until here</span>
+</span><span class="line" data-line="317"><span style="color: #16181a;">}</span>
+</span></code></pre>
+</body>
+</html>

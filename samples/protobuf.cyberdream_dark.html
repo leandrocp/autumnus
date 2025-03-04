@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>protobuf - cyberdream_dark - Autumnus</title>
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=fira-code:300,400,500,600,700" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      * {
+        font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+      }
+    </style>
+</head>
+<body>
+<pre class="athl w-full overflow-auto rounded-lg p-8 text-sm antialiased leading-6" style="color: #ffffff; background-color: #16181a;"><code class="language-protocolbuffer" translate="no" tabindex="0"><span class="line" data-line="1"><span style="color: #7b8496;">/*</span>
+</span><span class="line" data-line="2"><span style="color: #7b8496;">* Language Syntax</span>
+</span><span class="line" data-line="3"><span style="color: #7b8496;">*/</span>
+</span><span class="line" data-line="4">
+</span><span class="line" data-line="5"><span style="color: #7b8496;">/*</span>
+</span><span class="line" data-line="6"><span style="color: #7b8496;">* Specifying Syntax Of Protocol Buffer Version</span>
+</span><span class="line" data-line="7"><span style="color: #7b8496;">* Specifying Which Protocol Buffer Version To Use</span>
+</span><span class="line" data-line="8"><span style="color: #7b8496;">* It can be usually proto3 or proto2</span>
+</span><span class="line" data-line="9"><span style="color: #7b8496;">*/</span>
+</span><span class="line" data-line="10"><span style="color: #ffbd5e;">syntax</span> <span style="color: #bd5eff;">=</span> <span style="color: #ff5ea0;">&quot;proto3&quot;</span><span style="color: #ffffff;">;</span>
+</span><span class="line" data-line="11">
+</span><span class="line" data-line="12"><span style="color: #7b8496;">/*</span>
+</span><span class="line" data-line="13"><span style="color: #7b8496;">* Declaring Message In Protocol Buffer:</span>
+</span><span class="line" data-line="14"><span style="color: #7b8496;">* As you can see, each field in the message definition has a unique number.</span>
+</span><span class="line" data-line="15"><span style="color: #7b8496;">* These field numbers are used to identify your fields in the message binary format,</span>
+</span><span class="line" data-line="16"><span style="color: #7b8496;">* and should not be changed once your message type is in use.</span>
+</span><span class="line" data-line="17"><span style="color: #7b8496;">* Note that field numbers in the range 1 through 15 take one byte to encode, including the field number and the field&#39;s type (you can find out more about this in Protocol Buffer Encoding).</span>
+</span><span class="line" data-line="18"><span style="color: #7b8496;">* Field numbers in the range 16 through 2047 take two bytes. So you should reserve the numbers 1 through 15 for very frequently occurring message elements.</span>
+</span><span class="line" data-line="19"><span style="color: #7b8496;">* Remember to leave some room for frequently occurring elements that might be added in the future.</span>
+</span><span class="line" data-line="20"><span style="color: #7b8496;">* The smallest field number you can specify is 1, and the largest is 2^29 - 1, or 536,870,911.</span>
+</span><span class="line" data-line="21"><span style="color: #7b8496;">* You also cannot use the numbers 19000 through 19999 (FieldDescriptor::kFirstReservedNumber through FieldDescriptor::kLastReservedNumber),</span>
+</span><span class="line" data-line="22"><span style="color: #7b8496;">* as they are reserved for the Protocol Buffers implementation - the protocol buffer compiler will complain if you use one of these reserved numbers in your .proto.</span>
+</span><span class="line" data-line="23"><span style="color: #7b8496;">* Similarly, you cannot use any previously reserved field numbers.</span>
+</span><span class="line" data-line="24"><span style="color: #7b8496;">*</span>
+</span><span class="line" data-line="25"><span style="color: #7b8496;">*/</span>
+</span><span class="line" data-line="26">
+</span><span class="line" data-line="27"><span style="color: #7b8496;">/*</span>
+</span><span class="line" data-line="28"><span style="color: #7b8496;">Syntax For Declaring Message:</span>
+</span><span class="line" data-line="29"><span style="color: #7b8496;">    message ${MessageName} {</span>
+</span><span class="line" data-line="30"><span style="color: #7b8496;">        ${Scalar Value Type} ${FieldName1} = ${Tag Number1};</span>
+</span><span class="line" data-line="31"><span style="color: #7b8496;">                .</span>
+</span><span class="line" data-line="32"><span style="color: #7b8496;">                .</span>
+</span><span class="line" data-line="33"><span style="color: #7b8496;">                .</span>
+</span><span class="line" data-line="34"><span style="color: #7b8496;">        ${Scalar Value Type} ${FieldNameN} = ${Tag NumberN};</span>
+</span><span class="line" data-line="35"><span style="color: #7b8496;">    }</span>
+</span><span class="line" data-line="36"><span style="color: #7b8496;"></span>
+</span><span class="line" data-line="37"><span style="color: #7b8496;">Default Values Will be applied any case if the message doesn&#39;t contain a existing field defined</span>
+</span><span class="line" data-line="38"><span style="color: #7b8496;">in the message definition</span>
+</span><span class="line" data-line="39"><span style="color: #7b8496;">*/</span>
+</span><span class="line" data-line="40">
+</span><span class="line" data-line="41"><span style="color: #ffbd5e;">message</span> <span style="color: #bd5eff;">MessageTypes</span> <span style="color: #ffffff;">{</span>
+</span><span class="line" data-line="42">    <span style="color: #7b8496;">/*</span>
+</span><span class="line" data-line="43"><span style="color: #7b8496;">    * Scalar Value Types</span>
+</span><span class="line" data-line="44"><span style="color: #7b8496;">    */</span>
+</span><span class="line" data-line="45">    <span style="color: #bd5eff;">string</span> stringType <span style="color: #bd5eff;">=</span> <span style="color: #ffbd5e;">1</span><span style="color: #ffffff;">;</span> <span style="color: #7b8496;">// A string must always contain UTF-8 encoded or 7-bit ASCII text. Default value = &quot;&quot;</span>
+</span><span class="line" data-line="46">
+</span><span class="line" data-line="47">    <span style="color: #7b8496;">// Number Types, Default Value = 0</span>
+</span><span class="line" data-line="48">    <span style="color: #bd5eff;">int32</span> int32Type <span style="color: #bd5eff;">=</span> <span style="color: #ffbd5e;">2</span><span style="color: #ffffff;">;</span> <span style="color: #7b8496;">// Uses Variable Length Encoding. Inefficient For Negative Numbers, Instead Use sint32.</span>
+</span><span class="line" data-line="49">    <span style="color: #bd5eff;">int64</span> int64Type <span style="color: #bd5eff;">=</span> <span style="color: #ffbd5e;">3</span><span style="color: #ffffff;">;</span> <span style="color: #7b8496;">// Uses Variable Length Encoding. Inefficient For Negative Numbers, Instead Use sint64.</span>
+</span><span class="line" data-line="50">    <span style="color: #bd5eff;">uint32</span> uInt32Type <span style="color: #bd5eff;">=</span> <span style="color: #ffbd5e;">4</span><span style="color: #ffffff;">;</span> <span style="color: #7b8496;">// Uses Variable Length Encoding</span>
+</span><span class="line" data-line="51">    <span style="color: #bd5eff;">uint64</span> uInt64Type <span style="color: #bd5eff;">=</span> <span style="color: #ffbd5e;">5</span><span style="color: #ffffff;">;</span> <span style="color: #7b8496;">// Uses Variable Length Encoding</span>
+</span><span class="line" data-line="52">    <span style="color: #bd5eff;">sint32</span> sInt32Type <span style="color: #bd5eff;">=</span> <span style="color: #ffbd5e;">6</span><span style="color: #ffffff;">;</span> <span style="color: #7b8496;">// Uses Variable Length Encoding. They are efficient in encoding for negative numbers.</span>
+</span><span class="line" data-line="53">                           <span style="color: #7b8496;">// Use this instead of int32 for negative numbers</span>
+</span><span class="line" data-line="54">    <span style="color: #bd5eff;">sint64</span> sInt64Type <span style="color: #bd5eff;">=</span> <span style="color: #ffbd5e;">7</span><span style="color: #ffffff;">;</span> <span style="color: #7b8496;">// Uses Variable Length Encoding. They are efficient in encoding for negative numbers.</span>
+</span><span class="line" data-line="55">    <span style="color: #7b8496;">// Use this instead of int64 for negative numbers.</span>
+</span><span class="line" data-line="56">
+</span><span class="line" data-line="57">    <span style="color: #bd5eff;">fixed32</span> fixed32Type <span style="color: #bd5eff;">=</span> <span style="color: #ffbd5e;">8</span><span style="color: #ffffff;">;</span> <span style="color: #7b8496;">// Always four bytes. More efficient than uint32 if values are often greater than 2^28.</span>
+</span><span class="line" data-line="58">    <span style="color: #bd5eff;">fixed64</span> fixed64Type <span style="color: #bd5eff;">=</span> <span style="color: #ffbd5e;">9</span><span style="color: #ffffff;">;</span> <span style="color: #7b8496;">// Always eight bytes. More efficient than uint64 if values are often greater than 2^56</span>
+</span><span class="line" data-line="59">
+</span><span class="line" data-line="60">    <span style="color: #bd5eff;">sfixed32</span> sfixed32Type <span style="color: #bd5eff;">=</span> <span style="color: #ffbd5e;">10</span><span style="color: #ffffff;">;</span> <span style="color: #7b8496;">// Always four bytes.</span>
+</span><span class="line" data-line="61">    <span style="color: #bd5eff;">sfixed64</span> sfixed64Type <span style="color: #bd5eff;">=</span> <span style="color: #ffbd5e;">11</span><span style="color: #ffffff;">;</span> <span style="color: #7b8496;">// Always Eight bytes.</span>
+</span><span class="line" data-line="62">
+</span><span class="line" data-line="63">    <span style="color: #bd5eff;">bool</span> boolType <span style="color: #bd5eff;">=</span> <span style="color: #ffbd5e;">12</span><span style="color: #ffffff;">;</span> <span style="color: #7b8496;">// Boolean Type. Default Value = false</span>
+</span><span class="line" data-line="64">
+</span><span class="line" data-line="65">    <span style="color: #bd5eff;">bytes</span> bytesType <span style="color: #bd5eff;">=</span> <span style="color: #ffbd5e;">13</span><span style="color: #ffffff;">;</span> <span style="color: #7b8496;">// May contain any arbitrary sequence of bytes. Default Value = Empty Bytes</span>
+</span><span class="line" data-line="66">
+</span><span class="line" data-line="67">    <span style="color: #bd5eff;">double</span> doubleType <span style="color: #bd5eff;">=</span> <span style="color: #ffbd5e;">14</span><span style="color: #ffffff;">;</span>
+</span><span class="line" data-line="68">    <span style="color: #bd5eff;">float</span> floatType <span style="color: #bd5eff;">=</span> <span style="color: #ffbd5e;">15</span><span style="color: #ffffff;">;</span>
+</span><span class="line" data-line="69">
+</span><span class="line" data-line="70">    <span style="color: #ffbd5e;">enum</span> <span style="color: #bd5eff;">Week</span> <span style="color: #ffffff;">{</span>
+</span><span class="line" data-line="71">        <span style="color: #ff5ea0;">UNDEFINED</span> <span style="color: #bd5eff;">=</span> <span style="color: #ffbd5e;">0</span><span style="color: #ffffff;">;</span> <span style="color: #7b8496;">// Tag 0 is always used as default in case of enum</span>
+</span><span class="line" data-line="72">        <span style="color: #ff5ea0;">SUNDAY</span> <span style="color: #bd5eff;">=</span> <span style="color: #ffbd5e;">1</span><span style="color: #ffffff;">;</span>
+</span><span class="line" data-line="73">        <span style="color: #ff5ea0;">MONDAY</span> <span style="color: #bd5eff;">=</span> <span style="color: #ffbd5e;">2</span><span style="color: #ffffff;">;</span>
+</span><span class="line" data-line="74">        <span style="color: #ff5ea0;">TUESDAY</span> <span style="color: #bd5eff;">=</span> <span style="color: #ffbd5e;">3</span><span style="color: #ffffff;">;</span>
+</span><span class="line" data-line="75">        <span style="color: #ff5ea0;">WEDNESDAY</span> <span style="color: #bd5eff;">=</span> <span style="color: #ffbd5e;">4</span><span style="color: #ffffff;">;</span>
+</span><span class="line" data-line="76">        <span style="color: #ff5ea0;">THURSDAY</span> <span style="color: #bd5eff;">=</span> <span style="color: #ffbd5e;">5</span><span style="color: #ffffff;">;</span>
+</span><span class="line" data-line="77">        <span style="color: #ff5ea0;">FRIDAY</span> <span style="color: #bd5eff;">=</span> <span style="color: #ffbd5e;">6</span><span style="color: #ffffff;">;</span>
+</span><span class="line" data-line="78">        <span style="color: #ff5ea0;">SATURDAY</span> <span style="color: #bd5eff;">=</span> <span style="color: #ffbd5e;">7</span><span style="color: #ffffff;">;</span>
+</span><span class="line" data-line="79">    <span style="color: #ffffff;">}</span>
+</span><span class="line" data-line="80">    <span style="color: #bd5eff;"><span style="color: #bd5eff;">Week</span></span> wkDayType <span style="color: #bd5eff;">=</span> <span style="color: #ffbd5e;">16</span><span style="color: #ffffff;">;</span>
+</span><span class="line" data-line="81">
+</span><span class="line" data-line="82">    <span style="color: #7b8496;">/*</span>
+</span><span class="line" data-line="83"><span style="color: #7b8496;">    * Defining Collection Of Scalar Value Type</span>
+</span><span class="line" data-line="84"><span style="color: #7b8496;">    * Syntax: repeated ${ScalarType} ${name} = TagValue</span>
+</span><span class="line" data-line="85"><span style="color: #7b8496;">    */</span>
+</span><span class="line" data-line="86">    <span style="color: #ffbd5e;">repeated</span> <span style="color: #bd5eff;">string</span> listOfString <span style="color: #bd5eff;">=</span> <span style="color: #ffbd5e;">17</span><span style="color: #ffffff;">;</span> <span style="color: #7b8496;">// List[String]</span>
+</span><span class="line" data-line="87"><span style="color: #ffffff;">}</span>
+</span><span class="line" data-line="88">
+</span><span class="line" data-line="89"><span style="color: #7b8496;">/*</span>
+</span><span class="line" data-line="90"><span style="color: #7b8496;">* Defining Defined Message Types In Other Message Definition</span>
+</span><span class="line" data-line="91"><span style="color: #7b8496;">*/</span>
+</span><span class="line" data-line="92"><span style="color: #ffbd5e;">message</span> <span style="color: #bd5eff;">Person</span> <span style="color: #ffffff;">{</span>
+</span><span class="line" data-line="93">    <span style="color: #bd5eff;">string</span> fname <span style="color: #bd5eff;">=</span> <span style="color: #ffbd5e;">1</span><span style="color: #ffffff;">;</span>
+</span><span class="line" data-line="94">    <span style="color: #bd5eff;">string</span> sname <span style="color: #bd5eff;">=</span> <span style="color: #ffbd5e;">2</span><span style="color: #ffffff;">;</span>
+</span><span class="line" data-line="95"><span style="color: #ffffff;">}</span>
+</span><span class="line" data-line="96">
+</span><span class="line" data-line="97"><span style="color: #ffbd5e;">message</span> <span style="color: #bd5eff;">City</span> <span style="color: #ffffff;">{</span>
+</span><span class="line" data-line="98">    <span style="color: #bd5eff;"><span style="color: #bd5eff;">Person</span></span> p <span style="color: #bd5eff;">=</span> <span style="color: #ffbd5e;">1</span><span style="color: #ffffff;">;</span>
+</span><span class="line" data-line="99"><span style="color: #ffffff;">}</span>
+</span><span class="line" data-line="100">
+</span><span class="line" data-line="101"><span style="color: #7b8496;">/*</span>
+</span><span class="line" data-line="102"><span style="color: #7b8496;">* Nested Message Definitions</span>
+</span><span class="line" data-line="103"><span style="color: #7b8496;">*/</span>
+</span><span class="line" data-line="104">
+</span><span class="line" data-line="105"><span style="color: #ffbd5e;">message</span> <span style="color: #bd5eff;">NestedMessages</span> <span style="color: #ffffff;">{</span>
+</span><span class="line" data-line="106">    <span style="color: #ffbd5e;">message</span> <span style="color: #bd5eff;">FirstLevelNestedMessage</span> <span style="color: #ffffff;">{</span>
+</span><span class="line" data-line="107">        <span style="color: #bd5eff;">string</span> firstString <span style="color: #bd5eff;">=</span> <span style="color: #ffbd5e;">1</span><span style="color: #ffffff;">;</span>
+</span><span class="line" data-line="108">        <span style="color: #ffbd5e;">message</span> <span style="color: #bd5eff;">SecondLevelNestedMessage</span> <span style="color: #ffffff;">{</span>
+</span><span class="line" data-line="109">            <span style="color: #bd5eff;">string</span> secondString <span style="color: #bd5eff;">=</span> <span style="color: #ffbd5e;">2</span><span style="color: #ffffff;">;</span>
+</span><span class="line" data-line="110">        <span style="color: #ffffff;">}</span>
+</span><span class="line" data-line="111">    <span style="color: #ffffff;">}</span>
+</span><span class="line" data-line="112">    <span style="color: #bd5eff;"><span style="color: #bd5eff;">FirstLevelNestedMessage</span></span> msg <span style="color: #bd5eff;">=</span> <span style="color: #ffbd5e;">1</span><span style="color: #ffffff;">;</span>
+</span><span class="line" data-line="113">    <span style="color: #bd5eff;"><span style="color: #bd5eff;">FirstLevelNestedMessage.SecondLevelNestedMessage</span></span> msg2 <span style="color: #bd5eff;">=</span> <span style="color: #ffbd5e;">2</span><span style="color: #ffffff;">;</span>
+</span><span class="line" data-line="114"><span style="color: #ffffff;">}</span>
+</span><span class="line" data-line="115">
+</span><span class="line" data-line="116"><span style="color: #7b8496;">/*</span>
+</span><span class="line" data-line="117"><span style="color: #7b8496;">* Importing Message From A File</span>
+</span><span class="line" data-line="118"><span style="color: #7b8496;">*/</span>
+</span><span class="line" data-line="119">
+</span><span class="line" data-line="120"><span style="color: #7b8496;">// one.proto</span>
+</span><span class="line" data-line="121"><span style="color: #7b8496;">// message One {</span>
+</span><span class="line" data-line="122"><span style="color: #7b8496;">//     string oneMsg = 1;</span>
+</span><span class="line" data-line="123"><span style="color: #7b8496;">// }</span>
+</span><span class="line" data-line="124">
+</span><span class="line" data-line="125"><span style="color: #7b8496;">// two.proto</span>
+</span><span class="line" data-line="126"><span style="color: #7b8496;">//  import &quot;myproject/one.proto&quot;</span>
+</span><span class="line" data-line="127"><span style="color: #7b8496;">//  message Two {</span>
+</span><span class="line" data-line="128"><span style="color: #7b8496;">//       string twoMsg = 2;</span>
+</span><span class="line" data-line="129"><span style="color: #7b8496;">//  }</span>
+</span><span class="line" data-line="130">
+</span><span class="line" data-line="131">
+</span><span class="line" data-line="132"><span style="color: #7b8496;">/*</span>
+</span><span class="line" data-line="133"><span style="color: #7b8496;">* Advanced Topics</span>
+</span><span class="line" data-line="134"><span style="color: #7b8496;">*/</span>
+</span><span class="line" data-line="135">
+</span><span class="line" data-line="136"><span style="color: #7b8496;">/*</span>
+</span><span class="line" data-line="137"><span style="color: #7b8496;">* Handling Message Type Changes:</span>
+</span><span class="line" data-line="138"><span style="color: #7b8496;">* Never Change/Use The TagNumber Of A Message Field Which Was Removed</span>
+</span><span class="line" data-line="139"><span style="color: #7b8496;">* We should use reserved in case of message definition update.</span>
+</span><span class="line" data-line="140"><span style="color: #7b8496;">* (<span style="text-decoration: underline;">https://developers.google.com/protocol-buffers/docs/proto3#updating</span>)</span>
+</span><span class="line" data-line="141"><span style="color: #7b8496;">*/</span>
+</span><span class="line" data-line="142">
+</span><span class="line" data-line="143"><span style="color: #7b8496;">/*</span>
+</span><span class="line" data-line="144"><span style="color: #7b8496;">* Reserved Fields</span>
+</span><span class="line" data-line="145"><span style="color: #7b8496;">* It&#39;s used in case if we need to add/remove new fields into message.</span>
+</span><span class="line" data-line="146"><span style="color: #7b8496;">* Using Reserved Backward and Forward Compatibility Of Messages can be achieved</span>
+</span><span class="line" data-line="147"><span style="color: #7b8496;">*/</span>
+</span><span class="line" data-line="148">
+</span><span class="line" data-line="149">
+</span><span class="line" data-line="150"><span style="color: #ffbd5e;">message</span> <span style="color: #bd5eff;">ReservedMessage</span> <span style="color: #ffffff;">{</span>
+</span><span class="line" data-line="151">    <span style="color: #ffbd5e;">reserved</span> <span style="color: #ffbd5e;">0</span><span style="color: #ffffff;">,</span> <span style="color: #ffbd5e;">1</span><span style="color: #ffffff;">,</span> <span style="color: #ffbd5e;">2</span><span style="color: #ffffff;">,</span> <span style="color: #ffbd5e;">3</span> <span style="color: #ffbd5e;">to</span> <span style="color: #ffbd5e;">10</span><span style="color: #ffffff;">;</span> <span style="color: #7b8496;">// Set Of Tag Numbers Which Can&#39;t be reused.</span>
+</span><span class="line" data-line="152">    <span style="color: #ffbd5e;">reserved</span> &quot;firstMsg&quot;<span style="color: #ffffff;">,</span> &quot;secondMsg&quot;<span style="color: #ffffff;">,</span> &quot;thirdMsg&quot;<span style="color: #ffffff;">;</span> <span style="color: #7b8496;">// Set Of Labels Which Can&#39;t Be reused.</span>
+</span><span class="line" data-line="153"><span style="color: #ffffff;">}</span>
+</span><span class="line" data-line="154">
+</span><span class="line" data-line="155"><span style="color: #7b8496;">/*</span>
+</span><span class="line" data-line="156"><span style="color: #7b8496;">* Any</span>
+</span><span class="line" data-line="157"><span style="color: #7b8496;">* The Any message type lets you use messages as embedded types without having their .proto definition.</span>
+</span><span class="line" data-line="158"><span style="color: #7b8496;">* An Any contains an arbitrary serialized message as bytes,</span>
+</span><span class="line" data-line="159"><span style="color: #7b8496;">* along with a URL that acts as a globally unique identifier for and resolves to that message&#39;s type.</span>
+</span><span class="line" data-line="160"><span style="color: #7b8496;">* For Any to work we need to import it as shown below.</span>
+</span><span class="line" data-line="161"><span style="color: #7b8496;">*/</span>
+</span><span class="line" data-line="162"><span style="color: #7b8496;">/*</span>
+</span><span class="line" data-line="163"><span style="color: #7b8496;">    import &quot;google/protobuf/any.proto&quot;;</span>
+</span><span class="line" data-line="164"><span style="color: #7b8496;">    message AnySampleMessage {</span>
+</span><span class="line" data-line="165"><span style="color: #7b8496;">        repeated google.protobuf.Any.details = 1;</span>
+</span><span class="line" data-line="166"><span style="color: #7b8496;">    }</span>
+</span><span class="line" data-line="167"><span style="color: #7b8496;"></span>
+</span><span class="line" data-line="168"><span style="color: #7b8496;">*/</span>
+</span><span class="line" data-line="169">
+</span><span class="line" data-line="170">
+</span><span class="line" data-line="171"><span style="color: #7b8496;">/*</span>
+</span><span class="line" data-line="172"><span style="color: #7b8496;">*  OneOf</span>
+</span><span class="line" data-line="173"><span style="color: #7b8496;">* There are cases, wherein only one field at-most might be present as part of the message.</span>
+</span><span class="line" data-line="174"><span style="color: #7b8496;">* Note: OneOf messages can&#39;t be repeated.</span>
+</span><span class="line" data-line="175"><span style="color: #7b8496;">*/</span>
+</span><span class="line" data-line="176">
+</span><span class="line" data-line="177"><span style="color: #ffbd5e;">message</span> <span style="color: #bd5eff;">OneOfMessage</span> <span style="color: #ffffff;">{</span>
+</span><span class="line" data-line="178">    <span style="color: #ffbd5e;">oneof</span> msg <span style="color: #ffffff;">{</span>
+</span><span class="line" data-line="179">        <span style="color: #bd5eff;">string</span> fname <span style="color: #bd5eff;">=</span> <span style="color: #ffbd5e;">1</span><span style="color: #ffffff;">;</span>
+</span><span class="line" data-line="180">        <span style="color: #bd5eff;">string</span> sname <span style="color: #bd5eff;">=</span> <span style="color: #ffbd5e;">2</span><span style="color: #ffffff;">;</span>
+</span><span class="line" data-line="181">    <span style="color: #ffffff;">}</span><span style="color: #ffffff;">;</span>
+</span><span class="line" data-line="182"><span style="color: #ffffff;">}</span>
+</span><span class="line" data-line="183">
+</span><span class="line" data-line="184"><span style="color: #7b8496;">/*</span>
+</span><span class="line" data-line="185"><span style="color: #7b8496;">* Maps</span>
+</span><span class="line" data-line="186"><span style="color: #7b8496;">* Map fields cannot be repeated.</span>
+</span><span class="line" data-line="187"><span style="color: #7b8496;">* Ordering Of A Map Is Not Guaranteed.</span>
+</span><span class="line" data-line="188"><span style="color: #7b8496;">*/</span>
+</span><span class="line" data-line="189">
+</span><span class="line" data-line="190"><span style="color: #ffbd5e;">message</span> <span style="color: #bd5eff;">MessageWithMaps</span> <span style="color: #ffffff;">{</span>
+</span><span class="line" data-line="191">    map<span style="color: #ffffff;">&lt;</span><span style="color: #bd5eff;">string</span><span style="color: #ffffff;">,</span> <span style="color: #bd5eff;">string</span><span style="color: #ffffff;">&gt;</span> mapOfMessages <span style="color: #bd5eff;">=</span> <span style="color: #ffbd5e;">1</span><span style="color: #ffffff;">;</span>
+</span><span class="line" data-line="192"><span style="color: #ffffff;">}</span>
+</span><span class="line" data-line="193">
+</span><span class="line" data-line="194">
+</span><span class="line" data-line="195"><span style="color: #7b8496;">/*</span>
+</span><span class="line" data-line="196"><span style="color: #7b8496;">* Packages</span>
+</span><span class="line" data-line="197"><span style="color: #7b8496;">* Used for preventing name clashes between protocol message types</span>
+</span><span class="line" data-line="198"><span style="color: #7b8496;">* Syntax:</span>
+</span><span class="line" data-line="199"><span style="color: #7b8496;">    package ${packageName};</span>
+</span><span class="line" data-line="200"><span style="color: #7b8496;"></span>
+</span><span class="line" data-line="201"><span style="color: #7b8496;">    To Access the package;</span>
+</span><span class="line" data-line="202"><span style="color: #7b8496;">    ${packageName}.${messageName} = ${tagNumber};</span>
+</span><span class="line" data-line="203"><span style="color: #7b8496;">*/</span>
+</span><span class="line" data-line="204">
+</span><span class="line" data-line="205"><span style="color: #7b8496;">/*</span>
+</span><span class="line" data-line="206"><span style="color: #7b8496;">* Services</span>
+</span><span class="line" data-line="207"><span style="color: #7b8496;">* Message Types Defined For Using In RPC system.</span>
+</span><span class="line" data-line="208"><span style="color: #7b8496;">*  When protoc compiler generates for various languages it generates stub methods for the services.</span>
+</span><span class="line" data-line="209"><span style="color: #7b8496;">*/</span>
+</span><span class="line" data-line="210">
+</span><span class="line" data-line="211"><span style="color: #ffbd5e;">message</span> <span style="color: #bd5eff;">SearchRequest</span> <span style="color: #ffffff;">{</span>
+</span><span class="line" data-line="212">    <span style="color: #bd5eff;">string</span> queryString <span style="color: #bd5eff;">=</span> <span style="color: #ffbd5e;">1</span><span style="color: #ffffff;">;</span>
+</span><span class="line" data-line="213"><span style="color: #ffffff;">}</span>
+</span><span class="line" data-line="214">
+</span><span class="line" data-line="215"><span style="color: #ffbd5e;">message</span> <span style="color: #bd5eff;">SearchResponse</span> <span style="color: #ffffff;">{</span>
+</span><span class="line" data-line="216">    <span style="color: #bd5eff;">string</span> queryResponse <span style="color: #bd5eff;">=</span> <span style="color: #ffbd5e;">1</span><span style="color: #ffffff;">;</span>
+</span><span class="line" data-line="217"><span style="color: #ffffff;">}</span>
+</span><span class="line" data-line="218"><span style="color: #ffbd5e;">service</span> <span style="color: #bd5eff;">SearchService</span> <span style="color: #ffffff;">{</span>
+</span><span class="line" data-line="219">    <span style="color: #ffbd5e;">rpc</span> <span style="color: #bd5eff;">Search</span> <span style="color: #ffffff;">(</span><span style="color: #bd5eff;">SearchRequest</span><span style="color: #ffffff;">)</span> <span style="color: #ffbd5e;">returns</span> <span style="color: #ffffff;">(</span><span style="color: #bd5eff;">SearchResponse</span><span style="color: #ffffff;">)</span><span style="color: #ffffff;">;</span>
+</span><span class="line" data-line="220"><span style="color: #ffffff;">}</span>
+</span></code></pre>
+</body>
+</html>
