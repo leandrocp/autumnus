@@ -16,7 +16,7 @@ impl<'a> HtmlLinked<'a> {
     }
 }
 
-impl<'a> Formatter for HtmlLinked<'a> {
+impl Formatter for HtmlLinked<'_> {
     fn start<W>(&self, writer: &mut W, _: &str)
     where
         W: std::fmt::Write,

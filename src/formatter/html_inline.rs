@@ -16,7 +16,7 @@ impl<'a> HtmlInline<'a> {
     }
 }
 
-impl<'a> Formatter for HtmlInline<'a> {
+impl Formatter for HtmlInline<'_> {
     fn start<W>(&self, writer: &mut W, _: &str)
     where
         W: std::fmt::Write,

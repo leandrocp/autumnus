@@ -21,7 +21,7 @@ impl<'a> Terminal<'a> {
     }
 }
 
-impl<'a> Formatter for Terminal<'a> {
+impl Formatter for Terminal<'_> {
     fn write<W>(
         &self,
         _writer: &mut W,

@@ -235,9 +235,9 @@ use crate::formatter::HtmlInline;
 use crate::formatter::HtmlLinked;
 use crate::languages::Language;
 use formatter::Terminal;
+use std::sync::LazyLock;
 use themes::Theme;
 use tree_sitter_highlight::Highlighter;
-use std::sync::LazyLock;
 
 static DEFAULT_THEME: LazyLock<Theme> = LazyLock::new(Theme::default);
 
@@ -379,7 +379,7 @@ pub struct Options<'a> {
     pub formatter: FormatterOption,
 }
 
-impl<'a> Default for Options<'a> {
+impl Default for Options<'_> {
     fn default() -> Self {
         Self {
             theme: &DEFAULT_THEME,

@@ -426,10 +426,8 @@ fn convert_lua_pattern_to_rust_regex(lua_pattern: &str) -> String {
             || c == '{'
             || c == '}'
             || c == '|'
+            || (c == '^' && !result.is_empty())
         {
-            result.push('\\');
-            result.push(c);
-        } else if c == '^' && !result.is_empty() {
             result.push('\\');
             result.push(c);
         } else {
