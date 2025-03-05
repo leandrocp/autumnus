@@ -22,7 +22,7 @@ update-parsers:
     #!/usr/bin/env bash
     set -euo pipefail
     
-    echo "⚠️  This will update all parser subtrees in vendored_parsers/."
+    echo "⚠️  This will update all parser source files in vendored_parsers/."
     echo ""
     read -p "Are you sure you want to proceed? (y/N) " -n 1 -r
     echo ""
@@ -31,10 +31,13 @@ update-parsers:
         exit 0
     fi
 
+    TEMP_DIR=$(mktemp -d)
+    trap 'rm -rf "$TEMP_DIR"' EXIT
+
     parsers=(
         "tree-sitter-clojure https://github.com/sogaiu/tree-sitter-clojure.git master"
         "tree-sitter-make https://github.com/alemuller/tree-sitter-make.git main"
-        "tree-sitter-vue git@github.com:tree-sitter-grammars/tree-sitter-vue.git fork"
+        "tree-sitter-vue https://github.com/tree-sitter-grammars/tree-sitter-vue.git fork"
         "tree-sitter-cmake https://github.com/uyha/tree-sitter-cmake.git master"
         "tree-sitter-iex https://github.com/elixir-lang/tree-sitter-iex.git main"
         "tree-sitter-llvm https://github.com/benwilliamgraham/tree-sitter-llvm.git main"
@@ -46,7 +49,7 @@ update-parsers:
         "tree-sitter-liquid https://github.com/hankthetank27/tree-sitter-liquid.git main"
         "tree-sitter-csv https://github.com/tree-sitter-grammars/tree-sitter-csv.git master"
         "tree-sitter-glimmer https://github.com/ember-tooling/tree-sitter-glimmer.git main"
-        "tree-sitter-latex https://github.com/latex-lsp/tree-sitter-latex.git master"
+        # "tree-sitter-latex https://github.com/latex-lsp/tree-sitter-latex.git master"
         "tree-sitter-eex https://github.com/connorlay/tree-sitter-eex.git main"
         "tree-sitter-elm https://github.com/elm-tooling/tree-sitter-elm.git main"
         "tree-sitter-comment https://github.com/stsewd/tree-sitter-comment.git master"
@@ -62,10 +65,30 @@ update-parsers:
     for parser_info in "${parsers[@]}"; do
         read -r parser repo branch <<< "$parser_info"
         echo "Updating $parser from $repo ($branch)"
-        git subtree pull --prefix="vendored_parsers/$parser" "$repo" "$branch" --squash
+        
+        git clone --depth 1 --branch "$branch" "$repo" "$TEMP_DIR/$parser"
+        mkdir -p "vendored_parsers/$parser"
+        
+        if [ "$parser" = "tree-sitter-csv" ] && [ -d "$TEMP_DIR/$parser/csv" ]; then
+            rm -rf "vendored_parsers/$parser/src"
+            cp -r "$TEMP_DIR/$parser/csv" "vendored_parsers/$parser/src"
+            echo "✓ Updated $parser (special case: copied csv/ as src/)"
+        elif [ "$parser" = "tree-sitter-latex" ]; then
+            rm -rf "vendored_parsers/$parser"/*
+            cp -r "$TEMP_DIR/$parser"/* "vendored_parsers/$parser/"
+            rm -f "vendored_parsers/$parser/Cargo.toml"
+            (cd "vendored_parsers/$parser" && npx tree-sitter generate)
+            echo "✓ Updated $parser (special case: generated parser)"
+        elif [ -d "$TEMP_DIR/$parser/src" ]; then
+            rm -rf "vendored_parsers/$parser/src"
+            cp -r "$TEMP_DIR/$parser/src" "vendored_parsers/$parser/"
+            echo "✓ Updated $parser"
+        else
+            echo "⚠️  No src directory found for $parser"
+        fi
+        
+        rm -rf "$TEMP_DIR/$parser"
     done
-
-    find ./vendored_parsers/tree-sitter-*/ -name "Cargo.toml" -type f -delete
 
 update-queries:
     #!/usr/bin/env bash

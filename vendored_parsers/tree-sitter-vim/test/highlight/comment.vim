@@ -1,3 +1,0 @@
-echo
-"\ lorem ipsum
-" <- @comment

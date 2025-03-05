@@ -1,9 +1,0 @@
-schema {
-  query: MyQueryType
-  mutation: MyMutationType
-}
-
-schema @deprecated {
-  query: MyDeprecatedQueryType
-  mutation: MyDeprecatedMutationType
-}
