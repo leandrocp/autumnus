@@ -21,15 +21,16 @@ impl<'a> Formatter for HtmlLinked<'a> {
     where
         W: std::fmt::Write,
     {
-        write!(writer, "<pre class=\"athl");
-
-        if let Some(pre_clas) = &self.options.pre_class {
-            write!(writer, " {}", pre_clas);
-        }
+        let class = if let Some(pre_clas) = self.options.pre_class {
+            format!("athl {}", pre_clas)
+        } else {
+            "athl".to_string()
+        };
 
         write!(
             writer,
-            "\"><code class=\"language-{}\" translate=\"no\" tabindex=\"0\">",
+            "<pre class=\"{}\"><code class=\"language-{}\" translate=\"no\" tabindex=\"0\">",
+            class,
             self.lang.id_name()
         );
     }
@@ -44,13 +45,19 @@ impl<'a> Formatter for HtmlLinked<'a> {
     {
         let mut renderer = tree_sitter_highlight::HtmlRenderer::new();
 
+        let highlight_attr = if self.options.include_highlight {
+            " data-highlight=\""
+        } else {
+            ""
+        };
+
         renderer
             .render(events, source.as_bytes(), &move |highlight, output| {
                 let scope = HIGHLIGHT_NAMES[highlight.0];
                 let class = CLASSES[highlight.0];
 
                 if self.options.include_highlight {
-                    output.extend(b"data-highlight=\"");
+                    output.extend(highlight_attr.as_bytes());
                     output.extend(scope.as_bytes());
                     output.extend(b"\"");
                 }
