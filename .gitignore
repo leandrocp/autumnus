@@ -1,4 +1,4 @@
 /target
-themes/nvim
-queries/**/folds.scm
-queries/**/indents.scm
+/themes/nvim
+/queries/**/folds.scm
+/queries/**/indents.scm

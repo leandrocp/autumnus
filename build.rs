@@ -7,7 +7,6 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 
 fn main() {
-    println!("cargo:rerun-if-changed=build.rs");
     vendored_parsers();
     queries();
     themes();
@@ -238,8 +237,6 @@ fn read_query_file(path: &Path, language: &str, query: &str) -> String {
 }
 
 fn queries() {
-    println!("cargo:rerun-if-changed=queries");
-
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
     let dest_path = out_dir.join("queries_constants.rs");
 

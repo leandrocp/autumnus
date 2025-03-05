@@ -101,3 +101,32 @@ dev-server:
     #!/usr/bin/env bash
     set -euo pipefail
     (cd samples && python -m http.server)
+
+update-parsers:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    
+    echo "⚠️  This will update all parser subtrees in vendored_parsers/."
+    echo ""
+    read -p "Are you sure you want to proceed? (y/N) " -n 1 -r
+    echo ""
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo "Operation cancelled."
+        exit 0
+    fi
+
+    for dir in vendored_parsers/tree-sitter-*; do
+        if [ -d "$dir" ]; then
+            parser_name=$(basename "$dir")
+            remote_url=$(git config -f "$dir/.git/config" --get remote.origin.url)
+            if [ -n "$remote_url" ]; then
+                branch=$(cd "$dir" && git symbolic-ref --short HEAD 2>/dev/null || echo "main")
+                git subtree pull --prefix="$dir" "$remote_url" "$branch" --squash
+            else
+                echo "⚠️  Could not find remote URL for $parser_name"
+            fi
+        fi
+    done
+
+    # necessary for `cargo package` to work
+    find vendored_parsers -type f -name "Cargo.toml" -delete

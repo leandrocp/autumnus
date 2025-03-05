@@ -11,9 +11,9 @@ license = "MIT"
 include = [
   "/build.rs",
   "/src/",
-  "/vendored_parsers/tree-sitter-*/**/*.c",
-  "/vendored_parsers/tree-sitter-*/**/*.h",
-  "/vendored_parsers/tree-sitter-*/**/*.cc",
+  "/vendored_parsers/tree-sitter-*/**/src/**/*.h",
+  "/vendored_parsers/tree-sitter-*/**/src/**/*.c",
+  "/vendored_parsers/tree-sitter-*/**/src/**/*.cc",
   "/queries/README.md",
   "/queries/**/highlights.scm",
   "/queries/**/injections.scm",
