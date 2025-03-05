@@ -244,7 +244,7 @@ impl Language {
         None
     }
 
-    // TODO: review tree-sitter.json file-types
+    // TODO: https://github.com/nvim-treesitter/nvim-treesitter/tree/master/queries/embedded_template
     pub fn language_globs(language: Language) -> Vec<glob::Pattern> {
         let glob_strs: &'static [&'static str] = match language {
             Language::Angular => &["*.angular", "component.html"],
@@ -286,6 +286,8 @@ impl Language {
                 "bash_profile",
                 "bashrc",
                 "cshrc",
+                "ebuild",
+                "eclass",
                 "gradlew",
                 "kshrc",
                 "login",
@@ -308,7 +310,7 @@ impl Language {
             Language::CSharp => &["*.cs"],
             Language::CSV => &["*.csv"],
             Language::CPlusPlus => &[
-                "*.cc", "*.cpp", "*.h", "*.hh", "*.hpp", "*.ino", "*.cxx", "*.cu",
+                "*.cc", "*.cpp", "*.h", "*.hh", "*.hpp", "*.ino", "*.cxx", "*.cu", "*.hxx",
             ],
             Language::CSS => &["*.css"],
             Language::Diff => &["*.diff"],
@@ -327,6 +329,7 @@ impl Language {
             Language::Elm => &["*.elm"],
             Language::Erlang => &[
                 "*.erl",
+                "*.app",
                 "*.app.src",
                 "*.es",
                 "*.escript",
@@ -334,18 +337,19 @@ impl Language {
                 "*.xrl",
                 "*.yrl",
                 "Emakefile",
+                "rebar.config",
             ],
             Language::FSharp => &["*.fs", "*.fsx", "*.fsi"],
             Language::Gleam => &["*.gleam"],
             Language::Glimmer => &["*.hbs", "*.handlebars", "*.html.handlebars", "*.glimmer"],
             Language::Go => &["*.go"],
             Language::GraphQL => &[],
-            Language::Haskell => &["*.hs"],
+            Language::Haskell => &["*.hs", "*.hs-boot"],
             Language::HEEx => &["*.heex", "*.neex"],
             Language::HTML => &["*.html", "*.htm", "*.xhtml"],
             Language::IEx => &["*.iex"],
             Language::Java => &["*.java"],
-            Language::JavaScript => &["*.cjs", "*.js", "*.mjs", "*.snap"],
+            Language::JavaScript => &["*.cjs", "*.js", "*.mjs", "*.snap", "*.jsx"],
             Language::JSON => &[
                 "*.json",
                 "*.avsc",
@@ -387,10 +391,12 @@ impl Language {
                 "*.makefile",
                 "*.mk",
                 "*.mkfile",
+                "*.dsp",
                 "BSDmakefile",
                 "GNUmakefile",
                 "Kbuild",
                 "Makefile",
+                "MAKEFILE",
                 "Makefile.am",
                 "Makefile.boot",
                 "Makefile.frag",
@@ -401,12 +407,12 @@ impl Language {
                 "makefile.sco",
                 "mkfile",
             ],
-            Language::Markdown => &["*.md", "README"],
+            Language::Markdown => &["*.md", "README", "LICENSE"],
             Language::MarkdownInline => &[],
-            Language::ObjC => &["*.m"],
+            Language::ObjC => &["*.m", "*.objc"],
             Language::OCaml => &["*.ml"],
             Language::OCamlInterface => &["*.mli"],
-            Language::Perl => &["*.pm", "*.pl"],
+            Language::Perl => &["*.pm", "*.pl", "*.t"],
             Language::Php => &[
                 "*.php", "*.phtml", "*.php3", "*.php4", "*.php5", "*.php7", "*.phps",
             ],
@@ -415,7 +421,7 @@ impl Language {
             Language::PlainText => &[],
             Language::Python => &["*.py", "*.py3", "*.pyi", "*.bzl", "TARGETS", "BUCK", "DEPS"],
             Language::R => &["*.R", "*.r", "*.rd", "*.rsx", ".Rprofile", "expr-dist"],
-            Language::Regex => &[],
+            Language::Regex => &["*.regex"],
             Language::Ruby => &[
                 "*.rb",
                 "*.builder",
@@ -460,6 +466,7 @@ impl Language {
                 "*.xsl",
                 "*.xslt",
                 "*.zcml",
+                "*.rng",
                 "App.config",
                 "nuget.config",
                 "packages.config",
