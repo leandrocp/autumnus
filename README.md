@@ -1,6 +1,6 @@
 # Autumnus
 
-Autumnus is a powerful syntax highlighter powered by tree-sitter and Neovim themes. It provides beautiful and accurate syntax highlighting for over 50 programming languages with support for over 100 themes.
+Autumnus is a syntax highlighter powered by tree-sitter and Neovim themes. It provides beautiful and accurate syntax highlighting for over 50 programming languages with support for over 100 themes.
 
 ## Features
 
@@ -108,7 +108,7 @@ let html = highlight(
 When using `FormatterOption::HtmlLinked`, include the corresponding CSS file for your chosen theme:
 
 ```html
-<link rel="stylesheet" href="css/dracula.css">
+<link rel="stylesheet" href="css/dracula.css" />
 ```
 
 ## Supported Languages
