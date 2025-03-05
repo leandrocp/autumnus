@@ -38,21 +38,25 @@ include!(concat!(env!("OUT_DIR"), "/queries_constants.rs"));
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter)]
 pub enum Language {
+    // Hcl, TODO: repo is too large (too many files)
+    // Vue, TODO: vuejs
     Angular,
     Astro,
     Bash,
     C,
     CMake,
-    CSharp,
+    CPlusPlus,
+    CSS,
     CSV,
+    CSharp,
     Clojure,
     Comment,
     CommonLisp,
-    CPlusPlus,
-    CSS,
     Diff,
     Dockerfile,
     EEx,
+    EJS,
+    ERB,
     Elixir,
     Elm,
     Erlang,
@@ -61,14 +65,13 @@ pub enum Language {
     Glimmer,
     Go,
     GraphQL,
-    Haskell,
-    // Hcl, TODO: repo is too large (too many files)
     HEEx,
     HTML,
+    Haskell,
     IEx,
+    JSON,
     Java,
     JavaScript,
-    JSON,
     Kotlin,
     LaTeX,
     Liquid,
@@ -77,9 +80,9 @@ pub enum Language {
     Make,
     Markdown,
     MarkdownInline,
-    ObjC,
     OCaml,
     OCamlInterface,
+    ObjC,
     Perl,
     Php,
     PlainText,
@@ -90,17 +93,16 @@ pub enum Language {
     Regex,
     Ruby,
     Rust,
-    Scala,
     SCSS,
     SQL,
+    Scala,
     Surface,
     Svelte,
     Swift,
     Toml,
-    TypeScript,
     Tsx,
+    TypeScript,
     Vim,
-    // Vue,
     XML,
     YAML,
     Zig,
@@ -124,6 +126,8 @@ impl Language {
             "diff" => Some(Language::Diff),
             "dockerfile" | "docker" => Some(Language::Dockerfile),
             "eex" => Some(Language::EEx),
+            "ejs" => Some(Language::EJS),
+            "erb" => Some(Language::ERB),
             "elixir" => Some(Language::Elixir),
             "elm" => Some(Language::Elm),
             "erlang" => Some(Language::Erlang),
@@ -325,6 +329,8 @@ impl Language {
                 "*.container",
             ],
             Language::EEx => &["*.eex"],
+            Language::EJS => &["*.ejs"],
+            Language::ERB => &["*.erb"],
             Language::Elixir => &["*.ex", "*.exs"],
             Language::Elm => &["*.elm"],
             Language::Erlang => &[
@@ -627,6 +633,8 @@ impl Language {
             Language::Diff => "Diff",
             Language::Dockerfile => "Dockerfile",
             Language::EEx => "Eex",
+            Language::EJS => "EJS",
+            Language::ERB => "ERB",
             Language::Elixir => "Elixir",
             Language::Elm => "Elm",
             Language::Erlang => "Erlang",
@@ -700,6 +708,8 @@ impl Language {
             Language::Diff => &DIFF_CONFIG,
             Language::Dockerfile => &DOCKERFILE_CONFIG,
             Language::EEx => &EEX_CONFIG,
+            Language::EJS => &EJS_CONFIG,
+            Language::ERB => &ERB_CONFIG,
             Language::Elixir => &ELIXIR_CONFIG,
             Language::Elm => &ELM_CONFIG,
             Language::Erlang => &ERLANG_CONFIG,
@@ -972,6 +982,32 @@ static EEX_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         EEX_LOCALS,
     )
     .expect("failed to create eex highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static EJS_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(tree_sitter_embedded_template::LANGUAGE),
+        "ejs",
+        EMBEDDED_TEMPLATE_HIGHLIGHTS,
+        EMBEDDED_TEMPLATE_INJECTIONS,
+        EMBEDDED_TEMPLATE_LOCALS,
+    )
+    .expect("failed to create ejs highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+static ERB_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(tree_sitter_embedded_template::LANGUAGE),
+        "erb",
+        EMBEDDED_TEMPLATE_HIGHLIGHTS,
+        EMBEDDED_TEMPLATE_INJECTIONS,
+        EMBEDDED_TEMPLATE_LOCALS,
+    )
+    .expect("failed to create erb highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
