@@ -1,0 +1,177 @@
+================================================================================
+qr() strings
+================================================================================
+qr/pattern/;
+qr/pattern with (parens)/;
+qr/pattern with $interpolation/;
+qr'pattern with no $interpolation';
+qr/pattern/i;
+qr/^anchored pattern$/;
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (quoted_regexp
+      (regexp_content)))
+  (expression_statement
+    (quoted_regexp
+      (regexp_content)))
+  (expression_statement
+    (quoted_regexp
+      (regexp_content
+        (scalar
+          (varname)))))
+  (expression_statement
+    (quoted_regexp
+      (regexp_content)))
+  (expression_statement
+    (quoted_regexp
+      (regexp_content)
+      (quoted_regexp_modifiers)))
+  (expression_statement
+    (quoted_regexp
+      (regexp_content))))
+
+================================================================================
+modifiers whitespace
+================================================================================
+qr/pattern/ unless 2;
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (postfix_conditional_expression
+      (quoted_regexp
+        (regexp_content))
+      (number))))
+
+================================================================================
+Regexp match
+================================================================================
+m/pattern/;
+m/pattern with (parens)/;
+m/pattern with $interpolation->{things}/;
+m'pattern with no $interpolation';
+m/pattern/i;
+m/^anchored pattern$/;
+m/^pattern(?:$|,)/;
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (match_regexp
+      (regexp_content)))
+  (expression_statement
+    (match_regexp
+      (regexp_content)))
+  (expression_statement
+    (match_regexp
+      (regexp_content
+        (hash_element_expression
+          (scalar
+            (varname))
+          (autoquoted_bareword)))))
+  (expression_statement
+    (match_regexp
+      (regexp_content)))
+  (expression_statement
+    (match_regexp
+      (regexp_content)
+      (match_regexp_modifiers)))
+  (expression_statement
+    (match_regexp
+      (regexp_content)))
+  (expression_statement
+    (match_regexp
+      (regexp_content))))
+
+================================================================================
+Match w just solidus
+================================================================================
+$var =~ /pattern/;
+time / 2; #comment
+sum /pattern;#still pattern/;
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (binary_expression
+      (scalar
+        (varname))
+      (match_regexp
+        (regexp_content))))
+  (expression_statement
+    (binary_expression
+      (func0op_call_expression)
+      (number)))
+  (comment)
+  (expression_statement
+    (ambiguous_function_call_expression
+      (function)
+      (match_regexp
+        (regexp_content)))))
+
+================================================================================
+just solidus - DOR vs regex
+================================================================================
+sum //, 2, 3;
+shift // 1;
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (ambiguous_function_call_expression
+      (function)
+      (match_regexp)
+      (number)
+      (number)))
+  (expression_statement
+    (binary_expression
+      (func1op_call_expression)
+      (number))))
+
+================================================================================
+substitution
+================================================================================
+s/thing $var/$tings/xgr;
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (substitution_regexp
+      (regexp_content
+        (scalar
+          (varname)))
+      (replacement
+        (scalar
+          (varname)))
+      (substitution_regexp_modifiers))))
+
+================================================================================
+non-interpolating vars
+================================================================================
+m/@/;
+m/@!/;
+m/$ things/;
+m/$/;
+m/tings$
+  /x;
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (match_regexp
+      (regexp_content)))
+  (expression_statement
+    (match_regexp
+      (regexp_content)))
+  (expression_statement
+    (match_regexp
+      (regexp_content)))
+  (expression_statement
+    (match_regexp
+      (regexp_content)))
+  (expression_statement
+    (match_regexp
+      (regexp_content)
+      (match_regexp_modifiers))))

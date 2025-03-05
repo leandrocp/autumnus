@@ -1,0 +1,393 @@
+================================================================================
+Small declaration
+================================================================================
+sub foo
+{
+  123;
+}
+--------------------------------------------------------------------------------
+
+(source_file
+  (subroutine_declaration_statement
+    name: (bareword)
+    body: (block
+      (expression_statement
+        (number)))))
+
+================================================================================
+Small anonymous
+================================================================================
+sub { $x };
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (anonymous_subroutine_expression
+      (block
+        (expression_statement
+          (scalar
+            (varname)))))))
+
+================================================================================
+Attributes on named subs
+================================================================================
+sub abc :lvalue { }
+sub def :lvalue const { }
+sub ghi :lvalue :const { }
+sub jkl : { }
+--------------------------------------------------------------------------------
+
+(source_file
+  (subroutine_declaration_statement
+    (bareword)
+    (attrlist
+      (attribute
+        (attribute_name)))
+    (block))
+  (subroutine_declaration_statement
+    (bareword)
+    (attrlist
+      (attribute
+        (attribute_name))
+      (attribute
+        (attribute_name)))
+    (block))
+  (subroutine_declaration_statement
+    (bareword)
+    (attrlist
+      (attribute
+        (attribute_name))
+      (attribute
+        (attribute_name)))
+    (block))
+  (subroutine_declaration_statement
+    (bareword)
+    (block)))
+
+================================================================================
+Attributes on anonymous subs
+================================================================================
+sub :lvalue {};
+sub :lvalue const {};
+sub :lvalue :const {};
+sub : {};
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (anonymous_subroutine_expression
+      (attrlist
+        (attribute
+          (attribute_name)))
+      (block)))
+  (expression_statement
+    (anonymous_subroutine_expression
+      (attrlist
+        (attribute
+          (attribute_name))
+        (attribute
+          (attribute_name)))
+      (block)))
+  (expression_statement
+    (anonymous_subroutine_expression
+      (attrlist
+        (attribute
+          (attribute_name))
+        (attribute
+          (attribute_name)))
+      (block)))
+  (expression_statement
+    (anonymous_subroutine_expression
+      (block))))
+
+================================================================================
+Attributes with values
+================================================================================
+sub abc :title(Boo!) { }
+sub def :title(Boo(here)) { }
+sub ghi :title(Boo\(is fine) { }
+
+sub :title(Boo!) { }
+--------------------------------------------------------------------------------
+
+(source_file
+  (subroutine_declaration_statement
+    (bareword)
+    (attrlist
+      (attribute
+        (attribute_name)
+        (attribute_value)))
+    (block))
+  (subroutine_declaration_statement
+    (bareword)
+    (attrlist
+      (attribute
+        (attribute_name)
+        (attribute_value)))
+    (block))
+  (subroutine_declaration_statement
+    (bareword)
+    (attrlist
+      (attribute
+        (attribute_name)
+        (attribute_value)))
+    (block))
+  (expression_statement
+    (anonymous_subroutine_expression
+      (attrlist
+        (attribute
+          (attribute_name)
+          (attribute_value)))
+      (block))))
+
+================================================================================
+Prototypes
+================================================================================
+sub foo0 () { }
+sub foo1 ($) { }
+sub fooN (@) { }
+--------------------------------------------------------------------------------
+
+(source_file
+  (subroutine_declaration_statement
+    (bareword)
+    (prototype)
+    (block))
+  (subroutine_declaration_statement
+    (bareword)
+    (prototype)
+    (block))
+  (subroutine_declaration_statement
+    (bareword)
+    (prototype)
+    (block)))
+
+================================================================================
+Signatures
+================================================================================
+sub bar1 ($arg) { }
+sub bar3 ($one = 1, $two = 2, $three = ($one + $two)) { }
+sub barN ($x, $y, @z) { }
+--------------------------------------------------------------------------------
+
+(source_file
+  (subroutine_declaration_statement
+    (bareword)
+    (signature
+      (mandatory_parameter
+        (scalar
+          (varname))))
+    (block))
+  (subroutine_declaration_statement
+    (bareword)
+    (signature
+      (optional_parameter
+        (scalar
+          (varname))
+        (number))
+      (optional_parameter
+        (scalar
+          (varname))
+        (number))
+      (optional_parameter
+        (scalar
+          (varname))
+        (binary_expression
+          (scalar
+            (varname))
+          (scalar
+            (varname)))))
+    (block))
+  (subroutine_declaration_statement
+    (bareword)
+    (signature
+      (mandatory_parameter
+        (scalar
+          (varname)))
+      (mandatory_parameter
+        (scalar
+          (varname)))
+      (slurpy_parameter
+        (array
+          (varname))))
+    (block)))
+
+================================================================================
+Attribute plus signature
+================================================================================
+sub f :attr ($sig) {}
+--------------------------------------------------------------------------------
+
+(source_file
+  (subroutine_declaration_statement
+    (bareword)
+    (attrlist
+      (attribute
+        (attribute_name)))
+    (signature
+      (mandatory_parameter
+        (scalar
+          (varname))))
+    (block)))
+
+================================================================================
+Methods
+================================================================================
+method m1 { 123; }
+method { "anon" };
+method m2 :lvalue { }
+method m3 ($tings) { }
+--------------------------------------------------------------------------------
+
+(source_file
+  (method_declaration_statement
+    name: (bareword)
+    body: (block
+      (expression_statement
+        (number))))
+  (expression_statement
+    (anonymous_method_expression
+      body: (block
+        (expression_statement
+          (interpolated_string_literal
+            content: (string_content))))))
+  (method_declaration_statement
+    name: (bareword)
+    attributes: (attrlist
+      (attribute
+        name: (attribute_name)))
+    body: (block))
+  (method_declaration_statement
+    name: (bareword)
+    (signature
+      (mandatory_parameter
+        (scalar
+          (varname))))
+    body: (block)))
+
+================================================================================
+Lexical named sub
+================================================================================
+my sub abc { }
+--------------------------------------------------------------------------------
+
+(source_file
+  (subroutine_declaration_statement
+    (bareword)
+    (block)))
+
+================================================================================
+Funkier Signatures
+================================================================================
+sub unnamed ($thing, $, $=, @) {}
+sub named_params (:$red, :$blue) {}
+--------------------------------------------------------------------------------
+
+(source_file
+  (subroutine_declaration_statement
+    (bareword)
+    (signature
+      (mandatory_parameter
+        (scalar
+          (varname)))
+      (mandatory_parameter
+        (scalar))
+      (optional_parameter
+        (scalar))
+      (slurpy_parameter
+        (array)))
+    (block))
+  (subroutine_declaration_statement
+    (bareword)
+    (signature
+      (named_parameter
+        (scalar
+          (varname)))
+      (named_parameter
+        (scalar
+          (varname))))
+    (block)))
+
+================================================================================
+Recursive Signatures
+================================================================================
+sub but_why ($cb = sub ($arg) { say $arg }) {}
+--------------------------------------------------------------------------------
+
+(source_file
+  (subroutine_declaration_statement
+    (bareword)
+    (signature
+      (optional_parameter
+        (scalar
+          (varname))
+        (anonymous_subroutine_expression
+          (signature
+            (mandatory_parameter
+              (scalar
+                (varname))))
+          (block
+            (expression_statement
+              (ambiguous_function_call_expression
+                (function)
+                (scalar
+                  (varname))))))))
+    (block)))
+
+================================================================================
+async/await
+================================================================================
+async sub ($thing) {
+  await $thing->promise;
+}
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (anonymous_subroutine_expression
+      (signature
+        (mandatory_parameter
+          (scalar
+            (varname))))
+      (block
+        (expression_statement
+          (await_expression
+            (method_call_expression
+              (scalar
+                (varname))
+              (method))))))))
+
+================================================================================
+extended sub/method
+================================================================================
+extended sub thingy {}
+my extended method stuff {};
+my async extended method stuff {};
+my extended async method stuff {};
+--------------------------------------------------------------------------------
+
+(source_file
+  (subroutine_declaration_statement
+    (bareword)
+    (block))
+  (method_declaration_statement
+    (bareword)
+    (block))
+  (method_declaration_statement
+    (bareword)
+    (block))
+  (method_declaration_statement
+    (bareword)
+    (block)))
+
+================================================================================
+lexical method calls experimental Object::Pad syntax
+================================================================================
+$sner->&over_9000
+--------------------------------------------------------------------------------
+(source_file
+  (expression_statement
+    (method_call_expression
+      (scalar
+        (varname))
+      (method))))

@@ -1,0 +1,336 @@
+================================================================================
+Fancy indirob interpolation
+================================================================================
+"${\$obj->method}";
+"@{[1,2,3]}";
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (interpolated_string_literal
+      (string_content
+        (scalar
+          (block
+            (expression_statement
+              (refgen_expression
+                (method_call_expression
+                  (scalar
+                    (varname))
+                  (method)))))))))
+  (expression_statement
+    (interpolated_string_literal
+      (string_content
+        (array
+          (block
+            (expression_statement
+              (anonymous_array_expression
+                (list_expression
+                  (number)
+                  (number)
+                  (number))))))))))
+
+================================================================================
+Array element interpolation
+================================================================================
+"an array $elem[0]";
+"an array $elem->[1] deref";
+"an deep $elem->[1][0] deref";
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (interpolated_string_literal
+      (string_content
+        (array_element_expression
+          (container_variable
+            (varname))
+          (number)))))
+  (expression_statement
+    (interpolated_string_literal
+      (string_content
+        (array_element_expression
+          (scalar
+            (varname))
+          (number)))))
+  (expression_statement
+    (interpolated_string_literal
+      (string_content
+        (array_element_expression
+          (array_element_expression
+            (scalar
+              (varname))
+            (number))
+          (number))))))
+
+================================================================================
+Hash element interpolation
+================================================================================
+"a $hash{key}";
+"an $hash->{key} deref";
+"an deep $hash->{key}{deref}";
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (interpolated_string_literal
+      (string_content
+        (hash_element_expression
+          (container_variable
+            (varname))
+          (autoquoted_bareword)))))
+  (expression_statement
+    (interpolated_string_literal
+      (string_content
+        (hash_element_expression
+          (scalar
+            (varname))
+          (autoquoted_bareword)))))
+  (expression_statement
+    (interpolated_string_literal
+      (string_content
+        (hash_element_expression
+          (hash_element_expression
+            (scalar
+              (varname))
+            (autoquoted_bareword))
+          (autoquoted_bareword))))))
+
+================================================================================
+Method calls don't interpolate
+================================================================================
+"this is not a $method->call";
+"this is not a $method->$call";
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (interpolated_string_literal
+      (string_content
+        (scalar
+          (varname)))))
+  (expression_statement
+    (interpolated_string_literal
+      (string_content
+        (scalar
+          (varname))
+        (scalar
+          (varname))))))
+
+================================================================================
+Space skips interpolation
+================================================================================
+"an array $elem [0]";
+"an array $elem ->[1] deref";
+"an array $elem-> [1] deref and a slice $slice->@ [1..10]";
+"an array $elem->
+[1] deref";
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (interpolated_string_literal
+      (string_content
+        (scalar
+          (varname)))))
+  (expression_statement
+    (interpolated_string_literal
+      (string_content
+        (scalar
+          (varname)))))
+  (expression_statement
+    (interpolated_string_literal
+      (string_content
+        (scalar
+          (varname))
+        (scalar
+          (varname)))))
+  (expression_statement
+    (interpolated_string_literal
+      (string_content
+        (scalar
+          (varname))))))
+
+================================================================================
+Slice interpolation
+================================================================================
+"a plain @ary[0,1]";
+"a hash slice @hash{key}";
+"and now postfix $aryref->@[0,1,2]";
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (interpolated_string_literal
+      content: (string_content
+        (slice_expression
+          array: (slice_container_variable
+            (varname))
+          (list_expression
+            (number)
+            (number))))))
+  (expression_statement
+    (interpolated_string_literal
+      content: (string_content
+        (slice_expression
+          hash: (slice_container_variable
+            (varname))
+          (autoquoted_bareword)))))
+  (expression_statement
+    (interpolated_string_literal
+      content: (string_content
+        (slice_expression
+          arrayref: (scalar
+            (varname))
+          (list_expression
+            (number)
+            (number)
+            (number)))))))
+
+================================================================================
+Postfix star interpolation
+================================================================================
+"a $scalaref->$* and an unrolled $aryref->@*";
+"but $not-> $* or $here->$ *"
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (interpolated_string_literal
+      (string_content
+        (scalar_deref_expression
+          (scalar
+            (varname)))
+        (array_deref_expression
+          (scalar
+            (varname))))))
+  (expression_statement
+    (interpolated_string_literal
+      (string_content
+        (scalar
+          (varname))
+        (scalar
+          (varname))
+        (scalar
+          (varname))))))
+
+================================================================================
+Punctuation vars that interpolate
+================================================================================
+"$+";
+"$(";
+"$!";
+"@+";
+"@-";
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (interpolated_string_literal
+      (string_content
+        (scalar
+          (varname)))))
+  (expression_statement
+    (interpolated_string_literal
+      (string_content
+        (scalar
+          (varname)))))
+  (expression_statement
+    (interpolated_string_literal
+      (string_content
+        (scalar
+          (varname)))))
+  (expression_statement
+    (interpolated_string_literal
+      (string_content
+        (array
+          (varname)))))
+  (expression_statement
+    (interpolated_string_literal
+      (string_content
+        (array
+          (varname))))))
+
+================================================================================
+Punctuation vars that do not interpolate
+================================================================================
+"@(";
+"@)";
+"@";
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (interpolated_string_literal
+      (string_content)))
+  (expression_statement
+    (interpolated_string_literal
+      (string_content)))
+  (expression_statement
+    (interpolated_string_literal
+      (string_content))))
+
+================================================================================
+braced vars do not subscript
+================================================================================
+"${herro}[not an index]";
+"@{herro}[not an index]";
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (interpolated_string_literal
+      (string_content
+        (scalar
+          (varname)))))
+  (expression_statement
+    (interpolated_string_literal
+      (string_content
+        (array
+          (varname))))))
+
+================================================================================
+Nested quotes! (#98)
+================================================================================
+qq(things ${\q(and $shtuff)} and $shtuff);
+s[things ${\q{hello}} ][ ${\q[hi again]}];
+print "$test{'value'}";
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (interpolated_string_literal
+      (string_content
+        (scalar
+          (block
+            (expression_statement
+              (refgen_expression
+                (string_literal
+                  (string_content))))))
+        (scalar
+          (varname)))))
+  (expression_statement
+    (substitution_regexp
+      (regexp_content
+        (scalar
+          (block
+            (expression_statement
+              (refgen_expression
+                (string_literal
+                  (string_content)))))))
+      (replacement
+        (scalar
+          (block
+            (expression_statement
+              (refgen_expression
+                (string_literal
+                  (string_content)))))))))
+  (expression_statement
+    (ambiguous_function_call_expression
+      (function)
+      (interpolated_string_literal
+        (string_content
+          (hash_element_expression
+            (container_variable
+              (varname))
+            (string_literal
+              (string_content))))))))

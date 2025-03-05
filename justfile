@@ -22,7 +22,7 @@ update-parsers:
     #!/usr/bin/env bash
     set -euo pipefail
     
-    echo "⚠️  This will update all parser source files in vendored_parsers/."
+    echo "⚠️  This will update all parser files in vendored_parsers/."
     echo ""
     read -p "Are you sure you want to proceed? (y/N) " -n 1 -r
     echo ""
@@ -35,31 +35,31 @@ update-parsers:
     trap 'rm -rf "$TEMP_DIR"' EXIT
 
     parsers=(
-        "tree-sitter-clojure https://github.com/sogaiu/tree-sitter-clojure.git master"
-        "tree-sitter-make https://github.com/alemuller/tree-sitter-make.git main"
-        "tree-sitter-vue https://github.com/tree-sitter-grammars/tree-sitter-vue.git fork"
-        "tree-sitter-cmake https://github.com/uyha/tree-sitter-cmake.git master"
-        "tree-sitter-iex https://github.com/elixir-lang/tree-sitter-iex.git main"
-        "tree-sitter-llvm https://github.com/benwilliamgraham/tree-sitter-llvm.git main"
-        "tree-sitter-dockerfile https://github.com/camdencheek/tree-sitter-dockerfile.git main"
-        "tree-sitter-perl https://github.com/tree-sitter-perl/tree-sitter-perl.git master"
-        "tree-sitter-scss https://github.com/serenadeai/tree-sitter-scss.git master"
-        "tree-sitter-graphql https://github.com/bkegley/tree-sitter-graphql.git master"
-        "tree-sitter-kotlin https://github.com/fwcd/tree-sitter-kotlin.git main"
-        "tree-sitter-liquid https://github.com/hankthetank27/tree-sitter-liquid.git main"
-        "tree-sitter-csv https://github.com/tree-sitter-grammars/tree-sitter-csv.git master"
-        "tree-sitter-glimmer https://github.com/ember-tooling/tree-sitter-glimmer.git main"
-        # "tree-sitter-latex https://github.com/latex-lsp/tree-sitter-latex.git master"
-        "tree-sitter-eex https://github.com/connorlay/tree-sitter-eex.git main"
-        "tree-sitter-elm https://github.com/elm-tooling/tree-sitter-elm.git main"
-        "tree-sitter-comment https://github.com/stsewd/tree-sitter-comment.git master"
-        "tree-sitter-commonlisp https://github.com/tree-sitter-grammars/tree-sitter-commonlisp.git master"
-        "tree-sitter-http https://github.com/rest-nvim/tree-sitter-http.git main"
-        "tree-sitter-surface https://github.com/connorlay/tree-sitter-surface.git main"
         "tree-sitter-angular https://github.com/dlvandenberg/tree-sitter-angular.git main"
         "tree-sitter-astro https://github.com/virchau13/tree-sitter-astro.git master"
+        "tree-sitter-clojure https://github.com/sogaiu/tree-sitter-clojure.git master"
+        "tree-sitter-cmake https://github.com/uyha/tree-sitter-cmake.git master"
+        "tree-sitter-comment https://github.com/stsewd/tree-sitter-comment.git master"
+        "tree-sitter-commonlisp https://github.com/tree-sitter-grammars/tree-sitter-commonlisp.git master"
+        "tree-sitter-csv https://github.com/tree-sitter-grammars/tree-sitter-csv.git master"
+        "tree-sitter-dockerfile https://github.com/camdencheek/tree-sitter-dockerfile.git main"
+        "tree-sitter-eex https://github.com/connorlay/tree-sitter-eex.git main"
+        "tree-sitter-elm https://github.com/elm-tooling/tree-sitter-elm.git main"
+        "tree-sitter-glimmer https://github.com/ember-tooling/tree-sitter-glimmer.git main"
+        "tree-sitter-graphql https://github.com/bkegley/tree-sitter-graphql.git master"
+        "tree-sitter-http https://github.com/rest-nvim/tree-sitter-http.git main"
+        "tree-sitter-iex https://github.com/elixir-lang/tree-sitter-iex.git main"
+        "tree-sitter-kotlin https://github.com/fwcd/tree-sitter-kotlin.git main"
+        "tree-sitter-latex https://github.com/latex-lsp/tree-sitter-latex.git master"
+        "tree-sitter-liquid https://github.com/hankthetank27/tree-sitter-liquid.git main"
+        "tree-sitter-llvm https://github.com/benwilliamgraham/tree-sitter-llvm.git main"
+        "tree-sitter-make https://github.com/alemuller/tree-sitter-make.git main"
+        "tree-sitter-perl https://github.com/tree-sitter-perl/tree-sitter-perl.git master"
         "tree-sitter-powershell https://github.com/airbus-cert/tree-sitter-powershell.git main"
+        "tree-sitter-scss https://github.com/serenadeai/tree-sitter-scss.git master"
+        "tree-sitter-surface https://github.com/connorlay/tree-sitter-surface.git main"
         "tree-sitter-vim https://github.com/tree-sitter-grammars/tree-sitter-vim.git master"
+        "tree-sitter-vue https://github.com/tree-sitter-grammars/tree-sitter-vue.git fork"
     )
 
     for parser_info in "${parsers[@]}"; do
@@ -70,15 +70,16 @@ update-parsers:
         mkdir -p "vendored_parsers/$parser"
         
         if [ "$parser" = "tree-sitter-csv" ] && [ -d "$TEMP_DIR/$parser/csv" ]; then
-            rm -rf "vendored_parsers/$parser/src"
-            cp -r "$TEMP_DIR/$parser/csv" "vendored_parsers/$parser/src"
-            echo "✓ Updated $parser (special case: copied csv/ as src/)"
-        elif [ "$parser" = "tree-sitter-latex" ]; then
+            rm -rf "vendored_parsers/$parser/csv"
+            cp -r "$TEMP_DIR/$parser/csv" "vendored_parsers/$parser/"
+            echo "✓ Updated $parser"
+        elif [ "$parser" = "tree-sitter-latex" ] || [ "$parser" = "tree-sitter-perl" ]; then
             rm -rf "vendored_parsers/$parser"/*
             cp -r "$TEMP_DIR/$parser"/* "vendored_parsers/$parser/"
+            (cd "vendored_parsers/$parser" && npm install --no-save tree-sitter-cli && npx tree-sitter generate)
             rm -f "vendored_parsers/$parser/Cargo.toml"
-            (cd "vendored_parsers/$parser" && npx tree-sitter generate)
-            echo "✓ Updated $parser (special case: generated parser)"
+            rm -rf "vendored_parsers/$parser/node_modules"
+            echo "✓ Updated $parser"
         elif [ -d "$TEMP_DIR/$parser/src" ]; then
             rm -rf "vendored_parsers/$parser/src"
             cp -r "$TEMP_DIR/$parser/src" "vendored_parsers/$parser/"

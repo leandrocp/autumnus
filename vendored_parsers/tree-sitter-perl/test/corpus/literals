@@ -1,0 +1,291 @@
+================================================================================
+integers
+================================================================================
+123;
+077;
+0xDEADBEEF;
+0b11011011011;
+1234567890198;
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (number))
+  (expression_statement
+    (number))
+  (expression_statement
+    (number))
+  (expression_statement
+    (number))
+  (expression_statement
+    (number)))
+
+================================================================================
+floats
+================================================================================
+111_111e99_99;
+111_111e-99_99;
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (number))
+  (expression_statement
+    (number)))
+
+================================================================================
+'' strings
+================================================================================
+'hello';
+'a\'string';
+'a\\string';
+'\n is literal';
+'a string with a final \\';
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (string_literal
+      (string_content)))
+  (expression_statement
+    (string_literal
+      (string_content
+        (escaped_delimiter))))
+  (expression_statement
+    (string_literal
+      (string_content
+        (escape_sequence))))
+  (expression_statement
+    (string_literal
+      (string_content)))
+  (expression_statement
+    (string_literal
+      (string_content
+        (escape_sequence)))))
+
+================================================================================
+q() strings
+================================================================================
+q(hello);
+q(a 'string');
+q(a (string) here);
+q"literal $without interpolation";
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (string_literal
+      (string_content)))
+  (expression_statement
+    (string_literal
+      (string_content)))
+  (expression_statement
+    (string_literal
+      (string_content)))
+  (expression_statement
+    (string_literal
+      (string_content))))
+
+================================================================================
+"" strings
+================================================================================
+"hello";
+"a\"string";
+"a\\string";
+"a string w/ a final \\";
+"a string with\nlinefeed";
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (interpolated_string_literal
+      (string_content)))
+  (expression_statement
+    (interpolated_string_literal
+      (string_content
+        (escaped_delimiter))))
+  (expression_statement
+    (interpolated_string_literal
+      (string_content
+        (escape_sequence))))
+  (expression_statement
+    (interpolated_string_literal
+      (string_content
+        (escape_sequence))))
+  (expression_statement
+    (interpolated_string_literal
+      (string_content
+        (escape_sequence)))))
+
+================================================================================
+"" strings - no runaway barewords (fix when ambiguous funcs hit)
+================================================================================
+BAREWORD"string"
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (ambiguous_function_call_expression
+      (function)
+      (interpolated_string_literal
+        (string_content)))))
+
+================================================================================
+qq() strings
+================================================================================
+qq(hello);
+qq(a 'string');
+qq(a (string) here);
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (interpolated_string_literal
+      (string_content)))
+  (expression_statement
+    (interpolated_string_literal
+      (string_content)))
+  (expression_statement
+    (interpolated_string_literal
+      (string_content))))
+
+================================================================================
+quotelike strings - tricky delimeters
+================================================================================
+q#hello#;
+q # this is a comment
+   (hello);
+# another comment so this can fail properly
+q\backslashes\;
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (string_literal
+      (string_content)))
+  (expression_statement
+    (string_literal
+      (comment)
+      (string_content)))
+  (comment)
+  (expression_statement
+    (string_literal
+      (string_content))))
+
+================================================================================
+Interpolation in "" strings
+================================================================================
+"with $scalar";
+"even with a $ space after";
+"with @array";
+qq'with $scalar in single-quotes';
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (interpolated_string_literal
+      (string_content
+        (scalar
+          (varname)))))
+  (expression_statement
+    (interpolated_string_literal
+      (string_content
+        (scalar
+          (varname)))))
+  (expression_statement
+    (interpolated_string_literal
+      (string_content
+        (array
+          (varname)))))
+  (expression_statement
+    (interpolated_string_literal
+      (string_content
+        (scalar
+          (varname))))))
+
+================================================================================
+qw() lists
+================================================================================
+qw( a b c );
+qw();
+qw/ 1 2 /;
+qw/ literal\nslash-n /;
+qw/ literal \n slash-n /;
+qw| double escape \\|;
+qw/ hello \/ goodbye /;
+qw\ backslashes \;
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (quoted_word_list
+      (string_content)))
+  (expression_statement
+    (quoted_word_list))
+  (expression_statement
+    (quoted_word_list
+      (string_content)))
+  (expression_statement
+    (quoted_word_list
+      (string_content)))
+  (expression_statement
+    (quoted_word_list
+      (string_content)))
+  (expression_statement
+    (quoted_word_list
+      (string_content
+        (escape_sequence))))
+  (expression_statement
+    (quoted_word_list
+      (string_content
+        (escaped_delimiter))))
+  (expression_statement
+    (quoted_word_list
+      (string_content))))
+
+================================================================================
+`` strings
+================================================================================
+`command`;
+`command with (parens)`;
+`command with $interpolation`;
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (command_string
+      (string_content)))
+  (expression_statement
+    (command_string
+      (string_content)))
+  (expression_statement
+    (command_string
+      (string_content
+        (scalar
+          (varname))))))
+
+================================================================================
+qx() strings
+================================================================================
+qx(command);
+qx(command with (parens));
+qx(command with $interpolation);
+qx'command with no $interpolation';
+--------------------------------------------------------------------------------
+
+(source_file
+  (expression_statement
+    (command_string
+      (string_content)))
+  (expression_statement
+    (command_string
+      (string_content)))
+  (expression_statement
+    (command_string
+      (string_content
+        (scalar
+          (varname)))))
+  (expression_statement
+    (command_string
+      (string_content))))
