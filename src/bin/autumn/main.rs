@@ -165,11 +165,13 @@ fn print_cursor(src: &str, cursor: &mut tree_sitter::TreeCursor, depth: usize) {
 }
 
 fn highlight(path: &str, formatter: Option<Formatter>, theme: Option<String>) -> Result<()> {
-    let theme = theme.unwrap_or("catppuccin_frappe".to_string());
-    let theme = autumnus::themes::get(&theme).expect("Theme not found");
+    let theme_name = theme.unwrap_or("catppuccin_frappe".to_string());
+    let theme = autumnus::themes::get(&theme_name)
+        .map_err(|e| anyhow::anyhow!("Failed to load theme '{}': {}", theme_name, e))?;
 
     let bytes = read_or_die(Path::new(&path));
-    let source = std::str::from_utf8(&bytes).unwrap();
+    let source = std::str::from_utf8(&bytes)
+        .map_err(|e| anyhow::anyhow!("Failed to decode file '{}' as UTF-8: {}", path, e))?;
 
     match formatter.unwrap_or_default() {
         Formatter::HtmlInline => {

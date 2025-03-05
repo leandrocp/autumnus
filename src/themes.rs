@@ -8,12 +8,21 @@ use std::{collections::BTreeMap, fs, path::Path};
 pub enum ThemeError {
     /// Theme not found
     NotFound(String),
+    /// Invalid theme JSON
+    InvalidJson(String),
+    /// Theme file not found
+    FileNotFound(String),
+    /// Theme file read error
+    FileReadError(String),
 }
 
 impl std::fmt::Display for ThemeError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             ThemeError::NotFound(name) => write!(f, "Theme '{}' not found", name),
+            ThemeError::InvalidJson(msg) => write!(f, "Invalid theme JSON: {}", msg),
+            ThemeError::FileNotFound(path) => write!(f, "Theme file not found: {}", path),
+            ThemeError::FileReadError(msg) => write!(f, "Failed to read theme file: {}", msg),
         }
     }
 }
@@ -142,9 +151,17 @@ include!(concat!(env!("OUT_DIR"), "/theme_data.rs"));
 /// let path = Path::new("catppuccin_frappe.json");
 /// let theme = themes::from_file(path);
 /// ```
-pub fn from_file<P: AsRef<Path>>(path: P) -> Result<Theme, Box<dyn std::error::Error>> {
-    let json = fs::read_to_string(path)?;
-    Ok(serde_json::from_str(&json)?)
+pub fn from_file<P: AsRef<Path>>(path: P) -> Result<Theme, ThemeError> {
+    let path = path.as_ref();
+    let json = fs::read_to_string(path).map_err(|e| {
+        if e.kind() == std::io::ErrorKind::NotFound {
+            ThemeError::FileNotFound(path.display().to_string())
+        } else {
+            ThemeError::FileReadError(e.to_string())
+        }
+    })?;
+
+    from_json(&json).map_err(|e| ThemeError::InvalidJson(e.to_string()))
 }
 
 /// Creates a `Theme` from a JSON string.
@@ -160,7 +177,17 @@ pub fn from_file<P: AsRef<Path>>(path: P) -> Result<Theme, Box<dyn std::error::E
 /// assert_eq!(theme.name, "My Theme");
 /// ```
 pub fn from_json(json: &str) -> Result<Theme, Box<dyn std::error::Error>> {
-    Ok(serde_json::from_str(json)?)
+    let theme: Theme = serde_json::from_str(json)?;
+
+    // Validate required fields
+    if theme.name.is_empty() {
+        return Err("Theme name cannot be empty".into());
+    }
+    if theme.appearance.is_empty() {
+        return Err("Theme appearance cannot be empty".into());
+    }
+
+    Ok(theme)
 }
 
 impl Theme {
