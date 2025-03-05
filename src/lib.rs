@@ -295,7 +295,7 @@ pub struct Options<'a> {
     /// use autumnus::{Options, highlight};
     ///
     /// let options = Options {
-    ///     pre_class: Some("my-code-block".to_string()),
+    ///     pre_class: Some("my-code-block"),
     ///     ..Options::default()
     /// };
     ///
@@ -303,7 +303,7 @@ pub struct Options<'a> {
     /// let html = highlight("rust", code, options);
     /// // Output: <pre class="athl my-code-block">
     /// ```
-    pub pre_class: Option<String>,
+    pub pre_class: Option<&'a str>,
 
     /// Whether to use italics for highlighting.
     ///

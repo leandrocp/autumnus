@@ -112,7 +112,7 @@ mod tests {
         let formatter = HtmlInline::new(
             Language::PlainText,
             Options {
-                pre_class: Some("test-pre-class".to_string()),
+                pre_class: Some("test-pre-class"),
                 ..Default::default()
             },
         );
@@ -129,7 +129,7 @@ mod tests {
         let formatter = HtmlInline::new(
             Language::PlainText,
             Options {
-                pre_class: Some("test-pre-class".to_string()),
+                pre_class: Some("test-pre-class"),
                 theme: themes::get("github_light").expect("Theme not found"),
                 ..Default::default()
             },
