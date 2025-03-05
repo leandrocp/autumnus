@@ -146,7 +146,7 @@ update-parsers:
     for parser_info in "${parsers[@]}"; do
         read -r parser repo branch <<< "$parser_info"
         echo "Updating $parser from $repo ($branch)"
-        git subtree pull --prefix="vendored_parsers/$parser" "$repo" "$branch" --squash
+        git subtree pull --prefix="vendored_parsers/$parser" "$repo" "$branch" --squash -X theirs
     done
 
     # necessary for `cargo package` to work
