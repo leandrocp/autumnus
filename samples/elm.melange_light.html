@@ -16,11 +16,11 @@
 </head>
 <body>
 <pre class="athl w-full overflow-auto rounded-lg p-8 text-sm antialiased leading-6" style="color: #54433a; background-color: #f1f1f1;"><code class="language-elm" translate="no" tabindex="0"><span class="line" data-line="1"><span style="color: #7d6658;">-- Single line comments start with two dashes.</span>
-</span><span class="line" data-line="2"><span style="color: #7d6658;">{- Multiline comments can be enclosed in a block like this.</span>
-</span><span class="line" data-line="3"><span style="color: #7d6658;">{- They can be nested. -}</span>
-</span><span class="line" data-line="4"><span style="color: #7d6658;">-}</span>
+</span><span class="line" data-line="2"><span style="color: #7d6658;">&lbrace;- Multiline comments can be enclosed in a block like this.</span>
+</span><span class="line" data-line="3"><span style="color: #7d6658;">&lbrace;- They can be nested. -&rbrace;</span>
+</span><span class="line" data-line="4"><span style="color: #7d6658;">-&rbrace;</span>
 </span><span class="line" data-line="5">
-</span><span class="line" data-line="6"><span style="color: #7d6658;">{-- The Basics --}</span>
+</span><span class="line" data-line="6"><span style="color: #7d6658;">&lbrace;-- The Basics --&rbrace;</span>
 </span><span class="line" data-line="7">
 </span><span class="line" data-line="8"><span style="color: #7d6658;">-- Arithmetic</span>
 </span><span class="line" data-line="9"><span style="color: #904180;">1</span> + 1 <span style="color: #7d6658;">-- 2</span>
@@ -48,7 +48,7 @@
 </span><span class="line" data-line="31"><span style="color: #7d6658;">-- Strings can be appended.</span>
 </span><span class="line" data-line="32"><span style="color: #465aa4;">&quot;</span><span style="color: #465aa4;">Hello </span><span style="color: #465aa4;">&quot;</span> ++ <span style="color: #465aa4;">&quot;</span>world!<span style="color: #465aa4;">&quot;</span> <span style="color: #7d6658;">-- &quot;Hello world!&quot;</span>
 </span><span class="line" data-line="33">
-</span><span class="line" data-line="34"><span style="color: #7d6658;">{-- Lists, Tuples, and Records --}</span>
+</span><span class="line" data-line="34"><span style="color: #7d6658;">&lbrace;-- Lists, Tuples, and Records --&rbrace;</span>
 </span><span class="line" data-line="35">
 </span><span class="line" data-line="36"><span style="color: #7d6658;">-- Every element in a list must have the same type.</span>
 </span><span class="line" data-line="37"><span style="color: #cca478;">[</span><span style="color: #465aa4;">&quot;</span><span style="color: #465aa4;">the</span><span style="color: #465aa4;">&quot;</span><span style="color: #c77b8b;">,</span> <span style="color: #465aa4;">&quot;</span><span style="color: #465aa4;">quick</span><span style="color: #465aa4;">&quot;</span><span style="color: #c77b8b;">,</span> <span style="color: #465aa4;">&quot;</span><span style="color: #465aa4;">brown</span><span style="color: #465aa4;">&quot;</span><span style="color: #c77b8b;">,</span> <span style="color: #465aa4;">&quot;</span><span style="color: #465aa4;">fox</span><span style="color: #465aa4;">&quot;</span><span style="color: #cca478;">]</span>
@@ -84,24 +84,24 @@
 </span><span class="line" data-line="67">
 </span><span class="line" data-line="68"><span style="color: #7d6658;">-- Records are like tuples but the fields have names. The order of fields</span>
 </span><span class="line" data-line="69"><span style="color: #7d6658;">-- doesn&#39;t matter. Notice that record values use equals signs, not colons.</span>
-</span><span class="line" data-line="70"><span style="color: #cca478;">{</span> <span style="color: #54433a;">x</span><span style="color: #cca478;"></span> <span style="color: #bf0021;">=</span> 3<span style="color: #c77b8b;">,</span> <span style="color: #a06d00;">y</span> <span style="color: #bf0021;">=</span> <span style="color: #904180;">7</span> <span style="color: #cca478;">}</span>
+</span><span class="line" data-line="70"><span style="color: #cca478;">&lbrace;</span> <span style="color: #54433a;">x</span><span style="color: #cca478;"></span> <span style="color: #bf0021;">=</span> 3<span style="color: #c77b8b;">,</span> <span style="color: #a06d00;">y</span> <span style="color: #bf0021;">=</span> <span style="color: #904180;">7</span> <span style="color: #cca478;">&rbrace;</span>
 </span><span class="line" data-line="71">
 </span><span class="line" data-line="72"><span style="color: #7d6658;">-- Access a field with a dot and the field name.</span>
-</span><span class="line" data-line="73"><span style="color: #cca478;">{</span> <span style="color: #54433a;">x</span><span style="color: #cca478;"></span> <span style="color: #bf0021;">=</span> 3<span style="color: #c77b8b;">,</span> <span style="color: #a06d00;">y</span> <span style="color: #bf0021;">=</span> <span style="color: #904180;">7</span> <span style="color: #cca478;">}</span><span style="color: #c77b8b;">.</span><span style="color: #54433a;">x</span> <span style="color: #7d6658;">-- 3</span>
+</span><span class="line" data-line="73"><span style="color: #cca478;">&lbrace;</span> <span style="color: #54433a;">x</span><span style="color: #cca478;"></span> <span style="color: #bf0021;">=</span> 3<span style="color: #c77b8b;">,</span> <span style="color: #a06d00;">y</span> <span style="color: #bf0021;">=</span> <span style="color: #904180;">7</span> <span style="color: #cca478;">&rbrace;</span><span style="color: #c77b8b;">.</span><span style="color: #54433a;">x</span> <span style="color: #7d6658;">-- 3</span>
 </span><span class="line" data-line="74">
 </span><span class="line" data-line="75"><span style="color: #7d6658;">-- Or with an accessor function, which is a dot and the field name on its own.</span>
-</span><span class="line" data-line="76"><span style="color: #c77b8b;">.</span><span style="color: #a06d00;">y</span> <span style="color: #cca478;">{</span> <span style="color: #54433a;">x</span><span style="color: #cca478;"></span> <span style="color: #bf0021;">=</span> 3<span style="color: #c77b8b;">,</span> <span style="color: #a06d00;">y</span> <span style="color: #bf0021;">=</span> <span style="color: #904180;">7</span> <span style="color: #cca478;">}</span> <span style="color: #7d6658;">-- 7</span>
+</span><span class="line" data-line="76"><span style="color: #c77b8b;">.</span><span style="color: #a06d00;">y</span> <span style="color: #cca478;">&lbrace;</span> <span style="color: #54433a;">x</span><span style="color: #cca478;"></span> <span style="color: #bf0021;">=</span> 3<span style="color: #c77b8b;">,</span> <span style="color: #a06d00;">y</span> <span style="color: #bf0021;">=</span> <span style="color: #904180;">7</span> <span style="color: #cca478;">&rbrace;</span> <span style="color: #7d6658;">-- 7</span>
 </span><span class="line" data-line="77">
 </span><span class="line" data-line="78"><span style="color: #7d6658;">-- Update the fields of a record. (It must have the fields already.)</span>
-</span><span class="line" data-line="79"><span style="color: #cca478;">{</span> <span style="color: #54433a;">person</span> <span style="color: #c77b8b;">|</span>
-</span><span class="line" data-line="80">  name <span style="color: #bf0021;">=</span> <span style="color: #465aa4;">&quot;</span>George<span style="color: #465aa4;">&quot;</span> <span style="color: #cca478;">}</span>
+</span><span class="line" data-line="79"><span style="color: #cca478;">&lbrace;</span> <span style="color: #54433a;">person</span> <span style="color: #c77b8b;">|</span>
+</span><span class="line" data-line="80">  name <span style="color: #bf0021;">=</span> <span style="color: #465aa4;">&quot;</span>George<span style="color: #465aa4;">&quot;</span> <span style="color: #cca478;">&rbrace;</span>
 </span><span class="line" data-line="81">
 </span><span class="line" data-line="82"><span style="color: #7d6658;">-- Update multiple fields at once, using the current values.</span>
-</span><span class="line" data-line="83"><span style="color: #cca478;">{</span> <span style="color: #54433a;">particle</span> <span style="color: #c77b8b;">|</span>
+</span><span class="line" data-line="83"><span style="color: #cca478;">&lbrace;</span> <span style="color: #54433a;">particle</span> <span style="color: #c77b8b;">|</span>
 </span><span class="line" data-line="84">  position <span style="color: #bf0021;">=</span> particle<span style="color: #c77b8b;">.</span>position + particle<span style="color: #c77b8b;">.</span>velocity<span style="color: #c77b8b;">,</span>
-</span><span class="line" data-line="85">  <span style="color: #54433a;">velocity</span><span style="color: #cca478;"></span> <span style="color: #bf0021;">=</span> <span style="color: #54433a;">particle</span><span style="color: #c77b8b;">.</span><span style="color: #54433a;">velocity</span> <span style="color: #bf0021;">+</span> <span style="color: #54433a;">particle</span><span style="color: #c77b8b;">.</span><span style="color: #54433a;">acceleration</span> <span style="color: #cca478;">}</span>
+</span><span class="line" data-line="85">  <span style="color: #54433a;">velocity</span><span style="color: #cca478;"></span> <span style="color: #bf0021;">=</span> <span style="color: #54433a;">particle</span><span style="color: #c77b8b;">.</span><span style="color: #54433a;">velocity</span> <span style="color: #bf0021;">+</span> <span style="color: #54433a;">particle</span><span style="color: #c77b8b;">.</span><span style="color: #54433a;">acceleration</span> <span style="color: #cca478;">&rbrace;</span>
 </span><span class="line" data-line="86">
-</span><span class="line" data-line="87"><span style="color: #7d6658;">{-- Control Flow --}</span>
+</span><span class="line" data-line="87"><span style="color: #7d6658;">&lbrace;-- Control Flow --&rbrace;</span>
 </span><span class="line" data-line="88">
 </span><span class="line" data-line="89"><span style="color: #7d6658;">-- If statements always have an else, and the branches must be the same type.</span>
 </span><span class="line" data-line="90"><span style="color: #a06d00;">if</span> <span style="color: #54433a;">powerLevel</span> &gt; <span style="color: #904180;">9000</span> <span style="color: #54433a;">then</span>
@@ -131,7 +131,7 @@
 </span><span class="line" data-line="114">  Just <span style="color: #54433a;">x</span> <span style="color: #bf0021;">-&gt;</span> <span style="color: #465aa4;">&quot;</span><span style="color: #465aa4;">The head is </span><span style="color: #465aa4;">&quot;</span> ++ <span style="color: #54433a;">toString</span> <span style="color: #54433a;">x</span>
 </span><span class="line" data-line="115">  Nothing <span style="color: #bf0021;">-&gt;</span> <span style="color: #465aa4;">&quot;</span><span style="color: #465aa4;">The list was empty.</span><span style="color: #465aa4;">&quot;</span>
 </span><span class="line" data-line="116">
-</span><span class="line" data-line="117"><span style="color: #7d6658;">{-- Functions --}</span>
+</span><span class="line" data-line="117"><span style="color: #7d6658;">&lbrace;-- Functions --&rbrace;</span>
 </span><span class="line" data-line="118">
 </span><span class="line" data-line="119"><span style="color: #7d6658;">-- Elm&#39;s syntax for functions is very minimal, relying mostly on whitespace</span>
 </span><span class="line" data-line="120"><span style="color: #7d6658;">-- rather than parentheses and curly brackets. There is no &quot;return&quot; keyword.</span>
@@ -168,13 +168,13 @@
 </span><span class="line" data-line="151">
 </span><span class="line" data-line="152"><span style="color: #7d6658;">-- Use curly brackets to pattern match record field names.</span>
 </span><span class="line" data-line="153"><span style="color: #7d6658;">-- Use let to define intermediate values.</span>
-</span><span class="line" data-line="154"><span style="color: #54433a;">volume</span> <span style="color: #cca478;">{</span><span style="color: #54433a;">width</span><span style="color: #c77b8b;">,</span> <span style="color: #54433a;">height</span><span style="color: #c77b8b;">,</span> <span style="color: #54433a;">depth</span><span style="color: #cca478;">}</span> <span style="color: #bf0021;">=</span>
+</span><span class="line" data-line="154"><span style="color: #54433a;">volume</span> <span style="color: #cca478;">&lbrace;</span><span style="color: #54433a;">width</span><span style="color: #c77b8b;">,</span> <span style="color: #54433a;">height</span><span style="color: #c77b8b;">,</span> <span style="color: #54433a;">depth</span><span style="color: #cca478;">&rbrace;</span> <span style="color: #bf0021;">=</span>
 </span><span class="line" data-line="155">  <span style="color: #bc5c00;">let</span>
 </span><span class="line" data-line="156">    <span style="color: #54433a;">area</span> <span style="color: #bf0021;">=</span> <span style="color: #54433a;">width</span> <span style="color: #bf0021;">*</span> <span style="color: #54433a;">height</span>
 </span><span class="line" data-line="157">  <span style="color: #bc5c00;">in</span>
 </span><span class="line" data-line="158">    <span style="color: #54433a;">area</span> <span style="color: #bf0021;">*</span> <span style="color: #54433a;">depth</span>
 </span><span class="line" data-line="159">
-</span><span class="line" data-line="160"><span style="color: #a06d00;">volume</span> <span style="color: #cca478;">{</span> <span style="color: #54433a;">width</span><span style="color: #cca478;"></span> <span style="color: #bf0021;">=</span> 3<span style="color: #c77b8b;">,</span> <span style="color: #a06d00;">height</span> <span style="color: #bf0021;">=</span> <span style="color: #904180;">2</span><span style="color: #c77b8b;">,</span> <span style="color: #54433a;">depth</span> <span style="color: #bf0021;">=</span> <span style="color: #904180;">7</span> <span style="color: #cca478;">}</span> <span style="color: #7d6658;">-- 42</span>
+</span><span class="line" data-line="160"><span style="color: #a06d00;">volume</span> <span style="color: #cca478;">&lbrace;</span> <span style="color: #54433a;">width</span><span style="color: #cca478;"></span> <span style="color: #bf0021;">=</span> 3<span style="color: #c77b8b;">,</span> <span style="color: #a06d00;">height</span> <span style="color: #bf0021;">=</span> <span style="color: #904180;">2</span><span style="color: #c77b8b;">,</span> <span style="color: #54433a;">depth</span> <span style="color: #bf0021;">=</span> <span style="color: #904180;">7</span> <span style="color: #cca478;">&rbrace;</span> <span style="color: #7d6658;">-- 42</span>
 </span><span class="line" data-line="161">
 </span><span class="line" data-line="162"><span style="color: #7d6658;">-- Functions can be recursive.</span>
 </span><span class="line" data-line="163"><span style="color: #a06d00;">fib</span> <span style="color: #54433a;">n</span> <span style="color: #bf0021;">=</span>
@@ -196,7 +196,7 @@
 </span><span class="line" data-line="179"><span style="color: #7d6658;">-- First degrees is applied to 30, then the result is passed to the trig</span>
 </span><span class="line" data-line="180"><span style="color: #7d6658;">-- functions, which is then squared, and the addition happens last.</span>
 </span><span class="line" data-line="181">
-</span><span class="line" data-line="182"><span style="color: #7d6658;">{-- Types and Type Annotations --}</span>
+</span><span class="line" data-line="182"><span style="color: #7d6658;">&lbrace;-- Types and Type Annotations --&rbrace;</span>
 </span><span class="line" data-line="183">
 </span><span class="line" data-line="184"><span style="color: #7d6658;">-- The compiler will infer the type of every value in your program.</span>
 </span><span class="line" data-line="185"><span style="color: #7d6658;">-- Types are always uppercase. Read x : T as &quot;x has type T&quot;.</span>
@@ -227,17 +227,17 @@
 </span><span class="line" data-line="210"><span style="color: #7d6658;">-- Comparable allows you to order numbers and strings, like a &lt; b.</span>
 </span><span class="line" data-line="211"><span style="color: #7d6658;">-- Appendable things can be combined with a ++ b.</span>
 </span><span class="line" data-line="212">
-</span><span class="line" data-line="213"><span style="color: #7d6658;">{-- Type Aliases and Custom Types --}</span>
+</span><span class="line" data-line="213"><span style="color: #7d6658;">&lbrace;-- Type Aliases and Custom Types --&rbrace;</span>
 </span><span class="line" data-line="214">
 </span><span class="line" data-line="215"><span style="color: #7d6658;">-- When you write a record or tuple, its type already exists.</span>
 </span><span class="line" data-line="216"><span style="color: #7d6658;">-- (Notice that record types use colon and record values use equals.)</span>
-</span><span class="line" data-line="217"><span style="color: #54433a;">origin</span> <span style="color: #bf0021;">:</span> <span style="color: #cca478;">{</span> x <span style="color: #bf0021;">:</span> <span style="color: #739797;">Float</span><span style="color: #c77b8b;">,</span> <span style="color: #739797;">y</span> <span style="color: #bf0021;">:</span> <span style="color: #739797;">Float</span><span style="color: #c77b8b;">,</span> <span style="color: #739797;">z</span> <span style="color: #bf0021;">:</span> <span style="color: #739797;">Float</span> <span style="color: #cca478;">}</span>
+</span><span class="line" data-line="217"><span style="color: #54433a;">origin</span> <span style="color: #bf0021;">:</span> <span style="color: #cca478;">&lbrace;</span> x <span style="color: #bf0021;">:</span> <span style="color: #739797;">Float</span><span style="color: #c77b8b;">,</span> <span style="color: #739797;">y</span> <span style="color: #bf0021;">:</span> <span style="color: #739797;">Float</span><span style="color: #c77b8b;">,</span> <span style="color: #739797;">z</span> <span style="color: #bf0021;">:</span> <span style="color: #739797;">Float</span> <span style="color: #cca478;">&rbrace;</span>
 </span><span class="line" data-line="218"><span style="color: #54433a;">origin</span> <span style="color: #bf0021;">=</span>
-</span><span class="line" data-line="219">  <span style="color: #cca478;">{</span> <span style="color: #54433a;">x</span> <span style="color: #bf0021;">=</span> <span style="color: #904180;">0</span><span style="color: #c77b8b;">,</span> <span style="color: #54433a;">y</span> <span style="color: #bf0021;">=</span> <span style="color: #904180;">0</span><span style="color: #c77b8b;">,</span> <span style="color: #54433a;">z</span> <span style="color: #bf0021;">=</span> <span style="color: #904180;">0</span> <span style="color: #cca478;">}</span>
+</span><span class="line" data-line="219">  <span style="color: #cca478;">&lbrace;</span> <span style="color: #54433a;">x</span> <span style="color: #bf0021;">=</span> <span style="color: #904180;">0</span><span style="color: #c77b8b;">,</span> <span style="color: #54433a;">y</span> <span style="color: #bf0021;">=</span> <span style="color: #904180;">0</span><span style="color: #c77b8b;">,</span> <span style="color: #54433a;">z</span> <span style="color: #bf0021;">=</span> <span style="color: #904180;">0</span> <span style="color: #cca478;">&rbrace;</span>
 </span><span class="line" data-line="220">
 </span><span class="line" data-line="221"><span style="color: #7d6658;">-- You can give existing types a nice name with a type alias.</span>
 </span><span class="line" data-line="222"><span style="color: #bc5c00;">type</span> <span style="color: #bc5c00;">alias</span> <span style="color: #739797;">Point3D</span> <span style="color: #bf0021;">=</span>
-</span><span class="line" data-line="223">  <span style="color: #cca478;">{</span> <span style="color: #54433a;">x</span> <span style="color: #bf0021;">:</span> <span style="color: #739797;">Float</span><span style="color: #c77b8b;">,</span> <span style="color: #54433a;">y</span> <span style="color: #bf0021;">:</span> <span style="color: #739797;">Float</span><span style="color: #c77b8b;">,</span> <span style="color: #54433a;">z</span> <span style="color: #bf0021;">:</span> <span style="color: #739797;">Float</span> <span style="color: #cca478;">}</span>
+</span><span class="line" data-line="223">  <span style="color: #cca478;">&lbrace;</span> <span style="color: #54433a;">x</span> <span style="color: #bf0021;">:</span> <span style="color: #739797;">Float</span><span style="color: #c77b8b;">,</span> <span style="color: #54433a;">y</span> <span style="color: #bf0021;">:</span> <span style="color: #739797;">Float</span><span style="color: #c77b8b;">,</span> <span style="color: #54433a;">z</span> <span style="color: #bf0021;">:</span> <span style="color: #739797;">Float</span> <span style="color: #cca478;">&rbrace;</span>
 </span><span class="line" data-line="224">
 </span><span class="line" data-line="225"><span style="color: #7d6658;">-- If you alias a record, you can use the name as a constructor function.</span>
 </span><span class="line" data-line="226"><span style="color: #54433a;">otherOrigin</span> <span style="color: #bf0021;">:</span> <span style="color: #739797;">Point3D</span>
@@ -281,7 +281,7 @@
 </span><span class="line" data-line="264"><span style="color: #7d6658;">-- That&#39;s pretty much it for the language itself. Now let&#39;s see how to organize</span>
 </span><span class="line" data-line="265"><span style="color: #7d6658;">-- and run your code.</span>
 </span><span class="line" data-line="266">
-</span><span class="line" data-line="267"><span style="color: #7d6658;">{-- Modules and Imports --}</span>
+</span><span class="line" data-line="267"><span style="color: #7d6658;">&lbrace;-- Modules and Imports --&rbrace;</span>
 </span><span class="line" data-line="268">
 </span><span class="line" data-line="269"><span style="color: #7d6658;">-- The core libraries are organized into modules, as are any third-party</span>
 </span><span class="line" data-line="270"><span style="color: #7d6658;">-- libraries you may use. For large projects, you can define your own modules.</span>
@@ -306,7 +306,7 @@
 </span><span class="line" data-line="289"><span style="color: #7d6658;">-- Rename an import.</span>
 </span><span class="line" data-line="290"><span style="color: #54433a;">import</span> <span style="color: #a06d00;">Graphics</span><span style="color: #c77b8b;">.</span><span style="color: #a06d00;">Collage</span> <span style="color: #bc5c00;">as</span> C
 </span><span class="line" data-line="291">
-</span><span class="line" data-line="292"><span style="color: #7d6658;">{-- Ports --}</span>
+</span><span class="line" data-line="292"><span style="color: #7d6658;">&lbrace;-- Ports --&rbrace;</span>
 </span><span class="line" data-line="293">
 </span><span class="line" data-line="294"><span style="color: #7d6658;">-- A port indicates that you will be communicating with the outside world.</span>
 </span><span class="line" data-line="295"><span style="color: #7d6658;">-- Ports are only allowed in the Main module.</span>
@@ -321,7 +321,7 @@
 </span><span class="line" data-line="304"><span style="color: #7d6658;">-- We won&#39;t go into the details, but you set up callbacks in JavaScript to send</span>
 </span><span class="line" data-line="305"><span style="color: #7d6658;">-- on incoming ports and receive on outgoing ports.</span>
 </span><span class="line" data-line="306">
-</span><span class="line" data-line="307"><span style="color: #7d6658;">{-- Command Line Tools --}</span>
+</span><span class="line" data-line="307"><span style="color: #7d6658;">&lbrace;-- Command Line Tools --&rbrace;</span>
 </span><span class="line" data-line="308">
 </span><span class="line" data-line="309"><span style="color: #7d6658;">-- Compile a file.</span>
 </span><span class="line" data-line="310">$ elm make MyFile<span style="color: #c77b8b;">.</span>elm

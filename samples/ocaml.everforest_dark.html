@@ -287,18 +287,18 @@
 </span><span class="line" data-line="270"><span style="color: #859289;">(* A collection of values with named fields *)</span>
 </span><span class="line" data-line="271">
 </span><span class="line" data-line="272"><span style="color: #e67e80;">type</span> <span style="color: #dbbc7f;">animal</span> <span style="color: #859289;">=</span> 
-</span><span class="line" data-line="273">   <span style="color: #d3c6aa;">{</span>
+</span><span class="line" data-line="273">   <span style="color: #d3c6aa;">&lbrace;</span>
 </span><span class="line" data-line="274">      <span style="color: #7fbbb3;">name</span><span style="color: #859289;">:</span> <span style="color: #dbbc7f;">string</span><span style="color: #859289;">;</span>
 </span><span class="line" data-line="275">      <span style="color: #7fbbb3;">color</span><span style="color: #859289;">:</span> <span style="color: #dbbc7f;">string</span><span style="color: #859289;">;</span>
 </span><span class="line" data-line="276">      <span style="color: #7fbbb3;">legs</span><span style="color: #859289;">:</span> <span style="color: #dbbc7f;">int</span><span style="color: #859289;">;</span>
-</span><span class="line" data-line="277">   <span style="color: #d3c6aa;">}</span>
+</span><span class="line" data-line="277">   <span style="color: #d3c6aa;">&rbrace;</span>
 </span><span class="line" data-line="278"><span style="color: #859289;">;;</span>
 </span><span class="line" data-line="279">
 </span><span class="line" data-line="280"><span style="color: #e67e80;">let</span> <span style="color: #d3c6aa;">cow</span> <span style="color: #859289;">=</span> 
-</span><span class="line" data-line="281">   <span style="color: #d3c6aa;">{</span>  <span style="color: #7fbbb3;">name</span><span style="color: #859289;">:</span> <span style="color: #83c092;">&quot;cow&quot;</span><span style="color: #859289;">;</span>
+</span><span class="line" data-line="281">   <span style="color: #d3c6aa;">&lbrace;</span>  <span style="color: #7fbbb3;">name</span><span style="color: #859289;">:</span> <span style="color: #83c092;">&quot;cow&quot;</span><span style="color: #859289;">;</span>
 </span><span class="line" data-line="282">      <span style="color: #7fbbb3;">color</span><span style="color: #859289;">:</span> <span style="color: #83c092;">&quot;black and white&quot;</span><span style="color: #859289;">;</span>
 </span><span class="line" data-line="283">      <span style="color: #7fbbb3;">legs</span><span style="color: #859289;">:</span> 4<span style="color: #859289;">;</span> 
-</span><span class="line" data-line="284">   <span style="color: #d3c6aa;">}</span>
+</span><span class="line" data-line="284">   <span style="color: #d3c6aa;">&rbrace;</span>
 </span><span class="line" data-line="285"><span style="color: #859289;">;;</span>
 </span><span class="line" data-line="286"><span style="color: #a7c080;">val</span> <span style="color: #d3c6aa;">cow</span> <span style="color: #859289;">:</span> <span style="color: #d3c6aa;">animal</span>
 </span><span class="line" data-line="287">
@@ -440,15 +440,15 @@
 </span><span class="line" data-line="423"><span style="color: #859289;">(* Records and variables are immutable: you cannot change where a variable points to *)</span>
 </span><span class="line" data-line="424">
 </span><span class="line" data-line="425"><span style="color: #859289;">(* However, you can create mutable polymorphic fields *)</span>
-</span><span class="line" data-line="426"><span style="color: #e67e80;">type</span> <span style="color: #dbbc7f;">counter</span> <span style="color: #859289;">=</span> <span style="color: #d3c6aa;">{</span> <span style="color: #e69875;">mutable</span> <span style="color: #7fbbb3;">num</span> <span style="color: #859289;">:</span> <span style="color: #dbbc7f;">int</span> <span style="color: #d3c6aa;">}</span> <span style="color: #859289;">;;</span>
+</span><span class="line" data-line="426"><span style="color: #e67e80;">type</span> <span style="color: #dbbc7f;">counter</span> <span style="color: #859289;">=</span> <span style="color: #d3c6aa;">&lbrace;</span> <span style="color: #e69875;">mutable</span> <span style="color: #7fbbb3;">num</span> <span style="color: #859289;">:</span> <span style="color: #dbbc7f;">int</span> <span style="color: #d3c6aa;">&rbrace;</span> <span style="color: #859289;">;;</span>
 </span><span class="line" data-line="427">
-</span><span class="line" data-line="428"><span style="color: #e67e80;">let</span> <span style="color: #d3c6aa;">c</span> <span style="color: #859289;">=</span> <span style="color: #d3c6aa;">{</span> <span style="color: #7fbbb3;">num</span><span style="color: #859289;">:</span> 0 <span style="color: #d3c6aa;">}</span> <span style="color: #859289;">;;</span>
+</span><span class="line" data-line="428"><span style="color: #e67e80;">let</span> <span style="color: #d3c6aa;">c</span> <span style="color: #859289;">=</span> <span style="color: #d3c6aa;">&lbrace;</span> <span style="color: #7fbbb3;">num</span><span style="color: #859289;">:</span> 0 <span style="color: #d3c6aa;">&rbrace;</span> <span style="color: #859289;">;;</span>
 </span><span class="line" data-line="429"><span style="color: #d3c6aa;">c</span><span style="color: #859289;">.</span><span style="color: #7fbbb3;">num</span> <span style="color: #859289;">;;</span> <span style="color: #859289;">(* Gives 0 *)</span>
 </span><span class="line" data-line="430"><span style="color: #d3c6aa;">c</span><span style="color: #859289;">.</span><span style="color: #7fbbb3;">num</span> <span style="color: #e69875;">&lt;-</span> <span style="color: #d699b6;">1</span> <span style="color: #859289;">;;</span> <span style="color: #859289;">(* &lt;- operator can set mutable record fields *)</span>
 </span><span class="line" data-line="431"><span style="color: #d3c6aa;">c</span><span style="color: #859289;">.</span><span style="color: #7fbbb3;">num</span> <span style="color: #859289;">;;</span> <span style="color: #859289;">(* Gives 1 *)</span>
 </span><span class="line" data-line="432">
 </span><span class="line" data-line="433"><span style="color: #859289;">(* OCaml&#39;s standard library provides a ref type to make single field mutability easier *)</span>
-</span><span class="line" data-line="434"><span style="color: #e67e80;">type</span> <span style="color: #d3c6aa;">&#39;a</span> <span style="color: #dbbc7f;">ref</span> <span style="color: #859289;">=</span> <span style="color: #d3c6aa;">{</span> <span style="color: #e69875;">mutable</span> <span style="color: #7fbbb3;">contents</span> <span style="color: #859289;">:</span> <span style="color: #d3c6aa;">&#39;a</span> <span style="color: #d3c6aa;">}</span> <span style="color: #859289;">;;</span>
+</span><span class="line" data-line="434"><span style="color: #e67e80;">type</span> <span style="color: #d3c6aa;">&#39;a</span> <span style="color: #dbbc7f;">ref</span> <span style="color: #859289;">=</span> <span style="color: #d3c6aa;">&lbrace;</span> <span style="color: #e69875;">mutable</span> <span style="color: #7fbbb3;">contents</span> <span style="color: #859289;">:</span> <span style="color: #d3c6aa;">&#39;a</span> <span style="color: #d3c6aa;">&rbrace;</span> <span style="color: #859289;">;;</span>
 </span><span class="line" data-line="435"><span style="color: #e67e80;">let</span> <span style="color: #d3c6aa;">counter</span> <span style="color: #859289;">=</span> <span style="color: #a7c080;">ref</span> <span style="color: #d699b6;">0</span> <span style="color: #859289;">;;</span>
 </span><span class="line" data-line="436"><span style="color: #e69875;">!</span><span style="color: #d3c6aa;">counter</span> <span style="color: #859289;">;;</span> <span style="color: #859289;">(* ! operator returns x.contents *)</span>
 </span><span class="line" data-line="437"><span style="color: #d3c6aa;">counter</span> <span style="color: #e69875;">:=</span> <span style="color: #e69875;">!</span><span style="color: #d3c6aa;">counter</span> <span style="color: #e69875;">+</span> <span style="color: #d699b6;">1</span> <span style="color: #859289;">;;</span> <span style="color: #859289;">(* := can be used to set contents *)</span>

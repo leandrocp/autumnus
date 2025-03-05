@@ -317,35 +317,35 @@
 </span><span class="line" data-line="300">
 </span><span class="line" data-line="301"><span style="color: #93a1a1;"># LOOPS</span>
 </span><span class="line" data-line="302"><span style="color: #93a1a1;"># We&#39;ve got for loops</span>
-</span><span class="line" data-line="303"><span style="color: #859900;">for</span> <span style="color: #657b83;">(</span><span style="color: #268bd2;">i</span> <span style="color: #859900;">in</span> <span style="color: #d33682;">1</span><span style="color: #859900;">:</span><span style="color: #d33682;">4</span><span style="color: #657b83;">)</span> <span style="color: #657b83;">{</span>
+</span><span class="line" data-line="303"><span style="color: #859900;">for</span> <span style="color: #657b83;">(</span><span style="color: #268bd2;">i</span> <span style="color: #859900;">in</span> <span style="color: #d33682;">1</span><span style="color: #859900;">:</span><span style="color: #d33682;">4</span><span style="color: #657b83;">)</span> <span style="color: #657b83;">&lbrace;</span>
 </span><span class="line" data-line="304">	<span style="color: #268bd2;">print</span><span style="color: #657b83;">(</span><span style="color: #268bd2;">i</span><span style="color: #657b83;">)</span>
-</span><span class="line" data-line="305"><span style="color: #657b83;">}</span>
+</span><span class="line" data-line="305"><span style="color: #657b83;">&rbrace;</span>
 </span><span class="line" data-line="306"><span style="color: #93a1a1;"># We&#39;ve got while loops</span>
 </span><span class="line" data-line="307"><span style="color: #268bd2;">a</span> <span style="color: #859900;">&lt;-</span> <span style="color: #d33682;">10</span>
-</span><span class="line" data-line="308"><span style="color: #859900;">while</span> <span style="color: #657b83;">(</span><span style="color: #268bd2;">a</span> <span style="color: #859900;">&gt;</span> <span style="color: #d33682;">4</span><span style="color: #657b83;">)</span> <span style="color: #657b83;">{</span>
+</span><span class="line" data-line="308"><span style="color: #859900;">while</span> <span style="color: #657b83;">(</span><span style="color: #268bd2;">a</span> <span style="color: #859900;">&gt;</span> <span style="color: #d33682;">4</span><span style="color: #657b83;">)</span> <span style="color: #657b83;">&lbrace;</span>
 </span><span class="line" data-line="309">	<span style="color: #268bd2;">cat</span><span style="color: #657b83;">(</span><span style="color: #268bd2;">a</span><span style="color: #657b83;">,</span> <span style="color: #2aa198;">&quot;...&quot;</span><span style="color: #657b83;">,</span> <span style="color: #268bd2;">sep</span> <span style="color: #859900;">=</span> <span style="color: #2aa198;">&quot;&quot;</span><span style="color: #657b83;">)</span>
 </span><span class="line" data-line="310">	<span style="color: #268bd2;">a</span> <span style="color: #859900;">&lt;-</span> <span style="color: #268bd2;">a</span> <span style="color: #859900;">-</span> <span style="color: #d33682;">1</span>
-</span><span class="line" data-line="311"><span style="color: #657b83;">}</span>
+</span><span class="line" data-line="311"><span style="color: #657b83;">&rbrace;</span>
 </span><span class="line" data-line="312"><span style="color: #93a1a1;"># Keep in mind that for and while loops run slowly in R</span>
 </span><span class="line" data-line="313"><span style="color: #93a1a1;"># Operations on entire vectors (i.e. a whole row, a whole column)</span>
 </span><span class="line" data-line="314"><span style="color: #93a1a1;"># or apply()-type functions (we&#39;ll discuss later) are preferred</span>
 </span><span class="line" data-line="315">
 </span><span class="line" data-line="316"><span style="color: #93a1a1;"># IF/ELSE</span>
 </span><span class="line" data-line="317"><span style="color: #93a1a1;"># Again, pretty standard</span>
-</span><span class="line" data-line="318"><span style="color: #859900;">if</span> <span style="color: #657b83;">(</span><span style="color: #d33682;">4</span> <span style="color: #859900;">&gt;</span> <span style="color: #d33682;">3</span><span style="color: #657b83;">)</span> <span style="color: #657b83;">{</span>
+</span><span class="line" data-line="318"><span style="color: #859900;">if</span> <span style="color: #657b83;">(</span><span style="color: #d33682;">4</span> <span style="color: #859900;">&gt;</span> <span style="color: #d33682;">3</span><span style="color: #657b83;">)</span> <span style="color: #657b83;">&lbrace;</span>
 </span><span class="line" data-line="319">	<span style="color: #268bd2;">print</span><span style="color: #657b83;">(</span><span style="color: #2aa198;">&quot;4 is greater than 3&quot;</span><span style="color: #657b83;">)</span>
-</span><span class="line" data-line="320"><span style="color: #657b83;">}</span> <span style="color: #859900;">else</span> <span style="color: #657b83;">{</span>
+</span><span class="line" data-line="320"><span style="color: #657b83;">&rbrace;</span> <span style="color: #859900;">else</span> <span style="color: #657b83;">&lbrace;</span>
 </span><span class="line" data-line="321">	<span style="color: #268bd2;">print</span><span style="color: #657b83;">(</span><span style="color: #2aa198;">&quot;4 is not greater than 3&quot;</span><span style="color: #657b83;">)</span>
-</span><span class="line" data-line="322"><span style="color: #657b83;">}</span>
+</span><span class="line" data-line="322"><span style="color: #657b83;">&rbrace;</span>
 </span><span class="line" data-line="323"><span style="color: #93a1a1;"># =&gt;</span>
 </span><span class="line" data-line="324"><span style="color: #93a1a1;"># [1] &quot;4 is greater than 3&quot;</span>
 </span><span class="line" data-line="325">
 </span><span class="line" data-line="326"><span style="color: #93a1a1;"># FUNCTIONS</span>
 </span><span class="line" data-line="327"><span style="color: #93a1a1;"># Defined like so:</span>
-</span><span class="line" data-line="328"><span style="color: #268bd2;">jiggle</span> <span style="color: #859900;">&lt;-</span> <span style="color: #586e75; font-weight: bold;">function</span><span style="color: #657b83;">(</span><span style="color: #268bd2;">x</span><span style="color: #657b83;">)</span> <span style="color: #657b83;">{</span>
+</span><span class="line" data-line="328"><span style="color: #268bd2;">jiggle</span> <span style="color: #859900;">&lt;-</span> <span style="color: #586e75; font-weight: bold;">function</span><span style="color: #657b83;">(</span><span style="color: #268bd2;">x</span><span style="color: #657b83;">)</span> <span style="color: #657b83;">&lbrace;</span>
 </span><span class="line" data-line="329">	<span style="color: #268bd2;">x</span> <span style="color: #859900;">=</span> <span style="color: #268bd2;">x</span> <span style="color: #859900;">+</span> <span style="color: #268bd2;">rnorm</span><span style="color: #657b83;">(</span><span style="color: #d33682;">1</span><span style="color: #657b83;">,</span> <span style="color: #268bd2;">sd</span><span style="color: #859900;">=</span><span style="color: #d33682;">.1</span><span style="color: #657b83;">)</span> <span style="color: #93a1a1;"># add in a bit of (controlled) noise</span>
 </span><span class="line" data-line="330">	<span style="color: #859900;">return</span><span style="color: #657b83;">(</span><span style="color: #268bd2;">x</span><span style="color: #657b83;">)</span>
-</span><span class="line" data-line="331"><span style="color: #657b83;">}</span>
+</span><span class="line" data-line="331"><span style="color: #657b83;">&rbrace;</span>
 </span><span class="line" data-line="332"><span style="color: #93a1a1;"># Called like any other R function:</span>
 </span><span class="line" data-line="333"><span style="color: #268bd2;">jiggle</span><span style="color: #657b83;">(</span><span style="color: #d33682;">5</span><span style="color: #657b83;">)</span>   <span style="color: #93a1a1;"># 5±ε. After set.seed(2716057), jiggle(5)==5.005043</span>
 </span><span class="line" data-line="334">

@@ -115,7 +115,7 @@ fn gen_samples_entries(
     entries: &[fs::DirEntry],
 ) -> Result<()> {
     for theme in themes {
-        let theme = autumnus::themes::get(theme).unwrap();
+        let theme = autumnus::themes::get(theme).expect("Failed to get theme");
 
         for entry in entries {
             let path = entry.path();
@@ -134,11 +134,10 @@ fn gen_samples_entries(
                 &contents,
                 autumnus::Options {
                     formatter: autumnus::FormatterOption::HtmlInline,
-                    theme: theme.clone(),
+                    theme,
                     include_highlight: false,
                     pre_class: Some(
-                        "w-full overflow-auto rounded-lg p-8 text-sm antialiased leading-6"
-                            .to_string(),
+                        "w-full overflow-auto rounded-lg p-8 text-sm antialiased leading-6",
                     ),
                     ..autumnus::Options::default()
                 },

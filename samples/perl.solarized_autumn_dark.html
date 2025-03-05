@@ -39,7 +39,7 @@
 </span><span class="line" data-line="22"><span style="color: #586e75;">#  A scalar represents a single value:</span>
 </span><span class="line" data-line="23"><span style="color: #93a1a1; font-weight: bold;">my</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">animal</span></span> <span style="color: #859900;">=</span> <span style="color: #2aa198;">&quot;camel&quot;</span><span style="color: #839496;">;</span>
 </span><span class="line" data-line="24"><span style="color: #93a1a1; font-weight: bold;">my</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">answer</span></span> <span style="color: #859900;">=</span> <span style="color: #6c71c4;">42</span><span style="color: #839496;">;</span>
-</span><span class="line" data-line="25"><span style="color: #93a1a1; font-weight: bold;">my</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">display</span></span> <span style="color: #859900;">=</span> <span style="color: #2aa198;">&quot;You have <span style="color: #268bd2;">$<span style="color: #6c71c4;">answer</span></span> <span style="color: #268bd2;">$<span style="color: #839496;">{</span><span style="color: #6c71c4;">animal</span><span style="color: #839496;">}</span></span>s.<span style="color: #859900;">\n</span>&quot;</span><span style="color: #839496;">;</span>
+</span><span class="line" data-line="25"><span style="color: #93a1a1; font-weight: bold;">my</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">display</span></span> <span style="color: #859900;">=</span> <span style="color: #2aa198;">&quot;You have <span style="color: #268bd2;">$<span style="color: #6c71c4;">answer</span></span> <span style="color: #268bd2;">$<span style="color: #839496;">&lbrace;</span><span style="color: #6c71c4;">animal</span><span style="color: #839496;">&rbrace;</span></span>s.<span style="color: #859900;">\n</span>&quot;</span><span style="color: #839496;">;</span>
 </span><span class="line" data-line="26">
 </span><span class="line" data-line="27"><span style="color: #586e75;"># Scalar values can be strings, integers or floating point numbers, and</span>
 </span><span class="line" data-line="28"><span style="color: #586e75;"># Perl will automatically convert between them as required.</span>
@@ -90,7 +90,7 @@
 </span><span class="line" data-line="73"><span style="color: #839496;">)</span><span style="color: #839496;">;</span>
 </span><span class="line" data-line="74">
 </span><span class="line" data-line="75"><span style="color: #586e75;"># Hash elements are accessed using curly braces, again with the $ sigil.</span>
-</span><span class="line" data-line="76"><span style="color: #93a1a1; font-weight: bold;">my</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">color</span></span> <span style="color: #859900;">=</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">fruit_color</span></span><span style="color: #839496;">{</span><span style="color: #6c71c4;">apple</span><span style="color: #839496;">}</span><span style="color: #839496;">;</span>
+</span><span class="line" data-line="76"><span style="color: #93a1a1; font-weight: bold;">my</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">color</span></span> <span style="color: #859900;">=</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">fruit_color</span></span><span style="color: #839496;">&lbrace;</span><span style="color: #6c71c4;">apple</span><span style="color: #839496;">&rbrace;</span><span style="color: #839496;">;</span>
 </span><span class="line" data-line="77">
 </span><span class="line" data-line="78"><span style="color: #586e75;"># All of the keys or values that exist in a hash can be accessed using</span>
 </span><span class="line" data-line="79"><span style="color: #586e75;"># the &quot;keys&quot; and &quot;values&quot; functions.</span>
@@ -112,7 +112,7 @@
 </span><span class="line" data-line="95"><span style="color: #586e75;"># You can also create anonymous arrays or hashes, returning a reference:</span>
 </span><span class="line" data-line="96">
 </span><span class="line" data-line="97"><span style="color: #93a1a1; font-weight: bold;">my</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">fruits</span></span> <span style="color: #859900;">=</span> <span style="color: #839496;">[</span><span style="color: #2aa198;">&quot;apple&quot;</span><span style="color: #839496;">,</span> <span style="color: #2aa198;">&quot;banana&quot;</span><span style="color: #839496;">]</span><span style="color: #839496;">;</span>
-</span><span class="line" data-line="98"><span style="color: #93a1a1; font-weight: bold;">my</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">colors</span></span> <span style="color: #859900;">=</span> <span style="color: #839496;">{</span><span style="color: #6c71c4;">apple</span> <span style="color: #839496;">=&gt;</span> <span style="color: #2aa198;">&quot;red&quot;</span><span style="color: #839496;">,</span> <span style="color: #6c71c4;">banana</span> <span style="color: #839496;">=&gt;</span> <span style="color: #2aa198;">&quot;yellow&quot;</span><span style="color: #839496;">}</span><span style="color: #839496;">;</span>
+</span><span class="line" data-line="98"><span style="color: #93a1a1; font-weight: bold;">my</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">colors</span></span> <span style="color: #859900;">=</span> <span style="color: #839496;">&lbrace;</span><span style="color: #6c71c4;">apple</span> <span style="color: #839496;">=&gt;</span> <span style="color: #2aa198;">&quot;red&quot;</span><span style="color: #839496;">,</span> <span style="color: #6c71c4;">banana</span> <span style="color: #839496;">=&gt;</span> <span style="color: #2aa198;">&quot;yellow&quot;</span><span style="color: #839496;">&rbrace;</span><span style="color: #839496;">;</span>
 </span><span class="line" data-line="99">
 </span><span class="line" data-line="100"><span style="color: #586e75;"># References can be dereferenced by prefixing the appropriate sigil.</span>
 </span><span class="line" data-line="101">
@@ -123,7 +123,7 @@
 </span><span class="line" data-line="106"><span style="color: #586e75;"># access a single value.</span>
 </span><span class="line" data-line="107">
 </span><span class="line" data-line="108"><span style="color: #93a1a1; font-weight: bold;">my</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">first</span></span> <span style="color: #859900;">=</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">array_ref</span></span><span style="color: #839496;">-&gt;</span><span style="color: #839496;">[</span><span style="color: #6c71c4;">0</span><span style="color: #839496;">]</span><span style="color: #839496;">;</span>
-</span><span class="line" data-line="109"><span style="color: #93a1a1; font-weight: bold;">my</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">value</span></span> <span style="color: #859900;">=</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">hash_ref</span></span><span style="color: #839496;">-&gt;</span><span style="color: #839496;">{</span><span style="color: #6c71c4;">banana</span><span style="color: #839496;">}</span><span style="color: #839496;">;</span>
+</span><span class="line" data-line="109"><span style="color: #93a1a1; font-weight: bold;">my</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">value</span></span> <span style="color: #859900;">=</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">hash_ref</span></span><span style="color: #839496;">-&gt;</span><span style="color: #839496;">&lbrace;</span><span style="color: #6c71c4;">banana</span><span style="color: #839496;">&rbrace;</span><span style="color: #839496;">;</span>
 </span><span class="line" data-line="110">
 </span><span class="line" data-line="111"><span style="color: #586e75;"># See perlreftut and perlref for more in-depth documentation on</span>
 </span><span class="line" data-line="112"><span style="color: #586e75;"># references.</span>
@@ -132,17 +132,17 @@
 </span><span class="line" data-line="115">
 </span><span class="line" data-line="116"><span style="color: #586e75;"># Perl has most of the usual conditional and looping constructs.</span>
 </span><span class="line" data-line="117">
-</span><span class="line" data-line="118"><span style="color: #859900;">if</span> <span style="color: #839496;">(</span><span style="color: #268bd2;">$<span style="color: #6c71c4;">var</span></span><span style="color: #839496;">)</span> <span style="color: #839496;">{</span>
+</span><span class="line" data-line="118"><span style="color: #859900;">if</span> <span style="color: #839496;">(</span><span style="color: #268bd2;">$<span style="color: #6c71c4;">var</span></span><span style="color: #839496;">)</span> <span style="color: #839496;">&lbrace;</span>
 </span><span class="line" data-line="119">  <span style="color: #859900;">...</span>
-</span><span class="line" data-line="120"><span style="color: #839496;">}</span> <span style="color: #859900;">elsif</span> <span style="color: #839496;">(</span><span style="color: #268bd2;">$<span style="color: #6c71c4;">var</span></span> <span style="color: #859900;">eq</span> <span style="color: #2aa198;">&#39;bar&#39;</span><span style="color: #839496;">)</span> <span style="color: #839496;">{</span>
+</span><span class="line" data-line="120"><span style="color: #839496;">&rbrace;</span> <span style="color: #859900;">elsif</span> <span style="color: #839496;">(</span><span style="color: #268bd2;">$<span style="color: #6c71c4;">var</span></span> <span style="color: #859900;">eq</span> <span style="color: #2aa198;">&#39;bar&#39;</span><span style="color: #839496;">)</span> <span style="color: #839496;">&lbrace;</span>
 </span><span class="line" data-line="121">  <span style="color: #859900;">...</span>
-</span><span class="line" data-line="122"><span style="color: #839496;">}</span> <span style="color: #859900;">else</span> <span style="color: #839496;">{</span>
+</span><span class="line" data-line="122"><span style="color: #839496;">&rbrace;</span> <span style="color: #859900;">else</span> <span style="color: #839496;">&lbrace;</span>
 </span><span class="line" data-line="123">  <span style="color: #859900;">...</span>
-</span><span class="line" data-line="124"><span style="color: #839496;">}</span>
+</span><span class="line" data-line="124"><span style="color: #839496;">&rbrace;</span>
 </span><span class="line" data-line="125">
-</span><span class="line" data-line="126"><span style="color: #859900;">unless</span> <span style="color: #839496;">(</span>condition<span style="color: #839496;">)</span> <span style="color: #839496;">{</span>
+</span><span class="line" data-line="126"><span style="color: #859900;">unless</span> <span style="color: #839496;">(</span>condition<span style="color: #839496;">)</span> <span style="color: #839496;">&lbrace;</span>
 </span><span class="line" data-line="127">  <span style="color: #859900;">...</span>
-</span><span class="line" data-line="128"><span style="color: #839496;">}</span>
+</span><span class="line" data-line="128"><span style="color: #839496;">&rbrace;</span>
 </span><span class="line" data-line="129"><span style="color: #586e75;"># This is provided as a more readable version of &quot;if (!condition)&quot;</span>
 </span><span class="line" data-line="130">
 </span><span class="line" data-line="131"><span style="color: #586e75;"># the Perlish post-condition way</span>
@@ -150,39 +150,39 @@
 </span><span class="line" data-line="133"><span style="color: #268bd2;">print</span> <span style="color: #2aa198;">&quot;We have no bananas&quot;</span> <span style="color: #859900;">unless</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">bananas</span></span><span style="color: #839496;">;</span>
 </span><span class="line" data-line="134">
 </span><span class="line" data-line="135"><span style="color: #586e75;">#  while</span>
-</span><span class="line" data-line="136"><span style="color: #859900;">while</span> <span style="color: #839496;">(</span>condition<span style="color: #839496;">)</span> <span style="color: #839496;">{</span>
+</span><span class="line" data-line="136"><span style="color: #859900;">while</span> <span style="color: #839496;">(</span>condition<span style="color: #839496;">)</span> <span style="color: #839496;">&lbrace;</span>
 </span><span class="line" data-line="137">  <span style="color: #859900;">...</span>
-</span><span class="line" data-line="138"><span style="color: #839496;">}</span>
+</span><span class="line" data-line="138"><span style="color: #839496;">&rbrace;</span>
 </span><span class="line" data-line="139">
 </span><span class="line" data-line="140"><span style="color: #93a1a1; font-weight: bold;">my</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">max</span></span> <span style="color: #859900;">=</span> <span style="color: #6c71c4;">5</span><span style="color: #839496;">;</span>
 </span><span class="line" data-line="141"><span style="color: #586e75;"># for loops and iteration</span>
-</span><span class="line" data-line="142"><span style="color: #859900;">for</span> <span style="color: #93a1a1; font-weight: bold;">my</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">i</span></span> <span style="color: #839496;">(</span><span style="color: #6c71c4;">0</span> <span style="color: #859900;">..</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">max</span></span><span style="color: #839496;">)</span> <span style="color: #839496;">{</span>
+</span><span class="line" data-line="142"><span style="color: #859900;">for</span> <span style="color: #93a1a1; font-weight: bold;">my</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">i</span></span> <span style="color: #839496;">(</span><span style="color: #6c71c4;">0</span> <span style="color: #859900;">..</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">max</span></span><span style="color: #839496;">)</span> <span style="color: #839496;">&lbrace;</span>
 </span><span class="line" data-line="143">  <span style="color: #268bd2;">print</span> <span style="color: #2aa198;">&quot;index is <span style="color: #268bd2;">$<span style="color: #6c71c4;">i</span></span>&quot;</span><span style="color: #839496;">;</span>
-</span><span class="line" data-line="144"><span style="color: #839496;">}</span>
+</span><span class="line" data-line="144"><span style="color: #839496;">&rbrace;</span>
 </span><span class="line" data-line="145">
-</span><span class="line" data-line="146"><span style="color: #859900;">for</span> <span style="color: #93a1a1; font-weight: bold;">my</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">element</span></span> <span style="color: #839496;">(</span><span style="color: #268bd2;">@<span style="color: #6c71c4;">elements</span></span><span style="color: #839496;">)</span> <span style="color: #839496;">{</span>
+</span><span class="line" data-line="146"><span style="color: #859900;">for</span> <span style="color: #93a1a1; font-weight: bold;">my</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">element</span></span> <span style="color: #839496;">(</span><span style="color: #268bd2;">@<span style="color: #6c71c4;">elements</span></span><span style="color: #839496;">)</span> <span style="color: #839496;">&lbrace;</span>
 </span><span class="line" data-line="147">  <span style="color: #268bd2;">print</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">element</span></span><span style="color: #839496;">;</span>
-</span><span class="line" data-line="148"><span style="color: #839496;">}</span>
+</span><span class="line" data-line="148"><span style="color: #839496;">&rbrace;</span>
 </span><span class="line" data-line="149">
-</span><span class="line" data-line="150"><span style="color: #268bd2;">map</span> <span style="color: #839496;">{</span><span style="color: #268bd2;">print</span><span style="color: #839496;">}</span> <span style="color: #268bd2;">@<span style="color: #6c71c4;">elements</span></span><span style="color: #839496;">;</span>
+</span><span class="line" data-line="150"><span style="color: #268bd2;">map</span> <span style="color: #839496;">&lbrace;</span><span style="color: #268bd2;">print</span><span style="color: #839496;">&rbrace;</span> <span style="color: #268bd2;">@<span style="color: #6c71c4;">elements</span></span><span style="color: #839496;">;</span>
 </span><span class="line" data-line="151">
 </span><span class="line" data-line="152"><span style="color: #586e75;"># implicitly</span>
 </span><span class="line" data-line="153">
-</span><span class="line" data-line="154"><span style="color: #859900;">for</span> <span style="color: #839496;">(</span><span style="color: #268bd2;">@<span style="color: #6c71c4;">elements</span></span><span style="color: #839496;">)</span> <span style="color: #839496;">{</span>
+</span><span class="line" data-line="154"><span style="color: #859900;">for</span> <span style="color: #839496;">(</span><span style="color: #268bd2;">@<span style="color: #6c71c4;">elements</span></span><span style="color: #839496;">)</span> <span style="color: #839496;">&lbrace;</span>
 </span><span class="line" data-line="155">  <span style="color: #268bd2;">print</span><span style="color: #839496;">;</span>
-</span><span class="line" data-line="156"><span style="color: #839496;">}</span>
+</span><span class="line" data-line="156"><span style="color: #839496;">&rbrace;</span>
 </span><span class="line" data-line="157">
 </span><span class="line" data-line="158"><span style="color: #586e75;"># iterating through a hash (for and foreach are equivalent)</span>
 </span><span class="line" data-line="159">
-</span><span class="line" data-line="160"><span style="color: #859900;">foreach</span> <span style="color: #93a1a1; font-weight: bold;">my</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">key</span></span> <span style="color: #839496;">(</span><span style="color: #268bd2;">keys</span> <span style="color: #268bd2;">%<span style="color: #6c71c4;">hash</span></span><span style="color: #839496;">)</span> <span style="color: #839496;">{</span>
-</span><span class="line" data-line="161">  <span style="color: #268bd2;">print</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">key</span></span><span style="color: #839496;">,</span> <span style="color: #2aa198;">&#39;: &#39;</span><span style="color: #839496;">,</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">hash</span></span><span style="color: #839496;">{</span><span style="color: #268bd2;">$<span style="color: #6c71c4;">key</span></span><span style="color: #839496;">}</span><span style="color: #839496;">,</span> <span style="color: #2aa198;">&quot;<span style="color: #859900;">\n</span>&quot;</span><span style="color: #839496;">;</span>
-</span><span class="line" data-line="162"><span style="color: #839496;">}</span>
+</span><span class="line" data-line="160"><span style="color: #859900;">foreach</span> <span style="color: #93a1a1; font-weight: bold;">my</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">key</span></span> <span style="color: #839496;">(</span><span style="color: #268bd2;">keys</span> <span style="color: #268bd2;">%<span style="color: #6c71c4;">hash</span></span><span style="color: #839496;">)</span> <span style="color: #839496;">&lbrace;</span>
+</span><span class="line" data-line="161">  <span style="color: #268bd2;">print</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">key</span></span><span style="color: #839496;">,</span> <span style="color: #2aa198;">&#39;: &#39;</span><span style="color: #839496;">,</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">hash</span></span><span style="color: #839496;">&lbrace;</span><span style="color: #268bd2;">$<span style="color: #6c71c4;">key</span></span><span style="color: #839496;">&rbrace;</span><span style="color: #839496;">,</span> <span style="color: #2aa198;">&quot;<span style="color: #859900;">\n</span>&quot;</span><span style="color: #839496;">;</span>
+</span><span class="line" data-line="162"><span style="color: #839496;">&rbrace;</span>
 </span><span class="line" data-line="163">
 </span><span class="line" data-line="164"><span style="color: #586e75;"># the Perlish post-condition way again</span>
 </span><span class="line" data-line="165">print <span style="color: #859900;">for</span> <span style="color: #268bd2;">@<span style="color: #6c71c4;">elements</span></span><span style="color: #839496;">;</span>
 </span><span class="line" data-line="166">
 </span><span class="line" data-line="167"><span style="color: #586e75;"># iterating through the keys and values of a referenced hash</span>
-</span><span class="line" data-line="168"><span style="color: #268bd2;">print</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">hash_ref</span></span><span style="color: #839496;">-&gt;</span><span style="color: #839496;">{</span><span style="color: #268bd2;">$<span style="color: #6c71c4;">_</span></span><span style="color: #839496;">}</span> <span style="color: #859900;">for</span> <span style="color: #268bd2;">keys</span> <span style="color: #268bd2;">%<span style="color: #6c71c4;"><span style="color: #268bd2;">$<span style="color: #6c71c4;">hash_ref</span></span></span></span><span style="color: #839496;">;</span>
+</span><span class="line" data-line="168"><span style="color: #268bd2;">print</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">hash_ref</span></span><span style="color: #839496;">-&gt;</span><span style="color: #839496;">&lbrace;</span><span style="color: #268bd2;">$<span style="color: #6c71c4;">_</span></span><span style="color: #839496;">&rbrace;</span> <span style="color: #859900;">for</span> <span style="color: #268bd2;">keys</span> <span style="color: #268bd2;">%<span style="color: #6c71c4;"><span style="color: #268bd2;">$<span style="color: #6c71c4;">hash_ref</span></span></span></span><span style="color: #839496;">;</span>
 </span><span class="line" data-line="169">
 </span><span class="line" data-line="170"><span style="color: #586e75;">#### Regular expressions</span>
 </span><span class="line" data-line="171">
@@ -191,8 +191,8 @@
 </span><span class="line" data-line="174"><span style="color: #586e75;"># elsewhere. However, in short:</span>
 </span><span class="line" data-line="175">
 </span><span class="line" data-line="176"><span style="color: #586e75;"># Simple matching</span>
-</span><span class="line" data-line="177"><span style="color: #859900;">if</span> <span style="color: #839496;">(</span><span style="color: #d33682;">/<span style="color: #d33682;">foo</span>/</span><span style="color: #839496;">)</span>       <span style="color: #839496;">{</span> <span style="color: #859900;">...</span> <span style="color: #839496;">}</span>  <span style="color: #586e75;"># true if $_ contains &quot;foo&quot;</span>
-</span><span class="line" data-line="178"><span style="color: #859900;">if</span> <span style="color: #839496;">(</span><span style="color: #268bd2;">$<span style="color: #6c71c4;">x</span></span> <span style="color: #859900;">=~</span> <span style="color: #d33682;">/<span style="color: #d33682;">foo</span>/</span><span style="color: #839496;">)</span> <span style="color: #839496;">{</span> <span style="color: #859900;">...</span> <span style="color: #839496;">}</span>  <span style="color: #586e75;"># true if $x contains &quot;foo&quot;</span>
+</span><span class="line" data-line="177"><span style="color: #859900;">if</span> <span style="color: #839496;">(</span><span style="color: #d33682;">/<span style="color: #d33682;">foo</span>/</span><span style="color: #839496;">)</span>       <span style="color: #839496;">&lbrace;</span> <span style="color: #859900;">...</span> <span style="color: #839496;">&rbrace;</span>  <span style="color: #586e75;"># true if $_ contains &quot;foo&quot;</span>
+</span><span class="line" data-line="178"><span style="color: #859900;">if</span> <span style="color: #839496;">(</span><span style="color: #268bd2;">$<span style="color: #6c71c4;">x</span></span> <span style="color: #859900;">=~</span> <span style="color: #d33682;">/<span style="color: #d33682;">foo</span>/</span><span style="color: #839496;">)</span> <span style="color: #839496;">&lbrace;</span> <span style="color: #859900;">...</span> <span style="color: #839496;">&rbrace;</span>  <span style="color: #586e75;"># true if $x contains &quot;foo&quot;</span>
 </span><span class="line" data-line="179">
 </span><span class="line" data-line="180"><span style="color: #586e75;"># Simple substitution</span>
 </span><span class="line" data-line="181">
@@ -221,9 +221,9 @@
 </span><span class="line" data-line="204">
 </span><span class="line" data-line="205"><span style="color: #586e75;"># You can iterate through the lines in a file one at a time with a while loop:</span>
 </span><span class="line" data-line="206">
-</span><span class="line" data-line="207"><span style="color: #859900;">while</span> <span style="color: #839496;">(</span><span style="color: #93a1a1; font-weight: bold;">my</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">line</span></span> <span style="color: #859900;">=</span> <span style="color: #859900;">&lt;</span>$<span style="color: #6c71c4;">in</span><span style="color: #859900;">&gt;</span><span style="color: #839496;">)</span> <span style="color: #839496;">{</span>
+</span><span class="line" data-line="207"><span style="color: #859900;">while</span> <span style="color: #839496;">(</span><span style="color: #93a1a1; font-weight: bold;">my</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">line</span></span> <span style="color: #859900;">=</span> <span style="color: #859900;">&lt;</span>$<span style="color: #6c71c4;">in</span><span style="color: #859900;">&gt;</span><span style="color: #839496;">)</span> <span style="color: #839496;">&lbrace;</span>
 </span><span class="line" data-line="208">  <span style="color: #268bd2;">print</span> <span style="color: #2aa198;">&quot;Found apples<span style="color: #859900;">\n</span>&quot;</span> <span style="color: #859900;">if</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">line</span></span> <span style="color: #859900;">=~</span> <span style="color: #859900;"><span style="color: #d33682;">m/<span style="color: #d33682;">apples</span>/</span></span><span style="color: #839496;">;</span>
-</span><span class="line" data-line="209"><span style="color: #839496;">}</span>
+</span><span class="line" data-line="209"><span style="color: #839496;">&rbrace;</span>
 </span><span class="line" data-line="210">
 </span><span class="line" data-line="211"><span style="color: #586e75;"># You can write to an open filehandle using the standard &quot;print&quot;</span>
 </span><span class="line" data-line="212"><span style="color: #586e75;"># function.</span>
@@ -235,13 +235,13 @@
 </span><span class="line" data-line="218">
 </span><span class="line" data-line="219"><span style="color: #586e75;"># Writing subroutines is easy:</span>
 </span><span class="line" data-line="220">
-</span><span class="line" data-line="221"><span style="color: #93a1a1; font-weight: bold;">sub</span> <span style="color: #268bd2;">logger</span> <span style="color: #839496;">{</span>
+</span><span class="line" data-line="221"><span style="color: #93a1a1; font-weight: bold;">sub</span> <span style="color: #268bd2;">logger</span> <span style="color: #839496;">&lbrace;</span>
 </span><span class="line" data-line="222">  <span style="color: #93a1a1; font-weight: bold;">my</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">logmessage</span></span> <span style="color: #859900;">=</span> <span style="color: #268bd2;">shift</span><span style="color: #839496;">;</span>
 </span><span class="line" data-line="223">
 </span><span class="line" data-line="224">  <span style="color: #268bd2;">open</span> <span style="color: #93a1a1; font-weight: bold;">my</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">logfile</span></span><span style="color: #839496;">,</span> <span style="color: #2aa198;">&quot;&gt;&gt;&quot;</span><span style="color: #839496;">,</span> <span style="color: #2aa198;">&quot;my.log&quot;</span> <span style="color: #859900;">or</span> <span style="color: #268bd2;">die</span> <span style="color: #2aa198;">&quot;Could not open my.log: <span style="color: #268bd2;">$<span style="color: #6c71c4;">!</span></span>&quot;</span><span style="color: #839496;">;</span>
 </span><span class="line" data-line="225">
 </span><span class="line" data-line="226">  <span style="color: #268bd2;">print</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">logfile</span></span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">logmessage</span></span><span style="color: #839496;">;</span>
-</span><span class="line" data-line="227"><span style="color: #839496;">}</span>
+</span><span class="line" data-line="227"><span style="color: #839496;">&rbrace;</span>
 </span><span class="line" data-line="228">
 </span><span class="line" data-line="229"><span style="color: #586e75;"># Now we can use the subroutine just as any other built-in function:</span>
 </span><span class="line" data-line="230">
@@ -257,12 +257,12 @@
 </span><span class="line" data-line="240"><span style="color: #93a1a1; font-weight: bold;">use</span> <span style="color: #cb4b16;">strict</span><span style="color: #839496;">;</span>
 </span><span class="line" data-line="241"><span style="color: #93a1a1; font-weight: bold;">use</span> <span style="color: #cb4b16;">warnings</span><span style="color: #839496;">;</span>
 </span><span class="line" data-line="242">
-</span><span class="line" data-line="243"><span style="color: #93a1a1; font-weight: bold;">sub</span> <span style="color: #268bd2;">trim</span> <span style="color: #839496;">{</span>
+</span><span class="line" data-line="243"><span style="color: #93a1a1; font-weight: bold;">sub</span> <span style="color: #268bd2;">trim</span> <span style="color: #839496;">&lbrace;</span>
 </span><span class="line" data-line="244">  <span style="color: #93a1a1; font-weight: bold;">my</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">string</span></span> <span style="color: #859900;">=</span> <span style="color: #268bd2;">shift</span><span style="color: #839496;">;</span>
 </span><span class="line" data-line="245">  <span style="color: #268bd2;">$<span style="color: #6c71c4;">string</span></span> <span style="color: #859900;">=~</span> <span style="color: #859900;">s</span>/<span style="color: #d33682;">^<span style="color: #859900;">\s</span>+</span>//<span style="color: #839496;">;</span>
 </span><span class="line" data-line="246">  <span style="color: #268bd2;">$<span style="color: #6c71c4;">string</span></span> <span style="color: #859900;">=~</span> <span style="color: #859900;">s</span>/<span style="color: #859900;"><span style="color: #d33682;">\s+$</span></span>//<span style="color: #839496;">;</span>
 </span><span class="line" data-line="247">  <span style="color: #859900;">return</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">string</span></span><span style="color: #839496;">;</span>
-</span><span class="line" data-line="248"><span style="color: #839496;">}</span>
+</span><span class="line" data-line="248"><span style="color: #839496;">&rbrace;</span>
 </span><span class="line" data-line="249">
 </span><span class="line" data-line="250"><span style="color: #6c71c4;">1</span><span style="color: #839496;">;</span>
 </span><span class="line" data-line="251">
@@ -295,21 +295,21 @@
 </span><span class="line" data-line="278"><span style="color: #93a1a1; font-weight: bold;">use</span> <span style="color: #cb4b16;">strict</span><span style="color: #839496;">;</span>
 </span><span class="line" data-line="279"><span style="color: #93a1a1; font-weight: bold;">use</span> <span style="color: #cb4b16;">warnings</span><span style="color: #839496;">;</span>
 </span><span class="line" data-line="280">
-</span><span class="line" data-line="281"><span style="color: #93a1a1; font-weight: bold;">sub</span> <span style="color: #268bd2;">new</span> <span style="color: #839496;">{</span>
+</span><span class="line" data-line="281"><span style="color: #93a1a1; font-weight: bold;">sub</span> <span style="color: #268bd2;">new</span> <span style="color: #839496;">&lbrace;</span>
 </span><span class="line" data-line="282">  <span style="color: #93a1a1; font-weight: bold;">my</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">class</span></span> <span style="color: #859900;">=</span> <span style="color: #268bd2;">shift</span><span style="color: #839496;">;</span>
-</span><span class="line" data-line="283">  <span style="color: #93a1a1; font-weight: bold;">my</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">self</span></span> <span style="color: #859900;">=</span> <span style="color: #839496;">{</span><span style="color: #6c71c4;">count</span> <span style="color: #839496;">=&gt;</span> <span style="color: #6c71c4;">0</span><span style="color: #839496;">}</span><span style="color: #839496;">;</span>
+</span><span class="line" data-line="283">  <span style="color: #93a1a1; font-weight: bold;">my</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">self</span></span> <span style="color: #859900;">=</span> <span style="color: #839496;">&lbrace;</span><span style="color: #6c71c4;">count</span> <span style="color: #839496;">=&gt;</span> <span style="color: #6c71c4;">0</span><span style="color: #839496;">&rbrace;</span><span style="color: #839496;">;</span>
 </span><span class="line" data-line="284">  <span style="color: #859900;">return</span> <span style="color: #268bd2;">bless</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">self</span></span><span style="color: #839496;">,</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">class</span></span><span style="color: #839496;">;</span>
-</span><span class="line" data-line="285"><span style="color: #839496;">}</span>
+</span><span class="line" data-line="285"><span style="color: #839496;">&rbrace;</span>
 </span><span class="line" data-line="286">
-</span><span class="line" data-line="287"><span style="color: #93a1a1; font-weight: bold;">sub</span> <span style="color: #268bd2;">count</span> <span style="color: #839496;">{</span>
+</span><span class="line" data-line="287"><span style="color: #93a1a1; font-weight: bold;">sub</span> <span style="color: #268bd2;">count</span> <span style="color: #839496;">&lbrace;</span>
 </span><span class="line" data-line="288">  <span style="color: #93a1a1; font-weight: bold;">my</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">self</span></span> <span style="color: #859900;">=</span> <span style="color: #268bd2;">shift</span><span style="color: #839496;">;</span>
-</span><span class="line" data-line="289">  <span style="color: #859900;">return</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">self</span></span><span style="color: #839496;">-&gt;</span><span style="color: #839496;">{</span><span style="color: #6c71c4;">count</span><span style="color: #839496;">}</span><span style="color: #839496;">;</span>
-</span><span class="line" data-line="290"><span style="color: #839496;">}</span>
+</span><span class="line" data-line="289">  <span style="color: #859900;">return</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">self</span></span><span style="color: #839496;">-&gt;</span><span style="color: #839496;">&lbrace;</span><span style="color: #6c71c4;">count</span><span style="color: #839496;">&rbrace;</span><span style="color: #839496;">;</span>
+</span><span class="line" data-line="290"><span style="color: #839496;">&rbrace;</span>
 </span><span class="line" data-line="291">
-</span><span class="line" data-line="292"><span style="color: #93a1a1; font-weight: bold;">sub</span> <span style="color: #268bd2;">increment</span> <span style="color: #839496;">{</span>
+</span><span class="line" data-line="292"><span style="color: #93a1a1; font-weight: bold;">sub</span> <span style="color: #268bd2;">increment</span> <span style="color: #839496;">&lbrace;</span>
 </span><span class="line" data-line="293">  <span style="color: #93a1a1; font-weight: bold;">my</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">self</span></span> <span style="color: #859900;">=</span> <span style="color: #268bd2;">shift</span><span style="color: #839496;">;</span>
-</span><span class="line" data-line="294">  <span style="color: #268bd2;">$<span style="color: #6c71c4;">self</span></span><span style="color: #839496;">-&gt;</span><span style="color: #839496;">{</span><span style="color: #6c71c4;">count</span><span style="color: #839496;">}</span><span style="color: #859900;">++</span><span style="color: #839496;">;</span>
-</span><span class="line" data-line="295"><span style="color: #839496;">}</span>
+</span><span class="line" data-line="294">  <span style="color: #268bd2;">$<span style="color: #6c71c4;">self</span></span><span style="color: #839496;">-&gt;</span><span style="color: #839496;">&lbrace;</span><span style="color: #6c71c4;">count</span><span style="color: #839496;">&rbrace;</span><span style="color: #859900;">++</span><span style="color: #839496;">;</span>
+</span><span class="line" data-line="295"><span style="color: #839496;">&rbrace;</span>
 </span><span class="line" data-line="296">
 </span><span class="line" data-line="297"><span style="color: #6c71c4;">1</span><span style="color: #839496;">;</span>
 </span><span class="line" data-line="298">
@@ -331,10 +331,10 @@
 </span><span class="line" data-line="314">
 </span><span class="line" data-line="315"><span style="color: #268bd2;">has</span> <span style="color: #2aa198;">&#39;count&#39;</span> <span style="color: #839496;">=&gt;</span> <span style="color: #839496;">(</span><span style="color: #6c71c4;">is</span> <span style="color: #839496;">=&gt;</span> <span style="color: #2aa198;">&#39;rwp&#39;</span><span style="color: #839496;">,</span> <span style="color: #6c71c4;">default</span> <span style="color: #839496;">=&gt;</span> <span style="color: #6c71c4;">0</span><span style="color: #839496;">,</span> <span style="color: #6c71c4;">init_arg</span> <span style="color: #839496;">=&gt;</span> <span style="color: #93a1a1; font-weight: bold;">undef</span><span style="color: #839496;">)</span><span style="color: #839496;">;</span>
 </span><span class="line" data-line="316">
-</span><span class="line" data-line="317"><span style="color: #93a1a1; font-weight: bold;">sub</span> <span style="color: #268bd2;">increment</span> <span style="color: #839496;">{</span>
+</span><span class="line" data-line="317"><span style="color: #93a1a1; font-weight: bold;">sub</span> <span style="color: #268bd2;">increment</span> <span style="color: #839496;">&lbrace;</span>
 </span><span class="line" data-line="318">  <span style="color: #93a1a1; font-weight: bold;">my</span> <span style="color: #268bd2;">$<span style="color: #6c71c4;">self</span></span> <span style="color: #859900;">=</span> <span style="color: #268bd2;">shift</span><span style="color: #839496;">;</span>
 </span><span class="line" data-line="319">  <span style="color: #268bd2;">$<span style="color: #6c71c4;">self</span></span><span style="color: #839496;">-&gt;</span><span style="color: #268bd2;">_set_count</span><span style="color: #839496;">(</span><span style="color: #268bd2;">$<span style="color: #6c71c4;">self</span></span><span style="color: #839496;">-&gt;</span><span style="color: #268bd2;">count</span> <span style="color: #859900;">+</span> <span style="color: #6c71c4;">1</span><span style="color: #839496;">)</span><span style="color: #839496;">;</span>
-</span><span class="line" data-line="320"><span style="color: #839496;">}</span>
+</span><span class="line" data-line="320"><span style="color: #839496;">&rbrace;</span>
 </span><span class="line" data-line="321">
 </span><span class="line" data-line="322"><span style="color: #6c71c4;">1</span><span style="color: #839496;">;</span>
 </span><span class="line" data-line="323">

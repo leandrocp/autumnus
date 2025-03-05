@@ -16,9 +16,9 @@
 </head>
 <body>
 <pre class="athl w-full overflow-auto rounded-lg p-8 text-sm antialiased leading-6" style="color: #ece1d7; background-color: #292522;"><code class="language-haskell" translate="no" tabindex="0"><span class="line" data-line="1"><span style="color: #c1a78e;">-- Single line comments start with two dashes.</span>
-</span><span class="line" data-line="2"><span style="color: #c1a78e;">{- Multiline comments can be enclosed</span>
+</span><span class="line" data-line="2"><span style="color: #c1a78e;">&lbrace;- Multiline comments can be enclosed</span>
 </span><span class="line" data-line="3"><span style="color: #c1a78e;">in a block like this.</span>
-</span><span class="line" data-line="4"><span style="color: #c1a78e;">-}</span>
+</span><span class="line" data-line="4"><span style="color: #c1a78e;">-&rbrace;</span>
 </span><span class="line" data-line="5">
 </span><span class="line" data-line="6"><span style="color: #c1a78e;">----------------------------------------------------</span>
 </span><span class="line" data-line="7"><span style="color: #c1a78e;">-- 1. Primitive Datatypes and Operators</span>
@@ -349,10 +349,10 @@
 </span><span class="line" data-line="332">
 </span><span class="line" data-line="333"><span style="color: #c1a78e;">-- To make things clearer we can use record syntax</span>
 </span><span class="line" data-line="334">
-</span><span class="line" data-line="335"><span style="color: #e49b5d;">data</span> <span style="color: #7b9695;">Point2D</span> <span style="color: #d47766;">=</span> <span style="color: #ebc06d;">CartesianPoint2D</span> <span style="color: #8b7449;">{</span> <span style="color: #ece1d7;">x</span> <span style="color: #d47766;">::</span> <span style="color: #7b9695;">Float</span><span style="color: #bd8183;">,</span> <span style="color: #ece1d7;">y</span> <span style="color: #d47766;">::</span> <span style="color: #7b9695;">Float</span> <span style="color: #8b7449;">}</span> 
-</span><span class="line" data-line="336">             <span style="color: #d47766;">|</span> <span style="color: #ebc06d;">PolarPoint2D</span> <span style="color: #8b7449;">{</span> <span style="color: #ece1d7;">r</span> <span style="color: #d47766;">::</span> <span style="color: #7b9695;">Float</span><span style="color: #bd8183;">,</span> <span style="color: #ece1d7;">theta</span> <span style="color: #d47766;">::</span> <span style="color: #7b9695;">Float</span> <span style="color: #8b7449;">}</span>
+</span><span class="line" data-line="335"><span style="color: #e49b5d;">data</span> <span style="color: #7b9695;">Point2D</span> <span style="color: #d47766;">=</span> <span style="color: #ebc06d;">CartesianPoint2D</span> <span style="color: #8b7449;">&lbrace;</span> <span style="color: #ece1d7;">x</span> <span style="color: #d47766;">::</span> <span style="color: #7b9695;">Float</span><span style="color: #bd8183;">,</span> <span style="color: #ece1d7;">y</span> <span style="color: #d47766;">::</span> <span style="color: #7b9695;">Float</span> <span style="color: #8b7449;">&rbrace;</span> 
+</span><span class="line" data-line="336">             <span style="color: #d47766;">|</span> <span style="color: #ebc06d;">PolarPoint2D</span> <span style="color: #8b7449;">&lbrace;</span> <span style="color: #ece1d7;">r</span> <span style="color: #d47766;">::</span> <span style="color: #7b9695;">Float</span><span style="color: #bd8183;">,</span> <span style="color: #ece1d7;">theta</span> <span style="color: #d47766;">::</span> <span style="color: #7b9695;">Float</span> <span style="color: #8b7449;">&rbrace;</span>
 </span><span class="line" data-line="337">
-</span><span class="line" data-line="338"><span style="color: #ece1d7;">myPoint</span> <span style="color: #d47766;">=</span> <span style="color: #ebc06d;">CartesianPoint2D</span> <span style="color: #8b7449;">{</span> <span style="color: #ece1d7;">x</span> <span style="color: #d47766;">=</span> <span style="color: #cf9bc2;">7.0</span><span style="color: #bd8183;">,</span> <span style="color: #ece1d7;">y</span> <span style="color: #d47766;">=</span> <span style="color: #cf9bc2;">10.0</span> <span style="color: #8b7449;">}</span>
+</span><span class="line" data-line="338"><span style="color: #ece1d7;">myPoint</span> <span style="color: #d47766;">=</span> <span style="color: #ebc06d;">CartesianPoint2D</span> <span style="color: #8b7449;">&lbrace;</span> <span style="color: #ece1d7;">x</span> <span style="color: #d47766;">=</span> <span style="color: #cf9bc2;">7.0</span><span style="color: #bd8183;">,</span> <span style="color: #ece1d7;">y</span> <span style="color: #d47766;">=</span> <span style="color: #cf9bc2;">10.0</span> <span style="color: #8b7449;">&rbrace;</span>
 </span><span class="line" data-line="339">
 </span><span class="line" data-line="340"><span style="color: #c1a78e;">-- Using record syntax automatically creates accessor functions</span>
 </span><span class="line" data-line="341"><span style="color: #c1a78e;">-- (the name of the field)</span>
@@ -363,9 +363,9 @@
 </span><span class="line" data-line="346">
 </span><span class="line" data-line="347"><span style="color: #c1a78e;">-- Record syntax also allows a simple form of update</span>
 </span><span class="line" data-line="348">
-</span><span class="line" data-line="349"><span style="color: #ece1d7;">myPoint&#39;</span> <span style="color: #d47766;">=</span> <span style="color: #ece1d7;">myPoint</span> <span style="color: #8b7449;">{</span> <span style="color: #ece1d7;">x</span> <span style="color: #d47766;">=</span> <span style="color: #cf9bc2;">9.0</span> <span style="color: #8b7449;">}</span>
+</span><span class="line" data-line="349"><span style="color: #ece1d7;">myPoint&#39;</span> <span style="color: #d47766;">=</span> <span style="color: #ece1d7;">myPoint</span> <span style="color: #8b7449;">&lbrace;</span> <span style="color: #ece1d7;">x</span> <span style="color: #d47766;">=</span> <span style="color: #cf9bc2;">9.0</span> <span style="color: #8b7449;">&rbrace;</span>
 </span><span class="line" data-line="350">
-</span><span class="line" data-line="351"><span style="color: #c1a78e;">-- myPoint&#39; is CartesianPoint2D { x = 9.0, y = 10.0 }</span>
+</span><span class="line" data-line="351"><span style="color: #c1a78e;">-- myPoint&#39; is CartesianPoint2D &lbrace; x = 9.0, y = 10.0 &rbrace;</span>
 </span><span class="line" data-line="352">
 </span><span class="line" data-line="353"><span style="color: #c1a78e;">-- Even if a type is defined with record syntax, it can be declared like</span>
 </span><span class="line" data-line="354"><span style="color: #c1a78e;">-- a simple data constructor. This is fine:</span>

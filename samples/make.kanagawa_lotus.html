@@ -139,7 +139,7 @@
 </span><span class="line" data-line="122">
 </span><span class="line" data-line="123"><span style="color: #4d699b;">echo</span><span style="color: #836f4a;">:</span>
 </span><span class="line" data-line="124">	<span style="color: #6693bf;">@</span><span style="color: #6693bf;">echo</span> <span style="color: #836f4a;">$(<span style="color: #6f894e;">name</span>)</span>
-</span><span class="line" data-line="125">	<span style="color: #6693bf;">@</span><span style="color: #6693bf;">echo</span> <span style="color: #836f4a;">${<span style="color: #6f894e;">name2</span>}</span>
+</span><span class="line" data-line="125">	<span style="color: #6693bf;">@</span><span style="color: #6693bf;">echo</span> <span style="color: #836f4a;">$&lbrace;<span style="color: #6f894e;">name2</span>&rbrace;</span>
 </span><span class="line" data-line="126">	<span style="color: #6693bf;">@</span><span style="color: #6693bf;">echo</span> <span style="color: #836f4a;">$<span style="color: #6f894e;">n</span></span><span style="color: #5d57a3;">ame</span>    <span style="color: #8a8980;"># This won&#39;t work, treated as <span style="color: #836f4a;">$(<span style="color: #6f894e;">n</span>)</span>ame.</span>
 </span><span class="line" data-line="127">	<span style="color: #6693bf;">@</span><span style="color: #6693bf;">echo</span> <span style="color: #836f4a;">$(<span style="color: #6f894e;">name3</span>)</span> <span style="color: #8a8980;"># Unknown variables are treated as empty strings.</span>
 </span><span class="line" data-line="128">
@@ -167,13 +167,13 @@
 </span><span class="line" data-line="150"><span style="color: #8a8980;"># Some variables defined automatically by make.</span>
 </span><span class="line" data-line="151"><span style="color: #4d699b;">echo_inbuilt</span><span style="color: #836f4a;">:</span>
 </span><span class="line" data-line="152">	<span style="color: #6693bf;">echo</span> <span style="color: #836f4a;">$(<span style="color: #6f894e;">CC</span>)</span>
-</span><span class="line" data-line="153">	<span style="color: #6693bf;">echo</span> <span style="color: #836f4a;">${<span style="color: #6f894e;">CXX</span>}</span>
+</span><span class="line" data-line="153">	<span style="color: #6693bf;">echo</span> <span style="color: #836f4a;">$&lbrace;<span style="color: #6f894e;">CXX</span>&rbrace;</span>
 </span><span class="line" data-line="154">	<span style="color: #6693bf;">echo</span> <span style="color: #836f4a;">$(<span style="color: #6f894e;">FC</span>)</span>
-</span><span class="line" data-line="155">	<span style="color: #6693bf;">echo</span> <span style="color: #836f4a;">${<span style="color: #6f894e;">CFLAGS</span>}</span>
+</span><span class="line" data-line="155">	<span style="color: #6693bf;">echo</span> <span style="color: #836f4a;">$&lbrace;<span style="color: #6f894e;">CFLAGS</span>&rbrace;</span>
 </span><span class="line" data-line="156">	<span style="color: #6693bf;">echo</span> <span style="color: #836f4a;">$(<span style="color: #6f894e;">CPPFLAGS</span>)</span>
-</span><span class="line" data-line="157">	<span style="color: #6693bf;">echo</span> <span style="color: #836f4a;">${<span style="color: #6f894e;">CXXFLAGS</span>}</span>
+</span><span class="line" data-line="157">	<span style="color: #6693bf;">echo</span> <span style="color: #836f4a;">$&lbrace;<span style="color: #6f894e;">CXXFLAGS</span>&rbrace;</span>
 </span><span class="line" data-line="158">	<span style="color: #6693bf;">echo</span> <span style="color: #836f4a;">$(<span style="color: #6f894e;">LDFLAGS</span>)</span>
-</span><span class="line" data-line="159">	<span style="color: #6693bf;">echo</span> <span style="color: #836f4a;">${<span style="color: #6f894e;">LDLIBS</span>}</span>
+</span><span class="line" data-line="159">	<span style="color: #6693bf;">echo</span> <span style="color: #836f4a;">$&lbrace;<span style="color: #6f894e;">LDLIBS</span>&rbrace;</span>
 </span><span class="line" data-line="160">
 </span><span class="line" data-line="161"><span style="color: #8a8980;">#-----------------------------------------------------------------------</span>
 </span><span class="line" data-line="162"><span style="color: #8a8980;"># Variables 2</span>

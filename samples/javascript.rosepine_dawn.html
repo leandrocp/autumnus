@@ -193,11 +193,11 @@
 </span><span class="line" data-line="176">
 </span><span class="line" data-line="177"><span style="color: #797593;">// JavaScript&#39;s objects are equivalent to &quot;dictionaries&quot; or &quot;maps&quot; in other</span>
 </span><span class="line" data-line="178"><span style="color: #797593;">// languages: an unordered collection of key-value pairs.</span>
-</span><span class="line" data-line="179"><span style="color: #286983;">var</span> <span style="color: #464261;">myObj</span> <span style="color: #797593;">=</span> <span style="color: #797593;">{</span><span style="color: #56949f;">key1</span><span style="color: #797593;">:</span> <span style="color: #ea9d34;">&quot;Hello&quot;</span><span style="color: #797593;">,</span> <span style="color: #56949f;">key2</span><span style="color: #797593;">:</span> <span style="color: #ea9d34;">&quot;World&quot;</span><span style="color: #797593;">}</span><span style="color: #797593;">;</span>
+</span><span class="line" data-line="179"><span style="color: #286983;">var</span> <span style="color: #464261;">myObj</span> <span style="color: #797593;">=</span> <span style="color: #797593;">&lbrace;</span><span style="color: #56949f;">key1</span><span style="color: #797593;">:</span> <span style="color: #ea9d34;">&quot;Hello&quot;</span><span style="color: #797593;">,</span> <span style="color: #56949f;">key2</span><span style="color: #797593;">:</span> <span style="color: #ea9d34;">&quot;World&quot;</span><span style="color: #797593;">&rbrace;</span><span style="color: #797593;">;</span>
 </span><span class="line" data-line="180">
 </span><span class="line" data-line="181"><span style="color: #797593;">// Keys are strings, but quotes aren&#39;t required if they&#39;re a valid</span>
 </span><span class="line" data-line="182"><span style="color: #797593;">// JavaScript identifier. Values can be any type.</span>
-</span><span class="line" data-line="183"><span style="color: #286983;">var</span> <span style="color: #464261;">myObj</span> <span style="color: #797593;">=</span> <span style="color: #797593;">{</span><span style="color: #56949f;">myKey</span><span style="color: #797593;">:</span> <span style="color: #ea9d34;">&quot;myValue&quot;</span><span style="color: #797593;">,</span> <span style="color: #ea9d34;">&quot;my other key&quot;</span><span style="color: #797593;">:</span> <span style="color: #ea9d34;">4</span><span style="color: #797593;">}</span><span style="color: #797593;">;</span>
+</span><span class="line" data-line="183"><span style="color: #286983;">var</span> <span style="color: #464261;">myObj</span> <span style="color: #797593;">=</span> <span style="color: #797593;">&lbrace;</span><span style="color: #56949f;">myKey</span><span style="color: #797593;">:</span> <span style="color: #ea9d34;">&quot;myValue&quot;</span><span style="color: #797593;">,</span> <span style="color: #ea9d34;">&quot;my other key&quot;</span><span style="color: #797593;">:</span> <span style="color: #ea9d34;">4</span><span style="color: #797593;">&rbrace;</span><span style="color: #797593;">;</span>
 </span><span class="line" data-line="184">
 </span><span class="line" data-line="185"><span style="color: #797593;">// Object attributes can also be accessed using the subscript syntax,</span>
 </span><span class="line" data-line="186"><span style="color: #464261;">myObj</span><span style="color: #797593;">[</span><span style="color: #ea9d34;">&quot;my other key&quot;</span><span style="color: #797593;">]</span><span style="color: #797593;">;</span> <span style="color: #797593;">// = 4</span>
@@ -216,65 +216,65 @@
 </span><span class="line" data-line="199">
 </span><span class="line" data-line="200"><span style="color: #797593;">// The `if` structure works as you&#39;d expect.</span>
 </span><span class="line" data-line="201"><span style="color: #286983;">var</span> <span style="color: #464261;">count</span> <span style="color: #797593;">=</span> <span style="color: #ea9d34;">1</span><span style="color: #797593;">;</span>
-</span><span class="line" data-line="202"><span style="color: #286983;">if</span> <span style="color: #797593;">(</span><span style="color: #464261;">count</span> <span style="color: #797593;">==</span> <span style="color: #ea9d34;">3</span><span style="color: #797593;">)</span><span style="color: #797593;">{</span>
+</span><span class="line" data-line="202"><span style="color: #286983;">if</span> <span style="color: #797593;">(</span><span style="color: #464261;">count</span> <span style="color: #797593;">==</span> <span style="color: #ea9d34;">3</span><span style="color: #797593;">)</span><span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="203">    <span style="color: #797593;">// evaluated if count is 3</span>
-</span><span class="line" data-line="204"><span style="color: #797593;">}</span> <span style="color: #286983;">else</span> <span style="color: #286983;">if</span> <span style="color: #797593;">(</span><span style="color: #464261;">count</span> <span style="color: #797593;">==</span> <span style="color: #ea9d34;">4</span><span style="color: #797593;">)</span><span style="color: #797593;">{</span>
+</span><span class="line" data-line="204"><span style="color: #797593;">&rbrace;</span> <span style="color: #286983;">else</span> <span style="color: #286983;">if</span> <span style="color: #797593;">(</span><span style="color: #464261;">count</span> <span style="color: #797593;">==</span> <span style="color: #ea9d34;">4</span><span style="color: #797593;">)</span><span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="205">    <span style="color: #797593;">// evaluated if count is 4</span>
-</span><span class="line" data-line="206"><span style="color: #797593;">}</span> <span style="color: #286983;">else</span> <span style="color: #797593;">{</span>
+</span><span class="line" data-line="206"><span style="color: #797593;">&rbrace;</span> <span style="color: #286983;">else</span> <span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="207">    <span style="color: #797593;">// evaluated if it&#39;s not either 3 or 4</span>
-</span><span class="line" data-line="208"><span style="color: #797593;">}</span>
+</span><span class="line" data-line="208"><span style="color: #797593;">&rbrace;</span>
 </span><span class="line" data-line="209">
 </span><span class="line" data-line="210"><span style="color: #797593;">// As does `while`.</span>
-</span><span class="line" data-line="211"><span style="color: #286983;">while</span> <span style="color: #797593;">(</span><span style="color: #d7827e;">true</span><span style="color: #797593;">)</span><span style="color: #797593;">{</span>
+</span><span class="line" data-line="211"><span style="color: #286983;">while</span> <span style="color: #797593;">(</span><span style="color: #d7827e;">true</span><span style="color: #797593;">)</span><span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="212">    <span style="color: #797593;">// An infinite loop!</span>
-</span><span class="line" data-line="213"><span style="color: #797593;">}</span>
+</span><span class="line" data-line="213"><span style="color: #797593;">&rbrace;</span>
 </span><span class="line" data-line="214">
 </span><span class="line" data-line="215"><span style="color: #797593;">// Do-while loops are like while loops, except they always run at least once.</span>
 </span><span class="line" data-line="216"><span style="color: #286983;">var</span> <span style="color: #464261;">input</span><span style="color: #797593;">;</span>
-</span><span class="line" data-line="217"><span style="color: #286983;">do</span> <span style="color: #797593;">{</span>
+</span><span class="line" data-line="217"><span style="color: #286983;">do</span> <span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="218">    <span style="color: #464261;">input</span> <span style="color: #797593;">=</span> <span style="color: #d7827e;">getInput</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">;</span>
-</span><span class="line" data-line="219"><span style="color: #797593;">}</span> <span style="color: #286983;">while</span> <span style="color: #797593;">(</span><span style="color: #797593;">!</span><span style="color: #d7827e;">isValid</span><span style="color: #797593;">(</span><span style="color: #464261;">input</span><span style="color: #797593;">)</span><span style="color: #797593;">)</span><span style="color: #797593;">;</span>
+</span><span class="line" data-line="219"><span style="color: #797593;">&rbrace;</span> <span style="color: #286983;">while</span> <span style="color: #797593;">(</span><span style="color: #797593;">!</span><span style="color: #d7827e;">isValid</span><span style="color: #797593;">(</span><span style="color: #464261;">input</span><span style="color: #797593;">)</span><span style="color: #797593;">)</span><span style="color: #797593;">;</span>
 </span><span class="line" data-line="220">
 </span><span class="line" data-line="221"><span style="color: #797593;">// The `for` loop is the same as C and Java:</span>
 </span><span class="line" data-line="222"><span style="color: #797593;">// initialization; continue condition; iteration.</span>
-</span><span class="line" data-line="223"><span style="color: #286983;">for</span> <span style="color: #797593;">(</span><span style="color: #286983;">var</span> <span style="color: #464261;">i</span> <span style="color: #797593;">=</span> <span style="color: #ea9d34;">0</span><span style="color: #797593;">;</span> <span style="color: #464261;">i</span> <span style="color: #797593;">&lt;</span> <span style="color: #ea9d34;">5</span><span style="color: #797593;">;</span> <span style="color: #464261;">i</span><span style="color: #797593;">++</span><span style="color: #797593;">)</span><span style="color: #797593;">{</span>
+</span><span class="line" data-line="223"><span style="color: #286983;">for</span> <span style="color: #797593;">(</span><span style="color: #286983;">var</span> <span style="color: #464261;">i</span> <span style="color: #797593;">=</span> <span style="color: #ea9d34;">0</span><span style="color: #797593;">;</span> <span style="color: #464261;">i</span> <span style="color: #797593;">&lt;</span> <span style="color: #ea9d34;">5</span><span style="color: #797593;">;</span> <span style="color: #464261;">i</span><span style="color: #797593;">++</span><span style="color: #797593;">)</span><span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="224">    <span style="color: #797593;">// will run 5 times</span>
-</span><span class="line" data-line="225"><span style="color: #797593;">}</span>
+</span><span class="line" data-line="225"><span style="color: #797593;">&rbrace;</span>
 </span><span class="line" data-line="226">
 </span><span class="line" data-line="227"><span style="color: #797593;">// Breaking out of labeled loops is similar to Java</span>
 </span><span class="line" data-line="228"><span style="color: #56949f;">outer</span><span style="color: #797593;">:</span>
-</span><span class="line" data-line="229"><span style="color: #286983;">for</span> <span style="color: #797593;">(</span><span style="color: #286983;">var</span> <span style="color: #464261;">i</span> <span style="color: #797593;">=</span> <span style="color: #ea9d34;">0</span><span style="color: #797593;">;</span> <span style="color: #464261;">i</span> <span style="color: #797593;">&lt;</span> <span style="color: #ea9d34;">10</span><span style="color: #797593;">;</span> <span style="color: #464261;">i</span><span style="color: #797593;">++</span><span style="color: #797593;">)</span> <span style="color: #797593;">{</span>
-</span><span class="line" data-line="230">    <span style="color: #286983;">for</span> <span style="color: #797593;">(</span><span style="color: #286983;">var</span> <span style="color: #464261;">j</span> <span style="color: #797593;">=</span> <span style="color: #ea9d34;">0</span><span style="color: #797593;">;</span> <span style="color: #464261;">j</span> <span style="color: #797593;">&lt;</span> <span style="color: #ea9d34;">10</span><span style="color: #797593;">;</span> <span style="color: #464261;">j</span><span style="color: #797593;">++</span><span style="color: #797593;">)</span> <span style="color: #797593;">{</span>
-</span><span class="line" data-line="231">        <span style="color: #286983;">if</span> <span style="color: #797593;">(</span><span style="color: #464261;">i</span> <span style="color: #797593;">==</span> <span style="color: #ea9d34;">5</span> <span style="color: #797593;">&amp;&amp;</span> <span style="color: #464261;">j</span> <span style="color: #797593;">==</span><span style="color: #ea9d34;">5</span><span style="color: #797593;">)</span> <span style="color: #797593;">{</span>
+</span><span class="line" data-line="229"><span style="color: #286983;">for</span> <span style="color: #797593;">(</span><span style="color: #286983;">var</span> <span style="color: #464261;">i</span> <span style="color: #797593;">=</span> <span style="color: #ea9d34;">0</span><span style="color: #797593;">;</span> <span style="color: #464261;">i</span> <span style="color: #797593;">&lt;</span> <span style="color: #ea9d34;">10</span><span style="color: #797593;">;</span> <span style="color: #464261;">i</span><span style="color: #797593;">++</span><span style="color: #797593;">)</span> <span style="color: #797593;">&lbrace;</span>
+</span><span class="line" data-line="230">    <span style="color: #286983;">for</span> <span style="color: #797593;">(</span><span style="color: #286983;">var</span> <span style="color: #464261;">j</span> <span style="color: #797593;">=</span> <span style="color: #ea9d34;">0</span><span style="color: #797593;">;</span> <span style="color: #464261;">j</span> <span style="color: #797593;">&lt;</span> <span style="color: #ea9d34;">10</span><span style="color: #797593;">;</span> <span style="color: #464261;">j</span><span style="color: #797593;">++</span><span style="color: #797593;">)</span> <span style="color: #797593;">&lbrace;</span>
+</span><span class="line" data-line="231">        <span style="color: #286983;">if</span> <span style="color: #797593;">(</span><span style="color: #464261;">i</span> <span style="color: #797593;">==</span> <span style="color: #ea9d34;">5</span> <span style="color: #797593;">&amp;&amp;</span> <span style="color: #464261;">j</span> <span style="color: #797593;">==</span><span style="color: #ea9d34;">5</span><span style="color: #797593;">)</span> <span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="232">            <span style="color: #286983;">break</span> <span style="color: #56949f;">outer</span><span style="color: #797593;">;</span>
 </span><span class="line" data-line="233">            <span style="color: #797593;">// breaks out of outer loop instead of only the inner one</span>
-</span><span class="line" data-line="234">        <span style="color: #797593;">}</span>
-</span><span class="line" data-line="235">    <span style="color: #797593;">}</span>
-</span><span class="line" data-line="236"><span style="color: #797593;">}</span>
+</span><span class="line" data-line="234">        <span style="color: #797593;">&rbrace;</span>
+</span><span class="line" data-line="235">    <span style="color: #797593;">&rbrace;</span>
+</span><span class="line" data-line="236"><span style="color: #797593;">&rbrace;</span>
 </span><span class="line" data-line="237">
 </span><span class="line" data-line="238"><span style="color: #797593;">// The for/in statement allows iteration over properties of an object.</span>
 </span><span class="line" data-line="239"><span style="color: #286983;">var</span> <span style="color: #464261;">description</span> <span style="color: #797593;">=</span> <span style="color: #ea9d34;">&quot;&quot;</span><span style="color: #797593;">;</span>
-</span><span class="line" data-line="240"><span style="color: #286983;">var</span> <span style="color: #464261;">person</span> <span style="color: #797593;">=</span> <span style="color: #797593;">{</span><span style="color: #56949f;">fname</span><span style="color: #797593;">:</span><span style="color: #ea9d34;">&quot;Paul&quot;</span><span style="color: #797593;">,</span> <span style="color: #56949f;">lname</span><span style="color: #797593;">:</span><span style="color: #ea9d34;">&quot;Ken&quot;</span><span style="color: #797593;">,</span> <span style="color: #56949f;">age</span><span style="color: #797593;">:</span><span style="color: #ea9d34;">18</span><span style="color: #797593;">}</span><span style="color: #797593;">;</span>
-</span><span class="line" data-line="241"><span style="color: #286983;">for</span> <span style="color: #797593;">(</span><span style="color: #286983;">var</span> <span style="color: #464261;">x</span> <span style="color: #797593;">in</span> <span style="color: #464261;">person</span><span style="color: #797593;">)</span><span style="color: #797593;">{</span>
+</span><span class="line" data-line="240"><span style="color: #286983;">var</span> <span style="color: #464261;">person</span> <span style="color: #797593;">=</span> <span style="color: #797593;">&lbrace;</span><span style="color: #56949f;">fname</span><span style="color: #797593;">:</span><span style="color: #ea9d34;">&quot;Paul&quot;</span><span style="color: #797593;">,</span> <span style="color: #56949f;">lname</span><span style="color: #797593;">:</span><span style="color: #ea9d34;">&quot;Ken&quot;</span><span style="color: #797593;">,</span> <span style="color: #56949f;">age</span><span style="color: #797593;">:</span><span style="color: #ea9d34;">18</span><span style="color: #797593;">&rbrace;</span><span style="color: #797593;">;</span>
+</span><span class="line" data-line="241"><span style="color: #286983;">for</span> <span style="color: #797593;">(</span><span style="color: #286983;">var</span> <span style="color: #464261;">x</span> <span style="color: #797593;">in</span> <span style="color: #464261;">person</span><span style="color: #797593;">)</span><span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="242">    <span style="color: #464261;">description</span> <span style="color: #797593;">+=</span> <span style="color: #464261;">person</span><span style="color: #797593;">[</span><span style="color: #464261;">x</span><span style="color: #797593;">]</span> <span style="color: #797593;">+</span> <span style="color: #ea9d34;">&quot; &quot;</span><span style="color: #797593;">;</span>
-</span><span class="line" data-line="243"><span style="color: #797593;">}</span> <span style="color: #797593;">// description = &#39;Paul Ken 18 &#39;</span>
+</span><span class="line" data-line="243"><span style="color: #797593;">&rbrace;</span> <span style="color: #797593;">// description = &#39;Paul Ken 18 &#39;</span>
 </span><span class="line" data-line="244">
 </span><span class="line" data-line="245"><span style="color: #797593;">// The for/of statement allows iteration over iterable objects (including the built-in String, </span>
 </span><span class="line" data-line="246"><span style="color: #797593;">// Array, e.g. the Array-like arguments or NodeList objects, TypedArray, Map and Set, </span>
 </span><span class="line" data-line="247"><span style="color: #797593;">// and user-defined iterables).</span>
 </span><span class="line" data-line="248"><span style="color: #286983;">var</span> <span style="color: #464261;">myPets</span> <span style="color: #797593;">=</span> <span style="color: #ea9d34;">&quot;&quot;</span><span style="color: #797593;">;</span>
 </span><span class="line" data-line="249"><span style="color: #286983;">var</span> <span style="color: #464261;">pets</span> <span style="color: #797593;">=</span> <span style="color: #797593;">[</span><span style="color: #ea9d34;">&quot;cat&quot;</span><span style="color: #797593;">,</span> <span style="color: #ea9d34;">&quot;dog&quot;</span><span style="color: #797593;">,</span> <span style="color: #ea9d34;">&quot;hamster&quot;</span><span style="color: #797593;">,</span> <span style="color: #ea9d34;">&quot;hedgehog&quot;</span><span style="color: #797593;">]</span><span style="color: #797593;">;</span>
-</span><span class="line" data-line="250"><span style="color: #286983;">for</span> <span style="color: #797593;">(</span><span style="color: #286983;">var</span> <span style="color: #464261;">pet</span> <span style="color: #286983;">of</span> <span style="color: #464261;">pets</span><span style="color: #797593;">)</span><span style="color: #797593;">{</span>
+</span><span class="line" data-line="250"><span style="color: #286983;">for</span> <span style="color: #797593;">(</span><span style="color: #286983;">var</span> <span style="color: #464261;">pet</span> <span style="color: #286983;">of</span> <span style="color: #464261;">pets</span><span style="color: #797593;">)</span><span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="251">    <span style="color: #464261;">myPets</span> <span style="color: #797593;">+=</span> <span style="color: #464261;">pet</span> <span style="color: #797593;">+</span> <span style="color: #ea9d34;">&quot; &quot;</span><span style="color: #797593;">;</span>
-</span><span class="line" data-line="252"><span style="color: #797593;">}</span> <span style="color: #797593;">// myPets = &#39;cat dog hamster hedgehog &#39;</span>
+</span><span class="line" data-line="252"><span style="color: #797593;">&rbrace;</span> <span style="color: #797593;">// myPets = &#39;cat dog hamster hedgehog &#39;</span>
 </span><span class="line" data-line="253">
 </span><span class="line" data-line="254"><span style="color: #797593;">// &amp;&amp; is logical and, || is logical or</span>
-</span><span class="line" data-line="255"><span style="color: #286983;">if</span> <span style="color: #797593;">(</span><span style="color: #464261;">house</span><span style="color: #797593;">.</span><span style="color: #56949f;">size</span> <span style="color: #797593;">==</span> <span style="color: #ea9d34;">&quot;big&quot;</span> <span style="color: #797593;">&amp;&amp;</span> <span style="color: #464261;">house</span><span style="color: #797593;">.</span><span style="color: #56949f;">colour</span> <span style="color: #797593;">==</span> <span style="color: #ea9d34;">&quot;blue&quot;</span><span style="color: #797593;">)</span><span style="color: #797593;">{</span>
+</span><span class="line" data-line="255"><span style="color: #286983;">if</span> <span style="color: #797593;">(</span><span style="color: #464261;">house</span><span style="color: #797593;">.</span><span style="color: #56949f;">size</span> <span style="color: #797593;">==</span> <span style="color: #ea9d34;">&quot;big&quot;</span> <span style="color: #797593;">&amp;&amp;</span> <span style="color: #464261;">house</span><span style="color: #797593;">.</span><span style="color: #56949f;">colour</span> <span style="color: #797593;">==</span> <span style="color: #ea9d34;">&quot;blue&quot;</span><span style="color: #797593;">)</span><span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="256">    <span style="color: #464261;">house</span><span style="color: #797593;">.</span><span style="color: #56949f;">contains</span> <span style="color: #797593;">=</span> <span style="color: #ea9d34;">&quot;bear&quot;</span><span style="color: #797593;">;</span>
-</span><span class="line" data-line="257"><span style="color: #797593;">}</span>
-</span><span class="line" data-line="258"><span style="color: #286983;">if</span> <span style="color: #797593;">(</span><span style="color: #464261;">colour</span> <span style="color: #797593;">==</span> <span style="color: #ea9d34;">&quot;red&quot;</span> <span style="color: #797593;">||</span> <span style="color: #464261;">colour</span> <span style="color: #797593;">==</span> <span style="color: #ea9d34;">&quot;blue&quot;</span><span style="color: #797593;">)</span><span style="color: #797593;">{</span>
+</span><span class="line" data-line="257"><span style="color: #797593;">&rbrace;</span>
+</span><span class="line" data-line="258"><span style="color: #286983;">if</span> <span style="color: #797593;">(</span><span style="color: #464261;">colour</span> <span style="color: #797593;">==</span> <span style="color: #ea9d34;">&quot;red&quot;</span> <span style="color: #797593;">||</span> <span style="color: #464261;">colour</span> <span style="color: #797593;">==</span> <span style="color: #ea9d34;">&quot;blue&quot;</span><span style="color: #797593;">)</span><span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="259">    <span style="color: #797593;">// colour is either red or blue</span>
-</span><span class="line" data-line="260"><span style="color: #797593;">}</span>
+</span><span class="line" data-line="260"><span style="color: #797593;">&rbrace;</span>
 </span><span class="line" data-line="261">
 </span><span class="line" data-line="262"><span style="color: #797593;">// &amp;&amp; and || &quot;short circuit&quot;, which is useful for setting default values.</span>
 </span><span class="line" data-line="263"><span style="color: #286983;">var</span> <span style="color: #464261;">name</span> <span style="color: #797593;">=</span> <span style="color: #464261;">otherName</span> <span style="color: #797593;">||</span> <span style="color: #ea9d34;">&quot;default&quot;</span><span style="color: #797593;">;</span>
@@ -283,7 +283,7 @@
 </span><span class="line" data-line="266"><span style="color: #797593;">// Use &#39;break&#39; after each case</span>
 </span><span class="line" data-line="267"><span style="color: #797593;">// or the cases after the correct one will be executed too.</span>
 </span><span class="line" data-line="268"><span style="color: #464261;">grade</span> <span style="color: #797593;">=</span> <span style="color: #ea9d34;">&#39;B&#39;</span><span style="color: #797593;">;</span>
-</span><span class="line" data-line="269"><span style="color: #286983;">switch</span> <span style="color: #797593;">(</span><span style="color: #464261;">grade</span><span style="color: #797593;">)</span> <span style="color: #797593;">{</span>
+</span><span class="line" data-line="269"><span style="color: #286983;">switch</span> <span style="color: #797593;">(</span><span style="color: #464261;">grade</span><span style="color: #797593;">)</span> <span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="270">  <span style="color: #286983;">case</span> <span style="color: #ea9d34;">&#39;A&#39;</span><span style="color: #797593;">:</span>
 </span><span class="line" data-line="271">    <span style="color: #b4637a; font-weight: bold;">console</span><span style="color: #797593;">.</span><span style="color: #907aa9;">log</span><span style="color: #797593;">(</span><span style="color: #ea9d34;">&quot;Great job&quot;</span><span style="color: #797593;">)</span><span style="color: #797593;">;</span>
 </span><span class="line" data-line="272">    <span style="color: #286983;">break</span><span style="color: #797593;">;</span>
@@ -296,106 +296,106 @@
 </span><span class="line" data-line="279">  <span style="color: #286983;">default</span><span style="color: #797593;">:</span>
 </span><span class="line" data-line="280">    <span style="color: #b4637a; font-weight: bold;">console</span><span style="color: #797593;">.</span><span style="color: #907aa9;">log</span><span style="color: #797593;">(</span><span style="color: #ea9d34;">&quot;Oy vey&quot;</span><span style="color: #797593;">)</span><span style="color: #797593;">;</span>
 </span><span class="line" data-line="281">    <span style="color: #286983;">break</span><span style="color: #797593;">;</span>
-</span><span class="line" data-line="282"><span style="color: #797593;">}</span>
+</span><span class="line" data-line="282"><span style="color: #797593;">&rbrace;</span>
 </span><span class="line" data-line="283">
 </span><span class="line" data-line="284">
 </span><span class="line" data-line="285"><span style="color: #797593;">///////////////////////////////////</span>
 </span><span class="line" data-line="286"><span style="color: #797593;">// 4. Functions, Scope and Closures</span>
 </span><span class="line" data-line="287">
 </span><span class="line" data-line="288"><span style="color: #797593;">// JavaScript functions are declared with the `function` keyword.</span>
-</span><span class="line" data-line="289"><span style="color: #286983;">function</span> <span style="color: #d7827e;">myFunction</span><span style="color: #797593;">(</span><span style="color: #907aa9;">thing</span><span style="color: #797593;">)</span><span style="color: #797593;">{</span>
+</span><span class="line" data-line="289"><span style="color: #286983;">function</span> <span style="color: #d7827e;">myFunction</span><span style="color: #797593;">(</span><span style="color: #907aa9;">thing</span><span style="color: #797593;">)</span><span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="290">    <span style="color: #286983;">return</span> <span style="color: #464261;">thing</span><span style="color: #797593;">.</span><span style="color: #907aa9;">toUpperCase</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">;</span>
-</span><span class="line" data-line="291"><span style="color: #797593;">}</span>
+</span><span class="line" data-line="291"><span style="color: #797593;">&rbrace;</span>
 </span><span class="line" data-line="292"><span style="color: #d7827e;">myFunction</span><span style="color: #797593;">(</span><span style="color: #ea9d34;">&quot;foo&quot;</span><span style="color: #797593;">)</span><span style="color: #797593;">;</span> <span style="color: #797593;">// = &quot;FOO&quot;</span>
 </span><span class="line" data-line="293">
 </span><span class="line" data-line="294"><span style="color: #797593;">// Note that the value to be returned must start on the same line as the</span>
 </span><span class="line" data-line="295"><span style="color: #797593;">// `return` keyword, otherwise you&#39;ll always return `undefined` due to</span>
 </span><span class="line" data-line="296"><span style="color: #797593;">// automatic semicolon insertion. Watch out for this when using Allman style.</span>
-</span><span class="line" data-line="297"><span style="color: #286983;">function</span> <span style="color: #d7827e;">myFunction</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">{</span>
+</span><span class="line" data-line="297"><span style="color: #286983;">function</span> <span style="color: #d7827e;">myFunction</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="298">    <span style="color: #286983;">return</span> <span style="color: #797593;">// &lt;- semicolon automatically inserted here</span>
-</span><span class="line" data-line="299">    <span style="color: #797593;">{</span><span style="color: #56949f;">thisIsAn</span><span style="color: #797593;">:</span> <span style="color: #ea9d34;">&#39;object literal&#39;</span><span style="color: #797593;">}</span><span style="color: #797593;">;</span>
-</span><span class="line" data-line="300"><span style="color: #797593;">}</span>
+</span><span class="line" data-line="299">    <span style="color: #797593;">&lbrace;</span><span style="color: #56949f;">thisIsAn</span><span style="color: #797593;">:</span> <span style="color: #ea9d34;">&#39;object literal&#39;</span><span style="color: #797593;">&rbrace;</span><span style="color: #797593;">;</span>
+</span><span class="line" data-line="300"><span style="color: #797593;">&rbrace;</span>
 </span><span class="line" data-line="301"><span style="color: #d7827e;">myFunction</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">;</span> <span style="color: #797593;">// = undefined</span>
 </span><span class="line" data-line="302">
 </span><span class="line" data-line="303"><span style="color: #797593;">// JavaScript functions are first class objects, so they can be reassigned to</span>
 </span><span class="line" data-line="304"><span style="color: #797593;">// different variable names and passed to other functions as arguments - for</span>
 </span><span class="line" data-line="305"><span style="color: #797593;">// example, when supplying an event handler:</span>
-</span><span class="line" data-line="306"><span style="color: #286983;">function</span> <span style="color: #d7827e;">myFunction</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">{</span>
+</span><span class="line" data-line="306"><span style="color: #286983;">function</span> <span style="color: #d7827e;">myFunction</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="307">    <span style="color: #797593;">// this code will be called in 5 seconds&#39; time</span>
-</span><span class="line" data-line="308"><span style="color: #797593;">}</span>
+</span><span class="line" data-line="308"><span style="color: #797593;">&rbrace;</span>
 </span><span class="line" data-line="309"><span style="color: #d7827e;">setTimeout</span><span style="color: #797593;">(</span><span style="color: #464261;">myFunction</span><span style="color: #797593;">,</span> <span style="color: #ea9d34;">5000</span><span style="color: #797593;">)</span><span style="color: #797593;">;</span>
 </span><span class="line" data-line="310"><span style="color: #797593;">// Note: setTimeout isn&#39;t part of the JS language, but is provided by browsers</span>
 </span><span class="line" data-line="311"><span style="color: #797593;">// and Node.js.</span>
 </span><span class="line" data-line="312">
 </span><span class="line" data-line="313"><span style="color: #797593;">// Another function provided by browsers is setInterval</span>
-</span><span class="line" data-line="314"><span style="color: #286983;">function</span> <span style="color: #d7827e;">myFunction</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">{</span>
+</span><span class="line" data-line="314"><span style="color: #286983;">function</span> <span style="color: #d7827e;">myFunction</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="315">    <span style="color: #797593;">// this code will be called every 5 seconds</span>
-</span><span class="line" data-line="316"><span style="color: #797593;">}</span>
+</span><span class="line" data-line="316"><span style="color: #797593;">&rbrace;</span>
 </span><span class="line" data-line="317"><span style="color: #d7827e;">setInterval</span><span style="color: #797593;">(</span><span style="color: #464261;">myFunction</span><span style="color: #797593;">,</span> <span style="color: #ea9d34;">5000</span><span style="color: #797593;">)</span><span style="color: #797593;">;</span>
 </span><span class="line" data-line="318">
 </span><span class="line" data-line="319"><span style="color: #797593;">// Function objects don&#39;t even have to be declared with a name - you can write</span>
 </span><span class="line" data-line="320"><span style="color: #797593;">// an anonymous function definition directly into the arguments of another.</span>
-</span><span class="line" data-line="321"><span style="color: #d7827e;">setTimeout</span><span style="color: #797593;">(</span><span style="color: #286983;">function</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">{</span>
+</span><span class="line" data-line="321"><span style="color: #d7827e;">setTimeout</span><span style="color: #797593;">(</span><span style="color: #286983;">function</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="322">    <span style="color: #797593;">// this code will be called in 5 seconds&#39; time</span>
-</span><span class="line" data-line="323"><span style="color: #797593;">}</span><span style="color: #797593;">,</span> <span style="color: #ea9d34;">5000</span><span style="color: #797593;">)</span><span style="color: #797593;">;</span>
+</span><span class="line" data-line="323"><span style="color: #797593;">&rbrace;</span><span style="color: #797593;">,</span> <span style="color: #ea9d34;">5000</span><span style="color: #797593;">)</span><span style="color: #797593;">;</span>
 </span><span class="line" data-line="324">
 </span><span class="line" data-line="325"><span style="color: #797593;">// JavaScript has function scope; functions get their own scope but other blocks</span>
 </span><span class="line" data-line="326"><span style="color: #797593;">// do not.</span>
-</span><span class="line" data-line="327"><span style="color: #286983;">if</span> <span style="color: #797593;">(</span><span style="color: #d7827e;">true</span><span style="color: #797593;">)</span><span style="color: #797593;">{</span>
+</span><span class="line" data-line="327"><span style="color: #286983;">if</span> <span style="color: #797593;">(</span><span style="color: #d7827e;">true</span><span style="color: #797593;">)</span><span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="328">    <span style="color: #286983;">var</span> <span style="color: #464261;">i</span> <span style="color: #797593;">=</span> <span style="color: #ea9d34;">5</span><span style="color: #797593;">;</span>
-</span><span class="line" data-line="329"><span style="color: #797593;">}</span>
+</span><span class="line" data-line="329"><span style="color: #797593;">&rbrace;</span>
 </span><span class="line" data-line="330"><span style="color: #464261;">i</span><span style="color: #797593;">;</span> <span style="color: #797593;">// = 5 - not undefined as you&#39;d expect in a block-scoped language</span>
 </span><span class="line" data-line="331">
 </span><span class="line" data-line="332"><span style="color: #797593;">// This has led to a common pattern of &quot;immediately-executing anonymous</span>
 </span><span class="line" data-line="333"><span style="color: #797593;">// functions&quot;, which prevent temporary variables from leaking into the global</span>
 </span><span class="line" data-line="334"><span style="color: #797593;">// scope.</span>
-</span><span class="line" data-line="335"><span style="color: #797593;">(</span><span style="color: #286983;">function</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">{</span>
+</span><span class="line" data-line="335"><span style="color: #797593;">(</span><span style="color: #286983;">function</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="336">    <span style="color: #286983;">var</span> <span style="color: #464261;">temporary</span> <span style="color: #797593;">=</span> <span style="color: #ea9d34;">5</span><span style="color: #797593;">;</span>
 </span><span class="line" data-line="337">    <span style="color: #797593;">// We can access the global scope by assigning to the &quot;global object&quot;, which</span>
 </span><span class="line" data-line="338">    <span style="color: #797593;">// in a web browser is always `window`. The global object may have a</span>
 </span><span class="line" data-line="339">    <span style="color: #797593;">// different name in non-browser environments such as Node.js.</span>
 </span><span class="line" data-line="340">    <span style="color: #b4637a; font-weight: bold;">window</span><span style="color: #797593;">.</span><span style="color: #56949f;">permanent</span> <span style="color: #797593;">=</span> <span style="color: #ea9d34;">10</span><span style="color: #797593;">;</span>
-</span><span class="line" data-line="341"><span style="color: #797593;">}</span><span style="color: #797593;">)</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">;</span>
+</span><span class="line" data-line="341"><span style="color: #797593;">&rbrace;</span><span style="color: #797593;">)</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">;</span>
 </span><span class="line" data-line="342"><span style="color: #464261;">temporary</span><span style="color: #797593;">;</span> <span style="color: #797593;">// raises ReferenceError</span>
 </span><span class="line" data-line="343"><span style="color: #464261;">permanent</span><span style="color: #797593;">;</span> <span style="color: #797593;">// = 10</span>
 </span><span class="line" data-line="344">
 </span><span class="line" data-line="345"><span style="color: #797593;">// One of JavaScript&#39;s most powerful features is closures. If a function is</span>
 </span><span class="line" data-line="346"><span style="color: #797593;">// defined inside another function, the inner function has access to all the</span>
 </span><span class="line" data-line="347"><span style="color: #797593;">// outer function&#39;s variables, even after the outer function exits.</span>
-</span><span class="line" data-line="348"><span style="color: #286983;">function</span> <span style="color: #d7827e;">sayHelloInFiveSeconds</span><span style="color: #797593;">(</span><span style="color: #907aa9;">name</span><span style="color: #797593;">)</span><span style="color: #797593;">{</span>
+</span><span class="line" data-line="348"><span style="color: #286983;">function</span> <span style="color: #d7827e;">sayHelloInFiveSeconds</span><span style="color: #797593;">(</span><span style="color: #907aa9;">name</span><span style="color: #797593;">)</span><span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="349">    <span style="color: #286983;">var</span> <span style="color: #464261;">prompt</span> <span style="color: #797593;">=</span> <span style="color: #ea9d34;">&quot;Hello, &quot;</span> <span style="color: #797593;">+</span> <span style="color: #464261;">name</span> <span style="color: #797593;">+</span> <span style="color: #ea9d34;">&quot;!&quot;</span><span style="color: #797593;">;</span>
 </span><span class="line" data-line="350">    <span style="color: #797593;">// Inner functions are put in the local scope by default, as if they were</span>
 </span><span class="line" data-line="351">    <span style="color: #797593;">// declared with `var`.</span>
-</span><span class="line" data-line="352">    <span style="color: #286983;">function</span> <span style="color: #d7827e;">inner</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">{</span>
+</span><span class="line" data-line="352">    <span style="color: #286983;">function</span> <span style="color: #d7827e;">inner</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="353">        <span style="color: #d7827e;">alert</span><span style="color: #797593;">(</span><span style="color: #464261;">prompt</span><span style="color: #797593;">)</span><span style="color: #797593;">;</span>
-</span><span class="line" data-line="354">    <span style="color: #797593;">}</span>
+</span><span class="line" data-line="354">    <span style="color: #797593;">&rbrace;</span>
 </span><span class="line" data-line="355">    <span style="color: #d7827e;">setTimeout</span><span style="color: #797593;">(</span><span style="color: #464261;">inner</span><span style="color: #797593;">,</span> <span style="color: #ea9d34;">5000</span><span style="color: #797593;">)</span><span style="color: #797593;">;</span>
 </span><span class="line" data-line="356">    <span style="color: #797593;">// setTimeout is asynchronous, so the sayHelloInFiveSeconds function will</span>
 </span><span class="line" data-line="357">    <span style="color: #797593;">// exit immediately, and setTimeout will call inner afterwards. However,</span>
 </span><span class="line" data-line="358">    <span style="color: #797593;">// because inner is &quot;closed over&quot; sayHelloInFiveSeconds, inner still has</span>
 </span><span class="line" data-line="359">    <span style="color: #797593;">// access to the `prompt` variable when it is finally called.</span>
-</span><span class="line" data-line="360"><span style="color: #797593;">}</span>
+</span><span class="line" data-line="360"><span style="color: #797593;">&rbrace;</span>
 </span><span class="line" data-line="361"><span style="color: #d7827e;">sayHelloInFiveSeconds</span><span style="color: #797593;">(</span><span style="color: #ea9d34;">&quot;Adam&quot;</span><span style="color: #797593;">)</span><span style="color: #797593;">;</span> <span style="color: #797593;">// will open a popup with &quot;Hello, Adam!&quot; in 5s</span>
 </span><span class="line" data-line="362">
 </span><span class="line" data-line="363"><span style="color: #797593;">///////////////////////////////////</span>
 </span><span class="line" data-line="364"><span style="color: #797593;">// 5. More about Objects; Constructors and Prototypes</span>
 </span><span class="line" data-line="365">
 </span><span class="line" data-line="366"><span style="color: #797593;">// Objects can contain functions.</span>
-</span><span class="line" data-line="367"><span style="color: #286983;">var</span> <span style="color: #464261;">myObj</span> <span style="color: #797593;">=</span> <span style="color: #797593;">{</span>
-</span><span class="line" data-line="368">    <span style="color: #d7827e;">myFunc</span><span style="color: #797593;">:</span> <span style="color: #286983;">function</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">{</span>
+</span><span class="line" data-line="367"><span style="color: #286983;">var</span> <span style="color: #464261;">myObj</span> <span style="color: #797593;">=</span> <span style="color: #797593;">&lbrace;</span>
+</span><span class="line" data-line="368">    <span style="color: #d7827e;">myFunc</span><span style="color: #797593;">:</span> <span style="color: #286983;">function</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="369">        <span style="color: #286983;">return</span> <span style="color: #ea9d34;">&quot;Hello world!&quot;</span><span style="color: #797593;">;</span>
-</span><span class="line" data-line="370">    <span style="color: #797593;">}</span>
-</span><span class="line" data-line="371"><span style="color: #797593;">}</span><span style="color: #797593;">;</span>
+</span><span class="line" data-line="370">    <span style="color: #797593;">&rbrace;</span>
+</span><span class="line" data-line="371"><span style="color: #797593;">&rbrace;</span><span style="color: #797593;">;</span>
 </span><span class="line" data-line="372"><span style="color: #464261;">myObj</span><span style="color: #797593;">.</span><span style="color: #907aa9;">myFunc</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">;</span> <span style="color: #797593;">// = &quot;Hello world!&quot;</span>
 </span><span class="line" data-line="373">
 </span><span class="line" data-line="374"><span style="color: #797593;">// When functions attached to an object are called, they can access the object</span>
 </span><span class="line" data-line="375"><span style="color: #797593;">// they&#39;re attached to using the `this` keyword.</span>
-</span><span class="line" data-line="376"><span style="color: #464261;">myObj</span> <span style="color: #797593;">=</span> <span style="color: #797593;">{</span>
+</span><span class="line" data-line="376"><span style="color: #464261;">myObj</span> <span style="color: #797593;">=</span> <span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="377">    <span style="color: #56949f;">myString</span><span style="color: #797593;">:</span> <span style="color: #ea9d34;">&quot;Hello world!&quot;</span><span style="color: #797593;">,</span>
-</span><span class="line" data-line="378">    <span style="color: #d7827e;">myFunc</span><span style="color: #797593;">:</span> <span style="color: #286983;">function</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">{</span>
+</span><span class="line" data-line="378">    <span style="color: #d7827e;">myFunc</span><span style="color: #797593;">:</span> <span style="color: #286983;">function</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="379">        <span style="color: #286983;">return</span> <span style="color: #b4637a; font-weight: bold;">this</span><span style="color: #797593;">.</span><span style="color: #56949f;">myString</span><span style="color: #797593;">;</span>
-</span><span class="line" data-line="380">    <span style="color: #797593;">}</span>
-</span><span class="line" data-line="381"><span style="color: #797593;">}</span><span style="color: #797593;">;</span>
+</span><span class="line" data-line="380">    <span style="color: #797593;">&rbrace;</span>
+</span><span class="line" data-line="381"><span style="color: #797593;">&rbrace;</span><span style="color: #797593;">;</span>
 </span><span class="line" data-line="382"><span style="color: #464261;">myObj</span><span style="color: #797593;">.</span><span style="color: #907aa9;">myFunc</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">;</span> <span style="color: #797593;">// = &quot;Hello world!&quot;</span>
 </span><span class="line" data-line="383">
 </span><span class="line" data-line="384"><span style="color: #797593;">// What `this` is set to has to do with how the function is called, not where</span>
@@ -406,18 +406,18 @@
 </span><span class="line" data-line="389">
 </span><span class="line" data-line="390"><span style="color: #797593;">// Inversely, a function can be assigned to the object and gain access to it</span>
 </span><span class="line" data-line="391"><span style="color: #797593;">// through `this`, even if it wasn&#39;t attached when it was defined.</span>
-</span><span class="line" data-line="392"><span style="color: #286983;">var</span> <span style="color: #d7827e;">myOtherFunc</span> <span style="color: #797593;">=</span> <span style="color: #286983;">function</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">{</span>
+</span><span class="line" data-line="392"><span style="color: #286983;">var</span> <span style="color: #d7827e;">myOtherFunc</span> <span style="color: #797593;">=</span> <span style="color: #286983;">function</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="393">    <span style="color: #286983;">return</span> <span style="color: #b4637a; font-weight: bold;">this</span><span style="color: #797593;">.</span><span style="color: #56949f;">myString</span><span style="color: #797593;">.</span><span style="color: #907aa9;">toUpperCase</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">;</span>
-</span><span class="line" data-line="394"><span style="color: #797593;">}</span><span style="color: #797593;">;</span>
+</span><span class="line" data-line="394"><span style="color: #797593;">&rbrace;</span><span style="color: #797593;">;</span>
 </span><span class="line" data-line="395"><span style="color: #464261;">myObj</span><span style="color: #797593;">.</span><span style="color: #56949f;">myOtherFunc</span> <span style="color: #797593;">=</span> <span style="color: #464261;">myOtherFunc</span><span style="color: #797593;">;</span>
 </span><span class="line" data-line="396"><span style="color: #464261;">myObj</span><span style="color: #797593;">.</span><span style="color: #907aa9;">myOtherFunc</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">;</span> <span style="color: #797593;">// = &quot;HELLO WORLD!&quot;</span>
 </span><span class="line" data-line="397">
 </span><span class="line" data-line="398"><span style="color: #797593;">// We can also specify a context for a function to execute in when we invoke it</span>
 </span><span class="line" data-line="399"><span style="color: #797593;">// using `call` or `apply`.</span>
 </span><span class="line" data-line="400">
-</span><span class="line" data-line="401"><span style="color: #286983;">var</span> <span style="color: #d7827e;">anotherFunc</span> <span style="color: #797593;">=</span> <span style="color: #286983;">function</span><span style="color: #797593;">(</span><span style="color: #907aa9;">s</span><span style="color: #797593;">)</span><span style="color: #797593;">{</span>
+</span><span class="line" data-line="401"><span style="color: #286983;">var</span> <span style="color: #d7827e;">anotherFunc</span> <span style="color: #797593;">=</span> <span style="color: #286983;">function</span><span style="color: #797593;">(</span><span style="color: #907aa9;">s</span><span style="color: #797593;">)</span><span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="402">    <span style="color: #286983;">return</span> <span style="color: #b4637a; font-weight: bold;">this</span><span style="color: #797593;">.</span><span style="color: #56949f;">myString</span> <span style="color: #797593;">+</span> <span style="color: #464261;">s</span><span style="color: #797593;">;</span>
-</span><span class="line" data-line="403"><span style="color: #797593;">}</span><span style="color: #797593;">;</span>
+</span><span class="line" data-line="403"><span style="color: #797593;">&rbrace;</span><span style="color: #797593;">;</span>
 </span><span class="line" data-line="404"><span style="color: #464261;">anotherFunc</span><span style="color: #797593;">.</span><span style="color: #907aa9;">call</span><span style="color: #797593;">(</span><span style="color: #464261;">myObj</span><span style="color: #797593;">,</span> <span style="color: #ea9d34;">&quot; And Hello Moon!&quot;</span><span style="color: #797593;">)</span><span style="color: #797593;">;</span> <span style="color: #797593;">// = &quot;Hello World! And Hello Moon!&quot;</span>
 </span><span class="line" data-line="405">
 </span><span class="line" data-line="406"><span style="color: #797593;">// The `apply` function is nearly identical, but takes an array for an argument</span>
@@ -440,7 +440,7 @@
 </span><span class="line" data-line="423">
 </span><span class="line" data-line="424"><span style="color: #797593;">// `bind` can also be used to partially apply (curry) a function.</span>
 </span><span class="line" data-line="425">
-</span><span class="line" data-line="426"><span style="color: #286983;">var</span> <span style="color: #d7827e;">product</span> <span style="color: #797593;">=</span> <span style="color: #286983;">function</span><span style="color: #797593;">(</span><span style="color: #907aa9;">a</span><span style="color: #797593;">,</span> <span style="color: #907aa9;">b</span><span style="color: #797593;">)</span><span style="color: #797593;">{</span> <span style="color: #286983;">return</span> <span style="color: #464261;">a</span> <span style="color: #797593;">*</span> <span style="color: #464261;">b</span><span style="color: #797593;">;</span> <span style="color: #797593;">}</span><span style="color: #797593;">;</span>
+</span><span class="line" data-line="426"><span style="color: #286983;">var</span> <span style="color: #d7827e;">product</span> <span style="color: #797593;">=</span> <span style="color: #286983;">function</span><span style="color: #797593;">(</span><span style="color: #907aa9;">a</span><span style="color: #797593;">,</span> <span style="color: #907aa9;">b</span><span style="color: #797593;">)</span><span style="color: #797593;">&lbrace;</span> <span style="color: #286983;">return</span> <span style="color: #464261;">a</span> <span style="color: #797593;">*</span> <span style="color: #464261;">b</span><span style="color: #797593;">;</span> <span style="color: #797593;">&rbrace;</span><span style="color: #797593;">;</span>
 </span><span class="line" data-line="427"><span style="color: #286983;">var</span> <span style="color: #464261;">doubler</span> <span style="color: #797593;">=</span> <span style="color: #464261;">product</span><span style="color: #797593;">.</span><span style="color: #907aa9;">bind</span><span style="color: #797593;">(</span><span style="color: #b4637a; font-weight: bold;">this</span><span style="color: #797593;">,</span> <span style="color: #ea9d34;">2</span><span style="color: #797593;">)</span><span style="color: #797593;">;</span>
 </span><span class="line" data-line="428"><span style="color: #d7827e;">doubler</span><span style="color: #797593;">(</span><span style="color: #ea9d34;">8</span><span style="color: #797593;">)</span><span style="color: #797593;">;</span> <span style="color: #797593;">// = 16</span>
 </span><span class="line" data-line="429">
@@ -448,10 +448,10 @@
 </span><span class="line" data-line="431"><span style="color: #797593;">// made available to the function via the `this` keyword. Functions designed to be</span>
 </span><span class="line" data-line="432"><span style="color: #797593;">// called like that are called constructors.</span>
 </span><span class="line" data-line="433">
-</span><span class="line" data-line="434"><span style="color: #286983;">var</span> <span style="color: #d7827e;">MyConstructor</span> <span style="color: #797593;">=</span> <span style="color: #286983;">function</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">{</span>
+</span><span class="line" data-line="434"><span style="color: #286983;">var</span> <span style="color: #d7827e;">MyConstructor</span> <span style="color: #797593;">=</span> <span style="color: #286983;">function</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="435">    <span style="color: #b4637a; font-weight: bold;">this</span><span style="color: #797593;">.</span><span style="color: #56949f;">myNumber</span> <span style="color: #797593;">=</span> <span style="color: #ea9d34;">5</span><span style="color: #797593;">;</span>
-</span><span class="line" data-line="436"><span style="color: #797593;">}</span><span style="color: #797593;">;</span>
-</span><span class="line" data-line="437"><span style="color: #464261;">myNewObj</span> <span style="color: #797593;">=</span> <span style="color: #797593;">new</span> <span style="color: #56949f;">MyConstructor</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">;</span> <span style="color: #797593;">// = {myNumber: 5}</span>
+</span><span class="line" data-line="436"><span style="color: #797593;">&rbrace;</span><span style="color: #797593;">;</span>
+</span><span class="line" data-line="437"><span style="color: #464261;">myNewObj</span> <span style="color: #797593;">=</span> <span style="color: #797593;">new</span> <span style="color: #56949f;">MyConstructor</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">;</span> <span style="color: #797593;">// = &lbrace;myNumber: 5&rbrace;</span>
 </span><span class="line" data-line="438"><span style="color: #464261;">myNewObj</span><span style="color: #797593;">.</span><span style="color: #56949f;">myNumber</span><span style="color: #797593;">;</span> <span style="color: #797593;">// = 5</span>
 </span><span class="line" data-line="439">
 </span><span class="line" data-line="440"><span style="color: #797593;">// Unlike most other popular object-oriented languages, JavaScript has no</span>
@@ -465,15 +465,15 @@
 </span><span class="line" data-line="448"><span style="color: #797593;">// Some JS implementations let you access an object&#39;s prototype on the magic</span>
 </span><span class="line" data-line="449"><span style="color: #797593;">// property `__proto__`. While this is useful for explaining prototypes it&#39;s not</span>
 </span><span class="line" data-line="450"><span style="color: #797593;">// part of the standard; we&#39;ll get to standard ways of using prototypes later.</span>
-</span><span class="line" data-line="451"><span style="color: #286983;">var</span> <span style="color: #464261;">myObj</span> <span style="color: #797593;">=</span> <span style="color: #797593;">{</span>
+</span><span class="line" data-line="451"><span style="color: #286983;">var</span> <span style="color: #464261;">myObj</span> <span style="color: #797593;">=</span> <span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="452">    <span style="color: #56949f;">myString</span><span style="color: #797593;">:</span> <span style="color: #ea9d34;">&quot;Hello world!&quot;</span>
-</span><span class="line" data-line="453"><span style="color: #797593;">}</span><span style="color: #797593;">;</span>
-</span><span class="line" data-line="454"><span style="color: #286983;">var</span> <span style="color: #464261;">myPrototype</span> <span style="color: #797593;">=</span> <span style="color: #797593;">{</span>
+</span><span class="line" data-line="453"><span style="color: #797593;">&rbrace;</span><span style="color: #797593;">;</span>
+</span><span class="line" data-line="454"><span style="color: #286983;">var</span> <span style="color: #464261;">myPrototype</span> <span style="color: #797593;">=</span> <span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="455">    <span style="color: #56949f;">meaningOfLife</span><span style="color: #797593;">:</span> <span style="color: #ea9d34;">42</span><span style="color: #797593;">,</span>
-</span><span class="line" data-line="456">    <span style="color: #d7827e;">myFunc</span><span style="color: #797593;">:</span> <span style="color: #286983;">function</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">{</span>
+</span><span class="line" data-line="456">    <span style="color: #d7827e;">myFunc</span><span style="color: #797593;">:</span> <span style="color: #286983;">function</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="457">        <span style="color: #286983;">return</span> <span style="color: #b4637a; font-weight: bold;">this</span><span style="color: #797593;">.</span><span style="color: #56949f;">myString</span><span style="color: #797593;">.</span><span style="color: #907aa9;">toLowerCase</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">;</span>
-</span><span class="line" data-line="458">    <span style="color: #797593;">}</span>
-</span><span class="line" data-line="459"><span style="color: #797593;">}</span><span style="color: #797593;">;</span>
+</span><span class="line" data-line="458">    <span style="color: #797593;">&rbrace;</span>
+</span><span class="line" data-line="459"><span style="color: #797593;">&rbrace;</span><span style="color: #797593;">;</span>
 </span><span class="line" data-line="460">
 </span><span class="line" data-line="461"><span style="color: #464261;">myObj</span><span style="color: #797593;">.</span><span style="color: #56949f;">__proto__</span> <span style="color: #797593;">=</span> <span style="color: #464261;">myPrototype</span><span style="color: #797593;">;</span>
 </span><span class="line" data-line="462"><span style="color: #464261;">myObj</span><span style="color: #797593;">.</span><span style="color: #56949f;">meaningOfLife</span><span style="color: #797593;">;</span> <span style="color: #797593;">// = 42</span>
@@ -483,9 +483,9 @@
 </span><span class="line" data-line="466">
 </span><span class="line" data-line="467"><span style="color: #797593;">// Of course, if your property isn&#39;t on your prototype, the prototype&#39;s</span>
 </span><span class="line" data-line="468"><span style="color: #797593;">// prototype is searched, and so on.</span>
-</span><span class="line" data-line="469"><span style="color: #464261;">myPrototype</span><span style="color: #797593;">.</span><span style="color: #56949f;">__proto__</span> <span style="color: #797593;">=</span> <span style="color: #797593;">{</span>
+</span><span class="line" data-line="469"><span style="color: #464261;">myPrototype</span><span style="color: #797593;">.</span><span style="color: #56949f;">__proto__</span> <span style="color: #797593;">=</span> <span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="470">    <span style="color: #56949f;">myBoolean</span><span style="color: #797593;">:</span> <span style="color: #d7827e;">true</span>
-</span><span class="line" data-line="471"><span style="color: #797593;">}</span><span style="color: #797593;">;</span>
+</span><span class="line" data-line="471"><span style="color: #797593;">&rbrace;</span><span style="color: #797593;">;</span>
 </span><span class="line" data-line="472"><span style="color: #464261;">myObj</span><span style="color: #797593;">.</span><span style="color: #56949f;">myBoolean</span><span style="color: #797593;">;</span> <span style="color: #797593;">// = true</span>
 </span><span class="line" data-line="473">
 </span><span class="line" data-line="474"><span style="color: #797593;">// There&#39;s no copying involved here; each object stores a reference to its</span>
@@ -496,9 +496,9 @@
 </span><span class="line" data-line="479">
 </span><span class="line" data-line="480"><span style="color: #797593;">// The for/in statement allows iteration over properties of an object,</span>
 </span><span class="line" data-line="481"><span style="color: #797593;">// walking up the prototype chain until it sees a null prototype.</span>
-</span><span class="line" data-line="482"><span style="color: #286983;">for</span> <span style="color: #797593;">(</span><span style="color: #286983;">var</span> <span style="color: #464261;">x</span> <span style="color: #797593;">in</span> <span style="color: #464261;">myObj</span><span style="color: #797593;">)</span><span style="color: #797593;">{</span>
+</span><span class="line" data-line="482"><span style="color: #286983;">for</span> <span style="color: #797593;">(</span><span style="color: #286983;">var</span> <span style="color: #464261;">x</span> <span style="color: #797593;">in</span> <span style="color: #464261;">myObj</span><span style="color: #797593;">)</span><span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="483">    <span style="color: #b4637a; font-weight: bold;">console</span><span style="color: #797593;">.</span><span style="color: #907aa9;">log</span><span style="color: #797593;">(</span><span style="color: #464261;">myObj</span><span style="color: #797593;">[</span><span style="color: #464261;">x</span><span style="color: #797593;">]</span><span style="color: #797593;">)</span><span style="color: #797593;">;</span>
-</span><span class="line" data-line="484"><span style="color: #797593;">}</span>
+</span><span class="line" data-line="484"><span style="color: #797593;">&rbrace;</span>
 </span><span class="line" data-line="485"><span style="color: #797593;">///prints:</span>
 </span><span class="line" data-line="486"><span style="color: #797593;">// Hello world!</span>
 </span><span class="line" data-line="487"><span style="color: #797593;">// 43</span>
@@ -507,11 +507,11 @@
 </span><span class="line" data-line="490">
 </span><span class="line" data-line="491"><span style="color: #797593;">// To only consider properties attached to the object itself</span>
 </span><span class="line" data-line="492"><span style="color: #797593;">// and not its prototypes, use the `hasOwnProperty()` check.</span>
-</span><span class="line" data-line="493"><span style="color: #286983;">for</span> <span style="color: #797593;">(</span><span style="color: #286983;">var</span> <span style="color: #464261;">x</span> <span style="color: #797593;">in</span> <span style="color: #464261;">myObj</span><span style="color: #797593;">)</span><span style="color: #797593;">{</span>
-</span><span class="line" data-line="494">    <span style="color: #286983;">if</span> <span style="color: #797593;">(</span><span style="color: #464261;">myObj</span><span style="color: #797593;">.</span><span style="color: #907aa9;">hasOwnProperty</span><span style="color: #797593;">(</span><span style="color: #464261;">x</span><span style="color: #797593;">)</span><span style="color: #797593;">)</span><span style="color: #797593;">{</span>
+</span><span class="line" data-line="493"><span style="color: #286983;">for</span> <span style="color: #797593;">(</span><span style="color: #286983;">var</span> <span style="color: #464261;">x</span> <span style="color: #797593;">in</span> <span style="color: #464261;">myObj</span><span style="color: #797593;">)</span><span style="color: #797593;">&lbrace;</span>
+</span><span class="line" data-line="494">    <span style="color: #286983;">if</span> <span style="color: #797593;">(</span><span style="color: #464261;">myObj</span><span style="color: #797593;">.</span><span style="color: #907aa9;">hasOwnProperty</span><span style="color: #797593;">(</span><span style="color: #464261;">x</span><span style="color: #797593;">)</span><span style="color: #797593;">)</span><span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="495">        <span style="color: #b4637a; font-weight: bold;">console</span><span style="color: #797593;">.</span><span style="color: #907aa9;">log</span><span style="color: #797593;">(</span><span style="color: #464261;">myObj</span><span style="color: #797593;">[</span><span style="color: #464261;">x</span><span style="color: #797593;">]</span><span style="color: #797593;">)</span><span style="color: #797593;">;</span>
-</span><span class="line" data-line="496">    <span style="color: #797593;">}</span>
-</span><span class="line" data-line="497"><span style="color: #797593;">}</span>
+</span><span class="line" data-line="496">    <span style="color: #797593;">&rbrace;</span>
+</span><span class="line" data-line="497"><span style="color: #797593;">&rbrace;</span>
 </span><span class="line" data-line="498"><span style="color: #797593;">///prints:</span>
 </span><span class="line" data-line="499"><span style="color: #797593;">// Hello world!</span>
 </span><span class="line" data-line="500">
@@ -528,12 +528,12 @@
 </span><span class="line" data-line="511"><span style="color: #797593;">// Constructors have a property called prototype. This is *not* the prototype of</span>
 </span><span class="line" data-line="512"><span style="color: #797593;">// the constructor function itself; instead, it&#39;s the prototype that new objects</span>
 </span><span class="line" data-line="513"><span style="color: #797593;">// are given when they&#39;re created with that constructor and the new keyword.</span>
-</span><span class="line" data-line="514"><span style="color: #56949f;">MyConstructor</span><span style="color: #797593;">.</span><span style="color: #56949f;">prototype</span> <span style="color: #797593;">=</span> <span style="color: #797593;">{</span>
+</span><span class="line" data-line="514"><span style="color: #56949f;">MyConstructor</span><span style="color: #797593;">.</span><span style="color: #56949f;">prototype</span> <span style="color: #797593;">=</span> <span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="515">    <span style="color: #56949f;">myNumber</span><span style="color: #797593;">:</span> <span style="color: #ea9d34;">5</span><span style="color: #797593;">,</span>
-</span><span class="line" data-line="516">    <span style="color: #d7827e;">getMyNumber</span><span style="color: #797593;">:</span> <span style="color: #286983;">function</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">{</span>
+</span><span class="line" data-line="516">    <span style="color: #d7827e;">getMyNumber</span><span style="color: #797593;">:</span> <span style="color: #286983;">function</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="517">        <span style="color: #286983;">return</span> <span style="color: #b4637a; font-weight: bold;">this</span><span style="color: #797593;">.</span><span style="color: #56949f;">myNumber</span><span style="color: #797593;">;</span>
-</span><span class="line" data-line="518">    <span style="color: #797593;">}</span>
-</span><span class="line" data-line="519"><span style="color: #797593;">}</span><span style="color: #797593;">;</span>
+</span><span class="line" data-line="518">    <span style="color: #797593;">&rbrace;</span>
+</span><span class="line" data-line="519"><span style="color: #797593;">&rbrace;</span><span style="color: #797593;">;</span>
 </span><span class="line" data-line="520"><span style="color: #286983;">var</span> <span style="color: #464261;">myNewObj2</span> <span style="color: #797593;">=</span> <span style="color: #797593;">new</span> <span style="color: #56949f;">MyConstructor</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">;</span>
 </span><span class="line" data-line="521"><span style="color: #464261;">myNewObj2</span><span style="color: #797593;">.</span><span style="color: #907aa9;">getMyNumber</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">;</span> <span style="color: #797593;">// = 5</span>
 </span><span class="line" data-line="522"><span style="color: #464261;">myNewObj2</span><span style="color: #797593;">.</span><span style="color: #56949f;">myNumber</span> <span style="color: #797593;">=</span> <span style="color: #ea9d34;">6</span><span style="color: #797593;">;</span>
@@ -549,19 +549,19 @@
 </span><span class="line" data-line="532"><span style="color: #797593;">typeof</span> <span style="color: #464261;">myNumber</span><span style="color: #797593;">;</span> <span style="color: #797593;">// = &#39;number&#39;</span>
 </span><span class="line" data-line="533"><span style="color: #797593;">typeof</span> <span style="color: #464261;">myNumberObj</span><span style="color: #797593;">;</span> <span style="color: #797593;">// = &#39;object&#39;</span>
 </span><span class="line" data-line="534"><span style="color: #464261;">myNumber</span> <span style="color: #797593;">===</span> <span style="color: #464261;">myNumberObj</span><span style="color: #797593;">;</span> <span style="color: #797593;">// = false</span>
-</span><span class="line" data-line="535"><span style="color: #286983;">if</span> <span style="color: #797593;">(</span><span style="color: #ea9d34;">0</span><span style="color: #797593;">)</span><span style="color: #797593;">{</span>
+</span><span class="line" data-line="535"><span style="color: #286983;">if</span> <span style="color: #797593;">(</span><span style="color: #ea9d34;">0</span><span style="color: #797593;">)</span><span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="536">    <span style="color: #797593;">// This code won&#39;t execute, because 0 is falsy.</span>
-</span><span class="line" data-line="537"><span style="color: #797593;">}</span>
-</span><span class="line" data-line="538"><span style="color: #286983;">if</span> <span style="color: #797593;">(</span><span style="color: #797593;">new</span> <span style="color: #56949f;">Number</span><span style="color: #797593;">(</span><span style="color: #ea9d34;">0</span><span style="color: #797593;">)</span><span style="color: #797593;">)</span><span style="color: #797593;">{</span>
+</span><span class="line" data-line="537"><span style="color: #797593;">&rbrace;</span>
+</span><span class="line" data-line="538"><span style="color: #286983;">if</span> <span style="color: #797593;">(</span><span style="color: #797593;">new</span> <span style="color: #56949f;">Number</span><span style="color: #797593;">(</span><span style="color: #ea9d34;">0</span><span style="color: #797593;">)</span><span style="color: #797593;">)</span><span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="539">   <span style="color: #797593;">// This code will execute, because wrapped numbers are objects, and objects</span>
 </span><span class="line" data-line="540">   <span style="color: #797593;">// are always truthy.</span>
-</span><span class="line" data-line="541"><span style="color: #797593;">}</span>
+</span><span class="line" data-line="541"><span style="color: #797593;">&rbrace;</span>
 </span><span class="line" data-line="542">
 </span><span class="line" data-line="543"><span style="color: #797593;">// However, the wrapper objects and the regular builtins share a prototype, so</span>
 </span><span class="line" data-line="544"><span style="color: #797593;">// you can actually add functionality to a string, for instance.</span>
-</span><span class="line" data-line="545"><span style="color: #56949f; font-weight: bold;">String</span><span style="color: #797593;">.</span><span style="color: #56949f;">prototype</span><span style="color: #797593;">.</span><span style="color: #d7827e;">firstCharacter</span> <span style="color: #797593;">=</span> <span style="color: #286983;">function</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">{</span>
+</span><span class="line" data-line="545"><span style="color: #56949f; font-weight: bold;">String</span><span style="color: #797593;">.</span><span style="color: #56949f;">prototype</span><span style="color: #797593;">.</span><span style="color: #d7827e;">firstCharacter</span> <span style="color: #797593;">=</span> <span style="color: #286983;">function</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="546">    <span style="color: #286983;">return</span> <span style="color: #b4637a; font-weight: bold;">this</span><span style="color: #797593;">.</span><span style="color: #907aa9;">charAt</span><span style="color: #797593;">(</span><span style="color: #ea9d34;">0</span><span style="color: #797593;">)</span><span style="color: #797593;">;</span>
-</span><span class="line" data-line="547"><span style="color: #797593;">}</span><span style="color: #797593;">;</span>
+</span><span class="line" data-line="547"><span style="color: #797593;">&rbrace;</span><span style="color: #797593;">;</span>
 </span><span class="line" data-line="548"><span style="color: #ea9d34;">&quot;abc&quot;</span><span style="color: #797593;">.</span><span style="color: #907aa9;">firstCharacter</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">;</span> <span style="color: #797593;">// = &quot;a&quot;</span>
 </span><span class="line" data-line="549">
 </span><span class="line" data-line="550"><span style="color: #797593;">// This fact is often used in &quot;polyfilling&quot;, which is implementing newer</span>
@@ -570,15 +570,15 @@
 </span><span class="line" data-line="553">
 </span><span class="line" data-line="554"><span style="color: #797593;">// For instance, we mentioned that Object.create isn&#39;t yet available in all</span>
 </span><span class="line" data-line="555"><span style="color: #797593;">// implementations, but we can still use it with this polyfill:</span>
-</span><span class="line" data-line="556"><span style="color: #286983;">if</span> <span style="color: #797593;">(</span><span style="color: #56949f; font-weight: bold;">Object</span><span style="color: #797593;">.</span><span style="color: #56949f;">create</span> <span style="color: #797593;">===</span> <span style="color: #ea9d34; font-weight: bold;">undefined</span><span style="color: #797593;">)</span><span style="color: #797593;">{</span> <span style="color: #797593;">// don&#39;t overwrite it if it exists</span>
-</span><span class="line" data-line="557">    <span style="color: #56949f; font-weight: bold;">Object</span><span style="color: #797593;">.</span><span style="color: #d7827e;">create</span> <span style="color: #797593;">=</span> <span style="color: #286983;">function</span><span style="color: #797593;">(</span><span style="color: #907aa9;">proto</span><span style="color: #797593;">)</span><span style="color: #797593;">{</span>
+</span><span class="line" data-line="556"><span style="color: #286983;">if</span> <span style="color: #797593;">(</span><span style="color: #56949f; font-weight: bold;">Object</span><span style="color: #797593;">.</span><span style="color: #56949f;">create</span> <span style="color: #797593;">===</span> <span style="color: #ea9d34; font-weight: bold;">undefined</span><span style="color: #797593;">)</span><span style="color: #797593;">&lbrace;</span> <span style="color: #797593;">// don&#39;t overwrite it if it exists</span>
+</span><span class="line" data-line="557">    <span style="color: #56949f; font-weight: bold;">Object</span><span style="color: #797593;">.</span><span style="color: #d7827e;">create</span> <span style="color: #797593;">=</span> <span style="color: #286983;">function</span><span style="color: #797593;">(</span><span style="color: #907aa9;">proto</span><span style="color: #797593;">)</span><span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="558">        <span style="color: #797593;">// make a temporary constructor with the right prototype</span>
-</span><span class="line" data-line="559">        <span style="color: #286983;">var</span> <span style="color: #d7827e;">Constructor</span> <span style="color: #797593;">=</span> <span style="color: #286983;">function</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">{</span><span style="color: #797593;">}</span><span style="color: #797593;">;</span>
+</span><span class="line" data-line="559">        <span style="color: #286983;">var</span> <span style="color: #d7827e;">Constructor</span> <span style="color: #797593;">=</span> <span style="color: #286983;">function</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">&lbrace;</span><span style="color: #797593;">&rbrace;</span><span style="color: #797593;">;</span>
 </span><span class="line" data-line="560">        <span style="color: #56949f;">Constructor</span><span style="color: #797593;">.</span><span style="color: #56949f;">prototype</span> <span style="color: #797593;">=</span> <span style="color: #464261;">proto</span><span style="color: #797593;">;</span>
 </span><span class="line" data-line="561">        <span style="color: #797593;">// then use it to create a new, appropriately-prototyped object</span>
 </span><span class="line" data-line="562">        <span style="color: #286983;">return</span> <span style="color: #797593;">new</span> <span style="color: #56949f;">Constructor</span><span style="color: #797593;">(</span><span style="color: #797593;">)</span><span style="color: #797593;">;</span>
-</span><span class="line" data-line="563">    <span style="color: #797593;">}</span><span style="color: #797593;">;</span>
-</span><span class="line" data-line="564"><span style="color: #797593;">}</span>
+</span><span class="line" data-line="563">    <span style="color: #797593;">&rbrace;</span><span style="color: #797593;">;</span>
+</span><span class="line" data-line="564"><span style="color: #797593;">&rbrace;</span>
 </span><span class="line" data-line="565">
 </span><span class="line" data-line="566"><span style="color: #797593;">// ES6 Additions</span>
 </span><span class="line" data-line="567">
@@ -600,17 +600,17 @@
 </span><span class="line" data-line="583"><span style="color: #797593;">// This allows functions to be defined in a lexical scope like with variables</span>
 </span><span class="line" data-line="584"><span style="color: #797593;">// defined by const and let. </span>
 </span><span class="line" data-line="585">
-</span><span class="line" data-line="586"><span style="color: #286983;">const</span> <span style="color: #d7827e;">isEven</span> <span style="color: #797593;">=</span> <span style="color: #797593;">(</span><span style="color: #907aa9;">number</span><span style="color: #797593;">)</span> <span style="color: #797593;">=&gt;</span> <span style="color: #797593;">{</span>
+</span><span class="line" data-line="586"><span style="color: #286983;">const</span> <span style="color: #d7827e;">isEven</span> <span style="color: #797593;">=</span> <span style="color: #797593;">(</span><span style="color: #907aa9;">number</span><span style="color: #797593;">)</span> <span style="color: #797593;">=&gt;</span> <span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="587">    <span style="color: #286983;">return</span> <span style="color: #464261;">number</span> <span style="color: #797593;">%</span> <span style="color: #ea9d34;">2</span> <span style="color: #797593;">===</span> <span style="color: #ea9d34;">0</span><span style="color: #797593;">;</span>
-</span><span class="line" data-line="588"><span style="color: #797593;">}</span><span style="color: #797593;">;</span>
+</span><span class="line" data-line="588"><span style="color: #797593;">&rbrace;</span><span style="color: #797593;">;</span>
 </span><span class="line" data-line="589">
 </span><span class="line" data-line="590"><span style="color: #d7827e;">isEven</span><span style="color: #797593;">(</span><span style="color: #ea9d34;">7</span><span style="color: #797593;">)</span><span style="color: #797593;">;</span> <span style="color: #797593;">// false</span>
 </span><span class="line" data-line="591">
 </span><span class="line" data-line="592"><span style="color: #797593;">// The &quot;equivalent&quot; of this function in the traditional syntax would look like this:</span>
 </span><span class="line" data-line="593">
-</span><span class="line" data-line="594"><span style="color: #286983;">function</span> <span style="color: #d7827e;">isEven</span><span style="color: #797593;">(</span><span style="color: #907aa9;">number</span><span style="color: #797593;">)</span> <span style="color: #797593;">{</span>
+</span><span class="line" data-line="594"><span style="color: #286983;">function</span> <span style="color: #d7827e;">isEven</span><span style="color: #797593;">(</span><span style="color: #907aa9;">number</span><span style="color: #797593;">)</span> <span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="595">    <span style="color: #286983;">return</span> <span style="color: #464261;">number</span> <span style="color: #797593;">%</span> <span style="color: #ea9d34;">2</span> <span style="color: #797593;">===</span> <span style="color: #ea9d34;">0</span><span style="color: #797593;">;</span>
-</span><span class="line" data-line="596"><span style="color: #797593;">}</span><span style="color: #797593;">;</span>
+</span><span class="line" data-line="596"><span style="color: #797593;">&rbrace;</span><span style="color: #797593;">;</span>
 </span><span class="line" data-line="597">
 </span><span class="line" data-line="598"><span style="color: #797593;">// I put the word &quot;equivalent&quot; in double quotes because a function defined</span>
 </span><span class="line" data-line="599"><span style="color: #797593;">// using the lambda syntax cannot be called before the definition.</span>
@@ -618,9 +618,9 @@
 </span><span class="line" data-line="601">
 </span><span class="line" data-line="602"><span style="color: #d7827e;">add</span><span style="color: #797593;">(</span><span style="color: #ea9d34;">1</span><span style="color: #797593;">,</span> <span style="color: #ea9d34;">8</span><span style="color: #797593;">)</span><span style="color: #797593;">;</span>
 </span><span class="line" data-line="603">
-</span><span class="line" data-line="604"><span style="color: #286983;">const</span> <span style="color: #d7827e;">add</span> <span style="color: #797593;">=</span> <span style="color: #797593;">(</span><span style="color: #907aa9;">firstNumber</span><span style="color: #797593;">,</span> <span style="color: #907aa9;">secondNumber</span><span style="color: #797593;">)</span> <span style="color: #797593;">=&gt;</span> <span style="color: #797593;">{</span>
+</span><span class="line" data-line="604"><span style="color: #286983;">const</span> <span style="color: #d7827e;">add</span> <span style="color: #797593;">=</span> <span style="color: #797593;">(</span><span style="color: #907aa9;">firstNumber</span><span style="color: #797593;">,</span> <span style="color: #907aa9;">secondNumber</span><span style="color: #797593;">)</span> <span style="color: #797593;">=&gt;</span> <span style="color: #797593;">&lbrace;</span>
 </span><span class="line" data-line="605">    <span style="color: #286983;">return</span> <span style="color: #464261;">firstNumber</span> <span style="color: #797593;">+</span> <span style="color: #464261;">secondNumber</span><span style="color: #797593;">;</span>
-</span><span class="line" data-line="606"><span style="color: #797593;">}</span><span style="color: #797593;">;</span>
+</span><span class="line" data-line="606"><span style="color: #797593;">&rbrace;</span><span style="color: #797593;">;</span>
 </span></code></pre>
 </body>
 </html>

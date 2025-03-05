@@ -99,9 +99,9 @@
 </span><span class="line" data-line="82">
 </span><span class="line" data-line="83"><span style="color: #6272a4;">// Enclose a variable in curly braces if needed</span>
 </span><span class="line" data-line="84"><span style="color: #f8f8f2;">$number</span> <span style="color: #ff79c6;">=</span> <span style="color: #bd93f9;">23</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="85"><span style="color: #f8f8f2;">$apples</span> <span style="color: #ff79c6;">=</span> <span style="color: #f1fa8c;">&quot;I have <span style="color: #f8f8f2;">{</span><span style="color: #f8f8f2;">$number</span><span style="color: #f8f8f2;">}</span> apples to eat.&quot;</span><span style="color: #f8f8f2;">;</span>   <span style="color: #6272a4;">// =&gt; I have 23 apples to eat.</span>
-</span><span class="line" data-line="86"><span style="color: #f8f8f2;">$oranges</span> <span style="color: #ff79c6;">=</span> <span style="color: #f1fa8c;">&quot;I have $<span style="color: #f8f8f2;">{</span>number<span style="color: #f8f8f2;">}</span> oranges to eat.&quot;</span><span style="color: #f8f8f2;">;</span> <span style="color: #6272a4;">// =&gt; I have 23 oranges to eat.</span>
-</span><span class="line" data-line="87"><span style="color: #f8f8f2;">$money</span> <span style="color: #ff79c6;">=</span> <span style="color: #f1fa8c;">&quot;I have $$<span style="color: #f8f8f2;">{</span>number<span style="color: #f8f8f2;">}</span> in the bank.&quot;</span><span style="color: #f8f8f2;">;</span>     <span style="color: #6272a4;">// =&gt; I have $23 in the bank.</span>
+</span><span class="line" data-line="85"><span style="color: #f8f8f2;">$apples</span> <span style="color: #ff79c6;">=</span> <span style="color: #f1fa8c;">&quot;I have <span style="color: #f8f8f2;">&lbrace;</span><span style="color: #f8f8f2;">$number</span><span style="color: #f8f8f2;">&rbrace;</span> apples to eat.&quot;</span><span style="color: #f8f8f2;">;</span>   <span style="color: #6272a4;">// =&gt; I have 23 apples to eat.</span>
+</span><span class="line" data-line="86"><span style="color: #f8f8f2;">$oranges</span> <span style="color: #ff79c6;">=</span> <span style="color: #f1fa8c;">&quot;I have $<span style="color: #f8f8f2;">&lbrace;</span>number<span style="color: #f8f8f2;">&rbrace;</span> oranges to eat.&quot;</span><span style="color: #f8f8f2;">;</span> <span style="color: #6272a4;">// =&gt; I have 23 oranges to eat.</span>
+</span><span class="line" data-line="87"><span style="color: #f8f8f2;">$money</span> <span style="color: #ff79c6;">=</span> <span style="color: #f1fa8c;">&quot;I have $$<span style="color: #f8f8f2;">&lbrace;</span>number<span style="color: #f8f8f2;">&rbrace;</span> in the bank.&quot;</span><span style="color: #f8f8f2;">;</span>     <span style="color: #6272a4;">// =&gt; I have $23 in the bank.</span>
 </span><span class="line" data-line="88">
 </span><span class="line" data-line="89"><span style="color: #6272a4;">// Since PHP 5.3, nowdocs can be used for uninterpolated multi-liners</span>
 </span><span class="line" data-line="90"><span style="color: #f8f8f2;">$nowdoc</span> <span style="color: #ff79c6;">=</span> <span style="color: #ff79c6;">&lt;&lt;&lt;</span><span style="color: #8be9fd;">&#39;</span><span style="color: #8be9fd;">END</span><span style="color: #8be9fd;">&#39;</span><span style="color: #f1fa8c;"></span>
@@ -280,21 +280,21 @@
 </span><span class="line" data-line="263"><span style="color: #6272a4;"> * Control Structures</span>
 </span><span class="line" data-line="264"><span style="color: #6272a4;"> */</span>
 </span><span class="line" data-line="265">
-</span><span class="line" data-line="266"><span style="color: #ff79c6;">if</span> <span style="color: #f8f8f2;">(</span><span style="color: #bd93f9;">true</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="266"><span style="color: #ff79c6;">if</span> <span style="color: #f8f8f2;">(</span><span style="color: #bd93f9;">true</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="267">    <span style="color: #ff79c6;">print</span> <span style="color: #f1fa8c;">&#39;I get printed&#39;</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="268"><span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="268"><span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="269">
-</span><span class="line" data-line="270"><span style="color: #ff79c6;">if</span> <span style="color: #f8f8f2;">(</span><span style="color: #bd93f9;">false</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="270"><span style="color: #ff79c6;">if</span> <span style="color: #f8f8f2;">(</span><span style="color: #bd93f9;">false</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="271">    <span style="color: #ff79c6;">print</span> <span style="color: #f1fa8c;">&#39;I don<span style="color: #8be9fd;">\&#39;</span>t&#39;</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="272"><span style="color: #f8f8f2;">}</span> <span style="color: #ff79c6;">else</span> <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="272"><span style="color: #f8f8f2;">&rbrace;</span> <span style="color: #ff79c6;">else</span> <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="273">    <span style="color: #ff79c6;">print</span> <span style="color: #f1fa8c;">&#39;I get printed&#39;</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="274"><span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="274"><span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="275">
-</span><span class="line" data-line="276"><span style="color: #ff79c6;">if</span> <span style="color: #f8f8f2;">(</span><span style="color: #bd93f9;">false</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="276"><span style="color: #ff79c6;">if</span> <span style="color: #f8f8f2;">(</span><span style="color: #bd93f9;">false</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="277">    <span style="color: #ff79c6;">print</span> <span style="color: #f1fa8c;">&#39;Does not get printed&#39;</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="278"><span style="color: #f8f8f2;">}</span> <span style="color: #ff79c6;">elseif</span> <span style="color: #f8f8f2;">(</span><span style="color: #bd93f9;">true</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="278"><span style="color: #f8f8f2;">&rbrace;</span> <span style="color: #ff79c6;">elseif</span> <span style="color: #f8f8f2;">(</span><span style="color: #bd93f9;">true</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="279">    <span style="color: #ff79c6;">print</span> <span style="color: #f1fa8c;">&#39;Does&#39;</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="280"><span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="280"><span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="281">
 </span><span class="line" data-line="282"><span style="color: #6272a4;">// ternary operator</span>
 </span><span class="line" data-line="283"><span style="color: #ff79c6;">print</span> <span style="color: #f8f8f2;">(</span><span style="color: #bd93f9;">false</span> <span style="color: #ff79c6;">?</span> <span style="color: #f1fa8c;">&#39;Does not get printed&#39;</span> <span style="color: #ff79c6;">:</span> <span style="color: #f1fa8c;">&#39;Does&#39;</span><span style="color: #f8f8f2;">)</span><span style="color: #f8f8f2;">;</span>
@@ -312,13 +312,13 @@
 </span><span class="line" data-line="295">
 </span><span class="line" data-line="296">
 </span><span class="line" data-line="297"><span style="color: #f8f8f2;">$x</span> <span style="color: #ff79c6;">=</span> <span style="color: #bd93f9;">0</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="298"><span style="color: #ff79c6;">if</span> <span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">$x</span> <span style="color: #ff79c6;">===</span> <span style="color: #f1fa8c;">&#39;0&#39;</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="298"><span style="color: #ff79c6;">if</span> <span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">$x</span> <span style="color: #ff79c6;">===</span> <span style="color: #f1fa8c;">&#39;0&#39;</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="299">    <span style="color: #ff79c6;">print</span> <span style="color: #f1fa8c;">&#39;Does not print&#39;</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="300"><span style="color: #f8f8f2;">}</span> <span style="color: #ff79c6;">elseif</span> <span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">$x</span> <span style="color: #ff79c6;">==</span> <span style="color: #f1fa8c;">&#39;1&#39;</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="300"><span style="color: #f8f8f2;">&rbrace;</span> <span style="color: #ff79c6;">elseif</span> <span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">$x</span> <span style="color: #ff79c6;">==</span> <span style="color: #f1fa8c;">&#39;1&#39;</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="301">    <span style="color: #ff79c6;">print</span> <span style="color: #f1fa8c;">&#39;Does not print&#39;</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="302"><span style="color: #f8f8f2;">}</span> <span style="color: #ff79c6;">else</span> <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="302"><span style="color: #f8f8f2;">&rbrace;</span> <span style="color: #ff79c6;">else</span> <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="303">    <span style="color: #ff79c6;">print</span> <span style="color: #f1fa8c;">&#39;Does print&#39;</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="304"><span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="304"><span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="305">
 </span><span class="line" data-line="306">
 </span><span class="line" data-line="307">
@@ -334,7 +334,7 @@
 </span><span class="line" data-line="317"><span style="color: #f8f8f2;">&lt;?php</span>
 </span><span class="line" data-line="318">
 </span><span class="line" data-line="319"><span style="color: #6272a4;">// Use switch to save some logic.</span>
-</span><span class="line" data-line="320"><span style="color: #ff79c6;">switch</span> <span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">$x</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="320"><span style="color: #ff79c6;">switch</span> <span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">$x</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="321">    <span style="color: #ff79c6;">case</span> <span style="color: #f1fa8c;">&#39;0&#39;</span><span style="color: #f8f8f2;">:</span>
 </span><span class="line" data-line="322">        <span style="color: #ff79c6;">print</span> <span style="color: #f1fa8c;">&#39;Switch does type coercion&#39;</span><span style="color: #f8f8f2;">;</span>
 </span><span class="line" data-line="323">        <span style="color: #ff79c6;">break</span><span style="color: #f8f8f2;">;</span> <span style="color: #6272a4;">// You must include a break, or you will fall through</span>
@@ -345,59 +345,59 @@
 </span><span class="line" data-line="328">        <span style="color: #ff79c6;">break</span><span style="color: #f8f8f2;">;</span>
 </span><span class="line" data-line="329">    <span style="color: #ff79c6;">default</span><span style="color: #f8f8f2;">:</span>
 </span><span class="line" data-line="330">        <span style="color: #6272a4;">// Do something by default</span>
-</span><span class="line" data-line="331"><span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="331"><span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="332">
 </span><span class="line" data-line="333"><span style="color: #6272a4;">// While, do...while and for loops are probably familiar</span>
 </span><span class="line" data-line="334"><span style="color: #f8f8f2;">$i</span> <span style="color: #ff79c6;">=</span> <span style="color: #bd93f9;">0</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="335"><span style="color: #ff79c6;">while</span> <span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">$i</span> <span style="color: #ff79c6;">&lt;</span> <span style="color: #bd93f9;">5</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="335"><span style="color: #ff79c6;">while</span> <span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">$i</span> <span style="color: #ff79c6;">&lt;</span> <span style="color: #bd93f9;">5</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="336">    <span style="color: #ff79c6;">echo</span> <span style="color: #f8f8f2;">$i</span><span style="color: #ff79c6;">++</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="337"><span style="color: #f8f8f2;">}</span> <span style="color: #6272a4;">// Prints &quot;01234&quot;</span>
+</span><span class="line" data-line="337"><span style="color: #f8f8f2;">&rbrace;</span> <span style="color: #6272a4;">// Prints &quot;01234&quot;</span>
 </span><span class="line" data-line="338">
 </span><span class="line" data-line="339"><span style="color: #ff79c6;">echo</span> <span style="color: #f1fa8c;">&quot;<span style="color: #8be9fd;">\n</span>&quot;</span><span style="color: #f8f8f2;">;</span>
 </span><span class="line" data-line="340">
 </span><span class="line" data-line="341"><span style="color: #f8f8f2;">$i</span> <span style="color: #ff79c6;">=</span> <span style="color: #bd93f9;">0</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="342"><span style="color: #ff79c6;">do</span> <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="342"><span style="color: #ff79c6;">do</span> <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="343">    <span style="color: #ff79c6;">echo</span> <span style="color: #f8f8f2;">$i</span><span style="color: #ff79c6;">++</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="344"><span style="color: #f8f8f2;">}</span> <span style="color: #ff79c6;">while</span> <span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">$i</span> <span style="color: #ff79c6;">&lt;</span> <span style="color: #bd93f9;">5</span><span style="color: #f8f8f2;">)</span><span style="color: #f8f8f2;">;</span> <span style="color: #6272a4;">// Prints &quot;01234&quot;</span>
+</span><span class="line" data-line="344"><span style="color: #f8f8f2;">&rbrace;</span> <span style="color: #ff79c6;">while</span> <span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">$i</span> <span style="color: #ff79c6;">&lt;</span> <span style="color: #bd93f9;">5</span><span style="color: #f8f8f2;">)</span><span style="color: #f8f8f2;">;</span> <span style="color: #6272a4;">// Prints &quot;01234&quot;</span>
 </span><span class="line" data-line="345">
 </span><span class="line" data-line="346"><span style="color: #ff79c6;">echo</span> <span style="color: #f1fa8c;">&quot;<span style="color: #8be9fd;">\n</span>&quot;</span><span style="color: #f8f8f2;">;</span>
 </span><span class="line" data-line="347">
-</span><span class="line" data-line="348"><span style="color: #ff79c6;">for</span> <span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">$x</span> <span style="color: #ff79c6;">=</span> <span style="color: #bd93f9;">0</span><span style="color: #f8f8f2;">;</span> <span style="color: #f8f8f2;">$x</span> <span style="color: #ff79c6;">&lt;</span> <span style="color: #bd93f9;">10</span><span style="color: #f8f8f2;">;</span> <span style="color: #f8f8f2;">$x</span><span style="color: #ff79c6;">++</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="348"><span style="color: #ff79c6;">for</span> <span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">$x</span> <span style="color: #ff79c6;">=</span> <span style="color: #bd93f9;">0</span><span style="color: #f8f8f2;">;</span> <span style="color: #f8f8f2;">$x</span> <span style="color: #ff79c6;">&lt;</span> <span style="color: #bd93f9;">10</span><span style="color: #f8f8f2;">;</span> <span style="color: #f8f8f2;">$x</span><span style="color: #ff79c6;">++</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="349">    <span style="color: #ff79c6;">echo</span> <span style="color: #f8f8f2;">$x</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="350"><span style="color: #f8f8f2;">}</span> <span style="color: #6272a4;">// Prints &quot;0123456789&quot;</span>
+</span><span class="line" data-line="350"><span style="color: #f8f8f2;">&rbrace;</span> <span style="color: #6272a4;">// Prints &quot;0123456789&quot;</span>
 </span><span class="line" data-line="351">
 </span><span class="line" data-line="352"><span style="color: #ff79c6;">echo</span> <span style="color: #f1fa8c;">&quot;<span style="color: #8be9fd;">\n</span>&quot;</span><span style="color: #f8f8f2;">;</span>
 </span><span class="line" data-line="353">
 </span><span class="line" data-line="354"><span style="color: #f8f8f2;">$wheels</span> <span style="color: #ff79c6;">=</span> <span style="color: #f8f8f2;">[</span><span style="color: #f1fa8c;">&#39;bicycle&#39;</span> <span style="color: #ff79c6;">=&gt;</span> <span style="color: #bd93f9;">2</span><span style="color: #f8f8f2;">,</span> <span style="color: #f1fa8c;">&#39;car&#39;</span> <span style="color: #ff79c6;">=&gt;</span> <span style="color: #bd93f9;">4</span><span style="color: #f8f8f2;">]</span><span style="color: #f8f8f2;">;</span>
 </span><span class="line" data-line="355">
 </span><span class="line" data-line="356"><span style="color: #6272a4;">// Foreach loops can iterate over arrays</span>
-</span><span class="line" data-line="357"><span style="color: #ff79c6;">foreach</span> <span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">$wheels</span> <span style="color: #ff79c6;">as</span> <span style="color: #f8f8f2;">$wheel_count</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="357"><span style="color: #ff79c6;">foreach</span> <span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">$wheels</span> <span style="color: #ff79c6;">as</span> <span style="color: #f8f8f2;">$wheel_count</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="358">    <span style="color: #ff79c6;">echo</span> <span style="color: #f8f8f2;">$wheel_count</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="359"><span style="color: #f8f8f2;">}</span> <span style="color: #6272a4;">// Prints &quot;24&quot;</span>
+</span><span class="line" data-line="359"><span style="color: #f8f8f2;">&rbrace;</span> <span style="color: #6272a4;">// Prints &quot;24&quot;</span>
 </span><span class="line" data-line="360">
 </span><span class="line" data-line="361"><span style="color: #ff79c6;">echo</span> <span style="color: #f1fa8c;">&quot;<span style="color: #8be9fd;">\n</span>&quot;</span><span style="color: #f8f8f2;">;</span>
 </span><span class="line" data-line="362">
 </span><span class="line" data-line="363"><span style="color: #6272a4;">// You can iterate over the keys as well as the values</span>
-</span><span class="line" data-line="364"><span style="color: #ff79c6;">foreach</span> <span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">$wheels</span> <span style="color: #ff79c6;">as</span> <span style="color: #f8f8f2;">$vehicle</span> <span style="color: #ff79c6;">=&gt;</span> <span style="color: #f8f8f2;">$wheel_count</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="364"><span style="color: #ff79c6;">foreach</span> <span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">$wheels</span> <span style="color: #ff79c6;">as</span> <span style="color: #f8f8f2;">$vehicle</span> <span style="color: #ff79c6;">=&gt;</span> <span style="color: #f8f8f2;">$wheel_count</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="365">    <span style="color: #ff79c6;">echo</span> <span style="color: #f1fa8c;">&quot;A <span style="color: #f8f8f2;">$vehicle</span> has <span style="color: #f8f8f2;">$wheel_count</span> wheels&quot;</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="366"><span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="366"><span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="367">
 </span><span class="line" data-line="368"><span style="color: #ff79c6;">echo</span> <span style="color: #f1fa8c;">&quot;<span style="color: #8be9fd;">\n</span>&quot;</span><span style="color: #f8f8f2;">;</span>
 </span><span class="line" data-line="369">
 </span><span class="line" data-line="370"><span style="color: #f8f8f2;">$i</span> <span style="color: #ff79c6;">=</span> <span style="color: #bd93f9;">0</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="371"><span style="color: #ff79c6;">while</span> <span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">$i</span> <span style="color: #ff79c6;">&lt;</span> <span style="color: #bd93f9;">5</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">{</span>
-</span><span class="line" data-line="372">    <span style="color: #ff79c6;">if</span> <span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">$i</span> <span style="color: #ff79c6;">===</span> <span style="color: #bd93f9;">3</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="371"><span style="color: #ff79c6;">while</span> <span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">$i</span> <span style="color: #ff79c6;">&lt;</span> <span style="color: #bd93f9;">5</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">&lbrace;</span>
+</span><span class="line" data-line="372">    <span style="color: #ff79c6;">if</span> <span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">$i</span> <span style="color: #ff79c6;">===</span> <span style="color: #bd93f9;">3</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="373">        <span style="color: #ff79c6;">break</span><span style="color: #f8f8f2;">;</span> <span style="color: #6272a4;">// Exit out of the while loop</span>
-</span><span class="line" data-line="374">    <span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="374">    <span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="375">    <span style="color: #ff79c6;">echo</span> <span style="color: #f8f8f2;">$i</span><span style="color: #ff79c6;">++</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="376"><span style="color: #f8f8f2;">}</span> <span style="color: #6272a4;">// Prints &quot;012&quot;</span>
+</span><span class="line" data-line="376"><span style="color: #f8f8f2;">&rbrace;</span> <span style="color: #6272a4;">// Prints &quot;012&quot;</span>
 </span><span class="line" data-line="377">
-</span><span class="line" data-line="378"><span style="color: #ff79c6;">for</span> <span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">$i</span> <span style="color: #ff79c6;">=</span> <span style="color: #bd93f9;">0</span><span style="color: #f8f8f2;">;</span> <span style="color: #f8f8f2;">$i</span> <span style="color: #ff79c6;">&lt;</span> <span style="color: #bd93f9;">5</span><span style="color: #f8f8f2;">;</span> <span style="color: #f8f8f2;">$i</span><span style="color: #ff79c6;">++</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">{</span>
-</span><span class="line" data-line="379">    <span style="color: #ff79c6;">if</span> <span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">$i</span> <span style="color: #ff79c6;">===</span> <span style="color: #bd93f9;">3</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="378"><span style="color: #ff79c6;">for</span> <span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">$i</span> <span style="color: #ff79c6;">=</span> <span style="color: #bd93f9;">0</span><span style="color: #f8f8f2;">;</span> <span style="color: #f8f8f2;">$i</span> <span style="color: #ff79c6;">&lt;</span> <span style="color: #bd93f9;">5</span><span style="color: #f8f8f2;">;</span> <span style="color: #f8f8f2;">$i</span><span style="color: #ff79c6;">++</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">&lbrace;</span>
+</span><span class="line" data-line="379">    <span style="color: #ff79c6;">if</span> <span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">$i</span> <span style="color: #ff79c6;">===</span> <span style="color: #bd93f9;">3</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="380">        <span style="color: #ff79c6;">continue</span><span style="color: #f8f8f2;">;</span> <span style="color: #6272a4;">// Skip this iteration of the loop</span>
-</span><span class="line" data-line="381">    <span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="381">    <span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="382">    <span style="color: #ff79c6;">echo</span> <span style="color: #f8f8f2;">$i</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="383"><span style="color: #f8f8f2;">}</span> <span style="color: #6272a4;">// Prints &quot;0124&quot;</span>
+</span><span class="line" data-line="383"><span style="color: #f8f8f2;">&rbrace;</span> <span style="color: #6272a4;">// Prints &quot;0124&quot;</span>
 </span><span class="line" data-line="384">
 </span><span class="line" data-line="385">
 </span><span class="line" data-line="386"><span style="color: #6272a4;">/********************************</span>
@@ -405,19 +405,19 @@
 </span><span class="line" data-line="388"><span style="color: #6272a4;"> */</span>
 </span><span class="line" data-line="389">
 </span><span class="line" data-line="390"><span style="color: #6272a4;">// Define a function with &quot;function&quot;:</span>
-</span><span class="line" data-line="391"><span style="color: #8be9fd;">function</span> <span style="color: #50fa7b;">my_function</span> <span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="391"><span style="color: #8be9fd;">function</span> <span style="color: #50fa7b;">my_function</span> <span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="392">    <span style="color: #ff79c6;">return</span> <span style="color: #f1fa8c;">&#39;Hello&#39;</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="393"><span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="393"><span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="394">
 </span><span class="line" data-line="395"><span style="color: #ff79c6;">echo</span> <span style="color: #50fa7b;">my_function</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">)</span><span style="color: #f8f8f2;">;</span> <span style="color: #6272a4;">// =&gt; &quot;Hello&quot;</span>
 </span><span class="line" data-line="396">
 </span><span class="line" data-line="397"><span style="color: #6272a4;">// A valid function name starts with a letter or underscore, followed by any</span>
 </span><span class="line" data-line="398"><span style="color: #6272a4;">// number of letters, numbers, or underscores.</span>
 </span><span class="line" data-line="399">
-</span><span class="line" data-line="400"><span style="color: #8be9fd;">function</span> <span style="color: #50fa7b;">add</span> <span style="color: #f8f8f2;">(</span><span style="color: #ffb86c;">$x</span><span style="color: #f8f8f2;">,</span> <span style="color: #ffb86c;">$y</span> <span style="color: #ff79c6;">=</span> <span style="color: #bd93f9;">1</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">{</span> <span style="color: #6272a4;">// $y is optional and defaults to 1</span>
+</span><span class="line" data-line="400"><span style="color: #8be9fd;">function</span> <span style="color: #50fa7b;">add</span> <span style="color: #f8f8f2;">(</span><span style="color: #ffb86c;">$x</span><span style="color: #f8f8f2;">,</span> <span style="color: #ffb86c;">$y</span> <span style="color: #ff79c6;">=</span> <span style="color: #bd93f9;">1</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">&lbrace;</span> <span style="color: #6272a4;">// $y is optional and defaults to 1</span>
 </span><span class="line" data-line="401">    <span style="color: #f8f8f2;">$result</span> <span style="color: #ff79c6;">=</span> <span style="color: #f8f8f2;">$x</span> <span style="color: #ff79c6;">+</span> <span style="color: #f8f8f2;">$y</span><span style="color: #f8f8f2;">;</span>
 </span><span class="line" data-line="402">    <span style="color: #ff79c6;">return</span> <span style="color: #f8f8f2;">$result</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="403"><span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="403"><span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="404">
 </span><span class="line" data-line="405"><span style="color: #ff79c6;">echo</span> <span style="color: #50fa7b;">add</span><span style="color: #f8f8f2;">(</span><span style="color: #bd93f9;">4</span><span style="color: #f8f8f2;">)</span><span style="color: #f8f8f2;">;</span> <span style="color: #6272a4;">// =&gt; 5</span>
 </span><span class="line" data-line="406"><span style="color: #ff79c6;">echo</span> <span style="color: #50fa7b;">add</span><span style="color: #f8f8f2;">(</span><span style="color: #bd93f9;">4</span><span style="color: #f8f8f2;">,</span> <span style="color: #bd93f9;">2</span><span style="color: #f8f8f2;">)</span><span style="color: #f8f8f2;">;</span> <span style="color: #6272a4;">// =&gt; 6</span>
@@ -426,23 +426,23 @@
 </span><span class="line" data-line="409"><span style="color: #6272a4;">// print $result; // Gives a warning.</span>
 </span><span class="line" data-line="410">
 </span><span class="line" data-line="411"><span style="color: #6272a4;">// Since PHP 5.3 you can declare anonymous functions;</span>
-</span><span class="line" data-line="412"><span style="color: #f8f8f2;">$inc</span> <span style="color: #ff79c6;">=</span> <span style="color: #8be9fd;">function</span> <span style="color: #f8f8f2;">(</span><span style="color: #ffb86c;">$x</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="412"><span style="color: #f8f8f2;">$inc</span> <span style="color: #ff79c6;">=</span> <span style="color: #8be9fd;">function</span> <span style="color: #f8f8f2;">(</span><span style="color: #ffb86c;">$x</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="413">    <span style="color: #ff79c6;">return</span> <span style="color: #f8f8f2;">$x</span> <span style="color: #ff79c6;">+</span> <span style="color: #bd93f9;">1</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="414"><span style="color: #f8f8f2;">}</span><span style="color: #f8f8f2;">;</span>
+</span><span class="line" data-line="414"><span style="color: #f8f8f2;">&rbrace;</span><span style="color: #f8f8f2;">;</span>
 </span><span class="line" data-line="415">
 </span><span class="line" data-line="416"><span style="color: #ff79c6;">echo</span> <span style="color: #f8f8f2;">$inc</span><span style="color: #f8f8f2;">(</span><span style="color: #bd93f9;">2</span><span style="color: #f8f8f2;">)</span><span style="color: #f8f8f2;">;</span> <span style="color: #6272a4;">// =&gt; 3</span>
 </span><span class="line" data-line="417">
-</span><span class="line" data-line="418"><span style="color: #8be9fd;">function</span> <span style="color: #50fa7b;">foo</span> <span style="color: #f8f8f2;">(</span><span style="color: #ffb86c;">$x</span><span style="color: #f8f8f2;">,</span> <span style="color: #ffb86c;">$y</span><span style="color: #f8f8f2;">,</span> <span style="color: #ffb86c;">$z</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="418"><span style="color: #8be9fd;">function</span> <span style="color: #50fa7b;">foo</span> <span style="color: #f8f8f2;">(</span><span style="color: #ffb86c;">$x</span><span style="color: #f8f8f2;">,</span> <span style="color: #ffb86c;">$y</span><span style="color: #f8f8f2;">,</span> <span style="color: #ffb86c;">$z</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="419">    <span style="color: #ff79c6;">echo</span> <span style="color: #f1fa8c;">&quot;<span style="color: #f8f8f2;">$x</span> - <span style="color: #f8f8f2;">$y</span> - <span style="color: #f8f8f2;">$z</span>&quot;</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="420"><span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="420"><span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="421">
 </span><span class="line" data-line="422"><span style="color: #6272a4;">// Functions can return functions</span>
-</span><span class="line" data-line="423"><span style="color: #8be9fd;">function</span> <span style="color: #50fa7b;">bar</span> <span style="color: #f8f8f2;">(</span><span style="color: #ffb86c;">$x</span><span style="color: #f8f8f2;">,</span> <span style="color: #ffb86c;">$y</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="423"><span style="color: #8be9fd;">function</span> <span style="color: #50fa7b;">bar</span> <span style="color: #f8f8f2;">(</span><span style="color: #ffb86c;">$x</span><span style="color: #f8f8f2;">,</span> <span style="color: #ffb86c;">$y</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="424">    <span style="color: #6272a4;">// Use &#39;use&#39; to bring in outside variables</span>
-</span><span class="line" data-line="425">    <span style="color: #ff79c6;">return</span> <span style="color: #8be9fd;">function</span> <span style="color: #f8f8f2;">(</span><span style="color: #ffb86c;">$z</span><span style="color: #f8f8f2;">)</span> <span style="color: #ff79c6;">use</span> <span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">$x</span><span style="color: #f8f8f2;">,</span> <span style="color: #f8f8f2;">$y</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="425">    <span style="color: #ff79c6;">return</span> <span style="color: #8be9fd;">function</span> <span style="color: #f8f8f2;">(</span><span style="color: #ffb86c;">$z</span><span style="color: #f8f8f2;">)</span> <span style="color: #ff79c6;">use</span> <span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">$x</span><span style="color: #f8f8f2;">,</span> <span style="color: #f8f8f2;">$y</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="426">        <span style="color: #50fa7b;">foo</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">$x</span><span style="color: #f8f8f2;">,</span> <span style="color: #f8f8f2;">$y</span><span style="color: #f8f8f2;">,</span> <span style="color: #f8f8f2;">$z</span><span style="color: #f8f8f2;">)</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="427">    <span style="color: #f8f8f2;">}</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="428"><span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="427">    <span style="color: #f8f8f2;">&rbrace;</span><span style="color: #f8f8f2;">;</span>
+</span><span class="line" data-line="428"><span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="429">
 </span><span class="line" data-line="430"><span style="color: #f8f8f2;">$bar</span> <span style="color: #ff79c6;">=</span> <span style="color: #50fa7b;">bar</span><span style="color: #f8f8f2;">(</span><span style="color: #f1fa8c;">&#39;A&#39;</span><span style="color: #f8f8f2;">,</span> <span style="color: #f1fa8c;">&#39;B&#39;</span><span style="color: #f8f8f2;">)</span><span style="color: #f8f8f2;">;</span>
 </span><span class="line" data-line="431"><span style="color: #f8f8f2;">$bar</span><span style="color: #f8f8f2;">(</span><span style="color: #f1fa8c;">&#39;C&#39;</span><span style="color: #f8f8f2;">)</span><span style="color: #f8f8f2;">;</span> <span style="color: #6272a4;">// Prints &quot;A - B - C&quot;</span>
@@ -455,26 +455,26 @@
 </span><span class="line" data-line="438">
 </span><span class="line" data-line="439">
 </span><span class="line" data-line="440"><span style="color: #6272a4;">// You can get all the parameters passed to a function</span>
-</span><span class="line" data-line="441"><span style="color: #8be9fd;">function</span> <span style="color: #50fa7b;">parameters</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="441"><span style="color: #8be9fd;">function</span> <span style="color: #50fa7b;">parameters</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="442">    <span style="color: #f8f8f2;">$numargs</span> <span style="color: #ff79c6;">=</span> <span style="color: #50fa7b;">func_num_args</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">)</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="443">    <span style="color: #ff79c6;">if</span> <span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">$numargs</span> <span style="color: #ff79c6;">&gt;</span> <span style="color: #bd93f9;">0</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="443">    <span style="color: #ff79c6;">if</span> <span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">$numargs</span> <span style="color: #ff79c6;">&gt;</span> <span style="color: #bd93f9;">0</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="444">        <span style="color: #ff79c6;">echo</span> <span style="color: #50fa7b;">func_get_arg</span><span style="color: #f8f8f2;">(</span><span style="color: #bd93f9;">0</span><span style="color: #f8f8f2;">)</span> <span style="color: #ff79c6;">.</span> <span style="color: #f1fa8c;">&#39; | &#39;</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="445">    <span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="445">    <span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="446">    <span style="color: #f8f8f2;">$args_array</span> <span style="color: #ff79c6;">=</span> <span style="color: #50fa7b;">func_get_args</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">)</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="447">    <span style="color: #ff79c6;">foreach</span> <span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">$args_array</span> <span style="color: #ff79c6;">as</span> <span style="color: #f8f8f2;">$key</span> <span style="color: #ff79c6;">=&gt;</span> <span style="color: #f8f8f2;">$arg</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="447">    <span style="color: #ff79c6;">foreach</span> <span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">$args_array</span> <span style="color: #ff79c6;">as</span> <span style="color: #f8f8f2;">$key</span> <span style="color: #ff79c6;">=&gt;</span> <span style="color: #f8f8f2;">$arg</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="448">        <span style="color: #ff79c6;">echo</span> <span style="color: #f8f8f2;">$key</span> <span style="color: #ff79c6;">.</span> <span style="color: #f1fa8c;">&#39; - &#39;</span> <span style="color: #ff79c6;">.</span> <span style="color: #f8f8f2;">$arg</span> <span style="color: #ff79c6;">.</span> <span style="color: #f1fa8c;">&#39; | &#39;</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="449">    <span style="color: #f8f8f2;">}</span>
-</span><span class="line" data-line="450"><span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="449">    <span style="color: #f8f8f2;">&rbrace;</span>
+</span><span class="line" data-line="450"><span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="451">
 </span><span class="line" data-line="452"><span style="color: #50fa7b;">parameters</span><span style="color: #f8f8f2;">(</span><span style="color: #f1fa8c;">&#39;Hello&#39;</span><span style="color: #f8f8f2;">,</span> <span style="color: #f1fa8c;">&#39;World&#39;</span><span style="color: #f8f8f2;">)</span><span style="color: #f8f8f2;">;</span> <span style="color: #6272a4;">// Hello | 0 - Hello | 1 - World |</span>
 </span><span class="line" data-line="453">
 </span><span class="line" data-line="454"><span style="color: #6272a4;">// Since PHP 5.6 you can get a variable number of arguments</span>
-</span><span class="line" data-line="455"><span style="color: #8be9fd;">function</span> <span style="color: #50fa7b;">variable</span><span style="color: #f8f8f2;">(</span><span style="color: #ffb86c;">$word</span><span style="color: #f8f8f2;">,</span> <span style="color: #ff79c6;">...</span><span style="color: #ffb86c;">$list</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="455"><span style="color: #8be9fd;">function</span> <span style="color: #50fa7b;">variable</span><span style="color: #f8f8f2;">(</span><span style="color: #ffb86c;">$word</span><span style="color: #f8f8f2;">,</span> <span style="color: #ff79c6;">...</span><span style="color: #ffb86c;">$list</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="456">	<span style="color: #ff79c6;">echo</span> <span style="color: #f8f8f2;">$word</span> <span style="color: #ff79c6;">.</span> <span style="color: #f1fa8c;">&quot; || &quot;</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="457">	<span style="color: #ff79c6;">foreach</span> <span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">$list</span> <span style="color: #ff79c6;">as</span> <span style="color: #f8f8f2;">$item</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="457">	<span style="color: #ff79c6;">foreach</span> <span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">$list</span> <span style="color: #ff79c6;">as</span> <span style="color: #f8f8f2;">$item</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="458">		<span style="color: #ff79c6;">echo</span> <span style="color: #f8f8f2;">$item</span> <span style="color: #ff79c6;">.</span> <span style="color: #f1fa8c;">&#39; | &#39;</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="459">	<span style="color: #f8f8f2;">}</span>
-</span><span class="line" data-line="460"><span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="459">	<span style="color: #f8f8f2;">&rbrace;</span>
+</span><span class="line" data-line="460"><span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="461">
 </span><span class="line" data-line="462"><span style="color: #50fa7b;">variable</span><span style="color: #f8f8f2;">(</span><span style="color: #f1fa8c;">&quot;Separate&quot;</span><span style="color: #f8f8f2;">,</span> <span style="color: #f1fa8c;">&quot;Hello&quot;</span><span style="color: #f8f8f2;">,</span> <span style="color: #f1fa8c;">&quot;World&quot;</span><span style="color: #f8f8f2;">)</span><span style="color: #f8f8f2;">;</span> <span style="color: #6272a4;">// Separate || Hello | World |</span>
 </span><span class="line" data-line="463">
@@ -520,7 +520,7 @@
 </span><span class="line" data-line="503"><span style="color: #6272a4;">// Classes are defined with the class keyword</span>
 </span><span class="line" data-line="504">
 </span><span class="line" data-line="505"><span style="color: #ff79c6;">class</span> <span style="color: #a4ffff;">MyClass</span>
-</span><span class="line" data-line="506"><span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="506"><span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="507">    <span style="color: #ff79c6;">const</span> <span style="color: #bd93f9;">MY_CONST</span>      <span style="color: #ff79c6;">=</span> <span style="color: #f1fa8c;">&#39;value&#39;</span><span style="color: #f8f8f2;">;</span> <span style="color: #6272a4;">// A constant</span>
 </span><span class="line" data-line="508">
 </span><span class="line" data-line="509">    <span style="color: #ff79c6;">static</span> <span style="color: #bd93f9;">$staticVar</span>   <span style="color: #ff79c6;">=</span> <span style="color: #f1fa8c;">&#39;static&#39;</span><span style="color: #f8f8f2;">;</span>
@@ -540,36 +540,36 @@
 </span><span class="line" data-line="523">
 </span><span class="line" data-line="524">    <span style="color: #6272a4;">// Create a constructor with __construct</span>
 </span><span class="line" data-line="525">    <span style="color: #ff79c6;">public</span> <span style="color: #8be9fd;">function</span> <span style="color: #8be9fd;">__construct</span><span style="color: #f8f8f2;">(</span><span style="color: #ffb86c;">$instanceProp</span><span style="color: #f8f8f2;">)</span>
-</span><span class="line" data-line="526">    <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="526">    <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="527">        <span style="color: #6272a4;">// Access instance variables with $this</span>
 </span><span class="line" data-line="528">        <span style="color: #bd93f9;">$this</span><span style="color: #ff79c6;">-&gt;</span><span style="color: #ffb86c;">instanceProp</span> <span style="color: #ff79c6;">=</span> <span style="color: #f8f8f2;">$instanceProp</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="529">    <span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="529">    <span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="530">
 </span><span class="line" data-line="531">    <span style="color: #6272a4;">// Methods are declared as functions inside a class</span>
 </span><span class="line" data-line="532">    <span style="color: #ff79c6;">public</span> <span style="color: #8be9fd;">function</span> <span style="color: #50fa7b;">myMethod</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">)</span>
-</span><span class="line" data-line="533">    <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="533">    <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="534">        <span style="color: #ff79c6;">print</span> <span style="color: #f1fa8c;">&#39;MyClass&#39;</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="535">    <span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="535">    <span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="536">
 </span><span class="line" data-line="537">    <span style="color: #6272a4;">// final keyword would make a function unoverridable</span>
 </span><span class="line" data-line="538">    <span style="color: #ff79c6;">final</span> <span style="color: #8be9fd;">function</span> <span style="color: #50fa7b;">youCannotOverrideMe</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">)</span>
-</span><span class="line" data-line="539">    <span style="color: #f8f8f2;">{</span>
-</span><span class="line" data-line="540">    <span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="539">    <span style="color: #f8f8f2;">&lbrace;</span>
+</span><span class="line" data-line="540">    <span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="541">
 </span><span class="line" data-line="542">    <span style="color: #6272a4;">// Magic Methods</span>
 </span><span class="line" data-line="543">
 </span><span class="line" data-line="544">    <span style="color: #6272a4;">// what to do if Object is treated as a String</span>
 </span><span class="line" data-line="545">    <span style="color: #ff79c6;">public</span> <span style="color: #8be9fd;">function</span> <span style="color: #50fa7b;">__toString</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">)</span>
-</span><span class="line" data-line="546">    <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="546">    <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="547">        <span style="color: #ff79c6;">return</span> <span style="color: #f8f8f2;">$property</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="548">    <span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="548">    <span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="549">
 </span><span class="line" data-line="550">    <span style="color: #6272a4;">// opposite to __construct()</span>
 </span><span class="line" data-line="551">    <span style="color: #6272a4;">// called when object is no longer referenced</span>
 </span><span class="line" data-line="552">    <span style="color: #ff79c6;">public</span> <span style="color: #8be9fd;">function</span> <span style="color: #50fa7b;">__destruct</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">)</span>
-</span><span class="line" data-line="553">    <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="553">    <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="554">        <span style="color: #ff79c6;">print</span> <span style="color: #f1fa8c;">&quot;Destroying&quot;</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="555">    <span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="555">    <span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="556">
 </span><span class="line" data-line="557"><span style="color: #6272a4;">/*</span>
 </span><span class="line" data-line="558"><span style="color: #6272a4;"> * Declaring class properties or methods as static makes them accessible without</span>
@@ -578,10 +578,10 @@
 </span><span class="line" data-line="561"><span style="color: #6272a4;"> */</span>
 </span><span class="line" data-line="562">
 </span><span class="line" data-line="563">    <span style="color: #ff79c6;">public</span> <span style="color: #ff79c6;">static</span> <span style="color: #8be9fd;">function</span> <span style="color: #50fa7b;">myStaticMethod</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">)</span>
-</span><span class="line" data-line="564">    <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="564">    <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="565">        <span style="color: #ff79c6;">print</span> <span style="color: #f1fa8c;">&#39;I am static&#39;</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="566">    <span style="color: #f8f8f2;">}</span>
-</span><span class="line" data-line="567"><span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="566">    <span style="color: #f8f8f2;">&rbrace;</span>
+</span><span class="line" data-line="567"><span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="568">
 </span><span class="line" data-line="569"><span style="color: #6272a4;">// Class constants can always be accessed statically</span>
 </span><span class="line" data-line="570"><span style="color: #ff79c6;">echo</span> <span style="color: #a4ffff;">MyClass</span><span style="color: #ff79c6;">::</span><span style="color: #bd93f9;">MY_CONST</span><span style="color: #f8f8f2;">;</span>    <span style="color: #6272a4;">// Outputs &#39;value&#39;;</span>
@@ -607,43 +607,43 @@
 </span><span class="line" data-line="590">
 </span><span class="line" data-line="591"><span style="color: #6272a4;">// Extend classes using &quot;extends&quot;</span>
 </span><span class="line" data-line="592">class MyOtherClass <span style="color: #ff79c6;">extends</span> MyClass
-</span><span class="line" data-line="593"><span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="593"><span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="594">    <span style="color: #8be9fd;">function</span> <span style="color: #50fa7b;">printProtectedProperty</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">)</span><span style="color: #f8f8f2;"></span>
-</span><span class="line" data-line="595">    <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="595">    <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="596">        <span style="color: #ff79c6;">echo</span> <span style="color: #bd93f9;">$this</span><span style="color: #ff79c6;">-&gt;</span><span style="color: #ffb86c;">prot</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="597">    <span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="597">    <span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="598">
 </span><span class="line" data-line="599">    <span style="color: #6272a4;">// Override a method</span>
 </span><span class="line" data-line="600">    <span style="color: #8be9fd;">function</span> <span style="color: #50fa7b;">myMethod</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">)</span>
-</span><span class="line" data-line="601">    <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="601">    <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="602">        <span style="color: #bd93f9;">parent</span><span style="color: #ff79c6;">::</span><span style="color: #50fa7b;">myMethod</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">)</span><span style="color: #f8f8f2;">;</span>
 </span><span class="line" data-line="603">        <span style="color: #ff79c6;">print</span> <span style="color: #f1fa8c;">&#39; &gt; MyOtherClass&#39;</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="604">    <span style="color: #f8f8f2;">}</span>
-</span><span class="line" data-line="605"><span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="604">    <span style="color: #f8f8f2;">&rbrace;</span>
+</span><span class="line" data-line="605"><span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="606">
 </span><span class="line" data-line="607"><span style="color: #f8f8f2;">$my_other_class</span> <span style="color: #ff79c6;">=</span> <span style="color: #ff79c6;">new</span> <span style="color: #8be9fd;">MyOtherClass</span><span style="color: #f8f8f2;">(</span><span style="color: #f1fa8c;">&#39;Instance prop&#39;</span><span style="color: #f8f8f2;">)</span><span style="color: #f8f8f2;">;</span>
 </span><span class="line" data-line="608"><span style="color: #f8f8f2;">$my_other_class</span><span style="color: #ff79c6;">-&gt;</span><span style="color: #50fa7b;">printProtectedProperty</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">)</span><span style="color: #f8f8f2;">;</span> <span style="color: #6272a4;">// =&gt; Prints &quot;protected&quot;</span>
 </span><span class="line" data-line="609"><span style="color: #f8f8f2;">$my_other_class</span><span style="color: #ff79c6;">-&gt;</span><span style="color: #50fa7b;">myMethod</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">)</span><span style="color: #f8f8f2;">;</span>               <span style="color: #6272a4;">// Prints &quot;MyClass &gt; MyOtherClass&quot;</span>
 </span><span class="line" data-line="610">
 </span><span class="line" data-line="611"><span style="color: #ff79c6;">final</span> <span style="color: #ff79c6;">class</span> <span style="color: #a4ffff;">YouCannotExtendMe</span>
-</span><span class="line" data-line="612"><span style="color: #f8f8f2;">{</span>
-</span><span class="line" data-line="613"><span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="612"><span style="color: #f8f8f2;">&lbrace;</span>
+</span><span class="line" data-line="613"><span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="614">
 </span><span class="line" data-line="615"><span style="color: #6272a4;">// You can use &quot;magic methods&quot; to create getters and setters</span>
 </span><span class="line" data-line="616"><span style="color: #ff79c6;">class</span> <span style="color: #a4ffff;">MyMapClass</span>
-</span><span class="line" data-line="617"><span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="617"><span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="618">    <span style="color: #ff79c6;">private</span> <span style="color: #bd93f9;">$property</span><span style="color: #f8f8f2;">;</span>
 </span><span class="line" data-line="619">
 </span><span class="line" data-line="620">    <span style="color: #ff79c6;">public</span> <span style="color: #8be9fd;">function</span> <span style="color: #50fa7b;">__get</span><span style="color: #f8f8f2;">(</span><span style="color: #ffb86c;">$key</span><span style="color: #f8f8f2;">)</span>
-</span><span class="line" data-line="621">    <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="621">    <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="622">        <span style="color: #ff79c6;">return</span> <span style="color: #bd93f9;">$this</span><span style="color: #ff79c6;">-&gt;</span><span style="color: #ffb86c;">$key</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="623">    <span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="623">    <span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="624">
 </span><span class="line" data-line="625">    <span style="color: #ff79c6;">public</span> <span style="color: #8be9fd;">function</span> <span style="color: #50fa7b;">__set</span><span style="color: #f8f8f2;">(</span><span style="color: #ffb86c;">$key</span><span style="color: #f8f8f2;">,</span> <span style="color: #ffb86c;">$value</span><span style="color: #f8f8f2;">)</span>
-</span><span class="line" data-line="626">    <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="626">    <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="627">        <span style="color: #bd93f9;">$this</span><span style="color: #ff79c6;">-&gt;</span><span style="color: #ffb86c;">$key</span> <span style="color: #ff79c6;">=</span> <span style="color: #f8f8f2;">$value</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="628">    <span style="color: #f8f8f2;">}</span>
-</span><span class="line" data-line="629"><span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="628">    <span style="color: #f8f8f2;">&rbrace;</span>
+</span><span class="line" data-line="629"><span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="630">
 </span><span class="line" data-line="631"><span style="color: #f8f8f2;">$x</span> <span style="color: #ff79c6;">=</span> <span style="color: #ff79c6;">new</span> <span style="color: #8be9fd;">MyMapClass</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">)</span><span style="color: #f8f8f2;">;</span>
 </span><span class="line" data-line="632"><span style="color: #ff79c6;">echo</span> <span style="color: #f8f8f2;">$x</span><span style="color: #ff79c6;">-&gt;</span><span style="color: #ffb86c;">property</span><span style="color: #f8f8f2;">;</span> <span style="color: #6272a4;">// Will use the __get() method</span>
@@ -654,53 +654,53 @@
 </span><span class="line" data-line="637"><span style="color: #6272a4;">// An interface is declared with the interface keyword.</span>
 </span><span class="line" data-line="638">
 </span><span class="line" data-line="639"><span style="color: #ff79c6;">interface</span> <span style="color: #a4ffff;">InterfaceOne</span>
-</span><span class="line" data-line="640"><span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="640"><span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="641">    <span style="color: #ff79c6;">public</span> <span style="color: #8be9fd;">function</span> <span style="color: #50fa7b;">doSomething</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">)</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="642"><span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="642"><span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="643">
 </span><span class="line" data-line="644"><span style="color: #ff79c6;">interface</span> <span style="color: #a4ffff;">InterfaceTwo</span>
-</span><span class="line" data-line="645"><span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="645"><span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="646">    <span style="color: #ff79c6;">public</span> <span style="color: #8be9fd;">function</span> <span style="color: #50fa7b;">doSomethingElse</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">)</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="647"><span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="647"><span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="648">
 </span><span class="line" data-line="649"><span style="color: #6272a4;">// interfaces can be extended</span>
 </span><span class="line" data-line="650"><span style="color: #ff79c6;">interface</span> <span style="color: #a4ffff;">InterfaceThree</span> <span style="color: #ff79c6;">extends</span> <span style="color: #a4ffff;">InterfaceTwo</span>
-</span><span class="line" data-line="651"><span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="651"><span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="652">    <span style="color: #ff79c6;">public</span> <span style="color: #8be9fd;">function</span> <span style="color: #50fa7b;">doAnotherContract</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">)</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="653"><span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="653"><span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="654">
 </span><span class="line" data-line="655"><span style="color: #ff79c6;">abstract</span> <span style="color: #ff79c6;">class</span> <span style="color: #a4ffff;">MyAbstractClass</span> <span style="color: #ff79c6;">implements</span> <span style="color: #a4ffff;">InterfaceOne</span>
-</span><span class="line" data-line="656"><span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="656"><span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="657">    <span style="color: #ff79c6;">public</span> <span style="color: #bd93f9;">$x</span> <span style="color: #ff79c6;">=</span> <span style="color: #f1fa8c;">&#39;doSomething&#39;</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="658"><span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="658"><span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="659">
 </span><span class="line" data-line="660"><span style="color: #ff79c6;">class</span> <span style="color: #a4ffff;">MyConcreteClass</span> <span style="color: #ff79c6;">extends</span> <span style="color: #a4ffff;">MyAbstractClass</span> <span style="color: #ff79c6;">implements</span> <span style="color: #a4ffff;">InterfaceTwo</span>
-</span><span class="line" data-line="661"><span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="661"><span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="662">    <span style="color: #ff79c6;">public</span> <span style="color: #8be9fd;">function</span> <span style="color: #50fa7b;">doSomething</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">)</span>
-</span><span class="line" data-line="663">    <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="663">    <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="664">        <span style="color: #ff79c6;">echo</span> <span style="color: #f8f8f2;">$x</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="665">    <span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="665">    <span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="666">
 </span><span class="line" data-line="667">    <span style="color: #ff79c6;">public</span> <span style="color: #8be9fd;">function</span> <span style="color: #50fa7b;">doSomethingElse</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">)</span>
-</span><span class="line" data-line="668">    <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="668">    <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="669">        <span style="color: #ff79c6;">echo</span> <span style="color: #f1fa8c;">&#39;doSomethingElse&#39;</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="670">    <span style="color: #f8f8f2;">}</span>
-</span><span class="line" data-line="671"><span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="670">    <span style="color: #f8f8f2;">&rbrace;</span>
+</span><span class="line" data-line="671"><span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="672">
 </span><span class="line" data-line="673">
 </span><span class="line" data-line="674"><span style="color: #6272a4;">// Classes can implement more than one interface</span>
 </span><span class="line" data-line="675"><span style="color: #ff79c6;">class</span> <span style="color: #a4ffff;">SomeOtherClass</span> <span style="color: #ff79c6;">implements</span> <span style="color: #a4ffff;">InterfaceOne</span><span style="color: #f8f8f2;">,</span> <span style="color: #a4ffff;">InterfaceTwo</span>
-</span><span class="line" data-line="676"><span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="676"><span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="677">    <span style="color: #ff79c6;">public</span> <span style="color: #8be9fd;">function</span> <span style="color: #50fa7b;">doSomething</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">)</span>
-</span><span class="line" data-line="678">    <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="678">    <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="679">        <span style="color: #ff79c6;">echo</span> <span style="color: #f1fa8c;">&#39;doSomething&#39;</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="680">    <span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="680">    <span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="681">
 </span><span class="line" data-line="682">    <span style="color: #ff79c6;">public</span> <span style="color: #8be9fd;">function</span> <span style="color: #50fa7b;">doSomethingElse</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">)</span>
-</span><span class="line" data-line="683">    <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="683">    <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="684">        <span style="color: #ff79c6;">echo</span> <span style="color: #f1fa8c;">&#39;doSomethingElse&#39;</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="685">    <span style="color: #f8f8f2;">}</span>
-</span><span class="line" data-line="686"><span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="685">    <span style="color: #f8f8f2;">&rbrace;</span>
+</span><span class="line" data-line="686"><span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="687">
 </span><span class="line" data-line="688">
 </span><span class="line" data-line="689"><span style="color: #6272a4;">/********************************</span>
@@ -710,17 +710,17 @@
 </span><span class="line" data-line="693"><span style="color: #6272a4;">// Traits are available from PHP 5.4.0 and are declared using &quot;trait&quot;</span>
 </span><span class="line" data-line="694">
 </span><span class="line" data-line="695"><span style="color: #ff79c6;">trait</span> <span style="color: #a4ffff;">MyTrait</span>
-</span><span class="line" data-line="696"><span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="696"><span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="697">    <span style="color: #ff79c6;">public</span> <span style="color: #8be9fd;">function</span> <span style="color: #50fa7b;">myTraitMethod</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">)</span>
-</span><span class="line" data-line="698">    <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="698">    <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="699">        <span style="color: #ff79c6;">print</span> <span style="color: #f1fa8c;">&#39;I have MyTrait&#39;</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="700">    <span style="color: #f8f8f2;">}</span>
-</span><span class="line" data-line="701"><span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="700">    <span style="color: #f8f8f2;">&rbrace;</span>
+</span><span class="line" data-line="701"><span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="702">
 </span><span class="line" data-line="703"><span style="color: #ff79c6;">class</span> <span style="color: #a4ffff;">MyTraitfulClass</span>
-</span><span class="line" data-line="704"><span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="704"><span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="705">    <span style="color: #ff79c6;">use</span> <span style="color: #a4ffff;">MyTrait</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="706"><span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="706"><span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="707">
 </span><span class="line" data-line="708"><span style="color: #f8f8f2;">$cls</span> <span style="color: #ff79c6;">=</span> <span style="color: #ff79c6;">new</span> <span style="color: #8be9fd;">MyTraitfulClass</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">)</span><span style="color: #f8f8f2;">;</span>
 </span><span class="line" data-line="709"><span style="color: #f8f8f2;">$cls</span><span style="color: #ff79c6;">-&gt;</span><span style="color: #50fa7b;">myTraitMethod</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">)</span><span style="color: #f8f8f2;">;</span> <span style="color: #6272a4;">// Prints &quot;I have MyTrait&quot;</span>
@@ -746,8 +746,8 @@
 </span><span class="line" data-line="729"><span style="color: #ff79c6;">namespace</span> <span style="color: #ffb86c;">My</span><span style="color: #f8f8f2;">\</span><span style="color: #ffb86c;">Namespace</span><span style="color: #f8f8f2;">;</span>
 </span><span class="line" data-line="730">
 </span><span class="line" data-line="731"><span style="color: #ff79c6;">class</span> <span style="color: #a4ffff;">MyClass</span>
-</span><span class="line" data-line="732"><span style="color: #f8f8f2;">{</span>
-</span><span class="line" data-line="733"><span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="732"><span style="color: #f8f8f2;">&lbrace;</span>
+</span><span class="line" data-line="733"><span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="734">
 </span><span class="line" data-line="735"><span style="color: #6272a4;">// (from another file)</span>
 </span><span class="line" data-line="736"><span style="color: #f8f8f2;">$cls</span> <span style="color: #ff79c6;">=</span> <span style="color: #ff79c6;">new</span> <span style="color: #ffb86c;">My</span><span style="color: #f8f8f2;">\</span><span style="color: #ffb86c;">Namespace</span><span style="color: #f8f8f2;">\</span><span style="color: #8be9fd;">MyClass</span><span style="color: #f8f8f2;">;</span>
@@ -774,20 +774,20 @@
 </span><span class="line" data-line="757"><span style="color: #6272a4;">*/</span>
 </span><span class="line" data-line="758">
 </span><span class="line" data-line="759"><span style="color: #ff79c6;">class</span> <span style="color: #a4ffff;">ParentClass</span>
-</span><span class="line" data-line="760"><span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="760"><span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="761">    <span style="color: #ff79c6;">public</span> <span style="color: #ff79c6;">static</span> <span style="color: #8be9fd;">function</span> <span style="color: #50fa7b;">who</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">)</span>
-</span><span class="line" data-line="762">    <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="762">    <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="763">        <span style="color: #ff79c6;">echo</span> <span style="color: #f1fa8c;">&quot;I&#39;m a &quot;</span> <span style="color: #ff79c6;">.</span> <span style="color: #bd93f9;">__CLASS__</span> <span style="color: #ff79c6;">.</span> <span style="color: #f1fa8c;">&quot;<span style="color: #8be9fd;">\n</span>&quot;</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="764">    <span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="764">    <span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="765">
 </span><span class="line" data-line="766">    <span style="color: #ff79c6;">public</span> <span style="color: #ff79c6;">static</span> <span style="color: #8be9fd;">function</span> <span style="color: #50fa7b;">test</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">)</span>
-</span><span class="line" data-line="767">    <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="767">    <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="768">        <span style="color: #6272a4;">// self references the class the method is defined within</span>
 </span><span class="line" data-line="769">        <span style="color: #bd93f9;">self</span><span style="color: #ff79c6;">::</span><span style="color: #50fa7b;">who</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">)</span><span style="color: #f8f8f2;">;</span>
 </span><span class="line" data-line="770">        <span style="color: #6272a4;">// static references the class the method was invoked on</span>
 </span><span class="line" data-line="771">        <span style="color: #bd93f9;">static</span><span style="color: #ff79c6;">::</span><span style="color: #50fa7b;">who</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">)</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="772">    <span style="color: #f8f8f2;">}</span>
-</span><span class="line" data-line="773"><span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="772">    <span style="color: #f8f8f2;">&rbrace;</span>
+</span><span class="line" data-line="773"><span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="774">
 </span><span class="line" data-line="775"><span style="color: #a4ffff;">ParentClass</span><span style="color: #ff79c6;">::</span><span style="color: #50fa7b;">test</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">)</span><span style="color: #f8f8f2;">;</span>
 </span><span class="line" data-line="776"><span style="color: #6272a4;">/*</span>
@@ -796,12 +796,12 @@
 </span><span class="line" data-line="779"><span style="color: #6272a4;">*/</span>
 </span><span class="line" data-line="780">
 </span><span class="line" data-line="781"><span style="color: #ff79c6;">class</span> <span style="color: #a4ffff;">ChildClass</span> <span style="color: #ff79c6;">extends</span> <span style="color: #a4ffff;">ParentClass</span>
-</span><span class="line" data-line="782"><span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="782"><span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="783">    <span style="color: #ff79c6;">public</span> <span style="color: #ff79c6;">static</span> <span style="color: #8be9fd;">function</span> <span style="color: #50fa7b;">who</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">)</span>
-</span><span class="line" data-line="784">    <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="784">    <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="785">        <span style="color: #ff79c6;">echo</span> <span style="color: #f1fa8c;">&quot;But I&#39;m &quot;</span> <span style="color: #ff79c6;">.</span> <span style="color: #bd93f9;">__CLASS__</span> <span style="color: #ff79c6;">.</span> <span style="color: #f1fa8c;">&quot;<span style="color: #8be9fd;">\n</span>&quot;</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="786">    <span style="color: #f8f8f2;">}</span>
-</span><span class="line" data-line="787"><span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="786">    <span style="color: #f8f8f2;">&rbrace;</span>
+</span><span class="line" data-line="787"><span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="788">
 </span><span class="line" data-line="789"><span style="color: #a4ffff;">ChildClass</span><span style="color: #ff79c6;">::</span><span style="color: #50fa7b;">test</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">)</span><span style="color: #f8f8f2;">;</span>
 </span><span class="line" data-line="790"><span style="color: #6272a4;">/*</span>
@@ -848,38 +848,38 @@
 </span><span class="line" data-line="831">
 </span><span class="line" data-line="832"><span style="color: #6272a4;">// Simple error handling can be done with try catch block</span>
 </span><span class="line" data-line="833">
-</span><span class="line" data-line="834"><span style="color: #bd93f9;">try</span> <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="834"><span style="color: #bd93f9;">try</span> <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="835">    <span style="color: #6272a4;">// Do something</span>
-</span><span class="line" data-line="836"><span style="color: #f8f8f2;">}</span> <span style="color: #bd93f9;">catch</span> <span style="color: #f8f8f2;">(</span><span style="color: #a4ffff;">Exception</span> <span style="color: #f8f8f2;">$e</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="836"><span style="color: #f8f8f2;">&rbrace;</span> <span style="color: #bd93f9;">catch</span> <span style="color: #f8f8f2;">(</span><span style="color: #a4ffff;">Exception</span> <span style="color: #f8f8f2;">$e</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="837">    <span style="color: #6272a4;">// Handle exception</span>
-</span><span class="line" data-line="838"><span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="838"><span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="839">
 </span><span class="line" data-line="840"><span style="color: #6272a4;">// When using try catch blocks in a namespaced environment it is important to</span>
 </span><span class="line" data-line="841"><span style="color: #6272a4;">// escape to the global namespace, because Exceptions are classes, and the</span>
 </span><span class="line" data-line="842"><span style="color: #6272a4;">// Exception class exists in the global namespace. This can be done using a</span>
 </span><span class="line" data-line="843"><span style="color: #6272a4;">// leading backslash to catch the Exception.</span>
 </span><span class="line" data-line="844">
-</span><span class="line" data-line="845"><span style="color: #bd93f9;">try</span> <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="845"><span style="color: #bd93f9;">try</span> <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="846">    <span style="color: #6272a4;">// Do something</span>
-</span><span class="line" data-line="847"><span style="color: #f8f8f2;">}</span> <span style="color: #bd93f9;">catch</span> <span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">\</span><span style="color: #a4ffff;">Exception</span> <span style="color: #f8f8f2;">$e</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="847"><span style="color: #f8f8f2;">&rbrace;</span> <span style="color: #bd93f9;">catch</span> <span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">\</span><span style="color: #a4ffff;">Exception</span> <span style="color: #f8f8f2;">$e</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="848">    <span style="color: #6272a4;">// Handle exception</span>
-</span><span class="line" data-line="849"><span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="849"><span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="850">
 </span><span class="line" data-line="851"><span style="color: #6272a4;">// Custom exceptions</span>
 </span><span class="line" data-line="852">
-</span><span class="line" data-line="853"><span style="color: #ff79c6;">class</span> <span style="color: #a4ffff;">MyException</span> <span style="color: #ff79c6;">extends</span> <span style="color: #a4ffff;">Exception</span> <span style="color: #f8f8f2;">{</span><span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="853"><span style="color: #ff79c6;">class</span> <span style="color: #a4ffff;">MyException</span> <span style="color: #ff79c6;">extends</span> <span style="color: #a4ffff;">Exception</span> <span style="color: #f8f8f2;">&lbrace;</span><span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="854">
-</span><span class="line" data-line="855"><span style="color: #bd93f9;">try</span> <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="855"><span style="color: #bd93f9;">try</span> <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="856">
 </span><span class="line" data-line="857">    <span style="color: #f8f8f2;">$condition</span> <span style="color: #ff79c6;">=</span> <span style="color: #bd93f9;">true</span><span style="color: #f8f8f2;">;</span>
 </span><span class="line" data-line="858">
-</span><span class="line" data-line="859">    <span style="color: #ff79c6;">if</span> <span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">$condition</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="859">    <span style="color: #ff79c6;">if</span> <span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">$condition</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="860">        <span style="color: #bd93f9;">throw</span> <span style="color: #ff79c6;">new</span> <span style="color: #8be9fd;">MyException</span><span style="color: #f8f8f2;">(</span><span style="color: #f1fa8c;">&#39;Something just happened&#39;</span><span style="color: #f8f8f2;">)</span><span style="color: #f8f8f2;">;</span>
-</span><span class="line" data-line="861">    <span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="861">    <span style="color: #f8f8f2;">&rbrace;</span>
 </span><span class="line" data-line="862">
-</span><span class="line" data-line="863"><span style="color: #f8f8f2;">}</span> <span style="color: #bd93f9;">catch</span> <span style="color: #f8f8f2;">(</span><span style="color: #a4ffff;">MyException</span> <span style="color: #f8f8f2;">$e</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">{</span>
+</span><span class="line" data-line="863"><span style="color: #f8f8f2;">&rbrace;</span> <span style="color: #bd93f9;">catch</span> <span style="color: #f8f8f2;">(</span><span style="color: #a4ffff;">MyException</span> <span style="color: #f8f8f2;">$e</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">&lbrace;</span>
 </span><span class="line" data-line="864">    <span style="color: #6272a4;">// Handle my exception</span>
-</span><span class="line" data-line="865"><span style="color: #f8f8f2;">}</span>
+</span><span class="line" data-line="865"><span style="color: #f8f8f2;">&rbrace;</span>
 </span></code></pre>
 </body>
 </html>

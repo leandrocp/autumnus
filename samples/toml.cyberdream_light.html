@@ -155,7 +155,7 @@
 </span><span class="line" data-line="138"><span style="color: #16181a;">type</span> <span style="color: #a018ff;">=</span> <span style="color: #008b0c;">&quot;pug&quot;</span>
 </span><span class="line" data-line="139">
 </span><span class="line" data-line="140"><span style="color: #7b8496;"># In JSON land, that would give you the following structure:</span>
-</span><span class="line" data-line="141"><span style="color: #7b8496;"># { &quot;dog&quot;: { &quot;tater.man&quot;: { &quot;type&quot;: &quot;pug&quot; } } }</span>
+</span><span class="line" data-line="141"><span style="color: #7b8496;"># &lbrace; &quot;dog&quot;: &lbrace; &quot;tater.man&quot;: &lbrace; &quot;type&quot;: &quot;pug&quot; &rbrace; &rbrace; &rbrace;</span>
 </span><span class="line" data-line="142">
 </span><span class="line" data-line="143"><span style="color: #7b8496;"># Whitespace around dot-separated parts is ignored, however, best practice is to</span>
 </span><span class="line" data-line="144"><span style="color: #7b8496;"># not use any extraneous whitespace.</span>
@@ -179,7 +179,7 @@
 </span><span class="line" data-line="162"><span style="color: #16181a;">d</span> <span style="color: #a018ff;">=</span> <span style="color: #d17c00;">2</span>
 </span><span class="line" data-line="163">
 </span><span class="line" data-line="164"><span style="color: #7b8496;"># Will generate the following in JSON:</span>
-</span><span class="line" data-line="165"><span style="color: #7b8496;"># { &quot;a&quot;: {&quot;b&quot;: {&quot;c&quot;: 1}, &quot;d&quot;: 2 } }</span>
+</span><span class="line" data-line="165"><span style="color: #7b8496;"># &lbrace; &quot;a&quot;: &lbrace;&quot;b&quot;: &lbrace;&quot;c&quot;: 1&rbrace;, &quot;d&quot;: 2 &rbrace; &rbrace;</span>
 </span><span class="line" data-line="166">
 </span><span class="line" data-line="167"><span style="color: #7b8496;"># You cannot define any key or table more than once. Doing so is invalid.</span>
 </span><span class="line" data-line="168">
@@ -208,12 +208,12 @@
 </span><span class="line" data-line="191"><span style="color: #7b8496;"># Inline table #</span>
 </span><span class="line" data-line="192"><span style="color: #7b8496;">################</span>
 </span><span class="line" data-line="193">
-</span><span class="line" data-line="194"><span style="color: #16181a;">inlineTables</span> <span style="color: #a018ff;">=</span> <span style="color: #16181a;">{</span> <span style="color: #16181a;">areEnclosedWith</span> <span style="color: #a018ff;">=</span> <span style="color: #008b0c;">&quot;{ and }&quot;</span><span style="color: #16181a;">,</span> <span style="color: #16181a;">a</span> <span style="color: #a018ff;">=</span> <span style="color: #16181a;">{</span> <span style="color: #16181a;">b</span> <span style="color: #a018ff;">=</span> <span style="color: #16181a;">{</span> <span style="color: #16181a;">c</span> <span style="color: #a018ff;">=</span> <span style="color: #16181a;">{</span> <span style="color: #16181a;">d</span> <span style="color: #a018ff;">=</span> <span style="color: #16181a;">1</span> <span style="color: #16181a;">}</span> <span style="color: #16181a;">}</span> <span style="color: #16181a;">}</span> <span style="color: #16181a;">}</span>
-</span><span class="line" data-line="195"><span style="color: #16181a;">point</span> <span style="color: #a018ff;">=</span> <span style="color: #16181a;">{</span> <span style="color: #16181a;">x</span> <span style="color: #a018ff;">=</span> <span style="color: #16181a;">1</span><span style="color: #16181a;">,</span> <span style="color: #16181a;">y</span> <span style="color: #a018ff;">=</span> <span style="color: #16181a;">2</span> <span style="color: #16181a;">}</span>
-</span><span class="line" data-line="196"><span style="color: #16181a;">usingMultiple</span> <span style="color: #a018ff;">=</span> <span style="color: #16181a;">{</span>
+</span><span class="line" data-line="194"><span style="color: #16181a;">inlineTables</span> <span style="color: #a018ff;">=</span> <span style="color: #16181a;">&lbrace;</span> <span style="color: #16181a;">areEnclosedWith</span> <span style="color: #a018ff;">=</span> <span style="color: #008b0c;">&quot;&lbrace; and &rbrace;&quot;</span><span style="color: #16181a;">,</span> <span style="color: #16181a;">a</span> <span style="color: #a018ff;">=</span> <span style="color: #16181a;">&lbrace;</span> <span style="color: #16181a;">b</span> <span style="color: #a018ff;">=</span> <span style="color: #16181a;">&lbrace;</span> <span style="color: #16181a;">c</span> <span style="color: #a018ff;">=</span> <span style="color: #16181a;">&lbrace;</span> <span style="color: #16181a;">d</span> <span style="color: #a018ff;">=</span> <span style="color: #16181a;">1</span> <span style="color: #16181a;">&rbrace;</span> <span style="color: #16181a;">&rbrace;</span> <span style="color: #16181a;">&rbrace;</span> <span style="color: #16181a;">&rbrace;</span>
+</span><span class="line" data-line="195"><span style="color: #16181a;">point</span> <span style="color: #a018ff;">=</span> <span style="color: #16181a;">&lbrace;</span> <span style="color: #16181a;">x</span> <span style="color: #a018ff;">=</span> <span style="color: #16181a;">1</span><span style="color: #16181a;">,</span> <span style="color: #16181a;">y</span> <span style="color: #a018ff;">=</span> <span style="color: #16181a;">2</span> <span style="color: #16181a;">&rbrace;</span>
+</span><span class="line" data-line="196"><span style="color: #16181a;">usingMultiple</span> <span style="color: #a018ff;">=</span> <span style="color: #16181a;">&lbrace;</span>
 </span><span class="line" data-line="197">  <span style="color: #16181a;">lines</span> <span style="color: #a018ff;">=</span> <span style="color: #008b0c;">&quot;discouraged!&quot;</span><span style="color: #16181a;">,</span>
 </span><span class="line" data-line="198">  <span style="color: #16181a;">instead</span> <span style="color: #a018ff;">=</span> <span style="color: #008b0c;">&quot;use normal TOML tables&quot;</span><span style="color: #16181a;">,</span>
-</span><span class="line" data-line="199"><span style="color: #16181a;">}</span>
+</span><span class="line" data-line="199"><span style="color: #16181a;">&rbrace;</span>
 </span><span class="line" data-line="200">
 </span><span class="line" data-line="201"><span style="color: #7b8496;">###################</span>
 </span><span class="line" data-line="202"><span style="color: #7b8496;"># Array of Tables #</span>

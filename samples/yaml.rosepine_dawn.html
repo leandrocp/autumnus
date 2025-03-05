@@ -57,7 +57,7 @@
 </span><span class="line" data-line="40"><span style="color: #56949f;">Superscript two</span><span style="color: #797593;">:</span> <span style="color: #ea9d34;">\u00B2</span>
 </span><span class="line" data-line="41">
 </span><span class="line" data-line="42"><span style="color: #797593;"># Special characters must be enclosed in single or double quotes</span>
-</span><span class="line" data-line="43"><span style="color: #56949f;">special_characters</span><span style="color: #797593;">:</span> <span style="color: #ea9d34;">&quot;[ John ] &amp; { Jane } - &lt;Doe&gt;&quot;</span>
+</span><span class="line" data-line="43"><span style="color: #56949f;">special_characters</span><span style="color: #797593;">:</span> <span style="color: #ea9d34;">&quot;[ John ] &amp; &lbrace; Jane &rbrace; - &lt;Doe&gt;&quot;</span>
 </span><span class="line" data-line="44">
 </span><span class="line" data-line="45"><span style="color: #797593;"># Multiple-line strings can be written either as a &#39;literal block&#39; (using |), </span>
 </span><span class="line" data-line="46"><span style="color: #797593;"># or a &#39;folded block&#39; (using &#39;&gt;&#39;).</span>
@@ -144,9 +144,9 @@
 </span><span class="line" data-line="127">
 </span><span class="line" data-line="128"><span style="color: #797593;"># Since YAML is a superset of JSON, you can also write JSON-style maps and</span>
 </span><span class="line" data-line="129"><span style="color: #797593;"># sequences:</span>
-</span><span class="line" data-line="130"><span style="color: #56949f;">json_map</span><span style="color: #797593;">:</span> <span style="color: #797593;">{</span> <span style="color: #56949f;">&quot;key&quot;</span><span style="color: #797593;">:</span> <span style="color: #ea9d34;">&quot;value&quot;</span> <span style="color: #797593;">}</span>
+</span><span class="line" data-line="130"><span style="color: #56949f;">json_map</span><span style="color: #797593;">:</span> <span style="color: #797593;">&lbrace;</span> <span style="color: #56949f;">&quot;key&quot;</span><span style="color: #797593;">:</span> <span style="color: #ea9d34;">&quot;value&quot;</span> <span style="color: #797593;">&rbrace;</span>
 </span><span class="line" data-line="131"><span style="color: #56949f;">json_seq</span><span style="color: #797593;">:</span> <span style="color: #797593;">[</span> <span style="color: #ea9d34;">3</span><span style="color: #797593;">,</span> <span style="color: #ea9d34;">2</span><span style="color: #797593;">,</span> <span style="color: #ea9d34;">1</span><span style="color: #797593;">,</span> <span style="color: #ea9d34;">&quot;takeoff&quot;</span> <span style="color: #797593;">]</span>
-</span><span class="line" data-line="132"><span style="color: #56949f;">and quotes are optional</span><span style="color: #797593;">:</span> <span style="color: #797593;">{</span> <span style="color: #56949f;">key</span><span style="color: #797593;">:</span> <span style="color: #797593;">[</span> <span style="color: #ea9d34;">3</span><span style="color: #797593;">,</span> <span style="color: #ea9d34;">2</span><span style="color: #797593;">,</span> <span style="color: #ea9d34;">1</span><span style="color: #797593;">,</span> <span style="color: #ea9d34;">takeoff</span> <span style="color: #797593;">]</span> <span style="color: #797593;">}</span>
+</span><span class="line" data-line="132"><span style="color: #56949f;">and quotes are optional</span><span style="color: #797593;">:</span> <span style="color: #797593;">&lbrace;</span> <span style="color: #56949f;">key</span><span style="color: #797593;">:</span> <span style="color: #797593;">[</span> <span style="color: #ea9d34;">3</span><span style="color: #797593;">,</span> <span style="color: #ea9d34;">2</span><span style="color: #797593;">,</span> <span style="color: #ea9d34;">1</span><span style="color: #797593;">,</span> <span style="color: #ea9d34;">takeoff</span> <span style="color: #797593;">]</span> <span style="color: #797593;">&rbrace;</span>
 </span><span class="line" data-line="133">
 </span><span class="line" data-line="134"><span style="color: #797593;">#######################</span>
 </span><span class="line" data-line="135"><span style="color: #797593;"># EXTRA YAML FEATURES #</span>
@@ -194,7 +194,7 @@
 </span><span class="line" data-line="177"><span style="color: #797593;"># We can also use yaml complex keys with language specific tags</span>
 </span><span class="line" data-line="178"><span style="color: #797593;">?</span> <span style="color: #56949f;">!!python/tuple</span> <span style="color: #797593;">[</span> <span style="color: #ea9d34;">5</span><span style="color: #797593;">,</span> <span style="color: #ea9d34;">7</span> <span style="color: #797593;">]</span>
 </span><span class="line" data-line="179"><span style="color: #797593;">:</span> <span style="color: #ea9d34;">Fifty Seven</span>
-</span><span class="line" data-line="180"><span style="color: #797593;"># Would be {(5, 7): &#39;Fifty Seven&#39;} in Python</span>
+</span><span class="line" data-line="180"><span style="color: #797593;"># Would be &lbrace;(5, 7): &#39;Fifty Seven&#39;&rbrace; in Python</span>
 </span><span class="line" data-line="181">
 </span><span class="line" data-line="182"><span style="color: #797593;">####################</span>
 </span><span class="line" data-line="183"><span style="color: #797593;"># EXTRA YAML TYPES #</span>
@@ -220,7 +220,7 @@
 </span><span class="line" data-line="203">  <span style="color: #797593;">?</span> <span style="color: #56949f;">item1</span>
 </span><span class="line" data-line="204">  <span style="color: #797593;">?</span> <span style="color: #56949f;">item2</span>
 </span><span class="line" data-line="205">  <span style="color: #797593;">?</span> <span style="color: #56949f;">item3</span>
-</span><span class="line" data-line="206"><span style="color: #56949f;">or</span><span style="color: #797593;">:</span> <span style="color: #797593;">{</span> <span style="color: #ea9d34;">item1</span><span style="color: #797593;">,</span> <span style="color: #ea9d34;">item2</span><span style="color: #797593;">,</span> <span style="color: #ea9d34;">item3</span> <span style="color: #797593;">}</span>
+</span><span class="line" data-line="206"><span style="color: #56949f;">or</span><span style="color: #797593;">:</span> <span style="color: #797593;">&lbrace;</span> <span style="color: #ea9d34;">item1</span><span style="color: #797593;">,</span> <span style="color: #ea9d34;">item2</span><span style="color: #797593;">,</span> <span style="color: #ea9d34;">item3</span> <span style="color: #797593;">&rbrace;</span>
 </span><span class="line" data-line="207">
 </span><span class="line" data-line="208"><span style="color: #797593;"># Sets are just maps with null values; the above is equivalent to:</span>
 </span><span class="line" data-line="209"><span style="color: #56949f;">set2</span><span style="color: #797593;">:</span>
