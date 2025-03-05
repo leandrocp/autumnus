@@ -53,7 +53,7 @@ let html = highlight(
     "sql",
     code,
     Options {
-        theme: themes::get("dracula").unwrap().clone(),
+        theme: themes::get("dracula").expect("Theme not found"),
         ..Options::default()
     }
 );

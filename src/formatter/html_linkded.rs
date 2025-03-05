@@ -5,18 +5,18 @@ use crate::languages::Language;
 use crate::{constants::CLASSES, constants::HIGHLIGHT_NAMES, Options};
 use tree_sitter_highlight::{Error, HighlightEvent};
 
-pub(crate) struct HtmlLinked {
+pub(crate) struct HtmlLinked<'a> {
     lang: Language,
-    options: Options,
+    options: Options<'a>,
 }
 
-impl HtmlLinked {
-    pub fn new(lang: Language, options: Options) -> Self {
+impl<'a> HtmlLinked<'a> {
+    pub fn new(lang: Language, options: Options<'a>) -> Self {
         Self { lang, options }
     }
 }
 
-impl Formatter for HtmlLinked {
+impl<'a> Formatter for HtmlLinked<'a> {
     fn start<W>(&self, writer: &mut W, _: &str)
     where
         W: std::fmt::Write,

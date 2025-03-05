@@ -165,9 +165,8 @@ fn print_cursor(src: &str, cursor: &mut tree_sitter::TreeCursor, depth: usize) {
 }
 
 fn highlight(path: &str, formatter: Option<Formatter>, theme: Option<String>) -> Result<()> {
-    let theme = autumnus::themes::get(&theme.unwrap_or("dracula".to_string()))
-        .cloned()
-        .unwrap_or_default();
+    let theme = theme.unwrap_or("catppuccin_frappe".to_string());
+    let theme = autumnus::themes::get(&theme).expect("Theme not found");
 
     let bytes = read_or_die(Path::new(&path));
     let source = std::str::from_utf8(&bytes).unwrap();
@@ -292,9 +291,8 @@ fn highlight_source(
     formatter: Option<Formatter>,
     theme: Option<String>,
 ) -> Result<()> {
-    let theme = autumnus::themes::get(&theme.unwrap_or("dracula".to_string()))
-        .cloned()
-        .unwrap_or_default();
+    let theme = theme.unwrap_or("catppuccin_frappe".to_string());
+    let theme = autumnus::themes::get(&theme).expect("Theme not found");
 
     match formatter.unwrap_or_default() {
         Formatter::HtmlInline => {

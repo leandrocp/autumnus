@@ -3,6 +3,23 @@
 use serde::{Deserialize, Serialize};
 use std::{collections::BTreeMap, fs, path::Path};
 
+/// Error type for theme operations
+#[derive(Debug)]
+pub enum ThemeError {
+    /// Theme not found
+    NotFound(String),
+}
+
+impl std::fmt::Display for ThemeError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ThemeError::NotFound(name) => write!(f, "Theme '{}' not found", name),
+        }
+    }
+}
+
+impl std::error::Error for ThemeError {}
+
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 /// A theme for syntax highlighting.
 ///
@@ -278,8 +295,11 @@ mod tests {
 
     #[test]
     fn test_get_by_name() {
-        let theme = get("github_light");
-        assert_eq!(theme.unwrap().name, "github_light")
+        let theme = get("github_light").expect("Theme not found");
+        assert_eq!(theme.name, "github_light");
+
+        let err = get("non_existent_theme");
+        assert!(err.is_err());
     }
 
     #[test]

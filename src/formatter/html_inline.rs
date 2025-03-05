@@ -5,18 +5,18 @@ use crate::languages::Language;
 use crate::{constants::HIGHLIGHT_NAMES, Options};
 use tree_sitter_highlight::{Error, HighlightEvent};
 
-pub(crate) struct HtmlInline {
+pub(crate) struct HtmlInline<'a> {
     lang: Language,
-    options: Options,
+    options: Options<'a>,
 }
 
-impl HtmlInline {
-    pub fn new(lang: Language, options: Options) -> Self {
+impl<'a> HtmlInline<'a> {
+    pub fn new(lang: Language, options: Options<'a>) -> Self {
         Self { lang, options }
     }
 }
 
-impl Formatter for HtmlInline {
+impl<'a> Formatter for HtmlInline<'a> {
     fn start<W>(&self, writer: &mut W, _: &str)
     where
         W: std::fmt::Write,
@@ -27,11 +27,13 @@ impl Formatter for HtmlInline {
             write!(writer, " {}", pre_clas);
         }
 
+        write!(writer, "\"");
+
         if let Some(pre_style) = &self.options.theme.pre_style(" ") {
-            write!(writer, "\" style=\"{}\">", pre_style);
-        } else {
-            write!(writer, "\">");
+            write!(writer, " style=\"{}\"", pre_style);
         }
+
+        write!(writer, ">");
 
         write!(
             writer,
@@ -92,6 +94,8 @@ impl Formatter for HtmlInline {
 
 #[cfg(test)]
 mod tests {
+    use crate::themes;
+
     use super::*;
 
     #[test]
@@ -118,5 +122,23 @@ mod tests {
         assert!(buffer
             .as_str()
             .contains("<pre class=\"athl test-pre-class\">"));
+    }
+
+    #[test]
+    fn test_include_pre_class_with_theme() {
+        let formatter = HtmlInline::new(
+            Language::PlainText,
+            Options {
+                pre_class: Some("test-pre-class".to_string()),
+                theme: themes::get("github_light").expect("Theme not found"),
+                ..Default::default()
+            },
+        );
+        let mut buffer = String::new();
+        formatter.start(&mut buffer, "");
+
+        assert!(buffer
+            .as_str()
+            .contains("<pre class=\"athl test-pre-class\" style=\"color: #1f2328; background-color: #ffffff;\">"));
     }
 }

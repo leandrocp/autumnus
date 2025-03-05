@@ -7,13 +7,13 @@ use std::io::Write;
 use termcolor::{ColorSpec, WriteColor};
 use tree_sitter_highlight::{Error, HighlightEvent};
 
-pub struct Terminal {
-    options: Options,
+pub struct Terminal<'a> {
+    options: Options<'a>,
     buffer: RefCell<termcolor::Buffer>,
 }
 
-impl Terminal {
-    pub fn new(options: Options) -> Self {
+impl<'a> Terminal<'a> {
+    pub fn new(options: Options<'a>) -> Self {
         Self {
             options,
             buffer: RefCell::new(termcolor::Buffer::ansi()),
@@ -21,7 +21,7 @@ impl Terminal {
     }
 }
 
-impl Formatter for Terminal {
+impl<'a> Formatter for Terminal<'a> {
     fn write<W>(
         &self,
         _writer: &mut W,

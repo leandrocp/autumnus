@@ -482,7 +482,7 @@ fn themes() {
     let theme_name_matches = theme_names.iter().map(|name| {
         let constant_name = format_ident!("{}", name.to_uppercase());
         let name_str = name.to_lowercase();
-        quote! { #name_str => Some(&#constant_name), }
+        quote! { #name_str => Ok(&#constant_name), }
     });
 
     let output = quote! {
@@ -502,16 +502,16 @@ fn themes() {
         /// ```
         /// use autumnus::themes;
         ///
-        /// let theme = themes::get("github_light");
-        /// assert_eq!(theme.unwrap().name, "github_light");
+        /// let theme = themes::get("github_light").expect("Theme not found");
+        /// assert_eq!(theme.name, "github_light");
         ///
         /// let theme = themes::get("non_existent_theme");
-        /// assert!(theme.is_none());
+        /// assert!(theme.is_err());
         /// ```
-        pub fn get(name: &str) -> Option<&'static Theme> {
+        pub fn get(name: &str) -> Result<&'static Theme, ThemeError> {
             match name {
                 #(#theme_name_matches)*
-                _ => None,
+                _ => Err(ThemeError::NotFound(name.to_string())),
             }
         }
     };

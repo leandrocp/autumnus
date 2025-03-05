@@ -26,7 +26,7 @@
 //!     "sql",
 //!     code,
 //!     Options {
-//!         theme: themes::get("dracula").unwrap().clone(),
+//!         theme: themes::get("dracula").expect("Theme not found"),
 //!         ..Options::default()
 //!     }
 //! );
@@ -237,6 +237,9 @@ use crate::languages::Language;
 use formatter::Terminal;
 use themes::Theme;
 use tree_sitter_highlight::Highlighter;
+use std::sync::LazyLock;
+
+static DEFAULT_THEME: LazyLock<Theme> = LazyLock::new(Theme::default);
 
 /// The type of formatter to use for syntax highlighting.
 #[derive(Debug, Clone)]
@@ -258,7 +261,7 @@ pub enum FormatterOption {
 
 /// Options for the highlighter.
 #[derive(Debug)]
-pub struct Options {
+pub struct Options<'a> {
     /// Theme to use for highlighting.
     ///
     /// # Examples
@@ -267,7 +270,7 @@ pub struct Options {
     /// use autumnus::{Options, themes, highlight};
     ///
     /// let options = Options {
-    ///     theme: themes::get("dracula").unwrap().clone(),
+    ///     theme: themes::get("dracula").expect("Theme not found"),
     ///     ..Options::default()
     /// };
     ///
@@ -282,7 +285,7 @@ pub struct Options {
     /// //   </code>
     /// // </pre>
     /// ```
-    pub theme: Theme,
+    pub theme: &'a Theme,
 
     /// Class to add to the `<pre>` tag.
     ///
@@ -376,10 +379,10 @@ pub struct Options {
     pub formatter: FormatterOption,
 }
 
-impl Default for Options {
+impl<'a> Default for Options<'a> {
     fn default() -> Self {
         Self {
-            theme: Theme::default(),
+            theme: &DEFAULT_THEME,
             pre_class: None,
             italic: false,
             include_highlight: false,
@@ -581,12 +584,10 @@ end
             "elixir",
             code,
             Options {
-                theme: themes::CATPPUCCIN_FRAPPE.clone(),
+                theme: themes::get("catppuccin_frappe").expect("Theme not found"),
                 ..Options::default()
             },
         );
-
-        std::fs::write("result.html", result.clone()).unwrap();
 
         assert_eq!(result, expected);
     }
@@ -600,7 +601,7 @@ end
             "elixir",
             "{:ok, char: '{'}",
             Options {
-                theme: themes::CATPPUCCIN_FRAPPE.clone(),
+                theme: themes::get("catppuccin_frappe").expect("Theme not found"),
                 ..Options::default()
             },
         );
@@ -618,7 +619,7 @@ end
             "{:ok, char: '{'}",
             Options {
                 formatter: FormatterOption::HtmlLinked,
-                theme: themes::CATPPUCCIN_FRAPPE.clone(),
+                theme: themes::get("catppuccin_frappe").expect("Theme not found"),
                 ..Options::default()
             },
         );
@@ -655,7 +656,7 @@ end
             code,
             Options {
                 formatter: FormatterOption::HtmlLinked,
-                theme: themes::CATPPUCCIN_FRAPPE.clone(),
+                theme: themes::get("catppuccin_frappe").expect("Theme not found"),
                 ..Options::default()
             },
         );
