@@ -1,4 +1,4 @@
-VERSION := 0.5.0
+VERSION := 0.6.1
 
 LANGUAGE_NAME := tree-sitter-cmake
 

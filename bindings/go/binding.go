@@ -2,8 +2,9 @@ package tree_sitter_cmake
 
 // #cgo CFLAGS: -std=c11 -fPIC
 // #include "../../src/parser.c"
+// #if __has_include("../../src/scanner.c")
 // #include "../../src/scanner.c"
-// // NOTE: if your language has an external scanner, add it here.
+// #endif
 import "C"
 
 import "unsafe"
