@@ -148,6 +148,3 @@ update-parsers:
         echo "Updating $parser from $repo ($branch)"
         git subtree pull --prefix="vendored_parsers/$parser" "$repo" "$branch" --squash
     done
-
-    # necessary for `cargo package` to work
-    find vendored_parsers -type f -name "Cargo.toml" -delete
