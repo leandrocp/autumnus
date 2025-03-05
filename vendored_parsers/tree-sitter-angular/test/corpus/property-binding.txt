@@ -205,6 +205,33 @@ Event binding expression
             (expression
               (identifier))))))))
 
+========================
+Event binding with mutiple expressions
+========================
+
+<element (click)="handle($event); $event.preventDefault()"/>
+
+---
+
+(document
+  (element
+    (self_closing_tag
+      (tag_name)
+      (attribute
+        (event_binding
+          (binding_name
+            (identifier))
+          (expression
+            (call_expression
+              (identifier)
+              (arguments
+                (identifier))))
+          (expression
+            (member_expression
+              (identifier)
+              (call_expression
+                (identifier)))))))))
+
 =================
 Regular attribute
 =================

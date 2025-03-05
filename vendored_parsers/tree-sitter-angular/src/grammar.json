@@ -2301,6 +2301,39 @@
           ]
         },
         {
+          "type": "REPEAT",
+          "content": {
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "STRING",
+                "value": ";"
+              },
+              {
+                "type": "CHOICE",
+                "members": [
+                  {
+                    "type": "CHOICE",
+                    "members": [
+                      {
+                        "type": "SYMBOL",
+                        "name": "_any_expression"
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "assignment_expression"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "BLANK"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
           "type": "SYMBOL",
           "name": "_double_quote"
         }
