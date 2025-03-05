@@ -387,6 +387,10 @@ module.exports = grammar(HTML, {
         '=',
         $._double_quote,
         optional(choice($._any_expression, $.assignment_expression)),
+        repeat(seq(
+          ';',
+          optional(choice($._any_expression, $.assignment_expression)),
+        )),
         $._double_quote,
       ),
 
