@@ -13,27 +13,39 @@
         theme: {
           extend: {
             fontFamily: {
-              sans: ['Inter', 'system-ui', 'sans-serif'],
-              mono: ['Fira Code', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+              sans: ["Inter", "system-ui", "sans-serif"],
+              mono: [
+                "Fira Code",
+                "ui-monospace",
+                "SFMono-Regular",
+                "Menlo",
+                "monospace",
+              ],
             },
             keyframes: {
               fadeIn: {
-                '0%': { opacity: '0', transform: 'translateY(10px)' },
-                '100%': { opacity: '1', transform: 'translateY(0)' },
-              }
+                "0%": { opacity: "0", transform: "translateY(10px)" },
+                "100%": { opacity: "1", transform: "translateY(0)" },
+              },
             },
             animation: {
-              fadeIn: 'fadeIn 0.3s ease-out',
-            }
-          }
-        }
-      }
+              fadeIn: "fadeIn 0.3s ease-out",
+            },
+          },
+        },
+      };
     </script>
     <style>
       @keyframes gradient {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
       }
       .gradient-bg {
         background: linear-gradient(-45deg, #ff7e5f, #feb47b, #ffcb8c, #fff1e6);
@@ -52,70 +64,128 @@
   </head>
   <body class="min-h-screen">
     <div class="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
-      <div class="rounded-xl border border-orange-100 bg-white/90 backdrop-blur-sm shadow-lg animate-fadeIn">
+      <div
+        class="rounded-xl border border-orange-100 bg-white/90 backdrop-blur-sm shadow-lg animate-fadeIn"
+      >
         <div class="p-6 sm:p-8">
           <div class="mb-8">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 sm:gap-8">
+            <div
+              class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 sm:gap-8"
+            >
               <div class="flex items-center gap-3">
                 <div class="flex flex-col">
-                  <h2 class="text-3xl font-semibold tracking-tight bg-gradient-to-r from-orange-600 to-amber-500 bg-clip-text text-transparent">
+                  <h2
+                    class="text-3xl font-semibold tracking-tight bg-gradient-to-r from-orange-600 to-amber-500 bg-clip-text text-transparent"
+                  >
                     Autumnus
                   </h2>
-                  <p class="text-sm font-medium text-amber-700">Syntax Highlighter</p>
+                  <p class="text-sm font-medium text-amber-700">
+                    Syntax Highlighter
+                  </p>
                 </div>
               </div>
               <div class="flex flex-col gap-6">
                 <div class="flex flex-col sm:flex-row gap-4">
-                  <div class="flex-1 flex flex-col gap-2 p-2.5 rounded-lg bg-gradient-to-r from-amber-50 to-orange-50">
+                  <div
+                    class="flex-1 flex flex-col gap-2 p-2.5 rounded-lg bg-gradient-to-r from-amber-50 to-orange-50"
+                  >
                     <div class="flex items-center gap-2">
                       <span class="font-semibold text-amber-800">Rust</span>
-                      <span class="px-2 py-0.5 text-xs font-medium bg-amber-100 text-amber-700 rounded-full">autumnus</span>
+                      <span
+                        class="px-2 py-0.5 text-xs font-medium bg-amber-100 text-amber-700 rounded-full"
+                        >autumnus</span
+                      >
                     </div>
                     <div class="flex items-center gap-2">
-                      <a href="https://crates.io/crates/autumnus"
+                      <a
+                        href="https://crates.io/crates/autumnus"
                         class="text-amber-700 hover:text-amber-900 inline-flex items-center gap-1.5 transition-colors"
                         target="_blank"
                       >
-                        <svg class="w-4 h-4" viewBox="0 0 512 512" fill="currentColor">
-                          <path d="M239.1 6.3l-208 78c-18.7 7-31.1 25-31.1 45v225.1c0 18.2 10.3 34.8 26.5 42.9l208 104c13.5 6.8 29.4 6.8 42.9 0l208-104c16.3-8.1 26.5-24.8 26.5-42.9V129.3c0-20-12.4-37.9-31.1-44.9l-208-78C262 2.2 250 2.2 239.1 6.3zM256 68.4l192 72v1.1l-192 78-192-78v-1.1l192-72zm32 356V275.5l160-65v133.9l-160 80z"/>
+                        <svg
+                          class="w-4 h-4"
+                          viewBox="0 0 512 512"
+                          fill="currentColor"
+                        >
+                          <path
+                            d="M239.1 6.3l-208 78c-18.7 7-31.1 25-31.1 45v225.1c0 18.2 10.3 34.8 26.5 42.9l208 104c13.5 6.8 29.4 6.8 42.9 0l208-104c16.3-8.1 26.5-24.8 26.5-42.9V129.3c0-20-12.4-37.9-31.1-44.9l-208-78C262 2.2 250 2.2 239.1 6.3zM256 68.4l192 72v1.1l-192 78-192-78v-1.1l192-72zm32 356V275.5l160-65v133.9l-160 80z"
+                          />
                         </svg>
-                        <span class="hover:underline decoration-2 underline-offset-2">crates.io</span>
+                        <span
+                          class="hover:underline decoration-2 underline-offset-2"
+                          >crates.io</span
+                        >
                       </a>
-                      <a href="https://github.com/leandrocp/autumnus"
+                      <a
+                        href="https://github.com/leandrocp/autumnus"
                         class="text-amber-700 hover:text-amber-900 inline-flex items-center gap-1.5 transition-colors"
                         target="_blank"
                       >
-                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                        <svg
+                          class="w-4 h-4"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                        >
+                          <path
+                            d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"
+                          />
                         </svg>
-                        <span class="hover:underline decoration-2 underline-offset-2">GitHub</span>
+                        <span
+                          class="hover:underline decoration-2 underline-offset-2"
+                          >GitHub</span
+                        >
                       </a>
                     </div>
                   </div>
 
-                  <div class="flex-1 flex flex-col gap-2 p-2.5 rounded-lg bg-gradient-to-r from-amber-50 to-orange-50">
+                  <div
+                    class="flex-1 flex flex-col gap-2 p-2.5 rounded-lg bg-gradient-to-r from-amber-50 to-orange-50"
+                  >
                     <div class="flex items-center gap-2">
                       <span class="font-semibold text-amber-800">Elixir</span>
-                      <span class="px-2 py-0.5 text-xs font-medium bg-amber-100 text-amber-700 rounded-full">autumn</span>
+                      <span
+                        class="px-2 py-0.5 text-xs font-medium bg-amber-100 text-amber-700 rounded-full"
+                        >autumn</span
+                      >
                     </div>
                     <div class="flex items-center gap-2">
-                      <a href="https://hex.pm/packages/autumn"
+                      <a
+                        href="https://hex.pm/packages/autumn"
                         class="text-amber-700 hover:text-amber-900 inline-flex items-center gap-1.5 transition-colors"
                         target="_blank"
                       >
-                        <svg class="w-4 h-4" viewBox="0 0 220 220" fill="currentColor">
-                          <path d="M110,0 L220,110 L110,220 L0,110 L110,0 z M159.939,117.061 L110,167 L60.061,117.061 L110,67.121 L159.939,117.061 z"/>
+                        <svg
+                          class="w-4 h-4"
+                          viewBox="0 0 220 220"
+                          fill="currentColor"
+                        >
+                          <path
+                            d="M110,0 L220,110 L110,220 L0,110 L110,0 z M159.939,117.061 L110,167 L60.061,117.061 L110,67.121 L159.939,117.061 z"
+                          />
                         </svg>
-                        <span class="hover:underline decoration-2 underline-offset-2">hex.pm</span>
+                        <span
+                          class="hover:underline decoration-2 underline-offset-2"
+                          >hex.pm</span
+                        >
                       </a>
-                      <a href="https://github.com/leandrocp/autumn"
+                      <a
+                        href="https://github.com/leandrocp/autumn"
                         class="text-amber-700 hover:text-amber-900 inline-flex items-center gap-1.5 transition-colors"
                         target="_blank"
                       >
-                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                        <svg
+                          class="w-4 h-4"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                        >
+                          <path
+                            d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"
+                          />
                         </svg>
-                        <span class="hover:underline decoration-2 underline-offset-2">GitHub</span>
+                        <span
+                          class="hover:underline decoration-2 underline-offset-2"
+                          >GitHub</span
+                        >
                       </a>
                     </div>
                   </div>
@@ -124,16 +194,23 @@
             </div>
           </div>
 
-          <div class="sticky top-0 z-10 -mx-6 sm:-mx-8 px-6 sm:px-8 py-4 bg-white/95 backdrop-blur-sm border-b shadow-sm transition-all">
+          <div
+            class="sticky top-0 z-10 -mx-6 sm:-mx-8 px-6 sm:px-8 py-4 bg-white/95 backdrop-blur-sm border-b shadow-sm transition-all"
+          >
             <div class="flex flex-col sm:flex-row gap-6">
               <div class="flex-1 space-y-2.5">
-                <label class="text-sm font-medium text-gray-700"> Language </label>
+                <label class="text-sm font-medium text-gray-700">
+                  Language
+                </label>
                 <select
                   id="language"
                   class="flex h-10 w-full items-center justify-between rounded-lg border border-gray-200 bg-white px-3.5 py-2 text-sm text-gray-800 hover:bg-gray-50 ring-offset-white focus:outline-none focus:ring-2 focus:ring-gray-950/10 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
                 ></select>
                 <p class="text-xs text-gray-500 flex items-center gap-1.5">
-                  <code class="bg-gray-100/80 px-1.5 py-0.5 rounded-md font-mono" id="language-value"></code>
+                  <code
+                    class="bg-gray-100/80 px-1.5 py-0.5 rounded-md font-mono"
+                    id="language-value"
+                  ></code>
                 </p>
               </div>
               <div class="flex-1 space-y-2.5">
@@ -143,7 +220,10 @@
                   class="flex h-10 w-full items-center justify-between rounded-lg border border-gray-200 bg-white px-3.5 py-2 text-sm text-gray-800 hover:bg-gray-50 ring-offset-white focus:outline-none focus:ring-2 focus:ring-gray-950/10 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
                 ></select>
                 <p class="text-xs text-gray-500 flex items-center gap-1.5">
-                  <code class="bg-gray-100/80 px-1.5 py-0.5 rounded-md font-mono" id="theme-value"></code>
+                  <code
+                    class="bg-gray-100/80 px-1.5 py-0.5 rounded-md font-mono"
+                    id="theme-value"
+                  ></code>
                 </p>
               </div>
             </div>
