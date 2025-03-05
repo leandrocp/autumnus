@@ -16,8 +16,7 @@ Autumnus is a powerful syntax highlighter powered by tree-sitter and Neovim them
   - HTML with linked stylesheets
   - Terminal output with ANSI colors
 - 🔍 Automatic language detection from file extensions
-- 🎭 Italic support for themes that use it
-- 🎯 Zero configuration needed to get started
+- 🚀 Zero configuration needed to get started
 
 ## Installation
 
