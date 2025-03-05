@@ -76,7 +76,7 @@ impl<'a> Formatter for HtmlInline<'a> {
                     output.extend(b"\"");
                 }
             })
-            .expect("TODO");
+            .expect("failed to render highlight events");
 
         for (i, line) in renderer.lines().enumerate() {
             write!(

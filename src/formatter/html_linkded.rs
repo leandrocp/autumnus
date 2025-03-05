@@ -66,7 +66,7 @@ impl<'a> Formatter for HtmlLinked<'a> {
                 output.extend(class.as_bytes());
                 output.extend(b"\"");
             })
-            .expect("TODO");
+            .expect("failed to render highlight events");
 
         for (i, line) in renderer.lines().enumerate() {
             write!(
