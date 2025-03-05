@@ -115,17 +115,38 @@ update-parsers:
         exit 0
     fi
 
-    for dir in vendored_parsers/tree-sitter-*; do
-        if [ -d "$dir" ]; then
-            parser_name=$(basename "$dir")
-            remote_url=$(git config -f "$dir/.git/config" --get remote.origin.url)
-            if [ -n "$remote_url" ]; then
-                branch=$(cd "$dir" && git symbolic-ref --short HEAD 2>/dev/null || echo "main")
-                git subtree pull --prefix="$dir" "$remote_url" "$branch" --squash
-            else
-                echo "⚠️  Could not find remote URL for $parser_name"
-            fi
-        fi
+    parsers=(
+        "tree-sitter-clojure https://github.com/sogaiu/tree-sitter-clojure.git master"
+        "tree-sitter-make https://github.com/alemuller/tree-sitter-make.git main"
+        "tree-sitter-vue git@github.com:tree-sitter-grammars/tree-sitter-vue.git fork"
+        "tree-sitter-cmake https://github.com/uyha/tree-sitter-cmake.git master"
+        "tree-sitter-iex https://github.com/elixir-lang/tree-sitter-iex.git main"
+        "tree-sitter-llvm https://github.com/benwilliamgraham/tree-sitter-llvm.git main"
+        "tree-sitter-dockerfile https://github.com/camdencheek/tree-sitter-dockerfile.git main"
+        "tree-sitter-perl https://github.com/tree-sitter-perl/tree-sitter-perl.git master"
+        "tree-sitter-scss https://github.com/serenadeai/tree-sitter-scss.git master"
+        "tree-sitter-graphql https://github.com/bkegley/tree-sitter-graphql.git master"
+        "tree-sitter-kotlin https://github.com/fwcd/tree-sitter-kotlin.git main"
+        "tree-sitter-liquid https://github.com/hankthetank27/tree-sitter-liquid.git main"
+        "tree-sitter-csv https://github.com/tree-sitter-grammars/tree-sitter-csv.git master"
+        "tree-sitter-glimmer https://github.com/ember-tooling/tree-sitter-glimmer.git main"
+        "tree-sitter-latex https://github.com/latex-lsp/tree-sitter-latex.git master"
+        "tree-sitter-eex https://github.com/connorlay/tree-sitter-eex.git main"
+        "tree-sitter-elm https://github.com/elm-tooling/tree-sitter-elm.git main"
+        "tree-sitter-comment https://github.com/stsewd/tree-sitter-comment.git master"
+        "tree-sitter-commonlisp https://github.com/tree-sitter-grammars/tree-sitter-commonlisp.git master"
+        "tree-sitter-http https://github.com/rest-nvim/tree-sitter-http.git main"
+        "tree-sitter-surface https://github.com/connorlay/tree-sitter-surface.git main"
+        "tree-sitter-angular https://github.com/dlvandenberg/tree-sitter-angular.git main"
+        "tree-sitter-astro https://github.com/virchau13/tree-sitter-astro.git master"
+        "tree-sitter-powershell https://github.com/airbus-cert/tree-sitter-powershell.git main"
+        "tree-sitter-vim https://github.com/tree-sitter-grammars/tree-sitter-vim.git master"
+    )
+
+    for parser_info in "${parsers[@]}"; do
+        read -r parser repo branch <<< "$parser_info"
+        echo "Updating $parser from $repo ($branch)"
+        git subtree pull --prefix="vendored_parsers/$parser" "$repo" "$branch" --squash
     done
 
     # necessary for `cargo package` to work
