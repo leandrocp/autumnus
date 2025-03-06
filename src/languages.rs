@@ -4,6 +4,7 @@ use crate::constants::HIGHLIGHT_NAMES;
 use lazy_static::lazy_static;
 use regex::Regex;
 use std::borrow::Borrow;
+use std::collections::HashMap;
 use std::{path::Path, sync::LazyLock};
 use strum::{EnumIter, IntoEnumIterator};
 use tree_sitter_highlight::HighlightConfiguration;
@@ -761,6 +762,29 @@ impl Language {
             _ => &PLAIN_TEXT_CONFIG,
         }
     }
+}
+
+/// Returns a BTreeMap containing all supported languages with their details.
+///
+/// The key is the language's id_name (lowercase, no spaces).
+/// The value is a tuple containing:
+/// - The friendly name (e.g. "Elixir", "Common Lisp")
+/// - A Vec of file extensions/patterns
+pub fn available_languages() -> HashMap<String, (String, Vec<String>)> {
+    let mut languages = HashMap::new();
+
+    for language in Language::iter() {
+        let id_name = language.id_name();
+        let friendly_name = language.name().to_string();
+        let extensions: Vec<String> = Language::language_globs(language)
+            .iter()
+            .map(|p| p.to_string())
+            .collect();
+
+        languages.insert(id_name, (friendly_name, extensions));
+    }
+
+    languages
 }
 
 fn split_on_newlines(s: &str) -> impl Iterator<Item = &str> {
@@ -1704,6 +1728,26 @@ mod tests {
             let _ = highlighter
                 .highlight(lang.config(), "".as_bytes(), None, |_| None)
                 .unwrap();
+        }
+    }
+
+    #[test]
+    fn test_available_languages() {
+        let languages = available_languages();
+
+        assert!(!languages.is_empty());
+        assert!(languages.contains_key("elixir"));
+        assert!(languages.contains_key("rust"));
+        assert!(languages.contains_key("python"));
+
+        let (friendly_name, extensions) = languages.get("elixir").unwrap();
+        assert_eq!(friendly_name, "Elixir");
+        assert!(extensions.contains(&"*.ex".to_string()));
+        assert!(extensions.contains(&"*.exs".to_string()));
+
+        for (id_name, (friendly_name, _extensions)) in languages {
+            assert!(!id_name.is_empty());
+            assert!(!friendly_name.is_empty());
         }
     }
 }

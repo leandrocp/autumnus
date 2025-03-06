@@ -306,10 +306,37 @@ impl Style {
     }
 }
 
+/// Returns a list of all available themes.
+pub fn available_themes() -> Vec<&'static Theme> {
+    ALL_THEMES.iter().copied().collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use std::path::Path;
+
+    #[test]
+    fn test_available_themes() {
+        let themes = available_themes();
+
+        assert!(!themes.is_empty());
+        assert_eq!(themes.len(), 104);
+
+        let dracula = themes.iter().find(|t| t.name == "dracula").unwrap();
+        assert_eq!(dracula.name, "dracula");
+        assert_eq!(dracula.appearance, "dark");
+
+        let github_light = themes.iter().find(|t| t.name == "github_light").unwrap();
+        assert_eq!(github_light.name, "github_light");
+        assert_eq!(github_light.appearance, "light");
+
+        for theme in themes {
+            assert!(!theme.name.is_empty());
+            assert!(!theme.appearance.is_empty());
+            assert!(theme.appearance == "light" || theme.appearance == "dark");
+        }
+    }
 
     #[test]
     fn test_load_all_themes() {

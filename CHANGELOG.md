@@ -1,6 +1,13 @@
 # Changelog
 
-## [0.1.4] - 2024-03-22
+## Unreleased
+
+### Added
+
+- `available_languages()`: Get a map of all supported languages with their details
+- `available_themes()`: Get a map of all available themes with their details
+
+## [0.1.4] - 2025-03-06
 
 ### Fixed
 
@@ -8,25 +15,25 @@
 - Documentation: exclude dev binary from docs
 - Documentation: remove unnecessary empty default features
 
-## [0.1.3] - 2024-03-21
+## [0.1.3] - 2025-03-05
 
 ### Fixed
 
 - Docs: generate link to def
 
-## [0.1.2] - 2024-03-21
+## [0.1.2] - 2025-03-05
 
 ### Fixed
 
 - doc_auto_cfg
 
-## [0.1.1] - 2024-03-21
+## [0.1.1] - 2025-03-05
 
 ### Fixed
 
 - Docs config
 
-## [0.1.0] - 2024-03-21
+## [0.1.0] - 2025-03-05
 
 ### Added
 

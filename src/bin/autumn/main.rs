@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 use strum::IntoEnumIterator;
 
 /// CLI for the Autumnus syntax highlighter
-/// 
+///
 /// This binary provides command-line access to Autumnus's syntax highlighting capabilities.
 /// While the package is named 'autumnus', this binary is named 'autumn' for easier typing.
 #[derive(Parser)]
@@ -78,7 +78,7 @@ enum Formatter {
 }
 
 /// Entry point for the autumn CLI
-/// 
+///
 /// Parses command line arguments and dispatches to the appropriate handler function.
 fn main() -> Result<()> {
     let cli = Cli::parse();
@@ -130,10 +130,10 @@ fn list_languages() -> Result<()> {
 }
 
 /// Dumps the Tree-sitter AST for a given file
-/// 
+///
 /// This is useful for debugging and understanding how Tree-sitter parses your code.
 /// The output shows the AST structure with node types, positions, and source text.
-/// 
+///
 /// # Arguments
 /// * `path` - Path to the file to analyze
 fn dump_tree_sitter(path: &str) -> Result<()> {
@@ -147,7 +147,7 @@ fn dump_tree_sitter(path: &str) -> Result<()> {
 }
 
 /// Creates a Tree-sitter tree from source code and language
-/// 
+///
 /// # Arguments
 /// * `src` - Source code to parse
 /// * `language` - Tree-sitter language for parsing
@@ -162,7 +162,7 @@ fn to_tree(src: &str, language: &tree_sitter::Language) -> tree_sitter::Tree {
 }
 
 /// Recursively prints the Tree-sitter AST
-/// 
+///
 /// # Arguments
 /// * `src` - Original source code
 /// * `tree` - Tree-sitter tree to print
@@ -172,7 +172,7 @@ fn print_tree(src: &str, tree: &tree_sitter::Tree) {
 }
 
 /// Prints a node in the Tree-sitter AST and recursively visits its children
-/// 
+///
 /// # Arguments
 /// * `src` - Original source code
 /// * `cursor` - Current position in the tree
@@ -207,7 +207,7 @@ fn print_cursor(src: &str, cursor: &mut tree_sitter::TreeCursor, depth: usize) {
 }
 
 /// Highlights a file with syntax highlighting
-/// 
+///
 /// # Arguments
 /// * `path` - Path to the file to highlight
 /// * `formatter` - Output format (terminal, html-inline, html-linked)
@@ -273,7 +273,7 @@ fn highlight(path: &str, formatter: Option<Formatter>, theme: Option<String>) ->
 const EXIT_BAD_ARGUMENTS: i32 = 2;
 
 /// Reads a file or exits with an error message
-/// 
+///
 /// # Arguments
 /// * `path` - Path to the file to read
 fn read_or_die(path: &Path) -> Vec<u8> {
@@ -287,7 +287,7 @@ fn read_or_die(path: &Path) -> Vec<u8> {
 }
 
 /// Prints a user-friendly error message for file read errors
-/// 
+///
 /// # Arguments
 /// * `file_arg` - File argument that caused the error
 /// * `e` - The error that occurred
@@ -332,7 +332,7 @@ impl Display for FileArgument {
 }
 
 /// Converts an absolute path to a path relative to the current directory
-/// 
+///
 /// # Arguments
 /// * `path` - The path to convert
 fn relative_to_current(path: &Path) -> PathBuf {
@@ -349,7 +349,7 @@ fn relative_to_current(path: &Path) -> PathBuf {
 }
 
 /// Attempts to canonicalize a path, falling back to the original path on error
-/// 
+///
 /// # Arguments
 /// * `path` - The path to canonicalize
 fn try_canonicalize(path: &Path) -> PathBuf {
@@ -357,7 +357,7 @@ fn try_canonicalize(path: &Path) -> PathBuf {
 }
 
 /// Highlights a string of source code
-/// 
+///
 /// # Arguments
 /// * `source` - The source code to highlight
 /// * `language` - Programming language for the source code
