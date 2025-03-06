@@ -20,8 +20,11 @@ Autumnus is a syntax highlighter powered by tree-sitter and Neovim themes. It pr
   - Terminal output with ANSI colors
 - 🔍 Automatic language detection from file extensions
 - 🚀 Zero configuration needed to get started
+- 🖥️ Command-line interface included
 
 ## Installation
+
+### As a Library
 
 Add Autumnus to your `Cargo.toml`:
 
@@ -30,9 +33,21 @@ Add Autumnus to your `Cargo.toml`:
 autumnus = "0.1.0"
 ```
 
+### As a CLI Tool
+
+Install the `autumn` command-line tool:
+
+```sh
+cargo install autumnus
+```
+
+Note: While the package name is `autumnus`, the installed binary is named `autumn`. This means you use `cargo install autumnus` to install it, but run it as `autumn` in your terminal.
+
 ## Usage
 
-### Basic Example
+### Library Usage
+
+#### Basic Example
 
 ```rust
 use autumnus::{highlight, Options};
@@ -46,7 +61,7 @@ let code = r#"
 let html = highlight("javascript", code, Options::default());
 ```
 
-### Using a Specific Theme
+#### Using a Specific Theme
 
 ```rust
 use autumnus::{highlight, Options, themes};
@@ -62,7 +77,7 @@ let html = highlight(
 );
 ```
 
-### Language Detection from File Path
+#### Language Detection from File Path
 
 ```rust
 use autumnus::{highlight, Options};
@@ -76,7 +91,7 @@ let code = r#"
 let html = highlight("app.ex", code, Options::default());
 ```
 
-### Terminal Output with ANSI Colors
+#### Terminal Output with ANSI Colors
 
 ```rust
 use autumnus::{highlight, Options, FormatterOption};
@@ -92,7 +107,7 @@ let ansi = highlight(
 );
 ```
 
-### HTML with Linked Stylesheets
+#### HTML with Linked Stylesheets
 
 ```rust
 use autumnus::{highlight, Options, FormatterOption};
@@ -113,6 +128,72 @@ When using `FormatterOption::HtmlLinked`, include the corresponding CSS file for
 ```html
 <link rel="stylesheet" href="css/dracula.css" />
 ```
+
+### Command-Line Usage
+
+The `autumn` command-line tool provides several commands for syntax highlighting and code analysis:
+
+#### List Available Languages
+
+```sh
+autumn list-languages
+```
+
+Lists all supported programming languages and their associated file patterns.
+
+#### List Available Themes
+
+```sh
+autumn list-themes
+```
+
+Lists all available syntax highlighting themes.
+
+#### Highlight a File
+
+```sh
+autumn highlight <path> [options]
+```
+
+Highlights the contents of a file with syntax highlighting.
+
+Options:
+- `-f, --formatter <formatter>`: Output format (default: terminal)
+  - `terminal`: ANSI colored output for terminal
+  - `html-inline`: HTML output with inline styles
+  - `html-linked`: HTML output with linked stylesheet
+- `-t, --theme <theme>`: Theme name (default: catppuccin_frappe)
+
+Example:
+```sh
+autumn highlight src/main.rs --formatter html-inline --theme github_dark
+```
+
+#### Highlight Source Code
+
+```sh
+autumn highlight-source <source> [options]
+```
+
+Highlights a string of source code.
+
+Options:
+- `-l, --language <language>`: Programming language for the source code
+- `-f, --formatter <formatter>`: Output format (default: terminal)
+- `-t, --theme <theme>`: Theme name (default: catppuccin_frappe)
+
+Example:
+```sh
+autumn highlight-source "println!(\"Hello World!\");" -l rust
+```
+
+#### Dump Tree-sitter AST
+
+```sh
+autumn dump-tree-sitter <path>
+```
+
+Dumps the Tree-sitter AST (Abstract Syntax Tree) for a given file. This is useful for debugging or understanding how Tree-sitter parses your code.
 
 ## Supported Languages
 
@@ -184,7 +265,7 @@ Contributions are welcome! Feel free to:
 
 ## Acknowledgements
 
-Autumnus would not be possible without theses projects:
+Autumnus would not be possible without these projects:
 
 - [inkjet](https://github.com/Colonial-Dev/inkjet)
 - [difftastic](https://github.com/Wilfred/difftastic)

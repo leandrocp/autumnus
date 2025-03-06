@@ -1,10 +1,12 @@
 # Changelog
 
-## Unreleased
+## [0.1.4] - 2024-03-22
 
 ### Fixed
 
-- Theme path
+- Build theme path relative to CARGO_MANIFEST_DIR
+- Documentation: exclude dev binary from docs
+- Documentation: remove unnecessary empty default features
 
 ## [0.1.3] - 2024-03-21
 

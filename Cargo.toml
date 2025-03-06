@@ -1,6 +1,6 @@
 [package]
 name = "autumnus"
-version = "0.1.3"
+version = "0.1.4"
 homepage = "https://autumnus.dev"
 repository = "https://github.com/leandrocp/autumnus"
 authors = ["Leandro Pereira <leandro@leandro.io>"]
@@ -32,6 +32,7 @@ include = [
 
 [package.metadata.docs.rs]
 rustdoc-args = ["--generate-link-to-definition"]
+no-default-features = true
 
 [dependencies]
 tree-sitter = "0.25.1"
@@ -96,7 +97,6 @@ rayon = "1"
 syn = { version = "2.0", features = ["full", "parsing"] }
 
 [features]
-default = []
 dev = []
 
 [profile.release]
@@ -106,8 +106,10 @@ strip = true
 [[bin]]
 name = "autumn"
 path = "src/bin/autumn/main.rs"
+doc = true
 
 [[bin]]
 name = "dev"
 path = "src/bin/dev/main.rs"
 required-features = ["dev"]
+doc = false
