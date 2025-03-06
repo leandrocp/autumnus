@@ -1,6 +1,6 @@
 [package]
 name = "autumnus"
-version = "0.1.2"
+version = "0.1.3"
 homepage = "https://autumnus.dev"
 repository = "https://github.com/leandrocp/autumnus"
 authors = ["Leandro Pereira <leandro@leandro.io>"]
@@ -31,8 +31,7 @@ include = [
 ]
 
 [package.metadata.docs.rs]
-all-features = true
-rustdoc-args = ["--cfg", "docsrs"]
+rustdoc-args = ["--generate-link-to-definition"]
 
 [dependencies]
 tree-sitter = "0.25.1"

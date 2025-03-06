@@ -226,8 +226,6 @@
 //! | vscode_light |
 //! | zephyr_dark |
 
-#![cfg_attr(docsrs, feature(doc_auto_cfg))]
-
 #[doc(hidden)]
 pub mod constants;
 pub mod formatter;

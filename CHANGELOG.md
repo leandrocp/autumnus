@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.3] - 2024-03-21
+
+### Fixed
+
+- Docs: generate link to def
+
 ## [0.1.2] - 2024-03-21
 
 ### Fixed
