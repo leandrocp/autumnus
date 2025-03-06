@@ -1,5 +1,6 @@
 use anyhow::Result;
 use autumnus::languages::Language;
+use autumnus::FormatterOption;
 use clap::{Parser, Subcommand, ValueEnum};
 use std::fmt::Display;
 use std::fs;
@@ -227,10 +228,8 @@ fn highlight(path: &str, formatter: Option<Formatter>, theme: Option<String>) ->
                 path,
                 source,
                 autumnus::Options {
-                    formatter: autumnus::FormatterOption::HtmlInline,
+                    formatter: FormatterOption::default(),
                     theme,
-                    include_highlight: false,
-                    ..autumnus::Options::default()
                 },
             );
 
@@ -242,10 +241,12 @@ fn highlight(path: &str, formatter: Option<Formatter>, theme: Option<String>) ->
                 path,
                 source,
                 autumnus::Options {
-                    formatter: autumnus::FormatterOption::HtmlLinked,
+                    formatter: FormatterOption::HtmlLinked {
+                        pre_class: None,
+                        italic: false,
+                        include_highlight: false,
+                    },
                     theme,
-                    include_highlight: false,
-                    ..autumnus::Options::default()
                 },
             );
 
@@ -257,9 +258,8 @@ fn highlight(path: &str, formatter: Option<Formatter>, theme: Option<String>) ->
                 path,
                 source,
                 autumnus::Options {
-                    formatter: autumnus::FormatterOption::Terminal,
+                    formatter: FormatterOption::Terminal { italic: false },
                     theme,
-                    ..autumnus::Options::default()
                 },
             );
 
@@ -378,10 +378,8 @@ fn highlight_source(
                 language.unwrap_or_default(),
                 source,
                 autumnus::Options {
-                    formatter: autumnus::FormatterOption::HtmlInline,
+                    formatter: FormatterOption::default(),
                     theme,
-                    include_highlight: false,
-                    ..autumnus::Options::default()
                 },
             );
 
@@ -393,10 +391,12 @@ fn highlight_source(
                 language.unwrap_or_default(),
                 source,
                 autumnus::Options {
-                    formatter: autumnus::FormatterOption::HtmlLinked,
+                    formatter: FormatterOption::HtmlLinked {
+                        pre_class: None,
+                        italic: false,
+                        include_highlight: false,
+                    },
                     theme,
-                    include_highlight: false,
-                    ..autumnus::Options::default()
                 },
             );
 
@@ -408,9 +408,8 @@ fn highlight_source(
                 language.unwrap_or_default(),
                 source,
                 autumnus::Options {
-                    formatter: autumnus::FormatterOption::Terminal,
+                    formatter: FormatterOption::Terminal { italic: false },
                     theme,
-                    ..autumnus::Options::default()
                 },
             );
 

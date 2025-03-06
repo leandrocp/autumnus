@@ -247,7 +247,15 @@ static DEFAULT_THEME: LazyLock<Theme> = LazyLock::new(Theme::default);
 #[derive(Debug, Clone)]
 pub enum FormatterOption {
     /// HTML output with inline styles.
-    HtmlInline,
+    HtmlInline {
+        /// Class to add to the `<pre>` tag.
+        pre_class: Option<&'static str>,
+        /// Whether to use italics for highlighting.
+        italic: bool,
+        /// Whether to include the original highlight scope name in a `data` attribute.
+        /// Useful for debugging.
+        include_highlight: bool,
+    },
     /// HTML output with linked styles.
     ///
     /// When using this formatter, CSS files for all themes are available in the `css/` directory.
@@ -256,9 +264,30 @@ pub enum FormatterOption {
     /// ```html
     /// <link rel="stylesheet" href="css/dracula.css">
     /// ```
-    HtmlLinked,
+    HtmlLinked {
+        /// Class to add to the `<pre>` tag.
+        pre_class: Option<&'static str>,
+        /// Whether to use italics for highlighting.
+        italic: bool,
+        /// Whether to include the original highlight scope name in a `data` attribute.
+        /// Useful for debugging.
+        include_highlight: bool,
+    },
     /// Terminal output with ANSI colors.
-    Terminal,
+    Terminal {
+        /// Whether to use italics for highlighting.
+        italic: bool,
+    },
+}
+
+impl Default for FormatterOption {
+    fn default() -> Self {
+        Self::HtmlInline {
+            pre_class: None,
+            italic: false,
+            include_highlight: false,
+        }
+    }
 }
 
 /// Options for the highlighter.
@@ -289,73 +318,6 @@ pub struct Options<'a> {
     /// ```
     pub theme: &'a Theme,
 
-    /// Class to add to the `<pre>` tag.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use autumnus::{Options, highlight};
-    ///
-    /// let options = Options {
-    ///     pre_class: Some("my-code-block"),
-    ///     ..Options::default()
-    /// };
-    ///
-    /// let code = r#"fn main() { println!("Hello"); }"#;
-    /// let html = highlight("rust", code, options);
-    /// // Output: <pre class="athl my-code-block">
-    /// ```
-    pub pre_class: Option<&'a str>,
-
-    /// Whether to use italics for highlighting.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use autumnus::{Options, highlight};
-    ///
-    /// let options = Options {
-    ///     italic: true,
-    ///     ..Options::default()
-    /// };
-    ///
-    /// let code = r#"fn main() { println!("Hello"); }"#;
-    /// let html = highlight("rust", code, options);
-    /// // Output: <pre class="athl">
-    /// //   <code class="language-rust" translate="no" tabindex="0">
-    /// //     <span class="line" data-line="1">
-    /// //       <span style="color: #ff79c6; font-style: italic;">fn</span> ...
-    /// //     </span>
-    /// //   </code>
-    /// // </pre>
-    /// ```
-    pub italic: bool,
-
-    /// Whether to include the original highlight scope name in a `data` attribute.
-    /// Useful for debugging.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use autumnus::{Options, highlight};
-    ///
-    /// let options = Options {
-    ///     include_highlight: true,
-    ///     ..Options::default()
-    /// };
-    ///
-    /// let code = r#"fn main() { println!("Hello"); }"#;
-    /// let html = highlight("rust", code, options);
-    /// // Output: <pre class="athl">
-    /// //   <code class="language-rust" translate="no" tabindex="0">
-    /// //     <span class="line" data-line="1">
-    /// //       <span style="color: #ff79c6;" data-highlight="keyword.function">fn</span> ...
-    /// //     </span>
-    /// //   </code>
-    /// // </pre>
-    /// ```
-    pub include_highlight: bool,
-
     /// The type of formatter to use for output.
     ///
     /// # Examples
@@ -364,16 +326,20 @@ pub struct Options<'a> {
     /// use autumnus::{Options, FormatterOption, highlight};
     ///
     /// let options = Options {
-    ///     formatter: FormatterOption::HtmlLinked,
+    ///     formatter: FormatterOption::HtmlLinked {
+    ///         pre_class: Some("my-code-block"),
+    ///         italic: true,
+    ///         include_highlight: true,
+    ///     },
     ///     ..Options::default()
     /// };
     ///
     /// let code = r#"fn main() { println!("Hello"); }"#;
     /// let html = highlight("rust", code, options);
-    /// // Output: <pre class="athl">
+    /// // Output: <pre class="athl my-code-block">
     /// //   <code class="language-rust" translate="no" tabindex="0">
     /// //     <span class="line" data-line="1">
-    /// //       <span class="keyword-function">fn</span> ...
+    /// //       <span class="keyword-function" data-highlight="keyword.function">fn</span> ...
     /// //     </span>
     /// //   </code>
     /// // </pre>
@@ -385,10 +351,11 @@ impl Default for Options<'_> {
     fn default() -> Self {
         Self {
             theme: &DEFAULT_THEME,
-            pre_class: None,
-            italic: false,
-            include_highlight: false,
-            formatter: FormatterOption::HtmlInline,
+            formatter: FormatterOption::HtmlInline {
+                pre_class: None,
+                italic: false,
+                include_highlight: false,
+            },
         }
     }
 }
@@ -459,7 +426,7 @@ impl Default for Options<'_> {
 ///     "rust",
 ///     code,
 ///     Options {
-///         formatter: FormatterOption::HtmlLinked,
+///         formatter: FormatterOption::HtmlLinked { pre_class: Some("my-code-block") },
 ///         ..Options::default()
 ///     }
 /// );
@@ -467,7 +434,7 @@ impl Default for Options<'_> {
 ///
 /// Output with HTML linked styles:
 /// ```html
-/// <pre class="athl">
+/// <pre class="athl my-code-block">
 ///   <code class="language-rust" translate="no" tabindex="0">
 ///     <span class="line" data-line="1">
 ///       <span class="keyword-function">fn</span> <span class="function">main</span>() {
@@ -527,20 +494,27 @@ pub fn highlight(lang_or_path: &str, source: &str, options: Options) -> String {
         .expect("failed to generate highlight events");
 
     match options.formatter {
-        FormatterOption::HtmlInline => {
+        FormatterOption::HtmlInline {
+            pre_class: _,
+            italic: _,
+            include_highlight: _,
+        } => {
             let formatter = HtmlInline::new(lang, options);
             formatter.start(&mut buffer, source);
             formatter.write(&mut buffer, source, events);
             formatter.finish(&mut buffer, source);
         }
-        FormatterOption::HtmlLinked => {
+        FormatterOption::HtmlLinked {
+            pre_class: _,
+            italic: _,
+            include_highlight: _,
+        } => {
             let formatter = HtmlLinked::new(lang, options);
             formatter.start(&mut buffer, source);
             formatter.write(&mut buffer, source, events);
             formatter.finish(&mut buffer, source);
         }
-
-        FormatterOption::Terminal => {
+        FormatterOption::Terminal { italic: _ } => {
             let formatter = Terminal::new(options);
             formatter.start(&mut buffer, source);
             formatter.write(&mut buffer, source, events);
@@ -620,7 +594,11 @@ end
             "elixir",
             "{:ok, char: '{'}",
             Options {
-                formatter: FormatterOption::HtmlLinked,
+                formatter: FormatterOption::HtmlLinked {
+                    pre_class: None,
+                    italic: false,
+                    include_highlight: false,
+                },
                 theme: themes::get("catppuccin_frappe").expect("Theme not found"),
                 ..Options::default()
             },
@@ -657,7 +635,11 @@ end
             "elixir",
             code,
             Options {
-                formatter: FormatterOption::HtmlLinked,
+                formatter: FormatterOption::HtmlLinked {
+                    pre_class: None,
+                    italic: false,
+                    include_highlight: false,
+                },
                 theme: themes::get("catppuccin_frappe").expect("Theme not found"),
                 ..Options::default()
             },

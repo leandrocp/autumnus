@@ -133,12 +133,13 @@ fn gen_samples_entries(
                 file_name,
                 &contents,
                 autumnus::Options {
-                    formatter: autumnus::FormatterOption::HtmlInline,
+                    formatter: autumnus::FormatterOption::HtmlInline {
+                        pre_class: Some(
+                            "w-full overflow-auto rounded-lg p-8 text-sm antialiased leading-6",
+                        ),
+                        ..autumnus::FormatterOption::default()
+                    },
                     theme,
-                    include_highlight: false,
-                    pre_class: Some(
-                        "w-full overflow-auto rounded-lg p-8 text-sm antialiased leading-6",
-                    ),
                     ..autumnus::Options::default()
                 },
             );

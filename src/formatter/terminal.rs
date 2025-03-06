@@ -1,7 +1,7 @@
 #![allow(unused_must_use)]
 
 use super::Formatter;
-use crate::{constants::HIGHLIGHT_NAMES, Options};
+use crate::{constants::HIGHLIGHT_NAMES, FormatterOption, Options};
 use std::cell::RefCell;
 use std::io::Write;
 use termcolor::{ColorSpec, WriteColor};
@@ -30,6 +30,12 @@ impl Formatter for Terminal<'_> {
     ) where
         W: std::fmt::Write,
     {
+        let _italic = if let FormatterOption::Terminal { italic } = &self.options.formatter {
+            *italic
+        } else {
+            false
+        };
+
         for event in events {
             let event = event.expect("todo");
 
@@ -71,5 +77,17 @@ impl Formatter for Terminal<'_> {
     {
         let output = String::from_utf8(self.buffer.borrow_mut().clone().into_inner()).unwrap();
         let _ = writer.write_str(output.as_str());
+    }
+}
+
+impl Default for Terminal<'_> {
+    fn default() -> Self {
+        Self {
+            options: Options {
+                formatter: FormatterOption::Terminal { italic: false },
+                ..Options::default()
+            },
+            buffer: RefCell::new(termcolor::Buffer::ansi()),
+        }
     }
 }

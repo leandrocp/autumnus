@@ -2,7 +2,7 @@
 
 use super::Formatter;
 use crate::languages::Language;
-use crate::{constants::HIGHLIGHT_NAMES, Options};
+use crate::{constants::HIGHLIGHT_NAMES, FormatterOption, Options};
 use tree_sitter_highlight::{Error, HighlightEvent};
 
 pub(crate) struct HtmlInline<'a> {
@@ -21,7 +21,12 @@ impl Formatter for HtmlInline<'_> {
     where
         W: std::fmt::Write,
     {
-        let class = if let Some(pre_clas) = self.options.pre_class {
+        let class = if let FormatterOption::HtmlInline {
+            pre_class: Some(pre_clas),
+            italic: _,
+            include_highlight: _,
+        } = &self.options.formatter
+        {
             format!("athl {}", pre_clas)
         } else {
             "athl".to_string()
@@ -50,29 +55,43 @@ impl Formatter for HtmlInline<'_> {
     {
         let mut renderer = tree_sitter_highlight::HtmlRenderer::new();
 
-        let highlight_attr = if self.options.include_highlight {
-            " data-highlight=\""
+        let (highlight_attr, include_highlight) = if let FormatterOption::HtmlInline {
+            include_highlight,
+            ..
+        } = &self.options.formatter
+        {
+            if *include_highlight {
+                (" data-highlight=\"", true)
+            } else {
+                ("", false)
+            }
         } else {
-            ""
+            ("", false)
+        };
+
+        let italic = if let FormatterOption::HtmlInline { italic, .. } = &self.options.formatter {
+            *italic
+        } else {
+            false
         };
 
         renderer
             .render(events, source.as_bytes(), &move |highlight, output| {
                 let scope = HIGHLIGHT_NAMES[highlight.0];
 
-                if self.options.include_highlight {
+                if include_highlight {
                     output.extend(highlight_attr.as_bytes());
                     output.extend(scope.as_bytes());
                     output.extend(b"\"");
                 }
 
                 if let Some(style) = self.options.theme.get_style(scope) {
-                    if self.options.include_highlight {
+                    if include_highlight {
                         output.extend(b" ");
                     }
 
                     output.extend(b"style=\"");
-                    output.extend(style.css(self.options.italic, " ").as_bytes());
+                    output.extend(style.css(italic, " ").as_bytes());
                     output.extend(b"\"");
                 }
             })
@@ -96,6 +115,15 @@ impl Formatter for HtmlInline<'_> {
     }
 }
 
+impl Default for HtmlInline<'_> {
+    fn default() -> Self {
+        Self {
+            lang: Language::PlainText,
+            options: Options::default(),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::themes;
@@ -104,7 +132,7 @@ mod tests {
 
     #[test]
     fn test_do_not_append_pre_style_if_missing_theme_style() {
-        let formatter = HtmlInline::new(Language::PlainText, Options::default());
+        let formatter = HtmlInline::default();
         let mut buffer = String::new();
         formatter.start(&mut buffer, "");
 
@@ -113,13 +141,12 @@ mod tests {
 
     #[test]
     fn test_include_pre_class() {
-        let formatter = HtmlInline::new(
-            Language::PlainText,
-            Options {
-                pre_class: Some("test-pre-class"),
-                ..Default::default()
-            },
-        );
+        let mut formatter = HtmlInline::default();
+        formatter.options.formatter = FormatterOption::HtmlInline {
+            pre_class: Some("test-pre-class"),
+            italic: false,
+            include_highlight: false,
+        };
         let mut buffer = String::new();
         formatter.start(&mut buffer, "");
 
@@ -130,14 +157,13 @@ mod tests {
 
     #[test]
     fn test_include_pre_class_with_theme() {
-        let formatter = HtmlInline::new(
-            Language::PlainText,
-            Options {
-                pre_class: Some("test-pre-class"),
-                theme: themes::get("github_light").expect("Theme not found"),
-                ..Default::default()
-            },
-        );
+        let mut formatter = HtmlInline::default();
+        formatter.options.formatter = FormatterOption::HtmlInline {
+            pre_class: Some("test-pre-class"),
+            italic: false,
+            include_highlight: false,
+        };
+        formatter.options.theme = themes::get("github_light").expect("Theme not found");
         let mut buffer = String::new();
         formatter.start(&mut buffer, "");
 
