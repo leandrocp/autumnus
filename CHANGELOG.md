@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- Theme path
+
 ## [0.1.3] - 2024-03-21
 
 ### Fixed

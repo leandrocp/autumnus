@@ -439,11 +439,11 @@ fn themes() {
     println!("cargo:rerun-if-changed=themes");
 
     let out_dir = env::var("OUT_DIR").unwrap();
+    let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
     let dest_path = Path::new(&out_dir).join("theme_data.rs");
+    let themes_dir = Path::new(&manifest_dir).join("themes");
 
-    let themes_dir = Path::new("themes");
-
-    let theme_names: Vec<String> = fs::read_dir(themes_dir)
+    let theme_names: Vec<String> = fs::read_dir(&themes_dir)
         .unwrap()
         .filter_map(|entry| {
             let entry = entry.ok()?;
@@ -458,7 +458,7 @@ fn themes() {
 
     let theme_constants = theme_names.iter().map(|name| {
         let constant_name = format_ident!("{}", name.to_uppercase());
-        let json_path = format!("../../../../../themes/{}.json", name);
+        let json_path = format!("{}/{}.json", themes_dir.display(), name);
 
         quote! {
             #[doc(hidden)]
