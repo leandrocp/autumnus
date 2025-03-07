@@ -134,9 +134,11 @@ gen-themes:
         echo "Operation cancelled."
         exit 0
     fi
-
+    
     find themes -type f -name "*.json" -delete
-    (cd themes && nvim --clean --headless -u init.lua -l extract_themes.lua)
+    cd themes
+    rm -rf nvim
+    nvim --clean --headless -u init.lua -l extract_themes.lua
 
 gen-css:
     #!/usr/bin/env bash
