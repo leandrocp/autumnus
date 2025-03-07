@@ -56,7 +56,7 @@
 //!     "ruby",
 //!     code,
 //!     Options {
-//!         formatter: FormatterOption::Terminal,
+//!         formatter: FormatterOption::Terminal { italic: false },
 //!         ..Options::default()
 //!     }
 //! );
@@ -328,7 +328,7 @@ pub struct Options<'a> {
     /// let options = Options {
     ///     formatter: FormatterOption::HtmlLinked {
     ///         pre_class: Some("my-code-block"),
-    ///         italic: true,
+    ///         italic: false,
     ///         include_highlight: true,
     ///     },
     ///     ..Options::default()
@@ -426,7 +426,7 @@ impl Default for Options<'_> {
 ///     "rust",
 ///     code,
 ///     Options {
-///         formatter: FormatterOption::HtmlLinked { pre_class: Some("my-code-block") },
+///         formatter: FormatterOption::HtmlLinked { pre_class: Some("my-code-block"), italic: false, include_highlight: false },
 ///         ..Options::default()
 ///     }
 /// );
@@ -471,7 +471,7 @@ impl Default for Options<'_> {
 ///     "rust",
 ///     code,
 ///     Options {
-///         formatter: FormatterOption::Terminal,
+///         formatter: FormatterOption::Terminal { italic: false },
 ///         ..Options::default()
 ///     }
 /// );
@@ -673,5 +673,17 @@ end
     fn test_fallback_to_plain_text() {
         let result = highlight("none", "source code", Options::default());
         assert!(result.as_str().contains("language-plaintext"));
+    }
+
+    #[test]
+    fn test_highlight_terminal() {
+        let options = Options {
+            theme: themes::get("dracula").expect("Theme not found"),
+            formatter: FormatterOption::Terminal { italic: false },
+        };
+        let code = "puts 'Hello from Ruby!'";
+        let ansi = highlight("ruby", code, options);
+
+        assert!(ansi.as_str().contains("[38;2;241;250;140mHello from Ruby!"));
     }
 }
