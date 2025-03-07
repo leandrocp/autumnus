@@ -640,16 +640,6 @@ local themes = {
 			opts = {},
 		},
 	},
-	-- {
-	-- 	name = "onedarkpro",
-	-- 	colorscheme = "onedark",
-	-- 	appearance = "dark",
-	-- 	plugin = {
-	-- 		"olimorris/onedarkpro.nvim",
-	-- 		name = "onedarkpro",
-	-- 		opts = {},
-	-- 	},
-	-- },
 	{
 		name = "onedarkpro_light",
 		colorscheme = "onelight",

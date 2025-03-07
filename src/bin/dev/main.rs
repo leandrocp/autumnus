@@ -59,8 +59,6 @@ fn gen_samples() -> Result<()> {
         "dracula",
         "everforest_dark",
         "everforest_light",
-        "flexoki_dark",
-        "flexoki_light",
         "github_dark",
         "github_light",
         "gruvbox_dark",
@@ -72,6 +70,9 @@ fn gen_samples() -> Result<()> {
         "monokai_pro_dark",
         "nightfox",
         "nord",
+        "onedark_dark",
+        "onedarkpro_dark",
+        "onedarkpro_light",
         "rosepine_dark",
         "rosepine_dawn",
         "solarized_autumn_dark",
@@ -137,7 +138,8 @@ fn gen_samples_entries(
                         pre_class: Some(
                             "w-full overflow-auto rounded-lg p-8 text-sm antialiased leading-6",
                         ),
-                        ..autumnus::FormatterOption::default()
+                        italic: false,
+                        include_highlight: false,
                     },
                     theme,
                     ..autumnus::Options::default()
