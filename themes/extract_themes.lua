@@ -381,15 +381,6 @@ local themes = {
 		},
 	},
 	-- {
-	-- 	name = "onedark_dark",
-	-- 	colorscheme = "onedark",
-	-- 	appearance = "dark",
-	-- 	plugin = {
-	-- 		"navarasu/onedark.nvim",
-	-- 		opts = { style = "dark" },
-	-- 	},
-	-- },
-	-- {
 	-- 	name = "onedark_darker",
 	-- 	colorscheme = "onedark",
 	-- 	appearance = "dark",
@@ -1230,8 +1221,6 @@ local function extract_colorscheme_colors(theme_def)
 
 	print(string.format("%s (colorscheme: %s, appearance: %s)", theme_name, colorscheme_name, appearance))
 
-	vim.cmd("colorscheme default")
-
 	local preserved_modules = {
 		"_G",
 		"bit",
@@ -1259,6 +1248,10 @@ local function extract_colorscheme_colors(theme_def)
 	end
 
 	vim.api.nvim_command("hi clear")
+	vim.g.colors_name = nil
+	if vim.fn.exists("syntax_on") then
+		vim.api.nvim_command("syntax reset")
+	end
 	vim.opt.termguicolors = true
 	vim.o.background = appearance
 
