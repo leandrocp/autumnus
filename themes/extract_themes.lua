@@ -8,7 +8,7 @@ local themes = {
 		colorscheme = "ayu-dark",
 		appearance = "dark",
 		plugin = {
-			"Shatur/neovim-ayu"
+			"Shatur/neovim-ayu",
 		},
 	},
 	{
@@ -16,7 +16,7 @@ local themes = {
 		colorscheme = "ayu-light",
 		appearance = "light",
 		plugin = {
-			"Shatur/neovim-ayu"
+			"Shatur/neovim-ayu",
 		},
 	},
 	{
@@ -24,7 +24,7 @@ local themes = {
 		colorscheme = "ayu-mirage",
 		appearance = "dark",
 		plugin = {
-			"Shatur/neovim-ayu"
+			"Shatur/neovim-ayu",
 		},
 	},
 	{
@@ -34,7 +34,7 @@ local themes = {
 		plugin = {
 			"AlexvZyl/nordic.nvim",
 			config = function()
-				require('nordic').load()
+				require("nordic").load()
 			end,
 		},
 	},
@@ -43,7 +43,7 @@ local themes = {
 		colorscheme = "melange",
 		appearance = "dark",
 		plugin = {
-			"savq/melange-nvim"
+			"savq/melange-nvim",
 		},
 	},
 	{
@@ -51,7 +51,7 @@ local themes = {
 		colorscheme = "melange",
 		appearance = "light",
 		plugin = {
-			"savq/melange-nvim"
+			"savq/melange-nvim",
 		},
 	},
 	{
@@ -452,7 +452,7 @@ local themes = {
 			config = function()
 				require("solarized").setup({
 					variant = "winter",
-					appearance = "dark"
+					appearance = "dark",
 				})
 			end,
 		},
@@ -466,7 +466,7 @@ local themes = {
 			config = function()
 				require("solarized").setup({
 					variant = "winter",
-					appearance = "light"
+					appearance = "light",
 				})
 			end,
 		},
@@ -480,7 +480,7 @@ local themes = {
 			config = function()
 				require("solarized").setup({
 					variant = "spring",
-					appearance = "dark"
+					appearance = "dark",
 				})
 			end,
 		},
@@ -494,7 +494,7 @@ local themes = {
 			config = function()
 				require("solarized").setup({
 					variant = "spring",
-					appearance = "light"
+					appearance = "light",
 				})
 			end,
 		},
@@ -508,7 +508,7 @@ local themes = {
 			config = function()
 				require("solarized").setup({
 					variant = "summer",
-					appearance = "dark"
+					appearance = "dark",
 				})
 			end,
 		},
@@ -522,7 +522,7 @@ local themes = {
 			config = function()
 				require("solarized").setup({
 					variant = "summer",
-					appearance = "light"
+					appearance = "light",
 				})
 			end,
 		},
@@ -536,7 +536,7 @@ local themes = {
 			config = function()
 				require("solarized").setup({
 					variant = "autumn",
-					appearance = "dark"
+					appearance = "dark",
 				})
 			end,
 		},
@@ -550,7 +550,7 @@ local themes = {
 			config = function()
 				require("solarized").setup({
 					variant = "autumn",
-					appearance = "light"
+					appearance = "light",
 				})
 			end,
 		},
@@ -958,7 +958,7 @@ local themes = {
 		plugin = {
 			"ribru17/bamboo.nvim",
 			config = function()
-				require('bamboo').setup({ style = 'light' })
+				require("bamboo").setup({ style = "light" })
 			end,
 		},
 	},
@@ -969,7 +969,7 @@ local themes = {
 		plugin = {
 			"ribru17/bamboo.nvim",
 			config = function()
-				require('bamboo').setup({ style = 'vulgaris' })
+				require("bamboo").setup({ style = "vulgaris" })
 			end,
 		},
 	},
@@ -980,7 +980,7 @@ local themes = {
 		plugin = {
 			"ribru17/bamboo.nvim",
 			config = function()
-				require('bamboo').setup({ style = 'multiplex' })
+				require("bamboo").setup({ style = "multiplex" })
 			end,
 		},
 	},
@@ -1075,7 +1075,7 @@ local themes = {
 			dependencies = { "rktjmp/lush.nvim" },
 			config = function()
 				require("bluloco").setup({
-					style = "dark"
+					style = "dark",
 				})
 			end,
 		},
@@ -1089,7 +1089,7 @@ local themes = {
 			dependencies = { "rktjmp/lush.nvim" },
 			config = function()
 				require("bluloco").setup({
-					style = "light"
+					style = "light",
 				})
 			end,
 		},
@@ -1258,7 +1258,7 @@ local function extract_colorscheme_colors(theme_def)
 		end
 	end
 
-	vim.api.nvim_command('hi clear')
+	vim.api.nvim_command("hi clear")
 	vim.opt.termguicolors = true
 	vim.o.background = appearance
 
