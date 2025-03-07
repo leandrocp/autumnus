@@ -555,81 +555,81 @@ local themes = {
 			end,
 		},
 	},
-	-- {
-	-- 	name = "material_darker",
-	-- 	colorscheme = "material-darker",
-	-- 	appearance = "dark",
-	-- 	plugin = {
-	-- 		"marko-cerovac/material.nvim",
-	-- 		config = function()
-	-- 			vim.g.material_style = "darker"
-	-- 			require("material").setup({})
-	-- 		end,
-	-- 	},
-	-- 	after = function()
-	-- 		vim.g.material_style = nil
-	-- 	end,
-	-- },
-	-- {
-	-- 	name = "material_lighter",
-	-- 	colorscheme = "material-lighter",
-	-- 	appearance = "light",
-	-- 	plugin = {
-	-- 		"marko-cerovac/material.nvim",
-	-- 		config = function()
-	-- 			vim.g.material_style = "lighter"
-	-- 			require("material").setup({})
-	-- 		end,
-	-- 	},
-	-- 	after = function()
-	-- 		vim.g.material_style = nil
-	-- 	end,
-	-- },
-	-- {
-	-- 	name = "material_oceanic",
-	-- 	colorscheme = "material-oceanic",
-	-- 	appearance = "dark",
-	-- 	plugin = {
-	-- 		"marko-cerovac/material.nvim",
-	-- 		config = function()
-	-- 			vim.g.material_style = "oceanic"
-	-- 			require("material").setup({})
-	-- 		end,
-	-- 	},
-	-- 	after = function()
-	-- 		vim.g.material_style = nil
-	-- 	end,
-	-- },
-	-- {
-	-- 	name = "material_palenight",
-	-- 	colorscheme = "material-palenight",
-	-- 	appearance = "dark",
-	-- 	plugin = {
-	-- 		"marko-cerovac/material.nvim",
-	-- 		config = function()
-	-- 			vim.g.material_style = "palenight"
-	-- 			require("material").setup({})
-	-- 		end,
-	-- 	},
-	-- 	after = function()
-	-- 		vim.g.material_style = nil
-	-- 	end,
-	-- },
-	-- {
-	-- 	name = "material_deep_ocean",
-	-- 	colorscheme = "material-deep-ocean",
-	-- 	appearance = "dark",
-	-- 	plugin = {
-	-- 		"marko-cerovac/material.nvim",
-	-- 		config = function()
-	-- 			vim.g.material_style = "deep ocean"
-	-- 			require("material").setup({})
-	-- 		end,
-	-- 	},
-	-- 	after = function()
-	-- 		vim.g.material_style = nil
-	-- 	end,
-	-- },
+	{
+		name = "material_darker",
+		colorscheme = "material-darker",
+		appearance = "dark",
+		plugin = {
+			"marko-cerovac/material.nvim",
+			config = function()
+				vim.g.material_style = "darker"
+				require("material").setup({})
+			end,
+		},
+		after = function()
+			vim.g.material_style = nil
+		end,
+	},
+	{
+		name = "material_lighter",
+		colorscheme = "material-lighter",
+		appearance = "light",
+		plugin = {
+			"marko-cerovac/material.nvim",
+			config = function()
+				vim.g.material_style = "lighter"
+				require("material").setup({})
+			end,
+		},
+		after = function()
+			vim.g.material_style = nil
+		end,
+	},
+	{
+		name = "material_oceanic",
+		colorscheme = "material-oceanic",
+		appearance = "dark",
+		plugin = {
+			"marko-cerovac/material.nvim",
+			config = function()
+				vim.g.material_style = "oceanic"
+				require("material").setup({})
+			end,
+		},
+		after = function()
+			vim.g.material_style = nil
+		end,
+	},
+	{
+		name = "material_palenight",
+		colorscheme = "material-palenight",
+		appearance = "dark",
+		plugin = {
+			"marko-cerovac/material.nvim",
+			config = function()
+				vim.g.material_style = "palenight"
+				require("material").setup({})
+			end,
+		},
+		after = function()
+			vim.g.material_style = nil
+		end,
+	},
+	{
+		name = "material_deep_ocean",
+		colorscheme = "material-deep-ocean",
+		appearance = "dark",
+		plugin = {
+			"marko-cerovac/material.nvim",
+			config = function()
+				vim.g.material_style = "deep ocean"
+				require("material").setup({})
+			end,
+		},
+		after = function()
+			vim.g.material_style = nil
+		end,
+	},
 	{
 		name = "nord",
 		colorscheme = "nord",

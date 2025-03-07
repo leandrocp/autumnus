@@ -65,6 +65,8 @@ fn gen_samples() -> Result<()> {
         "gruvbox_light",
         "kanagawa_lotus",
         "kanagawa_wave",
+        "material_oceanic",
+        "material_lighter",
         "melange_dark",
         "melange_light",
         "monokai_pro_dark",
