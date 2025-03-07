@@ -1,10 +1,10 @@
 # Changelog
 
-## Unreleased
+## [0.1.5] - 2025-03-07
 
 ### Added
-- `available_languages()`: Get a map of all supported languages with their details
-- `available_themes()`: Get a map of all available themes with their details
+- `languages::available_languages()`: Get a map of all supported languages with their details
+- `themes::available_themes()`: Get a list of all available themes
 
 ### Changed
 - Moved formatter-specific options (pre_class, italic, include_highlight) from `Options` to their respective formatter structs (`HtmlInline`, `HtmlLinked`, `Terminal`)
