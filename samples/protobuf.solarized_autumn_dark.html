@@ -24,7 +24,7 @@
 </span><span class="line" data-line="7"><span style="color: #586e75;">* Specifying Which Protocol Buffer Version To Use</span>
 </span><span class="line" data-line="8"><span style="color: #586e75;">* It can be usually proto3 or proto2</span>
 </span><span class="line" data-line="9"><span style="color: #586e75;">*/</span>
-</span><span class="line" data-line="10"><span style="color: #93a1a1; font-weight: bold;">syntax</span> <span style="color: #859900;">=</span> <span style="color: #6c71c4;">&quot;proto3&quot;</span><span style="color: #839496;">;</span>
+</span><span class="line" data-line="10"><span style="color: #859900;">syntax</span> <span style="color: #859900;">=</span> <span style="color: #6c71c4;">&quot;proto3&quot;</span><span style="color: #cb4b16;">;</span>
 </span><span class="line" data-line="11">
 </span><span class="line" data-line="12"><span style="color: #586e75;">/*</span>
 </span><span class="line" data-line="13"><span style="color: #586e75;">* Declaring Message In Protocol Buffer:</span>
@@ -55,80 +55,80 @@
 </span><span class="line" data-line="38"><span style="color: #586e75;">in the message definition</span>
 </span><span class="line" data-line="39"><span style="color: #586e75;">*/</span>
 </span><span class="line" data-line="40">
-</span><span class="line" data-line="41"><span style="color: #93a1a1; font-weight: bold;">message</span> <span style="color: #cb4b16;">MessageTypes</span> <span style="color: #839496;">&lbrace;</span>
+</span><span class="line" data-line="41"><span style="color: #859900;">message</span> <span style="color: #b58900;">MessageTypes</span> <span style="color: #cb4b16;">&lbrace;</span>
 </span><span class="line" data-line="42">    <span style="color: #586e75;">/*</span>
 </span><span class="line" data-line="43"><span style="color: #586e75;">    * Scalar Value Types</span>
 </span><span class="line" data-line="44"><span style="color: #586e75;">    */</span>
-</span><span class="line" data-line="45">    <span style="color: #cb4b16;">string</span> stringType <span style="color: #859900;">=</span> <span style="color: #6c71c4;">1</span><span style="color: #839496;">;</span> <span style="color: #586e75;">// A string must always contain UTF-8 encoded or 7-bit ASCII text. Default value = &quot;&quot;</span>
+</span><span class="line" data-line="45">    <span style="color: #b58900;">string</span> stringType <span style="color: #859900;">=</span> <span style="color: #d33682;">1</span><span style="color: #cb4b16;">;</span> <span style="color: #586e75;">// A string must always contain UTF-8 encoded or 7-bit ASCII text. Default value = &quot;&quot;</span>
 </span><span class="line" data-line="46">
 </span><span class="line" data-line="47">    <span style="color: #586e75;">// Number Types, Default Value = 0</span>
-</span><span class="line" data-line="48">    <span style="color: #cb4b16;">int32</span> int32Type <span style="color: #859900;">=</span> <span style="color: #6c71c4;">2</span><span style="color: #839496;">;</span> <span style="color: #586e75;">// Uses Variable Length Encoding. Inefficient For Negative Numbers, Instead Use sint32.</span>
-</span><span class="line" data-line="49">    <span style="color: #cb4b16;">int64</span> int64Type <span style="color: #859900;">=</span> <span style="color: #6c71c4;">3</span><span style="color: #839496;">;</span> <span style="color: #586e75;">// Uses Variable Length Encoding. Inefficient For Negative Numbers, Instead Use sint64.</span>
-</span><span class="line" data-line="50">    <span style="color: #cb4b16;">uint32</span> uInt32Type <span style="color: #859900;">=</span> <span style="color: #6c71c4;">4</span><span style="color: #839496;">;</span> <span style="color: #586e75;">// Uses Variable Length Encoding</span>
-</span><span class="line" data-line="51">    <span style="color: #cb4b16;">uint64</span> uInt64Type <span style="color: #859900;">=</span> <span style="color: #6c71c4;">5</span><span style="color: #839496;">;</span> <span style="color: #586e75;">// Uses Variable Length Encoding</span>
-</span><span class="line" data-line="52">    <span style="color: #cb4b16;">sint32</span> sInt32Type <span style="color: #859900;">=</span> <span style="color: #6c71c4;">6</span><span style="color: #839496;">;</span> <span style="color: #586e75;">// Uses Variable Length Encoding. They are efficient in encoding for negative numbers.</span>
+</span><span class="line" data-line="48">    <span style="color: #b58900;">int32</span> int32Type <span style="color: #859900;">=</span> <span style="color: #d33682;">2</span><span style="color: #cb4b16;">;</span> <span style="color: #586e75;">// Uses Variable Length Encoding. Inefficient For Negative Numbers, Instead Use sint32.</span>
+</span><span class="line" data-line="49">    <span style="color: #b58900;">int64</span> int64Type <span style="color: #859900;">=</span> <span style="color: #d33682;">3</span><span style="color: #cb4b16;">;</span> <span style="color: #586e75;">// Uses Variable Length Encoding. Inefficient For Negative Numbers, Instead Use sint64.</span>
+</span><span class="line" data-line="50">    <span style="color: #b58900;">uint32</span> uInt32Type <span style="color: #859900;">=</span> <span style="color: #d33682;">4</span><span style="color: #cb4b16;">;</span> <span style="color: #586e75;">// Uses Variable Length Encoding</span>
+</span><span class="line" data-line="51">    <span style="color: #b58900;">uint64</span> uInt64Type <span style="color: #859900;">=</span> <span style="color: #d33682;">5</span><span style="color: #cb4b16;">;</span> <span style="color: #586e75;">// Uses Variable Length Encoding</span>
+</span><span class="line" data-line="52">    <span style="color: #b58900;">sint32</span> sInt32Type <span style="color: #859900;">=</span> <span style="color: #d33682;">6</span><span style="color: #cb4b16;">;</span> <span style="color: #586e75;">// Uses Variable Length Encoding. They are efficient in encoding for negative numbers.</span>
 </span><span class="line" data-line="53">                           <span style="color: #586e75;">// Use this instead of int32 for negative numbers</span>
-</span><span class="line" data-line="54">    <span style="color: #cb4b16;">sint64</span> sInt64Type <span style="color: #859900;">=</span> <span style="color: #6c71c4;">7</span><span style="color: #839496;">;</span> <span style="color: #586e75;">// Uses Variable Length Encoding. They are efficient in encoding for negative numbers.</span>
+</span><span class="line" data-line="54">    <span style="color: #b58900;">sint64</span> sInt64Type <span style="color: #859900;">=</span> <span style="color: #d33682;">7</span><span style="color: #cb4b16;">;</span> <span style="color: #586e75;">// Uses Variable Length Encoding. They are efficient in encoding for negative numbers.</span>
 </span><span class="line" data-line="55">    <span style="color: #586e75;">// Use this instead of int64 for negative numbers.</span>
 </span><span class="line" data-line="56">
-</span><span class="line" data-line="57">    <span style="color: #cb4b16;">fixed32</span> fixed32Type <span style="color: #859900;">=</span> <span style="color: #6c71c4;">8</span><span style="color: #839496;">;</span> <span style="color: #586e75;">// Always four bytes. More efficient than uint32 if values are often greater than 2^28.</span>
-</span><span class="line" data-line="58">    <span style="color: #cb4b16;">fixed64</span> fixed64Type <span style="color: #859900;">=</span> <span style="color: #6c71c4;">9</span><span style="color: #839496;">;</span> <span style="color: #586e75;">// Always eight bytes. More efficient than uint64 if values are often greater than 2^56</span>
+</span><span class="line" data-line="57">    <span style="color: #b58900;">fixed32</span> fixed32Type <span style="color: #859900;">=</span> <span style="color: #d33682;">8</span><span style="color: #cb4b16;">;</span> <span style="color: #586e75;">// Always four bytes. More efficient than uint32 if values are often greater than 2^28.</span>
+</span><span class="line" data-line="58">    <span style="color: #b58900;">fixed64</span> fixed64Type <span style="color: #859900;">=</span> <span style="color: #d33682;">9</span><span style="color: #cb4b16;">;</span> <span style="color: #586e75;">// Always eight bytes. More efficient than uint64 if values are often greater than 2^56</span>
 </span><span class="line" data-line="59">
-</span><span class="line" data-line="60">    <span style="color: #cb4b16;">sfixed32</span> sfixed32Type <span style="color: #859900;">=</span> <span style="color: #6c71c4;">10</span><span style="color: #839496;">;</span> <span style="color: #586e75;">// Always four bytes.</span>
-</span><span class="line" data-line="61">    <span style="color: #cb4b16;">sfixed64</span> sfixed64Type <span style="color: #859900;">=</span> <span style="color: #6c71c4;">11</span><span style="color: #839496;">;</span> <span style="color: #586e75;">// Always Eight bytes.</span>
+</span><span class="line" data-line="60">    <span style="color: #b58900;">sfixed32</span> sfixed32Type <span style="color: #859900;">=</span> <span style="color: #d33682;">10</span><span style="color: #cb4b16;">;</span> <span style="color: #586e75;">// Always four bytes.</span>
+</span><span class="line" data-line="61">    <span style="color: #b58900;">sfixed64</span> sfixed64Type <span style="color: #859900;">=</span> <span style="color: #d33682;">11</span><span style="color: #cb4b16;">;</span> <span style="color: #586e75;">// Always Eight bytes.</span>
 </span><span class="line" data-line="62">
-</span><span class="line" data-line="63">    <span style="color: #cb4b16;">bool</span> boolType <span style="color: #859900;">=</span> <span style="color: #6c71c4;">12</span><span style="color: #839496;">;</span> <span style="color: #586e75;">// Boolean Type. Default Value = false</span>
+</span><span class="line" data-line="63">    <span style="color: #b58900;">bool</span> boolType <span style="color: #859900;">=</span> <span style="color: #d33682;">12</span><span style="color: #cb4b16;">;</span> <span style="color: #586e75;">// Boolean Type. Default Value = false</span>
 </span><span class="line" data-line="64">
-</span><span class="line" data-line="65">    <span style="color: #cb4b16;">bytes</span> bytesType <span style="color: #859900;">=</span> <span style="color: #6c71c4;">13</span><span style="color: #839496;">;</span> <span style="color: #586e75;">// May contain any arbitrary sequence of bytes. Default Value = Empty Bytes</span>
+</span><span class="line" data-line="65">    <span style="color: #b58900;">bytes</span> bytesType <span style="color: #859900;">=</span> <span style="color: #d33682;">13</span><span style="color: #cb4b16;">;</span> <span style="color: #586e75;">// May contain any arbitrary sequence of bytes. Default Value = Empty Bytes</span>
 </span><span class="line" data-line="66">
-</span><span class="line" data-line="67">    <span style="color: #cb4b16;">double</span> doubleType <span style="color: #859900;">=</span> <span style="color: #6c71c4;">14</span><span style="color: #839496;">;</span>
-</span><span class="line" data-line="68">    <span style="color: #cb4b16;">float</span> floatType <span style="color: #859900;">=</span> <span style="color: #6c71c4;">15</span><span style="color: #839496;">;</span>
+</span><span class="line" data-line="67">    <span style="color: #b58900;">double</span> doubleType <span style="color: #859900;">=</span> <span style="color: #d33682;">14</span><span style="color: #cb4b16;">;</span>
+</span><span class="line" data-line="68">    <span style="color: #b58900;">float</span> floatType <span style="color: #859900;">=</span> <span style="color: #d33682;">15</span><span style="color: #cb4b16;">;</span>
 </span><span class="line" data-line="69">
-</span><span class="line" data-line="70">    <span style="color: #93a1a1; font-weight: bold;">enum</span> <span style="color: #cb4b16;">Week</span> <span style="color: #839496;">&lbrace;</span>
-</span><span class="line" data-line="71">        <span style="color: #6c71c4;">UNDEFINED</span> <span style="color: #859900;">=</span> <span style="color: #6c71c4;">0</span><span style="color: #839496;">;</span> <span style="color: #586e75;">// Tag 0 is always used as default in case of enum</span>
-</span><span class="line" data-line="72">        <span style="color: #6c71c4;">SUNDAY</span> <span style="color: #859900;">=</span> <span style="color: #6c71c4;">1</span><span style="color: #839496;">;</span>
-</span><span class="line" data-line="73">        <span style="color: #6c71c4;">MONDAY</span> <span style="color: #859900;">=</span> <span style="color: #6c71c4;">2</span><span style="color: #839496;">;</span>
-</span><span class="line" data-line="74">        <span style="color: #6c71c4;">TUESDAY</span> <span style="color: #859900;">=</span> <span style="color: #6c71c4;">3</span><span style="color: #839496;">;</span>
-</span><span class="line" data-line="75">        <span style="color: #6c71c4;">WEDNESDAY</span> <span style="color: #859900;">=</span> <span style="color: #6c71c4;">4</span><span style="color: #839496;">;</span>
-</span><span class="line" data-line="76">        <span style="color: #6c71c4;">THURSDAY</span> <span style="color: #859900;">=</span> <span style="color: #6c71c4;">5</span><span style="color: #839496;">;</span>
-</span><span class="line" data-line="77">        <span style="color: #6c71c4;">FRIDAY</span> <span style="color: #859900;">=</span> <span style="color: #6c71c4;">6</span><span style="color: #839496;">;</span>
-</span><span class="line" data-line="78">        <span style="color: #6c71c4;">SATURDAY</span> <span style="color: #859900;">=</span> <span style="color: #6c71c4;">7</span><span style="color: #839496;">;</span>
-</span><span class="line" data-line="79">    <span style="color: #839496;">&rbrace;</span>
-</span><span class="line" data-line="80">    <span style="color: #cb4b16;"><span style="color: #cb4b16;">Week</span></span> wkDayType <span style="color: #859900;">=</span> <span style="color: #6c71c4;">16</span><span style="color: #839496;">;</span>
+</span><span class="line" data-line="70">    <span style="color: #859900;">enum</span> <span style="color: #b58900;">Week</span> <span style="color: #cb4b16;">&lbrace;</span>
+</span><span class="line" data-line="71">        <span style="color: #6c71c4;">UNDEFINED</span> <span style="color: #859900;">=</span> <span style="color: #d33682;">0</span><span style="color: #cb4b16;">;</span> <span style="color: #586e75;">// Tag 0 is always used as default in case of enum</span>
+</span><span class="line" data-line="72">        <span style="color: #6c71c4;">SUNDAY</span> <span style="color: #859900;">=</span> <span style="color: #d33682;">1</span><span style="color: #cb4b16;">;</span>
+</span><span class="line" data-line="73">        <span style="color: #6c71c4;">MONDAY</span> <span style="color: #859900;">=</span> <span style="color: #d33682;">2</span><span style="color: #cb4b16;">;</span>
+</span><span class="line" data-line="74">        <span style="color: #6c71c4;">TUESDAY</span> <span style="color: #859900;">=</span> <span style="color: #d33682;">3</span><span style="color: #cb4b16;">;</span>
+</span><span class="line" data-line="75">        <span style="color: #6c71c4;">WEDNESDAY</span> <span style="color: #859900;">=</span> <span style="color: #d33682;">4</span><span style="color: #cb4b16;">;</span>
+</span><span class="line" data-line="76">        <span style="color: #6c71c4;">THURSDAY</span> <span style="color: #859900;">=</span> <span style="color: #d33682;">5</span><span style="color: #cb4b16;">;</span>
+</span><span class="line" data-line="77">        <span style="color: #6c71c4;">FRIDAY</span> <span style="color: #859900;">=</span> <span style="color: #d33682;">6</span><span style="color: #cb4b16;">;</span>
+</span><span class="line" data-line="78">        <span style="color: #6c71c4;">SATURDAY</span> <span style="color: #859900;">=</span> <span style="color: #d33682;">7</span><span style="color: #cb4b16;">;</span>
+</span><span class="line" data-line="79">    <span style="color: #cb4b16;">&rbrace;</span>
+</span><span class="line" data-line="80">    <span style="color: #b58900;"><span style="color: #b58900;">Week</span></span> wkDayType <span style="color: #859900;">=</span> <span style="color: #d33682;">16</span><span style="color: #cb4b16;">;</span>
 </span><span class="line" data-line="81">
 </span><span class="line" data-line="82">    <span style="color: #586e75;">/*</span>
 </span><span class="line" data-line="83"><span style="color: #586e75;">    * Defining Collection Of Scalar Value Type</span>
 </span><span class="line" data-line="84"><span style="color: #586e75;">    * Syntax: repeated $&lbrace;ScalarType&rbrace; $&lbrace;name&rbrace; = TagValue</span>
 </span><span class="line" data-line="85"><span style="color: #586e75;">    */</span>
-</span><span class="line" data-line="86">    <span style="color: #93a1a1; font-weight: bold;">repeated</span> <span style="color: #cb4b16;">string</span> listOfString <span style="color: #859900;">=</span> <span style="color: #6c71c4;">17</span><span style="color: #839496;">;</span> <span style="color: #586e75;">// List[String]</span>
-</span><span class="line" data-line="87"><span style="color: #839496;">&rbrace;</span>
+</span><span class="line" data-line="86">    <span style="color: #859900;">repeated</span> <span style="color: #b58900;">string</span> listOfString <span style="color: #859900;">=</span> <span style="color: #d33682;">17</span><span style="color: #cb4b16;">;</span> <span style="color: #586e75;">// List[String]</span>
+</span><span class="line" data-line="87"><span style="color: #cb4b16;">&rbrace;</span>
 </span><span class="line" data-line="88">
 </span><span class="line" data-line="89"><span style="color: #586e75;">/*</span>
 </span><span class="line" data-line="90"><span style="color: #586e75;">* Defining Defined Message Types In Other Message Definition</span>
 </span><span class="line" data-line="91"><span style="color: #586e75;">*/</span>
-</span><span class="line" data-line="92"><span style="color: #93a1a1; font-weight: bold;">message</span> <span style="color: #cb4b16;">Person</span> <span style="color: #839496;">&lbrace;</span>
-</span><span class="line" data-line="93">    <span style="color: #cb4b16;">string</span> fname <span style="color: #859900;">=</span> <span style="color: #6c71c4;">1</span><span style="color: #839496;">;</span>
-</span><span class="line" data-line="94">    <span style="color: #cb4b16;">string</span> sname <span style="color: #859900;">=</span> <span style="color: #6c71c4;">2</span><span style="color: #839496;">;</span>
-</span><span class="line" data-line="95"><span style="color: #839496;">&rbrace;</span>
+</span><span class="line" data-line="92"><span style="color: #859900;">message</span> <span style="color: #b58900;">Person</span> <span style="color: #cb4b16;">&lbrace;</span>
+</span><span class="line" data-line="93">    <span style="color: #b58900;">string</span> fname <span style="color: #859900;">=</span> <span style="color: #d33682;">1</span><span style="color: #cb4b16;">;</span>
+</span><span class="line" data-line="94">    <span style="color: #b58900;">string</span> sname <span style="color: #859900;">=</span> <span style="color: #d33682;">2</span><span style="color: #cb4b16;">;</span>
+</span><span class="line" data-line="95"><span style="color: #cb4b16;">&rbrace;</span>
 </span><span class="line" data-line="96">
-</span><span class="line" data-line="97"><span style="color: #93a1a1; font-weight: bold;">message</span> <span style="color: #cb4b16;">City</span> <span style="color: #839496;">&lbrace;</span>
-</span><span class="line" data-line="98">    <span style="color: #cb4b16;"><span style="color: #cb4b16;">Person</span></span> p <span style="color: #859900;">=</span> <span style="color: #6c71c4;">1</span><span style="color: #839496;">;</span>
-</span><span class="line" data-line="99"><span style="color: #839496;">&rbrace;</span>
+</span><span class="line" data-line="97"><span style="color: #859900;">message</span> <span style="color: #b58900;">City</span> <span style="color: #cb4b16;">&lbrace;</span>
+</span><span class="line" data-line="98">    <span style="color: #b58900;"><span style="color: #b58900;">Person</span></span> p <span style="color: #859900;">=</span> <span style="color: #d33682;">1</span><span style="color: #cb4b16;">;</span>
+</span><span class="line" data-line="99"><span style="color: #cb4b16;">&rbrace;</span>
 </span><span class="line" data-line="100">
 </span><span class="line" data-line="101"><span style="color: #586e75;">/*</span>
 </span><span class="line" data-line="102"><span style="color: #586e75;">* Nested Message Definitions</span>
 </span><span class="line" data-line="103"><span style="color: #586e75;">*/</span>
 </span><span class="line" data-line="104">
-</span><span class="line" data-line="105"><span style="color: #93a1a1; font-weight: bold;">message</span> <span style="color: #cb4b16;">NestedMessages</span> <span style="color: #839496;">&lbrace;</span>
-</span><span class="line" data-line="106">    <span style="color: #93a1a1; font-weight: bold;">message</span> <span style="color: #cb4b16;">FirstLevelNestedMessage</span> <span style="color: #839496;">&lbrace;</span>
-</span><span class="line" data-line="107">        <span style="color: #cb4b16;">string</span> firstString <span style="color: #859900;">=</span> <span style="color: #6c71c4;">1</span><span style="color: #839496;">;</span>
-</span><span class="line" data-line="108">        <span style="color: #93a1a1; font-weight: bold;">message</span> <span style="color: #cb4b16;">SecondLevelNestedMessage</span> <span style="color: #839496;">&lbrace;</span>
-</span><span class="line" data-line="109">            <span style="color: #cb4b16;">string</span> secondString <span style="color: #859900;">=</span> <span style="color: #6c71c4;">2</span><span style="color: #839496;">;</span>
-</span><span class="line" data-line="110">        <span style="color: #839496;">&rbrace;</span>
-</span><span class="line" data-line="111">    <span style="color: #839496;">&rbrace;</span>
-</span><span class="line" data-line="112">    <span style="color: #cb4b16;"><span style="color: #cb4b16;">FirstLevelNestedMessage</span></span> msg <span style="color: #859900;">=</span> <span style="color: #6c71c4;">1</span><span style="color: #839496;">;</span>
-</span><span class="line" data-line="113">    <span style="color: #cb4b16;"><span style="color: #cb4b16;">FirstLevelNestedMessage.SecondLevelNestedMessage</span></span> msg2 <span style="color: #859900;">=</span> <span style="color: #6c71c4;">2</span><span style="color: #839496;">;</span>
-</span><span class="line" data-line="114"><span style="color: #839496;">&rbrace;</span>
+</span><span class="line" data-line="105"><span style="color: #859900;">message</span> <span style="color: #b58900;">NestedMessages</span> <span style="color: #cb4b16;">&lbrace;</span>
+</span><span class="line" data-line="106">    <span style="color: #859900;">message</span> <span style="color: #b58900;">FirstLevelNestedMessage</span> <span style="color: #cb4b16;">&lbrace;</span>
+</span><span class="line" data-line="107">        <span style="color: #b58900;">string</span> firstString <span style="color: #859900;">=</span> <span style="color: #d33682;">1</span><span style="color: #cb4b16;">;</span>
+</span><span class="line" data-line="108">        <span style="color: #859900;">message</span> <span style="color: #b58900;">SecondLevelNestedMessage</span> <span style="color: #cb4b16;">&lbrace;</span>
+</span><span class="line" data-line="109">            <span style="color: #b58900;">string</span> secondString <span style="color: #859900;">=</span> <span style="color: #d33682;">2</span><span style="color: #cb4b16;">;</span>
+</span><span class="line" data-line="110">        <span style="color: #cb4b16;">&rbrace;</span>
+</span><span class="line" data-line="111">    <span style="color: #cb4b16;">&rbrace;</span>
+</span><span class="line" data-line="112">    <span style="color: #b58900;"><span style="color: #b58900;">FirstLevelNestedMessage</span></span> msg <span style="color: #859900;">=</span> <span style="color: #d33682;">1</span><span style="color: #cb4b16;">;</span>
+</span><span class="line" data-line="113">    <span style="color: #b58900;"><span style="color: #b58900;">FirstLevelNestedMessage.SecondLevelNestedMessage</span></span> msg2 <span style="color: #859900;">=</span> <span style="color: #d33682;">2</span><span style="color: #cb4b16;">;</span>
+</span><span class="line" data-line="114"><span style="color: #cb4b16;">&rbrace;</span>
 </span><span class="line" data-line="115">
 </span><span class="line" data-line="116"><span style="color: #586e75;">/*</span>
 </span><span class="line" data-line="117"><span style="color: #586e75;">* Importing Message From A File</span>
@@ -164,10 +164,10 @@
 </span><span class="line" data-line="147"><span style="color: #586e75;">*/</span>
 </span><span class="line" data-line="148">
 </span><span class="line" data-line="149">
-</span><span class="line" data-line="150"><span style="color: #93a1a1; font-weight: bold;">message</span> <span style="color: #cb4b16;">ReservedMessage</span> <span style="color: #839496;">&lbrace;</span>
-</span><span class="line" data-line="151">    <span style="color: #93a1a1; font-weight: bold;">reserved</span> <span style="color: #6c71c4;">0</span><span style="color: #839496;">,</span> <span style="color: #6c71c4;">1</span><span style="color: #839496;">,</span> <span style="color: #6c71c4;">2</span><span style="color: #839496;">,</span> <span style="color: #6c71c4;">3</span> <span style="color: #93a1a1; font-weight: bold;">to</span> <span style="color: #6c71c4;">10</span><span style="color: #839496;">;</span> <span style="color: #586e75;">// Set Of Tag Numbers Which Can&#39;t be reused.</span>
-</span><span class="line" data-line="152">    <span style="color: #93a1a1; font-weight: bold;">reserved</span> &quot;firstMsg&quot;<span style="color: #839496;">,</span> &quot;secondMsg&quot;<span style="color: #839496;">,</span> &quot;thirdMsg&quot;<span style="color: #839496;">;</span> <span style="color: #586e75;">// Set Of Labels Which Can&#39;t Be reused.</span>
-</span><span class="line" data-line="153"><span style="color: #839496;">&rbrace;</span>
+</span><span class="line" data-line="150"><span style="color: #859900;">message</span> <span style="color: #b58900;">ReservedMessage</span> <span style="color: #cb4b16;">&lbrace;</span>
+</span><span class="line" data-line="151">    <span style="color: #859900;">reserved</span> <span style="color: #d33682;">0</span><span style="color: #cb4b16;">,</span> <span style="color: #d33682;">1</span><span style="color: #cb4b16;">,</span> <span style="color: #d33682;">2</span><span style="color: #cb4b16;">,</span> <span style="color: #d33682;">3</span> <span style="color: #859900;">to</span> <span style="color: #d33682;">10</span><span style="color: #cb4b16;">;</span> <span style="color: #586e75;">// Set Of Tag Numbers Which Can&#39;t be reused.</span>
+</span><span class="line" data-line="152">    <span style="color: #859900;">reserved</span> &quot;firstMsg&quot;<span style="color: #cb4b16;">,</span> &quot;secondMsg&quot;<span style="color: #cb4b16;">,</span> &quot;thirdMsg&quot;<span style="color: #cb4b16;">;</span> <span style="color: #586e75;">// Set Of Labels Which Can&#39;t Be reused.</span>
+</span><span class="line" data-line="153"><span style="color: #cb4b16;">&rbrace;</span>
 </span><span class="line" data-line="154">
 </span><span class="line" data-line="155"><span style="color: #586e75;">/*</span>
 </span><span class="line" data-line="156"><span style="color: #586e75;">* Any</span>
@@ -191,12 +191,12 @@
 </span><span class="line" data-line="174"><span style="color: #586e75;">* Note: OneOf messages can&#39;t be repeated.</span>
 </span><span class="line" data-line="175"><span style="color: #586e75;">*/</span>
 </span><span class="line" data-line="176">
-</span><span class="line" data-line="177"><span style="color: #93a1a1; font-weight: bold;">message</span> <span style="color: #cb4b16;">OneOfMessage</span> <span style="color: #839496;">&lbrace;</span>
-</span><span class="line" data-line="178">    <span style="color: #93a1a1; font-weight: bold;">oneof</span> msg <span style="color: #839496;">&lbrace;</span>
-</span><span class="line" data-line="179">        <span style="color: #cb4b16;">string</span> fname <span style="color: #859900;">=</span> <span style="color: #6c71c4;">1</span><span style="color: #839496;">;</span>
-</span><span class="line" data-line="180">        <span style="color: #cb4b16;">string</span> sname <span style="color: #859900;">=</span> <span style="color: #6c71c4;">2</span><span style="color: #839496;">;</span>
-</span><span class="line" data-line="181">    <span style="color: #839496;">&rbrace;</span><span style="color: #839496;">;</span>
-</span><span class="line" data-line="182"><span style="color: #839496;">&rbrace;</span>
+</span><span class="line" data-line="177"><span style="color: #859900;">message</span> <span style="color: #b58900;">OneOfMessage</span> <span style="color: #cb4b16;">&lbrace;</span>
+</span><span class="line" data-line="178">    <span style="color: #859900;">oneof</span> msg <span style="color: #cb4b16;">&lbrace;</span>
+</span><span class="line" data-line="179">        <span style="color: #b58900;">string</span> fname <span style="color: #859900;">=</span> <span style="color: #d33682;">1</span><span style="color: #cb4b16;">;</span>
+</span><span class="line" data-line="180">        <span style="color: #b58900;">string</span> sname <span style="color: #859900;">=</span> <span style="color: #d33682;">2</span><span style="color: #cb4b16;">;</span>
+</span><span class="line" data-line="181">    <span style="color: #cb4b16;">&rbrace;</span><span style="color: #cb4b16;">;</span>
+</span><span class="line" data-line="182"><span style="color: #cb4b16;">&rbrace;</span>
 </span><span class="line" data-line="183">
 </span><span class="line" data-line="184"><span style="color: #586e75;">/*</span>
 </span><span class="line" data-line="185"><span style="color: #586e75;">* Maps</span>
@@ -204,9 +204,9 @@
 </span><span class="line" data-line="187"><span style="color: #586e75;">* Ordering Of A Map Is Not Guaranteed.</span>
 </span><span class="line" data-line="188"><span style="color: #586e75;">*/</span>
 </span><span class="line" data-line="189">
-</span><span class="line" data-line="190"><span style="color: #93a1a1; font-weight: bold;">message</span> <span style="color: #cb4b16;">MessageWithMaps</span> <span style="color: #839496;">&lbrace;</span>
-</span><span class="line" data-line="191">    map<span style="color: #839496;">&lt;</span><span style="color: #cb4b16;">string</span><span style="color: #839496;">,</span> <span style="color: #cb4b16;">string</span><span style="color: #839496;">&gt;</span> mapOfMessages <span style="color: #859900;">=</span> <span style="color: #6c71c4;">1</span><span style="color: #839496;">;</span>
-</span><span class="line" data-line="192"><span style="color: #839496;">&rbrace;</span>
+</span><span class="line" data-line="190"><span style="color: #859900;">message</span> <span style="color: #b58900;">MessageWithMaps</span> <span style="color: #cb4b16;">&lbrace;</span>
+</span><span class="line" data-line="191">    map<span style="color: #cb4b16;">&lt;</span><span style="color: #b58900;">string</span><span style="color: #cb4b16;">,</span> <span style="color: #b58900;">string</span><span style="color: #cb4b16;">&gt;</span> mapOfMessages <span style="color: #859900;">=</span> <span style="color: #d33682;">1</span><span style="color: #cb4b16;">;</span>
+</span><span class="line" data-line="192"><span style="color: #cb4b16;">&rbrace;</span>
 </span><span class="line" data-line="193">
 </span><span class="line" data-line="194">
 </span><span class="line" data-line="195"><span style="color: #586e75;">/*</span>
@@ -225,16 +225,16 @@
 </span><span class="line" data-line="208"><span style="color: #586e75;">*  When protoc compiler generates for various languages it generates stub methods for the services.</span>
 </span><span class="line" data-line="209"><span style="color: #586e75;">*/</span>
 </span><span class="line" data-line="210">
-</span><span class="line" data-line="211"><span style="color: #93a1a1; font-weight: bold;">message</span> <span style="color: #cb4b16;">SearchRequest</span> <span style="color: #839496;">&lbrace;</span>
-</span><span class="line" data-line="212">    <span style="color: #cb4b16;">string</span> queryString <span style="color: #859900;">=</span> <span style="color: #6c71c4;">1</span><span style="color: #839496;">;</span>
-</span><span class="line" data-line="213"><span style="color: #839496;">&rbrace;</span>
+</span><span class="line" data-line="211"><span style="color: #859900;">message</span> <span style="color: #b58900;">SearchRequest</span> <span style="color: #cb4b16;">&lbrace;</span>
+</span><span class="line" data-line="212">    <span style="color: #b58900;">string</span> queryString <span style="color: #859900;">=</span> <span style="color: #d33682;">1</span><span style="color: #cb4b16;">;</span>
+</span><span class="line" data-line="213"><span style="color: #cb4b16;">&rbrace;</span>
 </span><span class="line" data-line="214">
-</span><span class="line" data-line="215"><span style="color: #93a1a1; font-weight: bold;">message</span> <span style="color: #cb4b16;">SearchResponse</span> <span style="color: #839496;">&lbrace;</span>
-</span><span class="line" data-line="216">    <span style="color: #cb4b16;">string</span> queryResponse <span style="color: #859900;">=</span> <span style="color: #6c71c4;">1</span><span style="color: #839496;">;</span>
-</span><span class="line" data-line="217"><span style="color: #839496;">&rbrace;</span>
-</span><span class="line" data-line="218"><span style="color: #93a1a1; font-weight: bold;">service</span> <span style="color: #cb4b16;">SearchService</span> <span style="color: #839496;">&lbrace;</span>
-</span><span class="line" data-line="219">    <span style="color: #93a1a1; font-weight: bold;">rpc</span> <span style="color: #cb4b16;">Search</span> <span style="color: #839496;">(</span><span style="color: #cb4b16;">SearchRequest</span><span style="color: #839496;">)</span> <span style="color: #859900;">returns</span> <span style="color: #839496;">(</span><span style="color: #cb4b16;">SearchResponse</span><span style="color: #839496;">)</span><span style="color: #839496;">;</span>
-</span><span class="line" data-line="220"><span style="color: #839496;">&rbrace;</span>
+</span><span class="line" data-line="215"><span style="color: #859900;">message</span> <span style="color: #b58900;">SearchResponse</span> <span style="color: #cb4b16;">&lbrace;</span>
+</span><span class="line" data-line="216">    <span style="color: #b58900;">string</span> queryResponse <span style="color: #859900;">=</span> <span style="color: #d33682;">1</span><span style="color: #cb4b16;">;</span>
+</span><span class="line" data-line="217"><span style="color: #cb4b16;">&rbrace;</span>
+</span><span class="line" data-line="218"><span style="color: #859900;">service</span> <span style="color: #b58900;">SearchService</span> <span style="color: #cb4b16;">&lbrace;</span>
+</span><span class="line" data-line="219">    <span style="color: #859900;">rpc</span> <span style="color: #b58900;">Search</span> <span style="color: #cb4b16;">(</span><span style="color: #b58900;">SearchRequest</span><span style="color: #cb4b16;">)</span> <span style="color: #859900;">returns</span> <span style="color: #cb4b16;">(</span><span style="color: #b58900;">SearchResponse</span><span style="color: #cb4b16;">)</span><span style="color: #cb4b16;">;</span>
+</span><span class="line" data-line="220"><span style="color: #cb4b16;">&rbrace;</span>
 </span></code></pre>
 </body>
 </html>

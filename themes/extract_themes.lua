@@ -353,72 +353,6 @@ local themes = {
 		},
 	},
 	{
-		name = "onedark_darker",
-		colorscheme = "onedark",
-		appearance = "dark",
-		plugin = {
-			"navarasu/onedark.nvim",
-		},
-		before = function()
-			require("onedark").setup({ style = "darker" })
-		end,
-	},
-	{
-		name = "onedark_cool",
-		colorscheme = "onedark",
-		appearance = "dark",
-		plugin = {
-			"navarasu/onedark.nvim",
-		},
-		before = function()
-			require("onedark").setup({ style = "cool" })
-		end,
-	},
-	{
-		name = "onedark_deep",
-		colorscheme = "onedark",
-		appearance = "dark",
-		plugin = {
-			"navarasu/onedark.nvim",
-		},
-		before = function()
-			require("onedark").setup({ style = "deep" })
-		end,
-	},
-	{
-		name = "onedark_warm",
-		colorscheme = "onedark",
-		appearance = "dark",
-		plugin = {
-			"navarasu/onedark.nvim",
-		},
-		before = function()
-			require("onedark").setup({ style = "warm" })
-		end,
-	},
-	{
-		name = "onedark_warmer",
-		colorscheme = "onedark",
-		appearance = "dark",
-		plugin = {
-			"navarasu/onedark.nvim",
-		},
-		before = function()
-			require("onedark").setup({ style = "warmer" })
-		end,
-	},
-	{
-		name = "onedark_light",
-		colorscheme = "onedark",
-		appearance = "light",
-		plugin = {
-			"navarasu/onedark.nvim",
-		},
-		before = function()
-			require("onedark").setup({ style = "light" })
-		end,
-	},
-	{
 		name = "solarized_winter_dark",
 		colorscheme = "solarized",
 		appearance = "dark",
@@ -599,7 +533,81 @@ local themes = {
 		},
 	},
 	{
-		name = "onedarkpro_light",
+		name = "onedark_darker",
+		colorscheme = "onedark",
+		appearance = "dark",
+		plugin = {
+			"navarasu/onedark.nvim",
+		},
+		before = function()
+			require("onedark").setup({ style = "darker" })
+		end,
+	},
+	-- {
+	-- 	name = "onedark_cool",
+	-- 	colorscheme = "onedark",
+	-- 	appearance = "dark",
+	-- 	plugin = {
+	-- 		"navarasu/onedark.nvim",
+	-- 	},
+	-- 	before = function()
+	-- 		require("onedark").setup({ style = "cool" })
+	-- 	end,
+	-- },
+	-- {
+	-- 	name = "onedark_deep",
+	-- 	colorscheme = "onedark",
+	-- 	appearance = "dark",
+	-- 	plugin = {
+	-- 		"navarasu/onedark.nvim",
+	-- 	},
+	-- 	before = function()
+	-- 		require("onedark").setup({ style = "deep" })
+	-- 	end,
+	-- },
+	-- {
+	-- 	name = "onedark_warm",
+	-- 	colorscheme = "onedark",
+	-- 	appearance = "dark",
+	-- 	plugin = {
+	-- 		"navarasu/onedark.nvim",
+	-- 	},
+	-- 	before = function()
+	-- 		require("onedark").setup({ style = "warm" })
+	-- 	end,
+	-- },
+	-- {
+	-- 	name = "onedark_warmer",
+	-- 	colorscheme = "onedark",
+	-- 	appearance = "dark",
+	-- 	plugin = {
+	-- 		"navarasu/onedark.nvim",
+	-- 	},
+	-- 	before = function()
+	-- 		require("onedark").setup({ style = "warmer" })
+	-- 	end,
+	-- },
+	-- {
+	-- 	name = "onedark_light",
+	-- 	colorscheme = "onedark",
+	-- 	appearance = "light",
+	-- 	plugin = {
+	-- 		"navarasu/onedark.nvim",
+	-- 	},
+	-- 	before = function()
+	-- 		require("onedark").setup({ style = "light" })
+	-- 	end,
+	-- },
+	{
+		name = "onedark",
+		colorscheme = "onedark",
+		appearance = "dark",
+		plugin = {
+			"olimorris/onedarkpro.nvim",
+		},
+	},
+	{
+		name = "onelight",
 		colorscheme = "onelight",
 		appearance = "light",
 		plugin = {

@@ -107,7 +107,7 @@
 </span><span class="line" data-line="90"><span style="color: #586e75;"># Directory paths are normally ignored when matching pattern rules. But</span>
 </span><span class="line" data-line="91"><span style="color: #586e75;"># make will try to use the most appropriate rule available.</span>
 </span><span class="line" data-line="92"><span style="color: #268bd2;">small/%.png</span><span style="color: #859900;">:</span> %.svg
-</span><span class="line" data-line="93">	<span style="color: #268bd2;">inkscape</span> <span style="color: #268bd2;">--export-png</span> <span style="color: #268bd2;">--export-dpi</span> <span style="color: #6c71c4;">30</span> <span style="color: #859900;">$</span><span style="color: #6c71c4;">^</span>
+</span><span class="line" data-line="93">	<span style="color: #268bd2;">inkscape</span> <span style="color: #268bd2;">--export-png</span> <span style="color: #268bd2;">--export-dpi</span> <span style="color: #d33682;">30</span> <span style="color: #859900;">$</span><span style="color: #6c71c4;">^</span>
 </span><span class="line" data-line="94">
 </span><span class="line" data-line="95"><span style="color: #586e75;"># make will use the last version for a pattern rule that it finds.</span>
 </span><span class="line" data-line="96"><span style="color: #268bd2;">%.png</span><span style="color: #859900;">:</span> %.svg
@@ -134,8 +134,8 @@
 </span><span class="line" data-line="117">
 </span><span class="line" data-line="118"><span style="color: #586e75;"># Variables are basically all string types</span>
 </span><span class="line" data-line="119">
-</span><span class="line" data-line="120"><span style="color: #268bd2;">name</span> <span style="color: #859900;">=</span> Ted
-</span><span class="line" data-line="121"><span style="color: #268bd2;">name2</span><span style="color: #859900;">=</span>&quot;Sarah&quot;
+</span><span class="line" data-line="120"><span style="color: #839496;">name</span> <span style="color: #859900;">=</span> Ted
+</span><span class="line" data-line="121"><span style="color: #839496;">name2</span><span style="color: #859900;">=</span>&quot;Sarah&quot;
 </span><span class="line" data-line="122">
 </span><span class="line" data-line="123"><span style="color: #268bd2;">echo</span><span style="color: #859900;">:</span>
 </span><span class="line" data-line="124">	<span style="color: #6c71c4;">@</span><span style="color: #268bd2;">echo</span> <span style="color: #859900;">$(<span style="color: #2aa198;">name</span>)</span>
@@ -150,17 +150,17 @@
 </span><span class="line" data-line="133"><span style="color: #586e75;"># 3: shell environment variables - make imports these automatically.</span>
 </span><span class="line" data-line="134"><span style="color: #586e75;"># 4: make has some predefined variables</span>
 </span><span class="line" data-line="135">
-</span><span class="line" data-line="136"><span style="color: #268bd2;">name4</span> <span style="color: #859900;">?=</span> Jean
+</span><span class="line" data-line="136"><span style="color: #839496;">name4</span> <span style="color: #859900;">?=</span> Jean
 </span><span class="line" data-line="137"><span style="color: #586e75;"># Only set the variable if environment variable is not already defined.</span>
 </span><span class="line" data-line="138">
-</span><span class="line" data-line="139"><span style="color: #93a1a1; font-weight: bold;">override</span> <span style="color: #268bd2;">name5</span> <span style="color: #859900;">=</span> David
+</span><span class="line" data-line="139"><span style="color: #859900;">override</span> <span style="color: #839496;">name5</span> <span style="color: #859900;">=</span> David
 </span><span class="line" data-line="140"><span style="color: #586e75;"># Stops commandline arguments from changing this variable.</span>
 </span><span class="line" data-line="141">
-</span><span class="line" data-line="142"><span style="color: #268bd2;">name4</span> <span style="color: #859900;">+=</span>grey
+</span><span class="line" data-line="142"><span style="color: #839496;">name4</span> <span style="color: #859900;">+=</span>grey
 </span><span class="line" data-line="143"><span style="color: #586e75;"># Append values to variable (includes a space).</span>
 </span><span class="line" data-line="144">
 </span><span class="line" data-line="145"><span style="color: #586e75;"># Pattern-specific variable values (GNU extension).</span>
-</span><span class="line" data-line="146">echo: <span style="color: #268bd2;">name2</span> <span style="color: #859900;">=</span> Sara # True within the matching rule
+</span><span class="line" data-line="146">echo: <span style="color: #839496;">name2</span> <span style="color: #859900;">=</span> Sara # True within the matching rule
 </span><span class="line" data-line="147">	<span style="color: #586e75;"># and also within its remade recursive dependencies</span>
 </span><span class="line" data-line="148">	<span style="color: #586e75;"># (except it can break when your graph gets too complicated!)</span>
 </span><span class="line" data-line="149">
@@ -183,16 +183,16 @@
 </span><span class="line" data-line="166"><span style="color: #586e75;"># This can be expensive, so a second type of variable exists which is</span>
 </span><span class="line" data-line="167"><span style="color: #586e75;"># only evaluated once. (This is a GNU make extension)</span>
 </span><span class="line" data-line="168">
-</span><span class="line" data-line="169"><span style="color: #268bd2;">var</span> <span style="color: #859900;">:=</span> hello
-</span><span class="line" data-line="170"><span style="color: #268bd2;">var2</span> <span style="color: #859900;">::=</span> <span style="color: #859900;">$(<span style="color: #2aa198;">var</span>)</span> hello
+</span><span class="line" data-line="169"><span style="color: #839496;">var</span> <span style="color: #859900;">:=</span> hello
+</span><span class="line" data-line="170"><span style="color: #839496;">var2</span> <span style="color: #859900;">::=</span> <span style="color: #859900;">$(<span style="color: #2aa198;">var</span>)</span> hello
 </span><span class="line" data-line="171"><span style="color: #586e75;">#:= and ::= are equivalent.</span>
 </span><span class="line" data-line="172">
 </span><span class="line" data-line="173"><span style="color: #586e75;"># These variables are evaluated procedurally (in the order that they</span>
 </span><span class="line" data-line="174"><span style="color: #586e75;"># appear), thus breaking with the rest of the language !</span>
 </span><span class="line" data-line="175">
 </span><span class="line" data-line="176"><span style="color: #586e75;"># This doesn&#39;t work</span>
-</span><span class="line" data-line="177"><span style="color: #268bd2;">var3</span> <span style="color: #859900;">::=</span> <span style="color: #859900;">$(<span style="color: #2aa198;">var4</span>)</span> and good luck
-</span><span class="line" data-line="178"><span style="color: #268bd2;">var4</span> <span style="color: #859900;">::=</span> good night
+</span><span class="line" data-line="177"><span style="color: #839496;">var3</span> <span style="color: #859900;">::=</span> <span style="color: #859900;">$(<span style="color: #2aa198;">var4</span>)</span> and good luck
+</span><span class="line" data-line="178"><span style="color: #839496;">var4</span> <span style="color: #859900;">::=</span> good night
 </span><span class="line" data-line="179">
 </span><span class="line" data-line="180"><span style="color: #586e75;">#-----------------------------------------------------------------------</span>
 </span><span class="line" data-line="181"><span style="color: #586e75;"># Functions</span>
@@ -200,8 +200,8 @@
 </span><span class="line" data-line="183">
 </span><span class="line" data-line="184"><span style="color: #586e75;"># make has lots of functions available.</span>
 </span><span class="line" data-line="185">
-</span><span class="line" data-line="186"><span style="color: #268bd2;">sourcefiles</span> <span style="color: #859900;">=</span> <span style="color: #859900;">$</span><span style="color: #859900;">(</span><span style="color: #268bd2;">wildcard</span> *.c */*.c<span style="color: #859900;">)</span>
-</span><span class="line" data-line="187"><span style="color: #268bd2;">objectfiles</span> <span style="color: #859900;">=</span> <span style="color: #859900;">$</span><span style="color: #859900;">(</span><span style="color: #268bd2;">patsubst</span> %.c,%.o,<span style="color: #859900;">$(<span style="color: #2aa198;">sourcefiles</span>)</span><span style="color: #859900;">)</span>
+</span><span class="line" data-line="186"><span style="color: #839496;">sourcefiles</span> <span style="color: #859900;">=</span> <span style="color: #859900;">$</span><span style="color: #859900;">(</span><span style="color: #268bd2;">wildcard</span> *.c */*.c<span style="color: #859900;">)</span>
+</span><span class="line" data-line="187"><span style="color: #839496;">objectfiles</span> <span style="color: #859900;">=</span> <span style="color: #859900;">$</span><span style="color: #859900;">(</span><span style="color: #268bd2;">patsubst</span> %.c,%.o,<span style="color: #859900;">$(<span style="color: #2aa198;">sourcefiles</span>)</span><span style="color: #859900;">)</span>
 </span><span class="line" data-line="188">
 </span><span class="line" data-line="189"><span style="color: #586e75;"># Format is $(func arg0,arg1,arg2...)</span>
 </span><span class="line" data-line="190">
@@ -216,9 +216,9 @@
 </span><span class="line" data-line="199"><span style="color: #586e75;">#-----------------------------------------------------------------------</span>
 </span><span class="line" data-line="200">
 </span><span class="line" data-line="201"><span style="color: #586e75;"># Include other makefiles, useful for platform specific code</span>
-</span><span class="line" data-line="202"><span style="color: #93a1a1; font-weight: bold;">include</span> <span style="color: #6c71c4;">foo.mk</span>
+</span><span class="line" data-line="202"><span style="color: #cb4b16;">include</span> <span style="color: #6c71c4;">foo.mk</span>
 </span><span class="line" data-line="203">
-</span><span class="line" data-line="204"><span style="color: #268bd2;">sport</span> <span style="color: #859900;">=</span> tennis
+</span><span class="line" data-line="204"><span style="color: #839496;">sport</span> <span style="color: #859900;">=</span> tennis
 </span><span class="line" data-line="205"><span style="color: #586e75;"># Conditional compilation</span>
 </span><span class="line" data-line="206"><span style="color: #268bd2;">report</span><span style="color: #859900;">:</span>
 </span><span class="line" data-line="207"><span style="color: #859900;">ifeq</span> (<span style="color: #859900;">$(<span style="color: #2aa198;">sport</span>)</span>,tennis)
@@ -229,10 +229,10 @@
 </span><span class="line" data-line="212">
 </span><span class="line" data-line="213"><span style="color: #586e75;"># There are also ifneq, ifdef, ifndef</span>
 </span><span class="line" data-line="214">
-</span><span class="line" data-line="215"><span style="color: #268bd2;">foo</span> <span style="color: #859900;">=</span> true
+</span><span class="line" data-line="215"><span style="color: #839496;">foo</span> <span style="color: #859900;">=</span> true
 </span><span class="line" data-line="216">
 </span><span class="line" data-line="217"><span style="color: #859900;">ifdef</span> <span style="color: #859900;">$(<span style="color: #2aa198;">foo</span>)</span>
-</span><span class="line" data-line="218"><span style="color: #268bd2;">bar</span> <span style="color: #859900;">=</span> &#39;hello&#39;
+</span><span class="line" data-line="218"><span style="color: #839496;">bar</span> <span style="color: #859900;">=</span> &#39;hello&#39;
 </span><span class="line" data-line="219"><span style="color: #859900;">endif</span>
 </span></code></pre>
 </body>
