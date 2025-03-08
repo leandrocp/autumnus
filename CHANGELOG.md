@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.6] - 2025-03-08
+
+### Fixed
+- Some theme colors and CSS
+
 ## [0.1.5] - 2025-03-07
 
 ### Added
