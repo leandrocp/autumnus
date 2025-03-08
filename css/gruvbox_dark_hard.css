@@ -1,6 +1,6 @@
 pre.athl {
   color: #ebdbb2;
-  background-color: #282828;
+  background-color: #1d2021;
 }
 .attribute {
   color: #8ec07c;
@@ -38,10 +38,10 @@ pre.athl {
   color: #fe8019;
 }
 .diff-minus {
-  background-color: #722529;
+  background-color: #792329;
 }
 .diff-plus {
-  background-color: #62693e;
+  background-color: #5a633a;
 }
 .function {
   color: #b8bb26;
@@ -171,7 +171,7 @@ pre.athl {
 }
 .normal {
   color: #ebdbb2;
-  background-color: #282828;
+  background-color: #1d2021;
 }
 .number {
   color: #d3869b;

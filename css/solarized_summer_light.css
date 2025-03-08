@@ -3,8 +3,7 @@ pre.athl {
   background-color: #fdf6e3;
 }
 .attribute {
-  color: #586e75;
-  font-weight: bold;
+  color: #859900;
 }
 .attribute-builtin {
   color: #6c71c4;
@@ -34,7 +33,7 @@ pre.athl {
   color: #d33682;
 }
 .constructor {
-  color: #b58900;
+  color: #dc322f;
 }
 .diff-minus {
   color: #dc322f;
@@ -43,26 +42,25 @@ pre.athl {
   color: #859900;
 }
 .function {
-  color: #268bd2;
+  color: #b58900;
 }
 .function-builtin {
-  color: #268bd2;
+  color: #b58900;
 }
 .function-call {
-  color: #268bd2;
+  color: #b58900;
 }
 .function-macro {
-  color: #268bd2;
+  color: #b58900;
 }
 .function-method {
-  color: #268bd2;
+  color: #b58900;
 }
 .function-method-call {
-  color: #268bd2;
+  color: #b58900;
 }
 .keyword {
-  color: #586e75;
-  font-weight: bold;
+  color: #859900;
 }
 .keyword-conditional {
   color: #859900;
@@ -86,15 +84,13 @@ pre.athl {
   color: #859900;
 }
 .keyword-function {
-  color: #586e75;
-  font-weight: bold;
+  color: #859900;
 }
 .keyword-import {
   color: #cb4b16;
 }
 .keyword-modifier {
-  color: #586e75;
-  font-weight: bold;
+  color: #859900;
 }
 .keyword-operator {
   color: #859900;
@@ -106,8 +102,7 @@ pre.athl {
   color: #859900;
 }
 .keyword-type {
-  color: #586e75;
-  font-weight: bold;
+  color: #859900;
 }
 .label {
   color: #859900;
@@ -158,7 +153,7 @@ pre.athl {
   text-decoration: underline;
 }
 .module {
-  color: #b58900;
+  color: #dc322f;
 }
 .module-builtin {
   color: #d33682;
@@ -180,14 +175,13 @@ pre.athl {
   color: #268bd2;
 }
 .punctuation-bracket {
-  color: #657b83;
+  color: #dc322f;
 }
 .punctuation-delimiter {
-  color: #657b83;
+  color: #dc322f;
 }
 .punctuation-special {
-  color: #586e75;
-  font-weight: bold;
+  color: #859900;
 }
 .string {
   color: #2aa198;
@@ -215,23 +209,22 @@ pre.athl {
   text-decoration: underline;
 }
 .tag {
-  color: #268bd2;
+  color: #dc322f;
 }
 .tag-attribute {
-  color: #6c71c4;
+  color: #268bd2;
 }
 .tag-delimiter {
-  color: #657b83;
+  color: #dc322f;
 }
 .type {
-  color: #b58900;
+  color: #dc322f;
 }
 .type-builtin {
-  color: #586e75;
-  font-weight: bold;
+  color: #859900;
 }
 .type-definition {
-  color: #b58900;
+  color: #dc322f;
 }
 .variable {
   color: #268bd2;

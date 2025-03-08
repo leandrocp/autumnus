@@ -993,12 +993,60 @@ local themes = {
 		end,
 	},
 	{
+		name = "darkplus",
+		colorscheme = "darkplus",
+		appearance = "dark",
+		plugin = {
+			"martinsione/darkplus.nvim",
+		},
+	},
+	{
 		name = "flexoki_dark",
 		colorscheme = "flexoki-dark",
 		appearance = "dark",
 		plugin = {
 			"kepano/flexoki-neovim",
 			name = "flexoki",
+		},
+	},
+	{
+		name = "xcode_dark",
+		colorscheme = "xcodedark",
+		appearance = "dark",
+		plugin = {
+			"nomis51/nvim-xcode-theme",
+		},
+	},
+	{
+		name = "xcode_dark_hc",
+		colorscheme = "xcodedarkhc",
+		appearance = "dark",
+		plugin = {
+			"nomis51/nvim-xcode-theme",
+		},
+	},
+	{
+		name = "xcode_light",
+		colorscheme = "xcodelight",
+		appearance = "light",
+		plugin = {
+			"nomis51/nvim-xcode-theme",
+		},
+	},
+	{
+		name = "xcode_light_hc",
+		colorscheme = "xcodelighthc",
+		appearance = "light",
+		plugin = {
+			"nomis51/nvim-xcode-theme",
+		},
+	},
+	{
+		name = "xcode_wwdc",
+		colorscheme = "xcodewwdc",
+		appearance = "dark",
+		plugin = {
+			"nomis51/nvim-xcode-theme",
 		},
 	},
 	{
