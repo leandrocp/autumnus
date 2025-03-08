@@ -33,10 +33,10 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"AlexvZyl/nordic.nvim",
-			config = function()
-				require("nordic").load()
-			end,
 		},
+		before = function()
+			require("nordic").load()
+		end,
 	},
 	{
 		name = "melange_dark",
@@ -61,7 +61,6 @@ local themes = {
 		plugin = {
 			"bluz71/vim-nightfly-colors",
 			name = "nightfly",
-			opts = {},
 		},
 	},
 	{
@@ -70,7 +69,6 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"folke/tokyonight.nvim",
-			opts = { style = "night" },
 		},
 	},
 	{
@@ -79,7 +77,6 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"folke/tokyonight.nvim",
-			opts = { style = "moon" },
 		},
 	},
 	{
@@ -88,7 +85,6 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"folke/tokyonight.nvim",
-			opts = { style = "storm" },
 		},
 	},
 	{
@@ -97,7 +93,6 @@ local themes = {
 		appearance = "light",
 		plugin = {
 			"folke/tokyonight.nvim",
-			opts = { style = "day" },
 		},
 	},
 	{
@@ -107,7 +102,6 @@ local themes = {
 		plugin = {
 			"catppuccin/nvim",
 			name = "catppuccin",
-			opts = {},
 		},
 	},
 	{
@@ -117,7 +111,6 @@ local themes = {
 		plugin = {
 			"catppuccin/nvim",
 			name = "catppuccin",
-			opts = {},
 		},
 	},
 	{
@@ -127,7 +120,6 @@ local themes = {
 		plugin = {
 			"catppuccin/nvim",
 			name = "catppuccin",
-			opts = {},
 		},
 	},
 	{
@@ -137,7 +129,6 @@ local themes = {
 		plugin = {
 			"catppuccin/nvim",
 			name = "catppuccin",
-			opts = {},
 		},
 	},
 	{
@@ -147,7 +138,6 @@ local themes = {
 		plugin = {
 			"projekt0n/github-nvim-theme",
 			name = "github-theme",
-			opts = {},
 		},
 	},
 	{
@@ -157,7 +147,6 @@ local themes = {
 		plugin = {
 			"projekt0n/github-nvim-theme",
 			name = "github-theme",
-			opts = {},
 		},
 	},
 	{
@@ -167,7 +156,6 @@ local themes = {
 		plugin = {
 			"projekt0n/github-nvim-theme",
 			name = "github-theme",
-			opts = {},
 		},
 	},
 	{
@@ -177,7 +165,6 @@ local themes = {
 		plugin = {
 			"projekt0n/github-nvim-theme",
 			name = "github-theme",
-			opts = {},
 		},
 	},
 	{
@@ -187,7 +174,6 @@ local themes = {
 		plugin = {
 			"projekt0n/github-nvim-theme",
 			name = "github-theme",
-			opts = {},
 		},
 	},
 	{
@@ -197,7 +183,6 @@ local themes = {
 		plugin = {
 			"projekt0n/github-nvim-theme",
 			name = "github-theme",
-			opts = {},
 		},
 	},
 	{
@@ -207,7 +192,6 @@ local themes = {
 		plugin = {
 			"projekt0n/github-nvim-theme",
 			name = "github-theme",
-			opts = {},
 		},
 	},
 	{
@@ -217,7 +201,6 @@ local themes = {
 		plugin = {
 			"projekt0n/github-nvim-theme",
 			name = "github-theme",
-			opts = {},
 		},
 	},
 	{
@@ -227,7 +210,6 @@ local themes = {
 		plugin = {
 			"projekt0n/github-nvim-theme",
 			name = "github-theme",
-			opts = {},
 		},
 	},
 	{
@@ -237,7 +219,6 @@ local themes = {
 		plugin = {
 			"projekt0n/github-nvim-theme",
 			name = "github-theme",
-			opts = {},
 		},
 	},
 	{
@@ -247,37 +228,30 @@ local themes = {
 		plugin = {
 			"projekt0n/github-nvim-theme",
 			name = "github-theme",
-			opts = {},
 		},
 	},
 	{
 		name = "kanagawa_wave",
-		colorscheme = "kanagawa",
+		colorscheme = "kanagawa-wave",
 		appearance = "dark",
 		plugin = {
 			"rebelot/kanagawa.nvim",
-			name = "kanagawa",
-			opts = { theme = "wave" },
 		},
 	},
 	{
 		name = "kanagawa_dragon",
-		colorscheme = "kanagawa",
+		colorscheme = "kanagawa-dragon",
 		appearance = "dark",
 		plugin = {
 			"rebelot/kanagawa.nvim",
-			name = "kanagawa",
-			opts = { theme = "dragon" },
 		},
 	},
 	{
 		name = "kanagawa_lotus",
-		colorscheme = "kanagawa",
+		colorscheme = "kanagawa-lotus",
 		appearance = "light",
 		plugin = {
 			"rebelot/kanagawa.nvim",
-			name = "kanagawa",
-			opts = { theme = "lotus" },
 		},
 	},
 	{
@@ -286,9 +260,10 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"ellisonleao/gruvbox.nvim",
-			name = "gruvbox",
-			opts = { contrast = "" },
 		},
+		before = function()
+			require("gruvbox").setup({ contrast = "" })
+		end,
 	},
 	{
 		name = "gruvbox_dark_hard",
@@ -296,9 +271,10 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"ellisonleao/gruvbox.nvim",
-			name = "gruvbox",
-			opts = { contrast = "hard" },
 		},
+		before = function()
+			require("gruvbox").setup({ contrast = "hard" })
+		end,
 	},
 	{
 		name = "gruvbox_dark_soft",
@@ -306,9 +282,10 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"ellisonleao/gruvbox.nvim",
-			name = "gruvbox",
-			opts = { contrast = "soft" },
 		},
+		before = function()
+			require("gruvbox").setup({ contrast = "soft" })
+		end,
 	},
 	{
 		name = "gruvbox_light",
@@ -316,9 +293,10 @@ local themes = {
 		appearance = "light",
 		plugin = {
 			"ellisonleao/gruvbox.nvim",
-			name = "gruvbox",
-			opts = { contrast = "" },
 		},
+		before = function()
+			require("gruvbox").setup({ contrast = "" })
+		end,
 	},
 	{
 		name = "gruvbox_light_hard",
@@ -326,9 +304,10 @@ local themes = {
 		appearance = "light",
 		plugin = {
 			"ellisonleao/gruvbox.nvim",
-			name = "gruvbox",
-			opts = { contrast = "hard" },
 		},
+		before = function()
+			require("gruvbox").setup({ contrast = "hard" })
+		end,
 	},
 	{
 		name = "gruvbox_light_soft",
@@ -336,9 +315,10 @@ local themes = {
 		appearance = "light",
 		plugin = {
 			"ellisonleao/gruvbox.nvim",
-			name = "gruvbox",
-			opts = { contrast = "soft" },
 		},
+		before = function()
+			require("gruvbox").setup({ contrast = "soft" })
+		end,
 	},
 	{
 		name = "dracula",
@@ -346,8 +326,6 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"Mofiqul/dracula.nvim",
-			name = "dracula",
-			opts = {},
 		},
 	},
 	{
@@ -356,8 +334,6 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"Mofiqul/dracula.nvim",
-			name = "dracula",
-			opts = { theme = "dracula-soft" },
 		},
 	},
 	{
@@ -366,8 +342,6 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"Mofiqul/vscode.nvim",
-			name = "vscode",
-			opts = {},
 		},
 	},
 	{
@@ -376,77 +350,87 @@ local themes = {
 		appearance = "light",
 		plugin = {
 			"Mofiqul/vscode.nvim",
-			name = "vscode",
-			opts = {},
 		},
 	},
-	-- {
-	-- 	name = "onedark_darker",
-	-- 	colorscheme = "onedark",
-	-- 	appearance = "dark",
-	-- 	plugin = {
-	-- 		"navarasu/onedark.nvim",
-	-- 		opts = { style = "darker" },
-	-- 	},
-	-- },
-	-- {
-	-- 	name = "onedark_cool",
-	-- 	colorscheme = "onedark",
-	-- 	appearance = "dark",
-	-- 	plugin = {
-	-- 		"navarasu/onedark.nvim",
-	-- 		opts = { style = "cool" },
-	-- 	},
-	-- },
-	-- {
-	-- 	name = "onedark_deep",
-	-- 	colorscheme = "onedark",
-	-- 	appearance = "dark",
-	-- 	plugin = {
-	-- 		"navarasu/onedark.nvim",
-	-- 		opts = { style = "deep" },
-	-- 	},
-	-- },
-	-- {
-	-- 	name = "onedark_warm",
-	-- 	colorscheme = "onedark",
-	-- 	appearance = "dark",
-	-- 	plugin = {
-	-- 		"navarasu/onedark.nvim",
-	-- 		opts = { style = "warm" },
-	-- 	},
-	-- },
-	-- {
-	-- 	name = "onedark_warmer",
-	-- 	colorscheme = "onedark",
-	-- 	appearance = "dark",
-	-- 	plugin = {
-	-- 		"navarasu/onedark.nvim",
-	-- 		opts = { style = "warmer" },
-	-- 	},
-	-- },
-	-- {
-	-- 	name = "onedark_light",
-	-- 	colorscheme = "onedark",
-	-- 	appearance = "light",
-	-- 	plugin = {
-	-- 		"navarasu/onedark.nvim",
-	-- 		opts = { style = "light" },
-	-- 	},
-	-- },
+	{
+		name = "onedark_darker",
+		colorscheme = "onedark",
+		appearance = "dark",
+		plugin = {
+			"navarasu/onedark.nvim",
+		},
+		before = function()
+			require("onedark").setup({ style = "darker" })
+		end,
+	},
+	{
+		name = "onedark_cool",
+		colorscheme = "onedark",
+		appearance = "dark",
+		plugin = {
+			"navarasu/onedark.nvim",
+		},
+		before = function()
+			require("onedark").setup({ style = "cool" })
+		end,
+	},
+	{
+		name = "onedark_deep",
+		colorscheme = "onedark",
+		appearance = "dark",
+		plugin = {
+			"navarasu/onedark.nvim",
+		},
+		before = function()
+			require("onedark").setup({ style = "deep" })
+		end,
+	},
+	{
+		name = "onedark_warm",
+		colorscheme = "onedark",
+		appearance = "dark",
+		plugin = {
+			"navarasu/onedark.nvim",
+		},
+		before = function()
+			require("onedark").setup({ style = "warm" })
+		end,
+	},
+	{
+		name = "onedark_warmer",
+		colorscheme = "onedark",
+		appearance = "dark",
+		plugin = {
+			"navarasu/onedark.nvim",
+		},
+		before = function()
+			require("onedark").setup({ style = "warmer" })
+		end,
+	},
+	{
+		name = "onedark_light",
+		colorscheme = "onedark",
+		appearance = "light",
+		plugin = {
+			"navarasu/onedark.nvim",
+		},
+		before = function()
+			require("onedark").setup({ style = "light" })
+		end,
+	},
 	{
 		name = "solarized_winter_dark",
 		colorscheme = "solarized",
 		appearance = "dark",
 		plugin = {
 			"maxmx03/solarized.nvim",
-			config = function()
-				require("solarized").setup({
-					variant = "winter",
-					appearance = "dark",
-				})
-			end,
 		},
+		before = function()
+			require("solarized").setup({
+				variant = "winter",
+				appearance = "dark",
+			})
+		end,
 	},
 	{
 		name = "solarized_winter_light",
@@ -454,13 +438,13 @@ local themes = {
 		appearance = "light",
 		plugin = {
 			"maxmx03/solarized.nvim",
-			config = function()
-				require("solarized").setup({
-					variant = "winter",
-					appearance = "light",
-				})
-			end,
 		},
+		before = function()
+			require("solarized").setup({
+				variant = "winter",
+				appearance = "light",
+			})
+		end,
 	},
 	{
 		name = "solarized_spring_dark",
@@ -468,13 +452,13 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"maxmx03/solarized.nvim",
-			config = function()
-				require("solarized").setup({
-					variant = "spring",
-					appearance = "dark",
-				})
-			end,
 		},
+		before = function()
+			require("solarized").setup({
+				variant = "spring",
+				appearance = "dark",
+			})
+		end,
 	},
 	{
 		name = "solarized_spring_light",
@@ -482,13 +466,13 @@ local themes = {
 		appearance = "light",
 		plugin = {
 			"maxmx03/solarized.nvim",
-			config = function()
-				require("solarized").setup({
-					variant = "spring",
-					appearance = "light",
-				})
-			end,
 		},
+		before = function()
+			require("solarized").setup({
+				variant = "spring",
+				appearance = "light",
+			})
+		end,
 	},
 	{
 		name = "solarized_summer_dark",
@@ -496,13 +480,13 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"maxmx03/solarized.nvim",
-			config = function()
-				require("solarized").setup({
-					variant = "summer",
-					appearance = "dark",
-				})
-			end,
 		},
+		before = function()
+			require("solarized").setup({
+				variant = "summer",
+				appearance = "dark",
+			})
+		end,
 	},
 	{
 		name = "solarized_summer_light",
@@ -510,13 +494,13 @@ local themes = {
 		appearance = "light",
 		plugin = {
 			"maxmx03/solarized.nvim",
-			config = function()
-				require("solarized").setup({
-					variant = "summer",
-					appearance = "light",
-				})
-			end,
 		},
+		before = function()
+			require("solarized").setup({
+				variant = "summer",
+				appearance = "light",
+			})
+		end,
 	},
 	{
 		name = "solarized_autumn_dark",
@@ -524,13 +508,13 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"maxmx03/solarized.nvim",
-			config = function()
-				require("solarized").setup({
-					variant = "autumn",
-					appearance = "dark",
-				})
-			end,
 		},
+		before = function()
+			require("solarized").setup({
+				variant = "autumn",
+				appearance = "dark",
+			})
+		end,
 	},
 	{
 		name = "solarized_autumn_light",
@@ -538,13 +522,13 @@ local themes = {
 		appearance = "light",
 		plugin = {
 			"maxmx03/solarized.nvim",
-			config = function()
-				require("solarized").setup({
-					variant = "autumn",
-					appearance = "light",
-				})
-			end,
 		},
+		before = function()
+			require("solarized").setup({
+				variant = "autumn",
+				appearance = "light",
+			})
+		end,
 	},
 	{
 		name = "material_darker",
@@ -552,13 +536,10 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"marko-cerovac/material.nvim",
-			config = function()
-				vim.g.material_style = "darker"
-				require("material").setup({})
-			end,
 		},
-		after = function()
-			vim.g.material_style = nil
+		before = function()
+			vim.g.material_style = "darker"
+			require("material").setup({ async_loading = false })
 		end,
 	},
 	{
@@ -567,13 +548,10 @@ local themes = {
 		appearance = "light",
 		plugin = {
 			"marko-cerovac/material.nvim",
-			config = function()
-				vim.g.material_style = "lighter"
-				require("material").setup({})
-			end,
 		},
-		after = function()
-			vim.g.material_style = nil
+		before = function()
+			vim.g.material_style = "lighter"
+			require("material").setup({ async_loading = false })
 		end,
 	},
 	{
@@ -582,13 +560,10 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"marko-cerovac/material.nvim",
-			config = function()
-				vim.g.material_style = "oceanic"
-				require("material").setup({})
-			end,
 		},
-		after = function()
-			vim.g.material_style = nil
+		before = function()
+			vim.g.material_style = "oceanic"
+			require("material").setup({ async_loading = false })
 		end,
 	},
 	{
@@ -597,13 +572,10 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"marko-cerovac/material.nvim",
-			config = function()
-				vim.g.material_style = "palenight"
-				require("material").setup({})
-			end,
 		},
-		after = function()
-			vim.g.material_style = nil
+		before = function()
+			vim.g.material_style = "palenight"
+			require("material").setup({ async_loading = false })
 		end,
 	},
 	{
@@ -612,13 +584,10 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"marko-cerovac/material.nvim",
-			config = function()
-				vim.g.material_style = "deep ocean"
-				require("material").setup({})
-			end,
 		},
-		after = function()
-			vim.g.material_style = nil
+		before = function()
+			vim.g.material_style = "deep ocean"
+			require("material").setup({ async_loading = false })
 		end,
 	},
 	{
@@ -627,8 +596,6 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"shaunsingh/nord.nvim",
-			name = "nord",
-			opts = {},
 		},
 	},
 	{
@@ -637,8 +604,6 @@ local themes = {
 		appearance = "light",
 		plugin = {
 			"olimorris/onedarkpro.nvim",
-			name = "onedarkpro",
-			opts = {},
 		},
 	},
 	{
@@ -647,8 +612,6 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"olimorris/onedarkpro.nvim",
-			name = "onedarkpro",
-			opts = {},
 		},
 	},
 	{
@@ -657,8 +620,6 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"olimorris/onedarkpro.nvim",
-			name = "onedarkpro",
-			opts = {},
 		},
 	},
 	{
@@ -667,8 +628,6 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"EdenEast/nightfox.nvim",
-			name = "nightfox",
-			opts = {},
 		},
 	},
 	{
@@ -677,8 +636,6 @@ local themes = {
 		appearance = "light",
 		plugin = {
 			"EdenEast/nightfox.nvim",
-			name = "nightfox",
-			opts = {},
 		},
 	},
 	{
@@ -687,8 +644,6 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"EdenEast/nightfox.nvim",
-			name = "nightfox",
-			opts = {},
 		},
 	},
 	{
@@ -697,8 +652,6 @@ local themes = {
 		appearance = "light",
 		plugin = {
 			"EdenEast/nightfox.nvim",
-			name = "nightfox",
-			opts = {},
 		},
 	},
 	{
@@ -707,8 +660,6 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"EdenEast/nightfox.nvim",
-			name = "nightfox",
-			opts = {},
 		},
 	},
 	{
@@ -717,8 +668,6 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"EdenEast/nightfox.nvim",
-			name = "nightfox",
-			opts = {},
 		},
 	},
 	{
@@ -727,8 +676,6 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"rose-pine/neovim",
-			name = "rose-pine",
-			opts = {},
 		},
 	},
 	{
@@ -738,7 +685,6 @@ local themes = {
 		plugin = {
 			"rose-pine/neovim",
 			name = "rose-pine",
-			opts = { variant = "moon" },
 		},
 	},
 	{
@@ -748,7 +694,6 @@ local themes = {
 		plugin = {
 			"rose-pine/neovim",
 			name = "rose-pine",
-			opts = { variant = "dawn" },
 		},
 	},
 	{
@@ -757,13 +702,10 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"neanias/everforest-nvim",
-			version = false,
-			config = function()
-				require("everforest").setup({
-					background = "medium",
-				})
-			end,
 		},
+		before = function()
+			require("everforest").setup({ background = "medium" })
+		end,
 	},
 	{
 		name = "everforest_light",
@@ -771,13 +713,10 @@ local themes = {
 		appearance = "light",
 		plugin = {
 			"neanias/everforest-nvim",
-			version = false,
-			config = function()
-				require("everforest").setup({
-					background = "medium",
-				})
-			end,
 		},
+		before = function()
+			require("everforest").setup({ background = "medium" })
+		end,
 	},
 	{
 		name = "edge_dark",
@@ -785,11 +724,10 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"sainnhe/edge",
-			opts = {
-				style = "default",
-				transparent = false,
-			},
 		},
+		before = function()
+			vim.g.edge_style = "default"
+		end,
 	},
 	{
 		name = "edge_light",
@@ -797,11 +735,10 @@ local themes = {
 		appearance = "light",
 		plugin = {
 			"sainnhe/edge",
-			opts = {
-				style = "default",
-				transparent = false,
-			},
 		},
+		before = function()
+			vim.g.edge_style = "default"
+		end,
 	},
 	{
 		name = "edge_aura",
@@ -809,11 +746,10 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"sainnhe/edge",
-			opts = {
-				style = "aura",
-				transparent = false,
-			},
 		},
+		before = function()
+			vim.g.edge_style = "aura"
+		end,
 	},
 	{
 		name = "edge_neon",
@@ -821,35 +757,10 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"sainnhe/edge",
-			opts = {
-				style = "neon",
-				transparent = false,
-			},
 		},
-	},
-	{
-		name = "gruvbox_material_dark",
-		colorscheme = "gruvbox-material",
-		appearance = "dark",
-		plugin = {
-			"sainnhe/gruvbox-material",
-			opts = {
-				background = "hard",
-				transparent_background = false,
-			},
-		},
-	},
-	{
-		name = "gruvbox_material_light",
-		colorscheme = "gruvbox-material",
-		appearance = "light",
-		plugin = {
-			"sainnhe/gruvbox-material",
-			opts = {
-				background = "hard",
-				transparent_background = false,
-			},
-		},
+		before = function()
+			vim.g.edge_style = "neon"
+		end,
 	},
 	{
 		name = "modus_operandi",
@@ -857,7 +768,6 @@ local themes = {
 		appearance = "light",
 		plugin = {
 			"miikanissi/modus-themes.nvim",
-			opts = {},
 		},
 	},
 	{
@@ -866,7 +776,6 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"miikanissi/modus-themes.nvim",
-			opts = {},
 		},
 	},
 	{
@@ -875,7 +784,6 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"glepnir/zephyr-nvim",
-			opts = {},
 		},
 	},
 	{
@@ -885,7 +793,6 @@ local themes = {
 		plugin = {
 			"svrana/neosolarized.nvim",
 			dependencies = { "tjdevries/colorbuddy.nvim" },
-			opts = {},
 		},
 	},
 	{
@@ -895,7 +802,6 @@ local themes = {
 		plugin = {
 			"svrana/neosolarized.nvim",
 			dependencies = { "tjdevries/colorbuddy.nvim" },
-			opts = {},
 		},
 	},
 	{
@@ -904,10 +810,10 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"loctvl842/monokai-pro.nvim",
-			opts = {
-				filter = "pro",
-			},
 		},
+		before = function()
+			require("monokai-pro").setup({ filter = "pro" })
+		end,
 	},
 	{
 		name = "monokai_pro_machine",
@@ -915,10 +821,10 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"loctvl842/monokai-pro.nvim",
-			opts = {
-				filter = "machine",
-			},
 		},
+		before = function()
+			require("monokai-pro").setup({ filter = "machine" })
+		end,
 	},
 	{
 		name = "monokai_pro_ristretto",
@@ -926,10 +832,10 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"loctvl842/monokai-pro.nvim",
-			opts = {
-				filter = "ristretto",
-			},
 		},
+		before = function()
+			require("monokai-pro").setup({ filter = "ristretto" })
+		end,
 	},
 	{
 		name = "monokai_pro_spectrum",
@@ -937,10 +843,10 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"loctvl842/monokai-pro.nvim",
-			opts = {
-				filter = "spectrum",
-			},
 		},
+		before = function()
+			require("monokai-pro").setup({ filter = "spectrum" })
+		end,
 	},
 	{
 		name = "bamboo_light",
@@ -948,10 +854,10 @@ local themes = {
 		appearance = "light",
 		plugin = {
 			"ribru17/bamboo.nvim",
-			config = function()
-				require("bamboo").setup({ style = "light" })
-			end,
 		},
+		before = function()
+			require("bamboo").setup({ style = "light" })
+		end,
 	},
 	{
 		name = "bamboo_vulgaris",
@@ -959,10 +865,10 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"ribru17/bamboo.nvim",
-			config = function()
-				require("bamboo").setup({ style = "vulgaris" })
-			end,
 		},
+		before = function()
+			require("bamboo").setup({ style = "vulgaris" })
+		end,
 	},
 	{
 		name = "bamboo_multiplex",
@@ -970,10 +876,10 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"ribru17/bamboo.nvim",
-			config = function()
-				require("bamboo").setup({ style = "multiplex" })
-			end,
 		},
+		before = function()
+			require("bamboo").setup({ style = "multiplex" })
+		end,
 	},
 	{
 		name = "aura_dark",
@@ -1030,7 +936,6 @@ local themes = {
 		plugin = {
 			"bluz71/vim-moonfly-colors",
 			name = "moonfly",
-			opts = {},
 		},
 	},
 	{
@@ -1039,11 +944,10 @@ local themes = {
 		appearance = "dark",
 		plugin = {
 			"scottmckendry/cyberdream.nvim",
-			name = "cyberdream",
-			opts = {
-				variant = "dark",
-			},
 		},
+		before = function()
+			require("cyberdream").setup({ variant = "dark" })
+		end,
 	},
 	{
 		name = "cyberdream_light",
@@ -1051,11 +955,10 @@ local themes = {
 		appearance = "light",
 		plugin = {
 			"scottmckendry/cyberdream.nvim",
-			name = "cyberdream",
-			opts = {
-				variant = "light",
-			},
 		},
+		before = function()
+			require("cyberdream").setup({ variant = "light" })
+		end,
 	},
 	{
 		name = "bluloco_dark",
@@ -1064,12 +967,10 @@ local themes = {
 		plugin = {
 			"uloco/bluloco.nvim",
 			dependencies = { "rktjmp/lush.nvim" },
-			config = function()
-				require("bluloco").setup({
-					style = "dark",
-				})
-			end,
 		},
+		before = function()
+			require("bluloco").setup({ style = "dark" })
+		end,
 	},
 	{
 		name = "bluloco_light",
@@ -1078,12 +979,10 @@ local themes = {
 		plugin = {
 			"uloco/bluloco.nvim",
 			dependencies = { "rktjmp/lush.nvim" },
-			config = function()
-				require("bluloco").setup({
-					style = "light",
-				})
-			end,
 		},
+		before = function()
+			require("bluloco").setup({ style = "light" })
+		end,
 	},
 	{
 		name = "flexoki_dark",
@@ -1247,6 +1146,10 @@ local function extract_colorscheme_colors(theme_def)
 		end
 	end
 
+	if theme_def.before then
+		theme_def.before()
+	end
+
 	vim.api.nvim_command("hi clear")
 	vim.g.colors_name = nil
 	if vim.fn.exists("syntax_on") then
@@ -1294,10 +1197,6 @@ local function extract_colorscheme_colors(theme_def)
 		if next(style) ~= nil then
 			highlights[string.lower(string.gsub(group, "@", ""))] = style
 		end
-	end
-
-	if theme_def.after then
-		theme_def.after()
 	end
 
 	local output_file = theme_name .. ".json"

@@ -3,20 +3,19 @@
   "appearance": "light",
   "highlights": {
     "attribute": {
-      "fg": "#586e75",
-      "bold": true
+      "fg": "#859900"
     },
     "attribute.builtin": {
       "fg": "#6c71c4"
     },
     "boolean": {
-      "fg": "#d33682"
+      "fg": "#6c71c4"
     },
     "character": {
-      "fg": "#d33682"
+      "fg": "#6c71c4"
     },
     "character.special": {
-      "fg": "#d33682"
+      "fg": "#6c71c4"
     },
     "comment": {
       "fg": "#93a1a1"
@@ -25,13 +24,13 @@
       "fg": "#93a1a1"
     },
     "constant": {
-      "fg": "#d33682"
+      "fg": "#6c71c4"
     },
     "constant.builtin": {
-      "fg": "#d33682"
+      "fg": "#6c71c4"
     },
     "constant.macro": {
-      "fg": "#d33682"
+      "fg": "#6c71c4"
     },
     "constructor": {
       "fg": "#b58900"
@@ -61,56 +60,52 @@
       "fg": "#268bd2"
     },
     "keyword": {
-      "fg": "#586e75",
-      "bold": true
+      "fg": "#859900"
     },
     "keyword.conditional": {
-      "fg": "#859900"
+      "fg": "#d33682"
     },
     "keyword.conditional.ternary": {
-      "fg": "#859900"
+      "fg": "#d33682"
     },
     "keyword.coroutine": {
-      "fg": "#859900"
+      "fg": "#d33682"
     },
     "keyword.debug": {
-      "fg": "#859900"
+      "fg": "#d33682"
     },
     "keyword.directive": {
-      "fg": "#859900"
+      "fg": "#d33682"
     },
     "keyword.directive.define": {
-      "fg": "#859900"
+      "fg": "#d33682"
     },
     "keyword.exception": {
-      "fg": "#859900"
+      "fg": "#d33682"
     },
     "keyword.function": {
-      "fg": "#586e75",
-      "bold": true
+      "fg": "#859900"
     },
     "keyword.import": {
-      "fg": "#cb4b16"
+      "fg": "#859900"
     },
     "keyword.modifier": {
-      "fg": "#586e75",
-      "bold": true
+      "fg": "#859900"
     },
     "keyword.operator": {
-      "fg": "#859900"
+      "fg": "#d33682"
     },
     "keyword.repeat": {
-      "fg": "#859900"
+      "fg": "#d33682"
     },
     "keyword.return": {
-      "fg": "#859900"
+      "fg": "#d33682"
     },
     "keyword.type": {
-      "fg": "#586e75",
-      "bold": true
+      "fg": "#859900"
     },
     "label": {
-      "fg": "#859900"
+      "fg": "#d33682"
     },
     "markup.heading": {
       "fg": "#dc322f",
@@ -140,7 +135,7 @@
       "italic": true
     },
     "markup.link.label": {
-      "fg": "#d33682"
+      "fg": "#6c71c4"
     },
     "markup.raw": {
       "fg": "#2aa198"
@@ -161,42 +156,41 @@
       "fg": "#b58900"
     },
     "module.builtin": {
-      "fg": "#d33682"
+      "fg": "#6c71c4"
     },
     "normal": {
       "fg": "#657b83",
       "bg": "#fdf6e3"
     },
     "number": {
-      "fg": "#d33682"
+      "fg": "#6c71c4"
     },
     "number.float": {
-      "fg": "#d33682"
+      "fg": "#6c71c4"
     },
     "operator": {
-      "fg": "#859900"
+      "fg": "#d33682"
     },
     "property": {
       "fg": "#268bd2"
     },
     "punctuation.bracket": {
-      "fg": "#657b83"
+      "fg": "#93a1a1"
     },
     "punctuation.delimiter": {
-      "fg": "#657b83"
+      "fg": "#93a1a1"
     },
     "punctuation.special": {
-      "fg": "#586e75",
-      "bold": true
+      "fg": "#859900"
     },
     "string": {
       "fg": "#2aa198"
     },
     "string.documentation": {
-      "fg": "#859900"
+      "fg": "#d33682"
     },
     "string.escape": {
-      "fg": "#859900"
+      "fg": "#d33682"
     },
     "string.regexp": {
       "fg": "#d33682"
@@ -215,20 +209,19 @@
       "underline": true
     },
     "tag": {
-      "fg": "#268bd2"
+      "fg": "#d33682"
     },
     "tag.attribute": {
-      "fg": "#6c71c4"
+      "fg": "#268bd2"
     },
     "tag.delimiter": {
-      "fg": "#657b83"
+      "fg": "#93a1a1"
     },
     "type": {
       "fg": "#b58900"
     },
     "type.builtin": {
-      "fg": "#586e75",
-      "bold": true
+      "fg": "#859900"
     },
     "type.definition": {
       "fg": "#b58900"
@@ -237,7 +230,7 @@
       "fg": "#268bd2"
     },
     "variable.builtin": {
-      "fg": "#d33682"
+      "fg": "#6c71c4"
     },
     "variable.member": {
       "fg": "#268bd2"

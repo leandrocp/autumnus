@@ -38,10 +38,10 @@
       "fg": "#af3a03"
     },
     "diff.minus": {
-      "bg": "#fc9487"
+      "bg": "#f78b7f"
     },
     "diff.plus": {
-      "bg": "#d5d39b"
+      "bg": "#cecb94"
     },
     "function": {
       "fg": "#79740e",
@@ -171,7 +171,7 @@
     },
     "normal": {
       "fg": "#3c3836",
-      "bg": "#fbf1c7"
+      "bg": "#f2e5bc"
     },
     "number": {
       "fg": "#8f3f71"

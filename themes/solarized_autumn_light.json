@@ -3,8 +3,7 @@
   "appearance": "light",
   "highlights": {
     "attribute": {
-      "fg": "#586e75",
-      "bold": true
+      "fg": "#859900"
     },
     "attribute.builtin": {
       "fg": "#6c71c4"
@@ -61,8 +60,7 @@
       "fg": "#268bd2"
     },
     "keyword": {
-      "fg": "#586e75",
-      "bold": true
+      "fg": "#859900"
     },
     "keyword.conditional": {
       "fg": "#859900"
@@ -86,15 +84,13 @@
       "fg": "#859900"
     },
     "keyword.function": {
-      "fg": "#586e75",
-      "bold": true
+      "fg": "#859900"
     },
     "keyword.import": {
       "fg": "#cb4b16"
     },
     "keyword.modifier": {
-      "fg": "#586e75",
-      "bold": true
+      "fg": "#859900"
     },
     "keyword.operator": {
       "fg": "#859900"
@@ -106,8 +102,7 @@
       "fg": "#859900"
     },
     "keyword.type": {
-      "fg": "#586e75",
-      "bold": true
+      "fg": "#859900"
     },
     "label": {
       "fg": "#859900"
@@ -180,14 +175,13 @@
       "fg": "#268bd2"
     },
     "punctuation.bracket": {
-      "fg": "#657b83"
+      "fg": "#cb4b16"
     },
     "punctuation.delimiter": {
-      "fg": "#657b83"
+      "fg": "#cb4b16"
     },
     "punctuation.special": {
-      "fg": "#586e75",
-      "bold": true
+      "fg": "#859900"
     },
     "string": {
       "fg": "#2aa198"
@@ -208,33 +202,32 @@
       "fg": "#6c71c4"
     },
     "string.special.symbol": {
-      "fg": "#268bd2"
+      "fg": "#657b83"
     },
     "string.special.url": {
       "fg": "#d33682",
       "underline": true
     },
     "tag": {
-      "fg": "#268bd2"
+      "fg": "#859900"
     },
     "tag.attribute": {
-      "fg": "#6c71c4"
+      "fg": "#268bd2"
     },
     "tag.delimiter": {
-      "fg": "#657b83"
+      "fg": "#cb4b16"
     },
     "type": {
       "fg": "#b58900"
     },
     "type.builtin": {
-      "fg": "#586e75",
-      "bold": true
+      "fg": "#859900"
     },
     "type.definition": {
       "fg": "#b58900"
     },
     "variable": {
-      "fg": "#268bd2"
+      "fg": "#657b83"
     },
     "variable.builtin": {
       "fg": "#d33682"

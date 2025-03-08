@@ -3,8 +3,7 @@
   "appearance": "dark",
   "highlights": {
     "attribute": {
-      "fg": "#93a1a1",
-      "bold": true
+      "fg": "#859900"
     },
     "attribute.builtin": {
       "fg": "#6c71c4"
@@ -34,7 +33,7 @@
       "fg": "#6c71c4"
     },
     "constructor": {
-      "fg": "#cb4b16"
+      "fg": "#dc322f"
     },
     "diff.minus": {
       "fg": "#dc322f"
@@ -43,26 +42,25 @@
       "fg": "#268bd2"
     },
     "function": {
-      "fg": "#268bd2"
+      "fg": "#b58900"
     },
     "function.builtin": {
-      "fg": "#268bd2"
+      "fg": "#b58900"
     },
     "function.call": {
-      "fg": "#268bd2"
+      "fg": "#b58900"
     },
     "function.macro": {
-      "fg": "#268bd2"
+      "fg": "#b58900"
     },
     "function.method": {
-      "fg": "#268bd2"
+      "fg": "#b58900"
     },
     "function.method.call": {
-      "fg": "#268bd2"
+      "fg": "#b58900"
     },
     "keyword": {
-      "fg": "#93a1a1",
-      "bold": true
+      "fg": "#859900"
     },
     "keyword.conditional": {
       "fg": "#859900"
@@ -74,8 +72,7 @@
       "fg": "#859900"
     },
     "keyword.debug": {
-      "fg": "#93a1a1",
-      "bold": true
+      "fg": "#859900"
     },
     "keyword.directive": {
       "fg": "#859900"
@@ -87,16 +84,13 @@
       "fg": "#859900"
     },
     "keyword.function": {
-      "fg": "#93a1a1",
-      "bold": true
+      "fg": "#859900"
     },
     "keyword.import": {
-      "fg": "#93a1a1",
-      "bold": true
+      "fg": "#cb4b16"
     },
     "keyword.modifier": {
-      "fg": "#93a1a1",
-      "bold": true
+      "fg": "#859900"
     },
     "keyword.operator": {
       "fg": "#859900"
@@ -108,8 +102,7 @@
       "fg": "#859900"
     },
     "keyword.type": {
-      "fg": "#93a1a1",
-      "bold": true
+      "fg": "#859900"
     },
     "label": {
       "fg": "#859900"
@@ -159,7 +152,7 @@
       "underline": true
     },
     "module": {
-      "fg": "#cb4b16"
+      "fg": "#dc322f"
     },
     "module.builtin": {
       "fg": "#6c71c4"
@@ -169,10 +162,10 @@
       "bg": "#002b36"
     },
     "number": {
-      "fg": "#6c71c4"
+      "fg": "#d33682"
     },
     "number.float": {
-      "fg": "#6c71c4"
+      "fg": "#d33682"
     },
     "operator": {
       "fg": "#859900"
@@ -181,14 +174,13 @@
       "fg": "#268bd2"
     },
     "punctuation.bracket": {
-      "fg": "#839496"
+      "fg": "#dc322f"
     },
     "punctuation.delimiter": {
-      "fg": "#839496"
+      "fg": "#dc322f"
     },
     "punctuation.special": {
-      "fg": "#93a1a1",
-      "bold": true
+      "fg": "#859900"
     },
     "string": {
       "fg": "#2aa198"
@@ -216,23 +208,22 @@
       "underline": true
     },
     "tag": {
-      "fg": "#268bd2"
+      "fg": "#dc322f"
     },
     "tag.attribute": {
-      "fg": "#93a1a1"
+      "fg": "#268bd2"
     },
     "tag.delimiter": {
-      "fg": "#586e75"
+      "fg": "#dc322f"
     },
     "type": {
-      "fg": "#cb4b16"
+      "fg": "#dc322f"
     },
     "type.builtin": {
-      "fg": "#93a1a1",
-      "bold": true
+      "fg": "#859900"
     },
     "type.definition": {
-      "fg": "#cb4b16"
+      "fg": "#dc322f"
     },
     "variable": {
       "fg": "#268bd2"
