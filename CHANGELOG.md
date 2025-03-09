@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.7] - 2025-03-09
+
+### Fixed
+- Guess uppercase language names
+
+### Changed
+- Make language optional and move to `Options`
+- Rename `lang_or_path` to `lang_or_file`
+- Rename option `include_highlight` to `include_highlights`
+- Change types `&str` to `String` in `Options`
+- Remove options `italic` and `include_highlights` from `HtmlLinked`
+
 ## [0.1.6] - 2025-03-08
 
 ### Fixed
