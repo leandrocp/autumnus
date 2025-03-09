@@ -30,6 +30,7 @@ impl Formatter for Terminal<'_> {
     ) where
         W: std::fmt::Write,
     {
+        // FIXME: implement italic
         let _italic = if let FormatterOption::Terminal { italic } = &self.options.formatter {
             *italic
         } else {

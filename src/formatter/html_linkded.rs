@@ -64,6 +64,7 @@ impl Formatter for HtmlLinked<'_> {
             ("", false)
         };
 
+        // FIXME: implement italic
         let _italic = if let FormatterOption::HtmlLinked { italic, .. } = &self.options.formatter {
             *italic
         } else {

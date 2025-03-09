@@ -143,7 +143,7 @@ mod tests {
     fn test_include_pre_class() {
         let mut formatter = HtmlInline::default();
         formatter.options.formatter = FormatterOption::HtmlInline {
-            pre_class: Some("test-pre-class"),
+            pre_class: Some("test-pre-class".to_string()),
             italic: false,
             include_highlight: false,
         };
@@ -159,7 +159,7 @@ mod tests {
     fn test_include_pre_class_with_theme() {
         let mut formatter = HtmlInline::default();
         formatter.options.formatter = FormatterOption::HtmlInline {
-            pre_class: Some("test-pre-class"),
+            pre_class: Some("test-pre-class".to_string()),
             italic: false,
             include_highlight: false,
         };

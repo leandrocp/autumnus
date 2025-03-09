@@ -283,11 +283,11 @@ static DEFAULT_THEME: LazyLock<Theme> = LazyLock::new(Theme::default);
 
 /// The type of formatter to use for syntax highlighting.
 #[derive(Debug, Clone)]
-pub enum FormatterOption<'a> {
+pub enum FormatterOption {
     /// HTML output with inline styles.
     HtmlInline {
         /// Class to add to the `<pre>` tag.
-        pre_class: Option<&'a str>,
+        pre_class: Option<String>,
         /// Whether to use italics for highlighting.
         italic: bool,
         /// Whether to include the original highlight scope name in a `data` attribute.
@@ -304,7 +304,7 @@ pub enum FormatterOption<'a> {
     /// ```
     HtmlLinked {
         /// Class to add to the `<pre>` tag.
-        pre_class: Option<&'a str>,
+        pre_class: Option<String>,
         /// Whether to use italics for highlighting.
         italic: bool,
         /// Whether to include the original highlight scope name in a `data` attribute.
@@ -318,7 +318,7 @@ pub enum FormatterOption<'a> {
     },
 }
 
-impl Default for FormatterOption<'_> {
+impl Default for FormatterOption {
     fn default() -> Self {
         Self::HtmlInline {
             pre_class: None,
@@ -385,7 +385,7 @@ pub struct Options<'a> {
     ///     }
     /// );
     /// ```
-    pub formatter: FormatterOption<'a>,
+    pub formatter: FormatterOption,
 }
 
 impl Default for Options<'_> {
@@ -468,7 +468,7 @@ impl Default for Options<'_> {
 ///     code,
 ///     Options {
 ///         lang_or_file: Some("rust"),
-///         formatter: FormatterOption::HtmlLinked { pre_class: Some("my-code-block"), italic: false, include_highlight: false },
+///         formatter: FormatterOption::HtmlLinked { pre_class: Some("my-code-block".to_string()), italic: false, include_highlight: false },
 ///         ..Options::default()
 ///     }
 /// );
