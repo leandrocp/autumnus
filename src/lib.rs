@@ -305,11 +305,6 @@ pub enum FormatterOption {
     HtmlLinked {
         /// Class to add to the `<pre>` tag.
         pre_class: Option<String>,
-        /// Whether to use italics for highlighting.
-        italic: bool,
-        /// Whether to include the original highlight scope name in a `data` attribute.
-        /// Useful for debugging.
-        include_highlights: bool,
     },
     /// Terminal output with ANSI colors.
     Terminal {
@@ -468,7 +463,7 @@ impl Default for Options<'_> {
 ///     code,
 ///     Options {
 ///         lang_or_file: Some("rust"),
-///         formatter: FormatterOption::HtmlLinked { pre_class: Some("my-code-block".to_string()), italic: false, include_highlights: false },
+///         formatter: FormatterOption::HtmlLinked { pre_class: Some("my-code-block".to_string()) },
 ///         ..Options::default()
 ///     }
 /// );
@@ -546,11 +541,7 @@ pub fn highlight(source: &str, options: Options) -> String {
             formatter.write(&mut buffer, source, events);
             formatter.finish(&mut buffer, source);
         }
-        FormatterOption::HtmlLinked {
-            pre_class: _,
-            italic: _,
-            include_highlights: _,
-        } => {
+        FormatterOption::HtmlLinked { pre_class: _ } => {
             let formatter = HtmlLinked::new(lang, options);
             formatter.start(&mut buffer, source);
             formatter.write(&mut buffer, source, events);
@@ -611,6 +602,34 @@ end
     }
 
     #[test]
+    fn test_highlight_html_inline_include_highlights() {
+        let code = r#"defmodule Foo do
+  @lang :elixir
+end
+"#;
+
+        let expected = r#"<pre class="athl" style="color: #c6d0f5; background-color: #303446;"><code class="language-elixir" translate="no" tabindex="0"><span class="line" data-line="1"><span  data-highlight="keyword.function" style="color: #ca9ee6;">defmodule</span> <span  data-highlight="module" style="color: #babbf1;">Foo</span> <span  data-highlight="keyword" style="color: #ca9ee6;">do</span>
+</span><span class="line" data-line="2">  <span  data-highlight="operator" style="color: #99d1db;"><span  data-highlight="constant" style="color: #ef9f76;">@<span  data-highlight="function.call" style="color: #8caaee;"><span  data-highlight="constant" style="color: #ef9f76;">lang <span  data-highlight="string.special.symbol" style="color: #eebebe;">:elixir</span></span></span></span></span>
+</span><span class="line" data-line="3"><span  data-highlight="keyword" style="color: #ca9ee6;">end</span>
+</span></code></pre>"#;
+
+        let result = highlight(
+            code,
+            Options {
+                lang_or_file: Some("elixir"),
+                theme: themes::get("catppuccin_frappe").expect("Theme not found"),
+                formatter: FormatterOption::HtmlInline {
+                    pre_class: None,
+                    italic: false,
+                    include_highlights: true,
+                },
+            },
+        );
+
+        assert_eq!(result, expected);
+    }
+
+    #[test]
     fn test_highlight_html_inline_escape_curly_braces() {
         let expected = r#"<pre class="athl" style="color: #c6d0f5; background-color: #303446;"><code class="language-elixir" translate="no" tabindex="0"><span class="line" data-line="1"><span style="color: #949cbb;">&lbrace;</span><span style="color: #eebebe;">:ok</span><span style="color: #949cbb;">,</span> <span style="color: #eebebe;">char: </span><span style="color: #81c8be;">&#39;&lbrace;&#39;</span><span style="color: #949cbb;">&rbrace;</span>
 </span></code></pre>"#;
@@ -619,28 +638,6 @@ end
             "{:ok, char: '{'}",
             Options {
                 lang_or_file: Some("elixir"),
-                theme: themes::get("catppuccin_frappe").expect("Theme not found"),
-                ..Options::default()
-            },
-        );
-
-        assert_eq!(result, expected);
-    }
-
-    #[test]
-    fn test_highlight_html_linked_escape_curly_braces() {
-        let expected = r#"<pre class="athl"><code class="language-elixir" translate="no" tabindex="0"><span class="line" data-line="1"><span class="punctuation-bracket">&lbrace;</span><span class="string-special-symbol">:ok</span><span class="punctuation-delimiter">,</span> <span class="string-special-symbol">char: </span><span class="character">&#39;&lbrace;&#39;</span><span class="punctuation-bracket">&rbrace;</span>
-</span></code></pre>"#;
-
-        let result = highlight(
-            "{:ok, char: '{'}",
-            Options {
-                lang_or_file: Some("elixir"),
-                formatter: FormatterOption::HtmlLinked {
-                    pre_class: None,
-                    italic: false,
-                    include_highlights: false,
-                },
                 theme: themes::get("catppuccin_frappe").expect("Theme not found"),
                 ..Options::default()
             },
@@ -677,12 +674,26 @@ end
             code,
             Options {
                 lang_or_file: Some("elixir"),
-                formatter: FormatterOption::HtmlLinked {
-                    pre_class: None,
-                    italic: false,
-                    include_highlights: false,
-                },
+                formatter: FormatterOption::HtmlLinked { pre_class: None },
                 theme: themes::get("catppuccin_frappe").expect("Theme not found"),
+            },
+        );
+
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_highlight_html_linked_escape_curly_braces() {
+        let expected = r#"<pre class="athl"><code class="language-elixir" translate="no" tabindex="0"><span class="line" data-line="1"><span class="punctuation-bracket">&lbrace;</span><span class="string-special-symbol">:ok</span><span class="punctuation-delimiter">,</span> <span class="string-special-symbol">char: </span><span class="character">&#39;&lbrace;&#39;</span><span class="punctuation-bracket">&rbrace;</span>
+</span></code></pre>"#;
+
+        let result = highlight(
+            "{:ok, char: '{'}",
+            Options {
+                lang_or_file: Some("elixir"),
+                formatter: FormatterOption::HtmlLinked { pre_class: None },
+                theme: themes::get("catppuccin_frappe").expect("Theme not found"),
+                ..Options::default()
             },
         );
 
