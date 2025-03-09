@@ -1714,6 +1714,24 @@ mod tests {
     }
 
     #[test]
+    fn test_match_filename() {
+        let lang = Language::guess("app.ex", "");
+        assert_eq!(lang.name(), "Elixir");
+    }
+
+    #[test]
+    fn test_match_extension() {
+        let lang = Language::guess(".ex", "");
+        assert_eq!(lang.name(), "Elixir");
+    }
+
+    #[test]
+    fn test_match_path_with_extension() {
+        let lang = Language::guess("lib/app.ex", "");
+        assert_eq!(lang.name(), "Elixir");
+    }
+
+    #[test]
     fn test_no_match_fallbacks_to_plain_text() {
         let lang = Language::guess("none", "");
         assert_eq!(lang.name(), "Plain Text");
