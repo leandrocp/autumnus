@@ -112,7 +112,9 @@ pub enum Language {
 impl Language {
     /// Guess the language based on the provided language name, file path, or source content.
     pub fn guess(lang_or_file: &str, src: &str) -> Self {
-        let exact = match lang_or_file {
+        let lang_or_file = lang_or_file.to_ascii_lowercase();
+
+        let exact = match lang_or_file.as_str() {
             "angular" => Some(Language::Angular),
             "astro" => Some(Language::Astro),
             "bash" => Some(Language::Bash),
@@ -184,13 +186,13 @@ impl Language {
         match exact {
             Some(lang) => lang,
             None => {
-                let path = Path::new(lang_or_file);
+                let path = Path::new(&lang_or_file);
 
                 if let Some(lang) = Self::from_glob(path) {
                     return lang;
                 }
 
-                if let Some(lang) = Self::from_extension(lang_or_file) {
+                if let Some(lang) = Self::from_extension(&lang_or_file) {
                     return lang;
                 }
 
@@ -1710,6 +1712,9 @@ mod tests {
     #[test]
     fn test_match_exact_name() {
         let lang = Language::guess("elixir", "");
+        assert_eq!(lang.name(), "Elixir");
+
+        let lang = Language::guess("Elixir", "");
         assert_eq!(lang.name(), "Elixir");
     }
 
