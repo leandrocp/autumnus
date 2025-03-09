@@ -110,8 +110,9 @@ pub enum Language {
 }
 
 impl Language {
-    pub fn guess(lang_or_path: &str, src: &str) -> Self {
-        let exact = match lang_or_path {
+    /// Guess the language based on the provided language name, file path, or source content.
+    pub fn guess(lang_or_file: &str, src: &str) -> Self {
+        let exact = match lang_or_file {
             "angular" => Some(Language::Angular),
             "astro" => Some(Language::Astro),
             "bash" => Some(Language::Bash),
@@ -183,13 +184,13 @@ impl Language {
         match exact {
             Some(lang) => lang,
             None => {
-                let path = Path::new(lang_or_path);
+                let path = Path::new(lang_or_file);
 
                 if let Some(lang) = Self::from_glob(path) {
                     return lang;
                 }
 
-                if let Some(lang) = Self::from_extension(lang_or_path) {
+                if let Some(lang) = Self::from_extension(lang_or_file) {
                     return lang;
                 }
 

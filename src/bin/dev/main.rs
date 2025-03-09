@@ -136,7 +136,7 @@ fn gen_samples_entries(
             let highlighted = autumnus::highlight(
                 &contents,
                 autumnus::Options {
-                    lang_or_path: Some(file_name),
+                    lang_or_file: Some(file_name),
                     formatter: autumnus::FormatterOption::HtmlInline {
                         pre_class: Some(
                             "w-full overflow-auto rounded-lg p-8 text-sm antialiased leading-6",

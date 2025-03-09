@@ -14,7 +14,7 @@
 //! "#;
 //!
 //! let html = highlight(code, Options {
-//!         lang_or_path: Some("javascript"),
+//!         lang_or_file: Some("javascript"),
 //!         ..Options::default()
 //!     }
 //! );
@@ -29,7 +29,7 @@
 //! let html = highlight(
 //!     code,
 //!     Options {
-//!         lang_or_path: Some("sql"),
+//!         lang_or_file: Some("sql"),
 //!         theme: themes::get("dracula").expect("Theme not found"),
 //!         ..Options::default()
 //!     }
@@ -50,7 +50,7 @@
 //! let html = highlight(
 //!     code,
 //!     Options {
-//!         lang_or_path: Some("app.ex"),
+//!         lang_or_file: Some("app.ex"),
 //!         ..Options::default()
 //!     }
 //! );
@@ -79,7 +79,7 @@
 //! let ansi = highlight(
 //!     code,
 //!     Options {
-//!         lang_or_path: Some("ruby"),
+//!         lang_or_file: Some("ruby"),
 //!         formatter: FormatterOption::Terminal { italic: false },
 //!         ..Options::default()
 //!     }
@@ -340,14 +340,14 @@ pub struct Options<'a> {
     /// use autumnus::{Options, highlight};
     ///
     /// let options = Options {
-    ///     lang_or_path: Some("rust"),
+    ///     lang_or_file: Some("rust"),
     ///     ..Options::default()
     /// };
     ///
     /// let code = r#"fn main() { println!("Hello"); }"#;
     /// let html = highlight(code, options);
     /// ```
-    pub lang_or_path: Option<&'a str>,
+    pub lang_or_file: Option<&'a str>,
 
     /// Theme to use for highlighting.
     ///
@@ -360,7 +360,7 @@ pub struct Options<'a> {
     /// let html = highlight(
     ///     code,
     ///     Options {
-    ///         lang_or_path: Some("sql"),
+    ///         lang_or_file: Some("sql"),
     ///         theme: themes::get("dracula").expect("Theme not found"),
     ///         ..Options::default()
     ///     }
@@ -379,7 +379,7 @@ pub struct Options<'a> {
     /// let ansi = highlight(
     ///     code,
     ///     Options {
-    ///         lang_or_path: Some("ruby"),
+    ///         lang_or_file: Some("ruby"),
     ///         formatter: FormatterOption::Terminal { italic: false },
     ///         ..Options::default()
     ///     }
@@ -391,7 +391,7 @@ pub struct Options<'a> {
 impl Default for Options<'_> {
     fn default() -> Self {
         Self {
-            lang_or_path: None,
+            lang_or_file: None,
             theme: &DEFAULT_THEME,
             formatter: FormatterOption::HtmlInline {
                 pre_class: None,
@@ -430,7 +430,7 @@ impl Default for Options<'_> {
 /// let html = highlight(
 ///     code,
 ///     Options {
-///         lang_or_path: Some("rust"),
+///         lang_or_file: Some("rust"),
 ///         ..Options::default()
 ///     }
 /// );
@@ -467,7 +467,7 @@ impl Default for Options<'_> {
 /// let html = highlight(
 ///     code,
 ///     Options {
-///         lang_or_path: Some("rust"),
+///         lang_or_file: Some("rust"),
 ///         formatter: FormatterOption::HtmlLinked { pre_class: Some("my-code-block"), italic: false, include_highlight: false },
 ///         ..Options::default()
 ///     }
@@ -512,7 +512,7 @@ impl Default for Options<'_> {
 /// let ansi = highlight(
 ///     code,
 ///     Options {
-///         lang_or_path: Some("rust"),
+///         lang_or_file: Some("rust"),
 ///         formatter: FormatterOption::Terminal { italic: false },
 ///         ..Options::default()
 ///     }
@@ -526,7 +526,7 @@ impl Default for Options<'_> {
 /// }
 /// ```
 pub fn highlight(source: &str, options: Options) -> String {
-    let lang = Language::guess(options.lang_or_path.unwrap_or(""), source);
+    let lang = Language::guess(options.lang_or_file.unwrap_or(""), source);
     let mut buffer = String::new();
     let mut highlighter = Highlighter::new();
     let events = highlighter
@@ -601,7 +601,7 @@ end
         let result = highlight(
             code,
             Options {
-                lang_or_path: Some("elixir"),
+                lang_or_file: Some("elixir"),
                 theme: themes::get("catppuccin_frappe").expect("Theme not found"),
                 ..Options::default()
             },
@@ -618,7 +618,7 @@ end
         let result = highlight(
             "{:ok, char: '{'}",
             Options {
-                lang_or_path: Some("elixir"),
+                lang_or_file: Some("elixir"),
                 theme: themes::get("catppuccin_frappe").expect("Theme not found"),
                 ..Options::default()
             },
@@ -635,7 +635,7 @@ end
         let result = highlight(
             "{:ok, char: '{'}",
             Options {
-                lang_or_path: Some("elixir"),
+                lang_or_file: Some("elixir"),
                 formatter: FormatterOption::HtmlLinked {
                     pre_class: None,
                     italic: false,
@@ -676,7 +676,7 @@ end
         let result = highlight(
             code,
             Options {
-                lang_or_path: Some("elixir"),
+                lang_or_file: Some("elixir"),
                 formatter: FormatterOption::HtmlLinked {
                     pre_class: None,
                     italic: false,
@@ -694,7 +694,7 @@ end
         let result = highlight(
             "foo = 1",
             Options {
-                lang_or_path: Some("app.ex"),
+                lang_or_file: Some("app.ex"),
                 ..Options::default()
             },
         );
@@ -706,7 +706,7 @@ end
         let result = highlight(
             "# Title",
             Options {
-                lang_or_path: Some("md"),
+                lang_or_file: Some("md"),
                 ..Options::default()
             },
         );
@@ -715,7 +715,7 @@ end
         let result = highlight(
             "foo = 1",
             Options {
-                lang_or_path: Some("ex"),
+                lang_or_file: Some("ex"),
                 ..Options::default()
             },
         );
@@ -727,7 +727,7 @@ end
         let result = highlight(
             "#!/usr/bin/env elixir",
             Options {
-                lang_or_path: Some("test"),
+                lang_or_file: Some("test"),
                 ..Options::default()
             },
         );
@@ -739,7 +739,7 @@ end
         let result = highlight(
             "source code",
             Options {
-                lang_or_path: Some("none"),
+                lang_or_file: Some("none"),
                 ..Options::default()
             },
         );
@@ -749,7 +749,7 @@ end
     #[test]
     fn test_highlight_terminal() {
         let options = Options {
-            lang_or_path: Some("ruby"),
+            lang_or_file: Some("ruby"),
             theme: themes::get("dracula").expect("Theme not found"),
             formatter: FormatterOption::Terminal { italic: false },
         };

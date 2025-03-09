@@ -227,7 +227,7 @@ fn highlight(path: &str, formatter: Option<Formatter>, theme: Option<String>) ->
             let highlighted = autumnus::highlight(
                 source,
                 autumnus::Options {
-                    lang_or_path: Some(path),
+                    lang_or_file: Some(path),
                     formatter: FormatterOption::default(),
                     theme,
                 },
@@ -240,7 +240,7 @@ fn highlight(path: &str, formatter: Option<Formatter>, theme: Option<String>) ->
             let highlighted = autumnus::highlight(
                 source,
                 autumnus::Options {
-                    lang_or_path: Some(path),
+                    lang_or_file: Some(path),
                     formatter: FormatterOption::HtmlLinked {
                         pre_class: None,
                         italic: false,
@@ -257,7 +257,7 @@ fn highlight(path: &str, formatter: Option<Formatter>, theme: Option<String>) ->
             let highlighted = autumnus::highlight(
                 source,
                 autumnus::Options {
-                    lang_or_path: Some(path),
+                    lang_or_file: Some(path),
                     formatter: FormatterOption::Terminal { italic: false },
                     theme,
                 },
@@ -377,7 +377,7 @@ fn highlight_source(
             let highlighted = autumnus::highlight(
                 source,
                 autumnus::Options {
-                    lang_or_path: language,
+                    lang_or_file: language,
                     formatter: FormatterOption::default(),
                     theme,
                 },
@@ -390,7 +390,7 @@ fn highlight_source(
             let highlighted = autumnus::highlight(
                 source,
                 autumnus::Options {
-                    lang_or_path: language,
+                    lang_or_file: language,
                     formatter: FormatterOption::HtmlLinked {
                         pre_class: None,
                         italic: false,
@@ -407,7 +407,7 @@ fn highlight_source(
             let highlighted = autumnus::highlight(
                 source,
                 autumnus::Options {
-                    lang_or_path: language,
+                    lang_or_file: language,
                     formatter: FormatterOption::Terminal { italic: false },
                     theme,
                 },
