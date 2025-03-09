@@ -244,7 +244,7 @@ fn highlight(path: &str, formatter: Option<Formatter>, theme: Option<String>) ->
                     formatter: FormatterOption::HtmlLinked {
                         pre_class: None,
                         italic: false,
-                        include_highlight: false,
+                        include_highlights: false,
                     },
                     theme,
                 },
@@ -394,7 +394,7 @@ fn highlight_source(
                     formatter: FormatterOption::HtmlLinked {
                         pre_class: None,
                         italic: false,
-                        include_highlight: false,
+                        include_highlights: false,
                     },
                     theme,
                 },

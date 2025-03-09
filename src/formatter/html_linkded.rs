@@ -24,7 +24,7 @@ impl Formatter for HtmlLinked<'_> {
         let class = if let FormatterOption::HtmlLinked {
             pre_class: Some(pre_clas),
             italic: _,
-            include_highlight: _,
+            include_highlights: _,
         } = &self.options.formatter
         {
             format!("athl {}", pre_clas)
@@ -50,12 +50,12 @@ impl Formatter for HtmlLinked<'_> {
     {
         let mut renderer = tree_sitter_highlight::HtmlRenderer::new();
 
-        let (highlight_attr, include_highlight) = if let FormatterOption::HtmlLinked {
-            include_highlight,
+        let (highlight_attr, include_highlights) = if let FormatterOption::HtmlLinked {
+            include_highlights,
             ..
         } = &self.options.formatter
         {
-            if *include_highlight {
+            if *include_highlights {
                 (" data-highlight=\"", true)
             } else {
                 ("", false)
@@ -76,7 +76,7 @@ impl Formatter for HtmlLinked<'_> {
                 let scope = HIGHLIGHT_NAMES[highlight.0];
                 let class = CLASSES[highlight.0];
 
-                if include_highlight {
+                if include_highlights {
                     output.extend(b" data-highlight=\"");
                     output.extend(highlight_attr.as_bytes());
                     output.extend(scope.as_bytes());
@@ -115,7 +115,7 @@ impl Default for HtmlLinked<'_> {
                 formatter: FormatterOption::HtmlLinked {
                     pre_class: None,
                     italic: false,
-                    include_highlight: false,
+                    include_highlights: false,
                 },
                 ..Options::default()
             },

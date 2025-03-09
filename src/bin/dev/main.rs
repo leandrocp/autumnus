@@ -142,7 +142,7 @@ fn gen_samples_entries(
                             "w-full overflow-auto rounded-lg p-8 text-sm antialiased leading-6",
                         ),
                         italic: false,
-                        include_highlight: false,
+                        include_highlights: false,
                     },
                     theme,
                 },

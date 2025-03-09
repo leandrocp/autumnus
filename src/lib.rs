@@ -292,7 +292,7 @@ pub enum FormatterOption {
         italic: bool,
         /// Whether to include the original highlight scope name in a `data` attribute.
         /// Useful for debugging.
-        include_highlight: bool,
+        include_highlights: bool,
     },
     /// HTML output with linked styles.
     ///
@@ -309,7 +309,7 @@ pub enum FormatterOption {
         italic: bool,
         /// Whether to include the original highlight scope name in a `data` attribute.
         /// Useful for debugging.
-        include_highlight: bool,
+        include_highlights: bool,
     },
     /// Terminal output with ANSI colors.
     Terminal {
@@ -323,7 +323,7 @@ impl Default for FormatterOption {
         Self::HtmlInline {
             pre_class: None,
             italic: false,
-            include_highlight: false,
+            include_highlights: false,
         }
     }
 }
@@ -396,7 +396,7 @@ impl Default for Options<'_> {
             formatter: FormatterOption::HtmlInline {
                 pre_class: None,
                 italic: false,
-                include_highlight: false,
+                include_highlights: false,
             },
         }
     }
@@ -468,7 +468,7 @@ impl Default for Options<'_> {
 ///     code,
 ///     Options {
 ///         lang_or_file: Some("rust"),
-///         formatter: FormatterOption::HtmlLinked { pre_class: Some("my-code-block".to_string()), italic: false, include_highlight: false },
+///         formatter: FormatterOption::HtmlLinked { pre_class: Some("my-code-block".to_string()), italic: false, include_highlights: false },
 ///         ..Options::default()
 ///     }
 /// );
@@ -539,7 +539,7 @@ pub fn highlight(source: &str, options: Options) -> String {
         FormatterOption::HtmlInline {
             pre_class: _,
             italic: _,
-            include_highlight: _,
+            include_highlights: _,
         } => {
             let formatter = HtmlInline::new(lang, options);
             formatter.start(&mut buffer, source);
@@ -549,7 +549,7 @@ pub fn highlight(source: &str, options: Options) -> String {
         FormatterOption::HtmlLinked {
             pre_class: _,
             italic: _,
-            include_highlight: _,
+            include_highlights: _,
         } => {
             let formatter = HtmlLinked::new(lang, options);
             formatter.start(&mut buffer, source);
@@ -639,7 +639,7 @@ end
                 formatter: FormatterOption::HtmlLinked {
                     pre_class: None,
                     italic: false,
-                    include_highlight: false,
+                    include_highlights: false,
                 },
                 theme: themes::get("catppuccin_frappe").expect("Theme not found"),
                 ..Options::default()
@@ -680,7 +680,7 @@ end
                 formatter: FormatterOption::HtmlLinked {
                     pre_class: None,
                     italic: false,
-                    include_highlight: false,
+                    include_highlights: false,
                 },
                 theme: themes::get("catppuccin_frappe").expect("Theme not found"),
             },

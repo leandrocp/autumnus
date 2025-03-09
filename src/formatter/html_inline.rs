@@ -24,7 +24,7 @@ impl Formatter for HtmlInline<'_> {
         let class = if let FormatterOption::HtmlInline {
             pre_class: Some(pre_clas),
             italic: _,
-            include_highlight: _,
+            include_highlights: _,
         } = &self.options.formatter
         {
             format!("athl {}", pre_clas)
@@ -55,12 +55,12 @@ impl Formatter for HtmlInline<'_> {
     {
         let mut renderer = tree_sitter_highlight::HtmlRenderer::new();
 
-        let (highlight_attr, include_highlight) = if let FormatterOption::HtmlInline {
-            include_highlight,
+        let (highlight_attr, include_highlights) = if let FormatterOption::HtmlInline {
+            include_highlights,
             ..
         } = &self.options.formatter
         {
-            if *include_highlight {
+            if *include_highlights {
                 (" data-highlight=\"", true)
             } else {
                 ("", false)
@@ -79,14 +79,14 @@ impl Formatter for HtmlInline<'_> {
             .render(events, source.as_bytes(), &move |highlight, output| {
                 let scope = HIGHLIGHT_NAMES[highlight.0];
 
-                if include_highlight {
+                if include_highlights {
                     output.extend(highlight_attr.as_bytes());
                     output.extend(scope.as_bytes());
                     output.extend(b"\"");
                 }
 
                 if let Some(style) = self.options.theme.get_style(scope) {
-                    if include_highlight {
+                    if include_highlights {
                         output.extend(b" ");
                     }
 
@@ -145,7 +145,7 @@ mod tests {
         formatter.options.formatter = FormatterOption::HtmlInline {
             pre_class: Some("test-pre-class".to_string()),
             italic: false,
-            include_highlight: false,
+            include_highlights: false,
         };
         let mut buffer = String::new();
         formatter.start(&mut buffer, "");
@@ -161,7 +161,7 @@ mod tests {
         formatter.options.formatter = FormatterOption::HtmlInline {
             pre_class: Some("test-pre-class".to_string()),
             italic: false,
-            include_highlight: false,
+            include_highlights: false,
         };
         formatter.options.theme = themes::get("github_light").expect("Theme not found");
         let mut buffer = String::new();
