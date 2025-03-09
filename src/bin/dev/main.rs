@@ -134,9 +134,9 @@ fn gen_samples_entries(
                 .with_context(|| format!("failed to read sample file: {}", file_name))?;
 
             let highlighted = autumnus::highlight(
-                file_name,
                 &contents,
                 autumnus::Options {
+                    lang_or_path: Some(file_name),
                     formatter: autumnus::FormatterOption::HtmlInline {
                         pre_class: Some(
                             "w-full overflow-auto rounded-lg p-8 text-sm antialiased leading-6",
@@ -145,7 +145,6 @@ fn gen_samples_entries(
                         include_highlight: false,
                     },
                     theme,
-                    ..autumnus::Options::default()
                 },
             );
 
