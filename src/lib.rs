@@ -283,11 +283,11 @@ static DEFAULT_THEME: LazyLock<Theme> = LazyLock::new(Theme::default);
 
 /// The type of formatter to use for syntax highlighting.
 #[derive(Debug, Clone)]
-pub enum FormatterOption {
+pub enum FormatterOption<'a> {
     /// HTML output with inline styles.
     HtmlInline {
         /// Class to add to the `<pre>` tag.
-        pre_class: Option<&'static str>,
+        pre_class: Option<&'a str>,
         /// Whether to use italics for highlighting.
         italic: bool,
         /// Whether to include the original highlight scope name in a `data` attribute.
@@ -304,7 +304,7 @@ pub enum FormatterOption {
     /// ```
     HtmlLinked {
         /// Class to add to the `<pre>` tag.
-        pre_class: Option<&'static str>,
+        pre_class: Option<&'a str>,
         /// Whether to use italics for highlighting.
         italic: bool,
         /// Whether to include the original highlight scope name in a `data` attribute.
@@ -318,7 +318,7 @@ pub enum FormatterOption {
     },
 }
 
-impl Default for FormatterOption {
+impl Default for FormatterOption<'_> {
     fn default() -> Self {
         Self::HtmlInline {
             pre_class: None,
@@ -385,7 +385,7 @@ pub struct Options<'a> {
     ///     }
     /// );
     /// ```
-    pub formatter: FormatterOption,
+    pub formatter: FormatterOption<'a>,
 }
 
 impl Default for Options<'_> {
