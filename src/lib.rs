@@ -13,7 +13,11 @@
 //!     }
 //! "#;
 //!
-//! let html = highlight("javascript", code, Options::default());
+//! let html = highlight(code, Options {
+//!         lang_or_path: Some("javascript"),
+//!         ..Options::default()
+//!     }
+//! );
 //! ```
 //!
 //! Using a specific theme:
@@ -23,9 +27,9 @@
 //!
 //! let code = "SELECT * FROM users WHERE active = true;";
 //! let html = highlight(
-//!     "sql",
 //!     code,
 //!     Options {
+//!         lang_or_path: Some("sql"),
 //!         theme: themes::get("dracula").expect("Theme not found"),
 //!         ..Options::default()
 //!     }
@@ -43,7 +47,27 @@
 //!     end
 //! "#;
 //! // Language will be automatically detected as Elixir from the .ex extension
-//! let html = highlight("app.ex", code, Options::default());
+//! let html = highlight(
+//!     code,
+//!     Options {
+//!         lang_or_path: Some("app.ex"),
+//!         ..Options::default()
+//!     }
+//! );
+//! ```
+//!
+//! Guess language by source content:
+//!
+//! ```rust
+//! use autumnus::{highlight, Options};
+//!
+//! let code = r#"
+//!     #!/usr/bin/env bash
+//!
+//!     echo "Hello, world!"
+//! "#;
+//! // Language will be automatically detected as Bash from the shebang line
+//! let html = highlight(code, Options::default());
 //! ```
 //!
 //! Terminal output with ANSI colors:
@@ -53,9 +77,9 @@
 //!
 //! let code = "puts 'Hello from Ruby!'";
 //! let ansi = highlight(
-//!     "ruby",
 //!     code,
 //!     Options {
+//!         lang_or_path: Some("ruby"),
 //!         formatter: FormatterOption::Terminal { italic: false },
 //!         ..Options::default()
 //!     }
@@ -293,6 +317,24 @@ impl Default for FormatterOption {
 /// Options for the highlighter.
 #[derive(Debug)]
 pub struct Options<'a> {
+    /// Optional language or file path to use for highlighting.
+    /// If not provided, the language will be guessed based on the source content.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use autumnus::{Options, highlight};
+    ///
+    /// let options = Options {
+    ///     lang_or_path: Some("rust"),
+    ///     ..Options::default()
+    /// };
+    ///
+    /// let code = r#"fn main() { println!("Hello"); }"#;
+    /// let html = highlight(code, options);
+    /// ```
+    pub lang_or_path: Option<&'a str>,
+
     /// Theme to use for highlighting.
     ///
     /// # Examples
@@ -300,21 +342,15 @@ pub struct Options<'a> {
     /// ```
     /// use autumnus::{Options, themes, highlight};
     ///
-    /// let options = Options {
-    ///     theme: themes::get("dracula").expect("Theme not found"),
-    ///     ..Options::default()
-    /// };
-    ///
-    /// let code = r#"fn main() { println!("Hello"); }"#;
-    /// let html = highlight("rust", code, options);
-    /// // Output: <pre class="athl" style="color: #f8f8f2; background-color: #282a36;">
-    /// //   <code class="language-rust" translate="no" tabindex="0">
-    /// //     <span class="line" data-line="1">
-    /// //       <span style="color: #ff79c6;">fn</span> <span style="color: #f8f8f2;">main</span>() {
-    /// //       <span style="color: #8be9fd;">println!</span>(<span style="color: #f1fa8c;">"Hello"</span>); }
-    /// //     </span>
-    /// //   </code>
-    /// // </pre>
+    /// let code = r#"SELECT * FROM users WHERE active = true;"#;
+    /// let html = highlight(
+    ///     code,
+    ///     Options {
+    ///         lang_or_path: Some("sql"),
+    ///         theme: themes::get("dracula").expect("Theme not found"),
+    ///         ..Options::default()
+    ///     }
+    /// );
     /// ```
     pub theme: &'a Theme,
 
@@ -325,24 +361,15 @@ pub struct Options<'a> {
     /// ```
     /// use autumnus::{Options, FormatterOption, highlight};
     ///
-    /// let options = Options {
-    ///     formatter: FormatterOption::HtmlLinked {
-    ///         pre_class: Some("my-code-block"),
-    ///         italic: false,
-    ///         include_highlight: true,
-    ///     },
-    ///     ..Options::default()
-    /// };
-    ///
-    /// let code = r#"fn main() { println!("Hello"); }"#;
-    /// let html = highlight("rust", code, options);
-    /// // Output: <pre class="athl my-code-block">
-    /// //   <code class="language-rust" translate="no" tabindex="0">
-    /// //     <span class="line" data-line="1">
-    /// //       <span class="keyword-function" data-highlight="keyword.function">fn</span> ...
-    /// //     </span>
-    /// //   </code>
-    /// // </pre>
+    /// let code = "puts 'Hello from Ruby!'";
+    /// let ansi = highlight(
+    ///     code,
+    ///     Options {
+    ///         lang_or_path: Some("ruby"),
+    ///         formatter: FormatterOption::Terminal { italic: false },
+    ///         ..Options::default()
+    ///     }
+    /// );
     /// ```
     pub formatter: FormatterOption,
 }
@@ -350,6 +377,7 @@ pub struct Options<'a> {
 impl Default for Options<'_> {
     fn default() -> Self {
         Self {
+            lang_or_path: None,
             theme: &DEFAULT_THEME,
             formatter: FormatterOption::HtmlInline {
                 pre_class: None,
@@ -362,16 +390,14 @@ impl Default for Options<'_> {
 
 /// Highlights source code and returns it as a string with syntax highlighting.
 ///
-/// This function takes the language or file path, source code, and options as input,
+/// This function takes the source code and options as input,
 /// and returns a string with the source code highlighted according to the specified formatter.
 ///
 /// # Arguments
 ///
-/// * `lang_or_path` - A string slice that represents the language or file path of the source code.
-///   If a file path is provided, the language will be guessed based on the file extension.
 /// * `source` - A string slice that represents the source code to be highlighted.
 /// * `options` - An `Options` struct that contains the configuration options for the highlighter,
-///   including the formatter type to use.
+///   including the optional language/file path and formatter type to use.
 ///
 /// # Examples
 ///
@@ -388,9 +414,11 @@ impl Default for Options<'_> {
 /// "#;
 ///
 /// let html = highlight(
-///     "rust",
 ///     code,
-///     Options::default()
+///     Options {
+///         lang_or_path: Some("rust"),
+///         ..Options::default()
+///     }
 /// );
 /// ```
 ///
@@ -423,9 +451,9 @@ impl Default for Options<'_> {
 /// "#;
 ///
 /// let html = highlight(
-///     "rust",
 ///     code,
 ///     Options {
+///         lang_or_path: Some("rust"),
 ///         formatter: FormatterOption::HtmlLinked { pre_class: Some("my-code-block"), italic: false, include_highlight: false },
 ///         ..Options::default()
 ///     }
@@ -468,9 +496,9 @@ impl Default for Options<'_> {
 /// "#;
 ///
 /// let ansi = highlight(
-///     "rust",
 ///     code,
 ///     Options {
+///         lang_or_path: Some("rust"),
 ///         formatter: FormatterOption::Terminal { italic: false },
 ///         ..Options::default()
 ///     }
@@ -483,9 +511,8 @@ impl Default for Options<'_> {
 ///     [38;2;140;170;238mprintln![0m([38;2;166;209;137m"Hello, world!"[0m);
 /// }
 /// ```
-// TODO: also highlight the Theme struct instead of just the name
-pub fn highlight(lang_or_path: &str, source: &str, options: Options) -> String {
-    let lang = Language::guess(lang_or_path, source);
+pub fn highlight(source: &str, options: Options) -> String {
+    let lang = Language::guess(options.lang_or_path.unwrap_or(""), source);
     let mut buffer = String::new();
     let mut highlighter = Highlighter::new();
     let events = highlighter
@@ -558,9 +585,9 @@ end
 </span></code></pre>"#;
 
         let result = highlight(
-            "elixir",
             code,
             Options {
+                lang_or_path: Some("elixir"),
                 theme: themes::get("catppuccin_frappe").expect("Theme not found"),
                 ..Options::default()
             },
@@ -575,9 +602,9 @@ end
 </span></code></pre>"#;
 
         let result = highlight(
-            "elixir",
             "{:ok, char: '{'}",
             Options {
+                lang_or_path: Some("elixir"),
                 theme: themes::get("catppuccin_frappe").expect("Theme not found"),
                 ..Options::default()
             },
@@ -592,9 +619,9 @@ end
 </span></code></pre>"#;
 
         let result = highlight(
-            "elixir",
             "{:ok, char: '{'}",
             Options {
+                lang_or_path: Some("elixir"),
                 formatter: FormatterOption::HtmlLinked {
                     pre_class: None,
                     italic: false,
@@ -633,16 +660,15 @@ end
 </span></code></pre>"#;
 
         let result = highlight(
-            "elixir",
             code,
             Options {
+                lang_or_path: Some("elixir"),
                 formatter: FormatterOption::HtmlLinked {
                     pre_class: None,
                     italic: false,
                     include_highlight: false,
                 },
                 theme: themes::get("catppuccin_frappe").expect("Theme not found"),
-                ..Options::default()
             },
         );
 
@@ -651,39 +677,70 @@ end
 
     #[test]
     fn test_guess_language_by_file_name() {
-        let result = highlight("app.ex", "foo = 1", Options::default());
+        let result = highlight(
+            "foo = 1",
+            Options {
+                lang_or_path: Some("app.ex"),
+                ..Options::default()
+            },
+        );
         assert!(result.as_str().contains("language-elixir"));
     }
 
     #[test]
     fn test_guess_language_by_file_extension() {
-        let result = highlight("md", "# Title", Options::default());
+        let result = highlight(
+            "# Title",
+            Options {
+                lang_or_path: Some("md"),
+                ..Options::default()
+            },
+        );
         assert!(result.as_str().contains("language-markdown"));
 
-        let result = highlight("ex", "foo = 1", Options::default());
+        let result = highlight(
+            "foo = 1",
+            Options {
+                lang_or_path: Some("ex"),
+                ..Options::default()
+            },
+        );
         assert!(result.as_str().contains("language-elixir"));
     }
 
     #[test]
     fn test_guess_language_by_shebang() {
-        let result = highlight("test", "#!/usr/bin/env elixir", Options::default());
+        let result = highlight(
+            "#!/usr/bin/env elixir",
+            Options {
+                lang_or_path: Some("test"),
+                ..Options::default()
+            },
+        );
         assert!(result.as_str().contains("language-elixir"));
     }
 
     #[test]
     fn test_fallback_to_plain_text() {
-        let result = highlight("none", "source code", Options::default());
+        let result = highlight(
+            "source code",
+            Options {
+                lang_or_path: Some("none"),
+                ..Options::default()
+            },
+        );
         assert!(result.as_str().contains("language-plaintext"));
     }
 
     #[test]
     fn test_highlight_terminal() {
         let options = Options {
+            lang_or_path: Some("ruby"),
             theme: themes::get("dracula").expect("Theme not found"),
             formatter: FormatterOption::Terminal { italic: false },
         };
         let code = "puts 'Hello from Ruby!'";
-        let ansi = highlight("ruby", code, options);
+        let ansi = highlight(code, options);
 
         assert!(ansi.as_str().contains("[38;2;241;250;140mHello from Ruby!"));
     }
