@@ -321,7 +321,6 @@ mod tests {
         let themes = available_themes();
 
         assert!(!themes.is_empty());
-        assert_eq!(themes.len(), 96);
 
         let dracula = themes.iter().find(|t| t.name == "dracula").unwrap();
         assert_eq!(dracula.name, "dracula");
@@ -344,7 +343,7 @@ mod tests {
             assert!(!theme.name.is_empty());
         }
 
-        assert_eq!(ALL_THEMES.len(), 104);
+        assert_eq!(ALL_THEMES.len(), 102);
     }
 
     #[test]

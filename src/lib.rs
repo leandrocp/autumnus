@@ -483,6 +483,7 @@ impl Default for Options<'_> {
 ///     [38;2;140;170;238mprintln![0m([38;2;166;209;137m"Hello, world!"[0m);
 /// }
 /// ```
+// TODO: also highlight the Theme struct instead of just the name
 pub fn highlight(lang_or_path: &str, source: &str, options: Options) -> String {
     let lang = Language::guess(lang_or_path, source);
     let mut buffer = String::new();
