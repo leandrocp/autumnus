@@ -1,0 +1,56 @@
+[package]
+name = "lumis-wasm"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[lib]
+crate-type = ["cdylib"]
+
+[features]
+default = ["lang-html"]
+
+# Individual languages
+lang-html = ["tree-sitter-html"]
+lang-css = ["tree-sitter-css"]
+lang-javascript = ["tree-sitter-javascript"]
+lang-typescript = ["tree-sitter-typescript"]
+lang-json = ["tree-sitter-json"]
+lang-rust = ["tree-sitter-rust"]
+lang-go = ["tree-sitter-go"]
+lang-c = ["tree-sitter-c"]
+lang-python = ["tree-sitter-python"]
+lang-ruby = ["tree-sitter-ruby"]
+lang-bash = ["tree-sitter-bash"]
+lang-lua = ["tree-sitter-lua"]
+
+# Bundles
+bundle-web = ["lang-html", "lang-css", "lang-javascript", "lang-typescript", "lang-json"]
+bundle-system = ["lang-rust", "lang-go", "lang-c"]
+bundle-scripting = ["lang-python", "lang-ruby", "lang-bash", "lang-lua"]
+
+[dependencies]
+tree-sitter = "0.25"
+tree-sitter-highlight = "0.25"
+tree-sitter-html = { version = "0.23", optional = true }
+tree-sitter-css = { version = "0.25", optional = true }
+tree-sitter-javascript = { version = "0.25", optional = true }
+tree-sitter-typescript = { version = "0.23", optional = true }
+tree-sitter-json = { version = "0.24", optional = true }
+tree-sitter-rust = { version = "0.24", optional = true }
+tree-sitter-go = { version = "0.25", optional = true }
+tree-sitter-c = { version = "0.24", optional = true }
+tree-sitter-python = { version = "0.25", optional = true }
+tree-sitter-ruby = { version = "0.23", optional = true }
+tree-sitter-bash = { version = "0.25", optional = true }
+tree-sitter-lua = { version = "0.4", optional = true }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

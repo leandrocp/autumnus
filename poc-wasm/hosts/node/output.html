@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Lumis WASM POC - Node.js</title>
+  <style>
+    body { font-family: system-ui; background: #1a1b26; color: #c0caf5; padding: 2rem; }
+    h1 { color: #7aa2f7; }
+    h2 { color: #bb9af7; margin-top: 2rem; }
+    h3 { color: #7dcfff; }
+    .section { margin: 1rem 0; padding: 1rem; background: #24283b; border-radius: 8px; }
+    pre { margin: 0; }
+    code { font-family: 'JetBrains Mono', monospace; }
+  </style>
+</head>
+<body>
+  <h1>Lumis WASM POC - Node.js Host</h1>
+
+  <h2>Individual Modules</h2>
+
+  <h3>lumis-lang-html.wasm</h3>
+  <div class="section">
+    <pre><code><span style="color:#2ac3de;">&lt;!</span><span style="color:#ff9e64;">DOCTYPE html</span><span style="color:#2ac3de;">&gt;</span>
+<span style="color:#2ac3de;">&lt;</span><span style="color:#bb9af7;">html</span> <span style="color:#73daca;">lang</span><span style="color:#89ddff;">=</span><span style="color:#9ece6a;">&quot;</span><span style="color:#9ece6a;">en</span><span style="color:#9ece6a;">&quot;</span><span style="color:#2ac3de;">&gt;</span>
+<span style="color:#2ac3de;">&lt;</span><span style="color:#bb9af7;">head</span><span style="color:#2ac3de;">&gt;</span>
+  <span style="color:#2ac3de;">&lt;</span><span style="color:#bb9af7;">title</span><span style="color:#2ac3de;">&gt;</span>Hello<span style="color:#2ac3de;">&lt;/</span><span style="color:#bb9af7;">title</span><span style="color:#2ac3de;">&gt;</span>
+<span style="color:#2ac3de;">&lt;/</span><span style="color:#bb9af7;">head</span><span style="color:#2ac3de;">&gt;</span>
+<span style="color:#2ac3de;">&lt;</span><span style="color:#bb9af7;">body</span><span style="color:#2ac3de;">&gt;</span>
+  <span style="color:#2ac3de;">&lt;</span><span style="color:#bb9af7;">h1</span> <span style="color:#73daca;">class</span><span style="color:#89ddff;">=</span><span style="color:#9ece6a;">&quot;</span><span style="color:#9ece6a;">title</span><span style="color:#9ece6a;">&quot;</span><span style="color:#2ac3de;">&gt;</span>Hello, World!<span style="color:#2ac3de;">&lt;/</span><span style="color:#bb9af7;">h1</span><span style="color:#2ac3de;">&gt;</span>
+<span style="color:#2ac3de;">&lt;/</span><span style="color:#bb9af7;">body</span><span style="color:#2ac3de;">&gt;</span>
+<span style="color:#2ac3de;">&lt;/</span><span style="color:#bb9af7;">html</span><span style="color:#2ac3de;">&gt;</span></code></pre>
+  </div>
+
+  <h3>lumis-lang-css.wasm</h3>
+  <div class="section">
+    <pre><code><span style="color:#89ddff;">.</span><span style="color:#2ac3de;">title</span> <span style="color:#a9b1d6;">{</span>
+  <span style="color:#73daca;">color</span><span style="color:#89ddff;">:</span> <span style="color:#89ddff;">#</span><span style="color:#9ece6a;">333</span><span style="color:#89ddff;">;</span>
+  <span style="color:#73daca;">font-size</span><span style="color:#89ddff;">:</span> <span style="color:#ff9e64;">24</span><span style="color:#9ece6a;">px</span><span style="color:#89ddff;">;</span>
+<span style="color:#a9b1d6;">}</span>
+
+<span style="color:#7dcfff;">@media</span> <span style="color:#a9b1d6;">(</span><span style="color:#73daca;">max-width</span><span style="color:#89ddff;">:</span> <span style="color:#ff9e64;">768</span><span style="color:#9ece6a;">px</span><span style="color:#a9b1d6;">)</span> <span style="color:#a9b1d6;">{</span>
+  <span style="color:#89ddff;">.</span><span style="color:#2ac3de;">title</span> <span style="color:#a9b1d6;">{</span>
+    <span style="color:#73daca;">font-size</span><span style="color:#89ddff;">:</span> <span style="color:#ff9e64;">18</span><span style="color:#9ece6a;">px</span><span style="color:#89ddff;">;</span>
+  <span style="color:#a9b1d6;">}</span>
+<span style="color:#a9b1d6;">}</span></code></pre>
+  </div>
+
+  <h2>Bundle Module (lumis-lang-bundle-web.wasm)</h2>
+
+  <h3>HTML</h3>
+  <div class="section">
+    <pre><code><span style="color:#2ac3de;">&lt;!</span><span style="color:#ff9e64;">DOCTYPE html</span><span style="color:#2ac3de;">&gt;</span>
+<span style="color:#2ac3de;">&lt;</span><span style="color:#bb9af7;">html</span> <span style="color:#73daca;">lang</span><span style="color:#89ddff;">=</span><span style="color:#9ece6a;">&quot;</span><span style="color:#9ece6a;">en</span><span style="color:#9ece6a;">&quot;</span><span style="color:#2ac3de;">&gt;</span>
+<span style="color:#2ac3de;">&lt;</span><span style="color:#bb9af7;">head</span><span style="color:#2ac3de;">&gt;</span>
+  <span style="color:#2ac3de;">&lt;</span><span style="color:#bb9af7;">title</span><span style="color:#2ac3de;">&gt;</span>Hello<span style="color:#2ac3de;">&lt;/</span><span style="color:#bb9af7;">title</span><span style="color:#2ac3de;">&gt;</span>
+<span style="color:#2ac3de;">&lt;/</span><span style="color:#bb9af7;">head</span><span style="color:#2ac3de;">&gt;</span>
+<span style="color:#2ac3de;">&lt;</span><span style="color:#bb9af7;">body</span><span style="color:#2ac3de;">&gt;</span>
+  <span style="color:#2ac3de;">&lt;</span><span style="color:#bb9af7;">h1</span> <span style="color:#73daca;">class</span><span style="color:#89ddff;">=</span><span style="color:#9ece6a;">&quot;</span><span style="color:#9ece6a;">title</span><span style="color:#9ece6a;">&quot;</span><span style="color:#2ac3de;">&gt;</span>Hello, World!<span style="color:#2ac3de;">&lt;/</span><span style="color:#bb9af7;">h1</span><span style="color:#2ac3de;">&gt;</span>
+<span style="color:#2ac3de;">&lt;/</span><span style="color:#bb9af7;">body</span><span style="color:#2ac3de;">&gt;</span>
+<span style="color:#2ac3de;">&lt;/</span><span style="color:#bb9af7;">html</span><span style="color:#2ac3de;">&gt;</span></code></pre>
+  </div>
+
+  <h3>CSS</h3>
+  <div class="section">
+    <pre><code><span style="color:#89ddff;">.</span><span style="color:#2ac3de;">title</span> <span style="color:#a9b1d6;">{</span>
+  <span style="color:#73daca;">color</span><span style="color:#89ddff;">:</span> <span style="color:#89ddff;">#</span><span style="color:#9ece6a;">333</span><span style="color:#89ddff;">;</span>
+  <span style="color:#73daca;">font-size</span><span style="color:#89ddff;">:</span> <span style="color:#ff9e64;">24</span><span style="color:#9ece6a;">px</span><span style="color:#89ddff;">;</span>
+<span style="color:#a9b1d6;">}</span>
+
+<span style="color:#7dcfff;">@media</span> <span style="color:#a9b1d6;">(</span><span style="color:#73daca;">max-width</span><span style="color:#89ddff;">:</span> <span style="color:#ff9e64;">768</span><span style="color:#9ece6a;">px</span><span style="color:#a9b1d6;">)</span> <span style="color:#a9b1d6;">{</span>
+  <span style="color:#89ddff;">.</span><span style="color:#2ac3de;">title</span> <span style="color:#a9b1d6;">{</span>
+    <span style="color:#73daca;">font-size</span><span style="color:#89ddff;">:</span> <span style="color:#ff9e64;">18</span><span style="color:#9ece6a;">px</span><span style="color:#89ddff;">;</span>
+  <span style="color:#a9b1d6;">}</span>
+<span style="color:#a9b1d6;">}</span></code></pre>
+  </div>
+</body>
+</html>
