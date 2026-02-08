@@ -1,0 +1,132 @@
+<pre class="lumis w-full overflow-auto rounded-lg p-8 font-mono text-sm antialiased leading-6" style="color: #d3c6aa; background-color: #2d353b;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1"># GraphQL Schema Definition
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3">&quot;&quot;&quot;
+</div><div class="line" data-line="4">User type representing a registered user in the system
+</div><div class="line" data-line="5">&quot;&quot;&quot;
+</div><div class="line" data-line="6">type User &lbrace;
+</div><div class="line" data-line="7">  id: ID!
+</div><div class="line" data-line="8">  email: String!
+</div><div class="line" data-line="9">  name: String
+</div><div class="line" data-line="10">  avatar: String
+</div><div class="line" data-line="11">  role: Role!
+</div><div class="line" data-line="12">  posts(first: Int, after: String): PostConnection!
+</div><div class="line" data-line="13">  createdAt: DateTime!
+</div><div class="line" data-line="14">  updatedAt: DateTime!
+</div><div class="line" data-line="15">&rbrace;
+</div><div class="line" data-line="16">
+</div><div class="line" data-line="17">enum Role &lbrace;
+</div><div class="line" data-line="18">  ADMIN
+</div><div class="line" data-line="19">  USER
+</div><div class="line" data-line="20">  GUEST
+</div><div class="line" data-line="21">&rbrace;
+</div><div class="line" data-line="22">
+</div><div class="line" data-line="23">type Post &lbrace;
+</div><div class="line" data-line="24">  id: ID!
+</div><div class="line" data-line="25">  title: String!
+</div><div class="line" data-line="26">  content: String!
+</div><div class="line" data-line="27">  published: Boolean!
+</div><div class="line" data-line="28">  author: User!
+</div><div class="line" data-line="29">  tags: [Tag!]!
+</div><div class="line" data-line="30">  comments(limit: Int = 10): [Comment!]!
+</div><div class="line" data-line="31">  createdAt: DateTime!
+</div><div class="line" data-line="32">&rbrace;
+</div><div class="line" data-line="33">
+</div><div class="line" data-line="34">type Tag &lbrace;
+</div><div class="line" data-line="35">  id: ID!
+</div><div class="line" data-line="36">  name: String!
+</div><div class="line" data-line="37">  posts: [Post!]!
+</div><div class="line" data-line="38">&rbrace;
+</div><div class="line" data-line="39">
+</div><div class="line" data-line="40">type Comment &lbrace;
+</div><div class="line" data-line="41">  id: ID!
+</div><div class="line" data-line="42">  text: String!
+</div><div class="line" data-line="43">  author: User!
+</div><div class="line" data-line="44">  post: Post!
+</div><div class="line" data-line="45">  createdAt: DateTime!
+</div><div class="line" data-line="46">&rbrace;
+</div><div class="line" data-line="47">
+</div><div class="line" data-line="48"># Pagination types
+</div><div class="line" data-line="49">type PostConnection &lbrace;
+</div><div class="line" data-line="50">  edges: [PostEdge!]!
+</div><div class="line" data-line="51">  pageInfo: PageInfo!
+</div><div class="line" data-line="52">  totalCount: Int!
+</div><div class="line" data-line="53">&rbrace;
+</div><div class="line" data-line="54">
+</div><div class="line" data-line="55">type PostEdge &lbrace;
+</div><div class="line" data-line="56">  cursor: String!
+</div><div class="line" data-line="57">  node: Post!
+</div><div class="line" data-line="58">&rbrace;
+</div><div class="line" data-line="59">
+</div><div class="line" data-line="60">type PageInfo &lbrace;
+</div><div class="line" data-line="61">  hasNextPage: Boolean!
+</div><div class="line" data-line="62">  hasPreviousPage: Boolean!
+</div><div class="line" data-line="63">  startCursor: String
+</div><div class="line" data-line="64">  endCursor: String
+</div><div class="line" data-line="65">&rbrace;
+</div><div class="line" data-line="66">
+</div><div class="line" data-line="67"># Input types
+</div><div class="line" data-line="68">input CreatePostInput &lbrace;
+</div><div class="line" data-line="69">  title: String!
+</div><div class="line" data-line="70">  content: String!
+</div><div class="line" data-line="71">  published: Boolean = false
+</div><div class="line" data-line="72">  tagIds: [ID!]
+</div><div class="line" data-line="73">&rbrace;
+</div><div class="line" data-line="74">
+</div><div class="line" data-line="75">input UpdatePostInput &lbrace;
+</div><div class="line" data-line="76">  title: String
+</div><div class="line" data-line="77">  content: String
+</div><div class="line" data-line="78">  published: Boolean
+</div><div class="line" data-line="79">  tagIds: [ID!]
+</div><div class="line" data-line="80">&rbrace;
+</div><div class="line" data-line="81">
+</div><div class="line" data-line="82">input PostFilter &lbrace;
+</div><div class="line" data-line="83">  published: Boolean
+</div><div class="line" data-line="84">  authorId: ID
+</div><div class="line" data-line="85">  tagIds: [ID!]
+</div><div class="line" data-line="86">  search: String
+</div><div class="line" data-line="87">&rbrace;
+</div><div class="line" data-line="88">
+</div><div class="line" data-line="89"># Custom scalar
+</div><div class="line" data-line="90">scalar DateTime
+</div><div class="line" data-line="91">
+</div><div class="line" data-line="92"># Queries
+</div><div class="line" data-line="93">type Query &lbrace;
+</div><div class="line" data-line="94">  me: User
+</div><div class="line" data-line="95">  user(id: ID!): User
+</div><div class="line" data-line="96">  users(role: Role): [User!]!
+</div><div class="line" data-line="97">
+</div><div class="line" data-line="98">  post(id: ID!): Post
+</div><div class="line" data-line="99">  posts(
+</div><div class="line" data-line="100">    filter: PostFilter
+</div><div class="line" data-line="101">    first: Int
+</div><div class="line" data-line="102">    after: String
+</div><div class="line" data-line="103">    orderBy: PostOrderBy
+</div><div class="line" data-line="104">  ): PostConnection!
+</div><div class="line" data-line="105">
+</div><div class="line" data-line="106">  tags: [Tag!]!
+</div><div class="line" data-line="107">&rbrace;
+</div><div class="line" data-line="108">
+</div><div class="line" data-line="109">enum PostOrderBy &lbrace;
+</div><div class="line" data-line="110">  CREATED_AT_ASC
+</div><div class="line" data-line="111">  CREATED_AT_DESC
+</div><div class="line" data-line="112">  TITLE_ASC
+</div><div class="line" data-line="113">  TITLE_DESC
+</div><div class="line" data-line="114">&rbrace;
+</div><div class="line" data-line="115">
+</div><div class="line" data-line="116"># Mutations
+</div><div class="line" data-line="117">type Mutation &lbrace;
+</div><div class="line" data-line="118">  createPost(input: CreatePostInput!): Post!
+</div><div class="line" data-line="119">  updatePost(id: ID!, input: UpdatePostInput!): Post!
+</div><div class="line" data-line="120">  deletePost(id: ID!): Boolean!
+</div><div class="line" data-line="121">
+</div><div class="line" data-line="122">  publishPost(id: ID!): Post!
+</div><div class="line" data-line="123">
+</div><div class="line" data-line="124">  addComment(postId: ID!, text: String!): Comment!
+</div><div class="line" data-line="125">&rbrace;
+</div><div class="line" data-line="126">
+</div><div class="line" data-line="127"># Subscriptions
+</div><div class="line" data-line="128">type Subscription &lbrace;
+</div><div class="line" data-line="129">  postCreated: Post!
+</div><div class="line" data-line="130">  commentAdded(postId: ID!): Comment!
+</div><div class="line" data-line="131">&rbrace;
+</div></code></pre>

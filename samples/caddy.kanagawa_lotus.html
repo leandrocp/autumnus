@@ -1,0 +1,73 @@
+<pre class="lumis w-full overflow-auto rounded-lg p-8 font-mono text-sm antialiased leading-6" style="color: #545464; background-color: #f2ecbc;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1"># Caddyfile - Caddy Web Server Configuration
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"># Global options
+</div><div class="line" data-line="4">&lbrace;
+</div><div class="line" data-line="5">    email admin@example.com
+</div><div class="line" data-line="6">    acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
+</div><div class="line" data-line="7">    admin off
+</div><div class="line" data-line="8">    log &lbrace;
+</div><div class="line" data-line="9">        output file /var/log/caddy/access.log
+</div><div class="line" data-line="10">        format json
+</div><div class="line" data-line="11">    &rbrace;
+</div><div class="line" data-line="12">&rbrace;
+</div><div class="line" data-line="13">
+</div><div class="line" data-line="14"># Simple static site
+</div><div class="line" data-line="15">example.com &lbrace;
+</div><div class="line" data-line="16">    root * /var/www/html
+</div><div class="line" data-line="17">    file_server
+</div><div class="line" data-line="18">    encode gzip zstd
+</div><div class="line" data-line="19">&rbrace;
+</div><div class="line" data-line="20">
+</div><div class="line" data-line="21"># Reverse proxy with load balancing
+</div><div class="line" data-line="22">api.example.com &lbrace;
+</div><div class="line" data-line="23">    reverse_proxy /api/* &lbrace;
+</div><div class="line" data-line="24">        to localhost:8080 localhost:8081 localhost:8082
+</div><div class="line" data-line="25">        lb_policy round_robin
+</div><div class="line" data-line="26">        health_uri /health
+</div><div class="line" data-line="27">        health_interval 30s
+</div><div class="line" data-line="28">
+</div><div class="line" data-line="29">        header_up Host &lbrace;upstream_hostport&rbrace;
+</div><div class="line" data-line="30">        header_up X-Real-IP &lbrace;remote_host&rbrace;
+</div><div class="line" data-line="31">        header_down -Server
+</div><div class="line" data-line="32">    &rbrace;
+</div><div class="line" data-line="33">
+</div><div class="line" data-line="34">    log &lbrace;
+</div><div class="line" data-line="35">        output file /var/log/caddy/api.log
+</div><div class="line" data-line="36">    &rbrace;
+</div><div class="line" data-line="37">&rbrace;
+</div><div class="line" data-line="38">
+</div><div class="line" data-line="39"># HTTPS with custom certificates
+</div><div class="line" data-line="40">secure.example.com &lbrace;
+</div><div class="line" data-line="41">    tls /etc/ssl/certs/cert.pem /etc/ssl/private/key.pem
+</div><div class="line" data-line="42">
+</div><div class="line" data-line="43">    @websockets &lbrace;
+</div><div class="line" data-line="44">        header Connection *Upgrade*
+</div><div class="line" data-line="45">        header Upgrade websocket
+</div><div class="line" data-line="46">    &rbrace;
+</div><div class="line" data-line="47">
+</div><div class="line" data-line="48">    reverse_proxy @websockets localhost:3000
+</div><div class="line" data-line="49">
+</div><div class="line" data-line="50">    respond /health 200
+</div><div class="line" data-line="51">
+</div><div class="line" data-line="52">    handle_errors &lbrace;
+</div><div class="line" data-line="53">        respond &quot;&lbrace;http.error.status_code&rbrace; &lbrace;http.error.status_text&rbrace;&quot;
+</div><div class="line" data-line="54">    &rbrace;
+</div><div class="line" data-line="55">&rbrace;
+</div><div class="line" data-line="56">
+</div><div class="line" data-line="57"># Basic auth and rate limiting
+</div><div class="line" data-line="58">admin.example.com &lbrace;
+</div><div class="line" data-line="59">    basicauth &lbrace;
+</div><div class="line" data-line="60">        admin $2a$14$hashhere
+</div><div class="line" data-line="61">    &rbrace;
+</div><div class="line" data-line="62">
+</div><div class="line" data-line="63">    rate_limit &lbrace;
+</div><div class="line" data-line="64">        zone static &lbrace;
+</div><div class="line" data-line="65">            key static
+</div><div class="line" data-line="66">            events 100
+</div><div class="line" data-line="67">            window 1m
+</div><div class="line" data-line="68">        &rbrace;
+</div><div class="line" data-line="69">    &rbrace;
+</div><div class="line" data-line="70">
+</div><div class="line" data-line="71">    php_fastcgi unix//run/php/php-fpm.sock
+</div><div class="line" data-line="72">&rbrace;
+</div></code></pre>
