@@ -84,6 +84,7 @@ list-vendored-parsers:
     extra_parsers=(
         "http"
         "iex"
+        "nu"
     )
 
     for base_name in "${parsers[@]}"; do
@@ -143,6 +144,7 @@ update-vendored-parsers parser_name="":
     extra_parsers=(
         "tree-sitter-http https://github.com/rest-nvim/tree-sitter-http.git main"
         "tree-sitter-iex https://github.com/elixir-lang/tree-sitter-iex.git main"
+        "tree-sitter-nu https://github.com/nushell/tree-sitter-nu.git main"
     )
 
     for base_name in "${all_parsers[@]}"; do
@@ -266,6 +268,7 @@ update-queries query_name="":
     declare -A special_repos
     special_repos["iex"]="https://github.com/elixir-lang/tree-sitter-iex.git main"
     special_repos["nix"]="https://github.com/nix-community/tree-sitter-nix.git master"
+    special_repos["nu"]="https://github.com/nushell/tree-sitter-nu.git main"
     # https://github.com/leandrocp/lumis/pull/200
     special_repos["python"]="https://github.com/tree-sitter/tree-sitter-python.git master"
 
