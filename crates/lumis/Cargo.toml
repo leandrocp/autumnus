@@ -92,6 +92,7 @@ all-languages = [
     "lang-markdown",
     "lang-markdown-inline",
     "lang-nix",
+    "lang-nushell",
     "lang-objc",
     "lang-ocaml",
     "lang-perl",
@@ -166,6 +167,7 @@ lang-make = []
 lang-markdown = []
 lang-markdown-inline = []
 lang-nix = ["dep:tree-sitter-nix"]
+lang-nushell = []
 lang-objc = ["dep:tree-sitter-objc"]
 lang-ocaml = ["dep:tree-sitter-ocaml"]
 lang-perl = []

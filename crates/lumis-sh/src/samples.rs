@@ -46,6 +46,7 @@ pub fn samples() -> HashMap<&'static str, &'static str> {
     m.insert("make", include_str!("../../../samples/make.mk"));
     m.insert("markdown", include_str!("../../../samples/markdown.md"));
     m.insert("nix", include_str!("../../../samples/nix.nix"));
+    m.insert("nushell", include_str!("../../../samples/nushell.nu"));
     m.insert("objective-c", include_str!("../../../samples/objc.m"));
     m.insert("ocaml", include_str!("../../../samples/ocaml.ml"));
     m.insert("ocamlinterface", include_str!("../../../samples/ocamlinterface.mli"));

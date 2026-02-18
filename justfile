@@ -288,6 +288,11 @@ update-queries query_name="":
             git clone --depth 1 --branch "$branch" "$repo" "$TEMP_DIR/$LANG-special"
             SRC_DIR="$TEMP_DIR/$LANG-special/queries"
 
+            # Some repos nest queries under queries/<lang>/ — flatten if so
+            if [ -d "$SRC_DIR/$LANG" ]; then
+                SRC_DIR="$SRC_DIR/$LANG"
+            fi
+
             if [ -d "$SRC_DIR" ]; then
                 mkdir -p "$DEST_DIR"
                 cp -r "$SRC_DIR"/* "$DEST_DIR/" 2>/dev/null || true

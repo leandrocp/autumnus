@@ -228,6 +228,13 @@ fn vendored_parsers() {
         extra_files: vec!["scanner.c"],
     });
 
+    #[cfg(feature = "lang-nushell")]
+    parsers.push(TreeSitterParser {
+        name: "tree-sitter-nu",
+        src_dir: "vendored_parsers/tree-sitter-nu/src",
+        extra_files: vec!["scanner.c"],
+    });
+
     #[cfg(feature = "lang-perl")]
     parsers.push(TreeSitterParser {
         name: "tree-sitter-perl",
@@ -436,6 +443,7 @@ fn queries() {
             "lua" => cfg!(feature = "lang-lua"),
             "make" => cfg!(feature = "lang-make"),
             "nix" => cfg!(feature = "lang-nix"),
+            "nu" => cfg!(feature = "lang-nushell"),
             "objc" => cfg!(feature = "lang-objc"),
             "perl" => cfg!(feature = "lang-perl"),
             "php" => cfg!(feature = "lang-php"),
