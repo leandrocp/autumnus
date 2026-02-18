@@ -75,19 +75,6 @@ checksum = "a23eb6b1614318a8071c9b2521f36b424b2c83db5eb3a0fead4a6c0809af6e61"
 
 [[package]]
 name = "askama"
-version = "0.14.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f75363874b771be265f4ffe307ca705ef6f3baa19011c149da8674a87f1b75c4"
-dependencies = [
- "askama_derive 0.14.0",
- "itoa",
- "percent-encoding",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "askama"
 version = "0.15.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "08e1676b346cadfec169374f949d7490fd80a24193d37d2afce0c047cf695e57"
@@ -101,11 +88,11 @@ dependencies = [
 
 [[package]]
 name = "askama_derive"
-version = "0.14.0"
+version = "0.15.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "129397200fe83088e8a68407a8e2b1f826cf0086b21ccdb866a722c8bcd3a94f"
+checksum = "7661ff56517787343f376f75db037426facd7c8d3049cef8911f1e75016f3a37"
 dependencies = [
- "askama_parser 0.14.0",
+ "askama_parser",
  "basic-toml",
  "memchr",
  "proc-macro2",
@@ -117,38 +104,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "askama_derive"
-version = "0.15.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7661ff56517787343f376f75db037426facd7c8d3049cef8911f1e75016f3a37"
-dependencies = [
- "askama_parser 0.15.4",
- "memchr",
- "proc-macro2",
- "quote",
- "rustc-hash",
- "syn",
-]
-
-[[package]]
 name = "askama_macros"
 version = "0.15.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "713ee4dbfd1eb719c2dab859465b01fa1d21cb566684614a713a6b7a99a4e47b"
 dependencies = [
- "askama_derive 0.15.4",
-]
-
-[[package]]
-name = "askama_parser"
-version = "0.14.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d6ab5630b3d5eaf232620167977f95eb51f3432fc76852328774afbd242d4358"
-dependencies = [
- "memchr",
- "serde",
- "serde_derive",
- "winnow",
+ "askama_derive",
 ]
 
 [[package]]
@@ -158,6 +119,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1d62d674238a526418b30c0def480d5beadb9d8964e7f38d635b03bf639c704c"
 dependencies = [
  "rustc-hash",
+ "serde",
+ "serde_derive",
  "unicode-ident",
  "winnow",
 ]
@@ -168,7 +131,7 @@ version = "0.15.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5911a65ac3916ef133167a855d52978f9fbf54680a093e0ef29e20b7e94a4523"
 dependencies = [
- "askama 0.15.4",
+ "askama",
  "askama_web_derive",
  "axum-core",
  "bytes",
@@ -911,7 +874,7 @@ dependencies = [
 name = "lumis-sh"
 version = "0.1.0"
 dependencies = [
- "askama 0.14.0",
+ "askama",
  "askama_web",
  "axum",
  "lumis 0.1.1",

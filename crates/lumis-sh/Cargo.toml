@@ -12,7 +12,7 @@ path = "src/main.rs"
 lumis = { path = "../lumis", features = ["all-languages"] }
 axum = "0.8"
 tokio = { version = "1", features = ["full"] }
-askama = "0.14"
+askama = "0.15"
 askama_web = { version = "0.15", features = ["axum-0.8"] }
 serde = { version = "1", features = ["derive"] }
 tower-http = { version = "0.6", features = ["compression-gzip"] }
