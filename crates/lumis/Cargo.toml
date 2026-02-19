@@ -269,3 +269,86 @@ syn = { version = "2.0", features = ["full", "parsing"] }
 
 [dev-dependencies]
 pretty_assertions = "1.4"
+
+[package.metadata.langs.parsers]
+asm = { dep = true }
+bash = { dep = true }
+c = { dep = true }
+cmake = { dep = true }
+comment = { dep = true }
+cpp = { dep = true }
+csharp = { dep = "tree-sitter-c-sharp" }
+css = { dep = true }
+diff = { dep = true }
+ejs = { dep = "tree-sitter-embedded-template" }
+elixir = { dep = true }
+elm = { dep = true }
+erb = { dep = "tree-sitter-embedded-template" }
+erlang = { dep = true }
+fsharp = { dep = true }
+gleam = { dep = true }
+go = { dep = true }
+haskell = { dep = true }
+hcl = { dep = true }
+heex = { dep = true }
+html = { dep = true }
+java = { dep = true }
+javascript = { dep = true }
+json = { dep = true }
+lua = { dep = true }
+nix = { dep = true }
+objc = { dep = true }
+ocaml = { dep = true }
+php = { dep = true }
+powershell = { dep = true }
+protobuf = { dep = "tree-sitter-proto" }
+python = { dep = true }
+r = { dep = true }
+regex = { dep = true }
+ruby = { dep = true }
+rust = { dep = true }
+scala = { dep = true }
+sql = { dep = "tree-sitter-sequel" }
+svelte = { dep = "tree-sitter-svelte-ng" }
+swift = { dep = true }
+toml = { dep = "tree-sitter-toml-ng" }
+tsx = { dep = "tree-sitter-typescript" }
+typescript = { dep = "tree-sitter-typescript" }
+xml = { dep = true }
+yaml = { dep = true }
+zig = { dep = true }
+angular = { git = "https://github.com/dlvandenberg/tree-sitter-angular.git", rev = "f0d0685701b70883fa2dfe94ee7dc27965cab841" }
+astro = { git = "https://github.com/virchau13/tree-sitter-astro.git", rev = "213f6e6973d9b456c6e50e86f19f66877e7ef0ee" }
+caddy = { git = "https://github.com/opa-oz/tree-sitter-caddy.git", rev = "2686186edb61be47960431c93a204fb249681360" }
+clojure = { git = "https://github.com/sogaiu/tree-sitter-clojure.git", rev = "e43eff80d17cf34852dcd92ca5e6986d23a7040f" }
+commonlisp = { git = "https://github.com/tree-sitter-grammars/tree-sitter-commonlisp.git", rev = "32323509b3d9fe96607d151c2da2c9009eb13a2f" }
+csv = { git = "https://github.com/tree-sitter-grammars/tree-sitter-csv.git", rev = "f6bf6e35eb0b95fbadea4bb39cb9709507fcb181", location = "csv" }
+dart = { git = "https://github.com/UserNobody14/tree-sitter-dart.git", rev = "81638dbbdb76a0e88ea8c31b95ec76b9625ddb84" }
+dockerfile = { git = "https://github.com/camdencheek/tree-sitter-dockerfile.git", rev = "971acdd908568b4531b0ba28a445bf0bb720aba5" }
+eex = { git = "https://github.com/connorlay/tree-sitter-eex.git", rev = "f742f2fe327463335e8671a87c0b9b396905d1d1" }
+fish = { git = "https://github.com/ram02z/tree-sitter-fish.git", rev = "aa074a0bacde8b5823c592574d7138f156a95776" }
+glimmer = { git = "https://github.com/ember-tooling/tree-sitter-glimmer.git", rev = "88af85568bde3b91acb5d4c352ed094d0c1f9d84" }
+graphql = { git = "https://github.com/bkegley/tree-sitter-graphql.git", rev = "5e66e961eee421786bdda8495ed1db045e06b5fe" }
+http = { git = "https://github.com/rest-nvim/tree-sitter-http.git", rev = "db8b4398de90b6d0b6c780aba96aaa2cd8e9202c" }
+iex = { git = "https://github.com/elixir-lang/tree-sitter-iex.git", rev = "39f20bb51f502e32058684e893c0c0b00bb2332c" }
+kotlin = { git = "https://github.com/fwcd/tree-sitter-kotlin.git", rev = "48c964a9ddfe4387968d1b6412d7b39106fb7f39" }
+latex = { git = "https://github.com/latex-lsp/tree-sitter-latex.git", rev = "7e0ecdc02926c7b9b2e0c76003d4fe7b0944f957", generate = true }
+liquid = { git = "https://github.com/hankthetank27/tree-sitter-liquid.git", rev = "d6ebde3974742cd1b61b55d1d94aab1dacb41056" }
+llvm = { git = "https://github.com/benwilliamgraham/tree-sitter-llvm.git", rev = "2914786ae6774d4c4e25a230f4afe16aa68fe1c1" }
+make = { git = "https://github.com/tree-sitter-grammars/tree-sitter-make.git", rev = "5e9e8f8ff3387b0edcaa90f46ddf3629f4cfeb1d" }
+markdown = { git = "https://github.com/tree-sitter-grammars/tree-sitter-markdown.git", rev = "cee71b8288f2ec09c29415219ac15a654bd571b9", location = "tree-sitter-markdown" }
+markdown_inline = { git = "https://github.com/tree-sitter-grammars/tree-sitter-markdown.git", rev = "cee71b8288f2ec09c29415219ac15a654bd571b9", location = "tree-sitter-markdown-inline" }
+nu = { git = "https://github.com/nushell/tree-sitter-nu.git", rev = "bb3f533e5792260291945e1f329e1f0a779def6e" }
+perl = { git = "https://github.com/tree-sitter-perl/tree-sitter-perl.git", rev = "0c24d001dd1921e418fb933d208a7bd7dd3f923a", generate = true }
+scss = { git = "https://github.com/serenadeai/tree-sitter-scss.git", rev = "c478c6868648eff49eb04a4df90d703dc45b312a" }
+surface = { git = "https://github.com/connorlay/tree-sitter-surface.git", rev = "f4586b35ac8548667a9aad4eae44456c1f43d032" }
+typst = { git = "https://github.com/uben0/tree-sitter-typst.git", rev = "46cf4ded12ee974a70bf8457263b67ad7ee0379d" }
+vim = { git = "https://github.com/tree-sitter-grammars/tree-sitter-vim.git", rev = "1cd0a0892b389bd314a9bd09545160e5ee3c9137" }
+vue = { git = "https://github.com/tree-sitter-grammars/tree-sitter-vue.git", rev = "ce8011a414fdf8091f4e4071752efc376f4afb08" }
+
+[package.metadata.langs.queries]
+default = { git = "https://github.com/nvim-treesitter/nvim-treesitter.git", rev = "3edb01f912867603c2aef9079f208f0244c0885b" }
+iex = { git = "https://github.com/elixir-lang/tree-sitter-iex.git", rev = "39f20bb51f502e32058684e893c0c0b00bb2332c" }
+nix = { git = "https://github.com/nix-community/tree-sitter-nix.git", rev = "eabf96807ea4ab6d6c7f09b671a88cd483542840" }
+nu = { git = "https://github.com/nushell/tree-sitter-nu.git", rev = "bb3f533e5792260291945e1f329e1f0a779def6e" }
+python = { git = "https://github.com/tree-sitter/tree-sitter-python.git", rev = "26855eabccb19c6abf499fbc5b8dc7cc9ab8bc64" }
