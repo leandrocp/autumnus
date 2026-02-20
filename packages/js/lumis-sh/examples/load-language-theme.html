@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>loadLanguage / loadTheme</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-slate-900 text-slate-300 min-h-screen">
+  <div class="max-w-2xl mx-auto py-12 px-4">
+    <h1 class="text-2xl font-semibold text-white mb-2">loadLanguage / loadTheme</h1>
+    <p class="text-slate-400 mb-6">Start with one language, then add more on demand.</p>
+    <div id="error" class="hidden text-sm px-3 py-2 rounded mb-6 bg-red-900/40 text-red-300"></div>
+
+    <h2 class="text-lg font-medium text-blue-400 mt-8 mb-3">Initial: JavaScript</h2>
+    <div id="js-output"></div>
+
+    <h2 class="text-lg font-medium text-blue-400 mt-8 mb-3">Loaded later: JSON</h2>
+    <div id="json-output"></div>
+
+    <h2 class="text-lg font-medium text-blue-400 mt-8 mb-3">New theme: Dracula</h2>
+    <div id="dracula-output"></div>
+  </div>
+
+  <script type="module">
+    import { createHighlighter, htmlInline } from '../src/index.ts'
+    import javascript from '../langs/javascript.ts'
+    import json from '../langs/json.ts'
+    import tokyonight_moon from '../themes/tokyonight_moon.ts'
+    import dracula from '../themes/dracula.ts'
+
+    try {
+      const hl = await createHighlighter({
+        langs: [javascript],
+        themes: [tokyonight_moon],
+      })
+
+      document.getElementById('js-output').innerHTML = hl.highlight(
+        `const x = [1, 2, 3].map(n => n * 2)`,
+        htmlInline({ lang: 'javascript', theme: 'tokyonight_moon' })
+      )
+
+      await hl.loadLanguage(json)
+
+      document.getElementById('json-output').innerHTML = hl.highlight(
+        `{\n  "name": "lumis-sh",\n  "version": "0.1.0"\n}`,
+        htmlInline({ lang: 'json', theme: 'tokyonight_moon' })
+      )
+
+      hl.loadTheme(dracula)
+
+      document.getElementById('dracula-output').innerHTML = hl.highlight(
+        `const x = [1, 2, 3].map(n => n * 2)`,
+        htmlInline({ lang: 'javascript', theme: 'dracula' })
+      )
+    } catch (err) {
+      const el = document.getElementById('error')
+      el.textContent = `Error: ${err.message}`
+      el.classList.remove('hidden')
+      console.error(err)
+    }
+  </script>
+</body>
+</html>

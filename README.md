@@ -37,6 +37,18 @@
 </tr>
 </table>
 
+## API
+
+```
+highlight(source, formatter)
+```
+
+The **formatter** is a complete highlighting configuration:
+- **What** to parse (lang)
+- **How** to style (theme)
+- **What** to output (html/terminal/etc.)
+- **How** to decorate (highlight_lines, header, etc.)
+
 ## Quick Start
 
 ### CLI

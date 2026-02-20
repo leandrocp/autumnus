@@ -1,0 +1,7 @@
+node_modules/
+dist/
+langs/
+themes/
+wasm/
+queries/
+src/tree-sitter-wasm.ts

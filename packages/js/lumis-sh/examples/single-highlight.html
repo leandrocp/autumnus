@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Single highlight() call</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-slate-900 text-slate-300 min-h-screen">
+  <div class="max-w-2xl mx-auto py-12 px-4">
+    <h1 class="text-2xl font-semibold text-white mb-2">Single highlight() call</h1>
+    <p class="text-slate-400 mb-6">Stateless shorthand — no setup, just pass a bundle and theme directly.</p>
+    <div id="error" class="hidden text-sm px-3 py-2 rounded mb-6 bg-red-900/40 text-red-300"></div>
+    <div id="output"></div>
+  </div>
+
+  <script type="module">
+    import { highlight, htmlInline } from '../src/index.ts'
+    import javascript from '../langs/javascript.ts'
+    import tokyonight_moon from '../themes/tokyonight_moon.ts'
+
+    try {
+      document.getElementById('output').innerHTML = await highlight(
+        `const x = 1\nconst y = "hello"\nconsole.log(x, y)`,
+        htmlInline({ lang: javascript, theme: tokyonight_moon })
+      )
+    } catch (err) {
+      const el = document.getElementById('error')
+      el.textContent = `Error: ${err.message}`
+      el.classList.remove('hidden')
+      console.error(err)
+    }
+  </script>
+</body>
+</html>

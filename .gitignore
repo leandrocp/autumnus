@@ -5,6 +5,7 @@
 /queries/**/indents.scm
 mise.toml
 .envrc
+.vite/
 /.claude/
 AGENTS.md
 CLAUDE.md
