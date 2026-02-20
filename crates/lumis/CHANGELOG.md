@@ -1,9 +1,13 @@
 # Changelog
 
+## 0.1.3 - 2026-02-20
+
+### Changed
+- Add language wat (@andreaTP)
+
 ## 0.1.2 - 2026-02-18
 
 ### Changed
-
 - Add language nushell (started by @c4lliope)
 - Rename CSS class from `athl` to `lumis` for consistency with the project name
 - Rename CSS class from `athl-themes` to `lumis-themes` for multi-theme formatter
@@ -12,7 +16,6 @@
 ## 0.1.1 - 2026-01-27
 
 ### Removed
-
 - Remove `elixir-nif` feature. The Elixir/Rustler bridge code is now maintained in the Elixir package itself.
 
 ## 0.1.0 - 2026-01-23

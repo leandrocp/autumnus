@@ -153,6 +153,8 @@ unsafe extern "C" {
     fn tree_sitter_vim() -> *const ();
     #[cfg(feature = "lang-vue")]
     fn tree_sitter_vue() -> *const ();
+    #[cfg(feature = "lang-wat")]
+    fn tree_sitter_wat() -> *const ();
 }
 
 include!(concat!(env!("OUT_DIR"), "/queries_constants.rs"));
@@ -302,6 +304,8 @@ pub enum Language {
     Vim,
     #[cfg(feature = "lang-vue")]
     Vue,
+    #[cfg(feature = "lang-wat")]
+    Wat,
     #[cfg(feature = "lang-xml")]
     XML,
     #[cfg(feature = "lang-yaml")]
@@ -525,6 +529,8 @@ impl std::str::FromStr for Language {
             "vim" | "viml" | "vimscript" => Some(Language::Vim),
             #[cfg(feature = "lang-vue")]
             "vue" => Some(Language::Vue),
+            #[cfg(feature = "lang-wat")]
+            "wat" | "wasm" | "webassembly" => Some(Language::Wat),
             #[cfg(feature = "lang-xml")]
             "xml" => Some(Language::XML),
             #[cfg(feature = "lang-yaml")]
@@ -945,6 +951,8 @@ impl Language {
             Language::Vim => &["*.vim", "*.viml"],
             #[cfg(feature = "lang-vue")]
             Language::Vue => &["*.vue"],
+            #[cfg(feature = "lang-wat")]
+            Language::Wat => &["*.wat"],
             #[cfg(feature = "lang-xml")]
             Language::XML => &[
                 "*.ant",
@@ -1304,6 +1312,8 @@ impl Language {
             Language::Vim => "Vim",
             #[cfg(feature = "lang-vue")]
             Language::Vue => "Vue",
+            #[cfg(feature = "lang-wat")]
+            Language::Wat => "WAT",
             #[cfg(feature = "lang-xml")]
             Language::XML => "XML",
             #[cfg(feature = "lang-yaml")]
@@ -1460,6 +1470,8 @@ impl Language {
             Language::Vim => &VIM_CONFIG,
             #[cfg(feature = "lang-vue")]
             Language::Vue => &VUE_CONFIG,
+            #[cfg(feature = "lang-wat")]
+            Language::Wat => &WAT_CONFIG,
             #[cfg(feature = "lang-xml")]
             Language::XML => &XML_CONFIG,
             #[cfg(feature = "lang-yaml")]
@@ -2634,6 +2646,22 @@ static VUE_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         VUE_LOCALS,
     )
     .expect("failed to create vue highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+#[cfg(feature = "lang-wat")]
+static WAT_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_wat) };
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "wat",
+        WAT_HIGHLIGHTS,
+        WAT_INJECTIONS,
+        WAT_LOCALS,
+    )
+    .expect("failed to create wat highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
