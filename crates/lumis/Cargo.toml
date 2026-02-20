@@ -116,6 +116,7 @@ all-languages = [
     "lang-typst",
     "lang-vim",
     "lang-vue",
+    "lang-wat",
     "lang-xml",
     "lang-yaml",
     "lang-zig",
@@ -191,6 +192,7 @@ lang-typescript = ["dep:tree-sitter-typescript"]
 lang-typst = []
 lang-vim = []
 lang-vue = []
+lang-wat = []
 lang-xml = ["dep:tree-sitter-xml"]
 lang-yaml = ["dep:tree-sitter-yaml"]
 lang-zig = ["dep:tree-sitter-zig"]
