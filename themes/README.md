@@ -45,10 +45,10 @@ Regenerate existing themes defined in `themes.lua`:
 
 ```bash
 # Regenerate all themes
-just gen-themes
+just themes-gen
 
 # Regenerate a single theme
-just gen-themes catppuccin_mocha
+just themes-gen catppuccin_mocha
 ```
 
 ### How It Works
@@ -76,6 +76,6 @@ To add a new theme to the built-in collection:
 }
 ```
 
-2. Run `just gen-themes theme_name` to generate the JSON file
+2. Run `just themes-gen theme_name` to generate the JSON file
 
 3. The theme will be automatically included in the next build via `build.rs`

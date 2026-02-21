@@ -7,6 +7,7 @@ use askama::Template;
 use askama_web::WebTemplate;
 use axum::{extract::Query, extract::State, routing::get, Router};
 use lumis::themes::Appearance;
+use rand::seq::IndexedRandom;
 use serde::Deserialize;
 use tower_http::compression::CompressionLayer;
 
@@ -53,12 +54,24 @@ async fn index(
     let selected_lang = params
         .lang
         .filter(|l| state.samples.contains_key(l.as_str()))
-        .unwrap_or_else(|| "rust".to_string());
+        .unwrap_or_else(|| {
+            state
+                .languages
+                .choose(&mut rand::rng())
+                .map(|l| l.id.clone())
+                .unwrap_or_else(|| "rust".to_string())
+        });
 
     let selected_theme = params
         .theme
         .filter(|t| lumis::themes::get(t).is_ok())
-        .unwrap_or_else(|| "dracula".to_string());
+        .unwrap_or_else(|| {
+            state
+                .themes
+                .choose(&mut rand::rng())
+                .map(|t| t.id.clone())
+                .unwrap_or_else(|| "dracula".to_string())
+        });
 
     let source = state
         .samples

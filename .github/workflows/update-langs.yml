@@ -18,14 +18,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: leafo/gh-actions-lua@v12
-
-      - uses: taiki-e/install-action@just
-
       - name: Generate language matrix
         id: set-matrix
         run: |
-          LANGS=$(just list-vendored-parsers | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          LANGS=$(cargo metadata --format-version 1 --no-deps \
+            | jq -c '.packages[] | select(.name == "lumis") | .metadata.langs.parsers | to_entries | map(select(.value.git)) | map(.key)')
           echo "Generated matrix for languages: $LANGS"
           echo "languages=$LANGS" >> $GITHUB_OUTPUT
 
@@ -43,23 +40,33 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: leafo/gh-actions-lua@v12
-
       - uses: taiki-e/install-action@just
 
-      - name: update-parsers for ${{ matrix.language }}
-        run: echo "y" | just update-vendored-parsers ${{ matrix.language }}
+      - uses: leafo/gh-actions-lua@v12
 
-      - name: update-queries for ${{ matrix.language }}
-        run: echo "y" | just update-queries ${{ matrix.language }}
+      - uses: leafo/gh-actions-luarocks@v5
+
+      - name: Install Lua dependencies
+        run: luarocks install toml-edit && luarocks install dkjson
+
+      - name: langs-get-parsers for ${{ matrix.language }}
+        run: just langs-get-parsers ${{ matrix.language }}
+
+      - name: langs-get-queries for ${{ matrix.language }}
+        run: just langs-get-queries ${{ matrix.language }}
+
+      - name: docs-gen-languages
+        run: just docs-gen-languages
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.CI_TOKEN }}
           add-paths: |
+            crates/lumis/Cargo.toml
             crates/lumis/vendored_parsers
             crates/lumis/queries
+            LANGUAGES.md
           commit-message: "chore: update ${{ matrix.language }}"
           title: "chore: update ${{ matrix.language }}"
           body: |

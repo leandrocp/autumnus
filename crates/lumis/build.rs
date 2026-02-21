@@ -277,6 +277,13 @@ fn vendored_parsers() {
         extra_files: vec!["scanner.c"],
     });
 
+    #[cfg(feature = "lang-wat")]
+    parsers.push(TreeSitterParser {
+        name: "tree-sitter-wat",
+        src_dir: "vendored_parsers/tree-sitter-wat/src",
+        extra_files: vec![],
+    });
+
     for parser in &parsers {
         println!(
             "cargo:rerun-if-changed={}",
@@ -464,6 +471,7 @@ fn queries() {
             "typst" => cfg!(feature = "lang-typst"),
             "vim" => cfg!(feature = "lang-vim"),
             "vue" => cfg!(feature = "lang-vue"),
+            "wat" => cfg!(feature = "lang-wat"),
             "xml" => cfg!(feature = "lang-xml"),
             "yaml" => cfg!(feature = "lang-yaml"),
             "zig" => cfg!(feature = "lang-zig"),
