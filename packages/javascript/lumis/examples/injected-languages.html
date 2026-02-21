@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Injected languages showcase</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+    :root {
+      color-scheme: dark;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 antialiased">
+  <main class="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-6 lg:px-8">
+    <nav class="flex items-center justify-between rounded-2xl border border-cyan-400/20 bg-slate-950/70 px-4 py-3 shadow-[0_20px_50px_rgba(2,6,23,0.45)] backdrop-blur">
+      <a class="text-sm font-medium text-slate-200 transition-colors hover:text-white" href="/">All examples</a>
+      <span class="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-[11px] uppercase tracking-[0.25em] text-cyan-300">Injected languages</span>
+    </nav>
+
+    <section class="rounded-[28px] border border-slate-800 bg-slate-950/70 p-6 shadow-[0_20px_50px_rgba(2,6,23,0.45)] backdrop-blur md:p-8">
+      <div>
+        <p class="mb-3 text-[11px] uppercase tracking-[0.3em] text-cyan-300">One file, three grammars</p>
+        <h1>Injected language showcase</h1>
+        <p class="max-w-3xl text-base leading-7 text-slate-400">
+          HTML, CSS, and JavaScript in the same document. This is the kind of case where fake token sharing breaks and real syntax layering matters.
+        </p>
+        <div class="mt-5 flex flex-wrap gap-2">
+          <span class="rounded-full border border-slate-700 bg-slate-950/80 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.2em] text-slate-300">html</span>
+          <span class="rounded-full border border-slate-700 bg-slate-950/80 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.2em] text-slate-300">css</span>
+          <span class="rounded-full border border-slate-700 bg-slate-950/80 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.2em] text-slate-300">javascript</span>
+          <span class="rounded-full border border-slate-700 bg-slate-950/80 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.2em] text-slate-300">htmlInline</span>
+          <span class="rounded-full border border-slate-700 bg-slate-950/80 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.2em] text-slate-300">htmlLinked</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid gap-4 lg:grid-cols-3">
+      <article class="rounded-[28px] border border-slate-800 bg-slate-950/70 p-5 shadow-[0_20px_50px_rgba(2,6,23,0.45)] backdrop-blur">
+        <h2>Highlighted source</h2>
+        <p>The input snippet itself, rendered through the same mixed-language parse so you can inspect the layers clearly.</p>
+        <div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/95 shadow-md" style="margin-top: 1rem;">
+          <div class="flex items-center justify-between gap-4 border-b border-slate-800 bg-slate-950/95 px-4 py-3">
+            <div class="flex items-center gap-3">
+              <div class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-rose-400/80"></span><span class="h-2.5 w-2.5 rounded-full bg-amber-300/80"></span><span class="h-2.5 w-2.5 rounded-full bg-emerald-400/80"></span></div>
+              <div>
+                <div class="font-medium text-white">landing.html</div>
+                <div class="text-sm text-slate-500">docs/snippets/injected-languages</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-[11px] uppercase tracking-[0.25em] text-cyan-300">mixed grammar</span>
+            </div>
+          </div>
+          <div class="overflow-x-auto bg-slate-950/60 p-4" id="source-output"></div>
+        </div>
+        <div id="error-output" class="hidden rounded-2xl border border-rose-500/30 bg-rose-950/40 px-4 py-3 text-sm text-rose-200"></div>
+      </article>
+
+      <article class="rounded-[28px] border border-slate-800 bg-slate-950/70 p-5 shadow-[0_20px_50px_rgba(2,6,23,0.45)] backdrop-blur">
+        <h2>Inline output</h2>
+        <p>Self-contained HTML with theme data embedded directly in the markup.</p>
+        <div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/95 shadow-md" style="margin-top: 1rem;">
+          <div class="flex items-center justify-between gap-4 border-b border-slate-800 bg-slate-950/95 px-4 py-3">
+            <div class="flex items-center gap-3">
+              <div>
+                <div class="font-medium text-white">htmlInline()</div>
+                <div class="text-sm text-slate-500">portable output</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-[11px] uppercase tracking-[0.25em] text-cyan-300">no stylesheet</span>
+            </div>
+          </div>
+          <div class="overflow-x-auto bg-slate-950/60 p-4" id="inline-output"></div>
+        </div>
+      </article>
+
+      <article class="rounded-[28px] border border-slate-800 bg-slate-950/70 p-5 shadow-[0_20px_50px_rgba(2,6,23,0.45)] backdrop-blur">
+        <h2>Linked output</h2>
+        <p>Class-based markup using the same mixed-language parse, ready for external theme CSS.</p>
+        <div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/95 shadow-md" style="margin-top: 1rem;">
+          <div class="flex items-center justify-between gap-4 border-b border-slate-800 bg-slate-950/95 px-4 py-3">
+            <div class="flex items-center gap-3">
+              <div>
+                <div class="font-medium text-white">htmlLinked()</div>
+                <div class="text-sm text-slate-500">semantic classes</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-[11px] uppercase tracking-[0.25em] text-cyan-300">dracula.css</span>
+            </div>
+          </div>
+          <div class="overflow-x-auto bg-slate-950/60 p-4" id="linked-output"></div>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <script type="module">
+    import { createHighlighter } from '../src/index.browser.ts'
+    import { htmlInline, htmlLinked } from '../src/formatters.ts'
+    import html from '../langs/html.ts'
+    import css from '../langs/css.ts'
+    import javascript from '../langs/javascript.ts'
+    import dracula from '@lumis-sh/themes/dracula'
+    import '../../themes/dist/css/dracula.css'
+
+    const code = `<!doctype html>
+<html lang="en">
+  <head>
+    <style>
+      :root { color-scheme: dark; }
+      .hero::before { content: "lumis"; color: #67e8f9; }
+    <\/style>
+  </head>
+  <body>
+    <main class="hero">
+      <h1>Injected languages</h1>
+      <script>
+        const users = ["Ada", "Linus", "Margaret"]
+        console.log(users.map((name) => \`hello, \${name}\`))
+      <\/script>
+    </main>
+  </body>
+</html>`
+
+    const errorBox = document.getElementById('error-output')
+    const sourceOutput = document.getElementById('source-output')
+    const inlineOutput = document.getElementById('inline-output')
+    const linkedOutput = document.getElementById('linked-output')
+
+    try {
+      const hl = await createHighlighter({ langs: [html, css, javascript] })
+      sourceOutput.innerHTML = hl.highlight(
+        code,
+        htmlInline({ language: html, theme: dracula })
+      )
+
+      inlineOutput.innerHTML = hl.highlight(
+        code,
+        htmlInline({ language: html, theme: dracula })
+      )
+
+      linkedOutput.innerHTML = hl.highlight(
+        code,
+        htmlLinked({ language: html })
+      )
+    } catch (error) {
+      errorBox.classList.remove('hidden')
+      errorBox.textContent = error instanceof Error ? error.message : String(error)
+    }
+  </script>
+</body>
+</html>

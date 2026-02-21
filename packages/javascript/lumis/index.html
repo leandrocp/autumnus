@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>@lumis-sh/lumis examples</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  </head>
+<body class="min-h-screen bg-slate-950 text-slate-100 antialiased">
+  <main class="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-6 lg:px-8">
+    <nav class="flex items-center justify-between rounded-2xl border border-cyan-400/20 bg-slate-950/70 px-4 py-3 shadow-[0_20px_50px_rgba(2,6,23,0.45)] backdrop-blur">
+      <a class="text-sm font-medium text-slate-200 transition-colors hover:text-white" href="https://lumis.sh">lumis.sh</a>
+      <span class="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-[11px] uppercase tracking-[0.25em] text-cyan-300">JS package examples</span>
+    </nav>
+
+    <section class="rounded-[28px] border border-slate-800 bg-slate-950/70 p-6 shadow-[0_20px_50px_rgba(2,6,23,0.45)] backdrop-blur md:p-8">
+      <div>
+        <h1>Examples</h1>
+        <p class="max-w-3xl text-base leading-7 text-slate-400">
+          Browser demos for the JS package: loading languages, switching themes, and rendering code in different formats.
+        </p>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="mb-4 text-lg font-semibold text-white">Getting started</h2>
+      <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <a class="group flex h-full flex-col gap-4 rounded-2xl border border-slate-800 bg-slate-950/70 p-5 shadow-[0_0_0_1px_rgba(34,211,238,0.05)] transition-colors hover:border-cyan-400/30 hover:bg-slate-950/90" href="/examples/single-highlight.html">
+          <span class="text-[11px] uppercase tracking-[0.25em] text-cyan-300">Stateless</span>
+          <h3>Single highlight()</h3>
+          <p>One imported bundle, one formatter, one awaited call. The shortest path from source code to HTML.</p>
+          <span class="mt-auto text-sm font-medium text-slate-200 transition-colors group-hover:text-white">Open demo</span>
+        </a>
+
+        <a class="group flex h-full flex-col gap-4 rounded-2xl border border-slate-800 bg-slate-950/70 p-5 shadow-[0_0_0_1px_rgba(34,211,238,0.05)] transition-colors hover:border-cyan-400/30 hover:bg-slate-950/90" href="/examples/create-highlighter.html">
+          <span class="text-[11px] uppercase tracking-[0.25em] text-cyan-300">Stateful</span>
+          <h3>createHighlighter()</h3>
+          <p>Preload languages once and render synchronously after setup for servers, editors, and repeated work.</p>
+          <span class="mt-auto text-sm font-medium text-slate-200 transition-colors group-hover:text-white">Open demo</span>
+        </a>
+
+        <a class="group flex h-full flex-col gap-4 rounded-2xl border border-slate-800 bg-slate-950/70 p-5 shadow-[0_0_0_1px_rgba(34,211,238,0.05)] transition-colors hover:border-cyan-400/30 hover:bg-slate-950/90" href="/examples/load-language-theme.html">
+          <span class="text-[11px] uppercase tracking-[0.25em] text-cyan-300">Progressive</span>
+          <h3>loadLanguage()</h3>
+          <p>Start lean, then add more languages later without rebuilding the highlighter instance.</p>
+          <span class="mt-auto text-sm font-medium text-slate-200 transition-colors group-hover:text-white">Open demo</span>
+        </a>
+
+        <a class="group flex h-full flex-col gap-4 rounded-2xl border border-slate-800 bg-slate-950/70 p-5 shadow-[0_0_0_1px_rgba(34,211,238,0.05)] transition-colors hover:border-cyan-400/30 hover:bg-slate-950/90" href="/examples/custom-wasm-resolver.html">
+          <span class="text-[11px] uppercase tracking-[0.25em] text-cyan-300">Deployment</span>
+          <h3>Custom WASM resolver</h3>
+          <p>Swap CDNs or serve parser binaries yourself when you need deterministic hosting.</p>
+          <span class="mt-auto text-sm font-medium text-slate-200 transition-colors group-hover:text-white">Open demo</span>
+        </a>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="mb-4 text-lg font-semibold text-white">Formatters</h2>
+      <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <a class="group flex h-full flex-col gap-4 rounded-2xl border border-slate-800 bg-slate-950/70 p-5 shadow-[0_0_0_1px_rgba(34,211,238,0.05)] transition-colors hover:border-cyan-400/30 hover:bg-slate-950/90" href="/examples/html-inline-options.html">
+          <span class="text-[11px] uppercase tracking-[0.25em] text-cyan-300">Formatter</span>
+          <h3>htmlInline</h3>
+          <p>Self-contained HTML with inline styles, wrappers, and line emphasis for embeds and previews.</p>
+          <span class="mt-auto text-sm font-medium text-slate-200 transition-colors group-hover:text-white">Open demo</span>
+        </a>
+
+        <a class="group flex h-full flex-col gap-4 rounded-2xl border border-slate-800 bg-slate-950/70 p-5 shadow-[0_0_0_1px_rgba(34,211,238,0.05)] transition-colors hover:border-cyan-400/30 hover:bg-slate-950/90" href="/examples/html-linked.html">
+          <span class="text-[11px] uppercase tracking-[0.25em] text-cyan-300">Formatter</span>
+          <h3>htmlLinked</h3>
+          <p>Semantic class output for sites that want external CSS, cleaner markup, and easier theming control.</p>
+          <span class="mt-auto text-sm font-medium text-slate-200 transition-colors group-hover:text-white">Open demo</span>
+        </a>
+
+        <a class="group flex h-full flex-col gap-4 rounded-2xl border border-slate-800 bg-slate-950/70 p-5 shadow-[0_0_0_1px_rgba(34,211,238,0.05)] transition-colors hover:border-cyan-400/30 hover:bg-slate-950/90" href="/examples/multi-themes.html">
+          <span class="text-[11px] uppercase tracking-[0.25em] text-cyan-300">Formatter</span>
+          <h3>htmlMultiThemes</h3>
+          <p>Switch light and dark themes at runtime with CSS variables and no re-rendering.</p>
+          <span class="mt-auto text-sm font-medium text-slate-200 transition-colors group-hover:text-white">Open demo</span>
+        </a>
+
+        <a class="group flex h-full flex-col gap-4 rounded-2xl border border-slate-800 bg-slate-950/70 p-5 shadow-[0_0_0_1px_rgba(34,211,238,0.05)] transition-colors hover:border-cyan-400/30 hover:bg-slate-950/90" href="/examples/terminal.html">
+          <span class="text-[11px] uppercase tracking-[0.25em] text-cyan-300">Formatter</span>
+          <h3>terminal</h3>
+          <p>Generate ANSI-colored text for terminals, CLIs, logs, and transport to other terminal UIs.</p>
+          <span class="mt-auto text-sm font-medium text-slate-200 transition-colors group-hover:text-white">Open demo</span>
+        </a>
+
+        <a class="group flex h-full flex-col gap-4 rounded-2xl border border-slate-800 bg-slate-950/70 p-5 shadow-[0_0_0_1px_rgba(34,211,238,0.05)] transition-colors hover:border-cyan-400/30 hover:bg-slate-950/90" href="/examples/custom-formatter.html">
+          <span class="text-[11px] uppercase tracking-[0.25em] text-cyan-300">Formatter</span>
+          <h3>Custom formatter</h3>
+          <p>Build your own output format with the same public formatter contract and utility helpers as the built-ins.</p>
+          <span class="mt-auto text-sm font-medium text-slate-200 transition-colors group-hover:text-white">Open demo</span>
+        </a>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="mb-4 text-lg font-semibold text-white">Showcases</h2>
+      <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <a class="group flex h-full flex-col gap-4 rounded-2xl border border-slate-800 bg-slate-950/70 p-5 shadow-[0_0_0_1px_rgba(34,211,238,0.05)] transition-colors hover:border-cyan-400/30 hover:bg-slate-950/90" href="/examples/injected-languages.html">
+          <span class="text-[11px] uppercase tracking-[0.25em] text-cyan-300">Showcase</span>
+          <h3>Injected languages</h3>
+          <p>HTML, CSS, and JavaScript in one file, rendered through the real mixed-language parser stack.</p>
+          <span class="mt-auto text-sm font-medium text-slate-200 transition-colors group-hover:text-white">Open demo</span>
+        </a>
+
+        <a class="group flex h-full flex-col gap-4 rounded-2xl border border-slate-800 bg-slate-950/70 p-5 shadow-[0_0_0_1px_rgba(34,211,238,0.05)] transition-colors hover:border-cyan-400/30 hover:bg-slate-950/90" href="/examples/erb-template.html">
+          <span class="text-[11px] uppercase tracking-[0.25em] text-cyan-300">Showcase</span>
+          <h3>ERB template</h3>
+          <p>An ERB file with injected HTML and Ruby, loading the shared embedded-template WASM parser.</p>
+          <span class="mt-auto text-sm font-medium text-slate-200 transition-colors group-hover:text-white">Open demo</span>
+        </a>
+
+        <a class="group flex h-full flex-col gap-4 rounded-2xl border border-slate-800 bg-slate-950/70 p-5 shadow-[0_0_0_1px_rgba(34,211,238,0.05)] transition-colors hover:border-cyan-400/30 hover:bg-slate-950/90" href="/examples/typescript.html">
+          <span class="text-[11px] uppercase tracking-[0.25em] text-cyan-300">Showcase</span>
+          <h3>Real TypeScript</h3>
+          <p>Highlight TypeScript with the imported bundle directly, not a guessed string language name.</p>
+          <span class="mt-auto text-sm font-medium text-slate-200 transition-colors group-hover:text-white">Open demo</span>
+        </a>
+
+        <a class="group flex h-full flex-col gap-4 rounded-2xl border border-slate-800 bg-slate-950/70 p-5 shadow-[0_0_0_1px_rgba(34,211,238,0.05)] transition-colors hover:border-cyan-400/30 hover:bg-slate-950/90" href="/examples/nodejs.html">
+          <span class="text-[11px] uppercase tracking-[0.25em] text-cyan-300">Runtime</span>
+          <h3>Node.js usage</h3>
+          <p>See the actual server-side flow for preloading a highlighter and writing highlighted HTML.</p>
+          <span class="mt-auto text-sm font-medium text-slate-200 transition-colors group-hover:text-white">Open demo</span>
+        </a>
+
+        <a class="group flex h-full flex-col gap-4 rounded-2xl border border-slate-800 bg-slate-950/70 p-5 shadow-[0_0_0_1px_rgba(34,211,238,0.05)] transition-colors hover:border-cyan-400/30 hover:bg-slate-950/90" href="/examples/multi-themes-app.html">
+          <span class="text-[11px] uppercase tracking-[0.25em] text-cyan-300">Showcase</span>
+          <h3>App-quality multi-theme</h3>
+          <p>A docs-style shell that flips themes without remounting or re-highlighting the code block.</p>
+          <span class="mt-auto text-sm font-medium text-slate-200 transition-colors group-hover:text-white">Open demo</span>
+        </a>
+
+        <a class="group flex h-full flex-col gap-4 rounded-2xl border border-slate-800 bg-slate-950/70 p-5 shadow-[0_0_0_1px_rgba(34,211,238,0.05)] transition-colors hover:border-cyan-400/30 hover:bg-slate-950/90" href="/examples/toolbar-copy.html">
+          <span class="text-[11px] uppercase tracking-[0.25em] text-cyan-300">Wrapper</span>
+          <h3>Toolbar + copy</h3>
+          <p>File metadata, editor chrome, and a copy action wrapped around a highlighted code block.</p>
+          <span class="mt-auto text-sm font-medium text-slate-200 transition-colors group-hover:text-white">Open demo</span>
+        </a>
+
+        <a class="group flex h-full flex-col gap-4 rounded-2xl border border-slate-800 bg-slate-950/70 p-5 shadow-[0_0_0_1px_rgba(34,211,238,0.05)] transition-colors hover:border-cyan-400/30 hover:bg-slate-950/90" href="/examples/theme-gallery.html">
+          <span class="text-[11px] uppercase tracking-[0.25em] text-cyan-300">Themes</span>
+          <h3>Theme gallery</h3>
+          <p>The same snippet across several themes so people can compare visual direction immediately.</p>
+          <span class="mt-auto text-sm font-medium text-slate-200 transition-colors group-hover:text-white">Open demo</span>
+        </a>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="mb-4 text-lg font-semibold text-white">Feature drills</h2>
+      <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <a class="group flex h-full flex-col gap-4 rounded-2xl border border-slate-800 bg-slate-950/70 p-5 shadow-[0_0_0_1px_rgba(34,211,238,0.05)] transition-colors hover:border-cyan-400/30 hover:bg-slate-950/90" href="/examples/highlight-lines.html">
+          <span class="text-[11px] uppercase tracking-[0.25em] text-cyan-300">Feature</span>
+          <h3>Line highlighting</h3>
+          <p>Compare line emphasis across inline HTML, linked HTML, and multi-theme rendering.</p>
+          <span class="mt-auto text-sm font-medium text-slate-200 transition-colors group-hover:text-white">Open demo</span>
+        </a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,1 @@
+html`<section><style>.box::before { content: "😀"; color: red; }</style><script>const label = "hi"; mount(label)</script></section>`

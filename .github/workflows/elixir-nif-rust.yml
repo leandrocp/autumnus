@@ -6,10 +6,12 @@ on:
       - main
     paths:
       - "packages/elixir/lumis/native/**"
+      - "crates/**"
       - ".github/workflows/elixir-nif-rust.yml"
   pull_request:
     paths:
       - "packages/elixir/lumis/native/**"
+      - "crates/**"
       - ".github/workflows/elixir-nif-rust.yml"
   workflow_dispatch:
 

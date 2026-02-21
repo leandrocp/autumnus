@@ -1,0 +1,637 @@
+{
+  "name": "javascript-locals-shadowed-calls",
+  "language": "javascript",
+  "theme": "dracula",
+  "events": [
+    {
+      "type": "start",
+      "scope": "keyword.function",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 0,
+      "end": 8
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 8,
+      "end": 9
+    },
+    {
+      "type": "start",
+      "scope": "function",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 9,
+      "end": 13
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 13,
+      "end": 14
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "variable.parameter",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 14,
+      "end": 19
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 19,
+      "end": 20
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 20,
+      "end": 21
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 21,
+      "end": 22
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 22,
+      "end": 25
+    },
+    {
+      "type": "start",
+      "scope": "keyword",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 25,
+      "end": 30
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 30,
+      "end": 31
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 31,
+      "end": 37
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 37,
+      "end": 38
+    },
+    {
+      "type": "start",
+      "scope": "operator",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 38,
+      "end": 39
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 39,
+      "end": 40
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 40,
+      "end": 45
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.delimiter",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 45,
+      "end": 46
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 46,
+      "end": 49
+    },
+    {
+      "type": "start",
+      "scope": "keyword.conditional",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 49,
+      "end": 51
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 51,
+      "end": 52
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 52,
+      "end": 53
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 53,
+      "end": 58
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 58,
+      "end": 59
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 59,
+      "end": 60
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 60,
+      "end": 61
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 61,
+      "end": 66
+    },
+    {
+      "type": "start",
+      "scope": "keyword",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 66,
+      "end": 71
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 71,
+      "end": 72
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 72,
+      "end": 78
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 78,
+      "end": 79
+    },
+    {
+      "type": "start",
+      "scope": "operator",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 79,
+      "end": 80
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 80,
+      "end": 81
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 81,
+      "end": 86
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.delimiter",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 86,
+      "end": 87
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 87,
+      "end": 92
+    },
+    {
+      "type": "start",
+      "scope": "keyword.return",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 92,
+      "end": 98
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 98,
+      "end": 99
+    },
+    {
+      "type": "start",
+      "scope": "function.call",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 99,
+      "end": 105
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 105,
+      "end": 106
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 106,
+      "end": 111
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 111,
+      "end": 112
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.delimiter",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 112,
+      "end": 113
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 113,
+      "end": 116
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 116,
+      "end": 117
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 117,
+      "end": 120
+    },
+    {
+      "type": "start",
+      "scope": "keyword.return",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 120,
+      "end": 126
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 126,
+      "end": 127
+    },
+    {
+      "type": "start",
+      "scope": "function.call",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 127,
+      "end": 133
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 133,
+      "end": 134
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 134,
+      "end": 139
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 139,
+      "end": 140
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 140,
+      "end": 141
+    },
+    {
+      "type": "start",
+      "scope": "operator",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 141,
+      "end": 142
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 142,
+      "end": 143
+    },
+    {
+      "type": "start",
+      "scope": "function.call",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 143,
+      "end": 151
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 151,
+      "end": 152
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 152,
+      "end": 157
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 157,
+      "end": 158
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.delimiter",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 158,
+      "end": 159
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 159,
+      "end": 160
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 160,
+      "end": 161
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 161,
+      "end": 162
+    }
+  ]
+}

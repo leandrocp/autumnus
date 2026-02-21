@@ -7,9 +7,11 @@ exclude = ["packages/elixir/lumis/native/lumis_nif"]
 edition = "2021"
 rust-version = "1.91"
 license = "MIT"
+homepage = "https://lumis.sh"
 repository = "https://github.com/leandrocp/lumis"
 authors = ["Leandro Pereira <leandro@leandro.io>"]
 
 [profile.release]
 lto = true
+codegen-units = 1
 strip = true

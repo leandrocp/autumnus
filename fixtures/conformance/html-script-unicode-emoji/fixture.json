@@ -1,0 +1,142 @@
+{
+  "name": "html-script-unicode-emoji",
+  "language": "html",
+  "theme": "dracula",
+  "events": [
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 0,
+      "end": 1
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "tag",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 1,
+      "end": 7
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 7,
+      "end": 8
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "keyword",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 8,
+      "end": 13
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 13,
+      "end": 14
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 14,
+      "end": 19
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "operator",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 19,
+      "end": 20
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "string",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 20,
+      "end": 26
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 26,
+      "end": 28
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "tag",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 28,
+      "end": 34
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 34,
+      "end": 35
+    },
+    {
+      "type": "end"
+    }
+  ]
+}

@@ -16,10 +16,11 @@
 //! See the [formatter](crate::formatter) module for more information and examples.
 
 use super::{Formatter, HtmlElement};
+use crate::highlight;
 use crate::languages::Language;
 use crate::themes::Theme;
-use crate::vendor::tree_sitter_highlight::{Highlighter, HtmlRenderer};
 use derive_builder::Builder;
+use lumis_core::formatter::Formatter as _;
 use std::{
     io::{self, Write},
     ops::RangeInclusive,
@@ -192,41 +193,6 @@ impl HtmlInline {
             header,
         }
     }
-
-    fn get_line_attrs(&self, line_number: usize) -> (Option<String>, Option<String>) {
-        let is_highlighted = self
-            .highlight_lines
-            .as_ref()
-            .is_some_and(|hl| hl.lines.iter().any(|r| r.contains(&line_number)));
-
-        if !is_highlighted {
-            return (None, None);
-        }
-
-        let class_suffix = self
-            .highlight_lines
-            .as_ref()
-            .and_then(|hl| hl.class.as_ref())
-            .map(|c| format!(" {}", c));
-
-        let style = self.get_highlight_style();
-
-        (class_suffix, style)
-    }
-
-    fn get_highlight_style(&self) -> Option<String> {
-        let highlight_lines = self.highlight_lines.as_ref()?;
-
-        match &highlight_lines.style {
-            Some(HighlightLinesStyle::Theme) => {
-                let theme = self.theme.as_ref()?;
-                let highlighted_style = theme.get_style("highlighted")?;
-                Some(highlighted_style.css(self.italic, " "))
-            }
-            Some(HighlightLinesStyle::Style(style_string)) => Some(style_string.clone()),
-            None => None,
-        }
-    }
 }
 
 impl Default for HtmlInline {
@@ -245,68 +211,36 @@ impl Default for HtmlInline {
 
 impl Formatter for HtmlInline {
     fn format(&self, source: &str, output: &mut dyn Write) -> io::Result<()> {
-        let mut buffer = Vec::new();
+        let events = highlight::highlight_events(source, self.lang).map_err(io::Error::other)?;
 
-        if let Some(ref header) = self.header {
-            write!(buffer, "{}", header.open_tag)?;
-        }
+        let core_formatter = lumis_core::formatter::html_inline::HtmlInline::new(
+            self.lang,
+            self.theme.clone(),
+            self.pre_class.clone(),
+            self.italic,
+            self.include_highlights,
+            self.highlight_lines.clone().map(map_highlight_lines),
+            self.header.clone(),
+        );
 
-        crate::formatter::html::open_pre_tag(
-            &mut buffer,
-            self.pre_class.as_deref(),
-            self.theme.as_ref(),
-        )?;
-        crate::formatter::html::open_code_tag(&mut buffer, &self.lang)?;
+        core_formatter.render(source, &events, output)
+    }
+}
 
-        let mut highlighter = Highlighter::new();
-        let events = highlighter
-            .highlight(self.lang.config(), source.as_bytes(), None, |injected| {
-                Some(Language::guess(Some(injected), "").config())
-            })
-            .map_err(io::Error::other)?;
-
-        let mut renderer = HtmlRenderer::new();
-
-        renderer
-            .render(
-                events,
-                source.as_bytes(),
-                &move |highlight, language, output| {
-                    let scope = crate::constants::HIGHLIGHT_NAMES[highlight.0];
-                    let lang = Language::guess(Some(language), "");
-                    let attrs = crate::formatter::html::span_inline_attrs(
-                        scope,
-                        Some(lang),
-                        self.theme.as_ref(),
-                        self.italic,
-                        self.include_highlights,
-                    );
-                    output.extend(attrs.as_bytes());
-                },
-            )
-            .map_err(io::Error::other)?;
-
-        for (i, line) in renderer.lines().enumerate() {
-            let line_number = i + 1;
-            let line_with_braces = crate::formatter::html::escape_braces(line);
-            let (class_suffix, style) = self.get_line_attrs(line_number);
-            let wrapped = crate::formatter::html::wrap_line(
-                line_number,
-                &line_with_braces,
-                class_suffix.as_deref(),
-                style.as_deref(),
-            );
-            write!(&mut buffer, "{}", wrapped)?;
-        }
-
-        crate::formatter::html::closing_tags(&mut buffer)?;
-
-        if let Some(ref header) = self.header {
-            write!(buffer, "{}", header.close_tag)?;
-        }
-
-        output.write_all(&buffer)?;
-        Ok(())
+fn map_highlight_lines(
+    highlight_lines: HighlightLines,
+) -> lumis_core::formatter::html_inline::HighlightLines {
+    lumis_core::formatter::html_inline::HighlightLines {
+        lines: highlight_lines.lines,
+        style: highlight_lines.style.map(|style| match style {
+            HighlightLinesStyle::Theme => {
+                lumis_core::formatter::html_inline::HighlightLinesStyle::Theme
+            }
+            HighlightLinesStyle::Style(style) => {
+                lumis_core::formatter::html_inline::HighlightLinesStyle::Style(style)
+            }
+        }),
+        class: highlight_lines.class,
     }
 }
 

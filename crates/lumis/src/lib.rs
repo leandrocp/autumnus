@@ -304,12 +304,11 @@
 //! | zenburn |
 //! | zephyr_dark |
 
-pub mod constants;
 pub mod formatter;
 pub mod highlight;
 pub mod languages;
 pub mod themes;
-pub mod vendor;
+mod vendor;
 
 // Re-export helper modules from formatter for convenience
 pub use formatter::ansi;
@@ -447,6 +446,7 @@ end
 </div><div class="line" data-line="7">
 </div><div class="line" data-line="8">  <span style="color: #ca9ee6;">def</span> <span style="color: #c6d0f5;">projects</span><span style="color: #949cbb;">,</span> <span style="color: #eebebe;">do: </span><span style="color: #99d1db;"><span style="color: #ef9f76;">@<span style="color: #ef9f76;">projects</span></span></span>
 </div><div class="line" data-line="9"><span style="color: #ca9ee6;">end</span>
+</div><div class="line" data-line="10">
 </div></code></pre>"#;
 
         let formatter = HtmlInlineBuilder::default()
@@ -470,6 +470,7 @@ end
         let expected = r#"<pre class="lumis" style="color: #c6d0f5; background-color: #303446;"><code class="language-elixir" translate="no" tabindex="0"><div class="line" data-line="1"><span data-highlight="keyword" style="color: #ca9ee6;">defmodule</span> <span data-highlight="module" style="color: #e5c890;">Foo</span> <span data-highlight="keyword" style="color: #ca9ee6;">do</span>
 </div><div class="line" data-line="2">  <span data-highlight="operator" style="color: #99d1db;"><span data-highlight="constant" style="color: #ef9f76;">@<span data-highlight="function.call" style="color: #8caaee;"><span data-highlight="constant" style="color: #ef9f76;">lang <span data-highlight="string.special.symbol" style="color: #eebebe;">:elixir</span></span></span></span></span>
 </div><div class="line" data-line="3"><span data-highlight="keyword" style="color: #ca9ee6;">end</span>
+</div><div class="line" data-line="4">
 </div></code></pre>"#;
 
         let formatter = HtmlInlineBuilder::default()
@@ -523,6 +524,7 @@ end
 </div><div class="line" data-line="7">
 </div><div class="line" data-line="8">  <span class="keyword">def</span> <span class="variable">projects</span><span class="punctuation-delimiter">,</span> <span class="string-special-symbol">do: </span><span class="operator"><span class="constant">@<span class="constant">projects</span></span></span>
 </div><div class="line" data-line="9"><span class="keyword">end</span>
+</div><div class="line" data-line="10">
 </div></code></pre>"#;
 
         let formatter = HtmlLinkedBuilder::default()

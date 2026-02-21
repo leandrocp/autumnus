@@ -1,0 +1,8 @@
+function demo(value) {
+  const format = value;
+  if (value) {
+    const format = value;
+    return format(value);
+  }
+  return format(value) + external(value);
+}

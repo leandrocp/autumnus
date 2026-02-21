@@ -289,11 +289,16 @@ pub fn highlight_iter_with_ansi(
 ) -> Result<AnsiIterator<'_>, HighlightError> {
     let mut segments = Vec::new();
 
-    highlight_iter(source, language, theme, |text, range, _scope, style| {
-        let wrapped = wrap_with_ansi(text, style);
-        segments.push((wrapped, range));
-        Ok::<_, std::io::Error>(())
-    })?;
+    highlight_iter(
+        source,
+        language,
+        theme,
+        |text, _language, range, _scope, style| {
+            let wrapped = wrap_with_ansi(text, style);
+            segments.push((wrapped, range));
+            Ok::<_, std::io::Error>(())
+        },
+    )?;
 
     Ok(AnsiIterator {
         segments,

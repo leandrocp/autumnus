@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Toolbar and copy button</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  </head>
+<body class="min-h-screen bg-slate-950 text-slate-100 antialiased">
+  <main class="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-6 lg:px-8">
+    <nav class="flex items-center justify-between rounded-2xl border border-cyan-400/20 bg-slate-950/70 px-4 py-3 shadow-[0_20px_50px_rgba(2,6,23,0.45)] backdrop-blur">
+      <a class="text-sm font-medium text-slate-200 transition-colors hover:text-white" href="/">All examples</a>
+      <span class="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-[11px] uppercase tracking-[0.25em] text-cyan-300">Wrapper UI</span>
+    </nav>
+
+    <section class="rounded-[28px] border border-slate-800 bg-slate-950/70 p-6 shadow-[0_20px_50px_rgba(2,6,23,0.45)] backdrop-blur md:p-8">
+      <div>
+        <p class="mb-3 text-[11px] uppercase tracking-[0.3em] text-cyan-300">File chrome</p>
+        <h1>Toolbar, filename, and copy action</h1>
+        <p class="max-w-3xl text-base leading-7 text-slate-400">
+          A more obvious wrapper example: file metadata on top, highlighted code inside, and a copy button that grabs the raw source.
+        </p>
+      </div>
+    </section>
+
+    <section class="rounded-[28px] border border-slate-800 bg-slate-950/70 p-5 shadow-[0_20px_50px_rgba(2,6,23,0.45)] backdrop-blur">
+      <h2>Editor card</h2>
+      <p>This is the kind of block people actually drop into docs, dashboards, and marketing pages.</p>
+      <div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/95 shadow-md" style="margin-top: 1rem;">
+        <div class="flex items-center justify-between gap-4 border-b border-slate-800 bg-slate-950/95 px-4 py-3">
+          <div class="flex items-center gap-3">
+            <div class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-rose-400/80"></span><span class="h-2.5 w-2.5 rounded-full bg-amber-300/80"></span><span class="h-2.5 w-2.5 rounded-full bg-emerald-400/80"></span></div>
+            <div>
+              <div class="font-medium text-white">createClient.ts</div>
+              <div class="text-sm text-slate-500">packages/sdk/src/client</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-[11px] uppercase tracking-[0.25em] text-cyan-300">typescript</span>
+            <button id="copy-button" class="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-xs font-medium text-cyan-200 transition-colors hover:border-cyan-300 hover:text-white" type="button">Copy</button>
+            <span id="copy-status" class="text-xs text-slate-400">Ready</span>
+          </div>
+        </div>
+        <div class="overflow-x-auto bg-slate-950/60 p-4" id="output"></div>
+      </div>
+      <div id="error-output" class="hidden rounded-2xl border border-rose-500/30 bg-rose-950/40 px-4 py-3 text-sm text-rose-200"></div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { createHighlighter } from '../src/index.browser.ts'
+    import { htmlInline } from '../src/formatters.ts'
+    import typescript from '../langs/typescript.ts'
+    import auraDark from '@lumis-sh/themes/aura_dark'
+
+    const code = `type ClientOptions = {
+  token: string
+  endpoint?: string
+}
+
+export function createClient({
+  token,
+  endpoint = 'https://api.lumis.sh',
+}: ClientOptions) {
+  return {
+    request(path: string) {
+      return fetch(new URL(path, endpoint), {
+        headers: { Authorization: \`Bearer \${token}\` },
+      })
+    },
+  }
+}`
+
+    const output = document.getElementById('output')
+    const errorBox = document.getElementById('error-output')
+    const copyButton = document.getElementById('copy-button')
+    const copyStatus = document.getElementById('copy-status')
+
+    try {
+      const hl = await createHighlighter({ langs: [typescript] })
+      output.innerHTML = hl.highlight(
+        code,
+        htmlInline({
+        language: typescript,
+          theme: auraDark,
+          highlightLines: { lines: [[6, 14]], style: 'theme' },
+        })
+      )
+
+      copyButton.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(code)
+          copyButton.classList.add('border-emerald-400/40', 'bg-emerald-400/10', 'text-emerald-200')
+          copyButton.classList.remove('border-cyan-400/30', 'bg-cyan-400/10', 'text-cyan-200')
+          copyButton.textContent = 'Copied'
+          copyStatus.textContent = 'Source copied to clipboard'
+
+          window.setTimeout(() => {
+            copyButton.classList.remove('border-emerald-400/40', 'bg-emerald-400/10', 'text-emerald-200')
+            copyButton.classList.add('border-cyan-400/30', 'bg-cyan-400/10', 'text-cyan-200')
+            copyButton.textContent = 'Copy'
+            copyStatus.textContent = 'Ready'
+          }, 1400)
+        } catch (error) {
+          copyStatus.textContent = error instanceof Error ? error.message : 'Clipboard unavailable'
+        }
+      })
+    } catch (error) {
+      errorBox.classList.remove('hidden')
+      errorBox.textContent = error instanceof Error ? error.message : String(error)
+    }
+  </script>
+</body>
+</html>

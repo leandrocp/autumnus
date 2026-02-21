@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Node.js usage</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  </head>
+<body class="min-h-screen bg-slate-950 text-slate-100 antialiased">
+  <main class="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-6 lg:px-8">
+    <nav class="flex items-center justify-between rounded-2xl border border-cyan-400/20 bg-slate-950/70 px-4 py-3 shadow-[0_20px_50px_rgba(2,6,23,0.45)] backdrop-blur">
+      <a class="text-sm font-medium text-slate-200 transition-colors hover:text-white" href="/">All examples</a>
+      <span class="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-[11px] uppercase tracking-[0.25em] text-cyan-300">Node.js</span>
+    </nav>
+
+    <section class="rounded-[28px] border border-slate-800 bg-slate-950/70 p-6 shadow-[0_20px_50px_rgba(2,6,23,0.45)] backdrop-blur md:p-8">
+      <div>
+        <p class="mb-3 text-[11px] uppercase tracking-[0.3em] text-cyan-300">Server-side usage</p>
+        <h1>Node.js flow, not just browser sugar</h1>
+        <p class="max-w-3xl text-base leading-7 text-slate-400">
+          This page shows the code you would actually run in Node: preload a highlighter once, render HTML, and write it wherever your app needs it.
+        </p>
+        <div class="mt-5 flex flex-wrap gap-2">
+          <span class="rounded-full border border-slate-700 bg-slate-950/80 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.2em] text-slate-300">createHighlighter</span>
+          <span class="rounded-full border border-slate-700 bg-slate-950/80 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.2em] text-slate-300">javascript</span>
+          <span class="rounded-full border border-slate-700 bg-slate-950/80 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.2em] text-slate-300">bash</span>
+          <span class="rounded-full border border-slate-700 bg-slate-950/80 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.2em] text-slate-300">htmlInline</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid gap-4 lg:grid-cols-3">
+      <article class="rounded-[28px] border border-slate-800 bg-slate-950/70 p-5 shadow-[0_20px_50px_rgba(2,6,23,0.45)] backdrop-blur">
+        <h2>demo.mjs</h2>
+        <p>Preload the bundle once and write the resulting HTML to a file or stdout.</p>
+        <div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/95 shadow-md" style="margin-top: 1rem;">
+          <div class="flex items-center justify-between gap-4 border-b border-slate-800 bg-slate-950/95 px-4 py-3">
+            <div class="flex items-center gap-3">
+              <div class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-rose-400/80"></span><span class="h-2.5 w-2.5 rounded-full bg-amber-300/80"></span><span class="h-2.5 w-2.5 rounded-full bg-emerald-400/80"></span></div>
+              <div>
+                <div class="font-medium text-white">demo.mjs</div>
+                <div class="text-sm text-slate-500">node/examples</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-[11px] uppercase tracking-[0.25em] text-cyan-300">esm</span>
+            </div>
+          </div>
+          <div class="overflow-x-auto bg-slate-950/60 p-4" id="script-output"></div>
+        </div>
+      </article>
+
+      <article class="rounded-[28px] border border-slate-800 bg-slate-950/70 p-5 shadow-[0_20px_50px_rgba(2,6,23,0.45)] backdrop-blur">
+        <h2>CLI flow</h2>
+        <p>Minimal shell flow for generating a file that can be dropped into a static page.</p>
+        <div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/95 shadow-md" style="margin-top: 1rem;">
+          <div class="flex items-center justify-between gap-4 border-b border-slate-800 bg-slate-950/95 px-4 py-3">
+            <div class="flex items-center gap-3">
+              <div>
+                <div class="font-medium text-white">terminal</div>
+                <div class="text-sm text-slate-500">example command</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-[11px] uppercase tracking-[0.25em] text-cyan-300">bash</span>
+            </div>
+          </div>
+          <div class="overflow-x-auto bg-slate-950/60 p-4" id="command-output"></div>
+        </div>
+        <div id="error-output" class="hidden rounded-2xl border border-rose-500/30 bg-rose-950/40 px-4 py-3 text-sm text-rose-200"></div>
+      </article>
+    </section>
+  </main>
+
+  <script type="module">
+    import { createHighlighter } from '../src/index.browser.ts'
+    import { htmlInline } from '../src/formatters.ts'
+    import javascript from '../langs/javascript.ts'
+    import bash from '../langs/bash.ts'
+    import githubDark from '@lumis-sh/themes/github_dark'
+
+    const scriptCode = `import { createHighlighter } from '@lumis-sh/lumis'
+import { htmlInline } from '@lumis-sh/lumis/formatters'
+import typescript from '@lumis-sh/lumis/langs/typescript'
+import dracula from '@lumis-sh/themes/dracula'
+import { writeFile } from 'node:fs/promises'
+
+const hl = await createHighlighter({ langs: [typescript] })
+
+const html = hl.highlight(
+  'export const ready = true',
+  htmlInline({ language: typescript, theme: dracula })
+)
+
+await writeFile('snippet.html', html)`
+
+    const commandCode = `npm install @lumis-sh/lumis @lumis-sh/themes
+node demo.mjs
+open snippet.html`
+
+    const scriptOutput = document.getElementById('script-output')
+    const commandOutput = document.getElementById('command-output')
+    const errorBox = document.getElementById('error-output')
+
+    try {
+      const hl = await createHighlighter({ langs: [javascript, bash] })
+
+      scriptOutput.innerHTML = hl.highlight(
+        scriptCode,
+        htmlInline({ language: javascript, theme: githubDark })
+      )
+
+      commandOutput.innerHTML = hl.highlight(
+        commandCode,
+        htmlInline({ language: bash, theme: githubDark })
+      )
+    } catch (error) {
+      errorBox.classList.remove('hidden')
+      errorBox.textContent = error instanceof Error ? error.message : String(error)
+    }
+  </script>
+</body>
+</html>

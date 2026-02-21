@@ -16,9 +16,10 @@
 //! See the [formatter](crate::formatter) module for more information and examples.
 
 use super::{Formatter, HtmlElement};
+use crate::highlight;
 use crate::languages::Language;
-use crate::vendor::tree_sitter_highlight::{Highlighter, HtmlRenderer};
 use derive_builder::Builder;
+use lumis_core::formatter::Formatter as _;
 use std::{
     io::{self, Write},
     ops::RangeInclusive,
@@ -171,64 +172,25 @@ impl Default for HtmlLinked {
 
 impl Formatter for HtmlLinked {
     fn format(&self, source: &str, output: &mut dyn Write) -> io::Result<()> {
-        let mut buffer = Vec::new();
+        let events = highlight::highlight_events(source, self.lang).map_err(io::Error::other)?;
 
-        if let Some(ref header) = self.header {
-            write!(buffer, "{}", header.open_tag)?;
-        }
+        let core_formatter = lumis_core::formatter::html_linked::HtmlLinked::new(
+            self.lang,
+            self.pre_class.clone(),
+            self.highlight_lines.clone().map(map_highlight_lines),
+            self.header.clone(),
+        );
 
-        crate::formatter::html::open_pre_tag(&mut buffer, self.pre_class.as_deref(), None)?;
-        crate::formatter::html::open_code_tag(&mut buffer, &self.lang)?;
+        core_formatter.render(source, &events, output)
+    }
+}
 
-        let mut highlighter = Highlighter::new();
-        let events = highlighter
-            .highlight(self.lang.config(), source.as_bytes(), None, |injected| {
-                Some(Language::guess(Some(injected), "").config())
-            })
-            .map_err(io::Error::other)?;
-
-        let mut renderer = HtmlRenderer::new();
-
-        renderer
-            .render(
-                events,
-                source.as_bytes(),
-                &move |highlight, _language, output| {
-                    let scope = crate::constants::HIGHLIGHT_NAMES[highlight.0];
-                    let attrs = crate::formatter::html::span_linked_attrs(scope);
-                    output.extend(attrs.as_bytes());
-                },
-            )
-            .map_err(io::Error::other)?;
-
-        for (i, line) in renderer.lines().enumerate() {
-            let line_number = i + 1;
-            let class_suffix = self.highlight_lines.as_ref().and_then(|hl| {
-                if hl.lines.iter().any(|range| range.contains(&line_number)) {
-                    Some(format!(" {}", hl.class))
-                } else {
-                    None
-                }
-            });
-
-            let line_with_braces = crate::formatter::html::escape_braces(line);
-            let wrapped = crate::formatter::html::wrap_line(
-                line_number,
-                &line_with_braces,
-                class_suffix.as_deref(),
-                None,
-            );
-            write!(&mut buffer, "{}", wrapped)?;
-        }
-
-        crate::formatter::html::closing_tags(&mut buffer)?;
-
-        if let Some(ref header) = self.header {
-            write!(buffer, "{}", header.close_tag)?;
-        }
-
-        output.write_all(&buffer)?;
-        Ok(())
+fn map_highlight_lines(
+    highlight_lines: HighlightLines,
+) -> lumis_core::formatter::html_linked::HighlightLines {
+    lumis_core::formatter::html_linked::HighlightLines {
+        lines: highlight_lines.lines,
+        class: highlight_lines.class,
     }
 }
 

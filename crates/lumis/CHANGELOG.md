@@ -1,5 +1,34 @@
 # Changelog
 
+## Unreleased
+
+### Breaking Changes
+
+- **`highlight_iter` callback signature changed**: the callback now receives `(text, language, range, scope, style)` instead of `(text, range, scope, style)`. The new `language` parameter reports the active language (useful for language injections, e.g. JavaScript inside HTML `<script>` tags).
+- **`span_inline` / `span_inline_attrs` parameter order changed**: `language` now comes before `scope` — `span_inline(text, language, scope, ...)` instead of `span_inline(text, scope, language, ...)`.
+
+### Migration
+
+Update `highlight_iter` callbacks:
+
+```rust
+// Before
+highlight_iter(source, language, theme, |text, range, scope, style| { ... })
+
+// After
+highlight_iter(source, language, theme, |text, _language, range, scope, style| { ... })
+```
+
+Update `span_inline` calls:
+
+```rust
+// Before
+span_inline(text, scope, Some(language), theme, false, false)
+
+// After
+span_inline(text, Some(language), scope, theme, false, false)
+```
+
 ## 0.1.3 - 2026-02-20
 
 ### Changed

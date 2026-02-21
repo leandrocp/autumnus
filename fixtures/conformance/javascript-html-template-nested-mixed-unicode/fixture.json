@@ -1,0 +1,453 @@
+{
+  "name": "javascript-html-template-nested-mixed-unicode",
+  "language": "javascript",
+  "theme": "dracula",
+  "events": [
+    {
+      "type": "start",
+      "scope": "function.call",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 0,
+      "end": 4
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "string",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 4,
+      "end": 5
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 5,
+      "end": 6
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "tag",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 6,
+      "end": 9
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 9,
+      "end": 10
+    },
+    {
+      "type": "start",
+      "scope": "attribute",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 10,
+      "end": 15
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "operator",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 15,
+      "end": 16
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "string",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 16,
+      "end": 17
+    },
+    {
+      "type": "start",
+      "scope": "string",
+      "language": "html"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 17,
+      "end": 19
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 19,
+      "end": 23
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 23,
+      "end": 24
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 24,
+      "end": 25
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 25,
+      "end": 26
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 26,
+      "end": 38
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 38,
+      "end": 43
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 43,
+      "end": 44
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 44,
+      "end": 45
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "tag",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 45,
+      "end": 49
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 49,
+      "end": 50
+    },
+    {
+      "type": "start",
+      "scope": "attribute",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 50,
+      "end": 56
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "operator",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 56,
+      "end": 57
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "string",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 57,
+      "end": 58
+    },
+    {
+      "type": "start",
+      "scope": "string",
+      "language": "html"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 58,
+      "end": 60
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 60,
+      "end": 65
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 65,
+      "end": 66
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 66,
+      "end": 67
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 67,
+      "end": 68
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 68,
+      "end": 70
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 70,
+      "end": 77
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 77,
+      "end": 78
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 78,
+      "end": 80
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "tag",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 80,
+      "end": 84
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 84,
+      "end": 85
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 85,
+      "end": 87
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "tag",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 87,
+      "end": 90
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 90,
+      "end": 91
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 91,
+      "end": 92
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 92,
+      "end": 93
+    }
+  ]
+}

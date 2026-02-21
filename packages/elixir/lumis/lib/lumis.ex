@@ -467,25 +467,22 @@ defmodule Lumis do
 
   @doc false
   defp convert_html_inline_options(opts) do
-    with {:ok, opts} <- convert_highlight_lines_inline(opts),
-         {:ok, opts} <- convert_header(opts) do
-      {:ok, opts}
+    with {:ok, opts} <- convert_highlight_lines_inline(opts) do
+      convert_header(opts)
     end
   end
 
   @doc false
   defp convert_html_linked_options(opts) do
-    with {:ok, opts} <- convert_highlight_lines_linked(opts),
-         {:ok, opts} <- convert_header(opts) do
-      {:ok, opts}
+    with {:ok, opts} <- convert_highlight_lines_linked(opts) do
+      convert_header(opts)
     end
   end
 
   defp convert_html_multi_themes_options(opts) do
     with {:ok, opts} <- validate_and_convert_themes(opts),
-         {:ok, opts} <- convert_highlight_lines_inline(opts),
-         {:ok, opts} <- convert_header(opts) do
-      {:ok, opts}
+         {:ok, opts} <- convert_highlight_lines_inline(opts) do
+      convert_header(opts)
     end
   end
 
@@ -786,7 +783,7 @@ defmodule Lumis do
   See https://docs.rs/lumis/latest/lumis/fn.highlight.html for more info.
 
   """
-  @spec highlight(String.t(), options()) :: {:ok, String.t()} | {:error, term()}
+  @spec highlight(String.t(), options()) :: {:ok, String.t()}
   def highlight(source, options \\ [])
 
   def highlight(source, options) when is_binary(source) and is_list(options) do
@@ -954,20 +951,8 @@ defmodule Lumis do
   def highlight!(source, options \\ [])
 
   def highlight!(source, options) when is_binary(source) and is_list(options) do
-    case highlight(source, options) do
-      {:ok, highlighted} ->
-        highlighted
-
-      {:error, error} ->
-        raise """
-        failed to highlight source code
-
-        Got:
-
-          #{inspect(error)}
-
-        """
-    end
+    {:ok, highlighted} = highlight(source, options)
+    highlighted
   end
 
   def highlight!(language, source)

@@ -24,12 +24,12 @@ impl TokenMetadataFormatter {
 impl Formatter for TokenMetadataFormatter {
     fn format(&self, source: &str, output: &mut dyn Write) -> io::Result<()> {
         // Use highlight_iter() with a callback to process styled tokens
-        // The callback receives (text, range, scope, style) for each token
+        // The callback receives (text, language, range, scope, style) for each token
         highlight_iter(
             source,
             self.language,
             self.theme.clone(),
-            |text, range, scope, style| {
+            |text, _language, range, scope, style| {
                 writeln!(
                     output,
                     "{} (pos:{}..{} scope:{} fg:{} bg:{})",

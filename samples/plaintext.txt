@@ -1,0 +1,2 @@
+just plain text
+with no syntax rules

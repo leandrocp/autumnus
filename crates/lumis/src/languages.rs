@@ -1,8 +1,9 @@
 //! Language detection and Tree-sitter configuration.
 //!
-//! This module provides the [`Language`] enum that represents all supported programming
-//! languages and their Tree-sitter configurations. It includes automatic language
-//! detection based on file extensions, file names, content analysis, and shebangs.
+//! This module provides the [`Language`] enum that represents
+//! all supported programming languages and their Tree-sitter configurations. It includes
+//! automatic language detection based on file extensions, file names, content analysis,
+//! and shebangs.
 //!
 //! # Language Detection
 //!
@@ -70,33 +71,11 @@
 //! assert!(extensions.contains(&"*.rs".to_string()));
 //! ```
 //!
-//! ## Tree-sitter integration
-//!
-//! ```rust
-//! use lumis::languages::Language;
-//! use lumis::vendor::tree_sitter_highlight::Highlighter;
-//!
-//! let lang = Language::Rust;
-//! let config = lang.config();
-//!
-//! let mut highlighter = Highlighter::new();
-//! let events = highlighter.highlight(
-//!     config,
-//!     b"fn main() {}",
-//!     None,
-//!     |_| None
-//! ).unwrap();
-//! ```
+pub use lumis_core::languages::{available_languages, Language, LanguageParseError};
 
-// Guess Language copied from https://github.com/Wilfred/difftastic/blob/f34a9014760efbaed01b972caba8b73754da16c9/src/parse/guess_language.rs
-
-use crate::constants::HIGHLIGHT_NAMES;
 use crate::vendor::tree_sitter_highlight::HighlightConfiguration;
-use regex::Regex;
-use std::collections::HashMap;
-use std::path::Path;
+use lumis_core::highlights::HIGHLIGHT_NAMES;
 use std::sync::LazyLock;
-use strum::{EnumIter, IntoEnumIterator};
 
 unsafe extern "C" {
     #[cfg(feature = "lang-angular")]
@@ -123,6 +102,8 @@ unsafe extern "C" {
     fn tree_sitter_glimmer() -> *const ();
     #[cfg(feature = "lang-graphql")]
     fn tree_sitter_graphql() -> *const ();
+    #[cfg(feature = "lang-http")]
+    fn tree_sitter_http() -> *const ();
     #[cfg(feature = "lang-iex")]
     fn tree_sitter_iex() -> *const ();
     #[cfg(feature = "lang-kotlin")]
@@ -159,1175 +140,13 @@ unsafe extern "C" {
 
 include!(concat!(env!("OUT_DIR"), "/queries_constants.rs"));
 
-#[derive(Clone, Copy, Debug, Default, EnumIter, Eq, Hash, PartialEq)]
-pub enum Language {
-    #[cfg(feature = "lang-angular")]
-    Angular,
-    #[cfg(feature = "lang-asm")]
-    Assembly,
-    #[cfg(feature = "lang-astro")]
-    Astro,
-    #[cfg(feature = "lang-bash")]
-    Bash,
-    #[cfg(feature = "lang-c")]
-    C,
-    #[cfg(feature = "lang-caddy")]
-    Caddy,
-    #[cfg(feature = "lang-cmake")]
-    CMake,
-    #[cfg(feature = "lang-cpp")]
-    CPlusPlus,
-    #[cfg(feature = "lang-css")]
-    CSS,
-    #[cfg(feature = "lang-csv")]
-    CSV,
-    #[cfg(feature = "lang-csharp")]
-    CSharp,
-    #[cfg(feature = "lang-clojure")]
-    Clojure,
-    #[cfg(feature = "lang-comment")]
-    Comment,
-    #[cfg(feature = "lang-commonlisp")]
-    CommonLisp,
-    #[cfg(feature = "lang-dart")]
-    Dart,
-    Diff,
-    #[cfg(feature = "lang-dockerfile")]
-    Dockerfile,
-    #[cfg(feature = "lang-eex")]
-    EEx,
-    #[cfg(feature = "lang-ejs")]
-    EJS,
-    #[cfg(feature = "lang-erb")]
-    ERB,
-    #[cfg(feature = "lang-elixir")]
-    Elixir,
-    #[cfg(feature = "lang-elm")]
-    Elm,
-    #[cfg(feature = "lang-erlang")]
-    Erlang,
-    #[cfg(feature = "lang-fish")]
-    Fish,
-    #[cfg(feature = "lang-fsharp")]
-    FSharp,
-    #[cfg(feature = "lang-gleam")]
-    Gleam,
-    #[cfg(feature = "lang-glimmer")]
-    Glimmer,
-    #[cfg(feature = "lang-go")]
-    Go,
-    #[cfg(feature = "lang-graphql")]
-    GraphQL,
-    #[cfg(feature = "lang-heex")]
-    HEEx,
-    #[cfg(feature = "lang-html")]
-    HTML,
-    #[cfg(feature = "lang-haskell")]
-    Haskell,
-    #[cfg(feature = "lang-hcl")]
-    HCL,
-    #[cfg(feature = "lang-iex")]
-    IEx,
-    #[cfg(feature = "lang-json")]
-    JSON,
-    #[cfg(feature = "lang-java")]
-    Java,
-    #[cfg(feature = "lang-javascript")]
-    JavaScript,
-    #[cfg(feature = "lang-kotlin")]
-    Kotlin,
-    #[cfg(feature = "lang-latex")]
-    LaTeX,
-    #[cfg(feature = "lang-liquid")]
-    Liquid,
-    #[cfg(feature = "lang-llvm")]
-    Llvm,
-    #[cfg(feature = "lang-lua")]
-    Lua,
-    #[cfg(feature = "lang-make")]
-    Make,
-    #[cfg(feature = "lang-markdown")]
-    Markdown,
-    #[cfg(feature = "lang-markdown-inline")]
-    MarkdownInline,
-    #[cfg(feature = "lang-nix")]
-    Nix,
-    #[cfg(feature = "lang-nushell")]
-    Nushell,
-    #[cfg(feature = "lang-ocaml")]
-    OCaml,
-    #[cfg(feature = "lang-ocaml")]
-    OCamlInterface,
-    #[cfg(feature = "lang-objc")]
-    ObjC,
-    #[cfg(feature = "lang-perl")]
-    Perl,
-    #[cfg(feature = "lang-php")]
-    Php,
-    #[default]
-    PlainText,
-    #[cfg(feature = "lang-powershell")]
-    PowerShell,
-    #[cfg(feature = "lang-protobuf")]
-    ProtoBuf,
-    #[cfg(feature = "lang-python")]
-    Python,
-    #[cfg(feature = "lang-r")]
-    R,
-    #[cfg(feature = "lang-regex")]
-    Regex,
-    #[cfg(feature = "lang-ruby")]
-    Ruby,
-    #[cfg(feature = "lang-rust")]
-    Rust,
-    #[cfg(feature = "lang-scss")]
-    SCSS,
-    #[cfg(feature = "lang-sql")]
-    SQL,
-    #[cfg(feature = "lang-scala")]
-    Scala,
-    #[cfg(feature = "lang-surface")]
-    Surface,
-    #[cfg(feature = "lang-svelte")]
-    Svelte,
-    #[cfg(feature = "lang-swift")]
-    Swift,
-    #[cfg(feature = "lang-toml")]
-    Toml,
-    #[cfg(feature = "lang-tsx")]
-    Tsx,
-    #[cfg(feature = "lang-typescript")]
-    TypeScript,
-    #[cfg(feature = "lang-typst")]
-    Typst,
-    #[cfg(feature = "lang-vim")]
-    Vim,
-    #[cfg(feature = "lang-vue")]
-    Vue,
-    #[cfg(feature = "lang-wat")]
-    Wat,
-    #[cfg(feature = "lang-xml")]
-    XML,
-    #[cfg(feature = "lang-yaml")]
-    YAML,
-    #[cfg(feature = "lang-zig")]
-    Zig,
+/// Internal extension trait mapping each language to its highlight configuration.
+pub(crate) trait LanguageConfig {
+    fn config(&self) -> &'static HighlightConfiguration;
 }
 
-/// Error returned when a language cannot be determined from input.
-///
-/// This error occurs when using [`std::str::FromStr`] or the `.parse()` method
-/// with an unrecognized language name, file extension, or file path.
-///
-/// # Example
-///
-/// ```rust
-/// use lumis::languages::Language;
-///
-/// let result: Result<Language, _> = "unknown_lang".parse();
-/// assert!(result.is_err());
-/// ```
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct LanguageParseError(String);
-
-impl std::fmt::Display for LanguageParseError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "unknown language or file type: {}", self.0)
-    }
-}
-
-impl std::error::Error for LanguageParseError {}
-
-impl std::str::FromStr for Language {
-    type Err = LanguageParseError;
-
-    /// Parse a language from a string.
-    ///
-    /// The input can be:
-    /// - A language name (e.g., "rust", "python", "javascript")
-    /// - A file extension (e.g., "rs", "py", "js")
-    /// - A file path (e.g., "src/main.rs", "script.py")
-    ///
-    /// Returns an error if the language cannot be determined from the input.
-    ///
-    /// # Examples
-    ///
-    /// ```rust
-    /// use lumis::languages::Language;
-    /// use std::str::FromStr;
-    ///
-    /// // From language name
-    /// let lang = Language::from_str("rust").unwrap();
-    /// assert_eq!(lang, Language::Rust);
-    ///
-    /// // Using .parse()
-    /// let lang: Language = "python".parse().unwrap();
-    /// assert_eq!(lang, Language::Python);
-    ///
-    /// // From extension
-    /// let lang: Language = "js".parse().unwrap();
-    /// assert_eq!(lang, Language::JavaScript);
-    ///
-    /// // From file path
-    /// let lang: Language = "src/main.rs".parse().unwrap();
-    /// assert_eq!(lang, Language::Rust);
-    ///
-    /// // Empty string defaults to PlainText
-    /// let lang: Language = "".parse().unwrap();
-    /// assert_eq!(lang, Language::PlainText);
-    ///
-    /// // Unknown language returns error
-    /// assert!(Language::from_str("unknown").is_err());
-    /// assert!("unknown".parse::<Language>().is_err());
-    /// ```
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if s.is_empty() {
-            return Ok(Language::PlainText);
-        }
-
-        let s_lower = s.to_ascii_lowercase();
-
-        let exact = match s_lower.as_str() {
-            #[cfg(feature = "lang-angular")]
-            "angular" => Some(Language::Angular),
-            #[cfg(feature = "lang-asm")]
-            "asm" | "assembly" => Some(Language::Assembly),
-            #[cfg(feature = "lang-astro")]
-            "astro" => Some(Language::Astro),
-            #[cfg(feature = "lang-bash")]
-            "bash" => Some(Language::Bash),
-            #[cfg(feature = "lang-c")]
-            "c" => Some(Language::C),
-            #[cfg(feature = "lang-caddy")]
-            "caddy" => Some(Language::Caddy),
-            #[cfg(feature = "lang-clojure")]
-            "clojure" => Some(Language::Clojure),
-            #[cfg(feature = "lang-comment")]
-            "comment" => Some(Language::Comment),
-            #[cfg(feature = "lang-commonlisp")]
-            "commonlisp" => Some(Language::CommonLisp),
-            #[cfg(feature = "lang-cpp")]
-            "c++" | "cpp" => Some(Language::CPlusPlus),
-            #[cfg(feature = "lang-cmake")]
-            "cmake" => Some(Language::CMake),
-            #[cfg(feature = "lang-csharp")]
-            "c#" | "csharp" => Some(Language::CSharp),
-            #[cfg(feature = "lang-csv")]
-            "csv" => Some(Language::CSV),
-            #[cfg(feature = "lang-css")]
-            "css" => Some(Language::CSS),
-            #[cfg(feature = "lang-dart")]
-            "dart" => Some(Language::Dart),
-            "diff" => Some(Language::Diff),
-            #[cfg(feature = "lang-dockerfile")]
-            "dockerfile" | "docker" => Some(Language::Dockerfile),
-            #[cfg(feature = "lang-eex")]
-            "eex" => Some(Language::EEx),
-            #[cfg(feature = "lang-ejs")]
-            "ejs" => Some(Language::EJS),
-            #[cfg(feature = "lang-erb")]
-            "erb" => Some(Language::ERB),
-            #[cfg(feature = "lang-elixir")]
-            "elixir" => Some(Language::Elixir),
-            #[cfg(feature = "lang-elm")]
-            "elm" => Some(Language::Elm),
-            #[cfg(feature = "lang-erlang")]
-            "erlang" => Some(Language::Erlang),
-            #[cfg(feature = "lang-fish")]
-            "fish" => Some(Language::Fish),
-            #[cfg(feature = "lang-fsharp")]
-            "f#" | "fsharp" => Some(Language::FSharp),
-            #[cfg(feature = "lang-gleam")]
-            "gleam" => Some(Language::Gleam),
-            #[cfg(feature = "lang-glimmer")]
-            "ember" | "glimmer" | "handlebars" => Some(Language::Glimmer),
-            #[cfg(feature = "lang-go")]
-            "go" => Some(Language::Go),
-            #[cfg(feature = "lang-graphql")]
-            "graphql" => Some(Language::GraphQL),
-            #[cfg(feature = "lang-haskell")]
-            "haskell" => Some(Language::Haskell),
-            #[cfg(feature = "lang-hcl")]
-            "hcl" | "terraform" => Some(Language::HCL),
-            #[cfg(feature = "lang-heex")]
-            "heex" => Some(Language::HEEx),
-            #[cfg(feature = "lang-html")]
-            "html" => Some(Language::HTML),
-            #[cfg(feature = "lang-iex")]
-            "iex" => Some(Language::IEx),
-            #[cfg(feature = "lang-java")]
-            "java" => Some(Language::Java),
-            #[cfg(feature = "lang-javascript")]
-            "jsx" | "javascript" => Some(Language::JavaScript),
-            #[cfg(feature = "lang-json")]
-            "json" => Some(Language::JSON),
-            #[cfg(feature = "lang-kotlin")]
-            "kotlin" => Some(Language::Kotlin),
-            #[cfg(feature = "lang-latex")]
-            "latex" => Some(Language::LaTeX),
-            #[cfg(feature = "lang-liquid")]
-            "liquid" => Some(Language::Liquid),
-            #[cfg(feature = "lang-llvm")]
-            "llvm" => Some(Language::Llvm),
-            #[cfg(feature = "lang-lua")]
-            "lua" => Some(Language::Lua),
-            #[cfg(feature = "lang-objc")]
-            "objc" | "objective-c" => Some(Language::ObjC),
-            #[cfg(feature = "lang-ocaml")]
-            "ocaml" => Some(Language::OCaml),
-            #[cfg(feature = "lang-ocaml")]
-            "ocaml_interface" => Some(Language::OCamlInterface),
-            #[cfg(feature = "lang-perl")]
-            "perl" => Some(Language::Perl),
-            #[cfg(feature = "lang-make")]
-            "make" => Some(Language::Make),
-            #[cfg(feature = "lang-markdown")]
-            "markdown" => Some(Language::Markdown),
-            #[cfg(feature = "lang-markdown-inline")]
-            "markdown_inline" => Some(Language::MarkdownInline),
-            #[cfg(feature = "lang-nix")]
-            "nix" => Some(Language::Nix),
-            #[cfg(feature = "lang-nushell")]
-            "nushell" | "nu" => Some(Language::Nushell),
-            #[cfg(feature = "lang-php")]
-            "php" => Some(Language::Php),
-            #[cfg(feature = "lang-powershell")]
-            "powershell" => Some(Language::PowerShell),
-            #[cfg(feature = "lang-protobuf")]
-            "protobuf" => Some(Language::ProtoBuf),
-            #[cfg(feature = "lang-python")]
-            "python" => Some(Language::Python),
-            #[cfg(feature = "lang-r")]
-            "r" => Some(Language::R),
-            #[cfg(feature = "lang-regex")]
-            "regex" => Some(Language::Regex),
-            #[cfg(feature = "lang-ruby")]
-            "ruby" => Some(Language::Ruby),
-            #[cfg(feature = "lang-rust")]
-            "rust" => Some(Language::Rust),
-            #[cfg(feature = "lang-scala")]
-            "scala" => Some(Language::Scala),
-            #[cfg(feature = "lang-scss")]
-            "scss" => Some(Language::SCSS),
-            #[cfg(feature = "lang-sql")]
-            "sql" => Some(Language::SQL),
-            #[cfg(feature = "lang-surface")]
-            "surface" => Some(Language::Surface),
-            #[cfg(feature = "lang-svelte")]
-            "svelte" => Some(Language::Svelte),
-            #[cfg(feature = "lang-swift")]
-            "swift" => Some(Language::Swift),
-            #[cfg(feature = "lang-toml")]
-            "toml" => Some(Language::Toml),
-            #[cfg(feature = "lang-typescript")]
-            "typescript" => Some(Language::TypeScript),
-            #[cfg(feature = "lang-tsx")]
-            "tsx" => Some(Language::Tsx),
-            #[cfg(feature = "lang-typst")]
-            "typst" => Some(Language::Typst),
-            #[cfg(feature = "lang-vim")]
-            "vim" | "viml" | "vimscript" => Some(Language::Vim),
-            #[cfg(feature = "lang-vue")]
-            "vue" => Some(Language::Vue),
-            #[cfg(feature = "lang-wat")]
-            "wat" | "wasm" | "webassembly" => Some(Language::Wat),
-            #[cfg(feature = "lang-xml")]
-            "xml" => Some(Language::XML),
-            #[cfg(feature = "lang-yaml")]
-            "yaml" => Some(Language::YAML),
-            #[cfg(feature = "lang-zig")]
-            "zig" => Some(Language::Zig),
-            _ => None,
-        };
-
-        if let Some(lang) = exact {
-            return Ok(lang);
-        }
-
-        let path = Path::new(&s_lower);
-
-        if let Some(lang) = Self::from_glob(path) {
-            return Ok(lang);
-        }
-
-        if let Some(lang) = Self::from_extension(&s_lower) {
-            return Ok(lang);
-        }
-
-        Err(LanguageParseError(s.to_string()))
-    }
-}
-
-impl Language {
-    /// Guess the language based on an optional language hint and source content.
-    ///
-    /// # Arguments
-    ///
-    /// * `language` - Optional language hint. Can be:
-    ///   - `None`: Try to auto-detect language from source content
-    ///   - `Some(s)`: Language name, file extension, or file path
-    /// * `src` - The source code content to analyze
-    ///
-    /// # Detection Strategy
-    ///
-    /// When `language` is `Some(...)`:
-    /// 1. Try to parse as language name/extension/path via `FromStr`
-    /// 2. If parsing succeeds, return that language
-    /// 3. If parsing fails, fall through to content-based detection
-    ///
-    /// When `language` is `None` or parsing fails:
-    /// 1. Check for Emacs mode header (`// -*- mode: rust -*-`)
-    /// 2. Check for shebang (`#!/usr/bin/env python`)
-    /// 3. Apply content heuristics (HTML doctype, XML declaration, etc.)
-    /// 4. Default to `PlainText` if nothing matches
-    ///
-    /// # Examples
-    ///
-    /// ```rust
-    /// use lumis::languages::Language;
-    ///
-    /// // Explicit language
-    /// let lang = Language::guess(Some("rust"), "");
-    /// assert_eq!(lang, Language::Rust);
-    ///
-    /// // Auto-detect from shebang
-    /// let lang = Language::guess(None, "#!/usr/bin/env python3\nprint('hi')");
-    /// assert_eq!(lang, Language::Python);
-    ///
-    /// // File path hint
-    /// let lang = Language::guess(Some("src/main.rs"), "");
-    /// assert_eq!(lang, Language::Rust);
-    /// ```
-    pub fn guess(language: Option<&str>, src: &str) -> Self {
-        // If a language hint is provided, try to parse it
-        if let Some(input) = language {
-            if let Ok(lang) = input.parse() {
-                return lang;
-            }
-            // If parsing fails, continue to content-based detection
-        }
-
-        // Auto-detection from content
-        if let Some(lang) = Self::from_emacs_mode_header(src) {
-            return lang;
-        }
-
-        if let Some(lang) = Self::from_shebang(src) {
-            return lang;
-        }
-
-        #[cfg(feature = "lang-html")]
-        if Self::looks_like_html(src) {
-            return Language::HTML;
-        }
-
-        #[cfg(feature = "lang-xml")]
-        if Self::looks_like_xml(src) {
-            return Language::XML;
-        }
-
-        #[cfg(feature = "lang-objc")]
-        if Self::looks_like_objc(Path::new(""), src) {
-            return Language::ObjC;
-        }
-
-        Language::PlainText
-    }
-
-    fn from_glob(path: &Path) -> Option<Self> {
-        match path.file_name() {
-            Some(name) => {
-                let name = name.to_string_lossy().into_owned();
-                for language in Language::iter() {
-                    for glob in Language::language_globs(language) {
-                        if glob.matches(&name) {
-                            return Some(language);
-                        }
-                    }
-                }
-
-                None
-            }
-            None => None,
-        }
-    }
-
-    fn from_extension(token: &str) -> Option<Self> {
-        let token_pattern = format!("*.{token}");
-
-        for language in Language::iter() {
-            for glob in Language::language_globs(language) {
-                if glob.matches(&token_pattern) {
-                    return Some(language);
-                }
-            }
-        }
-        None
-    }
-
-    // TODO: https://github.com/nvim-treesitter/nvim-treesitter/tree/master/queries/embedded_template
-    pub fn language_globs(language: Language) -> Vec<glob::Pattern> {
-        let glob_strs: &'static [&'static str] = match language {
-            #[cfg(feature = "lang-angular")]
-            Language::Angular => &["*.angular", "component.html"],
-            #[cfg(feature = "lang-asm")]
-            Language::Assembly => &["*.s", "*.asm", "*.assembly"],
-            #[cfg(feature = "lang-astro")]
-            Language::Astro => &["*.astro"],
-            #[cfg(feature = "lang-bash")]
-            Language::Bash => &[
-                "*.bash",
-                "*.bats",
-                "*.cgi",
-                "*.command",
-                "*.env",
-                "*.fcgi",
-                "*.ksh",
-                "*.sh",
-                "*.sh.in",
-                "*.tmux",
-                "*.tool",
-                "*.zsh",
-                ".bash_aliases",
-                ".bash_history",
-                ".bash_logout",
-                ".bash_profile",
-                ".bashrc",
-                ".cshrc",
-                ".env",
-                ".env.example",
-                ".flaskenv",
-                ".kshrc",
-                ".login",
-                ".profile",
-                ".zlogin",
-                ".zlogout",
-                ".zprofile",
-                ".zshenv",
-                ".zshrc",
-                "9fs",
-                "PKGBUILD",
-                "bash_aliases",
-                "bash_logout",
-                "bash_profile",
-                "bashrc",
-                "cshrc",
-                "ebuild",
-                "eclass",
-                "gradlew",
-                "kshrc",
-                "login",
-                "man",
-                "profile",
-                "zlogin",
-                "zlogout",
-                "zprofile",
-                "zshenv",
-                "zshrc",
-            ],
-            #[cfg(feature = "lang-c")]
-            Language::C => &["*.c"],
-            #[cfg(feature = "lang-caddy")]
-            Language::Caddy => &["Caddyfile", "caddyfile"],
-            #[cfg(feature = "lang-clojure")]
-            Language::Clojure => &[
-                "*.bb", "*.boot", "*.clj", "*.cljc", "*.clje", "*.cljs", "*.cljx", "*.edn",
-                "*.joke", "*.joker",
-            ],
-            #[cfg(feature = "lang-comment")]
-            Language::Comment => &[],
-            #[cfg(feature = "lang-commonlisp")]
-            Language::CommonLisp => &["*.lisp", "*.lsp", "*.asd"],
-            #[cfg(feature = "lang-cmake")]
-            Language::CMake => &["*.cmake", "*.cmake.in", "CMakeLists.txt"],
-            #[cfg(feature = "lang-csharp")]
-            Language::CSharp => &["*.cs"],
-            #[cfg(feature = "lang-csv")]
-            Language::CSV => &["*.csv"],
-            #[cfg(feature = "lang-cpp")]
-            Language::CPlusPlus => &[
-                "*.cc", "*.cpp", "*.h", "*.hh", "*.hpp", "*.ino", "*.cxx", "*.cu", "*.hxx",
-            ],
-            #[cfg(feature = "lang-css")]
-            Language::CSS => &["*.css"],
-            #[cfg(feature = "lang-dart")]
-            Language::Dart => &["*.dart"],
-            Language::Diff => &["*.diff"],
-            #[cfg(feature = "lang-dockerfile")]
-            Language::Dockerfile => &[
-                "Dockerfile",
-                "dockerfile",
-                "docker",
-                "Containerfile",
-                "container",
-                "*.dockerfile",
-                "*.docker",
-                "*.container",
-            ],
-            #[cfg(feature = "lang-eex")]
-            Language::EEx => &["*.eex"],
-            #[cfg(feature = "lang-ejs")]
-            Language::EJS => &["*.ejs"],
-            #[cfg(feature = "lang-erb")]
-            Language::ERB => &["*.erb"],
-            #[cfg(feature = "lang-elixir")]
-            Language::Elixir => &["*.ex", "*.exs"],
-            #[cfg(feature = "lang-elm")]
-            Language::Elm => &["*.elm"],
-            #[cfg(feature = "lang-erlang")]
-            Language::Erlang => &[
-                "*.erl",
-                "*.app",
-                "*.app.src",
-                "*.es",
-                "*.escript",
-                "*.hrl",
-                "*.xrl",
-                "*.yrl",
-                "Emakefile",
-                "rebar.config",
-            ],
-            #[cfg(feature = "lang-fish")]
-            Language::Fish => &["*.fish"],
-            #[cfg(feature = "lang-fsharp")]
-            Language::FSharp => &["*.fs", "*.fsx", "*.fsi"],
-            #[cfg(feature = "lang-gleam")]
-            Language::Gleam => &["*.gleam"],
-            #[cfg(feature = "lang-glimmer")]
-            Language::Glimmer => &["*.hbs", "*.handlebars", "*.html.handlebars", "*.glimmer"],
-            #[cfg(feature = "lang-go")]
-            Language::Go => &["*.go"],
-            #[cfg(feature = "lang-graphql")]
-            Language::GraphQL => &[],
-            #[cfg(feature = "lang-haskell")]
-            Language::Haskell => &["*.hs", "*.hs-boot"],
-            #[cfg(feature = "lang-hcl")]
-            Language::HCL => &["*.hcl", "*.nomad", "*.tf", "*.tfvars", "*.workflow"],
-            #[cfg(feature = "lang-heex")]
-            Language::HEEx => &["*.heex", "*.neex"],
-            #[cfg(feature = "lang-html")]
-            Language::HTML => &["*.html", "*.htm", "*.xhtml"],
-            #[cfg(feature = "lang-iex")]
-            Language::IEx => &["*.iex"],
-            #[cfg(feature = "lang-java")]
-            Language::Java => &["*.java"],
-            #[cfg(feature = "lang-javascript")]
-            Language::JavaScript => &["*.cjs", "*.js", "*.mjs", "*.snap", "*.jsx"],
-            #[cfg(feature = "lang-json")]
-            Language::JSON => &[
-                "*.json",
-                "*.avsc",
-                "*.geojson",
-                "*.gltf",
-                "*.har",
-                "*.ice",
-                "*.JSON-tmLanguage",
-                "*.jsonl",
-                "*.mcmeta",
-                "*.tfstate",
-                "*.tfstate.backup",
-                "*.topojson",
-                "*.webapp",
-                "*.webmanifest",
-                ".arcconfig",
-                ".auto-changelog",
-                ".c8rc",
-                ".htmlhintrc",
-                ".imgbotconfig",
-                ".nycrc",
-                ".tern-config",
-                ".tern-project",
-                ".watchmanconfig",
-                "Pipfile.lock",
-                "composer.lock",
-                "mcmod.info",
-                "flake.lock",
-            ],
-            #[cfg(feature = "lang-kotlin")]
-            Language::Kotlin => &["*.kt", "*.ktm", "*.kts"],
-            #[cfg(feature = "lang-latex")]
-            Language::LaTeX => &["*.aux", "*.cls", "*.sty", "*.tex"],
-            #[cfg(feature = "lang-liquid")]
-            Language::Liquid => &["*liquid"],
-            #[cfg(feature = "lang-llvm")]
-            Language::Llvm => &["*.llvm", "*.ll"],
-            #[cfg(feature = "lang-lua")]
-            Language::Lua => &["*.lua"],
-            #[cfg(feature = "lang-make")]
-            Language::Make => &[
-                "*.mak",
-                "*.d",
-                "*.make",
-                "*.makefile",
-                "*.mk",
-                "*.mkfile",
-                "*.dsp",
-                "BSDmakefile",
-                "GNUmakefile",
-                "Kbuild",
-                "Makefile",
-                "MAKEFILE",
-                "Makefile.am",
-                "Makefile.boot",
-                "Makefile.frag",
-                "Makefile*.in",
-                "Makefile.inc",
-                "Makefile.wat",
-                "makefile",
-                "makefile.sco",
-                "mkfile",
-            ],
-            #[cfg(feature = "lang-markdown")]
-            Language::Markdown => &["*.md", ".MD", "README", "LICENSE"],
-            #[cfg(feature = "lang-markdown-inline")]
-            Language::MarkdownInline => &[],
-            #[cfg(feature = "lang-nix")]
-            Language::Nix => &["*.nix"],
-            #[cfg(feature = "lang-nushell")]
-            Language::Nushell => &["*.nu"],
-            #[cfg(feature = "lang-objc")]
-            Language::ObjC => &["*.m", "*.objc"],
-            #[cfg(feature = "lang-ocaml")]
-            Language::OCaml => &["*.ml"],
-            #[cfg(feature = "lang-ocaml")]
-            Language::OCamlInterface => &["*.mli"],
-            #[cfg(feature = "lang-perl")]
-            Language::Perl => &["*.pm", "*.pl", "*.t"],
-            #[cfg(feature = "lang-php")]
-            Language::Php => &[
-                "*.php", "*.phtml", "*.php3", "*.php4", "*.php5", "*.php7", "*.phps",
-            ],
-            #[cfg(feature = "lang-powershell")]
-            Language::PowerShell => &["*.ps1", "*.psm1"],
-            #[cfg(feature = "lang-protobuf")]
-            Language::ProtoBuf => &["*.proto", "*.protobuf", "*.proto2", "*.proto3"],
-            Language::PlainText => &[],
-            #[cfg(feature = "lang-python")]
-            Language::Python => &["*.py", "*.py3", "*.pyi", "*.bzl", "TARGETS", "BUCK", "DEPS"],
-            #[cfg(feature = "lang-r")]
-            Language::R => &["*.R", "*.r", "*.rd", "*.rsx", ".Rprofile", "expr-dist"],
-            #[cfg(feature = "lang-regex")]
-            Language::Regex => &["*.regex"],
-            #[cfg(feature = "lang-ruby")]
-            Language::Ruby => &[
-                "*.rb",
-                "*.builder",
-                "*.spec",
-                "*.rake",
-                "Gemfile",
-                "Rakefile",
-            ],
-            #[cfg(feature = "lang-rust")]
-            Language::Rust => &["*.rs"],
-            #[cfg(feature = "lang-scala")]
-            Language::Scala => &["*.scala", "*.sbt", "*.sc"],
-            #[cfg(feature = "lang-scss")]
-            Language::SCSS => &["*.scss"],
-            #[cfg(feature = "lang-sql")]
-            Language::SQL => &["*.sql", "*.pgsql"],
-            #[cfg(feature = "lang-surface")]
-            Language::Surface => &["*.surface", "*.sface"],
-            #[cfg(feature = "lang-svelte")]
-            Language::Svelte => &["*.svelte"],
-            #[cfg(feature = "lang-swift")]
-            Language::Swift => &["*.swift"],
-            #[cfg(feature = "lang-toml")]
-            Language::Toml => &[
-                "*.toml",
-                "Cargo.lock",
-                "Gopkg.lock",
-                "Pipfile",
-                "pdm.lock",
-                "poetry.lock",
-                "uv.lock",
-            ],
-            #[cfg(feature = "lang-typescript")]
-            Language::TypeScript => &["*.ts"],
-            #[cfg(feature = "lang-tsx")]
-            Language::Tsx => &["*.tsx"],
-            #[cfg(feature = "lang-typst")]
-            Language::Typst => &["*.typ", "*.typst"],
-            #[cfg(feature = "lang-vim")]
-            Language::Vim => &["*.vim", "*.viml"],
-            #[cfg(feature = "lang-vue")]
-            Language::Vue => &["*.vue"],
-            #[cfg(feature = "lang-wat")]
-            Language::Wat => &["*.wat"],
-            #[cfg(feature = "lang-xml")]
-            Language::XML => &[
-                "*.ant",
-                "*.csproj",
-                // Following GitHub, treat MJML as XML.
-                // https://documentation.mjml.io/
-                "*.mjml",
-                "*.plist",
-                "*.resx",
-                "*.svg",
-                "*.ui",
-                "*.vbproj",
-                "*.xaml",
-                "*.xml",
-                "*.xsd",
-                "*.xsl",
-                "*.xslt",
-                "*.zcml",
-                "*.rng",
-                "App.config",
-                "nuget.config",
-                "packages.config",
-                ".classpath",
-                ".cproject",
-                ".project",
-            ],
-            #[cfg(feature = "lang-yaml")]
-            Language::YAML => &["*.yaml", "*.yml"],
-            #[cfg(feature = "lang-zig")]
-            Language::Zig => &["*.zig"],
-        };
-
-        glob_strs
-            .iter()
-            .map(|name| glob::Pattern::new(name).expect("failed to guess language by path"))
-            .collect()
-    }
-
-    /// Try to guess the language based on an Emacs mode comment at the
-    /// beginning of the file.
-    ///
-    /// <https://www.gnu.org/software/emacs/manual/html_node/emacs/Choosing-Modes.html>
-    /// <https://www.gnu.org/software/emacs/manual/html_node/emacs/Specifying-File-Variables.html>
-    fn from_emacs_mode_header(src: &str) -> Option<Language> {
-        static MODE_RE: LazyLock<Regex> =
-            LazyLock::new(|| Regex::new(r"-\*-.*mode:([^;]+?);.*-\*-").unwrap());
-        static SHORTHAND_RE: LazyLock<Regex> =
-            LazyLock::new(|| Regex::new(r"-\*-(.+)-\*-").unwrap());
-
-        // Emacs allows the mode header to occur on the second line if the
-        // first line is a shebang.
-        for line in split_on_newlines(src).take(2) {
-            let mode_name: String = match (MODE_RE.captures(line), SHORTHAND_RE.captures(line)) {
-                (Some(cap), _) | (_, Some(cap)) => cap[1].into(),
-                _ => "".into(),
-            };
-            let lang = match mode_name.to_ascii_lowercase().trim() {
-                #[cfg(feature = "lang-c")]
-                "c" => Some(Language::C),
-                #[cfg(feature = "lang-clojure")]
-                "clojure" => Some(Language::Clojure),
-                #[cfg(feature = "lang-csharp")]
-                "csharp" => Some(Language::CSharp),
-                #[cfg(feature = "lang-csv")]
-                "csv" => Some(Language::CSV),
-                #[cfg(feature = "lang-css")]
-                "css" => Some(Language::CSS),
-                #[cfg(feature = "lang-cpp")]
-                "c++" => Some(Language::CPlusPlus),
-                #[cfg(feature = "lang-elixir")]
-                "elixir" => Some(Language::Elixir),
-                #[cfg(feature = "lang-elm")]
-                "elm" => Some(Language::Elm),
-                #[cfg(feature = "lang-fsharp")]
-                "fsharp" => Some(Language::FSharp),
-                #[cfg(feature = "lang-gleam")]
-                "gleam" => Some(Language::Gleam),
-                #[cfg(feature = "lang-go")]
-                "go" => Some(Language::Go),
-                #[cfg(feature = "lang-haskell")]
-                "haskell" => Some(Language::Haskell),
-                #[cfg(feature = "lang-hcl")]
-                "hcl" => Some(Language::HCL),
-                #[cfg(feature = "lang-html")]
-                "html" => Some(Language::HTML),
-                #[cfg(feature = "lang-java")]
-                "java" => Some(Language::Java),
-                #[cfg(feature = "lang-javascript")]
-                "js" | "js2" => Some(Language::JavaScript),
-                #[cfg(feature = "lang-commonlisp")]
-                "lisp" => Some(Language::CommonLisp),
-                #[cfg(feature = "lang-nix")]
-                "nix" => Some(Language::Nix),
-                #[cfg(feature = "lang-xml")]
-                "nxml" => Some(Language::XML),
-                #[cfg(feature = "lang-objc")]
-                "objc" => Some(Language::ObjC),
-                #[cfg(feature = "lang-perl")]
-                "perl" => Some(Language::Perl),
-                #[cfg(feature = "lang-python")]
-                "python" => Some(Language::Python),
-                #[cfg(feature = "lang-ruby")]
-                "ruby" => Some(Language::Ruby),
-                #[cfg(feature = "lang-rust")]
-                "rust" => Some(Language::Rust),
-                #[cfg(feature = "lang-scala")]
-                "scala" => Some(Language::Scala),
-                #[cfg(feature = "lang-scss")]
-                "scss" => Some(Language::SCSS),
-                #[cfg(feature = "lang-bash")]
-                "sh" => Some(Language::Bash),
-                #[cfg(feature = "lang-sql")]
-                "sql" => Some(Language::SQL),
-                #[cfg(feature = "lang-surface")]
-                "surface" => Some(Language::Surface),
-                #[cfg(feature = "lang-swift")]
-                "swift" => Some(Language::Swift),
-                #[cfg(feature = "lang-toml")]
-                "toml" => Some(Language::Toml),
-                #[cfg(feature = "lang-typescript")]
-                "typescript" => Some(Language::TypeScript),
-                #[cfg(feature = "lang-tsx")]
-                "tsx" => Some(Language::Tsx),
-                #[cfg(feature = "lang-ocaml")]
-                "tuareg" => Some(Language::OCaml),
-                // "typescript" => Some(Language::TypeScript),
-                #[cfg(feature = "lang-yaml")]
-                "yaml" => Some(Language::YAML),
-                #[cfg(feature = "lang-zig")]
-                "zig" => Some(Language::Zig),
-                _ => None,
-            };
-            if lang.is_some() {
-                return lang;
-            }
-        }
-
-        None
-    }
-
-    fn from_shebang(src: &str) -> Option<Language> {
-        static RE: LazyLock<Regex> =
-            LazyLock::new(|| Regex::new(r"#! *(?:/usr/bin/env )?([^ ]+)").unwrap());
-
-        if let Some(first_line) = split_on_newlines(src).next() {
-            if let Some(cap) = RE.captures(first_line) {
-                let interpreter_path = Path::new(&cap[1]);
-                if let Some(name) = interpreter_path.file_name() {
-                    match name.to_string_lossy().as_ref() {
-                        #[cfg(feature = "lang-typescript")]
-                        "deno" | "ts-node" => return Some(Language::TypeScript),
-                        #[cfg(feature = "lang-ocaml")]
-                        "ocaml" | "ocamlrun" | "ocamlscript" => return Some(Language::OCaml),
-                        #[cfg(feature = "lang-commonlisp")]
-                        "lisp" | "sbc" | "ccl" | "clisp" | "ecl" => {
-                            return Some(Language::CommonLisp);
-                        }
-                        #[cfg(feature = "lang-haskell")]
-                        "runghc" | "runhaskell" | "runhugs" => return Some(Language::Haskell),
-                        #[cfg(feature = "lang-bash")]
-                        "ash" | "bash" | "dash" | "ksh" | "mksh" | "pdksh" | "rc" | "sh"
-                        | "zsh" => return Some(Language::Bash),
-                        #[cfg(feature = "lang-elixir")]
-                        "elixir" => return Some(Language::Elixir),
-                        #[cfg(feature = "lang-r")]
-                        "Rscript" => return Some(Language::R),
-                        #[cfg(feature = "lang-python")]
-                        "python" | "python2" | "python3" => return Some(Language::Python),
-                        #[cfg(feature = "lang-perl")]
-                        "perl" => return Some(Language::Perl),
-                        #[cfg(feature = "lang-ruby")]
-                        "ruby" | "macruby" | "rake" | "jruby" | "rbx" => {
-                            return Some(Language::Ruby);
-                        }
-                        #[cfg(feature = "lang-nushell")]
-                        "nu" => return Some(Language::Nushell),
-                        #[cfg(feature = "lang-swift")]
-                        "swift" => return Some(Language::Swift),
-                        #[cfg(feature = "lang-c")]
-                        "tcc" => return Some(Language::C),
-                        _ => {}
-                    }
-                }
-            }
-        }
-
-        None
-    }
-
-    /// Use a heuristic to determine if a '.h' file looks like Objective-C.
-    /// We look for a line starting with '#import', '@interface' or '@protocol'
-    /// near the top of the file.  These keywords are not valid C or C++, so this
-    /// should not produce false positives.
-    fn looks_like_objc(path: &Path, src: &str) -> bool {
-        if let Some(extension) = path.extension() {
-            if extension == "h" {
-                return split_on_newlines(src).take(100).any(|line| {
-                    ["#import", "@interface", "@protocol"]
-                        .iter()
-                        .any(|keyword| line.starts_with(keyword))
-                });
-            }
-        }
-
-        false
-    }
-
-    fn looks_like_xml(src: &str) -> bool {
-        src.to_lowercase().starts_with("<?xml")
-    }
-
-    fn looks_like_html(src: &str) -> bool {
-        src.to_lowercase().starts_with("<!doctype html")
-    }
-
-    pub fn name(&self) -> &'static str {
-        match self {
-            #[cfg(feature = "lang-angular")]
-            Language::Angular => "Angular",
-            #[cfg(feature = "lang-asm")]
-            Language::Assembly => "Assembly",
-            #[cfg(feature = "lang-astro")]
-            Language::Astro => "Astro",
-            #[cfg(feature = "lang-bash")]
-            Language::Bash => "Bash",
-            #[cfg(feature = "lang-c")]
-            Language::C => "C",
-            #[cfg(feature = "lang-caddy")]
-            Language::Caddy => "Caddy",
-            #[cfg(feature = "lang-clojure")]
-            Language::Clojure => "Clojure",
-            #[cfg(feature = "lang-comment")]
-            Language::Comment => "Comment",
-            #[cfg(feature = "lang-commonlisp")]
-            Language::CommonLisp => "Common Lisp",
-            #[cfg(feature = "lang-cmake")]
-            Language::CMake => "CMake",
-            #[cfg(feature = "lang-csharp")]
-            Language::CSharp => "C#",
-            #[cfg(feature = "lang-csv")]
-            Language::CSV => "CSV",
-            #[cfg(feature = "lang-cpp")]
-            Language::CPlusPlus => "C++",
-            #[cfg(feature = "lang-css")]
-            Language::CSS => "CSS",
-            #[cfg(feature = "lang-dart")]
-            Language::Dart => "Dart",
-            Language::Diff => "Diff",
-            #[cfg(feature = "lang-dockerfile")]
-            Language::Dockerfile => "Dockerfile",
-            #[cfg(feature = "lang-eex")]
-            Language::EEx => "Eex",
-            #[cfg(feature = "lang-ejs")]
-            Language::EJS => "EJS",
-            #[cfg(feature = "lang-erb")]
-            Language::ERB => "ERB",
-            #[cfg(feature = "lang-elixir")]
-            Language::Elixir => "Elixir",
-            #[cfg(feature = "lang-elm")]
-            Language::Elm => "Elm",
-            #[cfg(feature = "lang-erlang")]
-            Language::Erlang => "Erlang",
-            #[cfg(feature = "lang-fish")]
-            Language::Fish => "Fish",
-            #[cfg(feature = "lang-fsharp")]
-            Language::FSharp => "F#",
-            #[cfg(feature = "lang-gleam")]
-            Language::Gleam => "Gleam",
-            #[cfg(feature = "lang-glimmer")]
-            Language::Glimmer => "Glimmer",
-            #[cfg(feature = "lang-go")]
-            Language::Go => "Go",
-            #[cfg(feature = "lang-graphql")]
-            Language::GraphQL => "GraphQL",
-            #[cfg(feature = "lang-haskell")]
-            Language::Haskell => "Haskell",
-            #[cfg(feature = "lang-hcl")]
-            Language::HCL => "HCL",
-            #[cfg(feature = "lang-heex")]
-            Language::HEEx => "HEEx",
-            #[cfg(feature = "lang-html")]
-            Language::HTML => "HTML",
-            #[cfg(feature = "lang-iex")]
-            Language::IEx => "IEx",
-            #[cfg(feature = "lang-java")]
-            Language::Java => "Java",
-            #[cfg(feature = "lang-javascript")]
-            Language::JavaScript => "JavaScript",
-            #[cfg(feature = "lang-json")]
-            Language::JSON => "JSON",
-            #[cfg(feature = "lang-kotlin")]
-            Language::Kotlin => "Kotlin",
-            #[cfg(feature = "lang-latex")]
-            Language::LaTeX => "LaTeX",
-            #[cfg(feature = "lang-liquid")]
-            Language::Liquid => "Liquid",
-            #[cfg(feature = "lang-llvm")]
-            Language::Llvm => "LLVM",
-            #[cfg(feature = "lang-lua")]
-            Language::Lua => "Lua",
-            #[cfg(feature = "lang-objc")]
-            Language::ObjC => "Objective-C",
-            #[cfg(feature = "lang-ocaml")]
-            Language::OCaml => "OCaml",
-            #[cfg(feature = "lang-ocaml")]
-            Language::OCamlInterface => "OCaml Interface",
-            #[cfg(feature = "lang-make")]
-            Language::Make => "Make",
-            #[cfg(feature = "lang-markdown")]
-            Language::Markdown => "Markdown",
-            #[cfg(feature = "lang-markdown-inline")]
-            Language::MarkdownInline => "Markdown Inline",
-            #[cfg(feature = "lang-nix")]
-            Language::Nix => "Nix",
-            #[cfg(feature = "lang-nushell")]
-            Language::Nushell => "Nushell",
-            #[cfg(feature = "lang-perl")]
-            Language::Perl => "Perl",
-            #[cfg(feature = "lang-php")]
-            Language::Php => "PHP",
-            Language::PlainText => "Plain Text",
-            #[cfg(feature = "lang-powershell")]
-            Language::PowerShell => "PowerShell",
-            #[cfg(feature = "lang-protobuf")]
-            Language::ProtoBuf => "Protocol Buffer",
-            #[cfg(feature = "lang-python")]
-            Language::Python => "Python",
-            #[cfg(feature = "lang-r")]
-            Language::R => "R",
-            #[cfg(feature = "lang-regex")]
-            Language::Regex => "Regex",
-            #[cfg(feature = "lang-ruby")]
-            Language::Ruby => "Ruby",
-            #[cfg(feature = "lang-rust")]
-            Language::Rust => "Rust",
-            #[cfg(feature = "lang-scala")]
-            Language::Scala => "Scala",
-            #[cfg(feature = "lang-scss")]
-            Language::SCSS => "SCSS",
-            #[cfg(feature = "lang-sql")]
-            Language::SQL => "SQL",
-            #[cfg(feature = "lang-surface")]
-            Language::Surface => "Surface",
-            #[cfg(feature = "lang-svelte")]
-            Language::Svelte => "Svelte",
-            #[cfg(feature = "lang-swift")]
-            Language::Swift => "Swift",
-            #[cfg(feature = "lang-toml")]
-            Language::Toml => "TOML",
-            #[cfg(feature = "lang-typescript")]
-            Language::TypeScript => "TypeScript",
-            #[cfg(feature = "lang-tsx")]
-            Language::Tsx => "TSX",
-            #[cfg(feature = "lang-typst")]
-            Language::Typst => "Typst",
-            #[cfg(feature = "lang-vim")]
-            Language::Vim => "Vim",
-            #[cfg(feature = "lang-vue")]
-            Language::Vue => "Vue",
-            #[cfg(feature = "lang-wat")]
-            Language::Wat => "WAT",
-            #[cfg(feature = "lang-xml")]
-            Language::XML => "XML",
-            #[cfg(feature = "lang-yaml")]
-            Language::YAML => "YAML",
-            #[cfg(feature = "lang-zig")]
-            Language::Zig => "Zig",
-        }
-    }
-
-    pub fn id_name(&self) -> String {
-        self.name().to_ascii_lowercase().replace(" ", "")
-    }
-
-    pub fn config(&self) -> &'static HighlightConfiguration {
+impl LanguageConfig for Language {
+    fn config(&self) -> &'static HighlightConfiguration {
         match self {
             #[cfg(feature = "lang-angular")]
             Language::Angular => &ANGULAR_CONFIG,
@@ -1394,6 +213,8 @@ impl Language {
             Language::HEEx => &HEEX_CONFIG,
             #[cfg(feature = "lang-html")]
             Language::HTML => &HTML_CONFIG,
+            #[cfg(feature = "lang-http")]
+            Language::HTTP => &HTTP_CONFIG,
             #[cfg(feature = "lang-iex")]
             Language::IEx => &IEX_CONFIG,
             #[cfg(feature = "lang-java")]
@@ -1481,114 +302,6 @@ impl Language {
             _ => &PLAIN_TEXT_CONFIG,
         }
     }
-}
-
-/// Returns a HashMap containing all supported languages with their details.
-///
-/// The key is the language's id_name (lowercase, no spaces).
-/// The value is a tuple containing:
-/// - The friendly name (e.g. "Elixir", "Common Lisp")
-/// - A Vec of file extensions/patterns
-///
-/// # Examples
-///
-/// ## Basic usage - listing all languages
-///
-/// ```rust
-/// use lumis::languages::available_languages;
-///
-/// let languages = available_languages();
-/// println!("Supported languages: {}", languages.len());
-///
-/// // Check if specific languages are supported
-/// assert!(languages.contains_key("rust"));
-/// assert!(languages.contains_key("elixir"));
-/// assert!(languages.contains_key("javascript"));
-/// ```
-///
-/// ## Getting language information
-///
-/// ```rust
-/// use lumis::languages::available_languages;
-///
-/// let languages = available_languages();
-///
-/// // Get details for Rust
-/// let (name, extensions) = &languages["rust"];
-/// assert_eq!(name, "Rust");
-/// assert!(extensions.contains(&"*.rs".to_string()));
-///
-/// // Get details for Elixir
-/// let (name, extensions) = &languages["elixir"];
-/// assert_eq!(name, "Elixir");
-/// assert!(extensions.contains(&"*.ex".to_string()));
-/// assert!(extensions.contains(&"*.exs".to_string()));
-///
-/// // Languages with special characters in names
-/// let (name, _) = &languages["c#"];
-/// assert_eq!(name, "C#");
-///
-/// let (name, _) = &languages["c++"];
-/// assert_eq!(name, "C++");
-/// ```
-///
-/// ## Building a language selector UI
-///
-/// ```rust
-/// use lumis::languages::available_languages;
-///
-/// let languages = available_languages();
-/// let mut sorted_languages: Vec<_> = languages.iter().collect();
-/// sorted_languages.sort_by(|a, b| a.1.0.cmp(&b.1.0)); // Sort by friendly name
-///
-/// for (id, (name, extensions)) in sorted_languages {
-///     println!("{} ({}): {}", name, id, extensions.join(", "));
-/// }
-/// ```
-///
-/// ## Finding languages by file extension
-///
-/// ```rust
-/// use lumis::languages::available_languages;
-///
-/// let languages = available_languages();
-/// let target_extension = "*.py";
-///
-/// let python_languages: Vec<_> = languages
-///     .iter()
-///     .filter(|(_, (_, extensions))| extensions.contains(&target_extension.to_string()))
-///     .collect();
-///
-/// assert!(!python_languages.is_empty());
-/// let (id, (name, _)) = python_languages[0];
-/// assert_eq!(id, "python");
-/// assert_eq!(name, "Python");
-/// ```
-pub fn available_languages() -> HashMap<String, (String, Vec<String>)> {
-    let mut languages = HashMap::new();
-
-    for language in Language::iter() {
-        let id_name = language.id_name();
-        let friendly_name = language.name().to_string();
-        let extensions: Vec<String> = Language::language_globs(language)
-            .iter()
-            .map(|p| p.to_string())
-            .collect();
-
-        languages.insert(id_name, (friendly_name, extensions));
-    }
-
-    languages
-}
-
-fn split_on_newlines(s: &str) -> impl Iterator<Item = &str> {
-    s.split('\n').map(|l| {
-        if let Some(l) = l.strip_suffix('\r') {
-            l
-        } else {
-            l
-        }
-    })
 }
 
 #[cfg(feature = "lang-angular")]
@@ -2072,6 +785,22 @@ static HTML_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         HTML_LOCALS,
     )
     .expect("failed to create html highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+#[cfg(feature = "lang-http")]
+static HTTP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_http) };
+
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "http",
+        HTTP_HIGHLIGHTS,
+        HTTP_INJECTIONS,
+        HTTP_LOCALS,
+    )
+    .expect("failed to create http highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
@@ -2712,6 +1441,16 @@ static ZIG_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 mod tests {
     use super::*;
     use crate::vendor::tree_sitter_highlight::Highlighter;
+    use serde::Deserialize;
+    use std::{fs, path::PathBuf};
+
+    #[derive(Debug, Deserialize)]
+    struct GuessCase {
+        name: String,
+        input: Option<String>,
+        source: String,
+        expected: String,
+    }
 
     #[test]
     fn test_match_exact_name() {
@@ -2746,952 +1485,221 @@ mod tests {
         assert_eq!(lang.name(), "Plain Text");
     }
 
-    #[test]
-    #[cfg(feature = "lang-angular")]
-    fn test_angular_config_loads() {
-        let lang = Language::Angular;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Angular");
-
-        // Verify we can create a highlighter with this config
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-astro")]
-    fn test_astro_config_loads() {
-        let lang = Language::Astro;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Astro");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-bash")]
-    fn test_bash_config_loads() {
-        let lang = Language::Bash;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Bash");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-c")]
-    fn test_c_config_loads() {
-        let lang = Language::C;
-        let config = lang.config();
-        assert_eq!(lang.name(), "C");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-caddy")]
-    fn test_caddy_config_loads() {
-        let lang = Language::Caddy;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Caddy");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-cmake")]
-    fn test_cmake_config_loads() {
-        let lang = Language::CMake;
-        let config = lang.config();
-        assert_eq!(lang.name(), "CMake");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-cpp")]
-    fn test_cpp_config_loads() {
-        let lang = Language::CPlusPlus;
-        let config = lang.config();
-        assert_eq!(lang.name(), "C++");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-css")]
-    fn test_css_config_loads() {
-        let lang = Language::CSS;
-        let config = lang.config();
-        assert_eq!(lang.name(), "CSS");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-csv")]
-    fn test_csv_config_loads() {
-        let lang = Language::CSV;
-        let config = lang.config();
-        assert_eq!(lang.name(), "CSV");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-csharp")]
-    fn test_csharp_config_loads() {
-        let lang = Language::CSharp;
-        let config = lang.config();
-        assert_eq!(lang.name(), "C#");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-clojure")]
-    fn test_clojure_config_loads() {
-        let lang = Language::Clojure;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Clojure");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-comment")]
-    fn test_comment_config_loads() {
-        let lang = Language::Comment;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Comment");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-commonlisp")]
-    fn test_commonlisp_config_loads() {
-        let lang = Language::CommonLisp;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Common Lisp");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    fn test_diff_config_loads() {
-        let lang = Language::Diff;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Diff");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-dockerfile")]
-    fn test_dockerfile_config_loads() {
-        let lang = Language::Dockerfile;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Dockerfile");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-eex")]
-    fn test_eex_config_loads() {
-        let lang = Language::EEx;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Eex");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-ejs")]
-    fn test_ejs_config_loads() {
-        let lang = Language::EJS;
-        let config = lang.config();
-        assert_eq!(lang.name(), "EJS");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-erb")]
-    fn test_erb_config_loads() {
-        let lang = Language::ERB;
-        let config = lang.config();
-        assert_eq!(lang.name(), "ERB");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-elixir")]
-    fn test_elixir_config_loads() {
-        let lang = Language::Elixir;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Elixir");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-elm")]
-    fn test_elm_config_loads() {
-        let lang = Language::Elm;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Elm");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-erlang")]
-    fn test_erlang_config_loads() {
-        let lang = Language::Erlang;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Erlang");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-fish")]
-    fn test_fish_config_loads() {
-        let lang = Language::Fish;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Fish");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-fsharp")]
-    fn test_fsharp_config_loads() {
-        let lang = Language::FSharp;
-        let config = lang.config();
-        assert_eq!(lang.name(), "F#");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-gleam")]
-    fn test_gleam_config_loads() {
-        let lang = Language::Gleam;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Gleam");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-glimmer")]
-    fn test_glimmer_config_loads() {
-        let lang = Language::Glimmer;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Glimmer");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-go")]
-    fn test_go_config_loads() {
-        let lang = Language::Go;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Go");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-graphql")]
-    fn test_graphql_config_loads() {
-        let lang = Language::GraphQL;
-        let config = lang.config();
-        assert_eq!(lang.name(), "GraphQL");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-heex")]
-    fn test_heex_config_loads() {
-        let lang = Language::HEEx;
-        let config = lang.config();
-        assert_eq!(lang.name(), "HEEx");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-html")]
-    fn test_html_config_loads() {
-        let lang = Language::HTML;
-        let config = lang.config();
-        assert_eq!(lang.name(), "HTML");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-haskell")]
-    fn test_haskell_config_loads() {
-        let lang = Language::Haskell;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Haskell");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-hcl")]
-    fn test_hcl_config_loads() {
-        let lang = Language::HCL;
-        let config = lang.config();
-        assert_eq!(lang.name(), "HCL");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-iex")]
-    fn test_iex_config_loads() {
-        let lang = Language::IEx;
-        let config = lang.config();
-        assert_eq!(lang.name(), "IEx");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-json")]
-    fn test_json_config_loads() {
-        let lang = Language::JSON;
-        let config = lang.config();
-        assert_eq!(lang.name(), "JSON");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-java")]
-    fn test_java_config_loads() {
-        let lang = Language::Java;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Java");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-javascript")]
-    fn test_javascript_config_loads() {
-        let lang = Language::JavaScript;
-        let config = lang.config();
-        assert_eq!(lang.name(), "JavaScript");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-kotlin")]
-    fn test_kotlin_config_loads() {
-        let lang = Language::Kotlin;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Kotlin");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-latex")]
-    fn test_latex_config_loads() {
-        let lang = Language::LaTeX;
-        let config = lang.config();
-        assert_eq!(lang.name(), "LaTeX");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-liquid")]
-    fn test_liquid_config_loads() {
-        let lang = Language::Liquid;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Liquid");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-llvm")]
-    fn test_llvm_config_loads() {
-        let lang = Language::Llvm;
-        let config = lang.config();
-        assert_eq!(lang.name(), "LLVM");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-lua")]
-    fn test_lua_config_loads() {
-        let lang = Language::Lua;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Lua");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-make")]
-    fn test_make_config_loads() {
-        let lang = Language::Make;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Make");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-markdown")]
-    fn test_markdown_config_loads() {
-        let lang = Language::Markdown;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Markdown");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-markdown-inline")]
-    fn test_markdown_inline_config_loads() {
-        let lang = Language::MarkdownInline;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Markdown Inline");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-nix")]
-    fn test_nix_config_loads() {
-        let lang = Language::Nix;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Nix");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-nushell")]
-    fn test_nushell_config_loads() {
-        let lang = Language::Nushell;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Nushell");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-ocaml")]
-    fn test_ocaml_config_loads() {
-        let lang = Language::OCaml;
-        let config = lang.config();
-        assert_eq!(lang.name(), "OCaml");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-ocaml")]
-    fn test_ocaml_interface_config_loads() {
-        let lang = Language::OCamlInterface;
-        let config = lang.config();
-        assert_eq!(lang.name(), "OCaml Interface");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-objc")]
-    fn test_objc_config_loads() {
-        let lang = Language::ObjC;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Objective-C");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-perl")]
-    fn test_perl_config_loads() {
-        let lang = Language::Perl;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Perl");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-php")]
-    fn test_php_config_loads() {
-        let lang = Language::Php;
-        let config = lang.config();
-        assert_eq!(lang.name(), "PHP");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    fn test_plaintext_config_loads() {
-        let lang = Language::PlainText;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Plain Text");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-powershell")]
-    fn test_powershell_config_loads() {
-        let lang = Language::PowerShell;
-        let config = lang.config();
-        assert_eq!(lang.name(), "PowerShell");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-protobuf")]
-    fn test_protobuf_config_loads() {
-        let lang = Language::ProtoBuf;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Protocol Buffer");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-python")]
-    fn test_python_config_loads() {
-        let lang = Language::Python;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Python");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-r")]
-    fn test_r_config_loads() {
-        let lang = Language::R;
-        let config = lang.config();
-        assert_eq!(lang.name(), "R");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-regex")]
-    fn test_regex_config_loads() {
-        let lang = Language::Regex;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Regex");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-ruby")]
-    fn test_ruby_config_loads() {
-        let lang = Language::Ruby;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Ruby");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-rust")]
-    fn test_rust_config_loads() {
-        let lang = Language::Rust;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Rust");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-scala")]
-    fn test_scala_config_loads() {
-        let lang = Language::Scala;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Scala");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-scss")]
-    fn test_scss_config_loads() {
-        let lang = Language::SCSS;
-        let config = lang.config();
-        assert_eq!(lang.name(), "SCSS");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-sql")]
-    fn test_sql_config_loads() {
-        let lang = Language::SQL;
-        let config = lang.config();
-        assert_eq!(lang.name(), "SQL");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-surface")]
-    fn test_surface_config_loads() {
-        let lang = Language::Surface;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Surface");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-svelte")]
-    fn test_svelte_config_loads() {
-        let lang = Language::Svelte;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Svelte");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-swift")]
-    fn test_swift_config_loads() {
-        let lang = Language::Swift;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Swift");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-toml")]
-    fn test_toml_config_loads() {
-        let lang = Language::Toml;
-        let config = lang.config();
-        assert_eq!(lang.name(), "TOML");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-tsx")]
-    fn test_tsx_config_loads() {
-        let lang = Language::Tsx;
-        let config = lang.config();
-        assert_eq!(lang.name(), "TSX");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-typescript")]
-    fn test_typescript_config_loads() {
-        let lang = Language::TypeScript;
-        let config = lang.config();
-        assert_eq!(lang.name(), "TypeScript");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-typst")]
-    fn test_typst_config_loads() {
-        let lang = Language::Typst;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Typst");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-vim")]
-    fn test_vim_config_loads() {
-        let lang = Language::Vim;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Vim");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-vue")]
-    fn test_vue_config_loads() {
-        let lang = Language::Vue;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Vue");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-xml")]
-    fn test_xml_config_loads() {
-        let lang = Language::XML;
-        let config = lang.config();
-        assert_eq!(lang.name(), "XML");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-yaml")]
-    fn test_yaml_config_loads() {
-        let lang = Language::YAML;
-        let config = lang.config();
-        assert_eq!(lang.name(), "YAML");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
-    }
-
-    #[test]
-    #[cfg(feature = "lang-zig")]
-    fn test_zig_config_loads() {
-        let lang = Language::Zig;
-        let config = lang.config();
-        assert_eq!(lang.name(), "Zig");
-
-        let mut highlighter = Highlighter::new();
-        let _ = highlighter
-            .highlight(config, "".as_bytes(), None, |_| None)
-            .unwrap();
+    fn samples_dir() -> PathBuf {
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../samples")
+    }
+
+    fn guess_cases() -> Vec<GuessCase> {
+        let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("../../fixtures/language-guess-cases.json");
+        serde_json::from_str(&fs::read_to_string(path).expect("guess cases should exist"))
+            .expect("guess cases should be valid json")
+    }
+
+    #[test]
+    fn shared_guess_cases_match_expected_results() {
+        for case in guess_cases() {
+            let language = Language::guess(case.input.as_deref(), &case.source);
+            assert_eq!(
+                language.id_name(),
+                case.expected,
+                "case failed: {}",
+                case.name
+            );
+        }
+    }
+
+    fn assert_language_sample_highlights(lang: Language, expected_name: &str, sample_file: &str) {
+        let config = lang.config();
+        let source =
+            fs::read_to_string(samples_dir().join(sample_file)).expect("sample should exist");
+
+        assert_eq!(lang.name(), expected_name);
+
+        let mut highlighter = Highlighter::new();
+        let events = highlighter
+            .highlight(config, source.as_bytes(), None, |injected| {
+                injected
+                    .parse::<Language>()
+                    .ok()
+                    .map(|language| language.config())
+            })
+            .expect("highlight should start");
+
+        let rendered = events
+            .collect::<Result<Vec<_>, _>>()
+            .expect("highlight should finish");
+        assert!(
+            !rendered.is_empty(),
+            "expected highlight events for {sample_file}"
+        );
+    }
+
+    macro_rules! language_sample_tests {
+        ($($(#[$meta:meta])* $name:ident => ($lang:expr, $expected:literal, $sample:literal);)+) => {
+            $(
+                #[test]
+                $(#[$meta])*
+                fn $name() {
+                    assert_language_sample_highlights($lang, $expected, $sample);
+                }
+            )+
+        };
+    }
+
+    language_sample_tests! {
+        #[cfg(feature = "lang-angular")]
+        test_angular_config_loads => (Language::Angular, "Angular", "angular.angular");
+        #[cfg(feature = "lang-asm")]
+        test_asm_config_loads => (Language::Assembly, "Assembly", "assembly.s");
+        #[cfg(feature = "lang-astro")]
+        test_astro_config_loads => (Language::Astro, "Astro", "astro.astro");
+        #[cfg(feature = "lang-bash")]
+        test_bash_config_loads => (Language::Bash, "Bash", "bash.sh");
+        #[cfg(feature = "lang-c")]
+        test_c_config_loads => (Language::C, "C", "c.c");
+        #[cfg(feature = "lang-caddy")]
+        test_caddy_config_loads => (Language::Caddy, "Caddy", "caddy.caddyfile");
+        #[cfg(feature = "lang-clojure")]
+        test_clojure_config_loads => (Language::Clojure, "Clojure", "clojure.clj");
+        #[cfg(feature = "lang-cmake")]
+        test_cmake_config_loads => (Language::CMake, "CMake", "cmake.cmake");
+        #[cfg(feature = "lang-comment")]
+        test_comment_config_loads => (Language::Comment, "Comment", "comment.txt");
+        #[cfg(feature = "lang-commonlisp")]
+        test_commonlisp_config_loads => (Language::CommonLisp, "Common Lisp", "commonlisp.lisp");
+        #[cfg(feature = "lang-cpp")]
+        test_cpp_config_loads => (Language::CPlusPlus, "C++", "cpp.cpp");
+        #[cfg(feature = "lang-csharp")]
+        test_csharp_config_loads => (Language::CSharp, "C#", "csharp.cs");
+        #[cfg(feature = "lang-css")]
+        test_css_config_loads => (Language::CSS, "CSS", "css.css");
+        #[cfg(feature = "lang-csv")]
+        test_csv_config_loads => (Language::CSV, "CSV", "csv.csv");
+        #[cfg(feature = "lang-dart")]
+        test_dart_config_loads => (Language::Dart, "Dart", "dart.dart");
+        test_diff_config_loads => (Language::Diff, "Diff", "diff.diff");
+        #[cfg(feature = "lang-dockerfile")]
+        test_dockerfile_config_loads => (Language::Dockerfile, "Dockerfile", "dockerfile.dockerfile");
+        #[cfg(feature = "lang-eex")]
+        test_eex_config_loads => (Language::EEx, "Eex", "eex.eex");
+        #[cfg(feature = "lang-ejs")]
+        test_ejs_config_loads => (Language::EJS, "EJS", "ejs.ejs");
+        #[cfg(feature = "lang-erb")]
+        test_erb_config_loads => (Language::ERB, "ERB", "erb.erb");
+        #[cfg(feature = "lang-elixir")]
+        test_elixir_config_loads => (Language::Elixir, "Elixir", "elixir.ex");
+        #[cfg(feature = "lang-elm")]
+        test_elm_config_loads => (Language::Elm, "Elm", "elm.elm");
+        #[cfg(feature = "lang-erlang")]
+        test_erlang_config_loads => (Language::Erlang, "Erlang", "erlang.erl");
+        #[cfg(feature = "lang-fish")]
+        test_fish_config_loads => (Language::Fish, "Fish", "fish.fish");
+        #[cfg(feature = "lang-fsharp")]
+        test_fsharp_config_loads => (Language::FSharp, "F#", "fsharp.fs");
+        #[cfg(feature = "lang-gleam")]
+        test_gleam_config_loads => (Language::Gleam, "Gleam", "gleam.gleam");
+        #[cfg(feature = "lang-glimmer")]
+        test_glimmer_config_loads => (Language::Glimmer, "Glimmer", "glimmer.hbs");
+        #[cfg(feature = "lang-go")]
+        test_go_config_loads => (Language::Go, "Go", "go.go");
+        #[cfg(feature = "lang-graphql")]
+        test_graphql_config_loads => (Language::GraphQL, "GraphQL", "graphql.graphql");
+        #[cfg(feature = "lang-haskell")]
+        test_haskell_config_loads => (Language::Haskell, "Haskell", "haskell.hs");
+        #[cfg(feature = "lang-hcl")]
+        test_hcl_config_loads => (Language::HCL, "HCL", "hcl.hcl");
+        #[cfg(feature = "lang-heex")]
+        test_heex_config_loads => (Language::HEEx, "HEEx", "heex.heex");
+        #[cfg(feature = "lang-html")]
+        test_html_config_loads => (Language::HTML, "HTML", "html.html");
+        #[cfg(feature = "lang-http")]
+        test_http_config_loads => (Language::HTTP, "HTTP", "http.http");
+        #[cfg(feature = "lang-iex")]
+        test_iex_config_loads => (Language::IEx, "IEx", "iex.iex");
+        #[cfg(feature = "lang-java")]
+        test_java_config_loads => (Language::Java, "Java", "java.java");
+        #[cfg(feature = "lang-javascript")]
+        test_javascript_config_loads => (Language::JavaScript, "JavaScript", "javascript.js");
+        #[cfg(feature = "lang-json")]
+        test_json_config_loads => (Language::JSON, "JSON", "json.json");
+        #[cfg(feature = "lang-kotlin")]
+        test_kotlin_config_loads => (Language::Kotlin, "Kotlin", "kotlin.kt");
+        #[cfg(feature = "lang-latex")]
+        test_latex_config_loads => (Language::LaTeX, "LaTeX", "latex.tex");
+        #[cfg(feature = "lang-liquid")]
+        test_liquid_config_loads => (Language::Liquid, "Liquid", "liquid.liquid");
+        #[cfg(feature = "lang-llvm")]
+        test_llvm_config_loads => (Language::Llvm, "LLVM", "llvm.ll");
+        #[cfg(feature = "lang-lua")]
+        test_lua_config_loads => (Language::Lua, "Lua", "lua.lua");
+        #[cfg(feature = "lang-make")]
+        test_make_config_loads => (Language::Make, "Make", "make.mk");
+        #[cfg(feature = "lang-markdown")]
+        test_markdown_config_loads => (Language::Markdown, "Markdown", "markdown.md");
+        #[cfg(feature = "lang-markdown-inline")]
+        test_markdown_inline_config_loads => (Language::MarkdownInline, "Markdown Inline", "markdown_inline.txt");
+        #[cfg(feature = "lang-nix")]
+        test_nix_config_loads => (Language::Nix, "Nix", "nix.nix");
+        #[cfg(feature = "lang-nushell")]
+        test_nushell_config_loads => (Language::Nushell, "Nushell", "nushell.nu");
+        #[cfg(feature = "lang-objc")]
+        test_objc_config_loads => (Language::ObjC, "Objective-C", "objc.m");
+        #[cfg(feature = "lang-ocaml")]
+        test_ocaml_config_loads => (Language::OCaml, "OCaml", "ocaml.ml");
+        #[cfg(feature = "lang-ocaml")]
+        test_ocaml_interface_config_loads => (Language::OCamlInterface, "OCaml Interface", "ocamlinterface.mli");
+        #[cfg(feature = "lang-perl")]
+        test_perl_config_loads => (Language::Perl, "Perl", "perl.pm");
+        #[cfg(feature = "lang-php")]
+        test_php_config_loads => (Language::Php, "PHP", "php.php");
+        test_plaintext_config_loads => (Language::PlainText, "Plain Text", "plaintext.txt");
+        #[cfg(feature = "lang-powershell")]
+        test_powershell_config_loads => (Language::PowerShell, "PowerShell", "powershell.ps1");
+        #[cfg(feature = "lang-protobuf")]
+        test_protobuf_config_loads => (Language::ProtoBuf, "Protocol Buffer", "protobuf.proto");
+        #[cfg(feature = "lang-python")]
+        test_python_config_loads => (Language::Python, "Python", "python.py");
+        #[cfg(feature = "lang-r")]
+        test_r_config_loads => (Language::R, "R", "r.r");
+        #[cfg(feature = "lang-regex")]
+        test_regex_config_loads => (Language::Regex, "Regex", "regex.regex");
+        #[cfg(feature = "lang-ruby")]
+        test_ruby_config_loads => (Language::Ruby, "Ruby", "ruby.rb");
+        #[cfg(feature = "lang-rust")]
+        test_rust_config_loads => (Language::Rust, "Rust", "rust.rs");
+        #[cfg(feature = "lang-scala")]
+        test_scala_config_loads => (Language::Scala, "Scala", "scala.scala");
+        #[cfg(feature = "lang-scss")]
+        test_scss_config_loads => (Language::SCSS, "SCSS", "scss.scss");
+        #[cfg(feature = "lang-sql")]
+        test_sql_config_loads => (Language::SQL, "SQL", "sql.sql");
+        #[cfg(feature = "lang-surface")]
+        test_surface_config_loads => (Language::Surface, "Surface", "surface.sface");
+        #[cfg(feature = "lang-svelte")]
+        test_svelte_config_loads => (Language::Svelte, "Svelte", "svelte.svelte");
+        #[cfg(feature = "lang-swift")]
+        test_swift_config_loads => (Language::Swift, "Swift", "swift.swift");
+        #[cfg(feature = "lang-toml")]
+        test_toml_config_loads => (Language::Toml, "TOML", "toml.toml");
+        #[cfg(feature = "lang-tsx")]
+        test_tsx_config_loads => (Language::Tsx, "TSX", "tsx.tsx");
+        #[cfg(feature = "lang-typescript")]
+        test_typescript_config_loads => (Language::TypeScript, "TypeScript", "typescript.ts");
+        #[cfg(feature = "lang-typst")]
+        test_typst_config_loads => (Language::Typst, "Typst", "typst.typ");
+        #[cfg(feature = "lang-vim")]
+        test_vim_config_loads => (Language::Vim, "Vim", "vim.vim");
+        #[cfg(feature = "lang-vue")]
+        test_vue_config_loads => (Language::Vue, "Vue", "vue.vue");
+        #[cfg(feature = "lang-wat")]
+        test_wat_config_loads => (Language::Wat, "WAT", "wat.wat");
+        #[cfg(feature = "lang-xml")]
+        test_xml_config_loads => (Language::XML, "XML", "xml.xml");
+        #[cfg(feature = "lang-yaml")]
+        test_yaml_config_loads => (Language::YAML, "YAML", "yaml.yml");
+        #[cfg(feature = "lang-zig")]
+        test_zig_config_loads => (Language::Zig, "Zig", "zig.zig");
     }
 
     #[test]

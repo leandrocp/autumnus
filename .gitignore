@@ -1,4 +1,5 @@
 /target
+/tmp
 /packages/elixir/lumis/native/lumis_nif/target
 /themes/nvim
 /queries/**/folds.scm
@@ -9,3 +10,12 @@ mise.toml
 /.claude/
 AGENTS.md
 CLAUDE.md
+node_modules/
+packages/javascript/lumis/src/generated/
+packages/javascript/lumis/doc/
+packages/javascript/themes/dist/
+packages/javascript/themes/themes/
+website/dist/
+crates/lumis-cli/languages.toml
+crates/lumis-core/languages.toml
+__pycache__/

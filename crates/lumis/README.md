@@ -24,7 +24,7 @@
 - Language auto-detection via file extensions and shebangs
 - Line highlighting with custom styling
 - Custom HTML wrappers for code blocks
-- Streaming-friendly - handles incomplete code gracefully
+- Streaming-friendly — handles incomplete code without crashing
 - Custom formatters via the `Formatter` trait
 
 ## Installation
@@ -88,7 +88,7 @@ Lumis provides four built-in formatters:
 
 ### HTML Inline
 
-Generates HTML with inline styles for each token:
+Inline styles on each token:
 
 ```rust
 use lumis::{highlight, HtmlInlineBuilder, languages::Language, themes};
@@ -110,7 +110,7 @@ let html = highlight(code, formatter);
 
 ### HTML Linked
 
-Generates HTML with CSS classes for styling (requires external CSS):
+CSS classes instead of inline styles (requires external CSS):
 
 ```rust
 use lumis::{highlight, HtmlLinkedBuilder, languages::Language};
@@ -130,7 +130,7 @@ CSS theme files are available in the `css/` directory of the crate.
 
 ### HTML Multi-Themes
 
-Generates HTML with CSS custom properties for multiple themes, enabling light/dark mode support:
+CSS custom properties for multiple themes (light/dark mode):
 
 ```rust
 use lumis::{highlight, HtmlMultiThemesBuilder, languages::Language, themes};
@@ -166,7 +166,7 @@ Use CSS media queries for automatic theme switching:
 
 ### Terminal
 
-Generates ANSI escape codes for terminal output:
+ANSI escape codes:
 
 ```rust
 use lumis::{highlight, TerminalBuilder, languages::Language, themes};
@@ -186,7 +186,7 @@ println!("{}", ansi);
 
 ## Line Highlighting
 
-Highlight specific lines with custom styling:
+Highlight specific lines:
 
 ```rust
 use lumis::{highlight, HtmlInlineBuilder, languages::Language, themes};
@@ -213,7 +213,7 @@ let html = highlight(code, formatter);
 
 ## Custom HTML Wrappers
 
-Wrap the formatted output with custom HTML elements:
+Wrap output with custom HTML elements:
 
 ```rust
 use lumis::{highlight, HtmlInlineBuilder, languages::Language, formatter::HtmlElement};
@@ -259,7 +259,7 @@ let dark_themes: Vec<_> = themes::available_themes()
     .collect();
 ```
 
-### Custom Themes
+#### Custom Themes
 
 Load themes from JSON files or strings:
 
@@ -285,32 +285,33 @@ let theme = themes::from_json(json).unwrap();
 
 ## Custom Formatters
 
-Implement the `Formatter` trait to create custom output formats:
+Implement the `Formatter` trait. Minimal example that wraps each token in a colored `<span>`:
 
 ```rust
 use lumis::{
     formatter::Formatter,
+    formatter::html::{open_pre_tag, open_code_tag, closing_tags, span_inline},
     highlight::highlight_iter,
     languages::Language,
     themes,
 };
 use std::io::{self, Write};
 
-struct CsvFormatter {
+struct MinimalHtmlFormatter {
     language: Language,
     theme: Option<themes::Theme>,
 }
 
-impl Formatter for CsvFormatter {
+impl Formatter for MinimalHtmlFormatter {
     fn format(&self, source: &str, output: &mut dyn Write) -> io::Result<()> {
-        writeln!(output, "text,start,end,scope,fg")?;
-
-        highlight_iter(source, self.language, self.theme.clone(), |text, range, scope, style| {
-            let fg = style.fg.as_deref().unwrap_or("none");
-            let escaped = text.replace('"', "\"\"");
-            writeln!(output, "\"{}\",{},{},{},{}", escaped, range.start, range.end, scope, fg)
+        open_pre_tag(output, None, self.theme.as_ref())?;
+        open_code_tag(output, &self.language)?;
+        highlight_iter(source, self.language, self.theme.clone(), |text, _language, _range, scope, _style| {
+            write!(output, "{}", span_inline(text, Some(self.language), scope, self.theme.as_ref(), false, false))
         })
-        .map_err(io::Error::other)
+        .map_err(io::Error::other)?;
+        closing_tags(output)?;
+        Ok(())
     }
 }
 ```
@@ -336,7 +337,7 @@ lumis languages
 
 ## Language Feature Flags
 
-By default, Lumis includes all languages. To reduce compile time and binary size, enable only the languages you need:
+All languages are included by default. To reduce compile time and binary size, pick only what you need:
 
 ```toml
 [dependencies]
@@ -399,7 +400,7 @@ See the full list of language features in [Cargo.toml](https://github.com/leandr
 
 ## Available Themes
 
-Themes are sourced from popular Neovim colorschemes:
+Themes from Neovim colorschemes:
 
 - **Catppuccin**: catppuccin_frappe, catppuccin_latte, catppuccin_macchiato, catppuccin_mocha
 - **Dracula**: dracula, dracula_soft

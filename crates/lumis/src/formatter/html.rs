@@ -3,30 +3,8 @@
 //! This module provides utilities to make it easy to create custom HTML formatters
 //! without dealing with tree-sitter internals directly.
 //!
-//! # Example: Simple HTML Formatter
-//!
-//! ```rust
-//! use lumis::{highlight::highlight_iter, html, languages::Language, themes};
-//! use std::io::Write;
-//!
-//! let code = "fn main() {}";
-//! let theme = themes::get("dracula").unwrap();
-//! let lang = Language::Rust;
-//!
-//! let mut output = Vec::new();
-//! html::open_pre_tag(&mut output, None, Some(&theme)).unwrap();
-//! html::open_code_tag(&mut output, &lang).unwrap();
-//!
-//! highlight_iter(code, lang, Some(theme.clone()), |text, _range, scope, _style| {
-//!     let span = html::span_inline(text, scope, Some(lang), Some(&theme), false, false);
-//!     write!(&mut output, "{}", span)
-//! }).unwrap();
-//!
-//! html::closing_tags(&mut output).unwrap();
-//! ```
-//!
 //! See also:
-//! - [`Formatter`](crate::formatter::Formatter) trait documentation
+//! - [`Formatter`](crate::formatter::Formatter) trait documentation for a complete example
 //! - [`examples/custom_html_formatter.rs`](https://github.com/leandrocp/lumis/blob/main/examples/custom_html_formatter.rs)
 
 use crate::languages::Language;
@@ -53,19 +31,19 @@ use std::io::{self, Write};
 /// use lumis::{html, languages::Language, themes};
 ///
 /// let theme = themes::get("dracula").ok();
-/// let span = html::span_inline("fn", "keyword", Some(Language::Rust), theme.as_ref(), false, true);
+/// let span = html::span_inline("fn", Some(Language::Rust), "keyword", theme.as_ref(), false, true);
 /// assert_eq!(span, r#"<span data-highlight="keyword" style="color: #ff79c6;">fn</span>"#);
 /// ```
 pub fn span_inline(
     text: &str,
-    scope: &str,
     language: Option<Language>,
+    scope: &str,
     theme: Option<&Theme>,
     italic: bool,
     include_highlights: bool,
 ) -> String {
     let escaped = escape(text);
-    let attrs = span_inline_attrs(scope, language, theme, italic, include_highlights);
+    let attrs = span_inline_attrs(language, scope, theme, italic, include_highlights);
 
     if attrs.is_empty() {
         escaped
@@ -85,12 +63,12 @@ pub fn span_inline(
 /// use lumis::{html, languages::Language, themes};
 ///
 /// let theme = themes::get("dracula").ok();
-/// let attrs = html::span_inline_attrs("keyword", Some(Language::Rust), theme.as_ref(), false, true);
+/// let attrs = html::span_inline_attrs(Some(Language::Rust), "keyword", theme.as_ref(), false, true);
 /// assert_eq!(attrs, r#"data-highlight="keyword" style="color: #ff79c6;""#);
 /// ```
 pub fn span_inline_attrs(
-    scope: &str,
     language: Option<Language>,
+    scope: &str,
     theme: Option<&Theme>,
     italic: bool,
     include_highlights: bool,
@@ -651,10 +629,10 @@ pub fn wrap_line(
 /// assert_eq!(html::scope_to_class("function.method.call"), "function-method-call");
 /// ```
 pub fn scope_to_class(scope: &str) -> &str {
-    crate::constants::HIGHLIGHT_NAMES
+    lumis_core::highlights::HIGHLIGHT_NAMES
         .iter()
         .position(|&s| s == scope)
-        .and_then(|idx| crate::constants::CLASSES.get(idx))
+        .and_then(|idx| lumis_core::highlights::CLASSES.get(idx))
         .copied()
         .unwrap_or("text")
 }
@@ -927,8 +905,8 @@ mod tests {
         let theme = crate::themes::get("dracula").unwrap();
         let result = span_inline(
             "fn",
-            "keyword",
             Some(Language::Rust),
+            "keyword",
             Some(&theme),
             false,
             true,
@@ -941,7 +919,7 @@ mod tests {
 
     #[test]
     fn test_span_inline_no_theme() {
-        let result = span_inline("text", "text", None, None, false, false);
+        let result = span_inline("text", None, "text", None, false, false);
         assert_str_eq!(result, "text");
     }
 

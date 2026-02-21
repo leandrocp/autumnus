@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ERB template (injected languages)</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+    pre.lumis { padding: 1rem; border-radius: 0.5rem; overflow-x: auto; }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 antialiased">
+  <main class="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-6 lg:px-8">
+    <nav class="flex items-center justify-between rounded-2xl border border-cyan-400/20 bg-slate-950/70 px-4 py-3 shadow-[0_20px_50px_rgba(2,6,23,0.45)] backdrop-blur">
+      <a class="text-sm font-medium text-slate-200 transition-colors hover:text-white" href="/">All examples</a>
+      <span class="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-[11px] uppercase tracking-[0.25em] text-cyan-300">Injected languages</span>
+    </nav>
+    <section class="rounded-[28px] border border-slate-800 bg-slate-950/70 p-6 shadow-[0_20px_50px_rgba(2,6,23,0.45)] backdrop-blur md:p-8">
+      <p class="mb-3 text-[11px] uppercase tracking-[0.3em] text-cyan-300">ERB + HTML + Ruby</p>
+      <h1 class="text-2xl font-semibold text-white mb-2">ERB template</h1>
+      <p class="text-slate-400 mb-6">An ERB template with injected HTML and Ruby, resolved from <code class="text-cyan-300">@lumis-sh/wasm-embedded-template</code>.</p>
+      <div id="output"></div>
+      <div id="error" class="hidden rounded-2xl border border-rose-500/30 bg-rose-950/40 px-4 py-3 text-sm text-rose-200"></div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { createHighlighter } from '../src/index.browser.ts'
+    import { htmlInline } from '../src/formatters.ts'
+    import erb from '../langs/erb.ts'
+    import html from '../langs/html.ts'
+    import ruby from '../langs/ruby.ts'
+    import tokyonightMoon from '@lumis-sh/themes/tokyonight_moon'
+
+    const code = `<h1><%= @title %></h1>
+
+<ul>
+  <% @users.each do |user| %>
+    <li class="user" id="user-<%= user.id %>">
+      <%= link_to user.name, user_path(user) %>
+      <span class="role"><%= user.role.capitalize %></span>
+    </li>
+  <% end %>
+</ul>
+
+<%# Render the sidebar partial %>
+<%= render "shared/sidebar", locals: { current_user: @user } %>`
+
+    try {
+      const hl = await createHighlighter({ langs: [erb, html, ruby] })
+      document.getElementById('output').innerHTML = hl.highlight(
+        code,
+        htmlInline({ language: erb, theme: tokyonightMoon })
+      )
+    } catch (error) {
+      const el = document.getElementById('error')
+      el.classList.remove('hidden')
+      el.textContent = error instanceof Error ? error.message : String(error)
+    }
+  </script>
+</body>
+</html>

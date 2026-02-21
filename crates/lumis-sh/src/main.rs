@@ -47,10 +47,7 @@ struct IndexParams {
     theme: Option<String>,
 }
 
-async fn index(
-    State(state): State<AppState>,
-    Query(params): Query<IndexParams>,
-) -> IndexTemplate {
+async fn index(State(state): State<AppState>, Query(params): Query<IndexParams>) -> IndexTemplate {
     let selected_lang = params
         .lang
         .filter(|l| state.samples.contains_key(l.as_str()))
@@ -169,9 +166,7 @@ async fn main() {
         .layer(CompressionLayer::new())
         .with_state(state);
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000")
-        .await
-        .unwrap();
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     println!("Listening on http://localhost:3000");
     axum::serve(listener, app).await.unwrap();
 }

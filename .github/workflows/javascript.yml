@@ -1,0 +1,69 @@
+name: JavaScript CI
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "packages/javascript/lumis/**"
+      - "packages/javascript/themes/**"
+      - "crates/**"
+      - "fixtures/conformance/**"
+      - ".github/workflows/javascript.yml"
+  pull_request:
+    paths:
+      - "packages/javascript/lumis/**"
+      - "packages/javascript/themes/**"
+      - "crates/**"
+      - "fixtures/conformance/**"
+      - ".github/workflows/javascript.yml"
+  workflow_dispatch:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+          cache-dependency-path: packages/javascript/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+        working-directory: packages/javascript
+      - run: pnpm --filter @lumis-sh/lumis fmt:check
+        working-directory: packages/javascript
+      - run: pnpm --filter @lumis-sh/lumis lint
+        working-directory: packages/javascript
+      - run: pnpm --filter @lumis-sh/themes fmt:check
+        working-directory: packages/javascript
+      - run: pnpm --filter @lumis-sh/themes lint
+        working-directory: packages/javascript
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+          cache-dependency-path: packages/javascript/pnpm-lock.yaml
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-wasip2
+      - uses: mymindstorm/setup-emsdk@v14
+      - run: pnpm add -g tree-sitter-cli@0.26
+      - run: pnpm install --frozen-lockfile
+        working-directory: packages/javascript
+      - run: pnpm --filter @lumis-sh/themes build
+        working-directory: packages/javascript
+      - run: pnpm --filter @lumis-sh/lumis build
+        working-directory: packages/javascript
+      - run: pnpm --filter @lumis-sh/lumis test
+        working-directory: packages/javascript

@@ -1,0 +1,92 @@
+[
+  {
+    "name": "exact-language-id",
+    "input": "elixir",
+    "source": "",
+    "expected": "elixir"
+  },
+  {
+    "name": "mixed-case-language-id",
+    "input": "Elixir",
+    "source": "",
+    "expected": "elixir"
+  },
+  {
+    "name": "alias",
+    "input": "js",
+    "source": "",
+    "expected": "javascript"
+  },
+  {
+    "name": "filename",
+    "input": "app.ex",
+    "source": "",
+    "expected": "elixir"
+  },
+  {
+    "name": "extension",
+    "input": ".ex",
+    "source": "",
+    "expected": "elixir"
+  },
+  {
+    "name": "path-with-extension",
+    "input": "lib/app.ex",
+    "source": "",
+    "expected": "elixir"
+  },
+  {
+    "name": "filename-glob",
+    "input": "Dockerfile",
+    "source": "",
+    "expected": "dockerfile"
+  },
+  {
+    "name": "hidden-filename-glob",
+    "input": ".bashrc",
+    "source": "",
+    "expected": "bash"
+  },
+  {
+    "name": "unknown-input-falls-through-to-shebang",
+    "input": "unknown",
+    "source": "#!/usr/bin/env python\nprint(1)\n",
+    "expected": "python"
+  },
+  {
+    "name": "emacs-mode-header",
+    "input": null,
+    "source": "// -*- mode: rust; -*-\nfn main() {}\n",
+    "expected": "rust"
+  },
+  {
+    "name": "emacs-shorthand-second-line",
+    "input": null,
+    "source": "# comment\n-*- ruby -*-\nputs 1\n",
+    "expected": "ruby"
+  },
+  {
+    "name": "html-doctype",
+    "input": null,
+    "source": "<!DOCTYPE html><html></html>",
+    "expected": "html"
+  },
+  {
+    "name": "xml-declaration",
+    "input": null,
+    "source": "<?xml version=\"1.0\"?><root />",
+    "expected": "xml"
+  },
+  {
+    "name": "empty-string-is-plaintext",
+    "input": "",
+    "source": "",
+    "expected": "plaintext"
+  },
+  {
+    "name": "fallback-plaintext",
+    "input": "none",
+    "source": "plain text",
+    "expected": "plaintext"
+  }
+]

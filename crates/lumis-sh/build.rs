@@ -1,3 +1,16 @@
+// Generates `samples_generated.rs` into OUT_DIR.
+//
+// Scans `samples/` at the workspace root and emits a function:
+//
+//   pub fn sample_files() -> Vec<(&'static str, &'static str)>
+//
+// Each entry is (filename, file_contents) using `include_str!` so the
+// sample source code is embedded at compile time. Markdown files are
+// excluded. Used by lumis-sh to render sample snippets for demos.
+//
+// To inspect the generated output, look in:
+//   target/debug/build/lumis-sh-<hash>/out/samples_generated.rs
+
 use std::env;
 use std::fs;
 use std::path::Path;
@@ -5,7 +18,9 @@ use std::path::Path;
 fn main() {
     let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
     let samples_dir = Path::new(&manifest_dir).join("../../samples");
-    let samples_dir = samples_dir.canonicalize().expect("samples directory not found");
+    let samples_dir = samples_dir
+        .canonicalize()
+        .expect("samples directory not found");
 
     println!("cargo:rerun-if-changed={}", samples_dir.display());
 
@@ -14,11 +29,7 @@ fn main() {
         .filter_map(|e| e.ok())
         .filter(|e| {
             let path = e.path();
-            path.is_file()
-                && path
-                    .extension()
-                    .map(|ext| ext != "md")
-                    .unwrap_or(false)
+            path.is_file() && path.extension().map(|ext| ext != "md").unwrap_or(false)
         })
         .collect();
 

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "out": "doc",
+  "entryPoints": [
+    "src/index.ts",
+    "src/formatters.ts",
+    "src/formatter/html.ts",
+    "src/formatter/ansi.ts"
+  ],
+  "excludeInternal": true
+}

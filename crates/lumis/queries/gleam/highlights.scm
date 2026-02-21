@@ -105,8 +105,8 @@
 ; Strings
 (string) @string
 
-; Bit Strings
-(bit_string_segment) @string.special
+; Bit Arrays
+(bit_array_segment) @string.special
 
 ; Numbers
 (integer) @number

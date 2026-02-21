@@ -1,0 +1,720 @@
+# languages.toml — single source of truth for parser and query metadata.
+#
+# See CONTRIBUTING.md for field documentation.
+
+[queries.default]
+git = "https://github.com/nvim-treesitter/nvim-treesitter.git"
+rev = "3edb01f912867603c2aef9079f208f0244c0885b"
+path = "runtime/queries"
+
+[queries.iex]
+git = "https://github.com/elixir-lang/tree-sitter-iex.git"
+rev = "39f20bb51f502e32058684e893c0c0b00bb2332c"
+path = "queries"
+
+[queries.nix]
+git = "https://github.com/nix-community/tree-sitter-nix.git"
+rev = "eabf96807ea4ab6d6c7f09b671a88cd483542840"
+path = "queries"
+
+[queries.nu]
+git = "https://github.com/nushell/tree-sitter-nu.git"
+rev = "bb3f533e5792260291945e1f329e1f0a779def6e"
+path = "queries"
+
+[queries.python]
+git = "https://github.com/tree-sitter/tree-sitter-python.git"
+rev = "26855eabccb19c6abf499fbc5b8dc7cc9ab8bc64"
+path = "queries"
+
+[queries.wat]
+git = "https://github.com/helix-editor/helix.git"
+rev = "79c7203a388e1ac7aa6aebfc2e4c9a91b6efc97a"
+path = "runtime/queries/wat"
+
+# ── Parsers ──────────────────────────────────────────────────────────────────
+
+[parsers.angular]
+git = "https://github.com/dlvandenberg/tree-sitter-angular.git"
+rev = "f0d0685701b70883fa2dfe94ee7dc27965cab841"
+version = "0.1.0"
+globs = ["*.angular", "component.html"]
+
+[parsers.asm]
+git = "https://github.com/RubixDev/tree-sitter-asm.git"
+rev = "3b2b86881b478c9416bb43c19ab5053edbea6e7d"
+crate = "tree-sitter-asm"
+version = "0.24.0"
+aliases = ["assembly"]
+variant = "Assembly"
+globs = ["*.s", "*.asm", "*.assembly"]
+
+[parsers.astro]
+git = "https://github.com/virchau13/tree-sitter-astro.git"
+rev = "213f6e6973d9b456c6e50e86f19f66877e7ef0ee"
+version = "0.1.0"
+globs = ["*.astro"]
+
+[parsers.bash]
+git = "https://github.com/tree-sitter/tree-sitter-bash.git"
+rev = "a06c2e4415e9bc0346c6b86d401879ffb44058f7"
+crate = "tree-sitter-bash"
+version = "0.25.1"
+aliases = ["sh", "zsh"]
+globs = [
+  "*.bash", "*.bats", "*.cgi", "*.command", "*.env", "*.fcgi",
+  "*.ksh", "*.sh", "*.sh.in", "*.tmux", "*.tool", "*.zsh",
+  ".bash_aliases", ".bash_history", ".bash_logout", ".bash_profile",
+  ".bashrc", ".cshrc", ".env", ".env.example", ".flaskenv",
+  ".kshrc", ".login", ".profile", ".zlogin", ".zlogout",
+  ".zprofile", ".zshenv", ".zshrc",
+  "9fs", "PKGBUILD", "bash_aliases", "bash_logout", "bash_profile",
+  "bashrc", "cshrc", "ebuild", "eclass", "gradlew", "kshrc",
+  "login", "man", "profile", "zlogin", "zlogout", "zprofile",
+  "zshenv", "zshrc",
+]
+emacs = ["sh"]
+shebang = ["ash", "bash", "dash", "ksh", "mksh", "pdksh", "rc", "sh", "zsh"]
+
+[parsers.c]
+git = "https://github.com/tree-sitter/tree-sitter-c.git"
+rev = "7fa1be1b694b6e763686793d97da01f36a0e5c12"
+crate = "tree-sitter-c"
+version = "0.24.1"
+globs = ["*.c"]
+emacs = ["c"]
+shebang = ["tcc"]
+
+[parsers.caddy]
+git = "https://github.com/opa-oz/tree-sitter-caddy.git"
+rev = "2686186edb61be47960431c93a204fb249681360"
+version = "0.1.0"
+globs = ["Caddyfile", "caddyfile"]
+
+[parsers.clojure]
+git = "https://github.com/sogaiu/tree-sitter-clojure.git"
+rev = "e43eff80d17cf34852dcd92ca5e6986d23a7040f"
+version = "0.1.0"
+globs = ["*.bb", "*.boot", "*.clj", "*.cljc", "*.clje", "*.cljs", "*.cljx", "*.edn", "*.joke", "*.joker"]
+emacs = ["clojure"]
+
+[parsers.cmake]
+git = "https://github.com/uyha/tree-sitter-cmake.git"
+rev = "c7b2a71e7f8ecb167fad4c97227c838439280175"
+crate = "tree-sitter-cmake"
+version = "0.7.1"
+variant = "CMake"
+globs = ["*.cmake", "*.cmake.in", "CMakeLists.txt"]
+
+[parsers.comment]
+git = "https://github.com/stsewd/tree-sitter-comment.git"
+rev = "689be73775bd2dd57b938b8e12bf50fec35a6ca3"
+crate = "tree-sitter-comment"
+version = "0.3.0"
+
+[parsers.commonlisp]
+git = "https://github.com/tree-sitter-grammars/tree-sitter-commonlisp.git"
+rev = "32323509b3d9fe96607d151c2da2c9009eb13a2f"
+version = "0.1.0"
+variant = "CommonLisp"
+display_name = "Common Lisp"
+globs = ["*.lisp", "*.lsp", "*.asd"]
+emacs = ["lisp"]
+shebang = ["lisp", "sbc", "ccl", "clisp", "ecl"]
+
+[parsers.cpp]
+git = "https://github.com/tree-sitter/tree-sitter-cpp.git"
+rev = "f41e1a044c8a84ea9fa8577fdd2eab92ec96de02"
+crate = "tree-sitter-cpp"
+version = "0.23.4"
+aliases = ["c++"]
+variant = "CPlusPlus"
+display_name = "C++"
+globs = ["*.cc", "*.cpp", "*.h", "*.hh", "*.hpp", "*.ino", "*.cxx", "*.cu", "*.hxx"]
+emacs = ["c++"]
+
+[parsers.csharp]
+git = "https://github.com/tree-sitter/tree-sitter-c-sharp.git"
+rev = "362a8a41b265056592a0c3771664a21d23a71392"
+crate = "tree-sitter-c-sharp"
+version = "0.23.1"
+aliases = ["c#"]
+query_name = "c_sharp"
+variant = "CSharp"
+display_name = "C#"
+globs = ["*.cs"]
+emacs = ["csharp"]
+
+[parsers.css]
+git = "https://github.com/tree-sitter/tree-sitter-css.git"
+rev = "147df05b08816a52b0ccf90b390506297f554b7d"
+crate = "tree-sitter-css"
+version = "0.25.0"
+variant = "CSS"
+globs = ["*.css"]
+emacs = ["css"]
+
+[parsers.csv]
+git = "https://github.com/tree-sitter-grammars/tree-sitter-csv.git"
+rev = "f6bf6e35eb0b95fbadea4bb39cb9709507fcb181"
+version = "0.1.0"
+location = "csv"
+variant = "CSV"
+globs = ["*.csv"]
+emacs = ["csv"]
+
+[parsers.dart]
+git = "https://github.com/UserNobody14/tree-sitter-dart.git"
+rev = "81638dbbdb76a0e88ea8c31b95ec76b9625ddb84"
+version = "0.1.0"
+globs = ["*.dart"]
+
+[parsers.diff]
+git = "https://github.com/tree-sitter-grammars/tree-sitter-diff.git"
+rev = "2520c3f934b3179bb540d23e0ef45f75304b5fed"
+crate = "tree-sitter-diff"
+version = "0.1.0"
+globs = ["*.diff"]
+
+[parsers.dockerfile]
+git = "https://github.com/camdencheek/tree-sitter-dockerfile.git"
+rev = "971acdd908568b4531b0ba28a445bf0bb720aba5"
+version = "0.1.0"
+aliases = ["docker"]
+globs = ["Dockerfile", "dockerfile", "docker", "Containerfile", "container", "*.dockerfile", "*.docker", "*.container"]
+
+[parsers.eex]
+git = "https://github.com/connorlay/tree-sitter-eex.git"
+rev = "f742f2fe327463335e8671a87c0b9b396905d1d1"
+version = "0.1.0"
+variant = "EEx"
+display_name = "Eex"
+globs = ["*.eex"]
+
+[parsers.ejs]
+git = "https://github.com/tree-sitter/tree-sitter-embedded-template.git"
+rev = "5bce9d580d3b78f48e13e331f69dfa0abd4ff68b"
+crate = "tree-sitter-embedded-template"
+version = "0.25.0"
+wasm_name = "tree-sitter-embedded-template"
+query_name = "embedded_template"
+variant = "EJS"
+globs = ["*.ejs"]
+
+[parsers.elixir]
+git = "https://github.com/elixir-lang/tree-sitter-elixir.git"
+rev = "86ec2ed45d6d9433b4e0b88cd3d96796bd45625f"
+crate = "tree-sitter-elixir"
+version = "0.3.4"
+globs = ["*.ex", "*.exs"]
+emacs = ["elixir"]
+shebang = ["elixir"]
+
+[parsers.elm]
+git = "https://github.com/elm-tooling/tree-sitter-elm.git"
+rev = "027728466b8115cf807517af943cbeaed34053fc"
+crate = "tree-sitter-elm"
+version = "5.9.0"
+globs = ["*.elm"]
+emacs = ["elm"]
+
+[parsers.erb]
+git = "https://github.com/tree-sitter/tree-sitter-embedded-template.git"
+rev = "5bce9d580d3b78f48e13e331f69dfa0abd4ff68b"
+crate = "tree-sitter-embedded-template"
+version = "0.25.0"
+wasm_name = "tree-sitter-embedded-template"
+query_name = "embedded_template"
+variant = "ERB"
+globs = ["*.erb"]
+
+[parsers.erlang]
+git = "https://github.com/WhatsApp/tree-sitter-erlang.git"
+rev = "f21023bbd6cd30cadbc793d80ae4d990d9be86fc"
+crate = "tree-sitter-erlang"
+version = "0.15.0"
+globs = ["*.erl", "*.app", "*.app.src", "*.es", "*.escript", "*.hrl", "*.xrl", "*.yrl", "Emakefile", "rebar.config"]
+
+[parsers.fish]
+git = "https://github.com/ram02z/tree-sitter-fish.git"
+rev = "aa074a0bacde8b5823c592574d7138f156a95776"
+version = "0.1.0"
+globs = ["*.fish"]
+
+[parsers.fsharp]
+git = "https://github.com/ionide/tree-sitter-fsharp.git"
+rev = "dcbd07b8860fbde39f207dbc03b36a791986cd96"
+crate = "tree-sitter-fsharp"
+version = "0.1.0"
+location = "fsharp"
+aliases = ["f#"]
+variant = "FSharp"
+display_name = "F#"
+globs = ["*.fs", "*.fsx", "*.fsi"]
+emacs = ["fsharp"]
+
+[parsers.gleam]
+git = "https://github.com/gleam-lang/tree-sitter-gleam.git"
+rev = "6ea757f7eb8d391dbf24dbb9461990757946dd5e"
+crate = "tree-sitter-gleam"
+version = "1.0.0"
+globs = ["*.gleam"]
+emacs = ["gleam"]
+
+[parsers.glimmer]
+git = "https://github.com/ember-tooling/tree-sitter-glimmer.git"
+rev = "88af85568bde3b91acb5d4c352ed094d0c1f9d84"
+version = "0.1.0"
+aliases = ["ember", "handlebars"]
+globs = ["*.hbs", "*.handlebars", "*.html.handlebars", "*.glimmer"]
+
+[parsers.go]
+git = "https://github.com/tree-sitter/tree-sitter-go.git"
+rev = "6048bfc6e5238eaf062c2221bd934489c39fbb61"
+crate = "tree-sitter-go"
+version = "0.25.0"
+globs = ["*.go"]
+emacs = ["go"]
+
+[parsers.graphql]
+git = "https://github.com/bkegley/tree-sitter-graphql.git"
+rev = "5e66e961eee421786bdda8495ed1db045e06b5fe"
+version = "0.1.0"
+variant = "GraphQL"
+
+[parsers.haskell]
+git = "https://github.com/tree-sitter/tree-sitter-haskell.git"
+rev = "c30d812bc90827f1a54106a25bc9a6307f5cdcec"
+crate = "tree-sitter-haskell"
+version = "0.23.1"
+globs = ["*.hs", "*.hs-boot"]
+emacs = ["haskell"]
+shebang = ["runghc", "runhaskell", "runhugs"]
+
+[parsers.hcl]
+git = "https://github.com/tree-sitter-grammars/tree-sitter-hcl.git"
+rev = "64ad62785d442eb4d45df3a1764962dafd5bc98b"
+crate = "tree-sitter-hcl"
+version = "1.2.0"
+aliases = ["terraform"]
+variant = "HCL"
+globs = ["*.hcl", "*.nomad", "*.tf", "*.tfvars", "*.workflow"]
+emacs = ["hcl"]
+
+[parsers.heex]
+git = "https://github.com/phoenixframework/tree-sitter-heex.git"
+rev = "b5a7cb5f74dc695a9ff5f04919f872ebc7a895e9"
+crate = "tree-sitter-heex"
+version = "0.8.1"
+variant = "HEEx"
+globs = ["*.heex", "*.neex"]
+
+[parsers.html]
+git = "https://github.com/tree-sitter/tree-sitter-html.git"
+rev = "5a5ca8551a179998360b4a4ca2c0f366a35acc03"
+crate = "tree-sitter-html"
+version = "0.23.2"
+variant = "HTML"
+globs = ["*.html", "*.htm", "*.xhtml"]
+emacs = ["html"]
+
+[parsers.http]
+git = "https://github.com/rest-nvim/tree-sitter-http.git"
+rev = "db8b4398de90b6d0b6c780aba96aaa2cd8e9202c"
+version = "0.1.0"
+variant = "HTTP"
+globs = ["*.http", "*.rest"]
+
+[parsers.iex]
+git = "https://github.com/elixir-lang/tree-sitter-iex.git"
+rev = "39f20bb51f502e32058684e893c0c0b00bb2332c"
+version = "0.1.0"
+variant = "IEx"
+globs = ["*.iex"]
+
+[parsers.java]
+git = "https://github.com/tree-sitter/tree-sitter-java.git"
+rev = "94703d5a6bed02b98e438d7cad1136c01a60ba2c"
+crate = "tree-sitter-java"
+version = "0.23.5"
+globs = ["*.java"]
+emacs = ["java"]
+
+[parsers.javascript]
+git = "https://github.com/tree-sitter/tree-sitter-javascript.git"
+rev = "f76aea6aa47322ea5c208c9c2e67f4a350d554f3"
+crate = "tree-sitter-javascript"
+version = "0.25.0"
+aliases = ["js", "jsx"]
+variant = "JavaScript"
+globs = ["*.cjs", "*.js", "*.mjs", "*.snap", "*.jsx"]
+emacs = ["js", "js2"]
+
+[parsers.json]
+git = "https://github.com/tree-sitter/tree-sitter-json.git"
+rev = "ee35a6ebefcef0c5c416c0d1ccec7370cfca5a24"
+crate = "tree-sitter-json"
+version = "0.24.8"
+variant = "JSON"
+globs = [
+  "*.json", "*.avsc", "*.geojson", "*.gltf", "*.har", "*.ice",
+  "*.JSON-tmLanguage", "*.jsonl", "*.mcmeta", "*.tfstate",
+  "*.tfstate.backup", "*.topojson", "*.webapp", "*.webmanifest",
+  ".arcconfig", ".auto-changelog", ".c8rc", ".htmlhintrc",
+  ".imgbotconfig", ".nycrc", ".tern-config", ".tern-project",
+  ".watchmanconfig", "Pipfile.lock", "composer.lock", "mcmod.info",
+  "flake.lock",
+]
+
+[parsers.kotlin]
+git = "https://github.com/fwcd/tree-sitter-kotlin.git"
+rev = "f3a1ea74304adad67164a0a6ffe729428748a7a7"
+version = "0.1.0"
+globs = ["*.kt", "*.ktm", "*.kts"]
+
+[parsers.latex]
+git = "https://github.com/latex-lsp/tree-sitter-latex.git"
+rev = "7e0ecdc02926c7b9b2e0c76003d4fe7b0944f957"
+version = "0.1.0"
+generate = true
+aliases = ["tex"]
+variant = "LaTeX"
+globs = ["*.aux", "*.cls", "*.sty", "*.tex"]
+
+[parsers.liquid]
+git = "https://github.com/hankthetank27/tree-sitter-liquid.git"
+rev = "d6ebde3974742cd1b61b55d1d94aab1dacb41056"
+version = "0.1.0"
+globs = ["*liquid"]
+
+[parsers.llvm]
+git = "https://github.com/benwilliamgraham/tree-sitter-llvm.git"
+rev = "2914786ae6774d4c4e25a230f4afe16aa68fe1c1"
+version = "0.1.0"
+display_name = "LLVM"
+globs = ["*.llvm", "*.ll"]
+
+[parsers.lua]
+git = "https://github.com/tree-sitter-grammars/tree-sitter-lua.git"
+rev = "816840c592ab973500ae9750763c707b447e7fef"
+crate = "tree-sitter-lua"
+version = "0.4.1"
+globs = ["*.lua"]
+
+[parsers.make]
+git = "https://github.com/tree-sitter-grammars/tree-sitter-make.git"
+rev = "5e9e8f8ff3387b0edcaa90f46ddf3629f4cfeb1d"
+version = "0.1.0"
+globs = [
+  "*.mak", "*.d", "*.make", "*.makefile", "*.mk", "*.mkfile", "*.dsp",
+  "BSDmakefile", "GNUmakefile", "Kbuild", "Makefile", "MAKEFILE",
+  "Makefile.am", "Makefile.boot", "Makefile.frag", "Makefile*.in",
+  "Makefile.inc", "Makefile.wat", "makefile", "makefile.sco", "mkfile",
+]
+
+[parsers.markdown]
+git = "https://github.com/tree-sitter-grammars/tree-sitter-markdown.git"
+rev = "cee71b8288f2ec09c29415219ac15a654bd571b9"
+version = "0.1.0"
+location = "tree-sitter-markdown"
+globs = ["*.md", ".MD", "README", "LICENSE"]
+
+[parsers.markdown_inline]
+git = "https://github.com/tree-sitter-grammars/tree-sitter-markdown.git"
+rev = "cee71b8288f2ec09c29415219ac15a654bd571b9"
+version = "0.1.0"
+location = "tree-sitter-markdown-inline"
+variant = "MarkdownInline"
+display_name = "Markdown Inline"
+
+[parsers.nix]
+git = "https://github.com/nix-community/tree-sitter-nix.git"
+rev = "ea1d87f7996be1329ef6555dcacfa63a69bd55c6"
+crate = "tree-sitter-nix"
+version = "0.3.0"
+globs = ["*.nix"]
+emacs = ["nix"]
+
+[parsers.nushell]
+git = "https://github.com/nushell/tree-sitter-nu.git"
+rev = "bb3f533e5792260291945e1f329e1f0a779def6e"
+version = "0.0.1"
+aliases = ["nu"]
+query_name = "nu"
+wasm_name = "tree-sitter-nushell"
+globs = ["*.nu"]
+shebang = ["nu"]
+
+[parsers.objc]
+git = "https://github.com/tree-sitter-grammars/tree-sitter-objc.git"
+rev = "18802acf31d0b5c1c1d50bdbc9eb0e1636cab9ed"
+crate = "tree-sitter-objc"
+version = "3.0.2"
+aliases = ["objective-c"]
+variant = "ObjC"
+display_name = "Objective-C"
+globs = ["*.m", "*.objc"]
+emacs = ["objc"]
+
+[parsers.ocaml]
+git = "https://github.com/tree-sitter/tree-sitter-ocaml.git"
+rev = "432adf64cb083773619bce38835e0084cf484d36"
+crate = "tree-sitter-ocaml"
+version = "0.24.2"
+location = "grammars/ocaml"
+variant = "OCaml"
+globs = ["*.ml"]
+emacs = ["tuareg"]
+shebang = ["ocaml", "ocamlrun", "ocamlscript"]
+
+[parsers.ocaml_interface]
+git = "https://github.com/tree-sitter/tree-sitter-ocaml.git"
+rev = "432adf64cb083773619bce38835e0084cf484d36"
+crate = "tree-sitter-ocaml"
+version = "0.24.2"
+location = "grammars/interface"
+variant = "OCamlInterface"
+display_name = "OCaml Interface"
+feature = "lang-ocaml"
+globs = ["*.mli"]
+
+[parsers.perl]
+git = "https://github.com/tree-sitter-perl/tree-sitter-perl.git"
+rev = "0c24d001dd1921e418fb933d208a7bd7dd3f923a"
+version = "0.1.0"
+generate = true
+globs = ["*.pm", "*.pl", "*.t"]
+emacs = ["perl"]
+shebang = ["perl"]
+
+[parsers.php]
+git = "https://github.com/tree-sitter/tree-sitter-php.git"
+rev = "094172694b05589f8b394017d6821a07055c1a61"
+crate = "tree-sitter-php"
+version = "0.24.2"
+location = "php"
+query_name = "php_only"
+display_name = "PHP"
+globs = ["*.php", "*.phtml", "*.php3", "*.php4", "*.php5", "*.php7", "*.phps"]
+
+[parsers.powershell]
+git = "https://github.com/airbus-cert/tree-sitter-powershell.git"
+rev = "7212f47716ced384ac012b2cc428fd9f52f7c5d4"
+crate = "tree-sitter-powershell"
+version = "0.25.10"
+variant = "PowerShell"
+globs = ["*.ps1", "*.psm1"]
+
+[parsers.protobuf]
+git = "https://github.com/coder3101/tree-sitter-proto.git"
+rev = "3ef027b83540c1c161bea64257654ab3d198ad54"
+crate = "tree-sitter-proto"
+version = "0.4.0"
+query_name = "proto"
+variant = "ProtoBuf"
+display_name = "Protocol Buffer"
+globs = ["*.proto", "*.protobuf", "*.proto2", "*.proto3"]
+
+[parsers.python]
+git = "https://github.com/tree-sitter/tree-sitter-python.git"
+rev = "d326e4cad262cf681656e130960e49dfc04c03ea"
+crate = "tree-sitter-python"
+version = "0.25.0"
+globs = ["*.py", "*.py3", "*.pyi", "*.bzl", "TARGETS", "BUCK", "DEPS"]
+emacs = ["python"]
+shebang = ["python", "python2", "python3"]
+
+[parsers.r]
+git = "https://github.com/r-lib/tree-sitter-r.git"
+rev = "e9944e9801595ad484f49be492daf0c4c81547ef"
+crate = "tree-sitter-r"
+version = "1.2.0"
+globs = ["*.R", "*.r", "*.rd", "*.rsx", ".Rprofile", "expr-dist"]
+shebang = ["Rscript"]
+
+[parsers.regex]
+git = "https://github.com/tree-sitter/tree-sitter-regex.git"
+rev = "e51a4963a230af05222cb9c9e65e23778619cdab"
+crate = "tree-sitter-regex"
+version = "0.25.0"
+globs = ["*.regex"]
+
+[parsers.ruby]
+git = "https://github.com/tree-sitter/tree-sitter-ruby.git"
+rev = "71bd32fb7607035768799732addba884a37a6210"
+crate = "tree-sitter-ruby"
+version = "0.23.1"
+globs = ["*.rb", "*.builder", "*.spec", "*.rake", "Gemfile", "Rakefile"]
+emacs = ["ruby"]
+shebang = ["ruby", "macruby", "rake", "jruby", "rbx"]
+
+[parsers.rust]
+git = "https://github.com/tree-sitter/tree-sitter-rust.git"
+rev = "18b0515fca567f5a10aee9978c6d2640e878671a"
+crate = "tree-sitter-rust"
+version = "0.24.0"
+globs = ["*.rs"]
+emacs = ["rust"]
+
+[parsers.scala]
+git = "https://github.com/tree-sitter/tree-sitter-scala.git"
+rev = "f02174244f72ea7fc96f34cdd445beb6142d348c"
+crate = "tree-sitter-scala"
+version = "0.24.0"
+globs = ["*.scala", "*.sbt", "*.sc"]
+emacs = ["scala"]
+
+[parsers.scss]
+git = "https://github.com/serenadeai/tree-sitter-scss.git"
+rev = "c478c6868648eff49eb04a4df90d703dc45b312a"
+version = "0.1.0"
+variant = "SCSS"
+globs = ["*.scss"]
+emacs = ["scss"]
+
+[parsers.sql]
+git = "https://github.com/derekstride/tree-sitter-sql.git"
+rev = "7b51ecda191d36b92f5a90a8d1bc3faef1c7b8b8"
+crate = "tree-sitter-sequel"
+version = "0.3.11"
+variant = "SQL"
+globs = ["*.sql", "*.pgsql"]
+emacs = ["sql"]
+
+[parsers.surface]
+git = "https://github.com/connorlay/tree-sitter-surface.git"
+rev = "f4586b35ac8548667a9aad4eae44456c1f43d032"
+version = "0.1.0"
+globs = ["*.surface", "*.sface"]
+emacs = ["surface"]
+
+[parsers.svelte]
+git = "https://github.com/tree-sitter-grammars/tree-sitter-svelte.git"
+rev = "774a65aea563accc35f5d45fafa4d96ec5761f57"
+crate = "tree-sitter-svelte-ng"
+version = "1.0.2"
+globs = ["*.svelte"]
+
+[parsers.swift]
+git = "https://github.com/alex-pinkus/tree-sitter-swift.git"
+rev = "7c2f26b5dce12e82ef2bd932a883ef514ae566b8"
+crate = "tree-sitter-swift"
+version = "0.7.1"
+globs = ["*.swift"]
+emacs = ["swift"]
+shebang = ["swift"]
+
+[parsers.toml]
+git = "https://github.com/tree-sitter-grammars/tree-sitter-toml.git"
+rev = "64b56832c2cffe41758f28e05c756a3a98d16f41"
+crate = "tree-sitter-toml-ng"
+version = "0.7.0"
+display_name = "TOML"
+globs = ["*.toml", "Cargo.lock", "Gopkg.lock", "Pipfile", "pdm.lock", "poetry.lock", "uv.lock"]
+emacs = ["toml"]
+
+[parsers.tsx]
+git = "https://github.com/tree-sitter/tree-sitter-typescript.git"
+rev = "f975a621f4e7f532fe322e13c4f79495e0a7b2e7"
+crate = "tree-sitter-typescript"
+version = "0.23.2"
+location = "tsx"
+display_name = "TSX"
+globs = ["*.tsx"]
+emacs = ["tsx"]
+
+[parsers.typescript]
+git = "https://github.com/tree-sitter/tree-sitter-typescript.git"
+rev = "f975a621f4e7f532fe322e13c4f79495e0a7b2e7"
+crate = "tree-sitter-typescript"
+version = "0.23.2"
+location = "typescript"
+aliases = ["ts"]
+variant = "TypeScript"
+globs = ["*.ts"]
+emacs = ["typescript"]
+shebang = ["deno", "ts-node"]
+
+[parsers.typst]
+git = "https://github.com/uben0/tree-sitter-typst.git"
+rev = "46cf4ded12ee974a70bf8457263b67ad7ee0379d"
+version = "0.1.0"
+globs = ["*.typ", "*.typst"]
+
+[parsers.vim]
+git = "https://github.com/tree-sitter-grammars/tree-sitter-vim.git"
+rev = "1cd0a0892b389bd314a9bd09545160e5ee3c9137"
+version = "0.1.0"
+aliases = ["viml", "vimscript"]
+globs = ["*.vim", "*.viml"]
+
+[parsers.vue]
+git = "https://github.com/tree-sitter-grammars/tree-sitter-vue.git"
+rev = "ce8011a414fdf8091f4e4071752efc376f4afb08"
+version = "0.1.0"
+globs = ["*.vue"]
+
+[parsers.wat]
+git = "https://github.com/wasm-lsp/tree-sitter-wasm.git"
+rev = "2ca28a9f9d709847bf7a3de0942a84e912f59088"
+version = "0.1.0"
+location = "wat"
+aliases = ["wasm", "webassembly"]
+display_name = "WAT"
+globs = ["*.wat"]
+
+[parsers.xml]
+git = "https://github.com/tree-sitter-grammars/tree-sitter-xml.git"
+rev = "4b64dd3a03ec002258d6268d712fd93716d6ab57"
+crate = "tree-sitter-xml"
+version = "0.7.0"
+location = "xml"
+variant = "XML"
+globs = [
+  "*.ant", "*.csproj", "*.mjml", "*.plist", "*.resx", "*.svg",
+  "*.ui", "*.vbproj", "*.xaml", "*.xml", "*.xsd", "*.xsl",
+  "*.xslt", "*.zcml", "*.rng",
+  "App.config", "nuget.config", "packages.config",
+  ".classpath", ".cproject", ".project",
+]
+emacs = ["nxml"]
+
+[parsers.yaml]
+git = "https://github.com/tree-sitter-grammars/tree-sitter-yaml.git"
+rev = "7708026449bed86239b1cd5bce6e3c34dbca6415"
+crate = "tree-sitter-yaml"
+version = "0.7.2"
+variant = "YAML"
+globs = ["*.yaml", "*.yml"]
+emacs = ["yaml"]
+
+[parsers.zig]
+git = "https://github.com/tree-sitter-grammars/tree-sitter-zig.git"
+rev = "b670c8df85a1568f498aa5c8cae42f51a90473c0"
+crate = "tree-sitter-zig"
+version = "1.1.2"
+globs = ["*.zig"]
+emacs = ["zig"]
+
+# ── Bundles ─────────────────────────────────────────────────────────────────
+
+[bundles.web]
+parsers = [
+  "html", "css", "scss", "javascript", "typescript", "tsx",
+  "json", "yaml", "toml", "xml", "markdown", "markdown_inline",
+  "sql", "graphql", "regex",
+  "bash", "diff", "dockerfile", "comment",
+  "svelte", "vue", "astro",
+]
+
+[bundles.system]
+parsers = [
+  "c", "cpp", "rust", "go", "zig",
+  "asm", "llvm", "wat",
+  "cmake", "make",
+  "bash", "diff", "comment", "regex",
+  "toml", "yaml", "json",
+]
+
+[bundles.full]
+parsers = "all"

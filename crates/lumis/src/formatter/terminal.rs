@@ -15,9 +15,12 @@
 //!
 //! See the [formatter](crate::formatter) module for more information and examples.
 
-use super::{ansi, Formatter};
-use crate::{languages::Language, themes::Theme};
+use super::Formatter;
+use crate::highlight;
+use crate::languages::Language;
+use crate::themes::Theme;
 use derive_builder::Builder;
+use lumis_core::formatter::Formatter as _;
 use std::io::{self, Write};
 
 /// Terminal formatter for syntax highlighting with ANSI color codes.
@@ -73,16 +76,11 @@ impl Default for Terminal {
 
 impl Formatter for Terminal {
     fn format(&self, source: &str, output: &mut dyn Write) -> io::Result<()> {
-        crate::highlight::highlight_iter(
-            source,
-            self.lang,
-            self.theme.clone(),
-            |text, _range, _scope, style| {
-                let ansi_text = ansi::wrap_with_ansi(text, style);
-                write!(output, "{}", ansi_text)
-            },
-        )
-        .map_err(io::Error::other)
+        let events = highlight::highlight_events(source, self.lang).map_err(io::Error::other)?;
+
+        let core_formatter =
+            lumis_core::formatter::terminal::Terminal::new(self.lang, self.theme.clone());
+        core_formatter.render(source, &events, output)
     }
 }
 

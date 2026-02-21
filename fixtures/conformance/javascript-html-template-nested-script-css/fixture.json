@@ -1,0 +1,613 @@
+{
+  "name": "javascript-html-template-nested-script-css",
+  "language": "javascript",
+  "theme": "dracula",
+  "events": [
+    {
+      "type": "start",
+      "scope": "function.call",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 0,
+      "end": 4
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "string",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 4,
+      "end": 5
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 5,
+      "end": 6
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "tag",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 6,
+      "end": 13
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 13,
+      "end": 14
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 14,
+      "end": 15
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "tag",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 15,
+      "end": 20
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 20,
+      "end": 21
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.delimiter",
+      "language": "css"
+    },
+    {
+      "type": "source",
+      "start": 21,
+      "end": 22
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "type",
+      "language": "css"
+    },
+    {
+      "type": "source",
+      "start": 22,
+      "end": 25
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.delimiter",
+      "language": "css"
+    },
+    {
+      "type": "source",
+      "start": 25,
+      "end": 27
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "attribute",
+      "language": "css"
+    },
+    {
+      "type": "source",
+      "start": 27,
+      "end": 33
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 33,
+      "end": 34
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "css"
+    },
+    {
+      "type": "source",
+      "start": 34,
+      "end": 35
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 35,
+      "end": 36
+    },
+    {
+      "type": "start",
+      "scope": "property",
+      "language": "css"
+    },
+    {
+      "type": "source",
+      "start": 36,
+      "end": 43
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.delimiter",
+      "language": "css"
+    },
+    {
+      "type": "source",
+      "start": 43,
+      "end": 44
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 44,
+      "end": 45
+    },
+    {
+      "type": "start",
+      "scope": "string",
+      "language": "css"
+    },
+    {
+      "type": "source",
+      "start": 45,
+      "end": 51
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.delimiter",
+      "language": "css"
+    },
+    {
+      "type": "source",
+      "start": 51,
+      "end": 52
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 52,
+      "end": 53
+    },
+    {
+      "type": "start",
+      "scope": "property",
+      "language": "css"
+    },
+    {
+      "type": "source",
+      "start": 53,
+      "end": 58
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.delimiter",
+      "language": "css"
+    },
+    {
+      "type": "source",
+      "start": 58,
+      "end": 59
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 59,
+      "end": 63
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.delimiter",
+      "language": "css"
+    },
+    {
+      "type": "source",
+      "start": 63,
+      "end": 64
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 64,
+      "end": 65
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "css"
+    },
+    {
+      "type": "source",
+      "start": 65,
+      "end": 66
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 66,
+      "end": 68
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "tag",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 68,
+      "end": 73
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 73,
+      "end": 74
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 74,
+      "end": 75
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "tag",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 75,
+      "end": 81
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 81,
+      "end": 82
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "keyword",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 82,
+      "end": 87
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 87,
+      "end": 88
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 88,
+      "end": 93
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 93,
+      "end": 94
+    },
+    {
+      "type": "start",
+      "scope": "operator",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 94,
+      "end": 95
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 95,
+      "end": 96
+    },
+    {
+      "type": "start",
+      "scope": "string",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 96,
+      "end": 100
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.delimiter",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 100,
+      "end": 101
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 101,
+      "end": 102
+    },
+    {
+      "type": "start",
+      "scope": "function.call",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 102,
+      "end": 107
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 107,
+      "end": 108
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 108,
+      "end": 113
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 113,
+      "end": 114
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 114,
+      "end": 116
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "tag",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 116,
+      "end": 122
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 122,
+      "end": 123
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 123,
+      "end": 125
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "tag",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 125,
+      "end": 132
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 132,
+      "end": 133
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 133,
+      "end": 134
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 134,
+      "end": 135
+    }
+  ]
+}

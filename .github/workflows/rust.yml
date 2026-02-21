@@ -5,10 +5,12 @@ on:
     branches: [ main ]
     paths:
       - "crates/**"
+      - "fixtures/conformance/**"
       - ".github/workflows/rust.yml"
   pull_request:
     paths:
       - "crates/**"
+      - "fixtures/conformance/**"
       - ".github/workflows/rust.yml"
   workflow_dispatch:
 
@@ -17,9 +19,7 @@ jobs:
     uses: leandrocp/github-actions/.github/workflows/rust-test.yml@main
     with:
       msrv: '1.91'
-      manifest-path: 'crates/lumis/Cargo.toml'
   lint:
     uses: leandrocp/github-actions/.github/workflows/rust-lint.yml@main
     with:
       msrv: '1.91'
-      manifest-path: 'crates/lumis/Cargo.toml'

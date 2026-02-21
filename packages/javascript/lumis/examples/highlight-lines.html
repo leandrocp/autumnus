@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Line highlighting</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+    pre.lumis { padding: 1rem; border-radius: 0.5rem; overflow-x: auto; }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 antialiased">
+  <main class="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-6 lg:px-8">
+    <nav class="flex items-center justify-between rounded-2xl border border-cyan-400/20 bg-slate-950/70 px-4 py-3 shadow-[0_20px_50px_rgba(2,6,23,0.45)] backdrop-blur">
+      <a class="text-sm font-medium text-slate-200 transition-colors hover:text-white" href="/">All examples</a>
+      <span class="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-[11px] uppercase tracking-[0.25em] text-cyan-300">Feature</span>
+    </nav>
+    <section class="rounded-[28px] border border-slate-800 bg-slate-950/70 p-6 shadow-[0_20px_50px_rgba(2,6,23,0.45)] backdrop-blur md:p-8">
+      <p class="mb-3 text-[11px] uppercase tracking-[0.3em] text-cyan-300">Visual emphasis</p>
+      <h1 class="text-2xl font-semibold text-white mb-2">Line highlighting</h1>
+      <p class="text-slate-400 mb-6">Highlight specific line ranges to draw attention to important code.</p>
+
+      <h2 class="text-lg font-medium text-blue-400 mt-8 mb-3">htmlInline — theme style (default)</h2>
+      <div id="inline-theme-output"></div>
+
+      <h2 class="text-lg font-medium text-blue-400 mt-8 mb-3">htmlInline — custom CSS style</h2>
+      <div id="inline-custom-output"></div>
+
+      <h2 class="text-lg font-medium text-blue-400 mt-8 mb-3">htmlInline — custom class</h2>
+      <style>
+        .my-highlight { background: rgba(239, 68, 68, 0.15); border-right: 3px solid #ef4444; margin-right: -1rem; padding-right: calc(1rem - 3px); }
+      </style>
+      <div id="inline-class-output"></div>
+
+      <h2 class="text-lg font-medium text-blue-400 mt-8 mb-3">htmlLinked — class-based</h2>
+      <style>
+        .hl-line { background: rgba(255, 255, 255, 0.08); }
+      </style>
+      <div id="linked-output"></div>
+
+      <h2 class="text-lg font-medium text-blue-400 mt-8 mb-3">htmlMultiThemes — with line highlights</h2>
+      <div id="multi-output"></div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { createHighlighter } from '../src/index.browser.ts'
+    import { htmlInline, htmlLinked, htmlMultiThemes } from '../src/formatters.ts'
+    import json from '../langs/json.ts'
+    import tokyonightMoon from '@lumis-sh/themes/tokyonight_moon'
+    import dracula from '@lumis-sh/themes/dracula'
+    import '../../themes/dist/css/dracula.css'
+
+    const code = `{
+  "id": 1,
+  "name": "Alice",
+  "email": "alice@example.com",
+  "active": true,
+  "roles": ["admin", "reviewer"],
+  "unicode": "😀 café"
+}`
+
+    const hl = await createHighlighter({ langs: [json] })
+
+    // htmlInline with theme-derived highlight style
+    document.getElementById('inline-theme-output').innerHTML = hl.highlight(
+      code,
+      htmlInline({
+        language: json,
+        theme: tokyonightMoon,
+        highlightLines: {
+          lines: [[2, 3]],
+          style: 'theme',
+        },
+      })
+    )
+
+    // htmlInline with custom CSS string
+    document.getElementById('inline-custom-output').innerHTML = hl.highlight(
+      code,
+      htmlInline({
+        language: json,
+        theme: tokyonightMoon,
+        highlightLines: {
+          lines: [[1, 2], [5, 6]],
+          style: 'background: rgba(250, 204, 21, 0.12); border-left: 3px solid #facc15; margin-left: -1rem; padding-left: calc(1rem - 3px);',
+        },
+      })
+    )
+
+    // htmlInline with custom class
+    document.getElementById('inline-class-output').innerHTML = hl.highlight(
+      code,
+      htmlInline({
+        language: json,
+        theme: tokyonightMoon,
+        highlightLines: {
+          lines: [[4, 4]],
+          class: 'my-highlight',
+        },
+      })
+    )
+
+    // htmlLinked with class-based highlighting
+    document.getElementById('linked-output').innerHTML = hl.highlight(
+      code,
+      htmlLinked({
+        language: json,
+        highlightLines: {
+          lines: [[2, 3], 6],
+          class: 'hl-line',
+        },
+      })
+    )
+
+    // htmlMultiThemes with line highlights
+    document.getElementById('multi-output').innerHTML = hl.highlight(
+      code,
+      htmlMultiThemes({
+        language: json,
+        themes: { light: tokyonightMoon, dark: dracula },
+        defaultTheme: 'light',
+        highlightLines: {
+          lines: [[2, 3]],
+          style: 'theme',
+        },
+      })
+    )
+  </script>
+</body>
+</html>

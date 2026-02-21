@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>htmlMultiThemes</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+    pre.lumis { padding: 1rem; border-radius: 0.5rem; overflow-x: auto; }
+
+    /* Switch themes by toggling CSS variables */
+    .use-dark .lumis-themes {
+      color: var(--lumis-dark) !important;
+      background-color: var(--lumis-dark-bg) !important;
+    }
+    .use-dark .lumis-themes span[style] {
+      color: var(--lumis-dark) !important;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 antialiased">
+  <main class="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-6 lg:px-8">
+    <nav class="flex items-center justify-between rounded-2xl border border-cyan-400/20 bg-slate-950/70 px-4 py-3 shadow-[0_20px_50px_rgba(2,6,23,0.45)] backdrop-blur">
+      <a class="text-sm font-medium text-slate-200 transition-colors hover:text-white" href="/">All examples</a>
+      <span class="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-[11px] uppercase tracking-[0.25em] text-cyan-300">Formatter</span>
+    </nav>
+    <section class="rounded-[28px] border border-slate-800 bg-slate-950/70 p-6 shadow-[0_20px_50px_rgba(2,6,23,0.45)] backdrop-blur md:p-8">
+      <p class="mb-3 text-[11px] uppercase tracking-[0.3em] text-cyan-300">Theme switching</p>
+      <h1 class="text-2xl font-semibold mb-2">htmlMultiThemes</h1>
+      <p class="text-slate-500 mb-8">Render code with multiple themes using CSS variables. Theme switching happens entirely in CSS.</p>
+
+      <!-- Example 1: JS-driven toggle -->
+      <section class="rounded-xl border border-slate-200 overflow-hidden mb-8 transition-colors duration-300 bg-white" id="toggle-section">
+        <div class="px-6 pt-5 pb-4">
+          <h2 class="text-lg font-medium mb-1 transition-colors duration-300" id="toggle-title">JS toggle</h2>
+          <p class="text-sm text-slate-400 mb-4 transition-colors duration-300" id="toggle-desc">Switch themes by toggling a CSS class from JavaScript. Click the buttons to try it.</p>
+          <div class="flex gap-2 mb-4">
+            <button id="btn-light" class="px-4 py-2 rounded-lg font-medium text-sm cursor-pointer transition-all duration-200 bg-slate-800 text-white shadow-md">Light</button>
+            <button id="btn-dark" class="px-4 py-2 rounded-lg font-medium text-sm cursor-pointer transition-all duration-200 bg-transparent text-slate-400 hover:bg-slate-100">Dark</button>
+          </div>
+        </div>
+        <div class="px-6 pb-6" id="output"></div>
+      </section>
+
+      <!-- Example 2: light-dark() -->
+      <section class="rounded-xl border border-slate-200 bg-white overflow-hidden" style="color-scheme: light dark;">
+        <div class="px-6 pt-5 pb-4">
+          <h2 class="text-lg font-medium mb-1">OS preference via <code class="font-mono text-sm bg-slate-100 px-1.5 py-0.5 rounded">light-dark()</code></h2>
+          <p class="text-sm text-slate-400 mb-4">Uses the CSS <code class="font-mono text-sm">light-dark()</code> function. Toggle your OS appearance (System Settings &rarr; Appearance) to see it switch automatically. Requires <code class="font-mono text-sm">color-scheme: light dark</code> on the page.</p>
+        </div>
+        <div class="px-6 pb-6" id="light-dark-output"></div>
+      </section>
+    </section>
+  </main>
+
+  <script type="module">
+    import { createHighlighter } from '../src/index.browser.ts'
+    import { htmlMultiThemes } from '../src/formatters.ts'
+    import json from '../langs/json.ts'
+    import githubLight from '@lumis-sh/themes/github_light'
+    import githubDark from '@lumis-sh/themes/github_dark'
+
+    const code = `{
+  "feature": "htmlMultiThemes",
+  "defaultTheme": "light",
+  "users": ["Alice", "Bob", "Charlie"],
+  "unicode": "😀 café"
+}`
+
+    const themes = { light: githubLight, dark: githubDark }
+
+    const hl = await createHighlighter({ langs: [json] })
+
+    // JS toggle
+    document.getElementById('output').innerHTML = hl.highlight(
+      code,
+      htmlMultiThemes({
+        language: json,
+        themes,
+        defaultTheme: 'light',
+      })
+    )
+
+    // light-dark()
+    document.getElementById('light-dark-output').innerHTML = hl.highlight(
+      code,
+      htmlMultiThemes({
+        language: json,
+        themes,
+        defaultTheme: 'light-dark()',
+      })
+    )
+
+    // Theme switching for first example only
+    const section = document.getElementById('toggle-section')
+    const title = document.getElementById('toggle-title')
+    const desc = document.getElementById('toggle-desc')
+    const btnLight = document.getElementById('btn-light')
+    const btnDark = document.getElementById('btn-dark')
+    const outputEl = document.getElementById('output')
+
+    function setTheme(mode) {
+      const isLight = mode === 'light'
+
+      // Toggle code theme
+      if (isLight) {
+        outputEl.classList.remove('use-dark')
+      } else {
+        outputEl.classList.add('use-dark')
+      }
+
+      // Toggle section
+      section.classList.toggle('bg-white', isLight)
+      section.classList.toggle('border-slate-200', isLight)
+      section.classList.toggle('bg-slate-900', !isLight)
+      section.classList.toggle('border-slate-700', !isLight)
+
+      // Toggle text
+      title.classList.toggle('text-slate-800', isLight)
+      title.classList.toggle('text-white', !isLight)
+      desc.classList.toggle('text-slate-400', isLight)
+      desc.classList.toggle('text-slate-500', !isLight)
+
+      // Toggle active button
+      const base = 'px-4 py-2 rounded-lg font-medium text-sm cursor-pointer transition-all duration-200'
+      btnLight.className = `${base} ${
+        isLight ? 'bg-slate-800 text-white shadow-md' : 'bg-transparent text-slate-400 hover:bg-slate-800'
+      }`
+      btnDark.className = `${base} ${
+        !isLight ? 'bg-white text-slate-800 shadow-md' : 'bg-transparent text-slate-400 hover:bg-slate-100'
+      }`
+    }
+
+    btnLight.addEventListener('click', () => setTheme('light'))
+    btnDark.addEventListener('click', () => setTheme('dark'))
+  </script>
+</body>
+</html>

@@ -1,0 +1,178 @@
+{
+  "name": "javascript-html-template-unicode-emoji",
+  "language": "javascript",
+  "theme": "dracula",
+  "events": [
+    {
+      "type": "start",
+      "scope": "function.call",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 0,
+      "end": 4
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "string",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 4,
+      "end": 5
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 5,
+      "end": 6
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "tag",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 6,
+      "end": 9
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 9,
+      "end": 10
+    },
+    {
+      "type": "start",
+      "scope": "attribute",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 10,
+      "end": 15
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "operator",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 15,
+      "end": 16
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "string",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 16,
+      "end": 17
+    },
+    {
+      "type": "start",
+      "scope": "string",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 17,
+      "end": 21
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 21,
+      "end": 22
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 22,
+      "end": 23
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 23,
+      "end": 25
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "tag",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 25,
+      "end": 28
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 28,
+      "end": 29
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 29,
+      "end": 30
+    },
+    {
+      "type": "end"
+    }
+  ]
+}

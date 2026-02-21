@@ -1,0 +1,72 @@
+{
+  "name": "json-basic",
+  "language": "json",
+  "theme": "dracula",
+  "events": [
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "json"
+    },
+    {
+      "type": "source",
+      "start": 0,
+      "end": 1
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "property",
+      "language": "json"
+    },
+    {
+      "type": "source",
+      "start": 1,
+      "end": 4
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.delimiter",
+      "language": "json"
+    },
+    {
+      "type": "source",
+      "start": 4,
+      "end": 5
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "number",
+      "language": "json"
+    },
+    {
+      "type": "source",
+      "start": 5,
+      "end": 6
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "json"
+    },
+    {
+      "type": "source",
+      "start": 6,
+      "end": 7
+    },
+    {
+      "type": "end"
+    }
+  ]
+}

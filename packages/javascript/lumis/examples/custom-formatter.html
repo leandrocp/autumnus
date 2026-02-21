@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Custom formatter</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #08111f;
+      --panel: rgba(8, 17, 31, 0.82);
+      --panel-strong: #0d1728;
+      --panel-muted: #122036;
+      --border: rgba(143, 184, 255, 0.16);
+      --text: #e7edf7;
+      --muted: #97a7c2;
+      --accent: #7dd3fc;
+      --accent-strong: #38bdf8;
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.34);
+      --radius: 24px;
+      --mono: "JetBrains Mono", "SFMono-Regular", "Menlo", monospace;
+      --sans: "IBM Plex Sans", "Avenir Next", "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--sans);
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), transparent 28%),
+        radial-gradient(circle at top right, rgba(251, 191, 36, 0.12), transparent 24%),
+        linear-gradient(180deg, #0a1220 0%, #07101b 100%);
+    }
+
+    main {
+      width: min(1240px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 40px;
+    }
+
+    .hero,
+    .panel {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--panel);
+      backdrop-filter: blur(14px);
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      padding: 28px;
+      margin-bottom: 20px;
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 4vw, 3.4rem);
+      line-height: 0.95;
+      letter-spacing: -0.04em;
+    }
+
+    .lede {
+      max-width: 68ch;
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.7;
+    }
+
+    .facts {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .fact {
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(18, 32, 54, 0.78);
+      border: 1px solid rgba(143, 184, 255, 0.12);
+    }
+
+    .fact strong,
+    .stat strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .fact span,
+    .stat span {
+      color: var(--text);
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .layout {
+      display: grid;
+      gap: 20px;
+      grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+    }
+
+    .stack {
+      display: grid;
+      gap: 20px;
+    }
+
+    .panel {
+      padding: 20px;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .panel-header p {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .badge {
+      flex: 0 0 auto;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.12);
+      color: var(--accent);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .preview-shell {
+      overflow: hidden;
+      border-radius: 18px;
+      border: 1px solid rgba(143, 184, 255, 0.1);
+      background: #09111d;
+    }
+
+    .preview-shell .lumis,
+    .preview-shell .docs-demo {
+      margin: 0;
+      padding: 0;
+      overflow-x: auto;
+      background: transparent;
+      font-family: var(--mono);
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    .preview-shell code {
+      display: block;
+      min-width: 100%;
+    }
+
+    .preview-shell .line {
+      display: block;
+      padding: 0 18px;
+      min-height: 1.65em;
+    }
+
+    .preview-shell .line[data-line]::before {
+      content: attr(data-line);
+      display: inline-block;
+      width: 2.5rem;
+      margin-right: 16px;
+      color: #5d708f;
+      user-select: none;
+    }
+
+    .docs-demo .tok {
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 120ms ease, box-shadow 120ms ease;
+    }
+
+    .docs-demo .tok:hover,
+    .docs-demo .tok:focus-visible {
+      background: rgba(125, 211, 252, 0.14);
+      box-shadow: 0 0 0 1px rgba(125, 211, 252, 0.22);
+      outline: none;
+    }
+
+    .docs-demo .tok.is-active {
+      background: rgba(56, 189, 248, 0.18);
+      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.35);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .stat {
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: var(--panel-strong);
+      border: 1px solid rgba(143, 184, 255, 0.1);
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .meta-item {
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: var(--panel-strong);
+      border: 1px solid rgba(143, 184, 255, 0.08);
+    }
+
+    .meta-item strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .meta-item span,
+    .meta-item code {
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .legend-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(18, 32, 54, 0.9);
+      border: 1px solid rgba(143, 184, 255, 0.1);
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--text);
+    }
+
+    .legend-swatch {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--accent-strong);
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
+    }
+
+    .code-frame {
+      overflow: auto;
+      border-radius: 18px;
+      border: 1px solid rgba(143, 184, 255, 0.1);
+      background: #09111d;
+    }
+
+    .code-frame pre {
+      margin: 0;
+      padding: 18px;
+      color: #ced8e7;
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .note {
+      margin-top: 16px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(56, 189, 248, 0.08);
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    @media (max-width: 980px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      main {
+        width: min(100% - 20px, 1240px);
+        padding-top: 20px;
+      }
+
+      .hero,
+      .panel {
+        padding: 18px;
+      }
+
+      .stats,
+      .meta-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .preview-shell .line,
+      .preview-shell .line[data-line]::before {
+        padding-left: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <p class="eyebrow">Custom formatter</p>
+      <h1>Interactive token inspector</h1>
+      <p class="lede">
+        A custom formatter that calls <code>hl.highlightIter()</code> inside <code>format()</code> to build
+        annotated HTML with per-token metadata you can inspect, including injected-language tokens.
+      </p>
+      <div class="facts">
+        <div class="fact">
+          <strong>Input</strong>
+          <span>HTML with injected JavaScript inside <code>&lt;script&gt;</code>.</span>
+        </div>
+        <div class="fact">
+          <strong>Output</strong>
+          <span>Hoverable tokens with scope metadata and byte range annotations.</span>
+        </div>
+        <div class="fact">
+          <strong>Use case</strong>
+          <span>Code walkthroughs, token inspection, and mixed-language UI hooks.</span>
+        </div>
+      </div>
+    </section>
+
+    <article class="panel">
+      <div class="panel-header">
+        <div>
+          <h2>Custom output</h2>
+          <p>Hover or click a token to inspect the metadata the formatter attached, including whether it came from HTML or JavaScript.</p>
+        </div>
+        <span class="badge">highlightIter</span>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <strong>Highlighted tokens</strong>
+          <span id="token-count">0</span>
+        </div>
+        <div class="stat">
+          <strong>Unique scopes</strong>
+          <span id="scope-count">0</span>
+        </div>
+        <div class="stat">
+          <strong>Languages seen</strong>
+          <span id="language-count">0</span>
+        </div>
+      </div>
+
+      <div id="formatter-output" class="preview-shell"></div>
+
+      <div class="meta-grid">
+        <div class="meta-item">
+          <strong>Token text</strong>
+          <code id="token-text">-</code>
+        </div>
+        <div class="meta-item">
+          <strong>Scope</strong>
+          <span id="token-scope">-</span>
+        </div>
+        <div class="meta-item">
+          <strong>Language</strong>
+          <span id="token-language">-</span>
+        </div>
+        <div class="meta-item">
+          <strong>Byte range</strong>
+          <span id="token-range">-</span>
+        </div>
+        <div class="meta-item">
+          <strong>Foreground</strong>
+          <span id="token-fg">-</span>
+        </div>
+        <div class="meta-item">
+          <strong>Background</strong>
+          <span id="token-bg">-</span>
+        </div>
+      </div>
+
+      <div class="legend" id="scope-legend"></div>
+      <div class="legend" id="language-legend"></div>
+
+      <p class="note">
+        This is the kind of formatter you would write when the built-in HTML output is not enough:
+        you want syntax highlighting but also need custom DOM hooks for tutorials, analytics, or token-aware UI.
+      </p>
+    </article>
+
+    <article class="panel">
+      <div class="panel-header">
+        <div>
+          <h2>Formatter source</h2>
+          <p>The formatter calls <code>hl.highlightIter()</code> and turns the callbacks into annotated HTML spans.</p>
+        </div>
+        <span class="badge">User formatter</span>
+      </div>
+      <div id="formatter-source" class="preview-shell"></div>
+    </article>
+  </main>
+
+  <script type="module">
+    import { createHighlighter } from '../src/index.browser.ts'
+    import { htmlInline } from '../src/formatters.ts'
+    import {
+      closeTag,
+      closingTags,
+      escape,
+      getScopedThemeStyle,
+      openCodeTag,
+      openPreTag,
+      openSpanTag,
+      styleToCss,
+      wrapLine,
+    } from '../src/formatter/html.ts'
+    import html from '../langs/html.ts'
+    import javascript from '../langs/javascript.ts'
+    import dracula from '@lumis-sh/themes/dracula'
+
+    const source = `<article class="profile-card">
+  <h2>User profile</h2>
+  <script>
+    async function loadUserProfile(userId) {
+      const response = await fetch(\`/api/users/\${userId}\`)
+      if (!response.ok) throw new Error('Failed to load user profile')
+
+      return response.json()
+    }
+  <\/script>
+</article>`
+
+    const formatterSource = `import type { Formatter } from '@lumis-sh/lumis/formatters'
+import {
+  closingTags,
+  escape,
+  getScopedThemeStyle,
+  openCodeTag,
+  openPreTag,
+  openSpanTag,
+  styleToCss,
+  wrapLine,
+} from '@lumis-sh/lumis/formatters/html'
+import html from '@lumis-sh/lumis/langs/html'
+import dracula from '@lumis-sh/themes/dracula'
+
+const docsFormatter: Formatter = {
+  language: html,
+  format(source, hl) {
+    let tokenId = 0
+    const lines = ['']
+
+    hl.highlightIter(source, html, dracula, (text, language, range, scope, style) => {
+      const parts = text.split('\\n')
+      for (let i = 0; i < parts.length; i++) {
+        const part = parts[i]
+        if (part.length > 0) {
+          const escaped = escape(part)
+          if (scope) {
+            lines[lines.length - 1] += openSpanTag({
+              class: 'tok',
+              tabindex: 0,
+              'data-token-id': String(++tokenId),
+              'data-scope': scope,
+              'data-language': language,
+              'data-start': String(range.start),
+              'data-end': String(range.end),
+              'data-fg': style?.fg,
+              'data-bg': style?.bg,
+              style: styleToCss(style, { italic: true }),
+            }) + escaped + '</span>'
+          } else {
+            lines[lines.length - 1] += escaped
+          }
+        }
+        if (i < parts.length - 1) lines.push('')
+      }
+    })
+
+    const body = lines.map((line, i) => wrapLine(i + 1, line)).join('')
+    return openPreTag({ preClass: 'docs-demo' })
+      + openCodeTag(html) + body + closingTags()
+  },
+}`
+
+    const docsFormatter = {
+      language: html,
+      format(source, hl) {
+        let tokenId = 0
+        const lines = ['']
+
+        hl.highlightIter(source, html, dracula, (text, language, range, scope, style) => {
+          const parts = text.split('\n')
+          for (let i = 0; i < parts.length; i++) {
+            const part = parts[i]
+            if (part.length > 0) {
+              const escaped = escape(part)
+              if (scope) {
+                lines[lines.length - 1] += openSpanTag({
+                  class: 'tok',
+                  tabindex: 0,
+                  'data-token-id': String(++tokenId),
+                  'data-scope': scope,
+                  'data-language': language,
+                  'data-start': String(range.start),
+                  'data-end': String(range.end),
+                  'data-fg': style?.fg,
+                  'data-bg': style?.bg,
+                  style: styleToCss(style, { italic: true }),
+                }) + escaped + '</span>'
+              } else {
+                lines[lines.length - 1] += escaped
+              }
+            }
+            if (i < parts.length - 1) lines.push('')
+          }
+        })
+
+        const body = lines.map((line, i) => wrapLine(i + 1, line)).join('')
+        return `${openPreTag({ preClass: 'docs-demo' })}${openCodeTag(html)}${body}${closingTags()}`
+      },
+    }
+
+    const formatterSourcePreview = document.getElementById('formatter-source')
+    const formatterOutput = document.getElementById('formatter-output')
+    const tokenCount = document.getElementById('token-count')
+    const scopeCount = document.getElementById('scope-count')
+    const languageCount = document.getElementById('language-count')
+    const scopeLegend = document.getElementById('scope-legend')
+    const languageLegend = document.getElementById('language-legend')
+    const tokenText = document.getElementById('token-text')
+    const tokenScope = document.getElementById('token-scope')
+    const tokenLanguage = document.getElementById('token-language')
+    const tokenRange = document.getElementById('token-range')
+    const tokenFg = document.getElementById('token-fg')
+    const tokenBg = document.getElementById('token-bg')
+
+    const hl = await createHighlighter({ langs: [html, javascript] })
+
+    formatterSourcePreview.innerHTML = hl.highlight(
+      formatterSource,
+      htmlInline({ language: javascript, theme: dracula })
+    )
+
+    formatterOutput.innerHTML = hl.highlight(source, docsFormatter)
+
+    const tokens = [...formatterOutput.querySelectorAll('.tok')]
+    const scopeTotals = new Map()
+    const languageTotals = new Map()
+
+    for (const token of tokens) {
+      const scope = token.dataset.scope
+      if (!scope) continue
+      scopeTotals.set(scope, (scopeTotals.get(scope) ?? 0) + 1)
+
+      const language = token.dataset.language
+      if (language) {
+        languageTotals.set(language, (languageTotals.get(language) ?? 0) + 1)
+      }
+    }
+
+    tokenCount.textContent = String(tokens.length)
+    scopeCount.textContent = String(scopeTotals.size)
+    languageCount.textContent = String(languageTotals.size)
+
+    for (const [scope, count] of [...scopeTotals.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
+      const chip = document.createElement('span')
+      chip.className = 'legend-chip'
+      chip.innerHTML = `<span class="legend-swatch"></span>${scope} x${count}`
+      scopeLegend.append(chip)
+    }
+
+    for (const [language, count] of [...languageTotals.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
+      const chip = document.createElement('span')
+      chip.className = 'legend-chip'
+      chip.innerHTML = `<span class="legend-swatch"></span>${language} x${count}`
+      languageLegend.append(chip)
+    }
+
+    function selectToken(token) {
+      for (const entry of tokens) {
+        entry.classList.remove('is-active')
+      }
+
+      token.classList.add('is-active')
+      tokenText.textContent = token.textContent ?? ''
+      tokenScope.textContent = token.dataset.scope ?? '-'
+      tokenLanguage.textContent = token.dataset.language ?? '-'
+      tokenRange.textContent = `${token.dataset.start ?? '?'}..${token.dataset.end ?? '?'}`
+      tokenFg.textContent = token.dataset.fg ?? 'none'
+      tokenBg.textContent = token.dataset.bg ?? 'none'
+    }
+
+    for (const token of tokens) {
+      token.addEventListener('mouseenter', () => selectToken(token))
+      token.addEventListener('focus', () => selectToken(token))
+      token.addEventListener('click', () => selectToken(token))
+    }
+
+    if (tokens[0]) {
+      selectToken(tokens[0])
+    }
+  </script>
+</body>
+</html>
