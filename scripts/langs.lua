@@ -255,9 +255,14 @@ local function cmd_get_queries(name)
       local dest = "crates/lumis/queries/" .. query_name
 
       local src_dir
-      if info.git:find("nvim%-treesitter") then
-         src_dir = clone_dir .. "/runtime/queries/" .. query_name
+      if info.path then
+         src_dir = clone_dir .. "/" .. info.path
+         -- default path is a prefix, append query name
+         if not queries[query_name] or query_name == "default" then
+            src_dir = src_dir .. "/" .. query_name
+         end
       else
+         -- fallback for entries without path
          src_dir = clone_dir .. "/queries"
          if os.execute("test -d " .. src_dir .. "/" .. query_name) then
             src_dir = src_dir .. "/" .. query_name

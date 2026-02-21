@@ -347,10 +347,12 @@ surface = { git = "https://github.com/connorlay/tree-sitter-surface.git", rev = 
 typst = { git = "https://github.com/uben0/tree-sitter-typst.git", rev = "46cf4ded12ee974a70bf8457263b67ad7ee0379d" }
 vim = { git = "https://github.com/tree-sitter-grammars/tree-sitter-vim.git", rev = "1cd0a0892b389bd314a9bd09545160e5ee3c9137" }
 vue = { git = "https://github.com/tree-sitter-grammars/tree-sitter-vue.git", rev = "ce8011a414fdf8091f4e4071752efc376f4afb08" }
+wat = { git = "https://github.com/wasm-lsp/tree-sitter-wasm.git", rev = "2ca28a9f9d709847bf7a3de0942a84e912f59088", location = "wat" }
 
 [package.metadata.langs.queries]
-default = { git = "https://github.com/nvim-treesitter/nvim-treesitter.git", rev = "3edb01f912867603c2aef9079f208f0244c0885b" }
-iex = { git = "https://github.com/elixir-lang/tree-sitter-iex.git", rev = "39f20bb51f502e32058684e893c0c0b00bb2332c" }
-nix = { git = "https://github.com/nix-community/tree-sitter-nix.git", rev = "eabf96807ea4ab6d6c7f09b671a88cd483542840" }
-nu = { git = "https://github.com/nushell/tree-sitter-nu.git", rev = "bb3f533e5792260291945e1f329e1f0a779def6e" }
-python = { git = "https://github.com/tree-sitter/tree-sitter-python.git", rev = "26855eabccb19c6abf499fbc5b8dc7cc9ab8bc64" }
+default = { git = "https://github.com/nvim-treesitter/nvim-treesitter.git", rev = "3edb01f912867603c2aef9079f208f0244c0885b", path = "runtime/queries" }
+iex = { git = "https://github.com/elixir-lang/tree-sitter-iex.git", rev = "39f20bb51f502e32058684e893c0c0b00bb2332c", path = "queries" }
+nix = { git = "https://github.com/nix-community/tree-sitter-nix.git", rev = "eabf96807ea4ab6d6c7f09b671a88cd483542840", path = "queries" }
+nu = { git = "https://github.com/nushell/tree-sitter-nu.git", rev = "bb3f533e5792260291945e1f329e1f0a779def6e", path = "queries" }
+python = { git = "https://github.com/tree-sitter/tree-sitter-python.git", rev = "26855eabccb19c6abf499fbc5b8dc7cc9ab8bc64", path = "queries" }
+wat = { git = "https://github.com/helix-editor/helix.git", rev = "79c7203a388e1ac7aa6aebfc2e4c9a91b6efc97a", path = "runtime/queries/wat" }

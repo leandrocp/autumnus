@@ -47,12 +47,24 @@ Most languages use the `default` query source (nvim-treesitter) defined in `[pac
 
   ```toml
   # only needed when NOT using nvim-treesitter
-  {name} = { git = "https://github.com/…/tree-sitter-{name}.git", rev = "..." }
+  {name} = { git = "https://github.com/…/tree-sitter-{name}.git", rev = "...", path = "queries" }
   ```
+
+The `path` field specifies where `.scm` files live in the repo. For the `default` entry it's a prefix (`runtime/queries`) and the language name is appended automatically. For explicit entries, use the full path to the `.scm` directory (e.g., `queries`, `runtime/queries/wat`).
 
 - Run `just langs-fetch-queries {name}` to fetch `highlights.scm`, `injections.scm`, and `locals.scm` into `crates/lumis/queries/{name}/`
 
-### 3. Wire up `languages.rs`
+### 3. Fetch and build
+
+After wiring up the parser, queries, and `languages.rs`:
+
+```sh
+just langs-fetch-parsers {name}   # only for vendored parsers
+just langs-fetch-queries {name}
+cargo build --all-features
+```
+
+### 4. Wire up `languages.rs`
 
 In `crates/lumis/src/languages.rs`:
 
@@ -63,15 +75,15 @@ In `crates/lumis/src/languages.rs`:
 - [ ] Add the `{LANG}_CONFIG` static `LazyLock` with the `HighlightConfiguration`
 - [ ] Return it from the `config()` method with `#[cfg(feature = "lang-{name}")]`
 
-### 4. Sample file
+### 5. Sample file
 
 Add a sample file at `samples/{name}.{ext}` with representative code for testing.
 
-### 5. Generate docs
+### 6. Generate docs
 
 Run `just docs-gen-languages` to update `LANGUAGES.md`.
 
-### 6. Verify
+### 7. Verify
 
 ```sh
 cargo test --all-features
@@ -81,8 +93,8 @@ cargo clippy --all-features -- -D warnings
 ## Updating Parsers
 
 ```sh
-just langs-upgrade-parsers {name}  # updates Cargo.toml
-just langs-fetch-parsers {name}      # fetches updated files
+just langs-upgrade-parsers {name} # updates Cargo.toml
+just langs-fetch-parsers {name}   # fetches updated files
 ```
 
 ## Updating Queries
@@ -90,8 +102,8 @@ just langs-fetch-parsers {name}      # fetches updated files
 To upgrade query files from upstream:
 
 ```sh
-just langs-upgrade-queries {name}  # updates Cargo.toml
-just langs-fetch-queries {name}      # fetches updated files
+just langs-upgrade-queries {name} # updates Cargo.toml
+just langs-fetch-queries {name}   # fetches updated files
 ```
 
 To upgrade all queries at once, omit the name argument.
