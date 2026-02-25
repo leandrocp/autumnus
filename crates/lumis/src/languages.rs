@@ -151,6 +151,2042 @@ pub(crate) trait LanguageConfig {
 
 impl LanguageConfig for Language {
     fn config(&self) -> &'static HighlightConfiguration {
+/// Error returned when a language cannot be determined from input.
+///
+/// This error occurs when using [`std::str::FromStr`] or the `.parse()` method
+/// with an unrecognized language name, file extension, or file path.
+///
+/// # Example
+///
+/// ```rust
+/// use lumis::languages::Language;
+///
+/// let result: Result<Language, _> = "unknown_lang".parse();
+/// assert!(result.is_err());
+/// ```
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct LanguageParseError(String);
+
+impl std::fmt::Display for LanguageParseError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "unknown language or file type: {}", self.0)
+    }
+}
+
+impl std::error::Error for LanguageParseError {}
+
+impl std::str::FromStr for Language {
+    type Err = LanguageParseError;
+
+    /// Parse a language from a string.
+    ///
+    /// The input can be:
+    /// - A language name (e.g., "rust", "python", "javascript")
+    /// - A file extension (e.g., "rs", "py", "js")
+    /// - A file path (e.g., "src/main.rs", "script.py")
+    ///
+    /// Returns an error if the language cannot be determined from the input.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use lumis::languages::Language;
+    /// use std::str::FromStr;
+    ///
+    /// // From language name
+    /// let lang = Language::from_str("rust").unwrap();
+    /// assert_eq!(lang, Language::Rust);
+    ///
+    /// // Using .parse()
+    /// let lang: Language = "python".parse().unwrap();
+    /// assert_eq!(lang, Language::Python);
+    ///
+    /// // From extension
+    /// let lang: Language = "js".parse().unwrap();
+    /// assert_eq!(lang, Language::JavaScript);
+    ///
+    /// // From file path
+    /// let lang: Language = "src/main.rs".parse().unwrap();
+    /// assert_eq!(lang, Language::Rust);
+    ///
+    /// // Empty string defaults to PlainText
+    /// let lang: Language = "".parse().unwrap();
+    /// assert_eq!(lang, Language::PlainText);
+    ///
+    /// // Unknown language returns error
+    /// assert!(Language::from_str("unknown").is_err());
+    /// assert!("unknown".parse::<Language>().is_err());
+    /// ```
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.is_empty() {
+            return Ok(Language::PlainText);
+        }
+
+        let s_lower = s.to_ascii_lowercase();
+
+        let exact = match s_lower.as_str() {
+            #[cfg(feature = "lang-angular")]
+            "angular" => Some(Language::Angular),
+            #[cfg(feature = "lang-asm")]
+            "asm" | "assembly" => Some(Language::Assembly),
+            #[cfg(feature = "lang-astro")]
+            "astro" => Some(Language::Astro),
+            #[cfg(feature = "lang-bash")]
+            "bash" => Some(Language::Bash),
+            #[cfg(feature = "lang-c")]
+            "c" => Some(Language::C),
+            #[cfg(feature = "lang-caddy")]
+            "caddy" => Some(Language::Caddy),
+            #[cfg(feature = "lang-clojure")]
+            "clojure" => Some(Language::Clojure),
+            #[cfg(feature = "lang-comment")]
+            "comment" => Some(Language::Comment),
+            #[cfg(feature = "lang-commonlisp")]
+            "commonlisp" => Some(Language::CommonLisp),
+            #[cfg(feature = "lang-cpp")]
+            "c++" | "cpp" => Some(Language::CPlusPlus),
+            #[cfg(feature = "lang-cmake")]
+            "cmake" => Some(Language::CMake),
+            #[cfg(feature = "lang-csharp")]
+            "c#" | "csharp" => Some(Language::CSharp),
+            #[cfg(feature = "lang-csv")]
+            "csv" => Some(Language::CSV),
+            #[cfg(feature = "lang-css")]
+            "css" => Some(Language::CSS),
+            #[cfg(feature = "lang-dart")]
+            "dart" => Some(Language::Dart),
+            "diff" => Some(Language::Diff),
+            #[cfg(feature = "lang-dockerfile")]
+            "dockerfile" | "docker" => Some(Language::Dockerfile),
+            #[cfg(feature = "lang-eex")]
+            "eex" => Some(Language::EEx),
+            #[cfg(feature = "lang-ejs")]
+            "ejs" => Some(Language::EJS),
+            #[cfg(feature = "lang-erb")]
+            "erb" => Some(Language::ERB),
+            #[cfg(feature = "lang-elixir")]
+            "elixir" => Some(Language::Elixir),
+            #[cfg(feature = "lang-elm")]
+            "elm" => Some(Language::Elm),
+            #[cfg(feature = "lang-erlang")]
+            "erlang" => Some(Language::Erlang),
+            #[cfg(feature = "lang-fish")]
+            "fish" => Some(Language::Fish),
+            #[cfg(feature = "lang-fsharp")]
+            "f#" | "fsharp" => Some(Language::FSharp),
+            #[cfg(feature = "lang-gleam")]
+            "gleam" => Some(Language::Gleam),
+            #[cfg(feature = "lang-glimmer")]
+            "ember" | "glimmer" | "handlebars" => Some(Language::Glimmer),
+            #[cfg(feature = "lang-go")]
+            "go" => Some(Language::Go),
+            #[cfg(feature = "lang-graphql")]
+            "graphql" => Some(Language::GraphQL),
+            #[cfg(feature = "lang-haskell")]
+            "haskell" => Some(Language::Haskell),
+            #[cfg(feature = "lang-hcl")]
+            "hcl" | "terraform" => Some(Language::HCL),
+            #[cfg(feature = "lang-heex")]
+            "heex" => Some(Language::HEEx),
+            #[cfg(feature = "lang-html")]
+            "html" => Some(Language::HTML),
+            #[cfg(feature = "lang-iex")]
+            "iex" => Some(Language::IEx),
+            #[cfg(feature = "lang-java")]
+            "java" => Some(Language::Java),
+            #[cfg(feature = "lang-javascript")]
+            "jsx" | "javascript" => Some(Language::JavaScript),
+            #[cfg(feature = "lang-json")]
+            "json" => Some(Language::JSON),
+            #[cfg(feature = "lang-kotlin")]
+            "kotlin" => Some(Language::Kotlin),
+            #[cfg(feature = "lang-latex")]
+            "latex" => Some(Language::LaTeX),
+            #[cfg(feature = "lang-liquid")]
+            "liquid" => Some(Language::Liquid),
+            #[cfg(feature = "lang-llvm")]
+            "llvm" => Some(Language::Llvm),
+            #[cfg(feature = "lang-lua")]
+            "lua" => Some(Language::Lua),
+            #[cfg(feature = "lang-objc")]
+            "objc" | "objective-c" => Some(Language::ObjC),
+            #[cfg(feature = "lang-ocaml")]
+            "ocaml" => Some(Language::OCaml),
+            #[cfg(feature = "lang-ocaml")]
+            "ocaml_interface" => Some(Language::OCamlInterface),
+            #[cfg(feature = "lang-perl")]
+            "perl" => Some(Language::Perl),
+            #[cfg(feature = "lang-make")]
+            "make" => Some(Language::Make),
+            #[cfg(feature = "lang-markdown")]
+            "markdown" => Some(Language::Markdown),
+            #[cfg(feature = "lang-markdown-inline")]
+            "markdown_inline" => Some(Language::MarkdownInline),
+            #[cfg(feature = "lang-nix")]
+            "nix" => Some(Language::Nix),
+            #[cfg(feature = "lang-nushell")]
+            "nushell" | "nu" => Some(Language::Nushell),
+            #[cfg(feature = "lang-php")]
+            "php" => Some(Language::Php),
+            #[cfg(feature = "lang-powershell")]
+            "powershell" => Some(Language::PowerShell),
+            #[cfg(feature = "lang-protobuf")]
+            "protobuf" => Some(Language::ProtoBuf),
+            #[cfg(feature = "lang-python")]
+            "python" => Some(Language::Python),
+            #[cfg(feature = "lang-r")]
+            "r" => Some(Language::R),
+            #[cfg(feature = "lang-regex")]
+            "regex" => Some(Language::Regex),
+            #[cfg(feature = "lang-ruby")]
+            "ruby" => Some(Language::Ruby),
+            #[cfg(feature = "lang-rust")]
+            "rust" => Some(Language::Rust),
+            #[cfg(feature = "lang-scala")]
+            "scala" => Some(Language::Scala),
+            #[cfg(feature = "lang-scss")]
+            "scss" => Some(Language::SCSS),
+            #[cfg(feature = "lang-sql")]
+            "sql" => Some(Language::SQL),
+            #[cfg(feature = "lang-surface")]
+            "surface" => Some(Language::Surface),
+            #[cfg(feature = "lang-svelte")]
+            "svelte" => Some(Language::Svelte),
+            #[cfg(feature = "lang-swift")]
+            "swift" => Some(Language::Swift),
+            #[cfg(feature = "lang-toml")]
+            "toml" => Some(Language::Toml),
+            #[cfg(feature = "lang-typescript")]
+            "typescript" => Some(Language::TypeScript),
+            #[cfg(feature = "lang-tsx")]
+            "tsx" => Some(Language::Tsx),
+            #[cfg(feature = "lang-typst")]
+            "typst" => Some(Language::Typst),
+            #[cfg(feature = "lang-vim")]
+            "vim" | "viml" | "vimscript" => Some(Language::Vim),
+            #[cfg(feature = "lang-vue")]
+            "vue" => Some(Language::Vue),
+            #[cfg(feature = "lang-wat")]
+            "wat" | "wasm" | "webassembly" => Some(Language::Wat),
+            #[cfg(feature = "lang-xml")]
+            "xml" => Some(Language::XML),
+            #[cfg(feature = "lang-yaml")]
+            "yaml" => Some(Language::YAML),
+            #[cfg(feature = "lang-zig")]
+            "zig" => Some(Language::Zig),
+            _ => None,
+        };
+
+        if let Some(lang) = exact {
+            return Ok(lang);
+        }
+
+        let path = Path::new(&s_lower);
+
+        if let Some(lang) = Self::from_glob(path) {
+            return Ok(lang);
+        }
+
+        if let Some(lang) = Self::from_extension(&s_lower) {
+            return Ok(lang);
+        }
+
+        Err(LanguageParseError(s.to_string()))
+    }
+}
+
+impl Language {
+    /// Guess the language based on an optional language hint and source content.
+    ///
+    /// # Arguments
+    ///
+    /// * `language` - Optional language hint. Can be:
+    ///   - `None`: Try to auto-detect language from source content
+    ///   - `Some(s)`: Language name, file extension, or file path
+    /// * `src` - The source code content to analyze
+    ///
+    /// # Detection Strategy
+    ///
+    /// When `language` is `Some(...)`:
+    /// 1. Try to parse as language name/extension/path via `FromStr`
+    /// 2. If parsing succeeds, return that language
+    /// 3. If parsing fails, fall through to content-based detection
+    ///
+    /// When `language` is `None` or parsing fails:
+    /// 1. Check for Emacs mode header (`// -*- mode: rust -*-`)
+    /// 2. Check for shebang (`#!/usr/bin/env python`)
+    /// 3. Apply content heuristics (HTML doctype, XML declaration, etc.)
+    /// 4. Default to `PlainText` if nothing matches
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use lumis::languages::Language;
+    ///
+    /// // Explicit language
+    /// let lang = Language::guess(Some("rust"), "");
+    /// assert_eq!(lang, Language::Rust);
+    ///
+    /// // Auto-detect from shebang
+    /// let lang = Language::guess(None, "#!/usr/bin/env python3\nprint('hi')");
+    /// assert_eq!(lang, Language::Python);
+    ///
+    /// // File path hint
+    /// let lang = Language::guess(Some("src/main.rs"), "");
+    /// assert_eq!(lang, Language::Rust);
+    /// ```
+    pub fn guess(language: Option<&str>, src: &str) -> Self {
+        // If a language hint is provided, try to parse it
+        if let Some(input) = language {
+            if let Ok(lang) = input.parse() {
+                return lang;
+            }
+            // If parsing fails, continue to content-based detection
+        }
+
+        // Auto-detection from content
+        if let Some(lang) = Self::from_emacs_mode_header(src) {
+            return lang;
+        }
+
+        if let Some(lang) = Self::from_shebang(src) {
+            return lang;
+        }
+
+        #[cfg(feature = "lang-html")]
+        if Self::looks_like_html(src) {
+            return Language::HTML;
+        }
+
+        #[cfg(feature = "lang-xml")]
+        if Self::looks_like_xml(src) {
+            return Language::XML;
+        }
+
+        #[cfg(feature = "lang-objc")]
+        if Self::looks_like_objc(Path::new(""), src) {
+            return Language::ObjC;
+        }
+
+        Language::PlainText
+    }
+
+    fn from_glob(path: &Path) -> Option<Self> {
+        match path.file_name() {
+            Some(name) => {
+                let name = name.to_string_lossy().into_owned();
+                for language in Language::iter() {
+                    for glob in Language::language_globs(language) {
+                        if glob.matches(&name) {
+                            return Some(language);
+                        }
+                    }
+                }
+
+                None
+            }
+            None => None,
+        }
+    }
+
+    fn from_extension(token: &str) -> Option<Self> {
+        let token_pattern = format!("*.{token}");
+
+        for language in Language::iter() {
+            for glob in Language::language_globs(language) {
+                if glob.matches(&token_pattern) {
+                    return Some(language);
+                }
+            }
+        }
+        None
+    }
+
+    // TODO: https://github.com/nvim-treesitter/nvim-treesitter/tree/master/queries/embedded_template
+    pub fn language_globs(language: Language) -> Vec<glob::Pattern> {
+        let glob_strs: &'static [&'static str] = match language {
+            #[cfg(feature = "lang-angular")]
+            Language::Angular => &["*.angular", "component.html"],
+            #[cfg(feature = "lang-asm")]
+            Language::Assembly => &["*.s", "*.asm", "*.assembly"],
+            #[cfg(feature = "lang-astro")]
+            Language::Astro => &["*.astro"],
+            #[cfg(feature = "lang-bash")]
+            Language::Bash => &[
+                "*.bash",
+                "*.bats",
+                "*.cgi",
+                "*.command",
+                "*.env",
+                "*.fcgi",
+                "*.ksh",
+                "*.sh",
+                "*.sh.in",
+                "*.tmux",
+                "*.tool",
+                "*.zsh",
+                ".bash_aliases",
+                ".bash_history",
+                ".bash_logout",
+                ".bash_profile",
+                ".bashrc",
+                ".cshrc",
+                ".env",
+                ".env.example",
+                ".flaskenv",
+                ".kshrc",
+                ".login",
+                ".profile",
+                ".zlogin",
+                ".zlogout",
+                ".zprofile",
+                ".zshenv",
+                ".zshrc",
+                "9fs",
+                "PKGBUILD",
+                "bash_aliases",
+                "bash_logout",
+                "bash_profile",
+                "bashrc",
+                "cshrc",
+                "ebuild",
+                "eclass",
+                "gradlew",
+                "kshrc",
+                "login",
+                "man",
+                "profile",
+                "zlogin",
+                "zlogout",
+                "zprofile",
+                "zshenv",
+                "zshrc",
+            ],
+            #[cfg(feature = "lang-c")]
+            Language::C => &["*.c"],
+            #[cfg(feature = "lang-caddy")]
+            Language::Caddy => &["Caddyfile", "caddyfile"],
+            #[cfg(feature = "lang-clojure")]
+            Language::Clojure => &[
+                "*.bb", "*.boot", "*.clj", "*.cljc", "*.clje", "*.cljs", "*.cljx", "*.edn",
+                "*.joke", "*.joker",
+            ],
+            #[cfg(feature = "lang-comment")]
+            Language::Comment => &[],
+            #[cfg(feature = "lang-commonlisp")]
+            Language::CommonLisp => &["*.lisp", "*.lsp", "*.asd"],
+            #[cfg(feature = "lang-cmake")]
+            Language::CMake => &["*.cmake", "*.cmake.in", "CMakeLists.txt"],
+            #[cfg(feature = "lang-csharp")]
+            Language::CSharp => &["*.cs"],
+            #[cfg(feature = "lang-csv")]
+            Language::CSV => &["*.csv"],
+            #[cfg(feature = "lang-cpp")]
+            Language::CPlusPlus => &[
+                "*.cc", "*.cpp", "*.h", "*.hh", "*.hpp", "*.ino", "*.cxx", "*.cu", "*.hxx",
+            ],
+            #[cfg(feature = "lang-css")]
+            Language::CSS => &["*.css"],
+            #[cfg(feature = "lang-dart")]
+            Language::Dart => &["*.dart"],
+            Language::Diff => &["*.diff"],
+            #[cfg(feature = "lang-dockerfile")]
+            Language::Dockerfile => &[
+                "Dockerfile",
+                "dockerfile",
+                "docker",
+                "Containerfile",
+                "container",
+                "*.dockerfile",
+                "*.docker",
+                "*.container",
+            ],
+            #[cfg(feature = "lang-eex")]
+            Language::EEx => &["*.eex"],
+            #[cfg(feature = "lang-ejs")]
+            Language::EJS => &["*.ejs"],
+            #[cfg(feature = "lang-erb")]
+            Language::ERB => &["*.erb"],
+            #[cfg(feature = "lang-elixir")]
+            Language::Elixir => &["*.ex", "*.exs"],
+            #[cfg(feature = "lang-elm")]
+            Language::Elm => &["*.elm"],
+            #[cfg(feature = "lang-erlang")]
+            Language::Erlang => &[
+                "*.erl",
+                "*.app",
+                "*.app.src",
+                "*.es",
+                "*.escript",
+                "*.hrl",
+                "*.xrl",
+                "*.yrl",
+                "Emakefile",
+                "rebar.config",
+            ],
+            #[cfg(feature = "lang-fish")]
+            Language::Fish => &["*.fish"],
+            #[cfg(feature = "lang-fsharp")]
+            Language::FSharp => &["*.fs", "*.fsx", "*.fsi"],
+            #[cfg(feature = "lang-gleam")]
+            Language::Gleam => &["*.gleam"],
+            #[cfg(feature = "lang-glimmer")]
+            Language::Glimmer => &["*.hbs", "*.handlebars", "*.html.handlebars", "*.glimmer"],
+            #[cfg(feature = "lang-go")]
+            Language::Go => &["*.go"],
+            #[cfg(feature = "lang-graphql")]
+            Language::GraphQL => &[],
+            #[cfg(feature = "lang-haskell")]
+            Language::Haskell => &["*.hs", "*.hs-boot"],
+            #[cfg(feature = "lang-hcl")]
+            Language::HCL => &["*.hcl", "*.nomad", "*.tf", "*.tfvars", "*.workflow"],
+            #[cfg(feature = "lang-heex")]
+            Language::HEEx => &["*.heex", "*.neex"],
+            #[cfg(feature = "lang-html")]
+            Language::HTML => &["*.html", "*.htm", "*.xhtml"],
+            #[cfg(feature = "lang-iex")]
+            Language::IEx => &["*.iex"],
+            #[cfg(feature = "lang-java")]
+            Language::Java => &["*.java"],
+            #[cfg(feature = "lang-javascript")]
+            Language::JavaScript => &["*.cjs", "*.js", "*.mjs", "*.snap", "*.jsx"],
+            #[cfg(feature = "lang-json")]
+            Language::JSON => &[
+                "*.json",
+                "*.avsc",
+                "*.geojson",
+                "*.gltf",
+                "*.har",
+                "*.ice",
+                "*.JSON-tmLanguage",
+                "*.jsonl",
+                "*.mcmeta",
+                "*.tfstate",
+                "*.tfstate.backup",
+                "*.topojson",
+                "*.webapp",
+                "*.webmanifest",
+                ".arcconfig",
+                ".auto-changelog",
+                ".c8rc",
+                ".htmlhintrc",
+                ".imgbotconfig",
+                ".nycrc",
+                ".tern-config",
+                ".tern-project",
+                ".watchmanconfig",
+                "Pipfile.lock",
+                "composer.lock",
+                "mcmod.info",
+                "flake.lock",
+            ],
+            #[cfg(feature = "lang-kotlin")]
+            Language::Kotlin => &["*.kt", "*.ktm", "*.kts"],
+            #[cfg(feature = "lang-latex")]
+            Language::LaTeX => &["*.aux", "*.cls", "*.sty", "*.tex"],
+            #[cfg(feature = "lang-liquid")]
+            Language::Liquid => &["*liquid"],
+            #[cfg(feature = "lang-llvm")]
+            Language::Llvm => &["*.llvm", "*.ll"],
+            #[cfg(feature = "lang-lua")]
+            Language::Lua => &["*.lua"],
+            #[cfg(feature = "lang-make")]
+            Language::Make => &[
+                "*.mak",
+                "*.d",
+                "*.make",
+                "*.makefile",
+                "*.mk",
+                "*.mkfile",
+                "*.dsp",
+                "BSDmakefile",
+                "GNUmakefile",
+                "Kbuild",
+                "Makefile",
+                "MAKEFILE",
+                "Makefile.am",
+                "Makefile.boot",
+                "Makefile.frag",
+                "Makefile*.in",
+                "Makefile.inc",
+                "Makefile.wat",
+                "makefile",
+                "makefile.sco",
+                "mkfile",
+            ],
+            #[cfg(feature = "lang-markdown")]
+            Language::Markdown => &["*.md", ".MD", "README", "LICENSE"],
+            #[cfg(feature = "lang-markdown-inline")]
+            Language::MarkdownInline => &[],
+            #[cfg(feature = "lang-nix")]
+            Language::Nix => &["*.nix"],
+            #[cfg(feature = "lang-nushell")]
+            Language::Nushell => &["*.nu"],
+            #[cfg(feature = "lang-objc")]
+            Language::ObjC => &["*.m", "*.objc"],
+            #[cfg(feature = "lang-ocaml")]
+            Language::OCaml => &["*.ml"],
+            #[cfg(feature = "lang-ocaml")]
+            Language::OCamlInterface => &["*.mli"],
+            #[cfg(feature = "lang-perl")]
+            Language::Perl => &["*.pm", "*.pl", "*.t"],
+            #[cfg(feature = "lang-php")]
+            Language::Php => &[
+                "*.php", "*.phtml", "*.php3", "*.php4", "*.php5", "*.php7", "*.phps",
+            ],
+            #[cfg(feature = "lang-powershell")]
+            Language::PowerShell => &["*.ps1", "*.psm1"],
+            #[cfg(feature = "lang-protobuf")]
+            Language::ProtoBuf => &["*.proto", "*.protobuf", "*.proto2", "*.proto3"],
+            Language::PlainText => &[],
+            #[cfg(feature = "lang-python")]
+            Language::Python => &["*.py", "*.py3", "*.pyi", "*.bzl", "TARGETS", "BUCK", "DEPS"],
+            #[cfg(feature = "lang-r")]
+            Language::R => &["*.R", "*.r", "*.rd", "*.rsx", ".Rprofile", "expr-dist"],
+            #[cfg(feature = "lang-regex")]
+            Language::Regex => &["*.regex"],
+            #[cfg(feature = "lang-ruby")]
+            Language::Ruby => &[
+                "*.rb",
+                "*.builder",
+                "*.spec",
+                "*.rake",
+                "Gemfile",
+                "Rakefile",
+            ],
+            #[cfg(feature = "lang-rust")]
+            Language::Rust => &["*.rs"],
+            #[cfg(feature = "lang-scala")]
+            Language::Scala => &["*.scala", "*.sbt", "*.sc"],
+            #[cfg(feature = "lang-scss")]
+            Language::SCSS => &["*.scss"],
+            #[cfg(feature = "lang-sql")]
+            Language::SQL => &["*.sql", "*.pgsql"],
+            #[cfg(feature = "lang-surface")]
+            Language::Surface => &["*.surface", "*.sface"],
+            #[cfg(feature = "lang-svelte")]
+            Language::Svelte => &["*.svelte"],
+            #[cfg(feature = "lang-swift")]
+            Language::Swift => &["*.swift"],
+            #[cfg(feature = "lang-toml")]
+            Language::Toml => &[
+                "*.toml",
+                "Cargo.lock",
+                "Gopkg.lock",
+                "Pipfile",
+                "pdm.lock",
+                "poetry.lock",
+                "uv.lock",
+            ],
+            #[cfg(feature = "lang-typescript")]
+            Language::TypeScript => &["*.ts"],
+            #[cfg(feature = "lang-tsx")]
+            Language::Tsx => &["*.tsx"],
+            #[cfg(feature = "lang-typst")]
+            Language::Typst => &["*.typ", "*.typst"],
+            #[cfg(feature = "lang-vim")]
+            Language::Vim => &["*.vim", "*.viml"],
+            #[cfg(feature = "lang-vue")]
+            Language::Vue => &["*.vue"],
+            #[cfg(feature = "lang-wat")]
+            Language::Wat => &["*.wat"],
+            #[cfg(feature = "lang-xml")]
+            Language::XML => &[
+                "*.ant",
+                "*.csproj",
+                // Following GitHub, treat MJML as XML.
+                // https://documentation.mjml.io/
+                "*.mjml",
+                "*.plist",
+                "*.resx",
+                "*.svg",
+                "*.ui",
+                "*.vbproj",
+                "*.xaml",
+                "*.xml",
+                "*.xsd",
+                "*.xsl",
+                "*.xslt",
+                "*.zcml",
+                "*.rng",
+                "App.config",
+                "nuget.config",
+                "packages.config",
+                ".classpath",
+                ".cproject",
+                ".project",
+            ],
+            #[cfg(feature = "lang-yaml")]
+            Language::YAML => &["*.yaml", "*.yml"],
+            #[cfg(feature = "lang-zig")]
+            Language::Zig => &["*.zig"],
+        };
+
+        glob_strs
+            .iter()
+            .map(|name| glob::Pattern::new(name).expect("failed to guess language by path"))
+            .collect()
+    }
+
+    /// Try to guess the language based on an Emacs mode comment at the
+    /// beginning of the file.
+    ///
+    /// <https://www.gnu.org/software/emacs/manual/html_node/emacs/Choosing-Modes.html>
+    /// <https://www.gnu.org/software/emacs/manual/html_node/emacs/Specifying-File-Variables.html>
+    fn from_emacs_mode_header(src: &str) -> Option<Language> {
+        static MODE_RE: LazyLock<Regex> =
+            LazyLock::new(|| Regex::new(r"-\*-.*mode:([^;]+?);.*-\*-").unwrap());
+        static SHORTHAND_RE: LazyLock<Regex> =
+            LazyLock::new(|| Regex::new(r"-\*-(.+)-\*-").unwrap());
+
+        // Emacs allows the mode header to occur on the second line if the
+        // first line is a shebang.
+        for line in split_on_newlines(src).take(2) {
+            let mode_name: String = match (MODE_RE.captures(line), SHORTHAND_RE.captures(line)) {
+                (Some(cap), _) | (_, Some(cap)) => cap[1].into(),
+                _ => "".into(),
+            };
+            let lang = match mode_name.to_ascii_lowercase().trim() {
+                #[cfg(feature = "lang-c")]
+                "c" => Some(Language::C),
+                #[cfg(feature = "lang-clojure")]
+                "clojure" => Some(Language::Clojure),
+                #[cfg(feature = "lang-csharp")]
+                "csharp" => Some(Language::CSharp),
+                #[cfg(feature = "lang-csv")]
+                "csv" => Some(Language::CSV),
+                #[cfg(feature = "lang-css")]
+                "css" => Some(Language::CSS),
+                #[cfg(feature = "lang-cpp")]
+                "c++" => Some(Language::CPlusPlus),
+                #[cfg(feature = "lang-elixir")]
+                "elixir" => Some(Language::Elixir),
+                #[cfg(feature = "lang-elm")]
+                "elm" => Some(Language::Elm),
+                #[cfg(feature = "lang-fsharp")]
+                "fsharp" => Some(Language::FSharp),
+                #[cfg(feature = "lang-gleam")]
+                "gleam" => Some(Language::Gleam),
+                #[cfg(feature = "lang-go")]
+                "go" => Some(Language::Go),
+                #[cfg(feature = "lang-haskell")]
+                "haskell" => Some(Language::Haskell),
+                #[cfg(feature = "lang-hcl")]
+                "hcl" => Some(Language::HCL),
+                #[cfg(feature = "lang-html")]
+                "html" => Some(Language::HTML),
+                #[cfg(feature = "lang-java")]
+                "java" => Some(Language::Java),
+                #[cfg(feature = "lang-javascript")]
+                "js" | "js2" => Some(Language::JavaScript),
+                #[cfg(feature = "lang-commonlisp")]
+                "lisp" => Some(Language::CommonLisp),
+                #[cfg(feature = "lang-nix")]
+                "nix" => Some(Language::Nix),
+                #[cfg(feature = "lang-xml")]
+                "nxml" => Some(Language::XML),
+                #[cfg(feature = "lang-objc")]
+                "objc" => Some(Language::ObjC),
+                #[cfg(feature = "lang-perl")]
+                "perl" => Some(Language::Perl),
+                #[cfg(feature = "lang-python")]
+                "python" => Some(Language::Python),
+                #[cfg(feature = "lang-ruby")]
+                "ruby" => Some(Language::Ruby),
+                #[cfg(feature = "lang-rust")]
+                "rust" => Some(Language::Rust),
+                #[cfg(feature = "lang-scala")]
+                "scala" => Some(Language::Scala),
+                #[cfg(feature = "lang-scss")]
+                "scss" => Some(Language::SCSS),
+                #[cfg(feature = "lang-bash")]
+                "sh" => Some(Language::Bash),
+                #[cfg(feature = "lang-sql")]
+                "sql" => Some(Language::SQL),
+                #[cfg(feature = "lang-surface")]
+                "surface" => Some(Language::Surface),
+                #[cfg(feature = "lang-swift")]
+                "swift" => Some(Language::Swift),
+                #[cfg(feature = "lang-toml")]
+                "toml" => Some(Language::Toml),
+                #[cfg(feature = "lang-typescript")]
+                "typescript" => Some(Language::TypeScript),
+                #[cfg(feature = "lang-tsx")]
+                "tsx" => Some(Language::Tsx),
+                #[cfg(feature = "lang-ocaml")]
+                "tuareg" => Some(Language::OCaml),
+                // "typescript" => Some(Language::TypeScript),
+                #[cfg(feature = "lang-yaml")]
+                "yaml" => Some(Language::YAML),
+                #[cfg(feature = "lang-zig")]
+                "zig" => Some(Language::Zig),
+                _ => None,
+            };
+            if lang.is_some() {
+                return lang;
+            }
+        }
+
+        None
+    }
+
+    fn from_shebang(src: &str) -> Option<Language> {
+        static RE: LazyLock<Regex> =
+            LazyLock::new(|| Regex::new(r"#! *(?:/usr/bin/env )?([^ ]+)").unwrap());
+
+        if let Some(first_line) = split_on_newlines(src).next() {
+            if let Some(cap) = RE.captures(first_line) {
+                let interpreter_path = Path::new(&cap[1]);
+                if let Some(name) = interpreter_path.file_name() {
+                    match name.to_string_lossy().as_ref() {
+                        #[cfg(feature = "lang-typescript")]
+                        "deno" | "ts-node" => return Some(Language::TypeScript),
+                        #[cfg(feature = "lang-ocaml")]
+                        "ocaml" | "ocamlrun" | "ocamlscript" => return Some(Language::OCaml),
+                        #[cfg(feature = "lang-commonlisp")]
+                        "lisp" | "sbc" | "ccl" | "clisp" | "ecl" => {
+                            return Some(Language::CommonLisp);
+                        }
+                        #[cfg(feature = "lang-haskell")]
+                        "runghc" | "runhaskell" | "runhugs" => return Some(Language::Haskell),
+                        #[cfg(feature = "lang-bash")]
+                        "ash" | "bash" | "dash" | "ksh" | "mksh" | "pdksh" | "rc" | "sh"
+                        | "zsh" => return Some(Language::Bash),
+                        #[cfg(feature = "lang-elixir")]
+                        "elixir" => return Some(Language::Elixir),
+                        #[cfg(feature = "lang-r")]
+                        "Rscript" => return Some(Language::R),
+                        #[cfg(feature = "lang-python")]
+                        "python" | "python2" | "python3" => return Some(Language::Python),
+                        #[cfg(feature = "lang-perl")]
+                        "perl" => return Some(Language::Perl),
+                        #[cfg(feature = "lang-ruby")]
+                        "ruby" | "macruby" | "rake" | "jruby" | "rbx" => {
+                            return Some(Language::Ruby);
+                        }
+                        #[cfg(feature = "lang-nushell")]
+                        "nu" => return Some(Language::Nushell),
+                        #[cfg(feature = "lang-swift")]
+                        "swift" => return Some(Language::Swift),
+                        #[cfg(feature = "lang-c")]
+                        "tcc" => return Some(Language::C),
+                        _ => {}
+                    }
+                }
+            }
+        }
+
+        None
+    }
+
+    /// Use a heuristic to determine if a '.h' file looks like Objective-C.
+    /// We look for a line starting with '#import', '@interface' or '@protocol'
+    /// near the top of the file.  These keywords are not valid C or C++, so this
+    /// should not produce false positives.
+    fn looks_like_objc(path: &Path, src: &str) -> bool {
+        if let Some(extension) = path.extension() {
+            if extension == "h" {
+                return split_on_newlines(src).take(100).any(|line| {
+                    ["#import", "@interface", "@protocol"]
+                        .iter()
+                        .any(|keyword| line.starts_with(keyword))
+                });
+            }
+        }
+
+        false
+    }
+
+    fn looks_like_xml(src: &str) -> bool {
+        src.to_lowercase().starts_with("<?xml")
+    }
+
+    fn looks_like_html(src: &str) -> bool {
+        src.to_lowercase().starts_with("<!doctype html")
+    }
+
+    pub fn name(&self) -> &'static str {
+        match self {
+            #[cfg(feature = "lang-angular")]
+            Language::Angular => "Angular",
+            #[cfg(feature = "lang-asm")]
+            Language::Assembly => "Assembly",
+            #[cfg(feature = "lang-astro")]
+            Language::Astro => "Astro",
+            #[cfg(feature = "lang-bash")]
+            Language::Bash => "Bash",
+            #[cfg(feature = "lang-c")]
+            Language::C => "C",
+            #[cfg(feature = "lang-caddy")]
+            Language::Caddy => "Caddy",
+            #[cfg(feature = "lang-clojure")]
+            Language::Clojure => "Clojure",
+            #[cfg(feature = "lang-comment")]
+            Language::Comment => "Comment",
+            #[cfg(feature = "lang-commonlisp")]
+            Language::CommonLisp => "Common Lisp",
+            #[cfg(feature = "lang-cmake")]
+            Language::CMake => "CMake",
+            #[cfg(feature = "lang-csharp")]
+            Language::CSharp => "C#",
+            #[cfg(feature = "lang-csv")]
+            Language::CSV => "CSV",
+            #[cfg(feature = "lang-cpp")]
+            Language::CPlusPlus => "C++",
+            #[cfg(feature = "lang-css")]
+            Language::CSS => "CSS",
+            #[cfg(feature = "lang-dart")]
+            Language::Dart => "Dart",
+            Language::Diff => "Diff",
+            #[cfg(feature = "lang-dockerfile")]
+            Language::Dockerfile => "Dockerfile",
+            #[cfg(feature = "lang-eex")]
+            Language::EEx => "Eex",
+            #[cfg(feature = "lang-ejs")]
+            Language::EJS => "EJS",
+            #[cfg(feature = "lang-erb")]
+            Language::ERB => "ERB",
+            #[cfg(feature = "lang-elixir")]
+            Language::Elixir => "Elixir",
+            #[cfg(feature = "lang-elm")]
+            Language::Elm => "Elm",
+            #[cfg(feature = "lang-erlang")]
+            Language::Erlang => "Erlang",
+            #[cfg(feature = "lang-fish")]
+            Language::Fish => "Fish",
+            #[cfg(feature = "lang-fsharp")]
+            Language::FSharp => "F#",
+            #[cfg(feature = "lang-gleam")]
+            Language::Gleam => "Gleam",
+            #[cfg(feature = "lang-glimmer")]
+            Language::Glimmer => "Glimmer",
+            #[cfg(feature = "lang-go")]
+            Language::Go => "Go",
+            #[cfg(feature = "lang-graphql")]
+            Language::GraphQL => "GraphQL",
+            #[cfg(feature = "lang-haskell")]
+            Language::Haskell => "Haskell",
+            #[cfg(feature = "lang-hcl")]
+            Language::HCL => "HCL",
+            #[cfg(feature = "lang-heex")]
+            Language::HEEx => "HEEx",
+            #[cfg(feature = "lang-html")]
+            Language::HTML => "HTML",
+            #[cfg(feature = "lang-iex")]
+            Language::IEx => "IEx",
+            #[cfg(feature = "lang-java")]
+            Language::Java => "Java",
+            #[cfg(feature = "lang-javascript")]
+            Language::JavaScript => "JavaScript",
+            #[cfg(feature = "lang-json")]
+            Language::JSON => "JSON",
+            #[cfg(feature = "lang-kotlin")]
+            Language::Kotlin => "Kotlin",
+            #[cfg(feature = "lang-latex")]
+            Language::LaTeX => "LaTeX",
+            #[cfg(feature = "lang-liquid")]
+            Language::Liquid => "Liquid",
+            #[cfg(feature = "lang-llvm")]
+            Language::Llvm => "LLVM",
+            #[cfg(feature = "lang-lua")]
+            Language::Lua => "Lua",
+            #[cfg(feature = "lang-objc")]
+            Language::ObjC => "Objective-C",
+            #[cfg(feature = "lang-ocaml")]
+            Language::OCaml => "OCaml",
+            #[cfg(feature = "lang-ocaml")]
+            Language::OCamlInterface => "OCaml Interface",
+            #[cfg(feature = "lang-make")]
+            Language::Make => "Make",
+            #[cfg(feature = "lang-markdown")]
+            Language::Markdown => "Markdown",
+            #[cfg(feature = "lang-markdown-inline")]
+            Language::MarkdownInline => "Markdown Inline",
+            #[cfg(feature = "lang-nix")]
+            Language::Nix => "Nix",
+            #[cfg(feature = "lang-nushell")]
+            Language::Nushell => "Nushell",
+            #[cfg(feature = "lang-perl")]
+            Language::Perl => "Perl",
+            #[cfg(feature = "lang-php")]
+            Language::Php => "PHP",
+            Language::PlainText => "Plain Text",
+            #[cfg(feature = "lang-powershell")]
+            Language::PowerShell => "PowerShell",
+            #[cfg(feature = "lang-protobuf")]
+            Language::ProtoBuf => "Protocol Buffer",
+            #[cfg(feature = "lang-python")]
+            Language::Python => "Python",
+            #[cfg(feature = "lang-r")]
+            Language::R => "R",
+            #[cfg(feature = "lang-regex")]
+            Language::Regex => "Regex",
+            #[cfg(feature = "lang-ruby")]
+            Language::Ruby => "Ruby",
+            #[cfg(feature = "lang-rust")]
+            Language::Rust => "Rust",
+            #[cfg(feature = "lang-scala")]
+            Language::Scala => "Scala",
+            #[cfg(feature = "lang-scss")]
+            Language::SCSS => "SCSS",
+            #[cfg(feature = "lang-sql")]
+            Language::SQL => "SQL",
+            #[cfg(feature = "lang-surface")]
+            Language::Surface => "Surface",
+            #[cfg(feature = "lang-svelte")]
+            Language::Svelte => "Svelte",
+            #[cfg(feature = "lang-swift")]
+            Language::Swift => "Swift",
+            #[cfg(feature = "lang-toml")]
+            Language::Toml => "TOML",
+            #[cfg(feature = "lang-typescript")]
+            Language::TypeScript => "TypeScript",
+            #[cfg(feature = "lang-tsx")]
+            Language::Tsx => "TSX",
+            #[cfg(feature = "lang-typst")]
+            Language::Typst => "Typst",
+            #[cfg(feature = "lang-vim")]
+            Language::Vim => "Vim",
+            #[cfg(feature = "lang-vue")]
+            Language::Vue => "Vue",
+            #[cfg(feature = "lang-wat")]
+            Language::Wat => "WAT",
+            #[cfg(feature = "lang-xml")]
+            Language::XML => "XML",
+            #[cfg(feature = "lang-yaml")]
+            Language::YAML => "YAML",
+            #[cfg(feature = "lang-zig")]
+            Language::Zig => "Zig",
+        }
+    }
+
+    pub fn id_name(&self) -> String {
+        self.name().to_ascii_lowercase().replace(" ", "")
+    }
+
+    pub fn scope_name(&self) -> &str {
+        &self.config().language_name
+    }
+}
+
+/// Error returned when a language cannot be determined from input.
+///
+/// This error occurs when using [`std::str::FromStr`] or the `.parse()` method
+/// with an unrecognized language name, file extension, or file path.
+///
+/// # Example
+///
+/// ```rust
+/// use lumis::languages::Language;
+///
+/// let result: Result<Language, _> = "unknown_lang".parse();
+/// assert!(result.is_err());
+/// ```
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct LanguageParseError(String);
+
+impl std::fmt::Display for LanguageParseError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "unknown language or file type: {}", self.0)
+    }
+}
+
+impl std::error::Error for LanguageParseError {}
+
+impl std::str::FromStr for Language {
+    type Err = LanguageParseError;
+
+    /// Parse a language from a string.
+    ///
+    /// The input can be:
+    /// - A language name (e.g., "rust", "python", "javascript")
+    /// - A file extension (e.g., "rs", "py", "js")
+    /// - A file path (e.g., "src/main.rs", "script.py")
+    ///
+    /// Returns an error if the language cannot be determined from the input.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use lumis::languages::Language;
+    /// use std::str::FromStr;
+    ///
+    /// // From language name
+    /// let lang = Language::from_str("rust").unwrap();
+    /// assert_eq!(lang, Language::Rust);
+    ///
+    /// // Using .parse()
+    /// let lang: Language = "python".parse().unwrap();
+    /// assert_eq!(lang, Language::Python);
+    ///
+    /// // From extension
+    /// let lang: Language = "js".parse().unwrap();
+    /// assert_eq!(lang, Language::JavaScript);
+    ///
+    /// // From file path
+    /// let lang: Language = "src/main.rs".parse().unwrap();
+    /// assert_eq!(lang, Language::Rust);
+    ///
+    /// // Empty string defaults to PlainText
+    /// let lang: Language = "".parse().unwrap();
+    /// assert_eq!(lang, Language::PlainText);
+    ///
+    /// // Unknown language returns error
+    /// assert!(Language::from_str("unknown").is_err());
+    /// assert!("unknown".parse::<Language>().is_err());
+    /// ```
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.is_empty() {
+            return Ok(Language::PlainText);
+        }
+
+        let s_lower = s.to_ascii_lowercase();
+
+        let exact = match s_lower.as_str() {
+            #[cfg(feature = "lang-angular")]
+            "angular" => Some(Language::Angular),
+            #[cfg(feature = "lang-asm")]
+            "asm" | "assembly" => Some(Language::Assembly),
+            #[cfg(feature = "lang-astro")]
+            "astro" => Some(Language::Astro),
+            #[cfg(feature = "lang-bash")]
+            "bash" => Some(Language::Bash),
+            #[cfg(feature = "lang-c")]
+            "c" => Some(Language::C),
+            #[cfg(feature = "lang-caddy")]
+            "caddy" => Some(Language::Caddy),
+            #[cfg(feature = "lang-clojure")]
+            "clojure" => Some(Language::Clojure),
+            #[cfg(feature = "lang-comment")]
+            "comment" => Some(Language::Comment),
+            #[cfg(feature = "lang-commonlisp")]
+            "commonlisp" => Some(Language::CommonLisp),
+            #[cfg(feature = "lang-cpp")]
+            "c++" | "cpp" => Some(Language::CPlusPlus),
+            #[cfg(feature = "lang-cmake")]
+            "cmake" => Some(Language::CMake),
+            #[cfg(feature = "lang-csharp")]
+            "c#" | "csharp" => Some(Language::CSharp),
+            #[cfg(feature = "lang-csv")]
+            "csv" => Some(Language::CSV),
+            #[cfg(feature = "lang-css")]
+            "css" => Some(Language::CSS),
+            #[cfg(feature = "lang-dart")]
+            "dart" => Some(Language::Dart),
+            "diff" => Some(Language::Diff),
+            #[cfg(feature = "lang-dockerfile")]
+            "dockerfile" | "docker" => Some(Language::Dockerfile),
+            #[cfg(feature = "lang-eex")]
+            "eex" => Some(Language::EEx),
+            #[cfg(feature = "lang-ejs")]
+            "ejs" => Some(Language::EJS),
+            #[cfg(feature = "lang-erb")]
+            "erb" => Some(Language::ERB),
+            #[cfg(feature = "lang-elixir")]
+            "elixir" => Some(Language::Elixir),
+            #[cfg(feature = "lang-elm")]
+            "elm" => Some(Language::Elm),
+            #[cfg(feature = "lang-erlang")]
+            "erlang" => Some(Language::Erlang),
+            #[cfg(feature = "lang-fish")]
+            "fish" => Some(Language::Fish),
+            #[cfg(feature = "lang-fsharp")]
+            "f#" | "fsharp" => Some(Language::FSharp),
+            #[cfg(feature = "lang-gleam")]
+            "gleam" => Some(Language::Gleam),
+            #[cfg(feature = "lang-glimmer")]
+            "ember" | "glimmer" | "handlebars" => Some(Language::Glimmer),
+            #[cfg(feature = "lang-go")]
+            "go" => Some(Language::Go),
+            #[cfg(feature = "lang-graphql")]
+            "graphql" => Some(Language::GraphQL),
+            #[cfg(feature = "lang-haskell")]
+            "haskell" => Some(Language::Haskell),
+            #[cfg(feature = "lang-hcl")]
+            "hcl" | "terraform" => Some(Language::HCL),
+            #[cfg(feature = "lang-heex")]
+            "heex" => Some(Language::HEEx),
+            #[cfg(feature = "lang-html")]
+            "html" => Some(Language::HTML),
+            #[cfg(feature = "lang-iex")]
+            "iex" => Some(Language::IEx),
+            #[cfg(feature = "lang-java")]
+            "java" => Some(Language::Java),
+            #[cfg(feature = "lang-javascript")]
+            "jsx" | "javascript" => Some(Language::JavaScript),
+            #[cfg(feature = "lang-json")]
+            "json" => Some(Language::JSON),
+            #[cfg(feature = "lang-kotlin")]
+            "kotlin" => Some(Language::Kotlin),
+            #[cfg(feature = "lang-latex")]
+            "latex" => Some(Language::LaTeX),
+            #[cfg(feature = "lang-liquid")]
+            "liquid" => Some(Language::Liquid),
+            #[cfg(feature = "lang-llvm")]
+            "llvm" => Some(Language::Llvm),
+            #[cfg(feature = "lang-lua")]
+            "lua" => Some(Language::Lua),
+            #[cfg(feature = "lang-objc")]
+            "objc" | "objective-c" => Some(Language::ObjC),
+            #[cfg(feature = "lang-ocaml")]
+            "ocaml" => Some(Language::OCaml),
+            #[cfg(feature = "lang-ocaml")]
+            "ocaml_interface" => Some(Language::OCamlInterface),
+            #[cfg(feature = "lang-perl")]
+            "perl" => Some(Language::Perl),
+            #[cfg(feature = "lang-make")]
+            "make" => Some(Language::Make),
+            #[cfg(feature = "lang-markdown")]
+            "markdown" => Some(Language::Markdown),
+            #[cfg(feature = "lang-markdown-inline")]
+            "markdown_inline" => Some(Language::MarkdownInline),
+            #[cfg(feature = "lang-nix")]
+            "nix" => Some(Language::Nix),
+            #[cfg(feature = "lang-nushell")]
+            "nushell" | "nu" => Some(Language::Nushell),
+            #[cfg(feature = "lang-php")]
+            "php" => Some(Language::Php),
+            #[cfg(feature = "lang-powershell")]
+            "powershell" => Some(Language::PowerShell),
+            #[cfg(feature = "lang-protobuf")]
+            "protobuf" => Some(Language::ProtoBuf),
+            #[cfg(feature = "lang-python")]
+            "python" => Some(Language::Python),
+            #[cfg(feature = "lang-r")]
+            "r" => Some(Language::R),
+            #[cfg(feature = "lang-regex")]
+            "regex" => Some(Language::Regex),
+            #[cfg(feature = "lang-ruby")]
+            "ruby" => Some(Language::Ruby),
+            #[cfg(feature = "lang-rust")]
+            "rust" => Some(Language::Rust),
+            #[cfg(feature = "lang-scala")]
+            "scala" => Some(Language::Scala),
+            #[cfg(feature = "lang-scss")]
+            "scss" => Some(Language::SCSS),
+            #[cfg(feature = "lang-sql")]
+            "sql" => Some(Language::SQL),
+            #[cfg(feature = "lang-surface")]
+            "surface" => Some(Language::Surface),
+            #[cfg(feature = "lang-svelte")]
+            "svelte" => Some(Language::Svelte),
+            #[cfg(feature = "lang-swift")]
+            "swift" => Some(Language::Swift),
+            #[cfg(feature = "lang-toml")]
+            "toml" => Some(Language::Toml),
+            #[cfg(feature = "lang-typescript")]
+            "typescript" => Some(Language::TypeScript),
+            #[cfg(feature = "lang-tsx")]
+            "tsx" => Some(Language::Tsx),
+            #[cfg(feature = "lang-typst")]
+            "typst" => Some(Language::Typst),
+            #[cfg(feature = "lang-vim")]
+            "vim" | "viml" | "vimscript" => Some(Language::Vim),
+            #[cfg(feature = "lang-vue")]
+            "vue" => Some(Language::Vue),
+            #[cfg(feature = "lang-wat")]
+            "wat" | "wasm" | "webassembly" => Some(Language::Wat),
+            #[cfg(feature = "lang-xml")]
+            "xml" => Some(Language::XML),
+            #[cfg(feature = "lang-yaml")]
+            "yaml" => Some(Language::YAML),
+            #[cfg(feature = "lang-zig")]
+            "zig" => Some(Language::Zig),
+            _ => None,
+        };
+
+        if let Some(lang) = exact {
+            return Ok(lang);
+        }
+
+        let path = Path::new(&s_lower);
+
+        if let Some(lang) = Self::from_glob(path) {
+            return Ok(lang);
+        }
+
+        if let Some(lang) = Self::from_extension(&s_lower) {
+            return Ok(lang);
+        }
+
+        Err(LanguageParseError(s.to_string()))
+    }
+}
+
+impl Language {
+    /// Guess the language based on an optional language hint and source content.
+    ///
+    /// # Arguments
+    ///
+    /// * `language` - Optional language hint. Can be:
+    ///   - `None`: Try to auto-detect language from source content
+    ///   - `Some(s)`: Language name, file extension, or file path
+    /// * `src` - The source code content to analyze
+    ///
+    /// # Detection Strategy
+    ///
+    /// When `language` is `Some(...)`:
+    /// 1. Try to parse as language name/extension/path via `FromStr`
+    /// 2. If parsing succeeds, return that language
+    /// 3. If parsing fails, fall through to content-based detection
+    ///
+    /// When `language` is `None` or parsing fails:
+    /// 1. Check for Emacs mode header (`// -*- mode: rust -*-`)
+    /// 2. Check for shebang (`#!/usr/bin/env python`)
+    /// 3. Apply content heuristics (HTML doctype, XML declaration, etc.)
+    /// 4. Default to `PlainText` if nothing matches
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use lumis::languages::Language;
+    ///
+    /// // Explicit language
+    /// let lang = Language::guess(Some("rust"), "");
+    /// assert_eq!(lang, Language::Rust);
+    ///
+    /// // Auto-detect from shebang
+    /// let lang = Language::guess(None, "#!/usr/bin/env python3\nprint('hi')");
+    /// assert_eq!(lang, Language::Python);
+    ///
+    /// // File path hint
+    /// let lang = Language::guess(Some("src/main.rs"), "");
+    /// assert_eq!(lang, Language::Rust);
+    /// ```
+    pub fn guess(language: Option<&str>, src: &str) -> Self {
+        // If a language hint is provided, try to parse it
+        if let Some(input) = language {
+            if let Ok(lang) = input.parse() {
+                return lang;
+            }
+            // If parsing fails, continue to content-based detection
+        }
+
+        // Auto-detection from content
+        if let Some(lang) = Self::from_emacs_mode_header(src) {
+            return lang;
+        }
+
+        if let Some(lang) = Self::from_shebang(src) {
+            return lang;
+        }
+
+        #[cfg(feature = "lang-html")]
+        if Self::looks_like_html(src) {
+            return Language::HTML;
+        }
+
+        #[cfg(feature = "lang-xml")]
+        if Self::looks_like_xml(src) {
+            return Language::XML;
+        }
+
+        #[cfg(feature = "lang-objc")]
+        if Self::looks_like_objc(Path::new(""), src) {
+            return Language::ObjC;
+        }
+
+        Language::PlainText
+    }
+
+    fn from_glob(path: &Path) -> Option<Self> {
+        match path.file_name() {
+            Some(name) => {
+                let name = name.to_string_lossy().into_owned();
+                for language in Language::iter() {
+                    for glob in Language::language_globs(language) {
+                        if glob.matches(&name) {
+                            return Some(language);
+                        }
+                    }
+                }
+
+                None
+            }
+            None => None,
+        }
+    }
+
+    fn from_extension(token: &str) -> Option<Self> {
+        let token_pattern = format!("*.{token}");
+
+        for language in Language::iter() {
+            for glob in Language::language_globs(language) {
+                if glob.matches(&token_pattern) {
+                    return Some(language);
+                }
+            }
+        }
+        None
+    }
+
+    // TODO: https://github.com/nvim-treesitter/nvim-treesitter/tree/master/queries/embedded_template
+    pub fn language_globs(language: Language) -> Vec<glob::Pattern> {
+        let glob_strs: &'static [&'static str] = match language {
+            #[cfg(feature = "lang-angular")]
+            Language::Angular => &["*.angular", "component.html"],
+            #[cfg(feature = "lang-asm")]
+            Language::Assembly => &["*.s", "*.asm", "*.assembly"],
+            #[cfg(feature = "lang-astro")]
+            Language::Astro => &["*.astro"],
+            #[cfg(feature = "lang-bash")]
+            Language::Bash => &[
+                "*.bash",
+                "*.bats",
+                "*.cgi",
+                "*.command",
+                "*.env",
+                "*.fcgi",
+                "*.ksh",
+                "*.sh",
+                "*.sh.in",
+                "*.tmux",
+                "*.tool",
+                "*.zsh",
+                ".bash_aliases",
+                ".bash_history",
+                ".bash_logout",
+                ".bash_profile",
+                ".bashrc",
+                ".cshrc",
+                ".env",
+                ".env.example",
+                ".flaskenv",
+                ".kshrc",
+                ".login",
+                ".profile",
+                ".zlogin",
+                ".zlogout",
+                ".zprofile",
+                ".zshenv",
+                ".zshrc",
+                "9fs",
+                "PKGBUILD",
+                "bash_aliases",
+                "bash_logout",
+                "bash_profile",
+                "bashrc",
+                "cshrc",
+                "ebuild",
+                "eclass",
+                "gradlew",
+                "kshrc",
+                "login",
+                "man",
+                "profile",
+                "zlogin",
+                "zlogout",
+                "zprofile",
+                "zshenv",
+                "zshrc",
+            ],
+            #[cfg(feature = "lang-c")]
+            Language::C => &["*.c"],
+            #[cfg(feature = "lang-caddy")]
+            Language::Caddy => &["Caddyfile", "caddyfile"],
+            #[cfg(feature = "lang-clojure")]
+            Language::Clojure => &[
+                "*.bb", "*.boot", "*.clj", "*.cljc", "*.clje", "*.cljs", "*.cljx", "*.edn",
+                "*.joke", "*.joker",
+            ],
+            #[cfg(feature = "lang-comment")]
+            Language::Comment => &[],
+            #[cfg(feature = "lang-commonlisp")]
+            Language::CommonLisp => &["*.lisp", "*.lsp", "*.asd"],
+            #[cfg(feature = "lang-cmake")]
+            Language::CMake => &["*.cmake", "*.cmake.in", "CMakeLists.txt"],
+            #[cfg(feature = "lang-csharp")]
+            Language::CSharp => &["*.cs"],
+            #[cfg(feature = "lang-csv")]
+            Language::CSV => &["*.csv"],
+            #[cfg(feature = "lang-cpp")]
+            Language::CPlusPlus => &[
+                "*.cc", "*.cpp", "*.h", "*.hh", "*.hpp", "*.ino", "*.cxx", "*.cu", "*.hxx",
+            ],
+            #[cfg(feature = "lang-css")]
+            Language::CSS => &["*.css"],
+            #[cfg(feature = "lang-dart")]
+            Language::Dart => &["*.dart"],
+            Language::Diff => &["*.diff"],
+            #[cfg(feature = "lang-dockerfile")]
+            Language::Dockerfile => &[
+                "Dockerfile",
+                "dockerfile",
+                "docker",
+                "Containerfile",
+                "container",
+                "*.dockerfile",
+                "*.docker",
+                "*.container",
+            ],
+            #[cfg(feature = "lang-eex")]
+            Language::EEx => &["*.eex"],
+            #[cfg(feature = "lang-ejs")]
+            Language::EJS => &["*.ejs"],
+            #[cfg(feature = "lang-erb")]
+            Language::ERB => &["*.erb"],
+            #[cfg(feature = "lang-elixir")]
+            Language::Elixir => &["*.ex", "*.exs"],
+            #[cfg(feature = "lang-elm")]
+            Language::Elm => &["*.elm"],
+            #[cfg(feature = "lang-erlang")]
+            Language::Erlang => &[
+                "*.erl",
+                "*.app",
+                "*.app.src",
+                "*.es",
+                "*.escript",
+                "*.hrl",
+                "*.xrl",
+                "*.yrl",
+                "Emakefile",
+                "rebar.config",
+            ],
+            #[cfg(feature = "lang-fish")]
+            Language::Fish => &["*.fish"],
+            #[cfg(feature = "lang-fsharp")]
+            Language::FSharp => &["*.fs", "*.fsx", "*.fsi"],
+            #[cfg(feature = "lang-gleam")]
+            Language::Gleam => &["*.gleam"],
+            #[cfg(feature = "lang-glimmer")]
+            Language::Glimmer => &["*.hbs", "*.handlebars", "*.html.handlebars", "*.glimmer"],
+            #[cfg(feature = "lang-go")]
+            Language::Go => &["*.go"],
+            #[cfg(feature = "lang-graphql")]
+            Language::GraphQL => &[],
+            #[cfg(feature = "lang-haskell")]
+            Language::Haskell => &["*.hs", "*.hs-boot"],
+            #[cfg(feature = "lang-hcl")]
+            Language::HCL => &["*.hcl", "*.nomad", "*.tf", "*.tfvars", "*.workflow"],
+            #[cfg(feature = "lang-heex")]
+            Language::HEEx => &["*.heex", "*.neex"],
+            #[cfg(feature = "lang-html")]
+            Language::HTML => &["*.html", "*.htm", "*.xhtml"],
+            #[cfg(feature = "lang-iex")]
+            Language::IEx => &["*.iex"],
+            #[cfg(feature = "lang-java")]
+            Language::Java => &["*.java"],
+            #[cfg(feature = "lang-javascript")]
+            Language::JavaScript => &["*.cjs", "*.js", "*.mjs", "*.snap", "*.jsx"],
+            #[cfg(feature = "lang-json")]
+            Language::JSON => &[
+                "*.json",
+                "*.avsc",
+                "*.geojson",
+                "*.gltf",
+                "*.har",
+                "*.ice",
+                "*.JSON-tmLanguage",
+                "*.jsonl",
+                "*.mcmeta",
+                "*.tfstate",
+                "*.tfstate.backup",
+                "*.topojson",
+                "*.webapp",
+                "*.webmanifest",
+                ".arcconfig",
+                ".auto-changelog",
+                ".c8rc",
+                ".htmlhintrc",
+                ".imgbotconfig",
+                ".nycrc",
+                ".tern-config",
+                ".tern-project",
+                ".watchmanconfig",
+                "Pipfile.lock",
+                "composer.lock",
+                "mcmod.info",
+                "flake.lock",
+            ],
+            #[cfg(feature = "lang-kotlin")]
+            Language::Kotlin => &["*.kt", "*.ktm", "*.kts"],
+            #[cfg(feature = "lang-latex")]
+            Language::LaTeX => &["*.aux", "*.cls", "*.sty", "*.tex"],
+            #[cfg(feature = "lang-liquid")]
+            Language::Liquid => &["*liquid"],
+            #[cfg(feature = "lang-llvm")]
+            Language::Llvm => &["*.llvm", "*.ll"],
+            #[cfg(feature = "lang-lua")]
+            Language::Lua => &["*.lua"],
+            #[cfg(feature = "lang-make")]
+            Language::Make => &[
+                "*.mak",
+                "*.d",
+                "*.make",
+                "*.makefile",
+                "*.mk",
+                "*.mkfile",
+                "*.dsp",
+                "BSDmakefile",
+                "GNUmakefile",
+                "Kbuild",
+                "Makefile",
+                "MAKEFILE",
+                "Makefile.am",
+                "Makefile.boot",
+                "Makefile.frag",
+                "Makefile*.in",
+                "Makefile.inc",
+                "Makefile.wat",
+                "makefile",
+                "makefile.sco",
+                "mkfile",
+            ],
+            #[cfg(feature = "lang-markdown")]
+            Language::Markdown => &["*.md", ".MD", "README", "LICENSE"],
+            #[cfg(feature = "lang-markdown-inline")]
+            Language::MarkdownInline => &[],
+            #[cfg(feature = "lang-nix")]
+            Language::Nix => &["*.nix"],
+            #[cfg(feature = "lang-nushell")]
+            Language::Nushell => &["*.nu"],
+            #[cfg(feature = "lang-objc")]
+            Language::ObjC => &["*.m", "*.objc"],
+            #[cfg(feature = "lang-ocaml")]
+            Language::OCaml => &["*.ml"],
+            #[cfg(feature = "lang-ocaml")]
+            Language::OCamlInterface => &["*.mli"],
+            #[cfg(feature = "lang-perl")]
+            Language::Perl => &["*.pm", "*.pl", "*.t"],
+            #[cfg(feature = "lang-php")]
+            Language::Php => &[
+                "*.php", "*.phtml", "*.php3", "*.php4", "*.php5", "*.php7", "*.phps",
+            ],
+            #[cfg(feature = "lang-powershell")]
+            Language::PowerShell => &["*.ps1", "*.psm1"],
+            #[cfg(feature = "lang-protobuf")]
+            Language::ProtoBuf => &["*.proto", "*.protobuf", "*.proto2", "*.proto3"],
+            Language::PlainText => &[],
+            #[cfg(feature = "lang-python")]
+            Language::Python => &["*.py", "*.py3", "*.pyi", "*.bzl", "TARGETS", "BUCK", "DEPS"],
+            #[cfg(feature = "lang-r")]
+            Language::R => &["*.R", "*.r", "*.rd", "*.rsx", ".Rprofile", "expr-dist"],
+            #[cfg(feature = "lang-regex")]
+            Language::Regex => &["*.regex"],
+            #[cfg(feature = "lang-ruby")]
+            Language::Ruby => &[
+                "*.rb",
+                "*.builder",
+                "*.spec",
+                "*.rake",
+                "Gemfile",
+                "Rakefile",
+            ],
+            #[cfg(feature = "lang-rust")]
+            Language::Rust => &["*.rs"],
+            #[cfg(feature = "lang-scala")]
+            Language::Scala => &["*.scala", "*.sbt", "*.sc"],
+            #[cfg(feature = "lang-scss")]
+            Language::SCSS => &["*.scss"],
+            #[cfg(feature = "lang-sql")]
+            Language::SQL => &["*.sql", "*.pgsql"],
+            #[cfg(feature = "lang-surface")]
+            Language::Surface => &["*.surface", "*.sface"],
+            #[cfg(feature = "lang-svelte")]
+            Language::Svelte => &["*.svelte"],
+            #[cfg(feature = "lang-swift")]
+            Language::Swift => &["*.swift"],
+            #[cfg(feature = "lang-toml")]
+            Language::Toml => &[
+                "*.toml",
+                "Cargo.lock",
+                "Gopkg.lock",
+                "Pipfile",
+                "pdm.lock",
+                "poetry.lock",
+                "uv.lock",
+            ],
+            #[cfg(feature = "lang-typescript")]
+            Language::TypeScript => &["*.ts"],
+            #[cfg(feature = "lang-tsx")]
+            Language::Tsx => &["*.tsx"],
+            #[cfg(feature = "lang-typst")]
+            Language::Typst => &["*.typ", "*.typst"],
+            #[cfg(feature = "lang-vim")]
+            Language::Vim => &["*.vim", "*.viml"],
+            #[cfg(feature = "lang-vue")]
+            Language::Vue => &["*.vue"],
+            #[cfg(feature = "lang-wat")]
+            Language::Wat => &["*.wat"],
+            #[cfg(feature = "lang-xml")]
+            Language::XML => &[
+                "*.ant",
+                "*.csproj",
+                // Following GitHub, treat MJML as XML.
+                // https://documentation.mjml.io/
+                "*.mjml",
+                "*.plist",
+                "*.resx",
+                "*.svg",
+                "*.ui",
+                "*.vbproj",
+                "*.xaml",
+                "*.xml",
+                "*.xsd",
+                "*.xsl",
+                "*.xslt",
+                "*.zcml",
+                "*.rng",
+                "App.config",
+                "nuget.config",
+                "packages.config",
+                ".classpath",
+                ".cproject",
+                ".project",
+            ],
+            #[cfg(feature = "lang-yaml")]
+            Language::YAML => &["*.yaml", "*.yml"],
+            #[cfg(feature = "lang-zig")]
+            Language::Zig => &["*.zig"],
+        };
+
+        glob_strs
+            .iter()
+            .map(|name| glob::Pattern::new(name).expect("failed to guess language by path"))
+            .collect()
+    }
+
+    /// Try to guess the language based on an Emacs mode comment at the
+    /// beginning of the file.
+    ///
+    /// <https://www.gnu.org/software/emacs/manual/html_node/emacs/Choosing-Modes.html>
+    /// <https://www.gnu.org/software/emacs/manual/html_node/emacs/Specifying-File-Variables.html>
+    fn from_emacs_mode_header(src: &str) -> Option<Language> {
+        static MODE_RE: LazyLock<Regex> =
+            LazyLock::new(|| Regex::new(r"-\*-.*mode:([^;]+?);.*-\*-").unwrap());
+        static SHORTHAND_RE: LazyLock<Regex> =
+            LazyLock::new(|| Regex::new(r"-\*-(.+)-\*-").unwrap());
+
+        // Emacs allows the mode header to occur on the second line if the
+        // first line is a shebang.
+        for line in split_on_newlines(src).take(2) {
+            let mode_name: String = match (MODE_RE.captures(line), SHORTHAND_RE.captures(line)) {
+                (Some(cap), _) | (_, Some(cap)) => cap[1].into(),
+                _ => "".into(),
+            };
+            let lang = match mode_name.to_ascii_lowercase().trim() {
+                #[cfg(feature = "lang-c")]
+                "c" => Some(Language::C),
+                #[cfg(feature = "lang-clojure")]
+                "clojure" => Some(Language::Clojure),
+                #[cfg(feature = "lang-csharp")]
+                "csharp" => Some(Language::CSharp),
+                #[cfg(feature = "lang-csv")]
+                "csv" => Some(Language::CSV),
+                #[cfg(feature = "lang-css")]
+                "css" => Some(Language::CSS),
+                #[cfg(feature = "lang-cpp")]
+                "c++" => Some(Language::CPlusPlus),
+                #[cfg(feature = "lang-elixir")]
+                "elixir" => Some(Language::Elixir),
+                #[cfg(feature = "lang-elm")]
+                "elm" => Some(Language::Elm),
+                #[cfg(feature = "lang-fsharp")]
+                "fsharp" => Some(Language::FSharp),
+                #[cfg(feature = "lang-gleam")]
+                "gleam" => Some(Language::Gleam),
+                #[cfg(feature = "lang-go")]
+                "go" => Some(Language::Go),
+                #[cfg(feature = "lang-haskell")]
+                "haskell" => Some(Language::Haskell),
+                #[cfg(feature = "lang-hcl")]
+                "hcl" => Some(Language::HCL),
+                #[cfg(feature = "lang-html")]
+                "html" => Some(Language::HTML),
+                #[cfg(feature = "lang-java")]
+                "java" => Some(Language::Java),
+                #[cfg(feature = "lang-javascript")]
+                "js" | "js2" => Some(Language::JavaScript),
+                #[cfg(feature = "lang-commonlisp")]
+                "lisp" => Some(Language::CommonLisp),
+                #[cfg(feature = "lang-nix")]
+                "nix" => Some(Language::Nix),
+                #[cfg(feature = "lang-xml")]
+                "nxml" => Some(Language::XML),
+                #[cfg(feature = "lang-objc")]
+                "objc" => Some(Language::ObjC),
+                #[cfg(feature = "lang-perl")]
+                "perl" => Some(Language::Perl),
+                #[cfg(feature = "lang-python")]
+                "python" => Some(Language::Python),
+                #[cfg(feature = "lang-ruby")]
+                "ruby" => Some(Language::Ruby),
+                #[cfg(feature = "lang-rust")]
+                "rust" => Some(Language::Rust),
+                #[cfg(feature = "lang-scala")]
+                "scala" => Some(Language::Scala),
+                #[cfg(feature = "lang-scss")]
+                "scss" => Some(Language::SCSS),
+                #[cfg(feature = "lang-bash")]
+                "sh" => Some(Language::Bash),
+                #[cfg(feature = "lang-sql")]
+                "sql" => Some(Language::SQL),
+                #[cfg(feature = "lang-surface")]
+                "surface" => Some(Language::Surface),
+                #[cfg(feature = "lang-swift")]
+                "swift" => Some(Language::Swift),
+                #[cfg(feature = "lang-toml")]
+                "toml" => Some(Language::Toml),
+                #[cfg(feature = "lang-typescript")]
+                "typescript" => Some(Language::TypeScript),
+                #[cfg(feature = "lang-tsx")]
+                "tsx" => Some(Language::Tsx),
+                #[cfg(feature = "lang-ocaml")]
+                "tuareg" => Some(Language::OCaml),
+                // "typescript" => Some(Language::TypeScript),
+                #[cfg(feature = "lang-yaml")]
+                "yaml" => Some(Language::YAML),
+                #[cfg(feature = "lang-zig")]
+                "zig" => Some(Language::Zig),
+                _ => None,
+            };
+            if lang.is_some() {
+                return lang;
+            }
+        }
+
+        None
+    }
+
+    fn from_shebang(src: &str) -> Option<Language> {
+        static RE: LazyLock<Regex> =
+            LazyLock::new(|| Regex::new(r"#! *(?:/usr/bin/env )?([^ ]+)").unwrap());
+
+        if let Some(first_line) = split_on_newlines(src).next() {
+            if let Some(cap) = RE.captures(first_line) {
+                let interpreter_path = Path::new(&cap[1]);
+                if let Some(name) = interpreter_path.file_name() {
+                    match name.to_string_lossy().as_ref() {
+                        #[cfg(feature = "lang-typescript")]
+                        "deno" | "ts-node" => return Some(Language::TypeScript),
+                        #[cfg(feature = "lang-ocaml")]
+                        "ocaml" | "ocamlrun" | "ocamlscript" => return Some(Language::OCaml),
+                        #[cfg(feature = "lang-commonlisp")]
+                        "lisp" | "sbc" | "ccl" | "clisp" | "ecl" => {
+                            return Some(Language::CommonLisp);
+                        }
+                        #[cfg(feature = "lang-haskell")]
+                        "runghc" | "runhaskell" | "runhugs" => return Some(Language::Haskell),
+                        #[cfg(feature = "lang-bash")]
+                        "ash" | "bash" | "dash" | "ksh" | "mksh" | "pdksh" | "rc" | "sh"
+                        | "zsh" => return Some(Language::Bash),
+                        #[cfg(feature = "lang-elixir")]
+                        "elixir" => return Some(Language::Elixir),
+                        #[cfg(feature = "lang-r")]
+                        "Rscript" => return Some(Language::R),
+                        #[cfg(feature = "lang-python")]
+                        "python" | "python2" | "python3" => return Some(Language::Python),
+                        #[cfg(feature = "lang-perl")]
+                        "perl" => return Some(Language::Perl),
+                        #[cfg(feature = "lang-ruby")]
+                        "ruby" | "macruby" | "rake" | "jruby" | "rbx" => {
+                            return Some(Language::Ruby);
+                        }
+                        #[cfg(feature = "lang-nushell")]
+                        "nu" => return Some(Language::Nushell),
+                        #[cfg(feature = "lang-swift")]
+                        "swift" => return Some(Language::Swift),
+                        #[cfg(feature = "lang-c")]
+                        "tcc" => return Some(Language::C),
+                        _ => {}
+                    }
+                }
+            }
+        }
+
+        None
+    }
+
+    /// Use a heuristic to determine if a '.h' file looks like Objective-C.
+    /// We look for a line starting with '#import', '@interface' or '@protocol'
+    /// near the top of the file.  These keywords are not valid C or C++, so this
+    /// should not produce false positives.
+    fn looks_like_objc(path: &Path, src: &str) -> bool {
+        if let Some(extension) = path.extension() {
+            if extension == "h" {
+                return split_on_newlines(src).take(100).any(|line| {
+                    ["#import", "@interface", "@protocol"]
+                        .iter()
+                        .any(|keyword| line.starts_with(keyword))
+                });
+            }
+        }
+
+        false
+    }
+
+    fn looks_like_xml(src: &str) -> bool {
+        src.to_lowercase().starts_with("<?xml")
+    }
+
+    fn looks_like_html(src: &str) -> bool {
+        src.to_lowercase().starts_with("<!doctype html")
+    }
+
+    pub fn name(&self) -> &'static str {
+        match self {
+            #[cfg(feature = "lang-angular")]
+            Language::Angular => "Angular",
+            #[cfg(feature = "lang-asm")]
+            Language::Assembly => "Assembly",
+            #[cfg(feature = "lang-astro")]
+            Language::Astro => "Astro",
+            #[cfg(feature = "lang-bash")]
+            Language::Bash => "Bash",
+            #[cfg(feature = "lang-c")]
+            Language::C => "C",
+            #[cfg(feature = "lang-caddy")]
+            Language::Caddy => "Caddy",
+            #[cfg(feature = "lang-clojure")]
+            Language::Clojure => "Clojure",
+            #[cfg(feature = "lang-comment")]
+            Language::Comment => "Comment",
+            #[cfg(feature = "lang-commonlisp")]
+            Language::CommonLisp => "Common Lisp",
+            #[cfg(feature = "lang-cmake")]
+            Language::CMake => "CMake",
+            #[cfg(feature = "lang-csharp")]
+            Language::CSharp => "C#",
+            #[cfg(feature = "lang-csv")]
+            Language::CSV => "CSV",
+            #[cfg(feature = "lang-cpp")]
+            Language::CPlusPlus => "C++",
+            #[cfg(feature = "lang-css")]
+            Language::CSS => "CSS",
+            #[cfg(feature = "lang-dart")]
+            Language::Dart => "Dart",
+            Language::Diff => "Diff",
+            #[cfg(feature = "lang-dockerfile")]
+            Language::Dockerfile => "Dockerfile",
+            #[cfg(feature = "lang-eex")]
+            Language::EEx => "Eex",
+            #[cfg(feature = "lang-ejs")]
+            Language::EJS => "EJS",
+            #[cfg(feature = "lang-erb")]
+            Language::ERB => "ERB",
+            #[cfg(feature = "lang-elixir")]
+            Language::Elixir => "Elixir",
+            #[cfg(feature = "lang-elm")]
+            Language::Elm => "Elm",
+            #[cfg(feature = "lang-erlang")]
+            Language::Erlang => "Erlang",
+            #[cfg(feature = "lang-fish")]
+            Language::Fish => "Fish",
+            #[cfg(feature = "lang-fsharp")]
+            Language::FSharp => "F#",
+            #[cfg(feature = "lang-gleam")]
+            Language::Gleam => "Gleam",
+            #[cfg(feature = "lang-glimmer")]
+            Language::Glimmer => "Glimmer",
+            #[cfg(feature = "lang-go")]
+            Language::Go => "Go",
+            #[cfg(feature = "lang-graphql")]
+            Language::GraphQL => "GraphQL",
+            #[cfg(feature = "lang-haskell")]
+            Language::Haskell => "Haskell",
+            #[cfg(feature = "lang-hcl")]
+            Language::HCL => "HCL",
+            #[cfg(feature = "lang-heex")]
+            Language::HEEx => "HEEx",
+            #[cfg(feature = "lang-html")]
+            Language::HTML => "HTML",
+            #[cfg(feature = "lang-iex")]
+            Language::IEx => "IEx",
+            #[cfg(feature = "lang-java")]
+            Language::Java => "Java",
+            #[cfg(feature = "lang-javascript")]
+            Language::JavaScript => "JavaScript",
+            #[cfg(feature = "lang-json")]
+            Language::JSON => "JSON",
+            #[cfg(feature = "lang-kotlin")]
+            Language::Kotlin => "Kotlin",
+            #[cfg(feature = "lang-latex")]
+            Language::LaTeX => "LaTeX",
+            #[cfg(feature = "lang-liquid")]
+            Language::Liquid => "Liquid",
+            #[cfg(feature = "lang-llvm")]
+            Language::Llvm => "LLVM",
+            #[cfg(feature = "lang-lua")]
+            Language::Lua => "Lua",
+            #[cfg(feature = "lang-objc")]
+            Language::ObjC => "Objective-C",
+            #[cfg(feature = "lang-ocaml")]
+            Language::OCaml => "OCaml",
+            #[cfg(feature = "lang-ocaml")]
+            Language::OCamlInterface => "OCaml Interface",
+            #[cfg(feature = "lang-make")]
+            Language::Make => "Make",
+            #[cfg(feature = "lang-markdown")]
+            Language::Markdown => "Markdown",
+            #[cfg(feature = "lang-markdown-inline")]
+            Language::MarkdownInline => "Markdown Inline",
+            #[cfg(feature = "lang-nix")]
+            Language::Nix => "Nix",
+            #[cfg(feature = "lang-nushell")]
+            Language::Nushell => "Nushell",
+            #[cfg(feature = "lang-perl")]
+            Language::Perl => "Perl",
+            #[cfg(feature = "lang-php")]
+            Language::Php => "PHP",
+            Language::PlainText => "Plain Text",
+            #[cfg(feature = "lang-powershell")]
+            Language::PowerShell => "PowerShell",
+            #[cfg(feature = "lang-protobuf")]
+            Language::ProtoBuf => "Protocol Buffer",
+            #[cfg(feature = "lang-python")]
+            Language::Python => "Python",
+            #[cfg(feature = "lang-r")]
+            Language::R => "R",
+            #[cfg(feature = "lang-regex")]
+            Language::Regex => "Regex",
+            #[cfg(feature = "lang-ruby")]
+            Language::Ruby => "Ruby",
+            #[cfg(feature = "lang-rust")]
+            Language::Rust => "Rust",
+            #[cfg(feature = "lang-scala")]
+            Language::Scala => "Scala",
+            #[cfg(feature = "lang-scss")]
+            Language::SCSS => "SCSS",
+            #[cfg(feature = "lang-sql")]
+            Language::SQL => "SQL",
+            #[cfg(feature = "lang-surface")]
+            Language::Surface => "Surface",
+            #[cfg(feature = "lang-svelte")]
+            Language::Svelte => "Svelte",
+            #[cfg(feature = "lang-swift")]
+            Language::Swift => "Swift",
+            #[cfg(feature = "lang-toml")]
+            Language::Toml => "TOML",
+            #[cfg(feature = "lang-typescript")]
+            Language::TypeScript => "TypeScript",
+            #[cfg(feature = "lang-tsx")]
+            Language::Tsx => "TSX",
+            #[cfg(feature = "lang-typst")]
+            Language::Typst => "Typst",
+            #[cfg(feature = "lang-vim")]
+            Language::Vim => "Vim",
+            #[cfg(feature = "lang-vue")]
+            Language::Vue => "Vue",
+            #[cfg(feature = "lang-wat")]
+            Language::Wat => "WAT",
+            #[cfg(feature = "lang-xml")]
+            Language::XML => "XML",
+            #[cfg(feature = "lang-yaml")]
+            Language::YAML => "YAML",
+            #[cfg(feature = "lang-zig")]
+            Language::Zig => "Zig",
+        }
+    }
+
+    pub fn id_name(&self) -> String {
+        self.name().to_ascii_lowercase().replace(" ", "")
+    }
+
+    pub fn scope_name(&self) -> &str {
+        &self.config().language_name
+    }
+
+    pub fn config(&self) -> &'static HighlightConfiguration {
         match self {
             #[cfg(feature = "lang-angular")]
             Language::Angular => &ANGULAR_CONFIG,
