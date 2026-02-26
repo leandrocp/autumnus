@@ -44,7 +44,7 @@ jobs:
 
       - uses: leafo/gh-actions-lua@v12
 
-      - uses: leafo/gh-actions-luarocks@v5
+      - uses: leafo/gh-actions-luarocks@v6
 
       - name: Install Lua dependencies
         run: luarocks install toml-edit && luarocks install dkjson
