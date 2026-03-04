@@ -1,9 +1,13 @@
 # Changelog
 
+## 0.1.2 - 2026-03-04
+
+### Fixed
+- Use published `lumis` crate
+
 ## 0.1.1 - 2026-02-19
 
 ### Changed
-
 - Add language nushell (started by @c4lliope)
 - Rename CSS class from `athl` to `lumis` for consistency with the project name
 - Rename CSS class from `athl-themes` to `lumis-themes` for multi-theme formatter
