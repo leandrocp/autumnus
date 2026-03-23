@@ -55,13 +55,26 @@ struct ParserEntry {
     _rest: toml::Value,
 }
 
-fn workspace_root() -> PathBuf {
+fn manifest_dir() -> PathBuf {
     PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap())
-        .parent()
-        .unwrap()
-        .parent()
-        .unwrap()
-        .to_path_buf()
+}
+
+fn workspace_root() -> PathBuf {
+    manifest_dir().parent().unwrap().parent().unwrap().to_path_buf()
+}
+
+/// Resolve a path that lives at the workspace root during development
+/// but at the crate root when published (via symlinks in Cargo include).
+fn resolve_path(relative_to_root: &str) -> PathBuf {
+    let workspace = workspace_root().join(relative_to_root);
+    if workspace.exists() {
+        return workspace;
+    }
+    let crate_local = manifest_dir().join(relative_to_root);
+    if crate_local.exists() {
+        return crate_local;
+    }
+    workspace
 }
 
 fn titlecase(s: &str) -> String {
@@ -78,8 +91,8 @@ fn main() {
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
     let dest_path = out_dir.join("queries_constants.rs");
 
-    let queries_path = workspace_root().join("queries").join("processed");
-    let languages_toml_path = workspace_root().join("languages.toml");
+    let queries_path = resolve_path("queries/processed");
+    let languages_toml_path = resolve_path("languages.toml");
 
     println!("cargo:rerun-if-changed={}", queries_path.display());
     println!("cargo:rerun-if-changed={}", languages_toml_path.display());
@@ -241,7 +254,7 @@ fn main() {
 
 fn gen_conformance_tests() {
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
-    let conformance_dir = workspace_root().join("fixtures").join("conformance");
+    let conformance_dir = resolve_path("fixtures/conformance");
 
     println!("cargo:rerun-if-changed={}", conformance_dir.display());
 
