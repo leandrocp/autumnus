@@ -897,6 +897,7 @@ dependencies = [
  "syn 2.0.117",
  "termcolor",
  "thiserror 2.0.18",
+ "toml",
  "tree-sitter",
  "tree-sitter-asm",
  "tree-sitter-bash",

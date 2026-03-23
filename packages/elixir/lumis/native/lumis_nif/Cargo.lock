@@ -272,6 +272,7 @@ dependencies = [
  "syn",
  "termcolor",
  "thiserror",
+ "toml",
  "tree-sitter",
  "tree-sitter-asm",
  "tree-sitter-bash",
