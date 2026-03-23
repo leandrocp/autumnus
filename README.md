@@ -1,5 +1,7 @@
 <h1 align="center">Lumis</h1>
 
+<img src="assets/intro.png" alt="Lumis Syntax Highlighter">
+
 <p align="center">
   <strong>Syntax Highlighter powered by Tree-sitter and Neovim themes</strong>
 </p>
