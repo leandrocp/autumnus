@@ -1,7 +1,7 @@
 {
   "name": "@lumis-sh/lumis",
   "version": "0.0.1",
-  "description": "Syntax Highlighter powered by Tree-sitter and Neovim themes.",
+  "description": "Syntax Highlighter powered by Tree-sitter and Neovim themes",
   "author": "Leandro Pereira",
   "license": "MIT",
   "repository": {
@@ -13,9 +13,11 @@
   "homepage": "https://lumis.sh",
   "keywords": [
     "syntax-highlighting",
-    "tree-sitter",
+    "code-highlighting",
     "highlighter",
-    "code-highlighting"
+    "tree-sitter",
+    "neovim",
+    "wasm"
   ],
   "sideEffects": false,
   "type": "module",
