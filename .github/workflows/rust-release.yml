@@ -3,16 +3,30 @@ name: Rust Release
 on:
   push:
     tags:
-      - 'rust@v*'
+      - "lumis@v*"
+      - "lumis-core@v*"
+      - "lumis-build@v*"
+      - "lumis-cli@v*"
 
 permissions:
   contents: write
 
 jobs:
-  release:
+  publish:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Determine crate to publish
+        id: crate
+        run: |
+          tag="${GITHUB_REF#refs/tags/}"
+          crate="${tag%%@*}"
+          echo "name=$crate" >> $GITHUB_OUTPUT
+
+      - name: Publish to crates.io
+        run: cargo publish -p ${{ steps.crate.outputs.name }}
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}

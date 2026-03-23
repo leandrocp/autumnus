@@ -113,7 +113,15 @@ fn format_entry(key: &str, entry: &ParserEntry) -> String {
 }
 
 fn languages() {
-    let languages_toml_path = manifest_dir().join("../../languages.toml");
+    // In the workspace, languages.toml lives at the repo root (../../).
+    // When published, it's included at the crate root via Cargo.toml `include`.
+    let workspace_path = manifest_dir().join("../../languages.toml");
+    let crate_path = manifest_dir().join("languages.toml");
+    let languages_toml_path = if workspace_path.exists() {
+        workspace_path
+    } else {
+        crate_path
+    };
 
     println!("cargo:rerun-if-changed={}", languages_toml_path.display());
 
