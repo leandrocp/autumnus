@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+#hero-fluid {
+  position: absolute !important;
+  inset: 0;
+  top: -4rem;
+  mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 65%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 65%, transparent 100%);
+}
+
+#hero-fluid canvas {
+  position: absolute !important;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+}

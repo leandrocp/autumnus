@@ -1,0 +1,288 @@
+import { describe, expect, it } from "vitest";
+import type { Theme } from "../src/types.js";
+import {
+  attrsToString,
+  closeCodeTag,
+  closePreTag,
+  closeTag,
+  closingTags,
+  escape,
+  escapeAttr,
+  escapeBraces,
+  formatHighlightIterLines,
+  getScopedThemeStyle,
+  getThemeStyle,
+  joinClasses,
+  lineIsHighlighted,
+  openCodeTag,
+  openPreTag,
+  openSpanTag,
+  openTag,
+  scopeToClass,
+  spanInline,
+  spanInlineAttrs,
+  spanLinked,
+  spanLinkedAttrs,
+  spanMultiThemes,
+  spanMultiThemesAttrs,
+  styleToCss,
+  textDecoration,
+  wrapLine,
+  wrapWithHeader,
+} from "../src/formatter/html.js";
+import { sanitizeThemeName } from "../src/themes.js";
+import { hexToRgb, rgbToAnsi, styleToAnsi, wrapWithAnsi } from "../src/formatter/ansi.js";
+import type { Language } from "../src/types.js";
+
+const jsonLang: Language = { id: "json", aliases: [], highlights: "", wasm: "json.wasm" };
+
+const theme = {
+  name: "test",
+  appearance: "dark",
+  highlights: {
+    normal: { fg: "#ffffff", bg: "#000000" },
+    string: { fg: "#00ff00" },
+    "string.json": { fg: "#22ff22", italic: true },
+    highlighted: { bg: "#222222" },
+    emphasis: { underline: "double", strikethrough: true },
+  },
+} satisfies Theme;
+
+describe("formatter shared helpers", () => {
+  it("falls back from specific scopes to parent scopes", () => {
+    expect(getThemeStyle(theme, "string.special.regex")).toEqual({ fg: "#00ff00" });
+  });
+
+  it("prefers language-specific styles when present", () => {
+    expect(getScopedThemeStyle(theme, "string", "json")).toEqual({
+      fg: "#22ff22",
+      italic: true,
+    });
+  });
+
+  it("formats CSS declarations with optional italic handling", () => {
+    expect(styleToCss({ fg: "#fff", italic: true }, { italic: false })).toBe("color: #fff;");
+    expect(styleToCss({ fg: "#fff", italic: true }, { italic: true })).toBe(
+      "color: #fff; font-style: italic;",
+    );
+  });
+
+  it("renders text decoration combinations", () => {
+    expect(textDecoration({ underline: "double", strikethrough: true })).toBe(
+      "underline double line-through",
+    );
+  });
+
+  it("escapes HTML entities and braces", () => {
+    expect(escape(`<tag attr='x'>&{"y"}`)).toBe(
+      "&lt;tag attr=&#39;x&#39;&gt;&amp;&lbrace;&quot;y&quot;&rbrace;",
+    );
+  });
+
+  it("escapes HTML attributes without touching braces", () => {
+    expect(escapeAttr(`"quoted" & <tag> {'x'}`)).toBe(
+      "&quot;quoted&quot; &amp; &lt;tag&gt; {&#39;x&#39;}",
+    );
+  });
+
+  it("renders HTML attrs and skips falsey non-string values", () => {
+    expect(
+      attrsToString({
+        class: "lumis code",
+        tabindex: 0,
+        hidden: false,
+        inert: true,
+        style: undefined,
+      }),
+    ).toBe('class="lumis code" tabindex="0" inert');
+  });
+
+  it("joins classes and drops empty values", () => {
+    expect(joinClasses("lumis", undefined, false, "custom")).toBe("lumis custom");
+    expect(joinClasses(undefined, false, null)).toBeUndefined();
+  });
+
+  it("opens and closes tags with escaped attrs", () => {
+    expect(openTag("span", { title: `"quoted"` })).toBe('<span title="&quot;quoted&quot;">');
+    expect(closeTag("span")).toBe("</span>");
+    expect(closePreTag()).toBe("</pre>");
+    expect(closeCodeTag()).toBe("</code>");
+    expect(closingTags()).toBe("</code></pre>");
+    expect(openSpanTag({ class: "token" })).toBe('<span class="token">');
+    expect(openPreTag()).toBe('<pre class="lumis">');
+    expect(openPreTag({ preClass: "custom" })).toBe('<pre class="lumis custom">');
+    expect(openPreTag({ theme })).toBe(
+      '<pre class="lumis" style="color: #ffffff; background-color: #000000;">',
+    );
+    expect(openPreTag({ preClass: "custom", theme })).toBe(
+      '<pre class="lumis custom" style="color: #ffffff; background-color: #000000;">',
+    );
+    expect(openCodeTag({ id: "json", aliases: [], highlights: "" })).toBe(
+      '<code class="language-json" translate="no" tabindex="0">',
+    );
+  });
+
+  it("wraps highlighted output with an optional header", () => {
+    expect(
+      wrapWithHeader("<pre></pre>", {
+        openTag: '<section class="wrapper">',
+        closeTag: "</section>",
+      }),
+    ).toBe('<section class="wrapper"><pre></pre></section>');
+    expect(wrapWithHeader("<pre></pre>")).toBe("<pre></pre>");
+  });
+
+  it("turns scopes into linked formatter classes", () => {
+    expect(scopeToClass("keyword.operator")).toBe("keyword-operator");
+  });
+
+  it("matches single lines and inclusive ranges", () => {
+    expect(lineIsHighlighted([1, [3, 5]], 1)).toBe(true);
+    expect(lineIsHighlighted([1, [3, 5]], 4)).toBe(true);
+    expect(lineIsHighlighted([1, [3, 5]], 6)).toBe(false);
+  });
+
+  it("wraps lines with optional class and style", () => {
+    expect(wrapLine(2, "code", { className: "highlighted", style: "color: red;" })).toBe(
+      '<div class="line highlighted" style="color: red;" data-line="2">code\n</div>',
+    );
+  });
+
+  it("renders highlight events into line fragments", () => {
+    const { lines, language } = formatHighlightIterLines(
+      "a\nb",
+      [
+        { type: "start", scope: "string", language: "json" },
+        { type: "source", startByte: 0, endByte: 1 },
+        { type: "end" },
+        { type: "source", startByte: 1, endByte: 2 },
+        { type: "start", scope: "number", language: "json" },
+        { type: "source", startByte: 2, endByte: 3 },
+        { type: "end" },
+      ],
+      jsonLang,
+      undefined,
+      {
+        openSpan: (span) => `<span data-scope="${span.scope}">`,
+      },
+    );
+
+    expect(language).toBe("json");
+    expect(lines).toEqual([
+      '<span data-scope="string">a</span>',
+      '<span data-scope="number">b</span>',
+    ]);
+  });
+
+  it("splits multiline source events into separate rendered lines", () => {
+    const { lines } = formatHighlightIterLines(
+      "ab\ncd",
+      [
+        { type: "start", scope: "string", language: "json" },
+        { type: "source", startByte: 0, endByte: 5 },
+        { type: "end" },
+      ],
+      jsonLang,
+      undefined,
+      {
+        openSpan: (span) => `<span data-scope="${span.scope}">`,
+      },
+    );
+
+    expect(lines).toEqual([
+      '<span data-scope="string">ab</span>',
+      '<span data-scope="string">cd</span>',
+    ]);
+  });
+
+  it("escapes only braces", () => {
+    expect(escapeBraces("fn() {}")).toBe("fn() &lbrace;&rbrace;");
+    expect(escapeBraces("<div>{x}</div>")).toBe("<div>&lbrace;x&rbrace;</div>");
+  });
+
+  it("sanitizes theme names for CSS variable use", () => {
+    expect(sanitizeThemeName("dracula")).toBe("dracula");
+    expect(sanitizeThemeName("one-dark")).toBe("one-dark");
+    expect(sanitizeThemeName("my theme!")).toBe("my-theme-");
+    expect(sanitizeThemeName("theme_v2")).toBe("theme_v2");
+  });
+
+  it("generates span inline attrs with theme styling", () => {
+    const attrs = spanInlineAttrs({ scope: "string", language: "json", theme, includeHighlights: true });
+    expect(attrs["data-highlight"]).toBe("string");
+    expect(attrs.style).toContain("color: #22ff22");
+  });
+
+  it("generates span inline without highlights when disabled", () => {
+    const attrs = spanInlineAttrs({ scope: "string", language: "json", theme });
+    expect(attrs["data-highlight"]).toBeUndefined();
+    expect(attrs.style).toContain("color: #22ff22");
+  });
+
+  it("wraps text in inline styled span", () => {
+    const html = spanInline("hello", { language: "json", scope: "string", theme });
+    expect(html).toContain("<span");
+    expect(html).toContain("hello");
+    expect(html).toContain("#22ff22");
+  });
+
+  it("returns plain escaped text when no style matches", () => {
+    const html = spanInline("<b>", { language: "json", scope: "string" });
+    expect(html).toBe("&lt;b&gt;");
+  });
+
+  it("generates linked span attrs", () => {
+    expect(spanLinkedAttrs("keyword.operator")).toBe('class="keyword-operator"');
+  });
+
+  it("wraps text in linked span", () => {
+    expect(spanLinked("if", "keyword.conditional")).toBe(
+      '<span class="keyword-conditional">if</span>',
+    );
+  });
+
+  it("generates multi-themes span attrs with default theme", () => {
+    const themes = { dracula: theme };
+    const attrs = spanMultiThemesAttrs({ scope: "string", language: "json", themes, defaultTheme: "dracula" });
+    expect(attrs.style).toContain("#22ff22");
+  });
+
+  it("wraps text in multi-themes span", () => {
+    const themes = { dracula: theme };
+    const html = spanMultiThemes("x", { scope: "string", language: "json", themes, defaultTheme: "dracula" });
+    expect(html).toContain("<span");
+    expect(html).toContain("x");
+  });
+
+  it("returns plain text for multi-themes with empty themes", () => {
+    const html = spanMultiThemes("<b>", { scope: "string", language: "json", themes: {} });
+    expect(html).toBe("&lt;b&gt;");
+  });
+});
+
+describe("ansi helpers", () => {
+  it("converts hex to rgb", () => {
+    expect(hexToRgb("#ff5555")).toEqual([255, 85, 85]);
+    expect(hexToRgb("ff5555")).toEqual([255, 85, 85]);
+    expect(hexToRgb("#fff")).toBeUndefined();
+    expect(hexToRgb("invalid")).toBeUndefined();
+  });
+
+  it("generates foreground and background ANSI codes", () => {
+    expect(rgbToAnsi(255, 85, 85, false)).toBe("\u001b[38;2;255;85;85m");
+    expect(rgbToAnsi(40, 42, 54, true)).toBe("\u001b[48;2;40;42;54m");
+  });
+
+  it("converts style to ANSI codes", () => {
+    expect(styleToAnsi({ bold: true })).toBe("\u001b[1m");
+    expect(styleToAnsi({ fg: "#8be9fd" })).toContain("\u001b[38;2;");
+    expect(styleToAnsi(undefined)).toBe("");
+  });
+
+  it("wraps text with ANSI codes", () => {
+    expect(wrapWithAnsi("text", undefined)).toBe("text");
+    const result = wrapWithAnsi("fn", { fg: "#8be9fd" });
+    expect(result).toContain("\u001b[0m");
+    expect(result).toContain("fn");
+  });
+});

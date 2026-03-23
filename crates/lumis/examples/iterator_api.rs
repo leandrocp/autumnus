@@ -17,7 +17,7 @@ fn main() {
 
     println!("Tokens with position information:\n");
 
-    highlight_iter(code, lang, theme, |text, range, scope, style| {
+    highlight_iter(code, lang, theme, |text, _language, range, scope, style| {
         println!(
             "{}..{}: {:?} (scope: {}, fg: {:?}, bold: {}, italic: {})",
             range.start, range.end, text, scope, style.fg, style.bold, style.italic

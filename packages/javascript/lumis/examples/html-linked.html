@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>htmlLinked options</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+    :root {
+      color-scheme: dark;
+    }
+
+    body {
+      background:
+        radial-gradient(circle at top, rgba(34, 197, 94, 0.16), transparent 30rem),
+        linear-gradient(180deg, #08111f 0%, #0f172a 48%, #020617 100%);
+    }
+
+    pre.lumis {
+      padding: 1rem;
+      border-radius: 0.75rem;
+      overflow-x: auto;
+    }
+
+    #header-output pre.lumis {
+      border-radius: 0;
+      margin: 0;
+    }
+
+    .linked-focus {
+      background: rgba(34, 197, 94, 0.12);
+      box-shadow: inset 3px 0 0 rgba(74, 222, 128, 0.8);
+    }
+  </style>
+</head>
+<body class="example-page text-slate-200 min-h-screen">
+  <main class="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-6 lg:px-8">
+    <nav class="flex items-center justify-between rounded-2xl border border-cyan-400/20 bg-slate-950/70 px-4 py-3 shadow-[0_20px_50px_rgba(2,6,23,0.45)] backdrop-blur">
+      <a class="text-sm font-medium text-slate-200 transition-colors hover:text-white" href="/">All examples</a>
+      <span class="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-[11px] uppercase tracking-[0.25em] text-cyan-300">Formatter showcase</span>
+    </nav>
+    <div class="grid gap-10 lg:grid-cols-[0.9fr_1.1fr]">
+      <section class="space-y-6">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-300">htmlLinked</p>
+          <h1 class="mt-3 text-4xl font-semibold text-white">Linked HTML output</h1>
+          <p class="mt-4 max-w-xl text-sm leading-7 text-slate-400">
+            Class-based HTML for sites that prefer external CSS. This page shows the default output,
+            line highlighting, and a wrapped file-card presentation using a linked theme stylesheet.
+          </p>
+        </div>
+
+        <div class="rounded-2xl border border-emerald-500/20 bg-slate-950/60 p-5 shadow-[0_0_0_1px_rgba(34,197,94,0.06)]">
+          <h2 class="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-300">Source</h2>
+
+          <div class="mt-4 rounded-xl border border-slate-800 bg-slate-900/90 p-4">
+            <div class="flex items-center justify-between gap-4">
+              <h3 class="text-sm font-medium text-slate-200">package.json snippet</h3>
+              <span class="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-300">
+                json + linked css
+              </span>
+            </div>
+            <pre id="source-output" class="mt-4 overflow-x-auto text-sm leading-6 text-slate-300"></pre>
+          </div>
+
+          <div id="error-output" class="mt-5 hidden rounded-xl border border-rose-500/30 bg-rose-950/40 p-4 text-sm text-rose-200"></div>
+        </div>
+      </section>
+
+      <section class="space-y-6">
+        <div class="rounded-2xl border border-slate-800 bg-slate-950/55 p-5">
+          <h2 class="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-300">Default render</h2>
+          <p class="mt-2 text-sm text-slate-500">Public <code>hl.highlight()</code> with the default <code>htmlLinked</code> formatter.</p>
+          <div id="default-output" class="mt-4"></div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-800 bg-slate-950/55 p-5">
+          <h2 class="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-300">Line highlighting</h2>
+          <p class="mt-2 text-sm text-slate-500">Linked output still supports per-line classes for focused review.</p>
+          <div id="lines-output" class="mt-4"></div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-800 bg-slate-950/55 p-5">
+          <h2 class="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-300">Header wrapper</h2>
+          <p class="mt-2 text-sm text-slate-500">Useful for file cards, editor frames, and other linked CSS layouts.</p>
+          <div id="header-output" class="mt-4"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script type="module">
+    import { createHighlighter } from '../src/index.browser.ts'
+    import { htmlLinked } from '../src/formatters.ts'
+    import json from '../langs/json.ts'
+    import '../../themes/dist/css/dracula.css'
+
+    const code = `{
+  "name": "lumis",
+  "unicode": "😀 café",
+  "format": "html-linked",
+  "published": false,
+  "milestones": [2024, 2025, 2026]
+}`
+
+    const errorBox = document.getElementById('error-output')
+
+    try {
+      const hl = await createHighlighter({
+        langs: [json],
+      })
+      document.getElementById('source-output').textContent = code
+
+      document.getElementById('default-output').innerHTML = hl.highlight(
+        code,
+        htmlLinked({ language: json })
+      )
+
+      document.getElementById('lines-output').innerHTML = hl.highlight(
+        code,
+        htmlLinked({
+        language: json,
+          highlightLines: {
+            lines: [[2, 3]],
+            class: 'linked-focus',
+          },
+        })
+      )
+
+      document.getElementById('header-output').innerHTML = hl.highlight(
+        code,
+        htmlLinked({
+        language: json,
+          header: {
+            openTag: '<div class="overflow-hidden rounded-xl border border-slate-800 shadow-[0_20px_50px_rgba(2,6,23,0.45)]"><div class="flex items-center justify-between border-b border-slate-800 bg-slate-950/95 px-4 py-3"><div class="flex items-center gap-3"><div class="flex gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-rose-400/80"></span><span class="h-2.5 w-2.5 rounded-full bg-amber-300/80"></span><span class="h-2.5 w-2.5 rounded-full bg-emerald-400/80"></span></div><div><div class="text-sm font-medium text-slate-100">package.json</div><div class="text-xs text-slate-500">examples/native-html-linked</div></div></div><span class="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.25em] text-emerald-300">linked css</span></div>',
+            closeTag: '</div>',
+          },
+        })
+      )
+    } catch (error) {
+      errorBox.classList.remove('hidden')
+      errorBox.textContent = error instanceof Error ? error.message : String(error)
+    }
+  </script>
+</body>
+</html>

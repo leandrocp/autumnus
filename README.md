@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <strong>70+ languages. 120+ themes. 4 platforms. One API.</strong>
+  <strong>70+ languages. 120+ themes. 6 platforms. One API.</strong>
 </p>
 
 <p align="center">
@@ -14,7 +14,9 @@
 
 <p align="center">
   <a href="https://crates.io/crates/lumis"><img src="https://img.shields.io/crates/v/lumis" alt="Crates.io"></a>
-  <a href=""><img src="https://img.shields.io/hexpm/v/lumis" alt="Hex.pm"></a>
+  <a href="https://www.npmjs.com/package/@lumis-sh/lumis"><img src="https://img.shields.io/npm/v/@lumis-sh/lumis" alt="npm"></a>
+  <a href="https://hex.pm/packages/lumis"><img src="https://img.shields.io/hexpm/v/lumis" alt="Hex.pm"></a>
+  <a href="https://central.sonatype.com/artifact/io.roastedroot/lumis4j"><img src="https://img.shields.io/maven-central/v/io.roastedroot/lumis4j" alt="Maven Central"></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-blue" alt="License"></a>
 </p>
 
@@ -24,7 +26,7 @@
 
 - **70+ Tree-sitter languages** - Fast and accurate syntax parsing
 - **120+ Neovim themes** - Updated and curated themes from the Neovim community
-- **4 platforms** - CLI, Rust, Elixir, Java
+- **6 platforms** - CLI, Rust, Elixir, Node.js, Browser, Java
 - **Multiple outputs** - HTML (inline/linked), Terminal (ANSI), multi-theme (light/dark), and custom formatters
 - **Language auto-detection** - File extension and shebang support
 - **Streaming-friendly** - Handles incomplete code gracefully
@@ -39,12 +41,12 @@
 
 ## Quick Start
 
-### CLI
+### [CLI](https://crates.io/crates/lumis-cli)
 
 ```sh
-cargo install lumis
+cargo install lumis-cli
 
-lumis highlight src/index.js --theme dracula
+lumis highlight app.js --theme dracula
 ```
 
 ### [Rust](https://crates.io/crates/lumis)
@@ -52,23 +54,46 @@ lumis highlight src/index.js --theme dracula
 ```rust
 use lumis::{highlight, HtmlInlineBuilder, languages::Language, themes};
 
-let code = "print('Hello')";
-
 let theme = themes::get("dracula").unwrap();
 
 let formatter = HtmlInlineBuilder::new()
-    .lang(Language::Python)
+    .lang(Language::Javascript)
     .theme(Some(theme))
     .build()
     .unwrap();
 
-let html = highlight(code, formatter);
+let html = highlight("const x = 1", formatter);
+```
+
+### [Node.js / Browser](https://www.npmjs.com/package/@lumis-sh/lumis)
+
+Works in Node.js and browsers.
+
+```typescript
+import { highlight } from '@lumis-sh/lumis'
+import { htmlInline } from '@lumis-sh/lumis/formatters'
+import javascript from '@lumis-sh/lumis/langs/javascript'
+import dracula from '@lumis-sh/themes/dracula'
+
+const html = await highlight('const x = 1', htmlInline({ language: javascript, theme: dracula }))
+```
+
+Preload languages once if you want repeated synchronous calls:
+
+```typescript
+import { createHighlighter } from '@lumis-sh/lumis'
+import { htmlInline } from '@lumis-sh/lumis/formatters'
+import javascript from '@lumis-sh/lumis/langs/javascript'
+import dracula from '@lumis-sh/themes/dracula'
+
+const hl = await createHighlighter({ langs: [javascript] })
+const html = hl.highlight('const x = 1', htmlInline({ language: javascript, theme: dracula }))
 ```
 
 ### [Elixir](https://hex.pm/packages/lumis)
 
 ```elixir
-Lumis.highlight!("setTimeout(fun, 5000)", language: "js", formatter: {:html_inline, theme: "dracula"})
+Lumis.highlight!("const x = 1", language: "javascript", formatter: {:html_inline, theme: "dracula"})
 ```
 
 ### [Java](https://github.com/roastedroot/lumis4j)
@@ -85,7 +110,7 @@ var lumis = Lumis.builder()
     .withTheme(Theme.DRACULA)
     .build();
 
-var result = lumis.highlight("console.log('Hello, World!');");
+var result = lumis.highlight("const x = 1");
 System.out.println(result.string());
 ```
 
@@ -93,10 +118,32 @@ System.out.println(result.string());
 
 | Platform | Install | Package | Docs |
 |----------|---------| ------- | -----|
-| **CLI** | `cargo install lumis` | - | `lumis --help` |
+| **CLI** | `cargo install lumis-cli` | [crates.io/lumis-cli](https://crates.io/crates/lumis-cli) | [README.md](crates/lumis-cli/README.md) |
 | **Rust** | `cargo add lumis` | [crates.io/lumis](https://crates.io/crates/lumis) | [README.md](crates/lumis/README.md) &bull; [docs.rs](https://docs.rs/lumis) |
 | **Elixir** | `{:lumis, "~> 0.1"}` | [hex.pm/lumis](https://hex.pm/packages/lumis) | [README.md](packages/elixir/lumis/README.md) &bull; [hexdocs](https://hexdocs.pm/lumis) |
+| **Node.js** | `npm install @lumis-sh/lumis` | [npmjs.com/@lumis-sh/lumis](https://www.npmjs.com/package/@lumis-sh/lumis) | [README.md](packages/javascript/lumis/README.md) |
+| **Browser** | `npm install @lumis-sh/lumis` | [npmjs.com/@lumis-sh/lumis](https://www.npmjs.com/package/@lumis-sh/lumis) | [README.md](packages/javascript/lumis/README.md) |
 | **Java** | `io.roastedroot:lumis4j:latest` | - | - |
+
+## Architecture
+
+Every Lumis package is built around the same three pieces:
+
+- themes extracted from Neovim
+- languages backed by Tree-sitter grammars
+- formatters that turn highlighted tokens into output
+
+Given some source code, Lumis parses it with the selected Tree-sitter language, resolves styles from the chosen theme, and then formats the highlighted result into HTML, ANSI, or any custom output.
+
+### WASM Versions
+
+The npm WASM package versions follow the pattern `<tree-sitter-version>.<seq>`, where:
+
+- `tree-version-version` is the major-minor version of the Tree-sitter compatible version
+- `seq` is a patch number for Lumis own updates
+
+For example, `@lumis-sh/wasm-rust@0.26` is the first published version compatible with Tree-sitter 0.26,
+while `@lumis-sh/wasm-javasciprt@0.26.1` is a patch update compatible with Tree-sitter 0.26
 
 ## Contributing
 

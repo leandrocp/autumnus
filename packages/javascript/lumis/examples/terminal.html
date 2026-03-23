@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>terminal</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+    pre.lumis { padding: 1rem; border-radius: 0.5rem; overflow-x: auto; }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 antialiased">
+  <main class="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-6 lg:px-8">
+    <nav class="flex items-center justify-between rounded-2xl border border-cyan-400/20 bg-slate-950/70 px-4 py-3 shadow-[0_20px_50px_rgba(2,6,23,0.45)] backdrop-blur">
+      <a class="text-sm font-medium text-slate-200 transition-colors hover:text-white" href="/">All examples</a>
+      <span class="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-[11px] uppercase tracking-[0.25em] text-cyan-300">Formatter</span>
+    </nav>
+    <section class="rounded-[28px] border border-slate-800 bg-slate-950/70 p-6 shadow-[0_20px_50px_rgba(2,6,23,0.45)] backdrop-blur md:p-8">
+      <p class="mb-3 text-[11px] uppercase tracking-[0.3em] text-cyan-300">ANSI output</p>
+      <h1 class="text-2xl font-semibold text-white mb-2">terminal</h1>
+      <p class="text-slate-400 mb-6">Outputs ANSI escape codes for terminal rendering. The raw output is shown below.</p>
+
+      <h2 class="text-lg font-medium text-blue-400 mt-8 mb-3">Raw ANSI output</h2>
+      <pre id="raw-output" class="bg-slate-800 text-slate-300 p-4 rounded-lg overflow-x-auto text-sm font-mono whitespace-pre-wrap break-all"></pre>
+
+      <h2 class="text-lg font-medium text-blue-400 mt-8 mb-3">Different theme</h2>
+      <pre id="dracula-output" class="bg-slate-800 text-slate-300 p-4 rounded-lg overflow-x-auto text-sm font-mono whitespace-pre-wrap break-all"></pre>
+    </section>
+  </main>
+
+  <script type="module">
+    import { createHighlighter } from '../src/index.browser.ts'
+    import { terminal } from '../src/formatters.ts'
+    import json from '../langs/json.ts'
+    import tokyonightMoon from '@lumis-sh/themes/tokyonight_moon'
+    import dracula from '@lumis-sh/themes/dracula'
+
+    const code = `{
+  "feature": "terminal",
+  "target": "ansi",
+  "unicode": "😀 café",
+  "releases": [2024, 2025, 2026]
+}`
+
+    const hl = await createHighlighter({ langs: [json] })
+
+    const ansiTokyonight = hl.highlight(
+      code,
+      terminal({ language: json, theme: tokyonightMoon })
+    )
+
+    const ansiDracula = hl.highlight(
+      code,
+      terminal({ language: json, theme: dracula })
+    )
+
+    // Show the raw ANSI escape codes (escaped for display in HTML)
+    document.getElementById('raw-output').textContent = ansiTokyonight
+    document.getElementById('dracula-output').textContent = ansiDracula
+  </script>
+</body>
+</html>

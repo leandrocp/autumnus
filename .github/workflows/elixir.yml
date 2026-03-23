@@ -5,10 +5,16 @@ on:
     branches: [ main ]
     paths:
       - "packages/elixir/lumis/**"
+      - "crates/**"
+      - "queries/**"
+      - "fixtures/conformance/**"
       - ".github/workflows/elixir.yml"
   pull_request:
     paths:
       - "packages/elixir/lumis/**"
+      - "crates/**"
+      - "queries/**"
+      - "fixtures/conformance/**"
       - ".github/workflows/elixir.yml"
   workflow_dispatch:
 
@@ -22,8 +28,10 @@ jobs:
     with:
       working-directory: packages/elixir/lumis
       env_vars: '{"LUMIS_BUILD": "1"}'
+      rust-toolchain: 'stable'
   lint:
     uses: leandrocp/github-actions/.github/workflows/elixir-lint.yml@main
     with:
       working-directory: packages/elixir/lumis
       env_vars: '{"LUMIS_BUILD": "1"}'
+      rust-toolchain: 'stable'

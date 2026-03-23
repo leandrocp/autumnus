@@ -1,0 +1,10 @@
+function outer(value) {
+  const render = () => value;
+
+  function inner(value) {
+    const render = () => value + 1;
+    return render() + value;
+  }
+
+  return render() + inner(value);
+}

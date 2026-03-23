@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Theme gallery</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  </head>
+<body class="min-h-screen bg-slate-950 text-slate-100 antialiased">
+  <main class="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-6 lg:px-8">
+    <nav class="flex items-center justify-between rounded-2xl border border-cyan-400/20 bg-slate-950/70 px-4 py-3 shadow-[0_20px_50px_rgba(2,6,23,0.45)] backdrop-blur">
+      <a class="text-sm font-medium text-slate-200 transition-colors hover:text-white" href="/">All examples</a>
+      <span class="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-[11px] uppercase tracking-[0.25em] text-cyan-300">More themes</span>
+    </nav>
+
+    <section class="rounded-[28px] border border-slate-800 bg-slate-950/70 p-6 shadow-[0_20px_50px_rgba(2,6,23,0.45)] backdrop-blur md:p-8">
+      <div>
+        <p class="mb-3 text-[11px] uppercase tracking-[0.3em] text-cyan-300">Same code, different moods</p>
+        <h1>Theme gallery</h1>
+        <p class="max-w-3xl text-base leading-7 text-slate-400">
+          One snippet rendered across several themes so you can compare personalities instead of guessing from a list of names.
+        </p>
+      </div>
+    </section>
+
+    <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-3" id="gallery"></section>
+    <div id="error-output" class="hidden rounded-2xl border border-rose-500/30 bg-rose-950/40 px-4 py-3 text-sm text-rose-200"></div>
+  </main>
+
+  <script type="module">
+    import { createHighlighter } from '../src/index.browser.ts'
+    import { htmlInline } from '../src/formatters.ts'
+    import javascript from '../langs/javascript.ts'
+    import dracula from '@lumis-sh/themes/dracula'
+    import githubDark from '@lumis-sh/themes/github_dark'
+    import githubLight from '@lumis-sh/themes/github_light'
+    import catppuccinLatte from '@lumis-sh/themes/catppuccin_latte'
+    import catppuccinMocha from '@lumis-sh/themes/catppuccin_mocha'
+    import tokyonightMoon from '@lumis-sh/themes/tokyonight_moon'
+    import cyberdreamLight from '@lumis-sh/themes/cyberdream_light'
+    import ayuDark from '@lumis-sh/themes/ayu_dark'
+
+    const code = `export async function ship(feature) {
+  const status = feature.ready ? 'live' : 'draft'
+  return {
+    ...feature,
+    status,
+    shippedAt: new Date().toISOString(),
+  }
+}`
+
+    const themes = [
+      ['Dracula', dracula],
+      ['GitHub Dark', githubDark],
+      ['GitHub Light', githubLight],
+      ['Catppuccin Latte', catppuccinLatte],
+      ['Catppuccin Mocha', catppuccinMocha],
+      ['Tokyo Night Moon', tokyonightMoon],
+      ['Cyberdream Light', cyberdreamLight],
+      ['Ayu Dark', ayuDark],
+    ]
+
+    const gallery = document.getElementById('gallery')
+    const errorBox = document.getElementById('error-output')
+
+    try {
+      const hl = await createHighlighter({ langs: [javascript] })
+
+      for (const [label, theme] of themes) {
+        const card = document.createElement('article')
+        card.className = 'overflow-hidden rounded-[28px] border border-slate-800 bg-slate-950/70 shadow-[0_20px_50px_rgba(2,6,23,0.45)] backdrop-blur'
+        card.innerHTML = `
+          <div class="flex items-center justify-between border-b border-slate-800 bg-slate-950/95 px-4 py-3">
+            <strong class="font-medium text-white">${label}</strong>
+            <span class="rounded-full border border-slate-700 bg-slate-950/80 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-slate-300">${theme.appearance}</span>
+          </div>
+          <div class="overflow-x-auto bg-slate-950/60 p-4">${hl.highlight(code, htmlInline({ language: javascript, theme }))}</div>
+        `
+        gallery.append(card)
+      }
+    } catch (error) {
+      errorBox.classList.remove('hidden')
+      errorBox.textContent = error instanceof Error ? error.message : String(error)
+    }
+  </script>
+</body>
+</html>

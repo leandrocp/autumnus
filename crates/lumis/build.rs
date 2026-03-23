@@ -1,3 +1,31 @@
+// Generates two outputs into OUT_DIR:
+//
+// 1. Compiled C/C++ tree-sitter parsers (via `vendored_parsers()`)
+//
+//    Compiles vendored tree-sitter grammar sources under `vendored_parsers/`.
+//    Each parser is gated behind its `lang-*` feature flag. Builds run in
+//    parallel using rayon. Produces static libraries linked into the final
+//    binary (e.g. `libtree-sitter-rust.a`).
+//
+// 2. `queries_constants.rs` (via `queries()`, included by `src/queries.rs`)
+//
+//    Reads processed .scm files from `queries/processed/<lang>/` and
+//    emits one `&str` constant per language per query type:
+//      pub const RUST_HIGHLIGHTS: &str = "...";
+//      pub const RUST_INJECTIONS: &str = "...";
+//      pub const RUST_LOCALS: &str = "...";
+//
+//    Also converts `#lua-match?` predicates to `#match?` with Lua-to-Rust
+//    regex conversion (this step only applies to the native Rust crate,
+//    not the CLI which uses web-tree-sitter).
+//
+//    Each constant is feature-gated to match its language.
+//
+// Theme data is provided by lumis-core (re-exported via src/themes.rs).
+//
+// To inspect the generated output, look in:
+//   target/debug/build/lumis-<hash>/out/
+
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use rayon::prelude::*;
@@ -13,7 +41,50 @@ fn manifest_dir() -> PathBuf {
 fn main() {
     vendored_parsers();
     queries();
-    themes();
+    gen_conformance_tests();
+}
+
+fn gen_conformance_tests() {
+    let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
+    let conformance_dir = workspace_root().join("fixtures").join("conformance");
+
+    println!("cargo:rerun-if-changed={}", conformance_dir.display());
+
+    let mut code = String::new();
+
+    if let Ok(entries) = fs::read_dir(&conformance_dir) {
+        let mut names: Vec<String> = entries
+            .filter_map(|e| {
+                let e = e.ok()?;
+                if e.file_type().ok()?.is_dir() {
+                    Some(e.file_name().to_string_lossy().to_string())
+                } else {
+                    None
+                }
+            })
+            .filter(|n| !n.starts_with('.'))
+            .collect();
+        names.sort();
+
+        for name in &names {
+            let ident = name.replace('-', "_");
+            code.push_str(&format!(
+                r#"
+mod {ident} {{
+    use super::*;
+    fn fixture() -> Fixture {{ load_fixture("{name}") }}
+    #[test] fn events() {{ check_events(&fixture()); }}
+    #[test] fn html_inline() {{ check_html_inline(&fixture()); }}
+    #[test] fn html_linked() {{ check_html_linked(&fixture()); }}
+    #[test] fn html_multi_themes() {{ check_html_multi_themes(&fixture()); }}
+    #[test] fn terminal() {{ check_terminal(&fixture()); }}
+}}
+"#
+            ));
+        }
+    }
+
+    fs::write(out_dir.join("conformance_tests.rs"), code).unwrap();
 }
 
 struct TreeSitterParser {
@@ -172,6 +243,13 @@ fn vendored_parsers() {
         extra_files: vec![],
     });
 
+    #[cfg(feature = "lang-http")]
+    parsers.push(TreeSitterParser {
+        name: "tree-sitter-http",
+        src_dir: "vendored_parsers/tree-sitter-http/src",
+        extra_files: vec![],
+    });
+
     #[cfg(feature = "lang-iex")]
     parsers.push(TreeSitterParser {
         name: "tree-sitter-iex",
@@ -294,87 +372,60 @@ fn vendored_parsers() {
     parsers.par_iter().for_each(|p| p.build());
 }
 
-fn read_query_file(path: &Path, language: &str, query: &str) -> String {
+fn workspace_root() -> PathBuf {
+    manifest_dir()
+        .parent()
+        .unwrap()
+        .parent()
+        .unwrap()
+        .to_path_buf()
+}
+
+fn read_query_file(path: &Path) -> String {
     if !path.exists() {
         return String::new();
     }
 
-    let mut query_content: Vec<String> = Vec::new();
+    let content = fs::read_to_string(path).expect("failed to read query file");
+    lumis_build::convert_lua_matches(&content)
+}
 
-    let original_content = fs::read_to_string(path).expect("failed to ready query file");
+fn require_highlights_query(path: &Path, language: &str) {
+    assert!(
+        path.exists(),
+        "missing processed highlights query for language '{language}' at {}. Run `just langs-preprocess-queries` first.",
+        path.display()
+    );
 
-    // fix incompatible patterns
-    let content = original_content
-        .replace("@spell", "")
-        .replace("@nospell", "")
-        .replace("; inherits html_tags", "; inherits: html_tags")
-        .replace(
-            "#set! @string.special.url url @string.special.url",
-            "#set! @string.special.url url \"string.special.url\"",
-        )
-        .replace(
-            "#set! @_label url @_url",
-            "#set! @_label url \"markup.link.url\"",
-        )
-        .replace(
-            "#set! @_url url @_url",
-            "#set! @_url highlight \"markup.link.url\"",
-        )
-        .replace(
-            "#set! @_hyperlink url @markup.link.url",
-            "#set! @_hyperlink highlight \"markup.link.url\"",
-        )
-        .replace("\\\\c", "(?i)")
-        .replace("^{[-]|[^|]", "^\\{[-]|^\\{[^|]")
-        .replace(r#""^\\if"#, r#""^if"#);
-
-    let content = convert_lua_matches(&content);
-
-    for line in content.lines() {
-        if line.starts_with("; inherits: ") {
-            let inherits_str = line.trim_start_matches("; inherits: ").trim();
-
-            let parent_languages: Vec<String> = inherits_str
-                .split(',')
-                .map(|s| s.trim().to_string())
-                .collect();
-
-            for parent_language in parent_languages {
-                let parent_path =
-                    manifest_dir().join(format!("queries/{parent_language}/{query}.scm"));
-                let parent_content = read_query_file(&parent_path, &parent_language, query);
-                query_content.push(parent_content.clone());
-            }
-        }
-    }
-
-    query_content.push(format!("\n; query: {language}"));
-    query_content.push(content.clone());
-
-    let overwrite_path = manifest_dir().join(format!("overwrites/{language}/{query}.scm"));
-    if overwrite_path.exists() {
-        println!(
-            "cargo:warning=appending {} into {}",
-            overwrite_path.display(),
+    let content = fs::read_to_string(path).unwrap_or_else(|err| {
+        panic!(
+            "failed to read processed highlights query for language '{language}' at {}: {err}",
             path.display()
-        );
-        let overwrite_content =
-            fs::read_to_string(&overwrite_path).expect("failed to read overwrite file");
-        query_content.push(format!("\n; overwrite: {}", overwrite_path.display()));
-        query_content.push(overwrite_content);
-    }
+        )
+    });
 
-    query_content.join("\n")
+    assert!(
+        !content.trim().is_empty(),
+        "empty processed highlights query for language '{language}' at {}. Run `just langs-preprocess-queries` again.",
+        path.display()
+    );
 }
 
 fn queries() {
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
     let dest_path = out_dir.join("queries_constants.rs");
 
-    let queries_path = manifest_dir().join("queries");
+    let queries_path = workspace_root().join("queries").join("processed");
     let mut generated_code = TokenStream::new();
 
-    let entries = fs::read_dir(&queries_path).unwrap();
+    println!("cargo:rerun-if-changed={}", queries_path.display());
+
+    let entries = fs::read_dir(&queries_path).unwrap_or_else(|_| {
+        panic!(
+            "failed to read queries/processed directory at {}. Run `just langs-preprocess-queries` first.",
+            queries_path.display()
+        )
+    });
 
     for entry in entries {
         let entry = entry.unwrap();
@@ -385,16 +436,6 @@ fn queries() {
         }
 
         let language = path.file_name().unwrap().to_str().unwrap();
-        println!(
-            "cargo:rerun-if-changed={}",
-            manifest_dir().join(format!("queries/{language}")).display()
-        );
-        println!(
-            "cargo:rerun-if-changed={}",
-            manifest_dir()
-                .join(format!("overwrites/{language}"))
-                .display()
-        );
 
         // Check if we should generate constants for this language based on feature flags
 
@@ -439,6 +480,7 @@ fn queries() {
             "hcl" => cfg!(feature = "lang-hcl"),
             "heex" => cfg!(feature = "lang-heex"),
             "html" => cfg!(feature = "lang-html"),
+            "http" => cfg!(feature = "lang-http"),
             "iex" => cfg!(feature = "lang-iex"),
             "java" => cfg!(feature = "lang-java"),
             "javascript" => cfg!(feature = "lang-javascript"),
@@ -485,10 +527,12 @@ fn queries() {
         let lang_upper = language.to_uppercase();
         let queries = ["highlights", "injections", "locals"];
 
+        require_highlights_query(&path.join("highlights.scm"), language);
+
         for query in queries {
             let file_path = path.join(format!("{query}.scm"));
             let const_name = format_ident!("{}_{}", lang_upper, query.to_uppercase());
-            let processed_content = read_query_file(&file_path, language, query);
+            let processed_content = read_query_file(&file_path);
 
             generated_code.extend(quote! {
                 #[doc(hidden)]
@@ -509,237 +553,4 @@ fn queries() {
         prettyplease::unparse(&syn::parse2::<syn::File>(generated_code).unwrap())
     )
     .unwrap();
-}
-
-fn convert_lua_matches(content: &str) -> String {
-    let mut result = String::new();
-    let lines: Vec<&str> = content.lines().collect();
-
-    for line in lines {
-        let line = line
-            .replace("#lua-match?", "#match?")
-            .replace("#not-lua-match?", "#not-match?");
-
-        if line.contains("#match?") || line.contains("#not-match?") {
-            if let Some(pattern_start) = line.find('"') {
-                if let Some(pattern_end) = line[pattern_start + 1..].find('"') {
-                    let pattern_end = pattern_start + 1 + pattern_end;
-                    let lua_pattern = &line[pattern_start + 1..pattern_end];
-
-                    let rust_pattern = convert_lua_pattern_to_rust_regex(lua_pattern);
-
-                    let mut new_line = line[..pattern_start + 1].to_string();
-                    new_line.push_str(&rust_pattern);
-                    new_line.push_str(&line[pattern_end..]);
-
-                    result.push_str(&new_line);
-                    result.push('\n');
-                    continue;
-                }
-            }
-        }
-
-        result.push_str(&line);
-        result.push('\n');
-    }
-
-    if !content.ends_with('\n') && result.ends_with('\n') {
-        result.pop();
-    }
-
-    result
-}
-
-fn convert_lua_pattern_to_rust_regex(lua_pattern: &str) -> String {
-    let mut result = String::new();
-    let mut chars = lua_pattern.chars().peekable();
-
-    while let Some(c) = chars.next() {
-        if c == '%' {
-            if let Some(&next_char) = chars.peek() {
-                match next_char {
-                    'd' => {
-                        result.push_str("\\d");
-                        chars.next();
-                    }
-                    's' => {
-                        result.push_str("\\s");
-                        chars.next();
-                    }
-                    'l' => {
-                        result.push_str("[a-z]");
-                        chars.next();
-                    }
-                    'u' => {
-                        result.push_str("[A-Z]");
-                        chars.next();
-                    }
-                    'A' => {
-                        result.push_str("[^a-zA-Z]");
-                        chars.next();
-                    }
-                    'S' => {
-                        result.push_str("\\S");
-                        chars.next();
-                    }
-                    '.' => {
-                        result.push_str("\\.");
-                        chars.next();
-                    }
-                    '%' => {
-                        result.push('%');
-                        chars.next();
-                    }
-                    '{' => {
-                        result.push_str("\\{");
-                        chars.next();
-                    }
-                    '}' => {
-                        result.push_str("\\}");
-                        chars.next();
-                    }
-                    '$' => {
-                        // Special handling for $
-                        result.push_str("\\$");
-                        chars.next();
-                        // Check if next char is {, which needs special handling in Rust regex
-                        if let Some(&next) = chars.peek() {
-                            if next == '{' {
-                                result.push('\\'); // Add extra escape for ${
-                            }
-                        }
-                    }
-                    '^' => {
-                        result.push_str("\\^");
-                        chars.next();
-                    }
-                    _ => {
-                        result.push('\\');
-                        result.push(next_char);
-                        chars.next();
-                    }
-                }
-            } else {
-                result.push('%');
-            }
-        } else if c == '\\' {
-            result.push('\\');
-            result.push('\\');
-            if let Some(&next_char) = chars.peek() {
-                result.push(next_char);
-                chars.next();
-            }
-        } else if c == '$' {
-            // Handle special $ character
-            result.push_str("\\$");
-            // Check if next char is {, which needs special handling in Rust regex
-            if let Some(&next) = chars.peek() {
-                if next == '{' {
-                    result.push('\\'); // Add extra escape for ${
-                }
-            }
-        } else if c == '.'
-            || c == '*'
-            || c == '+'
-            || c == '?'
-            || c == '('
-            || c == ')'
-            || c == '['
-            || c == ']'
-            || c == '{'
-            || c == '}'
-            || c == '|'
-            || (c == '^' && !result.is_empty())
-        {
-            result.push('\\');
-            result.push(c);
-        } else {
-            result.push(c);
-        }
-    }
-
-    result
-}
-
-fn themes() {
-    println!(
-        "cargo:rerun-if-changed={}",
-        manifest_dir().join("themes").display()
-    );
-
-    let out_dir = env::var("OUT_DIR").unwrap();
-    let dest_path = Path::new(&out_dir).join("theme_data.rs");
-    let themes_dir = manifest_dir().join("themes");
-
-    let theme_names: Vec<String> = fs::read_dir(&themes_dir)
-        .unwrap()
-        .filter_map(|entry| {
-            let entry = entry.ok()?;
-            let path = entry.path();
-            if path.extension().and_then(|s| s.to_str()) == Some("json") {
-                path.file_stem().and_then(|s| s.to_str()).map(String::from)
-            } else {
-                None
-            }
-        })
-        .collect();
-
-    let theme_constants = theme_names.iter().map(|name| {
-        let constant_name = format_ident!("{}", name.to_uppercase());
-        let json_path = format!("{}/{}.json", themes_dir.display(), name);
-
-        quote! {
-            #[doc(hidden)]
-            pub(crate) static #constant_name: LazyLock<Theme> = LazyLock::new(|| {
-                let theme_str = include_str!(#json_path);
-                 crate::themes::from_json(theme_str).unwrap_or_else(|_| panic!("failed to load theme: {}", #name))
-            });
-        }
-    });
-
-    let theme_refs = theme_names.iter().map(|name| {
-        let constant_name = format_ident!("{}", name.to_uppercase());
-        quote! { &#constant_name }
-    });
-
-    let theme_name_matches = theme_names.iter().map(|name| {
-        let constant_name = format_ident!("{}", name.to_uppercase());
-        let name_str = name.to_lowercase();
-        quote! { #name_str => Ok(#constant_name.clone()), }
-    });
-
-    let output = quote! {
-        use std::sync::LazyLock;
-
-        #(#theme_constants)*
-
-        #[doc(hidden)]
-        pub static ALL_THEMES: LazyLock<Vec<&'static Theme>> = LazyLock::new(|| vec![
-            #(#theme_refs),*
-        ]);
-
-        /// Retrieves a theme by its name.
-        ///
-        /// Returns an owned `Theme` that can be used for syntax highlighting.
-        ///
-        /// # Examples
-        ///
-        /// ```
-        /// use lumis::themes;
-        ///
-        /// let theme = themes::get("github_light").expect("Theme not found");
-        /// assert_eq!(theme.name, "github_light");
-        ///
-        /// let theme = themes::get("non_existent_theme");
-        /// assert!(theme.is_err());
-        /// ```
-        pub fn get(name: &str) -> Result<Theme, ThemeError> {
-            match name {
-                #(#theme_name_matches)*
-                _ => Err(ThemeError::NotFound(name.to_string())),
-            }
-        }
-    };
-
-    fs::write(dest_path, output.to_string()).unwrap();
 }

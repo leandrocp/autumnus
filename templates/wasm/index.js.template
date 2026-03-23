@@ -1,0 +1,3 @@
+const wasmBase64 = "{base64_wasm}"
+const wasmBinary = Uint8Array.from(atob(wasmBase64), c => c.charCodeAt(0))
+export default wasmBinary

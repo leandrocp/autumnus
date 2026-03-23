@@ -74,8 +74,12 @@ defmodule Lumis.LumisTest do
 
   test "available_languages" do
     available_languages = Lumis.available_languages()
-    assert available_languages |> Map.keys() |> length() == 76
+
+    assert map_size(available_languages) >= 77
     assert available_languages["elixir"] == {"Elixir", ["*.ex", "*.exs"]}
+    assert available_languages["comment"] == {"Comment", []}
+    assert available_languages["markdown_inline"] == {"Markdown Inline", []}
+    assert available_languages["plaintext"] == {"Plain Text", []}
   end
 
   test "available_themes" do

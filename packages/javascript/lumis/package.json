@@ -1,0 +1,92 @@
+{
+  "name": "@lumis-sh/lumis",
+  "version": "0.0.1",
+  "description": "Syntax Highlighter powered by Tree-sitter and Neovim themes.",
+  "author": "Leandro Pereira",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leandrocp/lumis.git",
+    "directory": "packages/javascript/lumis"
+  },
+  "bugs": "https://github.com/leandrocp/lumis/issues",
+  "homepage": "https://lumis.sh",
+  "keywords": [
+    "syntax-highlighting",
+    "tree-sitter",
+    "highlighter",
+    "code-highlighting"
+  ],
+  "sideEffects": false,
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "browser": "./dist/index.browser.js",
+      "node": "./dist/index.js",
+      "import": "./dist/index.js",
+      "default": "./dist/index.browser.js"
+    },
+    "./formatters": {
+      "types": "./dist/formatters.d.ts",
+      "import": "./dist/formatters.js"
+    },
+    "./formatters/html": {
+      "types": "./dist/formatters/html.d.ts",
+      "import": "./dist/formatters/html.js"
+    },
+    "./formatters/ansi": {
+      "types": "./dist/formatters/ansi.d.ts",
+      "import": "./dist/formatters/ansi.js"
+    },
+    "./langs/*": {
+      "types": "./dist/langs/*.d.ts",
+      "import": "./dist/langs/*.js"
+    },
+    "./bundles/*": {
+      "types": "./dist/bundles/*.d.ts",
+      "import": "./dist/bundles/*.js"
+    }
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ],
+  "packageManager": "pnpm@10.31.0",
+  "scripts": {
+    "build:langs": "tsx scripts/build-langs.ts",
+    "build:runtime-wasm": "tsx scripts/build-runtime-wasm.ts",
+    "build:generate": "pnpm run build:runtime-wasm && pnpm run build:langs",
+    "build": "pnpm run build:generate && tsup",
+    "test": "vitest run --exclude test/all-languages-load.test.ts",
+    "test:all-languages": "vitest run test/all-languages-load.test.ts",
+    "dev": "vite",
+    "docs": "typedoc",
+    "lint": "oxlint --type-aware src/",
+    "fmt": "oxfmt src/",
+    "fmt:check": "oxfmt --check src/",
+    "prepack": "pnpm run build"
+  },
+  "dependencies": {
+    "web-tree-sitter": "0.26.7"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@lumis-sh/themes": "workspace:^0.0.2",
+    "@lumis-sh/wasm-json": "^0.24.8",
+    "@types/node": "^25.3.2",
+    "oxfmt": "^0.35.0",
+    "oxlint": "1.55.0",
+    "oxlint-tsgolint": "0.17.0",
+    "smol-toml": "^1.6.0",
+    "tsup": "^8.3.0",
+    "tsx": "^4.19.0",
+    "typedoc": "^0.28.17",
+    "typescript": "^5.6.0",
+    "vite": "^7.3.1",
+    "vitest": "^4.0.18"
+  }
+}

@@ -1,0 +1,2 @@
+TODO(someone): tighten query validation after parser load tests land
+NOTE: comments should still parse standalone

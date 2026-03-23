@@ -18,11 +18,31 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - uses: leafo/gh-actions-lua@v12
+
+      - uses: leafo/gh-actions-luarocks@v6
+
+      - name: Install Lua dependencies
+        run: luarocks install toml-edit
+
       - name: Generate language matrix
         id: set-matrix
         run: |
-          LANGS=$(cargo metadata --format-version 1 --no-deps \
-            | jq -c '.packages[] | select(.name == "lumis") | .metadata.langs.parsers | to_entries | map(select(.value.git)) | map(.key)')
+          LANGS=$(lua -e "
+            local toml_edit = require('toml_edit')
+            local f = io.open('languages.toml', 'r')
+            local tbl = toml_edit.parse_as_tbl(f:read('*a'))
+            f:close()
+            local names = {}
+            for k, v in pairs(tbl.parsers) do
+              if v.git then names[#names+1] = k end
+            end
+            table.sort(names)
+            io.write('[\"' .. table.concat(names, '\",\"') .. '\"]')
+          ")
           echo "Generated matrix for languages: $LANGS"
           echo "languages=$LANGS" >> $GITHUB_OUTPUT
 
@@ -44,28 +64,23 @@ jobs:
 
       - uses: leafo/gh-actions-lua@v12
 
-      - uses: leafo/gh-actions-luarocks@v5
+      - uses: leafo/gh-actions-luarocks@v6
 
       - name: Install Lua dependencies
         run: luarocks install toml-edit && luarocks install dkjson
 
-      - name: langs-get-parsers for ${{ matrix.language }}
-        run: just langs-get-parsers ${{ matrix.language }}
-
-      - name: langs-get-queries for ${{ matrix.language }}
-        run: just langs-get-queries ${{ matrix.language }}
-
-      - name: docs-gen-languages
-        run: just docs-gen-languages
+      - run: just langs-update ${{ matrix.language }}
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.CI_TOKEN }}
           add-paths: |
-            crates/lumis/Cargo.toml
+            languages.toml
             crates/lumis/vendored_parsers
-            crates/lumis/queries
+            queries/upstream
+            queries/processed
+            queries/overrides
             LANGUAGES.md
           commit-message: "chore: update ${{ matrix.language }}"
           title: "chore: update ${{ matrix.language }}"

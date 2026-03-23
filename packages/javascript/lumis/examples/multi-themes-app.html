@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>App-quality multi-theme demo</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  </head>
+<body class="min-h-screen bg-slate-950 text-slate-100 antialiased">
+  <main class="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-6 lg:px-8">
+    <nav class="flex items-center justify-between rounded-2xl border border-cyan-400/20 bg-slate-950/70 px-4 py-3 shadow-[0_20px_50px_rgba(2,6,23,0.45)] backdrop-blur">
+      <a class="text-sm font-medium text-slate-200 transition-colors hover:text-white" href="/">All examples</a>
+      <span class="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-[11px] uppercase tracking-[0.25em] text-cyan-300">Multi-theme app</span>
+    </nav>
+
+    <section class="rounded-[28px] border border-slate-800 bg-slate-950/70 p-6 shadow-[0_20px_50px_rgba(2,6,23,0.45)] backdrop-blur md:p-8">
+      <div>
+        <p class="mb-3 text-[11px] uppercase tracking-[0.3em] text-cyan-300">htmlMultiThemes in context</p>
+        <h1>An app shell, not just a code block</h1>
+        <p class="max-w-3xl text-base leading-7 text-slate-400">
+          The same rendered markup can live inside a real docs-style interface and switch themes without re-highlighting the source.
+        </p>
+      </div>
+    </section>
+
+    <section class="grid gap-0 overflow-hidden rounded-[28px] border border-slate-800 bg-slate-950/70 shadow-[0_20px_50px_rgba(2,6,23,0.45)] lg:grid-cols-[280px_minmax(0,1fr)]" id="docs-app" data-theme="light">
+      <aside class="border-b border-slate-800 bg-slate-950/95 p-6 lg:border-b-0 lg:border-r">
+        <h2>Components</h2>
+        <p>Switch the surrounding app theme and keep the same highlighted markup mounted.</p>
+        <div class="mt-4 flex flex-wrap gap-2">
+          <button class="rounded-full border border-cyan-400/40 bg-cyan-400/10 px-3 py-1 text-xs font-medium text-cyan-200 transition-colors hover:border-cyan-300 hover:text-white" data-theme-target="light">Light</button>
+          <button class="rounded-full border border-slate-700 bg-slate-950/80 px-3 py-1 text-xs font-medium text-slate-300 transition-colors hover:border-cyan-300 hover:text-white" data-theme-target="night">Night</button>
+          <button class="rounded-full border border-slate-700 bg-slate-950/80 px-3 py-1 text-xs font-medium text-slate-300 transition-colors hover:border-cyan-300 hover:text-white" data-theme-target="neon">Neon</button>
+        </div>
+
+        <div class="mt-6 space-y-3">
+          <div class="rounded-xl border border-slate-800 bg-slate-950/70 p-4">
+            <strong>Button</strong>
+            <span>Variants, states, and shortcuts</span>
+          </div>
+          <div class="rounded-xl border border-slate-800 bg-slate-950/70 p-4">
+            <strong>Dialog</strong>
+            <span>Structured layout and escape hatches</span>
+          </div>
+          <div class="rounded-xl border border-slate-800 bg-slate-950/70 p-4">
+            <strong>Tabs</strong>
+            <span>Compound components and roving focus</span>
+          </div>
+        </div>
+      </aside>
+
+      <section class="p-6 md:p-8">
+        <p class="mb-3 text-[11px] uppercase tracking-[0.3em] text-cyan-300">Live preview</p>
+        <h2>Button API</h2>
+        <p>Rendered once with three themes embedded as CSS variables. The UI chrome flips modes without asking Lumis to do the work again.</p>
+
+        <div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/95 shadow-md" style="margin-top: 1rem;">
+          <div class="flex items-center justify-between gap-4 border-b border-slate-800 bg-slate-950/95 px-4 py-3">
+            <div class="flex items-center gap-3">
+              <div class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-rose-400/80"></span><span class="h-2.5 w-2.5 rounded-full bg-amber-300/80"></span><span class="h-2.5 w-2.5 rounded-full bg-emerald-400/80"></span></div>
+              <div>
+                <div class="font-medium text-white">button.tsx</div>
+                <div class="text-sm text-slate-500">packages/ui/src/button.tsx</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-[11px] uppercase tracking-[0.25em] text-cyan-300">htmlMultiThemes</span>
+            </div>
+          </div>
+          <div class="overflow-x-auto bg-slate-950/60 p-4" id="output"></div>
+        </div>
+        <div id="error-output" class="hidden rounded-2xl border border-rose-500/30 bg-rose-950/40 px-4 py-3 text-sm text-rose-200"></div>
+      </section>
+    </section>
+  </main>
+
+  <script type="module">
+    import { createHighlighter } from '../src/index.browser.ts'
+    import { htmlMultiThemes } from '../src/formatters.ts'
+    import tsx from '../langs/tsx.ts'
+    import githubLight from '@lumis-sh/themes/github_light'
+    import tokyonightMoon from '@lumis-sh/themes/tokyonight_moon'
+    import cyberdreamDark from '@lumis-sh/themes/cyberdream_dark'
+
+    const code = `type ButtonProps = {
+  tone?: 'primary' | 'ghost'
+  size?: 'sm' | 'md' | 'lg'
+  children: React.ReactNode
+}
+
+export function Button({
+  tone = 'primary',
+  size = 'md',
+  children,
+}: ButtonProps) {
+  const classes = [
+    'btn',
+    \`btn--\${tone}\`,
+    \`btn--\${size}\`,
+  ].join(' ')
+
+  return <button className={classes}>{children}</button>
+}`
+
+    const output = document.getElementById('output')
+    const app = document.getElementById('docs-app')
+    const errorBox = document.getElementById('error-output')
+    const toggles = Array.from(document.querySelectorAll('[data-theme-target]'))
+
+    try {
+      const hl = await createHighlighter({ langs: [tsx] })
+
+      output.innerHTML = hl.highlight(
+        code,
+        htmlMultiThemes({
+        language: tsx,
+          themes: {
+            light: githubLight,
+            night: tokyonightMoon,
+            neon: cyberdreamDark,
+          },
+          defaultTheme: 'light',
+          cssVariablePrefix: '--app-code',
+          highlightLines: { lines: [[7, 14]], style: 'theme' },
+        })
+      )
+
+      function setTheme(nextTheme) {
+        app.dataset.theme = nextTheme
+        for (const button of toggles) {
+          const active = button.dataset.themeTarget === nextTheme
+          button.classList.toggle('border-cyan-400/40', active)
+          button.classList.toggle('bg-cyan-400/10', active)
+          button.classList.toggle('text-cyan-200', active)
+          button.classList.toggle('border-slate-700', !active)
+          button.classList.toggle('bg-slate-950/80', !active)
+          button.classList.toggle('text-slate-300', !active)
+        }
+      }
+
+      for (const button of toggles) {
+        button.addEventListener('click', () => setTheme(button.dataset.themeTarget))
+      }
+    } catch (error) {
+      errorBox.classList.remove('hidden')
+      errorBox.textContent = error instanceof Error ? error.message : String(error)
+    }
+  </script>
+</body>
+</html>

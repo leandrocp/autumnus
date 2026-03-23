@@ -1,0 +1,22 @@
+# @lumis-sh/wasm-{lang}
+
+Tree-sitter WASM grammar for {lang}
+
+Built with [`tree-sitter build --wasm`](https://tree-sitter.github.io/tree-sitter/cli/build.html) `v{tree_sitter_cli_version}`
+
+Used by [Lumis](https://lumis.sh) and compatible with [web-tree-sitter](https://www.npmjs.com/package/web-tree-sitter) v{tree_sitter_cli} and other WASM runtimes.
+
+## Parser
+
+| Parser | Version | Rev |
+| ------ | ------- | --- |
+| [{git_url}]({git_url}) | {upstream_version} | {rev} |
+
+## CDN
+
+- [https://unpkg.com/@lumis-sh/wasm-{lang}@{tree_sitter_cli}/{wasm_name}.wasm](https://unpkg.com/@lumis-sh/wasm-{lang}@{tree_sitter_cli}/{wasm_name}.wasm)
+- [https://cdn.jsdelivr.net/npm/@lumis-sh/wasm-{lang}@{tree_sitter_cli}/{wasm_name}.wasm](https://cdn.jsdelivr.net/npm/@lumis-sh/wasm-{lang}@{tree_sitter_cli}/{wasm_name}.wasm)
+
+## License
+
+This package redistributes the parser source listed above; see that project for its license.

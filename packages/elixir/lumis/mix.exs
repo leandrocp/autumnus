@@ -91,7 +91,8 @@ defmodule Lumis.MixProject do
       {:ex_doc, ">= 0.0.0", only: :docs},
       {:makeup_elixir, ">= 0.0.0", only: :docs},
       {:makeup_eex, ">= 0.0.0", only: :docs},
-      {:makeup_syntect, ">= 0.0.0", only: :docs}
+      {:makeup_syntect, ">= 0.0.0", only: :docs},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false}
     ]
   end
 

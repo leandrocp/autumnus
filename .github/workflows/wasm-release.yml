@@ -1,0 +1,83 @@
+name: WASM Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      parser:
+        description: "Parser name (leave empty for all)"
+        required: false
+        default: ""
+  # push:
+  #   tags-ignore:
+  #     - "**"
+  #   paths:
+  #     - "languages.toml"
+  #     - ".github/workflows/wasm-release.yml"
+  #     - "crates/dev/**"
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      parsers: ${{ steps.needed.outputs.parsers }}
+      skip: ${{ steps.needed.outputs.skip }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: taiki-e/install-action@just
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Determine which parsers need publishing
+        id: needed
+        run: |
+          needed=$(just wasm-publish-needed "${{ inputs.parser }}")
+          if [ -z "$needed" ]; then
+            echo "All packages already published, nothing to build"
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo 'parsers=[]' >> $GITHUB_OUTPUT
+          else
+            echo "Need to build: $needed"
+            echo "skip=false" >> $GITHUB_OUTPUT
+            json=$(echo "$needed" | tr ' ' '\n' | jq -R . | jq -sc .)
+            echo "parsers=$json" >> $GITHUB_OUTPUT
+          fi
+
+  build:
+    needs: detect
+    if: needs.detect.outputs.skip == 'false'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        parser: ${{ fromJson(needs.detect.outputs.parsers) }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: taiki-e/install-action@just
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+
+      - uses: mymindstorm/setup-emsdk@v14
+
+      - run: npm install -g tree-sitter-cli@0.26
+
+      - run: just wasm-publish-prepare "${{ matrix.parser }}"
+
+      - name: Publish to npm
+        run: cd "tmp/wasm-publish/${{ matrix.parser }}" && npm publish --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
