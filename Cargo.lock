@@ -522,7 +522,7 @@ dependencies = [
  "full_moon",
  "glob",
  "lumis",
- "lumis-core",
+ "lumis-core 0.0.1",
  "md-5",
  "regex",
  "serde",
@@ -883,8 +883,8 @@ dependencies = [
  "cc",
  "derive_builder",
  "glob",
- "lumis-build",
- "lumis-core",
+ "lumis-build 0.0.1",
+ "lumis-core 0.0.1",
  "pretty_assertions",
  "prettyplease",
  "proc-macro2",
@@ -954,6 +954,12 @@ name = "lumis-build"
 version = "0.0.1"
 
 [[package]]
+name = "lumis-build"
+version = "0.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8cd1020dacf54e11fd412ef98e67d94586552305cd6e8ddb29add52e7ccef8ea"
+
+[[package]]
 name = "lumis-cli"
 version = "0.0.1"
 dependencies = [
@@ -961,8 +967,8 @@ dependencies = [
  "assert_cmd",
  "clap",
  "etcetera",
- "lumis-build",
- "lumis-core",
+ "lumis-build 0.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "lumis-core 0.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "predicates",
  "prettyplease",
  "proc-macro2",
@@ -985,6 +991,25 @@ dependencies = [
  "derive_builder",
  "glob",
  "pretty_assertions",
+ "prettyplease",
+ "proc-macro2",
+ "quote",
+ "regex",
+ "serde",
+ "serde_json",
+ "syn 2.0.117",
+ "toml",
+ "v_htmlescape",
+]
+
+[[package]]
+name = "lumis-core"
+version = "0.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c8f44f465915ebeb0926afa7740e62346c97cac65b2b900f47b1a2c84427c159"
+dependencies = [
+ "derive_builder",
+ "glob",
  "prettyplease",
  "proc-macro2",
  "quote",

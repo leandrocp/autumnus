@@ -13,6 +13,7 @@ keywords = ["lumis", "syntax-highlighter", "tree-sitter", "neovim"]
 categories = ["text-processing"]
 include = [
     "/build.rs",
+    "/languages.toml",
     "/src/",
     "/vendored_parsers/tree-sitter-*/src/tree_sitter/*.h",
     "/vendored_parsers/tree-sitter-*/src/*.h",

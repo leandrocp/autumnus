@@ -18,7 +18,7 @@ path = "src/main.rs"
 doc = false
 
 [dependencies]
-lumis-core = { version = "0.0.1", path = "../lumis-core", features = ["all-languages"] }
+lumis-core = { version = "0.0.1", features = ["all-languages"] }
 tree-sitter = { version = "0.25", features = ["wasm"] }
 streaming-iterator = "0.1"
 thiserror = "2"
@@ -41,4 +41,4 @@ syn = { version = "2", features = ["full", "parsing"] }
 prettyplease = "0.2"
 toml = "0.8"
 serde = { version = "1", features = ["derive"] }
-lumis-build = { path = "../lumis-build" }
+lumis-build = { version = "0.0.1" }
