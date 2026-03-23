@@ -3,6 +3,33 @@ import { loadTheme, THEMES, THEMES_BY_ID } from "./data/themes";
 import { preloadAllLanguages, renderHighlight, renderHighlightMultiTheme } from "./lib/highlighter";
 import { mountHeroFluid } from "./lib/hero-fluid";
 
+const ACTIVE_TAB_CLASSES = ["border-zinc-900", "text-zinc-900", "dark:border-white", "dark:text-white"];
+const INACTIVE_TAB_CLASSES = ["border-transparent", "text-zinc-400"];
+
+function setupTabs(
+  root: HTMLElement,
+  tabSelector: string,
+  dataAttr: string,
+  panelSelector: string,
+  panelDataAttr: string,
+) {
+  const tabs = root.querySelectorAll<HTMLButtonElement>(tabSelector);
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      const id = tab.dataset[dataAttr]!;
+      tabs.forEach((t) => {
+        const isActive = t.dataset[dataAttr] === id;
+        ACTIVE_TAB_CLASSES.forEach((c) => t.classList.toggle(c, isActive));
+        INACTIVE_TAB_CLASSES.forEach((c) => t.classList.toggle(c, !isActive));
+        if (t.hasAttribute("aria-selected")) t.setAttribute("aria-selected", String(isActive));
+      });
+      root.querySelectorAll(panelSelector).forEach((panel) => {
+        panel.classList.toggle("hidden", (panel as HTMLElement).dataset[panelDataAttr] !== id);
+      });
+    });
+  });
+}
+
 const initialLanguage = LANGUAGES[0];
 const initialTheme = THEMES[0];
 
@@ -502,31 +529,14 @@ export async function mountApp(root: HTMLDivElement) {
     </footer>
   `;
 
-  // Hero fluid animation
+  // Hero fluid animation (start immediately, before any WASM loading)
   const heroFluidContainer = root.querySelector<HTMLDivElement>("#hero-fluid");
   if (heroFluidContainer) {
     mountHeroFluid(heroFluidContainer);
   }
 
-  // Install tab switching
-  const installTabs = root.querySelectorAll<HTMLButtonElement>(".install-tab");
-  installTabs.forEach((tab) => {
-    tab.addEventListener("click", () => {
-      const id = tab.dataset.install!;
-      installTabs.forEach((t) => {
-        const isActive = t.dataset.install === id;
-        t.classList.toggle("border-zinc-900", isActive);
-        t.classList.toggle("text-zinc-900", isActive);
-        t.classList.toggle("dark:border-white", isActive);
-        t.classList.toggle("dark:text-white", isActive);
-        t.classList.toggle("border-transparent", !isActive);
-        t.classList.toggle("text-zinc-400", !isActive);
-      });
-      root.querySelectorAll("[data-install-panel]").forEach((panel) => {
-        panel.classList.toggle("hidden", (panel as HTMLElement).dataset.installPanel !== id);
-      });
-    });
-  });
+  setupTabs(root, ".install-tab", "install", "[data-install-panel]", "installPanel");
+
 
   // Copy install command
   root.querySelectorAll<HTMLButtonElement>(".copy-install").forEach((btn) => {
@@ -543,26 +553,7 @@ export async function mountApp(root: HTMLDivElement) {
     });
   });
 
-  // Quickstart tab switching
-  const tabs = root.querySelectorAll<HTMLButtonElement>(".quickstart-tab");
-  tabs.forEach((tab) => {
-    tab.addEventListener("click", () => {
-      const id = tab.dataset.tab!;
-      tabs.forEach((t) => {
-        const isActive = t.dataset.tab === id;
-        t.setAttribute("aria-selected", String(isActive));
-        t.classList.toggle("border-zinc-900", isActive);
-        t.classList.toggle("text-zinc-900", isActive);
-        t.classList.toggle("dark:border-white", isActive);
-        t.classList.toggle("dark:text-white", isActive);
-        t.classList.toggle("border-transparent", !isActive);
-        t.classList.toggle("text-zinc-400", !isActive);
-      });
-      root.querySelectorAll("[data-tab-panel]").forEach((panel) => {
-        panel.classList.toggle("hidden", (panel as HTMLElement).dataset.tabPanel !== id);
-      });
-    });
-  });
+  setupTabs(root, ".quickstart-tab", "tab", "[data-tab-panel]", "tabPanel");
 
   const languageSelect = root.querySelector<HTMLSelectElement>('select[name="language"]')!;
   const themeSelect = root.querySelector<HTMLSelectElement>('select[name="theme"]')!;

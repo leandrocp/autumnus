@@ -1,35 +1,36 @@
-import { createHighlighter } from "@lumis-sh/lumis";
-import { bundledLanguages } from "@lumis-sh/lumis/bundles/full";
-import { htmlInline, htmlMultiThemes } from "@lumis-sh/lumis/formatters";
-import type { Highlighter, Theme } from "@lumis-sh/lumis";
+import type { Theme } from "@lumis-sh/lumis";
+import type { WorkerRequest, WorkerResponse } from "./highlight-worker";
 import type { LanguageOption } from "../data/languages";
-import { LANGUAGES } from "../data/languages";
 
-const highlighterPromise = createHighlighter({
-  langs: [bundledLanguages],
-});
+const worker = new Worker(new URL("./highlight-worker.ts", import.meta.url), { type: "module" });
 
-/** Preload all language WASMs in the background so switching is instant. */
-export async function preloadAllLanguages(): Promise<void> {
-  const highlighter = await highlighterPromise;
-  await Promise.all(LANGUAGES.map((l) => highlighter.loadLanguage(l.language).catch(() => {})));
+let nextId = 0;
+const pending = new Map<number, { resolve: (v: WorkerResponse) => void }>();
+
+worker.onmessage = (e: MessageEvent<WorkerResponse>) => {
+  const handler = pending.get(e.data.id);
+  if (handler) {
+    pending.delete(e.data.id);
+    handler.resolve(e.data);
+  }
+};
+
+function send(req: Omit<WorkerRequest, "id">): Promise<WorkerResponse> {
+  const id = nextId++;
+  return new Promise((resolve) => {
+    pending.set(id, { resolve });
+    worker.postMessage({ ...req, id });
+  });
 }
 
-export async function renderHighlight(language: LanguageOption, theme: Theme, source: string, preClass?: string) {
-  const highlighter = await highlighterPromise;
-  await highlighter.loadLanguage(language.language);
-  return highlighter.highlight(
-    source,
-    htmlInline({
-      language: language.language,
-      theme,
-      preClass:
-        preClass ??
-        "m-0 overflow-x-auto p-5 font-mono text-[13px] leading-relaxed sm:p-6 sm:text-sm",
-      includeHighlights: true,
-      italic: false,
-    }),
-  );
+export async function preloadAllLanguages(): Promise<void> {
+  await send({ type: "preloadAll" });
+}
+
+export async function renderHighlight(language: LanguageOption, theme: Theme, source: string, preClass?: string): Promise<string> {
+  const res = await send({ type: "highlight", languageId: language.id, theme, source, preClass });
+  if (res.type === "error") throw new Error(res.message);
+  return (res as Extract<WorkerResponse, { type: "result" }>).html;
 }
 
 export async function renderHighlightMultiTheme(
@@ -38,19 +39,8 @@ export async function renderHighlightMultiTheme(
   darkTheme: Theme,
   source: string,
   preClass?: string,
-) {
-  const highlighter = await highlighterPromise;
-  await highlighter.loadLanguage(language.language);
-  return highlighter.highlight(
-    source,
-    htmlMultiThemes({
-      language: language.language,
-      themes: { light: lightTheme, dark: darkTheme },
-      defaultTheme: "light-dark()",
-      preClass:
-        preClass ??
-        "m-0 overflow-x-auto p-5 font-mono text-[13px] leading-relaxed sm:p-6 sm:text-sm",
-      italic: false,
-    }),
-  );
+): Promise<string> {
+  const res = await send({ type: "highlightMultiTheme", languageId: language.id, lightTheme, darkTheme, source, preClass });
+  if (res.type === "error") throw new Error(res.message);
+  return (res as Extract<WorkerResponse, { type: "result" }>).html;
 }
