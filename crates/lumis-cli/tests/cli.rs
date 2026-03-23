@@ -33,7 +33,7 @@ fn help_flag() {
 #[test]
 fn list_languages() {
     cmd()
-        .arg("list-languages")
+        .args(["languages", "list"])
         .assert()
         .success()
         .stdout(predicate::str::contains("rust"))
@@ -44,7 +44,7 @@ fn list_languages() {
 #[test]
 fn list_themes() {
     cmd()
-        .arg("list-themes")
+        .args(["themes", "list"])
         .assert()
         .success()
         .stdout(predicate::str::contains("dracula"));
@@ -74,7 +74,8 @@ fn highlight_source_diff_terminal() {
     cmd()
         .arg("--data-dir")
         .arg(fixtures_dir())
-        .args(["highlight-source", "-l", "diff", "--", DIFF_SNIPPET])
+        .args(["highlight", "-l", "diff"])
+        .write_stdin(DIFF_SNIPPET)
         .assert()
         .success()
         .stdout(predicate::str::is_empty().not());
@@ -85,17 +86,8 @@ fn highlight_source_diff_html_inline() {
     cmd()
         .arg("--data-dir")
         .arg(fixtures_dir())
-        .args([
-            "highlight-source",
-            "-l",
-            "diff",
-            "-f",
-            "html-inline",
-            "-t",
-            "dracula",
-            "--",
-            DIFF_SNIPPET,
-        ])
+        .args(["highlight", "-l", "diff", "-f", "html-inline", "-t", "dracula"])
+        .write_stdin(DIFF_SNIPPET)
         .assert()
         .success()
         .stdout(predicate::str::contains("<pre"));
@@ -106,15 +98,8 @@ fn highlight_source_diff_html_linked() {
     cmd()
         .arg("--data-dir")
         .arg(fixtures_dir())
-        .args([
-            "highlight-source",
-            "-l",
-            "diff",
-            "-f",
-            "html-linked",
-            "--",
-            DIFF_SNIPPET,
-        ])
+        .args(["highlight", "-l", "diff", "-f", "html-linked"])
+        .write_stdin(DIFF_SNIPPET)
         .assert()
         .success()
         .stdout(predicate::str::contains("<pre"));
@@ -125,7 +110,7 @@ fn highlight_source_diff_html_linked() {
 #[test]
 fn fetch_parsers_no_args_fails() {
     cmd()
-        .args(["fetch-parsers"])
+        .args(["parsers", "fetch"])
         .assert()
         .failure()
         .stderr(predicate::str::contains(
@@ -136,7 +121,7 @@ fn fetch_parsers_no_args_fails() {
 #[test]
 fn update_parsers_no_args_fails() {
     cmd()
-        .args(["update-parsers"])
+        .args(["parsers", "update"])
         .assert()
         .failure()
         .stderr(predicate::str::contains(
@@ -150,7 +135,7 @@ fn fetch_parsers_already_cached() {
     cmd()
         .arg("--data-dir")
         .arg(fixtures_dir())
-        .args(["fetch-parsers", "diff"])
+        .args(["parsers", "fetch", "diff"])
         .assert()
         .success();
 }
@@ -162,7 +147,7 @@ fn fetch_parsers_already_cached_verbose() {
         .arg("--data-dir")
         .arg(fixtures_dir())
         .arg("-v")
-        .args(["fetch-parsers", "diff"])
+        .args(["parsers", "fetch", "diff"])
         .assert()
         .success()
         .stderr(predicate::str::contains("tree-sitter-diff.wasm"));
@@ -174,7 +159,7 @@ fn update_parsers_all_empty_data_dir() {
     cmd()
         .arg("--data-dir")
         .arg(tmp.path())
-        .args(["update-parsers", "--all"])
+        .args(["parsers", "update", "--all"])
         .assert()
         .success();
 }
@@ -185,7 +170,7 @@ fn fetch_parsers_to_temp_dir() {
     cmd()
         .arg("--data-dir")
         .arg(tmp.path())
-        .args(["fetch-parsers", "json"])
+        .args(["parsers", "fetch", "json"])
         .assert()
         .success();
 
@@ -200,7 +185,7 @@ fn fetch_parsers_to_temp_dir_verbose() {
         .arg("--data-dir")
         .arg(tmp.path())
         .arg("-v")
-        .args(["fetch-parsers", "json"])
+        .args(["parsers", "fetch", "json"])
         .assert()
         .success()
         .stderr(predicate::str::contains("tree-sitter-json.wasm"));
@@ -216,7 +201,7 @@ fn fetch_parsers_then_update() {
     cmd()
         .arg("--data-dir")
         .arg(tmp.path())
-        .args(["fetch-parsers", "json"])
+        .args(["parsers", "fetch", "json"])
         .assert()
         .success();
 
@@ -225,7 +210,7 @@ fn fetch_parsers_then_update() {
         .arg("--data-dir")
         .arg(tmp.path())
         .arg("-v")
-        .args(["update-parsers", "json"])
+        .args(["parsers", "update", "json"])
         .assert()
         .success()
         .stderr(predicate::str::contains("tree-sitter-json.wasm"));
@@ -239,7 +224,7 @@ fn fetch_parsers_then_highlight() {
     cmd()
         .arg("--data-dir")
         .arg(tmp.path())
-        .args(["fetch-parsers", "json"])
+        .args(["parsers", "fetch", "json"])
         .assert()
         .success();
 
@@ -247,13 +232,8 @@ fn fetch_parsers_then_highlight() {
     cmd()
         .arg("--data-dir")
         .arg(tmp.path())
-        .args([
-            "highlight-source",
-            "-l",
-            "json",
-            "--",
-            r#"{"key": "value"}"#,
-        ])
+        .args(["highlight", "-l", "json"])
+        .write_stdin(r#"{"key": "value"}"#)
         .assert()
         .success()
         .stdout(predicate::str::is_empty().not());

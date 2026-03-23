@@ -11,6 +11,7 @@ use lumis_core::formatter::Formatter as CoreFormatter;
 use lumis_core::languages::Language;
 use std::fmt::Display;
 use std::fs;
+use std::io::{IsTerminal, Read as _};
 use std::ops::RangeInclusive;
 use std::path::{Path, PathBuf};
 
@@ -39,56 +40,13 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    /// Print supported languages and their file patterns
-    ListLanguages,
-
-    /// Print available themes (built-in and from --data-dir)
-    ListThemes,
-
-    /// Highlight a file (language is detected from the path)
+    /// Highlight source code from a file or stdin
     #[command(
-        after_help = "Examples:\n  lumis highlight main.rs\n  lumis highlight -l javascript main.txt\n  lumis highlight -f html-inline -t dracula main.rs\n  lumis highlight -h 1,3-5 lib.rs"
+        after_help = "Examples:\n  lumis highlight main.rs\n  lumis highlight -l javascript main.txt\n  lumis highlight -f html-inline -t dracula main.rs\n  lumis highlight -h 1,3-5 lib.rs\n  cat main.rs | lumis highlight -l rust\n  echo 'fn main() {}' | lumis highlight -l rust"
     )]
     Highlight {
-        /// File to highlight
-        path: String,
-
-        /// Language id override (e.g. rust, javascript, elixir)
-        #[arg(short = 'l', long)]
-        language: Option<String>,
-
-        /// Output format [default: terminal]
-        #[arg(short = 'f', long)]
-        formatter: Option<Formatter>,
-
-        /// Theme name, e.g. dracula, github_dark
-        #[arg(short = 't', long)]
-        theme: Option<String>,
-
-        /// Theme pair as name:theme_id, can be repeated (requires html-multi-themes)
-        #[arg(long)]
-        themes: Vec<String>,
-
-        /// Which --themes entry gets inline styles
-        #[arg(long)]
-        default_theme: Option<String>,
-
-        /// Prefix for CSS custom properties
-        #[arg(long, default_value = "--lumis")]
-        css_variable_prefix: String,
-
-        /// Lines to highlight, e.g. "1,3-5,10"
-        #[arg(short = 'h', long)]
-        highlight_lines: Option<String>,
-    },
-
-    /// Highlight source passed as an argument
-    #[command(
-        after_help = "Examples:\n  lumis highlight-source -l rust 'fn main() {}'\n  lumis highlight-source -l python -f html-inline -t dracula -- 'print(1)'"
-    )]
-    HighlightSource {
-        /// Source code string
-        source: String,
+        /// File to highlight (reads from stdin if omitted)
+        path: Option<String>,
 
         /// Language id (e.g. rust, javascript, elixir)
         #[arg(short = 'l', long)]
@@ -119,37 +77,41 @@ enum Commands {
         highlight_lines: Option<String>,
     },
 
-    /// Download parser WASMs ahead of time
-    #[command(
-        after_help = "Examples:\n  lumis fetch-parsers rust javascript\n  lumis fetch-parsers --all"
-    )]
-    FetchParsers {
-        /// Language names to download (e.g. rust javascript elixir)
-        languages: Vec<String>,
-
-        /// Download all supported parsers
-        #[arg(long)]
-        all: bool,
+    /// Manage languages
+    Languages {
+        #[command(subcommand)]
+        command: LanguagesCommands,
     },
 
-    /// Re-download parser WASMs to get the latest versions
-    #[command(
-        after_help = "Examples:\n  lumis update-parsers rust javascript\n  lumis update-parsers --all"
-    )]
-    UpdateParsers {
-        /// Language names to update (e.g. rust javascript elixir)
-        languages: Vec<String>,
-
-        /// Update all cached parsers
-        #[arg(long)]
-        all: bool,
+    /// Manage themes
+    Themes {
+        #[command(subcommand)]
+        command: ThemesCommands,
     },
+
+    /// Manage Tree-sitter WASM parsers
+    Parsers {
+        #[command(subcommand)]
+        command: ParsersCommands,
+    },
+}
+
+#[derive(Subcommand)]
+enum LanguagesCommands {
+    /// Print supported languages and their file patterns
+    List,
+}
+
+#[derive(Subcommand)]
+enum ThemesCommands {
+    /// Print available themes (built-in and from --data-dir)
+    List,
 
     /// Extract a theme from a Neovim colorscheme Git repo
     #[command(
-        after_help = "Examples:\n  lumis gen-theme -u https://github.com/catppuccin/nvim -c catppuccin-mocha\n  lumis gen-theme -u https://github.com/folke/tokyonight.nvim -c tokyonight-night -o tokyonight.json"
+        after_help = "Examples:\n  lumis themes generate -u https://github.com/catppuccin/nvim -c catppuccin-mocha\n  lumis themes generate -u https://github.com/folke/tokyonight.nvim -c tokyonight-night -o tokyonight.json"
     )]
-    GenTheme {
+    Generate {
         /// Git repository URL
         #[arg(short = 'u', long)]
         url: String,
@@ -169,6 +131,35 @@ enum Commands {
         /// light or dark [default: dark]
         #[arg(short = 'a', long)]
         appearance: Option<String>,
+    },
+}
+
+#[derive(Subcommand)]
+enum ParsersCommands {
+    /// Download parser WASMs ahead of time
+    #[command(
+        after_help = "Examples:\n  lumis parsers fetch rust javascript\n  lumis parsers fetch --all"
+    )]
+    Fetch {
+        /// Language names to download (e.g. rust javascript elixir)
+        languages: Vec<String>,
+
+        /// Download all supported parsers
+        #[arg(long)]
+        all: bool,
+    },
+
+    /// Re-download parser WASMs to get the latest versions
+    #[command(
+        after_help = "Examples:\n  lumis parsers update rust javascript\n  lumis parsers update --all"
+    )]
+    Update {
+        /// Language names to update (e.g. rust javascript elixir)
+        languages: Vec<String>,
+
+        /// Update all cached parsers
+        #[arg(long)]
+        all: bool,
     },
 }
 
@@ -198,8 +189,6 @@ fn main() -> Result<()> {
     let verbose = cli.verbose;
 
     match cli.command {
-        Commands::ListLanguages => list_languages(),
-        Commands::ListThemes => list_themes(&data_dir),
         Commands::Highlight {
             path,
             language,
@@ -213,8 +202,8 @@ fn main() -> Result<()> {
             let reg = registry::Registry::new(data_dir)?;
             do_highlight(
                 &reg,
-                &path,
-                language.as_deref(),
+                path,
+                language,
                 formatter,
                 theme,
                 themes,
@@ -223,50 +212,35 @@ fn main() -> Result<()> {
                 highlight_lines,
             )
         }
-        Commands::HighlightSource {
-            source,
-            language,
-            formatter,
-            theme,
-            themes,
-            default_theme,
-            css_variable_prefix,
-            highlight_lines,
-        } => {
-            let reg = registry::Registry::new(data_dir)?;
-            do_highlight_source(
-                &reg,
-                &source,
-                language.as_deref(),
-                formatter,
-                theme,
-                themes,
-                default_theme,
-                css_variable_prefix,
-                highlight_lines,
-            )
-        }
-        Commands::FetchParsers { languages, all } => {
-            let reg = registry::Registry::new(data_dir)?;
-            fetch_parsers(&reg, &languages, all, verbose)
-        }
-        Commands::UpdateParsers { languages, all } => {
-            let reg = registry::Registry::new(data_dir)?;
-            update_parsers(&reg, &languages, all, verbose)
-        }
-        Commands::GenTheme {
-            url,
-            colorscheme,
-            setup,
-            output,
-            appearance,
-        } => gen_theme::generate_theme(
-            &url,
-            &colorscheme,
-            setup.as_deref(),
-            output.as_deref(),
-            appearance.as_deref(),
-        ),
+        Commands::Languages { command } => match command {
+            LanguagesCommands::List => list_languages(),
+        },
+        Commands::Themes { command } => match command {
+            ThemesCommands::List => list_themes(&data_dir),
+            ThemesCommands::Generate {
+                url,
+                colorscheme,
+                setup,
+                output,
+                appearance,
+            } => gen_theme::generate_theme(
+                &url,
+                &colorscheme,
+                setup.as_deref(),
+                output.as_deref(),
+                appearance.as_deref(),
+            ),
+        },
+        Commands::Parsers { command } => match command {
+            ParsersCommands::Fetch { languages, all } => {
+                let reg = registry::Registry::new(data_dir)?;
+                fetch_parsers(&reg, &languages, all, verbose)
+            }
+            ParsersCommands::Update { languages, all } => {
+                let reg = registry::Registry::new(data_dir)?;
+                update_parsers(&reg, &languages, all, verbose)
+            }
+        },
     }
 }
 
@@ -459,8 +433,8 @@ fn resolve_theme(
 #[allow(clippy::too_many_arguments)]
 fn do_highlight(
     reg: &registry::Registry,
-    path: &str,
-    language: Option<&str>,
+    path: Option<String>,
+    language: Option<String>,
     formatter: Option<Formatter>,
     theme: Option<String>,
     themes: Vec<String>,
@@ -468,18 +442,35 @@ fn do_highlight(
     css_variable_prefix: String,
     highlight_lines: Option<String>,
 ) -> Result<()> {
-    let bytes = read_or_die(Path::new(path));
-    let source = std::str::from_utf8(&bytes)
-        .map_err(|e| anyhow::anyhow!("Failed to decode file '{}' as UTF-8: {}", path, e))?;
-
-    let lang = if language.is_some() {
-        Language::guess(language, source)
+    let (source, lang) = if let Some(path) = path {
+        let bytes = read_or_die(Path::new(&path));
+        let source = std::str::from_utf8(&bytes)
+            .map_err(|e| anyhow::anyhow!("Failed to decode file '{}' as UTF-8: {}", path, e))?
+            .to_string();
+        let lang = if language.is_some() {
+            Language::guess(language.as_deref(), &source)
+        } else {
+            Language::guess(Some(path.as_str()), &source)
+        };
+        (source, lang)
+    } else if !std::io::stdin().is_terminal() {
+        let mut buf = String::new();
+        std::io::stdin().read_to_string(&mut buf)?;
+        let lang = Language::guess(language.as_deref(), &buf);
+        (buf, lang)
     } else {
-        Language::guess(Some(path), source)
+        return Err(anyhow::anyhow!(
+            "provide a file path or pipe input via stdin"
+        ));
     };
-    let lang_name = registry::language_to_query_name(lang);
 
-    let events = highlight_to_events(reg, source, lang_name)?;
+    if lang == Language::PlainText {
+        print!("{}", source);
+        return Ok(());
+    }
+
+    let lang_name = registry::language_to_query_name(lang);
+    let events = highlight_to_events(reg, &source, lang_name)?;
 
     let parsed_highlight_lines = if let Some(lines_str) = highlight_lines {
         Some(parse_highlight_lines(&lines_str)?)
@@ -489,44 +480,7 @@ fn do_highlight(
 
     render_output(
         reg,
-        source,
-        &events,
-        lang,
-        formatter,
-        theme,
-        themes,
-        default_theme,
-        css_variable_prefix,
-        parsed_highlight_lines,
-    )
-}
-
-#[allow(clippy::too_many_arguments)]
-fn do_highlight_source(
-    reg: &registry::Registry,
-    source: &str,
-    language: Option<&str>,
-    formatter: Option<Formatter>,
-    theme: Option<String>,
-    themes: Vec<String>,
-    default_theme: Option<String>,
-    css_variable_prefix: String,
-    highlight_lines: Option<String>,
-) -> Result<()> {
-    let lang = Language::guess(language, source);
-    let lang_name = registry::language_to_query_name(lang);
-
-    let events = highlight_to_events(reg, source, lang_name)?;
-
-    let parsed_highlight_lines = if let Some(lines_str) = highlight_lines {
-        Some(parse_highlight_lines(&lines_str)?)
-    } else {
-        None
-    };
-
-    render_output(
-        reg,
-        source,
+        &source,
         &events,
         lang,
         formatter,
@@ -792,7 +746,7 @@ fn highlight_to_events(
         .map_err(|e| anyhow::anyhow!("failed to set wasm store: {:?}", e))?;
 
     // Injection languages (e.g. heex inside elixir) are resolved from already-loaded
-    // configs. Missing injections are silently skipped — use `fetch-parsers` to
+    // configs. Missing injections are silently skipped — use `parsers fetch` to
     // pre-download injection language parsers for full highlighting.
     let events = highlighter
         .highlight(config, source.as_bytes(), None, |injected| {
