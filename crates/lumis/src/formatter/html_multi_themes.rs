@@ -251,21 +251,18 @@ impl HtmlMultiThemesBuilder {
         }
 
         match &result.default_theme {
-            Some(DefaultTheme::Theme(name)) => {
-                if !result.themes.contains_key(name) {
-                    return Err(format!("Default theme '{}' not found in themes map", name));
-                }
+            Some(DefaultTheme::Theme(name)) if !result.themes.contains_key(name) => {
+                return Err(format!("Default theme '{}' not found in themes map", name));
             }
-            Some(DefaultTheme::LightDark) => {
-                if !result.themes.contains_key("light") || !result.themes.contains_key("dark") {
-                    return Err(
-                        "LightDark mode requires themes named 'light' and 'dark'".to_string()
-                    );
-                }
+            Some(DefaultTheme::LightDark)
+                if !result.themes.contains_key("light") || !result.themes.contains_key("dark") =>
+            {
+                return Err("LightDark mode requires themes named 'light' and 'dark'".to_string());
             }
             None => {
                 // No default theme - all themes are CSS variables only
             }
+            _ => {}
         }
 
         Ok(result)
