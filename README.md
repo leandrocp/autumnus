@@ -1,13 +1,8 @@
+
 <h1 align="center">Lumis</h1>
 
-<img src="assets/intro.png" alt="Lumis Syntax Highlighter">
-
 <p align="center">
-  <strong>Syntax Highlighter powered by Tree-sitter and Neovim themes</strong>
-</p>
-
-<p align="center">
-  <strong>70+ languages. 120+ themes. 6 platforms. One API.</strong>
+  <a href="https://lumis.sh"><img src="assets/intro.jpg" alt="Lumis Syntax Highlighter"></a>
 </p>
 
 <p align="center">
@@ -26,13 +21,12 @@
 
 ## Features
 
-- **70+ Tree-sitter languages** - Fast and accurate syntax parsing
+- **70+ Tree-sitter languages** - Fast, accurate, and updated syntax parsing
 - **120+ Neovim themes** - Updated and curated themes from the Neovim community
 - **6 platforms** - CLI, Rust, Elixir, Node.js, Browser, Java
-- **Multiple outputs** - HTML (inline/linked), Terminal (ANSI), multi-theme (light/dark), and custom formatters
-- **Language auto-detection** - File extension and shebang support
-- **Streaming-friendly** - Handles incomplete code gracefully
-- **Zero config** - Works out of the box
+- **Multiple outputs** - HTML (inline/linked), Terminal (ANSI), Multi-theme (light/dark), and custom formatters
+- **Language auto-detection** - File extension, shebang, and emacs-mode support
+- **Streaming-friendly** - Handles incomplete code
 
 <table>
 <tr>
@@ -80,18 +74,6 @@ import dracula from '@lumis-sh/themes/dracula'
 const html = await highlight('const x = 1', htmlInline({ language: javascript, theme: dracula }))
 ```
 
-Preload languages once if you want repeated synchronous calls:
-
-```typescript
-import { createHighlighter } from '@lumis-sh/lumis'
-import { htmlInline } from '@lumis-sh/lumis/formatters'
-import javascript from '@lumis-sh/lumis/langs/javascript'
-import dracula from '@lumis-sh/themes/dracula'
-
-const hl = await createHighlighter({ langs: [javascript] })
-const html = hl.highlight('const x = 1', htmlInline({ language: javascript, theme: dracula }))
-```
-
 ### [Elixir](https://hex.pm/packages/lumis)
 
 ```elixir
@@ -100,7 +82,7 @@ Lumis.highlight!("const x = 1", language: "javascript", formatter: {:html_inline
 
 ### [Java](https://github.com/roastedroot/lumis4j)
 
-Project by [@andreaTP](https://github.com/andreaTP). More details at https://chicory.dev/blog/syntax-highlight
+By [@andreaTP](https://github.com/andreaTP). More details at https://chicory.dev/blog/syntax-highlight
 
 ```java
 import io.roastedroot.lumis4j.core.Lumis;
@@ -154,7 +136,7 @@ Contributions welcome! Feel free to open issues or PRs for bugs, features, new t
 ## Acknowledgements
 * [Makeup](https://hex.pm/packages/makeup) for setting up the baseline for the Elixir package
 * [Inkjet](https://crates.io/crates/inkjet) for the Rust implementation in the initial versions
-* [Shiki](https://shiki.style) and [syntect](https://crates.io/crates/syntect) for providing awesome syntax highlighting
+* [Shiki](https://shiki.style) and [syntect](https://crates.io/crates/syntect) for the hard work defining how syntax highlighters should work
 
 ## License
 
