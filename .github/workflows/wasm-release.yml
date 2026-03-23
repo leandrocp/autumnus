@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       parser:
-        description: "Parser name (leave empty for all)"
+        description: "Parser name(s), comma-separated (leave empty for all)"
         required: false
         default: ""
   # push:

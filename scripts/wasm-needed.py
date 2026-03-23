@@ -4,7 +4,7 @@
 Reads languages.toml, computes npm versions, and checks npm registry.
 Prints space-separated list of parser names that need publishing.
 
-Usage: python3 scripts/wasm-needed.py [parser_name]
+Usage: python3 scripts/wasm-needed.py [parser_name[,parser_name...]]
 """
 
 import subprocess
@@ -23,14 +23,19 @@ def wasm_package_suffix(wasm_name: str) -> str:
 with open("languages.toml", "rb") as f:
     data = tomllib.load(f)
 
-filter_parser = sys.argv[1] if len(sys.argv) > 1 else ""
+raw_filter = sys.argv[1] if len(sys.argv) > 1 else ""
+filter_parsers = {part.strip() for part in raw_filter.split(",") if part.strip()}
 needed = []
 seen = set()
 
 for pname, info in data.get("parsers", {}).items():
     wasm_name = info.get("wasm_name") or f"tree-sitter-{pname}"
 
-    if filter_parser and pname != filter_parser and wasm_name != filter_parser:
+    if (
+        filter_parsers
+        and pname not in filter_parsers
+        and wasm_name not in filter_parsers
+    ):
         continue
 
     if wasm_name in seen:
