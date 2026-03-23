@@ -1,0 +1,42 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "separate-pull-requests": true,
+  "tag-separator": "@",
+  "packages": {
+    "crates/lumis": {
+      "release-type": "rust",
+      "component": "rust",
+      "changelog-path": "CHANGELOG.md"
+    },
+    "crates/lumis-core": {
+      "release-type": "rust",
+      "component": "rust-core",
+      "changelog-path": "CHANGELOG.md"
+    },
+    "crates/lumis-build": {
+      "release-type": "rust",
+      "component": "rust-build",
+      "changelog-path": "CHANGELOG.md"
+    },
+    "crates/lumis-cli": {
+      "release-type": "rust",
+      "component": "rust-cli",
+      "changelog-path": "CHANGELOG.md"
+    },
+    "packages/javascript/lumis": {
+      "release-type": "node",
+      "component": "javascript",
+      "changelog-path": "CHANGELOG.md"
+    },
+    "packages/javascript/themes": {
+      "release-type": "node",
+      "component": "themes",
+      "changelog-path": "CHANGELOG.md"
+    },
+    "packages/elixir/lumis": {
+      "release-type": "elixir",
+      "component": "elixir",
+      "changelog-path": "CHANGELOG.md"
+    }
+  }
+}

@@ -3,10 +3,10 @@ name: Rust Release
 on:
   push:
     tags:
-      - "lumis@v*"
-      - "lumis-core@v*"
-      - "lumis-build@v*"
-      - "lumis-cli@v*"
+      - "rust@v*"
+      - "rust-core@v*"
+      - "rust-build@v*"
+      - "rust-cli@v*"
 
 permissions:
   contents: write
@@ -23,7 +23,14 @@ jobs:
         id: crate
         run: |
           tag="${GITHUB_REF#refs/tags/}"
-          crate="${tag%%@*}"
+          component="${tag%%@*}"
+          case "$component" in
+            rust)       crate="lumis" ;;
+            rust-core)  crate="lumis-core" ;;
+            rust-build) crate="lumis-build" ;;
+            rust-cli)   crate="lumis-cli" ;;
+            *)          echo "Unknown component: $component" && exit 1 ;;
+          esac
           echo "name=$crate" >> $GITHUB_OUTPUT
 
       - name: Publish to crates.io
