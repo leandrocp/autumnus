@@ -1,5 +1,8 @@
 name: WASM Release
 
+env:
+  EMSDK_VERSION: "5.0.3"
+
 on:
   workflow_dispatch:
     inputs:
@@ -66,12 +69,28 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Cache Rust build artifacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: wasm-release
+
+      - name: Cache tree-sitter tool downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/tree-sitter
+          key: ${{ runner.os }}-tree-sitter-cli-0.26-v1
+          restore-keys: |
+            ${{ runner.os }}-tree-sitter-cli-0.26-
+
       - uses: actions/setup-node@v6
         with:
           node-version: "24"
           registry-url: "https://registry.npmjs.org"
 
       - uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: ${{ env.EMSDK_VERSION }}
+          actions-cache-folder: emsdk-cache
 
       - run: npm install -g tree-sitter-cli@0.26
 
