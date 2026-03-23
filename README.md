@@ -106,7 +106,7 @@ System.out.println(result.string());
 | **Rust** | `cargo add lumis` | [crates.io/lumis](https://crates.io/crates/lumis) | [README.md](crates/lumis/README.md) &bull; [docs.rs](https://docs.rs/lumis) |
 | **Elixir** | `{:lumis, "~> 0.1"}` | [hex.pm/lumis](https://hex.pm/packages/lumis) | [README.md](packages/elixir/lumis/README.md) &bull; [hexdocs](https://hexdocs.pm/lumis) |
 | **Node.js/Browser** | `npm install @lumis-sh/lumis` | [npmjs.com/@lumis-sh/lumis](https://www.npmjs.com/package/@lumis-sh/lumis) | [README.md](packages/javascript/lumis/README.md) |
-| **Java** | `io.roastedroot:lumis4j:latest` | [io.roastedroot/lumis4j](https://central.sonatype.com/artifact/io.roastedroot/lumis4j) - | [README.md](https://github.com/roastedroot/lumis4j/blob/main/README.md) |
+| **Java** | `io.roastedroot:lumis4j:latest` | [io.roastedroot/lumis4j](https://central.sonatype.com/artifact/io.roastedroot/lumis4j) | [README.md](https://github.com/roastedroot/lumis4j/blob/main/README.md) |
 
 ## Architecture
 
@@ -132,7 +132,7 @@ while `@lumis-sh/wasm-javascript@0.26.1` is a patch update compatible with Tree-
 
 Contributions aew welcome! Feel free to open issues or PRs for bugs, features, new themes languages.
 
-See [CONTRIBUTING.md]
+See [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## Acknowledgements
 * [Makeup](https://hex.pm/packages/makeup) for setting up the baseline for the Elixir package
