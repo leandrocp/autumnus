@@ -264,7 +264,9 @@ prettyplease = "0.2"
 proc-macro2 = "1"
 quote = "1"
 rayon = "1"
+serde = { version = "1", features = ["derive"] }
 syn = { version = "2.0", features = ["full", "parsing"] }
+toml = "0.8"
 
 [dev-dependencies]
 pretty_assertions = "1.4"

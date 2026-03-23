@@ -2,10 +2,10 @@
 //
 // 1. Compiled C/C++ tree-sitter parsers (via `vendored_parsers()`)
 //
-//    Compiles vendored tree-sitter grammar sources under `vendored_parsers/`.
-//    Each parser is gated behind its `lang-*` feature flag. Builds run in
-//    parallel using rayon. Produces static libraries linked into the final
-//    binary (e.g. `libtree-sitter-rust.a`).
+//    Reads `languages.toml` to find parsers without a `crate` field — these
+//    are vendored under `vendored_parsers/`. Each parser is gated behind its
+//    `lang-*` feature flag. Builds run in parallel using rayon. Scanner files
+//    (scanner.c / scanner.cc) are auto-detected from the filesystem.
 //
 // 2. `queries_constants.rs` (via `queries()`, included by `src/queries.rs`)
 //
@@ -19,7 +19,8 @@
 //    regex conversion (this step only applies to the native Rust crate,
 //    not the CLI which uses web-tree-sitter).
 //
-//    Each constant is feature-gated to match its language.
+//    Feature gates are derived from `languages.toml` using each parser's
+//    `query_name` (or key) and `feature` (or `lang-{key}`) fields.
 //
 // Theme data is provided by lumis-core (re-exported via src/themes.rs).
 //
@@ -29,20 +30,347 @@
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use rayon::prelude::*;
+use serde::Deserialize;
+use std::collections::BTreeMap;
 use std::env;
 use std::fs::{self, File};
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
+// ── languages.toml types ───────────────────────────────────────────────────
+
+#[derive(Deserialize)]
+struct LanguagesToml {
+    parsers: BTreeMap<String, ParserEntry>,
+    #[serde(flatten)]
+    _rest: toml::Value,
+}
+
+#[derive(Deserialize)]
+struct ParserEntry {
+    #[serde(rename = "crate")]
+    crate_name: Option<String>,
+    git: Option<String>,
+    location: Option<String>,
+    query_name: Option<String>,
+    feature: Option<String>,
+    #[serde(flatten)]
+    _rest: toml::Value,
+}
+
+fn load_languages_toml() -> LanguagesToml {
+    let path = workspace_root().join("languages.toml");
+    println!("cargo:rerun-if-changed={}", path.display());
+    let content = fs::read_to_string(&path).expect("failed to read languages.toml");
+    toml::from_str(&content).expect("failed to parse languages.toml")
+}
+
+/// Derive the feature flag for a parser entry.
+fn feature_for(key: &str, entry: &ParserEntry) -> String {
+    entry
+        .feature
+        .clone()
+        .unwrap_or_else(|| format!("lang-{}", key.replace('_', "-")))
+}
+
+/// Check whether a cargo feature is enabled via `CARGO_FEATURE_*` env vars.
+fn is_feature_enabled(feature: &str) -> bool {
+    let env_key = format!("CARGO_FEATURE_{}", feature.to_uppercase().replace('-', "_"));
+    env::var(env_key).is_ok()
+}
+
+// ── main ───────────────────────────────────────────────────────────────────
+
 fn manifest_dir() -> PathBuf {
     PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap())
 }
 
+fn workspace_root() -> PathBuf {
+    manifest_dir()
+        .parent()
+        .unwrap()
+        .parent()
+        .unwrap()
+        .to_path_buf()
+}
+
 fn main() {
-    vendored_parsers();
-    queries();
+    let toml = load_languages_toml();
+    vendored_parsers(&toml);
+    queries(&toml);
     gen_conformance_tests();
 }
+
+// ── vendored parsers ───────────────────────────────────────────────────────
+
+struct TreeSitterParser {
+    name: String,
+    src_dir: PathBuf,
+    extra_files: Vec<String>,
+}
+
+impl TreeSitterParser {
+    fn build(&self) {
+        let mut c_files = vec!["parser.c".to_string()];
+        let mut cpp_files = vec![];
+
+        for file in &self.extra_files {
+            if file.ends_with(".c") {
+                c_files.push(file.clone());
+            } else {
+                cpp_files.push(file.clone());
+            }
+        }
+
+        if !cpp_files.is_empty() {
+            let mut cpp_build = cc::Build::new();
+            cpp_build
+                .include(&self.src_dir)
+                .cpp(true)
+                .std("c++14")
+                .flag_if_supported("-Wno-implicit-fallthrough")
+                .flag_if_supported("-Wno-unused-parameter")
+                .flag_if_supported("-Wno-ignored-qualifiers")
+                .link_lib_modifier("+whole-archive");
+
+            for file in &cpp_files {
+                cpp_build.file(self.src_dir.join(file));
+            }
+
+            cpp_build.compile(&format!("{}-cpp", self.name));
+        }
+
+        let mut build = cc::Build::new();
+        build.include(&self.src_dir).warnings(false);
+
+        // Prefix TAG_TYPES_BY_TAG_NAME to avoid symbol conflicts between
+        // parsers that share the same tag.h definitions (angular, astro, vue).
+        let tag_h = self.src_dir.join("tag.h");
+        if tag_h.exists() {
+            if let Ok(content) = fs::read_to_string(&tag_h) {
+                if content.contains("TAG_TYPES_BY_TAG_NAME") {
+                    build.flag(format!(
+                        "-DTAG_TYPES_BY_TAG_NAME={}_TAG_TYPES_BY_TAG_NAME",
+                        self.name.replace('-', "_"),
+                    ));
+                }
+            }
+        }
+
+        for file in &c_files {
+            build.file(self.src_dir.join(file));
+        }
+
+        build.link_lib_modifier("+whole-archive");
+        build.compile(&self.name);
+    }
+}
+
+/// Find the vendored directory name for a parser.
+///
+/// Tries `tree-sitter-{key}` first (covers most cases), then falls back to
+/// extracting the repository name from the git URL (covers nushell → tree-sitter-nu).
+fn find_vendored_dir(vendored_root: &Path, key: &str, entry: &ParserEntry) -> Option<String> {
+    let default_name = format!("tree-sitter-{}", key);
+    if vendored_root.join(&default_name).exists() {
+        return Some(default_name);
+    }
+
+    // Extract repo name from git URL (e.g. ".../tree-sitter-nu.git" → "tree-sitter-nu")
+    if let Some(git) = &entry.git {
+        if let Some(repo) = git.rsplit('/').next() {
+            let repo_name = repo.trim_end_matches(".git");
+            if vendored_root.join(repo_name).exists() {
+                return Some(repo_name.to_string());
+            }
+        }
+    }
+
+    None
+}
+
+/// Determine the src directory within a vendored parser.
+///
+/// If `location` is set and `{parser_dir}/{location}/src/parser.c` exists,
+/// uses the nested path (e.g. tree-sitter-csv/csv/src). Otherwise uses
+/// `{parser_dir}/src`.
+fn resolve_src_dir(parser_dir: &Path, entry: &ParserEntry) -> PathBuf {
+    if let Some(loc) = &entry.location {
+        let nested = parser_dir.join(loc).join("src");
+        if nested.join("parser.c").exists() {
+            return nested;
+        }
+    }
+    parser_dir.join("src")
+}
+
+// https://github.com/Wilfred/difftastic/blob/8953c55cf854ceac2ccb6ece004d6a94a5bfa122/build.rs
+// TODO: remove vendored parsers in favor of crates as soon as they implement LanguageFn
+fn vendored_parsers(toml: &LanguagesToml) {
+    let vendored_root = manifest_dir().join("vendored_parsers");
+
+    let parsers: Vec<TreeSitterParser> = toml
+        .parsers
+        .iter()
+        .filter(|(_, entry)| entry.crate_name.is_none())
+        .filter(|(key, entry)| is_feature_enabled(&feature_for(key, entry)))
+        .filter_map(|(key, entry)| {
+            let dir_name = find_vendored_dir(&vendored_root, key, entry)?;
+            let parser_dir = vendored_root.join(&dir_name);
+            let src_dir = resolve_src_dir(&parser_dir, entry);
+
+            assert!(
+                src_dir.join("parser.c").exists(),
+                "missing parser.c for vendored parser '{key}' at {}",
+                src_dir.display()
+            );
+
+            // Auto-detect scanner files
+            let mut extra_files = Vec::new();
+            for name in ["scanner.c", "scanner.cc"] {
+                if src_dir.join(name).exists() {
+                    extra_files.push(name.to_string());
+                }
+            }
+
+            Some(TreeSitterParser {
+                name: dir_name,
+                src_dir,
+                extra_files,
+            })
+        })
+        .collect();
+
+    for parser in &parsers {
+        println!("cargo:rerun-if-changed={}", parser.src_dir.display());
+    }
+
+    parsers.par_iter().for_each(|p| p.build());
+}
+
+// ── queries ────────────────────────────────────────────────────────────────
+
+fn read_query_file(path: &Path) -> String {
+    if !path.exists() {
+        return String::new();
+    }
+
+    let content = fs::read_to_string(path).expect("failed to read query file");
+    lumis_build::convert_lua_matches(&content)
+}
+
+fn require_highlights_query(path: &Path, language: &str) {
+    assert!(
+        path.exists(),
+        "missing processed highlights query for language '{language}' at {}. Run `just langs-preprocess-queries` first.",
+        path.display()
+    );
+
+    let content = fs::read_to_string(path).unwrap_or_else(|err| {
+        panic!(
+            "failed to read processed highlights query for language '{language}' at {}: {err}",
+            path.display()
+        )
+    });
+
+    assert!(
+        !content.trim().is_empty(),
+        "empty processed highlights query for language '{language}' at {}. Run `just langs-preprocess-queries` again.",
+        path.display()
+    );
+}
+
+/// Build a map from query directory name → list of feature flags.
+///
+/// Uses `query_name` (or the parser key) as the map key, and `feature`
+/// (or `lang-{key}`) as the feature flag. Multiple parsers may share the
+/// same query name (e.g. ejs and erb both use "embedded_template").
+fn build_query_feature_map(toml: &LanguagesToml) -> BTreeMap<String, Vec<String>> {
+    let mut map: BTreeMap<String, Vec<String>> = BTreeMap::new();
+
+    for (key, entry) in &toml.parsers {
+        let query_name = entry.query_name.as_deref().unwrap_or(key).to_string();
+        let feat = feature_for(key, entry);
+        map.entry(query_name).or_default().push(feat);
+    }
+
+    map
+}
+
+fn queries(toml: &LanguagesToml) {
+    let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
+    let dest_path = out_dir.join("queries_constants.rs");
+
+    let queries_path = workspace_root().join("queries").join("processed");
+    let mut generated_code = TokenStream::new();
+
+    println!("cargo:rerun-if-changed={}", queries_path.display());
+
+    let entries = fs::read_dir(&queries_path).unwrap_or_else(|_| {
+        panic!(
+            "failed to read queries/processed directory at {}. Run `just langs-preprocess-queries` first.",
+            queries_path.display()
+        )
+    });
+
+    let query_feature_map = build_query_feature_map(toml);
+
+    for entry in entries {
+        let entry = entry.unwrap();
+        let path = entry.path();
+
+        if !path.is_dir() {
+            continue;
+        }
+
+        let language = path.file_name().unwrap().to_str().unwrap();
+
+        // Determine whether to generate constants for this query directory.
+        // "diff" is always enabled (used as plaintext fallback).
+        let should_generate = if language == "diff" {
+            true
+        } else if let Some(features) = query_feature_map.get(language) {
+            features.iter().any(|f| is_feature_enabled(f))
+        } else {
+            false
+        };
+
+        if !should_generate {
+            continue;
+        }
+
+        let lang_upper = language.to_uppercase();
+        let queries = ["highlights", "injections", "locals"];
+
+        require_highlights_query(&path.join("highlights.scm"), language);
+
+        for query in queries {
+            let file_path = path.join(format!("{query}.scm"));
+            let const_name = format_ident!("{}_{}", lang_upper, query.to_uppercase());
+            let processed_content = read_query_file(&file_path);
+
+            generated_code.extend(quote! {
+                #[doc(hidden)]
+                pub const #const_name: &str = #processed_content;
+            });
+
+            generated_code.extend(quote! {});
+        }
+
+        generated_code.extend(quote! {});
+    }
+
+    let mut output_file = File::create(&dest_path).unwrap();
+
+    write!(
+        output_file,
+        "{}",
+        prettyplease::unparse(&syn::parse2::<syn::File>(generated_code).unwrap())
+    )
+    .unwrap();
+}
+
+// ── conformance tests ──────────────────────────────────────────────────────
 
 fn gen_conformance_tests() {
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
@@ -85,472 +413,4 @@ mod {ident} {{
     }
 
     fs::write(out_dir.join("conformance_tests.rs"), code).unwrap();
-}
-
-struct TreeSitterParser {
-    name: &'static str,
-    src_dir: &'static str,
-    extra_files: Vec<&'static str>,
-}
-
-impl TreeSitterParser {
-    fn build(&self) {
-        let dir = manifest_dir().join(self.src_dir);
-
-        let mut c_files = vec!["parser.c"];
-        let mut cpp_files = vec![];
-
-        for file in &self.extra_files {
-            if file.ends_with(".c") {
-                c_files.push(file);
-            } else {
-                cpp_files.push(file);
-            }
-        }
-
-        if !cpp_files.is_empty() {
-            let mut cpp_build = cc::Build::new();
-            cpp_build
-                .include(&dir)
-                .cpp(true)
-                .std("c++14")
-                .flag_if_supported("-Wno-implicit-fallthrough")
-                .flag_if_supported("-Wno-unused-parameter")
-                .flag_if_supported("-Wno-ignored-qualifiers")
-                .link_lib_modifier("+whole-archive");
-
-            for file in cpp_files {
-                cpp_build.file(dir.join(file));
-            }
-
-            cpp_build.compile(&format!("{}-cpp", self.name));
-        }
-
-        let mut build = cc::Build::new();
-
-        // if cfg!(target_env = "msvc") {
-        //     build.flag("/utf-8");
-        // }
-
-        build.include(&dir).warnings(false);
-
-        // Add unique prefix for symbols to avoid conflicts
-        if self.name == "tree-sitter-angular" || self.name == "tree-sitter-vue" {
-            build.flag(format!(
-                "-DTAG_TYPES_BY_TAG_NAME={}_{}",
-                self.name.replace("-", "_"),
-                "TAG_TYPES_BY_TAG_NAME"
-            ));
-        }
-
-        for file in c_files {
-            build.file(dir.join(file));
-        }
-
-        build.link_lib_modifier("+whole-archive");
-
-        build.compile(self.name);
-    }
-}
-
-// https://github.com/Wilfred/difftastic/blob/8953c55cf854ceac2ccb6ece004d6a94a5bfa122/build.rs
-// TODO: remove vendored parsers in favor of crates as soon as they implement LanguageFn
-#[allow(clippy::vec_init_then_push, unused_mut)]
-fn vendored_parsers() {
-    let mut parsers: Vec<TreeSitterParser> = vec![];
-
-    #[cfg(feature = "lang-angular")]
-    parsers.push(TreeSitterParser {
-        name: "tree-sitter-angular",
-        src_dir: "vendored_parsers/tree-sitter-angular/src",
-        extra_files: vec!["scanner.c"],
-    });
-
-    #[cfg(feature = "lang-astro")]
-    parsers.push(TreeSitterParser {
-        name: "tree-sitter-astro",
-        src_dir: "vendored_parsers/tree-sitter-astro/src",
-        extra_files: vec!["scanner.c"],
-    });
-
-    #[cfg(feature = "lang-caddy")]
-    parsers.push(TreeSitterParser {
-        name: "tree-sitter-caddy",
-        src_dir: "vendored_parsers/tree-sitter-caddy/src",
-        extra_files: vec!["scanner.c"],
-    });
-
-    #[cfg(feature = "lang-clojure")]
-    parsers.push(TreeSitterParser {
-        name: "tree-sitter-clojure",
-        src_dir: "vendored_parsers/tree-sitter-clojure/src",
-        extra_files: vec![],
-    });
-
-    #[cfg(feature = "lang-commonlisp")]
-    parsers.push(TreeSitterParser {
-        name: "tree-sitter-commonlisp",
-        src_dir: "vendored_parsers/tree-sitter-commonlisp/src",
-        extra_files: vec![],
-    });
-
-    #[cfg(feature = "lang-csv")]
-    parsers.push(TreeSitterParser {
-        name: "tree-sitter-csv",
-        src_dir: "vendored_parsers/tree-sitter-csv/csv/src",
-        extra_files: vec![],
-    });
-
-    #[cfg(feature = "lang-dart")]
-    parsers.push(TreeSitterParser {
-        name: "tree-sitter-dart",
-        src_dir: "vendored_parsers/tree-sitter-dart/src",
-        extra_files: vec!["scanner.c"],
-    });
-
-    #[cfg(feature = "lang-dockerfile")]
-    parsers.push(TreeSitterParser {
-        name: "tree-sitter-dockerfile",
-        src_dir: "vendored_parsers/tree-sitter-dockerfile/src",
-        extra_files: vec!["scanner.c"],
-    });
-
-    #[cfg(feature = "lang-eex")]
-    parsers.push(TreeSitterParser {
-        name: "tree-sitter-eex",
-        src_dir: "vendored_parsers/tree-sitter-eex/src",
-        extra_files: vec![],
-    });
-
-    #[cfg(feature = "lang-fish")]
-    parsers.push(TreeSitterParser {
-        name: "tree-sitter-fish",
-        src_dir: "vendored_parsers/tree-sitter-fish/src",
-        extra_files: vec!["scanner.c"],
-    });
-
-    #[cfg(feature = "lang-glimmer")]
-    parsers.push(TreeSitterParser {
-        name: "tree-sitter-glimmer",
-        src_dir: "vendored_parsers/tree-sitter-glimmer/src",
-        extra_files: vec!["scanner.c"],
-    });
-
-    #[cfg(feature = "lang-graphql")]
-    parsers.push(TreeSitterParser {
-        name: "tree-sitter-graphql",
-        src_dir: "vendored_parsers/tree-sitter-graphql/src",
-        extra_files: vec![],
-    });
-
-    #[cfg(feature = "lang-http")]
-    parsers.push(TreeSitterParser {
-        name: "tree-sitter-http",
-        src_dir: "vendored_parsers/tree-sitter-http/src",
-        extra_files: vec![],
-    });
-
-    #[cfg(feature = "lang-iex")]
-    parsers.push(TreeSitterParser {
-        name: "tree-sitter-iex",
-        src_dir: "vendored_parsers/tree-sitter-iex/src",
-        extra_files: vec![],
-    });
-
-    #[cfg(feature = "lang-kotlin")]
-    parsers.push(TreeSitterParser {
-        name: "tree-sitter-kotlin",
-        src_dir: "vendored_parsers/tree-sitter-kotlin/src",
-        extra_files: vec!["scanner.c"],
-    });
-
-    #[cfg(feature = "lang-latex")]
-    parsers.push(TreeSitterParser {
-        name: "tree-sitter-latex",
-        src_dir: "vendored_parsers/tree-sitter-latex/src",
-        extra_files: vec!["scanner.c"],
-    });
-
-    #[cfg(feature = "lang-liquid")]
-    parsers.push(TreeSitterParser {
-        name: "tree-sitter-liquid",
-        src_dir: "vendored_parsers/tree-sitter-liquid/src",
-        extra_files: vec!["scanner.c"],
-    });
-
-    #[cfg(feature = "lang-llvm")]
-    parsers.push(TreeSitterParser {
-        name: "tree-sitter-llvm",
-        src_dir: "vendored_parsers/tree-sitter-llvm/src",
-        extra_files: vec![],
-    });
-
-    #[cfg(feature = "lang-make")]
-    parsers.push(TreeSitterParser {
-        name: "tree-sitter-make",
-        src_dir: "vendored_parsers/tree-sitter-make/src",
-        extra_files: vec![],
-    });
-
-    #[cfg(feature = "lang-markdown")]
-    parsers.push(TreeSitterParser {
-        name: "tree-sitter-markdown",
-        src_dir: "vendored_parsers/tree-sitter-markdown/src",
-        extra_files: vec!["scanner.c"],
-    });
-
-    #[cfg(feature = "lang-markdown-inline")]
-    parsers.push(TreeSitterParser {
-        name: "tree-sitter-markdown_inline",
-        src_dir: "vendored_parsers/tree-sitter-markdown_inline/src",
-        extra_files: vec!["scanner.c"],
-    });
-
-    #[cfg(feature = "lang-nushell")]
-    parsers.push(TreeSitterParser {
-        name: "tree-sitter-nu",
-        src_dir: "vendored_parsers/tree-sitter-nu/src",
-        extra_files: vec!["scanner.c"],
-    });
-
-    #[cfg(feature = "lang-perl")]
-    parsers.push(TreeSitterParser {
-        name: "tree-sitter-perl",
-        src_dir: "vendored_parsers/tree-sitter-perl/src",
-        extra_files: vec!["scanner.c"],
-    });
-
-    #[cfg(feature = "lang-scss")]
-    parsers.push(TreeSitterParser {
-        name: "tree-sitter-scss",
-        src_dir: "vendored_parsers/tree-sitter-scss/src",
-        extra_files: vec!["scanner.c"],
-    });
-
-    #[cfg(feature = "lang-surface")]
-    parsers.push(TreeSitterParser {
-        name: "tree-sitter-surface",
-        src_dir: "vendored_parsers/tree-sitter-surface/src",
-        extra_files: vec![],
-    });
-
-    #[cfg(feature = "lang-typst")]
-    parsers.push(TreeSitterParser {
-        name: "tree-sitter-typst",
-        src_dir: "vendored_parsers/tree-sitter-typst/src",
-        extra_files: vec!["scanner.c"],
-    });
-
-    #[cfg(feature = "lang-vim")]
-    parsers.push(TreeSitterParser {
-        name: "tree-sitter-vim",
-        src_dir: "vendored_parsers/tree-sitter-vim/src",
-        extra_files: vec!["scanner.c"],
-    });
-
-    #[cfg(feature = "lang-vue")]
-    parsers.push(TreeSitterParser {
-        name: "tree-sitter-vue",
-        src_dir: "vendored_parsers/tree-sitter-vue/src",
-        extra_files: vec!["scanner.c"],
-    });
-
-    #[cfg(feature = "lang-wat")]
-    parsers.push(TreeSitterParser {
-        name: "tree-sitter-wat",
-        src_dir: "vendored_parsers/tree-sitter-wat/src",
-        extra_files: vec![],
-    });
-
-    for parser in &parsers {
-        println!(
-            "cargo:rerun-if-changed={}",
-            manifest_dir().join(parser.src_dir).display()
-        );
-    }
-
-    parsers.par_iter().for_each(|p| p.build());
-}
-
-fn workspace_root() -> PathBuf {
-    manifest_dir()
-        .parent()
-        .unwrap()
-        .parent()
-        .unwrap()
-        .to_path_buf()
-}
-
-fn read_query_file(path: &Path) -> String {
-    if !path.exists() {
-        return String::new();
-    }
-
-    let content = fs::read_to_string(path).expect("failed to read query file");
-    lumis_build::convert_lua_matches(&content)
-}
-
-fn require_highlights_query(path: &Path, language: &str) {
-    assert!(
-        path.exists(),
-        "missing processed highlights query for language '{language}' at {}. Run `just langs-preprocess-queries` first.",
-        path.display()
-    );
-
-    let content = fs::read_to_string(path).unwrap_or_else(|err| {
-        panic!(
-            "failed to read processed highlights query for language '{language}' at {}: {err}",
-            path.display()
-        )
-    });
-
-    assert!(
-        !content.trim().is_empty(),
-        "empty processed highlights query for language '{language}' at {}. Run `just langs-preprocess-queries` again.",
-        path.display()
-    );
-}
-
-fn queries() {
-    let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
-    let dest_path = out_dir.join("queries_constants.rs");
-
-    let queries_path = workspace_root().join("queries").join("processed");
-    let mut generated_code = TokenStream::new();
-
-    println!("cargo:rerun-if-changed={}", queries_path.display());
-
-    let entries = fs::read_dir(&queries_path).unwrap_or_else(|_| {
-        panic!(
-            "failed to read queries/processed directory at {}. Run `just langs-preprocess-queries` first.",
-            queries_path.display()
-        )
-    });
-
-    for entry in entries {
-        let entry = entry.unwrap();
-        let path = entry.path();
-
-        if !path.is_dir() {
-            continue;
-        }
-
-        let language = path.file_name().unwrap().to_str().unwrap();
-
-        // Check if we should generate constants for this language based on feature flags
-
-        // Only generate constants if the language feature is enabled
-        let should_generate = match language {
-            "c_sharp" => cfg!(feature = "lang-csharp"),
-            "embedded_template" => cfg!(feature = "lang-ejs") || cfg!(feature = "lang-erb"),
-            "markdown" => cfg!(feature = "lang-markdown"),
-            "markdown_inline" => cfg!(feature = "lang-markdown-inline"),
-            "ocaml" => cfg!(feature = "lang-ocaml"),
-            "ocaml_interface" => cfg!(feature = "lang-ocaml"),
-            "sql" => cfg!(feature = "lang-sql"),
-            "svelte" => cfg!(feature = "lang-svelte"),
-            "toml" => cfg!(feature = "lang-toml"),
-            "angular" => cfg!(feature = "lang-angular"),
-            "asm" => cfg!(feature = "lang-asm"),
-            "astro" => cfg!(feature = "lang-astro"),
-            "bash" => cfg!(feature = "lang-bash"),
-            "c" => cfg!(feature = "lang-c"),
-            "caddy" => cfg!(feature = "lang-caddy"),
-            "clojure" => cfg!(feature = "lang-clojure"),
-            "cmake" => cfg!(feature = "lang-cmake"),
-            "comment" => cfg!(feature = "lang-comment"),
-            "commonlisp" => cfg!(feature = "lang-commonlisp"),
-            "cpp" => cfg!(feature = "lang-cpp"),
-            "css" => cfg!(feature = "lang-css"),
-            "csv" => cfg!(feature = "lang-csv"),
-            "dart" => cfg!(feature = "lang-dart"),
-            "diff" => true, // Always enabled for plaintext fallback
-            "dockerfile" => cfg!(feature = "lang-dockerfile"),
-            "eex" => cfg!(feature = "lang-eex"),
-            "elixir" => cfg!(feature = "lang-elixir"),
-            "elm" => cfg!(feature = "lang-elm"),
-            "erlang" => cfg!(feature = "lang-erlang"),
-            "fish" => cfg!(feature = "lang-fish"),
-            "fsharp" => cfg!(feature = "lang-fsharp"),
-            "gleam" => cfg!(feature = "lang-gleam"),
-            "glimmer" => cfg!(feature = "lang-glimmer"),
-            "go" => cfg!(feature = "lang-go"),
-            "graphql" => cfg!(feature = "lang-graphql"),
-            "haskell" => cfg!(feature = "lang-haskell"),
-            "hcl" => cfg!(feature = "lang-hcl"),
-            "heex" => cfg!(feature = "lang-heex"),
-            "html" => cfg!(feature = "lang-html"),
-            "http" => cfg!(feature = "lang-http"),
-            "iex" => cfg!(feature = "lang-iex"),
-            "java" => cfg!(feature = "lang-java"),
-            "javascript" => cfg!(feature = "lang-javascript"),
-            "json" => cfg!(feature = "lang-json"),
-            "kotlin" => cfg!(feature = "lang-kotlin"),
-            "latex" => cfg!(feature = "lang-latex"),
-            "liquid" => cfg!(feature = "lang-liquid"),
-            "llvm" => cfg!(feature = "lang-llvm"),
-            "lua" => cfg!(feature = "lang-lua"),
-            "make" => cfg!(feature = "lang-make"),
-            "nix" => cfg!(feature = "lang-nix"),
-            "nu" => cfg!(feature = "lang-nushell"),
-            "objc" => cfg!(feature = "lang-objc"),
-            "perl" => cfg!(feature = "lang-perl"),
-            "php" => cfg!(feature = "lang-php"),
-            "php_only" => cfg!(feature = "lang-php"),
-            "powershell" => cfg!(feature = "lang-powershell"),
-            "proto" => cfg!(feature = "lang-protobuf"),
-            "python" => cfg!(feature = "lang-python"),
-            "r" => cfg!(feature = "lang-r"),
-            "regex" => cfg!(feature = "lang-regex"),
-            "ruby" => cfg!(feature = "lang-ruby"),
-            "rust" => cfg!(feature = "lang-rust"),
-            "scala" => cfg!(feature = "lang-scala"),
-            "scss" => cfg!(feature = "lang-scss"),
-            "surface" => cfg!(feature = "lang-surface"),
-            "swift" => cfg!(feature = "lang-swift"),
-            "tsx" => cfg!(feature = "lang-tsx"),
-            "typescript" => cfg!(feature = "lang-typescript"),
-            "typst" => cfg!(feature = "lang-typst"),
-            "vim" => cfg!(feature = "lang-vim"),
-            "vue" => cfg!(feature = "lang-vue"),
-            "wat" => cfg!(feature = "lang-wat"),
-            "xml" => cfg!(feature = "lang-xml"),
-            "yaml" => cfg!(feature = "lang-yaml"),
-            "zig" => cfg!(feature = "lang-zig"),
-            _ => false, // Unknown language, skip
-        };
-
-        if !should_generate {
-            continue;
-        }
-
-        let lang_upper = language.to_uppercase();
-        let queries = ["highlights", "injections", "locals"];
-
-        require_highlights_query(&path.join("highlights.scm"), language);
-
-        for query in queries {
-            let file_path = path.join(format!("{query}.scm"));
-            let const_name = format_ident!("{}_{}", lang_upper, query.to_uppercase());
-            let processed_content = read_query_file(&file_path);
-
-            generated_code.extend(quote! {
-                #[doc(hidden)]
-                pub const #const_name: &str = #processed_content;
-            });
-
-            generated_code.extend(quote! {});
-        }
-
-        generated_code.extend(quote! {});
-    }
-
-    let mut output_file = File::create(&dest_path).unwrap();
-
-    write!(
-        output_file,
-        "{}",
-        prettyplease::unparse(&syn::parse2::<syn::File>(generated_code).unwrap())
-    )
-    .unwrap();
 }
