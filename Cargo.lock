@@ -225,7 +225,7 @@ checksum = "c08606f8c3cbf4ce6ec8e28fb0014a2c086708fe954eaa885384a6165172e7e8"
 name = "autumnus"
 version = "0.9.0"
 dependencies = [
- "lumis 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "lumis",
 ]
 
 [[package]]
@@ -712,7 +712,7 @@ dependencies = [
  "clap",
  "full_moon",
  "glob",
- "lumis 0.1.3",
+ "lumis",
  "lumis-core",
  "md-5",
  "regex",
@@ -1237,85 +1237,10 @@ dependencies = [
  "tree-sitter-embedded-template",
  "tree-sitter-erlang",
  "tree-sitter-fsharp",
- "tree-sitter-gleam 1.0.0 (git+https://github.com/gleam-lang/tree-sitter-gleam.git?rev=6ea757f7eb8d391dbf24dbb9461990757946dd5e)",
+ "tree-sitter-gleam",
  "tree-sitter-go",
  "tree-sitter-haskell",
- "tree-sitter-hcl 1.2.0",
- "tree-sitter-heex",
- "tree-sitter-highlight",
- "tree-sitter-html",
- "tree-sitter-java",
- "tree-sitter-javascript",
- "tree-sitter-json",
- "tree-sitter-language",
- "tree-sitter-lua",
- "tree-sitter-nix",
- "tree-sitter-objc",
- "tree-sitter-ocaml",
- "tree-sitter-php",
- "tree-sitter-powershell",
- "tree-sitter-proto",
- "tree-sitter-python",
- "tree-sitter-r",
- "tree-sitter-regex",
- "tree-sitter-ruby",
- "tree-sitter-rust",
- "tree-sitter-scala",
- "tree-sitter-sequel",
- "tree-sitter-svelte-ng",
- "tree-sitter-swift",
- "tree-sitter-toml-ng",
- "tree-sitter-typescript",
- "tree-sitter-xml",
- "tree-sitter-yaml",
- "tree-sitter-zig",
- "v_htmlescape",
-]
-
-[[package]]
-name = "lumis"
-version = "0.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "693ed521fc90585dfb96e37199b8a567fa9e716d6217d21205794ccc59d0eb21"
-dependencies = [
- "anyhow",
- "cc",
- "clap",
- "derive_builder",
- "glob",
- "prettyplease",
- "proc-macro2",
- "quote",
- "rayon",
- "regex",
- "serde",
- "serde_json",
- "smol_str",
- "streaming-iterator",
- "strum",
- "syn 2.0.117",
- "tempfile",
- "termcolor",
- "thiserror 2.0.18",
- "tree-sitter",
- "tree-sitter-asm",
- "tree-sitter-bash",
- "tree-sitter-c",
- "tree-sitter-c-sharp",
- "tree-sitter-cmake",
- "tree-sitter-comment",
- "tree-sitter-cpp",
- "tree-sitter-css",
- "tree-sitter-diff",
- "tree-sitter-elixir",
- "tree-sitter-elm",
- "tree-sitter-embedded-template",
- "tree-sitter-erlang",
- "tree-sitter-fsharp",
- "tree-sitter-gleam 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "tree-sitter-go",
- "tree-sitter-haskell",
- "tree-sitter-hcl 1.1.0",
+ "tree-sitter-hcl",
  "tree-sitter-heex",
  "tree-sitter-highlight",
  "tree-sitter-html",
@@ -1401,7 +1326,7 @@ dependencies = [
  "askama",
  "askama_web",
  "axum",
- "lumis 0.1.3",
+ "lumis",
  "rand",
  "serde",
  "tokio",
@@ -2024,27 +1949,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7da8b5736845d9f2fcb837ea5d9e2628564b3b043a70948a3f0b778838c5fb4f"
 
 [[package]]
-name = "strum"
-version = "0.27.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "af23d6f6c1a224baef9d3f61e287d2761385a5b88fdab4eb4c6f11aeb54c4bcf"
-dependencies = [
- "strum_macros",
-]
-
-[[package]]
-name = "strum_macros"
-version = "0.27.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7695ce3845ea4b33927c055a39dc438a45b059f7c1b3d91d38d10355fb8cbca7"
-dependencies = [
- "heck",
- "proc-macro2",
- "quote",
- "syn 2.0.117",
-]
-
-[[package]]
 name = "subtle"
 version = "2.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2471,16 +2375,6 @@ dependencies = [
 [[package]]
 name = "tree-sitter-gleam"
 version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f0175c53793bda5d444360dd5add25463d18d66afb7f521d6791e2fc61bf2fb3"
-dependencies = [
- "cc",
- "tree-sitter-language",
-]
-
-[[package]]
-name = "tree-sitter-gleam"
-version = "1.0.0"
 source = "git+https://github.com/gleam-lang/tree-sitter-gleam.git?rev=6ea757f7eb8d391dbf24dbb9461990757946dd5e#6ea757f7eb8d391dbf24dbb9461990757946dd5e"
 dependencies = [
  "cc",
@@ -2502,16 +2396,6 @@ name = "tree-sitter-haskell"
 version = "0.23.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "977c51e504548cba13fc27cb5a2edab2124cf6716a1934915d07ab99523b05a4"
-dependencies = [
- "cc",
- "tree-sitter-language",
-]
-
-[[package]]
-name = "tree-sitter-hcl"
-version = "1.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5a7b2cc3d7121553b84309fab9d11b3ff3d420403eef9ae50f9fd1cd9d9cf012"
 dependencies = [
  "cc",
  "tree-sitter-language",

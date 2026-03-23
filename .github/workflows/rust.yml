@@ -19,7 +19,11 @@ jobs:
     uses: leandrocp/github-actions/.github/workflows/rust-test.yml@main
     with:
       msrv: '1.91'
+      manifest-path: 'crates/lumis/Cargo.toml'
+      setup-command: 'cargo run -p dev -- preprocess-queries'
   lint:
     uses: leandrocp/github-actions/.github/workflows/rust-lint.yml@main
     with:
       msrv: '1.91'
+      manifest-path: 'crates/lumis/Cargo.toml'
+      setup-command: 'cargo run -p dev -- preprocess-queries'

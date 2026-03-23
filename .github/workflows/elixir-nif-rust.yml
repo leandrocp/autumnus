@@ -21,8 +21,10 @@ jobs:
     with:
       manifest-path: 'packages/elixir/lumis/native/lumis_nif/Cargo.toml'
       msrv: '1.91'
+      setup-command: 'cargo run -p dev -- preprocess-queries'
   lint:
     uses: leandrocp/github-actions/.github/workflows/rust-lint.yml@main
     with:
       manifest-path: 'packages/elixir/lumis/native/lumis_nif/Cargo.toml'
       msrv: '1.91'
+      setup-command: 'cargo run -p dev -- preprocess-queries'
