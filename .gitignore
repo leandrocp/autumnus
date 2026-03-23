@@ -16,6 +16,4 @@ packages/javascript/lumis/doc/
 packages/javascript/themes/dist/
 packages/javascript/themes/themes/
 website/dist/
-crates/lumis-cli/languages.toml
-crates/lumis-core/languages.toml
 __pycache__/
