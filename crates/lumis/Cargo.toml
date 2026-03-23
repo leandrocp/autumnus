@@ -146,12 +146,12 @@ lang-erb = ["dep:tree-sitter-embedded-template", "lumis-core/lang-erb"]
 lang-erlang = ["dep:tree-sitter-erlang", "lumis-core/lang-erlang"]
 lang-fish = ["lumis-core/lang-fish"]
 lang-fsharp = ["dep:tree-sitter-fsharp", "lumis-core/lang-fsharp"]
-lang-gleam = ["dep:tree-sitter-gleam", "lumis-core/lang-gleam"]
+lang-gleam = ["lumis-core/lang-gleam"]
 lang-glimmer = ["lumis-core/lang-glimmer"]
 lang-go = ["dep:tree-sitter-go", "lumis-core/lang-go"]
 lang-graphql = ["lumis-core/lang-graphql"]
 lang-haskell = ["dep:tree-sitter-haskell", "lumis-core/lang-haskell"]
-lang-hcl = ["dep:tree-sitter-hcl", "lumis-core/lang-hcl"]
+lang-hcl = ["lumis-core/lang-hcl"]
 lang-heex = ["dep:tree-sitter-heex", "lumis-core/lang-heex"]
 lang-html = ["dep:tree-sitter-html", "lumis-core/lang-html"]
 lang-http = ["lumis-core/lang-http"]
@@ -224,10 +224,8 @@ tree-sitter-elm = { version = "5.9.0", optional = true }
 tree-sitter-embedded-template = { version = "0.25.0", optional = true }
 tree-sitter-erlang = { version = "0.15.0", optional = true }
 tree-sitter-fsharp = { version = "0.1.0", optional = true }
-tree-sitter-gleam = { git = "https://github.com/gleam-lang/tree-sitter-gleam.git", rev = "6ea757f7eb8d391dbf24dbb9461990757946dd5e", optional = true }
 tree-sitter-go = { version = "0.25.0", optional = true }
 tree-sitter-haskell = { version = "0.23.1", optional = true }
-tree-sitter-hcl = { git = "https://github.com/tree-sitter-grammars/tree-sitter-hcl.git", rev = "64ad62785d442eb4d45df3a1764962dafd5bc98b", optional = true }
 tree-sitter-heex = { version = "0.8.1", optional = true }
 tree-sitter-highlight = "0.25"
 tree-sitter-html = { version = "0.23.2", optional = true }

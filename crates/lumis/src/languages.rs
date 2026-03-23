@@ -98,10 +98,14 @@ unsafe extern "C" {
     fn tree_sitter_eex() -> *const ();
     #[cfg(feature = "lang-fish")]
     fn tree_sitter_fish() -> *const ();
+    #[cfg(feature = "lang-gleam")]
+    fn tree_sitter_gleam() -> *const ();
     #[cfg(feature = "lang-glimmer")]
     fn tree_sitter_glimmer() -> *const ();
     #[cfg(feature = "lang-graphql")]
     fn tree_sitter_graphql() -> *const ();
+    #[cfg(feature = "lang-hcl")]
+    fn tree_sitter_hcl() -> *const ();
     #[cfg(feature = "lang-http")]
     fn tree_sitter_http() -> *const ();
     #[cfg(feature = "lang-iex")]
@@ -675,8 +679,9 @@ static FSHARP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-gleam")]
 static GLEAM_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_gleam) };
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(tree_sitter_gleam::LANGUAGE),
+        tree_sitter::Language::new(language_fn),
         "gleam",
         GLEAM_HIGHLIGHTS,
         GLEAM_INJECTIONS,
@@ -749,8 +754,9 @@ static HASKELL_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-hcl")]
 static HCL_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_hcl) };
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(tree_sitter_hcl::LANGUAGE),
+        tree_sitter::Language::new(language_fn),
         "hcl",
         HCL_HIGHLIGHTS,
         HCL_INJECTIONS,

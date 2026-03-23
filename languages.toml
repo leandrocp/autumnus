@@ -256,7 +256,6 @@ emacs = ["fsharp"]
 [parsers.gleam]
 git = "https://github.com/gleam-lang/tree-sitter-gleam.git"
 rev = "6ea757f7eb8d391dbf24dbb9461990757946dd5e"
-crate = "tree-sitter-gleam"
 version = "1.0.0"
 globs = ["*.gleam"]
 emacs = ["gleam"]
@@ -294,7 +293,6 @@ shebang = ["runghc", "runhaskell", "runhugs"]
 [parsers.hcl]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-hcl.git"
 rev = "64ad62785d442eb4d45df3a1764962dafd5bc98b"
-crate = "tree-sitter-hcl"
 version = "1.2.0"
 aliases = ["terraform"]
 variant = "HCL"

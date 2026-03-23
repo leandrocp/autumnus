@@ -310,6 +310,9 @@ pub mod languages;
 pub mod themes;
 mod vendor;
 
+pub use lumis_core::events;
+pub use lumis_core::highlights;
+
 // Re-export helper modules from formatter for convenience
 pub use formatter::ansi;
 pub use formatter::html;

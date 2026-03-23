@@ -11,6 +11,10 @@ homepage = "https://lumis.sh"
 repository = "https://github.com/leandrocp/lumis"
 authors = ["Leandro Pereira <leandro@leandro.io>"]
 
+[patch.crates-io]
+lumis-core = { path = "crates/lumis-core" }
+lumis-build = { path = "crates/lumis-build" }
+
 [profile.release]
 lto = true
 codegen-units = 1

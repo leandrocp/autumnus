@@ -522,7 +522,6 @@ dependencies = [
  "full_moon",
  "glob",
  "lumis 0.2.0",
- "lumis-core 0.0.1",
  "md-5",
  "regex",
  "serde",
@@ -915,10 +914,10 @@ dependencies = [
  "tree-sitter-embedded-template",
  "tree-sitter-erlang",
  "tree-sitter-fsharp",
- "tree-sitter-gleam 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "tree-sitter-gleam",
  "tree-sitter-go",
  "tree-sitter-haskell",
- "tree-sitter-hcl 1.1.0",
+ "tree-sitter-hcl",
  "tree-sitter-heex",
  "tree-sitter-highlight",
  "tree-sitter-html",
@@ -958,8 +957,8 @@ dependencies = [
  "cc",
  "derive_builder",
  "glob",
- "lumis-build 0.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "lumis-core 0.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "lumis-build",
+ "lumis-core",
  "pretty_assertions",
  "prettyplease",
  "proc-macro2",
@@ -989,10 +988,8 @@ dependencies = [
  "tree-sitter-embedded-template",
  "tree-sitter-erlang",
  "tree-sitter-fsharp",
- "tree-sitter-gleam 1.0.0 (git+https://github.com/gleam-lang/tree-sitter-gleam.git?rev=6ea757f7eb8d391dbf24dbb9461990757946dd5e)",
  "tree-sitter-go",
  "tree-sitter-haskell",
- "tree-sitter-hcl 1.2.0",
  "tree-sitter-heex",
  "tree-sitter-highlight",
  "tree-sitter-html",
@@ -1029,12 +1026,6 @@ name = "lumis-build"
 version = "0.0.1"
 
 [[package]]
-name = "lumis-build"
-version = "0.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8cd1020dacf54e11fd412ef98e67d94586552305cd6e8ddb29add52e7ccef8ea"
-
-[[package]]
 name = "lumis-cli"
 version = "0.0.1"
 dependencies = [
@@ -1042,8 +1033,8 @@ dependencies = [
  "assert_cmd",
  "clap",
  "etcetera",
- "lumis-build 0.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "lumis-core 0.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "lumis-build",
+ "lumis-core",
  "predicates",
  "prettyplease",
  "proc-macro2",
@@ -1066,25 +1057,6 @@ dependencies = [
  "derive_builder",
  "glob",
  "pretty_assertions",
- "prettyplease",
- "proc-macro2",
- "quote",
- "regex",
- "serde",
- "serde_json",
- "syn 2.0.117",
- "toml",
- "v_htmlescape",
-]
-
-[[package]]
-name = "lumis-core"
-version = "0.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c8f44f465915ebeb0926afa7740e62346c97cac65b2b900f47b1a2c84427c159"
-dependencies = [
- "derive_builder",
- "glob",
  "prettyplease",
  "proc-macro2",
  "quote",
@@ -1970,15 +1942,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "tree-sitter-gleam"
-version = "1.0.0"
-source = "git+https://github.com/gleam-lang/tree-sitter-gleam.git?rev=6ea757f7eb8d391dbf24dbb9461990757946dd5e#6ea757f7eb8d391dbf24dbb9461990757946dd5e"
-dependencies = [
- "cc",
- "tree-sitter-language",
-]
-
-[[package]]
 name = "tree-sitter-go"
 version = "0.25.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2003,15 +1966,6 @@ name = "tree-sitter-hcl"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5a7b2cc3d7121553b84309fab9d11b3ff3d420403eef9ae50f9fd1cd9d9cf012"
-dependencies = [
- "cc",
- "tree-sitter-language",
-]
-
-[[package]]
-name = "tree-sitter-hcl"
-version = "1.2.0"
-source = "git+https://github.com/tree-sitter-grammars/tree-sitter-hcl.git?rev=64ad62785d442eb4d45df3a1764962dafd5bc98b#64ad62785d442eb4d45df3a1764962dafd5bc98b"
 dependencies = [
  "cc",
  "tree-sitter-language",
