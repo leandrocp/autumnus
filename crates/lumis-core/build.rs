@@ -113,12 +113,7 @@ fn format_entry(key: &str, entry: &ParserEntry) -> String {
 }
 
 fn languages() {
-    let local = manifest_dir().join("languages.toml");
-    let languages_toml_path = if local.exists() {
-        local
-    } else {
-        manifest_dir().join("../../languages.toml")
-    };
+    let languages_toml_path = manifest_dir().join("../../languages.toml");
 
     println!("cargo:rerun-if-changed={}", languages_toml_path.display());
 

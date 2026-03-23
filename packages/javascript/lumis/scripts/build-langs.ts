@@ -1,9 +1,9 @@
 /**
- * Reads preprocessed query .scm files from tmp/queries_processed/, converts
+ * Reads preprocessed query .scm files from queries/processed/, converts
  * Lua patterns to JS regex, and emits one TypeScript module per language.
  *
  * Preprocessing (inheritance, text replacements, overwrite merging) is done by
- * `cargo run -p dev -- preprocess-queries`, which is run by `pnpm run build:generate`.
+ * `just langs-preprocess-queries`, which is run by `pnpm run build:generate`.
  *
  * Language list and metadata (aliases, wasm_name, query_name) are read from
  * languages.toml at the repo root.
@@ -14,7 +14,7 @@ import path from 'node:path'
 import { parse as parseToml } from 'smol-toml'
 
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, '../../../..')
-const QUERIES_PROCESSED_DIR = path.join(WORKSPACE_ROOT, 'tmp', 'queries_processed')
+const QUERIES_PROCESSED_DIR = path.join(WORKSPACE_ROOT, 'queries', 'processed')
 const OUT_DIR = path.resolve(import.meta.dirname, '../langs')
 const LANGUAGES_TOML = path.join(WORKSPACE_ROOT, 'languages.toml')
 const PACKAGE_JSON = path.resolve(import.meta.dirname, '../package.json')

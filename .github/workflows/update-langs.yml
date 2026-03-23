@@ -78,7 +78,9 @@ jobs:
           add-paths: |
             languages.toml
             crates/lumis/vendored_parsers
-            crates/lumis/queries
+            queries/upstream
+            queries/processed
+            queries/overrides
             LANGUAGES.md
           commit-message: "chore: update ${{ matrix.language }}"
           title: "chore: update ${{ matrix.language }}"

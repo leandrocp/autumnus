@@ -78,14 +78,8 @@ fn main() {
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
     let dest_path = out_dir.join("queries_constants.rs");
 
-    let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
-    let queries_path = manifest_dir.join("queries");
-    let local_toml = manifest_dir.join("languages.toml");
-    let languages_toml_path = if local_toml.exists() {
-        local_toml
-    } else {
-        workspace_root().join("languages.toml")
-    };
+    let queries_path = workspace_root().join("queries").join("processed");
+    let languages_toml_path = workspace_root().join("languages.toml");
 
     println!("cargo:rerun-if-changed={}", queries_path.display());
     println!("cargo:rerun-if-changed={}", languages_toml_path.display());

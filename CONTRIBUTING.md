@@ -55,9 +55,9 @@ This produces:
 
 All language metadata lives here. Consumed by:
 
-- `crates/dev` -- fetches vendored parsers, queries, preprocesses queries, builds WASMs, generates docs
-- `crates/lumis/build.rs` -- reads `tmp/queries_processed/` to embed query constants (with Lua-to-Rust regex conversion)
-- `crates/lumis-cli/build.rs` -- reads `crates/lumis-cli/queries/` to embed query constants (no regex conversion, used with WASM-based tree-sitter)
+- `crates/dev` -- fetches vendored parsers, preprocesses queries, builds WASMs, and generates docs
+- `crates/lumis/build.rs` -- reads `queries/processed/` to embed query constants (with Lua-to-Rust regex conversion)
+- `crates/lumis-cli/build.rs` -- reads `queries/processed/` to embed query constants
 - `crates/lumis-core/build.rs` -- generates the `Language` enum and Rust-side detection metadata
 - `packages/javascript/lumis/scripts/build-langs.ts` -- generates `packages/javascript/lumis/langs/*.ts`, bundles, and JS detection/load metadata from the same source
 - CI workflows -- builds WASMs, updates parser/query revisions
@@ -204,14 +204,17 @@ just langs-fetch-parsers {name}   # fetches updated files
 
 ```sh
 just langs-upgrade-queries {name} # updates languages.toml revisions
-just langs-fetch-queries {name}   # fetches updated files
+just langs-fetch-queries {name}   # fetches updated upstream files
+just langs-preprocess-queries     # regenerates checked-in processed queries
 ```
 
 Omit the name argument to upgrade all queries at once.
 
+Raw query sources live in `queries/upstream/`. Preprocessed tracked outputs live in `queries/processed/` and should be committed whenever upstream queries or overrides change.
+
 #### Custom overrides
 
-If a query needs modifications that diverge from upstream, place override files in `crates/lumis/overwrites/{name}/`. These are merged on top of the upstream queries during preprocessing.
+If a query needs modifications that diverge from upstream, place override files in `queries/overrides/{name}/`. These are merged on top of the upstream queries during preprocessing.
 
 ### Building WASMs
 

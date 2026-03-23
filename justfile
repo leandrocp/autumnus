@@ -228,6 +228,7 @@ langs-update name:
     set -euo pipefail
     just langs-fetch-parsers {{name}}
     just langs-fetch-queries {{name}}
+    just langs-preprocess-queries {{name}}
     just docs-gen-languages-md
 
 # Generate THEMES.md from themes definition
@@ -238,7 +239,7 @@ docs-gen-themes-md:
 langs-extract-scopes:
     #!/usr/bin/env bash
     set -euo pipefail
-    find crates/lumis/queries -type f -name "*.scm" -exec grep -oh '@[^_ ][^ ]*' {} \; 2>/dev/null | sed 's/^@//; s/[^a-zA-Z0-9_.-]//g' | sort -u
+    find queries/upstream -type f -name "*.scm" -exec grep -oh '@[^_ ][^ ]*' {} \; 2>/dev/null | sed 's/^@//; s/[^a-zA-Z0-9_.-]//g' | sort -u
 
 # Fetch vendored parser sources at pinned revisions
 langs-fetch-parsers name="":

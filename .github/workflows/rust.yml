@@ -5,11 +5,13 @@ on:
     branches: [ main ]
     paths:
       - "crates/**"
+      - "queries/**"
       - "fixtures/conformance/**"
       - ".github/workflows/rust.yml"
   pull_request:
     paths:
       - "crates/**"
+      - "queries/**"
       - "fixtures/conformance/**"
       - ".github/workflows/rust.yml"
   workflow_dispatch:
@@ -20,10 +22,8 @@ jobs:
     with:
       msrv: '1.91'
       manifest-path: 'crates/lumis/Cargo.toml'
-      setup-command: 'cargo run -p dev -- preprocess-queries'
   lint:
     uses: leandrocp/github-actions/.github/workflows/rust-lint.yml@main
     with:
       msrv: '1.91'
       manifest-path: 'crates/lumis/Cargo.toml'
-      setup-command: 'cargo run -p dev -- preprocess-queries'

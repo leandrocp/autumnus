@@ -9,7 +9,7 @@
 //
 // 2. `queries_constants.rs` (via `queries()`, included by `src/queries.rs`)
 //
-//    Reads processed .scm files from `tmp/queries_processed/<lang>/` and
+//    Reads processed .scm files from `queries/processed/<lang>/` and
 //    emits one `&str` constant per language per query type:
 //      pub const RUST_HIGHLIGHTS: &str = "...";
 //      pub const RUST_INJECTIONS: &str = "...";
@@ -415,14 +415,14 @@ fn queries() {
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
     let dest_path = out_dir.join("queries_constants.rs");
 
-    let queries_path = workspace_root().join("tmp").join("queries_processed");
+    let queries_path = workspace_root().join("queries").join("processed");
     let mut generated_code = TokenStream::new();
 
     println!("cargo:rerun-if-changed={}", queries_path.display());
 
     let entries = fs::read_dir(&queries_path).unwrap_or_else(|_| {
         panic!(
-            "failed to read tmp/queries_processed directory at {}. Run `just langs-preprocess-queries` first.",
+            "failed to read queries/processed directory at {}. Run `just langs-preprocess-queries` first.",
             queries_path.display()
         )
     });

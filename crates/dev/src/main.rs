@@ -696,7 +696,7 @@ fn tmpdir() -> Result<String> {
 
 fn query_names() -> Result<Vec<String>> {
     let mut names = Vec::new();
-    let dir = Path::new("crates/lumis/queries");
+    let dir = Path::new("queries/upstream");
     if dir.exists() {
         for entry in fs::read_dir(dir)? {
             let entry = entry?;
@@ -939,7 +939,7 @@ fn fetch_queries(name: &str) -> Result<()> {
         }
 
         let clone_dir = &repo_clones[&clone_key];
-        let dest = format!("crates/lumis/queries/{query_name}");
+        let dest = format!("queries/upstream/{query_name}");
 
         let src_dir = if let Some(ref path) = info.path {
             if toml.queries.contains_key(&query_name) && query_name != "default" {
@@ -991,9 +991,10 @@ fn apply_text_replacements(content: &str) -> String {
             "#set! @_hyperlink url @markup.link.url",
             "#set! @_hyperlink highlight \"markup.link.url\"",
         ),
-        ("\\\\c", "(?i)"),
-        ("^{[-]|[^|]", "^\\{[-]|^\\{[^|]"),
-        ("\"^\\\\if", "\"^if"),
+        (r"\c", "(?i)"),
+        (r"\(?i)", "(?i)"),
+        ("^{[-]|[^|]", r"^\{[-]|^\{[^|]"),
+        (r#"^\\if"#, r#"^if"#),
     ];
 
     let mut s = content.to_string();
@@ -1102,13 +1103,11 @@ fn resolve_and_preprocess(
 }
 
 fn preprocess_queries(name: &str) -> Result<()> {
-    let src = "crates/lumis/queries";
-    let overwrites = "crates/lumis/overwrites";
-    let dest = "tmp/queries_processed";
-    let cli_dest = "crates/lumis-cli/queries";
+    let src = "queries/upstream";
+    let overwrites = "queries/overrides";
+    let dest = "queries/processed";
 
     let _ = fs::remove_dir_all(dest);
-    let _ = fs::remove_dir_all(cli_dest);
 
     for lang in query_names()? {
         if !name.is_empty() && lang != name {
@@ -1116,8 +1115,6 @@ fn preprocess_queries(name: &str) -> Result<()> {
         }
 
         fs::create_dir_all(format!("{dest}/{lang}"))?;
-        fs::create_dir_all(format!("{cli_dest}/{lang}"))?;
-
         let mut wrote = false;
         for query_type in &["highlights", "injections", "locals"] {
             let mut seen = HashSet::new();
@@ -1125,7 +1122,6 @@ fn preprocess_queries(name: &str) -> Result<()> {
             if !content.is_empty() {
                 let full = format!("; This file is auto-generated. Do not edit.\n{content}");
                 fs::write(format!("{dest}/{lang}/{query_type}.scm"), &full)?;
-                fs::write(format!("{cli_dest}/{lang}/{query_type}.scm"), &full)?;
                 wrote = true;
             }
         }
@@ -1133,10 +1129,6 @@ fn preprocess_queries(name: &str) -> Result<()> {
             println!("  {lang}");
         }
     }
-
-    // Sync languages.toml into crates
-    fs::copy("languages.toml", "crates/lumis-core/languages.toml")?;
-    fs::copy("languages.toml", "crates/lumis-cli/languages.toml")?;
 
     Ok(())
 }
