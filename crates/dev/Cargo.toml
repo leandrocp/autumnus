@@ -15,7 +15,6 @@ path = "src/main.rs"
 
 [dependencies]
 lumis = { path = "../lumis" }
-lumis-core = { path = "../lumis-core" }
 anyhow = "1"
 base64 = "0.22"
 clap = { version = "4", features = ["derive"] }

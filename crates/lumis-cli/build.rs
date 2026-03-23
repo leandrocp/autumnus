@@ -60,7 +60,12 @@ fn manifest_dir() -> PathBuf {
 }
 
 fn workspace_root() -> PathBuf {
-    manifest_dir().parent().unwrap().parent().unwrap().to_path_buf()
+    manifest_dir()
+        .parent()
+        .unwrap()
+        .parent()
+        .unwrap()
+        .to_path_buf()
 }
 
 /// Resolve a path that lives at the workspace root during development

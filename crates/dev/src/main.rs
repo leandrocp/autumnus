@@ -1,9 +1,9 @@
 use anyhow::{bail, Context, Result};
 use clap::{Parser, Subcommand};
+use lumis::events::HighlightEvent;
 use lumis::formatter::Formatter as _;
 use lumis::highlight::highlight_events;
 use lumis::languages::Language;
-use lumis_core::events::HighlightEvent;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::collections::{BTreeMap, HashSet};
@@ -179,7 +179,7 @@ fn serialize_events(events: Vec<HighlightEvent>) -> Vec<SerializableHighlightEve
                 scope_index,
                 language,
             } => SerializableHighlightEvent::Start {
-                scope: lumis_core::highlights::HIGHLIGHT_NAMES[scope_index].to_string(),
+                scope: lumis::highlights::HIGHLIGHT_NAMES[scope_index].to_string(),
                 language,
             },
             HighlightEvent::Source { start, end } => {
@@ -453,7 +453,7 @@ fn gen_css() -> Result<()> {
     let css_dir = Path::new("css");
     fs::create_dir_all(css_dir)?;
 
-    let mut themes: Vec<_> = lumis_core::themes::ALL_THEMES.iter().collect();
+    let mut themes: Vec<_> = lumis::themes::ALL_THEMES.iter().collect();
     themes.sort_by(|a, b| a.name.cmp(&b.name));
 
     for theme in themes {
