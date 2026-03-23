@@ -56,14 +56,6 @@ jobs:
           node-version: '24'
           cache: 'pnpm'
           cache-dependency-path: packages/javascript/pnpm-lock.yaml
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: wasm32-wasip2
-      - uses: taiki-e/install-action@v2
-        with:
-          tool: just
-      - uses: mymindstorm/setup-emsdk@v14
-      - run: pnpm add -g tree-sitter-cli@0.26
       - run: pnpm install --frozen-lockfile
         working-directory: packages/javascript
       - run: pnpm --filter @lumis-sh/themes build

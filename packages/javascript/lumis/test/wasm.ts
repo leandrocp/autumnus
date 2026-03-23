@@ -1,24 +1,19 @@
-import { execFileSync } from "node:child_process";
-import { existsSync } from "node:fs";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
 import { configureWasmResolver } from "../src/index.js";
 
-const repoRoot = new URL("../../../../", import.meta.url);
+const fixturesRoot = new URL("./fixtures/wasm/", import.meta.url);
 
 export function ensureLocalWasm(language: string): URL {
   return ensureLocalParserWasm(language, `tree-sitter-${language}`);
 }
 
 export function ensureLocalParserWasm(language: string, parser: string): URL {
-  const wasmUrl = new URL(`tmp/wasms/${parser}.wasm`, repoRoot);
+  const wasmUrl = new URL(`${parser}.wasm`, fixturesRoot);
 
   if (!existsSync(fileURLToPath(wasmUrl))) {
-    execFileSync("cargo", ["run", "-p", "dev", "--", "build-wasm", language], {
-      cwd: fileURLToPath(repoRoot),
-      stdio: "pipe",
-    });
+    throw new Error(`Missing committed test WASM for ${language} at ${fileURLToPath(wasmUrl)}`);
   }
 
   return wasmUrl;
@@ -29,7 +24,7 @@ export function configureLocalWasmResolver(langs: string[]): void {
     ensureLocalWasm(language);
   }
 
-  configureWasmResolver((_language, wasm) => new URL(`tmp/wasms/${wasm.name}.wasm`, repoRoot));
+  configureWasmResolver((_language, wasm) => new URL(`${wasm.name}.wasm`, fixturesRoot));
 }
 
 export function ensureLocalParserWasmDataUrl(language: string, parser: string): string {

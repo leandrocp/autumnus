@@ -3,5 +3,7 @@ dist/
 langs/
 themes/
 wasm/
+!test/fixtures/wasm/
+!test/fixtures/wasm/*.wasm
 queries/
 src/tree-sitter-wasm.ts

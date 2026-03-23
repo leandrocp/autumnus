@@ -87,7 +87,10 @@ fn check_html_inline(fixture: &Fixture) {
         .theme(Some(theme))
         .build()
         .unwrap();
-    assert_eq!(highlight(&fixture.source, fmt), fixture.html_inline);
+    assert_eq!(
+        normalize_newlines(&highlight(&fixture.source, fmt)),
+        normalize_newlines(&fixture.html_inline)
+    );
 }
 
 fn check_html_linked(fixture: &Fixture) {
@@ -95,7 +98,10 @@ fn check_html_linked(fixture: &Fixture) {
     let fmt = HtmlLinkedBuilder::new().lang(lang).build().unwrap();
     let mut out = Vec::new();
     fmt.format(&fixture.source, &mut out).unwrap();
-    assert_eq!(String::from_utf8(out).unwrap(), fixture.html_linked);
+    assert_eq!(
+        normalize_newlines(&String::from_utf8(out).unwrap()),
+        normalize_newlines(&fixture.html_linked)
+    );
 }
 
 fn check_html_multi_themes(fixture: &Fixture) {
@@ -111,7 +117,10 @@ fn check_html_multi_themes(fixture: &Fixture) {
         .unwrap();
     let mut out = Vec::new();
     fmt.format(&fixture.source, &mut out).unwrap();
-    assert_eq!(String::from_utf8(out).unwrap(), fixture.html_multi_themes);
+    assert_eq!(
+        normalize_newlines(&String::from_utf8(out).unwrap()),
+        normalize_newlines(&fixture.html_multi_themes)
+    );
 }
 
 fn check_terminal(fixture: &Fixture) {
@@ -124,7 +133,14 @@ fn check_terminal(fixture: &Fixture) {
         .unwrap();
     let mut out = Vec::new();
     fmt.format(&fixture.source, &mut out).unwrap();
-    assert_eq!(String::from_utf8(out).unwrap(), fixture.terminal);
+    assert_eq!(
+        normalize_newlines(&String::from_utf8(out).unwrap()),
+        normalize_newlines(&fixture.terminal)
+    );
+}
+
+fn normalize_newlines(value: &str) -> String {
+    value.replace("\r\n", "\n")
 }
 
 // Generate one test module per fixture directory found at build time.
