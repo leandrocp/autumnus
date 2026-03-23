@@ -1,16 +1,16 @@
 [package]
 name = "lumis-cli"
-version = "0.1.0"
+version = "0.0.1"
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 homepage.workspace = true
 repository.workspace = true
 authors.workspace = true
-description = "Syntax Highlighter powered by Tree-sitter and Neovim themes"
-keywords = ["syntax-highlighting", "tree-sitter", "cli"]
+description = "Syntax Highlighter CLI powered by Tree-sitter and Neovim themes"
+keywords = ["lumis", "syntax-highlighter", "tree-sitter", "neovim", "cli"]
 categories = ["command-line-utilities", "text-processing"]
-include = ["/src/", "/build.rs", "/languages.toml", "/queries/", "/CHANGELOG.md"]
+include = ["/src/", "/build.rs", "/languages.toml", "/queries/", "/CHANGELOG.md", "/LICENSE"]
 
 [[bin]]
 name = "lumis"

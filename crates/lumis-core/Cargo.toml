@@ -7,12 +7,15 @@ license.workspace = true
 homepage.workspace = true
 repository.workspace = true
 authors.workspace = true
-description = "Shared core logic for Lumis"
+description = "Lumis shared core"
+keywords = ["lumis", "syntax-highlighter", "tree-sitter", "neovim"]
 include = [
     "/src/",
     "/build.rs",
     "/languages.toml",
     "/themes/*.json",
+    "/CHANGELOG.md",
+    "/LICENSE",
 ]
 
 [features]

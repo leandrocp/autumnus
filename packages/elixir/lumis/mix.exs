@@ -59,7 +59,7 @@ defmodule Lumis.MixProject do
         checksum-*.exs
         mix.exs
         README.md
-        LICENSE.md
+        LICENSE
         CHANGELOG.md
         usage-rules.md
       ]

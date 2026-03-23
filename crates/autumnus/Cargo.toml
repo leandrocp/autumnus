@@ -8,7 +8,7 @@ homepage.workspace = true
 repository.workspace = true
 authors.workspace = true
 description = "DEPRECATED - Use `lumis` instead. Syntax highlighter powered by Tree-sitter."
-readme = "README.md"
+keywords = ["lumis", "syntax-highlighter", "tree-sitter", "neovim"]
 
 [dependencies]
 lumis = "0.1.0"

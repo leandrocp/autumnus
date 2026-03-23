@@ -86,7 +86,15 @@ fn highlight_source_diff_html_inline() {
     cmd()
         .arg("--data-dir")
         .arg(fixtures_dir())
-        .args(["highlight", "-l", "diff", "-f", "html-inline", "-t", "dracula"])
+        .args([
+            "highlight",
+            "-l",
+            "diff",
+            "-f",
+            "html-inline",
+            "-t",
+            "dracula",
+        ])
         .write_stdin(DIFF_SNIPPET)
         .assert()
         .success()

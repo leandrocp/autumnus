@@ -17,13 +17,28 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
+  test-lumis:
     uses: leandrocp/github-actions/.github/workflows/rust-test.yml@main
     with:
       msrv: '1.91'
       manifest-path: 'crates/lumis/Cargo.toml'
+  test-lumis-build:
+    uses: leandrocp/github-actions/.github/workflows/rust-test.yml@main
+    with:
+      msrv: '1.91'
+      manifest-path: 'crates/lumis-build/Cargo.toml'
+  test-lumis-core:
+    uses: leandrocp/github-actions/.github/workflows/rust-test.yml@main
+    with:
+      msrv: '1.91'
+      manifest-path: 'crates/lumis-core/Cargo.toml'
+  test-lumis-cli:
+    uses: leandrocp/github-actions/.github/workflows/rust-test.yml@main
+    with:
+      msrv: '1.91'
+      manifest-path: 'crates/lumis-cli/Cargo.toml'
   lint:
     uses: leandrocp/github-actions/.github/workflows/rust-lint.yml@main
     with:
       msrv: '1.91'
-      manifest-path: 'crates/lumis/Cargo.toml'
+      manifest-path: 'Cargo.toml'
