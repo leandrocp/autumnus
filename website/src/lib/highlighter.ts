@@ -1,12 +1,19 @@
 import { createHighlighter } from "@lumis-sh/lumis";
 import { bundledLanguages } from "@lumis-sh/lumis/bundles/full";
 import { htmlInline, htmlMultiThemes } from "@lumis-sh/lumis/formatters";
-import type { Theme } from "@lumis-sh/lumis";
+import type { Highlighter, Theme } from "@lumis-sh/lumis";
 import type { LanguageOption } from "../data/languages";
+import { LANGUAGES } from "../data/languages";
 
 const highlighterPromise = createHighlighter({
   langs: [bundledLanguages],
 });
+
+/** Preload all language WASMs in the background so switching is instant. */
+export async function preloadAllLanguages(): Promise<void> {
+  const highlighter = await highlighterPromise;
+  await Promise.all(LANGUAGES.map((l) => highlighter.loadLanguage(l.language).catch(() => {})));
+}
 
 export async function renderHighlight(language: LanguageOption, theme: Theme, source: string, preClass?: string) {
   const highlighter = await highlighterPromise;

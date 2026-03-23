@@ -1,21 +1,75 @@
 import { bundledLanguages } from "@lumis-sh/lumis/bundles/full";
-import { SAMPLES } from "./samples";
+import type { LazyLanguage } from "@lumis-sh/lumis";
+import { getSample } from "./samples";
 
-export const LANGUAGES = [
-  { id: "bash", label: "Bash", language: bundledLanguages.bash, sample: SAMPLES.bash },
-  { id: "css", label: "CSS", language: bundledLanguages.css, sample: SAMPLES.css },
-  { id: "diff", label: "Diff", language: bundledLanguages.diff, sample: SAMPLES.diff },
-  { id: "elixir", label: "Elixir", language: bundledLanguages.elixir, sample: SAMPLES.elixir },
-  { id: "html", label: "HTML", language: bundledLanguages.html, sample: SAMPLES.html },
-  { id: "java", label: "Java", language: bundledLanguages.java, sample: SAMPLES.java },
-  { id: "javascript", label: "JavaScript", language: bundledLanguages.javascript, sample: SAMPLES.javascript },
-  { id: "json", label: "JSON", language: bundledLanguages.json, sample: SAMPLES.json },
-  { id: "ruby", label: "Ruby", language: bundledLanguages.ruby, sample: SAMPLES.ruby },
-  { id: "rust", label: "Rust", language: bundledLanguages.rust, sample: SAMPLES.rust },
-  { id: "tsx", label: "TSX", language: bundledLanguages.tsx, sample: SAMPLES.tsx },
-  { id: "typescript", label: "TypeScript", language: bundledLanguages.typescript, sample: SAMPLES.typescript },
-] as const;
+// Labels for languages that need special casing
+const LABEL_OVERRIDES: Record<string, string> = {
+  asm: "Assembly",
+  bash: "Bash",
+  c: "C",
+  caddy: "Caddy",
+  cmake: "CMake",
+  commonlisp: "Common Lisp",
+  cpp: "C++",
+  csharp: "C#",
+  css: "CSS",
+  csv: "CSV",
+  eex: "EEx",
+  ejs: "EJS",
+  erb: "ERB",
+  fsharp: "F#",
+  glimmer: "Glimmer",
+  go: "Go",
+  graphql: "GraphQL",
+  hcl: "HCL",
+  heex: "HEEx",
+  html: "HTML",
+  http: "HTTP",
+  iex: "IEx",
+  javascript: "JavaScript",
+  json: "JSON",
+  latex: "LaTeX",
+  llvm: "LLVM",
+  markdown_inline: "Markdown Inline",
+  nushell: "Nushell",
+  objc: "Objective-C",
+  ocaml: "OCaml",
+  ocaml_interface: "OCaml Interface",
+  php: "PHP",
+  plaintext: "Plain Text",
+  powershell: "PowerShell",
+  protobuf: "Protocol Buffers",
+  r: "R",
+  scss: "SCSS",
+  sql: "SQL",
+  tsx: "TSX",
+  typescript: "TypeScript",
+  typst: "Typst",
+  vim: "Vim",
+  vue: "Vue",
+  wat: "WAT",
+  xml: "XML",
+  yaml: "YAML",
+};
 
-export type LanguageOption = (typeof LANGUAGES)[number];
+function labelizeLanguage(id: string): string {
+  return LABEL_OVERRIDES[id] ?? id.charAt(0).toUpperCase() + id.slice(1);
+}
+
+export interface LanguageOption {
+  id: string;
+  label: string;
+  language: LazyLanguage;
+}
+
+export const LANGUAGES: LanguageOption[] = Object.entries(bundledLanguages)
+  .map(([id, language]) => ({
+    id,
+    label: labelizeLanguage(id),
+    language,
+  }))
+  .sort((a, b) => a.label.localeCompare(b.label));
 
 export const LANGUAGES_BY_ID = new Map(LANGUAGES.map((language) => [language.id, language]));
+
+export { getSample };

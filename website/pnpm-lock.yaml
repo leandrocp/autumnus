@@ -9,53 +9,11 @@ importers:
   .:
     dependencies:
       '@lumis-sh/lumis':
-        specifier: link:../packages/javascript/lumis
-        version: link:../packages/javascript/lumis
+        specifier: ^0.0.1
+        version: 0.0.1
       '@lumis-sh/themes':
-        specifier: 0.0.2
+        specifier: ^0.0.2
         version: 0.0.2
-      '@lumis-sh/wasm-bash':
-        specifier: ^0.26.0
-        version: 0.26.0
-      '@lumis-sh/wasm-comment':
-        specifier: ^0.26.0
-        version: 0.26.1
-      '@lumis-sh/wasm-css':
-        specifier: ^0.26.0
-        version: 0.26.0
-      '@lumis-sh/wasm-diff':
-        specifier: ^0.26.0
-        version: 0.26.0
-      '@lumis-sh/wasm-elixir':
-        specifier: ^0.26.0
-        version: 0.26.1
-      '@lumis-sh/wasm-embedded-template':
-        specifier: ^0.26.0
-        version: 0.26.1
-      '@lumis-sh/wasm-html':
-        specifier: ^0.26.0
-        version: 0.26.0
-      '@lumis-sh/wasm-java':
-        specifier: ^0.26.0
-        version: 0.26.1
-      '@lumis-sh/wasm-javascript':
-        specifier: ^0.26.0
-        version: 0.26.0
-      '@lumis-sh/wasm-json':
-        specifier: ^0.26.0
-        version: 0.26.1
-      '@lumis-sh/wasm-ruby':
-        specifier: ^0.26.0
-        version: 0.26.1
-      '@lumis-sh/wasm-rust':
-        specifier: ^0.26.1
-        version: 0.26.1
-      '@lumis-sh/wasm-tsx':
-        specifier: ^0.26.0
-        version: 0.26.0
-      '@lumis-sh/wasm-typescript':
-        specifier: ^0.26.0
-        version: 0.26.0
       webgl-fluid-enhanced:
         specifier: ^0.8.0
         version: 0.8.0
@@ -247,50 +205,12 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
+  '@lumis-sh/lumis@0.0.1':
+    resolution: {integrity: sha512-CKUBXdOMOB4bsbrLL4cfz5X/70JKAKod4A5RxxWb80pEKxnrwWMsNVh6gDtoMW9FmHzQMItcmOPpqNgzYusIwg==}
+    engines: {node: '>=18'}
+
   '@lumis-sh/themes@0.0.2':
     resolution: {integrity: sha512-lVorEHtHZalmyPjRD1pb+3Q5VsuHn1wpe3Vcc1ffpdQGmuhg2nwvc3We806F4zuSbH19IVO9j66RKl2ioDsD+A==}
-
-  '@lumis-sh/wasm-bash@0.26.0':
-    resolution: {integrity: sha512-ECFpMLMVY7EoBlt6Whnv4OPhkpe7J8HhecvubSyKQTYT2/pmjXVHU77gyvsJ6zsYbCltgYtIxxgLvuHukTEmrQ==}
-
-  '@lumis-sh/wasm-comment@0.26.1':
-    resolution: {integrity: sha512-BkVfnfvZg+Nt9LIuHLl57RFyfgr+VVHgk2xhq+CRsaVFrh4avgVR/rJbaETesk9l1xMGQxUxWxEWge2nHZMBbA==}
-
-  '@lumis-sh/wasm-css@0.26.0':
-    resolution: {integrity: sha512-vB6TLEm2fRohdzeIwlCJspgyuJKNjhLyNvTXbY1s4Q57SD9qw5IEwPIamyYg5TmOxTT9BlWgsgR6NA6TuBx3lg==}
-
-  '@lumis-sh/wasm-diff@0.26.0':
-    resolution: {integrity: sha512-Zd3on+YkRPBsXyKaaGK4lNFtH49xvcBpzMP9PBLyZh32qwSDfr/PHwvOrgpHKQ6PLMSTyAOSMTfvrIK796QcHA==}
-
-  '@lumis-sh/wasm-elixir@0.26.1':
-    resolution: {integrity: sha512-HqlYSj3NUG+tBoQ9jvRkqLg40p+tIEQNOlhrm0DYVWEafVvIJglQOetKWiL5/kkHk5helEx3A5FMRaZjSm8CgQ==}
-
-  '@lumis-sh/wasm-embedded-template@0.26.1':
-    resolution: {integrity: sha512-wR94xJpFfZcXESNSGvsmwApgw7060JZBRWY3F47Mgru629d2KjLcd9MSI1OfPH4HsqkQ0003y9BO0vaN4xeVYA==}
-
-  '@lumis-sh/wasm-html@0.26.0':
-    resolution: {integrity: sha512-PRNf7H776CtzX7QTElzxyVVBXCz34wkeHtOWZuorkQ9ta4YzzC7woeZm+6i8pEfvKO1iUY9N+ZsF5E+HFk1YXA==}
-
-  '@lumis-sh/wasm-java@0.26.1':
-    resolution: {integrity: sha512-B0S/3CYAobN5NtEmYJARZoTsnCSr0UTLqR9HqrZKouiY0UEUOwMTr3eRAbtMplRjBGvzZvDN2nlINY1DNac0Rg==}
-
-  '@lumis-sh/wasm-javascript@0.26.0':
-    resolution: {integrity: sha512-QJchuTditoVsulVGTx2Yy0Yxir90fJFd3IAz4LgmioyU/VMvSVnIj0TLaXBDbg05rCmBSSARugUjF/u7aLIReA==}
-
-  '@lumis-sh/wasm-json@0.26.1':
-    resolution: {integrity: sha512-HX3vI2uxylvBsDXEJBtRNjtgEfqmvOM+QRW5ZDPGmh4L7HNzVbkT2VFS7OAgp8jX4cwXAlzsa/kvijdcYtXbUQ==}
-
-  '@lumis-sh/wasm-ruby@0.26.1':
-    resolution: {integrity: sha512-FJoWjMJpiPtG1zx9inALZ400rzqeDkPwvhlr+igSByrWg/cZb+GVxRUUpOaN7vuGdPUaGE+gqoCjLAQtpamtTg==}
-
-  '@lumis-sh/wasm-rust@0.26.1':
-    resolution: {integrity: sha512-j3xcUKS4KDU1uRCkAUtj7wVzbcq79kenXKfpjHDVExo4vrZ90KnFyi6FmG48CI8uTEz+rfx0baAfIJqE9+vbQA==}
-
-  '@lumis-sh/wasm-tsx@0.26.0':
-    resolution: {integrity: sha512-kbpg5cL28S+izAvzThspezRw5ZWNXVuMA9cswHriQUMA/mQFqIEBkKwpBTkx1JYt83zN7u0RZj9vSQb2vHWcqQ==}
-
-  '@lumis-sh/wasm-typescript@0.26.0':
-    resolution: {integrity: sha512-48v0MvvML+PdlmzFwchqGRri8RNLlihQhdiUm3IEJsAeIMfAXq8HzI1a/iJDnL3jx1OLunKMS/ySABLxGESvhg==}
 
   '@rollup/rollup-android-arm-eabi@4.59.0':
     resolution: {integrity: sha512-upnNBkA6ZH2VKGcBj9Fyl9IGNPULcjXRlg0LLeaioQWueH30p6IXtJEbKAgvyv+mJaMxSm1l6xwDXYjpEMiLMg==}
@@ -719,6 +639,9 @@ packages:
       yaml:
         optional: true
 
+  web-tree-sitter@0.26.7:
+    resolution: {integrity: sha512-KiZhelTvBA/ziUHEO7Emb75cGVAq8iGZNabYaZm53Zpy50NsXyOW+xSHlwHt5CVg/TRPZBfeVLTTobF0LjFJ1w==}
+
   webgl-fluid-enhanced@0.8.0:
     resolution: {integrity: sha512-Yj3+AfQYC6bENe3mTpj1XExVfSZCG6pGxAqGXluUgdjCPCP8rvjrHXy4P5LChlJUgL8kf4E9dgmv5nLXjTJIAg==}
 
@@ -821,35 +744,11 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
+  '@lumis-sh/lumis@0.0.1':
+    dependencies:
+      web-tree-sitter: 0.26.7
+
   '@lumis-sh/themes@0.0.2': {}
-
-  '@lumis-sh/wasm-bash@0.26.0': {}
-
-  '@lumis-sh/wasm-comment@0.26.1': {}
-
-  '@lumis-sh/wasm-css@0.26.0': {}
-
-  '@lumis-sh/wasm-diff@0.26.0': {}
-
-  '@lumis-sh/wasm-elixir@0.26.1': {}
-
-  '@lumis-sh/wasm-embedded-template@0.26.1': {}
-
-  '@lumis-sh/wasm-html@0.26.0': {}
-
-  '@lumis-sh/wasm-java@0.26.1': {}
-
-  '@lumis-sh/wasm-javascript@0.26.0': {}
-
-  '@lumis-sh/wasm-json@0.26.1': {}
-
-  '@lumis-sh/wasm-ruby@0.26.1': {}
-
-  '@lumis-sh/wasm-rust@0.26.1': {}
-
-  '@lumis-sh/wasm-tsx@0.26.0': {}
-
-  '@lumis-sh/wasm-typescript@0.26.0': {}
 
   '@rollup/rollup-android-arm-eabi@4.59.0':
     optional: true
@@ -1164,5 +1063,7 @@ snapshots:
       fsevents: 2.3.3
       jiti: 2.6.1
       lightningcss: 1.31.1
+
+  web-tree-sitter@0.26.7: {}
 
   webgl-fluid-enhanced@0.8.0: {}

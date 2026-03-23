@@ -174,11 +174,7 @@ cli-install path:
     cp target/release/lumis "{{path}}/lumis"
     echo "Installed lumis to {{path}}/lumis"
 
-# Start local dev server
-server:
-    cargo run -p lumis-sh
-
-# Start standalone JS website
+# Start website dev server
 dev:
     #!/usr/bin/env bash
     set -euo pipefail

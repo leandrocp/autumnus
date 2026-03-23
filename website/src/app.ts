@@ -1,6 +1,6 @@
-import { LANGUAGES, LANGUAGES_BY_ID } from "./data/languages";
+import { LANGUAGES, LANGUAGES_BY_ID, getSample } from "./data/languages";
 import { loadTheme, THEMES, THEMES_BY_ID } from "./data/themes";
-import { renderHighlight, renderHighlightMultiTheme } from "./lib/highlighter";
+import { preloadAllLanguages, renderHighlight, renderHighlightMultiTheme } from "./lib/highlighter";
 import { mountHeroFluid } from "./lib/hero-fluid";
 
 const initialLanguage = LANGUAGES[0];
@@ -326,7 +326,7 @@ export async function mountApp(root: HTMLDivElement) {
         </div>
 
         <div class="mt-8 overflow-hidden border border-zinc-200 dark:border-zinc-800">
-          <div class="preview-content max-h-[32rem] overflow-y-auto [&_code]:font-mono sm:max-h-[36rem]"></div>
+          <div class="preview-content max-h-[50rem] overflow-y-auto [&_code]:font-mono"></div>
         </div>
       </div>
     </section>
@@ -582,7 +582,7 @@ export async function mountApp(root: HTMLDivElement) {
     preview.setAttribute("data-state", "loading");
 
     const themeData = await loadTheme(theme.id);
-    const html = await renderHighlight(language, themeData, language.sample);
+    const html = await renderHighlight(language, themeData, getSample(language.id));
     if (token !== renderToken) return;
 
     preview.innerHTML = html;
@@ -601,6 +601,9 @@ export async function mountApp(root: HTMLDivElement) {
   });
 
   await render();
+
+  // Preload all language WASMs in the background so switching languages is instant
+  void preloadAllLanguages();
 
   const [quickstartLightTheme, quickstartDarkTheme] = await Promise.all([
     loadTheme("github_light"),
