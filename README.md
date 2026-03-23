@@ -39,7 +39,7 @@
 
 ### [CLI](https://crates.io/crates/lumis-cli)
 
-```sh
+```bash
 cargo install lumis-cli
 
 lumis highlight app.js --theme dracula
@@ -65,7 +65,7 @@ let html = highlight("const x = 1", formatter);
 
 Works in Node.js and browsers.
 
-```typescript
+```javascript
 import { highlight } from '@lumis-sh/lumis'
 import { htmlInline } from '@lumis-sh/lumis/formatters'
 import javascript from '@lumis-sh/lumis/langs/javascript'
@@ -105,9 +105,8 @@ System.out.println(result.string());
 | **CLI** | `cargo install lumis-cli` | [crates.io/lumis-cli](https://crates.io/crates/lumis-cli) | [README.md](crates/lumis-cli/README.md) |
 | **Rust** | `cargo add lumis` | [crates.io/lumis](https://crates.io/crates/lumis) | [README.md](crates/lumis/README.md) &bull; [docs.rs](https://docs.rs/lumis) |
 | **Elixir** | `{:lumis, "~> 0.1"}` | [hex.pm/lumis](https://hex.pm/packages/lumis) | [README.md](packages/elixir/lumis/README.md) &bull; [hexdocs](https://hexdocs.pm/lumis) |
-| **Node.js** | `npm install @lumis-sh/lumis` | [npmjs.com/@lumis-sh/lumis](https://www.npmjs.com/package/@lumis-sh/lumis) | [README.md](packages/javascript/lumis/README.md) |
-| **Browser** | `npm install @lumis-sh/lumis` | [npmjs.com/@lumis-sh/lumis](https://www.npmjs.com/package/@lumis-sh/lumis) | [README.md](packages/javascript/lumis/README.md) |
-| **Java** | `io.roastedroot:lumis4j:latest` | - | - |
+| **Node.js/Browser** | `npm install @lumis-sh/lumis` | [npmjs.com/@lumis-sh/lumis](https://www.npmjs.com/package/@lumis-sh/lumis) | [README.md](packages/javascript/lumis/README.md) |
+| **Java** | `io.roastedroot:lumis4j:latest` | [io.roastedroot/lumis4j](https://central.sonatype.com/artifact/io.roastedroot/lumis4j) - | [README.md](https://github.com/roastedroot/lumis4j/blob/main/README.md) |
 
 ## Architecture
 
@@ -121,17 +120,19 @@ Given some source code, Lumis parses it with the selected Tree-sitter language, 
 
 ### WASM Versions
 
-The npm WASM package versions follow the pattern `<tree-sitter-version>.<seq>`, where:
+The npm [WASM package](https://www.npmjs.com/search?q=keywords:lumis-sh) versions follow the pattern `<tree-sitter-version>.<seq>` where:
 
 - `tree-version-version` is the major-minor version of the Tree-sitter compatible version
 - `seq` is a patch number for Lumis own updates
 
-For example, `@lumis-sh/wasm-rust@0.26` is the first published version compatible with Tree-sitter 0.26,
-while `@lumis-sh/wasm-javasciprt@0.26.1` is a patch update compatible with Tree-sitter 0.26
+For example, `@lumis-sh/wasm-rust@0.26.0` is the first published version compatible with Tree-sitter 0.26,
+while `@lumis-sh/wasm-javascript@0.26.1` is a patch update compatible with Tree-sitter 0.26 (usually containing upstream parser updates).
 
 ## Contributing
 
-Contributions welcome! Feel free to open issues or PRs for bugs, features, new themes, or language support.
+Contributions aew welcome! Feel free to open issues or PRs for bugs, features, new themes languages.
+
+See [CONTRIBUTING.md]
 
 ## Acknowledgements
 * [Makeup](https://hex.pm/packages/makeup) for setting up the baseline for the Elixir package
