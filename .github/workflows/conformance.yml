@@ -1,0 +1,103 @@
+name: Conformance
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "crates/**"
+      - "queries/**"
+      - "fixtures/conformance/**"
+      - "packages/javascript/lumis/**"
+      - "packages/elixir/lumis/**"
+      - ".github/workflows/conformance.yml"
+  pull_request:
+    paths:
+      - "crates/**"
+      - "queries/**"
+      - "fixtures/conformance/**"
+      - "packages/javascript/lumis/**"
+      - "packages/elixir/lumis/**"
+      - ".github/workflows/conformance.yml"
+  workflow_dispatch:
+
+jobs:
+  rust:
+    name: Rust conformance
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-nextest
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo nextest run -p lumis --test formatter_conformance
+
+  cli:
+    name: CLI conformance
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-nextest
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo nextest run -p lumis-cli --test conformance
+
+  javascript:
+    name: JS conformance
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v5
+        with:
+          version: 10
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+          cache-dependency-path: packages/javascript/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+        working-directory: packages/javascript
+      - run: pnpm --filter @lumis-sh/themes build
+        working-directory: packages/javascript
+      - run: pnpm --filter @lumis-sh/lumis build
+        working-directory: packages/javascript
+      - run: pnpm --filter @lumis-sh/lumis vitest run test/conformance.test.ts
+        working-directory: packages/javascript
+
+  elixir:
+    name: Elixir conformance
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      LUMIS_BUILD: "1"
+      MIX_ENV: test
+    steps:
+      - uses: actions/checkout@v6
+      - uses: erlef/setup-beam@v1
+        with:
+          elixir-version: '1.19.x'
+          otp-version: '28.x'
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+      - uses: actions/cache@v5
+        with:
+          path: |
+            packages/elixir/lumis/deps
+            packages/elixir/lumis/_build
+          key: ${{ runner.os }}-conformance-mix-${{ hashFiles('packages/elixir/lumis/mix.lock') }}
+          restore-keys: ${{ runner.os }}-conformance-mix-
+      - run: mix deps.get
+        working-directory: packages/elixir/lumis
+      - run: mix test test/conformance_test.exs
+        working-directory: packages/elixir/lumis
