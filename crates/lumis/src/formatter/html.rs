@@ -81,7 +81,7 @@ pub fn span_inline_attrs(
 
     if let Some(theme) = theme {
         let specialized_scope = if let Some(lang) = language {
-            format!("{}.{}", scope, lang.scope_name())
+            format!("{}.{}", scope, lang.id_name())
         } else {
             scope.to_string()
         };
@@ -247,7 +247,7 @@ pub fn span_multi_themes_attrs(
     }
 
     let specialized_scope = if let Some(lang) = language {
-        format!("{}.{}", scope, lang.scope_name())
+        format!("{}.{}", scope, lang.id_name())
     } else {
         scope.to_string()
     };
