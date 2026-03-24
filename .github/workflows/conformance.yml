@@ -1,28 +1,78 @@
 name: Conformance
 
+permissions:
+  contents: read
+  pull-requests: read
+
 on:
   push:
     branches: [ main ]
     paths:
       - "crates/**"
       - "queries/**"
+      - "languages.toml"
       - "fixtures/conformance/**"
       - "packages/javascript/lumis/**"
+      - "packages/javascript/themes/**"
       - "packages/elixir/lumis/**"
       - ".github/workflows/conformance.yml"
   pull_request:
     paths:
       - "crates/**"
       - "queries/**"
+      - "languages.toml"
       - "fixtures/conformance/**"
       - "packages/javascript/lumis/**"
+      - "packages/javascript/themes/**"
       - "packages/elixir/lumis/**"
       - ".github/workflows/conformance.yml"
   workflow_dispatch:
 
 jobs:
+  changes:
+    name: Detect changed areas
+    runs-on: ubuntu-latest
+    outputs:
+      rust: ${{ steps.filter.outputs.rust }}
+      cli: ${{ steps.filter.outputs.cli }}
+      javascript: ${{ steps.filter.outputs.javascript }}
+      elixir: ${{ steps.filter.outputs.elixir }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            rust:
+              - 'crates/lumis/**'
+              - 'crates/lumis-core/**'
+              - 'queries/**'
+              - 'fixtures/conformance/**'
+              - 'languages.toml'
+              - '.github/workflows/conformance.yml'
+            cli:
+              - 'crates/lumis-cli/**'
+              - 'crates/lumis-core/**'
+              - 'queries/**'
+              - 'fixtures/conformance/**'
+              - 'languages.toml'
+              - '.github/workflows/conformance.yml'
+            javascript:
+              - 'packages/javascript/lumis/**'
+              - 'packages/javascript/themes/**'
+              - 'queries/**'
+              - 'fixtures/conformance/**'
+              - 'languages.toml'
+              - '.github/workflows/conformance.yml'
+            elixir:
+              - 'packages/elixir/lumis/**'
+              - 'fixtures/conformance/**'
+              - '.github/workflows/conformance.yml'
+
   rust:
     name: Rust conformance
+    needs: changes
+    if: needs.changes.outputs.rust == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -38,6 +88,8 @@ jobs:
 
   cli:
     name: CLI conformance
+    needs: changes
+    if: needs.changes.outputs.cli == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -53,6 +105,8 @@ jobs:
 
   javascript:
     name: JS conformance
+    needs: changes
+    if: needs.changes.outputs.javascript == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -76,6 +130,8 @@ jobs:
 
   elixir:
     name: Elixir conformance
+    needs: changes
+    if: needs.changes.outputs.elixir == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:

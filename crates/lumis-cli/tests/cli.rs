@@ -1,5 +1,8 @@
 use assert_cmd::cargo::cargo_bin_cmd;
 use predicates::prelude::*;
+use std::ffi::OsString;
+use std::fs;
+use std::path::Path;
 use std::path::PathBuf;
 
 fn cmd() -> assert_cmd::Command {
@@ -10,6 +13,94 @@ fn fixtures_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
         .join("fixtures")
+}
+
+fn write_file(path: &Path, content: &str) {
+    if let Some(parent) = path.parent() {
+        fs::create_dir_all(parent).unwrap();
+    }
+    fs::write(path, content).unwrap();
+}
+
+#[cfg(unix)]
+fn install_fake_nvim(bin_dir: &Path) {
+    let script = r##"#!/usr/bin/env bash
+set -euo pipefail
+
+capture_dir="${LUMIS_FAKE_NVIM_CAPTURE_DIR:?missing capture dir}"
+appearance="${LUMIS_FAKE_NVIM_APPEARANCE:-dark}"
+colorscheme="${@: -1}"
+
+cp init.lua "$capture_dir/init.lua"
+cp themes.lua "$capture_dir/themes.lua"
+cp extract_theme.lua "$capture_dir/extract_theme.lua"
+printf '%s\n' "$@" > "$capture_dir/argv.txt"
+
+cat > "$colorscheme.json" <<EOF
+{"name":"$colorscheme","appearance":"$appearance","revision":"fake-revision","highlights":{"normal":{"fg":"#ffffff","bg":"#000000"}}}
+EOF
+"##;
+
+    let path = bin_dir.join("nvim");
+    write_file(&path, script);
+
+    #[allow(clippy::useless_conversion)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+
+        let mut perms = fs::metadata(&path).unwrap().permissions();
+        perms.set_mode(0o755);
+        fs::set_permissions(&path, perms).unwrap();
+    }
+}
+
+#[cfg(windows)]
+fn install_fake_nvim(bin_dir: &Path) {
+    let source = r##"
+use std::env;
+use std::fs;
+use std::path::PathBuf;
+
+fn main() {
+    let capture_dir = PathBuf::from(env::var("LUMIS_FAKE_NVIM_CAPTURE_DIR").expect("missing capture dir"));
+    let appearance = env::var("LUMIS_FAKE_NVIM_APPEARANCE").unwrap_or_else(|_| "dark".to_string());
+    let args: Vec<String> = env::args().skip(1).collect();
+    let colorscheme = args.last().expect("missing colorscheme arg");
+
+    fs::copy("init.lua", capture_dir.join("init.lua")).unwrap();
+    fs::copy("themes.lua", capture_dir.join("themes.lua")).unwrap();
+    fs::copy("extract_theme.lua", capture_dir.join("extract_theme.lua")).unwrap();
+    fs::write(capture_dir.join("argv.txt"), args.join("\n") + "\n").unwrap();
+
+    let json = format!(
+        "{{\"name\":\"{}\",\"appearance\":\"{}\",\"revision\":\"fake-revision\",\"highlights\":{{\"normal\":{{\"fg\":\"#ffffff\",\"bg\":\"#000000\"}}}}}}",
+        colorscheme, appearance
+    );
+    fs::write(format!("{}.json", colorscheme), json).unwrap();
+}
+"##;
+
+    let source_path = bin_dir.join("fake_nvim.rs");
+    let exe_path = bin_dir.join("nvim.exe");
+
+    write_file(&source_path, source);
+
+    let status = std::process::Command::new("rustc")
+        .arg(&source_path)
+        .arg("-O")
+        .arg("-o")
+        .arg(&exe_path)
+        .status()
+        .unwrap();
+
+    assert!(status.success(), "failed to build fake nvim.exe");
+}
+
+fn fake_nvim_path(bin_dir: &Path) -> OsString {
+    let current_path = std::env::var_os("PATH").unwrap_or_default();
+    let mut paths = vec![bin_dir.to_path_buf()];
+    paths.extend(std::env::split_paths(&current_path));
+    std::env::join_paths(paths).unwrap()
 }
 
 #[test]
@@ -48,6 +139,22 @@ fn list_themes() {
         .assert()
         .success()
         .stdout(predicate::str::contains("dracula"));
+}
+
+#[test]
+fn list_themes_uses_data_dir_from_env() {
+    let tmp = tempfile::tempdir().unwrap();
+    write_file(
+        &tmp.path().join("themes/custom.json"),
+        r#"{"name":"custom","appearance":"dark","revision":"test","highlights":{}}"#,
+    );
+
+    cmd()
+        .env("LUMIS_DATA_DIR", tmp.path())
+        .args(["themes", "list"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("custom (file)"));
 }
 
 #[test]
@@ -111,6 +218,154 @@ fn highlight_source_diff_html_linked() {
         .assert()
         .success()
         .stdout(predicate::str::contains("<pre"));
+}
+
+#[test]
+fn highlight_file_path_autodetects_language() {
+    let tmp = tempfile::tempdir().unwrap();
+    let source = tmp.path().join("sample.json");
+    write_file(&source, r#"{"key": true}"#);
+
+    cmd()
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .args(["highlight", source.to_str().unwrap()])
+        .assert()
+        .success()
+        .stdout(predicate::str::is_empty().not());
+}
+
+#[test]
+fn highlight_source_diff_html_multi_themes_with_all_options() {
+    cmd()
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .args([
+            "highlight",
+            "-l",
+            "diff",
+            "-f",
+            "html-multi-themes",
+            "--themes",
+            "main:dracula",
+            "--themes",
+            "alt:github_dark",
+            "--default-theme",
+            "main",
+            "--css-variable-prefix=--demo",
+            "-h",
+            "2",
+        ])
+        .write_stdin(DIFF_SNIPPET)
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("class=\"lumis lumis-themes"))
+        .stdout(predicate::str::contains("--demo-alt"))
+        .stdout(predicate::str::contains("data-line=\"2\""));
+}
+
+#[test]
+fn highlight_requires_themes_for_html_multi_themes() {
+    cmd()
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .args(["highlight", "-l", "diff", "-f", "html-multi-themes"])
+        .write_stdin(DIFF_SNIPPET)
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains(
+            "--formatter html-multi-themes requires --themes",
+        ));
+}
+
+#[test]
+fn highlight_rejects_invalid_highlight_line_ranges() {
+    cmd()
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .args(["highlight", "-l", "diff", "-h", "3-1"])
+        .write_stdin(DIFF_SNIPPET)
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains(
+            "Start line (3) must be less than or equal to end line (1)",
+        ));
+}
+
+#[test]
+fn themes_generate_prints_json_to_stdout() {
+    let tmp = tempfile::tempdir().unwrap();
+    let bin_dir = tmp.path().join("bin");
+    let capture_dir = tmp.path().join("capture");
+
+    fs::create_dir_all(&bin_dir).unwrap();
+    fs::create_dir_all(&capture_dir).unwrap();
+    install_fake_nvim(&bin_dir);
+
+    cmd()
+        .env("PATH", fake_nvim_path(&bin_dir))
+        .env("LUMIS_FAKE_NVIM_CAPTURE_DIR", &capture_dir)
+        .args([
+            "themes",
+            "generate",
+            "-u",
+            "https://github.com/folke/tokyonight.nvim",
+            "-c",
+            "tokyonight-night",
+        ])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(r#""name":"tokyonight-night""#));
+
+    assert!(capture_dir.join("extract_theme.lua").exists());
+    assert!(capture_dir.join("init.lua").exists());
+    assert!(capture_dir.join("themes.lua").exists());
+
+    let themes_lua = fs::read_to_string(capture_dir.join("themes.lua")).unwrap();
+    assert!(themes_lua.contains("https://github.com/folke/tokyonight.nvim"));
+    assert!(themes_lua.contains("vim.o.background = \"dark\""));
+    assert!(!themes_lua.contains("vim.g.test_setup = true"));
+}
+
+#[test]
+fn themes_generate_supports_output_setup_and_appearance_options() {
+    let tmp = tempfile::tempdir().unwrap();
+    let bin_dir = tmp.path().join("bin");
+    let capture_dir = tmp.path().join("capture");
+    let output_path = tmp.path().join("tokyonight.json");
+
+    fs::create_dir_all(&bin_dir).unwrap();
+    fs::create_dir_all(&capture_dir).unwrap();
+    install_fake_nvim(&bin_dir);
+
+    cmd()
+        .env("PATH", fake_nvim_path(&bin_dir))
+        .env("LUMIS_FAKE_NVIM_CAPTURE_DIR", &capture_dir)
+        .env("LUMIS_FAKE_NVIM_APPEARANCE", "light")
+        .args([
+            "themes",
+            "generate",
+            "-u",
+            "https://github.com/folke/tokyonight.nvim",
+            "-c",
+            "tokyonight-day",
+            "-s",
+            "vim.g.test_setup = true",
+            "-o",
+            output_path.to_str().unwrap(),
+            "-a",
+            "light",
+        ])
+        .assert()
+        .success()
+        .stderr(predicate::str::contains("Theme saved to"));
+
+    let generated = fs::read_to_string(&output_path).unwrap();
+    assert!(generated.contains(r#""appearance":"light""#));
+
+    let themes_lua = fs::read_to_string(capture_dir.join("themes.lua")).unwrap();
+    assert!(themes_lua.contains("vim.o.background = \"light\""));
+    assert!(themes_lua.contains("vim.g.test_setup = true"));
 }
 
 // -- fetch-parsers / update-parsers --
