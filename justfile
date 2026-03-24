@@ -70,6 +70,10 @@ setup:
     (cd website && pnpm install)
     echo ""
 
+    echo "Installing docs site dependencies..."
+    (cd docs && pnpm install)
+    echo ""
+
     echo "Preprocessing shared queries..."
     just langs-preprocess-queries
     echo ""
@@ -179,6 +183,12 @@ dev:
     #!/usr/bin/env bash
     set -euo pipefail
     (cd website && pnpm dev)
+
+# Start docs site dev server
+docs-site:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    (cd docs && pnpm start)
 
 # Generate CSS files for HTML linked formatter
 css-gen:

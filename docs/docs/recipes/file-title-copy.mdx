@@ -1,0 +1,213 @@
+---
+sidebar_position: 2
+slug: /recipes/file-title-copy
+title: Filename Title and Copy Button
+description: Build a code block header with a filename label and copy button using Lumis header tags, plain CSS, and browser JavaScript.
+keywords:
+  - lumis code block title
+  - lumis copy button
+  - lumis header
+  - filename code block
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Filename Title and Copy Button
+
+Use the HTML formatter `header` option to wrap the `<pre>` with your own markup. This keeps the whole pattern as plain HTML, CSS, and browser JavaScript. No custom component.
+
+This works with `htmlInline()`, `htmlLinked()`, and `htmlMultiThemes()`.
+
+Use whatever class names fit your app. The examples here keep them short on purpose.
+
+## 1. Render a header bar
+
+The idea is simple: open a container, render a title row with the filename and button, let Lumis render the `<pre>`, then close the container.
+
+<Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
+  <TabItem value="javascript" label="JavaScript">
+
+```js
+import {highlight} from '@lumis-sh/lumis'
+import {htmlInline} from '@lumis-sh/lumis/formatters'
+import javascript from '@lumis-sh/lumis/langs/javascript'
+import dracula from '@lumis-sh/themes/dracula'
+
+const source = 'console.log("hello")'
+const filename = 'app.js'
+
+const html = await highlight(
+  source,
+  htmlInline({
+    language: javascript,
+    theme: dracula,
+    header: {
+      openTag: `<div class="snippet-frame">
+  <div class="snippet-bar">
+    <span class="snippet-name">${filename}</span>
+    <button type="button" class="snippet-copy" data-copy-snippet>
+      Copy
+    </button>
+  </div>`,
+      closeTag: '</div>',
+    },
+  })
+)
+```
+
+  </TabItem>
+  <TabItem value="rust" label="Rust">
+
+```rust
+use lumis::{highlight, HtmlInlineBuilder, formatter::HtmlElement, languages::Language, themes};
+
+let source = "console.log(\"hello\")";
+let filename = "app.js";
+
+let formatter = HtmlInlineBuilder::new()
+    .lang(Language::Javascript)
+    .theme(Some(themes::get("dracula").unwrap()))
+    .header(Some(HtmlElement {
+        open_tag: format!(
+            r#"<div class="snippet-frame">
+  <div class="snippet-bar">
+    <span class="snippet-name">{}</span>
+    <button type="button" class="snippet-copy" data-copy-snippet>
+      Copy
+    </button>
+  </div>"#,
+            filename
+        ),
+        close_tag: "</div>".to_string(),
+    }))
+    .build()
+    .unwrap();
+
+let html = highlight(source, formatter);
+```
+
+  </TabItem>
+  <TabItem value="elixir" label="Elixir">
+
+```elixir
+source = ~S(console.log("hello"))
+filename = "app.js"
+
+html = Lumis.highlight!(
+  source,
+  language: "javascript",
+  formatter: {:html_inline,
+    theme: "dracula",
+    header: %{
+      open_tag: """
+      <div class="snippet-frame">
+        <div class="snippet-bar">
+          <span class="snippet-name">#{filename}</span>
+          <button type="button" class="snippet-copy" data-copy-snippet>
+            Copy
+          </button>
+        </div>
+      """,
+      close_tag: "</div>"
+    }
+  }
+)
+```
+
+  </TabItem>
+</Tabs>
+
+Resulting shape:
+
+```html
+<div class="snippet-frame">
+  <div class="snippet-bar">
+    <span class="snippet-name">app.js</span>
+    <button type="button" class="snippet-copy" data-copy-snippet>
+      Copy
+    </button>
+  </div>
+  <pre class="lumis">...</pre>
+</div>
+```
+
+## 2. Style the title row
+
+```css
+.snippet-frame {
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.snippet-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--ifm-color-emphasis-300);
+  background: var(--ifm-color-emphasis-100);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.snippet-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.snippet-copy {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.35rem 0.7rem;
+  background: var(--ifm-color-primary);
+  color: white;
+  font: inherit;
+  cursor: pointer;
+}
+
+.snippet-copy:hover {
+  background: var(--ifm-color-primary-dark);
+}
+
+.snippet-frame .lumis {
+  margin: 0;
+  border-radius: 0;
+}
+```
+
+## 3. Wire the copy button
+
+This script uses event delegation, finds the matching code block, rebuilds the code from each rendered line, and copies it with `navigator.clipboard`.
+
+```js
+document.addEventListener('click', async event => {
+  const button = event.target.closest('[data-copy-snippet]')
+  if (!button) return
+
+  const container = button.closest('.snippet-frame')
+  const lines = container?.querySelectorAll('.lumis [data-line]')
+  if (!lines?.length) return
+
+  const text = Array.from(lines, line => line.textContent ?? '').join('\n')
+  await navigator.clipboard.writeText(text)
+
+  const originalLabel = button.textContent
+  button.textContent = 'Copied'
+
+  window.setTimeout(() => {
+    button.textContent = originalLabel
+  }, 1500)
+})
+```
+
+## Notes
+
+- Copy from the original source string when you already have it available; reading rendered lines is a good browser-side fallback.
+- Escape untrusted filenames before interpolating them into `openTag`.
+- The same header markup works with linked CSS and multi-theme formatters too.

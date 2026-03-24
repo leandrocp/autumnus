@@ -42,6 +42,7 @@ const sidebars: SidebarsConfig = {
       label: 'Recipes',
       items: [
         'recipes/light-dark',
+        'recipes/file-title-copy',
         'usage/line-highlighting',
       ],
     },
