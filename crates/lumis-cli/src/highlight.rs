@@ -695,7 +695,7 @@ impl<'a> HighlightIterLayer<'a> {
             for excluded_range in node
                 .children(&mut cursor)
                 .filter_map(|child| {
-                    if includes_children {
+                    if includes_children || !child.is_named() {
                         None
                     } else {
                         Some(child.range())
