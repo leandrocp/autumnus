@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/leandrocp/lumis/compare/rust@v0.2.0...rust@v0.2.1) (2026-03-24)
+
+
+### Bug Fixes
+
+* include unnamed children in range ([#430](https://github.com/leandrocp/lumis/issues/430)) ([782bfaa](https://github.com/leandrocp/lumis/commit/782bfaaf4ac86fd287541fcd1307157060846ffc))
+
 ## 0.2.0 - 2026-03-23
 
 ### Breaking Changes
