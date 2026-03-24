@@ -1,6 +1,12 @@
 name: JavaScript Release
 
 on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to publish (for example: javascript@v0.0.1)"
+        required: true
+        type: string
   push:
     tags:
       - "javascript@v*"
@@ -14,6 +20,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.tag || github.ref_name }}
 
       - uses: pnpm/action-setup@v5
         with:
@@ -32,12 +40,16 @@ jobs:
       - name: Determine package to publish
         id: pkg
         run: |
-          tag="${GITHUB_REF#refs/tags/}"
+          tag="${{ inputs.tag || github.ref_name }}"
           component="${tag%%@*}"
           if [ "$component" = "themes" ]; then
             echo "filter=@lumis-sh/themes" >> $GITHUB_OUTPUT
+            echo "build_lumis=false" >> $GITHUB_OUTPUT
           elif [ "$component" = "javascript" ]; then
             echo "filter=@lumis-sh/lumis" >> $GITHUB_OUTPUT
+            echo "build_lumis=true" >> $GITHUB_OUTPUT
+          else
+            echo "Unknown component: $component" && exit 1
           fi
 
       - name: Build themes
@@ -45,7 +57,7 @@ jobs:
         working-directory: packages/javascript
 
       - name: Build lumis
-        if: contains(github.ref, 'javascript@')
+        if: steps.pkg.outputs.build_lumis == 'true'
         run: pnpm --filter @lumis-sh/lumis build
         working-directory: packages/javascript
 

@@ -1,6 +1,12 @@
 name: Rust Release
 
 on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to publish (for example: rust@v0.2.1)"
+        required: true
+        type: string
   push:
     tags:
       - "rust@v*"
@@ -16,13 +22,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.tag || github.ref_name }}
 
       - uses: dtolnay/rust-toolchain@stable
 
       - name: Determine crate to publish
         id: crate
         run: |
-          tag="${GITHUB_REF#refs/tags/}"
+          tag="${{ inputs.tag || github.ref_name }}"
           component="${tag%%@*}"
           case "$component" in
             rust)       crate="lumis" ;;
