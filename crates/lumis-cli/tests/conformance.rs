@@ -77,14 +77,18 @@ fn run_highlight_source(fixture: &Fixture, formatter: &str, extra_args: &[&str])
     String::from_utf8(output.stdout).unwrap()
 }
 
+fn assert_text_eq(output: &str, expected: &str) {
+    assert_eq!(output.replace("\r\n", "\n"), expected.replace("\r\n", "\n"));
+}
+
 fn check_html_inline(fixture: &Fixture) {
     let output = run_highlight_source(fixture, "html-inline", &["-t", &fixture.metadata.theme]);
-    assert_eq!(output, fixture.html_inline);
+    assert_text_eq(&output, &fixture.html_inline);
 }
 
 fn check_html_linked(fixture: &Fixture) {
     let output = run_highlight_source(fixture, "html-linked", &[]);
-    assert_eq!(output, fixture.html_linked);
+    assert_text_eq(&output, &fixture.html_linked);
 }
 
 fn check_html_multi_themes(fixture: &Fixture) {
@@ -98,12 +102,12 @@ fn check_html_multi_themes(fixture: &Fixture) {
             "main",
         ],
     );
-    assert_eq!(output, fixture.html_multi_themes);
+    assert_text_eq(&output, &fixture.html_multi_themes);
 }
 
 fn check_terminal(fixture: &Fixture) {
     let output = run_highlight_source(fixture, "terminal", &["-t", &fixture.metadata.theme]);
-    assert_eq!(output, fixture.terminal);
+    assert_text_eq(&output, &fixture.terminal);
 }
 
 include!(concat!(env!("OUT_DIR"), "/conformance_tests.rs"));

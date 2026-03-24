@@ -13,7 +13,7 @@ crate-type = ["cdylib"]
 once_cell = "1.21"
 parking_lot = "0.12"
 rustler = "0.37"
-lumis = { version = "0.1", features = ["all-languages"] }
+lumis = { version = "0.2.0", features = ["all-languages"] }
 
 [features]
 default = ["nif_version_2_15"]

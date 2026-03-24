@@ -8,6 +8,7 @@
 // - `HighlightEvent::HighlightStart` carries `language: String`
 // - tree-sitter 0.25 compatibility adjustments remain in place
 // - `String::from_utf8_lossy` is used where upstream uses newer tree-sitter helpers
+// - Only exclude named children from injections like nvim (https://github.com/leandrocp/lumis/issues/429)
 //
 // When touching this file, prefer minimizing the diff against upstream rather than extending it.
 //
@@ -695,7 +696,7 @@ impl<'a> HighlightIterLayer<'a> {
             for excluded_range in node
                 .children(&mut cursor)
                 .filter_map(|child| {
-                    if includes_children {
+                    if includes_children || !child.is_named() {
                         None
                     } else {
                         Some(child.range())
