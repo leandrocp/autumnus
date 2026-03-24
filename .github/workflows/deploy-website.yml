@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "website/**"
+      - "docs/**"
       - ".github/workflows/deploy-website.yml"
   workflow_dispatch:
 
@@ -31,13 +32,23 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
-          cache-dependency-path: website/pnpm-lock.yaml
+          cache-dependency-path: |
+            website/pnpm-lock.yaml
+            docs/pnpm-lock.yaml
 
       - run: pnpm install --frozen-lockfile
         working-directory: website
 
+      - run: pnpm install --frozen-lockfile
+        working-directory: docs
+
       - run: pnpm build
         working-directory: website
+
+      - run: pnpm build
+        working-directory: docs
+
+      - run: mkdir -p website/dist/docs && cp -R docs/build/. website/dist/docs/
 
       - uses: actions/upload-pages-artifact@v3
         with:
