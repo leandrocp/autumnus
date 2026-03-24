@@ -71,8 +71,8 @@ jobs:
         working-directory: packages/javascript
       - run: pnpm --filter @lumis-sh/lumis build
         working-directory: packages/javascript
-      - run: pnpm --filter @lumis-sh/lumis vitest run test/conformance.test.ts
-        working-directory: packages/javascript
+      - run: pnpm vitest run test/conformance.test.ts
+        working-directory: packages/javascript/lumis
 
   elixir:
     name: Elixir conformance
