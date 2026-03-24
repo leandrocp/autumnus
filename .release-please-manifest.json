@@ -2,7 +2,7 @@
   "crates/lumis": "0.2.1",
   "crates/lumis-core": "0.0.1",
   "crates/lumis-build": "0.0.1",
-  "crates/lumis-cli": "0.0.1",
+  "crates/lumis-cli": "0.0.2",
   "packages/javascript/lumis": "0.0.1",
   "packages/javascript/themes": "0.0.2",
   "packages/elixir/lumis": "0.1.2"
