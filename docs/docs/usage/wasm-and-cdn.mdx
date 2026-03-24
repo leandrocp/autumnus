@@ -1,0 +1,99 @@
+---
+sidebar_position: 7
+slug: /advanced/wasm-and-cdn
+title: WASM and CDN
+description: Understand Lumis parser WASM files, default CDN resolution, local cache behavior, and custom resolvers.
+keywords:
+  - lumis wasm
+  - parser wasm
+  - jsdelivr
+  - configureWasmResolver
+  - cdn
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# WASM and CDN
+
+## What ships where
+
+- `@lumis-sh/lumis` ships the JS API and embedded `web-tree-sitter` runtime WASM
+- parser grammars are separate `.wasm` files loaded at runtime
+- each parser also has its own npm package such as `@lumis-sh/wasm-rust`
+
+## Default JavaScript behavior
+
+By default, Lumis resolves parser WASM from jsDelivr using versioned packages.
+
+The default shape is:
+
+```text title="Default resolver pattern"
+https://cdn.jsdelivr.net/npm/@lumis-sh/wasm-<parser-name-without-tree-sitter-prefix>@<tree-sitter-version>/<parser>.wasm
+```
+
+In Node.js, fetched parser files are cached locally when possible.
+
+## Override the resolver
+
+Override [`configureWasmResolver`](https://github.com/leandrocp/lumis/blob/main/packages/javascript/lumis/src/index.ts) to use your own CDN, local files, or work offline.
+
+<Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
+  <TabItem value="javascript" label="JavaScript">
+
+```js title="Global resolver"
+import {configureWasmResolver} from '@lumis-sh/lumis'
+
+configureWasmResolver((_language, wasm) =>
+  `https://unpkg.com/${wasm.packageName}@${wasm.version}/${wasm.name}.wasm`
+)
+```
+
+```js title="Per-highlighter resolver"
+import {createHighlighter} from '@lumis-sh/lumis'
+import rust from '@lumis-sh/lumis/langs/rust'
+
+const hl = await createHighlighter({
+  langs: [rust],
+  wasmResolver: (_language, wasm) => `/wasm/${wasm.name}.wasm`,
+})
+```
+
+  </TabItem>
+  <TabItem value="cli" label="CLI">
+
+```bash title="Pre-download parsers"
+lumis parsers fetch rust javascript elixir
+```
+
+```bash title="Download all parsers"
+lumis parsers fetch --all
+```
+
+```bash title="Refresh cached parsers"
+lumis parsers update rust
+```
+
+  </TabItem>
+</Tabs>
+
+## Browser / CDN usage
+
+```html title="ESM CDN"
+<script type="module">
+  import {highlight} from 'https://esm.sh/@lumis-sh/lumis'
+  import {htmlInline} from 'https://esm.sh/@lumis-sh/lumis/formatters'
+  import javascript from 'https://esm.sh/@lumis-sh/lumis/langs/javascript'
+  import dracula from 'https://esm.sh/@lumis-sh/themes/dracula'
+
+  const html = await highlight(
+    'const x = 1',
+    htmlInline({language: javascript, theme: dracula})
+  )
+</script>
+```
+
+## Related docs
+
+- full language and WASM package list: [Languages](/reference/languages)
+- CLI parser commands: [CLI Commands](/cli/commands)

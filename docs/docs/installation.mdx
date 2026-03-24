@@ -1,0 +1,94 @@
+---
+sidebar_position: 2
+slug: /installation
+title: Installation
+description: Install Lumis for CLI, Rust, Elixir, JavaScript, browser, and Java.
+keywords:
+  - lumis installation
+  - cargo
+  - npm
+  - hex
+  - maven
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Installation
+
+Pick the runtime you want to use first. The highlighting concepts stay the same across all of them.
+
+<Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
+  <TabItem value="javascript" label="JavaScript">
+
+```bash
+npm install @lumis-sh/lumis @lumis-sh/themes
+```
+
+Use `@lumis-sh/lumis` for the runtime and `@lumis-sh/themes` for bundled themes.
+
+  </TabItem>
+  <TabItem value="rust" label="Rust">
+
+```bash
+cargo add lumis
+```
+
+  </TabItem>
+  <TabItem value="elixir" label="Elixir">
+
+```elixir
+def deps do
+  [
+    {:lumis, "~> 0.1"}
+  ]
+end
+```
+
+  </TabItem>
+  <TabItem value="java" label="Java">
+
+```xml
+<dependency>
+  <groupId>io.roastedroot</groupId>
+  <artifactId>lumis4j</artifactId>
+  <version>0.0.7</version>
+</dependency>
+```
+
+  </TabItem>
+  <TabItem value="cli" label="CLI">
+
+```bash
+cargo install lumis-cli
+```
+
+The installed binary is `lumis`.
+
+  </TabItem>
+  <TabItem value="browser" label="Browser / CDN">
+
+```html
+<script type="module">
+  import {highlight} from 'https://esm.sh/@lumis-sh/lumis';
+  import {htmlInline} from 'https://esm.sh/@lumis-sh/lumis/formatters';
+  import javascript from 'https://esm.sh/@lumis-sh/lumis/langs/javascript';
+  import dracula from 'https://esm.sh/@lumis-sh/themes/dracula';
+
+  const html = await highlight(
+    'const x = 1',
+    htmlInline({language: javascript, theme: dracula})
+  );
+
+  document.getElementById('output').innerHTML = html;
+</script>
+```
+
+  </TabItem>
+</Tabs>
+
+## Notes
+
+- JavaScript loads parser WASM files at runtime. By default they come from a CDN. See [WASM and CDN](/advanced/wasm-and-cdn).
+- The CLI caches parsers and custom themes in a local data directory.
+- For repeated JavaScript highlighting, use `createHighlighter()`. See [JavaScript](/highlight/javascript).

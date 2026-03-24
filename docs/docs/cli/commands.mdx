@@ -1,0 +1,158 @@
+---
+sidebar_position: 1
+slug: /cli/commands
+title: CLI Commands
+description: Highlight files, manage parsers, and generate themes with the Lumis CLI.
+keywords:
+  - lumis cli
+  - themes generate
+  - parsers fetch
+  - highlight command
+---
+
+# CLI Commands
+
+## Global options
+
+These flags work with any subcommand:
+
+| Flag | Short | Description |
+| --- | --- | --- |
+| `--verbose` | `-v` | Show extra output: downloads, cache hits, parser paths |
+| `--data-dir <path>` | `-d` | Override the data directory (also `LUMIS_DATA_DIR` env var) |
+| `--help` | | Print help for any command |
+
+## Commands
+
+| Command | What it does |
+| --- | --- |
+| `lumis highlight` | Highlight a file or stdin |
+| `lumis languages list` | List supported languages and file patterns |
+| `lumis themes list` | List built-in and local themes |
+| `lumis themes generate` | Generate a theme from a Neovim colorscheme repo |
+| `lumis parsers fetch` | Pre-download parser WASM files |
+| `lumis parsers update` | Refresh cached parser WASM files |
+
+## `lumis highlight`
+
+```bash title="Terminal output (default formatter)"
+lumis highlight main.rs --theme dracula
+```
+
+```bash title="Pipe from stdin"
+cat main.rs | lumis highlight -l rust
+echo 'const x = 1' | lumis highlight -l javascript --formatter html-inline
+```
+
+### Options
+
+| Flag | Short | Description |
+| --- | --- | --- |
+| `--language <lang>` | `-l` | Language id (e.g., `rust`, `javascript`). Auto-detects from file if omitted. |
+| `--formatter <fmt>` | `-f` | Output format: `terminal` (default), `html-inline`, `html-linked`, `html-multi-themes` |
+| `--theme <name>` | `-t` | Theme name (e.g., `dracula`, `github_dark`) |
+| `--themes <key:theme>` | | Theme pair for multi-themes (repeatable, e.g., `--themes light:github_light --themes dark:github_dark`) |
+| `--default-theme <id>` | | Which `--themes` entry gets inline styles |
+| `--css-variable-prefix <prefix>` | | Prefix for CSS custom properties (default: `--lumis`) |
+| `--highlight-lines <lines>` | `-h` | Lines to highlight (e.g., `1,3-5,10`) |
+
+### Examples
+
+```bash title="HTML inline"
+lumis highlight main.rs -f html-inline -t github_dark
+```
+
+```bash title="HTML linked"
+lumis highlight main.rs -f html-linked
+```
+
+```bash title="HTML multi-themes"
+lumis highlight main.rs \
+  -f html-multi-themes \
+  --themes light:github_light \
+  --themes dark:github_dark \
+  --default-theme light
+```
+
+```bash title="Verbose mode — see cache hits and parser paths"
+lumis highlight main.rs -v
+```
+
+## `lumis languages list`
+
+```bash
+lumis languages list
+```
+
+Prints all supported languages with their file extensions and patterns.
+
+## `lumis themes list`
+
+```bash
+lumis themes list
+```
+
+Lists built-in themes and any custom themes found in the data directory.
+
+## `lumis themes generate`
+
+Extract a theme from a Neovim colorscheme Git repository.
+
+| Flag | Short | Description |
+| --- | --- | --- |
+| `--url <url>` | `-u` | Git repository URL |
+| `--colorscheme <name>` | `-c` | Colorscheme name to activate (e.g., `catppuccin-mocha`) |
+| `--output <path>` | `-o` | Write JSON to this path (prints to stdout if omitted) |
+| `--setup <lua>` | `-s` | Lua code to run before loading the colorscheme |
+| `--appearance <mode>` | `-a` | `light` or `dark` (default: `dark`) |
+
+```bash
+lumis themes generate \
+  -u https://github.com/folke/tokyonight.nvim \
+  -c tokyonight-night \
+  -o tokyonight.json
+```
+
+```bash title="Light theme"
+lumis themes generate \
+  -u https://github.com/projekt0n/github-nvim-theme \
+  -c github_light \
+  -a light \
+  -o github-light.json
+```
+
+## `lumis parsers fetch`
+
+Pre-download parser WASM files so highlighting doesn't trigger downloads at runtime.
+
+```bash title="Selected parsers"
+lumis parsers fetch rust javascript elixir
+```
+
+```bash title="All parsers"
+lumis parsers fetch --all
+```
+
+## `lumis parsers update`
+
+Re-download parsers to get the latest versions.
+
+```bash
+lumis parsers update rust javascript
+lumis parsers update --all
+```
+
+## Data directory
+
+Lumis stores parser WASM files and custom theme JSON in a local data directory.
+
+| OS | Default path |
+| --- | --- |
+| macOS / Linux | `~/.local/share/lumis/` |
+| Windows | `%APPDATA%/lumis/` |
+
+Override with `--data-dir` or `LUMIS_DATA_DIR`.
+
+Contents:
+- `parsers/` — cached Tree-sitter WASM files
+- `themes/` — custom theme JSON files (visible in `lumis themes list`)

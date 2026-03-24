@@ -235,6 +235,7 @@ export async function mountApp(root: HTMLDivElement) {
           <a href="#quickstart" class="hidden text-zinc-500 transition-colors hover:text-zinc-900 dark:hover:text-white sm:inline-block">Quickstart</a>
           <a href="#engine" class="hidden text-zinc-500 transition-colors hover:text-zinc-900 dark:hover:text-white sm:inline-block">Engine</a>
           <a href="#platforms" class="hidden text-zinc-500 transition-colors hover:text-zinc-900 dark:hover:text-white sm:inline-block">Platforms</a>
+          <a href="/docs" class="hidden text-zinc-500 transition-colors hover:text-zinc-900 dark:hover:text-white sm:inline-block">Docs</a>
           <a href="https://github.com/leandrocp/lumis" target="_blank" rel="noreferrer"
              class="inline-flex items-center gap-1.5 border border-zinc-900 px-3 py-1.5 text-zinc-900 transition-colors hover:bg-zinc-900 hover:text-white dark:border-white dark:text-white dark:hover:bg-white dark:hover:text-zinc-900">
             ${GITHUB_SVG}
@@ -317,7 +318,7 @@ export async function mountApp(root: HTMLDivElement) {
           </div>
           <div class="bg-white px-6 py-8 dark:bg-[#09090b]">
             <p class="font-mono text-2xl font-bold tabular-nums text-zinc-900 dark:text-white">110+ <span class="text-amber-400">Themes</span></p>
-            <p class="mt-1 font-mono text-xs text-zinc-500">Neovim color schemes btw. Pick one of the built-in themes or bring your own.</p>
+            <p class="mt-1 font-mono text-xs text-zinc-500">Neovim colorschemes btw. Pick one of the built-in themes or bring your own.</p>
           </div>
         </div>
       </div>
@@ -369,6 +370,14 @@ export async function mountApp(root: HTMLDivElement) {
           Install, import, highlight.
         </h2>
         <p class="mt-4 font-mono text-sm text-zinc-500">Every platform, same pattern.</p>
+        <div class="mt-6 flex flex-wrap items-center gap-3">
+          <a href="/docs"
+             class="inline-flex items-center gap-2 border border-zinc-200 px-4 py-2 font-mono text-xs tracking-wider text-zinc-700 uppercase transition-colors hover:border-zinc-900 hover:text-zinc-900 dark:border-zinc-800 dark:text-zinc-300 dark:hover:border-white dark:hover:text-white">
+            full docs
+            <svg class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+          </a>
+          <span class="font-mono text-xs text-zinc-400">API guides, formatters, themes, CLI, and platform references.</span>
+        </div>
 
         <div class="mt-12">
           <div class="flex gap-1 border-b border-zinc-200 dark:border-zinc-800" role="tablist">

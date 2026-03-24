@@ -1,0 +1,132 @@
+---
+sidebar_position: 2
+slug: /highlight/javascript
+title: JavaScript
+description: Lumis JavaScript API including highlighters, bundles, lazy loading, auto-detection, injected languages, and runtime metadata.
+keywords:
+  - lumis javascript
+  - createHighlighter
+  - bundles
+  - loadLanguage
+  - injected languages
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# JavaScript
+
+## [`highlight()`](https://www.npmjs.com/package/@lumis-sh/lumis) vs [`createHighlighter()`](https://www.npmjs.com/package/@lumis-sh/lumis)
+
+- use `highlight()` for one-off async calls
+- use `createHighlighter()` when you want explicit control, instance isolation, or repeated synchronous highlighting after setup
+- `highlight()` uses a shared default runtime, so loaded languages and global WASM resolver changes are process-wide
+- `createHighlighter()` creates an isolated highlighter unless you intentionally rely on the global resolver
+
+```ts
+import {highlight, createHighlighter} from '@lumis-sh/lumis'
+```
+
+## Bundles
+
+Bundles register many languages lazily.
+
+| Bundle | Purpose |
+| --- | --- |
+| `@lumis-sh/lumis/bundles/web` | HTML, CSS, JS, TS, JSON, Markdown, SQL, Svelte, Vue, Astro, and other web-focused languages |
+| `@lumis-sh/lumis/bundles/system` | C, C++, Rust, Go, Zig, LLVM, Make, CMake, and related system languages |
+| `@lumis-sh/lumis/bundles/full` | all supported languages |
+
+```ts
+import {createHighlighter} from '@lumis-sh/lumis'
+import {bundledLanguages} from '@lumis-sh/lumis/bundles/web'
+
+const hl = await createHighlighter({langs: [bundledLanguages]})
+
+hl.registeredLanguages // registered, including lazy entries
+hl.languages // loaded right now, usually just plaintext at first
+```
+
+## Lazy loading
+
+You can register a language now and load it only when needed.
+
+```ts
+import {createHighlighter} from '@lumis-sh/lumis'
+import {htmlInline} from '@lumis-sh/lumis/formatters'
+import {bundledLanguages} from '@lumis-sh/lumis/bundles/web'
+import dracula from '@lumis-sh/themes/dracula'
+
+const hl = await createHighlighter({langs: [bundledLanguages]})
+
+await hl.loadLanguage(bundledLanguages.javascript)
+
+const html = hl.highlight(
+  'const x = 1',
+  htmlInline({language: bundledLanguages.javascript, theme: dracula})
+)
+```
+
+`createHighlighter({ langs })` accepts:
+
+- eager `Language` objects
+- a bundle object
+- dynamic import promises
+- lazy import functions
+
+## Language references
+
+These are equivalent at highlight time:
+
+```ts
+htmlInline({language: json, theme})
+htmlInline({language: bundledLanguages.json, theme})
+htmlInline({language: 'json', theme})
+```
+
+## Auto-detection and plaintext fallback
+
+If you omit `language`, Lumis tries to detect it and falls back to plaintext when it can't.
+
+Detection methods:
+
+- file extensions (`.rs`, `.js`, `.ex`)
+- filenames (`Makefile`, `Dockerfile`)
+- shebangs (`#!/usr/bin/env python`)
+- Emacs mode lines
+
+```ts
+const html = await highlight(source, htmlInline({theme: dracula}))
+```
+
+Useful when rendering user-provided content or pasted snippets.
+
+## Injected languages
+
+Lumis can highlight embedded languages such as HTML with CSS and JavaScript inside it.
+
+Important rule: load every participating language, not just the outer one.
+
+```ts
+const hl = await createHighlighter({langs: [html, css, javascript]})
+
+const htmlOutput = hl.highlight(source, htmlInline({language: html, theme: dracula}))
+```
+
+If nested languages are missing, Lumis cannot fully highlight those embedded regions.
+
+## Metadata APIs
+
+Useful for dropdowns, config validation, and docs tooling:
+
+- [`availableLanguages()`](https://github.com/leandrocp/lumis/blob/main/packages/javascript/lumis/src/index.ts)
+- [`availableThemes()`](https://github.com/leandrocp/lumis/blob/main/packages/javascript/lumis/src/index.ts)
+- [`sanitizeThemeName()`](https://github.com/leandrocp/lumis/blob/main/packages/javascript/lumis/src/index.ts)
+
+## Browser vs Node
+
+- the package uses conditional exports so browser and Node get the right runtime automatically
+- Node caches fetched parser WASM locally when possible
+- browser usage usually relies on remote parser assets unless you override the resolver
+
+For parser asset details, continue with [WASM and CDN](/advanced/wasm-and-cdn).
