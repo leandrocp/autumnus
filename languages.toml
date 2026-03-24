@@ -422,6 +422,7 @@ git = "https://github.com/tree-sitter-grammars/tree-sitter-markdown.git"
 rev = "cee71b8288f2ec09c29415219ac15a654bd571b9"
 version = "0.1.0"
 location = "tree-sitter-markdown-inline"
+wasm_name = "tree-sitter-markdown_inline"
 variant = "MarkdownInline"
 display_name = "Markdown Inline"
 

@@ -286,7 +286,8 @@ export function closeTag(name: string): string {
  * ```
  */
 export function openSpanTag(attrs: HtmlAttrs = {}): string {
-  return openTag("span", attrs);
+  const renderedAttrs = attrsToString(attrs);
+  return renderedAttrs.length > 0 ? `<span ${renderedAttrs}>` : `<span >`;
 }
 
 /**

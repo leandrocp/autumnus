@@ -6,6 +6,8 @@ import html from "../langs/html.ts";
 import javascript from "../langs/javascript.ts";
 import json from "../langs/json.ts";
 import lua from "../langs/lua.ts";
+import markdown from "../langs/markdown.ts";
+import markdownInline from "../langs/markdown_inline.ts";
 import python from "../langs/python.ts";
 import { createHighlighter } from "../src/index.js";
 import { htmlInline, htmlLinked, htmlMultiThemes, terminal } from "../src/formatters.js";
@@ -24,6 +26,8 @@ const langBundles: Record<string, Language> = {
   javascript,
   css,
   lua,
+  markdown,
+  markdownInline,
   python,
 };
 
@@ -36,7 +40,17 @@ function getLanguage(id: string): Language {
 let highlighter: Highlighter;
 
 beforeAll(async () => {
-  configureLocalWasmResolver(["diff", "json", "html", "javascript", "css", "lua", "python"]);
+  configureLocalWasmResolver([
+    "diff",
+    "json",
+    "html",
+    "javascript",
+    "css",
+    "lua",
+    "markdown",
+    "markdown_inline",
+    "python",
+  ]);
   highlighter = await createHighlighter({
     langs: [
       json,
@@ -44,6 +58,8 @@ beforeAll(async () => {
       { ...javascript, wasm: ensureLocalWasm("javascript") },
       { ...css, wasm: ensureLocalWasm("css") },
       { ...lua, wasm: ensureLocalWasm("lua") },
+      { ...markdown, wasm: ensureLocalWasm("markdown") },
+      { ...markdownInline, wasm: ensureLocalWasm("markdown_inline") },
       { ...python, wasm: ensureLocalWasm("python") },
     ],
   });

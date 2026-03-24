@@ -579,7 +579,7 @@ function indexToPoint(index: number, lineStarts: number[]): Point {
   throw new Error(`Invalid source index ${index}`);
 }
 
-function getInjectionRanges(node: Node, includeChildren: boolean): Range[] {
+export function getInjectionRanges(node: Node, includeChildren: boolean): Range[] {
   if (includeChildren || node.childCount === 0) {
     return [nodeToRange(node)];
   }
@@ -590,6 +590,10 @@ function getInjectionRanges(node: Node, includeChildren: boolean): Range[] {
 
   for (const child of node.children) {
     if (!child) continue;
+
+    if (!child.isNamed) {
+      continue;
+    }
 
     if (startIndex < child.startIndex) {
       ranges.push(makeRange(startIndex, child.startIndex, startPosition, child.startPosition));
