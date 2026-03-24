@@ -1,7 +1,7 @@
 use assert_cmd::cargo::cargo_bin_cmd;
 use predicates::prelude::*;
+use std::ffi::OsString;
 use std::fs;
-use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
 use std::path::PathBuf;
 
@@ -22,6 +22,7 @@ fn write_file(path: &Path, content: &str) {
     fs::write(path, content).unwrap();
 }
 
+#[cfg(unix)]
 fn install_fake_nvim(bin_dir: &Path) {
     let script = r##"#!/usr/bin/env bash
 set -euo pipefail
@@ -43,14 +44,54 @@ EOF
     let path = bin_dir.join("nvim");
     write_file(&path, script);
 
-    let mut perms = fs::metadata(&path).unwrap().permissions();
-    perms.set_mode(0o755);
-    fs::set_permissions(&path, perms).unwrap();
+    #[allow(clippy::useless_conversion)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+
+        let mut perms = fs::metadata(&path).unwrap().permissions();
+        perms.set_mode(0o755);
+        fs::set_permissions(&path, perms).unwrap();
+    }
 }
 
-fn fake_nvim_path(bin_dir: &Path) -> String {
-    let current_path = std::env::var("PATH").unwrap_or_default();
-    format!("{}:{}", bin_dir.display(), current_path)
+#[cfg(windows)]
+fn install_fake_nvim(bin_dir: &Path) {
+    let script = r##"@echo off
+setlocal EnableExtensions EnableDelayedExpansion
+
+if "%LUMIS_FAKE_NVIM_CAPTURE_DIR%"=="" (
+  echo missing capture dir 1>&2
+  exit /b 1
+)
+
+set "capture_dir=%LUMIS_FAKE_NVIM_CAPTURE_DIR%"
+set "appearance=%LUMIS_FAKE_NVIM_APPEARANCE%"
+if "%appearance%"=="" set "appearance=dark"
+
+set "colorscheme="
+for %%a in (%*) do set "colorscheme=%%~a"
+
+copy /Y init.lua "%capture_dir%\init.lua" >NUL
+copy /Y themes.lua "%capture_dir%\themes.lua" >NUL
+copy /Y extract_theme.lua "%capture_dir%\extract_theme.lua" >NUL
+
+> "%capture_dir%\argv.txt" (
+  for %%a in (%*) do echo %%~a
+)
+
+> "%colorscheme%.json" (
+  <nul set /p ={"name":"%colorscheme%","appearance":"%appearance%","revision":"fake-revision","highlights":{"normal":{"fg":"#ffffff","bg":"#000000"}}}
+)
+"##;
+
+    write_file(&bin_dir.join("nvim.cmd"), script);
+}
+
+fn fake_nvim_path(bin_dir: &Path) -> OsString {
+    let current_path = std::env::var_os("PATH").unwrap_or_default();
+    let mut paths = vec![bin_dir.to_path_buf()];
+    paths.extend(std::env::split_paths(&current_path));
+    std::env::join_paths(paths).unwrap()
 }
 
 #[test]

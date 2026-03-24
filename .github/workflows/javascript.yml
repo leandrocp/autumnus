@@ -6,16 +6,16 @@ on:
     paths:
       - "packages/javascript/lumis/**"
       - "packages/javascript/themes/**"
-      - "crates/**"
       - "queries/**"
+      - "languages.toml"
       - "fixtures/conformance/**"
       - ".github/workflows/javascript.yml"
   pull_request:
     paths:
       - "packages/javascript/lumis/**"
       - "packages/javascript/themes/**"
-      - "crates/**"
       - "queries/**"
+      - "languages.toml"
       - "fixtures/conformance/**"
       - ".github/workflows/javascript.yml"
   workflow_dispatch:
