@@ -1,0 +1,98 @@
+---
+sidebar_position: 3
+slug: /highlight/elixir
+title: Elixir
+description: Elixir-specific Lumis API including highlight/2, Phoenix, LiveView, custom themes, validation, and multi-theme integration.
+keywords:
+  - lumis elixir
+  - phoenix
+  - liveview
+  - highlight!
+  - html_multi_themes
+---
+
+# Elixir
+
+## [`highlight/2`](https://hexdocs.pm/lumis/Lumis.html#highlight/2) vs [`highlight!/2`](https://hexdocs.pm/lumis/Lumis.html#highlight!/2)
+
+- `highlight/2` returns `{:ok, output}` or `{:error, reason}`
+- `highlight!/2` returns the highlighted output or raises
+
+```elixir
+case Lumis.highlight(source, language: "elixir") do
+  {:ok, html} -> html
+  {:error, reason} -> handle_error(reason)
+end
+
+html = Lumis.highlight!(source, language: "elixir")
+```
+
+Use the non-bang version in app code when user input may be invalid or when you want explicit error handling.
+
+## Language selection
+
+Elixir accepts several forms:
+
+```elixir
+Lumis.highlight!(code, language: "elixir")
+Lumis.highlight!(code, language: ".ex")
+Lumis.highlight!(code, language: "lib/my_app.ex")
+Lumis.highlight!(code)
+```
+
+Omitting `language` enables auto-detection.
+
+## Discover supported languages and themes
+
+```elixir
+Lumis.available_languages()
+Lumis.available_themes()
+Lumis.Theme.get("github_light")
+```
+
+See [`Lumis`](https://hexdocs.pm/lumis/Lumis.html) and [`Lumis.Theme`](https://hexdocs.pm/lumis/Lumis.Theme.html) on HexDocs.
+
+## Phoenix and LiveView
+
+Highlighted HTML must be rendered as raw HTML in templates.
+
+```elixir
+code = Lumis.highlight!(source, language: "elixir")
+```
+
+```heex
+{Phoenix.HTML.raw(@code)}
+```
+
+For linked CSS output, also mount a theme stylesheet through `Plug.Static` as shown in [CSS Theme Files](/themes/css-files).
+
+## Light/dark mode
+
+See [Light/Dark Mode](/recipes/light-dark) for three approaches to theme switching (CSS `light-dark()`, media queries, and manual toggle).
+
+## Custom themes
+
+```elixir
+{:ok, theme} = Lumis.Theme.from_file("/path/to/theme.json")
+{:ok, theme} = Lumis.Theme.from_json(theme_json)
+```
+
+Then pass the resulting theme struct into the formatter options.
+
+## Validation
+
+```elixir
+# validate options before passing to highlight
+Lumis.validate_options!(language: "elixir", formatter: {:html_inline, theme: "dracula"})
+
+# inspect defaults
+Lumis.default_options()
+```
+
+Use `validate_options!/1` when your app exposes formatter options to users (e.g., config files, admin panels). It raises on invalid values.
+
+## API notes
+
+- prefer the 2-arity `highlight/2` and `highlight!/2`
+- avoid deprecated 3-arity calls
+- use formatter-specific options instead of older top-level formatting options

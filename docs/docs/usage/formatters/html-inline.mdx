@@ -1,0 +1,193 @@
+---
+sidebar_position: 1
+slug: /formatters/html-inline
+title: HTML Inline Formatter
+description: Options and examples for Lumis HTML inline output.
+keywords:
+  - lumis html inline
+  - preClass
+  - includeHighlights
+  - header
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# HTML Inline Formatter
+
+Self-contained HTML with inline styles on each token. No external CSS required.
+
+## Options
+
+| Runtime | Options |
+| --- | --- |
+| Rust | `lang`, `theme`, `pre_class`, `italic`, `include_highlights`, `highlight_lines`, `header` |
+| Elixir | `:theme`, `:pre_class`, `:italic`, `:include_highlights`, `:highlight_lines`, `:header` |
+| JavaScript | `language`, `theme`, `preClass`, `italic`, `includeHighlights`, `highlightLines`, `header` |
+| CLI | `--theme`, `--highlight-lines` |
+
+## Basic example
+
+<Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
+  <TabItem value="javascript" label="JavaScript">
+
+```js
+import {highlight} from '@lumis-sh/lumis'
+import {htmlInline} from '@lumis-sh/lumis/formatters'
+import rust from '@lumis-sh/lumis/langs/rust'
+import dracula from '@lumis-sh/themes/dracula'
+
+const html = await highlight('fn main() {}', htmlInline({language: rust, theme: dracula}))
+```
+
+  </TabItem>
+  <TabItem value="rust" label="Rust">
+
+```rust
+use lumis::{highlight, HtmlInlineBuilder, languages::Language, themes};
+
+let html = highlight(
+    "fn main() {}",
+    HtmlInlineBuilder::new()
+        .lang(Language::Rust)
+        .theme(Some(themes::get("dracula").unwrap()))
+        .build()
+        .unwrap(),
+);
+```
+
+  </TabItem>
+  <TabItem value="elixir" label="Elixir">
+
+```elixir
+Lumis.highlight!(
+  "fn main() {}",
+  language: "rust",
+  formatter: {:html_inline, theme: "dracula"}
+)
+```
+
+  </TabItem>
+  <TabItem value="java" label="Java">
+
+```java
+import io.roastedroot.lumis4j.core.Lang;
+import io.roastedroot.lumis4j.core.Lumis;
+import io.roastedroot.lumis4j.core.Theme;
+
+var lumis = Lumis.builder()
+    .withLang(Lang.RUST)
+    .withTheme(Theme.DRACULA)
+    .build();
+
+var html = lumis.highlight("fn main() {}").string();
+```
+
+  </TabItem>
+  <TabItem value="cli" label="CLI">
+
+```bash
+lumis highlight main.rs --formatter html-inline --theme dracula
+```
+
+  </TabItem>
+</Tabs>
+
+## Add classes and metadata
+
+<Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
+  <TabItem value="javascript" label="JavaScript">
+
+```js
+const html = await highlight(
+  'const x = 1',
+  htmlInline({language: javascript, theme: dracula, preClass: 'code-block', includeHighlights: true})
+)
+```
+
+  </TabItem>
+  <TabItem value="rust" label="Rust">
+
+```rust
+let formatter = HtmlInlineBuilder::new()
+    .lang(Language::Javascript)
+    .theme(Some(themes::get("dracula").unwrap()))
+    .pre_class(Some("code-block".to_string()))
+    .include_highlights(true)
+    .build()
+    .unwrap();
+
+let html = highlight("const x = 1", formatter);
+```
+
+  </TabItem>
+  <TabItem value="elixir" label="Elixir">
+
+```elixir
+Lumis.highlight!(
+  "const x = 1",
+  language: "javascript",
+  formatter: {:html_inline, theme: "dracula", pre_class: "code-block", include_highlights: true}
+)
+```
+
+  </TabItem>
+</Tabs>
+
+## Wrap with custom HTML
+
+<Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
+  <TabItem value="javascript" label="JavaScript">
+
+```js
+const html = await highlight(
+  'const x = 1',
+  htmlInline({
+    language: javascript,
+    theme: dracula,
+    header: {openTag: '<figure><figcaption>index.js</figcaption>', closeTag: '</figure>'},
+  })
+)
+```
+
+  </TabItem>
+  <TabItem value="rust" label="Rust">
+
+```rust
+use lumis::formatter::HtmlElement;
+
+let formatter = HtmlInlineBuilder::new()
+    .lang(Language::Javascript)
+    .theme(Some(themes::get("dracula").unwrap()))
+    .header(Some(HtmlElement {
+        open_tag: "<figure><figcaption>index.js</figcaption>".to_string(),
+        close_tag: "</figure>".to_string(),
+    }))
+    .build()
+    .unwrap();
+
+let html = highlight("const x = 1", formatter);
+```
+
+  </TabItem>
+  <TabItem value="elixir" label="Elixir">
+
+```elixir
+Lumis.highlight!(
+  "const x = 1",
+  language: "javascript",
+  formatter: {:html_inline,
+    theme: "dracula",
+    header: %{open_tag: "<figure><figcaption>index.js</figcaption>", close_tag: "</figure>"}
+  }
+)
+```
+
+  </TabItem>
+</Tabs>
+
+## When to use it
+
+- self-contained HTML
+- email / CMS / markdown export
+- no external stylesheet pipeline

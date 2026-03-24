@@ -7,6 +7,8 @@
 
 <p align="center">
   <a href="https://lumis.sh">lumis.sh</a>
+  -
+  <a href="https://lumis.sh/doc">docs</a>
 </p>
 
 <p align="center">

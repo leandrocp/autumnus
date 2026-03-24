@@ -1,0 +1,95 @@
+---
+sidebar_position: 2
+slug: /formatters/html-linked
+title: HTML Linked Formatter
+description: Options and examples for Lumis HTML linked output with CSS theme files.
+keywords:
+  - lumis html linked
+  - css theme files
+  - preClass
+  - header
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# HTML Linked Formatter
+
+Class-based HTML that pairs with a CSS theme file. Smaller output than inline styles.
+
+## Options
+
+| Runtime | Options |
+| --- | --- |
+| Rust | `lang`, `pre_class`, `highlight_lines`, `header` |
+| Elixir | `:pre_class`, `:highlight_lines`, `:header` |
+| JavaScript | `language`, `preClass`, `highlightLines`, `header` |
+| CLI | `--highlight-lines` |
+
+## Basic example
+
+<Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
+  <TabItem value="javascript" label="JavaScript">
+
+```js
+import '@lumis-sh/themes/css/dracula.css'
+import {highlight} from '@lumis-sh/lumis'
+import {htmlLinked} from '@lumis-sh/lumis/formatters'
+import javascript from '@lumis-sh/lumis/langs/javascript'
+
+const html = await highlight('const x = 1', htmlLinked({language: javascript}))
+```
+
+  </TabItem>
+  <TabItem value="rust" label="Rust">
+
+```rust
+use lumis::{highlight, HtmlLinkedBuilder, languages::Language};
+
+let html = highlight(
+    "const x = 1",
+    HtmlLinkedBuilder::new()
+        .lang(Language::Javascript)
+        .pre_class(Some("demo".to_string()))
+        .build()
+        .unwrap(),
+);
+```
+
+  </TabItem>
+  <TabItem value="elixir" label="Elixir">
+
+```elixir
+Lumis.highlight!(
+  "const x = 1",
+  language: "javascript",
+  formatter: {:html_linked, pre_class: "demo"}
+)
+```
+
+  </TabItem>
+  <TabItem value="cli" label="CLI">
+
+```bash
+lumis highlight index.js --formatter html-linked
+```
+
+  </TabItem>
+</Tabs>
+
+## Theme files
+
+Use CSS theme files from:
+
+- `@lumis-sh/themes/css/<theme>.css`
+- `https://unpkg.com/@lumis-sh/themes/dist/css/<theme>.css`
+- `priv/static/css/` in Elixir
+
+See [CSS Theme Files](/themes/css-files) for the full setup.
+
+## When to use it
+
+- many code blocks
+- shared stylesheet pipeline
+- cacheable theme CSS
+- smaller HTML output
