@@ -5,6 +5,10 @@
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }
 
+html, body {
+  overflow-x: hidden;
+}
+
 #hero-fluid {
   position: absolute !important;
   inset: 0;
