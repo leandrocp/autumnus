@@ -26,7 +26,8 @@ Write your own formatter when the built-in ones don't produce the output you nee
 
 Implement the [`Formatter`](https://docs.rs/lumis/latest/lumis/formatter/trait.Formatter.html) trait.
 
-```rustuse lumis::{
+```rust
+use lumis::{
     formatter::Formatter,
     formatter::html::{open_pre_tag, open_code_tag, closing_tags, span_inline},
     highlight::highlight_iter,
@@ -58,7 +59,8 @@ impl Formatter for MinimalHtmlFormatter {
 
 Pass an object with `language` and `format(source, hl)`.
 
-```tsimport {createHighlighter} from '@lumis-sh/lumis'
+```ts
+import {createHighlighter} from '@lumis-sh/lumis'
 import type {Formatter} from '@lumis-sh/lumis/formatters'
 import {openPreTag, openCodeTag, closingTags, spanInline} from '@lumis-sh/lumis/formatters/html'
 import rust from '@lumis-sh/lumis/langs/rust'

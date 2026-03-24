@@ -22,7 +22,8 @@ Lumis themes come from the Neovim ecosystem. You can use the built-in collection
 <Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
   <TabItem value="javascript" label="JavaScript">
 
-```jsimport dracula from '@lumis-sh/themes/dracula';
+```js
+import dracula from '@lumis-sh/themes/dracula';
 import {highlight} from '@lumis-sh/lumis';
 import {htmlInline} from '@lumis-sh/lumis/formatters';
 import javascript from '@lumis-sh/lumis/langs/javascript';
@@ -36,7 +37,8 @@ const html = await highlight(
   </TabItem>
   <TabItem value="rust" label="Rust">
 
-```rustuse lumis::themes;
+```rust
+use lumis::themes;
 
 let theme = themes::get("dracula").unwrap();
 ```
@@ -44,7 +46,8 @@ let theme = themes::get("dracula").unwrap();
   </TabItem>
   <TabItem value="elixir" label="Elixir">
 
-```elixirtheme = Lumis.Theme.get("github_light")
+```elixir
+theme = Lumis.Theme.get("github_light")
 
 Lumis.highlight!(
   "setTimeout(fun, 5000);",
@@ -68,7 +71,8 @@ lumis themes list
 <Tabs groupId="runtime" queryString="lang" defaultValue="rust">
   <TabItem value="rust" label="Rust">
 
-```rustuse lumis::themes;
+```rust
+use lumis::themes;
 
 let theme = themes::from_file("my_theme.json").unwrap();
 ```
@@ -76,7 +80,8 @@ let theme = themes::from_file("my_theme.json").unwrap();
   </TabItem>
   <TabItem value="elixir" label="Elixir">
 
-```elixir{:ok, theme} = Lumis.Theme.from_file("/path/to/theme.json")
+```elixir
+{:ok, theme} = Lumis.Theme.from_file("/path/to/theme.json")
 
 Lumis.highlight!("const x = 1", language: "javascript", formatter: {:html_inline, theme: theme})
 ```
@@ -112,4 +117,3 @@ If you use `htmlLinked`, pair the HTML output with a stylesheet. See [CSS Theme 
 ## Theme switching with CSS variables
 
 If you want one block to support multiple themes, use the multi-theme formatter from [Formatters](/formatters).
-

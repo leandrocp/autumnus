@@ -25,7 +25,8 @@ This is the core Lumis workflow: choose a language, choose a formatter, then ren
 <Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
   <TabItem value="javascript" label="JavaScript">
 
-```jsimport {highlight} from '@lumis-sh/lumis';
+```js
+import {highlight} from '@lumis-sh/lumis';
 import {htmlInline} from '@lumis-sh/lumis/formatters';
 import javascript from '@lumis-sh/lumis/langs/javascript';
 import dracula from '@lumis-sh/themes/dracula';
@@ -39,7 +40,8 @@ const html = await highlight(
   </TabItem>
   <TabItem value="rust" label="Rust">
 
-```rustuse lumis::{highlight, HtmlInlineBuilder, languages::Language, themes};
+```rust
+use lumis::{highlight, HtmlInlineBuilder, languages::Language, themes};
 
 let theme = themes::get("dracula").unwrap();
 
@@ -55,7 +57,8 @@ let html = highlight("const x = 1", formatter);
   </TabItem>
   <TabItem value="elixir" label="Elixir">
 
-```elixirLumis.highlight!(
+```elixir
+Lumis.highlight!(
   "const x = 1",
   language: "javascript",
   formatter: {:html_inline, theme: "dracula"}
@@ -65,7 +68,8 @@ let html = highlight("const x = 1", formatter);
   </TabItem>
   <TabItem value="java" label="Java">
 
-```javaimport io.roastedroot.lumis4j.core.Lang;
+```java
+import io.roastedroot.lumis4j.core.Lang;
 import io.roastedroot.lumis4j.core.Lumis;
 import io.roastedroot.lumis4j.core.Theme;
 
@@ -80,7 +84,8 @@ var html = lumis.highlight("const x = 1").string();
   </TabItem>
   <TabItem value="cli" label="CLI">
 
-```bashlumis highlight index.js \
+```bash
+lumis highlight index.js \
   --language javascript \
   --theme dracula
 ```
@@ -100,7 +105,8 @@ var html = lumis.highlight("const x = 1").string();
 
 For repeated calls, preload languages with `createHighlighter()` and call `hl.highlight()` synchronously afterward.
 
-```jsimport {createHighlighter} from '@lumis-sh/lumis';
+```js
+import {createHighlighter} from '@lumis-sh/lumis';
 import {htmlInline} from '@lumis-sh/lumis/formatters';
 import javascript from '@lumis-sh/lumis/langs/javascript';
 import dracula from '@lumis-sh/themes/dracula';

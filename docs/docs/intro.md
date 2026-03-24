@@ -53,7 +53,7 @@ It keeps the same core workflow across runtimes:
 
 | Runtime | Good fit | Main package |
 | --- | --- | --- |
-| CLI | scripts, local workflows, parser/theme management | `lumis` |
+| CLI | scripts, local workflows, parser/theme management | `lumis-cli` (`lumis` binary) |
 | Rust | backends, static sites, editors | `lumis` |
 | Elixir | Phoenix, LiveView, BEAM apps | `lumis` |
 | JavaScript | Node.js, browser apps, build tools | `@lumis-sh/lumis` |

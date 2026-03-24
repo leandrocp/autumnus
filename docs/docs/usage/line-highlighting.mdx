@@ -28,7 +28,8 @@ Line highlighting lets you emphasize key lines without changing the rest of the 
 <Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
   <TabItem value="javascript" label="JavaScript">
 
-```jsimport {highlight} from '@lumis-sh/lumis';
+```js
+import {highlight} from '@lumis-sh/lumis';
 import {htmlInline} from '@lumis-sh/lumis/formatters';
 import javascript from '@lumis-sh/lumis/langs/javascript';
 import dracula from '@lumis-sh/themes/dracula';
@@ -48,7 +49,8 @@ For linked HTML, use `htmlLinked({ highlightLines: { lines: [1, [3, 4]], class: 
   </TabItem>
   <TabItem value="rust" label="Rust">
 
-```rustuse lumis::{highlight, HtmlInlineBuilder, languages::Language, themes};
+```rust
+use lumis::{highlight, HtmlInlineBuilder, languages::Language, themes};
 use lumis::formatter::html_inline::{HighlightLines, HighlightLinesStyle};
 
 let highlight_lines = HighlightLines {
@@ -70,7 +72,8 @@ let html = highlight("line 1\nline 2\nline 3\nline 4", formatter);
   </TabItem>
   <TabItem value="elixir" label="Elixir">
 
-```elixirLumis.highlight!(
+```elixir
+Lumis.highlight!(
   "line 1\nline 2\nline 3\nline 4",
   language: "plaintext",
   formatter: {:html_inline,
@@ -88,7 +91,8 @@ For linked HTML, switch to `:html_linked` and set `class: "active-line"`.
   </TabItem>
   <TabItem value="cli" label="CLI">
 
-```bashlumis highlight main.rs --formatter html-inline --highlight-lines 1,3-5,10
+```bash
+lumis highlight main.rs --formatter html-inline --highlight-lines 1,3-5,10
 ```
 
   </TabItem>
@@ -102,4 +106,3 @@ For linked HTML, switch to `:html_linked` and set `class: "active-line"`.
 | linked HTML | CSS class names |
 | multi-theme HTML | theme style or custom inline CSS |
 | terminal | no line highlight styling |
-

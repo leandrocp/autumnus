@@ -41,7 +41,8 @@ Self-contained output with no external CSS.
 <Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
   <TabItem value="javascript" label="JavaScript">
 
-```jsimport {highlight} from '@lumis-sh/lumis';
+```js
+import {highlight} from '@lumis-sh/lumis';
 import {htmlInline} from '@lumis-sh/lumis/formatters';
 import javascript from '@lumis-sh/lumis/langs/javascript';
 import dracula from '@lumis-sh/themes/dracula';
@@ -55,7 +56,8 @@ const html = await highlight(
   </TabItem>
   <TabItem value="rust" label="Rust">
 
-```rustuse lumis::{highlight, HtmlInlineBuilder, languages::Language, themes};
+```rust
+use lumis::{highlight, HtmlInlineBuilder, languages::Language, themes};
 
 let formatter = HtmlInlineBuilder::new()
     .lang(Language::Rust)
@@ -70,7 +72,8 @@ let html = highlight("fn main() {}", formatter);
   </TabItem>
   <TabItem value="elixir" label="Elixir">
 
-```elixirLumis.highlight!(
+```elixir
+Lumis.highlight!(
   "fn main() {}",
   language: "rust",
   formatter: {:html_inline, theme: "dracula", pre_class: "code-block"}
@@ -80,7 +83,8 @@ let html = highlight("fn main() {}", formatter);
   </TabItem>
   <TabItem value="cli" label="CLI">
 
-```bashlumis highlight main.rs --formatter html-inline --theme dracula
+```bash
+lumis highlight main.rs --formatter html-inline --theme dracula
 ```
 
   </TabItem>
@@ -93,7 +97,8 @@ Smaller HTML. Pair with a CSS theme file.
 <Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
   <TabItem value="javascript" label="JavaScript">
 
-```jsimport '@lumis-sh/themes/css/dracula.css';
+```js
+import '@lumis-sh/themes/css/dracula.css';
 import {highlight} from '@lumis-sh/lumis';
 import {htmlLinked} from '@lumis-sh/lumis/formatters';
 import javascript from '@lumis-sh/lumis/langs/javascript';
@@ -107,7 +112,8 @@ const html = await highlight(
   </TabItem>
   <TabItem value="rust" label="Rust">
 
-```rustuse lumis::{highlight, HtmlLinkedBuilder, languages::Language};
+```rust
+use lumis::{highlight, HtmlLinkedBuilder, languages::Language};
 
 let formatter = HtmlLinkedBuilder::new()
     .lang(Language::Rust)
@@ -121,7 +127,8 @@ let html = highlight("fn main() {}", formatter);
   </TabItem>
   <TabItem value="elixir" label="Elixir">
 
-```elixirLumis.highlight!(
+```elixir
+Lumis.highlight!(
   "fn main() {}",
   language: "rust",
   formatter: {:html_linked, pre_class: "code-block"}
@@ -131,7 +138,8 @@ let html = highlight("fn main() {}", formatter);
   </TabItem>
   <TabItem value="cli" label="CLI">
 
-```bashlumis highlight main.rs --formatter html-linked
+```bash
+lumis highlight main.rs --formatter html-linked
 ```
 
   </TabItem>
@@ -144,7 +152,8 @@ One block, multiple themes via CSS custom properties.
 <Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
   <TabItem value="javascript" label="JavaScript">
 
-```jsimport {highlight} from '@lumis-sh/lumis';
+```js
+import {highlight} from '@lumis-sh/lumis';
 import {htmlMultiThemes} from '@lumis-sh/lumis/formatters';
 import javascript from '@lumis-sh/lumis/langs/javascript';
 import githubLight from '@lumis-sh/themes/github_light';
@@ -163,7 +172,8 @@ const html = await highlight(
   </TabItem>
   <TabItem value="rust" label="Rust">
 
-```rustuse lumis::{highlight, HtmlMultiThemesBuilder, languages::Language, themes};
+```rust
+use lumis::{highlight, HtmlMultiThemesBuilder, languages::Language, themes};
 use std::collections::HashMap;
 
 let mut theme_map = HashMap::new();
@@ -183,7 +193,8 @@ let html = highlight("const x = 1", formatter);
   </TabItem>
   <TabItem value="elixir" label="Elixir">
 
-```elixirLumis.highlight!(
+```elixir
+Lumis.highlight!(
   "const x = 1",
   language: "javascript",
   formatter: {:html_multi_themes,
@@ -196,7 +207,8 @@ let html = highlight("const x = 1", formatter);
   </TabItem>
   <TabItem value="cli" label="CLI">
 
-```bashlumis highlight main.rs \
+```bash
+lumis highlight main.rs \
   --formatter html-multi-themes \
   --themes light:github_light \
   --themes dark:github_dark \
@@ -213,7 +225,8 @@ ANSI output for the terminal.
 <Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
   <TabItem value="javascript" label="JavaScript">
 
-```jsimport {highlight} from '@lumis-sh/lumis';
+```js
+import {highlight} from '@lumis-sh/lumis';
 import {terminal} from '@lumis-sh/lumis/formatters';
 import javascript from '@lumis-sh/lumis/langs/javascript';
 import dracula from '@lumis-sh/themes/dracula';
@@ -227,7 +240,8 @@ const ansi = await highlight(
   </TabItem>
   <TabItem value="rust" label="Rust">
 
-```rustuse lumis::{highlight, TerminalBuilder, languages::Language, themes};
+```rust
+use lumis::{highlight, TerminalBuilder, languages::Language, themes};
 
 let formatter = TerminalBuilder::new()
     .lang(Language::Rust)
@@ -242,7 +256,8 @@ println!("{}", ansi);
   </TabItem>
   <TabItem value="elixir" label="Elixir">
 
-```elixirLumis.highlight!(
+```elixir
+Lumis.highlight!(
   "fn main() {}",
   language: "rust",
   formatter: {:terminal, theme: "dracula"}
@@ -252,7 +267,8 @@ println!("{}", ansi);
   </TabItem>
   <TabItem value="cli" label="CLI">
 
-```bashlumis highlight main.rs --theme dracula
+```bash
+lumis highlight main.rs --theme dracula
 ```
 
   </TabItem>
