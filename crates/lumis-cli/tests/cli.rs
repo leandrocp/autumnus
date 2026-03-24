@@ -56,35 +56,44 @@ EOF
 
 #[cfg(windows)]
 fn install_fake_nvim(bin_dir: &Path) {
-    let script = r##"@echo off
-setlocal EnableExtensions EnableDelayedExpansion
+    let source = r##"
+use std::env;
+use std::fs;
+use std::path::PathBuf;
 
-if "%LUMIS_FAKE_NVIM_CAPTURE_DIR%"=="" (
-  echo missing capture dir 1>&2
-  exit /b 1
-)
+fn main() {
+    let capture_dir = PathBuf::from(env::var("LUMIS_FAKE_NVIM_CAPTURE_DIR").expect("missing capture dir"));
+    let appearance = env::var("LUMIS_FAKE_NVIM_APPEARANCE").unwrap_or_else(|_| "dark".to_string());
+    let args: Vec<String> = env::args().skip(1).collect();
+    let colorscheme = args.last().expect("missing colorscheme arg");
 
-set "capture_dir=%LUMIS_FAKE_NVIM_CAPTURE_DIR%"
-set "appearance=%LUMIS_FAKE_NVIM_APPEARANCE%"
-if "%appearance%"=="" set "appearance=dark"
+    fs::copy("init.lua", capture_dir.join("init.lua")).unwrap();
+    fs::copy("themes.lua", capture_dir.join("themes.lua")).unwrap();
+    fs::copy("extract_theme.lua", capture_dir.join("extract_theme.lua")).unwrap();
+    fs::write(capture_dir.join("argv.txt"), args.join("\n") + "\n").unwrap();
 
-set "colorscheme="
-for %%a in (%*) do set "colorscheme=%%~a"
-
-copy /Y init.lua "%capture_dir%\init.lua" >NUL
-copy /Y themes.lua "%capture_dir%\themes.lua" >NUL
-copy /Y extract_theme.lua "%capture_dir%\extract_theme.lua" >NUL
-
-> "%capture_dir%\argv.txt" (
-  for %%a in (%*) do echo %%~a
-)
-
-> "%colorscheme%.json" (
-  <nul set /p ={"name":"%colorscheme%","appearance":"%appearance%","revision":"fake-revision","highlights":{"normal":{"fg":"#ffffff","bg":"#000000"}}}
-)
+    let json = format!(
+        "{{\"name\":\"{}\",\"appearance\":\"{}\",\"revision\":\"fake-revision\",\"highlights\":{{\"normal\":{{\"fg\":\"#ffffff\",\"bg\":\"#000000\"}}}}}}",
+        colorscheme, appearance
+    );
+    fs::write(format!("{}.json", colorscheme), json).unwrap();
+}
 "##;
 
-    write_file(&bin_dir.join("nvim.cmd"), script);
+    let source_path = bin_dir.join("fake_nvim.rs");
+    let exe_path = bin_dir.join("nvim.exe");
+
+    write_file(&source_path, source);
+
+    let status = std::process::Command::new("rustc")
+        .arg(&source_path)
+        .arg("-O")
+        .arg("-o")
+        .arg(&exe_path)
+        .status()
+        .unwrap();
+
+    assert!(status.success(), "failed to build fake nvim.exe");
 }
 
 fn fake_nvim_path(bin_dir: &Path) -> OsString {
