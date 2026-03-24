@@ -46,7 +46,7 @@ const config: Config = {
   ],
 
   themeConfig: {
-    image: 'img/docusaurus-social-card.jpg',
+    image: 'img/intro.jpg',
     metadata: [
       {
         name: 'keywords',
