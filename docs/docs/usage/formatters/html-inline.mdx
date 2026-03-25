@@ -75,12 +75,14 @@ import io.roastedroot.lumis4j.core.Lang;
 import io.roastedroot.lumis4j.core.Lumis;
 import io.roastedroot.lumis4j.core.Theme;
 
-var lumis = Lumis.builder()
+var lumis = Lumis.builder().build();
+
+var highlighter = lumis.highlighter()
     .withLang(Lang.RUST)
     .withTheme(Theme.DRACULA)
     .build();
 
-var html = lumis.highlight("fn main() {}").string();
+var html = highlighter.highlight("fn main() {}").string();
 ```
 
   </TabItem>
