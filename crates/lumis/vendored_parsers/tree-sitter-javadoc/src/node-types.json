@@ -1,0 +1,1512 @@
+[
+  {
+    "type": "block_tag",
+    "named": true,
+    "subtypes": [
+      {
+        "type": "author_tag",
+        "named": true
+      },
+      {
+        "type": "custom_tag",
+        "named": true
+      },
+      {
+        "type": "deprecated_tag",
+        "named": true
+      },
+      {
+        "type": "hidden_tag",
+        "named": true
+      },
+      {
+        "type": "param_tag",
+        "named": true
+      },
+      {
+        "type": "provides_tag",
+        "named": true
+      },
+      {
+        "type": "return_tag",
+        "named": true
+      },
+      {
+        "type": "see_tag",
+        "named": true
+      },
+      {
+        "type": "serial_data_tag",
+        "named": true
+      },
+      {
+        "type": "serial_field_tag",
+        "named": true
+      },
+      {
+        "type": "serial_tag",
+        "named": true
+      },
+      {
+        "type": "since_tag",
+        "named": true
+      },
+      {
+        "type": "spec_tag",
+        "named": true
+      },
+      {
+        "type": "throws_tag",
+        "named": true
+      },
+      {
+        "type": "uses_tag",
+        "named": true
+      },
+      {
+        "type": "version_tag",
+        "named": true
+      }
+    ]
+  },
+  {
+    "type": "inline_tag",
+    "named": true,
+    "subtypes": [
+      {
+        "type": "code_tag",
+        "named": true
+      },
+      {
+        "type": "custom_inline_tag",
+        "named": true
+      },
+      {
+        "type": "doc_root_tag",
+        "named": true
+      },
+      {
+        "type": "index_tag",
+        "named": true
+      },
+      {
+        "type": "inherit_doc_tag",
+        "named": true
+      },
+      {
+        "type": "link_tag",
+        "named": true
+      },
+      {
+        "type": "literal_tag",
+        "named": true
+      },
+      {
+        "type": "return_tag",
+        "named": true
+      },
+      {
+        "type": "snippet_tag",
+        "named": true
+      },
+      {
+        "type": "summary_tag",
+        "named": true
+      },
+      {
+        "type": "system_property_tag",
+        "named": true
+      },
+      {
+        "type": "value_tag",
+        "named": true
+      }
+    ]
+  },
+  {
+    "type": "attribute",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      },
+      "value": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "attribute_value",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "attribute_value",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "string_literal",
+          "named": true
+        },
+        {
+          "type": "unsigned_integer",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "attributes",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "attribute",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "author_tag",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "tag_name",
+            "named": true
+          }
+        ]
+      },
+      "name_text": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "description",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "code_tag",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "tag_name",
+            "named": true
+          }
+        ]
+      },
+      "text": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "code",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "custom_inline_tag",
+    "named": true,
+    "fields": {
+      "description": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "description",
+            "named": true
+          }
+        ]
+      },
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "tag_name",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "custom_tag",
+    "named": true,
+    "fields": {
+      "description": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "description",
+            "named": true
+          }
+        ]
+      },
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "tag_name",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "deprecated_tag",
+    "named": true,
+    "fields": {
+      "deprecated_text": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "description",
+            "named": true
+          }
+        ]
+      },
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "tag_name",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "description",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "inline_tag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "doc_root_tag",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "tag_name",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "document",
+    "named": true,
+    "root": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "block_tag",
+          "named": true
+        },
+        {
+          "type": "description",
+          "named": true
+        },
+        {
+          "type": "markdown_description",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "floating_point_type",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "hidden_tag",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "tag_name",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "index_tag",
+    "named": true,
+    "fields": {
+      "description": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "description",
+            "named": true
+          }
+        ]
+      },
+      "indexword": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "indexword",
+            "named": true
+          }
+        ]
+      },
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "tag_name",
+            "named": true
+          }
+        ]
+      },
+      "phrase": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "string_literal",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "inherit_doc_tag",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "tag_name",
+            "named": true
+          }
+        ]
+      },
+      "supertype": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "type",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "integral_type",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "link_tag",
+    "named": true,
+    "fields": {
+      "label": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "description",
+            "named": true
+          }
+        ]
+      },
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "tag_name",
+            "named": true
+          }
+        ]
+      },
+      "reference": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "reference",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "literal_format_string",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "literal_tag",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "tag_name",
+            "named": true
+          }
+        ]
+      },
+      "text": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "literal",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "markdown_description",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "inline_tag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "member",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "method",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "method",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "parameters",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "module",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "identifier",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "param_tag",
+    "named": true,
+    "fields": {
+      "description": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "description",
+            "named": true
+          }
+        ]
+      },
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "tag_name",
+            "named": true
+          }
+        ]
+      },
+      "parameter_name": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      },
+      "type_parameter_name": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "type_parameter",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "parameter",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "parameter_type",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "parameter_type",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "boolean_type",
+          "named": true
+        },
+        {
+          "type": "floating_point_type",
+          "named": true
+        },
+        {
+          "type": "integral_type",
+          "named": true
+        },
+        {
+          "type": "type",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "parameters",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "parameter",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "provides_tag",
+    "named": true,
+    "fields": {
+      "description": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "description",
+            "named": true
+          }
+        ]
+      },
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "tag_name",
+            "named": true
+          }
+        ]
+      },
+      "service_type": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "type",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "reference",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "fragment",
+          "named": true
+        },
+        {
+          "type": "member",
+          "named": true
+        },
+        {
+          "type": "module",
+          "named": true
+        },
+        {
+          "type": "type",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "return_tag",
+    "named": true,
+    "fields": {
+      "description": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "description",
+            "named": true
+          }
+        ]
+      },
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "tag_name",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "see_tag",
+    "named": true,
+    "fields": {
+      "label": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "description",
+            "named": true
+          }
+        ]
+      },
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "tag_name",
+            "named": true
+          }
+        ]
+      },
+      "reference": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "reference",
+            "named": true
+          }
+        ]
+      },
+      "string": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "string_literal",
+            "named": true
+          }
+        ]
+      },
+      "url_title": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "url_title",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "serial_data_tag",
+    "named": true,
+    "fields": {
+      "data_description": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "description",
+            "named": true
+          }
+        ]
+      },
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "tag_name",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "serial_field_tag",
+    "named": true,
+    "fields": {
+      "field_description": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "description",
+            "named": true
+          }
+        ]
+      },
+      "field_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      },
+      "field_type": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "type",
+            "named": true
+          }
+        ]
+      },
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "tag_name",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "serial_tag",
+    "named": true,
+    "fields": {
+      "exclude": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "exclude",
+            "named": false
+          }
+        ]
+      },
+      "field_description": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "description",
+            "named": true
+          }
+        ]
+      },
+      "include": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "include",
+            "named": false
+          }
+        ]
+      },
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "tag_name",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "since_tag",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "tag_name",
+            "named": true
+          }
+        ]
+      },
+      "since_text": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "description",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "snippet_tag",
+    "named": true,
+    "fields": {
+      "attributes": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "attributes",
+            "named": true
+          }
+        ]
+      },
+      "body": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "description",
+            "named": true
+          }
+        ]
+      },
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "tag_name",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "spec_tag",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "tag_name",
+            "named": true
+          }
+        ]
+      },
+      "title": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "description",
+            "named": true
+          }
+        ]
+      },
+      "url": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "url",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "string_literal",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "quoted_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "summary_tag",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "tag_name",
+            "named": true
+          }
+        ]
+      },
+      "text": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "description",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "system_property",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "identifier",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "system_property_tag",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "tag_name",
+            "named": true
+          }
+        ]
+      },
+      "property_name": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "system_property",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "throws_tag",
+    "named": true,
+    "fields": {
+      "description": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "description",
+            "named": true
+          }
+        ]
+      },
+      "exception_type": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "type",
+            "named": true
+          }
+        ]
+      },
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "tag_name",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "type",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "identifier",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "type_parameter",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "identifier",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "url_title",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "description",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "uses_tag",
+    "named": true,
+    "fields": {
+      "description": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "description",
+            "named": true
+          }
+        ]
+      },
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "tag_name",
+            "named": true
+          }
+        ]
+      },
+      "service_type": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "type",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "value_tag",
+    "named": true,
+    "fields": {
+      "field_reference": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "reference",
+            "named": true
+          }
+        ]
+      },
+      "format": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "bare_format_string",
+            "named": true
+          },
+          {
+            "type": "literal_format_string",
+            "named": true
+          }
+        ]
+      },
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "tag_name",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "version_tag",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "tag_name",
+            "named": true
+          }
+        ]
+      },
+      "version_text": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "description",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "\n",
+    "named": false
+  },
+  {
+    "type": "\"",
+    "named": false
+  },
+  {
+    "type": "#",
+    "named": false
+  },
+  {
+    "type": "##",
+    "named": false
+  },
+  {
+    "type": "(",
+    "named": false
+  },
+  {
+    "type": ")",
+    "named": false
+  },
+  {
+    "type": "*/",
+    "named": false
+  },
+  {
+    "type": ",",
+    "named": false
+  },
+  {
+    "type": ".",
+    "named": false
+  },
+  {
+    "type": "...",
+    "named": false
+  },
+  {
+    "type": "/",
+    "named": false
+  },
+  {
+    "type": "/**",
+    "named": false
+  },
+  {
+    "type": "///",
+    "named": false
+  },
+  {
+    "type": ":",
+    "named": false
+  },
+  {
+    "type": "<",
+    "named": false
+  },
+  {
+    "type": "=",
+    "named": false
+  },
+  {
+    "type": ">",
+    "named": false
+  },
+  {
+    "type": "[",
+    "named": false
+  },
+  {
+    "type": "]",
+    "named": false
+  },
+  {
+    "type": "bare_format_string",
+    "named": true
+  },
+  {
+    "type": "boolean_type",
+    "named": true
+  },
+  {
+    "type": "byte",
+    "named": false
+  },
+  {
+    "type": "char",
+    "named": false
+  },
+  {
+    "type": "code",
+    "named": true
+  },
+  {
+    "type": "double",
+    "named": false
+  },
+  {
+    "type": "exclude",
+    "named": false
+  },
+  {
+    "type": "float",
+    "named": false
+  },
+  {
+    "type": "fragment",
+    "named": true
+  },
+  {
+    "type": "identifier",
+    "named": true
+  },
+  {
+    "type": "include",
+    "named": false
+  },
+  {
+    "type": "indexword",
+    "named": true
+  },
+  {
+    "type": "int",
+    "named": false
+  },
+  {
+    "type": "literal",
+    "named": true
+  },
+  {
+    "type": "long",
+    "named": false
+  },
+  {
+    "type": "quoted_value",
+    "named": true
+  },
+  {
+    "type": "short",
+    "named": false
+  },
+  {
+    "type": "tag_name",
+    "named": true
+  },
+  {
+    "type": "unsigned_integer",
+    "named": true
+  },
+  {
+    "type": "url",
+    "named": true
+  },
+  {
+    "type": "{",
+    "named": false
+  },
+  {
+    "type": "}",
+    "named": false
+  }
+]

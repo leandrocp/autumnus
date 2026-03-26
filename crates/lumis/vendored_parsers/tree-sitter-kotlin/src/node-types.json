@@ -5283,7 +5283,31 @@
       "required": true,
       "types": [
         {
+          "type": "function_type",
+          "named": true
+        },
+        {
           "type": "multi_variable_declaration",
+          "named": true
+        },
+        {
+          "type": "not_nullable_type",
+          "named": true
+        },
+        {
+          "type": "nullable_type",
+          "named": true
+        },
+        {
+          "type": "parenthesized_type",
+          "named": true
+        },
+        {
+          "type": "type_modifiers",
+          "named": true
+        },
+        {
+          "type": "user_type",
           "named": true
         },
         {
@@ -5734,7 +5758,7 @@
     "named": true,
     "fields": {},
     "children": {
-      "multiple": false,
+      "multiple": true,
       "required": false,
       "types": [
         {
@@ -5743,6 +5767,10 @@
         },
         {
           "type": "simple_identifier",
+          "named": true
+        },
+        {
+          "type": "type_arguments",
           "named": true
         }
       ]
@@ -5776,11 +5804,15 @@
     "named": true,
     "fields": {},
     "children": {
-      "multiple": false,
-      "required": false,
+      "multiple": true,
+      "required": true,
       "types": [
         {
           "type": "parenthesized_type",
+          "named": true
+        },
+        {
+          "type": "quest",
           "named": true
         },
         {
@@ -5823,7 +5855,7 @@
     "fields": {},
     "children": {
       "multiple": true,
-      "required": true,
+      "required": false,
       "types": [
         {
           "type": "class_body",
@@ -6946,6 +6978,11 @@
     }
   },
   {
+    "type": "property_modifier",
+    "named": true,
+    "fields": {}
+  },
+  {
     "type": "range_expression",
     "named": true,
     "fields": {},
@@ -7315,6 +7352,11 @@
     }
   },
   {
+    "type": "reification_modifier",
+    "named": true,
+    "fields": {}
+  },
+  {
     "type": "secondary_constructor",
     "named": true,
     "fields": {},
@@ -7401,6 +7443,7 @@
   {
     "type": "source_file",
     "named": true,
+    "root": true,
     "fields": {},
     "children": {
       "multiple": true,
@@ -9315,14 +9358,6 @@
     "named": false
   },
   {
-    "type": "!in",
-    "named": false
-  },
-  {
-    "type": "!is",
-    "named": false
-  },
-  {
     "type": "#!",
     "named": false
   },
@@ -9408,6 +9443,10 @@
   },
   {
     "type": "..",
+    "named": false
+  },
+  {
+    "type": "..<",
     "named": false
   },
   {
@@ -9532,6 +9571,10 @@
   },
   {
     "type": "companion",
+    "named": false
+  },
+  {
+    "type": "const",
     "named": false
   },
   {
@@ -9719,16 +9762,16 @@
     "named": false
   },
   {
-    "type": "property_modifier",
-    "named": true
-  },
-  {
     "type": "protected",
     "named": false
   },
   {
     "type": "public",
     "named": false
+  },
+  {
+    "type": "quest",
+    "named": true
   },
   {
     "type": "real_literal",
@@ -9739,8 +9782,8 @@
     "named": false
   },
   {
-    "type": "reification_modifier",
-    "named": true
+    "type": "reified",
+    "named": false
   },
   {
     "type": "return",

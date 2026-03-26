@@ -1650,10 +1650,6 @@
         },
         {
           "type": "SYMBOL",
-          "name": "template_string"
-        },
-        {
-          "type": "SYMBOL",
           "name": "regular_expression"
         },
         {
@@ -2371,8 +2367,17 @@
           "value": "["
         },
         {
-          "type": "SYMBOL",
-          "name": "binding_name"
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "binding_name"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "class_binding"
+            }
+          ]
         },
         {
           "type": "STRING",
@@ -2531,22 +2536,71 @@
       ]
     },
     "binding_name": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "identifier"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "member_expression"
+        }
+      ]
+    },
+    "class_binding": {
       "type": "SEQ",
       "members": [
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "STRING",
+            "value": "class"
+          },
+          "named": true,
+          "value": "identifier"
+        },
         {
           "type": "CHOICE",
           "members": [
             {
-              "type": "SYMBOL",
-              "name": "identifier"
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "STRING",
+                  "value": "."
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "class_name"
+                }
+              ]
             },
             {
-              "type": "SYMBOL",
-              "name": "member_expression"
+              "type": "BLANK"
             }
           ]
         }
       ]
+    },
+    "class_name": {
+      "type": "TOKEN",
+      "content": {
+        "type": "REPEAT1",
+        "content": {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "PATTERN",
+              "value": "[\\!a-zA-Z0-9_\\-\\/:'\"()]+"
+            },
+            {
+              "type": "PATTERN",
+              "value": "\\[[^\\]]+\\]"
+            }
+          ]
+        }
+      }
     },
     "_normal_attribute": {
       "type": "SEQ",
@@ -3018,6 +3072,10 @@
         {
           "type": "SYMBOL",
           "name": "string"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "template_string"
         },
         {
           "type": "SYMBOL",

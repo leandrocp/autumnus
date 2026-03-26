@@ -1,0 +1,1742 @@
+[
+  {
+    "type": "branch",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "breaking_change",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "token",
+          "named": true
+        },
+        {
+          "type": "value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "change",
+    "named": true,
+    "fields": {
+      "kind": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "deleted",
+            "named": true
+          },
+          {
+            "type": "modified",
+            "named": true
+          },
+          {
+            "type": "new",
+            "named": true
+          },
+          {
+            "type": "renamed",
+            "named": true
+          },
+          {
+            "type": "typechange",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "comment",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "title",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "deleted",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "diff",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "generated_comment",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "generated_comment",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "annotation",
+          "named": true
+        },
+        {
+          "type": "arrow",
+          "named": true
+        },
+        {
+          "type": "branch",
+          "named": true
+        },
+        {
+          "type": "change",
+          "named": true
+        },
+        {
+          "type": "filepath",
+          "named": true
+        },
+        {
+          "type": "number",
+          "named": true
+        },
+        {
+          "type": "rebase_command",
+          "named": true
+        },
+        {
+          "type": "text",
+          "named": true
+        },
+        {
+          "type": "title",
+          "named": true
+        },
+        {
+          "type": "value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "message",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "breaking_change",
+          "named": true
+        },
+        {
+          "type": "comment",
+          "named": true
+        },
+        {
+          "type": "message_line",
+          "named": true
+        },
+        {
+          "type": "trailer",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "message_line",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "modified",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "new",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "prefix",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "scope",
+          "named": true
+        },
+        {
+          "type": "type",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "rebase_command",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "renamed",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "source",
+    "named": true,
+    "root": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "comment",
+          "named": true
+        },
+        {
+          "type": "diff",
+          "named": true
+        },
+        {
+          "type": "generated_comment",
+          "named": true
+        },
+        {
+          "type": "message",
+          "named": true
+        },
+        {
+          "type": "scissor",
+          "named": true
+        },
+        {
+          "type": "subject",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "subject",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "prefix",
+          "named": true
+        },
+        {
+          "type": "subject_prefix",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "trailer",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "token",
+          "named": true
+        },
+        {
+          "type": "value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "typechange",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": " Commit hinter '",
+    "named": false
+  },
+  {
+    "type": " Commit vor '",
+    "named": false
+  },
+  {
+    "type": " Commits hinter '",
+    "named": false
+  },
+  {
+    "type": " Commits vor '",
+    "named": false
+  },
+  {
+    "type": " comissions per darrere de «",
+    "named": false
+  },
+  {
+    "type": " comissions per davant de «",
+    "named": false
+  },
+  {
+    "type": " comissió per darrere de «",
+    "named": false
+  },
+  {
+    "type": " comissió per davant de «",
+    "named": false
+  },
+  {
+    "type": " commit e ne posso eseguire il fast forward.",
+    "named": false
+  },
+  {
+    "type": " commit, and can be fast-forwarded.",
+    "named": false
+  },
+  {
+    "type": " commit, et peut être mise à jour en avance rapide.",
+    "named": false
+  },
+  {
+    "type": " commit, podendo ser atualizado com avanço rápido.",
+    "named": false
+  },
+  {
+    "type": " commit, y puede ser avanzada rápido.",
+    "named": false
+  },
+  {
+    "type": " commit.",
+    "named": false
+  },
+  {
+    "type": " commits, and can be fast-forwarded.",
+    "named": false
+  },
+  {
+    "type": " commits, et peut être mise à jour en avance rapide.",
+    "named": false
+  },
+  {
+    "type": " commits, podendo ser atualizado com avanço rápido.",
+    "named": false
+  },
+  {
+    "type": " commits, y puede ser avanzada rápido.",
+    "named": false
+  },
+  {
+    "type": " commits.",
+    "named": false
+  },
+  {
+    "type": " incheckning, och kan snabbspolas.",
+    "named": false
+  },
+  {
+    "type": " incheckning.",
+    "named": false
+  },
+  {
+    "type": " incheckningar, och kan snabbspolas.",
+    "named": false
+  },
+  {
+    "type": " incheckningar.",
+    "named": false
+  },
+  {
+    "type": " işleme geride ve ileri sarılabilir.",
+    "named": false
+  },
+  {
+    "type": " işleme ileride.",
+    "named": false
+  },
+  {
+    "type": " komit, dan bisa di maju-cepatkan.",
+    "named": false
+  },
+  {
+    "type": " komit.",
+    "named": false
+  },
+  {
+    "type": " lần chuyển giao, và có thể được chuyển-tiếp-nhanh.",
+    "named": false
+  },
+  {
+    "type": " lần chuyển giao.",
+    "named": false
+  },
+  {
+    "type": " memória, e pode ser avançado.",
+    "named": false
+  },
+  {
+    "type": " memória.",
+    "named": false
+  },
+  {
+    "type": " memórias, e pode ser avançado.",
+    "named": false
+  },
+  {
+    "type": " memórias.",
+    "named": false
+  },
+  {
+    "type": " zapis i może zostać przewinięta.",
+    "named": false
+  },
+  {
+    "type": " zapis.",
+    "named": false
+  },
+  {
+    "type": " zapisy i może zostać przewinięta.",
+    "named": false
+  },
+  {
+    "type": " zapisy.",
+    "named": false
+  },
+  {
+    "type": " zapisów i może zostać przewinięta.",
+    "named": false
+  },
+  {
+    "type": " zapisów.",
+    "named": false
+  },
+  {
+    "type": " υποβολές, και μπορεί να κάνει ταχεία προώθηση.",
+    "named": false
+  },
+  {
+    "type": " υποβολές.",
+    "named": false
+  },
+  {
+    "type": " υποβολή, και μπορεί να κάνει ταχεία προώθηση.",
+    "named": false
+  },
+  {
+    "type": " υποβολή.",
+    "named": false
+  },
+  {
+    "type": " коммит и может быть быстро перемотана.",
+    "named": false
+  },
+  {
+    "type": " коммит и может быть перемотана вперед.",
+    "named": false
+  },
+  {
+    "type": " коммит.",
+    "named": false
+  },
+  {
+    "type": " коммита и может быть быстро перемотана.",
+    "named": false
+  },
+  {
+    "type": " коммита и может быть перемотана вперед.",
+    "named": false
+  },
+  {
+    "type": " коммита.",
+    "named": false
+  },
+  {
+    "type": " коммитов и может быть быстро перемотана.",
+    "named": false
+  },
+  {
+    "type": " коммитов и может быть перемотана вперед.",
+    "named": false
+  },
+  {
+    "type": " коммитов.",
+    "named": false
+  },
+  {
+    "type": " коміт, і її можна перемотати вперед.",
+    "named": false
+  },
+  {
+    "type": " коміт.",
+    "named": false
+  },
+  {
+    "type": " коміти, і її можна перемотати вперед.",
+    "named": false
+  },
+  {
+    "type": " коміти.",
+    "named": false
+  },
+  {
+    "type": " комітів, і її можна перемотати вперед.",
+    "named": false
+  },
+  {
+    "type": " комітів.",
+    "named": false
+  },
+  {
+    "type": " подаване зад „",
+    "named": false
+  },
+  {
+    "type": " подаване пред „",
+    "named": false
+  },
+  {
+    "type": " подавания зад „",
+    "named": false
+  },
+  {
+    "type": " подавания пред „",
+    "named": false
+  },
+  {
+    "type": " 个提交。",
+    "named": false
+  },
+  {
+    "type": " 个提交，并且可以快进。",
+    "named": false
+  },
+  {
+    "type": " 個提交。",
+    "named": false
+  },
+  {
+    "type": " 個提交，並且可以快轉。",
+    "named": false
+  },
+  {
+    "type": "!",
+    "named": false
+  },
+  {
+    "type": "\" med ",
+    "named": false
+  },
+  {
+    "type": "\" ovanpå \"",
+    "named": false
+  },
+  {
+    "type": "\" на ",
+    "named": false
+  },
+  {
+    "type": "\" на \"",
+    "named": false
+  },
+  {
+    "type": "\".",
+    "named": false
+  },
+  {
+    "type": "#",
+    "named": false
+  },
+  {
+    "type": "#    ",
+    "named": false
+  },
+  {
+    "type": "' ",
+    "named": false
+  },
+  {
+    "type": "' auf '",
+    "named": false
+  },
+  {
+    "type": "' by ",
+    "named": false
+  },
+  {
+    "type": "' dalından ",
+    "named": false
+  },
+  {
+    "type": "' dalını '",
+    "named": false
+  },
+  {
+    "type": "' de ",
+    "named": false
+  },
+  {
+    "type": "' di ",
+    "named": false
+  },
+  {
+    "type": "' en '",
+    "named": false
+  },
+  {
+    "type": "' ile güncel.",
+    "named": false
+  },
+  {
+    "type": "' lên '",
+    "named": false
+  },
+  {
+    "type": "' oleh ",
+    "named": false
+  },
+  {
+    "type": "' on '",
+    "named": false
+  },
+  {
+    "type": "' pada '",
+    "named": false
+  },
+  {
+    "type": "' por ",
+    "named": false
+  },
+  {
+    "type": "' sobre '",
+    "named": false
+  },
+  {
+    "type": "' su '",
+    "named": false
+  },
+  {
+    "type": "' sur '",
+    "named": false
+  },
+  {
+    "type": "' üzerine yeniden temellendiriyorsunuz.",
+    "named": false
+  },
+  {
+    "type": "' κατά ",
+    "named": false
+  },
+  {
+    "type": "' στο '",
+    "named": false
+  },
+  {
+    "type": "' на ",
+    "named": false
+  },
+  {
+    "type": "' на '",
+    "named": false
+  },
+  {
+    "type": "' 一致。",
+    "named": false
+  },
+  {
+    "type": "' 共 ",
+    "named": false
+  },
+  {
+    "type": "' 变基到 '",
+    "named": false
+  },
+  {
+    "type": "' 的動作。",
+    "named": false
+  },
+  {
+    "type": "' 的操作。",
+    "named": false
+  },
+  {
+    "type": "' 重定基底到 '",
+    "named": false
+  },
+  {
+    "type": "' 브랜치를 '",
+    "named": false
+  },
+  {
+    "type": "' 위로 리베이스하는 중입니다.",
+    "named": false
+  },
+  {
+    "type": "', und kann vorgespult werden.",
+    "named": false
+  },
+  {
+    "type": "', è indietro di ",
+    "named": false
+  },
+  {
+    "type": "'.",
+    "named": false
+  },
+  {
+    "type": "'보다 ",
+    "named": false
+  },
+  {
+    "type": "'에 맞게 업데이트된 상태입니다.",
+    "named": false
+  },
+  {
+    "type": "(",
+    "named": false
+  },
+  {
+    "type": ")",
+    "named": false
+  },
+  {
+    "type": ":",
+    "named": false
+  },
+  {
+    "type": "Actualment esteu fent «rebase» de la branca «",
+    "named": false
+  },
+  {
+    "type": "Anda sedang mendasarkan ulang cabang '",
+    "named": false
+  },
+  {
+    "type": "Attualmente stai eseguendo il rebase del branch '",
+    "named": false
+  },
+  {
+    "type": "Bạn hiện nay đang thực hiện việc “rebase” nhánh “",
+    "named": false
+  },
+  {
+    "type": "Bạn hiện đang thực hiện rebase (cải tổ) nhánh '",
+    "named": false
+  },
+  {
+    "type": "Cabang Anda di belakan '",
+    "named": false
+  },
+  {
+    "type": "Cabang Anda di belakang '",
+    "named": false
+  },
+  {
+    "type": "Cabang Anda mendahului '",
+    "named": false
+  },
+  {
+    "type": "Cabang Anda mutakhir dengan '",
+    "named": false
+  },
+  {
+    "type": "Dalınız '",
+    "named": false
+  },
+  {
+    "type": "Din gren ligger efter \"",
+    "named": false
+  },
+  {
+    "type": "Din gren ligger efter ”",
+    "named": false
+  },
+  {
+    "type": "Din gren ligger före \"",
+    "named": false
+  },
+  {
+    "type": "Din gren ligger före ”",
+    "named": false
+  },
+  {
+    "type": "Din gren är à jour med \"",
+    "named": false
+  },
+  {
+    "type": "Din gren är à jour med ”",
+    "named": false
+  },
+  {
+    "type": "Du håller på att ombasera grenen \"",
+    "named": false
+  },
+  {
+    "type": "Du håller på att ombasera grenen ”",
+    "named": false
+  },
+  {
+    "type": "Está a realizar rebase do ramo '",
+    "named": false
+  },
+  {
+    "type": "Estás aplicando un rebase de la rama '",
+    "named": false
+  },
+  {
+    "type": "Estás rebaseando ramo '",
+    "named": false
+  },
+  {
+    "type": "Ihr Branch ist ",
+    "named": false
+  },
+  {
+    "type": "Ihr Branch ist auf demselben Stand wie '",
+    "named": false
+  },
+  {
+    "type": "Il tuo branch è aggiornato rispetto a '",
+    "named": false
+  },
+  {
+    "type": "Il tuo branch è avanti rispetto a '",
+    "named": false
+  },
+  {
+    "type": "Il tuo branch, rispetto a '",
+    "named": false
+  },
+  {
+    "type": "La vostra branca està ",
+    "named": false
+  },
+  {
+    "type": "La vostra branca està al dia amb «",
+    "named": false
+  },
+  {
+    "type": "Nhánh của bạn đã cập nhật với '",
+    "named": false
+  },
+  {
+    "type": "Nhánh của bạn đã cập nhật với “",
+    "named": false
+  },
+  {
+    "type": "Nhánh của bạn đứng sau '",
+    "named": false
+  },
+  {
+    "type": "Nhánh của bạn đứng trước '",
+    "named": false
+  },
+  {
+    "type": "Nhánh của bạn đứng trước “",
+    "named": false
+  },
+  {
+    "type": "Nhánh của bạn đứng đằng sau “",
+    "named": false
+  },
+  {
+    "type": "O seu ramo está atrás de '",
+    "named": false
+  },
+  {
+    "type": "O seu ramo está atualizado com '",
+    "named": false
+  },
+  {
+    "type": "O seu ramo está à frente de '",
+    "named": false
+  },
+  {
+    "type": "Przestawiasz właśnie gałąź „",
+    "named": false
+  },
+  {
+    "type": "Sie sind gerade beim Rebase von Branch '",
+    "named": false
+  },
+  {
+    "type": "Teu ramo está atrás de '",
+    "named": false
+  },
+  {
+    "type": "Teu ramo está atualizado com '",
+    "named": false
+  },
+  {
+    "type": "Teu ramo está à frente de '",
+    "named": false
+  },
+  {
+    "type": "Tu rama está actualizada con '",
+    "named": false
+  },
+  {
+    "type": "Tu rama está adelantada a '",
+    "named": false
+  },
+  {
+    "type": "Tu rama está detrás de '",
+    "named": false
+  },
+  {
+    "type": "Twoja gałąź jest do przodu względem „",
+    "named": false
+  },
+  {
+    "type": "Twoja gałąź jest na bieżąco z „",
+    "named": false
+  },
+  {
+    "type": "Twoja gałąź jest za „",
+    "named": false
+  },
+  {
+    "type": "Typänderung:",
+    "named": false
+  },
+  {
+    "type": "Votre branche est en avance sur '",
+    "named": false
+  },
+  {
+    "type": "Votre branche est en retard sur '",
+    "named": false
+  },
+  {
+    "type": "Votre branche est à jour avec '",
+    "named": false
+  },
+  {
+    "type": "Vous êtes en train de rebaser la branche '",
+    "named": false
+  },
+  {
+    "type": "You are currently rebasing branch '",
+    "named": false
+  },
+  {
+    "type": "Your branch is ahead of '",
+    "named": false
+  },
+  {
+    "type": "Your branch is behind '",
+    "named": false
+  },
+  {
+    "type": "Your branch is up to date with '",
+    "named": false
+  },
+  {
+    "type": "annotation",
+    "named": true
+  },
+  {
+    "type": "arrow",
+    "named": true
+  },
+  {
+    "type": "berkas baru:",
+    "named": false
+  },
+  {
+    "type": "borrado:",
+    "named": false
+  },
+  {
+    "type": "borrados:",
+    "named": false
+  },
+  {
+    "type": "borttagen:",
+    "named": false
+  },
+  {
+    "type": "break",
+    "named": false
+  },
+  {
+    "type": "cambio de tipo:",
+    "named": false
+  },
+  {
+    "type": "cambios de tipo:",
+    "named": false
+  },
+  {
+    "type": "canviat de nom:",
+    "named": false
+  },
+  {
+    "type": "canviat de tipus:",
+    "named": false
+  },
+  {
+    "type": "deleted:",
+    "named": false
+  },
+  {
+    "type": "değiştirildi:",
+    "named": false
+  },
+  {
+    "type": "drop",
+    "named": false
+  },
+  {
+    "type": "edit",
+    "named": false
+  },
+  {
+    "type": "eliminado:",
+    "named": false
+  },
+  {
+    "type": "eliminato:",
+    "named": false
+  },
+  {
+    "type": "exec",
+    "named": false
+  },
+  {
+    "type": "filepath",
+    "named": true
+  },
+  {
+    "type": "fitxer nou:",
+    "named": false
+  },
+  {
+    "type": "fixup",
+    "named": false
+  },
+  {
+    "type": "gelöscht:",
+    "named": false
+  },
+  {
+    "type": "geändert:",
+    "named": false
+  },
+  {
+    "type": "interactive rebase in progress; onto ",
+    "named": false
+  },
+  {
+    "type": "interaktiv ombasering pågår; ovanpå ",
+    "named": false
+  },
+  {
+    "type": "interaktives Rebase im Gange; auf ",
+    "named": false
+  },
+  {
+    "type": "label",
+    "named": false
+  },
+  {
+    "type": "merge",
+    "named": false
+  },
+  {
+    "type": "modif. type :",
+    "named": false
+  },
+  {
+    "type": "modifica tipo:",
+    "named": false
+  },
+  {
+    "type": "modificado:",
+    "named": false
+  },
+  {
+    "type": "modificados:",
+    "named": false
+  },
+  {
+    "type": "modificat:",
+    "named": false
+  },
+  {
+    "type": "modificato:",
+    "named": false
+  },
+  {
+    "type": "modified:",
+    "named": false
+  },
+  {
+    "type": "modifié :",
+    "named": false
+  },
+  {
+    "type": "namnbytt:",
+    "named": false
+  },
+  {
+    "type": "neue Datei:",
+    "named": false
+  },
+  {
+    "type": "new file:",
+    "named": false
+  },
+  {
+    "type": "nome mudado:",
+    "named": false
+  },
+  {
+    "type": "nouveau fichier :",
+    "named": false
+  },
+  {
+    "type": "novo ficheiro:",
+    "named": false
+  },
+  {
+    "type": "nowy plik:",
+    "named": false
+  },
+  {
+    "type": "nuevo archivo:",
+    "named": false
+  },
+  {
+    "type": "nuevos archivos:",
+    "named": false
+  },
+  {
+    "type": "number",
+    "named": true
+  },
+  {
+    "type": "nuovo file:",
+    "named": false
+  },
+  {
+    "type": "ny fil:",
+    "named": false
+  },
+  {
+    "type": "pick",
+    "named": false
+  },
+  {
+    "type": "rebasage interactif en cours ; sur ",
+    "named": false
+  },
+  {
+    "type": "rebase có tương tác đang được thực hiện; lên trên ",
+    "named": false
+  },
+  {
+    "type": "rebase interactivo en progreso; en ",
+    "named": false
+  },
+  {
+    "type": "rebase interactivo en progreso; sobre ",
+    "named": false
+  },
+  {
+    "type": "rebase interativo em curso; sobre ",
+    "named": false
+  },
+  {
+    "type": "rebase interattivo in corso su ",
+    "named": false
+  },
+  {
+    "type": "rebase ở chế độ tương tác đang được thực hiện; lên trên ",
+    "named": false
+  },
+  {
+    "type": "renamed:",
+    "named": false
+  },
+  {
+    "type": "renombrado:",
+    "named": false
+  },
+  {
+    "type": "renombrados:",
+    "named": false
+  },
+  {
+    "type": "renomeado:",
+    "named": false
+  },
+  {
+    "type": "renommé :",
+    "named": false
+  },
+  {
+    "type": "reset",
+    "named": false
+  },
+  {
+    "type": "reword",
+    "named": false
+  },
+  {
+    "type": "rinominato:",
+    "named": false
+  },
+  {
+    "type": "scissor",
+    "named": true
+  },
+  {
+    "type": "scope",
+    "named": true
+  },
+  {
+    "type": "sedang mendasarkan ulang interaktif; ke ",
+    "named": false
+  },
+  {
+    "type": "silindi:",
+    "named": false
+  },
+  {
+    "type": "squash",
+    "named": false
+  },
+  {
+    "type": "subject_prefix",
+    "named": true
+  },
+  {
+    "type": "supprimé :",
+    "named": false
+  },
+  {
+    "type": "suprimit:",
+    "named": false
+  },
+  {
+    "type": "terganti nama:",
+    "named": false
+  },
+  {
+    "type": "terhapus:",
+    "named": false
+  },
+  {
+    "type": "terubah:",
+    "named": false
+  },
+  {
+    "type": "text",
+    "named": true
+  },
+  {
+    "type": "tipe perubahan:",
+    "named": false
+  },
+  {
+    "type": "tipo alterado:",
+    "named": false
+  },
+  {
+    "type": "title",
+    "named": true
+  },
+  {
+    "type": "token",
+    "named": true
+  },
+  {
+    "type": "trwa interaktywne przestawianie na ",
+    "named": false
+  },
+  {
+    "type": "typbyte:",
+    "named": false
+  },
+  {
+    "type": "type",
+    "named": true
+  },
+  {
+    "type": "typechange:",
+    "named": false
+  },
+  {
+    "type": "türü değiştirildi:",
+    "named": false
+  },
+  {
+    "type": "tập tin mới:",
+    "named": false
+  },
+  {
+    "type": "umbenannt:",
+    "named": false
+  },
+  {
+    "type": "usunięto:",
+    "named": false
+  },
+  {
+    "type": "value",
+    "named": true
+  },
+  {
+    "type": "yeni dosya:",
+    "named": false
+  },
+  {
+    "type": "yeniden adlandırıldı:",
+    "named": false
+  },
+  {
+    "type": "zmiana typu:",
+    "named": false
+  },
+  {
+    "type": "zmieniono nazwę:",
+    "named": false
+  },
+  {
+    "type": "zmieniono:",
+    "named": false
+  },
+  {
+    "type": "«rebase» interactiu en curs; sobre ",
+    "named": false
+  },
+  {
+    "type": "» en «",
+    "named": false
+  },
+  {
+    "type": "» на ",
+    "named": false
+  },
+  {
+    "type": "» над «",
+    "named": false
+  },
+  {
+    "type": "», i pot avançar-se ràpidament.",
+    "named": false
+  },
+  {
+    "type": "».",
+    "named": false
+  },
+  {
+    "type": "ändrad:",
+    "named": false
+  },
+  {
+    "type": "đã sửa:",
+    "named": false
+  },
+  {
+    "type": "đã xóa:",
+    "named": false
+  },
+  {
+    "type": "đã đổi tên:",
+    "named": false
+  },
+  {
+    "type": "đổi kiểu:",
+    "named": false
+  },
+  {
+    "type": "đổi-kiểu:",
+    "named": false
+  },
+  {
+    "type": "Şu anda '",
+    "named": false
+  },
+  {
+    "type": "şunun üzerine etkileşimli yeniden temellendirme sürmekte: ",
+    "named": false
+  },
+  {
+    "type": "Αυτή τη στιγμή κάνετε rebase τον κλάδο '",
+    "named": false
+  },
+  {
+    "type": "Ο κλάδος σας είναι ενήμερος με το '",
+    "named": false
+  },
+  {
+    "type": "Ο κλάδος σας είναι μπροστά από το '",
+    "named": false
+  },
+  {
+    "type": "Ο κλάδος σας είναι πίσω από το '",
+    "named": false
+  },
+  {
+    "type": "αλλαγή τύπου:",
+    "named": false
+  },
+  {
+    "type": "διαγραφή:",
+    "named": false
+  },
+  {
+    "type": "εκτελείται διαδραστικό rebase, πάνω στο ",
+    "named": false
+  },
+  {
+    "type": "μετονομασία:",
+    "named": false
+  },
+  {
+    "type": "νέο αρχείο:",
+    "named": false
+  },
+  {
+    "type": "τροποποίηση:",
+    "named": false
+  },
+  {
+    "type": "В момента пребазирате клона „",
+    "named": false
+  },
+  {
+    "type": "Ваша ветка обновлена в соответствии с «",
+    "named": false
+  },
+  {
+    "type": "Ваша ветка опережает «",
+    "named": false
+  },
+  {
+    "type": "Ваша ветка отстает от «",
+    "named": false
+  },
+  {
+    "type": "Ваша гілка випереджає \"",
+    "named": false
+  },
+  {
+    "type": "Ваша гілка випереджає '",
+    "named": false
+  },
+  {
+    "type": "Ваша гілка відстає від \"",
+    "named": false
+  },
+  {
+    "type": "Ваша гілка відстає від гілки '",
+    "named": false
+  },
+  {
+    "type": "Ваша гілка не відрізняється від \"",
+    "named": false
+  },
+  {
+    "type": "Ваша гілка не відрізняється від '",
+    "named": false
+  },
+  {
+    "type": "Ветка отстает от «",
+    "named": false
+  },
+  {
+    "type": "Вы сейчас перемещаете ветку «",
+    "named": false
+  },
+  {
+    "type": "Клонът ви е с ",
+    "named": false
+  },
+  {
+    "type": "Клонът е обновен към „",
+    "named": false
+  },
+  {
+    "type": "Наразі ви перебазовуєте гілку \"",
+    "named": false
+  },
+  {
+    "type": "Наразі ви перебазовуєте гілку '",
+    "named": false
+  },
+  {
+    "type": "Эта ветка соответствует «",
+    "named": false
+  },
+  {
+    "type": "видалено:",
+    "named": false
+  },
+  {
+    "type": "змінено тип:",
+    "named": false
+  },
+  {
+    "type": "змінено:",
+    "named": false
+  },
+  {
+    "type": "извършвате интерактивно пребазиране върху ",
+    "named": false
+  },
+  {
+    "type": "изменен тип:",
+    "named": false
+  },
+  {
+    "type": "изменено:",
+    "named": false
+  },
+  {
+    "type": "изтрит:",
+    "named": false
+  },
+  {
+    "type": "интерактивное перемещение в процессе; над ",
+    "named": false
+  },
+  {
+    "type": "нов файл:",
+    "named": false
+  },
+  {
+    "type": "новий файл:",
+    "named": false
+  },
+  {
+    "type": "новый файл:",
+    "named": false
+  },
+  {
+    "type": "переименовано:",
+    "named": false
+  },
+  {
+    "type": "перейменовано:",
+    "named": false
+  },
+  {
+    "type": "преименуван:",
+    "named": false
+  },
+  {
+    "type": "променен:",
+    "named": false
+  },
+  {
+    "type": "смяна на вида:",
+    "named": false
+  },
+  {
+    "type": "триває інтерактивне перебазування на ",
+    "named": false
+  },
+  {
+    "type": "удалено:",
+    "named": false
+  },
+  {
+    "type": "інтерактивне перебазовування в процесі; на ",
+    "named": false
+  },
+  {
+    "type": "“ върху „",
+    "named": false
+  },
+  {
+    "type": "“ и може да бъде превъртян.",
+    "named": false
+  },
+  {
+    "type": "“.",
+    "named": false
+  },
+  {
+    "type": "” ",
+    "named": false
+  },
+  {
+    "type": "” med ",
+    "named": false
+  },
+  {
+    "type": "” na „",
+    "named": false
+  },
+  {
+    "type": "” o ",
+    "named": false
+  },
+  {
+    "type": "” ovanpå ”",
+    "named": false
+  },
+  {
+    "type": "” trên “",
+    "named": false
+  },
+  {
+    "type": "”.",
+    "named": false
+  },
+  {
+    "type": "互動式重定基底動作正在進行中；至 ",
+    "named": false
+  },
+  {
+    "type": "交互式变基操作正在进行中；至 ",
+    "named": false
+  },
+  {
+    "type": "修改：",
+    "named": false
+  },
+  {
+    "type": "删除：",
+    "named": false
+  },
+  {
+    "type": "刪除：",
+    "named": false
+  },
+  {
+    "type": "您在執行將分支 '",
+    "named": false
+  },
+  {
+    "type": "您在执行将分支 '",
+    "named": false
+  },
+  {
+    "type": "您的分支与上游分支 '",
+    "named": false
+  },
+  {
+    "type": "您的分支與上游分支 '",
+    "named": false
+  },
+  {
+    "type": "您的分支落后 '",
+    "named": false
+  },
+  {
+    "type": "您的分支落後 '",
+    "named": false
+  },
+  {
+    "type": "您的分支領先 '",
+    "named": false
+  },
+  {
+    "type": "您的分支领先 '",
+    "named": false
+  },
+  {
+    "type": "新文件：",
+    "named": false
+  },
+  {
+    "type": "新檔案：",
+    "named": false
+  },
+  {
+    "type": "类型变更：",
+    "named": false
+  },
+  {
+    "type": "重命名：",
+    "named": false
+  },
+  {
+    "type": "重新命名：",
+    "named": false
+  },
+  {
+    "type": "類型變更：",
+    "named": false
+  },
+  {
+    "type": "개 커밋 뒤에 있고, 앞으로 돌릴 수 있습니다.",
+    "named": false
+  },
+  {
+    "type": "개 커밋만큼 앞에 있습니다.",
+    "named": false
+  },
+  {
+    "type": "대화형 리베이스 진행 중. 갈 위치는 ",
+    "named": false
+  },
+  {
+    "type": "브랜치가 '",
+    "named": false
+  },
+  {
+    "type": "삭제함:",
+    "named": false
+  },
+  {
+    "type": "새 파일:",
+    "named": false
+  },
+  {
+    "type": "수정함:",
+    "named": false
+  },
+  {
+    "type": "이름 바꿈:",
+    "named": false
+  },
+  {
+    "type": "종류 바뀜:",
+    "named": false
+  },
+  {
+    "type": "현재 '",
+    "named": false
+  }
+]

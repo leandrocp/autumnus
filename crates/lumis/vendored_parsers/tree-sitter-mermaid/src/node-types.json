@@ -1,0 +1,3296 @@
+[
+  {
+    "type": "_class_linetype",
+    "named": true,
+    "subtypes": [
+      {
+        "type": "class_linetype_dotted",
+        "named": true
+      },
+      {
+        "type": "class_linetype_solid",
+        "named": true
+      }
+    ]
+  },
+  {
+    "type": "_class_reltype",
+    "named": true,
+    "subtypes": [
+      {
+        "type": "class_reltype_aggregation",
+        "named": true
+      },
+      {
+        "type": "class_reltype_composition",
+        "named": true
+      },
+      {
+        "type": "class_reltype_dependency",
+        "named": true
+      },
+      {
+        "type": "class_reltype_extension",
+        "named": true
+      }
+    ]
+  },
+  {
+    "type": "_class_stmt",
+    "named": true,
+    "subtypes": [
+      {
+        "type": "class_stmt_annotation",
+        "named": true
+      },
+      {
+        "type": "class_stmt_class",
+        "named": true
+      },
+      {
+        "type": "class_stmt_method",
+        "named": true
+      },
+      {
+        "type": "class_stmt_relation",
+        "named": true
+      }
+    ]
+  },
+  {
+    "type": "_direction",
+    "named": true,
+    "subtypes": [
+      {
+        "type": "direction_bt",
+        "named": true
+      },
+      {
+        "type": "direction_lr",
+        "named": true
+      },
+      {
+        "type": "direction_rl",
+        "named": true
+      },
+      {
+        "type": "direction_tb",
+        "named": true
+      }
+    ]
+  },
+  {
+    "type": "_er_attribute_key_type",
+    "named": true,
+    "subtypes": [
+      {
+        "type": "er_attribute_key_type_fk",
+        "named": true
+      },
+      {
+        "type": "er_attribute_key_type_pk",
+        "named": true
+      }
+    ]
+  },
+  {
+    "type": "_er_cardinarity",
+    "named": true,
+    "subtypes": [
+      {
+        "type": "er_cardinarity_one_or_more",
+        "named": true
+      },
+      {
+        "type": "er_cardinarity_only_one",
+        "named": true
+      },
+      {
+        "type": "er_cardinarity_zero_or_more",
+        "named": true
+      },
+      {
+        "type": "er_cardinarity_zero_or_one",
+        "named": true
+      }
+    ]
+  },
+  {
+    "type": "_er_reltype",
+    "named": true,
+    "subtypes": [
+      {
+        "type": "er_reltype_identifying",
+        "named": true
+      },
+      {
+        "type": "er_reltype_non_identifying",
+        "named": true
+      }
+    ]
+  },
+  {
+    "type": "_er_stmt",
+    "named": true,
+    "subtypes": [
+      {
+        "type": "er_stmt_entity",
+        "named": true
+      },
+      {
+        "type": "er_stmt_entity_block",
+        "named": true
+      },
+      {
+        "type": "er_stmt_entity_relation",
+        "named": true
+      }
+    ]
+  },
+  {
+    "type": "_flow_link",
+    "named": true,
+    "subtypes": [
+      {
+        "type": "flow_link_arrowtext",
+        "named": true
+      },
+      {
+        "type": "flow_link_middletext",
+        "named": true
+      },
+      {
+        "type": "flow_link_simplelink",
+        "named": true
+      }
+    ]
+  },
+  {
+    "type": "_flow_stmt",
+    "named": true,
+    "subtypes": [
+      {
+        "type": "flow_stmt_direction",
+        "named": true
+      },
+      {
+        "type": "flow_stmt_subgraph",
+        "named": true
+      },
+      {
+        "type": "flow_stmt_vertice",
+        "named": true
+      }
+    ]
+  },
+  {
+    "type": "_flow_vertex_kind",
+    "named": true,
+    "subtypes": [
+      {
+        "type": "flow_vertex_circle",
+        "named": true
+      },
+      {
+        "type": "flow_vertex_cylinder",
+        "named": true
+      },
+      {
+        "type": "flow_vertex_diamond",
+        "named": true
+      },
+      {
+        "type": "flow_vertex_ellipse",
+        "named": true
+      },
+      {
+        "type": "flow_vertex_hexagon",
+        "named": true
+      },
+      {
+        "type": "flow_vertex_inv_trapezoid",
+        "named": true
+      },
+      {
+        "type": "flow_vertex_leanleft",
+        "named": true
+      },
+      {
+        "type": "flow_vertex_leanright",
+        "named": true
+      },
+      {
+        "type": "flow_vertex_odd",
+        "named": true
+      },
+      {
+        "type": "flow_vertex_rect",
+        "named": true
+      },
+      {
+        "type": "flow_vertex_round",
+        "named": true
+      },
+      {
+        "type": "flow_vertex_square",
+        "named": true
+      },
+      {
+        "type": "flow_vertex_stadium",
+        "named": true
+      },
+      {
+        "type": "flow_vertex_subroutine",
+        "named": true
+      },
+      {
+        "type": "flow_vertex_trapezoid",
+        "named": true
+      }
+    ]
+  },
+  {
+    "type": "_flowchart_direction",
+    "named": true,
+    "subtypes": [
+      {
+        "type": "flowchart_direction_bt",
+        "named": true
+      },
+      {
+        "type": "flowchart_direction_lr",
+        "named": true
+      },
+      {
+        "type": "flowchart_direction_rl",
+        "named": true
+      },
+      {
+        "type": "flowchart_direction_tb",
+        "named": true
+      }
+    ]
+  },
+  {
+    "type": "_gantt_stmt",
+    "named": true,
+    "subtypes": [
+      {
+        "type": "gantt_stmt_axisformat",
+        "named": true
+      },
+      {
+        "type": "gantt_stmt_dateformat",
+        "named": true
+      },
+      {
+        "type": "gantt_stmt_excludes",
+        "named": true
+      },
+      {
+        "type": "gantt_stmt_includes",
+        "named": true
+      },
+      {
+        "type": "gantt_stmt_inclusiveenddates",
+        "named": true
+      },
+      {
+        "type": "gantt_stmt_section",
+        "named": true
+      },
+      {
+        "type": "gantt_stmt_task",
+        "named": true
+      },
+      {
+        "type": "gantt_stmt_title",
+        "named": true
+      },
+      {
+        "type": "gantt_stmt_todaymarker",
+        "named": true
+      },
+      {
+        "type": "gantt_stmt_topaxis",
+        "named": true
+      }
+    ]
+  },
+  {
+    "type": "_pie_stmt",
+    "named": true,
+    "subtypes": [
+      {
+        "type": "pie_stmt_element",
+        "named": true
+      },
+      {
+        "type": "pie_stmt_title",
+        "named": true
+      }
+    ]
+  },
+  {
+    "type": "_sequence_stmt",
+    "named": true,
+    "subtypes": [
+      {
+        "type": "sequence_stmt_activate",
+        "named": true
+      },
+      {
+        "type": "sequence_stmt_actor",
+        "named": true
+      },
+      {
+        "type": "sequence_stmt_alt",
+        "named": true
+      },
+      {
+        "type": "sequence_stmt_autonumber",
+        "named": true
+      },
+      {
+        "type": "sequence_stmt_deactivate",
+        "named": true
+      },
+      {
+        "type": "sequence_stmt_details",
+        "named": true
+      },
+      {
+        "type": "sequence_stmt_link",
+        "named": true
+      },
+      {
+        "type": "sequence_stmt_links",
+        "named": true
+      },
+      {
+        "type": "sequence_stmt_loop",
+        "named": true
+      },
+      {
+        "type": "sequence_stmt_note",
+        "named": true
+      },
+      {
+        "type": "sequence_stmt_opt",
+        "named": true
+      },
+      {
+        "type": "sequence_stmt_par",
+        "named": true
+      },
+      {
+        "type": "sequence_stmt_participant",
+        "named": true
+      },
+      {
+        "type": "sequence_stmt_properties",
+        "named": true
+      },
+      {
+        "type": "sequence_stmt_rect",
+        "named": true
+      },
+      {
+        "type": "sequence_stmt_signal",
+        "named": true
+      },
+      {
+        "type": "sequence_stmt_title",
+        "named": true
+      }
+    ]
+  },
+  {
+    "type": "_state_annotation",
+    "named": true,
+    "subtypes": [
+      {
+        "type": "state_annotation_choice",
+        "named": true
+      },
+      {
+        "type": "state_annotation_fork",
+        "named": true
+      },
+      {
+        "type": "state_annotation_join",
+        "named": true
+      }
+    ]
+  },
+  {
+    "type": "_state_stmt",
+    "named": true,
+    "subtypes": [
+      {
+        "type": "_direction",
+        "named": true
+      },
+      {
+        "type": "state_division",
+        "named": true
+      },
+      {
+        "type": "state_note",
+        "named": true
+      },
+      {
+        "type": "state_stmt_annotation",
+        "named": true
+      },
+      {
+        "type": "state_stmt_arrow",
+        "named": true
+      },
+      {
+        "type": "state_stmt_composite",
+        "named": true
+      },
+      {
+        "type": "state_stmt_hide_empty_description",
+        "named": true
+      },
+      {
+        "type": "state_stmt_simple",
+        "named": true
+      }
+    ]
+  },
+  {
+    "type": "class_annotation_line",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "annotation",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "class_generics",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "class_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "class_label",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "class_linetype_dotted",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "class_linetype_solid",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "class_method_line",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "class_classifier_abstract",
+          "named": true
+        },
+        {
+          "type": "class_classifier_static",
+          "named": true
+        },
+        {
+          "type": "class_visibility_internal",
+          "named": true
+        },
+        {
+          "type": "class_visibility_private",
+          "named": true
+        },
+        {
+          "type": "class_visibility_protected",
+          "named": true
+        },
+        {
+          "type": "class_visibility_public",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "class_name",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "class_generics",
+          "named": true
+        },
+        {
+          "type": "class_name_body",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "class_name_body",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "class_relation",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "_class_linetype",
+          "named": true
+        },
+        {
+          "type": "_class_reltype",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "class_reltype_composition",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "class_reltype_dependency",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "class_reltype_extension",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "class_stmt_annotation",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "annotation",
+          "named": true
+        },
+        {
+          "type": "class_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "class_stmt_class",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "class_annotation_line",
+          "named": true
+        },
+        {
+          "type": "class_method_line",
+          "named": true
+        },
+        {
+          "type": "class_name",
+          "named": true
+        },
+        {
+          "type": "class_style_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "class_stmt_method",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "class_method_line",
+          "named": true
+        },
+        {
+          "type": "class_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "class_stmt_relation",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "cardinality",
+          "named": true
+        },
+        {
+          "type": "class_label",
+          "named": true
+        },
+        {
+          "type": "class_name",
+          "named": true
+        },
+        {
+          "type": "class_relation",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "diagram_class",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "_class_stmt",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "diagram_er",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "_er_stmt",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "diagram_flow",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "_flow_stmt",
+          "named": true
+        },
+        {
+          "type": "_flowchart_direction",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "diagram_gantt",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "_gantt_stmt",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "diagram_mindmap",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "mmap_node",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "diagram_pie",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "_pie_stmt",
+          "named": true
+        },
+        {
+          "type": "pie_showdata",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "diagram_sequence",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "_sequence_stmt",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "diagram_state",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "_state_stmt",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "direction_bt",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "direction_lr",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "direction_rl",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "direction_tb",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "arg_directive",
+          "named": true
+        },
+        {
+          "type": "type_directive",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "dotted_open_arrow",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "er_attribute",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "_er_attribute_key_type",
+          "named": true
+        },
+        {
+          "type": "er_attribute_comment",
+          "named": true
+        },
+        {
+          "type": "er_attribute_name",
+          "named": true
+        },
+        {
+          "type": "er_attribute_type",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "er_attribute_comment",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "er_attribute_key_type_fk",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "er_attribute_key_type_pk",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "er_attribute_name",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "er_attribute_type",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "er_cardinarity_one_or_more",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "er_cardinarity_zero_or_more",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "er_cardinarity_zero_or_one",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "er_entity_name",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "er_relation",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "_er_cardinarity",
+          "named": true
+        },
+        {
+          "type": "_er_reltype",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "er_reltype_identifying",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "er_reltype_non_identifying",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "er_role",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "er_stmt_entity",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "er_entity_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "er_stmt_entity_block",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "er_entity_name",
+          "named": true
+        },
+        {
+          "type": "er_stmt_entity_block_inner",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "er_stmt_entity_block_inner",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "er_attribute",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "er_stmt_entity_relation",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "er_entity_name",
+          "named": true
+        },
+        {
+          "type": "er_relation",
+          "named": true
+        },
+        {
+          "type": "er_role",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "flow_arrow_text",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "flow_link_arrow",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "flow_link_arrow_start",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "flow_link_arrowtext",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "flow_arrow_text",
+          "named": true
+        },
+        {
+          "type": "flow_link_arrow",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "flow_link_middletext",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "flow_arrow_text",
+          "named": true
+        },
+        {
+          "type": "flow_link_arrow",
+          "named": true
+        },
+        {
+          "type": "flow_link_arrow_start",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "flow_link_simplelink",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flow_link_arrow",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "flow_node",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "flow_vertex",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "flow_stmt_direction",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "_flowchart_direction",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "flow_stmt_subgraph",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "flow_stmt_subgraph_inner",
+          "named": true
+        },
+        {
+          "type": "flow_vertex_id",
+          "named": true
+        },
+        {
+          "type": "flow_vertex_text",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "flow_stmt_subgraph_inner",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "_flow_stmt",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "flow_stmt_vertice",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "_flow_link",
+          "named": true
+        },
+        {
+          "type": "flow_node",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "flow_text_literal",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "flow_vertex",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "_flow_vertex_kind",
+          "named": true
+        },
+        {
+          "type": "flow_vertex_id",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "flow_vertex_circle",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flow_text_literal",
+          "named": true
+        },
+        {
+          "type": "flow_text_quoted",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "flow_vertex_cylinder",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flow_text_literal",
+          "named": true
+        },
+        {
+          "type": "flow_text_quoted",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "flow_vertex_diamond",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flow_text_literal",
+          "named": true
+        },
+        {
+          "type": "flow_text_quoted",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "flow_vertex_ellipse",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flow_text_literal",
+          "named": true
+        },
+        {
+          "type": "flow_text_quoted",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "flow_vertex_hexagon",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flow_text_literal",
+          "named": true
+        },
+        {
+          "type": "flow_text_quoted",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "flow_vertex_id",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "flow_vertex_inv_trapezoid",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flow_text_literal",
+          "named": true
+        },
+        {
+          "type": "flow_text_quoted",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "flow_vertex_leanleft",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flow_text_literal",
+          "named": true
+        },
+        {
+          "type": "flow_text_quoted",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "flow_vertex_leanright",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flow_text_literal",
+          "named": true
+        },
+        {
+          "type": "flow_text_quoted",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "flow_vertex_odd",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flow_text_literal",
+          "named": true
+        },
+        {
+          "type": "flow_text_quoted",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "flow_vertex_rect",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flow_text_literal",
+          "named": true
+        },
+        {
+          "type": "flow_text_quoted",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "flow_vertex_round",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flow_text_literal",
+          "named": true
+        },
+        {
+          "type": "flow_text_quoted",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "flow_vertex_square",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flow_text_literal",
+          "named": true
+        },
+        {
+          "type": "flow_text_quoted",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "flow_vertex_stadium",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flow_text_literal",
+          "named": true
+        },
+        {
+          "type": "flow_text_quoted",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "flow_vertex_subroutine",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flow_text_literal",
+          "named": true
+        },
+        {
+          "type": "flow_text_quoted",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "flow_vertex_text",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "flow_vertex_trapezoid",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flow_text_literal",
+          "named": true
+        },
+        {
+          "type": "flow_text_quoted",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "flowchart_direction_bt",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "flowchart_direction_lr",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "flowchart_direction_rl",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "flowchart_direction_tb",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "gantt_axis_format",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "gantt_date_format",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "gantt_end_dates",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "gantt_excludes",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "gantt_includes",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "gantt_section",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "gantt_stmt_axisformat",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "gantt_axis_format",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "gantt_stmt_dateformat",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "gantt_date_format",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "gantt_stmt_excludes",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "gantt_excludes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "gantt_stmt_includes",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "gantt_includes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "gantt_stmt_inclusiveenddates",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "gantt_end_dates",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "gantt_stmt_section",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "gantt_section",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "gantt_stmt_task",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "gantt_task_data",
+          "named": true
+        },
+        {
+          "type": "gantt_task_text",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "gantt_stmt_title",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "gantt_title",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "gantt_stmt_todaymarker",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "gantt_today_marker",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "gantt_stmt_topaxis",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "gantt_top_axis",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "gantt_task_text",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "gantt_title",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "gantt_today_marker",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "gantt_top_axis",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "mmap_class",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "mmap_icon",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "mmap_markdown",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "md_text",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "mmap_node",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "mmap_class",
+          "named": true
+        },
+        {
+          "type": "mmap_icon",
+          "named": true
+        },
+        {
+          "type": "mmap_node_bang",
+          "named": true
+        },
+        {
+          "type": "mmap_node_circle",
+          "named": true
+        },
+        {
+          "type": "mmap_node_cloud",
+          "named": true
+        },
+        {
+          "type": "mmap_node_hexagon",
+          "named": true
+        },
+        {
+          "type": "mmap_node_id",
+          "named": true
+        },
+        {
+          "type": "mmap_node_rounded",
+          "named": true
+        },
+        {
+          "type": "mmap_node_square",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "mmap_node_bang",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "mmap_node_content",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "mmap_node_circle",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "mmap_node_content",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "mmap_node_cloud",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "mmap_node_content",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "mmap_node_content",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "mmap_markdown",
+          "named": true
+        },
+        {
+          "type": "mmap_text",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "mmap_node_hexagon",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "mmap_node_content",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "mmap_node_id",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "mmap_node_rounded",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "mmap_node_content",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "mmap_node_square",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "mmap_node_content",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "mmap_text",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "note_content",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "note_placement_left",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "note_placement_right",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "pie_label",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "pie_showdata",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "pie_stmt_element",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "pie_label",
+          "named": true
+        },
+        {
+          "type": "pie_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "pie_stmt_title",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "pie_title",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "sequence_actor",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "sequence_alias",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "sequence_note_placement",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "note_placement_left",
+          "named": true
+        },
+        {
+          "type": "note_placement_right",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "sequence_signal_minus_sign",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "sequence_signal_plus_sign",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "sequence_signal_type",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "dotted_arrow",
+          "named": true
+        },
+        {
+          "type": "dotted_cross",
+          "named": true
+        },
+        {
+          "type": "dotted_open_arrow",
+          "named": true
+        },
+        {
+          "type": "dotted_point",
+          "named": true
+        },
+        {
+          "type": "solid_arrow",
+          "named": true
+        },
+        {
+          "type": "solid_cross",
+          "named": true
+        },
+        {
+          "type": "solid_open_arrow",
+          "named": true
+        },
+        {
+          "type": "solid_point",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "sequence_stmt_activate",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "sequence_actor",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "sequence_stmt_actor",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "sequence_actor",
+          "named": true
+        },
+        {
+          "type": "sequence_alias",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "sequence_stmt_alt",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "sequence_stmt_alt_branch",
+          "named": true
+        },
+        {
+          "type": "sequence_text",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "sequence_stmt_alt_branch",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "_sequence_stmt",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "sequence_stmt_autonumber",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "sequence_stmt_deactivate",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "sequence_actor",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "sequence_stmt_details",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "sequence_actor",
+          "named": true
+        },
+        {
+          "type": "sequence_text",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "sequence_stmt_link",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "sequence_actor",
+          "named": true
+        },
+        {
+          "type": "sequence_text",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "sequence_stmt_links",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "sequence_actor",
+          "named": true
+        },
+        {
+          "type": "sequence_text",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "sequence_stmt_loop",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "sequence_stmt_loop_inner",
+          "named": true
+        },
+        {
+          "type": "sequence_text",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "sequence_stmt_loop_inner",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "_sequence_stmt",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "sequence_stmt_note",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "sequence_actor",
+          "named": true
+        },
+        {
+          "type": "sequence_note_placement",
+          "named": true
+        },
+        {
+          "type": "sequence_text",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "sequence_stmt_opt",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "sequence_stmt_opt_inner",
+          "named": true
+        },
+        {
+          "type": "sequence_text",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "sequence_stmt_opt_inner",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "_sequence_stmt",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "sequence_stmt_par",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "sequence_stmt_alt_branch",
+          "named": true
+        },
+        {
+          "type": "sequence_text",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "sequence_stmt_participant",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "sequence_actor",
+          "named": true
+        },
+        {
+          "type": "sequence_alias",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "sequence_stmt_properties",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "sequence_actor",
+          "named": true
+        },
+        {
+          "type": "sequence_text",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "sequence_stmt_rect",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "sequence_stmt_rect_inner",
+          "named": true
+        },
+        {
+          "type": "sequence_text",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "sequence_stmt_rect_inner",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "_sequence_stmt",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "sequence_stmt_signal",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "sequence_actor",
+          "named": true
+        },
+        {
+          "type": "sequence_signal_minus_sign",
+          "named": true
+        },
+        {
+          "type": "sequence_signal_plus_sign",
+          "named": true
+        },
+        {
+          "type": "sequence_signal_type",
+          "named": true
+        },
+        {
+          "type": "sequence_text",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "sequence_stmt_title",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "title",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "sequence_text",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "solid_point",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "source_file",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "diagram_class",
+          "named": true
+        },
+        {
+          "type": "diagram_er",
+          "named": true
+        },
+        {
+          "type": "diagram_flow",
+          "named": true
+        },
+        {
+          "type": "diagram_gantt",
+          "named": true
+        },
+        {
+          "type": "diagram_mindmap",
+          "named": true
+        },
+        {
+          "type": "diagram_pie",
+          "named": true
+        },
+        {
+          "type": "diagram_sequence",
+          "named": true
+        },
+        {
+          "type": "diagram_state",
+          "named": true
+        },
+        {
+          "type": "directive",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "state_alias",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "state_description",
+          "named": true
+        },
+        {
+          "type": "state_id",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "state_annotation_choice",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "state_annotation_fork",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "state_annotation_join",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "state_arrow",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "state_composite_body",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "_state_stmt",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "state_description",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "state_division",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "state_hide_empty_description",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "state_name",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "state_note",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "note_content",
+          "named": true
+        },
+        {
+          "type": "state_name",
+          "named": true
+        },
+        {
+          "type": "state_note_placement",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "state_note_placement",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "note_placement_left",
+          "named": true
+        },
+        {
+          "type": "note_placement_right",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "state_stmt_annotation",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "_state_annotation",
+          "named": true
+        },
+        {
+          "type": "state_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "state_stmt_arrow",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "state_arrow",
+          "named": true
+        },
+        {
+          "type": "state_description",
+          "named": true
+        },
+        {
+          "type": "state_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "state_stmt_composite",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "state_alias",
+          "named": true
+        },
+        {
+          "type": "state_composite_body",
+          "named": true
+        },
+        {
+          "type": "state_id",
+          "named": true
+        },
+        {
+          "type": "state_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "state_stmt_hide_empty_description",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "state_hide_empty_description",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "state_stmt_simple",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "state_alias",
+          "named": true
+        },
+        {
+          "type": "state_description",
+          "named": true
+        },
+        {
+          "type": "state_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "title",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "%%{",
+    "named": false
+  },
+  {
+    "type": "&",
+    "named": false
+  },
+  {
+    "type": "(",
+    "named": false
+  },
+  {
+    "type": "((",
+    "named": false
+  },
+  {
+    "type": "(-",
+    "named": false
+  },
+  {
+    "type": "([",
+    "named": false
+  },
+  {
+    "type": ")",
+    "named": false
+  },
+  {
+    "type": "))",
+    "named": false
+  },
+  {
+    "type": ")]",
+    "named": false
+  },
+  {
+    "type": "*",
+    "named": false
+  },
+  {
+    "type": "+",
+    "named": false
+  },
+  {
+    "type": ",",
+    "named": false
+  },
+  {
+    "type": "-",
+    "named": false
+  },
+  {
+    "type": "-)",
+    "named": false
+  },
+  {
+    "type": "--",
+    "named": false
+  },
+  {
+    "type": "-->",
+    "named": false
+  },
+  {
+    "type": "-.",
+    "named": false
+  },
+  {
+    "type": ".-",
+    "named": false
+  },
+  {
+    "type": "..",
+    "named": false
+  },
+  {
+    "type": "/]",
+    "named": false
+  },
+  {
+    "type": ":",
+    "named": false
+  },
+  {
+    "type": ":::",
+    "named": false
+  },
+  {
+    "type": ";",
+    "named": false
+  },
+  {
+    "type": "<",
+    "named": false
+  },
+  {
+    "type": "<<",
+    "named": false
+  },
+  {
+    "type": "<|",
+    "named": false
+  },
+  {
+    "type": ">",
+    "named": false
+  },
+  {
+    "type": ">>",
+    "named": false
+  },
+  {
+    "type": "[",
+    "named": false
+  },
+  {
+    "type": "[(",
+    "named": false
+  },
+  {
+    "type": "[*]",
+    "named": false
+  },
+  {
+    "type": "[/",
+    "named": false
+  },
+  {
+    "type": "[[",
+    "named": false
+  },
+  {
+    "type": "[\\",
+    "named": false
+  },
+  {
+    "type": "[|",
+    "named": false
+  },
+  {
+    "type": "\\]",
+    "named": false
+  },
+  {
+    "type": "]",
+    "named": false
+  },
+  {
+    "type": "])",
+    "named": false
+  },
+  {
+    "type": "]]",
+    "named": false
+  },
+  {
+    "type": "^",
+    "named": false
+  },
+  {
+    "type": "activate",
+    "named": false
+  },
+  {
+    "type": "actor",
+    "named": false
+  },
+  {
+    "type": "alt",
+    "named": false
+  },
+  {
+    "type": "and",
+    "named": false
+  },
+  {
+    "type": "annotation",
+    "named": true
+  },
+  {
+    "type": "arg_directive",
+    "named": true
+  },
+  {
+    "type": "as",
+    "named": false
+  },
+  {
+    "type": "autonumber",
+    "named": false
+  },
+  {
+    "type": "axisformat",
+    "named": false
+  },
+  {
+    "type": "br",
+    "named": false
+  },
+  {
+    "type": "bt",
+    "named": false
+  },
+  {
+    "type": "cardinality",
+    "named": true
+  },
+  {
+    "type": "class",
+    "named": false
+  },
+  {
+    "type": "classDiagram",
+    "named": false
+  },
+  {
+    "type": "classDiagram-v2",
+    "named": false
+  },
+  {
+    "type": "class_classifier_abstract",
+    "named": true
+  },
+  {
+    "type": "class_classifier_static",
+    "named": true
+  },
+  {
+    "type": "class_reltype_aggregation",
+    "named": true
+  },
+  {
+    "type": "class_style_name",
+    "named": true
+  },
+  {
+    "type": "class_visibility_internal",
+    "named": true
+  },
+  {
+    "type": "class_visibility_private",
+    "named": true
+  },
+  {
+    "type": "class_visibility_protected",
+    "named": true
+  },
+  {
+    "type": "class_visibility_public",
+    "named": true
+  },
+  {
+    "type": "comment",
+    "named": true
+  },
+  {
+    "type": "dateformat",
+    "named": false
+  },
+  {
+    "type": "deactivate",
+    "named": false
+  },
+  {
+    "type": "details",
+    "named": false
+  },
+  {
+    "type": "direction",
+    "named": false
+  },
+  {
+    "type": "direction bt",
+    "named": false
+  },
+  {
+    "type": "direction lr",
+    "named": false
+  },
+  {
+    "type": "direction rl",
+    "named": false
+  },
+  {
+    "type": "direction tb",
+    "named": false
+  },
+  {
+    "type": "dotted_arrow",
+    "named": true
+  },
+  {
+    "type": "dotted_cross",
+    "named": true
+  },
+  {
+    "type": "dotted_point",
+    "named": true
+  },
+  {
+    "type": "else",
+    "named": false
+  },
+  {
+    "type": "end",
+    "named": false
+  },
+  {
+    "type": "er_cardinarity_only_one",
+    "named": true
+  },
+  {
+    "type": "erdiagram",
+    "named": false
+  },
+  {
+    "type": "excludes",
+    "named": false
+  },
+  {
+    "type": "fk",
+    "named": false
+  },
+  {
+    "type": "flow_text_quoted",
+    "named": true
+  },
+  {
+    "type": "flowchart",
+    "named": false
+  },
+  {
+    "type": "gantt",
+    "named": false
+  },
+  {
+    "type": "gantt_task_data",
+    "named": true
+  },
+  {
+    "type": "hide empty description",
+    "named": false
+  },
+  {
+    "type": "includes",
+    "named": false
+  },
+  {
+    "type": "inclusiveenddates",
+    "named": false
+  },
+  {
+    "type": "left of",
+    "named": false
+  },
+  {
+    "type": "link",
+    "named": false
+  },
+  {
+    "type": "links",
+    "named": false
+  },
+  {
+    "type": "loop",
+    "named": false
+  },
+  {
+    "type": "lr",
+    "named": false
+  },
+  {
+    "type": "md_text",
+    "named": true
+  },
+  {
+    "type": "note ",
+    "named": false
+  },
+  {
+    "type": "opt",
+    "named": false
+  },
+  {
+    "type": "over",
+    "named": false
+  },
+  {
+    "type": "o{",
+    "named": false
+  },
+  {
+    "type": "o|",
+    "named": false
+  },
+  {
+    "type": "par",
+    "named": false
+  },
+  {
+    "type": "participant",
+    "named": false
+  },
+  {
+    "type": "pie",
+    "named": false
+  },
+  {
+    "type": "pie_title",
+    "named": true
+  },
+  {
+    "type": "pie_value",
+    "named": true
+  },
+  {
+    "type": "pk",
+    "named": false
+  },
+  {
+    "type": "properties",
+    "named": false
+  },
+  {
+    "type": "rect",
+    "named": false
+  },
+  {
+    "type": "right of",
+    "named": false
+  },
+  {
+    "type": "rl",
+    "named": false
+  },
+  {
+    "type": "section",
+    "named": false
+  },
+  {
+    "type": "sequenceDiagram",
+    "named": false
+  },
+  {
+    "type": "sequence_actor",
+    "named": false
+  },
+  {
+    "type": "showdata",
+    "named": false
+  },
+  {
+    "type": "solid_arrow",
+    "named": true
+  },
+  {
+    "type": "solid_cross",
+    "named": true
+  },
+  {
+    "type": "solid_open_arrow",
+    "named": true
+  },
+  {
+    "type": "state ",
+    "named": false
+  },
+  {
+    "type": "stateDiagram",
+    "named": false
+  },
+  {
+    "type": "stateDiagram-v2",
+    "named": false
+  },
+  {
+    "type": "state_id",
+    "named": true
+  },
+  {
+    "type": "subgraph",
+    "named": false
+  },
+  {
+    "type": "tb",
+    "named": false
+  },
+  {
+    "type": "td",
+    "named": false
+  },
+  {
+    "type": "title",
+    "named": false
+  },
+  {
+    "type": "todaymarker",
+    "named": false
+  },
+  {
+    "type": "topaxis",
+    "named": false
+  },
+  {
+    "type": "type_directive",
+    "named": true
+  },
+  {
+    "type": "v",
+    "named": false
+  },
+  {
+    "type": "{",
+    "named": false
+  },
+  {
+    "type": "{{",
+    "named": false
+  },
+  {
+    "type": "|",
+    "named": false
+  },
+  {
+    "type": "|>",
+    "named": false
+  },
+  {
+    "type": "|]",
+    "named": false
+  },
+  {
+    "type": "|o",
+    "named": false
+  },
+  {
+    "type": "|{",
+    "named": false
+  },
+  {
+    "type": "}",
+    "named": false
+  },
+  {
+    "type": "}o",
+    "named": false
+  },
+  {
+    "type": "}|",
+    "named": false
+  },
+  {
+    "type": "}}",
+    "named": false
+  },
+  {
+    "type": "~",
+    "named": false
+  }
+]
