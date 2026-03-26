@@ -9,11 +9,11 @@ importers:
   .:
     dependencies:
       '@lumis-sh/lumis':
-        specifier: ^0.0.1
-        version: 0.0.1
+        specifier: link:../packages/javascript/lumis
+        version: link:../packages/javascript/lumis
       '@lumis-sh/themes':
-        specifier: ^0.0.2
-        version: 0.0.2
+        specifier: link:../packages/javascript/themes
+        version: link:../packages/javascript/themes
       webgl-fluid-enhanced:
         specifier: ^0.8.0
         version: 0.8.0
@@ -204,13 +204,6 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
-
-  '@lumis-sh/lumis@0.0.1':
-    resolution: {integrity: sha512-CKUBXdOMOB4bsbrLL4cfz5X/70JKAKod4A5RxxWb80pEKxnrwWMsNVh6gDtoMW9FmHzQMItcmOPpqNgzYusIwg==}
-    engines: {node: '>=18'}
-
-  '@lumis-sh/themes@0.0.2':
-    resolution: {integrity: sha512-lVorEHtHZalmyPjRD1pb+3Q5VsuHn1wpe3Vcc1ffpdQGmuhg2nwvc3We806F4zuSbH19IVO9j66RKl2ioDsD+A==}
 
   '@rollup/rollup-android-arm-eabi@4.59.0':
     resolution: {integrity: sha512-upnNBkA6ZH2VKGcBj9Fyl9IGNPULcjXRlg0LLeaioQWueH30p6IXtJEbKAgvyv+mJaMxSm1l6xwDXYjpEMiLMg==}
@@ -639,9 +632,6 @@ packages:
       yaml:
         optional: true
 
-  web-tree-sitter@0.26.7:
-    resolution: {integrity: sha512-KiZhelTvBA/ziUHEO7Emb75cGVAq8iGZNabYaZm53Zpy50NsXyOW+xSHlwHt5CVg/TRPZBfeVLTTobF0LjFJ1w==}
-
   webgl-fluid-enhanced@0.8.0:
     resolution: {integrity: sha512-Yj3+AfQYC6bENe3mTpj1XExVfSZCG6pGxAqGXluUgdjCPCP8rvjrHXy4P5LChlJUgL8kf4E9dgmv5nLXjTJIAg==}
 
@@ -743,12 +733,6 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
-
-  '@lumis-sh/lumis@0.0.1':
-    dependencies:
-      web-tree-sitter: 0.26.7
-
-  '@lumis-sh/themes@0.0.2': {}
 
   '@rollup/rollup-android-arm-eabi@4.59.0':
     optional: true
@@ -1063,7 +1047,5 @@ snapshots:
       fsevents: 2.3.3
       jiti: 2.6.1
       lightningcss: 1.31.1
-
-  web-tree-sitter@0.26.7: {}
 
   webgl-fluid-enhanced@0.8.0: {}

@@ -1,0 +1,407 @@
+[
+  {
+    "type": "brace_expansion",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "expansion_string",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "character_choice",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "character",
+          "named": true
+        },
+        {
+          "type": "character_range",
+          "named": true
+        },
+        {
+          "type": "escaped_character",
+          "named": true
+        },
+        {
+          "type": "negation",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "character_range",
+    "named": true,
+    "fields": {
+      "end": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "character",
+            "named": true
+          }
+        ]
+      },
+      "start": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "character",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "comment",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "document",
+    "named": true,
+    "root": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "preamble",
+          "named": true
+        },
+        {
+          "type": "section",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "expansion_string",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "brace_expansion",
+          "named": true
+        },
+        {
+          "type": "character",
+          "named": true
+        },
+        {
+          "type": "character_choice",
+          "named": true
+        },
+        {
+          "type": "escaped_character",
+          "named": true
+        },
+        {
+          "type": "integer_range",
+          "named": true
+        },
+        {
+          "type": "path_separator",
+          "named": true
+        },
+        {
+          "type": "wildcard_any_characters",
+          "named": true
+        },
+        {
+          "type": "wildcard_characters",
+          "named": true
+        },
+        {
+          "type": "wildcard_single_character",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "integer_range",
+    "named": true,
+    "fields": {
+      "end": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "integer",
+            "named": true
+          }
+        ]
+      },
+      "start": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "integer",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "pair",
+    "named": true,
+    "fields": {
+      "key": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      },
+      "value": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "boolean",
+            "named": true
+          },
+          {
+            "type": "charset",
+            "named": true
+          },
+          {
+            "type": "end_of_line",
+            "named": true
+          },
+          {
+            "type": "indent_style",
+            "named": true
+          },
+          {
+            "type": "integer",
+            "named": true
+          },
+          {
+            "type": "spelling_language",
+            "named": true
+          },
+          {
+            "type": "unknown",
+            "named": true
+          },
+          {
+            "type": "unset",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "preamble",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "comment",
+          "named": true
+        },
+        {
+          "type": "pair",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "section",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "comment",
+          "named": true
+        },
+        {
+          "type": "pair",
+          "named": true
+        },
+        {
+          "type": "section_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "section_name",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "brace_expansion",
+          "named": true
+        },
+        {
+          "type": "character",
+          "named": true
+        },
+        {
+          "type": "character_choice",
+          "named": true
+        },
+        {
+          "type": "escaped_character",
+          "named": true
+        },
+        {
+          "type": "integer_range",
+          "named": true
+        },
+        {
+          "type": "path_separator",
+          "named": true
+        },
+        {
+          "type": "wildcard_any_characters",
+          "named": true
+        },
+        {
+          "type": "wildcard_characters",
+          "named": true
+        },
+        {
+          "type": "wildcard_single_character",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": ",",
+    "named": false
+  },
+  {
+    "type": "-",
+    "named": false
+  },
+  {
+    "type": "..",
+    "named": false
+  },
+  {
+    "type": "=",
+    "named": false
+  },
+  {
+    "type": "[",
+    "named": false
+  },
+  {
+    "type": "]",
+    "named": false
+  },
+  {
+    "type": "boolean",
+    "named": true
+  },
+  {
+    "type": "character",
+    "named": true
+  },
+  {
+    "type": "charset",
+    "named": true
+  },
+  {
+    "type": "end_of_line",
+    "named": true
+  },
+  {
+    "type": "escaped_character",
+    "named": true
+  },
+  {
+    "type": "identifier",
+    "named": true
+  },
+  {
+    "type": "indent_style",
+    "named": true
+  },
+  {
+    "type": "integer",
+    "named": true
+  },
+  {
+    "type": "negation",
+    "named": true
+  },
+  {
+    "type": "path_separator",
+    "named": true
+  },
+  {
+    "type": "spelling_language",
+    "named": true
+  },
+  {
+    "type": "unknown",
+    "named": true
+  },
+  {
+    "type": "unset",
+    "named": true
+  },
+  {
+    "type": "wildcard_any_characters",
+    "named": true
+  },
+  {
+    "type": "wildcard_characters",
+    "named": true
+  },
+  {
+    "type": "wildcard_single_character",
+    "named": true
+  },
+  {
+    "type": "{",
+    "named": false
+  },
+  {
+    "type": "}",
+    "named": false
+  }
+]

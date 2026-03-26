@@ -1,0 +1,10 @@
+events {}
+
+http {
+    server {
+        listen 80;
+        location / {
+            return 200 "hello";
+        }
+    }
+}
