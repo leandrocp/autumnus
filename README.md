@@ -91,12 +91,14 @@ import io.roastedroot.lumis4j.core.Lumis;
 import io.roastedroot.lumis4j.core.Lang;
 import io.roastedroot.lumis4j.core.Theme;
 
-var lumis = Lumis.builder()
+var lumis = Lumis.builder().build();
+
+var highlighter = lumis.highlighter()
     .withLang(Lang.JAVASCRIPT)
     .withTheme(Theme.DRACULA)
     .build();
 
-var result = lumis.highlight("const x = 1");
+var result = highlighter.highlight("const x = 1");
 System.out.println(result.string());
 ```
 
