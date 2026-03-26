@@ -1,0 +1,9843 @@
+[
+  {
+    "type": "action_alias",
+    "named": true,
+    "fields": {
+      "action": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "string",
+            "named": true
+          }
+        ]
+      },
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "constant",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "action_arguments",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "boolean",
+          "named": true
+        },
+        {
+          "type": "color",
+          "named": true
+        },
+        {
+          "type": "inherit",
+          "named": true
+        },
+        {
+          "type": "number",
+          "named": true
+        },
+        {
+          "type": "percentage",
+          "named": true
+        },
+        {
+          "type": "pixel",
+          "named": true
+        },
+        {
+          "type": "string",
+          "named": true
+        },
+        {
+          "type": "time",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "aliased_action",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "string",
+            "named": true
+          }
+        ]
+      },
+      "value": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "action_arguments",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "alt",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "background_alpha",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "constant",
+          "named": true
+        },
+        {
+          "type": "number",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "boolean",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "boolean_operator",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "boolean_option",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "boolean",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "border_width",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "number",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "box_drawing_scale",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "scale_value",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "box_value",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "number",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "change_font_size",
+    "named": true,
+    "fields": {
+      "amount": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "font_change_amount",
+            "named": true
+          }
+        ]
+      },
+      "target": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "os_window",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "action_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "clear_target",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "clear_terminal",
+    "named": true,
+    "fields": {
+      "action": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "constant",
+            "named": true
+          }
+        ]
+      },
+      "target": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "clear_target",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "action_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "click_action",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "clipboard_action",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "clipboard_actions",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "clipboard_action",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "clipboard_control",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "clipboard_actions",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "clone_source_strategies",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "source_stratagies",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "close_window_with_confirmation",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "action_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "color",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "color_all",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "boolean",
+          "named": true
+        },
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "color_configured",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "boolean",
+          "named": true
+        },
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "color_data",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "color_option_name",
+            "named": true
+          }
+        ]
+      },
+      "path": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "path",
+            "named": true
+          }
+        ]
+      },
+      "value": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "color",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "color_match",
+    "named": true,
+    "fields": {
+      "query": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "pattern",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "color_match_tab",
+    "named": true,
+    "fields": {
+      "query": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "pattern",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "color_option",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "color_option_name",
+            "named": true
+          }
+        ]
+      },
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "color",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "color_option_name",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "color_options",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "color_all",
+          "named": true
+        },
+        {
+          "type": "color_configured",
+          "named": true
+        },
+        {
+          "type": "color_match",
+          "named": true
+        },
+        {
+          "type": "color_match_tab",
+          "named": true
+        },
+        {
+          "type": "color_reset",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "color_reset",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "boolean",
+          "named": true
+        },
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "color_value",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "color_data",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "combine",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "action_name",
+          "named": true
+        },
+        {
+          "type": "combine_action",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "combine_action",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "aliased_action",
+          "named": true
+        },
+        {
+          "type": "change_font_size",
+          "named": true
+        },
+        {
+          "type": "clear_terminal",
+          "named": true
+        },
+        {
+          "type": "close_window_with_confirmation",
+          "named": true
+        },
+        {
+          "type": "copy_to_buffer",
+          "named": true
+        },
+        {
+          "type": "detach_window",
+          "named": true
+        },
+        {
+          "type": "disable_ligatures_in",
+          "named": true
+        },
+        {
+          "type": "generic_action",
+          "named": true
+        },
+        {
+          "type": "goto_layout",
+          "named": true
+        },
+        {
+          "type": "goto_tab",
+          "named": true
+        },
+        {
+          "type": "kitten",
+          "named": true
+        },
+        {
+          "type": "launch",
+          "named": true
+        },
+        {
+          "type": "load_config_file",
+          "named": true
+        },
+        {
+          "type": "mouse_handle_click",
+          "named": true
+        },
+        {
+          "type": "mouse_selection",
+          "named": true
+        },
+        {
+          "type": "move_window",
+          "named": true
+        },
+        {
+          "type": "neighboring_window",
+          "named": true
+        },
+        {
+          "type": "new_window",
+          "named": true
+        },
+        {
+          "type": "nth_os_window",
+          "named": true
+        },
+        {
+          "type": "nth_window",
+          "named": true
+        },
+        {
+          "type": "open_url",
+          "named": true
+        },
+        {
+          "type": "pass_selection_to_program",
+          "named": true
+        },
+        {
+          "type": "paste_from_buffer",
+          "named": true
+        },
+        {
+          "type": "remote_control",
+          "named": true
+        },
+        {
+          "type": "remote_control_script",
+          "named": true
+        },
+        {
+          "type": "resize_window",
+          "named": true
+        },
+        {
+          "type": "scroll_prompt_to_top",
+          "named": true
+        },
+        {
+          "type": "scroll_to_prompt",
+          "named": true
+        },
+        {
+          "type": "send_key",
+          "named": true
+        },
+        {
+          "type": "send_text",
+          "named": true
+        },
+        {
+          "type": "separator",
+          "named": true
+        },
+        {
+          "type": "set_background_opacity",
+          "named": true
+        },
+        {
+          "type": "set_colors",
+          "named": true
+        },
+        {
+          "type": "set_tab_title",
+          "named": true
+        },
+        {
+          "type": "set_window_title",
+          "named": true
+        },
+        {
+          "type": "show_kitty_doc",
+          "named": true
+        },
+        {
+          "type": "signal_child",
+          "named": true
+        },
+        {
+          "type": "sleep",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "comment",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "comment_content",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "composition_value",
+    "named": true,
+    "fields": {
+      "gamma_adjustment": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "number",
+            "named": true
+          }
+        ]
+      },
+      "multiplicative_contrast": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "number",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "constant",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "configuration_file",
+    "named": true,
+    "root": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "action_alias",
+          "named": true
+        },
+        {
+          "type": "boolean_option",
+          "named": true
+        },
+        {
+          "type": "box_drawing_scale",
+          "named": true
+        },
+        {
+          "type": "clipboard_control",
+          "named": true
+        },
+        {
+          "type": "clone_source_strategies",
+          "named": true
+        },
+        {
+          "type": "color_option",
+          "named": true
+        },
+        {
+          "type": "comment",
+          "named": true
+        },
+        {
+          "type": "confirm_os_window_close",
+          "named": true
+        },
+        {
+          "type": "cursor_blink_interval",
+          "named": true
+        },
+        {
+          "type": "cursor_shape",
+          "named": true
+        },
+        {
+          "type": "cursor_shape_unfocused",
+          "named": true
+        },
+        {
+          "type": "cursor_trail_decay",
+          "named": true
+        },
+        {
+          "type": "enabled_layouts",
+          "named": true
+        },
+        {
+          "type": "env",
+          "named": true
+        },
+        {
+          "type": "filter_notification",
+          "named": true
+        },
+        {
+          "type": "font_features",
+          "named": true
+        },
+        {
+          "type": "font_option",
+          "named": true
+        },
+        {
+          "type": "include",
+          "named": true
+        },
+        {
+          "type": "initial_window_size",
+          "named": true
+        },
+        {
+          "type": "keyboard_shortcut",
+          "named": true
+        },
+        {
+          "type": "kitty_mod",
+          "named": true
+        },
+        {
+          "type": "menu_map",
+          "named": true
+        },
+        {
+          "type": "modify_font",
+          "named": true
+        },
+        {
+          "type": "mouse_hide_wait",
+          "named": true
+        },
+        {
+          "type": "mouse_shortcut",
+          "named": true
+        },
+        {
+          "type": "narrow_symbols",
+          "named": true
+        },
+        {
+          "type": "notify_on_cmd_finish",
+          "named": true
+        },
+        {
+          "type": "numeric_option",
+          "named": true
+        },
+        {
+          "type": "paste_actions",
+          "named": true
+        },
+        {
+          "type": "pointer_option",
+          "named": true
+        },
+        {
+          "type": "pointer_shape_when_dragging",
+          "named": true
+        },
+        {
+          "type": "remote_control_password",
+          "named": true
+        },
+        {
+          "type": "resize_debounce_time",
+          "named": true
+        },
+        {
+          "type": "scrollback_pager",
+          "named": true
+        },
+        {
+          "type": "scrollbar",
+          "named": true
+        },
+        {
+          "type": "shell_integration",
+          "named": true
+        },
+        {
+          "type": "single_window_margin_width",
+          "named": true
+        },
+        {
+          "type": "single_window_padding_width",
+          "named": true
+        },
+        {
+          "type": "string_option",
+          "named": true
+        },
+        {
+          "type": "symbol_map",
+          "named": true
+        },
+        {
+          "type": "tab_bar_margin_height",
+          "named": true
+        },
+        {
+          "type": "tab_fade",
+          "named": true
+        },
+        {
+          "type": "text_composition_strategy",
+          "named": true
+        },
+        {
+          "type": "text_fg_override_threshold",
+          "named": true
+        },
+        {
+          "type": "transparent_background_colors",
+          "named": true
+        },
+        {
+          "type": "undercurl_style",
+          "named": true
+        },
+        {
+          "type": "url_excluded_characters",
+          "named": true
+        },
+        {
+          "type": "url_prefixes",
+          "named": true
+        },
+        {
+          "type": "visual_bell_color",
+          "named": true
+        },
+        {
+          "type": "wayland_titlebar_color",
+          "named": true
+        },
+        {
+          "type": "window_border_width",
+          "named": true
+        },
+        {
+          "type": "window_logo_scale",
+          "named": true
+        },
+        {
+          "type": "window_margin_width",
+          "named": true
+        },
+        {
+          "type": "window_padding_width",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "confirm_os_window_close",
+    "named": true,
+    "fields": {
+      "count_background": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "constant",
+            "named": true
+          }
+        ]
+      },
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "number",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "constant",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "constant",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "copy_to_buffer",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "string",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "action_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "ctrl",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "cubic_bezier",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "number",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "cursor",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "cursor_blink_interval",
+    "named": true,
+    "fields": {
+      "ease": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "ease",
+            "named": true
+          }
+        ]
+      },
+      "interval": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "number",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "cursor_shape",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "cursor",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "cursor_shape_unfocused",
+    "named": true,
+    "fields": {
+      "shape": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "cursor",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "cursor_trail_decay",
+    "named": true,
+    "fields": {
+      "fastest_time": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "number",
+            "named": true
+          }
+        ]
+      },
+      "slowest_time": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "number",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "detach_into",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "detach_window",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "detach_into",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "action_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "direction",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "down",
+          "named": true
+        },
+        {
+          "type": "left",
+          "named": true
+        },
+        {
+          "type": "right",
+          "named": true
+        },
+        {
+          "type": "up",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "disable_ligatures_in",
+    "named": true,
+    "fields": {
+      "target": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "ligature_target",
+            "named": true
+          }
+        ]
+      },
+      "type": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "ligature_disabled",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "action_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "ease",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "constant",
+          "named": true
+        },
+        {
+          "type": "cubic_bezier",
+          "named": true
+        },
+        {
+          "type": "ease_step",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "ease_step",
+    "named": true,
+    "fields": {
+      "count": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "number",
+            "named": true
+          }
+        ]
+      },
+      "position": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "ease_step_position",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "ease_step_position",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "enabled_layouts",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "layout_list",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "env",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "boolean",
+            "named": true
+          },
+          {
+            "type": "color",
+            "named": true
+          },
+          {
+            "type": "inherit",
+            "named": true
+          },
+          {
+            "type": "number",
+            "named": true
+          },
+          {
+            "type": "percentage",
+            "named": true
+          },
+          {
+            "type": "pixel",
+            "named": true
+          },
+          {
+            "type": "string",
+            "named": true
+          },
+          {
+            "type": "time",
+            "named": true
+          }
+        ]
+      },
+      "variable": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "string",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "fade_list",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "number",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "feature_list",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "font_feature",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "fg_override_threshold",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "number",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "filter_element",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "boolean_operator",
+          "named": true
+        },
+        {
+          "type": "filter_element_type",
+          "named": true
+        },
+        {
+          "type": "pattern",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "filter_element_type",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "filter_notification",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "filter_sequence",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "filter_sequence",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "filter_element",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "focus_policy",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "font_change_amount",
+    "named": true,
+    "fields": {
+      "sign": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "font_change_sign",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "number",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "font_change_sign",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "font_features",
+    "named": true,
+    "fields": {
+      "features": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "feature_list",
+            "named": true
+          }
+        ]
+      },
+      "font": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "constant",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "constant",
+          "named": true
+        },
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "font_modification_type",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "font_option",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "font_value",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "font_property",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "string",
+            "named": true
+          }
+        ]
+      },
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "boolean",
+            "named": true
+          },
+          {
+            "type": "color",
+            "named": true
+          },
+          {
+            "type": "inherit",
+            "named": true
+          },
+          {
+            "type": "number",
+            "named": true
+          },
+          {
+            "type": "percentage",
+            "named": true
+          },
+          {
+            "type": "pixel",
+            "named": true
+          },
+          {
+            "type": "string",
+            "named": true
+          },
+          {
+            "type": "time",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "font_value",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "constant",
+          "named": true
+        },
+        {
+          "type": "font_property",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "function",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "generic_action",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "goto_layout",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "layout_type",
+            "named": true
+          }
+        ]
+      },
+      "options": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "layout_option",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "action_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "goto_tab",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "label",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "action_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "handle_click_actions",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "click_action",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "include",
+    "named": true,
+    "fields": {
+      "environment_variable": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "string",
+            "named": true
+          }
+        ]
+      },
+      "glob": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "pattern",
+            "named": true
+          }
+        ]
+      },
+      "path": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "path",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "initial_window_size",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "number",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "key_action",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "aliased_action",
+          "named": true
+        },
+        {
+          "type": "change_font_size",
+          "named": true
+        },
+        {
+          "type": "clear_terminal",
+          "named": true
+        },
+        {
+          "type": "close_window_with_confirmation",
+          "named": true
+        },
+        {
+          "type": "combine",
+          "named": true
+        },
+        {
+          "type": "copy_to_buffer",
+          "named": true
+        },
+        {
+          "type": "detach_window",
+          "named": true
+        },
+        {
+          "type": "disable_ligatures_in",
+          "named": true
+        },
+        {
+          "type": "generic_action",
+          "named": true
+        },
+        {
+          "type": "goto_layout",
+          "named": true
+        },
+        {
+          "type": "goto_tab",
+          "named": true
+        },
+        {
+          "type": "kitten",
+          "named": true
+        },
+        {
+          "type": "kitty_shell",
+          "named": true
+        },
+        {
+          "type": "launch",
+          "named": true
+        },
+        {
+          "type": "load_config_file",
+          "named": true
+        },
+        {
+          "type": "mouse_handle_click",
+          "named": true
+        },
+        {
+          "type": "mouse_selection",
+          "named": true
+        },
+        {
+          "type": "move_window",
+          "named": true
+        },
+        {
+          "type": "neighboring_window",
+          "named": true
+        },
+        {
+          "type": "new_window",
+          "named": true
+        },
+        {
+          "type": "nth_os_window",
+          "named": true
+        },
+        {
+          "type": "nth_window",
+          "named": true
+        },
+        {
+          "type": "open_url",
+          "named": true
+        },
+        {
+          "type": "pass_selection_to_program",
+          "named": true
+        },
+        {
+          "type": "paste_from_buffer",
+          "named": true
+        },
+        {
+          "type": "remote_control",
+          "named": true
+        },
+        {
+          "type": "remote_control_script",
+          "named": true
+        },
+        {
+          "type": "resize_window",
+          "named": true
+        },
+        {
+          "type": "scroll_prompt_to_top",
+          "named": true
+        },
+        {
+          "type": "scroll_to_prompt",
+          "named": true
+        },
+        {
+          "type": "send_key",
+          "named": true
+        },
+        {
+          "type": "send_text",
+          "named": true
+        },
+        {
+          "type": "set_background_opacity",
+          "named": true
+        },
+        {
+          "type": "set_colors",
+          "named": true
+        },
+        {
+          "type": "set_tab_title",
+          "named": true
+        },
+        {
+          "type": "set_window_title",
+          "named": true
+        },
+        {
+          "type": "show_kitty_doc",
+          "named": true
+        },
+        {
+          "type": "signal_child",
+          "named": true
+        },
+        {
+          "type": "sleep",
+          "named": true
+        },
+        {
+          "type": "toggle_layout",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "key_focus_on",
+    "named": true,
+    "fields": {
+      "condition": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "string",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "key_sequence",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "down",
+          "named": true
+        },
+        {
+          "type": "function",
+          "named": true
+        },
+        {
+          "type": "key",
+          "named": true
+        },
+        {
+          "type": "left",
+          "named": true
+        },
+        {
+          "type": "middle",
+          "named": true
+        },
+        {
+          "type": "modified_key",
+          "named": true
+        },
+        {
+          "type": "mouse_button",
+          "named": true
+        },
+        {
+          "type": "right",
+          "named": true
+        },
+        {
+          "type": "special",
+          "named": true
+        },
+        {
+          "type": "up",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "keyboard_mode",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "constant",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "keyboard_shortcut",
+    "named": true,
+    "fields": {
+      "action": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "key_action",
+            "named": true
+          }
+        ]
+      },
+      "sequence": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "key_sequence",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "key_focus_on",
+          "named": true
+        },
+        {
+          "type": "mode",
+          "named": true
+        },
+        {
+          "type": "new_mode",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "keys",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "down",
+          "named": true
+        },
+        {
+          "type": "function",
+          "named": true
+        },
+        {
+          "type": "key",
+          "named": true
+        },
+        {
+          "type": "left",
+          "named": true
+        },
+        {
+          "type": "middle",
+          "named": true
+        },
+        {
+          "type": "modified_key",
+          "named": true
+        },
+        {
+          "type": "mouse_button",
+          "named": true
+        },
+        {
+          "type": "right",
+          "named": true
+        },
+        {
+          "type": "special",
+          "named": true
+        },
+        {
+          "type": "up",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "kitten",
+    "named": true,
+    "fields": {
+      "arguments": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "kitten_arguments",
+            "named": true
+          }
+        ]
+      },
+      "target": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "string",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "action_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "kitten_arguments",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "boolean",
+          "named": true
+        },
+        {
+          "type": "color",
+          "named": true
+        },
+        {
+          "type": "inherit",
+          "named": true
+        },
+        {
+          "type": "number",
+          "named": true
+        },
+        {
+          "type": "percentage",
+          "named": true
+        },
+        {
+          "type": "pixel",
+          "named": true
+        },
+        {
+          "type": "string",
+          "named": true
+        },
+        {
+          "type": "time",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "kitty_mod",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "key_sequence",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "kitty_shell",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "kitty_shell_open_as",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "action_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "kitty_shell_open_as",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "label",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "label",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "launch",
+    "named": true,
+    "fields": {
+      "command": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "string",
+            "named": true
+          }
+        ]
+      },
+      "options": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "launch_options",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "action_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "launch_bias",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "number",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "launch_color",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "color_option_name",
+            "named": true
+          }
+        ]
+      },
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "color",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "launch_copy_cmd",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "boolean",
+          "named": true
+        },
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "launch_copy_colors",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "boolean",
+          "named": true
+        },
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "launch_copy_env",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "boolean",
+          "named": true
+        },
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "launch_cwd",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "path",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "launch_env",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "variable",
+            "named": true
+          }
+        ]
+      },
+      "variable": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "string",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "launch_focus",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "boolean",
+          "named": true
+        },
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "launch_hold",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "boolean",
+          "named": true
+        },
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "launch_hold_after_ssh",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "boolean",
+          "named": true
+        },
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "launch_logo",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "path",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "launch_logo_alpha",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "number",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "launch_logo_position",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "logo_position",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "launch_marker",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "markers",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "launch_next_to",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "string",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "launch_options",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "launch_bias",
+          "named": true
+        },
+        {
+          "type": "launch_color",
+          "named": true
+        },
+        {
+          "type": "launch_copy_cmd",
+          "named": true
+        },
+        {
+          "type": "launch_copy_colors",
+          "named": true
+        },
+        {
+          "type": "launch_copy_env",
+          "named": true
+        },
+        {
+          "type": "launch_cwd",
+          "named": true
+        },
+        {
+          "type": "launch_env",
+          "named": true
+        },
+        {
+          "type": "launch_focus",
+          "named": true
+        },
+        {
+          "type": "launch_hold",
+          "named": true
+        },
+        {
+          "type": "launch_hold_after_ssh",
+          "named": true
+        },
+        {
+          "type": "launch_logo",
+          "named": true
+        },
+        {
+          "type": "launch_logo_alpha",
+          "named": true
+        },
+        {
+          "type": "launch_logo_position",
+          "named": true
+        },
+        {
+          "type": "launch_marker",
+          "named": true
+        },
+        {
+          "type": "launch_next_to",
+          "named": true
+        },
+        {
+          "type": "launch_os_panel",
+          "named": true
+        },
+        {
+          "type": "launch_os_window_class",
+          "named": true
+        },
+        {
+          "type": "launch_os_window_name",
+          "named": true
+        },
+        {
+          "type": "launch_os_window_state",
+          "named": true
+        },
+        {
+          "type": "launch_os_window_title",
+          "named": true
+        },
+        {
+          "type": "launch_remote_control",
+          "named": true
+        },
+        {
+          "type": "launch_remote_password",
+          "named": true
+        },
+        {
+          "type": "launch_source_window",
+          "named": true
+        },
+        {
+          "type": "launch_spacing",
+          "named": true
+        },
+        {
+          "type": "launch_stdin_formatting",
+          "named": true
+        },
+        {
+          "type": "launch_stdin_line_wrap",
+          "named": true
+        },
+        {
+          "type": "launch_stdin_source",
+          "named": true
+        },
+        {
+          "type": "launch_tab_title",
+          "named": true
+        },
+        {
+          "type": "launch_type",
+          "named": true
+        },
+        {
+          "type": "launch_var",
+          "named": true
+        },
+        {
+          "type": "launch_watcher",
+          "named": true
+        },
+        {
+          "type": "launch_window_location",
+          "named": true
+        },
+        {
+          "type": "launch_window_title",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "launch_os_panel",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "os_panel_app_id",
+            "named": true
+          },
+          {
+            "type": "os_panel_columns",
+            "named": true
+          },
+          {
+            "type": "os_panel_debug_input",
+            "named": true
+          },
+          {
+            "type": "os_panel_debug_rendering",
+            "named": true
+          },
+          {
+            "type": "os_panel_detach",
+            "named": true
+          },
+          {
+            "type": "os_panel_detach_log",
+            "named": true
+          },
+          {
+            "type": "os_panel_edge",
+            "named": true
+          },
+          {
+            "type": "os_panel_exclusive_zone",
+            "named": true
+          },
+          {
+            "type": "os_panel_focus_policy",
+            "named": true
+          },
+          {
+            "type": "os_panel_grab_keyboard",
+            "named": true
+          },
+          {
+            "type": "os_panel_instance_group",
+            "named": true
+          },
+          {
+            "type": "os_panel_layer",
+            "named": true
+          },
+          {
+            "type": "os_panel_lines",
+            "named": true
+          },
+          {
+            "type": "os_panel_listen_on",
+            "named": true
+          },
+          {
+            "type": "os_panel_margin_bottom",
+            "named": true
+          },
+          {
+            "type": "os_panel_margin_left",
+            "named": true
+          },
+          {
+            "type": "os_panel_margin_right",
+            "named": true
+          },
+          {
+            "type": "os_panel_margin_top",
+            "named": true
+          },
+          {
+            "type": "os_panel_name",
+            "named": true
+          },
+          {
+            "type": "os_panel_output_name",
+            "named": true
+          },
+          {
+            "type": "os_panel_override_exclusive_zone",
+            "named": true
+          },
+          {
+            "type": "os_panel_single_instancw",
+            "named": true
+          },
+          {
+            "type": "os_panel_start_as_hidden",
+            "named": true
+          },
+          {
+            "type": "os_panel_toggle_visibility",
+            "named": true
+          },
+          {
+            "type": "os_panel_wait_for_single_instance_window_close",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "launch_os_window_class",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "os_window_class",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "launch_os_window_name",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "string",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "launch_os_window_state",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "window_state",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "launch_os_window_title",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "string",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "launch_remote_control",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "boolean",
+          "named": true
+        },
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "launch_remote_password",
+    "named": true,
+    "fields": {
+      "actions": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "remote_actions",
+            "named": true
+          }
+        ]
+      },
+      "password": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "string",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "launch_source_window",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "string",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "launch_spacing",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "spacing_type",
+            "named": true
+          }
+        ]
+      },
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "number",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "launch_stdin_formatting",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "boolean",
+          "named": true
+        },
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "launch_stdin_line_wrap",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "boolean",
+          "named": true
+        },
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "launch_stdin_source",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "stdin_source",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "launch_tab_title",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "string",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "launch_type",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "launch_type_value",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "launch_type_value",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "launch_var",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "variable",
+            "named": true
+          }
+        ]
+      },
+      "variable": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "string",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "launch_watcher",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "path",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "launch_window_location",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "window_location",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "launch_window_title",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "string",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "layer",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "layout",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "layout_list",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "layout",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "layout_option",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "constant",
+            "named": true
+          }
+        ]
+      },
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "boolean",
+            "named": true
+          },
+          {
+            "type": "color",
+            "named": true
+          },
+          {
+            "type": "inherit",
+            "named": true
+          },
+          {
+            "type": "number",
+            "named": true
+          },
+          {
+            "type": "percentage",
+            "named": true
+          },
+          {
+            "type": "pixel",
+            "named": true
+          },
+          {
+            "type": "string",
+            "named": true
+          },
+          {
+            "type": "time",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "layout_type",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "ligature_disabled",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "ligature_target",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "line_continuation",
+    "named": true,
+    "extra": true,
+    "fields": {}
+  },
+  {
+    "type": "load_config_file",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "path",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "action_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "logo_position",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "marker_entries",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "marker_entry",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "marker_entry",
+    "named": true,
+    "fields": {
+      "id": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "label",
+            "named": true
+          }
+        ]
+      },
+      "pattern": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "pattern",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "marker_type",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "markers",
+    "named": true,
+    "fields": {
+      "markers": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "marker_entries",
+            "named": true
+          }
+        ]
+      },
+      "type": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "marker_type",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "menu_map",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "string",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "mode",
+    "named": true,
+    "fields": {
+      "mode": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "constant",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "modified_key",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "alt",
+          "named": true
+        },
+        {
+          "type": "ctrl",
+          "named": true
+        },
+        {
+          "type": "down",
+          "named": true
+        },
+        {
+          "type": "function",
+          "named": true
+        },
+        {
+          "type": "key",
+          "named": true
+        },
+        {
+          "type": "left",
+          "named": true
+        },
+        {
+          "type": "middle",
+          "named": true
+        },
+        {
+          "type": "mouse_button",
+          "named": true
+        },
+        {
+          "type": "right",
+          "named": true
+        },
+        {
+          "type": "shift",
+          "named": true
+        },
+        {
+          "type": "special",
+          "named": true
+        },
+        {
+          "type": "super",
+          "named": true
+        },
+        {
+          "type": "up",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "modify_font",
+    "named": true,
+    "fields": {
+      "type": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "font_modification_type",
+            "named": true
+          }
+        ]
+      },
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "number",
+            "named": true
+          },
+          {
+            "type": "percentage",
+            "named": true
+          },
+          {
+            "type": "pixel",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "mouse_event",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "mouse_handle_click",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "handle_click_actions",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "action_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "mouse_hide_wait",
+    "named": true,
+    "fields": {
+      "hide_wait": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "number",
+            "named": true
+          }
+        ]
+      },
+      "scroll_unhide": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "boolean",
+            "named": true
+          }
+        ]
+      },
+      "unhide_threshold": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "number",
+            "named": true
+          }
+        ]
+      },
+      "unhide_wait": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "number",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "mouse_mode",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "mouse_selection",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "mouse_selection_type",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "action_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "mouse_selection_type",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "mouse_sequence",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "down",
+          "named": true
+        },
+        {
+          "type": "function",
+          "named": true
+        },
+        {
+          "type": "key",
+          "named": true
+        },
+        {
+          "type": "left",
+          "named": true
+        },
+        {
+          "type": "middle",
+          "named": true
+        },
+        {
+          "type": "modified_key",
+          "named": true
+        },
+        {
+          "type": "mouse_button",
+          "named": true
+        },
+        {
+          "type": "right",
+          "named": true
+        },
+        {
+          "type": "special",
+          "named": true
+        },
+        {
+          "type": "up",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "mouse_shortcut",
+    "named": true,
+    "fields": {
+      "action": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "aliased_action",
+            "named": true
+          },
+          {
+            "type": "change_font_size",
+            "named": true
+          },
+          {
+            "type": "clear_terminal",
+            "named": true
+          },
+          {
+            "type": "close_window_with_confirmation",
+            "named": true
+          },
+          {
+            "type": "combine",
+            "named": true
+          },
+          {
+            "type": "copy_to_buffer",
+            "named": true
+          },
+          {
+            "type": "detach_window",
+            "named": true
+          },
+          {
+            "type": "disable_ligatures_in",
+            "named": true
+          },
+          {
+            "type": "generic_action",
+            "named": true
+          },
+          {
+            "type": "goto_layout",
+            "named": true
+          },
+          {
+            "type": "goto_tab",
+            "named": true
+          },
+          {
+            "type": "kitten",
+            "named": true
+          },
+          {
+            "type": "kitty_shell",
+            "named": true
+          },
+          {
+            "type": "launch",
+            "named": true
+          },
+          {
+            "type": "load_config_file",
+            "named": true
+          },
+          {
+            "type": "mouse_handle_click",
+            "named": true
+          },
+          {
+            "type": "mouse_selection",
+            "named": true
+          },
+          {
+            "type": "move_window",
+            "named": true
+          },
+          {
+            "type": "neighboring_window",
+            "named": true
+          },
+          {
+            "type": "new_window",
+            "named": true
+          },
+          {
+            "type": "nth_os_window",
+            "named": true
+          },
+          {
+            "type": "nth_window",
+            "named": true
+          },
+          {
+            "type": "open_url",
+            "named": true
+          },
+          {
+            "type": "pass_selection_to_program",
+            "named": true
+          },
+          {
+            "type": "paste_from_buffer",
+            "named": true
+          },
+          {
+            "type": "remote_control",
+            "named": true
+          },
+          {
+            "type": "remote_control_script",
+            "named": true
+          },
+          {
+            "type": "resize_window",
+            "named": true
+          },
+          {
+            "type": "scroll_prompt_to_top",
+            "named": true
+          },
+          {
+            "type": "scroll_to_prompt",
+            "named": true
+          },
+          {
+            "type": "send_key",
+            "named": true
+          },
+          {
+            "type": "send_text",
+            "named": true
+          },
+          {
+            "type": "set_background_opacity",
+            "named": true
+          },
+          {
+            "type": "set_colors",
+            "named": true
+          },
+          {
+            "type": "set_tab_title",
+            "named": true
+          },
+          {
+            "type": "set_window_title",
+            "named": true
+          },
+          {
+            "type": "show_kitty_doc",
+            "named": true
+          },
+          {
+            "type": "signal_child",
+            "named": true
+          },
+          {
+            "type": "sleep",
+            "named": true
+          },
+          {
+            "type": "toggle_layout",
+            "named": true
+          }
+        ]
+      },
+      "event_type": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "mouse_event",
+            "named": true
+          }
+        ]
+      },
+      "modes": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "mouse_mode",
+            "named": true
+          }
+        ]
+      },
+      "sequence": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "mouse_sequence",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "move_window",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "direction",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "action_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "narrow_symbols",
+    "named": true,
+    "fields": {
+      "codepoints": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "constant",
+            "named": true
+          }
+        ]
+      },
+      "width": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "number",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "neighboring_window",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "direction",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "action_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "new_mode",
+    "named": true,
+    "fields": {
+      "mode": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "constant",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "flag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "new_window",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "title",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "action_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "notification_action",
+    "named": true,
+    "fields": {
+      "command": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "string",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "notification_time",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "notify_on_cmd_finish",
+    "named": true,
+    "fields": {
+      "action": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "notification_action",
+            "named": true
+          }
+        ]
+      },
+      "duration": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "number",
+            "named": true
+          }
+        ]
+      },
+      "when": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "notification_time",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "nth_os_window",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "label",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "action_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "nth_window",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "label",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "action_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "numeric_option",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "number",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "open_url",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "string",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "action_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "option_name",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "os_panel_app_id",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "output_name",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "os_panel_columns",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "number",
+            "named": true
+          },
+          {
+            "type": "pixel",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "os_panel_debug_input",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "boolean",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "os_panel_debug_rendering",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "boolean",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "os_panel_detach",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "boolean",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "os_panel_detach_log",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "string",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "os_panel_edge",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "constant",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "os_panel_exclusive_zone",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "number",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "os_panel_focus_policy",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "focus_policy",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "os_panel_grab_keyboard",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "boolean",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "os_panel_instance_group",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "string",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "os_panel_layer",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "layer",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "os_panel_lines",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "number",
+            "named": true
+          },
+          {
+            "type": "pixel",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "os_panel_listen_on",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "string",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "os_panel_margin_bottom",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "number",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "os_panel_margin_left",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "number",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "os_panel_margin_right",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "number",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "os_panel_margin_top",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "number",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "os_panel_name",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "output_name",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "os_panel_output_name",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "output_name",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "os_panel_override_exclusive_zone",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "boolean",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "os_panel_single_instancw",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "boolean",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "os_panel_start_as_hidden",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "boolean",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "os_panel_toggle_visibility",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "boolean",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "os_panel_wait_for_single_instance_window_close",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "boolean",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "os_window",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "output_name",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "pass_selection_to_program",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "constant",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "action_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "paste_action",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "paste_action_list",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "paste_action",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "paste_actions",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "paste_action_list",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "paste_from_buffer",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "string",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "action_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "path",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "path",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "pattern",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "pattern",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "percentage",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "number",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "pixel",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "number",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "pointer",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "pointer_option",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "pointer",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "pointer_shape_when_dragging",
+    "named": true,
+    "fields": {
+      "default": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "pointer",
+            "named": true
+          }
+        ]
+      },
+      "rectangular": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "pointer",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "remote_actions",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "remote_action",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "remote_args",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "boolean",
+          "named": true
+        },
+        {
+          "type": "color",
+          "named": true
+        },
+        {
+          "type": "inherit",
+          "named": true
+        },
+        {
+          "type": "number",
+          "named": true
+        },
+        {
+          "type": "percentage",
+          "named": true
+        },
+        {
+          "type": "pixel",
+          "named": true
+        },
+        {
+          "type": "string",
+          "named": true
+        },
+        {
+          "type": "time",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "remote_control",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "string",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "action_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "remote_control_password",
+    "named": true,
+    "fields": {
+      "actions": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "remote_actions",
+            "named": true
+          }
+        ]
+      },
+      "password": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "string",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "remote_control_script",
+    "named": true,
+    "fields": {
+      "arguments": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "remote_args",
+            "named": true
+          }
+        ]
+      },
+      "path": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "path",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "action_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "resize_debounce_time",
+    "named": true,
+    "fields": {
+      "after_pause": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "number",
+            "named": true
+          }
+        ]
+      },
+      "debounce": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "number",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "resize_window",
+    "named": true,
+    "fields": {
+      "amount": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "number",
+            "named": true
+          }
+        ]
+      },
+      "layout": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "window_layout",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "action_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "scale_value",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "number",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "scroll_prompt_to_top",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "action_name",
+          "named": true
+        },
+        {
+          "type": "boolean",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "scroll_to_prompt",
+    "named": true,
+    "fields": {
+      "lines_above": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "number",
+            "named": true
+          }
+        ]
+      },
+      "prompt_number": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "number",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "action_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "scrollback_pager",
+    "named": true,
+    "fields": {
+      "command": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "string",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "scrollbar",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "constant",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "send_key",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "keys",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "action_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "send_text",
+    "named": true,
+    "fields": {
+      "mode": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "keyboard_mode",
+            "named": true
+          }
+        ]
+      },
+      "text": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "string",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "action_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "separator",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "set_background_opacity",
+    "named": true,
+    "fields": {
+      "alpha": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "background_alpha",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "action_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "set_colors",
+    "named": true,
+    "fields": {
+      "options": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "color_options",
+            "named": true
+          }
+        ]
+      },
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "color_value",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "set_tab_title",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "title",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "action_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "set_window_title",
+    "named": true,
+    "fields": {
+      "title": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "title",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "action_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "shell_feature",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "shell_features",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "boolean",
+          "named": true
+        },
+        {
+          "type": "shell_feature",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "shell_integration",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "shell_features",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "shift",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "show_kitty_doc",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "label",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "action_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "signal_child",
+    "named": true,
+    "fields": {
+      "signal": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "signal_name",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "action_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "single_window_margin_width",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "box_value",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "single_window_padding_width",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "box_value",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "sleep",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "time",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "action_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "source_stratagies",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "source_strategy",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "source_strategy",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "special",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "stdin_source",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "string",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "string_option",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "string",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "super",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "symbol_map",
+    "named": true,
+    "fields": {
+      "codepoints": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "constant",
+            "named": true
+          }
+        ]
+      },
+      "font_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "string",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "tab_bar_margin_height",
+    "named": true,
+    "fields": {
+      "inner": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "number",
+            "named": true
+          }
+        ]
+      },
+      "outer": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "number",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "tab_fade",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "fade_list",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "text_composition_strategy",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "composition_value",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "text_fg_override_threshold",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "fg_override_threshold",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "time",
+    "named": true,
+    "fields": {
+      "duration": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "number",
+            "named": true
+          }
+        ]
+      },
+      "suffix": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "time_suffix",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "time_suffix",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "title",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "titlebar_color",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "color",
+          "named": true
+        },
+        {
+          "type": "constant",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "toggle_layout",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "layout_type",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "action_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "transparency_list",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "transparent_color",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "transparent_background_colors",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "transparency_list",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "transparent_color",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "alpha",
+          "named": true
+        },
+        {
+          "type": "color",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "undercurl_style",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "constant",
+          "named": true
+        },
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "url_excluded_characters",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "string",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "url_prefix_list",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "constant",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "url_prefixes",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "url_prefix_list",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "variable",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "variable",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "visual_bell_color",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "color",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "wayland_titlebar_color",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "titlebar_color",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "window_border_width",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "border_width",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "window_layout",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "window_location",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "window_logo_scale",
+    "named": true,
+    "fields": {
+      "scale_h": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "number",
+            "named": true
+          }
+        ]
+      },
+      "scale_w": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "number",
+            "named": true
+          }
+        ]
+      },
+      "value": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "number",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "window_margin_width",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "box_value",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "window_padding_width",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "box_value",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "option_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "window_state",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "#",
+    "named": false
+  },
+  {
+    "type": "%",
+    "named": false
+  },
+  {
+    "type": "'",
+    "named": false
+  },
+  {
+    "type": "(",
+    "named": false
+  },
+  {
+    "type": ")",
+    "named": false
+  },
+  {
+    "type": "*",
+    "named": false
+  },
+  {
+    "type": "+",
+    "named": false
+  },
+  {
+    "type": ",",
+    "named": false
+  },
+  {
+    "type": "-",
+    "named": false
+  },
+  {
+    "type": "--watcher",
+    "named": false
+  },
+  {
+    "type": "-w",
+    "named": false
+  },
+  {
+    "type": "/",
+    "named": false
+  },
+  {
+    "type": "1",
+    "named": false
+  },
+  {
+    "type": "2",
+    "named": false
+  },
+  {
+    "type": "3",
+    "named": false
+  },
+  {
+    "type": ":",
+    "named": false
+  },
+  {
+    "type": "=",
+    "named": false
+  },
+  {
+    "type": ">",
+    "named": false
+  },
+  {
+    "type": "@",
+    "named": false
+  },
+  {
+    "type": "@alternate",
+    "named": false
+  },
+  {
+    "type": "@first_cmd_output_on_screen",
+    "named": false
+  },
+  {
+    "type": "@last_cmd_output",
+    "named": false
+  },
+  {
+    "type": "@last_visited_cmd_output",
+    "named": false
+  },
+  {
+    "type": "@screen",
+    "named": false
+  },
+  {
+    "type": "@screen_scrollback",
+    "named": false
+  },
+  {
+    "type": "@selection",
+    "named": false
+  },
+  {
+    "type": "Fat",
+    "named": false
+  },
+  {
+    "type": "Grid",
+    "named": false
+  },
+  {
+    "type": "Horizontal",
+    "named": false
+  },
+  {
+    "type": "Splits",
+    "named": false
+  },
+  {
+    "type": "Stack",
+    "named": false
+  },
+  {
+    "type": "Tall",
+    "named": false
+  },
+  {
+    "type": "Vertical",
+    "named": false
+  },
+  {
+    "type": "^",
+    "named": false
+  },
+  {
+    "type": "action_name",
+    "named": true
+  },
+  {
+    "type": "active",
+    "named": false
+  },
+  {
+    "type": "active_border_color",
+    "named": false
+  },
+  {
+    "type": "active_tab_background",
+    "named": false
+  },
+  {
+    "type": "active_tab_font_style",
+    "named": false
+  },
+  {
+    "type": "active_tab_foreground",
+    "named": false
+  },
+  {
+    "type": "active_tab_title_template",
+    "named": false
+  },
+  {
+    "type": "after",
+    "named": false
+  },
+  {
+    "type": "aliceblue",
+    "named": false
+  },
+  {
+    "type": "all",
+    "named": false
+  },
+  {
+    "type": "allow_cloning",
+    "named": false
+  },
+  {
+    "type": "allow_hyperlinks",
+    "named": false
+  },
+  {
+    "type": "allow_remote_control",
+    "named": false
+  },
+  {
+    "type": "alpha",
+    "named": true
+  },
+  {
+    "type": "always",
+    "named": false
+  },
+  {
+    "type": "and",
+    "named": false
+  },
+  {
+    "type": "antiquewhite",
+    "named": false
+  },
+  {
+    "type": "apostrophe",
+    "named": false
+  },
+  {
+    "type": "app",
+    "named": false
+  },
+  {
+    "type": "application",
+    "named": false
+  },
+  {
+    "type": "aqua",
+    "named": false
+  },
+  {
+    "type": "aquamarine",
+    "named": false
+  },
+  {
+    "type": "arrow",
+    "named": false
+  },
+  {
+    "type": "ask",
+    "named": false
+  },
+  {
+    "type": "azure",
+    "named": false
+  },
+  {
+    "type": "background",
+    "named": false
+  },
+  {
+    "type": "background_blur",
+    "named": false
+  },
+  {
+    "type": "background_image",
+    "named": false
+  },
+  {
+    "type": "background_image_layout",
+    "named": false
+  },
+  {
+    "type": "background_image_linear",
+    "named": false
+  },
+  {
+    "type": "background_opacity",
+    "named": false
+  },
+  {
+    "type": "background_tint",
+    "named": false
+  },
+  {
+    "type": "background_tint_gaps",
+    "named": false
+  },
+  {
+    "type": "backslash",
+    "named": false
+  },
+  {
+    "type": "backspace",
+    "named": false
+  },
+  {
+    "type": "baseline",
+    "named": false
+  },
+  {
+    "type": "beam",
+    "named": false
+  },
+  {
+    "type": "before",
+    "named": false
+  },
+  {
+    "type": "beige",
+    "named": false
+  },
+  {
+    "type": "bell",
+    "named": false
+  },
+  {
+    "type": "bell_border_color",
+    "named": false
+  },
+  {
+    "type": "bell_on_tab",
+    "named": false
+  },
+  {
+    "type": "bell_path",
+    "named": false
+  },
+  {
+    "type": "bisque",
+    "named": false
+  },
+  {
+    "type": "black",
+    "named": false
+  },
+  {
+    "type": "blanchedalmond",
+    "named": false
+  },
+  {
+    "type": "block",
+    "named": false
+  },
+  {
+    "type": "blue",
+    "named": false
+  },
+  {
+    "type": "blueviolet",
+    "named": false
+  },
+  {
+    "type": "body",
+    "named": false
+  },
+  {
+    "type": "bottom",
+    "named": false
+  },
+  {
+    "type": "bottom-left",
+    "named": false
+  },
+  {
+    "type": "bottom-right",
+    "named": false
+  },
+  {
+    "type": "brown",
+    "named": false
+  },
+  {
+    "type": "burlywood",
+    "named": false
+  },
+  {
+    "type": "c",
+    "named": false
+  },
+  {
+    "type": "cadetblue",
+    "named": false
+  },
+  {
+    "type": "caps_lock",
+    "named": false
+  },
+  {
+    "type": "cell_height",
+    "named": false
+  },
+  {
+    "type": "cell_width",
+    "named": false
+  },
+  {
+    "type": "center",
+    "named": false
+  },
+  {
+    "type": "center-sized",
+    "named": false
+  },
+  {
+    "type": "chartreuse",
+    "named": false
+  },
+  {
+    "type": "chocolate",
+    "named": false
+  },
+  {
+    "type": "clear",
+    "named": false
+  },
+  {
+    "type": "clear_all_mouse_actions",
+    "named": false
+  },
+  {
+    "type": "clear_all_shortcuts",
+    "named": false
+  },
+  {
+    "type": "clear_selection",
+    "named": false
+  },
+  {
+    "type": "clear_selection_on_clipboard_loss",
+    "named": false
+  },
+  {
+    "type": "click",
+    "named": false
+  },
+  {
+    "type": "click_interval",
+    "named": false
+  },
+  {
+    "type": "clipboard,primary",
+    "named": false
+  },
+  {
+    "type": "clipboard_max_size",
+    "named": false
+  },
+  {
+    "type": "close_on_child_death",
+    "named": false
+  },
+  {
+    "type": "close_os_window",
+    "named": false
+  },
+  {
+    "type": "close_other_os_windows",
+    "named": false
+  },
+  {
+    "type": "close_other_tabs_in_os_window",
+    "named": false
+  },
+  {
+    "type": "close_other_windows_in_tab",
+    "named": false
+  },
+  {
+    "type": "close_shared_ssh_connections",
+    "named": false
+  },
+  {
+    "type": "close_tab",
+    "named": false
+  },
+  {
+    "type": "close_window",
+    "named": false
+  },
+  {
+    "type": "color0",
+    "named": false
+  },
+  {
+    "type": "color1",
+    "named": false
+  },
+  {
+    "type": "color10",
+    "named": false
+  },
+  {
+    "type": "color11",
+    "named": false
+  },
+  {
+    "type": "color12",
+    "named": false
+  },
+  {
+    "type": "color13",
+    "named": false
+  },
+  {
+    "type": "color14",
+    "named": false
+  },
+  {
+    "type": "color15",
+    "named": false
+  },
+  {
+    "type": "color2",
+    "named": false
+  },
+  {
+    "type": "color3",
+    "named": false
+  },
+  {
+    "type": "color4",
+    "named": false
+  },
+  {
+    "type": "color5",
+    "named": false
+  },
+  {
+    "type": "color6",
+    "named": false
+  },
+  {
+    "type": "color7",
+    "named": false
+  },
+  {
+    "type": "color8",
+    "named": false
+  },
+  {
+    "type": "color9",
+    "named": false
+  },
+  {
+    "type": "comma",
+    "named": false
+  },
+  {
+    "type": "command",
+    "named": false
+  },
+  {
+    "type": "command_on_bell",
+    "named": false
+  },
+  {
+    "type": "comment_content",
+    "named": true
+  },
+  {
+    "type": "conda",
+    "named": false
+  },
+  {
+    "type": "confirm",
+    "named": false
+  },
+  {
+    "type": "confirm-if-large",
+    "named": false
+  },
+  {
+    "type": "copy_and_clear_or_interrupt",
+    "named": false
+  },
+  {
+    "type": "copy_ansi_to_clipboard",
+    "named": false
+  },
+  {
+    "type": "copy_on_select",
+    "named": false
+  },
+  {
+    "type": "copy_or_interrupt",
+    "named": false
+  },
+  {
+    "type": "copy_to_clipboard",
+    "named": false
+  },
+  {
+    "type": "coral",
+    "named": false
+  },
+  {
+    "type": "cornflowerblue",
+    "named": false
+  },
+  {
+    "type": "cornsilk",
+    "named": false
+  },
+  {
+    "type": "create_marker",
+    "named": false
+  },
+  {
+    "type": "crimson",
+    "named": false
+  },
+  {
+    "type": "crosshair",
+    "named": false
+  },
+  {
+    "type": "cubic-bezier",
+    "named": false
+  },
+  {
+    "type": "current",
+    "named": false
+  },
+  {
+    "type": "cursor",
+    "named": false
+  },
+  {
+    "type": "cursor_beam_thickness",
+    "named": false
+  },
+  {
+    "type": "cursor_stop_blinking_after",
+    "named": false
+  },
+  {
+    "type": "cursor_text_color",
+    "named": false
+  },
+  {
+    "type": "cursor_trail",
+    "named": false
+  },
+  {
+    "type": "cursor_trail_start_threshold",
+    "named": false
+  },
+  {
+    "type": "cursor_underline_thickness",
+    "named": false
+  },
+  {
+    "type": "cyan",
+    "named": false
+  },
+  {
+    "type": "d",
+    "named": false
+  },
+  {
+    "type": "darkblue",
+    "named": false
+  },
+  {
+    "type": "darkcyan",
+    "named": false
+  },
+  {
+    "type": "darkgoldenrod",
+    "named": false
+  },
+  {
+    "type": "darkgray",
+    "named": false
+  },
+  {
+    "type": "darkgreen",
+    "named": false
+  },
+  {
+    "type": "darkgrey",
+    "named": false
+  },
+  {
+    "type": "darkkhaki",
+    "named": false
+  },
+  {
+    "type": "darkmagenta",
+    "named": false
+  },
+  {
+    "type": "darkolivegreen",
+    "named": false
+  },
+  {
+    "type": "darkorange",
+    "named": false
+  },
+  {
+    "type": "darkorchid",
+    "named": false
+  },
+  {
+    "type": "darkred",
+    "named": false
+  },
+  {
+    "type": "darksalmon",
+    "named": false
+  },
+  {
+    "type": "darkseagreen",
+    "named": false
+  },
+  {
+    "type": "darkslateblue",
+    "named": false
+  },
+  {
+    "type": "darkslategray",
+    "named": false
+  },
+  {
+    "type": "darkslategrey",
+    "named": false
+  },
+  {
+    "type": "darkturquoise",
+    "named": false
+  },
+  {
+    "type": "darkviolet",
+    "named": false
+  },
+  {
+    "type": "debug_config",
+    "named": false
+  },
+  {
+    "type": "deeppink",
+    "named": false
+  },
+  {
+    "type": "deepskyblue",
+    "named": false
+  },
+  {
+    "type": "delete",
+    "named": false
+  },
+  {
+    "type": "detach_tab",
+    "named": false
+  },
+  {
+    "type": "detect_urls",
+    "named": false
+  },
+  {
+    "type": "dim_opacity",
+    "named": false
+  },
+  {
+    "type": "dimgray",
+    "named": false
+  },
+  {
+    "type": "dimgrey",
+    "named": false
+  },
+  {
+    "type": "disable_ligatures",
+    "named": false
+  },
+  {
+    "type": "discard_event",
+    "named": false
+  },
+  {
+    "type": "dodgerblue",
+    "named": false
+  },
+  {
+    "type": "doubleclick",
+    "named": false
+  },
+  {
+    "type": "doublepress",
+    "named": false
+  },
+  {
+    "type": "down",
+    "named": true
+  },
+  {
+    "type": "draw_minimal_borders",
+    "named": false
+  },
+  {
+    "type": "dump_lines_with_attrs",
+    "named": false
+  },
+  {
+    "type": "dynamic_background_opacity",
+    "named": false
+  },
+  {
+    "type": "edit_config_file",
+    "named": false
+  },
+  {
+    "type": "editor",
+    "named": false
+  },
+  {
+    "type": "eighth_window",
+    "named": false
+  },
+  {
+    "type": "enable_audio_bell",
+    "named": false
+  },
+  {
+    "type": "end",
+    "named": false
+  },
+  {
+    "type": "enter",
+    "named": false
+  },
+  {
+    "type": "env_var",
+    "named": false
+  },
+  {
+    "type": "equal",
+    "named": false
+  },
+  {
+    "type": "escape",
+    "named": false
+  },
+  {
+    "type": "exclusive",
+    "named": false
+  },
+  {
+    "type": "exe_search_path",
+    "named": false
+  },
+  {
+    "type": "extend",
+    "named": false
+  },
+  {
+    "type": "f1",
+    "named": false
+  },
+  {
+    "type": "f10",
+    "named": false
+  },
+  {
+    "type": "f11",
+    "named": false
+  },
+  {
+    "type": "f12",
+    "named": false
+  },
+  {
+    "type": "f13",
+    "named": false
+  },
+  {
+    "type": "f14",
+    "named": false
+  },
+  {
+    "type": "f15",
+    "named": false
+  },
+  {
+    "type": "f16",
+    "named": false
+  },
+  {
+    "type": "f17",
+    "named": false
+  },
+  {
+    "type": "f18",
+    "named": false
+  },
+  {
+    "type": "f19",
+    "named": false
+  },
+  {
+    "type": "f2",
+    "named": false
+  },
+  {
+    "type": "f20",
+    "named": false
+  },
+  {
+    "type": "f21",
+    "named": false
+  },
+  {
+    "type": "f22",
+    "named": false
+  },
+  {
+    "type": "f23",
+    "named": false
+  },
+  {
+    "type": "f24",
+    "named": false
+  },
+  {
+    "type": "f25",
+    "named": false
+  },
+  {
+    "type": "f26",
+    "named": false
+  },
+  {
+    "type": "f27",
+    "named": false
+  },
+  {
+    "type": "f28",
+    "named": false
+  },
+  {
+    "type": "f29",
+    "named": false
+  },
+  {
+    "type": "f3",
+    "named": false
+  },
+  {
+    "type": "f30",
+    "named": false
+  },
+  {
+    "type": "f31",
+    "named": false
+  },
+  {
+    "type": "f32",
+    "named": false
+  },
+  {
+    "type": "f33",
+    "named": false
+  },
+  {
+    "type": "f34",
+    "named": false
+  },
+  {
+    "type": "f35",
+    "named": false
+  },
+  {
+    "type": "f4",
+    "named": false
+  },
+  {
+    "type": "f5",
+    "named": false
+  },
+  {
+    "type": "f6",
+    "named": false
+  },
+  {
+    "type": "f7",
+    "named": false
+  },
+  {
+    "type": "f8",
+    "named": false
+  },
+  {
+    "type": "f9",
+    "named": false
+  },
+  {
+    "type": "family",
+    "named": false
+  },
+  {
+    "type": "fat",
+    "named": false
+  },
+  {
+    "type": "features",
+    "named": false
+  },
+  {
+    "type": "fifth_window",
+    "named": false
+  },
+  {
+    "type": "file_transfer_confirmation_bypass",
+    "named": false
+  },
+  {
+    "type": "filter",
+    "named": false
+  },
+  {
+    "type": "firebrick",
+    "named": false
+  },
+  {
+    "type": "first",
+    "named": false
+  },
+  {
+    "type": "first_window",
+    "named": false
+  },
+  {
+    "type": "flag",
+    "named": true
+  },
+  {
+    "type": "floralwhite",
+    "named": false
+  },
+  {
+    "type": "focus_follows_mouse",
+    "named": false
+  },
+  {
+    "type": "focus_visible_window",
+    "named": false
+  },
+  {
+    "type": "font_feature",
+    "named": true
+  },
+  {
+    "type": "font_size",
+    "named": false
+  },
+  {
+    "type": "force_ltr",
+    "named": false
+  },
+  {
+    "type": "foreground",
+    "named": false
+  },
+  {
+    "type": "forestgreen",
+    "named": false
+  },
+  {
+    "type": "forward_stdio",
+    "named": false
+  },
+  {
+    "type": "fourth_window",
+    "named": false
+  },
+  {
+    "type": "fuchsia",
+    "named": false
+  },
+  {
+    "type": "full_name",
+    "named": false
+  },
+  {
+    "type": "fullscreen",
+    "named": false
+  },
+  {
+    "type": "function",
+    "named": false
+  },
+  {
+    "type": "gainsboro",
+    "named": false
+  },
+  {
+    "type": "ghostwhite",
+    "named": false
+  },
+  {
+    "type": "gold",
+    "named": false
+  },
+  {
+    "type": "goldenrod",
+    "named": false
+  },
+  {
+    "type": "grab_keyboard",
+    "named": false
+  },
+  {
+    "type": "grabbed",
+    "named": false
+  },
+  {
+    "type": "grave_accent",
+    "named": false
+  },
+  {
+    "type": "gray",
+    "named": false
+  },
+  {
+    "type": "green",
+    "named": false
+  },
+  {
+    "type": "greenyellow",
+    "named": false
+  },
+  {
+    "type": "grey",
+    "named": false
+  },
+  {
+    "type": "grid",
+    "named": false
+  },
+  {
+    "type": "h",
+    "named": false
+  },
+  {
+    "type": "hand",
+    "named": false
+  },
+  {
+    "type": "hide_macos_app",
+    "named": false
+  },
+  {
+    "type": "hide_macos_other_apps",
+    "named": false
+  },
+  {
+    "type": "hide_window_decorations",
+    "named": false
+  },
+  {
+    "type": "hollow",
+    "named": false
+  },
+  {
+    "type": "home",
+    "named": false
+  },
+  {
+    "type": "honeydew",
+    "named": false
+  },
+  {
+    "type": "horizontal",
+    "named": false
+  },
+  {
+    "type": "hotpink",
+    "named": false
+  },
+  {
+    "type": "hovered",
+    "named": false
+  },
+  {
+    "type": "hsplit",
+    "named": false
+  },
+  {
+    "type": "ignore-shell",
+    "named": false
+  },
+  {
+    "type": "inactive_border_color",
+    "named": false
+  },
+  {
+    "type": "inactive_tab_background",
+    "named": false
+  },
+  {
+    "type": "inactive_tab_font_style",
+    "named": false
+  },
+  {
+    "type": "inactive_tab_foreground",
+    "named": false
+  },
+  {
+    "type": "inactive_text_alpha",
+    "named": false
+  },
+  {
+    "type": "indianred",
+    "named": false
+  },
+  {
+    "type": "indigo",
+    "named": false
+  },
+  {
+    "type": "inherit",
+    "named": true
+  },
+  {
+    "type": "input_delay",
+    "named": false
+  },
+  {
+    "type": "input_unicode_character",
+    "named": false
+  },
+  {
+    "type": "insert",
+    "named": false
+  },
+  {
+    "type": "invisible",
+    "named": false
+  },
+  {
+    "type": "iregex",
+    "named": false
+  },
+  {
+    "type": "iso_level3_shift",
+    "named": false
+  },
+  {
+    "type": "iso_level5_shift",
+    "named": false
+  },
+  {
+    "type": "itext",
+    "named": false
+  },
+  {
+    "type": "ivory",
+    "named": false
+  },
+  {
+    "type": "jump-both",
+    "named": false
+  },
+  {
+    "type": "jump-end",
+    "named": false
+  },
+  {
+    "type": "jump-none",
+    "named": false
+  },
+  {
+    "type": "jump-start",
+    "named": false
+  },
+  {
+    "type": "key",
+    "named": true
+  },
+  {
+    "type": "khaki",
+    "named": false
+  },
+  {
+    "type": "kitty",
+    "named": false
+  },
+  {
+    "type": "kitty_mod",
+    "named": false
+  },
+  {
+    "type": "kp_0",
+    "named": false
+  },
+  {
+    "type": "kp_1",
+    "named": false
+  },
+  {
+    "type": "kp_2",
+    "named": false
+  },
+  {
+    "type": "kp_3",
+    "named": false
+  },
+  {
+    "type": "kp_4",
+    "named": false
+  },
+  {
+    "type": "kp_5",
+    "named": false
+  },
+  {
+    "type": "kp_6",
+    "named": false
+  },
+  {
+    "type": "kp_7",
+    "named": false
+  },
+  {
+    "type": "kp_8",
+    "named": false
+  },
+  {
+    "type": "kp_9",
+    "named": false
+  },
+  {
+    "type": "kp_add",
+    "named": false
+  },
+  {
+    "type": "kp_begin",
+    "named": false
+  },
+  {
+    "type": "kp_decimal",
+    "named": false
+  },
+  {
+    "type": "kp_delete",
+    "named": false
+  },
+  {
+    "type": "kp_divide",
+    "named": false
+  },
+  {
+    "type": "kp_down",
+    "named": false
+  },
+  {
+    "type": "kp_end",
+    "named": false
+  },
+  {
+    "type": "kp_enter",
+    "named": false
+  },
+  {
+    "type": "kp_equal",
+    "named": false
+  },
+  {
+    "type": "kp_home",
+    "named": false
+  },
+  {
+    "type": "kp_insert",
+    "named": false
+  },
+  {
+    "type": "kp_left",
+    "named": false
+  },
+  {
+    "type": "kp_multiply",
+    "named": false
+  },
+  {
+    "type": "kp_page_down",
+    "named": false
+  },
+  {
+    "type": "kp_page_up",
+    "named": false
+  },
+  {
+    "type": "kp_right",
+    "named": false
+  },
+  {
+    "type": "kp_separator",
+    "named": false
+  },
+  {
+    "type": "kp_subtract",
+    "named": false
+  },
+  {
+    "type": "kp_up",
+    "named": false
+  },
+  {
+    "type": "last",
+    "named": false
+  },
+  {
+    "type": "last_used_layout",
+    "named": false
+  },
+  {
+    "type": "lavender",
+    "named": false
+  },
+  {
+    "type": "lavenderblush",
+    "named": false
+  },
+  {
+    "type": "lawngreen",
+    "named": false
+  },
+  {
+    "type": "layout_action",
+    "named": false
+  },
+  {
+    "type": "left",
+    "named": true
+  },
+  {
+    "type": "left",
+    "named": false
+  },
+  {
+    "type": "left_alt",
+    "named": false
+  },
+  {
+    "type": "left_bracket",
+    "named": false
+  },
+  {
+    "type": "left_control",
+    "named": false
+  },
+  {
+    "type": "left_hyper",
+    "named": false
+  },
+  {
+    "type": "left_meta",
+    "named": false
+  },
+  {
+    "type": "left_shift",
+    "named": false
+  },
+  {
+    "type": "left_super",
+    "named": false
+  },
+  {
+    "type": "lemonchiffon",
+    "named": false
+  },
+  {
+    "type": "lightblue",
+    "named": false
+  },
+  {
+    "type": "lightcoral",
+    "named": false
+  },
+  {
+    "type": "lightcyan",
+    "named": false
+  },
+  {
+    "type": "lightgoldenrodyellow",
+    "named": false
+  },
+  {
+    "type": "lightgray",
+    "named": false
+  },
+  {
+    "type": "lightgreen",
+    "named": false
+  },
+  {
+    "type": "lightgrey",
+    "named": false
+  },
+  {
+    "type": "lightpink",
+    "named": false
+  },
+  {
+    "type": "lightsalmon",
+    "named": false
+  },
+  {
+    "type": "lightseagreen",
+    "named": false
+  },
+  {
+    "type": "lightskyblue",
+    "named": false
+  },
+  {
+    "type": "lightslategray",
+    "named": false
+  },
+  {
+    "type": "lightslategrey",
+    "named": false
+  },
+  {
+    "type": "lightsteelblue",
+    "named": false
+  },
+  {
+    "type": "lightyellow",
+    "named": false
+  },
+  {
+    "type": "lime",
+    "named": false
+  },
+  {
+    "type": "limegreen",
+    "named": false
+  },
+  {
+    "type": "line",
+    "named": false
+  },
+  {
+    "type": "line_from_point",
+    "named": false
+  },
+  {
+    "type": "linen",
+    "named": false
+  },
+  {
+    "type": "link",
+    "named": false
+  },
+  {
+    "type": "linux_bell_theme",
+    "named": false
+  },
+  {
+    "type": "linux_display_server",
+    "named": false
+  },
+  {
+    "type": "list",
+    "named": false
+  },
+  {
+    "type": "listen_on",
+    "named": false
+  },
+  {
+    "type": "listjson",
+    "named": false
+  },
+  {
+    "type": "lower_volume",
+    "named": false
+  },
+  {
+    "type": "m",
+    "named": false
+  },
+  {
+    "type": "macos_colorspace",
+    "named": false
+  },
+  {
+    "type": "macos_custom_beam_cursor",
+    "named": false
+  },
+  {
+    "type": "macos_hide_from_tasks",
+    "named": false
+  },
+  {
+    "type": "macos_menubar_title_max_length",
+    "named": false
+  },
+  {
+    "type": "macos_option_as_alt",
+    "named": false
+  },
+  {
+    "type": "macos_quit_when_last_window_closed",
+    "named": false
+  },
+  {
+    "type": "macos_show_window_title_in",
+    "named": false
+  },
+  {
+    "type": "macos_thicken_font",
+    "named": false
+  },
+  {
+    "type": "macos_titlebar_color",
+    "named": false
+  },
+  {
+    "type": "macos_traditional_fullscreen",
+    "named": false
+  },
+  {
+    "type": "macos_window_resizable",
+    "named": false
+  },
+  {
+    "type": "magenta",
+    "named": false
+  },
+  {
+    "type": "map",
+    "named": false
+  },
+  {
+    "type": "mark1_background",
+    "named": false
+  },
+  {
+    "type": "mark1_foreground",
+    "named": false
+  },
+  {
+    "type": "mark2_background",
+    "named": false
+  },
+  {
+    "type": "mark2_foreground",
+    "named": false
+  },
+  {
+    "type": "mark3_background",
+    "named": false
+  },
+  {
+    "type": "mark3_foreground",
+    "named": false
+  },
+  {
+    "type": "maroon",
+    "named": false
+  },
+  {
+    "type": "maximized",
+    "named": false
+  },
+  {
+    "type": "media_fast_forward",
+    "named": false
+  },
+  {
+    "type": "media_pause",
+    "named": false
+  },
+  {
+    "type": "media_play",
+    "named": false
+  },
+  {
+    "type": "media_play_pause",
+    "named": false
+  },
+  {
+    "type": "media_record",
+    "named": false
+  },
+  {
+    "type": "media_reverse",
+    "named": false
+  },
+  {
+    "type": "media_rewind",
+    "named": false
+  },
+  {
+    "type": "media_stop",
+    "named": false
+  },
+  {
+    "type": "media_track_next",
+    "named": false
+  },
+  {
+    "type": "media_track_previous",
+    "named": false
+  },
+  {
+    "type": "mediumaquamarine",
+    "named": false
+  },
+  {
+    "type": "mediumblue",
+    "named": false
+  },
+  {
+    "type": "mediumorchid",
+    "named": false
+  },
+  {
+    "type": "mediumpurple",
+    "named": false
+  },
+  {
+    "type": "mediumseagreen",
+    "named": false
+  },
+  {
+    "type": "mediumslateblue",
+    "named": false
+  },
+  {
+    "type": "mediumspringgreen",
+    "named": false
+  },
+  {
+    "type": "mediumturquoise",
+    "named": false
+  },
+  {
+    "type": "mediumvioletred",
+    "named": false
+  },
+  {
+    "type": "menu",
+    "named": false
+  },
+  {
+    "type": "middle",
+    "named": true
+  },
+  {
+    "type": "midnightblue",
+    "named": false
+  },
+  {
+    "type": "minimize_macos_window",
+    "named": false
+  },
+  {
+    "type": "minimized",
+    "named": false
+  },
+  {
+    "type": "mintcream",
+    "named": false
+  },
+  {
+    "type": "minus",
+    "named": false
+  },
+  {
+    "type": "mistyrose",
+    "named": false
+  },
+  {
+    "type": "moccasin",
+    "named": false
+  },
+  {
+    "type": "mouse_button",
+    "named": true
+  },
+  {
+    "type": "mouse_click_url",
+    "named": false
+  },
+  {
+    "type": "mouse_click_url_or_select",
+    "named": false
+  },
+  {
+    "type": "mouse_map",
+    "named": false
+  },
+  {
+    "type": "mouse_select_command_output",
+    "named": false
+  },
+  {
+    "type": "mouse_show_command_output",
+    "named": false
+  },
+  {
+    "type": "move_tab_backward",
+    "named": false
+  },
+  {
+    "type": "move_tab_forward",
+    "named": false
+  },
+  {
+    "type": "move_window_backward",
+    "named": false
+  },
+  {
+    "type": "move_window_forward",
+    "named": false
+  },
+  {
+    "type": "move_window_to_top",
+    "named": false
+  },
+  {
+    "type": "mute_volume",
+    "named": false
+  },
+  {
+    "type": "narrower",
+    "named": false
+  },
+  {
+    "type": "navajowhite",
+    "named": false
+  },
+  {
+    "type": "navy",
+    "named": false
+  },
+  {
+    "type": "neighbor",
+    "named": false
+  },
+  {
+    "type": "never",
+    "named": false
+  },
+  {
+    "type": "new-tab",
+    "named": false
+  },
+  {
+    "type": "new-tab-left",
+    "named": false
+  },
+  {
+    "type": "new-tab-next",
+    "named": false
+  },
+  {
+    "type": "new-tab-prev",
+    "named": false
+  },
+  {
+    "type": "new-tab-right",
+    "named": false
+  },
+  {
+    "type": "new_os_window",
+    "named": false
+  },
+  {
+    "type": "new_os_window_with_cwd",
+    "named": false
+  },
+  {
+    "type": "new_tab",
+    "named": false
+  },
+  {
+    "type": "new_tab_with_cwd",
+    "named": false
+  },
+  {
+    "type": "new_window_with_cwd",
+    "named": false
+  },
+  {
+    "type": "next_layout",
+    "named": false
+  },
+  {
+    "type": "next_tab",
+    "named": false
+  },
+  {
+    "type": "next_window",
+    "named": false
+  },
+  {
+    "type": "ninth_window",
+    "named": false
+  },
+  {
+    "type": "no",
+    "named": false
+  },
+  {
+    "type": "no-complete",
+    "named": false
+  },
+  {
+    "type": "no-cursor",
+    "named": false
+  },
+  {
+    "type": "no-cwd",
+    "named": false
+  },
+  {
+    "type": "no-op",
+    "named": false
+  },
+  {
+    "type": "no-prompt-mark",
+    "named": false
+  },
+  {
+    "type": "no-rc",
+    "named": false
+  },
+  {
+    "type": "no-sudo",
+    "named": false
+  },
+  {
+    "type": "no-title",
+    "named": false
+  },
+  {
+    "type": "no_op",
+    "named": false
+  },
+  {
+    "type": "none",
+    "named": false
+  },
+  {
+    "type": "normal",
+    "named": false
+  },
+  {
+    "type": "not",
+    "named": false
+  },
+  {
+    "type": "not-allowed",
+    "named": false
+  },
+  {
+    "type": "notify",
+    "named": false
+  },
+  {
+    "type": "num_lock",
+    "named": false
+  },
+  {
+    "type": "number",
+    "named": true
+  },
+  {
+    "type": "oldlace",
+    "named": false
+  },
+  {
+    "type": "olive",
+    "named": false
+  },
+  {
+    "type": "olivedrab",
+    "named": false
+  },
+  {
+    "type": "on-demand",
+    "named": false
+  },
+  {
+    "type": "open_url_with",
+    "named": false
+  },
+  {
+    "type": "open_url_with_hints",
+    "named": false
+  },
+  {
+    "type": "or",
+    "named": false
+  },
+  {
+    "type": "orange",
+    "named": false
+  },
+  {
+    "type": "orangered",
+    "named": false
+  },
+  {
+    "type": "orchid",
+    "named": false
+  },
+  {
+    "type": "os-panel",
+    "named": false
+  },
+  {
+    "type": "os-window",
+    "named": false
+  },
+  {
+    "type": "os_window",
+    "named": false
+  },
+  {
+    "type": "os_window_class",
+    "named": true
+  },
+  {
+    "type": "overlay",
+    "named": false
+  },
+  {
+    "type": "overlay-main",
+    "named": false
+  },
+  {
+    "type": "page_down",
+    "named": false
+  },
+  {
+    "type": "page_up",
+    "named": false
+  },
+  {
+    "type": "palegoldenrod",
+    "named": false
+  },
+  {
+    "type": "palegreen",
+    "named": false
+  },
+  {
+    "type": "paleturquoise",
+    "named": false
+  },
+  {
+    "type": "palevioletred",
+    "named": false
+  },
+  {
+    "type": "papayawhip",
+    "named": false
+  },
+  {
+    "type": "paste",
+    "named": false
+  },
+  {
+    "type": "paste_from_clipboard",
+    "named": false
+  },
+  {
+    "type": "paste_from_selection",
+    "named": false
+  },
+  {
+    "type": "paste_selection",
+    "named": false
+  },
+  {
+    "type": "paste_selection_or_clipboard",
+    "named": false
+  },
+  {
+    "type": "path",
+    "named": false
+  },
+  {
+    "type": "pause",
+    "named": false
+  },
+  {
+    "type": "peachpuff",
+    "named": false
+  },
+  {
+    "type": "period",
+    "named": false
+  },
+  {
+    "type": "peru",
+    "named": false
+  },
+  {
+    "type": "pink",
+    "named": false
+  },
+  {
+    "type": "placement_strategy",
+    "named": false
+  },
+  {
+    "type": "plum",
+    "named": false
+  },
+  {
+    "type": "plus",
+    "named": false
+  },
+  {
+    "type": "pointer_options",
+    "named": false
+  },
+  {
+    "type": "pop_keyboard_mode",
+    "named": false
+  },
+  {
+    "type": "postscript_name",
+    "named": false
+  },
+  {
+    "type": "powderblue",
+    "named": false
+  },
+  {
+    "type": "press",
+    "named": false
+  },
+  {
+    "type": "previous_tab",
+    "named": false
+  },
+  {
+    "type": "previous_window",
+    "named": false
+  },
+  {
+    "type": "print_screen",
+    "named": false
+  },
+  {
+    "type": "prompt",
+    "named": false
+  },
+  {
+    "type": "pt",
+    "named": false
+  },
+  {
+    "type": "purple",
+    "named": false
+  },
+  {
+    "type": "push_keyboard_mode",
+    "named": false
+  },
+  {
+    "type": "px",
+    "named": false
+  },
+  {
+    "type": "quit",
+    "named": false
+  },
+  {
+    "type": "quote-urls-at-prompt",
+    "named": false
+  },
+  {
+    "type": "raise_volume",
+    "named": false
+  },
+  {
+    "type": "ratio",
+    "named": false
+  },
+  {
+    "type": "read-clipboard",
+    "named": false
+  },
+  {
+    "type": "read-clipboard-ask",
+    "named": false
+  },
+  {
+    "type": "read-primary",
+    "named": false
+  },
+  {
+    "type": "read-primary-ask",
+    "named": false
+  },
+  {
+    "type": "rectangle",
+    "named": false
+  },
+  {
+    "type": "red",
+    "named": false
+  },
+  {
+    "type": "regex",
+    "named": false
+  },
+  {
+    "type": "release",
+    "named": false
+  },
+  {
+    "type": "remember_window_position",
+    "named": false
+  },
+  {
+    "type": "remember_window_size",
+    "named": false
+  },
+  {
+    "type": "remote_action",
+    "named": true
+  },
+  {
+    "type": "remove_marker",
+    "named": false
+  },
+  {
+    "type": "repaint_delay",
+    "named": false
+  },
+  {
+    "type": "replace-dangerous-control-codes",
+    "named": false
+  },
+  {
+    "type": "replace-newline",
+    "named": false
+  },
+  {
+    "type": "reset",
+    "named": false
+  },
+  {
+    "type": "reset_window_sizes",
+    "named": false
+  },
+  {
+    "type": "resize_in_steps",
+    "named": false
+  },
+  {
+    "type": "right",
+    "named": false
+  },
+  {
+    "type": "right",
+    "named": true
+  },
+  {
+    "type": "right_alt",
+    "named": false
+  },
+  {
+    "type": "right_bracket",
+    "named": false
+  },
+  {
+    "type": "right_control",
+    "named": false
+  },
+  {
+    "type": "right_hyper",
+    "named": false
+  },
+  {
+    "type": "right_meta",
+    "named": false
+  },
+  {
+    "type": "right_shift",
+    "named": false
+  },
+  {
+    "type": "right_super",
+    "named": false
+  },
+  {
+    "type": "rosybrown",
+    "named": false
+  },
+  {
+    "type": "royalblue",
+    "named": false
+  },
+  {
+    "type": "s",
+    "named": false
+  },
+  {
+    "type": "saddlebrown",
+    "named": false
+  },
+  {
+    "type": "salmon",
+    "named": false
+  },
+  {
+    "type": "sandybrown",
+    "named": false
+  },
+  {
+    "type": "scroll",
+    "named": false
+  },
+  {
+    "type": "scroll_end",
+    "named": false
+  },
+  {
+    "type": "scroll_home",
+    "named": false
+  },
+  {
+    "type": "scroll_line_down",
+    "named": false
+  },
+  {
+    "type": "scroll_line_up",
+    "named": false
+  },
+  {
+    "type": "scroll_lock",
+    "named": false
+  },
+  {
+    "type": "scroll_page_down",
+    "named": false
+  },
+  {
+    "type": "scroll_page_up",
+    "named": false
+  },
+  {
+    "type": "scroll_prompt_to_bottom",
+    "named": false
+  },
+  {
+    "type": "scroll_to_mark",
+    "named": false
+  },
+  {
+    "type": "scrollback",
+    "named": false
+  },
+  {
+    "type": "scrollback_fill_enlarged_window",
+    "named": false
+  },
+  {
+    "type": "scrollback_indicator_opacity",
+    "named": false
+  },
+  {
+    "type": "scrollback_lines",
+    "named": false
+  },
+  {
+    "type": "scrollback_pager_history_size",
+    "named": false
+  },
+  {
+    "type": "scrolled",
+    "named": false
+  },
+  {
+    "type": "scrolled-and-hovered",
+    "named": false
+  },
+  {
+    "type": "seagreen",
+    "named": false
+  },
+  {
+    "type": "seashell",
+    "named": false
+  },
+  {
+    "type": "second_window",
+    "named": false
+  },
+  {
+    "type": "select_by_word_characters",
+    "named": false
+  },
+  {
+    "type": "select_by_word_characters_forward",
+    "named": false
+  },
+  {
+    "type": "select_tab",
+    "named": false
+  },
+  {
+    "type": "selection",
+    "named": false
+  },
+  {
+    "type": "selection_background",
+    "named": false
+  },
+  {
+    "type": "selection_foreground",
+    "named": false
+  },
+  {
+    "type": "semicolon",
+    "named": false
+  },
+  {
+    "type": "set_colors",
+    "named": false
+  },
+  {
+    "type": "seventh_window",
+    "named": false
+  },
+  {
+    "type": "shell",
+    "named": false
+  },
+  {
+    "type": "shorter",
+    "named": false
+  },
+  {
+    "type": "show_error",
+    "named": false
+  },
+  {
+    "type": "show_first_command_output_on_screen",
+    "named": false
+  },
+  {
+    "type": "show_hyperlink_targets",
+    "named": false
+  },
+  {
+    "type": "show_kitty_env_vars",
+    "named": false
+  },
+  {
+    "type": "show_last_command_output",
+    "named": false
+  },
+  {
+    "type": "show_last_non_empty_command_output",
+    "named": false
+  },
+  {
+    "type": "show_last_visited_command_output",
+    "named": false
+  },
+  {
+    "type": "show_scrollback",
+    "named": false
+  },
+  {
+    "type": "sienna",
+    "named": false
+  },
+  {
+    "type": "signal_name",
+    "named": true
+  },
+  {
+    "type": "silver",
+    "named": false
+  },
+  {
+    "type": "simulate_color_scheme_preference_change",
+    "named": false
+  },
+  {
+    "type": "sixth_window",
+    "named": false
+  },
+  {
+    "type": "skyblue",
+    "named": false
+  },
+  {
+    "type": "slash",
+    "named": false
+  },
+  {
+    "type": "slateblue",
+    "named": false
+  },
+  {
+    "type": "slategray",
+    "named": false
+  },
+  {
+    "type": "slategrey",
+    "named": false
+  },
+  {
+    "type": "snow",
+    "named": false
+  },
+  {
+    "type": "space",
+    "named": false
+  },
+  {
+    "type": "spacing_type",
+    "named": true
+  },
+  {
+    "type": "split",
+    "named": false
+  },
+  {
+    "type": "splits",
+    "named": false
+  },
+  {
+    "type": "springgreen",
+    "named": false
+  },
+  {
+    "type": "stack",
+    "named": false
+  },
+  {
+    "type": "start",
+    "named": false
+  },
+  {
+    "type": "start_resizing_window",
+    "named": false
+  },
+  {
+    "type": "startup_session",
+    "named": false
+  },
+  {
+    "type": "steelblue",
+    "named": false
+  },
+  {
+    "type": "steps",
+    "named": false
+  },
+  {
+    "type": "strikethrough_position",
+    "named": false
+  },
+  {
+    "type": "strip_trailing_spaces",
+    "named": false
+  },
+  {
+    "type": "style",
+    "named": false
+  },
+  {
+    "type": "swap_with_window",
+    "named": false
+  },
+  {
+    "type": "sync_to_monitor",
+    "named": false
+  },
+  {
+    "type": "system",
+    "named": false
+  },
+  {
+    "type": "tab",
+    "named": false
+  },
+  {
+    "type": "tab-left",
+    "named": false
+  },
+  {
+    "type": "tab-next",
+    "named": false
+  },
+  {
+    "type": "tab-prev",
+    "named": false
+  },
+  {
+    "type": "tab-right",
+    "named": false
+  },
+  {
+    "type": "tab_activity_symbol",
+    "named": false
+  },
+  {
+    "type": "tab_bar_align",
+    "named": false
+  },
+  {
+    "type": "tab_bar_background",
+    "named": false
+  },
+  {
+    "type": "tab_bar_edge",
+    "named": false
+  },
+  {
+    "type": "tab_bar_margin_color",
+    "named": false
+  },
+  {
+    "type": "tab_bar_margin_width",
+    "named": false
+  },
+  {
+    "type": "tab_bar_min_tabs",
+    "named": false
+  },
+  {
+    "type": "tab_bar_style",
+    "named": false
+  },
+  {
+    "type": "tab_powerline_style",
+    "named": false
+  },
+  {
+    "type": "tab_separator",
+    "named": false
+  },
+  {
+    "type": "tab_switch_strategy",
+    "named": false
+  },
+  {
+    "type": "tab_title_max_length",
+    "named": false
+  },
+  {
+    "type": "tab_title_template",
+    "named": false
+  },
+  {
+    "type": "tall",
+    "named": false
+  },
+  {
+    "type": "taller",
+    "named": false
+  },
+  {
+    "type": "tan",
+    "named": false
+  },
+  {
+    "type": "teal",
+    "named": false
+  },
+  {
+    "type": "tenth_window",
+    "named": false
+  },
+  {
+    "type": "term",
+    "named": false
+  },
+  {
+    "type": "terminfo_type",
+    "named": false
+  },
+  {
+    "type": "text",
+    "named": false
+  },
+  {
+    "type": "third_window",
+    "named": false
+  },
+  {
+    "type": "thistle",
+    "named": false
+  },
+  {
+    "type": "title",
+    "named": false
+  },
+  {
+    "type": "to_cursor",
+    "named": false
+  },
+  {
+    "type": "to_cursor_scroll",
+    "named": false
+  },
+  {
+    "type": "toggle_fullscreen",
+    "named": false
+  },
+  {
+    "type": "toggle_macos_secure_keyboard_entry",
+    "named": false
+  },
+  {
+    "type": "toggle_marker",
+    "named": false
+  },
+  {
+    "type": "toggle_maximized",
+    "named": false
+  },
+  {
+    "type": "toggle_tab",
+    "named": false
+  },
+  {
+    "type": "tomato",
+    "named": false
+  },
+  {
+    "type": "top",
+    "named": false
+  },
+  {
+    "type": "top-left",
+    "named": false
+  },
+  {
+    "type": "top-right",
+    "named": false
+  },
+  {
+    "type": "touch_scroll_multiplier",
+    "named": false
+  },
+  {
+    "type": "triplepress",
+    "named": false
+  },
+  {
+    "type": "turquoise",
+    "named": false
+  },
+  {
+    "type": "type",
+    "named": false
+  },
+  {
+    "type": "unchanged",
+    "named": false
+  },
+  {
+    "type": "underline",
+    "named": false
+  },
+  {
+    "type": "underline_exclusion",
+    "named": false
+  },
+  {
+    "type": "underline_hyperlinks",
+    "named": false
+  },
+  {
+    "type": "underline_position",
+    "named": false
+  },
+  {
+    "type": "underline_thickness",
+    "named": false
+  },
+  {
+    "type": "unfocused",
+    "named": false
+  },
+  {
+    "type": "ungrab_keyboard",
+    "named": false
+  },
+  {
+    "type": "ungrabbed",
+    "named": false
+  },
+  {
+    "type": "up",
+    "named": true
+  },
+  {
+    "type": "update_check_interval",
+    "named": false
+  },
+  {
+    "type": "url_color",
+    "named": false
+  },
+  {
+    "type": "url_style",
+    "named": false
+  },
+  {
+    "type": "venv",
+    "named": false
+  },
+  {
+    "type": "vertical",
+    "named": false
+  },
+  {
+    "type": "violet",
+    "named": false
+  },
+  {
+    "type": "visual_bell_duration",
+    "named": false
+  },
+  {
+    "type": "visual_window_select_characters",
+    "named": false
+  },
+  {
+    "type": "vsplit",
+    "named": false
+  },
+  {
+    "type": "watcher",
+    "named": false
+  },
+  {
+    "type": "wayland_enable_ime",
+    "named": false
+  },
+  {
+    "type": "wheat",
+    "named": false
+  },
+  {
+    "type": "wheel_scroll_min_lines",
+    "named": false
+  },
+  {
+    "type": "wheel_scroll_multiplier",
+    "named": false
+  },
+  {
+    "type": "white",
+    "named": false
+  },
+  {
+    "type": "whitesmoke",
+    "named": false
+  },
+  {
+    "type": "wider",
+    "named": false
+  },
+  {
+    "type": "window",
+    "named": false
+  },
+  {
+    "type": "window_alert_on_bell",
+    "named": false
+  },
+  {
+    "type": "window_logo_alpha",
+    "named": false
+  },
+  {
+    "type": "window_logo_path",
+    "named": false
+  },
+  {
+    "type": "window_logo_position",
+    "named": false
+  },
+  {
+    "type": "window_resize_step_cells",
+    "named": false
+  },
+  {
+    "type": "window_resize_step_lines",
+    "named": false
+  },
+  {
+    "type": "word",
+    "named": false
+  },
+  {
+    "type": "write-clipboard",
+    "named": false
+  },
+  {
+    "type": "write-primary",
+    "named": false
+  },
+  {
+    "type": "yellow",
+    "named": false
+  },
+  {
+    "type": "yellowgreen",
+    "named": false
+  },
+  {
+    "type": "yes",
+    "named": false
+  },
+  {
+    "type": "|",
+    "named": false
+  },
+  {
+    "type": "⇧",
+    "named": false
+  },
+  {
+    "type": "⌘",
+    "named": false
+  },
+  {
+    "type": "⌥",
+    "named": false
+  }
+]

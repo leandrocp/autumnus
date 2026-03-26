@@ -1107,12 +1107,15 @@ fn preprocess_queries(name: &str) -> Result<()> {
     let overwrites = "queries/overrides";
     let dest = "queries/processed";
 
-    let _ = fs::remove_dir_all(dest);
+    if name.is_empty() {
+        let _ = fs::remove_dir_all(dest);
+    }
 
     for lang in query_names()? {
         if !name.is_empty() && lang != name {
             continue;
         }
+        let _ = fs::remove_dir_all(format!("{dest}/{lang}"));
 
         fs::create_dir_all(format!("{dest}/{lang}"))?;
         let mut wrote = false;

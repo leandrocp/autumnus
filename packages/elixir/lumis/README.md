@@ -26,7 +26,7 @@
 
 ## Features
 
-- 🌳 70+ languages with tree-sitter parsing
+- 🌳 110+ languages with tree-sitter parsing
 - 🎨 120+ Neovim themes
 - 📝 HTML output with inline styles or CSS classes
 - 🖥️ Terminal output with ANSI colors

@@ -23,7 +23,7 @@
 
 ## Features
 
-- **70+ Tree-sitter languages** - Fast, accurate, and updated syntax parsing
+- **110+ Tree-sitter languages** - Fast, accurate, and updated syntax parsing
 - **120+ Neovim themes** - Updated and curated themes from the Neovim community
 - **6 platforms** - CLI, Rust, Elixir, Node.js, Browser, Java
 - **Multiple outputs** - HTML (inline/linked), Terminal (ANSI), Multi-theme (light/dark), and custom formatters

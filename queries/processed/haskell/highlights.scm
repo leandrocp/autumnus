@@ -10,7 +10,8 @@
     (_) @variable.parameter))
 
 (expression/lambda
-  (_)+ @variable.parameter
+  patterns: (patterns
+    (_) @variable.parameter)
   "->")
 
 (decl/function
@@ -227,7 +228,8 @@
     (qualified
       ((module) @module
         (variable) @function.call))
-  ])
+  ]
+  operator: (operator))
 
 ; infix operators applied to variables
 ((expression/variable) @variable
@@ -246,7 +248,7 @@
 (function
   (infix
     left_operand: [
-      (variable) @variable
+      (variable) @variable.parameter
       (qualified
         ((module) @module
           (variable) @variable))

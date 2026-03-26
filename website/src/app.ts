@@ -328,7 +328,7 @@ export async function mountApp(root: HTMLDivElement) {
             <p class="mt-1 font-mono text-xs text-zinc-500">CLI, Rust, Elixir, Node.js, Browser, Java. Multiple engines, same output.</p>
           </div>
           <div class="bg-white px-6 py-8 dark:bg-[#09090b]">
-            <p class="font-mono text-2xl font-bold tabular-nums text-zinc-900 dark:text-white">70+ <span class="text-sky-400">Languages</span></p>
+            <p class="font-mono text-2xl font-bold tabular-nums text-zinc-900 dark:text-white">110+ <span class="text-sky-400">Languages</span></p>
             <p class="mt-1 font-mono text-xs text-zinc-500">Compiled Tree-sitter grammars containing highlights and injections.</p>
           </div>
           <div class="bg-white px-6 py-8 dark:bg-[#09090b]">

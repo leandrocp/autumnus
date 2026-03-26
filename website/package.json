@@ -10,8 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@lumis-sh/lumis": "^0.0.1",
-    "@lumis-sh/themes": "^0.0.2",
+    "@lumis-sh/lumis": "link:../packages/javascript/lumis",
+    "@lumis-sh/themes": "link:../packages/javascript/themes",
     "webgl-fluid-enhanced": "^0.8.0"
   },
   "devDependencies": {

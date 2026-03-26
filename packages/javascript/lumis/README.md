@@ -61,7 +61,7 @@ Use `createHighlighter()` when you want explicit control over loaded languages, 
 
 ## Bundles
 
-Bundles group languages into sets. Each language loads lazily on first use, so registering a bundle with 70+ languages costs almost nothing upfront.
+Bundles group languages into sets. Each language loads lazily on first use, so registering a bundle with 110+ languages costs almost nothing upfront.
 
 Three bundles ship with lumis:
 

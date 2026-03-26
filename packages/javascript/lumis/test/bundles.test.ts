@@ -51,7 +51,7 @@ describe('LanguageBundle type', () => {
 
     const bash = webBundle.bash
     expect(bash.id).toBe('bash')
-    expect(bash.aliases).toEqual(['sh', 'zsh'])
+    expect(bash.aliases).toEqual(['sh'])
   })
 
   it('LazyLanguage entries are callable', async () => {
@@ -100,7 +100,6 @@ describe('createHighlighter with LanguageBundle', () => {
   it('resolves aliases in lazy registry', async () => {
     const hl = await createHighlighter({ langs: [webBundle] })
     expect(hl.registeredLanguages).toContain('sh')
-    expect(hl.registeredLanguages).toContain('zsh')
   })
 })
 
