@@ -1,5 +1,6 @@
 ; This file is auto-generated. Do not edit.
 [
+  "!instanceof"
   "assert"
   "extends"
   "instanceof"
@@ -9,6 +10,7 @@
 "class" @keyword.type
 
 [
+  "!in"
   "as"
   "in"
 ] @keyword.operator
@@ -34,28 +36,30 @@
 [
   "for"
   "while"
-  "break"
-  "continue"
+  (break)
+  (continue)
 ] @keyword.repeat
 
 "return" @keyword.return
 
 [
-  (true)
-  (false)
+  "true"
+  "false"
 ] @boolean
 
-(null_literal) @constant.builtin
+(null) @constant.builtin
 
-(this) @variable.builtin
+"this" @variable.builtin
 
 [
   "int"
   "char"
   "short"
   "long"
+  "boolean"
   "float"
   "double"
+  "void"
 ] @type.builtin
 
 [
@@ -67,14 +71,18 @@
   "synchronized"
 ] @keyword.modifier
 
-[(line_comment) (block_comment)] @comment
+(comment) @comment 
 
 (shebang) @keyword.directive
 
-(string_literal) @string
+(string) @string
 
-(string_literal
+(string
   (escape_sequence) @string.escape)
+
+(string
+  (interpolation
+    "$" @punctuation.special))
 
 [
   "("
@@ -91,6 +99,8 @@
   "."
 ] @punctuation.delimiter
 
+(number_literal) @number
+
 (identifier) @variable
 
 ((identifier) @constant
@@ -106,56 +116,152 @@
   ">>"
   ">>>"
   ".."
+  "..<"
+  "<..<"
+  "<.."
   "<"
   "<="
   ">"
   ">="
   "=="
   "!="
+  "<=>"
+  "==="
+  "!=="
+  "=~"
+  "==~"
   "&"
   "^"
   "|"
   "&&"
   "||"
+  "?:"
+  ".&"
+  ".@"
+  "?."
+  "*."
+  "*:"
   "++"
   "--"
   "!"
 ] @operator
 
-(asterisk) @character.special
+(wildcard_import) @character.special
 
-(map_literal
+(string
+  "/" @string)
+
+(ternary_op
+  ([
+    "?"
+    ":"
+  ]) @keyword.conditional.ternary)
+
+(map
   (map_item
     key: (identifier) @variable.parameter))
 
-(formal_parameter
-  type: (_) @type
+(parameter
+  type: (identifier) @type
   name: (identifier) @variable.parameter)
 
+(generic_param
+  name: (identifier) @variable.parameter)
+
+(declaration
+  type: (identifier) @type)
+
 (function_definition
-  type: (_) @type)
+  type: (identifier) @type)
 
-(method_declaration
-  type: (_) @type)
+(function_declaration
+  type: (identifier) @type)
 
-(class_declaration
+(class_definition
   name: (identifier) @type)
 
-(method_invocation
-  name: (identifier) @function)
+(class_definition
+  superclass: (identifier) @type)
+
+(generic_param
+  superclass: (identifier) @type)
+
+(type_with_generics
+  (identifier) @type)
+
+(type_with_generics
+  (generics
+    (identifier) @type))
+
+(generics
+  [
+    "<"
+    ">"
+  ] @punctuation.bracket)
+
+(generic_parameters
+  [
+    "<"
+    ">"
+  ] @punctuation.bracket)
+
+; TODO: Class literals with PascalCase
+(declaration
+  "=" @operator)
+
+(assignment
+  "=" @operator)
+
+(function_call
+  function: (identifier) @function)
+
+(function_call
+  function: (dotted_identifier
+    (identifier) @function .))
+
+(function_call
+  (argument_list
+    (map_item
+      key: (identifier) @variable.parameter)))
 
 (juxt_function_call
-  name: (identifier) @function)
+  function: (identifier) @function)
+
+(juxt_function_call
+  function: (dotted_identifier
+    (identifier) @function .))
+
+(juxt_function_call
+  (argument_list
+    (map_item
+      key: (identifier) @variable.parameter)))
 
 (function_definition
-  name: (identifier) @function)
+  function: (identifier) @function)
 
-(method_declaration
-  name: (identifier) @function)
+(function_declaration
+  function: (identifier) @function)
 
 (annotation) @function.macro
 
 (annotation
-  name: (identifier) @function.macro)
+  (identifier) @function.macro)
 
 "@interface" @function.macro
+
+(groovy_doc) @comment.documentation 
+
+(groovy_doc
+  [
+    (groovy_doc_param)
+    (groovy_doc_throws)
+    (groovy_doc_tag)
+  ] @string.special )
+
+(groovy_doc
+  (groovy_doc_param
+    (identifier) @variable.parameter) )
+
+(groovy_doc
+  (groovy_doc_throws
+    (identifier) @type ))

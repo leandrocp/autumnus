@@ -52,9 +52,7 @@ bool tree_sitter_editorconfig_external_scanner_scan(
         return true;
     }
 
-    const int32_t next_char = lexer->lookahead;
-
-    if (valid_symbols[INTEGER_RANGE_START] && (next_char == '-' || is_digit(next_char))) {
+    if (valid_symbols[INTEGER_RANGE_START]) {
         return parse_integer_range(lexer);
     }
 

@@ -138,6 +138,10 @@
         "named": true
       },
       {
+        "type": "declaration_expression",
+        "named": true
+      },
+      {
         "type": "exception_definition",
         "named": true
       },
@@ -163,10 +167,6 @@
       },
       {
         "type": "type_definition",
-        "named": true
-      },
-      {
-        "type": "value_declaration",
         "named": true
       }
     ]
@@ -459,6 +459,10 @@
             "named": true
           },
           {
+            "type": "preproc_if",
+            "named": true
+          },
+          {
             "type": "type_extension_elements",
             "named": true
           }
@@ -656,7 +660,18 @@
   {
     "type": "attribute",
     "named": true,
-    "fields": {},
+    "fields": {
+      "target": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      }
+    },
     "children": {
       "multiple": true,
       "required": true,
@@ -740,6 +755,7 @@
   {
     "type": "block_comment",
     "named": true,
+    "extra": true,
     "fields": {},
     "children": {
       "multiple": false,
@@ -873,6 +889,7 @@
   {
     "type": "compiler_directive_decl",
     "named": true,
+    "extra": true,
     "fields": {},
     "children": {
       "multiple": false,
@@ -1119,7 +1136,7 @@
     "fields": {
       "in": {
         "multiple": false,
-        "required": true,
+        "required": false,
         "types": [
           {
             "type": "_expression",
@@ -1134,6 +1151,14 @@
       "types": [
         {
           "type": "_expression",
+          "named": true
+        },
+        {
+          "type": "attributes",
+          "named": true
+        },
+        {
+          "type": "do",
           "named": true
         },
         {
@@ -1325,7 +1350,7 @@
     "fields": {
       "block": {
         "multiple": true,
-        "required": true,
+        "required": false,
         "types": [
           {
             "type": "enum_type_cases",
@@ -1335,9 +1360,13 @@
       }
     },
     "children": {
-      "multiple": false,
+      "multiple": true,
       "required": true,
       "types": [
+        {
+          "type": "enum_type_cases",
+          "named": true
+        },
         {
           "type": "type_name",
           "named": true
@@ -1362,10 +1391,14 @@
     },
     "children": {
       "multiple": true,
-      "required": true,
+      "required": false,
       "types": [
         {
           "type": "_type",
+          "named": true
+        },
+        {
+          "type": "access_modifier",
           "named": true
         },
         {
@@ -1438,6 +1471,7 @@
   {
     "type": "file",
     "named": true,
+    "root": true,
     "fields": {},
     "children": {
       "multiple": true,
@@ -1543,13 +1577,18 @@
   {
     "type": "fsi_directive_decl",
     "named": true,
+    "extra": true,
     "fields": {},
     "children": {
       "multiple": false,
-      "required": true,
+      "required": false,
       "types": [
         {
           "type": "string",
+          "named": true
+        },
+        {
+          "type": "verbatim_string",
           "named": true
         }
       ]
@@ -1642,7 +1681,7 @@
     },
     "children": {
       "multiple": true,
-      "required": true,
+      "required": false,
       "types": [
         {
           "type": "_type",
@@ -1958,6 +1997,10 @@
           },
           {
             "type": "member_defn",
+            "named": true
+          },
+          {
+            "type": "preproc_if",
             "named": true
           }
         ]
@@ -2718,6 +2761,7 @@
   {
     "type": "preproc_line",
     "named": true,
+    "extra": true,
     "fields": {},
     "children": {
       "multiple": true,
@@ -3764,7 +3808,7 @@
     "fields": {
       "block": {
         "multiple": true,
-        "required": true,
+        "required": false,
         "types": [
           {
             "type": "access_modifier",
@@ -3782,11 +3826,23 @@
       }
     },
     "children": {
-      "multiple": false,
+      "multiple": true,
       "required": true,
       "types": [
         {
+          "type": "access_modifier",
+          "named": true
+        },
+        {
+          "type": "type_extension_elements",
+          "named": true
+        },
+        {
           "type": "type_name",
+          "named": true
+        },
+        {
+          "type": "union_type_cases",
           "named": true
         }
       ]
@@ -4124,6 +4180,10 @@
     "named": false
   },
   {
+    "type": "?->",
+    "named": false
+  },
+  {
     "type": "?<-",
     "named": false
   },
@@ -4196,10 +4256,6 @@
     "named": false
   },
   {
-    "type": "assembly",
-    "named": false
-  },
-  {
     "type": "assert",
     "named": false
   },
@@ -4221,10 +4277,6 @@
   },
   {
     "type": "comparison",
-    "named": false
-  },
-  {
-    "type": "constructor",
     "named": false
   },
   {
@@ -4276,19 +4328,11 @@
     "named": false
   },
   {
-    "type": "event",
-    "named": false
-  },
-  {
     "type": "exception",
     "named": false
   },
   {
     "type": "f",
-    "named": false
-  },
-  {
-    "type": "field",
     "named": false
   },
   {
@@ -4317,10 +4361,6 @@
   },
   {
     "type": "global",
-    "named": false
-  },
-  {
-    "type": "id",
     "named": false
   },
   {
@@ -4373,7 +4413,8 @@
   },
   {
     "type": "line_comment",
-    "named": true
+    "named": true,
+    "extra": true
   },
   {
     "type": "match",
@@ -4433,14 +4474,6 @@
   },
   {
     "type": "override",
-    "named": false
-  },
-  {
-    "type": "param",
-    "named": false
-  },
-  {
-    "type": "property",
     "named": false
   },
   {
@@ -4533,6 +4566,10 @@
   },
   {
     "type": "while",
+    "named": false
+  },
+  {
+    "type": "while!",
     "named": false
   },
   {

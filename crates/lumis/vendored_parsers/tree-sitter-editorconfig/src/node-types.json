@@ -8,7 +8,7 @@
       "required": false,
       "types": [
         {
-          "type": "expansion_string",
+          "type": "glob",
           "named": true
         }
       ]
@@ -27,15 +27,11 @@
           "named": true
         },
         {
+          "type": "character_escape",
+          "named": true
+        },
+        {
           "type": "character_range",
-          "named": true
-        },
-        {
-          "type": "escaped_character",
-          "named": true
-        },
-        {
-          "type": "negation",
           "named": true
         }
       ]
@@ -73,7 +69,7 @@
     "fields": {}
   },
   {
-    "type": "document",
+    "type": "editorconfig",
     "named": true,
     "root": true,
     "fields": {},
@@ -93,19 +89,15 @@
     }
   },
   {
-    "type": "expansion_string",
+    "type": "glob",
     "named": true,
     "fields": {},
     "children": {
       "multiple": true,
-      "required": true,
+      "required": false,
       "types": [
         {
           "type": "brace_expansion",
-          "named": true
-        },
-        {
-          "type": "character",
           "named": true
         },
         {
@@ -113,7 +105,7 @@
           "named": true
         },
         {
-          "type": "escaped_character",
+          "type": "character_escape",
           "named": true
         },
         {
@@ -121,19 +113,22 @@
           "named": true
         },
         {
-          "type": "path_separator",
+          "type": "wildcard",
           "named": true
-        },
+        }
+      ]
+    }
+  },
+  {
+    "type": "header",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
         {
-          "type": "wildcard_any_characters",
-          "named": true
-        },
-        {
-          "type": "wildcard_characters",
-          "named": true
-        },
-        {
-          "type": "wildcard_single_character",
+          "type": "glob",
           "named": true
         }
       ]
@@ -174,7 +169,7 @@
         "required": true,
         "types": [
           {
-            "type": "identifier",
+            "type": "property",
             "named": true
           }
         ]
@@ -184,35 +179,7 @@
         "required": false,
         "types": [
           {
-            "type": "boolean",
-            "named": true
-          },
-          {
-            "type": "charset",
-            "named": true
-          },
-          {
-            "type": "end_of_line",
-            "named": true
-          },
-          {
-            "type": "indent_style",
-            "named": true
-          },
-          {
-            "type": "integer",
-            "named": true
-          },
-          {
-            "type": "spelling_language",
-            "named": true
-          },
-          {
-            "type": "unknown",
-            "named": true
-          },
-          {
-            "type": "unset",
+            "type": "string",
             "named": true
           }
         ]
@@ -251,62 +218,19 @@
           "named": true
         },
         {
-          "type": "pair",
+          "type": "header",
           "named": true
         },
         {
-          "type": "section_name",
+          "type": "pair",
           "named": true
         }
       ]
     }
   },
   {
-    "type": "section_name",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "brace_expansion",
-          "named": true
-        },
-        {
-          "type": "character",
-          "named": true
-        },
-        {
-          "type": "character_choice",
-          "named": true
-        },
-        {
-          "type": "escaped_character",
-          "named": true
-        },
-        {
-          "type": "integer_range",
-          "named": true
-        },
-        {
-          "type": "path_separator",
-          "named": true
-        },
-        {
-          "type": "wildcard_any_characters",
-          "named": true
-        },
-        {
-          "type": "wildcard_characters",
-          "named": true
-        },
-        {
-          "type": "wildcard_single_character",
-          "named": true
-        }
-      ]
-    }
+    "type": "!",
+    "named": false
   },
   {
     "type": ",",
@@ -318,6 +242,10 @@
   },
   {
     "type": "..",
+    "named": false
+  },
+  {
+    "type": "/",
     "named": false
   },
   {
@@ -333,31 +261,11 @@
     "named": false
   },
   {
-    "type": "boolean",
-    "named": true
-  },
-  {
     "type": "character",
     "named": true
   },
   {
-    "type": "charset",
-    "named": true
-  },
-  {
-    "type": "end_of_line",
-    "named": true
-  },
-  {
-    "type": "escaped_character",
-    "named": true
-  },
-  {
-    "type": "identifier",
-    "named": true
-  },
-  {
-    "type": "indent_style",
+    "type": "character_escape",
     "named": true
   },
   {
@@ -365,35 +273,15 @@
     "named": true
   },
   {
-    "type": "negation",
+    "type": "property",
     "named": true
   },
   {
-    "type": "path_separator",
+    "type": "string",
     "named": true
   },
   {
-    "type": "spelling_language",
-    "named": true
-  },
-  {
-    "type": "unknown",
-    "named": true
-  },
-  {
-    "type": "unset",
-    "named": true
-  },
-  {
-    "type": "wildcard_any_characters",
-    "named": true
-  },
-  {
-    "type": "wildcard_characters",
-    "named": true
-  },
-  {
-    "type": "wildcard_single_character",
+    "type": "wildcard",
     "named": true
   },
   {

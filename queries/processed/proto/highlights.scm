@@ -32,6 +32,7 @@
 
 [
   "enum"
+  "group"
   "service"
   "message"
   "map"
@@ -42,6 +43,8 @@
 "returns" @keyword.return
 
 [
+  "export"
+  "local"
   "optional"
   "repeated"
   "required"
