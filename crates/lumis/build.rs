@@ -420,6 +420,7 @@ mod {ident} {{
     #[test] fn html_linked() {{ check_html_linked(&fixture()); }}
     #[test] fn html_multi_themes() {{ check_html_multi_themes(&fixture()); }}
     #[test] fn terminal() {{ check_terminal(&fixture()); }}
+    #[test] fn bbcode() {{ check_bbcode(&fixture()); }}
 }}
 "#
             ));

@@ -33,6 +33,7 @@ struct Fixture {
     html_linked: String,
     html_multi_themes: String,
     terminal: String,
+    bbcode: String,
 }
 
 fn load_fixture(name: &str) -> Fixture {
@@ -52,6 +53,7 @@ fn load_fixture(name: &str) -> Fixture {
         html_multi_themes: fs::read_to_string(dir.join("html-multi-themes.html"))
             .expect("failed to read html-multi-themes"),
         terminal: fs::read_to_string(dir.join("terminal.txt")).expect("failed to read terminal"),
+        bbcode: fs::read_to_string(dir.join("bbcode.txt")).expect("failed to read bbcode"),
     }
 }
 
@@ -108,6 +110,11 @@ fn check_html_multi_themes(fixture: &Fixture) {
 fn check_terminal(fixture: &Fixture) {
     let output = run_highlight_source(fixture, "terminal", &["-t", &fixture.metadata.theme]);
     assert_text_eq(&output, &fixture.terminal);
+}
+
+fn check_bbcode(fixture: &Fixture) {
+    let output = run_highlight_source(fixture, "bbcode", &[]);
+    assert_text_eq(&output, &fixture.bbcode);
 }
 
 include!(concat!(env!("OUT_DIR"), "/conformance_tests.rs"));

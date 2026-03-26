@@ -1,0 +1,1 @@
+[punctuation-bracket-json]{[/punctuation-bracket-json][property-json]"a"[/property-json][punctuation-delimiter-json]:[/punctuation-delimiter-json][number-json]1[/number-json][punctuation-bracket-json]}[/punctuation-bracket-json]

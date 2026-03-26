@@ -221,6 +221,18 @@ fn highlight_source_diff_html_linked() {
 }
 
 #[test]
+fn highlight_source_diff_bbcode() {
+    cmd()
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .args(["highlight", "-l", "diff", "-f", "bbcode"])
+        .write_stdin(DIFF_SNIPPET)
+        .assert()
+        .success()
+        .stdout(predicate::str::is_empty().not());
+}
+
+#[test]
 fn highlight_file_path_autodetects_language() {
     let tmp = tempfile::tempdir().unwrap();
     let source = tmp.path().join("sample.json");
