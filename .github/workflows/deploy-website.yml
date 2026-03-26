@@ -50,7 +50,7 @@ jobs:
 
       - run: mkdir -p website/dist/docs && cp -R docs/build/. website/dist/docs/
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v4
         with:
           path: website/dist
 
