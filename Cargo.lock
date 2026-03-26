@@ -958,7 +958,7 @@ dependencies = [
  "tree-sitter-objc",
  "tree-sitter-ocaml",
  "tree-sitter-php",
- "tree-sitter-powershell",
+ "tree-sitter-powershell 0.25.10",
  "tree-sitter-proto",
  "tree-sitter-python",
  "tree-sitter-r",
@@ -1043,7 +1043,7 @@ dependencies = [
  "tree-sitter-ocaml",
  "tree-sitter-pascal",
  "tree-sitter-php",
- "tree-sitter-powershell",
+ "tree-sitter-powershell 0.26.3",
  "tree-sitter-puppet",
  "tree-sitter-python",
  "tree-sitter-qmljs",
@@ -2366,6 +2366,16 @@ name = "tree-sitter-powershell"
 version = "0.25.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "415ec6251d133d26b4f62c60721149fe36c315334f47812450187d6ea59cffdf"
+dependencies = [
+ "cc",
+ "tree-sitter-language",
+]
+
+[[package]]
+name = "tree-sitter-powershell"
+version = "0.26.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1ff5d1c86d8b1625585fd18e05fff47e38c36564e45ec4f38fd0de4ecbf08e2c"
 dependencies = [
  "cc",
  "tree-sitter-language",
