@@ -111,10 +111,7 @@ mod tests {
 
     #[test]
     fn test_builder_pattern() {
-        let formatter = BBCodeBuilder::new()
-            .lang(Language::Rust)
-            .build()
-            .unwrap();
+        let formatter = BBCodeBuilder::new().lang(Language::Rust).build().unwrap();
 
         let code = "fn main() {}";
         let mut buffer = Vec::new();
