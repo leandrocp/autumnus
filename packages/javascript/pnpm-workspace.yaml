@@ -1,5 +1,7 @@
 packages:
   - lumis
   - themes
+  - markdown-it-lumis
+  - rehype-lumis
 
 verifyDepsBeforeRun: install

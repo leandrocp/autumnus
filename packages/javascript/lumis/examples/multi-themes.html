@@ -69,7 +69,7 @@
 
     const themes = { light: githubLight, dark: githubDark }
 
-    const hl = await createHighlighter({ langs: [json] })
+    const hl = await createHighlighter({ languages: [json] })
 
     // JS toggle
     document.getElementById('output').innerHTML = hl.highlight(

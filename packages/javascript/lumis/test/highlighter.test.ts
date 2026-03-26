@@ -35,7 +35,7 @@ beforeAll(async () => {
   configureLocalWasmResolver(['diff', 'json', 'javascript', 'bash', 'dockerfile', 'elixir', 'html', 'python', 'ruby', 'rust', 'xml'])
 
   hl = await createHighlighter({
-    langs: [json],
+    languages: [json],
   })
 }, 120_000)
 
@@ -46,7 +46,7 @@ describe('createHighlighter', () => {
 
   it('loads multiple languages passed in init', async () => {
     const multi = await createHighlighter({
-      langs: [json, javascript],
+      languages: [json, javascript],
     })
 
     expect(multi.languages).toContain('json')
@@ -63,13 +63,14 @@ describe('createHighlighter', () => {
   })
 
   it('keeps loaded languages isolated per instance', async () => {
-    const first = await createHighlighter({ langs: [json] })
+    const first = await createHighlighter({ languages: [json] })
     const second = await createHighlighter()
 
     expect(first.languages).toContain('json')
     expect(second.languages).toContain('plaintext')
     expect(second.languages).not.toContain('json')
   })
+
 })
 
 describe('hl.highlight', () => {
@@ -173,7 +174,7 @@ describe('plaintext', () => {
 
   beforeAll(async () => {
     plaintextHl = await createHighlighter({
-      langs: [json, plaintext],
+      languages: [json, plaintext],
     })
   })
 
@@ -243,7 +244,7 @@ describe('plaintext', () => {
     expect(html).toMatch(/<\/div>$/)
   })
 
-  it('renders when createHighlighter() is created without explicit langs', async () => {
+  it('renders when createHighlighter() is created without explicit languages', async () => {
     const defaultHl = await createHighlighter()
     const html = defaultHl.highlight('plain text', htmlInline({ theme }))
     expect(html).toContain('class="language-plaintext"')

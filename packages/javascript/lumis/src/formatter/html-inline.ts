@@ -62,25 +62,30 @@ function highlightLineClass(
   );
 }
 
+function getLineAttrs(
+  formatter: HtmlInlineFormatter,
+  lineNumber: number,
+): { className?: string; style?: string } {
+  return {
+    className: highlightLineClass(formatter, lineNumber),
+    style: highlightLineStyle(formatter, lineNumber),
+  };
+}
+
 export function formatHtmlInline(
   source: string,
   events: HighlightEvent[],
   formatter: HtmlInlineFormatter,
 ): string {
   const { lines } = formatHighlightIterLines(source, events, formatter.language, formatter.theme, {
-    openSpan: (span) => {
-      return openSpanTag(spanAttrs(span, formatter));
-    },
+    openSpan: (span) => openSpanTag(spanAttrs(span, formatter)),
   });
+
   const pre = openPreTag({ preClass: formatter.preClass, theme: formatter.theme });
   const code = openCodeTag(formatter.language);
   const body = lines
-    .map((line, idx) =>
-      wrapLine(idx + 1, line, {
-        className: highlightLineClass(formatter, idx + 1),
-        style: highlightLineStyle(formatter, idx + 1),
-      }),
-    )
+    .map((line, idx) => wrapLine(idx + 1, line, getLineAttrs(formatter, idx + 1)))
     .join("");
+
   return wrapWithHeader(`${pre}${code}${body}${closingTags()}`, formatter.header);
 }

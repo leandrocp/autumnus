@@ -52,7 +52,7 @@ beforeAll(async () => {
     "python",
   ]);
   highlighter = await createHighlighter({
-    langs: [
+    languages: [
       json,
       { ...html, wasm: ensureLocalWasm("html") },
       { ...javascript, wasm: ensureLocalWasm("javascript") },

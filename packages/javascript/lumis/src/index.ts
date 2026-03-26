@@ -18,7 +18,7 @@ const highlighter = createHighlighterModule({
  *
  * `createHighlighter` is async; the returned `hl.highlight()` is synchronous.
  *
- * The `langs` array accepts `Language` objects, `LanguageBundle` collections, and dynamic imports.
+ * The `languages` array accepts `Language` objects, `LanguageBundle` collections, and dynamic imports.
  *
  * @example Cherry-pick languages
  * ```ts
@@ -27,7 +27,7 @@ const highlighter = createHighlighterModule({
  * import javascript from '@lumis-sh/lumis/langs/javascript'
  * import dracula from '@lumis-sh/themes/dracula'
  *
- * const hl = await createHighlighter({ langs: [javascript] })
+ * const hl = await createHighlighter({ languages: [javascript] })
  * const html = hl.highlight('const x = 1', htmlInline({ language: javascript, theme: dracula }))
  * ```
  *
@@ -39,15 +39,16 @@ const highlighter = createHighlighterModule({
  * import dracula from '@lumis-sh/themes/dracula'
  *
  * // Register all web languages. None are loaded yet.
- * const hl = await createHighlighter({ langs: [bundledLanguages] })
+ * const hl = await createHighlighter({ languages: [bundledLanguages] })
  *
  * // Load a language, then highlight synchronously.
  * await hl.loadLanguage(bundledLanguages.javascript)
  * const html = hl.highlight('const x = 1', htmlInline({ language: bundledLanguages.javascript, theme: dracula }))
  * ```
  */
-export const createHighlighter = (...args: Parameters<typeof highlighter.createHighlighter>) =>
-  highlighter.createHighlighter(...args);
+export function createHighlighter(...args: Parameters<typeof highlighter.createHighlighter>) {
+  return highlighter.createHighlighter(...args);
+}
 
 /**
  * Highlight code in a single async call.
@@ -68,8 +69,9 @@ export const createHighlighter = (...args: Parameters<typeof highlighter.createH
  * const html = await highlight('const x = 1', htmlInline({ language: javascript, theme: dracula }))
  * ```
  */
-export const highlight = (...args: Parameters<typeof highlighter.highlight>) =>
-  highlighter.highlight(...args);
+export function highlight(...args: Parameters<typeof highlighter.highlight>) {
+  return highlighter.highlight(...args);
+}
 
 /**
  * Low-level token iterator. Calls `onToken` for each highlighted span.
@@ -85,8 +87,9 @@ export const highlight = (...args: Parameters<typeof highlighter.highlight>) =>
  * })
  * ```
  */
-export const highlightIter = (...args: Parameters<typeof highlighter.highlightIter>) =>
-  highlighter.highlightIter(...args);
+export function highlightIter(...args: Parameters<typeof highlighter.highlightIter>) {
+  return highlighter.highlightIter(...args);
+}
 export type { Highlighter } from "./core/highlighter.js";
 export type {
   HighlightContext,

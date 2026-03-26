@@ -17,6 +17,8 @@
 | `rust-build@v*` | lumis-build | crates.io |
 | `rust-cli@v*` | lumis-cli | crates.io |
 | `javascript@v*` | @lumis-sh/lumis | npm |
+| `markdown-it-lumis@v*` | @lumis-sh/markdown-it-lumis | npm |
+| `rehype-lumis@v*` | @lumis-sh/rehype-lumis | npm |
 | `themes@v*` | @lumis-sh/themes | npm |
 | `elixir@v*` | lumis | hex.pm |
 
@@ -28,7 +30,7 @@ WASM parsers have no tags. They publish via `workflow_dispatch`.
 |----------|---------|--------------|
 | `release-please.yml` | Push to `main` | Opens release PRs, creates tags and GitHub Releases on merge |
 | `rust-release.yml` | `rust*@v*` tags | `cargo publish` for the matching crate |
-| `javascript-release.yml` | `javascript@v*` or `themes@v*` tags | `pnpm publish` to npm |
+| `javascript-release.yml` | `javascript@v*`, `markdown-it-lumis@v*`, `rehype-lumis@v*`, or `themes@v*` tags | `pnpm publish` to npm |
 | `elixir-nif-release.yml` | `elixir@v*` tag | Builds precompiled NIF binaries, uploads to GitHub Release |
 | `elixir-hex-release.yml` | Manual (`workflow_dispatch`) | Downloads NIF checksums, publishes to hex.pm |
 | `wasm-release.yml` | Manual (`workflow_dispatch`) | Builds and publishes WASM parser packages to npm |
@@ -49,6 +51,7 @@ Merge the release-please PRs in that order. Each merge creates a tag, which trig
 
 1. `@lumis-sh/themes` first (lumis depends on it)
 2. `@lumis-sh/lumis`
+3. `@lumis-sh/markdown-it-lumis` and `@lumis-sh/rehype-lumis`
 
 ### Elixir
 

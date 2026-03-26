@@ -15,6 +15,20 @@ import { formatHtmlLinked } from "./formatter/html-linked.js";
 import { formatHtmlMultiThemes } from "./formatter/html-multi-themes.js";
 import { formatTerminal } from "./formatter/terminal.js";
 
+function createFormatter<T extends Formatter>(
+  options: Omit<T, "format">,
+  render: (source: string, hl: HighlightContext, formatter: T) => string,
+): T {
+  const formatter = {
+    ...options,
+    format(source: string, hl: HighlightContext): string {
+      return render(source, hl, formatter as T);
+    },
+  } as T;
+
+  return formatter;
+}
+
 /**
  * Create an inline-styles HTML formatter. Each token gets a `<span>` with
  * `style="color: ..."` pulled from the theme.
@@ -29,15 +43,10 @@ import { formatTerminal } from "./formatter/terminal.js";
  * ```
  */
 export function htmlInline(options: HtmlInlineOptions = {}): HtmlInlineFormatter {
-  const formatter: HtmlInlineFormatter = {
-    ...options,
-    format(source: string, hl: HighlightContext): string {
-      const events = hl.highlightEvents(source, options.language);
-      return formatHtmlInline(source, events, formatter);
-    },
-  };
-
-  return formatter;
+  return createFormatter(options, (source, hl, formatter) => {
+    const events = hl.highlightEvents(source, options.language);
+    return formatHtmlInline(source, events, formatter);
+  });
 }
 
 /**
@@ -54,15 +63,10 @@ export function htmlInline(options: HtmlInlineOptions = {}): HtmlInlineFormatter
  * ```
  */
 export function htmlLinked(options: HtmlLinkedOptions = {}): HtmlLinkedFormatter {
-  const formatter: HtmlLinkedFormatter = {
-    ...options,
-    format(source: string, hl: HighlightContext): string {
-      const events = hl.highlightEvents(source, options.language);
-      return formatHtmlLinked(source, events, formatter);
-    },
-  };
-
-  return formatter;
+  return createFormatter(options, (source, hl, formatter) => {
+    const events = hl.highlightEvents(source, options.language);
+    return formatHtmlLinked(source, events, formatter);
+  });
 }
 
 /**
@@ -84,15 +88,10 @@ export function htmlLinked(options: HtmlLinkedOptions = {}): HtmlLinkedFormatter
  * ```
  */
 export function htmlMultiThemes(options: HtmlMultiThemesOptions): HtmlMultiThemesFormatter {
-  const formatter: HtmlMultiThemesFormatter = {
-    ...options,
-    format(source: string, hl: HighlightContext): string {
-      const events = hl.highlightEvents(source, options.language);
-      return formatHtmlMultiThemes(source, events, formatter);
-    },
-  };
-
-  return formatter;
+  return createFormatter(options, (source, hl, formatter) => {
+    const events = hl.highlightEvents(source, options.language);
+    return formatHtmlMultiThemes(source, events, formatter);
+  });
 }
 
 /**
@@ -109,15 +108,10 @@ export function htmlMultiThemes(options: HtmlMultiThemesOptions): HtmlMultiTheme
  * ```
  */
 export function terminal(options: TerminalOptions = {}): TerminalFormatter {
-  const formatter: TerminalFormatter = {
-    ...options,
-    format(source: string, hl: HighlightContext): string {
-      const events = hl.highlightEvents(source, options.language);
-      return formatTerminal(source, events, formatter);
-    },
-  };
-
-  return formatter;
+  return createFormatter(options, (source, hl, formatter) => {
+    const events = hl.highlightEvents(source, options.language);
+    return formatTerminal(source, events, formatter);
+  });
 }
 
 export type {

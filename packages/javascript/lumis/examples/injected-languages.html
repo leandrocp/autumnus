@@ -131,7 +131,7 @@
     const linkedOutput = document.getElementById('linked-output')
 
     try {
-      const hl = await createHighlighter({ langs: [html, css, javascript] })
+      const hl = await createHighlighter({ languages: [html, css, javascript] })
       sourceOutput.innerHTML = hl.highlight(
         code,
         htmlInline({ language: html, theme: dracula })

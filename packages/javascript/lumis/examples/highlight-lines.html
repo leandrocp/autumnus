@@ -60,7 +60,7 @@
   "unicode": "😀 café"
 }`
 
-    const hl = await createHighlighter({ langs: [json] })
+    const hl = await createHighlighter({ languages: [json] })
 
     // htmlInline with theme-derived highlight style
     document.getElementById('inline-theme-output').innerHTML = hl.highlight(
