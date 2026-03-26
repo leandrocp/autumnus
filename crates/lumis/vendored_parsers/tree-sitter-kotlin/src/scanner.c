@@ -130,6 +130,13 @@ static bool scan_string_content(TSLexer *lexer, Stack *stack) {
           lexer->result_symbol = STRING_END;
           return true;
         }
+      } else if (is_triple && lexer->lookahead == end_char) {
+        // In triple-quoted strings, `\` is NOT an escape character. So `\"` is
+        // also literal backslash + quote, and the `"` might be the start of
+        // the closing `"""`. Don't advance past it (at the end of the while
+        // loop). Let the next iteration handle it.
+        has_content = true;
+        continue;
       }
     } else if (lexer->lookahead == end_char) {
       if (is_triple) {
@@ -300,6 +307,53 @@ static bool check_modifier_then_constructor(TSLexer *lexer) {
   // Skip horizontal whitespace (not newlines)
   while (lexer->lookahead == ' ' || lexer->lookahead == '\t') skip(lexer);
 
+  return check_word(lexer, "constructor", 11);
+}
+
+// Look ahead past one or more annotations (e.g. @Bar, @com.example.Bar,
+// @Bar(x=1)) and optional visibility modifier, then check for 'constructor'.
+// All characters are consumed with skip() so nothing affects token boundaries.
+static bool check_annotation_then_constructor(TSLexer *lexer) {
+  // Skip one or more '@annotation' sequences
+  while (lexer->lookahead == '@') {
+    skip(lexer); // skip '@'
+    if (!is_word_char(lexer->lookahead)) return false;
+    // Read annotation name, including dot-separated qualifiers
+    // (e.g. com.example.Inject)
+    while (is_word_char(lexer->lookahead)) skip(lexer);
+    while (lexer->lookahead == '.') {
+      skip(lexer); // skip '.'
+      if (!is_word_char(lexer->lookahead)) break;
+      while (is_word_char(lexer->lookahead)) skip(lexer);
+    }
+    // Skip optional '(...)' argument list (handle nested parens and strings)
+    if (lexer->lookahead == '(') {
+      unsigned depth = 1;
+      skip(lexer);
+      while (depth > 0 && lexer->lookahead != '\0' && !lexer->eof(lexer)) {
+        if (lexer->lookahead == '"') {
+          // Skip over string literal to avoid miscounting parens inside strings
+          skip(lexer);
+          while (lexer->lookahead != '"' && lexer->lookahead != '\0' && !lexer->eof(lexer)) {
+            if (lexer->lookahead == '\\') skip(lexer); // skip escaped char
+            skip(lexer);
+          }
+          if (lexer->lookahead == '"') skip(lexer); // skip closing quote
+        } else {
+          if (lexer->lookahead == '(') depth++;
+          else if (lexer->lookahead == ')') depth--;
+          skip(lexer);
+        }
+      }
+    }
+    // Skip whitespace and newlines between annotations or before constructor
+    while (iswspace(lexer->lookahead)) skip(lexer);
+  }
+  // Allow an optional visibility modifier before 'constructor'
+  if (is_word_char(lexer->lookahead) && lexer->lookahead != 'c') {
+    return check_modifier_then_constructor(lexer);
+  }
+  // Check directly for 'constructor'
   return check_word(lexer, "constructor", 11);
 }
 
@@ -650,6 +704,16 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
       // Don't insert a semicolon before finally (continues try_expression)
       case 'f':
         return !scan_for_word(lexer, "inally", 6);
+
+      // Don't insert a semicolon before an annotation that precedes 'constructor'
+      // e.g. `class Foo\n@Bar\nconstructor(...)` — the @Bar is a constructor modifier
+      case '@':
+        if (valid_symbols[PRIMARY_CONSTRUCTOR_KEYWORD] &&
+            !valid_symbols[STRING_CONTENT] &&
+            check_annotation_then_constructor(lexer)) {
+          return false;
+        }
+        return true;
 
       case ';':
         advance(lexer);

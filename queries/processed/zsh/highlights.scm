@@ -15,6 +15,8 @@
 [
   ";"
   ";;"
+  (case_fallthrough)
+  (case_test_next)
   "&"
 ] @punctuation.delimiter
 

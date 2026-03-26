@@ -1,6 +1,6 @@
 ; This file is auto-generated. Do not edit.
-((line_comment) @injection.content
+((comment) @injection.content
   (#set! injection.language "comment"))
 
-((block_comment) @injection.content
+((groovy_doc) @injection.content
   (#set! injection.language "comment"))

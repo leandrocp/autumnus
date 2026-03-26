@@ -144,8 +144,12 @@ unsafe extern "C" {
     fn tree_sitter_nim() -> *const ();
     #[cfg(feature = "lang-perl")]
     fn tree_sitter_perl() -> *const ();
+    #[cfg(feature = "lang-protobuf")]
+    fn tree_sitter_proto() -> *const ();
     #[cfg(feature = "lang-scss")]
     fn tree_sitter_scss() -> *const ();
+    #[cfg(feature = "lang-sql")]
+    fn tree_sitter_sql() -> *const ();
     #[cfg(feature = "lang-surface")]
     fn tree_sitter_surface() -> *const ();
     #[cfg(feature = "lang-tmux")]
@@ -164,6 +168,8 @@ unsafe extern "C" {
     fn tree_sitter_wat() -> *const ();
     #[cfg(feature = "lang-wgsl")]
     fn tree_sitter_wgsl() -> *const ();
+    #[cfg(feature = "lang-zsh")]
+    fn tree_sitter_zsh() -> *const ();
 }
 
 include!(concat!(env!("OUT_DIR"), "/queries_constants.rs"));
@@ -1139,7 +1145,7 @@ static JULIA_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 #[cfg(feature = "lang-jinja")]
 static JINJA_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(tree_sitter_jinja2::LANGUAGE),
+        tree_sitter_jinja::language(),
         "jinja",
         JINJA_HIGHLIGHTS,
         JINJA_INJECTIONS,
@@ -1527,7 +1533,9 @@ static POWERSHELL_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 #[cfg(feature = "lang-protobuf")]
 static PROTO_BUF_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(tree_sitter_proto::LANGUAGE),
+        tree_sitter::Language::new(unsafe {
+            tree_sitter_language::LanguageFn::from_raw(tree_sitter_proto)
+        }),
         "protobuf",
         PROTO_HIGHLIGHTS,
         PROTO_INJECTIONS,
@@ -1724,7 +1732,9 @@ static SCHEME_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 #[cfg(feature = "lang-sql")]
 static SQL_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(tree_sitter_sequel::LANGUAGE),
+        tree_sitter::Language::new(unsafe {
+            tree_sitter_language::LanguageFn::from_raw(tree_sitter_sql)
+        }),
         "sql",
         SQL_HIGHLIGHTS,
         SQL_INJECTIONS,
@@ -2005,7 +2015,9 @@ static YAML_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 #[cfg(feature = "lang-zsh")]
 static ZSH_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(tree_sitter_zsh::LANGUAGE),
+        tree_sitter::Language::new(unsafe {
+            tree_sitter_language::LanguageFn::from_raw(tree_sitter_zsh)
+        }),
         "zsh",
         ZSH_HIGHLIGHTS,
         ZSH_INJECTIONS,

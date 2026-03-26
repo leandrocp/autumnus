@@ -584,7 +584,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
 dependencies = [
  "libc",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -941,7 +941,7 @@ dependencies = [
  "tree-sitter-elm",
  "tree-sitter-embedded-template",
  "tree-sitter-erlang",
- "tree-sitter-fsharp",
+ "tree-sitter-fsharp 0.1.0",
  "tree-sitter-gleam",
  "tree-sitter-go",
  "tree-sitter-haskell",
@@ -1019,7 +1019,7 @@ dependencies = [
  "tree-sitter-embedded-template",
  "tree-sitter-erlang",
  "tree-sitter-fortran",
- "tree-sitter-fsharp",
+ "tree-sitter-fsharp 0.2.2",
  "tree-sitter-gitcommit",
  "tree-sitter-glsl",
  "tree-sitter-go",
@@ -1031,7 +1031,7 @@ dependencies = [
  "tree-sitter-java",
  "tree-sitter-javadoc",
  "tree-sitter-javascript",
- "tree-sitter-jinja2",
+ "tree-sitter-jinja",
  "tree-sitter-json",
  "tree-sitter-julia",
  "tree-sitter-language",
@@ -1044,7 +1044,6 @@ dependencies = [
  "tree-sitter-pascal",
  "tree-sitter-php",
  "tree-sitter-powershell",
- "tree-sitter-proto",
  "tree-sitter-puppet",
  "tree-sitter-python",
  "tree-sitter-qmljs",
@@ -1056,7 +1055,6 @@ dependencies = [
  "tree-sitter-rust",
  "tree-sitter-scala",
  "tree-sitter-scheme",
- "tree-sitter-sequel",
  "tree-sitter-solidity",
  "tree-sitter-svelte-ng",
  "tree-sitter-swift",
@@ -1067,7 +1065,6 @@ dependencies = [
  "tree-sitter-xml",
  "tree-sitter-yaml",
  "tree-sitter-zig",
- "tree-sitter-zsh",
  "v_htmlescape",
 ]
 
@@ -1477,7 +1474,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys 0.4.15",
- "windows-sys 0.52.0",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -1490,7 +1487,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys 0.12.1",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -1744,7 +1741,7 @@ dependencies = [
  "getrandom 0.4.2",
  "once_cell",
  "rustix 1.1.4",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -2107,6 +2104,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "tree-sitter-fsharp"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bd296b6559884f6c7e78458632337a18b41e19c1c9daa04407ea5b8478372774"
+dependencies = [
+ "cc",
+ "tree-sitter-language",
+]
+
+[[package]]
 name = "tree-sitter-gitcommit"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2239,13 +2246,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "tree-sitter-jinja2"
-version = "0.0.13"
+name = "tree-sitter-jinja"
+version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba9be18e38ec1489ff72f519781d2aecc113563c2d5bddfbd9797888ea396af7"
+checksum = "48fe39a344ddc8226aedae56699f21a6a85d97f9bb306ba0f709ef422dc44a59"
 dependencies = [
  "cc",
- "tree-sitter-language",
+ "tree-sitter",
 ]
 
 [[package]]
@@ -2589,16 +2596,6 @@ name = "tree-sitter-zig"
 version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ab11fc124851b0db4dd5e55983bbd9631192e93238389dcd44521715e5d53e28"
-dependencies = [
- "cc",
- "tree-sitter-language",
-]
-
-[[package]]
-name = "tree-sitter-zsh"
-version = "0.53.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6c9c60e41a997d47c2c4a29da159649225567de8e3a5bfb29242c68e55f7c9b6"
 dependencies = [
  "cc",
  "tree-sitter-language",
@@ -3023,7 +3020,7 @@ version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c2a7b1c03c876122aa43f3020e6c3c3ee5c05081c9a00739faf7503aeba10d22"
 dependencies = [
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]

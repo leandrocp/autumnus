@@ -241,9 +241,9 @@ globs = ["*.fish"]
 
 [parsers.fsharp]
 git = "https://github.com/ionide/tree-sitter-fsharp.git"
-rev = "dcbd07b8860fbde39f207dbc03b36a791986cd96"
+rev = "1c2d9351d1f731c08cfdc4ed41e63126ae56e462"
 crate = "tree-sitter-fsharp"
-version = "0.1.0"
+version = "0.2.2"
 location = "fsharp"
 aliases = ["f#"]
 variant = "FSharp"
@@ -380,8 +380,8 @@ emacs = ["julia"]
 
 [parsers.kotlin]
 git = "https://github.com/fwcd/tree-sitter-kotlin.git"
-rev = "f3a1ea74304adad67164a0a6ffe729428748a7a7"
-version = "0.1.0"
+rev = "802fd920c153b02b9d266369a3ef061622f2bbf0"
+version = "0.4.0"
 globs = ["*.kt", "*.ktm", "*.kts"]
 
 [parsers.latex]
@@ -415,8 +415,8 @@ globs = ["*.lua"]
 
 [parsers.make]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-make.git"
-rev = "5e9e8f8ff3387b0edcaa90f46ddf3629f4cfeb1d"
-version = "0.1.0"
+rev = "70613f3d812cbabbd7f38d104d60a409c4008b43"
+version = "1.1.1"
 globs = [
   "*.mak", "*.d", "*.make", "*.makefile", "*.mk", "*.mkfile", "*.dsp",
   "BSDmakefile", "GNUmakefile", "Kbuild", "Makefile", "MAKEFILE",
@@ -520,8 +520,7 @@ globs = ["*.ps1", "*.psm1"]
 
 [parsers.protobuf]
 git = "https://github.com/coder3101/tree-sitter-proto.git"
-rev = "3ef027b83540c1c161bea64257654ab3d198ad54"
-crate = "tree-sitter-proto"
+rev = "d65a18ce7c2242801f702770114ad08056c7f8c9"
 version = "0.4.0"
 query_name = "proto"
 variant = "ProtoBuf"
@@ -587,8 +586,7 @@ emacs = ["scss"]
 
 [parsers.sql]
 git = "https://github.com/derekstride/tree-sitter-sql.git"
-rev = "7b51ecda191d36b92f5a90a8d1bc3faef1c7b8b8"
-crate = "tree-sitter-sequel"
+rev = "851e9cb257ba7c66cc8c14214a31c44d2f1e954e"
 version = "0.3.11"
 variant = "SQL"
 globs = ["*.sql", "*.pgsql"]
@@ -732,8 +730,8 @@ globs = ["*.dot", "*.gv"]
 
 [parsers.editorconfig]
 git = "https://github.com/ValdezFOmar/tree-sitter-editorconfig.git"
-rev = "b58de0ce2c52990c8913e39a8c14ce4a40e29a39"
-version = "0.1.0"
+rev = "c4d5e725e1bbf683b223f4bebe83142cefe68da5"
+version = "2.0.0"
 globs = [".editorconfig"]
 
 [parsers.gitattributes]
@@ -833,9 +831,8 @@ globs = ["*.wgsl"]
 
 [parsers.zsh]
 git = "https://github.com/georgeharker/tree-sitter-zsh.git"
-rev = "v0.53.0"
-crate = "tree-sitter-zsh"
-version = "0.53.0"
+rev = "bd344c23a7683e293d077c6648e88f209782fedb"
+version = "0.63.1"
 display_name = "Zsh"
 globs = ["*.zsh", ".zshrc", ".zshenv", ".zprofile", ".zlogin", ".zlogout", "zshrc", "zshenv", "zprofile", "zlogin", "zlogout"]
 shebang = ["zsh"]
@@ -872,9 +869,9 @@ display_name = "GLSL"
 globs = ["*.comp", "*.frag", "*.geom", "*.glsl", "*.tesc", "*.tese", "*.vert"]
 
 [parsers.groovy]
-git = "https://github.com/amaanq/tree-sitter-groovy.git"
-rev = "70efb0b9b50f95bcbd89dcfd42b275e0304e10cf"
-version = "0.1.2"
+git = "https://github.com/murtaza64/tree-sitter-groovy.git"
+rev = "781d9cd1b482a70a6b27091e5c9e14bbcab3b768"
+version = "0.0.1"
 globs = ["*.gradle", "*.groovy", "Jenkinsfile"]
 emacs = ["groovy"]
 shebang = ["groovy"]
@@ -886,10 +883,11 @@ version = "0.1.0"
 globs = ["*.hurl"]
 
 [parsers.jinja]
-git = "https://github.com/uros-5/tree-sitter-jinja2.git"
-rev = "58cdf2650fea668a81a43fd8ad836b7a9351d34a"
-crate = "tree-sitter-jinja2"
-version = "0.0.13"
+git = "https://github.com/cathaysia/tree-sitter-jinja.git"
+rev = "7bd0422c6a57aaabfee8603502d7708d0a536f5f"
+crate = "tree-sitter-jinja"
+version = "0.11.1"
+location = "tree-sitter-jinja"
 aliases = ["jinja2"]
 display_name = "Jinja"
 globs = ["*.j2", "*.jinja", "*.jinja2"]
