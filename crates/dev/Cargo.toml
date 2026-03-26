@@ -13,8 +13,12 @@ authors.workspace = true
 name = "dev"
 path = "src/main.rs"
 
+[features]
+default = []
+lumis-all-languages = ["lumis/all-languages"]
+
 [dependencies]
-lumis = { path = "../lumis" }
+lumis = { path = "../lumis", default-features = false }
 anyhow = "1"
 base64 = "0.22"
 clap = { version = "4", features = ["derive"] }

@@ -200,15 +200,15 @@ css-sync:
 
 # Dump canonical Rust highlight events as JSON
 conformance-dump-events source lang:
-    cargo run -p dev -- dump-events "{{source}}" -l {{lang}}
+    cargo run -p dev --features lumis-all-languages -- dump-events "{{source}}" -l {{lang}}
 
 # Verify shared conformance fixtures against canonical Rust output
 conformance-verify name="":
-    cargo run -p dev -- verify-conformance {{name}}
+    cargo run -p dev --features lumis-all-languages -- verify-conformance {{name}}
 
 # Regenerate shared conformance fixtures from canonical Rust output
 conformance-regen name="":
-    cargo run -p dev -- regen-conformance {{name}}
+    cargo run -p dev --features lumis-all-languages -- regen-conformance {{name}}
 
 # Generate documentation for all crates and packages
 docs:
@@ -226,7 +226,7 @@ docs:
 
 # Generate LANGUAGES.md from languages.toml
 docs-gen-languages-md:
-    cargo run -p dev -- gen-languages-md
+    cargo run -p dev --no-default-features -- gen-languages-md
 
 # Update language parser, queries, and docs
 langs-update name:
@@ -239,7 +239,7 @@ langs-update name:
 
 # Generate THEMES.md from themes definition
 docs-gen-themes-md:
-    cargo run -p dev -- gen-themes-md
+    cargo run -p dev --no-default-features -- gen-themes-md
 
 # Extract highlight scopes from query files
 langs-extract-scopes:
@@ -249,31 +249,31 @@ langs-extract-scopes:
 
 # Fetch vendored parser sources at pinned revisions
 langs-fetch-parsers name="":
-    cargo run -p dev -- fetch-parsers {{name}}
+    cargo run -p dev --no-default-features -- fetch-parsers {{name}}
 
 # Fetch vendored query files at pinned revisions
 langs-fetch-queries name="":
-    cargo run -p dev -- fetch-queries {{name}}
+    cargo run -p dev --no-default-features -- fetch-queries {{name}}
 
 # Preprocess query files (resolve inheritance, apply fixes, strip unsupported predicates)
 langs-preprocess-queries name="":
-    cargo run -p dev -- preprocess-queries {{name}}
+    cargo run -p dev --no-default-features -- preprocess-queries {{name}}
 
 # Generate highlights.rs and highlights.ts from highlights.toml
 langs-gen-highlights:
-    cargo run -p dev -- gen-highlights
+    cargo run -p dev --no-default-features -- gen-highlights
 
 # List all languages declared in languages.toml
 langs-list:
-    cargo run -p dev -- langs-list
+    cargo run -p dev --no-default-features -- langs-list
 
 # Upgrade vendored parser revisions from nvim-treesitter parsers.lua and upstream
 langs-upgrade-parsers name="":
-    cargo run -p dev -- upgrade-parsers {{name}}
+    cargo run -p dev --no-default-features -- upgrade-parsers {{name}}
 
 # Upgrade vendored query revisions from upstream
 langs-upgrade-queries name="":
-    cargo run -p dev -- upgrade-queries {{name}}
+    cargo run -p dev --no-default-features -- upgrade-queries {{name}}
 
 # Build WASM files for tree-sitter parsers (requires emscripten)
 wasm-build name="":
