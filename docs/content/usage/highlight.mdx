@@ -1,0 +1,143 @@
+---
+sidebar_position: 1
+slug: /highlight
+title: Highlight
+description: Highlight code with one Lumis workflow across CLI, Rust, Elixir, JavaScript, and Java.
+keywords:
+  - lumis
+  - highlight
+  - syntax highlighting
+  - rust
+  - elixir
+  - javascript
+  - java
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Highlight
+
+This is the core Lumis workflow: choose a language, choose a formatter, then render output.
+
+## Simple example
+
+<Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
+  <TabItem value="javascript" label="JavaScript">
+
+```js
+import {highlight} from '@lumis-sh/lumis';
+import {htmlInline} from '@lumis-sh/lumis/formatters';
+import javascript from '@lumis-sh/lumis/langs/javascript';
+import dracula from '@lumis-sh/themes/dracula';
+
+const html = await highlight(
+  'const x = 1',
+  htmlInline({language: javascript, theme: dracula})
+);
+```
+
+  </TabItem>
+  <TabItem value="rust" label="Rust">
+
+```rust
+use lumis::{highlight, HtmlInlineBuilder, languages::Language, themes};
+
+let theme = themes::get("dracula").unwrap();
+
+let formatter = HtmlInlineBuilder::new()
+    .lang(Language::Javascript)
+    .theme(Some(theme))
+    .build()
+    .unwrap();
+
+let html = highlight("const x = 1", formatter);
+```
+
+  </TabItem>
+  <TabItem value="elixir" label="Elixir">
+
+```elixir
+Lumis.highlight!(
+  "const x = 1",
+  language: "javascript",
+  formatter: {:html_inline, theme: "dracula"}
+)
+```
+
+  </TabItem>
+  <TabItem value="java" label="Java">
+
+```java
+import io.roastedroot.lumis4j.core.Lang;
+import io.roastedroot.lumis4j.core.Lumis;
+import io.roastedroot.lumis4j.core.Theme;
+
+var lumis = Lumis.builder().build();
+
+var highlighter = lumis.highlighter()
+    .withLang(Lang.JAVASCRIPT)
+    .withTheme(Theme.DRACULA)
+    .build();
+
+var html = highlighter.highlight("const x = 1").string();
+```
+
+  </TabItem>
+  <TabItem value="cli" label="CLI">
+
+```bash
+lumis highlight index.js \
+  --language javascript \
+  --theme dracula
+```
+
+  </TabItem>
+</Tabs>
+
+## Options by runtime
+
+| Need | CLI | Rust | Elixir | JavaScript | Java |
+| --- | --- | --- | --- | --- | --- |
+| Set language | `--language` | `.lang(...)` | `language: "..."` | `language: ...` | `withLang(...)` |
+| Set theme | `--theme` | `.theme(...)` | `theme: "..."` | `theme: ...` | `withTheme(...)` |
+| Choose output | `--formatter` | builder type | `formatter: ...` | formatter factory | runtime-specific |
+
+## Repeated usage in JavaScript
+
+For repeated calls, preload languages with `createHighlighter()` and call `hl.highlight()` synchronously afterward.
+
+```js
+import {createHighlighter} from '@lumis-sh/lumis';
+import {htmlInline} from '@lumis-sh/lumis/formatters';
+import javascript from '@lumis-sh/lumis/langs/javascript';
+import dracula from '@lumis-sh/themes/dracula';
+
+const hl = await createHighlighter({languages: [javascript]});
+
+const html = hl.highlight(
+  'const x = 1',
+  htmlInline({language: javascript, theme: dracula})
+);
+```
+
+## Language detection
+
+If you omit the language, Lumis tries to detect it using:
+
+- file extensions (`.rs`, `.js`, `.ex`, etc.)
+- filenames (`Makefile`, `Dockerfile`, `Caddyfile`)
+- shebangs (`#!/usr/bin/env python`)
+- Emacs mode lines (`-*- mode: ruby -*-`)
+
+If detection fails, it falls back to plaintext.
+
+## Incomplete code
+
+Lumis handles incomplete or malformed code without crashing. Tree-sitter produces a partial syntax tree and Lumis highlights what it can. This is useful for streaming scenarios where code arrives in chunks (e.g., LLM output).
+
+## Next steps
+
+- choose an output mode in [Formatters](/formatters)
+- pick or generate colors in [Themes](/themes)
+- emphasize lines in [Line Highlighting](/recipes/line-highlighting)

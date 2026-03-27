@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/*", "packages/elixir/lumis/native/lumis_nif"]
+members = ["crates/*", "examples/ratatui", "packages/elixir/lumis/native/lumis_nif"]
 
 [workspace.package]
 edition = "2021"

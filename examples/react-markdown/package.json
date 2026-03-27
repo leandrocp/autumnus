@@ -1,0 +1,18 @@
+{
+  "name": "example-react-markdown-lumis",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "render": "node render.mjs",
+    "start": "vite"
+  },
+  "dependencies": {
+    "@lumis-sh/lumis": "workspace:*",
+    "@lumis-sh/rehype-lumis": "workspace:*",
+    "@lumis-sh/themes": "workspace:*",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-markdown": "^10.1.0",
+    "vite": "^8.0.2"
+  }
+}

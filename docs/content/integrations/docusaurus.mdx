@@ -1,0 +1,66 @@
+---
+sidebar_position: 8
+slug: /integrations/docusaurus
+title: Docusaurus
+description: Use Lumis in Docusaurus through MDX rehype plugins.
+keywords:
+  - docusaurus lumis
+  - docusaurus syntax highlighting
+  - rehype lumis
+  - mdx lumis
+---
+
+# Docusaurus
+
+[Full example on GitHub](https://github.com/leandrocp/lumis/tree/main/examples/docusaurus)
+
+Docusaurus docs use MDX and expose rehype plugin hooks in the docs plugin configuration.
+
+## Install
+
+```bash
+npm install @lumis-sh/rehype-lumis @lumis-sh/lumis @lumis-sh/themes
+```
+
+## Configure `docusaurus.config.mjs`
+
+```js
+import rehypeLumis from '@lumis-sh/rehype-lumis'
+import {htmlInline} from '@lumis-sh/lumis/formatters'
+import {bundledLanguages} from '@lumis-sh/lumis/bundles/web'
+import githubLight from '@lumis-sh/themes/github_light'
+
+export default {
+  presets: [
+    [
+      'classic',
+      {
+        docs: {
+          rehypePlugins: [
+            [rehypeLumis, {
+              formatter: (language) => htmlInline({language, theme: githubLight}),
+              languages: [bundledLanguages],
+            }],
+          ],
+        },
+      },
+    ],
+  ],
+}
+```
+
+## Disable Prism
+
+Docusaurus wraps code blocks with its built-in Prism `CodeBlock` component. To let Lumis handle all code rendering, override the `pre` and `code` MDX components so they pass through without Prism interference:
+
+```js title="src/theme/MDXComponents.js"
+import MDXComponents from '@theme-original/MDXComponents'
+
+export default {
+  ...MDXComponents,
+  pre: (props) => <pre {...props} />,
+  code: (props) => <code {...props} />,
+}
+```
+
+Do not set `"type": "module"` in `package.json` as it breaks Docusaurus's webpack SSR build.

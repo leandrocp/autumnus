@@ -10,3 +10,4 @@ mise.toml
 AGENTS.md
 CLAUDE.md
 __pycache__/
+node_modules/

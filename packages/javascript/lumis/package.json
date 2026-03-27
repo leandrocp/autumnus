@@ -21,6 +21,7 @@
   ],
   "sideEffects": false,
   "type": "module",
+  "main": "./dist/index.cjs",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
@@ -28,27 +29,33 @@
       "browser": "./dist/index.browser.js",
       "node": "./dist/index.js",
       "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
       "default": "./dist/index.browser.js"
     },
     "./formatters": {
       "types": "./dist/formatters.d.ts",
-      "import": "./dist/formatters.js"
+      "import": "./dist/formatters.js",
+      "require": "./dist/formatters.cjs"
     },
     "./formatters/html": {
       "types": "./dist/formatters/html.d.ts",
-      "import": "./dist/formatters/html.js"
+      "import": "./dist/formatters/html.js",
+      "require": "./dist/formatters/html.cjs"
     },
     "./formatters/ansi": {
       "types": "./dist/formatters/ansi.d.ts",
-      "import": "./dist/formatters/ansi.js"
+      "import": "./dist/formatters/ansi.js",
+      "require": "./dist/formatters/ansi.cjs"
     },
     "./langs/*": {
       "types": "./dist/langs/*.d.ts",
-      "import": "./dist/langs/*.js"
+      "import": "./dist/langs/*.js",
+      "require": "./dist/langs/*.cjs"
     },
     "./bundles/*": {
       "types": "./dist/bundles/*.d.ts",
-      "import": "./dist/bundles/*.js"
+      "import": "./dist/bundles/*.js",
+      "require": "./dist/bundles/*.cjs"
     }
   },
   "files": [
