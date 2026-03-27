@@ -87,7 +87,7 @@ Map.has_key?(Lumis.available_languages(), "elixir")
 
 ## Formatters
 
-Lumis supports four formatters. The formatter option controls the output format.
+Lumis supports five formatters. The formatter option controls the output format.
 
 ### HTML Inline (Default)
 
@@ -149,26 +149,6 @@ Available options for `:html_linked`:
 - `:pre_class` - CSS class to add to the `<pre>` tag
 - `:highlight_lines` - Highlight specific lines with CSS class
 - `:header` - Wrap with custom HTML tags
-
-### Terminal
-
-Generates ANSI escape codes for terminal output.
-
-```elixir
-Lumis.highlight!(code,
-  language: "elixir",
-  formatter: :terminal
-)
-
-# With theme
-Lumis.highlight!(code,
-  language: "elixir",
-  formatter: {:terminal, theme: "github_light"}
-)
-```
-
-Available options for `:terminal`:
-- `:theme` - Theme name (string) or `Lumis.Theme` struct
 
 ### HTML Multi-Themes
 
@@ -259,6 +239,40 @@ Available options for `:html_multi_themes`:
 - `:include_highlights` - Add `data-highlight` attributes for debugging (default: `false`)
 - `:highlight_lines` - Highlight specific lines (same options as `:html_inline`)
 - `:header` - Wrap with custom HTML tags (same options as other formatters)
+
+### Terminal
+
+Generates ANSI escape codes for terminal output.
+
+```elixir
+Lumis.highlight!(code,
+  language: "elixir",
+  formatter: :terminal
+)
+
+# With theme
+Lumis.highlight!(code,
+  language: "elixir",
+  formatter: {:terminal, theme: "github_light"}
+)
+```
+
+Available options for `:terminal`:
+- `:theme` - Theme name (string) or `Lumis.Theme` struct
+
+### BBCode Scoped
+
+Generates nested BBCode tags using highlight scope names from the Rust implementation. Literal `[` and `]` are escaped as `&#91;` and `&#93;` so forum software does not treat source text as markup. It does not emit standard forum-style BBCode like `[b]`, `[color]`, or `[code]`.
+
+```elixir
+Lumis.highlight!(code,
+  language: "elixir",
+  formatter: :bbcode_scoped
+)
+```
+
+Available options for `:bbcode_scoped`:
+- none
 
 ## Themes
 

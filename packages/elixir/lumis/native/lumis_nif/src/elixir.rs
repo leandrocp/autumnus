@@ -1,6 +1,6 @@
 use lumis::formatter::{
-    html_inline, html_linked, Formatter, HtmlElement, HtmlInlineBuilder, HtmlLinkedBuilder,
-    HtmlMultiThemesBuilder, TerminalBuilder,
+    html_inline, html_linked, BBCodeScopedBuilder, Formatter, HtmlElement, HtmlInlineBuilder,
+    HtmlLinkedBuilder, HtmlMultiThemesBuilder, TerminalBuilder,
 };
 use lumis::{languages::Language, themes};
 use rustler::{NifStruct, NifTaggedEnum, NifUnitEnum};
@@ -41,6 +41,7 @@ pub enum ExFormatterOption {
     Terminal {
         theme: Option<ThemeOrString>,
     },
+    BbcodeScoped {},
 }
 
 impl Default for ExFormatterOption {
@@ -210,6 +211,14 @@ impl ExFormatterOption {
                     .theme(theme)
                     .build()
                     .map_err(|e| format!("Terminal builder error: {:?}", e))?;
+
+                Ok(Box::new(formatter))
+            }
+            ExFormatterOption::BbcodeScoped {} => {
+                let formatter = BBCodeScopedBuilder::new()
+                    .lang(language)
+                    .build()
+                    .map_err(|e| format!("BBCode scoped builder error: {:?}", e))?;
 
                 Ok(Box::new(formatter))
             }

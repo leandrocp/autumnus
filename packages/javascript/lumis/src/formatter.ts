@@ -1,4 +1,6 @@
 import type {
+  BBCodeScopedFormatter,
+  BBCodeScopedOptions,
   Formatter,
   HighlightContext,
   HtmlInlineOptions,
@@ -10,6 +12,7 @@ import type {
   TerminalOptions,
   TerminalFormatter,
 } from "./types.js";
+import { formatBBCode } from "./formatter/bbcode.js";
 import { formatHtmlInline } from "./formatter/html-inline.js";
 import { formatHtmlLinked } from "./formatter/html-linked.js";
 import { formatHtmlMultiThemes } from "./formatter/html-multi-themes.js";
@@ -95,6 +98,26 @@ export function htmlMultiThemes(options: HtmlMultiThemesOptions): HtmlMultiTheme
 }
 
 /**
+ * Create a BBCode scoped formatter using highlight scope names as nested tags.
+ * It does not emit standard forum-style BBCode like `[b]`, `[color]`, or `[code]`.
+ *
+ * @example
+ * ```ts
+ * import { bbcodeScoped } from '@lumis-sh/lumis/formatters'
+ * import javascript from '@lumis-sh/lumis/langs/javascript'
+ *
+ * const output = hl.highlight('const x = 1', bbcodeScoped({ language: javascript }))
+ * console.log(output)
+ * ```
+ */
+export function bbcodeScoped(options: BBCodeScopedOptions = {}): BBCodeScopedFormatter {
+  return createFormatter(options, (source, hl, formatter) => {
+    const events = hl.highlightEvents(source, options.language);
+    return formatBBCode(source, events, formatter);
+  });
+}
+
+/**
  * Create a terminal formatter that outputs ANSI escape codes.
  *
  * @example
@@ -115,6 +138,8 @@ export function terminal(options: TerminalOptions = {}): TerminalFormatter {
 }
 
 export type {
+  BBCodeScopedFormatter,
+  BBCodeScopedOptions,
   Formatter,
   HighlightCallback,
   HighlightContext,

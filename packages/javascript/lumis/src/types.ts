@@ -420,6 +420,19 @@ export interface HtmlMultiThemesOptions {
 export interface HtmlMultiThemesFormatter extends Formatter, HtmlMultiThemesOptions {}
 
 /**
+ * Options for {@link bbcodeScoped}.
+ *
+ * ```ts
+ * bbcodeScoped({ language: javascript })
+ * ```
+ */
+export interface BBCodeScopedOptions {
+  language?: LanguageRef;
+}
+
+export interface BBCodeScopedFormatter extends Formatter, BBCodeScopedOptions {}
+
+/**
  * Options for {@link terminal}.
  *
  * ```ts

@@ -103,6 +103,7 @@ test:
     (cd packages/elixir/lumis && LUMIS_BUILD=1 mix test)
     echo ""
     echo "Running Javascript tests..."
+    (cd packages/javascript && pnpm --filter @lumis-sh/lumis build)
     (cd packages/javascript && pnpm -r --if-present test)
 
 # Run conformance tests across all packages

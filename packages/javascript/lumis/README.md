@@ -169,7 +169,18 @@ All three are equivalent at highlight time. The runtime resolves the language by
 - `htmlLinked()` for class-based HTML that uses external CSS
 - `htmlMultiThemes()` for light/dark or multi-theme HTML with CSS variables
 - `terminal()` for ANSI-colored terminal output
+- `bbcodeScoped()` for nested BBCode tags using highlight scope names
 - custom formatter objects via `@lumis-sh/lumis/formatters`
+
+```typescript
+import { bbcodeScoped } from '@lumis-sh/lumis/formatters'
+import javascript from '@lumis-sh/lumis/langs/javascript'
+
+const output = hl.highlight('const x = "[url=x]"', bbcodeScoped({ language: javascript }))
+// [keyword-javascript]const[/keyword-javascript] x = [string-javascript]"&#91;url=x&#93;"[/string-javascript]
+```
+
+`bbcodeScoped()` emits highlight scope names as tags, not standard forum-style BBCode like `[b]`, `[color]`, or `[code]`.
 
 ## Custom Formatters
 

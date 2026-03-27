@@ -19,6 +19,7 @@ defmodule Lumis.ConformanceTest do
       "htmlInline" => File.read!(Path.join(dir, "html-inline.html")),
       "htmlLinked" => File.read!(Path.join(dir, "html-linked.html")),
       "htmlMultiThemes" => File.read!(Path.join(dir, "html-multi-themes.html")),
+      "bbcode" => File.read!(Path.join(dir, "bbcode.txt")),
       "terminal" => File.read!(Path.join(dir, "terminal.txt"))
     })
   end
@@ -64,6 +65,16 @@ defmodule Lumis.ConformanceTest do
                  language: fixture["language"],
                  formatter: {:terminal, theme: fixture["theme"]}
                ) == fixture["terminal"]
+      end
+
+      @tag fixture: name
+      test "bbcode_scoped" do
+        fixture = load_fixture(unquote(name))
+
+        assert Lumis.highlight!(fixture["source"],
+                 language: fixture["language"],
+                 formatter: :bbcode_scoped
+               ) == fixture["bbcode"]
       end
     end
   end

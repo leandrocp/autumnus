@@ -10,7 +10,7 @@ import markdown from "../langs/markdown.ts";
 import markdownInline from "../langs/markdown_inline.ts";
 import python from "../langs/python.ts";
 import { createHighlighter } from "../src/index.js";
-import { htmlInline, htmlLinked, htmlMultiThemes, terminal } from "../src/formatters.js";
+import { bbcodeScoped, htmlInline, htmlLinked, htmlMultiThemes, terminal } from "../src/formatters.js";
 import type { Highlighter } from "../src/core/highlighter.js";
 import type { Language, Theme } from "../src/types.js";
 
@@ -94,6 +94,14 @@ describe.each(conformanceFixtures.map((f) => [f.name, f]))(
         }),
       );
       expect(output).toBe(fixture.htmlMultiThemes);
+    });
+
+    it("bbcodeScoped", () => {
+      const output = highlighter.highlight(
+        fixture.source,
+        bbcodeScoped({ language: getLanguage(fixture.language) }),
+      );
+      expect(output).toBe(fixture.bbcode);
     });
 
     it("terminal", () => {

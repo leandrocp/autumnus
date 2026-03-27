@@ -1,9 +1,9 @@
 [comment-lua]-- Two dashes start a one-line comment.[/comment-lua]
 
-[comment-lua]--[[
-     Adding two ['s and ]'s makes it a
+[comment-lua]--&#91;&#91;
+     Adding two &#91;'s and &#93;'s makes it a
      multi-line comment.
---]][/comment-lua]
+--&#93;&#93;[/comment-lua]
 
 [comment-documentation-lua]----------------------------------------------------[/comment-documentation-lua]
 [comment-lua]-- 1. Variables and flow control.[/comment-lua]
@@ -13,9 +13,9 @@
 
 [variable-lua]s[/variable-lua] [operator-lua]=[/operator-lua] [string-lua]'walternate'[/string-lua]  [comment-lua]-- Immutable strings like Python.[/comment-lua]
 [variable-lua]t[/variable-lua] [operator-lua]=[/operator-lua] [string-lua]"double-quotes are also fine"[/string-lua]
-[variable-lua]u[/variable-lua] [operator-lua]=[/operator-lua] [string-lua][[ Double brackets
+[variable-lua]u[/variable-lua] [operator-lua]=[/operator-lua] [string-lua]&#91;&#91; Double brackets
        start and end
-       multi-line strings.]][/string-lua]
+       multi-line strings.&#93;&#93;[/string-lua]
 [variable-lua]t[/variable-lua] [operator-lua]=[/operator-lua] [constant-builtin-lua]nil[/constant-builtin-lua]  [comment-lua]-- Undefines t; Lua has garbage collection.[/comment-lua]
 
 [comment-lua]-- Blocks are denoted with keywords like do/end:[/comment-lua]
@@ -28,7 +28,7 @@
   [function-builtin-lua]print[/function-builtin-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][string-lua]'over 40'[/string-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]
 [keyword-conditional-lua]elseif[/keyword-conditional-lua] [variable-lua]s[/variable-lua] [operator-lua]~=[/operator-lua] [string-lua]'walternate'[/string-lua] [keyword-conditional-lua]then[/keyword-conditional-lua]  [comment-lua]-- ~= is not equals.[/comment-lua]
   [comment-lua]-- Equality check is == like Python; ok for strs.[/comment-lua]
-  [module-builtin-lua]io[/module-builtin-lua][punctuation-delimiter-lua].[/punctuation-delimiter-lua][function-call-lua]write[/function-call-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][string-lua]'not over 40[/string-lua][string-escape-lua]\n[/string-escape-lua][string-lua]'[/string-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]  [comment-lua]-- Defaults to stdout.[/comment-lua]
+  [module-builtin-lua]io[/module-builtin-lua][punctuation-delimiter-lua].[/punctuation-delimiter-lua][function-call-lua]write[/function-call-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][string-lua]'not over 40[string-escape-lua]\n[/string-escape-lua]'[/string-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]  [comment-lua]-- Defaults to stdout.[/comment-lua]
 [keyword-conditional-lua]else[/keyword-conditional-lua]
   [comment-lua]-- Variables are global by default.[/comment-lua]
   [variable-lua]thisIsGlobal[/variable-lua] [operator-lua]=[/operator-lua] [number-lua]5[/number-lua]  [comment-lua]-- Camel case is common.[/comment-lua]
@@ -62,7 +62,7 @@
 [variable-lua]fredSum[/variable-lua] [operator-lua]=[/operator-lua] [number-lua]0[/number-lua]
 [keyword-repeat-lua]for[/keyword-repeat-lua] [variable-lua]j[/variable-lua] [operator-lua]=[/operator-lua] [number-lua]100[/number-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [number-lua]1[/number-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [operator-lua]-[/operator-lua][number-lua]1[/number-lua] [keyword-repeat-lua]do[/keyword-repeat-lua] [variable-lua]fredSum[/variable-lua] [operator-lua]=[/operator-lua] [variable-lua]fredSum[/variable-lua] [operator-lua]+[/operator-lua] [variable-lua]j[/variable-lua] [keyword-repeat-lua]end[/keyword-repeat-lua]
 
-[comment-lua]-- In general, the range is begin, end[, step].[/comment-lua]
+[comment-lua]-- In general, the range is begin, end&#91;, step&#93;.[/comment-lua]
 
 [comment-lua]-- Another loop construct:[/comment-lua]
 [keyword-repeat-lua]repeat[/keyword-repeat-lua]
@@ -143,13 +143,13 @@
 [variable-lua]t[/variable-lua][punctuation-delimiter-lua].[/punctuation-delimiter-lua][variable-member-lua]key2[/variable-member-lua] [operator-lua]=[/operator-lua] [constant-builtin-lua]nil[/constant-builtin-lua]   [comment-lua]-- Removes key2 from the table.[/comment-lua]
 
 [comment-lua]-- Literal notation for any (non-nil) value as key:[/comment-lua]
-[variable-lua]u[/variable-lua] [operator-lua]=[/operator-lua] [constructor-lua]{[/constructor-lua][punctuation-bracket-lua][[/punctuation-bracket-lua][string-lua]'@!#'[/string-lua][punctuation-bracket-lua]][/punctuation-bracket-lua] [operator-lua]=[/operator-lua] [string-lua]'qbert'[/string-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [punctuation-bracket-lua][[/punctuation-bracket-lua][constructor-lua]{[/constructor-lua][constructor-lua]}[/constructor-lua][punctuation-bracket-lua]][/punctuation-bracket-lua] [operator-lua]=[/operator-lua] [number-lua]1729[/number-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [punctuation-bracket-lua][[/punctuation-bracket-lua][number-lua]6.28[/number-lua][punctuation-bracket-lua]][/punctuation-bracket-lua] [operator-lua]=[/operator-lua] [string-lua]'tau'[/string-lua][constructor-lua]}[/constructor-lua]
-[function-builtin-lua]print[/function-builtin-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][variable-lua]u[/variable-lua][punctuation-bracket-lua][[/punctuation-bracket-lua][number-lua]6.28[/number-lua][punctuation-bracket-lua]][/punctuation-bracket-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]  [comment-lua]-- prints "tau"[/comment-lua]
+[variable-lua]u[/variable-lua] [operator-lua]=[/operator-lua] [constructor-lua]{[/constructor-lua][punctuation-bracket-lua]&#91;[/punctuation-bracket-lua][string-lua]'@!#'[/string-lua][punctuation-bracket-lua]&#93;[/punctuation-bracket-lua] [operator-lua]=[/operator-lua] [string-lua]'qbert'[/string-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [punctuation-bracket-lua]&#91;[/punctuation-bracket-lua][constructor-lua]{[/constructor-lua][constructor-lua]}[/constructor-lua][punctuation-bracket-lua]&#93;[/punctuation-bracket-lua] [operator-lua]=[/operator-lua] [number-lua]1729[/number-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [punctuation-bracket-lua]&#91;[/punctuation-bracket-lua][number-lua]6.28[/number-lua][punctuation-bracket-lua]&#93;[/punctuation-bracket-lua] [operator-lua]=[/operator-lua] [string-lua]'tau'[/string-lua][constructor-lua]}[/constructor-lua]
+[function-builtin-lua]print[/function-builtin-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][variable-lua]u[/variable-lua][punctuation-bracket-lua]&#91;[/punctuation-bracket-lua][number-lua]6.28[/number-lua][punctuation-bracket-lua]&#93;[/punctuation-bracket-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]  [comment-lua]-- prints "tau"[/comment-lua]
 
 [comment-lua]-- Key matching is basically by value for numbers[/comment-lua]
 [comment-lua]-- and strings, but by identity for tables.[/comment-lua]
-[variable-lua]a[/variable-lua] [operator-lua]=[/operator-lua] [variable-lua]u[/variable-lua][punctuation-bracket-lua][[/punctuation-bracket-lua][string-lua]'@!#'[/string-lua][punctuation-bracket-lua]][/punctuation-bracket-lua]  [comment-lua]-- Now a = 'qbert'.[/comment-lua]
-[variable-lua]b[/variable-lua] [operator-lua]=[/operator-lua] [variable-lua]u[/variable-lua][punctuation-bracket-lua][[/punctuation-bracket-lua][constructor-lua]{[/constructor-lua][constructor-lua]}[/constructor-lua][punctuation-bracket-lua]][/punctuation-bracket-lua]     [comment-lua]-- We might expect 1729, but it's nil:[/comment-lua]
+[variable-lua]a[/variable-lua] [operator-lua]=[/operator-lua] [variable-lua]u[/variable-lua][punctuation-bracket-lua]&#91;[/punctuation-bracket-lua][string-lua]'@!#'[/string-lua][punctuation-bracket-lua]&#93;[/punctuation-bracket-lua]  [comment-lua]-- Now a = 'qbert'.[/comment-lua]
+[variable-lua]b[/variable-lua] [operator-lua]=[/operator-lua] [variable-lua]u[/variable-lua][punctuation-bracket-lua]&#91;[/punctuation-bracket-lua][constructor-lua]{[/constructor-lua][constructor-lua]}[/constructor-lua][punctuation-bracket-lua]&#93;[/punctuation-bracket-lua]     [comment-lua]-- We might expect 1729, but it's nil:[/comment-lua]
 [comment-lua]-- b = nil since the lookup fails. It fails[/comment-lua]
 [comment-lua]-- because the key we used is not the same object[/comment-lua]
 [comment-lua]-- as the one used to store the original value. So[/comment-lua]
@@ -164,14 +164,14 @@
 [keyword-repeat-lua]end[/keyword-repeat-lua]
 
 [comment-lua]-- _G is a special table of all globals.[/comment-lua]
-[function-builtin-lua]print[/function-builtin-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][module-builtin-lua]_G[/module-builtin-lua][punctuation-bracket-lua][[/punctuation-bracket-lua][string-lua]'_G'[/string-lua][punctuation-bracket-lua]][/punctuation-bracket-lua] [operator-lua]==[/operator-lua] [module-builtin-lua]_G[/module-builtin-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]  [comment-lua]-- Prints 'true'.[/comment-lua]
+[function-builtin-lua]print[/function-builtin-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][module-builtin-lua]_G[/module-builtin-lua][punctuation-bracket-lua]&#91;[/punctuation-bracket-lua][string-lua]'_G'[/string-lua][punctuation-bracket-lua]&#93;[/punctuation-bracket-lua] [operator-lua]==[/operator-lua] [module-builtin-lua]_G[/module-builtin-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]  [comment-lua]-- Prints 'true'.[/comment-lua]
 
 [comment-lua]-- Using tables as lists / arrays:[/comment-lua]
 
 [comment-lua]-- List literals implicitly set up int keys:[/comment-lua]
 [variable-lua]v[/variable-lua] [operator-lua]=[/operator-lua] [constructor-lua]{[/constructor-lua][string-lua]'value1'[/string-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [string-lua]'value2'[/string-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [number-lua]1.21[/number-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [string-lua]'gigawatts'[/string-lua][constructor-lua]}[/constructor-lua]
 [keyword-repeat-lua]for[/keyword-repeat-lua] [variable-lua]i[/variable-lua] [operator-lua]=[/operator-lua] [number-lua]1[/number-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [operator-lua]#[/operator-lua][variable-lua]v[/variable-lua] [keyword-repeat-lua]do[/keyword-repeat-lua]  [comment-lua]-- #v is the size of v for lists.[/comment-lua]
-  [function-builtin-lua]print[/function-builtin-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][variable-lua]v[/variable-lua][punctuation-bracket-lua][[/punctuation-bracket-lua][variable-lua]i[/variable-lua][punctuation-bracket-lua]][/punctuation-bracket-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]  [comment-lua]-- Indices start at 1 !! SO CRAZY![/comment-lua]
+  [function-builtin-lua]print[/function-builtin-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][variable-lua]v[/variable-lua][punctuation-bracket-lua]&#91;[/punctuation-bracket-lua][variable-lua]i[/variable-lua][punctuation-bracket-lua]&#93;[/punctuation-bracket-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]  [comment-lua]-- Indices start at 1 !! SO CRAZY![/comment-lua]
 [keyword-repeat-lua]end[/keyword-repeat-lua]
 [comment-lua]-- A 'list' is not a real type. v is just a table[/comment-lua]
 [comment-lua]-- with consecutive integer keys, treated as a list.[/comment-lua]

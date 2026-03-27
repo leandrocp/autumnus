@@ -9,7 +9,7 @@
 //! - [`html_multi_themes`] - HTML with multiple theme support
 //! - [`html_linked`] - HTML with CSS classes
 //! - [`terminal`] - ANSI color codes for terminal output
-//! - [`bbcode`] - BBCode with scope-based tags
+//! - [`bbcode`] - BBCode scoped output using highlight scope names as tags
 
 use crate::events::HighlightEvent;
 use std::io::{self, Write};
@@ -30,7 +30,7 @@ pub mod terminal;
 pub use terminal::{Terminal, TerminalBuilder};
 
 pub mod bbcode;
-pub use bbcode::{BBCode, BBCodeBuilder};
+pub use bbcode::{BBCodeScoped, BBCodeScopedBuilder};
 
 /// Configuration for wrapping the formatted output with custom HTML elements.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]

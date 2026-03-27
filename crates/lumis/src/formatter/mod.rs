@@ -5,7 +5,7 @@
 //! - [`html_multi_themes`] - HTML output with inline CSS styles (multiple themes)
 //! - [`html_linked`] - HTML output with CSS classes (requires external CSS)
 //! - [`terminal`] - ANSI color codes for terminal output
-//! - [`bbcode`] - BBCode output with scope-based tags
+//! - [`bbcode`] - BBCode scoped output using highlight scope names as tags
 //!
 //! # Builder Pattern
 //!
@@ -14,11 +14,11 @@
 //! - [`HtmlMultiThemesBuilder`] - Create HTML formatters with multiple theme support
 //! - [`HtmlLinkedBuilder`] - Create HTML formatters with CSS classes
 //! - [`TerminalBuilder`] - Create terminal formatters with ANSI colors
-//! - [`BBCodeBuilder`] - Create BBCode formatters with scope-based tags
+//! - [`BBCodeScopedBuilder`] - Create BBCode scoped formatters using highlight scope names as tags
 //!
 //! Builders are exported at the crate root for convenient access:
 //! ```rust
-//! use lumis::{HtmlInlineBuilder, HtmlMultiThemesBuilder, HtmlLinkedBuilder, TerminalBuilder, BBCodeBuilder};
+//! use lumis::{HtmlInlineBuilder, HtmlMultiThemesBuilder, HtmlLinkedBuilder, TerminalBuilder, BBCodeScopedBuilder};
 //! ```
 //!
 //! # Examples
@@ -166,7 +166,7 @@ pub mod terminal;
 pub use terminal::{Terminal, TerminalBuilder};
 
 pub mod bbcode;
-pub use bbcode::{BBCode, BBCodeBuilder};
+pub use bbcode::{BBCodeScoped, BBCodeScopedBuilder};
 
 pub use lumis_core::formatter::HtmlElement;
 
