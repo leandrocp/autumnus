@@ -1,0 +1,18 @@
+{
+  "name": "example-nuxt-lumis",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "start": "nuxt dev"
+  },
+  "dependencies": {
+    "@lumis-sh/lumis": "workspace:*",
+    "@lumis-sh/rehype-lumis": "workspace:*",
+    "@lumis-sh/themes": "workspace:*",
+    "@nuxt/content": "^3.12.0",
+    "better-sqlite3": "^12.8.0",
+    "nuxt": "^4.4.2",
+    "vue": "^3.5.31"
+  }
+}

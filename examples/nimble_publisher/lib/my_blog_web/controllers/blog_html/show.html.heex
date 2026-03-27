@@ -1,0 +1,14 @@
+<div class="max-w-3xl mx-auto py-10 px-4">
+  <a href={~p"/blog"} class="text-blue-600 hover:underline text-sm">&larr; Back to blog</a>
+
+  <article class="mt-6">
+    <h1 class="text-3xl font-bold">{@post.title}</h1>
+    <p class="text-sm text-gray-500 mt-2">
+      {Calendar.strftime(@post.date, "%B %d, %Y")} by {@post.author}
+    </p>
+
+    <div class="prose prose-lg mt-8">
+      {Phoenix.HTML.raw(@post.body)}
+    </div>
+  </article>
+</div>

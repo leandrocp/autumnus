@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/*"]
+members = ["crates/*", "examples/ratatui"]
 exclude = ["packages/elixir/lumis/native/lumis_nif"]
 
 [workspace.package]

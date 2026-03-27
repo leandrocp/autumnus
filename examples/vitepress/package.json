@@ -1,0 +1,15 @@
+{
+  "name": "example-vitepress-lumis",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vitepress build .",
+    "start": "vitepress dev ."
+  },
+  "dependencies": {
+    "@lumis-sh/lumis": "workspace:*",
+    "@lumis-sh/markdown-it-lumis": "workspace:*",
+    "@lumis-sh/themes": "workspace:*",
+    "vitepress": "^1.6.4"
+  }
+}

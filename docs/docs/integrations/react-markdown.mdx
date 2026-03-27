@@ -1,0 +1,72 @@
+---
+sidebar_position: 6
+slug: /integrations/react-markdown
+title: react-markdown
+description: Use Lumis in react-markdown with rehype-lumis.
+keywords:
+  - react-markdown lumis
+  - rehype lumis react
+  - react markdown syntax highlighting
+  - unified react markdown
+---
+
+# react-markdown
+
+[Full example on GitHub](https://github.com/leandrocp/lumis/tree/main/examples/react-markdown)
+
+`react-markdown` already supports `rehypePlugins`, so Lumis fits naturally through `@lumis-sh/rehype-lumis`.
+
+## Install
+
+```bash
+npm install react-markdown
+npm install @lumis-sh/rehype-lumis @lumis-sh/themes
+```
+
+## Server-side rendering
+
+`rehype-lumis` is async, so use `MarkdownAsync` for server rendering:
+
+```tsx
+import {MarkdownAsync} from 'react-markdown'
+import rehypeLumis from '@lumis-sh/rehype-lumis'
+import githubLight from '@lumis-sh/themes/github_light'
+
+export async function Article({source}: {source: string}) {
+  return (
+    <MarkdownAsync
+      rehypePlugins={[[rehypeLumis, {
+        theme: githubLight,
+        fallbackLanguage: 'plaintext',
+      }]]}
+    >
+      {source}
+    </MarkdownAsync>
+  )
+}
+```
+
+## Client-side rendering
+
+For client-side rendering (e.g. with Vite), use `MarkdownHooks` instead:
+
+```tsx
+import {MarkdownHooks} from 'react-markdown'
+import rehypeLumis from '@lumis-sh/rehype-lumis'
+import githubLight from '@lumis-sh/themes/github_light'
+
+function Article({source}: {source: string}) {
+  return (
+    <MarkdownHooks
+      rehypePlugins={[[rehypeLumis, {
+        theme: githubLight,
+        fallbackLanguage: 'plaintext',
+      }]]}
+    >
+      {source}
+    </MarkdownHooks>
+  )
+}
+```
+
+`MarkdownAsync` is for React Server Components. `MarkdownHooks` uses `useEffect` internally and works in any client-side React app.

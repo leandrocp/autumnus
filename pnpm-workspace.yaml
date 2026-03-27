@@ -1,0 +1,10 @@
+packages:
+  - packages/javascript/*
+  - examples/*
+allowBuilds:
+  '@parcel/watcher': true
+  better-sqlite3: true
+  core-js: true
+  core-js-pure: true
+  esbuild: true
+  sharp: true

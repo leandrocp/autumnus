@@ -39,6 +39,24 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
+      label: 'Integrations',
+      items: [
+        'integrations/rehype-lumis',
+        'integrations/markdown-it',
+        'integrations/vitepress',
+        'integrations/mdx',
+        'integrations/nextjs',
+        'integrations/astro',
+        'integrations/unified-rehype',
+        'integrations/react-markdown',
+        'integrations/ratatui',
+        'integrations/nimble-publisher',
+        'integrations/docusaurus',
+        'integrations/nuxt',
+      ],
+    },
+    {
+      type: 'category',
       label: 'Recipes',
       items: [
         'recipes/light-dark',
@@ -65,7 +83,11 @@ const sidebars: SidebarsConfig = {
     {
       type: 'category',
       label: 'Reference',
-      items: ['reference/languages', 'reference/themes', 'reference/platforms'],
+      items: [
+        'reference/languages',
+        'reference/themes',
+        'reference/platforms',
+      ],
     },
   ],
 };

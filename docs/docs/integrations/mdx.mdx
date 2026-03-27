@@ -1,0 +1,55 @@
+---
+sidebar_position: 2
+slug: /integrations/mdx
+title: MDX
+description: Use Lumis in MDX pipelines with rehype-lumis.
+keywords:
+  - lumis mdx
+  - rehype lumis
+  - mdx syntax highlighting
+  - unified lumis
+---
+
+# MDX
+
+[Full example on GitHub](https://github.com/leandrocp/lumis/tree/main/examples/mdx)
+
+MDX is the best fit for `@lumis-sh/rehype-lumis`.
+
+The pattern is simple: compile Markdown to HAST, let `rehype-lumis` replace each `pre > code` block with Lumis HTML, then continue your normal MDX pipeline.
+
+## Install
+
+```bash
+npm install @lumis-sh/rehype-lumis @lumis-sh/themes
+```
+
+## With `@mdx-js/mdx`
+
+```ts
+import {compile} from '@mdx-js/mdx'
+import rehypeLumis from '@lumis-sh/rehype-lumis'
+import githubLight from '@lumis-sh/themes/github_light'
+
+const file = await compile(source, {
+  rehypePlugins: [
+    [rehypeLumis, {
+      theme: githubLight,
+      fallbackLanguage: 'plaintext',
+    }],
+  ],
+})
+```
+
+## When to use this instead of `markdown-it-lumis`
+
+Use `rehype-lumis` when your stack is built on unified or MDX directly:
+
+- `@mdx-js/mdx`
+- Next.js MDX setups
+- Astro MDX setups
+- custom unified pipelines
+
+Use `markdown-it-lumis` when the host tool is built on `markdown-it`, like VitePress.
+
+`rehype-lumis` is async because Lumis language loading is async.

@@ -1,0 +1,87 @@
+---
+sidebar_position: 10
+slug: /integrations/markdown-it
+title: markdown-it
+description: Use Lumis directly in markdown-it with markdown-it-lumis.
+keywords:
+  - markdown-it lumis
+  - lumis markdown-it
+  - syntax highlighting markdown-it
+---
+
+# markdown-it
+
+[Full example on GitHub](https://github.com/leandrocp/lumis/tree/main/examples/markdown-it)
+
+Use `@lumis-sh/markdown-it-lumis` when your renderer is built on `markdown-it`.
+
+## Install
+
+```bash
+npm install markdown-it @lumis-sh/markdown-it-lumis @lumis-sh/themes
+```
+
+## Example
+
+```ts
+import MarkdownIt from 'markdown-it'
+import markdownItLumis from '@lumis-sh/markdown-it-lumis'
+import githubLight from '@lumis-sh/themes/github_light'
+
+const md = new MarkdownIt()
+const lumis = await markdownItLumis({
+  theme: githubLight,
+  loadLanguages: ['javascript', 'rust', 'plaintext'],
+  fallbackLanguage: 'plaintext',
+})
+
+lumis(md)
+
+const html = md.render(markdown)
+```
+
+Use this for tools like VitePress or for custom markdown-it renderers.
+
+## Exports
+
+### `default`
+
+```ts
+const lumis = await markdownItLumis(options)
+lumis(md)
+```
+
+Creates a Lumis highlighter and returns an installer function for a `markdown-it` instance.
+
+### `fromHighlighter`
+
+```ts
+import {createHighlighter} from '@lumis-sh/lumis'
+import {fromHighlighter} from '@lumis-sh/markdown-it-lumis'
+
+const highlighter = await createHighlighter()
+const lumis = fromHighlighter(highlighter, options)
+lumis(md)
+```
+
+Use this when you want to reuse an existing highlighter.
+
+## Options
+
+- `theme` - required Lumis theme
+- `langs` - extra language definitions passed to `createHighlighter`
+- `loadLanguages` - languages to preload during setup for sync markdown-it rendering
+- `defaultLanguage` - used when the fence has no language and `detectLanguage` is false
+- `fallbackLanguage` - used when the requested language fails
+- `preClass` - class added to the generated `<pre>`
+- `detectLanguage` - passes `undefined` language to Lumis instead of using `defaultLanguage`
+- `includeHighlights` - enables highlight metadata in HTML output
+- `italic` - keeps italic token styles in output
+- `onError` - error hook with `{ language, code }`
+
+## Behavior
+
+- overrides fenced code rendering
+- loads languages asynchronously
+- renders synchronously after setup, so preload the languages you expect to use
+- falls back to the default fence renderer if highlighting fails and no fallback succeeds

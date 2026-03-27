@@ -1,0 +1,73 @@
+---
+sidebar_position: 1
+slug: /integrations/vitepress
+title: VitePress
+description: Replace VitePress code fence highlighting with Lumis through markdown-it.
+keywords:
+  - vitepress lumis
+  - markdown-it lumis
+  - shiki replacement
+  - vitepress syntax highlighting
+---
+
+# VitePress
+
+[Full example on GitHub](https://github.com/leandrocp/lumis/tree/main/examples/vitepress)
+
+VitePress uses `markdown-it` under the hood. That makes Lumis integration straightforward: override the markdown renderer's `highlight` function and let VitePress keep the rest of its code block UI.
+
+## Install
+
+```bash
+npm install @lumis-sh/markdown-it-lumis @lumis-sh/themes
+```
+
+## Configure `.vitepress/config.ts`
+
+```ts
+import {defineConfig} from 'vitepress'
+import markdownItLumis from '@lumis-sh/markdown-it-lumis'
+import githubLight from '@lumis-sh/themes/github_light'
+
+const lumis = await markdownItLumis({
+  theme: githubLight,
+  loadLanguages: ['javascript', 'rust', 'plaintext'],
+  fallbackLanguage: 'plaintext',
+})
+
+export default defineConfig({
+  markdown: {
+    async config(md) {
+      lumis(md)
+    },
+  },
+})
+```
+
+## Pick a different theme
+
+Any `@lumis-sh/themes/*` theme module works.
+
+```ts
+import {defineConfig} from 'vitepress'
+import markdownItLumis from '@lumis-sh/markdown-it-lumis'
+import nightfly from '@lumis-sh/themes/nightfly'
+
+const lumis = await markdownItLumis({
+  theme: nightfly,
+  loadLanguages: ['javascript', 'rust', 'plaintext'],
+  fallbackLanguage: 'plaintext',
+})
+
+export default defineConfig({
+  markdown: {
+    async config(md) {
+      lumis(md)
+    },
+  },
+})
+```
+
+Unknown language labels fall back to `plaintext`.
+
+Preload the languages you expect to render.

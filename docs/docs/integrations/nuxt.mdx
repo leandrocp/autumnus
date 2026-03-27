@@ -1,0 +1,52 @@
+---
+sidebar_position: 9
+slug: /integrations/nuxt
+title: Nuxt
+description: Use Lumis in Nuxt Content through rehype plugins.
+keywords:
+  - nuxt lumis
+  - nuxt content lumis
+  - rehype lumis nuxt
+  - nuxt syntax highlighting
+---
+
+# Nuxt
+
+[Full example on GitHub](https://github.com/leandrocp/lumis/tree/main/examples/nuxt)
+
+Nuxt Content exposes markdown rehype plugins, so Lumis fits at the content pipeline layer.
+
+## Install
+
+```bash
+npm install @nuxt/content @lumis-sh/rehype-lumis @lumis-sh/themes
+```
+
+## Configure `nuxt.config.ts`
+
+```ts
+import githubLight from '@lumis-sh/themes/github_light'
+
+export default defineNuxtConfig({
+  modules: ['@nuxt/content'],
+  content: {
+    build: {
+      markdown: {
+        highlight: false,
+        rehypePlugins: {
+          '@lumis-sh/rehype-lumis': {
+            options: {
+              theme: githubLight,
+              fallbackLanguage: 'plaintext',
+            },
+          },
+        },
+      },
+    },
+  },
+})
+```
+
+Disable Nuxt Content's built-in Shiki highlighting with `highlight: false` when Lumis owns code blocks.
+
+The rehype plugin options must be nested under `options` because Nuxt Content's plugin loader expects `{ instance?, options? }`.
