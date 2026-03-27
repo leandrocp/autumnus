@@ -1,6 +1,6 @@
 use lumis::formatter::Formatter as _;
 use lumis::{
-    highlight, highlight::highlight_events, languages::Language, themes, BBCodeBuilder,
+    highlight, highlight::highlight_events, languages::Language, themes, BBCodeScopedBuilder,
     HtmlInlineBuilder, HtmlLinkedBuilder, HtmlMultiThemesBuilder, TerminalBuilder,
 };
 use serde::Deserialize;
@@ -143,7 +143,7 @@ fn check_terminal(fixture: &Fixture) {
 
 fn check_bbcode(fixture: &Fixture) {
     let lang: Language = fixture.metadata.language.parse().unwrap();
-    let fmt = BBCodeBuilder::new().lang(lang).build().unwrap();
+    let fmt = BBCodeScopedBuilder::new().lang(lang).build().unwrap();
     let mut out = Vec::new();
     fmt.format(&fixture.source, &mut out).unwrap();
     assert_eq!(

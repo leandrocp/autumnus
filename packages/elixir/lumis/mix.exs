@@ -75,6 +75,7 @@ defmodule Lumis.MixProject do
         "#{@source_url}/blob/elixir@v#{@version}/packages/elixir/lumis/%{path}#L%{line}",
       extras: [
         "CHANGELOG.md",
+        "examples/bbcode_scoped.livemd",
         "examples/light_dark_manual.livemd",
         "examples/light_dark_vars.livemd",
         "examples/light_dark_function.livemd"

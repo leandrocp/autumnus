@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>bbcodeScoped</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="min-h-screen bg-stone-950 text-stone-100 antialiased">
+  <main class="mx-auto flex max-w-6xl flex-col gap-6 px-6 py-6 lg:px-8">
+    <nav class="flex items-center justify-between rounded-2xl border border-amber-200/10 bg-stone-900/80 px-4 py-3 shadow-[0_20px_50px_rgba(0,0,0,0.4)] backdrop-blur">
+      <a class="text-sm font-medium text-stone-200 transition-colors hover:text-white" href="/">All examples</a>
+      <span class="rounded-full border border-amber-300/20 bg-amber-300/10 px-3 py-1 text-[11px] uppercase tracking-[0.25em] text-amber-200">Formatter</span>
+    </nav>
+
+    <section class="rounded-[28px] border border-stone-800 bg-[radial-gradient(circle_at_top_left,_rgba(251,191,36,0.08),_transparent_35%),linear-gradient(180deg,_rgba(28,25,23,0.95),_rgba(12,10,9,0.98))] p-6 shadow-[0_24px_60px_rgba(0,0,0,0.45)] md:p-8">
+      <p class="mb-3 text-[11px] uppercase tracking-[0.3em] text-amber-200">Forum-ready output</p>
+      <h1 class="mb-2 text-3xl font-semibold text-white">bbcodeScoped</h1>
+      <p class="max-w-3xl text-sm leading-6 text-stone-300">Outputs nested tags based on Lumis highlight scope names and escapes literal brackets so code like <code class="rounded bg-stone-800 px-1.5 py-0.5 text-amber-200">[url=x]</code> stays literal. It is meant for scope-aware BBCode parsers, not standard forum tags like <code class="rounded bg-stone-800 px-1.5 py-0.5 text-amber-200">[b]</code> or <code class="rounded bg-stone-800 px-1.5 py-0.5 text-amber-200">[color]</code>.</p>
+
+      <div class="mt-8 grid gap-6 lg:grid-cols-2">
+        <article>
+          <h2 class="mb-3 text-lg font-medium text-amber-100">Source</h2>
+          <pre id="source" class="overflow-x-auto rounded-2xl border border-stone-800 bg-stone-950 p-4 text-sm text-stone-300"></pre>
+        </article>
+
+        <article>
+          <h2 class="mb-3 text-lg font-medium text-amber-100">bbcodeScoped output</h2>
+          <pre id="output" class="overflow-x-auto rounded-2xl border border-stone-800 bg-stone-950 p-4 text-sm text-amber-100 whitespace-pre-wrap break-words"></pre>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { createHighlighter } from '../src/index.browser.ts'
+    import { bbcodeScoped } from '../src/formatters.ts'
+    import javascript from '../langs/javascript.ts'
+
+    const code = `const template = ` + "`<a href=\"/x\">[url=x]</a>`" + `\nconsole.log(template)\n`
+
+    const hl = await createHighlighter({ languages: [javascript] })
+    const output = hl.highlight(code, bbcodeScoped({ language: javascript }))
+
+    document.getElementById('source').textContent = code
+    document.getElementById('output').textContent = output
+  </script>
+</body>
+</html>

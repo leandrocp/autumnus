@@ -1,2 +1,2 @@
 [keyword-python]def[/keyword-python] [function-python]greet[/function-python]([variable-python]name[/variable-python]: [type-python]str[/type-python]) [operator-python]->[/operator-python] [type-python]str[/type-python]:
-    [keyword-python]return[/keyword-python] [string-python]f"hi, [/string-python][punctuation-special-python]{[/punctuation-special-python][variable-python]name[/variable-python][punctuation-special-python]}[/punctuation-special-python][string-python]"[/string-python]
+    [keyword-python]return[/keyword-python] [string-python]f"hi, [punctuation-special-python]{[/punctuation-special-python][variable-python]name[/variable-python][punctuation-special-python]}[/punctuation-special-python]"[/string-python]

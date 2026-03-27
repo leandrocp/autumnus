@@ -1,2 +1,2 @@
-[markup-heading-1-markdown]# [/markup-heading-1-markdown][markup-italic-markdown_inline]*italic*[/markup-italic-markdown_inline][markup-heading-1-markdown]
+[markup-heading-1-markdown]# [markup-italic-markdown_inline]*italic*[/markup-italic-markdown_inline]
 [/markup-heading-1-markdown]

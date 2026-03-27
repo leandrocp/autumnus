@@ -4,7 +4,7 @@ import {
   createHighlighter,
   highlight,
 } from '../src/index.js'
-import { htmlInline, htmlLinked, htmlMultiThemes, terminal } from '../src/formatters.js'
+import { bbcodeScoped, htmlInline, htmlLinked, htmlMultiThemes, terminal } from '../src/formatters.js'
 import * as formatterApi from '../src/formatters.js'
 import type { Highlighter, Theme } from '../src/index.js'
 import json from '../langs/json.ts'
@@ -140,6 +140,19 @@ describe('hl.highlight', () => {
     expect(html).toContain('<pre class="lumis">')
     expect(html).toContain('class="language-json"')
     expect(html).toMatch(/class="(string|number|punctuation)"/)
+  })
+
+  it('produces nested bbcodeScoped tags and escapes raw brackets', async () => {
+    const jsHighlighter = await createHighlighter({
+      languages: [json, javascript],
+    })
+
+    const output = jsHighlighter.highlight(
+      'const x = "[url=x]"\n',
+      bbcodeScoped({ language: javascript })
+    )
+    expect(output).toContain('[keyword-javascript]const[/keyword-javascript]')
+    expect(output).toContain('[string-javascript]"&#91;url=x&#93;"[/string-javascript]')
   })
 
   it('wraps htmlLinked output with header', () => {

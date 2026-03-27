@@ -113,7 +113,7 @@ fn check_terminal(fixture: &Fixture) {
 }
 
 fn check_bbcode(fixture: &Fixture) {
-    let output = run_highlight_source(fixture, "bbcode", &[]);
+    let output = run_highlight_source(fixture, "bbcode-scoped", &[]);
     assert_text_eq(&output, &fixture.bbcode);
 }
 

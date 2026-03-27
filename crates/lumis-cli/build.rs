@@ -290,7 +290,7 @@ mod {ident} {{
     #[test] fn conformance_html_linked() {{ check_html_linked(&fixture()); }}
     #[test] fn conformance_html_multi_themes() {{ check_html_multi_themes(&fixture()); }}
     #[test] fn conformance_terminal() {{ check_terminal(&fixture()); }}
-    #[test] fn conformance_bbcode() {{ check_bbcode(&fixture()); }}
+    #[test] fn conformance_bbcode_scoped() {{ check_bbcode(&fixture()); }}
 }}
 "#
             ));
