@@ -48,7 +48,15 @@ export interface HighlighterModuleFactory {
   getDefaultRuntime(): RuntimeLike;
 }
 
-async function loadLang(runtime: RuntimeLike, language: Language): Promise<void> {
+/** Options for {@link createHighlighter}. */
+export interface CreateHighlighterOptions {
+  /** Languages to preload or register lazily. */
+  languages?: LanguageInput[];
+  /** Optional resolver for external WASM assets. */
+  wasmResolver?: WasmResolver;
+}
+
+async function loadLanguageDefinition(runtime: RuntimeLike, language: Language): Promise<void> {
   await runtime.loadLanguage({
     definition: { id: language.id, aliases: language.aliases },
     wasm: language.wasm,
@@ -100,46 +108,46 @@ async function ensureLanguageLoaded(
   if (typeof ref !== "string") {
     if (!runtime.getLoadedLanguage(ref.id)) {
       if (isLanguage(ref)) {
-        await loadLang(runtime, ref);
+        await loadLanguageDefinition(runtime, ref);
       } else {
-        const lang = await ref();
-        await loadLang(runtime, lang);
+        const language = await ref();
+        await loadLanguageDefinition(runtime, language);
       }
     }
     return;
   }
 
-  const langId = ref;
-  if (runtime.getLoadedLanguage(langId)) {
+  const languageId = ref;
+  if (runtime.getLoadedLanguage(languageId)) {
     return;
   }
 
-  const lazy = lazyRegistry?.get(langId);
+  const lazy = lazyRegistry?.get(languageId);
   if (lazy) {
-    const lang = await lazy();
-    await loadLang(runtime, lang);
+    const language = await lazy();
+    await loadLanguageDefinition(runtime, language);
     return;
   }
 
-  const builtin = await loadBuiltinLanguageById(langId);
+  const builtin = await loadBuiltinLanguageById(languageId);
   if (builtin) {
-    await loadLang(runtime, builtin);
+    await loadLanguageDefinition(runtime, builtin);
   }
 }
 
 function resolveLoadedLanguage(runtime: RuntimeLike, ref?: LanguageRef) {
-  const langId = resolveRefId(ref);
-  const loaded = runtime.getLoadedLanguage(langId);
+  const languageId = resolveRefId(ref);
+  const loaded = runtime.getLoadedLanguage(languageId);
   if (!loaded) {
-    if (langId === PLAINTEXT_LANG_ID) {
+    if (languageId === PLAINTEXT_LANG_ID) {
       throw new Error(
-        `Language "${langId}" is not loaded. ` +
+        `Language "${languageId}" is not loaded. ` +
           `Load the plaintext bundle before using omitted/plaintext sync highlighting.`,
       );
     }
     throw new Error(
-      `Language "${langId}" is not loaded. ` +
-        `Pass it to createHighlighter({ langs: [...] }) or call hl.loadLanguage(bundle).`,
+      `Language "${languageId}" is not loaded. ` +
+        `Pass it to createHighlighter({ languages: [...] }) or call hl.loadLanguage(bundle).`,
     );
   }
 
@@ -248,7 +256,7 @@ async function resolveLanguageInput(
 ): Promise<void> {
   // Language object — load eagerly
   if (isLanguage(input)) {
-    await loadLang(runtime, input);
+    await loadLanguageDefinition(runtime, input);
     return;
   }
 
@@ -268,42 +276,110 @@ async function resolveLanguageInput(
   // () => Promise<{ default: Language }> — lazy function
   if (typeof input === "function") {
     const mod = await input();
-    await loadLang(runtime, mod.default);
+    await loadLanguageDefinition(runtime, mod.default);
     return;
   }
 
   // Promise<{ default: Language }> — eager dynamic import
   const mod = await input;
-  await loadLang(runtime, mod.default);
+  await loadLanguageDefinition(runtime, mod.default);
+}
+
+function registerLazyBundle(bundle: LanguageBundle, lazyRegistry: Map<string, LazyLanguage>): void {
+  for (const [id, lazy] of Object.entries(bundle)) {
+    if (lazyRegistry.has(id)) {
+      continue;
+    }
+
+    lazyRegistry.set(id, lazy);
+    for (const alias of lazy.aliases) {
+      lazyRegistry.set(alias, lazy);
+    }
+  }
+}
+
+async function loadHighlighterLanguage(
+  input: Language | LazyLanguage | string,
+  runtime: RuntimeLike,
+  lazyRegistry: Map<string, LazyLanguage>,
+): Promise<void> {
+  const id = typeof input === "string" ? input : input.id;
+  if (runtime.getLoadedLanguage(id)) {
+    return;
+  }
+
+  if (isLanguage(input)) {
+    await loadLanguageDefinition(runtime, input);
+    return;
+  }
+
+  if (typeof input === "string") {
+    const lazy = lazyRegistry.get(input);
+    if (lazy) {
+      const language = await lazy();
+      await loadLanguageDefinition(runtime, language);
+      return;
+    }
+
+    const builtin = await loadBuiltinLanguageById(input);
+    if (!builtin) {
+      throw new Error(`Language "${input}" is not registered in any bundle.`);
+    }
+
+    await loadLanguageDefinition(runtime, builtin);
+    return;
+  }
+
+  const language = await input();
+  await loadLanguageDefinition(runtime, language);
+}
+
+function getRegisteredLanguageIds(
+  runtime: RuntimeLike,
+  lazyRegistry: Map<string, LazyLanguage>,
+): string[] {
+  return [...new Set([...runtime.getLoadedLanguageIds(), ...lazyRegistry.keys()])];
+}
+
+async function loadInitialLanguages(
+  inputs: LanguageInput[],
+  runtime: RuntimeLike,
+  lazyRegistry: Map<string, LazyLanguage>,
+): Promise<void> {
+  const eagerLoads: Array<Promise<void>> = [];
+
+  for (const input of inputs) {
+    if (isLanguageBundle(input)) {
+      registerLazyBundle(input, lazyRegistry);
+      continue;
+    }
+
+    eagerLoads.push(resolveLanguageInput(input, runtime, lazyRegistry));
+  }
+
+  await Promise.all([runtime.loadPlaintext(), ...eagerLoads]);
+}
+
+async function prepareRuntimeHighlight(
+  runtime: RuntimeLike,
+  source: string,
+  language: LanguageRef | undefined,
+): Promise<LanguageRef | string> {
+  await runtime.initParser();
+
+  const detectedRef = detectLanguageRef(source, language);
+  await ensureLanguageLoaded(runtime, detectedRef);
+  return detectedRef;
 }
 
 export function createHighlighterModule(factory: HighlighterModuleFactory) {
   return {
-    async createHighlighter(
-      init: { langs?: LanguageInput[]; wasmResolver?: WasmResolver } = {},
-    ): Promise<Highlighter> {
+    async createHighlighter(init: CreateHighlighterOptions = {}): Promise<Highlighter> {
       const runtime = factory.createRuntime({ wasmResolver: init.wasmResolver });
       await runtime.initParser();
 
       const lazyRegistry = new Map<string, LazyLanguage>();
-      const inputs = init.langs ?? [];
-
-      const eagerLoads: Array<Promise<void>> = [];
-      for (const input of inputs) {
-        if (isLanguageBundle(input)) {
-          for (const [id, lazy] of Object.entries(input)) {
-            if (!lazyRegistry.has(id)) {
-              lazyRegistry.set(id, lazy);
-              for (const alias of lazy.aliases) {
-                lazyRegistry.set(alias, lazy);
-              }
-            }
-          }
-        } else {
-          eagerLoads.push(resolveLanguageInput(input, runtime, lazyRegistry));
-        }
-      }
-      await Promise.all([runtime.loadPlaintext(), ...eagerLoads]);
+      await loadInitialLanguages(init.languages ?? [], runtime, lazyRegistry);
 
       return {
         highlight: (source, fmt) => {
@@ -313,44 +389,20 @@ export function createHighlighterModule(factory: HighlighterModuleFactory) {
         highlightIter: (source, language, theme, onToken) =>
           runHighlightIter(runtime, source, detectLanguageRef(source, language), theme, onToken),
         async loadLanguage(input) {
-          const id = typeof input === "string" ? input : input.id;
-          if (runtime.getLoadedLanguage(id)) return;
-
-          if (isLanguage(input)) {
-            await loadLang(runtime, input);
-          } else if (typeof input === "string") {
-            const lazy = lazyRegistry.get(input);
-            if (lazy) {
-              const lang = await lazy();
-              await loadLang(runtime, lang);
-              return;
-            }
-
-            const builtin = await loadBuiltinLanguageById(input);
-            if (!builtin) {
-              throw new Error(`Language "${input}" is not registered in any bundle.`);
-            }
-            await loadLang(runtime, builtin);
-          } else if (typeof input === "function") {
-            const lang = await input();
-            await loadLang(runtime, lang);
-          }
+          await loadHighlighterLanguage(input, runtime, lazyRegistry);
         },
         get languages() {
           return runtime.getLoadedLanguageIds();
         },
         get registeredLanguages() {
-          return [...new Set([...runtime.getLoadedLanguageIds(), ...lazyRegistry.keys()])];
+          return getRegisteredLanguageIds(runtime, lazyRegistry);
         },
       };
     },
 
     async highlight(source: string, fmt: Formatter): Promise<string> {
       const runtime = factory.getDefaultRuntime();
-      await runtime.initParser();
-
-      const detectedRef = detectLanguageRef(source, fmt.language);
-      await ensureLanguageLoaded(runtime, detectedRef);
+      const detectedRef = await prepareRuntimeHighlight(runtime, source, fmt.language);
 
       return runFormatter(runtime, source, fmt, detectedRef);
     },
@@ -362,10 +414,7 @@ export function createHighlighterModule(factory: HighlighterModuleFactory) {
       onToken: HighlightCallback,
     ): Promise<void> {
       const runtime = factory.getDefaultRuntime();
-      await runtime.initParser();
-
-      const detectedRef = detectLanguageRef(source, language);
-      await ensureLanguageLoaded(runtime, detectedRef);
+      const detectedRef = await prepareRuntimeHighlight(runtime, source, language);
 
       runHighlightIter(runtime, source, detectedRef, theme, onToken);
     },

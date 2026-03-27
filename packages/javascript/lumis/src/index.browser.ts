@@ -14,14 +14,17 @@ const highlighter = createHighlighterModule({
 });
 
 /** {@inheritDoc index.createHighlighter} */
-export const createHighlighter = (...args: Parameters<typeof highlighter.createHighlighter>) =>
-  highlighter.createHighlighter(...args);
+export function createHighlighter(...args: Parameters<typeof highlighter.createHighlighter>) {
+  return highlighter.createHighlighter(...args);
+}
 /** {@inheritDoc index.highlight} */
-export const highlight = (...args: Parameters<typeof highlighter.highlight>) =>
-  highlighter.highlight(...args);
+export function highlight(...args: Parameters<typeof highlighter.highlight>) {
+  return highlighter.highlight(...args);
+}
 /** {@inheritDoc index.highlightIter} */
-export const highlightIter = (...args: Parameters<typeof highlighter.highlightIter>) =>
-  highlighter.highlightIter(...args);
+export function highlightIter(...args: Parameters<typeof highlighter.highlightIter>) {
+  return highlighter.highlightIter(...args);
+}
 export type { Highlighter } from "./core/highlighter.js";
 export type {
   HighlightContext,

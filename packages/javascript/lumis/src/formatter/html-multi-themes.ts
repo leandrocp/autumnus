@@ -1,121 +1,81 @@
 import type { HighlightEvent, HighlightSpan, HtmlMultiThemesFormatter, Theme } from "../types.js";
+import { sanitizeThemeName } from "../themes.js";
 import {
   closingTags,
   formatHighlightIterLines,
   getHighlightLineClass,
-  getScopedThemeStyle,
   getThemeStyle,
   joinClasses,
   lineIsHighlighted,
   openCodeTag,
   openTag,
-  openSpanTag,
+  spanMultiThemesAttrs,
   styleToCss,
-  textDecoration,
   wrapLine,
   wrapWithHeader,
 } from "./html.js";
-import { sanitizeThemeName } from "../themes.js";
 
-function pushThemeCssVars(
-  cssVars: string[],
+function buildNormalThemeVars(
+  styles: string[],
   prefix: string,
-  themeName: string,
-  span: HighlightSpan,
-  theme: Theme | undefined,
+  themes: Record<string, Theme>,
+  excludeTheme?: string,
 ): void {
-  const style = getScopedThemeStyle(theme, span.scope, span.language);
-  if (!style) return;
+  for (const [themeName, theme] of Object.entries(themes)) {
+    if (themeName === excludeTheme) {
+      continue;
+    }
 
-  const sanitized = sanitizeThemeName(themeName);
-  if (style.fg) cssVars.push(`${prefix}-${sanitized}:${style.fg};`);
-  if (style.bg) cssVars.push(`${prefix}-${sanitized}-bg:${style.bg};`);
-  cssVars.push(`${prefix}-${sanitized}-font-style:${style.italic ? "italic" : "normal"};`);
-  cssVars.push(`${prefix}-${sanitized}-font-weight:${style.bold ? "bold" : "normal"};`);
-  cssVars.push(`${prefix}-${sanitized}-text-decoration:${textDecoration(style) ?? "none"};`);
+    const sanitized = sanitizeThemeName(themeName);
+    const style = getThemeStyle(theme, "normal");
+    if (style?.fg) styles.push(`${prefix}-${sanitized}:${style.fg};`);
+    if (style?.bg) styles.push(`${prefix}-${sanitized}-bg:${style.bg};`);
+  }
+}
+
+function buildPreThemeStyle(options: {
+  themes: Record<string, Theme>;
+  defaultTheme?: string;
+  cssVariablePrefix?: string;
+}): string | undefined {
+  const prefix = options.cssVariablePrefix ?? "--lumis";
+  const styles: string[] = [];
+
+  if (options.defaultTheme === "light-dark()") {
+    const lightNormal = getThemeStyle(options.themes.light, "normal");
+    const darkNormal = getThemeStyle(options.themes.dark, "normal");
+    const lightFg = lightNormal?.fg ?? "#000000";
+    const lightBg = lightNormal?.bg ?? "#ffffff";
+    const darkFg = darkNormal?.fg ?? "#ffffff";
+    const darkBg = darkNormal?.bg ?? "#000000";
+
+    styles.push(`color: light-dark(${lightFg}, ${darkFg});`);
+    styles.push(`background-color: light-dark(${lightBg}, ${darkBg});`);
+  } else if (options.defaultTheme) {
+    const defaultStyle = getThemeStyle(options.themes[options.defaultTheme], "normal");
+    if (defaultStyle?.fg) styles.push(`color:${defaultStyle.fg};`);
+    if (defaultStyle?.bg) styles.push(`background-color:${defaultStyle.bg};`);
+    buildNormalThemeVars(styles, prefix, options.themes, options.defaultTheme);
+  } else {
+    buildNormalThemeVars(styles, prefix, options.themes);
+  }
+
+  return styles.length > 0 ? styles.join(" ") : undefined;
 }
 
 function spanAttrs(
   span: HighlightSpan,
   formatter: HtmlMultiThemesFormatter,
 ): Record<string, string | undefined> {
-  const themes = formatter.themes;
-  const defaultTheme = formatter.defaultTheme;
-  const prefix = formatter.cssVariablePrefix ?? "--lumis";
-
-  const attrs: Record<string, string | undefined> = {};
-  if (formatter.includeHighlights) {
-    attrs["data-highlight"] = span.scope;
-  }
-
-  if (Object.keys(themes).length === 0) {
-    return attrs;
-  }
-
-  const inlineStyles: string[] = [];
-  const cssVars: string[] = [];
-
-  if (defaultTheme === "light-dark()") {
-    const lightStyle = getScopedThemeStyle(themes.light, span.scope, span.language);
-    const darkStyle = getScopedThemeStyle(themes.dark, span.scope, span.language);
-
-    if (lightStyle && darkStyle) {
-      if (lightStyle.fg && darkStyle.fg) {
-        inlineStyles.push(`color: light-dark(${lightStyle.fg}, ${darkStyle.fg});`);
-      }
-      if (lightStyle.bg && darkStyle.bg) {
-        inlineStyles.push(`background-color: light-dark(${lightStyle.bg}, ${darkStyle.bg});`);
-      }
-      inlineStyles.push(
-        `font-weight: light-dark(${lightStyle.bold ? "bold" : "normal"}, ${darkStyle.bold ? "bold" : "normal"});`,
-      );
-      if (formatter.italic) {
-        inlineStyles.push(
-          `font-style: light-dark(${lightStyle.italic ? "italic" : "normal"}, ${darkStyle.italic ? "italic" : "normal"});`,
-        );
-      }
-
-      const lightDecoration = textDecoration(lightStyle) ?? "none";
-      const darkDecoration = textDecoration(darkStyle) ?? "none";
-      inlineStyles.push(`text-decoration: light-dark(${lightDecoration}, ${darkDecoration});`);
-    }
-  } else if (defaultTheme) {
-    const defaultStyle = getScopedThemeStyle(themes[defaultTheme], span.scope, span.language);
-    if (defaultStyle) {
-      const css = styleToCss(defaultStyle, {
-        italic: formatter.italic,
-        compact: true,
-      });
-      if (css) {
-        inlineStyles.push(css);
-      }
-
-      const sanitized = sanitizeThemeName(defaultTheme);
-      cssVars.push(
-        `${prefix}-${sanitized}-font-style:${defaultStyle.italic ? "italic" : "normal"};`,
-      );
-      cssVars.push(`${prefix}-${sanitized}-font-weight:${defaultStyle.bold ? "bold" : "normal"};`);
-      cssVars.push(
-        `${prefix}-${sanitized}-text-decoration:${textDecoration(defaultStyle) ?? "none"};`,
-      );
-    }
-
-    for (const [themeName, theme] of Object.entries(themes)) {
-      if (themeName === defaultTheme) continue;
-      pushThemeCssVars(cssVars, prefix, themeName, span, theme);
-    }
-  } else {
-    for (const [themeName, theme] of Object.entries(themes)) {
-      pushThemeCssVars(cssVars, prefix, themeName, span, theme);
-    }
-  }
-
-  const styleParts = [...inlineStyles, ...cssVars].filter(Boolean);
-  if (styleParts.length > 0) {
-    attrs.style = styleParts.join(" ");
-  }
-
-  return attrs;
+  return spanMultiThemesAttrs({
+    language: span.language,
+    scope: span.scope,
+    themes: formatter.themes,
+    defaultTheme: formatter.defaultTheme,
+    cssVariablePrefix: formatter.cssVariablePrefix,
+    italic: formatter.italic,
+    includeHighlights: formatter.includeHighlights,
+  });
 }
 
 function generatePreClasses(formatter: HtmlMultiThemesFormatter): string {
@@ -126,41 +86,11 @@ function generatePreClasses(formatter: HtmlMultiThemesFormatter): string {
 }
 
 function generatePreStyle(formatter: HtmlMultiThemesFormatter): string | undefined {
-  const prefix = formatter.cssVariablePrefix ?? "--lumis";
-  const styles: string[] = [];
-
-  if (formatter.defaultTheme === "light-dark()") {
-    const lightNormal = getThemeStyle(formatter.themes.light, "normal");
-    const darkNormal = getThemeStyle(formatter.themes.dark, "normal");
-    const lightFg = lightNormal?.fg ?? "#000000";
-    const lightBg = lightNormal?.bg ?? "#ffffff";
-    const darkFg = darkNormal?.fg ?? "#ffffff";
-    const darkBg = darkNormal?.bg ?? "#000000";
-
-    styles.push(`color: light-dark(${lightFg}, ${darkFg});`);
-    styles.push(`background-color: light-dark(${lightBg}, ${darkBg});`);
-  } else if (formatter.defaultTheme) {
-    const defaultStyle = getThemeStyle(formatter.themes[formatter.defaultTheme], "normal");
-    if (defaultStyle?.fg) styles.push(`color:${defaultStyle.fg};`);
-    if (defaultStyle?.bg) styles.push(`background-color:${defaultStyle.bg};`);
-
-    for (const [themeName, theme] of Object.entries(formatter.themes)) {
-      if (themeName === formatter.defaultTheme) continue;
-      const sanitized = sanitizeThemeName(themeName);
-      const style = getThemeStyle(theme, "normal");
-      if (style?.fg) styles.push(`${prefix}-${sanitized}:${style.fg};`);
-      if (style?.bg) styles.push(`${prefix}-${sanitized}-bg:${style.bg};`);
-    }
-  } else {
-    for (const [themeName, theme] of Object.entries(formatter.themes)) {
-      const sanitized = sanitizeThemeName(themeName);
-      const style = getThemeStyle(theme, "normal");
-      if (style?.fg) styles.push(`${prefix}-${sanitized}:${style.fg};`);
-      if (style?.bg) styles.push(`${prefix}-${sanitized}-bg:${style.bg};`);
-    }
-  }
-
-  return styles.length > 0 ? styles.join(" ") : undefined;
+  return buildPreThemeStyle({
+    themes: formatter.themes,
+    defaultTheme: formatter.defaultTheme,
+    cssVariablePrefix: formatter.cssVariablePrefix,
+  });
 }
 
 function highlightLineStyle(
@@ -195,6 +125,16 @@ function highlightLineClass(
   );
 }
 
+function getLineAttrs(
+  formatter: HtmlMultiThemesFormatter,
+  lineNumber: number,
+): { className?: string; style?: string } {
+  return {
+    className: highlightLineClass(formatter, lineNumber),
+    style: highlightLineStyle(formatter, lineNumber),
+  };
+}
+
 export function formatHtmlMultiThemes(
   source: string,
   events: HighlightEvent[],
@@ -202,20 +142,17 @@ export function formatHtmlMultiThemes(
 ): string {
   const theme = formatter.defaultTheme ? formatter.themes[formatter.defaultTheme] : undefined;
   const { lines } = formatHighlightIterLines(source, events, formatter.language, theme, {
-    openSpan: (span) => openSpanTag(spanAttrs(span, formatter)),
+    openSpan: (span, _style) => openTag("span", spanAttrs(span, formatter)),
   });
 
-  const preClasses = generatePreClasses(formatter);
-  const preStyle = generatePreStyle(formatter);
-  const pre = openTag("pre", { class: preClasses, style: preStyle });
+  const pre = openTag("pre", {
+    class: generatePreClasses(formatter),
+    style: generatePreStyle(formatter),
+  });
   const code = openCodeTag(formatter.language);
   const body = lines
-    .map((line, idx) =>
-      wrapLine(idx + 1, line, {
-        className: highlightLineClass(formatter, idx + 1),
-        style: highlightLineStyle(formatter, idx + 1),
-      }),
-    )
+    .map((line, idx) => wrapLine(idx + 1, line, getLineAttrs(formatter, idx + 1)))
     .join("");
+
   return wrapWithHeader(`${pre}${code}${body}${closingTags()}`, formatter.header);
 }

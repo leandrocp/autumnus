@@ -47,7 +47,7 @@ export interface HighlightRange {
  *
  * ```ts
  * import { availableLanguages } from '@lumis-sh/lumis'
- * const langs = availableLanguages()
+ * const languages = availableLanguages()
  * // [{ id: 'javascript', name: 'JavaScript', aliases: ['js', 'jsx'], extensions: ['*.js', ...] }, ...]
  * ```
  */
@@ -143,7 +143,7 @@ export interface Language {
  * import { bundledLanguages } from '@lumis-sh/lumis/bundles/web'
  *
  * bundledLanguages.javascript.id  // "javascript"
- * const lang = await bundledLanguages.javascript()  // loads the full Language
+ * const language = await bundledLanguages.javascript()  // loads the full Language
  * ```
  */
 export interface LazyLanguage {
@@ -164,7 +164,7 @@ export interface LazyLanguage {
 export type LanguageBundle = Record<string, LazyLanguage>;
 
 /**
- * What `createHighlighter({ langs })` accepts.
+ * What `createHighlighter({ languages })` accepts.
  *
  * - `Language` — loaded immediately
  * - `Promise<{ default: Language }>` — e.g. `import('@lumis-sh/lumis/langs/css')`

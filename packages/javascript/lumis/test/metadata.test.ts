@@ -3,13 +3,13 @@ import { availableLanguages, availableThemes } from '../src/index.js'
 
 describe('availableLanguages', () => {
   it('returns a non-empty array', () => {
-    const langs = availableLanguages()
-    expect(langs.length).toBeGreaterThan(0)
+    const languages = availableLanguages()
+    expect(languages.length).toBeGreaterThan(0)
   })
 
   it('includes known languages', () => {
-    const langs = availableLanguages()
-    const ids = langs.map((l) => l.id)
+    const languages = availableLanguages()
+    const ids = languages.map((language) => language.id)
     expect(ids).toContain('javascript')
     expect(ids).toContain('rust')
     expect(ids).toContain('python')
