@@ -1,0 +1,17 @@
+<div class="max-w-3xl mx-auto py-10 px-4">
+  <h1 class="text-3xl font-bold mb-8">Blog</h1>
+
+  <div class="space-y-6">
+    <article :for={post <- @posts} class="border-b pb-6">
+      <h2 class="text-xl font-semibold">
+        <a href={~p"/blog/#{post.id}"} class="text-blue-600 hover:underline">
+          {post.title}
+        </a>
+      </h2>
+      <p class="text-sm text-gray-500 mt-1">
+        {Calendar.strftime(post.date, "%B %d, %Y")} by {post.author}
+      </p>
+      <p class="mt-2 text-gray-700">{post.description}</p>
+    </article>
+  </div>
+</div>

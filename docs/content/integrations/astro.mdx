@@ -1,0 +1,78 @@
+---
+sidebar_position: 4
+slug: /integrations/astro
+title: Astro
+description: Use Lumis in Astro markdown and MDX through rehype-lumis.
+keywords:
+  - astro lumis
+  - astro mdx lumis
+  - astro markdown syntax highlighting
+  - rehype lumis
+---
+
+# Astro
+
+[Full example on GitHub](https://github.com/leandrocp/lumis/tree/main/examples/astro)
+
+Astro exposes markdown and MDX configuration through remark and rehype plugins. That makes `@lumis-sh/rehype-lumis` the clean Lumis integration point.
+
+You can use the same plugin for both regular markdown content and Astro MDX.
+
+## Install
+
+```bash
+npm install @lumis-sh/rehype-lumis @lumis-sh/lumis @lumis-sh/themes
+```
+
+If you use MDX files too:
+
+```bash
+npm install @astrojs/mdx
+```
+
+## Astro markdown
+
+```ts
+import {defineConfig} from 'astro/config'
+import rehypeLumis from '@lumis-sh/rehype-lumis'
+import {htmlInline} from '@lumis-sh/lumis/formatters'
+import {bundledLanguages} from '@lumis-sh/lumis/bundles/web'
+import githubLight from '@lumis-sh/themes/github_light'
+
+export default defineConfig({
+  markdown: {
+    rehypePlugins: [
+      [rehypeLumis, {
+        formatter: (language) => htmlInline({language, theme: githubLight}),
+        languages: [bundledLanguages],
+      }],
+    ],
+  },
+})
+```
+
+## Astro MDX
+
+```ts
+import {defineConfig} from 'astro/config'
+import mdx from '@astrojs/mdx'
+import rehypeLumis from '@lumis-sh/rehype-lumis'
+import {htmlInline} from '@lumis-sh/lumis/formatters'
+import {bundledLanguages} from '@lumis-sh/lumis/bundles/web'
+import githubLight from '@lumis-sh/themes/github_light'
+
+export default defineConfig({
+  integrations: [
+    mdx({
+      rehypePlugins: [
+        [rehypeLumis, {
+          formatter: (language) => htmlInline({language, theme: githubLight}),
+          languages: [bundledLanguages],
+        }],
+      ],
+    }),
+  ],
+})
+```
+
+If you already use other Astro markdown plugins, keep `rehype-lumis` in the rehype stage.

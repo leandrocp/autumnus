@@ -1,0 +1,16 @@
+{
+  "name": "example-astro-lumis",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "astro build",
+    "start": "astro dev"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^5.0.2",
+    "@lumis-sh/lumis": "workspace:*",
+    "@lumis-sh/rehype-lumis": "workspace:*",
+    "@lumis-sh/themes": "workspace:*",
+    "astro": "^6.0.8"
+  }
+}

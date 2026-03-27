@@ -1,0 +1,63 @@
+---
+sidebar_position: 3
+slug: /integrations/nextjs
+title: Next.js
+description: Use Lumis in Next.js MDX through rehype-lumis.
+keywords:
+  - nextjs lumis
+  - next mdx rehype
+  - nextjs syntax highlighting
+  - rehype lumis
+---
+
+# Next.js
+
+[Full example on GitHub](https://github.com/leandrocp/lumis/tree/main/examples/nextjs)
+
+Next.js MDX already supports `rehypePlugins`. That makes `@lumis-sh/rehype-lumis` the right Lumis integration point.
+
+## Install
+
+```bash
+npm install @next/mdx @mdx-js/loader @mdx-js/react @types/mdx
+npm install @lumis-sh/rehype-lumis @lumis-sh/lumis @lumis-sh/themes
+```
+
+## Configure `next.config.mjs`
+
+Wrap the configured plugin in a local module so Turbopack only sees a plain plugin reference:
+
+```js
+import createMDX from '@next/mdx'
+import {fileURLToPath} from 'node:url'
+
+const rehypeLumisPath = fileURLToPath(new URL('./rehype-lumis.mjs', import.meta.url))
+
+const withMDX = createMDX({
+  options: {
+    rehypePlugins: [rehypeLumisPath],
+  },
+})
+
+export default withMDX({
+  pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
+})
+```
+
+```js title="rehype-lumis.mjs"
+import rehypeLumis from '@lumis-sh/rehype-lumis'
+import {htmlInline} from '@lumis-sh/lumis/formatters'
+import {bundledLanguages} from '@lumis-sh/lumis/bundles/web'
+import githubLight from '@lumis-sh/themes/github_light'
+
+export default function configuredRehypeLumis() {
+  return rehypeLumis.call(this, {
+    formatter: (language) => htmlInline({language, theme: githubLight}),
+    languages: [bundledLanguages],
+  })
+}
+```
+
+This avoids passing non-serializable formatter callbacks directly through the MDX loader options.
+
+You also need `app/layout.tsx` and `mdx-components.tsx` at the project root for Next.js App Router MDX to work.

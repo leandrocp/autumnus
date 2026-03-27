@@ -1,0 +1,74 @@
+---
+sidebar_position: 6
+slug: /highlight/cli
+title: CLI
+description: Highlight files and stdin with the Lumis CLI.
+keywords:
+  - lumis cli highlight
+  - lumis highlight command
+  - lumis stdin
+  - lumis formatter
+---
+
+# CLI
+
+Use `lumis highlight` when you want highlighted output from a file or stdin.
+
+## Basic examples
+
+```bash
+lumis highlight main.rs
+lumis highlight index.js --theme dracula
+lumis highlight index.js --formatter html-inline --theme dracula
+```
+
+Terminal output is the default formatter, so `--formatter terminal` is optional.
+
+## From stdin
+
+```bash
+cat main.rs | lumis highlight --language rust
+echo 'const x = 1' | lumis highlight --language javascript --formatter html-inline --theme dracula
+```
+
+Use `--language` when piping content with no filename hint.
+
+## Language selection
+
+- provide `--language` when you already know the language
+- omit it when file extension, filename, or source content should drive detection
+- if detection fails, Lumis falls back to plaintext
+
+```bash
+lumis highlight main.rs
+lumis highlight main.txt --language rust
+```
+
+## Formatter selection
+
+```bash
+lumis highlight main.rs --theme dracula
+lumis highlight main.rs --formatter html-inline --theme dracula
+lumis highlight main.rs --formatter html-linked
+lumis highlight main.rs --formatter html-multi-themes --themes light:github_light --themes dark:github_dark
+lumis highlight main.rs --formatter bbcode-scoped
+```
+
+## Parser availability
+
+The CLI downloads parser WASM files on demand and caches them in the data directory.
+
+- first use may trigger a parser download
+- `lumis parsers fetch ...` pre-downloads parsers
+- `lumis parsers update ...` refreshes cached parsers
+
+```bash
+lumis parsers fetch rust javascript elixir
+lumis parsers update rust
+```
+
+## Related pages
+
+- [CLI Commands](/cli/commands)
+- [CLI Behavior](/cli/behavior)
+- [Formatters](/formatters)

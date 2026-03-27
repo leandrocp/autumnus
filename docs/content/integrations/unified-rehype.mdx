@@ -1,0 +1,55 @@
+---
+sidebar_position: 5
+slug: /integrations/unified-rehype
+title: unified / rehype
+description: Use Lumis directly in unified pipelines with rehype-lumis.
+keywords:
+  - unified lumis
+  - rehype lumis
+  - markdown to html lumis
+  - syntax highlighting pipeline
+---
+
+# unified / rehype
+
+[Full example on GitHub](https://github.com/leandrocp/lumis/tree/main/examples/rehype-lumis)
+
+This is the base integration underneath MDX, Next.js MDX, and many other content pipelines.
+
+If your system already uses `unified`, use `@lumis-sh/rehype-lumis` directly.
+
+## Install
+
+```bash
+npm install unified remark-parse remark-rehype rehype-stringify
+npm install @lumis-sh/rehype-lumis @lumis-sh/lumis @lumis-sh/themes
+```
+
+## Example
+
+```ts
+import {unified} from 'unified'
+import remarkParse from 'remark-parse'
+import remarkRehype from 'remark-rehype'
+import rehypeStringify from 'rehype-stringify'
+import rehypeLumis from '@lumis-sh/rehype-lumis'
+import {htmlInline} from '@lumis-sh/lumis/formatters'
+import javascript from '@lumis-sh/lumis/langs/javascript'
+import rust from '@lumis-sh/lumis/langs/rust'
+import plaintext from '@lumis-sh/lumis/langs/plaintext'
+import githubLight from '@lumis-sh/themes/github_light'
+
+const file = await unified()
+  .use(remarkParse)
+  .use(remarkRehype)
+  .use(rehypeLumis, {
+    formatter: (language) => htmlInline({language, theme: githubLight}),
+    languages: [javascript, rust, plaintext],
+  })
+  .use(rehypeStringify)
+  .process(markdown)
+
+const html = String(file)
+```
+
+`rehype-lumis` runs after `remark-rehype` and before `rehype-stringify`.
