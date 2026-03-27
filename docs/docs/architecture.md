@@ -61,6 +61,7 @@ Convert highlighted tokens into output:
 | HTML linked | `<span class="keyword">` |
 | HTML multi-themes | `<span style="--lumis-light: #333; --lumis-dark: #ccc;">` |
 | Terminal | ANSI escape codes |
+| BBCode | `[keyword-function]main[/keyword-function]` |
 
 ## Crate structure
 
@@ -71,4 +72,4 @@ lumis-cli         CLI binary
 lumis-build       build-time code generation
 ```
 
-The Elixir package (`packages/elixir/lumis`) wraps the Rust crate via Rustler NIF. The JavaScript package (`packages/javascript/lumis`) uses `web-tree-sitter` and reimplements the formatter logic in TypeScript.
+The Elixir package (`packages/elixir/lumis`) wraps the Rust crate via Rustler NIF. The JavaScript runtime package (`packages/javascript/lumis`) uses `web-tree-sitter` and reimplements the formatter logic in TypeScript. The `packages/javascript/markdown-it-lumis` and `packages/javascript/rehype-lumis` packages build on top of that runtime for Markdown and HAST pipelines.

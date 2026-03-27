@@ -19,6 +19,8 @@ keywords:
 | Rust | `lumis` | [docs.rs](https://docs.rs/lumis) |
 | Elixir | `lumis` | [HexDocs](https://hexdocs.pm/lumis) |
 | JavaScript | `@lumis-sh/lumis` | [npm](https://www.npmjs.com/package/@lumis-sh/lumis) |
+| JS integration | `@lumis-sh/markdown-it-lumis` | [npm](https://www.npmjs.com/package/@lumis-sh/markdown-it-lumis) |
+| JS integration | `@lumis-sh/rehype-lumis` | [npm](https://www.npmjs.com/package/@lumis-sh/rehype-lumis) |
 | Themes | `@lumis-sh/themes` | [npm](https://www.npmjs.com/package/@lumis-sh/themes) |
 | Java | `lumis4j` | [GitHub](https://github.com/roastedroot/lumis4j) |
 

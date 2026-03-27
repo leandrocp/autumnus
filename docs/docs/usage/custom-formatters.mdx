@@ -66,7 +66,7 @@ import {openPreTag, openCodeTag, closingTags, spanInline} from '@lumis-sh/lumis/
 import rust from '@lumis-sh/lumis/langs/rust'
 import dracula from '@lumis-sh/themes/dracula'
 
-const hl = await createHighlighter({langs: [rust]})
+const hl = await createHighlighter({languages: [rust]})
 
 const formatter: Formatter = {
   language: rust,
@@ -96,8 +96,8 @@ const html = hl.highlight('fn main() {}', formatter)
 
 | Runtime | Module | Reference |
 | --- | --- | --- |
-| JavaScript | `@lumis-sh/lumis/formatters/html` | [source](https://github.com/leandrocp/lumis/blob/main/packages/javascript/lumis/src/formatters/html.ts) |
-| JavaScript | `@lumis-sh/lumis/formatters/ansi` | [source](https://github.com/leandrocp/lumis/blob/main/packages/javascript/lumis/src/formatters/ansi.ts) |
+| JavaScript | `@lumis-sh/lumis/formatters/html` | [source](https://github.com/leandrocp/lumis/blob/main/packages/javascript/lumis/src/formatter/html.ts) |
+| JavaScript | `@lumis-sh/lumis/formatters/ansi` | [source](https://github.com/leandrocp/lumis/blob/main/packages/javascript/lumis/src/formatter/ansi.ts) |
 | Rust | `lumis::formatter::html` | [docs.rs](https://docs.rs/lumis/latest/lumis/formatter/html/index.html) |
 | Rust | `lumis::formatter::ansi` | [docs.rs](https://docs.rs/lumis/latest/lumis/formatter/ansi/index.html) |
 

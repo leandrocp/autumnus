@@ -19,7 +19,7 @@ VitePress uses `markdown-it` under the hood. That makes Lumis integration straig
 ## Install
 
 ```bash
-npm install @lumis-sh/markdown-it-lumis @lumis-sh/themes
+npm install markdown-it @lumis-sh/markdown-it-lumis @lumis-sh/themes
 ```
 
 ## Configure `.vitepress/config.ts`
@@ -27,12 +27,15 @@ npm install @lumis-sh/markdown-it-lumis @lumis-sh/themes
 ```ts
 import {defineConfig} from 'vitepress'
 import markdownItLumis from '@lumis-sh/markdown-it-lumis'
+import {htmlInline} from '@lumis-sh/lumis/formatters'
+import javascript from '@lumis-sh/lumis/langs/javascript'
+import rust from '@lumis-sh/lumis/langs/rust'
+import plaintext from '@lumis-sh/lumis/langs/plaintext'
 import githubLight from '@lumis-sh/themes/github_light'
 
 const lumis = await markdownItLumis({
-  theme: githubLight,
-  loadLanguages: ['javascript', 'rust', 'plaintext'],
-  fallbackLanguage: 'plaintext',
+  formatter: (language) => htmlInline({language, theme: githubLight}),
+  languages: [javascript, rust, plaintext],
 })
 
 export default defineConfig({
@@ -51,12 +54,15 @@ Any `@lumis-sh/themes/*` theme module works.
 ```ts
 import {defineConfig} from 'vitepress'
 import markdownItLumis from '@lumis-sh/markdown-it-lumis'
+import {htmlInline} from '@lumis-sh/lumis/formatters'
+import javascript from '@lumis-sh/lumis/langs/javascript'
+import rust from '@lumis-sh/lumis/langs/rust'
+import plaintext from '@lumis-sh/lumis/langs/plaintext'
 import nightfly from '@lumis-sh/themes/nightfly'
 
 const lumis = await markdownItLumis({
-  theme: nightfly,
-  loadLanguages: ['javascript', 'rust', 'plaintext'],
-  fallbackLanguage: 'plaintext',
+  formatter: (language) => htmlInline({language, theme: nightfly}),
+  languages: [javascript, rust, plaintext],
 })
 
 export default defineConfig({
@@ -67,7 +73,5 @@ export default defineConfig({
   },
 })
 ```
-
-Unknown language labels fall back to `plaintext`.
 
 Preload the languages you expect to render.

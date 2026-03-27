@@ -21,7 +21,7 @@ The pattern is simple: compile Markdown to HAST, let `rehype-lumis` replace each
 ## Install
 
 ```bash
-npm install @lumis-sh/rehype-lumis @lumis-sh/themes
+npm install @lumis-sh/rehype-lumis @lumis-sh/lumis @lumis-sh/themes
 ```
 
 ## With `@mdx-js/mdx`
@@ -29,13 +29,15 @@ npm install @lumis-sh/rehype-lumis @lumis-sh/themes
 ```ts
 import {compile} from '@mdx-js/mdx'
 import rehypeLumis from '@lumis-sh/rehype-lumis'
+import {htmlInline} from '@lumis-sh/lumis/formatters'
+import {bundledLanguages} from '@lumis-sh/lumis/bundles/web'
 import githubLight from '@lumis-sh/themes/github_light'
 
 const file = await compile(source, {
   rehypePlugins: [
     [rehypeLumis, {
-      theme: githubLight,
-      fallbackLanguage: 'plaintext',
+      formatter: (language) => htmlInline({language, theme: githubLight}),
+      languages: [bundledLanguages],
     }],
   ],
 })

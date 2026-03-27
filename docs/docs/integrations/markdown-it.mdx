@@ -26,13 +26,16 @@ npm install markdown-it @lumis-sh/markdown-it-lumis @lumis-sh/themes
 ```ts
 import MarkdownIt from 'markdown-it'
 import markdownItLumis from '@lumis-sh/markdown-it-lumis'
+import {htmlInline} from '@lumis-sh/lumis/formatters'
+import javascript from '@lumis-sh/lumis/langs/javascript'
+import rust from '@lumis-sh/lumis/langs/rust'
+import plaintext from '@lumis-sh/lumis/langs/plaintext'
 import githubLight from '@lumis-sh/themes/github_light'
 
 const md = new MarkdownIt()
 const lumis = await markdownItLumis({
-  theme: githubLight,
-  loadLanguages: ['javascript', 'rust', 'plaintext'],
-  fallbackLanguage: 'plaintext',
+  formatter: (language) => htmlInline({language, theme: githubLight}),
+  languages: [javascript, rust, plaintext],
 })
 
 lumis(md)
@@ -58,8 +61,13 @@ Creates a Lumis highlighter and returns an installer function for a `markdown-it
 ```ts
 import {createHighlighter} from '@lumis-sh/lumis'
 import {fromHighlighter} from '@lumis-sh/markdown-it-lumis'
+import {htmlInline} from '@lumis-sh/lumis/formatters'
+import {bundledLanguages} from '@lumis-sh/lumis/bundles/web'
+import githubLight from '@lumis-sh/themes/github_light'
 
-const highlighter = await createHighlighter()
+const highlighter = await createHighlighter({languages: [bundledLanguages]})
+await highlighter.loadLanguage(bundledLanguages.javascript)
+
 const lumis = fromHighlighter(highlighter, options)
 lumis(md)
 ```
@@ -68,20 +76,12 @@ Use this when you want to reuse an existing highlighter.
 
 ## Options
 
-- `theme` - required Lumis theme
-- `langs` - extra language definitions passed to `createHighlighter`
-- `loadLanguages` - languages to preload during setup for sync markdown-it rendering
-- `defaultLanguage` - used when the fence has no language and `detectLanguage` is false
-- `fallbackLanguage` - used when the requested language fails
-- `preClass` - class added to the generated `<pre>`
-- `detectLanguage` - passes `undefined` language to Lumis instead of using `defaultLanguage`
-- `includeHighlights` - enables highlight metadata in HTML output
-- `italic` - keeps italic token styles in output
-- `onError` - error hook with `{ language, code }`
+- `formatter` - required callback that receives the fence language and returns a Lumis formatter
+- `languages` - languages to register or preload before calling sync `md.render()`; accepts `Language` objects, bundles, and string refs when a bundle is also present
 
 ## Behavior
 
 - overrides fenced code rendering
-- loads languages asynchronously
+- loads any language refs passed in `languages` during async setup
 - renders synchronously after setup, so preload the languages you expect to use
 - falls back to the default fence renderer if highlighting fails and no fallback succeeds

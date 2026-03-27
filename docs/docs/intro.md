@@ -30,7 +30,7 @@ It keeps the same core workflow across runtimes:
 - Tree-sitter parsing instead of regex-based tokenization
 - 70+ languages with nested language support
 - 100+ themes sourced from Neovim colorschemes
-- HTML inline, HTML linked, multi-theme HTML, and terminal output
+- HTML inline, HTML linked, multi-theme HTML, terminal, and BBCode output
 - handles incomplete code (useful for streaming)
 - one API across CLI, Rust, Elixir, JavaScript, browser, and Java
 
@@ -57,6 +57,7 @@ It keeps the same core workflow across runtimes:
 | Rust | backends, static sites, editors | `lumis` |
 | Elixir | Phoenix, LiveView, BEAM apps | `lumis` |
 | JavaScript | Node.js, browser apps, build tools | `@lumis-sh/lumis` |
+| JS integrations | markdown-it and rehype content pipelines | `@lumis-sh/markdown-it-lumis`, `@lumis-sh/rehype-lumis` |
 | Themes | CSS themes and JSON theme modules | `@lumis-sh/themes` |
 | Java | JVM apps | `lumis4j` |
 

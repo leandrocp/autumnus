@@ -41,7 +41,7 @@ Bundles register many languages lazily.
 import {createHighlighter} from '@lumis-sh/lumis'
 import {bundledLanguages} from '@lumis-sh/lumis/bundles/web'
 
-const hl = await createHighlighter({langs: [bundledLanguages]})
+const hl = await createHighlighter({languages: [bundledLanguages]})
 
 hl.registeredLanguages // registered, including lazy entries
 hl.languages // loaded right now, usually just plaintext at first
@@ -57,7 +57,7 @@ import {htmlInline} from '@lumis-sh/lumis/formatters'
 import {bundledLanguages} from '@lumis-sh/lumis/bundles/web'
 import dracula from '@lumis-sh/themes/dracula'
 
-const hl = await createHighlighter({langs: [bundledLanguages]})
+const hl = await createHighlighter({languages: [bundledLanguages]})
 
 await hl.loadLanguage(bundledLanguages.javascript)
 
@@ -67,7 +67,7 @@ const html = hl.highlight(
 )
 ```
 
-`createHighlighter({ langs })` accepts:
+`createHighlighter({ languages })` accepts:
 
 - eager `Language` objects
 - a bundle object
@@ -108,7 +108,7 @@ Lumis can highlight embedded languages such as HTML with CSS and JavaScript insi
 Important rule: load every participating language, not just the outer one.
 
 ```ts
-const hl = await createHighlighter({langs: [html, css, javascript]})
+const hl = await createHighlighter({languages: [html, css, javascript]})
 
 const htmlOutput = hl.highlight(source, htmlInline({language: html, theme: dracula}))
 ```

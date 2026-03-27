@@ -25,11 +25,14 @@ npm install @lumis-sh/rehype-lumis @lumis-sh/themes
 
 ```ts
 import rehypeLumis from '@lumis-sh/rehype-lumis'
+import {htmlInline} from '@lumis-sh/lumis/formatters'
+import javascript from '@lumis-sh/lumis/langs/javascript'
+import plaintext from '@lumis-sh/lumis/langs/plaintext'
 import githubLight from '@lumis-sh/themes/github_light'
 
 processor.use(rehypeLumis, {
-  theme: githubLight,
-  fallbackLanguage: 'plaintext',
+  formatter: (language) => htmlInline({language, theme: githubLight}),
+  languages: [javascript, plaintext],
 })
 ```
 
@@ -43,14 +46,18 @@ import remarkParse from 'remark-parse'
 import remarkRehype from 'remark-rehype'
 import rehypeStringify from 'rehype-stringify'
 import rehypeLumis from '@lumis-sh/rehype-lumis'
+import {htmlInline} from '@lumis-sh/lumis/formatters'
+import javascript from '@lumis-sh/lumis/langs/javascript'
+import rust from '@lumis-sh/lumis/langs/rust'
+import plaintext from '@lumis-sh/lumis/langs/plaintext'
 import githubLight from '@lumis-sh/themes/github_light'
 
 const file = await unified()
   .use(remarkParse)
   .use(remarkRehype)
   .use(rehypeLumis, {
-    theme: githubLight,
-    fallbackLanguage: 'plaintext',
+    formatter: (language) => htmlInline({language, theme: githubLight}),
+    languages: [javascript, rust, plaintext],
   })
   .use(rehypeStringify)
   .process(markdown)
@@ -58,23 +65,15 @@ const file = await unified()
 
 ## Options
 
-- `theme` - required Lumis theme
-- `langs` - extra language definitions passed to `createHighlighter`
-- `loadLanguages` - languages to preload during setup
-- `defaultLanguage` - used when the code block has no `language-*` class and `detectLanguage` is false
-- `fallbackLanguage` - used when the requested language fails
-- `preClass` - class added to the generated `<pre>`
-- `detectLanguage` - passes `undefined` language to Lumis instead of using `defaultLanguage`
-- `includeHighlights` - enables highlight metadata in HTML output
-- `italic` - keeps italic token styles in output
-- `onError` - error hook with `{ language, code }`
+- `formatter` - required callback that receives the detected block language and returns a Lumis formatter
+- `languages` - optional language definitions to register up front with `createHighlighter`
 
 ## Behavior
 
 - visits `pre > code` blocks in HAST
 - reads languages from `language-*` classes on the `<code>` or `<pre>` node, or from `data-language` / `language` properties
 - replaces each block with Lumis HTML output
-- loads languages asynchronously and loads requested fence languages before rendering
+- loads detected languages on demand before rendering each block
 
 Use it in:
 

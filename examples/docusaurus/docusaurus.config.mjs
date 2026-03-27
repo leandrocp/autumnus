@@ -1,4 +1,6 @@
 import rehypeLumis from '@lumis-sh/rehype-lumis'
+import { htmlInline } from '@lumis-sh/lumis/formatters'
+import { bundledLanguages } from '@lumis-sh/lumis/bundles/web'
 import githubLight from '@lumis-sh/themes/github_light'
 
 export default {
@@ -20,7 +22,10 @@ export default {
         docs: {
           routeBasePath: '/',
           sidebarPath: './sidebars.js',
-          rehypePlugins: [[rehypeLumis, { theme: githubLight, fallbackLanguage: 'plaintext' }]],
+          rehypePlugins: [[rehypeLumis, {
+            formatter: (language) => htmlInline({ language, theme: githubLight }),
+            languages: [bundledLanguages],
+          }]],
         },
         blog: false,
         theme: {

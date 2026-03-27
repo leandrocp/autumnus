@@ -1,9 +1,11 @@
 import createMDX from '@next/mdx'
-import githubLight from '@lumis-sh/themes/github_light'
+import { fileURLToPath } from 'node:url'
+
+const rehypeLumisPath = fileURLToPath(new URL('./rehype-lumis.mjs', import.meta.url))
 
 const withMDX = createMDX({
   options: {
-    rehypePlugins: [['@lumis-sh/rehype-lumis', { theme: githubLight, fallbackLanguage: 'plaintext' }]],
+    rehypePlugins: [rehypeLumisPath],
   },
 })
 

@@ -20,25 +20,22 @@ Next.js MDX already supports `rehypePlugins`. That makes `@lumis-sh/rehype-lumis
 
 ```bash
 npm install @next/mdx @mdx-js/loader @mdx-js/react @types/mdx
-npm install @lumis-sh/rehype-lumis @lumis-sh/themes
+npm install @lumis-sh/rehype-lumis @lumis-sh/lumis @lumis-sh/themes
 ```
 
 ## Configure `next.config.mjs`
 
-Pass the plugin as a string so Turbopack can resolve it:
+Wrap the configured plugin in a local module so Turbopack only sees a plain plugin reference:
 
 ```js
 import createMDX from '@next/mdx'
-import githubLight from '@lumis-sh/themes/github_light'
+import {fileURLToPath} from 'node:url'
+
+const rehypeLumisPath = fileURLToPath(new URL('./rehype-lumis.mjs', import.meta.url))
 
 const withMDX = createMDX({
   options: {
-    rehypePlugins: [
-      ['@lumis-sh/rehype-lumis', {
-        theme: githubLight,
-        fallbackLanguage: 'plaintext',
-      }],
-    ],
+    rehypePlugins: [rehypeLumisPath],
   },
 })
 
@@ -47,6 +44,20 @@ export default withMDX({
 })
 ```
 
-The plugin name is passed as a string (`'@lumis-sh/rehype-lumis'`) instead of a function reference because Next.js Turbopack requires serializable options. The theme object is plain JSON, so it serializes fine.
+```js title="rehype-lumis.mjs"
+import rehypeLumis from '@lumis-sh/rehype-lumis'
+import {htmlInline} from '@lumis-sh/lumis/formatters'
+import {bundledLanguages} from '@lumis-sh/lumis/bundles/web'
+import githubLight from '@lumis-sh/themes/github_light'
+
+export default function configuredRehypeLumis() {
+  return rehypeLumis.call(this, {
+    formatter: (language) => htmlInline({language, theme: githubLight}),
+    languages: [bundledLanguages],
+  })
+}
+```
+
+This avoids passing non-serializable formatter callbacks directly through the MDX loader options.
 
 You also need `app/layout.tsx` and `mdx-components.tsx` at the project root for Next.js App Router MDX to work.

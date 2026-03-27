@@ -4,6 +4,8 @@ import React from 'react'
 import { renderToPipeableStream } from 'react-dom/server'
 import { MarkdownAsync } from 'react-markdown'
 import rehypeLumis from '@lumis-sh/rehype-lumis'
+import { htmlInline } from '@lumis-sh/lumis/formatters'
+import { bundledLanguages } from '@lumis-sh/lumis/bundles/web'
 import githubLight from '@lumis-sh/themes/github_light'
 
 const source = `# Demo
@@ -28,7 +30,10 @@ const html = await new Promise((resolve, reject) => {
     React.createElement(
       MarkdownAsync,
       {
-        rehypePlugins: [[rehypeLumis, { theme: githubLight, fallbackLanguage: 'plaintext' }]],
+        rehypePlugins: [[rehypeLumis, {
+          formatter: (language) => htmlInline({ language, theme: githubLight }),
+          languages: [bundledLanguages],
+        }]],
       },
       source,
     ),

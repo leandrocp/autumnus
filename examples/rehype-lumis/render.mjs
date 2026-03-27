@@ -4,6 +4,10 @@ import remarkParse from 'remark-parse'
 import remarkRehype from 'remark-rehype'
 import rehypeStringify from 'rehype-stringify'
 import rehypeLumis from '@lumis-sh/rehype-lumis'
+import { htmlInline } from '@lumis-sh/lumis/formatters'
+import javascript from '@lumis-sh/lumis/langs/javascript'
+import rust from '@lumis-sh/lumis/langs/rust'
+import plaintext from '@lumis-sh/lumis/langs/plaintext'
 import githubLight from '@lumis-sh/themes/github_light'
 
 const source = `# Demo
@@ -25,8 +29,8 @@ const file = await unified()
   .use(remarkParse)
   .use(remarkRehype)
   .use(rehypeLumis, {
-    theme: githubLight,
-    fallbackLanguage: 'plaintext',
+    formatter: (language) => htmlInline({ language, theme: githubLight }),
+    languages: [javascript, rust, plaintext],
   })
   .use(rehypeStringify)
   .process(source)

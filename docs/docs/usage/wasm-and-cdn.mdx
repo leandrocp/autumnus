@@ -54,7 +54,7 @@ import {createHighlighter} from '@lumis-sh/lumis'
 import rust from '@lumis-sh/lumis/langs/rust'
 
 const hl = await createHighlighter({
-  langs: [rust],
+  languages: [rust],
   wasmResolver: (_language, wasm) => `/wasm/${wasm.name}.wasm`,
 })
 ```

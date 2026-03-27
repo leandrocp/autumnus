@@ -444,7 +444,7 @@ import css from '@lumis-sh/lumis/langs/css'
 import javascript from '@lumis-sh/lumis/langs/javascript'
 
 // load all participating languages, not just the outer one
-const hl = await createHighlighter({langs: [html, css, javascript]})
+const hl = await createHighlighter({languages: [html, css, javascript]})
 
 const output = hl.highlight(source, htmlInline({language: html, theme: dracula}))
 ```
@@ -570,7 +570,7 @@ import {htmlInline} from '@lumis-sh/lumis/formatters'
 import {bundledLanguages} from '@lumis-sh/lumis/bundles/web'
 import dracula from '@lumis-sh/themes/dracula'
 
-const hl = await createHighlighter({langs: [bundledLanguages]})
+const hl = await createHighlighter({languages: [bundledLanguages]})
 await hl.loadLanguage('javascript')
 
 const html = hl.highlight('const x = 1', htmlInline({language: 'javascript', theme: dracula}))
