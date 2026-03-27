@@ -41,7 +41,7 @@ lumis highlight main.rs --theme dracula
 
 ```bash title="Pipe from stdin"
 cat main.rs | lumis highlight -l rust
-echo 'const x = 1' | lumis highlight -l javascript --formatter html-inline
+echo 'const x = 1' | lumis highlight -l javascript --formatter html-inline --theme dracula
 ```
 
 ### Options
@@ -49,7 +49,7 @@ echo 'const x = 1' | lumis highlight -l javascript --formatter html-inline
 | Flag | Short | Description |
 | --- | --- | --- |
 | `--language <lang>` | `-l` | Language id (e.g., `rust`, `javascript`). Auto-detects from file if omitted. |
-| `--formatter <fmt>` | `-f` | Output format: `terminal` (default), `html-inline`, `html-linked`, `html-multi-themes`, `bbcode` |
+| `--formatter <fmt>` | `-f` | Output format: `terminal` (default), `html-inline`, `html-linked`, `html-multi-themes`, `bbcode-scoped` |
 | `--theme <name>` | `-t` | Theme name (e.g., `dracula`, `github_dark`) |
 | `--themes <key:theme>` | | Theme pair for multi-themes (repeatable, e.g., `--themes light:github_light --themes dark:github_dark`) |
 | `--default-theme <id>` | | Which `--themes` entry gets inline styles |
@@ -72,6 +72,10 @@ lumis highlight main.rs \
   --themes light:github_light \
   --themes dark:github_dark \
   --default-theme light
+```
+
+```bash title="BBCode Scoped"
+lumis highlight main.rs -f bbcode-scoped
 ```
 
 ```bash title="Verbose mode — see cache hits and parser paths"

@@ -18,6 +18,7 @@ keywords:
 - if a path is provided, Lumis reads that file
 - if no path is provided, Lumis reads from stdin
 - you can pipe content directly into `lumis highlight`
+- terminal output is the default formatter unless you pass `--formatter`
 
 ```bash
 cat main.rs | lumis highlight -l rust
@@ -65,6 +66,8 @@ The data dir stores:
 Themes placed in the data directory can be discovered by `lumis themes list` and used by name.
 
 That is useful when you generate themes with `lumis themes generate` and want to keep using them locally.
+
+See [CLI Commands](/cli/commands#lumis-themes-generate) for theme generation flags and [CLI](/highlight/cli) for highlight workflow examples.
 
 ## Nested languages and parser availability
 

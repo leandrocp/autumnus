@@ -29,7 +29,7 @@ highlighted tokens (text + scope + byte range)
 theme (scope -> color/style mapping)
     |
     v
-formatter (tokens + styles -> HTML / ANSI / custom output)
+formatter (tokens + styles -> HTML / ANSI / BBCode Scoped / custom output)
 ```
 
 1. Tree-sitter parses the source into a concrete syntax tree
@@ -57,11 +57,11 @@ Convert highlighted tokens into output:
 
 | Formatter | Output |
 | --- | --- |
-| HTML inline | `<span style="color: #e5c07b;">` |
-| HTML linked | `<span class="keyword">` |
-| HTML multi-themes | `<span style="--lumis-light: #333; --lumis-dark: #ccc;">` |
+| HTML Inline | `<span style="color: #e5c07b;">` |
+| HTML Linked | `<span class="keyword">` |
+| HTML Multi-Themes | `<span style="--lumis-light: #333; --lumis-dark: #ccc;">` |
 | Terminal | ANSI escape codes |
-| BBCode | `[keyword-function]main[/keyword-function]` |
+| BBCode Scoped | `[keyword-function]main[/keyword-function]` |
 
 ## Crate structure
 
@@ -72,4 +72,8 @@ lumis-cli         CLI binary
 lumis-build       build-time code generation
 ```
 
-The Elixir package (`packages/elixir/lumis`) wraps the Rust crate via Rustler NIF. The JavaScript runtime package (`packages/javascript/lumis`) uses `web-tree-sitter` and reimplements the formatter logic in TypeScript. The `packages/javascript/markdown-it-lumis` and `packages/javascript/rehype-lumis` packages build on top of that runtime for Markdown and HAST pipelines.
+## Package layers
+
+- The Elixir package (`packages/elixir/lumis`) wraps the Rust crate via Rustler NIF.
+- The JavaScript runtime package (`packages/javascript/lumis`) uses `web-tree-sitter` and reimplements the formatter logic in TypeScript.
+- The integration packages (`packages/javascript/markdown-it-lumis` and `packages/javascript/rehype-lumis`) build on top of that JavaScript runtime for Markdown and HAST pipelines.

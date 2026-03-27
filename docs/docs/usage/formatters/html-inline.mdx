@@ -24,6 +24,7 @@ Self-contained HTML with inline styles on each token. No external CSS required.
 | Rust | `lang`, `theme`, `pre_class`, `italic`, `include_highlights`, `highlight_lines`, `header` |
 | Elixir | `:theme`, `:pre_class`, `:italic`, `:include_highlights`, `:highlight_lines`, `:header` |
 | JavaScript | `language`, `theme`, `preClass`, `italic`, `includeHighlights`, `highlightLines`, `header` |
+| Java | `withLang()`, `withTheme()`, `withFormatter(Formatter.HTML_INLINE)` |
 | CLI | `--theme`, `--highlight-lines` |
 
 ## Basic example
@@ -71,6 +72,7 @@ Lumis.highlight!(
   <TabItem value="java" label="Java">
 
 ```java
+import io.roastedroot.lumis4j.core.Formatter;
 import io.roastedroot.lumis4j.core.Lang;
 import io.roastedroot.lumis4j.core.Lumis;
 import io.roastedroot.lumis4j.core.Theme;
@@ -80,9 +82,12 @@ var lumis = Lumis.builder().build();
 var highlighter = lumis.highlighter()
     .withLang(Lang.RUST)
     .withTheme(Theme.DRACULA)
+    .withFormatter(Formatter.HTML_INLINE)
     .build();
 
 var html = highlighter.highlight("fn main() {}").string();
+
+lumis.close();
 ```
 
   </TabItem>
@@ -132,6 +137,16 @@ Lumis.highlight!(
   formatter: {:html_inline, theme: "dracula", pre_class: "code-block", include_highlights: true}
 )
 ```
+
+  </TabItem>
+  <TabItem value="java" label="Java">
+
+`lumis4j` does not currently expose `preClass` or `includeHighlights` for HTML Inline output.
+
+  </TabItem>
+  <TabItem value="cli" label="CLI">
+
+The CLI does not expose `preClass` or `includeHighlights` for HTML Inline output.
 
   </TabItem>
 </Tabs>
@@ -186,7 +201,37 @@ Lumis.highlight!(
 ```
 
   </TabItem>
+  <TabItem value="java" label="Java">
+
+Custom HTML wrappers are not currently exposed by `lumis4j`.
+
+  </TabItem>
+  <TabItem value="cli" label="CLI">
+
+Custom HTML wrappers are not available in the CLI formatter.
+
+  </TabItem>
 </Tabs>
+
+## Output format
+
+HTML Inline emits the full block structure with inline styles on each token:
+
+```html
+<pre class="lumis" style="background-color: #282c34; color: #abb2bf;">
+  <code class="language-rust" translate="no" tabindex="0">
+    <div class="line" data-line="1">
+      <span style="color: #e5c07b;">fn</span>
+      <span style="color: #61afef;">main</span>
+    </div>
+  </code>
+</pre>
+```
+
+- `<pre class="lumis">` is the outer wrapper and carries the block background
+- `<code class="language-*">` identifies the language and keeps the block focusable
+- `<div class="line" data-line="N">` wraps each line
+- `<span style="...">` carries the token colors and font styles inline
 
 ## When to use it
 

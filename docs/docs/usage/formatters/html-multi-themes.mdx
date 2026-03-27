@@ -24,6 +24,7 @@ One HTML block that supports multiple themes via CSS custom properties. Useful f
 | Rust | `lang`, `themes`, `default_theme`, `pre_class`, `italic`, `include_highlights`, `highlight_lines`, `header` |
 | Elixir | `:themes`, `:default_theme`, `:css_variable_prefix`, `:pre_class`, `:italic`, `:include_highlights`, `:highlight_lines`, `:header` |
 | JavaScript | `language`, `themes`, `defaultTheme`, `cssVariablePrefix`, `preClass`, `italic`, `includeHighlights`, `highlightLines`, `header` |
+| Java | Not currently supported in `lumis4j` |
 | CLI | `--themes`, `--default-theme`, `--css-variable-prefix`, `--highlight-lines` |
 
 ## Basic example
@@ -83,6 +84,11 @@ Lumis.highlight!(
   }
 )
 ```
+
+  </TabItem>
+  <TabItem value="java" label="Java">
+
+HTML Multi-Themes is not currently supported in `lumis4j`.
 
   </TabItem>
   <TabItem value="cli" label="CLI">
@@ -145,6 +151,11 @@ Lumis.highlight!(
 ```
 
   </TabItem>
+  <TabItem value="java" label="Java">
+
+HTML Multi-Themes is not currently supported in `lumis4j`.
+
+  </TabItem>
   <TabItem value="cli" label="CLI">
 
 ```bash
@@ -167,6 +178,25 @@ Controls what color values appear inline (not just as CSS variables):
 | omitted / `null` | CSS variables only, no inline colors |
 | `"light"` | Inline colors from the `light` theme, CSS variables for all themes |
 | `"light-dark()"` | Uses CSS `light-dark()` function for automatic OS-level switching |
+
+## Output format
+
+HTML Multi-Themes keeps the same HTML structure, but each token carries CSS variables for one or more themes:
+
+```html
+<pre class="lumis" style="--lumis-light-bg: #ffffff; --lumis-dark-bg: #0d1117;">
+  <code class="language-javascript" translate="no" tabindex="0">
+    <div class="line" data-line="1">
+      <span style="--lumis-light: #cf222e; --lumis-dark: #ff7b72; color: light-dark(var(--lumis-light), var(--lumis-dark));">const</span>
+    </div>
+  </code>
+</pre>
+```
+
+- `<pre class="lumis">` carries shared background and theme variables
+- `<code class="language-*">` identifies the language and keeps the block focusable
+- `<div class="line" data-line="N">` wraps each line
+- `<span style="--lumis-...">` carries per-theme token colors and font styles
 
 ## Good uses
 

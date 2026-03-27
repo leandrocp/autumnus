@@ -30,7 +30,7 @@ It keeps the same core workflow across runtimes:
 - Tree-sitter parsing instead of regex-based tokenization
 - 70+ languages with nested language support
 - 100+ themes sourced from Neovim colorschemes
-- HTML inline, HTML linked, multi-theme HTML, terminal, and BBCode output
+- HTML Inline, HTML Linked, HTML Multi-Themes, Terminal, and BBCode Scoped output
 - handles incomplete code (useful for streaming)
 - one API across CLI, Rust, Elixir, JavaScript, browser, and Java
 

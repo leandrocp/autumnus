@@ -24,6 +24,7 @@ Class-based HTML that pairs with a CSS theme file. Smaller output than inline st
 | Rust | `lang`, `pre_class`, `highlight_lines`, `header` |
 | Elixir | `:pre_class`, `:highlight_lines`, `:header` |
 | JavaScript | `language`, `preClass`, `highlightLines`, `header` |
+| Java | `withLang()`, `withFormatter(Formatter.HTML_LINKED)` |
 | CLI | `--highlight-lines` |
 
 ## Basic example
@@ -68,6 +69,25 @@ Lumis.highlight!(
 ```
 
   </TabItem>
+  <TabItem value="java" label="Java">
+
+```java
+import io.roastedroot.lumis4j.core.Formatter;
+import io.roastedroot.lumis4j.core.Lang;
+import io.roastedroot.lumis4j.core.Lumis;
+
+var lumis = Lumis.builder().build();
+
+var highlighter = lumis.highlighter()
+    .withLang(Lang.JAVASCRIPT)
+    .withFormatter(Formatter.HTML_LINKED)
+    .build();
+
+var html = highlighter.highlight("const x = 1").string();
+lumis.close();
+```
+
+  </TabItem>
   <TabItem value="cli" label="CLI">
 
 ```bash
@@ -86,6 +106,26 @@ Use CSS theme files from:
 - `priv/static/css/` in Elixir
 
 See [CSS Theme Files](/themes/css-files) for the full setup.
+
+## Output format
+
+HTML Linked keeps the same block structure, but token styling moves to CSS classes instead of inline styles:
+
+```html
+<pre class="lumis">
+  <code class="language-javascript" translate="no" tabindex="0">
+    <div class="line" data-line="1">
+      <span class="keyword">const</span>
+      <span class="variable">x</span>
+    </div>
+  </code>
+</pre>
+```
+
+- `<pre class="lumis">` is the outer wrapper
+- `<code class="language-*">` identifies the language and keeps the block focusable
+- `<div class="line" data-line="N">` wraps each line
+- `<span class="...">` carries semantic highlight classes such as `keyword` or `string`
 
 ## When to use it
 

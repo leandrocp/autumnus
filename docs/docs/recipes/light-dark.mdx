@@ -22,6 +22,16 @@ The multi-themes formatter renders one HTML block with CSS variables for each th
 
 The simplest option. The browser switches automatically based on the OS theme. Requires `color-scheme: light dark` on the root element.
 
+Required CSS for the rendered HTML output:
+
+```css
+html {
+  color-scheme: light dark;
+}
+```
+
+That's it for runtimes that support HTML Multi-Themes output. No JavaScript or media queries are needed. `lumis4j` does not support this formatter, and the CLI only generates the HTML; your app or page still needs to provide the CSS.
+
 <Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
   <TabItem value="javascript" label="JavaScript">
 
@@ -79,6 +89,11 @@ Lumis.highlight!(
 ```
 
   </TabItem>
+  <TabItem value="java" label="Java">
+
+HTML Multi-Themes is not currently supported in `lumis4j`.
+
+  </TabItem>
   <TabItem value="cli" label="CLI">
 
 ```bash
@@ -92,52 +107,11 @@ lumis highlight index.js \
   </TabItem>
 </Tabs>
 
-Required CSS:
-
-```css
-html {
-  color-scheme: light dark;
-}
-```
-
-That's it. No JavaScript, no media queries. The `light-dark()` function resolves the correct variable automatically.
-
 ## 2. `@media (prefers-color-scheme)` with CSS variables
 
 Use this when you need more control than `light-dark()` provides, or when targeting browsers that don't support it yet. The inline styles render the light theme by default, and a media query overrides with dark theme variables.
 
-<Tabs groupId="runtime" queryString="lang" defaultValue="elixir">
-  <TabItem value="elixir" label="Elixir">
-
-```elixir
-Lumis.highlight!(
-  code,
-  language: "elixir",
-  formatter: {:html_multi_themes,
-    themes: [light: "github_light", dark: "github_dark"],
-    default_theme: "light"
-  }
-)
-```
-
-  </TabItem>
-  <TabItem value="javascript" label="JavaScript">
-
-```js
-const html = await highlight(
-  code,
-  htmlMultiThemes({
-    language: javascript,
-    themes: {light: githubLight, dark: githubDark},
-    defaultTheme: 'light',
-  })
-)
-```
-
-  </TabItem>
-</Tabs>
-
-Required CSS:
+Required CSS for the rendered HTML output:
 
 ```css
 @media (prefers-color-scheme: dark) {
@@ -152,13 +126,51 @@ Required CSS:
 }
 ```
 
-The `default_theme: "light"` makes the light theme's colors render as inline styles (visible without any CSS). The media query swaps to the dark theme's CSS variables when the OS is in dark mode.
+For runtimes that support HTML Multi-Themes, `default_theme: "light"` makes the light theme's colors render as inline styles. The media query then swaps to the dark theme's CSS variables when the OS is in dark mode. `lumis4j` does not support this formatter, and the CLI only generates the HTML.
 
-## 3. Manual switching with JavaScript
+<Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
+  <TabItem value="javascript" label="JavaScript">
 
-Use this when you want a toggle button or user preference that's independent of the OS setting. Add a class to the root element and target it in CSS.
+```js
+import {highlight} from '@lumis-sh/lumis'
+import {htmlMultiThemes} from '@lumis-sh/lumis/formatters'
+import javascript from '@lumis-sh/lumis/langs/javascript'
+import githubLight from '@lumis-sh/themes/github_light'
+import githubDark from '@lumis-sh/themes/github_dark'
 
-<Tabs groupId="runtime" queryString="lang" defaultValue="elixir">
+const html = await highlight(
+  code,
+  htmlMultiThemes({
+    language: javascript,
+    themes: {light: githubLight, dark: githubDark},
+    defaultTheme: 'light',
+  })
+)
+```
+
+  </TabItem>
+  <TabItem value="rust" label="Rust">
+
+```rust
+use lumis::{highlight, HtmlMultiThemesBuilder, languages::Language, themes};
+use std::collections::HashMap;
+
+let mut theme_map = HashMap::new();
+theme_map.insert("light".to_string(), themes::get("github_light").unwrap());
+theme_map.insert("dark".to_string(), themes::get("github_dark").unwrap());
+
+let html = highlight(
+    code,
+    HtmlMultiThemesBuilder::new()
+        .lang(Language::Javascript)
+        .themes(theme_map)
+        .default_theme("light")
+        .build()
+        .unwrap(),
+);
+```
+
+  </TabItem>
   <TabItem value="elixir" label="Elixir">
 
 ```elixir
@@ -173,23 +185,29 @@ Lumis.highlight!(
 ```
 
   </TabItem>
-  <TabItem value="javascript" label="JavaScript">
+  <TabItem value="java" label="Java">
 
-```js
-const html = await highlight(
-  code,
-  htmlMultiThemes({
-    language: javascript,
-    themes: {light: githubLight, dark: githubDark},
-    defaultTheme: 'light',
-  })
-)
+HTML Multi-Themes is not currently supported in `lumis4j`.
+
+  </TabItem>
+  <TabItem value="cli" label="CLI">
+
+```bash
+lumis highlight index.js \
+  --formatter html-multi-themes \
+  --themes light:github_light \
+  --themes dark:github_dark \
+  --default-theme light
 ```
 
   </TabItem>
 </Tabs>
 
-Required CSS:
+## 3. Manual switching with JavaScript
+
+Use this when you want a toggle button or user preference that's independent of the OS setting. Add a class to the root element and target it in CSS.
+
+Required CSS for the rendered HTML output:
 
 ```css
 html.dark .lumis,
@@ -214,7 +232,82 @@ function setTheme(theme) {
 }
 ```
 
-This pattern works with any framework. In Phoenix LiveView, you'd wire the button to a `phx-click` event that toggles a class via a JS command.
+This pattern works anywhere you render the generated HTML. In Phoenix LiveView, you'd wire the button to a `phx-click` event that toggles a class via a JS command. `lumis4j` does not support HTML Multi-Themes, and the CLI only generates the HTML for another renderer to display.
+
+<Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
+  <TabItem value="javascript" label="JavaScript">
+
+```js
+import {highlight} from '@lumis-sh/lumis'
+import {htmlMultiThemes} from '@lumis-sh/lumis/formatters'
+import javascript from '@lumis-sh/lumis/langs/javascript'
+import githubLight from '@lumis-sh/themes/github_light'
+import githubDark from '@lumis-sh/themes/github_dark'
+
+const html = await highlight(
+  code,
+  htmlMultiThemes({
+    language: javascript,
+    themes: {light: githubLight, dark: githubDark},
+    defaultTheme: 'light',
+  })
+)
+```
+
+  </TabItem>
+  <TabItem value="rust" label="Rust">
+
+```rust
+use lumis::{highlight, HtmlMultiThemesBuilder, languages::Language, themes};
+use std::collections::HashMap;
+
+let mut theme_map = HashMap::new();
+theme_map.insert("light".to_string(), themes::get("github_light").unwrap());
+theme_map.insert("dark".to_string(), themes::get("github_dark").unwrap());
+
+let html = highlight(
+    code,
+    HtmlMultiThemesBuilder::new()
+        .lang(Language::Javascript)
+        .themes(theme_map)
+        .default_theme("light")
+        .build()
+        .unwrap(),
+);
+```
+
+  </TabItem>
+  <TabItem value="elixir" label="Elixir">
+
+```elixir
+Lumis.highlight!(
+  code,
+  language: "elixir",
+  formatter: {:html_multi_themes,
+    themes: [light: "github_light", dark: "github_dark"],
+    default_theme: "light"
+  }
+)
+```
+
+  </TabItem>
+  <TabItem value="java" label="Java">
+
+HTML Multi-Themes is not currently supported in `lumis4j`.
+
+  </TabItem>
+  <TabItem value="cli" label="CLI">
+
+```bash
+lumis highlight index.js \
+  --formatter html-multi-themes \
+  --themes light:github_light \
+  --themes dark:github_dark \
+  --default-theme light
+```
+
+  </TabItem>
+</Tabs>
 
 ## Which approach to use
 

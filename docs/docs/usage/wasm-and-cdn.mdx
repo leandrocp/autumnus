@@ -74,10 +74,14 @@ lumis parsers fetch --all
 lumis parsers update rust
 ```
 
+The CLI does not expose a custom WASM resolver hook. Use the parser cache commands and `--data-dir` when you need local control over parser files.
+
   </TabItem>
 </Tabs>
 
 ## Browser / CDN usage
+
+This works well when your app can fetch parser WASM files from the default CDN. If you need a different host or local assets, set a custom resolver first.
 
 ```html title="ESM CDN"
 <script type="module">

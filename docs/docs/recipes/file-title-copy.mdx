@@ -17,6 +17,8 @@ import TabItem from '@theme/TabItem';
 
 Use the HTML formatter `header` option to wrap the `<pre>` with your own markup. This keeps the whole pattern as plain HTML, CSS, and browser JavaScript. No custom component.
 
+This recipe applies to runtimes that expose custom header wrappers. `lumis4j` and the CLI do not currently expose this feature.
+
 This works with `htmlInline()`, `htmlLinked()`, and `htmlMultiThemes()`.
 
 Use whatever class names fit your app. The examples here keep them short on purpose.
@@ -24,6 +26,20 @@ Use whatever class names fit your app. The examples here keep them short on purp
 ## 1. Render a header bar
 
 The idea is simple: open a container, render a title row with the filename and button, let Lumis render the `<pre>`, then close the container.
+
+Resulting shape for runtimes that support custom header wrappers:
+
+```html
+<div class="snippet-frame">
+  <div class="snippet-bar">
+    <span class="snippet-name">app.js</span>
+    <button type="button" class="snippet-copy" data-copy-snippet>
+      Copy
+    </button>
+  </div>
+  <pre class="lumis">...</pre>
+</div>
+```
 
 <Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
   <TabItem value="javascript" label="JavaScript">
@@ -116,21 +132,17 @@ html = Lumis.highlight!(
 ```
 
   </TabItem>
+  <TabItem value="java" label="Java">
+
+Custom header wrappers are not currently exposed by `lumis4j`.
+
+  </TabItem>
+  <TabItem value="cli" label="CLI">
+
+Custom header wrappers are not available in the CLI formatter.
+
+  </TabItem>
 </Tabs>
-
-Resulting shape:
-
-```html
-<div class="snippet-frame">
-  <div class="snippet-bar">
-    <span class="snippet-name">app.js</span>
-    <button type="button" class="snippet-copy" data-copy-snippet>
-      Copy
-    </button>
-  </div>
-  <pre class="lumis">...</pre>
-</div>
-```
 
 ## 2. Style the title row
 

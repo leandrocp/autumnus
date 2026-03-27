@@ -24,14 +24,9 @@ Lumis themes come from the Neovim ecosystem. You can use the built-in collection
 
 ```js
 import dracula from '@lumis-sh/themes/dracula';
-import {highlight} from '@lumis-sh/lumis';
-import {htmlInline} from '@lumis-sh/lumis/formatters';
-import javascript from '@lumis-sh/lumis/langs/javascript';
 
-const html = await highlight(
-  'const x = 1',
-  htmlInline({language: javascript, theme: dracula})
-);
+console.log(dracula.name);
+console.log(dracula.appearance);
 ```
 
   </TabItem>
@@ -48,18 +43,22 @@ let theme = themes::get("dracula").unwrap();
 
 ```elixir
 theme = Lumis.Theme.get("github_light")
+theme.name
+```
 
-Lumis.highlight!(
-  "setTimeout(fun, 5000);",
-  language: "javascript",
-  formatter: {:html_inline, theme: theme}
-)
+  </TabItem>
+  <TabItem value="java" label="Java">
+
+```java
+import io.roastedroot.lumis4j.core.Theme;
+
+var theme = Theme.DRACULA;
 ```
 
   </TabItem>
   <TabItem value="cli" label="CLI">
 
-```bash title="List themes"
+```bash
 lumis themes list
 ```
 
@@ -68,7 +67,12 @@ lumis themes list
 
 ## Load a custom theme from JSON
 
-<Tabs groupId="runtime" queryString="lang" defaultValue="rust">
+<Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
+  <TabItem value="javascript" label="JavaScript">
+
+Custom theme JSON loading is not currently exposed by `@lumis-sh/themes` as a runtime helper.
+
+  </TabItem>
   <TabItem value="rust" label="Rust">
 
 ```rust
@@ -87,13 +91,42 @@ Lumis.highlight!("const x = 1", language: "javascript", formatter: {:html_inline
 ```
 
   </TabItem>
+  <TabItem value="java" label="Java">
+
+Custom theme JSON loading is not currently exposed by `lumis4j`.
+
+  </TabItem>
+  <TabItem value="cli" label="CLI">
+
+```bash
+# generate a theme JSON file
+lumis themes generate \
+  --url https://github.com/catppuccin/nvim \
+  --colorscheme catppuccin-mocha \
+  --output catppuccin-mocha.json
+
+# move it into the Lumis data dir so `lumis themes list` can discover it
+mkdir -p ~/.local/share/lumis/themes
+cp catppuccin-mocha.json ~/.local/share/lumis/themes/
+
+# then use the theme by name
+lumis highlight index.js --theme my-custom-theme
+```
+
+```text
+Replace `my-custom-theme` with the JSON theme's `name` field.
+```
+
+See [CLI Commands](/cli/commands#lumis-themes-generate) for the full `lumis themes generate` options.
+
+  </TabItem>
 </Tabs>
 
 ## Generate a theme from a Neovim colorscheme
 
 The CLI can extract a theme directly from a Git repository.
 
-```bash title="Generate theme JSON"
+```bash
 lumis themes generate \
   --url https://github.com/catppuccin/nvim \
   --colorscheme catppuccin-mocha \
@@ -102,7 +135,7 @@ lumis themes generate \
 
 You can also pass custom setup code or mark the theme as light mode:
 
-```bash title="Generate light theme"
+```bash
 lumis themes generate \
   --url https://github.com/projekt0n/github-nvim-theme \
   --colorscheme github_light \

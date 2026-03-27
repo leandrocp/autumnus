@@ -13,6 +13,14 @@ keywords:
 
 Source: [`THEMES.md`](https://github.com/leandrocp/lumis/blob/main/THEMES.md).
 
+Theme names in this list are the IDs you use across Lumis:
+
+- JavaScript modules: `@lumis-sh/themes/<theme>`
+- CSS files: `@lumis-sh/themes/css/<theme>.css`
+- JSON on CDN: `https://unpkg.com/@lumis-sh/themes/dist/json/<theme>.json`
+
+For usage examples, see [Themes](/themes) and [CSS Theme Files](/themes/css-files).
+
 | Theme | Repository |
 |-------|------------|
 | `aura_dark` | [daltonmenezes/aura-theme](https://github.com/daltonmenezes/aura-theme) |

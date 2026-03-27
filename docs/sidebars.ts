@@ -5,16 +5,17 @@ const sidebars: SidebarsConfig = {
     'intro',
     'installation',
     'architecture',
+    'reference/platforms',
     {
       type: 'category',
       label: 'Highlight',
       items: [
         'usage/highlight',
-        'usage/html-output',
         'usage/rust-advanced',
         'usage/javascript-runtime',
         'usage/elixir-integration',
         'usage/java',
+        'usage/cli-highlight',
       ],
     },
     {
@@ -87,7 +88,6 @@ const sidebars: SidebarsConfig = {
       items: [
         'reference/languages',
         'reference/themes',
-        'reference/platforms',
       ],
     },
   ],
