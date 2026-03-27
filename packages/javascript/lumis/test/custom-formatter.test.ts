@@ -18,7 +18,7 @@ describe("custom formatter", () => {
   }, 120_000);
 
   it("flows through the public formatter contract using hl.highlightIter", async () => {
-    const hl = await createHighlighter({ langs: [json] });
+    const hl = await createHighlighter({ languages: [json] });
 
     const formatter: Formatter = {
       language: json,
@@ -67,7 +67,7 @@ describe("custom formatter", () => {
   }, 30_000);
 
   it("keeps built-in formatters as plain convenience objects", async () => {
-    const hl = await createHighlighter({ langs: [json] });
+    const hl = await createHighlighter({ languages: [json] });
     const output = hl.highlight('{"name":"lumis"}', htmlInline({ language: json, theme }));
 
     expect(output).toContain('<pre class="lumis"');

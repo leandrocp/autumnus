@@ -4,7 +4,7 @@
 
 [queries.default]
 git = "https://github.com/nvim-treesitter/nvim-treesitter.git"
-rev = "3edb01f912867603c2aef9079f208f0244c0885b"
+rev = "6620ae1c44dfa8623b22d0cbf873a9e8d073b849"
 path = "runtime/queries"
 
 [queries.iex]
@@ -60,21 +60,19 @@ git = "https://github.com/tree-sitter/tree-sitter-bash.git"
 rev = "a06c2e4415e9bc0346c6b86d401879ffb44058f7"
 crate = "tree-sitter-bash"
 version = "0.25.1"
-aliases = ["sh", "zsh"]
+aliases = ["sh"]
 globs = [
   "*.bash", "*.bats", "*.cgi", "*.command", "*.env", "*.fcgi",
-  "*.ksh", "*.sh", "*.sh.in", "*.tmux", "*.tool", "*.zsh",
+  "*.ksh", "*.sh", "*.sh.in", "*.tool",
   ".bash_aliases", ".bash_history", ".bash_logout", ".bash_profile",
   ".bashrc", ".cshrc", ".env", ".env.example", ".flaskenv",
-  ".kshrc", ".login", ".profile", ".zlogin", ".zlogout",
-  ".zprofile", ".zshenv", ".zshrc",
+  ".kshrc", ".login", ".profile",
   "9fs", "PKGBUILD", "bash_aliases", "bash_logout", "bash_profile",
   "bashrc", "cshrc", "ebuild", "eclass", "gradlew", "kshrc",
-  "login", "man", "profile", "zlogin", "zlogout", "zprofile",
-  "zshenv", "zshrc",
+  "login", "man", "profile",
 ]
 emacs = ["sh"]
-shebang = ["ash", "bash", "dash", "ksh", "mksh", "pdksh", "rc", "sh", "zsh"]
+shebang = ["ash", "bash", "dash", "ksh", "mksh", "pdksh", "rc", "sh"]
 
 [parsers.c]
 git = "https://github.com/tree-sitter/tree-sitter-c.git"
@@ -130,7 +128,7 @@ version = "0.23.4"
 aliases = ["c++"]
 variant = "CPlusPlus"
 display_name = "C++"
-globs = ["*.cc", "*.cpp", "*.h", "*.hh", "*.hpp", "*.ino", "*.cxx", "*.cu", "*.hxx"]
+globs = ["*.cc", "*.cpp", "*.h", "*.hh", "*.hpp", "*.cxx", "*.cu", "*.hxx"]
 emacs = ["c++"]
 
 [parsers.csharp]
@@ -243,9 +241,9 @@ globs = ["*.fish"]
 
 [parsers.fsharp]
 git = "https://github.com/ionide/tree-sitter-fsharp.git"
-rev = "dcbd07b8860fbde39f207dbc03b36a791986cd96"
+rev = "1c2d9351d1f731c08cfdc4ed41e63126ae56e462"
 crate = "tree-sitter-fsharp"
-version = "0.1.0"
+version = "0.2.2"
 location = "fsharp"
 aliases = ["f#"]
 variant = "FSharp"
@@ -294,9 +292,8 @@ shebang = ["runghc", "runhaskell", "runhugs"]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-hcl.git"
 rev = "64ad62785d442eb4d45df3a1764962dafd5bc98b"
 version = "1.2.0"
-aliases = ["terraform"]
 variant = "HCL"
-globs = ["*.hcl", "*.nomad", "*.tf", "*.tfvars", "*.workflow"]
+globs = ["*.hcl", "*.nomad", "*.workflow"]
 emacs = ["hcl"]
 
 [parsers.heex]
@@ -329,6 +326,15 @@ rev = "39f20bb51f502e32058684e893c0c0b00bb2332c"
 version = "0.1.0"
 variant = "IEx"
 globs = ["*.iex"]
+
+[parsers.ini]
+git = "https://github.com/justinmk/tree-sitter-ini.git"
+rev = "e4018b5176132b4f3c5d6e61cea383f42288d0f5"
+crate = "tree-sitter-ini"
+version = "1.4.0"
+variant = "INI"
+display_name = "INI"
+globs = ["*.ini", "*.cfg", "*.cnf", ".gitmodules", ".npmrc"]
 
 [parsers.java]
 git = "https://github.com/tree-sitter/tree-sitter-java.git"
@@ -364,10 +370,18 @@ globs = [
   "flake.lock",
 ]
 
+[parsers.julia]
+git = "https://github.com/tree-sitter/tree-sitter-julia.git"
+rev = "e0f9dcd180fdcfcfa8d79a3531e11d99e79321d3"
+crate = "tree-sitter-julia"
+version = "0.23.1"
+globs = ["*.jl"]
+emacs = ["julia"]
+
 [parsers.kotlin]
 git = "https://github.com/fwcd/tree-sitter-kotlin.git"
-rev = "f3a1ea74304adad67164a0a6ffe729428748a7a7"
-version = "0.1.0"
+rev = "802fd920c153b02b9d266369a3ef061622f2bbf0"
+version = "0.4.0"
 globs = ["*.kt", "*.ktm", "*.kts"]
 
 [parsers.latex]
@@ -401,8 +415,8 @@ globs = ["*.lua"]
 
 [parsers.make]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-make.git"
-rev = "5e9e8f8ff3387b0edcaa90f46ddf3629f4cfeb1d"
-version = "0.1.0"
+rev = "70613f3d812cbabbd7f38d104d60a409c4008b43"
+version = "1.1.1"
 globs = [
   "*.mak", "*.d", "*.make", "*.makefile", "*.mk", "*.mkfile", "*.dsp",
   "BSDmakefile", "GNUmakefile", "Kbuild", "Makefile", "MAKEFILE",
@@ -506,8 +520,7 @@ globs = ["*.ps1", "*.psm1"]
 
 [parsers.protobuf]
 git = "https://github.com/coder3101/tree-sitter-proto.git"
-rev = "3ef027b83540c1c161bea64257654ab3d198ad54"
-crate = "tree-sitter-proto"
+rev = "d65a18ce7c2242801f702770114ad08056c7f8c9"
 version = "0.4.0"
 query_name = "proto"
 variant = "ProtoBuf"
@@ -573,8 +586,7 @@ emacs = ["scss"]
 
 [parsers.sql]
 git = "https://github.com/derekstride/tree-sitter-sql.git"
-rev = "7b51ecda191d36b92f5a90a8d1bc3faef1c7b8b8"
-crate = "tree-sitter-sequel"
+rev = "851e9cb257ba7c66cc8c14214a31c44d2f1e954e"
 version = "0.3.11"
 variant = "SQL"
 globs = ["*.sql", "*.pgsql"]
@@ -694,6 +706,301 @@ crate = "tree-sitter-zig"
 version = "1.1.2"
 globs = ["*.zig"]
 emacs = ["zig"]
+
+[parsers.arduino]
+git = "https://github.com/tree-sitter-grammars/tree-sitter-arduino.git"
+rev = "53eb391da4c6c5857f8defa2c583c46c2594f565"
+crate = "tree-sitter-arduino"
+version = "0.24.0"
+globs = ["*.ino", "*.pde"]
+
+[parsers.bicep]
+git = "https://github.com/tree-sitter-grammars/tree-sitter-bicep.git"
+rev = "bff59884307c0ab009bd5e81afd9324b46a6c0f9"
+crate = "tree-sitter-bicep"
+version = "1.1.0"
+globs = ["*.bicep", "*.bicepparam"]
+
+[parsers.dot]
+git = "https://github.com/rydesun/tree-sitter-dot.git"
+rev = "80327abbba6f47530edeb0df9f11bd5d5c93c14d"
+version = "0.1.6"
+display_name = "Dot"
+globs = ["*.dot", "*.gv"]
+
+[parsers.editorconfig]
+git = "https://github.com/ValdezFOmar/tree-sitter-editorconfig.git"
+rev = "c4d5e725e1bbf683b223f4bebe83142cefe68da5"
+version = "2.0.0"
+globs = [".editorconfig"]
+
+[parsers.gitattributes]
+git = "https://github.com/tree-sitter-grammars/tree-sitter-gitattributes.git"
+rev = "1b7af09d45b579f9f288453b95ad555f1f431645"
+version = "0.1.6"
+display_name = "Git Attributes"
+globs = [".gitattributes", "gitattributes"]
+
+[parsers.gitcommit]
+git = "https://github.com/gbprod/tree-sitter-gitcommit.git"
+rev = "a716678c0f00645fed1e6f1d0eb221481dbd6f6d"
+crate = "tree-sitter-gitcommit"
+version = "0.5.0"
+display_name = "Git Commit"
+globs = ["COMMIT_EDITMSG", "MERGE_MSG", "TAG_EDITMSG", "SQUASH_MSG"]
+
+[parsers.javadoc]
+git = "https://github.com/rmuir/tree-sitter-javadoc.git"
+rev = "d1a2efc871825ff29a1d241cdcac5713c99cfd54"
+crate = "tree-sitter-javadoc"
+version = "0.3.1"
+display_name = "Javadoc"
+
+[parsers.jq]
+git = "https://github.com/flurie/tree-sitter-jq.git"
+rev = "c204e36d2c3c6fce1f57950b12cabcc24e5cc4d9"
+version = "1.0.2"
+display_name = "jq"
+globs = ["*.jq"]
+
+[parsers.kdl]
+git = "https://github.com/tree-sitter-grammars/tree-sitter-kdl.git"
+rev = "b37e3d58e5c5cf8d739b315d6114e02d42e66664"
+version = "1.1.0"
+display_name = "KDL"
+globs = ["*.kdl"]
+
+[parsers.kitty]
+git = "https://github.com/OXY2DEV/tree-sitter-kitty.git"
+rev = "f821c16397ffab5b776d8781245215811438a624"
+version = "0.1.0"
+display_name = "Kitty"
+globs = ["kitty.conf"]
+
+[parsers.luadoc]
+git = "https://github.com/tree-sitter-grammars/tree-sitter-luadoc.git"
+rev = "873612aadd3f684dd4e631bdf42ea8990c57634e"
+version = "1.1.0"
+display_name = "LuaDoc"
+
+[parsers.nim]
+git = "https://github.com/alaviss/tree-sitter-nim.git"
+rev = "9b4ede21a6ca866d29263f6b66c070961bc622b4"
+version = "0.1.0"
+display_name = "Nim"
+globs = ["*.nim", "*.nims", "*.nimble"]
+
+[parsers.pascal]
+git = "https://github.com/Isopod/tree-sitter-pascal.git"
+rev = "042119eca2e18a60e56317fb06ee3ba5c32cb447"
+crate = "tree-sitter-pascal"
+version = "0.10.2"
+display_name = "Pascal"
+globs = ["*.pas", "*.pp", "*.lpr", "*.dpr"]
+
+[parsers.puppet]
+git = "https://github.com/tree-sitter-grammars/tree-sitter-puppet.git"
+rev = "15f192929b7d317f5914de2b4accd37b349182a6"
+crate = "tree-sitter-puppet"
+version = "1.3.0"
+display_name = "Puppet"
+globs = ["*.pp", "Puppetfile"]
+
+[parsers.terraform]
+git = "https://github.com/MichaHoffmann/tree-sitter-hcl.git"
+rev = "64ad62785d442eb4d45df3a1764962dafd5bc98b"
+location = "dialects/terraform"
+query_name = "terraform"
+version = "0.1.0"
+display_name = "Terraform"
+globs = ["*.tf", "*.tfvars", "*.tfvars.json"]
+
+[parsers.tmux]
+git = "https://github.com/Freed-Wu/tree-sitter-tmux.git"
+rev = "75d1b995b0c23400ac8e49db757a2e0386f9fa8f"
+version = "0.0.4"
+display_name = "tmux"
+globs = [".tmux.conf", "tmux.conf", "*.tmux"]
+
+[parsers.wgsl]
+git = "https://github.com/szebniok/tree-sitter-wgsl.git"
+rev = "40259f3c77ea856841a4e0c4c807705f3e4a2b65"
+version = "0.0.6"
+display_name = "WGSL"
+globs = ["*.wgsl"]
+
+[parsers.zsh]
+git = "https://github.com/georgeharker/tree-sitter-zsh.git"
+rev = "bd344c23a7683e293d077c6648e88f209782fedb"
+version = "0.63.1"
+display_name = "Zsh"
+globs = ["*.zsh", ".zshrc", ".zshenv", ".zprofile", ".zlogin", ".zlogout", "zshrc", "zshenv", "zprofile", "zlogin", "zlogout"]
+shebang = ["zsh"]
+
+[parsers.d]
+git = "https://github.com/gdamore/tree-sitter-d.git"
+rev = "fb028c8f14f4188286c2eef143f105def6fbf24f"
+crate = "tree-sitter-d"
+version = "0.8.2"
+display_name = "D"
+globs = ["*.d"]
+
+[parsers.fortran]
+git = "https://github.com/stadelmanma/tree-sitter-fortran.git"
+rev = "be30d90dc7dfa4080b9c4abed3f400c9163a88df"
+crate = "tree-sitter-fortran"
+version = "0.5.1"
+globs = ["*.f", "*.f03", "*.f08", "*.f90", "*.f95", "*.for", "*.ftn"]
+
+[parsers.gitignore]
+git = "https://github.com/shunsambongi/tree-sitter-gitignore.git"
+rev = "f4685bf11ac466dd278449bcfe5fd014e94aa504"
+version = "0.1.0"
+variant = "GitIgnore"
+display_name = "Git Ignore"
+globs = [".gitignore", ".ignore", ".fdignore", ".rgignore"]
+
+[parsers.glsl]
+git = "https://github.com/theHamsta/tree-sitter-glsl.git"
+rev = "24a6c8ef698e4480fecf8340d771fbcb5de8fbb4"
+crate = "tree-sitter-glsl"
+version = "0.2.0"
+display_name = "GLSL"
+globs = ["*.comp", "*.frag", "*.geom", "*.glsl", "*.tesc", "*.tese", "*.vert"]
+
+[parsers.groovy]
+git = "https://github.com/murtaza64/tree-sitter-groovy.git"
+rev = "781d9cd1b482a70a6b27091e5c9e14bbcab3b768"
+version = "0.0.1"
+globs = ["*.gradle", "*.groovy", "Jenkinsfile"]
+emacs = ["groovy"]
+shebang = ["groovy"]
+
+[parsers.hurl]
+git = "https://github.com/pfeiferj/tree-sitter-hurl.git"
+rev = "c9538dbb0f52f70896ee6ff56cd3ab6a8bfba57c"
+version = "0.1.0"
+globs = ["*.hurl"]
+
+[parsers.jinja]
+git = "https://github.com/cathaysia/tree-sitter-jinja.git"
+rev = "7bd0422c6a57aaabfee8603502d7708d0a536f5f"
+crate = "tree-sitter-jinja"
+version = "0.11.1"
+location = "tree-sitter-jinja"
+aliases = ["jinja2"]
+display_name = "Jinja"
+globs = ["*.j2", "*.jinja", "*.jinja2"]
+
+[parsers.json5]
+git = "https://github.com/Joakker/tree-sitter-json5.git"
+rev = "aa630ef48903ab99e406a8acd2e2933077cc34e1"
+version = "0.1.0"
+variant = "JSON5"
+display_name = "JSON5"
+globs = ["*.json5"]
+
+[parsers.just]
+git = "https://github.com/casey/tree-sitter-just.git"
+rev = "d9da862c156020c1a83d3c6ccdda32be6d8a5d4a"
+version = "0.1.0"
+globs = ["*.just", ".just", ".justfile", ".JUSTFILE", ".Justfile", "justfile", "JUSTFILE", "Justfile"]
+
+[parsers.matlab]
+git = "https://github.com/acristoffers/tree-sitter-matlab.git"
+rev = "c2390a59016f74e7d5f75ef09510768b4f30217e"
+crate = "tree-sitter-matlab"
+version = "1.3.0"
+display_name = "MATLAB"
+globs = ["*.m"]
+
+[parsers.mermaid]
+git = "https://github.com/monaqa/tree-sitter-mermaid.git"
+rev = "90ae195b31933ceb9d079abfa8a3ad0a36fee4cc"
+version = "0.1.0"
+globs = ["*.mmd", "*.mermaid"]
+
+[parsers.nginx]
+git = "https://github.com/opa-oz/tree-sitter-nginx.git"
+rev = "47ade644d754cce57974aac44d2c9450e823d4f4"
+crate = "tree-sitter-nginx"
+version = "1.0.1"
+display_name = "Nginx"
+globs = ["*.nginx", "nginx.conf"]
+
+[parsers.prisma]
+git = "https://github.com/LumaKernel/tree-sitter-prisma.git"
+rev = "3556b2c1f20ec9ac91e92d32c43d9d2a0ca3cc49"
+version = "0.1.1"
+globs = ["*.prisma"]
+
+[parsers.qmljs]
+git = "https://github.com/yuja/tree-sitter-qmljs.git"
+rev = "0bec4359a7eb2f6c9220cd57372d87d236f66d59"
+crate = "tree-sitter-qmljs"
+version = "0.3.0"
+aliases = ["qml"]
+variant = "QMLJS"
+display_name = "QML/JS"
+globs = ["*.qml", "*.qmljs", "*.qmltypes"]
+
+[parsers.racket]
+git = "https://github.com/6cdh/tree-sitter-racket.git"
+rev = "54649be8b939341d2d5410b594ab954fe8814bd0"
+crate = "tree-sitter-racket"
+version = "0.24.7"
+globs = ["*.rkt", "*.rktd", "*.rktl"]
+shebang = ["racket"]
+
+[parsers.rst]
+git = "https://github.com/stsewd/tree-sitter-rst.git"
+rev = "4e562e1598b95b93db4f3f64fe40ddefbc677a15"
+crate = "tree-sitter-rst"
+version = "0.2.0"
+aliases = ["restructuredtext"]
+variant = "RST"
+display_name = "reStructuredText"
+globs = ["*.rst"]
+
+[parsers.scheme]
+git = "https://github.com/6cdh/tree-sitter-scheme.git"
+rev = "c6cb7c7d7a04b3f5d999c28e2e9c0c31b2d50ece"
+crate = "tree-sitter-scheme"
+version = "0.24.7"
+globs = ["*.scm", "*.sld", "*.ss"]
+shebang = ["guile", "scheme"]
+
+[parsers.solidity]
+git = "https://github.com/JoranHonig/tree-sitter-solidity.git"
+rev = "048fe686cb1fde267243739b8bdbec8fc3a55272"
+crate = "tree-sitter-solidity"
+version = "1.2.13"
+globs = ["*.sol"]
+
+[parsers.systemverilog]
+git = "https://github.com/gmlarumbe/tree-sitter-systemverilog.git"
+rev = "293928578cb27fbd0005fcc5f09c09a1e8628c89"
+crate = "tree-sitter-systemverilog"
+version = "0.3.1"
+variant = "SystemVerilog"
+display_name = "SystemVerilog"
+globs = ["*.sv", "*.svh"]
+
+[parsers.tcl]
+git = "https://github.com/tree-sitter-grammars/tree-sitter-tcl.git"
+rev = "8f11ac7206a54ed11210491cee1e0657e2962c47"
+version = "0.1.0"
+globs = ["*.itcl", "*.tcl", "*.tk"]
+shebang = ["tclsh", "wish"]
+
+[parsers.vhdl]
+git = "https://github.com/jpt13653903/tree-sitter-vhdl.git"
+rev = "c2d9be3d5ab7fb2cae8ad5ae604cd3606a4af0f2"
+crate = "tree-sitter-vhdl"
+version = "1.4.0"
+variant = "VHDL"
+display_name = "VHDL"
+globs = ["*.vhd", "*.vhdl"]
 
 # ── Bundles ─────────────────────────────────────────────────────────────────
 

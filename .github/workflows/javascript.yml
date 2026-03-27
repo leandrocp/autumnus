@@ -5,6 +5,8 @@ on:
     branches: [ main ]
     paths:
       - "packages/javascript/lumis/**"
+      - "packages/javascript/markdown-it-lumis/**"
+      - "packages/javascript/rehype-lumis/**"
       - "packages/javascript/themes/**"
       - "queries/**"
       - "languages.toml"
@@ -13,6 +15,8 @@ on:
   pull_request:
     paths:
       - "packages/javascript/lumis/**"
+      - "packages/javascript/markdown-it-lumis/**"
+      - "packages/javascript/rehype-lumis/**"
       - "packages/javascript/themes/**"
       - "queries/**"
       - "languages.toml"
@@ -39,6 +43,14 @@ jobs:
         working-directory: packages/javascript
       - run: pnpm --filter @lumis-sh/lumis lint
         working-directory: packages/javascript
+      - run: pnpm --filter @lumis-sh/markdown-it-lumis fmt:check
+        working-directory: packages/javascript
+      - run: pnpm --filter @lumis-sh/markdown-it-lumis lint
+        working-directory: packages/javascript
+      - run: pnpm --filter @lumis-sh/rehype-lumis fmt:check
+        working-directory: packages/javascript
+      - run: pnpm --filter @lumis-sh/rehype-lumis lint
+        working-directory: packages/javascript
       - run: pnpm --filter @lumis-sh/themes fmt:check
         working-directory: packages/javascript
       - run: pnpm --filter @lumis-sh/themes lint
@@ -61,6 +73,14 @@ jobs:
       - run: pnpm --filter @lumis-sh/themes build
         working-directory: packages/javascript
       - run: pnpm --filter @lumis-sh/lumis build
+        working-directory: packages/javascript
+      - run: pnpm --filter @lumis-sh/markdown-it-lumis build
+        working-directory: packages/javascript
+      - run: pnpm --filter @lumis-sh/rehype-lumis build
+        working-directory: packages/javascript
+      - run: pnpm --filter @lumis-sh/markdown-it-lumis test
+        working-directory: packages/javascript
+      - run: pnpm --filter @lumis-sh/rehype-lumis test
         working-directory: packages/javascript
       - run: pnpm --filter @lumis-sh/lumis test
         working-directory: packages/javascript

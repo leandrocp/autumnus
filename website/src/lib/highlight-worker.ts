@@ -5,7 +5,7 @@ import type { Theme } from "@lumis-sh/lumis";
 
 const DEFAULT_PRE_CLASS = "m-0 overflow-x-auto p-5 font-mono text-[13px] leading-relaxed sm:p-6 sm:text-sm";
 
-const highlighterPromise = createHighlighter({ langs: [bundledLanguages] });
+const highlighterPromise = createHighlighter({ languages: [bundledLanguages] });
 
 export type WorkerRequest =
   | { id: number; type: "highlight"; languageId: string; theme: Theme; source: string; preClass?: string }

@@ -1,0 +1,878 @@
+[
+  {
+    "type": "_inline_markup",
+    "named": true,
+    "subtypes": [
+      {
+        "type": "citation_reference",
+        "named": true
+      },
+      {
+        "type": "emphasis",
+        "named": true
+      },
+      {
+        "type": "footnote_reference",
+        "named": true
+      },
+      {
+        "type": "inline_target",
+        "named": true
+      },
+      {
+        "type": "interpreted_text",
+        "named": true
+      },
+      {
+        "type": "literal",
+        "named": true
+      },
+      {
+        "type": "reference",
+        "named": true
+      },
+      {
+        "type": "standalone_hyperlink",
+        "named": true
+      },
+      {
+        "type": "strong",
+        "named": true
+      },
+      {
+        "type": "substitution_reference",
+        "named": true
+      },
+      {
+        "type": "text",
+        "named": false
+      }
+    ]
+  },
+  {
+    "type": "_list",
+    "named": true,
+    "subtypes": [
+      {
+        "type": "bullet_list",
+        "named": true
+      },
+      {
+        "type": "definition_list",
+        "named": true
+      },
+      {
+        "type": "enumerated_list",
+        "named": true
+      },
+      {
+        "type": "field_list",
+        "named": true
+      }
+    ]
+  },
+  {
+    "type": "_markup_block",
+    "named": true,
+    "subtypes": [
+      {
+        "type": "citation",
+        "named": true
+      },
+      {
+        "type": "comment",
+        "named": true
+      },
+      {
+        "type": "directive",
+        "named": true
+      },
+      {
+        "type": "footnote",
+        "named": true
+      },
+      {
+        "type": "substitution_definition",
+        "named": true
+      },
+      {
+        "type": "target",
+        "named": true
+      }
+    ]
+  },
+  {
+    "type": "arguments",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "attribution",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "_inline_markup",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "block_quote",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "_list",
+          "named": true
+        },
+        {
+          "type": "_markup_block",
+          "named": true
+        },
+        {
+          "type": "attribution",
+          "named": true
+        },
+        {
+          "type": "block_quote",
+          "named": true
+        },
+        {
+          "type": "doctest_block",
+          "named": true
+        },
+        {
+          "type": "line_block",
+          "named": true
+        },
+        {
+          "type": "literal_block",
+          "named": true
+        },
+        {
+          "type": "paragraph",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "body",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "_list",
+          "named": true
+        },
+        {
+          "type": "_markup_block",
+          "named": true
+        },
+        {
+          "type": "arguments",
+          "named": true
+        },
+        {
+          "type": "block_quote",
+          "named": true
+        },
+        {
+          "type": "content",
+          "named": true
+        },
+        {
+          "type": "doctest_block",
+          "named": true
+        },
+        {
+          "type": "line_block",
+          "named": true
+        },
+        {
+          "type": "literal_block",
+          "named": true
+        },
+        {
+          "type": "options",
+          "named": true
+        },
+        {
+          "type": "paragraph",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "bullet_list",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "list_item",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "citation",
+    "named": true,
+    "fields": {
+      "body": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "body",
+            "named": true
+          }
+        ]
+      },
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "label",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "classifier",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "_inline_markup",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "comment",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "content",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "definition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "_list",
+          "named": true
+        },
+        {
+          "type": "_markup_block",
+          "named": true
+        },
+        {
+          "type": "block_quote",
+          "named": true
+        },
+        {
+          "type": "doctest_block",
+          "named": true
+        },
+        {
+          "type": "line_block",
+          "named": true
+        },
+        {
+          "type": "literal_block",
+          "named": true
+        },
+        {
+          "type": "paragraph",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "definition_list",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "list_item",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "directive",
+    "named": true,
+    "fields": {
+      "body": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "body",
+            "named": true
+          }
+        ]
+      },
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "type",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "doctest_block",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "document",
+    "named": true,
+    "root": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "_list",
+          "named": true
+        },
+        {
+          "type": "_markup_block",
+          "named": true
+        },
+        {
+          "type": "block_quote",
+          "named": true
+        },
+        {
+          "type": "doctest_block",
+          "named": true
+        },
+        {
+          "type": "line_block",
+          "named": true
+        },
+        {
+          "type": "literal_block",
+          "named": true
+        },
+        {
+          "type": "paragraph",
+          "named": true
+        },
+        {
+          "type": "section",
+          "named": true
+        },
+        {
+          "type": "transition",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "enumerated_list",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "list_item",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "field",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "field_body",
+          "named": true
+        },
+        {
+          "type": "field_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "field_body",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "_list",
+          "named": true
+        },
+        {
+          "type": "_markup_block",
+          "named": true
+        },
+        {
+          "type": "block_quote",
+          "named": true
+        },
+        {
+          "type": "doctest_block",
+          "named": true
+        },
+        {
+          "type": "line_block",
+          "named": true
+        },
+        {
+          "type": "literal_block",
+          "named": true
+        },
+        {
+          "type": "paragraph",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "field_list",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "field",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "field_name",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "_inline_markup",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "footnote",
+    "named": true,
+    "fields": {
+      "body": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "body",
+            "named": true
+          }
+        ]
+      },
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "label",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "interpreted_text",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "role",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "line",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "_inline_markup",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "line_block",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "line",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "list_item",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "body",
+          "named": true
+        },
+        {
+          "type": "classifier",
+          "named": true
+        },
+        {
+          "type": "definition",
+          "named": true
+        },
+        {
+          "type": "term",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "literal_block",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "options",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "field",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "paragraph",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "_inline_markup",
+          "named": true
+        },
+        {
+          "type": "literal_block",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "section",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "title",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "substitution_definition",
+    "named": true,
+    "fields": {
+      "body": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "directive",
+            "named": true
+          }
+        ]
+      },
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "substitution",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "target",
+    "named": true,
+    "fields": {
+      "link": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "link",
+            "named": true
+          }
+        ]
+      },
+      "name": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "name",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "term",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "_inline_markup",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "title",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "_inline_markup",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "\t",
+    "named": false
+  },
+  {
+    "type": "\u000b",
+    "named": false
+  },
+  {
+    "type": "\f",
+    "named": false
+  },
+  {
+    "type": " ",
+    "named": false
+  },
+  {
+    "type": "--",
+    "named": false
+  },
+  {
+    "type": "..",
+    "named": false
+  },
+  {
+    "type": ":",
+    "named": false
+  },
+  {
+    "type": "::",
+    "named": false
+  },
+  {
+    "type": "__",
+    "named": false
+  },
+  {
+    "type": "adornment",
+    "named": false
+  },
+  {
+    "type": "bullet",
+    "named": false
+  },
+  {
+    "type": "citation_reference",
+    "named": true
+  },
+  {
+    "type": "emphasis",
+    "named": true
+  },
+  {
+    "type": "footnote_reference",
+    "named": true
+  },
+  {
+    "type": "inline_target",
+    "named": true
+  },
+  {
+    "type": "interpreted_text",
+    "named": false
+  },
+  {
+    "type": "label",
+    "named": true
+  },
+  {
+    "type": "link",
+    "named": true
+  },
+  {
+    "type": "literal",
+    "named": true
+  },
+  {
+    "type": "name",
+    "named": true
+  },
+  {
+    "type": "reference",
+    "named": true
+  },
+  {
+    "type": "role",
+    "named": true
+  },
+  {
+    "type": "standalone_hyperlink",
+    "named": true
+  },
+  {
+    "type": "strong",
+    "named": true
+  },
+  {
+    "type": "substitution",
+    "named": true
+  },
+  {
+    "type": "substitution_reference",
+    "named": true
+  },
+  {
+    "type": "text",
+    "named": false
+  },
+  {
+    "type": "transition",
+    "named": true
+  },
+  {
+    "type": "type",
+    "named": true
+  },
+  {
+    "type": "|",
+    "named": false
+  },
+  {
+    "type": " ",
+    "named": false
+  }
+]

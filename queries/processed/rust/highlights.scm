@@ -477,9 +477,12 @@
 [
   (line_comment)
   (block_comment)
+] @comment 
+
+[
   (outer_doc_comment_marker)
   (inner_doc_comment_marker)
-] @comment 
+] @comment.documentation
 
 (line_comment
   (doc_comment)) @comment.documentation

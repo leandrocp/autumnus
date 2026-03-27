@@ -1,11 +1,13 @@
 ; This file is auto-generated. Do not edit.
 ; inherits: html_tags
-(tag_name) @tag
+(tag_name) @tag 
 
 ; (erroneous_end_tag_name) @error ; we do not lint syntax errors
 (comment) @comment 
 
-(attribute_name) @tag.attribute
+(attribute_name) @tag.attribute 
+
+(attribute_value) 
 
 ((attribute
   (quoted_attribute_value) @string)
@@ -129,6 +131,12 @@
 
 (binding_name
   (identifier) @keyword)
+
+(class_binding
+  [
+    (identifier)
+    (class_name)
+  ] @keyword)
 
 (event_binding
   (binding_name

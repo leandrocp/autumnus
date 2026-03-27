@@ -1,0 +1,7750 @@
+[
+  {
+    "type": "adjustment",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "attach_session_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "flags",
+          "named": true
+        },
+        {
+          "type": "session",
+          "named": true
+        },
+        {
+          "type": "working_directory",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "bind_key_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "attach_session_directive",
+          "named": true
+        },
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "bind_key_directive",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "break_pane_directive",
+          "named": true
+        },
+        {
+          "type": "capture_pane_directive",
+          "named": true
+        },
+        {
+          "type": "choose_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "choose_client_directive",
+          "named": true
+        },
+        {
+          "type": "choose_tree_directive",
+          "named": true
+        },
+        {
+          "type": "clear_history_directive",
+          "named": true
+        },
+        {
+          "type": "clear_prompt_history_directive",
+          "named": true
+        },
+        {
+          "type": "clock_mode_directive",
+          "named": true
+        },
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "command_prompt_directive",
+          "named": true
+        },
+        {
+          "type": "confirm_before_directive",
+          "named": true
+        },
+        {
+          "type": "copy_mode_directive",
+          "named": true
+        },
+        {
+          "type": "customize_mode_directive",
+          "named": true
+        },
+        {
+          "type": "delete_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "detach_client_directive",
+          "named": true
+        },
+        {
+          "type": "display_menu_directive",
+          "named": true
+        },
+        {
+          "type": "display_message_directive",
+          "named": true
+        },
+        {
+          "type": "display_panes_directive",
+          "named": true
+        },
+        {
+          "type": "display_popup_directive",
+          "named": true
+        },
+        {
+          "type": "environment_assignment",
+          "named": true
+        },
+        {
+          "type": "find_window_directive",
+          "named": true
+        },
+        {
+          "type": "has_session_directive",
+          "named": true
+        },
+        {
+          "type": "hidden_assignment",
+          "named": true
+        },
+        {
+          "type": "if_shell_directive",
+          "named": true
+        },
+        {
+          "type": "join_pane_directive",
+          "named": true
+        },
+        {
+          "type": "key",
+          "named": true
+        },
+        {
+          "type": "key_table",
+          "named": true
+        },
+        {
+          "type": "kill_pane_directive",
+          "named": true
+        },
+        {
+          "type": "kill_server_directive",
+          "named": true
+        },
+        {
+          "type": "kill_session_directive",
+          "named": true
+        },
+        {
+          "type": "kill_window_directive",
+          "named": true
+        },
+        {
+          "type": "last_pane_directive",
+          "named": true
+        },
+        {
+          "type": "last_window_directive",
+          "named": true
+        },
+        {
+          "type": "link_window_directive",
+          "named": true
+        },
+        {
+          "type": "list_buffers_directive",
+          "named": true
+        },
+        {
+          "type": "list_clients_directive",
+          "named": true
+        },
+        {
+          "type": "list_commands_directive",
+          "named": true
+        },
+        {
+          "type": "list_keys_directive",
+          "named": true
+        },
+        {
+          "type": "list_panes_directive",
+          "named": true
+        },
+        {
+          "type": "list_sessions_directive",
+          "named": true
+        },
+        {
+          "type": "list_windows_directive",
+          "named": true
+        },
+        {
+          "type": "load_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "lock_client_directive",
+          "named": true
+        },
+        {
+          "type": "lock_server_directive",
+          "named": true
+        },
+        {
+          "type": "lock_session_directive",
+          "named": true
+        },
+        {
+          "type": "move_pane_directive",
+          "named": true
+        },
+        {
+          "type": "move_window_directive",
+          "named": true
+        },
+        {
+          "type": "new_session_directive",
+          "named": true
+        },
+        {
+          "type": "new_window_directive",
+          "named": true
+        },
+        {
+          "type": "next_layout_directive",
+          "named": true
+        },
+        {
+          "type": "next_window_directive",
+          "named": true
+        },
+        {
+          "type": "note",
+          "named": true
+        },
+        {
+          "type": "paste_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "pipe_pane_directive",
+          "named": true
+        },
+        {
+          "type": "previous_layout_directive",
+          "named": true
+        },
+        {
+          "type": "previous_window_directive",
+          "named": true
+        },
+        {
+          "type": "refresh_client_directive",
+          "named": true
+        },
+        {
+          "type": "rename_session_directive",
+          "named": true
+        },
+        {
+          "type": "rename_window_directive",
+          "named": true
+        },
+        {
+          "type": "resize_pane_directive",
+          "named": true
+        },
+        {
+          "type": "resize_window_directive",
+          "named": true
+        },
+        {
+          "type": "respawn_pane_directive",
+          "named": true
+        },
+        {
+          "type": "respawn_window_directive",
+          "named": true
+        },
+        {
+          "type": "rotate_window_directive",
+          "named": true
+        },
+        {
+          "type": "run_shell_directive",
+          "named": true
+        },
+        {
+          "type": "save_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "select_layout_directive",
+          "named": true
+        },
+        {
+          "type": "select_pane_directive",
+          "named": true
+        },
+        {
+          "type": "select_window_directive",
+          "named": true
+        },
+        {
+          "type": "send_keys_directive",
+          "named": true
+        },
+        {
+          "type": "send_prefix_directive",
+          "named": true
+        },
+        {
+          "type": "server_access_directive",
+          "named": true
+        },
+        {
+          "type": "set_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "set_environment_directive",
+          "named": true
+        },
+        {
+          "type": "set_hook_directive",
+          "named": true
+        },
+        {
+          "type": "set_option_directive",
+          "named": true
+        },
+        {
+          "type": "set_window_option_directive",
+          "named": true
+        },
+        {
+          "type": "show_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "show_environment_directive",
+          "named": true
+        },
+        {
+          "type": "show_hooks_directive",
+          "named": true
+        },
+        {
+          "type": "show_messages_directive",
+          "named": true
+        },
+        {
+          "type": "show_options_directive",
+          "named": true
+        },
+        {
+          "type": "show_prompt_history_directive",
+          "named": true
+        },
+        {
+          "type": "source_file_directive",
+          "named": true
+        },
+        {
+          "type": "split_window_directive",
+          "named": true
+        },
+        {
+          "type": "start_server_directive",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "suspend_client_directive",
+          "named": true
+        },
+        {
+          "type": "swap_pane_directive",
+          "named": true
+        },
+        {
+          "type": "swap_window_directive",
+          "named": true
+        },
+        {
+          "type": "switch_client_directive",
+          "named": true
+        },
+        {
+          "type": "unbind_key_directive",
+          "named": true
+        },
+        {
+          "type": "unlink_window_directive",
+          "named": true
+        },
+        {
+          "type": "wait_for_directive",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "block",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "attach_session_directive",
+          "named": true
+        },
+        {
+          "type": "bind_key_directive",
+          "named": true
+        },
+        {
+          "type": "break_pane_directive",
+          "named": true
+        },
+        {
+          "type": "capture_pane_directive",
+          "named": true
+        },
+        {
+          "type": "choose_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "choose_client_directive",
+          "named": true
+        },
+        {
+          "type": "choose_tree_directive",
+          "named": true
+        },
+        {
+          "type": "clear_history_directive",
+          "named": true
+        },
+        {
+          "type": "clear_prompt_history_directive",
+          "named": true
+        },
+        {
+          "type": "clock_mode_directive",
+          "named": true
+        },
+        {
+          "type": "command_prompt_directive",
+          "named": true
+        },
+        {
+          "type": "confirm_before_directive",
+          "named": true
+        },
+        {
+          "type": "copy_mode_directive",
+          "named": true
+        },
+        {
+          "type": "customize_mode_directive",
+          "named": true
+        },
+        {
+          "type": "delete_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "detach_client_directive",
+          "named": true
+        },
+        {
+          "type": "display_menu_directive",
+          "named": true
+        },
+        {
+          "type": "display_message_directive",
+          "named": true
+        },
+        {
+          "type": "display_panes_directive",
+          "named": true
+        },
+        {
+          "type": "display_popup_directive",
+          "named": true
+        },
+        {
+          "type": "environment_assignment",
+          "named": true
+        },
+        {
+          "type": "find_window_directive",
+          "named": true
+        },
+        {
+          "type": "has_session_directive",
+          "named": true
+        },
+        {
+          "type": "hidden_assignment",
+          "named": true
+        },
+        {
+          "type": "if_shell_directive",
+          "named": true
+        },
+        {
+          "type": "if_statement",
+          "named": true
+        },
+        {
+          "type": "join_pane_directive",
+          "named": true
+        },
+        {
+          "type": "kill_pane_directive",
+          "named": true
+        },
+        {
+          "type": "kill_server_directive",
+          "named": true
+        },
+        {
+          "type": "kill_session_directive",
+          "named": true
+        },
+        {
+          "type": "kill_window_directive",
+          "named": true
+        },
+        {
+          "type": "last_pane_directive",
+          "named": true
+        },
+        {
+          "type": "last_window_directive",
+          "named": true
+        },
+        {
+          "type": "link_window_directive",
+          "named": true
+        },
+        {
+          "type": "list_buffers_directive",
+          "named": true
+        },
+        {
+          "type": "list_clients_directive",
+          "named": true
+        },
+        {
+          "type": "list_commands_directive",
+          "named": true
+        },
+        {
+          "type": "list_keys_directive",
+          "named": true
+        },
+        {
+          "type": "list_panes_directive",
+          "named": true
+        },
+        {
+          "type": "list_sessions_directive",
+          "named": true
+        },
+        {
+          "type": "list_windows_directive",
+          "named": true
+        },
+        {
+          "type": "load_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "lock_client_directive",
+          "named": true
+        },
+        {
+          "type": "lock_server_directive",
+          "named": true
+        },
+        {
+          "type": "lock_session_directive",
+          "named": true
+        },
+        {
+          "type": "move_pane_directive",
+          "named": true
+        },
+        {
+          "type": "move_window_directive",
+          "named": true
+        },
+        {
+          "type": "new_session_directive",
+          "named": true
+        },
+        {
+          "type": "new_window_directive",
+          "named": true
+        },
+        {
+          "type": "next_layout_directive",
+          "named": true
+        },
+        {
+          "type": "next_window_directive",
+          "named": true
+        },
+        {
+          "type": "paste_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "pipe_pane_directive",
+          "named": true
+        },
+        {
+          "type": "previous_layout_directive",
+          "named": true
+        },
+        {
+          "type": "previous_window_directive",
+          "named": true
+        },
+        {
+          "type": "refresh_client_directive",
+          "named": true
+        },
+        {
+          "type": "rename_session_directive",
+          "named": true
+        },
+        {
+          "type": "rename_window_directive",
+          "named": true
+        },
+        {
+          "type": "resize_pane_directive",
+          "named": true
+        },
+        {
+          "type": "resize_window_directive",
+          "named": true
+        },
+        {
+          "type": "respawn_pane_directive",
+          "named": true
+        },
+        {
+          "type": "respawn_window_directive",
+          "named": true
+        },
+        {
+          "type": "rotate_window_directive",
+          "named": true
+        },
+        {
+          "type": "run_shell_directive",
+          "named": true
+        },
+        {
+          "type": "save_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "select_layout_directive",
+          "named": true
+        },
+        {
+          "type": "select_pane_directive",
+          "named": true
+        },
+        {
+          "type": "select_window_directive",
+          "named": true
+        },
+        {
+          "type": "send_keys_directive",
+          "named": true
+        },
+        {
+          "type": "send_prefix_directive",
+          "named": true
+        },
+        {
+          "type": "server_access_directive",
+          "named": true
+        },
+        {
+          "type": "set_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "set_environment_directive",
+          "named": true
+        },
+        {
+          "type": "set_hook_directive",
+          "named": true
+        },
+        {
+          "type": "set_option_directive",
+          "named": true
+        },
+        {
+          "type": "set_window_option_directive",
+          "named": true
+        },
+        {
+          "type": "show_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "show_environment_directive",
+          "named": true
+        },
+        {
+          "type": "show_hooks_directive",
+          "named": true
+        },
+        {
+          "type": "show_messages_directive",
+          "named": true
+        },
+        {
+          "type": "show_options_directive",
+          "named": true
+        },
+        {
+          "type": "show_prompt_history_directive",
+          "named": true
+        },
+        {
+          "type": "source_file_directive",
+          "named": true
+        },
+        {
+          "type": "split_window_directive",
+          "named": true
+        },
+        {
+          "type": "start_server_directive",
+          "named": true
+        },
+        {
+          "type": "suspend_client_directive",
+          "named": true
+        },
+        {
+          "type": "swap_pane_directive",
+          "named": true
+        },
+        {
+          "type": "swap_window_directive",
+          "named": true
+        },
+        {
+          "type": "switch_client_directive",
+          "named": true
+        },
+        {
+          "type": "unbind_key_directive",
+          "named": true
+        },
+        {
+          "type": "unlink_window_directive",
+          "named": true
+        },
+        {
+          "type": "wait_for_directive",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "border_lines",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "border_style",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "break_pane_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "format",
+          "named": true
+        },
+        {
+          "type": "pane",
+          "named": true
+        },
+        {
+          "type": "window",
+          "named": true
+        },
+        {
+          "type": "window_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "buffer_name",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "capture_pane_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "buffer_name",
+          "named": true
+        },
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "end_line",
+          "named": true
+        },
+        {
+          "type": "pane",
+          "named": true
+        },
+        {
+          "type": "start_line",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "channel",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "choose_buffer_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "filter",
+          "named": true
+        },
+        {
+          "type": "format",
+          "named": true
+        },
+        {
+          "type": "pane",
+          "named": true
+        },
+        {
+          "type": "sort_order",
+          "named": true
+        },
+        {
+          "type": "template",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "choose_client_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "filter",
+          "named": true
+        },
+        {
+          "type": "format",
+          "named": true
+        },
+        {
+          "type": "pane",
+          "named": true
+        },
+        {
+          "type": "sort_order",
+          "named": true
+        },
+        {
+          "type": "template",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "choose_tree_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "filter",
+          "named": true
+        },
+        {
+          "type": "format",
+          "named": true
+        },
+        {
+          "type": "key_format",
+          "named": true
+        },
+        {
+          "type": "pane",
+          "named": true
+        },
+        {
+          "type": "sort_order",
+          "named": true
+        },
+        {
+          "type": "template",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "clear_history_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "pane",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "clear_prompt_history_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "prompt_type",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "client",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "clock_mode_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "pane",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "command_prompt_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "attach_session_directive",
+          "named": true
+        },
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "bind_key_directive",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "break_pane_directive",
+          "named": true
+        },
+        {
+          "type": "capture_pane_directive",
+          "named": true
+        },
+        {
+          "type": "choose_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "choose_client_directive",
+          "named": true
+        },
+        {
+          "type": "choose_tree_directive",
+          "named": true
+        },
+        {
+          "type": "clear_history_directive",
+          "named": true
+        },
+        {
+          "type": "clear_prompt_history_directive",
+          "named": true
+        },
+        {
+          "type": "client",
+          "named": true
+        },
+        {
+          "type": "clock_mode_directive",
+          "named": true
+        },
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "command_prompt_directive",
+          "named": true
+        },
+        {
+          "type": "confirm_before_directive",
+          "named": true
+        },
+        {
+          "type": "copy_mode_directive",
+          "named": true
+        },
+        {
+          "type": "customize_mode_directive",
+          "named": true
+        },
+        {
+          "type": "delete_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "detach_client_directive",
+          "named": true
+        },
+        {
+          "type": "display_menu_directive",
+          "named": true
+        },
+        {
+          "type": "display_message_directive",
+          "named": true
+        },
+        {
+          "type": "display_panes_directive",
+          "named": true
+        },
+        {
+          "type": "display_popup_directive",
+          "named": true
+        },
+        {
+          "type": "environment_assignment",
+          "named": true
+        },
+        {
+          "type": "find_window_directive",
+          "named": true
+        },
+        {
+          "type": "has_session_directive",
+          "named": true
+        },
+        {
+          "type": "hidden_assignment",
+          "named": true
+        },
+        {
+          "type": "if_shell_directive",
+          "named": true
+        },
+        {
+          "type": "inputs",
+          "named": true
+        },
+        {
+          "type": "join_pane_directive",
+          "named": true
+        },
+        {
+          "type": "kill_pane_directive",
+          "named": true
+        },
+        {
+          "type": "kill_server_directive",
+          "named": true
+        },
+        {
+          "type": "kill_session_directive",
+          "named": true
+        },
+        {
+          "type": "kill_window_directive",
+          "named": true
+        },
+        {
+          "type": "last_pane_directive",
+          "named": true
+        },
+        {
+          "type": "last_window_directive",
+          "named": true
+        },
+        {
+          "type": "link_window_directive",
+          "named": true
+        },
+        {
+          "type": "list_buffers_directive",
+          "named": true
+        },
+        {
+          "type": "list_clients_directive",
+          "named": true
+        },
+        {
+          "type": "list_commands_directive",
+          "named": true
+        },
+        {
+          "type": "list_keys_directive",
+          "named": true
+        },
+        {
+          "type": "list_panes_directive",
+          "named": true
+        },
+        {
+          "type": "list_sessions_directive",
+          "named": true
+        },
+        {
+          "type": "list_windows_directive",
+          "named": true
+        },
+        {
+          "type": "load_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "lock_client_directive",
+          "named": true
+        },
+        {
+          "type": "lock_server_directive",
+          "named": true
+        },
+        {
+          "type": "lock_session_directive",
+          "named": true
+        },
+        {
+          "type": "move_pane_directive",
+          "named": true
+        },
+        {
+          "type": "move_window_directive",
+          "named": true
+        },
+        {
+          "type": "new_session_directive",
+          "named": true
+        },
+        {
+          "type": "new_window_directive",
+          "named": true
+        },
+        {
+          "type": "next_layout_directive",
+          "named": true
+        },
+        {
+          "type": "next_window_directive",
+          "named": true
+        },
+        {
+          "type": "paste_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "pipe_pane_directive",
+          "named": true
+        },
+        {
+          "type": "previous_layout_directive",
+          "named": true
+        },
+        {
+          "type": "previous_window_directive",
+          "named": true
+        },
+        {
+          "type": "prompt_type",
+          "named": true
+        },
+        {
+          "type": "prompts",
+          "named": true
+        },
+        {
+          "type": "refresh_client_directive",
+          "named": true
+        },
+        {
+          "type": "rename_session_directive",
+          "named": true
+        },
+        {
+          "type": "rename_window_directive",
+          "named": true
+        },
+        {
+          "type": "resize_pane_directive",
+          "named": true
+        },
+        {
+          "type": "resize_window_directive",
+          "named": true
+        },
+        {
+          "type": "respawn_pane_directive",
+          "named": true
+        },
+        {
+          "type": "respawn_window_directive",
+          "named": true
+        },
+        {
+          "type": "rotate_window_directive",
+          "named": true
+        },
+        {
+          "type": "run_shell_directive",
+          "named": true
+        },
+        {
+          "type": "save_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "select_layout_directive",
+          "named": true
+        },
+        {
+          "type": "select_pane_directive",
+          "named": true
+        },
+        {
+          "type": "select_window_directive",
+          "named": true
+        },
+        {
+          "type": "send_keys_directive",
+          "named": true
+        },
+        {
+          "type": "send_prefix_directive",
+          "named": true
+        },
+        {
+          "type": "server_access_directive",
+          "named": true
+        },
+        {
+          "type": "set_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "set_environment_directive",
+          "named": true
+        },
+        {
+          "type": "set_hook_directive",
+          "named": true
+        },
+        {
+          "type": "set_option_directive",
+          "named": true
+        },
+        {
+          "type": "set_window_option_directive",
+          "named": true
+        },
+        {
+          "type": "show_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "show_environment_directive",
+          "named": true
+        },
+        {
+          "type": "show_hooks_directive",
+          "named": true
+        },
+        {
+          "type": "show_messages_directive",
+          "named": true
+        },
+        {
+          "type": "show_options_directive",
+          "named": true
+        },
+        {
+          "type": "show_prompt_history_directive",
+          "named": true
+        },
+        {
+          "type": "source_file_directive",
+          "named": true
+        },
+        {
+          "type": "split_window_directive",
+          "named": true
+        },
+        {
+          "type": "start_server_directive",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "suspend_client_directive",
+          "named": true
+        },
+        {
+          "type": "swap_pane_directive",
+          "named": true
+        },
+        {
+          "type": "swap_window_directive",
+          "named": true
+        },
+        {
+          "type": "switch_client_directive",
+          "named": true
+        },
+        {
+          "type": "unbind_key_directive",
+          "named": true
+        },
+        {
+          "type": "unlink_window_directive",
+          "named": true
+        },
+        {
+          "type": "wait_for_directive",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "condition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "expr_double_quotes",
+          "named": true
+        },
+        {
+          "type": "hash_escape",
+          "named": true
+        },
+        {
+          "type": "hash_rgb",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "confirm_before_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "attach_session_directive",
+          "named": true
+        },
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "bind_key_directive",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "break_pane_directive",
+          "named": true
+        },
+        {
+          "type": "capture_pane_directive",
+          "named": true
+        },
+        {
+          "type": "choose_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "choose_client_directive",
+          "named": true
+        },
+        {
+          "type": "choose_tree_directive",
+          "named": true
+        },
+        {
+          "type": "clear_history_directive",
+          "named": true
+        },
+        {
+          "type": "clear_prompt_history_directive",
+          "named": true
+        },
+        {
+          "type": "client",
+          "named": true
+        },
+        {
+          "type": "clock_mode_directive",
+          "named": true
+        },
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "command_prompt_directive",
+          "named": true
+        },
+        {
+          "type": "confirm_before_directive",
+          "named": true
+        },
+        {
+          "type": "copy_mode_directive",
+          "named": true
+        },
+        {
+          "type": "customize_mode_directive",
+          "named": true
+        },
+        {
+          "type": "delete_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "detach_client_directive",
+          "named": true
+        },
+        {
+          "type": "display_menu_directive",
+          "named": true
+        },
+        {
+          "type": "display_message_directive",
+          "named": true
+        },
+        {
+          "type": "display_panes_directive",
+          "named": true
+        },
+        {
+          "type": "display_popup_directive",
+          "named": true
+        },
+        {
+          "type": "environment_assignment",
+          "named": true
+        },
+        {
+          "type": "find_window_directive",
+          "named": true
+        },
+        {
+          "type": "has_session_directive",
+          "named": true
+        },
+        {
+          "type": "hidden_assignment",
+          "named": true
+        },
+        {
+          "type": "if_shell_directive",
+          "named": true
+        },
+        {
+          "type": "join_pane_directive",
+          "named": true
+        },
+        {
+          "type": "kill_pane_directive",
+          "named": true
+        },
+        {
+          "type": "kill_server_directive",
+          "named": true
+        },
+        {
+          "type": "kill_session_directive",
+          "named": true
+        },
+        {
+          "type": "kill_window_directive",
+          "named": true
+        },
+        {
+          "type": "last_pane_directive",
+          "named": true
+        },
+        {
+          "type": "last_window_directive",
+          "named": true
+        },
+        {
+          "type": "link_window_directive",
+          "named": true
+        },
+        {
+          "type": "list_buffers_directive",
+          "named": true
+        },
+        {
+          "type": "list_clients_directive",
+          "named": true
+        },
+        {
+          "type": "list_commands_directive",
+          "named": true
+        },
+        {
+          "type": "list_keys_directive",
+          "named": true
+        },
+        {
+          "type": "list_panes_directive",
+          "named": true
+        },
+        {
+          "type": "list_sessions_directive",
+          "named": true
+        },
+        {
+          "type": "list_windows_directive",
+          "named": true
+        },
+        {
+          "type": "load_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "lock_client_directive",
+          "named": true
+        },
+        {
+          "type": "lock_server_directive",
+          "named": true
+        },
+        {
+          "type": "lock_session_directive",
+          "named": true
+        },
+        {
+          "type": "move_pane_directive",
+          "named": true
+        },
+        {
+          "type": "move_window_directive",
+          "named": true
+        },
+        {
+          "type": "new_session_directive",
+          "named": true
+        },
+        {
+          "type": "new_window_directive",
+          "named": true
+        },
+        {
+          "type": "next_layout_directive",
+          "named": true
+        },
+        {
+          "type": "next_window_directive",
+          "named": true
+        },
+        {
+          "type": "paste_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "pipe_pane_directive",
+          "named": true
+        },
+        {
+          "type": "previous_layout_directive",
+          "named": true
+        },
+        {
+          "type": "previous_window_directive",
+          "named": true
+        },
+        {
+          "type": "prompt",
+          "named": true
+        },
+        {
+          "type": "refresh_client_directive",
+          "named": true
+        },
+        {
+          "type": "rename_session_directive",
+          "named": true
+        },
+        {
+          "type": "rename_window_directive",
+          "named": true
+        },
+        {
+          "type": "resize_pane_directive",
+          "named": true
+        },
+        {
+          "type": "resize_window_directive",
+          "named": true
+        },
+        {
+          "type": "respawn_pane_directive",
+          "named": true
+        },
+        {
+          "type": "respawn_window_directive",
+          "named": true
+        },
+        {
+          "type": "rotate_window_directive",
+          "named": true
+        },
+        {
+          "type": "run_shell_directive",
+          "named": true
+        },
+        {
+          "type": "save_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "select_layout_directive",
+          "named": true
+        },
+        {
+          "type": "select_pane_directive",
+          "named": true
+        },
+        {
+          "type": "select_window_directive",
+          "named": true
+        },
+        {
+          "type": "send_keys_directive",
+          "named": true
+        },
+        {
+          "type": "send_prefix_directive",
+          "named": true
+        },
+        {
+          "type": "server_access_directive",
+          "named": true
+        },
+        {
+          "type": "set_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "set_environment_directive",
+          "named": true
+        },
+        {
+          "type": "set_hook_directive",
+          "named": true
+        },
+        {
+          "type": "set_option_directive",
+          "named": true
+        },
+        {
+          "type": "set_window_option_directive",
+          "named": true
+        },
+        {
+          "type": "show_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "show_environment_directive",
+          "named": true
+        },
+        {
+          "type": "show_hooks_directive",
+          "named": true
+        },
+        {
+          "type": "show_messages_directive",
+          "named": true
+        },
+        {
+          "type": "show_options_directive",
+          "named": true
+        },
+        {
+          "type": "show_prompt_history_directive",
+          "named": true
+        },
+        {
+          "type": "source_file_directive",
+          "named": true
+        },
+        {
+          "type": "split_window_directive",
+          "named": true
+        },
+        {
+          "type": "start_server_directive",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "suspend_client_directive",
+          "named": true
+        },
+        {
+          "type": "swap_pane_directive",
+          "named": true
+        },
+        {
+          "type": "swap_window_directive",
+          "named": true
+        },
+        {
+          "type": "switch_client_directive",
+          "named": true
+        },
+        {
+          "type": "unbind_key_directive",
+          "named": true
+        },
+        {
+          "type": "unlink_window_directive",
+          "named": true
+        },
+        {
+          "type": "wait_for_directive",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "copy_mode_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "pane",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "customize_mode_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "filter",
+          "named": true
+        },
+        {
+          "type": "format",
+          "named": true
+        },
+        {
+          "type": "pane",
+          "named": true
+        },
+        {
+          "type": "template",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "data",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "delete_buffer_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "buffer_name",
+          "named": true
+        },
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "detach_client_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "client",
+          "named": true
+        },
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "session",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "display_menu_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "client",
+          "named": true
+        },
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "key",
+          "named": true
+        },
+        {
+          "type": "name",
+          "named": true
+        },
+        {
+          "type": "pane",
+          "named": true
+        },
+        {
+          "type": "position",
+          "named": true
+        },
+        {
+          "type": "title",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "display_message_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "client",
+          "named": true
+        },
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "int",
+          "named": true
+        },
+        {
+          "type": "message",
+          "named": true
+        },
+        {
+          "type": "pane",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "display_panes_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "client",
+          "named": true
+        },
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "int",
+          "named": true
+        },
+        {
+          "type": "template",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "display_popup_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "border_lines",
+          "named": true
+        },
+        {
+          "type": "border_style",
+          "named": true
+        },
+        {
+          "type": "client",
+          "named": true
+        },
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "environment",
+          "named": true
+        },
+        {
+          "type": "height",
+          "named": true
+        },
+        {
+          "type": "pane",
+          "named": true
+        },
+        {
+          "type": "position",
+          "named": true
+        },
+        {
+          "type": "start_directory",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        },
+        {
+          "type": "style",
+          "named": true
+        },
+        {
+          "type": "title",
+          "named": true
+        },
+        {
+          "type": "width",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "end_line",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "environment",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "environment_assignment",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "name",
+            "named": true
+          }
+        ]
+      },
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "value",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "expr_double_quotes",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "attribute",
+          "named": true
+        },
+        {
+          "type": "expr_double_quotes",
+          "named": true
+        },
+        {
+          "type": "function_name",
+          "named": true
+        },
+        {
+          "type": "hash_escape_no_comma",
+          "named": true
+        },
+        {
+          "type": "hash_rgb",
+          "named": true
+        },
+        {
+          "type": "name",
+          "named": true
+        },
+        {
+          "type": "operator",
+          "named": true
+        },
+        {
+          "type": "shell",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "expr_single_quotes",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "attribute",
+          "named": true
+        },
+        {
+          "type": "expr_single_quotes",
+          "named": true
+        },
+        {
+          "type": "function_name",
+          "named": true
+        },
+        {
+          "type": "hash_escape_no_comma",
+          "named": true
+        },
+        {
+          "type": "hash_rgb",
+          "named": true
+        },
+        {
+          "type": "name",
+          "named": true
+        },
+        {
+          "type": "operator",
+          "named": true
+        },
+        {
+          "type": "shell",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "file",
+    "named": true,
+    "root": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "attach_session_directive",
+          "named": true
+        },
+        {
+          "type": "bind_key_directive",
+          "named": true
+        },
+        {
+          "type": "break_pane_directive",
+          "named": true
+        },
+        {
+          "type": "capture_pane_directive",
+          "named": true
+        },
+        {
+          "type": "choose_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "choose_client_directive",
+          "named": true
+        },
+        {
+          "type": "choose_tree_directive",
+          "named": true
+        },
+        {
+          "type": "clear_history_directive",
+          "named": true
+        },
+        {
+          "type": "clear_prompt_history_directive",
+          "named": true
+        },
+        {
+          "type": "clock_mode_directive",
+          "named": true
+        },
+        {
+          "type": "command_prompt_directive",
+          "named": true
+        },
+        {
+          "type": "confirm_before_directive",
+          "named": true
+        },
+        {
+          "type": "copy_mode_directive",
+          "named": true
+        },
+        {
+          "type": "customize_mode_directive",
+          "named": true
+        },
+        {
+          "type": "delete_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "detach_client_directive",
+          "named": true
+        },
+        {
+          "type": "display_menu_directive",
+          "named": true
+        },
+        {
+          "type": "display_message_directive",
+          "named": true
+        },
+        {
+          "type": "display_panes_directive",
+          "named": true
+        },
+        {
+          "type": "display_popup_directive",
+          "named": true
+        },
+        {
+          "type": "environment_assignment",
+          "named": true
+        },
+        {
+          "type": "find_window_directive",
+          "named": true
+        },
+        {
+          "type": "has_session_directive",
+          "named": true
+        },
+        {
+          "type": "hidden_assignment",
+          "named": true
+        },
+        {
+          "type": "if_shell_directive",
+          "named": true
+        },
+        {
+          "type": "if_statement",
+          "named": true
+        },
+        {
+          "type": "join_pane_directive",
+          "named": true
+        },
+        {
+          "type": "kill_pane_directive",
+          "named": true
+        },
+        {
+          "type": "kill_server_directive",
+          "named": true
+        },
+        {
+          "type": "kill_session_directive",
+          "named": true
+        },
+        {
+          "type": "kill_window_directive",
+          "named": true
+        },
+        {
+          "type": "last_pane_directive",
+          "named": true
+        },
+        {
+          "type": "last_window_directive",
+          "named": true
+        },
+        {
+          "type": "link_window_directive",
+          "named": true
+        },
+        {
+          "type": "list_buffers_directive",
+          "named": true
+        },
+        {
+          "type": "list_clients_directive",
+          "named": true
+        },
+        {
+          "type": "list_commands_directive",
+          "named": true
+        },
+        {
+          "type": "list_keys_directive",
+          "named": true
+        },
+        {
+          "type": "list_panes_directive",
+          "named": true
+        },
+        {
+          "type": "list_sessions_directive",
+          "named": true
+        },
+        {
+          "type": "list_windows_directive",
+          "named": true
+        },
+        {
+          "type": "load_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "lock_client_directive",
+          "named": true
+        },
+        {
+          "type": "lock_server_directive",
+          "named": true
+        },
+        {
+          "type": "lock_session_directive",
+          "named": true
+        },
+        {
+          "type": "move_pane_directive",
+          "named": true
+        },
+        {
+          "type": "move_window_directive",
+          "named": true
+        },
+        {
+          "type": "new_session_directive",
+          "named": true
+        },
+        {
+          "type": "new_window_directive",
+          "named": true
+        },
+        {
+          "type": "next_layout_directive",
+          "named": true
+        },
+        {
+          "type": "next_window_directive",
+          "named": true
+        },
+        {
+          "type": "paste_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "pipe_pane_directive",
+          "named": true
+        },
+        {
+          "type": "previous_layout_directive",
+          "named": true
+        },
+        {
+          "type": "previous_window_directive",
+          "named": true
+        },
+        {
+          "type": "refresh_client_directive",
+          "named": true
+        },
+        {
+          "type": "rename_session_directive",
+          "named": true
+        },
+        {
+          "type": "rename_window_directive",
+          "named": true
+        },
+        {
+          "type": "resize_pane_directive",
+          "named": true
+        },
+        {
+          "type": "resize_window_directive",
+          "named": true
+        },
+        {
+          "type": "respawn_pane_directive",
+          "named": true
+        },
+        {
+          "type": "respawn_window_directive",
+          "named": true
+        },
+        {
+          "type": "rotate_window_directive",
+          "named": true
+        },
+        {
+          "type": "run_shell_directive",
+          "named": true
+        },
+        {
+          "type": "save_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "select_layout_directive",
+          "named": true
+        },
+        {
+          "type": "select_pane_directive",
+          "named": true
+        },
+        {
+          "type": "select_window_directive",
+          "named": true
+        },
+        {
+          "type": "send_keys_directive",
+          "named": true
+        },
+        {
+          "type": "send_prefix_directive",
+          "named": true
+        },
+        {
+          "type": "server_access_directive",
+          "named": true
+        },
+        {
+          "type": "set_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "set_environment_directive",
+          "named": true
+        },
+        {
+          "type": "set_hook_directive",
+          "named": true
+        },
+        {
+          "type": "set_option_directive",
+          "named": true
+        },
+        {
+          "type": "set_window_option_directive",
+          "named": true
+        },
+        {
+          "type": "show_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "show_environment_directive",
+          "named": true
+        },
+        {
+          "type": "show_hooks_directive",
+          "named": true
+        },
+        {
+          "type": "show_messages_directive",
+          "named": true
+        },
+        {
+          "type": "show_options_directive",
+          "named": true
+        },
+        {
+          "type": "show_prompt_history_directive",
+          "named": true
+        },
+        {
+          "type": "source_file_directive",
+          "named": true
+        },
+        {
+          "type": "split_window_directive",
+          "named": true
+        },
+        {
+          "type": "start_server_directive",
+          "named": true
+        },
+        {
+          "type": "suspend_client_directive",
+          "named": true
+        },
+        {
+          "type": "swap_pane_directive",
+          "named": true
+        },
+        {
+          "type": "swap_window_directive",
+          "named": true
+        },
+        {
+          "type": "switch_client_directive",
+          "named": true
+        },
+        {
+          "type": "unbind_key_directive",
+          "named": true
+        },
+        {
+          "type": "unlink_window_directive",
+          "named": true
+        },
+        {
+          "type": "wait_for_directive",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "filter",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "find_window_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "pane",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "flags",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "format",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "group_name",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "has_session_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "session",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "height",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "hidden_assignment",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "name",
+            "named": true
+          }
+        ]
+      },
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "value",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "hidden_keyword",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "if_shell_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "attach_session_directive",
+          "named": true
+        },
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "bind_key_directive",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "break_pane_directive",
+          "named": true
+        },
+        {
+          "type": "capture_pane_directive",
+          "named": true
+        },
+        {
+          "type": "choose_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "choose_client_directive",
+          "named": true
+        },
+        {
+          "type": "choose_tree_directive",
+          "named": true
+        },
+        {
+          "type": "clear_history_directive",
+          "named": true
+        },
+        {
+          "type": "clear_prompt_history_directive",
+          "named": true
+        },
+        {
+          "type": "clock_mode_directive",
+          "named": true
+        },
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "command_prompt_directive",
+          "named": true
+        },
+        {
+          "type": "confirm_before_directive",
+          "named": true
+        },
+        {
+          "type": "copy_mode_directive",
+          "named": true
+        },
+        {
+          "type": "customize_mode_directive",
+          "named": true
+        },
+        {
+          "type": "delete_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "detach_client_directive",
+          "named": true
+        },
+        {
+          "type": "display_menu_directive",
+          "named": true
+        },
+        {
+          "type": "display_message_directive",
+          "named": true
+        },
+        {
+          "type": "display_panes_directive",
+          "named": true
+        },
+        {
+          "type": "display_popup_directive",
+          "named": true
+        },
+        {
+          "type": "environment_assignment",
+          "named": true
+        },
+        {
+          "type": "find_window_directive",
+          "named": true
+        },
+        {
+          "type": "has_session_directive",
+          "named": true
+        },
+        {
+          "type": "hidden_assignment",
+          "named": true
+        },
+        {
+          "type": "if_shell_directive",
+          "named": true
+        },
+        {
+          "type": "join_pane_directive",
+          "named": true
+        },
+        {
+          "type": "kill_pane_directive",
+          "named": true
+        },
+        {
+          "type": "kill_server_directive",
+          "named": true
+        },
+        {
+          "type": "kill_session_directive",
+          "named": true
+        },
+        {
+          "type": "kill_window_directive",
+          "named": true
+        },
+        {
+          "type": "last_pane_directive",
+          "named": true
+        },
+        {
+          "type": "last_window_directive",
+          "named": true
+        },
+        {
+          "type": "link_window_directive",
+          "named": true
+        },
+        {
+          "type": "list_buffers_directive",
+          "named": true
+        },
+        {
+          "type": "list_clients_directive",
+          "named": true
+        },
+        {
+          "type": "list_commands_directive",
+          "named": true
+        },
+        {
+          "type": "list_keys_directive",
+          "named": true
+        },
+        {
+          "type": "list_panes_directive",
+          "named": true
+        },
+        {
+          "type": "list_sessions_directive",
+          "named": true
+        },
+        {
+          "type": "list_windows_directive",
+          "named": true
+        },
+        {
+          "type": "load_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "lock_client_directive",
+          "named": true
+        },
+        {
+          "type": "lock_server_directive",
+          "named": true
+        },
+        {
+          "type": "lock_session_directive",
+          "named": true
+        },
+        {
+          "type": "move_pane_directive",
+          "named": true
+        },
+        {
+          "type": "move_window_directive",
+          "named": true
+        },
+        {
+          "type": "new_session_directive",
+          "named": true
+        },
+        {
+          "type": "new_window_directive",
+          "named": true
+        },
+        {
+          "type": "next_layout_directive",
+          "named": true
+        },
+        {
+          "type": "next_window_directive",
+          "named": true
+        },
+        {
+          "type": "pane",
+          "named": true
+        },
+        {
+          "type": "paste_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "pipe_pane_directive",
+          "named": true
+        },
+        {
+          "type": "previous_layout_directive",
+          "named": true
+        },
+        {
+          "type": "previous_window_directive",
+          "named": true
+        },
+        {
+          "type": "refresh_client_directive",
+          "named": true
+        },
+        {
+          "type": "rename_session_directive",
+          "named": true
+        },
+        {
+          "type": "rename_window_directive",
+          "named": true
+        },
+        {
+          "type": "resize_pane_directive",
+          "named": true
+        },
+        {
+          "type": "resize_window_directive",
+          "named": true
+        },
+        {
+          "type": "respawn_pane_directive",
+          "named": true
+        },
+        {
+          "type": "respawn_window_directive",
+          "named": true
+        },
+        {
+          "type": "rotate_window_directive",
+          "named": true
+        },
+        {
+          "type": "run_shell_directive",
+          "named": true
+        },
+        {
+          "type": "save_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "select_layout_directive",
+          "named": true
+        },
+        {
+          "type": "select_pane_directive",
+          "named": true
+        },
+        {
+          "type": "select_window_directive",
+          "named": true
+        },
+        {
+          "type": "send_keys_directive",
+          "named": true
+        },
+        {
+          "type": "send_prefix_directive",
+          "named": true
+        },
+        {
+          "type": "server_access_directive",
+          "named": true
+        },
+        {
+          "type": "set_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "set_environment_directive",
+          "named": true
+        },
+        {
+          "type": "set_hook_directive",
+          "named": true
+        },
+        {
+          "type": "set_option_directive",
+          "named": true
+        },
+        {
+          "type": "set_window_option_directive",
+          "named": true
+        },
+        {
+          "type": "show_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "show_environment_directive",
+          "named": true
+        },
+        {
+          "type": "show_hooks_directive",
+          "named": true
+        },
+        {
+          "type": "show_messages_directive",
+          "named": true
+        },
+        {
+          "type": "show_options_directive",
+          "named": true
+        },
+        {
+          "type": "show_prompt_history_directive",
+          "named": true
+        },
+        {
+          "type": "source_file_directive",
+          "named": true
+        },
+        {
+          "type": "split_window_directive",
+          "named": true
+        },
+        {
+          "type": "start_server_directive",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        },
+        {
+          "type": "suspend_client_directive",
+          "named": true
+        },
+        {
+          "type": "swap_pane_directive",
+          "named": true
+        },
+        {
+          "type": "swap_window_directive",
+          "named": true
+        },
+        {
+          "type": "switch_client_directive",
+          "named": true
+        },
+        {
+          "type": "unbind_key_directive",
+          "named": true
+        },
+        {
+          "type": "unlink_window_directive",
+          "named": true
+        },
+        {
+          "type": "wait_for_directive",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "if_statement",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "attach_session_directive",
+          "named": true
+        },
+        {
+          "type": "bind_key_directive",
+          "named": true
+        },
+        {
+          "type": "break_pane_directive",
+          "named": true
+        },
+        {
+          "type": "capture_pane_directive",
+          "named": true
+        },
+        {
+          "type": "choose_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "choose_client_directive",
+          "named": true
+        },
+        {
+          "type": "choose_tree_directive",
+          "named": true
+        },
+        {
+          "type": "clear_history_directive",
+          "named": true
+        },
+        {
+          "type": "clear_prompt_history_directive",
+          "named": true
+        },
+        {
+          "type": "clock_mode_directive",
+          "named": true
+        },
+        {
+          "type": "command_prompt_directive",
+          "named": true
+        },
+        {
+          "type": "condition",
+          "named": true
+        },
+        {
+          "type": "confirm_before_directive",
+          "named": true
+        },
+        {
+          "type": "copy_mode_directive",
+          "named": true
+        },
+        {
+          "type": "customize_mode_directive",
+          "named": true
+        },
+        {
+          "type": "delete_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "detach_client_directive",
+          "named": true
+        },
+        {
+          "type": "display_menu_directive",
+          "named": true
+        },
+        {
+          "type": "display_message_directive",
+          "named": true
+        },
+        {
+          "type": "display_panes_directive",
+          "named": true
+        },
+        {
+          "type": "display_popup_directive",
+          "named": true
+        },
+        {
+          "type": "elif_keyword",
+          "named": true
+        },
+        {
+          "type": "else_keyword",
+          "named": true
+        },
+        {
+          "type": "endif_keyword",
+          "named": true
+        },
+        {
+          "type": "environment_assignment",
+          "named": true
+        },
+        {
+          "type": "find_window_directive",
+          "named": true
+        },
+        {
+          "type": "has_session_directive",
+          "named": true
+        },
+        {
+          "type": "hidden_assignment",
+          "named": true
+        },
+        {
+          "type": "if_keyword",
+          "named": true
+        },
+        {
+          "type": "if_shell_directive",
+          "named": true
+        },
+        {
+          "type": "if_statement",
+          "named": true
+        },
+        {
+          "type": "join_pane_directive",
+          "named": true
+        },
+        {
+          "type": "kill_pane_directive",
+          "named": true
+        },
+        {
+          "type": "kill_server_directive",
+          "named": true
+        },
+        {
+          "type": "kill_session_directive",
+          "named": true
+        },
+        {
+          "type": "kill_window_directive",
+          "named": true
+        },
+        {
+          "type": "last_pane_directive",
+          "named": true
+        },
+        {
+          "type": "last_window_directive",
+          "named": true
+        },
+        {
+          "type": "link_window_directive",
+          "named": true
+        },
+        {
+          "type": "list_buffers_directive",
+          "named": true
+        },
+        {
+          "type": "list_clients_directive",
+          "named": true
+        },
+        {
+          "type": "list_commands_directive",
+          "named": true
+        },
+        {
+          "type": "list_keys_directive",
+          "named": true
+        },
+        {
+          "type": "list_panes_directive",
+          "named": true
+        },
+        {
+          "type": "list_sessions_directive",
+          "named": true
+        },
+        {
+          "type": "list_windows_directive",
+          "named": true
+        },
+        {
+          "type": "load_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "lock_client_directive",
+          "named": true
+        },
+        {
+          "type": "lock_server_directive",
+          "named": true
+        },
+        {
+          "type": "lock_session_directive",
+          "named": true
+        },
+        {
+          "type": "move_pane_directive",
+          "named": true
+        },
+        {
+          "type": "move_window_directive",
+          "named": true
+        },
+        {
+          "type": "new_session_directive",
+          "named": true
+        },
+        {
+          "type": "new_window_directive",
+          "named": true
+        },
+        {
+          "type": "next_layout_directive",
+          "named": true
+        },
+        {
+          "type": "next_window_directive",
+          "named": true
+        },
+        {
+          "type": "paste_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "pipe_pane_directive",
+          "named": true
+        },
+        {
+          "type": "previous_layout_directive",
+          "named": true
+        },
+        {
+          "type": "previous_window_directive",
+          "named": true
+        },
+        {
+          "type": "refresh_client_directive",
+          "named": true
+        },
+        {
+          "type": "rename_session_directive",
+          "named": true
+        },
+        {
+          "type": "rename_window_directive",
+          "named": true
+        },
+        {
+          "type": "resize_pane_directive",
+          "named": true
+        },
+        {
+          "type": "resize_window_directive",
+          "named": true
+        },
+        {
+          "type": "respawn_pane_directive",
+          "named": true
+        },
+        {
+          "type": "respawn_window_directive",
+          "named": true
+        },
+        {
+          "type": "rotate_window_directive",
+          "named": true
+        },
+        {
+          "type": "run_shell_directive",
+          "named": true
+        },
+        {
+          "type": "save_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "select_layout_directive",
+          "named": true
+        },
+        {
+          "type": "select_pane_directive",
+          "named": true
+        },
+        {
+          "type": "select_window_directive",
+          "named": true
+        },
+        {
+          "type": "send_keys_directive",
+          "named": true
+        },
+        {
+          "type": "send_prefix_directive",
+          "named": true
+        },
+        {
+          "type": "server_access_directive",
+          "named": true
+        },
+        {
+          "type": "set_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "set_environment_directive",
+          "named": true
+        },
+        {
+          "type": "set_hook_directive",
+          "named": true
+        },
+        {
+          "type": "set_option_directive",
+          "named": true
+        },
+        {
+          "type": "set_window_option_directive",
+          "named": true
+        },
+        {
+          "type": "show_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "show_environment_directive",
+          "named": true
+        },
+        {
+          "type": "show_hooks_directive",
+          "named": true
+        },
+        {
+          "type": "show_messages_directive",
+          "named": true
+        },
+        {
+          "type": "show_options_directive",
+          "named": true
+        },
+        {
+          "type": "show_prompt_history_directive",
+          "named": true
+        },
+        {
+          "type": "source_file_directive",
+          "named": true
+        },
+        {
+          "type": "split_window_directive",
+          "named": true
+        },
+        {
+          "type": "start_server_directive",
+          "named": true
+        },
+        {
+          "type": "suspend_client_directive",
+          "named": true
+        },
+        {
+          "type": "swap_pane_directive",
+          "named": true
+        },
+        {
+          "type": "swap_window_directive",
+          "named": true
+        },
+        {
+          "type": "switch_client_directive",
+          "named": true
+        },
+        {
+          "type": "unbind_key_directive",
+          "named": true
+        },
+        {
+          "type": "unlink_window_directive",
+          "named": true
+        },
+        {
+          "type": "wait_for_directive",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "inputs",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "join_pane_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "pane",
+          "named": true
+        },
+        {
+          "type": "size",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "key",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "key_format",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "key_table",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "kill_pane_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "pane",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "kill_server_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "kill_session_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "session",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "kill_window_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "window",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "last_pane_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "window",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "last_window_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "session",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "layout_name",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "link_window_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "window",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "list_buffers_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "filter",
+          "named": true
+        },
+        {
+          "type": "format",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "list_clients_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "format",
+          "named": true
+        },
+        {
+          "type": "session",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "list_commands_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "attach_session_directive",
+          "named": true
+        },
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "bind_key_directive",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "break_pane_directive",
+          "named": true
+        },
+        {
+          "type": "capture_pane_directive",
+          "named": true
+        },
+        {
+          "type": "choose_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "choose_client_directive",
+          "named": true
+        },
+        {
+          "type": "choose_tree_directive",
+          "named": true
+        },
+        {
+          "type": "clear_history_directive",
+          "named": true
+        },
+        {
+          "type": "clear_prompt_history_directive",
+          "named": true
+        },
+        {
+          "type": "clock_mode_directive",
+          "named": true
+        },
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "command_prompt_directive",
+          "named": true
+        },
+        {
+          "type": "confirm_before_directive",
+          "named": true
+        },
+        {
+          "type": "copy_mode_directive",
+          "named": true
+        },
+        {
+          "type": "customize_mode_directive",
+          "named": true
+        },
+        {
+          "type": "delete_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "detach_client_directive",
+          "named": true
+        },
+        {
+          "type": "display_menu_directive",
+          "named": true
+        },
+        {
+          "type": "display_message_directive",
+          "named": true
+        },
+        {
+          "type": "display_panes_directive",
+          "named": true
+        },
+        {
+          "type": "display_popup_directive",
+          "named": true
+        },
+        {
+          "type": "environment_assignment",
+          "named": true
+        },
+        {
+          "type": "find_window_directive",
+          "named": true
+        },
+        {
+          "type": "format",
+          "named": true
+        },
+        {
+          "type": "has_session_directive",
+          "named": true
+        },
+        {
+          "type": "hidden_assignment",
+          "named": true
+        },
+        {
+          "type": "if_shell_directive",
+          "named": true
+        },
+        {
+          "type": "join_pane_directive",
+          "named": true
+        },
+        {
+          "type": "kill_pane_directive",
+          "named": true
+        },
+        {
+          "type": "kill_server_directive",
+          "named": true
+        },
+        {
+          "type": "kill_session_directive",
+          "named": true
+        },
+        {
+          "type": "kill_window_directive",
+          "named": true
+        },
+        {
+          "type": "last_pane_directive",
+          "named": true
+        },
+        {
+          "type": "last_window_directive",
+          "named": true
+        },
+        {
+          "type": "link_window_directive",
+          "named": true
+        },
+        {
+          "type": "list_buffers_directive",
+          "named": true
+        },
+        {
+          "type": "list_clients_directive",
+          "named": true
+        },
+        {
+          "type": "list_commands_directive",
+          "named": true
+        },
+        {
+          "type": "list_keys_directive",
+          "named": true
+        },
+        {
+          "type": "list_panes_directive",
+          "named": true
+        },
+        {
+          "type": "list_sessions_directive",
+          "named": true
+        },
+        {
+          "type": "list_windows_directive",
+          "named": true
+        },
+        {
+          "type": "load_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "lock_client_directive",
+          "named": true
+        },
+        {
+          "type": "lock_server_directive",
+          "named": true
+        },
+        {
+          "type": "lock_session_directive",
+          "named": true
+        },
+        {
+          "type": "move_pane_directive",
+          "named": true
+        },
+        {
+          "type": "move_window_directive",
+          "named": true
+        },
+        {
+          "type": "new_session_directive",
+          "named": true
+        },
+        {
+          "type": "new_window_directive",
+          "named": true
+        },
+        {
+          "type": "next_layout_directive",
+          "named": true
+        },
+        {
+          "type": "next_window_directive",
+          "named": true
+        },
+        {
+          "type": "paste_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "pipe_pane_directive",
+          "named": true
+        },
+        {
+          "type": "previous_layout_directive",
+          "named": true
+        },
+        {
+          "type": "previous_window_directive",
+          "named": true
+        },
+        {
+          "type": "refresh_client_directive",
+          "named": true
+        },
+        {
+          "type": "rename_session_directive",
+          "named": true
+        },
+        {
+          "type": "rename_window_directive",
+          "named": true
+        },
+        {
+          "type": "resize_pane_directive",
+          "named": true
+        },
+        {
+          "type": "resize_window_directive",
+          "named": true
+        },
+        {
+          "type": "respawn_pane_directive",
+          "named": true
+        },
+        {
+          "type": "respawn_window_directive",
+          "named": true
+        },
+        {
+          "type": "rotate_window_directive",
+          "named": true
+        },
+        {
+          "type": "run_shell_directive",
+          "named": true
+        },
+        {
+          "type": "save_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "select_layout_directive",
+          "named": true
+        },
+        {
+          "type": "select_pane_directive",
+          "named": true
+        },
+        {
+          "type": "select_window_directive",
+          "named": true
+        },
+        {
+          "type": "send_keys_directive",
+          "named": true
+        },
+        {
+          "type": "send_prefix_directive",
+          "named": true
+        },
+        {
+          "type": "server_access_directive",
+          "named": true
+        },
+        {
+          "type": "set_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "set_environment_directive",
+          "named": true
+        },
+        {
+          "type": "set_hook_directive",
+          "named": true
+        },
+        {
+          "type": "set_option_directive",
+          "named": true
+        },
+        {
+          "type": "set_window_option_directive",
+          "named": true
+        },
+        {
+          "type": "show_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "show_environment_directive",
+          "named": true
+        },
+        {
+          "type": "show_hooks_directive",
+          "named": true
+        },
+        {
+          "type": "show_messages_directive",
+          "named": true
+        },
+        {
+          "type": "show_options_directive",
+          "named": true
+        },
+        {
+          "type": "show_prompt_history_directive",
+          "named": true
+        },
+        {
+          "type": "source_file_directive",
+          "named": true
+        },
+        {
+          "type": "split_window_directive",
+          "named": true
+        },
+        {
+          "type": "start_server_directive",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "suspend_client_directive",
+          "named": true
+        },
+        {
+          "type": "swap_pane_directive",
+          "named": true
+        },
+        {
+          "type": "swap_window_directive",
+          "named": true
+        },
+        {
+          "type": "switch_client_directive",
+          "named": true
+        },
+        {
+          "type": "unbind_key_directive",
+          "named": true
+        },
+        {
+          "type": "unlink_window_directive",
+          "named": true
+        },
+        {
+          "type": "wait_for_directive",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "list_keys_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "key",
+          "named": true
+        },
+        {
+          "type": "key_table",
+          "named": true
+        },
+        {
+          "type": "prefix_string",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "list_panes_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "filter",
+          "named": true
+        },
+        {
+          "type": "format",
+          "named": true
+        },
+        {
+          "type": "pane",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "list_sessions_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "filter",
+          "named": true
+        },
+        {
+          "type": "format",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "list_windows_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "filter",
+          "named": true
+        },
+        {
+          "type": "format",
+          "named": true
+        },
+        {
+          "type": "session",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "load_buffer_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "buffer_name",
+          "named": true
+        },
+        {
+          "type": "client",
+          "named": true
+        },
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "path",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "lock_client_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "client",
+          "named": true
+        },
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "lock_server_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "lock_session_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "session",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "message",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "move_pane_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "pane",
+          "named": true
+        },
+        {
+          "type": "size",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "move_window_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "window",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "name",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "name_what_format",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "new_session_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "environment",
+          "named": true
+        },
+        {
+          "type": "flags",
+          "named": true
+        },
+        {
+          "type": "format",
+          "named": true
+        },
+        {
+          "type": "group_name",
+          "named": true
+        },
+        {
+          "type": "height",
+          "named": true
+        },
+        {
+          "type": "session_name",
+          "named": true
+        },
+        {
+          "type": "start_directory",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        },
+        {
+          "type": "width",
+          "named": true
+        },
+        {
+          "type": "window_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "new_window_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "environment",
+          "named": true
+        },
+        {
+          "type": "format",
+          "named": true
+        },
+        {
+          "type": "start_directory",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        },
+        {
+          "type": "window",
+          "named": true
+        },
+        {
+          "type": "window_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "next_layout_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "window",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "next_window_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "session",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "note",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "pane",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "pane_state",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "paste_buffer_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "buffer_name",
+          "named": true
+        },
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "pane",
+          "named": true
+        },
+        {
+          "type": "separator",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "path",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "pipe_pane_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "pane",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "position",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "prefix_string",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "previous_layout_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "window",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "previous_window_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "session",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "prompt",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "prompt_type",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "prompts",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "refresh_client_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "adjustment",
+          "named": true
+        },
+        {
+          "type": "client",
+          "named": true
+        },
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "flags",
+          "named": true
+        },
+        {
+          "type": "name_what_format",
+          "named": true
+        },
+        {
+          "type": "pane",
+          "named": true
+        },
+        {
+          "type": "pane_state",
+          "named": true
+        },
+        {
+          "type": "size",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "rename_session_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "name",
+          "named": true
+        },
+        {
+          "type": "session",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "rename_window_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "name",
+          "named": true
+        },
+        {
+          "type": "window",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "resize_pane_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "adjustment",
+          "named": true
+        },
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "height",
+          "named": true
+        },
+        {
+          "type": "pane",
+          "named": true
+        },
+        {
+          "type": "width",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "resize_window_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "adjustment",
+          "named": true
+        },
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "height",
+          "named": true
+        },
+        {
+          "type": "width",
+          "named": true
+        },
+        {
+          "type": "window",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "respawn_pane_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "environment",
+          "named": true
+        },
+        {
+          "type": "pane",
+          "named": true
+        },
+        {
+          "type": "start_directory",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "respawn_window_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "environment",
+          "named": true
+        },
+        {
+          "type": "pane",
+          "named": true
+        },
+        {
+          "type": "start_directory",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "rotate_window_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "window",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "run_shell_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "int",
+          "named": true
+        },
+        {
+          "type": "pane",
+          "named": true
+        },
+        {
+          "type": "start_directory",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "save_buffer_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "buffer_name",
+          "named": true
+        },
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "path",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "select_layout_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "layout_name",
+          "named": true
+        },
+        {
+          "type": "pane",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "select_pane_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "pane",
+          "named": true
+        },
+        {
+          "type": "title",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "select_window_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "window",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "send_keys_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "comment",
+          "named": true
+        },
+        {
+          "type": "int",
+          "named": true
+        },
+        {
+          "type": "key",
+          "named": true
+        },
+        {
+          "type": "pane",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "send_prefix_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "pane",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "separator",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "server_access_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "user",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "session",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "session_name",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "set_buffer_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "buffer_name",
+          "named": true
+        },
+        {
+          "type": "client",
+          "named": true
+        },
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "data",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "set_environment_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "name",
+          "named": true
+        },
+        {
+          "type": "session",
+          "named": true
+        },
+        {
+          "type": "value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "set_hook_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "attach_session_directive",
+          "named": true
+        },
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "bind_key_directive",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "break_pane_directive",
+          "named": true
+        },
+        {
+          "type": "capture_pane_directive",
+          "named": true
+        },
+        {
+          "type": "choose_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "choose_client_directive",
+          "named": true
+        },
+        {
+          "type": "choose_tree_directive",
+          "named": true
+        },
+        {
+          "type": "clear_history_directive",
+          "named": true
+        },
+        {
+          "type": "clear_prompt_history_directive",
+          "named": true
+        },
+        {
+          "type": "clock_mode_directive",
+          "named": true
+        },
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "command_prompt_directive",
+          "named": true
+        },
+        {
+          "type": "confirm_before_directive",
+          "named": true
+        },
+        {
+          "type": "copy_mode_directive",
+          "named": true
+        },
+        {
+          "type": "customize_mode_directive",
+          "named": true
+        },
+        {
+          "type": "delete_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "detach_client_directive",
+          "named": true
+        },
+        {
+          "type": "display_menu_directive",
+          "named": true
+        },
+        {
+          "type": "display_message_directive",
+          "named": true
+        },
+        {
+          "type": "display_panes_directive",
+          "named": true
+        },
+        {
+          "type": "display_popup_directive",
+          "named": true
+        },
+        {
+          "type": "environment_assignment",
+          "named": true
+        },
+        {
+          "type": "find_window_directive",
+          "named": true
+        },
+        {
+          "type": "has_session_directive",
+          "named": true
+        },
+        {
+          "type": "hidden_assignment",
+          "named": true
+        },
+        {
+          "type": "hook_name",
+          "named": true
+        },
+        {
+          "type": "if_shell_directive",
+          "named": true
+        },
+        {
+          "type": "int",
+          "named": true
+        },
+        {
+          "type": "join_pane_directive",
+          "named": true
+        },
+        {
+          "type": "kill_pane_directive",
+          "named": true
+        },
+        {
+          "type": "kill_server_directive",
+          "named": true
+        },
+        {
+          "type": "kill_session_directive",
+          "named": true
+        },
+        {
+          "type": "kill_window_directive",
+          "named": true
+        },
+        {
+          "type": "last_pane_directive",
+          "named": true
+        },
+        {
+          "type": "last_window_directive",
+          "named": true
+        },
+        {
+          "type": "link_window_directive",
+          "named": true
+        },
+        {
+          "type": "list_buffers_directive",
+          "named": true
+        },
+        {
+          "type": "list_clients_directive",
+          "named": true
+        },
+        {
+          "type": "list_commands_directive",
+          "named": true
+        },
+        {
+          "type": "list_keys_directive",
+          "named": true
+        },
+        {
+          "type": "list_panes_directive",
+          "named": true
+        },
+        {
+          "type": "list_sessions_directive",
+          "named": true
+        },
+        {
+          "type": "list_windows_directive",
+          "named": true
+        },
+        {
+          "type": "load_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "lock_client_directive",
+          "named": true
+        },
+        {
+          "type": "lock_server_directive",
+          "named": true
+        },
+        {
+          "type": "lock_session_directive",
+          "named": true
+        },
+        {
+          "type": "move_pane_directive",
+          "named": true
+        },
+        {
+          "type": "move_window_directive",
+          "named": true
+        },
+        {
+          "type": "new_session_directive",
+          "named": true
+        },
+        {
+          "type": "new_window_directive",
+          "named": true
+        },
+        {
+          "type": "next_layout_directive",
+          "named": true
+        },
+        {
+          "type": "next_window_directive",
+          "named": true
+        },
+        {
+          "type": "pane",
+          "named": true
+        },
+        {
+          "type": "paste_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "pipe_pane_directive",
+          "named": true
+        },
+        {
+          "type": "previous_layout_directive",
+          "named": true
+        },
+        {
+          "type": "previous_window_directive",
+          "named": true
+        },
+        {
+          "type": "refresh_client_directive",
+          "named": true
+        },
+        {
+          "type": "rename_session_directive",
+          "named": true
+        },
+        {
+          "type": "rename_window_directive",
+          "named": true
+        },
+        {
+          "type": "resize_pane_directive",
+          "named": true
+        },
+        {
+          "type": "resize_window_directive",
+          "named": true
+        },
+        {
+          "type": "respawn_pane_directive",
+          "named": true
+        },
+        {
+          "type": "respawn_window_directive",
+          "named": true
+        },
+        {
+          "type": "rotate_window_directive",
+          "named": true
+        },
+        {
+          "type": "run_shell_directive",
+          "named": true
+        },
+        {
+          "type": "save_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "select_layout_directive",
+          "named": true
+        },
+        {
+          "type": "select_pane_directive",
+          "named": true
+        },
+        {
+          "type": "select_window_directive",
+          "named": true
+        },
+        {
+          "type": "send_keys_directive",
+          "named": true
+        },
+        {
+          "type": "send_prefix_directive",
+          "named": true
+        },
+        {
+          "type": "server_access_directive",
+          "named": true
+        },
+        {
+          "type": "set_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "set_environment_directive",
+          "named": true
+        },
+        {
+          "type": "set_hook_directive",
+          "named": true
+        },
+        {
+          "type": "set_option_directive",
+          "named": true
+        },
+        {
+          "type": "set_window_option_directive",
+          "named": true
+        },
+        {
+          "type": "show_buffer_directive",
+          "named": true
+        },
+        {
+          "type": "show_environment_directive",
+          "named": true
+        },
+        {
+          "type": "show_hooks_directive",
+          "named": true
+        },
+        {
+          "type": "show_messages_directive",
+          "named": true
+        },
+        {
+          "type": "show_options_directive",
+          "named": true
+        },
+        {
+          "type": "show_prompt_history_directive",
+          "named": true
+        },
+        {
+          "type": "source_file_directive",
+          "named": true
+        },
+        {
+          "type": "split_window_directive",
+          "named": true
+        },
+        {
+          "type": "start_server_directive",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "suspend_client_directive",
+          "named": true
+        },
+        {
+          "type": "swap_pane_directive",
+          "named": true
+        },
+        {
+          "type": "swap_window_directive",
+          "named": true
+        },
+        {
+          "type": "switch_client_directive",
+          "named": true
+        },
+        {
+          "type": "unbind_key_directive",
+          "named": true
+        },
+        {
+          "type": "unlink_window_directive",
+          "named": true
+        },
+        {
+          "type": "wait_for_directive",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "set_option_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "option",
+          "named": true
+        },
+        {
+          "type": "pane",
+          "named": true
+        },
+        {
+          "type": "value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "set_window_option_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "option",
+          "named": true
+        },
+        {
+          "type": "value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "show_buffer_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "buffer_name",
+          "named": true
+        },
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "show_environment_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "name",
+          "named": true
+        },
+        {
+          "type": "session",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "show_hooks_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "pane",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "show_messages_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "client",
+          "named": true
+        },
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "show_options_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "option",
+          "named": true
+        },
+        {
+          "type": "pane",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "show_prompt_history_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "prompt_type",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "size",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "sort_order",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "source_file_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "path",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "split_window_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "environment",
+          "named": true
+        },
+        {
+          "type": "format",
+          "named": true
+        },
+        {
+          "type": "pane",
+          "named": true
+        },
+        {
+          "type": "size",
+          "named": true
+        },
+        {
+          "type": "start_directory",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "start_directory",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "start_line",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "start_server_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "str_double_quotes",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "expr_double_quotes",
+          "named": true
+        },
+        {
+          "type": "hash_escape",
+          "named": true
+        },
+        {
+          "type": "hash_rgb",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "str_single_quotes",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "expr_single_quotes",
+          "named": true
+        },
+        {
+          "type": "hash_escape",
+          "named": true
+        },
+        {
+          "type": "hash_rgb",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "style",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "suspend_client_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "client",
+          "named": true
+        },
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "swap_pane_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "pane",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "swap_window_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "window",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "switch_client_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "client",
+          "named": true
+        },
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "key_table",
+          "named": true
+        },
+        {
+          "type": "session",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "template",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "title",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "unbind_key_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "key",
+          "named": true
+        },
+        {
+          "type": "key_table",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "unlink_window_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "command",
+          "named": true
+        },
+        {
+          "type": "command_line_option",
+          "named": true
+        },
+        {
+          "type": "window",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "user",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "value",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "wait_for_directive",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "channel",
+          "named": true
+        },
+        {
+          "type": "command",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "width",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "window",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "window_name",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "working_directory",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "backslash_escape",
+          "named": true
+        },
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "str_double_quotes",
+          "named": true
+        },
+        {
+          "type": "str_single_quotes",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": " ",
+    "named": false
+  },
+  {
+    "type": "\"",
+    "named": false
+  },
+  {
+    "type": "#",
+    "named": false
+  },
+  {
+    "type": "#(",
+    "named": false
+  },
+  {
+    "type": "#,",
+    "named": false
+  },
+  {
+    "type": "#[",
+    "named": false
+  },
+  {
+    "type": "#{",
+    "named": false
+  },
+  {
+    "type": "'",
+    "named": false
+  },
+  {
+    "type": "';'",
+    "named": false
+  },
+  {
+    "type": ")",
+    "named": false
+  },
+  {
+    "type": ",",
+    "named": false
+  },
+  {
+    "type": "-L",
+    "named": false
+  },
+  {
+    "type": "-S",
+    "named": false
+  },
+  {
+    "type": "-U",
+    "named": false
+  },
+  {
+    "type": ":",
+    "named": false
+  },
+  {
+    "type": ";",
+    "named": false
+  },
+  {
+    "type": "=",
+    "named": false
+  },
+  {
+    "type": "?",
+    "named": false
+  },
+  {
+    "type": "[",
+    "named": false
+  },
+  {
+    "type": "\\;",
+    "named": false
+  },
+  {
+    "type": "]",
+    "named": false
+  },
+  {
+    "type": "attribute",
+    "named": true
+  },
+  {
+    "type": "backslash_escape",
+    "named": true
+  },
+  {
+    "type": "command",
+    "named": true
+  },
+  {
+    "type": "command_line_option",
+    "named": true
+  },
+  {
+    "type": "comment",
+    "named": true,
+    "extra": true
+  },
+  {
+    "type": "elif_keyword",
+    "named": true
+  },
+  {
+    "type": "else_keyword",
+    "named": true
+  },
+  {
+    "type": "endif_keyword",
+    "named": true
+  },
+  {
+    "type": "function_name",
+    "named": true
+  },
+  {
+    "type": "hash_escape",
+    "named": true
+  },
+  {
+    "type": "hash_escape_no_comma",
+    "named": true
+  },
+  {
+    "type": "hash_rgb",
+    "named": true
+  },
+  {
+    "type": "hidden_keyword",
+    "named": true
+  },
+  {
+    "type": "hook_name",
+    "named": true
+  },
+  {
+    "type": "if_keyword",
+    "named": true
+  },
+  {
+    "type": "int",
+    "named": true
+  },
+  {
+    "type": "operator",
+    "named": true
+  },
+  {
+    "type": "option",
+    "named": true
+  },
+  {
+    "type": "shell",
+    "named": true
+  },
+  {
+    "type": "{",
+    "named": false
+  },
+  {
+    "type": "}",
+    "named": false
+  }
+]

@@ -106,7 +106,7 @@
 ; Strings
 (string) @string
 
-; Bit Arrays
+; Bit Strings
 (bit_array_segment) @string.special
 
 ; Numbers

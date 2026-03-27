@@ -23,6 +23,12 @@ function highlightLineClass(
   );
 }
 
+function getLineAttrs(formatter: HtmlLinkedFormatter, lineNumber: number): { className?: string } {
+  return {
+    className: highlightLineClass(formatter, lineNumber),
+  };
+}
+
 export function formatHtmlLinked(
   source: string,
   events: HighlightEvent[],
@@ -35,11 +41,8 @@ export function formatHtmlLinked(
   const pre = openPreTag({ preClass: formatter.preClass });
   const code = openCodeTag(formatter.language);
   const body = lines
-    .map((line, idx) =>
-      wrapLine(idx + 1, line, {
-        className: highlightLineClass(formatter, idx + 1),
-      }),
-    )
+    .map((line, idx) => wrapLine(idx + 1, line, getLineAttrs(formatter, idx + 1)))
     .join("");
+
   return wrapWithHeader(`${pre}${code}${body}${closingTags()}`, formatter.header);
 }

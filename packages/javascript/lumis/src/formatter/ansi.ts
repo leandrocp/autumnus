@@ -1,6 +1,10 @@
-import type { HighlightStyle } from "../types.js";
+import type { HighlightRange, HighlightStyle, LanguageRef, Theme } from "../types.js";
 
-const ANSI_RESET = "\u001b[0m";
+/** ANSI reset escape sequence. */
+export const ANSI_RESET = "\u001b[0m";
+
+/** A rendered ANSI segment paired with its byte range. */
+export type AnsiSegment = [string, HighlightRange];
 
 /**
  * Parse a hex color string to RGB components.
@@ -125,4 +129,27 @@ export function wrapWithAnsi(text: string, style: HighlightStyle | undefined): s
   }
 
   return `${ANSI_RESET}${open}${text}${ANSI_RESET}`;
+}
+
+/**
+ * Highlight source and collect ANSI-wrapped segments.
+ *
+ * ```ts
+ * const segments = await highlightIterWithAnsi('const x = 1', 'javascript', theme)
+ * // [["\x1b[0m...const\x1b[0m", { start: 0, end: 5 }], ...]
+ * ```
+ */
+export async function highlightIterWithAnsi(
+  source: string,
+  language: LanguageRef | undefined,
+  theme: Theme | undefined,
+): Promise<AnsiSegment[]> {
+  const { highlightIter } = await import("../index.js");
+  const segments: AnsiSegment[] = [];
+
+  await highlightIter(source, language, theme, (text, _language, range, _scope, style) => {
+    segments.push([wrapWithAnsi(text, style), range]);
+  });
+
+  return segments;
 }

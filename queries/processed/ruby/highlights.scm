@@ -49,6 +49,9 @@
   "then"
 ] @keyword.conditional
 
+(in_clause
+  "in" @keyword.conditional)
+
 (if
   "end" @keyword.conditional)
 
@@ -61,6 +64,9 @@
   "retry"
   "next"
 ] @keyword.repeat
+
+(in
+  "in" @keyword.repeat)
 
 (constant) @constant
 
@@ -290,6 +296,9 @@
   "/" @punctuation.bracket)
 
 (pair
+  ":" @punctuation.delimiter)
+
+(keyword_pattern
   ":" @punctuation.delimiter)
 
 [

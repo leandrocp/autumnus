@@ -28,6 +28,16 @@
       "component": "javascript",
       "changelog-path": "CHANGELOG.md"
     },
+    "packages/javascript/markdown-it-lumis": {
+      "release-type": "node",
+      "component": "markdown-it-lumis",
+      "changelog-path": "CHANGELOG.md"
+    },
+    "packages/javascript/rehype-lumis": {
+      "release-type": "node",
+      "component": "rehype-lumis",
+      "changelog-path": "CHANGELOG.md"
+    },
     "packages/javascript/themes": {
       "release-type": "node",
       "component": "themes",

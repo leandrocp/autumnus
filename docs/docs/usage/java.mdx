@@ -31,12 +31,14 @@ import io.roastedroot.lumis4j.core.Lang;
 import io.roastedroot.lumis4j.core.Lumis;
 import io.roastedroot.lumis4j.core.Theme;
 
-var lumis = Lumis.builder()
+var lumis = Lumis.builder().build();
+
+var highlighter = lumis.highlighter()
     .withLang(Lang.JAVASCRIPT)
     .withTheme(Theme.DRACULA)
     .build();
 
-var html = lumis.highlight("const x = 1").string();
+var html = highlighter.highlight("const x = 1").string();
 ```
 
 ## Languages and themes
@@ -57,7 +59,7 @@ Theme.ONEDARK
 
 ## Formatter support
 
-lumis4j currently outputs HTML inline. Other formatters (HTML linked, multi-themes, terminal) are not yet available in the Java package.
+lumis4j supports the following formatters: `TERMINAL`, `HTML_INLINE`, `HTML_LINKED`, and `BBCODE`. Note that `HTML_LINKED` and `BBCODE` do not support themes.
 
 ## API reference
 

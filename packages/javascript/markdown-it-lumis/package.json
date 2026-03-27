@@ -1,7 +1,7 @@
 {
   "name": "@lumis-sh/markdown-it-lumis",
   "version": "0.0.1",
-  "description": "markdown-it plugin for Lumis syntax highlighting",
+  "description": "markdown-it plugin for Lumis syntax highlighter",
   "author": "Leandro Pereira",
   "license": "MIT",
   "repository": {
@@ -35,13 +35,13 @@
   "packageManager": "pnpm@10.31.0",
   "scripts": {
     "build": "tsup",
+    "test": "vitest run",
     "lint": "oxlint --type-aware src/",
     "fmt": "oxfmt src/ *.ts",
     "fmt:check": "oxfmt --check src/ *.ts"
   },
   "dependencies": {
     "@lumis-sh/lumis": "workspace:^0.0.1",
-    "@lumis-sh/themes": "workspace:^0.0.2",
     "markdown-it": "^14.1.0"
   },
   "devDependencies": {
@@ -50,6 +50,7 @@
     "oxlint": "1.55.0",
     "oxlint-tsgolint": "0.17.0",
     "tsup": "^8.5.0",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "vitest": "^4.0.18"
   }
 }

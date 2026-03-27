@@ -38,27 +38,38 @@ export type {
 
 const runtime = createLanguagesModule(browserRuntimePlatform);
 
-export const createRuntime = (...args: Parameters<typeof runtime.createRuntime>) =>
-  runtime.createRuntime(...args);
+export function createRuntime(...args: Parameters<typeof runtime.createRuntime>) {
+  return runtime.createRuntime(...args);
+}
 /** {@inheritDoc node.configureWasmResolver} */
-export const configureWasmResolver = (...args: Parameters<typeof runtime.configureWasmResolver>) =>
-  runtime.configureWasmResolver(...args);
-export const initParser = (...args: Parameters<typeof runtime.initParser>) =>
-  runtime.initParser(...args);
-export const registerLanguage = (...args: Parameters<typeof runtime.registerLanguage>) =>
-  runtime.registerLanguage(...args);
-export const resolveLanguageId = (...args: Parameters<typeof runtime.resolveLanguageId>) =>
-  runtime.resolveLanguageId(...args);
-export const loadLanguage = (...args: Parameters<typeof runtime.loadLanguage>) =>
-  runtime.loadLanguage(...args);
-export const loadPlaintext = (...args: Parameters<typeof runtime.loadPlaintext>) =>
-  runtime.loadPlaintext(...args);
-export const getLoadedLanguage = (...args: Parameters<typeof runtime.getLoadedLanguage>) =>
-  runtime.getLoadedLanguage(...args);
-export const getLoadedLanguageIds = (...args: Parameters<typeof runtime.getLoadedLanguageIds>) =>
-  runtime.getLoadedLanguageIds(...args);
+export function configureWasmResolver(...args: Parameters<typeof runtime.configureWasmResolver>) {
+  return runtime.configureWasmResolver(...args);
+}
+export function initParser(...args: Parameters<typeof runtime.initParser>) {
+  return runtime.initParser(...args);
+}
+export function registerLanguage(...args: Parameters<typeof runtime.registerLanguage>) {
+  return runtime.registerLanguage(...args);
+}
+export function resolveLanguageId(...args: Parameters<typeof runtime.resolveLanguageId>) {
+  return runtime.resolveLanguageId(...args);
+}
+export function loadLanguage(...args: Parameters<typeof runtime.loadLanguage>) {
+  return runtime.loadLanguage(...args);
+}
+export function loadPlaintext(...args: Parameters<typeof runtime.loadPlaintext>) {
+  return runtime.loadPlaintext(...args);
+}
+export function getLoadedLanguage(...args: Parameters<typeof runtime.getLoadedLanguage>) {
+  return runtime.getLoadedLanguage(...args);
+}
+export function getLoadedLanguageIds(...args: Parameters<typeof runtime.getLoadedLanguageIds>) {
+  return runtime.getLoadedLanguageIds(...args);
+}
 /** {@inheritDoc node.availableLanguages} */
-export const availableLanguages = (...args: Parameters<typeof runtime.availableLanguages>) =>
-  runtime.availableLanguages(...args);
-export const getDefaultRuntime = (...args: Parameters<typeof runtime.getDefaultRuntime>) =>
-  runtime.getDefaultRuntime(...args);
+export function availableLanguages(...args: Parameters<typeof runtime.availableLanguages>) {
+  return runtime.availableLanguages(...args);
+}
+export function getDefaultRuntime(...args: Parameters<typeof runtime.getDefaultRuntime>) {
+  return runtime.getDefaultRuntime(...args);
+}

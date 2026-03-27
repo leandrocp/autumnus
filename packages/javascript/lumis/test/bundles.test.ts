@@ -51,7 +51,7 @@ describe('LanguageBundle type', () => {
 
     const bash = webBundle.bash
     expect(bash.id).toBe('bash')
-    expect(bash.aliases).toEqual(['sh', 'zsh'])
+    expect(bash.aliases).toEqual(['sh'])
   })
 
   it('LazyLanguage entries are callable', async () => {
@@ -64,7 +64,7 @@ describe('LanguageBundle type', () => {
 
 describe('createHighlighter with LanguageBundle', () => {
   it('accepts a bundle and lazily loads languages', async () => {
-    const hl = await createHighlighter({ langs: [webBundle] })
+    const hl = await createHighlighter({ languages: [webBundle] })
 
     // Languages are registered but not loaded yet
     expect(hl.registeredLanguages).toContain('json')
@@ -77,7 +77,7 @@ describe('createHighlighter with LanguageBundle', () => {
   })
 
   it('loads language on demand via loadLanguage string', async () => {
-    const hl = await createHighlighter({ langs: [webBundle] })
+    const hl = await createHighlighter({ languages: [webBundle] })
     expect(hl.languages).not.toContain('json')
 
     await hl.loadLanguage('json')
@@ -88,7 +88,7 @@ describe('createHighlighter with LanguageBundle', () => {
   })
 
   it('loads language on demand via LazyLanguage handle', async () => {
-    const hl = await createHighlighter({ langs: [webBundle] })
+    const hl = await createHighlighter({ languages: [webBundle] })
 
     await hl.loadLanguage(webBundle.json)
     expect(hl.languages).toContain('json')
@@ -98,16 +98,15 @@ describe('createHighlighter with LanguageBundle', () => {
   })
 
   it('resolves aliases in lazy registry', async () => {
-    const hl = await createHighlighter({ langs: [webBundle] })
+    const hl = await createHighlighter({ languages: [webBundle] })
     expect(hl.registeredLanguages).toContain('sh')
-    expect(hl.registeredLanguages).toContain('zsh')
   })
 })
 
 describe('createHighlighter with mixed inputs', () => {
   it('accepts Language objects and bundles together', async () => {
     const hl = await createHighlighter({
-      langs: [json, systemBundle],
+      languages: [json, systemBundle],
     })
 
     // json is eagerly loaded
@@ -120,7 +119,7 @@ describe('createHighlighter with mixed inputs', () => {
 
   it('accepts dynamic import promise', async () => {
     const hl = await createHighlighter({
-      langs: [import('../langs/json.ts')],
+      languages: [import('../langs/json.ts')],
     })
 
     expect(hl.languages).toContain('json')
@@ -128,7 +127,7 @@ describe('createHighlighter with mixed inputs', () => {
 
   it('accepts lazy import function', async () => {
     const hl = await createHighlighter({
-      langs: [() => import('../langs/json.ts')],
+      languages: [() => import('../langs/json.ts')],
     })
 
     expect(hl.languages).toContain('json')
@@ -139,7 +138,7 @@ describe('highlight with LanguageRef', () => {
   let hl: Highlighter
 
   beforeAll(async () => {
-    hl = await createHighlighter({ langs: [json] })
+    hl = await createHighlighter({ languages: [json] })
   })
 
   it('accepts Language object as language', () => {

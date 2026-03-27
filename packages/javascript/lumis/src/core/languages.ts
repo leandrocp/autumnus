@@ -91,6 +91,20 @@ function isRuntimeWasmInput(
   return !(typeof wasm === "object" && wasm !== null && isWasmRef(wasm));
 }
 
+async function trackLoad<T>(
+  loads: Map<string, Promise<T>>,
+  key: string,
+  promise: Promise<T>,
+): Promise<T> {
+  loads.set(key, promise);
+
+  try {
+    return await promise;
+  } finally {
+    loads.delete(key);
+  }
+}
+
 function matchesSpecialCapture(name: string, base: string): boolean {
   return name === base;
 }
@@ -245,6 +259,71 @@ export function createLanguagesModule(platform: RuntimePlatform): LanguagesModul
       return this.explicitResolver ?? configuredDefaultResolver;
     }
 
+    private async loadWasmBytes(language: string, ref: WasmRef, key: string): Promise<Uint8Array> {
+      const fsCached = await platform.readFsCache(key);
+      if (fsCached) {
+        this.sharedCache.wasmBytes.set(key, fsCached);
+        return fsCached;
+      }
+
+      try {
+        const mod = await import(/* @vite-ignore */ ref.packageName);
+        if (mod.default instanceof Uint8Array) {
+          this.sharedCache.wasmBytes.set(key, mod.default);
+          return mod.default;
+        }
+      } catch {
+        // Package not installed - fall back to resolver URL
+      }
+
+      const url = this.resolver(language, ref);
+      const diskData = await platform.readResolvedWasmFromDisk(url);
+      if (diskData) {
+        this.sharedCache.wasmBytes.set(key, diskData);
+        return diskData;
+      }
+
+      const response = await fetch(typeof url === "string" ? url : url.href);
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch WASM for ${ref.name}@${ref.version}: ${response.status} ${response.statusText}`,
+        );
+      }
+
+      const data = new Uint8Array(await response.arrayBuffer());
+      this.sharedCache.wasmBytes.set(key, data);
+      await platform.writeFsCache(key, data);
+      return data;
+    }
+
+    private async createLoadedLanguage(opts: LoadLanguageOptions): Promise<LoadedLanguage> {
+      await this.initParser();
+
+      let wasmInput: Uint8Array | string;
+      if (typeof opts.wasm === "object" && opts.wasm !== null && isWasmRef(opts.wasm)) {
+        wasmInput = await this.resolveWasmRef(opts.definition.id, opts.wasm);
+      } else if (isRuntimeWasmInput(opts.wasm)) {
+        wasmInput = await platform.resolveWasm(opts.wasm);
+      } else {
+        throw new Error(`Unsupported WASM input for language "${opts.definition.id}"`);
+      }
+
+      const language = await Language.load(wasmInput);
+      const parser = new Parser();
+      parser.setLanguage(language);
+
+      const loaded: LoadedLanguage = {
+        definition: opts.definition,
+        parser,
+        language,
+        config: compileHighlightConfig(language, opts.highlights, opts.injections, opts.locals),
+      };
+
+      this.loadedLanguages.set(opts.definition.id, loaded);
+      this.registerLanguage(opts.definition);
+      return loaded;
+    }
+
     configureWasmResolver(fn: WasmResolver): void {
       this.explicitResolver = fn;
     }
@@ -283,51 +362,7 @@ export function createLanguagesModule(platform: RuntimePlatform): LanguagesModul
         return existingLoad;
       }
 
-      const loadPromise = (async () => {
-        const fsCached = await platform.readFsCache(key);
-        if (fsCached) {
-          this.sharedCache.wasmBytes.set(key, fsCached);
-          return fsCached;
-        }
-
-        // Try loading from installed wasm package
-        try {
-          const mod = await import(/* @vite-ignore */ ref.packageName);
-          if (mod.default instanceof Uint8Array) {
-            this.sharedCache.wasmBytes.set(key, mod.default);
-            return mod.default;
-          }
-        } catch {
-          // Package not installed — fall back to resolver URL
-        }
-
-        const url = this.resolver(language, ref);
-        const diskData = await platform.readResolvedWasmFromDisk(url);
-        if (diskData) {
-          this.sharedCache.wasmBytes.set(key, diskData);
-          return diskData;
-        }
-
-        const response = await fetch(typeof url === "string" ? url : url.href);
-        if (!response.ok) {
-          throw new Error(
-            `Failed to fetch WASM for ${ref.name}@${ref.version}: ${response.status} ${response.statusText}`,
-          );
-        }
-
-        const data = new Uint8Array(await response.arrayBuffer());
-        this.sharedCache.wasmBytes.set(key, data);
-        await platform.writeFsCache(key, data);
-        return data;
-      })();
-
-      this.sharedCache.wasmLoads.set(key, loadPromise);
-
-      try {
-        return await loadPromise;
-      } finally {
-        this.sharedCache.wasmLoads.delete(key);
-      }
+      return trackLoad(this.sharedCache.wasmLoads, key, this.loadWasmBytes(language, ref, key));
     }
 
     async loadLanguage(opts: LoadLanguageOptions): Promise<LoadedLanguage> {
@@ -337,41 +372,7 @@ export function createLanguagesModule(platform: RuntimePlatform): LanguagesModul
       const inFlight = this.languageLoads.get(opts.definition.id);
       if (inFlight) return inFlight;
 
-      const loadPromise = (async () => {
-        await this.initParser();
-
-        let wasmInput: Uint8Array | string;
-        if (typeof opts.wasm === "object" && opts.wasm !== null && isWasmRef(opts.wasm)) {
-          wasmInput = await this.resolveWasmRef(opts.definition.id, opts.wasm);
-        } else if (isRuntimeWasmInput(opts.wasm)) {
-          wasmInput = await platform.resolveWasm(opts.wasm);
-        } else {
-          throw new Error(`Unsupported WASM input for language "${opts.definition.id}"`);
-        }
-
-        const language = await Language.load(wasmInput);
-        const parser = new Parser();
-        parser.setLanguage(language);
-
-        const loaded: LoadedLanguage = {
-          definition: opts.definition,
-          parser,
-          language,
-          config: compileHighlightConfig(language, opts.highlights, opts.injections, opts.locals),
-        };
-
-        this.loadedLanguages.set(opts.definition.id, loaded);
-        this.registerLanguage(opts.definition);
-        return loaded;
-      })();
-
-      this.languageLoads.set(opts.definition.id, loadPromise);
-
-      try {
-        return await loadPromise;
-      } finally {
-        this.languageLoads.delete(opts.definition.id);
-      }
+      return trackLoad(this.languageLoads, opts.definition.id, this.createLoadedLanguage(opts));
     }
 
     async loadPlaintext(): Promise<LoadedLanguage> {

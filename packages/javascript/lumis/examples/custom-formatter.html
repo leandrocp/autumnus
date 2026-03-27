@@ -577,7 +577,7 @@ const docsFormatter: Formatter = {
     const tokenFg = document.getElementById('token-fg')
     const tokenBg = document.getElementById('token-bg')
 
-    const hl = await createHighlighter({ langs: [html, javascript] })
+    const hl = await createHighlighter({ languages: [html, javascript] })
 
     formatterSourcePreview.innerHTML = hl.highlight(
       formatterSource,

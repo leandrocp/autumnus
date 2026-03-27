@@ -15065,20 +15065,7 @@
     {
       "type": "source",
       "start": 10170,
-      "end": 10173
-    },
-    {
-      "type": "start",
-      "scope": "operator",
-      "language": "lua"
-    },
-    {
-      "type": "source",
-      "start": 10173,
       "end": 10174
-    },
-    {
-      "type": "end"
     },
     {
       "type": "start",
@@ -15156,21 +15143,8 @@
       "type": "end"
     },
     {
-      "type": "start",
-      "scope": "operator",
-      "language": "lua"
-    },
-    {
       "type": "source",
       "start": 10193,
-      "end": 10194
-    },
-    {
-      "type": "end"
-    },
-    {
-      "type": "source",
-      "start": 10194,
       "end": 10195
     },
     {

@@ -16,7 +16,7 @@
 
 ## Features
 
-- 70+ languages with Tree-sitter parsing
+- 110+ languages with Tree-sitter parsing
 - 120+ Neovim themes
 - HTML output with inline styles or CSS classes
 - Multi-theme support for light/dark mode

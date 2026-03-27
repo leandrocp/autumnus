@@ -4,9 +4,9 @@
   "if" "then" "else" "block" "loop" "end" "mut"
 ] @keyword
 
-["import" "export"] @keyword.import
+["import" "export"] @keyword.control.import
 
-["local"] @keyword.type
+["local"] @keyword.storage.type
 
 [(name) (string)] @string
 
@@ -14,7 +14,7 @@
 
 [(comment_block) (comment_line)] @comment
 
-[(nat) (float) (align_offset_value)] @number
+[(nat) (float) (align_offset_value)] @constant.numeric.integer
 
 (value_type) @type
 

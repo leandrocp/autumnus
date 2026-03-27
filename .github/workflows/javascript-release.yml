@@ -10,6 +10,8 @@ on:
   push:
     tags:
       - "javascript@v*"
+      - "markdown-it-lumis@v*"
+      - "rehype-lumis@v*"
       - "themes@v*"
 
 permissions:
@@ -45,9 +47,23 @@ jobs:
           if [ "$component" = "themes" ]; then
             echo "filter=@lumis-sh/themes" >> $GITHUB_OUTPUT
             echo "build_lumis=false" >> $GITHUB_OUTPUT
+            echo "build_markdown_it=false" >> $GITHUB_OUTPUT
+            echo "build_rehype=false" >> $GITHUB_OUTPUT
           elif [ "$component" = "javascript" ]; then
             echo "filter=@lumis-sh/lumis" >> $GITHUB_OUTPUT
             echo "build_lumis=true" >> $GITHUB_OUTPUT
+            echo "build_markdown_it=false" >> $GITHUB_OUTPUT
+            echo "build_rehype=false" >> $GITHUB_OUTPUT
+          elif [ "$component" = "markdown-it-lumis" ]; then
+            echo "filter=@lumis-sh/markdown-it-lumis" >> $GITHUB_OUTPUT
+            echo "build_lumis=true" >> $GITHUB_OUTPUT
+            echo "build_markdown_it=true" >> $GITHUB_OUTPUT
+            echo "build_rehype=false" >> $GITHUB_OUTPUT
+          elif [ "$component" = "rehype-lumis" ]; then
+            echo "filter=@lumis-sh/rehype-lumis" >> $GITHUB_OUTPUT
+            echo "build_lumis=true" >> $GITHUB_OUTPUT
+            echo "build_markdown_it=false" >> $GITHUB_OUTPUT
+            echo "build_rehype=true" >> $GITHUB_OUTPUT
           else
             echo "Unknown component: $component" && exit 1
           fi
@@ -59,6 +75,16 @@ jobs:
       - name: Build lumis
         if: steps.pkg.outputs.build_lumis == 'true'
         run: pnpm --filter @lumis-sh/lumis build
+        working-directory: packages/javascript
+
+      - name: Build markdown-it-lumis
+        if: steps.pkg.outputs.build_markdown_it == 'true'
+        run: pnpm --filter @lumis-sh/markdown-it-lumis build
+        working-directory: packages/javascript
+
+      - name: Build rehype-lumis
+        if: steps.pkg.outputs.build_rehype == 'true'
+        run: pnpm --filter @lumis-sh/rehype-lumis build
         working-directory: packages/javascript
 
       - name: Publish to npm

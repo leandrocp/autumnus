@@ -108,7 +108,7 @@ export function Button({
     const toggles = Array.from(document.querySelectorAll('[data-theme-target]'))
 
     try {
-      const hl = await createHighlighter({ langs: [tsx] })
+      const hl = await createHighlighter({ languages: [tsx] })
 
       output.innerHTML = hl.highlight(
         code,

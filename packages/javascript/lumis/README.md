@@ -48,7 +48,7 @@ import { htmlInline } from '@lumis-sh/lumis/formatters'
 import javascript from '@lumis-sh/lumis/langs/javascript'
 import dracula from '@lumis-sh/themes/dracula'
 
-const hl = await createHighlighter({ langs: [javascript] })
+const hl = await createHighlighter({ languages: [javascript] })
 
 // hl.highlight() is synchronous, languages are already loaded
 const html = hl.highlight(
@@ -61,7 +61,7 @@ Use `createHighlighter()` when you want explicit control over loaded languages, 
 
 ## Bundles
 
-Bundles group languages into sets. Each language loads lazily on first use, so registering a bundle with 70+ languages costs almost nothing upfront.
+Bundles group languages into sets. Each language loads lazily on first use, so registering a bundle with 110+ languages costs almost nothing upfront.
 
 Three bundles ship with lumis:
 
@@ -81,7 +81,7 @@ import { htmlInline } from '@lumis-sh/lumis/formatters'
 import { bundledLanguages } from '@lumis-sh/lumis/bundles/web'
 import dracula from '@lumis-sh/themes/dracula'
 
-const hl = await createHighlighter({ langs: [bundledLanguages] })
+const hl = await createHighlighter({ languages: [bundledLanguages] })
 
 // Load a language before highlighting
 await hl.loadLanguage('javascript')
@@ -98,7 +98,7 @@ Each entry in a bundle is a `LazyLanguage` handle. You can pass it to formatters
 ```typescript
 import { bundledLanguages } from '@lumis-sh/lumis/bundles/web'
 
-const hl = await createHighlighter({ langs: [bundledLanguages] })
+const hl = await createHighlighter({ languages: [bundledLanguages] })
 await hl.loadLanguage(bundledLanguages.javascript)
 
 const html = hl.highlight(
@@ -117,7 +117,7 @@ import { bundledLanguages } from '@lumis-sh/lumis/bundles/system'
 import elixir from '@lumis-sh/lumis/langs/elixir'
 
 const hl = await createHighlighter({
-  langs: [
+  languages: [
     elixir,                                    // loaded immediately
     bundledLanguages,                          // registered lazily
     import('@lumis-sh/lumis/langs/python'),     // loaded immediately via dynamic import
@@ -128,7 +128,7 @@ const hl = await createHighlighter({
 ### Checking registered vs loaded languages
 
 ```typescript
-const hl = await createHighlighter({ langs: [bundledLanguages] })
+const hl = await createHighlighter({ languages: [bundledLanguages] })
 
 hl.registeredLanguages  // all languages in the bundle (including lazy)
 hl.languages            // only languages that have been loaded
@@ -184,7 +184,7 @@ import { openPreTag, openCodeTag, closingTags, spanInline } from '@lumis-sh/lumi
 import rust from '@lumis-sh/lumis/langs/rust'
 import dracula from '@lumis-sh/themes/dracula'
 
-const hl = await createHighlighter({ langs: [rust] })
+const hl = await createHighlighter({ languages: [rust] })
 
 const formatter: Formatter = {
   language: rust,

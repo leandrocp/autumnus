@@ -22,20 +22,5 @@ export function availableThemes(): ThemeInfo[] {
  * ```
  */
 export function sanitizeThemeName(name: string): string {
-  let result = "";
-  for (let i = 0; i < name.length; i += 1) {
-    const code = name.charCodeAt(i);
-    if (
-      (code >= 48 && code <= 57) ||
-      (code >= 65 && code <= 90) ||
-      (code >= 97 && code <= 122) ||
-      code === 45 ||
-      code === 95
-    ) {
-      result += name[i];
-    } else {
-      result += "-";
-    }
-  }
-  return result;
+  return name.replace(/[^0-9A-Za-z_-]/g, "-");
 }
