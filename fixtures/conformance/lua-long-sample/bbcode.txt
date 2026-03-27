@@ -1,0 +1,372 @@
+[comment-lua]-- Two dashes start a one-line comment.[/comment-lua]
+
+[comment-lua]--[[
+     Adding two ['s and ]'s makes it a
+     multi-line comment.
+--]][/comment-lua]
+
+[comment-documentation-lua]----------------------------------------------------[/comment-documentation-lua]
+[comment-lua]-- 1. Variables and flow control.[/comment-lua]
+[comment-documentation-lua]----------------------------------------------------[/comment-documentation-lua]
+
+[variable-lua]num[/variable-lua] [operator-lua]=[/operator-lua] [number-lua]42[/number-lua]  [comment-lua]-- Numbers can be integer or floating point.[/comment-lua]
+
+[variable-lua]s[/variable-lua] [operator-lua]=[/operator-lua] [string-lua]'walternate'[/string-lua]  [comment-lua]-- Immutable strings like Python.[/comment-lua]
+[variable-lua]t[/variable-lua] [operator-lua]=[/operator-lua] [string-lua]"double-quotes are also fine"[/string-lua]
+[variable-lua]u[/variable-lua] [operator-lua]=[/operator-lua] [string-lua][[ Double brackets
+       start and end
+       multi-line strings.]][/string-lua]
+[variable-lua]t[/variable-lua] [operator-lua]=[/operator-lua] [constant-builtin-lua]nil[/constant-builtin-lua]  [comment-lua]-- Undefines t; Lua has garbage collection.[/comment-lua]
+
+[comment-lua]-- Blocks are denoted with keywords like do/end:[/comment-lua]
+[keyword-repeat-lua]while[/keyword-repeat-lua] [variable-lua]num[/variable-lua] [operator-lua]<[/operator-lua] [number-lua]50[/number-lua] [keyword-repeat-lua]do[/keyword-repeat-lua]
+  [variable-lua]num[/variable-lua] [operator-lua]=[/operator-lua] [variable-lua]num[/variable-lua] [operator-lua]+[/operator-lua] [number-lua]1[/number-lua]  [comment-lua]-- No ++ or += type operators.[/comment-lua]
+[keyword-repeat-lua]end[/keyword-repeat-lua]
+
+[comment-lua]-- If clauses:[/comment-lua]
+[keyword-conditional-lua]if[/keyword-conditional-lua] [variable-lua]num[/variable-lua] [operator-lua]>[/operator-lua] [number-lua]40[/number-lua] [keyword-conditional-lua]then[/keyword-conditional-lua]
+  [function-builtin-lua]print[/function-builtin-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][string-lua]'over 40'[/string-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]
+[keyword-conditional-lua]elseif[/keyword-conditional-lua] [variable-lua]s[/variable-lua] [operator-lua]~=[/operator-lua] [string-lua]'walternate'[/string-lua] [keyword-conditional-lua]then[/keyword-conditional-lua]  [comment-lua]-- ~= is not equals.[/comment-lua]
+  [comment-lua]-- Equality check is == like Python; ok for strs.[/comment-lua]
+  [module-builtin-lua]io[/module-builtin-lua][punctuation-delimiter-lua].[/punctuation-delimiter-lua][function-call-lua]write[/function-call-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][string-lua]'not over 40[/string-lua][string-escape-lua]\n[/string-escape-lua][string-lua]'[/string-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]  [comment-lua]-- Defaults to stdout.[/comment-lua]
+[keyword-conditional-lua]else[/keyword-conditional-lua]
+  [comment-lua]-- Variables are global by default.[/comment-lua]
+  [variable-lua]thisIsGlobal[/variable-lua] [operator-lua]=[/operator-lua] [number-lua]5[/number-lua]  [comment-lua]-- Camel case is common.[/comment-lua]
+
+  [comment-lua]-- How to make a variable local:[/comment-lua]
+  [keyword-lua]local[/keyword-lua] [variable-lua]line[/variable-lua] [operator-lua]=[/operator-lua] [module-builtin-lua]io[/module-builtin-lua][punctuation-delimiter-lua].[/punctuation-delimiter-lua][function-call-lua]read[/function-call-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]  [comment-lua]-- Reads next stdin line.[/comment-lua]
+
+  [comment-lua]-- String concatenation uses the .. operator:[/comment-lua]
+  [function-builtin-lua]print[/function-builtin-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][string-lua]'Winter is coming, '[/string-lua] [operator-lua]..[/operator-lua] [variable-lua]line[/variable-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]
+[keyword-conditional-lua]end[/keyword-conditional-lua]
+
+[comment-lua]-- Undefined variables return nil.[/comment-lua]
+[comment-lua]-- This is not an error:[/comment-lua]
+[variable-lua]foo[/variable-lua] [operator-lua]=[/operator-lua] [variable-lua]anUnknownVariable[/variable-lua]  [comment-lua]-- Now foo = nil.[/comment-lua]
+
+[variable-lua]aBoolValue[/variable-lua] [operator-lua]=[/operator-lua] [boolean-lua]false[/boolean-lua]
+
+[comment-lua]-- Only nil and false are falsy; 0 and '' are true![/comment-lua]
+[keyword-conditional-lua]if[/keyword-conditional-lua] [keyword-operator-lua]not[/keyword-operator-lua] [variable-lua]aBoolValue[/variable-lua] [keyword-conditional-lua]then[/keyword-conditional-lua] [function-builtin-lua]print[/function-builtin-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][string-lua]'it was false'[/string-lua][punctuation-bracket-lua])[/punctuation-bracket-lua] [keyword-conditional-lua]end[/keyword-conditional-lua]
+
+[comment-lua]-- 'or' and 'and' are short-circuited.[/comment-lua]
+[comment-lua]-- This is similar to the a?b:c operator in C/js:[/comment-lua]
+[variable-lua]ans[/variable-lua] [operator-lua]=[/operator-lua] [variable-lua]aBoolValue[/variable-lua] [keyword-operator-lua]and[/keyword-operator-lua] [string-lua]'yes'[/string-lua] [keyword-operator-lua]or[/keyword-operator-lua] [string-lua]'no'[/string-lua]  [comment-lua]--> 'no'[/comment-lua]
+
+[variable-lua]karlSum[/variable-lua] [operator-lua]=[/operator-lua] [number-lua]0[/number-lua]
+[keyword-repeat-lua]for[/keyword-repeat-lua] [variable-lua]i[/variable-lua] [operator-lua]=[/operator-lua] [number-lua]1[/number-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [number-lua]100[/number-lua] [keyword-repeat-lua]do[/keyword-repeat-lua]  [comment-lua]-- The range includes both ends.[/comment-lua]
+  [variable-lua]karlSum[/variable-lua] [operator-lua]=[/operator-lua] [variable-lua]karlSum[/variable-lua] [operator-lua]+[/operator-lua] [variable-lua]i[/variable-lua]
+[keyword-repeat-lua]end[/keyword-repeat-lua]
+
+[comment-lua]-- Use "100, 1, -1" as the range to count down:[/comment-lua]
+[variable-lua]fredSum[/variable-lua] [operator-lua]=[/operator-lua] [number-lua]0[/number-lua]
+[keyword-repeat-lua]for[/keyword-repeat-lua] [variable-lua]j[/variable-lua] [operator-lua]=[/operator-lua] [number-lua]100[/number-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [number-lua]1[/number-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [operator-lua]-[/operator-lua][number-lua]1[/number-lua] [keyword-repeat-lua]do[/keyword-repeat-lua] [variable-lua]fredSum[/variable-lua] [operator-lua]=[/operator-lua] [variable-lua]fredSum[/variable-lua] [operator-lua]+[/operator-lua] [variable-lua]j[/variable-lua] [keyword-repeat-lua]end[/keyword-repeat-lua]
+
+[comment-lua]-- In general, the range is begin, end[, step].[/comment-lua]
+
+[comment-lua]-- Another loop construct:[/comment-lua]
+[keyword-repeat-lua]repeat[/keyword-repeat-lua]
+  [function-builtin-lua]print[/function-builtin-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][string-lua]'the way of the future'[/string-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]
+  [variable-lua]num[/variable-lua] [operator-lua]=[/operator-lua] [variable-lua]num[/variable-lua] [operator-lua]-[/operator-lua] [number-lua]1[/number-lua]
+[keyword-repeat-lua]until[/keyword-repeat-lua] [variable-lua]num[/variable-lua] [operator-lua]==[/operator-lua] [number-lua]0[/number-lua]
+
+
+[comment-documentation-lua]----------------------------------------------------[/comment-documentation-lua]
+[comment-lua]-- 2. Functions.[/comment-lua]
+[comment-documentation-lua]----------------------------------------------------[/comment-documentation-lua]
+
+[keyword-function-lua]function[/keyword-function-lua] [function-lua]fib[/function-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][variable-parameter-lua]n[/variable-parameter-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]
+  [keyword-conditional-lua]if[/keyword-conditional-lua] [variable-lua]n[/variable-lua] [operator-lua]<[/operator-lua] [number-lua]2[/number-lua] [keyword-conditional-lua]then[/keyword-conditional-lua] [keyword-return-lua]return[/keyword-return-lua] [number-lua]1[/number-lua] [keyword-conditional-lua]end[/keyword-conditional-lua]
+  [keyword-return-lua]return[/keyword-return-lua] [function-call-lua]fib[/function-call-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][variable-lua]n[/variable-lua] [operator-lua]-[/operator-lua] [number-lua]2[/number-lua][punctuation-bracket-lua])[/punctuation-bracket-lua] [operator-lua]+[/operator-lua] [function-call-lua]fib[/function-call-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][variable-lua]n[/variable-lua] [operator-lua]-[/operator-lua] [number-lua]1[/number-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]
+[keyword-function-lua]end[/keyword-function-lua]
+
+[comment-lua]-- Closures and anonymous functions are ok:[/comment-lua]
+[keyword-function-lua]function[/keyword-function-lua] [function-lua]adder[/function-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][variable-parameter-lua]x[/variable-parameter-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]
+  [comment-lua]-- The returned function is created when adder is[/comment-lua]
+  [comment-lua]-- called, and remembers the value of x:[/comment-lua]
+  [keyword-return-lua]return[/keyword-return-lua] [keyword-function-lua]function[/keyword-function-lua] [punctuation-bracket-lua]([/punctuation-bracket-lua][variable-parameter-lua]y[/variable-parameter-lua][punctuation-bracket-lua])[/punctuation-bracket-lua] [keyword-return-lua]return[/keyword-return-lua] [variable-lua]x[/variable-lua] [operator-lua]+[/operator-lua] [variable-lua]y[/variable-lua] [keyword-function-lua]end[/keyword-function-lua]
+[keyword-function-lua]end[/keyword-function-lua]
+[variable-lua]a1[/variable-lua] [operator-lua]=[/operator-lua] [function-call-lua]adder[/function-call-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][number-lua]9[/number-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]
+[variable-lua]a2[/variable-lua] [operator-lua]=[/operator-lua] [function-call-lua]adder[/function-call-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][number-lua]36[/number-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]
+[function-builtin-lua]print[/function-builtin-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][function-call-lua]a1[/function-call-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][number-lua]16[/number-lua][punctuation-bracket-lua])[/punctuation-bracket-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]  [comment-lua]--> 25[/comment-lua]
+[function-builtin-lua]print[/function-builtin-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][function-call-lua]a2[/function-call-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][number-lua]64[/number-lua][punctuation-bracket-lua])[/punctuation-bracket-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]  [comment-lua]--> 100[/comment-lua]
+
+[comment-lua]-- Returns, func calls, and assignments all work[/comment-lua]
+[comment-lua]-- with lists that may be mismatched in length.[/comment-lua]
+[comment-lua]-- Unmatched receivers are nil;[/comment-lua]
+[comment-lua]-- unmatched senders are discarded.[/comment-lua]
+
+[variable-lua]x[/variable-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [variable-lua]y[/variable-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [variable-lua]z[/variable-lua] [operator-lua]=[/operator-lua] [number-lua]1[/number-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [number-lua]2[/number-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [number-lua]3[/number-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [number-lua]4[/number-lua]
+[comment-lua]-- Now x = 1, y = 2, z = 3, and 4 is thrown away.[/comment-lua]
+
+[keyword-function-lua]function[/keyword-function-lua] [function-lua]bar[/function-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][variable-parameter-lua]a[/variable-parameter-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [variable-parameter-lua]b[/variable-parameter-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [variable-parameter-lua]c[/variable-parameter-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]
+  [function-builtin-lua]print[/function-builtin-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][variable-lua]a[/variable-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [variable-lua]b[/variable-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [variable-lua]c[/variable-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]
+  [keyword-return-lua]return[/keyword-return-lua] [number-lua]4[/number-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [number-lua]8[/number-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [number-lua]15[/number-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [number-lua]16[/number-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [number-lua]23[/number-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [number-lua]42[/number-lua]
+[keyword-function-lua]end[/keyword-function-lua]
+
+[variable-lua]x[/variable-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [variable-lua]y[/variable-lua] [operator-lua]=[/operator-lua] [function-call-lua]bar[/function-call-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][string-lua]'zaphod'[/string-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]  [comment-lua]--> prints "zaphod  nil nil"[/comment-lua]
+[comment-lua]-- Now x = 4, y = 8, values 15...42 are discarded.[/comment-lua]
+
+[comment-lua]-- Functions are first-class, may be local/global.[/comment-lua]
+[comment-lua]-- These are the same:[/comment-lua]
+[keyword-function-lua]function[/keyword-function-lua] [function-lua]f[/function-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][variable-parameter-lua]x[/variable-parameter-lua][punctuation-bracket-lua])[/punctuation-bracket-lua] [keyword-return-lua]return[/keyword-return-lua] [variable-lua]x[/variable-lua] [operator-lua]*[/operator-lua] [variable-lua]x[/variable-lua] [keyword-function-lua]end[/keyword-function-lua]
+[function-lua]f[/function-lua] [operator-lua]=[/operator-lua] [keyword-function-lua]function[/keyword-function-lua] [punctuation-bracket-lua]([/punctuation-bracket-lua][variable-parameter-lua]x[/variable-parameter-lua][punctuation-bracket-lua])[/punctuation-bracket-lua] [keyword-return-lua]return[/keyword-return-lua] [variable-lua]x[/variable-lua] [operator-lua]*[/operator-lua] [variable-lua]x[/variable-lua] [keyword-function-lua]end[/keyword-function-lua]
+
+[comment-lua]-- And so are these:[/comment-lua]
+[keyword-lua]local[/keyword-lua] [keyword-function-lua]function[/keyword-function-lua] [function-lua]g[/function-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][variable-parameter-lua]x[/variable-parameter-lua][punctuation-bracket-lua])[/punctuation-bracket-lua] [keyword-return-lua]return[/keyword-return-lua] [module-builtin-lua]math[/module-builtin-lua][punctuation-delimiter-lua].[/punctuation-delimiter-lua][function-call-lua]sin[/function-call-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][variable-lua]x[/variable-lua][punctuation-bracket-lua])[/punctuation-bracket-lua] [keyword-function-lua]end[/keyword-function-lua]
+[keyword-lua]local[/keyword-lua] [variable-lua]g[/variable-lua][punctuation-delimiter-lua];[/punctuation-delimiter-lua] [function-lua]g[/function-lua]  [operator-lua]=[/operator-lua] [keyword-function-lua]function[/keyword-function-lua] [punctuation-bracket-lua]([/punctuation-bracket-lua][variable-parameter-lua]x[/variable-parameter-lua][punctuation-bracket-lua])[/punctuation-bracket-lua] [keyword-return-lua]return[/keyword-return-lua] [module-builtin-lua]math[/module-builtin-lua][punctuation-delimiter-lua].[/punctuation-delimiter-lua][function-call-lua]sin[/function-call-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][variable-lua]x[/variable-lua][punctuation-bracket-lua])[/punctuation-bracket-lua] [keyword-function-lua]end[/keyword-function-lua]
+[comment-lua]-- the 'local g' decl makes g-self-references ok.[/comment-lua]
+
+[comment-lua]-- Trig funcs work in radians, by the way.[/comment-lua]
+
+[comment-lua]-- Calls with one string param don't need parens:[/comment-lua]
+[function-builtin-lua]print[/function-builtin-lua] [string-lua]'hello'[/string-lua]  [comment-lua]-- Works fine.[/comment-lua]
+
+
+[comment-documentation-lua]----------------------------------------------------[/comment-documentation-lua]
+[comment-lua]-- 3. Tables.[/comment-lua]
+[comment-documentation-lua]----------------------------------------------------[/comment-documentation-lua]
+
+[comment-lua]-- Tables = Lua's only compound data structure;[/comment-lua]
+[comment-lua]--          they are associative arrays.[/comment-lua]
+[comment-lua]-- Similar to php arrays or js objects, they are[/comment-lua]
+[comment-lua]-- hash-lookup dicts that can also be used as lists.[/comment-lua]
+
+[comment-lua]-- Using tables as dictionaries / maps:[/comment-lua]
+
+[comment-lua]-- Dict literals have string keys by default:[/comment-lua]
+[variable-lua]t[/variable-lua] [operator-lua]=[/operator-lua] [constructor-lua]{[/constructor-lua][property-lua]key1[/property-lua] [operator-lua]=[/operator-lua] [string-lua]'value1'[/string-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [property-lua]key2[/property-lua] [operator-lua]=[/operator-lua] [boolean-lua]false[/boolean-lua][constructor-lua]}[/constructor-lua]
+
+[comment-lua]-- String keys can use js-like dot notation:[/comment-lua]
+[function-builtin-lua]print[/function-builtin-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][variable-lua]t[/variable-lua][punctuation-delimiter-lua].[/punctuation-delimiter-lua][variable-member-lua]key1[/variable-member-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]  [comment-lua]-- Prints 'value1'.[/comment-lua]
+[variable-lua]t[/variable-lua][punctuation-delimiter-lua].[/punctuation-delimiter-lua][variable-member-lua]newKey[/variable-member-lua] [operator-lua]=[/operator-lua] [constructor-lua]{[/constructor-lua][constructor-lua]}[/constructor-lua]  [comment-lua]-- Adds a new key/value pair.[/comment-lua]
+[variable-lua]t[/variable-lua][punctuation-delimiter-lua].[/punctuation-delimiter-lua][variable-member-lua]key2[/variable-member-lua] [operator-lua]=[/operator-lua] [constant-builtin-lua]nil[/constant-builtin-lua]   [comment-lua]-- Removes key2 from the table.[/comment-lua]
+
+[comment-lua]-- Literal notation for any (non-nil) value as key:[/comment-lua]
+[variable-lua]u[/variable-lua] [operator-lua]=[/operator-lua] [constructor-lua]{[/constructor-lua][punctuation-bracket-lua][[/punctuation-bracket-lua][string-lua]'@!#'[/string-lua][punctuation-bracket-lua]][/punctuation-bracket-lua] [operator-lua]=[/operator-lua] [string-lua]'qbert'[/string-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [punctuation-bracket-lua][[/punctuation-bracket-lua][constructor-lua]{[/constructor-lua][constructor-lua]}[/constructor-lua][punctuation-bracket-lua]][/punctuation-bracket-lua] [operator-lua]=[/operator-lua] [number-lua]1729[/number-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [punctuation-bracket-lua][[/punctuation-bracket-lua][number-lua]6.28[/number-lua][punctuation-bracket-lua]][/punctuation-bracket-lua] [operator-lua]=[/operator-lua] [string-lua]'tau'[/string-lua][constructor-lua]}[/constructor-lua]
+[function-builtin-lua]print[/function-builtin-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][variable-lua]u[/variable-lua][punctuation-bracket-lua][[/punctuation-bracket-lua][number-lua]6.28[/number-lua][punctuation-bracket-lua]][/punctuation-bracket-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]  [comment-lua]-- prints "tau"[/comment-lua]
+
+[comment-lua]-- Key matching is basically by value for numbers[/comment-lua]
+[comment-lua]-- and strings, but by identity for tables.[/comment-lua]
+[variable-lua]a[/variable-lua] [operator-lua]=[/operator-lua] [variable-lua]u[/variable-lua][punctuation-bracket-lua][[/punctuation-bracket-lua][string-lua]'@!#'[/string-lua][punctuation-bracket-lua]][/punctuation-bracket-lua]  [comment-lua]-- Now a = 'qbert'.[/comment-lua]
+[variable-lua]b[/variable-lua] [operator-lua]=[/operator-lua] [variable-lua]u[/variable-lua][punctuation-bracket-lua][[/punctuation-bracket-lua][constructor-lua]{[/constructor-lua][constructor-lua]}[/constructor-lua][punctuation-bracket-lua]][/punctuation-bracket-lua]     [comment-lua]-- We might expect 1729, but it's nil:[/comment-lua]
+[comment-lua]-- b = nil since the lookup fails. It fails[/comment-lua]
+[comment-lua]-- because the key we used is not the same object[/comment-lua]
+[comment-lua]-- as the one used to store the original value. So[/comment-lua]
+[comment-lua]-- strings & numbers are more portable keys.[/comment-lua]
+
+[comment-lua]-- A one-table-param function call needs no parens:[/comment-lua]
+[keyword-function-lua]function[/keyword-function-lua] [function-lua]h[/function-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][variable-parameter-lua]x[/variable-parameter-lua][punctuation-bracket-lua])[/punctuation-bracket-lua] [function-builtin-lua]print[/function-builtin-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][variable-lua]x[/variable-lua][punctuation-delimiter-lua].[/punctuation-delimiter-lua][variable-member-lua]key1[/variable-member-lua][punctuation-bracket-lua])[/punctuation-bracket-lua] [keyword-function-lua]end[/keyword-function-lua]
+[function-call-lua]h[/function-call-lua][constructor-lua]{[/constructor-lua][property-lua]key1[/property-lua] [operator-lua]=[/operator-lua] [string-lua]'Sonmi~451'[/string-lua][constructor-lua]}[/constructor-lua]  [comment-lua]-- Prints 'Sonmi~451'.[/comment-lua]
+
+[keyword-repeat-lua]for[/keyword-repeat-lua] [variable-lua]key[/variable-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [variable-lua]val[/variable-lua] [keyword-lua]in[/keyword-lua] [function-builtin-lua]pairs[/function-builtin-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][variable-lua]u[/variable-lua][punctuation-bracket-lua])[/punctuation-bracket-lua] [keyword-repeat-lua]do[/keyword-repeat-lua]  [comment-lua]-- Table iteration.[/comment-lua]
+  [function-builtin-lua]print[/function-builtin-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][variable-lua]key[/variable-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [variable-lua]val[/variable-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]
+[keyword-repeat-lua]end[/keyword-repeat-lua]
+
+[comment-lua]-- _G is a special table of all globals.[/comment-lua]
+[function-builtin-lua]print[/function-builtin-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][module-builtin-lua]_G[/module-builtin-lua][punctuation-bracket-lua][[/punctuation-bracket-lua][string-lua]'_G'[/string-lua][punctuation-bracket-lua]][/punctuation-bracket-lua] [operator-lua]==[/operator-lua] [module-builtin-lua]_G[/module-builtin-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]  [comment-lua]-- Prints 'true'.[/comment-lua]
+
+[comment-lua]-- Using tables as lists / arrays:[/comment-lua]
+
+[comment-lua]-- List literals implicitly set up int keys:[/comment-lua]
+[variable-lua]v[/variable-lua] [operator-lua]=[/operator-lua] [constructor-lua]{[/constructor-lua][string-lua]'value1'[/string-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [string-lua]'value2'[/string-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [number-lua]1.21[/number-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [string-lua]'gigawatts'[/string-lua][constructor-lua]}[/constructor-lua]
+[keyword-repeat-lua]for[/keyword-repeat-lua] [variable-lua]i[/variable-lua] [operator-lua]=[/operator-lua] [number-lua]1[/number-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [operator-lua]#[/operator-lua][variable-lua]v[/variable-lua] [keyword-repeat-lua]do[/keyword-repeat-lua]  [comment-lua]-- #v is the size of v for lists.[/comment-lua]
+  [function-builtin-lua]print[/function-builtin-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][variable-lua]v[/variable-lua][punctuation-bracket-lua][[/punctuation-bracket-lua][variable-lua]i[/variable-lua][punctuation-bracket-lua]][/punctuation-bracket-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]  [comment-lua]-- Indices start at 1 !! SO CRAZY![/comment-lua]
+[keyword-repeat-lua]end[/keyword-repeat-lua]
+[comment-lua]-- A 'list' is not a real type. v is just a table[/comment-lua]
+[comment-lua]-- with consecutive integer keys, treated as a list.[/comment-lua]
+
+[comment-documentation-lua]----------------------------------------------------[/comment-documentation-lua]
+[comment-lua]-- 3.1 Metatables and metamethods.[/comment-lua]
+[comment-documentation-lua]----------------------------------------------------[/comment-documentation-lua]
+
+[comment-lua]-- A table can have a metatable that gives the table[/comment-lua]
+[comment-lua]-- operator-overloadish behavior. Later we'll see[/comment-lua]
+[comment-lua]-- how metatables support js-prototype behavior.[/comment-lua]
+
+[variable-lua]f1[/variable-lua] [operator-lua]=[/operator-lua] [constructor-lua]{[/constructor-lua][property-lua]a[/property-lua] [operator-lua]=[/operator-lua] [number-lua]1[/number-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [property-lua]b[/property-lua] [operator-lua]=[/operator-lua] [number-lua]2[/number-lua][constructor-lua]}[/constructor-lua]  [comment-lua]-- Represents the fraction a/b.[/comment-lua]
+[variable-lua]f2[/variable-lua] [operator-lua]=[/operator-lua] [constructor-lua]{[/constructor-lua][property-lua]a[/property-lua] [operator-lua]=[/operator-lua] [number-lua]2[/number-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [property-lua]b[/property-lua] [operator-lua]=[/operator-lua] [number-lua]3[/number-lua][constructor-lua]}[/constructor-lua]
+
+[comment-lua]-- This would fail:[/comment-lua]
+[comment-lua]-- s = f1 + f2[/comment-lua]
+
+[variable-lua]metafraction[/variable-lua] [operator-lua]=[/operator-lua] [constructor-lua]{[/constructor-lua][constructor-lua]}[/constructor-lua]
+[keyword-function-lua]function[/keyword-function-lua] [variable-lua]metafraction[/variable-lua][punctuation-delimiter-lua].[/punctuation-delimiter-lua][function-lua]__add[/function-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][variable-parameter-lua]f1[/variable-parameter-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [variable-parameter-lua]f2[/variable-parameter-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]
+  [variable-lua]sum[/variable-lua] [operator-lua]=[/operator-lua] [constructor-lua]{[/constructor-lua][constructor-lua]}[/constructor-lua]
+  [variable-lua]sum[/variable-lua][punctuation-delimiter-lua].[/punctuation-delimiter-lua][variable-member-lua]b[/variable-member-lua] [operator-lua]=[/operator-lua] [variable-lua]f1[/variable-lua][punctuation-delimiter-lua].[/punctuation-delimiter-lua][variable-member-lua]b[/variable-member-lua] [operator-lua]*[/operator-lua] [variable-lua]f2[/variable-lua][punctuation-delimiter-lua].[/punctuation-delimiter-lua][variable-member-lua]b[/variable-member-lua]
+  [variable-lua]sum[/variable-lua][punctuation-delimiter-lua].[/punctuation-delimiter-lua][variable-member-lua]a[/variable-member-lua] [operator-lua]=[/operator-lua] [variable-lua]f1[/variable-lua][punctuation-delimiter-lua].[/punctuation-delimiter-lua][variable-member-lua]a[/variable-member-lua] [operator-lua]*[/operator-lua] [variable-lua]f2[/variable-lua][punctuation-delimiter-lua].[/punctuation-delimiter-lua][variable-member-lua]b[/variable-member-lua] [operator-lua]+[/operator-lua] [variable-lua]f2[/variable-lua][punctuation-delimiter-lua].[/punctuation-delimiter-lua][variable-member-lua]a[/variable-member-lua] [operator-lua]*[/operator-lua] [variable-lua]f1[/variable-lua][punctuation-delimiter-lua].[/punctuation-delimiter-lua][variable-member-lua]b[/variable-member-lua]
+  [keyword-return-lua]return[/keyword-return-lua] [variable-lua]sum[/variable-lua]
+[keyword-function-lua]end[/keyword-function-lua]
+
+[function-builtin-lua]setmetatable[/function-builtin-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][variable-lua]f1[/variable-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [variable-lua]metafraction[/variable-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]
+[function-builtin-lua]setmetatable[/function-builtin-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][variable-lua]f2[/variable-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [variable-lua]metafraction[/variable-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]
+
+[variable-lua]s[/variable-lua] [operator-lua]=[/operator-lua] [variable-lua]f1[/variable-lua] [operator-lua]+[/operator-lua] [variable-lua]f2[/variable-lua]  [comment-lua]-- call __add(f1, f2) on f1's metatable[/comment-lua]
+
+[comment-lua]-- f1, f2 have no key for their metatable, unlike[/comment-lua]
+[comment-lua]-- prototypes in js, so you must retrieve it as in[/comment-lua]
+[comment-lua]-- getmetatable(f1). The metatable is a normal table[/comment-lua]
+[comment-lua]-- with keys that Lua knows about, like __add.[/comment-lua]
+
+[comment-lua]-- But the next line fails since s has no metatable:[/comment-lua]
+[comment-lua]-- t = s + s[/comment-lua]
+[comment-lua]-- Class-like patterns given below would fix this.[/comment-lua]
+
+[comment-lua]-- An __index on a metatable overloads dot lookups:[/comment-lua]
+[variable-lua]defaultFavs[/variable-lua] [operator-lua]=[/operator-lua] [constructor-lua]{[/constructor-lua][property-lua]animal[/property-lua] [operator-lua]=[/operator-lua] [string-lua]'gru'[/string-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [property-lua]food[/property-lua] [operator-lua]=[/operator-lua] [string-lua]'donuts'[/string-lua][constructor-lua]}[/constructor-lua]
+[variable-lua]myFavs[/variable-lua] [operator-lua]=[/operator-lua] [constructor-lua]{[/constructor-lua][property-lua]food[/property-lua] [operator-lua]=[/operator-lua] [string-lua]'pizza'[/string-lua][constructor-lua]}[/constructor-lua]
+[function-builtin-lua]setmetatable[/function-builtin-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][variable-lua]myFavs[/variable-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [constructor-lua]{[/constructor-lua][property-lua]__index[/property-lua] [operator-lua]=[/operator-lua] [variable-lua]defaultFavs[/variable-lua][constructor-lua]}[/constructor-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]
+[variable-lua]eatenBy[/variable-lua] [operator-lua]=[/operator-lua] [variable-lua]myFavs[/variable-lua][punctuation-delimiter-lua].[/punctuation-delimiter-lua][variable-member-lua]animal[/variable-member-lua]  [comment-lua]-- works! thanks, metatable[/comment-lua]
+
+[comment-lua]-- Direct table lookups that fail will retry using[/comment-lua]
+[comment-lua]-- the metatable's __index value, and this recurses.[/comment-lua]
+
+[comment-lua]-- An __index value can also be a function(tbl, key)[/comment-lua]
+[comment-lua]-- for more customized lookups.[/comment-lua]
+
+[comment-lua]-- Values of __index,add, .. are called metamethods.[/comment-lua]
+[comment-lua]-- Full list. Here a is a table with the metamethod.[/comment-lua]
+
+[comment-lua]-- __add(a, b)                     for a + b[/comment-lua]
+[comment-lua]-- __sub(a, b)                     for a - b[/comment-lua]
+[comment-lua]-- __mul(a, b)                     for a * b[/comment-lua]
+[comment-lua]-- __div(a, b)                     for a / b[/comment-lua]
+[comment-lua]-- __mod(a, b)                     for a % b[/comment-lua]
+[comment-lua]-- __pow(a, b)                     for a ^ b[/comment-lua]
+[comment-lua]-- __unm(a)                        for -a[/comment-lua]
+[comment-lua]-- __concat(a, b)                  for a .. b[/comment-lua]
+[comment-lua]-- __len(a)                        for #a[/comment-lua]
+[comment-lua]-- __eq(a, b)                      for a == b[/comment-lua]
+[comment-lua]-- __lt(a, b)                      for a < b[/comment-lua]
+[comment-lua]-- __le(a, b)                      for a <= b[/comment-lua]
+[comment-lua]-- __index(a, b)  <fn or a table>  for a.b[/comment-lua]
+[comment-lua]-- __newindex(a, b, c)             for a.b = c[/comment-lua]
+[comment-lua]-- __call(a, ...)                  for a(...)[/comment-lua]
+
+[comment-documentation-lua]----------------------------------------------------[/comment-documentation-lua]
+[comment-lua]-- 3.2 Class-like tables and inheritance.[/comment-lua]
+[comment-documentation-lua]----------------------------------------------------[/comment-documentation-lua]
+
+[comment-lua]-- Classes aren't built in; there are different ways[/comment-lua]
+[comment-lua]-- to make them using tables and metatables.[/comment-lua]
+
+[comment-lua]-- Explanation for this example is below it.[/comment-lua]
+
+[variable-lua]Dog[/variable-lua] [operator-lua]=[/operator-lua] [constructor-lua]{[/constructor-lua][constructor-lua]}[/constructor-lua]                                   [comment-lua]-- 1.[/comment-lua]
+
+[keyword-function-lua]function[/keyword-function-lua] [variable-lua]Dog[/variable-lua][punctuation-delimiter-lua]:[/punctuation-delimiter-lua][function-method-lua]new[/function-method-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]                         [comment-lua]-- 2.[/comment-lua]
+  [variable-lua]newObj[/variable-lua] [operator-lua]=[/operator-lua] [constructor-lua]{[/constructor-lua][property-lua]sound[/property-lua] [operator-lua]=[/operator-lua] [string-lua]'woof'[/string-lua][constructor-lua]}[/constructor-lua]                [comment-lua]-- 3.[/comment-lua]
+  [variable-builtin-lua]self[/variable-builtin-lua][punctuation-delimiter-lua].[/punctuation-delimiter-lua][variable-member-lua]__index[/variable-member-lua] [operator-lua]=[/operator-lua] [variable-builtin-lua]self[/variable-builtin-lua]                      [comment-lua]-- 4.[/comment-lua]
+  [keyword-return-lua]return[/keyword-return-lua] [function-builtin-lua]setmetatable[/function-builtin-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][variable-lua]newObj[/variable-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [variable-builtin-lua]self[/variable-builtin-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]        [comment-lua]-- 5.[/comment-lua]
+[keyword-function-lua]end[/keyword-function-lua]
+
+[keyword-function-lua]function[/keyword-function-lua] [variable-lua]Dog[/variable-lua][punctuation-delimiter-lua]:[/punctuation-delimiter-lua][function-method-lua]makeSound[/function-method-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]                   [comment-lua]-- 6.[/comment-lua]
+  [function-builtin-lua]print[/function-builtin-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][string-lua]'I say '[/string-lua] [operator-lua]..[/operator-lua] [variable-builtin-lua]self[/variable-builtin-lua][punctuation-delimiter-lua].[/punctuation-delimiter-lua][variable-member-lua]sound[/variable-member-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]
+[keyword-function-lua]end[/keyword-function-lua]
+
+[variable-lua]mrDog[/variable-lua] [operator-lua]=[/operator-lua] [variable-lua]Dog[/variable-lua][punctuation-delimiter-lua]:[/punctuation-delimiter-lua][function-method-call-lua]new[/function-method-call-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]                          [comment-lua]-- 7.[/comment-lua]
+[variable-lua]mrDog[/variable-lua][punctuation-delimiter-lua]:[/punctuation-delimiter-lua][function-method-call-lua]makeSound[/function-method-call-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]  [comment-lua]-- 'I say woof'         -- 8.[/comment-lua]
+
+[comment-lua]-- 1. Dog acts like a class; it's really a table.[/comment-lua]
+[comment-lua]-- 2. function tablename:fn(...) is the same as[/comment-lua]
+[comment-lua]--    function tablename.fn(self, ...)[/comment-lua]
+[comment-lua]--    The : just adds a first arg called self.[/comment-lua]
+[comment-lua]--    Read 7 & 8 below for how self gets its value.[/comment-lua]
+[comment-lua]-- 3. newObj will be an instance of class Dog.[/comment-lua]
+[comment-lua]-- 4. self = the class being instantiated. Often[/comment-lua]
+[comment-lua]--    self = Dog, but inheritance can change it.[/comment-lua]
+[comment-lua]--    newObj gets self's functions when we set both[/comment-lua]
+[comment-lua]--    newObj's metatable and self's __index to self.[/comment-lua]
+[comment-lua]-- 5. Reminder: setmetatable returns its first arg.[/comment-lua]
+[comment-lua]-- 6. The : works as in 2, but this time we expect[/comment-lua]
+[comment-lua]--    self to be an instance instead of a class.[/comment-lua]
+[comment-lua]-- 7. Same as Dog.new(Dog), so self = Dog in new().[/comment-lua]
+[comment-lua]-- 8. Same as mrDog.makeSound(mrDog); self = mrDog.[/comment-lua]
+
+[comment-documentation-lua]----------------------------------------------------[/comment-documentation-lua]
+
+[comment-lua]-- Inheritance example:[/comment-lua]
+
+[variable-lua]LoudDog[/variable-lua] [operator-lua]=[/operator-lua] [variable-lua]Dog[/variable-lua][punctuation-delimiter-lua]:[/punctuation-delimiter-lua][function-method-call-lua]new[/function-method-call-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]                           [comment-lua]-- 1.[/comment-lua]
+
+[keyword-function-lua]function[/keyword-function-lua] [variable-lua]LoudDog[/variable-lua][punctuation-delimiter-lua]:[/punctuation-delimiter-lua][function-method-lua]makeSound[/function-method-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]
+  [variable-lua]s[/variable-lua] [operator-lua]=[/operator-lua] [variable-builtin-lua]self[/variable-builtin-lua][punctuation-delimiter-lua].[/punctuation-delimiter-lua][variable-member-lua]sound[/variable-member-lua] [operator-lua]..[/operator-lua] [string-lua]' '[/string-lua]                       [comment-lua]-- 2.[/comment-lua]
+  [function-builtin-lua]print[/function-builtin-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][variable-lua]s[/variable-lua] [operator-lua]..[/operator-lua] [variable-lua]s[/variable-lua] [operator-lua]..[/operator-lua] [variable-lua]s[/variable-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]
+[keyword-function-lua]end[/keyword-function-lua]
+
+[variable-lua]seymour[/variable-lua] [operator-lua]=[/operator-lua] [variable-lua]LoudDog[/variable-lua][punctuation-delimiter-lua]:[/punctuation-delimiter-lua][function-method-call-lua]new[/function-method-call-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]                       [comment-lua]-- 3.[/comment-lua]
+[variable-lua]seymour[/variable-lua][punctuation-delimiter-lua]:[/punctuation-delimiter-lua][function-method-call-lua]makeSound[/function-method-call-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]  [comment-lua]-- 'woof woof woof'      -- 4.[/comment-lua]
+
+[comment-lua]-- 1. LoudDog gets Dog's methods and variables.[/comment-lua]
+[comment-lua]-- 2. self has a 'sound' key from new(), see 3.[/comment-lua]
+[comment-lua]-- 3. Same as LoudDog.new(LoudDog), and converted to[/comment-lua]
+[comment-lua]--    Dog.new(LoudDog) as LoudDog has no 'new' key,[/comment-lua]
+[comment-lua]--    but does have __index = Dog on its metatable.[/comment-lua]
+[comment-lua]--    Result: seymour's metatable is LoudDog, and[/comment-lua]
+[comment-lua]--    LoudDog.__index = LoudDog. So seymour.key will[/comment-lua]
+[comment-lua]--    = seymour.key, LoudDog.key, Dog.key, whichever[/comment-lua]
+[comment-lua]--    table is the first with the given key.[/comment-lua]
+[comment-lua]-- 4. The 'makeSound' key is found in LoudDog; this[/comment-lua]
+[comment-lua]--    is the same as LoudDog.makeSound(seymour).[/comment-lua]
+
+[comment-lua]-- If needed, a subclass's new() is like the base's:[/comment-lua]
+[keyword-function-lua]function[/keyword-function-lua] [variable-lua]LoudDog[/variable-lua][punctuation-delimiter-lua]:[/punctuation-delimiter-lua][function-method-lua]new[/function-method-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]
+  [variable-lua]newObj[/variable-lua] [operator-lua]=[/operator-lua] [constructor-lua]{[/constructor-lua][constructor-lua]}[/constructor-lua]
+  [comment-lua]-- set up newObj[/comment-lua]
+  [variable-builtin-lua]self[/variable-builtin-lua][punctuation-delimiter-lua].[/punctuation-delimiter-lua][variable-member-lua]__index[/variable-member-lua] [operator-lua]=[/operator-lua] [variable-builtin-lua]self[/variable-builtin-lua]
+  [keyword-return-lua]return[/keyword-return-lua] [function-builtin-lua]setmetatable[/function-builtin-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][variable-lua]newObj[/variable-lua][punctuation-delimiter-lua],[/punctuation-delimiter-lua] [variable-builtin-lua]self[/variable-builtin-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]
+[keyword-function-lua]end[/keyword-function-lua]
+
+[comment-documentation-lua]----------------------------------------------------[/comment-documentation-lua]
+[comment-lua]-- 4. Modules.[/comment-lua]
+[comment-documentation-lua]----------------------------------------------------[/comment-documentation-lua]
+
+[comment-lua]-- Suppose the file mod.lua looks like this:[/comment-lua]
+[keyword-lua]local[/keyword-lua] [constant-lua]M[/constant-lua] [operator-lua]=[/operator-lua] [constructor-lua]{[/constructor-lua][constructor-lua]}[/constructor-lua]
+
+[keyword-lua]local[/keyword-lua] [keyword-function-lua]function[/keyword-function-lua] [function-lua]sayMyName[/function-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]
+  [function-builtin-lua]print[/function-builtin-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][string-lua]'Hrunkner'[/string-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]
+[keyword-function-lua]end[/keyword-function-lua]
+
+[keyword-function-lua]function[/keyword-function-lua] [constant-lua]M[/constant-lua][punctuation-delimiter-lua].[/punctuation-delimiter-lua][function-lua]sayHello[/function-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]
+  [function-builtin-lua]print[/function-builtin-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][string-lua]'Why hello there'[/string-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]
+  [function-call-lua]sayMyName[/function-call-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]
+[keyword-function-lua]end[/keyword-function-lua]
+
+[keyword-return-lua]return[/keyword-return-lua] [constant-lua]M[/constant-lua]
+
+[comment-lua]-- Another file can use mod.lua's functionality:[/comment-lua]
+[keyword-lua]local[/keyword-lua] [variable-lua]mod[/variable-lua] [operator-lua]=[/operator-lua] [function-builtin-lua]require[/function-builtin-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][string-lua]'mod'[/string-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]  [comment-lua]-- Run the file mod.lua.[/comment-lua]
+
+[comment-lua]-- require is the standard way to include modules.[/comment-lua]
+[comment-lua]-- require acts like:     (if not cached; see below)[/comment-lua]
+[keyword-lua]local[/keyword-lua] [variable-lua]mod[/variable-lua] [operator-lua]=[/operator-lua] [punctuation-bracket-lua]([/punctuation-bracket-lua][keyword-function-lua]function[/keyword-function-lua] [punctuation-bracket-lua]([/punctuation-bracket-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]
+  <[variable-lua]contents[/variable-lua] [variable-lua]of[/variable-lua] [variable-lua]mod[/variable-lua][punctuation-delimiter-lua].[/punctuation-delimiter-lua][variable-member-lua]lua[/variable-member-lua]>
+[keyword-function-lua]end[/keyword-function-lua][punctuation-bracket-lua])[/punctuation-bracket-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]
+[comment-lua]-- It's like mod.lua is a function body, so that[/comment-lua]
+[comment-lua]-- locals inside mod.lua are invisible outside it.[/comment-lua]
+
+[comment-lua]-- This works because mod here = M in mod.lua:[/comment-lua]
+[variable-lua]mod[/variable-lua][punctuation-delimiter-lua].[/punctuation-delimiter-lua][function-call-lua]sayHello[/function-call-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][punctuation-bracket-lua])[/punctuation-bracket-lua] [comment-lua]-- Prints: Why hello there Hrunkner[/comment-lua]
+
+[comment-lua]-- This is wrong; sayMyName only exists in mod.lua:[/comment-lua]
+[variable-lua]mod[/variable-lua][punctuation-delimiter-lua].[/punctuation-delimiter-lua][function-call-lua]sayMyName[/function-call-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]  [comment-lua]-- error[/comment-lua]
+
+[comment-lua]-- require's return values are cached so a file is[/comment-lua]
+[comment-lua]-- run at most once, even when require'd many times.[/comment-lua]
+
+[comment-lua]-- Suppose mod2.lua contains "print('Hi!')".[/comment-lua]
+[keyword-lua]local[/keyword-lua] [variable-lua]a[/variable-lua] [operator-lua]=[/operator-lua] [function-builtin-lua]require[/function-builtin-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][string-lua]'mod2'[/string-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]  [comment-lua]-- Prints Hi![/comment-lua]
+[keyword-lua]local[/keyword-lua] [variable-lua]b[/variable-lua] [operator-lua]=[/operator-lua] [function-builtin-lua]require[/function-builtin-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][string-lua]'mod2'[/string-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]  [comment-lua]-- Doesn't print; a=b.[/comment-lua]
+
+[comment-lua]-- dofile is like require without caching:[/comment-lua]
+[function-builtin-lua]dofile[/function-builtin-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][string-lua]'mod2.lua'[/string-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]  [comment-lua]--> Hi![/comment-lua]
+[function-builtin-lua]dofile[/function-builtin-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][string-lua]'mod2.lua'[/string-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]  [comment-lua]--> Hi! (runs it again)[/comment-lua]
+
+[comment-lua]-- loadfile loads a lua file but doesn't run it yet.[/comment-lua]
+[variable-lua]f[/variable-lua] [operator-lua]=[/operator-lua] [function-builtin-lua]loadfile[/function-builtin-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][string-lua]'mod2.lua'[/string-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]  [comment-lua]-- Call f() to run it.[/comment-lua]
+
+[comment-lua]-- load is loadfile for strings.[/comment-lua]
+[comment-lua]-- (loadstring is deprecated, use load instead)[/comment-lua]
+[variable-lua]g[/variable-lua] [operator-lua]=[/operator-lua] [function-builtin-lua]load[/function-builtin-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][string-lua]'print(343)'[/string-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]  [comment-lua]-- Returns a function.[/comment-lua]
+[function-call-lua]g[/function-call-lua][punctuation-bracket-lua]([/punctuation-bracket-lua][punctuation-bracket-lua])[/punctuation-bracket-lua]  [comment-lua]-- Prints out 343; nothing printed before now.[/comment-lua]

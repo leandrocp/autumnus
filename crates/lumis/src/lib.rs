@@ -81,6 +81,7 @@
 //! | [`HtmlMultiThemesBuilder`] | HTML (inline) with multiple themes | Support light/dark mode, theme switching |
 //! | [`HtmlLinkedBuilder`] | HTML with CSS classes | Multiple code blocks, custom styling |
 //! | [`TerminalBuilder`] | ANSI escape codes | CLI tools, terminal output |
+//! | [`BBCodeBuilder`] | BBCode with scope tags | Forum posts, BBCode-based platforms |
 //!
 //! See the [`formatter`] module for advanced features like line highlighting and custom formatters.
 //!
@@ -322,7 +323,7 @@ use std::io::{self, Write};
 
 // Re-export builders for easier access
 pub use crate::formatter::{
-    HtmlInlineBuilder, HtmlLinkedBuilder, HtmlMultiThemesBuilder, TerminalBuilder,
+    BBCodeBuilder, HtmlInlineBuilder, HtmlLinkedBuilder, HtmlMultiThemesBuilder, TerminalBuilder,
 };
 
 /// Highlights source code and returns it as a string.

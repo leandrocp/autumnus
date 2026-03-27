@@ -26,7 +26,7 @@
 - **110+ Tree-sitter languages** - Fast, accurate, and updated syntax parsing
 - **120+ Neovim themes** - Updated and curated themes from the Neovim community
 - **6 platforms** - CLI, Rust, Elixir, Node.js, Browser, Java
-- **Multiple outputs** - HTML (inline/linked), Terminal (ANSI), Multi-theme (light/dark), and custom formatters
+- **Multiple outputs** - HTML (inline/linked), Terminal (ANSI), Multi-theme (light/dark), BBCode, and custom formatters
 - **Language auto-detection** - File extension, shebang, and emacs-mode support
 - **Streaming-friendly** - Handles incomplete code
 

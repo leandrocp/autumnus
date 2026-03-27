@@ -26,6 +26,7 @@ const sidebars: SidebarsConfig = {
         'usage/formatters/html-linked',
         'usage/formatters/html-multi-themes',
         'usage/formatters/terminal',
+        'usage/formatters/bbcode',
         'usage/custom-formatters',
       ],
     },

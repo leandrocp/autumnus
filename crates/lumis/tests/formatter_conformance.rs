@@ -1,7 +1,7 @@
 use lumis::formatter::Formatter as _;
 use lumis::{
-    highlight, highlight::highlight_events, languages::Language, themes, HtmlInlineBuilder,
-    HtmlLinkedBuilder, HtmlMultiThemesBuilder, TerminalBuilder,
+    highlight, highlight::highlight_events, languages::Language, themes, BBCodeBuilder,
+    HtmlInlineBuilder, HtmlLinkedBuilder, HtmlMultiThemesBuilder, TerminalBuilder,
 };
 use serde::Deserialize;
 use std::{collections::HashMap, fs, path::PathBuf};
@@ -31,6 +31,7 @@ struct Fixture {
     html_linked: String,
     html_multi_themes: String,
     terminal: String,
+    bbcode: String,
 }
 
 fn conformance_dir() -> PathBuf {
@@ -53,6 +54,7 @@ fn load_fixture(name: &str) -> Fixture {
         html_multi_themes: fs::read_to_string(dir.join("html-multi-themes.html"))
             .expect("failed to read html-multi-themes"),
         terminal: fs::read_to_string(dir.join("terminal.txt")).expect("failed to read terminal"),
+        bbcode: fs::read_to_string(dir.join("bbcode.txt")).expect("failed to read bbcode"),
         metadata,
     }
 }
@@ -136,6 +138,17 @@ fn check_terminal(fixture: &Fixture) {
     assert_eq!(
         normalize_newlines(&String::from_utf8(out).unwrap()),
         normalize_newlines(&fixture.terminal)
+    );
+}
+
+fn check_bbcode(fixture: &Fixture) {
+    let lang: Language = fixture.metadata.language.parse().unwrap();
+    let fmt = BBCodeBuilder::new().lang(lang).build().unwrap();
+    let mut out = Vec::new();
+    fmt.format(&fixture.source, &mut out).unwrap();
+    assert_eq!(
+        normalize_newlines(&String::from_utf8(out).unwrap()),
+        normalize_newlines(&fixture.bbcode)
     );
 }
 
