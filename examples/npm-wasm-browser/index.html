@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>npm-wasm-browser + Lumis</title>
+    <style>
+      body { font-family: sans-serif; margin: 2rem; background: #f6f7f9; }
+      main { max-width: 960px; margin: 0 auto; }
+      p { line-height: 1.5; }
+      #output pre.lumis {
+        margin-top: 1rem;
+        overflow-x: auto;
+      }
+      #error {
+        display: none;
+        margin-top: 1rem;
+        padding: 0.75rem;
+        border: 1px solid #d28484;
+        background: #fff1f1;
+        color: #8a2f2f;
+        font: 14px/1.5 monospace;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>npm-wasm-browser + Lumis</h1>
+      <p>
+        This example imports <code>@lumis-sh/wasm-elixir</code> from npm and passes its WASM bytes directly to
+        Lumis.
+      </p>
+      <div id="output">Loading Elixir parser from npm package...</div>
+      <pre id="error"></pre>
+    </main>
+
+    <script type="module" src="./main.js"></script>
+  </body>
+  </html>

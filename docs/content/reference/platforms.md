@@ -46,4 +46,5 @@ keywords:
 JavaScript parser grammars are also published as per-language WASM packages such as `@lumis-sh/wasm-rust`, `@lumis-sh/wasm-javascript`, and `@lumis-sh/wasm-elixir`.
 
 - package list: [Languages](/reference/languages)
+- browser helper for npm parser packages: `withWasm()` from `@lumis-sh/lumis`
 - loading and resolver behavior: [WASM and CDN](/advanced/wasm-and-cdn)

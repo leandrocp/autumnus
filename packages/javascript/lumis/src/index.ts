@@ -90,6 +90,23 @@ export function highlight(...args: Parameters<typeof highlighter.highlight>) {
 export function highlightIter(...args: Parameters<typeof highlighter.highlightIter>) {
   return highlighter.highlightIter(...args);
 }
+
+/**
+ * Return a copy of a language with a custom WASM source.
+ *
+ * Useful in browser bundlers when you want to import a parser package directly,
+ * for example `import elixirWasm from '@lumis-sh/wasm-elixir'`.
+ */
+export function withWasm<T extends import("./types.js").Language>(
+  language: T,
+  wasm: import("./types.js").RuntimeWasmInput,
+): Omit<T, "wasm"> & { wasm: import("./types.js").RuntimeWasmInput } {
+  return {
+    ...language,
+    wasm,
+  };
+}
+
 export type { Highlighter } from "./core/highlighter.js";
 export type {
   HighlightContext,
@@ -107,6 +124,7 @@ export type {
   LazyLanguage,
   Theme,
   WasmRef,
+  RuntimeWasmInput,
   LanguageInfo,
   ThemeInfo,
 } from "./types.js";
