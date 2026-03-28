@@ -83,7 +83,13 @@ defmodule Lumis.LumisTest do
   end
 
   test "available_themes" do
-    assert Lumis.available_themes() |> length() == 117
+    expected_count =
+      __DIR__
+      |> Path.join("../../../../themes")
+      |> File.ls!()
+      |> Enum.count(&String.ends_with?(&1, ".json"))
+
+    assert Lumis.available_themes() |> length() == expected_count
   end
 
   test "default_options/0" do

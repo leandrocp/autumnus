@@ -1,4 +1,6 @@
 import { describe, it, expect } from 'vitest'
+import { readdirSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { availableLanguages, availableThemes } from '../src/index.js'
 
 describe('availableLanguages', () => {
@@ -71,5 +73,13 @@ describe('availableThemes', () => {
     for (const theme of availableThemes()) {
       expect(['light', 'dark']).toContain(theme.appearance)
     }
+  })
+
+  it('matches the repository theme inventory', () => {
+    const expectedCount = readdirSync(resolve(import.meta.dirname, '../../../../themes'))
+      .filter((file) => file.endsWith('.json'))
+      .length
+
+    expect(availableThemes()).toHaveLength(expectedCount)
   })
 })

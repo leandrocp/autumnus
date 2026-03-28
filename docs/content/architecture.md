@@ -49,7 +49,7 @@ formatter (tokens + styles -> HTML / ANSI / BBCode Scoped / custom output)
 
 ### Themes
 
-120+ themes extracted from Neovim colorschemes. Each theme is a JSON file mapping Tree-sitter scopes to styles. Themes have a `name` and `appearance` (light or dark).
+250+ themes extracted from Neovim colorschemes. Each theme is a JSON file mapping Tree-sitter scopes to styles. Themes have a `name` and `appearance` (light or dark).
 
 ### Formatters
 

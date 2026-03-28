@@ -17,7 +17,7 @@
 ## Features
 
 - 110+ languages with Tree-sitter parsing
-- 120+ Neovim themes
+- 250+ built-in Neovim themes
 - HTML output with inline styles or CSS classes
 - Multi-theme support for light/dark mode
 - Terminal output with ANSI colors
@@ -235,7 +235,7 @@ let html = highlight(code, formatter);
 
 ## Themes
 
-120+ themes from popular Neovim colorschemes:
+250+ themes from popular Neovim colorschemes:
 
 ```rust
 use lumis::themes;
