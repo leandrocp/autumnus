@@ -1,15 +1,33 @@
-import { createHighlighter } from "@lumis-sh/lumis";
+import { createHighlighter, configureWasmResolver } from "@lumis-sh/lumis";
 import { bundledLanguages } from "@lumis-sh/lumis/bundles/full";
 import { htmlInline, htmlMultiThemes } from "@lumis-sh/lumis/formatters";
 import type { Theme } from "@lumis-sh/lumis";
 
-const DEFAULT_PRE_CLASS = "m-0 overflow-x-auto p-5 font-mono text-[13px] leading-relaxed sm:p-6 sm:text-sm";
+configureWasmResolver((_language, wasm) => `/wasm/${wasm.name}.wasm`);
+
+const DEFAULT_PRE_CLASS =
+  "m-0 overflow-x-auto p-5 font-mono text-[13px] leading-relaxed sm:p-6 sm:text-sm";
 
 const highlighterPromise = createHighlighter({ languages: [bundledLanguages] });
 
 export type WorkerRequest =
-  | { id: number; type: "highlight"; languageId: string; theme: Theme; source: string; preClass?: string }
-  | { id: number; type: "highlightMultiTheme"; languageId: string; lightTheme: Theme; darkTheme: Theme; source: string; preClass?: string }
+  | {
+      id: number;
+      type: "highlight";
+      languageId: string;
+      theme: Theme;
+      source: string;
+      preClass?: string;
+    }
+  | {
+      id: number;
+      type: "highlightMultiTheme";
+      languageId: string;
+      lightTheme: Theme;
+      darkTheme: Theme;
+      source: string;
+      preClass?: string;
+    }
   | { id: number; type: "preloadAll" };
 
 export type WorkerResponse =
@@ -23,7 +41,8 @@ async function handleMessage(req: WorkerRequest): Promise<WorkerResponse> {
   switch (req.type) {
     case "highlight": {
       const lang = bundledLanguages[req.languageId];
-      if (!lang) return { id: req.id, type: "error", message: `Unknown language: ${req.languageId}` };
+      if (!lang)
+        return { id: req.id, type: "error", message: `Unknown language: ${req.languageId}` };
       await hl.loadLanguage(lang);
       const html = hl.highlight(
         req.source,
@@ -39,7 +58,8 @@ async function handleMessage(req: WorkerRequest): Promise<WorkerResponse> {
     }
     case "highlightMultiTheme": {
       const lang = bundledLanguages[req.languageId];
-      if (!lang) return { id: req.id, type: "error", message: `Unknown language: ${req.languageId}` };
+      if (!lang)
+        return { id: req.id, type: "error", message: `Unknown language: ${req.languageId}` };
       await hl.loadLanguage(lang);
       const html = hl.highlight(
         req.source,
@@ -54,7 +74,9 @@ async function handleMessage(req: WorkerRequest): Promise<WorkerResponse> {
       return { id: req.id, type: "result", html };
     }
     case "preloadAll": {
-      await Promise.all(Object.values(bundledLanguages).map((l) => hl.loadLanguage(l).catch(() => {})));
+      await Promise.all(
+        Object.values(bundledLanguages).map((l) => hl.loadLanguage(l).catch(() => {})),
+      );
       return { id: req.id, type: "done" };
     }
   }
@@ -65,6 +87,10 @@ self.onmessage = async (e: MessageEvent<WorkerRequest>) => {
     const response = await handleMessage(e.data);
     self.postMessage(response);
   } catch (err) {
-    self.postMessage({ id: e.data.id, type: "error", message: String(err) } satisfies WorkerResponse);
+    self.postMessage({
+      id: e.data.id,
+      type: "error",
+      message: String(err),
+    } satisfies WorkerResponse);
   }
 };
