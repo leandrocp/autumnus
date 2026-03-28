@@ -1,0 +1,13 @@
+{
+  "name": "example-wasm-bundle-essential-node",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "render": "node render.mjs"
+  },
+  "dependencies": {
+    "@lumis-sh/lumis": "workspace:*",
+    "@lumis-sh/themes": "workspace:*",
+    "@lumis-sh/wasm-bundle-essential": "workspace:*"
+  }
+}

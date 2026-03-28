@@ -1004,22 +1004,98 @@ globs = ["*.vhd", "*.vhdl"]
 
 # ── Bundles ─────────────────────────────────────────────────────────────────
 
+[bundles.essential]
+parsers = [
+  "bash",
+  "comment",
+  "diff",
+  "ini",
+  "xml",
+  "json",
+  "markdown",
+  "markdown_inline",
+  "regex",
+  "toml",
+  "yaml",
+]
+
 [bundles.web]
 parsers = [
-  "html", "css", "scss", "javascript", "typescript", "tsx",
-  "json", "yaml", "toml", "xml", "markdown", "markdown_inline",
-  "sql", "graphql", "regex",
-  "bash", "diff", "dockerfile", "comment",
-  "svelte", "vue", "astro",
+  "astro",
+  "bash",
+  "comment",
+  "css",
+  "diff",
+  "dockerfile",
+  "graphql",
+  "heex",
+  "html",
+  "javascript",
+  "json",
+  "markdown",
+  "markdown_inline",
+  "regex",
+  "scss",
+  "sql",
+  "svelte",
+  "toml",
+  "tsx",
+  "typescript",
+  "vue",
+  "xml",
+  "yaml",
 ]
 
 [bundles.system]
 parsers = [
-  "c", "cpp", "rust", "go", "zig",
-  "asm", "llvm", "wat",
-  "cmake", "make",
-  "bash", "diff", "comment", "regex",
-  "toml", "yaml", "json",
+  "asm",
+  "bash",
+  "c",
+  "cmake",
+  "comment",
+  "cpp",
+  "diff",
+  "go",
+  "json",
+  "llvm",
+  "make",
+  "regex",
+  "rust",
+  "toml",
+  "wat",
+  "yaml",
+  "zig",
+]
+
+[bundles.backend]
+parsers = [
+  "bash",
+  "comment",
+  "csharp",
+  "diff",
+  "dockerfile",
+  "elixir",
+  "erlang",
+  "go",
+  "graphql",
+  "http",
+  "java",
+  "javascript",
+  "json",
+  "kotlin",
+  "nginx",
+  "php",
+  "protobuf",
+  "python",
+  "regex",
+  "ruby",
+  "rust",
+  "scala",
+  "sql",
+  "toml",
+  "typescript",
+  "xml",
+  "yaml",
 ]
 
 [bundles.full]

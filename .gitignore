@@ -11,3 +11,4 @@ AGENTS.md
 CLAUDE.md
 __pycache__/
 node_modules/
+examples/**/dist/

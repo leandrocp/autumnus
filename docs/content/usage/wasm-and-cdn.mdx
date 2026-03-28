@@ -44,6 +44,8 @@ Lumis supports two good npm-based workflows:
 - Node: install the parser package and use the normal language import
 - browser bundlers: import the parser package explicitly and apply it with `withWasm()`
 
+For multiple languages, install a preset package such as `@lumis-sh/wasm-bundle-essential` and pair it with the matching Lumis bundle.
+
 <Tabs groupId="npm-wasm" queryString="npm-wasm" defaultValue="node">
   <TabItem value="node" label="Node">
 
@@ -67,6 +69,32 @@ const html = hl.highlight(
 This is the optimized Node DX. Once `@lumis-sh/wasm-elixir` is installed, Lumis can load it automatically.
 
 See `examples/npm-wasm-node`.
+
+  </TabItem>
+  <TabItem value="node-bundle" label="Node bundle">
+
+```js title="Installed bundle autoload"
+import {createHighlighter} from '@lumis-sh/lumis'
+import {htmlInline} from '@lumis-sh/lumis/formatters'
+import {bundledLanguages} from '@lumis-sh/lumis/bundles/essential'
+import githubLight from '@lumis-sh/themes/github_light'
+import '@lumis-sh/wasm-bundle-essential'
+
+const hl = await createHighlighter({
+  languages: [bundledLanguages],
+})
+
+await hl.loadLanguage(bundledLanguages.toml)
+
+const html = hl.highlight(
+  'theme = "github-light"',
+  htmlInline({language: bundledLanguages.toml, theme: githubLight})
+)
+```
+
+Use this when you want one package in `package.json` to cover a whole preset. Lumis still imports only `@lumis-sh/lumis/bundles/essential`; Node resolves the installed parser packages automatically.
+
+See `examples/wasm-bundle-essential-node`.
 
   </TabItem>
   <TabItem value="browser" label="Browser bundlers">
@@ -93,6 +121,34 @@ const html = hl.highlight(
 Use this in browser bundlers so the parser package is visible to the bundler and does not rely on a CDN fetch.
 
 See `examples/npm-wasm-browser`.
+
+  </TabItem>
+  <TabItem value="browser-bundle" label="Browser bundle">
+
+```js title="withWasmBundle helper"
+import {createHighlighter, withWasmBundle} from '@lumis-sh/lumis'
+import {htmlInline} from '@lumis-sh/lumis/formatters'
+import {bundledLanguages} from '@lumis-sh/lumis/bundles/essential'
+import {bundledWasms} from '@lumis-sh/wasm-bundle-essential'
+import githubLight from '@lumis-sh/themes/github_light'
+
+const languages = withWasmBundle(bundledLanguages, bundledWasms)
+
+const hl = await createHighlighter({
+  languages: [languages],
+})
+
+await hl.loadLanguage(languages.toml)
+
+const html = hl.highlight(
+  'theme = "github-light"',
+  htmlInline({language: languages.toml, theme: githubLight})
+)
+```
+
+Use this in browser bundlers when you want local, bundler-managed parser assets for a whole preset instead of wiring each language one by one.
+
+See `examples/wasm-bundle-essential-browser`.
 
   </TabItem>
 </Tabs>
@@ -144,7 +200,7 @@ The CLI does not expose a custom WASM resolver hook. Use the parser cache comman
 
 ## Browser / CDN usage
 
-This works well when your app can fetch parser WASM files from the default CDN. If you need a different host or local assets, set a custom resolver first. If you want bundler-managed parser assets from npm instead, prefer `withWasm()`.
+This works well when your app can fetch parser WASM files from the default CDN. If you need a different host or local assets, set a custom resolver first. If you want bundler-managed parser assets from npm instead, prefer `withWasm()` for single languages or `withWasmBundle()` for preset bundles.
 
 ```html title="ESM CDN"
 <script type="module">
@@ -165,3 +221,4 @@ This works well when your app can fetch parser WASM files from the default CDN. 
 - full language and WASM package list: [Languages](/reference/languages)
 - JavaScript runtime overview: [JavaScript Runtime](/highlight/javascript)
 - CLI parser commands: [CLI Commands](/cli/commands)
+- platform and package overview: [Platforms](/reference/platforms)
