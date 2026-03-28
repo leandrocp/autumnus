@@ -1012,7 +1012,11 @@ return {
 		name = "horizon_light",
 		config = function()
 			vim.o.background = "light"
-			vim.cmd([[colorscheme horizon]])
+			local data = require("horizon.palette-light")
+			data.palette.syntax.apricot = data.palette.syntax.apricot or data.palette.syntax.jaffa
+			data.palette.syntax.lavender = data.palette.syntax.lavender or data.palette.syntax.amethyst
+			data.palette.syntax.turquoise = data.palette.syntax.turquoise or data.palette.syntax.elm
+			require("horizon").setup()
 		end,
 	},
 	{
@@ -1148,7 +1152,8 @@ return {
 		name = "solarized_osaka_storm",
 		config = function()
 			vim.o.background = "dark"
-			vim.cmd([[colorscheme solarized-osaka-storm]])
+			require("solarized-osaka").setup({ style = "storm" })
+			vim.cmd([[colorscheme solarized-osaka]])
 		end,
 	},
 	{
@@ -1380,8 +1385,7 @@ return {
 		name = "neomodern_moon_dark",
 		config = function()
 			vim.o.background = "dark"
-			require("neomodern").setup({ theme = "moon" })
-			vim.cmd([[colorscheme neomodern]])
+			require("neomodern").load("moon")
 		end,
 	},
 	{
@@ -1389,8 +1393,7 @@ return {
 		name = "neomodern_moon_light",
 		config = function()
 			vim.o.background = "light"
-			require("neomodern").setup({ theme = "moon" })
-			vim.cmd([[colorscheme neomodern]])
+			require("neomodern").load("moon")
 		end,
 	},
 	{
@@ -1398,8 +1401,7 @@ return {
 		name = "neomodern_iceclimber_dark",
 		config = function()
 			vim.o.background = "dark"
-			require("neomodern").setup({ theme = "iceclimber" })
-			vim.cmd([[colorscheme neomodern]])
+			require("neomodern").load("iceclimber")
 		end,
 	},
 	{
@@ -1407,8 +1409,7 @@ return {
 		name = "neomodern_iceclimber_light",
 		config = function()
 			vim.o.background = "light"
-			require("neomodern").setup({ theme = "iceclimber" })
-			vim.cmd([[colorscheme neomodern]])
+			require("neomodern").load("iceclimber")
 		end,
 	},
 	{
@@ -1416,8 +1417,7 @@ return {
 		name = "neomodern_gyokuro_dark",
 		config = function()
 			vim.o.background = "dark"
-			require("neomodern").setup({ theme = "gyokuro" })
-			vim.cmd([[colorscheme neomodern]])
+			require("neomodern").load("gyokuro")
 		end,
 	},
 	{
@@ -1425,8 +1425,7 @@ return {
 		name = "neomodern_gyokuro_light",
 		config = function()
 			vim.o.background = "light"
-			require("neomodern").setup({ theme = "gyokuro" })
-			vim.cmd([[colorscheme neomodern]])
+			require("neomodern").load("gyokuro")
 		end,
 	},
 	{
@@ -1434,8 +1433,7 @@ return {
 		name = "neomodern_hojicha_dark",
 		config = function()
 			vim.o.background = "dark"
-			require("neomodern").setup({ theme = "hojicha" })
-			vim.cmd([[colorscheme neomodern]])
+			require("neomodern").load("hojicha")
 		end,
 	},
 	{
@@ -1443,8 +1441,7 @@ return {
 		name = "neomodern_hojicha_light",
 		config = function()
 			vim.o.background = "light"
-			require("neomodern").setup({ theme = "hojicha" })
-			vim.cmd([[colorscheme neomodern]])
+			require("neomodern").load("hojicha")
 		end,
 	},
 	{
@@ -1452,8 +1449,7 @@ return {
 		name = "neomodern_roseprime_dark",
 		config = function()
 			vim.o.background = "dark"
-			require("neomodern").setup({ theme = "roseprime" })
-			vim.cmd([[colorscheme neomodern]])
+			require("neomodern").load("roseprime")
 		end,
 	},
 	{
@@ -1461,8 +1457,7 @@ return {
 		name = "neomodern_roseprime_light",
 		config = function()
 			vim.o.background = "light"
-			require("neomodern").setup({ theme = "roseprime" })
-			vim.cmd([[colorscheme neomodern]])
+			require("neomodern").load("roseprime")
 		end,
 	},
 	{
@@ -1891,7 +1886,9 @@ return {
 		name = "astrodark",
 		config = function()
 			vim.o.background = "dark"
-			vim.cmd([[colorscheme astrodark]])
+			local astrotheme = require("astrotheme")
+			astrotheme.setup({ palette = "astrodark" })
+			astrotheme.load("astrodark")
 		end,
 	},
 	{
@@ -1899,7 +1896,9 @@ return {
 		name = "astrolight",
 		config = function()
 			vim.o.background = "light"
-			vim.cmd([[colorscheme astrolight]])
+			local astrotheme = require("astrotheme")
+			astrotheme.setup({ palette = "astrolight" })
+			astrotheme.load("astrolight")
 		end,
 	},
 	{
@@ -1907,7 +1906,9 @@ return {
 		name = "astromars",
 		config = function()
 			vim.o.background = "dark"
-			vim.cmd([[colorscheme astromars]])
+			local astrotheme = require("astrotheme")
+			astrotheme.setup({ palette = "astromars" })
+			astrotheme.load("astromars")
 		end,
 	},
 	{
@@ -1915,7 +1916,9 @@ return {
 		name = "astrojupiter",
 		config = function()
 			vim.o.background = "light"
-			vim.cmd([[colorscheme astrojupiter]])
+			local astrotheme = require("astrotheme")
+			astrotheme.setup({ palette = "astrojupiter" })
+			astrotheme.load("astrojupiter")
 		end,
 	},
 	{
@@ -1940,7 +1943,7 @@ return {
 		name = "jellybeans",
 		config = function()
 			vim.o.background = "dark"
-			vim.cmd([[colorscheme jellybeans]])
+			vim.cmd([[colorscheme jellybeans-nvim]])
 		end,
 		dependencies = { "https://github.com/rktjmp/lush.nvim" },
 	},
@@ -2051,7 +2054,7 @@ return {
 		name = "ofirkai",
 		config = function()
 			vim.o.background = "dark"
-			require("ofirkai").setup()
+			require("ofirkai").setup({})
 		end,
 	},
 	{
@@ -2099,7 +2102,14 @@ return {
 		name = "synthweave_aqua",
 		config = function()
 			vim.o.background = "dark"
-			vim.cmd([[colorscheme synthweave-aqua]])
+			require("synthweave").setup({
+				palette = {
+					cyan = "#7df9ff",
+					blue_bright = "#59f3ff",
+					green_bright = "#8fffe0",
+				},
+			})
+			require("synthweave").load()
 		end,
 	},
 	{

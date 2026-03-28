@@ -1,7 +1,7 @@
 {
   "name": "modus_operandi",
   "appearance": "light",
-  "revision": "c57c2c56c9f0af04f3b609d11caa840880074784",
+  "revision": "17a64464c27c1be605adca13dbe48f2f402fe107",
   "highlights": {
     "attribute": {
       "fg": "#a0132f"
@@ -24,7 +24,6 @@
       "italic": true
     },
     "comment.documentation": {
-      "fg": "#2a5045",
       "italic": true
     },
     "comment.error": {
@@ -48,10 +47,10 @@
       "fg": "#000000"
     },
     "constant.builtin": {
-      "fg": "#005f5f"
+      "fg": "#8f0075"
     },
     "constant.macro": {
-      "fg": "#a0132f"
+      "fg": "#000000"
     },
     "constructor": {
       "fg": "#7a4f2f"
@@ -75,13 +74,13 @@
       "fg": "#721045"
     },
     "function.builtin": {
-      "fg": "#005f5f"
+      "fg": "#8f0075"
     },
     "function.call": {
       "fg": "#721045"
     },
     "function.macro": {
-      "fg": "#a0132f"
+      "fg": "#721045"
     },
     "function.method": {
       "fg": "#721045"
@@ -107,7 +106,7 @@
       "italic": true
     },
     "keyword.debug": {
-      "fg": "#005f5f"
+      "fg": "#8f0075"
     },
     "keyword.directive": {
       "fg": "#a0132f"
@@ -143,19 +142,20 @@
       "italic": true
     },
     "keyword.type": {
-      "fg": "#005f5f"
+      "fg": "#531ab6",
+      "italic": true
     },
     "label": {
       "fg": "#005e8b"
     },
     "markup": {
-      "fg": "#005f5f"
+      "fg": "#8f0075"
     },
     "markup.environment": {
-      "fg": "#005f5f"
+      "fg": "#8f0075"
     },
     "markup.environment.name": {
-      "fg": "#005f5f"
+      "fg": "#8f0075"
     },
     "markup.heading": {
       "fg": "#193668",
@@ -208,7 +208,7 @@
       "fg": "#6f5500"
     },
     "markup.math": {
-      "fg": "#005f5f"
+      "fg": "#8f0075"
     },
     "markup.quote": {
       "italic": true
@@ -260,7 +260,6 @@
       "fg": "#3548cf"
     },
     "string.documentation": {
-      "fg": "#2a5045",
       "italic": true
     },
     "string.escape": {
@@ -288,7 +287,7 @@
       "fg": "#005e8b"
     },
     "tag.builtin": {
-      "fg": "#005f5f"
+      "fg": "#8f0075"
     },
     "tag.delimiter": {
       "fg": "#000000"

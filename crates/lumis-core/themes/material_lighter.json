@@ -1,7 +1,7 @@
 {
   "name": "material_lighter",
   "appearance": "light",
-  "revision": "52c121551ffbf7b8f25bed3ef5878e5d6896c786",
+  "revision": "92f7366a9315cd386bc4fa4d716fde375dda210f",
   "highlights": {
     "attribute": {
       "bg": "#dbe2ed"
@@ -90,7 +90,7 @@
       "bg": "#e7e7e8"
     },
     "keyword": {
-      "fg": "#39adb5"
+      "fg": "#7c4dff"
     },
     "keyword.conditional": {
       "fg": "#7c4dff"
@@ -99,11 +99,10 @@
       "fg": "#7c4dff"
     },
     "keyword.coroutine": {
-      "fg": "#39adb5",
-      "italic": true
+      "fg": "#7c4dff"
     },
     "keyword.debug": {
-      "fg": "#39adb5"
+      "fg": "#7c4dff"
     },
     "keyword.directive": {
       "fg": "#39adb5"
@@ -115,28 +114,28 @@
       "fg": "#e53935"
     },
     "keyword.export": {
-      "fg": "#39adb5"
+      "fg": "#7c4dff"
     },
     "keyword.function": {
-      "fg": "#39adb5"
+      "fg": "#7c4dff"
     },
     "keyword.import": {
       "fg": "#39adb5"
     },
     "keyword.modifier": {
-      "fg": "#39adb5"
+      "fg": "#7c4dff"
     },
     "keyword.operator": {
-      "fg": "#39adb5"
+      "fg": "#7c4dff"
     },
     "keyword.repeat": {
       "fg": "#7c4dff"
     },
     "keyword.return": {
-      "fg": "#39adb5"
+      "fg": "#7c4dff"
     },
     "keyword.type": {
-      "fg": "#39adb5"
+      "fg": "#7c4dff"
     },
     "label": {
       "fg": "#f6a434"
@@ -300,7 +299,7 @@
       "fg": "#546e7a"
     },
     "variable.builtin": {
-      "fg": "#39adb5"
+      "fg": "#7c4dff"
     },
     "variable.member": {
       "fg": "#94a7b0"
