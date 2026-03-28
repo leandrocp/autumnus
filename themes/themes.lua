@@ -2142,4 +2142,28 @@ return {
 			vim.cmd([[colorscheme OceanicNext]])
 		end,
 	},
+	{
+		url = "https://github.com/datsfilipe/vesper.nvim",
+		name = "vesper",
+		config = function()
+			vim.o.background = "dark"
+			vim.cmd([[colorscheme vesper]])
+		end,
+	},
+	{
+		url = "https://github.com/tiagovla/tokyodark.nvim",
+		name = "tokyodark",
+		config = function()
+			vim.o.background = "dark"
+			vim.cmd([[colorscheme tokyodark]])
+		end,
+	},
+	{
+		url = "https://github.com/darkvoid-theme/darkvoid.nvim",
+		name = "darkvoid",
+		config = function()
+			vim.o.background = "dark"
+			vim.cmd([[colorscheme darkvoid]])
+		end,
+	},
 }
