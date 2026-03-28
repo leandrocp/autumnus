@@ -1168,7 +1168,6 @@ return {
 			vim.cmd([[colorscheme eldritch]])
 		end,
 	},
-	-- zenbones variants
 	{
 		url = "https://github.com/zenbones-theme/zenbones.nvim",
 		name = "zenbones_dark",
@@ -1376,7 +1375,6 @@ return {
 		end,
 		dependencies = { "https://github.com/rktjmp/lush.nvim" },
 	},
-	-- neomodern variants
 	{
 		url = "https://github.com/casedami/neomodern.nvim",
 		name = "neomodern_moon_dark",
@@ -1467,7 +1465,6 @@ return {
 			vim.cmd([[colorscheme neomodern]])
 		end,
 	},
-	-- mfd variants
 	{
 		url = "https://github.com/kungfusheep/mfd.nvim",
 		name = "mfd_default",
@@ -1604,7 +1601,6 @@ return {
 			vim.cmd([[colorscheme mfd-lumon]])
 		end,
 	},
-	-- popular standalone themes
 	{
 		url = "https://github.com/rmehri01/onenord.nvim",
 		name = "onenord_dark",
