@@ -23,8 +23,9 @@ describe("LanguageBundle type", () => {
   it("essential bundle has expected languages", () => {
     expect(Object.keys(essentialBundle)).toContain("json");
     expect(Object.keys(essentialBundle)).toContain("markdown");
-    expect(Object.keys(essentialBundle)).toContain("dockerfile");
+    expect(Object.keys(essentialBundle)).toContain("xml");
     expect(Object.keys(essentialBundle)).toContain("plaintext");
+    expect(Object.keys(essentialBundle)).not.toContain("dockerfile");
     expect(Object.keys(essentialBundle)).not.toContain("html");
     expect(Object.keys(essentialBundle)).not.toContain("rust");
   });
