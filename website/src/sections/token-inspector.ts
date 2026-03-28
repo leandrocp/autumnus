@@ -86,7 +86,7 @@ export async function setupTokenInspector(root: HTMLElement) {
 
 async function initInspector(root: HTMLElement, output: HTMLDivElement) {
   const [
-    { createHighlighter },
+    { createHighlighter, configureWasmResolver },
     { escape, openSpanTag, openPreTag, openCodeTag, closingTags, wrapLine, styleToCss },
     html,
     javascript,
@@ -101,6 +101,7 @@ async function initInspector(root: HTMLElement, output: HTMLDivElement) {
     loadTheme("catppuccin_mocha"),
   ]);
 
+  configureWasmResolver((_language, wasm) => `/wasm/${wasm.name}.wasm`);
   const hl = await createHighlighter({ languages: [html, javascript] });
 
   const docsFormatter = {

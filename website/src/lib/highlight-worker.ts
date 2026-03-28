@@ -1,7 +1,9 @@
-import { createHighlighter } from "@lumis-sh/lumis";
+import { createHighlighter, configureWasmResolver } from "@lumis-sh/lumis";
 import { bundledLanguages } from "@lumis-sh/lumis/bundles/full";
 import { htmlInline, htmlMultiThemes } from "@lumis-sh/lumis/formatters";
 import type { Theme } from "@lumis-sh/lumis";
+
+configureWasmResolver((_language, wasm) => `/wasm/${wasm.name}.wasm`);
 
 const DEFAULT_PRE_CLASS =
   "m-0 overflow-x-auto p-5 font-mono text-[13px] leading-relaxed sm:p-6 sm:text-sm";
