@@ -36,6 +36,12 @@ jobs:
             website/pnpm-lock.yaml
             docs/pnpm-lock.yaml
 
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm --filter @lumis-sh/themes build
+
+      - run: pnpm --filter @lumis-sh/lumis build
+
       - run: pnpm install --frozen-lockfile --ignore-workspace
         working-directory: website
 
