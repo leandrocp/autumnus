@@ -110,6 +110,8 @@ export interface WasmRef {
   version: string;
 }
 
+export type RuntimeWasmInput = Uint8Array | ArrayBuffer | string | URL | Response;
+
 /**
  * A language definition with Tree-sitter queries and a WASM parser reference.
  *
@@ -130,10 +132,11 @@ export interface Language {
   /**
    * WASM parser source:
    * - `WasmRef` fetched from CDN (default for pre-built bundles)
+   * - `Uint8Array` or `ArrayBuffer` passed directly (useful with browser bundlers)
    * - `URL` fetched directly (`file://` works in Node.js)
    * - `string` treated as file path (Node.js) or URL (browser)
    */
-  wasm: WasmRef | URL | string;
+  wasm: WasmRef | RuntimeWasmInput;
 }
 
 /**
