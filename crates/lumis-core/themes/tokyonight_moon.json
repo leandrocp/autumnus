@@ -1,7 +1,7 @@
 {
   "name": "tokyonight_moon",
   "appearance": "dark",
-  "revision": "5da1b76e64daf4c5d410f06bcb6b9cb640da7dfd",
+  "revision": "cdc07ac78467a233fd62c493de29a17e0cf2b2b6",
   "highlights": {
     "attribute": {
       "fg": "#86e1fc"
@@ -157,18 +157,12 @@
       "fg": "#82aaff",
       "bold": true
     },
-    "markup.heading.1.markdown": {
-      "fg": "#82aaff",
-      "bg": "#2c314a",
-      "bold": true
-    },
     "markup.heading.2": {
       "fg": "#82aaff",
       "bold": true
     },
     "markup.heading.2.markdown": {
       "fg": "#ffc777",
-      "bg": "#38343d",
       "bold": true
     },
     "markup.heading.3": {
@@ -177,7 +171,6 @@
     },
     "markup.heading.3.markdown": {
       "fg": "#c3e88d",
-      "bg": "#32383f",
       "bold": true
     },
     "markup.heading.4": {
@@ -186,7 +179,6 @@
     },
     "markup.heading.4.markdown": {
       "fg": "#4fd6be",
-      "bg": "#273644",
       "bold": true
     },
     "markup.heading.5": {
@@ -195,7 +187,6 @@
     },
     "markup.heading.5.markdown": {
       "fg": "#c099ff",
-      "bg": "#32304a",
       "bold": true
     },
     "markup.heading.6": {
@@ -204,7 +195,6 @@
     },
     "markup.heading.6.markdown": {
       "fg": "#fca7ea",
-      "bg": "#383148",
       "bold": true
     },
     "markup.italic": {

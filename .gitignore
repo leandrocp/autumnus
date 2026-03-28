@@ -1,5 +1,6 @@
 /target
 /tmp
+/nvim/
 /themes/nvim
 /queries/**/folds.scm
 /queries/**/indents.scm

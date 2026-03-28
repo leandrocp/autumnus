@@ -1,7 +1,7 @@
 {
   "name": "everforest_light",
   "appearance": "light",
-  "revision": "557bce922401e247a596583679bc181d4d688554",
+  "revision": "323e7633034a8068636a11597cec03bca5465c50",
   "highlights": {
     "attribute": {
       "fg": "#df69ba"
