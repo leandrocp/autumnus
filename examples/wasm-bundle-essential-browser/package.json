@@ -1,0 +1,15 @@
+{
+  "name": "example-wasm-bundle-essential-browser",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "start": "vite"
+  },
+  "dependencies": {
+    "@lumis-sh/lumis": "workspace:*",
+    "@lumis-sh/themes": "workspace:*",
+    "@lumis-sh/wasm-bundle-essential": "workspace:*",
+    "vite": "^8.0.2"
+  }
+}

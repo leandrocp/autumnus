@@ -67,9 +67,11 @@ Three bundles ship with lumis:
 
 | Bundle | Languages | Use case |
 |--------|-----------|----------|
+| `bundles/essential` | 13 | Minimal docs, config, shell, and diff languages |
 | `bundles/web` | 23 | HTML, CSS, JS, TS, JSON, Markdown, SQL, Svelte, Vue, Astro, and other web essentials |
 | `bundles/system` | 18 | C, C++, Rust, Go, Zig, ASM, LLVM, CMake, Make |
-| `bundles/full` | 77 | Every supported language |
+| `bundles/backend` | 28 | Popular backend languages plus common API, config, and infra formats |
+| `bundles/full` | 118 | Every supported language |
 
 ### Using a bundle
 
@@ -123,6 +125,22 @@ const hl = await createHighlighter({
     import('@lumis-sh/lumis/langs/python'),     // loaded immediately via dynamic import
   ],
 })
+```
+
+## Local WASM bundle packages
+
+Install a `@lumis-sh/wasm-bundle-*` package when you want the matching bundle's parser WASM files available locally.
+
+- In Node.js, installing the package is enough. Lumis will detect the installed `@lumis-sh/wasm-*` parser packages automatically.
+- In browser bundlers, pair it with `withWasmBundle()` so the bundler can include the static WASM imports.
+
+```typescript
+import { createHighlighter, withWasmBundle } from '@lumis-sh/lumis'
+import { bundledLanguages } from '@lumis-sh/lumis/bundles/web'
+import { bundledWasms } from '@lumis-sh/wasm-bundle-web'
+
+const languages = withWasmBundle(bundledLanguages, bundledWasms)
+const hl = await createHighlighter({ languages: [languages] })
 ```
 
 ### Checking registered vs loaded languages

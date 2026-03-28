@@ -33,8 +33,10 @@ Bundles register many languages lazily.
 
 | Bundle | Purpose |
 | --- | --- |
+| `@lumis-sh/lumis/bundles/essential` | docs, config, shell, diff, and other low-level essentials |
 | `@lumis-sh/lumis/bundles/web` | HTML, CSS, JS, TS, JSON, Markdown, SQL, Svelte, Vue, Astro, and other web-focused languages |
 | `@lumis-sh/lumis/bundles/system` | C, C++, Rust, Go, Zig, LLVM, Make, CMake, and related system languages |
+| `@lumis-sh/lumis/bundles/backend` | popular backend languages plus common API, config, and infra formats |
 | `@lumis-sh/lumis/bundles/full` | all supported languages |
 
 ```ts
@@ -127,7 +129,7 @@ Useful for dropdowns, config validation, and docs tooling:
 
 - the package uses conditional exports so browser and Node get the right runtime automatically
 - Node caches fetched parser WASM locally when possible
-- Node can also auto-load installed parser packages such as `@lumis-sh/wasm-elixir`
-- browser usage usually relies on remote parser assets unless you override the resolver or use `withWasm()` with an npm parser package
+- Node can also auto-load installed parser packages such as `@lumis-sh/wasm-elixir` or preset packages such as `@lumis-sh/wasm-bundle-essential`
+- browser usage usually relies on remote parser assets unless you override the resolver, use `withWasm()` with a single npm parser package, or use `withWasmBundle()` with a preset bundle package
 
 For parser asset details, continue with [WASM and CDN](/advanced/wasm-and-cdn).

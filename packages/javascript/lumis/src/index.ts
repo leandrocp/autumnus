@@ -1,6 +1,7 @@
 /** Syntax highlighting with Tree-sitter and Neovim themes. */
 
 import { createHighlighterModule } from "./core/highlighter.js";
+import { mapBundle } from "./bundle-helpers.js";
 import {
   availableLanguages,
   configureWasmResolver,
@@ -107,6 +108,21 @@ export function withWasm<T extends import("./types.js").Language>(
   };
 }
 
+/**
+ * Apply a map of statically imported WASM assets to every matching language in a bundle.
+ *
+ * Useful with packages like `@lumis-sh/wasm-bundle-web` in browser bundlers.
+ */
+export function withWasmBundle(
+  bundle: import("./types.js").LanguageBundle,
+  wasms: import("./types.js").RuntimeWasmBundle,
+): import("./types.js").LanguageBundle {
+  return mapBundle(bundle, (language) => {
+    const wasm = wasms[language.id];
+    return wasm ? withWasm(language, wasm) : language;
+  });
+}
+
 export type { Highlighter } from "./core/highlighter.js";
 export type {
   HighlightContext,
@@ -125,6 +141,7 @@ export type {
   Theme,
   WasmRef,
   RuntimeWasmInput,
+  RuntimeWasmBundle,
   LanguageInfo,
   ThemeInfo,
 } from "./types.js";

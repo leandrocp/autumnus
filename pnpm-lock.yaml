@@ -255,6 +255,33 @@ importers:
         specifier: ^1.6.4
         version: 1.6.4(@algolia/client-search@5.50.0)(@types/node@25.5.0)(fuse.js@7.1.0)(lightningcss@1.32.0)(nprogress@0.2.0)(postcss@8.5.8)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(search-insights@2.17.3)(terser@5.46.1)(typescript@5.9.3)
 
+  examples/wasm-bundle-essential-browser:
+    dependencies:
+      '@lumis-sh/lumis':
+        specifier: workspace:*
+        version: link:../../packages/javascript/lumis
+      '@lumis-sh/themes':
+        specifier: workspace:*
+        version: link:../../packages/javascript/themes
+      '@lumis-sh/wasm-bundle-essential':
+        specifier: workspace:*
+        version: link:../../packages/javascript/wasm-bundle-essential
+      vite:
+        specifier: ^8.0.2
+        version: 8.0.2(@types/node@25.5.0)(esbuild@0.27.4)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+
+  examples/wasm-bundle-essential-node:
+    dependencies:
+      '@lumis-sh/lumis':
+        specifier: workspace:*
+        version: link:../../packages/javascript/lumis
+      '@lumis-sh/themes':
+        specifier: workspace:*
+        version: link:../../packages/javascript/themes
+      '@lumis-sh/wasm-bundle-essential':
+        specifier: workspace:*
+        version: link:../../packages/javascript/wasm-bundle-essential
+
   packages/javascript/lumis:
     dependencies:
       web-tree-sitter:
@@ -392,6 +419,600 @@ importers:
       typescript:
         specifier: ^5.9
         version: 5.9.3
+
+  packages/javascript/wasm-bundle-backend:
+    dependencies:
+      '@lumis-sh/lumis':
+        specifier: ^0.0.1
+        version: 0.0.1
+      '@lumis-sh/wasm-bash':
+        specifier: ^0.26.0
+        version: 0.26.1
+      '@lumis-sh/wasm-comment':
+        specifier: ^0.26.0
+        version: 0.26.1
+      '@lumis-sh/wasm-csharp':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-diff':
+        specifier: ^0.26.0
+        version: 0.26.1
+      '@lumis-sh/wasm-dockerfile':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-elixir':
+        specifier: ^0.26.0
+        version: 0.26.1
+      '@lumis-sh/wasm-erlang':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-go':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-graphql':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-http':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-java':
+        specifier: ^0.26.0
+        version: 0.26.1
+      '@lumis-sh/wasm-javascript':
+        specifier: ^0.26.0
+        version: 0.26.1
+      '@lumis-sh/wasm-json':
+        specifier: ^0.26.0
+        version: 0.26.2
+      '@lumis-sh/wasm-kotlin':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-nginx':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-php':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-protobuf':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-python':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-regex':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-ruby':
+        specifier: ^0.26.0
+        version: 0.26.1
+      '@lumis-sh/wasm-rust':
+        specifier: ^0.26.0
+        version: 0.26.2
+      '@lumis-sh/wasm-scala':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-sql':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-toml':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-typescript':
+        specifier: ^0.26.0
+        version: 0.26.1
+      '@lumis-sh/wasm-xml':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-yaml':
+        specifier: ^0.26.0
+        version: 0.26.0
+
+  packages/javascript/wasm-bundle-essential:
+    dependencies:
+      '@lumis-sh/lumis':
+        specifier: ^0.0.1
+        version: 0.0.1
+      '@lumis-sh/wasm-bash':
+        specifier: ^0.26.0
+        version: 0.26.1
+      '@lumis-sh/wasm-comment':
+        specifier: ^0.26.0
+        version: 0.26.1
+      '@lumis-sh/wasm-diff':
+        specifier: ^0.26.0
+        version: 0.26.1
+      '@lumis-sh/wasm-ini':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-json':
+        specifier: ^0.26.0
+        version: 0.26.2
+      '@lumis-sh/wasm-markdown':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-markdown_inline':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-regex':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-toml':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-xml':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-yaml':
+        specifier: ^0.26.0
+        version: 0.26.0
+
+  packages/javascript/wasm-bundle-full:
+    dependencies:
+      '@lumis-sh/lumis':
+        specifier: ^0.0.1
+        version: 0.0.1
+      '@lumis-sh/wasm-angular':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-arduino':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-asm':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-astro':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-bash':
+        specifier: ^0.26.0
+        version: 0.26.1
+      '@lumis-sh/wasm-bicep':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-c':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-caddy':
+        specifier: ^0.26.0
+        version: 0.26.1
+      '@lumis-sh/wasm-clojure':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-cmake':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-comment':
+        specifier: ^0.26.0
+        version: 0.26.1
+      '@lumis-sh/wasm-commonlisp':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-cpp':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-csharp':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-css':
+        specifier: ^0.26.0
+        version: 0.26.1
+      '@lumis-sh/wasm-csv':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-d':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-dart':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-diff':
+        specifier: ^0.26.0
+        version: 0.26.1
+      '@lumis-sh/wasm-dockerfile':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-dot':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-editorconfig':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-eex':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-elixir':
+        specifier: ^0.26.0
+        version: 0.26.1
+      '@lumis-sh/wasm-elm':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-embedded-template':
+        specifier: ^0.26.0
+        version: 0.26.1
+      '@lumis-sh/wasm-erlang':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-fish':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-fortran':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-fsharp':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-gitattributes':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-gitignore':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-gleam':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-glimmer':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-glsl':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-go':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-graphql':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-groovy':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-haskell':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-hcl':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-heex':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-html':
+        specifier: ^0.26.0
+        version: 0.26.1
+      '@lumis-sh/wasm-http':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-hurl':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-iex':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-ini':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-java':
+        specifier: ^0.26.0
+        version: 0.26.1
+      '@lumis-sh/wasm-javadoc':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-javascript':
+        specifier: ^0.26.0
+        version: 0.26.1
+      '@lumis-sh/wasm-jinja':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-jq':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-json':
+        specifier: ^0.26.0
+        version: 0.26.2
+      '@lumis-sh/wasm-json5':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-julia':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-just':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-kdl':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-kotlin':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-latex':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-liquid':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-lua':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-luadoc':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-make':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-markdown':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-markdown_inline':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-matlab':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-mermaid':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-nginx':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-nim':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-nix':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-nushell':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-objc':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-ocaml':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-ocaml_interface':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-pascal':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-perl':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-php':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-powershell':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-prisma':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-protobuf':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-puppet':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-python':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-qmljs':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-r':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-racket':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-regex':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-rst':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-ruby':
+        specifier: ^0.26.0
+        version: 0.26.1
+      '@lumis-sh/wasm-rust':
+        specifier: ^0.26.0
+        version: 0.26.2
+      '@lumis-sh/wasm-scala':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-scheme':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-scss':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-solidity':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-sql':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-surface':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-svelte':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-swift':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-systemverilog':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-tcl':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-terraform':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-toml':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-tsx':
+        specifier: ^0.26.0
+        version: 0.26.1
+      '@lumis-sh/wasm-typescript':
+        specifier: ^0.26.0
+        version: 0.26.1
+      '@lumis-sh/wasm-typst':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-vhdl':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-vim':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-vue':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-wat':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-wgsl':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-xml':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-yaml':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-zig':
+        specifier: ^0.26.0
+        version: 0.26.0
+
+  packages/javascript/wasm-bundle-system:
+    dependencies:
+      '@lumis-sh/lumis':
+        specifier: ^0.0.1
+        version: 0.0.1
+      '@lumis-sh/wasm-asm':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-bash':
+        specifier: ^0.26.0
+        version: 0.26.1
+      '@lumis-sh/wasm-c':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-cmake':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-comment':
+        specifier: ^0.26.0
+        version: 0.26.1
+      '@lumis-sh/wasm-cpp':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-diff':
+        specifier: ^0.26.0
+        version: 0.26.1
+      '@lumis-sh/wasm-go':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-json':
+        specifier: ^0.26.0
+        version: 0.26.2
+      '@lumis-sh/wasm-make':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-regex':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-rust':
+        specifier: ^0.26.0
+        version: 0.26.2
+      '@lumis-sh/wasm-toml':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-wat':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-yaml':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-zig':
+        specifier: ^0.26.0
+        version: 0.26.0
+
+  packages/javascript/wasm-bundle-web:
+    dependencies:
+      '@lumis-sh/lumis':
+        specifier: ^0.0.1
+        version: 0.0.1
+      '@lumis-sh/wasm-astro':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-bash':
+        specifier: ^0.26.0
+        version: 0.26.1
+      '@lumis-sh/wasm-comment':
+        specifier: ^0.26.0
+        version: 0.26.1
+      '@lumis-sh/wasm-css':
+        specifier: ^0.26.0
+        version: 0.26.1
+      '@lumis-sh/wasm-diff':
+        specifier: ^0.26.0
+        version: 0.26.1
+      '@lumis-sh/wasm-dockerfile':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-graphql':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-heex':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-html':
+        specifier: ^0.26.0
+        version: 0.26.1
+      '@lumis-sh/wasm-javascript':
+        specifier: ^0.26.0
+        version: 0.26.1
+      '@lumis-sh/wasm-json':
+        specifier: ^0.26.0
+        version: 0.26.2
+      '@lumis-sh/wasm-markdown':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-markdown_inline':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-regex':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-scss':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-sql':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-svelte':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-toml':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-tsx':
+        specifier: ^0.26.0
+        version: 0.26.1
+      '@lumis-sh/wasm-typescript':
+        specifier: ^0.26.0
+        version: 0.26.1
+      '@lumis-sh/wasm-vue':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-xml':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-yaml':
+        specifier: ^0.26.0
+        version: 0.26.0
 
   website:
     dependencies:
@@ -2656,6 +3277,10 @@ packages:
   '@leichtgewicht/ip-codec@2.0.5':
     resolution: {integrity: sha512-Vo+PSpZG2/fmgmiNzYK9qWRh8h/CHrwD0mo1h1DzL4yzHNSfWYujGTYsWGreD000gcgmZ7K4Ys6Tx9TxtsKdDw==}
 
+  '@lumis-sh/lumis@0.0.1':
+    resolution: {integrity: sha512-CKUBXdOMOB4bsbrLL4cfz5X/70JKAKod4A5RxxWb80pEKxnrwWMsNVh6gDtoMW9FmHzQMItcmOPpqNgzYusIwg==}
+    engines: {node: '>=18'}
+
   '@lumis-sh/wasm-angular@0.26.0':
     resolution: {integrity: sha512-IE5LBu5+wzC7hXEszI1fAKO/6B9l7QV7vvfGTK4YmL36HYMVEnlN+uwEjtDPxTarTzUgYYvipfdT9FYHP8fJjQ==}
 
@@ -2809,8 +3434,14 @@ packages:
   '@lumis-sh/wasm-jq@0.26.0':
     resolution: {integrity: sha512-9F4clWWO5vBydgTaAS9xTHCZZvncaPnpi/zTbdLumrXjTsvUcvtCCGiBQDdUwuEJtquMbZgHB1PVN2DsX0rejA==}
 
+  '@lumis-sh/wasm-json5@0.26.0':
+    resolution: {integrity: sha512-5PnCx5C3FWJGC6lcFK876lIK6cLJoXYV5JQ8EQrjHxJ4lj4aU0jPkCEh2YKHwrEXtGiKK3lsqG02/ciuj58E2Q==}
+
   '@lumis-sh/wasm-json@0.24.8':
     resolution: {integrity: sha512-P8QQ5juTAfvx2iClusxC1ZD8J4dZ+X1u0FzcAR4fiKN4m+W6PVIyf3JjRRp2iX5M768L9thw4q/ORnVqYywFoA==}
+
+  '@lumis-sh/wasm-json@0.26.2':
+    resolution: {integrity: sha512-W6AvLDlMnSiSpgRmO8a6qmkApZkzEylXA4QEPefgL7NCkfk5sHZuhcWkR/J2z1Y4kOt+qZA8OvjqVZi2gp+uBQ==}
 
   '@lumis-sh/wasm-julia@0.26.0':
     resolution: {integrity: sha512-/noypdifFxSwoD+RKjqf/SgTdUPamuyC1Zwtu21ETNFVCaRX5ATIBDHNsn/PwVTzcizZ2KgskpDr45PY31K0ww==}
@@ -13623,6 +14254,10 @@ snapshots:
 
   '@leichtgewicht/ip-codec@2.0.5': {}
 
+  '@lumis-sh/lumis@0.0.1':
+    dependencies:
+      web-tree-sitter: 0.26.7
+
   '@lumis-sh/wasm-angular@0.26.0': {}
 
   '@lumis-sh/wasm-arduino@0.26.0': {}
@@ -13725,7 +14360,11 @@ snapshots:
 
   '@lumis-sh/wasm-jq@0.26.0': {}
 
+  '@lumis-sh/wasm-json5@0.26.0': {}
+
   '@lumis-sh/wasm-json@0.24.8': {}
+
+  '@lumis-sh/wasm-json@0.26.2': {}
 
   '@lumis-sh/wasm-julia@0.26.0': {}
 

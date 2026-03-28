@@ -1,9 +1,4 @@
 packages:
-  - lumis
-  - markdown-it-lumis
-  - rehype-lumis
-  - themes
-  - markdown-it-lumis
-  - rehype-lumis
+  - "*"
 
 verifyDepsBeforeRun: install

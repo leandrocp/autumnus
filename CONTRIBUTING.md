@@ -60,7 +60,24 @@ All language metadata lives here. Consumed by:
 - `crates/lumis-cli/build.rs` -- reads `queries/processed/` to embed query constants
 - `crates/lumis-core/build.rs` -- generates the `Language` enum and Rust-side detection metadata
 - `packages/javascript/lumis/scripts/build-langs.ts` -- generates `packages/javascript/lumis/langs/*.ts`, bundles, and JS detection/load metadata from the same source
+- `packages/javascript/lumis/scripts/build-wasm-bundles.ts` -- generates `packages/javascript/wasm-bundle-*` preset packages from bundle definitions in the same source
 - CI workflows -- builds WASMs, updates parser/query revisions
+
+Bundle definitions also live in `languages.toml` under `[bundles.*]`.
+
+- Keep one parser ID per line inside bundle arrays for cleaner diffs.
+- After changing parser or bundle entries, regenerate the checked-in JavaScript outputs:
+
+```sh
+pnpm --filter @lumis-sh/lumis build:generate
+```
+
+This updates files such as:
+
+- `packages/javascript/lumis/langs/*.ts`
+- `packages/javascript/lumis/bundles/*.ts`
+- `packages/javascript/lumis/src/generated/*`
+- `packages/javascript/wasm-bundle-*/`
 
 #### Parser entry fields
 

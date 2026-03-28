@@ -593,6 +593,31 @@ const html = hl.highlight('const x = 1', htmlInline({language: 'javascript', the
 <div id="output"></div>
 ```
 
+## Browser / local WASM bundle
+
+```js
+import {createHighlighter, withWasmBundle} from '@lumis-sh/lumis'
+import {htmlInline} from '@lumis-sh/lumis/formatters'
+import {bundledLanguages} from '@lumis-sh/lumis/bundles/essential'
+import {bundledWasms} from '@lumis-sh/wasm-bundle-essential'
+import githubLight from '@lumis-sh/themes/github_light'
+
+const languages = withWasmBundle(bundledLanguages, bundledWasms)
+const hl = await createHighlighter({languages: [languages]})
+
+await hl.loadLanguage(languages.toml)
+
+const html = hl.highlight(
+  'theme = "github-light"',
+  htmlInline({language: languages.toml, theme: githubLight})
+)
+```
+
+Full examples on GitHub:
+
+- `examples/wasm-bundle-essential-node`
+- `examples/wasm-bundle-essential-browser`
+
 ## More
 
 - [Highlight](/highlight/)
