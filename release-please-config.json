@@ -45,6 +45,31 @@
       "component": "themes",
       "changelog-path": "CHANGELOG.md"
     },
+    "packages/javascript/wasm-bundle-essential": {
+      "release-type": "node",
+      "component": "wasm-bundle-essential",
+      "changelog-path": "CHANGELOG.md"
+    },
+    "packages/javascript/wasm-bundle-web": {
+      "release-type": "node",
+      "component": "wasm-bundle-web",
+      "changelog-path": "CHANGELOG.md"
+    },
+    "packages/javascript/wasm-bundle-system": {
+      "release-type": "node",
+      "component": "wasm-bundle-system",
+      "changelog-path": "CHANGELOG.md"
+    },
+    "packages/javascript/wasm-bundle-backend": {
+      "release-type": "node",
+      "component": "wasm-bundle-backend",
+      "changelog-path": "CHANGELOG.md"
+    },
+    "packages/javascript/wasm-bundle-full": {
+      "release-type": "node",
+      "component": "wasm-bundle-full",
+      "changelog-path": "CHANGELOG.md"
+    },
     "packages/elixir/lumis": {
       "release-type": "elixir",
       "component": "elixir",

@@ -1,7 +1,7 @@
 {
   "name": "modus_vivendi",
   "appearance": "dark",
-  "revision": "c57c2c56c9f0af04f3b609d11caa840880074784",
+  "revision": "17a64464c27c1be605adca13dbe48f2f402fe107",
   "highlights": {
     "attribute": {
       "fg": "#ff7f9f"
@@ -24,7 +24,6 @@
       "italic": true
     },
     "comment.documentation": {
-      "fg": "#88ca9f",
       "italic": true
     },
     "comment.error": {
@@ -48,10 +47,10 @@
       "fg": "#ffffff"
     },
     "constant.builtin": {
-      "fg": "#6ae4b9"
+      "fg": "#f78fe7"
     },
     "constant.macro": {
-      "fg": "#ff7f9f"
+      "fg": "#ffffff"
     },
     "constructor": {
       "fg": "#dfaf7a"
@@ -75,13 +74,13 @@
       "fg": "#feacd0"
     },
     "function.builtin": {
-      "fg": "#6ae4b9"
+      "fg": "#f78fe7"
     },
     "function.call": {
       "fg": "#feacd0"
     },
     "function.macro": {
-      "fg": "#ff7f9f"
+      "fg": "#feacd0"
     },
     "function.method": {
       "fg": "#feacd0"
@@ -107,7 +106,7 @@
       "italic": true
     },
     "keyword.debug": {
-      "fg": "#6ae4b9"
+      "fg": "#f78fe7"
     },
     "keyword.directive": {
       "fg": "#ff7f9f"
@@ -143,19 +142,20 @@
       "italic": true
     },
     "keyword.type": {
-      "fg": "#6ae4b9"
+      "fg": "#b6a0ff",
+      "italic": true
     },
     "label": {
       "fg": "#00d3d0"
     },
     "markup": {
-      "fg": "#6ae4b9"
+      "fg": "#f78fe7"
     },
     "markup.environment": {
-      "fg": "#6ae4b9"
+      "fg": "#f78fe7"
     },
     "markup.environment.name": {
-      "fg": "#6ae4b9"
+      "fg": "#f78fe7"
     },
     "markup.heading": {
       "fg": "#c6daff",
@@ -208,7 +208,7 @@
       "fg": "#d0bc00"
     },
     "markup.math": {
-      "fg": "#6ae4b9"
+      "fg": "#f78fe7"
     },
     "markup.quote": {
       "italic": true
@@ -260,7 +260,6 @@
       "fg": "#79a8ff"
     },
     "string.documentation": {
-      "fg": "#88ca9f",
       "italic": true
     },
     "string.escape": {
@@ -288,7 +287,7 @@
       "fg": "#00d3d0"
     },
     "tag.builtin": {
-      "fg": "#6ae4b9"
+      "fg": "#f78fe7"
     },
     "tag.delimiter": {
       "fg": "#ffffff"

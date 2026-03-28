@@ -1,5 +1,6 @@
 /target
 /tmp
+/nvim/
 /themes/nvim
 /queries/**/folds.scm
 /queries/**/indents.scm
@@ -11,3 +12,4 @@ AGENTS.md
 CLAUDE.md
 __pycache__/
 node_modules/
+examples/**/dist/

@@ -180,6 +180,11 @@ cli-install path:
 dev:
     #!/usr/bin/env bash
     set -euo pipefail
+    if [ ! -f packages/javascript/lumis/dist/bundles/full.js ]; then
+        echo "Building @lumis-sh/lumis for website imports..."
+        (cd packages/javascript && pnpm --filter @lumis-sh/lumis build)
+        echo ""
+    fi
     (cd website && pnpm dev)
 
 # Start docs site dev server

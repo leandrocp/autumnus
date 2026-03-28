@@ -1,4 +1,5 @@
 packages:
+  - website
   - packages/javascript/*
   - examples/*
 allowBuilds:

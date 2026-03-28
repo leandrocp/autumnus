@@ -8,6 +8,7 @@ on:
       - "packages/javascript/markdown-it-lumis/**"
       - "packages/javascript/rehype-lumis/**"
       - "packages/javascript/themes/**"
+      - "packages/javascript/wasm-bundle-*/**"
       - "queries/**"
       - "languages.toml"
       - "fixtures/conformance/**"
@@ -18,6 +19,7 @@ on:
       - "packages/javascript/markdown-it-lumis/**"
       - "packages/javascript/rehype-lumis/**"
       - "packages/javascript/themes/**"
+      - "packages/javascript/wasm-bundle-*/**"
       - "queries/**"
       - "languages.toml"
       - "fixtures/conformance/**"
@@ -55,6 +57,8 @@ jobs:
         working-directory: packages/javascript
       - run: pnpm --filter @lumis-sh/themes lint
         working-directory: packages/javascript
+      - run: pnpm --filter @lumis-sh/lumis build:wasm-bundles && git diff --exit-code -- wasm-bundle-*
+        working-directory: packages/javascript
 
   test:
     runs-on: ubuntu-latest
@@ -83,4 +87,6 @@ jobs:
       - run: pnpm --filter @lumis-sh/rehype-lumis test
         working-directory: packages/javascript
       - run: pnpm --filter @lumis-sh/lumis test
+        working-directory: packages/javascript
+      - run: pnpm --filter @lumis-sh/lumis build:wasm-bundles && git diff --exit-code -- wasm-bundle-*
         working-directory: packages/javascript

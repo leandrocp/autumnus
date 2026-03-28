@@ -65,8 +65,9 @@
   "packageManager": "pnpm@10.31.0",
   "scripts": {
     "build:langs": "tsx scripts/build-langs.ts",
+    "build:wasm-bundles": "tsx scripts/build-wasm-bundles.ts",
     "build:runtime-wasm": "tsx scripts/build-runtime-wasm.ts",
-    "build:generate": "pnpm run build:runtime-wasm && pnpm run build:langs",
+    "build:generate": "pnpm run build:runtime-wasm && pnpm run build:langs && pnpm run build:wasm-bundles",
     "build": "pnpm run build:generate && tsup",
     "test": "vitest run --exclude test/all-languages-load.test.ts",
     "test:all-languages": "vitest run test/all-languages-load.test.ts",

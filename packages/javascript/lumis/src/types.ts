@@ -112,6 +112,8 @@ export interface WasmRef {
 
 export type RuntimeWasmInput = Uint8Array | ArrayBuffer | string | URL | Response;
 
+export type RuntimeWasmBundle = Partial<Record<string, RuntimeWasmInput>>;
+
 /**
  * A language definition with Tree-sitter queries and a WASM parser reference.
  *
@@ -159,9 +161,11 @@ export interface LazyLanguage {
  * A collection of lazy language handles. Import a preset bundle:
  *
  * ```ts
- * import { bundledLanguages } from '@lumis-sh/lumis/bundles/web'    // 23 web languages
- * import { bundledLanguages } from '@lumis-sh/lumis/bundles/system' // 18 systems languages
- * import { bundledLanguages } from '@lumis-sh/lumis/bundles/full'   // all 77 languages
+ * import { bundledLanguages } from '@lumis-sh/lumis/bundles/essential'
+ * import { bundledLanguages } from '@lumis-sh/lumis/bundles/web'
+ * import { bundledLanguages } from '@lumis-sh/lumis/bundles/system'
+ * import { bundledLanguages } from '@lumis-sh/lumis/bundles/backend'
+ * import { bundledLanguages } from '@lumis-sh/lumis/bundles/full'
  * ```
  */
 export type LanguageBundle = Record<string, LazyLanguage>;

@@ -69,7 +69,25 @@ jobs:
       - name: Install Lua dependencies
         run: luarocks install toml-edit && luarocks install dkjson
 
+      - uses: pnpm/action-setup@v5
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: "pnpm"
+          cache-dependency-path: packages/javascript/pnpm-lock.yaml
+
+      - name: Install JavaScript dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: packages/javascript
+
       - run: just langs-update ${{ matrix.language }}
+
+      - name: Regenerate JavaScript outputs
+        run: pnpm --filter @lumis-sh/lumis build:generate
+        working-directory: packages/javascript
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v8
@@ -82,6 +100,10 @@ jobs:
             queries/processed
             queries/overrides
             LANGUAGES.md
+            packages/javascript/lumis/langs
+            packages/javascript/lumis/bundles
+            packages/javascript/lumis/src/generated
+            packages/javascript/wasm-bundle-*
           commit-message: "chore: update ${{ matrix.language }}"
           title: "chore: update ${{ matrix.language }}"
           body: |

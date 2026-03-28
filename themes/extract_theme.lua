@@ -1,3 +1,34 @@
+local script_path = debug.getinfo(1, "S").source:sub(2)
+local script_dir = vim.fn.fnamemodify(script_path, ":p:h")
+local colliding_repo_names = {}
+
+local function parse_repo_parts(repo_url)
+	local owner, repo = repo_url:match("github%.com/([^/]+)/([^/]+)$")
+	if not owner or not repo then
+		return nil, repo_url:match("/([^/]+)$")
+	end
+	return owner, repo:gsub("%.git$", "")
+end
+
+local function plugin_dir_name(repo_url)
+	local owner, repo = parse_repo_parts(repo_url)
+	if not repo then
+		return "unknown"
+	end
+	if owner and colliding_repo_names[repo] then
+		return owner .. "-" .. repo
+	end
+	return repo
+end
+
+local function table_size(tbl)
+	local count = 0
+	for _ in pairs(tbl) do
+		count = count + 1
+	end
+	return count
+end
+
 local regular_groups = {
 	"Normal",
 	"Comment",
@@ -257,7 +288,7 @@ local function extract_style(hl)
 end
 
 local function get_plugin_revision(repo_url)
-	local plugin_name = repo_url:match("/([^/]+)$")
+	local plugin_name = plugin_dir_name(repo_url)
 	local plugin_path = vim.fn.stdpath("data") .. "/site/pack/core/opt/" .. plugin_name
 
 	if vim.fn.isdirectory(plugin_path) == 0 then
@@ -338,7 +369,7 @@ local function extract_colorscheme_colors(theme)
 		end
 	end
 
-	local output_file = theme.name .. ".json"
+	local output_file = script_dir .. "/" .. theme.name .. ".json"
 	local theme_data = {
 		name = theme.name,
 		appearance = appearance,
@@ -399,7 +430,38 @@ if not theme_name then
 	os.exit(1)
 end
 
+package.path = table.concat({
+	script_dir .. "/?.lua",
+	script_dir .. "/?/init.lua",
+	package.path,
+}, ";")
+
 local themes = require("themes")
+local repo_names = {}
+
+for _, theme_def in ipairs(themes) do
+	local _, repo = parse_repo_parts(theme_def.url)
+	if repo then
+		repo_names[repo] = repo_names[repo] or {}
+		repo_names[repo][theme_def.url] = true
+	end
+	if theme_def.dependencies then
+		for _, dep_url in ipairs(theme_def.dependencies) do
+			local _, dep_repo = parse_repo_parts(dep_url)
+			if dep_repo then
+				repo_names[dep_repo] = repo_names[dep_repo] or {}
+				repo_names[dep_repo][dep_url] = true
+			end
+		end
+	end
+end
+
+for repo, urls in pairs(repo_names) do
+	if table_size(urls) > 1 then
+		colliding_repo_names[repo] = true
+	end
+end
+
 local theme = nil
 
 for _, theme_def in ipairs(themes) do
@@ -418,17 +480,17 @@ local plugins_to_install = {}
 
 if theme.dependencies then
 	for _, dep_url in ipairs(theme.dependencies) do
-		table.insert(plugins_to_install, dep_url)
+		table.insert(plugins_to_install, { src = dep_url, name = plugin_dir_name(dep_url) })
 	end
 end
 
-table.insert(plugins_to_install, theme.url)
+table.insert(plugins_to_install, { src = theme.url, name = plugin_dir_name(theme.url) })
 
 print("📦 Installing plugins...\n")
 vim.pack.add(plugins_to_install, { load = true, confirm = false })
 
 local pack_dir = vim.fn.stdpath("data") .. "/site/pack/core/opt"
-local plugin_name = theme.url:match("/([^/]+)$")
+local plugin_name = plugin_dir_name(theme.url)
 
 local success = vim.wait(60000, function()
 	local plugin_path = pack_dir .. "/" .. plugin_name
@@ -441,11 +503,8 @@ if not success then
 end
 
 for _, plugin in ipairs(plugins_to_install) do
-	local pname = plugin:match("/([^/]+)$")
-	if pname then
-		local plugin_path = pack_dir .. "/" .. pname
-		vim.opt.runtimepath:prepend(plugin_path)
-	end
+	local plugin_path = pack_dir .. "/" .. plugin.name
+	vim.opt.runtimepath:prepend(plugin_path)
 end
 
 if theme.config then

@@ -1,5 +1,5 @@
 /* material_lighter
- * revision: 52c121551ffbf7b8f25bed3ef5878e5d6896c786
+ * revision: 92f7366a9315cd386bc4fa4d716fde375dda210f
  */
 
 pre.lumis {
@@ -93,7 +93,7 @@ pre.lumis {
   background-color: #e7e7e8;
 }
 .keyword {
-  color: #39adb5;
+  color: #7c4dff;
 }
 .keyword-conditional {
   color: #7c4dff;
@@ -102,11 +102,10 @@ pre.lumis {
   color: #7c4dff;
 }
 .keyword-coroutine {
-  color: #39adb5;
-  font-style: italic;
+  color: #7c4dff;
 }
 .keyword-debug {
-  color: #39adb5;
+  color: #7c4dff;
 }
 .keyword-directive {
   color: #39adb5;
@@ -118,28 +117,28 @@ pre.lumis {
   color: #e53935;
 }
 .keyword-export {
-  color: #39adb5;
+  color: #7c4dff;
 }
 .keyword-function {
-  color: #39adb5;
+  color: #7c4dff;
 }
 .keyword-import {
   color: #39adb5;
 }
 .keyword-modifier {
-  color: #39adb5;
+  color: #7c4dff;
 }
 .keyword-operator {
-  color: #39adb5;
+  color: #7c4dff;
 }
 .keyword-repeat {
   color: #7c4dff;
 }
 .keyword-return {
-  color: #39adb5;
+  color: #7c4dff;
 }
 .keyword-type {
-  color: #39adb5;
+  color: #7c4dff;
 }
 .label {
   color: #f6a434;
@@ -303,7 +302,7 @@ pre.lumis {
   color: #546e7a;
 }
 .variable-builtin {
-  color: #39adb5;
+  color: #7c4dff;
 }
 .variable-member {
   color: #94a7b0;

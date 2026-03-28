@@ -1,7 +1,7 @@
 {
   "name": "monokai_pro_ristretto",
   "appearance": "dark",
-  "revision": "8d43e7746754c2dc6e8b797cbcdd361b46086675",
+  "revision": "d8884d4473667c48bd17a68d08383d38839136a3",
   "highlights": {
     "attribute": {
       "fg": "#adda78"
@@ -96,7 +96,7 @@
       "fg": "#85dacc"
     },
     "highlighted": {
-      "bg": "#362f2f"
+      "bg": "#372f2f"
     },
     "keyword": {
       "fg": "#fd6883",
