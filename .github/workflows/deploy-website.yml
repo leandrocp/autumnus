@@ -36,10 +36,10 @@ jobs:
             website/pnpm-lock.yaml
             docs/pnpm-lock.yaml
 
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile --ignore-workspace
         working-directory: website
 
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile --ignore-workspace
         working-directory: docs
 
       - run: pnpm build
