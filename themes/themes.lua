@@ -1031,4 +1031,141 @@ return {
 			require("matteblack").colorscheme()
 		end,
 	},
+	{
+		url = "https://github.com/sainnhe/sonokai",
+		name = "sonokai_default",
+		config = function()
+			vim.o.background = "dark"
+			vim.g.sonokai_style = "default"
+			vim.cmd([[colorscheme sonokai]])
+		end,
+	},
+	{
+		url = "https://github.com/sainnhe/sonokai",
+		name = "sonokai_atlantis",
+		config = function()
+			vim.o.background = "dark"
+			vim.g.sonokai_style = "atlantis"
+			vim.cmd([[colorscheme sonokai]])
+		end,
+	},
+	{
+		url = "https://github.com/sainnhe/sonokai",
+		name = "sonokai_andromeda",
+		config = function()
+			vim.o.background = "dark"
+			vim.g.sonokai_style = "andromeda"
+			vim.cmd([[colorscheme sonokai]])
+		end,
+	},
+	{
+		url = "https://github.com/sainnhe/sonokai",
+		name = "sonokai_shusia",
+		config = function()
+			vim.o.background = "dark"
+			vim.g.sonokai_style = "shusia"
+			vim.cmd([[colorscheme sonokai]])
+		end,
+	},
+	{
+		url = "https://github.com/sainnhe/sonokai",
+		name = "sonokai_maia",
+		config = function()
+			vim.o.background = "dark"
+			vim.g.sonokai_style = "maia"
+			vim.cmd([[colorscheme sonokai]])
+		end,
+	},
+	{
+		url = "https://github.com/sainnhe/sonokai",
+		name = "sonokai_espresso",
+		config = function()
+			vim.o.background = "dark"
+			vim.g.sonokai_style = "espresso"
+			vim.cmd([[colorscheme sonokai]])
+		end,
+	},
+	{
+		url = "https://github.com/sainnhe/gruvbox-material",
+		name = "gruvbox_material_dark",
+		config = function()
+			vim.o.background = "dark"
+			vim.g.gruvbox_material_background = "medium"
+			vim.cmd([[colorscheme gruvbox-material]])
+		end,
+	},
+	{
+		url = "https://github.com/sainnhe/gruvbox-material",
+		name = "gruvbox_material_light",
+		config = function()
+			vim.o.background = "light"
+			vim.g.gruvbox_material_background = "medium"
+			vim.cmd([[colorscheme gruvbox-material]])
+		end,
+	},
+	{
+		url = "https://github.com/oxfist/night-owl.nvim",
+		name = "night_owl",
+		config = function()
+			vim.o.background = "dark"
+			vim.cmd([[colorscheme night-owl]])
+		end,
+	},
+	{
+		url = "https://github.com/nyoom-engineering/oxocarbon.nvim",
+		name = "oxocarbon_dark",
+		config = function()
+			vim.o.background = "dark"
+			vim.cmd([[colorscheme oxocarbon]])
+		end,
+	},
+	{
+		url = "https://github.com/nyoom-engineering/oxocarbon.nvim",
+		name = "oxocarbon_light",
+		config = function()
+			vim.o.background = "light"
+			vim.cmd([[colorscheme oxocarbon]])
+		end,
+	},
+	{
+		url = "https://github.com/craftzdog/solarized-osaka.nvim",
+		name = "solarized_osaka_dark",
+		config = function()
+			vim.o.background = "dark"
+			vim.cmd([[colorscheme solarized-osaka]])
+		end,
+	},
+	{
+		url = "https://github.com/craftzdog/solarized-osaka.nvim",
+		name = "solarized_osaka_light",
+		config = function()
+			vim.o.background = "light"
+			vim.cmd([[colorscheme solarized-osaka]])
+		end,
+	},
+	{
+		url = "https://github.com/craftzdog/solarized-osaka.nvim",
+		name = "solarized_osaka_storm",
+		config = function()
+			vim.o.background = "dark"
+			vim.cmd([[colorscheme solarized-osaka-storm]])
+		end,
+	},
+	{
+		url = "https://github.com/olivercederborg/poimandres.nvim",
+		name = "poimandres",
+		config = function()
+			vim.o.background = "dark"
+			require("poimandres").setup()
+			vim.cmd([[colorscheme poimandres]])
+		end,
+	},
+	{
+		url = "https://github.com/eldritch-theme/eldritch.nvim",
+		name = "eldritch",
+		config = function()
+			vim.o.background = "dark"
+			vim.cmd([[colorscheme eldritch]])
+		end,
+	},
 }
