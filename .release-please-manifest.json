@@ -6,6 +6,6 @@
   "packages/javascript/lumis": "0.0.1",
   "packages/javascript/markdown-it-lumis": "0.0.1",
   "packages/javascript/rehype-lumis": "0.0.1",
-  "packages/javascript/themes": "0.0.2",
+  "packages/javascript/themes": "0.0.3",
   "packages/elixir/lumis": "0.1.2"
 }
