@@ -245,9 +245,6 @@ importers:
       '@lumis-sh/wasm-diff':
         specifier: ^0.26.0
         version: 0.26.1
-      '@lumis-sh/wasm-dockerfile':
-        specifier: ^0.26.0
-        version: 0.26.0
       '@lumis-sh/wasm-ini':
         specifier: ^0.26.0
         version: 0.26.0
@@ -690,6 +687,9 @@ importers:
         specifier: ^0.26.0
         version: 0.26.0
       '@lumis-sh/wasm-graphql':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-heex':
         specifier: ^0.26.0
         version: 0.26.0
       '@lumis-sh/wasm-html':
