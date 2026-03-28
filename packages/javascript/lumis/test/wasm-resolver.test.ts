@@ -38,6 +38,18 @@ describe('Wasm resolver', () => {
     expect(html).toContain('class="language-diff"')
   }, 30_000)
 
+  it('supports withWasm for explicit runtime wasm inputs', async () => {
+    const { createHighlighter, withWasm } = await import('../src/index.js')
+    const { htmlLinked } = await import('../src/formatters.js')
+    const { default: diff } = await import('../langs/diff.ts')
+
+    const language = withWasm(diff, ensureLocalWasm('diff'))
+    const hl = await createHighlighter({ languages: [language] })
+
+    const html = hl.highlight('- old\n+ new', htmlLinked({ language }))
+    expect(html).toContain('class="language-diff"')
+  }, 30_000)
+
   it('accepts wasmResolver in createHighlighter options', async () => {
     const { createHighlighter } = await import('../src/index.js')
     const { htmlLinked } = await import('../src/formatters.js')

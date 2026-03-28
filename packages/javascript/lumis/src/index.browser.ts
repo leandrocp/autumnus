@@ -25,6 +25,18 @@ export function highlight(...args: Parameters<typeof highlighter.highlight>) {
 export function highlightIter(...args: Parameters<typeof highlighter.highlightIter>) {
   return highlighter.highlightIter(...args);
 }
+
+/** {@inheritDoc index.withWasm} */
+export function withWasm<T extends import("./types.js").Language>(
+  language: T,
+  wasm: import("./types.js").RuntimeWasmInput,
+): Omit<T, "wasm"> & { wasm: import("./types.js").RuntimeWasmInput } {
+  return {
+    ...language,
+    wasm,
+  };
+}
+
 export type { Highlighter } from "./core/highlighter.js";
 export type {
   HighlightContext,
@@ -42,6 +54,7 @@ export type {
   LazyLanguage,
   Theme,
   WasmRef,
+  RuntimeWasmInput,
   LanguageInfo,
   ThemeInfo,
 } from "./types.js";

@@ -127,6 +127,7 @@ Useful for dropdowns, config validation, and docs tooling:
 
 - the package uses conditional exports so browser and Node get the right runtime automatically
 - Node caches fetched parser WASM locally when possible
-- browser usage usually relies on remote parser assets unless you override the resolver
+- Node can also auto-load installed parser packages such as `@lumis-sh/wasm-elixir`
+- browser usage usually relies on remote parser assets unless you override the resolver or use `withWasm()` with an npm parser package
 
 For parser asset details, continue with [WASM and CDN](/advanced/wasm-and-cdn).

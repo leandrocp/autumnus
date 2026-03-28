@@ -2,11 +2,12 @@
 sidebar_position: 7
 slug: /advanced/wasm-and-cdn
 title: WASM and CDN
-description: Understand Lumis parser WASM files, default CDN resolution, local cache behavior, and custom resolvers.
+description: Understand Lumis parser WASM files, default CDN resolution, npm WASM packages, local cache behavior, and custom resolvers.
 keywords:
   - lumis wasm
   - parser wasm
   - jsdelivr
+  - withWasm
   - configureWasmResolver
   - cdn
 ---
@@ -33,6 +34,68 @@ https://cdn.jsdelivr.net/npm/@lumis-sh/wasm-<parser-name-without-tree-sitter-pre
 ```
 
 In Node.js, fetched parser files are cached locally when possible.
+
+If a matching npm parser package is installed, such as `@lumis-sh/wasm-elixir`, Node can load that package directly before falling back to the resolver URL.
+
+## NPM WASM packages
+
+Lumis supports two good npm-based workflows:
+
+- Node: install the parser package and use the normal language import
+- browser bundlers: import the parser package explicitly and apply it with `withWasm()`
+
+<Tabs groupId="npm-wasm" queryString="npm-wasm" defaultValue="node">
+  <TabItem value="node" label="Node">
+
+```js title="Installed package autoload"
+import {createHighlighter} from '@lumis-sh/lumis'
+import {htmlInline} from '@lumis-sh/lumis/formatters'
+import elixir from '@lumis-sh/lumis/langs/elixir'
+import githubLight from '@lumis-sh/themes/github_light'
+import '@lumis-sh/wasm-elixir'
+
+const hl = await createHighlighter({
+  languages: [elixir],
+})
+
+const html = hl.highlight(
+  'defmodule Demo do\nend',
+  htmlInline({language: elixir, theme: githubLight})
+)
+```
+
+This is the optimized Node DX. Once `@lumis-sh/wasm-elixir` is installed, Lumis can load it automatically.
+
+See `examples/npm-wasm-node`.
+
+  </TabItem>
+  <TabItem value="browser" label="Browser bundlers">
+
+```js title="withWasm helper"
+import {createHighlighter, withWasm} from '@lumis-sh/lumis'
+import {htmlInline} from '@lumis-sh/lumis/formatters'
+import elixir from '@lumis-sh/lumis/langs/elixir'
+import githubLight from '@lumis-sh/themes/github_light'
+import elixirWasm from '@lumis-sh/wasm-elixir'
+
+const elixirFromNpm = withWasm(elixir, elixirWasm)
+
+const hl = await createHighlighter({
+  languages: [elixirFromNpm],
+})
+
+const html = hl.highlight(
+  'defmodule Demo do\nend',
+  htmlInline({language: elixirFromNpm, theme: githubLight})
+)
+```
+
+Use this in browser bundlers so the parser package is visible to the bundler and does not rely on a CDN fetch.
+
+See `examples/npm-wasm-browser`.
+
+  </TabItem>
+</Tabs>
 
 ## Override the resolver
 
@@ -81,7 +144,7 @@ The CLI does not expose a custom WASM resolver hook. Use the parser cache comman
 
 ## Browser / CDN usage
 
-This works well when your app can fetch parser WASM files from the default CDN. If you need a different host or local assets, set a custom resolver first.
+This works well when your app can fetch parser WASM files from the default CDN. If you need a different host or local assets, set a custom resolver first. If you want bundler-managed parser assets from npm instead, prefer `withWasm()`.
 
 ```html title="ESM CDN"
 <script type="module">
@@ -100,4 +163,5 @@ This works well when your app can fetch parser WASM files from the default CDN. 
 ## Related docs
 
 - full language and WASM package list: [Languages](/reference/languages)
+- JavaScript runtime overview: [JavaScript Runtime](/highlight/javascript)
 - CLI parser commands: [CLI Commands](/cli/commands)

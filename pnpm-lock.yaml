@@ -132,6 +132,39 @@ importers:
         specifier: ^19.2.4
         version: 19.2.4(react@19.2.4)
 
+  examples/npm-wasm-browser:
+    dependencies:
+      '@lumis-sh/lumis':
+        specifier: workspace:*
+        version: link:../../packages/javascript/lumis
+      '@lumis-sh/themes':
+        specifier: workspace:*
+        version: link:../../packages/javascript/themes
+      '@lumis-sh/wasm-diff':
+        specifier: ^0.26.0
+        version: 0.26.1
+      '@lumis-sh/wasm-elixir':
+        specifier: ^0.26.0
+        version: 0.26.1
+      vite:
+        specifier: ^8.0.2
+        version: 8.0.2(@types/node@25.5.0)(esbuild@0.27.4)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+
+  examples/npm-wasm-node:
+    dependencies:
+      '@lumis-sh/lumis':
+        specifier: workspace:*
+        version: link:../../packages/javascript/lumis
+      '@lumis-sh/themes':
+        specifier: workspace:*
+        version: link:../../packages/javascript/themes
+      '@lumis-sh/wasm-diff':
+        specifier: ^0.26.0
+        version: 0.26.1
+      '@lumis-sh/wasm-elixir':
+        specifier: ^0.26.0
+        version: 0.26.1
+
   examples/nuxt:
     dependencies:
       '@lumis-sh/lumis':
@@ -2292,6 +2325,12 @@ packages:
 
   '@leichtgewicht/ip-codec@2.0.5':
     resolution: {integrity: sha512-Vo+PSpZG2/fmgmiNzYK9qWRh8h/CHrwD0mo1h1DzL4yzHNSfWYujGTYsWGreD000gcgmZ7K4Ys6Tx9TxtsKdDw==}
+
+  '@lumis-sh/wasm-diff@0.26.1':
+    resolution: {integrity: sha512-g5OWK8bQ+TyqUfxAuk05Q45FhF3YrF5ULH4MP9wGGiNIXlpvH1UEp42TZibKfvdmOEdrk3yGjxaYhlnUXDpIoQ==}
+
+  '@lumis-sh/wasm-elixir@0.26.1':
+    resolution: {integrity: sha512-HqlYSj3NUG+tBoQ9jvRkqLg40p+tIEQNOlhrm0DYVWEafVvIJglQOetKWiL5/kkHk5helEx3A5FMRaZjSm8CgQ==}
 
   '@lumis-sh/wasm-json@0.24.8':
     resolution: {integrity: sha512-P8QQ5juTAfvx2iClusxC1ZD8J4dZ+X1u0FzcAR4fiKN4m+W6PVIyf3JjRRp2iX5M768L9thw4q/ORnVqYywFoA==}
@@ -12932,6 +12971,10 @@ snapshots:
   '@kwsites/promise-deferred@1.1.1': {}
 
   '@leichtgewicht/ip-codec@2.0.5': {}
+
+  '@lumis-sh/wasm-diff@0.26.1': {}
+
+  '@lumis-sh/wasm-elixir@0.26.1': {}
 
   '@lumis-sh/wasm-json@0.24.8': {}
 
