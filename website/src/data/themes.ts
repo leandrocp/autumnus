@@ -1,8 +1,11 @@
 import type { Theme } from "@lumis-sh/lumis";
 
-const themeModules = import.meta.glob<Theme>("../../node_modules/@lumis-sh/themes/dist/themes/*.js", {
-  import: "default",
-});
+const themeModules = import.meta.glob<Theme>(
+  "../../node_modules/@lumis-sh/themes/dist/themes/*.js",
+  {
+    import: "default",
+  },
+);
 
 function labelizeTheme(id: string): string {
   return id

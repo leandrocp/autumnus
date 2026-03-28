@@ -1,0 +1,3 @@
+{
+  // Explicit config file to stop oxfmt from trying to load vite.config.ts.
+}
