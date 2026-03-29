@@ -1,6 +1,10 @@
 import { LANGUAGES, LANGUAGES_BY_ID, getSample } from "../data/languages";
 import { loadTheme, THEMES, THEMES_BY_ID } from "../data/themes";
-import { preloadAllLanguages, renderHighlight } from "../lib/highlighter";
+import { renderHighlight } from "../lib/highlighter";
+
+function pickRandom<T>(items: T[]): T {
+  return items[Math.floor(Math.random() * items.length)]!;
+}
 
 export function renderPlayground() {
   return `
@@ -41,23 +45,20 @@ export function renderPlayground() {
 }
 
 export async function setupPlayground(root: HTMLElement) {
-  const initialLanguage = LANGUAGES[0];
-  const initialTheme = THEMES[0];
-
   const languageSelect = root.querySelector<HTMLSelectElement>('select[name="language"]')!;
   const themeSelect = root.querySelector<HTMLSelectElement>('select[name="theme"]')!;
   const preview = root.querySelector<HTMLDivElement>(".preview-content")!;
   const randomizeButton = root.querySelector<HTMLButtonElement>(".randomize")!;
 
-  languageSelect.value = LANGUAGES[Math.floor(Math.random() * LANGUAGES.length)].id;
-  themeSelect.value = THEMES[Math.floor(Math.random() * THEMES.length)].id;
+  languageSelect.value = pickRandom(LANGUAGES).id;
+  themeSelect.value = pickRandom(THEMES).id;
 
   let renderToken = 0;
 
   const render = async () => {
     const token = ++renderToken;
-    const language = LANGUAGES_BY_ID.get(languageSelect.value) ?? initialLanguage;
-    const theme = THEMES_BY_ID.get(themeSelect.value) ?? initialTheme;
+    const language = LANGUAGES_BY_ID.get(languageSelect.value) ?? LANGUAGES[0]!;
+    const theme = THEMES_BY_ID.get(themeSelect.value) ?? THEMES[0]!;
 
     preview.setAttribute("data-state", "loading");
 
@@ -73,14 +74,12 @@ export async function setupPlayground(root: HTMLElement) {
   themeSelect.addEventListener("change", () => void render());
 
   randomizeButton.addEventListener("click", () => {
-    const language = LANGUAGES[Math.floor(Math.random() * LANGUAGES.length)];
-    const theme = THEMES[Math.floor(Math.random() * THEMES.length)];
+    const language = pickRandom(LANGUAGES);
+    const theme = pickRandom(THEMES);
     languageSelect.value = language.id;
     themeSelect.value = theme.id;
     void render();
   });
 
   await render();
-
-  void preloadAllLanguages();
 }

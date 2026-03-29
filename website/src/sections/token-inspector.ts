@@ -86,10 +86,12 @@ export async function setupTokenInspector(root: HTMLElement) {
 
 async function initInspector(root: HTMLElement, output: HTMLDivElement) {
   const [
-    { createHighlighter, configureWasmResolver },
+    { createHighlighter, withWasm },
     { escape, openSpanTag, openPreTag, openCodeTag, closingTags, wrapLine, styleToCss },
     html,
     javascript,
+    wasmHtml,
+    wasmJavascript,
     lightTheme,
     darkTheme,
   ] = await Promise.all([
@@ -97,12 +99,15 @@ async function initInspector(root: HTMLElement, output: HTMLDivElement) {
     import("@lumis-sh/lumis/formatters/html"),
     import("@lumis-sh/lumis/langs/html").then((m) => m.default),
     import("@lumis-sh/lumis/langs/javascript").then((m) => m.default),
+    import("@lumis-sh/wasm-html").then((m) => m.default),
+    import("@lumis-sh/wasm-javascript").then((m) => m.default),
     loadTheme("catppuccin_latte"),
     loadTheme("catppuccin_mocha"),
   ]);
 
-  configureWasmResolver((_language, wasm) => `/wasm/${wasm.name}.wasm`);
-  const hl = await createHighlighter({ languages: [html, javascript] });
+  const hl = await createHighlighter({
+    languages: [withWasm(html, wasmHtml), withWasm(javascript, wasmJavascript)],
+  });
 
   const docsFormatter = {
     language: html,

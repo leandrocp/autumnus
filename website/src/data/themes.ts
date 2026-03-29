@@ -1,7 +1,7 @@
 import type { Theme } from "@lumis-sh/lumis";
 
 const themeModules = import.meta.glob<Theme>(
-  "../../node_modules/@lumis-sh/themes/dist/themes/*.js",
+  "../../../themes/*.json",
   {
     import: "default",
   },
@@ -16,7 +16,7 @@ function labelizeTheme(id: string): string {
 
 function stripPrefix(path: string): string {
   const filename = path.split("/").pop();
-  return filename?.replace(/\.js$/, "") ?? path;
+  return filename?.replace(/\.json$/, "") ?? path;
 }
 
 export const THEMES = Object.keys(themeModules)
