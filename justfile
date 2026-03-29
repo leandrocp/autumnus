@@ -332,6 +332,7 @@ themes-gen theme_name="":
 themes-list:
     cargo run -p dev -- list-themes
 
-# Copy theme JSON files to crates/lumis/themes
+# Copy theme JSON files to crates/lumis/themes and generate JS theme modules
 themes-sync:
     cargo run -p dev -- sync-themes
+    (cd packages/javascript && pnpm --filter @lumis-sh/themes build:themes)
