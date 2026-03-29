@@ -13,7 +13,7 @@
   "dependencies": {
     "@lumis-sh/lumis": "link:../packages/javascript/lumis",
     "@lumis-sh/themes": "link:../packages/javascript/themes",
-    "@lumis-sh/wasm-bundle-full": "workspace:^0.0.1",
+    "@lumis-sh/wasm-bundle-full": "link:../packages/javascript/wasm-bundle-full",
     "@lumis-sh/wasm-html": "*",
     "@lumis-sh/wasm-javascript": "*",
 

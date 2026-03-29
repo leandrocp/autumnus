@@ -1023,7 +1023,7 @@ importers:
         specifier: link:../packages/javascript/themes
         version: link:../packages/javascript/themes
       '@lumis-sh/wasm-bundle-full':
-        specifier: workspace:^0.0.1
+        specifier: link:../packages/javascript/wasm-bundle-full
         version: link:../packages/javascript/wasm-bundle-full
       '@lumis-sh/wasm-html':
         specifier: '*'
