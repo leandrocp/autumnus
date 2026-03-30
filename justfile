@@ -131,11 +131,9 @@ test:
     echo "Running Elixir tests..."
     (cd packages/elixir/lumis && LUMIS_BUILD=1 mix test)
     echo ""
-    echo "Building JS package..."
+    echo "Running Javascript tests..."
     (cd packages/javascript && pnpm --filter @lumis-sh/lumis build)
-    echo ""
-    echo "Running JS tests..."
-    (cd packages/javascript && pnpm --filter @lumis-sh/lumis test)
+    (cd packages/javascript && pnpm -r --if-present test)
 
 # Run conformance tests across all packages
 test-conformance:
@@ -211,6 +209,11 @@ cli-install path:
 dev:
     #!/usr/bin/env bash
     set -euo pipefail
+    if [ ! -f packages/javascript/lumis/dist/bundles/full.js ]; then
+        echo "Building @lumis-sh/lumis for website imports..."
+        (cd packages/javascript && pnpm --filter @lumis-sh/lumis build)
+        echo ""
+    fi
     (cd website && pnpm dev)
 
 # Start docs site dev server
@@ -262,6 +265,7 @@ langs-update name:
     #!/usr/bin/env bash
     set -euo pipefail
     just langs-fetch-parsers {{name}}
+    cargo run -p dev --no-default-features -- cargo-update-dep {{name}}
     just langs-fetch-queries {{name}}
     just langs-preprocess-queries {{name}}
     just docs-gen-languages-md
@@ -358,6 +362,7 @@ themes-gen theme_name="":
 themes-list:
     cargo run -p dev -- list-themes
 
-# Copy theme JSON files to crates/lumis/themes
+# Copy theme JSON files to crates/lumis/themes and generate JS theme modules
 themes-sync:
     cargo run -p dev -- sync-themes
+    (cd packages/javascript && pnpm --filter @lumis-sh/themes build:themes)

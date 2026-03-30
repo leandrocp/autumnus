@@ -60,7 +60,24 @@ All language metadata lives here. Consumed by:
 - `crates/lumis-cli/build.rs` -- reads `queries/processed/` to embed query constants
 - `crates/lumis-core/build.rs` -- generates the `Language` enum and Rust-side detection metadata
 - `packages/javascript/lumis/scripts/build-langs.ts` -- generates `packages/javascript/lumis/langs/*.ts`, bundles, and JS detection/load metadata from the same source
+- `packages/javascript/lumis/scripts/build-wasm-bundles.ts` -- generates `packages/javascript/wasm-bundle-*` preset packages from bundle definitions in the same source
 - CI workflows -- builds WASMs, updates parser/query revisions
+
+Bundle definitions also live in `languages.toml` under `[bundles.*]`.
+
+- Keep one parser ID per line inside bundle arrays for cleaner diffs.
+- After changing parser or bundle entries, regenerate the checked-in JavaScript outputs:
+
+```sh
+pnpm --filter @lumis-sh/lumis build:generate
+```
+
+This updates files such as:
+
+- `packages/javascript/lumis/langs/*.ts`
+- `packages/javascript/lumis/bundles/*.ts`
+- `packages/javascript/lumis/src/generated/*`
+- `packages/javascript/wasm-bundle-*/`
 
 #### Parser entry fields
 
@@ -89,10 +106,10 @@ feature = "lang-ocaml"            # optional -- override feature name (default: 
 `git` + `rev` vs `crate`: these are not alternatives.
 
 - `git` + `rev` -- always required. Used to build WASMs, fetch vendored parser sources, and as the authoritative version pin.
-- `crate` -- optional, Rust-only. When present, the Rust build uses the crate from crates.io instead of compiling from vendored source. The dependency must also be declared in `crates/lumis/Cargo.toml` as an optional dep (see step 2 below).
+- `crate` -- optional, Rust-only. When present, the Rust build uses the crate from crates.io instead of compiling from vendored source. The dependency must also be declared in `crates/lumis/Cargo.toml` as an optional dep for new languages, and existing entries are kept in sync from `languages.toml` by `cargo run -p dev --no-default-features -- cargo-update-dep`.
 
 `version` is used for two things:
-1. When `crate` is set, this is the crate version in `Cargo.toml`
+1. When `crate` is set, this is the crate version synced into `crates/lumis/Cargo.toml`
 2. Always drives the npm package version for `@lumis-sh/wasm-{name}`
 
 #### Query entry fields
@@ -152,6 +169,7 @@ In `crates/lumis/Cargo.toml`:
 
 ```sh
 just langs-fetch-parsers {name}   # fetches vendored source from git
+just cargo-update-dep {name}      # syncs crate-backed parser versions into crates/lumis/Cargo.toml
 just langs-fetch-queries {name}   # fetches .scm query files
 ```
 
@@ -197,8 +215,11 @@ just test-conformance
 
 ```sh
 just langs-upgrade-parsers {name} # updates languages.toml revisions
-just langs-fetch-parsers {name}   # fetches updated files
+just langs-fetch-parsers {name}   # fetches updated vendored parser files
+just cargo-update-dep {name}      # syncs crate-backed parser versions into crates/lumis/Cargo.toml
 ```
+
+For parser and query updates, prefer `just langs-update {name}` or the `update-langs` GitHub workflow. Do not use Dependabot to bump `tree-sitter-*` Rust parser crates independently; those versions are tied to the pinned parser/query state in `languages.toml`.
 
 ### Updating queries
 
@@ -209,6 +230,8 @@ just langs-preprocess-queries     # regenerates checked-in processed queries
 ```
 
 Omit the name argument to upgrade all queries at once.
+
+`just langs-update {name}` is the end-to-end command for a coordinated parser update. It fetches parsers first, syncs crate-backed Rust parser deps, then fetches and preprocesses queries, and regenerates `LANGUAGES.md`.
 
 Raw query sources live in `queries/upstream/`. Preprocessed tracked outputs live in `queries/processed/` and should be committed whenever upstream queries or overrides change.
 

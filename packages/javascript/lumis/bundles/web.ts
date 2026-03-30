@@ -10,6 +10,7 @@ export const bundledLanguages: LanguageBundle = {
   "diff": lazy("diff", [], () => import("../langs/diff.js")),
   "dockerfile": lazy("dockerfile", ["docker"], () => import("../langs/dockerfile.js")),
   "graphql": lazy("graphql", [], () => import("../langs/graphql.js")),
+  "heex": lazy("heex", [], () => import("../langs/heex.js")),
   "html": lazy("html", [], () => import("../langs/html.js")),
   "javascript": lazy("javascript", ["js","jsx"], () => import("../langs/javascript.js")),
   "json": lazy("json", [], () => import("../langs/json.js")),

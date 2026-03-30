@@ -174,6 +174,8 @@ enum Formatter {
     /// ANSI escape codes
     #[default]
     Terminal,
+    /// BBCode using highlight scope names as tags
+    BbcodeScoped,
 }
 
 fn default_data_dir() -> PathBuf {
@@ -602,6 +604,13 @@ fn render_output(
             builder.lang(lang).theme(theme_obj);
 
             let fmt = builder.build().map_err(|e| anyhow::anyhow!("{}", e))?;
+            let mut output = Vec::new();
+            fmt.render(source, events, &mut output)?;
+            print!("{}", String::from_utf8(output)?);
+        }
+
+        Formatter::BbcodeScoped => {
+            let fmt = lumis_core::formatter::BBCodeScoped::new(lang);
             let mut output = Vec::new();
             fmt.render(source, events, &mut output)?;
             print!("{}", String::from_utf8(output)?);

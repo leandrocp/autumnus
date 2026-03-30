@@ -1,0 +1,58 @@
+---
+sidebar_position: 3
+slug: /integrations/ratatui
+title: Ratatui
+description: Render Lumis terminal output inside Ratatui by converting ANSI output into styled text.
+keywords:
+  - lumis ratatui
+  - ratatui syntax highlighting
+  - ansi to tui
+  - rust tui code blocks
+---
+
+# Ratatui
+
+[Full example on GitHub](https://github.com/leandrocp/lumis/tree/main/examples/ratatui)
+
+Ratatui already has a good bridge for ANSI-colored text: [`ansi-to-tui`](https://github.com/ratatui/ansi-to-tui). Lumis already emits ANSI. So the clean integration path is:
+
+1. highlight with Lumis terminal output
+2. convert ANSI to `ratatui::text::Text`
+3. render that text in a widget
+
+That gives you syntax highlighting in terminal UIs without a custom Lumis formatter just for Ratatui.
+
+## Add dependencies
+
+```toml
+[dependencies]
+lumis = "0.2"
+ratatui = "0.29"
+ansi-to-tui = "7"
+```
+
+## Highlight and render
+
+```rust
+use ansi_to_tui::IntoText;
+use lumis::{formatter::Formatter, languages::Language, themes, TerminalBuilder};
+use ratatui::widgets::{Block, Paragraph};
+
+fn code_paragraph(source: &str, language: Language) -> Paragraph<'static> {
+    let theme = themes::get("dracula").unwrap();
+    let formatter = TerminalBuilder::new()
+        .lang(language)
+        .theme(Some(theme))
+        .build()
+        .unwrap();
+
+    let mut output = Vec::new();
+    formatter.format(source, &mut output).unwrap();
+    let ansi = String::from_utf8(output).unwrap();
+    let text = ansi.into_text().unwrap();
+
+    Paragraph::new(text).block(Block::bordered().title("main.rs"))
+}
+```
+
+Use a dark theme (like `dracula`) for terminal UIs since they render on a dark background.

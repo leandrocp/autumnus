@@ -48,7 +48,7 @@ import { htmlInline } from '@lumis-sh/lumis/formatters'
 import javascript from '@lumis-sh/lumis/langs/javascript'
 import dracula from '@lumis-sh/themes/dracula'
 
-const hl = await createHighlighter({ langs: [javascript] })
+const hl = await createHighlighter({ languages: [javascript] })
 
 // hl.highlight() is synchronous, languages are already loaded
 const html = hl.highlight(
@@ -67,9 +67,11 @@ Three bundles ship with lumis:
 
 | Bundle | Languages | Use case |
 |--------|-----------|----------|
+| `bundles/essential` | 13 | Minimal docs, config, shell, and diff languages |
 | `bundles/web` | 23 | HTML, CSS, JS, TS, JSON, Markdown, SQL, Svelte, Vue, Astro, and other web essentials |
 | `bundles/system` | 18 | C, C++, Rust, Go, Zig, ASM, LLVM, CMake, Make |
-| `bundles/full` | 77 | Every supported language |
+| `bundles/backend` | 28 | Popular backend languages plus common API, config, and infra formats |
+| `bundles/full` | 118 | Every supported language |
 
 ### Using a bundle
 
@@ -81,7 +83,7 @@ import { htmlInline } from '@lumis-sh/lumis/formatters'
 import { bundledLanguages } from '@lumis-sh/lumis/bundles/web'
 import dracula from '@lumis-sh/themes/dracula'
 
-const hl = await createHighlighter({ langs: [bundledLanguages] })
+const hl = await createHighlighter({ languages: [bundledLanguages] })
 
 // Load a language before highlighting
 await hl.loadLanguage('javascript')
@@ -98,7 +100,7 @@ Each entry in a bundle is a `LazyLanguage` handle. You can pass it to formatters
 ```typescript
 import { bundledLanguages } from '@lumis-sh/lumis/bundles/web'
 
-const hl = await createHighlighter({ langs: [bundledLanguages] })
+const hl = await createHighlighter({ languages: [bundledLanguages] })
 await hl.loadLanguage(bundledLanguages.javascript)
 
 const html = hl.highlight(
@@ -117,7 +119,7 @@ import { bundledLanguages } from '@lumis-sh/lumis/bundles/system'
 import elixir from '@lumis-sh/lumis/langs/elixir'
 
 const hl = await createHighlighter({
-  langs: [
+  languages: [
     elixir,                                    // loaded immediately
     bundledLanguages,                          // registered lazily
     import('@lumis-sh/lumis/langs/python'),     // loaded immediately via dynamic import
@@ -125,10 +127,26 @@ const hl = await createHighlighter({
 })
 ```
 
+## Local WASM bundle packages
+
+Install a `@lumis-sh/wasm-bundle-*` package when you want the matching bundle's parser WASM files available locally.
+
+- In Node.js, installing the package is enough. Lumis will detect the installed `@lumis-sh/wasm-*` parser packages automatically.
+- In browser bundlers, pair it with `withWasmBundle()` so the bundler can include the static WASM imports.
+
+```typescript
+import { createHighlighter, withWasmBundle } from '@lumis-sh/lumis'
+import { bundledLanguages } from '@lumis-sh/lumis/bundles/web'
+import { bundledWasms } from '@lumis-sh/wasm-bundle-web'
+
+const languages = withWasmBundle(bundledLanguages, bundledWasms)
+const hl = await createHighlighter({ languages: [languages] })
+```
+
 ### Checking registered vs loaded languages
 
 ```typescript
-const hl = await createHighlighter({ langs: [bundledLanguages] })
+const hl = await createHighlighter({ languages: [bundledLanguages] })
 
 hl.registeredLanguages  // all languages in the bundle (including lazy)
 hl.languages            // only languages that have been loaded
@@ -169,7 +187,18 @@ All three are equivalent at highlight time. The runtime resolves the language by
 - `htmlLinked()` for class-based HTML that uses external CSS
 - `htmlMultiThemes()` for light/dark or multi-theme HTML with CSS variables
 - `terminal()` for ANSI-colored terminal output
+- `bbcodeScoped()` for nested BBCode tags using highlight scope names
 - custom formatter objects via `@lumis-sh/lumis/formatters`
+
+```typescript
+import { bbcodeScoped } from '@lumis-sh/lumis/formatters'
+import javascript from '@lumis-sh/lumis/langs/javascript'
+
+const output = hl.highlight('const x = "[url=x]"', bbcodeScoped({ language: javascript }))
+// [keyword-javascript]const[/keyword-javascript] x = [string-javascript]"&#91;url=x&#93;"[/string-javascript]
+```
+
+`bbcodeScoped()` emits highlight scope names as tags, not standard forum-style BBCode like `[b]`, `[color]`, or `[code]`.
 
 ## Custom Formatters
 
@@ -184,7 +213,7 @@ import { openPreTag, openCodeTag, closingTags, spanInline } from '@lumis-sh/lumi
 import rust from '@lumis-sh/lumis/langs/rust'
 import dracula from '@lumis-sh/themes/dracula'
 
-const hl = await createHighlighter({ langs: [rust] })
+const hl = await createHighlighter({ languages: [rust] })
 
 const formatter: Formatter = {
   language: rust,

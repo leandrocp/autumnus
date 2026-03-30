@@ -1,0 +1,443 @@
+---
+sidebar_position: 2
+slug: /formatters
+title: Formatters
+description: Choose between HTML Inline, HTML Linked, HTML Multi-Themes, Terminal, BBCode Scoped, or custom formatters in Lumis.
+keywords:
+  - lumis formatters
+  - html inline
+  - html linked
+  - terminal
+  - multi-theme
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Formatters
+
+Lumis separates parsing from rendering. The parser finds tokens; the formatter decides how those tokens become output.
+
+## Built-in formatter types
+
+| Output | CLI | Rust | Elixir | JavaScript | Java |
+| --- | --- | --- | --- | --- | --- |
+| HTML with inline styles | `html-inline` | `HtmlInlineBuilder` | `:html_inline` | `htmlInline()` | `Formatter.HTML_INLINE` |
+| HTML with CSS classes | `html-linked` | `HtmlLinkedBuilder` | `:html_linked` | `htmlLinked()` | `Formatter.HTML_LINKED` |
+| HTML with CSS variables for multiple themes | `html-multi-themes` | `HtmlMultiThemesBuilder` | `:html_multi_themes` | `htmlMultiThemes()` | — |
+| ANSI terminal output | `terminal` | `TerminalBuilder` | `:terminal` | `terminal()` | `Formatter.TERMINAL` |
+| BBCode with scope tags | `bbcode-scoped` | `BBCodeScopedBuilder` | `:bbcode_scoped` | `bbcodeScoped()` | `Formatter.BBCODE` |
+
+Each built-in formatter has a dedicated page with options and more examples:
+
+- [HTML Inline](/formatters/html-inline)
+- [HTML Linked](/formatters/html-linked)
+- [HTML Multi-Themes](/formatters/html-multi-themes)
+- [Terminal](/formatters/terminal)
+- [BBCode Scoped](/formatters/bbcode)
+
+## HTML Inline
+
+Self-contained output with no external CSS.
+
+<Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
+  <TabItem value="javascript" label="JavaScript">
+
+```js
+import {highlight} from '@lumis-sh/lumis';
+import {htmlInline} from '@lumis-sh/lumis/formatters';
+import javascript from '@lumis-sh/lumis/langs/javascript';
+import dracula from '@lumis-sh/themes/dracula';
+
+const html = await highlight(
+  'const x = 1',
+  htmlInline({language: javascript, theme: dracula, preClass: 'code-block'})
+);
+```
+
+  </TabItem>
+  <TabItem value="rust" label="Rust">
+
+```rust
+use lumis::{highlight, HtmlInlineBuilder, languages::Language, themes};
+
+let formatter = HtmlInlineBuilder::new()
+    .lang(Language::Rust)
+    .theme(Some(themes::get("dracula").unwrap()))
+    .pre_class(Some("code-block".to_string()))
+    .build()
+    .unwrap();
+
+let html = highlight("fn main() {}", formatter);
+```
+
+  </TabItem>
+  <TabItem value="elixir" label="Elixir">
+
+```elixir
+Lumis.highlight!(
+  "fn main() {}",
+  language: "rust",
+  formatter: {:html_inline, theme: "dracula", pre_class: "code-block"}
+)
+```
+
+  </TabItem>
+  <TabItem value="java" label="Java">
+
+```java
+import io.roastedroot.lumis4j.core.Formatter;
+import io.roastedroot.lumis4j.core.Lang;
+import io.roastedroot.lumis4j.core.Lumis;
+import io.roastedroot.lumis4j.core.Theme;
+
+var lumis = Lumis.builder().build();
+
+var highlighter = lumis.highlighter()
+    .withLang(Lang.RUST)
+    .withTheme(Theme.DRACULA)
+    .withFormatter(Formatter.HTML_INLINE)
+    .build();
+
+var html = highlighter.highlight("fn main() {}").string();
+lumis.close();
+```
+
+  </TabItem>
+  <TabItem value="cli" label="CLI">
+
+```bash
+lumis highlight main.rs --formatter html-inline --theme dracula
+```
+
+  </TabItem>
+</Tabs>
+
+## HTML Linked
+
+Smaller HTML. Pair with a CSS theme file.
+
+<Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
+  <TabItem value="javascript" label="JavaScript">
+
+```js
+import '@lumis-sh/themes/css/dracula.css';
+import {highlight} from '@lumis-sh/lumis';
+import {htmlLinked} from '@lumis-sh/lumis/formatters';
+import javascript from '@lumis-sh/lumis/langs/javascript';
+
+const html = await highlight(
+  'const x = 1',
+  htmlLinked({language: javascript, preClass: 'code-block'})
+);
+```
+
+  </TabItem>
+  <TabItem value="rust" label="Rust">
+
+```rust
+use lumis::{highlight, HtmlLinkedBuilder, languages::Language};
+
+let formatter = HtmlLinkedBuilder::new()
+    .lang(Language::Rust)
+    .pre_class(Some("code-block".to_string()))
+    .build()
+    .unwrap();
+
+let html = highlight("fn main() {}", formatter);
+```
+
+  </TabItem>
+  <TabItem value="elixir" label="Elixir">
+
+```elixir
+Lumis.highlight!(
+  "fn main() {}",
+  language: "rust",
+  formatter: {:html_linked, pre_class: "code-block"}
+)
+```
+
+  </TabItem>
+  <TabItem value="java" label="Java">
+
+```java
+import io.roastedroot.lumis4j.core.Formatter;
+import io.roastedroot.lumis4j.core.Lang;
+import io.roastedroot.lumis4j.core.Lumis;
+
+var lumis = Lumis.builder().build();
+
+var highlighter = lumis.highlighter()
+    .withLang(Lang.RUST)
+    .withFormatter(Formatter.HTML_LINKED)
+    .build();
+
+var html = highlighter.highlight("fn main() {}").string();
+lumis.close();
+```
+
+  </TabItem>
+  <TabItem value="cli" label="CLI">
+
+```bash
+lumis highlight main.rs --formatter html-linked
+```
+
+  </TabItem>
+</Tabs>
+
+## HTML Multi-Themes
+
+One block, multiple themes via CSS custom properties.
+
+<Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
+  <TabItem value="javascript" label="JavaScript">
+
+```js
+import {highlight} from '@lumis-sh/lumis';
+import {htmlMultiThemes} from '@lumis-sh/lumis/formatters';
+import javascript from '@lumis-sh/lumis/langs/javascript';
+import githubLight from '@lumis-sh/themes/github_light';
+import githubDark from '@lumis-sh/themes/github_dark';
+
+const html = await highlight(
+  'const x = 1',
+  htmlMultiThemes({
+    language: javascript,
+    themes: {light: githubLight, dark: githubDark},
+    defaultTheme: 'light-dark()',
+  })
+);
+```
+
+  </TabItem>
+  <TabItem value="rust" label="Rust">
+
+```rust
+use lumis::{highlight, HtmlMultiThemesBuilder, languages::Language, themes};
+use std::collections::HashMap;
+
+let mut theme_map = HashMap::new();
+theme_map.insert("light".to_string(), themes::get("github_light").unwrap());
+theme_map.insert("dark".to_string(), themes::get("github_dark").unwrap());
+
+let formatter = HtmlMultiThemesBuilder::new()
+    .lang(Language::Javascript)
+    .themes(theme_map)
+    .default_theme("light-dark()")
+    .build()
+    .unwrap();
+
+let html = highlight("const x = 1", formatter);
+```
+
+  </TabItem>
+  <TabItem value="elixir" label="Elixir">
+
+```elixir
+Lumis.highlight!(
+  "const x = 1",
+  language: "javascript",
+  formatter: {:html_multi_themes,
+    themes: [light: "github_light", dark: "github_dark"],
+    default_theme: "light-dark()"
+  }
+)
+```
+
+  </TabItem>
+  <TabItem value="java" label="Java">
+
+```java
+import io.roastedroot.lumis4j.core.Formatter;
+import io.roastedroot.lumis4j.core.Lang;
+import io.roastedroot.lumis4j.core.Lumis;
+import io.roastedroot.lumis4j.core.Theme;
+
+var lumis = Lumis.builder().build();
+
+var highlighter = lumis.highlighter()
+    .withLang(Lang.RUST)
+    .withTheme(Theme.DRACULA)
+    .withFormatter(Formatter.TERMINAL)
+    .build();
+
+var ansi = highlighter.highlight("fn main() {}").string();
+lumis.close();
+```
+
+  </TabItem>
+  <TabItem value="cli" label="CLI">
+
+```bash
+lumis highlight main.rs \
+  --formatter html-multi-themes \
+  --themes light:github_light \
+  --themes dark:github_dark \
+  --default-theme light-dark()
+```
+
+  </TabItem>
+</Tabs>
+
+Java does not support HTML Multi-Themes in `lumis4j` at the moment.
+
+## Terminal
+
+ANSI output for the terminal.
+
+<Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
+  <TabItem value="javascript" label="JavaScript">
+
+```js
+import {highlight} from '@lumis-sh/lumis';
+import {terminal} from '@lumis-sh/lumis/formatters';
+import javascript from '@lumis-sh/lumis/langs/javascript';
+import dracula from '@lumis-sh/themes/dracula';
+
+const ansi = await highlight(
+  'const x = 1',
+  terminal({language: javascript, theme: dracula})
+);
+```
+
+  </TabItem>
+  <TabItem value="rust" label="Rust">
+
+```rust
+use lumis::{highlight, TerminalBuilder, languages::Language, themes};
+
+let formatter = TerminalBuilder::new()
+    .lang(Language::Rust)
+    .theme(Some(themes::get("dracula").unwrap()))
+    .build()
+    .unwrap();
+
+let ansi = highlight("fn main() {}", formatter);
+println!("{}", ansi);
+```
+
+  </TabItem>
+  <TabItem value="elixir" label="Elixir">
+
+```elixir
+Lumis.highlight!(
+  "fn main() {}",
+  language: "rust",
+  formatter: {:terminal, theme: "dracula"}
+)
+```
+
+  </TabItem>
+  <TabItem value="java" label="Java">
+
+```java
+import io.roastedroot.lumis4j.core.Formatter;
+import io.roastedroot.lumis4j.core.Lang;
+import io.roastedroot.lumis4j.core.Lumis;
+import io.roastedroot.lumis4j.core.Theme;
+
+var lumis = Lumis.builder().build();
+
+var highlighter = lumis.highlighter()
+    .withLang(Lang.RUST)
+    .withTheme(Theme.DRACULA)
+    .withFormatter(Formatter.TERMINAL)
+    .build();
+
+var ansi = highlighter.highlight("fn main() {}").string();
+lumis.close();
+```
+
+  </TabItem>
+  <TabItem value="cli" label="CLI">
+
+```bash
+lumis highlight main.rs --theme dracula
+```
+
+  </TabItem>
+</Tabs>
+
+## BBCode Scoped
+
+Scope-based BBCode output for BBCode-aware renderers and custom pipelines.
+
+<Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
+  <TabItem value="javascript" label="JavaScript">
+
+```js
+import {highlight} from '@lumis-sh/lumis';
+import {bbcodeScoped} from '@lumis-sh/lumis/formatters';
+import javascript from '@lumis-sh/lumis/langs/javascript';
+
+const output = await highlight(
+  'const x = "[url=x]"',
+  bbcodeScoped({language: javascript})
+);
+```
+
+  </TabItem>
+  <TabItem value="rust" label="Rust">
+
+```rust
+use lumis::{highlight, BBCodeScopedBuilder, languages::Language};
+
+let output = highlight(
+    "fn main() {}",
+    BBCodeScopedBuilder::new()
+        .lang(Language::Rust)
+        .build()
+        .unwrap(),
+);
+```
+
+  </TabItem>
+  <TabItem value="elixir" label="Elixir">
+
+```elixir
+Lumis.highlight!(
+  ~s(const x = "[url=x]"),
+  language: "javascript",
+  formatter: :bbcode_scoped
+)
+```
+
+  </TabItem>
+  <TabItem value="java" label="Java">
+
+```java
+import io.roastedroot.lumis4j.core.Formatter;
+import io.roastedroot.lumis4j.core.Lang;
+import io.roastedroot.lumis4j.core.Lumis;
+
+var lumis = Lumis.builder().build();
+
+var highlighter = lumis.highlighter()
+    .withLang(Lang.JAVASCRIPT)
+    .withFormatter(Formatter.BBCODE)
+    .build();
+
+var output = highlighter.highlight("const x = \"[url=x]\"").string();
+lumis.close();
+```
+
+  </TabItem>
+  <TabItem value="cli" label="CLI">
+
+```bash
+lumis highlight main.rs --formatter bbcode-scoped
+```
+
+  </TabItem>
+</Tabs>
+
+## Custom formatters
+
+Rust and JavaScript expose lower-level formatter APIs so you can render tokens however you want.
+
+- Rust: implement the [`Formatter`](https://docs.rs/lumis/latest/lumis/formatter/trait.Formatter.html) trait
+- JavaScript: pass a formatter object with `language` and `format(source, hl)` — see [source](https://github.com/leandrocp/lumis/blob/main/packages/javascript/lumis/src/formatter.ts)
+
+For deeper formatter-specific options, use the dedicated pages above. For theme data and formatter helpers, continue with [Themes](/themes).

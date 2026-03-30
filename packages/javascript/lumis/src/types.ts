@@ -47,7 +47,7 @@ export interface HighlightRange {
  *
  * ```ts
  * import { availableLanguages } from '@lumis-sh/lumis'
- * const langs = availableLanguages()
+ * const languages = availableLanguages()
  * // [{ id: 'javascript', name: 'JavaScript', aliases: ['js', 'jsx'], extensions: ['*.js', ...] }, ...]
  * ```
  */
@@ -110,6 +110,10 @@ export interface WasmRef {
   version: string;
 }
 
+export type RuntimeWasmInput = Uint8Array | ArrayBuffer | string | URL | Response;
+
+export type RuntimeWasmBundle = Partial<Record<string, RuntimeWasmInput>>;
+
 /**
  * A language definition with Tree-sitter queries and a WASM parser reference.
  *
@@ -130,10 +134,11 @@ export interface Language {
   /**
    * WASM parser source:
    * - `WasmRef` fetched from CDN (default for pre-built bundles)
+   * - `Uint8Array` or `ArrayBuffer` passed directly (useful with browser bundlers)
    * - `URL` fetched directly (`file://` works in Node.js)
    * - `string` treated as file path (Node.js) or URL (browser)
    */
-  wasm: WasmRef | URL | string;
+  wasm: WasmRef | RuntimeWasmInput;
 }
 
 /**
@@ -143,7 +148,7 @@ export interface Language {
  * import { bundledLanguages } from '@lumis-sh/lumis/bundles/web'
  *
  * bundledLanguages.javascript.id  // "javascript"
- * const lang = await bundledLanguages.javascript()  // loads the full Language
+ * const language = await bundledLanguages.javascript()  // loads the full Language
  * ```
  */
 export interface LazyLanguage {
@@ -156,15 +161,17 @@ export interface LazyLanguage {
  * A collection of lazy language handles. Import a preset bundle:
  *
  * ```ts
- * import { bundledLanguages } from '@lumis-sh/lumis/bundles/web'    // 23 web languages
- * import { bundledLanguages } from '@lumis-sh/lumis/bundles/system' // 18 systems languages
- * import { bundledLanguages } from '@lumis-sh/lumis/bundles/full'   // all 77 languages
+ * import { bundledLanguages } from '@lumis-sh/lumis/bundles/essential'
+ * import { bundledLanguages } from '@lumis-sh/lumis/bundles/web'
+ * import { bundledLanguages } from '@lumis-sh/lumis/bundles/system'
+ * import { bundledLanguages } from '@lumis-sh/lumis/bundles/backend'
+ * import { bundledLanguages } from '@lumis-sh/lumis/bundles/full'
  * ```
  */
 export type LanguageBundle = Record<string, LazyLanguage>;
 
 /**
- * What `createHighlighter({ langs })` accepts.
+ * What `createHighlighter({ languages })` accepts.
  *
  * - `Language` — loaded immediately
  * - `Promise<{ default: Language }>` — e.g. `import('@lumis-sh/lumis/langs/css')`
@@ -418,6 +425,19 @@ export interface HtmlMultiThemesOptions {
 }
 
 export interface HtmlMultiThemesFormatter extends Formatter, HtmlMultiThemesOptions {}
+
+/**
+ * Options for {@link bbcodeScoped}.
+ *
+ * ```ts
+ * bbcodeScoped({ language: javascript })
+ * ```
+ */
+export interface BBCodeScopedOptions {
+  language?: LanguageRef;
+}
+
+export interface BBCodeScopedFormatter extends Formatter, BBCodeScopedOptions {}
 
 /**
  * Options for {@link terminal}.

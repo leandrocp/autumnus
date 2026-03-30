@@ -1,0 +1,14 @@
+{
+  "name": "example-npm-wasm-node",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "render": "node render.mjs"
+  },
+  "dependencies": {
+    "@lumis-sh/lumis": "workspace:*",
+    "@lumis-sh/themes": "workspace:*",
+    "@lumis-sh/wasm-diff": "^0.26.0",
+    "@lumis-sh/wasm-elixir": "^0.26.0"
+  }
+}

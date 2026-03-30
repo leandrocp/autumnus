@@ -53,6 +53,6 @@ const code = `<article class="profile-card">
   </script>
 </article>`;
 
-const hl = await createHighlighter({ langs: [html, javascript] });
+const hl = await createHighlighter({ languages: [html, javascript] });
 
 console.log(hl.highlight(code, new InteractiveDocsFormatter()));

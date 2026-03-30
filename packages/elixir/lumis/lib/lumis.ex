@@ -86,7 +86,7 @@ defmodule Lumis do
   @typedoc """
   Highlighter formatter and its options.
 
-  Available formatters: `:html_inline`, `:html_linked`, `:html_multi_themes`, `:terminal`
+  Available formatters: `:html_inline`, `:html_linked`, `:html_multi_themes`, `:terminal`, `:bbcode_scoped`
 
   * `:html_inline` - generates `<span>` tags with inline styles for each token, for example: `<span style="color: #6eb4bff;">Atom</span>`.
   * `:html_linked` - generates `<span>` tags with `class` representing the token type, for example: `<span class="keyword-special">Atom</span>`.
@@ -94,6 +94,7 @@ defmodule Lumis do
   * `:html_multi_themes` - generates HTML with CSS custom properties (variables) for multiple themes, enabling light/dark mode support.
      Inspired by [Shiki Dual Themes](https://shiki.style/guide/dual-themes).
   * `:terminal` - generates ANSI escape codes for terminal output.
+  * `:bbcode_scoped` - generates nested BBCode tags using highlight scope names, for example: `[keyword-elixir]defmodule[/keyword-elixir]`.
 
   You can either pass the formatter as an atom to use default options or a tuple with the formatter name and options, so both are equivalent:
 
@@ -208,6 +209,12 @@ defmodule Lumis do
 
       {:terminal, theme: "github_light"}
 
+  ### BBCode Scoped formatter
+
+      :bbcode_scoped
+
+  Emits highlight scope names as tags, not standard forum-style BBCode like `[b]`, `[color]`, or `[code]`.
+
   See https://docs.rs/lumis/latest/lumis/enum.FormatterOption.html for more info.
   """
   @type formatter ::
@@ -245,6 +252,8 @@ defmodule Lumis do
              [
                theme: theme()
              ]}
+          | :bbcode_scoped
+          | {:bbcode_scoped, []}
 
   @formatter_schema [
     type: {:custom, Lumis, :formatter_type, []},
@@ -289,7 +298,13 @@ defmodule Lumis do
 
   @doc false
   def formatter_type(formatter)
-      when formatter in [:html_inline, :html_linked, :html_multi_themes, :terminal] do
+      when formatter in [
+             :html_inline,
+             :html_linked,
+             :html_multi_themes,
+             :bbcode_scoped,
+             :terminal
+           ] do
     formatter_type({formatter, []})
   end
 
@@ -458,6 +473,13 @@ defmodule Lumis do
 
       invalid ->
         {:error, "invalid options given to terminal: #{inspect(invalid)}"}
+    end
+  end
+
+  def formatter_type({:bbcode_scoped, options}) when is_list(options) do
+    case options do
+      [] -> {:ok, {:bbcode_scoped, []}}
+      invalid -> {:error, "invalid options given to bbcode_scoped: #{inspect(invalid)}"}
     end
   end
 
@@ -912,6 +934,10 @@ defmodule Lumis do
   defp convert_formatter_for_nif(:terminal, opts) do
     opts = convert_theme_for_nif(opts)
     {:terminal, Map.take(opts, [:theme])}
+  end
+
+  defp convert_formatter_for_nif(:bbcode_scoped, _opts) do
+    {:bbcode_scoped, %{}}
   end
 
   defp convert_formatter_for_nif(:html_multi_themes, opts) do

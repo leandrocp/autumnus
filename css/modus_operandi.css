@@ -1,5 +1,5 @@
 /* modus_operandi
- * revision: c57c2c56c9f0af04f3b609d11caa840880074784
+ * revision: 17a64464c27c1be605adca13dbe48f2f402fe107
  */
 
 pre.lumis {
@@ -27,7 +27,6 @@ pre.lumis {
   font-style: italic;
 }
 .comment-documentation {
-  color: #2a5045;
   font-style: italic;
 }
 .comment-error {
@@ -51,10 +50,10 @@ pre.lumis {
   color: #000000;
 }
 .constant-builtin {
-  color: #005f5f;
+  color: #8f0075;
 }
 .constant-macro {
-  color: #a0132f;
+  color: #000000;
 }
 .constructor {
   color: #7a4f2f;
@@ -78,13 +77,13 @@ pre.lumis {
   color: #721045;
 }
 .function-builtin {
-  color: #005f5f;
+  color: #8f0075;
 }
 .function-call {
   color: #721045;
 }
 .function-macro {
-  color: #a0132f;
+  color: #721045;
 }
 .function-method {
   color: #721045;
@@ -110,7 +109,7 @@ pre.lumis {
   font-style: italic;
 }
 .keyword-debug {
-  color: #005f5f;
+  color: #8f0075;
 }
 .keyword-directive {
   color: #a0132f;
@@ -146,19 +145,20 @@ pre.lumis {
   font-style: italic;
 }
 .keyword-type {
-  color: #005f5f;
+  color: #531ab6;
+  font-style: italic;
 }
 .label {
   color: #005e8b;
 }
 .markup {
-  color: #005f5f;
+  color: #8f0075;
 }
 .markup-environment {
-  color: #005f5f;
+  color: #8f0075;
 }
 .markup-environment-name {
-  color: #005f5f;
+  color: #8f0075;
 }
 .markup-heading {
   color: #193668;
@@ -211,7 +211,7 @@ pre.lumis {
   color: #6f5500;
 }
 .markup-math {
-  color: #005f5f;
+  color: #8f0075;
 }
 .markup-quote {
   font-style: italic;
@@ -263,7 +263,6 @@ pre.lumis {
   color: #3548cf;
 }
 .string-documentation {
-  color: #2a5045;
   font-style: italic;
 }
 .string-escape {
@@ -291,7 +290,7 @@ pre.lumis {
   color: #005e8b;
 }
 .tag-builtin {
-  color: #005f5f;
+  color: #8f0075;
 }
 .tag-delimiter {
   color: #000000;

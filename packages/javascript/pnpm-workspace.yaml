@@ -1,5 +1,4 @@
 packages:
-  - lumis
-  - themes
+  - "*"
 
 verifyDepsBeforeRun: install

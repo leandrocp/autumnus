@@ -5,6 +5,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "tree-sitter-*"
 
   - package-ecosystem: "github-actions"
     directory: "/"

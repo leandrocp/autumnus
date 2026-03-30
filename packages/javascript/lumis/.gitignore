@@ -1,9 +1,11 @@
 node_modules/
 dist/
+doc/
 langs/
 themes/
 wasm/
 !test/fixtures/wasm/
 !test/fixtures/wasm/*.wasm
 queries/
+src/generated/
 src/tree-sitter-wasm.ts

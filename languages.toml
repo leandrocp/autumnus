@@ -732,7 +732,7 @@ globs = ["*.dot", "*.gv"]
 
 [parsers.editorconfig]
 git = "https://github.com/ValdezFOmar/tree-sitter-editorconfig.git"
-rev = "v2.0.0"
+rev = "c4d5e725e1bbf683b223f4bebe83142cefe68da5"
 version = "2.0.0"
 globs = [".editorconfig"]
 
@@ -1015,6 +1015,21 @@ globs = ["*.vhd", "*.vhdl"]
 
 # -- Bundles
 
+[bundles.essential]
+parsers = [
+  "bash",
+  "comment",
+  "diff",
+  "ini",
+  "xml",
+  "json",
+  "markdown",
+  "markdown_inline",
+  "regex",
+  "toml",
+  "yaml",
+]
+
 [bundles.web]
 parsers = [
   "astro",
@@ -1024,6 +1039,7 @@ parsers = [
   "diff",
   "dockerfile",
   "graphql",
+  "heex",
   "html",
   "javascript",
   "json",
@@ -1060,6 +1076,37 @@ parsers = [
   "wat",
   "yaml",
   "zig",
+]
+
+[bundles.backend]
+parsers = [
+  "bash",
+  "comment",
+  "csharp",
+  "diff",
+  "dockerfile",
+  "elixir",
+  "erlang",
+  "go",
+  "graphql",
+  "http",
+  "java",
+  "javascript",
+  "json",
+  "kotlin",
+  "nginx",
+  "php",
+  "protobuf",
+  "python",
+  "regex",
+  "ruby",
+  "rust",
+  "scala",
+  "sql",
+  "toml",
+  "typescript",
+  "xml",
+  "yaml",
 ]
 
 [bundles.full]

@@ -6,7 +6,7 @@ import {
   getLoadedLanguage,
   getLoadedLanguageIds,
   resolveLanguageId,
-} from '../src/platform/node.js'
+} from '../src/runtime/node.js'
 import json from '../langs/json.ts'
 import { configureLocalWasmResolver } from './wasm.js'
 

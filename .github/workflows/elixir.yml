@@ -1,5 +1,9 @@
 name: Elixir CI
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches: [ main ]
@@ -18,12 +22,14 @@ defaults:
 
 jobs:
   test:
+    if: ${{ github.event_name != 'pull_request' || !startsWith(github.head_ref, 'release-please--') }}
     uses: leandrocp/github-actions/.github/workflows/elixir-test.yml@main
     with:
       working-directory: packages/elixir/lumis
       env_vars: '{"LUMIS_BUILD": "1"}'
       rust-toolchain: 'stable'
   lint:
+    if: ${{ github.event_name != 'pull_request' || !startsWith(github.head_ref, 'release-please--') }}
     uses: leandrocp/github-actions/.github/workflows/elixir-lint.yml@main
     with:
       working-directory: packages/elixir/lumis

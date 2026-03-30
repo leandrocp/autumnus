@@ -97,7 +97,7 @@ export async function renderPreview<TSource extends string>(
     const errorBox = document.getElementById('error-output')
 
     try {
-      const hl = await createHighlighter({ langs: [typescript] })
+      const hl = await createHighlighter({ languages: [typescript] })
       output.innerHTML = hl.highlight(
         code,
         htmlInline({

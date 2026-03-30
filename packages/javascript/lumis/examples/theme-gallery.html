@@ -64,7 +64,7 @@
     const errorBox = document.getElementById('error-output')
 
     try {
-      const hl = await createHighlighter({ langs: [javascript] })
+      const hl = await createHighlighter({ languages: [javascript] })
 
       for (const [label, theme] of themes) {
         const card = document.createElement('article')

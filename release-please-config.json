@@ -1,6 +1,8 @@
 {
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
   "separate-pull-requests": true,
+  "bump-minor-pre-major": true,
+  "bump-patch-for-minor-pre-major": true,
   "tag-separator": "@",
   "packages": {
     "crates/lumis": {
@@ -28,9 +30,44 @@
       "component": "javascript",
       "changelog-path": "CHANGELOG.md"
     },
+    "packages/javascript/markdown-it-lumis": {
+      "release-type": "node",
+      "component": "markdown-it-lumis",
+      "changelog-path": "CHANGELOG.md"
+    },
+    "packages/javascript/rehype-lumis": {
+      "release-type": "node",
+      "component": "rehype-lumis",
+      "changelog-path": "CHANGELOG.md"
+    },
     "packages/javascript/themes": {
       "release-type": "node",
       "component": "themes",
+      "changelog-path": "CHANGELOG.md"
+    },
+    "packages/javascript/wasm-bundle-essential": {
+      "release-type": "node",
+      "component": "wasm-bundle-essential",
+      "changelog-path": "CHANGELOG.md"
+    },
+    "packages/javascript/wasm-bundle-web": {
+      "release-type": "node",
+      "component": "wasm-bundle-web",
+      "changelog-path": "CHANGELOG.md"
+    },
+    "packages/javascript/wasm-bundle-system": {
+      "release-type": "node",
+      "component": "wasm-bundle-system",
+      "changelog-path": "CHANGELOG.md"
+    },
+    "packages/javascript/wasm-bundle-backend": {
+      "release-type": "node",
+      "component": "wasm-bundle-backend",
+      "changelog-path": "CHANGELOG.md"
+    },
+    "packages/javascript/wasm-bundle-full": {
+      "release-type": "node",
+      "component": "wasm-bundle-full",
       "changelog-path": "CHANGELOG.md"
     },
     "packages/elixir/lumis": {

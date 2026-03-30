@@ -77,7 +77,7 @@ export function createClient({
     const copyStatus = document.getElementById('copy-status')
 
     try {
-      const hl = await createHighlighter({ langs: [typescript] })
+      const hl = await createHighlighter({ languages: [typescript] })
       output.innerHTML = hl.highlight(
         code,
         htmlInline({

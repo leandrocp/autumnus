@@ -1,5 +1,5 @@
 /* material_darker
- * revision: 52c121551ffbf7b8f25bed3ef5878e5d6896c786
+ * revision: 92f7366a9315cd386bc4fa4d716fde375dda210f
  */
 
 pre.lumis {
@@ -93,7 +93,7 @@ pre.lumis {
   background-color: #323232;
 }
 .keyword {
-  color: #89ddff;
+  color: #c792ea;
 }
 .keyword-conditional {
   color: #c792ea;
@@ -102,11 +102,10 @@ pre.lumis {
   color: #c792ea;
 }
 .keyword-coroutine {
-  color: #89ddff;
-  font-style: italic;
+  color: #c792ea;
 }
 .keyword-debug {
-  color: #89ddff;
+  color: #c792ea;
 }
 .keyword-directive {
   color: #89ddff;
@@ -115,28 +114,28 @@ pre.lumis {
   color: #89ddff;
 }
 .keyword-export {
-  color: #89ddff;
+  color: #c792ea;
 }
 .keyword-function {
-  color: #89ddff;
+  color: #c792ea;
 }
 .keyword-import {
   color: #89ddff;
 }
 .keyword-modifier {
-  color: #89ddff;
+  color: #c792ea;
 }
 .keyword-operator {
-  color: #89ddff;
+  color: #c792ea;
 }
 .keyword-repeat {
   color: #c792ea;
 }
 .keyword-return {
-  color: #89ddff;
+  color: #c792ea;
 }
 .keyword-type {
-  color: #89ddff;
+  color: #c792ea;
 }
 .label {
   color: #ffcb6b;
@@ -300,7 +299,7 @@ pre.lumis {
   color: #b0bec5;
 }
 .variable-builtin {
-  color: #89ddff;
+  color: #c792ea;
 }
 .variable-member {
   color: #8c8b8b;

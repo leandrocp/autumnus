@@ -1,12 +1,28 @@
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
+import dracula from "../../themes/dist/json/dracula.json";
+import json from "../langs/json.ts";
 import {
+  ANSI_RESET,
   hexToRgb,
+  highlightIterWithAnsi,
   rgbToAnsi,
   styleToAnsi,
   wrapWithAnsi,
 } from "../src/formatter/ansi.js";
+import type { Theme } from "../src/types.js";
+import { configureLocalWasmResolver } from "./wasm.js";
+
+const theme: Theme = dracula;
 
 describe("formatter ansi helpers", () => {
+  beforeAll(() => {
+    configureLocalWasmResolver(["diff", "json"]);
+  }, 120_000);
+
+  it("exports the ANSI reset sequence", () => {
+    expect(ANSI_RESET).toBe("\u001b[0m");
+  });
+
   it("parses full hex colors", () => {
     expect(hexToRgb("#123456")).toEqual([0x12, 0x34, 0x56]);
     expect(hexToRgb("abcdef")).toEqual([0xab, 0xcd, 0xef]);
@@ -57,4 +73,12 @@ describe("formatter ansi helpers", () => {
   it("returns unmodified text when no style is present", () => {
     expect(wrapWithAnsi("plain", undefined)).toBe("plain");
   });
+
+  it("collects ANSI wrapped segments from highlight iteration", async () => {
+    const segments = await highlightIterWithAnsi('{"x":1}', json, theme);
+
+    expect(segments.length).toBeGreaterThan(0);
+    expect(segments.some(([text]) => text.includes("\u001b["))).toBe(true);
+    expect(segments.map(([text]) => text.replaceAll("\u001b[0m", "")).join("")).toContain('"x"');
+  }, 30_000);
 });

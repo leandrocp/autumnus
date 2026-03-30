@@ -83,7 +83,13 @@ defmodule Lumis.LumisTest do
   end
 
   test "available_themes" do
-    assert Lumis.available_themes() |> length() == 117
+    expected_count =
+      __DIR__
+      |> Path.join("../../../../themes")
+      |> File.ls!()
+      |> Enum.count(&String.ends_with?(&1, ".json"))
+
+    assert Lumis.available_themes() |> length() == expected_count
   end
 
   test "default_options/0" do
@@ -140,6 +146,12 @@ defmodule Lumis.LumisTest do
     test "default opts" do
       assert Lumis.formatter_type(:terminal) ==
                {:ok, {:terminal, theme: "onedark"}}
+    end
+  end
+
+  describe "formatter_type: :bbcode_scoped" do
+    test "default opts" do
+      assert Lumis.formatter_type(:bbcode_scoped) == {:ok, {:bbcode_scoped, []}}
     end
   end
 
@@ -280,6 +292,21 @@ defmodule Lumis.LumisTest do
         "\e[0m\e[38;2;207;34;46mdefmodule\e[0m \e[0m\e[38;2;149;56;0mTest\e[0m \e[0m\e[38;2;207;34;46mdo\e[0m\n  \e[0m\e[38;2;5;80;174m@\e[0m\e[0m\e[38;2;5;80;174mlang \e[0m\e[0m\e[38;2;5;80;174m:elixir\e[0m\n\e[0m\e[38;2;207;34;46mend\e[0m",
         language: "elixir",
         formatter: {:terminal, theme: "github_light"}
+      )
+    end
+  end
+
+  describe "formatter: bbcode_scoped" do
+    test "with default opts" do
+      assert_output(
+        "defmodule Test do\n  value = \"[url=x]\"\nend",
+        ~s"""
+        [keyword-elixir]defmodule[/keyword-elixir] [module-elixir]Test[/module-elixir] [keyword-elixir]do[/keyword-elixir]
+          [variable-elixir]value[/variable-elixir] [operator-elixir]=[/operator-elixir] [string-elixir]\"&#91;url=x&#93;\"[/string-elixir]
+        [keyword-elixir]end[/keyword-elixir]
+        """,
+        language: "elixir",
+        formatter: :bbcode_scoped
       )
     end
   end
@@ -1110,6 +1137,12 @@ defmodule Lumis.LumisTest do
 
       assert %{formatter: {:terminal, %{theme: {:string, "github_light"}}}} =
                Lumis.rust_options!(options)
+    end
+
+    test "converts bbcode_scoped formatter" do
+      options = Lumis.validate_options!(formatter: :bbcode_scoped)
+
+      assert %{formatter: {:bbcode_scoped, %{}}} = Lumis.rust_options!(options)
     end
 
     test "handles highlight_lines option" do

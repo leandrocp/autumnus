@@ -1,0 +1,16 @@
+:root {
+  --ifm-color-primary: #2563eb;
+}
+
+/* Let Lumis handle code block styling */
+.lumis {
+  border-radius: var(--ifm-code-border-radius);
+  padding: var(--ifm-pre-padding);
+  overflow: auto;
+}
+
+.lumis code {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: var(--ifm-code-font-size);
+  line-height: var(--ifm-pre-line-height);
+}

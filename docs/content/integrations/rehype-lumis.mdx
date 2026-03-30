@@ -1,0 +1,84 @@
+---
+sidebar_position: 11
+slug: /integrations/rehype-lumis
+title: rehype-lumis
+description: Use Lumis directly in rehype and unified pipelines with rehype-lumis.
+keywords:
+  - rehype lumis
+  - unified lumis
+  - lumis rehype plugin
+---
+
+# rehype-lumis
+
+[Full example on GitHub](https://github.com/leandrocp/lumis/tree/main/examples/rehype-lumis)
+
+Use `@lumis-sh/rehype-lumis` when your stack already has a rehype stage.
+
+## Install
+
+```bash
+npm install @lumis-sh/rehype-lumis @lumis-sh/themes
+```
+
+## Example
+
+```ts
+import rehypeLumis from '@lumis-sh/rehype-lumis'
+import {htmlInline} from '@lumis-sh/lumis/formatters'
+import javascript from '@lumis-sh/lumis/langs/javascript'
+import plaintext from '@lumis-sh/lumis/langs/plaintext'
+import githubLight from '@lumis-sh/themes/github_light'
+
+processor.use(rehypeLumis, {
+  formatter: (language) => htmlInline({language, theme: githubLight}),
+  languages: [javascript, plaintext],
+})
+```
+
+This plugin replaces `pre > code` blocks in HAST with Lumis HTML output.
+
+## Full pipeline
+
+```ts
+import {unified} from 'unified'
+import remarkParse from 'remark-parse'
+import remarkRehype from 'remark-rehype'
+import rehypeStringify from 'rehype-stringify'
+import rehypeLumis from '@lumis-sh/rehype-lumis'
+import {htmlInline} from '@lumis-sh/lumis/formatters'
+import javascript from '@lumis-sh/lumis/langs/javascript'
+import rust from '@lumis-sh/lumis/langs/rust'
+import plaintext from '@lumis-sh/lumis/langs/plaintext'
+import githubLight from '@lumis-sh/themes/github_light'
+
+const file = await unified()
+  .use(remarkParse)
+  .use(remarkRehype)
+  .use(rehypeLumis, {
+    formatter: (language) => htmlInline({language, theme: githubLight}),
+    languages: [javascript, rust, plaintext],
+  })
+  .use(rehypeStringify)
+  .process(markdown)
+```
+
+## Options
+
+- `formatter` - required callback that receives the detected block language and returns a Lumis formatter
+- `languages` - optional language definitions to register up front with `createHighlighter`
+
+## Behavior
+
+- visits `pre > code` blocks in HAST
+- reads languages from `language-*` classes on the `<code>` or `<pre>` node, or from `data-language` / `language` properties
+- replaces each block with Lumis HTML output
+- loads detected languages on demand before rendering each block
+
+Use it in:
+
+- `unified`
+- MDX pipelines
+- Next.js MDX
+- Astro markdown and MDX
+- `react-markdown`

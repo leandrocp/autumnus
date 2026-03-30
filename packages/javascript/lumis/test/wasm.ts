@@ -19,8 +19,8 @@ export function ensureLocalParserWasm(language: string, parser: string): URL {
   return wasmUrl;
 }
 
-export function configureLocalWasmResolver(langs: string[]): void {
-  for (const language of langs) {
+export function configureLocalWasmResolver(languages: string[]): void {
+  for (const language of languages) {
     ensureLocalWasm(language);
   }
 

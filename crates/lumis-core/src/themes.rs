@@ -634,7 +634,14 @@ mod tests {
             assert!(!theme.name.is_empty());
         }
 
-        assert_eq!(ALL_THEMES.len(), 117);
+        let manifest_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
+        let expected_count = std::fs::read_dir(manifest_dir.join("themes"))
+            .unwrap()
+            .filter_map(|entry| entry.ok())
+            .filter(|entry| entry.path().extension().and_then(|s| s.to_str()) == Some("json"))
+            .count();
+
+        assert_eq!(ALL_THEMES.len(), expected_count);
     }
 
     #[test]

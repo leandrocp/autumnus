@@ -1,0 +1,123 @@
+---
+sidebar_position: 4
+slug: /formatters/terminal
+title: Terminal Formatter
+description: Options and examples for Lumis ANSI terminal output.
+keywords:
+  - lumis terminal
+  - ansi
+  - terminal formatter
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Terminal Formatter
+
+ANSI escape codes for shell output.
+
+## Options
+
+| Runtime | Options |
+| --- | --- |
+| Rust | `lang`, `theme` |
+| Elixir | `:theme` |
+| JavaScript | `language`, `theme` |
+| Java | `withLang()`, `withTheme()`, `withFormatter(Formatter.TERMINAL)` |
+| CLI | default formatter, `--theme` |
+
+## Example
+
+<Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
+  <TabItem value="javascript" label="JavaScript">
+
+```js
+import {highlight} from '@lumis-sh/lumis'
+import {terminal} from '@lumis-sh/lumis/formatters'
+import javascript from '@lumis-sh/lumis/langs/javascript'
+import dracula from '@lumis-sh/themes/dracula'
+
+const ansi = await highlight('const x = 1', terminal({language: javascript, theme: dracula}))
+console.log(ansi)
+```
+
+  </TabItem>
+  <TabItem value="rust" label="Rust">
+
+```rust
+use lumis::{highlight, TerminalBuilder, languages::Language, themes};
+
+let ansi = highlight(
+    "fn main() {}",
+    TerminalBuilder::new()
+        .lang(Language::Rust)
+        .theme(Some(themes::get("dracula").unwrap()))
+        .build()
+        .unwrap(),
+);
+
+println!("{}", ansi);
+```
+
+  </TabItem>
+  <TabItem value="elixir" label="Elixir">
+
+```elixir
+Lumis.highlight!(
+  "fn main() {}",
+  language: "rust",
+  formatter: {:terminal, theme: "dracula"}
+)
+```
+
+  </TabItem>
+  <TabItem value="java" label="Java">
+
+```java
+import io.roastedroot.lumis4j.core.Formatter;
+import io.roastedroot.lumis4j.core.Lang;
+import io.roastedroot.lumis4j.core.Lumis;
+import io.roastedroot.lumis4j.core.Theme;
+
+var lumis = Lumis.builder().build();
+
+var highlighter = lumis.highlighter()
+    .withLang(Lang.JAVASCRIPT)
+    .withTheme(Theme.DRACULA)
+    .withFormatter(Formatter.TERMINAL)
+    .build();
+
+var ansi = highlighter.highlight("const x = 1").string();
+System.out.println(ansi);
+
+lumis.close();
+```
+
+  </TabItem>
+  <TabItem value="cli" label="CLI">
+
+```bash
+lumis highlight main.rs --theme dracula
+# same as: lumis highlight main.rs --formatter terminal --theme dracula
+```
+
+  </TabItem>
+</Tabs>
+
+## Output format
+
+Terminal output is plain text wrapped in ANSI escape sequences:
+
+```text
+\x1b[38;2;229;192;123mfn\x1b[0m \x1b[38;2;97;175;239mmain\x1b[0m() {}
+```
+
+- the source stays as terminal text, not HTML
+- ANSI escape sequences set foreground color and text styles
+- `\x1b[0m` resets formatting between styled segments
+
+## When to use it
+
+- CLI tools
+- logs and local scripts
+- previewing highlighted code in a terminal

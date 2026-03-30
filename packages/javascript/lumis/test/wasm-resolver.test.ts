@@ -31,10 +31,22 @@ describe('Wasm resolver', () => {
     const { default: diff } = await import('../langs/diff.ts')
 
     const hl = await createHighlighter({
-      langs: [{ ...diff, wasm: ensureLocalWasm('diff') }],
+      languages: [{ ...diff, wasm: ensureLocalWasm('diff') }],
     })
 
     const html = hl.highlight('- old\n+ new', htmlLinked({ language: diff }))
+    expect(html).toContain('class="language-diff"')
+  }, 30_000)
+
+  it('supports withWasm for explicit runtime wasm inputs', async () => {
+    const { createHighlighter, withWasm } = await import('../src/index.js')
+    const { htmlLinked } = await import('../src/formatters.js')
+    const { default: diff } = await import('../langs/diff.ts')
+
+    const language = withWasm(diff, ensureLocalWasm('diff'))
+    const hl = await createHighlighter({ languages: [language] })
+
+    const html = hl.highlight('- old\n+ new', htmlLinked({ language }))
     expect(html).toContain('class="language-diff"')
   }, 30_000)
 
@@ -46,7 +58,7 @@ describe('Wasm resolver', () => {
     const resolver = (_language: string, wasm: { name: string }) => ensureLocalParserWasm(_language, wasm.name)
 
     const hl = await createHighlighter({
-      langs: [diff],
+      languages: [diff],
       wasmResolver: resolver,
     })
 
@@ -68,7 +80,7 @@ describe('Wasm resolver', () => {
     })
 
     const hl = await createHighlighter({
-      langs: [diff],
+      languages: [diff],
       wasmResolver: (language, wasm) => {
         instanceCalls.push(language)
         return ensureLocalParserWasm(language, wasm.name)
@@ -92,7 +104,7 @@ describe('Wasm resolver', () => {
       return ensureLocalParserWasm(language, wasm.name)
     })
 
-    const hl = await createHighlighter({ langs: [diff] })
+    const hl = await createHighlighter({ languages: [diff] })
     const html = hl.highlight('- old\n+ new', htmlLinked({ language: diff }))
 
     expect(html).toContain('class="language-diff"')

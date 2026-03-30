@@ -27,7 +27,12 @@ export async function preloadAllLanguages(): Promise<void> {
   await send({ type: "preloadAll" });
 }
 
-export async function renderHighlight(language: LanguageOption, theme: Theme, source: string, preClass?: string): Promise<string> {
+export async function renderHighlight(
+  language: LanguageOption,
+  theme: Theme,
+  source: string,
+  preClass?: string,
+): Promise<string> {
   const res = await send({ type: "highlight", languageId: language.id, theme, source, preClass });
   if (res.type === "error") throw new Error(res.message);
   return (res as Extract<WorkerResponse, { type: "result" }>).html;
@@ -40,7 +45,14 @@ export async function renderHighlightMultiTheme(
   source: string,
   preClass?: string,
 ): Promise<string> {
-  const res = await send({ type: "highlightMultiTheme", languageId: language.id, lightTheme, darkTheme, source, preClass });
+  const res = await send({
+    type: "highlightMultiTheme",
+    languageId: language.id,
+    lightTheme,
+    darkTheme,
+    source,
+    preClass,
+  });
   if (res.type === "error") throw new Error(res.message);
   return (res as Extract<WorkerResponse, { type: "result" }>).html;
 }

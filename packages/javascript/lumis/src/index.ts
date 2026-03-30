@@ -1,12 +1,13 @@
 /** Syntax highlighting with Tree-sitter and Neovim themes. */
 
 import { createHighlighterModule } from "./core/highlighter.js";
+import { mapBundle } from "./bundle-helpers.js";
 import {
   availableLanguages,
   configureWasmResolver,
   createRuntime,
   getDefaultRuntime,
-} from "./platform/node.js";
+} from "./runtime/node.js";
 
 const highlighter = createHighlighterModule({
   createRuntime,
@@ -18,7 +19,7 @@ const highlighter = createHighlighterModule({
  *
  * `createHighlighter` is async; the returned `hl.highlight()` is synchronous.
  *
- * The `langs` array accepts `Language` objects, `LanguageBundle` collections, and dynamic imports.
+ * The `languages` array accepts `Language` objects, `LanguageBundle` collections, and dynamic imports.
  *
  * @example Cherry-pick languages
  * ```ts
@@ -27,7 +28,7 @@ const highlighter = createHighlighterModule({
  * import javascript from '@lumis-sh/lumis/langs/javascript'
  * import dracula from '@lumis-sh/themes/dracula'
  *
- * const hl = await createHighlighter({ langs: [javascript] })
+ * const hl = await createHighlighter({ languages: [javascript] })
  * const html = hl.highlight('const x = 1', htmlInline({ language: javascript, theme: dracula }))
  * ```
  *
@@ -39,15 +40,16 @@ const highlighter = createHighlighterModule({
  * import dracula from '@lumis-sh/themes/dracula'
  *
  * // Register all web languages. None are loaded yet.
- * const hl = await createHighlighter({ langs: [bundledLanguages] })
+ * const hl = await createHighlighter({ languages: [bundledLanguages] })
  *
  * // Load a language, then highlight synchronously.
  * await hl.loadLanguage(bundledLanguages.javascript)
  * const html = hl.highlight('const x = 1', htmlInline({ language: bundledLanguages.javascript, theme: dracula }))
  * ```
  */
-export const createHighlighter = (...args: Parameters<typeof highlighter.createHighlighter>) =>
-  highlighter.createHighlighter(...args);
+export function createHighlighter(...args: Parameters<typeof highlighter.createHighlighter>) {
+  return highlighter.createHighlighter(...args);
+}
 
 /**
  * Highlight code in a single async call.
@@ -68,8 +70,9 @@ export const createHighlighter = (...args: Parameters<typeof highlighter.createH
  * const html = await highlight('const x = 1', htmlInline({ language: javascript, theme: dracula }))
  * ```
  */
-export const highlight = (...args: Parameters<typeof highlighter.highlight>) =>
-  highlighter.highlight(...args);
+export function highlight(...args: Parameters<typeof highlighter.highlight>) {
+  return highlighter.highlight(...args);
+}
 
 /**
  * Low-level token iterator. Calls `onToken` for each highlighted span.
@@ -85,8 +88,41 @@ export const highlight = (...args: Parameters<typeof highlighter.highlight>) =>
  * })
  * ```
  */
-export const highlightIter = (...args: Parameters<typeof highlighter.highlightIter>) =>
-  highlighter.highlightIter(...args);
+export function highlightIter(...args: Parameters<typeof highlighter.highlightIter>) {
+  return highlighter.highlightIter(...args);
+}
+
+/**
+ * Return a copy of a language with a custom WASM source.
+ *
+ * Useful in browser bundlers when you want to import a parser package directly,
+ * for example `import elixirWasm from '@lumis-sh/wasm-elixir'`.
+ */
+export function withWasm<T extends import("./types.js").Language>(
+  language: T,
+  wasm: import("./types.js").RuntimeWasmInput,
+): Omit<T, "wasm"> & { wasm: import("./types.js").RuntimeWasmInput } {
+  return {
+    ...language,
+    wasm,
+  };
+}
+
+/**
+ * Apply a map of statically imported WASM assets to every matching language in a bundle.
+ *
+ * Useful with packages like `@lumis-sh/wasm-bundle-web` in browser bundlers.
+ */
+export function withWasmBundle(
+  bundle: import("./types.js").LanguageBundle,
+  wasms: import("./types.js").RuntimeWasmBundle,
+): import("./types.js").LanguageBundle {
+  return mapBundle(bundle, (language) => {
+    const wasm = wasms[language.id];
+    return wasm ? withWasm(language, wasm) : language;
+  });
+}
+
 export type { Highlighter } from "./core/highlighter.js";
 export type {
   HighlightContext,
@@ -104,6 +140,8 @@ export type {
   LazyLanguage,
   Theme,
   WasmRef,
+  RuntimeWasmInput,
+  RuntimeWasmBundle,
   LanguageInfo,
   ThemeInfo,
 } from "./types.js";

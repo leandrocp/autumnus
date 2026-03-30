@@ -9,15 +9,19 @@ import {
   escape,
   escapeAttr,
   escapeBraces,
+  escapeFragment,
   formatHighlightIterLines,
   getScopedThemeStyle,
   getThemeStyle,
   joinClasses,
+  linesFromOffsets,
   lineIsHighlighted,
   openCodeTag,
   openPreTag,
   openSpanTag,
   openTag,
+  renderEvents,
+  renderLinesFromEvents,
   scopeToClass,
   spanInline,
   spanInlineAttrs,
@@ -71,6 +75,7 @@ describe("formatter shared helpers", () => {
     expect(textDecoration({ underline: "double", strikethrough: true })).toBe(
       "underline double line-through",
     );
+    expect(textDecoration({})).toBe("none");
   });
 
   it("escapes HTML entities and braces", () => {
@@ -134,6 +139,7 @@ describe("formatter shared helpers", () => {
 
   it("turns scopes into linked formatter classes", () => {
     expect(scopeToClass("keyword.operator")).toBe("keyword-operator");
+    expect(scopeToClass("unknown.scope.name")).toBe("text");
   });
 
   it("matches single lines and inclusive ranges", () => {
@@ -198,6 +204,41 @@ describe("formatter shared helpers", () => {
   it("escapes only braces", () => {
     expect(escapeBraces("fn() {}")).toBe("fn() &lbrace;&rbrace;");
     expect(escapeBraces("<div>{x}</div>")).toBe("<div>&lbrace;x&rbrace;</div>");
+    expect(escapeFragment("<div>{x}</div>")).toBe("&lt;div&gt;&lbrace;x&rbrace;&lt;/div&gt;");
+  });
+
+  it("renders HTML lines from events with span attrs callback", () => {
+    const lines = renderLinesFromEvents(
+      "a\nb",
+      [
+        { type: "start", scope: "string", language: "json" },
+        { type: "source", startByte: 0, endByte: 3 },
+        { type: "end" },
+      ],
+      (scope) => `class="${scope}"`,
+    );
+
+    expect(lines).toEqual(['<span class="string">a</span>', '<span class="string">b</span>']);
+  });
+
+  it("renders event HTML and slices it back into lines", () => {
+    const [html, offsets] = renderEvents(
+      "a\n<b>",
+      [
+        { type: "start", scope: "string", language: "json" },
+        { type: "source", startByte: 0, endByte: 5 },
+        { type: "end" },
+      ],
+      (scope, _language, out) => {
+        out.push(`class="${scope}"`);
+      },
+    );
+
+    expect(new TextDecoder().decode(html)).toBe('<span class="string">a\n&lt;b&gt;</span>');
+    expect(linesFromOffsets(html, offsets)).toEqual([
+      '<span class="string">a\n',
+      '&lt;b&gt;</span>',
+    ]);
   });
 
   it("sanitizes theme names for CSS variable use", () => {

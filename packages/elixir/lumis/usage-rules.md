@@ -1,13 +1,13 @@
 # Lumis - Usage Rules for AI Agents
 
-Lumis is a syntax highlighter for Elixir that uses Tree-sitter parsers and Neovim themes. It provides fast, accurate syntax highlighting with support for 110+ languages and 120+ themes, outputting to HTML (inline or linked) or terminal (ANSI codes).
+Lumis is a syntax highlighter for Elixir that uses Tree-sitter parsers and Neovim themes. It provides fast, accurate syntax highlighting with support for 110+ languages and 250+ built-in themes, outputting to HTML (inline or linked) or terminal (ANSI codes).
 
 ## Core Concepts
 
 ### What Lumis Does
 - Highlights source code using Tree-sitter parsers
 - Supports 110+ programming languages with auto-detection
-- Provides 120+ Neovim themes (light and dark)
+- Provides 250+ built-in Neovim themes (light and dark)
 - Handles incomplete/malformed code gracefully (useful for streaming scenarios)
 - Outputs HTML with inline styles, HTML with CSS classes, or ANSI terminal codes
 
@@ -87,7 +87,7 @@ Map.has_key?(Lumis.available_languages(), "elixir")
 
 ## Formatters
 
-Lumis supports four formatters. The formatter option controls the output format.
+Lumis supports five formatters. The formatter option controls the output format.
 
 ### HTML Inline (Default)
 
@@ -149,26 +149,6 @@ Available options for `:html_linked`:
 - `:pre_class` - CSS class to add to the `<pre>` tag
 - `:highlight_lines` - Highlight specific lines with CSS class
 - `:header` - Wrap with custom HTML tags
-
-### Terminal
-
-Generates ANSI escape codes for terminal output.
-
-```elixir
-Lumis.highlight!(code,
-  language: "elixir",
-  formatter: :terminal
-)
-
-# With theme
-Lumis.highlight!(code,
-  language: "elixir",
-  formatter: {:terminal, theme: "github_light"}
-)
-```
-
-Available options for `:terminal`:
-- `:theme` - Theme name (string) or `Lumis.Theme` struct
 
 ### HTML Multi-Themes
 
@@ -259,6 +239,40 @@ Available options for `:html_multi_themes`:
 - `:include_highlights` - Add `data-highlight` attributes for debugging (default: `false`)
 - `:highlight_lines` - Highlight specific lines (same options as `:html_inline`)
 - `:header` - Wrap with custom HTML tags (same options as other formatters)
+
+### Terminal
+
+Generates ANSI escape codes for terminal output.
+
+```elixir
+Lumis.highlight!(code,
+  language: "elixir",
+  formatter: :terminal
+)
+
+# With theme
+Lumis.highlight!(code,
+  language: "elixir",
+  formatter: {:terminal, theme: "github_light"}
+)
+```
+
+Available options for `:terminal`:
+- `:theme` - Theme name (string) or `Lumis.Theme` struct
+
+### BBCode Scoped
+
+Generates nested BBCode tags using highlight scope names from the Rust implementation. Literal `[` and `]` are escaped as `&#91;` and `&#93;` so forum software does not treat source text as markup. It does not emit standard forum-style BBCode like `[b]`, `[color]`, or `[code]`.
+
+```elixir
+Lumis.highlight!(code,
+  language: "elixir",
+  formatter: :bbcode_scoped
+)
+```
+
+Available options for `:bbcode_scoped`:
+- none
 
 ## Themes
 
@@ -736,7 +750,7 @@ Lumis is a fast, reliable syntax highlighter for Elixir. Key points to remember:
 6. **Include CSS files** when using `:html_linked` formatter
 7. **Handles incomplete code** gracefully for streaming scenarios
 8. **110+ languages** with auto-detection support
-9. **117 Neovim themes** available
+9. **250+ built-in Neovim themes** available
 10. **Line numbers** are 1-indexed in the `data-line` attribute
 11. **Validate options** with `validate_options!/1` when needed
 

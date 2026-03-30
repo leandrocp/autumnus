@@ -1,23 +1,31 @@
 {
   "name": "lumis-website",
-  "private": true,
   "version": "0.0.0",
+  "private": true,
   "type": "module",
-  "packageManager": "pnpm@10.31.0",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "lint": "oxlint -c .oxlintrc.jsonc .",
+    "fmt": "oxfmt -c .oxfmtrc.jsonc .",
     "preview": "vite preview"
   },
   "dependencies": {
     "@lumis-sh/lumis": "link:../packages/javascript/lumis",
     "@lumis-sh/themes": "link:../packages/javascript/themes",
+    "@lumis-sh/wasm-bundle-full": "link:../packages/javascript/wasm-bundle-full",
+    "@lumis-sh/wasm-html": "*",
+    "@lumis-sh/wasm-javascript": "*",
+
     "webgl-fluid-enhanced": "^0.8.0"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.13",
+    "oxfmt": "^0.42.0",
+    "oxlint": "^1.57.0",
     "tailwindcss": "^4.1.13",
     "typescript": "^5.9.2",
     "vite": "^7.1.5"
-  }
+  },
+  "packageManager": "pnpm@10.31.0"
 }

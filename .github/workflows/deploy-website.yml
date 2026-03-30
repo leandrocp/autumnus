@@ -6,6 +6,8 @@ on:
     paths:
       - "website/**"
       - "docs/**"
+      - "packages/javascript/lumis/**"
+      - "packages/javascript/themes/**"
       - ".github/workflows/deploy-website.yml"
   workflow_dispatch:
 
@@ -37,9 +39,15 @@ jobs:
             docs/pnpm-lock.yaml
 
       - run: pnpm install --frozen-lockfile
+
+      - run: pnpm --filter @lumis-sh/themes build
+
+      - run: pnpm --filter @lumis-sh/lumis build
+
+      - run: pnpm install --frozen-lockfile --ignore-workspace
         working-directory: website
 
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile --ignore-workspace
         working-directory: docs
 
       - run: pnpm build
@@ -50,7 +58,7 @@ jobs:
 
       - run: mkdir -p website/dist/docs && cp -R docs/build/. website/dist/docs/
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v4
         with:
           path: website/dist
 
@@ -62,4 +70,4 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

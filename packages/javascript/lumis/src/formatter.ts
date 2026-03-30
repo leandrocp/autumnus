@@ -1,4 +1,6 @@
 import type {
+  BBCodeScopedFormatter,
+  BBCodeScopedOptions,
   Formatter,
   HighlightContext,
   HtmlInlineOptions,
@@ -10,10 +12,25 @@ import type {
   TerminalOptions,
   TerminalFormatter,
 } from "./types.js";
+import { formatBBCode } from "./formatter/bbcode.js";
 import { formatHtmlInline } from "./formatter/html-inline.js";
 import { formatHtmlLinked } from "./formatter/html-linked.js";
 import { formatHtmlMultiThemes } from "./formatter/html-multi-themes.js";
 import { formatTerminal } from "./formatter/terminal.js";
+
+function createFormatter<T extends Formatter>(
+  options: Omit<T, "format">,
+  render: (source: string, hl: HighlightContext, formatter: T) => string,
+): T {
+  const formatter = {
+    ...options,
+    format(source: string, hl: HighlightContext): string {
+      return render(source, hl, formatter as T);
+    },
+  } as T;
+
+  return formatter;
+}
 
 /**
  * Create an inline-styles HTML formatter. Each token gets a `<span>` with
@@ -29,15 +46,10 @@ import { formatTerminal } from "./formatter/terminal.js";
  * ```
  */
 export function htmlInline(options: HtmlInlineOptions = {}): HtmlInlineFormatter {
-  const formatter: HtmlInlineFormatter = {
-    ...options,
-    format(source: string, hl: HighlightContext): string {
-      const events = hl.highlightEvents(source, options.language);
-      return formatHtmlInline(source, events, formatter);
-    },
-  };
-
-  return formatter;
+  return createFormatter(options, (source, hl, formatter) => {
+    const events = hl.highlightEvents(source, options.language);
+    return formatHtmlInline(source, events, formatter);
+  });
 }
 
 /**
@@ -54,15 +66,10 @@ export function htmlInline(options: HtmlInlineOptions = {}): HtmlInlineFormatter
  * ```
  */
 export function htmlLinked(options: HtmlLinkedOptions = {}): HtmlLinkedFormatter {
-  const formatter: HtmlLinkedFormatter = {
-    ...options,
-    format(source: string, hl: HighlightContext): string {
-      const events = hl.highlightEvents(source, options.language);
-      return formatHtmlLinked(source, events, formatter);
-    },
-  };
-
-  return formatter;
+  return createFormatter(options, (source, hl, formatter) => {
+    const events = hl.highlightEvents(source, options.language);
+    return formatHtmlLinked(source, events, formatter);
+  });
 }
 
 /**
@@ -84,15 +91,30 @@ export function htmlLinked(options: HtmlLinkedOptions = {}): HtmlLinkedFormatter
  * ```
  */
 export function htmlMultiThemes(options: HtmlMultiThemesOptions): HtmlMultiThemesFormatter {
-  const formatter: HtmlMultiThemesFormatter = {
-    ...options,
-    format(source: string, hl: HighlightContext): string {
-      const events = hl.highlightEvents(source, options.language);
-      return formatHtmlMultiThemes(source, events, formatter);
-    },
-  };
+  return createFormatter(options, (source, hl, formatter) => {
+    const events = hl.highlightEvents(source, options.language);
+    return formatHtmlMultiThemes(source, events, formatter);
+  });
+}
 
-  return formatter;
+/**
+ * Create a BBCode scoped formatter using highlight scope names as nested tags.
+ * It does not emit standard forum-style BBCode like `[b]`, `[color]`, or `[code]`.
+ *
+ * @example
+ * ```ts
+ * import { bbcodeScoped } from '@lumis-sh/lumis/formatters'
+ * import javascript from '@lumis-sh/lumis/langs/javascript'
+ *
+ * const output = hl.highlight('const x = 1', bbcodeScoped({ language: javascript }))
+ * console.log(output)
+ * ```
+ */
+export function bbcodeScoped(options: BBCodeScopedOptions = {}): BBCodeScopedFormatter {
+  return createFormatter(options, (source, hl, formatter) => {
+    const events = hl.highlightEvents(source, options.language);
+    return formatBBCode(source, events, formatter);
+  });
 }
 
 /**
@@ -109,18 +131,15 @@ export function htmlMultiThemes(options: HtmlMultiThemesOptions): HtmlMultiTheme
  * ```
  */
 export function terminal(options: TerminalOptions = {}): TerminalFormatter {
-  const formatter: TerminalFormatter = {
-    ...options,
-    format(source: string, hl: HighlightContext): string {
-      const events = hl.highlightEvents(source, options.language);
-      return formatTerminal(source, events, formatter);
-    },
-  };
-
-  return formatter;
+  return createFormatter(options, (source, hl, formatter) => {
+    const events = hl.highlightEvents(source, options.language);
+    return formatTerminal(source, events, formatter);
+  });
 }
 
 export type {
+  BBCodeScopedFormatter,
+  BBCodeScopedOptions,
   Formatter,
   HighlightCallback,
   HighlightContext,

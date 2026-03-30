@@ -1,0 +1,66 @@
+---
+sidebar_position: 5
+slug: /highlight/java
+title: Java
+description: Lumis Java API via lumis4j including highlighting, language and theme selection, and JVM integration.
+keywords:
+  - lumis java
+  - lumis4j
+  - jvm
+  - syntax highlighting java
+---
+
+# Java
+
+The Java package is [`lumis4j`](https://github.com/roastedroot/lumis4j), maintained by [roastedroot](https://github.com/roastedroot).
+
+## Installation
+
+```xml
+<dependency>
+  <groupId>io.roastedroot</groupId>
+  <artifactId>lumis4j</artifactId>
+  <version>0.0.7</version>
+</dependency>
+```
+
+## Basic usage
+
+```java
+import io.roastedroot.lumis4j.core.Lang;
+import io.roastedroot.lumis4j.core.Lumis;
+import io.roastedroot.lumis4j.core.Theme;
+
+var lumis = Lumis.builder().build();
+
+var highlighter = lumis.highlighter()
+    .withLang(Lang.JAVASCRIPT)
+    .withTheme(Theme.DRACULA)
+    .build();
+
+var html = highlighter.highlight("const x = 1").string();
+```
+
+## Languages and themes
+
+Languages and themes are available as enum constants:
+
+```java
+Lang.RUST
+Lang.JAVASCRIPT
+Lang.ELIXIR
+Lang.PYTHON
+
+Theme.DRACULA
+Theme.GITHUB_DARK
+Theme.CATPPUCCIN_MOCHA
+Theme.ONEDARK
+```
+
+## Formatter support
+
+lumis4j supports the following formatters: `TERMINAL`, `HTML_INLINE`, `HTML_LINKED`, and `BBCODE`. `HTML_INLINE`, `TERMINAL`, and `BBCODE` support themes; `HTML_LINKED` is designed for external CSS.
+
+## API reference
+
+See the [lumis4j GitHub repository](https://github.com/roastedroot/lumis4j) for full API documentation.

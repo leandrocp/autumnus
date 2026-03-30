@@ -85,7 +85,7 @@ import typescript from '@lumis-sh/lumis/langs/typescript'
 import dracula from '@lumis-sh/themes/dracula'
 import { writeFile } from 'node:fs/promises'
 
-const hl = await createHighlighter({ langs: [typescript] })
+const hl = await createHighlighter({ languages: [typescript] })
 
 const html = hl.highlight(
   'export const ready = true',
@@ -103,7 +103,7 @@ open snippet.html`
     const errorBox = document.getElementById('error-output')
 
     try {
-      const hl = await createHighlighter({ langs: [javascript, bash] })
+      const hl = await createHighlighter({ languages: [javascript, bash] })
 
       scriptOutput.innerHTML = hl.highlight(
         scriptCode,

@@ -27,7 +27,7 @@
 ## Features
 
 - 🌳 110+ languages with tree-sitter parsing
-- 🎨 120+ Neovim themes
+- 🎨 250+ built-in Neovim themes
 - 📝 HTML output with inline styles or CSS classes
 - 🖥️ Terminal output with ANSI colors
 - 🔍 Language auto-detection
@@ -110,7 +110,7 @@ iex> Lumis.highlight!("const header = document.getEl", language: "js")
 
 ## Formatters
 
-Lumis supports four output formatters:
+Lumis supports five output formatters:
 
 All HTML formatters wrap each line in a `<div class="line">` element with a `data-line` attribute containing the line number, making it easy to add line numbers or implement line-based features in your application.
 
@@ -236,6 +236,16 @@ iex> Lumis.highlight!("Atom.to_string(:elixir)", language: "elixir", formatter: 
 
 Options:
 - `:theme` - theme to apply styles
+
+### BBCode Scoped
+
+Generates nested BBCode tags using highlight scope names:
+
+```elixir
+iex> Lumis.highlight!("Atom.to_string(:elixir)", language: "javascript", formatter: :bbcode_scoped)
+```
+
+This formatter emits highlight scope names as tags, not standard forum-style BBCode like `[b]`, `[color]`, or `[code]`.
 
 ## Samples
 

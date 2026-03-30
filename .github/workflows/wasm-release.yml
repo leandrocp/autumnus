@@ -1,23 +1,34 @@
 name: WASM Release
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   EMSDK_VERSION: "5.0.3"
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 on:
+  push:
+    branches: [ main ]
+    paths:
+      - "languages.toml"
+      - "crates/dev/**"
+      - "crates/lumis/vendored_parsers/**"
+      - "queries/**"
+      - "scripts/wasm-needed.py"
+      - "packages/javascript/lumis/bundles/**"
+      - "packages/javascript/lumis/langs/**"
+      - "packages/javascript/lumis/src/generated/**"
+      - "packages/javascript/wasm-bundle-*/**"
+      - ".github/workflows/wasm-release.yml"
+      - ".github/workflows/update-langs.yml"
   workflow_dispatch:
     inputs:
       parser:
         description: "Parser name(s), comma-separated (leave empty for all)"
         required: false
         default: ""
-  push:
-    tags-ignore:
-      - "**"
-    paths:
-      - "languages.toml"
-      - ".github/workflows/wasm-release.yml"
-      - "crates/dev/**"
 
 jobs:
   detect:
@@ -78,7 +89,7 @@ jobs:
           shared-key: wasm-release
           add-job-id-key: false
       - name: Cache tree-sitter tool downloads
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/tree-sitter
           key: ${{ runner.os }}-tree-sitter-cli-0.26-v1

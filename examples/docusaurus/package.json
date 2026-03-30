@@ -1,0 +1,18 @@
+{
+  "name": "example-docusaurus-lumis",
+  "private": true,
+  "scripts": {
+    "build": "docusaurus build",
+    "start": "docusaurus start"
+  },
+  "dependencies": {
+    "@docusaurus/core": "^3.9.2",
+    "@docusaurus/preset-classic": "^3.9.2",
+    "@mdx-js/react": "^3.1.1",
+    "@lumis-sh/lumis": "workspace:*",
+    "@lumis-sh/rehype-lumis": "workspace:*",
+    "@lumis-sh/themes": "workspace:*",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
+  }
+}

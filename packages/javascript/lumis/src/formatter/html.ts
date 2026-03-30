@@ -7,6 +7,7 @@ import type {
   LanguageRef,
   Theme,
 } from "../types.js";
+import { HIGHLIGHT_NAMES } from "../highlights.js";
 import { sanitizeThemeName } from "../themes.js";
 
 const _encoder = new TextEncoder();
@@ -31,6 +32,39 @@ export type HtmlAttrs = Record<string, string | number | boolean | undefined | n
 
 function languageId(language: LanguageRef): string {
   return typeof language === "string" ? language : language.id;
+}
+
+function emptySpan(scope: string, language: string): HighlightSpan {
+  return {
+    startByte: 0,
+    endByte: 0,
+    scope,
+    language,
+  };
+}
+
+function getSpanStyle(
+  theme: Theme | undefined,
+  scope: string,
+  language: string,
+): HighlightStyle | undefined {
+  if (scope.length === 0) {
+    return undefined;
+  }
+
+  return getScopedThemeStyle(theme, scope, language);
+}
+
+function getUnderlineDecoration(style: HighlightStyle): string | undefined {
+  if (style.underline == null || style.underline === false) {
+    return undefined;
+  }
+
+  if (style.underline === true || style.underline === "solid") {
+    return "underline";
+  }
+
+  return `underline ${style.underline}`;
 }
 
 /**
@@ -85,22 +119,15 @@ export function getScopedThemeStyle(
  * // "underline wavy line-through"
  * ```
  */
-export function textDecoration(style: HighlightStyle): string | undefined {
-  const underline =
-    style.underline === true
-      ? "underline"
-      : style.underline === false || style.underline == null
-        ? undefined
-        : style.underline === "solid"
-          ? "underline"
-          : `underline ${style.underline}`;
+export function textDecoration(style: HighlightStyle): string {
+  const underline = getUnderlineDecoration(style);
 
   if (underline && style.strikethrough) {
     return `${underline} line-through`;
   }
   if (underline) return underline;
   if (style.strikethrough) return "line-through";
-  return undefined;
+  return "none";
 }
 
 /**
@@ -130,7 +157,7 @@ export function styleToCss(
   if (options.italic && style.italic) rules.push(declaration("font-style", "italic"));
 
   const decoration = textDecoration(style);
-  if (decoration) {
+  if (decoration !== "none") {
     rules.push(declaration("text-decoration", decoration));
   }
 
@@ -393,6 +420,10 @@ export function escapeBraces(text: string): string {
   return text.replaceAll("{", "&lbrace;").replaceAll("}", "&rbrace;");
 }
 
+export function escapeFragment(text: string): string {
+  return escape(text);
+}
+
 /**
  * Convert a dot-separated scope to a CSS class name.
  *
@@ -401,7 +432,7 @@ export function escapeBraces(text: string): string {
  * ```
  */
 export function scopeToClass(scope: string): string {
-  return scope.replaceAll(".", "-");
+  return HIGHLIGHT_NAMES.includes(scope) ? scope.replaceAll(".", "-") : "text";
 }
 
 /**
@@ -536,52 +567,13 @@ export function spanMultiThemesAttrs(options: SpanMultiThemesOptions): HtmlAttrs
     const darkStyle = getScopedThemeStyle(themes.dark, scope, language);
 
     if (lightStyle && darkStyle) {
-      if (lightStyle.fg && darkStyle.fg) {
-        inlineStyles.push(`color: light-dark(${lightStyle.fg}, ${darkStyle.fg});`);
-      }
-      if (lightStyle.bg && darkStyle.bg) {
-        inlineStyles.push(`background-color: light-dark(${lightStyle.bg}, ${darkStyle.bg});`);
-      }
-      inlineStyles.push(
-        `font-weight: light-dark(${lightStyle.bold ? "bold" : "normal"}, ${darkStyle.bold ? "bold" : "normal"});`,
-      );
-      if (italic) {
-        inlineStyles.push(
-          `font-style: light-dark(${lightStyle.italic ? "italic" : "normal"}, ${darkStyle.italic ? "italic" : "normal"});`,
-        );
-      }
-      const lightDecoration = textDecoration(lightStyle) ?? "none";
-      const darkDecoration = textDecoration(darkStyle) ?? "none";
-      inlineStyles.push(`text-decoration: light-dark(${lightDecoration}, ${darkDecoration});`);
+      appendLightDarkStyles(inlineStyles, lightStyle, darkStyle, italic);
     }
   } else if (defaultTheme) {
-    const defaultStyle = getScopedThemeStyle(themes[defaultTheme], scope, language);
-    if (defaultStyle) {
-      const css = styleToCss(defaultStyle, { italic, compact: true });
-      if (css) {
-        inlineStyles.push(css);
-      }
-
-      const sanitized = sanitizeThemeName(defaultTheme);
-      cssVars.push(
-        `${cssVariablePrefix}-${sanitized}-font-style:${defaultStyle.italic ? "italic" : "normal"};`,
-      );
-      cssVars.push(
-        `${cssVariablePrefix}-${sanitized}-font-weight:${defaultStyle.bold ? "bold" : "normal"};`,
-      );
-      cssVars.push(
-        `${cssVariablePrefix}-${sanitized}-text-decoration:${textDecoration(defaultStyle) ?? "none"};`,
-      );
-    }
-
-    for (const [themeName, theme] of Object.entries(themes)) {
-      if (themeName === defaultTheme) continue;
-      pushThemeCssVars(cssVars, cssVariablePrefix, themeName, scope, language, theme);
-    }
+    applyDefaultMultiTheme(inlineStyles, cssVars, options);
+    appendThemeCssVars(cssVars, cssVariablePrefix, themes, scope, language, defaultTheme);
   } else {
-    for (const [themeName, theme] of Object.entries(themes)) {
-      pushThemeCssVars(cssVars, cssVariablePrefix, themeName, scope, language, theme);
-    }
+    appendThemeCssVars(cssVars, cssVariablePrefix, themes, scope, language);
   }
 
   const styleParts = [...inlineStyles, ...cssVars].filter(Boolean);
@@ -590,6 +582,69 @@ export function spanMultiThemesAttrs(options: SpanMultiThemesOptions): HtmlAttrs
   }
 
   return attrs;
+}
+
+function appendDefaultThemeCssVars(
+  cssVars: string[],
+  prefix: string,
+  themeName: string,
+  style: HighlightStyle,
+): void {
+  const sanitized = sanitizeThemeName(themeName);
+  cssVars.push(`${prefix}-${sanitized}-font-style:${style.italic ? "italic" : "normal"};`);
+  cssVars.push(`${prefix}-${sanitized}-font-weight:${style.bold ? "bold" : "normal"};`);
+  cssVars.push(`${prefix}-${sanitized}-text-decoration:${textDecoration(style)};`);
+}
+
+function appendLightDarkStyles(
+  inlineStyles: string[],
+  lightStyle: HighlightStyle,
+  darkStyle: HighlightStyle,
+  italic?: boolean,
+): void {
+  if (lightStyle.fg && darkStyle.fg) {
+    inlineStyles.push(`color: light-dark(${lightStyle.fg}, ${darkStyle.fg});`);
+  }
+  if (lightStyle.bg && darkStyle.bg) {
+    inlineStyles.push(`background-color: light-dark(${lightStyle.bg}, ${darkStyle.bg});`);
+  }
+
+  inlineStyles.push(
+    `font-weight: light-dark(${lightStyle.bold ? "bold" : "normal"}, ${darkStyle.bold ? "bold" : "normal"});`,
+  );
+
+  if (italic) {
+    inlineStyles.push(
+      `font-style: light-dark(${lightStyle.italic ? "italic" : "normal"}, ${darkStyle.italic ? "italic" : "normal"});`,
+    );
+  }
+
+  const lightDecoration = textDecoration(lightStyle) ?? "none";
+  const darkDecoration = textDecoration(darkStyle);
+  inlineStyles.push(`text-decoration: light-dark(${lightDecoration}, ${darkDecoration});`);
+}
+
+function applyDefaultMultiTheme(
+  inlineStyles: string[],
+  cssVars: string[],
+  options: SpanMultiThemesOptions,
+): void {
+  const { defaultTheme, themes, scope, language, italic, cssVariablePrefix = "--lumis" } = options;
+  if (!defaultTheme || defaultTheme === "light-dark()") {
+    return;
+  }
+
+  const defaultStyle = getScopedThemeStyle(themes[defaultTheme], scope, language);
+  if (!defaultStyle) {
+    return;
+  }
+
+  const css = styleToCss(defaultStyle, { italic, compact: true });
+  if (css) {
+    inlineStyles.push(css);
+  }
+
+  appendDefaultThemeCssVars(cssVars, cssVariablePrefix, defaultTheme, defaultStyle);
 }
 
 /**
@@ -632,7 +687,87 @@ function pushThemeCssVars(
   if (style.bg) cssVars.push(`${prefix}-${sanitized}-bg:${style.bg};`);
   cssVars.push(`${prefix}-${sanitized}-font-style:${style.italic ? "italic" : "normal"};`);
   cssVars.push(`${prefix}-${sanitized}-font-weight:${style.bold ? "bold" : "normal"};`);
-  cssVars.push(`${prefix}-${sanitized}-text-decoration:${textDecoration(style) ?? "none"};`);
+  cssVars.push(`${prefix}-${sanitized}-text-decoration:${textDecoration(style)};`);
+}
+
+export function appendThemeCssVars(
+  cssVars: string[],
+  prefix: string,
+  themes: Record<string, Theme | undefined>,
+  scope: string,
+  language: LanguageRef,
+  excludeTheme?: string,
+): void {
+  for (const [themeName, theme] of Object.entries(themes)) {
+    if (themeName === excludeTheme) {
+      continue;
+    }
+
+    pushThemeCssVars(cssVars, prefix, themeName, scope, language, theme);
+  }
+}
+
+export function buildNormalThemeVars(
+  styles: string[],
+  prefix: string,
+  themes: Record<string, Theme>,
+  excludeTheme?: string,
+): void {
+  for (const [themeName, theme] of Object.entries(themes)) {
+    if (themeName === excludeTheme) {
+      continue;
+    }
+
+    const sanitized = sanitizeThemeName(themeName);
+    const style = getThemeStyle(theme, "normal");
+    if (style?.fg) styles.push(`${prefix}-${sanitized}:${style.fg};`);
+    if (style?.bg) styles.push(`${prefix}-${sanitized}-bg:${style.bg};`);
+  }
+}
+
+export function buildPreThemeStyle(options: {
+  themes: Record<string, Theme>;
+  defaultTheme?: string;
+  cssVariablePrefix?: string;
+}): string | undefined {
+  const prefix = options.cssVariablePrefix ?? "--lumis";
+  const styles: string[] = [];
+
+  if (options.defaultTheme === "light-dark()") {
+    const lightNormal = getThemeStyle(options.themes.light, "normal");
+    const darkNormal = getThemeStyle(options.themes.dark, "normal");
+    const lightFg = lightNormal?.fg ?? "#000000";
+    const lightBg = lightNormal?.bg ?? "#ffffff";
+    const darkFg = darkNormal?.fg ?? "#ffffff";
+    const darkBg = darkNormal?.bg ?? "#000000";
+
+    styles.push(`color: light-dark(${lightFg}, ${darkFg});`);
+    styles.push(`background-color: light-dark(${lightBg}, ${darkBg});`);
+  } else if (options.defaultTheme) {
+    const defaultStyle = getThemeStyle(options.themes[options.defaultTheme], "normal");
+    if (defaultStyle?.fg) styles.push(`color:${defaultStyle.fg};`);
+    if (defaultStyle?.bg) styles.push(`background-color:${defaultStyle.bg};`);
+    buildNormalThemeVars(styles, prefix, options.themes, options.defaultTheme);
+  } else {
+    buildNormalThemeVars(styles, prefix, options.themes);
+  }
+
+  return styles.length > 0 ? styles.join(" ") : undefined;
+}
+
+export function renderHtmlBlock(options: {
+  lines: string[];
+  language: LanguageRef | undefined;
+  pre: string;
+  lineOptions: (lineNumber: number) => { className?: string; style?: string };
+  header?: HtmlElement;
+}): string {
+  const code = openCodeTag(options.language);
+  const body = options.lines
+    .map((line, idx) => wrapLine(idx + 1, line, options.lineOptions(idx + 1)))
+    .join("");
+
+  return wrapWithHeader(`${options.pre}${code}${body}${closingTags()}`, options.header);
 }
 
 /**
@@ -718,6 +853,57 @@ export function appendFragment(lines: string[], fragment: string): void {
   }
 }
 
+function closeOpenSpans(
+  lines: string[],
+  stack: Array<{ scope: string; language: string }>,
+  closeSpan: (span: HighlightSpan, style: HighlightStyle | undefined) => string,
+  theme: Theme | undefined,
+): void {
+  for (let i = stack.length - 1; i >= 0; i -= 1) {
+    const entry = stack[i]!;
+    const style = getSpanStyle(theme, entry.scope, entry.language);
+    appendFragment(lines, closeSpan(emptySpan(entry.scope, entry.language), style));
+  }
+}
+
+function reopenSpans(
+  lines: string[],
+  stack: Array<{ scope: string; language: string }>,
+  openSpan: (span: HighlightSpan, style: HighlightStyle | undefined) => string,
+  theme: Theme | undefined,
+): void {
+  for (const entry of stack) {
+    const style = getSpanStyle(theme, entry.scope, entry.language);
+    appendFragment(lines, openSpan(emptySpan(entry.scope, entry.language), style));
+  }
+}
+
+function renderSourceEvent(
+  lines: string[],
+  text: string,
+  stack: Array<{ scope: string; language: string }>,
+  formatText: (text: string) => string,
+  openSpan: (span: HighlightSpan, style: HighlightStyle | undefined) => string,
+  closeSpan: (span: HighlightSpan, style: HighlightStyle | undefined) => string,
+  theme: Theme | undefined,
+): void {
+  let remaining = text;
+
+  while (true) {
+    const newlineIndex = remaining.indexOf("\n");
+    if (newlineIndex === -1) {
+      appendFragment(lines, formatText(remaining));
+      return;
+    }
+
+    appendFragment(lines, formatText(remaining.slice(0, newlineIndex)));
+    closeOpenSpans(lines, stack, closeSpan, theme);
+    lines.push("");
+    reopenSpans(lines, stack, openSpan, theme);
+    remaining = remaining.slice(newlineIndex + 1);
+  }
+}
+
 /** @internal */
 export function formatHighlightIterLines(
   source: string,
@@ -739,16 +925,8 @@ export function formatHighlightIterLines(
 
   for (const event of events) {
     if (event.type === "start") {
-      const style =
-        event.scope.length > 0
-          ? getScopedThemeStyle(theme, event.scope, event.language)
-          : undefined;
-      const span: HighlightSpan = {
-        startByte: 0,
-        endByte: 0,
-        scope: event.scope,
-        language: event.language,
-      };
+      const style = getSpanStyle(theme, event.scope, event.language);
+      const span = emptySpan(event.scope, event.language);
       appendFragment(lines, options.openSpan(span, style));
       stack.push({ scope: event.scope, language: event.language });
       continue;
@@ -757,14 +935,8 @@ export function formatHighlightIterLines(
     if (event.type === "end") {
       const top = stack.pop();
       if (top) {
-        const style =
-          top.scope.length > 0 ? getScopedThemeStyle(theme, top.scope, top.language) : undefined;
-        const span: HighlightSpan = {
-          startByte: 0,
-          endByte: 0,
-          scope: top.scope,
-          language: top.language,
-        };
+        const style = getSpanStyle(theme, top.scope, top.language);
+        const span = emptySpan(top.scope, top.language);
         appendFragment(lines, closeSpan(span, style));
       }
       continue;
@@ -778,55 +950,117 @@ export function formatHighlightIterLines(
 
     const text = decodeSourceSlice(sourceBytes, event.startByte, event.endByte);
 
-    // Handle newlines: close all open spans, start new line, reopen spans
-    const parts = text.split("\n");
-    for (let i = 0; i < parts.length; i += 1) {
-      const part = parts[i] ?? "";
-      if (part.length > 0) {
-        appendFragment(lines, formatText(part));
+    renderSourceEvent(lines, text, stack, formatText, options.openSpan, closeSpan, theme);
+  }
+
+  while (stack.pop()) {
+    appendFragment(lines, closeSpan(emptySpan("", ""), undefined));
+  }
+
+  return { lines, language };
+}
+
+/**
+ * Render highlight events into escaped HTML lines, reopening active spans across newlines.
+ *
+ * ```ts
+ * renderLinesFromEvents('a\nb', events, (scope) => `class="${scope}"`)
+ * // ['<span class="...">a</span>', '<span class="...">b</span>']
+ * ```
+ */
+export function renderLinesFromEvents(
+  source: string,
+  events: HighlightEvent[],
+  spanAttrs: (scope: string, language: string) => string,
+): string[] {
+  return formatHighlightIterLines(source, events, undefined, undefined, {
+    openSpan: (span) => {
+      const attrs = spanAttrs(span.scope, span.language);
+      return attrs.length > 0 ? `<span ${attrs}>` : "<span >";
+    },
+  }).lines;
+}
+
+/**
+ * Render highlight events into a single HTML buffer plus line offsets.
+ *
+ * The returned offsets can be passed to {@link linesFromOffsets}.
+ */
+export function renderEvents(
+  source: string,
+  events: HighlightEvent[],
+  attributeCallback: (scope: string, language: string, html: string[]) => void,
+): [Uint8Array, number[]] {
+  const sourceBytes = encodeSource(source);
+  const html: string[] = [];
+  const lineOffsets = [0];
+  let renderedLength = 0;
+
+  const push = (fragment: string): void => {
+    html.push(fragment);
+    renderedLength += fragment.length;
+  };
+
+  for (const event of events) {
+    if (event.type === "start") {
+      push("<span ");
+      attributeCallback(event.scope, event.language, html);
+      renderedLength = html.join("").length;
+      push(">");
+      continue;
+    }
+
+    if (event.type === "end") {
+      push("</span>");
+      continue;
+    }
+
+    const text = decodeSourceSlice(sourceBytes, event.startByte, event.endByte);
+    for (let i = 0; i < text.length; i += 1) {
+      const char = text[i]!;
+      if (char === "\n") {
+        push("\n");
+        lineOffsets.push(renderedLength);
+        continue;
       }
-      if (i < parts.length - 1) {
-        // Close all open spans for this line
-        for (let j = stack.length - 1; j >= 0; j--) {
-          const entry = stack[j]!;
-          const entryStyle =
-            entry.scope.length > 0
-              ? getScopedThemeStyle(theme, entry.scope, entry.language)
-              : undefined;
-          appendFragment(
-            lines,
-            closeSpan(
-              { startByte: 0, endByte: 0, scope: entry.scope, language: entry.language },
-              entryStyle,
-            ),
-          );
-        }
-        lines.push("");
-        // Reopen all spans on new line
-        for (const entry of stack) {
-          const entryStyle =
-            entry.scope.length > 0
-              ? getScopedThemeStyle(theme, entry.scope, entry.language)
-              : undefined;
-          appendFragment(
-            lines,
-            options.openSpan(
-              { startByte: 0, endByte: 0, scope: entry.scope, language: entry.language },
-              entryStyle,
-            ),
-          );
-        }
+
+      switch (char) {
+        case "&":
+          push("&amp;");
+          break;
+        case "<":
+          push("&lt;");
+          break;
+        case ">":
+          push("&gt;");
+          break;
+        case '"':
+          push("&quot;");
+          break;
+        case "'":
+          push("&#39;");
+          break;
+        default:
+          push(char);
       }
     }
   }
 
-  // Close any remaining open spans
-  while (stack.pop()) {
-    appendFragment(
-      lines,
-      closeSpan({ startByte: 0, endByte: 0, scope: "", language: "" }, undefined),
-    );
+  return [encodeSource(html.join("")), lineOffsets];
+}
+
+/**
+ * Slice rendered HTML back into lines using offsets from {@link renderEvents}.
+ */
+export function linesFromOffsets(html: Uint8Array, lineOffsets: number[]): string[] {
+  const rendered = _decoder.decode(html);
+  const lines: string[] = [];
+
+  for (let i = 0; i < lineOffsets.length; i += 1) {
+    const start = lineOffsets[i] ?? 0;
+    const end = lineOffsets[i + 1] ?? rendered.length;
+    lines.push(rendered.slice(start, end));
   }
 
-  return { lines, language };
+  return lines;
 }

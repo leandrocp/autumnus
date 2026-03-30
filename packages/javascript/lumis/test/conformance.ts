@@ -14,6 +14,7 @@ export interface ConformanceFixture {
   htmlInline: string;
   htmlLinked: string;
   htmlMultiThemes: string;
+  bbcode: string;
   terminal: string;
 }
 
@@ -41,6 +42,7 @@ export function loadConformanceFixtures(): ConformanceFixture[] {
         htmlInline: readFileSync(new URL("html-inline.html", fixtureDir), "utf8"),
         htmlLinked: readFileSync(new URL("html-linked.html", fixtureDir), "utf8"),
         htmlMultiThemes: readFileSync(new URL("html-multi-themes.html", fixtureDir), "utf8"),
+        bbcode: readFileSync(new URL("bbcode.txt", fixtureDir), "utf8"),
         terminal: readFileSync(new URL("terminal.txt", fixtureDir), "utf8"),
       };
     })

@@ -1,15 +1,17 @@
 import { describe, it, expect } from 'vitest'
+import { readdirSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { availableLanguages, availableThemes } from '../src/index.js'
 
 describe('availableLanguages', () => {
   it('returns a non-empty array', () => {
-    const langs = availableLanguages()
-    expect(langs.length).toBeGreaterThan(0)
+    const languages = availableLanguages()
+    expect(languages.length).toBeGreaterThan(0)
   })
 
   it('includes known languages', () => {
-    const langs = availableLanguages()
-    const ids = langs.map((l) => l.id)
+    const languages = availableLanguages()
+    const ids = languages.map((language) => language.id)
     expect(ids).toContain('javascript')
     expect(ids).toContain('rust')
     expect(ids).toContain('python')
@@ -71,5 +73,13 @@ describe('availableThemes', () => {
     for (const theme of availableThemes()) {
       expect(['light', 'dark']).toContain(theme.appearance)
     }
+  })
+
+  it('matches the repository theme inventory', () => {
+    const expectedCount = readdirSync(resolve(import.meta.dirname, '../../../../themes'))
+      .filter((file) => file.endsWith('.json'))
+      .length
+
+    expect(availableThemes()).toHaveLength(expectedCount)
   })
 })

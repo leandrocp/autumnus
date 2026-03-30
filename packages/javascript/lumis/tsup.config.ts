@@ -37,7 +37,7 @@ export default defineConfig({
     ...langEntries,
     ...bundleEntries,
   },
-  format: ['esm'],
+  format: ['esm', 'cjs'],
   dts: true,
   splitting: true,
   clean: true,

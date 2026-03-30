@@ -47,7 +47,7 @@
 <%= render "shared/sidebar", locals: { current_user: @user } %>`
 
     try {
-      const hl = await createHighlighter({ langs: [erb, html, ruby] })
+      const hl = await createHighlighter({ languages: [erb, html, ruby] })
       document.getElementById('output').innerHTML = hl.highlight(
         code,
         htmlInline({ language: erb, theme: tokyonightMoon })

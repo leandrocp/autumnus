@@ -1,0 +1,21 @@
+{
+  "name": "example-nextjs-lumis",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "next build",
+    "start": "next dev"
+  },
+  "dependencies": {
+    "@lumis-sh/lumis": "workspace:*",
+    "@lumis-sh/rehype-lumis": "workspace:*",
+    "@lumis-sh/themes": "workspace:*",
+    "@mdx-js/loader": "^3.1.1",
+    "@mdx-js/react": "^3.1.1",
+    "@next/mdx": "^16.2.1",
+    "@types/mdx": "^2.0.13",
+    "next": "^16.2.1",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
+  }
+}

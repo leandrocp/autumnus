@@ -221,6 +221,24 @@ fn highlight_source_diff_html_linked() {
 }
 
 #[test]
+fn highlight_source_diff_bbcode_scoped() {
+    let source = "@@ -1 +1 @@\n-[url=x]\n+[url=y]\n";
+
+    cmd()
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .args(["highlight", "-l", "diff", "-f", "bbcode-scoped"])
+        .write_stdin(source)
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(
+            "[attribute-diff]@@ -1 +1 @@[/attribute-diff]",
+        ))
+        .stdout(predicate::str::contains("&#91;url=x&#93;"))
+        .stdout(predicate::str::contains("&#91;url=y&#93;"));
+}
+
+#[test]
 fn highlight_file_path_autodetects_language() {
     let tmp = tempfile::tempdir().unwrap();
     let source = tmp.path().join("sample.json");

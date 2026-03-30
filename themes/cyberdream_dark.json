@@ -1,7 +1,7 @@
 {
   "name": "cyberdream_dark",
   "appearance": "dark",
-  "revision": "f79f8c3880de7fcfa9a46ee99c53cbdc760d7420",
+  "revision": "a68ffa6af98bf1fc88f33a071c51a188ec85c725",
   "highlights": {
     "attribute": {
       "fg": "#5ef1ff"
@@ -261,7 +261,7 @@
       "fg": "#5eff6c"
     },
     "string.documentation": {
-      "fg": "#5eff6c"
+      "fg": "#7b8496"
     },
     "string.escape": {
       "fg": "#ff5ea0"

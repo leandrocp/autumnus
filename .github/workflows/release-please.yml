@@ -1,8 +1,13 @@
 name: Release Please
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: write
