@@ -306,8 +306,8 @@ impl Formatter for MinimalHtmlFormatter {
     fn format(&self, source: &str, output: &mut dyn Write) -> io::Result<()> {
         open_pre_tag(output, None, self.theme.as_ref())?;
         open_code_tag(output, &self.language)?;
-        highlight_iter(source, self.language, self.theme.clone(), |text, _language, _range, scope, _style| {
-            write!(output, "{}", span_inline(text, Some(self.language), scope, self.theme.as_ref(), false, false))
+        highlight_iter(source, self.language, self.theme.clone(), |text, language, _range, scope, _style| {
+            write!(output, "{}", span_inline(text, Some(language), scope, self.theme.as_ref(), false, false))
         })
         .map_err(io::Error::other)?;
         closing_tags(output)?;

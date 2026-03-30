@@ -59,8 +59,16 @@
 //! let code = "let x = 42;";
 //! let theme = themes::get("github_light").unwrap();
 //!
-//! highlight_iter(code, Language::Rust, Some(theme), |text, _language, range, scope, style| {
-//!     println!("{}..{}: '{}' (scope: {}, color: {:?})", range.start, range.end, text, scope, style.fg);
+//! highlight_iter(code, Language::Rust, Some(theme), |text, language, range, scope, style| {
+//!     println!(
+//!         "{}..{}: '{}' (language: {}, scope: {}, color: {:?})",
+//!         range.start,
+//!         range.end,
+//!         text,
+//!         language.id_name(),
+//!         scope,
+//!         style.fg
+//!     );
 //!     Ok::<_, std::io::Error>(())
 //! }).unwrap();
 //! ```
@@ -310,10 +318,9 @@ pub fn highlight_iter<F, E>(
     mut on_event_source: F,
 ) -> Result<(), HighlightError>
 where
-    F: FnMut(&str, &str, Range<usize>, &'static str, &Style) -> Result<(), E>,
+    F: FnMut(&str, Language, Range<usize>, &'static str, &Style) -> Result<(), E>,
     E: std::error::Error + Send + Sync + 'static,
 {
-    let lang_id = language.id_name();
     let mut ts_highlighter = TSHighlighter::new();
     let events = ts_highlighter
         .highlight(language.config(), source.as_bytes(), None, |injected| {
@@ -323,7 +330,7 @@ where
 
     let mut style_stack: Vec<Style> = vec![Style::default()];
     let mut scope_stack: Vec<&'static str> = vec![""];
-    let mut language_stack: Vec<String> = vec![lang_id.to_string()];
+    let mut language_stack = vec![language];
 
     for event in events {
         let event = event.map_err(|e| HighlightError::EventProcessing(format!("{:?}", e)))?;
@@ -334,7 +341,9 @@ where
                 language: lang,
             } => {
                 let scope = HIGHLIGHT_NAMES[highlight.0];
-                let specialized_scope = format_smolstr!("{}.{}", scope, lang);
+                let injected_language = Language::guess(Some(&lang), "");
+                let specialized_scope =
+                    format_smolstr!("{}.{}", scope, injected_language.id_name());
 
                 let new_style = if let Some(ref theme) = theme {
                     theme
@@ -346,7 +355,7 @@ where
                 };
                 style_stack.push(new_style);
                 scope_stack.push(scope);
-                language_stack.push(lang);
+                language_stack.push(injected_language);
             }
             HighlightEvent::Source { start, end } => {
                 let text = &source[start..end];
@@ -354,8 +363,7 @@ where
                     let default_style = Style::default();
                     let current_style = style_stack.last().unwrap_or(&default_style);
                     let current_scope = scope_stack.last().copied().unwrap_or("");
-                    let current_language =
-                        language_stack.last().map(|s| s.as_str()).unwrap_or(lang_id);
+                    let current_language = language_stack.last().copied().unwrap_or(language);
                     on_event_source(
                         text,
                         current_language,
@@ -481,8 +489,8 @@ mod tests {
             code,
             Language::Rust,
             None,
-            |text, _language, range, scope, style| {
-                segments.push((text.to_string(), range, scope, style.clone()));
+            |text, language, range, scope, style| {
+                segments.push((text.to_string(), language, range, scope, style.clone()));
                 Ok::<_, std::io::Error>(())
             },
         )
@@ -491,8 +499,9 @@ mod tests {
         assert!(!segments.is_empty());
 
         // Check that ranges are valid and scopes are present
-        for (text, range, scope, _style) in &segments {
+        for (text, language, range, scope, _style) in &segments {
             assert_eq!(&code[range.clone()], text.as_str());
+            assert_eq!(*language, Language::Rust);
             assert!(scope.is_empty() || !scope.is_empty()); // scope is always valid
         }
     }

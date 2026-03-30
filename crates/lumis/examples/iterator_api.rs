@@ -17,10 +17,17 @@ fn main() {
 
     println!("Tokens with position information:\n");
 
-    highlight_iter(code, lang, theme, |text, _language, range, scope, style| {
+    highlight_iter(code, lang, theme, |text, language, range, scope, style| {
         println!(
-            "{}..{}: {:?} (scope: {}, fg: {:?}, bold: {}, italic: {})",
-            range.start, range.end, text, scope, style.fg, style.bold, style.italic
+            "{}..{}: {:?} (language: {}, scope: {}, fg: {:?}, bold: {}, italic: {})",
+            range.start,
+            range.end,
+            text,
+            language.id_name(),
+            scope,
+            style.fg,
+            style.bold,
+            style.italic
         );
         Ok::<_, std::io::Error>(())
     })
