@@ -1,0 +1,4628 @@
+[
+  {
+    "type": "addrspace",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "number",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "alias",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "addrspace",
+          "named": true
+        },
+        {
+          "type": "attribute",
+          "named": true
+        },
+        {
+          "type": "constant_expr",
+          "named": true
+        },
+        {
+          "type": "global_var",
+          "named": true
+        },
+        {
+          "type": "linkage",
+          "named": true
+        },
+        {
+          "type": "metadata_refs",
+          "named": true
+        },
+        {
+          "type": "thread_local",
+          "named": true
+        },
+        {
+          "type": "type",
+          "named": true
+        },
+        {
+          "type": "unnamed_addr",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "alignment",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "number",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "argument",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "metadata",
+          "named": true
+        },
+        {
+          "type": "param_or_return_attrs",
+          "named": true
+        },
+        {
+          "type": "type",
+          "named": true
+        },
+        {
+          "type": "value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "argument_list",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "argument",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "array_type",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "array_vector_body",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "array_value",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "array_vector_body",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "number",
+          "named": true
+        },
+        {
+          "type": "type",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "asm",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "string",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "atomic_bin_op_keyword",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "atomic_ordering",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "attribute",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "alignment",
+          "named": true
+        },
+        {
+          "type": "attr_ref",
+          "named": true
+        },
+        {
+          "type": "attribute_name",
+          "named": true
+        },
+        {
+          "type": "comdat_ref",
+          "named": true
+        },
+        {
+          "type": "number",
+          "named": true
+        },
+        {
+          "type": "string",
+          "named": true
+        },
+        {
+          "type": "type",
+          "named": true
+        },
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "attribute_name",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "memory_attribute",
+          "named": true
+        },
+        {
+          "type": "uwtable",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "bin_op_keyword",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "atomic_bin_op_keyword",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "blockaddress",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "global_var",
+          "named": true
+        },
+        {
+          "type": "local_var",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "calling_conv",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "number",
+          "named": true
+        },
+        {
+          "type": "string",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "cast_inst",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "comdat",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "comdat_ref",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "constant_bin_op",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "bin_op_keyword",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "fast_math",
+          "named": true
+        },
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "constant_cast",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "cast_inst",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "type",
+          "named": true
+        },
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "constant_expr",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "constant_bin_op",
+          "named": true
+        },
+        {
+          "type": "constant_cast",
+          "named": true
+        },
+        {
+          "type": "constant_extractelement",
+          "named": true
+        },
+        {
+          "type": "constant_extractvalue",
+          "named": true
+        },
+        {
+          "type": "constant_fcmp",
+          "named": true
+        },
+        {
+          "type": "constant_fneg",
+          "named": true
+        },
+        {
+          "type": "constant_getelementptr",
+          "named": true
+        },
+        {
+          "type": "constant_icmp",
+          "named": true
+        },
+        {
+          "type": "constant_insertelement",
+          "named": true
+        },
+        {
+          "type": "constant_insertvalue",
+          "named": true
+        },
+        {
+          "type": "constant_select",
+          "named": true
+        },
+        {
+          "type": "constant_shufflevector",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "constant_extractelement",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "extractelement",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "constant_extractvalue",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "extractvalue",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "number",
+          "named": true
+        },
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "constant_fcmp",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "fcmp",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "fast_math",
+          "named": true
+        },
+        {
+          "type": "fcmp_cond",
+          "named": true
+        },
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "constant_fneg",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "fneg",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "fast_math",
+          "named": true
+        },
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "constant_getelementptr",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "getelementptr",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "number",
+          "named": true
+        },
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "constant_icmp",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "icmp",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "icmp_cond",
+          "named": true
+        },
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "constant_insertelement",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "insertelement",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "constant_insertvalue",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "insertvalue",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "number",
+          "named": true
+        },
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "constant_select",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "select",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "constant_shufflevector",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "shufflevector",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "data_layout",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "string",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "declare",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "function_header",
+          "named": true
+        },
+        {
+          "type": "metadata_attachment",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "dll_storage_class",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "dso_local",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "fast_math",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "fcmp_cond",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "fn_define",
+    "named": true,
+    "fields": {
+      "body": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "function_body",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "function_header",
+          "named": true
+        },
+        {
+          "type": "metadata_attachment",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "function_body",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "instruction",
+          "named": true
+        },
+        {
+          "type": "label",
+          "named": true
+        },
+        {
+          "type": "use_list_order",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "function_header",
+    "named": true,
+    "fields": {
+      "arguments": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "argument_list",
+            "named": true
+          }
+        ]
+      },
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "global_var",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "addrspace",
+          "named": true
+        },
+        {
+          "type": "attribute",
+          "named": true
+        },
+        {
+          "type": "calling_conv",
+          "named": true
+        },
+        {
+          "type": "linkage",
+          "named": true
+        },
+        {
+          "type": "param_or_return_attrs",
+          "named": true
+        },
+        {
+          "type": "type",
+          "named": true
+        },
+        {
+          "type": "unnamed_addr",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "global_global",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "addrspace",
+          "named": true
+        },
+        {
+          "type": "attribute",
+          "named": true
+        },
+        {
+          "type": "global_var",
+          "named": true
+        },
+        {
+          "type": "linkage",
+          "named": true
+        },
+        {
+          "type": "metadata_refs",
+          "named": true
+        },
+        {
+          "type": "thread_local",
+          "named": true
+        },
+        {
+          "type": "type_and_value",
+          "named": true
+        },
+        {
+          "type": "unnamed_addr",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "global_metadata",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "metadata",
+          "named": true
+        },
+        {
+          "type": "metadata_ref",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "global_type",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "local_var",
+          "named": true
+        },
+        {
+          "type": "type",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "icmp_cond",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "ifunc",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "addrspace",
+          "named": true
+        },
+        {
+          "type": "attribute",
+          "named": true
+        },
+        {
+          "type": "constant_expr",
+          "named": true
+        },
+        {
+          "type": "global_var",
+          "named": true
+        },
+        {
+          "type": "linkage",
+          "named": true
+        },
+        {
+          "type": "metadata_refs",
+          "named": true
+        },
+        {
+          "type": "thread_local",
+          "named": true
+        },
+        {
+          "type": "type",
+          "named": true
+        },
+        {
+          "type": "unnamed_addr",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "inline_asm",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "asm",
+          "named": true
+        },
+        {
+          "type": "string",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "instruction",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "instruction_alloca",
+          "named": true
+        },
+        {
+          "type": "instruction_atomicrmw",
+          "named": true
+        },
+        {
+          "type": "instruction_bin_op",
+          "named": true
+        },
+        {
+          "type": "instruction_br",
+          "named": true
+        },
+        {
+          "type": "instruction_call",
+          "named": true
+        },
+        {
+          "type": "instruction_callbr",
+          "named": true
+        },
+        {
+          "type": "instruction_cast",
+          "named": true
+        },
+        {
+          "type": "instruction_catchpad",
+          "named": true
+        },
+        {
+          "type": "instruction_catchret",
+          "named": true
+        },
+        {
+          "type": "instruction_catchswitch",
+          "named": true
+        },
+        {
+          "type": "instruction_cleanuppad",
+          "named": true
+        },
+        {
+          "type": "instruction_cleanupret",
+          "named": true
+        },
+        {
+          "type": "instruction_cmpxchg",
+          "named": true
+        },
+        {
+          "type": "instruction_extractelement",
+          "named": true
+        },
+        {
+          "type": "instruction_extractvalue",
+          "named": true
+        },
+        {
+          "type": "instruction_fcmp",
+          "named": true
+        },
+        {
+          "type": "instruction_fence",
+          "named": true
+        },
+        {
+          "type": "instruction_fneg",
+          "named": true
+        },
+        {
+          "type": "instruction_freeze",
+          "named": true
+        },
+        {
+          "type": "instruction_getelementptr",
+          "named": true
+        },
+        {
+          "type": "instruction_icmp",
+          "named": true
+        },
+        {
+          "type": "instruction_indirectbr",
+          "named": true
+        },
+        {
+          "type": "instruction_insertelement",
+          "named": true
+        },
+        {
+          "type": "instruction_insertvalue",
+          "named": true
+        },
+        {
+          "type": "instruction_invoke",
+          "named": true
+        },
+        {
+          "type": "instruction_landingpad",
+          "named": true
+        },
+        {
+          "type": "instruction_load",
+          "named": true
+        },
+        {
+          "type": "instruction_phi",
+          "named": true
+        },
+        {
+          "type": "instruction_resume",
+          "named": true
+        },
+        {
+          "type": "instruction_ret",
+          "named": true
+        },
+        {
+          "type": "instruction_select",
+          "named": true
+        },
+        {
+          "type": "instruction_shufflevector",
+          "named": true
+        },
+        {
+          "type": "instruction_store",
+          "named": true
+        },
+        {
+          "type": "instruction_switch",
+          "named": true
+        },
+        {
+          "type": "instruction_unreachable",
+          "named": true
+        },
+        {
+          "type": "instruction_va_arg",
+          "named": true
+        },
+        {
+          "type": "local_var",
+          "named": true
+        },
+        {
+          "type": "metadata_refs",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "instruction_alloca",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "alloca",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "addrspace",
+          "named": true
+        },
+        {
+          "type": "alignment",
+          "named": true
+        },
+        {
+          "type": "type",
+          "named": true
+        },
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "instruction_atomicrmw",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "atomicrmw",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "alignment",
+          "named": true
+        },
+        {
+          "type": "atomic_bin_op_keyword",
+          "named": true
+        },
+        {
+          "type": "atomic_ordering",
+          "named": true
+        },
+        {
+          "type": "syncscope",
+          "named": true
+        },
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "instruction_bin_op",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "bin_op_keyword",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "fast_math",
+          "named": true
+        },
+        {
+          "type": "type_and_value",
+          "named": true
+        },
+        {
+          "type": "value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "instruction_br",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "br",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "instruction_call",
+    "named": true,
+    "fields": {
+      "arguments": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "argument_list",
+            "named": true
+          }
+        ]
+      },
+      "callee": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "inline_asm",
+            "named": true
+          },
+          {
+            "type": "value",
+            "named": true
+          }
+        ]
+      },
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "call",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "addrspace",
+          "named": true
+        },
+        {
+          "type": "attribute",
+          "named": true
+        },
+        {
+          "type": "calling_conv",
+          "named": true
+        },
+        {
+          "type": "fast_math",
+          "named": true
+        },
+        {
+          "type": "operand_bundles",
+          "named": true
+        },
+        {
+          "type": "param_or_return_attrs",
+          "named": true
+        },
+        {
+          "type": "type",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "instruction_callbr",
+    "named": true,
+    "fields": {
+      "arguments": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "argument_list",
+            "named": true
+          }
+        ]
+      },
+      "callee": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "inline_asm",
+            "named": true
+          },
+          {
+            "type": "value",
+            "named": true
+          }
+        ]
+      },
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "callbr",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "addrspace",
+          "named": true
+        },
+        {
+          "type": "attribute",
+          "named": true
+        },
+        {
+          "type": "calling_conv",
+          "named": true
+        },
+        {
+          "type": "operand_bundles",
+          "named": true
+        },
+        {
+          "type": "param_or_return_attrs",
+          "named": true
+        },
+        {
+          "type": "type",
+          "named": true
+        },
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "instruction_cast",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "cast_inst",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "type",
+          "named": true
+        },
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "instruction_catchpad",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "catchpad",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "local_var",
+          "named": true
+        },
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "instruction_catchret",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "catchret",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "local_var",
+          "named": true
+        },
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "instruction_catchswitch",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "catchswitch",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "local_var",
+          "named": true
+        },
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "instruction_cleanuppad",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "cleanuppad",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "local_var",
+          "named": true
+        },
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "instruction_cleanupret",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "cleanupret",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "local_var",
+          "named": true
+        },
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "instruction_cmpxchg",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "cmpxchg",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "alignment",
+          "named": true
+        },
+        {
+          "type": "atomic_ordering",
+          "named": true
+        },
+        {
+          "type": "syncscope",
+          "named": true
+        },
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "instruction_extractelement",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "extractelement",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "instruction_extractvalue",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "extractvalue",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "number",
+          "named": true
+        },
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "instruction_fcmp",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "fcmp",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "fast_math",
+          "named": true
+        },
+        {
+          "type": "fcmp_cond",
+          "named": true
+        },
+        {
+          "type": "type_and_value",
+          "named": true
+        },
+        {
+          "type": "value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "instruction_fence",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "fence",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "atomic_ordering",
+          "named": true
+        },
+        {
+          "type": "syncscope",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "instruction_fneg",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "fneg",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "fast_math",
+          "named": true
+        },
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "instruction_freeze",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "freeze",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "instruction_getelementptr",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "getelementptr",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "instruction_icmp",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "icmp",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "icmp_cond",
+          "named": true
+        },
+        {
+          "type": "type_and_value",
+          "named": true
+        },
+        {
+          "type": "value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "instruction_indirectbr",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "indirectbr",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "instruction_insertelement",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "insertelement",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "instruction_insertvalue",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "insertvalue",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "number",
+          "named": true
+        },
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "instruction_invoke",
+    "named": true,
+    "fields": {
+      "arguments": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "argument_list",
+            "named": true
+          }
+        ]
+      },
+      "callee": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "inline_asm",
+            "named": true
+          },
+          {
+            "type": "value",
+            "named": true
+          }
+        ]
+      },
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "invoke",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "addrspace",
+          "named": true
+        },
+        {
+          "type": "attribute",
+          "named": true
+        },
+        {
+          "type": "calling_conv",
+          "named": true
+        },
+        {
+          "type": "operand_bundles",
+          "named": true
+        },
+        {
+          "type": "param_or_return_attrs",
+          "named": true
+        },
+        {
+          "type": "type",
+          "named": true
+        },
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "instruction_landingpad",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "landingpad",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "landingpad_clause",
+          "named": true
+        },
+        {
+          "type": "type",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "instruction_load",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "load",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "atomic_ordering",
+          "named": true
+        },
+        {
+          "type": "number",
+          "named": true
+        },
+        {
+          "type": "syncscope",
+          "named": true
+        },
+        {
+          "type": "type",
+          "named": true
+        },
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "instruction_phi",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "phi",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "fast_math",
+          "named": true
+        },
+        {
+          "type": "local_var",
+          "named": true
+        },
+        {
+          "type": "type",
+          "named": true
+        },
+        {
+          "type": "value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "instruction_resume",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "resume",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "instruction_ret",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "ret",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "instruction_select",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "select",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "fast_math",
+          "named": true
+        },
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "instruction_shufflevector",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "shufflevector",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "instruction_store",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "store",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "atomic_ordering",
+          "named": true
+        },
+        {
+          "type": "number",
+          "named": true
+        },
+        {
+          "type": "syncscope",
+          "named": true
+        },
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "instruction_switch",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "switch",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "instruction_unreachable",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "unreachable",
+            "named": false
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "instruction_va_arg",
+    "named": true,
+    "fields": {
+      "inst_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "va_arg",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "type",
+          "named": true
+        },
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "landingpad_clause",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "linkage",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "dll_storage_class",
+          "named": true
+        },
+        {
+          "type": "dso_local",
+          "named": true
+        },
+        {
+          "type": "linkage_aux",
+          "named": true
+        },
+        {
+          "type": "visibility",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "linkage_aux",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "memory_attribute",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "memory_attribute_val",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "memory_attribute_val",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "metadata",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "metadata_tuple",
+          "named": true
+        },
+        {
+          "type": "specialized_md",
+          "named": true
+        },
+        {
+          "type": "string",
+          "named": true
+        },
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "metadata_attachment",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "metadata",
+          "named": true
+        },
+        {
+          "type": "metadata_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "metadata_name",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "metadata_ref",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "metadata_refs",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "metadata",
+          "named": true
+        },
+        {
+          "type": "metadata_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "metadata_tuple",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "metadata",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "module",
+    "named": true,
+    "root": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "alias",
+          "named": true
+        },
+        {
+          "type": "comdat",
+          "named": true
+        },
+        {
+          "type": "declare",
+          "named": true
+        },
+        {
+          "type": "fn_define",
+          "named": true
+        },
+        {
+          "type": "global_global",
+          "named": true
+        },
+        {
+          "type": "global_metadata",
+          "named": true
+        },
+        {
+          "type": "global_type",
+          "named": true
+        },
+        {
+          "type": "ifunc",
+          "named": true
+        },
+        {
+          "type": "module_asm",
+          "named": true
+        },
+        {
+          "type": "source_file_name",
+          "named": true
+        },
+        {
+          "type": "summary_entry",
+          "named": true
+        },
+        {
+          "type": "target_definition",
+          "named": true
+        },
+        {
+          "type": "unnamed_attr_grp",
+          "named": true
+        },
+        {
+          "type": "use_list_order",
+          "named": true
+        },
+        {
+          "type": "use_list_order_bb",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "module_asm",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "asm",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "number",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "operand_bundles",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "string",
+          "named": true
+        },
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "packed_struct_type",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "struct_body",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "packed_struct_value",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "param_or_return_attrs",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "attribute_name",
+          "named": true
+        },
+        {
+          "type": "number",
+          "named": true
+        },
+        {
+          "type": "type",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "source_file_name",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "string",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "specialized_md",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "metadata_ref",
+          "named": true
+        },
+        {
+          "type": "specialized_md_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "specialized_md_value",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "addrspace",
+          "named": true
+        },
+        {
+          "type": "cstring",
+          "named": true
+        },
+        {
+          "type": "float",
+          "named": true
+        },
+        {
+          "type": "metadata_tuple",
+          "named": true
+        },
+        {
+          "type": "number",
+          "named": true
+        },
+        {
+          "type": "specialized_md",
+          "named": true
+        },
+        {
+          "type": "specialized_md_value",
+          "named": true
+        },
+        {
+          "type": "string",
+          "named": true
+        },
+        {
+          "type": "type_keyword",
+          "named": true
+        },
+        {
+          "type": "var",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "struct_body",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "type",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "struct_type",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "struct_body",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "struct_value",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "summary_entry",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "number",
+          "named": true
+        },
+        {
+          "type": "string",
+          "named": true
+        },
+        {
+          "type": "summary_ref",
+          "named": true
+        },
+        {
+          "type": "summary_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "summary_value",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "attribute_name",
+          "named": true
+        },
+        {
+          "type": "linkage_aux",
+          "named": true
+        },
+        {
+          "type": "number",
+          "named": true
+        },
+        {
+          "type": "string",
+          "named": true
+        },
+        {
+          "type": "summary_ref",
+          "named": true
+        },
+        {
+          "type": "summary_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "syncscope",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "string",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "target_definition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "data_layout",
+          "named": true
+        },
+        {
+          "type": "target_triple",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "target_triple",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "string",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "thread_local",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "type",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "addrspace",
+          "named": true
+        },
+        {
+          "type": "argument_list",
+          "named": true
+        },
+        {
+          "type": "array_type",
+          "named": true
+        },
+        {
+          "type": "local_var",
+          "named": true
+        },
+        {
+          "type": "packed_struct_type",
+          "named": true
+        },
+        {
+          "type": "struct_type",
+          "named": true
+        },
+        {
+          "type": "type_keyword",
+          "named": true
+        },
+        {
+          "type": "vector_type",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "type_and_value",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "metadata",
+          "named": true
+        },
+        {
+          "type": "type",
+          "named": true
+        },
+        {
+          "type": "value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "type_keyword",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "unnamed_addr",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "unnamed_attr_grp",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "attr_ref",
+          "named": true
+        },
+        {
+          "type": "attribute",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "use_list_order",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "number",
+          "named": true
+        },
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "use_list_order_bb",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "global_var",
+          "named": true
+        },
+        {
+          "type": "local_var",
+          "named": true
+        },
+        {
+          "type": "number",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "uwtable",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "value",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "array_value",
+          "named": true
+        },
+        {
+          "type": "blockaddress",
+          "named": true
+        },
+        {
+          "type": "constant_expr",
+          "named": true
+        },
+        {
+          "type": "cstring",
+          "named": true
+        },
+        {
+          "type": "float",
+          "named": true
+        },
+        {
+          "type": "linkage",
+          "named": true
+        },
+        {
+          "type": "number",
+          "named": true
+        },
+        {
+          "type": "packed_struct_value",
+          "named": true
+        },
+        {
+          "type": "string",
+          "named": true
+        },
+        {
+          "type": "struct_value",
+          "named": true
+        },
+        {
+          "type": "var",
+          "named": true
+        },
+        {
+          "type": "vector_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "var",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "global_var",
+          "named": true
+        },
+        {
+          "type": "local_var",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "vector_type",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "array_vector_body",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "vector_value",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "type_and_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "visibility",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "!",
+    "named": false
+  },
+  {
+    "type": "(",
+    "named": false
+  },
+  {
+    "type": ")",
+    "named": false
+  },
+  {
+    "type": "*",
+    "named": false
+  },
+  {
+    "type": ",",
+    "named": false
+  },
+  {
+    "type": "...",
+    "named": false
+  },
+  {
+    "type": ":",
+    "named": false
+  },
+  {
+    "type": "<",
+    "named": false
+  },
+  {
+    "type": "<{",
+    "named": false
+  },
+  {
+    "type": "=",
+    "named": false
+  },
+  {
+    "type": ">",
+    "named": false
+  },
+  {
+    "type": "[",
+    "named": false
+  },
+  {
+    "type": "]",
+    "named": false
+  },
+  {
+    "type": "acq_rel",
+    "named": false
+  },
+  {
+    "type": "acquire",
+    "named": false
+  },
+  {
+    "type": "add",
+    "named": false
+  },
+  {
+    "type": "addrspace",
+    "named": false
+  },
+  {
+    "type": "addrspacecast",
+    "named": false
+  },
+  {
+    "type": "afn",
+    "named": false
+  },
+  {
+    "type": "alias",
+    "named": false
+  },
+  {
+    "type": "align",
+    "named": false
+  },
+  {
+    "type": "alignstack",
+    "named": false
+  },
+  {
+    "type": "alloca",
+    "named": false
+  },
+  {
+    "type": "allocsize",
+    "named": false
+  },
+  {
+    "type": "alwaysinline",
+    "named": false
+  },
+  {
+    "type": "and",
+    "named": false
+  },
+  {
+    "type": "any",
+    "named": false
+  },
+  {
+    "type": "anyregcc",
+    "named": false
+  },
+  {
+    "type": "appending",
+    "named": false
+  },
+  {
+    "type": "arcp",
+    "named": false
+  },
+  {
+    "type": "argmem",
+    "named": false
+  },
+  {
+    "type": "argmemonly",
+    "named": false
+  },
+  {
+    "type": "ashr",
+    "named": false
+  },
+  {
+    "type": "asm",
+    "named": false
+  },
+  {
+    "type": "async",
+    "named": false
+  },
+  {
+    "type": "atomic",
+    "named": false
+  },
+  {
+    "type": "atomicrmw",
+    "named": false
+  },
+  {
+    "type": "attr_ref",
+    "named": true
+  },
+  {
+    "type": "attributes",
+    "named": false
+  },
+  {
+    "type": "available_externally",
+    "named": false
+  },
+  {
+    "type": "bfloat",
+    "named": false
+  },
+  {
+    "type": "bitcast",
+    "named": false
+  },
+  {
+    "type": "blockaddress",
+    "named": false
+  },
+  {
+    "type": "br",
+    "named": false
+  },
+  {
+    "type": "builtin",
+    "named": false
+  },
+  {
+    "type": "byref",
+    "named": false
+  },
+  {
+    "type": "byval",
+    "named": false
+  },
+  {
+    "type": "call",
+    "named": false
+  },
+  {
+    "type": "callbr",
+    "named": false
+  },
+  {
+    "type": "caller",
+    "named": false
+  },
+  {
+    "type": "catch",
+    "named": false
+  },
+  {
+    "type": "catchpad",
+    "named": false
+  },
+  {
+    "type": "catchret",
+    "named": false
+  },
+  {
+    "type": "catchswitch",
+    "named": false
+  },
+  {
+    "type": "cc",
+    "named": false
+  },
+  {
+    "type": "ccc",
+    "named": false
+  },
+  {
+    "type": "cfguard_checkcc",
+    "named": false
+  },
+  {
+    "type": "cleanup",
+    "named": false
+  },
+  {
+    "type": "cleanuppad",
+    "named": false
+  },
+  {
+    "type": "cleanupret",
+    "named": false
+  },
+  {
+    "type": "cmpxchg",
+    "named": false
+  },
+  {
+    "type": "cold",
+    "named": false
+  },
+  {
+    "type": "coldcc",
+    "named": false
+  },
+  {
+    "type": "comdat",
+    "named": false
+  },
+  {
+    "type": "comdat_ref",
+    "named": true
+  },
+  {
+    "type": "comment",
+    "named": true,
+    "extra": true
+  },
+  {
+    "type": "common",
+    "named": false
+  },
+  {
+    "type": "constant",
+    "named": false
+  },
+  {
+    "type": "contract",
+    "named": false
+  },
+  {
+    "type": "convergent",
+    "named": false
+  },
+  {
+    "type": "cstring",
+    "named": true
+  },
+  {
+    "type": "cxx_fast_tlscc",
+    "named": false
+  },
+  {
+    "type": "datalayout",
+    "named": false
+  },
+  {
+    "type": "declare",
+    "named": false
+  },
+  {
+    "type": "default",
+    "named": false
+  },
+  {
+    "type": "define",
+    "named": false
+  },
+  {
+    "type": "dereferenceable",
+    "named": false
+  },
+  {
+    "type": "dereferenceable_or_null",
+    "named": false
+  },
+  {
+    "type": "disable_sanitizer_instrumentation",
+    "named": false
+  },
+  {
+    "type": "disjoint",
+    "named": false
+  },
+  {
+    "type": "distinct",
+    "named": false
+  },
+  {
+    "type": "dllexport",
+    "named": false
+  },
+  {
+    "type": "dllimport",
+    "named": false
+  },
+  {
+    "type": "double",
+    "named": false
+  },
+  {
+    "type": "dso_local",
+    "named": false
+  },
+  {
+    "type": "dso_local_equivalent",
+    "named": false
+  },
+  {
+    "type": "dso_preemptable",
+    "named": false
+  },
+  {
+    "type": "elementtype",
+    "named": false
+  },
+  {
+    "type": "eq",
+    "named": false
+  },
+  {
+    "type": "exact",
+    "named": false
+  },
+  {
+    "type": "exactmatch",
+    "named": false
+  },
+  {
+    "type": "extern_weak",
+    "named": false
+  },
+  {
+    "type": "external",
+    "named": false
+  },
+  {
+    "type": "externally_initialized",
+    "named": false
+  },
+  {
+    "type": "extractelement",
+    "named": false
+  },
+  {
+    "type": "extractvalue",
+    "named": false
+  },
+  {
+    "type": "fadd",
+    "named": false
+  },
+  {
+    "type": "false",
+    "named": false
+  },
+  {
+    "type": "fast",
+    "named": false
+  },
+  {
+    "type": "fastcc",
+    "named": false
+  },
+  {
+    "type": "fcmp",
+    "named": false
+  },
+  {
+    "type": "fdiv",
+    "named": false
+  },
+  {
+    "type": "fence",
+    "named": false
+  },
+  {
+    "type": "filter",
+    "named": false
+  },
+  {
+    "type": "float",
+    "named": true
+  },
+  {
+    "type": "float",
+    "named": false
+  },
+  {
+    "type": "fmul",
+    "named": false
+  },
+  {
+    "type": "fneg",
+    "named": false
+  },
+  {
+    "type": "fp128",
+    "named": false
+  },
+  {
+    "type": "fpext",
+    "named": false
+  },
+  {
+    "type": "fptosi",
+    "named": false
+  },
+  {
+    "type": "fptoui",
+    "named": false
+  },
+  {
+    "type": "fptrunc",
+    "named": false
+  },
+  {
+    "type": "freeze",
+    "named": false
+  },
+  {
+    "type": "frem",
+    "named": false
+  },
+  {
+    "type": "from",
+    "named": false
+  },
+  {
+    "type": "fsub",
+    "named": false
+  },
+  {
+    "type": "gc",
+    "named": false
+  },
+  {
+    "type": "getelementptr",
+    "named": false
+  },
+  {
+    "type": "ghccc",
+    "named": false
+  },
+  {
+    "type": "global",
+    "named": false
+  },
+  {
+    "type": "global_var",
+    "named": true
+  },
+  {
+    "type": "half",
+    "named": false
+  },
+  {
+    "type": "hidden",
+    "named": false
+  },
+  {
+    "type": "hot",
+    "named": false
+  },
+  {
+    "type": "icmp",
+    "named": false
+  },
+  {
+    "type": "ifunc",
+    "named": false
+  },
+  {
+    "type": "immarg",
+    "named": false
+  },
+  {
+    "type": "inaccessiblemem",
+    "named": false
+  },
+  {
+    "type": "inaccessiblemem_or_argmemonly",
+    "named": false
+  },
+  {
+    "type": "inaccessiblememonly",
+    "named": false
+  },
+  {
+    "type": "inalloca",
+    "named": false
+  },
+  {
+    "type": "inbounds",
+    "named": false
+  },
+  {
+    "type": "indirect-tls-seg-refs",
+    "named": false
+  },
+  {
+    "type": "indirectbr",
+    "named": false
+  },
+  {
+    "type": "initialexec",
+    "named": false
+  },
+  {
+    "type": "inlinehint",
+    "named": false
+  },
+  {
+    "type": "inrange",
+    "named": false
+  },
+  {
+    "type": "inreg",
+    "named": false
+  },
+  {
+    "type": "insertelement",
+    "named": false
+  },
+  {
+    "type": "insertvalue",
+    "named": false
+  },
+  {
+    "type": "inteldialect",
+    "named": false
+  },
+  {
+    "type": "internal",
+    "named": false
+  },
+  {
+    "type": "inttoptr",
+    "named": false
+  },
+  {
+    "type": "invoke",
+    "named": false
+  },
+  {
+    "type": "jumptable",
+    "named": false
+  },
+  {
+    "type": "label",
+    "named": true
+  },
+  {
+    "type": "label",
+    "named": false
+  },
+  {
+    "type": "landingpad",
+    "named": false
+  },
+  {
+    "type": "largest",
+    "named": false
+  },
+  {
+    "type": "linkonce",
+    "named": false
+  },
+  {
+    "type": "linkonce_odr",
+    "named": false
+  },
+  {
+    "type": "load",
+    "named": false
+  },
+  {
+    "type": "local_unnamed_addr",
+    "named": false
+  },
+  {
+    "type": "local_var",
+    "named": true
+  },
+  {
+    "type": "localdynamic",
+    "named": false
+  },
+  {
+    "type": "localexec",
+    "named": false
+  },
+  {
+    "type": "lshr",
+    "named": false
+  },
+  {
+    "type": "max",
+    "named": false
+  },
+  {
+    "type": "memory",
+    "named": false
+  },
+  {
+    "type": "metadata",
+    "named": false
+  },
+  {
+    "type": "min",
+    "named": false
+  },
+  {
+    "type": "minsize",
+    "named": false
+  },
+  {
+    "type": "module",
+    "named": false
+  },
+  {
+    "type": "monotonic",
+    "named": false
+  },
+  {
+    "type": "mul",
+    "named": false
+  },
+  {
+    "type": "mustprogress",
+    "named": false
+  },
+  {
+    "type": "musttail",
+    "named": false
+  },
+  {
+    "type": "naked",
+    "named": false
+  },
+  {
+    "type": "nand",
+    "named": false
+  },
+  {
+    "type": "ne",
+    "named": false
+  },
+  {
+    "type": "nest",
+    "named": false
+  },
+  {
+    "type": "ninf",
+    "named": false
+  },
+  {
+    "type": "nnan",
+    "named": false
+  },
+  {
+    "type": "nneg",
+    "named": false
+  },
+  {
+    "type": "no-jump-tables",
+    "named": false
+  },
+  {
+    "type": "no_cfi",
+    "named": false
+  },
+  {
+    "type": "noalias",
+    "named": false
+  },
+  {
+    "type": "nobuiltin",
+    "named": false
+  },
+  {
+    "type": "nocallback",
+    "named": false
+  },
+  {
+    "type": "nocapture",
+    "named": false
+  },
+  {
+    "type": "nocf_check",
+    "named": false
+  },
+  {
+    "type": "nodeduplicate",
+    "named": false
+  },
+  {
+    "type": "noduplicate",
+    "named": false
+  },
+  {
+    "type": "nofree",
+    "named": false
+  },
+  {
+    "type": "noimplicitfloat",
+    "named": false
+  },
+  {
+    "type": "noinline",
+    "named": false
+  },
+  {
+    "type": "nomerge",
+    "named": false
+  },
+  {
+    "type": "none",
+    "named": false
+  },
+  {
+    "type": "nonlazybind",
+    "named": false
+  },
+  {
+    "type": "nonnull",
+    "named": false
+  },
+  {
+    "type": "noprofile",
+    "named": false
+  },
+  {
+    "type": "norecurse",
+    "named": false
+  },
+  {
+    "type": "noredzone",
+    "named": false
+  },
+  {
+    "type": "noreturn",
+    "named": false
+  },
+  {
+    "type": "nosanitize_coverage",
+    "named": false
+  },
+  {
+    "type": "nosync",
+    "named": false
+  },
+  {
+    "type": "notail",
+    "named": false
+  },
+  {
+    "type": "noundef",
+    "named": false
+  },
+  {
+    "type": "nounwind",
+    "named": false
+  },
+  {
+    "type": "nsw",
+    "named": false
+  },
+  {
+    "type": "nsz",
+    "named": false
+  },
+  {
+    "type": "null",
+    "named": false
+  },
+  {
+    "type": "null_pointer_is_valid",
+    "named": false
+  },
+  {
+    "type": "nuw",
+    "named": false
+  },
+  {
+    "type": "oeq",
+    "named": false
+  },
+  {
+    "type": "oge",
+    "named": false
+  },
+  {
+    "type": "ogt",
+    "named": false
+  },
+  {
+    "type": "ole",
+    "named": false
+  },
+  {
+    "type": "olt",
+    "named": false
+  },
+  {
+    "type": "one",
+    "named": false
+  },
+  {
+    "type": "opaque",
+    "named": false
+  },
+  {
+    "type": "optforfuzzing",
+    "named": false
+  },
+  {
+    "type": "optnone",
+    "named": false
+  },
+  {
+    "type": "optsize",
+    "named": false
+  },
+  {
+    "type": "or",
+    "named": false
+  },
+  {
+    "type": "ord",
+    "named": false
+  },
+  {
+    "type": "partition",
+    "named": false
+  },
+  {
+    "type": "personality",
+    "named": false
+  },
+  {
+    "type": "phi",
+    "named": false
+  },
+  {
+    "type": "poison",
+    "named": false
+  },
+  {
+    "type": "ppc_fp128",
+    "named": false
+  },
+  {
+    "type": "preallocated",
+    "named": false
+  },
+  {
+    "type": "prefix",
+    "named": false
+  },
+  {
+    "type": "preserve_allcc",
+    "named": false
+  },
+  {
+    "type": "preserve_mostcc",
+    "named": false
+  },
+  {
+    "type": "private",
+    "named": false
+  },
+  {
+    "type": "prologue",
+    "named": false
+  },
+  {
+    "type": "protected",
+    "named": false
+  },
+  {
+    "type": "ptr",
+    "named": false
+  },
+  {
+    "type": "ptrtoint",
+    "named": false
+  },
+  {
+    "type": "read",
+    "named": false
+  },
+  {
+    "type": "readnone",
+    "named": false
+  },
+  {
+    "type": "readonly",
+    "named": false
+  },
+  {
+    "type": "readwrite",
+    "named": false
+  },
+  {
+    "type": "reassoc",
+    "named": false
+  },
+  {
+    "type": "release",
+    "named": false
+  },
+  {
+    "type": "resume",
+    "named": false
+  },
+  {
+    "type": "ret",
+    "named": false
+  },
+  {
+    "type": "returned",
+    "named": false
+  },
+  {
+    "type": "returns_twice",
+    "named": false
+  },
+  {
+    "type": "safestack",
+    "named": false
+  },
+  {
+    "type": "samesize",
+    "named": false
+  },
+  {
+    "type": "sanitize_address",
+    "named": false
+  },
+  {
+    "type": "sanitize_hwaddress",
+    "named": false
+  },
+  {
+    "type": "sanitize_memory",
+    "named": false
+  },
+  {
+    "type": "sanitize_memtag",
+    "named": false
+  },
+  {
+    "type": "sanitize_thread",
+    "named": false
+  },
+  {
+    "type": "sdiv",
+    "named": false
+  },
+  {
+    "type": "section",
+    "named": false
+  },
+  {
+    "type": "select",
+    "named": false
+  },
+  {
+    "type": "seq_cst",
+    "named": false
+  },
+  {
+    "type": "sext",
+    "named": false
+  },
+  {
+    "type": "sge",
+    "named": false
+  },
+  {
+    "type": "sgt",
+    "named": false
+  },
+  {
+    "type": "shadowcallstack",
+    "named": false
+  },
+  {
+    "type": "shl",
+    "named": false
+  },
+  {
+    "type": "shufflevector",
+    "named": false
+  },
+  {
+    "type": "sideeffect",
+    "named": false
+  },
+  {
+    "type": "signext",
+    "named": false
+  },
+  {
+    "type": "sitofp",
+    "named": false
+  },
+  {
+    "type": "sle",
+    "named": false
+  },
+  {
+    "type": "slt",
+    "named": false
+  },
+  {
+    "type": "source_filename",
+    "named": false
+  },
+  {
+    "type": "speculatable",
+    "named": false
+  },
+  {
+    "type": "speculative_load_hardening",
+    "named": false
+  },
+  {
+    "type": "srem",
+    "named": false
+  },
+  {
+    "type": "sret",
+    "named": false
+  },
+  {
+    "type": "ssp",
+    "named": false
+  },
+  {
+    "type": "sspreq",
+    "named": false
+  },
+  {
+    "type": "sspstrong",
+    "named": false
+  },
+  {
+    "type": "store",
+    "named": false
+  },
+  {
+    "type": "strictfp",
+    "named": false
+  },
+  {
+    "type": "string",
+    "named": true
+  },
+  {
+    "type": "sub",
+    "named": false
+  },
+  {
+    "type": "summary_ref",
+    "named": true
+  },
+  {
+    "type": "swiftasync",
+    "named": false
+  },
+  {
+    "type": "swiftcc",
+    "named": false
+  },
+  {
+    "type": "swifterror",
+    "named": false
+  },
+  {
+    "type": "swiftself",
+    "named": false
+  },
+  {
+    "type": "swifttailcc",
+    "named": false
+  },
+  {
+    "type": "switch",
+    "named": false
+  },
+  {
+    "type": "sync",
+    "named": false
+  },
+  {
+    "type": "syncscope",
+    "named": false
+  },
+  {
+    "type": "tail",
+    "named": false
+  },
+  {
+    "type": "tailcc",
+    "named": false
+  },
+  {
+    "type": "target",
+    "named": false
+  },
+  {
+    "type": "thread_local",
+    "named": false
+  },
+  {
+    "type": "to",
+    "named": false
+  },
+  {
+    "type": "token",
+    "named": false
+  },
+  {
+    "type": "triple",
+    "named": false
+  },
+  {
+    "type": "true",
+    "named": false
+  },
+  {
+    "type": "trunc",
+    "named": false
+  },
+  {
+    "type": "type",
+    "named": false
+  },
+  {
+    "type": "udiv",
+    "named": false
+  },
+  {
+    "type": "ueq",
+    "named": false
+  },
+  {
+    "type": "uge",
+    "named": false
+  },
+  {
+    "type": "ugt",
+    "named": false
+  },
+  {
+    "type": "uitofp",
+    "named": false
+  },
+  {
+    "type": "ule",
+    "named": false
+  },
+  {
+    "type": "ult",
+    "named": false
+  },
+  {
+    "type": "umax",
+    "named": false
+  },
+  {
+    "type": "umin",
+    "named": false
+  },
+  {
+    "type": "undef",
+    "named": false
+  },
+  {
+    "type": "une",
+    "named": false
+  },
+  {
+    "type": "unnamed_addr",
+    "named": false
+  },
+  {
+    "type": "uno",
+    "named": false
+  },
+  {
+    "type": "unordered",
+    "named": false
+  },
+  {
+    "type": "unreachable",
+    "named": false
+  },
+  {
+    "type": "unwind",
+    "named": false
+  },
+  {
+    "type": "urem",
+    "named": false
+  },
+  {
+    "type": "uselistorder",
+    "named": false
+  },
+  {
+    "type": "uselistorder_bb",
+    "named": false
+  },
+  {
+    "type": "uwtable",
+    "named": false
+  },
+  {
+    "type": "va_arg",
+    "named": false
+  },
+  {
+    "type": "void",
+    "named": false
+  },
+  {
+    "type": "volatile",
+    "named": false
+  },
+  {
+    "type": "vscale",
+    "named": false
+  },
+  {
+    "type": "vscale_range",
+    "named": false
+  },
+  {
+    "type": "weak",
+    "named": false
+  },
+  {
+    "type": "weak_odr",
+    "named": false
+  },
+  {
+    "type": "webkit_jscc",
+    "named": false
+  },
+  {
+    "type": "willreturn",
+    "named": false
+  },
+  {
+    "type": "within",
+    "named": false
+  },
+  {
+    "type": "write",
+    "named": false
+  },
+  {
+    "type": "writeonly",
+    "named": false
+  },
+  {
+    "type": "x",
+    "named": false
+  },
+  {
+    "type": "x86_amx",
+    "named": false
+  },
+  {
+    "type": "x86_fp80",
+    "named": false
+  },
+  {
+    "type": "x86_mmx",
+    "named": false
+  },
+  {
+    "type": "xchg",
+    "named": false
+  },
+  {
+    "type": "xor",
+    "named": false
+  },
+  {
+    "type": "zeroext",
+    "named": false
+  },
+  {
+    "type": "zeroinitializer",
+    "named": false
+  },
+  {
+    "type": "zext",
+    "named": false
+  },
+  {
+    "type": "{",
+    "named": false
+  },
+  {
+    "type": "|",
+    "named": false
+  },
+  {
+    "type": "}",
+    "named": false
+  },
+  {
+    "type": "}>",
+    "named": false
+  }
+]

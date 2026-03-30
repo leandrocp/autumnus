@@ -105,6 +105,7 @@ all-languages = [
     "lang-kotlin",
     "lang-latex",
     "lang-liquid",
+    "lang-llvm",
     "lang-lua",
     "lang-luadoc",
     "lang-make",
@@ -156,6 +157,7 @@ all-languages = [
     "lang-xml",
     "lang-yaml",
     "lang-zig",
+    "lang-zsh",
 ]
 
 lang-arduino = ["dep:tree-sitter-arduino", "lumis-core/lang-arduino"]
@@ -219,6 +221,7 @@ lang-kdl = ["lumis-core/lang-kdl"]
 lang-kotlin = ["lumis-core/lang-kotlin"]
 lang-latex = ["lumis-core/lang-latex"]
 lang-liquid = ["lumis-core/lang-liquid"]
+lang-llvm = ["lumis-core/lang-llvm"]
 lang-lua = ["dep:tree-sitter-lua", "lumis-core/lang-lua"]
 lang-luadoc = ["lumis-core/lang-luadoc"]
 lang-make = ["lumis-core/lang-make"]
@@ -270,6 +273,7 @@ lang-wgsl = ["lumis-core/lang-wgsl"]
 lang-xml = ["dep:tree-sitter-xml", "lumis-core/lang-xml"]
 lang-yaml = ["dep:tree-sitter-yaml", "lumis-core/lang-yaml"]
 lang-zig = ["dep:tree-sitter-zig", "lumis-core/lang-zig"]
+lang-zsh = ["lumis-core/lang-zsh"]
 
 [dependencies]
 lumis-core = { path = "../lumis-core", version = ">=0.0.1, <1.0.0", default-features = false }

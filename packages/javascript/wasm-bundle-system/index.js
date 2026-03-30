@@ -7,6 +7,7 @@ import wasmCpp from "@lumis-sh/wasm-cpp"
 import wasmDiff from "@lumis-sh/wasm-diff"
 import wasmGo from "@lumis-sh/wasm-go"
 import wasmJson from "@lumis-sh/wasm-json"
+import wasmLlvm from "@lumis-sh/wasm-llvm"
 import wasmMake from "@lumis-sh/wasm-make"
 import wasmRegex from "@lumis-sh/wasm-regex"
 import wasmRust from "@lumis-sh/wasm-rust"
@@ -25,6 +26,7 @@ export const bundledWasms = {
   "diff": wasmDiff,
   "go": wasmGo,
   "json": wasmJson,
+  "llvm": wasmLlvm,
   "make": wasmMake,
   "regex": wasmRegex,
   "rust": wasmRust,

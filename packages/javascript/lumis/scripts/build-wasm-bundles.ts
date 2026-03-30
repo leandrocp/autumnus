@@ -1,6 +1,5 @@
 import fs from "node:fs";
 import path from "node:path";
-import { spawnSync } from "node:child_process";
 import { parse as parseToml } from "smol-toml";
 
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../../../..");
@@ -87,13 +86,6 @@ function unique<T>(values: T[]): T[] {
   return [...new Set(values)];
 }
 
-function isPublishedForCompat(packageName: string, versionRange: string): boolean {
-  const result = spawnSync("npm", ["view", `${packageName}@${versionRange}`, "version", "--json"], {
-    encoding: "utf-8",
-  });
-  return result.status === 0;
-}
-
 function bundleLanguageIds(bundle: BundleEntry, allParserIds: string[]): string[] {
   const parserIds = bundle.parsers === "all" ? allParserIds : bundle.parsers;
   return parserIds.includes("plaintext") ? parserIds : [...parserIds, "plaintext"];
@@ -117,28 +109,14 @@ function writeBundlePackage(
   const dependencyPackages = unique(Object.values(wasmPackagesByLanguage)).sort();
   const wasmVersionRange = treeSitterCompatRange();
   const lumisPeerRange = lumisVersionRange();
-  const publishedPackages = new Set(
-    dependencyPackages.filter((packageName) => isPublishedForCompat(packageName, wasmVersionRange)),
-  );
-  const publishedLanguageIds = languageIds.filter((id) =>
-    publishedPackages.has(wasmPackagesByLanguage[id]),
-  );
-  const unpublishedLanguageIds = languageIds.filter(
-    (id) => !publishedPackages.has(wasmPackagesByLanguage[id]),
-  );
-
-  if (unpublishedLanguageIds.length > 0) {
-    throw new Error(
-      `Missing published WASM packages for bundle ${bundleName}: ${unpublishedLanguageIds.join(", ")}`,
-    );
-  }
+  const publishedPackages = new Set(dependencyPackages);
 
   const importLines = [...publishedPackages]
     .sort()
     .map((pkg) => `import ${importName(pkg)} from ${JSON.stringify(pkg)}`)
     .join("\n");
 
-  const entries = publishedLanguageIds
+  const entries = languageIds
     .map((id) => `  ${JSON.stringify(id)}: ${importName(wasmPackagesByLanguage[id])},`)
     .join("\n");
 

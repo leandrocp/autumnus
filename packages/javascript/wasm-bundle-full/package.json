@@ -99,6 +99,7 @@
     "@lumis-sh/wasm-kotlin": "^0.26.0",
     "@lumis-sh/wasm-latex": "^0.26.0",
     "@lumis-sh/wasm-liquid": "^0.26.0",
+    "@lumis-sh/wasm-llvm": "^0.26.0",
     "@lumis-sh/wasm-lua": "^0.26.0",
     "@lumis-sh/wasm-luadoc": "^0.26.0",
     "@lumis-sh/wasm-make": "^0.26.0",
@@ -150,6 +151,7 @@
     "@lumis-sh/wasm-wgsl": "^0.26.0",
     "@lumis-sh/wasm-xml": "^0.26.0",
     "@lumis-sh/wasm-yaml": "^0.26.0",
-    "@lumis-sh/wasm-zig": "^0.26.0"
+    "@lumis-sh/wasm-zig": "^0.26.0",
+    "@lumis-sh/wasm-zsh": "^0.26.0"
   }
 }
