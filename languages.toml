@@ -888,7 +888,7 @@ globs = ["*.hurl"]
 git = "https://github.com/cathaysia/tree-sitter-jinja.git"
 rev = "413dba9fea354b62f6adada1815b2f504e32ffb5"
 crate = "tree-sitter-jinja"
-version = "0.11.1"
+version = "0.12.0"
 location = "tree-sitter-jinja"
 aliases = ["jinja2"]
 display_name = "Jinja"
@@ -901,7 +901,7 @@ location = "tree-sitter-jinja_inline"
 wasm_name = "tree-sitter-jinja_inline"
 variant = "JinjaInline"
 display_name = "Jinja Inline"
-version = "0.0.1"
+version = "0.12.0"
 
 [parsers.json5]
 git = "https://github.com/Joakker/tree-sitter-json5.git"

@@ -625,6 +625,7 @@ dependencies = [
  "lumis 0.2.2",
  "md-5",
  "regex",
+ "semver",
  "serde",
  "serde_json",
  "toml",

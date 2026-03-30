@@ -745,13 +745,24 @@ fn langs_list() -> Result<()> {
     Ok(())
 }
 
-fn resolve_upstream_version(git_url: &str, rev: &str) -> String {
+fn resolve_upstream_version(git_url: &str, rev: &str, location: Option<&str>) -> String {
     let raw_base = git_url
         .trim_end_matches(".git")
         .replace("github.com", "raw.githubusercontent.com");
 
-    for filename in &["tree-sitter.json", "package.json"] {
-        let url = format!("{raw_base}/{rev}/{filename}");
+    let mut urls = Vec::new();
+
+    if let Some(location) = location {
+        urls.push(format!("{raw_base}/{rev}/{location}/package.json"));
+        urls.push(format!("{raw_base}/{rev}/{location}/tree-sitter.json"));
+    }
+
+    urls.push(format!("{raw_base}/{rev}/package.json"));
+    urls.push(format!("{raw_base}/{rev}/tree-sitter.json"));
+
+    let mut versions = Vec::new();
+
+    for url in urls {
         let Ok(mut resp) = ureq::get(&url).call() else {
             continue;
         };
@@ -764,9 +775,15 @@ fn resolve_upstream_version(git_url: &str, rev: &str) -> String {
                     .and_then(|m| m.get("version"))
                     .and_then(|v| v.as_str())
             }) {
-                return ver.to_string();
+                if let Ok(parsed) = semver::Version::parse(ver) {
+                    versions.push(parsed);
+                }
             }
         }
+    }
+
+    if let Some(version) = versions.into_iter().max() {
+        return version.to_string();
     }
 
     "0.0.1".to_string()
@@ -803,21 +820,21 @@ fn upgrade_parsers(name: &str) -> Result<()> {
             continue;
         }
 
+        let ver = resolve_upstream_version(git, &new_rev, info.location.as_deref());
         let current_rev = info.rev.as_deref().unwrap_or("");
-        if current_rev == new_rev {
-            println!("  {parser_name}: already up to date ({current_rev})");
+        let current_ver = info.version.as_deref().unwrap_or("");
+        if current_rev == new_rev && ver == current_ver {
+            println!("  {parser_name}: already up to date ({current_rev}, {current_ver})");
         } else {
-            println!("  {parser_name}: {current_rev} -> {new_rev}");
-            doc["parsers"][parser_name.as_str()]["rev"] = toml_edit::value(&new_rev);
+            if current_rev != new_rev {
+                println!("  {parser_name}: {current_rev} -> {new_rev}");
+                doc["parsers"][parser_name.as_str()]["rev"] = toml_edit::value(&new_rev);
+            }
         }
 
-        if info.crate_field.is_none() {
-            let ver = resolve_upstream_version(git, &new_rev);
-            let current_ver = info.version.as_deref().unwrap_or("");
-            if ver != current_ver {
-                println!("    version: {current_ver} -> {ver}");
-                doc["parsers"][parser_name.as_str()]["version"] = toml_edit::value(&ver);
-            }
+        if ver != current_ver {
+            println!("    version: {current_ver} -> {ver}");
+            doc["parsers"][parser_name.as_str()]["version"] = toml_edit::value(&ver);
         }
     }
 
