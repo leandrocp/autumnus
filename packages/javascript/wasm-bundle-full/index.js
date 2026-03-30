@@ -48,6 +48,7 @@ import wasmJava from "@lumis-sh/wasm-java"
 import wasmJavadoc from "@lumis-sh/wasm-javadoc"
 import wasmJavascript from "@lumis-sh/wasm-javascript"
 import wasmJinja from "@lumis-sh/wasm-jinja"
+import wasmJinjaInline from "@lumis-sh/wasm-jinja_inline"
 import wasmJq from "@lumis-sh/wasm-jq"
 import wasmJson from "@lumis-sh/wasm-json"
 import wasmJson5 from "@lumis-sh/wasm-json5"
@@ -209,6 +210,7 @@ export const bundledWasms = {
   "groovy": wasmGroovy,
   "hurl": wasmHurl,
   "jinja": wasmJinja,
+  "jinja_inline": wasmJinjaInline,
   "json5": wasmJson5,
   "just": wasmJust,
   "matlab": wasmMatlab,
@@ -225,13 +227,5 @@ export const bundledWasms = {
   "vhdl": wasmVhdl,
   "plaintext": wasmDiff,
 }
-
-export const missingLanguages = [
-  "llvm",
-  "gitcommit",
-  "kitty",
-  "tmux",
-  "zsh"
-]
 
 export default bundledWasms

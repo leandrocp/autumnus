@@ -22,14 +22,3 @@ import { bundledWasms } from '@lumis-sh/wasm-bundle-full'
 const languages = withWasmBundle(bundledLanguages, bundledWasms)
 const highlighter = await createHighlighter({ languages: [languages] })
 ```
-
-## Missing local packages
-
-These languages currently fall back to Lumis's normal runtime resolution because compatible `@lumis-sh/wasm-*` packages are not published yet:
-
-- `llvm`
-- `gitcommit`
-- `kitty`
-- `tmux`
-- `zsh`
-

@@ -2,6 +2,8 @@
 #
 # See CONTRIBUTING.md for field documentation.
 
+# -- Queries
+
 [queries.default]
 git = "https://github.com/nvim-treesitter/nvim-treesitter.git"
 rev = "6620ae1c44dfa8623b22d0cbf873a9e8d073b849"
@@ -32,7 +34,7 @@ git = "https://github.com/helix-editor/helix.git"
 rev = "79c7203a388e1ac7aa6aebfc2e4c9a91b6efc97a"
 path = "runtime/queries/wat"
 
-# ── Parsers ──────────────────────────────────────────────────────────────────
+# -- Parsers
 
 [parsers.angular]
 git = "https://github.com/dlvandenberg/tree-sitter-angular.git"
@@ -399,12 +401,12 @@ rev = "d6ebde3974742cd1b61b55d1d94aab1dacb41056"
 version = "0.1.0"
 globs = ["*liquid"]
 
-[parsers.llvm]
-git = "https://github.com/benwilliamgraham/tree-sitter-llvm.git"
-rev = "2914786ae6774d4c4e25a230f4afe16aa68fe1c1"
-version = "0.1.0"
-display_name = "LLVM"
-globs = ["*.llvm", "*.ll"]
+# [parsers.llvm]
+# git = "https://github.com/benwilliamgraham/tree-sitter-llvm.git"
+# rev = "2914786ae6774d4c4e25a230f4afe16aa68fe1c1"
+# version = "0.1.0"
+# display_name = "LLVM"
+# globs = ["*.llvm", "*.ll"]
 
 [parsers.lua]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-lua.git"
@@ -502,7 +504,7 @@ shebang = ["perl"]
 
 [parsers.php]
 git = "https://github.com/tree-sitter/tree-sitter-php.git"
-rev = "094172694b05589f8b394017d6821a07055c1a61"
+rev = "3f2465c217d0a966d41e584b42d75522f2a3149e"
 crate = "tree-sitter-php"
 version = "0.24.2"
 location = "php"
@@ -676,7 +678,7 @@ globs = ["*.wat"]
 
 [parsers.xml]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-xml.git"
-rev = "4b64dd3a03ec002258d6268d712fd93716d6ab57"
+rev = "5000ae8f22d11fbe93939b05c1e37cf21117162d"
 crate = "tree-sitter-xml"
 version = "0.7.0"
 location = "xml"
@@ -741,13 +743,13 @@ version = "0.1.6"
 display_name = "Git Attributes"
 globs = [".gitattributes", "gitattributes"]
 
-[parsers.gitcommit]
-git = "https://github.com/gbprod/tree-sitter-gitcommit.git"
-rev = "a716678c0f00645fed1e6f1d0eb221481dbd6f6d"
-crate = "tree-sitter-gitcommit"
-version = "0.5.0"
-display_name = "Git Commit"
-globs = ["COMMIT_EDITMSG", "MERGE_MSG", "TAG_EDITMSG", "SQUASH_MSG"]
+# [parsers.gitcommit]
+# git = "https://github.com/gbprod/tree-sitter-gitcommit.git"
+# rev = "a716678c0f00645fed1e6f1d0eb221481dbd6f6d"
+# crate = "tree-sitter-gitcommit"
+# version = "0.5.0"
+# display_name = "Git Commit"
+# globs = ["COMMIT_EDITMSG", "MERGE_MSG", "TAG_EDITMSG", "SQUASH_MSG"]
 
 [parsers.javadoc]
 git = "https://github.com/rmuir/tree-sitter-javadoc.git"
@@ -770,12 +772,12 @@ version = "1.1.0"
 display_name = "KDL"
 globs = ["*.kdl"]
 
-[parsers.kitty]
-git = "https://github.com/OXY2DEV/tree-sitter-kitty.git"
-rev = "f821c16397ffab5b776d8781245215811438a624"
-version = "0.1.0"
-display_name = "Kitty"
-globs = ["kitty.conf"]
+# [parsers.kitty]
+# git = "https://github.com/OXY2DEV/tree-sitter-kitty.git"
+# rev = "f821c16397ffab5b776d8781245215811438a624"
+# version = "0.1.0"
+# display_name = "Kitty"
+# globs = ["kitty.conf"]
 
 [parsers.luadoc]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-luadoc.git"
@@ -815,12 +817,12 @@ version = "0.1.0"
 display_name = "Terraform"
 globs = ["*.tf", "*.tfvars", "*.tfvars.json"]
 
-[parsers.tmux]
-git = "https://github.com/Freed-Wu/tree-sitter-tmux.git"
-rev = "75d1b995b0c23400ac8e49db757a2e0386f9fa8f"
-version = "0.0.4"
-display_name = "tmux"
-globs = [".tmux.conf", "tmux.conf", "*.tmux"]
+# [parsers.tmux]
+# git = "https://github.com/Freed-Wu/tree-sitter-tmux.git"
+# rev = "75d1b995b0c23400ac8e49db757a2e0386f9fa8f"
+# version = "0.0.4"
+# display_name = "tmux"
+# globs = [".tmux.conf", "tmux.conf", "*.tmux"]
 
 [parsers.wgsl]
 git = "https://github.com/szebniok/tree-sitter-wgsl.git"
@@ -829,13 +831,13 @@ version = "0.0.6"
 display_name = "WGSL"
 globs = ["*.wgsl"]
 
-[parsers.zsh]
-git = "https://github.com/georgeharker/tree-sitter-zsh.git"
-rev = "bd344c23a7683e293d077c6648e88f209782fedb"
-version = "0.63.1"
-display_name = "Zsh"
-globs = ["*.zsh", ".zshrc", ".zshenv", ".zprofile", ".zlogin", ".zlogout", "zshrc", "zshenv", "zprofile", "zlogin", "zlogout"]
-shebang = ["zsh"]
+# [parsers.zsh]
+# git = "https://github.com/georgeharker/tree-sitter-zsh.git"
+# rev = "bd344c23a7683e293d077c6648e88f209782fedb"
+# version = "0.63.1"
+# display_name = "Zsh"
+# globs = ["*.zsh", ".zshrc", ".zshenv", ".zprofile", ".zlogin", ".zlogout", "zshrc", "zshenv", "zprofile", "zlogin", "zlogout"]
+# shebang = ["zsh"]
 
 [parsers.d]
 git = "https://github.com/gdamore/tree-sitter-d.git"
@@ -884,13 +886,22 @@ globs = ["*.hurl"]
 
 [parsers.jinja]
 git = "https://github.com/cathaysia/tree-sitter-jinja.git"
-rev = "7bd0422c6a57aaabfee8603502d7708d0a536f5f"
+rev = "413dba9fea354b62f6adada1815b2f504e32ffb5"
 crate = "tree-sitter-jinja"
-version = "0.11.1"
+version = "0.12.0"
 location = "tree-sitter-jinja"
 aliases = ["jinja2"]
 display_name = "Jinja"
 globs = ["*.j2", "*.jinja", "*.jinja2"]
+
+[parsers.jinja_inline]
+git = "https://github.com/cathaysia/tree-sitter-jinja.git"
+rev = "413dba9fea354b62f6adada1815b2f504e32ffb5"
+location = "tree-sitter-jinja_inline"
+wasm_name = "tree-sitter-jinja_inline"
+variant = "JinjaInline"
+display_name = "Jinja Inline"
+version = "0.12.0"
 
 [parsers.json5]
 git = "https://github.com/Joakker/tree-sitter-json5.git"
@@ -931,7 +942,7 @@ globs = ["*.nginx", "nginx.conf"]
 [parsers.prisma]
 git = "https://github.com/LumaKernel/tree-sitter-prisma.git"
 rev = "3556b2c1f20ec9ac91e92d32c43d9d2a0ca3cc49"
-version = "0.1.1"
+version = "0.0.1"
 globs = ["*.prisma"]
 
 [parsers.qmljs]
@@ -1002,7 +1013,7 @@ variant = "VHDL"
 display_name = "VHDL"
 globs = ["*.vhd", "*.vhdl"]
 
-# ── Bundles ─────────────────────────────────────────────────────────────────
+# -- Bundles
 
 [bundles.essential]
 parsers = [
@@ -1057,7 +1068,7 @@ parsers = [
   "diff",
   "go",
   "json",
-  "llvm",
+  # "llvm",
   "make",
   "regex",
   "rust",

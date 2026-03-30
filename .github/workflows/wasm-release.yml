@@ -6,6 +6,7 @@ concurrency:
 
 env:
   EMSDK_VERSION: "5.0.3"
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 on:
   push:
@@ -64,11 +65,13 @@ jobs:
     needs: detect
     if: needs.detect.outputs.skip == 'false'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       id-token: write
 
     strategy:
       fail-fast: false
+      max-parallel: 4
       matrix:
         parser: ${{ fromJson(needs.detect.outputs.parsers) }}
 
@@ -84,7 +87,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           shared-key: wasm-release
-
+          add-job-id-key: false
       - name: Cache tree-sitter tool downloads
         uses: actions/cache@v5
         with:

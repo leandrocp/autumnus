@@ -6,5 +6,5 @@ publish = false
 
 [dependencies]
 lumis = { path = "../../crates/lumis" }
-ratatui = "0.30"
+ratatui = "0.29"
 ansi-to-tui = "7"

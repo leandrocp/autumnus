@@ -567,6 +567,10 @@
       "required": true,
       "types": [
         {
+          "type": "argument_placeholder",
+          "named": true
+        },
+        {
           "type": "expression",
           "named": true
         },
@@ -580,6 +584,11 @@
         }
       ]
     }
+  },
+  {
+    "type": "argument_placeholder",
+    "named": true,
+    "fields": {}
   },
   {
     "type": "arguments",
@@ -4142,7 +4151,7 @@
         ]
       },
       "visibility": {
-        "multiple": false,
+        "multiple": true,
         "required": true,
         "types": [
           {

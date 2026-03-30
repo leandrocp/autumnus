@@ -123,9 +123,15 @@ function writeBundlePackage(
   const publishedLanguageIds = languageIds.filter((id) =>
     publishedPackages.has(wasmPackagesByLanguage[id]),
   );
-  const missingLanguageIds = languageIds.filter(
+  const unpublishedLanguageIds = languageIds.filter(
     (id) => !publishedPackages.has(wasmPackagesByLanguage[id]),
   );
+
+  if (unpublishedLanguageIds.length > 0) {
+    throw new Error(
+      `Missing published WASM packages for bundle ${bundleName}: ${unpublishedLanguageIds.join(", ")}`,
+    );
+  }
 
   const importLines = [...publishedPackages]
     .sort()
@@ -142,15 +148,12 @@ export const bundledWasms = {
 ${entries}
 }
 
-export const missingLanguages = ${JSON.stringify(missingLanguageIds, null, 2)}
-
 export default bundledWasms
 `;
 
   const indexDts = `import type { RuntimeWasmBundle } from '@lumis-sh/lumis'
 
 export declare const bundledWasms: RuntimeWasmBundle
-export declare const missingLanguages: string[]
 export default bundledWasms
 `;
 
@@ -190,16 +193,6 @@ export default bundledWasms
     dependencies,
   };
 
-  const missingSection =
-    missingLanguageIds.length > 0
-      ? `## Missing local packages
-
-These languages currently fall back to Lumis's normal runtime resolution because compatible \`@lumis-sh/wasm-*\` packages are not published yet:
-
-${missingLanguageIds.map((id) => `- \`${id}\``).join("\n")}
-`
-      : "";
-
   const readme = `# @lumis-sh/wasm-bundle-${bundleName}
 
 Static WASM imports for the ${bundleName} Lumis bundle.
@@ -224,8 +217,6 @@ import { bundledWasms } from '@lumis-sh/wasm-bundle-${bundleName}'
 const languages = withWasmBundle(bundledLanguages, bundledWasms)
 const highlighter = await createHighlighter({ languages: [languages] })
 \`\`\`
-
-${missingSection}
 `;
 
   const changelog = "# Changelog\n\n";
@@ -236,11 +227,7 @@ ${missingSection}
   fs.writeFileSync(path.join(dir, "README.md"), readme);
   fs.writeFileSync(path.join(dir, "CHANGELOG.md"), changelog);
 
-  const missingSuffix =
-    missingLanguageIds.length > 0 ? `, ${missingLanguageIds.length} missing local package(s)` : "";
-  console.log(
-    `  wasm bundle ${bundleName}: packages/javascript/wasm-bundle-${bundleName}${missingSuffix}`,
-  );
+  console.log(`  wasm bundle ${bundleName}: packages/javascript/wasm-bundle-${bundleName}`);
 }
 
 function main() {
