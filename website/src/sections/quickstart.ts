@@ -109,7 +109,7 @@ export function renderQuickstart() {
         <h2 class="mt-8 font-mono text-4xl font-bold tracking-tight text-zinc-900 dark:text-white">
           Install, import, highlight.
         </h2>
-        <p class="mt-4 font-mono text-sm text-zinc-500">Every platform, same patterns.</p>
+        <p class="mt-4 font-mono text-sm text-zinc-500">Every runtime, same patterns.</p>
         <div class="mt-6 flex flex-wrap items-center gap-3">
           <a href="/docs"
              class="inline-flex items-center gap-2 border border-zinc-200 px-4 py-2 font-mono text-xs tracking-wider text-zinc-700 uppercase transition-colors hover:border-zinc-900 hover:text-zinc-900 dark:border-zinc-800 dark:text-zinc-300 dark:hover:border-white dark:hover:text-white">

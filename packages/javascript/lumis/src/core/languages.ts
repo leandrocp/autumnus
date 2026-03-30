@@ -1,7 +1,7 @@
 import { Parser, Language, Query } from "web-tree-sitter";
 import { LANGUAGES } from "../generated/languages-meta.js";
 import { HIGHLIGHT_NAMES } from "../highlights.js";
-import type { RuntimePlatform } from "../platform/runtime.js";
+import type { RuntimeEnvironment } from "../runtime/runtime.js";
 import type {
   CaptureMetadata,
   CompiledHighlightConfig,
@@ -236,7 +236,7 @@ function compileHighlightConfig(
   };
 }
 
-export function createLanguagesModule(platform: RuntimePlatform): LanguagesModule {
+export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesModule {
   let configuredDefaultResolver: WasmResolver = DEFAULT_RESOLVER;
 
   class HighlighterRuntime implements RuntimeLike {
@@ -260,7 +260,7 @@ export function createLanguagesModule(platform: RuntimePlatform): LanguagesModul
     }
 
     private async loadWasmBytes(language: string, ref: WasmRef, key: string): Promise<Uint8Array> {
-      const fsCached = await platform.readFsCache(key);
+      const fsCached = await runtime.readFsCache(key);
       if (fsCached) {
         this.sharedCache.wasmBytes.set(key, fsCached);
         return fsCached;
@@ -277,7 +277,7 @@ export function createLanguagesModule(platform: RuntimePlatform): LanguagesModul
       }
 
       const url = this.resolver(language, ref);
-      const diskData = await platform.readResolvedWasmFromDisk(url);
+      const diskData = await runtime.readResolvedWasmFromDisk(url);
       if (diskData) {
         this.sharedCache.wasmBytes.set(key, diskData);
         return diskData;
@@ -292,7 +292,7 @@ export function createLanguagesModule(platform: RuntimePlatform): LanguagesModul
 
       const data = new Uint8Array(await response.arrayBuffer());
       this.sharedCache.wasmBytes.set(key, data);
-      await platform.writeFsCache(key, data);
+      await runtime.writeFsCache(key, data);
       return data;
     }
 
@@ -303,7 +303,7 @@ export function createLanguagesModule(platform: RuntimePlatform): LanguagesModul
       if (typeof opts.wasm === "object" && opts.wasm !== null && isWasmRef(opts.wasm)) {
         wasmInput = await this.resolveWasmRef(opts.definition.id, opts.wasm);
       } else if (isRuntimeWasmInput(opts.wasm)) {
-        wasmInput = await platform.resolveWasm(opts.wasm);
+        wasmInput = await runtime.resolveWasm(opts.wasm);
       } else {
         throw new Error(`Unsupported WASM input for language "${opts.definition.id}"`);
       }

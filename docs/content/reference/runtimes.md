@@ -1,7 +1,7 @@
 ---
 sidebar_position: 1
-slug: /reference/platforms
-title: Platforms
+slug: /reference/runtimes
+title: Runtimes
 description: Package and API references for Lumis across Rust, Elixir, JavaScript, Java, and CLI.
 keywords:
   - lumis
@@ -11,11 +11,11 @@ keywords:
   - java
 ---
 
-# Platforms
+# Runtimes
 
 ## Main packages
 
-| Platform | Package | Reference |
+| Runtime | Package | Reference |
 | --- | --- | --- |
 | JavaScript | `@lumis-sh/lumis` | [npm](https://www.npmjs.com/package/@lumis-sh/lumis) |
 | Rust | `lumis` | [docs.rs](https://docs.rs/lumis) |
@@ -30,13 +30,13 @@ keywords:
 
 ## Themes
 
-| Platform | Package | Reference |
+| Runtime | Package | Reference |
 | --- | --- | --- |
 | JavaScript | `@lumis-sh/themes` | [npm](https://www.npmjs.com/package/@lumis-sh/themes) |
 
 ## Integrations
 
-| Platform | Integration | Package | Reference |
+| Runtime | Integration | Package | Reference |
 | --- | --- | --- | --- |
 | JavaScript | `markdown-it` | `@lumis-sh/markdown-it-lumis` | [npm](https://www.npmjs.com/package/@lumis-sh/markdown-it-lumis) |
 | JavaScript | `rehype` | `@lumis-sh/rehype-lumis` | [npm](https://www.npmjs.com/package/@lumis-sh/rehype-lumis) |

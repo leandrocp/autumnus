@@ -25,7 +25,7 @@
 
 - **110+ Tree-sitter languages** - Fast, accurate, and updated syntax parsing
 - **250+ built-in Neovim themes** - Updated and curated themes from the Neovim community
-- **6 platforms** - CLI, Rust, Elixir, Node.js, Browser, Java
+- **6 runtimes** - CLI, Rust, Elixir, Node.js, Browser, Java
 - **Multiple outputs** - HTML (inline/linked), Terminal (ANSI), Multi-theme (light/dark), BBCode, and custom formatters
 - **Language auto-detection** - File extension, shebang, and emacs-mode support
 - **Streaming-friendly** - Handles incomplete code
@@ -104,7 +104,7 @@ System.out.println(result.string());
 
 ## Documentation
 
-| Platform | Install | Package | Docs |
+| Runtime | Install | Package | Docs |
 |----------|---------| ------- | -----|
 | **CLI** | `cargo install lumis-cli` | [crates.io/lumis-cli](https://crates.io/crates/lumis-cli) | [README.md](crates/lumis-cli/README.md) |
 | **Rust** | `cargo add lumis` | [crates.io/lumis](https://crates.io/crates/lumis) | [README.md](crates/lumis/README.md) &bull; [docs.rs](https://docs.rs/lumis) |

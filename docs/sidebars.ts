@@ -5,7 +5,7 @@ const sidebars: SidebarsConfig = {
     'intro',
     'installation',
     'architecture',
-    'reference/platforms',
+    'reference/runtimes',
     {
       type: 'category',
       label: 'Highlight',

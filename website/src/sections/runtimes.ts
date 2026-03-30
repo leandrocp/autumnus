@@ -1,4 +1,4 @@
-const PLATFORM_LINKS = [
+const RUNTIME_LINKS = [
   {
     name: "CLI",
     summary: "Pipes, scripts, local workflows.",
@@ -69,12 +69,12 @@ const PLATFORM_LINKS = [
   },
 ] as const;
 
-export function renderPlatforms() {
+export function renderRuntimes() {
   return `
-    <section id="platforms" class="py-24 sm:py-36">
+    <section id="runtimes" class="py-24 sm:py-36">
       <div class="mx-auto max-w-6xl px-6">
-        <a href="#platforms" class="group inline-flex items-center gap-1 font-mono text-sm font-semibold tracking-wider no-underline transition-opacity hover:opacity-80">
-          <span class="text-rose-400">&lt;</span><span class="text-indigo-400">Platforms</span> <span class="text-rose-400">/&gt;</span>
+        <a href="#runtimes" class="group inline-flex items-center gap-1 font-mono text-sm font-semibold tracking-wider no-underline transition-opacity hover:opacity-80">
+          <span class="text-rose-400">&lt;</span><span class="text-indigo-400">Runtimes</span> <span class="text-rose-400">/&gt;</span>
         </a>
         <h2 class="mt-8 font-mono text-4xl font-bold tracking-tight text-zinc-900 dark:text-white">
           Same engine, every stack.
@@ -83,7 +83,7 @@ export function renderPlatforms() {
 
         <div class="mt-12">
           <div class="grid gap-px border border-zinc-200 bg-zinc-200 dark:border-zinc-800 dark:bg-zinc-800 sm:grid-cols-2 lg:grid-cols-3">
-            ${PLATFORM_LINKS.map(
+            ${RUNTIME_LINKS.map(
               (p) => `
               <div class="bg-white p-6 dark:bg-[#09090b]">
                 <h3 class="font-mono text-sm font-bold tracking-wider text-zinc-900 uppercase dark:text-white">${p.name}</h3>
