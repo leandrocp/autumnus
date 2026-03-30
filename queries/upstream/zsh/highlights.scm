@@ -1,4 +1,3 @@
-; This file is auto-generated. Do not edit.
 [
   "("
   ")"
@@ -120,7 +119,7 @@
 ((word) @boolean
   (#any-of? @boolean "true" "false"))
 
-(comment) @comment 
+(comment) @comment @spell
 
 (test_operator) @operator
 
@@ -323,5 +322,5 @@
 
 ((program
   .
-  (comment) @keyword.directive )
+  (comment) @keyword.directive @nospell)
   (#lua-match? @keyword.directive "^#![ \t]*/"))
