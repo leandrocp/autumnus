@@ -89,6 +89,7 @@
     "@lumis-sh/wasm-javadoc": "^0.26.0",
     "@lumis-sh/wasm-javascript": "^0.26.0",
     "@lumis-sh/wasm-jinja": "^0.26.0",
+    "@lumis-sh/wasm-jinja_inline": "^0.26.0",
     "@lumis-sh/wasm-jq": "^0.26.0",
     "@lumis-sh/wasm-json": "^0.26.0",
     "@lumis-sh/wasm-json5": "^0.26.0",
