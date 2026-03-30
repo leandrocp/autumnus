@@ -1,6 +1,6 @@
 import type { WasmRef } from "../types.js";
 
-export interface RuntimePlatform {
+export interface RuntimeEnvironment {
   resolveWasm(
     wasm: Uint8Array | ArrayBuffer | string | URL | Response,
   ): Promise<Uint8Array | string>;
@@ -9,7 +9,7 @@ export interface RuntimePlatform {
   readResolvedWasmFromDisk(source: string | URL): Promise<Uint8Array | undefined>;
 }
 
-export interface RuntimePlatformResolver {
+export interface RuntimeEnvironmentResolver {
   language: string;
   ref: WasmRef;
 }

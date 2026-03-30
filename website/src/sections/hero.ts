@@ -8,7 +8,7 @@ export function renderHero() {
         <h1 class="font-mono text-4xl font-bold leading-[1.05] tracking-tighter text-zinc-900 sm:text-5xl lg:text-6xl dark:text-white">
           Syntax Highlighter powered by Tree-sitter
         </h1>
-        <p class="mt-5 font-mono text-2xl font-medium text-zinc-500 sm:text-3xl dark:text-zinc-400">Unified API for 6 Platforms</p>
+        <p class="mt-5 font-mono text-2xl font-medium text-zinc-500 sm:text-3xl dark:text-zinc-400">Unified API for 6 Runtimes</p>
 
         <div class="mt-12 flex items-center justify-center gap-3">
           <a href="#quickstart"

@@ -1,7 +1,7 @@
-import type { RuntimePlatform } from "./runtime.js";
+import type { RuntimeEnvironment } from "./runtime.js";
 import { createLanguagesModule } from "../core/languages.js";
 
-export const browserRuntimePlatform: RuntimePlatform = {
+export const browserRuntime: RuntimeEnvironment = {
   async resolveWasm(wasm) {
     if (wasm instanceof URL) {
       return wasm.href;
@@ -36,7 +36,7 @@ export type {
   WasmResolver,
 } from "../core/languages.js";
 
-const runtime = createLanguagesModule(browserRuntimePlatform);
+const runtime = createLanguagesModule(browserRuntime);
 
 export function createRuntime(...args: Parameters<typeof runtime.createRuntime>) {
   return runtime.createRuntime(...args);

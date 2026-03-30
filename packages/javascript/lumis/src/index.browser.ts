@@ -7,7 +7,7 @@ import {
   configureWasmResolver,
   createRuntime,
   getDefaultRuntime,
-} from "./platform/browser.js";
+} from "./runtime/browser.js";
 
 const highlighter = createHighlighterModule({
   createRuntime,
