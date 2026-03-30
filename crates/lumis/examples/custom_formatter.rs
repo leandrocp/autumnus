@@ -29,11 +29,12 @@ impl Formatter for TokenMetadataFormatter {
             source,
             self.language,
             self.theme.clone(),
-            |text, _language, range, scope, style| {
+            |text, language, range, scope, style| {
                 writeln!(
                     output,
-                    "{} (pos:{}..{} scope:{} fg:{} bg:{})",
+                    "{} (lang:{} pos:{}..{} scope:{} fg:{} bg:{})",
                     text.escape_debug(),
+                    language.id_name(),
                     range.start,
                     range.end,
                     scope,

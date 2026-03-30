@@ -30,10 +30,10 @@ impl Formatter for CustomHtmlFormatter {
             source,
             self.language,
             self.theme.clone(),
-            |text, _language, _range, scope, _style| {
+            |text, language, _range, scope, _style| {
                 let span = html::span_inline(
                     text,
-                    Some(self.language),
+                    Some(language),
                     scope,
                     self.theme.as_ref(),
                     false,
