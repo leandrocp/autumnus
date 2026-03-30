@@ -236,6 +236,7 @@ langs-update name:
     #!/usr/bin/env bash
     set -euo pipefail
     just langs-fetch-parsers {{name}}
+    cargo run -p dev --no-default-features -- cargo-update-dep {{name}}
     just langs-fetch-queries {{name}}
     just langs-preprocess-queries {{name}}
     just docs-gen-languages-md

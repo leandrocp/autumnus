@@ -106,10 +106,10 @@ feature = "lang-ocaml"            # optional -- override feature name (default: 
 `git` + `rev` vs `crate`: these are not alternatives.
 
 - `git` + `rev` -- always required. Used to build WASMs, fetch vendored parser sources, and as the authoritative version pin.
-- `crate` -- optional, Rust-only. When present, the Rust build uses the crate from crates.io instead of compiling from vendored source. The dependency must also be declared in `crates/lumis/Cargo.toml` as an optional dep (see step 2 below).
+- `crate` -- optional, Rust-only. When present, the Rust build uses the crate from crates.io instead of compiling from vendored source. The dependency must also be declared in `crates/lumis/Cargo.toml` as an optional dep for new languages, and existing entries are kept in sync from `languages.toml` by `cargo run -p dev --no-default-features -- cargo-update-dep`.
 
 `version` is used for two things:
-1. When `crate` is set, this is the crate version in `Cargo.toml`
+1. When `crate` is set, this is the crate version synced into `crates/lumis/Cargo.toml`
 2. Always drives the npm package version for `@lumis-sh/wasm-{name}`
 
 #### Query entry fields
@@ -169,6 +169,7 @@ In `crates/lumis/Cargo.toml`:
 
 ```sh
 just langs-fetch-parsers {name}   # fetches vendored source from git
+just cargo-update-dep {name}      # syncs crate-backed parser versions into crates/lumis/Cargo.toml
 just langs-fetch-queries {name}   # fetches .scm query files
 ```
 
@@ -214,8 +215,11 @@ just test-conformance
 
 ```sh
 just langs-upgrade-parsers {name} # updates languages.toml revisions
-just langs-fetch-parsers {name}   # fetches updated files
+just langs-fetch-parsers {name}   # fetches updated vendored parser files
+just cargo-update-dep {name}      # syncs crate-backed parser versions into crates/lumis/Cargo.toml
 ```
+
+For parser and query updates, prefer `just langs-update {name}` or the `update-langs` GitHub workflow. Do not use Dependabot to bump `tree-sitter-*` Rust parser crates independently; those versions are tied to the pinned parser/query state in `languages.toml`.
 
 ### Updating queries
 
@@ -226,6 +230,8 @@ just langs-preprocess-queries     # regenerates checked-in processed queries
 ```
 
 Omit the name argument to upgrade all queries at once.
+
+`just langs-update {name}` is the end-to-end command for a coordinated parser update. It fetches parsers first, syncs crate-backed Rust parser deps, then fetches and preprocesses queries, and regenerates `LANGUAGES.md`.
 
 Raw query sources live in `queries/upstream/`. Preprocessed tracked outputs live in `queries/processed/` and should be committed whenever upstream queries or overrides change.
 

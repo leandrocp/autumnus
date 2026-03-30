@@ -6,6 +6,8 @@ on:
     paths:
       - "website/**"
       - "docs/**"
+      - "packages/javascript/lumis/**"
+      - "packages/javascript/themes/**"
       - ".github/workflows/deploy-website.yml"
   workflow_dispatch:
 

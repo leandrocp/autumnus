@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """Determine which WASM parsers need building/publishing.
 
-Reads languages.toml, computes npm versions, and checks npm registry.
-Prints space-separated list of parser names that need publishing.
+Reads languages.toml, inspects published npm metadata, and prints the parsers
+that need a new release in the current tree-sitter CLI series.
+
+If a parser rev changed upstream and there is no published `0.26.x` package with
+matching `lumis.rev` metadata, the next `0.26.x` patch must be published.
 
 Usage: python3 scripts/wasm-needed.py [parser_name[,parser_name...]]
 """
@@ -18,6 +21,45 @@ SUPPORTED_TREE_SITTER_CLI = "0.26"
 def wasm_package_suffix(wasm_name: str) -> str:
     prefix = "tree-sitter-"
     return wasm_name[len(prefix) :] if wasm_name.startswith(prefix) else wasm_name
+
+
+def current_series_versions(versions: list[str]) -> list[str]:
+    prefix = f"{SUPPORTED_TREE_SITTER_CLI}."
+    return [version for version in versions if version.startswith(prefix)]
+
+
+def next_patch_version(versions: list[str]) -> str:
+    highest_patch = -1
+    prefix = f"{SUPPORTED_TREE_SITTER_CLI}."
+    for version in versions:
+        if not version.startswith(prefix):
+            continue
+        patch = version[len(prefix) :]
+        if patch.isdigit():
+            highest_patch = max(highest_patch, int(patch))
+    return f"{SUPPORTED_TREE_SITTER_CLI}.{highest_patch + 1}"
+
+
+def published_for_revision(pkg: str, versions: list[str], rev: str) -> bool:
+    for npm_version in current_series_versions(versions):
+        meta = subprocess.run(
+            ["npm", "view", f"{pkg}@{npm_version}", "lumis", "--json"],
+            capture_output=True,
+            text=True,
+        )
+        if meta.returncode != 0:
+            continue
+        try:
+            lumis_meta = json.loads(meta.stdout or "{}")
+        except Exception:
+            continue
+        if (
+            isinstance(lumis_meta, dict)
+            and lumis_meta.get("rev") == rev
+            and lumis_meta.get("treeSitter") == SUPPORTED_TREE_SITTER_CLI
+        ):
+            return True
+    return False
 
 
 with open("languages.toml", "rb") as f:
@@ -64,31 +106,13 @@ for pname, info in data.get("parsers", {}).items():
     else:
         versions = [v for v in versions_data if isinstance(v, str)]
 
-    published = False
-    prefix = f"{SUPPORTED_TREE_SITTER_CLI}."
-    for npm_version in versions:
-        if not npm_version.startswith(prefix):
-            continue
-        meta = subprocess.run(
-            ["npm", "view", f"{pkg}@{npm_version}", "lumis", "--json"],
-            capture_output=True,
-            text=True,
-        )
-        if meta.returncode != 0:
-            continue
-        try:
-            lumis_meta = json.loads(meta.stdout or "{}")
-        except Exception:
-            continue
-        if (
-            isinstance(lumis_meta, dict)
-            and lumis_meta.get("rev") == info.get("rev", "")
-            and lumis_meta.get("treeSitter") == SUPPORTED_TREE_SITTER_CLI
-        ):
-            published = True
-            break
+    published = published_for_revision(pkg, versions, info.get("rev", ""))
 
     if not published:
+        print(
+            f"Need to publish {pkg}@{next_patch_version(versions)} for {info.get('rev', '')}",
+            file=sys.stderr,
+        )
         needed.append(wasm_name)
 
 print(" ".join(needed))

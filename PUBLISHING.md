@@ -20,9 +20,10 @@
 | `markdown-it-lumis@v*` | @lumis-sh/markdown-it-lumis | npm |
 | `rehype-lumis@v*` | @lumis-sh/rehype-lumis | npm |
 | `themes@v*` | @lumis-sh/themes | npm |
+| `wasm-bundle-*@v*` | matching `@lumis-sh/wasm-bundle-*` package | npm |
 | `elixir@v*` | lumis | hex.pm |
 
-WASM parsers have no tags. They publish via `workflow_dispatch`.
+WASM parser packages `@lumis-sh/wasm-*` have no tags. They publish automatically from `main` when parser metadata, vendored parser sources, queries, or generated WASM outputs change, or manually via `workflow_dispatch`.
 
 ## Workflows
 
@@ -30,10 +31,9 @@ WASM parsers have no tags. They publish via `workflow_dispatch`.
 |----------|---------|--------------|
 | `release-please.yml` | Push to `main` | Opens release PRs, creates tags and GitHub Releases on merge |
 | `rust-release.yml` | `rust*@v*` tags | `cargo publish` for the matching crate |
-| `javascript-release.yml` | `javascript@v*`, `markdown-it-lumis@v*`, `rehype-lumis@v*`, or `themes@v*` tags | `pnpm publish` to npm |
-| `elixir-nif-release.yml` | `elixir@v*` tag | Builds precompiled NIF binaries, uploads to GitHub Release |
-| `elixir-hex-release.yml` | Manual (`workflow_dispatch`) | Downloads NIF checksums, publishes to hex.pm |
-| `wasm-release.yml` | Manual (`workflow_dispatch`) | Builds and publishes WASM parser packages to npm |
+| `javascript-release.yml` | `javascript@v*`, `markdown-it-lumis@v*`, `rehype-lumis@v*`, `themes@v*`, or `wasm-bundle-*@v*` tags | `pnpm publish` to npm |
+| `elixir-release.yml` | `elixir@v*` tag | Builds precompiled NIF binaries, uploads them to the GitHub Release, then publishes the Hex package |
+| `wasm-release.yml` | Push to `main` when parser metadata, vendored parser sources, queries, or generated WASM outputs change, or manual (`workflow_dispatch`) | Detects unpublished `@lumis-sh/wasm-*` parser packages and publishes only the ones that still need release |
 
 ## Publishing order
 
@@ -56,19 +56,24 @@ Merge the release-please PRs in that order. Each merge creates a tag, which trig
 ### Elixir
 
 1. Merge the release-please PR (creates `elixir@v*` tag)
-2. Wait for `Elixir NIF Release` workflow to finish (builds NIF binaries)
-3. Manually trigger `Elixir Hex Release` workflow: `gh workflow run "Elixir Hex Release"`
+2. `elixir-release.yml` builds the precompiled NIF binaries and publishes the Hex package automatically
 
 ### WASM
 
-Run manually when parser versions change:
+WASM publishing is split into parser packages and bundle packages:
+
+1. Parser package changes from `languages.toml`, vendored parser sources, queries, generated WASM outputs, or `update-langs` PR merges trigger `wasm-release.yml` on `main`.
+2. `wasm-release.yml` auto-detects which `@lumis-sh/wasm-*` packages are still unpublished and only publishes those.
+3. Bundle package changes under `packages/javascript/wasm-bundle-*` are release-managed and publish through `javascript-release.yml` once their release PRs are merged.
+
+You can still run parser publishing manually:
 
 ```sh
 gh workflow run "WASM Release"
 gh workflow run "WASM Release" -f parser=rust,javascript  # specific parsers
 ```
 
-The workflow auto-detects which packages need publishing.
+The workflow auto-detects which parser packages need publishing.
 
 ## Commit conventions
 

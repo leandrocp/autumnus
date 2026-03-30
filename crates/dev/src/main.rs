@@ -42,6 +42,10 @@ enum Commands {
         #[arg(default_value = "")]
         name: String,
     },
+    CargoUpdateDep {
+        #[arg(default_value = "")]
+        name: String,
+    },
     PreprocessQueries {
         #[arg(default_value = "")]
         name: String,
@@ -100,6 +104,7 @@ fn main() -> Result<()> {
         Commands::FetchParsers { name } => fetch_parsers(&name),
         Commands::UpgradeQueries { name } => upgrade_queries(&name),
         Commands::FetchQueries { name } => fetch_queries(&name),
+        Commands::CargoUpdateDep { name } => cargo_update_dep(&name),
         Commands::PreprocessQueries { name } => preprocess_queries(&name),
         Commands::GenHighlights => gen_highlights(),
         Commands::GenLanguagesMd => gen_languages_md(),
@@ -665,6 +670,16 @@ fn write_languages_toml_edit(doc: &toml_edit::DocumentMut) -> Result<()> {
     Ok(())
 }
 
+fn read_lumis_cargo_toml_edit() -> Result<toml_edit::DocumentMut> {
+    let text = fs::read_to_string("crates/lumis/Cargo.toml")?;
+    Ok(text.parse()?)
+}
+
+fn write_lumis_cargo_toml_edit(doc: &toml_edit::DocumentMut) -> Result<()> {
+    fs::write("crates/lumis/Cargo.toml", doc.to_string())?;
+    Ok(())
+}
+
 fn run_cmd(cmd: &str) -> Result<String> {
     let output = Command::new("sh")
         .arg("-c")
@@ -906,6 +921,59 @@ fn upgrade_queries(name: &str) -> Result<()> {
     write_languages_toml_edit(&doc)?;
     println!("Done. Review changes with: git diff languages.toml");
     Ok(())
+}
+
+fn cargo_update_dep(name: &str) -> Result<()> {
+    let toml = read_languages_toml()?;
+    let mut cargo = read_lumis_cargo_toml_edit()?;
+    let deps = cargo["dependencies"]
+        .as_table_like_mut()
+        .context("missing [dependencies] in crates/lumis/Cargo.toml")?;
+
+    let mut crate_versions = BTreeMap::<String, String>::new();
+
+    for (parser_name, info) in &toml.parsers {
+        let Some(crate_name) = info.crate_field.as_ref() else {
+            continue;
+        };
+        let Some(version) = info.version.as_ref() else {
+            continue;
+        };
+        if !name.is_empty() && parser_name != name {
+            continue;
+        }
+
+        if let Some(existing) = crate_versions.get(crate_name) {
+            if existing != version {
+                bail!("conflicting versions for crate {crate_name}: {existing} vs {version}");
+            }
+        } else {
+            crate_versions.insert(crate_name.clone(), version.clone());
+        }
+    }
+
+    for (crate_name, version) in crate_versions {
+        let Some(dep_item) = deps.get_mut(&crate_name) else {
+            bail!("missing dependency {crate_name} in crates/lumis/Cargo.toml");
+        };
+
+        match dep_item {
+            toml_edit::Item::Value(toml_edit::Value::String(_)) => {
+                *dep_item = toml_edit::value(version.clone());
+            }
+            toml_edit::Item::Value(toml_edit::Value::InlineTable(table)) => {
+                table.insert("version", toml_edit::Value::from(version.clone()));
+            }
+            toml_edit::Item::Table(table) => {
+                table["version"] = toml_edit::value(version.clone());
+            }
+            _ => bail!("unsupported dependency format for {crate_name}"),
+        }
+
+        println!("  synced {crate_name} -> {version}");
+    }
+
+    write_lumis_cargo_toml_edit(&cargo)
 }
 
 fn fetch_queries(name: &str) -> Result<()> {

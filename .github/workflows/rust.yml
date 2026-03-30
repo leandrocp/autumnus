@@ -1,5 +1,9 @@
 name: Rust CI
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches: [ main ]
@@ -18,26 +22,31 @@ on:
 
 jobs:
   test-lumis:
+    if: ${{ github.event_name != 'pull_request' || !startsWith(github.head_ref, 'release-please--') }}
     uses: leandrocp/github-actions/.github/workflows/rust-test.yml@main
     with:
       msrv: '1.91'
       manifest-path: 'crates/lumis/Cargo.toml'
   test-lumis-build:
+    if: ${{ github.event_name != 'pull_request' || !startsWith(github.head_ref, 'release-please--') }}
     uses: leandrocp/github-actions/.github/workflows/rust-test.yml@main
     with:
       msrv: '1.91'
       manifest-path: 'crates/lumis-build/Cargo.toml'
   test-lumis-core:
+    if: ${{ github.event_name != 'pull_request' || !startsWith(github.head_ref, 'release-please--') }}
     uses: leandrocp/github-actions/.github/workflows/rust-test.yml@main
     with:
       msrv: '1.91'
       manifest-path: 'crates/lumis-core/Cargo.toml'
   test-lumis-cli:
+    if: ${{ github.event_name != 'pull_request' || !startsWith(github.head_ref, 'release-please--') }}
     uses: leandrocp/github-actions/.github/workflows/rust-test.yml@main
     with:
       msrv: '1.91'
       manifest-path: 'crates/lumis-cli/Cargo.toml'
   lint:
+    if: ${{ github.event_name != 'pull_request' || !startsWith(github.head_ref, 'release-please--') }}
     uses: leandrocp/github-actions/.github/workflows/rust-lint.yml@main
     with:
       msrv: '1.91'

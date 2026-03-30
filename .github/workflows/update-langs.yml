@@ -60,6 +60,9 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
       - uses: taiki-e/install-action@just
 
       - uses: leafo/gh-actions-lua@v12
@@ -95,6 +98,7 @@ jobs:
           token: ${{ secrets.CI_TOKEN }}
           add-paths: |
             languages.toml
+            crates/lumis/Cargo.toml
             crates/lumis/vendored_parsers
             queries/upstream
             queries/processed
