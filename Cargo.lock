@@ -726,6 +726,7 @@ dependencies = [
  "ansi-to-tui",
  "lumis 0.2.2",
  "ratatui",
+ "ratatui-core",
 ]
 
 [[package]]

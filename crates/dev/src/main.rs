@@ -1008,7 +1008,10 @@ fn fetch_queries(name: &str) -> Result<()> {
 
         if !repo_clones.contains_key(&clone_key) {
             use md5::{Digest, Md5};
-            let hash = format!("{:x}", Md5::digest(clone_key.as_bytes()));
+            let hash = Md5::digest(clone_key.as_bytes())
+                .iter()
+                .map(|byte| format!("{byte:02x}"))
+                .collect::<String>();
             let clone_dir = format!("{tmp}/repo-{hash}");
             println!(
                 "Cloning {} at {}",
