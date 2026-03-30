@@ -227,11 +227,6 @@ export const bundledWasms = {
 }
 
 export const missingLanguages = [
-  "llvm",
-  "gitcommit",
-  "kitty",
-  "tmux",
-  "zsh"
+  "jinja_inline"
 ]
-
 export default bundledWasms

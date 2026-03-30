@@ -35,8 +35,4 @@ export const bundledWasms = {
   "plaintext": wasmDiff,
 }
 
-export const missingLanguages = [
-  "llvm"
-]
-
 export default bundledWasms

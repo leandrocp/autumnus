@@ -22,5 +22,3 @@ import { bundledWasms } from '@lumis-sh/wasm-bundle-backend'
 const languages = withWasmBundle(bundledLanguages, bundledWasms)
 const highlighter = await createHighlighter({ languages: [languages] })
 ```
-
-
