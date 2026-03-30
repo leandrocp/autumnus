@@ -53,7 +53,6 @@ all-languages = [
     "lang-fortran",
     "lang-fsharp",
     "lang-gitattributes",
-    "lang-gitcommit",
     "lang-gitignore",
     "lang-gleam",
     "lang-glimmer",
@@ -74,16 +73,15 @@ all-languages = [
     "lang-json",
     "lang-json5",
     "lang-jinja",
+    "lang-jinja-inline",
     "lang-just",
     "lang-javadoc",
     "lang-jq",
     "lang-julia",
     "lang-kdl",
     "lang-kotlin",
-    "lang-kitty",
     "lang-latex",
     "lang-liquid",
-    "lang-llvm",
     "lang-lua",
     "lang-luadoc",
     "lang-make",
@@ -123,7 +121,6 @@ all-languages = [
     "lang-systemverilog",
     "lang-tcl",
     "lang-terraform",
-    "lang-tmux",
     "lang-toml",
     "lang-tsx",
     "lang-typescript",
@@ -135,7 +132,6 @@ all-languages = [
     "lang-wgsl",
     "lang-xml",
     "lang-yaml",
-    "lang-zsh",
     "lang-zig",
 ]
 
@@ -170,7 +166,6 @@ lang-fish = []
 lang-fortran = []
 lang-fsharp = []
 lang-gitattributes = []
-lang-gitcommit = []
 lang-gitignore = []
 lang-gleam = []
 lang-glimmer = []
@@ -191,16 +186,15 @@ lang-javascript = []
 lang-json = []
 lang-json5 = []
 lang-jinja = []
+lang-jinja-inline = []
 lang-javadoc = []
 lang-jq = []
 lang-just = []
 lang-julia = []
 lang-kdl = []
 lang-kotlin = []
-lang-kitty = []
 lang-latex = []
 lang-liquid = []
-lang-llvm = []
 lang-lua = []
 lang-luadoc = []
 lang-make = []
@@ -240,7 +234,6 @@ lang-swift = []
 lang-systemverilog = []
 lang-terraform = []
 lang-tcl = []
-lang-tmux = []
 lang-toml = []
 lang-tsx = []
 lang-typescript = []
@@ -252,7 +245,6 @@ lang-wat = []
 lang-wgsl = []
 lang-xml = []
 lang-yaml = []
-lang-zsh = []
 lang-zig = []
 
 [dependencies]

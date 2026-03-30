@@ -1,0 +1,4 @@
+{
+  unquoted: 'value',
+  trailing: true,
+}

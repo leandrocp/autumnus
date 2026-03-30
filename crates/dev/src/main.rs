@@ -1266,7 +1266,9 @@ fn build_wasm(name: &str) -> Result<()> {
     let tmp = tmpdir()?;
     let cwd = std::env::current_dir()?;
     let out_dir = cwd.join("tmp/wasms");
+    let log_dir = cwd.join("tmp/wasm-build-logs");
     fs::create_dir_all(&out_dir)?;
+    fs::create_dir_all(&log_dir)?;
     let mut built_wasm_names = HashSet::new();
 
     for (parser_name, info) in &toml.parsers {
@@ -1286,13 +1288,13 @@ fn build_wasm(name: &str) -> Result<()> {
         let wasm_file = out_dir.join(format!("{wasm_name}.wasm"));
 
         let clone_dir = format!("{tmp}/tree-sitter-{parser_name}");
-        println!("Building WASM for {parser_name} ...");
+        println!("-> Building WASM for {parser_name} ...");
 
+        println!("* cloning {git}");
+        let _ = run_cmd_ok(&format!("git clone --depth 1 {git} {clone_dir}"));
+        println!("* checking out {rev}");
         let _ = run_cmd_ok(&format!(
-            "git clone --depth 1 {git} {clone_dir} 2>/dev/null"
-        ));
-        let _ = run_cmd_ok(&format!(
-            "cd {clone_dir} && git fetch --depth 1 origin {rev} && git checkout {rev} 2>/dev/null"
+            "cd {clone_dir} && git fetch --depth 1 origin {rev} && git checkout {rev}"
         ));
 
         let repo_dir = if let Some(ref location) = info.location {
@@ -1310,6 +1312,11 @@ fn build_wasm(name: &str) -> Result<()> {
         let has_package_lock = Path::new(&repo_dir).join("package-lock.json").exists()
             || Path::new(&metadata_dir).join("package-lock.json").exists();
 
+        if has_package_json || tree_sitter_json.exists() {
+            println!("* writing tree-sitter.json metadata");
+            write_tree_sitter_json(parser_name, &repo_dir, &metadata_dir, info)?;
+        }
+
         if has_grammar_source || info.generate.unwrap_or(false) {
             if has_package_json {
                 let npm_cmd = if has_package_lock {
@@ -1322,19 +1329,18 @@ fn build_wasm(name: &str) -> Result<()> {
                 } else {
                     &metadata_dir
                 };
-                let _ = run_cmd_ok(&format!("cd {install_dir} && {npm_cmd} 2>/dev/null"));
+                println!("* installing npm dependencies in {install_dir}");
+                let _ = run_cmd_ok(&format!("cd {install_dir} && {npm_cmd}"));
             }
-            let _ = run_cmd_ok(&format!(
-                "cd {repo_dir} && tree-sitter generate 2>/dev/null"
-            ));
-        }
-
-        if has_package_json || tree_sitter_json.exists() {
-            write_tree_sitter_json(parser_name, &repo_dir, &metadata_dir, info)?;
+            println!("* generating parser sources in {repo_dir}");
+            let _ = run_cmd_ok(&format!("cd {repo_dir} && tree-sitter generate"));
         }
 
         let wasm_path = wasm_file.display();
-        match build_repo_wasm(&repo_dir, &wasm_file) {
+        let build_log = log_dir.join(format!("{wasm_name}.log"));
+        println!("* building wasm in {repo_dir}");
+        println!("* build log: {}", build_log.display());
+        match build_repo_wasm(&repo_dir, &wasm_file, &build_log) {
             Ok(()) => println!("{wasm_path}"),
             Err(_) => println!("  ERROR: failed to build {parser_name}"),
         }
@@ -1346,13 +1352,27 @@ fn build_wasm(name: &str) -> Result<()> {
     Ok(())
 }
 
-fn build_repo_wasm(repo_dir: &str, wasm_file: &Path) -> Result<()> {
-    let mut cmd = Command::new("tree-sitter");
-    cmd.current_dir(repo_dir)
-        .arg("build")
-        .arg("--wasm")
-        .arg("-o")
-        .arg(wasm_file);
+fn build_repo_wasm(repo_dir: &str, wasm_file: &Path, build_log: &Path) -> Result<()> {
+    let verbose = std::env::var("LUMIS_WASM_VERBOSE").ok().as_deref() == Some("1");
+    let build_cmd = format!("tree-sitter build --wasm -o \"{}\"", wasm_file.display());
+    let shell_cmd = if verbose {
+        format!(
+            "{{ printf '[start] %s\n' \"$(date)\"; printf '[cmd] %s\n' '{}' ; EMCC_DEBUG=1 {}; printf '[end] %s\n' \"$(date)\"; }} 2>&1 | tee \"{}\"",
+            build_cmd,
+            build_cmd,
+            build_log.display()
+        )
+    } else {
+        format!(
+            "{{ printf '[start] %s\n' \"$(date)\"; printf '[cmd] %s\n' '{}' ; {}; printf '[end] %s\n' \"$(date)\"; }} 2>&1 | tee \"{}\"",
+            build_cmd,
+            build_cmd,
+            build_log.display()
+        )
+    };
+
+    let mut cmd = Command::new("sh");
+    cmd.current_dir(repo_dir).arg("-c").arg(shell_cmd);
 
     if let Some(python3) = resolve_python3_10_plus() {
         cmd.env("EMSDK_PYTHON", &python3).env("PYTHON", python3);

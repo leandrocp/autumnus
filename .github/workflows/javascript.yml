@@ -64,3 +64,7 @@ jobs:
         working-directory: packages/javascript
       - run: pnpm --filter @lumis-sh/lumis test
         working-directory: packages/javascript
+      # - run: pnpm --filter @lumis-sh/lumis precache-wasms
+      #   working-directory: packages/javascript
+      # - run: pnpm --filter @lumis-sh/lumis test:all-languages
+      #   working-directory: packages/javascript

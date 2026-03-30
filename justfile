@@ -38,6 +38,35 @@ setup:
         fi
     }
 
+    check_tree_sitter_cli() {
+        if ! command -v tree-sitter &>/dev/null; then
+            echo "  ✗ tree-sitter -- tree-sitter-cli >= 0.26 is needed for WASM builds"
+            errors=$((errors + 1))
+            return
+        fi
+
+        local version raw_version major minor
+        raw_version="$(tree-sitter --version 2>/dev/null)"
+        version="${raw_version#tree-sitter }"
+        version="${version%% *}"
+
+        if [[ ! "$version" =~ ^([0-9]+)\.([0-9]+)(\.[0-9]+)?$ ]]; then
+            echo "  ✗ tree-sitter ($raw_version) -- could not determine version; need >= 0.26"
+            errors=$((errors + 1))
+            return
+        fi
+
+        major="${BASH_REMATCH[1]}"
+        minor="${BASH_REMATCH[2]}"
+
+        if (( major > 0 || minor >= 26 )); then
+            echo "  ✓ tree-sitter ($version)"
+        else
+            echo "  ✗ tree-sitter ($version) -- tree-sitter-cli >= 0.26 is needed for WASM builds"
+            errors=$((errors + 1))
+        fi
+    }
+
     echo "Checking required tools..."
     check_bin cargo "https://rustup.rs"
     check_bin node "https://nodejs.org"
@@ -47,7 +76,7 @@ setup:
     echo ""
 
     echo "Checking optional tools..."
-    check_bin tree-sitter "cargo install tree-sitter-cli (needed for WASM builds)"
+    check_tree_sitter_cli
     check_bin emcc "https://emscripten.org (needed for WASM builds)"
     check_python310
     check_bin nvim "https://neovim.io (needed for theme generation)"

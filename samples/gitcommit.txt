@@ -1,3 +1,0 @@
-Add parser wiring for new languages
-
-Wire new grammars through Rust and fetch matching queries.

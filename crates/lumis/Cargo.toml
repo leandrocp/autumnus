@@ -76,7 +76,6 @@ all-languages = [
     "lang-fortran",
     "lang-fsharp",
     "lang-gitattributes",
-    "lang-gitcommit",
     "lang-gitignore",
     "lang-gleam",
     "lang-glimmer",
@@ -97,16 +96,15 @@ all-languages = [
     "lang-json",
     "lang-json5",
     "lang-jinja",
+    "lang-jinja-inline",
     "lang-just",
     "lang-javadoc",
     "lang-jq",
     "lang-julia",
     "lang-kdl",
     "lang-kotlin",
-    "lang-kitty",
     "lang-latex",
     "lang-liquid",
-    "lang-llvm",
     "lang-lua",
     "lang-luadoc",
     "lang-make",
@@ -146,7 +144,6 @@ all-languages = [
     "lang-systemverilog",
     "lang-tcl",
     "lang-terraform",
-    "lang-tmux",
     "lang-toml",
     "lang-tsx",
     "lang-typescript",
@@ -158,7 +155,6 @@ all-languages = [
     "lang-wgsl",
     "lang-xml",
     "lang-yaml",
-    "lang-zsh",
     "lang-zig",
 ]
 
@@ -194,7 +190,6 @@ lang-fish = ["lumis-core/lang-fish"]
 lang-fortran = ["dep:tree-sitter-fortran", "lumis-core/lang-fortran"]
 lang-fsharp = ["dep:tree-sitter-fsharp", "lumis-core/lang-fsharp"]
 lang-gitattributes = ["lumis-core/lang-gitattributes"]
-lang-gitcommit = ["dep:tree-sitter-gitcommit", "lumis-core/lang-gitcommit"]
 lang-gitignore = ["lumis-core/lang-gitignore"]
 lang-gleam = ["lumis-core/lang-gleam"]
 lang-glimmer = ["lumis-core/lang-glimmer"]
@@ -215,16 +210,15 @@ lang-javascript = ["dep:tree-sitter-javascript", "lumis-core/lang-javascript"]
 lang-json = ["dep:tree-sitter-json", "lumis-core/lang-json"]
 lang-json5 = ["lumis-core/lang-json5"]
 lang-jinja = ["dep:tree-sitter-jinja", "lumis-core/lang-jinja"]
+lang-jinja-inline = ["lumis-core/lang-jinja-inline"]
 lang-just = ["lumis-core/lang-just"]
 lang-javadoc = ["dep:tree-sitter-javadoc", "lumis-core/lang-javadoc"]
 lang-jq = ["lumis-core/lang-jq"]
 lang-julia = ["dep:tree-sitter-julia", "lumis-core/lang-julia"]
 lang-kdl = ["lumis-core/lang-kdl"]
 lang-kotlin = ["lumis-core/lang-kotlin"]
-lang-kitty = ["lumis-core/lang-kitty"]
 lang-latex = ["lumis-core/lang-latex"]
 lang-liquid = ["lumis-core/lang-liquid"]
-lang-llvm = ["lumis-core/lang-llvm"]
 lang-lua = ["dep:tree-sitter-lua", "lumis-core/lang-lua"]
 lang-luadoc = ["lumis-core/lang-luadoc"]
 lang-make = ["lumis-core/lang-make"]
@@ -264,7 +258,6 @@ lang-swift = ["dep:tree-sitter-swift", "lumis-core/lang-swift"]
 lang-systemverilog = ["dep:tree-sitter-systemverilog", "lumis-core/lang-systemverilog"]
 lang-tcl = ["lumis-core/lang-tcl"]
 lang-terraform = ["lumis-core/lang-terraform"]
-lang-tmux = ["lumis-core/lang-tmux"]
 lang-toml = ["dep:tree-sitter-toml-ng", "lumis-core/lang-toml"]
 lang-tsx = ["dep:tree-sitter-typescript", "lumis-core/lang-tsx"]
 lang-typescript = ["dep:tree-sitter-typescript", "lumis-core/lang-typescript"]
@@ -276,7 +269,6 @@ lang-wat = ["lumis-core/lang-wat"]
 lang-wgsl = ["lumis-core/lang-wgsl"]
 lang-xml = ["dep:tree-sitter-xml", "lumis-core/lang-xml"]
 lang-yaml = ["dep:tree-sitter-yaml", "lumis-core/lang-yaml"]
-lang-zsh = ["lumis-core/lang-zsh"]
 lang-zig = ["dep:tree-sitter-zig", "lumis-core/lang-zig"]
 
 [dependencies]
@@ -310,7 +302,6 @@ tree-sitter-embedded-template = { version = "0.25.0", optional = true }
 tree-sitter-erlang = { version = "0.15.0", optional = true }
 tree-sitter-fsharp = { version = "0.2.2", optional = true }
 tree-sitter-fortran = { version = "0.5.1", optional = true }
-tree-sitter-gitcommit = { version = "0.5.0", optional = true }
 tree-sitter-go = { version = "0.25.0", optional = true }
 tree-sitter-glsl = { version = "0.2.0", optional = true }
 tree-sitter-haskell = { version = "0.23.1", optional = true }
