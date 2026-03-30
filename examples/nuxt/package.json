@@ -14,5 +14,8 @@
     "better-sqlite3": "^12.8.0",
     "nuxt": "^4.4.2",
     "vue": "^3.5.31"
+  },
+  "devDependencies": {
+    "vite": "^7.1.5"
   }
 }
