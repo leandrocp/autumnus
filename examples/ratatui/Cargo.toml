@@ -8,3 +8,4 @@ publish = false
 lumis = { path = "../../crates/lumis" }
 ratatui = "0.29"
 ansi-to-tui = "8"
+ratatui-core = "0.1"
