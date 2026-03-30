@@ -401,12 +401,12 @@ rev = "d6ebde3974742cd1b61b55d1d94aab1dacb41056"
 version = "0.1.0"
 globs = ["*liquid"]
 
-# [parsers.llvm]
-# git = "https://github.com/benwilliamgraham/tree-sitter-llvm.git"
-# rev = "2914786ae6774d4c4e25a230f4afe16aa68fe1c1"
-# version = "0.1.0"
-# display_name = "LLVM"
-# globs = ["*.llvm", "*.ll"]
+[parsers.llvm]
+git = "https://github.com/benwilliamgraham/tree-sitter-llvm.git"
+rev = "2914786ae6774d4c4e25a230f4afe16aa68fe1c1"
+version = "1.1.0"
+display_name = "LLVM"
+globs = ["*.llvm", "*.ll"]
 
 [parsers.lua]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-lua.git"
@@ -745,7 +745,7 @@ globs = [".gitattributes", "gitattributes"]
 
 # [parsers.gitcommit]
 # git = "https://github.com/gbprod/tree-sitter-gitcommit.git"
-# rev = "a716678c0f00645fed1e6f1d0eb221481dbd6f6d"
+# rev = "33fe8548abcc6e374feaac5724b5a2364bf23090"
 # crate = "tree-sitter-gitcommit"
 # version = "0.5.0"
 # display_name = "Git Commit"
@@ -774,8 +774,8 @@ globs = ["*.kdl"]
 
 # [parsers.kitty]
 # git = "https://github.com/OXY2DEV/tree-sitter-kitty.git"
-# rev = "f821c16397ffab5b776d8781245215811438a624"
-# version = "0.1.0"
+# rev = "fa6ab3fd32d890a0217495c96b35761e6d2dcb5b"
+# version = "3.3.1"
 # display_name = "Kitty"
 # globs = ["kitty.conf"]
 
@@ -831,13 +831,13 @@ version = "0.0.6"
 display_name = "WGSL"
 globs = ["*.wgsl"]
 
-# [parsers.zsh]
-# git = "https://github.com/georgeharker/tree-sitter-zsh.git"
-# rev = "bd344c23a7683e293d077c6648e88f209782fedb"
-# version = "0.63.1"
-# display_name = "Zsh"
-# globs = ["*.zsh", ".zshrc", ".zshenv", ".zprofile", ".zlogin", ".zlogout", "zshrc", "zshenv", "zprofile", "zlogin", "zlogout"]
-# shebang = ["zsh"]
+[parsers.zsh]
+git = "https://github.com/georgeharker/tree-sitter-zsh.git"
+rev = "bd344c23a7683e293d077c6648e88f209782fedb"
+version = "0.63.1"
+display_name = "Zsh"
+globs = ["*.zsh", ".zshrc", ".zshenv", ".zprofile", ".zlogin", ".zlogout", "zshrc", "zshenv", "zprofile", "zlogin", "zlogout"]
+shebang = ["zsh"]
 
 [parsers.d]
 git = "https://github.com/gdamore/tree-sitter-d.git"
@@ -1068,7 +1068,7 @@ parsers = [
   "diff",
   "go",
   "json",
-  # "llvm",
+  "llvm",
   "make",
   "regex",
   "rust",

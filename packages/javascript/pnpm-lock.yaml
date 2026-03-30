@@ -455,6 +455,9 @@ importers:
       '@lumis-sh/wasm-liquid':
         specifier: ^0.26.0
         version: 0.26.0
+      '@lumis-sh/wasm-llvm':
+        specifier: ^0.26.0
+        version: 0.26.1
       '@lumis-sh/wasm-lua':
         specifier: ^0.26.0
         version: 0.26.0
@@ -611,6 +614,9 @@ importers:
       '@lumis-sh/wasm-zig':
         specifier: ^0.26.0
         version: 0.26.0
+      '@lumis-sh/wasm-zsh':
+        specifier: ^0.26.0
+        version: 0.26.0
 
   wasm-bundle-system:
     dependencies:
@@ -644,6 +650,9 @@ importers:
       '@lumis-sh/wasm-json':
         specifier: ^0.26.0
         version: 0.26.2
+      '@lumis-sh/wasm-llvm':
+        specifier: ^0.26.0
+        version: 0.26.1
       '@lumis-sh/wasm-make':
         specifier: ^0.26.0
         version: 0.26.0
@@ -1102,6 +1111,9 @@ packages:
   '@lumis-sh/wasm-liquid@0.26.0':
     resolution: {integrity: sha512-D6St85R3Ri451+PtlxrPa38XWmSnJ7mTj2c12jgqOAYq549V6djX7rZp9T5XUikdlPDmG+C77B4eORjUq77/xg==}
 
+  '@lumis-sh/wasm-llvm@0.26.1':
+    resolution: {integrity: sha512-u3/Vs/R1zRit0LFN5spXiXWxkWixKQh9V4ZXe+xkAEQ8ejQw1FPxFsy2d7ocshuWkLQEDOduhUiDnpy4q0tF9w==}
+
   '@lumis-sh/wasm-lua@0.26.0':
     resolution: {integrity: sha512-DEMqgH2aKoxTr5I5IEbcpUSkxkmI54uNqXpEQwrVmNWz4aFuA3kaf7oZPOcQCLxX7ASmlR340QQpNIrwNyRtug==}
 
@@ -1257,6 +1269,9 @@ packages:
 
   '@lumis-sh/wasm-zig@0.26.0':
     resolution: {integrity: sha512-ZP+WnMrT1zgvb7rIA4lu+6gn2Y0YmM6OC7F/8F+c394HD5ZoMiVCnPXZ0nUMLB6ghPGwOu3/HrEN0AqDJgi0IQ==}
+
+  '@lumis-sh/wasm-zsh@0.26.0':
+    resolution: {integrity: sha512-gwk5QG03kVsIefcloMaRI5EXmAjqmnWCL/JKTewJjjIRBkxP0oudltBEfrSdN+Cu4LPKlj+sUps0gxSGSH/qxQ==}
 
   '@oxfmt/binding-android-arm-eabi@0.35.0':
     resolution: {integrity: sha512-BaRKlM3DyG81y/xWTsE6gZiv89F/3pHe2BqX2H4JbiB8HNVlWWtplzgATAE5IDSdwChdeuWLDTQzJ92Lglw3ZA==}
@@ -2476,6 +2491,8 @@ snapshots:
 
   '@lumis-sh/wasm-liquid@0.26.0': {}
 
+  '@lumis-sh/wasm-llvm@0.26.1': {}
+
   '@lumis-sh/wasm-lua@0.26.0': {}
 
   '@lumis-sh/wasm-luadoc@0.26.0': {}
@@ -2579,6 +2596,8 @@ snapshots:
   '@lumis-sh/wasm-yaml@0.26.0': {}
 
   '@lumis-sh/wasm-zig@0.26.0': {}
+
+  '@lumis-sh/wasm-zsh@0.26.0': {}
 
   '@oxfmt/binding-android-arm-eabi@0.35.0':
     optional: true

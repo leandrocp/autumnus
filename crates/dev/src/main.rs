@@ -1151,36 +1151,40 @@ fn resolve_and_preprocess(
     seen.insert(key);
 
     let raw = read_query_raw(src_dir, lang, query_type);
-    if raw.is_empty() {
+    let overwrite_path = format!("{overwrites_dir}/{lang}/{query_type}.scm");
+    let overwrite_content = fs::read_to_string(&overwrite_path).ok();
+
+    if raw.is_empty() && overwrite_content.is_none() {
         return String::new();
     }
 
-    let content = apply_text_replacements(&raw);
-    let content = strip_set_capture_patterns(&content);
-
     let mut parts = Vec::new();
-    let mut stripped_lines = Vec::new();
+    if !raw.is_empty() {
+        let content = apply_text_replacements(&raw);
+        let content = strip_set_capture_patterns(&content);
 
-    for line in content.lines() {
-        if line.starts_with("; inherits: ") {
-            let inherits_str = line.trim_start_matches("; inherits: ").trim();
-            for parent in inherits_str.split([',', ' ']).filter(|s| !s.is_empty()) {
-                let parent_content =
-                    resolve_and_preprocess(src_dir, overwrites_dir, parent, query_type, seen);
-                if !parent_content.is_empty() {
-                    parts.push(format!("; inherits: {parent}"));
-                    parts.push(parent_content);
+        let mut stripped_lines = Vec::new();
+
+        for line in content.lines() {
+            if line.starts_with("; inherits: ") {
+                let inherits_str = line.trim_start_matches("; inherits: ").trim();
+                for parent in inherits_str.split([',', ' ']).filter(|s| !s.is_empty()) {
+                    let parent_content =
+                        resolve_and_preprocess(src_dir, overwrites_dir, parent, query_type, seen);
+                    if !parent_content.is_empty() {
+                        parts.push(format!("; inherits: {parent}"));
+                        parts.push(parent_content);
+                    }
                 }
+            } else {
+                stripped_lines.push(line);
             }
-        } else {
-            stripped_lines.push(line);
         }
+
+        parts.push(stripped_lines.join("\n"));
     }
 
-    parts.push(stripped_lines.join("\n"));
-
-    let overwrite_path = format!("{overwrites_dir}/{lang}/{query_type}.scm");
-    if let Ok(overwrite_content) = fs::read_to_string(overwrite_path) {
+    if let Some(overwrite_content) = overwrite_content {
         parts.push(overwrite_content);
     }
 
@@ -1965,4 +1969,42 @@ fn wasm_meta(name: &str) -> Result<()> {
 
 fn wasm_package_suffix(wasm_name: &str) -> &str {
     wasm_name.strip_prefix("tree-sitter-").unwrap_or(wasm_name)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    #[test]
+    fn resolve_and_preprocess_uses_overrides_without_upstream() {
+        let unique = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("time should be monotonic")
+            .as_nanos();
+        let root = std::env::temp_dir().join(format!("lumis-dev-query-test-{unique}"));
+        let upstream = root.join("upstream");
+        let overrides = root.join("overrides");
+        let override_dir = overrides.join("demo");
+
+        fs::create_dir_all(&override_dir).expect("override dir should be created");
+        fs::write(
+            override_dir.join("highlights.scm"),
+            "((comment) @comment)\n",
+        )
+        .expect("override query should be written");
+
+        let mut seen = HashSet::new();
+        let content = resolve_and_preprocess(
+            upstream.to_str().expect("upstream path should be valid"),
+            overrides.to_str().expect("overrides path should be valid"),
+            "demo",
+            "highlights",
+            &mut seen,
+        );
+
+        assert_eq!(content, "((comment) @comment)\n");
+
+        let _ = fs::remove_dir_all(root);
+    }
 }

@@ -12,6 +12,7 @@ export const bundledLanguages: LanguageBundle = {
   "diff": lazy("diff", [], () => import("../langs/diff.js")),
   "go": lazy("go", [], () => import("../langs/go.js")),
   "json": lazy("json", [], () => import("../langs/json.js")),
+  "llvm": lazy("llvm", [], () => import("../langs/llvm.js")),
   "make": lazy("make", [], () => import("../langs/make.js")),
   "regex": lazy("regex", [], () => import("../langs/regex.js")),
   "rust": lazy("rust", [], () => import("../langs/rust.js")),

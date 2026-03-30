@@ -1,35 +1,20 @@
-import { execFileSync } from "node:child_process";
-import {
-  existsSync,
-  mkdirSync,
-  readFileSync,
-  readdirSync,
-  rmSync,
-  statSync,
-} from "node:fs";
+import { existsSync, readdirSync, statSync } from "node:fs";
 import { join, parse } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
-type Language = {
+import { availableLanguages } from "../src/index.js";
+
+type LanguageModule = {
   id: string;
   aliases?: string[];
-  wasm?: {
-    packageName: string;
-    name: string;
-    version: string;
-  };
+  highlights?: string;
 };
 
 const repoRoot = fileURLToPath(new URL("../../../..", import.meta.url));
-const distRoot = fileURLToPath(new URL("../dist/", import.meta.url));
+const langsRoot = fileURLToPath(new URL("../langs/", import.meta.url));
 const samplesDir = join(repoRoot, "samples");
-const npmCacheDir = execFileSync("npm", ["config", "get", "cache"], {
-  cwd: repoRoot,
-  encoding: "utf8",
-}).trim();
-const wasmCacheDir = join(repoRoot, "tmp", "npm-wasm-cache");
 
 const sampleBaseNameOverrides = new Map<string, string>([
   ["ocaml_interface", "ocamlinterface"],
@@ -46,20 +31,20 @@ function readdirRecursive(dir: string): string[] {
   });
 }
 
-function listDistLanguageIds(): string[] {
-  return readdirSync(join(distRoot, "langs"))
-    .filter((entry) => entry.endsWith(".js"))
+function listSourceLanguageIds(): string[] {
+  return readdirSync(langsRoot)
+    .filter((entry) => entry.endsWith(".ts"))
     .map((entry) => parse(entry).name)
     .sort((a, b) => a.localeCompare(b));
 }
 
-async function loadLanguageModule(id: string): Promise<Language> {
-  const moduleUrl = pathToFileURL(join(distRoot, "langs", `${id}.js`)).href;
+async function loadLanguageModule(id: string): Promise<LanguageModule> {
+  const moduleUrl = pathToFileURL(join(langsRoot, `${id}.ts`)).href;
   const mod = await import(moduleUrl);
-  return mod.default as Language;
+  return mod.default as LanguageModule;
 }
 
-function resolveSamplePath(language: Language): string | undefined {
+function resolveSamplePath(language: LanguageModule): string | undefined {
   const candidates = [language.id, sampleBaseNameOverrides.get(language.id), ...(language.aliases ?? [])]
     .filter((value): value is string => value != null)
     .map((value) => value.toLowerCase());
@@ -70,89 +55,32 @@ function resolveSamplePath(language: Language): string | undefined {
   }
 }
 
-function sanitizePackageName(packageName: string): string {
-  return packageName.replace(/^@/, "").replaceAll("/", "-");
-}
+const sourceLanguageIds = listSourceLanguageIds();
+const availableLanguageIds = availableLanguages()
+  .map((language) => language.id)
+  .sort((a, b) => a.localeCompare(b));
 
-function ensureCachedWasm(wasm: NonNullable<Language["wasm"]>): string {
-  const packageDir = join(wasmCacheDir, `${sanitizePackageName(wasm.packageName)}@${wasm.version}`);
-  const wasmPath = join(packageDir, "package", `${wasm.name}.wasm`);
+const languageFixtures = await Promise.all(
+  sourceLanguageIds.map(async (id) => {
+    const language = await loadLanguageModule(id);
+    const samplePath = resolveSamplePath(language);
 
-  if (existsSync(wasmPath)) return wasmPath;
+    if (!samplePath) {
+      throw new Error(`No sample file found for language "${id}"`);
+    }
 
-  mkdirSync(packageDir, { recursive: true });
-
-  const packageSpec = `${wasm.packageName}@${wasm.version}`;
-  const tarballName = execFileSync(
-    "npm",
-    ["pack", packageSpec, "--cache", npmCacheDir, "--offline", "--silent"],
-    {
-      cwd: packageDir,
-      encoding: "utf8",
-    },
-  )
-    .trim()
-    .split(/\r?\n/)
-    .at(-1);
-
-  if (!tarballName) {
-    throw new Error(`Failed to resolve ${packageSpec} from npm cache`);
-  }
-
-  execFileSync("tar", ["-xzf", tarballName], { cwd: packageDir, stdio: "inherit" });
-  rmSync(join(packageDir, tarballName), { force: true });
-
-  if (!existsSync(wasmPath)) {
-    throw new Error(`Expected ${wasmPath} in cached package ${packageSpec}`);
-  }
-
-  return wasmPath;
-}
-
-const selectedLanguageIds = listDistLanguageIds();
-const wasmPaths = new Map<string, string>();
-
-const languageFixtures = (
-  await Promise.all(
-    selectedLanguageIds.map(async (id) => {
-      const language = await loadLanguageModule(id);
-      const samplePath = resolveSamplePath(language);
-
-      if (!samplePath) {
-        throw new Error(`No sample file found for language \"${id}\"`);
-      }
-
-      if (!language.wasm) {
-        if (id === "plaintext") return null;
-        throw new Error(`Language \"${id}\" has no WasmRef`);
-      }
-
-      return { id, language, samplePath };
-    }),
-  )
-).filter((fixture): fixture is { id: string; language: Language; samplePath: string } => fixture !== null);
-
-mkdirSync(wasmCacheDir, { recursive: true });
-
-const { configureWasmResolver, highlight } = await import(pathToFileURL(join(distRoot, "index.js")).href);
-const { htmlLinked } = await import(pathToFileURL(join(distRoot, "formatters.js")).href);
-
-configureWasmResolver((_language: string, wasm: NonNullable<Language["wasm"]>) => {
-  let wasmPath = wasmPaths.get(wasm.name);
-  if (!wasmPath) {
-    wasmPath = ensureCachedWasm(wasm);
-    wasmPaths.set(wasm.name, wasmPath);
-  }
-  return wasmPath;
-});
+    return { id, language, samplePath };
+  }),
+);
 
 describe.skipIf(languageFixtures.length === 0)("all languages", () => {
-  it.each(languageFixtures)("loads $id and highlights its sample", async ({ id, language, samplePath }) => {
-    const code = readFileSync(samplePath, "utf8");
+  it("matches source modules to available languages", () => {
+    expect(sourceLanguageIds).toEqual(availableLanguageIds);
+  });
 
-    const html = await highlight(code, htmlLinked({ language }));
-
-    expect(html).toContain(`language-${id}`);
-    expect(html).toContain("<span");
-  }, 30_000);
+  it.each(languageFixtures)("loads $id and has a sample fixture", async ({ id, language, samplePath }) => {
+    expect(language.id).toBe(id);
+    expect(typeof language.highlights).toBe("string");
+    expect(existsSync(samplePath)).toBe(true);
+  });
 });

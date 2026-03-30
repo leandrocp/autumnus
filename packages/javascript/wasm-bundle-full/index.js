@@ -58,6 +58,7 @@ import wasmKdl from "@lumis-sh/wasm-kdl"
 import wasmKotlin from "@lumis-sh/wasm-kotlin"
 import wasmLatex from "@lumis-sh/wasm-latex"
 import wasmLiquid from "@lumis-sh/wasm-liquid"
+import wasmLlvm from "@lumis-sh/wasm-llvm"
 import wasmLua from "@lumis-sh/wasm-lua"
 import wasmLuadoc from "@lumis-sh/wasm-luadoc"
 import wasmMake from "@lumis-sh/wasm-make"
@@ -110,6 +111,7 @@ import wasmWgsl from "@lumis-sh/wasm-wgsl"
 import wasmXml from "@lumis-sh/wasm-xml"
 import wasmYaml from "@lumis-sh/wasm-yaml"
 import wasmZig from "@lumis-sh/wasm-zig"
+import wasmZsh from "@lumis-sh/wasm-zsh"
 
 export const bundledWasms = {
   "angular": wasmAngular,
@@ -155,6 +157,7 @@ export const bundledWasms = {
   "kotlin": wasmKotlin,
   "latex": wasmLatex,
   "liquid": wasmLiquid,
+  "llvm": wasmLlvm,
   "lua": wasmLua,
   "make": wasmMake,
   "markdown": wasmMarkdown,
@@ -203,6 +206,7 @@ export const bundledWasms = {
   "puppet": wasmPuppet,
   "terraform": wasmTerraform,
   "wgsl": wasmWgsl,
+  "zsh": wasmZsh,
   "d": wasmD,
   "fortran": wasmFortran,
   "gitignore": wasmGitignore,

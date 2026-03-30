@@ -48,6 +48,7 @@
     "@lumis-sh/wasm-diff": "^0.26.0",
     "@lumis-sh/wasm-go": "^0.26.0",
     "@lumis-sh/wasm-json": "^0.26.0",
+    "@lumis-sh/wasm-llvm": "^0.26.0",
     "@lumis-sh/wasm-make": "^0.26.0",
     "@lumis-sh/wasm-regex": "^0.26.0",
     "@lumis-sh/wasm-rust": "^0.26.0",

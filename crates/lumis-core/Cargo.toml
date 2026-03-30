@@ -82,6 +82,7 @@ all-languages = [
     "lang-kotlin",
     "lang-latex",
     "lang-liquid",
+    "lang-llvm",
     "lang-lua",
     "lang-luadoc",
     "lang-make",
@@ -133,6 +134,7 @@ all-languages = [
     "lang-xml",
     "lang-yaml",
     "lang-zig",
+    "lang-zsh",
 ]
 
 lang-arduino = []
@@ -195,6 +197,7 @@ lang-kdl = []
 lang-kotlin = []
 lang-latex = []
 lang-liquid = []
+lang-llvm = []
 lang-lua = []
 lang-luadoc = []
 lang-make = []
@@ -232,8 +235,8 @@ lang-surface = []
 lang-svelte = []
 lang-swift = []
 lang-systemverilog = []
-lang-terraform = []
 lang-tcl = []
+lang-terraform = []
 lang-toml = []
 lang-tsx = []
 lang-typescript = []
@@ -246,6 +249,7 @@ lang-wgsl = []
 lang-xml = []
 lang-yaml = []
 lang-zig = []
+lang-zsh = []
 
 [dependencies]
 derive_builder = "0.20"

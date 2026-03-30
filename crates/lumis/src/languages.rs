@@ -164,6 +164,8 @@ unsafe extern "C" {
     fn tree_sitter_wat() -> *const ();
     #[cfg(feature = "lang-wgsl")]
     fn tree_sitter_wgsl() -> *const ();
+    #[cfg(feature = "lang-zsh")]
+    fn tree_sitter_zsh() -> *const ();
 }
 
 include!(concat!(env!("OUT_DIR"), "/queries_constants.rs"));
@@ -387,6 +389,8 @@ impl LanguageConfig for Language {
             Language::YAML => &YAML_CONFIG,
             #[cfg(feature = "lang-zig")]
             Language::Zig => &ZIG_CONFIG,
+            #[cfg(feature = "lang-zsh")]
+            Language::Zsh => &ZSH_CONFIG,
             _ => &PLAIN_TEXT_CONFIG,
         }
     }
@@ -1967,6 +1971,21 @@ static ZIG_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     config
 });
 
+#[cfg(feature = "lang-zsh")]
+static ZSH_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_zsh) };
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(language_fn),
+        "zsh",
+        ZSH_HIGHLIGHTS,
+        ZSH_INJECTIONS,
+        ZSH_LOCALS,
+    )
+    .expect("failed to create zsh highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -2065,6 +2084,23 @@ mod tests {
         );
     }
 
+    fn sample_file_for_language_id(id: &str) -> Option<String> {
+        let expected_stem = match id {
+            "asm" => "assembly",
+            "ocaml_interface" => "ocamlinterface",
+            other => other,
+        };
+
+        fs::read_dir(samples_dir())
+            .ok()?
+            .filter_map(Result::ok)
+            .find_map(|entry| {
+                let path = entry.path();
+                let stem = path.file_stem()?.to_str()?.to_ascii_lowercase();
+                (stem == expected_stem).then(|| entry.file_name().to_string_lossy().into_owned())
+            })
+    }
+
     macro_rules! language_sample_tests {
         ($($(#[$meta:meta])* $name:ident => ($lang:expr, $expected:literal, $sample:literal);)+) => {
             $(
@@ -2075,6 +2111,25 @@ mod tests {
                 }
             )+
         };
+    }
+
+    #[test]
+    fn test_all_available_languages_have_samples_and_highlight() {
+        let mut ids = available_languages().keys().cloned().collect::<Vec<_>>();
+        ids.sort();
+
+        for id in ids {
+            let language = if id == "plaintext" {
+                Language::PlainText
+            } else {
+                id.parse::<Language>()
+                    .unwrap_or_else(|_| panic!("unknown language id: {id}"))
+            };
+            let sample_file = sample_file_for_language_id(&id)
+                .unwrap_or_else(|| panic!("missing sample for language id: {id}"));
+
+            assert_language_sample_highlights(language, language.name(), &sample_file);
+        }
     }
 
     language_sample_tests! {
@@ -2199,6 +2254,8 @@ mod tests {
         test_latex_config_loads => (Language::LaTeX, "LaTeX", "latex.tex");
         #[cfg(feature = "lang-liquid")]
         test_liquid_config_loads => (Language::Liquid, "Liquid", "liquid.liquid");
+        #[cfg(feature = "lang-llvm")]
+        test_llvm_config_loads => (Language::Llvm, "LLVM", "llvm.ll");
         #[cfg(feature = "lang-lua")]
         test_lua_config_loads => (Language::Lua, "Lua", "lua.lua");
         #[cfg(feature = "lang-luadoc")]
@@ -2304,6 +2361,8 @@ mod tests {
         test_yaml_config_loads => (Language::YAML, "YAML", "yaml.yml");
         #[cfg(feature = "lang-zig")]
         test_zig_config_loads => (Language::Zig, "Zig", "zig.zig");
+        #[cfg(feature = "lang-zsh")]
+        test_zsh_config_loads => (Language::Zsh, "Zsh", "zsh.zsh");
     }
 
     #[test]
