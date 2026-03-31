@@ -33,13 +33,34 @@ jobs:
           tag="${{ inputs.tag || github.ref_name }}"
           component="${tag%%@*}"
           case "$component" in
-            rust)       crate="lumis" ;;
-            rust-core)  crate="lumis-core" ;;
-            rust-build) crate="lumis-build" ;;
-            rust-cli)   crate="lumis-cli" ;;
-            *)          echo "Unknown component: $component" && exit 1 ;;
+            rust)
+              crate="lumis"
+              manifest="crates/lumis/Cargo.toml"
+              ;;
+            rust-core)
+              crate="lumis-core"
+              manifest="crates/lumis-core/Cargo.toml"
+              ;;
+            rust-build)
+              crate="lumis-build"
+              manifest="crates/lumis-build/Cargo.toml"
+              ;;
+            rust-cli)
+              crate="lumis-cli"
+              manifest="crates/lumis-cli/Cargo.toml"
+              ;;
+            *)
+              echo "Unknown component: $component" >&2
+              exit 1
+              ;;
           esac
-          echo "name=$crate" >> $GITHUB_OUTPUT
+          version=$(python3 ./scripts/verify-rust-publish.py print-version "$manifest")
+          echo "name=$crate" >> "$GITHUB_OUTPUT"
+          echo "manifest=$manifest" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Verify publish prerequisites
+        run: python3 ./scripts/verify-rust-publish.py "${{ steps.crate.outputs.manifest }}" "${{ steps.crate.outputs.name }}"
 
       - name: Publish to crates.io
         run: cargo publish -p ${{ steps.crate.outputs.name }}
