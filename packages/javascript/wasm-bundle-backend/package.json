@@ -1,6 +1,6 @@
 {
   "name": "@lumis-sh/wasm-bundle-backend",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Preset WASM parser bundle for the backend Lumis language bundle",
   "author": "Leandro Pereira",
   "license": "MIT",
