@@ -14,7 +14,8 @@
     "crates/lumis": {
       "release-type": "rust",
       "component": "rust",
-      "changelog-path": "CHANGELOG.md"
+      "changelog-path": "CHANGELOG.md",
+      "release-as": "0.3.1"
     },
     "crates/lumis-core": {
       "release-type": "rust",
@@ -29,7 +30,8 @@
     "crates/lumis-cli": {
       "release-type": "rust",
       "component": "rust-cli",
-      "changelog-path": "CHANGELOG.md"
+      "changelog-path": "CHANGELOG.md",
+      "release-as": "0.0.4"
     },
     "packages/javascript/lumis": {
       "release-type": "node",
