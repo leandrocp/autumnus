@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.3.0](https://github.com/leandrocp/lumis/compare/rust@v0.2.2...rust@v0.3.0) (2026-03-30)
+
+
+### ⚠ BREAKING CHANGES
+
+* pass Language to highlight_iter callbacks ([#509](https://github.com/leandrocp/lumis/issues/509))
+
+### Features
+
+* add 135 themes ([#483](https://github.com/leandrocp/lumis/issues/483)) ([26b9d84](https://github.com/leandrocp/lumis/commit/26b9d84f096e5d9dd5064cf816f794fd578f5adf))
+* add zsh and llvm languages ([#510](https://github.com/leandrocp/lumis/issues/510)) ([fe8bb2c](https://github.com/leandrocp/lumis/commit/fe8bb2ce76634b75ac5624166216112aba56915a))
+* pass Language to highlight_iter callbacks ([#509](https://github.com/leandrocp/lumis/issues/509)) ([5cd345b](https://github.com/leandrocp/lumis/commit/5cd345baefe410a6966b8d855e87a440a1640c14))
+
+
+### Bug Fixes
+
+* add jinja_inline and remove disabled wasm parsers ([#508](https://github.com/leandrocp/lumis/issues/508)) ([4cb4527](https://github.com/leandrocp/lumis/commit/4cb45279783fd0eba25016c219a3a1feb8b09ac1))
+
 ## [0.2.2](https://github.com/leandrocp/lumis/compare/rust@v0.2.1...rust@v0.2.2) (2026-03-27)
 
 
