@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.0.3](https://github.com/leandrocp/lumis/compare/rust-cli@v0.0.2...rust-cli@v0.0.3) (2026-03-31)
+
+
+### Features
+
+* add BBCode formatter ([@andrea](https://github.com/andrea)TP) ([#471](https://github.com/leandrocp/lumis/issues/471)) ([8fdce4d](https://github.com/leandrocp/lumis/commit/8fdce4dbff7fcd6cd943d049c9f46588a77e1aa5))
+* add BBCode formatter ([@andrea](https://github.com/andrea)TP) ([#471](https://github.com/leandrocp/lumis/issues/471)) ([8fdce4d](https://github.com/leandrocp/lumis/commit/8fdce4dbff7fcd6cd943d049c9f46588a77e1aa5))
+* add bbcode_scoped formatter to Elixir and Javascript ([#478](https://github.com/leandrocp/lumis/issues/478)) ([1a34357](https://github.com/leandrocp/lumis/commit/1a343574b0239b5100d6b170124b586b0aabecfe))
+
 ## [0.0.2](https://github.com/leandrocp/lumis/compare/rust-cli@v0.0.1...rust-cli@v0.0.2) (2026-03-24)
 
 
