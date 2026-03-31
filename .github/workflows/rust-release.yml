@@ -59,68 +59,8 @@ jobs:
           echo "manifest=$manifest" >> "$GITHUB_OUTPUT"
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
-      - name: Wait for internal crates.io dependencies
-        env:
-          MANIFEST_PATH: ${{ steps.crate.outputs.manifest }}
-        run: |
-          set -euo pipefail
-
-          extract_required_version() {
-            local dep_line="$1"
-            local version
-            version=$(printf '%s\n' "$dep_line" | sed -nE 's/.*version *= *">=([^",]+).*/\1/p')
-            if [ -n "$version" ]; then
-              echo "$version"
-              return 0
-            fi
-
-            version=$(printf '%s\n' "$dep_line" | sed -nE 's/.*version *= *"[\^~]?([0-9]+\.[0-9]+\.[0-9]+)".*/\1/p')
-            echo "$version"
-          }
-
-          wait_for_version() {
-            local crate="$1"
-            local version="$2"
-            local deadline=$((SECONDS + 300))
-
-            echo "Waiting for crates.io to expose $crate $version"
-            while [ "$SECONDS" -lt "$deadline" ]; do
-              if curl --fail --silent --show-error "https://crates.io/api/v1/crates/$crate/$version" >/dev/null; then
-                echo "Found $crate $version on crates.io"
-                return 0
-              fi
-              sleep 5
-            done
-
-            echo "::error::Timed out waiting for crates.io package $crate $version required by $MANIFEST_PATH" >&2
-            exit 1
-          }
-
-          while IFS= read -r dep; do
-            line=$(grep -E "^[[:space:]]*$dep[[:space:]]*=" "$MANIFEST_PATH" || true)
-            [ -n "$line" ] || continue
-
-            required_version=$(extract_required_version "$line")
-            if [ -z "$required_version" ]; then
-              echo "::error::Could not determine required version for internal dependency $dep from: $line" >&2
-              echo "::error::Expected release-please cargo-workspace to rewrite the dependency to a concrete lower bound." >&2
-              exit 1
-            fi
-
-            wait_for_version "$dep" "$required_version"
-          done < <(printf '%s\n' lumis-build lumis-core | grep -vx "${{ steps.crate.outputs.name }}")
-
-      - name: Verify packaged crate resolution
-        env:
-          CRATE_NAME: ${{ steps.crate.outputs.name }}
-        run: |
-          set -euo pipefail
-          if ! cargo publish -p "$CRATE_NAME" --dry-run; then
-            echo "::error::cargo publish --dry-run failed for $CRATE_NAME" >&2
-            echo "::error::This usually means internal Rust dependency versions were not propagated into the release PR, or crates.io has not indexed the required internal crates yet." >&2
-            echo "::error::Check release-please manifest mode with the cargo-workspace plugin and confirm the tagged Cargo.toml points at the expected internal crate versions." >&2
-            exit 1
-          fi
+      - name: Verify publish prerequisites
+        run: ./scripts/verify-rust-publish.sh "${{ steps.crate.outputs.manifest }}" "${{ steps.crate.outputs.name }}"
 
       - name: Publish to crates.io
         run: cargo publish -p ${{ steps.crate.outputs.name }}
