@@ -3,7 +3,7 @@
   "crates/lumis-core": "0.0.3",
   "crates/lumis-build": "0.0.1",
   "crates/lumis-cli": "0.0.2",
-  "packages/javascript/lumis": "0.0.1",
+  "packages/javascript/lumis": "0.0.2",
   "packages/javascript/markdown-it-lumis": "0.0.1",
   "packages/javascript/rehype-lumis": "0.0.1",
   "packages/javascript/themes": "0.0.3",
