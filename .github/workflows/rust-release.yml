@@ -54,13 +54,13 @@ jobs:
               exit 1
               ;;
           esac
-          version=$(grep -m1 '^version = ' "$manifest" | sed -E 's/^version = "([^"]+)"$/\1/')
+          version=$(python3 ./scripts/verify-rust-publish.py print-version "$manifest")
           echo "name=$crate" >> "$GITHUB_OUTPUT"
           echo "manifest=$manifest" >> "$GITHUB_OUTPUT"
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
       - name: Verify publish prerequisites
-        run: ./scripts/verify-rust-publish.sh "${{ steps.crate.outputs.manifest }}" "${{ steps.crate.outputs.name }}"
+        run: python3 ./scripts/verify-rust-publish.py "${{ steps.crate.outputs.manifest }}" "${{ steps.crate.outputs.name }}"
 
       - name: Publish to crates.io
         run: cargo publish -p ${{ steps.crate.outputs.name }}
