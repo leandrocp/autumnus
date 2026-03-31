@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/leandrocp/lumis/compare/rust@v0.3.0...rust@v0.3.1) (2026-03-31)
+
+
+### Bug Fixes
+
+* depend on lumis-core &gt;=0.0.1 ([61af49a](https://github.com/leandrocp/lumis/commit/61af49ae9a910c6abe248291eee3d9cee3e017e2))
+
 ## [0.3.0](https://github.com/leandrocp/lumis/compare/rust@v0.2.2...rust@v0.3.0) (2026-03-30)
 
 
