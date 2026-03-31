@@ -1,2 +1,17 @@
 # Changelog
 
+## [0.0.2](https://github.com/leandrocp/lumis/compare/wasm-bundle-full@v0.0.1...wasm-bundle-full@v0.0.2) (2026-03-31)
+
+
+### Features
+
+* add zsh and llvm languages ([#510](https://github.com/leandrocp/lumis/issues/510)) ([fe8bb2c](https://github.com/leandrocp/lumis/commit/fe8bb2ce76634b75ac5624166216112aba56915a))
+* introduce lang bundles ([#484](https://github.com/leandrocp/lumis/issues/484)) ([5a30160](https://github.com/leandrocp/lumis/commit/5a30160531fb2509d705fa14af7b10a9343de2c0))
+* sync vendored with nvim-treesitter ([#112](https://github.com/leandrocp/lumis/issues/112)) ([fd94ea2](https://github.com/leandrocp/lumis/commit/fd94ea2852f2ac4bf176913d054e35c3e401f71a))
+
+
+### Bug Fixes
+
+* add jinja_inline and remove disabled wasm parsers ([#508](https://github.com/leandrocp/lumis/issues/508)) ([4cb4527](https://github.com/leandrocp/lumis/commit/4cb45279783fd0eba25016c219a3a1feb8b09ac1))
+
+## Changelog
