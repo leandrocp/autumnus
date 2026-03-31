@@ -12,5 +12,9 @@
   "packages/javascript/wasm-bundle-system": "0.0.2",
   "packages/javascript/wasm-bundle-backend": "0.0.2",
   "packages/javascript/wasm-bundle-full": "0.0.2",
-  "packages/elixir/lumis": "0.1.2"
+  "packages/elixir/lumis": "0.1.2",
+  "crates/autumnus": "0.9.1",
+  "crates/dev": "0.1.1",
+  "examples/ratatui": "0.0.1",
+  "packages/elixir/lumis/native/lumis_nif": "0.1.1"
 }

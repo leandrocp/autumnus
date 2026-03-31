@@ -4,6 +4,8 @@
 >
 > The API remains the same between `autumnus` v0.8.0 and `lumis` v0.2.0 - only the crate name changed.
 
+
+
 ## [0.9.0] - 2026-01-23
 
 ### Changed
