@@ -84,12 +84,6 @@ unsafe extern "C" {
     fn tree_sitter_angular() -> *const ();
     #[cfg(feature = "lang-astro")]
     fn tree_sitter_astro() -> *const ();
-    #[cfg(feature = "lang-caddy")]
-    fn tree_sitter_caddy() -> *const ();
-    #[cfg(feature = "lang-clojure")]
-    fn tree_sitter_clojure() -> *const ();
-    #[cfg(feature = "lang-commonlisp")]
-    fn tree_sitter_commonlisp() -> *const ();
     #[cfg(feature = "lang-csv")]
     fn tree_sitter_csv() -> *const ();
     #[cfg(feature = "lang-dart")]
@@ -108,10 +102,6 @@ unsafe extern "C" {
     fn tree_sitter_glimmer() -> *const ();
     #[cfg(feature = "lang-groovy")]
     fn tree_sitter_groovy() -> *const ();
-    #[cfg(feature = "lang-graphql")]
-    fn tree_sitter_graphql() -> *const ();
-    #[cfg(feature = "lang-hcl")]
-    fn tree_sitter_hcl() -> *const ();
     #[cfg(feature = "lang-http")]
     fn tree_sitter_http() -> *const ();
     #[cfg(feature = "lang-iex")]
@@ -132,18 +122,14 @@ unsafe extern "C" {
     fn tree_sitter_luadoc() -> *const ();
     #[cfg(feature = "lang-make")]
     fn tree_sitter_make() -> *const ();
-    #[cfg(feature = "lang-markdown")]
-    fn tree_sitter_markdown() -> *const ();
-    #[cfg(feature = "lang-markdown-inline")]
-    fn tree_sitter_markdown_inline() -> *const ();
     #[cfg(feature = "lang-dot")]
     fn tree_sitter_dot() -> *const ();
     #[cfg(feature = "lang-nim")]
     fn tree_sitter_nim() -> *const ();
-    #[cfg(feature = "lang-perl")]
-    fn tree_sitter_perl() -> *const ();
     #[cfg(feature = "lang-protobuf")]
     fn tree_sitter_proto() -> *const ();
+    #[cfg(feature = "lang-perl")]
+    fn tree_sitter_perl() -> *const ();
     #[cfg(feature = "lang-scss")]
     fn tree_sitter_scss() -> *const ();
     #[cfg(feature = "lang-sql")]
@@ -152,8 +138,6 @@ unsafe extern "C" {
     fn tree_sitter_surface() -> *const ();
     #[cfg(feature = "lang-terraform")]
     fn tree_sitter_terraform() -> *const ();
-    #[cfg(feature = "lang-typst")]
-    fn tree_sitter_typst() -> *const ();
     #[cfg(feature = "lang-nushell")]
     fn tree_sitter_nu() -> *const ();
     #[cfg(feature = "lang-vim")]
@@ -164,8 +148,6 @@ unsafe extern "C" {
     fn tree_sitter_wat() -> *const ();
     #[cfg(feature = "lang-wgsl")]
     fn tree_sitter_wgsl() -> *const ();
-    #[cfg(feature = "lang-zsh")]
-    fn tree_sitter_zsh() -> *const ();
 }
 
 include!(concat!(env!("OUT_DIR"), "/queries_constants.rs"));
@@ -413,7 +395,6 @@ static ARDUINO_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 #[cfg(feature = "lang-angular")]
 static ANGULAR_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_angular) };
-
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "angular",
@@ -500,10 +481,8 @@ static C_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-caddy")]
 static CADDY_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_caddy) };
-
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter::Language::new(tree_sitter_caddy::LANGUAGE),
         "caddy",
         CADDY_HIGHLIGHTS,
         CADDY_INJECTIONS,
@@ -516,10 +495,8 @@ static CADDY_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-clojure")]
 static CLOJURE_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_clojure) };
-
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter::Language::new(tree_sitter_clojure_orchard::LANGUAGE),
         "clojure",
         CLOJURE_HIGHLIGHTS,
         CLOJURE_INJECTIONS,
@@ -546,10 +523,8 @@ static COMMENT_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-commonlisp")]
 static COMMONLISP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_commonlisp) };
-
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter::Language::new(tree_sitter_commonlisp::LANGUAGE_COMMONLISP),
         "common_lisp",
         COMMONLISP_HIGHLIGHTS,
         COMMONLISP_INJECTIONS,
@@ -945,10 +920,8 @@ static GROOVY_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-graphql")]
 static GRAPHQL_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_graphql) };
-
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter::Language::new(tree_sitter_graphql::LANGUAGE),
         "graphql",
         GRAPHQL_HIGHLIGHTS,
         GRAPHQL_INJECTIONS,
@@ -975,9 +948,8 @@ static HASKELL_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-hcl")]
 static HCL_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_hcl) };
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter::Language::new(tree_sitter_hcl::LANGUAGE),
         "hcl",
         HCL_HIGHLIGHTS,
         HCL_INJECTIONS,
@@ -1165,6 +1137,7 @@ static JAVADOC_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 #[cfg(feature = "lang-jq")]
 static JQ_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_jq) };
+
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "jq",
@@ -1316,7 +1289,6 @@ static OCAML_INTERFACE_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(
 #[cfg(feature = "lang-make")]
 static MAKE_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_make) };
-
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "make",
@@ -1345,9 +1317,8 @@ static MATLAB_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-markdown")]
 static MARKDOWN_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_markdown) };
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter::Language::new(tree_sitter_md::LANGUAGE),
         "markdown",
         MARKDOWN_HIGHLIGHTS,
         MARKDOWN_INJECTIONS,
@@ -1374,10 +1345,8 @@ static NGINX_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-markdown-inline")]
 static MARKDOWN_INLINE_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn =
-        unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_markdown_inline) };
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter::Language::new(tree_sitter_md::INLINE_LANGUAGE),
         "markdown_inline",
         MARKDOWN_INLINE_HIGHLIGHTS,
         MARKDOWN_INLINE_INJECTIONS,
@@ -1436,7 +1405,6 @@ static NUSHELL_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 #[cfg(feature = "lang-perl")]
 static PERL_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_perl) };
-
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "perl",
@@ -1837,10 +1805,8 @@ static TSX_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-typst")]
 static TYPST_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_typst) };
-
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter::Language::new(codebook_tree_sitter_typst::LANGUAGE),
         "typst",
         TYPST_HIGHLIGHTS,
         TYPST_INJECTIONS,
@@ -1973,9 +1939,8 @@ static ZIG_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-zsh")]
 static ZSH_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_zsh) };
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter::Language::new(tree_sitter_zsh::LANGUAGE),
         "zsh",
         ZSH_HIGHLIGHTS,
         ZSH_INJECTIONS,

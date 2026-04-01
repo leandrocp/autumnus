@@ -39,7 +39,7 @@ path = "runtime/queries/wat"
 [parsers.angular]
 git = "https://github.com/dlvandenberg/tree-sitter-angular.git"
 rev = "f0d0685701b70883fa2dfe94ee7dc27965cab841"
-version = "0.1.0"
+version = "0.8.4"
 globs = ["*.angular", "component.html"]
 
 [parsers.asm]
@@ -88,13 +88,15 @@ shebang = ["tcc"]
 [parsers.caddy]
 git = "https://github.com/opa-oz/tree-sitter-caddy.git"
 rev = "2686186edb61be47960431c93a204fb249681360"
+crate = "tree-sitter-caddy"
 version = "0.1.0"
 globs = ["Caddyfile", "caddyfile"]
 
 [parsers.clojure]
 git = "https://github.com/sogaiu/tree-sitter-clojure.git"
 rev = "e43eff80d17cf34852dcd92ca5e6986d23a7040f"
-version = "0.1.0"
+crate = "tree-sitter-clojure-orchard"
+version = "0.2.5"
 globs = ["*.bb", "*.boot", "*.clj", "*.cljc", "*.clje", "*.cljs", "*.cljx", "*.edn", "*.joke", "*.joker"]
 emacs = ["clojure"]
 
@@ -115,7 +117,8 @@ version = "0.3.0"
 [parsers.commonlisp]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-commonlisp.git"
 rev = "32323509b3d9fe96607d151c2da2c9009eb13a2f"
-version = "0.1.0"
+crate = "tree-sitter-commonlisp"
+version = "0.4.1"
 variant = "CommonLisp"
 display_name = "Common Lisp"
 globs = ["*.lisp", "*.lsp", "*.asd"]
@@ -205,7 +208,7 @@ globs = ["*.ejs"]
 git = "https://github.com/elixir-lang/tree-sitter-elixir.git"
 rev = "86ec2ed45d6d9433b4e0b88cd3d96796bd45625f"
 crate = "tree-sitter-elixir"
-version = "0.3.4"
+version = "0.3.5"
 globs = ["*.ex", "*.exs"]
 emacs = ["elixir"]
 shebang = ["elixir"]
@@ -278,6 +281,7 @@ emacs = ["go"]
 [parsers.graphql]
 git = "https://github.com/bkegley/tree-sitter-graphql.git"
 rev = "5e66e961eee421786bdda8495ed1db045e06b5fe"
+crate = "tree-sitter-graphql"
 version = "0.1.0"
 variant = "GraphQL"
 
@@ -293,7 +297,8 @@ shebang = ["runghc", "runhaskell", "runhugs"]
 [parsers.hcl]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-hcl.git"
 rev = "64ad62785d442eb4d45df3a1764962dafd5bc98b"
-version = "1.2.0"
+crate = "tree-sitter-hcl"
+version = "1.1.0"
 variant = "HCL"
 globs = ["*.hcl", "*.nomad", "*.workflow"]
 emacs = ["hcl"]
@@ -404,6 +409,7 @@ globs = ["*liquid"]
 [parsers.llvm]
 git = "https://github.com/benwilliamgraham/tree-sitter-llvm.git"
 rev = "2914786ae6774d4c4e25a230f4afe16aa68fe1c1"
+crate = "tree-sitter-llvm"
 version = "1.1.0"
 display_name = "LLVM"
 globs = ["*.llvm", "*.ll"]
@@ -412,7 +418,7 @@ globs = ["*.llvm", "*.ll"]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-lua.git"
 rev = "816840c592ab973500ae9750763c707b447e7fef"
 crate = "tree-sitter-lua"
-version = "0.4.1"
+version = "0.5.0"
 globs = ["*.lua"]
 
 [parsers.make]
@@ -429,14 +435,16 @@ globs = [
 [parsers.markdown]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-markdown.git"
 rev = "cee71b8288f2ec09c29415219ac15a654bd571b9"
-version = "0.1.0"
+crate = "tree-sitter-md"
+version = "0.5.3"
 location = "tree-sitter-markdown"
 globs = ["*.md", ".MD", "README", "LICENSE"]
 
 [parsers.markdown_inline]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-markdown.git"
 rev = "cee71b8288f2ec09c29415219ac15a654bd571b9"
-version = "0.1.0"
+crate = "tree-sitter-md"
+version = "0.5.3"
 location = "tree-sitter-markdown-inline"
 wasm_name = "tree-sitter-markdown_inline"
 variant = "MarkdownInline"
@@ -516,7 +524,7 @@ globs = ["*.php", "*.phtml", "*.php3", "*.php4", "*.php5", "*.php7", "*.phps"]
 git = "https://github.com/airbus-cert/tree-sitter-powershell.git"
 rev = "7212f47716ced384ac012b2cc428fd9f52f7c5d4"
 crate = "tree-sitter-powershell"
-version = "0.25.10"
+version = "0.26.3"
 variant = "PowerShell"
 globs = ["*.ps1", "*.psm1"]
 
@@ -566,7 +574,7 @@ shebang = ["ruby", "macruby", "rake", "jruby", "rbx"]
 git = "https://github.com/tree-sitter/tree-sitter-rust.git"
 rev = "18b0515fca567f5a10aee9978c6d2640e878671a"
 crate = "tree-sitter-rust"
-version = "0.24.0"
+version = "0.24.2"
 globs = ["*.rs"]
 emacs = ["rust"]
 
@@ -574,7 +582,7 @@ emacs = ["rust"]
 git = "https://github.com/tree-sitter/tree-sitter-scala.git"
 rev = "f02174244f72ea7fc96f34cdd445beb6142d348c"
 crate = "tree-sitter-scala"
-version = "0.24.0"
+version = "0.25.0"
 globs = ["*.scala", "*.sbt", "*.sc"]
 emacs = ["scala"]
 
@@ -651,7 +659,8 @@ shebang = ["deno", "ts-node"]
 [parsers.typst]
 git = "https://github.com/uben0/tree-sitter-typst.git"
 rev = "46cf4ded12ee974a70bf8457263b67ad7ee0379d"
-version = "0.1.0"
+crate = "codebook-tree-sitter-typst"
+version = "0.12.1"
 globs = ["*.typ", "*.typst"]
 
 [parsers.vim]
@@ -834,6 +843,7 @@ globs = ["*.wgsl"]
 [parsers.zsh]
 git = "https://github.com/georgeharker/tree-sitter-zsh.git"
 rev = "bd344c23a7683e293d077c6648e88f209782fedb"
+crate = "tree-sitter-zsh"
 version = "0.63.1"
 display_name = "Zsh"
 globs = ["*.zsh", ".zshrc", ".zshenv", ".zprofile", ".zlogin", ".zlogout", "zshrc", "zshenv", "zprofile", "zlogin", "zlogout"]
@@ -914,7 +924,7 @@ globs = ["*.json5"]
 [parsers.just]
 git = "https://github.com/casey/tree-sitter-just.git"
 rev = "d9da862c156020c1a83d3c6ccdda32be6d8a5d4a"
-version = "0.1.0"
+version = "0.2.0"
 globs = ["*.just", ".just", ".justfile", ".JUSTFILE", ".Justfile", "justfile", "JUSTFILE", "Justfile"]
 
 [parsers.matlab]
