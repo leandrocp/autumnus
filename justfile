@@ -113,6 +113,7 @@ setup:
 
     echo "Generating JS language/runtime artifacts..."
     (cd packages/javascript && pnpm --filter @lumis-sh/lumis build:generate)
+    (cd packages/javascript && pnpm run build:wasm-bundles)
     echo ""
 
     echo "Fetching Elixir dependencies..."

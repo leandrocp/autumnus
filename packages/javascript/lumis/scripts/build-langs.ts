@@ -3,7 +3,7 @@
  * Lua patterns to JS regex, and emits one TypeScript module per language.
  *
  * Preprocessing (inheritance, text replacements, overwrite merging) is done by
- * `just langs-preprocess-queries`, which is run by `pnpm run build:generate`.
+ * `just langs-preprocess-queries`, which is run before the JS generate commands.
  *
  * Language list and metadata (aliases, wasm_name, query_name) are read from
  * languages.toml at the repo root.
@@ -208,6 +208,15 @@ function main() {
 
   const config = readLanguagesToml()
   const tsCli = treeSitterWasmCli()
+  const expectedLanguageIds = new Set([...Object.keys(config.parsers), 'plaintext'])
+
+  for (const entry of fs.readdirSync(OUT_DIR)) {
+    if (!entry.endsWith('.ts')) continue
+    const id = path.parse(entry).name
+    if (expectedLanguageIds.has(id)) continue
+    fs.unlinkSync(path.join(OUT_DIR, entry))
+    console.log(`  removed stale language: langs/${entry}`)
+  }
 
   for (const [id, entry] of Object.entries(config.parsers)) {
     const queryName = entry.query_name || id
