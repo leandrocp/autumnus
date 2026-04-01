@@ -1,6 +1,7 @@
 [workspace]
 resolver = "2"
 members = ["crates/*", "examples/ratatui", "packages/elixir/lumis/native/lumis_nif"]
+exclude = ["crates/autumnus"]
 
 [workspace.package]
 edition = "2021"

@@ -89,7 +89,7 @@ jobs:
         with:
           tool: cargo-nextest
       - uses: Swatinem/rust-cache@v2
-      - run: cargo nextest run -p lumis --test formatter_conformance
+      - run: cargo nextest run -p lumis --test formatter_conformance --run-ignored ignored-only
 
   cli:
     name: CLI conformance
@@ -106,7 +106,7 @@ jobs:
         with:
           tool: cargo-nextest
       - uses: Swatinem/rust-cache@v2
-      - run: cargo nextest run -p lumis-cli --test conformance
+      - run: cargo nextest run -p lumis-cli --test conformance --run-ignored ignored-only
 
   javascript:
     name: JS conformance
@@ -130,7 +130,7 @@ jobs:
         working-directory: packages/javascript
       - run: pnpm --filter @lumis-sh/lumis build
         working-directory: packages/javascript
-      - run: pnpm vitest run test/conformance.test.ts
+      - run: pnpm test:conformance
         working-directory: packages/javascript/lumis
 
   elixir:
@@ -160,5 +160,5 @@ jobs:
           restore-keys: ${{ runner.os }}-conformance-mix-
       - run: mix deps.get
         working-directory: packages/elixir/lumis
-      - run: mix test test/conformance_test.exs
+      - run: mix test --include conformance test/conformance_test.exs
         working-directory: packages/elixir/lumis

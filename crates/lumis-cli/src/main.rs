@@ -1,7 +1,7 @@
 mod gen_theme;
-#[allow(clippy::all, dead_code)]
-mod highlight;
 mod registry;
+#[allow(clippy::all, dead_code)]
+mod vendor;
 
 use anyhow::Result;
 use clap::{ArgAction, Parser, Subcommand, ValueEnum};
@@ -746,7 +746,7 @@ fn highlight_to_events(
         .get(lang_name)
         .ok_or_else(|| anyhow::anyhow!("no config for language '{}'", lang_name))?;
 
-    let mut highlighter = crate::highlight::Highlighter::new();
+    let mut highlighter = crate::vendor::tree_sitter_highlight::Highlighter::new();
 
     let wasm_store = reg.new_wasm_store()?;
     highlighter
@@ -769,10 +769,10 @@ fn highlight_to_events(
         let event = event.map_err(|e| anyhow::anyhow!("highlight event error: {:?}", e))?;
 
         match event {
-            crate::highlight::HighlightEvent::Source { start, end } => {
+            crate::vendor::tree_sitter_highlight::HighlightEvent::Source { start, end } => {
                 core_events.push(HighlightEvent::Source { start, end });
             }
-            crate::highlight::HighlightEvent::HighlightStart {
+            crate::vendor::tree_sitter_highlight::HighlightEvent::HighlightStart {
                 highlight,
                 language,
             } => {
@@ -781,7 +781,7 @@ fn highlight_to_events(
                     language,
                 });
             }
-            crate::highlight::HighlightEvent::HighlightEnd => {
+            crate::vendor::tree_sitter_highlight::HighlightEvent::HighlightEnd => {
                 core_events.push(HighlightEvent::End);
             }
         }

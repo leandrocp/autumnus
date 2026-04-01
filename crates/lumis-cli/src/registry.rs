@@ -1,4 +1,4 @@
-use crate::highlight::HighlightConfiguration;
+use crate::vendor::tree_sitter_highlight::HighlightConfiguration;
 use anyhow::{bail, Context, Result};
 use lumis_core::highlights::HIGHLIGHT_NAMES;
 use lumis_core::languages::Language;

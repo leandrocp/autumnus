@@ -1,5 +1,6 @@
 defmodule Lumis.ConformanceTest do
   use ExUnit.Case, async: true
+  @moduletag :conformance
 
   @conformance_dir Path.expand("../../../../fixtures/conformance", __DIR__)
 

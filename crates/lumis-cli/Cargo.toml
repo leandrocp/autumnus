@@ -19,7 +19,7 @@ doc = false
 
 [dependencies]
 lumis-core = { path = "../lumis-core", version = "0.0.3", features = ["all-languages"] }
-tree-sitter = { version = "0.25", features = ["wasm"] }
+tree-sitter = { version = "^0.26", features = ["wasm"] }
 streaming-iterator = "0.1"
 thiserror = "2"
 clap = { version = "4", features = ["derive", "env"] }
