@@ -752,7 +752,6 @@ globs = [".editorconfig"]
 [parsers.gitattributes]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-gitattributes.git"
 rev = "1b7af09d45b579f9f288453b95ad555f1f431645"
-crate = "tree-sitter-gitattributes"
 version = "0.1.6"
 display_name = "Git Attributes"
 globs = [".gitattributes", "gitattributes"]
@@ -782,7 +781,6 @@ globs = ["*.jq"]
 [parsers.kdl]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-kdl.git"
 rev = "b37e3d58e5c5cf8d739b315d6114e02d42e66664"
-crate = "tree-sitter-kdl"
 version = "1.1.0"
 display_name = "KDL"
 globs = ["*.kdl"]
@@ -797,7 +795,6 @@ globs = ["*.kdl"]
 [parsers.luadoc]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-luadoc.git"
 rev = "873612aadd3f684dd4e631bdf42ea8990c57634e"
-crate = "tree-sitter-luadoc"
 version = "1.1.0"
 display_name = "LuaDoc"
 
@@ -923,7 +920,6 @@ version = "0.12.0"
 [parsers.json5]
 git = "https://github.com/Joakker/tree-sitter-json5.git"
 rev = "aa630ef48903ab99e406a8acd2e2933077cc34e1"
-crate = "tree-sitter-json5"
 version = "0.1.0"
 variant = "JSON5"
 display_name = "JSON5"

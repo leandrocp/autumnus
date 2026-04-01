@@ -1,0 +1,433 @@
+[
+  {
+    "type": "ansi_c_escape",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "attribute",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "attr_name",
+          "named": true
+        },
+        {
+          "type": "attr_reset",
+          "named": true
+        },
+        {
+          "type": "attr_set",
+          "named": true
+        },
+        {
+          "type": "attr_unset",
+          "named": true
+        },
+        {
+          "type": "boolean_value",
+          "named": true
+        },
+        {
+          "type": "builtin_attr",
+          "named": true
+        },
+        {
+          "type": "ignored_value",
+          "named": true
+        },
+        {
+          "type": "string_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "builtin_attr",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "class_range",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "comment",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "file",
+    "named": true,
+    "root": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "attribute",
+          "named": true
+        },
+        {
+          "type": "comment",
+          "named": true
+        },
+        {
+          "type": "macro_def",
+          "named": true
+        },
+        {
+          "type": "pattern",
+          "named": true
+        },
+        {
+          "type": "quoted_pattern",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "ignored_value",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "attr_set",
+          "named": true
+        },
+        {
+          "type": "boolean_value",
+          "named": true
+        },
+        {
+          "type": "string_value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "macro_def",
+    "named": true,
+    "fields": {
+      "macro_name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "attr_name",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "attribute",
+          "named": true
+        },
+        {
+          "type": "macro_tag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "pattern",
+    "named": true,
+    "fields": {
+      "absolute": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "dir_sep",
+            "named": true
+          }
+        ]
+      },
+      "relative": {
+        "multiple": true,
+        "required": false,
+        "types": [
+          {
+            "type": "dir_sep",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "escaped_char",
+          "named": true
+        },
+        {
+          "type": "pattern_negation",
+          "named": true
+        },
+        {
+          "type": "range_notation",
+          "named": true
+        },
+        {
+          "type": "redundant_escape",
+          "named": true
+        },
+        {
+          "type": "trailing_slash",
+          "named": true
+        },
+        {
+          "type": "wildcard",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "quoted_pattern",
+    "named": true,
+    "fields": {
+      "absolute": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "dir_sep",
+            "named": true
+          }
+        ]
+      },
+      "relative": {
+        "multiple": true,
+        "required": false,
+        "types": [
+          {
+            "type": "dir_sep",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "ansi_c_escape",
+          "named": true
+        },
+        {
+          "type": "escaped_char",
+          "named": true
+        },
+        {
+          "type": "pattern_negation",
+          "named": true
+        },
+        {
+          "type": "range_notation",
+          "named": true
+        },
+        {
+          "type": "redundant_escape",
+          "named": true
+        },
+        {
+          "type": "trailing_slash",
+          "named": true
+        },
+        {
+          "type": "wildcard",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "range_notation",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "ansi_c_escape",
+          "named": true
+        },
+        {
+          "type": "character_class",
+          "named": true
+        },
+        {
+          "type": "class_range",
+          "named": true
+        },
+        {
+          "type": "range_negation",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "\u0000",
+    "named": false
+  },
+  {
+    "type": "\"",
+    "named": false
+  },
+  {
+    "type": "#",
+    "named": false
+  },
+  {
+    "type": "-",
+    "named": false
+  },
+  {
+    "type": "[",
+    "named": false
+  },
+  {
+    "type": "]",
+    "named": false
+  },
+  {
+    "type": "attr_name",
+    "named": true
+  },
+  {
+    "type": "attr_reset",
+    "named": true
+  },
+  {
+    "type": "attr_set",
+    "named": true
+  },
+  {
+    "type": "attr_unset",
+    "named": true
+  },
+  {
+    "type": "binary",
+    "named": false
+  },
+  {
+    "type": "boolean_value",
+    "named": true
+  },
+  {
+    "type": "character_class",
+    "named": true
+  },
+  {
+    "type": "crlf",
+    "named": false
+  },
+  {
+    "type": "delta",
+    "named": false
+  },
+  {
+    "type": "diff",
+    "named": false
+  },
+  {
+    "type": "dir_sep",
+    "named": true
+  },
+  {
+    "type": "encoding",
+    "named": false
+  },
+  {
+    "type": "eol",
+    "named": false
+  },
+  {
+    "type": "escaped_char",
+    "named": true
+  },
+  {
+    "type": "export-ignore",
+    "named": false
+  },
+  {
+    "type": "export-subst",
+    "named": false
+  },
+  {
+    "type": "filter",
+    "named": false
+  },
+  {
+    "type": "ident",
+    "named": false
+  },
+  {
+    "type": "macro_tag",
+    "named": true
+  },
+  {
+    "type": "merge",
+    "named": false
+  },
+  {
+    "type": "pattern_negation",
+    "named": true
+  },
+  {
+    "type": "range_negation",
+    "named": true
+  },
+  {
+    "type": "redundant_escape",
+    "named": true
+  },
+  {
+    "type": "string_value",
+    "named": true
+  },
+  {
+    "type": "text",
+    "named": false
+  },
+  {
+    "type": "trailing_slash",
+    "named": true
+  },
+  {
+    "type": "whitespace",
+    "named": false
+  },
+  {
+    "type": "wildcard",
+    "named": true
+  },
+  {
+    "type": "working-tree-encoding",
+    "named": false
+  }
+]

@@ -98,8 +98,6 @@ unsafe extern "C" {
     fn tree_sitter_gitattributes() -> *const ();
     #[cfg(feature = "lang-glimmer")]
     fn tree_sitter_glimmer() -> *const ();
-    #[cfg(feature = "lang-groovy")]
-    fn tree_sitter_groovy() -> *const ();
     #[cfg(feature = "lang-http")]
     fn tree_sitter_http() -> *const ();
     #[cfg(feature = "lang-iex")]
@@ -225,8 +223,6 @@ impl LanguageConfig for Language {
             Language::Glsl => &GLSL_CONFIG,
             #[cfg(feature = "lang-go")]
             Language::Go => &GO_CONFIG,
-            #[cfg(feature = "lang-groovy")]
-            Language::Groovy => &GROOVY_CONFIG,
             #[cfg(feature = "lang-graphql")]
             Language::GraphQL => &GRAPHQL_CONFIG,
             #[cfg(feature = "lang-haskell")]
@@ -824,7 +820,6 @@ static FSHARP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-gitattributes")]
 static GITATTRIBUTES_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let _ = tree_sitter_gitattributes::NODE_TYPES;
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(unsafe {
             tree_sitter_language::LanguageFn::from_raw(tree_sitter_gitattributes)
@@ -893,21 +888,6 @@ static GO_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         GO_LOCALS,
     )
     .expect("failed to create go highlight configuration");
-    config.configure(&HIGHLIGHT_NAMES);
-    config
-});
-
-#[cfg(feature = "lang-groovy")]
-static GROOVY_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_groovy) };
-    let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
-        "groovy",
-        GROOVY_HIGHLIGHTS,
-        GROOVY_INJECTIONS,
-        GROOVY_LOCALS,
-    )
-    .expect("failed to create groovy highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
@@ -1146,7 +1126,6 @@ static JQ_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-kdl")]
 static KDL_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let _ = tree_sitter_kdl::NODE_TYPES;
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(unsafe {
             tree_sitter_language::LanguageFn::from_raw(tree_sitter_kdl)
@@ -1224,7 +1203,6 @@ static LUA_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-luadoc")]
 static LUADOC_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let _ = tree_sitter_luadoc::NODE_TYPES;
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(unsafe {
             tree_sitter_language::LanguageFn::from_raw(tree_sitter_luadoc)
@@ -2163,8 +2141,6 @@ mod tests {
         test_glsl_config_loads => (Language::Glsl, "GLSL", "glsl.glsl");
         #[cfg(feature = "lang-go")]
         test_go_config_loads => (Language::Go, "Go", "go.go");
-        #[cfg(feature = "lang-groovy")]
-        test_groovy_config_loads => (Language::Groovy, "Groovy", "groovy.groovy");
         #[cfg(feature = "lang-graphql")]
         test_graphql_config_loads => (Language::GraphQL, "GraphQL", "graphql.graphql");
         #[cfg(feature = "lang-haskell")]
