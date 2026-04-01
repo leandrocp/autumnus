@@ -39,7 +39,8 @@ path = "runtime/queries/wat"
 [parsers.angular]
 git = "https://github.com/dlvandenberg/tree-sitter-angular.git"
 rev = "f0d0685701b70883fa2dfe94ee7dc27965cab841"
-version = "0.1.0"
+crate = "tree-sitter-angular"
+version = "0.8.4"
 globs = ["*.angular", "component.html"]
 
 [parsers.asm]
@@ -88,12 +89,14 @@ shebang = ["tcc"]
 [parsers.caddy]
 git = "https://github.com/opa-oz/tree-sitter-caddy.git"
 rev = "2686186edb61be47960431c93a204fb249681360"
+crate = "tree-sitter-caddy"
 version = "0.1.0"
 globs = ["Caddyfile", "caddyfile"]
 
 [parsers.clojure]
 git = "https://github.com/sogaiu/tree-sitter-clojure.git"
 rev = "e43eff80d17cf34852dcd92ca5e6986d23a7040f"
+crate = "tree-sitter-clojure"
 version = "0.1.0"
 globs = ["*.bb", "*.boot", "*.clj", "*.cljc", "*.clje", "*.cljs", "*.cljx", "*.edn", "*.joke", "*.joker"]
 emacs = ["clojure"]
@@ -115,7 +118,8 @@ version = "0.3.0"
 [parsers.commonlisp]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-commonlisp.git"
 rev = "32323509b3d9fe96607d151c2da2c9009eb13a2f"
-version = "0.1.0"
+crate = "tree-sitter-commonlisp"
+version = "0.4.1"
 variant = "CommonLisp"
 display_name = "Common Lisp"
 globs = ["*.lisp", "*.lsp", "*.asd"]
@@ -278,6 +282,7 @@ emacs = ["go"]
 [parsers.graphql]
 git = "https://github.com/bkegley/tree-sitter-graphql.git"
 rev = "5e66e961eee421786bdda8495ed1db045e06b5fe"
+crate = "tree-sitter-graphql"
 version = "0.1.0"
 variant = "GraphQL"
 
@@ -404,6 +409,7 @@ globs = ["*liquid"]
 [parsers.llvm]
 git = "https://github.com/benwilliamgraham/tree-sitter-llvm.git"
 rev = "2914786ae6774d4c4e25a230f4afe16aa68fe1c1"
+crate = "tree-sitter-llvm"
 version = "1.1.0"
 display_name = "LLVM"
 globs = ["*.llvm", "*.ll"]
@@ -914,7 +920,8 @@ globs = ["*.json5"]
 [parsers.just]
 git = "https://github.com/casey/tree-sitter-just.git"
 rev = "d9da862c156020c1a83d3c6ccdda32be6d8a5d4a"
-version = "0.1.0"
+crate = "tree-sitter-just"
+version = "0.2.0"
 globs = ["*.just", ".just", ".justfile", ".JUSTFILE", ".Justfile", "justfile", "JUSTFILE", "Justfile"]
 
 [parsers.matlab]

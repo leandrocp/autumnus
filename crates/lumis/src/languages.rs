@@ -80,16 +80,8 @@ use std::sync::LazyLock;
 unsafe extern "C" {
     #[cfg(feature = "lang-editorconfig")]
     fn tree_sitter_editorconfig() -> *const ();
-    #[cfg(feature = "lang-angular")]
-    fn tree_sitter_angular() -> *const ();
     #[cfg(feature = "lang-astro")]
     fn tree_sitter_astro() -> *const ();
-    #[cfg(feature = "lang-caddy")]
-    fn tree_sitter_caddy() -> *const ();
-    #[cfg(feature = "lang-clojure")]
-    fn tree_sitter_clojure() -> *const ();
-    #[cfg(feature = "lang-commonlisp")]
-    fn tree_sitter_commonlisp() -> *const ();
     #[cfg(feature = "lang-csv")]
     fn tree_sitter_csv() -> *const ();
     #[cfg(feature = "lang-dart")]
@@ -108,8 +100,6 @@ unsafe extern "C" {
     fn tree_sitter_glimmer() -> *const ();
     #[cfg(feature = "lang-groovy")]
     fn tree_sitter_groovy() -> *const ();
-    #[cfg(feature = "lang-graphql")]
-    fn tree_sitter_graphql() -> *const ();
     #[cfg(feature = "lang-hcl")]
     fn tree_sitter_hcl() -> *const ();
     #[cfg(feature = "lang-http")]
@@ -412,10 +402,8 @@ static ARDUINO_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-angular")]
 static ANGULAR_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_angular) };
-
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter_angular::language(),
         "angular",
         ANGULAR_HIGHLIGHTS,
         ANGULAR_INJECTIONS,
@@ -500,10 +488,8 @@ static C_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-caddy")]
 static CADDY_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_caddy) };
-
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter::Language::new(tree_sitter_caddy::LANGUAGE),
         "caddy",
         CADDY_HIGHLIGHTS,
         CADDY_INJECTIONS,
@@ -516,10 +502,8 @@ static CADDY_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-clojure")]
 static CLOJURE_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_clojure) };
-
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter::Language::new(tree_sitter_clojure::LANGUAGE),
         "clojure",
         CLOJURE_HIGHLIGHTS,
         CLOJURE_INJECTIONS,
@@ -546,10 +530,8 @@ static COMMENT_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-commonlisp")]
 static COMMONLISP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_commonlisp) };
-
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter::Language::new(tree_sitter_commonlisp::LANGUAGE_COMMONLISP),
         "common_lisp",
         COMMONLISP_HIGHLIGHTS,
         COMMONLISP_INJECTIONS,
@@ -945,10 +927,8 @@ static GROOVY_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-graphql")]
 static GRAPHQL_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_graphql) };
-
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter::Language::new(tree_sitter_graphql::LANGUAGE),
         "graphql",
         GRAPHQL_HIGHLIGHTS,
         GRAPHQL_INJECTIONS,
@@ -1165,6 +1145,7 @@ static JAVADOC_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 #[cfg(feature = "lang-jq")]
 static JQ_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_jq) };
+
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "jq",
