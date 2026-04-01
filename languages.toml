@@ -298,7 +298,8 @@ shebang = ["runghc", "runhaskell", "runhugs"]
 [parsers.hcl]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-hcl.git"
 rev = "64ad62785d442eb4d45df3a1764962dafd5bc98b"
-version = "1.2.0"
+crate = "tree-sitter-hcl"
+version = "1.1.0"
 variant = "HCL"
 globs = ["*.hcl", "*.nomad", "*.workflow"]
 emacs = ["hcl"]
@@ -657,7 +658,8 @@ shebang = ["deno", "ts-node"]
 [parsers.typst]
 git = "https://github.com/uben0/tree-sitter-typst.git"
 rev = "46cf4ded12ee974a70bf8457263b67ad7ee0379d"
-version = "0.1.0"
+crate = "codebook-tree-sitter-typst"
+version = "0.12.1"
 globs = ["*.typ", "*.typst"]
 
 [parsers.vim]
@@ -840,6 +842,7 @@ globs = ["*.wgsl"]
 [parsers.zsh]
 git = "https://github.com/georgeharker/tree-sitter-zsh.git"
 rev = "bd344c23a7683e293d077c6648e88f209782fedb"
+crate = "tree-sitter-zsh"
 version = "0.63.1"
 display_name = "Zsh"
 globs = ["*.zsh", ".zshrc", ".zshenv", ".zprofile", ".zlogin", ".zlogout", "zshrc", "zshenv", "zprofile", "zlogin", "zlogout"]
