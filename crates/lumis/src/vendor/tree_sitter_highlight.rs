@@ -6,7 +6,6 @@
 //
 // Current local deltas:
 // - `HighlightEvent::HighlightStart` carries `language: String`
-// - tree-sitter 0.25 compatibility adjustments remain in place
 // - `String::from_utf8_lossy` is used where upstream uses newer tree-sitter helpers
 // - Only exclude named children from injections like nvim (https://github.com/leandrocp/lumis/issues/429)
 //
@@ -553,7 +552,7 @@ impl<'a> HighlightIterLayer<'a> {
                     .set_language(&config.language)
                     .map_err(|_| Error::InvalidLanguage)?;
 
-                // Note: tree-sitter 0.25 uses bool return, not ControlFlow
+                // tree-sitter 0.26 uses ControlFlow for cancellation checks.
                 let tree = highlighter
                     .parser
                     .parse_with_options(
@@ -567,9 +566,13 @@ impl<'a> HighlightIterLayer<'a> {
                         None,
                         Some(ParseOptions::new().progress_callback(&mut |_| {
                             if let Some(cancellation_flag) = cancellation_flag {
-                                cancellation_flag.load(Ordering::SeqCst) != 0
+                                if cancellation_flag.load(Ordering::SeqCst) != 0 {
+                                    ops::ControlFlow::Break(())
+                                } else {
+                                    ops::ControlFlow::Continue(())
+                                }
                             } else {
-                                false
+                                ops::ControlFlow::Continue(())
                             }
                         })),
                     )

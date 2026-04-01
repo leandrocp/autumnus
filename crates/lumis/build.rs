@@ -415,12 +415,12 @@ fn gen_conformance_tests() {
 mod {ident} {{
     use super::*;
     fn fixture() -> Fixture {{ load_fixture("{name}") }}
-    #[test] fn events() {{ check_events(&fixture()); }}
-    #[test] fn html_inline() {{ check_html_inline(&fixture()); }}
-    #[test] fn html_linked() {{ check_html_linked(&fixture()); }}
-    #[test] fn html_multi_themes() {{ check_html_multi_themes(&fixture()); }}
-    #[test] fn terminal() {{ check_terminal(&fixture()); }}
-    #[test] fn bbcode_scoped() {{ check_bbcode(&fixture()); }}
+    #[test] #[ignore = "conformance"] fn conformance_events() {{ check_events(&fixture()); }}
+    #[test] #[ignore = "conformance"] fn conformance_html_inline() {{ check_html_inline(&fixture()); }}
+    #[test] #[ignore = "conformance"] fn conformance_html_linked() {{ check_html_linked(&fixture()); }}
+    #[test] #[ignore = "conformance"] fn conformance_html_multi_themes() {{ check_html_multi_themes(&fixture()); }}
+    #[test] #[ignore = "conformance"] fn conformance_terminal() {{ check_terminal(&fixture()); }}
+    #[test] #[ignore = "conformance"] fn conformance_bbcode_scoped() {{ check_bbcode(&fixture()); }}
 }}
 "#
             ));
