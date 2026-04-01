@@ -1,4 +1,5 @@
 /target
+/crates/dev/target
 /tmp
 /nvim/
 /themes/nvim
