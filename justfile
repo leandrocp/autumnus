@@ -141,16 +141,16 @@ test-conformance:
     #!/usr/bin/env bash
     set -euo pipefail
     echo "Rust conformance..."
-    cargo test -p lumis --test formatter_conformance
+    cargo test -p lumis --test formatter_conformance -- --ignored
     echo ""
     echo "CLI conformance..."
-    cargo test -p lumis-cli --test conformance
+    cargo test -p lumis-cli --test conformance -- --ignored
     echo ""
     echo "JS conformance..."
-    (cd packages/javascript/lumis && pnpm vitest run test/conformance.test.ts)
+    (cd packages/javascript/lumis && pnpm test:conformance)
     echo ""
     echo "Elixir conformance..."
-    (cd packages/elixir/lumis && LUMIS_BUILD=1 mix test test/conformance_test.exs)
+    (cd packages/elixir/lumis && LUMIS_BUILD=1 mix test --include conformance test/conformance_test.exs)
 
 # Run all linters
 lint:
