@@ -1138,7 +1138,6 @@ dependencies = [
  "thiserror",
  "toml",
  "tree-sitter",
- "tree-sitter-angular",
  "tree-sitter-arduino",
  "tree-sitter-asm",
  "tree-sitter-bash",
@@ -1146,7 +1145,7 @@ dependencies = [
  "tree-sitter-c",
  "tree-sitter-c-sharp",
  "tree-sitter-caddy",
- "tree-sitter-clojure",
+ "tree-sitter-clojure-orchard",
  "tree-sitter-cmake",
  "tree-sitter-comment",
  "tree-sitter-commonlisp",
@@ -1175,11 +1174,11 @@ dependencies = [
  "tree-sitter-jinja",
  "tree-sitter-json",
  "tree-sitter-julia",
- "tree-sitter-just",
  "tree-sitter-language",
  "tree-sitter-llvm",
  "tree-sitter-lua",
  "tree-sitter-matlab",
+ "tree-sitter-md",
  "tree-sitter-nginx",
  "tree-sitter-nix",
  "tree-sitter-objc",
@@ -2141,17 +2140,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "tree-sitter-angular"
-version = "0.8.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "108c70d1f010589e33e599bdb2c5d3f70f4e0c66f5b2c1cd2651fbdd91bb396f"
-dependencies = [
- "cc",
- "tree-sitter",
- "tree-sitter-html",
-]
-
-[[package]]
 name = "tree-sitter-arduino"
 version = "0.24.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2222,13 +2210,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "tree-sitter-clojure"
-version = "0.1.0"
+name = "tree-sitter-clojure-orchard"
+version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4004884cc509449a1d78fa3e1f02b4e953d0a8065984445304795e72e885338c"
+checksum = "c3e2db28a1ab22649790656936325bdc69e992c38006258694ea39a7620e784d"
 dependencies = [
  "cc",
- "tree-sitter",
  "tree-sitter-language",
 ]
 
@@ -2403,6 +2390,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "tree-sitter-hcl"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5a7b2cc3d7121553b84309fab9d11b3ff3d420403eef9ae50f9fd1cd9d9cf012"
+dependencies = [
+ "cc",
+ "tree-sitter-language",
+]
+
+[[package]]
 name = "tree-sitter-heex"
 version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2505,17 +2502,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "tree-sitter-just"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bd46794f2c270f43d73b2f2c8c256992471f3493c903604da0886df984771920"
-dependencies = [
- "cc",
- "tree-sitter",
- "tree-sitter-language",
-]
-
-[[package]]
 name = "tree-sitter-language"
 version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2533,9 +2519,9 @@ dependencies = [
 
 [[package]]
 name = "tree-sitter-lua"
-version = "0.4.1"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ea992f4164d83f371ef1239ae178c4d4596c296c09055e9a48bb02a2760403af"
+checksum = "8daaf5f4235188a58603c39760d5fa5d4b920d36a299c934adddae757f32a10c"
 dependencies = [
  "cc",
  "tree-sitter-language",
@@ -2546,6 +2532,16 @@ name = "tree-sitter-matlab"
 version = "1.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8e8d8831a78547f54860dd8467166b1ab0c466d03d43c4bb447af55c024281f7"
+dependencies = [
+ "cc",
+ "tree-sitter-language",
+]
+
+[[package]]
+name = "tree-sitter-md"
+version = "0.5.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2efd398be546456c814598ee56c0f51769a77241511b4a58077815d120afa882"
 dependencies = [
  "cc",
  "tree-sitter-language",
@@ -2613,9 +2609,9 @@ dependencies = [
 
 [[package]]
 name = "tree-sitter-powershell"
-version = "0.25.10"
+version = "0.26.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "415ec6251d133d26b4f62c60721149fe36c315334f47812450187d6ea59cffdf"
+checksum = "1ff5d1c86d8b1625585fd18e05fff47e38c36564e45ec4f38fd0de4ecbf08e2c"
 dependencies = [
  "cc",
  "tree-sitter-language",
@@ -2713,9 +2709,9 @@ dependencies = [
 
 [[package]]
 name = "tree-sitter-scala"
-version = "0.24.1"
+version = "0.25.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3b4f354028b5fcf1d0c77f1c6d84cd5a579f29a1e43cb61551ec6580e9a99229"
+checksum = "83079f50ea7d03e0faf6be6260ed97538e6df7349ec3cbcbf5771f7b38e3c8b7"
 dependencies = [
  "cc",
  "tree-sitter-language",
