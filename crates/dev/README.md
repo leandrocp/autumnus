@@ -5,7 +5,7 @@ Internal CLI for managing themes, languages, parsers, queries, and WASM builds. 
 ## Usage
 
 ```sh
-cargo run -p dev -- <command> [args]
+cargo run --manifest-path crates/dev/Cargo.toml -- <command> [args]
 ```
 
 Most commands are wrapped by `justfile` recipes.

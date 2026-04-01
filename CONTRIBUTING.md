@@ -107,7 +107,7 @@ feature = "lang-ocaml"            # optional -- override feature name (default: 
 `git` + `rev` vs `crate`: these are not alternatives.
 
 - `git` + `rev` -- always required. Used to build WASMs, fetch vendored parser sources, and as the authoritative version pin.
-- `crate` -- optional, Rust-only. When present, the Rust build uses the crate from crates.io instead of compiling from vendored source. The dependency must also be declared in `crates/lumis/Cargo.toml` as an optional dep for new languages, and existing entries are kept in sync from `languages.toml` by `cargo run -p dev --no-default-features -- cargo-update-dep`.
+- `crate` -- optional, Rust-only. When present, the Rust build uses the crate from crates.io instead of compiling from vendored source. The dependency must also be declared in `crates/lumis/Cargo.toml` as an optional dep for new languages, and existing entries are kept in sync from `languages.toml` by `cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- cargo-update-dep`.
 
 `version` is used for two things:
 1. When `crate` is set, this is the crate version synced into `crates/lumis/Cargo.toml`

@@ -225,23 +225,23 @@ docs-site:
 
 # Generate CSS files for HTML linked formatter
 css-gen:
-    cargo run -p dev --release -- gen-css
+    cargo run --manifest-path crates/dev/Cargo.toml --release -- gen-css
 
 # Copy CSS files to crates and packages
 css-sync:
-    cargo run -p dev -- sync-css
+    cargo run --manifest-path crates/dev/Cargo.toml -- sync-css
 
 # Dump canonical Rust highlight events as JSON
 conformance-dump-events source lang:
-    cargo run -p dev --features lumis-all-languages -- dump-events "{{source}}" -l {{lang}}
+    cargo run --manifest-path crates/dev/Cargo.toml --features lumis-all-languages -- dump-events "{{source}}" -l {{lang}}
 
 # Verify shared conformance fixtures against canonical Rust output
 conformance-verify name="":
-    cargo run -p dev --features lumis-all-languages -- verify-conformance {{name}}
+    cargo run --manifest-path crates/dev/Cargo.toml --features lumis-all-languages -- verify-conformance {{name}}
 
 # Regenerate shared conformance fixtures from canonical Rust output
 conformance-regen name="":
-    cargo run -p dev --features lumis-all-languages -- regen-conformance {{name}}
+    cargo run --manifest-path crates/dev/Cargo.toml --features lumis-all-languages -- regen-conformance {{name}}
 
 # Generate documentation for all crates and packages
 docs:
@@ -259,21 +259,21 @@ docs:
 
 # Generate LANGUAGES.md from languages.toml
 docs-gen-languages-md:
-    cargo run -p dev --no-default-features -- gen-languages-md
+    cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- gen-languages-md
 
 # Update language parser, queries, and docs
 langs-update name:
     #!/usr/bin/env bash
     set -euo pipefail
     just langs-fetch-parsers {{name}}
-    cargo run -p dev --no-default-features -- cargo-update-dep {{name}}
+    cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- cargo-update-dep {{name}}
     just langs-fetch-queries {{name}}
     just langs-preprocess-queries {{name}}
     just docs-gen-languages-md
 
 # Generate THEMES.md from themes definition
 docs-gen-themes-md:
-    cargo run -p dev --no-default-features -- gen-themes-md
+    cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- gen-themes-md
 
 # Extract highlight scopes from query files
 langs-extract-scopes:
@@ -283,35 +283,35 @@ langs-extract-scopes:
 
 # Fetch vendored parser sources at pinned revisions
 langs-fetch-parsers name="":
-    cargo run -p dev --no-default-features -- fetch-parsers {{name}}
+    cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- fetch-parsers {{name}}
 
 # Fetch vendored query files at pinned revisions
 langs-fetch-queries name="":
-    cargo run -p dev --no-default-features -- fetch-queries {{name}}
+    cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- fetch-queries {{name}}
 
 # Preprocess query files (resolve inheritance, apply fixes, strip unsupported predicates)
 langs-preprocess-queries name="":
-    cargo run -p dev --no-default-features -- preprocess-queries {{name}}
+    cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- preprocess-queries {{name}}
 
 # Generate highlights.rs and highlights.ts from highlights.toml
 langs-gen-highlights:
-    cargo run -p dev --no-default-features -- gen-highlights
+    cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- gen-highlights
 
 # List all languages declared in languages.toml
 langs-list:
-    cargo run -p dev --no-default-features -- langs-list
+    cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- langs-list
 
 # Upgrade vendored parser revisions from nvim-treesitter parsers.lua and upstream
 langs-upgrade-parsers name="":
-    cargo run -p dev --no-default-features -- upgrade-parsers {{name}}
+    cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- upgrade-parsers {{name}}
 
 # Upgrade vendored query revisions from upstream
 langs-upgrade-queries name="":
-    cargo run -p dev --no-default-features -- upgrade-queries {{name}}
+    cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- upgrade-queries {{name}}
 
 # Build WASM files for tree-sitter parsers (requires emscripten)
 wasm-build name="":
-    cargo run -p dev -- build-wasm {{name}}
+    cargo run --manifest-path crates/dev/Cargo.toml -- build-wasm {{name}}
 
 # List parsers whose current WASM packages still need publishing
 wasm-publish-needed parser="":
@@ -322,7 +322,7 @@ wasm-publish-prepare parser:
     #!/usr/bin/env bash
     set -euo pipefail
     just wasm-build {{parser}}
-    cargo run -p dev -- stage-wasm {{parser}}
+    cargo run --manifest-path crates/dev/Cargo.toml -- stage-wasm {{parser}}
 
 # Stage and publish a WASM package to npm
 wasm-publish parser:
@@ -347,7 +347,7 @@ themes-gen theme_name="":
         read -p "Do you want to proceed? (y/N) " reply
         [[ "$reply" =~ ^[Yy]$ ]] || { echo "Operation cancelled."; exit 0; }
         find themes -type f -name '*.json' -delete
-        for name in $(cargo run -p dev -- list-themes); do
+        for name in $(cargo run --manifest-path crates/dev/Cargo.toml -- list-themes); do
             echo "Generating $name..."
             nvim --clean --headless -V3 -u themes/init.lua -l themes/extract_theme.lua "$name"
         done
@@ -357,13 +357,13 @@ themes-gen theme_name="":
         [[ "$reply" =~ ^[Yy]$ ]] || { echo "Operation cancelled."; exit 0; }
         nvim --clean --headless -V3 -u themes/init.lua -l themes/extract_theme.lua {{theme_name}}
     fi
-    cargo run -p dev -- sync-themes
+    cargo run --manifest-path crates/dev/Cargo.toml -- sync-themes
 
 # List all available themes
 themes-list:
-    cargo run -p dev -- list-themes
+    cargo run --manifest-path crates/dev/Cargo.toml -- list-themes
 
 # Copy theme JSON files to crates/lumis/themes and generate JS theme modules
 themes-sync:
-    cargo run -p dev -- sync-themes
+    cargo run --manifest-path crates/dev/Cargo.toml -- sync-themes
     (cd packages/javascript && pnpm --filter @lumis-sh/themes build:themes)
