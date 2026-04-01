@@ -96,8 +96,6 @@ unsafe extern "C" {
     fn tree_sitter_fish() -> *const ();
     #[cfg(feature = "lang-gitattributes")]
     fn tree_sitter_gitattributes() -> *const ();
-    #[cfg(feature = "lang-gleam")]
-    fn tree_sitter_gleam() -> *const ();
     #[cfg(feature = "lang-glimmer")]
     fn tree_sitter_glimmer() -> *const ();
     #[cfg(feature = "lang-groovy")]
@@ -120,8 +118,6 @@ unsafe extern "C" {
     fn tree_sitter_liquid() -> *const ();
     #[cfg(feature = "lang-luadoc")]
     fn tree_sitter_luadoc() -> *const ();
-    #[cfg(feature = "lang-make")]
-    fn tree_sitter_make() -> *const ();
     #[cfg(feature = "lang-dot")]
     fn tree_sitter_dot() -> *const ();
     #[cfg(feature = "lang-nim")]
@@ -132,8 +128,6 @@ unsafe extern "C" {
     fn tree_sitter_perl() -> *const ();
     #[cfg(feature = "lang-scss")]
     fn tree_sitter_scss() -> *const ();
-    #[cfg(feature = "lang-sql")]
-    fn tree_sitter_sql() -> *const ();
     #[cfg(feature = "lang-surface")]
     fn tree_sitter_surface() -> *const ();
     #[cfg(feature = "lang-terraform")]
@@ -596,7 +590,6 @@ static D_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 #[cfg(feature = "lang-dart")]
 static DART_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_dart) };
-
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "dart",
@@ -700,6 +693,7 @@ static EEX_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-fish")]
 static FISH_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let _ = tree_sitter_fish::NODE_TYPES;
     let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_fish) };
 
     let mut config = HighlightConfiguration::new(
@@ -830,6 +824,7 @@ static FSHARP_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-gitattributes")]
 static GITATTRIBUTES_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let _ = tree_sitter_gitattributes::NODE_TYPES;
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(unsafe {
             tree_sitter_language::LanguageFn::from_raw(tree_sitter_gitattributes)
@@ -846,9 +841,8 @@ static GITATTRIBUTES_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(||
 
 #[cfg(feature = "lang-gleam")]
 static GLEAM_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_gleam) };
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter::Language::new(tree_sitter_gleam::LANGUAGE),
         "gleam",
         GLEAM_HIGHLIGHTS,
         GLEAM_INJECTIONS,
@@ -1152,6 +1146,7 @@ static JQ_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-kdl")]
 static KDL_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let _ = tree_sitter_kdl::NODE_TYPES;
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(unsafe {
             tree_sitter_language::LanguageFn::from_raw(tree_sitter_kdl)
@@ -1169,7 +1164,6 @@ static KDL_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 #[cfg(feature = "lang-kotlin")]
 static KOTLIN_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_kotlin) };
-
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "kotlin",
@@ -1230,6 +1224,7 @@ static LUA_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-luadoc")]
 static LUADOC_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let _ = tree_sitter_luadoc::NODE_TYPES;
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(unsafe {
             tree_sitter_language::LanguageFn::from_raw(tree_sitter_luadoc)
@@ -1288,9 +1283,8 @@ static OCAML_INTERFACE_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(
 
 #[cfg(feature = "lang-make")]
 static MAKE_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_make) };
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter::Language::new(tree_sitter_make::LANGUAGE),
         "make",
         MAKE_HIGHLIGHTS,
         MAKE_INJECTIONS,
@@ -1661,9 +1655,7 @@ static SCHEME_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 #[cfg(feature = "lang-sql")]
 static SQL_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(unsafe {
-            tree_sitter_language::LanguageFn::from_raw(tree_sitter_sql)
-        }),
+        tree_sitter::Language::new(tree_sitter_sequel::LANGUAGE),
         "sql",
         SQL_HIGHLIGHTS,
         SQL_INJECTIONS,
@@ -2185,8 +2177,6 @@ mod tests {
         test_html_config_loads => (Language::HTML, "HTML", "html.html");
         #[cfg(feature = "lang-http")]
         test_http_config_loads => (Language::HTTP, "HTTP", "http.http");
-        #[cfg(feature = "lang-hurl")]
-        test_hurl_config_loads => (Language::Hurl, "Hurl", "hurl.hurl");
         #[cfg(feature = "lang-iex")]
         test_iex_config_loads => (Language::IEx, "IEx", "iex.iex");
         #[cfg(feature = "lang-ini")]

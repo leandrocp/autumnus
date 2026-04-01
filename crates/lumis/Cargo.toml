@@ -15,19 +15,111 @@ include = [
     "/build.rs",
     "/languages.toml",
     "/src/",
-    "/vendored_parsers/tree-sitter-*/src/tree_sitter/*.h",
-    "/vendored_parsers/tree-sitter-*/src/*.h",
-    "/vendored_parsers/tree-sitter-*/src/*.c",
-    "/vendored_parsers/tree-sitter-*/src/*.cc",
+    "/vendored_parsers/tree-sitter-angular/src/tree_sitter/*.h",
+    "/vendored_parsers/tree-sitter-angular/src/*.h",
+    "/vendored_parsers/tree-sitter-angular/src/*.c",
+    "/vendored_parsers/tree-sitter-astro/src/tree_sitter/*.h",
+    "/vendored_parsers/tree-sitter-astro/src/*.h",
+    "/vendored_parsers/tree-sitter-astro/src/*.c",
     "/vendored_parsers/tree-sitter-csv/csv/src/tree_sitter/*.h",
     "/vendored_parsers/tree-sitter-csv/csv/src/*.c",
+    "/vendored_parsers/tree-sitter-dart/src/tree_sitter/*.h",
+    "/vendored_parsers/tree-sitter-dart/src/*.h",
+    "/vendored_parsers/tree-sitter-dart/src/*.c",
+    "/vendored_parsers/tree-sitter-dockerfile/src/tree_sitter/*.h",
+    "/vendored_parsers/tree-sitter-dockerfile/src/*.h",
+    "/vendored_parsers/tree-sitter-dockerfile/src/*.c",
+    "/vendored_parsers/tree-sitter-dot/src/tree_sitter/*.h",
+    "/vendored_parsers/tree-sitter-dot/src/*.h",
+    "/vendored_parsers/tree-sitter-dot/src/*.c",
+    "/vendored_parsers/tree-sitter-editorconfig/src/tree_sitter/*.h",
+    "/vendored_parsers/tree-sitter-editorconfig/src/*.h",
+    "/vendored_parsers/tree-sitter-editorconfig/src/*.c",
+    "/vendored_parsers/tree-sitter-eex/src/tree_sitter/*.h",
+    "/vendored_parsers/tree-sitter-eex/src/*.h",
+    "/vendored_parsers/tree-sitter-eex/src/*.c",
+    "/vendored_parsers/tree-sitter-gitignore/src/tree_sitter/*.h",
+    "/vendored_parsers/tree-sitter-gitignore/src/*.h",
+    "/vendored_parsers/tree-sitter-gitignore/src/*.c",
+    "/vendored_parsers/tree-sitter-glimmer/src/tree_sitter/*.h",
+    "/vendored_parsers/tree-sitter-glimmer/src/*.h",
+    "/vendored_parsers/tree-sitter-glimmer/src/*.c",
+    "/vendored_parsers/tree-sitter-http/src/tree_sitter/*.h",
+    "/vendored_parsers/tree-sitter-http/src/*.h",
+    "/vendored_parsers/tree-sitter-http/src/*.c",
+    "/vendored_parsers/tree-sitter-iex/src/tree_sitter/*.h",
+    "/vendored_parsers/tree-sitter-iex/src/*.h",
+    "/vendored_parsers/tree-sitter-iex/src/*.c",
+    "/vendored_parsers/tree-sitter-jinja_inline/src/tree_sitter/*.h",
+    "/vendored_parsers/tree-sitter-jinja_inline/src/*.h",
+    "/vendored_parsers/tree-sitter-jinja_inline/src/*.c",
+    "/vendored_parsers/tree-sitter-jq/src/tree_sitter/*.h",
+    "/vendored_parsers/tree-sitter-jq/src/*.h",
+    "/vendored_parsers/tree-sitter-jq/src/*.c",
+    "/vendored_parsers/tree-sitter-kotlin/src/tree_sitter/*.h",
+    "/vendored_parsers/tree-sitter-kotlin/src/*.h",
+    "/vendored_parsers/tree-sitter-kotlin/src/*.c",
+    "/vendored_parsers/tree-sitter-latex/src/tree_sitter/*.h",
+    "/vendored_parsers/tree-sitter-latex/src/*.h",
+    "/vendored_parsers/tree-sitter-latex/src/*.c",
+    "/vendored_parsers/tree-sitter-liquid/src/tree_sitter/*.h",
+    "/vendored_parsers/tree-sitter-liquid/src/*.h",
+    "/vendored_parsers/tree-sitter-liquid/src/*.c",
+    "/vendored_parsers/tree-sitter-just/src/tree_sitter/*.h",
+    "/vendored_parsers/tree-sitter-just/src/*.h",
+    "/vendored_parsers/tree-sitter-just/src/*.c",
+    "/vendored_parsers/tree-sitter-mermaid/src/tree_sitter/*.h",
+    "/vendored_parsers/tree-sitter-mermaid/src/*.h",
+    "/vendored_parsers/tree-sitter-mermaid/src/*.c",
+    "/vendored_parsers/tree-sitter-nim/src/tree_sitter/*.h",
+    "/vendored_parsers/tree-sitter-nim/src/*.h",
+    "/vendored_parsers/tree-sitter-nim/src/*.c",
+    "/vendored_parsers/tree-sitter-nu/src/tree_sitter/*.h",
+    "/vendored_parsers/tree-sitter-nu/src/*.h",
+    "/vendored_parsers/tree-sitter-nu/src/*.c",
+    "/vendored_parsers/tree-sitter-perl/src/tree_sitter/*.h",
+    "/vendored_parsers/tree-sitter-perl/src/*.h",
+    "/vendored_parsers/tree-sitter-perl/src/*.c",
+    "/vendored_parsers/tree-sitter-protobuf/src/tree_sitter/*.h",
+    "/vendored_parsers/tree-sitter-protobuf/src/*.h",
+    "/vendored_parsers/tree-sitter-protobuf/src/*.c",
+    "/vendored_parsers/tree-sitter-prisma/src/tree_sitter/*.h",
+    "/vendored_parsers/tree-sitter-prisma/src/*.h",
+    "/vendored_parsers/tree-sitter-prisma/src/*.c",
+    "/vendored_parsers/tree-sitter-scss/src/tree_sitter/*.h",
+    "/vendored_parsers/tree-sitter-scss/src/*.h",
+    "/vendored_parsers/tree-sitter-scss/src/*.c",
+    "/vendored_parsers/tree-sitter-scss/src/*.cc",
+    "/vendored_parsers/tree-sitter-surface/src/tree_sitter/*.h",
+    "/vendored_parsers/tree-sitter-surface/src/*.h",
+    "/vendored_parsers/tree-sitter-surface/src/*.c",
+    "/vendored_parsers/tree-sitter-tcl/src/tree_sitter/*.h",
+    "/vendored_parsers/tree-sitter-tcl/src/*.h",
+    "/vendored_parsers/tree-sitter-tcl/src/*.c",
+    "/vendored_parsers/tree-sitter-terraform/src/tree_sitter/*.h",
+    "/vendored_parsers/tree-sitter-terraform/src/*.h",
+    "/vendored_parsers/tree-sitter-terraform/src/*.c",
+    "/vendored_parsers/tree-sitter-vim/src/tree_sitter/*.h",
+    "/vendored_parsers/tree-sitter-vim/src/*.h",
+    "/vendored_parsers/tree-sitter-vim/src/*.c",
+    "/vendored_parsers/tree-sitter-vue/src/tree_sitter/*.h",
+    "/vendored_parsers/tree-sitter-vue/src/*.h",
+    "/vendored_parsers/tree-sitter-vue/src/*.c",
+    "/vendored_parsers/tree-sitter-wat/src/tree_sitter/*.h",
+    "/vendored_parsers/tree-sitter-wat/src/*.h",
+    "/vendored_parsers/tree-sitter-wat/src/*.c",
+    "/vendored_parsers/tree-sitter-wat/src/*.cc",
+    "/vendored_parsers/tree-sitter-wgsl/src/tree_sitter/*.h",
+    "/vendored_parsers/tree-sitter-wgsl/src/*.h",
+    "/vendored_parsers/tree-sitter-wgsl/src/*.c",
     "/vendored_parsers/tree-sitter-comment/src/tree_sitter_comment/*.h",
     "/vendored_parsers/tree-sitter-comment/src/tree_sitter_comment/*.c",
-    "/queries/README.md",
-    "/queries/**/highlights.scm",
-    "/queries/**/injections.scm",
-    "/queries/**/locals.scm",
-    "/overwrites/",
+    "/queries/overrides/**/highlights.scm",
+    "/queries/overrides/**/injections.scm",
+    "/queries/overrides/**/locals.scm",
+    "/queries/processed/**/highlights.scm",
+    "/queries/processed/**/injections.scm",
+    "/queries/processed/**/locals.scm",
     "/css/*.css",
     "/themes/*.json",
     "/LICENSE",
@@ -81,11 +173,9 @@ all-languages = [
     "lang-glimmer",
     "lang-glsl",
     "lang-go",
-    "lang-groovy",
     "lang-graphql",
     "lang-haskell",
     "lang-hcl",
-    "lang-hurl",
     "lang-heex",
     "lang-html",
     "lang-http",
@@ -188,43 +278,41 @@ lang-elm = ["dep:tree-sitter-elm", "lumis-core/lang-elm"]
 lang-editorconfig = ["lumis-core/lang-editorconfig"]
 lang-erb = ["dep:tree-sitter-embedded-template", "lumis-core/lang-erb"]
 lang-erlang = ["dep:tree-sitter-erlang", "lumis-core/lang-erlang"]
-lang-fish = ["lumis-core/lang-fish"]
+lang-fish = ["dep:tree-sitter-fish", "lumis-core/lang-fish"]
 lang-fortran = ["dep:tree-sitter-fortran", "lumis-core/lang-fortran"]
 lang-fsharp = ["dep:tree-sitter-fsharp", "lumis-core/lang-fsharp"]
-lang-gitattributes = ["lumis-core/lang-gitattributes"]
+lang-gitattributes = ["dep:tree-sitter-gitattributes", "lumis-core/lang-gitattributes"]
 lang-gitignore = ["lumis-core/lang-gitignore"]
-lang-gleam = ["lumis-core/lang-gleam"]
+lang-gleam = ["dep:tree-sitter-gleam", "lumis-core/lang-gleam"]
 lang-glimmer = ["lumis-core/lang-glimmer"]
 lang-glsl = ["dep:tree-sitter-glsl", "lumis-core/lang-glsl"]
 lang-go = ["dep:tree-sitter-go", "lumis-core/lang-go"]
-lang-groovy = ["lumis-core/lang-groovy"]
 lang-graphql = ["dep:tree-sitter-graphql", "lumis-core/lang-graphql"]
 lang-haskell = ["dep:tree-sitter-haskell", "lumis-core/lang-haskell"]
 lang-hcl = ["dep:tree-sitter-hcl", "lumis-core/lang-hcl"]
 lang-heex = ["dep:tree-sitter-heex", "lumis-core/lang-heex"]
 lang-html = ["dep:tree-sitter-html", "lumis-core/lang-html"]
 lang-http = ["lumis-core/lang-http"]
-lang-hurl = ["lumis-core/lang-hurl"]
 lang-iex = ["lumis-core/lang-iex"]
 lang-ini = ["dep:tree-sitter-ini", "lumis-core/lang-ini"]
 lang-java = ["dep:tree-sitter-java", "lumis-core/lang-java"]
 lang-javascript = ["dep:tree-sitter-javascript", "lumis-core/lang-javascript"]
 lang-json = ["dep:tree-sitter-json", "lumis-core/lang-json"]
-lang-json5 = ["lumis-core/lang-json5"]
+lang-json5 = ["dep:tree-sitter-json5", "lumis-core/lang-json5"]
 lang-jinja = ["dep:tree-sitter-jinja", "lumis-core/lang-jinja"]
 lang-jinja-inline = ["lumis-core/lang-jinja-inline"]
 lang-just = ["lumis-core/lang-just"]
 lang-javadoc = ["dep:tree-sitter-javadoc", "lumis-core/lang-javadoc"]
 lang-jq = ["lumis-core/lang-jq"]
 lang-julia = ["dep:tree-sitter-julia", "lumis-core/lang-julia"]
-lang-kdl = ["lumis-core/lang-kdl"]
+lang-kdl = ["dep:tree-sitter-kdl", "lumis-core/lang-kdl"]
 lang-kotlin = ["lumis-core/lang-kotlin"]
 lang-latex = ["lumis-core/lang-latex"]
 lang-liquid = ["lumis-core/lang-liquid"]
 lang-llvm = ["dep:tree-sitter-llvm", "lumis-core/lang-llvm"]
 lang-lua = ["dep:tree-sitter-lua", "lumis-core/lang-lua"]
-lang-luadoc = ["lumis-core/lang-luadoc"]
-lang-make = ["lumis-core/lang-make"]
+lang-luadoc = ["dep:tree-sitter-luadoc", "lumis-core/lang-luadoc"]
+lang-make = ["dep:tree-sitter-make", "lumis-core/lang-make"]
 lang-matlab = ["dep:tree-sitter-matlab", "lumis-core/lang-matlab"]
 lang-mermaid = ["lumis-core/lang-mermaid"]
 lang-markdown = ["dep:tree-sitter-md", "lumis-core/lang-markdown"]
@@ -253,7 +341,7 @@ lang-rust = ["dep:tree-sitter-rust", "lumis-core/lang-rust"]
 lang-scala = ["dep:tree-sitter-scala", "lumis-core/lang-scala"]
 lang-scss = ["lumis-core/lang-scss"]
 lang-scheme = ["dep:tree-sitter-scheme", "lumis-core/lang-scheme"]
-lang-sql = ["lumis-core/lang-sql"]
+lang-sql = ["dep:tree-sitter-sequel", "lumis-core/lang-sql"]
 lang-solidity = ["dep:tree-sitter-solidity", "lumis-core/lang-solidity"]
 lang-surface = ["lumis-core/lang-surface"]
 lang-svelte = ["dep:tree-sitter-svelte-ng", "lumis-core/lang-svelte"]
@@ -307,8 +395,10 @@ tree-sitter-elixir = { version = "0.3.5", optional = true }
 tree-sitter-elm = { version = "5.9.0", optional = true }
 tree-sitter-embedded-template = { version = "0.25.0", optional = true }
 tree-sitter-erlang = { version = "0.15.0", optional = true }
+tree-sitter-fish = { version = "3.6.0", optional = true }
 tree-sitter-fsharp = { version = "0.2.2", optional = true }
 tree-sitter-fortran = { version = "0.5.1", optional = true }
+tree-sitter-gleam = { version = "1.0.0", optional = true }
 tree-sitter-go = { version = "0.25.0", optional = true }
 tree-sitter-glsl = { version = "0.2.0", optional = true }
 tree-sitter-graphql = { version = "0.1.0", optional = true }
@@ -323,10 +413,15 @@ tree-sitter-javascript = { version = "0.25.0", optional = true }
 tree-sitter-javadoc = { version = "0.3.1", optional = true }
 tree-sitter-jinja = { version = "0.11.1", optional = true }
 tree-sitter-json = { version = "0.24.8", optional = true }
+tree-sitter-json5 = { version = "0.1.0", optional = true }
 tree-sitter-julia = { version = "0.23.1", optional = true }
+tree-sitter-gitattributes = { version = "0.1.6", optional = true }
 tree-sitter-language = "0.1.7"
+tree-sitter-kdl = { version = "1.1.0", optional = true }
 tree-sitter-llvm = { version = "1.1.0", optional = true }
+tree-sitter-luadoc = { version = "1.1.0", optional = true }
 tree-sitter-lua = { version = "0.5.0", optional = true }
+tree-sitter-make = { version = "1.1.1", optional = true }
 tree-sitter-matlab = { version = "1.3.0", optional = true }
 tree-sitter-md = { version = "0.5.3", optional = true }
 tree-sitter-nix = { version = "0.3.0", optional = true }
@@ -349,6 +444,7 @@ tree-sitter-ruby = { version = "0.23.1", optional = true }
 tree-sitter-rust = { version = "0.24.2", optional = true }
 tree-sitter-scala = { version = "0.25.0", optional = true }
 tree-sitter-scheme = { version = "0.24.7", optional = true }
+tree-sitter-sequel = { version = "0.3.11", optional = true }
 
 tree-sitter-solidity = { version = "1.2.13", optional = true }
 tree-sitter-svelte-ng = { version = "1.0.2", optional = true }
