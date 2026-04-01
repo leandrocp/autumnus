@@ -2,9 +2,9 @@ import fs from "node:fs";
 import path from "node:path";
 import { parse as parseToml } from "smol-toml";
 
-const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../../../..");
+const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../../..");
 const LANGUAGES_TOML = path.join(WORKSPACE_ROOT, "languages.toml");
-const LUMIS_PACKAGE_JSON = path.resolve(import.meta.dirname, "../package.json");
+const LUMIS_PACKAGE_JSON = path.resolve(import.meta.dirname, "../lumis/package.json");
 const PACKAGES_DIR = path.join(WORKSPACE_ROOT, "packages", "javascript");
 
 interface ParserEntry {
@@ -13,6 +13,11 @@ interface ParserEntry {
 
 interface BundleEntry {
   parsers: string[] | "all";
+}
+
+interface BundlePackageJson {
+  version?: string;
+  peerDependencies?: Record<string, string>;
 }
 
 interface LanguagesToml {
@@ -86,6 +91,18 @@ function unique<T>(values: T[]): T[] {
   return [...new Set(values)];
 }
 
+function readBundlePackageJson(dir: string): BundlePackageJson | null {
+  const file = path.join(dir, "package.json");
+  if (!fs.existsSync(file)) return null;
+  return JSON.parse(fs.readFileSync(file, "utf-8")) as BundlePackageJson;
+}
+
+function readBundleChangelog(dir: string): string | null {
+  const file = path.join(dir, "CHANGELOG.md");
+  if (!fs.existsSync(file)) return null;
+  return fs.readFileSync(file, "utf-8");
+}
+
 function bundleLanguageIds(bundle: BundleEntry, allParserIds: string[]): string[] {
   const parserIds = bundle.parsers === "all" ? allParserIds : bundle.parsers;
   return parserIds.includes("plaintext") ? parserIds : [...parserIds, "plaintext"];
@@ -98,6 +115,9 @@ function writeBundlePackage(
 ) {
   const dir = packageDir(bundleName);
   fs.mkdirSync(dir, { recursive: true });
+
+  const existingPackageJson = readBundlePackageJson(dir);
+  const existingChangelog = readBundleChangelog(dir);
 
   const wasmPackagesByLanguage = Object.fromEntries(
     languageIds.map((id) => {
@@ -140,7 +160,7 @@ export default bundledWasms
   );
   const packageJson = {
     name: `@lumis-sh/wasm-bundle-${bundleName}`,
-    version: "0.0.1",
+    version: existingPackageJson?.version ?? "0.0.1",
     description: `Preset WASM parser bundle for the ${bundleName} Lumis language bundle`,
     author: "Leandro Pereira",
     license: "MIT",
@@ -166,7 +186,7 @@ export default bundledWasms
       access: "public",
     },
     peerDependencies: {
-      "@lumis-sh/lumis": lumisPeerRange,
+      "@lumis-sh/lumis": existingPackageJson?.peerDependencies?.["@lumis-sh/lumis"] ?? lumisPeerRange,
     },
     dependencies,
   };
@@ -203,7 +223,7 @@ const highlighter = await createHighlighter({ languages: [languages] })
   fs.writeFileSync(path.join(dir, "index.d.ts"), indexDts);
   fs.writeFileSync(path.join(dir, "package.json"), JSON.stringify(packageJson, null, 2) + "\n");
   fs.writeFileSync(path.join(dir, "README.md"), readme);
-  fs.writeFileSync(path.join(dir, "CHANGELOG.md"), changelog);
+  fs.writeFileSync(path.join(dir, "CHANGELOG.md"), existingChangelog ?? changelog);
 
   console.log(`  wasm bundle ${bundleName}: packages/javascript/wasm-bundle-${bundleName}`);
 }
