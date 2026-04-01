@@ -62,7 +62,7 @@ jobs:
         working-directory: packages/javascript
       - run: pnpm --filter @lumis-sh/themes lint
         working-directory: packages/javascript
-      - run: pnpm --filter @lumis-sh/lumis build:wasm-bundles && git diff --exit-code -- wasm-bundle-*
+      - run: pnpm run build:wasm-bundles && git diff --exit-code -- wasm-bundle-*
         working-directory: packages/javascript
 
   test:
@@ -94,5 +94,5 @@ jobs:
         working-directory: packages/javascript
       - run: pnpm --filter @lumis-sh/lumis test
         working-directory: packages/javascript
-      - run: pnpm --filter @lumis-sh/lumis build:wasm-bundles && git diff --exit-code -- wasm-bundle-*
+      - run: pnpm run build:wasm-bundles && git diff --exit-code -- wasm-bundle-*
         working-directory: packages/javascript
