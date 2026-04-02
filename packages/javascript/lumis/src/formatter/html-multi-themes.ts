@@ -1,6 +1,7 @@
 import type { HighlightEvent, HighlightSpan, HtmlMultiThemesFormatter, Theme } from "../types.js";
 import { sanitizeThemeName } from "../themes.js";
 import {
+  type HtmlAttrs,
   closingTags,
   formatHighlightIterLines,
   getHighlightLineClass,
@@ -63,10 +64,7 @@ function buildPreThemeStyle(options: {
   return styles.length > 0 ? styles.join(" ") : undefined;
 }
 
-function spanAttrs(
-  span: HighlightSpan,
-  formatter: HtmlMultiThemesFormatter,
-): Record<string, string | undefined> {
+function spanAttrs(span: HighlightSpan, formatter: HtmlMultiThemesFormatter): HtmlAttrs {
   return spanMultiThemesAttrs({
     language: span.language,
     scope: span.scope,
