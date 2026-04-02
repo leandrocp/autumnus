@@ -194,8 +194,6 @@ fn static_injection_languages(lang_name: &str) -> Vec<String> {
 mod tests {
     use super::*;
     use crate::vendor::tree_sitter_highlight::Highlighter;
-    use std::fs;
-    use std::path::PathBuf;
     use tempfile::tempdir;
     use tree_sitter::Parser;
 
@@ -254,10 +252,17 @@ mod tests {
         let mut store = reg.new_wasm_store().unwrap();
         let configs = reg.load_related_configs("elixir", &mut store).unwrap();
 
-        let sample = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-            .join("../..")
-            .join("sample.ex");
-        let source = fs::read_to_string(sample).unwrap();
+        let source = r#"
+defmodule MyAppWeb.CounterLive do
+  use MyAppWeb, :live_view
+
+  def render(assigns) do
+    ~H"""
+    <.vue count={@count} v-component="Counter" v-socket={@socket} />
+    """
+  end
+end
+"#;
 
         let config = configs.get("elixir").unwrap();
         let mut highlighter = Highlighter::new();
