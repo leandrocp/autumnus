@@ -54,6 +54,6 @@
     "oxlint-tsgolint": "0.17.0",
     "tsup": "^8.5",
     "tsx": "^4.21",
-    "typescript": "^5.9"
+    "typescript": "^6.0"
   }
 }
