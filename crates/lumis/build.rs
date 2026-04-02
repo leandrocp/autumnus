@@ -34,8 +34,9 @@ use serde::Deserialize;
 use std::collections::BTreeMap;
 use std::env;
 use std::fs::{self, File};
-use std::io::Write;
+use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
+use xz2::read::XzDecoder;
 
 // ── languages.toml types ───────────────────────────────────────────────────
 
@@ -50,7 +51,6 @@ struct LanguagesToml {
 struct ParserEntry {
     #[serde(rename = "crate")]
     crate_name: Option<String>,
-    git: Option<String>,
     location: Option<String>,
     query_name: Option<String>,
     feature: Option<String>,
@@ -120,16 +120,17 @@ fn main() {
 struct TreeSitterParser {
     name: String,
     src_dir: PathBuf,
-    extra_files: Vec<String>,
+    parser_file: PathBuf,
+    extra_files: Vec<PathBuf>,
 }
 
 impl TreeSitterParser {
     fn build(&self) {
-        let mut c_files = vec!["parser.c".to_string()];
+        let mut c_files = vec![self.parser_file.clone()];
         let mut cpp_files = vec![];
 
         for file in &self.extra_files {
-            if file.ends_with(".c") {
+            if file.extension().and_then(|ext| ext.to_str()) == Some("c") {
                 c_files.push(file.clone());
             } else {
                 cpp_files.push(file.clone());
@@ -148,7 +149,7 @@ impl TreeSitterParser {
                 .link_lib_modifier("+whole-archive");
 
             for file in &cpp_files {
-                cpp_build.file(self.src_dir.join(file));
+                cpp_build.file(file);
             }
 
             cpp_build.compile(&format!("{}-cpp", self.name));
@@ -172,7 +173,7 @@ impl TreeSitterParser {
         }
 
         for file in &c_files {
-            build.file(self.src_dir.join(file));
+            build.file(file);
         }
 
         build.link_lib_modifier("+whole-archive");
@@ -182,22 +183,18 @@ impl TreeSitterParser {
 
 /// Find the vendored directory name for a parser.
 ///
-/// Tries `tree-sitter-{key}` first (covers most cases), then falls back to
-/// extracting the repository name from the git URL (covers nushell → tree-sitter-nu).
+/// Uses `query_name` when present, otherwise defaults to `tree-sitter-{key}`.
 fn find_vendored_dir(vendored_root: &Path, key: &str, entry: &ParserEntry) -> Option<String> {
+    if let Some(query_name) = &entry.query_name {
+        let query_dir = format!("tree-sitter-{query_name}");
+        if vendored_root.join(&query_dir).exists() {
+            return Some(query_dir);
+        }
+    }
+
     let default_name = format!("tree-sitter-{}", key);
     if vendored_root.join(&default_name).exists() {
         return Some(default_name);
-    }
-
-    // Extract repo name from git URL (e.g. ".../tree-sitter-nu.git" → "tree-sitter-nu")
-    if let Some(git) = &entry.git {
-        if let Some(repo) = git.rsplit('/').next() {
-            let repo_name = repo.trim_end_matches(".git");
-            if vendored_root.join(repo_name).exists() {
-                return Some(repo_name.to_string());
-            }
-        }
     }
 
     None
@@ -205,23 +202,75 @@ fn find_vendored_dir(vendored_root: &Path, key: &str, entry: &ParserEntry) -> Op
 
 /// Determine the src directory within a vendored parser.
 ///
-/// If `location` is set and `{parser_dir}/{location}/src/parser.c` exists,
+/// If `location` is set and `{parser_dir}/{location}/src/parser.c` or
+/// `{parser_dir}/{location}/src/parser.c.xz` exists,
 /// uses the nested path (e.g. tree-sitter-csv/csv/src). Otherwise uses
 /// `{parser_dir}/src`.
 fn resolve_src_dir(parser_dir: &Path, entry: &ParserEntry) -> PathBuf {
     if let Some(loc) = &entry.location {
         let nested = parser_dir.join(loc).join("src");
-        if nested.join("parser.c").exists() {
+        if nested.join("parser.c").exists() || nested.join("parser.c.xz").exists() {
             return nested;
         }
     }
     parser_dir.join("src")
 }
 
+fn ensure_source_file(
+    out_dir: &Path,
+    parser_name: &str,
+    src_dir: &Path,
+    key: &str,
+    file_name: &str,
+) -> PathBuf {
+    let source = src_dir.join(file_name);
+    if source.exists() {
+        return source;
+    }
+
+    let compressed = src_dir.join(format!("{file_name}.xz"));
+    assert!(
+        compressed.exists(),
+        "missing parser source '{file_name}' for vendored parser '{key}' at {}",
+        src_dir.display()
+    );
+
+    let unpacked_dir = out_dir.join("vendored_parsers").join(parser_name);
+    let unpacked_source = unpacked_dir.join(file_name);
+
+    if !unpacked_source.exists() {
+        fs::create_dir_all(&unpacked_dir).expect("failed to create decompressed parser directory");
+
+        let input = File::open(&compressed).unwrap_or_else(|err| {
+            panic!(
+                "failed to open compressed parser source '{file_name}' for '{key}' at {}: {err}",
+                compressed.display()
+            )
+        });
+        let mut decoder = XzDecoder::new(input);
+        let mut decoded = Vec::new();
+        decoder.read_to_end(&mut decoded).unwrap_or_else(|err| {
+            panic!(
+                "failed to decompress parser source '{file_name}' for '{key}' at {}: {err}",
+                compressed.display()
+            )
+        });
+        fs::write(&unpacked_source, decoded).unwrap_or_else(|err| {
+            panic!(
+                "failed to write decompressed parser source '{file_name}' for '{key}' at {}: {err}",
+                unpacked_source.display()
+            )
+        });
+    }
+
+    unpacked_source
+}
+
 // https://github.com/Wilfred/difftastic/blob/8953c55cf854ceac2ccb6ece004d6a94a5bfa122/build.rs
 // TODO: remove vendored parsers in favor of crates as soon as they implement LanguageFn
 fn vendored_parsers(toml: &LanguagesToml) {
     let vendored_root = manifest_dir().join("vendored_parsers");
+    let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
 
     let parsers: Vec<TreeSitterParser> = toml
         .parsers
@@ -232,24 +281,26 @@ fn vendored_parsers(toml: &LanguagesToml) {
             let dir_name = find_vendored_dir(&vendored_root, key, entry)?;
             let parser_dir = vendored_root.join(&dir_name);
             let src_dir = resolve_src_dir(&parser_dir, entry);
+            let parser_file = ensure_source_file(&out_dir, &dir_name, &src_dir, key, "parser.c");
 
             assert!(
-                src_dir.join("parser.c").exists(),
-                "missing parser.c for vendored parser '{key}' at {}",
+                parser_file.exists(),
+                "missing parser source for vendored parser '{key}' at {}",
                 src_dir.display()
             );
 
             // Auto-detect scanner files
             let mut extra_files = Vec::new();
             for name in ["scanner.c", "scanner.cc"] {
-                if src_dir.join(name).exists() {
-                    extra_files.push(name.to_string());
+                if src_dir.join(name).exists() || src_dir.join(format!("{name}.xz")).exists() {
+                    extra_files.push(ensure_source_file(&out_dir, &dir_name, &src_dir, key, name));
                 }
             }
 
             Some(TreeSitterParser {
                 name: dir_name,
                 src_dir,
+                parser_file,
                 extra_files,
             })
         })
