@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.1.0](https://github.com/leandrocp/lumis/compare/javascript@v0.0.2...javascript@v0.1.0) (2026-04-02)
+
+
+### ⚠ BREAKING CHANGES
+
+* bump tree-sitter 0.26 ([#521](https://github.com/leandrocp/lumis/issues/521))
+
+### Bug Fixes
+
+* wasm bundle codegen ([#519](https://github.com/leandrocp/lumis/issues/519)) ([a784f04](https://github.com/leandrocp/lumis/commit/a784f04638b7561906df7b232edf67b1052aefdc))
+
+
+### Miscellaneous Chores
+
+* bump tree-sitter 0.26 ([#521](https://github.com/leandrocp/lumis/issues/521)) ([ad9a567](https://github.com/leandrocp/lumis/commit/ad9a5679e94032e153eb7d997f2c1577479ec812))
+
 ## [0.0.2](https://github.com/leandrocp/lumis/compare/javascript@v0.0.1...javascript@v0.0.2) (2026-03-31)
 
 
