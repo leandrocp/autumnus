@@ -60,7 +60,7 @@
     "@lumis-sh/wasm-diff": "^0.26.0",
     "@lumis-sh/wasm-dockerfile": "^0.26.0",
     "@lumis-sh/wasm-dot": "^0.26.0",
-    "@lumis-sh/wasm-editorconfig": "^0.26.0",
+    "@lumis-sh/wasm-editorconfig": "^0.26.1",
     "@lumis-sh/wasm-eex": "^0.26.0",
     "@lumis-sh/wasm-elixir": "^0.26.0",
     "@lumis-sh/wasm-elm": "^0.26.0",
