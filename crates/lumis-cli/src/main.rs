@@ -269,16 +269,22 @@ fn fetch_parsers(
     let mut errors = Vec::new();
     for name in &names {
         let query_name = resolve_query_name(name);
+        let parser_path = reg.parser_path(query_name);
         if reg.is_cached(query_name) {
             if verbose {
-                eprintln!("{}: {}", name, reg.parser_path(query_name).display());
+                eprintln!("{}: {}", name, parser_path.display());
             }
             continue;
         }
         match reg.download_parser(query_name) {
             Ok(_) => {
                 if verbose {
-                    eprintln!("{}: {}", name, reg.parser_path(query_name).display());
+                    eprintln!(
+                        "{}: {} -> {}",
+                        name,
+                        reg.parser_download_url(query_name),
+                        parser_path.display()
+                    );
                 }
             }
             Err(e) => {
@@ -330,10 +336,16 @@ fn update_parsers(
     let mut errors = Vec::new();
     for name in &names {
         let query_name = resolve_query_name(name);
+        let parser_path = reg.parser_path(query_name);
         match reg.update_parser(query_name) {
             Ok(_) => {
                 if verbose {
-                    eprintln!("{}: {}", name, reg.parser_path(query_name).display());
+                    eprintln!(
+                        "{}: {} -> {}",
+                        name,
+                        reg.parser_download_url(query_name),
+                        parser_path.display()
+                    );
                 }
             }
             Err(e) => {
@@ -737,18 +749,13 @@ fn highlight_to_events(
     source: &str,
     lang_name: &str,
 ) -> Result<Vec<HighlightEvent>> {
-    reg.ensure_config(lang_name)?;
-    // Load any cached injection language parsers so injections resolve
-    reg.load_cached_parsers();
-
-    let configs = reg.configs();
+    let mut wasm_store = reg.new_wasm_store()?;
+    let configs = reg.load_related_configs(lang_name, &mut wasm_store)?;
     let config = configs
         .get(lang_name)
         .ok_or_else(|| anyhow::anyhow!("no config for language '{}'", lang_name))?;
 
     let mut highlighter = crate::vendor::tree_sitter_highlight::Highlighter::new();
-
-    let wasm_store = reg.new_wasm_store()?;
     highlighter
         .parser()
         .set_wasm_store(wasm_store)
