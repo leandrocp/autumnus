@@ -284,6 +284,11 @@ langs-extract-scopes:
 # Fetch vendored parser sources at pinned revisions
 langs-fetch-parsers name="":
     cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- fetch-parsers {{name}}
+    cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- compress-parsers {{name}}
+
+# Compress selected vendored parser sources for crates.io packaging
+langs-compress-parsers name="":
+    cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- compress-parsers {{name}}
 
 # Fetch vendored query files at pinned revisions
 langs-fetch-queries name="":

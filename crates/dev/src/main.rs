@@ -8,8 +8,10 @@ use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::collections::{BTreeMap, HashSet};
 use std::fs;
+use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use xz2::write::XzEncoder;
 
 #[derive(Parser)]
 #[command(version)]
@@ -31,6 +33,10 @@ enum Commands {
         name: String,
     },
     FetchParsers {
+        #[arg(default_value = "")]
+        name: String,
+    },
+    CompressParsers {
         #[arg(default_value = "")]
         name: String,
     },
@@ -102,6 +108,7 @@ fn main() -> Result<()> {
         Commands::LangsList => langs_list(),
         Commands::UpgradeParsers { name } => upgrade_parsers(&name),
         Commands::FetchParsers { name } => fetch_parsers(&name),
+        Commands::CompressParsers { name } => compress_parsers(&name),
         Commands::UpgradeQueries { name } => upgrade_queries(&name),
         Commands::FetchQueries { name } => fetch_queries(&name),
         Commands::CargoUpdateDep { name } => cargo_update_dep(&name),
@@ -638,6 +645,7 @@ struct ParserInfo {
     #[serde(rename = "crate")]
     crate_field: Option<String>,
     location: Option<String>,
+    query_name: Option<String>,
     generate: Option<bool>,
     wasm_name: Option<String>,
     #[allow(dead_code)]
@@ -854,7 +862,7 @@ fn fetch_parsers(name: &str) -> Result<()> {
         }
 
         let rev = info.rev.as_deref().unwrap_or("HEAD");
-        let parser_dir = format!("tree-sitter-{parser_name}");
+        let parser_dir = vendored_parser_dir_name(parser_name, info);
         let clone_dir = format!("{tmp}/{parser_dir}");
 
         println!("Fetching {parser_name} from {git} at {rev}");
@@ -867,14 +875,16 @@ fn fetch_parsers(name: &str) -> Result<()> {
         if info.generate.unwrap_or(false) {
             let _ = run_cmd_ok(&format!("rm -rf {dest}"));
             fs::create_dir_all(&dest)?;
-            let _ = run_cmd_ok(&format!("cp -r {clone_dir}/* {dest}/"));
             let _ = run_cmd_ok(&format!(
-                "cd {dest} && npm install --no-save tree-sitter-cli && npx tree-sitter generate"
+                "cd {clone_dir} && npm install --no-save tree-sitter-cli && npx tree-sitter generate"
             ));
-            let _ = run_cmd_ok(&format!("rm -f {dest}/Cargo.toml"));
-            let _ = run_cmd_ok(&format!("rm -rf {dest}/node_modules"));
-            let _ = run_cmd_ok(&format!("rm -rf {dest}/bindings"));
-            println!("  Updated {parser_name} (generated)");
+            let src = format!("{clone_dir}/src");
+            if Path::new(&src).is_dir() {
+                let _ = run_cmd_ok(&format!("cp -r {src} {dest}/"));
+                println!("  Updated {parser_name} (generated)");
+            } else {
+                println!("  Warning: no generated src directory found for {parser_name}");
+            }
         } else if let Some(ref location) = info.location {
             fs::create_dir_all(&dest)?;
             let src = format!("{clone_dir}/{location}/src");
@@ -903,6 +913,103 @@ fn fetch_parsers(name: &str) -> Result<()> {
     }
 
     let _ = run_cmd_ok(&format!("rm -rf {tmp}"));
+    Ok(())
+}
+
+fn vendored_parser_dir_name(parser_name: &str, info: &ParserInfo) -> String {
+    if let Some(query_name) = &info.query_name {
+        return format!("tree-sitter-{query_name}");
+    }
+
+    format!("tree-sitter-{parser_name}")
+}
+
+fn compress_parser_file(parser_name: &str, src_dir: &Path) -> Result<()> {
+    let parser_c = src_dir.join("parser.c");
+    let parser_xz = src_dir.join("parser.c.xz");
+    let bytes = fs::read(&parser_c)
+        .with_context(|| format!("failed to read parser source at {}", parser_c.display()))?;
+    let output = fs::File::create(&parser_xz).with_context(|| {
+        format!(
+            "failed to create compressed parser source at {}",
+            parser_xz.display()
+        )
+    })?;
+    let mut encoder = XzEncoder::new(output, 9);
+    encoder.write_all(&bytes).with_context(|| {
+        format!(
+            "failed to write compressed parser source at {}",
+            parser_xz.display()
+        )
+    })?;
+    encoder.finish().with_context(|| {
+        format!(
+            "failed to finalize compressed parser source at {}",
+            parser_xz.display()
+        )
+    })?;
+    fs::remove_file(&parser_c).with_context(|| {
+        format!(
+            "failed to remove uncompressed parser source at {}",
+            parser_c.display()
+        )
+    })?;
+    println!("  Compressed {parser_name} parser.c -> parser.c.xz");
+
+    Ok(())
+}
+
+fn compress_parsers(name: &str) -> Result<()> {
+    let toml = read_languages_toml()?;
+
+    for (parser_name, info) in &toml.parsers {
+        if info.git.is_none() || info.crate_field.is_some() {
+            continue;
+        }
+        if !name.is_empty() && parser_name != name {
+            continue;
+        }
+
+        let parser_dir = format!(
+            "crates/lumis/vendored_parsers/{}",
+            vendored_parser_dir_name(parser_name, info)
+        );
+        if !Path::new(&parser_dir).exists() {
+            continue;
+        }
+
+        let src_dir = if let Some(location) = &info.location {
+            let nested = Path::new(&parser_dir).join(location).join("src");
+            if nested.join("parser.c").exists() || nested.join("parser.c.xz").exists() {
+                nested
+            } else {
+                Path::new(&parser_dir).join("src")
+            }
+        } else {
+            Path::new(&parser_dir).join("src")
+        };
+
+        if !src_dir.exists() {
+            println!(
+                "  Warning: no src directory found for {parser_name} at {}",
+                src_dir.display()
+            );
+            continue;
+        }
+
+        if !src_dir.join("parser.c").exists() && !src_dir.join("parser.c.xz").exists() {
+            println!(
+                "  Warning: no parser source found for {parser_name} at {}",
+                src_dir.display()
+            );
+            continue;
+        }
+
+        if src_dir.join("parser.c").exists() {
+            compress_parser_file(parser_name, &src_dir)?;
+        }
+    }
+
     Ok(())
 }
 

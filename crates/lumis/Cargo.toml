@@ -19,6 +19,7 @@ include = [
     "/vendored_parsers/tree-sitter-*/src/*.h",
     "/vendored_parsers/tree-sitter-*/src/*.c",
     "/vendored_parsers/tree-sitter-*/src/*.cc",
+    "/vendored_parsers/tree-sitter-*/src/*.xz",
     "/vendored_parsers/tree-sitter-comment/src/tree_sitter_comment/*.h",
     "/vendored_parsers/tree-sitter-comment/src/tree_sitter_comment/*.c",
     "/queries/overrides/**/highlights.scm",
@@ -374,6 +375,7 @@ rayon = "1"
 serde = { version = "1", features = ["derive"] }
 syn = { version = "2.0", features = ["full", "parsing"] }
 toml = "1.1"
+xz2 = "0.1"
 
 [dev-dependencies]
 pretty_assertions = "1.4"
