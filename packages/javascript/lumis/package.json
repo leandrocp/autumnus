@@ -80,7 +80,7 @@
     "prepack": "pnpm run build"
   },
   "dependencies": {
-    "web-tree-sitter": "0.26.7"
+    "web-tree-sitter": "0.26.8"
   },
   "engines": {
     "node": ">=18"
