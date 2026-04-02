@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.1.0](https://github.com/leandrocp/lumis/compare/rust-cli@v0.0.3...rust-cli@v0.1.0) (2026-04-02)
+
+
+### ⚠ BREAKING CHANGES
+
+* bump tree-sitter 0.26 ([#521](https://github.com/leandrocp/lumis/issues/521))
+
+### Miscellaneous Chores
+
+* bump tree-sitter 0.26 ([#521](https://github.com/leandrocp/lumis/issues/521)) ([ad9a567](https://github.com/leandrocp/lumis/commit/ad9a5679e94032e153eb7d997f2c1577479ec812))
+
 ## [0.0.3](https://github.com/leandrocp/lumis/compare/rust-cli@v0.0.2...rust-cli@v0.0.3) (2026-03-31)
 
 
