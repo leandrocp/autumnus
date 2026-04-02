@@ -86,6 +86,7 @@
     "node": ">=18"
   },
   "devDependencies": {
+    "@microsoft/api-extractor": "^7.36.0",
     "@lumis-sh/themes": "workspace:^0.0.2",
     "@lumis-sh/wasm-json": "^0.24.8",
     "@types/node": "^25.5.0",
