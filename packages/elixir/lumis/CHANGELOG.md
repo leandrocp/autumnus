@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/leandrocp/lumis/compare/elixir@v0.2.0...elixir@v0.2.1) (2026-04-02)
+
+
+### Bug Fixes
+
+* elixir nif dep resolution ([4187bbe](https://github.com/leandrocp/lumis/commit/4187bbed0464832af687eaf29d0b64d7c0dfc77d))
+
 ## [0.2.0](https://github.com/leandrocp/lumis/compare/elixir@v0.1.2...elixir@v0.2.0) (2026-04-02)
 
 
