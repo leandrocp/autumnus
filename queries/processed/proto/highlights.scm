@@ -43,7 +43,6 @@
 "returns" @keyword.return
 
 [
-  "export"
   "local"
   "optional"
   "repeated"

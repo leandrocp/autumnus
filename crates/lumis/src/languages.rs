@@ -92,16 +92,10 @@ unsafe extern "C" {
     fn tree_sitter_dockerfile() -> *const ();
     #[cfg(feature = "lang-eex")]
     fn tree_sitter_eex() -> *const ();
-    #[cfg(feature = "lang-fish")]
-    fn tree_sitter_fish() -> *const ();
     #[cfg(feature = "lang-gitattributes")]
     fn tree_sitter_gitattributes() -> *const ();
-    #[cfg(feature = "lang-gleam")]
-    fn tree_sitter_gleam() -> *const ();
     #[cfg(feature = "lang-glimmer")]
     fn tree_sitter_glimmer() -> *const ();
-    #[cfg(feature = "lang-groovy")]
-    fn tree_sitter_groovy() -> *const ();
     #[cfg(feature = "lang-http")]
     fn tree_sitter_http() -> *const ();
     #[cfg(feature = "lang-iex")]
@@ -120,8 +114,6 @@ unsafe extern "C" {
     fn tree_sitter_liquid() -> *const ();
     #[cfg(feature = "lang-luadoc")]
     fn tree_sitter_luadoc() -> *const ();
-    #[cfg(feature = "lang-make")]
-    fn tree_sitter_make() -> *const ();
     #[cfg(feature = "lang-dot")]
     fn tree_sitter_dot() -> *const ();
     #[cfg(feature = "lang-nim")]
@@ -132,8 +124,6 @@ unsafe extern "C" {
     fn tree_sitter_perl() -> *const ();
     #[cfg(feature = "lang-scss")]
     fn tree_sitter_scss() -> *const ();
-    #[cfg(feature = "lang-sql")]
-    fn tree_sitter_sql() -> *const ();
     #[cfg(feature = "lang-surface")]
     fn tree_sitter_surface() -> *const ();
     #[cfg(feature = "lang-terraform")]
@@ -231,8 +221,6 @@ impl LanguageConfig for Language {
             Language::Glsl => &GLSL_CONFIG,
             #[cfg(feature = "lang-go")]
             Language::Go => &GO_CONFIG,
-            #[cfg(feature = "lang-groovy")]
-            Language::Groovy => &GROOVY_CONFIG,
             #[cfg(feature = "lang-graphql")]
             Language::GraphQL => &GRAPHQL_CONFIG,
             #[cfg(feature = "lang-haskell")]
@@ -596,7 +584,6 @@ static D_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 #[cfg(feature = "lang-dart")]
 static DART_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_dart) };
-
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "dart",
@@ -700,10 +687,8 @@ static EEX_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-fish")]
 static FISH_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_fish) };
-
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter_fish::language(),
         "fish",
         FISH_HIGHLIGHTS,
         FISH_INJECTIONS,
@@ -846,9 +831,8 @@ static GITATTRIBUTES_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(||
 
 #[cfg(feature = "lang-gleam")]
 static GLEAM_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_gleam) };
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter::Language::new(tree_sitter_gleam::LANGUAGE),
         "gleam",
         GLEAM_HIGHLIGHTS,
         GLEAM_INJECTIONS,
@@ -899,21 +883,6 @@ static GO_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         GO_LOCALS,
     )
     .expect("failed to create go highlight configuration");
-    config.configure(&HIGHLIGHT_NAMES);
-    config
-});
-
-#[cfg(feature = "lang-groovy")]
-static GROOVY_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_groovy) };
-    let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
-        "groovy",
-        GROOVY_HIGHLIGHTS,
-        GROOVY_INJECTIONS,
-        GROOVY_LOCALS,
-    )
-    .expect("failed to create groovy highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
@@ -1169,7 +1138,6 @@ static KDL_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 #[cfg(feature = "lang-kotlin")]
 static KOTLIN_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_kotlin) };
-
     let mut config = HighlightConfiguration::new(
         tree_sitter::Language::new(language_fn),
         "kotlin",
@@ -1288,9 +1256,8 @@ static OCAML_INTERFACE_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(
 
 #[cfg(feature = "lang-make")]
 static MAKE_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_make) };
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter::Language::new(tree_sitter_make::LANGUAGE),
         "make",
         MAKE_HIGHLIGHTS,
         MAKE_INJECTIONS,
@@ -1661,9 +1628,7 @@ static SCHEME_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 #[cfg(feature = "lang-sql")]
 static SQL_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(unsafe {
-            tree_sitter_language::LanguageFn::from_raw(tree_sitter_sql)
-        }),
+        tree_sitter::Language::new(tree_sitter_sequel::LANGUAGE),
         "sql",
         SQL_HIGHLIGHTS,
         SQL_INJECTIONS,
@@ -2171,8 +2136,6 @@ mod tests {
         test_glsl_config_loads => (Language::Glsl, "GLSL", "glsl.glsl");
         #[cfg(feature = "lang-go")]
         test_go_config_loads => (Language::Go, "Go", "go.go");
-        #[cfg(feature = "lang-groovy")]
-        test_groovy_config_loads => (Language::Groovy, "Groovy", "groovy.groovy");
         #[cfg(feature = "lang-graphql")]
         test_graphql_config_loads => (Language::GraphQL, "GraphQL", "graphql.graphql");
         #[cfg(feature = "lang-haskell")]
@@ -2185,8 +2148,6 @@ mod tests {
         test_html_config_loads => (Language::HTML, "HTML", "html.html");
         #[cfg(feature = "lang-http")]
         test_http_config_loads => (Language::HTTP, "HTTP", "http.http");
-        #[cfg(feature = "lang-hurl")]
-        test_hurl_config_loads => (Language::Hurl, "Hurl", "hurl.hurl");
         #[cfg(feature = "lang-iex")]
         test_iex_config_loads => (Language::IEx, "IEx", "iex.iex");
         #[cfg(feature = "lang-ini")]

@@ -241,6 +241,7 @@ globs = ["*.erl", "*.app", "*.app.src", "*.es", "*.escript", "*.hrl", "*.xrl", "
 [parsers.fish]
 git = "https://github.com/ram02z/tree-sitter-fish.git"
 rev = "aa074a0bacde8b5823c592574d7138f156a95776"
+crate = "tree-sitter-fish"
 version = "0.1.0"
 globs = ["*.fish"]
 
@@ -259,6 +260,7 @@ emacs = ["fsharp"]
 [parsers.gleam]
 git = "https://github.com/gleam-lang/tree-sitter-gleam.git"
 rev = "6ea757f7eb8d391dbf24dbb9461990757946dd5e"
+crate = "tree-sitter-gleam"
 version = "1.0.0"
 globs = ["*.gleam"]
 emacs = ["gleam"]
@@ -424,6 +426,7 @@ globs = ["*.lua"]
 [parsers.make]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-make.git"
 rev = "70613f3d812cbabbd7f38d104d60a409c4008b43"
+crate = "tree-sitter-make"
 version = "1.1.1"
 globs = [
   "*.mak", "*.d", "*.make", "*.makefile", "*.mk", "*.mkfile", "*.dsp",
@@ -597,6 +600,7 @@ emacs = ["scss"]
 [parsers.sql]
 git = "https://github.com/derekstride/tree-sitter-sql.git"
 rev = "851e9cb257ba7c66cc8c14214a31c44d2f1e954e"
+crate = "tree-sitter-sequel"
 version = "0.3.11"
 variant = "SQL"
 globs = ["*.sql", "*.pgsql"]
