@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.4.0](https://github.com/leandrocp/lumis/compare/rust@v0.3.1...rust@v0.4.0) (2026-04-02)
+
+
+### ⚠ BREAKING CHANGES
+
+* bump tree-sitter 0.26 ([#521](https://github.com/leandrocp/lumis/issues/521))
+
+### Bug Fixes
+
+* reduce package size ([#527](https://github.com/leandrocp/lumis/issues/527)) ([50844a5](https://github.com/leandrocp/lumis/commit/50844a5ab412a4f12c35c59af8eb3011e2496576))
+
+
+### Miscellaneous Chores
+
+* bump tree-sitter 0.26 ([#521](https://github.com/leandrocp/lumis/issues/521)) ([ad9a567](https://github.com/leandrocp/lumis/commit/ad9a5679e94032e153eb7d997f2c1577479ec812))
+
 ## [0.3.1](https://github.com/leandrocp/lumis/compare/rust@v0.3.0...rust@v0.3.1) (2026-03-31)
 
 
