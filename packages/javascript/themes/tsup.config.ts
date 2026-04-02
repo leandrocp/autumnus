@@ -19,7 +19,7 @@ export default defineConfig({
     ...themeEntries,
   },
   format: ["esm", "cjs"],
-  dts: true,
+  experimentalDts: true,
   splitting: true,
   clean: true,
   treeshake: true,

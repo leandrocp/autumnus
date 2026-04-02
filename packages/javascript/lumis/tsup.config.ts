@@ -38,7 +38,7 @@ export default defineConfig({
     ...bundleEntries,
   },
   format: ['esm', 'cjs'],
-  dts: true,
+  experimentalDts: true,
   splitting: true,
   clean: true,
   treeshake: true,

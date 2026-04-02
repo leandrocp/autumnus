@@ -265,7 +265,7 @@ docs-gen-languages-md:
 langs-update name:
     #!/usr/bin/env bash
     set -euo pipefail
-    just langs-fetch-parsers {{name}}
+    just langs-fetch-vendored-parsers {{name}}
     cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- cargo-update-dep {{name}}
     just langs-fetch-queries {{name}}
     just langs-preprocess-queries {{name}}
@@ -282,8 +282,9 @@ langs-extract-scopes:
     find queries/upstream -type f -name "*.scm" -exec grep -oh '@[^_ ][^ ]*' {} \; 2>/dev/null | sed 's/^@//; s/[^a-zA-Z0-9_.-]//g' | sort -u
 
 # Fetch vendored parser sources at pinned revisions
-langs-fetch-parsers name="":
+langs-fetch-vendored-parsers name="":
     cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- fetch-parsers {{name}}
+    cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- compress-parsers {{name}}
 
 # Fetch vendored query files at pinned revisions
 langs-fetch-queries name="":
@@ -301,9 +302,10 @@ langs-gen-highlights:
 langs-list:
     cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- langs-list
 
-# Upgrade vendored parser revisions from nvim-treesitter parsers.lua and upstream
+# Upgrade parser revisions and sync crate-backed versions
 langs-upgrade-parsers name="":
     cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- upgrade-parsers {{name}}
+    cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- cargo-update-dep {{name}}
 
 # Upgrade vendored query revisions from upstream
 langs-upgrade-queries name="":

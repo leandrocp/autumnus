@@ -4,6 +4,7 @@
     "lib": ["esnext", "dom"],
     "module": "preserve",
     "moduleDetection": "force",
+    "types": ["node"],
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,

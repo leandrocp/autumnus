@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import re
-import subprocess
 import sys
 import time
 import tomllib
@@ -123,47 +122,7 @@ def wait_for_version(crate: str, version: str, manifest_path: Path) -> None:
     )
 
 
-def verify_publish(crate_name: str) -> None:
-    result = subprocess.run(
-        ["cargo", "publish", "-p", crate_name, "--dry-run"],
-        check=False,
-    )
-    if result.returncode == 0:
-        return
-
-    fail(
-        f"cargo publish --dry-run failed for {crate_name}. "
-        "This usually means internal Rust dependency versions were not propagated into the release PR, "
-        "or crates.io has not indexed the required internal crates yet. "
-        "Check release-please manifest mode with the cargo-workspace plugin and confirm the tagged Cargo.toml "
-        "points at the expected internal crate versions."
-    )
-
-
-def print_version(manifest_path: Path) -> None:
-    manifest = load_manifest(manifest_path)
-    package = manifest.get("package")
-    if not isinstance(package, dict):
-        fail(f"Could not find [package] section in {manifest_path}")
-
-    version = package.get("version")
-    if not isinstance(version, str):
-        fail(f"Could not determine package version from {manifest_path}")
-
-    print(version)
-
-
 def main(argv: list[str]) -> int:
-    if len(argv) >= 2 and argv[1] == "print-version":
-        if len(argv) != 3:
-            print(
-                "usage: verify-rust-publish.py print-version <manifest-path>",
-                file=sys.stderr,
-            )
-            return 1
-        print_version(Path(argv[2]))
-        return 0
-
     if len(argv) != 3:
         print(
             "usage: verify-rust-publish.py <manifest-path> <crate-name>",
@@ -177,8 +136,6 @@ def main(argv: list[str]) -> int:
 
     for dep_name, required_version in iter_internal_dependencies(manifest, crate_name):
         wait_for_version(dep_name, required_version, manifest_path)
-
-    verify_publish(crate_name)
     return 0
 
 

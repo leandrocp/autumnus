@@ -248,6 +248,7 @@
   (identifier) @function.macro)
 
 "@interface" @function.macro
+
 (groovy_doc) @comment.documentation 
 
 (groovy_doc

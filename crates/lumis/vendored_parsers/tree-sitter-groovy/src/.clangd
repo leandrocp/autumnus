@@ -1,0 +1,4 @@
+CompileFlags:
+  Add: 
+    - "-I." # so we can use angle import
+

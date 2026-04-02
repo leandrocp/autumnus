@@ -1,8 +1,8 @@
 {
-  "crates/lumis": "0.3.1",
+  "crates/lumis": "0.5.0",
   "crates/lumis-core": "0.0.3",
   "crates/lumis-build": "0.0.1",
-  "crates/lumis-cli": "0.0.3",
+  "crates/lumis-cli": "0.1.0",
   "packages/javascript/lumis": "0.1.0",
   "packages/javascript/markdown-it-lumis": "0.0.2",
   "packages/javascript/rehype-lumis": "0.0.2",
@@ -12,5 +12,6 @@
   "packages/javascript/wasm-bundle-system": "0.0.2",
   "packages/javascript/wasm-bundle-backend": "0.0.2",
   "packages/javascript/wasm-bundle-full": "0.0.2",
-  "packages/elixir/lumis": "0.1.2"
+  "packages/elixir/lumis": "0.1.2",
+  "packages/elixir/lumis/native/lumis_nif": "0.1.1"
 }

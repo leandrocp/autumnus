@@ -1,8 +1,4 @@
 ; This file is auto-generated. Do not edit.
-; Comments
-([
-  (module_comment)
-  (statement_comment)
-  (comment)
-] @injection.content
-  (#set! injection.language "comment"))
+((module_comment) @injection.content
+  (#set! injection.language "markdown")
+  (#set! injection.combined))

@@ -60,6 +60,8 @@
   "@public"
   "@protected"
   "@private"
+  "(exact)"
+  "(key)"
 ] @keyword.modifier 
 
 ; Variables

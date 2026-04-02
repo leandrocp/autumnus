@@ -1,5 +1,53 @@
 # Changelog
 
+## [0.5.0](https://github.com/leandrocp/lumis/compare/rust@v0.4.0...rust@v0.5.0) (2026-04-02)
+
+
+### ⚠ BREAKING CHANGES
+
+* bump tree-sitter 0.26 ([#521](https://github.com/leandrocp/lumis/issues/521))
+* pass Language to highlight_iter callbacks ([#509](https://github.com/leandrocp/lumis/issues/509))
+
+### Features
+
+* add 135 themes ([#483](https://github.com/leandrocp/lumis/issues/483)) ([26b9d84](https://github.com/leandrocp/lumis/commit/26b9d84f096e5d9dd5064cf816f794fd578f5adf))
+* add 42 new languages ([#467](https://github.com/leandrocp/lumis/issues/467)) ([9bacc46](https://github.com/leandrocp/lumis/commit/9bacc46552597f0b7ee5c3b8adde3bfc321a2097))
+* add BBCode formatter ([@andrea](https://github.com/andrea)TP) ([#471](https://github.com/leandrocp/lumis/issues/471)) ([8fdce4d](https://github.com/leandrocp/lumis/commit/8fdce4dbff7fcd6cd943d049c9f46588a77e1aa5))
+* add BBCode formatter ([@andrea](https://github.com/andrea)TP) ([#471](https://github.com/leandrocp/lumis/issues/471)) ([8fdce4d](https://github.com/leandrocp/lumis/commit/8fdce4dbff7fcd6cd943d049c9f46588a77e1aa5))
+* add bbcode_scoped formatter to Elixir and Javascript ([#478](https://github.com/leandrocp/lumis/issues/478)) ([1a34357](https://github.com/leandrocp/lumis/commit/1a343574b0239b5100d6b170124b586b0aabecfe))
+* add zsh and llvm languages ([#510](https://github.com/leandrocp/lumis/issues/510)) ([fe8bb2c](https://github.com/leandrocp/lumis/commit/fe8bb2ce76634b75ac5624166216112aba56915a))
+* pass Language to highlight_iter callbacks ([#509](https://github.com/leandrocp/lumis/issues/509)) ([5cd345b](https://github.com/leandrocp/lumis/commit/5cd345baefe410a6966b8d855e87a440a1640c14))
+
+
+### Bug Fixes
+
+* add jinja_inline and remove disabled wasm parsers ([#508](https://github.com/leandrocp/lumis/issues/508)) ([4cb4527](https://github.com/leandrocp/lumis/commit/4cb45279783fd0eba25016c219a3a1feb8b09ac1))
+* align parsers with nvim-treesitter query expectations ([#472](https://github.com/leandrocp/lumis/issues/472)) ([297cbfd](https://github.com/leandrocp/lumis/commit/297cbfda5b13694bfbc863093f98557481b91445))
+* depend on lumis-core &gt;=0.0.1 ([61af49a](https://github.com/leandrocp/lumis/commit/61af49ae9a910c6abe248291eee3d9cee3e017e2))
+* include unnamed children in range ([#430](https://github.com/leandrocp/lumis/issues/430)) ([782bfaa](https://github.com/leandrocp/lumis/commit/782bfaaf4ac86fd287541fcd1307157060846ffc))
+* reduce package size ([#527](https://github.com/leandrocp/lumis/issues/527)) ([50844a5](https://github.com/leandrocp/lumis/commit/50844a5ab412a4f12c35c59af8eb3011e2496576))
+
+
+### Miscellaneous Chores
+
+* bump tree-sitter 0.26 ([#521](https://github.com/leandrocp/lumis/issues/521)) ([ad9a567](https://github.com/leandrocp/lumis/commit/ad9a5679e94032e153eb7d997f2c1577479ec812))
+
+## [0.4.0](https://github.com/leandrocp/lumis/compare/rust@v0.3.1...rust@v0.4.0) (2026-04-02)
+
+
+### ⚠ BREAKING CHANGES
+
+* bump tree-sitter 0.26 ([#521](https://github.com/leandrocp/lumis/issues/521))
+
+### Bug Fixes
+
+* reduce package size ([#527](https://github.com/leandrocp/lumis/issues/527)) ([50844a5](https://github.com/leandrocp/lumis/commit/50844a5ab412a4f12c35c59af8eb3011e2496576))
+
+
+### Miscellaneous Chores
+
+* bump tree-sitter 0.26 ([#521](https://github.com/leandrocp/lumis/issues/521)) ([ad9a567](https://github.com/leandrocp/lumis/commit/ad9a5679e94032e153eb7d997f2c1577479ec812))
+
 ## [0.3.1](https://github.com/leandrocp/lumis/compare/rust@v0.3.0...rust@v0.3.1) (2026-03-31)
 
 
