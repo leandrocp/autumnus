@@ -92,8 +92,6 @@ unsafe extern "C" {
     fn tree_sitter_dockerfile() -> *const ();
     #[cfg(feature = "lang-eex")]
     fn tree_sitter_eex() -> *const ();
-    #[cfg(feature = "lang-fish")]
-    fn tree_sitter_fish() -> *const ();
     #[cfg(feature = "lang-gitattributes")]
     fn tree_sitter_gitattributes() -> *const ();
     #[cfg(feature = "lang-glimmer")]
@@ -689,11 +687,8 @@ static EEX_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-fish")]
 static FISH_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
-    let _ = tree_sitter_fish::NODE_TYPES;
-    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_fish) };
-
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(language_fn),
+        tree_sitter_fish::language(),
         "fish",
         FISH_HIGHLIGHTS,
         FISH_INJECTIONS,
