@@ -88,7 +88,7 @@
   "devDependencies": {
     "@lumis-sh/themes": "workspace:^0.0.2",
     "@lumis-sh/wasm-json": "^0.24.8",
-    "@types/node": "^25.3.2",
+    "@types/node": "^25.5.0",
     "oxfmt": "^0.35.0",
     "oxlint": "1.55.0",
     "oxlint-tsgolint": "0.17.0",
