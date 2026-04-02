@@ -17,13 +17,20 @@ updates:
     directory: "/packages/elixir/lumis"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "tree-sitter-*"
 
   - package-ecosystem: "cargo"
     directory: "/packages/elixir/lumis/native/lumis_nif"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "tree-sitter-*"
 
   - package-ecosystem: "npm"
     directory: "/packages/javascript"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "tree-sitter-*"
+      - dependency-name: "@lumis-sh/wasm-*"
