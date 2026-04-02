@@ -157,7 +157,6 @@
   (keyword_constraint)
   (keyword_force)
   (keyword_use)
-  (keyword_include)
   (keyword_for)
   (keyword_if)
   (keyword_exists)
@@ -269,8 +268,6 @@
   (keyword_start)
   (keyword_restart)
   (keyword_tablespace)
-  (keyword_split)
-  (keyword_tablets)
   (keyword_until)
   (keyword_user)
   (keyword_valid)
@@ -335,7 +332,6 @@
   (keyword_duplicate)
 ] @keyword
 
-(keyword_while) @keyword.repeat
 
 [
   (keyword_restrict)
