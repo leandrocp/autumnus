@@ -64,10 +64,7 @@ function buildPreThemeStyle(options: {
   return styles.length > 0 ? styles.join(" ") : undefined;
 }
 
-function spanAttrs(
-  span: HighlightSpan,
-  formatter: HtmlMultiThemesFormatter,
-): HtmlAttrs {
+function spanAttrs(span: HighlightSpan, formatter: HtmlMultiThemesFormatter): HtmlAttrs {
   return spanMultiThemesAttrs({
     language: span.language,
     scope: span.scope,
