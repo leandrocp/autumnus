@@ -121,7 +121,7 @@ struct TreeSitterParser {
     name: String,
     src_dir: PathBuf,
     parser_file: PathBuf,
-    extra_files: Vec<String>,
+    extra_files: Vec<PathBuf>,
 }
 
 impl TreeSitterParser {
@@ -130,10 +130,10 @@ impl TreeSitterParser {
         let mut cpp_files = vec![];
 
         for file in &self.extra_files {
-            if file.ends_with(".c") {
-                c_files.push(self.src_dir.join(file));
+            if file.extension().and_then(|ext| ext.to_str()) == Some("c") {
+                c_files.push(file.clone());
             } else {
-                cpp_files.push(self.src_dir.join(file));
+                cpp_files.push(file.clone());
             }
         }
 
@@ -202,61 +202,68 @@ fn find_vendored_dir(vendored_root: &Path, key: &str, entry: &ParserEntry) -> Op
 
 /// Determine the src directory within a vendored parser.
 ///
-/// If `location` is set and `{parser_dir}/{location}/src/parser.c` exists,
+/// If `location` is set and `{parser_dir}/{location}/src/parser.c` or
+/// `{parser_dir}/{location}/src/parser.c.xz` exists,
 /// uses the nested path (e.g. tree-sitter-csv/csv/src). Otherwise uses
 /// `{parser_dir}/src`.
 fn resolve_src_dir(parser_dir: &Path, entry: &ParserEntry) -> PathBuf {
     if let Some(loc) = &entry.location {
         let nested = parser_dir.join(loc).join("src");
-        if nested.join("parser.c").exists() {
+        if nested.join("parser.c").exists() || nested.join("parser.c.xz").exists() {
             return nested;
         }
     }
     parser_dir.join("src")
 }
 
-fn ensure_parser_file(out_dir: &Path, parser_name: &str, src_dir: &Path, key: &str) -> PathBuf {
-    let parser_c = src_dir.join("parser.c");
-    if parser_c.exists() {
-        return parser_c;
+fn ensure_source_file(
+    out_dir: &Path,
+    parser_name: &str,
+    src_dir: &Path,
+    key: &str,
+    file_name: &str,
+) -> PathBuf {
+    let source = src_dir.join(file_name);
+    if source.exists() {
+        return source;
     }
 
-    let parser_xz = src_dir.join("parser.c.xz");
+    let compressed = src_dir.join(format!("{file_name}.xz"));
     assert!(
-        parser_xz.exists(),
-        "missing parser source for vendored parser '{key}' at {}",
+        compressed.exists(),
+        "missing parser source '{file_name}' for vendored parser '{key}' at {}",
         src_dir.display()
     );
 
     let unpacked_dir = out_dir.join("vendored_parsers").join(parser_name);
-    let unpacked_parser = unpacked_dir.join("parser.c");
+    let unpacked_source = unpacked_dir.join(file_name);
 
-    if !unpacked_parser.exists() {
+    if !unpacked_source.exists() {
         fs::create_dir_all(&unpacked_dir).expect("failed to create decompressed parser directory");
 
-        let input = File::open(&parser_xz).unwrap_or_else(|err| {
+        let input = File::open(&compressed).unwrap_or_else(|err| {
             panic!(
-                "failed to open compressed parser source for '{key}' at {}: {err}",
-                parser_xz.display()
+                "failed to open compressed parser source '{file_name}' for '{key}' at {}: {err}",
+                compressed.display()
             )
         });
         let mut decoder = XzDecoder::new(input);
         let mut decoded = Vec::new();
         decoder.read_to_end(&mut decoded).unwrap_or_else(|err| {
             panic!(
-                "failed to decompress parser source for '{key}' at {}: {err}",
-                parser_xz.display()
+                "failed to decompress parser source '{file_name}' for '{key}' at {}: {err}",
+                compressed.display()
             )
         });
-        fs::write(&unpacked_parser, decoded).unwrap_or_else(|err| {
+        fs::write(&unpacked_source, decoded).unwrap_or_else(|err| {
             panic!(
-                "failed to write decompressed parser source for '{key}' at {}: {err}",
-                unpacked_parser.display()
+                "failed to write decompressed parser source '{file_name}' for '{key}' at {}: {err}",
+                unpacked_source.display()
             )
         });
     }
 
-    unpacked_parser
+    unpacked_source
 }
 
 // https://github.com/Wilfred/difftastic/blob/8953c55cf854ceac2ccb6ece004d6a94a5bfa122/build.rs
@@ -274,7 +281,7 @@ fn vendored_parsers(toml: &LanguagesToml) {
             let dir_name = find_vendored_dir(&vendored_root, key, entry)?;
             let parser_dir = vendored_root.join(&dir_name);
             let src_dir = resolve_src_dir(&parser_dir, entry);
-            let parser_file = ensure_parser_file(&out_dir, &dir_name, &src_dir, key);
+            let parser_file = ensure_source_file(&out_dir, &dir_name, &src_dir, key, "parser.c");
 
             assert!(
                 parser_file.exists(),
@@ -285,8 +292,8 @@ fn vendored_parsers(toml: &LanguagesToml) {
             // Auto-detect scanner files
             let mut extra_files = Vec::new();
             for name in ["scanner.c", "scanner.cc"] {
-                if src_dir.join(name).exists() {
-                    extra_files.push(name.to_string());
+                if src_dir.join(name).exists() || src_dir.join(format!("{name}.xz")).exists() {
+                    extra_files.push(ensure_source_file(&out_dir, &dir_name, &src_dir, key, name));
                 }
             }
 

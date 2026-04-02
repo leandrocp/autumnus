@@ -169,7 +169,7 @@ In `crates/lumis/Cargo.toml`:
 #### 3. Fetch parser and queries
 
 ```sh
-just langs-fetch-parsers {name}   # fetches vendored source from git
+just langs-fetch-vendored-parsers {name} # fetches vendored source from git
 just cargo-update-dep {name}      # syncs crate-backed parser versions into crates/lumis/Cargo.toml
 just langs-fetch-queries {name}   # fetches .scm query files
 ```
@@ -215,12 +215,11 @@ just test-conformance
 ### Updating parsers
 
 ```sh
-just langs-upgrade-parsers {name} # updates languages.toml revisions
-just langs-fetch-parsers {name}   # fetches updated vendored parser files
-just cargo-update-dep {name}      # syncs crate-backed parser versions into crates/lumis/Cargo.toml
+just langs-upgrade-parsers {name}       # updates languages.toml revisions and syncs crate-backed versions
+just langs-fetch-vendored-parsers {name} # fetches updated vendored parser files
 ```
 
-For parser and query updates, prefer `just langs-update {name}` or the `update-langs` GitHub workflow. Do not use Dependabot to bump `tree-sitter-*` Rust parser crates independently; those versions are tied to the pinned parser/query state in `languages.toml`.
+For parser and query updates, prefer `just langs-update {name}` or the `update-langs` GitHub workflow. Do not use Dependabot to bump `tree-sitter-*` Rust parser crates independently; those versions are tied to the pinned parser/query state in `languages.toml`. `just langs-upgrade-parsers {name}` now updates `languages.toml` and syncs any crate-backed Rust parser versions into `crates/lumis/Cargo.toml` in one step.
 
 ### Updating queries
 

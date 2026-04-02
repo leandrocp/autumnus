@@ -1,3 +1,6 @@
+(object_reference
+  name: (identifier) @type)
+
 (invocation
   (object_reference
     name: (identifier) @function.call))
@@ -13,103 +16,91 @@
   (keyword_object_id)
 ] @function.call
 
-((object_reference
-  name: (identifier) @type) @_obj_ref
-  (#not-has-parent? @_obj_ref invocation))
-
-(cte
-  (identifier) @type)
-
 (relation
   alias: (identifier) @variable)
 
 (field
-  name: (identifier) @variable.member)
-
-(column_definition
-  name: (identifier) @variable.member)
+  name: (identifier) @field)
 
 (term
   alias: (identifier) @variable)
 
-(term
-  value: (cast
+((term
+   value: (cast
     name: (keyword_cast) @function.call
-    parameter: (literal)?))
+    parameter: [(literal)]?)))
 
 (literal) @string
-
 (comment) @comment @spell
-
 (marginalia) @comment
 
 ((literal) @number
-  (#lua-match? @number "^%d+$"))
+   (#match? @number "^[-+]?%d+$"))
 
-((literal) @number.float
-  (#lua-match? @number.float "^[-]?%d*%.%d*$"))
+((literal) @float
+  (#match? @float "^[-+]?%d*\.%d*$"))
 
-(parameter) @variable.parameter
+(parameter) @parameter
 
 [
-  (keyword_true)
-  (keyword_false)
+ (keyword_true)
+ (keyword_false)
 ] @boolean
 
 [
-  (keyword_asc)
-  (keyword_desc)
-  (keyword_terminated)
-  (keyword_escaped)
-  (keyword_unsigned)
-  (keyword_nulls)
-  (keyword_last)
-  (keyword_delimited)
-  (keyword_replication)
-  (keyword_auto_increment)
-  (keyword_default)
-  (keyword_collate)
-  (keyword_concurrently)
-  (keyword_engine)
-  (keyword_always)
-  (keyword_generated)
-  (keyword_preceding)
-  (keyword_following)
-  (keyword_first)
-  (keyword_current_timestamp)
-  (keyword_immutable)
-  (keyword_atomic)
-  (keyword_parallel)
-  (keyword_leakproof)
-  (keyword_safe)
-  (keyword_cost)
-  (keyword_strict)
+ (keyword_asc)
+ (keyword_desc)
+ (keyword_terminated)
+ (keyword_escaped)
+ (keyword_unsigned)
+ (keyword_nulls)
+ (keyword_last)
+ (keyword_delimited)
+ (keyword_replication)
+ (keyword_auto_increment)
+ (keyword_default)
+ (keyword_collate)
+ (keyword_concurrently)
+ (keyword_engine)
+ (keyword_always)
+ (keyword_generated)
+ (keyword_preceding)
+ (keyword_following)
+ (keyword_first)
+ (keyword_current_timestamp)
+ (keyword_immutable)
+ (keyword_atomic)
+ (keyword_parallel)
+ (keyword_leakproof)
+ (keyword_safe)
+ (keyword_cost)
+ (keyword_strict)
 ] @attribute
 
 [
-  (keyword_materialized)
-  (keyword_recursive)
-  (keyword_temp)
-  (keyword_temporary)
-  (keyword_unlogged)
-  (keyword_external)
-  (keyword_parquet)
-  (keyword_csv)
-  (keyword_rcfile)
-  (keyword_textfile)
-  (keyword_orc)
-  (keyword_avro)
-  (keyword_jsonfile)
-  (keyword_sequencefile)
-  (keyword_volatile)
-] @keyword.modifier
+ (keyword_materialized)
+ (keyword_recursive)
+ (keyword_temp)
+ (keyword_temporary)
+ (keyword_unlogged)
+ (keyword_external)
+ (keyword_parquet)
+ (keyword_csv)
+ (keyword_rcfile)
+ (keyword_textfile)
+ (keyword_orc)
+ (keyword_avro)
+ (keyword_jsonfile)
+ (keyword_sequencefile)
+ (keyword_volatile)
+] @storageclass
 
 [
-  (keyword_case)
-  (keyword_when)
-  (keyword_then)
-  (keyword_else)
-] @keyword.conditional
+ (keyword_case)
+ (keyword_when)
+ (keyword_then)
+ (keyword_else)
+] @conditional
 
 [
   (keyword_select)
@@ -156,7 +147,6 @@
   (keyword_constraint)
   (keyword_force)
   (keyword_use)
-  (keyword_include)
   (keyword_for)
   (keyword_if)
   (keyword_exists)
@@ -268,8 +258,6 @@
   (keyword_start)
   (keyword_restart)
   (keyword_tablespace)
-  (keyword_split)
-  (keyword_tablets)
   (keyword_until)
   (keyword_user)
   (keyword_valid)
@@ -334,33 +322,31 @@
   (keyword_duplicate)
 ] @keyword
 
-(keyword_while) @keyword.repeat
-
 [
-  (keyword_restrict)
-  (keyword_unbounded)
-  (keyword_unique)
-  (keyword_cascade)
-  (keyword_delayed)
-  (keyword_high_priority)
-  (keyword_low_priority)
-  (keyword_ignore)
-  (keyword_nothing)
-  (keyword_check)
-  (keyword_option)
-  (keyword_local)
-  (keyword_cascaded)
-  (keyword_wait)
-  (keyword_nowait)
-  (keyword_metadata)
-  (keyword_incremental)
-  (keyword_bin_pack)
-  (keyword_noscan)
-  (keyword_stats)
-  (keyword_statistics)
-  (keyword_maxvalue)
-  (keyword_minvalue)
-] @keyword.modifier
+ (keyword_restrict)
+ (keyword_unbounded)
+ (keyword_unique)
+ (keyword_cascade)
+ (keyword_delayed)
+ (keyword_high_priority)
+ (keyword_low_priority)
+ (keyword_ignore)
+ (keyword_nothing)
+ (keyword_check)
+ (keyword_option)
+ (keyword_local)
+ (keyword_cascaded)
+ (keyword_wait)
+ (keyword_nowait)
+ (keyword_metadata)
+ (keyword_incremental)
+ (keyword_bin_pack)
+ (keyword_noscan)
+ (keyword_stats)
+ (keyword_statistics)
+ (keyword_maxvalue)
+ (keyword_minvalue)
+] @type.qualifier
 
 [
   (keyword_int)

@@ -899,16 +899,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "lumis_nif"
-version = "0.1.0"
-dependencies = [
- "lumis",
- "once_cell",
- "parking_lot",
- "rustler",
-]
-
-[[package]]
 name = "lzma-sys"
 version = "0.1.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"

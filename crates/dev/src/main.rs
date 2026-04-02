@@ -856,6 +856,13 @@ fn fetch_parsers(name: &str) -> Result<()> {
     let tmp = tmpdir()?;
 
     for (parser_name, info) in &toml.parsers {
+        if let Some(crate_name) = &info.crate_field {
+            if name.is_empty() || parser_name == name {
+                println!("Skipping {parser_name}: parser is provided by crate {crate_name}");
+            }
+            continue;
+        }
+
         let Some(ref git) = info.git else { continue };
         if !name.is_empty() && parser_name != name {
             continue;
@@ -875,9 +882,7 @@ fn fetch_parsers(name: &str) -> Result<()> {
         if info.generate.unwrap_or(false) {
             let _ = run_cmd_ok(&format!("rm -rf {dest}"));
             fs::create_dir_all(&dest)?;
-            let _ = run_cmd_ok(&format!(
-                "cd {clone_dir} && npm install --no-save tree-sitter-cli && npx tree-sitter generate"
-            ));
+            run_cmd_ok(&format!("cd {clone_dir} && tree-sitter generate"))?;
             let src = format!("{clone_dir}/src");
             if Path::new(&src).is_dir() {
                 let _ = run_cmd_ok(&format!("cp -r {src} {dest}/"));
@@ -924,37 +929,37 @@ fn vendored_parser_dir_name(parser_name: &str, info: &ParserInfo) -> String {
     format!("tree-sitter-{parser_name}")
 }
 
-fn compress_parser_file(parser_name: &str, src_dir: &Path) -> Result<()> {
-    let parser_c = src_dir.join("parser.c");
-    let parser_xz = src_dir.join("parser.c.xz");
-    let bytes = fs::read(&parser_c)
-        .with_context(|| format!("failed to read parser source at {}", parser_c.display()))?;
-    let output = fs::File::create(&parser_xz).with_context(|| {
+fn compress_source_file(parser_name: &str, src_dir: &Path, file_name: &str) -> Result<()> {
+    let source = src_dir.join(file_name);
+    let compressed = src_dir.join(format!("{file_name}.xz"));
+    let bytes = fs::read(&source)
+        .with_context(|| format!("failed to read parser source at {}", source.display()))?;
+    let output = fs::File::create(&compressed).with_context(|| {
         format!(
             "failed to create compressed parser source at {}",
-            parser_xz.display()
+            compressed.display()
         )
     })?;
     let mut encoder = XzEncoder::new(output, 9);
     encoder.write_all(&bytes).with_context(|| {
         format!(
             "failed to write compressed parser source at {}",
-            parser_xz.display()
+            compressed.display()
         )
     })?;
     encoder.finish().with_context(|| {
         format!(
             "failed to finalize compressed parser source at {}",
-            parser_xz.display()
+            compressed.display()
         )
     })?;
-    fs::remove_file(&parser_c).with_context(|| {
+    fs::remove_file(&source).with_context(|| {
         format!(
             "failed to remove uncompressed parser source at {}",
-            parser_c.display()
+            source.display()
         )
     })?;
-    println!("  Compressed {parser_name} parser.c -> parser.c.xz");
+    println!("  Compressed {parser_name} {file_name} -> {file_name}.xz");
 
     Ok(())
 }
@@ -1005,8 +1010,10 @@ fn compress_parsers(name: &str) -> Result<()> {
             continue;
         }
 
-        if src_dir.join("parser.c").exists() {
-            compress_parser_file(parser_name, &src_dir)?;
+        for file_name in ["parser.c", "scanner.c", "scanner.cc"] {
+            if src_dir.join(file_name).exists() {
+                compress_source_file(parser_name, &src_dir, file_name)?;
+            }
         }
     }
 
