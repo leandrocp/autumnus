@@ -749,24 +749,34 @@ fn highlight_to_events(
     source: &str,
     lang_name: &str,
 ) -> Result<Vec<HighlightEvent>> {
-    let mut wasm_store = reg.new_wasm_store()?;
-    let configs = reg.load_related_configs(lang_name, &mut wasm_store)?;
-    let config = configs
-        .get(lang_name)
+    let config = reg
+        .load_config(lang_name)?
         .ok_or_else(|| anyhow::anyhow!("no config for language '{}'", lang_name))?;
+    // Leak configs to satisfy the 'static lifetime required by the highlight callback.
+    // Acceptable because the CLI process exits after highlighting.
+    let config = Box::leak(Box::new(config));
+    let mut injected_configs: std::collections::HashMap<
+        String,
+        &'static crate::vendor::tree_sitter_highlight::HighlightConfiguration,
+    > = std::collections::HashMap::new();
 
     let mut highlighter = crate::vendor::tree_sitter_highlight::Highlighter::new();
+    let wasm_store = reg.new_wasm_store()?;
     highlighter
         .parser()
         .set_wasm_store(wasm_store)
         .map_err(|e| anyhow::anyhow!("failed to set wasm store: {:?}", e))?;
 
-    // Injection languages (e.g. heex inside elixir) are resolved from already-loaded
-    // configs. Missing injections are silently skipped — use `parsers fetch` to
-    // pre-download injection language parsers for full highlighting.
+    // Injected languages are loaded lazily and only if their parsers were cached already.
     let events = highlighter
         .highlight(config, source.as_bytes(), None, |injected| {
-            configs.get(injected)
+            if !injected_configs.contains_key(injected) {
+                if let Ok(Some(cfg)) = reg.load_cached_config(injected) {
+                    injected_configs.insert(injected.to_string(), Box::leak(Box::new(cfg)));
+                }
+            }
+
+            injected_configs.get(injected).copied()
         })
         .map_err(|e| anyhow::anyhow!("highlight init failed: {:?}", e))?;
 
@@ -795,4 +805,37 @@ fn highlight_to_events(
     }
 
     Ok(core_events)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tempfile::tempdir;
+
+    #[test]
+    fn highlight_to_events_uses_cached_injection_parsers() {
+        let dir = tempdir().unwrap();
+        let reg = registry::Registry::new(dir.path().to_path_buf()).unwrap();
+        reg.download_parser("elixir").unwrap();
+        reg.download_parser("heex").unwrap();
+
+        let source = r#"
+defmodule MyAppWeb.CounterLive do
+  use MyAppWeb, :live_view
+
+  def render(assigns) do
+    ~H"""
+    <div>{@count}</div>
+    """
+  end
+end
+"#;
+
+        let events = highlight_to_events(&reg, source, "elixir").unwrap();
+
+        assert!(events.iter().any(|event| matches!(
+            event,
+            HighlightEvent::Start { language, .. } if language == "heex"
+        )));
+    }
 }
