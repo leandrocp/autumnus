@@ -6,7 +6,7 @@ use lumis::highlight::highlight_events;
 use lumis::languages::Language;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
-use std::collections::{BTreeMap, HashSet};
+use std::collections::{BTreeMap, BTreeSet, HashSet};
 use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -52,6 +52,7 @@ enum Commands {
         #[arg(default_value = "")]
         name: String,
     },
+    SyncCargoFeatures,
     PreprocessQueries {
         #[arg(default_value = "")]
         name: String,
@@ -112,6 +113,7 @@ fn main() -> Result<()> {
         Commands::UpgradeQueries { name } => upgrade_queries(&name),
         Commands::FetchQueries { name } => fetch_queries(&name),
         Commands::CargoUpdateDep { name } => cargo_update_dep(&name),
+        Commands::SyncCargoFeatures => sync_cargo_features(),
         Commands::PreprocessQueries { name } => preprocess_queries(&name),
         Commands::GenHighlights => gen_highlights(),
         Commands::GenLanguagesMd => gen_languages_md(),
@@ -627,6 +629,8 @@ fn gen_themes_md() -> Result<()> {
 struct LanguagesToml {
     queries: BTreeMap<String, QueryInfo>,
     parsers: BTreeMap<String, ParserInfo>,
+    #[serde(default)]
+    bundles: BTreeMap<String, BundleInfo>,
 }
 
 #[derive(Debug, serde::Deserialize)]
@@ -646,6 +650,7 @@ struct ParserInfo {
     crate_field: Option<String>,
     location: Option<String>,
     query_name: Option<String>,
+    feature: Option<String>,
     generate: Option<bool>,
     wasm_name: Option<String>,
     #[allow(dead_code)]
@@ -656,6 +661,18 @@ struct ParserInfo {
     aliases: Vec<String>,
     #[allow(dead_code)]
     variant: Option<String>,
+}
+
+#[derive(Debug, Clone, serde::Deserialize)]
+struct BundleInfo {
+    parsers: BundleParsers,
+}
+
+#[derive(Debug, Clone, serde::Deserialize)]
+#[serde(untagged)]
+enum BundleParsers {
+    List(Vec<String>),
+    All(String),
 }
 
 #[derive(Debug, serde::Deserialize)]
@@ -685,6 +702,24 @@ fn read_lumis_cargo_toml_edit() -> Result<toml_edit::DocumentMut> {
 
 fn write_lumis_cargo_toml_edit(doc: &toml_edit::DocumentMut) -> Result<()> {
     fs::write("crates/lumis/Cargo.toml", doc.to_string())?;
+    Ok(())
+}
+
+fn read_lumis_core_cargo_toml() -> Result<String> {
+    Ok(fs::read_to_string("crates/lumis-core/Cargo.toml")?)
+}
+
+fn write_lumis_core_cargo_toml(text: &str) -> Result<()> {
+    fs::write("crates/lumis-core/Cargo.toml", text)?;
+    Ok(())
+}
+
+fn read_lumis_cargo_toml() -> Result<String> {
+    Ok(fs::read_to_string("crates/lumis/Cargo.toml")?)
+}
+
+fn write_lumis_cargo_toml(text: &str) -> Result<()> {
+    fs::write("crates/lumis/Cargo.toml", text)?;
     Ok(())
 }
 
@@ -1105,6 +1140,222 @@ fn cargo_update_dep(name: &str) -> Result<()> {
     }
 
     write_lumis_cargo_toml_edit(&cargo)
+}
+
+const GENERATED_FEATURES_BEGIN: &str = "# BEGIN GENERATED LANGUAGE FEATURES";
+const GENERATED_FEATURES_END: &str = "# END GENERATED LANGUAGE FEATURES";
+
+fn feature_name(parser_name: &str, info: &ParserInfo) -> String {
+    info.feature
+        .clone()
+        .unwrap_or_else(|| format!("lang-{}", parser_name.replace('_', "-")))
+}
+
+fn bundle_feature_name(bundle_name: &str) -> String {
+    format!("bundle-{bundle_name}")
+}
+
+fn bundle_language_ids(
+    bundle_name: &str,
+    bundle: &BundleInfo,
+    parsers: &BTreeMap<String, ParserInfo>,
+) -> Result<Vec<String>> {
+    match &bundle.parsers {
+        BundleParsers::List(ids) => Ok(ids.clone()),
+        BundleParsers::All(value) if value == "all" => Ok(parsers.keys().cloned().collect()),
+        BundleParsers::All(value) => bail!(
+            "unsupported parsers value {value:?} for bundle {bundle_name}; expected \"all\""
+        ),
+    }
+}
+
+fn fmt_feature_list(lines: &[String]) -> String {
+    match lines {
+        [] => "[]".to_string(),
+        [single] => format!("[{single}]"),
+        many => {
+            let body = many
+                .iter()
+                .map(|line| format!("    {line},"))
+                .collect::<Vec<_>>()
+                .join("\n");
+            format!("[\n{body}\n]")
+        }
+    }
+}
+
+fn generate_lumis_core_features(toml: &LanguagesToml) -> Result<String> {
+    let all_languages = toml
+        .parsers
+        .iter()
+        .map(|(name, info)| feature_name(name, info))
+        .collect::<BTreeSet<_>>()
+        .into_iter()
+        .map(|feature| format!("{feature:?}"))
+        .collect::<Vec<_>>();
+
+    let mut out = String::new();
+    out.push_str("default = [\"all-languages\"]\n\n");
+    out.push_str(&format!(
+        "all-languages = {}\n\n",
+        fmt_feature_list(&all_languages)
+    ));
+
+    for (bundle_name, bundle) in &toml.bundles {
+        let parser_ids = bundle_language_ids(bundle_name, bundle, &toml.parsers)?;
+        for parser_id in &parser_ids {
+            if !toml.parsers.contains_key(parser_id) {
+                bail!("bundle {bundle_name} references unknown parser {parser_id}");
+            }
+        }
+
+        let members = if matches!(&bundle.parsers, BundleParsers::All(_)) {
+            vec!["\"all-languages\"".to_string()]
+        } else {
+            parser_ids
+                .iter()
+                .map(|parser_id| {
+                    let info = toml.parsers.get(parser_id).expect("validated parser id");
+                    format!("{:?}", feature_name(parser_id, info))
+                })
+                .collect::<Vec<_>>()
+        };
+
+        out.push_str(&format!(
+            "{} = {}\n\n",
+            bundle_feature_name(bundle_name),
+            fmt_feature_list(&members)
+        ));
+    }
+
+    for feature in toml
+        .parsers
+        .iter()
+        .map(|(parser_name, info)| feature_name(parser_name, info))
+        .collect::<BTreeSet<_>>()
+    {
+        out.push_str(&format!("{feature} = []\n"));
+    }
+
+    Ok(out)
+}
+
+fn lumis_dep_feature(parser_name: &str, info: &ParserInfo) -> Option<String> {
+    match info.crate_field.as_deref() {
+        Some(_) if parser_name == "diff" => None,
+        Some(crate_name) => Some(format!("{:?}", format!("dep:{crate_name}"))),
+        None => None,
+    }
+}
+
+fn generate_lumis_features(toml: &LanguagesToml) -> Result<String> {
+    let all_languages = toml
+        .parsers
+        .iter()
+        .map(|(name, info)| feature_name(name, info))
+        .collect::<BTreeSet<_>>()
+        .into_iter()
+        .map(|feature| format!("{feature:?}"))
+        .collect::<Vec<_>>();
+
+    let mut out = String::new();
+    out.push_str("default = [\"all-languages\"]\n\n");
+    out.push_str(&format!(
+        "all-languages = {}\n\n",
+        fmt_feature_list(&all_languages)
+    ));
+
+    for (bundle_name, bundle) in &toml.bundles {
+        let parser_ids = bundle_language_ids(bundle_name, bundle, &toml.parsers)?;
+        for parser_id in &parser_ids {
+            if !toml.parsers.contains_key(parser_id) {
+                bail!("bundle {bundle_name} references unknown parser {parser_id}");
+            }
+        }
+
+        let members = if matches!(&bundle.parsers, BundleParsers::All(_)) {
+            vec!["\"all-languages\"".to_string()]
+        } else {
+            parser_ids
+                .iter()
+                .map(|parser_id| {
+                    let info = toml.parsers.get(parser_id).expect("validated parser id");
+                    format!("{:?}", feature_name(parser_id, info))
+                })
+                .collect::<Vec<_>>()
+        };
+
+        out.push_str(&format!(
+            "{} = {}\n\n",
+            bundle_feature_name(bundle_name),
+            fmt_feature_list(&members)
+        ));
+    }
+
+    let mut feature_members = BTreeMap::<String, BTreeSet<String>>::new();
+
+    for (parser_name, info) in &toml.parsers {
+        let feature = feature_name(parser_name, info);
+        let members = feature_members.entry(feature).or_default();
+        if let Some(dep_feature) = lumis_dep_feature(parser_name, info) {
+            members.insert(dep_feature);
+        }
+        members.insert(format!(
+            "{:?}",
+            format!("lumis-core/{}", feature_name(parser_name, info))
+        ));
+    }
+
+    for (feature, members) in feature_members {
+        out.push_str(&format!(
+            "{feature} = {}\n",
+            fmt_feature_list(&members.into_iter().collect::<Vec<_>>())
+        ));
+    }
+
+    Ok(out)
+}
+
+fn replace_generated_features(path: &str, current: &str, generated: &str) -> Result<String> {
+    let start = current
+        .find(GENERATED_FEATURES_BEGIN)
+        .with_context(|| format!("missing {GENERATED_FEATURES_BEGIN} marker in {path}"))?;
+    let end = current
+        .find(GENERATED_FEATURES_END)
+        .with_context(|| format!("missing {GENERATED_FEATURES_END} marker in {path}"))?;
+
+    if end <= start {
+        bail!("invalid generated feature markers in {path}");
+    }
+
+    let prefix = &current[..start + GENERATED_FEATURES_BEGIN.len()];
+    let suffix = &current[end..];
+    Ok(format!("{prefix}\n{generated}\n{suffix}"))
+}
+
+fn sync_cargo_features() -> Result<()> {
+    let toml = read_languages_toml()?;
+
+    let lumis_core_generated = generate_lumis_core_features(&toml)?;
+    let lumis_generated = generate_lumis_features(&toml)?;
+
+    let lumis_core_current = read_lumis_core_cargo_toml()?;
+    let lumis_current = read_lumis_cargo_toml()?;
+
+    let lumis_core_updated = replace_generated_features(
+        "crates/lumis-core/Cargo.toml",
+        &lumis_core_current,
+        &lumis_core_generated,
+    )?;
+    let lumis_updated =
+        replace_generated_features("crates/lumis/Cargo.toml", &lumis_current, &lumis_generated)?;
+
+    write_lumis_core_cargo_toml(&lumis_core_updated)?;
+    write_lumis_cargo_toml(&lumis_updated)?;
+
+    println!("Synced generated features in crates/lumis-core/Cargo.toml");
+    println!("Synced generated features in crates/lumis/Cargo.toml");
+    Ok(())
 }
 
 fn fetch_queries(name: &str) -> Result<()> {

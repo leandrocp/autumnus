@@ -17,7 +17,7 @@ path = "src/main.rs"
 
 [features]
 default = []
-lumis-all-languages = ["lumis/all-languages"]
+lumis-all-languages = ["lumis/bundle-full"]
 
 [dependencies]
 lumis = { path = "../lumis", default-features = false }

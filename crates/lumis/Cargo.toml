@@ -41,11 +41,12 @@ no-default-features = true
 
 [features]
 dev = []
+# BEGIN GENERATED LANGUAGE FEATURES
 default = ["all-languages"]
 
 all-languages = [
-    "lang-arduino",
     "lang-angular",
+    "lang-arduino",
     "lang-asm",
     "lang-astro",
     "lang-bash",
@@ -65,11 +66,11 @@ all-languages = [
     "lang-diff",
     "lang-dockerfile",
     "lang-dot",
+    "lang-editorconfig",
     "lang-eex",
     "lang-ejs",
     "lang-elixir",
     "lang-elm",
-    "lang-editorconfig",
     "lang-erb",
     "lang-erlang",
     "lang-fish",
@@ -82,23 +83,25 @@ all-languages = [
     "lang-glsl",
     "lang-go",
     "lang-graphql",
+    "lang-groovy",
     "lang-haskell",
     "lang-hcl",
     "lang-heex",
     "lang-html",
     "lang-http",
+    "lang-hurl",
     "lang-iex",
     "lang-ini",
     "lang-java",
+    "lang-javadoc",
     "lang-javascript",
-    "lang-json",
-    "lang-json5",
     "lang-jinja",
     "lang-jinja-inline",
-    "lang-just",
-    "lang-javadoc",
     "lang-jq",
+    "lang-json",
+    "lang-json5",
     "lang-julia",
+    "lang-just",
     "lang-kdl",
     "lang-kotlin",
     "lang-latex",
@@ -107,10 +110,10 @@ all-languages = [
     "lang-lua",
     "lang-luadoc",
     "lang-make",
-    "lang-matlab",
-    "lang-mermaid",
     "lang-markdown",
     "lang-markdown-inline",
+    "lang-matlab",
+    "lang-mermaid",
     "lang-nginx",
     "lang-nim",
     "lang-nix",
@@ -133,10 +136,10 @@ all-languages = [
     "lang-ruby",
     "lang-rust",
     "lang-scala",
-    "lang-scss",
     "lang-scheme",
-    "lang-sql",
+    "lang-scss",
     "lang-solidity",
+    "lang-sql",
     "lang-surface",
     "lang-svelte",
     "lang-swift",
@@ -147,8 +150,8 @@ all-languages = [
     "lang-tsx",
     "lang-typescript",
     "lang-typst",
-    "lang-vim",
     "lang-vhdl",
+    "lang-vim",
     "lang-vue",
     "lang-wat",
     "lang-wgsl",
@@ -158,118 +161,439 @@ all-languages = [
     "lang-zsh",
 ]
 
-lang-arduino = ["dep:tree-sitter-arduino", "lumis-core/lang-arduino"]
+bundle-backend = [
+    "lang-bash",
+    "lang-comment",
+    "lang-csharp",
+    "lang-diff",
+    "lang-dockerfile",
+    "lang-elixir",
+    "lang-erlang",
+    "lang-go",
+    "lang-graphql",
+    "lang-http",
+    "lang-java",
+    "lang-javascript",
+    "lang-json",
+    "lang-kotlin",
+    "lang-nginx",
+    "lang-php",
+    "lang-protobuf",
+    "lang-python",
+    "lang-regex",
+    "lang-ruby",
+    "lang-rust",
+    "lang-scala",
+    "lang-sql",
+    "lang-toml",
+    "lang-typescript",
+    "lang-xml",
+    "lang-yaml",
+]
+
+bundle-essential = [
+    "lang-bash",
+    "lang-comment",
+    "lang-diff",
+    "lang-ini",
+    "lang-xml",
+    "lang-json",
+    "lang-markdown",
+    "lang-markdown-inline",
+    "lang-regex",
+    "lang-toml",
+    "lang-yaml",
+]
+
+bundle-full = ["all-languages"]
+
+bundle-system = [
+    "lang-asm",
+    "lang-bash",
+    "lang-c",
+    "lang-cmake",
+    "lang-comment",
+    "lang-cpp",
+    "lang-diff",
+    "lang-go",
+    "lang-json",
+    "lang-llvm",
+    "lang-make",
+    "lang-regex",
+    "lang-rust",
+    "lang-toml",
+    "lang-wat",
+    "lang-yaml",
+    "lang-zig",
+]
+
+bundle-web = [
+    "lang-astro",
+    "lang-bash",
+    "lang-comment",
+    "lang-css",
+    "lang-diff",
+    "lang-dockerfile",
+    "lang-graphql",
+    "lang-heex",
+    "lang-html",
+    "lang-javascript",
+    "lang-json",
+    "lang-markdown",
+    "lang-markdown-inline",
+    "lang-regex",
+    "lang-scss",
+    "lang-sql",
+    "lang-svelte",
+    "lang-toml",
+    "lang-tsx",
+    "lang-typescript",
+    "lang-vue",
+    "lang-xml",
+    "lang-yaml",
+]
+
 lang-angular = ["lumis-core/lang-angular"]
-lang-asm = ["dep:tree-sitter-asm", "lumis-core/lang-asm"]
+lang-arduino = [
+    "dep:tree-sitter-arduino",
+    "lumis-core/lang-arduino",
+]
+lang-asm = [
+    "dep:tree-sitter-asm",
+    "lumis-core/lang-asm",
+]
 lang-astro = ["lumis-core/lang-astro"]
-lang-bash = ["dep:tree-sitter-bash", "lumis-core/lang-bash"]
-lang-bicep = ["dep:tree-sitter-bicep", "lumis-core/lang-bicep"]
-lang-c = ["dep:tree-sitter-c", "lumis-core/lang-c"]
-lang-caddy = ["dep:tree-sitter-caddy", "lumis-core/lang-caddy"]
-lang-clojure = ["dep:tree-sitter-clojure-orchard", "lumis-core/lang-clojure"]
-lang-cmake = ["dep:tree-sitter-cmake", "lumis-core/lang-cmake"]
-lang-comment = ["dep:tree-sitter-comment", "lumis-core/lang-comment"]
-lang-commonlisp = ["dep:tree-sitter-commonlisp", "lumis-core/lang-commonlisp"]
-lang-cpp = ["dep:tree-sitter-cpp", "lumis-core/lang-cpp"]
-lang-csharp = ["dep:tree-sitter-c-sharp", "lumis-core/lang-csharp"]
-lang-css = ["dep:tree-sitter-css", "lumis-core/lang-css"]
+lang-bash = [
+    "dep:tree-sitter-bash",
+    "lumis-core/lang-bash",
+]
+lang-bicep = [
+    "dep:tree-sitter-bicep",
+    "lumis-core/lang-bicep",
+]
+lang-c = [
+    "dep:tree-sitter-c",
+    "lumis-core/lang-c",
+]
+lang-caddy = [
+    "dep:tree-sitter-caddy",
+    "lumis-core/lang-caddy",
+]
+lang-clojure = [
+    "dep:tree-sitter-clojure-orchard",
+    "lumis-core/lang-clojure",
+]
+lang-cmake = [
+    "dep:tree-sitter-cmake",
+    "lumis-core/lang-cmake",
+]
+lang-comment = [
+    "dep:tree-sitter-comment",
+    "lumis-core/lang-comment",
+]
+lang-commonlisp = [
+    "dep:tree-sitter-commonlisp",
+    "lumis-core/lang-commonlisp",
+]
+lang-cpp = [
+    "dep:tree-sitter-cpp",
+    "lumis-core/lang-cpp",
+]
+lang-csharp = [
+    "dep:tree-sitter-c-sharp",
+    "lumis-core/lang-csharp",
+]
+lang-css = [
+    "dep:tree-sitter-css",
+    "lumis-core/lang-css",
+]
 lang-csv = ["lumis-core/lang-csv"]
-lang-d = ["dep:tree-sitter-d", "lumis-core/lang-d"]
+lang-d = [
+    "dep:tree-sitter-d",
+    "lumis-core/lang-d",
+]
 lang-dart = ["lumis-core/lang-dart"]
-lang-diff = []
+lang-diff = ["lumis-core/lang-diff"]
 lang-dockerfile = ["lumis-core/lang-dockerfile"]
 lang-dot = ["lumis-core/lang-dot"]
-lang-eex = ["lumis-core/lang-eex"]
-lang-ejs = ["dep:tree-sitter-embedded-template", "lumis-core/lang-ejs"]
-lang-elixir = ["dep:tree-sitter-elixir", "lumis-core/lang-elixir"]
-lang-elm = ["dep:tree-sitter-elm", "lumis-core/lang-elm"]
 lang-editorconfig = ["lumis-core/lang-editorconfig"]
-lang-erb = ["dep:tree-sitter-embedded-template", "lumis-core/lang-erb"]
-lang-erlang = ["dep:tree-sitter-erlang", "lumis-core/lang-erlang"]
-lang-fish = ["dep:tree-sitter-fish", "lumis-core/lang-fish"]
-lang-fortran = ["dep:tree-sitter-fortran", "lumis-core/lang-fortran"]
-lang-fsharp = ["dep:tree-sitter-fsharp", "lumis-core/lang-fsharp"]
+lang-eex = ["lumis-core/lang-eex"]
+lang-ejs = [
+    "dep:tree-sitter-embedded-template",
+    "lumis-core/lang-ejs",
+]
+lang-elixir = [
+    "dep:tree-sitter-elixir",
+    "lumis-core/lang-elixir",
+]
+lang-elm = [
+    "dep:tree-sitter-elm",
+    "lumis-core/lang-elm",
+]
+lang-erb = [
+    "dep:tree-sitter-embedded-template",
+    "lumis-core/lang-erb",
+]
+lang-erlang = [
+    "dep:tree-sitter-erlang",
+    "lumis-core/lang-erlang",
+]
+lang-fish = [
+    "dep:tree-sitter-fish",
+    "lumis-core/lang-fish",
+]
+lang-fortran = [
+    "dep:tree-sitter-fortran",
+    "lumis-core/lang-fortran",
+]
+lang-fsharp = [
+    "dep:tree-sitter-fsharp",
+    "lumis-core/lang-fsharp",
+]
 lang-gitattributes = ["lumis-core/lang-gitattributes"]
 lang-gitignore = ["lumis-core/lang-gitignore"]
-lang-gleam = ["dep:tree-sitter-gleam", "lumis-core/lang-gleam"]
+lang-gleam = [
+    "dep:tree-sitter-gleam",
+    "lumis-core/lang-gleam",
+]
 lang-glimmer = ["lumis-core/lang-glimmer"]
-lang-glsl = ["dep:tree-sitter-glsl", "lumis-core/lang-glsl"]
-lang-go = ["dep:tree-sitter-go", "lumis-core/lang-go"]
-lang-graphql = ["dep:tree-sitter-graphql", "lumis-core/lang-graphql"]
-lang-haskell = ["dep:tree-sitter-haskell", "lumis-core/lang-haskell"]
-lang-hcl = ["dep:tree-sitter-hcl", "lumis-core/lang-hcl"]
-lang-heex = ["dep:tree-sitter-heex", "lumis-core/lang-heex"]
-lang-html = ["dep:tree-sitter-html", "lumis-core/lang-html"]
+lang-glsl = [
+    "dep:tree-sitter-glsl",
+    "lumis-core/lang-glsl",
+]
+lang-go = [
+    "dep:tree-sitter-go",
+    "lumis-core/lang-go",
+]
+lang-graphql = [
+    "dep:tree-sitter-graphql",
+    "lumis-core/lang-graphql",
+]
+lang-groovy = ["lumis-core/lang-groovy"]
+lang-haskell = [
+    "dep:tree-sitter-haskell",
+    "lumis-core/lang-haskell",
+]
+lang-hcl = [
+    "dep:tree-sitter-hcl",
+    "lumis-core/lang-hcl",
+]
+lang-heex = [
+    "dep:tree-sitter-heex",
+    "lumis-core/lang-heex",
+]
+lang-html = [
+    "dep:tree-sitter-html",
+    "lumis-core/lang-html",
+]
 lang-http = ["lumis-core/lang-http"]
+lang-hurl = ["lumis-core/lang-hurl"]
 lang-iex = ["lumis-core/lang-iex"]
-lang-ini = ["dep:tree-sitter-ini", "lumis-core/lang-ini"]
-lang-java = ["dep:tree-sitter-java", "lumis-core/lang-java"]
-lang-javascript = ["dep:tree-sitter-javascript", "lumis-core/lang-javascript"]
-lang-json = ["dep:tree-sitter-json", "lumis-core/lang-json"]
-lang-json5 = ["lumis-core/lang-json5"]
-lang-jinja = ["dep:tree-sitter-jinja", "lumis-core/lang-jinja"]
+lang-ini = [
+    "dep:tree-sitter-ini",
+    "lumis-core/lang-ini",
+]
+lang-java = [
+    "dep:tree-sitter-java",
+    "lumis-core/lang-java",
+]
+lang-javadoc = [
+    "dep:tree-sitter-javadoc",
+    "lumis-core/lang-javadoc",
+]
+lang-javascript = [
+    "dep:tree-sitter-javascript",
+    "lumis-core/lang-javascript",
+]
+lang-jinja = [
+    "dep:tree-sitter-jinja",
+    "lumis-core/lang-jinja",
+]
 lang-jinja-inline = ["lumis-core/lang-jinja-inline"]
-lang-just = ["lumis-core/lang-just"]
-lang-javadoc = ["dep:tree-sitter-javadoc", "lumis-core/lang-javadoc"]
 lang-jq = ["lumis-core/lang-jq"]
-lang-julia = ["dep:tree-sitter-julia", "lumis-core/lang-julia"]
+lang-json = [
+    "dep:tree-sitter-json",
+    "lumis-core/lang-json",
+]
+lang-json5 = ["lumis-core/lang-json5"]
+lang-julia = [
+    "dep:tree-sitter-julia",
+    "lumis-core/lang-julia",
+]
+lang-just = ["lumis-core/lang-just"]
 lang-kdl = ["lumis-core/lang-kdl"]
 lang-kotlin = ["lumis-core/lang-kotlin"]
 lang-latex = ["lumis-core/lang-latex"]
 lang-liquid = ["lumis-core/lang-liquid"]
-lang-llvm = ["dep:tree-sitter-llvm", "lumis-core/lang-llvm"]
-lang-lua = ["dep:tree-sitter-lua", "lumis-core/lang-lua"]
+lang-llvm = [
+    "dep:tree-sitter-llvm",
+    "lumis-core/lang-llvm",
+]
+lang-lua = [
+    "dep:tree-sitter-lua",
+    "lumis-core/lang-lua",
+]
 lang-luadoc = ["lumis-core/lang-luadoc"]
-lang-make = ["dep:tree-sitter-make", "lumis-core/lang-make"]
-lang-matlab = ["dep:tree-sitter-matlab", "lumis-core/lang-matlab"]
+lang-make = [
+    "dep:tree-sitter-make",
+    "lumis-core/lang-make",
+]
+lang-markdown = [
+    "dep:tree-sitter-md",
+    "lumis-core/lang-markdown",
+]
+lang-markdown-inline = [
+    "dep:tree-sitter-md",
+    "lumis-core/lang-markdown-inline",
+]
+lang-matlab = [
+    "dep:tree-sitter-matlab",
+    "lumis-core/lang-matlab",
+]
 lang-mermaid = ["lumis-core/lang-mermaid"]
-lang-markdown = ["dep:tree-sitter-md", "lumis-core/lang-markdown"]
-lang-markdown-inline = ["dep:tree-sitter-md", "lumis-core/lang-markdown-inline"]
-lang-nginx = ["dep:tree-sitter-nginx", "lumis-core/lang-nginx"]
+lang-nginx = [
+    "dep:tree-sitter-nginx",
+    "lumis-core/lang-nginx",
+]
 lang-nim = ["lumis-core/lang-nim"]
-lang-nix = ["dep:tree-sitter-nix", "lumis-core/lang-nix"]
+lang-nix = [
+    "dep:tree-sitter-nix",
+    "lumis-core/lang-nix",
+]
 lang-nushell = ["lumis-core/lang-nushell"]
-lang-objc = ["dep:tree-sitter-objc", "lumis-core/lang-objc"]
-lang-ocaml = ["dep:tree-sitter-ocaml", "lumis-core/lang-ocaml"]
-lang-pascal = ["dep:tree-sitter-pascal", "lumis-core/lang-pascal"]
+lang-objc = [
+    "dep:tree-sitter-objc",
+    "lumis-core/lang-objc",
+]
+lang-ocaml = [
+    "dep:tree-sitter-ocaml",
+    "lumis-core/lang-ocaml",
+]
+lang-pascal = [
+    "dep:tree-sitter-pascal",
+    "lumis-core/lang-pascal",
+]
 lang-perl = ["lumis-core/lang-perl"]
-lang-php = ["dep:tree-sitter-php", "lumis-core/lang-php"]
-lang-powershell = ["dep:tree-sitter-powershell", "lumis-core/lang-powershell"]
+lang-php = [
+    "dep:tree-sitter-php",
+    "lumis-core/lang-php",
+]
+lang-powershell = [
+    "dep:tree-sitter-powershell",
+    "lumis-core/lang-powershell",
+]
 lang-prisma = ["lumis-core/lang-prisma"]
 lang-protobuf = ["lumis-core/lang-protobuf"]
-lang-puppet = ["dep:tree-sitter-puppet", "lumis-core/lang-puppet"]
-lang-python = ["dep:tree-sitter-python", "lumis-core/lang-python"]
-lang-qmljs = ["dep:tree-sitter-qmljs", "lumis-core/lang-qmljs"]
-lang-r = ["dep:tree-sitter-r", "lumis-core/lang-r"]
-lang-racket = ["dep:tree-sitter-racket", "lumis-core/lang-racket"]
-lang-regex = ["dep:tree-sitter-regex", "lumis-core/lang-regex"]
-lang-rst = ["dep:tree-sitter-rst", "lumis-core/lang-rst"]
-lang-ruby = ["dep:tree-sitter-ruby", "lumis-core/lang-ruby"]
-lang-rust = ["dep:tree-sitter-rust", "lumis-core/lang-rust"]
-lang-scala = ["dep:tree-sitter-scala", "lumis-core/lang-scala"]
+lang-puppet = [
+    "dep:tree-sitter-puppet",
+    "lumis-core/lang-puppet",
+]
+lang-python = [
+    "dep:tree-sitter-python",
+    "lumis-core/lang-python",
+]
+lang-qmljs = [
+    "dep:tree-sitter-qmljs",
+    "lumis-core/lang-qmljs",
+]
+lang-r = [
+    "dep:tree-sitter-r",
+    "lumis-core/lang-r",
+]
+lang-racket = [
+    "dep:tree-sitter-racket",
+    "lumis-core/lang-racket",
+]
+lang-regex = [
+    "dep:tree-sitter-regex",
+    "lumis-core/lang-regex",
+]
+lang-rst = [
+    "dep:tree-sitter-rst",
+    "lumis-core/lang-rst",
+]
+lang-ruby = [
+    "dep:tree-sitter-ruby",
+    "lumis-core/lang-ruby",
+]
+lang-rust = [
+    "dep:tree-sitter-rust",
+    "lumis-core/lang-rust",
+]
+lang-scala = [
+    "dep:tree-sitter-scala",
+    "lumis-core/lang-scala",
+]
+lang-scheme = [
+    "dep:tree-sitter-scheme",
+    "lumis-core/lang-scheme",
+]
 lang-scss = ["lumis-core/lang-scss"]
-lang-scheme = ["dep:tree-sitter-scheme", "lumis-core/lang-scheme"]
-lang-sql = ["dep:tree-sitter-sequel", "lumis-core/lang-sql"]
-lang-solidity = ["dep:tree-sitter-solidity", "lumis-core/lang-solidity"]
+lang-solidity = [
+    "dep:tree-sitter-solidity",
+    "lumis-core/lang-solidity",
+]
+lang-sql = [
+    "dep:tree-sitter-sequel",
+    "lumis-core/lang-sql",
+]
 lang-surface = ["lumis-core/lang-surface"]
-lang-svelte = ["dep:tree-sitter-svelte-ng", "lumis-core/lang-svelte"]
-lang-swift = ["dep:tree-sitter-swift", "lumis-core/lang-swift"]
-lang-systemverilog = ["dep:tree-sitter-systemverilog", "lumis-core/lang-systemverilog"]
+lang-svelte = [
+    "dep:tree-sitter-svelte-ng",
+    "lumis-core/lang-svelte",
+]
+lang-swift = [
+    "dep:tree-sitter-swift",
+    "lumis-core/lang-swift",
+]
+lang-systemverilog = [
+    "dep:tree-sitter-systemverilog",
+    "lumis-core/lang-systemverilog",
+]
 lang-tcl = ["lumis-core/lang-tcl"]
 lang-terraform = ["lumis-core/lang-terraform"]
-lang-toml = ["dep:tree-sitter-toml-ng", "lumis-core/lang-toml"]
-lang-tsx = ["dep:tree-sitter-typescript", "lumis-core/lang-tsx"]
-lang-typescript = ["dep:tree-sitter-typescript", "lumis-core/lang-typescript"]
-lang-typst = ["dep:codebook-tree-sitter-typst", "lumis-core/lang-typst"]
+lang-toml = [
+    "dep:tree-sitter-toml-ng",
+    "lumis-core/lang-toml",
+]
+lang-tsx = [
+    "dep:tree-sitter-typescript",
+    "lumis-core/lang-tsx",
+]
+lang-typescript = [
+    "dep:tree-sitter-typescript",
+    "lumis-core/lang-typescript",
+]
+lang-typst = [
+    "dep:codebook-tree-sitter-typst",
+    "lumis-core/lang-typst",
+]
+lang-vhdl = [
+    "dep:tree-sitter-vhdl",
+    "lumis-core/lang-vhdl",
+]
 lang-vim = ["lumis-core/lang-vim"]
-lang-vhdl = ["dep:tree-sitter-vhdl", "lumis-core/lang-vhdl"]
 lang-vue = ["lumis-core/lang-vue"]
 lang-wat = ["lumis-core/lang-wat"]
 lang-wgsl = ["lumis-core/lang-wgsl"]
-lang-xml = ["dep:tree-sitter-xml", "lumis-core/lang-xml"]
-lang-yaml = ["dep:tree-sitter-yaml", "lumis-core/lang-yaml"]
-lang-zig = ["dep:tree-sitter-zig", "lumis-core/lang-zig"]
-lang-zsh = ["dep:tree-sitter-zsh", "lumis-core/lang-zsh"]
+lang-xml = [
+    "dep:tree-sitter-xml",
+    "lumis-core/lang-xml",
+]
+lang-yaml = [
+    "dep:tree-sitter-yaml",
+    "lumis-core/lang-yaml",
+]
+lang-zig = [
+    "dep:tree-sitter-zig",
+    "lumis-core/lang-zig",
+]
+lang-zsh = [
+    "dep:tree-sitter-zsh",
+    "lumis-core/lang-zsh",
+]
+
+# END GENERATED LANGUAGE FEATURES
 
 [dependencies]
 lumis-core = { path = "../lumis-core", version = "0.0.3", default-features = false }

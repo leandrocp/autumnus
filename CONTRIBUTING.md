@@ -59,6 +59,7 @@ All language metadata lives here. Consumed by:
 - `crates/lumis/build.rs` -- reads `queries/processed/` to embed query constants (with Lua-to-Rust regex conversion)
 - `crates/lumis-cli/build.rs` -- reads `queries/processed/` to embed query constants
 - `crates/lumis-core/build.rs` -- generates the `Language` enum and Rust-side detection metadata
+- `cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- sync-cargo-features` -- regenerates Rust `lang-*` and `bundle-*` feature declarations in `crates/lumis/Cargo.toml` and `crates/lumis-core/Cargo.toml`
 - `packages/javascript/lumis/scripts/build-langs.ts` -- generates `packages/javascript/lumis/langs/*.ts`, bundles, and JS detection/load metadata from the same source
 - `packages/javascript/scripts/build-wasm-bundles.ts` -- generates `packages/javascript/wasm-bundle-*` preset packages from bundle definitions in the same source
 - CI workflows -- builds WASMs, updates parser/query revisions
@@ -69,6 +70,7 @@ Bundle definitions also live in `languages.toml` under `[bundles.*]`.
 - After changing parser or bundle entries, regenerate the checked-in JavaScript outputs:
 
 ```sh
+just cargo-sync-features
 pnpm --filter @lumis-sh/lumis build:generate
 pnpm --dir packages/javascript run build:wasm-bundles
 ```
@@ -156,15 +158,10 @@ In `crates/lumis/Cargo.toml`:
   ```toml
   tree-sitter-{lang} = { version = "x.y.z", optional = true }
   ```
-  and a feature flag:
-  ```toml
-  lang-{name} = ["dep:tree-sitter-{lang}"]
+- Do not hand-edit `lang-*`, `bundle-*`, or `all-languages` features. Regenerate them from `languages.toml`:
+  ```sh
+  just cargo-sync-features
   ```
-- If no crate exists, add an empty feature flag:
-  ```toml
-  lang-{name} = []
-  ```
-- Add to the `all-languages` list
 
 #### 3. Fetch parser and queries
 
