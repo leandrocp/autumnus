@@ -99,7 +99,7 @@ function bindHighlighter(highlighter: HighlighterInput) {
     }, [fallback, props.children, props.formatter]);
 
     if (error) {
-      throw error;
+      throw error instanceof Error ? error : new Error("Code block rendering failed");
     }
 
     return { content, isLoading };

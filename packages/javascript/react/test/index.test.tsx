@@ -39,7 +39,9 @@ describe("@lumis-sh/react", () => {
 
     const html = renderToStaticMarkup(node);
 
-    expect(html).toMatch(/<pre class="lumis" style="color:#[0-9a-f]+;background-color:#[0-9a-f]+">/);
+    expect(html).toMatch(
+      /<pre class="lumis" style="color:#[0-9a-f]+;background-color:#[0-9a-f]+">/,
+    );
     expect(html).toMatch(/<code class="language-javascript"/);
     expect(html).toMatch(/<span style="color:#[0-9a-f]+">const<\/span>/);
   });
@@ -56,7 +58,7 @@ describe("@lumis-sh/react", () => {
     const html = renderToStaticMarkup(node);
 
     expect(html).toContain('class="language-javascript"');
-    expect(html).toContain("<pre class=\"lumis\"");
+    expect(html).toContain('<pre class="lumis"');
   });
 
   it("renders a fallback first and then highlights on the client", async () => {
@@ -103,10 +105,7 @@ describe("@lumis-sh/react", () => {
     await highlighter.loadLanguage("javascript");
 
     function HookHarness() {
-      const formatter = useMemo(
-        () => htmlInline({ language: "javascript", theme: dracula }),
-        [],
-      );
+      const formatter = useMemo(() => htmlInline({ language: "javascript", theme: dracula }), []);
 
       const { content, isLoading } = useCodeBlock({
         children: SOURCE,

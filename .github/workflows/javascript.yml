@@ -11,6 +11,7 @@ on:
       - "packages/javascript/lumis/**"
       - "packages/javascript/markdown-it-lumis/**"
       - "packages/javascript/rehype-lumis/**"
+      - "packages/javascript/react/**"
       - "packages/javascript/themes/**"
       - "packages/javascript/wasm-bundle-*/**"
       - "queries/**"
@@ -21,6 +22,7 @@ on:
       - "packages/javascript/lumis/**"
       - "packages/javascript/markdown-it-lumis/**"
       - "packages/javascript/rehype-lumis/**"
+      - "packages/javascript/react/**"
       - "packages/javascript/themes/**"
       - "packages/javascript/wasm-bundle-*/**"
       - "queries/**"
@@ -56,6 +58,10 @@ jobs:
         working-directory: packages/javascript
       - run: pnpm --filter @lumis-sh/rehype-lumis lint
         working-directory: packages/javascript
+      - run: pnpm --filter @lumis-sh/react fmt:check
+        working-directory: packages/javascript
+      - run: pnpm --filter @lumis-sh/react lint
+        working-directory: packages/javascript
       - run: pnpm --filter @lumis-sh/themes fmt:check
         working-directory: packages/javascript
       - run: pnpm --filter @lumis-sh/themes lint
@@ -86,11 +92,15 @@ jobs:
         working-directory: packages/javascript
       - run: pnpm --filter @lumis-sh/rehype-lumis build
         working-directory: packages/javascript
+      - run: pnpm --filter @lumis-sh/react build
+        working-directory: packages/javascript
       - run: pnpm --filter @lumis-sh/markdown-it-lumis test
         working-directory: packages/javascript
       - run: pnpm --filter @lumis-sh/rehype-lumis test
         working-directory: packages/javascript
       - run: pnpm --filter @lumis-sh/lumis test
+        working-directory: packages/javascript
+      - run: pnpm --filter @lumis-sh/react test
         working-directory: packages/javascript
       - run: pnpm run build:wasm-bundles && git diff --exit-code -- wasm-bundle-*
         working-directory: packages/javascript
