@@ -59,12 +59,12 @@
 //!
 //! ```toml
 //! [dependencies]
-//! lumis = { version = "0.1", default-features = false, features = ["lang-rust", "lang-javascript"] }
+//! lumis = { version = "0.1", default-features = false, features = ["lang-rust", "lang-javascript", "bundle-web"] }
 //! ```
 //!
-//! Available language features include: `lang-angular`, `lang-astro`, `lang-bash`, `lang-c`,
-//! `lang-cpp`, `lang-css`, `lang-elixir`, `lang-go`, `lang-html`, `lang-java`, `lang-javascript`,
-//! `lang-json`, `lang-markdown`, `lang-python`, `lang-rust`, `lang-typescript`, and many more.
+//! Available features include per-language flags like `lang-rust`, `lang-javascript`,
+//! `lang-html`, and bundle flags like `bundle-web`, `bundle-web-extra`, `bundle-system`,
+//! `bundle-backend`, and `bundle-full`.
 //!
 //! Use `all-languages` to enable all language support:
 //!

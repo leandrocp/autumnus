@@ -161,7 +161,7 @@ export default bundledWasms
   const packageJson = {
     name: `@lumis-sh/wasm-bundle-${bundleName}`,
     version: existingPackageJson?.version ?? "0.0.1",
-    description: `Preset WASM parser bundle for the ${bundleName} Lumis language bundle`,
+    description: `WASM parsers for Lumis ${bundleName} languages bundle`,
     author: "Leandro Pereira",
     license: "MIT",
     repository: {
@@ -232,6 +232,14 @@ function main() {
   const config = readLanguagesToml();
   const bundles = config.bundles ?? {};
   const allParserIds = Object.keys(config.parsers);
+
+  for (const entry of fs.readdirSync(PACKAGES_DIR, { withFileTypes: true })) {
+    if (!entry.isDirectory() || !entry.name.startsWith("wasm-bundle-")) continue;
+    const bundleName = entry.name.slice("wasm-bundle-".length);
+    if (bundleName in bundles) continue;
+    fs.rmSync(path.join(PACKAGES_DIR, entry.name), { recursive: true, force: true });
+    console.log(`  removed stale wasm bundle ${bundleName}: packages/javascript/${entry.name}`);
+  }
 
   for (const [bundleName, bundle] of Object.entries(bundles)) {
     writeBundlePackage(bundleName, bundleLanguageIds(bundle, allParserIds), config.parsers);

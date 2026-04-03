@@ -45,7 +45,7 @@ keywords:
 
 JavaScript parser grammars are also published as per-language WASM packages such as `@lumis-sh/wasm-rust`, `@lumis-sh/wasm-javascript`, and `@lumis-sh/wasm-elixir`.
 
-Preset bundle packages are also available, such as `@lumis-sh/wasm-bundle-essential`, `@lumis-sh/wasm-bundle-web`, and `@lumis-sh/wasm-bundle-system`.
+Preset bundle packages are also available, such as `@lumis-sh/wasm-bundle-web`, `@lumis-sh/wasm-bundle-web-extra`, `@lumis-sh/wasm-bundle-system`, and `@lumis-sh/wasm-bundle-backend`.
 
 - package list: [Languages](/reference/languages)
 - browser helper for npm parser packages: `withWasm()` from `@lumis-sh/lumis`

@@ -34,7 +34,7 @@ These files feed into code generation, builds, detection metadata, and theme ext
 | File | Purpose |
 |------|---------|
 | [`highlights.toml`](highlights.toml) | Tree-sitter highlight scope names |
-| [`languages.toml`](languages.toml) | Parser metadata, query sources, feature flags |
+| [`languages.toml`](languages.toml) | Parser metadata, query sources, language bundles, feature flags |
 | [`themes/themes.lua`](themes/themes.lua) | Theme definitions (Neovim colorscheme sources) |
 
 ### highlights.toml
@@ -64,6 +64,8 @@ All language metadata lives here. Consumed by:
 - CI workflows -- builds WASMs, updates parser/query revisions
 
 Bundle definitions also live in `languages.toml` under `[bundles.*]`.
+
+For Rust crates, bundle support is implemented as Cargo features such as `bundle-web` and `bundle-system` that enable the corresponding `lang-*` features transitively. Keep the bundle membership in `languages.toml` aligned with the bundle feature lists in `crates/lumis/Cargo.toml` and `crates/lumis-core/Cargo.toml`.
 
 - Keep one parser ID per line inside bundle arrays for cleaner diffs.
 - After changing parser or bundle entries, regenerate the checked-in JavaScript outputs:
@@ -158,13 +160,14 @@ In `crates/lumis/Cargo.toml`:
   ```
   and a feature flag:
   ```toml
-  lang-{name} = ["dep:tree-sitter-{lang}"]
+  lang-{name} = ["dep:tree-sitter-{lang}", "lumis-core/lang-{name}"]
   ```
 - If no crate exists, add an empty feature flag:
   ```toml
-  lang-{name} = []
+  lang-{name} = ["lumis-core/lang-{name}"]
   ```
-- Add to the `all-languages` list
+- Add `lang-{name}` to the `all-languages` list in both `crates/lumis/Cargo.toml` and `crates/lumis-core/Cargo.toml`
+- If the language belongs in an existing bundle, add it to the matching `bundle-*` feature lists in both Cargo manifests so `bundle-web`-style installs enable the existing `#[cfg(feature = "lang-{name}")]` code automatically
 
 #### 3. Fetch parser and queries
 

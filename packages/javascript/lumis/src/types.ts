@@ -161,8 +161,8 @@ export interface LazyLanguage {
  * A collection of lazy language handles. Import a preset bundle:
  *
  * ```ts
- * import { bundledLanguages } from '@lumis-sh/lumis/bundles/essential'
  * import { bundledLanguages } from '@lumis-sh/lumis/bundles/web'
+ * import { bundledLanguages } from '@lumis-sh/lumis/bundles/web-extra'
  * import { bundledLanguages } from '@lumis-sh/lumis/bundles/system'
  * import { bundledLanguages } from '@lumis-sh/lumis/bundles/backend'
  * import { bundledLanguages } from '@lumis-sh/lumis/bundles/full'
