@@ -51,14 +51,14 @@
       "component": "themes",
       "changelog-path": "CHANGELOG.md"
     },
-    "packages/javascript/wasm-bundle-essential": {
-      "release-type": "node",
-      "component": "wasm-bundle-essential",
-      "changelog-path": "CHANGELOG.md"
-    },
     "packages/javascript/wasm-bundle-web": {
       "release-type": "node",
       "component": "wasm-bundle-web",
+      "changelog-path": "CHANGELOG.md"
+    },
+    "packages/javascript/wasm-bundle-web-extra": {
+      "release-type": "node",
+      "component": "wasm-bundle-web-extra",
       "changelog-path": "CHANGELOG.md"
     },
     "packages/javascript/wasm-bundle-system": {

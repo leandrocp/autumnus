@@ -1,7 +1,7 @@
 {
   "name": "@lumis-sh/wasm-bundle-system",
   "version": "0.0.2",
-  "description": "Preset WASM parser bundle for the system Lumis language bundle",
+  "description": "WASM parsers for Lumis system languages bundle",
   "author": "Leandro Pereira",
   "license": "MIT",
   "repository": {
@@ -43,18 +43,14 @@
     "@lumis-sh/wasm-bash": "^0.26.0",
     "@lumis-sh/wasm-c": "^0.26.0",
     "@lumis-sh/wasm-cmake": "^0.26.0",
-    "@lumis-sh/wasm-comment": "^0.26.0",
     "@lumis-sh/wasm-cpp": "^0.26.0",
     "@lumis-sh/wasm-diff": "^0.26.0",
     "@lumis-sh/wasm-go": "^0.26.0",
-    "@lumis-sh/wasm-json": "^0.26.0",
     "@lumis-sh/wasm-llvm": "^0.26.0",
     "@lumis-sh/wasm-make": "^0.26.0",
-    "@lumis-sh/wasm-regex": "^0.26.0",
     "@lumis-sh/wasm-rust": "^0.26.0",
-    "@lumis-sh/wasm-toml": "^0.26.0",
     "@lumis-sh/wasm-wat": "^0.26.0",
-    "@lumis-sh/wasm-yaml": "^0.26.0",
-    "@lumis-sh/wasm-zig": "^0.26.0"
+    "@lumis-sh/wasm-zig": "^0.26.0",
+    "@lumis-sh/wasm-zsh": "^0.26.0"
   }
 }

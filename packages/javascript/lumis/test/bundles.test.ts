@@ -4,8 +4,8 @@ import { htmlInline } from "../src/formatters.js";
 import type { Highlighter, Theme } from "../src/index.js";
 import json from "../langs/json.ts";
 import { withWasmBundle } from "../src/index.js";
-import { bundledLanguages as essentialBundle } from "../bundles/essential.ts";
 import { bundledLanguages as webBundle } from "../bundles/web.ts";
+import { bundledLanguages as webExtraBundle } from "../bundles/web-extra.ts";
 import { bundledLanguages as systemBundle } from "../bundles/system.ts";
 import { bundledLanguages as backendBundle } from "../bundles/backend.ts";
 import { bundledLanguages as fullBundle } from "../bundles/full.ts";
@@ -20,24 +20,32 @@ beforeAll(() => {
 }, 120_000);
 
 describe("LanguageBundle type", () => {
-  it("essential bundle has expected languages", () => {
-    expect(Object.keys(essentialBundle)).toContain("json");
-    expect(Object.keys(essentialBundle)).toContain("markdown");
-    expect(Object.keys(essentialBundle)).toContain("xml");
-    expect(Object.keys(essentialBundle)).toContain("plaintext");
-    expect(Object.keys(essentialBundle)).not.toContain("dockerfile");
-    expect(Object.keys(essentialBundle)).not.toContain("html");
-    expect(Object.keys(essentialBundle)).not.toContain("rust");
-  });
-
   it("web bundle has expected languages", () => {
     expect(Object.keys(webBundle)).toContain("html");
     expect(Object.keys(webBundle)).toContain("javascript");
     expect(Object.keys(webBundle)).toContain("css");
     expect(Object.keys(webBundle)).toContain("json");
+    expect(Object.keys(webBundle)).toContain("typescript");
     expect(Object.keys(webBundle)).toContain("plaintext");
     expect(Object.keys(webBundle)).not.toContain("rust");
-    expect(Object.keys(webBundle)).not.toContain("c");
+    expect(Object.keys(webBundle)).not.toContain("bash");
+    expect(Object.keys(webBundle)).not.toContain("heex");
+  });
+
+  it("web extra bundle has expected languages", () => {
+    expect(Object.keys(webExtraBundle)).toContain("angular");
+    expect(Object.keys(webExtraBundle)).toContain("astro");
+    expect(Object.keys(webExtraBundle)).toContain("dart");
+    expect(Object.keys(webExtraBundle)).toContain("elm");
+    expect(Object.keys(webExtraBundle)).toContain("heex");
+    expect(Object.keys(webExtraBundle)).toContain("php");
+    expect(Object.keys(webExtraBundle)).toContain("prisma");
+    expect(Object.keys(webExtraBundle)).toContain("surface");
+    expect(Object.keys(webExtraBundle)).toContain("vue");
+    expect(Object.keys(webExtraBundle)).toContain("plaintext");
+    expect(Object.keys(webExtraBundle)).not.toContain("javascript");
+    expect(Object.keys(webExtraBundle)).not.toContain("bash");
+    expect(Object.keys(webExtraBundle)).not.toContain("sql");
   });
 
   it("system bundle has expected languages", () => {
@@ -54,9 +62,11 @@ describe("LanguageBundle type", () => {
     expect(Object.keys(backendBundle)).toContain("python");
     expect(Object.keys(backendBundle)).toContain("go");
     expect(Object.keys(backendBundle)).toContain("sql");
-    expect(Object.keys(backendBundle)).toContain("nginx");
+    expect(Object.keys(backendBundle)).toContain("javadoc");
     expect(Object.keys(backendBundle)).toContain("plaintext");
     expect(Object.keys(backendBundle)).not.toContain("html");
+    expect(Object.keys(backendBundle)).not.toContain("json");
+    expect(Object.keys(backendBundle)).not.toContain("nginx");
   });
 
   it("full bundle has all languages", () => {
@@ -71,9 +81,9 @@ describe("LanguageBundle type", () => {
     expect(html.id).toBe("html");
     expect(html.aliases).toEqual([]);
 
-    const bash = webBundle.bash;
-    expect(bash.id).toBe("bash");
-    expect(bash.aliases).toEqual(["sh"]);
+    const js = webBundle.javascript;
+    expect(js.id).toBe("javascript");
+    expect(js.aliases).toEqual(["js", "jsx"]);
   });
 
   it("LazyLanguage entries are callable", async () => {
@@ -131,7 +141,7 @@ describe("createHighlighter with LanguageBundle", () => {
 
   it("resolves aliases in lazy registry", async () => {
     const hl = await createHighlighter({ languages: [webBundle] });
-    expect(hl.registeredLanguages).toContain("sh");
+    expect(hl.registeredLanguages).toContain("js");
   });
 });
 

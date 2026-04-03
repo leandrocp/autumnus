@@ -899,19 +899,19 @@ version = "0.2.0"
 display_name = "GLSL"
 globs = ["*.comp", "*.frag", "*.geom", "*.glsl", "*.tesc", "*.tese", "*.vert"]
 
-[parsers.groovy]
-git = "https://github.com/murtaza64/tree-sitter-groovy.git"
-rev = "781d9cd1b482a70a6b27091e5c9e14bbcab3b768"
-version = "0.0.1"
-globs = ["*.gradle", "*.groovy", "Jenkinsfile"]
-emacs = ["groovy"]
-shebang = ["groovy"]
+# [parsers.groovy]
+# git = "https://github.com/murtaza64/tree-sitter-groovy.git"
+# rev = "781d9cd1b482a70a6b27091e5c9e14bbcab3b768"
+# version = "0.0.1"
+# globs = ["*.gradle", "*.groovy", "Jenkinsfile"]
+# emacs = ["groovy"]
+# shebang = ["groovy"]
 
-[parsers.hurl]
-git = "https://github.com/pfeiferj/tree-sitter-hurl.git"
-rev = "c9538dbb0f52f70896ee6ff56cd3ab6a8bfba57c"
-version = "0.1.0"
-globs = ["*.hurl"]
+# [parsers.hurl]
+# git = "https://github.com/pfeiferj/tree-sitter-hurl.git"
+# rev = "c9538dbb0f52f70896ee6ff56cd3ab6a8bfba57c"
+# version = "0.1.0"
+# globs = ["*.hurl"]
 
 [parsers.jinja]
 git = "https://github.com/cathaysia/tree-sitter-jinja.git"
@@ -1044,46 +1044,37 @@ globs = ["*.vhd", "*.vhdl"]
 
 # -- Bundles
 
-[bundles.essential]
-parsers = [
-  "bash",
-  "comment",
-  "diff",
-  "ini",
-  "xml",
-  "json",
-  "markdown",
-  "markdown_inline",
-  "regex",
-  "toml",
-  "yaml",
-]
-
 [bundles.web]
 parsers = [
-  "astro",
-  "bash",
-  "comment",
   "css",
-  "diff",
-  "dockerfile",
-  "graphql",
-  "heex",
   "html",
   "javascript",
   "json",
-  "markdown",
-  "markdown_inline",
-  "regex",
-  "scss",
-  "sql",
-  "svelte",
-  "toml",
   "tsx",
   "typescript",
+]
+
+[bundles."web-extra"]
+parsers = [
+  "angular",
+  "astro",
+  "dart",
+  "eex",
+  "ejs",
+  "elm",
+  "erb",
+  "glimmer",
+  "graphql",
+  "heex",
+  "markdown",
+  "markdown_inline",
+  "php",
+  "prisma",
+  "scss",
+  "surface",
+  "svelte",
   "vue",
   "xml",
-  "yaml",
 ]
 
 [bundles.system]
@@ -1092,50 +1083,34 @@ parsers = [
   "bash",
   "c",
   "cmake",
-  "comment",
   "cpp",
-  "diff",
   "go",
-  "json",
   "llvm",
   "make",
-  "regex",
   "rust",
-  "toml",
   "wat",
-  "yaml",
   "zig",
+  "zsh",
 ]
 
 [bundles.backend]
 parsers = [
-  "bash",
-  "comment",
   "csharp",
-  "diff",
-  "dockerfile",
   "elixir",
   "erlang",
   "go",
-  "graphql",
-  "http",
   "java",
+  "javadoc",
   "javascript",
-  "json",
   "kotlin",
-  "nginx",
   "php",
   "protobuf",
   "python",
-  "regex",
   "ruby",
   "rust",
   "scala",
   "sql",
-  "toml",
   "typescript",
-  "xml",
-  "yaml",
 ]
 
 [bundles.full]

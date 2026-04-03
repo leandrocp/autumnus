@@ -267,6 +267,7 @@ langs-update name:
     set -euo pipefail
     just langs-fetch-vendored-parsers {{name}}
     cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- cargo-update-dep {{name}}
+    cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- cargo-update-features
     just langs-fetch-queries {{name}}
     just langs-preprocess-queries {{name}}
     just docs-gen-languages-md
@@ -302,10 +303,15 @@ langs-gen-highlights:
 langs-list:
     cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- langs-list
 
+# Sync Rust bundle feature lists from languages.toml
+cargo-update-features:
+    cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- cargo-update-features
+
 # Upgrade parser revisions and sync crate-backed versions
 langs-upgrade-parsers name="":
     cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- upgrade-parsers {{name}}
     cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- cargo-update-dep {{name}}
+    cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- cargo-update-features
 
 # Upgrade vendored query revisions from upstream
 langs-upgrade-queries name="":
