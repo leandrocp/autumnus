@@ -1,6 +1,6 @@
 {
   "crates/lumis": "0.5.1",
-  "crates/lumis-core": "0.0.4",
+  "crates/lumis-core": "0.0.5",
   "crates/lumis-build": "0.0.1",
   "crates/lumis-cli": "0.1.1",
   "packages/javascript/lumis": "0.1.0",
