@@ -45,6 +45,7 @@
     "markdown-it": "^14.1.0"
   },
   "devDependencies": {
+    "@microsoft/api-extractor": "^7.36.0",
     "@types/markdown-it": "^14.1.2",
     "oxfmt": "^0.43.0",
     "oxlint": "1.58.0",

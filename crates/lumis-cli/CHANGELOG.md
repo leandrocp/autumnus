@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/leandrocp/lumis/compare/rust-cli@v0.1.0...rust-cli@v0.1.1) (2026-04-02)
+
+
+### Bug Fixes
+
+* cli seg fault ([#544](https://github.com/leandrocp/lumis/issues/544)) ([7948c64](https://github.com/leandrocp/lumis/commit/7948c64295580e5e9c8be9e041716a837da71e43))
+
 ## [0.1.0](https://github.com/leandrocp/lumis/compare/rust-cli@v0.0.3...rust-cli@v0.1.0) (2026-04-02)
 
 

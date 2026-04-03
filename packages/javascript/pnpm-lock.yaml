@@ -30,6 +30,9 @@ importers:
       '@lumis-sh/wasm-json':
         specifier: ^0.24.8
         version: 0.24.8
+      '@microsoft/api-extractor':
+        specifier: ^7.36.0
+        version: 7.58.0(@types/node@25.5.0)
       '@types/node':
         specifier: ^25.5.0
         version: 25.5.0
@@ -73,6 +76,9 @@ importers:
         specifier: ^14.1.0
         version: 14.1.1
     devDependencies:
+      '@microsoft/api-extractor':
+        specifier: ^7.36.0
+        version: 7.58.0(@types/node@25.5.0)
       '@types/markdown-it':
         specifier: ^14.1.2
         version: 14.1.2
@@ -165,6 +171,9 @@ importers:
         specifier: ^5.1.0
         version: 5.1.0
     devDependencies:
+      '@microsoft/api-extractor':
+        specifier: ^7.36.0
+        version: 7.58.0(@types/node@25.5.0)
       '@types/hast':
         specifier: ^3.0.4
         version: 3.0.4
@@ -189,6 +198,9 @@ importers:
 
   themes:
     devDependencies:
+      '@microsoft/api-extractor':
+        specifier: ^7.36.0
+        version: 7.58.0(@types/node@25.5.0)
       oxfmt:
         specifier: ^0.43.0
         version: 0.43.0

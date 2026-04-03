@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.2.0](https://github.com/leandrocp/lumis/compare/elixir@v0.1.2...elixir@v0.2.0) (2026-04-02)
+
+
+### ⚠ BREAKING CHANGES
+
+* bump tree-sitter 0.26 ([#521](https://github.com/leandrocp/lumis/issues/521))
+
+### Features
+
+* add 135 themes ([#483](https://github.com/leandrocp/lumis/issues/483)) ([26b9d84](https://github.com/leandrocp/lumis/commit/26b9d84f096e5d9dd5064cf816f794fd578f5adf))
+* add 42 new languages ([#467](https://github.com/leandrocp/lumis/issues/467)) ([9bacc46](https://github.com/leandrocp/lumis/commit/9bacc46552597f0b7ee5c3b8adde3bfc321a2097))
+* add bbcode_scoped formatter to Elixir and Javascript ([#478](https://github.com/leandrocp/lumis/issues/478)) ([1a34357](https://github.com/leandrocp/lumis/commit/1a343574b0239b5100d6b170124b586b0aabecfe))
+
+
+### Bug Fixes
+
+* include unnamed children in range ([#430](https://github.com/leandrocp/lumis/issues/430)) ([782bfaa](https://github.com/leandrocp/lumis/commit/782bfaaf4ac86fd287541fcd1307157060846ffc))
+* isolate elixir nif from rust release workspace ([#528](https://github.com/leandrocp/lumis/issues/528)) ([da1c6d1](https://github.com/leandrocp/lumis/commit/da1c6d127850ebc33697a502577e0b6c968e9825))
+
+
+### Miscellaneous Chores
+
+* bump tree-sitter 0.26 ([#521](https://github.com/leandrocp/lumis/issues/521)) ([ad9a567](https://github.com/leandrocp/lumis/commit/ad9a5679e94032e153eb7d997f2c1577479ec812))
+
 ## 0.1.2 - 2026-03-04
 
 ### Fixed
