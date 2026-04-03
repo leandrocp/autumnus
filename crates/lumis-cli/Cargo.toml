@@ -18,7 +18,7 @@ path = "src/main.rs"
 doc = false
 
 [dependencies]
-lumis-core = { path = "../lumis-core", version = "0.0.5", features = ["all-languages"] }
+lumis-core = { path = "../lumis-core", version = "0.0.4", features = ["all-languages"] }
 tree-sitter = { version = "^0.26", features = ["wasm"] }
 wasmtime = { version = "36", features = ["cache"] }
 streaming-iterator = "0.1"
