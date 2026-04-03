@@ -98,7 +98,6 @@ static DEFAULT_STYLE: LazyLock<Arc<Style>> = LazyLock::new(|| Arc::new(Style::de
 
 thread_local! {
     static DOCUMENT_TS_HIGHLIGHTER: RefCell<TSHighlighter> = RefCell::new(TSHighlighter::new());
-    static ITER_TS_HIGHLIGHTER: RefCell<TSHighlighter> = RefCell::new(TSHighlighter::new());
 }
 
 /// Error type for syntax highlighting operations.
@@ -321,35 +320,13 @@ pub fn highlight_iter<F, E>(
     source: &str,
     language: Language,
     theme: Option<Theme>,
-    on_event_source: F,
-) -> Result<(), HighlightError>
-where
-    F: FnMut(&str, Language, Range<usize>, &'static str, &Style) -> Result<(), E>,
-    E: std::error::Error + Send + Sync + 'static,
-{
-    ITER_TS_HIGHLIGHTER.with(|ts_hl| {
-        let mut ts_highlighter = ts_hl.borrow_mut();
-        highlight_iter_with(
-            &mut ts_highlighter,
-            source,
-            language,
-            theme,
-            on_event_source,
-        )
-    })
-}
-
-fn highlight_iter_with<F, E>(
-    ts_highlighter: &mut TSHighlighter,
-    source: &str,
-    language: Language,
-    theme: Option<Theme>,
     mut on_event_source: F,
 ) -> Result<(), HighlightError>
 where
     F: FnMut(&str, Language, Range<usize>, &'static str, &Style) -> Result<(), E>,
     E: std::error::Error + Send + Sync + 'static,
 {
+    let mut ts_highlighter = TSHighlighter::new();
     let events = ts_highlighter
         .highlight(language.config(), source.as_bytes(), None, |injected| {
             Some(Language::guess(Some(injected), "").config())
