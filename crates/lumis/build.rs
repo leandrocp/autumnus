@@ -31,7 +31,7 @@ use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use rayon::prelude::*;
 use serde::Deserialize;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::env;
 use std::fs::{self, File};
 use std::io::{Read, Write};
@@ -43,6 +43,8 @@ use xz2::read::XzDecoder;
 #[derive(Deserialize)]
 struct LanguagesToml {
     parsers: BTreeMap<String, ParserEntry>,
+    #[serde(default)]
+    bundles: BTreeMap<String, BundleEntry>,
     #[serde(flatten)]
     _rest: toml::Value,
 }
@@ -56,6 +58,18 @@ struct ParserEntry {
     feature: Option<String>,
     #[serde(flatten)]
     _rest: toml::Value,
+}
+
+#[derive(Deserialize)]
+struct BundleEntry {
+    parsers: BundleParsers,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged)]
+enum BundleParsers {
+    List(Vec<String>),
+    All(String),
 }
 
 fn load_languages_toml() -> LanguagesToml {
@@ -77,6 +91,51 @@ fn feature_for(key: &str, entry: &ParserEntry) -> String {
 fn is_feature_enabled(feature: &str) -> bool {
     let env_key = format!("CARGO_FEATURE_{}", feature.to_uppercase().replace('-', "_"));
     env::var(env_key).is_ok()
+}
+
+fn bundle_feature_name(bundle_name: &str) -> String {
+    format!("bundle-{bundle_name}")
+}
+
+fn bundle_parser_ids(
+    bundle_name: &str,
+    bundle: &BundleEntry,
+    parsers: &BTreeMap<String, ParserEntry>,
+) -> Vec<String> {
+    match &bundle.parsers {
+        BundleParsers::List(ids) => ids.clone(),
+        BundleParsers::All(value) if value == "all" => parsers.keys().cloned().collect(),
+        BundleParsers::All(value) => {
+            panic!("unsupported parsers value {value:?} for bundle {bundle_name}; expected \"all\"")
+        }
+    }
+}
+
+fn enabling_features_for_parser(
+    key: &str,
+    entry: &ParserEntry,
+    toml: &LanguagesToml,
+) -> Vec<String> {
+    let mut features = BTreeSet::new();
+    features.insert(feature_for(key, entry));
+    features.insert("all-languages".to_string());
+
+    for (bundle_name, bundle) in &toml.bundles {
+        if bundle_parser_ids(bundle_name, bundle, &toml.parsers)
+            .iter()
+            .any(|parser_id| parser_id == key)
+        {
+            features.insert(bundle_feature_name(bundle_name));
+        }
+    }
+
+    features.into_iter().collect()
+}
+
+fn is_parser_enabled(key: &str, entry: &ParserEntry, toml: &LanguagesToml) -> bool {
+    enabling_features_for_parser(key, entry, toml)
+        .iter()
+        .any(|feature| is_feature_enabled(feature))
 }
 
 // ── main ───────────────────────────────────────────────────────────────────
@@ -276,7 +335,7 @@ fn vendored_parsers(toml: &LanguagesToml) {
         .parsers
         .iter()
         .filter(|(_, entry)| entry.crate_name.is_none())
-        .filter(|(key, entry)| is_feature_enabled(&feature_for(key, entry)))
+        .filter(|(key, entry)| is_parser_enabled(key, entry, toml))
         .filter_map(|(key, entry)| {
             let dir_name = find_vendored_dir(&vendored_root, key, entry)?;
             let parser_dir = vendored_root.join(&dir_name);
@@ -355,8 +414,13 @@ fn build_query_feature_map(toml: &LanguagesToml) -> BTreeMap<String, Vec<String>
 
     for (key, entry) in &toml.parsers {
         let query_name = entry.query_name.as_deref().unwrap_or(key).to_string();
-        let feat = feature_for(key, entry);
-        map.entry(query_name).or_default().push(feat);
+        let features = enabling_features_for_parser(key, entry, toml);
+        map.entry(query_name).or_default().extend(features);
+    }
+
+    for features in map.values_mut() {
+        features.sort();
+        features.dedup();
     }
 
     map
