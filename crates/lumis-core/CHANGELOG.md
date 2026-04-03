@@ -8,10 +8,6 @@
 * fix release
 
 
-### Bug Fixes
-
-* add jinja_inline and remove disabled wasm parsers ([#508](https://github.com/leandrocp/lumis/issues/508)) ([4cb4527](https://github.com/leandrocp/lumis/commit/4cb45279783fd0eba25016c219a3a1feb8b09ac1))
-
 ## [0.0.4](https://github.com/leandrocp/lumis/compare/rust-core@v0.0.3...rust-core@v0.0.4) (2026-04-03)
 
 
