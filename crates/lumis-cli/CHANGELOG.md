@@ -9,12 +9,6 @@
 * query overrides and injections ([#551](https://github.com/leandrocp/lumis/issues/551)) ([2a356fb](https://github.com/leandrocp/lumis/commit/2a356fbd8f0841c7e0fdb5835330f98621c199ce))
 
 
-### Dependencies
-
-* The following workspace dependencies were updated
-  * dependencies
-    * lumis-core bumped from >=0.0.1 to 0.0.5
-
 ## [0.1.1](https://github.com/leandrocp/lumis/compare/rust-cli@v0.1.0...rust-cli@v0.1.1) (2026-04-02)
 
 
