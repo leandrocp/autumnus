@@ -186,7 +186,7 @@ export default bundledWasms
       access: "public",
     },
     peerDependencies: {
-      "@lumis-sh/lumis": existingPackageJson?.peerDependencies?.["@lumis-sh/lumis"] ?? lumisPeerRange,
+      "@lumis-sh/lumis": lumisPeerRange,
     },
     dependencies,
   };
