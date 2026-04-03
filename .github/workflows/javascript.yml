@@ -30,7 +30,10 @@ on:
 
 jobs:
   lint:
-    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && !startsWith(github.head_ref, 'release-please--')) || (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore(main): release ')) }}
+    if: >-
+      ${{ github.event_name == 'workflow_dispatch' ||
+          (github.event_name == 'pull_request' && !startsWith(github.head_ref, 'release-please--')) ||
+          (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore(main): release ')) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -64,7 +67,10 @@ jobs:
         working-directory: packages/javascript
 
   test:
-    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && !startsWith(github.head_ref, 'release-please--')) || (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore(main): release ')) }}
+    if: >-
+      ${{ github.event_name == 'workflow_dispatch' ||
+          (github.event_name == 'pull_request' && !startsWith(github.head_ref, 'release-please--')) ||
+          (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore(main): release ')) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6

@@ -34,7 +34,10 @@ on:
 
 jobs:
   changes:
-    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && !startsWith(github.head_ref, 'release-please--')) || (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore(main): release ')) }}
+    if: >-
+      ${{ github.event_name == 'workflow_dispatch' ||
+          (github.event_name == 'pull_request' && !startsWith(github.head_ref, 'release-please--')) ||
+          (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore(main): release ')) }}
     name: Detect changed areas
     runs-on: ubuntu-latest
     outputs:
