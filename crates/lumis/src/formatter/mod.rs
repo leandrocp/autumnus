@@ -170,6 +170,23 @@ pub use bbcode::{BBCodeScoped, BBCodeScopedBuilder};
 
 pub use lumis_core::formatter::HtmlElement;
 
+pub(crate) fn map_inline_highlight_lines(
+    highlight_lines: html_inline::HighlightLines,
+) -> lumis_core::formatter::html_inline::HighlightLines {
+    lumis_core::formatter::html_inline::HighlightLines {
+        lines: highlight_lines.lines,
+        style: highlight_lines.style.map(|style| match style {
+            html_inline::HighlightLinesStyle::Theme => {
+                lumis_core::formatter::html_inline::HighlightLinesStyle::Theme
+            }
+            html_inline::HighlightLinesStyle::Style(style) => {
+                lumis_core::formatter::html_inline::HighlightLinesStyle::Style(style)
+            }
+        }),
+        class: highlight_lines.class,
+    }
+}
+
 /// Trait for implementing custom syntax highlighting formatters.
 ///
 /// The `Formatter` trait allows you to create custom output formats for syntax highlighted code.

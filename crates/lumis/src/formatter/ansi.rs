@@ -125,43 +125,43 @@ pub fn rgb_to_ansi(r: u8, g: u8, b: u8, is_background: bool) -> String {
 /// let ansi = style_to_ansi(&style);
 /// ```
 pub fn style_to_ansi(style: &Style) -> String {
-    let mut codes = Vec::new();
+    let mut result = String::new();
 
     if let Some(fg) = &style.fg {
         if let Some((r, g, b)) = hex_to_rgb(fg) {
-            codes.push(rgb_to_ansi(r, g, b, false));
+            result.push_str(&rgb_to_ansi(r, g, b, false));
         }
     }
 
     if let Some(bg) = &style.bg {
         if let Some((r, g, b)) = hex_to_rgb(bg) {
-            codes.push(rgb_to_ansi(r, g, b, true));
+            result.push_str(&rgb_to_ansi(r, g, b, true));
         }
     }
 
     if style.bold {
-        codes.push("\u{1b}[1m".to_string());
+        result.push_str("\u{1b}[1m");
     }
 
     if style.italic {
-        codes.push("\u{1b}[3m".to_string());
+        result.push_str("\u{1b}[3m");
     }
 
     use crate::themes::UnderlineStyle;
     match style.text_decoration.underline {
         UnderlineStyle::None => {}
-        UnderlineStyle::Solid => codes.push("\u{1b}[4m".to_string()),
-        UnderlineStyle::Wavy => codes.push("\u{1b}[4:3m".to_string()),
-        UnderlineStyle::Double => codes.push("\u{1b}[4:2m".to_string()),
-        UnderlineStyle::Dotted => codes.push("\u{1b}[4:4m".to_string()),
-        UnderlineStyle::Dashed => codes.push("\u{1b}[4:5m".to_string()),
+        UnderlineStyle::Solid => result.push_str("\u{1b}[4m"),
+        UnderlineStyle::Wavy => result.push_str("\u{1b}[4:3m"),
+        UnderlineStyle::Double => result.push_str("\u{1b}[4:2m"),
+        UnderlineStyle::Dotted => result.push_str("\u{1b}[4:4m"),
+        UnderlineStyle::Dashed => result.push_str("\u{1b}[4:5m"),
     }
 
     if style.text_decoration.strikethrough {
-        codes.push("\u{1b}[9m".to_string());
+        result.push_str("\u{1b}[9m");
     }
 
-    codes.join("")
+    result
 }
 
 /// Wrap text with ANSI color codes based on a Style.
@@ -232,13 +232,12 @@ pub fn wrap_with_ansi(text: &str, style: &Style) -> String {
 /// Iterator over highlighted tokens with ANSI codes pre-applied.
 ///
 /// Returns tuples of `(ansi_wrapped_text, byte_range)` for each token.
-pub struct AnsiIterator<'a> {
+pub struct AnsiIterator {
     segments: Vec<(String, Range<usize>)>,
     index: usize,
-    _phantom: std::marker::PhantomData<&'a ()>,
 }
 
-impl<'a> Iterator for AnsiIterator<'a> {
+impl Iterator for AnsiIterator {
     type Item = (String, Range<usize>);
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -286,7 +285,7 @@ pub fn highlight_iter_with_ansi(
     source: &str,
     language: Language,
     theme: Option<Theme>,
-) -> Result<AnsiIterator<'_>, HighlightError> {
+) -> Result<AnsiIterator, HighlightError> {
     let mut segments = Vec::new();
 
     highlight_iter(
@@ -300,11 +299,7 @@ pub fn highlight_iter_with_ansi(
         },
     )?;
 
-    Ok(AnsiIterator {
-        segments,
-        index: 0,
-        _phantom: std::marker::PhantomData,
-    })
+    Ok(AnsiIterator { segments, index: 0 })
 }
 
 #[cfg(test)]

@@ -86,6 +86,14 @@ use thiserror::Error;
 
 pub use crate::themes::{Style, TextDecoration, UnderlineStyle};
 
+fn resolve_style(theme: Option<&Theme>, scope: &str, language: &str) -> Style {
+    let specialized_scope = format_smolstr!("{}.{}", scope, language);
+    theme
+        .and_then(|t| t.get_style(&specialized_scope))
+        .cloned()
+        .unwrap_or_default()
+}
+
 thread_local! {
     static DOCUMENT_TS_HIGHLIGHTER: RefCell<TSHighlighter> = RefCell::new(TSHighlighter::new());
 }
@@ -238,18 +246,7 @@ impl Highlighter {
                     language,
                 } => {
                     let scope = HIGHLIGHT_NAMES[highlight.0];
-                    let specialized_scope = format_smolstr!("{}.{}", scope, language);
-
-                    let new_style = if let Some(ref theme) = self.theme {
-                        Arc::new(
-                            theme
-                                .get_style(&specialized_scope)
-                                .cloned()
-                                .unwrap_or_default(),
-                        )
-                    } else {
-                        Arc::new(Style::default())
-                    };
+                    let new_style = Arc::new(resolve_style(self.theme.as_ref(), scope, &language));
                     style_stack.push(new_style);
                 }
                 HighlightEvent::Source { start, end } => {
@@ -342,17 +339,7 @@ where
             } => {
                 let scope = HIGHLIGHT_NAMES[highlight.0];
                 let injected_language = Language::guess(Some(&lang), "");
-                let specialized_scope =
-                    format_smolstr!("{}.{}", scope, injected_language.id_name());
-
-                let new_style = if let Some(ref theme) = theme {
-                    theme
-                        .get_style(&specialized_scope)
-                        .cloned()
-                        .unwrap_or_default()
-                } else {
-                    Style::default()
-                };
+                let new_style = resolve_style(theme.as_ref(), scope, injected_language.id_name());
                 style_stack.push(new_style);
                 scope_stack.push(scope);
                 language_stack.push(injected_language);
@@ -499,10 +486,9 @@ mod tests {
         assert!(!segments.is_empty());
 
         // Check that ranges are valid and scopes are present
-        for (text, language, range, scope, _style) in &segments {
+        for (text, language, range, _scope, _style) in &segments {
             assert_eq!(&code[range.clone()], text.as_str());
             assert_eq!(*language, Language::Rust);
-            assert!(scope.is_empty() || !scope.is_empty()); // scope is always valid
         }
     }
 

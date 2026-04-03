@@ -590,29 +590,21 @@ pub fn wrap_line(
     class_suffix: Option<&str>,
     style: Option<&str>,
 ) -> String {
-    let class_attr = if let Some(suffix) = class_suffix {
-        format!("line{}", suffix)
-    } else {
-        "line".to_string()
+    let class_attr = match class_suffix {
+        Some(suffix) => format!("line{}", suffix),
+        None => "line".to_string(),
     };
 
-    let style_attr = if let Some(s) = style {
-        format!(" style=\"{}\"", s)
-    } else {
-        String::new()
-    };
-
-    format!(
-        "<div class=\"{}\"{}data-line=\"{}\">{}</div>",
-        class_attr,
-        if style.is_some() {
-            format!("{} ", style_attr)
-        } else {
-            " ".to_string()
-        },
-        line_number,
-        content
-    )
+    match style {
+        Some(s) => format!(
+            "<div class=\"{}\" style=\"{}\" data-line=\"{}\">{}</div>",
+            class_attr, s, line_number, content
+        ),
+        None => format!(
+            "<div class=\"{}\" data-line=\"{}\">{}</div>",
+            class_attr, line_number, content
+        ),
+    }
 }
 
 /// Map tree-sitter scope to CSS class name.
