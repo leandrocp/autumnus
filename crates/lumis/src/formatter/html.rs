@@ -529,21 +529,31 @@ pub fn span_multi_themes(
 /// assert_eq!(html::escape("{code}"), "&lbrace;code&rbrace;");
 /// ```
 pub fn escape(text: &str) -> String {
+    let bytes = text.as_bytes();
     let mut buf = String::with_capacity(text.len() + text.len() / 10);
+    let mut last = 0;
 
-    for c in text.chars() {
-        match c {
-            '&' => buf.push_str("&amp;"),
-            '<' => buf.push_str("&lt;"),
-            '>' => buf.push_str("&gt;"),
-            '"' => buf.push_str("&quot;"),
-            '\'' => buf.push_str("&#39;"),
-            '{' => buf.push_str("&lbrace;"),
-            '}' => buf.push_str("&rbrace;"),
-            _ => buf.push(c),
-        }
+    for (i, &b) in bytes.iter().enumerate() {
+        let replacement = match b {
+            b'&' => "&amp;",
+            b'<' => "&lt;",
+            b'>' => "&gt;",
+            b'"' => "&quot;",
+            b'\'' => "&#39;",
+            b'{' => "&lbrace;",
+            b'}' => "&rbrace;",
+            _ => continue,
+        };
+        buf.push_str(&text[last..i]);
+        buf.push_str(replacement);
+        last = i + 1;
     }
 
+    if last == 0 {
+        return text.to_string();
+    }
+
+    buf.push_str(&text[last..]);
     buf
 }
 

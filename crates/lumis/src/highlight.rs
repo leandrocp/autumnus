@@ -81,7 +81,7 @@ use lumis_core::highlights::HIGHLIGHT_NAMES;
 use smol_str::format_smolstr;
 use std::cell::RefCell;
 use std::ops::Range;
-use std::sync::Arc;
+use std::sync::{Arc, LazyLock};
 use thiserror::Error;
 
 pub use crate::themes::{Style, TextDecoration, UnderlineStyle};
@@ -94,8 +94,11 @@ fn resolve_style(theme: Option<&Theme>, scope: &str, language: &str) -> Style {
         .unwrap_or_default()
 }
 
+static DEFAULT_STYLE: LazyLock<Arc<Style>> = LazyLock::new(|| Arc::new(Style::default()));
+
 thread_local! {
     static DOCUMENT_TS_HIGHLIGHTER: RefCell<TSHighlighter> = RefCell::new(TSHighlighter::new());
+    static ITER_TS_HIGHLIGHTER: RefCell<TSHighlighter> = RefCell::new(TSHighlighter::new());
 }
 
 /// Error type for syntax highlighting operations.
@@ -235,7 +238,7 @@ impl Highlighter {
             .map_err(|e| HighlightError::HighlighterInit(format!("{:?}", e)))?;
 
         let mut result = Vec::new();
-        let mut style_stack: Vec<Arc<Style>> = vec![Arc::new(Style::default())];
+        let mut style_stack: Vec<Arc<Style>> = vec![Arc::clone(&DEFAULT_STYLE)];
 
         for event in events {
             let event = event.map_err(|e| HighlightError::EventProcessing(format!("{:?}", e)))?;
@@ -246,7 +249,13 @@ impl Highlighter {
                     language,
                 } => {
                     let scope = HIGHLIGHT_NAMES[highlight.0];
-                    let new_style = Arc::new(resolve_style(self.theme.as_ref(), scope, &language));
+                    let specialized_scope = format_smolstr!("{}.{}", scope, language);
+                    let new_style = self
+                        .theme
+                        .as_ref()
+                        .and_then(|t| t.get_style(&specialized_scope))
+                        .map(|s| Arc::new(s.clone()))
+                        .unwrap_or_else(|| Arc::clone(&DEFAULT_STYLE));
                     style_stack.push(new_style);
                 }
                 HighlightEvent::Source { start, end } => {
@@ -312,13 +321,35 @@ pub fn highlight_iter<F, E>(
     source: &str,
     language: Language,
     theme: Option<Theme>,
+    on_event_source: F,
+) -> Result<(), HighlightError>
+where
+    F: FnMut(&str, Language, Range<usize>, &'static str, &Style) -> Result<(), E>,
+    E: std::error::Error + Send + Sync + 'static,
+{
+    ITER_TS_HIGHLIGHTER.with(|ts_hl| {
+        let mut ts_highlighter = ts_hl.borrow_mut();
+        highlight_iter_with(
+            &mut ts_highlighter,
+            source,
+            language,
+            theme,
+            on_event_source,
+        )
+    })
+}
+
+fn highlight_iter_with<F, E>(
+    ts_highlighter: &mut TSHighlighter,
+    source: &str,
+    language: Language,
+    theme: Option<Theme>,
     mut on_event_source: F,
 ) -> Result<(), HighlightError>
 where
     F: FnMut(&str, Language, Range<usize>, &'static str, &Style) -> Result<(), E>,
     E: std::error::Error + Send + Sync + 'static,
 {
-    let mut ts_highlighter = TSHighlighter::new();
     let events = ts_highlighter
         .highlight(language.config(), source.as_bytes(), None, |injected| {
             Some(Language::guess(Some(injected), "").config())
