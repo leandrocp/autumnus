@@ -152,6 +152,7 @@ bundle-backend = [
     "lang-http",
     "lang-java",
     "lang-javascript",
+    "lang-html",
     "lang-json",
     "lang-kotlin",
     "lang-nginx",
@@ -280,7 +281,7 @@ lang-iex = []
 lang-ini = []
 lang-java = []
 lang-javadoc = []
-lang-javascript = []
+lang-javascript = ["lang-html"]
 lang-jinja = []
 lang-jinja-inline = []
 lang-jq = []

@@ -22,7 +22,7 @@
 
 use quote::{format_ident, quote};
 use serde::Deserialize;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::env;
 use std::fs;
 use std::io::Write;
@@ -31,6 +31,8 @@ use std::path::{Path, PathBuf};
 #[derive(Deserialize)]
 struct LanguagesToml {
     parsers: BTreeMap<String, ParserEntry>,
+    #[serde(default)]
+    bundles: BTreeMap<String, BundleEntry>,
     #[serde(flatten)]
     _rest: toml::Value,
 }
@@ -44,8 +46,22 @@ struct ParserEntry {
     emacs: Option<Vec<String>>,
     shebang: Option<Vec<String>>,
     feature: Option<String>,
+    #[serde(default)]
+    requires: Vec<String>,
     #[serde(flatten)]
     _rest: toml::Value,
+}
+
+#[derive(Deserialize)]
+struct BundleEntry {
+    parsers: BundleParsers,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged)]
+enum BundleParsers {
+    List(Vec<String>),
+    All(String),
 }
 
 fn manifest_dir() -> PathBuf {
@@ -62,6 +78,94 @@ fn titlecase(s: &str) -> String {
 
 fn key_to_feature(key: &str) -> String {
     format!("lang-{}", key.replace('_', "-"))
+}
+
+fn feature_for(key: &str, entry: &ParserEntry) -> String {
+    entry.feature.clone().unwrap_or_else(|| key_to_feature(key))
+}
+
+fn bundle_feature_name(bundle_name: &str) -> String {
+    format!("bundle-{bundle_name}")
+}
+
+fn expand_parser_requirements(
+    parser_name: &str,
+    parsers: &BTreeMap<String, ParserEntry>,
+    seen: &mut BTreeSet<String>,
+    ordered: &mut Vec<String>,
+) {
+    if !seen.insert(parser_name.to_string()) {
+        return;
+    }
+
+    let entry = parsers
+        .get(parser_name)
+        .unwrap_or_else(|| panic!("unknown parser {parser_name}"));
+    ordered.push(parser_name.to_string());
+
+    for required in &entry.requires {
+        expand_parser_requirements(required, parsers, seen, ordered);
+    }
+}
+
+fn expanded_parser_ids(
+    parser_ids: &[String],
+    parsers: &BTreeMap<String, ParserEntry>,
+) -> Vec<String> {
+    let mut seen = BTreeSet::new();
+    let mut ordered = Vec::new();
+
+    for parser_id in parser_ids {
+        expand_parser_requirements(parser_id, parsers, &mut seen, &mut ordered);
+    }
+
+    ordered
+}
+
+fn bundle_parser_ids(
+    bundle_name: &str,
+    bundle: &BundleEntry,
+    parsers: &BTreeMap<String, ParserEntry>,
+) -> Vec<String> {
+    match &bundle.parsers {
+        BundleParsers::List(ids) => expanded_parser_ids(ids, parsers),
+        BundleParsers::All(value) if value == "all" => parsers.keys().cloned().collect(),
+        BundleParsers::All(value) => {
+            panic!("unsupported parsers value {value:?} for bundle {bundle_name}; expected \"all\"")
+        }
+    }
+}
+
+fn enabling_features_for_parser(
+    parser_name: &str,
+    toml: &LanguagesToml,
+    parser_feature_map: &BTreeMap<String, BTreeSet<String>>,
+) -> Vec<String> {
+    let mut features = BTreeSet::new();
+    let parser = toml
+        .parsers
+        .get(parser_name)
+        .unwrap_or_else(|| panic!("unknown parser {parser_name}"));
+
+    features.insert(feature_for(parser_name, parser));
+    features.insert("all-languages".to_string());
+
+    for (feature, enabled_parsers) in parser_feature_map {
+        if enabled_parsers.contains(parser_name) {
+            features.insert(feature.clone());
+        }
+    }
+
+    for (bundle_name, bundle) in &toml.bundles {
+        if bundle_parser_ids(bundle_name, bundle, &toml.parsers)
+            .iter()
+            .any(|name| name == parser_name)
+        {
+            features.insert(bundle_feature_name(bundle_name));
+        }
+    }
+
+    features.into_iter().collect()
 }
 
 fn format_str_list(list: &[String]) -> String {
@@ -130,6 +234,7 @@ fn languages() {
 
     let mut always_entries = Vec::new();
     let mut gated_entries = Vec::new();
+    let mut parser_feature_map = BTreeMap::<String, BTreeSet<String>>::new();
 
     // PlainText is always hardcoded (no parser entry in languages.toml)
     always_entries.push(
@@ -150,9 +255,25 @@ fn languages() {
         if key == "diff" {
             always_entries.push(format!("        {}", body));
         } else {
-            let feat = entry.feature.clone().unwrap_or_else(|| key_to_feature(key));
-            gated_entries.push(format!("        [\"{}\"] {}", feat, body));
+            let feature = feature_for(key, entry);
+            let enabled_parsers = parser_feature_map.entry(feature).or_default();
+            for parser_id in expanded_parser_ids(std::slice::from_ref(key), &toml.parsers) {
+                enabled_parsers.insert(parser_id);
+            }
         }
+    }
+
+    for (key, entry) in &toml.parsers {
+        if key == "diff" {
+            continue;
+        }
+
+        let body = format_entry(key, entry);
+        let feature_list = enabling_features_for_parser(key, &toml, &parser_feature_map)
+            .into_iter()
+            .map(|feature| format!("\"{feature}\""))
+            .collect::<Vec<_>>();
+        gated_entries.push(format!("        [{}] {}", feature_list.join(", "), body));
     }
 
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());

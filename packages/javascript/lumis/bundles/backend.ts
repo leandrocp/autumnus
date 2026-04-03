@@ -15,6 +15,7 @@ export const bundledLanguages: LanguageBundle = {
   "http": lazy("http", [], () => import("../langs/http.js")),
   "java": lazy("java", [], () => import("../langs/java.js")),
   "javascript": lazy("javascript", ["js","jsx"], () => import("../langs/javascript.js")),
+  "html": lazy("html", [], () => import("../langs/html.js")),
   "json": lazy("json", [], () => import("../langs/json.js")),
   "kotlin": lazy("kotlin", [], () => import("../langs/kotlin.js")),
   "nginx": lazy("nginx", [], () => import("../langs/nginx.js")),
