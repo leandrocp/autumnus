@@ -43,6 +43,7 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Integrations',
       items: [
+        'integrations/react',
         'integrations/rehype-lumis',
         'integrations/markdown-it',
         'integrations/vitepress',
