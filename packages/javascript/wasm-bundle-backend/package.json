@@ -48,7 +48,6 @@
     "@lumis-sh/wasm-erlang": "^0.26.0",
     "@lumis-sh/wasm-go": "^0.26.0",
     "@lumis-sh/wasm-graphql": "^0.26.0",
-    "@lumis-sh/wasm-html": "^0.26.0",
     "@lumis-sh/wasm-http": "^0.26.0",
     "@lumis-sh/wasm-java": "^0.26.0",
     "@lumis-sh/wasm-javascript": "^0.26.0",

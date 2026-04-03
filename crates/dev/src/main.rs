@@ -651,8 +651,6 @@ struct ParserInfo {
     location: Option<String>,
     query_name: Option<String>,
     feature: Option<String>,
-    #[serde(default)]
-    requires: Vec<String>,
     generate: Option<bool>,
     wasm_name: Option<String>,
     #[allow(dead_code)]
@@ -1171,43 +1169,6 @@ fn bundle_language_ids(
     }
 }
 
-fn expand_parser_requirements(
-    parser_name: &str,
-    parsers: &BTreeMap<String, ParserInfo>,
-    seen: &mut BTreeSet<String>,
-    ordered: &mut Vec<String>,
-) -> Result<()> {
-    if !seen.insert(parser_name.to_string()) {
-        return Ok(());
-    }
-
-    let info = parsers
-        .get(parser_name)
-        .with_context(|| format!("unknown parser {parser_name}"))?;
-
-    ordered.push(parser_name.to_string());
-
-    for required in &info.requires {
-        expand_parser_requirements(required, parsers, seen, ordered)?;
-    }
-
-    Ok(())
-}
-
-fn expanded_parser_ids(
-    parser_ids: &[String],
-    parsers: &BTreeMap<String, ParserInfo>,
-) -> Result<Vec<String>> {
-    let mut seen = BTreeSet::new();
-    let mut ordered = Vec::new();
-
-    for parser_id in parser_ids {
-        expand_parser_requirements(parser_id, parsers, &mut seen, &mut ordered)?;
-    }
-
-    Ok(ordered)
-}
-
 fn fmt_feature_list(lines: &[String]) -> String {
     match lines {
         [] => "[]".to_string(),
@@ -1241,8 +1202,7 @@ fn generate_lumis_core_features(toml: &LanguagesToml) -> Result<String> {
     ));
 
     for (bundle_name, bundle) in &toml.bundles {
-        let parser_ids =
-            expanded_parser_ids(&bundle_language_ids(bundle_name, bundle, &toml.parsers)?, &toml.parsers)?;
+        let parser_ids = bundle_language_ids(bundle_name, bundle, &toml.parsers)?;
         for parser_id in &parser_ids {
             if !toml.parsers.contains_key(parser_id) {
                 bail!("bundle {bundle_name} references unknown parser {parser_id}");
@@ -1268,29 +1228,13 @@ fn generate_lumis_core_features(toml: &LanguagesToml) -> Result<String> {
         ));
     }
 
-    let mut feature_members = BTreeMap::<String, BTreeSet<String>>::new();
-
-    for (parser_name, info) in &toml.parsers {
-        let feature = feature_name(parser_name, info);
-        let members = feature_members.entry(feature).or_default();
-
-        for required in expanded_parser_ids(&info.requires, &toml.parsers)? {
-            if required == *parser_name {
-                continue;
-            }
-            let required_info = toml
-                .parsers
-                .get(&required)
-                .expect("expanded parser id must exist");
-            members.insert(format!("{:?}", feature_name(&required, required_info)));
-        }
-    }
-
-    for (feature, members) in feature_members {
-        out.push_str(&format!(
-            "{feature} = {}\n",
-            fmt_feature_list(&members.into_iter().collect::<Vec<_>>())
-        ));
+    for feature in toml
+        .parsers
+        .iter()
+        .map(|(parser_name, info)| feature_name(parser_name, info))
+        .collect::<BTreeSet<_>>()
+    {
+        out.push_str(&format!("{feature} = []\n"));
     }
 
     Ok(out)
@@ -1322,8 +1266,7 @@ fn generate_lumis_features(toml: &LanguagesToml) -> Result<String> {
     ));
 
     for (bundle_name, bundle) in &toml.bundles {
-        let parser_ids =
-            expanded_parser_ids(&bundle_language_ids(bundle_name, bundle, &toml.parsers)?, &toml.parsers)?;
+        let parser_ids = bundle_language_ids(bundle_name, bundle, &toml.parsers)?;
         for parser_id in &parser_ids {
             if !toml.parsers.contains_key(parser_id) {
                 bail!("bundle {bundle_name} references unknown parser {parser_id}");
@@ -1361,17 +1304,6 @@ fn generate_lumis_features(toml: &LanguagesToml) -> Result<String> {
             "{:?}",
             format!("lumis-core/{}", feature_name(parser_name, info))
         ));
-
-        for required in expanded_parser_ids(&info.requires, &toml.parsers)? {
-            if required == *parser_name {
-                continue;
-            }
-            let required_info = toml
-                .parsers
-                .get(&required)
-                .expect("expanded parser id must exist");
-            members.insert(format!("{:?}", feature_name(&required, required_info)));
-        }
     }
 
     for (feature, members) in feature_members {

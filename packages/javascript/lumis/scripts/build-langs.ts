@@ -31,7 +31,6 @@ interface ParserEntry {
   generate?: boolean
   wasm_name?: string
   query_name?: string
-  requires?: string[]
   display_name?: string
   variant?: string
   globs?: string[]
@@ -198,41 +197,6 @@ function resolveQuery(language: string, queryType: string): string {
   if (!fs.existsSync(filePath)) return ''
   const content = fs.readFileSync(filePath, 'utf-8')
   return convertLuaMatches(content)
-}
-
-function expandParserRequirements(
-  parserId: string,
-  parsers: Record<string, ParserEntry>,
-  seen: Set<string>,
-  ordered: string[],
-): void {
-  if (seen.has(parserId)) return
-
-  const parser = parsers[parserId]
-  if (!parser) {
-    throw new Error(`Unknown parser ${parserId}`)
-  }
-
-  seen.add(parserId)
-  ordered.push(parserId)
-
-  for (const required of parser.requires ?? []) {
-    expandParserRequirements(required, parsers, seen, ordered)
-  }
-}
-
-function expandedParserIds(
-  parserIds: string[],
-  parsers: Record<string, ParserEntry>,
-): string[] {
-  const seen = new Set<string>()
-  const ordered: string[] = []
-
-  for (const parserId of parserIds) {
-    expandParserRequirements(parserId, parsers, seen, ordered)
-  }
-
-  return ordered
 }
 
 function escapeTemplateString(s: string): string {
@@ -426,10 +390,7 @@ export const THEMES: ThemeInfo[] = ${JSON.stringify(themeEntries, null, 2)}
   const allParserIds = Object.keys(config.parsers)
 
   for (const [bundleName, bundleEntry] of Object.entries(config.bundles ?? {})) {
-    const parserIds =
-      bundleEntry.parsers === 'all'
-        ? allParserIds
-        : expandedParserIds(bundleEntry.parsers, config.parsers)
+    const parserIds = bundleEntry.parsers === 'all' ? allParserIds : bundleEntry.parsers
     const aliases: Record<string, string[]> = {}
 
     for (const id of parserIds) {

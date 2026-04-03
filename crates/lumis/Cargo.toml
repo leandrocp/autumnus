@@ -174,7 +174,6 @@ bundle-backend = [
     "lang-http",
     "lang-java",
     "lang-javascript",
-    "lang-html",
     "lang-json",
     "lang-kotlin",
     "lang-nginx",
@@ -404,7 +403,6 @@ lang-javadoc = [
 ]
 lang-javascript = [
     "dep:tree-sitter-javascript",
-    "lang-html",
     "lumis-core/lang-javascript",
 ]
 lang-jinja = [

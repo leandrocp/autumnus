@@ -9,7 +9,6 @@ const PACKAGES_DIR = path.join(WORKSPACE_ROOT, "packages", "javascript");
 
 interface ParserEntry {
   wasm_name?: string;
-  requires?: string[];
 }
 
 interface BundleEntry {
@@ -92,38 +91,6 @@ function unique<T>(values: T[]): T[] {
   return [...new Set(values)];
 }
 
-function expandParserRequirements(
-  parserId: string,
-  parsers: Record<string, ParserEntry>,
-  seen: Set<string>,
-  ordered: string[],
-) {
-  if (seen.has(parserId)) return;
-
-  const parser = parsers[parserId];
-  if (!parser) {
-    throw new Error(`Unknown parser ${parserId}`);
-  }
-
-  seen.add(parserId);
-  ordered.push(parserId);
-
-  for (const required of parser.requires ?? []) {
-    expandParserRequirements(required, parsers, seen, ordered);
-  }
-}
-
-function expandedParserIds(parserIds: string[], parsers: Record<string, ParserEntry>): string[] {
-  const seen = new Set<string>();
-  const ordered: string[] = [];
-
-  for (const parserId of parserIds) {
-    expandParserRequirements(parserId, parsers, seen, ordered);
-  }
-
-  return ordered;
-}
-
 function readBundlePackageJson(dir: string): BundlePackageJson | null {
   const file = path.join(dir, "package.json");
   if (!fs.existsSync(file)) return null;
@@ -136,13 +103,8 @@ function readBundleChangelog(dir: string): string | null {
   return fs.readFileSync(file, "utf-8");
 }
 
-function bundleLanguageIds(
-  bundle: BundleEntry,
-  allParserIds: string[],
-  parsers: Record<string, ParserEntry>,
-): string[] {
-  const parserIds =
-    bundle.parsers === "all" ? allParserIds : expandedParserIds(bundle.parsers, parsers);
+function bundleLanguageIds(bundle: BundleEntry, allParserIds: string[]): string[] {
+  const parserIds = bundle.parsers === "all" ? allParserIds : bundle.parsers;
   return parserIds.includes("plaintext") ? parserIds : [...parserIds, "plaintext"];
 }
 
@@ -272,11 +234,7 @@ function main() {
   const allParserIds = Object.keys(config.parsers);
 
   for (const [bundleName, bundle] of Object.entries(bundles)) {
-    writeBundlePackage(
-      bundleName,
-      bundleLanguageIds(bundle, allParserIds, config.parsers),
-      config.parsers,
-    );
+    writeBundlePackage(bundleName, bundleLanguageIds(bundle, allParserIds), config.parsers);
   }
 }
 

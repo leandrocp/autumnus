@@ -95,7 +95,6 @@ generate = true                   # optional -- run `tree-sitter generate` befor
 aliases = ["sh", "zsh"]           # optional -- alternative names (extra from_str matches)
 wasm_name = "tree-sitter-bash"    # optional -- override WASM filename (default: tree-sitter-{name})
 query_name = "bash"               # optional -- override query directory name (default: parser name)
-requires = ["html"]               # optional -- other parser ids enabled transitively with this parser
 # Language detection fields (used by lumis-core/build.rs):
 globs = ["*.sh", "*.bash"]        # optional -- file glob patterns (default: [])
 variant = "Bash"                  # optional -- Rust enum variant (default: titlecase of key)
@@ -111,7 +110,6 @@ feature = "lang-ocaml"            # optional -- override feature name (default: 
 
 - `git` + `rev` -- always required. Used to build WASMs, fetch vendored parser sources, and as the authoritative version pin.
 - `crate` -- optional, Rust-only. When present, the Rust build uses the crate from crates.io instead of compiling from vendored source. The dependency must also be declared in `crates/lumis/Cargo.toml` as an optional dep for new languages, and existing entries are kept in sync from `languages.toml` by `cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- cargo-update-dep`.
-- `requires` -- optional. Lists parser ids that should be enabled transitively when this parser feature or any bundle containing it is selected. This is how bundle and per-language feature closures stay aligned across Rust and JS codegen.
 
 `version` is used for two things:
 1. When `crate` is set, this is the crate version synced into `crates/lumis/Cargo.toml`

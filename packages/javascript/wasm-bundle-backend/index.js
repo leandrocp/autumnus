@@ -7,7 +7,6 @@ import wasmElixir from "@lumis-sh/wasm-elixir"
 import wasmErlang from "@lumis-sh/wasm-erlang"
 import wasmGo from "@lumis-sh/wasm-go"
 import wasmGraphql from "@lumis-sh/wasm-graphql"
-import wasmHtml from "@lumis-sh/wasm-html"
 import wasmHttp from "@lumis-sh/wasm-http"
 import wasmJava from "@lumis-sh/wasm-java"
 import wasmJavascript from "@lumis-sh/wasm-javascript"
@@ -40,7 +39,6 @@ export const bundledWasms = {
   "http": wasmHttp,
   "java": wasmJava,
   "javascript": wasmJavascript,
-  "html": wasmHtml,
   "json": wasmJson,
   "kotlin": wasmKotlin,
   "nginx": wasmNginx,

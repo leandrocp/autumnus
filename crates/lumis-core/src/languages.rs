@@ -34,7 +34,7 @@ macro_rules! define_languages {
         }
         gated {
             $(
-                [$($g_feat:expr),+ $(,)?] $g_variant:ident {
+                [$g_feat:expr] $g_variant:ident {
                     id: $g_id:expr,
                     name: $g_name:expr,
                     from_str: [$($g_str:expr),* $(,)?],
@@ -51,7 +51,7 @@ macro_rules! define_languages {
                 $a_variant,
             )*
             $(
-                #[cfg(any($(feature = $g_feat),+))]
+                #[cfg(feature = $g_feat)]
                 $g_variant,
             )*
         }
@@ -70,7 +70,7 @@ macro_rules! define_languages {
                 ];
                 let gated: &[Language] = &[
                     $(
-                        #[cfg(any($(feature = $g_feat),+))]
+                        #[cfg(feature = $g_feat)]
                         Language::$g_variant,
                     )*
                 ];
@@ -83,7 +83,7 @@ macro_rules! define_languages {
                         Language::$a_variant => &[$($a_glob),*],
                     )*
                     $(
-                        #[cfg(any($(feature = $g_feat),+))]
+                        #[cfg(feature = $g_feat)]
                         Language::$g_variant => &[$($g_glob),*],
                     )*
                 };
@@ -100,7 +100,7 @@ macro_rules! define_languages {
                         Language::$a_variant => $a_name,
                     )*
                     $(
-                        #[cfg(any($(feature = $g_feat),+))]
+                        #[cfg(feature = $g_feat)]
                         Language::$g_variant => $g_name,
                     )*
                 }
@@ -112,44 +112,8 @@ macro_rules! define_languages {
                         Language::$a_variant => $a_id,
                     )*
                     $(
-                        #[cfg(any($(feature = $g_feat),+))]
+                        #[cfg(feature = $g_feat)]
                         Language::$g_variant => $g_id,
-                    )*
-                }
-            }
-
-            fn exact_names(&self) -> &'static [&'static str] {
-                match self {
-                    $(
-                        Language::$a_variant => &[$($a_str),*],
-                    )*
-                    $(
-                        #[cfg(any($(feature = $g_feat),+))]
-                        Language::$g_variant => &[$($g_str),*],
-                    )*
-                }
-            }
-
-            fn emacs_modes(&self) -> &'static [&'static str] {
-                match self {
-                    $(
-                        Language::$a_variant => &[$($a_emacs),*],
-                    )*
-                    $(
-                        #[cfg(any($(feature = $g_feat),+))]
-                        Language::$g_variant => &[$($g_emacs),*],
-                    )*
-                }
-            }
-
-            fn shebangs(&self) -> &'static [&'static str] {
-                match self {
-                    $(
-                        Language::$a_variant => &[$($a_shebang),*],
-                    )*
-                    $(
-                        #[cfg(any($(feature = $g_feat),+))]
-                        Language::$g_variant => &[$($g_shebang),*],
                     )*
                 }
             }
@@ -165,14 +129,18 @@ macro_rules! define_languages {
                         (Some(cap), _) | (_, Some(cap)) => cap[1].into(),
                         _ => "".into(),
                     };
-                    let mode_name = mode_name.to_ascii_lowercase();
-                    let mode_name = mode_name.trim();
-                    let lang = Language::iter().find(|language| {
-                        language
-                            .emacs_modes()
-                            .iter()
-                            .any(|emacs| emacs.eq_ignore_ascii_case(mode_name))
-                    });
+                    let lang = match mode_name.to_ascii_lowercase().trim() {
+                        $(
+                            $($a_emacs => Some(Language::$a_variant),)*
+                        )*
+                        $(
+                            $(
+                                #[cfg(feature = $g_feat)]
+                                $g_emacs => Some(Language::$g_variant),
+                            )*
+                        )*
+                        _ => None,
+                    };
                     if lang.is_some() {
                         return lang;
                     }
@@ -189,15 +157,17 @@ macro_rules! define_languages {
                     if let Some(cap) = RE.captures(first_line) {
                         let interpreter_path = Path::new(&cap[1]);
                         if let Some(name) = interpreter_path.file_name() {
-                            let interpreter = name.to_string_lossy();
-                            for language in Language::iter() {
-                                if language
-                                    .shebangs()
-                                    .iter()
-                                    .any(|shebang| shebang.eq_ignore_ascii_case(&interpreter))
-                                {
-                                    return Some(language);
-                                }
+                            match name.to_string_lossy().as_ref() {
+                                $(
+                                    $($a_shebang => return Some(Language::$a_variant),)*
+                                )*
+                                $(
+                                    $(
+                                        #[cfg(feature = $g_feat)]
+                                        $g_shebang => return Some(Language::$g_variant),
+                                    )*
+                                )*
+                                _ => {}
                             }
                         }
                     }
@@ -216,12 +186,19 @@ macro_rules! define_languages {
                 }
 
                 let s_lower = s.to_ascii_lowercase();
-                let exact = Language::iter().find(|language| {
-                    language
-                        .exact_names()
-                        .iter()
-                        .any(|name| name.eq_ignore_ascii_case(&s_lower))
-                });
+
+                let exact = match s_lower.as_str() {
+                    $(
+                        $($a_str => Some(Language::$a_variant),)*
+                    )*
+                    $(
+                        $(
+                            #[cfg(feature = $g_feat)]
+                            $g_str => Some(Language::$g_variant),
+                        )*
+                    )*
+                    _ => None,
+                };
 
                 if let Some(lang) = exact {
                     return Ok(lang);
