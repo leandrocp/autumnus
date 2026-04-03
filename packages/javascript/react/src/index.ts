@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { createHighlighter } from "@lumis-sh/lumis";
 import { fromHtml } from "hast-util-from-html";
 import { toJsxRuntime } from "hast-util-to-jsx-runtime";
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { jsx, jsxs } from "react/jsx-runtime";
 
 export interface RenderCodeBlockOptions {
@@ -64,6 +64,8 @@ function bindHighlighter(highlighter: HighlighterInput) {
       () => props.fallback ?? createFallback(props.children),
       [props.children, props.fallback],
     );
+    const formatterRef = useRef(props.formatter);
+    formatterRef.current = props.formatter;
     const [content, setContent] = useState<ReactNode>(fallback);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<unknown>();
@@ -75,7 +77,10 @@ function bindHighlighter(highlighter: HighlighterInput) {
       setIsLoading(true);
       setError(undefined);
 
-      void renderCodeBlock(props)
+      void highlightToReactNode(highlighter, {
+        children: props.children,
+        formatter: formatterRef.current,
+      })
         .then((next) => {
           if (!active) {
             return;
@@ -96,7 +101,7 @@ function bindHighlighter(highlighter: HighlighterInput) {
       return () => {
         active = false;
       };
-    }, [fallback, props.children, props.formatter]);
+    }, [fallback, props.children]);
 
     if (error) {
       throw error instanceof Error ? error : new Error("Code block rendering failed");
