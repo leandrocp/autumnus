@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.5](https://github.com/leandrocp/lumis/compare/rust-core@v0.0.4...rust-core@v0.0.5) (2026-04-03)
+
+
+### Maintenance
+
+* fix release
+
+
 ## [0.0.4](https://github.com/leandrocp/lumis/compare/rust-core@v0.0.3...rust-core@v0.0.4) (2026-04-03)
 
 
