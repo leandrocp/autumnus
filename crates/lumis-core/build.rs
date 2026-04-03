@@ -22,7 +22,7 @@
 
 use quote::{format_ident, quote};
 use serde::Deserialize;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::env;
 use std::fs;
 use std::io::Write;
@@ -31,6 +31,8 @@ use std::path::{Path, PathBuf};
 #[derive(Deserialize)]
 struct LanguagesToml {
     parsers: BTreeMap<String, ParserEntry>,
+    #[serde(default)]
+    bundles: BTreeMap<String, BundleEntry>,
     #[serde(flatten)]
     _rest: toml::Value,
 }
@@ -48,6 +50,18 @@ struct ParserEntry {
     _rest: toml::Value,
 }
 
+#[derive(Deserialize)]
+struct BundleEntry {
+    parsers: BundleParsers,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged)]
+enum BundleParsers {
+    List(Vec<String>),
+    All(String),
+}
+
 fn manifest_dir() -> PathBuf {
     PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap())
 }
@@ -62,6 +76,49 @@ fn titlecase(s: &str) -> String {
 
 fn key_to_feature(key: &str) -> String {
     format!("lang-{}", key.replace('_', "-"))
+}
+
+fn feature_for(key: &str, entry: &ParserEntry) -> String {
+    entry.feature.clone().unwrap_or_else(|| key_to_feature(key))
+}
+
+fn bundle_feature_name(bundle_name: &str) -> String {
+    format!("bundle-{bundle_name}")
+}
+
+fn bundle_parser_ids(
+    bundle_name: &str,
+    bundle: &BundleEntry,
+    parsers: &BTreeMap<String, ParserEntry>,
+) -> Vec<String> {
+    match &bundle.parsers {
+        BundleParsers::List(ids) => ids.clone(),
+        BundleParsers::All(value) if value == "all" => parsers.keys().cloned().collect(),
+        BundleParsers::All(value) => {
+            panic!("unsupported parsers value {value:?} for bundle {bundle_name}; expected \"all\"")
+        }
+    }
+}
+
+fn enabling_features_for_parser(
+    key: &str,
+    entry: &ParserEntry,
+    toml: &LanguagesToml,
+) -> Vec<String> {
+    let mut features = BTreeSet::new();
+    features.insert(feature_for(key, entry));
+    features.insert("all-languages".to_string());
+
+    for (bundle_name, bundle) in &toml.bundles {
+        if bundle_parser_ids(bundle_name, bundle, &toml.parsers)
+            .iter()
+            .any(|parser_id| parser_id == key)
+        {
+            features.insert(bundle_feature_name(bundle_name));
+        }
+    }
+
+    features.into_iter().collect()
 }
 
 fn format_str_list(list: &[String]) -> String {
@@ -150,8 +207,11 @@ fn languages() {
         if key == "diff" {
             always_entries.push(format!("        {}", body));
         } else {
-            let feat = entry.feature.clone().unwrap_or_else(|| key_to_feature(key));
-            gated_entries.push(format!("        [\"{}\"] {}", feat, body));
+            let feature_list = enabling_features_for_parser(key, entry, &toml)
+                .into_iter()
+                .map(|feature| format!("\"{feature}\""))
+                .collect::<Vec<_>>();
+            gated_entries.push(format!("        [{}] {}", feature_list.join(", "), body));
         }
     }
 
