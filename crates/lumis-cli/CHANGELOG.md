@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.3](https://github.com/leandrocp/lumis/compare/rust-cli@v0.1.2...rust-cli@v0.1.3) (2026-04-03)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * lumis-core bumped from 0.0.4 to 0.0.5
+
 ## [0.1.2](https://github.com/leandrocp/lumis/compare/rust-cli@v0.1.1...rust-cli@v0.1.2) (2026-04-03)
 
 
