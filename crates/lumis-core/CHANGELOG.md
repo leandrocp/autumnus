@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.4](https://github.com/leandrocp/lumis/compare/rust-core@v0.0.3...rust-core@v0.0.4) (2026-04-03)
+
+
+### Features
+
+* language bundles ([#556](https://github.com/leandrocp/lumis/issues/556)) ([6e98734](https://github.com/leandrocp/lumis/commit/6e98734c20d8a86384f3e8b8e2b694c40bbb0f12))
+
 ## [0.0.3](https://github.com/leandrocp/lumis/compare/rust-core@v0.0.2...rust-core@v0.0.3) (2026-03-30)
 
 
