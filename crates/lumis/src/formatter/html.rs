@@ -529,21 +529,31 @@ pub fn span_multi_themes(
 /// assert_eq!(html::escape("{code}"), "&lbrace;code&rbrace;");
 /// ```
 pub fn escape(text: &str) -> String {
+    let bytes = text.as_bytes();
     let mut buf = String::with_capacity(text.len() + text.len() / 10);
+    let mut last = 0;
 
-    for c in text.chars() {
-        match c {
-            '&' => buf.push_str("&amp;"),
-            '<' => buf.push_str("&lt;"),
-            '>' => buf.push_str("&gt;"),
-            '"' => buf.push_str("&quot;"),
-            '\'' => buf.push_str("&#39;"),
-            '{' => buf.push_str("&lbrace;"),
-            '}' => buf.push_str("&rbrace;"),
-            _ => buf.push(c),
-        }
+    for (i, &b) in bytes.iter().enumerate() {
+        let replacement = match b {
+            b'&' => "&amp;",
+            b'<' => "&lt;",
+            b'>' => "&gt;",
+            b'"' => "&quot;",
+            b'\'' => "&#39;",
+            b'{' => "&lbrace;",
+            b'}' => "&rbrace;",
+            _ => continue,
+        };
+        buf.push_str(&text[last..i]);
+        buf.push_str(replacement);
+        last = i + 1;
     }
 
+    if last == 0 {
+        return text.to_string();
+    }
+
+    buf.push_str(&text[last..]);
     buf
 }
 
@@ -590,29 +600,21 @@ pub fn wrap_line(
     class_suffix: Option<&str>,
     style: Option<&str>,
 ) -> String {
-    let class_attr = if let Some(suffix) = class_suffix {
-        format!("line{}", suffix)
-    } else {
-        "line".to_string()
+    let class_attr = match class_suffix {
+        Some(suffix) => format!("line{}", suffix),
+        None => "line".to_string(),
     };
 
-    let style_attr = if let Some(s) = style {
-        format!(" style=\"{}\"", s)
-    } else {
-        String::new()
-    };
-
-    format!(
-        "<div class=\"{}\"{}data-line=\"{}\">{}</div>",
-        class_attr,
-        if style.is_some() {
-            format!("{} ", style_attr)
-        } else {
-            " ".to_string()
-        },
-        line_number,
-        content
-    )
+    match style {
+        Some(s) => format!(
+            "<div class=\"{}\" style=\"{}\" data-line=\"{}\">{}</div>",
+            class_attr, s, line_number, content
+        ),
+        None => format!(
+            "<div class=\"{}\" data-line=\"{}\">{}</div>",
+            class_attr, line_number, content
+        ),
+    }
 }
 
 /// Map tree-sitter scope to CSS class name.

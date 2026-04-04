@@ -404,9 +404,6 @@ mod tests {
     use super::*;
     use crate::languages::Language;
 
-    // println!("{}", result);
-    // std::fs::write("result.html", result.clone()).unwrap();
-
     #[test]
     fn test_write_highlight() {
         let code = r#"const = 1"#;
