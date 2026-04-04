@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/leandrocp/lumis/compare/rust-cli@v0.1.2...rust-cli@v0.1.3) (2026-04-04)
+
+
+### Bug Fixes
+
+* stop pinning lumis-core workspace deps ([ef2f002](https://github.com/leandrocp/lumis/commit/ef2f002eb60cd408872c5ce5f4dd7792bb00c557))
+
 ## [0.1.2](https://github.com/leandrocp/lumis/compare/rust-cli@v0.1.1...rust-cli@v0.1.2) (2026-04-03)
 
 
