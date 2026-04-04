@@ -8,7 +8,7 @@
   "packages/javascript/rehype-lumis": "0.0.2",
   "packages/javascript/themes": "0.0.3",
   "packages/javascript/wasm-bundle-web": "0.0.2",
-  "packages/javascript/wasm-bundle-web-extra": "0.0.1",
+  "packages/javascript/wasm-bundle-web-extra": "0.0.2",
   "packages/javascript/wasm-bundle-system": "0.0.2",
   "packages/javascript/wasm-bundle-backend": "0.0.2",
   "packages/javascript/wasm-bundle-full": "0.0.2",
