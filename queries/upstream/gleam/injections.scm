@@ -1,3 +1,3 @@
-((module_comment) @injection.content
-  (#set! injection.language "markdown")
-  (#set! injection.combined))
+((doc_comment_content) @injection.content
+ (#set! injection.language "markdown")
+ (#set! injection.combined))
