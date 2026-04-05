@@ -1,6 +1,8 @@
 # @lumis-sh/react
 
-React helpers and components for Lumis.
+React helpers and components for [Lumis](https://lumis.sh)
+
+Docs: [https://lumis.sh/docs](https://lumis.sh/docs)
 
 ## Install
 
@@ -8,17 +10,12 @@ React helpers and components for Lumis.
 npm install @lumis-sh/react @lumis-sh/lumis @lumis-sh/themes react
 ```
 
-## Client component
+## Usage
 
 ```tsx
-import { createHighlighter } from '@lumis-sh/lumis'
-import { bundledLanguages } from '@lumis-sh/lumis/bundles/web'
-import { fromHighlighter } from '@lumis-sh/react'
+import { CodeBlock } from '@lumis-sh/react'
 import { htmlInline } from '@lumis-sh/lumis/formatters'
 import githubLight from '@lumis-sh/themes/github_light'
-
-const highlighter = await createHighlighter({ languages: [bundledLanguages] })
-const { CodeBlock } = fromHighlighter(highlighter)
 
 export function Example() {
   return (
@@ -28,10 +25,6 @@ export function Example() {
   )
 }
 ```
-
-When `fromHighlighter` receives a resolved `Highlighter`, `CodeBlock` renders synchronously with no flash of unstyled content.
-
-When it receives a `Promise<Highlighter>`, `CodeBlock` renders nothing until the highlighter resolves.
 
 ## Server rendering
 

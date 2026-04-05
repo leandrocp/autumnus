@@ -15,7 +15,7 @@
     "react",
     "syntax-highlighting",
     "tree-sitter",
-    "lumis"
+    "lumis-sh"
   ],
   "sideEffects": false,
   "type": "module",
