@@ -46,42 +46,46 @@ jobs:
         run: |
           tag="${{ inputs.tag || github.ref_name }}"
           component="${tag%%@*}"
+          set_output() {
+            printf '%s=%s\n' "$1" "$2" >> "$GITHUB_OUTPUT"
+          }
+
           if [ "$component" = "themes" ]; then
-            echo "filter=@lumis-sh/themes" >> $GITHUB_OUTPUT
-            echo "build_lumis=false" >> $GITHUB_OUTPUT
-            echo "build_markdown_it=false" >> $GITHUB_OUTPUT
-            echo "build_rehype=false" >> $GITHUB_OUTPUT
-            echo "build_react=false" >> $GITHUB_OUTPUT
+            set_output filter "@lumis-sh/themes"
+            set_output build_lumis false
+            set_output build_markdown_it false
+            set_output build_rehype false
+            set_output build_react false
           elif [ "$component" = "javascript" ]; then
-            echo "filter=@lumis-sh/lumis" >> $GITHUB_OUTPUT
-            echo "build_lumis=true" >> $GITHUB_OUTPUT
-            echo "build_markdown_it=false" >> $GITHUB_OUTPUT
-            echo "build_rehype=false" >> $GITHUB_OUTPUT
-            echo "build_react=false" >> $GITHUB_OUTPUT
+            set_output filter "@lumis-sh/lumis"
+            set_output build_lumis true
+            set_output build_markdown_it false
+            set_output build_rehype false
+            set_output build_react false
           elif [ "$component" = "markdown-it-lumis" ]; then
-            echo "filter=@lumis-sh/markdown-it-lumis" >> $GITHUB_OUTPUT
-            echo "build_lumis=true" >> $GITHUB_OUTPUT
-            echo "build_markdown_it=true" >> $GITHUB_OUTPUT
-            echo "build_rehype=false" >> $GITHUB_OUTPUT
-            echo "build_react=false" >> $GITHUB_OUTPUT
+            set_output filter "@lumis-sh/markdown-it-lumis"
+            set_output build_lumis true
+            set_output build_markdown_it true
+            set_output build_rehype false
+            set_output build_react false
           elif [ "$component" = "rehype-lumis" ]; then
-            echo "filter=@lumis-sh/rehype-lumis" >> $GITHUB_OUTPUT
-            echo "build_lumis=true" >> $GITHUB_OUTPUT
-            echo "build_markdown_it=false" >> $GITHUB_OUTPUT
-            echo "build_rehype=true" >> $GITHUB_OUTPUT
-            echo "build_react=false" >> $GITHUB_OUTPUT
+            set_output filter "@lumis-sh/rehype-lumis"
+            set_output build_lumis true
+            set_output build_markdown_it false
+            set_output build_rehype true
+            set_output build_react false
           elif [ "$component" = "react" ]; then
-            echo "filter=@lumis-sh/react" >> $GITHUB_OUTPUT
-            echo "build_lumis=true" >> $GITHUB_OUTPUT
-            echo "build_markdown_it=false" >> $GITHUB_OUTPUT
-            echo "build_rehype=false" >> $GITHUB_OUTPUT
-            echo "build_react=true" >> $GITHUB_OUTPUT
+            set_output filter "@lumis-sh/react"
+            set_output build_lumis true
+            set_output build_markdown_it false
+            set_output build_rehype false
+            set_output build_react true
           elif [[ "$component" == wasm-bundle-* ]]; then
-            echo "filter=@lumis-sh/$component" >> $GITHUB_OUTPUT
-            echo "build_lumis=false" >> $GITHUB_OUTPUT
-            echo "build_markdown_it=false" >> $GITHUB_OUTPUT
-            echo "build_rehype=false" >> $GITHUB_OUTPUT
-            echo "build_react=false" >> $GITHUB_OUTPUT
+            set_output filter "@lumis-sh/$component"
+            set_output build_lumis false
+            set_output build_markdown_it false
+            set_output build_rehype false
+            set_output build_react false
           else
             echo "Unknown component: $component" && exit 1
           fi
