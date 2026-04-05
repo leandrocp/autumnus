@@ -35,13 +35,11 @@ import wasmGlimmer from "@lumis-sh/wasm-glimmer"
 import wasmGlsl from "@lumis-sh/wasm-glsl"
 import wasmGo from "@lumis-sh/wasm-go"
 import wasmGraphql from "@lumis-sh/wasm-graphql"
-import wasmGroovy from "@lumis-sh/wasm-groovy"
 import wasmHaskell from "@lumis-sh/wasm-haskell"
 import wasmHcl from "@lumis-sh/wasm-hcl"
 import wasmHeex from "@lumis-sh/wasm-heex"
 import wasmHtml from "@lumis-sh/wasm-html"
 import wasmHttp from "@lumis-sh/wasm-http"
-import wasmHurl from "@lumis-sh/wasm-hurl"
 import wasmIex from "@lumis-sh/wasm-iex"
 import wasmIni from "@lumis-sh/wasm-ini"
 import wasmJava from "@lumis-sh/wasm-java"
@@ -211,8 +209,6 @@ export const bundledWasms = {
   "fortran": wasmFortran,
   "gitignore": wasmGitignore,
   "glsl": wasmGlsl,
-  "groovy": wasmGroovy,
-  "hurl": wasmHurl,
   "jinja": wasmJinja,
   "jinja_inline": wasmJinjaInline,
   "json5": wasmJson5,

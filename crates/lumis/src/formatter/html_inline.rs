@@ -219,28 +219,13 @@ impl Formatter for HtmlInline {
             self.pre_class.clone(),
             self.italic,
             self.include_highlights,
-            self.highlight_lines.clone().map(map_highlight_lines),
+            self.highlight_lines
+                .clone()
+                .map(super::map_inline_highlight_lines),
             self.header.clone(),
         );
 
         core_formatter.render(source, &events, output)
-    }
-}
-
-fn map_highlight_lines(
-    highlight_lines: HighlightLines,
-) -> lumis_core::formatter::html_inline::HighlightLines {
-    lumis_core::formatter::html_inline::HighlightLines {
-        lines: highlight_lines.lines,
-        style: highlight_lines.style.map(|style| match style {
-            HighlightLinesStyle::Theme => {
-                lumis_core::formatter::html_inline::HighlightLinesStyle::Theme
-            }
-            HighlightLinesStyle::Style(style) => {
-                lumis_core::formatter::html_inline::HighlightLinesStyle::Style(style)
-            }
-        }),
-        class: highlight_lines.class,
     }
 }
 

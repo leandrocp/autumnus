@@ -1,7 +1,7 @@
 {
   "name": "@lumis-sh/wasm-bundle-full",
-  "version": "0.0.2",
-  "description": "Preset WASM parser bundle for the full Lumis language bundle",
+  "version": "0.0.3",
+  "description": "WASM parsers for Lumis full languages bundle",
   "author": "Leandro Pereira",
   "license": "MIT",
   "repository": {
@@ -76,13 +76,11 @@
     "@lumis-sh/wasm-glsl": "^0.26.0",
     "@lumis-sh/wasm-go": "^0.26.0",
     "@lumis-sh/wasm-graphql": "^0.26.0",
-    "@lumis-sh/wasm-groovy": "^0.26.0",
     "@lumis-sh/wasm-haskell": "^0.26.0",
     "@lumis-sh/wasm-hcl": "^0.26.0",
     "@lumis-sh/wasm-heex": "^0.26.0",
     "@lumis-sh/wasm-html": "^0.26.0",
     "@lumis-sh/wasm-http": "^0.26.0",
-    "@lumis-sh/wasm-hurl": "^0.26.0",
     "@lumis-sh/wasm-iex": "^0.26.0",
     "@lumis-sh/wasm-ini": "^0.26.0",
     "@lumis-sh/wasm-java": "^0.26.0",

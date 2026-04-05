@@ -388,6 +388,15 @@ export const THEMES: ThemeInfo[] = ${JSON.stringify(themeEntries, null, 2)}
   fs.mkdirSync(BUNDLES_DIR, { recursive: true })
 
   const allParserIds = Object.keys(config.parsers)
+  const expectedBundles = new Set(Object.keys(config.bundles ?? {}))
+
+  for (const entry of fs.readdirSync(BUNDLES_DIR)) {
+    if (!entry.endsWith('.ts')) continue
+    const bundleName = path.parse(entry).name
+    if (expectedBundles.has(bundleName)) continue
+    fs.unlinkSync(path.join(BUNDLES_DIR, entry))
+    console.log(`  removed stale bundle: bundles/${entry}`)
+  }
 
   for (const [bundleName, bundleEntry] of Object.entries(config.bundles ?? {})) {
     const parserIds = bundleEntry.parsers === 'all' ? allParserIds : bundleEntry.parsers

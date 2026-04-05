@@ -335,7 +335,9 @@ impl Formatter for HtmlMultiThemes {
             self.pre_class.clone(),
             self.italic,
             self.include_highlights,
-            self.highlight_lines.clone().map(map_highlight_lines),
+            self.highlight_lines
+                .clone()
+                .map(super::map_inline_highlight_lines),
             self.header.clone(),
         );
 
@@ -353,23 +355,6 @@ fn map_default_theme(
         DefaultTheme::LightDark => {
             lumis_core::formatter::html_multi_themes::DefaultTheme::LightDark
         }
-    }
-}
-
-fn map_highlight_lines(
-    highlight_lines: HighlightLines,
-) -> lumis_core::formatter::html_inline::HighlightLines {
-    lumis_core::formatter::html_inline::HighlightLines {
-        lines: highlight_lines.lines,
-        style: highlight_lines.style.map(|style| match style {
-            crate::formatter::html_inline::HighlightLinesStyle::Theme => {
-                lumis_core::formatter::html_inline::HighlightLinesStyle::Theme
-            }
-            crate::formatter::html_inline::HighlightLinesStyle::Style(style) => {
-                lumis_core::formatter::html_inline::HighlightLinesStyle::Style(style)
-            }
-        }),
-        class: highlight_lines.class,
     }
 }
 

@@ -34,7 +34,7 @@ These files feed into code generation, builds, detection metadata, and theme ext
 | File | Purpose |
 |------|---------|
 | [`highlights.toml`](highlights.toml) | Tree-sitter highlight scope names |
-| [`languages.toml`](languages.toml) | Parser metadata, query sources, feature flags |
+| [`languages.toml`](languages.toml) | Parser metadata, query sources, language bundles, feature flags |
 | [`themes/themes.lua`](themes/themes.lua) | Theme definitions (Neovim colorscheme sources) |
 
 ### highlights.toml
@@ -65,10 +65,13 @@ All language metadata lives here. Consumed by:
 
 Bundle definitions also live in `languages.toml` under `[bundles.*]`.
 
+For Rust crates, bundle support is implemented as Cargo features such as `bundle-web` and `bundle-system` that enable the corresponding `lang-*` features transitively. The `bundle-*` feature lists in `crates/lumis/Cargo.toml` and `crates/lumis-core/Cargo.toml` are auto-generated from `languages.toml` by `just cargo-update-features`.
+
 - Keep one parser ID per line inside bundle arrays for cleaner diffs.
-- After changing parser or bundle entries, regenerate the checked-in JavaScript outputs:
+- After changing parser or bundle entries, sync Rust feature manifests and regenerate the checked-in JavaScript outputs:
 
 ```sh
+just cargo-update-features
 pnpm --filter @lumis-sh/lumis build:generate
 pnpm --dir packages/javascript run build:wasm-bundles
 ```
@@ -158,19 +161,21 @@ In `crates/lumis/Cargo.toml`:
   ```
   and a feature flag:
   ```toml
-  lang-{name} = ["dep:tree-sitter-{lang}"]
+  lang-{name} = ["dep:tree-sitter-{lang}", "lumis-core/lang-{name}"]
   ```
 - If no crate exists, add an empty feature flag:
   ```toml
-  lang-{name} = []
+  lang-{name} = ["lumis-core/lang-{name}"]
   ```
-- Add to the `all-languages` list
+- Add `lang-{name}` to the `all-languages` list in both `crates/lumis/Cargo.toml` and `crates/lumis-core/Cargo.toml`
+- If the language belongs in an existing bundle, add it to the matching bundle in `languages.toml`, then run `just cargo-update-features` to regenerate the `bundle-*` feature lists in both Cargo manifests
 
 #### 3. Fetch parser and queries
 
 ```sh
 just langs-fetch-vendored-parsers {name} # fetches vendored source from git
 just cargo-update-dep {name}      # syncs crate-backed parser versions into crates/lumis/Cargo.toml
+just cargo-update-features        # syncs Rust bundle features from languages.toml
 just langs-fetch-queries {name}   # fetches .scm query files
 ```
 
@@ -219,7 +224,7 @@ just langs-upgrade-parsers {name}       # updates languages.toml revisions and s
 just langs-fetch-vendored-parsers {name} # fetches updated vendored parser files
 ```
 
-For parser and query updates, prefer `just langs-update {name}` or the `update-langs` GitHub workflow. Do not use Dependabot to bump `tree-sitter-*` Rust parser crates independently; those versions are tied to the pinned parser/query state in `languages.toml`. `just langs-upgrade-parsers {name}` now updates `languages.toml` and syncs any crate-backed Rust parser versions into `crates/lumis/Cargo.toml` in one step.
+For parser and query updates, prefer `just langs-update {name}` or the `update-langs` GitHub workflow. Do not use Dependabot to bump `tree-sitter-*` Rust parser crates independently; those versions are tied to the pinned parser/query state in `languages.toml`. `just langs-upgrade-parsers {name}` now updates `languages.toml`, syncs any crate-backed Rust parser versions into `crates/lumis/Cargo.toml`, and refreshes Rust bundle features from `languages.toml`.
 
 ### Updating queries
 
@@ -231,7 +236,7 @@ just langs-preprocess-queries     # regenerates checked-in processed queries
 
 Omit the name argument to upgrade all queries at once.
 
-`just langs-update {name}` is the end-to-end command for a coordinated parser update. It fetches parsers first, syncs crate-backed Rust parser deps, then fetches and preprocesses queries, and regenerates `LANGUAGES.md`.
+`just langs-update {name}` is the end-to-end command for a coordinated parser update. It fetches parsers first, syncs crate-backed Rust parser deps and Rust bundle features, then fetches and preprocesses queries, and regenerates `LANGUAGES.md`.
 
 Raw query sources live in `queries/upstream/`. Preprocessed tracked outputs live in `queries/processed/` and should be committed whenever upstream queries or overrides change.
 

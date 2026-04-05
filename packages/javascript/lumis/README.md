@@ -63,15 +63,15 @@ Use `createHighlighter()` when you want explicit control over loaded languages, 
 
 Bundles group languages into sets. Each language loads lazily on first use, so registering a bundle with 110+ languages costs almost nothing upfront.
 
-Three bundles ship with lumis:
+Five preset bundles ship with lumis:
 
-| Bundle | Languages | Use case |
-|--------|-----------|----------|
-| `bundles/essential` | 13 | Minimal docs, config, shell, and diff languages |
-| `bundles/web` | 23 | HTML, CSS, JS, TS, JSON, Markdown, SQL, Svelte, Vue, Astro, and other web essentials |
-| `bundles/system` | 18 | C, C++, Rust, Go, Zig, ASM, LLVM, CMake, Make |
-| `bundles/backend` | 28 | Popular backend languages plus common API, config, and infra formats |
-| `bundles/full` | 118 | Every supported language |
+| Bundle | Use case |
+|--------|----------|
+| `bundles/web` | Core web languages: HTML, CSS, JavaScript, TypeScript, TSX, and JSON |
+| `bundles/web-extra` | Web frameworks, templating, and adjacent formats like Angular, Astro, Dart, Elm, HEEx, Prisma, Surface, Vue, Svelte, PHP, GraphQL, and XML |
+| `bundles/system` | C, C++, Rust, Go, Zig, ASM, LLVM, CMake, Make |
+| `bundles/backend` | Backend languages like C#, Elixir, Erlang, Go, Java, JS, Kotlin, PHP, Python, Ruby, Rust, Scala, SQL, TypeScript, Protobuf, and Javadoc |
+| `bundles/full` | Every supported language |
 
 ### Using a bundle
 

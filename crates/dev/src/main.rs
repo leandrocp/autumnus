@@ -52,6 +52,7 @@ enum Commands {
         #[arg(default_value = "")]
         name: String,
     },
+    CargoUpdateFeatures,
     PreprocessQueries {
         #[arg(default_value = "")]
         name: String,
@@ -112,6 +113,7 @@ fn main() -> Result<()> {
         Commands::UpgradeQueries { name } => upgrade_queries(&name),
         Commands::FetchQueries { name } => fetch_queries(&name),
         Commands::CargoUpdateDep { name } => cargo_update_dep(&name),
+        Commands::CargoUpdateFeatures => cargo_update_features(),
         Commands::PreprocessQueries { name } => preprocess_queries(&name),
         Commands::GenHighlights => gen_highlights(),
         Commands::GenLanguagesMd => gen_languages_md(),
@@ -627,6 +629,20 @@ fn gen_themes_md() -> Result<()> {
 struct LanguagesToml {
     queries: BTreeMap<String, QueryInfo>,
     parsers: BTreeMap<String, ParserInfo>,
+    #[serde(default)]
+    bundles: BTreeMap<String, BundleInfo>,
+}
+
+#[derive(Debug, serde::Deserialize)]
+struct BundleInfo {
+    parsers: BundleParsers,
+}
+
+#[derive(Debug, serde::Deserialize)]
+#[serde(untagged)]
+enum BundleParsers {
+    List(Vec<String>),
+    All(String),
 }
 
 #[derive(Debug, serde::Deserialize)]
@@ -648,6 +664,7 @@ struct ParserInfo {
     query_name: Option<String>,
     generate: Option<bool>,
     wasm_name: Option<String>,
+    feature: Option<String>,
     #[allow(dead_code)]
     #[serde(default)]
     globs: Vec<String>,
@@ -685,6 +702,68 @@ fn read_lumis_cargo_toml_edit() -> Result<toml_edit::DocumentMut> {
 
 fn write_lumis_cargo_toml_edit(doc: &toml_edit::DocumentMut) -> Result<()> {
     fs::write("crates/lumis/Cargo.toml", doc.to_string())?;
+    Ok(())
+}
+
+fn read_lumis_core_cargo_toml_edit() -> Result<toml_edit::DocumentMut> {
+    let text = fs::read_to_string("crates/lumis-core/Cargo.toml")?;
+    Ok(text.parse()?)
+}
+
+fn write_lumis_core_cargo_toml_edit(doc: &toml_edit::DocumentMut) -> Result<()> {
+    fs::write("crates/lumis-core/Cargo.toml", doc.to_string())?;
+    Ok(())
+}
+
+fn parser_feature_name(parser_name: &str, info: &ParserInfo) -> String {
+    info.feature
+        .clone()
+        .unwrap_or_else(|| format!("lang-{}", parser_name.replace('_', "-")))
+}
+
+fn sync_bundle_features(
+    toml: &LanguagesToml,
+    lumis: &mut toml_edit::DocumentMut,
+    lumis_core: &mut toml_edit::DocumentMut,
+) -> Result<()> {
+    let lumis_features = lumis["features"]
+        .as_table_like_mut()
+        .context("missing [features] in crates/lumis/Cargo.toml")?;
+    let lumis_core_features = lumis_core["features"]
+        .as_table_like_mut()
+        .context("missing [features] in crates/lumis-core/Cargo.toml")?;
+
+    for (bundle_name, bundle) in &toml.bundles {
+        let bundle_feature = format!("bundle-{bundle_name}");
+        let parser_features = match &bundle.parsers {
+            BundleParsers::List(parsers) => parsers
+                .iter()
+                .map(|parser_name| {
+                    let info = toml.parsers.get(parser_name).with_context(|| {
+                        format!("bundle '{bundle_name}' references unknown parser '{parser_name}'")
+                    })?;
+                    Ok(parser_feature_name(parser_name, info))
+                })
+                .collect::<Result<Vec<_>>>()?,
+            BundleParsers::All(value) => {
+                if value != "all" {
+                    bail!("unsupported bundle parsers value for '{bundle_name}': {value}");
+                }
+                vec!["all-languages".to_string()]
+            }
+        };
+
+        let lumis_core_array = toml_edit::Array::from_iter(parser_features.iter().cloned());
+        lumis_core_features.insert(&bundle_feature, toml_edit::value(lumis_core_array));
+
+        let mut lumis_feature_values = parser_features;
+        lumis_feature_values.push(format!("lumis-core/{bundle_feature}"));
+        let lumis_array = toml_edit::Array::from_iter(lumis_feature_values);
+        lumis_features.insert(&bundle_feature, toml_edit::value(lumis_array));
+
+        println!("  synced {bundle_feature}");
+    }
+
     Ok(())
 }
 
@@ -1105,6 +1184,17 @@ fn cargo_update_dep(name: &str) -> Result<()> {
     }
 
     write_lumis_cargo_toml_edit(&cargo)
+}
+
+fn cargo_update_features() -> Result<()> {
+    let toml = read_languages_toml()?;
+    let mut cargo = read_lumis_cargo_toml_edit()?;
+    let mut cargo_core = read_lumis_core_cargo_toml_edit()?;
+
+    sync_bundle_features(&toml, &mut cargo, &mut cargo_core)?;
+
+    write_lumis_cargo_toml_edit(&cargo)?;
+    write_lumis_core_cargo_toml_edit(&cargo_core)
 }
 
 fn fetch_queries(name: &str) -> Result<()> {

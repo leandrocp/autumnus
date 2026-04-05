@@ -262,9 +262,7 @@ dependencies = [
 
 [[package]]
 name = "lumis"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bd10f7b8ff60101598533ec3c80cac1096b10f88f52331928fc1f51efd8fd8fa"
+version = "0.5.1"
 dependencies = [
  "anyhow",
  "cc",
@@ -368,14 +366,10 @@ dependencies = [
 [[package]]
 name = "lumis-build"
 version = "0.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8cd1020dacf54e11fd412ef98e67d94586552305cd6e8ddb29add52e7ccef8ea"
 
 [[package]]
 name = "lumis-core"
-version = "0.0.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2521c0e6d5c53d9397097552c661868665747553126a8c096f3e7a485f307466"
+version = "0.0.5"
 dependencies = [
  "derive_builder",
  "glob",

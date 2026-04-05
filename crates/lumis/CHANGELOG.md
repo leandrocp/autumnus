@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.6.0](https://github.com/leandrocp/lumis/compare/rust@v0.5.1...rust@v0.6.0) (2026-04-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* improve formatter internals ([#570](https://github.com/leandrocp/lumis/issues/570))
+
+### Code Refactoring
+
+* improve formatter internals ([#570](https://github.com/leandrocp/lumis/issues/570)) ([c811832](https://github.com/leandrocp/lumis/commit/c811832c808c50f0ab6603c70d5403813e06476d))
+
+## [0.5.1](https://github.com/leandrocp/lumis/compare/rust@v0.5.0...rust@v0.5.1) (2026-04-03)
+
+
+### Features
+
+* language bundles ([#556](https://github.com/leandrocp/lumis/issues/556)) ([6e98734](https://github.com/leandrocp/lumis/commit/6e98734c20d8a86384f3e8b8e2b694c40bbb0f12))
+
+
+### Bug Fixes
+
+* loosen lumis-core dep ([61a0e45](https://github.com/leandrocp/lumis/commit/61a0e45bc877f3a2f4652660e8c38a282b4d4552))
+* query overrides and injections ([#551](https://github.com/leandrocp/lumis/issues/551)) ([2a356fb](https://github.com/leandrocp/lumis/commit/2a356fbd8f0841c7e0fdb5835330f98621c199ce))
+
 ## [0.5.0](https://github.com/leandrocp/lumis/compare/rust@v0.4.0...rust@v0.5.0) (2026-04-02)
 
 
