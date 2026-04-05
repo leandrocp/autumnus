@@ -24,6 +24,10 @@ export interface UseCodeBlockResult {
 
 type HighlighterInput = Highlighter | Promise<Highlighter>;
 
+function toError(value: unknown): Error {
+  return value instanceof Error ? value : new Error(String(value));
+}
+
 function createFallback(source: string): ReactNode {
   return jsx("pre", {
     children: jsx("code", {
@@ -102,7 +106,7 @@ export function fromHighlighter(highlighter: HighlighterInput) {
     }, [fallback, props.children, props.formatter]);
 
     if (error) {
-      throw error;
+      throw toError(error);
     }
 
     return { content, isLoading };
