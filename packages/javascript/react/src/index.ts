@@ -8,29 +8,12 @@ import { toJsxRuntime } from "hast-util-to-jsx-runtime";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { jsx, jsxs } from "react/jsx-runtime";
 
-export interface RenderCodeBlockOptions {
+export interface CodeBlockProps {
   children: string;
   formatter: Formatter;
 }
 
-export interface CodeBlockProps extends RenderCodeBlockOptions {
-  fallback?: ReactNode;
-}
-
-export interface UseCodeBlockResult {
-  content: ReactNode;
-  isLoading: boolean;
-}
-
 type HighlighterInput = Highlighter | Promise<Highlighter>;
-
-function createFallback(source: string): ReactNode {
-  return jsx("pre", {
-    children: jsx("code", {
-      children: source,
-    }),
-  });
-}
 
 function toReactNode(html: string): ReactNode {
   const tree = fromHtml(html, { fragment: true }) as Root;
@@ -42,8 +25,8 @@ function toReactNode(html: string): ReactNode {
 }
 
 async function highlightToReactNode(
-  highlighterInput: HighlighterInput,
-  options: RenderCodeBlockOptions,
+  highlighterInput: Highlighter | Promise<Highlighter>,
+  options: CodeBlockProps,
 ): Promise<ReactNode> {
   const highlighter = await highlighterInput;
   if (options.formatter.language != null) {
@@ -55,51 +38,62 @@ async function highlightToReactNode(
 }
 
 export function fromHighlighter(highlighter: HighlighterInput) {
-  async function renderCodeBlock(options: RenderCodeBlockOptions): Promise<ReactNode> {
-    return highlightToReactNode(highlighter, options);
+  async function renderCodeBlock(options: CodeBlockProps): Promise<ReactNode> {
+    const hl = await highlighter;
+    if (options.formatter.language != null) {
+      await hl.loadLanguage(options.formatter.language);
+    }
+
+    const html = hl.highlight(options.children, options.formatter);
+    return toReactNode(html);
   }
 
-  function useCodeBlock(props: CodeBlockProps): UseCodeBlockResult {
-    const fallback = useMemo(
-      () => props.fallback ?? createFallback(props.children),
-      [props.children, props.fallback],
-    );
-    const [content, setContent] = useState<ReactNode>(fallback);
-    const [isLoading, setIsLoading] = useState(true);
+  function SyncCodeBlock(props: CodeBlockProps): ReactNode {
+    const hl = highlighter as Highlighter;
+    const [asyncContent, setAsyncContent] = useState<ReactNode>(undefined);
     const [error, setError] = useState<unknown>();
 
+    const needsLoad =
+      props.formatter.language != null &&
+      typeof props.formatter.language === "string" &&
+      !hl.languages.includes(props.formatter.language);
+
+    const syncContent = useMemo(() => {
+      if (needsLoad) {
+        return null;
+      }
+
+      const html = hl.highlight(props.children, props.formatter);
+      return toReactNode(html);
+    }, [hl, needsLoad, props.children, props.formatter]);
+
     useEffect(() => {
+      if (!needsLoad) {
+        setAsyncContent(undefined);
+        return;
+      }
+
       let active = true;
 
-      setContent(fallback);
-      setIsLoading(true);
-      setError(undefined);
-
-      void highlightToReactNode(highlighter, {
+      void highlightToReactNode(hl, {
         children: props.children,
         formatter: props.formatter,
       })
         .then((next) => {
-          if (!active) {
-            return;
+          if (active) {
+            setAsyncContent(next);
           }
-
-          setContent(next);
-          setIsLoading(false);
         })
         .catch((nextError) => {
-          if (!active) {
-            return;
+          if (active) {
+            setError(nextError);
           }
-
-          setError(nextError);
-          setIsLoading(false);
         });
 
       return () => {
         active = false;
       };
-    }, [fallback, props.children, props.formatter]);
+    }, [hl, needsLoad, props.children, props.formatter]);
 
     if (error) {
       if (error instanceof Error) {
@@ -109,21 +103,58 @@ export function fromHighlighter(highlighter: HighlighterInput) {
       throw new Error("Failed to render code block", { cause: error });
     }
 
-    return { content, isLoading };
+    return needsLoad ? (asyncContent ?? null) : syncContent;
   }
 
-  function CodeBlock(props: CodeBlockProps): ReactNode {
-    const { content } = useCodeBlock(props);
+  function AsyncCodeBlock(props: CodeBlockProps): ReactNode {
+    const [content, setContent] = useState<ReactNode>(null);
+    const [error, setError] = useState<unknown>();
+
+    useEffect(() => {
+      let active = true;
+
+      setContent(null);
+      setError(undefined);
+
+      void highlightToReactNode(highlighter, {
+        children: props.children,
+        formatter: props.formatter,
+      })
+        .then((next) => {
+          if (active) {
+            setContent(next);
+          }
+        })
+        .catch((nextError) => {
+          if (active) {
+            setError(nextError);
+          }
+        });
+
+      return () => {
+        active = false;
+      };
+    }, [props.children, props.formatter]);
+
+    if (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+
+      throw new Error("Failed to render code block", { cause: error });
+    }
+
     return content;
   }
+
+  const CodeBlock = highlighter instanceof Promise ? AsyncCodeBlock : SyncCodeBlock;
 
   return {
     CodeBlock,
     renderCodeBlock,
-    useCodeBlock,
   };
 }
 
 const sharedHighlighter = createHighlighter();
 
-export const { CodeBlock, renderCodeBlock, useCodeBlock } = fromHighlighter(sharedHighlighter);
+export const { CodeBlock, renderCodeBlock } = fromHighlighter(sharedHighlighter);
