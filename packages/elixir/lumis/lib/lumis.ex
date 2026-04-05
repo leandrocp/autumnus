@@ -712,9 +712,9 @@ defmodule Lumis do
   @deprecated "Use highlight/2 instead"
   def highlight(language, source, options) do
     IO.warn("""
-      passing the language in the first argument is deprecated, pass a `:language` option instead:
+      passing the language in the first argument is deprecated, use the formatter lang option instead:
 
-        Lumis.highlight("import Kernel", language: "elixir")
+        Lumis.highlight("import Kernel", formatter: {:html_inline, lang: "elixir"})
 
     """)
 
@@ -724,7 +724,7 @@ defmodule Lumis do
         current -> {current, String.capitalize(current)}
       end)
 
-    options = Keyword.put(options, :language, language)
+    options = put_formatter_lang(options, language)
 
     highlight(source, options)
   end
@@ -732,9 +732,9 @@ defmodule Lumis do
   @deprecated "Use highlight!/2 instead"
   def highlight!(language, source, options) do
     IO.warn("""
-      passing the language in the first argument is deprecated, pass a `:language` option instead:
+      passing the language in the first argument is deprecated, use the formatter lang option instead:
 
-        Lumis.highlight!("import Kernel", language: "elixir")
+        Lumis.highlight!("import Kernel", formatter: {:html_inline, lang: "elixir"})
 
     """)
 
@@ -744,7 +744,7 @@ defmodule Lumis do
         current -> {current, String.capitalize(current)}
       end)
 
-    options = Keyword.put(options, :language, language)
+    options = put_formatter_lang(options, language)
     highlight!(source, options)
   end
 
@@ -871,10 +871,8 @@ defmodule Lumis do
   @doc false
   def rust_options!(options) do
     {formatter, formatter_opts} = options[:formatter]
-    formatter_lang = Keyword.get(formatter_opts, :lang)
-    {language, options} = Keyword.pop(options, :language)
-    language = formatter_lang || language
-    formatter_opts = Keyword.delete(formatter_opts, :lang)
+    {language, formatter_opts} = Keyword.pop(formatter_opts, :lang)
+    options = Keyword.delete(options, :language)
 
     {theme, options} = Keyword.pop(options, :theme)
     theme = build_theme(theme || Keyword.get(formatter_opts, :theme))
@@ -911,15 +909,26 @@ defmodule Lumis do
   end
 
   defp normalize_formatter_lang(options) do
-    {language, options} = Keyword.pop(options, :language)
+    language = Keyword.get(options, :language)
     {formatter, formatter_opts} = Keyword.fetch!(options, :formatter)
 
     formatter_lang = Keyword.get(formatter_opts, :lang)
     formatter_opts = Keyword.put(formatter_opts, :lang, formatter_lang || language)
 
-    options
-    |> Keyword.put(:language, language)
-    |> Keyword.put(:formatter, {formatter, formatter_opts})
+    Keyword.put(options, :formatter, {formatter, formatter_opts})
+  end
+
+  defp put_formatter_lang(options, language) do
+    {formatter, options} = Keyword.pop(options, :formatter)
+
+    formatter =
+      case formatter do
+        nil -> {:html_inline, [lang: language]}
+        {name, opts} when is_list(opts) -> {name, Keyword.put_new(opts, :lang, language)}
+        name when is_atom(name) -> {name, [lang: language]}
+      end
+
+    Keyword.put(options, :formatter, formatter)
   end
 
   defp warn_deprecated_language_option(options) do
