@@ -117,6 +117,37 @@ describe("@lumis-sh/react", () => {
     });
   });
 
+  it("loads a lazy language handle then highlights on a resolved highlighter", async () => {
+    const highlighter = await createHighlighter({ languages: [bundledLanguages] });
+    const { CodeBlock } = fromHighlighter(highlighter);
+    const container = document.createElement("div");
+    document.body.append(container);
+    const root = createRoot(container);
+
+    await act(async () => {
+      root.render(
+        <CodeBlock
+          formatter={htmlInline({ language: bundledLanguages.javascript, theme: dracula })}
+        >
+          {SOURCE}
+        </CodeBlock>,
+      );
+    });
+
+    expect(container.innerHTML).toBe("");
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    });
+
+    expect(container.innerHTML).toContain('class="lumis"');
+    expect(container.innerHTML).toContain('class="language-javascript"');
+
+    await act(async () => {
+      root.unmount();
+    });
+  });
+
   it("renders null then highlights when given a promise", async () => {
     const deferred = createDeferred<Awaited<ReturnType<typeof createHighlighter>>>();
     const { CodeBlock } = fromHighlighter(deferred.promise);
@@ -181,6 +212,28 @@ describe("@lumis-sh/react", () => {
     const secondHtml = container.innerHTML;
     expect(secondHtml).toContain('class="lumis"');
     expect(secondHtml).not.toEqual(firstHtml);
+
+    await act(async () => {
+      root.unmount();
+    });
+  });
+
+  it("throws immediately for unknown string languages", async () => {
+    const highlighter = await createHighlighter({ languages: [bundledLanguages] });
+    const { CodeBlock } = fromHighlighter(highlighter);
+    const container = document.createElement("div");
+    document.body.append(container);
+    const root = createRoot(container);
+
+    await expect(
+      act(async () => {
+        root.render(
+          <CodeBlock formatter={htmlInline({ language: "not-a-language", theme: dracula })}>
+            {SOURCE}
+          </CodeBlock>,
+        );
+      }),
+    ).rejects.toThrow('Language "not-a-language" is not loaded.');
 
     await act(async () => {
       root.unmount();

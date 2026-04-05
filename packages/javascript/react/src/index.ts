@@ -15,6 +15,28 @@ export interface CodeBlockProps {
 
 type HighlighterInput = Highlighter | Promise<Highlighter>;
 
+function getLanguageId(language: Formatter["language"]): string | undefined {
+  if (typeof language === "string") {
+    return language;
+  }
+
+  if (typeof language === "object" && language !== null && "id" in language) {
+    return language.id;
+  }
+
+  return undefined;
+}
+
+function isUnknownLanguage(highlighter: Highlighter, language: Formatter["language"]): boolean {
+  const languageId = getLanguageId(language);
+  return languageId != null && !highlighter.registeredLanguages.includes(languageId);
+}
+
+function isLoadedLanguage(highlighter: Highlighter, language: Formatter["language"]): boolean {
+  const languageId = getLanguageId(language);
+  return languageId != null && highlighter.languages.includes(languageId);
+}
+
 function toReactNode(html: string): ReactNode {
   const tree = fromHtml(html, { fragment: true }) as Root;
   return toJsxRuntime(tree, {
@@ -53,27 +75,63 @@ export function fromHighlighter(highlighter: HighlighterInput) {
     const [asyncContent, setAsyncContent] = useState<ReactNode>(undefined);
     const [error, setError] = useState<unknown>();
 
-    const needsLoad =
-      props.formatter.language != null &&
-      typeof props.formatter.language === "string" &&
-      !hl.languages.includes(props.formatter.language);
-
-    const syncContent = useMemo(() => {
-      if (needsLoad) {
-        return null;
+    const syncState = useMemo(() => {
+      if (isUnknownLanguage(hl, props.formatter.language)) {
+        return {
+          content: null,
+          error: new Error(
+            `Language "${getLanguageId(props.formatter.language)}" is not loaded. Pass it to createHighlighter({ languages: [...] }) or call hl.loadLanguage(bundle).`,
+          ),
+          needsLoad: false,
+        };
       }
 
-      const html = hl.highlight(props.children, props.formatter);
-      return toReactNode(html);
-    }, [hl, needsLoad, props.children, props.formatter]);
+      if (props.formatter.language != null && !isLoadedLanguage(hl, props.formatter.language)) {
+        const languageId = getLanguageId(props.formatter.language);
+
+        if (languageId != null) {
+          return {
+            content: null,
+            error: undefined,
+            needsLoad: true,
+          };
+        }
+      }
+
+      try {
+        const html = hl.highlight(props.children, props.formatter);
+        return {
+          content: toReactNode(html),
+          error: undefined,
+          needsLoad: false,
+        };
+      } catch (nextError) {
+        if (props.formatter.language == null) {
+          return { content: null, error: nextError, needsLoad: false };
+        }
+
+        if (isLoadedLanguage(hl, props.formatter.language)) {
+          return { content: null, error: nextError, needsLoad: false };
+        }
+
+        return {
+          content: null,
+          error: undefined,
+          needsLoad: true,
+        };
+      }
+    }, [hl, props.children, props.formatter]);
 
     useEffect(() => {
-      if (!needsLoad) {
+      if (!syncState.needsLoad) {
         setAsyncContent(undefined);
+        setError(syncState.error);
         return;
       }
 
       let active = true;
+
+      setError(undefined);
 
       void highlightToReactNode(hl, {
         children: props.children,
@@ -93,17 +151,19 @@ export function fromHighlighter(highlighter: HighlighterInput) {
       return () => {
         active = false;
       };
-    }, [hl, needsLoad, props.children, props.formatter]);
+    }, [hl, props.children, props.formatter, syncState.error, syncState.needsLoad]);
 
-    if (error) {
-      if (error instanceof Error) {
-        throw error;
+    const renderError = error ?? syncState.error;
+
+    if (renderError) {
+      if (renderError instanceof Error) {
+        throw renderError;
       }
 
-      throw new Error("Failed to render code block", { cause: error });
+      throw new Error("Failed to render code block", { cause: renderError });
     }
 
-    return needsLoad ? (asyncContent ?? null) : syncContent;
+    return syncState.needsLoad ? (asyncContent ?? null) : syncState.content;
   }
 
   function AsyncCodeBlock(props: CodeBlockProps): ReactNode {
