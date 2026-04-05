@@ -27,10 +27,10 @@ defmodule SyntaxHighlighterLive do
 
     code = Lumis.highlight!(
       code,
-      language: "elixir",
       formatter:
         {
           :html_multi_themes,
+          lang: "elixir",
           themes: [light: "github_light", dark: "github_dark"],
           default_theme: "light"
         }

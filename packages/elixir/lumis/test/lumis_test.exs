@@ -111,7 +111,7 @@ defmodule Lumis.LumisTest do
   end
 
   test "default_options/0" do
-    assert [formatter: {:html_inline, formatter_opts}, language: nil] =
+    assert [formatter: {:html_inline, formatter_opts}] =
              Lumis.default_options()
 
     assert Keyword.equal?(
@@ -978,7 +978,7 @@ defmodule Lumis.LumisTest do
     end
 
     test "validates options with default values" do
-      assert [formatter: {:html_inline, formatter_opts}, language: nil] =
+      assert [formatter: {:html_inline, formatter_opts}] =
                Lumis.validate_options!([])
 
       assert Keyword.equal?(
@@ -996,7 +996,7 @@ defmodule Lumis.LumisTest do
     end
 
     test "validates formatter options" do
-      assert [formatter: {:html_inline, formatter_opts}, language: nil] =
+      assert [formatter: {:html_inline, formatter_opts}] =
                Lumis.validate_options!(formatter: {:html_inline, theme: "dracula", italic: true})
 
       assert Keyword.equal?(
@@ -1027,7 +1027,6 @@ defmodule Lumis.LumisTest do
                       pre_class: nil,
                       theme: "onedark"
                     ]},
-                 language: nil,
                  theme: "dracula",
                  inline_style: true,
                  pre_class: "custom"

@@ -79,7 +79,7 @@ const html = await highlight('const x = 1', htmlInline({ language: javascript, t
 ### [Elixir](https://hex.pm/packages/lumis)
 
 ```elixir
-Lumis.highlight!("const x = 1", language: "javascript", formatter: {:html_inline, theme: "dracula"})
+Lumis.highlight!("const x = 1", formatter: {:html_inline, lang: "javascript", theme: "dracula"})
 ```
 
 ### [Java](https://github.com/roastedroot/lumis4j)

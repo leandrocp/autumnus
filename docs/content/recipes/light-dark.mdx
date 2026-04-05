@@ -80,8 +80,8 @@ let html = highlight(
 ```elixir
 Lumis.highlight!(
   "const x = 1",
-  language: "javascript",
   formatter: {:html_multi_themes,
+    lang: "javascript",
     themes: [light: "github_light", dark: "github_dark"],
     default_theme: "light-dark()"
   }
@@ -176,8 +176,8 @@ let html = highlight(
 ```elixir
 Lumis.highlight!(
   code,
-  language: "elixir",
   formatter: {:html_multi_themes,
+    lang: "elixir",
     themes: [light: "github_light", dark: "github_dark"],
     default_theme: "light"
   }
@@ -282,8 +282,8 @@ let html = highlight(
 ```elixir
 Lumis.highlight!(
   code,
-  language: "elixir",
   formatter: {:html_multi_themes,
+    lang: "elixir",
     themes: [light: "github_light", dark: "github_dark"],
     default_theme: "light"
   }

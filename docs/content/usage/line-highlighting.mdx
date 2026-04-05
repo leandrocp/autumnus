@@ -75,8 +75,8 @@ let html = highlight("line 1\nline 2\nline 3\nline 4", formatter);
 ```elixir
 Lumis.highlight!(
   "line 1\nline 2\nline 3\nline 4",
-  language: "plaintext",
   formatter: {:html_inline,
+    lang: "plaintext",
     theme: "dracula",
     highlight_lines: %{
       lines: [1, 3..4],

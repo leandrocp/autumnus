@@ -87,7 +87,7 @@ let theme = themes::from_file("my_theme.json").unwrap();
 ```elixir
 {:ok, theme} = Lumis.Theme.from_file("/path/to/theme.json")
 
-Lumis.highlight!("const x = 1", language: "javascript", formatter: {:html_inline, theme: theme})
+Lumis.highlight!("const x = 1", formatter: {:html_inline, lang: "javascript", theme: theme})
 ```
 
   </TabItem>

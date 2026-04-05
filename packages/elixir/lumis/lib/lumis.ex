@@ -280,12 +280,8 @@ defmodule Lumis do
       type: {:or, [:string, nil]},
       type_spec: quote(do: Lumis.language()),
       type_doc: "`t:Lumis.language/0`",
-      default: nil,
-      doc: """
-      The language used to highlight source code.
-      You can also pass a filename or extension, for eg: `"enum.ex"` or just `"ex"`. If no language is provided, the highlighter will
-      try to guess it based on the content of the given source code. Use `Lumis.available_languages/0` to list all available languages.
-      """
+      deprecated:
+        "Use the :lang option inside the formatter tuple instead, eg: {:html_inline, lang: \"elixir\"}"
     ],
     formatter: @formatter_schema,
     theme: [
@@ -759,7 +755,7 @@ defmodule Lumis do
 
   Defining the language name:
 
-      iex> Lumis.highlight("Atom.to_string(:elixir)", language: "elixir")
+      iex> Lumis.highlight("Atom.to_string(:elixir)", formatter: {:html_inline, lang: "elixir"})
       {
         :ok,
         <pre class="lumis" style="color: #abb2bf; background-color: #282c34;"><code class="language-elixir" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e5c07b;">Atom</span><span style="color: #56b6c2;">.</span><span style="color: #61afef;">to_string</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">:elixir</span><span style="color: #c678dd;">)</span>
@@ -773,12 +769,12 @@ defmodule Lumis do
 
   With custom options:
 
-      iex> Lumis.highlight("Atom.to_string(:elixir)", language: "example.ex", formatter: {:html_inline, pre_class: "example-elixir"})
+      iex> Lumis.highlight("Atom.to_string(:elixir)", formatter: {:html_inline, lang: "example.ex", pre_class: "example-elixir"})
       {:ok, "<pre class=\"lumis example-elixir\" ...><code ...>...</code></pre>"}
 
   Terminal formatter:
 
-      iex> Lumis.highlight("Atom.to_string(:elixir)", language: "elixir", formatter: :terminal)
+      iex> Lumis.highlight("Atom.to_string(:elixir)", formatter: {:terminal, lang: "elixir"})
       {:ok, "\e[0m\e[38;2;229;192;123mAtom\e[0m\e[0m\e[38;2;86;182;194m.\e[0m\e[0m\e[38;2;97;175;239mto_string\e[0m\e[0m\e[38;2;198;120;221m(\e[0m\e[0m\e[38;2;224;108;117m:elixir\e[0m\e[0m\e[38;2;198;120;221m)\e[0m"}
 
   Highlighting specific lines in HTML Inline formatter:
@@ -790,7 +786,7 @@ defmodule Lumis do
       ...> end
       ...> \"""
       iex> highlight_lines = %{lines: [2]}
-      iex> Lumis.highlight(code, language: "elixir", formatter: {:html_inline, highlight_lines: highlight_lines})
+      iex> Lumis.highlight(code, formatter: {:html_inline, lang: "elixir", highlight_lines: highlight_lines})
       # Line 2 will be highlighted with the theme's `highlighted` style:
       <div class=\"line\" style=\"background-color: #414858;\" data-line=\"2\">...</div>
 
@@ -803,7 +799,7 @@ defmodule Lumis do
       ...> end
       ...> \"""
       iex> highlight_lines = %{lines: [2]}
-      iex> Lumis.highlight(code, language: "elixir", formatter: {:html_linked, highlight_lines: highlight_lines})
+      iex> Lumis.highlight(code, formatter: {:html_linked, lang: "elixir", highlight_lines: highlight_lines})
       # Line 2 will contain a `highlighted` class:
       <div class=\"line highlighted\" data-line=\"2\">...
 
@@ -813,7 +809,7 @@ defmodule Lumis do
       ...>   open_tag: "<figure><span>file: example.exs</span>",
       ...>   close_tag: "</figure>"
       ...> }
-      iex> Lumis.highlight("IO.puts('hello')", language: "elixir", formatter: {:html_inline, header: header})
+      iex> Lumis.highlight("IO.puts('hello')", formatter: {:html_inline, lang: "elixir", header: header})
       # Returns: "<div class='code-block' data-lang='elixir'><pre class='lumis'>...</pre></div>"
       {:ok, "<figure><span>file: example.exs</span><pre...><code ...>...</code></pre></figure>"}
 
@@ -824,8 +820,6 @@ defmodule Lumis do
   def highlight(source, options \\ [])
 
   def highlight(source, options) when is_binary(source) and is_list(options) do
-    warn_deprecated_language_option(options)
-
     options =
       options
       |> validate_options!()
@@ -851,11 +845,11 @@ defmodule Lumis do
 
   ## Examples
 
-      iex> Lumis.validate_options!(language: "elixir")
-      [language: "elixir", formatter: {:html_inline, [header: nil, highlight_lines: nil, include_highlights: false, italic: false, pre_class: nil, theme: "onedark"]}]
+      iex> Lumis.validate_options!(formatter: {:html_inline, lang: "elixir"})
+      [formatter: {:html_inline, [header: nil, highlight_lines: nil, include_highlights: false, italic: false, pre_class: nil, theme: "onedark", lang: "elixir"]}]
 
       iex> Lumis.validate_options!(formatter: {:html_inline, theme: "dracula"})
-      [language: nil, formatter: {:html_inline, [theme: "dracula", ...]}]
+      [formatter: {:html_inline, [theme: "dracula", ...]}]
 
       iex> Lumis.validate_options!(language: :invalid)
       ** (NimbleOptions.ValidationError)
@@ -929,12 +923,6 @@ defmodule Lumis do
       end
 
     Keyword.put(options, :formatter, formatter)
-  end
-
-  defp warn_deprecated_language_option(options) do
-    if Keyword.has_key?(options, :language) do
-      IO.warn(":language option is deprecated. Use formatter: [lang: ...] instead.")
-    end
   end
 
   @doc false

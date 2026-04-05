@@ -63,8 +63,7 @@ let html = highlight(
 ```elixir
 Lumis.highlight!(
   "const x = 1",
-  language: "javascript",
-  formatter: {:html_linked, pre_class: "demo"}
+  formatter: {:html_linked, lang: "javascript", pre_class: "demo"}
 )
 ```
 

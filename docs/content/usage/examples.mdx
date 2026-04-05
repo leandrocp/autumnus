@@ -51,7 +51,7 @@ let html = highlight(
   <TabItem value="elixir" label="Elixir">
 
 ```elixir
-html = Lumis.highlight!("const x = 1", language: "javascript", formatter: {:html_inline, theme: "dracula"})
+html = Lumis.highlight!("const x = 1", formatter: {:html_inline, lang: "javascript", theme: "dracula"})
 ```
 
   </TabItem>
@@ -154,7 +154,7 @@ let html = highlight(
   <TabItem value="elixir" label="Elixir">
 
 ```elixir
-Lumis.highlight!("const x = 1", language: "javascript", formatter: {:html_linked, pre_class: "demo"})
+Lumis.highlight!("const x = 1", formatter: {:html_linked, lang: "javascript", pre_class: "demo"})
 ```
 
   </TabItem>
@@ -217,8 +217,8 @@ let html = highlight(
 ```elixir
 Lumis.highlight!(
   "const x = 1",
-  language: "javascript",
   formatter: {:html_multi_themes,
+    lang: "javascript",
     themes: [light: "github_light", dark: "github_dark"],
     default_theme: "light-dark()"
   }
@@ -275,7 +275,7 @@ println!("{}", ansi);
   <TabItem value="elixir" label="Elixir">
 
 ```elixir
-Lumis.highlight!("fn main() {}", language: "rust", formatter: {:terminal, theme: "dracula"})
+Lumis.highlight!("fn main() {}", formatter: {:terminal, lang: "rust", theme: "dracula"})
 ```
 
   </TabItem>
@@ -330,8 +330,8 @@ let formatter = HtmlInlineBuilder::new()
 ```elixir
 Lumis.highlight!(
   "line 1\nline 2\nline 3",
-  language: "plaintext",
   formatter: {:html_inline,
+    lang: "plaintext",
     theme: "dracula",
     highlight_lines: %{lines: [2], style: :theme}
   }
@@ -390,8 +390,8 @@ let html = highlight(
 ```elixir
 Lumis.highlight!(
   "const x = 1",
-  language: "javascript",
   formatter: {:html_inline,
+    lang: "javascript",
     theme: "dracula",
     header: %{open_tag: "<figure><figcaption>index.js</figcaption>", close_tag: "</figure>"}
   }
@@ -427,7 +427,7 @@ let theme = themes::from_file("my_theme.json").unwrap();
 theme_json = ~s({"name":"my_theme","appearance":"dark","highlights":{"comment":{"fg":"#808080"}}})
 {:ok, theme} = Lumis.Theme.from_json(theme_json)
 
-Lumis.highlight!(source, language: "elixir", formatter: {:html_inline, theme: theme})
+Lumis.highlight!(source, formatter: {:html_inline, lang: "elixir", theme: theme})
 ```
 
   </TabItem>
@@ -466,7 +466,7 @@ let html = highlight(source, HtmlInlineBuilder::new()
 
 ```elixir
 # nested languages are handled automatically
-Lumis.highlight!(source, language: "html", formatter: {:html_inline, theme: "dracula"})
+Lumis.highlight!(source, formatter: {:html_inline, lang: "html", theme: "dracula"})
 ```
 
   </TabItem>
@@ -475,7 +475,7 @@ Lumis.highlight!(source, language: "html", formatter: {:html_inline, theme: "dra
 ## Phoenix LiveView rendering
 
 ```elixir
-code = Lumis.highlight!(source, language: "elixir", formatter: {:html_inline, theme: "dracula"})
+code = Lumis.highlight!(source, formatter: {:html_inline, lang: "elixir", theme: "dracula"})
 ```
 
 ```heex

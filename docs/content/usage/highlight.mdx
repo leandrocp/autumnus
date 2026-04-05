@@ -60,8 +60,7 @@ let html = highlight("const x = 1", formatter);
 ```elixir
 Lumis.highlight!(
   "const x = 1",
-  language: "javascript",
-  formatter: {:html_inline, theme: "dracula"}
+  formatter: {:html_inline, lang: "javascript", theme: "dracula"}
 )
 ```
 
@@ -99,7 +98,7 @@ lumis highlight index.js \
 
 | Need | CLI | Rust | Elixir | JavaScript | Java |
 | --- | --- | --- | --- | --- | --- |
-| Set language | `--language` | `.lang(...)` | `language: "..."` | `language: ...` | `withLang(...)` |
+| Set language | `--language` | `.lang(...)` | `lang: "..."` | `language: ...` | `withLang(...)` |
 | Set theme | `--theme` | `.theme(...)` | `theme: "..."` | `theme: ...` | `withTheme(...)` |
 | Choose output | `--formatter` | builder type | `formatter: ...` | formatter factory | runtime-specific |
 
