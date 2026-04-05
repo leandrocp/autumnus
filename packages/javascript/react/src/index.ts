@@ -102,9 +102,11 @@ export function fromHighlighter(highlighter: HighlighterInput) {
     }, [fallback, props.children, props.formatter]);
 
     if (error) {
-      throw error instanceof Error
-        ? error
-        : new Error(typeof error === "string" ? error : JSON.stringify(error));
+      if (error instanceof Error) {
+        throw error;
+      }
+
+      throw new Error(typeof error === "string" ? error : JSON.stringify(error));
     }
 
     return { content, isLoading };
