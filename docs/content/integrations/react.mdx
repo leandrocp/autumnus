@@ -2,7 +2,7 @@
 sidebar_position: 5
 slug: /integrations/react
 title: React
-description: Use Lumis directly in React with a formatter-first CodeBlock component, hook, and server renderer.
+description: Use Lumis directly in React with a formatter-first CodeBlock component and server renderer.
 keywords:
   - react lumis
   - react syntax highlighting
@@ -47,9 +47,9 @@ export function Example() {
 }
 ```
 
-`CodeBlock` renders a plain `<pre><code>` fallback first, then highlights after mount.
+The default `CodeBlock` renders nothing until highlighting completes. When `fromHighlighter` receives a resolved `Highlighter`, `CodeBlock` renders synchronously with no flash of unstyled content.
 
-## Server-side rendering
+## Server rendering
 
 Use `renderCodeBlock()` when you need highlighted output on the server.
 
@@ -80,8 +80,8 @@ If you already create a `Highlighter`, bind React helpers with `fromHighlighter(
 ```tsx
 import {createHighlighter} from '@lumis-sh/lumis'
 import {bundledLanguages} from '@lumis-sh/lumis/bundles/web'
-import {htmlInline} from '@lumis-sh/lumis/formatters'
 import {fromHighlighter} from '@lumis-sh/react'
+import {htmlInline} from '@lumis-sh/lumis/formatters'
 import githubLight from '@lumis-sh/themes/github_light'
 
 const codeString = `export const answer = 42`
@@ -102,37 +102,10 @@ export function Example() {
 
 This is the best option when you want to preload a bundle and render many code blocks on one page.
 
-## Hook API
-
-Use `useCodeBlock()` when you want custom loading UI or your own wrapper component.
-
-```tsx
-import {useCodeBlock} from '@lumis-sh/react'
-import {bundledLanguages} from '@lumis-sh/lumis/bundles/web'
-import {htmlInline} from '@lumis-sh/lumis/formatters'
-import githubLight from '@lumis-sh/themes/github_light'
-
-const formatter = htmlInline({language: bundledLanguages.javascript, theme: githubLight})
-
-export function CustomBlock({code}: {code: string}) {
-  const {content, isLoading} = useCodeBlock({
-    children: code,
-    formatter,
-  })
-
-  return (
-    <section>
-      <p>{isLoading ? 'Highlighting...' : 'Ready'}</p>
-      {content}
-    </section>
-  )
-}
-```
-
 ## Behavior
 
 - `formatter` is the single source of truth for the language
 - the React helpers call `highlighter.loadLanguage(formatter.language)` before highlighting
 - when the language is already loaded, Lumis reuses the cached result
 - for true server-rendered highlighting, prefer `renderCodeBlock()`
-- the hook re-highlights when `children` or `formatter` changes
+- `CodeBlock` re-highlights when `children` or `formatter` changes
