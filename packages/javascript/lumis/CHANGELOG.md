@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.2.0](https://github.com/leandrocp/lumis/compare/javascript@v0.1.0...javascript@v0.2.0) (2026-04-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* improve formatter internals ([#570](https://github.com/leandrocp/lumis/issues/570))
+
+### Features
+
+* language bundles ([#556](https://github.com/leandrocp/lumis/issues/556)) ([6e98734](https://github.com/leandrocp/lumis/commit/6e98734c20d8a86384f3e8b8e2b694c40bbb0f12))
+
+
+### Bug Fixes
+
+* add api-extractor to js package builds ([889bc9c](https://github.com/leandrocp/lumis/commit/889bc9cd082aeaad67a50baa3a389eabb5a6161d))
+
+
+### Code Refactoring
+
+* improve formatter internals ([#570](https://github.com/leandrocp/lumis/issues/570)) ([c811832](https://github.com/leandrocp/lumis/commit/c811832c808c50f0ab6603c70d5403813e06476d))
+
 ## [0.1.0](https://github.com/leandrocp/lumis/compare/javascript@v0.0.2...javascript@v0.1.0) (2026-04-02)
 
 
