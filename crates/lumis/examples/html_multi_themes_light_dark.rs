@@ -24,7 +24,7 @@ fn main() {
 
     // Generate with light-dark() function
     let formatter = HtmlMultiThemesBuilder::new()
-        .lang(Language::Rust)
+        .language(Language::Rust)
         .themes(themes)
         .default_theme("light-dark()")
         .build()

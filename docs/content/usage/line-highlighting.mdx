@@ -60,7 +60,7 @@ let highlight_lines = HighlightLines {
 };
 
 let formatter = HtmlInlineBuilder::new()
-    .lang(Language::PlainText)
+    .language(Language::PlainText)
     .theme(Some(themes::get("dracula").unwrap()))
     .highlight_lines(Some(highlight_lines))
     .build()

@@ -45,7 +45,7 @@
 //! let theme = themes::get("catppuccin_mocha").unwrap();
 //!
 //! let formatter = HtmlInlineBuilder::new()
-//!     .lang(Language::Rust)
+//!     .language(Language::Rust)
 //!     .theme(Some(theme))
 //!     .build()
 //!     .unwrap();

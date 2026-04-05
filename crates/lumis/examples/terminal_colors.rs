@@ -21,7 +21,7 @@ end"#;
     let theme = themes::get("github_dark").expect("github_dark theme should be available");
 
     let formatter = TerminalBuilder::new()
-        .lang(Language::Ruby)
+        .language(Language::Ruby)
         .theme(Some(theme))
         .build()
         .expect("Failed to build formatter");

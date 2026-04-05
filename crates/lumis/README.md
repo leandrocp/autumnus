@@ -51,13 +51,15 @@ let code = r#"fn main() { println!("Hello, world!"); }"#;
 let theme = themes::get("dracula").unwrap();
 
 let formatter = HtmlInlineBuilder::new()
-    .lang(Language::Rust)
+    .language(Language::Rust)
     .theme(Some(theme))
     .build()
     .unwrap();
 
 let html = highlight(code, formatter);
 ```
+
+Rust builders use `.language(...)`. The older `.lang(...)` setter still works but is deprecated.
 
 For streaming to files or other writers, use `write_highlight()`:
 
@@ -67,7 +69,7 @@ use std::fs::File;
 
 let code = "fn main() { }";
 let formatter = HtmlInlineBuilder::new()
-    .lang(Language::Rust)
+    .language(Language::Rust)
     .build()
     .unwrap();
 
@@ -97,7 +99,7 @@ let code = "puts 'Hello from Ruby!'";
 let theme = themes::get("catppuccin_mocha").unwrap();
 
 let formatter = HtmlInlineBuilder::new()
-    .lang(Language::Ruby)
+    .language(Language::Ruby)
     .theme(Some(theme))
     .pre_class(Some("code-block".to_string()))  // Custom CSS class for <pre>
     .italic(true)                                // Enable italic styles
@@ -118,7 +120,7 @@ use lumis::{highlight, HtmlLinkedBuilder, languages::Language};
 let code = "<div>Hello World</div>";
 
 let formatter = HtmlLinkedBuilder::new()
-    .lang(Language::HTML)
+    .language(Language::HTML)
     .pre_class(Some("my-code".to_string()))
     .build()
     .unwrap();
@@ -143,7 +145,7 @@ themes_map.insert("light".to_string(), themes::get("github_light").unwrap());
 themes_map.insert("dark".to_string(), themes::get("github_dark").unwrap());
 
 let formatter = HtmlMultiThemesBuilder::new()
-    .lang(Language::JavaScript)
+    .language(Language::JavaScript)
     .themes(themes_map)
     .default_theme("light")  // or "light-dark()" for CSS function
     .build()
@@ -175,7 +177,7 @@ let code = "puts 'Hello from Ruby!'";
 let theme = themes::get("dracula").unwrap();
 
 let formatter = TerminalBuilder::new()
-    .lang(Language::Ruby)
+    .language(Language::Ruby)
     .theme(Some(theme))
     .build()
     .unwrap();
@@ -202,7 +204,7 @@ let highlight_lines = HighlightLines {
 };
 
 let formatter = HtmlInlineBuilder::new()
-    .lang(Language::PlainText)
+    .language(Language::PlainText)
     .theme(Some(theme))
     .highlight_lines(Some(highlight_lines))
     .build()
@@ -221,7 +223,7 @@ use lumis::{highlight, HtmlInlineBuilder, languages::Language, formatter::HtmlEl
 let code = "fn main() { }";
 
 let formatter = HtmlInlineBuilder::new()
-    .lang(Language::Rust)
+    .language(Language::Rust)
     .header(Some(HtmlElement {
         open_tag: "<div class=\"code-wrapper\">".to_string(),
         close_tag: "</div>".to_string(),

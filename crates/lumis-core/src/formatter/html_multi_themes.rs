@@ -36,7 +36,8 @@ impl FromStr for DefaultTheme {
 #[derive(Builder, Clone, Debug)]
 #[builder(default, build_fn(skip))]
 pub struct HtmlMultiThemes {
-    lang: Language,
+    #[builder(setter(custom))]
+    language: Language,
     themes: HashMap<String, Theme>,
     #[builder(setter(custom))]
     default_theme: Option<DefaultTheme>,
@@ -54,6 +55,16 @@ impl HtmlMultiThemesBuilder {
         Self::default()
     }
 
+    pub fn language(&mut self, language: Language) -> &mut Self {
+        self.language = Some(language);
+        self
+    }
+
+    #[deprecated(note = "use `.language(...)` instead")]
+    pub fn lang(&mut self, language: Language) -> &mut Self {
+        self.language(language)
+    }
+
     pub fn default_theme<T: Into<DefaultThemeArg>>(&mut self, value: T) -> &mut Self {
         self.default_theme = Some(value.into().into_enum());
         self
@@ -61,7 +72,7 @@ impl HtmlMultiThemesBuilder {
 
     pub fn build(&mut self) -> Result<HtmlMultiThemes, String> {
         let result = HtmlMultiThemes {
-            lang: self.lang.take().unwrap_or(Language::PlainText),
+            language: self.language.take().unwrap_or(Language::PlainText),
             themes: self.themes.take().unwrap_or_default(),
             default_theme: self.default_theme.take().flatten(),
             css_variable_prefix: self
@@ -133,7 +144,7 @@ impl From<bool> for DefaultThemeArg {
 impl Default for HtmlMultiThemes {
     fn default() -> Self {
         Self {
-            lang: Language::PlainText,
+            language: Language::PlainText,
             themes: HashMap::new(),
             default_theme: None,
             css_variable_prefix: "--lumis".to_string(),
@@ -149,7 +160,7 @@ impl Default for HtmlMultiThemes {
 impl HtmlMultiThemes {
     #[allow(clippy::too_many_arguments)]
     pub fn new(
-        lang: Language,
+        language: Language,
         themes: HashMap<String, Theme>,
         default_theme: Option<DefaultTheme>,
         css_variable_prefix: String,
@@ -160,7 +171,7 @@ impl HtmlMultiThemes {
         header: Option<HtmlElement>,
     ) -> Self {
         Self {
-            lang,
+            language,
             themes,
             default_theme,
             css_variable_prefix,
@@ -345,7 +356,7 @@ impl Formatter for HtmlMultiThemes {
         }
 
         self.open_pre_tag(&mut buffer)?;
-        crate::formatter::html::open_code_tag(&mut buffer, &self.lang)?;
+        crate::formatter::html::open_code_tag(&mut buffer, &self.language)?;
 
         let lines = crate::formatter::html::render_lines_from_events(
             source,

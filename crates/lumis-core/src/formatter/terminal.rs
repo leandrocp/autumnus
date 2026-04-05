@@ -13,7 +13,8 @@ use std::io::{self, Write};
 #[derive(Builder, Clone, Debug)]
 #[builder(default)]
 pub struct Terminal {
-    lang: Language,
+    #[builder(setter(custom))]
+    language: Language,
     theme: Option<Theme>,
 }
 
@@ -21,18 +22,28 @@ impl TerminalBuilder {
     pub fn new() -> Self {
         Self::default()
     }
+
+    pub fn language(&mut self, language: Language) -> &mut Self {
+        self.language = Some(language);
+        self
+    }
+
+    #[deprecated(note = "use `.language(...)` instead")]
+    pub fn lang(&mut self, language: Language) -> &mut Self {
+        self.language(language)
+    }
 }
 
 impl Terminal {
-    pub fn new(lang: Language, theme: Option<Theme>) -> Self {
-        Self { lang, theme }
+    pub fn new(language: Language, theme: Option<Theme>) -> Self {
+        Self { language, theme }
     }
 }
 
 impl Default for Terminal {
     fn default() -> Self {
         Self {
-            lang: Language::PlainText,
+            language: Language::PlainText,
             theme: None,
         }
     }

@@ -18,7 +18,7 @@ fn main() {
     themes.insert("dark".to_string(), themes::get("github_dark")?);
 
     let formatter = HtmlMultiThemesBuilder::new()
-        .lang(Language::Rust)
+        .language(Language::Rust)
         .themes(themes)
         .default_theme("light")
         .build()

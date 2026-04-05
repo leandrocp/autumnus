@@ -50,7 +50,7 @@ use lumis::{highlight, HtmlLinkedBuilder, languages::Language};
 let html = highlight(
     "const x = 1",
     HtmlLinkedBuilder::new()
-        .lang(Language::Javascript)
+        .language(Language::Javascript)
         .pre_class(Some("demo".to_string()))
         .build()
         .unwrap(),

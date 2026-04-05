@@ -37,7 +37,8 @@ impl Default for HighlightLines {
 #[derive(Builder, Clone, Debug)]
 #[builder(default)]
 pub struct HtmlLinked {
-    lang: Language,
+    #[builder(setter(custom))]
+    language: Language,
     pre_class: Option<String>,
     highlight_lines: Option<HighlightLines>,
     header: Option<HtmlElement>,
@@ -47,17 +48,27 @@ impl HtmlLinkedBuilder {
     pub fn new() -> Self {
         Self::default()
     }
+
+    pub fn language(&mut self, language: Language) -> &mut Self {
+        self.language = Some(language);
+        self
+    }
+
+    #[deprecated(note = "use `.language(...)` instead")]
+    pub fn lang(&mut self, language: Language) -> &mut Self {
+        self.language(language)
+    }
 }
 
 impl HtmlLinked {
     pub fn new(
-        lang: Language,
+        language: Language,
         pre_class: Option<String>,
         highlight_lines: Option<HighlightLines>,
         header: Option<HtmlElement>,
     ) -> Self {
         Self {
-            lang,
+            language,
             pre_class,
             highlight_lines,
             header,
@@ -86,7 +97,7 @@ impl HtmlLinked {
 impl Default for HtmlLinked {
     fn default() -> Self {
         Self {
-            lang: Language::PlainText,
+            language: Language::PlainText,
             pre_class: None,
             highlight_lines: None,
             header: None,
@@ -108,7 +119,7 @@ impl Formatter for HtmlLinked {
         }
 
         crate::formatter::html::open_pre_tag(&mut buffer, self.pre_class.as_deref(), None)?;
-        crate::formatter::html::open_code_tag(&mut buffer, &self.lang)?;
+        crate::formatter::html::open_code_tag(&mut buffer, &self.language)?;
 
         let lines = crate::formatter::html::render_lines_from_events(
             source,

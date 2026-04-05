@@ -91,7 +91,7 @@ fn main() {
     let lang = Language::guess(Some("rust"), code);
 
     let formatter = HtmlInlineBuilder::new()
-        .lang(lang)
+        .language(lang)
         .theme(Some(custom_theme))
         .pre_class(Some("my-code-block".to_string()))
         .italic(true) // Enable italic rendering for elements marked as italic

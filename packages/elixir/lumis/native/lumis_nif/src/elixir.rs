@@ -121,7 +121,7 @@ impl ExFormatterOption {
                 });
 
                 let formatter = HtmlInlineBuilder::new()
-                    .lang(language)
+                    .language(language)
                     .theme(theme)
                     .pre_class(pre_class)
                     .italic(italic)
@@ -149,7 +149,7 @@ impl ExFormatterOption {
                 });
 
                 let formatter = HtmlLinkedBuilder::new()
-                    .lang(language)
+                    .language(language)
                     .pre_class(pre_class)
                     .highlight_lines(highlight_lines)
                     .header(header)
@@ -184,7 +184,7 @@ impl ExFormatterOption {
 
                 let mut builder = HtmlMultiThemesBuilder::new();
                 builder
-                    .lang(language)
+                    .language(language)
                     .themes(themes_map)
                     .css_variable_prefix(css_variable_prefix.as_deref().unwrap_or("--lumis"))
                     .pre_class(pre_class)
@@ -207,7 +207,7 @@ impl ExFormatterOption {
                 let theme = theme.and_then(resolve_theme);
 
                 let formatter = TerminalBuilder::new()
-                    .lang(language)
+                    .language(language)
                     .theme(theme)
                     .build()
                     .map_err(|e| format!("Terminal builder error: {:?}", e))?;
@@ -216,7 +216,7 @@ impl ExFormatterOption {
             }
             ExFormatterOption::BbcodeScoped {} => {
                 let formatter = BBCodeScopedBuilder::new()
-                    .lang(language)
+                    .language(language)
                     .build()
                     .map_err(|e| format!("BBCode scoped builder error: {:?}", e))?;
 

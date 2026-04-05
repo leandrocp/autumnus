@@ -104,7 +104,7 @@ mod tests {
     fn test_highlight_works() {
         let source = "@test :test";
         let lang = Language::guess(Some("elixir"), source);
-        let formatter = HtmlInlineBuilder::new().lang(lang).build().unwrap();
+        let formatter = HtmlInlineBuilder::new().language(lang).build().unwrap();
 
         let result = lumis::highlight(source, formatter);
 

@@ -21,7 +21,7 @@ print(fibonacci(10))
     let lang = Language::guess(None, code);
 
     let formatter = HtmlInlineBuilder::new()
-        .lang(lang)
+        .language(lang)
         .build()
         .expect("Failed to build formatter");
 

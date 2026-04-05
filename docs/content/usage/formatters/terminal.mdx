@@ -50,7 +50,7 @@ use lumis::{highlight, TerminalBuilder, languages::Language, themes};
 let ansi = highlight(
     "fn main() {}",
     TerminalBuilder::new()
-        .lang(Language::Rust)
+        .language(Language::Rust)
         .theme(Some(themes::get("dracula").unwrap()))
         .build()
         .unwrap(),

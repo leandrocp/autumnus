@@ -50,7 +50,8 @@ impl Default for HighlightLines {
 #[derive(Builder, Clone, Debug)]
 #[builder(default)]
 pub struct HtmlInline {
-    lang: Language,
+    #[builder(setter(custom))]
+    language: Language,
     theme: Option<Theme>,
     pre_class: Option<String>,
     italic: bool,
@@ -63,12 +64,22 @@ impl HtmlInlineBuilder {
     pub fn new() -> Self {
         Self::default()
     }
+
+    pub fn language(&mut self, language: Language) -> &mut Self {
+        self.language = Some(language);
+        self
+    }
+
+    #[deprecated(note = "use `.language(...)` instead")]
+    pub fn lang(&mut self, language: Language) -> &mut Self {
+        self.language(language)
+    }
 }
 
 impl HtmlInline {
     #[allow(clippy::too_many_arguments)]
     pub fn new(
-        lang: Language,
+        language: Language,
         theme: Option<Theme>,
         pre_class: Option<String>,
         italic: bool,
@@ -77,7 +88,7 @@ impl HtmlInline {
         header: Option<HtmlElement>,
     ) -> Self {
         Self {
-            lang,
+            language,
             theme,
             pre_class,
             italic,
@@ -141,7 +152,7 @@ impl HtmlInline {
 impl Default for HtmlInline {
     fn default() -> Self {
         Self {
-            lang: Language::PlainText,
+            language: Language::PlainText,
             theme: None,
             pre_class: None,
             italic: false,
@@ -170,7 +181,7 @@ impl Formatter for HtmlInline {
             self.pre_class.as_deref(),
             self.theme.as_ref(),
         )?;
-        crate::formatter::html::open_code_tag(&mut buffer, &self.lang)?;
+        crate::formatter::html::open_code_tag(&mut buffer, &self.language)?;
 
         let lines = crate::formatter::html::render_lines_from_events(
             source,

@@ -24,7 +24,7 @@ const QUICKSTART_TABS = [
 let theme = themes::get("dracula").unwrap();
 
 let formatter = HtmlInlineBuilder::new()
-    .lang(Language::Javascript)
+    .language(Language::Javascript)
     .theme(Some(theme))
     .build()
     .unwrap();

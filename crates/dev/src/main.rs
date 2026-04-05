@@ -252,7 +252,7 @@ fn render_formatter_output(
             let theme_name = theme.unwrap_or_else(|| "dracula".to_string());
             let theme = lumis::themes::get(&theme_name)?;
             let formatter = lumis::HtmlInlineBuilder::new()
-                .lang(language)
+                .language(language)
                 .theme(Some(theme))
                 .build()
                 .map_err(|e| anyhow::anyhow!("{e}"))?;
@@ -260,7 +260,7 @@ fn render_formatter_output(
         }
         "html-linked" => {
             let formatter = lumis::HtmlLinkedBuilder::new()
-                .lang(language)
+                .language(language)
                 .build()
                 .map_err(|e| anyhow::anyhow!("{e}"))?;
             formatter.format(source, &mut output)?;
@@ -279,7 +279,7 @@ fn render_formatter_output(
             }
 
             let mut builder = lumis::HtmlMultiThemesBuilder::new();
-            builder.lang(language).themes(theme_map);
+            builder.language(language).themes(theme_map);
 
             if let Some(default_theme) = default_theme {
                 builder.default_theme(default_theme);
@@ -292,7 +292,7 @@ fn render_formatter_output(
             let theme_name = theme.unwrap_or_else(|| "dracula".to_string());
             let theme = lumis::themes::get(&theme_name)?;
             let formatter = lumis::TerminalBuilder::new()
-                .lang(language)
+                .language(language)
                 .theme(Some(theme))
                 .build()
                 .map_err(|e| anyhow::anyhow!("{e}"))?;

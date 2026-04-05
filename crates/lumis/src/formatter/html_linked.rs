@@ -119,7 +119,7 @@ impl Default for HighlightLines {
 /// let code = "print('Hello')";
 ///
 /// let formatter = HtmlLinkedBuilder::new()
-///     .lang(Language::Python)
+///     .language(Language::Python)
 ///     .pre_class(Some("my-code".to_string()))
 ///     .build()
 ///     .unwrap();
@@ -131,7 +131,8 @@ impl Default for HighlightLines {
 #[derive(Builder, Clone, Debug)]
 #[builder(default)]
 pub struct HtmlLinked {
-    lang: Language,
+    #[builder(setter(custom))]
+    language: Language,
     pre_class: Option<String>,
     highlight_lines: Option<HighlightLines>,
     header: Option<HtmlElement>,
@@ -141,17 +142,27 @@ impl HtmlLinkedBuilder {
     pub fn new() -> Self {
         Self::default()
     }
+
+    pub fn language(&mut self, language: Language) -> &mut Self {
+        self.language = Some(language);
+        self
+    }
+
+    #[deprecated(note = "use `.language(...)` instead")]
+    pub fn lang(&mut self, language: Language) -> &mut Self {
+        self.language(language)
+    }
 }
 
 impl HtmlLinked {
     pub fn new(
-        lang: Language,
+        language: Language,
         pre_class: Option<String>,
         highlight_lines: Option<HighlightLines>,
         header: Option<HtmlElement>,
     ) -> Self {
         Self {
-            lang,
+            language,
             pre_class,
             highlight_lines,
             header,
@@ -162,7 +173,7 @@ impl HtmlLinked {
 impl Default for HtmlLinked {
     fn default() -> Self {
         Self {
-            lang: Language::PlainText,
+            language: Language::PlainText,
             pre_class: None,
             highlight_lines: None,
             header: None,
@@ -172,10 +183,11 @@ impl Default for HtmlLinked {
 
 impl Formatter for HtmlLinked {
     fn format(&self, source: &str, output: &mut dyn Write) -> io::Result<()> {
-        let events = highlight::highlight_events(source, self.lang).map_err(io::Error::other)?;
+        let events =
+            highlight::highlight_events(source, self.language).map_err(io::Error::other)?;
 
         let core_formatter = lumis_core::formatter::html_linked::HtmlLinked::new(
-            self.lang,
+            self.language,
             self.pre_class.clone(),
             self.highlight_lines.clone().map(map_highlight_lines),
             self.header.clone(),
@@ -234,7 +246,7 @@ mod tests {
     fn test_code_tag_with_language() {
         let formatter = HtmlLinked::new(Language::Rust, None, None, None);
         let mut buffer = Vec::new();
-        crate::formatter::html::open_code_tag(&mut buffer, &formatter.lang).unwrap();
+        crate::formatter::html::open_code_tag(&mut buffer, &formatter.language).unwrap();
         let result = String::from_utf8(buffer).unwrap();
         let expected = r#"<code class="language-rust" translate="no" tabindex="0">"#;
         assert_str_eq!(result, expected);
@@ -243,7 +255,7 @@ mod tests {
     #[test]
     fn test_builder_pattern() {
         let formatter = HtmlLinkedBuilder::new()
-            .lang(Language::Rust)
+            .language(Language::Rust)
             .pre_class(Some("test-pre-class".to_string()))
             .build()
             .unwrap();
@@ -256,7 +268,7 @@ mod tests {
         assert_str_eq!(pre_result, pre_expected);
 
         let mut buffer = Vec::new();
-        crate::formatter::html::open_code_tag(&mut buffer, &formatter.lang).unwrap();
+        crate::formatter::html::open_code_tag(&mut buffer, &formatter.language).unwrap();
         let code_result = String::from_utf8(buffer).unwrap();
         let code_expected = r#"<code class="language-rust" translate="no" tabindex="0">"#;
         assert_str_eq!(code_result, code_expected);
