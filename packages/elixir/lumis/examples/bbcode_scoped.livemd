@@ -10,8 +10,7 @@ Mix.install([
 code = ~S(const template = `<a href="/x">[url=x]</a>`)
 
 Lumis.highlight!(code,
-  language: "javascript",
-  formatter: :bbcode_scoped
+  formatter: {:bbcode_scoped, language: "javascript"}
 )
 ```
 
@@ -19,7 +18,6 @@ Lumis.highlight!(code,
 elixir_code = "defmodule Demo do\n  value = \"[url=x]\"\nend"
 
 Lumis.highlight!(elixir_code,
-  language: "elixir",
-  formatter: :bbcode_scoped
+  formatter: {:bbcode_scoped, language: "elixir"}
 )
 ```

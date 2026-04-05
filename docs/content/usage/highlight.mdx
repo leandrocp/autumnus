@@ -60,8 +60,7 @@ let html = highlight("const x = 1", formatter);
 ```elixir
 Lumis.highlight!(
   "const x = 1",
-  language: "javascript",
-  formatter: {:html_inline, theme: "dracula"}
+  formatter: {:html_inline, language: "javascript", theme: "dracula"}
 )
 ```
 

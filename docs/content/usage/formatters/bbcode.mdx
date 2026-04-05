@@ -68,8 +68,7 @@ println!("{}", bbcode);
 ```elixir
 bbcode = Lumis.highlight!(
   ~s(const x = "[url=x]"),
-  language: "javascript",
-  formatter: :bbcode_scoped
+  formatter: {:bbcode_scoped, language: "javascript"}
 )
 
 IO.puts(bbcode)
