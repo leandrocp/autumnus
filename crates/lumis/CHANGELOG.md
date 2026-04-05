@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.6.0](https://github.com/leandrocp/lumis/compare/rust@v0.5.1...rust@v0.6.0) (2026-04-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* improve formatter internals ([#570](https://github.com/leandrocp/lumis/issues/570))
+
+### Code Refactoring
+
+* improve formatter internals ([#570](https://github.com/leandrocp/lumis/issues/570)) ([c811832](https://github.com/leandrocp/lumis/commit/c811832c808c50f0ab6603c70d5403813e06476d))
+
 ## [0.5.1](https://github.com/leandrocp/lumis/compare/rust@v0.5.0...rust@v0.5.1) (2026-04-03)
 
 
