@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.3.0](https://github.com/leandrocp/lumis/compare/elixir@v0.2.0...elixir@v0.3.0) (2026-04-05)
+
+### Features
+
+* align formatters to accept `:language`  ([#572](https://github.com/leandrocp/lumis/issues/572)) ([0c6e569](https://github.com/leandrocp/lumis/commit/0c6e569fa4918a2962a61cea47715e6f0b762ec2))
+
+### Code Refactoring
+
+* improve formatter internals ([#570](https://github.com/leandrocp/lumis/issues/570)) ([c811832](https://github.com/leandrocp/lumis/commit/c811832c808c50f0ab6603c70d5403813e06476d))
+
+
+### Code Refactoring
+
+* improve formatter internals ([#570](https://github.com/leandrocp/lumis/issues/570)) ([c811832](https://github.com/leandrocp/lumis/commit/c811832c808c50f0ab6603c70d5403813e06476d))
+
 ## [0.2.0](https://github.com/leandrocp/lumis/compare/elixir@v0.1.2...elixir@v0.2.0) (2026-04-02)
 
 
