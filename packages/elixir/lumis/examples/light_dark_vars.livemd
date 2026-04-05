@@ -30,7 +30,7 @@ defmodule SyntaxHighlighterLive do
       formatter:
         {
           :html_multi_themes,
-          lang: "elixir",
+          language: "elixir",
           themes: [light: "github_light", dark: "github_dark"],
           default_theme: "light"
         }

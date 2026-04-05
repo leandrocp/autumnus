@@ -317,8 +317,6 @@ defmodule Lumis do
   end
 
   def formatter_type({:html_inline, options}) when is_list(options) do
-    options = normalize_formatter_language_key(options)
-
     schema = [
       language: [type: {:or, [:string, nil]}, default: nil],
       theme: [type: {:or, [{:struct, Lumis.Theme}, :string, nil]}, default: @default_theme],
@@ -368,8 +366,6 @@ defmodule Lumis do
   end
 
   def formatter_type({:html_linked, options}) when is_list(options) do
-    options = normalize_formatter_language_key(options)
-
     schema = [
       language: [type: {:or, [:string, nil]}, default: nil],
       pre_class: [type: {:or, [:string, nil]}, default: nil],
@@ -415,8 +411,6 @@ defmodule Lumis do
   end
 
   def formatter_type({:html_multi_themes, options}) when is_list(options) do
-    options = normalize_formatter_language_key(options)
-
     schema = [
       language: [type: {:or, [:string, nil]}, default: nil],
       themes: [
@@ -482,8 +476,6 @@ defmodule Lumis do
   end
 
   def formatter_type({:terminal, options}) when is_list(options) do
-    options = normalize_formatter_language_key(options)
-
     case Keyword.keys(options) -- [:language, :theme] do
       [] ->
         default_opts = [language: nil, theme: @default_theme]
@@ -496,8 +488,6 @@ defmodule Lumis do
   end
 
   def formatter_type({:bbcode_scoped, options}) when is_list(options) do
-    options = normalize_formatter_language_key(options)
-
     case Keyword.keys(options) -- [:language] do
       [] -> {:ok, {:bbcode_scoped, Keyword.merge([language: nil], options)}}
       invalid -> {:error, "invalid options given to bbcode_scoped: #{inspect(invalid)}"}
@@ -933,24 +923,6 @@ defmodule Lumis do
       end
 
     Keyword.put(options, :formatter, formatter)
-  end
-
-  defp normalize_formatter_language_key(options) do
-    case {Keyword.has_key?(options, :language), Keyword.has_key?(options, :lang)} do
-      {true, true} ->
-        Keyword.delete(options, :lang)
-
-      {true, false} ->
-        options
-
-      {false, true} ->
-        options
-        |> Keyword.put(:language, Keyword.get(options, :lang))
-        |> Keyword.delete(:lang)
-
-      {false, false} ->
-        options
-    end
   end
 
   @doc false

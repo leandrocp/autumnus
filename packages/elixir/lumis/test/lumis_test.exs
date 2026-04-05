@@ -244,13 +244,6 @@ defmodule Lumis.LumisTest do
 
       assert Keyword.get(opts, :language) == "rust"
     end
-
-    test "formatter_type accepts legacy lang alias" do
-      assert {:ok, {:html_inline, opts}} =
-               Lumis.formatter_type({:html_inline, [lang: "rust"]})
-
-      assert Keyword.get(opts, :language) == "rust"
-    end
   end
 
   test "accept empty theme" do
@@ -268,7 +261,11 @@ defmodule Lumis.LumisTest do
   end
 
   test "handles code with unicode characters" do
-    assert {:ok, result} = Lumis.highlight("def π() do\n  3.14\nend", language: "elixir")
+    assert {:ok, result} =
+             Lumis.highlight("def π() do\n  3.14\nend",
+               formatter: {:html_inline, language: "elixir"}
+             )
+
     assert result =~ "π"
   end
 
@@ -292,7 +289,7 @@ defmodule Lumis.LumisTest do
         </div><div class="line" data-line="3"><span style="color: #c678dd;">end</span>
         </div></code></pre>
         """,
-        language: "elixir"
+        formatter: {:html_inline, language: "elixir"}
       )
     end
 
@@ -305,8 +302,7 @@ defmodule Lumis.LumisTest do
         </div><div class="line" data-line="3"><span style="color: #ff79c6;">end</span>
         </div></code></pre>
         """,
-        language: "elixir",
-        formatter: {:html_inline, theme: "dracula"}
+        formatter: {:html_inline, language: "elixir", theme: "dracula"}
       )
     end
 
@@ -319,8 +315,7 @@ defmodule Lumis.LumisTest do
         </div><div class="line" data-line="3"><span style="color: #ff79c6;">end</span>
         </div></code></pre>
         """,
-        language: "elixir",
-        formatter: {:html_inline, theme: Lumis.Theme.get("dracula")}
+        formatter: {:html_inline, language: "elixir", theme: Lumis.Theme.get("dracula")}
       )
     end
 
@@ -328,8 +323,7 @@ defmodule Lumis.LumisTest do
       assert_contains(
         "defmodule Test do\n  @lang :elixir\nend",
         ~s|<pre class="lumis test-pre-class"|,
-        language: "elixir",
-        formatter: {:html_inline, pre_class: "test-pre-class"}
+        formatter: {:html_inline, language: "elixir", pre_class: "test-pre-class"}
       )
     end
 
@@ -342,8 +336,7 @@ defmodule Lumis.LumisTest do
         </div><div class="line" data-line="3"><span data-highlight="keyword" style="color: #c678dd;">end</span>
         </div></code></pre>
         """,
-        language: "elixir",
-        formatter: {:html_inline, include_highlights: true}
+        formatter: {:html_inline, language: "elixir", include_highlights: true}
       )
     end
   end
@@ -358,16 +351,14 @@ defmodule Lumis.LumisTest do
         </div><div class="line" data-line="3"><span class="keyword">end</span>
         </div></code></pre>
         """,
-        language: "elixir",
-        formatter: :html_linked
+        formatter: {:html_linked, language: "elixir"}
       )
     end
 
     test "with pre_class option" do
       assert {:ok, result} =
                Lumis.highlight("defmodule Test do\nend",
-                 language: "elixir",
-                 formatter: {:html_linked, pre_class: "custom-class"}
+                 formatter: {:html_linked, language: "elixir", pre_class: "custom-class"}
                )
 
       assert result =~ ~s|<pre class="lumis custom-class"|
@@ -379,8 +370,7 @@ defmodule Lumis.LumisTest do
       assert_output(
         "defmodule Test do\n  @lang :elixir\nend",
         "\e[0m\e[38;2;198;120;221mdefmodule\e[0m \e[0m\e[38;2;229;192;123mTest\e[0m \e[0m\e[38;2;198;120;221mdo\e[0m\n  \e[0m\e[38;2;209;154;102m@\e[0m\e[0m\e[38;2;209;154;102mlang \e[0m\e[0m\e[38;2;224;108;117m:elixir\e[0m\n\e[0m\e[38;2;198;120;221mend\e[0m",
-        language: "elixir",
-        formatter: :terminal
+        formatter: {:terminal, language: "elixir"}
       )
     end
 
@@ -388,8 +378,7 @@ defmodule Lumis.LumisTest do
       assert_output(
         "defmodule Test do\n  @lang :elixir\nend",
         "\e[0m\e[38;2;207;34;46mdefmodule\e[0m \e[0m\e[38;2;149;56;0mTest\e[0m \e[0m\e[38;2;207;34;46mdo\e[0m\n  \e[0m\e[38;2;5;80;174m@\e[0m\e[0m\e[38;2;5;80;174mlang \e[0m\e[0m\e[38;2;5;80;174m:elixir\e[0m\n\e[0m\e[38;2;207;34;46mend\e[0m",
-        language: "elixir",
-        formatter: {:terminal, theme: "github_light"}
+        formatter: {:terminal, language: "elixir", theme: "github_light"}
       )
     end
   end
@@ -403,8 +392,7 @@ defmodule Lumis.LumisTest do
           [variable-elixir]value[/variable-elixir] [operator-elixir]=[/operator-elixir] [string-elixir]\"&#91;url=x&#93;\"[/string-elixir]
         [keyword-elixir]end[/keyword-elixir]
         """,
-        language: "elixir",
-        formatter: :bbcode_scoped
+        formatter: {:bbcode_scoped, language: "elixir"}
       )
     end
   end
@@ -414,8 +402,9 @@ defmodule Lumis.LumisTest do
       assert_contains(
         "defmodule Test do\nend",
         ~s|--lumis-light-bg: #ffffff;|,
-        language: "elixir",
-        formatter: {:html_multi_themes, themes: [light: "github_light", dark: "github_dark"]}
+        formatter:
+          {:html_multi_themes,
+           language: "elixir", themes: [light: "github_light", dark: "github_dark"]}
       )
     end
 
@@ -426,8 +415,7 @@ defmodule Lumis.LumisTest do
         <pre class="lumis lumis-themes main" style="--lumis-main: #abb2bf; --lumis-main-bg: #282c34;"><code class="language-elixir" translate="no" tabindex="0"><div class="line" data-line="1"><span style="--lumis-main: #61afef; --lumis-main-font-style: normal; --lumis-main-font-weight: normal; --lumis-main-text-decoration: none;">test</span> <span style="--lumis-main: #e06c75; --lumis-main-font-style: normal; --lumis-main-font-weight: normal; --lumis-main-text-decoration: none;">code</span>
         </div></code></pre>
         """,
-        language: "elixir",
-        formatter: {:html_multi_themes, themes: [main: "onedark"]}
+        formatter: {:html_multi_themes, language: "elixir", themes: [main: "onedark"]}
       )
     end
 
@@ -435,10 +423,11 @@ defmodule Lumis.LumisTest do
       assert_contains(
         "test",
         ~s|style="color: light-dark(#1f2328, #e6edf3); background-color: light-dark(#ffffff, #0d1117)|,
-        language: "elixir",
         formatter:
           {:html_multi_themes,
-           themes: [light: "github_light", dark: "github_dark"], default_theme: "light-dark()"}
+           language: "elixir",
+           themes: [light: "github_light", dark: "github_dark"],
+           default_theme: "light-dark()"}
       )
     end
 
@@ -446,9 +435,9 @@ defmodule Lumis.LumisTest do
       assert_contains(
         "test",
         ~s|style="--custom-light: #1f2328; --custom-light-bg: #ffffff;|,
-        language: "elixir",
         formatter:
-          {:html_multi_themes, themes: [light: "github_light"], css_variable_prefix: "--custom"}
+          {:html_multi_themes,
+           language: "elixir", themes: [light: "github_light"], css_variable_prefix: "--custom"}
       )
     end
 
@@ -456,8 +445,9 @@ defmodule Lumis.LumisTest do
       assert_contains(
         "test",
         ~s|class="lumis lumis-themes custom-class main"|,
-        language: "elixir",
-        formatter: {:html_multi_themes, themes: [main: "onedark"], pre_class: "custom-class"}
+        formatter:
+          {:html_multi_themes,
+           language: "elixir", themes: [main: "onedark"], pre_class: "custom-class"}
       )
     end
 
@@ -471,9 +461,9 @@ defmodule Lumis.LumisTest do
       assert_contains(
         "line1\nline2",
         ~s|style="background-color: yellow;"|,
-        language: "elixir",
         formatter:
-          {:html_multi_themes, themes: [main: "onedark"], highlight_lines: highlight_lines}
+          {:html_multi_themes,
+           language: "elixir", themes: [main: "onedark"], highlight_lines: highlight_lines}
       )
     end
 
@@ -486,8 +476,8 @@ defmodule Lumis.LumisTest do
       assert_contains(
         "test",
         ~s|<div class="code-wrapper">|,
-        language: "elixir",
-        formatter: {:html_multi_themes, themes: [main: "onedark"], header: header}
+        formatter:
+          {:html_multi_themes, language: "elixir", themes: [main: "onedark"], header: header}
       )
     end
 
@@ -500,8 +490,7 @@ defmodule Lumis.LumisTest do
         <pre class="lumis lumis-themes main" style="--lumis-main: #abb2bf; --lumis-main-bg: #282c34;"><code class="language-elixir" translate="no" tabindex="0"><div class="line" data-line="1"><span style="--lumis-main: #61afef; --lumis-main-font-style: normal; --lumis-main-font-weight: normal; --lumis-main-text-decoration: none;">test</span> <span style="--lumis-main: #e06c75; --lumis-main-font-style: normal; --lumis-main-font-weight: normal; --lumis-main-text-decoration: none;">code</span>
         </div></code></pre>
         """,
-        language: "elixir",
-        formatter: {:html_multi_themes, themes: [main: theme]}
+        formatter: {:html_multi_themes, language: "elixir", themes: [main: theme]}
       )
     end
 
@@ -511,28 +500,31 @@ defmodule Lumis.LumisTest do
       assert_contains(
         "test",
         ~s|--lumis-light: #1f2328; --lumis-light-bg: #ffffff;|,
-        language: "elixir",
-        formatter: {:html_multi_themes, themes: [light: "github_light", dark: theme]}
+        formatter:
+          {:html_multi_themes, language: "elixir", themes: [light: "github_light", dark: theme]}
       )
     end
 
     test "raises when themes option is missing" do
       assert_raise NimbleOptions.ValidationError, ~r/required :themes option not found/, fn ->
-        Lumis.highlight("test", language: "elixir", formatter: :html_multi_themes)
+        Lumis.highlight("test",
+          formatter: {:html_multi_themes, language: "elixir"}
+        )
       end
     end
 
     test "raises when themes list is empty" do
       assert_raise NimbleOptions.ValidationError, ~r/empty/, fn ->
-        Lumis.highlight("test", language: "elixir", formatter: {:html_multi_themes, themes: []})
+        Lumis.highlight("test",
+          formatter: {:html_multi_themes, language: "elixir", themes: []}
+        )
       end
     end
 
     test "raises when theme not found" do
       assert_raise NimbleOptions.ValidationError, ~r/not found/, fn ->
         Lumis.highlight("test",
-          language: "elixir",
-          formatter: {:html_multi_themes, themes: [main: "nonexistent"]}
+          formatter: {:html_multi_themes, language: "elixir", themes: [main: "nonexistent"]}
         )
       end
     end
@@ -548,8 +540,7 @@ defmodule Lumis.LumisTest do
       result =
         Lumis.highlight!(
           "def hello\n  puts 'world'\nend",
-          language: "ruby",
-          formatter: {:html_inline, highlight_lines: highlight_lines}
+          formatter: {:html_inline, language: "ruby", highlight_lines: highlight_lines}
         )
 
       assert String.contains?(
@@ -567,8 +558,7 @@ defmodule Lumis.LumisTest do
       result =
         Lumis.highlight!(
           "line 1\nline 2\nline 3",
-          language: "text",
-          formatter: {:html_inline, highlight_lines: highlight_lines}
+          formatter: {:html_inline, language: "text", highlight_lines: highlight_lines}
         )
 
       assert String.contains?(
@@ -596,8 +586,7 @@ defmodule Lumis.LumisTest do
       result =
         Lumis.highlight!(
           "line 1\nline 2\nline 3\nline 4\nline 5\nline 6\nline 7\nline 8\nline 9",
-          language: "text",
-          formatter: {:html_inline, highlight_lines: highlight_lines}
+          formatter: {:html_inline, language: "text", highlight_lines: highlight_lines}
         )
 
       assert String.contains?(
@@ -645,8 +634,8 @@ defmodule Lumis.LumisTest do
       result =
         Lumis.highlight!(
           "def test\nend",
-          language: "ruby",
-          formatter: {:html_inline, theme: "dracula", highlight_lines: highlight_lines}
+          formatter:
+            {:html_inline, language: "ruby", theme: "dracula", highlight_lines: highlight_lines}
         )
 
       assert String.contains?(
@@ -664,8 +653,8 @@ defmodule Lumis.LumisTest do
       result =
         Lumis.highlight!(
           "def test\nend",
-          language: "ruby",
-          formatter: {:html_inline, theme: "dracula", highlight_lines: highlight_lines}
+          formatter:
+            {:html_inline, language: "ruby", theme: "dracula", highlight_lines: highlight_lines}
         )
 
       assert String.contains?(
@@ -683,8 +672,7 @@ defmodule Lumis.LumisTest do
       result =
         Lumis.highlight!(
           "def test\n  puts 'hello'\nend",
-          language: "ruby",
-          formatter: {:html_inline, highlight_lines: highlight_lines}
+          formatter: {:html_inline, language: "ruby", highlight_lines: highlight_lines}
         )
 
       assert String.contains?(
@@ -708,8 +696,7 @@ defmodule Lumis.LumisTest do
       result =
         Lumis.highlight!(
           "def test\n  raise 'error'\nend",
-          language: "ruby",
-          formatter: {:html_inline, highlight_lines: highlight_lines}
+          formatter: {:html_inline, language: "ruby", highlight_lines: highlight_lines}
         )
 
       assert String.contains?(
@@ -728,8 +715,7 @@ defmodule Lumis.LumisTest do
       result =
         Lumis.highlight!(
           "def test\nend",
-          language: "ruby",
-          formatter: {:html_inline, highlight_lines: highlight_lines}
+          formatter: {:html_inline, language: "ruby", highlight_lines: highlight_lines}
         )
 
       assert String.contains?(result, ~s|<div class="line custom-highlight" data-line="1">|)
@@ -743,8 +729,7 @@ defmodule Lumis.LumisTest do
       result =
         Lumis.highlight!(
           "line 1\nline 2\nline 3\nline 4\nline 5\nline 6\nline 7\nline 8\nline 9",
-          language: "text",
-          formatter: {:html_linked, highlight_lines: highlight_lines}
+          formatter: {:html_linked, language: "text", highlight_lines: highlight_lines}
         )
 
       assert String.contains?(result, ~s|<div class="line highlighted" data-line="1">|)
@@ -758,8 +743,7 @@ defmodule Lumis.LumisTest do
       result =
         Lumis.highlight!(
           "line 1\nline 2\nline 3\nline 4\nline 5\nline 6\nline 7\nline 8\nline 9",
-          language: "text",
-          formatter: {:html_linked, highlight_lines: highlight_lines}
+          formatter: {:html_linked, language: "text", highlight_lines: highlight_lines}
         )
 
       assert String.contains?(result, ~s|<div class="line highlighted" data-line="1">|)
@@ -775,8 +759,7 @@ defmodule Lumis.LumisTest do
       result =
         Lumis.highlight!(
           "line 1\nline 2\nline 3\nline 4\nline 5\nline 6\nline 7\nline 8\nline 9",
-          language: "text",
-          formatter: {:html_linked, highlight_lines: highlight_lines}
+          formatter: {:html_linked, language: "text", highlight_lines: highlight_lines}
         )
 
       assert String.contains?(result, ~s|<div class="line highlighted" data-line="1">|)
@@ -794,8 +777,7 @@ defmodule Lumis.LumisTest do
       result =
         Lumis.highlight!(
           "def broken\n  raise 'error'\nend",
-          language: "ruby",
-          formatter: {:html_linked, highlight_lines: highlight_lines}
+          formatter: {:html_linked, language: "ruby", highlight_lines: highlight_lines}
         )
 
       assert String.contains?(result, ~s|<div class="line hl-test" data-line="1">|)
@@ -805,8 +787,7 @@ defmodule Lumis.LumisTest do
       assert_raise NimbleOptions.ValidationError, fn ->
         Lumis.highlight!(
           "test",
-          language: "text",
-          formatter: {:html_inline, highlight_lines: "invalid"}
+          formatter: {:html_inline, language: "text", highlight_lines: "invalid"}
         )
       end
     end
@@ -820,8 +801,7 @@ defmodule Lumis.LumisTest do
       assert_raise NimbleOptions.ValidationError, ~r/invalid value for :highlight_lines/, fn ->
         Lumis.highlight!(
           "test",
-          language: "text",
-          formatter: {:html_inline, highlight_lines: highlight_lines}
+          formatter: {:html_inline, language: "text", highlight_lines: highlight_lines}
         )
       end
     end
@@ -835,8 +815,7 @@ defmodule Lumis.LumisTest do
       assert_raise NimbleOptions.ValidationError, ~r/invalid value for :style option/, fn ->
         Lumis.highlight!(
           "test",
-          language: "text",
-          formatter: {:html_inline, highlight_lines: highlight_lines}
+          formatter: {:html_inline, language: "text", highlight_lines: highlight_lines}
         )
       end
     end
@@ -852,8 +831,7 @@ defmodule Lumis.LumisTest do
       result =
         Lumis.highlight!(
           "puts 'hello'",
-          language: "ruby",
-          formatter: {:html_inline, header: header}
+          formatter: {:html_inline, language: "ruby", header: header}
         )
 
       assert String.starts_with?(result, ~s|<div class="wrapper"><pre class="lumis"|)
@@ -864,8 +842,7 @@ defmodule Lumis.LumisTest do
       assert_raise NimbleOptions.ValidationError, fn ->
         Lumis.highlight!(
           "test",
-          language: "text",
-          formatter: {:html_inline, header: "invalid"}
+          formatter: {:html_inline, language: "text", header: "invalid"}
         )
       end
     end
@@ -881,8 +858,7 @@ defmodule Lumis.LumisTest do
                    fn ->
                      Lumis.highlight!(
                        "test",
-                       language: "text",
-                       formatter: {:html_inline, header: header}
+                       formatter: {:html_inline, language: "text", header: header}
                      )
                    end
     end
@@ -898,8 +874,7 @@ defmodule Lumis.LumisTest do
                    fn ->
                      Lumis.highlight!(
                        "test",
-                       language: "text",
-                       formatter: {:html_inline, header: header}
+                       formatter: {:html_inline, language: "text", header: header}
                      )
                    end
     end
@@ -920,8 +895,8 @@ defmodule Lumis.LumisTest do
       result =
         Lumis.highlight!(
           "error_line\nnormal_line",
-          language: "text",
-          formatter: {:html_inline, highlight_lines: highlight_lines, header: header}
+          formatter:
+            {:html_inline, language: "text", highlight_lines: highlight_lines, header: header}
         )
 
       assert String.starts_with?(result, "<div class='code-block' data-highlighted='true'>")
@@ -944,9 +919,9 @@ defmodule Lumis.LumisTest do
       result =
         Lumis.highlight!(
           "def example\n  # this line is highlighted\n  puts 'done'\nend",
-          language: "ruby",
           formatter: {
             :html_inline,
+            language: "ruby",
             theme: "dracula",
             pre_class: "custom-code",
             italic: true,
