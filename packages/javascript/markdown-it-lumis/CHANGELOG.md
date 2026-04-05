@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.1.0](https://github.com/leandrocp/lumis/compare/markdown-it-lumis@v0.0.2...markdown-it-lumis@v0.1.0) (2026-04-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* improve formatter internals ([#570](https://github.com/leandrocp/lumis/issues/570))
+
+### Bug Fixes
+
+* add api-extractor to js package builds ([889bc9c](https://github.com/leandrocp/lumis/commit/889bc9cd082aeaad67a50baa3a389eabb5a6161d))
+
+
+### Code Refactoring
+
+* improve formatter internals ([#570](https://github.com/leandrocp/lumis/issues/570)) ([c811832](https://github.com/leandrocp/lumis/commit/c811832c808c50f0ab6603c70d5403813e06476d))
+
 ## [0.0.2](https://github.com/leandrocp/lumis/compare/markdown-it-lumis@v0.0.1...markdown-it-lumis@v0.0.2) (2026-03-31)
 
 
