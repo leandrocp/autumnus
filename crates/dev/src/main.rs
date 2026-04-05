@@ -754,12 +754,28 @@ fn sync_bundle_features(
         };
 
         let lumis_core_array = toml_edit::Array::from_iter(parser_features.iter().cloned());
+        let old_core_key_decor = lumis_core_features
+            .key(&bundle_feature)
+            .map(|k| k.leaf_decor().clone());
         lumis_core_features.insert(&bundle_feature, toml_edit::value(lumis_core_array));
+        if let Some(decor) = old_core_key_decor {
+            if let Some(mut key) = lumis_core_features.key_mut(&bundle_feature) {
+                *key.leaf_decor_mut() = decor;
+            }
+        }
 
         let mut lumis_feature_values = parser_features;
         lumis_feature_values.push(format!("lumis-core/{bundle_feature}"));
         let lumis_array = toml_edit::Array::from_iter(lumis_feature_values);
+        let old_lumis_key_decor = lumis_features
+            .key(&bundle_feature)
+            .map(|k| k.leaf_decor().clone());
         lumis_features.insert(&bundle_feature, toml_edit::value(lumis_array));
+        if let Some(decor) = old_lumis_key_decor {
+            if let Some(mut key) = lumis_features.key_mut(&bundle_feature) {
+                *key.leaf_decor_mut() = decor;
+            }
+        }
 
         println!("  synced {bundle_feature}");
     }

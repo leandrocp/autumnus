@@ -86,27 +86,23 @@ jobs:
         run: pnpm install --frozen-lockfile
         working-directory: packages/javascript
 
-      - name: Snapshot languages.toml
-        run: cp languages.toml languages.toml.before
-
       - run: just langs-update ${{ matrix.language }}
 
       - name: Regenerate JavaScript outputs
         run: pnpm --filter @lumis-sh/lumis build:generate
         working-directory: packages/javascript
 
-      - name: Check for language-specific changes
+      - name: Check for changes
         id: check-changes
         run: |
-          if diff -q languages.toml languages.toml.before > /dev/null 2>&1; then
+          if git diff --quiet; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
-            echo "No changes to ${{ matrix.language }}, skipping PR"
+            echo "No changes for ${{ matrix.language }}, skipping PR"
           else
             echo "skip=false" >> "$GITHUB_OUTPUT"
-            echo "languages.toml changed for ${{ matrix.language }}:"
-            diff languages.toml.before languages.toml || true
+            echo "Changes detected for ${{ matrix.language }}:"
+            git diff --stat
           fi
-          rm -f languages.toml.before
 
       - name: Create Pull Request
         if: steps.check-changes.outputs.skip != 'true'
@@ -120,7 +116,6 @@ jobs:
             queries/upstream
             queries/processed
             queries/overrides
-            LANGUAGES.md
             packages/javascript/lumis/langs
             packages/javascript/lumis/bundles
             packages/javascript/lumis/src/generated
