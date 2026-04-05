@@ -1,12 +1,19 @@
 import { createRoot } from 'react-dom/client'
-import { createHighlighter } from '@lumis-sh/lumis'
+import { createHighlighter, withWasmBundle } from '@lumis-sh/lumis'
 import { bundledLanguages } from '@lumis-sh/lumis/bundles/web'
+import { bundledWasms } from '@lumis-sh/wasm-bundle-web'
 import { fromHighlighter } from '@lumis-sh/react'
 import { htmlInline, htmlMultiThemes } from '@lumis-sh/lumis/formatters'
 import githubDark from '@lumis-sh/themes/github_dark'
 import githubLight from '@lumis-sh/themes/github_light'
 
-const highlighter = await createHighlighter({ languages: [bundledLanguages] })
+const languages = withWasmBundle(bundledLanguages, bundledWasms)
+
+const highlighter = await createHighlighter({ languages: [languages] })
+await Promise.all([
+  highlighter.loadLanguage('javascript'),
+  highlighter.loadLanguage('tsx'),
+])
 const { CodeBlock } = fromHighlighter(highlighter)
 
 function App() {
