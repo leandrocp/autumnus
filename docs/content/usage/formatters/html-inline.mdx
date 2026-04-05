@@ -63,7 +63,7 @@ let html = highlight(
 ```elixir
 Lumis.highlight!(
   "fn main() {}",
-  formatter: {:html_inline, lang: "rust", theme: "dracula"}
+  formatter: {:html_inline, language: "rust", theme: "dracula"}
 )
 ```
 
@@ -132,7 +132,7 @@ let html = highlight("const x = 1", formatter);
 ```elixir
 Lumis.highlight!(
   "const x = 1",
-  formatter: {:html_inline, lang: "javascript", theme: "dracula", pre_class: "code-block", include_highlights: true}
+  formatter: {:html_inline, language: "javascript", theme: "dracula", pre_class: "code-block", include_highlights: true}
 )
 ```
 
@@ -191,7 +191,7 @@ let html = highlight("const x = 1", formatter);
 Lumis.highlight!(
   "const x = 1",
   formatter: {:html_inline,
-    lang: "javascript",
+    language: "javascript",
     theme: "dracula",
     header: %{open_tag: "<figure><figcaption>index.js</figcaption>", close_tag: "</figure>"}
   }

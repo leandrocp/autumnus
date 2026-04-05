@@ -25,7 +25,7 @@ Always use the 2-arity form with options:
 
 ```elixir
 # Good - with language specified
-Lumis.highlight!("defmodule MyApp do", formatter: {:html_inline, lang: "elixir"})
+Lumis.highlight!("defmodule MyApp do", formatter: {:html_inline, language: "elixir"})
 
 # Good - language auto-detection
 Lumis.highlight!("#!/usr/bin/env bash\necho 'hello'")
@@ -41,13 +41,13 @@ Lumis.highlight!("elixir", "defmodule MyApp do", [])
 
 ```elixir
 # Pattern match on success/error
-case Lumis.highlight(source, formatter: {:html_inline, lang: "elixir"}) do
+case Lumis.highlight(source, formatter: {:html_inline, language: "elixir"}) do
   {:ok, html} -> html
   {:error, error} -> handle_error(error)
 end
 
 # Or use the bang version when you expect success
-html = Lumis.highlight!(source, formatter: {:html_inline, lang: "elixir"})
+html = Lumis.highlight!(source, formatter: {:html_inline, language: "elixir"})
 ```
 
 ## Language Specification
@@ -58,17 +58,17 @@ You can specify languages in multiple ways:
 
 ```elixir
 # By language name
-Lumis.highlight!(code, formatter: {:html_inline, lang: "elixir"})
-Lumis.highlight!(code, formatter: {:html_inline, lang: "javascript"})
-Lumis.highlight!(code, formatter: {:html_inline, lang: "rust"})
+Lumis.highlight!(code, formatter: {:html_inline, language: "elixir"})
+Lumis.highlight!(code, formatter: {:html_inline, language: "javascript"})
+Lumis.highlight!(code, formatter: {:html_inline, language: "rust"})
 
 # By file extension
-Lumis.highlight!(code, formatter: {:html_inline, lang: ".ex"})
-Lumis.highlight!(code, formatter: {:html_inline, lang: ".js"})
+Lumis.highlight!(code, formatter: {:html_inline, language: ".ex"})
+Lumis.highlight!(code, formatter: {:html_inline, language: ".js"})
 
 # By filename
-Lumis.highlight!(code, formatter: {:html_inline, lang: "app.ex"})
-Lumis.highlight!(code, formatter: {:html_inline, lang: "lib/my_module.ex"})
+Lumis.highlight!(code, formatter: {:html_inline, language: "app.ex"})
+Lumis.highlight!(code, formatter: {:html_inline, language: "lib/my_module.ex"})
 
 # Auto-detection (omit language option)
 Lumis.highlight!(code)
@@ -95,12 +95,12 @@ Generates HTML with inline styles. Best for email, isolated components, or when 
 
 ```elixir
 # Using default formatter
-Lumis.highlight!(code, formatter: {:html_inline, lang: "elixir"})
+Lumis.highlight!(code, formatter: {:html_inline, language: "elixir"})
 
 # Explicitly specify with options
 Lumis.highlight!(code,
   formatter: {:html_inline, [
-    lang: "elixir",
+    language: "elixir",
     theme: "github_light",
     pre_class: "my-code",
     italic: true,
@@ -124,7 +124,7 @@ Generates HTML with CSS classes. Requires linking a CSS file from `priv/static/c
 ```elixir
 Lumis.highlight!(code,
   formatter: {:html_linked, [
-    lang: "elixir",
+    language: "elixir",
     pre_class: "my-code"
   ]}
 )
@@ -158,7 +158,7 @@ Generates HTML with CSS custom properties (variables) for multiple themes, enabl
 # Basic dual theme with CSS variables
 Lumis.highlight!(code,
   formatter: {:html_multi_themes,
-    lang: "elixir",
+    language: "elixir",
     themes: [light: "github_light", dark: "github_dark"]
   }
 )
@@ -166,7 +166,7 @@ Lumis.highlight!(code,
 # With light-dark() function for automatic theme switching
 Lumis.highlight!(code,
   formatter: {:html_multi_themes,
-    lang: "elixir",
+    language: "elixir",
     themes: [light: "github_light", dark: "github_dark"],
     default_theme: "light-dark()"
   }
@@ -175,7 +175,7 @@ Lumis.highlight!(code,
 # With inline colors for default theme
 Lumis.highlight!(code,
   formatter: {:html_multi_themes,
-    lang: "elixir",
+    language: "elixir",
     themes: [light: "github_light", dark: "github_dark"],
     default_theme: "light"
   }
@@ -184,7 +184,7 @@ Lumis.highlight!(code,
 # Multiple themes with custom prefix
 Lumis.highlight!(code,
   formatter: {:html_multi_themes,
-    lang: "elixir",
+    language: "elixir",
     themes: [light: "github_light", dark: "github_dark", dim: "catppuccin_frappe"],
     css_variable_prefix: "--code"
   }
@@ -246,12 +246,12 @@ Generates ANSI escape codes for terminal output.
 
 ```elixir
 Lumis.highlight!(code,
-  formatter: {:terminal, lang: "elixir"}
+  formatter: {:terminal, language: "elixir"}
 )
 
 # With theme
 Lumis.highlight!(code,
-  formatter: {:terminal, lang: "elixir", theme: "github_light"}
+  formatter: {:terminal, language: "elixir", theme: "github_light"}
 )
 ```
 
@@ -264,7 +264,7 @@ Generates nested BBCode tags using highlight scope names from the Rust implement
 
 ```elixir
 Lumis.highlight!(code,
-  formatter: {:bbcode_scoped, lang: "elixir"}
+  formatter: {:bbcode_scoped, language: "elixir"}
 )
 ```
 
@@ -287,7 +287,7 @@ Lumis.highlight!(code,
 
 # Get a theme struct
 theme = Lumis.Theme.get("github_light")
-Lumis.highlight!(code, formatter: {:html_inline, lang: "elixir", theme: theme})
+Lumis.highlight!(code, formatter: {:html_inline, language: "elixir", theme: theme})
 ```
 
 ### Custom Themes
@@ -317,7 +317,7 @@ Highlight specific lines with custom styling or CSS classes.
 # Use theme's highlighted style (default)
 Lumis.highlight!(code,
   formatter: {:html_inline,
-    lang: "elixir",
+    language: "elixir",
     highlight_lines: %{lines: [2, 3, 4]}
   }
 )
@@ -325,7 +325,7 @@ Lumis.highlight!(code,
 # Explicit theme style
 Lumis.highlight!(code,
   formatter: {:html_inline,
-    lang: "elixir",
+    language: "elixir",
     highlight_lines: %{lines: [1, 5..10], style: :theme}
   }
 )
@@ -333,7 +333,7 @@ Lumis.highlight!(code,
 # Custom inline style
 Lumis.highlight!(code,
   formatter: {:html_inline,
-    lang: "elixir",
+    language: "elixir",
     highlight_lines: %{
       lines: [2..4, 7],
       style: "background-color: #fff3cd; border-left: 3px solid #ffc107;"
@@ -344,7 +344,7 @@ Lumis.highlight!(code,
 # CSS class only (no inline style)
 Lumis.highlight!(code,
   formatter: {:html_inline,
-    lang: "elixir",
+    language: "elixir",
     highlight_lines: %{
       lines: [1, 2, 3],
       style: nil,
@@ -365,7 +365,7 @@ The `:lines` option accepts:
 # Use default "highlighted" class from theme CSS
 Lumis.highlight!(code,
   formatter: {:html_linked,
-    lang: "elixir",
+    language: "elixir",
     highlight_lines: %{lines: [2..4, 6]}
   }
 )
@@ -373,7 +373,7 @@ Lumis.highlight!(code,
 # Use custom CSS class
 Lumis.highlight!(code,
   formatter: {:html_linked,
-    lang: "elixir",
+    language: "elixir",
     highlight_lines: %{lines: [1, 2, 3], class: "error-line"}
   }
 )
@@ -390,7 +390,7 @@ header = %{
 }
 
 Lumis.highlight!(code,
-  formatter: {:html_inline, lang: "elixir", header: header}
+  formatter: {:html_inline, language: "elixir", header: header}
 )
 
 # Output:
@@ -435,7 +435,7 @@ Key points:
 def render(assigns) do
   ~H"""
   <div class="code-container">
-    <%= raw Lumis.highlight!(@code, formatter: {:html_inline, lang: @language}) %>
+    <%= raw Lumis.highlight!(@code, formatter: {:html_inline, language: @language}) %>
   </div>
   """
 end
@@ -449,7 +449,7 @@ Lumis handles incomplete code gracefully:
 
 ```elixir
 # This works even though the code is incomplete
-Lumis.highlight!("defmodule MyApp do\n  def hel", formatter: {:html_inline, lang: "elixir"})
+Lumis.highlight!("defmodule MyApp do\n  def hel", formatter: {:html_inline, language: "elixir"})
 ```
 
 This is useful for streaming scenarios where code is being typed or generated incrementally.
@@ -461,7 +461,7 @@ def highlight_with_user_theme(code, language, user_preferences) do
   theme = user_preferences.dark_mode? && "github_dark" || "github_light"
 
   Lumis.highlight!(code,
-    formatter: {:html_inline, lang: language, theme: theme}
+    formatter: {:html_inline, language: language, theme: theme}
   )
 end
 ```
@@ -471,7 +471,7 @@ end
 ```elixir
 # Validate options before using them
 options = [
-  formatter: {:html_inline, lang: "elixir", theme: "onedark"}
+  formatter: {:html_inline, language: "elixir", theme: "onedark"}
 ]
 
 validated = Lumis.validate_options!(options)
@@ -494,7 +494,7 @@ Always specify the language when you know it:
 
 ```elixir
 # Good
-Lumis.highlight!(code, formatter: {:html_inline, lang: "elixir"})
+Lumis.highlight!(code, formatter: {:html_inline, language: "elixir"})
 
 # Less ideal - auto-detection is slower
 Lumis.highlight!(code)
@@ -504,13 +504,13 @@ Lumis.highlight!(code)
 
 ```elixir
 # Good
-case Lumis.highlight(code, formatter: {:html_inline, lang: "unknown"}) do
+case Lumis.highlight(code, formatter: {:html_inline, language: "unknown"}) do
   {:ok, html} -> html
   {:error, _} -> fallback_html(code)
 end
 
 # Or use with/1
-with {:ok, html} <- Lumis.highlight(code, formatter: {:html_inline, lang: lang}) do
+with {:ok, html} <- Lumis.highlight(code, formatter: {:html_inline, language: language}) do
   html
 end
 ```
@@ -523,7 +523,7 @@ Syntax highlighting is CPU-intensive. Cache the output when possible:
 # In Phoenix LiveView
 def mount(_params, _session, socket) do
   code = get_code()
-  highlighted = Lumis.highlight!(code, formatter: {:html_inline, lang: "elixir"})
+  highlighted = Lumis.highlight!(code, formatter: {:html_inline, language: "elixir"})
 
   {:ok, assign(socket, highlighted: highlighted)}
 end
@@ -536,7 +536,7 @@ For applications with many code blocks, use `:html_linked` to reduce HTML size:
 ```elixir
 # Smaller HTML output
 Lumis.highlight!(code,
-  formatter: {:html_linked, lang: "elixir"}
+  formatter: {:html_linked, language: "elixir"}
 )
 ```
 
@@ -545,12 +545,12 @@ Lumis.highlight!(code,
 ```elixir
 # Bad - will show escaped HTML entities
 ~H"""
-<div><%= Lumis.highlight!(code, formatter: {:html_inline, lang: "elixir"}) %></div>
+<div><%= Lumis.highlight!(code, formatter: {:html_inline, language: "elixir"}) %></div>
 """
 
 # Good - use raw/1
 ~H"""
-<div><%= raw Lumis.highlight!(code, formatter: {:html_inline, lang: "elixir"}) %></div>
+<div><%= raw Lumis.highlight!(code, formatter: {:html_inline, language: "elixir"}) %></div>
 """
 ```
 
@@ -676,7 +676,7 @@ opts = Lumis.default_options()
   formatter:
     :html_inline |
     {:html_inline, [
-      lang: "elixir" | ".ex" | "app.ex" | nil,
+      language: "elixir" | ".ex" | "app.ex" | nil,
       theme: "onedark" | %Lumis.Theme{},
       pre_class: "my-class",
       italic: false,
@@ -693,7 +693,7 @@ opts = Lumis.default_options()
     ]} |
     :html_linked |
     {:html_linked, [
-      lang: "elixir" | ".ex" | "app.ex" | nil,
+      language: "elixir" | ".ex" | "app.ex" | nil,
       pre_class: "my-class",
       highlight_lines: %{
         lines: [1, 2..5],
@@ -706,12 +706,12 @@ opts = Lumis.default_options()
     ]} |
     :terminal |
     {:terminal, [
-      lang: "elixir" | ".ex" | "app.ex" | nil,
+      language: "elixir" | ".ex" | "app.ex" | nil,
       theme: "onedark" | %Lumis.Theme{}
     ]} |
     :html_multi_themes |
     {:html_multi_themes, [
-      lang: "elixir" | ".ex" | "app.ex" | nil,
+      language: "elixir" | ".ex" | "app.ex" | nil,
       themes: [light: "github_light", dark: "github_dark"],  # required
       default_theme: "light" | "light-dark()" | nil,
       css_variable_prefix: "--custom",
@@ -730,7 +730,7 @@ opts = Lumis.default_options()
     ]} |
     :bbcode_scoped |
     {:bbcode_scoped, [
-      lang: "elixir" | ".ex" | "app.ex" | nil
+      language: "elixir" | ".ex" | "app.ex" | nil
     ]}
 ]
 ```

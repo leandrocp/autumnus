@@ -50,7 +50,7 @@ end
 ### Basic Usage (HTML Inline)
 
 ```elixir
-iex> Lumis.highlight!("Atom.to_string(:elixir)", formatter: {:html_inline, lang: "elixir"})
+iex> Lumis.highlight!("Atom.to_string(:elixir)", formatter: {:html_inline, language: "elixir"})
 ~s|<pre class="lumis" style="color: #abb2bf; background-color: #282c34;"><code class="language-elixir" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e5c07b;">Atom</span><span style="color: #56b6c2;">.</span><span style="color: #61afef;">to_string</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">:elixir</span><span style="color: #c678dd;">)</span>
 </span></code></pre>|
 ```
@@ -74,13 +74,13 @@ Use `Lumis.available_themes/0` to list all available themes. You can specify a t
 
 ```elixir
 # Using theme name in formatter options
-iex> Lumis.highlight!("setTimeout(fun, 5000);", formatter: {:html_inline, lang: "js", theme: "github_light"})
+iex> Lumis.highlight!("setTimeout(fun, 5000);", formatter: {:html_inline, language: "js", theme: "github_light"})
 ~s|<pre class="lumis" style="color: #1f2328; background-color: #ffffff;"><code class="language-javascript" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #6639ba;">setTimeout</span><span style="color: #1f2328;">(</span><span style="color: #1f2328;">fun</span><span style="color: #1f2328;">,</span> <span style="color: #0550ae;">5000</span><span style="color: #1f2328;">)</span><span style="color: #1f2328;">;</span>
 </span></code></pre>|
 
 # Using theme struct
 iex> theme = Lumis.Theme.get("github_light")
-iex> Lumis.highlight!("setTimeout(fun, 5000);", formatter: {:html_inline, lang: "js", theme: theme})
+iex> Lumis.highlight!("setTimeout(fun, 5000);", formatter: {:html_inline, language: "js", theme: theme})
 ```
 
 #### Bring Your Own Theme
@@ -103,7 +103,7 @@ Lumis.highlight!("your code", theme: theme)
 It's also capable of handling incomplete or malformed code, useful for streaming like in a ChatGPT interface:
 
 ```elixir
-iex> Lumis.highlight!("const header = document.getEl", formatter: {:html_inline, lang: "js"})
+iex> Lumis.highlight!("const header = document.getEl", formatter: {:html_inline, language: "js"})
 ~s|<pre class="lumis" style="color: #abb2bf; background-color: #282c34;"><code class="language-javascript" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">const</span> <span style="color: #abb2bf;">header</span> <span style="color: #abb2bf;">=</span> <span style="color: #e86671;">document</span><span style="color: #848b98;">.</span><span style="color: #56b6c2;">getEl</span>
 </span></code></pre>|
 ```
@@ -121,9 +121,9 @@ See the [Livebook examples](https://github.com/leandrocp/lumis/tree/main/example
 Generates HTML with inline styles for each token:
 
 ```elixir
-iex> Lumis.highlight!("Atom.to_string(:elixir)", formatter: {:html_inline, lang: "elixir"})
+iex> Lumis.highlight!("Atom.to_string(:elixir)", formatter: {:html_inline, language: "elixir"})
 # or with options
-iex> Lumis.highlight!("Atom.to_string(:elixir)", formatter: {:html_inline, lang: "elixir", pre_class: "my-code", italic: true, include_highlights: true})
+iex> Lumis.highlight!("Atom.to_string(:elixir)", formatter: {:html_inline, language: "elixir", pre_class: "my-code", italic: true, include_highlights: true})
 ```
 
 Options:
@@ -138,9 +138,9 @@ Options:
 Generates HTML with CSS classes for styling:
 
 ```elixir
-iex> Lumis.highlight!("Atom.to_string(:elixir)", formatter: {:html_linked, lang: "elixir"})
+iex> Lumis.highlight!("Atom.to_string(:elixir)", formatter: {:html_linked, language: "elixir"})
 # or with options
-iex> Lumis.highlight!("Atom.to_string(:elixir)", formatter: {:html_linked, lang: "elixir", pre_class: "my-code"})
+iex> Lumis.highlight!("Atom.to_string(:elixir)", formatter: {:html_linked, language: "elixir", pre_class: "my-code"})
 ```
 
 Options:
@@ -173,7 +173,7 @@ Generates HTML with CSS custom properties (variables) for multiple themes, enabl
 # Basic dual theme with CSS variables
 iex> Lumis.highlight!("Atom.to_string(:elixir)",
   formatter: {:html_multi_themes,
-    lang: "elixir",
+    language: "elixir",
     themes: [light: "github_light", dark: "github_dark"]
   }
 )
@@ -181,7 +181,7 @@ iex> Lumis.highlight!("Atom.to_string(:elixir)",
 # With light-dark() function for automatic theme switching
 iex> Lumis.highlight!("Atom.to_string(:elixir)",
   formatter: {:html_multi_themes,
-    lang: "elixir",
+    language: "elixir",
     themes: [light: "github_light", dark: "github_dark"],
     default_theme: "light-dark()"
   }
@@ -229,9 +229,9 @@ Options:
 Generates ANSI escape codes for terminal output:
 
 ```elixir
-iex> Lumis.highlight!("Atom.to_string(:elixir)", formatter: {:terminal, lang: "elixir"})
+iex> Lumis.highlight!("Atom.to_string(:elixir)", formatter: {:terminal, language: "elixir"})
 # or with options
-iex> Lumis.highlight!("Atom.to_string(:elixir)", formatter: {:terminal, lang: "elixir", theme: "github_light"})
+iex> Lumis.highlight!("Atom.to_string(:elixir)", formatter: {:terminal, language: "elixir", theme: "github_light"})
 ```
 
 Options:
@@ -242,7 +242,7 @@ Options:
 Generates nested BBCode tags using highlight scope names:
 
 ```elixir
-iex> Lumis.highlight!("Atom.to_string(:elixir)", formatter: {:bbcode_scoped, lang: "javascript"})
+iex> Lumis.highlight!("Atom.to_string(:elixir)", formatter: {:bbcode_scoped, language: "javascript"})
 ```
 
 This formatter emits highlight scope names as tags, not standard forum-style BBCode like `[b]`, `[color]`, or `[code]`.

@@ -116,7 +116,7 @@ defmodule Lumis.LumisTest do
 
     assert Keyword.equal?(
              [
-               lang: nil,
+               language: nil,
                header: nil,
                italic: false,
                theme: "onedark",
@@ -134,7 +134,7 @@ defmodule Lumis.LumisTest do
 
       assert Keyword.equal?(
                [
-                 lang: nil,
+                 language: nil,
                  italic: false,
                  theme: "onedark",
                  pre_class: nil,
@@ -153,7 +153,7 @@ defmodule Lumis.LumisTest do
 
       assert Keyword.equal?(
                [
-                 lang: nil,
+                 language: nil,
                  pre_class: nil,
                  highlight_lines: nil,
                  header: nil
@@ -166,82 +166,90 @@ defmodule Lumis.LumisTest do
   describe "formatter_type: :terminal" do
     test "default opts" do
       assert Lumis.formatter_type(:terminal) ==
-               {:ok, {:terminal, [lang: nil, theme: "onedark"]}}
+               {:ok, {:terminal, [language: nil, theme: "onedark"]}}
     end
   end
 
   describe "formatter_type: :bbcode_scoped" do
     test "default opts" do
-      assert Lumis.formatter_type(:bbcode_scoped) == {:ok, {:bbcode_scoped, [lang: nil]}}
+      assert Lumis.formatter_type(:bbcode_scoped) == {:ok, {:bbcode_scoped, [language: nil]}}
     end
   end
 
-  describe "formatter lang option" do
-    test "html_inline with lang" do
+  describe "formatter language option" do
+    test "html_inline with language" do
       assert {:ok, result} =
-               Lumis.highlight(":test", formatter: {:html_inline, lang: "elixir"})
+               Lumis.highlight(":test", formatter: {:html_inline, language: "elixir"})
 
       assert result =~ ~s|class="language-elixir"|
     end
 
-    test "html_linked with lang" do
+    test "html_linked with language" do
       assert {:ok, result} =
-               Lumis.highlight(":test", formatter: {:html_linked, lang: "elixir"})
+               Lumis.highlight(":test", formatter: {:html_linked, language: "elixir"})
 
       assert result =~ ~s|class="language-elixir"|
     end
 
-    test "terminal with lang" do
+    test "terminal with language" do
       assert {:ok, result} =
-               Lumis.highlight(":test", formatter: {:terminal, lang: "elixir"})
+               Lumis.highlight(":test", formatter: {:terminal, language: "elixir"})
 
       assert result =~ "\e[0m"
     end
 
-    test "bbcode_scoped with lang" do
+    test "bbcode_scoped with language" do
       assert {:ok, result} =
-               Lumis.highlight(":test", formatter: {:bbcode_scoped, lang: "elixir"})
+               Lumis.highlight(":test", formatter: {:bbcode_scoped, language: "elixir"})
 
       assert result =~ "[string-special-symbol-elixir]"
     end
 
-    test "html_multi_themes with lang" do
+    test "html_multi_themes with language" do
       assert {:ok, result} =
                Lumis.highlight(":test",
-                 formatter: {:html_multi_themes, lang: "elixir", themes: [main: "onedark"]}
+                 formatter: {:html_multi_themes, language: "elixir", themes: [main: "onedark"]}
                )
 
       assert result =~ ~s|class="language-elixir"|
     end
 
-    test "no deprecation warning when using formatter lang" do
+    test "no deprecation warning when using formatter language" do
       warning =
         capture_io(:stderr, fn ->
-          assert {:ok, _} = Lumis.highlight(":test", formatter: {:html_inline, lang: "elixir"})
+          assert {:ok, _} =
+                   Lumis.highlight(":test", formatter: {:html_inline, language: "elixir"})
         end)
 
       assert warning == ""
     end
 
-    test "formatter_type preserves lang value" do
+    test "formatter_type preserves language value" do
+      assert {:ok, {:html_inline, opts}} =
+               Lumis.formatter_type({:html_inline, [language: "rust"]})
+
+      assert Keyword.get(opts, :language) == "rust"
+    end
+
+    test "formatter_type preserves language for terminal" do
+      assert {:ok, {:terminal, opts}} =
+               Lumis.formatter_type({:terminal, [language: "rust"]})
+
+      assert Keyword.get(opts, :language) == "rust"
+    end
+
+    test "formatter_type preserves language for bbcode_scoped" do
+      assert {:ok, {:bbcode_scoped, opts}} =
+               Lumis.formatter_type({:bbcode_scoped, [language: "rust"]})
+
+      assert Keyword.get(opts, :language) == "rust"
+    end
+
+    test "formatter_type accepts legacy lang alias" do
       assert {:ok, {:html_inline, opts}} =
                Lumis.formatter_type({:html_inline, [lang: "rust"]})
 
-      assert Keyword.get(opts, :lang) == "rust"
-    end
-
-    test "formatter_type preserves lang for terminal" do
-      assert {:ok, {:terminal, opts}} =
-               Lumis.formatter_type({:terminal, [lang: "rust"]})
-
-      assert Keyword.get(opts, :lang) == "rust"
-    end
-
-    test "formatter_type preserves lang for bbcode_scoped" do
-      assert {:ok, {:bbcode_scoped, opts}} =
-               Lumis.formatter_type({:bbcode_scoped, [lang: "rust"]})
-
-      assert Keyword.get(opts, :lang) == "rust"
+      assert Keyword.get(opts, :language) == "rust"
     end
   end
 
@@ -971,7 +979,7 @@ defmodule Lumis.LumisTest do
                  italic: false,
                  pre_class: nil,
                  theme: "onedark",
-                 lang: "elixir"
+                 language: "elixir"
                ],
                formatter_opts
              )
@@ -989,7 +997,7 @@ defmodule Lumis.LumisTest do
                  italic: false,
                  pre_class: nil,
                  theme: "onedark",
-                 lang: nil
+                 language: nil
                ],
                formatter_opts
              )
@@ -1001,7 +1009,7 @@ defmodule Lumis.LumisTest do
 
       assert Keyword.equal?(
                [
-                 lang: nil,
+                 language: nil,
                  header: nil,
                  highlight_lines: nil,
                  include_highlights: false,
@@ -1019,7 +1027,7 @@ defmodule Lumis.LumisTest do
                  formatter:
                    {:html_inline,
                     [
-                      lang: nil,
+                      language: nil,
                       header: nil,
                       highlight_lines: nil,
                       include_highlights: false,
@@ -1039,13 +1047,13 @@ defmodule Lumis.LumisTest do
       end)
     end
 
-    test "copies deprecated language into formatter lang" do
+    test "copies deprecated language into formatter language" do
       assert [formatter: {:html_inline, formatter_opts}, language: "rust"] =
                Lumis.validate_options!(language: "rust")
 
       assert Keyword.equal?(
                [
-                 lang: "rust",
+                 language: "rust",
                  header: nil,
                  highlight_lines: nil,
                  include_highlights: false,
@@ -1057,17 +1065,17 @@ defmodule Lumis.LumisTest do
              )
     end
 
-    test "formatter lang takes precedence over deprecated language" do
+    test "formatter language takes precedence over deprecated language" do
       capture_io(:stderr, fn ->
         assert [formatter: {:html_inline, formatter_opts}, language: "elixir"] =
                  Lumis.validate_options!(
                    language: "elixir",
-                   formatter: {:html_inline, lang: "rust"}
+                   formatter: {:html_inline, language: "rust"}
                  )
 
         assert Keyword.equal?(
                  [
-                   lang: "rust",
+                   language: "rust",
                    header: nil,
                    highlight_lines: nil,
                    include_highlights: false,
@@ -1119,12 +1127,15 @@ defmodule Lumis.LumisTest do
              } = Lumis.rust_options!(options)
     end
 
-    test "uses formatter lang when deprecated language is present" do
+    test "uses formatter language when deprecated language is present" do
       capture_io(:stderr, fn ->
         send(
           self(),
           {:options,
-           Lumis.validate_options!(language: "elixir", formatter: {:html_inline, lang: "rust"})}
+           Lumis.validate_options!(
+             language: "elixir",
+             formatter: {:html_inline, language: "rust"}
+           )}
         )
       end)
 

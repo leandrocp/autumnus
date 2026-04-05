@@ -78,7 +78,7 @@ let html = highlight(
 Lumis.highlight!(
   "const x = 1",
   formatter: {:html_multi_themes,
-    lang: "javascript",
+    language: "javascript",
     themes: [light: "github_light", dark: "github_dark"],
     default_theme: "light-dark()"
   }
@@ -143,7 +143,7 @@ let html = highlight("const x = 1", formatter);
 Lumis.highlight!(
   "const x = 1",
   formatter: {:html_multi_themes,
-    lang: "javascript",
+    language: "javascript",
     themes: [light: "github_light", dark: "github_dark"],
     css_variable_prefix: "--code"
   }
