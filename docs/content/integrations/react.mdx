@@ -135,4 +135,4 @@ export function CustomBlock({code}: {code: string}) {
 - the React helpers call `highlighter.loadLanguage(formatter.language)` before highlighting
 - when the language is already loaded, Lumis reuses the cached result
 - for true server-rendered highlighting, prefer `renderCodeBlock()`
-- the hook re-highlights when `children` changes; to force a re-highlight after changing the formatter (e.g. switching themes), set a different `key` on the component
+- the hook re-highlights when `children` or `formatter` changes

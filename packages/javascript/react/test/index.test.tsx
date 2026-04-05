@@ -8,6 +8,7 @@ import { createHighlighter } from "@lumis-sh/lumis";
 import { bundledLanguages } from "@lumis-sh/lumis/bundles/web";
 import { htmlInline } from "@lumis-sh/lumis/formatters";
 import dracula from "../../themes/themes/dracula.ts";
+import githubLight from "../../themes/themes/github_light.ts";
 import { CodeBlock, fromHighlighter } from "../src/index.js";
 
 const SOURCE = "const x = 1";
@@ -89,6 +90,52 @@ describe("@lumis-sh/react", () => {
 
     expect(container.innerHTML).toContain('class="lumis"');
     expect(container.innerHTML).toContain('class="language-javascript"');
+
+    await act(async () => {
+      root.unmount();
+    });
+  });
+
+  it("re-highlights when the formatter changes", async () => {
+    const highlighter = await createHighlighter({ languages: [bundledLanguages] });
+    await highlighter.loadLanguage("javascript");
+    const { CodeBlock: BoundCodeBlock } = fromHighlighter(highlighter);
+    const container = document.createElement("div");
+    document.body.append(container);
+    const root = createRoot(container);
+
+    await act(async () => {
+      root.render(
+        <BoundCodeBlock formatter={htmlInline({ language: "javascript", theme: dracula })}>
+          {SOURCE}
+        </BoundCodeBlock>,
+      );
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    const firstHtml = container.innerHTML;
+    expect(firstHtml).toContain('class="lumis"');
+
+    await act(async () => {
+      root.render(
+        <BoundCodeBlock formatter={htmlInline({ language: "javascript", theme: githubLight })}>
+          {SOURCE}
+        </BoundCodeBlock>,
+      );
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    const secondHtml = container.innerHTML;
+    expect(secondHtml).toContain('class="lumis"');
+    expect(secondHtml).not.toEqual(firstHtml);
 
     await act(async () => {
       root.unmount();

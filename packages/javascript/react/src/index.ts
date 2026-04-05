@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { createHighlighter } from "@lumis-sh/lumis";
 import { fromHtml } from "hast-util-from-html";
 import { toJsxRuntime } from "hast-util-to-jsx-runtime";
-import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { jsx, jsxs } from "react/jsx-runtime";
 
 export interface RenderCodeBlockOptions {
@@ -54,7 +54,7 @@ async function highlightToReactNode(
   return toReactNode(html);
 }
 
-function bindHighlighter(highlighter: HighlighterInput) {
+export function fromHighlighter(highlighter: HighlighterInput) {
   async function renderCodeBlock(options: RenderCodeBlockOptions): Promise<ReactNode> {
     return highlightToReactNode(highlighter, options);
   }
@@ -64,8 +64,6 @@ function bindHighlighter(highlighter: HighlighterInput) {
       () => props.fallback ?? createFallback(props.children),
       [props.children, props.fallback],
     );
-    const formatterRef = useRef(props.formatter);
-    formatterRef.current = props.formatter;
     const [content, setContent] = useState<ReactNode>(fallback);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<unknown>();
@@ -79,7 +77,7 @@ function bindHighlighter(highlighter: HighlighterInput) {
 
       void highlightToReactNode(highlighter, {
         children: props.children,
-        formatter: formatterRef.current,
+        formatter: props.formatter,
       })
         .then((next) => {
           if (!active) {
@@ -101,10 +99,10 @@ function bindHighlighter(highlighter: HighlighterInput) {
       return () => {
         active = false;
       };
-    }, [fallback, props.children]);
+    }, [fallback, props.children, props.formatter]);
 
     if (error) {
-      throw error instanceof Error ? error : new Error("Code block rendering failed");
+      throw error;
     }
 
     return { content, isLoading };
@@ -124,8 +122,4 @@ function bindHighlighter(highlighter: HighlighterInput) {
 
 const sharedHighlighter = createHighlighter();
 
-export function fromHighlighter(highlighter: Highlighter | Promise<Highlighter>) {
-  return bindHighlighter(highlighter);
-}
-
-export const { CodeBlock, renderCodeBlock, useCodeBlock } = bindHighlighter(sharedHighlighter);
+export const { CodeBlock, renderCodeBlock, useCodeBlock } = fromHighlighter(sharedHighlighter);
