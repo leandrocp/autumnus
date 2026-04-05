@@ -34,6 +34,15 @@ defmodule Lumis.LumisTest do
       end)
     end
 
+    test "top-level language option warns" do
+      warning =
+        capture_io(:stderr, fn ->
+          assert {:ok, _highlighted} = Lumis.highlight(":test", language: "elixir")
+        end)
+
+      assert warning =~ ":language option is deprecated"
+    end
+
     test "highlight!" do
       capture_io(:stderr, fn ->
         assert Lumis.highlight!("elixir", ":test") =~
@@ -98,6 +107,7 @@ defmodule Lumis.LumisTest do
 
     assert Keyword.equal?(
              [
+               lang: nil,
                header: nil,
                italic: false,
                theme: "onedark",
@@ -115,6 +125,7 @@ defmodule Lumis.LumisTest do
 
       assert Keyword.equal?(
                [
+                 lang: nil,
                  italic: false,
                  theme: "onedark",
                  pre_class: nil,
@@ -133,6 +144,7 @@ defmodule Lumis.LumisTest do
 
       assert Keyword.equal?(
                [
+                 lang: nil,
                  pre_class: nil,
                  highlight_lines: nil,
                  header: nil
@@ -145,13 +157,13 @@ defmodule Lumis.LumisTest do
   describe "formatter_type: :terminal" do
     test "default opts" do
       assert Lumis.formatter_type(:terminal) ==
-               {:ok, {:terminal, theme: "onedark"}}
+               {:ok, {:terminal, [lang: nil, theme: "onedark"]}}
     end
   end
 
   describe "formatter_type: :bbcode_scoped" do
     test "default opts" do
-      assert Lumis.formatter_type(:bbcode_scoped) == {:ok, {:bbcode_scoped, []}}
+      assert Lumis.formatter_type(:bbcode_scoped) == {:ok, {:bbcode_scoped, [lang: nil]}}
     end
   end
 
@@ -870,52 +882,57 @@ defmodule Lumis.LumisTest do
 
   describe "validate_options!/1" do
     test "validates valid options" do
-      assert [
-               language: "elixir",
-               formatter:
-                 {:html_inline,
-                  [
-                    header: nil,
-                    highlight_lines: nil,
-                    include_highlights: false,
-                    italic: false,
-                    pre_class: nil,
-                    theme: "onedark"
-                  ]}
-             ] = Lumis.validate_options!(language: "elixir", formatter: :html_inline)
+      assert [formatter: {:html_inline, formatter_opts}, language: "elixir"] =
+               Lumis.validate_options!(language: "elixir", formatter: :html_inline)
+
+      assert Keyword.equal?(
+               [
+                 header: nil,
+                 highlight_lines: nil,
+                 include_highlights: false,
+                 italic: false,
+                 pre_class: nil,
+                 theme: "onedark",
+                 lang: "elixir"
+               ],
+               formatter_opts
+             )
     end
 
     test "validates options with default values" do
-      assert [
-               formatter:
-                 {:html_inline,
-                  [
-                    header: nil,
-                    highlight_lines: nil,
-                    include_highlights: false,
-                    italic: false,
-                    pre_class: nil,
-                    theme: "onedark"
-                  ]},
-               language: nil
-             ] = Lumis.validate_options!([])
+      assert [formatter: {:html_inline, formatter_opts}, language: nil] =
+               Lumis.validate_options!([])
+
+      assert Keyword.equal?(
+               [
+                 header: nil,
+                 highlight_lines: nil,
+                 include_highlights: false,
+                 italic: false,
+                 pre_class: nil,
+                 theme: "onedark",
+                 lang: nil
+               ],
+               formatter_opts
+             )
     end
 
     test "validates formatter options" do
-      assert [
-               language: nil,
-               formatter:
-                 {:html_inline,
-                  [
-                    header: nil,
-                    highlight_lines: nil,
-                    include_highlights: false,
-                    pre_class: nil,
-                    theme: "dracula",
-                    italic: true
-                  ]}
-             ] =
+      assert [formatter: {:html_inline, formatter_opts}, language: nil] =
                Lumis.validate_options!(formatter: {:html_inline, theme: "dracula", italic: true})
+
+      assert Keyword.equal?(
+               [
+                 lang: nil,
+                 header: nil,
+                 highlight_lines: nil,
+                 include_highlights: false,
+                 pre_class: nil,
+                 theme: "dracula",
+                 italic: true
+               ],
+               formatter_opts
+             )
     end
 
     test "validates deprecated options" do
@@ -924,6 +941,7 @@ defmodule Lumis.LumisTest do
                  formatter:
                    {:html_inline,
                     [
+                      lang: nil,
                       header: nil,
                       highlight_lines: nil,
                       include_highlights: false,
@@ -941,6 +959,47 @@ defmodule Lumis.LumisTest do
                    inline_style: true,
                    pre_class: "custom"
                  )
+      end)
+    end
+
+    test "copies deprecated language into formatter lang" do
+      assert [formatter: {:html_inline, formatter_opts}, language: "rust"] =
+               Lumis.validate_options!(language: "rust")
+
+      assert Keyword.equal?(
+               [
+                 lang: "rust",
+                 header: nil,
+                 highlight_lines: nil,
+                 include_highlights: false,
+                 italic: false,
+                 pre_class: nil,
+                 theme: "onedark"
+               ],
+               formatter_opts
+             )
+    end
+
+    test "formatter lang takes precedence over deprecated language" do
+      capture_io(:stderr, fn ->
+        assert [formatter: {:html_inline, formatter_opts}, language: "elixir"] =
+                 Lumis.validate_options!(
+                   language: "elixir",
+                   formatter: {:html_inline, lang: "rust"}
+                 )
+
+        assert Keyword.equal?(
+                 [
+                   lang: "rust",
+                   header: nil,
+                   highlight_lines: nil,
+                   include_highlights: false,
+                   italic: false,
+                   pre_class: nil,
+                   theme: "onedark"
+                 ],
+                 formatter_opts
+               )
       end)
     end
 
@@ -981,6 +1040,21 @@ defmodule Lumis.LumisTest do
                     theme: {:string, "onedark"}
                   }}
              } = Lumis.rust_options!(options)
+    end
+
+    test "uses formatter lang when deprecated language is present" do
+      capture_io(:stderr, fn ->
+        send(
+          self(),
+          {:options,
+           Lumis.validate_options!(language: "elixir", formatter: {:html_inline, lang: "rust"})}
+        )
+      end)
+
+      assert_received {:options, options}
+
+      assert %{language: "rust", formatter: {:html_inline, %{theme: {:string, "onedark"}}}} =
+               Lumis.rust_options!(options)
     end
 
     test "handles deprecated theme option" do

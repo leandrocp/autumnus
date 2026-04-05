@@ -107,6 +107,7 @@ defmodule Lumis do
 
   * `html_inline`:
 
+      - `:lang` (`t:language/0` - default: `nil`) - the language used by the formatter. When omitted, Lumis tries to auto-detect it from the source.
       - `:theme` (`t:theme/0` - default: `nil`) - the theme to apply styles on the highlighted source code.
       - `:pre_class` (`t:String.t/0` - default: `nil`) - the CSS class to append into the wrapping `<pre>` tag.
       - `:italic` (`t:boolean/0` - default: `false`) - enable italic style for the highlighted code.
@@ -116,12 +117,14 @@ defmodule Lumis do
 
   * `html_linked`:
 
+      - `:lang` (`t:language/0` - default: `nil`) - the language used by the formatter. When omitted, Lumis tries to auto-detect it from the source.
       - `:pre_class` (`t:String.t/0` - default: `nil`) - the CSS class to append into the wrapping `<pre>` tag.
       - `:highlight_lines` (`t:html_linked_highlight_lines/0` - default: `nil`) - highlight specific lines either using the `highlighted` class from themes or with a custom CSS class.
       - `:header` (`t:header/0` - default: `nil`) - wrap the highlighted code with custom open and close HTML tags.
 
   * `html_multi_themes`:
 
+      - `:lang` (`t:language/0` - default: `nil`) - the language used by the formatter. When omitted, Lumis tries to auto-detect it from the source.
       - `:themes` (`keyword(theme())` - required) - keyword list of theme identifiers to theme names/structs. Theme identifiers become CSS class names and CSS variable prefixes. Example: `[light: "github_light", dark: "github_dark"]`.
       - `:default_theme` (`t:String.t/0` - default: `nil`) - controls inline color rendering: specify a theme identifier for inline colors, use `"light-dark()"` for CSS light-dark() function, or `nil` for CSS variables only.
       - `:css_variable_prefix` (`t:String.t/0` - default: `nil`) - CSS variable prefix (defaults to `"--lumis"` if nil). Generates variables like `--lumis-light` (color), `--lumis-light-bg` (background), `--lumis-light-font-style`, etc.
@@ -133,7 +136,12 @@ defmodule Lumis do
 
   * `terminal`:
 
+      - `:lang` (`t:language/0` - default: `nil`) - the language used by the formatter. When omitted, Lumis tries to auto-detect it from the source.
       - `:theme` (`t:theme/0` - default: `nil`) - the theme to apply styles on the highlighted source code.
+
+  * `bbcode_scoped`:
+
+      - `:lang` (`t:language/0` - default: `nil`) - available when passed as `{:bbcode_scoped, ...}`.
 
   ## Examples
 
@@ -221,6 +229,7 @@ defmodule Lumis do
           :html_inline
           | {:html_inline,
              [
+               lang: language(),
                theme: theme(),
                pre_class: String.t(),
                italic: boolean(),
@@ -231,6 +240,7 @@ defmodule Lumis do
           | :html_linked
           | {:html_linked,
              [
+               lang: language(),
                pre_class: String.t(),
                highlight_lines: html_linked_highlight_lines(),
                header: header()
@@ -238,6 +248,7 @@ defmodule Lumis do
           | :html_multi_themes
           | {:html_multi_themes,
              [
+               lang: language(),
                themes: keyword(theme()),
                default_theme: String.t(),
                css_variable_prefix: String.t(),
@@ -250,10 +261,11 @@ defmodule Lumis do
           | :terminal
           | {:terminal,
              [
+               lang: language(),
                theme: theme()
              ]}
           | :bbcode_scoped
-          | {:bbcode_scoped, []}
+          | {:bbcode_scoped, [lang: language()]}
 
   @formatter_schema [
     type: {:custom, Lumis, :formatter_type, []},
@@ -310,6 +322,7 @@ defmodule Lumis do
 
   def formatter_type({:html_inline, options}) when is_list(options) do
     schema = [
+      lang: [type: {:or, [:string, nil]}, default: nil],
       theme: [type: {:or, [{:struct, Lumis.Theme}, :string, nil]}, default: @default_theme],
       pre_class: [type: {:or, [:string, nil]}, default: nil],
       italic: [type: :boolean, default: false],
@@ -358,6 +371,7 @@ defmodule Lumis do
 
   def formatter_type({:html_linked, options}) when is_list(options) do
     schema = [
+      lang: [type: {:or, [:string, nil]}, default: nil],
       pre_class: [type: {:or, [:string, nil]}, default: nil],
       highlight_lines: [
         type:
@@ -402,6 +416,7 @@ defmodule Lumis do
 
   def formatter_type({:html_multi_themes, options}) when is_list(options) do
     schema = [
+      lang: [type: {:or, [:string, nil]}, default: nil],
       themes: [
         type: :keyword_list,
         required: true,
@@ -465,9 +480,9 @@ defmodule Lumis do
   end
 
   def formatter_type({:terminal, options}) when is_list(options) do
-    case Keyword.keys(options) -- [:theme] do
+    case Keyword.keys(options) -- [:lang, :theme] do
       [] ->
-        default_opts = [theme: @default_theme]
+        default_opts = [lang: nil, theme: @default_theme]
         opts = Keyword.merge(default_opts, options)
         {:ok, {:terminal, opts}}
 
@@ -477,8 +492,8 @@ defmodule Lumis do
   end
 
   def formatter_type({:bbcode_scoped, options}) when is_list(options) do
-    case options do
-      [] -> {:ok, {:bbcode_scoped, []}}
+    case Keyword.keys(options) -- [:lang] do
+      [] -> {:ok, {:bbcode_scoped, Keyword.merge([lang: nil], options)}}
       invalid -> {:error, "invalid options given to bbcode_scoped: #{inspect(invalid)}"}
     end
   end
@@ -809,6 +824,8 @@ defmodule Lumis do
   def highlight(source, options \\ [])
 
   def highlight(source, options) when is_binary(source) and is_list(options) do
+    warn_deprecated_language_option(options)
+
     options =
       options
       |> validate_options!()
@@ -846,12 +863,19 @@ defmodule Lumis do
   """
   @spec validate_options!(options()) :: options()
   def validate_options!(options) do
-    NimbleOptions.validate!(options, @options_schema)
+    options
+    |> NimbleOptions.validate!(@options_schema)
+    |> normalize_formatter_lang()
   end
 
   @doc false
   def rust_options!(options) do
     {formatter, formatter_opts} = options[:formatter]
+    formatter_lang = Keyword.get(formatter_opts, :lang)
+    {language, options} = Keyword.pop(options, :language)
+    language = formatter_lang || language
+    formatter_opts = Keyword.delete(formatter_opts, :lang)
+
     {theme, options} = Keyword.pop(options, :theme)
     theme = build_theme(theme || Keyword.get(formatter_opts, :theme))
 
@@ -881,8 +905,27 @@ defmodule Lumis do
       )
 
     options
+    |> Keyword.put(:language, language)
     |> Keyword.put(:formatter, rust_formatter)
     |> Map.new()
+  end
+
+  defp normalize_formatter_lang(options) do
+    {language, options} = Keyword.pop(options, :language)
+    {formatter, formatter_opts} = Keyword.fetch!(options, :formatter)
+
+    formatter_lang = Keyword.get(formatter_opts, :lang)
+    formatter_opts = Keyword.put(formatter_opts, :lang, formatter_lang || language)
+
+    options
+    |> Keyword.put(:language, language)
+    |> Keyword.put(:formatter, {formatter, formatter_opts})
+  end
+
+  defp warn_deprecated_language_option(options) do
+    if Keyword.has_key?(options, :language) do
+      IO.warn(":language option is deprecated. Use formatter: [lang: ...] instead.")
+    end
   end
 
   @doc false
