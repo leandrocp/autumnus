@@ -106,7 +106,7 @@ export function fromHighlighter(highlighter: HighlighterInput) {
         throw error;
       }
 
-      throw new Error(typeof error === "string" ? error : JSON.stringify(error));
+      throw new Error("Failed to render code block", { cause: error });
     }
 
     return { content, isLoading };
