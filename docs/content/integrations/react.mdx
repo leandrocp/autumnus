@@ -1,0 +1,111 @@
+---
+sidebar_position: 5
+slug: /integrations/react
+title: React
+description: Use Lumis directly in React with a formatter-first CodeBlock component and server renderer.
+keywords:
+  - react lumis
+  - react syntax highlighting
+  - codeblock react lumis
+  - server render code blocks react
+---
+
+# React
+
+[Full example on GitHub](https://github.com/leandrocp/lumis/tree/main/examples/react)
+
+`@lumis-sh/react` keeps the same formatter-first API as the rest of Lumis.
+
+## Install
+
+```bash
+npm install @lumis-sh/react @lumis-sh/lumis @lumis-sh/themes react
+```
+
+## Client component
+
+Use `CodeBlock` when you want a drop-in React component.
+
+```tsx
+import {CodeBlock} from '@lumis-sh/react'
+import {bundledLanguages} from '@lumis-sh/lumis/bundles/web'
+import {htmlInline} from '@lumis-sh/lumis/formatters'
+import githubLight from '@lumis-sh/themes/github_light'
+
+const codeString = `export function Hello() {
+  return <h1>Hello</h1>
+}`
+
+export function Example() {
+  return (
+    <CodeBlock
+      formatter={htmlInline({language: bundledLanguages.tsx, theme: githubLight})}
+    >
+      {codeString}
+    </CodeBlock>
+  )
+}
+```
+
+The default `CodeBlock` renders nothing until highlighting completes. When `fromHighlighter` receives a resolved `Highlighter`, `CodeBlock` renders synchronously with no flash of unstyled content.
+
+## Server rendering
+
+Use `renderCodeBlock()` when you need highlighted output on the server.
+
+```tsx
+import {renderCodeBlock} from '@lumis-sh/react'
+import {bundledLanguages} from '@lumis-sh/lumis/bundles/web'
+import {htmlInline} from '@lumis-sh/lumis/formatters'
+import githubLight from '@lumis-sh/themes/github_light'
+
+const codeString = `export function Hello() {
+  return <h1>Hello</h1>
+}`
+
+export async function Article() {
+  const block = await renderCodeBlock({
+    children: codeString,
+    formatter: htmlInline({language: bundledLanguages.tsx, theme: githubLight}),
+  })
+
+  return <article>{block}</article>
+}
+```
+
+## Reusing one highlighter
+
+If you already create a `Highlighter`, bind React helpers with `fromHighlighter()`:
+
+```tsx
+import {createHighlighter} from '@lumis-sh/lumis'
+import {bundledLanguages} from '@lumis-sh/lumis/bundles/web'
+import {fromHighlighter} from '@lumis-sh/react'
+import {htmlInline} from '@lumis-sh/lumis/formatters'
+import githubLight from '@lumis-sh/themes/github_light'
+
+const codeString = `export const answer = 42`
+
+const highlighter = await createHighlighter({languages: [bundledLanguages]})
+const {CodeBlock} = fromHighlighter(highlighter)
+
+export function Example() {
+  return (
+    <CodeBlock
+      formatter={htmlInline({language: 'tsx', theme: githubLight})}
+    >
+      {codeString}
+    </CodeBlock>
+  )
+}
+```
+
+This is the best option when you want to preload a bundle and render many code blocks on one page.
+
+## Behavior
+
+- `formatter` is the single source of truth for the language
+- the React helpers call `highlighter.loadLanguage(formatter.language)` before highlighting
+- when the language is already loaded, Lumis reuses the cached result
+- for true server-rendered highlighting, prefer `renderCodeBlock()`
+- `CodeBlock` re-highlights when `children` or `formatter` changes

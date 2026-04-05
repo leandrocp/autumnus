@@ -44,7 +44,7 @@ jobs:
             io.write('[\"' .. table.concat(names, '\",\"') .. '\"]')
           ")
           echo "Generated matrix for languages: $LANGS"
-          echo "languages=$LANGS" >> $GITHUB_OUTPUT
+          echo "languages=$LANGS" >> "$GITHUB_OUTPUT"
 
   update-parsers:
     needs: generate-matrix

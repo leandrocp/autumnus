@@ -52,13 +52,13 @@ jobs:
           needed=$(just wasm-publish-needed "${{ inputs.parser }}")
           if [ -z "$needed" ]; then
             echo "All packages already published, nothing to build"
-            echo "skip=true" >> $GITHUB_OUTPUT
-            echo 'parsers=[]' >> $GITHUB_OUTPUT
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo 'parsers=[]' >> "$GITHUB_OUTPUT"
           else
             echo "Need to build: $needed"
-            echo "skip=false" >> $GITHUB_OUTPUT
+            echo "skip=false" >> "$GITHUB_OUTPUT"
             json=$(echo "$needed" | tr ' ' '\n' | jq -R . | jq -sc .)
-            echo "parsers=$json" >> $GITHUB_OUTPUT
+            echo "parsers=$json" >> "$GITHUB_OUTPUT"
           fi
 
   build:
