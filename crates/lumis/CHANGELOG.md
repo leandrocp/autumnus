@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.7.0](https://github.com/leandrocp/lumis/compare/rust@v0.6.0...rust@v0.7.0) (2026-04-06)
+
+
+### ⚠ BREAKING CHANGES
+
+* rename bundle features `bundle-{name}` -> `lang-bundle-{name}` ([#679](https://github.com/leandrocp/lumis/issues/679))
+* rename `formatter` -> `formatters` ([#678](https://github.com/leandrocp/lumis/issues/678))
+
+### Features
+
+* align `lang` -&gt; `language` ([#591](https://github.com/leandrocp/lumis/issues/591)) ([ec9614d](https://github.com/leandrocp/lumis/commit/ec9614d7e6631ec9c5146e758a4b6e849446e876))
+
+
+### Bug Fixes
+
+* rename `formatter` -&gt; `formatters` ([#678](https://github.com/leandrocp/lumis/issues/678)) ([138ba6d](https://github.com/leandrocp/lumis/commit/138ba6d8a968078d2009afe49943f38df7c119be))
+* rename bundle features `bundle-{name}` -&gt; `lang-bundle-{name}` ([#679](https://github.com/leandrocp/lumis/issues/679)) ([ae7ce75](https://github.com/leandrocp/lumis/commit/ae7ce752a72dbfbf5177103d9d72efbd6ff3af9f))
+
 ## [0.6.0](https://github.com/leandrocp/lumis/compare/rust@v0.5.1...rust@v0.6.0) (2026-04-04)
 
 
