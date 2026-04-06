@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.1.0](https://github.com/leandrocp/lumis/compare/rust-core@v0.0.5...rust-core@v0.1.0) (2026-04-06)
+
+
+### ⚠ BREAKING CHANGES
+
+* rename bundle features `bundle-{name}` -> `lang-bundle-{name}` ([#679](https://github.com/leandrocp/lumis/issues/679))
+
+### Features
+
+* align `lang` -&gt; `language` ([#591](https://github.com/leandrocp/lumis/issues/591)) ([ec9614d](https://github.com/leandrocp/lumis/commit/ec9614d7e6631ec9c5146e758a4b6e849446e876))
+
+
+### Bug Fixes
+
+* rename bundle features `bundle-{name}` -&gt; `lang-bundle-{name}` ([#679](https://github.com/leandrocp/lumis/issues/679)) ([ae7ce75](https://github.com/leandrocp/lumis/commit/ae7ce752a72dbfbf5177103d9d72efbd6ff3af9f))
+
 ## [0.0.5](https://github.com/leandrocp/lumis/compare/rust-core@v0.0.4...rust-core@v0.0.5) (2026-04-03)
 
 
