@@ -17,6 +17,8 @@ import TabItem from '@theme/TabItem';
 
 Copy-paste examples for common tasks.
 
+Full runnable examples live in [`examples/`](https://github.com/leandrocp/lumis/tree/main/examples).
+
 ## Minimal HTML
 
 <Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
@@ -474,12 +476,10 @@ Lumis.highlight!(source, formatter: {:html_inline, language: "html", theme: "dra
 
 ## Phoenix LiveView rendering
 
-```elixir
-code = Lumis.highlight!(source, formatter: {:html_inline, language: "elixir", theme: "dracula"})
-```
-
 ```heex
-{Phoenix.HTML.raw(@code)}
+{Phoenix.HTML.raw(
+  Lumis.highlight!(source, formatter: {:html_inline, language: "elixir", theme: "dracula"})
+)}
 ```
 
 ## Stream output to a file (Rust)
@@ -598,25 +598,20 @@ const html = hl.highlight('const x = 1', htmlInline({language: 'javascript', the
 ```js
 import {createHighlighter, withWasmBundle} from '@lumis-sh/lumis'
 import {htmlInline} from '@lumis-sh/lumis/formatters'
-import {bundledLanguages} from '@lumis-sh/lumis/bundles/essential'
-import {bundledWasms} from '@lumis-sh/wasm-bundle-essential'
+import {bundledLanguages} from '@lumis-sh/lumis/bundles/web'
+import {bundledWasms} from '@lumis-sh/wasm-bundle-web'
 import githubLight from '@lumis-sh/themes/github_light'
 
 const languages = withWasmBundle(bundledLanguages, bundledWasms)
 const hl = await createHighlighter({languages: [languages]})
 
-await hl.loadLanguage(languages.toml)
+await hl.loadLanguage(languages.javascript)
 
 const html = hl.highlight(
-  'theme = "github-light"',
-  htmlInline({language: languages.toml, theme: githubLight})
+  'const theme = "github-light"',
+  htmlInline({language: languages.javascript, theme: githubLight})
 )
 ```
-
-Full examples on GitHub:
-
-- `examples/wasm-bundle-essential-node`
-- `examples/wasm-bundle-essential-browser`
 
 ## More
 

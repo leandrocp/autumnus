@@ -33,8 +33,8 @@ Bundles register many languages lazily.
 
 | Bundle | Purpose |
 | --- | --- |
-| `@lumis-sh/lumis/bundles/essential` | docs, config, shell, diff, and other low-level essentials |
 | `@lumis-sh/lumis/bundles/web` | HTML, CSS, JS, TS, JSON, Markdown, SQL, Svelte, Vue, Astro, and other web-focused languages |
+| `@lumis-sh/lumis/bundles/web-extra` | framework and template languages that complement the web bundle |
 | `@lumis-sh/lumis/bundles/system` | C, C++, Rust, Go, Zig, LLVM, Make, CMake, and related system languages |
 | `@lumis-sh/lumis/bundles/backend` | popular backend languages plus common API, config, and infra formats |
 | `@lumis-sh/lumis/bundles/full` | all supported languages |
@@ -75,6 +75,24 @@ const html = hl.highlight(
 - a bundle object
 - dynamic import promises
 - lazy import functions
+
+## Repeated highlighting
+
+Preload languages once with `createHighlighter()`, then call `hl.highlight()` synchronously for repeated work.
+
+```ts
+import {createHighlighter} from '@lumis-sh/lumis'
+import {htmlInline} from '@lumis-sh/lumis/formatters'
+import javascript from '@lumis-sh/lumis/langs/javascript'
+import dracula from '@lumis-sh/themes/dracula'
+
+const hl = await createHighlighter({languages: [javascript]})
+
+const html = hl.highlight(
+  'const x = 1',
+  htmlInline({language: javascript, theme: dracula})
+)
+```
 
 ## Language references
 
@@ -129,7 +147,7 @@ Useful for dropdowns, config validation, and docs tooling:
 
 - the package uses conditional exports so browser and Node get the right runtime automatically
 - Node caches fetched parser WASM locally when possible
-- Node can also auto-load installed parser packages such as `@lumis-sh/wasm-elixir` or preset packages such as `@lumis-sh/wasm-bundle-essential`
-- browser usage usually relies on remote parser assets unless you override the resolver, use `withWasm()` with a single npm parser package, or use `withWasmBundle()` with a preset bundle package
+- Node can also auto-load installed parser packages such as `@lumis-sh/wasm-elixir` or bundle packages such as `@lumis-sh/wasm-bundle-web`
+- browser usage usually relies on remote parser assets unless you override the resolver, use `withWasm()` with a single npm parser package, or use `withWasmBundle()` with a bundle package such as `@lumis-sh/wasm-bundle-web`
 
 For parser asset details, continue with [WASM and CDN](/advanced/wasm-and-cdn).
