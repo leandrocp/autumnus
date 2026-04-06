@@ -1,6 +1,6 @@
 {
   "name": "@lumis-sh/react",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "React helpers and components for Lumis syntax highlighting",
   "author": "Leandro Pereira",
   "license": "MIT",
