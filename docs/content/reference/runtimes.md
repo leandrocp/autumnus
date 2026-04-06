@@ -38,6 +38,7 @@ keywords:
 
 | Runtime | Integration | Package | Reference |
 | --- | --- | --- | --- |
+| JavaScript | React | `@lumis-sh/react` | [npm](https://www.npmjs.com/package/@lumis-sh/react) |
 | JavaScript | `markdown-it` | `@lumis-sh/markdown-it-lumis` | [npm](https://www.npmjs.com/package/@lumis-sh/markdown-it-lumis) |
 | JavaScript | `rehype` | `@lumis-sh/rehype-lumis` | [npm](https://www.npmjs.com/package/@lumis-sh/rehype-lumis) |
 
