@@ -7,7 +7,7 @@
 //! (variables) for each theme. A `@media (prefers-color-scheme: dark)` rule
 //! then selects which set of variables to apply.
 
-use lumis::{formatter::Formatter, languages::Language, themes, HtmlMultiThemesBuilder};
+use lumis::{formatters::Formatter, languages::Language, themes, HtmlMultiThemesBuilder};
 use std::collections::HashMap;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {

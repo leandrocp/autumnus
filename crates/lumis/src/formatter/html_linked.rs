@@ -35,7 +35,7 @@ use std::{
 ///
 /// With default "highlighted" class:
 /// ```rust
-/// use lumis::formatter::html_linked::HighlightLines;
+/// use lumis::formatters::html_linked::HighlightLines;
 ///
 /// let highlight_lines = HighlightLines {
 ///     lines: vec![1..=1, 5..=7],
@@ -49,7 +49,7 @@ use std::{
 ///
 /// Using a custom CSS class:
 /// ```rust
-/// use lumis::formatter::html_linked::HighlightLines;
+/// use lumis::formatters::html_linked::HighlightLines;
 ///
 /// let highlight_lines = HighlightLines {
 ///     lines: vec![2..=3],
@@ -79,7 +79,7 @@ pub struct HighlightLines {
     ///
     /// Defaults to `"highlighted"`.
     /// ```rust
-    /// use lumis::formatter::html_linked::HighlightLines;
+    /// use lumis::formatters::html_linked::HighlightLines;
     ///
     /// let highlight_lines = HighlightLines {
     ///     lines: vec![1..=2],
@@ -113,7 +113,7 @@ impl Default for HighlightLines {
 /// # Example
 ///
 /// ```rust
-/// use lumis::{HtmlLinkedBuilder, languages::Language, formatter::Formatter};
+/// use lumis::{HtmlLinkedBuilder, languages::Language, formatters::Formatter};
 /// use std::io::Write;
 ///
 /// let code = "print('Hello')";
@@ -209,7 +209,7 @@ fn map_highlight_lines(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::formatter::HtmlLinkedBuilder;
+    use crate::formatters::HtmlLinkedBuilder;
 
     #[cfg(test)]
     use pretty_assertions::assert_str_eq;
@@ -235,7 +235,7 @@ mod tests {
             None,
         );
         let mut buffer = Vec::new();
-        crate::formatter::html::open_pre_tag(&mut buffer, formatter.pre_class.as_deref(), None)
+        crate::formatters::html::open_pre_tag(&mut buffer, formatter.pre_class.as_deref(), None)
             .unwrap();
         let result = String::from_utf8(buffer).unwrap();
         let expected = r#"<pre class="lumis test-pre-class">"#;
@@ -246,7 +246,7 @@ mod tests {
     fn test_code_tag_with_language() {
         let formatter = HtmlLinked::new(Language::Rust, None, None, None);
         let mut buffer = Vec::new();
-        crate::formatter::html::open_code_tag(&mut buffer, &formatter.language).unwrap();
+        crate::formatters::html::open_code_tag(&mut buffer, &formatter.language).unwrap();
         let result = String::from_utf8(buffer).unwrap();
         let expected = r#"<code class="language-rust" translate="no" tabindex="0">"#;
         assert_str_eq!(result, expected);
@@ -261,14 +261,14 @@ mod tests {
             .unwrap();
 
         let mut buffer = Vec::new();
-        crate::formatter::html::open_pre_tag(&mut buffer, formatter.pre_class.as_deref(), None)
+        crate::formatters::html::open_pre_tag(&mut buffer, formatter.pre_class.as_deref(), None)
             .unwrap();
         let pre_result = String::from_utf8(buffer).unwrap();
         let pre_expected = r#"<pre class="lumis test-pre-class">"#;
         assert_str_eq!(pre_result, pre_expected);
 
         let mut buffer = Vec::new();
-        crate::formatter::html::open_code_tag(&mut buffer, &formatter.language).unwrap();
+        crate::formatters::html::open_code_tag(&mut buffer, &formatter.language).unwrap();
         let code_result = String::from_utf8(buffer).unwrap();
         let code_expected = r#"<code class="language-rust" translate="no" tabindex="0">"#;
         assert_str_eq!(code_result, code_expected);

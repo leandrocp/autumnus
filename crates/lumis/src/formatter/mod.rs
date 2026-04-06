@@ -26,7 +26,7 @@
 //! ## Using HtmlInlineBuilder
 //!
 //! ```rust
-//! use lumis::{HtmlInlineBuilder, languages::Language, themes, formatter::Formatter};
+//! use lumis::{HtmlInlineBuilder, languages::Language, themes, formatters::Formatter};
 //! use std::io::Write;
 //!
 //! let code = "fn main() { println!(\"Hello\"); }";
@@ -50,7 +50,7 @@
 //! ## Using HtmlMultiThemesBuilder
 //!
 //! ```rust
-//! use lumis::{HtmlMultiThemesBuilder, languages::Language, themes, formatter::Formatter};
+//! use lumis::{HtmlMultiThemesBuilder, languages::Language, themes, formatters::Formatter};
 //! use std::collections::HashMap;
 //!
 //! let code = "fn main() { println!(\"Hello\"); }";
@@ -75,7 +75,7 @@
 //! ## Using HtmlLinkedBuilder
 //!
 //! ```rust
-//! use lumis::{HtmlLinkedBuilder, languages::Language, formatter::Formatter};
+//! use lumis::{HtmlLinkedBuilder, languages::Language, formatters::Formatter};
 //! use std::io::Write;
 //!
 //! let code = "<div>Hello World</div>";
@@ -94,7 +94,7 @@
 //! ## Using TerminalBuilder
 //!
 //! ```rust
-//! use lumis::{TerminalBuilder, languages::Language, themes, formatter::Formatter};
+//! use lumis::{TerminalBuilder, languages::Language, themes, formatters::Formatter};
 //! use std::io::Write;
 //!
 //! let code = "puts 'Hello from Ruby!'";
@@ -114,8 +114,8 @@
 //! ## Line highlighting with HTML formatters
 //!
 //! ```rust
-//! use lumis::{HtmlInlineBuilder, languages::Language, themes, formatter::Formatter};
-//! use lumis::formatter::html_inline::{HighlightLines, HighlightLinesStyle};
+//! use lumis::{HtmlInlineBuilder, languages::Language, themes, formatters::Formatter};
+//! use lumis::formatters::html_inline::{HighlightLines, HighlightLinesStyle};
 //! use std::io::Write;
 //!
 //! let code = "line 1\nline 2\nline 3\nline 4";
@@ -204,8 +204,8 @@ pub(crate) fn map_inline_highlight_lines(
 ///
 /// ```rust
 /// use lumis::{
-///     formatter::Formatter,
-///     formatter::html::{open_pre_tag, open_code_tag, closing_tags, span_inline},
+///     formatters::Formatter,
+///     formatters::html::{open_pre_tag, open_code_tag, closing_tags, span_inline},
 ///     highlight::highlight_iter,
 ///     languages::Language,
 ///     themes,
@@ -250,7 +250,7 @@ pub trait Formatter: Send + Sync {
     /// # Example
     ///
     /// ```rust
-    /// use lumis::{formatter::Formatter, HtmlInlineBuilder, languages::Language};
+    /// use lumis::{formatters::Formatter, HtmlInlineBuilder, languages::Language};
     ///
     /// let formatter = HtmlInlineBuilder::new()
     ///     .language(Language::Rust)

@@ -1,4 +1,4 @@
-use lumis::formatter::{
+use lumis::formatters::{
     html_inline, html_linked, BBCodeScopedBuilder, Formatter, HtmlElement, HtmlInlineBuilder,
     HtmlLinkedBuilder, HtmlMultiThemesBuilder, TerminalBuilder,
 };

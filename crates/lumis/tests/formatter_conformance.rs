@@ -1,4 +1,4 @@
-use lumis::formatter::Formatter as _;
+use lumis::formatters::Formatter as _;
 use lumis::{
     highlight, highlight::highlight_events, languages::Language, themes, BBCodeScopedBuilder,
     HtmlInlineBuilder, HtmlLinkedBuilder, HtmlMultiThemesBuilder, TerminalBuilder,

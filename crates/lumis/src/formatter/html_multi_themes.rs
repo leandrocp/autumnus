@@ -8,7 +8,7 @@
 //! # Usage
 //!
 //! ```rust
-//! use lumis::{HtmlMultiThemesBuilder, languages::Language, themes, formatter::Formatter};
+//! use lumis::{HtmlMultiThemesBuilder, languages::Language, themes, formatters::Formatter};
 //! use std::collections::HashMap;
 //!
 //! let mut theme_map = HashMap::new();
@@ -36,7 +36,7 @@
 //! ```
 //!
 //! **Note**: Multi-theme formatter generates a larger HTML payload due to CSS variables for
-//! each theme. If you only need a single theme, use [`HtmlInline`](crate::formatter::HtmlInline) instead.
+//! each theme. If you only need a single theme, use [`HtmlInline`](crate::formatters::HtmlInline) instead.
 //!
 //! # CSS You Must Provide
 //!
@@ -86,7 +86,7 @@
 //! For browsers that support the [CSS `light-dark()` function](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/color_value/light-dark), you can use a more elegant approach:
 //!
 //! ```rust
-//! use lumis::{HtmlMultiThemesBuilder, languages::Language, themes, formatter::Formatter};
+//! use lumis::{HtmlMultiThemesBuilder, languages::Language, themes, formatters::Formatter};
 //! use std::collections::HashMap;
 //!
 //! let mut theme_map = HashMap::new();
@@ -121,7 +121,7 @@
 //!
 
 use super::{Formatter, HtmlElement};
-use crate::formatter::html_inline::HighlightLines;
+use crate::formatters::html_inline::HighlightLines;
 use crate::highlight;
 use crate::languages::Language;
 use crate::themes::Theme;
@@ -168,7 +168,7 @@ impl FromStr for DefaultTheme {
 /// # Examples
 ///
 /// ```rust
-/// use lumis::{HtmlMultiThemesBuilder, languages::Language, themes, formatter::Formatter};
+/// use lumis::{HtmlMultiThemesBuilder, languages::Language, themes, formatters::Formatter};
 /// use std::collections::HashMap;
 ///
 /// let mut themes = HashMap::new();
@@ -376,7 +376,7 @@ mod tests {
 
     #[test]
     fn test_text_decoration() {
-        use crate::formatter::html::text_decoration;
+        use crate::formatters::html::text_decoration;
         use crate::themes::{TextDecoration, UnderlineStyle};
 
         let none = TextDecoration::default();

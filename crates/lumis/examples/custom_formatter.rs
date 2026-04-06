@@ -5,7 +5,7 @@
 //! shows what data is available from `highlight_iter()`.
 
 use lumis::{
-    formatter::Formatter, highlight::highlight_iter, languages::Language, themes, write_highlight,
+    formatters::Formatter, highlight::highlight_iter, languages::Language, themes, write_highlight,
 };
 use std::io::{self, Write};
 

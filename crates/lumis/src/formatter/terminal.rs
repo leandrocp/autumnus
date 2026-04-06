@@ -30,7 +30,7 @@ use std::io::{self, Write};
 /// # Example
 ///
 /// ```rust
-/// use lumis::{TerminalBuilder, languages::Language, themes, formatter::Formatter};
+/// use lumis::{TerminalBuilder, languages::Language, themes, formatters::Formatter};
 /// use std::io::Write;
 ///
 /// let code = "fn main() { println!(\"Hello\"); }";

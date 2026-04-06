@@ -4,7 +4,7 @@
 //! the public APIs from the `html` module:
 
 use lumis::{
-    formatter::Formatter, highlight::highlight_iter, html, languages::Language, themes,
+    formatters::Formatter, highlight::highlight_iter, html, languages::Language, themes,
     write_highlight,
 };
 use std::io::{self, Write};

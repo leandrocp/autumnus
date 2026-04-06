@@ -1,5 +1,5 @@
 use ansi_to_tui::IntoText;
-use lumis::{formatter::Formatter, languages::Language, themes, TerminalBuilder};
+use lumis::{formatters::Formatter, languages::Language, themes, TerminalBuilder};
 use ratatui::{
     crossterm::event::{self, Event, KeyCode},
     layout::Alignment,

@@ -5,11 +5,11 @@
 //!
 //! # Custom Formatters
 //!
-//! Custom formatters should implement [`Formatter`](crate::formatter::Formatter)
+//! Custom formatters should implement [`Formatter`](crate::formatters::Formatter)
 //! and use [`highlight_iter()`] for streaming token access.
 //!
 //! ```rust,no_run
-//! use lumis::{formatter::Formatter, highlight::highlight_iter};
+//! use lumis::{formatters::Formatter, highlight::highlight_iter};
 //! use std::io::{self, Write};
 //!
 //! # struct MyFormatter { language: lumis::languages::Language, theme: Option<lumis::themes::Theme> }
@@ -24,9 +24,9 @@
 //! ```
 //!
 //! See also:
-//! - [`Formatter`](crate::formatter::Formatter) trait documentation
-//! - [`formatter::html`](crate::formatter::html) module for HTML-specific helpers
-//! - [`formatter::ansi`](crate::formatter::ansi) module for terminal/ANSI-specific helpers
+//! - [`Formatter`](crate::formatters::Formatter) trait documentation
+//! - [`formatters::html`](crate::formatters::html) module for HTML-specific helpers
+//! - [`formatters::ansi`](crate::formatters::ansi) module for terminal/ANSI-specific helpers
 //!
 //! # Examples
 //!

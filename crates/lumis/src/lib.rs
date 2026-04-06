@@ -5,7 +5,7 @@
 //! Highlight code in three steps: pick a formatter, configure it, format your code.
 //!
 //! ```rust
-//! use lumis::{HtmlInlineBuilder, languages::Language, themes, formatter::Formatter};
+//! use lumis::{HtmlInlineBuilder, languages::Language, themes, formatters::Formatter};
 //!
 //! let code = "fn main() { println!(\"Hello, world!\"); }";
 //! let theme = themes::get("dracula").unwrap();
@@ -83,7 +83,7 @@
 //! | [`TerminalBuilder`] | ANSI escape codes | CLI tools, terminal output |
 //! | [`BBCodeScopedBuilder`] | BBCode with highlight scope tags | Scope-aware BBCode parsers, BBCode-based platforms |
 //!
-//! See the [`formatter`] module for advanced features like line highlighting and custom formatters.
+//! See the [`formatters`] module for advanced features like line highlighting and custom formatters.
 //!
 //! ## Themes
 //!
@@ -305,7 +305,10 @@
 //! | zenburn |
 //! | zephyr_dark |
 
-pub mod formatter;
+#[path = "formatter/mod.rs"]
+pub mod formatters;
+#[deprecated(note = "use `formatters` instead")]
+pub use formatters as formatter;
 pub mod highlight;
 pub mod languages;
 pub mod themes;
@@ -314,15 +317,15 @@ mod vendor;
 pub use lumis_core::events;
 pub use lumis_core::highlights;
 
-// Re-export helper modules from formatter for convenience
-pub use formatter::ansi;
-pub use formatter::html;
+// Re-export helper modules from formatters for convenience
+pub use formatters::ansi;
+pub use formatters::html;
 
-use crate::formatter::Formatter;
+use crate::formatters::Formatter;
 use std::io::{self, Write};
 
 // Re-export builders for easier access
-pub use crate::formatter::{
+pub use crate::formatters::{
     BBCodeScopedBuilder, HtmlInlineBuilder, HtmlLinkedBuilder, HtmlMultiThemesBuilder,
     TerminalBuilder,
 };

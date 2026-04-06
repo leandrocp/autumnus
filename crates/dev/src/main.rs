@@ -1,7 +1,7 @@
 use anyhow::{bail, Context, Result};
 use clap::{Parser, Subcommand};
 use lumis::events::HighlightEvent;
-use lumis::formatter::Formatter as _;
+use lumis::formatters::Formatter as _;
 use lumis::highlight::highlight_events;
 use lumis::languages::Language;
 use serde::{Deserialize, Serialize};

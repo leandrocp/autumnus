@@ -4,7 +4,7 @@
 //! the public APIs from the `ansi` module, without needing to interact with
 //! tree-sitter or termcolor internals directly.
 
-use lumis::{ansi, formatter::Formatter, languages::Language, themes, write_highlight};
+use lumis::{ansi, formatters::Formatter, languages::Language, themes, write_highlight};
 use std::io::{self, Write};
 
 const HORIZONTAL_LINE: char = '─';
