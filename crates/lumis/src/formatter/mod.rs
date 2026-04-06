@@ -168,6 +168,7 @@ pub use terminal::{Terminal, TerminalBuilder};
 pub mod bbcode;
 pub use bbcode::{BBCodeScoped, BBCodeScopedBuilder};
 
+#[deprecated(note = "use `formatters::html::HtmlElement` instead")]
 pub use lumis_core::formatter::HtmlElement;
 
 pub(crate) fn map_inline_highlight_lines(

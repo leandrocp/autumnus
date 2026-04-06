@@ -218,7 +218,7 @@ let html = highlight(code, formatter);
 Wrap output with custom HTML elements:
 
 ```rust
-use lumis::{highlight, HtmlInlineBuilder, languages::Language, formatter::HtmlElement};
+use lumis::{highlight, HtmlInlineBuilder, languages::Language, formatters::html::HtmlElement};
 
 let code = "fn main() { }";
 

@@ -9,6 +9,7 @@
 
 use crate::languages::Language;
 use crate::themes::Theme;
+pub use lumis_core::formatter::HtmlElement;
 use std::io::{self, Write};
 
 /// Generate an HTML `<span>` element with inline CSS styles.
