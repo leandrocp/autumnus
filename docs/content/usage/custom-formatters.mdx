@@ -24,12 +24,12 @@ Write your own formatter when the built-in ones don't produce the output you nee
 
 ## Rust
 
-Implement the [`Formatter`](https://docs.rs/lumis/latest/lumis/formatter/trait.Formatter.html) trait.
+Implement the [`Formatter`](https://docs.rs/lumis/latest/lumis/formatters/trait.Formatter.html) trait.
 
 ```rust
 use lumis::{
-    formatter::Formatter,
-    formatter::html::{open_pre_tag, open_code_tag, closing_tags, span_inline},
+    formatters::Formatter,
+    formatters::html::{open_pre_tag, open_code_tag, closing_tags, span_inline},
     highlight::highlight_iter,
     languages::Language,
     themes,
@@ -98,8 +98,10 @@ const html = hl.highlight('fn main() {}', formatter)
 | --- | --- | --- |
 | JavaScript | `@lumis-sh/lumis/formatters/html` | [source](https://github.com/leandrocp/lumis/blob/main/packages/javascript/lumis/src/formatter/html.ts) |
 | JavaScript | `@lumis-sh/lumis/formatters/ansi` | [source](https://github.com/leandrocp/lumis/blob/main/packages/javascript/lumis/src/formatter/ansi.ts) |
-| Rust | `lumis::formatter::html` | [docs.rs](https://docs.rs/lumis/latest/lumis/formatter/html/index.html) |
-| Rust | `lumis::formatter::ansi` | [docs.rs](https://docs.rs/lumis/latest/lumis/formatter/ansi/index.html) |
+| Rust | `lumis::formatters::html` | [docs.rs](https://docs.rs/lumis/latest/lumis/formatters/html/index.html) |
+| Rust | `lumis::formatters::ansi` | [docs.rs](https://docs.rs/lumis/latest/lumis/formatters/ansi/index.html) |
+
+`lumis::formatter::*` remains available for compatibility and is now deprecated in favor of `lumis::formatters::*`.
 
 ## Tip
 

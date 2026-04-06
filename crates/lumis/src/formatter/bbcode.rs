@@ -34,7 +34,7 @@ use std::io::{self, Write};
 /// # Example
 ///
 /// ```rust,ignore
-/// use lumis::{BBCodeScopedBuilder, languages::Language, formatter::Formatter};
+/// use lumis::{BBCodeScopedBuilder, languages::Language, formatters::Formatter};
 ///
 /// let code = "fn main() { println!(\"Hello\"); }";
 ///

@@ -310,7 +310,7 @@ const html = await highlight(
   <TabItem value="rust" label="Rust">
 
 ```rust
-use lumis::formatter::html_inline::{HighlightLines, HighlightLinesStyle};
+use lumis::formatters::html_inline::{HighlightLines, HighlightLinesStyle};
 
 let highlight_lines = HighlightLines {
     lines: vec![2..=2],
@@ -370,7 +370,7 @@ const html = await highlight(
   <TabItem value="rust" label="Rust">
 
 ```rust
-use lumis::{highlight, HtmlInlineBuilder, formatter::HtmlElement, languages::Language, themes};
+use lumis::{highlight, HtmlInlineBuilder, formatters::html::HtmlElement, languages::Language, themes};
 
 let html = highlight(
     "fn main() {}",

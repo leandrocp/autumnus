@@ -35,7 +35,7 @@ use std::{
 ///
 /// Using theme-based highlighting (requires a theme with 'highlighted' style):
 /// ```rust
-/// use lumis::formatter::html_inline::{HighlightLines, HighlightLinesStyle};
+/// use lumis::formatters::html_inline::{HighlightLines, HighlightLinesStyle};
 ///
 /// let highlight_lines = HighlightLines {
 ///     lines: vec![1..=1, 5..=7],
@@ -51,7 +51,7 @@ use std::{
 ///
 /// Using both style and class:
 /// ```rust
-/// use lumis::formatter::html_inline::{HighlightLines, HighlightLinesStyle};
+/// use lumis::formatters::html_inline::{HighlightLines, HighlightLinesStyle};
 ///
 /// let highlight_lines = HighlightLines {
 ///     lines: vec![2..=3],
@@ -67,7 +67,7 @@ use std::{
 ///
 /// Or disable either one of them:
 /// ```rust
-/// use lumis::formatter::html_inline::{HighlightLines, HighlightLinesStyle};
+/// use lumis::formatters::html_inline::{HighlightLines, HighlightLinesStyle};
 ///
 /// let highlight_lines = HighlightLines {
 ///     lines: vec![2..=3],
@@ -104,7 +104,7 @@ pub enum HighlightLinesStyle {
     ///
     /// # Example
     /// ```rust
-    /// use lumis::formatter::html_inline::HighlightLinesStyle;
+    /// use lumis::formatters::html_inline::HighlightLinesStyle;
     ///
     /// let style = HighlightLinesStyle::Style(
     ///     "background-color: rgba(255, 255, 0, 0.3); border-left: 2px solid orange".to_string()
@@ -138,7 +138,7 @@ impl Default for HighlightLines {
 /// # Example
 ///
 /// ```rust
-/// use lumis::{HtmlInlineBuilder, languages::Language, themes, formatter::Formatter};
+/// use lumis::{HtmlInlineBuilder, languages::Language, themes, formatters::Formatter};
 /// use std::io::Write;
 ///
 /// let code = "const x = 42;";
@@ -244,7 +244,7 @@ impl Formatter for HtmlInline {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::formatter::HtmlInlineBuilder;
+    use crate::formatters::HtmlInlineBuilder;
     use crate::themes;
 
     #[cfg(test)]
@@ -266,7 +266,7 @@ mod tests {
     fn test_do_not_append_pre_style_if_missing_theme_style() {
         let formatter = HtmlInline::default();
         let mut buffer = Vec::new();
-        crate::formatter::html::open_pre_tag(
+        crate::formatters::html::open_pre_tag(
             &mut buffer,
             formatter.pre_class.as_deref(),
             formatter.theme.as_ref(),
@@ -288,7 +288,7 @@ mod tests {
             None,
         );
         let mut buffer = Vec::new();
-        crate::formatter::html::open_pre_tag(
+        crate::formatters::html::open_pre_tag(
             &mut buffer,
             formatter.pre_class.as_deref(),
             formatter.theme.as_ref(),
@@ -311,7 +311,7 @@ mod tests {
             None,
         );
         let mut buffer = Vec::new();
-        crate::formatter::html::open_pre_tag(
+        crate::formatters::html::open_pre_tag(
             &mut buffer,
             formatter.pre_class.as_deref(),
             formatter.theme.as_ref(),
@@ -334,7 +334,7 @@ mod tests {
             .unwrap();
 
         let mut buffer = Vec::new();
-        crate::formatter::html::open_pre_tag(
+        crate::formatters::html::open_pre_tag(
             &mut buffer,
             formatter.pre_class.as_deref(),
             formatter.theme.as_ref(),

@@ -4,11 +4,12 @@
 //! without dealing with tree-sitter internals directly.
 //!
 //! See also:
-//! - [`Formatter`](crate::formatter::Formatter) trait documentation for a complete example
+//! - [`Formatter`](crate::formatters::Formatter) trait documentation for a complete example
 //! - [`examples/custom_html_formatter.rs`](https://github.com/leandrocp/lumis/blob/main/examples/custom_html_formatter.rs)
 
 use crate::languages::Language;
 use crate::themes::Theme;
+pub use lumis_core::formatter::HtmlElement;
 use std::io::{self, Write};
 
 /// Generate an HTML `<span>` element with inline CSS styles.

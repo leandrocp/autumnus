@@ -9,7 +9,7 @@
 //!
 //! Note: Requires browser support for `light-dark()` (Chrome 123+, Firefox 120+).
 
-use lumis::{formatter::Formatter, languages::Language, themes, HtmlMultiThemesBuilder};
+use lumis::{formatters::Formatter, languages::Language, themes, HtmlMultiThemesBuilder};
 use std::collections::HashMap;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {

@@ -192,7 +192,7 @@ Highlight specific lines:
 
 ```rust
 use lumis::{highlight, HtmlInlineBuilder, languages::Language, themes};
-use lumis::formatter::html_inline::{HighlightLines, HighlightLinesStyle};
+use lumis::formatters::html_inline::{HighlightLines, HighlightLinesStyle};
 
 let code = "line 1\nline 2\nline 3\nline 4";
 let theme = themes::get("catppuccin_mocha").unwrap();
@@ -218,7 +218,7 @@ let html = highlight(code, formatter);
 Wrap output with custom HTML elements:
 
 ```rust
-use lumis::{highlight, HtmlInlineBuilder, languages::Language, formatter::HtmlElement};
+use lumis::{highlight, HtmlInlineBuilder, languages::Language, formatters::html::HtmlElement};
 
 let code = "fn main() { }";
 
@@ -291,8 +291,8 @@ Implement the `Formatter` trait. Minimal example that wraps each token in a colo
 
 ```rust
 use lumis::{
-    formatter::Formatter,
-    formatter::html::{open_pre_tag, open_code_tag, closing_tags, span_inline},
+    formatters::Formatter,
+    formatters::html::{open_pre_tag, open_code_tag, closing_tags, span_inline},
     highlight::highlight_iter,
     languages::Language,
     themes,
