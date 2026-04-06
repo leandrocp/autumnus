@@ -343,12 +343,12 @@ All languages are included by default. To reduce compile time and binary size, p
 
 ```toml
 [dependencies]
-lumis = { version = "0.1", default-features = false, features = ["lang-rust", "lang-javascript", "bundle-web"] }
+lumis = { version = "0.1", default-features = false, features = ["lang-rust", "lang-javascript", "lang-bundle-web"] }
 ```
 
 Available features:
 - `all-languages` - Enable all languages (default)
-- `bundle-web`, `bundle-web-extra`, `bundle-system`, `bundle-backend`, `bundle-full`
+- `lang-bundle-web`, `lang-bundle-web-extra`, `lang-bundle-system`, `lang-bundle-backend`, `lang-bundle-full`
 - `lang-rust`, `lang-javascript`, `lang-typescript`, `lang-python`, etc.
 
 See the full list of language features in [Cargo.toml](https://github.com/leandrocp/lumis/blob/main/crates/lumis/Cargo.toml).

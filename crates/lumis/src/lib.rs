@@ -59,12 +59,12 @@
 //!
 //! ```toml
 //! [dependencies]
-//! lumis = { version = "0.1", default-features = false, features = ["lang-rust", "lang-javascript", "bundle-web"] }
+//! lumis = { version = "0.1", default-features = false, features = ["lang-rust", "lang-javascript", "lang-bundle-web"] }
 //! ```
 //!
 //! Available features include per-language flags like `lang-rust`, `lang-javascript`,
-//! `lang-html`, and bundle flags like `bundle-web`, `bundle-web-extra`, `bundle-system`,
-//! `bundle-backend`, and `bundle-full`.
+//! `lang-html`, and bundle flags like `lang-bundle-web`, `lang-bundle-web-extra`,
+//! `lang-bundle-system`, `lang-bundle-backend`, and `lang-bundle-full`.
 //!
 //! Use `all-languages` to enable all language support:
 //!

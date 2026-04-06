@@ -734,7 +734,7 @@ fn sync_bundle_features(
         .context("missing [features] in crates/lumis-core/Cargo.toml")?;
 
     for (bundle_name, bundle) in &toml.bundles {
-        let bundle_feature = format!("bundle-{bundle_name}");
+        let bundle_feature = format!("lang-bundle-{bundle_name}");
         let parser_features = match &bundle.parsers {
             BundleParsers::List(parsers) => parsers
                 .iter()
