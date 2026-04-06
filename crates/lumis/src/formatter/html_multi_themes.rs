@@ -16,7 +16,7 @@
 //! theme_map.insert("dark".to_string(), themes::get("github_dark").unwrap());
 //!
 //! let formatter = HtmlMultiThemesBuilder::new()
-//!     .lang(Language::Rust)
+//!     .language(Language::Rust)
 //!     .themes(theme_map)
 //!     .default_theme("light")
 //!     .build()
@@ -94,7 +94,7 @@
 //! theme_map.insert("dark".to_string(), themes::get("github_dark").unwrap());
 //!
 //! let formatter = HtmlMultiThemesBuilder::new()
-//!     .lang(Language::Rust)
+//!     .language(Language::Rust)
 //!     .themes(theme_map)
 //!     .default_theme("light-dark()")
 //!     .build()
@@ -176,7 +176,7 @@ impl FromStr for DefaultTheme {
 /// themes.insert("dark".to_string(), themes::get("github_dark").unwrap());
 ///
 /// let formatter = HtmlMultiThemesBuilder::new()
-///     .lang(Language::Rust)
+///     .language(Language::Rust)
 ///     .themes(themes)
 ///     .default_theme("light")
 ///     .build()
@@ -185,7 +185,8 @@ impl FromStr for DefaultTheme {
 #[derive(Builder, Clone, Debug)]
 #[builder(default, build_fn(skip))]
 pub struct HtmlMultiThemes {
-    lang: Language,
+    #[builder(setter(custom))]
+    language: Language,
     themes: HashMap<String, Theme>,
     #[builder(setter(custom))]
     default_theme: Option<DefaultTheme>,
@@ -213,7 +214,7 @@ pub struct HtmlMultiThemes {
 /// themes.insert("dark".to_string(), themes::get("github_dark").unwrap());
 ///
 /// let formatter = HtmlMultiThemesBuilder::new()
-///     .lang(Language::Rust)
+///     .language(Language::Rust)
 ///     .themes(themes)
 ///     .default_theme("light")
 ///     .css_variable_prefix("--my-app")
@@ -225,6 +226,16 @@ impl HtmlMultiThemesBuilder {
         Self::default()
     }
 
+    pub fn language(&mut self, language: Language) -> &mut Self {
+        self.language = Some(language);
+        self
+    }
+
+    #[deprecated(note = "use `.language(...)` instead")]
+    pub fn lang(&mut self, language: Language) -> &mut Self {
+        self.language(language)
+    }
+
     pub fn default_theme<T: Into<DefaultThemeArg>>(&mut self, value: T) -> &mut Self {
         self.default_theme = Some(value.into().into_enum());
         self
@@ -232,7 +243,7 @@ impl HtmlMultiThemesBuilder {
 
     pub fn build(&mut self) -> Result<HtmlMultiThemes, String> {
         let result = HtmlMultiThemes {
-            lang: self.lang.take().unwrap_or(Language::PlainText),
+            language: self.language.take().unwrap_or(Language::PlainText),
             themes: self.themes.take().unwrap_or_default(),
             default_theme: self.default_theme.take().flatten(),
             css_variable_prefix: self
@@ -310,7 +321,7 @@ impl From<bool> for DefaultThemeArg {
 impl Default for HtmlMultiThemes {
     fn default() -> Self {
         Self {
-            lang: Language::PlainText,
+            language: Language::PlainText,
             themes: HashMap::new(),
             default_theme: None,
             css_variable_prefix: "--lumis".to_string(),
@@ -325,10 +336,11 @@ impl Default for HtmlMultiThemes {
 
 impl Formatter for HtmlMultiThemes {
     fn format(&self, source: &str, output: &mut dyn Write) -> io::Result<()> {
-        let events = highlight::highlight_events(source, self.lang).map_err(io::Error::other)?;
+        let events =
+            highlight::highlight_events(source, self.language).map_err(io::Error::other)?;
 
         let core_formatter = lumis_core::formatter::html_multi_themes::HtmlMultiThemes::new(
-            self.lang,
+            self.language,
             self.themes.clone(),
             self.default_theme.clone().map(map_default_theme),
             self.css_variable_prefix.clone(),
@@ -414,7 +426,7 @@ mod tests {
         );
 
         let formatter = HtmlMultiThemesBuilder::new()
-            .lang(Language::Rust)
+            .language(Language::Rust)
             .themes(themes)
             .default_theme("light")
             .italic(true)
@@ -447,7 +459,7 @@ mod tests {
         );
 
         let formatter = HtmlMultiThemesBuilder::new()
-            .lang(Language::Rust)
+            .language(Language::Rust)
             .themes(themes)
             .default_theme("light-dark()")
             .italic(true)
@@ -477,7 +489,7 @@ mod tests {
         );
 
         let formatter = HtmlMultiThemesBuilder::new()
-            .lang(Language::Rust)
+            .language(Language::Rust)
             .themes(themes)
             .default_theme("light-dark()")
             .build()
@@ -504,7 +516,7 @@ mod tests {
         );
 
         let formatter = HtmlMultiThemesBuilder::new()
-            .lang(Language::Rust)
+            .language(Language::Rust)
             .themes(themes)
             .build()
             .unwrap();
@@ -537,7 +549,7 @@ mod tests {
         );
 
         let formatter = HtmlMultiThemesBuilder::new()
-            .lang(Language::Rust)
+            .language(Language::Rust)
             .themes(themes)
             .default_theme("light")
             .italic(true)
@@ -576,7 +588,7 @@ mod tests {
         );
 
         let formatter = HtmlMultiThemesBuilder::new()
-            .lang(Language::Rust)
+            .language(Language::Rust)
             .themes(themes.clone())
             .default_theme("light-dark()")
             .italic(false)
@@ -591,7 +603,7 @@ mod tests {
         assert!(!html.contains("font-style: light-dark("));
 
         let formatter = HtmlMultiThemesBuilder::new()
-            .lang(Language::Rust)
+            .language(Language::Rust)
             .themes(themes)
             .default_theme("light-dark()")
             .italic(true)

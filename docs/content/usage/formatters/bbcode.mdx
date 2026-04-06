@@ -54,7 +54,7 @@ use lumis::{highlight, BBCodeScopedBuilder, languages::Language};
 let bbcode = highlight(
     "fn main() {}",
     BBCodeScopedBuilder::new()
-        .lang(Language::Rust)
+        .language(Language::Rust)
         .build()
         .unwrap(),
 );

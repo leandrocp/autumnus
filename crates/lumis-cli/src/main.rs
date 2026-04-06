@@ -525,7 +525,7 @@ fn render_output(
         Formatter::HtmlInline => {
             let mut builder = lumis_core::formatter::HtmlInlineBuilder::new();
             builder
-                .lang(lang)
+                .language(lang)
                 .theme(theme_obj)
                 .italic(false)
                 .include_highlights(false);
@@ -570,7 +570,7 @@ fn render_output(
 
             let mut builder = lumis_core::formatter::HtmlMultiThemesBuilder::new();
             builder
-                .lang(lang)
+                .language(lang)
                 .themes(theme_map)
                 .css_variable_prefix(css_variable_prefix);
 
@@ -595,7 +595,7 @@ fn render_output(
 
         Formatter::HtmlLinked => {
             let mut builder = lumis_core::formatter::HtmlLinkedBuilder::new();
-            builder.lang(lang);
+            builder.language(lang);
 
             if let Some(lines) = highlight_lines {
                 let hl = lumis_core::formatter::html_linked::HighlightLines {
@@ -613,7 +613,7 @@ fn render_output(
 
         Formatter::Terminal => {
             let mut builder = lumis_core::formatter::TerminalBuilder::new();
-            builder.lang(lang).theme(theme_obj);
+            builder.language(lang).theme(theme_obj);
 
             let fmt = builder.build().map_err(|e| anyhow::anyhow!("{}", e))?;
             let mut output = Vec::new();

@@ -85,7 +85,7 @@ fn check_html_inline(fixture: &Fixture) {
     let lang: Language = fixture.metadata.language.parse().unwrap();
     let theme = themes::get(&fixture.metadata.theme).unwrap();
     let fmt = HtmlInlineBuilder::new()
-        .lang(lang)
+        .language(lang)
         .theme(Some(theme))
         .build()
         .unwrap();
@@ -97,7 +97,7 @@ fn check_html_inline(fixture: &Fixture) {
 
 fn check_html_linked(fixture: &Fixture) {
     let lang: Language = fixture.metadata.language.parse().unwrap();
-    let fmt = HtmlLinkedBuilder::new().lang(lang).build().unwrap();
+    let fmt = HtmlLinkedBuilder::new().language(lang).build().unwrap();
     let mut out = Vec::new();
     fmt.format(&fixture.source, &mut out).unwrap();
     assert_eq!(
@@ -112,7 +112,7 @@ fn check_html_multi_themes(fixture: &Fixture) {
     let mut map = HashMap::new();
     map.insert("main".to_string(), theme);
     let fmt = HtmlMultiThemesBuilder::new()
-        .lang(lang)
+        .language(lang)
         .themes(map)
         .default_theme("main")
         .build()
@@ -129,7 +129,7 @@ fn check_terminal(fixture: &Fixture) {
     let lang: Language = fixture.metadata.language.parse().unwrap();
     let theme = themes::get(&fixture.metadata.theme).unwrap();
     let fmt = TerminalBuilder::new()
-        .lang(lang)
+        .language(lang)
         .theme(Some(theme))
         .build()
         .unwrap();
@@ -143,7 +143,7 @@ fn check_terminal(fixture: &Fixture) {
 
 fn check_bbcode(fixture: &Fixture) {
     let lang: Language = fixture.metadata.language.parse().unwrap();
-    let fmt = BBCodeScopedBuilder::new().lang(lang).build().unwrap();
+    let fmt = BBCodeScopedBuilder::new().language(lang).build().unwrap();
     let mut out = Vec::new();
     fmt.format(&fixture.source, &mut out).unwrap();
     assert_eq!(
@@ -154,6 +154,19 @@ fn check_bbcode(fixture: &Fixture) {
 
 fn normalize_newlines(value: &str) -> String {
     value.replace("\r\n", "\n")
+}
+
+#[test]
+#[allow(deprecated)]
+fn deprecated_lang_builder_alias_still_works() {
+    let formatter = HtmlInlineBuilder::new()
+        .lang(Language::Rust)
+        .build()
+        .unwrap();
+
+    let html = highlight("fn main() {}", formatter);
+
+    assert!(html.contains("language-rust"));
 }
 
 // Generate one test module per fixture directory found at build time.

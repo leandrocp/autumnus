@@ -22,7 +22,7 @@ fn main() {
 
     // Generate with CSS variables
     let formatter = HtmlMultiThemesBuilder::new()
-        .lang(Language::Rust)
+        .language(Language::Rust)
         .themes(themes)
         .default_theme("light")
         .build()

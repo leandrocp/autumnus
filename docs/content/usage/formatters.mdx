@@ -62,7 +62,7 @@ const html = await highlight(
 use lumis::{highlight, HtmlInlineBuilder, languages::Language, themes};
 
 let formatter = HtmlInlineBuilder::new()
-    .lang(Language::Rust)
+    .language(Language::Rust)
     .theme(Some(themes::get("dracula").unwrap()))
     .pre_class(Some("code-block".to_string()))
     .build()
@@ -138,7 +138,7 @@ const html = await highlight(
 use lumis::{highlight, HtmlLinkedBuilder, languages::Language};
 
 let formatter = HtmlLinkedBuilder::new()
-    .lang(Language::Rust)
+    .language(Language::Rust)
     .pre_class(Some("code-block".to_string()))
     .build()
     .unwrap();
@@ -221,7 +221,7 @@ theme_map.insert("light".to_string(), themes::get("github_light").unwrap());
 theme_map.insert("dark".to_string(), themes::get("github_dark").unwrap());
 
 let formatter = HtmlMultiThemesBuilder::new()
-    .lang(Language::Javascript)
+    .language(Language::Javascript)
     .themes(theme_map)
     .default_theme("light-dark()")
     .build()
@@ -307,7 +307,7 @@ const ansi = await highlight(
 use lumis::{highlight, TerminalBuilder, languages::Language, themes};
 
 let formatter = TerminalBuilder::new()
-    .lang(Language::Rust)
+    .language(Language::Rust)
     .theme(Some(themes::get("dracula").unwrap()))
     .build()
     .unwrap();
@@ -384,7 +384,7 @@ use lumis::{highlight, BBCodeScopedBuilder, languages::Language};
 let output = highlight(
     "fn main() {}",
     BBCodeScopedBuilder::new()
-        .lang(Language::Rust)
+        .language(Language::Rust)
         .build()
         .unwrap(),
 );

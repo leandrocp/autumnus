@@ -40,7 +40,7 @@ use lumis::{highlight, HtmlInlineBuilder, languages::Language, themes};
 let html = highlight(
     "const x = 1",
     HtmlInlineBuilder::new()
-        .lang(Language::Javascript)
+        .language(Language::Javascript)
         .theme(Some(themes::get("dracula").unwrap()))
         .build()
         .unwrap(),
@@ -143,7 +143,7 @@ use lumis::{highlight, HtmlLinkedBuilder, languages::Language};
 let html = highlight(
     "const x = 1",
     HtmlLinkedBuilder::new()
-        .lang(Language::Javascript)
+        .language(Language::Javascript)
         .pre_class(Some("demo".to_string()))
         .build()
         .unwrap(),
@@ -203,7 +203,7 @@ theme_map.insert("dark".to_string(), themes::get("github_dark").unwrap());
 let html = highlight(
     "const x = 1",
     HtmlMultiThemesBuilder::new()
-        .lang(Language::Javascript)
+        .language(Language::Javascript)
         .themes(theme_map)
         .default_theme("light-dark()")
         .build()
@@ -263,7 +263,7 @@ use lumis::{highlight, TerminalBuilder, languages::Language, themes};
 let ansi = highlight(
     "fn main() {}",
     TerminalBuilder::new()
-        .lang(Language::Rust)
+        .language(Language::Rust)
         .theme(Some(themes::get("dracula").unwrap()))
         .build()
         .unwrap(),
@@ -317,7 +317,7 @@ let highlight_lines = HighlightLines {
 };
 
 let formatter = HtmlInlineBuilder::new()
-    .lang(Language::PlainText)
+    .language(Language::PlainText)
     .theme(Some(themes::get("dracula").unwrap()))
     .highlight_lines(Some(highlight_lines))
     .build()
@@ -373,7 +373,7 @@ use lumis::{highlight, HtmlInlineBuilder, formatter::HtmlElement, languages::Lan
 let html = highlight(
     "fn main() {}",
     HtmlInlineBuilder::new()
-        .lang(Language::Rust)
+        .language(Language::Rust)
         .theme(Some(themes::get("dracula").unwrap()))
         .header(Some(HtmlElement {
             open_tag: "<figure><figcaption>main.rs</figcaption>".to_string(),
@@ -455,7 +455,7 @@ const output = hl.highlight(source, htmlInline({language: html, theme: dracula})
 ```rust
 // nested languages are handled automatically when compiled in
 let html = highlight(source, HtmlInlineBuilder::new()
-    .lang(Language::Html)
+    .language(Language::Html)
     .theme(Some(themes::get("dracula").unwrap()))
     .build()
     .unwrap());
@@ -489,7 +489,7 @@ use lumis::{write_highlight, HtmlInlineBuilder, languages::Language};
 use std::fs::File;
 
 let formatter = HtmlInlineBuilder::new()
-    .lang(Language::Rust)
+    .language(Language::Rust)
     .build()
     .unwrap();
 

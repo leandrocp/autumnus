@@ -145,7 +145,7 @@ impl Default for HighlightLines {
 /// let theme = themes::get("github_dark").unwrap();
 ///
 /// let formatter = HtmlInlineBuilder::new()
-///     .lang(Language::JavaScript)
+///     .language(Language::JavaScript)
 ///     .theme(Some(theme))
 ///     .pre_class(Some("code-block".to_string()))
 ///     .build()
@@ -157,7 +157,8 @@ impl Default for HighlightLines {
 #[derive(Builder, Clone, Debug)]
 #[builder(default)]
 pub struct HtmlInline {
-    lang: Language,
+    #[builder(setter(custom))]
+    language: Language,
     theme: Option<Theme>,
     pre_class: Option<String>,
     italic: bool,
@@ -170,12 +171,22 @@ impl HtmlInlineBuilder {
     pub fn new() -> Self {
         Self::default()
     }
+
+    pub fn language(&mut self, language: Language) -> &mut Self {
+        self.language = Some(language);
+        self
+    }
+
+    #[deprecated(note = "use `.language(...)` instead")]
+    pub fn lang(&mut self, language: Language) -> &mut Self {
+        self.language(language)
+    }
 }
 
 impl HtmlInline {
     #[allow(clippy::too_many_arguments)]
     pub fn new(
-        lang: Language,
+        language: Language,
         theme: Option<Theme>,
         pre_class: Option<String>,
         italic: bool,
@@ -184,7 +195,7 @@ impl HtmlInline {
         header: Option<HtmlElement>,
     ) -> Self {
         Self {
-            lang,
+            language,
             theme,
             pre_class,
             italic,
@@ -198,7 +209,7 @@ impl HtmlInline {
 impl Default for HtmlInline {
     fn default() -> Self {
         Self {
-            lang: Language::PlainText,
+            language: Language::PlainText,
             theme: None,
             pre_class: None,
             italic: false,
@@ -211,10 +222,11 @@ impl Default for HtmlInline {
 
 impl Formatter for HtmlInline {
     fn format(&self, source: &str, output: &mut dyn Write) -> io::Result<()> {
-        let events = highlight::highlight_events(source, self.lang).map_err(io::Error::other)?;
+        let events =
+            highlight::highlight_events(source, self.language).map_err(io::Error::other)?;
 
         let core_formatter = lumis_core::formatter::html_inline::HtmlInline::new(
-            self.lang,
+            self.language,
             self.theme.clone(),
             self.pre_class.clone(),
             self.italic,
@@ -313,7 +325,7 @@ mod tests {
     fn test_builder_pattern() {
         let theme = themes::get("github_light").unwrap();
         let formatter = HtmlInlineBuilder::new()
-            .lang(Language::Rust)
+            .language(Language::Rust)
             .theme(Some(theme))
             .pre_class(Some("test-pre-class".to_string()))
             .italic(true)

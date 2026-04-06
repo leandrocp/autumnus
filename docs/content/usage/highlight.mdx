@@ -46,7 +46,7 @@ use lumis::{highlight, HtmlInlineBuilder, languages::Language, themes};
 let theme = themes::get("dracula").unwrap();
 
 let formatter = HtmlInlineBuilder::new()
-    .lang(Language::Javascript)
+    .language(Language::Javascript)
     .theme(Some(theme))
     .build()
     .unwrap();
@@ -94,11 +94,13 @@ lumis highlight index.js \
   </TabItem>
 </Tabs>
 
+Rust builders use `.language(...)`. The older `.lang(...)` setter still works but is deprecated.
+
 ## Options by runtime
 
 | Need | CLI | Rust | Elixir | JavaScript | Java |
 | --- | --- | --- | --- | --- | --- |
-| Set language | `--language` | `.lang(...)` | `language: "..."` | `language: ...` | `withLang(...)` |
+| Set language | `--language` | `.language(...)` | `language: "..."` | `language: ...` | `withLang(...)` |
 | Set theme | `--theme` | `.theme(...)` | `theme: "..."` | `theme: ...` | `withTheme(...)` |
 | Choose output | `--formatter` | builder type | `formatter: ...` | formatter factory | runtime-specific |
 

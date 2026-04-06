@@ -50,7 +50,7 @@ use lumis::{highlight, HtmlInlineBuilder, languages::Language, themes};
 let html = highlight(
     "fn main() {}",
     HtmlInlineBuilder::new()
-        .lang(Language::Rust)
+        .language(Language::Rust)
         .theme(Some(themes::get("dracula").unwrap()))
         .build()
         .unwrap(),
@@ -116,7 +116,7 @@ const html = await highlight(
 
 ```rust
 let formatter = HtmlInlineBuilder::new()
-    .lang(Language::Javascript)
+    .language(Language::Javascript)
     .theme(Some(themes::get("dracula").unwrap()))
     .pre_class(Some("code-block".to_string()))
     .include_highlights(true)
@@ -172,7 +172,7 @@ const html = await highlight(
 use lumis::formatter::HtmlElement;
 
 let formatter = HtmlInlineBuilder::new()
-    .lang(Language::Javascript)
+    .language(Language::Javascript)
     .theme(Some(themes::get("dracula").unwrap()))
     .header(Some(HtmlElement {
         open_tag: "<figure><figcaption>index.js</figcaption>".to_string(),

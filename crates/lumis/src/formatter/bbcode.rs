@@ -39,7 +39,7 @@ use std::io::{self, Write};
 /// let code = "fn main() { println!(\"Hello\"); }";
 ///
 /// let formatter = BBCodeScopedBuilder::new()
-///     .lang(Language::Rust)
+///     .language(Language::Rust)
 ///     .build()
 ///     .unwrap();
 ///
@@ -50,34 +50,46 @@ use std::io::{self, Write};
 #[derive(Builder, Clone, Debug)]
 #[builder(default)]
 pub struct BBCodeScoped {
-    lang: Language,
+    #[builder(setter(custom))]
+    language: Language,
 }
 
 impl BBCodeScopedBuilder {
     pub fn new() -> Self {
         Self::default()
     }
+
+    pub fn language(&mut self, language: Language) -> &mut Self {
+        self.language = Some(language);
+        self
+    }
+
+    #[deprecated(note = "use `.language(...)` instead")]
+    pub fn lang(&mut self, language: Language) -> &mut Self {
+        self.language(language)
+    }
 }
 
 impl BBCodeScoped {
-    pub fn new(lang: Language) -> Self {
-        Self { lang }
+    pub fn new(language: Language) -> Self {
+        Self { language }
     }
 }
 
 impl Default for BBCodeScoped {
     fn default() -> Self {
         Self {
-            lang: Language::PlainText,
+            language: Language::PlainText,
         }
     }
 }
 
 impl Formatter for BBCodeScoped {
     fn format(&self, source: &str, output: &mut dyn Write) -> io::Result<()> {
-        let events = highlight::highlight_events(source, self.lang).map_err(io::Error::other)?;
+        let events =
+            highlight::highlight_events(source, self.language).map_err(io::Error::other)?;
 
-        let core_formatter = lumis_core::formatter::bbcode::BBCodeScoped::new(self.lang);
+        let core_formatter = lumis_core::formatter::bbcode::BBCodeScoped::new(self.language);
         core_formatter.render(source, &events, output)
     }
 }
@@ -113,7 +125,7 @@ mod tests {
     #[test]
     fn test_builder_pattern() {
         let formatter = BBCodeScopedBuilder::new()
-            .lang(Language::Rust)
+            .language(Language::Rust)
             .build()
             .unwrap();
 

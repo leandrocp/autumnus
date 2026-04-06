@@ -55,7 +55,7 @@ use lumis::{highlight, HtmlInlineBuilder, languages::Language, themes};
 let theme = themes::get("dracula").unwrap();
 
 let formatter = HtmlInlineBuilder::new()
-    .lang(Language::Javascript)
+    .language(Language::Javascript)
     .theme(Some(theme))
     .build()
     .unwrap();

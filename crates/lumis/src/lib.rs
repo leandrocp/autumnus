@@ -11,7 +11,7 @@
 //! let theme = themes::get("dracula").unwrap();
 //!
 //! let formatter = HtmlInlineBuilder::new()
-//!     .lang(Language::Rust)
+//!     .language(Language::Rust)
 //!     .theme(Some(theme))
 //!     .build()
 //!     .unwrap();
@@ -30,7 +30,7 @@
 //! let theme = themes::get("dracula").unwrap();
 //!
 //! let formatter = HtmlInlineBuilder::new()
-//!     .lang(Language::Python)
+//!     .language(Language::Python)
 //!     .theme(Some(theme))
 //!     .build()
 //!     .unwrap();
@@ -45,7 +45,7 @@
 //! use std::fs::File;
 //!
 //! # let code = "x = 1";
-//! # let formatter = TerminalBuilder::new().lang(Language::Python).build().unwrap();
+//! # let formatter = TerminalBuilder::new().language(Language::Python).build().unwrap();
 //! let mut file = File::create("output.txt").unwrap();
 //!
 //! write_highlight(&mut file, code, formatter).unwrap();
@@ -350,7 +350,7 @@ pub use crate::formatter::{
 /// let code = r#"fn main() { println!("Hello!"); }"#;
 ///
 /// let formatter = HtmlInlineBuilder::new()
-///     .lang(Language::Rust)
+///     .language(Language::Rust)
 ///     .build()
 ///     .unwrap();
 ///
@@ -383,7 +383,7 @@ pub fn highlight<F: Formatter>(source: &str, formatter: F) -> String {
 ///
 /// let code = "fn main() { }";
 /// let formatter = HtmlInlineBuilder::new()
-///     .lang(Language::Rust)
+///     .language(Language::Rust)
 ///     .build()
 ///     .unwrap();
 ///
@@ -414,7 +414,7 @@ mod tests {
         let mut buffer = Vec::new();
 
         let formatter = HtmlInlineBuilder::default()
-            .lang(Language::JavaScript)
+            .language(Language::JavaScript)
             .theme(themes::get("catppuccin_frappe").ok())
             .build()
             .unwrap();
@@ -452,7 +452,7 @@ end
 </div></code></pre>"#;
 
         let formatter = HtmlInlineBuilder::default()
-            .lang(Language::Elixir)
+            .language(Language::Elixir)
             .theme(themes::get("catppuccin_frappe").ok())
             .build()
             .unwrap();
@@ -476,7 +476,7 @@ end
 </div></code></pre>"#;
 
         let formatter = HtmlInlineBuilder::default()
-            .lang(Language::Elixir)
+            .language(Language::Elixir)
             .include_highlights(true)
             .theme(themes::get("catppuccin_frappe").ok())
             .build()
@@ -494,7 +494,7 @@ end
 </div></code></pre>"#;
 
         let formatter = HtmlInlineBuilder::default()
-            .lang(Language::Elixir)
+            .language(Language::Elixir)
             .theme(themes::get("catppuccin_frappe").ok())
             .build()
             .unwrap();
@@ -530,7 +530,7 @@ end
 </div></code></pre>"#;
 
         let formatter = HtmlLinkedBuilder::default()
-            .lang(Language::Elixir)
+            .language(Language::Elixir)
             .build()
             .unwrap();
 
@@ -546,7 +546,7 @@ end
 </div></code></pre>"#;
 
         let formatter = HtmlLinkedBuilder::default()
-            .lang(Language::Elixir)
+            .language(Language::Elixir)
             .build()
             .unwrap();
 
@@ -559,7 +559,7 @@ end
     fn test_guess_language_by_file_name() {
         let code = "foo = 1";
         let formatter = HtmlInlineBuilder::default()
-            .lang(Language::Elixir)
+            .language(Language::Elixir)
             .theme(themes::get("catppuccin_frappe").ok())
             .build()
             .unwrap();
@@ -572,7 +572,7 @@ end
     fn test_guess_language_by_file_extension() {
         let code1 = "# Title";
         let formatter1 = HtmlInlineBuilder::default()
-            .lang(Language::Markdown)
+            .language(Language::Markdown)
             .theme(themes::get("catppuccin_frappe").ok())
             .build()
             .unwrap();
@@ -582,7 +582,7 @@ end
 
         let code2 = "foo = 1";
         let formatter2 = HtmlInlineBuilder::default()
-            .lang(Language::Elixir)
+            .language(Language::Elixir)
             .theme(themes::get("catppuccin_frappe").ok())
             .build()
             .unwrap();
@@ -595,7 +595,7 @@ end
     fn test_guess_language_by_shebang() {
         let code = "#!/usr/bin/env elixir";
         let formatter = HtmlInlineBuilder::default()
-            .lang(Language::Elixir)
+            .language(Language::Elixir)
             .theme(themes::get("catppuccin_frappe").ok())
             .build()
             .unwrap();
@@ -608,7 +608,7 @@ end
     fn test_fallback_to_plain_text() {
         let code = "source code";
         let formatter = HtmlInlineBuilder::default()
-            .lang(Language::PlainText)
+            .language(Language::PlainText)
             .theme(themes::get("catppuccin_frappe").ok())
             .build()
             .unwrap();
@@ -621,7 +621,7 @@ end
     fn test_highlight_terminal() {
         let code = "puts 'Hello from Ruby!'";
         let formatter = TerminalBuilder::default()
-            .lang(Language::Ruby)
+            .language(Language::Ruby)
             .theme(themes::get("dracula").ok())
             .build()
             .unwrap();
@@ -637,7 +637,7 @@ end
 
         // Test HtmlInline with header
         let inline_formatter = HtmlInlineBuilder::default()
-            .lang(Language::Rust)
+            .language(Language::Rust)
             .header(Some(formatter::HtmlElement {
                 open_tag: "<div class=\"code-container\">".to_string(),
                 close_tag: "</div>".to_string(),
@@ -653,7 +653,7 @@ end
 
         // Test HtmlLinked with header
         let linked_formatter = HtmlLinkedBuilder::default()
-            .lang(Language::Rust)
+            .language(Language::Rust)
             .header(Some(formatter::HtmlElement {
                 open_tag: "<section class=\"code-section\">".to_string(),
                 close_tag: "</section>".to_string(),

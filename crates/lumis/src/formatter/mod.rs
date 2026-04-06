@@ -34,7 +34,7 @@
 //!
 //! // HTML with inline styles
 //! let formatter = HtmlInlineBuilder::new()
-//!     .lang(Language::Rust)
+//!     .language(Language::Rust)
 //!     .theme(Some(theme))
 //!     .pre_class(Some("code-block".to_string()))
 //!     .italic(false)
@@ -61,7 +61,7 @@
 //!
 //! // HTML with multiple theme support using CSS variables
 //! let formatter = HtmlMultiThemesBuilder::new()
-//!     .lang(Language::Rust)
+//!     .language(Language::Rust)
 //!     .themes(themes_map)
 //!     .default_theme("light")
 //!     .build()
@@ -81,7 +81,7 @@
 //! let code = "<div>Hello World</div>";
 //!
 //! let formatter = HtmlLinkedBuilder::new()
-//!     .lang(Language::HTML)
+//!     .language(Language::HTML)
 //!     .pre_class(Some("my-code".to_string()))
 //!     .build()
 //!     .unwrap();
@@ -101,7 +101,7 @@
 //! let theme = themes::get("github_light").unwrap();
 //!
 //! let formatter = TerminalBuilder::new()
-//!     .lang(Language::Ruby)
+//!     .language(Language::Ruby)
 //!     .theme(Some(theme))
 //!     .build()
 //!     .unwrap();
@@ -128,7 +128,7 @@
 //! };
 //!
 //! let formatter = HtmlInlineBuilder::new()
-//!     .lang(Language::PlainText)
+//!     .language(Language::PlainText)
 //!     .theme(Some(theme))
 //!     .include_highlights(false)
 //!     .highlight_lines(Some(highlight_lines))
@@ -253,7 +253,7 @@ pub trait Formatter: Send + Sync {
     /// use lumis::{formatter::Formatter, HtmlInlineBuilder, languages::Language};
     ///
     /// let formatter = HtmlInlineBuilder::new()
-    ///     .lang(Language::Rust)
+    ///     .language(Language::Rust)
     ///     .build()
     ///     .unwrap();
     ///

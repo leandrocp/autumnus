@@ -22,7 +22,7 @@ const RUST_SOURCE: &str = r#"fn main() {
 fn highlight(source: &str, language: Language) -> String {
     let theme = themes::get("dracula").unwrap();
     let formatter = TerminalBuilder::new()
-        .lang(language)
+        .language(language)
         .theme(Some(theme))
         .build()
         .unwrap();

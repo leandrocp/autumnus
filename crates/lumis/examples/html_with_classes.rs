@@ -28,7 +28,7 @@ export default {
     let lang = Language::guess(Some("vue"), code);
 
     let formatter = HtmlLinkedBuilder::new()
-        .lang(lang)
+        .language(lang)
         .pre_class(Some("code-block".to_string()))
         .build()
         .expect("Failed to build formatter");

@@ -41,7 +41,7 @@ use ratatui::widgets::{Block, Paragraph};
 fn code_paragraph(source: &str, language: Language) -> Paragraph<'static> {
     let theme = themes::get("dracula").unwrap();
     let formatter = TerminalBuilder::new()
-        .lang(language)
+        .language(language)
         .theme(Some(theme))
         .build()
         .unwrap();

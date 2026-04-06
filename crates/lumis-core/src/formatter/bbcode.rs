@@ -32,25 +32,36 @@ use std::io::{self, Write};
 #[derive(Builder, Clone, Debug)]
 #[builder(default)]
 pub struct BBCodeScoped {
-    lang: Language,
+    #[builder(setter(custom))]
+    language: Language,
 }
 
 impl BBCodeScopedBuilder {
     pub fn new() -> Self {
         Self::default()
     }
+
+    pub fn language(&mut self, language: Language) -> &mut Self {
+        self.language = Some(language);
+        self
+    }
+
+    #[deprecated(note = "use `.language(...)` instead")]
+    pub fn lang(&mut self, language: Language) -> &mut Self {
+        self.language(language)
+    }
 }
 
 impl BBCodeScoped {
-    pub fn new(lang: Language) -> Self {
-        Self { lang }
+    pub fn new(language: Language) -> Self {
+        Self { language }
     }
 }
 
 impl Default for BBCodeScoped {
     fn default() -> Self {
         Self {
-            lang: Language::PlainText,
+            language: Language::PlainText,
         }
     }
 }
