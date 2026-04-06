@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4](https://github.com/leandrocp/lumis/compare/rust-cli@v0.1.3...rust-cli@v0.1.4) (2026-04-06)
+
+
+### Features
+
+* align `lang` -&gt; `language` ([#591](https://github.com/leandrocp/lumis/issues/591)) ([ec9614d](https://github.com/leandrocp/lumis/commit/ec9614d7e6631ec9c5146e758a4b6e849446e876))
+
 ## [0.1.3](https://github.com/leandrocp/lumis/compare/rust-cli@v0.1.2...rust-cli@v0.1.3) (2026-04-04)
 
 
