@@ -65,7 +65,7 @@ All language metadata lives here. Consumed by:
 
 Bundle definitions also live in `languages.toml` under `[bundles.*]`.
 
-For Rust crates, bundle support is implemented as Cargo features such as `bundle-web` and `bundle-system` that enable the corresponding `lang-*` features transitively. The `bundle-*` feature lists in `crates/lumis/Cargo.toml` and `crates/lumis-core/Cargo.toml` are auto-generated from `languages.toml` by `just cargo-update-features`.
+For Rust crates, bundle support is implemented as Cargo features such as `lang-bundle-web` and `lang-bundle-system` that enable the corresponding `lang-*` features transitively. The `lang-bundle-*` feature lists in `crates/lumis/Cargo.toml` and `crates/lumis-core/Cargo.toml` are auto-generated from `languages.toml` by `just cargo-update-features`.
 
 - Keep one parser ID per line inside bundle arrays for cleaner diffs.
 - After changing parser or bundle entries, sync Rust feature manifests and regenerate the checked-in JavaScript outputs:
@@ -168,7 +168,7 @@ In `crates/lumis/Cargo.toml`:
   lang-{name} = ["lumis-core/lang-{name}"]
   ```
 - Add `lang-{name}` to the `all-languages` list in both `crates/lumis/Cargo.toml` and `crates/lumis-core/Cargo.toml`
-- If the language belongs in an existing bundle, add it to the matching bundle in `languages.toml`, then run `just cargo-update-features` to regenerate the `bundle-*` feature lists in both Cargo manifests
+- If the language belongs in an existing bundle, add it to the matching bundle in `languages.toml`, then run `just cargo-update-features` to regenerate the `lang-bundle-*` feature lists in both Cargo manifests
 
 #### 3. Fetch parser and queries
 

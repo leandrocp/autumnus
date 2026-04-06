@@ -1,5 +1,5 @@
 #[cfg(all(
-    feature = "bundle-web",
+    feature = "lang-bundle-web",
     feature = "lang-rust",
     feature = "lang-javascript"
 ))]
@@ -16,7 +16,7 @@ mod tests {
     }
 
     #[test]
-    fn html_guessing_works_when_html_is_only_enabled_via_bundle() {
+    fn html_guessing_works_when_html_is_only_enabled_via_lang_bundle() {
         let src = "<!DOCTYPE html>\n<html><body>Hello</body></html>";
 
         assert_eq!(Language::guess(None, src), Language::HTML);
