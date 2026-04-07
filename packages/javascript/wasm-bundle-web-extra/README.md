@@ -1,6 +1,6 @@
 # @lumis-sh/wasm-bundle-web-extra
 
-Static WASM imports for the web-extra Lumis bundle.
+Lumis WASM web-extra language bundle.
 
 ## Install
 
@@ -8,11 +8,11 @@ Static WASM imports for the web-extra Lumis bundle.
 npm install @lumis-sh/lumis @lumis-sh/wasm-bundle-web-extra
 ```
 
-## Node.js
+## Usage in Node.js
 
 Install this package alongside `@lumis-sh/lumis/bundles/web-extra` and Lumis will resolve the local parser packages automatically.
 
-## Browser bundlers
+## Usage in browsers
 
 ```ts
 import { createHighlighter, withWasmBundle } from '@lumis-sh/lumis'

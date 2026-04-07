@@ -1,6 +1,6 @@
 # @lumis-sh/wasm-bundle-full
 
-Static WASM imports for the full Lumis bundle.
+Lumis WASM full language bundle.
 
 ## Install
 
@@ -8,11 +8,11 @@ Static WASM imports for the full Lumis bundle.
 npm install @lumis-sh/lumis @lumis-sh/wasm-bundle-full
 ```
 
-## Node.js
+## Usage in Node.js
 
 Install this package alongside `@lumis-sh/lumis/bundles/full` and Lumis will resolve the local parser packages automatically.
 
-## Browser bundlers
+## Usage in browsers
 
 ```ts
 import { createHighlighter, withWasmBundle } from '@lumis-sh/lumis'

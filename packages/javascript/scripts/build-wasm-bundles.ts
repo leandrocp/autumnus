@@ -132,7 +132,7 @@ function writeBundlePackage(
     .join("\n");
 
   const entries = languageIds
-    .map((id) => `  ${JSON.stringify(id)}: ${importName(wasmPackagesByLanguage[id])},`)
+    .map((id) => `  ${JSON.stringify(id)}: ${importName(wasmPackagesByLanguage[id]!)},`)
     .join("\n");
 
   const indexJs = `${importLines}
@@ -191,7 +191,7 @@ export default bundledWasms
 
   const readme = `# @lumis-sh/wasm-bundle-${bundleName}
 
-Static WASM imports for the ${bundleName} Lumis bundle.
+Lumis WASM ${bundleName} language bundle.
 
 ## Install
 
