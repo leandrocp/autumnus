@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.6](https://github.com/leandrocp/lumis/compare/wasm-bundle-full@v0.0.5...wasm-bundle-full@v0.0.6) (2026-04-07)
+
+
+### Bug Fixes
+
+* js release ([#686](https://github.com/leandrocp/lumis/issues/686)) ([41fbc43](https://github.com/leandrocp/lumis/commit/41fbc43bf731a124603de899d1a4cc94329cc663))
+
 ## [0.0.5](https://github.com/leandrocp/lumis/compare/wasm-bundle-full@v0.0.4...wasm-bundle-full@v0.0.5) (2026-04-07)
 
 
