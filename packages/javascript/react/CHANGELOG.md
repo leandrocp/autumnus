@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.1.0](https://github.com/leandrocp/lumis/compare/react@v0.0.3...react@v0.1.0) (2026-04-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* bump react package
+
+### Features
+
+* bump react package ([b2b11f8](https://github.com/leandrocp/lumis/commit/b2b11f8b3d0881edae288e66d5bf34bdc2343eb4))
+
+
+### Bug Fixes
+
+* js release ([#686](https://github.com/leandrocp/lumis/issues/686)) ([41fbc43](https://github.com/leandrocp/lumis/commit/41fbc43bf731a124603de899d1a4cc94329cc663))
+* react keywords ([8980a23](https://github.com/leandrocp/lumis/commit/8980a23781a48916dde11f8bc5a609e7dea645cc))
+
 ## [0.0.3](https://github.com/leandrocp/lumis/compare/react@v0.0.2...react@v0.0.3) (2026-04-06)
 
 
