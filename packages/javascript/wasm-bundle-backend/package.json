@@ -1,7 +1,7 @@
 {
   "name": "@lumis-sh/wasm-bundle-backend",
   "version": "0.0.3",
-  "description": "Lumis WASM backend language bundle.",
+  "description": "Lumis WASM backend language bundle",
   "author": "Leandro Pereira",
   "license": "MIT",
   "repository": {

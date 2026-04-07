@@ -1,7 +1,7 @@
 {
   "name": "@lumis-sh/wasm-bundle-web-extra",
   "version": "0.0.2",
-  "description": "Lumis WASM web-extra language bundle.",
+  "description": "Lumis WASM web-extra language bundle",
   "author": "Leandro Pereira",
   "license": "MIT",
   "repository": {

@@ -8,11 +8,11 @@ Lumis WASM backend language bundle.
 npm install @lumis-sh/lumis @lumis-sh/wasm-bundle-backend
 ```
 
-## Usage in Node.js
+## Node.js
 
 Install this package alongside `@lumis-sh/lumis/bundles/backend` and Lumis will resolve the local parser packages automatically.
 
-## Usage in browsers
+## Browser bundlers
 
 ```ts
 import { createHighlighter, withWasmBundle } from '@lumis-sh/lumis'
