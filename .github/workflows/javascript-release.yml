@@ -38,9 +38,6 @@ jobs:
           cache: "pnpm"
           cache-dependency-path: packages/javascript/pnpm-lock.yaml
 
-      - run: pnpm install --frozen-lockfile
-        working-directory: packages/javascript
-
       - name: Determine package to publish
         id: pkg
         run: |
@@ -52,70 +49,26 @@ jobs:
 
           if [ "$component" = "themes" ]; then
             set_output filter "@lumis-sh/themes"
-            set_output build_lumis false
-            set_output build_markdown_it false
-            set_output build_rehype false
-            set_output build_react false
           elif [ "$component" = "javascript" ]; then
             set_output filter "@lumis-sh/lumis"
-            set_output build_lumis true
-            set_output build_markdown_it false
-            set_output build_rehype false
-            set_output build_react false
           elif [ "$component" = "markdown-it-lumis" ]; then
             set_output filter "@lumis-sh/markdown-it-lumis"
-            set_output build_lumis true
-            set_output build_markdown_it true
-            set_output build_rehype false
-            set_output build_react false
           elif [ "$component" = "rehype-lumis" ]; then
             set_output filter "@lumis-sh/rehype-lumis"
-            set_output build_lumis true
-            set_output build_markdown_it false
-            set_output build_rehype true
-            set_output build_react false
           elif [ "$component" = "react" ]; then
             set_output filter "@lumis-sh/react"
-            set_output build_lumis true
-            set_output build_markdown_it false
-            set_output build_rehype false
-            set_output build_react true
           elif [[ "$component" == wasm-bundle-* ]]; then
             set_output filter "@lumis-sh/$component"
-            set_output build_lumis false
-            set_output build_markdown_it false
-            set_output build_rehype false
-            set_output build_react false
           else
             echo "Unknown component: $component" && exit 1
           fi
 
-      - name: Build themes
-        run: pnpm --filter @lumis-sh/themes build
-        working-directory: packages/javascript
-
-      - name: Build lumis
-        if: steps.pkg.outputs.build_lumis == 'true'
-        run: pnpm --filter @lumis-sh/lumis build
-        working-directory: packages/javascript
-
-      - name: Build markdown-it-lumis
-        if: steps.pkg.outputs.build_markdown_it == 'true'
-        run: pnpm --filter @lumis-sh/markdown-it-lumis build
-        working-directory: packages/javascript
-
-      - name: Build rehype-lumis
-        if: steps.pkg.outputs.build_rehype == 'true'
-        run: pnpm --filter @lumis-sh/rehype-lumis build
-        working-directory: packages/javascript
-
-      - name: Build react
-        if: steps.pkg.outputs.build_react == 'true'
-        run: pnpm --filter @lumis-sh/react build
+      - name: Install publish target dependencies
+        run: pnpm install --no-frozen-lockfile --config.recursive-install=false --filter "${{ steps.pkg.outputs.filter }}..."
         working-directory: packages/javascript
 
       - name: Publish to npm
-        run: pnpm --filter ${{ steps.pkg.outputs.filter }} publish --access public --no-git-checks --provenance
+        run: pnpm --filter "${{ steps.pkg.outputs.filter }}" publish --access public --no-git-checks --provenance
         working-directory: packages/javascript
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
