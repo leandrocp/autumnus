@@ -222,9 +222,6 @@ importers:
 
   wasm-bundle-backend:
     dependencies:
-      '@lumis-sh/lumis':
-        specifier: ^0.0.1
-        version: 0.0.1
       '@lumis-sh/wasm-csharp':
         specifier: ^0.26.0
         version: 0.26.0
@@ -276,12 +273,13 @@ importers:
       '@lumis-sh/wasm-typescript':
         specifier: ^0.26.0
         version: 0.26.1
+    devDependencies:
+      '@lumis-sh/lumis':
+        specifier: ^0.2.0
+        version: 0.2.0
 
   wasm-bundle-full:
     dependencies:
-      '@lumis-sh/lumis':
-        specifier: ^0.0.1
-        version: 0.0.1
       '@lumis-sh/wasm-angular':
         specifier: ^0.26.0
         version: 0.26.0
@@ -618,12 +616,13 @@ importers:
       '@lumis-sh/wasm-zsh':
         specifier: ^0.26.0
         version: 0.26.0
+    devDependencies:
+      '@lumis-sh/lumis':
+        specifier: ^0.2.0
+        version: 0.2.0
 
   wasm-bundle-system:
     dependencies:
-      '@lumis-sh/lumis':
-        specifier: ^0.0.1
-        version: 0.0.1
       '@lumis-sh/wasm-asm':
         specifier: ^0.26.0
         version: 0.26.0
@@ -663,12 +662,13 @@ importers:
       '@lumis-sh/wasm-zsh':
         specifier: ^0.26.0
         version: 0.26.0
+    devDependencies:
+      '@lumis-sh/lumis':
+        specifier: ^0.2.0
+        version: 0.2.0
 
   wasm-bundle-web:
     dependencies:
-      '@lumis-sh/lumis':
-        specifier: ^0.0.1
-        version: 0.0.1
       '@lumis-sh/wasm-css':
         specifier: ^0.26.0
         version: 0.26.1
@@ -690,12 +690,13 @@ importers:
       '@lumis-sh/wasm-typescript':
         specifier: ^0.26.0
         version: 0.26.1
+    devDependencies:
+      '@lumis-sh/lumis':
+        specifier: ^0.2.0
+        version: 0.2.0
 
   wasm-bundle-web-extra:
     dependencies:
-      '@lumis-sh/lumis':
-        specifier: ^0.1.0
-        version: 0.1.0
       '@lumis-sh/wasm-angular':
         specifier: ^0.26.0
         version: 0.26.0
@@ -753,6 +754,10 @@ importers:
       '@lumis-sh/wasm-xml':
         specifier: ^0.26.0
         version: 0.26.0
+    devDependencies:
+      '@lumis-sh/lumis':
+        specifier: ^0.2.0
+        version: 0.2.0
 
 packages:
 
@@ -994,12 +999,8 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@lumis-sh/lumis@0.0.1':
-    resolution: {integrity: sha512-CKUBXdOMOB4bsbrLL4cfz5X/70JKAKod4A5RxxWb80pEKxnrwWMsNVh6gDtoMW9FmHzQMItcmOPpqNgzYusIwg==}
-    engines: {node: '>=18'}
-
-  '@lumis-sh/lumis@0.1.0':
-    resolution: {integrity: sha512-qb2D4uMvz4ioGCZx6wPwFMv0GTi0o5svDSJIW5xzg5+xxNEgEd7BuiK2RWStDCcLUHVhoTCMH994IP/lP8lyqw==}
+  '@lumis-sh/lumis@0.2.0':
+    resolution: {integrity: sha512-zHa6r3Tf2W4bV8IbxeRhWQjBlWiDYTYpp/mIxakyzUDkBkGRlfd33IvHlb5r3XcLDplVZe/Y/MO1HXPQn+zCOg==}
     engines: {node: '>=18'}
 
   '@lumis-sh/wasm-angular@0.26.0':
@@ -2964,9 +2965,6 @@ packages:
   web-namespaces@2.0.1:
     resolution: {integrity: sha512-bKr1DkiNa2krS7qxNtdrtHAmzuYGFQLiQ13TsorsdT6ULTkPLKuu5+GsFpDlg6JFjUTwX2DyhMPG2be8uPrqsQ==}
 
-  web-tree-sitter@0.26.7:
-    resolution: {integrity: sha512-KiZhelTvBA/ziUHEO7Emb75cGVAq8iGZNabYaZm53Zpy50NsXyOW+xSHlwHt5CVg/TRPZBfeVLTTobF0LjFJ1w==}
-
   web-tree-sitter@0.26.8:
     resolution: {integrity: sha512-4sUwi7ZyOrIk5KLgYLkc2A/F0LFMQnBhfb+2Cdl7ik4ePJ6JD+fk4ofI2sA5eGawBKBaK4Vntt7Ww5KcEsay4A==}
 
@@ -3185,11 +3183,7 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@lumis-sh/lumis@0.0.1':
-    dependencies:
-      web-tree-sitter: 0.26.7
-
-  '@lumis-sh/lumis@0.1.0':
+  '@lumis-sh/lumis@0.2.0':
     dependencies:
       web-tree-sitter: 0.26.8
 
@@ -4999,8 +4993,6 @@ snapshots:
       xml-name-validator: 5.0.0
 
   web-namespaces@2.0.1: {}
-
-  web-tree-sitter@0.26.7: {}
 
   web-tree-sitter@0.26.8: {}
 

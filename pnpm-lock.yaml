@@ -487,9 +487,6 @@ importers:
 
   packages/javascript/wasm-bundle-backend:
     dependencies:
-      '@lumis-sh/lumis':
-        specifier: ^0.0.1
-        version: 0.0.1
       '@lumis-sh/wasm-csharp':
         specifier: ^0.26.0
         version: 0.26.0
@@ -541,12 +538,13 @@ importers:
       '@lumis-sh/wasm-typescript':
         specifier: ^0.26.0
         version: 0.26.1
+    devDependencies:
+      '@lumis-sh/lumis':
+        specifier: ^0.2.0
+        version: 0.2.0
 
   packages/javascript/wasm-bundle-full:
     dependencies:
-      '@lumis-sh/lumis':
-        specifier: ^0.0.1
-        version: 0.0.1
       '@lumis-sh/wasm-angular':
         specifier: ^0.26.0
         version: 0.26.0
@@ -883,12 +881,13 @@ importers:
       '@lumis-sh/wasm-zsh':
         specifier: ^0.26.0
         version: 0.26.0
+    devDependencies:
+      '@lumis-sh/lumis':
+        specifier: ^0.2.0
+        version: 0.2.0
 
   packages/javascript/wasm-bundle-system:
     dependencies:
-      '@lumis-sh/lumis':
-        specifier: ^0.0.1
-        version: 0.0.1
       '@lumis-sh/wasm-asm':
         specifier: ^0.26.0
         version: 0.26.0
@@ -928,12 +927,13 @@ importers:
       '@lumis-sh/wasm-zsh':
         specifier: ^0.26.0
         version: 0.26.0
+    devDependencies:
+      '@lumis-sh/lumis':
+        specifier: ^0.2.0
+        version: 0.2.0
 
   packages/javascript/wasm-bundle-web:
     dependencies:
-      '@lumis-sh/lumis':
-        specifier: ^0.0.1
-        version: 0.0.1
       '@lumis-sh/wasm-css':
         specifier: ^0.26.0
         version: 0.26.1
@@ -955,12 +955,13 @@ importers:
       '@lumis-sh/wasm-typescript':
         specifier: ^0.26.0
         version: 0.26.1
+    devDependencies:
+      '@lumis-sh/lumis':
+        specifier: ^0.2.0
+        version: 0.2.0
 
   packages/javascript/wasm-bundle-web-extra:
     dependencies:
-      '@lumis-sh/lumis':
-        specifier: ^0.1.0
-        version: 0.1.0
       '@lumis-sh/wasm-angular':
         specifier: ^0.26.0
         version: 0.26.0
@@ -1018,24 +1019,22 @@ importers:
       '@lumis-sh/wasm-xml':
         specifier: ^0.26.0
         version: 0.26.0
+    devDependencies:
+      '@lumis-sh/lumis':
+        specifier: ^0.2.0
+        version: 0.2.0
 
   website:
     dependencies:
       '@lumis-sh/lumis':
-        specifier: link:../packages/javascript/lumis
-        version: link:../packages/javascript/lumis
+        specifier: ^0.2.0
+        version: 0.2.0
       '@lumis-sh/themes':
-        specifier: link:../packages/javascript/themes
-        version: link:../packages/javascript/themes
+        specifier: ^0.0.3
+        version: 0.0.3
       '@lumis-sh/wasm-bundle-full':
-        specifier: link:../packages/javascript/wasm-bundle-full
-        version: link:../packages/javascript/wasm-bundle-full
-      '@lumis-sh/wasm-html':
-        specifier: '*'
-        version: 0.26.1
-      '@lumis-sh/wasm-javascript':
-        specifier: '*'
-        version: 0.26.1
+        specifier: ^0.0.3
+        version: 0.0.3(@lumis-sh/lumis@0.2.0)
       webgl-fluid-enhanced:
         specifier: ^0.8.0
         version: 0.8.0
@@ -3018,13 +3017,12 @@ packages:
   '@leichtgewicht/ip-codec@2.0.5':
     resolution: {integrity: sha512-Vo+PSpZG2/fmgmiNzYK9qWRh8h/CHrwD0mo1h1DzL4yzHNSfWYujGTYsWGreD000gcgmZ7K4Ys6Tx9TxtsKdDw==}
 
-  '@lumis-sh/lumis@0.0.1':
-    resolution: {integrity: sha512-CKUBXdOMOB4bsbrLL4cfz5X/70JKAKod4A5RxxWb80pEKxnrwWMsNVh6gDtoMW9FmHzQMItcmOPpqNgzYusIwg==}
+  '@lumis-sh/lumis@0.2.0':
+    resolution: {integrity: sha512-zHa6r3Tf2W4bV8IbxeRhWQjBlWiDYTYpp/mIxakyzUDkBkGRlfd33IvHlb5r3XcLDplVZe/Y/MO1HXPQn+zCOg==}
     engines: {node: '>=18'}
 
-  '@lumis-sh/lumis@0.1.0':
-    resolution: {integrity: sha512-qb2D4uMvz4ioGCZx6wPwFMv0GTi0o5svDSJIW5xzg5+xxNEgEd7BuiK2RWStDCcLUHVhoTCMH994IP/lP8lyqw==}
-    engines: {node: '>=18'}
+  '@lumis-sh/themes@0.0.3':
+    resolution: {integrity: sha512-P+TSqrmIakoE/C0Vg1AurMkZXzZu/zD1CDyYalUBD2rGjqiv2fBibKfY8C5+qvQciRw1Gl7bCV85dzWAM1vzVg==}
 
   '@lumis-sh/wasm-angular@0.26.0':
     resolution: {integrity: sha512-IE5LBu5+wzC7hXEszI1fAKO/6B9l7QV7vvfGTK4YmL36HYMVEnlN+uwEjtDPxTarTzUgYYvipfdT9FYHP8fJjQ==}
@@ -3043,6 +3041,11 @@ packages:
 
   '@lumis-sh/wasm-bicep@0.26.0':
     resolution: {integrity: sha512-1B5aOKjUVcsbzDF1g5+uZPTmU3r07WfmB1DkuLARnLyphue90XIQZZvnfSy+ggVOpfsTSrZTtry2YA6Vl2/TVg==}
+
+  '@lumis-sh/wasm-bundle-full@0.0.3':
+    resolution: {integrity: sha512-EjINd6IGoNaTPI2hcdWBFttVEWKEEC1NYFjK6TW9s/UOF91Q7fPA9sOVKYJc04/B5bmMp97Orp0y5jQiKiWQOw==}
+    peerDependencies:
+      '@lumis-sh/lumis': ^0.0.1
 
   '@lumis-sh/wasm-c@0.26.0':
     resolution: {integrity: sha512-wfvGeNdQHLsB5rVLr9mlXlGgLQvVW+utLJiSjjRVwK4J2CCesIXiwsTWWkXbO30AeskpCm6C9T9I8g2ElX5Tnw==}
@@ -11482,9 +11485,6 @@ packages:
   web-namespaces@2.0.1:
     resolution: {integrity: sha512-bKr1DkiNa2krS7qxNtdrtHAmzuYGFQLiQ13TsorsdT6ULTkPLKuu5+GsFpDlg6JFjUTwX2DyhMPG2be8uPrqsQ==}
 
-  web-tree-sitter@0.26.7:
-    resolution: {integrity: sha512-KiZhelTvBA/ziUHEO7Emb75cGVAq8iGZNabYaZm53Zpy50NsXyOW+xSHlwHt5CVg/TRPZBfeVLTTobF0LjFJ1w==}
-
   web-tree-sitter@0.26.8:
     resolution: {integrity: sha512-4sUwi7ZyOrIk5KLgYLkc2A/F0LFMQnBhfb+2Cdl7ik4ePJ6JD+fk4ofI2sA5eGawBKBaK4Vntt7Ww5KcEsay4A==}
 
@@ -14372,13 +14372,11 @@ snapshots:
 
   '@leichtgewicht/ip-codec@2.0.5': {}
 
-  '@lumis-sh/lumis@0.0.1':
-    dependencies:
-      web-tree-sitter: 0.26.7
-
-  '@lumis-sh/lumis@0.1.0':
+  '@lumis-sh/lumis@0.2.0':
     dependencies:
       web-tree-sitter: 0.26.8
+
+  '@lumis-sh/themes@0.0.3': {}
 
   '@lumis-sh/wasm-angular@0.26.0': {}
 
@@ -14391,6 +14389,122 @@ snapshots:
   '@lumis-sh/wasm-bash@0.26.1': {}
 
   '@lumis-sh/wasm-bicep@0.26.0': {}
+
+  '@lumis-sh/wasm-bundle-full@0.0.3(@lumis-sh/lumis@0.2.0)':
+    dependencies:
+      '@lumis-sh/lumis': 0.2.0
+      '@lumis-sh/wasm-angular': 0.26.0
+      '@lumis-sh/wasm-arduino': 0.26.0
+      '@lumis-sh/wasm-asm': 0.26.0
+      '@lumis-sh/wasm-astro': 0.26.0
+      '@lumis-sh/wasm-bash': 0.26.1
+      '@lumis-sh/wasm-bicep': 0.26.0
+      '@lumis-sh/wasm-c': 0.26.0
+      '@lumis-sh/wasm-caddy': 0.26.1
+      '@lumis-sh/wasm-clojure': 0.26.0
+      '@lumis-sh/wasm-cmake': 0.26.0
+      '@lumis-sh/wasm-comment': 0.26.1
+      '@lumis-sh/wasm-commonlisp': 0.26.0
+      '@lumis-sh/wasm-cpp': 0.26.0
+      '@lumis-sh/wasm-csharp': 0.26.0
+      '@lumis-sh/wasm-css': 0.26.1
+      '@lumis-sh/wasm-csv': 0.26.0
+      '@lumis-sh/wasm-d': 0.26.0
+      '@lumis-sh/wasm-dart': 0.26.0
+      '@lumis-sh/wasm-diff': 0.26.1
+      '@lumis-sh/wasm-dockerfile': 0.26.0
+      '@lumis-sh/wasm-dot': 0.26.0
+      '@lumis-sh/wasm-editorconfig': 0.26.0
+      '@lumis-sh/wasm-eex': 0.26.0
+      '@lumis-sh/wasm-elixir': 0.26.1
+      '@lumis-sh/wasm-elm': 0.26.0
+      '@lumis-sh/wasm-embedded-template': 0.26.1
+      '@lumis-sh/wasm-erlang': 0.26.0
+      '@lumis-sh/wasm-fish': 0.26.0
+      '@lumis-sh/wasm-fortran': 0.26.0
+      '@lumis-sh/wasm-fsharp': 0.26.0
+      '@lumis-sh/wasm-gitattributes': 0.26.0
+      '@lumis-sh/wasm-gitignore': 0.26.0
+      '@lumis-sh/wasm-gleam': 0.26.0
+      '@lumis-sh/wasm-glimmer': 0.26.0
+      '@lumis-sh/wasm-glsl': 0.26.0
+      '@lumis-sh/wasm-go': 0.26.0
+      '@lumis-sh/wasm-graphql': 0.26.0
+      '@lumis-sh/wasm-haskell': 0.26.0
+      '@lumis-sh/wasm-hcl': 0.26.0
+      '@lumis-sh/wasm-heex': 0.26.0
+      '@lumis-sh/wasm-html': 0.26.1
+      '@lumis-sh/wasm-http': 0.26.0
+      '@lumis-sh/wasm-iex': 0.26.0
+      '@lumis-sh/wasm-ini': 0.26.0
+      '@lumis-sh/wasm-java': 0.26.1
+      '@lumis-sh/wasm-javadoc': 0.26.0
+      '@lumis-sh/wasm-javascript': 0.26.1
+      '@lumis-sh/wasm-jinja': 0.26.0
+      '@lumis-sh/wasm-jinja_inline': 0.26.1
+      '@lumis-sh/wasm-jq': 0.26.0
+      '@lumis-sh/wasm-json': 0.26.2
+      '@lumis-sh/wasm-json5': 0.26.0
+      '@lumis-sh/wasm-julia': 0.26.0
+      '@lumis-sh/wasm-just': 0.26.0
+      '@lumis-sh/wasm-kdl': 0.26.0
+      '@lumis-sh/wasm-kotlin': 0.26.0
+      '@lumis-sh/wasm-latex': 0.26.0
+      '@lumis-sh/wasm-liquid': 0.26.0
+      '@lumis-sh/wasm-llvm': 0.26.1
+      '@lumis-sh/wasm-lua': 0.26.0
+      '@lumis-sh/wasm-luadoc': 0.26.0
+      '@lumis-sh/wasm-make': 0.26.0
+      '@lumis-sh/wasm-markdown': 0.26.0
+      '@lumis-sh/wasm-markdown_inline': 0.26.0
+      '@lumis-sh/wasm-matlab': 0.26.0
+      '@lumis-sh/wasm-mermaid': 0.26.0
+      '@lumis-sh/wasm-nginx': 0.26.0
+      '@lumis-sh/wasm-nim': 0.26.0
+      '@lumis-sh/wasm-nix': 0.26.0
+      '@lumis-sh/wasm-nushell': 0.26.0
+      '@lumis-sh/wasm-objc': 0.26.0
+      '@lumis-sh/wasm-ocaml': 0.26.0
+      '@lumis-sh/wasm-ocaml_interface': 0.26.0
+      '@lumis-sh/wasm-pascal': 0.26.0
+      '@lumis-sh/wasm-perl': 0.26.0
+      '@lumis-sh/wasm-php': 0.26.0
+      '@lumis-sh/wasm-powershell': 0.26.0
+      '@lumis-sh/wasm-prisma': 0.26.0
+      '@lumis-sh/wasm-protobuf': 0.26.0
+      '@lumis-sh/wasm-puppet': 0.26.0
+      '@lumis-sh/wasm-python': 0.26.0
+      '@lumis-sh/wasm-qmljs': 0.26.0
+      '@lumis-sh/wasm-r': 0.26.0
+      '@lumis-sh/wasm-racket': 0.26.0
+      '@lumis-sh/wasm-regex': 0.26.0
+      '@lumis-sh/wasm-rst': 0.26.0
+      '@lumis-sh/wasm-ruby': 0.26.1
+      '@lumis-sh/wasm-rust': 0.26.2
+      '@lumis-sh/wasm-scala': 0.26.0
+      '@lumis-sh/wasm-scheme': 0.26.0
+      '@lumis-sh/wasm-scss': 0.26.0
+      '@lumis-sh/wasm-solidity': 0.26.0
+      '@lumis-sh/wasm-sql': 0.26.0
+      '@lumis-sh/wasm-surface': 0.26.0
+      '@lumis-sh/wasm-svelte': 0.26.0
+      '@lumis-sh/wasm-swift': 0.26.0
+      '@lumis-sh/wasm-systemverilog': 0.26.0
+      '@lumis-sh/wasm-tcl': 0.26.0
+      '@lumis-sh/wasm-terraform': 0.26.0
+      '@lumis-sh/wasm-toml': 0.26.0
+      '@lumis-sh/wasm-tsx': 0.26.1
+      '@lumis-sh/wasm-typescript': 0.26.1
+      '@lumis-sh/wasm-typst': 0.26.0
+      '@lumis-sh/wasm-vhdl': 0.26.0
+      '@lumis-sh/wasm-vim': 0.26.0
+      '@lumis-sh/wasm-vue': 0.26.0
+      '@lumis-sh/wasm-wat': 0.26.0
+      '@lumis-sh/wasm-wgsl': 0.26.0
+      '@lumis-sh/wasm-xml': 0.26.0
+      '@lumis-sh/wasm-yaml': 0.26.0
+      '@lumis-sh/wasm-zig': 0.26.0
+      '@lumis-sh/wasm-zsh': 0.26.0
 
   '@lumis-sh/wasm-c@0.26.0': {}
 
@@ -23760,8 +23874,6 @@ snapshots:
       minimalistic-assert: 1.0.1
 
   web-namespaces@2.0.1: {}
-
-  web-tree-sitter@0.26.7: {}
 
   web-tree-sitter@0.26.8: {}
 

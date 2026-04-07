@@ -17,7 +17,6 @@ interface BundleEntry {
 
 interface BundlePackageJson {
   version?: string;
-  peerDependencies?: Record<string, string>;
 }
 
 interface LanguagesToml {
@@ -59,11 +58,7 @@ function treeSitterCompatRange(): string {
 }
 
 function lumisVersionRange(): string {
-  const packageJson: { version?: string } = JSON.parse(
-    fs.readFileSync(LUMIS_PACKAGE_JSON, "utf-8"),
-  );
-  if (!packageJson.version) throw new Error("Missing @lumis-sh/lumis version");
-  return `^${packageJson.version}`;
+  return ">=0.0.1";
 }
 
 function wasmNameForLanguage(id: string, entry: ParserEntry | undefined): string {
@@ -128,7 +123,7 @@ function writeBundlePackage(
 
   const dependencyPackages = unique(Object.values(wasmPackagesByLanguage)).sort();
   const wasmVersionRange = treeSitterCompatRange();
-  const lumisPeerRange = lumisVersionRange();
+  const lumisVersion = lumisVersionRange();
   const publishedPackages = new Set(dependencyPackages);
 
   const importLines = [...publishedPackages]
@@ -186,7 +181,10 @@ export default bundledWasms
       access: "public",
     },
     peerDependencies: {
-      "@lumis-sh/lumis": existingPackageJson?.peerDependencies?.["@lumis-sh/lumis"] ?? lumisPeerRange,
+      "@lumis-sh/lumis": lumisVersion,
+    },
+    devDependencies: {
+      "@lumis-sh/lumis": lumisVersion,
     },
     dependencies,
   };
