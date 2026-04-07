@@ -275,7 +275,7 @@ importers:
         version: 0.26.1
     devDependencies:
       '@lumis-sh/lumis':
-        specifier: ^0.2.0
+        specifier: '>=0.0.1'
         version: 0.2.0
 
   wasm-bundle-full:
@@ -618,7 +618,7 @@ importers:
         version: 0.26.0
     devDependencies:
       '@lumis-sh/lumis':
-        specifier: ^0.2.0
+        specifier: '>=0.0.1'
         version: 0.2.0
 
   wasm-bundle-system:
@@ -664,7 +664,7 @@ importers:
         version: 0.26.0
     devDependencies:
       '@lumis-sh/lumis':
-        specifier: ^0.2.0
+        specifier: '>=0.0.1'
         version: 0.2.0
 
   wasm-bundle-web:
@@ -692,7 +692,7 @@ importers:
         version: 0.26.1
     devDependencies:
       '@lumis-sh/lumis':
-        specifier: ^0.2.0
+        specifier: '>=0.0.1'
         version: 0.2.0
 
   wasm-bundle-web-extra:
@@ -756,7 +756,7 @@ importers:
         version: 0.26.0
     devDependencies:
       '@lumis-sh/lumis':
-        specifier: ^0.2.0
+        specifier: '>=0.0.1'
         version: 0.2.0
 
 packages:

@@ -156,7 +156,7 @@ export default bundledWasms
   const packageJson = {
     name: `@lumis-sh/wasm-bundle-${bundleName}`,
     version: existingPackageJson?.version ?? "0.0.1",
-    description: `WASM parsers for Lumis ${bundleName} languages bundle`,
+    description: `Lumis WASM ${bundleName} language bundle`,
     author: "Leandro Pereira",
     license: "MIT",
     repository: {

@@ -38,7 +38,8 @@
     "test": "vitest run",
     "lint": "oxlint --type-aware src/",
     "fmt": "oxfmt src/ test/ *.ts",
-    "fmt:check": "oxfmt --check src/ test/ *.ts"
+    "fmt:check": "oxfmt --check src/ test/ *.ts",
+    "prepack": "pnpm run build"
   },
   "dependencies": {
     "@lumis-sh/lumis": "workspace:^0.0.1",
