@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.5](https://github.com/leandrocp/lumis/compare/wasm-bundle-full@v0.0.4...wasm-bundle-full@v0.0.5) (2026-04-07)
+
+
+### Documentation
+
+* update readme ([09b3d2c](https://github.com/leandrocp/lumis/commit/09b3d2c9c7ad9238c6e6117645e5d2bbedee9d60))
+
 ## [0.0.4](https://github.com/leandrocp/lumis/compare/wasm-bundle-full@v0.0.3...wasm-bundle-full@v0.0.4) (2026-04-07)
 
 
