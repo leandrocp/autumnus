@@ -1,6 +1,6 @@
 {
   "name": "@lumis-sh/wasm-bundle-full",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "WASM parsers for Lumis full languages bundle",
   "author": "Leandro Pereira",
   "license": "MIT",

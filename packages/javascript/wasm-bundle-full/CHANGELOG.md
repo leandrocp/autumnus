@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.4](https://github.com/leandrocp/lumis/compare/wasm-bundle-full@v0.0.3...wasm-bundle-full@v0.0.4) (2026-04-07)
+
+
+### Bug Fixes
+
+* loosen lumis requirement ([bef2266](https://github.com/leandrocp/lumis/commit/bef226698ec32b9acf0ec62bb4aa533e69c5bda4))
+
 ## [0.0.3](https://github.com/leandrocp/lumis/compare/wasm-bundle-full@v0.0.2...wasm-bundle-full@v0.0.3) (2026-04-04)
 
 
