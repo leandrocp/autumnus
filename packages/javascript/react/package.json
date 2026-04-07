@@ -13,9 +13,9 @@
   "homepage": "https://lumis.sh",
   "keywords": [
     "react",
+    "lumis-sh",
     "syntax-highlighting",
     "tree-sitter",
-    "lumis-sh"
   ],
   "sideEffects": false,
   "type": "module",
