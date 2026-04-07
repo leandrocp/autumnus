@@ -12,7 +12,8 @@
   "bugs": "https://github.com/leandrocp/lumis/issues",
   "keywords": [
     "lumis-sh",
-    "neovim-themes"
+    "neovim",
+    "themes",
   ],
   "homepage": "https://lumis.sh",
   "sideEffects": false,
