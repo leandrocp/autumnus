@@ -1,6 +1,6 @@
 # @lumis-sh/react
 
-React helpers and components for [Lumis](https://lumis.sh)
+React integration for [Lumis](https://lumis.sh) syntax highlighting.
 
 Docs: [https://lumis.sh/docs](https://lumis.sh/docs)
 
