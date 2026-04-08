@@ -49,26 +49,35 @@ jobs:
 
           if [ "$component" = "npm-themes" ]; then
             set_output filter "@lumis-sh/themes"
+            set_output build_filters "@lumis-sh/themes"
           elif [ "$component" = "npm-lumis" ]; then
             set_output filter "@lumis-sh/lumis"
+            set_output build_filters "@lumis-sh/themes @lumis-sh/lumis"
           elif [ "$component" = "npm-markdown-it-lumis" ]; then
             set_output filter "@lumis-sh/markdown-it-lumis"
+            set_output build_filters "@lumis-sh/themes @lumis-sh/lumis @lumis-sh/markdown-it-lumis"
           elif [ "$component" = "npm-rehype-lumis" ]; then
             set_output filter "@lumis-sh/rehype-lumis"
+            set_output build_filters "@lumis-sh/themes @lumis-sh/lumis @lumis-sh/rehype-lumis"
           elif [ "$component" = "npm-react" ]; then
             set_output filter "@lumis-sh/react"
+            set_output build_filters "@lumis-sh/themes @lumis-sh/lumis @lumis-sh/react"
           elif [[ "$component" == npm-wasm-bundle-* ]]; then
             set_output filter "@lumis-sh/${component#npm-}"
+            set_output build_filters "@lumis-sh/${component#npm-}"
           else
             echo "Unknown component: $component" && exit 1
           fi
 
-      - name: Install publish target dependencies
-        run: pnpm install --no-frozen-lockfile --config.recursive-install=false --filter "${{ steps.pkg.outputs.filter }}..."
+      - name: Install workspace dependencies
+        run: pnpm install --frozen-lockfile
         working-directory: packages/javascript
 
       - name: Build publish target workspace packages
-        run: pnpm -r --filter "${{ steps.pkg.outputs.filter }}..." run build
+        run: |
+          for pkg in ${{ steps.pkg.outputs.build_filters }}; do
+            pnpm --filter "$pkg" run build
+          done
         working-directory: packages/javascript
 
       - name: Publish to npm
