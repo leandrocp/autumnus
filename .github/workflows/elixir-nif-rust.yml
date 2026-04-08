@@ -25,8 +25,8 @@ jobs:
   test:
     if: >-
       ${{ github.event_name == 'workflow_dispatch' ||
-          (github.event_name == 'pull_request' && !startsWith(github.head_ref, 'release-please--')) ||
-          (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore(main): release ')) }}
+          (github.event_name == 'pull_request' && github.head_ref != 'knope/release') ||
+          (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore: prepare releases')) }}
     uses: leandrocp/github-actions/.github/workflows/rust-test.yml@main
     with:
       manifest-path: 'packages/elixir/lumis/native/lumis_nif/Cargo.toml'
@@ -34,8 +34,8 @@ jobs:
   lint:
     if: >-
       ${{ github.event_name == 'workflow_dispatch' ||
-          (github.event_name == 'pull_request' && !startsWith(github.head_ref, 'release-please--')) ||
-          (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore(main): release ')) }}
+          (github.event_name == 'pull_request' && github.head_ref != 'knope/release') ||
+          (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore: prepare releases')) }}
     uses: leandrocp/github-actions/.github/workflows/rust-lint.yml@main
     with:
       manifest-path: 'packages/elixir/lumis/native/lumis_nif/Cargo.toml'

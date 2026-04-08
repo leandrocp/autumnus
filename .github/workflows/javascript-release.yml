@@ -4,17 +4,17 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Release tag to publish (for example: javascript@v0.0.1)"
+        description: "Release tag to publish (for example: npm-lumis/v0.0.1)"
         required: true
         type: string
   push:
     tags:
-      - "javascript@v*"
-      - "markdown-it-lumis@v*"
-      - "rehype-lumis@v*"
-      - "react@v*"
-      - "themes@v*"
-      - "wasm-bundle-*@v*"
+      - "npm-lumis/v*"
+      - "npm-markdown-it-lumis/v*"
+      - "npm-rehype-lumis/v*"
+      - "npm-react/v*"
+      - "npm-themes/v*"
+      - "npm-wasm-bundle-*/v*"
 
 permissions:
   id-token: write
@@ -42,23 +42,23 @@ jobs:
         id: pkg
         run: |
           tag="${{ inputs.tag || github.ref_name }}"
-          component="${tag%%@*}"
+          component="${tag%%/v*}"
           set_output() {
             printf '%s=%s\n' "$1" "$2" >> "$GITHUB_OUTPUT"
           }
 
-          if [ "$component" = "themes" ]; then
+          if [ "$component" = "npm-themes" ]; then
             set_output filter "@lumis-sh/themes"
-          elif [ "$component" = "javascript" ]; then
+          elif [ "$component" = "npm-lumis" ]; then
             set_output filter "@lumis-sh/lumis"
-          elif [ "$component" = "markdown-it-lumis" ]; then
+          elif [ "$component" = "npm-markdown-it-lumis" ]; then
             set_output filter "@lumis-sh/markdown-it-lumis"
-          elif [ "$component" = "rehype-lumis" ]; then
+          elif [ "$component" = "npm-rehype-lumis" ]; then
             set_output filter "@lumis-sh/rehype-lumis"
-          elif [ "$component" = "react" ]; then
+          elif [ "$component" = "npm-react" ]; then
             set_output filter "@lumis-sh/react"
-          elif [[ "$component" == wasm-bundle-* ]]; then
-            set_output filter "@lumis-sh/$component"
+          elif [[ "$component" == npm-wasm-bundle-* ]]; then
+            set_output filter "@lumis-sh/${component#npm-}"
           else
             echo "Unknown component: $component" && exit 1
           fi
