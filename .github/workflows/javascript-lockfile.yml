@@ -22,8 +22,7 @@ jobs:
         with:
           node-version: "24"
           cache: "pnpm"
-          cache-dependency-path: packages/javascript/pnpm-lock.yaml
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Verify JavaScript lockfile
         run: pnpm install --frozen-lockfile
-        working-directory: packages/javascript

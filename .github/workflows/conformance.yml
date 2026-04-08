@@ -126,13 +126,10 @@ jobs:
         with:
           node-version: '24'
           cache: 'pnpm'
-          cache-dependency-path: packages/javascript/pnpm-lock.yaml
+          cache-dependency-path: pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
-        working-directory: packages/javascript
       - run: pnpm --filter @lumis-sh/themes build
-        working-directory: packages/javascript
       - run: pnpm --filter @lumis-sh/lumis build
-        working-directory: packages/javascript
       - run: pnpm test:conformance
         working-directory: packages/javascript/lumis
 

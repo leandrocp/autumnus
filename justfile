@@ -92,7 +92,7 @@ setup:
     echo ""
 
     echo "Installing JS dependencies..."
-    (cd packages/javascript && pnpm install)
+    pnpm install
     echo ""
 
     echo "Installing website dependencies..."
@@ -108,12 +108,12 @@ setup:
     echo ""
 
     echo "Generating JS theme assets..."
-    (cd packages/javascript && pnpm --filter @lumis-sh/themes build)
+    pnpm --filter @lumis-sh/themes build
     echo ""
 
     echo "Generating JS language/runtime artifacts..."
-    (cd packages/javascript && pnpm --filter @lumis-sh/lumis build:generate)
-    (cd packages/javascript && pnpm run build:wasm-bundles)
+    pnpm --filter @lumis-sh/lumis build:generate
+    pnpm --dir packages/javascript run build:wasm-bundles
     echo ""
 
     echo "Fetching Elixir dependencies..."
@@ -133,8 +133,8 @@ test:
     (cd packages/elixir/lumis && LUMIS_BUILD=1 mix test)
     echo ""
     echo "Running Javascript tests..."
-    (cd packages/javascript && pnpm --filter @lumis-sh/lumis build)
-    (cd packages/javascript && pnpm -r --if-present test)
+    pnpm --filter @lumis-sh/lumis build
+    pnpm -r --if-present test
 
 # Run conformance tests across all packages
 test-conformance:
@@ -171,11 +171,11 @@ lint:
     (cd packages/elixir/lumis && LUMIS_BUILD=1 mix credo)
     echo ""
     echo "Running JS fmt check..."
-    (cd packages/javascript && pnpm --filter @lumis-sh/lumis fmt:check)
-    (cd packages/javascript && pnpm --filter @lumis-sh/themes fmt:check)
+    pnpm --filter @lumis-sh/lumis fmt:check
+    pnpm --filter @lumis-sh/themes fmt:check
     echo ""
     echo "Running JS lint..."
-    (cd packages/javascript && pnpm --filter @lumis-sh/lumis lint)
+    pnpm --filter @lumis-sh/lumis lint
     echo ""
     echo "Running Lua fmt check..."
     stylua --check themes/
@@ -191,8 +191,8 @@ fmt:
     (cd packages/elixir/lumis && mix format)
     echo ""
     echo "Formatting JS/TS..."
-    (cd packages/javascript && pnpm --filter @lumis-sh/lumis fmt)
-    (cd packages/javascript && pnpm --filter @lumis-sh/themes fmt)
+    pnpm --filter @lumis-sh/lumis fmt
+    pnpm --filter @lumis-sh/themes fmt
     echo ""
     echo "Formatting Lua..."
     stylua themes/
@@ -212,7 +212,7 @@ dev:
     set -euo pipefail
     if [ ! -f packages/javascript/lumis/dist/bundles/full.js ]; then
         echo "Building @lumis-sh/lumis for website imports..."
-        (cd packages/javascript && pnpm --filter @lumis-sh/lumis build)
+        pnpm --filter @lumis-sh/lumis build
         echo ""
     fi
     (cd website && pnpm dev)
@@ -249,7 +249,7 @@ docs:
     set -euo pipefail
     cargo doc --all-features --no-deps
     (cd packages/elixir/lumis && LUMIS_BUILD=1 mix docs)
-    (cd packages/javascript && pnpm --filter @lumis-sh/lumis docs)
+    pnpm --filter @lumis-sh/lumis docs
     echo ""
     echo "Docs generated:"
     echo "  lumis:           $(pwd)/target/doc/lumis/index.html"
@@ -374,4 +374,4 @@ themes-list:
 # Copy theme JSON files to crates/lumis/themes and generate JS theme modules
 themes-sync:
     cargo run --manifest-path crates/dev/Cargo.toml -- sync-themes
-    (cd packages/javascript && pnpm --filter @lumis-sh/themes build:themes)
+    pnpm --filter @lumis-sh/themes build:themes
