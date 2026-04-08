@@ -80,9 +80,9 @@ changelog = "packages/javascript/wasm-bundle-full/CHANGELOG.md"
 [packages.hex-lumis]
 versioned_files = [
   { path = "packages/elixir/lumis/mix.exs", regex = [
-    '@version "(?<version>\\d+\\.\\d+\\.\\d+(?:[-+][^\"]+)?)"',
-    'source_ref: "hex-lumis/v(?<version>\\d+\\.\\d+\\.\\d+(?:[-+][^\"]+)?)"',
-    'blob/hex-lumis/v(?<version>\\d+\\.\\d+\\.\\d+(?:[-+][^\"]+)?)/',
+    '@version "(?<version>\d+\.\d+\.\d+(?:[-+][^"]+)?)"',
+    'source_ref: "hex-lumis/v(?<version>\d+\.\d+\.\d+(?:[-+][^"]+)?)"',
+    'blob/hex-lumis/v(?<version>\d+\.\d+\.\d+(?:[-+][^"]+)?)/',
   ] },
 ]
 changelog = "packages/elixir/lumis/CHANGELOG.md"
