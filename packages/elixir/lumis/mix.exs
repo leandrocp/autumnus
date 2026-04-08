@@ -69,10 +69,10 @@ defmodule Lumis.MixProject do
   defp docs do
     [
       main: "Lumis",
-      source_ref: "elixir@v#{@version}",
+      source_ref: "hex-lumis/v#{@version}",
       source_url: @source_url,
       source_url_pattern:
-        "#{@source_url}/blob/elixir@v#{@version}/packages/elixir/lumis/%{path}#L%{line}",
+        "#{@source_url}/blob/hex-lumis/v#{@version}/packages/elixir/lumis/%{path}#L%{line}",
       extras: [
         "CHANGELOG.md",
         "examples/bbcode_scoped.livemd",

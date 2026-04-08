@@ -3,8 +3,13 @@ name: Elixir Release
 on:
   push:
     tags:
-      - "elixir@v*"
+      - "hex-lumis/v*"
   workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to publish (for example: hex-lumis/v0.3.0)"
+        required: false
+        type: string
 
 env:
   LUMIS_BUILD: "1"
@@ -25,7 +30,7 @@ jobs:
   hex-publish:
     name: Publish to Hex
     needs: nif-release
-    if: startsWith(github.ref, 'refs/tags/elixir@v')
+    if: startsWith(inputs.tag || github.ref_name, 'hex-lumis/v')
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -34,7 +39,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ github.ref }}
+          ref: ${{ inputs.tag || github.ref }}
 
       - uses: dtolnay/rust-toolchain@stable
 

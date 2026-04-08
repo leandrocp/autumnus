@@ -5,6 +5,7 @@ See `ARCHITECTURE.md` for an overview of how the crates, packages, website, and 
 ## Table of contents
 
 - [Getting started](#getting-started)
+- [Releases](#releases)
 - [Configuration files](#configuration-files)
   - [highlights.toml](#highlightstoml)
   - [languages.toml](#languagestoml)
@@ -26,6 +27,17 @@ just setup
 ```
 
 This installs all dependencies (Rust, JS, Elixir) and checks that required tools are available.
+
+## Releases
+
+This repository uses `knope` for release preparation.
+
+- Release metadata is prepared and maintained from the release workflow.
+- Contributors should not hand-edit package versions or changelog release sections in normal feature PRs.
+- Merged changes accumulate in a `knope/release` pull request.
+- Merging that release PR creates package tags like `cargo-lumis/v0.7.1` and triggers the existing publish workflows.
+
+The release PR is generated automatically from `main`. Do not edit release versions or changelog sections by hand unless you are intentionally fixing the generated release branch.
 
 ## Configuration files
 

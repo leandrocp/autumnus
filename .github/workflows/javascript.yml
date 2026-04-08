@@ -34,8 +34,8 @@ jobs:
   lint:
     if: >-
       ${{ github.event_name == 'workflow_dispatch' ||
-          (github.event_name == 'pull_request' && !startsWith(github.head_ref, 'release-please--')) ||
-          (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore(main): release ')) }}
+          (github.event_name == 'pull_request' && github.head_ref != 'knope/release') ||
+          (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore: prepare releases')) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -75,8 +75,8 @@ jobs:
   test:
     if: >-
       ${{ github.event_name == 'workflow_dispatch' ||
-          (github.event_name == 'pull_request' && !startsWith(github.head_ref, 'release-please--')) ||
-          (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore(main): release ')) }}
+          (github.event_name == 'pull_request' && github.head_ref != 'knope/release') ||
+          (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore: prepare releases')) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6

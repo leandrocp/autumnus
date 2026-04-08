@@ -4,15 +4,15 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Release tag to publish (for example: rust@v0.2.1)"
+        description: "Release tag to publish (for example: cargo-lumis/v0.2.1)"
         required: true
         type: string
   push:
     tags:
-      - "rust@v*"
-      - "rust-core@v*"
-      - "rust-build@v*"
-      - "rust-cli@v*"
+      - "cargo-lumis/v*"
+      - "cargo-lumis-core/v*"
+      - "cargo-lumis-build/v*"
+      - "cargo-lumis-cli/v*"
 
 permissions:
   contents: write
@@ -31,21 +31,21 @@ jobs:
         id: crate
         run: |
           tag="${{ inputs.tag || github.ref_name }}"
-          component="${tag%%@*}"
+          component="${tag%%/v*}"
           case "$component" in
-            rust)
+            cargo-lumis)
               crate="lumis"
               manifest="crates/lumis/Cargo.toml"
               ;;
-            rust-core)
+            cargo-lumis-core)
               crate="lumis-core"
               manifest="crates/lumis-core/Cargo.toml"
               ;;
-            rust-build)
+            cargo-lumis-build)
               crate="lumis-build"
               manifest="crates/lumis-build/Cargo.toml"
               ;;
-            rust-cli)
+            cargo-lumis-cli)
               crate="lumis-cli"
               manifest="crates/lumis-cli/Cargo.toml"
               ;;
