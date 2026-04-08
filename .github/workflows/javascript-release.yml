@@ -67,8 +67,8 @@ jobs:
         run: pnpm install --no-frozen-lockfile --config.recursive-install=false --filter "${{ steps.pkg.outputs.filter }}..."
         working-directory: packages/javascript
 
-      - name: Build publish target workspace dependencies
-        run: pnpm --filter "${{ steps.pkg.outputs.filter }}..." run build
+      - name: Build publish target workspace packages
+        run: pnpm -r --filter "${{ steps.pkg.outputs.filter }}..." run build
         working-directory: packages/javascript
 
       - name: Publish to npm
