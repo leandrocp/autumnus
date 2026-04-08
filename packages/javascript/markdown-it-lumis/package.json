@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "@lumis-sh/lumis": "workspace:^0.0.1",
-    "markdown-it": "^14.1.0"
+    "markdown-it": "^14.0.0"
   },
   "devDependencies": {
     "@microsoft/api-extractor": "^7.36.0",
