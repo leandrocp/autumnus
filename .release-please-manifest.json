@@ -5,7 +5,7 @@
   "crates/lumis-cli": "0.1.4",
   "packages/javascript/lumis": "0.2.0",
   "packages/javascript/markdown-it-lumis": "0.1.0",
-  "packages/javascript/rehype-lumis": "0.1.0",
+  "packages/javascript/rehype-lumis": "0.1.1",
   "packages/javascript/react": "0.1.0",
   "packages/javascript/themes": "0.0.3",
   "packages/javascript/wasm-bundle-web": "0.0.4",
