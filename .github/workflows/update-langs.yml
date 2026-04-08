@@ -80,17 +80,15 @@ jobs:
         with:
           node-version: "24"
           cache: "pnpm"
-          cache-dependency-path: packages/javascript/pnpm-lock.yaml
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Install JavaScript dependencies
         run: pnpm install --frozen-lockfile
-        working-directory: packages/javascript
 
       - run: just langs-update ${{ matrix.language }}
 
       - name: Regenerate JavaScript outputs
         run: pnpm --filter @lumis-sh/lumis build:generate
-        working-directory: packages/javascript
 
       - name: Check for changes
         id: check-changes

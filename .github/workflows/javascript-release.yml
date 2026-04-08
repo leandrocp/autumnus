@@ -36,7 +36,7 @@ jobs:
           node-version: "24"
           registry-url: "https://registry.npmjs.org"
           cache: "pnpm"
-          cache-dependency-path: packages/javascript/pnpm-lock.yaml
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Determine package to publish
         id: pkg
@@ -71,17 +71,14 @@ jobs:
 
       - name: Install workspace dependencies
         run: pnpm install --frozen-lockfile
-        working-directory: packages/javascript
 
       - name: Build publish target workspace packages
         run: |
           for pkg in ${{ steps.pkg.outputs.build_filters }}; do
             pnpm --filter "$pkg" run build
           done
-        working-directory: packages/javascript
 
       - name: Publish to npm
         run: pnpm --filter "${{ steps.pkg.outputs.filter }}" publish --access public --no-git-checks --provenance
-        working-directory: packages/javascript
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
