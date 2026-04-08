@@ -13,6 +13,6 @@
   "packages/javascript/wasm-bundle-system": "0.0.4",
   "packages/javascript/wasm-bundle-backend": "0.0.4",
   "packages/javascript/wasm-bundle-full": "0.0.6",
-  "packages/elixir/lumis": "0.3.0",
+  "packages/elixir/lumis": "0.4.0",
   "packages/elixir/lumis/native/lumis_nif": "0.1.1"
 }
