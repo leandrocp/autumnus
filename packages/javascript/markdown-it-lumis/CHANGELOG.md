@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.1](https://github.com/leandrocp/lumis/compare/markdown-it-lumis@v0.1.0...markdown-it-lumis@v0.1.1) (2026-04-08)
+
+
+### Bug Fixes
+
+* js release ([#686](https://github.com/leandrocp/lumis/issues/686)) ([41fbc43](https://github.com/leandrocp/lumis/commit/41fbc43bf731a124603de899d1a4cc94329cc663))
+* keywords ([6499ae0](https://github.com/leandrocp/lumis/commit/6499ae03284780f6f29332877dcf24dcf2f7cdb2))
+
 ## [0.1.0](https://github.com/leandrocp/lumis/compare/markdown-it-lumis@v0.0.2...markdown-it-lumis@v0.1.0) (2026-04-05)
 
 
