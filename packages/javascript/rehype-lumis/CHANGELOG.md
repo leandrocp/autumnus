@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1 (2026-04-08)
+
+### Fixes
+
+- Packge keywords and deps
+
 ## [0.1.0](https://github.com/leandrocp/lumis/compare/rehype-lumis@v0.0.2...rehype-lumis@v0.1.0) (2026-04-05)
 
 
