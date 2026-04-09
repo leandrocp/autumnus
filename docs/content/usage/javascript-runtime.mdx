@@ -16,16 +16,43 @@ import TabItem from '@theme/TabItem';
 
 # JavaScript
 
-## [`highlight()`](https://www.npmjs.com/package/@lumis-sh/lumis) vs [`createHighlighter()`](https://www.npmjs.com/package/@lumis-sh/lumis)
+## For one-off highlighting
 
-- use `highlight()` for one-off async calls
-- use `createHighlighter()` when you want explicit control, instance isolation, or repeated synchronous highlighting after setup
-- `highlight()` uses a shared default runtime, so loaded languages and global WASM resolver changes are process-wide
-- `createHighlighter()` creates an isolated highlighter unless you intentionally rely on the global resolver
+Use [`highlight()`](https://www.npmjs.com/package/@lumis-sh/lumis) when you just need one async highlight call and do not need to keep a highlighter instance around.
 
 ```ts
-import {highlight, createHighlighter} from '@lumis-sh/lumis'
+import {highlight} from '@lumis-sh/lumis'
+import {htmlInline} from '@lumis-sh/lumis/formatters'
+import javascript from '@lumis-sh/lumis/langs/javascript'
+import dracula from '@lumis-sh/themes/dracula'
+
+const html = await highlight(
+  'const x = 1',
+  htmlInline({language: javascript, theme: dracula})
+)
 ```
+
+`highlight()` uses a shared default runtime, so loaded languages and global WASM resolver changes are process-wide.
+
+## For reusable highlighters
+
+Use [`createHighlighter()`](https://www.npmjs.com/package/@lumis-sh/lumis) when you want instance isolation, explicit setup, lazy loading, or repeated synchronous `hl.highlight()` calls after initialization.
+
+```ts
+import {createHighlighter} from '@lumis-sh/lumis'
+import {htmlInline} from '@lumis-sh/lumis/formatters'
+import javascript from '@lumis-sh/lumis/langs/javascript'
+import dracula from '@lumis-sh/themes/dracula'
+
+const hl = await createHighlighter({languages: [javascript]})
+
+const html = hl.highlight(
+  'const x = 1',
+  htmlInline({language: javascript, theme: dracula})
+)
+```
+
+This creates an isolated highlighter unless you intentionally rely on the global resolver.
 
 ## Bundles
 
@@ -145,10 +172,10 @@ Useful for dropdowns, config validation, and docs tooling:
 
 ## Runtime notes
 
-- the package uses conditional exports so browsers and Node get the right runtime automatically
+- the package uses conditional exports so Node and web-standard runtimes get the right runtime automatically
 - Node caches fetched parser WASM locally when possible
 - Node can also auto-load installed parser packages such as `@lumis-sh/wasm-elixir` or bundle packages such as `@lumis-sh/wasm-bundle-web`
-- browser usage usually relies on remote parser assets unless you override the resolver, use `withWasm()` with a single npm parser package such as `@lumis-sh/wasm-json`, or use `withWasmBundle()` with a bundle package such as `@lumis-sh/wasm-bundle-web`
+- non-Node usage usually relies on remote parser assets unless you override the resolver, use `withWasm()` with a single npm parser package such as `@lumis-sh/wasm-json`, or use `withWasmBundle()` with a bundle package such as `@lumis-sh/wasm-bundle-web`
 - Bun and Deno are also supported
 - Edge runtimes such as Cloudflare Workers or Vercel Edge follow the browser runtime path, so the best DX is to use npm WASM packages with `withWasm()` or `withWasmBundle()` instead of manually fetching parser assets
 

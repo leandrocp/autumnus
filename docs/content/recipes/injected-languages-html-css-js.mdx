@@ -1,0 +1,46 @@
+---
+sidebar_position: 10
+slug: /recipes/injected-languages-html-css-js
+title: Injected languages (HTML + CSS + JS)
+description: Highlight HTML with nested CSS and JavaScript regions.
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Injected languages (HTML + CSS + JS)
+
+<Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
+  <TabItem value="javascript" label="JavaScript">
+
+```js
+import html from '@lumis-sh/lumis/langs/html'
+import css from '@lumis-sh/lumis/langs/css'
+import javascript from '@lumis-sh/lumis/langs/javascript'
+
+const hl = await createHighlighter({languages: [html, css, javascript]})
+const output = hl.highlight(source, htmlInline({language: html, theme: dracula}))
+```
+
+  </TabItem>
+  <TabItem value="rust" label="Rust">
+
+```rust
+let html = highlight(source, HtmlInlineBuilder::new()
+    .language(Language::Html)
+    .theme(Some(themes::get("dracula").unwrap()))
+    .build()
+    .unwrap());
+```
+
+  </TabItem>
+  <TabItem value="elixir" label="Elixir">
+
+```elixir
+Lumis.highlight!(source, formatter: {:html_inline, language: "html", theme: "dracula"})
+```
+
+  </TabItem>
+</Tabs>
+
+Load every participating language in JavaScript, not just the outer one.

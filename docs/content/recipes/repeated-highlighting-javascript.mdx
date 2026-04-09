@@ -1,0 +1,22 @@
+---
+sidebar_position: 17
+slug: /recipes/repeated-highlighting-javascript
+title: Repeated highlighting (JavaScript)
+description: Reuse a JavaScript highlighter for repeated synchronous highlights.
+---
+
+# Repeated highlighting (JavaScript)
+
+```js
+import {createHighlighter} from '@lumis-sh/lumis'
+import {htmlInline} from '@lumis-sh/lumis/formatters'
+import {bundledLanguages} from '@lumis-sh/lumis/bundles/web'
+import dracula from '@lumis-sh/themes/dracula'
+
+const hl = await createHighlighter({languages: [bundledLanguages]})
+await hl.loadLanguage('javascript')
+
+const html = hl.highlight('const x = 1', htmlInline({language: 'javascript', theme: dracula}))
+```
+
+See [JavaScript](/usage/javascript) for the reusable highlighter workflow.

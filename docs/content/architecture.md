@@ -41,7 +41,7 @@ formatter (tokens + styles -> HTML / ANSI / BBCode Scoped / custom output)
 
 ### Languages
 
-70+ Tree-sitter grammars. Each language has:
+110+ Tree-sitter grammars. Each language has:
 
 - a parser (compiled to native code for Rust/Elixir, WASM for JavaScript/CLI)
 - highlight queries (mostly from [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter))

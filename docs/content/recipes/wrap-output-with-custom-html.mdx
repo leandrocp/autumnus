@@ -1,0 +1,64 @@
+---
+sidebar_position: 8
+slug: /recipes/wrap-output-with-custom-html
+title: Wrap output with custom HTML
+description: Wrap highlighted output with custom header and container HTML.
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Wrap output with custom HTML
+
+<Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
+  <TabItem value="javascript" label="JavaScript">
+
+```js
+const html = await highlight(
+  'const x = 1',
+  htmlInline({
+    language: javascript,
+    theme: dracula,
+    header: {openTag: '<figure><figcaption>index.js</figcaption>', closeTag: '</figure>'},
+  })
+)
+```
+
+  </TabItem>
+  <TabItem value="rust" label="Rust">
+
+```rust
+use lumis::{highlight, HtmlInlineBuilder, formatters::html::HtmlElement, languages::Language, themes};
+
+let html = highlight(
+    "fn main() {}",
+    HtmlInlineBuilder::new()
+        .language(Language::Rust)
+        .theme(Some(themes::get("dracula").unwrap()))
+        .header(Some(HtmlElement {
+            open_tag: "<figure><figcaption>main.rs</figcaption>".to_string(),
+            close_tag: "</figure>".to_string(),
+        }))
+        .build()
+        .unwrap(),
+);
+```
+
+  </TabItem>
+  <TabItem value="elixir" label="Elixir">
+
+```elixir
+Lumis.highlight!(
+  "const x = 1",
+  formatter: {:html_inline,
+    language: "javascript",
+    theme: "dracula",
+    header: %{open_tag: "<figure><figcaption>index.js</figcaption>", close_tag: "</figure>"}
+  }
+)
+```
+
+  </TabItem>
+</Tabs>
+
+See [Build a code block header with copy button](/recipes/file-title-copy) for a fuller pattern.

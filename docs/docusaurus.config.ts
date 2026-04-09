@@ -100,8 +100,8 @@ const config: Config = {
               to: '/installation',
             },
             {
-              label: 'Usage',
-              to: '/usage',
+              label: 'Highlight',
+              to: '/usage/highlight',
             },
           ],
         },
@@ -119,6 +119,14 @@ const config: Config = {
             {
               label: 'JavaScript',
               href: 'https://www.npmjs.com/package/@lumis-sh/lumis',
+            },
+            {
+              label: 'CLI',
+              href: 'https://github.com/leandrocp/lumis/tree/main/crates/lumis-cli',
+            },
+            {
+              label: 'Java',
+              href: 'https://github.com/roastedroot/lumis4j',
             },
           ],
         },

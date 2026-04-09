@@ -1,0 +1,25 @@
+---
+sidebar_position: 18
+slug: /recipes/browser-cdn
+title: Browser / CDN
+description: Highlight code directly in the browser with ESM CDN imports.
+---
+
+# Browser / CDN
+
+```html
+<script type="module">
+  import {highlight} from 'https://esm.sh/@lumis-sh/lumis'
+  import {htmlInline} from 'https://esm.sh/@lumis-sh/lumis/formatters'
+  import javascript from 'https://esm.sh/@lumis-sh/lumis/langs/javascript'
+  import dracula from 'https://esm.sh/@lumis-sh/themes/dracula'
+
+  document.getElementById('output').innerHTML = await highlight(
+    'const x = 1',
+    htmlInline({language: javascript, theme: dracula})
+  )
+</script>
+<div id="output"></div>
+```
+
+See [WASM and CDN](/advanced/wasm-and-cdn) for resolver details.

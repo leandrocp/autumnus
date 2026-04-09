@@ -41,8 +41,8 @@ keywords:
 | Runtime | Integration | Package | Reference |
 | --- | --- | --- | --- |
 | JavaScript | React | `@lumis-sh/react` | [npm](https://www.npmjs.com/package/@lumis-sh/react) |
-| JavaScript | `markdown-it` | `@lumis-sh/markdown-it-lumis` | [npm](https://www.npmjs.com/package/@lumis-sh/markdown-it-lumis) |
-| JavaScript | `rehype` | `@lumis-sh/rehype-lumis` | [npm](https://www.npmjs.com/package/@lumis-sh/rehype-lumis) |
+| JavaScript | markdown-it | `@lumis-sh/markdown-it-lumis` | [npm](https://www.npmjs.com/package/@lumis-sh/markdown-it-lumis) |
+| JavaScript | rehype | `@lumis-sh/rehype-lumis` | [npm](https://www.npmjs.com/package/@lumis-sh/rehype-lumis) |
 
 ## WASM language packages
 
@@ -51,7 +51,7 @@ JavaScript parser grammars are also published as per-language WASM packages such
 Preset bundle packages are also available, such as `@lumis-sh/wasm-bundle-web`, `@lumis-sh/wasm-bundle-web-extra`, `@lumis-sh/wasm-bundle-system`, and `@lumis-sh/wasm-bundle-backend`.
 
 - package list: [Languages](/reference/languages)
-- browser helper for npm parser packages: `withWasm()` from `@lumis-sh/lumis`
-- browser helper for npm preset bundles: `withWasmBundle()` from `@lumis-sh/lumis`
+- helper for npm parser packages in non-Node runtimes: `withWasm()` from `@lumis-sh/lumis`
+- helper for npm preset bundles in non-Node runtimes: `withWasmBundle()` from `@lumis-sh/lumis`
 - loading and resolver behavior: [WASM and CDN](/advanced/wasm-and-cdn)
 - edge-runtime API notes: [JavaScript Runtime](/usage/javascript)

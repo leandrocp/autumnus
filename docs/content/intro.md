@@ -28,11 +28,11 @@ It keeps the same core workflow across runtimes:
 ## Why Lumis
 
 - Tree-sitter parsing instead of regex-based tokenization
-- 70+ languages with nested language support
-- 100+ themes sourced from Neovim colorschemes
-- HTML Inline, HTML Linked, HTML Multi-Themes, Terminal, and BBCode Scoped output
+- 110+ languages with nested language support
+- 250+ themes sourced from Neovim colorschemes
+- 5 formatters: HTML Inline, HTML Linked, HTML Multi-Themes, Terminal, and BBCode Scoped
 - handles incomplete code (useful for streaming)
-- one API across CLI, Rust, Elixir, JavaScript, browser, and Java
+- one API across 7 runtimes: CLI, Rust, Elixir, JavaScript, Node.js, browser, and Java
 
 ## How it works
 
@@ -57,6 +57,7 @@ It keeps the same core workflow across runtimes:
 | Rust | backends, static sites, editors | `lumis` |
 | Elixir | Phoenix, LiveView, BEAM apps | `lumis` |
 | JavaScript | Node.js, browser apps, build tools | `@lumis-sh/lumis` |
+| React | React apps and design systems | `@lumis-sh/react` |
 | JS integrations | markdown-it and rehype content pipelines | `@lumis-sh/markdown-it-lumis`, `@lumis-sh/rehype-lumis` |
 | Themes | CSS themes and JSON theme modules | `@lumis-sh/themes` |
 | Java | JVM apps | `lumis4j` |
@@ -64,11 +65,11 @@ It keeps the same core workflow across runtimes:
 ## Recommended path
 
 1. [Installation](./installation)
-2. [Highlight](./usage) — the core workflow
+2. [Highlight](./usage/highlight) — the core workflow
 3. [Formatters](./formatters) — choose an output style
 4. [Themes](./themes) — customize colors
 5. [Architecture](./architecture) — how the pipeline works
-6. [Examples](./examples) — copy-paste recipes
+6. [Recipes](./recipes) — copy-paste examples
 7. [Languages reference](./reference/languages) — full list
 
 ---

@@ -1,0 +1,52 @@
+---
+sidebar_position: 6
+slug: /recipes/terminal-output
+title: Terminal output
+description: Highlight code for terminal output with ANSI colors.
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Terminal output
+
+<Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
+  <TabItem value="javascript" label="JavaScript">
+
+```js
+import {highlight} from '@lumis-sh/lumis'
+import {terminal} from '@lumis-sh/lumis/formatters'
+import rust from '@lumis-sh/lumis/langs/rust'
+import dracula from '@lumis-sh/themes/dracula'
+
+const ansi = await highlight('fn main() {}', terminal({language: rust, theme: dracula}))
+console.log(ansi)
+```
+
+  </TabItem>
+  <TabItem value="rust" label="Rust">
+
+```rust
+use lumis::{highlight, TerminalBuilder, languages::Language, themes};
+
+let ansi = highlight(
+    "fn main() {}",
+    TerminalBuilder::new()
+        .language(Language::Rust)
+        .theme(Some(themes::get("dracula").unwrap()))
+        .build()
+        .unwrap(),
+);
+
+println!("{}", ansi);
+```
+
+  </TabItem>
+  <TabItem value="cli" label="CLI">
+
+```bash
+lumis highlight main.rs --theme dracula
+```
+
+  </TabItem>
+</Tabs>

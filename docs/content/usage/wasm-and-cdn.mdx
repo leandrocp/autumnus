@@ -48,7 +48,7 @@ If a matching npm parser package is installed, such as `@lumis-sh/wasm-elixir`, 
 Lumis supports two good npm-based workflows:
 
 - Node: install the parser package and use the normal language import
-- browser bundlers: import the parser package explicitly and apply it with `withWasm()`
+- non-Node runtimes with bundled assets: import the parser package explicitly and apply it with `withWasm()`
 
 For multiple languages, install a bundle package such as `@lumis-sh/wasm-bundle-web` and pair it with the matching Lumis bundle.
 
@@ -101,7 +101,7 @@ const html = hl.highlight(
 Use this when you want one package in `package.json` to cover a whole preset. Lumis still imports only `@lumis-sh/lumis/bundles/web`; Node resolves the installed parser packages automatically.
 
   </TabItem>
-  <TabItem value="browser" label="Browser bundlers">
+  <TabItem value="browser" label="Bundlers / Edge">
 
 ```js title="withWasm helper"
 import {createHighlighter, withWasm} from '@lumis-sh/lumis'
@@ -122,12 +122,12 @@ const html = hl.highlight(
 )
 ```
 
-Use this in browser bundlers so the parser package is visible to the bundler and does not rely on a CDN fetch.
+Use this when you want bundler-managed parser assets instead of a CDN fetch in browsers, Edge runtimes, or similar non-Node environments.
 
 See `examples/npm-wasm-browser`.
 
   </TabItem>
-  <TabItem value="browser-bundle" label="Browser bundle">
+  <TabItem value="browser-bundle" label="Bundle / Edge">
 
 ```js title="withWasmBundle helper"
 import {createHighlighter, withWasmBundle} from '@lumis-sh/lumis'
@@ -150,7 +150,7 @@ const html = hl.highlight(
 )
 ```
 
-Use this in browser bundlers when you want local, bundler-managed parser assets for a whole preset instead of wiring each language one by one.
+Use this when you want local, bundler-managed parser assets for a whole preset in browsers, Edge runtimes, or similar non-Node environments instead of wiring each language one by one.
 
   </TabItem>
 </Tabs>

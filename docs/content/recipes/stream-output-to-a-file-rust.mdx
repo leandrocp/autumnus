@@ -1,0 +1,23 @@
+---
+sidebar_position: 12
+slug: /recipes/stream-output-to-a-file-rust
+title: Stream output to a file (Rust)
+description: Write highlighted output directly to a file in Rust.
+---
+
+# Stream output to a file (Rust)
+
+```rust
+use lumis::{write_highlight, HtmlInlineBuilder, languages::Language};
+use std::fs::File;
+
+let formatter = HtmlInlineBuilder::new()
+    .language(Language::Rust)
+    .build()
+    .unwrap();
+
+let mut file = File::create("output.html").unwrap();
+write_highlight(&mut file, "fn main() {}", formatter).unwrap();
+```
+
+See [Rust](/usage/rust) for guidance on when to use `highlight()` vs `write_highlight()`.

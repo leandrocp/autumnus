@@ -1,0 +1,54 @@
+---
+sidebar_position: 14
+slug: /recipes/list-languages-and-themes
+title: List languages and themes
+description: Inspect available languages and themes across Lumis runtimes.
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# List languages and themes
+
+<Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
+  <TabItem value="javascript" label="JavaScript">
+
+```js
+import {availableLanguages, availableThemes} from '@lumis-sh/lumis'
+
+console.log(availableLanguages())
+console.log(availableThemes())
+```
+
+  </TabItem>
+  <TabItem value="rust" label="Rust">
+
+```rust
+use lumis::{languages::available_languages, themes};
+
+let languages = available_languages();
+println!("{}", languages.len());
+
+for theme in themes::available_themes() {
+    println!("{} {:?}", theme.name, theme.appearance);
+}
+```
+
+  </TabItem>
+  <TabItem value="elixir" label="Elixir">
+
+```elixir
+Lumis.available_languages()
+Lumis.available_themes()
+```
+
+  </TabItem>
+  <TabItem value="cli" label="CLI">
+
+```bash
+lumis languages list
+lumis themes list
+```
+
+  </TabItem>
+</Tabs>

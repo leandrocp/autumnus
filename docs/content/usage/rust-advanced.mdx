@@ -13,10 +13,24 @@ keywords:
 
 # Rust
 
-## [`highlight()`](https://docs.rs/lumis/latest/lumis/fn.highlight.html) vs [`write_highlight()`](https://docs.rs/lumis/latest/lumis/fn.write_highlight.html)
+## When you want a `String`
 
-- `highlight()` returns a `String`
-- `write_highlight()` streams into any writer
+Use [`highlight()`](https://docs.rs/lumis/latest/lumis/fn.highlight.html) when you want the rendered output in memory as a `String`.
+
+```rust
+use lumis::{highlight, HtmlInlineBuilder, languages::Language};
+
+let formatter = HtmlInlineBuilder::new()
+    .language(Language::Rust)
+    .build()
+    .unwrap();
+
+let html = highlight("fn main() {}", formatter);
+```
+
+## When you want to write directly to a stream
+
+Use [`write_highlight()`](https://docs.rs/lumis/latest/lumis/fn.write_highlight.html) when you want to stream into a file, socket, or other writer without building a large intermediate string.
 
 ```rust
 use lumis::{write_highlight, HtmlInlineBuilder, languages::Language};
@@ -30,8 +44,6 @@ let formatter = HtmlInlineBuilder::new()
 let mut file = File::create("output.html").unwrap();
 write_highlight(&mut file, "fn main() {}", formatter).unwrap();
 ```
-
-Use `write_highlight()` when you want to avoid building a large intermediate string.
 
 ## Language auto-detection
 

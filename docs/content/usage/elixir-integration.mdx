@@ -13,21 +13,28 @@ keywords:
 
 # Elixir
 
-## [`highlight/2`](https://hexdocs.pm/lumis/Lumis.html#highlight/2) vs [`highlight!/2`](https://hexdocs.pm/lumis/Lumis.html#highlight!/2)
+## When you want explicit error handling
 
-- `highlight/2` returns `{:ok, output}` or `{:error, reason}`
-- `highlight!/2` returns the highlighted output or raises
+Use [`highlight/2`](https://hexdocs.pm/lumis/Lumis.html#highlight/2) when invalid user input, formatter options, or language detection should stay in the normal control flow.
 
 ```elixir
 case Lumis.highlight(source, formatter: {:html_inline, language: "elixir"}) do
   {:ok, html} -> html
   {:error, reason} -> handle_error(reason)
 end
+```
 
+`highlight/2` returns `{:ok, output}` or `{:error, reason}`.
+
+## When you want the highlighted output directly
+
+Use [`highlight!/2`](https://hexdocs.pm/lumis/Lumis.html#highlight!/2) when failures should raise immediately, such as in scripts, trusted internal code, or examples.
+
+```elixir
 html = Lumis.highlight!(source, formatter: {:html_inline, language: "elixir"})
 ```
 
-Use the non-bang version in app code when user input may be invalid or when you want explicit error handling.
+`highlight!/2` returns the highlighted output or raises.
 
 ## Language selection
 
@@ -90,9 +97,3 @@ Lumis.default_options()
 ```
 
 Use `validate_options!/1` when your app exposes formatter options to users (e.g., config files, admin panels). It raises on invalid values.
-
-## API notes
-
-- prefer the 2-arity `highlight/2` and `highlight!/2`
-- avoid deprecated 3-arity calls
-- use formatter-specific options instead of older top-level formatting options

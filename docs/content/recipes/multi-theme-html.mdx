@@ -1,0 +1,47 @@
+---
+sidebar_position: 5
+slug: /recipes/multi-theme-html
+title: Multi-theme HTML
+description: Render HTML that carries multiple themes for light and dark mode.
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Multi-theme HTML
+
+<Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
+  <TabItem value="javascript" label="JavaScript">
+
+```js
+import {highlight} from '@lumis-sh/lumis'
+import {htmlMultiThemes} from '@lumis-sh/lumis/formatters'
+import javascript from '@lumis-sh/lumis/langs/javascript'
+import githubLight from '@lumis-sh/themes/github_light'
+import githubDark from '@lumis-sh/themes/github_dark'
+
+const html = await highlight(
+  'const x = 1',
+  htmlMultiThemes({
+    language: javascript,
+    themes: {light: githubLight, dark: githubDark},
+    defaultTheme: 'light-dark()',
+  })
+)
+```
+
+  </TabItem>
+  <TabItem value="cli" label="CLI">
+
+```bash
+lumis highlight index.js \
+  --formatter html-multi-themes \
+  --themes light:github_light \
+  --themes dark:github_dark \
+  --default-theme "light-dark()"
+```
+
+  </TabItem>
+</Tabs>
+
+See [HTML Multi-Themes](/formatters/html-multi-themes) for the full option set.

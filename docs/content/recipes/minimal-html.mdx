@@ -1,0 +1,74 @@
+---
+sidebar_position: 2
+slug: /recipes/minimal-html
+title: Minimal HTML
+description: Render a minimal highlighted HTML snippet with Lumis.
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Minimal HTML
+
+<Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
+  <TabItem value="javascript" label="JavaScript">
+
+```js
+import {highlight} from '@lumis-sh/lumis'
+import {htmlInline} from '@lumis-sh/lumis/formatters'
+import javascript from '@lumis-sh/lumis/langs/javascript'
+import dracula from '@lumis-sh/themes/dracula'
+
+const html = await highlight('const x = 1', htmlInline({language: javascript, theme: dracula}))
+```
+
+  </TabItem>
+  <TabItem value="rust" label="Rust">
+
+```rust
+use lumis::{highlight, HtmlInlineBuilder, languages::Language, themes};
+
+let html = highlight(
+    "const x = 1",
+    HtmlInlineBuilder::new()
+        .language(Language::Javascript)
+        .theme(Some(themes::get("dracula").unwrap()))
+        .build()
+        .unwrap(),
+);
+```
+
+  </TabItem>
+  <TabItem value="elixir" label="Elixir">
+
+```elixir
+html = Lumis.highlight!("const x = 1", formatter: {:html_inline, language: "javascript", theme: "dracula"})
+```
+
+  </TabItem>
+  <TabItem value="java" label="Java">
+
+```java
+import io.roastedroot.lumis4j.core.Lang;
+import io.roastedroot.lumis4j.core.Lumis;
+import io.roastedroot.lumis4j.core.Theme;
+
+var lumis = Lumis.builder().build();
+
+var highlighter = lumis.highlighter()
+    .withLang(Lang.JAVASCRIPT)
+    .withTheme(Theme.DRACULA)
+    .build();
+
+var html = highlighter.highlight("const x = 1").string();
+```
+
+  </TabItem>
+  <TabItem value="cli" label="CLI">
+
+```bash
+lumis highlight index.js --formatter html-inline --theme dracula
+```
+
+  </TabItem>
+</Tabs>

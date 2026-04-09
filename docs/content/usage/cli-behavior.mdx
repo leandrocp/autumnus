@@ -25,16 +25,23 @@ cat main.rs | lumis highlight -l rust
 echo 'fn main() {}' | lumis highlight -l rust
 ```
 
-## Auto-detection vs explicit language
+## When to set `--language`
 
-- use `--language` when you already know the language
-- omit it when file name or source content should drive auto-detection
-- if no language can be inferred, plaintext is the safe fallback
+Pass `--language` when you already know the correct parser and do not want detection to depend on the filename or input content.
+
+```bash
+lumis highlight main.txt --language rust
+```
+
+## When to rely on auto-detection
+
+Omit `--language` when the path, shebang, or source content should drive detection.
 
 ```bash
 lumis highlight main.rs
-lumis highlight main.txt --language rust
 ```
+
+If no language can be inferred, plaintext is the safe fallback.
 
 ## Parser cache lifecycle
 
