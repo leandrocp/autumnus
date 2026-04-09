@@ -290,10 +290,11 @@ export type HighlightEvent =
   | { type: "end" };
 
 /**
- * Signature of the `highlightIter` function on {@link HighlightContext}.
+ * Signature of the `highlightIter` free function and the `hl.highlightIter`
+ * method on a {@link Highlighter} instance.
  *
  * ```ts
- * hl.highlightIter(source, javascript, dracula, (text, language, range, scope, style) => {
+ * highlightIter(source, javascript, dracula, (text, language, range, scope, style) => {
  *   console.log(`${scope}: ${text}`)
  * })
  * ```
@@ -306,30 +307,26 @@ export type HighlightIterFn = (
 ) => void;
 
 /**
- * The highlighting context passed to {@link Formatter.format}.
- *
- * Provides `highlightIter` for callback-based token iteration.
- */
-export interface HighlightContext {
-  /** Iterate over highlighted tokens, calling `onToken` for each. */
-  highlightIter: HighlightIterFn;
-  /** @internal */
-  highlightEvents(source: string, language: LanguageRef | undefined): HighlightEvent[];
-}
-
-/**
  * A formatter renders highlighted source code into an output string.
  *
  * Built-in formatters are created with `htmlInline()`, `htmlLinked()`, etc.
- * Custom formatters implement the same interface. Call `hl.highlightIter`
- * inside `format()` to iterate over highlighted tokens.
+ * Custom formatters implement the same interface. Inside `format()`, call the
+ * sync free functions `highlightIter` (for flat token callbacks) or
+ * `highlightEvents` (for nested open/close events) imported from
+ * `@lumis-sh/lumis`.
+ *
+ * While `format()` is running, `this.language` is set to the resolved language
+ * after detection, so the formatter can render language-dependent output
+ * (e.g. `<code class="language-…">`) without re-running detection.
  *
  * ```ts
+ * import { highlightIter, type Formatter } from '@lumis-sh/lumis'
+ *
  * const formatter: Formatter = {
  *   language: javascript,
- *   format(source, hl) {
+ *   format(source) {
  *     const parts: string[] = []
- *     hl.highlightIter(source, javascript, dracula, (text, _lang, _range, scope, _style) => {
+ *     highlightIter(source, this.language, dracula, (text, _lang, _range, scope) => {
  *       parts.push(scope ? `[${scope}] ${text}` : text)
  *     })
  *     return parts.join('\n')
@@ -339,7 +336,7 @@ export interface HighlightContext {
  */
 export interface Formatter {
   language?: LanguageRef;
-  format(source: string, hl: HighlightContext): string;
+  format(source: string): string;
 }
 
 /**

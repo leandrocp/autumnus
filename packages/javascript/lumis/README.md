@@ -202,12 +202,12 @@ const output = hl.highlight('const x = "[url=x]"', bbcodeScoped({ language: java
 
 ## Custom Formatters
 
-A formatter is an object with `language` and `format(source, hl)`. Inside `format()`, call `hl.highlightIter()` to iterate over highlighted tokens. Built-in formatters are regular objects. Custom ones work the same way.
+A formatter is an object with `language` and `format(source)`. Inside `format()`, call the sync free functions `highlightIter` (for flat token callbacks) or `highlightEvents` (for nested open/close events) imported from `@lumis-sh/lumis`. Built-in formatters are regular objects. Custom ones work the same way.
 
 Minimal example that wraps each token in a colored `<span>`:
 
 ```typescript
-import { createHighlighter } from '@lumis-sh/lumis'
+import { createHighlighter, highlightIter } from '@lumis-sh/lumis'
 import type { Formatter } from '@lumis-sh/lumis/formatters'
 import { openPreTag, openCodeTag, closingTags, spanInline } from '@lumis-sh/lumis/formatters/html'
 import rust from '@lumis-sh/lumis/langs/rust'
@@ -217,13 +217,13 @@ const hl = await createHighlighter({ languages: [rust] })
 
 const formatter: Formatter = {
   language: rust,
-  format(source, hl) {
+  format(source) {
     const parts: string[] = []
 
     parts.push(openPreTag({ theme: dracula }))
-    parts.push(openCodeTag(rust))
+    parts.push(openCodeTag(this.language))
 
-    hl.highlightIter(source, rust, dracula, (text, language, _range, scope, _style) => {
+    highlightIter(source, this.language, dracula, (text, language, _range, scope, _style) => {
       if (scope) {
         parts.push(spanInline(text, { language, scope, theme: dracula }))
       } else {

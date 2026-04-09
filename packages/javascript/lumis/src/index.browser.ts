@@ -9,6 +9,8 @@ import {
   getDefaultRuntime,
 } from "./runtime/browser.js";
 
+export { highlightIter, highlightEvents } from "./core/highlighter.js";
+
 const highlighter = createHighlighterModule({
   createRuntime,
   getDefaultRuntime,
@@ -21,10 +23,6 @@ export function createHighlighter(...args: Parameters<typeof highlighter.createH
 /** {@inheritDoc index.highlight} */
 export function highlight(...args: Parameters<typeof highlighter.highlight>) {
   return highlighter.highlight(...args);
-}
-/** {@inheritDoc index.highlightIter} */
-export function highlightIter(...args: Parameters<typeof highlighter.highlightIter>) {
-  return highlighter.highlightIter(...args);
 }
 
 /** {@inheritDoc index.withWasm} */
@@ -51,7 +49,7 @@ export function withWasmBundle(
 
 export type { Highlighter } from "./core/highlighter.js";
 export type {
-  HighlightContext,
+  HighlightEvent,
   HighlightIterFn,
   HtmlElement,
   HighlightLinesInline,

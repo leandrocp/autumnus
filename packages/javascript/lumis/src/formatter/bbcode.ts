@@ -1,4 +1,4 @@
-import type { BBCodeScopedFormatter, HighlightEvent } from "../types.js";
+import type { HighlightEvent } from "../types.js";
 import { decodeSourceSlice, encodeSource } from "./html.js";
 
 function escapeBbcodeText(text: string): string {
@@ -9,11 +9,7 @@ function scopeToTagName(scope: string, language: string): string {
   return `${scope}.${language}`.replaceAll(".", "-");
 }
 
-export function formatBBCode(
-  source: string,
-  events: HighlightEvent[],
-  _formatter: BBCodeScopedFormatter,
-): string {
+export function formatBBCode(source: string, events: HighlightEvent[]): string {
   const sourceBytes = encodeSource(source);
   const parts: string[] = [];
   const scopeStack: string[] = [];

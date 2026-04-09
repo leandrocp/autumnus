@@ -349,7 +349,7 @@
       <p class="eyebrow">Custom formatter</p>
       <h1>Interactive token inspector</h1>
       <p class="lede">
-        A custom formatter that calls <code>hl.highlightIter()</code> inside <code>format()</code> to build
+        A custom formatter that calls <code>highlightIter()</code> inside <code>format()</code> to build
         annotated HTML with per-token metadata you can inspect, including injected-language tokens.
       </p>
       <div class="facts">
@@ -434,7 +434,7 @@
       <div class="panel-header">
         <div>
           <h2>Formatter source</h2>
-          <p>The formatter calls <code>hl.highlightIter()</code> and turns the callbacks into annotated HTML spans.</p>
+          <p>The formatter calls <code>highlightIter()</code> and turns the callbacks into annotated HTML spans.</p>
         </div>
         <span class="badge">User formatter</span>
       </div>
@@ -443,7 +443,7 @@
   </main>
 
   <script type="module">
-    import { createHighlighter } from '../src/index.browser.ts'
+    import { createHighlighter, highlightIter } from '../src/index.browser.ts'
     import { htmlInline } from '../src/formatters.ts'
     import {
       closeTag,
@@ -472,7 +472,8 @@
   <\/script>
 </article>`
 
-    const formatterSource = `import type { Formatter } from '@lumis-sh/lumis/formatters'
+    const formatterSource = `import { highlightIter } from '@lumis-sh/lumis'
+import type { Formatter } from '@lumis-sh/lumis/formatters'
 import {
   closingTags,
   escape,
@@ -488,11 +489,11 @@ import dracula from '@lumis-sh/themes/dracula'
 
 const docsFormatter: Formatter = {
   language: html,
-  format(source, hl) {
+  format(source) {
     let tokenId = 0
     const lines = ['']
 
-    hl.highlightIter(source, html, dracula, (text, language, range, scope, style) => {
+    highlightIter(source, this.language, dracula, (text, language, range, scope, style) => {
       const parts = text.split('\\n')
       for (let i = 0; i < parts.length; i++) {
         const part = parts[i]
@@ -527,11 +528,11 @@ const docsFormatter: Formatter = {
 
     const docsFormatter = {
       language: html,
-      format(source, hl) {
+      format(source) {
         let tokenId = 0
         const lines = ['']
 
-        hl.highlightIter(source, html, dracula, (text, language, range, scope, style) => {
+        highlightIter(source, this.language, dracula, (text, language, range, scope, style) => {
           const parts = text.split('\n')
           for (let i = 0; i < parts.length; i++) {
             const part = parts[i]

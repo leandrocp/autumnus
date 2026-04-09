@@ -2,7 +2,6 @@ import type {
   BBCodeScopedFormatter,
   BBCodeScopedOptions,
   Formatter,
-  HighlightContext,
   HtmlInlineOptions,
   HtmlInlineFormatter,
   HtmlLinkedOptions,
@@ -12,25 +11,12 @@ import type {
   TerminalOptions,
   TerminalFormatter,
 } from "./types.js";
+import { highlightEvents } from "./core/highlighter.js";
 import { formatBBCode } from "./formatter/bbcode.js";
 import { formatHtmlInline } from "./formatter/html-inline.js";
 import { formatHtmlLinked } from "./formatter/html-linked.js";
 import { formatHtmlMultiThemes } from "./formatter/html-multi-themes.js";
 import { formatTerminal } from "./formatter/terminal.js";
-
-function createFormatter<T extends Formatter>(
-  options: Omit<T, "format">,
-  render: (source: string, hl: HighlightContext, formatter: T) => string,
-): T {
-  const formatter = {
-    ...options,
-    format(source: string, hl: HighlightContext): string {
-      return render(source, hl, formatter as T);
-    },
-  } as T;
-
-  return formatter;
-}
 
 /**
  * Create an inline-styles HTML formatter. Each token gets a `<span>` with
@@ -46,10 +32,13 @@ function createFormatter<T extends Formatter>(
  * ```
  */
 export function htmlInline(options: HtmlInlineOptions = {}): HtmlInlineFormatter {
-  return createFormatter(options, (source, hl, formatter) => {
-    const events = hl.highlightEvents(source, options.language);
-    return formatHtmlInline(source, events, formatter);
-  });
+  const formatter: HtmlInlineFormatter = {
+    ...options,
+    format(source: string): string {
+      return formatHtmlInline(source, highlightEvents(source, formatter.language), formatter);
+    },
+  };
+  return formatter;
 }
 
 /**
@@ -66,10 +55,13 @@ export function htmlInline(options: HtmlInlineOptions = {}): HtmlInlineFormatter
  * ```
  */
 export function htmlLinked(options: HtmlLinkedOptions = {}): HtmlLinkedFormatter {
-  return createFormatter(options, (source, hl, formatter) => {
-    const events = hl.highlightEvents(source, options.language);
-    return formatHtmlLinked(source, events, formatter);
-  });
+  const formatter: HtmlLinkedFormatter = {
+    ...options,
+    format(source: string): string {
+      return formatHtmlLinked(source, highlightEvents(source, formatter.language), formatter);
+    },
+  };
+  return formatter;
 }
 
 /**
@@ -91,10 +83,13 @@ export function htmlLinked(options: HtmlLinkedOptions = {}): HtmlLinkedFormatter
  * ```
  */
 export function htmlMultiThemes(options: HtmlMultiThemesOptions): HtmlMultiThemesFormatter {
-  return createFormatter(options, (source, hl, formatter) => {
-    const events = hl.highlightEvents(source, options.language);
-    return formatHtmlMultiThemes(source, events, formatter);
-  });
+  const formatter: HtmlMultiThemesFormatter = {
+    ...options,
+    format(source: string): string {
+      return formatHtmlMultiThemes(source, highlightEvents(source, formatter.language), formatter);
+    },
+  };
+  return formatter;
 }
 
 /**
@@ -111,10 +106,13 @@ export function htmlMultiThemes(options: HtmlMultiThemesOptions): HtmlMultiTheme
  * ```
  */
 export function bbcodeScoped(options: BBCodeScopedOptions = {}): BBCodeScopedFormatter {
-  return createFormatter(options, (source, hl, formatter) => {
-    const events = hl.highlightEvents(source, options.language);
-    return formatBBCode(source, events, formatter);
-  });
+  const formatter: BBCodeScopedFormatter = {
+    ...options,
+    format(source: string): string {
+      return formatBBCode(source, highlightEvents(source, formatter.language));
+    },
+  };
+  return formatter;
 }
 
 /**
@@ -131,10 +129,13 @@ export function bbcodeScoped(options: BBCodeScopedOptions = {}): BBCodeScopedFor
  * ```
  */
 export function terminal(options: TerminalOptions = {}): TerminalFormatter {
-  return createFormatter(options, (source, hl, formatter) => {
-    const events = hl.highlightEvents(source, options.language);
-    return formatTerminal(source, events, formatter);
-  });
+  const formatter: TerminalFormatter = {
+    ...options,
+    format(source: string): string {
+      return formatTerminal(source, highlightEvents(source, formatter.language), formatter);
+    },
+  };
+  return formatter;
 }
 
 export type {
@@ -142,7 +143,6 @@ export type {
   BBCodeScopedOptions,
   Formatter,
   HighlightCallback,
-  HighlightContext,
   HighlightEvent,
   HighlightIterFn,
   HighlightRange,

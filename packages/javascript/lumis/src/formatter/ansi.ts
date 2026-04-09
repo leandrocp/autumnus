@@ -144,11 +144,17 @@ export async function highlightIterWithAnsi(
   language: LanguageRef | undefined,
   theme: Theme | undefined,
 ): Promise<AnsiSegment[]> {
-  const { highlightIter } = await import("../index.js");
+  const { highlight, highlightIter } = await import("../index.js");
   const segments: AnsiSegment[] = [];
 
-  await highlightIter(source, language, theme, (text, _language, range, _scope, style) => {
-    segments.push([wrapWithAnsi(text, style), range]);
+  await highlight(source, {
+    language,
+    format(src) {
+      highlightIter(src, this.language, theme, (text, _language, range, _scope, style) => {
+        segments.push([wrapWithAnsi(text, style), range]);
+      });
+      return "";
+    },
   });
 
   return segments;
