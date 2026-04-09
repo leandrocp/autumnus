@@ -1,5 +1,3 @@
-# Changelog
-
 ## [0.7.0](https://github.com/leandrocp/lumis/compare/rust@v0.6.0...rust@v0.7.0) (2026-04-06)
 
 

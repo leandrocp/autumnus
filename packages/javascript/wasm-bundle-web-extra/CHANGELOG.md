@@ -1,5 +1,3 @@
-# Changelog
-
 ## [0.0.3](https://github.com/leandrocp/lumis/compare/wasm-bundle-web-extra@v0.0.2...wasm-bundle-web-extra@v0.0.3) (2026-04-07)
 
 

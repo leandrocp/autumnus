@@ -78,6 +78,7 @@ setup:
     echo "Checking optional tools..."
     check_tree_sitter_cli
     check_bin emcc "https://emscripten.org (needed for WASM builds)"
+    check_bin git-cliff "https://git-cliff.org"
     check_python310
     check_bin nvim "https://neovim.io (needed for theme generation)"
     echo ""
@@ -375,3 +376,125 @@ themes-list:
 themes-sync:
     cargo run --manifest-path crates/dev/Cargo.toml -- sync-themes
     pnpm --filter @lumis-sh/themes build:themes
+
+# Update package version files and regenerate the package changelog locally
+release-prepare package version:
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    package="{{package}}"
+    version="{{version}}"
+    case "$package" in
+        cargo-lumis)
+            manifest="crates/lumis/Cargo.toml"
+            changelog="crates/lumis/CHANGELOG.md"
+            include_path="crates/lumis/**/*"
+            kind="cargo"
+            cargo_package="lumis"
+            ;;
+        cargo-lumis-core)
+            manifest="crates/lumis-core/Cargo.toml"
+            changelog="crates/lumis-core/CHANGELOG.md"
+            include_path="crates/lumis-core/**/*"
+            kind="cargo"
+            cargo_package="lumis-core"
+            ;;
+        cargo-lumis-build)
+            manifest="crates/lumis-build/Cargo.toml"
+            changelog="crates/lumis-build/CHANGELOG.md"
+            include_path="crates/lumis-build/**/*"
+            kind="cargo"
+            cargo_package="lumis-build"
+            ;;
+        cargo-lumis-cli)
+            manifest="crates/lumis-cli/Cargo.toml"
+            changelog="crates/lumis-cli/CHANGELOG.md"
+            include_path="crates/lumis-cli/**/*"
+            kind="cargo"
+            cargo_package="lumis-cli"
+            ;;
+        npm-lumis)
+            manifest="packages/javascript/lumis/package.json"
+            changelog="packages/javascript/lumis/CHANGELOG.md"
+            include_path="packages/javascript/lumis/**/*"
+            kind="npm"
+            ;;
+        npm-markdown-it-lumis)
+            manifest="packages/javascript/markdown-it-lumis/package.json"
+            changelog="packages/javascript/markdown-it-lumis/CHANGELOG.md"
+            include_path="packages/javascript/markdown-it-lumis/**/*"
+            kind="npm"
+            ;;
+        npm-rehype-lumis)
+            manifest="packages/javascript/rehype-lumis/package.json"
+            changelog="packages/javascript/rehype-lumis/CHANGELOG.md"
+            include_path="packages/javascript/rehype-lumis/**/*"
+            kind="npm"
+            ;;
+        npm-react)
+            manifest="packages/javascript/react/package.json"
+            changelog="packages/javascript/react/CHANGELOG.md"
+            include_path="packages/javascript/react/**/*"
+            kind="npm"
+            ;;
+        npm-themes)
+            manifest="packages/javascript/themes/package.json"
+            changelog="packages/javascript/themes/CHANGELOG.md"
+            include_path="packages/javascript/themes/**/*"
+            kind="npm"
+            ;;
+        npm-wasm-bundle-web)
+            manifest="packages/javascript/wasm-bundle-web/package.json"
+            changelog="packages/javascript/wasm-bundle-web/CHANGELOG.md"
+            include_path="packages/javascript/wasm-bundle-web/**/*"
+            kind="npm"
+            ;;
+        npm-wasm-bundle-web-extra)
+            manifest="packages/javascript/wasm-bundle-web-extra/package.json"
+            changelog="packages/javascript/wasm-bundle-web-extra/CHANGELOG.md"
+            include_path="packages/javascript/wasm-bundle-web-extra/**/*"
+            kind="npm"
+            ;;
+        npm-wasm-bundle-system)
+            manifest="packages/javascript/wasm-bundle-system/package.json"
+            changelog="packages/javascript/wasm-bundle-system/CHANGELOG.md"
+            include_path="packages/javascript/wasm-bundle-system/**/*"
+            kind="npm"
+            ;;
+        npm-wasm-bundle-backend)
+            manifest="packages/javascript/wasm-bundle-backend/package.json"
+            changelog="packages/javascript/wasm-bundle-backend/CHANGELOG.md"
+            include_path="packages/javascript/wasm-bundle-backend/**/*"
+            kind="npm"
+            ;;
+        npm-wasm-bundle-full)
+            manifest="packages/javascript/wasm-bundle-full/package.json"
+            changelog="packages/javascript/wasm-bundle-full/CHANGELOG.md"
+            include_path="packages/javascript/wasm-bundle-full/**/*"
+            kind="npm"
+            ;;
+        hex-lumis)
+            manifest="packages/elixir/lumis/mix.exs"
+            changelog="packages/elixir/lumis/CHANGELOG.md"
+            include_path="packages/elixir/lumis/**/*"
+            kind="hex"
+            ;;
+        *) echo "Unknown package: $package" >&2; exit 1 ;;
+    esac
+
+    tag="$package/v$version"
+
+    case "$kind" in
+        cargo)
+            cargo set-version --manifest-path "$manifest" -p "$cargo_package" "$version"
+            ;;
+        npm)
+            npm --prefix "$(dirname "$manifest")" version --no-git-tag-version "$version"
+            ;;
+        hex)
+            python3 -c 'from pathlib import Path; import re, sys; path = Path(sys.argv[1]); version = sys.argv[2]; content = path.read_text(); content = re.sub(r"@version \"[^\"]+\"", f"@version \"{version}\"", content, count=1); path.write_text(content)' "$manifest" "$version"
+            ;;
+    esac
+
+    git-cliff --config cliff.toml --github-repo leandrocp/lumis --include-path "$include_path" --tag-pattern "$package/v[0-9].*" --tag "$tag" --prepend "$changelog" --strip header --unreleased
+    printf 'Prepared %s %s\n' "$package" "$version"

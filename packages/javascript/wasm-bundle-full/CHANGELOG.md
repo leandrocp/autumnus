@@ -1,5 +1,3 @@
-# Changelog
-
 ## [0.0.6](https://github.com/leandrocp/lumis/compare/wasm-bundle-full@v0.0.5...wasm-bundle-full@v0.0.6) (2026-04-07)
 
 

@@ -30,14 +30,15 @@ This installs all dependencies (Rust, JS, Elixir) and checks that required tools
 
 ## Releases
 
-This repository uses `knope` for release preparation.
+This repository prepares releases locally and publishes from tags.
 
-- Release metadata is prepared and maintained from the release workflow.
-- Contributors should not hand-edit package versions or changelog release sections in normal feature PRs.
-- Merged changes accumulate in a `knope/release` pull request.
-- Merging that release PR creates package tags like `cargo-lumis/v0.7.1` and triggers the existing publish workflows.
+- Releasable packages use the shared root `cliff.toml` plus `just release-prepare <package> <version>`.
+- `just release-prepare` updates only the target package version file and prepends the next package changelog entry.
+- If dependent manifests must move in lockstep, update them separately in the same release commit.
+- Maintainers commit release prep changes directly and then push package tags such as `cargo-lumis-cli/v0.2.0`.
+- Pushing a package tag triggers the existing publish workflows.
 
-The release PR is generated automatically from `main`. Do not edit release versions or changelog sections by hand unless you are intentionally fixing the generated release branch.
+Do not hand-edit release versions or changelog sections when `just release-prepare` can generate them.
 
 ## Configuration files
 
