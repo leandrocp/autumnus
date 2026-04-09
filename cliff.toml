@@ -10,7 +10,7 @@ https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}
 {% for group, commits in commits | group_by(attribute=\"group\") %}
 ### {{ group }}
 
-{% for commit in commits %}- {% if commit.breaking %}BREAKING: {% endif %}{{ commit.message }}{% for link in commit.links %} ([{{ link.text }}]({{ link.href }})){% endfor %}
+{% for commit in commits %}- {% if commit.breaking %}BREAKING: {% endif %}{% if commit.remote.pr_number %}{{ commit.message | trim_end_matches(pat=(" (#" ~ commit.remote.pr_number ~ ")")) }} ([#{{ commit.remote.pr_number }}]({{ self::remote_url() }}/pull/{{ commit.remote.pr_number }})){% else %}{{ commit.message }}{% endif %}
 {% endfor %}
 {% endfor %}
 """
@@ -24,7 +24,7 @@ protect_breaking_commits = true
 filter_commits = true
 sort_commits = "oldest"
 commit_preprocessors = [
-  { pattern = ' \\((\\w+\\s)?#([0-9]+)\\)$', replace = "" },
+  { pattern = '\\((\\w+\\s)?#([0-9]+)\\)', replace = "" },
 ]
 commit_parsers = [
   { message = "^feat", group = "Features" },
