@@ -44,10 +44,10 @@ jobs:
 
       - run: pnpm --filter @lumis-sh/lumis build
 
-      - run: pnpm install --frozen-lockfile --ignore-workspace
+      - run: pnpm install
         working-directory: website
 
-      - run: pnpm install --frozen-lockfile --ignore-workspace
+      - run: pnpm install
         working-directory: docs
 
       - run: pnpm build
