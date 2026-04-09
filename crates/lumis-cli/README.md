@@ -127,8 +127,8 @@ lumis parsers update rust javascript
 lumis parsers update --all
 
 # Show cache paths while fetching or updating
-lumis parsers fetch -v rust
-lumis parsers update -v rust
+lumis parsers fetch --verbose rust
+lumis parsers update --verbose rust
 ```
 
 Notes:
@@ -158,7 +158,7 @@ Override the location with `--data-dir` or `LUMIS_DATA_DIR`.
 
 ```text
 -d, --data-dir <PATH>   Override the data directory
--v, --verbose           Show cache hits, downloads, and parser paths
+ -V, --verbose           Show cache hits, downloads, and parser paths
     --help              Print help
--V, --version           Print version
+-v, --version           Print version
 ```

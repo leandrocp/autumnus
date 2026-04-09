@@ -91,6 +91,7 @@ fn titlecase(s: &str) -> String {
 }
 
 fn main() {
+    sync_extract_theme_script();
     gen_conformance_tests();
 
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
@@ -255,6 +256,39 @@ fn main() {
         prettyplease::unparse(&syn::parse2::<syn::File>(generated_code).unwrap())
     )
     .unwrap();
+}
+
+fn sync_extract_theme_script() {
+    let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
+    let workspace_script = workspace_root().join("themes/extract_theme.lua");
+    let crate_script = manifest_dir().join("themes/extract_theme.lua");
+    let out_script = out_dir.join("extract_theme.lua");
+
+    println!("cargo:rerun-if-changed={}", crate_script.display());
+    if workspace_script.exists() {
+        println!("cargo:rerun-if-changed={}", workspace_script.display());
+    }
+
+    let script = if workspace_script.exists() {
+        let workspace_content =
+            fs::read_to_string(&workspace_script).expect("failed to read themes/extract_theme.lua");
+
+        let crate_content = fs::read_to_string(&crate_script).ok();
+        if crate_content.as_deref() != Some(workspace_content.as_str()) {
+            if let Some(parent) = crate_script.parent() {
+                fs::create_dir_all(parent).expect("failed to create crate themes directory");
+            }
+            fs::write(&crate_script, &workspace_content)
+                .expect("failed to sync crate-local extract_theme.lua");
+        }
+
+        workspace_content
+    } else {
+        fs::read_to_string(&crate_script)
+            .expect("failed to read crate-local themes/extract_theme.lua")
+    };
+
+    fs::write(&out_script, script).expect("failed to write generated extract_theme.lua");
 }
 
 fn gen_conformance_tests() {

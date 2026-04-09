@@ -113,6 +113,15 @@ fn version_flag() {
 }
 
 #[test]
+fn short_version_flag() {
+    cmd()
+        .arg("-v")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(env!("CARGO_PKG_VERSION")));
+}
+
+#[test]
 fn help_flag() {
     cmd()
         .arg("--help")
@@ -343,6 +352,9 @@ fn themes_generate_prints_json_to_stdout() {
     assert!(themes_lua.contains("https://github.com/folke/tokyonight.nvim"));
     assert!(themes_lua.contains("vim.o.background = \"dark\""));
     assert!(!themes_lua.contains("vim.g.test_setup = true"));
+
+    let extract_theme = fs::read_to_string(capture_dir.join("extract_theme.lua")).unwrap();
+    assert!(extract_theme.contains("extract_theme.lua requires a theme name"));
 }
 
 #[test]
@@ -423,11 +435,11 @@ fn fetch_parsers_already_cached() {
 
 #[test]
 fn fetch_parsers_already_cached_verbose() {
-    // With -v it shows the cached path
+    // With -V it shows the cached path
     cmd()
         .arg("--data-dir")
         .arg(fixtures_dir())
-        .arg("-v")
+        .arg("-V")
         .args(["parsers", "fetch", "diff"])
         .assert()
         .success()
@@ -465,7 +477,7 @@ fn fetch_parsers_to_temp_dir_verbose() {
     cmd()
         .arg("--data-dir")
         .arg(tmp.path())
-        .arg("-v")
+        .arg("-V")
         .args(["parsers", "fetch", "json"])
         .assert()
         .success()
@@ -490,7 +502,7 @@ fn fetch_parsers_then_update() {
     cmd()
         .arg("--data-dir")
         .arg(tmp.path())
-        .arg("-v")
+        .arg("-V")
         .args(["parsers", "update", "json"])
         .assert()
         .success()
