@@ -1,5 +1,3 @@
-# Changelog
-
 ## [0.1.0](https://github.com/leandrocp/lumis/compare/react@v0.0.3...react@v0.1.0) (2026-04-07)
 
 

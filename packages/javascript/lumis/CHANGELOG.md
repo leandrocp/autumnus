@@ -1,5 +1,3 @@
-# Changelog
-
 ## [0.2.0](https://github.com/leandrocp/lumis/compare/javascript@v0.1.0...javascript@v0.2.0) (2026-04-05)
 
 

@@ -1,35 +1,34 @@
 # Release
 
-This repository uses `knope` for release preparation and GitHub Actions for publishing.
+This repository publishes packages from tags.
 
-## Release flow
+## Checklist
 
-1. Merge normal work into `main`.
-2. Wait for the `Prepare Release` workflow to update or create the `knope/release` PR.
-3. Review the release PR:
-   - versions
-   - changelog entries
-   - included packages
-4. If needed, adjust release metadata on the release branch yourself.
-5. Merge the `knope/release` PR.
-6. The `Release` workflow creates package tags and GitHub releases.
-7. Tag-triggered publish workflows run for npm, crates.io, and Hex.
+1. Pick the package and version.
+2. Run `just release-prepare <package> <version>`.
+3. Review the changed version file and `CHANGELOG.md`.
+4. If needed, update dependent manifests in the same commit.
+5. Commit the release prep.
+6. Push the commit to `main`.
+7. Push the tag: `git push origin <package>/v<version>`.
+8. Watch the tag-triggered publish workflow.
+9. If publish fails because dependent packages also need releases, prepare and tag those packages separately.
 
 ## Failed releases
 
 If a release fails before any registry accepts the new version:
 
-1. Delete the GitHub releases created for that failed attempt.
-2. Delete every package tag created for that failed attempt.
-3. Fix the mistake on `main`.
-4. Let the `knope/release` PR regenerate.
-5. Merge it and release the same version again.
+1. Delete every package tag created for that failed attempt.
+2. Fix the mistake on `main`.
+3. Run `just release-prepare <package> <version>` again.
+4. Commit the updated changelog and version bump.
+5. Push the corrected package tag.
 
 If any registry already published the version, do not try to reuse it. Cut a new patch release instead.
 
 ## Tag format
 
-Knope creates one tag per released package:
+Use one tag per released package:
 
 - `cargo-lumis/v0.7.1`
 - `cargo-lumis-core/v0.1.0`
@@ -47,47 +46,25 @@ Knope creates one tag per released package:
 - `npm-wasm-bundle-full/v0.0.6`
 - `hex-lumis/v0.3.0`
 
-## What is automated
+## Git-Cliff
 
-- release PR creation and updates
-- version bumps
-- changelog updates
-- package tagging
-- GitHub release creation
-- npm publishing
-- crates.io publishing
-- Hex publishing
+All packages share the root `cliff.toml` template.
 
-## What is manual
+The `just release-prepare` recipe picks the right files for the package you name.
 
-- deciding when to ship
-- reviewing the release PR
-- fixing release metadata if the generated branch is wrong
-- merging the release PR
+For example, `cargo-lumis-cli` means:
 
-## Changesets
+- version file: `crates/lumis-cli/Cargo.toml`
+- changelog: `crates/lumis-cli/CHANGELOG.md`
+- tag format: `cargo-lumis-cli/v<version>`
+- commit scope for changelog generation: `crates/lumis-cli/**/*`
 
-Release changesets are maintainer-managed.
-
-Contributors are not expected to add `.changeset/*.md` files unless you ask for it.
-
-When you need to create or edit release metadata yourself, use:
+Example:
 
 ```sh
-knope document-change
+just release-prepare cargo-lumis-cli 0.2.0
 ```
 
-That creates a `.changeset/*.md` file using the package keys defined in `knope.toml`.
+`release-prepare` updates only the target package version file and prepends the next package changelog entry with `git-cliff`.
 
-## Important notes
-
-- Do not hand-edit package versions in normal feature PRs.
-- Do not hand-edit changelog release sections in normal feature PRs.
-- `packages/elixir/lumis/native/lumis_nif/Cargo.toml` is not released independently.
-- The Hex release is represented only by `hex-lumis`.
-
-## Required secret
-
-Set `RELEASE_TOKEN` in GitHub Actions with repo write access.
-
-The workflows fall back to `GITHUB_TOKEN`, but a write-capable token is the safer setup for creating tags and triggering downstream publish workflows consistently.
+If a release requires dependent manifests to move in lockstep, update those files separately and commit them with the release prep.

@@ -1,5 +1,3 @@
-# Changelog
-
 ## [0.1.4](https://github.com/leandrocp/lumis/compare/rust-cli@v0.1.3...rust-cli@v0.1.4) (2026-04-06)
 
 

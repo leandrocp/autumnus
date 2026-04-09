@@ -1,5 +1,3 @@
-# Changelog
-
 ## [0.3.0](https://github.com/leandrocp/lumis/compare/elixir@v0.2.0...elixir@v0.3.0) (2026-04-05)
 
 ### Features

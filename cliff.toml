@@ -1,0 +1,42 @@
+[changelog]
+header = ""
+body = """
+{%- macro remote_url() -%}
+https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}
+{%- endmacro -%}
+
+## [{{ version | split(pat=\"/v\") | last }}]({% if previous and previous.version %}{{ self::remote_url() }}/compare/{{ previous.version }}...{{ version }}{% else %}{{ self::remote_url() }}/tree/{{ version }}{% endif %}) ({{ timestamp | date(format=\"%Y-%m-%d\") }})
+
+{% for group, commits in commits | group_by(attribute=\"group\") %}
+### {{ group }}
+
+{% for commit in commits %}- {% if commit.breaking %}BREAKING: {% endif %}{{ commit.message }}
+{% endfor %}
+{% endfor %}
+"""
+footer = ""
+trim = true
+
+[git]
+conventional_commits = true
+filter_unconventional = true
+protect_breaking_commits = true
+filter_commits = true
+sort_commits = "oldest"
+commit_preprocessors = [
+  { pattern = '\\((\\w+\\s)?#([0-9]+)\\)', replace = "" },
+]
+commit_parsers = [
+  { message = "^feat", group = "Features" },
+  { message = "^fix", group = "Bug Fixes" },
+  { message = "^perf", group = "Performance" },
+  { message = "^refactor", group = "Code Refactoring" },
+  { message = "^revert", group = "Reverts" },
+  { message = "^docs", group = "Documentation" },
+  { message = "^test", group = "Testing" },
+  { message = ".*", skip = true },
+]
+
+[bump]
+features_always_bump_minor = true
+breaking_always_bump_major = false
