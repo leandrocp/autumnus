@@ -100,8 +100,8 @@ const config: Config = {
               to: '/installation',
             },
             {
-              label: 'Highlight',
-              to: '/highlight',
+              label: 'Usage',
+              to: '/usage',
             },
           ],
         },

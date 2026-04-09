@@ -200,6 +200,53 @@ The CLI does not expose a custom WASM resolver hook. Use the parser cache comman
   </TabItem>
 </Tabs>
 
+## Edge runtimes
+
+Edge runtimes include platforms such as Cloudflare Workers or Vercel Edge.
+
+- there is no Node filesystem cache layer
+- prefer npm WASM packages with `withWasm()` or `withWasmBundle()` instead of manually fetching parser assets
+
+```js title="Single language from npm"
+import {createHighlighter, withWasm} from '@lumis-sh/lumis'
+import {htmlLinked} from '@lumis-sh/lumis/formatters'
+import json from '@lumis-sh/lumis/langs/json'
+import jsonWasm from '@lumis-sh/wasm-json'
+
+const jsonLanguage = withWasm(json, jsonWasm)
+
+const hl = await createHighlighter({
+  languages: [jsonLanguage],
+})
+
+const html = hl.highlight(
+  '{"edge": true}',
+  htmlLinked({language: jsonLanguage})
+)
+```
+
+```js title="Bundle from npm"
+import {createHighlighter, withWasmBundle} from '@lumis-sh/lumis'
+import {htmlLinked} from '@lumis-sh/lumis/formatters'
+import {bundledLanguages} from '@lumis-sh/lumis/bundles/web'
+import {bundledWasms} from '@lumis-sh/wasm-bundle-web'
+
+const languages = withWasmBundle(bundledLanguages, bundledWasms)
+
+const hl = await createHighlighter({
+  languages: [languages],
+})
+
+await hl.loadLanguage(languages.json)
+
+const html = hl.highlight(
+  '{"edge": true}',
+  htmlLinked({language: languages.json})
+)
+```
+
+If you already have your own asset pipeline, `withWasm()` also accepts a `URL`, `Response`, `Uint8Array`, or `ArrayBuffer`.
+
 ## Browser / CDN usage
 
 This works well when your app can fetch parser WASM files from the default CDN. If you need a different host or local assets, set a custom resolver first. If you want bundler-managed parser assets from npm instead, prefer `withWasm()` for single languages or `withWasmBundle()` for preset bundles.
@@ -221,6 +268,6 @@ This works well when your app can fetch parser WASM files from the default CDN. 
 ## Related docs
 
 - full language and WASM package list: [Languages](/reference/languages)
-- JavaScript runtime overview: [JavaScript Runtime](/highlight/javascript)
+- JavaScript runtime overview: [JavaScript Runtime](/usage/javascript)
 - CLI parser commands: [CLI Commands](/cli/commands)
 - runtime and package overview: [Runtimes](/reference/runtimes)

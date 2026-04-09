@@ -1,6 +1,6 @@
 ---
 sidebar_position: 2
-slug: /highlight/javascript
+slug: /usage/javascript
 title: JavaScript
 description: Lumis JavaScript API including highlighters, bundles, lazy loading, auto-detection, injected languages, and runtime metadata.
 keywords:
@@ -143,11 +143,13 @@ Useful for dropdowns, config validation, and docs tooling:
 - [`availableThemes()`](https://github.com/leandrocp/lumis/blob/main/packages/javascript/lumis/src/index.ts)
 - [`sanitizeThemeName()`](https://github.com/leandrocp/lumis/blob/main/packages/javascript/lumis/src/index.ts)
 
-## Browser vs Node
+## Runtime notes
 
-- the package uses conditional exports so browser and Node get the right runtime automatically
+- the package uses conditional exports so browsers and Node get the right runtime automatically
 - Node caches fetched parser WASM locally when possible
 - Node can also auto-load installed parser packages such as `@lumis-sh/wasm-elixir` or bundle packages such as `@lumis-sh/wasm-bundle-web`
-- browser usage usually relies on remote parser assets unless you override the resolver, use `withWasm()` with a single npm parser package, or use `withWasmBundle()` with a bundle package such as `@lumis-sh/wasm-bundle-web`
+- browser usage usually relies on remote parser assets unless you override the resolver, use `withWasm()` with a single npm parser package such as `@lumis-sh/wasm-json`, or use `withWasmBundle()` with a bundle package such as `@lumis-sh/wasm-bundle-web`
+- Bun and Deno are also supported
+- Edge runtimes such as Cloudflare Workers or Vercel Edge follow the browser runtime path, so the best DX is to use npm WASM packages with `withWasm()` or `withWasmBundle()` instead of manually fetching parser assets
 
 For parser asset details, continue with [WASM and CDN](/advanced/wasm-and-cdn).

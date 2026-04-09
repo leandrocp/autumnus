@@ -40,7 +40,7 @@ export function renderWasm() {
               </div>
               <div class="border-l-2 border-zinc-200 py-1 pl-5 dark:border-zinc-800">
                 <dt class="font-mono text-sm font-medium text-zinc-900 dark:text-white">Works everywhere</dt>
-                <dd class="mt-1 font-mono text-xs leading-relaxed text-zinc-500">Browser and Node.js. Ship parsers with your app, no runtime downloads or CDN dependency.</dd>
+                <dd class="mt-1 font-mono text-xs leading-relaxed text-zinc-500">Node.js, Bun, Deno, browsers, and Edge runtimes. Ship parsers with your app, no runtime downloads or CDN dependency.</dd>
               </div>
               <div class="border-l-2 border-zinc-200 py-1 pl-5 dark:border-zinc-800">
                 <dt class="font-mono text-sm font-medium text-zinc-900 dark:text-white">Verified on npm</dt>

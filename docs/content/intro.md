@@ -64,7 +64,7 @@ It keeps the same core workflow across runtimes:
 ## Recommended path
 
 1. [Installation](./installation)
-2. [Highlight](./highlight) — the core workflow
+2. [Highlight](./usage) — the core workflow
 3. [Formatters](./formatters) — choose an output style
 4. [Themes](./themes) — customize colors
 5. [Architecture](./architecture) — how the pipeline works
