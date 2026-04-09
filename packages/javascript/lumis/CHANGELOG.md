@@ -1,3 +1,15 @@
+## [0.3.0](https://github.com/leandrocp/lumis/compare/npm-lumis/v0.2.0...npm-lumis/v0.3.0) (2026-04-09)
+
+
+### Code Refactoring
+
+- BREAKING: mirror Rust Formatter API ([#703](https://github.com/leandrocp/lumis/pull/703))
+
+
+### Documentation
+
+- clarify runtime support and rename usage routes
+
 ## [0.2.0](https://github.com/leandrocp/lumis/compare/javascript@v0.1.0...javascript@v0.2.0) (2026-04-05)
 
 
