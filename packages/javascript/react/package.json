@@ -1,6 +1,6 @@
 {
   "name": "@lumis-sh/react",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "React integration for Lumis syntax highlighting",
   "author": "Leandro Pereira",
   "license": "MIT",
@@ -42,7 +42,7 @@
     "prepack": "pnpm run build"
   },
   "dependencies": {
-    "@lumis-sh/lumis": "workspace:^0.0.1",
+    "@lumis-sh/lumis": "workspace:^0.3.0",
     "hast-util-from-html": "^2.0.3",
     "hast-util-to-jsx-runtime": "^2.3.6"
   },
