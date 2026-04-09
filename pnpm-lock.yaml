@@ -12,14 +12,14 @@ importers:
         specifier: ^5.0.2
         version: 5.0.2(astro@6.0.8(@types/node@25.5.0)(db0@0.3.4(better-sqlite3@12.8.0))(ioredis@5.10.1)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.0)(terser@5.46.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3))
       '@lumis-sh/lumis':
-        specifier: workspace:*
-        version: link:../../packages/javascript/lumis
+        specifier: '>=0.0.1'
+        version: 0.2.0
       '@lumis-sh/rehype-lumis':
-        specifier: workspace:*
-        version: link:../../packages/javascript/rehype-lumis
+        specifier: '>=0.0.1'
+        version: 0.1.1
       '@lumis-sh/themes':
-        specifier: workspace:*
-        version: link:../../packages/javascript/themes
+        specifier: '>=0.0.1'
+        version: 0.0.3
       astro:
         specifier: ^6.0.8
         version: 6.0.8(@types/node@25.5.0)(db0@0.3.4(better-sqlite3@12.8.0))(ioredis@5.10.1)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.0)(terser@5.46.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3)
@@ -33,14 +33,14 @@ importers:
         specifier: ^3.9.2
         version: 3.9.2(@algolia/client-search@5.50.0)(@mdx-js/react@3.1.1(@types/react@19.2.14)(react@19.2.4))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(search-insights@2.17.3)(typescript@6.0.2)
       '@lumis-sh/lumis':
-        specifier: workspace:*
-        version: link:../../packages/javascript/lumis
+        specifier: '>=0.0.1'
+        version: 0.2.0
       '@lumis-sh/rehype-lumis':
-        specifier: workspace:*
-        version: link:../../packages/javascript/rehype-lumis
+        specifier: '>=0.0.1'
+        version: 0.1.1
       '@lumis-sh/themes':
-        specifier: workspace:*
-        version: link:../../packages/javascript/themes
+        specifier: '>=0.0.1'
+        version: 0.0.3
       '@mdx-js/react':
         specifier: ^3.1.1
         version: 3.1.1(@types/react@19.2.14)(react@19.2.4)
@@ -54,14 +54,14 @@ importers:
   examples/markdown-it:
     dependencies:
       '@lumis-sh/lumis':
-        specifier: workspace:*
-        version: link:../../packages/javascript/lumis
+        specifier: '>=0.0.1'
+        version: 0.2.0
       '@lumis-sh/markdown-it-lumis':
-        specifier: workspace:*
-        version: link:../../packages/javascript/markdown-it-lumis
+        specifier: '>=0.0.1'
+        version: 0.1.1
       '@lumis-sh/themes':
-        specifier: workspace:*
-        version: link:../../packages/javascript/themes
+        specifier: '>=0.0.1'
+        version: 0.0.3
       markdown-it:
         specifier: ^14.1.1
         version: 14.1.1
@@ -75,14 +75,14 @@ importers:
   examples/mdx:
     dependencies:
       '@lumis-sh/lumis':
-        specifier: workspace:*
-        version: link:../../packages/javascript/lumis
+        specifier: '>=0.0.1'
+        version: 0.2.0
       '@lumis-sh/rehype-lumis':
-        specifier: workspace:*
-        version: link:../../packages/javascript/rehype-lumis
+        specifier: '>=0.0.1'
+        version: 0.1.1
       '@lumis-sh/themes':
-        specifier: workspace:*
-        version: link:../../packages/javascript/themes
+        specifier: '>=0.0.1'
+        version: 0.0.3
       '@mdx-js/mdx':
         specifier: ^3.1.1
         version: 3.1.1
@@ -102,14 +102,14 @@ importers:
   examples/nextjs:
     dependencies:
       '@lumis-sh/lumis':
-        specifier: workspace:*
-        version: link:../../packages/javascript/lumis
+        specifier: '>=0.0.1'
+        version: 0.2.0
       '@lumis-sh/rehype-lumis':
-        specifier: workspace:*
-        version: link:../../packages/javascript/rehype-lumis
+        specifier: '>=0.0.1'
+        version: 0.1.1
       '@lumis-sh/themes':
-        specifier: workspace:*
-        version: link:../../packages/javascript/themes
+        specifier: '>=0.0.1'
+        version: 0.0.3
       '@mdx-js/loader':
         specifier: ^3.1.1
         version: 3.1.1(webpack@5.105.4)
@@ -135,16 +135,16 @@ importers:
   examples/npm-wasm-browser:
     dependencies:
       '@lumis-sh/lumis':
-        specifier: workspace:*
-        version: link:../../packages/javascript/lumis
+        specifier: '>=0.0.1'
+        version: 0.2.0
       '@lumis-sh/themes':
-        specifier: workspace:*
-        version: link:../../packages/javascript/themes
+        specifier: '>=0.0.1'
+        version: 0.0.3
       '@lumis-sh/wasm-diff':
-        specifier: ^0.26.0
+        specifier: '>=0.0.1'
         version: 0.26.1
       '@lumis-sh/wasm-elixir':
-        specifier: ^0.26.0
+        specifier: '>=0.0.1'
         version: 0.26.1
       vite:
         specifier: ^8.0.2
@@ -153,29 +153,29 @@ importers:
   examples/npm-wasm-node:
     dependencies:
       '@lumis-sh/lumis':
-        specifier: workspace:*
-        version: link:../../packages/javascript/lumis
+        specifier: '>=0.0.1'
+        version: 0.2.0
       '@lumis-sh/themes':
-        specifier: workspace:*
-        version: link:../../packages/javascript/themes
+        specifier: '>=0.0.1'
+        version: 0.0.3
       '@lumis-sh/wasm-diff':
-        specifier: ^0.26.0
+        specifier: '>=0.0.1'
         version: 0.26.1
       '@lumis-sh/wasm-elixir':
-        specifier: ^0.26.0
+        specifier: '>=0.0.1'
         version: 0.26.1
 
   examples/nuxt:
     dependencies:
       '@lumis-sh/lumis':
-        specifier: workspace:*
-        version: link:../../packages/javascript/lumis
+        specifier: '>=0.0.1'
+        version: 0.2.0
       '@lumis-sh/rehype-lumis':
-        specifier: workspace:*
-        version: link:../../packages/javascript/rehype-lumis
+        specifier: '>=0.0.1'
+        version: 0.1.1
       '@lumis-sh/themes':
-        specifier: workspace:*
-        version: link:../../packages/javascript/themes
+        specifier: '>=0.0.1'
+        version: 0.0.3
       '@nuxt/content':
         specifier: ^3.12.0
         version: 3.12.0(better-sqlite3@12.8.0)(magicast@0.5.2)
@@ -196,17 +196,17 @@ importers:
   examples/react:
     dependencies:
       '@lumis-sh/lumis':
-        specifier: workspace:*
-        version: link:../../packages/javascript/lumis
+        specifier: '>=0.0.1'
+        version: 0.2.0
       '@lumis-sh/react':
-        specifier: workspace:*
-        version: link:../../packages/javascript/react
+        specifier: '>=0.0.1'
+        version: 0.1.0(react@19.2.4)
       '@lumis-sh/themes':
-        specifier: workspace:*
-        version: link:../../packages/javascript/themes
+        specifier: '>=0.0.1'
+        version: 0.0.3
       '@lumis-sh/wasm-bundle-web':
-        specifier: workspace:*
-        version: link:../../packages/javascript/wasm-bundle-web
+        specifier: '>=0.0.1'
+        version: 0.0.4(@lumis-sh/lumis@0.2.0)
       react:
         specifier: ^19.2.4
         version: 19.2.4
@@ -220,14 +220,14 @@ importers:
   examples/react-markdown:
     dependencies:
       '@lumis-sh/lumis':
-        specifier: workspace:*
-        version: link:../../packages/javascript/lumis
+        specifier: '>=0.0.1'
+        version: 0.2.0
       '@lumis-sh/rehype-lumis':
-        specifier: workspace:*
-        version: link:../../packages/javascript/rehype-lumis
+        specifier: '>=0.0.1'
+        version: 0.1.1
       '@lumis-sh/themes':
-        specifier: workspace:*
-        version: link:../../packages/javascript/themes
+        specifier: '>=0.0.1'
+        version: 0.0.3
       react:
         specifier: ^19.2.4
         version: 19.2.4
@@ -244,14 +244,14 @@ importers:
   examples/rehype-lumis:
     dependencies:
       '@lumis-sh/lumis':
-        specifier: workspace:*
-        version: link:../../packages/javascript/lumis
+        specifier: '>=0.0.1'
+        version: 0.2.0
       '@lumis-sh/rehype-lumis':
-        specifier: workspace:*
-        version: link:../../packages/javascript/rehype-lumis
+        specifier: '>=0.0.1'
+        version: 0.1.1
       '@lumis-sh/themes':
-        specifier: workspace:*
-        version: link:../../packages/javascript/themes
+        specifier: '>=0.0.1'
+        version: 0.0.3
       rehype-stringify:
         specifier: ^10.0.1
         version: 10.0.1
@@ -271,14 +271,14 @@ importers:
   examples/vitepress:
     dependencies:
       '@lumis-sh/lumis':
-        specifier: workspace:*
-        version: link:../../packages/javascript/lumis
+        specifier: '>=0.0.1'
+        version: 0.2.0
       '@lumis-sh/markdown-it-lumis':
-        specifier: workspace:*
-        version: link:../../packages/javascript/markdown-it-lumis
+        specifier: '>=0.0.1'
+        version: 0.1.1
       '@lumis-sh/themes':
-        specifier: workspace:*
-        version: link:../../packages/javascript/themes
+        specifier: '>=0.0.1'
+        version: 0.0.3
       vitepress:
         specifier: ^1.6.4
         version: 1.6.4(@algolia/client-search@5.50.0)(@types/node@25.5.0)(fuse.js@7.1.0)(lightningcss@1.32.0)(nprogress@0.2.0)(postcss@8.5.8)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(search-insights@2.17.3)(terser@5.46.1)(typescript@6.0.2)
@@ -369,14 +369,14 @@ importers:
   packages/javascript/react:
     dependencies:
       '@lumis-sh/lumis':
-        specifier: workspace:^0.0.1
+        specifier: workspace:^0.3.0
         version: link:../lumis
       hast-util-from-html:
-        specifier: ^2.0.3
+        specifier: ^2.0.0
         version: 2.0.3
       hast-util-to-jsx-runtime:
-        specifier: ^2.3.6
-        version: 2.3.6
+        specifier: ^2.0.0
+        version: 2.0.0
     devDependencies:
       '@microsoft/api-extractor':
         specifier: ^7.36.0
@@ -1027,19 +1027,19 @@ importers:
   website:
     dependencies:
       '@lumis-sh/lumis':
-        specifier: link:../packages/javascript/lumis
-        version: link:../packages/javascript/lumis
+        specifier: '>=0.0.1'
+        version: 0.2.0
       '@lumis-sh/themes':
-        specifier: link:../packages/javascript/themes
-        version: link:../packages/javascript/themes
+        specifier: '>=0.0.1'
+        version: 0.0.3
       '@lumis-sh/wasm-bundle-full':
-        specifier: link:../packages/javascript/wasm-bundle-full
-        version: link:../packages/javascript/wasm-bundle-full
+        specifier: '>=0.0.1'
+        version: 0.0.6(@lumis-sh/lumis@0.2.0)
       '@lumis-sh/wasm-html':
-        specifier: '*'
+        specifier: '>=0.0.1'
         version: 0.26.1
       '@lumis-sh/wasm-javascript':
-        specifier: '*'
+        specifier: '>=0.0.1'
         version: 0.26.1
       webgl-fluid-enhanced:
         specifier: ^0.8.0
@@ -3023,9 +3023,27 @@ packages:
   '@leichtgewicht/ip-codec@2.0.5':
     resolution: {integrity: sha512-Vo+PSpZG2/fmgmiNzYK9qWRh8h/CHrwD0mo1h1DzL4yzHNSfWYujGTYsWGreD000gcgmZ7K4Ys6Tx9TxtsKdDw==}
 
+  '@lumis-sh/lumis@0.0.1':
+    resolution: {integrity: sha512-CKUBXdOMOB4bsbrLL4cfz5X/70JKAKod4A5RxxWb80pEKxnrwWMsNVh6gDtoMW9FmHzQMItcmOPpqNgzYusIwg==}
+    engines: {node: '>=18'}
+
   '@lumis-sh/lumis@0.2.0':
     resolution: {integrity: sha512-zHa6r3Tf2W4bV8IbxeRhWQjBlWiDYTYpp/mIxakyzUDkBkGRlfd33IvHlb5r3XcLDplVZe/Y/MO1HXPQn+zCOg==}
     engines: {node: '>=18'}
+
+  '@lumis-sh/markdown-it-lumis@0.1.1':
+    resolution: {integrity: sha512-+YFTpyUJnnNfFoxgUKzNP0CmglEvy1N9WN7fX7tA67yTAZ7MV8ZXS41ePdCWzYZ4ijXFRodJrsYxLE2okV7msQ==}
+
+  '@lumis-sh/react@0.1.0':
+    resolution: {integrity: sha512-RFzU8HON7b8LULpHA0/tus7DxqUbt4HYV0yIQNPMZIaVOAnmyHeJmEVYSeH1kJ2gB3QPEI38PfE26XyNGjKHmQ==}
+    peerDependencies:
+      react: '>=18'
+
+  '@lumis-sh/rehype-lumis@0.1.1':
+    resolution: {integrity: sha512-5DgGwm3T9Sni7S4YVtiHyB2WYBZld6poFSgDj+KVj18bNAffLEN3YMPvpQD1E4j0Ky2a1aKC6NjN63H9F8IIaA==}
+
+  '@lumis-sh/themes@0.0.3':
+    resolution: {integrity: sha512-P+TSqrmIakoE/C0Vg1AurMkZXzZu/zD1CDyYalUBD2rGjqiv2fBibKfY8C5+qvQciRw1Gl7bCV85dzWAM1vzVg==}
 
   '@lumis-sh/wasm-angular@0.26.0':
     resolution: {integrity: sha512-IE5LBu5+wzC7hXEszI1fAKO/6B9l7QV7vvfGTK4YmL36HYMVEnlN+uwEjtDPxTarTzUgYYvipfdT9FYHP8fJjQ==}
@@ -3044,6 +3062,16 @@ packages:
 
   '@lumis-sh/wasm-bicep@0.26.0':
     resolution: {integrity: sha512-1B5aOKjUVcsbzDF1g5+uZPTmU3r07WfmB1DkuLARnLyphue90XIQZZvnfSy+ggVOpfsTSrZTtry2YA6Vl2/TVg==}
+
+  '@lumis-sh/wasm-bundle-full@0.0.6':
+    resolution: {integrity: sha512-D/g3MD2l4Us0hABEU5UO+cFafXQp/8l0ckO/cYoBjVR85libcpf8gLUepG6TX6XOUIwTdgShDmujUbHTNVR7kA==}
+    peerDependencies:
+      '@lumis-sh/lumis': '>=0.0.1'
+
+  '@lumis-sh/wasm-bundle-web@0.0.4':
+    resolution: {integrity: sha512-+IdFNYeqw8y/PHFHdVrhdqMt2Uhvj/KzfZCpHXXIS4CJEF5yBM9MWIT36k1ia3x7ogPau/XVHYdgDMdx3qWP3g==}
+    peerDependencies:
+      '@lumis-sh/lumis': '>=0.0.1'
 
   '@lumis-sh/wasm-c@0.26.0':
     resolution: {integrity: sha512-wfvGeNdQHLsB5rVLr9mlXlGgLQvVW+utLJiSjjRVwK4J2CCesIXiwsTWWkXbO30AeskpCm6C9T9I8g2ElX5Tnw==}
@@ -7566,6 +7594,9 @@ packages:
   hast-util-to-html@9.0.5:
     resolution: {integrity: sha512-OguPdidb+fbHQSU4Q4ZiLKnzWo8Wwsf5bZfbvu7//a9oTYoqD/fWpe96NuHkoS9h0ccGOTe0C4NGXdtS0iObOw==}
 
+  hast-util-to-jsx-runtime@2.0.0:
+    resolution: {integrity: sha512-0SKEyDOy1FTi2tYA8Jc0v0P3dZQyPymIWa3Qa9Ox5VlXsE5HbyV/1iKLbkrh0vTgC3R7WTmw5Dc841XkcdtP8w==}
+
   hast-util-to-jsx-runtime@2.3.6:
     resolution: {integrity: sha512-zl6s8LwNyo1P9uw+XJGvZtdFF1GdAkOg8ujOw+4Pyb76874fLps4ueHXDhXWdk6YHQ6OgUtinliG7RsYvCbbBg==}
 
@@ -7783,6 +7814,9 @@ packages:
   ini@4.1.1:
     resolution: {integrity: sha512-QQnnxNyfvmHFIsj7gkPcYymR8Jdw/o7mp5ZFihxn6h8Ci6fh3Dx4E1gPjpQEpIuPo9XVNY/ZUwh4BPMjGyL01g==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
+
+  inline-style-parser@0.1.1:
+    resolution: {integrity: sha512-7NXolsK4CAS5+xvdj5OMMbI962hU/wvwoxk+LWR9Ek9bVtyuuYScDN6eS0rUm6TxApFpw7CX1o4uJzcd4AyD3Q==}
 
   inline-style-parser@0.2.7:
     resolution: {integrity: sha512-Nb2ctOyNR8DqQoR0OwRG95uNWIC0C1lCgf5Naz5H6Ji72KZ8OcFZLz2P5sNgwlyoJ8Yif11oMuYs5pBQa86csA==}
@@ -9775,6 +9809,9 @@ packages:
   prop-types@15.8.1:
     resolution: {integrity: sha512-oj87CgZICdulUohogVAR7AjlC0327U4el4L6eAvOqCeudMDVU0NThNaV+b9Df4dXgSP1gXMTnPdhfe/2qDH5cg==}
 
+  property-information@6.5.0:
+    resolution: {integrity: sha512-PgTgs/BlvHxOu8QuEN7wi5A0OmXaBcHpmCSTehcs6Uuu9IkDIEo13Hy7n898RHfrQ49vKCoGeWZSaAK01nwVig==}
+
   property-information@7.1.0:
     resolution: {integrity: sha512-TwEZ+X+yCJmYfL7TPUOcvBZ4QfoT5YenQiJuX//0th53DE6w0xxLEtfK3iyryQFddXuvkIk51EEgrJQ0WJkOmQ==}
 
@@ -10560,6 +10597,9 @@ packages:
 
   style-to-js@1.1.21:
     resolution: {integrity: sha512-RjQetxJrrUJLQPHbLku6U/ocGtzyjbJMP9lCNK7Ag0CNh690nSH8woqWH9u16nMjYBAok+i7JO1NP2pOy8IsPQ==}
+
+  style-to-object@0.4.4:
+    resolution: {integrity: sha512-HYNoHZa2GorYNyqiCaBgsxvcJIn7OHq6inEga+E6Ke3m5JkoqpQbnFssk4jwe+K7AhGa2fcha4wSOf1Kn01dMg==}
 
   style-to-object@1.0.14:
     resolution: {integrity: sha512-LIN7rULI0jBscWQYaSswptyderlarFkjQ+t79nzty8tcIAceVomEVlLzH5VP4Cmsv6MtKhs7qaAiwlcp+Mgaxw==}
@@ -11482,6 +11522,9 @@ packages:
 
   web-namespaces@2.0.1:
     resolution: {integrity: sha512-bKr1DkiNa2krS7qxNtdrtHAmzuYGFQLiQ13TsorsdT6ULTkPLKuu5+GsFpDlg6JFjUTwX2DyhMPG2be8uPrqsQ==}
+
+  web-tree-sitter@0.26.7:
+    resolution: {integrity: sha512-KiZhelTvBA/ziUHEO7Emb75cGVAq8iGZNabYaZm53Zpy50NsXyOW+xSHlwHt5CVg/TRPZBfeVLTTobF0LjFJ1w==}
 
   web-tree-sitter@0.26.8:
     resolution: {integrity: sha512-4sUwi7ZyOrIk5KLgYLkc2A/F0LFMQnBhfb+2Cdl7ik4ePJ6JD+fk4ofI2sA5eGawBKBaK4Vntt7Ww5KcEsay4A==}
@@ -14370,9 +14413,37 @@ snapshots:
 
   '@leichtgewicht/ip-codec@2.0.5': {}
 
+  '@lumis-sh/lumis@0.0.1':
+    dependencies:
+      web-tree-sitter: 0.26.7
+
   '@lumis-sh/lumis@0.2.0':
     dependencies:
       web-tree-sitter: 0.26.8
+
+  '@lumis-sh/markdown-it-lumis@0.1.1':
+    dependencies:
+      '@lumis-sh/lumis': 0.0.1
+      markdown-it: 14.1.1
+
+  '@lumis-sh/react@0.1.0(react@19.2.4)':
+    dependencies:
+      '@lumis-sh/lumis': 0.0.1
+      hast-util-from-html: 2.0.3
+      hast-util-to-jsx-runtime: 2.3.6
+      react: 19.2.4
+    transitivePeerDependencies:
+      - supports-color
+
+  '@lumis-sh/rehype-lumis@0.1.1':
+    dependencies:
+      '@lumis-sh/lumis': 0.0.1
+      hast-util-from-html: 2.0.3
+      hast-util-to-string: 3.0.1
+      unified: 11.0.5
+      unist-util-visit: 5.1.0
+
+  '@lumis-sh/themes@0.0.3': {}
 
   '@lumis-sh/wasm-angular@0.26.0': {}
 
@@ -14385,6 +14456,133 @@ snapshots:
   '@lumis-sh/wasm-bash@0.26.1': {}
 
   '@lumis-sh/wasm-bicep@0.26.0': {}
+
+  '@lumis-sh/wasm-bundle-full@0.0.6(@lumis-sh/lumis@0.2.0)':
+    dependencies:
+      '@lumis-sh/lumis': 0.2.0
+      '@lumis-sh/wasm-angular': 0.26.0
+      '@lumis-sh/wasm-arduino': 0.26.0
+      '@lumis-sh/wasm-asm': 0.26.0
+      '@lumis-sh/wasm-astro': 0.26.0
+      '@lumis-sh/wasm-bash': 0.26.1
+      '@lumis-sh/wasm-bicep': 0.26.0
+      '@lumis-sh/wasm-c': 0.26.0
+      '@lumis-sh/wasm-caddy': 0.26.1
+      '@lumis-sh/wasm-clojure': 0.26.0
+      '@lumis-sh/wasm-cmake': 0.26.0
+      '@lumis-sh/wasm-comment': 0.26.1
+      '@lumis-sh/wasm-commonlisp': 0.26.0
+      '@lumis-sh/wasm-cpp': 0.26.0
+      '@lumis-sh/wasm-csharp': 0.26.0
+      '@lumis-sh/wasm-css': 0.26.1
+      '@lumis-sh/wasm-csv': 0.26.0
+      '@lumis-sh/wasm-d': 0.26.0
+      '@lumis-sh/wasm-dart': 0.26.0
+      '@lumis-sh/wasm-diff': 0.26.1
+      '@lumis-sh/wasm-dockerfile': 0.26.0
+      '@lumis-sh/wasm-dot': 0.26.0
+      '@lumis-sh/wasm-editorconfig': 0.26.0
+      '@lumis-sh/wasm-eex': 0.26.0
+      '@lumis-sh/wasm-elixir': 0.26.1
+      '@lumis-sh/wasm-elm': 0.26.0
+      '@lumis-sh/wasm-embedded-template': 0.26.1
+      '@lumis-sh/wasm-erlang': 0.26.0
+      '@lumis-sh/wasm-fish': 0.26.0
+      '@lumis-sh/wasm-fortran': 0.26.0
+      '@lumis-sh/wasm-fsharp': 0.26.0
+      '@lumis-sh/wasm-gitattributes': 0.26.0
+      '@lumis-sh/wasm-gitignore': 0.26.0
+      '@lumis-sh/wasm-gleam': 0.26.0
+      '@lumis-sh/wasm-glimmer': 0.26.0
+      '@lumis-sh/wasm-glsl': 0.26.0
+      '@lumis-sh/wasm-go': 0.26.0
+      '@lumis-sh/wasm-graphql': 0.26.0
+      '@lumis-sh/wasm-haskell': 0.26.0
+      '@lumis-sh/wasm-hcl': 0.26.0
+      '@lumis-sh/wasm-heex': 0.26.0
+      '@lumis-sh/wasm-html': 0.26.1
+      '@lumis-sh/wasm-http': 0.26.0
+      '@lumis-sh/wasm-iex': 0.26.0
+      '@lumis-sh/wasm-ini': 0.26.0
+      '@lumis-sh/wasm-java': 0.26.1
+      '@lumis-sh/wasm-javadoc': 0.26.0
+      '@lumis-sh/wasm-javascript': 0.26.1
+      '@lumis-sh/wasm-jinja': 0.26.0
+      '@lumis-sh/wasm-jinja_inline': 0.26.1
+      '@lumis-sh/wasm-jq': 0.26.0
+      '@lumis-sh/wasm-json': 0.26.2
+      '@lumis-sh/wasm-json5': 0.26.0
+      '@lumis-sh/wasm-julia': 0.26.0
+      '@lumis-sh/wasm-just': 0.26.0
+      '@lumis-sh/wasm-kdl': 0.26.0
+      '@lumis-sh/wasm-kotlin': 0.26.0
+      '@lumis-sh/wasm-latex': 0.26.0
+      '@lumis-sh/wasm-liquid': 0.26.0
+      '@lumis-sh/wasm-llvm': 0.26.1
+      '@lumis-sh/wasm-lua': 0.26.0
+      '@lumis-sh/wasm-luadoc': 0.26.0
+      '@lumis-sh/wasm-make': 0.26.0
+      '@lumis-sh/wasm-markdown': 0.26.0
+      '@lumis-sh/wasm-markdown_inline': 0.26.0
+      '@lumis-sh/wasm-matlab': 0.26.0
+      '@lumis-sh/wasm-mermaid': 0.26.0
+      '@lumis-sh/wasm-nginx': 0.26.0
+      '@lumis-sh/wasm-nim': 0.26.0
+      '@lumis-sh/wasm-nix': 0.26.0
+      '@lumis-sh/wasm-nushell': 0.26.0
+      '@lumis-sh/wasm-objc': 0.26.0
+      '@lumis-sh/wasm-ocaml': 0.26.0
+      '@lumis-sh/wasm-ocaml_interface': 0.26.0
+      '@lumis-sh/wasm-pascal': 0.26.0
+      '@lumis-sh/wasm-perl': 0.26.0
+      '@lumis-sh/wasm-php': 0.26.0
+      '@lumis-sh/wasm-powershell': 0.26.0
+      '@lumis-sh/wasm-prisma': 0.26.0
+      '@lumis-sh/wasm-protobuf': 0.26.0
+      '@lumis-sh/wasm-puppet': 0.26.0
+      '@lumis-sh/wasm-python': 0.26.0
+      '@lumis-sh/wasm-qmljs': 0.26.0
+      '@lumis-sh/wasm-r': 0.26.0
+      '@lumis-sh/wasm-racket': 0.26.0
+      '@lumis-sh/wasm-regex': 0.26.0
+      '@lumis-sh/wasm-rst': 0.26.0
+      '@lumis-sh/wasm-ruby': 0.26.1
+      '@lumis-sh/wasm-rust': 0.26.2
+      '@lumis-sh/wasm-scala': 0.26.0
+      '@lumis-sh/wasm-scheme': 0.26.0
+      '@lumis-sh/wasm-scss': 0.26.0
+      '@lumis-sh/wasm-solidity': 0.26.0
+      '@lumis-sh/wasm-sql': 0.26.0
+      '@lumis-sh/wasm-surface': 0.26.0
+      '@lumis-sh/wasm-svelte': 0.26.0
+      '@lumis-sh/wasm-swift': 0.26.0
+      '@lumis-sh/wasm-systemverilog': 0.26.0
+      '@lumis-sh/wasm-tcl': 0.26.0
+      '@lumis-sh/wasm-terraform': 0.26.0
+      '@lumis-sh/wasm-toml': 0.26.0
+      '@lumis-sh/wasm-tsx': 0.26.1
+      '@lumis-sh/wasm-typescript': 0.26.1
+      '@lumis-sh/wasm-typst': 0.26.0
+      '@lumis-sh/wasm-vhdl': 0.26.0
+      '@lumis-sh/wasm-vim': 0.26.0
+      '@lumis-sh/wasm-vue': 0.26.0
+      '@lumis-sh/wasm-wat': 0.26.0
+      '@lumis-sh/wasm-wgsl': 0.26.0
+      '@lumis-sh/wasm-xml': 0.26.0
+      '@lumis-sh/wasm-yaml': 0.26.0
+      '@lumis-sh/wasm-zig': 0.26.0
+      '@lumis-sh/wasm-zsh': 0.26.0
+
+  '@lumis-sh/wasm-bundle-web@0.0.4(@lumis-sh/lumis@0.2.0)':
+    dependencies:
+      '@lumis-sh/lumis': 0.2.0
+      '@lumis-sh/wasm-css': 0.26.1
+      '@lumis-sh/wasm-diff': 0.26.1
+      '@lumis-sh/wasm-html': 0.26.1
+      '@lumis-sh/wasm-javascript': 0.26.1
+      '@lumis-sh/wasm-json': 0.26.2
+      '@lumis-sh/wasm-tsx': 0.26.1
+      '@lumis-sh/wasm-typescript': 0.26.1
 
   '@lumis-sh/wasm-c@0.26.0': {}
 
@@ -14634,7 +14832,7 @@ snapshots:
       estree-util-is-identifier-name: 3.0.0
       estree-util-scope: 1.0.0
       estree-walker: 3.0.3
-      hast-util-to-jsx-runtime: 2.3.6
+      hast-util-to-jsx-runtime: 2.0.0
       markdown-extensions: 2.0.0
       recma-build-jsx: 1.0.0
       recma-jsx: 1.0.1(acorn@8.16.0)
@@ -18896,6 +19094,18 @@ snapshots:
       stringify-entities: 4.0.4
       zwitch: 2.0.4
 
+  hast-util-to-jsx-runtime@2.0.0:
+    dependencies:
+      '@types/hast': 3.0.4
+      '@types/unist': 3.0.3
+      comma-separated-tokens: 2.0.3
+      hast-util-whitespace: 3.0.0
+      property-information: 6.5.0
+      space-separated-tokens: 2.0.2
+      style-to-object: 0.4.4
+      unist-util-position: 5.0.0
+      vfile-message: 4.0.3
+
   hast-util-to-jsx-runtime@2.3.6:
     dependencies:
       '@types/estree': 1.0.8
@@ -19171,6 +19381,8 @@ snapshots:
   ini@2.0.0: {}
 
   ini@4.1.1: {}
+
+  inline-style-parser@0.1.1: {}
 
   inline-style-parser@0.2.7: {}
 
@@ -21793,6 +22005,8 @@ snapshots:
       object-assign: 4.1.1
       react-is: 16.13.1
 
+  property-information@6.5.0: {}
+
   property-information@7.1.0: {}
 
   proto-list@1.2.4: {}
@@ -21899,7 +22113,7 @@ snapshots:
       '@types/mdast': 4.0.4
       '@types/react': 19.2.14
       devlop: 1.1.0
-      hast-util-to-jsx-runtime: 2.3.6
+      hast-util-to-jsx-runtime: 2.0.0
       html-url-attributes: 3.0.1
       mdast-util-to-hast: 13.2.1
       react: 19.2.4
@@ -22900,6 +23114,10 @@ snapshots:
     dependencies:
       style-to-object: 1.0.14
 
+  style-to-object@0.4.4:
+    dependencies:
+      inline-style-parser: 0.1.1
+
   style-to-object@1.0.14:
     dependencies:
       inline-style-parser: 0.2.7
@@ -23754,6 +23972,8 @@ snapshots:
       minimalistic-assert: 1.0.1
 
   web-namespaces@2.0.1: {}
+
+  web-tree-sitter@0.26.7: {}
 
   web-tree-sitter@0.26.8: {}
 
