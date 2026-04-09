@@ -10,7 +10,7 @@ authors.workspace = true
 description = "Syntax Highlighter CLI powered by Tree-sitter and Neovim themes"
 keywords = ["lumis", "syntax-highlighter", "tree-sitter", "neovim", "cli"]
 categories = ["command-line-utilities", "text-processing"]
-include = ["/src/", "/build.rs", "/languages.toml", "/queries/", "/CHANGELOG.md", "/LICENSE"]
+include = ["/src/", "/themes/", "/build.rs", "/languages.toml", "/queries/", "/CHANGELOG.md", "/LICENSE"]
 
 [[bin]]
 name = "lumis"

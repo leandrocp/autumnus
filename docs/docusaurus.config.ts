@@ -109,25 +109,25 @@ const config: Config = {
           title: 'Packages',
           items: [
             {
-              label: 'Rust',
-              href: 'https://docs.rs/lumis',
+              label: 'CLI',
+              href: 'https://crates.io/crates/lumis-cli',
             },
             {
-              label: 'Elixir',
-              href: 'https://hexdocs.pm/lumis',
+              label: 'Rust',
+              href: 'https://crates.io/crates/lumis',
             },
             {
               label: 'JavaScript',
               href: 'https://www.npmjs.com/package/@lumis-sh/lumis',
             },
             {
-              label: 'CLI',
-              href: 'https://github.com/leandrocp/lumis/tree/main/crates/lumis-cli',
+              label: 'Elixir',
+              href: 'https://hex.pm/packages/lumis',
             },
             {
               label: 'Java',
               href: 'https://github.com/roastedroot/lumis4j',
-            },
+            }
           ],
         },
         {

@@ -18,10 +18,16 @@ use std::path::{Path, PathBuf};
 #[derive(Parser)]
 #[command(
     version,
+    propagate_version = true,
     about = "Syntax Highlighter powered by Tree-sitter and Neovim themes",
-    disable_help_flag = true
+    disable_help_flag = true,
+    disable_version_flag = true
 )]
 struct Cli {
+    /// Print version
+    #[arg(short = 'v', long, global = true, action = ArgAction::Version, help = "Print version")]
+    version: Option<bool>,
+
     #[command(subcommand)]
     command: Commands,
 
@@ -30,7 +36,7 @@ struct Cli {
     data_dir: Option<PathBuf>,
 
     /// Show extra output (downloads, cache hits, etc.)
-    #[arg(short = 'v', long, global = true)]
+    #[arg(short = 'V', long, global = true)]
     verbose: bool,
 
     /// Print help
