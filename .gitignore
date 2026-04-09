@@ -9,8 +9,6 @@ mise.toml
 .envrc
 .vite/
 /.claude/
-AGENTS.md
-CLAUDE.md
 __pycache__/
 node_modules/
 examples/**/dist/
