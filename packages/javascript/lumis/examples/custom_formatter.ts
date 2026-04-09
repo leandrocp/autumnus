@@ -1,9 +1,8 @@
-import { createHighlighter } from "../src/index.ts";
+import { createHighlighter, highlightIter } from "../src/index.ts";
 import { type Formatter } from "../src/formatters.ts";
 import {
-  closeTag,
   closingTags,
-  formatHighlightIterLines,
+  escape,
   openCodeTag,
   openPreTag,
   openSpanTag,
@@ -17,23 +16,35 @@ import dracula from "@lumis-sh/themes/dracula";
 class InteractiveDocsFormatter implements Formatter {
   constructor(readonly language = html) {}
 
-  format(_source: string, highlightIter: Parameters<Formatter["format"]>[1]): string {
+  format(source: string): string {
     let tokenId = 0;
+    const lines = [""];
 
-    const { lines, language } = formatHighlightIterLines(highlightIter, this.language, dracula, {
-      openSpan: (span, style) =>
-        openSpanTag({
-          class: "tok",
-          tabindex: 0,
-          "data-token-id": String(++tokenId),
-          "data-scope": span.scope,
-          "data-language": span.language,
-          "data-start": String(span.startByte),
-          "data-end": String(span.endByte),
-          "data-fg": style?.fg,
-          "data-bg": style?.bg,
-          style: styleToCss(style, { italic: true }),
-        }),
+    highlightIter(source, this.language, dracula, (text, language, range, scope, style) => {
+      const parts = text.split("\n");
+      for (let i = 0; i < parts.length; i += 1) {
+        const part = parts[i] ?? "";
+        if (part.length > 0) {
+          const escaped = escape(part);
+          if (scope) {
+            lines[lines.length - 1] += `${openSpanTag({
+              class: "tok",
+              tabindex: 0,
+              "data-token-id": String(++tokenId),
+              "data-scope": scope,
+              "data-language": language,
+              "data-start": String(range.start),
+              "data-end": String(range.end),
+              "data-fg": style?.fg,
+              "data-bg": style?.bg,
+              style: styleToCss(style, { italic: true }),
+            })}${escaped}</span>`;
+          } else {
+            lines[lines.length - 1] += escaped;
+          }
+        }
+        if (i < parts.length - 1) lines.push("");
+      }
     });
 
     const body = lines.map((line, index) => wrapLine(index + 1, line)).join("");

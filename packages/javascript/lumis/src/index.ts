@@ -9,6 +9,8 @@ import {
   getDefaultRuntime,
 } from "./runtime/node.js";
 
+export { highlightIter, highlightEvents } from "./core/highlighter.js";
+
 const highlighter = createHighlighterModule({
   createRuntime,
   getDefaultRuntime,
@@ -75,24 +77,6 @@ export function highlight(...args: Parameters<typeof highlighter.highlight>) {
 }
 
 /**
- * Low-level token iterator. Calls `onToken` for each highlighted span.
- *
- * @example
- * ```ts
- * import { highlightIter } from '@lumis-sh/lumis'
- * import javascript from '@lumis-sh/lumis/langs/javascript'
- * import dracula from '@lumis-sh/themes/dracula'
- *
- * await highlightIter('const x = 1', javascript, dracula, (text, language, range, scope, style) => {
- *   console.log(scope, text)
- * })
- * ```
- */
-export function highlightIter(...args: Parameters<typeof highlighter.highlightIter>) {
-  return highlighter.highlightIter(...args);
-}
-
-/**
  * Return a copy of a language with a custom WASM source.
  *
  * Useful in browser bundlers when you want to import a parser package directly,
@@ -125,7 +109,7 @@ export function withWasmBundle(
 
 export type { Highlighter } from "./core/highlighter.js";
 export type {
-  HighlightContext,
+  HighlightEvent,
   HighlightIterFn,
   HtmlElement,
   HighlightLinesInline,

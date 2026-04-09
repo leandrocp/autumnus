@@ -1,6 +1,5 @@
 import type {
   HighlightCallback,
-  HighlightContext,
   HighlightEvent,
   Language,
   LanguageBundle,
@@ -200,13 +199,52 @@ function runHighlightEvents(
   return buildHighlightEvents(source, loaded, runtime) as HighlightEvent[];
 }
 
-function createHighlightContext(runtime: RuntimeLike): HighlightContext {
-  return {
-    highlightIter: (source, language, theme, onToken) =>
-      runHighlightIter(runtime, source, detectLanguageRef(source, language), theme, onToken),
-    highlightEvents: (source, language) =>
-      runHighlightEvents(runtime, source, detectLanguageRef(source, language)),
-  };
+// Ambient runtime for sync free functions called inside `Formatter.format()`.
+// JS is single-threaded, so swapping a module-level reference around the call
+// gives the same guarantee Rust gets from `thread_local!` in `highlight.rs`.
+let currentRuntime: RuntimeLike | undefined;
+
+function requireCurrentRuntime(fnName: string): RuntimeLike {
+  if (!currentRuntime) {
+    throw new Error(
+      `${fnName}() must be called inside Formatter.format(). ` +
+        `For top-level token iteration, create a highlighter with ` +
+        `createHighlighter({ languages: [...] }) and call hl.highlightIter().`,
+    );
+  }
+  return currentRuntime;
+}
+
+/**
+ * Iterate over highlighted tokens for `source`, calling `onToken` for each flat span.
+ *
+ * Sync free function usable inside {@link Formatter.format}. For top-level
+ * (non-formatter) iteration, use `hl.highlightIter` on a {@link Highlighter}
+ * instance instead.
+ */
+export function highlightIter(
+  source: string,
+  language: LanguageRef | undefined,
+  theme: Theme | undefined,
+  onToken: HighlightCallback,
+): void {
+  const runtime = requireCurrentRuntime("highlightIter");
+  runHighlightIter(runtime, source, detectLanguageRef(source, language), theme, onToken);
+}
+
+/**
+ * Return the nested highlight event stream for `source`.
+ *
+ * Sync free function usable inside {@link Formatter.format}. Use this when your
+ * formatter needs paired open/close markers around nested scopes (e.g. BBCode
+ * tags) that the flat {@link highlightIter} callback API would lose.
+ */
+export function highlightEvents(
+  source: string,
+  language: LanguageRef | undefined,
+): HighlightEvent[] {
+  const runtime = requireCurrentRuntime("highlightEvents");
+  return runHighlightEvents(runtime, source, detectLanguageRef(source, language));
 }
 
 function runFormatter(
@@ -215,14 +253,15 @@ function runFormatter(
   fmt: Formatter,
   detectedRef: LanguageRef | string,
 ): string {
-  const ctx = createHighlightContext(runtime);
-  const originalLanguage = fmt.language;
+  const prevRuntime = currentRuntime;
+  const prevLanguage = fmt.language;
+  currentRuntime = runtime;
   fmt.language = detectedRef;
-
   try {
-    return fmt.format(source, ctx);
+    return fmt.format(source);
   } finally {
-    fmt.language = originalLanguage;
+    fmt.language = prevLanguage;
+    currentRuntime = prevRuntime;
   }
 }
 
@@ -405,18 +444,6 @@ export function createHighlighterModule(factory: HighlighterModuleFactory) {
       const detectedRef = await prepareRuntimeHighlight(runtime, source, fmt.language);
 
       return runFormatter(runtime, source, fmt, detectedRef);
-    },
-
-    async highlightIter(
-      source: string,
-      language: LanguageRef | undefined,
-      theme: Theme | undefined,
-      onToken: HighlightCallback,
-    ): Promise<void> {
-      const runtime = factory.getDefaultRuntime();
-      const detectedRef = await prepareRuntimeHighlight(runtime, source, language);
-
-      runHighlightIter(runtime, source, detectedRef, theme, onToken);
     },
   };
 }
