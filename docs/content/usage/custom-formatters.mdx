@@ -57,10 +57,10 @@ impl Formatter for MinimalHtmlFormatter {
 
 ## JavaScript
 
-Pass an object with `language` and `format(source, hl)`.
+Pass an object with `language` and `format(source)`. Inside `format()`, use the sync free functions `highlightIter()` or `highlightEvents()` imported from `@lumis-sh/lumis`.
 
 ```ts
-import {createHighlighter} from '@lumis-sh/lumis'
+import {createHighlighter, highlightIter} from '@lumis-sh/lumis'
 import type {Formatter} from '@lumis-sh/lumis/formatters'
 import {openPreTag, openCodeTag, closingTags, spanInline} from '@lumis-sh/lumis/formatters/html'
 import rust from '@lumis-sh/lumis/langs/rust'
@@ -70,13 +70,13 @@ const hl = await createHighlighter({languages: [rust]})
 
 const formatter: Formatter = {
   language: rust,
-  format(source, hl) {
+  format(source) {
     const parts: string[] = []
 
     parts.push(openPreTag({preClass: 'docs-demo', theme: dracula}))
-    parts.push(openCodeTag(rust))
+    parts.push(openCodeTag(this.language))
 
-    hl.highlightIter(source, rust, dracula, (text, language, _range, scope, _style) => {
+    highlightIter(source, this.language, dracula, (text, language, _range, scope, _style) => {
       if (scope) {
         parts.push(spanInline(text, {language, scope, theme: dracula}))
       } else {
