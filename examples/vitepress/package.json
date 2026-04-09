@@ -7,9 +7,9 @@
     "start": "vitepress dev ."
   },
   "dependencies": {
-    "@lumis-sh/lumis": "workspace:*",
-    "@lumis-sh/markdown-it-lumis": "workspace:*",
-    "@lumis-sh/themes": "workspace:*",
+    "@lumis-sh/lumis": ">=0.0.1",
+    "@lumis-sh/markdown-it-lumis": ">=0.0.1",
+    "@lumis-sh/themes": ">=0.0.1",
     "vitepress": "^1.6.4"
   }
 }

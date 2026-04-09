@@ -6,9 +6,9 @@
     "render": "node render.mjs"
   },
   "dependencies": {
-    "@lumis-sh/lumis": "workspace:*",
-    "@lumis-sh/themes": "workspace:*",
-    "@lumis-sh/wasm-diff": "^0.26.0",
-    "@lumis-sh/wasm-elixir": "^0.26.0"
+    "@lumis-sh/lumis": ">=0.0.1",
+    "@lumis-sh/themes": ">=0.0.1",
+    "@lumis-sh/wasm-diff": ">=0.0.1",
+    "@lumis-sh/wasm-elixir": ">=0.0.1"
   }
 }

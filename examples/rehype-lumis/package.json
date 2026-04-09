@@ -7,9 +7,9 @@
     "start": "vite"
   },
   "dependencies": {
-    "@lumis-sh/lumis": "workspace:*",
-    "@lumis-sh/rehype-lumis": "workspace:*",
-    "@lumis-sh/themes": "workspace:*",
+    "@lumis-sh/lumis": ">=0.0.1",
+    "@lumis-sh/rehype-lumis": ">=0.0.1",
+    "@lumis-sh/themes": ">=0.0.1",
     "rehype-stringify": "^10.0.1",
     "remark-parse": "^11.0.0",
     "remark-rehype": "^11.1.2",

@@ -7,10 +7,10 @@
     "start": "vite"
   },
   "dependencies": {
-    "@lumis-sh/lumis": "workspace:*",
-    "@lumis-sh/react": "workspace:*",
-    "@lumis-sh/themes": "workspace:*",
-    "@lumis-sh/wasm-bundle-web": "workspace:*",
+    "@lumis-sh/lumis": ">=0.0.1",
+    "@lumis-sh/react": ">=0.0.1",
+    "@lumis-sh/themes": ">=0.0.1",
+    "@lumis-sh/wasm-bundle-web": ">=0.0.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "vite": "^8.0.2"
