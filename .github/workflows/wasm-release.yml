@@ -101,7 +101,7 @@ jobs:
           node-version: "24"
           registry-url: "https://registry.npmjs.org"
 
-      - uses: mymindstorm/setup-emsdk@v14
+      - uses: mymindstorm/setup-emsdk@v16
         with:
           version: ${{ env.EMSDK_VERSION }}
           actions-cache-folder: emsdk-cache
