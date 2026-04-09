@@ -94,6 +94,7 @@ name = "prepare-release"
 
 [[workflows.steps]]
 type = "PrepareRelease"
+allow_empty = true
 
 [[workflows]]
 name = "release"
