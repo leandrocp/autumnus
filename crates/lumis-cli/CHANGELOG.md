@@ -1,5 +1,15 @@
-## [0.1.4](https://github.com/leandrocp/lumis/compare/rust-cli@v0.1.3...rust-cli@v0.1.4) (2026-04-06)
+## [0.2.0](https://github.com/leandrocp/lumis/compare/cargo-lumis-cli/v0.1.4...cargo-lumis-cli/v0.2.0) (2026-04-09)
 
+### Features
+
+- add -V as short for --verbose (#704)
+
+### Bug Fixes
+
+- BREAKING: restore -v version (#704)
+- bundle theme extractor to fix `themes generate` (#704)
+
+## [0.1.4](https://github.com/leandrocp/lumis/compare/rust-cli@v0.1.3...rust-cli@v0.1.4) (2026-04-06)
 
 ### Features
 
@@ -7,13 +17,11 @@
 
 ## [0.1.3](https://github.com/leandrocp/lumis/compare/rust-cli@v0.1.2...rust-cli@v0.1.3) (2026-04-04)
 
-
 ### Bug Fixes
 
 * stop pinning lumis-core workspace deps ([ef2f002](https://github.com/leandrocp/lumis/commit/ef2f002eb60cd408872c5ce5f4dd7792bb00c557))
 
 ## [0.1.2](https://github.com/leandrocp/lumis/compare/rust-cli@v0.1.1...rust-cli@v0.1.2) (2026-04-03)
-
 
 ### Bug Fixes
 
@@ -23,13 +31,11 @@
 
 ## [0.1.1](https://github.com/leandrocp/lumis/compare/rust-cli@v0.1.0...rust-cli@v0.1.1) (2026-04-02)
 
-
 ### Bug Fixes
 
 * cli seg fault ([#544](https://github.com/leandrocp/lumis/issues/544)) ([7948c64](https://github.com/leandrocp/lumis/commit/7948c64295580e5e9c8be9e041716a837da71e43))
 
 ## [0.1.0](https://github.com/leandrocp/lumis/compare/rust-cli@v0.0.3...rust-cli@v0.1.0) (2026-04-02)
-
 
 ### ⚠ BREAKING CHANGES
 
@@ -41,7 +47,6 @@
 
 ## [0.0.3](https://github.com/leandrocp/lumis/compare/rust-cli@v0.0.2...rust-cli@v0.0.3) (2026-03-31)
 
-
 ### Features
 
 * add BBCode formatter ([@andrea](https://github.com/andrea)TP) ([#471](https://github.com/leandrocp/lumis/issues/471)) ([8fdce4d](https://github.com/leandrocp/lumis/commit/8fdce4dbff7fcd6cd943d049c9f46588a77e1aa5))
@@ -49,7 +54,6 @@
 * add bbcode_scoped formatter to Elixir and Javascript ([#478](https://github.com/leandrocp/lumis/issues/478)) ([1a34357](https://github.com/leandrocp/lumis/commit/1a343574b0239b5100d6b170124b586b0aabecfe))
 
 ## [0.0.2](https://github.com/leandrocp/lumis/compare/rust-cli@v0.0.1...rust-cli@v0.0.2) (2026-03-24)
-
 
 ### Bug Fixes
 
