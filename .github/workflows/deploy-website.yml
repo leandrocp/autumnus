@@ -6,6 +6,7 @@ on:
     paths:
       - "website/**"
       - "docs/**"
+      - ".github/workflows/deploy-website.yml"
   workflow_dispatch:
 
 permissions:
@@ -35,7 +36,7 @@ jobs:
             website/pnpm-lock.yaml
             docs/pnpm-lock.yaml
 
-      - run: pnpm install --ignore-workspace
+      - run: pnpm install --ignore-workspace --no-frozen-lockfile
         working-directory: website
 
       - run: pnpm install --ignore-workspace --frozen-lockfile
