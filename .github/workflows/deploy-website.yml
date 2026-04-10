@@ -6,8 +6,6 @@ on:
     paths:
       - "website/**"
       - "docs/**"
-      - "packages/javascript/lumis/**"
-      - "packages/javascript/themes/**"
       - ".github/workflows/deploy-website.yml"
   workflow_dispatch:
 
@@ -34,21 +32,10 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
-          cache-dependency-path: |
-            website/pnpm-lock.yaml
-            docs/pnpm-lock.yaml
+          cache-dependency-path: website/pnpm-lock.yaml
 
       - run: pnpm install --frozen-lockfile
-
-      - run: pnpm --filter @lumis-sh/themes build
-
-      - run: pnpm --filter @lumis-sh/lumis build
-
-      - run: pnpm install
         working-directory: website
-
-      - run: pnpm install
-        working-directory: docs
 
       - run: pnpm build
         working-directory: website
