@@ -6,7 +6,6 @@ on:
     paths:
       - "website/**"
       - "docs/**"
-      - ".github/workflows/deploy-website.yml"
   workflow_dispatch:
 
 permissions:
@@ -32,10 +31,15 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
-          cache-dependency-path: website/pnpm-lock.yaml
+          cache-dependency-path: |
+            website/pnpm-lock.yaml
+            docs/pnpm-lock.yaml
 
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install --ignore-workspace
         working-directory: website
+
+      - run: pnpm install --ignore-workspace --frozen-lockfile
+        working-directory: docs
 
       - run: pnpm build
         working-directory: website
