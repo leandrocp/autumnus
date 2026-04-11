@@ -35,6 +35,7 @@
   "packageManager": "pnpm@10.31.0",
   "scripts": {
     "build": "tsup",
+    "prelint": "pnpm --filter @lumis-sh/lumis build",
     "test": "vitest run",
     "lint": "oxlint --type-aware src/",
     "fmt": "oxfmt src/ test/ *.ts",
