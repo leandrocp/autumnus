@@ -4,7 +4,7 @@
 Mix.install([
   {:phoenix_playground, "~> 0.1"},
   {:phoenix_html, "~> 4.3"},
-  {:lumis, ">= 0.1"}
+  {:lumis, "~> 0.1"}
 ])
 ```
 
@@ -31,7 +31,7 @@ defmodule SyntaxHighlighterLive do
         {
           :html_multi_themes,
           language: "elixir",
-          themes: [light: "github_light", dark: "github_dark"],
+          themes: [light: "catppuccin_latte", dark: "catppuccin_mocha"],
           default_theme: "light"
         }
     )

@@ -2,22 +2,16 @@
 
 ```elixir
 Mix.install([
-  {:lumis, path: "."}
+  {:lumis, "~> 0.3"}
 ])
 ```
+
+## Example
 
 ```elixir
 code = ~S(const template = `<a href="/x">[url=x]</a>`)
 
 Lumis.highlight!(code,
   formatter: {:bbcode_scoped, language: "javascript"}
-)
-```
-
-```elixir
-elixir_code = "defmodule Demo do\n  value = \"[url=x]\"\nend"
-
-Lumis.highlight!(elixir_code,
-  formatter: {:bbcode_scoped, language: "elixir"}
 )
 ```
