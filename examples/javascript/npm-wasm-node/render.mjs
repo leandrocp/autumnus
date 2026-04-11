@@ -45,4 +45,4 @@ const html = `<!doctype html>
 `
 
 await writeFile(new URL('./output.html', import.meta.url), html)
-console.log('Wrote examples/npm-wasm-node/output.html')
+console.log('Wrote examples/javascript/npm-wasm-node/output.html')

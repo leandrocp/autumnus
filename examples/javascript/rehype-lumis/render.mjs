@@ -36,4 +36,4 @@ const file = await unified()
   .process(source)
 
 await writeFile(new URL('./output.html', import.meta.url), String(file))
-console.log('Wrote examples/rehype-lumis/output.html')
+console.log('Wrote examples/javascript/rehype-lumis/output.html')

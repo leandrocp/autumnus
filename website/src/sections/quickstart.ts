@@ -124,7 +124,7 @@ export function renderQuickstart() {
           <span class="font-mono text-xs text-zinc-500 dark:text-zinc-400">API guides, examples, and recipes.</span>
         </div>
         <p class="mt-3 font-mono text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
-          Ready-to-run integrations are available in the examples repo folder for React, Astro, markdown-it, rehype, Cloudflare Workers, NimblePublisher, and more.
+          Ready-to-run examples are grouped by language in the repo, with JavaScript integrations plus dedicated Rust and Elixir examples.
         </p>
 
         <div class="mt-12">

@@ -38,4 +38,4 @@ const { default: Content } = await run(String(compiled), {
 
 const html = renderToStaticMarkup(React.createElement(Content))
 await writeFile(new URL('./output.html', import.meta.url), html)
-console.log('Wrote examples/mdx/output.html')
+console.log('Wrote examples/javascript/mdx/output.html')

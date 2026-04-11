@@ -32,4 +32,4 @@ install(md)
 
 const html = md.render(source)
 await writeFile(new URL('./output.html', import.meta.url), html)
-console.log('Wrote examples/markdown-it/output.html')
+console.log('Wrote examples/javascript/markdown-it/output.html')

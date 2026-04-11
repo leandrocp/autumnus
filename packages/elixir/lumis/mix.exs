@@ -55,7 +55,6 @@ defmodule Lumis.MixProject do
         native/lumis_nif/Cargo.*
         native/lumis_nif/Cross.toml
         priv/static/css
-        examples
         checksum-*.exs
         mix.exs
         README.md
@@ -75,10 +74,10 @@ defmodule Lumis.MixProject do
         "#{@source_url}/blob/hex-lumis/v#{@version}/packages/elixir/lumis/%{path}#L%{line}",
       extras: [
         "CHANGELOG.md",
-        "examples/bbcode_scoped.livemd",
-        "examples/light_dark_manual.livemd",
-        "examples/light_dark_vars.livemd",
-        "examples/light_dark_function.livemd"
+        "../../../examples/elixir/bbcode_scoped.livemd",
+        "../../../examples/elixir/light_dark_manual.livemd",
+        "../../../examples/elixir/light_dark_vars.livemd",
+        "../../../examples/elixir/light_dark_function.livemd"
       ],
       skip_undefined_reference_warnings_on: ["CHANGELOG.md"]
     ]

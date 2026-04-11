@@ -114,7 +114,7 @@ Lumis supports five output formatters:
 
 All HTML formatters wrap each line in a `<div class="line">` element with a `data-line` attribute containing the line number, making it easy to add line numbers or implement line-based features in your application.
 
-See the [Livebook examples](https://github.com/leandrocp/lumis/tree/main/examples) and [t:formatter/0](https://hexdocs.pm/lumis/Lumis.html#t:formatter/0) for more.
+See the [Livebook examples](https://github.com/leandrocp/lumis/tree/main/examples/elixir) and [t:formatter/0](https://hexdocs.pm/lumis/Lumis.html#t:formatter/0) for more.
 
 ### HTML Inline (Default)
 

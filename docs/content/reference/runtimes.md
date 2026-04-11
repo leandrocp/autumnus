@@ -36,9 +36,18 @@ keywords:
 
 | Runtime | Integration | Package | Reference |
 | --- | --- | --- | --- |
-| JavaScript | React | `@lumis-sh/react` | [npm](https://www.npmjs.com/package/@lumis-sh/react) |
-| JavaScript | markdown-it | `@lumis-sh/markdown-it-lumis` | [npm](https://www.npmjs.com/package/@lumis-sh/markdown-it-lumis) |
-| JavaScript | rehype | `@lumis-sh/rehype-lumis` | [npm](https://www.npmjs.com/package/@lumis-sh/rehype-lumis) |
+| JavaScript | React | `@lumis-sh/react` | [Docs](/integrations/react) |
+| JavaScript | markdown-it | `@lumis-sh/markdown-it-lumis` | [Docs](/integrations/markdown-it) |
+| JavaScript | rehype / unified | `@lumis-sh/rehype-lumis` | [Docs](/integrations/rehype-lumis) |
+| JavaScript | Astro | `@lumis-sh/rehype-lumis` | [Docs](/integrations/astro) |
+| JavaScript | MDX | `@lumis-sh/rehype-lumis` | [Docs](/integrations/mdx) |
+| JavaScript | Next.js | `@lumis-sh/rehype-lumis` | [Docs](/integrations/nextjs) |
+| JavaScript | Nuxt | `@lumis-sh/rehype-lumis` | [Docs](/integrations/nuxt) |
+| JavaScript | Docusaurus | `@lumis-sh/rehype-lumis` | [Docs](/integrations/docusaurus) |
+| JavaScript | react-markdown | `@lumis-sh/rehype-lumis` | [Docs](/integrations/react-markdown) |
+| JavaScript | VitePress | `@lumis-sh/markdown-it-lumis` | [Docs](/integrations/vitepress) |
+| Rust | Ratatui | `ansi-to-tui` + `lumis` | [Docs](/integrations/ratatui) |
+| Elixir | NimblePublisher | `mdex` + `lumis` | [Docs](/integrations/nimble-publisher) |
 
 ## WASM language packages
 

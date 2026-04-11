@@ -58,4 +58,4 @@ const html = await new Promise((resolve, reject) => {
 })
 
 await writeFile(new URL('./output.html', import.meta.url), html)
-console.log('Wrote examples/react-markdown/output.html')
+console.log('Wrote examples/javascript/react-markdown/output.html')

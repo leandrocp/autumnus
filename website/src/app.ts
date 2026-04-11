@@ -9,6 +9,7 @@ import { renderFormatters } from "./sections/formatters";
 import { renderInjections, setupInjections } from "./sections/injections";
 import { renderWasm } from "./sections/wasm";
 import { renderRuntimes } from "./sections/runtimes";
+import { renderIntegrations } from "./sections/integrations";
 import { renderFooter } from "./sections/footer";
 import { setupTabs, setupCopyButtons, SECTION_DIVIDER } from "./lib/utils";
 
@@ -24,6 +25,8 @@ export async function mountApp(root: HTMLDivElement) {
     renderQuickstart(),
     SECTION_DIVIDER,
     renderRuntimes(),
+    SECTION_DIVIDER,
+    renderIntegrations(),
     SECTION_DIVIDER,
     renderFormatters(),
     SECTION_DIVIDER,
