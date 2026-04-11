@@ -22,7 +22,7 @@
 //!
 //! See also:
 //! - [`Formatter`](crate::formatters::Formatter) trait documentation
-//! - [`examples/custom_terminal_formatter.rs`](https://github.com/leandrocp/lumis/blob/main/examples/custom_terminal_formatter.rs)
+//! - [`examples/rust/custom_terminal_formatter.rs`](https://github.com/leandrocp/lumis/blob/main/examples/rust/custom_terminal_formatter.rs)
 
 use crate::highlight::{highlight_iter, HighlightError, Style};
 use crate::languages::Language;

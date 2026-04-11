@@ -75,7 +75,7 @@
 //! let theme = themes::from_json(json).unwrap();
 //! ```
 //!
-//! See [custom_theme.rs](https://github.com/leandrocp/lumis/blob/main/examples/custom_theme.rs)
+//! See [custom_theme.rs](https://github.com/leandrocp/lumis/blob/main/examples/rust/custom_theme.rs)
 //! for a complete example of building themes programmatically.
 
 pub use lumis_core::themes::*;

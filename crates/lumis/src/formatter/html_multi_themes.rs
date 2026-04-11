@@ -116,8 +116,8 @@
 //! **Note**: Requires themes named exactly "light" and "dark". Only works in browsers
 //! supporting the CSS `light-dark()` function (Chrome 123+, Safari 17.5+, Firefox 120+).
 //!
-//! See [html_multi_themesi.rs](https://github.com/leandrocp/lumis/blob/main/examples/html_multi_themesi.rs)
-//! and [html_multi_themesi.html](https://github.com/leandrocp/lumis/blob/main/examples/html_multi_themesi.html) for a demo.
+//! See [html_multi_themes_manual.rs](https://github.com/leandrocp/lumis/blob/main/examples/rust/html_multi_themes_manual.rs)
+//! and `examples/rust/html_multi_themes_manual.html` for a demo.
 //!
 
 use super::{Formatter, HtmlElement};

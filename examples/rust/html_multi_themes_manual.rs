@@ -146,7 +146,7 @@ fn main() {
         highlighted
     );
 
-    std::fs::write("examples/html_multi_themes_manual.html", html)?;
+    std::fs::write("examples/rust/html_multi_themes_manual.html", html)?;
 
     Ok(())
 }

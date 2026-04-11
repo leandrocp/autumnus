@@ -71,7 +71,7 @@ fn main() {
         highlighted
     );
 
-    std::fs::write("examples/html_multi_themes_light_dark.html", html)?;
+    std::fs::write("examples/rust/html_multi_themes_light_dark.html", html)?;
 
     Ok(())
 }
