@@ -17,7 +17,10 @@ on:
       - "languages.toml"
       - "fixtures/conformance/**"
       - "packages/javascript/lumis/**"
+      - "packages/javascript/package.json"
       - "packages/javascript/themes/**"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
       - "packages/elixir/lumis/**"
       - ".github/workflows/conformance.yml"
   pull_request:
@@ -27,7 +30,10 @@ on:
       - "languages.toml"
       - "fixtures/conformance/**"
       - "packages/javascript/lumis/**"
+      - "packages/javascript/package.json"
       - "packages/javascript/themes/**"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
       - "packages/elixir/lumis/**"
       - ".github/workflows/conformance.yml"
   workflow_dispatch:
@@ -67,7 +73,10 @@ jobs:
               - '.github/workflows/conformance.yml'
             javascript:
               - 'packages/javascript/lumis/**'
+              - 'packages/javascript/package.json'
               - 'packages/javascript/themes/**'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
               - 'queries/**'
               - 'fixtures/conformance/**'
               - 'languages.toml'
@@ -130,8 +139,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @lumis-sh/themes build
       - run: pnpm --filter @lumis-sh/lumis build
-      - run: pnpm test:conformance
-        working-directory: packages/javascript/lumis
+      - run: pnpm --filter @lumis-sh/lumis test:conformance
 
   elixir:
     name: Elixir conformance

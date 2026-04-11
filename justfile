@@ -148,7 +148,7 @@ test-conformance:
     cargo test -p lumis-cli --test conformance -- --ignored
     echo ""
     echo "JS conformance..."
-    (cd packages/javascript/lumis && pnpm test:conformance)
+    pnpm --filter @lumis-sh/lumis test:conformance
     echo ""
     echo "Elixir conformance..."
     (cd packages/elixir/lumis && LUMIS_BUILD=1 mix test --include conformance test/conformance_test.exs)
