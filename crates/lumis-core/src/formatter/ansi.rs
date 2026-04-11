@@ -72,8 +72,8 @@ pub fn style_to_ansi(style: &Style) -> String {
     codes.join("")
 }
 
-/// Wrap text with ANSI color codes based on a Style.
-pub fn wrap_with_ansi(text: &str, style: &Style) -> String {
+/// Render text with ANSI color codes based on a Style.
+pub fn paint(text: &str, style: &Style) -> String {
     let ansi_codes = style_to_ansi(style);
 
     if ansi_codes.is_empty() {
@@ -147,20 +147,46 @@ mod tests {
     }
 
     #[test]
-    fn test_wrap_with_ansi_empty_style() {
+    fn test_paint_empty_style() {
         let style = Style::default();
-        assert_eq!(wrap_with_ansi("text", &style), "text");
+        assert_eq!(paint("text", &style), "text");
     }
 
     #[test]
-    fn test_wrap_with_ansi_fg() {
+    fn test_paint_fg() {
         let style = Style {
             fg: Some("#8be9fd".to_string()),
             ..Default::default()
         };
-        let result = wrap_with_ansi("fn", &style);
+        let result = paint("fn", &style);
         assert!(result.starts_with("\u{1b}[0m\u{1b}[38;2;139;233;253m"));
         assert!(result.contains("fn"));
         assert!(result.ends_with("\u{1b}[0m"));
+    }
+
+    #[test]
+    fn test_paint_multiline_without_background() {
+        let style = Style {
+            fg: Some("#8be9fd".to_string()),
+            ..Default::default()
+        };
+        let result = paint("a\nb", &style);
+
+        assert_eq!(result, "\u{1b}[0m\u{1b}[38;2;139;233;253ma\nb\u{1b}[0m");
+    }
+
+    #[test]
+    fn test_paint_multiline_with_background_resets_before_newline() {
+        let style = Style {
+            fg: Some("#8be9fd".to_string()),
+            bg: Some("#282a36".to_string()),
+            ..Default::default()
+        };
+        let result = paint("a\nb", &style);
+
+        assert_eq!(
+            result,
+            "\u{1b}[0m\u{1b}[38;2;139;233;253m\u{1b}[48;2;40;42;54ma\u{1b}[0m\n\u{1b}[38;2;139;233;253m\u{1b}[48;2;40;42;54mb\u{1b}[0m"
+        );
     }
 }

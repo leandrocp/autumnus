@@ -88,7 +88,7 @@ impl Formatter for Terminal {
                     });
 
                     if let Some(style) = styled {
-                        write!(output, "{}", ansi::wrap_with_ansi(text, style))?;
+                        write!(output, "{}", ansi::paint(text, style))?;
                     } else {
                         write!(output, "{}", text)?;
                     }

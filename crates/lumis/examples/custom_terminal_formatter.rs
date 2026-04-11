@@ -4,7 +4,10 @@
 //! the public APIs from the `ansi` module, without needing to interact with
 //! tree-sitter or termcolor internals directly.
 
-use lumis::{ansi, formatters::Formatter, languages::Language, themes, write_highlight};
+use lumis::{
+    ansi, formatters::Formatter, highlight::highlight_iter, languages::Language, themes,
+    write_highlight,
+};
 use std::io::{self, Write};
 
 const HORIZONTAL_LINE: char = '─';
@@ -66,27 +69,34 @@ impl Formatter for LineNumberedTerminal {
         // Print bat-style header with filename
         self.print_header(output)?;
 
-        let iter = ansi::highlight_iter_with_ansi(source, self.language, self.theme.clone())
-            .map_err(io::Error::other)?;
-
         let mut line_num = 1;
         let mut at_line_start = true;
 
-        for (ansi_text, _range) in iter {
-            if at_line_start {
-                // Add line number in gray using ANSI helpers
-                let gray_fg = ansi::rgb_to_ansi(128, 128, 128, false);
-                write!(output, "{}{:3} │ {}", gray_fg, line_num, ansi::ANSI_RESET)?;
-                at_line_start = false;
-            }
+        highlight_iter(
+            source,
+            self.language,
+            self.theme.clone(),
+            |text, _language, _range, _scope, style| {
+                let ansi_text = ansi::paint(text, style);
 
-            write!(output, "{}", ansi_text)?;
+                if at_line_start {
+                    // Add line number in gray using ANSI helpers
+                    let gray_fg = ansi::rgb_to_ansi(128, 128, 128, false);
+                    write!(output, "{}{:3} │ {}", gray_fg, line_num, ansi::ANSI_RESET)?;
+                    at_line_start = false;
+                }
 
-            if ansi_text.contains('\n') {
-                line_num += ansi_text.matches('\n').count();
-                at_line_start = true;
-            }
-        }
+                write!(output, "{}", ansi_text)?;
+
+                if ansi_text.contains('\n') {
+                    line_num += ansi_text.matches('\n').count();
+                    at_line_start = true;
+                }
+
+                Ok::<_, io::Error>(())
+            },
+        )
+        .map_err(io::Error::other)?;
 
         Ok(())
     }

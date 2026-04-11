@@ -6,7 +6,7 @@
 //! # Example: Simple Terminal Formatter
 //!
 //! ```rust
-//! use lumis::{ansi, languages::Language, themes};
+//! use lumis::{ansi::paint, highlight::highlight_iter, languages::Language, themes};
 //! use std::io::Write;
 //!
 //! let code = "fn main() {}";
@@ -14,9 +14,10 @@
 //! let lang = Language::Rust;
 //!
 //! let mut output = Vec::new();
-//! for (ansi_text, _range) in ansi::highlight_iter_with_ansi(code, lang, theme).unwrap() {
-//!     write!(&mut output, "{}", ansi_text).unwrap();
-//! }
+//! highlight_iter(code, lang, theme, |text, _language, _range, _scope, style| {
+//!     write!(&mut output, "{}", paint(text, style))
+//! })
+//! .unwrap();
 //! ```
 //!
 //! See also:
@@ -164,7 +165,7 @@ pub fn style_to_ansi(style: &Style) -> String {
     result
 }
 
-/// Wrap text with ANSI color codes based on a Style.
+/// Render text with ANSI color codes based on a Style.
 ///
 /// Applies ANSI escape sequences to the text and adds a reset sequence at the end.
 /// When the style includes a background color, resets are inserted before newlines
@@ -172,61 +173,36 @@ pub fn style_to_ansi(style: &Style) -> String {
 ///
 /// # Arguments
 ///
-/// * `text` - The text to wrap
+/// * `text` - The text to render
 /// * `style` - The styling to apply
 ///
 /// # Returns
 ///
-/// Text wrapped with ANSI codes and reset sequence.
+/// Text rendered with ANSI codes and reset sequence.
 ///
 /// # Examples
 ///
 /// ```rust
-/// use lumis::{ansi::wrap_with_ansi, highlight::Style};
+/// use lumis::{ansi::paint, highlight::Style};
 ///
 /// let style = Style {
 ///     fg: Some("#8be9fd".to_string()),
 ///     ..Default::default()
 /// };
 ///
-/// let wrapped = wrap_with_ansi("fn", &style);
-/// assert_eq!(wrapped, "\u{1b}[0m\u{1b}[38;2;139;233;253mfn\u{1b}[0m");
+/// let painted = paint("fn", &style);
+/// assert_eq!(painted, "\u{1b}[0m\u{1b}[38;2;139;233;253mfn\u{1b}[0m");
 /// ```
+pub fn paint(text: &str, style: &Style) -> String {
+    lumis_core::formatter::ansi::paint(text, style)
+}
+
+/// Wrap text with ANSI color codes based on a Style.
+///
+/// Deprecated: use [`paint()`] instead.
+#[deprecated(note = "use `paint(...)` instead")]
 pub fn wrap_with_ansi(text: &str, style: &Style) -> String {
-    let ansi_codes = style_to_ansi(style);
-
-    if ansi_codes.is_empty() {
-        text.to_string()
-    } else if style.bg.is_some() {
-        // When there's a background color, we need to reset before newlines
-        // to prevent the background from extending across the entire line width
-        let mut result = String::with_capacity(text.len() + ansi_codes.len() * 2 + 10);
-        result.push_str(ANSI_RESET);
-        result.push_str(&ansi_codes);
-
-        for (i, ch) in text.char_indices() {
-            if ch == '\n' {
-                // Reset before the newline, then output newline, then reapply style
-                result.push_str(ANSI_RESET);
-                result.push('\n');
-                // Only reapply style if there's more content after this newline
-                if i + 1 < text.len() {
-                    result.push_str(&ansi_codes);
-                }
-            } else {
-                result.push(ch);
-            }
-        }
-
-        // Final reset if text doesn't end with newline
-        if !text.ends_with('\n') {
-            result.push_str(ANSI_RESET);
-        }
-
-        result
-    } else {
-        format!("{}{}{}{}", ANSI_RESET, ansi_codes, text, ANSI_RESET)
-    }
+    paint(text, style)
 }
 
 /// Iterator over highlighted tokens with ANSI codes pre-applied.
@@ -257,6 +233,9 @@ impl Iterator for AnsiIterator {
 /// Each token is pre-wrapped with appropriate ANSI escape sequences based
 /// on the theme and includes a reset sequence.
 ///
+/// Deprecated: use [`highlight_iter()`](crate::highlight::highlight_iter)
+/// with [`paint()`] instead.
+///
 /// # Arguments
 ///
 /// * `source` - The source code to highlight
@@ -270,17 +249,19 @@ impl Iterator for AnsiIterator {
 /// # Examples
 ///
 /// ```rust
-/// use lumis::{ansi::highlight_iter_with_ansi, languages::Language, themes};
+/// use lumis::{ansi::paint, highlight::highlight_iter, languages::Language, themes};
 /// use std::io::Write;
 ///
 /// let code = "fn main() {}";
 /// let theme = themes::get("dracula").ok();
 ///
 /// let mut output = Vec::new();
-/// for (ansi_text, _range) in highlight_iter_with_ansi(code, Language::Rust, theme).unwrap() {
-///     write!(&mut output, "{}", ansi_text).unwrap();
-/// }
+/// highlight_iter(code, Language::Rust, theme, |text, _language, _range, _scope, style| {
+///     write!(&mut output, "{}", paint(text, style))
+/// })
+/// .unwrap();
 /// ```
+#[deprecated(note = "use `highlight::highlight_iter(...)` with `ansi::paint(...)` instead")]
 pub fn highlight_iter_with_ansi(
     source: &str,
     language: Language,
@@ -293,7 +274,7 @@ pub fn highlight_iter_with_ansi(
         language,
         theme,
         |text, _language, range, _scope, style| {
-            let wrapped = wrap_with_ansi(text, style);
+            let wrapped = paint(text, style);
             segments.push((wrapped, range));
             Ok::<_, std::io::Error>(())
         },
@@ -374,21 +355,21 @@ mod tests {
     }
 
     #[test]
-    fn test_wrap_with_ansi() {
+    fn test_paint() {
         let style = Style {
             fg: Some("#8be9fd".to_string()),
             ..Default::default()
         };
-        let result = wrap_with_ansi("fn", &style);
+        let result = paint("fn", &style);
         assert!(result.starts_with("\u{1b}[0m\u{1b}[38;2;139;233;253m"));
         assert!(result.contains("fn"));
         assert!(result.ends_with("\u{1b}[0m"));
     }
 
     #[test]
-    fn test_wrap_with_ansi_empty_style() {
+    fn test_paint_empty_style() {
         let style = Style::default();
-        let result = wrap_with_ansi("text", &style);
+        let result = paint("text", &style);
         assert_eq!(result, "text");
     }
 }
