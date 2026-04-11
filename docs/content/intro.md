@@ -32,7 +32,7 @@ It keeps the same core workflow across runtimes:
 - 250+ themes sourced from Neovim colorschemes
 - 5 formatters: HTML Inline, HTML Linked, HTML Multi-Themes, Terminal, and BBCode Scoped
 - handles incomplete code (useful for streaming)
-- one API across 7 runtimes: CLI, Rust, Elixir, JavaScript, Node.js, browser, and Java
+- one API across 6 runtimes: CLI, Rust, Elixir, JavaScript, Node.js, browser, and Java
 
 ## How it works
 

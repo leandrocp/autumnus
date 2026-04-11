@@ -59,18 +59,6 @@ const RUNTIME_LINKS = [
     ],
   },
   {
-    name: "Edge",
-    summary: "Cloudflare Workers, Vercel Edge, and similar runtimes.",
-    install: "npm install @lumis-sh/lumis",
-    links: [
-      { label: "Docs", href: "/docs/usage/javascript" },
-      {
-        label: "Source",
-        href: "https://github.com/leandrocp/lumis/tree/main/packages/javascript/lumis",
-      },
-    ],
-  },
-  {
     name: "Java",
     summary: "JVM parity across the stack.",
     install: "io.roastedroot:lumis4j",

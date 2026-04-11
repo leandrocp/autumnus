@@ -177,6 +177,9 @@ Useful for dropdowns, config validation, and docs tooling:
 - Node can also auto-load installed parser packages such as `@lumis-sh/wasm-elixir` or bundle packages such as `@lumis-sh/wasm-bundle-web`
 - non-Node usage usually relies on remote parser assets unless you override the resolver, use `withWasm()` with a single npm parser package such as `@lumis-sh/wasm-json`, or use `withWasmBundle()` with a bundle package such as `@lumis-sh/wasm-bundle-web`
 - Bun and Deno are also supported
-- Edge runtimes such as Cloudflare Workers or Vercel Edge follow the browser runtime path, so the best DX is to use npm WASM packages with `withWasm()` or `withWasmBundle()` instead of manually fetching parser assets
+
+:::note Edge is not supported yet
+Lumis still uses `web-tree-sitter` in the JavaScript runtime, but Edge runtimes are not supported yet because of an upstream Tree-sitter limitation: [tree-sitter/tree-sitter#2160](https://github.com/tree-sitter/tree-sitter/issues/2160).
+:::
 
 For parser asset details, continue with [WASM and CDN](/advanced/wasm-and-cdn).

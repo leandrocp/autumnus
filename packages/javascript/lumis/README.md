@@ -2,7 +2,7 @@
 
 Syntax Highlighter powered by Tree-sitter and Neovim themes.
 
-JavaScript/TypeScript package for [Lumis](https://lumis.sh). Works in Node.js, Bun, Deno, browsers, and edge runtimes such as Cloudflare Workers.
+JavaScript/TypeScript package for [Lumis](https://lumis.sh). Works in Node.js, Bun, Deno, and browsers.
 
 Uses `web-tree-sitter` for parsing.
 
@@ -179,28 +179,7 @@ All three are equivalent at highlight time. The runtime resolves the language by
 - By default, Lumis resolves parser WASM from `https://cdn.jsdelivr.net/npm/@lumis-sh/wasm-<parser-name-without-tree-sitter-prefix>@<tree-sitter-version>/<parser>.wasm`.
 - The `<tree-sitter-version>` segment is a partial version such as `0.26`, which CDNs resolve to the latest compatible patch release.
 - In Node, fetched parser WASM files are cached under `node_modules/.cache/lumis` when possible.
-- In Edge runtimes, prefer npm WASM packages with `withWasm()` or `withWasmBundle()` instead of wiring raw parser fetches yourself.
 - In restricted or offline environments, set a custom resolver before calling `highlight()` or `createHighlighter()`.
-
-## Edge Runtimes
-
-Edge runtimes include platforms such as Cloudflare Workers or Vercel Edge, not Bun or Deno.
-
-Prefer npm WASM packages or bundle packages instead of manual fetch logic:
-
-```typescript
-import { createHighlighter, withWasm } from '@lumis-sh/lumis'
-import { htmlLinked } from '@lumis-sh/lumis/formatters'
-import json from '@lumis-sh/lumis/langs/json'
-import jsonWasm from '@lumis-sh/wasm-json'
-
-const language = withWasm(json, jsonWasm)
-
-const hl = await createHighlighter({ languages: [language] })
-const html = hl.highlight('{"edge": true}', htmlLinked({ language }))
-```
-
-For multi-language setups, pair `bundledLanguages` with `bundledWasms` via `withWasmBundle()`.
 
 ## Output Formats
 

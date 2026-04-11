@@ -101,7 +101,7 @@ const html = hl.highlight(
 Use this when you want one package in `package.json` to cover a whole preset. Lumis still imports only `@lumis-sh/lumis/bundles/web`; Node resolves the installed parser packages automatically.
 
   </TabItem>
-  <TabItem value="browser" label="Bundlers / Edge">
+  <TabItem value="browser" label="Bundlers">
 
 ```js title="withWasm helper"
 import {createHighlighter, withWasm} from '@lumis-sh/lumis'
@@ -122,12 +122,12 @@ const html = hl.highlight(
 )
 ```
 
-Use this when you want bundler-managed parser assets instead of a CDN fetch in browsers, Edge runtimes, or similar non-Node environments.
+Use this when you want bundler-managed parser assets instead of a CDN fetch in browsers or similar non-Node environments.
 
 See `examples/npm-wasm-browser`.
 
   </TabItem>
-  <TabItem value="browser-bundle" label="Bundle / Edge">
+  <TabItem value="browser-bundle" label="Bundle">
 
 ```js title="withWasmBundle helper"
 import {createHighlighter, withWasmBundle} from '@lumis-sh/lumis'
@@ -150,7 +150,7 @@ const html = hl.highlight(
 )
 ```
 
-Use this when you want local, bundler-managed parser assets for a whole preset in browsers, Edge runtimes, or similar non-Node environments instead of wiring each language one by one.
+Use this when you want local, bundler-managed parser assets for a whole preset in browsers or similar non-Node environments instead of wiring each language one by one.
 
   </TabItem>
 </Tabs>
@@ -199,53 +199,6 @@ The CLI does not expose a custom WASM resolver hook. Use the parser cache comman
 
   </TabItem>
 </Tabs>
-
-## Edge runtimes
-
-Edge runtimes include platforms such as Cloudflare Workers or Vercel Edge.
-
-- there is no Node filesystem cache layer
-- prefer npm WASM packages with `withWasm()` or `withWasmBundle()` instead of manually fetching parser assets
-
-```js title="Single language from npm"
-import {createHighlighter, withWasm} from '@lumis-sh/lumis'
-import {htmlLinked} from '@lumis-sh/lumis/formatters'
-import json from '@lumis-sh/lumis/langs/json'
-import jsonWasm from '@lumis-sh/wasm-json'
-
-const jsonLanguage = withWasm(json, jsonWasm)
-
-const hl = await createHighlighter({
-  languages: [jsonLanguage],
-})
-
-const html = hl.highlight(
-  '{"edge": true}',
-  htmlLinked({language: jsonLanguage})
-)
-```
-
-```js title="Bundle from npm"
-import {createHighlighter, withWasmBundle} from '@lumis-sh/lumis'
-import {htmlLinked} from '@lumis-sh/lumis/formatters'
-import {bundledLanguages} from '@lumis-sh/lumis/bundles/web'
-import {bundledWasms} from '@lumis-sh/wasm-bundle-web'
-
-const languages = withWasmBundle(bundledLanguages, bundledWasms)
-
-const hl = await createHighlighter({
-  languages: [languages],
-})
-
-await hl.loadLanguage(languages.json)
-
-const html = hl.highlight(
-  '{"edge": true}',
-  htmlLinked({language: languages.json})
-)
-```
-
-If you already have your own asset pipeline, `withWasm()` also accepts a `URL`, `Response`, `Uint8Array`, or `ArrayBuffer`.
 
 ## Browser / CDN usage
 

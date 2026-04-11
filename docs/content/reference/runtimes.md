@@ -22,7 +22,7 @@ keywords:
 | Elixir | `lumis` | [HexDocs](https://hexdocs.pm/lumis) |
 | Java | `lumis4j` | [GitHub](https://github.com/roastedroot/lumis4j) |
 
-`@lumis-sh/lumis` covers Node.js, Bun, Deno, browser apps, and Edge runtimes through the same JavaScript package.
+`@lumis-sh/lumis` covers Node.js, Bun, Deno, and browser apps through the same JavaScript package.
 
 ## CLI
 
@@ -54,4 +54,4 @@ Preset bundle packages are also available, such as `@lumis-sh/wasm-bundle-web`, 
 - helper for npm parser packages in non-Node runtimes: `withWasm()` from `@lumis-sh/lumis`
 - helper for npm preset bundles in non-Node runtimes: `withWasmBundle()` from `@lumis-sh/lumis`
 - loading and resolver behavior: [WASM and CDN](/advanced/wasm-and-cdn)
-- edge-runtime API notes: [JavaScript Runtime](/usage/javascript)
+- JavaScript runtime notes: [JavaScript Runtime](/usage/javascript)
