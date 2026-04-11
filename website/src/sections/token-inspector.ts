@@ -86,7 +86,7 @@ export async function setupTokenInspector(root: HTMLElement) {
 
 async function initInspector(root: HTMLElement, output: HTMLDivElement) {
   const [
-    { createHighlighter, withWasm },
+    { createHighlighter, highlightIter, withWasm },
     { escape, openSpanTag, openPreTag, openCodeTag, closingTags, wrapLine, styleToCss },
     html,
     javascript,
@@ -111,27 +111,12 @@ async function initInspector(root: HTMLElement, output: HTMLDivElement) {
 
   const docsFormatter = {
     language: html,
-    format(source: string, hlCtx: unknown) {
+    format(source: string) {
       let tokenId = 0;
       const lines = [""];
-
-      const hl = hlCtx as {
-        highlightIter: (
-          source: string,
-          language: unknown,
-          theme: unknown,
-          cb: (
-            text: string,
-            language: string,
-            range: { start: number; end: number },
-            scope: string,
-            style: { fg?: string; bg?: string } | undefined,
-          ) => void,
-        ) => void;
-      };
       const darkStyles: Array<{ fg?: string; bg?: string } | undefined> = [];
 
-      hl.highlightIter(
+      highlightIter(
         source,
         html,
         darkTheme,
@@ -150,7 +135,7 @@ async function initInspector(root: HTMLElement, output: HTMLDivElement) {
       );
 
       let darkStyleIndex = 0;
-      hl.highlightIter(
+      highlightIter(
         source,
         html,
         lightTheme,
