@@ -1,11 +1,8 @@
 import type { Theme } from "@lumis-sh/lumis";
 
-const themeModules = import.meta.glob<Theme>(
-  "../../../themes/*.json",
-  {
-    import: "default",
-  },
-);
+const themeModules = import.meta.glob<Theme>("../../../themes/*.json", {
+  import: "default",
+});
 
 function labelizeTheme(id: string): string {
   return id

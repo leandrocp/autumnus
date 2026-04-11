@@ -16,7 +16,6 @@
     "@lumis-sh/wasm-bundle-full": ">=0.0.1",
     "@lumis-sh/wasm-html": ">=0.0.1",
     "@lumis-sh/wasm-javascript": ">=0.0.1",
-
     "webgl-fluid-enhanced": "^0.8.0"
   },
   "devDependencies": {

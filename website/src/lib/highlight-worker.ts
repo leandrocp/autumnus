@@ -113,7 +113,13 @@ async function handleMessage(req: WorkerRequest): Promise<WorkerResponse> {
       return { id: req.id, type: "result", html };
     }
     case "preloadAll": {
-      await Promise.all(Object.keys(bundledLanguages).map((id) => getLanguage(id).then((language) => hl.loadLanguage(language)).catch(() => {})));
+      await Promise.all(
+        Object.keys(bundledLanguages).map((id) =>
+          getLanguage(id)
+            .then((language) => hl.loadLanguage(language))
+            .catch(() => {}),
+        ),
+      );
       return { id: req.id, type: "done" };
     }
   }
