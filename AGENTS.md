@@ -100,6 +100,12 @@ This repository uses `knope` and automation-driven release PRs.
 - Follow `RELEASE.md` for release-specific tasks.
 - If a change affects packaging, tags, publish behavior, or release metadata expectations, treat it as a release-sensitive change and review the release docs before touching anything.
 
+## Commit messages
+
+- Use Conventional Commits for git commit messages.
+- Prefer a clear type and scope when they help, for example `fix(rust): ...` or `docs(website): ...`.
+- Keep the subject concise and descriptive.
+
 ## Practical default
 
 When in doubt:
