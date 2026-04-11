@@ -1,6 +1,6 @@
 import type { HighlightEvent, TerminalFormatter } from "../types.js";
 import { encodeSource, decodeSourceSlice, getScopedThemeStyle } from "./html.js";
-import { wrapWithAnsi } from "./ansi.js";
+import { paint } from "./ansi.js";
 
 export function formatTerminal(
   source: string,
@@ -27,7 +27,7 @@ export function formatTerminal(
     const active = scopeStack[scopeStack.length - 1];
     if (active && active.scope.length > 0) {
       const style = getScopedThemeStyle(formatter.theme, active.scope, active.language);
-      output += wrapWithAnsi(text, style);
+      output += paint(text, style);
     } else {
       output += text;
     }

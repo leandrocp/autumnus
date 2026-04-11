@@ -92,14 +92,14 @@ export function styleToAnsi(style: HighlightStyle | undefined): string {
 }
 
 /**
- * Wrap text with ANSI escape codes from a style, with reset on each newline.
+ * Render text with ANSI escape codes from a style, with reset on each newline.
  *
  * ```ts
- * wrapWithAnsi('const', { fg: '#ff79c6' })
+ * paint('const', { fg: '#ff79c6' })
  * // "\x1b[0m\x1b[38;2;255;121;198mconst\x1b[0m"
  * ```
  */
-export function wrapWithAnsi(text: string, style: HighlightStyle | undefined): string {
+export function paint(text: string, style: HighlightStyle | undefined): string {
   const open = styleToAnsi(style);
   if (!open) {
     return text;
@@ -132,12 +132,27 @@ export function wrapWithAnsi(text: string, style: HighlightStyle | undefined): s
 }
 
 /**
+ * Wrap text with ANSI escape codes from a style.
+ *
+ * @deprecated Use `paint()` instead.
+ */
+export function wrapWithAnsi(text: string, style: HighlightStyle | undefined): string {
+  return paint(text, style);
+}
+
+/**
  * Highlight source and collect ANSI-wrapped segments.
  *
  * ```ts
- * const segments = await highlightIterWithAnsi('const x = 1', 'javascript', theme)
+ * const segments = []
+ * highlightIter(source, language, theme, (text, _language, range, _scope, style) => {
+ *   segments.push([paint(text, style), range])
+ * })
  * // [["\x1b[0m...const\x1b[0m", { start: 0, end: 5 }], ...]
  * ```
+ */
+/**
+ * @deprecated Use `highlightIter()` with `paint()` instead.
  */
 export async function highlightIterWithAnsi(
   source: string,
@@ -151,7 +166,7 @@ export async function highlightIterWithAnsi(
     language,
     format(src) {
       highlightIter(src, this.language, theme, (text, _language, range, _scope, style) => {
-        segments.push([wrapWithAnsi(text, style), range]);
+        segments.push([paint(text, style), range]);
       });
       return "";
     },

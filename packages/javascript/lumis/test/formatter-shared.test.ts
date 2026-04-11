@@ -35,7 +35,7 @@ import {
   wrapWithHeader,
 } from "../src/formatter/html.js";
 import { sanitizeThemeName } from "../src/themes.js";
-import { hexToRgb, rgbToAnsi, styleToAnsi, wrapWithAnsi } from "../src/formatter/ansi.js";
+import { hexToRgb, paint, rgbToAnsi, styleToAnsi, wrapWithAnsi } from "../src/formatter/ansi.js";
 import type { Language } from "../src/types.js";
 
 const jsonLang: Language = { id: "json", aliases: [], highlights: "", wasm: "json.wasm" };
@@ -320,10 +320,14 @@ describe("ansi helpers", () => {
     expect(styleToAnsi(undefined)).toBe("");
   });
 
-  it("wraps text with ANSI codes", () => {
-    expect(wrapWithAnsi("text", undefined)).toBe("text");
-    const result = wrapWithAnsi("fn", { fg: "#8be9fd" });
+  it("renders text with ANSI codes", () => {
+    expect(paint("text", undefined)).toBe("text");
+    const result = paint("fn", { fg: "#8be9fd" });
     expect(result).toContain("\u001b[0m");
     expect(result).toContain("fn");
+  });
+
+  it("keeps wrapWithAnsi aligned with paint", () => {
+    expect(wrapWithAnsi("fn", { fg: "#8be9fd" })).toBe(paint("fn", { fg: "#8be9fd" }));
   });
 });

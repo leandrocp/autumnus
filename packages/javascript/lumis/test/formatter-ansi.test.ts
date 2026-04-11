@@ -5,6 +5,7 @@ import {
   ANSI_RESET,
   hexToRgb,
   highlightIterWithAnsi,
+  paint,
   rgbToAnsi,
   styleToAnsi,
   wrapWithAnsi,
@@ -60,7 +61,7 @@ describe("formatter ansi helpers", () => {
   });
 
   it("preserves background styling across lines and resets safely", () => {
-    const output = wrapWithAnsi("a\nb", {
+    const output = paint("a\nb", {
       fg: "#ffffff",
       bg: "#000000",
     });
@@ -71,7 +72,12 @@ describe("formatter ansi helpers", () => {
   });
 
   it("returns unmodified text when no style is present", () => {
-    expect(wrapWithAnsi("plain", undefined)).toBe("plain");
+    expect(paint("plain", undefined)).toBe("plain");
+  });
+
+  it("keeps wrapWithAnsi as an alias for paint", () => {
+    expect(wrapWithAnsi("plain", undefined)).toBe(paint("plain", undefined));
+    expect(wrapWithAnsi("fn", { fg: "#8be9fd" })).toBe(paint("fn", { fg: "#8be9fd" }));
   });
 
   it("collects ANSI wrapped segments from highlight iteration", async () => {

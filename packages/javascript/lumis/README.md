@@ -254,7 +254,7 @@ import {
 ANSI helpers (`@lumis-sh/lumis/formatters/ansi`):
 
 ```typescript
-import { hexToRgb, rgbToAnsi, styleToAnsi, wrapWithAnsi } from '@lumis-sh/lumis/formatters/ansi'
+import { hexToRgb, paint, rgbToAnsi, styleToAnsi } from '@lumis-sh/lumis/formatters/ansi'
 ```
 
 ## Custom WASM Resolution
