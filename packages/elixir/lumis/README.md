@@ -40,7 +40,7 @@
 ```elixir
 def deps do
   [
-    {:lumis, "~> 0.1"}
+    {:lumis, "~> 0.3"}
   ]
 end
 ```

@@ -24,7 +24,7 @@ const RUNTIME_LINKS = [
   {
     name: "Elixir",
     summary: "BEAM apps, Phoenix, LiveView.",
-    install: `{:lumis, "~> 0.1"}`,
+    install: `{:lumis, "~> 0.3"}`,
     links: [
       { label: "HexDocs", href: "https://hexdocs.pm/lumis" },
       { label: "Hex", href: "https://hex.pm/packages/lumis" },
@@ -35,8 +35,8 @@ const RUNTIME_LINKS = [
     ],
   },
   {
-    name: "Node.js",
-    summary: "Server-side rendering, build tools, SSR.",
+    name: "JavaScript",
+    summary: "Node.js, Bun, Deno, libraries, and tooling through one package.",
     install: "npm install @lumis-sh/lumis",
     links: [
       { label: "npm", href: "https://www.npmjs.com/package/@lumis-sh/lumis" },
@@ -47,8 +47,8 @@ const RUNTIME_LINKS = [
     ],
   },
   {
-    name: "Browser",
-    summary: "Client-side highlighting, SPAs, web apps.",
+    name: "Browsers / CDN",
+    summary: "Client-side highlighting, SPAs, web apps, and CDN imports.",
     install: "npm install @lumis-sh/lumis",
     links: [
       { label: "npm", href: "https://www.npmjs.com/package/@lumis-sh/lumis" },
@@ -61,7 +61,7 @@ const RUNTIME_LINKS = [
   {
     name: "Java",
     summary: "JVM parity across the stack.",
-    install: "io.roastedroot:lumis4j",
+    install: "io.roastedroot:lumis4j:0.0.7",
     links: [
       { label: "Maven", href: "https://central.sonatype.com/search?q=io.roastedroot%3Alumis4j" },
       { label: "Source", href: "https://github.com/roastedroot/lumis4j" },
@@ -79,7 +79,7 @@ export function renderRuntimes() {
         <h2 class="mt-8 font-mono text-4xl font-bold tracking-tight text-zinc-900 dark:text-white">
           Same engine, every stack.
         </h2>
-        <p class="mt-4 font-mono text-sm text-zinc-500">Same themes, same output. Pick the package for your runtime.</p>
+        <p class="mt-4 font-mono text-sm text-zinc-500">Same themes, same output across 6 runtimes. Pick the package for your runtime.</p>
 
         <div class="mt-12">
           <div class="grid gap-px border border-zinc-200 bg-zinc-200 dark:border-zinc-800 dark:bg-zinc-800 sm:grid-cols-2 lg:grid-cols-3">

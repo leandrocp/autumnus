@@ -33,8 +33,8 @@ let html = highlight("const x = 1", formatter);`,
     },
   },
   {
-    id: "nodejs",
-    label: "Node.js",
+    id: "javascript",
+    label: "JavaScript",
     install: { language: "bash", code: `npm install @lumis-sh/lumis @lumis-sh/themes` },
     usage: {
       language: "javascript",
@@ -51,7 +51,7 @@ const html = await highlight(
   },
   {
     id: "cdn",
-    label: "CDN",
+    label: "Browsers / CDN",
     install: null,
     usage: {
       language: "javascript",
@@ -69,7 +69,7 @@ document.getElementById('output').innerHTML = await highlight(
   {
     id: "elixir",
     label: "Elixir",
-    install: { language: "elixir", code: `{:lumis, "~> 0.1"}` },
+    install: { language: "elixir", code: `{:lumis, "~> 0.3"}` },
     usage: {
       language: "elixir",
       code: `Lumis.highlight!(
@@ -82,7 +82,7 @@ document.getElementById('output').innerHTML = await highlight(
   {
     id: "java",
     label: "Java",
-    install: { language: "bash", code: `io.roastedroot:lumis4j` },
+    install: { language: "bash", code: `io.roastedroot:lumis4j:0.0.7` },
     usage: {
       language: "java",
       code: `import io.roastedroot.lumis4j.core.Lumis;
@@ -116,8 +116,16 @@ export function renderQuickstart() {
             full docs
             <svg class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
           </a>
+          <a href="https://github.com/leandrocp/lumis/tree/main/examples" target="_blank" rel="noreferrer"
+             class="inline-flex items-center gap-2 border border-zinc-200 px-4 py-2 font-mono text-xs tracking-wider text-zinc-700 uppercase transition-colors hover:border-zinc-900 hover:text-zinc-900 dark:border-zinc-800 dark:text-zinc-300 dark:hover:border-white dark:hover:text-white">
+            examples
+            <svg class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+          </a>
           <span class="font-mono text-xs text-zinc-500 dark:text-zinc-400">API guides, examples, and recipes.</span>
         </div>
+        <p class="mt-3 font-mono text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
+          Ready-to-run integrations are available in the examples repo folder for React, Astro, markdown-it, rehype, Cloudflare Workers, NimblePublisher, and more.
+        </p>
 
         <div class="mt-12">
           <div class="flex gap-1 overflow-x-auto border-b border-zinc-200 dark:border-zinc-800" role="tablist">

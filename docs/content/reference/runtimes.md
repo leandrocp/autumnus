@@ -2,7 +2,7 @@
 sidebar_position: 1
 slug: /reference/runtimes
 title: Runtimes
-description: Package and API references for Lumis across Rust, Elixir, JavaScript, Java, and CLI.
+description: Package and API references for Lumis across CLI, Rust, Elixir, JavaScript, Browsers / CDN, and Java.
 keywords:
   - lumis
   - docs.rs
@@ -17,18 +17,14 @@ keywords:
 
 | Runtime | Package | Reference |
 | --- | --- | --- |
-| JavaScript | `@lumis-sh/lumis` | [npm](https://www.npmjs.com/package/@lumis-sh/lumis) |
+| CLI | `lumis-cli` (`lumis` binary) | [README](https://github.com/leandrocp/lumis/tree/main/crates/lumis-cli) |
 | Rust | `lumis` | [docs.rs](https://docs.rs/lumis) |
 | Elixir | `lumis` | [HexDocs](https://hexdocs.pm/lumis) |
+| JavaScript | `@lumis-sh/lumis` | [npm](https://www.npmjs.com/package/@lumis-sh/lumis) |
+| Browsers / CDN | `@lumis-sh/lumis` | [npm](https://www.npmjs.com/package/@lumis-sh/lumis) |
 | Java | `lumis4j` | [GitHub](https://github.com/roastedroot/lumis4j) |
 
-`@lumis-sh/lumis` covers Node.js, Bun, Deno, and browser apps through the same JavaScript package.
-
-## CLI
-
-| Package | Reference |
-| --- | --- |
-| `lumis-cli` (`lumis` binary) | [README](https://github.com/leandrocp/lumis/tree/main/crates/lumis-cli) |
+`@lumis-sh/lumis` covers JavaScript runtimes such as Node.js, Bun, and Deno, plus browser usage through bundlers or CDN imports.
 
 ## Themes
 

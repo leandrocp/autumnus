@@ -28,7 +28,7 @@ export function renderHero() {
             <button data-install="cli" role="tab" aria-selected="true" aria-controls="install-panel-cli" class="install-tab shrink-0 cursor-pointer border-b-2 border-zinc-900 px-4 py-2 font-mono text-xs tracking-wider text-zinc-900 uppercase dark:border-white dark:text-white">cli</button>
             <button data-install="rust" role="tab" aria-selected="false" aria-controls="install-panel-rust" class="install-tab shrink-0 cursor-pointer border-b-2 border-transparent px-4 py-2 font-mono text-xs tracking-wider text-zinc-500 uppercase hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-300">cargo</button>
             <button data-install="javascript" role="tab" aria-selected="false" aria-controls="install-panel-javascript" class="install-tab shrink-0 cursor-pointer border-b-2 border-transparent px-4 py-2 font-mono text-xs tracking-wider text-zinc-500 uppercase hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-300">npm</button>
-            <button data-install="browser" role="tab" aria-selected="false" aria-controls="install-panel-browser" class="install-tab shrink-0 cursor-pointer border-b-2 border-transparent px-4 py-2 font-mono text-xs tracking-wider text-zinc-500 uppercase hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-300">cdn</button>
+            <button data-install="browser" role="tab" aria-selected="false" aria-controls="install-panel-browser" class="install-tab shrink-0 cursor-pointer border-b-2 border-transparent px-4 py-2 font-mono text-xs tracking-wider text-zinc-500 uppercase hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-300">browsers</button>
             <button data-install="elixir" role="tab" aria-selected="false" aria-controls="install-panel-elixir" class="install-tab shrink-0 cursor-pointer border-b-2 border-transparent px-4 py-2 font-mono text-xs tracking-wider text-zinc-500 uppercase hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-300">hex</button>
             <button data-install="java" role="tab" aria-selected="false" aria-controls="install-panel-java" class="install-tab shrink-0 cursor-pointer border-b-2 border-transparent px-4 py-2 font-mono text-xs tracking-wider text-zinc-500 uppercase hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-300">maven</button>
           </div>
@@ -51,20 +51,20 @@ export function renderHero() {
             </div>
             <div data-install-panel="browser" id="install-panel-browser" role="tabpanel" class="hidden">
               <div class="flex items-center justify-between gap-2 px-4 py-3">
-                <code class="min-w-0 truncate font-mono text-sm text-zinc-700 dark:text-zinc-300"><span class="mr-2 text-zinc-400 select-none">&gt;</span>unpkg.com/@lumis-sh/lumis</code>
-                <button class="copy-install shrink-0 cursor-pointer text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white" aria-label="Copy to clipboard" data-copy="https://unpkg.com/@lumis-sh/lumis">${COPY_SVG}</button>
+                <code class="min-w-0 truncate font-mono text-sm text-zinc-700 dark:text-zinc-300"><span class="mr-2 text-zinc-400 select-none">&gt;</span>https://esm.sh/@lumis-sh/lumis</code>
+                <button class="copy-install shrink-0 cursor-pointer text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white" aria-label="Copy to clipboard" data-copy="https://esm.sh/@lumis-sh/lumis">${COPY_SVG}</button>
               </div>
             </div>
             <div data-install-panel="elixir" id="install-panel-elixir" role="tabpanel" class="hidden">
               <div class="flex items-center justify-between gap-2 px-4 py-3">
-                <code class="font-mono text-sm text-zinc-700 dark:text-zinc-300"><span class="mr-2 text-zinc-400 select-none">&gt;</span>{:lumis, "~&gt; 0.1"}</code>
-                <button class="copy-install shrink-0 cursor-pointer text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white" aria-label="Copy to clipboard" data-copy='{:lumis, "~> 0.1"}'>${COPY_SVG}</button>
+                <code class="font-mono text-sm text-zinc-700 dark:text-zinc-300"><span class="mr-2 text-zinc-400 select-none">&gt;</span>{:lumis, "~&gt; 0.3"}</code>
+                <button class="copy-install shrink-0 cursor-pointer text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white" aria-label="Copy to clipboard" data-copy='{:lumis, "~> 0.3"}'>${COPY_SVG}</button>
               </div>
             </div>
             <div data-install-panel="java" id="install-panel-java" role="tabpanel" class="hidden">
               <div class="flex items-center justify-between gap-2 px-4 py-3">
-                <code class="font-mono text-sm text-zinc-700 dark:text-zinc-300"><span class="mr-2 text-zinc-400 select-none">&gt;</span>io.roastedroot:lumis4j</code>
-                <button class="copy-install shrink-0 cursor-pointer text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white" aria-label="Copy to clipboard" data-copy="io.roastedroot:lumis4j">${COPY_SVG}</button>
+                <code class="font-mono text-sm text-zinc-700 dark:text-zinc-300"><span class="mr-2 text-zinc-400 select-none">&gt;</span>io.roastedroot:lumis4j:0.0.7</code>
+                <button class="copy-install shrink-0 cursor-pointer text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white" aria-label="Copy to clipboard" data-copy="io.roastedroot:lumis4j:0.0.7">${COPY_SVG}</button>
               </div>
             </div>
           </div>

@@ -2,7 +2,7 @@
 sidebar_position: 1
 slug: /
 title: Intro
-description: Lumis is a Tree-sitter syntax highlighter with Neovim themes and one workflow across CLI, Rust, Elixir, JavaScript, and Java.
+description: Lumis is a Tree-sitter syntax highlighter with Neovim themes and one workflow across CLI, Rust, Elixir, JavaScript, Browsers / CDN, and Java.
 keywords:
   - lumis
   - syntax highlighting
@@ -32,7 +32,7 @@ It keeps the same core workflow across runtimes:
 - 250+ themes sourced from Neovim colorschemes
 - 5 formatters: HTML Inline, HTML Linked, HTML Multi-Themes, Terminal, and BBCode Scoped
 - handles incomplete code (useful for streaming)
-- one API across 6 runtimes: CLI, Rust, Elixir, JavaScript, Node.js, browser, and Java
+- one API across 6 runtimes: CLI, Rust, Elixir, JavaScript, Browsers / CDN, and Java
 
 ## How it works
 
@@ -56,7 +56,8 @@ It keeps the same core workflow across runtimes:
 | CLI | scripts, local workflows, parser/theme management | `lumis-cli` (`lumis` binary) |
 | Rust | backends, static sites, editors | `lumis` |
 | Elixir | Phoenix, LiveView, BEAM apps | `lumis` |
-| JavaScript | Node.js, browser apps, build tools | `@lumis-sh/lumis` |
+| JavaScript | Node.js, Bun, Deno, libraries, and build tools | `@lumis-sh/lumis` |
+| Browsers / CDN | Client-side highlighting, SPAs, web apps, and CDN imports | `@lumis-sh/lumis` |
 | React | React apps and design systems | `@lumis-sh/react` |
 | JS integrations | markdown-it and rehype content pipelines | `@lumis-sh/markdown-it-lumis`, `@lumis-sh/rehype-lumis` |
 | Themes | CSS themes and JSON theme modules | `@lumis-sh/themes` |

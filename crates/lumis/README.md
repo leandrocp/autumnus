@@ -36,10 +36,10 @@ Add to your `Cargo.toml`:
 lumis = "0.1"
 ```
 
-Or install the CLI:
+Or install the CLI package:
 
 ```sh
-cargo install lumis
+cargo install lumis-cli
 ```
 
 ## Quick Start
