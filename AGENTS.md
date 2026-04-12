@@ -75,6 +75,7 @@ Code changes that affect user-facing behavior often need updates in one or both 
 Large parts of the repository are generated from shared inputs such as `languages.toml`, `highlights.toml`, themes, queries, and conformance fixtures.
 
 - Edit the source inputs, not generated outputs, unless the generated file is the intended source.
+- For query changes, treat `queries/upstream/` as fetched source material, `queries/override/` as full replacements, and `queries/append/` as additive local patches.
 - Regenerate checked-in artifacts with the documented `just` workflows.
 - Keep Rust, JavaScript, Elixir, docs, fixtures, and generated metadata in sync.
 

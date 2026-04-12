@@ -32,6 +32,7 @@ This installs all dependencies (Rust, JS, Elixir) and checks that required tools
 
 This repository prepares releases locally and publishes from tags.
 
+- Use `just release-needed` to list packages with path-scoped commits since their latest package tag.
 - Releasable packages use the shared root `cliff.toml` plus `just release-prepare <package> <version>`.
 - `just release-prepare` updates only the target package version file and prepends the next package changelog entry.
 - If dependent manifests must move in lockstep, update them separately in the same release commit.
@@ -251,11 +252,16 @@ Omit the name argument to upgrade all queries at once.
 
 `just langs-update {name}` is the end-to-end command for a coordinated parser update. It fetches parsers first, syncs crate-backed Rust parser deps and Rust bundle features, then fetches and preprocesses queries, and regenerates `LANGUAGES.md`.
 
-Raw query sources live in `queries/upstream/`. Preprocessed tracked outputs live in `queries/processed/` and should be committed whenever upstream queries or overrides change.
+Raw query sources live in `queries/upstream/`. Preprocessed tracked outputs live in `queries/processed/` and should be committed whenever upstream queries, replacements, or appended patches change.
 
-#### Custom overrides
+#### Query replacements and append patches
 
-If a query needs modifications that diverge from upstream, place override files in `queries/overrides/{name}/`. These are merged on top of the upstream queries during preprocessing.
+If a query needs modifications that diverge from upstream, use one of these directories:
+
+- `queries/override/{name}/{query}.scm` replaces the upstream query entirely.
+- `queries/append/{name}/{query}.scm` appends extra patterns after the upstream query, or after the replacement query when both exist.
+
+Use `queries/override/` when the fetched upstream query is incompatible with the pinned parser. Use `queries/append/` when you only need to add local patterns without replacing upstream behavior.
 
 ### Building WASMs
 

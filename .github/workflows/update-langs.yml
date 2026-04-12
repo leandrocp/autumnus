@@ -113,7 +113,8 @@ jobs:
             crates/lumis/vendored_parsers
             queries/upstream
             queries/processed
-            queries/overrides
+            queries/override
+            queries/append
             packages/javascript/lumis/langs
             packages/javascript/lumis/bundles
             packages/javascript/lumis/src/generated

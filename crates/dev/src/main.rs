@@ -1362,7 +1362,8 @@ fn read_query_raw(src_dir: &str, lang: &str, query_type: &str) -> String {
 
 fn resolve_and_preprocess(
     src_dir: &str,
-    overwrites_dir: &str,
+    override_dir: &str,
+    append_dir: &str,
     lang: &str,
     query_type: &str,
     seen: &mut HashSet<String>,
@@ -1373,11 +1374,23 @@ fn resolve_and_preprocess(
     }
     seen.insert(key);
 
-    let raw = read_query_raw(src_dir, lang, query_type);
-    let overwrite_path = format!("{overwrites_dir}/{lang}/{query_type}.scm");
-    let overwrite_content = fs::read_to_string(&overwrite_path).ok();
+    let override_path = format!("{override_dir}/{lang}/{query_type}.scm");
+    if let Ok(override_content) = fs::read_to_string(&override_path) {
+        let mut parts = vec![override_content];
 
-    if raw.is_empty() && overwrite_content.is_none() {
+        let append_path = format!("{append_dir}/{lang}/{query_type}.scm");
+        if let Ok(append_content) = fs::read_to_string(&append_path) {
+            parts.push(append_content);
+        }
+
+        return parts.join("\n");
+    }
+
+    let raw = read_query_raw(src_dir, lang, query_type);
+    let append_path = format!("{append_dir}/{lang}/{query_type}.scm");
+    let append_content = fs::read_to_string(&append_path).ok();
+
+    if raw.is_empty() && append_content.is_none() {
         return String::new();
     }
 
@@ -1392,8 +1405,14 @@ fn resolve_and_preprocess(
             if line.starts_with("; inherits: ") {
                 let inherits_str = line.trim_start_matches("; inherits: ").trim();
                 for parent in inherits_str.split([',', ' ']).filter(|s| !s.is_empty()) {
-                    let parent_content =
-                        resolve_and_preprocess(src_dir, overwrites_dir, parent, query_type, seen);
+                    let parent_content = resolve_and_preprocess(
+                        src_dir,
+                        override_dir,
+                        append_dir,
+                        parent,
+                        query_type,
+                        seen,
+                    );
                     if !parent_content.is_empty() {
                         parts.push(format!("; inherits: {parent}"));
                         parts.push(parent_content);
@@ -1407,8 +1426,8 @@ fn resolve_and_preprocess(
         parts.push(stripped_lines.join("\n"));
     }
 
-    if let Some(overwrite_content) = overwrite_content {
-        parts.push(overwrite_content);
+    if let Some(append_content) = append_content {
+        parts.push(append_content);
     }
 
     parts.join("\n")
@@ -1416,7 +1435,8 @@ fn resolve_and_preprocess(
 
 fn preprocess_queries(name: &str) -> Result<()> {
     let src = "queries/upstream";
-    let overwrites = "queries/overrides";
+    let override_dir = "queries/override";
+    let append_dir = "queries/append";
     let dest = "queries/processed";
 
     if name.is_empty() {
@@ -1433,7 +1453,8 @@ fn preprocess_queries(name: &str) -> Result<()> {
         let mut wrote = false;
         for query_type in &["highlights", "injections", "locals"] {
             let mut seen = HashSet::new();
-            let content = resolve_and_preprocess(src, overwrites, &lang, query_type, &mut seen);
+            let content =
+                resolve_and_preprocess(src, override_dir, append_dir, &lang, query_type, &mut seen);
             if !content.is_empty() {
                 let full = format!("; This file is auto-generated. Do not edit.\n{content}");
                 fs::write(format!("{dest}/{lang}/{query_type}.scm"), &full)?;
@@ -2200,19 +2221,63 @@ mod tests {
     use std::time::{SystemTime, UNIX_EPOCH};
 
     #[test]
-    fn resolve_and_preprocess_uses_overrides_without_upstream() {
+    fn resolve_and_preprocess_uses_append_without_upstream() {
         let unique = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .expect("time should be monotonic")
             .as_nanos();
         let root = std::env::temp_dir().join(format!("lumis-dev-query-test-{unique}"));
         let upstream = root.join("upstream");
-        let overrides = root.join("overrides");
-        let override_dir = overrides.join("demo");
+        let override_root = root.join("override");
+        let append_root = root.join("append");
+        let append_lang_dir = append_root.join("demo");
 
-        fs::create_dir_all(&override_dir).expect("override dir should be created");
+        fs::create_dir_all(&append_lang_dir).expect("append dir should be created");
         fs::write(
-            override_dir.join("highlights.scm"),
+            append_lang_dir.join("highlights.scm"),
+            "((comment) @comment)\n",
+        )
+        .expect("append query should be written");
+
+        let mut seen = HashSet::new();
+        let content = resolve_and_preprocess(
+            upstream.to_str().expect("upstream path should be valid"),
+            override_root
+                .to_str()
+                .expect("override path should be valid"),
+            append_root.to_str().expect("append path should be valid"),
+            "demo",
+            "highlights",
+            &mut seen,
+        );
+
+        assert_eq!(content, "((comment) @comment)\n");
+
+        let _ = fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn resolve_and_preprocess_override_replaces_upstream_query() {
+        let unique = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("time should be monotonic")
+            .as_nanos();
+        let root = std::env::temp_dir().join(format!("lumis-dev-query-test-{unique}"));
+        let upstream = root.join("upstream");
+        let upstream_dir = upstream.join("demo");
+        let override_root = root.join("override");
+        let append_root = root.join("append");
+        let override_lang_dir = override_root.join("demo");
+
+        fs::create_dir_all(&upstream_dir).expect("upstream dir should be created");
+        fs::create_dir_all(&override_lang_dir).expect("override dir should be created");
+        fs::write(
+            upstream_dir.join("highlights.scm"),
+            "(bad_node_name) @error\n",
+        )
+        .expect("upstream query should be written");
+        fs::write(
+            override_lang_dir.join("highlights.scm"),
             "((comment) @comment)\n",
         )
         .expect("override query should be written");
@@ -2220,13 +2285,66 @@ mod tests {
         let mut seen = HashSet::new();
         let content = resolve_and_preprocess(
             upstream.to_str().expect("upstream path should be valid"),
-            overrides.to_str().expect("overrides path should be valid"),
+            override_root
+                .to_str()
+                .expect("override path should be valid"),
+            append_root.to_str().expect("append path should be valid"),
             "demo",
             "highlights",
             &mut seen,
         );
 
         assert_eq!(content, "((comment) @comment)\n");
+
+        let _ = fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn resolve_and_preprocess_appends_after_override() {
+        let unique = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("time should be monotonic")
+            .as_nanos();
+        let root = std::env::temp_dir().join(format!("lumis-dev-query-test-{unique}"));
+        let upstream = root.join("upstream");
+        let upstream_dir = upstream.join("demo");
+        let override_root = root.join("override");
+        let override_lang_dir = override_root.join("demo");
+        let append_root = root.join("append");
+        let append_lang_dir = append_root.join("demo");
+
+        fs::create_dir_all(&upstream_dir).expect("upstream dir should be created");
+        fs::create_dir_all(&override_lang_dir).expect("override dir should be created");
+        fs::create_dir_all(&append_lang_dir).expect("append dir should be created");
+        fs::write(
+            upstream_dir.join("highlights.scm"),
+            "(bad_node_name) @error\n",
+        )
+        .expect("upstream query should be written");
+        fs::write(
+            override_lang_dir.join("highlights.scm"),
+            "((comment) @comment)\n",
+        )
+        .expect("override query should be written");
+        fs::write(
+            append_lang_dir.join("highlights.scm"),
+            "((string) @string)\n",
+        )
+        .expect("append query should be written");
+
+        let mut seen = HashSet::new();
+        let content = resolve_and_preprocess(
+            upstream.to_str().expect("upstream path should be valid"),
+            override_root
+                .to_str()
+                .expect("override path should be valid"),
+            append_root.to_str().expect("append path should be valid"),
+            "demo",
+            "highlights",
+            &mut seen,
+        );
+
+        assert_eq!(content, "((comment) @comment)\n\n((string) @string)\n");
 
         let _ = fs::remove_dir_all(root);
     }
