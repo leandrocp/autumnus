@@ -1,10 +1,9 @@
 Run:
 
 ```bash
-pnpm install
-pnpm approve-builds  # select better-sqlite3
-pnpm build
-pnpm start
+npm install
+npm run build
+npm start
 ```
 
 Open the local Nuxt URL.

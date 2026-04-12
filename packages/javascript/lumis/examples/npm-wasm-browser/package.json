@@ -1,6 +1,7 @@
 {
   "name": "example-npm-wasm-browser",
   "private": true,
+  "packageManager": "npm@10.9.2",
   "type": "module",
   "scripts": {
     "build": "vite build",
@@ -8,9 +9,9 @@
   },
   "dependencies": {
     "@lumis-sh/lumis": "^0.3.0",
-    "@lumis-sh/themes": "^0.0.3",
-    "@lumis-sh/wasm-diff": "^0.26.1",
-    "@lumis-sh/wasm-elixir": "^0.26.1",
-    "vite": "^8.0.2"
+    "@lumis-sh/themes": ">=0.0.1",
+    "@lumis-sh/wasm-diff": ">=0.0.1",
+    "@lumis-sh/wasm-elixir": ">=0.0.1",
+    "vite": "^8.0.0"
   }
 }

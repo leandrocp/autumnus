@@ -65,9 +65,9 @@
   </main>
 
   <script type="module">
-    import { createHighlighter } from '../src/index.browser.ts'
-    import { htmlInline } from '../src/formatters.ts'
-    import typescript from '../langs/typescript.ts'
+    import { createHighlighter } from '@lumis-sh/lumis'
+    import { htmlInline } from '@lumis-sh/lumis/formatters'
+    import typescript from '@lumis-sh/lumis/langs/typescript'
     import catppuccinMocha from '@lumis-sh/themes/catppuccin_mocha'
 
     const code = `type ThemeName = "light" | "dark"

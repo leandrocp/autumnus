@@ -36,10 +36,10 @@
     "access": "public"
   },
   "peerDependencies": {
-    "@lumis-sh/lumis": ">=0.0.1"
+    "@lumis-sh/lumis": "^0.3.0"
   },
   "devDependencies": {
-    "@lumis-sh/lumis": ">=0.0.1"
+    "@lumis-sh/lumis": "^0.3.0"
   },
   "dependencies": {
     "@lumis-sh/wasm-asm": "^0.26.0",

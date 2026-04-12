@@ -1,6 +1,7 @@
 {
   "name": "example-nextjs-lumis",
   "private": true,
+  "packageManager": "npm@10.9.2",
   "type": "module",
   "scripts": {
     "build": "next build",

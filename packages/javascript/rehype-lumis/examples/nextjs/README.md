@@ -1,9 +1,9 @@
 Run:
 
 ```bash
-pnpm install
-pnpm build
-pnpm start
+npm install
+npm run build
+npm start
 ```
 
 Open the local Next.js URL.

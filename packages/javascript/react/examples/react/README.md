@@ -1,8 +1,8 @@
 ## Server
 
 ```bash
-pnpm install
-pnpm render
+npm install
+npm run render
 ```
 
 Open `output.html`.
@@ -10,8 +10,8 @@ Open `output.html`.
 ## Client
 
 ```bash
-pnpm install
-pnpm start
+npm install
+npm start
 ```
 
 Open the local Vite URL.

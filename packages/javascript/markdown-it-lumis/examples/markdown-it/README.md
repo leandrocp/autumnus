@@ -1,9 +1,9 @@
 Run:
 
 ```bash
-pnpm install
-pnpm render
-pnpm start
+npm install
+npm run render
+npm start
 ```
 
 Open `output.html` or the local Vite URL.
