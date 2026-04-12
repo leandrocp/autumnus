@@ -1,0 +1,19 @@
+{
+  "name": "example-rehype-lumis",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "render": "node render.mjs",
+    "start": "vite"
+  },
+  "dependencies": {
+    "@lumis-sh/lumis": "^0.3.0",
+    "@lumis-sh/rehype-lumis": "^0.1.1",
+    "@lumis-sh/themes": "^0.0.3",
+    "rehype-stringify": "^10.0.1",
+    "remark-parse": "^11.0.0",
+    "remark-rehype": "^11.1.2",
+    "unified": "^11.0.5",
+    "vite": "^8.0.2"
+  }
+}

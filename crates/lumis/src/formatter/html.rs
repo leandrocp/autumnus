@@ -5,7 +5,7 @@
 //!
 //! See also:
 //! - [`Formatter`](crate::formatters::Formatter) trait documentation for a complete example
-//! - [`examples/custom_html_formatter.rs`](https://github.com/leandrocp/lumis/blob/main/examples/custom_html_formatter.rs)
+//! - [`crates/lumis/examples/custom_html_formatter.rs`](https://github.com/leandrocp/lumis/blob/main/crates/lumis/examples/custom_html_formatter.rs)
 
 use crate::languages::Language;
 use crate::themes::Theme;

@@ -12,7 +12,7 @@ keywords:
 
 # Ratatui
 
-[Full example on GitHub](https://github.com/leandrocp/lumis/tree/main/examples/ratatui)
+[Full example on GitHub](https://github.com/leandrocp/lumis/tree/main/crates/lumis/examples/ratatui)
 
 Ratatui already has a good bridge for ANSI-colored text: [`ansi-to-tui`](https://github.com/ratatui/ansi-to-tui). Lumis already emits ANSI. So the clean integration path is:
 
@@ -26,9 +26,9 @@ That gives you syntax highlighting in terminal UIs without a custom Lumis format
 
 ```toml
 [dependencies]
-lumis = "0.2"
+lumis = "0.7"
 ratatui = "0.29"
-ansi-to-tui = "7"
+ansi-to-tui = "8"
 ```
 
 ## Highlight and render

@@ -1,0 +1,18 @@
+{
+  "name": "example-react-lumis",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "render": "node render.mjs",
+    "start": "vite"
+  },
+  "dependencies": {
+    "@lumis-sh/lumis": "^0.3.0",
+    "@lumis-sh/react": "^0.1.0",
+    "@lumis-sh/themes": "^0.0.3",
+    "@lumis-sh/wasm-bundle-web": "^0.0.4",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "vite": "^8.0.2"
+  }
+}

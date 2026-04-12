@@ -1,0 +1,17 @@
+{
+  "name": "example-markdown-it-lumis",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "render": "node render.mjs",
+    "start": "vite"
+  },
+  "dependencies": {
+    "@lumis-sh/lumis": "^0.3.0",
+    "@lumis-sh/markdown-it-lumis": "^0.1.1",
+    "@lumis-sh/themes": "^0.0.3",
+    "markdown-it": "^14.1.1",
+    "node-html-parser": "^7.1.0",
+    "vite": "^8.0.2"
+  }
+}
