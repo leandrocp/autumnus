@@ -198,7 +198,7 @@ fmt:
     echo "Formatting Lua..."
     stylua themes/
 
-# Build lumis-cli in release mode and install to the given path
+# Build lumis-cli in release mode and install to the given path, eg: just cli-install ~/.local/bin
 cli-install path:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -232,15 +232,15 @@ css-gen:
 css-sync:
     cargo run --manifest-path crates/dev/Cargo.toml -- sync-css
 
-# Dump canonical Rust highlight events as JSON
+# Dump canonical Rust highlight events as JSON, eg: just conformance-dump-events samples/rust.rs rust
 conformance-dump-events source lang:
     cargo run --manifest-path crates/dev/Cargo.toml --features lumis-all-languages -- dump-events "{{source}}" -l {{lang}}
 
-# Verify shared conformance fixtures against canonical Rust output
+# Verify shared conformance fixtures against canonical Rust output, eg: just conformance-verify rust
 conformance-verify name="":
     cargo run --manifest-path crates/dev/Cargo.toml --features lumis-all-languages -- verify-conformance {{name}}
 
-# Regenerate shared conformance fixtures from canonical Rust output
+# Regenerate shared conformance fixtures from canonical Rust output, eg: just conformance-regen rust
 conformance-regen name="":
     cargo run --manifest-path crates/dev/Cargo.toml --features lumis-all-languages -- regen-conformance {{name}}
 
@@ -262,7 +262,7 @@ docs:
 docs-gen-languages-md:
     cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- gen-languages-md
 
-# Update language parser, queries, and docs
+# Update language parser, queries, and docs, eg: just langs-update bash
 langs-update name:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -283,16 +283,16 @@ langs-extract-scopes:
     set -euo pipefail
     find queries/upstream -type f -name "*.scm" -exec grep -oh '@[^_ ][^ ]*' {} \; 2>/dev/null | sed 's/^@//; s/[^a-zA-Z0-9_.-]//g' | sort -u
 
-# Fetch vendored parser sources at pinned revisions
+# Fetch vendored parser sources at pinned revisions, eg: just langs-fetch-vendored-parsers bash
 langs-fetch-vendored-parsers name="":
     cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- fetch-parsers {{name}}
     cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- compress-parsers {{name}}
 
-# Fetch vendored query files at pinned revisions
+# Fetch vendored query files at pinned revisions, eg: just langs-fetch-queries bash
 langs-fetch-queries name="":
     cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- fetch-queries {{name}}
 
-# Preprocess query files (resolve inheritance, apply fixes, strip unsupported predicates)
+# Preprocess query files (resolve inheritance, apply fixes, strip unsupported predicates), eg: just langs-preprocess-queries bash
 langs-preprocess-queries name="":
     cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- preprocess-queries {{name}}
 
@@ -308,32 +308,32 @@ langs-list:
 cargo-update-features:
     cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- cargo-update-features
 
-# Upgrade parser revisions and sync crate-backed versions
+# Upgrade parser revisions and sync crate-backed versions, eg: just langs-upgrade-parsers bash
 langs-upgrade-parsers name="":
     cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- upgrade-parsers {{name}}
     cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- cargo-update-dep {{name}}
     cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- cargo-update-features
 
-# Upgrade vendored query revisions from upstream
+# Upgrade vendored query revisions from upstream, eg: just langs-upgrade-queries bash
 langs-upgrade-queries name="":
     cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- upgrade-queries {{name}}
 
-# Build WASM files for tree-sitter parsers (requires emscripten)
+# Build WASM files for tree-sitter parsers (requires emscripten), eg: just wasm-build bash
 wasm-build name="":
     cargo run --manifest-path crates/dev/Cargo.toml -- build-wasm {{name}}
 
-# List parsers whose current WASM packages still need publishing
+# List parsers whose current WASM packages still need publishing, eg: just wasm-publish-needed bash
 wasm-publish-needed parser="":
     @python3 scripts/wasm-needed.py "{{parser}}"
 
-# Stage a WASM package for inspection before publishing
+# Stage a WASM package for inspection before publishing, eg: just wasm-publish-prepare bash
 wasm-publish-prepare parser:
     #!/usr/bin/env bash
     set -euo pipefail
     just wasm-build {{parser}}
     cargo run --manifest-path crates/dev/Cargo.toml -- stage-wasm {{parser}}
 
-# Stage and publish a WASM package to npm
+# Stage and publish a WASM package to npm, eg: just wasm-publish bash
 wasm-publish parser:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -347,7 +347,7 @@ themes-extract-scopes:
     set -euo pipefail
     jq -r '.highlights | keys[]' themes/*.json | sort -u
 
-# Generate theme JSON files from Neovim colorschemes
+# Generate theme JSON files from Neovim colorschemes, eg: just themes-gen catppuccin-mocha
 themes-gen theme_name="":
     #!/usr/bin/env bash
     set -euo pipefail
@@ -377,7 +377,64 @@ themes-sync:
     cargo run --manifest-path crates/dev/Cargo.toml -- sync-themes
     pnpm --filter @lumis-sh/themes build:themes
 
-# Update package version files and regenerate the package changelog locally
+# List packages with path-scoped commits since their latest release tag
+release-needed:
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    packages=(
+        "cargo-lumis|crates/lumis"
+        "cargo-lumis-core|crates/lumis-core"
+        "cargo-lumis-build|crates/lumis-build"
+        "cargo-lumis-cli|crates/lumis-cli"
+        "npm-lumis|packages/javascript/lumis"
+        "npm-markdown-it-lumis|packages/javascript/markdown-it-lumis"
+        "npm-rehype-lumis|packages/javascript/rehype-lumis"
+        "npm-react|packages/javascript/react"
+        "npm-themes|packages/javascript/themes"
+        "npm-wasm-bundle-web|packages/javascript/wasm-bundle-web"
+        "npm-wasm-bundle-web-extra|packages/javascript/wasm-bundle-web-extra"
+        "npm-wasm-bundle-system|packages/javascript/wasm-bundle-system"
+        "npm-wasm-bundle-backend|packages/javascript/wasm-bundle-backend"
+        "npm-wasm-bundle-full|packages/javascript/wasm-bundle-full"
+        "hex-lumis|packages/elixir/lumis"
+    )
+
+    found=0
+
+    for entry in "${packages[@]}"; do
+        package="${entry%%|*}"
+        path="${entry#*|}"
+        tag="$(git tag --list "$package/v*" --sort=-version:refname | head -n1)"
+
+        if [ -n "$tag" ]; then
+            commits="$(git log --no-merges --format='%h %s' "$tag"..HEAD -- "$path")"
+        else
+            commits="$(git log --no-merges --format='%h %s' -- "$path")"
+        fi
+
+        if [ -z "$commits" ]; then
+            continue
+        fi
+
+        found=1
+        echo "$package"
+        if [ -n "$tag" ]; then
+            echo "  since: $tag"
+        else
+            echo "  since: no tags yet"
+        fi
+        while IFS= read -r line; do
+            echo "  $line"
+        done <<< "$commits"
+        echo ""
+    done
+
+    if [ "$found" -eq 0 ]; then
+        echo "No package-scoped commits found since the latest package tags."
+    fi
+
+# Update package version files and regenerate the package changelog locally, eg: just release-prepare cargo-lumis-cli 0.2.1
 release-prepare package version:
     #!/usr/bin/env bash
     set -euo pipefail
