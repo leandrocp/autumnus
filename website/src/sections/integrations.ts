@@ -31,6 +31,13 @@ const INTEGRATION_LINKS = [
       ],
   },
   {
+    name: "Nuxt",
+      links: [
+        { label: "Docs", href: "/docs/integrations/nuxt" },
+        { label: "Package", href: "https://www.npmjs.com/package/@lumis-sh/rehype-lumis" },
+      ],
+  },
+  {
     name: "Ratatui",
       links: [
         { label: "Docs", href: "/docs/integrations/ratatui" },
