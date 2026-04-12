@@ -390,5 +390,5 @@ xz2 = "0.1"
 [dev-dependencies]
 ansi-to-tui = "8"
 pretty_assertions = "1.4"
-ratatui = "0.29"
+ratatui = "0.30"
 ratatui-core = "0.1"
