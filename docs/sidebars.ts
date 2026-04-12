@@ -5,7 +5,6 @@ const sidebars: SidebarsConfig = {
     'intro',
     'installation',
     'architecture',
-    'reference/runtimes',
     {
       type: 'category',
       label: 'Usage',
@@ -54,6 +53,7 @@ const sidebars: SidebarsConfig = {
         'integrations/react-markdown',
         'integrations/ratatui',
         'integrations/nimble-publisher',
+        'integrations/tableau',
         'integrations/docusaurus',
         'integrations/nuxt',
       ],

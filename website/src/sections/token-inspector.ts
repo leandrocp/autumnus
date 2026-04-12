@@ -8,12 +8,8 @@ export function renderTokenInspector() {
           <span class="text-cyan-400">&lt;</span><span class="text-pink-400">Inspector</span> <span class="text-cyan-400">/&gt;</span>
         </a>
         <h2 class="mt-8 font-mono text-4xl font-bold tracking-tight text-zinc-900 dark:text-white">
-          Inspect every token.
+          Tree-sitter parsing every token.
         </h2>
-        <p class="mt-4 font-mono text-sm text-zinc-500">
-          Tree-sitter parses every token with full grammar awareness. Hover any token to see
-          its scope, language, and where it sits in the source.
-        </p>
 
         <div class="mt-12 grid gap-8 lg:grid-cols-[1fr_320px]">
           <div>

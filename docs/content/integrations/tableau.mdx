@@ -1,0 +1,81 @@
+---
+sidebar_position: 5
+slug: /integrations/tableau
+title: Tableau
+description: Use Lumis in Tableau through Tableau's built-in MDEx markdown converter options.
+keywords:
+  - lumis tableau
+  - tableau syntax highlighting
+  - elixir static site highlighting
+  - mdex lumis tableau
+---
+
+# Tableau
+
+`Tableau` already uses `MDEx` for Markdown by default. That makes Lumis a built-in integration point rather than a custom post-processing step.
+
+The hook you want is Tableau's `config :tableau, :config, markdown: [mdex: ...]` configuration. Pass Lumis formatter options through MDEx's `syntax_highlight` setting.
+
+## Add dependencies
+
+```elixir
+def deps do
+  [
+    {:tableau, "~> 0.30"},
+    {:lumis, "~> 0.3"}
+  ]
+end
+```
+
+## Configure Tableau to use Lumis
+
+```elixir
+# config/config.exs
+import Config
+
+config :tableau, :config,
+  url: "http://localhost:8080",
+  markdown: [
+    mdex: [
+      extension: [
+        table: true,
+        header_ids: "",
+        tasklist: true,
+        strikethrough: true,
+        autolink: true,
+        alerts: true,
+        footnotes: true
+      ],
+      render: [unsafe: true],
+      syntax_highlight: [
+        formatter: {:html_inline, theme: "github_light"}
+      ]
+    ]
+  ]
+```
+
+With that in place, fenced code blocks rendered by Tableau's Markdown pipeline will use Lumis.
+
+## Multi-theme output
+
+```elixir
+config :tableau, :config,
+  url: "http://localhost:8080",
+  markdown: [
+    mdex: [
+      syntax_highlight: [
+        formatter: {:html_multi_themes,
+          themes: [light: "github_light", dark: "github_dark"],
+          default_theme: "light-dark()"}
+      ]
+    ]
+  ]
+```
+
+This is the better default when your site already supports light and dark themes.
+
+## Related docs
+
+- [NimblePublisher](/integrations/nimble-publisher)
+- [Elixir integration](/usage/elixir)
+- [Themes](/themes)

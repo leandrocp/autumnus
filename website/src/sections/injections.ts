@@ -26,12 +26,8 @@ export function renderInjections() {
           <span class="text-emerald-400">&lt;</span><span class="text-teal-400">Injections</span> <span class="text-emerald-400">/&gt;</span>
         </a>
         <h2 class="mt-8 font-mono text-4xl font-bold leading-tight tracking-tight text-zinc-900 dark:text-white">
-          Highlight injected languages too.
+          Highlight nested injected languages.
         </h2>
-        <p class="mt-4 font-mono text-sm leading-relaxed text-zinc-500">
-          All languages, no matter the level, are parsed using their own parser to output the correct colors. No plaintext, no confusion.
-        </p>
-
         <div class="mt-12">
           <div class="mb-3 flex items-center justify-between">
             <span class="font-mono text-[11px] tracking-wider text-zinc-500 uppercase dark:text-zinc-400">3 languages</span>

@@ -1,7 +1,8 @@
+import { COPY_SVG } from "../lib/utils";
+
 const RUNTIME_LINKS = [
   {
     name: "CLI",
-    summary: "Pipes, scripts, local workflows.",
     install: "cargo install lumis-cli",
     links: [
       {
@@ -13,7 +14,6 @@ const RUNTIME_LINKS = [
   },
   {
     name: "Rust",
-    summary: "Backend rendering, editors, docs pipelines.",
     install: "cargo add lumis",
     links: [
       { label: "docs.rs", href: "https://docs.rs/lumis" },
@@ -23,7 +23,6 @@ const RUNTIME_LINKS = [
   },
   {
     name: "Elixir",
-    summary: "BEAM apps, Phoenix, LiveView.",
     install: `{:lumis, "~> 0.3"}`,
     links: [
       { label: "HexDocs", href: "https://hexdocs.pm/lumis" },
@@ -36,7 +35,6 @@ const RUNTIME_LINKS = [
   },
   {
     name: "JavaScript",
-    summary: "Node.js, Bun, Deno, libraries, and tooling through one package.",
     install: "npm install @lumis-sh/lumis",
     links: [
       { label: "npm", href: "https://www.npmjs.com/package/@lumis-sh/lumis" },
@@ -48,7 +46,6 @@ const RUNTIME_LINKS = [
   },
   {
     name: "Browsers / CDN",
-    summary: "Client-side highlighting, SPAs, web apps, and CDN imports.",
     install: "npm install @lumis-sh/lumis",
     links: [
       { label: "npm", href: "https://www.npmjs.com/package/@lumis-sh/lumis" },
@@ -60,7 +57,6 @@ const RUNTIME_LINKS = [
   },
   {
     name: "Java",
-    summary: "JVM parity across the stack.",
     install: "io.roastedroot:lumis4j:0.0.7",
     links: [
       { label: "Maven", href: "https://central.sonatype.com/search?q=io.roastedroot%3Alumis4j" },
@@ -77,19 +73,17 @@ export function renderRuntimes() {
           <span class="text-rose-400">&lt;</span><span class="text-indigo-400">Runtimes</span> <span class="text-rose-400">/&gt;</span>
         </a>
         <h2 class="mt-8 font-mono text-4xl font-bold tracking-tight text-zinc-900 dark:text-white">
-          Same engine, every stack.
+          Same API, same themes. Pick your runtime.
         </h2>
-        <p class="mt-4 font-mono text-sm text-zinc-500">Same themes, same output across 6 runtimes. Pick the package for your runtime.</p>
-
         <div class="mt-12">
           <div class="grid gap-px border border-zinc-200 bg-zinc-200 dark:border-zinc-800 dark:bg-zinc-800 sm:grid-cols-2 lg:grid-cols-3">
             ${RUNTIME_LINKS.map(
               (p) => `
               <div class="bg-white p-6 dark:bg-[#09090b]">
                 <h3 class="font-mono text-sm font-bold tracking-wider text-zinc-900 uppercase dark:text-white">${p.name}</h3>
-                <p class="mt-2 font-mono text-xs leading-relaxed text-zinc-500">${p.summary}</p>
-                <div class="mt-4 overflow-x-auto border border-zinc-100 px-3 py-2 font-mono text-xs text-zinc-600 dark:border-zinc-800 dark:text-zinc-400">
-                  <span class="mr-2 text-zinc-300 select-none dark:text-zinc-700">&gt;</span>${p.install}
+                <div class="mt-4 flex items-center justify-between gap-2 overflow-x-auto border border-zinc-100 px-3 py-2 dark:border-zinc-800">
+                  <code class="min-w-0 truncate font-mono text-xs text-zinc-600 dark:text-zinc-400"><span class="mr-2 text-zinc-300 select-none dark:text-zinc-700">&gt;</span>${p.install}</code>
+                  <button class="copy-install shrink-0 cursor-pointer text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white" aria-label="Copy to clipboard" data-copy="${encodeURIComponent(p.install)}">${COPY_SVG}</button>
                 </div>
                 <div class="mt-4 flex flex-wrap gap-2">
                   ${p.links

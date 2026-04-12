@@ -37,11 +37,6 @@ export function renderFormatters() {
         <h2 class="mt-8 font-mono text-4xl font-bold tracking-tight text-zinc-900 dark:text-white">
           Built-in formatters or bring your own.
         </h2>
-        <p class="mt-4 font-mono text-sm text-zinc-500">
-          Parsing is separated from rendering. Choose a built-in formatter or implement the
-          trait/interface to output any format.
-        </p>
-
         <div class="mt-12 grid gap-px border border-zinc-200 bg-zinc-200 dark:border-zinc-800 dark:bg-zinc-800 sm:grid-cols-2 lg:grid-cols-3">
           ${FORMATTERS.map(
             (f) => `

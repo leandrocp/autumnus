@@ -21,13 +21,8 @@ export function renderStreaming() {
           <span class="text-fuchsia-400">&lt;</span><span class="text-blue-400">Streaming</span> <span class="text-fuchsia-400">/&gt;</span>
         </a>
         <h2 class="mt-8 font-mono text-4xl font-bold tracking-tight text-zinc-900 dark:text-white">
-          AI output, highlighted in real time.
+          Fast and accurate even for incomplete code.
         </h2>
-        <p class="mt-4 font-mono text-sm text-zinc-500">
-          Tree-sitter parses tokens from incomplete source code and efficiently highlights incoming tokens.
-          Perfect for chat-like apps, coding agents, and AI tools.
-        </p>
-
         <div class="mt-12">
           <div class="mb-3 flex items-center gap-2">
             <span class="inline-block h-2 w-2 rounded-full bg-emerald-400"></span>

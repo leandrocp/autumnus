@@ -109,23 +109,13 @@ export function renderQuickstart() {
         <h2 class="mt-8 font-mono text-4xl font-bold tracking-tight text-zinc-900 dark:text-white">
           Install, import, highlight.
         </h2>
-        <p class="mt-4 font-mono text-sm text-zinc-500">Every runtime, same patterns.</p>
         <div class="mt-6 flex flex-wrap items-center gap-3">
           <a href="/docs"
              class="inline-flex items-center gap-2 border border-zinc-200 px-4 py-2 font-mono text-xs tracking-wider text-zinc-700 uppercase transition-colors hover:border-zinc-900 hover:text-zinc-900 dark:border-zinc-800 dark:text-zinc-300 dark:hover:border-white dark:hover:text-white">
-            full docs
+            docs
             <svg class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
           </a>
-          <a href="https://github.com/leandrocp/lumis/tree/main/examples" target="_blank" rel="noreferrer"
-             class="inline-flex items-center gap-2 border border-zinc-200 px-4 py-2 font-mono text-xs tracking-wider text-zinc-700 uppercase transition-colors hover:border-zinc-900 hover:text-zinc-900 dark:border-zinc-800 dark:text-zinc-300 dark:hover:border-white dark:hover:text-white">
-            examples
-            <svg class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
-          </a>
-          <span class="font-mono text-xs text-zinc-500 dark:text-zinc-400">API guides, examples, and recipes.</span>
         </div>
-        <p class="mt-3 font-mono text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
-          Ready-to-run integrations are available in the examples repo folder for React, Astro, markdown-it, rehype, Cloudflare Workers, NimblePublisher, and more.
-        </p>
 
         <div class="mt-12">
           <div class="flex gap-1 overflow-x-auto border-b border-zinc-200 dark:border-zinc-800" role="tablist">

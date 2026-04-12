@@ -134,7 +134,7 @@ const config: Config = {
           title: 'More',
           items: [
             {
-              label: 'Main Website',
+              label: 'Website',
               href: 'https://lumis.sh',
             },
             {

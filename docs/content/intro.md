@@ -40,39 +40,6 @@ It keeps the same core workflow across runtimes:
 - [Neovim colorschemes](https://github.com/topics/neovim-colorscheme) supply the color data
 - highlight queries come from [`nvim-treesitter`](https://github.com/nvim-treesitter/nvim-treesitter)
 
-## What you can do
-
-- render one-off snippets with `highlight`
-- preload languages for repeated usage
-- switch between inline styles, CSS classes, CSS variables, and ANSI output
-- highlight individual lines
-- load or generate custom themes
-- build your own formatter on top of highlighted tokens
-
-## Runtimes
-
-| Runtime | Good fit | Main package |
-| --- | --- | --- |
-| CLI | scripts, local workflows, parser/theme management | `lumis-cli` (`lumis` binary) |
-| Rust | backends, static sites, editors | `lumis` |
-| Elixir | Phoenix, LiveView, BEAM apps | `lumis` |
-| JavaScript | Node.js, Bun, Deno, libraries, and build tools | `@lumis-sh/lumis` |
-| Browsers / CDN | Client-side highlighting, SPAs, web apps, and CDN imports | `@lumis-sh/lumis` |
-| React | React apps and design systems | `@lumis-sh/react` |
-| JS integrations | markdown-it and rehype content pipelines | `@lumis-sh/markdown-it-lumis`, `@lumis-sh/rehype-lumis` |
-| Themes | CSS themes and JSON theme modules | `@lumis-sh/themes` |
-| Java | JVM apps | `lumis4j` |
-
-## Recommended path
-
-1. [Installation](./installation)
-2. [Highlight](./usage/highlight) — the core workflow
-3. [Formatters](./formatters) — choose an output style
-4. [Themes](./themes) — customize colors
-5. [Architecture](./architecture) — how the pipeline works
-6. [Recipes](./recipes) — copy-paste examples
-7. [Languages reference](./reference/languages) — full list
-
 ---
 
 Every code block on this site is highlighted by Lumis itself, using the [multi-themes formatter](/formatters/html-multi-themes) with `github_light` and `github_dark` themes for automatic light/dark mode switching.
