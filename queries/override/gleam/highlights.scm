@@ -98,7 +98,7 @@
 ((escape_sequence) @warning
  ; Deprecated in v0.33.0-rc2:
  (#eq? @warning "\\e"))
-(bit_array_segment_option) @function.builtin
+(bit_string_segment_option) @function.builtin
 (integer) @number
 (float) @number
 
