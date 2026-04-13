@@ -1,0 +1,22 @@
+{
+  "name": "example-nuxt-lumis",
+  "private": true,
+  "packageManager": "npm@10.9.2",
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "start": "nuxt dev"
+  },
+  "dependencies": {
+    "@lumis-sh/lumis": "^0.3.0",
+    "@lumis-sh/rehype-lumis": "^0.1.1",
+    "@lumis-sh/themes": "^0.0.3",
+    "@nuxt/content": "^3.12.0",
+    "better-sqlite3": "^12.8.0",
+    "nuxt": "^4.4.2",
+    "vue": "^3.5.31"
+  },
+  "devDependencies": {
+    "vite": "^7.1.5"
+  }
+}

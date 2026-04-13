@@ -70,7 +70,7 @@ importers:
   packages/javascript/markdown-it-lumis:
     dependencies:
       '@lumis-sh/lumis':
-        specifier: workspace:^0.0.1
+        specifier: workspace:^0.3.0
         version: link:../lumis
       markdown-it:
         specifier: ^14.0.0
@@ -104,7 +104,7 @@ importers:
   packages/javascript/react:
     dependencies:
       '@lumis-sh/lumis':
-        specifier: workspace:^0.1.0
+        specifier: workspace:^0.3.0
         version: link:../lumis
       hast-util-from-html:
         specifier: ^2.0.0
@@ -156,7 +156,7 @@ importers:
   packages/javascript/rehype-lumis:
     dependencies:
       '@lumis-sh/lumis':
-        specifier: workspace:^0.0.1
+        specifier: workspace:^0.3.0
         version: link:../lumis
       hast-util-from-html:
         specifier: ^2.0.3
@@ -276,7 +276,7 @@ importers:
     devDependencies:
       '@lumis-sh/lumis':
         specifier: '>=0.0.1'
-        version: 0.2.0
+        version: 0.3.0
 
   packages/javascript/wasm-bundle-full:
     dependencies:
@@ -619,7 +619,7 @@ importers:
     devDependencies:
       '@lumis-sh/lumis':
         specifier: '>=0.0.1'
-        version: 0.2.0
+        version: 0.3.0
 
   packages/javascript/wasm-bundle-system:
     dependencies:
@@ -665,7 +665,7 @@ importers:
     devDependencies:
       '@lumis-sh/lumis':
         specifier: '>=0.0.1'
-        version: 0.2.0
+        version: 0.3.0
 
   packages/javascript/wasm-bundle-web:
     dependencies:
@@ -693,7 +693,7 @@ importers:
     devDependencies:
       '@lumis-sh/lumis':
         specifier: '>=0.0.1'
-        version: 0.2.0
+        version: 0.3.0
 
   packages/javascript/wasm-bundle-web-extra:
     dependencies:
@@ -757,7 +757,7 @@ importers:
     devDependencies:
       '@lumis-sh/lumis':
         specifier: '>=0.0.1'
-        version: 0.2.0
+        version: 0.3.0
 
 packages:
 
@@ -1002,8 +1002,8 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@lumis-sh/lumis@0.2.0':
-    resolution: {integrity: sha512-zHa6r3Tf2W4bV8IbxeRhWQjBlWiDYTYpp/mIxakyzUDkBkGRlfd33IvHlb5r3XcLDplVZe/Y/MO1HXPQn+zCOg==}
+  '@lumis-sh/lumis@0.3.0':
+    resolution: {integrity: sha512-BfT8mP7B2xHPfZXSgdvpK5HJNompn0VZ9VLA30015uf/EwnNbiF0RW9MhDgH/TijB8bXkYNIzDnqB8mY3Pd4xw==}
     engines: {node: '>=18'}
 
   '@lumis-sh/wasm-angular@0.26.0':
@@ -3207,7 +3207,7 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@lumis-sh/lumis@0.2.0':
+  '@lumis-sh/lumis@0.3.0':
     dependencies:
       web-tree-sitter: 0.26.8
 

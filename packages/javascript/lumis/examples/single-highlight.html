@@ -24,9 +24,9 @@
   </main>
 
   <script type="module">
-    import { highlight } from '../src/index.browser.ts'
-    import { htmlInline } from '../src/formatters.ts'
-    import rust from '../langs/rust.ts'
+    import { highlight } from '@lumis-sh/lumis'
+    import { htmlInline } from '@lumis-sh/lumis/formatters'
+    import rust from '@lumis-sh/lumis/langs/rust'
     import tokyonightMoon from '@lumis-sh/themes/tokyonight_moon'
 
     document.getElementById('output').innerHTML = await highlight(

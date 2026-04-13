@@ -43,7 +43,7 @@
     "prepack": "pnpm run build"
   },
   "dependencies": {
-    "@lumis-sh/lumis": "workspace:^0.0.1",
+    "@lumis-sh/lumis": "workspace:^0.3.0",
     "markdown-it": "^14.0.0"
   },
   "devDependencies": {

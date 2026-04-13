@@ -1,6 +1,4 @@
-import { bundledLanguages } from '@lumis-sh/lumis/bundles/web';
 import { createHighlighter } from '@lumis-sh/lumis';
-import { htmlInline } from '@lumis-sh/lumis/formatters';
 import { fromHtml } from 'hast-util-from-html';
 import { toString } from 'hast-util-to-string';
 import { visit } from 'unist-util-visit';
@@ -17,14 +15,18 @@ function getClassNames(node) {
   }
   return className.filter((value) => typeof value === "string");
 }
+function getLanguageFromClassNames(node) {
+  return getClassNames(node).find((className) => className.startsWith(LANGUAGE_PREFIX))?.slice(LANGUAGE_PREFIX.length);
+}
+function getLanguageFromProperties(node) {
+  return getPropertyString(node.properties.dataLanguage) ?? getPropertyString(node.properties["data-language"]) ?? getPropertyString(node.properties.language);
+}
 function parseCodeBlock(node) {
   const head = node.children[0];
   if (!head || head.type !== "element" || head.tagName !== "code") {
     return void 0;
   }
-  const languageFromClassName = getClassNames(head).find((className) => className.startsWith(LANGUAGE_PREFIX))?.slice(LANGUAGE_PREFIX.length);
-  const languageFromPreClassName = getClassNames(node).find((className) => className.startsWith(LANGUAGE_PREFIX))?.slice(LANGUAGE_PREFIX.length);
-  const language = languageFromClassName ?? languageFromPreClassName ?? getPropertyString(node.properties.dataLanguage) ?? getPropertyString(node.properties["data-language"]) ?? getPropertyString(node.properties.language);
+  const language = getLanguageFromClassNames(head) ?? getLanguageFromClassNames(node) ?? getLanguageFromProperties(node);
   return {
     code: toString(head),
     language
@@ -33,40 +35,17 @@ function parseCodeBlock(node) {
 function parseFragment(html) {
   return fromHtml(html, { fragment: true }).children;
 }
-function resolveLanguage(language, options) {
-  if (language) {
-    return language;
-  }
-  if (options.detectLanguage) {
-    return void 0;
-  }
-  return options.defaultLanguage;
-}
-async function renderBlock(highlighter, code, language, options) {
+async function renderBlock(highlighter, code, language, formatter) {
   if (language != null) {
     await highlighter.loadLanguage(language);
   }
-  const html = highlighter.highlight(
-    code,
-    htmlInline({
-      language,
-      theme: options.theme,
-      preClass: options.preClass,
-      includeHighlights: options.includeHighlights,
-      italic: options.italic
-    })
-  );
+  const html = highlighter.highlight(code, formatter(language));
   return parseFragment(html);
 }
 var rehypeLumis = function rehypeLumis2(options) {
-  const setup = (async () => {
-    const highlighter = await createHighlighter({
-      langs: [bundledLanguages, ...options.langs ?? []]
-    });
-    const loadLanguages = options.loadLanguages ?? ["plaintext"];
-    await Promise.all(loadLanguages.map((language) => highlighter.loadLanguage(language)));
-    return highlighter;
-  })();
+  const setup = createHighlighter({
+    languages: options.languages ?? []
+  });
   return async function transform(tree) {
     const highlighter = await setup;
     const targets = [];
@@ -83,14 +62,9 @@ var rehypeLumis = function rehypeLumis2(options) {
     });
     const replacements = await Promise.all(
       targets.map(async ({ parsed }) => {
-        const selectedLanguage = resolveLanguage(parsed.language, options);
         try {
-          return await renderBlock(highlighter, parsed.code, selectedLanguage, options);
-        } catch (error) {
-          if (options.fallbackLanguage && selectedLanguage !== options.fallbackLanguage) {
-            return renderBlock(highlighter, parsed.code, options.fallbackLanguage, options);
-          }
-          options.onError?.(error, { language: parsed.language, code: parsed.code });
+          return await renderBlock(highlighter, parsed.code, parsed.language, options.formatter);
+        } catch {
           return void 0;
         }
       })

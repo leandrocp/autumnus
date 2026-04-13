@@ -25,11 +25,11 @@
   </main>
 
   <script type="module">
-    import { createHighlighter } from '../src/index.browser.ts'
-    import { htmlInline } from '../src/formatters.ts'
-    import erb from '../langs/erb.ts'
-    import html from '../langs/html.ts'
-    import ruby from '../langs/ruby.ts'
+    import { createHighlighter } from '@lumis-sh/lumis'
+    import { htmlInline } from '@lumis-sh/lumis/formatters'
+    import erb from '@lumis-sh/lumis/langs/erb'
+    import html from '@lumis-sh/lumis/langs/html'
+    import ruby from '@lumis-sh/lumis/langs/ruby'
     import tokyonightMoon from '@lumis-sh/themes/tokyonight_moon'
 
     const code = `<h1><%= @title %></h1>

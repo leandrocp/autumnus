@@ -94,6 +94,20 @@ describe('hl.highlight', () => {
     expect(html).toContain('class="language-json"')
   })
 
+  it('accepts language aliases as strings', async () => {
+    const jsHighlighter = await createHighlighter({
+      languages: [javascript],
+    })
+
+    const html = jsHighlighter.highlight(
+      'const x = 1',
+      htmlInline({ language: 'js', theme: draculaTheme })
+    )
+
+    expect(html).toContain('class="language-javascript"')
+    expect(html).toContain('<span')
+  })
+
   it('adds custom class to pre element', () => {
     const html = hl.highlight(
       '{"a": 1}',

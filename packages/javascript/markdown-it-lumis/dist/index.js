@@ -1,28 +1,40 @@
-import { bundledLanguages } from '@lumis-sh/lumis/bundles/web';
 import { createHighlighter } from '@lumis-sh/lumis';
-import { htmlInline } from '@lumis-sh/lumis/formatters';
 
 // src/index.ts
-function resolveLanguage(language, options) {
-  if (language.length > 0) {
-    return language;
+function renderDefaultFence(defaultFence, ...args) {
+  if (defaultFence) {
+    return defaultFence(...args);
   }
-  if (options.detectLanguage) {
-    return void 0;
+  const [tokens, idx, opts, _env, self] = args;
+  return self.renderToken(tokens, idx, opts);
+}
+function getLanguageName(info) {
+  const language = info.trim().split(/\s+/, 1)[0];
+  return language && language.length > 0 ? language : void 0;
+}
+function splitLanguages(entries) {
+  const inputs = [];
+  const refs = [];
+  for (const entry of entries) {
+    if (typeof entry === "string") {
+      refs.push(entry);
+      continue;
+    }
+    inputs.push(entry);
+    if (isLanguageRef(entry)) {
+      refs.push(entry);
+    }
   }
-  return options.defaultLanguage;
+  return { inputs, refs };
 }
-function formatterOptions(language, options) {
-  return htmlInline({
-    language,
-    theme: options.theme,
-    preClass: options.preClass,
-    includeHighlights: options.includeHighlights,
-    italic: options.italic
-  });
+function isLanguage(value) {
+  return typeof value === "object" && value !== null && "id" in value && "highlights" in value && "wasm" in value;
 }
-function renderCodeBlock(highlighter, code, language, options) {
-  return highlighter.highlight(code, formatterOptions(language, options));
+function isLazyLanguage(value) {
+  return typeof value === "function" && "id" in value && "aliases" in value;
+}
+function isLanguageRef(value) {
+  return isLanguage(value) || isLazyLanguage(value);
 }
 function fromHighlighter(highlighter, options) {
   return function installMarkdownItLumis(md) {
@@ -30,33 +42,23 @@ function fromHighlighter(highlighter, options) {
     md.renderer.rules.fence = function fence(tokens, idx, opts, env, self) {
       const token = tokens[idx];
       if (!token) {
-        return defaultFence ? defaultFence(tokens, idx, opts, env, self) : self.renderToken(tokens, idx, opts);
+        return renderDefaultFence(defaultFence, tokens, idx, opts, env, self);
       }
-      const info = token.info.trim();
-      const language = info.split(/\s+/, 1)[0] ?? "";
-      const code = token.content;
-      const selectedLanguage = resolveLanguage(language, options);
+      const language = getLanguageName(token.info);
       try {
-        return renderCodeBlock(highlighter, code, selectedLanguage, options);
-      } catch (error) {
-        if (options.fallbackLanguage && selectedLanguage !== options.fallbackLanguage) {
-          return renderCodeBlock(highlighter, code, options.fallbackLanguage, options);
-        }
-        options.onError?.(error, { language, code });
-        if (defaultFence) {
-          return defaultFence(tokens, idx, opts, env, self);
-        }
-        return self.renderToken(tokens, idx, opts);
+        return highlighter.highlight(token.content, options.formatter(language));
+      } catch {
+        return renderDefaultFence(defaultFence, tokens, idx, opts, env, self);
       }
     };
   };
 }
 async function markdownItLumis(options) {
+  const { inputs: languageInputs, refs: languageRefs } = splitLanguages(options.languages ?? []);
   const highlighter = await createHighlighter({
-    langs: [bundledLanguages, ...options.langs ?? []]
+    languages: languageInputs
   });
-  const loadLanguages = options.loadLanguages ?? Object.keys(bundledLanguages);
-  await Promise.all(loadLanguages.map((language) => highlighter.loadLanguage(language)));
+  await Promise.all(languageRefs.map((language) => highlighter.loadLanguage(language)));
   return fromHighlighter(highlighter, options);
 }
 

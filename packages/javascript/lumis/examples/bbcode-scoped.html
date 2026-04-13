@@ -33,9 +33,9 @@
   </main>
 
   <script type="module">
-    import { createHighlighter } from '../src/index.browser.ts'
-    import { bbcodeScoped } from '../src/formatters.ts'
-    import javascript from '../langs/javascript.ts'
+    import { createHighlighter } from '@lumis-sh/lumis'
+    import { bbcodeScoped } from '@lumis-sh/lumis/formatters'
+    import javascript from '@lumis-sh/lumis/langs/javascript'
 
     const code = `const template = ` + "`<a href=\"/x\">[url=x]</a>`" + `\nconsole.log(template)\n`
 

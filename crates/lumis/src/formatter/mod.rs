@@ -143,7 +143,7 @@
 //! and the [`html`] / [`ansi`] helper modules to build output consistently with the
 //! built-in formatters.
 //!
-//! See the [examples directory](https://github.com/leandrocp/lumis/tree/main/examples)
+//! See the [crate examples](https://github.com/leandrocp/lumis/tree/main/crates/lumis/examples)
 //! for custom formatter implementations.
 
 // Originally based on https://github.com/Colonial-Dev/inkjet/tree/da289fa8b68f11dffad176e4b8fabae8d6ac376d/src/formatter
@@ -236,7 +236,7 @@ pub(crate) fn map_inline_highlight_lines(
 ///
 /// - [`highlight`](mod@crate::highlight) module - High-level API for accessing styled tokens
 /// - [`highlight_iter()`](crate::highlight::highlight_iter) - Streaming callback API
-/// - [Examples directory](https://github.com/leandrocp/lumis/tree/main/examples) - Custom formatter implementations
+/// - [Crate examples](https://github.com/leandrocp/lumis/tree/main/crates/lumis/examples) - Custom formatter implementations
 pub trait Formatter: Send + Sync {
     /// Format source code with syntax highlighting.
     ///
