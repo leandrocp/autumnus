@@ -20,11 +20,11 @@ ANSI escape codes for shell output.
 
 | Runtime | Options |
 | --- | --- |
-| Rust | `language`, `theme` |
-| Elixir | `language`, `theme` |
+| Rust | `language`, `theme`, `default_bg`, `width` |
+| Elixir | `language`, `theme`, `default_bg`, `width` |
 | JavaScript | `language`, `theme` |
 | Java | `withLang()`, `withTheme()`, `withFormatter(Formatter.TERMINAL)` |
-| CLI | default formatter, `--theme` |
+| CLI | default formatter, `--theme`, `--default-bg`, `--width` |
 
 ## Example
 
@@ -52,6 +52,8 @@ let ansi = highlight(
     TerminalBuilder::new()
         .language(Language::Rust)
         .theme(Some(themes::get("dracula").unwrap()))
+        .default_bg(Some("#282a36".to_string()))
+        .width(Some(120))
         .build()
         .unwrap(),
 );
@@ -65,7 +67,7 @@ println!("{}", ansi);
 ```elixir
 Lumis.highlight!(
   "fn main() {}",
-  formatter: {:terminal, language: "rust", theme: "dracula"}
+  formatter: {:terminal, language: "rust", theme: "dracula", default_bg: "#282a36", width: 120}
 )
 ```
 
@@ -98,6 +100,8 @@ lumis.close();
 ```bash
 lumis highlight main.rs --theme dracula
 # same as: lumis highlight main.rs --formatter terminal --theme dracula
+lumis highlight main.rs --theme dracula --default-bg '#282a36'
+lumis highlight main.rs --theme dracula --default-bg '#282a36' --width 120
 ```
 
   </TabItem>
@@ -113,6 +117,8 @@ Terminal output is plain text wrapped in ANSI escape sequences:
 
 - the source stays as terminal text, not HTML
 - ANSI escape sequences set foreground color and text styles
+- `default_bg` / `--default-bg` fills in the background only where the token style does not already provide one
+- `width` / `--width` pads each rendered line to the requested width; in the CLI, `auto` uses the current terminal width when available
 - `\x1b[0m` resets formatting between styled segments
 
 ## When to use it

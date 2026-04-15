@@ -39,6 +39,12 @@ echo 'fn main() {}' | lumis highlight -l rust
 # Pick a theme
 lumis highlight -t dracula src/main.rs
 
+# Keep an explicit terminal background between styled spans
+lumis highlight --default-bg '#282a36' src/main.rs
+
+# Pad terminal lines to a fixed width
+lumis highlight --default-bg '#282a36' --width 120 src/main.rs
+
 # HTML with inline styles
 lumis highlight -f html-inline -t github_dark src/main.rs
 
@@ -68,6 +74,8 @@ Notes:
 - `lumis highlight [PATH]` reads from stdin when `PATH` is omitted.
 - If the detected language falls back to `plaintext`, the source is printed unchanged.
 - The default theme is `catppuccin_frappe` when a formatter needs a theme and you do not pass `--theme`.
+- `--default-bg` applies only to terminal output and expects a hex color like `#282a36`.
+- `--width` applies only to terminal output. Pass a number or let it default to auto, which uses the current `COLUMNS` value when stdout is a TTY.
 - `html-multi-themes` requires at least one `--themes name:theme_id` entry.
 
 ## Languages

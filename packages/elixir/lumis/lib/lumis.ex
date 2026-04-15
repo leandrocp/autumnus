@@ -138,6 +138,8 @@ defmodule Lumis do
 
       - `:language` (`t:language/0` - default: `nil`) - the language used by the formatter. When omitted, Lumis tries to auto-detect it from the source.
       - `:theme` (`t:theme/0` - default: `nil`) - the theme to apply styles on the highlighted source code.
+      - `:default_bg` (`t:String.t/0` - default: `nil`) - a fallback background color applied between styled spans and on unstyled text.
+      - `:width` (`pos_integer() | nil` - default: `nil`) - pad each rendered terminal line to the given width. This is most useful with `:default_bg`.
 
   * `bbcode_scoped`:
 
@@ -262,7 +264,9 @@ defmodule Lumis do
           | {:terminal,
              [
                language: language(),
-               theme: theme()
+               theme: theme(),
+               default_bg: String.t() | nil,
+               width: pos_integer() | nil
              ]}
           | :bbcode_scoped
           | {:bbcode_scoped, [language: language()]}
@@ -476,9 +480,9 @@ defmodule Lumis do
   end
 
   def formatter_type({:terminal, options}) when is_list(options) do
-    case Keyword.keys(options) -- [:language, :theme] do
+    case Keyword.keys(options) -- [:language, :theme, :default_bg, :width] do
       [] ->
-        default_opts = [language: nil, theme: @default_theme]
+        default_opts = [language: nil, theme: @default_theme, default_bg: nil, width: nil]
         opts = Keyword.merge(default_opts, options)
         {:ok, {:terminal, opts}}
 
@@ -973,7 +977,7 @@ defmodule Lumis do
 
   defp convert_formatter_for_nif(:terminal, opts) do
     opts = convert_theme_for_nif(opts)
-    {:terminal, Map.take(opts, [:theme])}
+    {:terminal, Map.take(opts, [:theme, :default_bg, :width])}
   end
 
   defp convert_formatter_for_nif(:bbcode_scoped, _opts) do

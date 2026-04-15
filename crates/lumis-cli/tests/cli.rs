@@ -198,6 +198,40 @@ fn highlight_source_diff_terminal() {
 }
 
 #[test]
+fn highlight_source_terminal_with_default_background() {
+    cmd()
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .args(["highlight", "-l", "diff", "--default-bg", "#282a36"])
+        .write_stdin(DIFF_SNIPPET)
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("\u{1b}[48;2;40;42;54m"));
+}
+
+#[test]
+fn highlight_source_terminal_with_default_background_and_width() {
+    cmd()
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .args([
+            "highlight",
+            "-l",
+            "diff",
+            "--default-bg",
+            "#282a36",
+            "--width",
+            "20",
+        ])
+        .write_stdin("abc\n")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(
+            "\u{1b}[0m\u{1b}[48;2;40;42;54mabc\u{1b}[0m\u{1b}[0m\u{1b}[48;2;40;42;54m                 \u{1b}[0m\n",
+        ));
+}
+
+#[test]
 fn highlight_source_diff_html_inline() {
     cmd()
         .arg("--data-dir")
