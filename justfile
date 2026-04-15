@@ -383,15 +383,15 @@ release-needed:
     set -euo pipefail
 
     packages=(
-        "cargo-lumis|crates/lumis"
         "cargo-lumis-core|crates/lumis-core"
         "cargo-lumis-build|crates/lumis-build"
+        "cargo-lumis|crates/lumis"
         "cargo-lumis-cli|crates/lumis-cli"
+        "npm-themes|packages/javascript/themes"
         "npm-lumis|packages/javascript/lumis"
         "npm-markdown-it-lumis|packages/javascript/markdown-it-lumis"
         "npm-rehype-lumis|packages/javascript/rehype-lumis"
         "npm-react|packages/javascript/react"
-        "npm-themes|packages/javascript/themes"
         "npm-wasm-bundle-web|packages/javascript/wasm-bundle-web"
         "npm-wasm-bundle-web-extra|packages/javascript/wasm-bundle-web-extra"
         "npm-wasm-bundle-system|packages/javascript/wasm-bundle-system"
