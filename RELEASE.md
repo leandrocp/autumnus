@@ -1,30 +1,70 @@
 # Release
 
-This repository publishes packages from tags.
+Releases are prepared locally and published from tags.
 
 ## Checklist
 
-1. Pick the package and version.
-2. Run `just release-prepare <package> <version>`.
-3. Review the changed version file and `CHANGELOG.md`.
-4. If needed, update dependent manifests in the same commit.
-5. Commit the release prep.
-6. Push the commit to `main`.
-7. Push the tag: `git push origin <package>/v<version>`.
-8. Watch the tag-triggered publish workflow.
-9. If publish fails because dependent packages also need releases, prepare and tag those packages separately.
+1. Run `just release-needed` to see which packages have path-scoped commits since their latest package tag.
+2. Decide which packages must move together, including downstream dependency bumps.
+3. For each package, run `just release-prepare <package> <version>`.
+4. Review the changed manifest and `CHANGELOG.md` for each prepared package.
+5. If a package depends on another package in the same release, update the dependent manifest in the same commit.
+6. Commit the release prep changes.
+7. Push the commit to `main`.
+8. Push package tags in dependency order with `git push origin <package>/v<version>`.
+9. Watch the tag-triggered publish workflows.
+
+## Publish order
+
+Publish dependency packages before the packages that consume them.
+
+### Rust crates
+
+If multiple Rust crates are part of the same release, use this order:
+
+1. `cargo-lumis-core`
+2. `cargo-lumis-build`
+3. `cargo-lumis`
+4. `cargo-lumis-cli`
+
+`lumis` depends on `lumis-core` and `lumis-build`. `lumis-cli` depends on `lumis-core` and `lumis-build`. `cargo-lumis-core` and `cargo-lumis-build` are independent, but keep the order above for consistency.
+
+### JavaScript packages
+
+If multiple JS packages are part of the same release, use this order:
+
+1. `npm-themes`
+2. `npm-lumis`
+3. `npm-markdown-it-lumis`
+4. `npm-rehype-lumis`
+5. `npm-react`
+6. `npm-wasm-bundle-web`
+7. `npm-wasm-bundle-web-extra`
+8. `npm-wasm-bundle-system`
+9. `npm-wasm-bundle-backend`
+10. `npm-wasm-bundle-full`
+
+`@lumis-sh/lumis` builds against `@lumis-sh/themes`. `@lumis-sh/markdown-it-lumis`, `@lumis-sh/rehype-lumis`, and `@lumis-sh/react` depend on `@lumis-sh/lumis`. The `@lumis-sh/wasm-bundle-*` packages declare `@lumis-sh/lumis` as a peer dependency.
+
+After `npm-lumis` is published, the plugin packages and WASM bundle packages are independent. Keep the order above as the canonical release order.
+
+If a JS release also needs new parser WASM packages, publish those first through the WASM workflow. Run `just wasm-publish-needed` to see which parser packages still need publishing.
+
+### Elixir package
+
+Publish `hex-lumis` after any required `cargo-lumis` release because `packages/elixir/lumis/native/lumis_nif/Cargo.toml` depends on `lumis`.
 
 ## Failed releases
 
 If a release fails before any registry accepts the new version:
 
-1. Delete every package tag created for that failed attempt.
+1. Delete every package tag from the failed attempt.
 2. Fix the mistake on `main`.
-3. Run `just release-prepare <package> <version>` again.
+3. Run `just release-prepare <package> <version>` again for each affected package.
 4. Commit the updated changelog and version bump.
-5. Push the corrected package tag.
+5. Push the corrected package tags in dependency order.
 
-If any registry already published the version, do not try to reuse it. Cut a new patch release instead.
+If any registry already published the version, do not reuse it. Cut a new patch release instead.
 
 ## Tag format
 
@@ -46,13 +86,11 @@ Use one tag per released package:
 - `npm-wasm-bundle-full/v0.0.6`
 - `hex-lumis/v0.3.0`
 
-## Git-Cliff
+## Git-cliff
 
 All packages share the root `cliff.toml` template.
 
-The `just release-prepare` recipe picks the right files for the package you name.
-
-For example, `cargo-lumis-cli` means:
+`just release-prepare` picks the right files for the package you name. For example, `cargo-lumis-cli` maps to:
 
 - version file: `crates/lumis-cli/Cargo.toml`
 - changelog: `crates/lumis-cli/CHANGELOG.md`
@@ -65,6 +103,6 @@ Example:
 just release-prepare cargo-lumis-cli 0.2.0
 ```
 
-`release-prepare` updates only the target package version file and prepends the next package changelog entry with `git-cliff`.
+`release-prepare` updates only the target package version file and prepends the next changelog entry with `git-cliff`.
 
 If a release requires dependent manifests to move in lockstep, update those files separately and commit them with the release prep.

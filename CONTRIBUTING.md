@@ -1,6 +1,6 @@
 # Contributing
 
-See `ARCHITECTURE.md` for an overview of how the crates, packages, website, and build pipeline fit together.
+See `ARCHITECTURE.md` for how the crates, packages, website, and build pipeline fit together.
 
 ## Table of contents
 
@@ -20,68 +20,69 @@ See `ARCHITECTURE.md` for an overview of how the crates, packages, website, and 
 
 ## Getting started
 
-This project uses [just](https://just.systems/man/en/) as a command runner. After cloning the repo, run:
+This project uses [just](https://just.systems/man/en/) as its command runner. After cloning the repo, run:
 
 ```sh
 just setup
 ```
 
-This installs all dependencies (Rust, JS, Elixir) and checks that required tools are available.
+This installs the Rust, JS, and Elixir dependencies and checks the required tools.
 
 ## Releases
 
-This repository prepares releases locally and publishes from tags.
+Releases are prepared locally and published from tags.
 
-- Use `just release-needed` to list packages with path-scoped commits since their latest package tag.
-- Releasable packages use the shared root `cliff.toml` plus `just release-prepare <package> <version>`.
-- `just release-prepare` updates only the target package version file and prepends the next package changelog entry.
-- If dependent manifests must move in lockstep, update them separately in the same release commit.
-- Maintainers commit release prep changes directly and then push package tags such as `cargo-lumis-cli/v0.2.0`.
-- Pushing a package tag triggers the existing publish workflows.
+- Run `just release-needed` to list packages with path-scoped commits since their latest package tag.
+- Prepare each release with `just release-prepare <package> <version>`.
+- `just release-prepare` updates only the target package version file and prepends the next changelog entry.
+- If dependent manifests must move together, update them separately in the same release commit.
+- Maintainers commit the release prep changes, then push package tags such as `cargo-lumis-cli/v0.2.0`.
+- Pushing a package tag triggers the publish workflows.
 
 Do not hand-edit release versions or changelog sections when `just release-prepare` can generate them.
 
 ## Configuration files
 
-These files feed into code generation, builds, detection metadata, and theme extraction.
+These files drive code generation, builds, detection metadata, and theme extraction.
 
 | File | Purpose |
 |------|---------|
 | [`highlights.toml`](highlights.toml) | Tree-sitter highlight scope names |
 | [`languages.toml`](languages.toml) | Parser metadata, query sources, language bundles, feature flags |
-| [`themes/themes.lua`](themes/themes.lua) | Theme definitions (Neovim colorscheme sources) |
+| [`themes/themes.lua`](themes/themes.lua) | Theme definitions from Neovim colorscheme sources |
 
 ### highlights.toml
 
-Defines the recognized Tree-sitter highlight scope names. Both `crates/lumis-core/src/highlights.rs` and `packages/javascript/lumis/src/highlights.ts` are generated from this file -- do not edit them by hand.
+`highlights.toml` defines the recognized Tree-sitter highlight scope names. `crates/lumis-core/src/highlights.rs` and `packages/javascript/lumis/src/highlights.ts` are generated from it, so do not edit those files by hand.
 
-After modifying `highlights.toml`, regenerate:
+After changing `highlights.toml`, regenerate:
 
 ```sh
 just langs-gen-highlights
 ```
 
-This produces:
-- `highlights.rs` -- `HIGHLIGHT_NAMES` and `CLASSES` arrays (classes derived by replacing `.` with `-`)
-- `highlights.ts` -- `HIGHLIGHT_NAMES` array
+This updates:
+
+- `highlights.rs`: `HIGHLIGHT_NAMES` and `CLASSES` arrays (`CLASSES` replaces `.` with `-`)
+- `highlights.ts`: `HIGHLIGHT_NAMES` array
 
 ### languages.toml
 
-All language metadata lives here. Consumed by:
+All language metadata lives in `languages.toml`. It is consumed by:
 
-- `crates/dev` -- fetches vendored parsers, preprocesses queries, builds WASMs, and generates docs
-- `crates/lumis/build.rs` -- reads `queries/processed/` to embed query constants (with Lua-to-Rust regex conversion)
-- `crates/lumis-cli/build.rs` -- reads `queries/processed/` to embed query constants
-- `crates/lumis-core/build.rs` -- generates the `Language` enum and Rust-side detection metadata
-- `packages/javascript/lumis/scripts/build-langs.ts` -- generates `packages/javascript/lumis/langs/*.ts`, bundles, and JS detection/load metadata from the same source
-- `packages/javascript/scripts/build-wasm-bundles.ts` -- generates `packages/javascript/wasm-bundle-*` preset packages from bundle definitions in the same source
-- CI workflows -- builds WASMs, updates parser/query revisions
+- `crates/dev`: fetches vendored parsers, preprocesses queries, builds WASMs, and generates docs
+- `crates/lumis/build.rs`: reads `queries/processed/` to embed query constants, including Lua-to-Rust regex conversion
+- `crates/lumis-cli/build.rs`: reads `queries/processed/` to embed query constants
+- `crates/lumis-core/build.rs`: generates the `Language` enum and Rust detection metadata
+- `packages/javascript/lumis/scripts/build-langs.ts`: generates `packages/javascript/lumis/langs/*.ts`, bundles, and JS detection and loader metadata
+- `packages/javascript/scripts/build-wasm-bundles.ts`: generates `packages/javascript/wasm-bundle-*` preset packages from bundle definitions
+- CI workflows: build WASMs and update parser and query revisions
 
-Bundle definitions also live in `languages.toml` under `[bundles.*]`.
+Bundle definitions also live here under `[bundles.*]`.
 
-For Rust crates, bundle support is implemented as Cargo features such as `lang-bundle-web` and `lang-bundle-system` that enable the corresponding `lang-*` features transitively. The `lang-bundle-*` feature lists in `crates/lumis/Cargo.toml` and `crates/lumis-core/Cargo.toml` are auto-generated from `languages.toml` by `just cargo-update-features`.
+For Rust crates, bundle support is implemented as Cargo features such as `lang-bundle-web` and `lang-bundle-system`, which enable the related `lang-*` features transitively. The `lang-bundle-*` feature lists in `crates/lumis/Cargo.toml` and `crates/lumis-core/Cargo.toml` are generated from `languages.toml` by `just cargo-update-features`.
 
-- Keep one parser ID per line inside bundle arrays for cleaner diffs.
+- Keep one parser ID per line in bundle arrays for cleaner diffs.
 - After changing parser or bundle entries, sync Rust feature manifests and regenerate the checked-in JavaScript outputs:
 
 ```sh
@@ -119,16 +120,17 @@ shebang = ["bash", "sh"]          # optional -- shebang interpreter names
 feature = "lang-ocaml"            # optional -- override feature name (default: lang-{key with _ -> -})
 ```
 
-`git`, `rev`, and `version` are always required. Every parser is identified by its git repo and a pinned commit.
+`git`, `rev`, and `version` are always required. Every parser is identified by its git repo and pinned commit.
 
-`git` + `rev` vs `crate`: these are not alternatives.
+`git` + `rev` and `crate` are not alternatives:
 
-- `git` + `rev` -- always required. Used to build WASMs, fetch vendored parser sources, and as the authoritative version pin.
-- `crate` -- optional, Rust-only. When present, the Rust build uses the crate from crates.io instead of compiling from vendored source. The dependency must also be declared in `crates/lumis/Cargo.toml` as an optional dep for new languages, and existing entries are kept in sync from `languages.toml` by `cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- cargo-update-dep`.
+- `git` + `rev`: always required for WASM builds, vendored parser fetches, and the source-of-truth version pin
+- `crate`: optional and Rust-only. When present, Rust uses the crates.io package instead of vendored source. The dependency must also be declared in `crates/lumis/Cargo.toml` as an optional dependency for new languages, and existing entries are kept in sync from `languages.toml` by `cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- cargo-update-dep`.
 
 `version` is used for two things:
-1. When `crate` is set, this is the crate version synced into `crates/lumis/Cargo.toml`
-2. Always drives the npm package version for `@lumis-sh/wasm-{name}`
+
+1. If `crate` is set, it is the crate version synced into `crates/lumis/Cargo.toml`.
+2. It always drives the npm package version for `@lumis-sh/wasm-{name}`.
 
 #### Query entry fields
 
@@ -139,7 +141,7 @@ rev = "3edb01f912867603c2aef9079f208f0244c0885b"
 path = "runtime/queries"
 ```
 
-Most languages use the `default` query source (nvim-treesitter). Add an explicit entry only when queries come from a different repo:
+Most languages use the `default` query source from `nvim-treesitter`. Add an explicit entry only when queries come from a different repo:
 
 ```toml
 [queries.iex]
@@ -152,24 +154,24 @@ path = "queries"
 
 ### Adding a new language
 
-#### 1. Add parser entry to `languages.toml`
+#### 1. Add a parser entry to `languages.toml`
 
 ```toml
 [parsers.{name}]
-git = "https://github.com/…/tree-sitter-{lang}.git"
+git = "https://github.com/.../tree-sitter-{lang}.git"
 rev = "full_commit_sha"
 version = "x.y.z"
 # Add crate if a crates.io package exists
 # Add aliases if the language has common alternative names
 ```
 
-`crates/lumis-core/build.rs` generates the `Language` enum variant and detection metadata (globs, shebangs, etc.) from this entry, and the JS build generates its detection tables from the same `languages.toml` data.
+`crates/lumis-core/build.rs` generates the `Language` enum variant and Rust detection metadata from this entry. The JS build generates its detection tables from the same `languages.toml` data.
 
 #### 2. Add Rust wiring
 
 In `crates/lumis/Cargo.toml`:
 
-- If a crate exists on crates.io, add an optional dependency:
+- If a crates.io package exists, add an optional dependency:
   ```toml
   tree-sitter-{lang} = { version = "x.y.z", optional = true }
   ```
@@ -181,23 +183,23 @@ In `crates/lumis/Cargo.toml`:
   ```toml
   lang-{name} = ["lumis-core/lang-{name}"]
   ```
-- Add `lang-{name}` to the `all-languages` list in both `crates/lumis/Cargo.toml` and `crates/lumis-core/Cargo.toml`
-- If the language belongs in an existing bundle, add it to the matching bundle in `languages.toml`, then run `just cargo-update-features` to regenerate the `lang-bundle-*` feature lists in both Cargo manifests
+- Add `lang-{name}` to `all-languages` in both `crates/lumis/Cargo.toml` and `crates/lumis-core/Cargo.toml`.
+- If the language belongs in an existing bundle, add it to the matching bundle in `languages.toml`, then run `just cargo-update-features` to regenerate the `lang-bundle-*` feature lists in both Cargo manifests.
 
 #### 3. Fetch parser and queries
 
 ```sh
-just langs-fetch-vendored-parsers {name} # fetches vendored source from git
-just cargo-update-dep {name}      # syncs crate-backed parser versions into crates/lumis/Cargo.toml
-just cargo-update-features        # syncs Rust bundle features from languages.toml
-just langs-fetch-queries {name}   # fetches .scm query files
+just langs-fetch-vendored-parsers {name}
+just cargo-update-dep {name}
+just cargo-update-features
+just langs-fetch-queries {name}
 ```
 
-#### 4. Wire up vendored parsers (only if there is no crates.io package)
+#### 4. Wire up vendored parsers
 
-If the parser has no crates.io package:
+Do this only if there is no crates.io package:
 
-- Add compilation in `crates/lumis/build.rs` inside the `vendored_parsers()` function
+- Add compilation in `crates/lumis/build.rs` inside `vendored_parsers()`.
 - Add an `unsafe extern "C"` declaration in `crates/lumis/src/languages.rs`:
   ```rust
   #[cfg(feature = "lang-{name}")]
@@ -208,12 +210,12 @@ If the parser has no crates.io package:
 
 In `crates/lumis/src/languages.rs`:
 
-- Add a `{LANG}_CONFIG` static `LazyLock<HighlightConfiguration>`
-- Return it from the `config()` match with `#[cfg(feature = "lang-{name}")]`
+- Add a `{LANG}_CONFIG` static `LazyLock<HighlightConfiguration>`.
+- Return it from the `config()` match with `#[cfg(feature = "lang-{name}")]`.
 
-#### 6. Sample file
+#### 6. Add a sample file
 
-Add a sample file at `samples/{name}.{ext}` with representative code. It is used by tests and by `website/` demos.
+Add `samples/{name}.{ext}` with representative code. It is used by tests and `website/` demos.
 
 #### 7. Generate docs
 
@@ -221,7 +223,7 @@ Add a sample file at `samples/{name}.{ext}` with representative code. It is used
 just docs-gen-languages-md
 ```
 
-Updates `LANGUAGES.md`.
+This updates `LANGUAGES.md`.
 
 #### 8. Verify
 
@@ -234,55 +236,57 @@ just test-conformance
 ### Updating parsers
 
 ```sh
-just langs-upgrade-parsers {name}       # updates languages.toml revisions and syncs crate-backed versions
-just langs-fetch-vendored-parsers {name} # fetches updated vendored parser files
+just langs-upgrade-parsers {name}
+just langs-fetch-vendored-parsers {name}
 ```
 
-For parser and query updates, prefer `just langs-update {name}` or the `update-langs` GitHub workflow. Do not use Dependabot to bump `tree-sitter-*` Rust parser crates independently; those versions are tied to the pinned parser/query state in `languages.toml`. `just langs-upgrade-parsers {name}` now updates `languages.toml`, syncs any crate-backed Rust parser versions into `crates/lumis/Cargo.toml`, and refreshes Rust bundle features from `languages.toml`.
+For parser and query updates, prefer `just langs-update {name}` or the `update-langs` GitHub workflow. Do not use Dependabot to bump `tree-sitter-*` Rust parser crates independently. Those versions are tied to the pinned parser and query state in `languages.toml`.
+
+`just langs-upgrade-parsers {name}` updates `languages.toml`, syncs any crate-backed Rust parser versions into `crates/lumis/Cargo.toml`, and refreshes Rust bundle features from `languages.toml`.
 
 ### Updating queries
 
 ```sh
-just langs-upgrade-queries {name} # updates languages.toml revisions
-just langs-fetch-queries {name}   # fetches updated upstream files
-just langs-preprocess-queries     # regenerates checked-in processed queries
+just langs-upgrade-queries {name}
+just langs-fetch-queries {name}
+just langs-preprocess-queries
 ```
 
-Omit the name argument to upgrade all queries at once.
+Omit `{name}` to upgrade all queries at once.
 
-`just langs-update {name}` is the end-to-end command for a coordinated parser update. It fetches parsers first, syncs crate-backed Rust parser deps and Rust bundle features, then fetches and preprocesses queries, and regenerates `LANGUAGES.md`.
+`just langs-update {name}` is the end-to-end command for a coordinated parser update. It fetches parsers first, syncs crate-backed Rust parser dependencies and Rust bundle features, then fetches and preprocesses queries, and regenerates `LANGUAGES.md`.
 
-Raw query sources live in `queries/upstream/`. Preprocessed tracked outputs live in `queries/processed/` and should be committed whenever upstream queries, replacements, or appended patches change.
+Raw query sources live in `queries/upstream/`. Preprocessed tracked outputs live in `queries/processed/` and should be committed whenever upstream queries, replacements, or append patches change.
 
 #### Query replacements and append patches
 
-If a query needs modifications that diverge from upstream, use one of these directories:
+If a query must diverge from upstream, use one of these directories:
 
-- `queries/override/{name}/{query}.scm` replaces the upstream query entirely.
-- `queries/append/{name}/{query}.scm` appends extra patterns after the upstream query, or after the replacement query when both exist.
+- `queries/override/{name}/{query}.scm`: replace the upstream query entirely
+- `queries/append/{name}/{query}.scm`: append extra patterns after the upstream query, or after the replacement query when both exist
 
-Use `queries/override/` when the fetched upstream query is incompatible with the pinned parser. Use `queries/append/` when you only need to add local patterns without replacing upstream behavior.
+Use `queries/override/` when the fetched upstream query is incompatible with the pinned parser. Use `queries/append/` when you only need to add local patterns.
 
 ### Building WASMs
 
-WASMs are built in CI via the `wasm-release` workflow, but you can build locally with emscripten:
+WASMs are built in CI by the `wasm-release` workflow, but you can build them locally with emscripten:
 
 ```sh
-just wasm-build          # build all
-just wasm-build {name}   # build one
+just wasm-build
+just wasm-build {name}
 ```
 
-Requires `emcc` (emscripten) and `tree-sitter-cli`.
+This requires `emcc` and `tree-sitter-cli`.
 
 #### WASM distribution
 
-Each grammar WASM is published as an npm package: `@lumis-sh/wasm-{name}`.
+Each grammar WASM is published as `@lumis-sh/wasm-{name}`.
 
-The JS package (`@lumis-sh/lumis`) does not bundle parser WASMs. Language bundles contain a `WasmRef` (`packageName`, `name`, `version`) that is resolved at runtime via the WASM resolver. The default resolver fetches from jsDelivr. Call `configureWasmResolver()` to point at your own server.
+`@lumis-sh/lumis` does not bundle parser WASMs. Language bundles contain a `WasmRef` (`packageName`, `name`, `version`) that is resolved at runtime by the WASM resolver. The default resolver fetches from jsDelivr. Use `configureWasmResolver()` to point to your own server.
 
-The CLI (`lumis-cli`) also fetches parser WASMs from unpkg on first use and caches them in the data directory.
+`lumis-cli` also fetches parser WASMs on first use from unpkg and caches them in the data directory.
 
-The `wasm-release` workflow publishes packages automatically. It detects which parsers need publishing (via `scripts/wasm-needed.py`) and builds/publishes them in parallel.
+The `wasm-release` workflow publishes packages automatically. It detects which parsers still need publishing with `scripts/wasm-needed.py` and builds and publishes them in parallel.
 
 ## Themes
 
@@ -328,8 +332,8 @@ just docs-gen-themes-md
 ### Updating themes
 
 ```sh
-just themes-gen               # regenerate all themes from themes.lua
-just themes-gen theme_name    # regenerate a single theme
+just themes-gen
+just themes-gen theme_name
 ```
 
 After regenerating, sync the JSON and CSS files:
