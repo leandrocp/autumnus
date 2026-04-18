@@ -59,9 +59,7 @@ export const nodeRuntime: RuntimeEnvironment = {
       }
 
       const { fileURLToPath } = await import(nodeUrl);
-      return new Uint8Array(
-        await (await import(nodeFsPromises)).readFile(fileURLToPath(source)),
-      );
+      return new Uint8Array(await (await import(nodeFsPromises)).readFile(fileURLToPath(source)));
     }
 
     if (source.startsWith("file://")) {

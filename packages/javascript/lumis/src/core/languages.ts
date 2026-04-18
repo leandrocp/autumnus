@@ -278,7 +278,7 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
           /* webpackIgnore: true */
           /* turbopackIgnore: true */
           /* @vite-ignore */
-          ref.packageName,
+          ref.packageName
         );
         if (mod.default instanceof Uint8Array) {
           this.sharedCache.wasmBytes.set(key, mod.default);
@@ -329,7 +329,12 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
         definition: opts.definition,
         parser,
         language,
-        config: await compileHighlightConfig(language, opts.highlights, opts.injections, opts.locals),
+        config: await compileHighlightConfig(
+          language,
+          opts.highlights,
+          opts.injections,
+          opts.locals,
+        ),
       };
 
       this.loadedLanguages.set(opts.definition.id, loaded);
