@@ -1389,7 +1389,7 @@ dependencies = [
 
 [[package]]
 name = "lumis-build"
-version = "0.0.1"
+version = "1.0.0"
 
 [[package]]
 name = "lumis-cli"
