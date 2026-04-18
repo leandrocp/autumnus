@@ -1,6 +1,6 @@
 import type { HighlightEvent, TerminalFormatter } from "../types.js";
 import { encodeSource, decodeSourceSlice, getScopedThemeStyle } from "./html.js";
-import { paint } from "./ansi.js";
+import { paint } from "./ansi-core.js";
 
 export function formatTerminal(
   source: string,

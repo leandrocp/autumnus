@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
-import type { LumisOptions } from "./shared.js";
+import type { LumisOptions } from "./clientShared.js";
 import {
   getHighlighter,
   getLanguageId,
@@ -9,7 +9,7 @@ import {
   isLoadedLanguage,
   isUnknownLanguage,
   toReactNode,
-} from "./shared.js";
+} from "./clientShared.js";
 
 export interface UseLumisOptions extends LumisOptions {}
 

@@ -16,7 +16,6 @@ import { formatBBCode } from "./formatter/bbcode.js";
 import { formatHtmlInline } from "./formatter/html-inline.js";
 import { formatHtmlLinked } from "./formatter/html-linked.js";
 import { formatHtmlMultiThemes } from "./formatter/html-multi-themes.js";
-import { formatTerminal } from "./formatter/terminal.js";
 
 /**
  * Create an inline-styles HTML formatter. Each token gets a `<span>` with
@@ -128,16 +127,6 @@ export function bbcodeScoped(options: BBCodeScopedOptions = {}): BBCodeScopedFor
  * console.log(ansi)
  * ```
  */
-export function terminal(options: TerminalOptions = {}): TerminalFormatter {
-  const formatter: TerminalFormatter = {
-    ...options,
-    format(source: string): string {
-      return formatTerminal(source, highlightEvents(source, formatter.language), formatter);
-    },
-  };
-  return formatter;
-}
-
 export type {
   BBCodeScopedFormatter,
   BBCodeScopedOptions,

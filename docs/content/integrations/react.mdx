@@ -12,7 +12,10 @@ keywords:
 
 # React
 
-[Full example on GitHub](https://github.com/leandrocp/lumis/tree/main/packages/javascript/react/examples/react)
+Examples:
+
+- [Vite React example](https://github.com/leandrocp/lumis/tree/main/packages/javascript/react/examples/react)
+- [Next.js App Router example](https://github.com/leandrocp/lumis/tree/main/packages/javascript/react/examples/next-app-router)
 
 `@lumis-sh/react` follows the same formatter-first API as the rest of Lumis, but splits client and server helpers.
 
@@ -103,6 +106,8 @@ export function Example() {
 ## Server rendering
 
 Use `renderCodeBlock()` from the server subpath when you need highlighted output on the server.
+
+This is a good fit for React Server Components and Next.js App Router pages.
 
 ```tsx
 import {renderCodeBlock} from '@lumis-sh/react/server'

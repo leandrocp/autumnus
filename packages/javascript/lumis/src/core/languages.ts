@@ -1,4 +1,4 @@
-import { Parser, Language, Query } from "web-tree-sitter";
+import type { Parser, Language, Query } from "web-tree-sitter";
 import { LANGUAGES } from "../generated/languages-meta.js";
 import { HIGHLIGHT_NAMES } from "../highlights.js";
 import type { RuntimeEnvironment } from "../runtime/runtime.js";
@@ -11,7 +11,6 @@ import type {
   WasmRef,
 } from "../types.js";
 import { PLAINTEXT_LANG_ID, type LanguageInfo } from "../types.js";
-import treeSitterWasmBinary from "../tree-sitter-wasm.js";
 
 export type WasmResolver = (language: string, wasm: WasmRef) => string | URL;
 
@@ -91,6 +90,13 @@ function isRuntimeWasmInput(
   return !(typeof wasm === "object" && wasm !== null && isWasmRef(wasm));
 }
 
+let treeSitterPromise: Promise<typeof import("web-tree-sitter")> | undefined;
+
+async function loadTreeSitter() {
+  treeSitterPromise ??= import("web-tree-sitter");
+  return treeSitterPromise;
+}
+
 async function trackLoad<T>(
   loads: Map<string, Promise<T>>,
   key: string,
@@ -147,12 +153,13 @@ function resolveHighlightName(captureName: string): string | undefined {
   return best;
 }
 
-function compileHighlightConfig(
+async function compileHighlightConfig(
   language: Language,
   highlightsQuery: string,
   injectionsQuery = "",
   localsQuery = "",
-): CompiledHighlightConfig {
+): Promise<CompiledHighlightConfig> {
+  const { Query } = await loadTreeSitter();
   const querySource = `${injectionsQuery}${localsQuery}${highlightsQuery}`;
   const localsQueryOffset = injectionsQuery.length;
   const highlightsQueryOffset = injectionsQuery.length + localsQuery.length;
@@ -267,7 +274,12 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
       }
 
       try {
-        const mod = await import(/* @vite-ignore */ ref.packageName);
+        const mod = await import(
+          /* webpackIgnore: true */
+          /* turbopackIgnore: true */
+          /* @vite-ignore */
+          ref.packageName,
+        );
         if (mod.default instanceof Uint8Array) {
           this.sharedCache.wasmBytes.set(key, mod.default);
           return mod.default;
@@ -308,6 +320,7 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
         throw new Error(`Unsupported WASM input for language "${opts.definition.id}"`);
       }
 
+      const { Language, Parser } = await loadTreeSitter();
       const language = await Language.load(wasmInput);
       const parser = new Parser();
       parser.setLanguage(language);
@@ -316,7 +329,7 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
         definition: opts.definition,
         parser,
         language,
-        config: compileHighlightConfig(language, opts.highlights, opts.injections, opts.locals),
+        config: await compileHighlightConfig(language, opts.highlights, opts.injections, opts.locals),
       };
 
       this.loadedLanguages.set(opts.definition.id, loaded);
@@ -329,7 +342,10 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
     }
 
     async initParser(): Promise<void> {
-      this.sharedCache.parserInit ??= Parser.init({ wasmBinary: treeSitterWasmBinary });
+      this.sharedCache.parserInit ??= Promise.all([
+        loadTreeSitter(),
+        runtime.parserInitOptions?.() ?? Promise.resolve(undefined),
+      ]).then(([{ Parser }, initOptions]) => Parser.init(initOptions));
       await this.sharedCache.parserInit;
     }
 

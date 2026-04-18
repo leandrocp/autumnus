@@ -4,6 +4,11 @@ React integration for [Lumis](https://lumis.sh) syntax highlighting.
 
 Docs: [https://lumis.sh/docs](https://lumis.sh/docs)
 
+Examples:
+
+- [Vite React](./examples/react)
+- [Next.js App Router](./examples/next-app-router)
+
 ## Install
 
 ```bash
