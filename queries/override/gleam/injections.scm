@@ -1,4 +1,3 @@
-; This file is auto-generated. Do not edit.
 ([
   (module_comment)
   (statement_comment)

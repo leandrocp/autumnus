@@ -1109,9 +1109,9 @@ dependencies = [
 
 [[package]]
 name = "tree-sitter-jinja"
-version = "0.11.1"
+version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "48fe39a344ddc8226aedae56699f21a6a85d97f9bb306ba0f709ef422dc44a59"
+checksum = "31d144fa6fe361155241ada1b4a413ea95c9f323d127f0714f1e5a2c6ed8a35d"
 dependencies = [
  "cc",
  "tree-sitter",
