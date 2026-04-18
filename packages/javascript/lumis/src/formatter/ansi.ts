@@ -16,8 +16,7 @@ export type AnsiSegment = [string, HighlightRange];
  * })
  * // [["\x1b[0m...const\x1b[0m", { start: 0, end: 5 }], ...]
  * ```
- */
-/**
+ *
  * @deprecated Use `highlightIter()` with `paint()` instead.
  */
 export async function highlightIterWithAnsi(

@@ -114,19 +114,6 @@ export function bbcodeScoped(options: BBCodeScopedOptions = {}): BBCodeScopedFor
   return formatter;
 }
 
-/**
- * Create a terminal formatter that outputs ANSI escape codes.
- *
- * @example
- * ```ts
- * import { terminal } from '@lumis-sh/lumis/formatters'
- * import javascript from '@lumis-sh/lumis/langs/javascript'
- * import dracula from '@lumis-sh/themes/dracula'
- *
- * const ansi = hl.highlight('const x = 1', terminal({ language: javascript, theme: dracula }))
- * console.log(ansi)
- * ```
- */
 export type {
   BBCodeScopedFormatter,
   BBCodeScopedOptions,
