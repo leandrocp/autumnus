@@ -1,4 +1,4 @@
-import type { Parser, Language, Query } from "web-tree-sitter";
+import type { Language } from "web-tree-sitter";
 import { LANGUAGES } from "../generated/languages-meta.js";
 import { HIGHLIGHT_NAMES } from "../highlights.js";
 import type { RuntimeEnvironment } from "../runtime/runtime.js";
