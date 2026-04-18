@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { renderCodeBlock } from '@lumis-sh/react'
+import { renderCodeBlock } from '@lumis-sh/react/server'
 import { bundledLanguages } from '@lumis-sh/lumis/bundles/web'
 import { htmlInline } from '@lumis-sh/lumis/formatters'
 import githubLight from '@lumis-sh/themes/github_light'

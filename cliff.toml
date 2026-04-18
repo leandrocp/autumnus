@@ -10,7 +10,7 @@ https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}
 {% for group, commits in commits | group_by(attribute=\"group\") %}
 ### {{ group }}
 
-{% for commit in commits %}- {% if commit.breaking %}BREAKING: {% endif %}{% if commit.remote.pr_number %}{{ commit.message | trim_end_matches(pat=(" (#" ~ commit.remote.pr_number ~ ")")) }} ([#{{ commit.remote.pr_number }}]({{ self::remote_url() }}/pull/{{ commit.remote.pr_number }})){% else %}{{ commit.message }}{% endif %}
+{% for commit in commits %}- {% if commit.breaking %}BREAKING: {% endif %}{% if commit.remote.pr_number %}{{ commit.message | trim_end_matches(pat=(" (#" ~ commit.remote.pr_number ~ ")")) }} - [#{{ commit.remote.pr_number }}]({{ self::remote_url() }}/pull/{{ commit.remote.pr_number }}){% else %}{{ commit.message }}{% endif %}{% if commit.remote.username and commit.remote.username != "leandrocp" %} by @{{ commit.remote.username }}{% endif %}
 {% endfor %}
 {% endfor %}
 """

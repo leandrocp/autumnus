@@ -16,7 +16,6 @@ import { formatBBCode } from "./formatter/bbcode.js";
 import { formatHtmlInline } from "./formatter/html-inline.js";
 import { formatHtmlLinked } from "./formatter/html-linked.js";
 import { formatHtmlMultiThemes } from "./formatter/html-multi-themes.js";
-import { formatTerminal } from "./formatter/terminal.js";
 
 /**
  * Create an inline-styles HTML formatter. Each token gets a `<span>` with
@@ -110,29 +109,6 @@ export function bbcodeScoped(options: BBCodeScopedOptions = {}): BBCodeScopedFor
     ...options,
     format(source: string): string {
       return formatBBCode(source, highlightEvents(source, formatter.language));
-    },
-  };
-  return formatter;
-}
-
-/**
- * Create a terminal formatter that outputs ANSI escape codes.
- *
- * @example
- * ```ts
- * import { terminal } from '@lumis-sh/lumis/formatters'
- * import javascript from '@lumis-sh/lumis/langs/javascript'
- * import dracula from '@lumis-sh/themes/dracula'
- *
- * const ansi = hl.highlight('const x = 1', terminal({ language: javascript, theme: dracula }))
- * console.log(ansi)
- * ```
- */
-export function terminal(options: TerminalOptions = {}): TerminalFormatter {
-  const formatter: TerminalFormatter = {
-    ...options,
-    format(source: string): string {
-      return formatTerminal(source, highlightEvents(source, formatter.language), formatter);
     },
   };
   return formatter;
