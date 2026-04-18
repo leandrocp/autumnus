@@ -12,6 +12,8 @@ npm install @lumis-sh/react @lumis-sh/lumis @lumis-sh/themes react
 
 ## Usage
 
+### Simple
+
 ```tsx
 import { CodeBlock } from '@lumis-sh/react'
 import { htmlInline } from '@lumis-sh/lumis/formatters'
@@ -26,10 +28,58 @@ export function Example() {
 }
 ```
 
+### Reuse One Highlighter
+
+```tsx
+import { CodeBlock } from '@lumis-sh/react'
+import { createHighlighter } from '@lumis-sh/lumis'
+import { bundledLanguages } from '@lumis-sh/lumis/bundles/web'
+import { htmlInline } from '@lumis-sh/lumis/formatters'
+import githubLight from '@lumis-sh/themes/github_light'
+
+const highlighter = createHighlighter({ languages: [bundledLanguages] })
+
+export function Example() {
+  return (
+    <CodeBlock
+      highlighter={highlighter}
+      formatter={htmlInline({ language: 'javascript', theme: githubLight })}
+    >
+      {`const x = 1`}
+    </CodeBlock>
+  )
+}
+```
+
+## Hook
+
+Pass `highlighter` when you want to reuse one instance across multiple blocks or preload languages ahead of time.
+
+```tsx
+import { useLumis } from '@lumis-sh/react'
+import { createHighlighter } from '@lumis-sh/lumis'
+import { bundledLanguages } from '@lumis-sh/lumis/bundles/web'
+import { htmlInline } from '@lumis-sh/lumis/formatters'
+import githubLight from '@lumis-sh/themes/github_light'
+
+const highlighter = createHighlighter({ languages: [bundledLanguages] })
+
+export function Example() {
+  const { content, isLoading } = useLumis({
+    children: 'const x = 1',
+    formatter: htmlInline({ language: 'javascript', theme: githubLight }),
+    highlighter,
+  })
+
+  if (isLoading) return null
+  return content
+}
+```
+
 ## Server rendering
 
 ```tsx
-import { renderCodeBlock } from '@lumis-sh/react'
+import { renderCodeBlock } from '@lumis-sh/react/server'
 import { bundledLanguages } from '@lumis-sh/lumis/bundles/web'
 import { htmlInline } from '@lumis-sh/lumis/formatters'
 import githubLight from '@lumis-sh/themes/github_light'
