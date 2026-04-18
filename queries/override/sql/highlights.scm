@@ -1,4 +1,3 @@
-; This file is auto-generated. Do not edit.
 (invocation
   (object_reference
     name: (identifier) @function.call))

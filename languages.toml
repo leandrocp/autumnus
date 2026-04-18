@@ -6,7 +6,7 @@
 
 [queries.default]
 git = "https://github.com/nvim-treesitter/nvim-treesitter.git"
-rev = "6620ae1c44dfa8623b22d0cbf873a9e8d073b849"
+rev = "4916d6592ede8c07973490d9322f187e07dfefac"
 path = "runtime/queries"
 
 [queries.iex]
@@ -16,7 +16,7 @@ path = "queries"
 
 [queries.gleam]
 git = "https://github.com/gleam-lang/tree-sitter-gleam.git"
-rev = "6ea757f7eb8d391dbf24dbb9461990757946dd5e"
+rev = "0153f8b875cd02034b553f3a84a2f5ee67a80364"
 path = "queries"
 
 [queries.make]
@@ -41,7 +41,7 @@ path = "queries"
 
 [queries.sql]
 git = "https://github.com/derekstride/tree-sitter-sql.git"
-rev = "851e9cb257ba7c66cc8c14214a31c44d2f1e954e"
+rev = "c2e1e08db1ea20dc23bdb8d228a81a8756e9c450"
 path = "queries"
 
 [queries.wat]
@@ -274,7 +274,7 @@ emacs = ["fsharp"]
 
 [parsers.gleam]
 git = "https://github.com/gleam-lang/tree-sitter-gleam.git"
-rev = "6ea757f7eb8d391dbf24dbb9461990757946dd5e"
+rev = "0bb1b0ae1a3555180ae7b0004851da747fc230d1"
 crate = "tree-sitter-gleam"
 version = "1.0.0"
 globs = ["*.gleam"]
