@@ -98,7 +98,8 @@
   },
   "devDependencies": {
     "@microsoft/api-extractor": "^7.36.0",
-    "@lumis-sh/themes": "workspace:^0.0.2",
+    "@lumis-sh/themes": "workspace:*",
+    "@lumis-sh/wasm-bundle-full": "workspace:*",
     "@lumis-sh/wasm-json": "^0.24.8",
     "@types/node": "^25.5.0",
     "oxfmt": "^0.43.0",
