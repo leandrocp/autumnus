@@ -72,7 +72,7 @@ jobs:
       - name: Install Lua dependencies
         run: luarocks install toml-edit && luarocks install dkjson
 
-      - uses: pnpm/action-setup@v5
+      - uses: pnpm/action-setup@v6
         with:
           version: 10
 
