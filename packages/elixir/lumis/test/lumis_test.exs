@@ -943,8 +943,8 @@ defmodule Lumis.LumisTest do
 
   describe "validate_options!/1" do
     test "validates valid options" do
-      assert [formatter: {:html_inline, formatter_opts}, language: "elixir"] =
-               Lumis.validate_options!(language: "elixir", formatter: :html_inline)
+      assert [formatter: {:html_inline, formatter_opts}] =
+               Lumis.validate_options!(formatter: {:html_inline, language: "elixir"})
 
       assert Keyword.equal?(
                [
@@ -1065,7 +1065,7 @@ defmodule Lumis.LumisTest do
 
     test "raises on invalid language type" do
       assert_raise NimbleOptions.ValidationError, fn ->
-        Lumis.validate_options!(language: 123)
+        Lumis.validate_options!(formatter: {:html_inline, language: 123})
       end
     end
 
@@ -1085,7 +1085,7 @@ defmodule Lumis.LumisTest do
   describe "rust_options!/1" do
     test "converts basic options to rust format" do
       options =
-        Lumis.validate_options!(language: "elixir", formatter: {:html_inline, theme: "onedark"})
+        Lumis.validate_options!(formatter: {:html_inline, language: "elixir", theme: "onedark"})
 
       assert %{
                language: "elixir",
@@ -1103,18 +1103,11 @@ defmodule Lumis.LumisTest do
     end
 
     test "uses formatter language when deprecated language is present" do
-      capture_io(:stderr, fn ->
-        send(
-          self(),
-          {:options,
-           Lumis.validate_options!(
-             language: "elixir",
-             formatter: {:html_inline, language: "rust"}
-           )}
+      options =
+        Lumis.validate_options!(
+          language: "elixir",
+          formatter: {:html_inline, language: "rust"}
         )
-      end)
-
-      assert_received {:options, options}
 
       assert %{language: "rust", formatter: {:html_inline, %{theme: {:string, "onedark"}}}} =
                Lumis.rust_options!(options)
@@ -1321,7 +1314,7 @@ defmodule Lumis.LumisTest do
     end
 
     test "returns map instead of keyword list" do
-      options = Lumis.validate_options!(language: "elixir", formatter: :html_inline)
+      options = Lumis.validate_options!(formatter: {:html_inline, language: "elixir"})
 
       assert %{} = Lumis.rust_options!(options)
     end
