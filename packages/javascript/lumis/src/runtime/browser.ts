@@ -1,5 +1,6 @@
 import type { RuntimeEnvironment } from "./runtime.js";
 import { createLanguagesModule } from "../core/languages.js";
+import treeSitterWasmBinary from "../tree-sitter-wasm.js";
 
 export const browserRuntime: RuntimeEnvironment = {
   async resolveWasm(wasm) {
@@ -25,6 +26,12 @@ export const browserRuntime: RuntimeEnvironment = {
 
   async readResolvedWasmFromDisk() {
     return undefined;
+  },
+
+  async parserInitOptions() {
+    return {
+      wasmBinary: treeSitterWasmBinary,
+    };
   },
 };
 

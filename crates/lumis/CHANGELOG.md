@@ -1,3 +1,17 @@
+## [0.8.0](https://github.com/leandrocp/lumis/compare/cargo-lumis/v0.7.0...cargo-lumis/v0.8.0) (2026-04-18)
+
+### Bug Fixes
+
+- queries override
+
+### Code Refactoring
+
+- BREAKING: deprecate ANSI iterator helpers in favor of `paint` - [#706](https://github.com/leandrocp/lumis/pull/706)
+
+### Documentation
+
+- move runnable examples into package dirs - [#709](https://github.com/leandrocp/lumis/pull/709)
+
 ## [0.7.0](https://github.com/leandrocp/lumis/compare/rust@v0.6.0...rust@v0.7.0) (2026-04-06)
 
 

@@ -1,11 +1,16 @@
 import type { RuntimeEnvironment } from "./runtime.js";
 import { createLanguagesModule } from "../core/languages.js";
+import treeSitterWasmBinary from "../tree-sitter-wasm.js";
+
+const nodeFsPromises = "node:fs" + "/promises";
+const nodePath = "node:path";
+const nodeUrl = "node:url";
 
 export const nodeRuntime: RuntimeEnvironment = {
   async resolveWasm(wasm) {
     if (wasm instanceof URL) {
       if (wasm.protocol === "file:") {
-        const { fileURLToPath } = await import("node:url");
+        const { fileURLToPath } = await import(nodeUrl);
         return fileURLToPath(wasm);
       }
       return wasm.href;
@@ -24,8 +29,8 @@ export const nodeRuntime: RuntimeEnvironment = {
 
   async readFsCache(key) {
     try {
-      const { readFile } = await import("node:fs/promises");
-      const { join } = await import("node:path");
+      const { readFile } = await import(nodeFsPromises);
+      const { join } = await import(nodePath);
       const filePath = join("node_modules", ".cache", "lumis", key + ".wasm");
       return new Uint8Array(await readFile(filePath));
     } catch {
@@ -35,8 +40,8 @@ export const nodeRuntime: RuntimeEnvironment = {
 
   async writeFsCache(key, data) {
     try {
-      const { writeFile, mkdir } = await import("node:fs/promises");
-      const { join } = await import("node:path");
+      const { writeFile, mkdir } = await import(nodeFsPromises);
+      const { join } = await import(nodePath);
       const cacheDir = join("node_modules", ".cache", "lumis");
       await mkdir(cacheDir, { recursive: true });
       await writeFile(join(cacheDir, key + ".wasm"), data);
@@ -46,23 +51,21 @@ export const nodeRuntime: RuntimeEnvironment = {
   },
 
   async readResolvedWasmFromDisk(source) {
-    const { isAbsolute } = await import("node:path");
+    const { isAbsolute } = await import(nodePath);
 
     if (source instanceof URL) {
       if (source.protocol !== "file:") {
         return undefined;
       }
 
-      const { fileURLToPath } = await import("node:url");
-      return new Uint8Array(
-        await (await import("node:fs/promises")).readFile(fileURLToPath(source)),
-      );
+      const { fileURLToPath } = await import(nodeUrl);
+      return new Uint8Array(await (await import(nodeFsPromises)).readFile(fileURLToPath(source)));
     }
 
     if (source.startsWith("file://")) {
-      const { fileURLToPath } = await import("node:url");
+      const { fileURLToPath } = await import(nodeUrl);
       return new Uint8Array(
-        await (await import("node:fs/promises")).readFile(fileURLToPath(new URL(source))),
+        await (await import(nodeFsPromises)).readFile(fileURLToPath(new URL(source))),
       );
     }
 
@@ -70,8 +73,14 @@ export const nodeRuntime: RuntimeEnvironment = {
       return undefined;
     }
 
-    const { readFile } = await import("node:fs/promises");
+    const { readFile } = await import(nodeFsPromises);
     return new Uint8Array(await readFile(source));
+  },
+
+  async parserInitOptions() {
+    return {
+      wasmBinary: treeSitterWasmBinary,
+    };
   },
 };
 

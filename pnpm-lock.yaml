@@ -145,10 +145,7 @@ importers:
         version: 19.2.5
       react-dom:
         specifier: ^19.2.0
-        version: 19.2.5(react@19.2.5)
-      tsup:
-        specifier: ^8.5.0
-        version: 8.5.1(@microsoft/api-extractor@7.58.2(@types/node@25.6.0))(postcss@8.5.10)(tsx@4.21.0)(typescript@6.0.2)(yaml@2.8.3)
+        version: 19.2.4(react@19.2.4)
       typescript:
         specifier: ^6.0.2
         version: 6.0.2

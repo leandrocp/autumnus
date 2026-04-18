@@ -2,17 +2,23 @@
 
 Releases are prepared locally and published from tags.
 
-## Checklist
+## Quick flow
 
-1. Run `just release-needed` to see which packages have path-scoped commits since their latest package tag.
-2. Decide which packages must move together, including downstream dependency bumps.
-3. For each package, run `just release-prepare <package> <version>`.
-4. Review the changed manifest and `CHANGELOG.md` for each prepared package.
-5. If a package depends on another package in the same release, update the dependent manifest in the same commit.
-6. Commit the release prep changes.
-7. Push the commit to `main`.
-8. Push package tags in dependency order with `git push origin <package>/v<version>`.
-9. Watch the tag-triggered publish workflows.
+```sh
+just release-needed
+just release-prepare <package> <version>
+git add <changed-files>
+git commit -m "chore(release): <package> <version>"
+git push origin main
+git tag <package>/v<version>
+git push origin <package>/v<version>
+```
+
+- Run `just release-needed` first to decide which packages ship together.
+- Review each changed manifest and `CHANGELOG.md` after `just release-prepare`.
+- If one released package depends on another released package, update the dependent manifest in the same commit.
+- Push package tags in dependency order.
+- Watch the tag-triggered publish workflows after pushing tags.
 
 ## Publish order
 

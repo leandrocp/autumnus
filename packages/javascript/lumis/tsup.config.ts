@@ -42,4 +42,5 @@ export default defineConfig({
   splitting: true,
   clean: true,
   treeshake: true,
+  noExternal: ['web-tree-sitter'],
 })

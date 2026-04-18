@@ -1,3 +1,10 @@
+## [1.0.0](https://github.com/leandrocp/lumis/compare/cargo-lumis-core/v0.1.0...cargo-lumis-core/v1.0.0) (2026-04-18)
+
+
+### Code Refactoring
+
+- BREAKING: deprecate ANSI iterator helpers in favor of `paint` - [#706](https://github.com/leandrocp/lumis/pull/706)
+
 ## [0.1.0](https://github.com/leandrocp/lumis/compare/rust-core@v0.0.5...rust-core@v0.1.0) (2026-04-06)
 
 

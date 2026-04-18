@@ -32,8 +32,10 @@ defmodule Lumis.ConformanceTest do
         fixture = load_fixture(unquote(name))
 
         assert Lumis.highlight!(fixture["source"],
-                 language: fixture["language"],
-                 formatter: {:html_inline, theme: fixture["theme"]}
+                 formatter: {
+                   :html_inline,
+                   language: fixture["language"], theme: fixture["theme"]
+                 }
                ) == fixture["htmlInline"]
       end
 
@@ -42,8 +44,7 @@ defmodule Lumis.ConformanceTest do
         fixture = load_fixture(unquote(name))
 
         assert Lumis.highlight!(fixture["source"],
-                 language: fixture["language"],
-                 formatter: :html_linked
+                 formatter: {:html_linked, language: fixture["language"]}
                ) == fixture["htmlLinked"]
       end
 
@@ -52,9 +53,12 @@ defmodule Lumis.ConformanceTest do
         fixture = load_fixture(unquote(name))
 
         assert Lumis.highlight!(fixture["source"],
-                 language: fixture["language"],
-                 formatter:
-                   {:html_multi_themes, themes: [main: fixture["theme"]], default_theme: "main"}
+                 formatter: {
+                   :html_multi_themes,
+                   language: fixture["language"],
+                   themes: [main: fixture["theme"]],
+                   default_theme: "main"
+                 }
                ) == fixture["htmlMultiThemes"]
       end
 
@@ -63,8 +67,10 @@ defmodule Lumis.ConformanceTest do
         fixture = load_fixture(unquote(name))
 
         assert Lumis.highlight!(fixture["source"],
-                 language: fixture["language"],
-                 formatter: {:terminal, theme: fixture["theme"]}
+                 formatter: {
+                   :terminal,
+                   language: fixture["language"], theme: fixture["theme"]
+                 }
                ) == fixture["terminal"]
       end
 
@@ -73,8 +79,7 @@ defmodule Lumis.ConformanceTest do
         fixture = load_fixture(unquote(name))
 
         assert Lumis.highlight!(fixture["source"],
-                 language: fixture["language"],
-                 formatter: :bbcode_scoped
+                 formatter: {:bbcode_scoped, language: fixture["language"]}
                ) == fixture["bbcode"]
       end
     end

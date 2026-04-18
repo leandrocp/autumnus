@@ -9,7 +9,8 @@ import { bundledLanguages } from "@lumis-sh/lumis/bundles/web";
 import { htmlInline } from "@lumis-sh/lumis/formatters";
 import dracula from "../../themes/themes/dracula.ts";
 import githubLight from "../../themes/themes/github_light.ts";
-import { fromHighlighter } from "../src/index.js";
+import { CodeBlock, useLumis } from "../src/index.js";
+import { renderCodeBlock } from "../src/server.js";
 
 const SOURCE = "const x = 1";
 
@@ -24,6 +25,30 @@ function createDeferred<T>() {
   return { promise, resolve };
 }
 
+function HookHarness({
+  children,
+  formatter,
+  highlighter,
+}: {
+  children: string;
+  formatter: ReturnType<typeof htmlInline>;
+  highlighter?:
+    | Awaited<ReturnType<typeof createHighlighter>>
+    | Promise<Awaited<ReturnType<typeof createHighlighter>>>;
+}) {
+  const { content, isLoading } = useLumis({
+    children,
+    formatter,
+    highlighter,
+  });
+
+  if (isLoading) {
+    return <div data-state="loading" />;
+  }
+
+  return <>{content}</>;
+}
+
 afterEach(() => {
   document.body.innerHTML = "";
 });
@@ -31,11 +56,11 @@ afterEach(() => {
 describe("@lumis-sh/react", () => {
   it("renders highlighted React nodes on the server", async () => {
     const highlighter = await createHighlighter();
-    const { renderCodeBlock } = fromHighlighter(highlighter);
 
     const node = await renderCodeBlock({
       children: SOURCE,
       formatter: htmlInline({ language: bundledLanguages.javascript, theme: dracula }),
+      highlighter,
     });
 
     const html = renderToStaticMarkup(node);
@@ -47,13 +72,13 @@ describe("@lumis-sh/react", () => {
     expect(html).toMatch(/<span style="color:#[0-9a-f]+">const<\/span>/);
   });
 
-  it("supports string formatter languages through fromHighlighter", async () => {
+  it("supports string formatter languages through renderCodeBlock", async () => {
     const highlighter = await createHighlighter({ languages: [bundledLanguages] });
-    const { renderCodeBlock } = fromHighlighter(highlighter);
 
     const node = await renderCodeBlock({
       children: SOURCE,
       formatter: htmlInline({ language: "javascript", theme: dracula }),
+      highlighter,
     });
 
     const html = renderToStaticMarkup(node);
@@ -65,14 +90,16 @@ describe("@lumis-sh/react", () => {
   it("renders synchronously when given a resolved highlighter", async () => {
     const highlighter = await createHighlighter({ languages: [bundledLanguages] });
     await highlighter.loadLanguage("javascript");
-    const { CodeBlock } = fromHighlighter(highlighter);
     const container = document.createElement("div");
     document.body.append(container);
     const root = createRoot(container);
 
     await act(async () => {
       root.render(
-        <CodeBlock formatter={htmlInline({ language: "javascript", theme: dracula })}>
+        <CodeBlock
+          highlighter={highlighter}
+          formatter={htmlInline({ language: "javascript", theme: dracula })}
+        >
           {SOURCE}
         </CodeBlock>,
       );
@@ -88,23 +115,23 @@ describe("@lumis-sh/react", () => {
 
   it("loads a lazy language then highlights on a resolved highlighter", async () => {
     const highlighter = await createHighlighter({ languages: [bundledLanguages] });
-    const { CodeBlock } = fromHighlighter(highlighter);
     const container = document.createElement("div");
     document.body.append(container);
     const root = createRoot(container);
 
     await act(async () => {
       root.render(
-        <CodeBlock formatter={htmlInline({ language: "javascript", theme: dracula })}>
+        <CodeBlock
+          highlighter={highlighter}
+          formatter={htmlInline({ language: "javascript", theme: dracula })}
+        >
           {SOURCE}
         </CodeBlock>,
       );
     });
 
-    // Language not loaded yet, renders null initially
     expect(container.innerHTML).toBe("");
 
-    // Wait for loadLanguage (WASM loading) + highlight to complete
     await act(async () => {
       await new Promise((resolve) => setTimeout(resolve, 500));
     });
@@ -119,7 +146,6 @@ describe("@lumis-sh/react", () => {
 
   it("loads a lazy language handle then highlights on a resolved highlighter", async () => {
     const highlighter = await createHighlighter({ languages: [bundledLanguages] });
-    const { CodeBlock } = fromHighlighter(highlighter);
     const container = document.createElement("div");
     document.body.append(container);
     const root = createRoot(container);
@@ -127,6 +153,7 @@ describe("@lumis-sh/react", () => {
     await act(async () => {
       root.render(
         <CodeBlock
+          highlighter={highlighter}
           formatter={htmlInline({ language: bundledLanguages.javascript, theme: dracula })}
         >
           {SOURCE}
@@ -150,7 +177,6 @@ describe("@lumis-sh/react", () => {
 
   it("renders null then highlights when given a promise", async () => {
     const deferred = createDeferred<Awaited<ReturnType<typeof createHighlighter>>>();
-    const { CodeBlock } = fromHighlighter(deferred.promise);
     const container = document.createElement("div");
     document.body.append(container);
 
@@ -160,7 +186,10 @@ describe("@lumis-sh/react", () => {
 
     await act(async () => {
       root.render(
-        <CodeBlock formatter={htmlInline({ language: "javascript", theme: dracula })}>
+        <CodeBlock
+          highlighter={deferred.promise}
+          formatter={htmlInline({ language: "javascript", theme: dracula })}
+        >
           {SOURCE}
         </CodeBlock>,
       );
@@ -182,17 +211,54 @@ describe("@lumis-sh/react", () => {
     });
   });
 
+  it("supports custom rendering through useLumis", async () => {
+    const deferred = createDeferred<Awaited<ReturnType<typeof createHighlighter>>>();
+    const container = document.createElement("div");
+    document.body.append(container);
+    const root = createRoot(container);
+    const highlighter = await createHighlighter({ languages: [bundledLanguages] });
+    await highlighter.loadLanguage("javascript");
+
+    await act(async () => {
+      root.render(
+        <HookHarness
+          highlighter={deferred.promise}
+          formatter={htmlInline({ language: "javascript", theme: dracula })}
+        >
+          {SOURCE}
+        </HookHarness>,
+      );
+    });
+
+    expect(container.innerHTML).toContain('data-state="loading"');
+
+    await act(async () => {
+      deferred.resolve(highlighter);
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(container.innerHTML).toContain('class="lumis"');
+    expect(container.innerHTML).toContain('class="language-javascript"');
+
+    await act(async () => {
+      root.unmount();
+    });
+  });
+
   it("re-highlights when the formatter changes", async () => {
     const highlighter = await createHighlighter({ languages: [bundledLanguages] });
     await highlighter.loadLanguage("javascript");
-    const { CodeBlock } = fromHighlighter(highlighter);
     const container = document.createElement("div");
     document.body.append(container);
     const root = createRoot(container);
 
     await act(async () => {
       root.render(
-        <CodeBlock formatter={htmlInline({ language: "javascript", theme: dracula })}>
+        <CodeBlock
+          highlighter={highlighter}
+          formatter={htmlInline({ language: "javascript", theme: dracula })}
+        >
           {SOURCE}
         </CodeBlock>,
       );
@@ -203,7 +269,10 @@ describe("@lumis-sh/react", () => {
 
     await act(async () => {
       root.render(
-        <CodeBlock formatter={htmlInline({ language: "javascript", theme: githubLight })}>
+        <CodeBlock
+          highlighter={highlighter}
+          formatter={htmlInline({ language: "javascript", theme: githubLight })}
+        >
           {SOURCE}
         </CodeBlock>,
       );
@@ -220,7 +289,6 @@ describe("@lumis-sh/react", () => {
 
   it("throws immediately for unknown string languages", async () => {
     const highlighter = await createHighlighter({ languages: [bundledLanguages] });
-    const { CodeBlock } = fromHighlighter(highlighter);
     const container = document.createElement("div");
     document.body.append(container);
     const root = createRoot(container);
@@ -228,7 +296,10 @@ describe("@lumis-sh/react", () => {
     await expect(
       act(async () => {
         root.render(
-          <CodeBlock formatter={htmlInline({ language: "not-a-language", theme: dracula })}>
+          <CodeBlock
+            highlighter={highlighter}
+            formatter={htmlInline({ language: "not-a-language", theme: dracula })}
+          >
             {SOURCE}
           </CodeBlock>,
         );

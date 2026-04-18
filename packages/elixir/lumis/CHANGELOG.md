@@ -1,3 +1,18 @@
+## [0.4.0](https://github.com/leandrocp/lumis/compare/hex-lumis/v0.3.0...hex-lumis/v0.4.0) (2026-04-18)
+
+### Bug Fixes
+
+- BREAKING: rename `formatter` -> `formatters` - [#678](https://github.com/leandrocp/lumis/pull/678)
+
+### Documentation
+
+- elixir examples
+- move runnable examples into package dirs - [#709](https://github.com/leandrocp/lumis/pull/709)
+
+### Features
+
+- align `lang` -> `language` names - [#591](https://github.com/leandrocp/lumis/pull/591)
+
 ## [0.3.0](https://github.com/leandrocp/lumis/compare/elixir@v0.2.0...elixir@v0.3.0) (2026-04-05)
 
 ### Features

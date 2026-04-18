@@ -33,7 +33,7 @@ defmodule Lumis.Native do
     otp_app: :lumis,
     crate: "lumis_nif",
     version: version,
-    base_url: "#{github_url}/releases/download/elixir@v#{version}",
+    base_url: "#{github_url}/releases/download/hex-lumis/v#{version}",
     targets: ~w(
       aarch64-apple-darwin
       aarch64-unknown-linux-gnu

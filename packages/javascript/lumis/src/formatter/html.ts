@@ -64,6 +64,10 @@ function getUnderlineDecoration(style: HighlightStyle): string | undefined {
     return "underline";
   }
 
+  if (style.underline === "undercurl") {
+    return "underline wavy";
+  }
+
   return `underline ${style.underline}`;
 }
 

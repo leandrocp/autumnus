@@ -26,7 +26,7 @@ export interface HighlightStyle {
   bg?: string;
   bold?: boolean;
   italic?: boolean;
-  underline?: boolean | "solid" | "wavy" | "double" | "dotted" | "dashed";
+  underline?: boolean | "solid" | "wavy" | "double" | "dotted" | "dashed" | "undercurl";
   strikethrough?: boolean;
 }
 
