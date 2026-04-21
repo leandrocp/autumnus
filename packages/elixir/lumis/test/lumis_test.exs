@@ -166,7 +166,7 @@ defmodule Lumis.LumisTest do
   describe "formatter_type: :terminal" do
     test "default opts" do
       assert Lumis.formatter_type(:terminal) ==
-               {:ok, {:terminal, [language: nil, theme: "onedark"]}}
+               {:ok, {:terminal, [language: nil, theme: "onedark", default_bg: nil, width: nil]}}
     end
   end
 
@@ -236,6 +236,20 @@ defmodule Lumis.LumisTest do
                Lumis.formatter_type({:terminal, [language: "rust"]})
 
       assert Keyword.get(opts, :language) == "rust"
+    end
+
+    test "formatter_type preserves default_bg for terminal" do
+      assert {:ok, {:terminal, opts}} =
+               Lumis.formatter_type({:terminal, [default_bg: "#282a36"]})
+
+      assert Keyword.get(opts, :default_bg) == "#282a36"
+    end
+
+    test "formatter_type preserves width for terminal" do
+      assert {:ok, {:terminal, opts}} =
+               Lumis.formatter_type({:terminal, [width: 120]})
+
+      assert Keyword.get(opts, :width) == 120
     end
 
     test "formatter_type preserves language for bbcode_scoped" do
@@ -1267,6 +1281,30 @@ defmodule Lumis.LumisTest do
 
       assert %{formatter: {:terminal, %{theme: {:string, "github_light"}}}} =
                Lumis.rust_options!(options)
+    end
+
+    test "converts terminal formatter default background" do
+      options =
+        Lumis.validate_options!(
+          formatter: {:terminal, theme: "github_light", default_bg: "#ffffff"}
+        )
+
+      assert %{
+               formatter: {:terminal, %{theme: {:string, "github_light"}, default_bg: "#ffffff"}}
+             } = Lumis.rust_options!(options)
+    end
+
+    test "converts terminal formatter width" do
+      options =
+        Lumis.validate_options!(
+          formatter: {:terminal, theme: "github_light", default_bg: "#ffffff", width: 120}
+        )
+
+      assert %{
+               formatter:
+                 {:terminal,
+                  %{theme: {:string, "github_light"}, default_bg: "#ffffff", width: 120}}
+             } = Lumis.rust_options!(options)
     end
 
     test "converts bbcode_scoped formatter" do

@@ -14,6 +14,7 @@ use std::fs;
 use std::io::{IsTerminal, Read as _};
 use std::ops::RangeInclusive;
 use std::path::{Path, PathBuf};
+use terminal_size::{terminal_size, Width};
 
 #[derive(Parser)]
 #[command(
@@ -48,7 +49,7 @@ struct Cli {
 enum Commands {
     /// Highlight source code from a file or stdin
     #[command(
-        after_help = "Examples:\n  lumis highlight main.rs\n  lumis highlight -l javascript main.txt\n  lumis highlight -f html-inline -t dracula main.rs\n  lumis highlight -h 1,3-5 lib.rs\n  cat main.rs | lumis highlight -l rust\n  echo 'fn main() {}' | lumis highlight -l rust"
+        after_help = "Examples:\n  lumis highlight main.rs\n  lumis highlight -l javascript main.txt\n  lumis highlight -f html-inline -t dracula main.rs\n  lumis highlight --default-bg '#282a36' --width 120 main.rs\n  lumis highlight -h 1,3-5 lib.rs\n  cat main.rs | lumis highlight -l rust\n  echo 'fn main() {}' | lumis highlight -l rust"
     )]
     Highlight {
         /// File to highlight (reads from stdin if omitted)
@@ -65,6 +66,14 @@ enum Commands {
         /// Theme name, e.g. dracula, github_dark
         #[arg(short = 't', long)]
         theme: Option<String>,
+
+        /// Fallback background color for terminal output, e.g. #282a36
+        #[arg(long)]
+        default_bg: Option<String>,
+
+        /// Terminal render width for background padding. Use a number or 'auto'.
+        #[arg(long)]
+        width: Option<String>,
 
         /// Theme pair as name:theme_id, can be repeated (requires html-multi-themes)
         #[arg(long)]
@@ -202,6 +211,8 @@ fn main() -> Result<()> {
             language,
             formatter,
             theme,
+            default_bg,
+            width,
             themes,
             default_theme,
             css_variable_prefix,
@@ -214,6 +225,8 @@ fn main() -> Result<()> {
                 language,
                 formatter,
                 theme,
+                default_bg,
+                width,
                 themes,
                 default_theme,
                 css_variable_prefix,
@@ -457,6 +470,8 @@ fn do_highlight(
     language: Option<String>,
     formatter: Option<Formatter>,
     theme: Option<String>,
+    default_bg: Option<String>,
+    width: Option<String>,
     themes: Vec<String>,
     default_theme: Option<String>,
     css_variable_prefix: String,
@@ -505,6 +520,8 @@ fn do_highlight(
         lang,
         formatter,
         theme,
+        default_bg,
+        width,
         themes,
         default_theme,
         css_variable_prefix,
@@ -520,6 +537,8 @@ fn render_output(
     lang: Language,
     formatter: Option<Formatter>,
     theme: Option<String>,
+    default_bg: Option<String>,
+    width: Option<String>,
     themes: Vec<String>,
     default_theme: Option<String>,
     css_variable_prefix: String,
@@ -619,7 +638,11 @@ fn render_output(
 
         Formatter::Terminal => {
             let mut builder = lumis_core::formatter::TerminalBuilder::new();
-            builder.language(lang).theme(theme_obj);
+            builder
+                .language(lang)
+                .theme(theme_obj)
+                .default_bg(default_bg)
+                .width(resolve_terminal_width(width.as_deref())?);
 
             let fmt = builder.build().map_err(|e| anyhow::anyhow!("{}", e))?;
             let mut output = Vec::new();
@@ -636,6 +659,40 @@ fn render_output(
     }
 
     Ok(())
+}
+
+fn resolve_terminal_width(width: Option<&str>) -> Result<Option<usize>> {
+    match width {
+        Some("auto") | None => Ok(auto_terminal_width()),
+        Some(raw) => raw.parse::<usize>().map(Some).map_err(|_| {
+            anyhow::anyhow!(
+                "invalid width '{}', expected a positive integer or 'auto'",
+                raw
+            )
+        }),
+    }
+}
+
+fn auto_terminal_width() -> Option<usize> {
+    compute_auto_terminal_width(
+        std::io::stdout().is_terminal(),
+        terminal_size().map(|(Width(width), _)| usize::from(width)),
+        std::env::var("COLUMNS")
+            .ok()
+            .and_then(|value| value.parse().ok()),
+    )
+}
+
+fn compute_auto_terminal_width(
+    stdout_is_terminal: bool,
+    detected_width: Option<usize>,
+    columns_env: Option<usize>,
+) -> Option<usize> {
+    if !stdout_is_terminal {
+        return None;
+    }
+
+    detected_width.or(columns_env)
 }
 
 const EXIT_BAD_ARGUMENTS: i32 = 2;
@@ -843,5 +900,26 @@ end
             event,
             HighlightEvent::Start { language, .. } if language == "heex"
         )));
+    }
+
+    #[test]
+    fn compute_auto_terminal_width_prefers_detected_terminal_width() {
+        assert_eq!(
+            compute_auto_terminal_width(true, Some(120), Some(80)),
+            Some(120)
+        );
+    }
+
+    #[test]
+    fn compute_auto_terminal_width_falls_back_to_columns_env() {
+        assert_eq!(compute_auto_terminal_width(true, None, Some(80)), Some(80));
+    }
+
+    #[test]
+    fn compute_auto_terminal_width_returns_none_when_not_a_tty() {
+        assert_eq!(
+            compute_auto_terminal_width(false, Some(120), Some(80)),
+            None
+        );
     }
 }

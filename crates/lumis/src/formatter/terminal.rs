@@ -52,6 +52,8 @@ pub struct Terminal {
     #[builder(setter(custom))]
     language: Language,
     theme: Option<Theme>,
+    default_bg: Option<String>,
+    width: Option<usize>,
 }
 
 impl TerminalBuilder {
@@ -71,8 +73,18 @@ impl TerminalBuilder {
 }
 
 impl Terminal {
-    pub fn new(language: Language, theme: Option<Theme>) -> Self {
-        Self { language, theme }
+    pub fn new(
+        language: Language,
+        theme: Option<Theme>,
+        default_bg: Option<String>,
+        width: Option<usize>,
+    ) -> Self {
+        Self {
+            language,
+            theme,
+            default_bg,
+            width,
+        }
     }
 }
 
@@ -81,6 +93,8 @@ impl Default for Terminal {
         Self {
             language: Language::PlainText,
             theme: None,
+            default_bg: None,
+            width: None,
         }
     }
 }
@@ -90,8 +104,12 @@ impl Formatter for Terminal {
         let events =
             highlight::highlight_events(source, self.language).map_err(io::Error::other)?;
 
-        let core_formatter =
-            lumis_core::formatter::terminal::Terminal::new(self.language, self.theme.clone());
+        let core_formatter = lumis_core::formatter::terminal::Terminal::new(
+            self.language,
+            self.theme.clone(),
+            self.default_bg.clone(),
+            self.width,
+        );
         core_formatter.render(source, &events, output)
     }
 }
@@ -103,7 +121,7 @@ mod tests {
     #[test]
     fn test_no_attrs() {
         let code = "@lang :rust";
-        let formatter = Terminal::new(Language::Elixir, None);
+        let formatter = Terminal::new(Language::Elixir, None, None, None);
         let mut buffer = Vec::new();
         formatter.format(code, &mut buffer).unwrap();
         let result = String::from_utf8_lossy(&buffer);

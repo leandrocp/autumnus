@@ -40,6 +40,8 @@ pub enum ExFormatterOption {
     },
     Terminal {
         theme: Option<ThemeOrString>,
+        default_bg: Option<String>,
+        width: Option<usize>,
     },
     BbcodeScoped {},
 }
@@ -203,12 +205,18 @@ impl ExFormatterOption {
 
                 Ok(Box::new(formatter))
             }
-            ExFormatterOption::Terminal { theme } => {
+            ExFormatterOption::Terminal {
+                theme,
+                default_bg,
+                width,
+            } => {
                 let theme = theme.and_then(resolve_theme);
 
                 let formatter = TerminalBuilder::new()
                     .language(language)
                     .theme(theme)
+                    .default_bg(default_bg)
+                    .width(width)
                     .build()
                     .map_err(|e| format!("Terminal builder error: {:?}", e))?;
 
