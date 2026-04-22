@@ -1,3 +1,7 @@
+## [0.1.0](https://github.com/leandrocp/lumis/compare/npm-themes/v0.0.3...npm-themes/v0.1.0) (2026-04-22)
+
+Promote to v0.1.0
+
 ## [0.0.3](https://github.com/leandrocp/lumis/compare/themes@v0.0.2...themes@v0.0.3) (2026-03-29)
 
 
