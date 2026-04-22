@@ -1,3 +1,14 @@
+## [0.5.0](https://github.com/leandrocp/lumis/compare/hex-lumis/v0.4.0...hex-lumis/v0.5.0) (2026-04-22)
+
+### Bug Fixes
+
+- remove stale gleam query node name causing `QueryError` - [#718](https://github.com/leandrocp/lumis/pull/718) by @stefanobaghino
+
+### Features
+
+- terminal: add bg color and width options - [#713](https://github.com/leandrocp/lumis/pull/713) by @Gazler
+- terminal: add background theme option - [#723](https://github.com/leandrocp/lumis/pull/723)
+
 ## [0.4.0](https://github.com/leandrocp/lumis/compare/hex-lumis/v0.3.0...hex-lumis/v0.4.0) (2026-04-18)
 
 ### Bug Fixes
