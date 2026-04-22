@@ -211,7 +211,11 @@ impl ExFormatterOption {
 
                 Ok(Box::new(formatter))
             }
-            ExFormatterOption::Terminal { theme, background, width } => {
+            ExFormatterOption::Terminal {
+                theme,
+                background,
+                width,
+            } => {
                 let theme = theme.and_then(resolve_theme);
                 let background = match background {
                     Some(ExTerminalBackground::Theme) => TerminalBackground::Theme,

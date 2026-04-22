@@ -801,19 +801,17 @@ fn parse_highlight_lines(input: &str) -> Result<Vec<RangeInclusive<usize>>> {
 
 fn relative_to_current(path: &Path) -> PathBuf {
     if let Ok(current_path) = std::env::current_dir() {
-        let path = try_canonicalize(path);
-        let current_path = try_canonicalize(&current_path);
+        let path = path.canonicalize().unwrap_or_else(|_| path.into());
+        let current_path = current_path.canonicalize().unwrap_or(current_path);
 
-        if let Ok(rel_path) = path.strip_prefix(current_path) {
-            return rel_path.into();
+        if let Ok(relative_path) = path.strip_prefix(&current_path) {
+            return relative_path.into();
         }
+
+        return path;
     }
 
     path.into()
-}
-
-fn try_canonicalize(path: &Path) -> PathBuf {
-    path.canonicalize().unwrap_or_else(|_| path.into())
 }
 
 fn highlight_to_events(
