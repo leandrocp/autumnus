@@ -1,5 +1,9 @@
 ## [0.9.0](https://github.com/leandrocp/lumis/compare/cargo-lumis/v0.8.0...cargo-lumis/v0.9.0) (2026-04-22)
 
+### Bug Fixes
+
+- remove stale gleam query node name causing `QueryError` - [#718](https://github.com/leandrocp/lumis/pull/718) by @stefanobaghino
+
 ### Features
 
 - terminal: add bg color and width options - [#713](https://github.com/leandrocp/lumis/pull/713) by @Gazler
