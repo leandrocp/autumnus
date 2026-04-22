@@ -73,7 +73,7 @@ importers:
   packages/javascript/markdown-it-lumis:
     dependencies:
       '@lumis-sh/lumis':
-        specifier: workspace:^0.3.0
+        specifier: workspace:^0.4.0
         version: link:../lumis
       markdown-it:
         specifier: ^14.0.0
