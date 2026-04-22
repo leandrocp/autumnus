@@ -1,3 +1,22 @@
+## [0.4.0](https://github.com/leandrocp/lumis/compare/npm-lumis/v0.3.0...npm-lumis/v0.4.0) (2026-04-22)
+
+### Bug Fixes
+
+- remove gleam bit_string_segment_option node name - [#718](https://github.com/leandrocp/lumis/pull/718) by @stefanobaghino
+
+### Code Refactoring
+
+- BREAKING: deprecate ANSI iterator helpers in favor of `paint` - [#706](https://github.com/leandrocp/lumis/pull/706)
+
+### Documentation
+
+- move runnable examples into package dirs - [#709](https://github.com/leandrocp/lumis/pull/709)
+
+### Features
+
+- split client and server - [#719](https://github.com/leandrocp/lumis/pull/719)
+
+
 ## [0.3.0](https://github.com/leandrocp/lumis/compare/npm-lumis/v0.2.0...npm-lumis/v0.3.0) (2026-04-09)
 
 
