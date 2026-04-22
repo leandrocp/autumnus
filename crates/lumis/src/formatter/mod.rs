@@ -163,6 +163,7 @@ pub mod html_linked;
 pub use html_linked::{HtmlLinked, HtmlLinkedBuilder};
 
 pub mod terminal;
+pub use terminal::Background as TerminalBackground;
 pub use terminal::{Terminal, TerminalBuilder};
 
 pub mod bbcode;

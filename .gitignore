@@ -1,6 +1,7 @@
 /target
 /crates/dev/target
 /tmp
+/lumis
 /nvim/
 /themes/nvim
 /queries/**/folds.scm

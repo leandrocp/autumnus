@@ -1,6 +1,6 @@
 use lumis::formatters::{
     html_inline, html_linked, BBCodeScopedBuilder, Formatter, HtmlElement, HtmlInlineBuilder,
-    HtmlLinkedBuilder, HtmlMultiThemesBuilder, TerminalBuilder,
+    HtmlLinkedBuilder, HtmlMultiThemesBuilder, TerminalBackground, TerminalBuilder,
 };
 use lumis::{languages::Language, themes};
 use rustler::{NifStruct, NifTaggedEnum, NifUnitEnum};
@@ -40,10 +40,16 @@ pub enum ExFormatterOption {
     },
     Terminal {
         theme: Option<ThemeOrString>,
-        default_bg: Option<String>,
+        background: Option<ExTerminalBackground>,
         width: Option<usize>,
     },
     BbcodeScoped {},
+}
+
+#[derive(Debug, NifTaggedEnum)]
+pub enum ExTerminalBackground {
+    Theme,
+    String(String),
 }
 
 impl Default for ExFormatterOption {
@@ -207,15 +213,20 @@ impl ExFormatterOption {
             }
             ExFormatterOption::Terminal {
                 theme,
-                default_bg,
+                background,
                 width,
             } => {
                 let theme = theme.and_then(resolve_theme);
+                let background = match background {
+                    Some(ExTerminalBackground::Theme) => TerminalBackground::Theme,
+                    Some(ExTerminalBackground::String(color)) => TerminalBackground::Color(color),
+                    None => TerminalBackground::Inherit,
+                };
 
                 let formatter = TerminalBuilder::new()
                     .language(language)
                     .theme(theme)
-                    .default_bg(default_bg)
+                    .background(background)
                     .width(width)
                     .build()
                     .map_err(|e| format!("Terminal builder error: {:?}", e))?;

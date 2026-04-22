@@ -9,6 +9,18 @@ use crate::themes::{Style, Theme};
 use derive_builder::Builder;
 use std::io::{self, Write};
 
+/// Background fill behavior for terminal output.
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub enum Background {
+    /// Inherit the output environment's current background unless a token style sets one.
+    #[default]
+    Inherit,
+    /// Reuse the theme's `normal` background color as the fallback background.
+    Theme,
+    /// Use an explicit fallback background color.
+    Color(String),
+}
+
 /// Terminal formatter for syntax highlighting with ANSI color codes.
 #[derive(Builder, Clone, Debug)]
 #[builder(default)]
@@ -16,7 +28,7 @@ pub struct Terminal {
     #[builder(setter(custom))]
     language: Language,
     theme: Option<Theme>,
-    default_bg: Option<String>,
+    background: Background,
     width: Option<usize>,
 }
 
@@ -40,14 +52,22 @@ impl Terminal {
     pub fn new(
         language: Language,
         theme: Option<Theme>,
-        default_bg: Option<String>,
+        background: Background,
         width: Option<usize>,
     ) -> Self {
         Self {
             language,
             theme,
-            default_bg,
+            background,
             width,
+        }
+    }
+
+    fn fallback_bg(&self) -> Option<&str> {
+        match &self.background {
+            Background::Inherit => None,
+            Background::Theme => self.theme.as_ref().and_then(Theme::bg),
+            Background::Color(color) => Some(color.as_str()),
         }
     }
 }
@@ -57,7 +77,7 @@ impl Default for Terminal {
         Self {
             language: Language::PlainText,
             theme: None,
-            default_bg: None,
+            background: Background::Inherit,
             width: None,
         }
     }
@@ -73,6 +93,7 @@ impl Formatter for Terminal {
         let source_bytes = source.as_bytes();
         let mut scope_stack: Vec<(usize, String)> = Vec::new();
         let mut line_width = 0usize;
+        let fallback_bg = self.fallback_bg();
 
         for event in events {
             match event {
@@ -102,6 +123,11 @@ impl Formatter for Terminal {
                             .or_else(|| theme.get_style(scope))
                     });
 
+                    if fallback_bg.is_none() {
+                        write!(output, "{}", paint_with_background(text, styled, None))?;
+                        continue;
+                    }
+
                     for segment in text.split_inclusive('\n') {
                         let has_newline = segment.ends_with('\n');
                         let content = if has_newline {
@@ -114,18 +140,13 @@ impl Formatter for Terminal {
                             write!(
                                 output,
                                 "{}",
-                                paint_with_default_bg(content, styled, self.default_bg.as_deref())
+                                paint_with_background(content, styled, fallback_bg)
                             )?;
                             line_width += display_width(content);
                         }
 
                         if has_newline {
-                            write_line_padding(
-                                output,
-                                self.default_bg.as_deref(),
-                                self.width,
-                                line_width,
-                            )?;
+                            write_line_padding(output, fallback_bg, self.width, line_width)?;
                             writeln!(output)?;
                             line_width = 0;
                         }
@@ -142,25 +163,25 @@ impl Formatter for Terminal {
         }
 
         if !source.ends_with('\n') {
-            write_line_padding(output, self.default_bg.as_deref(), self.width, line_width)?;
+            write_line_padding(output, fallback_bg, self.width, line_width)?;
         }
 
         Ok(())
     }
 }
 
-fn paint_with_default_bg(text: &str, style: Option<&Style>, default_bg: Option<&str>) -> String {
-    match (style, default_bg) {
-        (Some(style), Some(default_bg)) if style.bg.is_none() => {
+fn paint_with_background(text: &str, style: Option<&Style>, fallback_bg: Option<&str>) -> String {
+    match (style, fallback_bg) {
+        (Some(style), Some(fallback_bg)) if style.bg.is_none() => {
             let mut style = style.clone();
-            style.bg = Some(default_bg.to_string());
+            style.bg = Some(fallback_bg.to_string());
             ansi::paint(text, &style)
         }
         (Some(style), _) => ansi::paint(text, style),
-        (None, Some(default_bg)) => ansi::paint(
+        (None, Some(fallback_bg)) => ansi::paint(
             text,
             &Style {
-                bg: Some(default_bg.to_string()),
+                bg: Some(fallback_bg.to_string()),
                 ..Default::default()
             },
         ),
@@ -170,11 +191,11 @@ fn paint_with_default_bg(text: &str, style: Option<&Style>, default_bg: Option<&
 
 fn write_line_padding(
     output: &mut dyn Write,
-    default_bg: Option<&str>,
+    fallback_bg: Option<&str>,
     width: Option<usize>,
     line_width: usize,
 ) -> io::Result<()> {
-    let Some(default_bg) = default_bg else {
+    let Some(fallback_bg) = fallback_bg else {
         return Ok(());
     };
     let Some(width) = width else {
@@ -189,7 +210,7 @@ fn write_line_padding(
     write!(
         output,
         "{}",
-        paint_with_default_bg(&padding, None, Some(default_bg))
+        paint_with_background(&padding, None, Some(fallback_bg))
     )
 }
 
@@ -205,23 +226,46 @@ fn display_width(text: &str) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::collections::BTreeMap;
+
+    fn theme_with_background(bg: &str) -> Theme {
+        Theme {
+            name: "test".to_string(),
+            highlights: BTreeMap::from([(
+                "normal".to_string(),
+                Style {
+                    bg: Some(bg.to_string()),
+                    ..Default::default()
+                },
+            )]),
+            ..Default::default()
+        }
+    }
+
+    fn theme_with_scope_style(scope: &str, style: Style) -> Theme {
+        Theme {
+            name: "test".to_string(),
+            highlights: BTreeMap::from([(scope.to_string(), style)]),
+            ..Default::default()
+        }
+    }
 
     #[test]
-    fn paint_with_default_bg_applies_background_to_unstyled_text() {
-        let painted = paint_with_default_bg("abc", None, Some("#282a36"));
+    fn paint_with_background_applies_background_to_unstyled_text() {
+        let painted = paint_with_background("abc", None, Some("#282a36"));
 
         assert_eq!(painted, "\u{1b}[0m\u{1b}[48;2;40;42;54mabc\u{1b}[0m");
     }
 
     #[test]
-    fn paint_with_default_bg_uses_fallback_when_style_has_no_background() {
+    fn paint_with_background_uses_fallback_when_style_has_no_background() {
         let style = Style {
             fg: Some("#8be9fd".to_string()),
             bold: true,
             ..Default::default()
         };
 
-        let painted = paint_with_default_bg("fn", Some(&style), Some("#282a36"));
+        let painted = paint_with_background("fn", Some(&style), Some("#282a36"));
 
         assert!(painted.contains("\u{1b}[38;2;139;233;253m"));
         assert!(painted.contains("\u{1b}[48;2;40;42;54m"));
@@ -229,27 +273,27 @@ mod tests {
     }
 
     #[test]
-    fn paint_with_default_bg_preserves_explicit_style_background() {
+    fn paint_with_background_preserves_explicit_style_background() {
         let style = Style {
             fg: Some("#8be9fd".to_string()),
             bg: Some("#ff0000".to_string()),
             ..Default::default()
         };
 
-        let painted = paint_with_default_bg("fn", Some(&style), Some("#282a36"));
+        let painted = paint_with_background("fn", Some(&style), Some("#282a36"));
 
         assert!(painted.contains("\u{1b}[48;2;255;0;0m"));
         assert!(!painted.contains("\u{1b}[48;2;40;42;54m"));
     }
 
     #[test]
-    fn paint_with_default_bg_resets_around_newlines() {
+    fn paint_with_background_resets_around_newlines() {
         let style = Style {
             fg: Some("#8be9fd".to_string()),
             ..Default::default()
         };
 
-        let painted = paint_with_default_bg("a\nb", Some(&style), Some("#282a36"));
+        let painted = paint_with_background("a\nb", Some(&style), Some("#282a36"));
 
         assert_eq!(
             painted,
@@ -258,11 +302,11 @@ mod tests {
     }
 
     #[test]
-    fn render_pads_lines_to_width_with_default_background() {
+    fn render_pads_lines_to_width_with_custom_background() {
         let formatter = Terminal::new(
             Language::PlainText,
             None,
-            Some("#282a36".to_string()),
+            Background::Color("#282a36".to_string()),
             Some(5),
         );
         let events = [HighlightEvent::Source { start: 0, end: 2 }];
@@ -281,7 +325,7 @@ mod tests {
         let formatter = Terminal::new(
             Language::PlainText,
             None,
-            Some("#282a36".to_string()),
+            Background::Color("#282a36".to_string()),
             Some(4),
         );
         let events = [HighlightEvent::Source { start: 0, end: 3 }];
@@ -292,6 +336,58 @@ mod tests {
         assert_eq!(
             String::from_utf8(output).unwrap(),
             "\u{1b}[0m\u{1b}[48;2;40;42;54ma\u{1b}[0m\u{1b}[0m\u{1b}[48;2;40;42;54m   \u{1b}[0m\n\u{1b}[0m\u{1b}[48;2;40;42;54mb\u{1b}[0m\u{1b}[0m\u{1b}[48;2;40;42;54m   \u{1b}[0m"
+        );
+    }
+
+    #[test]
+    fn render_uses_theme_background_when_requested() {
+        let formatter = Terminal::new(
+            Language::PlainText,
+            Some(theme_with_background("#282a36")),
+            Background::Theme,
+            None,
+        );
+        let events = [HighlightEvent::Source { start: 0, end: 2 }];
+        let mut output = Vec::new();
+
+        formatter.render("hi", &events, &mut output).unwrap();
+
+        assert_eq!(
+            String::from_utf8(output).unwrap(),
+            "\u{1b}[0m\u{1b}[48;2;40;42;54mhi\u{1b}[0m"
+        );
+    }
+
+    #[test]
+    fn render_preserves_styled_newline_when_background_is_inherited() {
+        let scope = crate::highlights::HIGHLIGHT_NAMES[0];
+        let formatter = Terminal::new(
+            Language::PlainText,
+            Some(theme_with_scope_style(
+                scope,
+                Style {
+                    fg: Some("#ffffff".to_string()),
+                    ..Default::default()
+                },
+            )),
+            Background::Inherit,
+            None,
+        );
+        let events = [
+            HighlightEvent::Start {
+                scope_index: 0,
+                language: "plaintext".to_string(),
+            },
+            HighlightEvent::Source { start: 0, end: 2 },
+            HighlightEvent::End,
+        ];
+        let mut output = Vec::new();
+
+        formatter.render("a\n", &events, &mut output).unwrap();
+
+        assert_eq!(
+            String::from_utf8(output).unwrap(),
+            "\u{1b}[0m\u{1b}[38;2;255;255;255ma\n\u{1b}[0m"
         );
     }
 }

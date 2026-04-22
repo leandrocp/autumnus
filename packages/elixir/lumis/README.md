@@ -232,10 +232,13 @@ Generates ANSI escape codes for terminal output:
 iex> Lumis.highlight!("Atom.to_string(:elixir)", formatter: {:terminal, language: "elixir"})
 # or with options
 iex> Lumis.highlight!("Atom.to_string(:elixir)", formatter: {:terminal, language: "elixir", theme: "github_light"})
+iex> Lumis.highlight!("Atom.to_string(:elixir)", formatter: {:terminal, language: "elixir", theme: "dracula", background: :theme, width: 120})
 ```
 
 Options:
 - `:theme` - theme to apply styles
+- `:background` - fallback terminal background: `nil`, `:theme`, or a hex color string
+- `:width` - pad each rendered line to a fixed width when a fallback background is active
 
 ### BBCode Scoped
 

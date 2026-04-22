@@ -165,8 +165,12 @@ defmodule Lumis.LumisTest do
 
   describe "formatter_type: :terminal" do
     test "default opts" do
-      assert Lumis.formatter_type(:terminal) ==
-               {:ok, {:terminal, [language: nil, theme: "onedark", default_bg: nil, width: nil]}}
+      assert {:ok, {:terminal, formatter_opts}} = Lumis.formatter_type(:terminal)
+
+      assert Keyword.equal?(
+               [language: nil, theme: "onedark", background: nil, width: nil],
+               formatter_opts
+             )
     end
   end
 
@@ -238,11 +242,17 @@ defmodule Lumis.LumisTest do
       assert Keyword.get(opts, :language) == "rust"
     end
 
-    test "formatter_type preserves default_bg for terminal" do
+    test "formatter_type preserves background for terminal" do
       assert {:ok, {:terminal, opts}} =
-               Lumis.formatter_type({:terminal, [default_bg: "#282a36"]})
+               Lumis.formatter_type({:terminal, [background: "#282a36"]})
 
-      assert Keyword.get(opts, :default_bg) == "#282a36"
+      assert Keyword.get(opts, :background) == "#282a36"
+    end
+
+    test "formatter_type preserves theme background for terminal" do
+      assert {:ok, {:terminal, opts}} = Lumis.formatter_type({:terminal, [background: :theme]})
+
+      assert Keyword.get(opts, :background) == :theme
     end
 
     test "formatter_type preserves width for terminal" do
@@ -1283,27 +1293,42 @@ defmodule Lumis.LumisTest do
                Lumis.rust_options!(options)
     end
 
-    test "converts terminal formatter default background" do
+    test "converts terminal formatter custom background" do
       options =
         Lumis.validate_options!(
-          formatter: {:terminal, theme: "github_light", default_bg: "#ffffff"}
+          formatter: {:terminal, theme: "github_light", background: "#ffffff"}
         )
 
       assert %{
-               formatter: {:terminal, %{theme: {:string, "github_light"}, default_bg: "#ffffff"}}
+               formatter:
+                 {:terminal,
+                  %{theme: {:string, "github_light"}, background: {:string, "#ffffff"}}}
              } = Lumis.rust_options!(options)
     end
 
     test "converts terminal formatter width" do
       options =
         Lumis.validate_options!(
-          formatter: {:terminal, theme: "github_light", default_bg: "#ffffff", width: 120}
+          formatter: {:terminal, theme: "github_light", background: "#ffffff", width: 120}
         )
 
       assert %{
                formatter:
                  {:terminal,
-                  %{theme: {:string, "github_light"}, default_bg: "#ffffff", width: 120}}
+                  %{
+                    theme: {:string, "github_light"},
+                    background: {:string, "#ffffff"},
+                    width: 120
+                  }}
+             } = Lumis.rust_options!(options)
+    end
+
+    test "converts terminal formatter theme background" do
+      options =
+        Lumis.validate_options!(formatter: {:terminal, theme: "github_light", background: :theme})
+
+      assert %{
+               formatter: {:terminal, %{theme: {:string, "github_light"}, background: :theme}}
              } = Lumis.rust_options!(options)
     end
 
