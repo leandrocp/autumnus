@@ -49,7 +49,7 @@
     "prepack": "pnpm run build"
   },
   "dependencies": {
-    "@lumis-sh/lumis": "workspace:^0.3.0",
+    "@lumis-sh/lumis": "workspace:^",
     "hast-util-from-html": "^2.0.0",
     "hast-util-to-jsx-runtime": "^2.0.0"
   },

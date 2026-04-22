@@ -107,7 +107,7 @@ importers:
   packages/javascript/react:
     dependencies:
       '@lumis-sh/lumis':
-        specifier: workspace:^0.3.0
+        specifier: workspace:^
         version: link:../lumis
       hast-util-from-html:
         specifier: ^2.0.0
