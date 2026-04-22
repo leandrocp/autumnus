@@ -1,3 +1,10 @@
+## [0.9.0](https://github.com/leandrocp/lumis/compare/cargo-lumis/v0.8.0...cargo-lumis/v0.9.0) (2026-04-22)
+
+### Features
+
+- terminal: add bg color and width options - [#713](https://github.com/leandrocp/lumis/pull/713) by @Gazler
+- terminal: add background theme option - [#723](https://github.com/leandrocp/lumis/pull/723)
+
 ## [0.8.0](https://github.com/leandrocp/lumis/compare/cargo-lumis/v0.7.0...cargo-lumis/v0.8.0) (2026-04-18)
 
 ### Bug Fixes
