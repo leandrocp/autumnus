@@ -799,6 +799,7 @@ fn parse_highlight_lines(input: &str) -> Result<Vec<RangeInclusive<usize>>> {
     Ok(ranges)
 }
 
+#[allow(dead_code)]
 fn relative_to_current(path: &Path) -> PathBuf {
     if let Ok(current_path) = std::env::current_dir() {
         let path = path.canonicalize().unwrap_or_else(|_| path.into());
