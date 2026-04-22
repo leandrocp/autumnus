@@ -8,6 +8,7 @@ use clap::{ArgAction, Parser, Subcommand, ValueEnum};
 use etcetera::BaseStrategy;
 use lumis_core::events::HighlightEvent;
 use lumis_core::formatter::Formatter as CoreFormatter;
+use lumis_core::formatter::TerminalBackground;
 use lumis_core::languages::Language;
 use std::fmt::Display;
 use std::fs;
@@ -49,7 +50,7 @@ struct Cli {
 enum Commands {
     /// Highlight source code from a file or stdin
     #[command(
-        after_help = "Examples:\n  lumis highlight main.rs\n  lumis highlight -l javascript main.txt\n  lumis highlight -f html-inline -t dracula main.rs\n  lumis highlight --default-bg '#282a36' --width 120 main.rs\n  lumis highlight -h 1,3-5 lib.rs\n  cat main.rs | lumis highlight -l rust\n  echo 'fn main() {}' | lumis highlight -l rust"
+        after_help = "Examples:\n  lumis highlight main.rs\n  lumis highlight -l javascript main.txt\n  lumis highlight -f html-inline -t dracula main.rs\n  lumis highlight -b theme -w 120 main.rs\n  lumis highlight --background '#282a36' --width 120 main.rs\n  lumis highlight -h 1,3-5 lib.rs\n  cat main.rs | lumis highlight -l rust\n  echo 'fn main() {}' | lumis highlight -l rust"
     )]
     Highlight {
         /// File to highlight (reads from stdin if omitted)
@@ -67,12 +68,12 @@ enum Commands {
         #[arg(short = 't', long)]
         theme: Option<String>,
 
-        /// Fallback background color for terminal output, e.g. #282a36
-        #[arg(long)]
-        default_bg: Option<String>,
+        /// Terminal background: use `theme`, a hex color, or omit it to inherit the output background
+        #[arg(short = 'b', long = "background")]
+        background: Option<String>,
 
         /// Terminal render width for background padding. Use a number or 'auto'.
-        #[arg(long)]
+        #[arg(short = 'w', long)]
         width: Option<String>,
 
         /// Theme pair as name:theme_id, can be repeated (requires html-multi-themes)
@@ -211,7 +212,7 @@ fn main() -> Result<()> {
             language,
             formatter,
             theme,
-            default_bg,
+            background,
             width,
             themes,
             default_theme,
@@ -225,7 +226,7 @@ fn main() -> Result<()> {
                 language,
                 formatter,
                 theme,
-                default_bg,
+                background,
                 width,
                 themes,
                 default_theme,
@@ -470,7 +471,7 @@ fn do_highlight(
     language: Option<String>,
     formatter: Option<Formatter>,
     theme: Option<String>,
-    default_bg: Option<String>,
+    background: Option<String>,
     width: Option<String>,
     themes: Vec<String>,
     default_theme: Option<String>,
@@ -520,7 +521,7 @@ fn do_highlight(
         lang,
         formatter,
         theme,
-        default_bg,
+        background,
         width,
         themes,
         default_theme,
@@ -537,7 +538,7 @@ fn render_output(
     lang: Language,
     formatter: Option<Formatter>,
     theme: Option<String>,
-    default_bg: Option<String>,
+    background: Option<String>,
     width: Option<String>,
     themes: Vec<String>,
     default_theme: Option<String>,
@@ -641,7 +642,7 @@ fn render_output(
             builder
                 .language(lang)
                 .theme(theme_obj)
-                .default_bg(default_bg)
+                .background(parse_terminal_background(background.as_deref()))
                 .width(resolve_terminal_width(width.as_deref())?);
 
             let fmt = builder.build().map_err(|e| anyhow::anyhow!("{}", e))?;
@@ -659,6 +660,14 @@ fn render_output(
     }
 
     Ok(())
+}
+
+fn parse_terminal_background(bg: Option<&str>) -> TerminalBackground {
+    match bg {
+        Some("theme") => TerminalBackground::Theme,
+        Some(color) => TerminalBackground::Color(color.to_string()),
+        None => TerminalBackground::Inherit,
+    }
 }
 
 fn resolve_terminal_width(width: Option<&str>) -> Result<Option<usize>> {

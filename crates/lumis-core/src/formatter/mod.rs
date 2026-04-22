@@ -27,7 +27,7 @@ pub mod html_linked;
 pub use html_linked::{HtmlLinked, HtmlLinkedBuilder};
 
 pub mod terminal;
-pub use terminal::{Terminal, TerminalBuilder};
+pub use terminal::{Background as TerminalBackground, Terminal, TerminalBuilder};
 
 pub mod bbcode;
 pub use bbcode::{BBCodeScoped, BBCodeScopedBuilder};

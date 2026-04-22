@@ -20,6 +20,7 @@ use crate::highlight;
 use crate::languages::Language;
 use crate::themes::Theme;
 use derive_builder::Builder;
+pub use lumis_core::formatter::terminal::Background;
 use lumis_core::formatter::Formatter as _;
 use std::io::{self, Write};
 
@@ -52,7 +53,7 @@ pub struct Terminal {
     #[builder(setter(custom))]
     language: Language,
     theme: Option<Theme>,
-    default_bg: Option<String>,
+    background: Background,
     width: Option<usize>,
 }
 
@@ -76,13 +77,13 @@ impl Terminal {
     pub fn new(
         language: Language,
         theme: Option<Theme>,
-        default_bg: Option<String>,
+        background: Background,
         width: Option<usize>,
     ) -> Self {
         Self {
             language,
             theme,
-            default_bg,
+            background,
             width,
         }
     }
@@ -93,7 +94,7 @@ impl Default for Terminal {
         Self {
             language: Language::PlainText,
             theme: None,
-            default_bg: None,
+            background: Background::Inherit,
             width: None,
         }
     }
@@ -107,7 +108,7 @@ impl Formatter for Terminal {
         let core_formatter = lumis_core::formatter::terminal::Terminal::new(
             self.language,
             self.theme.clone(),
-            self.default_bg.clone(),
+            self.background.clone(),
             self.width,
         );
         core_formatter.render(source, &events, output)
@@ -121,7 +122,7 @@ mod tests {
     #[test]
     fn test_no_attrs() {
         let code = "@lang :rust";
-        let formatter = Terminal::new(Language::Elixir, None, None, None);
+        let formatter = Terminal::new(Language::Elixir, None, Background::Inherit, None);
         let mut buffer = Vec::new();
         formatter.format(code, &mut buffer).unwrap();
         let result = String::from_utf8_lossy(&buffer);

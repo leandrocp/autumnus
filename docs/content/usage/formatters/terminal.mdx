@@ -20,11 +20,11 @@ ANSI escape codes for shell output.
 
 | Runtime | Options |
 | --- | --- |
-| Rust | `language`, `theme`, `default_bg`, `width` |
-| Elixir | `language`, `theme`, `default_bg`, `width` |
+| Rust | `language`, `theme`, `background`, `width` |
+| Elixir | `language`, `theme`, `background`, `width` |
 | JavaScript | `language`, `theme` |
 | Java | `withLang()`, `withTheme()`, `withFormatter(Formatter.TERMINAL)` |
-| CLI | default formatter, `--theme`, `--default-bg`, `--width` |
+| CLI | default formatter, `--theme`, `--background`, `--width` |
 
 ## Example
 
@@ -45,14 +45,14 @@ console.log(ansi)
   <TabItem value="rust" label="Rust">
 
 ```rust
-use lumis::{highlight, TerminalBuilder, languages::Language, themes};
+use lumis::{highlight, TerminalBackground, TerminalBuilder, languages::Language, themes};
 
 let ansi = highlight(
     "fn main() {}",
     TerminalBuilder::new()
         .language(Language::Rust)
         .theme(Some(themes::get("dracula").unwrap()))
-        .default_bg(Some("#282a36".to_string()))
+        .background(TerminalBackground::Theme)
         .width(Some(120))
         .build()
         .unwrap(),
@@ -67,7 +67,7 @@ println!("{}", ansi);
 ```elixir
 Lumis.highlight!(
   "fn main() {}",
-  formatter: {:terminal, language: "rust", theme: "dracula", default_bg: "#282a36", width: 120}
+  formatter: {:terminal, language: "rust", theme: "dracula", background: :theme, width: 120}
 )
 ```
 
@@ -100,8 +100,8 @@ lumis.close();
 ```bash
 lumis highlight main.rs --theme dracula
 # same as: lumis highlight main.rs --formatter terminal --theme dracula
-lumis highlight main.rs --theme dracula --default-bg '#282a36'
-lumis highlight main.rs --theme dracula --default-bg '#282a36' --width 120
+lumis highlight main.rs --theme dracula --background theme
+lumis highlight main.rs -b '#282a36' -w 120
 ```
 
   </TabItem>
@@ -117,8 +117,8 @@ Terminal output is plain text wrapped in ANSI escape sequences:
 
 - the source stays as terminal text, not HTML
 - ANSI escape sequences set foreground color and text styles
-- `default_bg` / `--default-bg` fills in the background only where the token style does not already provide one
-- `width` / `--width` pads each rendered line to the requested width; in the CLI, `auto` uses the current terminal width when available
+- `background` / `--background` controls the fallback background: omit it to inherit the output background, use `theme` to reuse the theme background, or pass a hex color
+- `width` / `--width` pads each rendered line to the requested width; in the CLI, `auto` uses the current terminal width when available, and `-w` is the short form
 - `\x1b[0m` resets formatting between styled segments
 
 ## When to use it

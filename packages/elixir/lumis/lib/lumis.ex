@@ -138,8 +138,8 @@ defmodule Lumis do
 
       - `:language` (`t:language/0` - default: `nil`) - the language used by the formatter. When omitted, Lumis tries to auto-detect it from the source.
       - `:theme` (`t:theme/0` - default: `nil`) - the theme to apply styles on the highlighted source code.
-      - `:default_bg` (`t:String.t/0` - default: `nil`) - a fallback background color applied between styled spans and on unstyled text.
-      - `:width` (`pos_integer() | nil` - default: `nil`) - pad each rendered terminal line to the given width. This is most useful with `:default_bg`.
+      - `:background` (`:theme | t:String.t/0 | nil` - default: `nil`) - fallback background behavior: `nil` inherits the output background, `:theme` uses the theme's normal background color, and a string uses that color.
+      - `:width` (`pos_integer() | nil` - default: `nil`) - pad each rendered terminal line to the given width. This is most useful with `:background`.
 
   * `bbcode_scoped`:
 
@@ -219,6 +219,10 @@ defmodule Lumis do
 
       {:terminal, theme: "github_light"}
 
+      {:terminal, theme: "dracula", background: :theme, width: 120}
+
+      {:terminal, theme: "dracula", background: "#282a36", width: 120}
+
   ### BBCode Scoped formatter
 
       :bbcode_scoped
@@ -265,7 +269,7 @@ defmodule Lumis do
              [
                language: language(),
                theme: theme(),
-               default_bg: String.t() | nil,
+               background: :theme | String.t() | nil,
                width: pos_integer() | nil
              ]}
           | :bbcode_scoped
@@ -480,14 +484,19 @@ defmodule Lumis do
   end
 
   def formatter_type({:terminal, options}) when is_list(options) do
-    case Keyword.keys(options) -- [:language, :theme, :default_bg, :width] do
-      [] ->
-        default_opts = [language: nil, theme: @default_theme, default_bg: nil, width: nil]
-        opts = Keyword.merge(default_opts, options)
-        {:ok, {:terminal, opts}}
+    schema = [
+      language: [type: {:or, [:string, nil]}, default: nil],
+      theme: [type: {:or, [{:struct, Lumis.Theme}, :string, nil]}, default: @default_theme],
+      background: [type: {:or, [:string, {:in, [:theme]}, nil]}, default: nil],
+      width: [type: {:or, [:pos_integer, nil]}, default: nil]
+    ]
 
-      invalid ->
-        {:error, "invalid options given to terminal: #{inspect(invalid)}"}
+    case NimbleOptions.validate(options, schema) do
+      {:ok, validated_opts} ->
+        {:ok, {:terminal, validated_opts}}
+
+      {:error, error} ->
+        {:error, "invalid options given to terminal: #{inspect(error)}"}
     end
   end
 
@@ -977,7 +986,15 @@ defmodule Lumis do
 
   defp convert_formatter_for_nif(:terminal, opts) do
     opts = convert_theme_for_nif(opts)
-    {:terminal, Map.take(opts, [:theme, :default_bg, :width])}
+
+    opts =
+      case opts[:background] do
+        :theme -> Map.put(opts, :background, :theme)
+        color when is_binary(color) -> Map.put(opts, :background, {:string, color})
+        nil -> Map.put(opts, :background, nil)
+      end
+
+    {:terminal, Map.take(opts, [:theme, :background, :width])}
   end
 
   defp convert_formatter_for_nif(:bbcode_scoped, _opts) do

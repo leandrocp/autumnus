@@ -327,7 +327,7 @@ use std::io::{self, Write};
 // Re-export builders for easier access
 pub use crate::formatters::{
     BBCodeScopedBuilder, HtmlInlineBuilder, HtmlLinkedBuilder, HtmlMultiThemesBuilder,
-    TerminalBuilder,
+    TerminalBackground, TerminalBuilder,
 };
 
 /// Highlights source code and returns it as a string.

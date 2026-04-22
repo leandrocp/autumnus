@@ -198,11 +198,11 @@ fn highlight_source_diff_terminal() {
 }
 
 #[test]
-fn highlight_source_terminal_with_default_background() {
+fn highlight_source_terminal_with_custom_background() {
     cmd()
         .arg("--data-dir")
         .arg(fixtures_dir())
-        .args(["highlight", "-l", "diff", "--default-bg", "#282a36"])
+        .args(["highlight", "-l", "diff", "-b", "#282a36"])
         .write_stdin(DIFF_SNIPPET)
         .assert()
         .success()
@@ -210,7 +210,7 @@ fn highlight_source_terminal_with_default_background() {
 }
 
 #[test]
-fn highlight_source_terminal_with_default_background_and_width() {
+fn highlight_source_terminal_with_theme_background_and_width() {
     cmd()
         .arg("--data-dir")
         .arg(fixtures_dir())
@@ -218,9 +218,11 @@ fn highlight_source_terminal_with_default_background_and_width() {
             "highlight",
             "-l",
             "diff",
-            "--default-bg",
-            "#282a36",
-            "--width",
+            "--theme",
+            "dracula",
+            "--background",
+            "theme",
+            "-w",
             "20",
         ])
         .write_stdin("abc\n")
