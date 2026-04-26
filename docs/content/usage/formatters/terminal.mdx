@@ -20,11 +20,11 @@ ANSI escape codes for shell output.
 
 | Runtime | Options |
 | --- | --- |
-| Rust | `language`, `theme`, `background`, `width` |
-| Elixir | `language`, `theme`, `background`, `width` |
+| Rust | `language`, `theme`, `background`, `width`, `style_override` |
+| Elixir | `language`, `theme`, `background`, `width`, `rainbow_brackets` |
 | JavaScript | `language`, `theme` |
 | Java | `withLang()`, `withTheme()`, `withFormatter(Formatter.TERMINAL)` |
-| CLI | default formatter, `--theme`, `--background`, `--width` |
+| CLI | default formatter, `--theme`, `--background`, `--width`, `--rainbow-brackets` |
 
 ## Example
 
@@ -126,3 +126,61 @@ Terminal output is plain text wrapped in ANSI escape sequences:
 - CLI tools
 - logs and local scripts
 - previewing highlighted code in a terminal
+
+## Rainbow brackets
+
+Color nested bracket pairs with a cycling palette so matching delimiters are visually distinct.
+
+<Tabs groupId="runtime" queryString="lang" defaultValue="elixir">
+  <TabItem value="elixir" label="Elixir">
+
+```elixir
+# Use default palette
+Lumis.highlight!(
+  "{:ok, [1, 2]}",
+  formatter: {:terminal, language: "elixir", theme: "dracula", rainbow_brackets: true}
+)
+
+# Custom palette
+Lumis.highlight!(
+  "{:ok, [1, 2]}",
+  formatter:
+    {:terminal,
+     language: "elixir",
+     theme: "dracula",
+     rainbow_brackets: %Lumis.RainbowBrackets{colors: ["#ff0000", "#00ff00", "#0000ff"]}}
+)
+```
+
+  </TabItem>
+  <TabItem value="rust" label="Rust">
+
+```rust
+use lumis::{TerminalBuilder, formatters::RainbowBrackets, languages::Language, themes, formatters::Formatter};
+use std::sync::Arc;
+
+let colors = vec!["#e06c75".into(), "#61afef".into(), "#98c379".into()];
+let formatter = TerminalBuilder::new()
+    .language(Language::Elixir)
+    .theme(Some(themes::get("dracula").unwrap()))
+    .style_override(Some(Arc::new(RainbowBrackets::new(colors))))
+    .build()
+    .unwrap();
+
+let ansi = lumis::highlight("{:ok, [1, 2]}", formatter);
+println!("{}", ansi);
+```
+
+  </TabItem>
+  <TabItem value="cli" label="CLI">
+
+```bash
+lumis highlight code.ex --theme dracula --rainbow-brackets
+```
+
+  </TabItem>
+</Tabs>
+
+Default palette: `#e06c75`, `#61afef`, `#98c379`, `#e5c07b`, `#c678dd`, `#56b6c2` (6 colors cycling by nesting depth).
+
+This feature is currently available in Rust, Elixir, and CLI. JavaScript and Java support may be added in a future release.

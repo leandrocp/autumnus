@@ -168,7 +168,13 @@ defmodule Lumis.LumisTest do
       assert {:ok, {:terminal, formatter_opts}} = Lumis.formatter_type(:terminal)
 
       assert Keyword.equal?(
-               [language: nil, theme: "onedark", background: nil, width: nil],
+               [
+                 language: nil,
+                 theme: "onedark",
+                 background: nil,
+                 width: nil,
+                 rainbow_brackets: nil
+               ],
                formatter_opts
              )
     end

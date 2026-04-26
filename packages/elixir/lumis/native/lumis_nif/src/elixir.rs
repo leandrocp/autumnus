@@ -1,10 +1,11 @@
 use lumis::formatters::{
     html_inline, html_linked, BBCodeScopedBuilder, Formatter, HtmlElement, HtmlInlineBuilder,
-    HtmlLinkedBuilder, HtmlMultiThemesBuilder, TerminalBackground, TerminalBuilder,
+    HtmlLinkedBuilder, HtmlMultiThemesBuilder, RainbowBrackets, TerminalBackground, TerminalBuilder,
 };
 use lumis::{languages::Language, themes};
 use rustler::{NifStruct, NifTaggedEnum, NifUnitEnum};
 use std::collections::HashMap;
+use std::sync::Arc;
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, NifUnitEnum)]
 pub enum ExAppearance {
@@ -42,8 +43,23 @@ pub enum ExFormatterOption {
         theme: Option<ThemeOrString>,
         background: Option<ExTerminalBackground>,
         width: Option<usize>,
+        rainbow_brackets: Option<ExRainbowBrackets>,
     },
     BbcodeScoped {},
+}
+
+#[derive(Clone, Debug, NifStruct)]
+#[module = "Lumis.RainbowBrackets"]
+pub struct ExRainbowBrackets {
+    pub colors: Vec<String>,
+}
+
+impl Default for ExRainbowBrackets {
+    fn default() -> Self {
+        Self {
+            colors: vec![],
+        }
+    }
 }
 
 #[derive(Debug, NifTaggedEnum)]
@@ -215,6 +231,7 @@ impl ExFormatterOption {
                 theme,
                 background,
                 width,
+                rainbow_brackets,
             } => {
                 let theme = theme.and_then(resolve_theme);
                 let background = match background {
@@ -230,6 +247,13 @@ impl ExFormatterOption {
                     .width(width)
                     .build()
                     .map_err(|e| format!("Terminal builder error: {:?}", e))?;
+
+                let formatter = match rainbow_brackets {
+                    Some(rb) => {
+                        formatter.with_style_override(Arc::new(RainbowBrackets::new(rb.colors)))
+                    }
+                    None => formatter,
+                };
 
                 Ok(Box::new(formatter))
             }

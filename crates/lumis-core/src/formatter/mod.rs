@@ -12,6 +12,7 @@
 //! - [`bbcode`] - BBCode scoped output using highlight scope names as tags
 
 use crate::events::HighlightEvent;
+use crate::themes::Style;
 use std::io::{self, Write};
 
 pub mod ansi;
@@ -26,6 +27,9 @@ pub use html_multi_themes::{HtmlMultiThemes, HtmlMultiThemesBuilder};
 pub mod html_linked;
 pub use html_linked::{HtmlLinked, HtmlLinkedBuilder};
 
+pub mod rainbow_brackets;
+pub use rainbow_brackets::RainbowBrackets;
+
 pub mod terminal;
 pub use terminal::{Background as TerminalBackground, Terminal, TerminalBuilder};
 
@@ -39,6 +43,47 @@ pub struct HtmlElement {
     pub open_tag: String,
     /// The closing HTML tag that will be placed after the formatted code.
     pub close_tag: String,
+}
+
+/// Trait for overriding the style of tokens during formatting.
+///
+/// Implementations receive the resolved theme style for each token and can
+/// return a modified style. This enables features like rainbow brackets without
+/// changing the formatter itself.
+///
+/// The `state` parameter is a `usize` that the override can use to track
+/// information across tokens (e.g., bracket nesting depth). It starts at `0`
+/// and is passed mutably to each call.
+///
+/// # Example
+///
+/// ```rust
+/// use lumis_core::formatter::StyleOverride;
+/// use lumis_core::themes::Style;
+///
+/// struct RainbowBrackets;
+///
+/// impl StyleOverride for RainbowBrackets {
+///     fn override_style(&self, text: &str, scope: &str, base: &Style, state: &mut usize) -> Style {
+///         if scope.starts_with("punctuation.bracket") {
+///             // ... apply rainbow color based on *state ...
+///             Style { fg: Some("#e06c75".to_string()), ..base.clone() }
+///         } else {
+///             base.clone()
+///         }
+///     }
+/// }
+/// ```
+pub trait StyleOverride: Send + Sync + std::fmt::Debug {
+    /// Return the style to use for this token.
+    ///
+    /// # Arguments
+    ///
+    /// * `text` - The source text of the token
+    /// * `scope` - The highlight scope name (e.g., `"punctuation.bracket"`)
+    /// * `base` - The style resolved from the theme
+    /// * `state` - Mutable state that persists across tokens within a single `render` call
+    fn override_style(&self, text: &str, scope: &str, base: &Style, state: &mut usize) -> Style;
 }
 
 /// Trait for implementing custom syntax highlighting formatters.

@@ -55,6 +55,7 @@ echo 'const x = 1' | lumis highlight -l javascript --formatter html-inline --the
 | `--default-theme <id>` | | Which `--themes` entry gets inline styles |
 | `--css-variable-prefix <prefix>` | | Prefix for CSS custom properties (default: `--lumis`) |
 | `--highlight-lines <lines>` | `-h` | Lines to highlight (e.g., `1,3-5,10`) |
+| `--rainbow-brackets` | | Color nested brackets by depth (terminal formatter). See [Rainbow brackets](/formatters/terminal#rainbow-brackets). |
 
 ### Examples
 
@@ -76,6 +77,10 @@ lumis highlight main.rs \
 
 ```bash title="BBCode Scoped"
 lumis highlight main.rs -f bbcode-scoped
+```
+
+```bash title="Rainbow brackets"
+lumis highlight main.rs --theme dracula --rainbow-brackets
 ```
 
 ```bash title="Verbose mode — see cache hits and parser paths"

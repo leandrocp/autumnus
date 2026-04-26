@@ -2,12 +2,13 @@
 //!
 //! Works with pre-computed highlight events from any source.
 
-use super::{ansi, Formatter};
+use super::{ansi, Formatter, StyleOverride};
 use crate::events::HighlightEvent;
 use crate::languages::Language;
 use crate::themes::{Style, Theme};
 use derive_builder::Builder;
 use std::io::{self, Write};
+use std::sync::Arc;
 
 /// Background fill behavior for terminal output.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
@@ -30,6 +31,7 @@ pub struct Terminal {
     theme: Option<Theme>,
     background: Background,
     width: Option<usize>,
+    style_override: Option<Arc<dyn StyleOverride>>,
 }
 
 impl TerminalBuilder {
@@ -60,7 +62,13 @@ impl Terminal {
             theme,
             background,
             width,
+            style_override: None,
         }
+    }
+
+    pub fn with_style_override(mut self, style_override: Arc<dyn StyleOverride>) -> Self {
+        self.style_override = Some(style_override);
+        self
     }
 
     fn fallback_bg(&self) -> Option<&str> {
@@ -79,6 +87,7 @@ impl Default for Terminal {
             theme: None,
             background: Background::Inherit,
             width: None,
+            style_override: None,
         }
     }
 }
@@ -94,6 +103,7 @@ impl Formatter for Terminal {
         let mut scope_stack: Vec<(usize, String)> = Vec::new();
         let mut line_width = 0usize;
         let fallback_bg = self.fallback_bg();
+        let mut override_state: usize = 0;
 
         for event in events {
             match event {
@@ -111,20 +121,40 @@ impl Formatter for Terminal {
                     }
                     let text = std::str::from_utf8(&source_bytes[*start..*end])
                         .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
-                    let styled = scope_stack.last().and_then(|(scope_index, language)| {
-                        let theme = self.theme.as_ref()?;
-                        let scope = crate::highlights::HIGHLIGHT_NAMES
-                            .get(*scope_index)
-                            .copied()
-                            .unwrap_or("");
-                        let specialized = format!("{}.{}", scope, language);
-                        theme
-                            .get_style(&specialized)
-                            .or_else(|| theme.get_style(scope))
-                    });
+                    let (styled, scope_name) = scope_stack
+                        .last()
+                        .map(|(scope_index, language)| {
+                            let scope = crate::highlights::HIGHLIGHT_NAMES
+                                .get(*scope_index)
+                                .copied()
+                                .unwrap_or("");
+                            let specialized = format!("{}.{}", scope, language);
+                            let style = self.theme.as_ref().and_then(|t| {
+                                t.get_style(&specialized).or_else(|| t.get_style(scope))
+                            });
+                            (style, scope)
+                        })
+                        .unwrap_or((None, ""));
+
+                    let styled = styled.cloned();
+
+                    let styled = match (&self.style_override, &styled) {
+                        (Some(ov), Some(base)) => {
+                            Some(ov.override_style(text, scope_name, base, &mut override_state))
+                        }
+                        (Some(ov), None) if !scope_name.is_empty() => {
+                            let base = Style::default();
+                            Some(ov.override_style(text, scope_name, &base, &mut override_state))
+                        }
+                        _ => styled,
+                    };
 
                     if fallback_bg.is_none() {
-                        write!(output, "{}", paint_with_background(text, styled, None))?;
+                        write!(
+                            output,
+                            "{}",
+                            paint_with_background(text, styled.as_ref(), None)
+                        )?;
                         continue;
                     }
 
@@ -140,7 +170,7 @@ impl Formatter for Terminal {
                             write!(
                                 output,
                                 "{}",
-                                paint_with_background(content, styled, fallback_bg)
+                                paint_with_background(content, styled.as_ref(), fallback_bg)
                             )?;
                             line_width += display_width(content);
                         }

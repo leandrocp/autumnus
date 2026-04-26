@@ -91,6 +91,10 @@ enum Commands {
         /// Lines to highlight, e.g. "1,3-5,10"
         #[arg(short = 'h', long)]
         highlight_lines: Option<String>,
+
+        /// Color nested brackets by depth (terminal formatter only)
+        #[arg(long)]
+        rainbow_brackets: bool,
     },
 
     /// Manage languages
@@ -218,6 +222,7 @@ fn main() -> Result<()> {
             default_theme,
             css_variable_prefix,
             highlight_lines,
+            rainbow_brackets,
         } => {
             let reg = registry::Registry::new(data_dir)?;
             do_highlight(
@@ -232,6 +237,7 @@ fn main() -> Result<()> {
                 default_theme,
                 css_variable_prefix,
                 highlight_lines,
+                rainbow_brackets,
             )
         }
         Commands::Languages { command } => match command {
@@ -477,6 +483,7 @@ fn do_highlight(
     default_theme: Option<String>,
     css_variable_prefix: String,
     highlight_lines: Option<String>,
+    rainbow_brackets: bool,
 ) -> Result<()> {
     let (source, lang) = if let Some(path) = path {
         let bytes = read_or_die(Path::new(&path));
@@ -527,6 +534,7 @@ fn do_highlight(
         default_theme,
         css_variable_prefix,
         parsed_highlight_lines,
+        rainbow_brackets,
     )
 }
 
@@ -544,6 +552,7 @@ fn render_output(
     default_theme: Option<String>,
     css_variable_prefix: String,
     highlight_lines: Option<Vec<RangeInclusive<usize>>>,
+    rainbow_brackets: bool,
 ) -> Result<()> {
     let theme_obj = resolve_theme(theme, Some(reg.data_dir()));
 
@@ -645,7 +654,21 @@ fn render_output(
                 .background(parse_terminal_background(background.as_deref()))
                 .width(resolve_terminal_width(width.as_deref())?);
 
-            let fmt = builder.build().map_err(|e| anyhow::anyhow!("{}", e))?;
+            let mut fmt = builder.build().map_err(|e| anyhow::anyhow!("{}", e))?;
+
+            if rainbow_brackets {
+                fmt = fmt.with_style_override(std::sync::Arc::new(
+                    lumis_core::formatter::RainbowBrackets::new(vec![
+                        "#e06c75".into(),
+                        "#61afef".into(),
+                        "#98c379".into(),
+                        "#e5c07b".into(),
+                        "#c678dd".into(),
+                        "#56b6c2".into(),
+                    ]),
+                ));
+            }
+
             let mut output = Vec::new();
             fmt.render(source, events, &mut output)?;
             print!("{}", String::from_utf8(output)?);

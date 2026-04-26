@@ -140,6 +140,7 @@ defmodule Lumis do
       - `:theme` (`t:theme/0` - default: `nil`) - the theme to apply styles on the highlighted source code.
       - `:background` (`:theme | t:String.t/0 | nil` - default: `nil`) - fallback background behavior: `nil` inherits the output background, `:theme` uses the theme's normal background color, and a string uses that color.
       - `:width` (`pos_integer() | nil` - default: `nil`) - pad each rendered terminal line to the given width. This is most useful with `:background`.
+      - `:rainbow_brackets` (`t:boolean/0` | `%Lumis.RainbowBrackets{}` - default: `false`) - when `true`, color nested brackets with a default palette. Pass a `%Lumis.RainbowBrackets{}` struct to customize colors.
 
   * `bbcode_scoped`:
 
@@ -223,6 +224,10 @@ defmodule Lumis do
 
       {:terminal, theme: "dracula", background: "#282a36", width: 120}
 
+      {:terminal, theme: "dracula", rainbow_brackets: true}
+
+      {:terminal, theme: "dracula", rainbow_brackets: %Lumis.RainbowBrackets{colors: ["#ff0000", "#00ff00", "#0000ff"]}}
+
   ### BBCode Scoped formatter
 
       :bbcode_scoped
@@ -270,7 +275,8 @@ defmodule Lumis do
                language: language(),
                theme: theme(),
                background: :theme | String.t() | nil,
-               width: pos_integer() | nil
+               width: pos_integer() | nil,
+               rainbow_brackets: boolean() | Lumis.RainbowBrackets.t() | nil
              ]}
           | :bbcode_scoped
           | {:bbcode_scoped, [language: language()]}
@@ -488,12 +494,22 @@ defmodule Lumis do
       language: [type: {:or, [:string, nil]}, default: nil],
       theme: [type: {:or, [{:struct, Lumis.Theme}, :string, nil]}, default: @default_theme],
       background: [type: {:or, [:string, {:in, [:theme]}, nil]}, default: nil],
-      width: [type: {:or, [:pos_integer, nil]}, default: nil]
+      width: [type: {:or, [:pos_integer, nil]}, default: nil],
+      rainbow_brackets: [
+        type: {:or, [{:in, [true, false]}, {:struct, Lumis.RainbowBrackets}, nil]},
+        default: nil
+      ]
     ]
 
     case NimbleOptions.validate(options, schema) do
       {:ok, validated_opts} ->
-        {:ok, {:terminal, validated_opts}}
+        case validated_opts[:rainbow_brackets] do
+          %Lumis.RainbowBrackets{colors: []} ->
+            {:error, "rainbow_brackets colors must not be empty"}
+
+          _ ->
+            {:ok, {:terminal, validated_opts}}
+        end
 
       {:error, error} ->
         {:error, "invalid options given to terminal: #{inspect(error)}"}
@@ -994,7 +1010,17 @@ defmodule Lumis do
         nil -> Map.put(opts, :background, nil)
       end
 
-    {:terminal, Map.take(opts, [:theme, :background, :width])}
+    rainbow_brackets =
+      case opts[:rainbow_brackets] do
+        true -> Lumis.RainbowBrackets.new()
+        %Lumis.RainbowBrackets{} = rb -> rb
+        false -> nil
+        nil -> nil
+      end
+
+    opts = Map.put(opts, :rainbow_brackets, rainbow_brackets)
+
+    {:terminal, Map.take(opts, [:theme, :background, :width, :rainbow_brackets])}
   end
 
   defp convert_formatter_for_nif(:bbcode_scoped, _opts) do

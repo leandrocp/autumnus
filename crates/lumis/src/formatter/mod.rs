@@ -166,6 +166,8 @@ pub mod terminal;
 pub use terminal::Background as TerminalBackground;
 pub use terminal::{Terminal, TerminalBuilder};
 
+pub use lumis_core::formatter::RainbowBrackets;
+
 pub mod bbcode;
 pub use bbcode::{BBCodeScoped, BBCodeScopedBuilder};
 

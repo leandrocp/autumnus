@@ -22,7 +22,9 @@ use crate::themes::Theme;
 use derive_builder::Builder;
 pub use lumis_core::formatter::terminal::Background;
 use lumis_core::formatter::Formatter as _;
+pub use lumis_core::formatter::StyleOverride;
 use std::io::{self, Write};
+use std::sync::Arc;
 
 /// Terminal formatter for syntax highlighting with ANSI color codes.
 ///
@@ -55,6 +57,7 @@ pub struct Terminal {
     theme: Option<Theme>,
     background: Background,
     width: Option<usize>,
+    style_override: Option<Arc<dyn StyleOverride>>,
 }
 
 impl TerminalBuilder {
@@ -85,7 +88,16 @@ impl Terminal {
             theme,
             background,
             width,
+            style_override: None,
         }
+    }
+
+    pub fn with_style_override(
+        mut self,
+        style_override: Arc<dyn lumis_core::formatter::StyleOverride>,
+    ) -> Self {
+        self.style_override = Some(style_override);
+        self
     }
 }
 
@@ -96,6 +108,7 @@ impl Default for Terminal {
             theme: None,
             background: Background::Inherit,
             width: None,
+            style_override: None,
         }
     }
 }
@@ -105,19 +118,26 @@ impl Formatter for Terminal {
         let events =
             highlight::highlight_events(source, self.language).map_err(io::Error::other)?;
 
-        let core_formatter = lumis_core::formatter::terminal::Terminal::new(
+        let mut core_formatter = lumis_core::formatter::terminal::Terminal::new(
             self.language,
             self.theme.clone(),
             self.background.clone(),
             self.width,
         );
+
+        if let Some(style_override) = &self.style_override {
+            core_formatter = core_formatter.with_style_override(Arc::clone(style_override));
+        }
+
         core_formatter.render(source, &events, output)
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use super::super::RainbowBrackets;
     use super::*;
+    use crate::themes;
 
     #[test]
     fn test_no_attrs() {
@@ -130,6 +150,91 @@ mod tests {
         assert!(result.contains("@"));
         assert!(result.contains("lang"));
         assert!(result.contains(":rust"));
-        // Without a theme, some tokens may not have styling, so just check the text is there
+    }
+
+    #[test]
+    fn test_rainbow_brackets() {
+        let code = "{:ok, [1, 2]}";
+        let formatter = TerminalBuilder::new()
+            .language(Language::Elixir)
+            .theme(themes::get("onedark").ok())
+            .style_override(Some(Arc::new(RainbowBrackets::new(vec![
+                "#e06c75".to_string(),
+                "#61afef".to_string(),
+                "#98c379".to_string(),
+                "#e5c07b".to_string(),
+                "#c678dd".to_string(),
+                "#56b6c2".to_string(),
+            ]))))
+            .build()
+            .unwrap();
+
+        let mut buffer = Vec::new();
+        formatter.format(code, &mut buffer).unwrap();
+        let result = String::from_utf8_lossy(&buffer);
+
+        // { at depth 0 -> red
+        assert!(result.contains("\u{1b}[38;2;224;108;117m{"));
+        // [ at depth 1 -> blue
+        assert!(result.contains("\u{1b}[38;2;97;175;239m["));
+        // ] at depth 1 -> blue (closing)
+        assert!(result.contains("\u{1b}[38;2;97;175;239m]"));
+        // } at depth 0 -> red (closing)
+        assert!(result.contains("\u{1b}[38;2;224;108;117m}"));
+    }
+
+    #[test]
+    fn test_rainbow_brackets_custom_colors() {
+        let code = "(a)";
+        let formatter = TerminalBuilder::new()
+            .language(Language::Rust)
+            .theme(themes::get("onedark").ok())
+            .style_override(Some(Arc::new(RainbowBrackets::new(vec![
+                "#ff0000".to_string()
+            ]))))
+            .build()
+            .unwrap();
+
+        let mut buffer = Vec::new();
+        formatter.format(code, &mut buffer).unwrap();
+        let result = String::from_utf8_lossy(&buffer);
+
+        assert!(result.contains("\u{1b}[38;2;255;0;0m("));
+        assert!(result.contains("\u{1b}[38;2;255;0;0m)"));
+    }
+
+    #[test]
+    fn test_no_override_by_default() {
+        let code = "{:ok}";
+        let formatter = TerminalBuilder::new()
+            .language(Language::Elixir)
+            .build()
+            .unwrap();
+
+        let mut buffer = Vec::new();
+        formatter.format(code, &mut buffer).unwrap();
+        let result = String::from_utf8_lossy(&buffer);
+
+        // No rainbow colors without style_override set
+        assert!(!result.contains("\u{1b}[38;2;224;108;117m{"));
+    }
+
+    #[test]
+    fn test_rainbow_brackets_without_theme() {
+        let code = "{:ok}";
+        let formatter = TerminalBuilder::new()
+            .language(Language::Elixir)
+            .style_override(Some(Arc::new(RainbowBrackets::new(vec![
+                "#ff0000".to_string()
+            ]))))
+            .build()
+            .unwrap();
+
+        let mut buffer = Vec::new();
+        formatter.format(code, &mut buffer).unwrap();
+        let result = String::from_utf8_lossy(&buffer);
+
+        // Rainbow colors apply even without a theme
+        assert!(result.contains("\u{1b}[38;2;255;0;0m{"));
     }
 }
