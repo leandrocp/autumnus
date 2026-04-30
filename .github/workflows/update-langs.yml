@@ -21,7 +21,7 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
-      - uses: leafo/gh-actions-lua@v12
+      - uses: leafo/gh-actions-lua@v13
 
       - uses: leafo/gh-actions-luarocks@v6
 
@@ -65,7 +65,7 @@ jobs:
 
       - uses: taiki-e/install-action@just
 
-      - uses: leafo/gh-actions-lua@v12
+      - uses: leafo/gh-actions-lua@v13
 
       - uses: leafo/gh-actions-luarocks@v6
 
