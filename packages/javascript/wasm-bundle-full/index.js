@@ -98,6 +98,7 @@ import wasmSystemverilog from "@lumis-sh/wasm-systemverilog"
 import wasmTcl from "@lumis-sh/wasm-tcl"
 import wasmTerraform from "@lumis-sh/wasm-terraform"
 import wasmToml from "@lumis-sh/wasm-toml"
+import wasmToon from "@lumis-sh/wasm-toon"
 import wasmTsx from "@lumis-sh/wasm-tsx"
 import wasmTypescript from "@lumis-sh/wasm-typescript"
 import wasmTypst from "@lumis-sh/wasm-typst"
@@ -203,6 +204,7 @@ export const bundledWasms = {
   "pascal": wasmPascal,
   "puppet": wasmPuppet,
   "terraform": wasmTerraform,
+  "toon": wasmToon,
   "wgsl": wasmWgsl,
   "zsh": wasmZsh,
   "d": wasmD,

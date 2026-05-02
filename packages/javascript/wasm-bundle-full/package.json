@@ -142,6 +142,7 @@
     "@lumis-sh/wasm-tcl": "^0.26.0",
     "@lumis-sh/wasm-terraform": "^0.26.0",
     "@lumis-sh/wasm-toml": "^0.26.0",
+    "@lumis-sh/wasm-toon": "^0.26.0",
     "@lumis-sh/wasm-tsx": "^0.26.0",
     "@lumis-sh/wasm-typescript": "^0.26.0",
     "@lumis-sh/wasm-typst": "^0.26.0",

@@ -94,6 +94,7 @@ export const bundledLanguages: LanguageBundle = {
   "pascal": lazy("pascal", [], () => import("../langs/pascal.js")),
   "puppet": lazy("puppet", [], () => import("../langs/puppet.js")),
   "terraform": lazy("terraform", [], () => import("../langs/terraform.js")),
+  "toon": lazy("toon", [], () => import("../langs/toon.js")),
   "wgsl": lazy("wgsl", [], () => import("../langs/wgsl.js")),
   "zsh": lazy("zsh", [], () => import("../langs/zsh.js")),
   "d": lazy("d", [], () => import("../langs/d.js")),

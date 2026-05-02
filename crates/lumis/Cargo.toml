@@ -146,6 +146,7 @@ all-languages = [
     "lang-systemverilog",
     "lang-tcl",
     "lang-terraform",
+    "lang-toon",
     "lang-toml",
     "lang-tsx",
     "lang-typescript",
@@ -267,6 +268,7 @@ lang-swift = ["dep:tree-sitter-swift", "lumis-core/lang-swift"]
 lang-systemverilog = ["dep:tree-sitter-systemverilog", "lumis-core/lang-systemverilog"]
 lang-tcl = ["lumis-core/lang-tcl"]
 lang-terraform = ["lumis-core/lang-terraform"]
+lang-toon = ["dep:tree-sitter-toon", "lumis-core/lang-toon"]
 lang-toml = ["dep:tree-sitter-toml-ng", "lumis-core/lang-toml"]
 lang-tsx = ["dep:tree-sitter-typescript", "lumis-core/lang-tsx"]
 lang-typescript = ["dep:tree-sitter-typescript", "lumis-core/lang-typescript"]
@@ -364,6 +366,7 @@ tree-sitter-solidity = { version = "1.2.13", optional = true }
 tree-sitter-svelte-ng = { version = "1.0.2", optional = true }
 tree-sitter-swift = { version = "0.7.1", optional = true }
 tree-sitter-systemverilog = { version = "0.3.1", optional = true }
+tree-sitter-toon = { version = "0.1.3", optional = true }
 tree-sitter-toml-ng = { version = "0.7.0", optional = true }
 tree-sitter-typescript = { version = "0.23.2", optional = true }
 tree-sitter-vhdl = { version = "1.4.0", optional = true }

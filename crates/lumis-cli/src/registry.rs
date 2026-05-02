@@ -136,10 +136,8 @@ impl Registry {
                 None => return Ok(None),
             }
         } else {
-            match self.ensure_parser(lang_name) {
-                Ok(bytes) => bytes,
-                Err(_) => return Ok(None),
-            }
+            self.ensure_parser(lang_name)
+                .with_context(|| format!("failed to load parser for '{lang_name}'"))?
         };
 
         let mut store = self.wasm_store.lock().unwrap();

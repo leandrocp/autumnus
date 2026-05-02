@@ -813,19 +813,24 @@ fn tmpdir() -> Result<String> {
 }
 
 fn query_names() -> Result<Vec<String>> {
-    let mut names = Vec::new();
-    let dir = Path::new("queries/upstream");
-    if dir.exists() {
-        for entry in fs::read_dir(dir)? {
+    let mut names = std::collections::BTreeSet::new();
+
+    for dir in ["queries/upstream", "queries/override", "queries/append"] {
+        let path = Path::new(dir);
+        if !path.exists() {
+            continue;
+        }
+
+        for entry in fs::read_dir(path)? {
             let entry = entry?;
             let name = entry.file_name().to_string_lossy().to_string();
             if name != "README.md" && entry.file_type()?.is_dir() {
-                names.push(name);
+                names.insert(name);
             }
         }
     }
-    names.sort();
-    Ok(names)
+
+    Ok(names.into_iter().collect())
 }
 
 fn resolve_query_source<'a>(
@@ -838,6 +843,12 @@ fn resolve_query_source<'a>(
         }
     }
     &queries["default"]
+}
+
+fn has_local_override_query(lang: &str) -> bool {
+    ["highlights", "injections", "locals"]
+        .iter()
+        .any(|query_type| Path::new("queries/override").join(lang).join(format!("{query_type}.scm")).exists())
 }
 
 fn langs_list() -> Result<()> {
@@ -1569,20 +1580,24 @@ fn gen_languages_md() -> Result<()> {
             "[@lumis-sh/wasm-{wasm_suffix}](https://www.npmjs.com/package/@lumis-sh/wasm-{wasm_suffix})"
         );
 
-        let qi = resolve_query_source(&toml.queries, lang);
-        let query_repo_path = qi
-            .git
-            .trim_start_matches("https://github.com/")
-            .trim_end_matches(".git");
-        let query_repo_name = query_repo_path
-            .rsplit('/')
-            .next()
-            .unwrap_or(query_repo_path);
-        let query_short_rev = &qi.rev[..7.min(qi.rev.len())];
-        let query_col = format!(
-            "[{query_repo_name}](https://github.com/{query_repo_path}/tree/{}) `{query_short_rev}`",
-            qi.rev
-        );
+        let query_col = if has_local_override_query(lang) {
+            "local override".to_string()
+        } else {
+            let qi = resolve_query_source(&toml.queries, lang);
+            let query_repo_path = qi
+                .git
+                .trim_start_matches("https://github.com/")
+                .trim_end_matches(".git");
+            let query_repo_name = query_repo_path
+                .rsplit('/')
+                .next()
+                .unwrap_or(query_repo_path);
+            let query_short_rev = &qi.rev[..7.min(qi.rev.len())];
+            format!(
+                "[{query_repo_name}](https://github.com/{query_repo_path}/tree/{}) `{query_short_rev}`",
+                qi.rev
+            )
+        };
 
         lines.push(format!(
             "| {lang} | {parser_link} | {vendored} | {version_col} | {query_col} | {wasm_col} |"
@@ -2218,15 +2233,23 @@ fn wasm_package_suffix(wasm_name: &str) -> &str {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::sync::atomic::{AtomicU64, Ordering};
     use std::time::{SystemTime, UNIX_EPOCH};
 
-    #[test]
-    fn resolve_and_preprocess_uses_append_without_upstream() {
+    fn unique_test_root() -> std::path::PathBuf {
+        static COUNTER: AtomicU64 = AtomicU64::new(0);
+
         let unique = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .expect("time should be monotonic")
             .as_nanos();
-        let root = std::env::temp_dir().join(format!("lumis-dev-query-test-{unique}"));
+        let counter = COUNTER.fetch_add(1, Ordering::Relaxed);
+        std::env::temp_dir().join(format!("lumis-dev-query-test-{unique}-{counter}"))
+    }
+
+    #[test]
+    fn resolve_and_preprocess_uses_append_without_upstream() {
+        let root = unique_test_root();
         let upstream = root.join("upstream");
         let override_root = root.join("override");
         let append_root = root.join("append");
@@ -2258,11 +2281,7 @@ mod tests {
 
     #[test]
     fn resolve_and_preprocess_override_replaces_upstream_query() {
-        let unique = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .expect("time should be monotonic")
-            .as_nanos();
-        let root = std::env::temp_dir().join(format!("lumis-dev-query-test-{unique}"));
+        let root = unique_test_root();
         let upstream = root.join("upstream");
         let upstream_dir = upstream.join("demo");
         let override_root = root.join("override");
@@ -2301,11 +2320,7 @@ mod tests {
 
     #[test]
     fn resolve_and_preprocess_appends_after_override() {
-        let unique = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .expect("time should be monotonic")
-            .as_nanos();
-        let root = std::env::temp_dir().join(format!("lumis-dev-query-test-{unique}"));
+        let root = unique_test_root();
         let upstream = root.join("upstream");
         let upstream_dir = upstream.join("demo");
         let override_root = root.join("override");
@@ -2346,6 +2361,49 @@ mod tests {
 
         assert_eq!(content, "((comment) @comment)\n\n((string) @string)\n");
 
+        let _ = fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn local_override_query_detection_checks_any_query_file() {
+        let root = unique_test_root();
+        let override_lang_dir = root.join("queries/override/demo");
+
+        fs::create_dir_all(&override_lang_dir).expect("override dir should be created");
+        fs::write(override_lang_dir.join("locals.scm"), "(node) @local.scope\n")
+            .expect("override query should be written");
+
+        let cwd = std::env::current_dir().expect("cwd should be available");
+        std::env::set_current_dir(&root).expect("should switch to temp dir");
+
+        let result = (|| {
+            assert!(has_local_override_query("demo"));
+            assert!(!has_local_override_query("missing"));
+        })();
+
+        std::env::set_current_dir(cwd).expect("should restore cwd");
+        result;
+        let _ = fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn query_names_includes_override_only_languages() {
+        let root = unique_test_root();
+        let override_lang_dir = root.join("queries/override/demo");
+
+        fs::create_dir_all(&override_lang_dir).expect("override dir should be created");
+        fs::write(override_lang_dir.join("highlights.scm"), "((comment) @comment)\n")
+            .expect("override query should be written");
+
+        let cwd = std::env::current_dir().expect("cwd should be available");
+        std::env::set_current_dir(&root).expect("should switch to temp dir");
+
+        let result = (|| {
+            assert_eq!(query_names().expect("query names should load"), vec!["demo"]);
+        })();
+
+        std::env::set_current_dir(cwd).expect("should restore cwd");
+        result;
         let _ = fs::remove_dir_all(root);
     }
 }
