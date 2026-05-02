@@ -58,6 +58,7 @@ const LABEL_OVERRIDES: Record<string, string> = {
   sql: "SQL",
   systemverilog: "SystemVerilog",
   tmux: "tmux",
+  toon: "TOON",
   tsx: "TSX",
   typescript: "TypeScript",
   typst: "Typst",

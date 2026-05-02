@@ -122,6 +122,7 @@ all-languages = [
     "lang-systemverilog",
     "lang-tcl",
     "lang-terraform",
+    "lang-toon",
     "lang-toml",
     "lang-tsx",
     "lang-typescript",
@@ -244,6 +245,7 @@ lang-swift = []
 lang-systemverilog = []
 lang-tcl = []
 lang-terraform = []
+lang-toon = []
 lang-toml = []
 lang-tsx = []
 lang-typescript = []

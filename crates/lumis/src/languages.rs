@@ -335,6 +335,8 @@ impl LanguageConfig for Language {
             Language::SystemVerilog => &SYSTEMVERILOG_CONFIG,
             #[cfg(feature = "lang-terraform")]
             Language::Terraform => &TERRAFORM_CONFIG,
+            #[cfg(feature = "lang-toon")]
+            Language::Toon => &TOON_CONFIG,
             #[cfg(feature = "lang-toml")]
             Language::Toml => &TOML_CONFIG,
             #[cfg(feature = "lang-typescript")]
@@ -1722,6 +1724,20 @@ static TERRAFORM_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         TERRAFORM_LOCALS,
     )
     .expect("failed to create terraform highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+#[cfg(feature = "lang-toon")]
+static TOON_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(tree_sitter_toon::LANGUAGE),
+        "toon",
+        TOON_HIGHLIGHTS,
+        TOON_INJECTIONS,
+        TOON_LOCALS,
+    )
+    .expect("failed to create toon highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });
