@@ -48,18 +48,10 @@ pub enum ExFormatterOption {
     BbcodeScoped {},
 }
 
-#[derive(Clone, Debug, NifStruct)]
+#[derive(Clone, Debug, Default, NifStruct)]
 #[module = "Lumis.RainbowBrackets"]
 pub struct ExRainbowBrackets {
     pub colors: Vec<String>,
-}
-
-impl Default for ExRainbowBrackets {
-    fn default() -> Self {
-        Self {
-            colors: vec![],
-        }
-    }
 }
 
 #[derive(Debug, NifTaggedEnum)]
