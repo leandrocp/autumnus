@@ -580,6 +580,9 @@ importers:
       '@lumis-sh/wasm-toml':
         specifier: ^0.26.0
         version: 0.26.0
+      '@lumis-sh/wasm-toon':
+        specifier: ^0.26.0
+        version: 0.26.0
       '@lumis-sh/wasm-tsx':
         specifier: ^0.26.0
         version: 0.26.1
@@ -1305,6 +1308,9 @@ packages:
 
   '@lumis-sh/wasm-toml@0.26.0':
     resolution: {integrity: sha512-yeI5GYaZAJZvFSB2+rajLcYEt9YuMqjfCfz05m+zXX1NrbIrItxrPo9ykQVFX/s5f8tpGFx27tNjHZ19o4JVFw==}
+
+  '@lumis-sh/wasm-toon@0.26.0':
+    resolution: {integrity: sha512-9o0WVzLhOECB/GALyMGUbPiiGX7RGx4LhcObc+1DJhgX1e1+p1rzDg02foZgE9pMTfswrx4tqkJVLFoFGgP8Gg==}
 
   '@lumis-sh/wasm-tsx@0.26.1':
     resolution: {integrity: sha512-XD6wVR4NIEZ+l1IvHFJSVXz5Zvxr45W8rujM/LXE0wcsnFpb2uo2rbj8jqxfey5hq55d0XCmEUNabY11RITvXA==}
@@ -3402,6 +3408,8 @@ snapshots:
   '@lumis-sh/wasm-terraform@0.26.0': {}
 
   '@lumis-sh/wasm-toml@0.26.0': {}
+
+  '@lumis-sh/wasm-toon@0.26.0': {}
 
   '@lumis-sh/wasm-tsx@0.26.1': {}
 
