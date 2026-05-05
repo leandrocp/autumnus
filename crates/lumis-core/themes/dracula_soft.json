@@ -276,6 +276,27 @@
       "fg": "#87e58e",
       "italic": true
     },
+    "rainbow.delimiter.blue": {
+      "fg": "#a7dfef"
+    },
+    "rainbow.delimiter.cyan": {
+      "fg": "#f6f6f5"
+    },
+    "rainbow.delimiter.green": {
+      "fg": "#baa0e8"
+    },
+    "rainbow.delimiter.orange": {
+      "fg": "#87e58e"
+    },
+    "rainbow.delimiter.red": {
+      "fg": "#f6f6f5"
+    },
+    "rainbow.delimiter.violet": {
+      "fg": "#fdc38e"
+    },
+    "rainbow.delimiter.yellow": {
+      "fg": "#e48cc1"
+    },
     "string": {
       "fg": "#e8eda2"
     },

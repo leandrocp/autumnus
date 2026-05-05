@@ -43,7 +43,7 @@ pub enum ExFormatterOption {
         theme: Option<ThemeOrString>,
         background: Option<ExTerminalBackground>,
         width: Option<usize>,
-        rainbow_brackets: Option<ExRainbowBrackets>,
+        rainbow_brackets: Option<ExRainbowBracketsOption>,
     },
     BbcodeScoped {},
 }
@@ -52,6 +52,12 @@ pub enum ExFormatterOption {
 #[module = "Lumis.RainbowBrackets"]
 pub struct ExRainbowBrackets {
     pub colors: Vec<String>,
+}
+
+#[derive(Clone, Debug, NifTaggedEnum)]
+pub enum ExRainbowBracketsOption {
+    Theme,
+    Custom(ExRainbowBrackets),
 }
 
 #[derive(Debug, NifTaggedEnum)]
@@ -241,7 +247,9 @@ impl ExFormatterOption {
                     .map_err(|e| format!("Terminal builder error: {:?}", e))?;
 
                 let formatter = match rainbow_brackets {
-                    Some(rb) => {
+                    Some(ExRainbowBracketsOption::Theme) => formatter
+                        .with_style_override(RainbowBrackets::from_theme(theme.as_ref()).into_override()),
+                    Some(ExRainbowBracketsOption::Custom(rb)) => {
                         formatter.with_style_override(Arc::new(RainbowBrackets::new(rb.colors)))
                     }
                     None => formatter,

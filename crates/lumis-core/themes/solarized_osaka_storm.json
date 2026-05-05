@@ -268,6 +268,27 @@
       "fg": "#c94c16",
       "bold": true
     },
+    "rainbow.delimiter.blue": {
+      "fg": "#268bd3"
+    },
+    "rainbow.delimiter.cyan": {
+      "fg": "#29a298"
+    },
+    "rainbow.delimiter.green": {
+      "fg": "#849900"
+    },
+    "rainbow.delimiter.orange": {
+      "fg": "#c94c16"
+    },
+    "rainbow.delimiter.red": {
+      "fg": "#db302d"
+    },
+    "rainbow.delimiter.violet": {
+      "fg": "#6d71c4"
+    },
+    "rainbow.delimiter.yellow": {
+      "fg": "#b28500"
+    },
     "string": {
       "fg": "#29a298"
     },

@@ -650,23 +650,17 @@ fn render_output(
             let mut builder = lumis_core::formatter::TerminalBuilder::new();
             builder
                 .language(lang)
-                .theme(theme_obj)
+                .theme(theme_obj.clone())
                 .background(parse_terminal_background(background.as_deref()))
                 .width(resolve_terminal_width(width.as_deref())?);
 
             let mut fmt = builder.build().map_err(|e| anyhow::anyhow!("{}", e))?;
 
             if rainbow_brackets {
-                fmt = fmt.with_style_override(std::sync::Arc::new(
-                    lumis_core::formatter::RainbowBrackets::new(vec![
-                        "#e06c75".into(),
-                        "#61afef".into(),
-                        "#98c379".into(),
-                        "#e5c07b".into(),
-                        "#c678dd".into(),
-                        "#56b6c2".into(),
-                    ]),
-                ));
+                fmt = fmt.with_style_override(
+                    lumis_core::formatter::RainbowBrackets::from_theme(theme_obj.as_ref())
+                        .into_override(),
+                );
             }
 
             let mut output = Vec::new();

@@ -320,6 +320,27 @@
     "punctuation.special": {
       "fg": "#e65e72"
     },
+    "rainbow.delimiter.blue": {
+      "fg": "#80a0ff"
+    },
+    "rainbow.delimiter.cyan": {
+      "fg": "#79dac8"
+    },
+    "rainbow.delimiter.green": {
+      "fg": "#8cc85f"
+    },
+    "rainbow.delimiter.orange": {
+      "fg": "#de935f"
+    },
+    "rainbow.delimiter.red": {
+      "fg": "#ff5d5d"
+    },
+    "rainbow.delimiter.violet": {
+      "fg": "#cf87e8"
+    },
+    "rainbow.delimiter.yellow": {
+      "fg": "#e3c78a"
+    },
     "string": {
       "fg": "#c6c684"
     },

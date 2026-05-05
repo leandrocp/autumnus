@@ -258,6 +258,24 @@
     "punctuation.special": {
       "fg": "#50848c"
     },
+    "rainbow.delimiter.blue": {
+      "fg": "#286983"
+    },
+    "rainbow.delimiter.cyan": {
+      "fg": "#56949f"
+    },
+    "rainbow.delimiter.green": {
+      "fg": "#618774"
+    },
+    "rainbow.delimiter.orange": {
+      "fg": "#d7827e"
+    },
+    "rainbow.delimiter.red": {
+      "fg": "#b4637a"
+    },
+    "rainbow.delimiter.yellow": {
+      "fg": "#ea9d34"
+    },
     "string": {
       "fg": "#618774"
     },

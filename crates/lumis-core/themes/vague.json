@@ -261,6 +261,27 @@
     "punctuation.special": {
       "fg": "#6e94b2"
     },
+    "rainbow.delimiter.blue": {
+      "fg": "#7e98e8"
+    },
+    "rainbow.delimiter.cyan": {
+      "fg": "#6e94b2"
+    },
+    "rainbow.delimiter.green": {
+      "fg": "#7fa563"
+    },
+    "rainbow.delimiter.orange": {
+      "fg": "#c48282"
+    },
+    "rainbow.delimiter.red": {
+      "fg": "#d8647e"
+    },
+    "rainbow.delimiter.violet": {
+      "fg": "#bb9dbd"
+    },
+    "rainbow.delimiter.yellow": {
+      "fg": "#f3be7c"
+    },
     "string": {
       "fg": "#e8b589",
       "italic": true

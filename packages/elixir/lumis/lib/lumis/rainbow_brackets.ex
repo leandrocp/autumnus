@@ -8,7 +8,9 @@ defmodule Lumis.RainbowBrackets do
 
   ## Default palette
 
-      colors: ["#e06c75", "#61afef", "#98c379", "#e5c07b", "#c678dd", "#56b6c2"]
+  `rainbow_brackets: true` uses the selected theme's standard rainbow delimiter
+  colors when available. `%Lumis.RainbowBrackets{}` customizes the explicit
+  color palette.
 
   ## Example
 
@@ -23,24 +25,9 @@ defmodule Lumis.RainbowBrackets do
   @enforce_keys [:colors]
   defstruct [:colors]
 
-  @default_colors [
-    "#e06c75",
-    "#61afef",
-    "#98c379",
-    "#e5c07b",
-    "#c678dd",
-    "#56b6c2"
-  ]
-
   @type t :: %__MODULE__{
           colors: [String.t()]
         }
-
-  @doc """
-  Returns a `%Lumis.RainbowBrackets{}` with the default 6-color palette.
-  """
-  @spec new() :: t()
-  def new, do: %__MODULE__{colors: @default_colors}
 
   @doc """
   Returns a `%Lumis.RainbowBrackets{}` with the given custom colors.

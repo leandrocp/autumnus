@@ -347,6 +347,15 @@
     "punctuation.special.bash": {
       "fg": "#c5e478"
     },
+    "rainbow.delimiter.blue": {
+      "fg": "#169fff"
+    },
+    "rainbow.delimiter.violet": {
+      "fg": "#da70d6"
+    },
+    "rainbow.delimiter.yellow": {
+      "fg": "#ffd602"
+    },
     "string": {
       "fg": "#ecc48d"
     },

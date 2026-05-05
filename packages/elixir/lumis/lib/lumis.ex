@@ -140,7 +140,7 @@ defmodule Lumis do
       - `:theme` (`t:theme/0` - default: `nil`) - the theme to apply styles on the highlighted source code.
       - `:background` (`:theme | t:String.t/0 | nil` - default: `nil`) - fallback background behavior: `nil` inherits the output background, `:theme` uses the theme's normal background color, and a string uses that color.
       - `:width` (`pos_integer() | nil` - default: `nil`) - pad each rendered terminal line to the given width. This is most useful with `:background`.
-      - `:rainbow_brackets` (`t:boolean/0` | `%Lumis.RainbowBrackets{}` - default: `false`) - when `true`, color nested brackets with a default palette. Pass a `%Lumis.RainbowBrackets{}` struct to customize colors.
+      - `:rainbow_brackets` (`t:boolean/0` | `%Lumis.RainbowBrackets{}` - default: `false`) - when `true`, color nested brackets with the selected theme's rainbow delimiter colors when available. Pass a `%Lumis.RainbowBrackets{}` struct to customize colors.
 
   * `bbcode_scoped`:
 
@@ -1012,8 +1012,8 @@ defmodule Lumis do
 
     rainbow_brackets =
       case opts[:rainbow_brackets] do
-        true -> Lumis.RainbowBrackets.new()
-        %Lumis.RainbowBrackets{} = rb -> rb
+        true -> :theme
+        %Lumis.RainbowBrackets{} = rb -> {:custom, rb}
         false -> nil
         nil -> nil
       end

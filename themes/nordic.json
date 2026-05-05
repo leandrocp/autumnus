@@ -255,6 +255,21 @@
       "fg": "#d08770",
       "bold": true
     },
+    "rainbow.delimiter.blue": {
+      "fg": "#88c0d0"
+    },
+    "rainbow.delimiter.green": {
+      "fg": "#b1c89d"
+    },
+    "rainbow.delimiter.orange": {
+      "fg": "#d08770"
+    },
+    "rainbow.delimiter.red": {
+      "fg": "#c5727a"
+    },
+    "rainbow.delimiter.yellow": {
+      "fg": "#efd49f"
+    },
     "string": {
       "fg": "#a3be8c"
     },

@@ -288,6 +288,27 @@
     "punctuation.special.markdown": {
       "fg": "#b15c00"
     },
+    "rainbow.delimiter.blue": {
+      "fg": "#2e7de9"
+    },
+    "rainbow.delimiter.cyan": {
+      "fg": "#007197"
+    },
+    "rainbow.delimiter.green": {
+      "fg": "#587539"
+    },
+    "rainbow.delimiter.orange": {
+      "fg": "#b15c00"
+    },
+    "rainbow.delimiter.red": {
+      "fg": "#f52a65"
+    },
+    "rainbow.delimiter.violet": {
+      "fg": "#7847bd"
+    },
+    "rainbow.delimiter.yellow": {
+      "fg": "#8c6c3e"
+    },
     "string": {
       "fg": "#587539"
     },

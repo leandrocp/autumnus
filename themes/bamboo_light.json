@@ -290,6 +290,27 @@
     "punctuation.special.diff": {
       "fg": "#838781"
     },
+    "rainbow.delimiter.blue": {
+      "fg": "#1134a0"
+    },
+    "rainbow.delimiter.cyan": {
+      "fg": "#126877"
+    },
+    "rainbow.delimiter.green": {
+      "fg": "#1d6408"
+    },
+    "rainbow.delimiter.orange": {
+      "fg": "#a7431d"
+    },
+    "rainbow.delimiter.red": {
+      "fg": "#95202d"
+    },
+    "rainbow.delimiter.violet": {
+      "fg": "#6838a7"
+    },
+    "rainbow.delimiter.yellow": {
+      "fg": "#7d5c00"
+    },
     "string": {
       "fg": "#27850b"
     },

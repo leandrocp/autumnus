@@ -315,6 +315,27 @@
     "punctuation.special.rust": {
       "fg": "#90437a"
     },
+    "rainbow.delimiter.blue": {
+      "fg": "#006e89"
+    },
+    "rainbow.delimiter.cyan": {
+      "fg": "#007652"
+    },
+    "rainbow.delimiter.green": {
+      "fg": "#467118"
+    },
+    "rainbow.delimiter.orange": {
+      "fg": "#954d00"
+    },
+    "rainbow.delimiter.red": {
+      "fg": "#a13f37"
+    },
+    "rainbow.delimiter.violet": {
+      "fg": "#90437a"
+    },
+    "rainbow.delimiter.yellow": {
+      "fg": "#805c00"
+    },
     "string": {
       "fg": "#467118"
     },

@@ -301,6 +301,27 @@
     "punctuation.special.typescript": {
       "fg": "#e78a4e"
     },
+    "rainbow.delimiter.blue": {
+      "fg": "#7daea3"
+    },
+    "rainbow.delimiter.cyan": {
+      "fg": "#89b482"
+    },
+    "rainbow.delimiter.green": {
+      "fg": "#a9b665"
+    },
+    "rainbow.delimiter.orange": {
+      "fg": "#e78a4e"
+    },
+    "rainbow.delimiter.red": {
+      "fg": "#ea6962"
+    },
+    "rainbow.delimiter.violet": {
+      "fg": "#d3869b"
+    },
+    "rainbow.delimiter.yellow": {
+      "fg": "#d8a657"
+    },
     "string": {
       "fg": "#89b482"
     },

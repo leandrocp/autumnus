@@ -157,13 +157,12 @@ Lumis.highlight!(
 
 ```rust
 use lumis::{TerminalBuilder, formatters::RainbowBrackets, languages::Language, themes, formatters::Formatter};
-use std::sync::Arc;
 
-let colors = vec!["#e06c75".into(), "#61afef".into(), "#98c379".into()];
+let theme = themes::get("dracula").unwrap();
 let formatter = TerminalBuilder::new()
     .language(Language::Elixir)
-    .theme(Some(themes::get("dracula").unwrap()))
-    .style_override(Some(Arc::new(RainbowBrackets::new(colors))))
+    .theme(Some(theme.clone()))
+    .style_override(Some(RainbowBrackets::from_theme(Some(&theme)).into_override()))
     .build()
     .unwrap();
 
@@ -181,6 +180,6 @@ lumis highlight code.ex --theme dracula --rainbow-brackets
   </TabItem>
 </Tabs>
 
-Default palette: `#e06c75`, `#61afef`, `#98c379`, `#e5c07b`, `#c678dd`, `#56b6c2` (6 colors cycling by nesting depth).
+Default palette comes from the selected theme's standard `RainbowDelimiterRed`, `RainbowDelimiterYellow`, `RainbowDelimiterBlue`, `RainbowDelimiterOrange`, `RainbowDelimiterGreen`, `RainbowDelimiterViolet`, and `RainbowDelimiterCyan` highlight groups when available. Missing colors fall back to `#e06c75`, `#e5c07b`, `#61afef`, `#d19a66`, `#98c379`, `#c678dd`, `#56b6c2`.
 
 This feature is currently available in Rust, Elixir, and CLI. JavaScript and Java support may be added in a future release.

@@ -15,7 +15,7 @@ local function plugin_dir_name(repo_url)
 	if not repo then
 		return "unknown"
 	end
-	if owner and colliding_repo_names[repo] then
+	if owner and colliding_repo_names[string.lower(repo)] then
 		return owner .. "-" .. repo
 	end
 	return repo
@@ -33,6 +33,16 @@ local regular_groups = {
 	"Normal",
 	"Comment",
 	"CursorLine",
+}
+
+local rainbow_delimiter_groups = {
+	"RainbowDelimiterRed",
+	"RainbowDelimiterYellow",
+	"RainbowDelimiterBlue",
+	"RainbowDelimiterOrange",
+	"RainbowDelimiterGreen",
+	"RainbowDelimiterViolet",
+	"RainbowDelimiterCyan",
 }
 
 local treesitter_groups = {
@@ -328,6 +338,10 @@ local function extract_colorscheme_colors(theme)
 		table.insert(all_groups, group)
 	end
 
+	for _, group in ipairs(rainbow_delimiter_groups) do
+		table.insert(all_groups, group)
+	end
+
 	for _, group in ipairs(treesitter_groups) do
 		table.insert(all_groups, "@" .. group)
 	end
@@ -343,6 +357,9 @@ local function extract_colorscheme_colors(theme)
 			local key = string.lower(string.gsub(group, "@", ""))
 			if key == "cursorline" then
 				key = "highlighted"
+			elseif string.sub(group, 1, string.len("RainbowDelimiter")) == "RainbowDelimiter" then
+				key = string.gsub(group, "RainbowDelimiter", "rainbow.delimiter.")
+				key = string.lower(key)
 			end
 			highlights[key] = style
 		end
@@ -442,15 +459,17 @@ local repo_names = {}
 for _, theme_def in ipairs(themes) do
 	local _, repo = parse_repo_parts(theme_def.url)
 	if repo then
-		repo_names[repo] = repo_names[repo] or {}
-		repo_names[repo][theme_def.url] = true
+		local key = string.lower(repo)
+		repo_names[key] = repo_names[key] or {}
+		repo_names[key][theme_def.url] = true
 	end
 	if theme_def.dependencies then
 		for _, dep_url in ipairs(theme_def.dependencies) do
 			local _, dep_repo = parse_repo_parts(dep_url)
 			if dep_repo then
-				repo_names[dep_repo] = repo_names[dep_repo] or {}
-				repo_names[dep_repo][dep_url] = true
+				local key = string.lower(dep_repo)
+				repo_names[key] = repo_names[key] or {}
+				repo_names[key][dep_url] = true
 			end
 		end
 	end
