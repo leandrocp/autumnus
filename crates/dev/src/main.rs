@@ -2168,6 +2168,11 @@ fn stage_wasm(name: &str) -> Result<()> {
     let node_entry = node_template.replace("{wasm_name}", wasm_name);
     fs::write(format!("{out}/index.node.js"), node_entry)?;
 
+    fs::copy(
+        "templates/wasm/index.d.ts.template",
+        format!("{out}/index.d.ts"),
+    )?;
+
     let readme = readme_template
         .replace("{wasm_name}", wasm_name)
         .replace("{lang}", parser_name)
