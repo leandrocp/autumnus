@@ -29,6 +29,11 @@ on:
         description: "Parser name(s), comma-separated (leave empty for all)"
         required: false
         default: ""
+      force:
+        description: "Publish even when the current parser revision already exists"
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   detect:
@@ -49,7 +54,7 @@ jobs:
       - name: Determine which parsers need publishing
         id: needed
         run: |
-          needed=$(just wasm-publish-needed "${{ inputs.parser }}")
+          needed=$(just wasm-publish-needed "${{ inputs.parser }}" "${{ inputs.force || 'false' }}")
           if [ -z "$needed" ]; then
             echo "All packages already published, nothing to build"
             echo "skip=true" >> "$GITHUB_OUTPUT"
