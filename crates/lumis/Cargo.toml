@@ -375,7 +375,7 @@ tree-sitter-yaml = { version = "0.7.2", optional = true }
 
 tree-sitter-zig = { version = "1.1.2", optional = true }
 tree-sitter-zsh = { version = "0.63.1", optional = true }
-v_htmlescape = "0.15"
+v_htmlescape = "0.17"
 
 [build-dependencies]
 cc = "1"
