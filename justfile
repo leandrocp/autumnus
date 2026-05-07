@@ -323,8 +323,8 @@ wasm-build name="":
     cargo run --manifest-path crates/dev/Cargo.toml -- build-wasm {{name}}
 
 # List parsers whose current WASM packages still need publishing, eg: just wasm-publish-needed bash
-wasm-publish-needed parser="":
-    @python3 scripts/wasm-needed.py "{{parser}}"
+wasm-publish-needed parser="" force="false":
+    @python3 scripts/wasm-needed.py "{{parser}}" "{{force}}"
 
 # Stage a WASM package for inspection before publishing, eg: just wasm-publish-prepare bash
 wasm-publish-prepare parser:

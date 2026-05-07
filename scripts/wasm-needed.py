@@ -7,7 +7,7 @@ that need a new release in the current tree-sitter CLI series.
 If a parser rev changed upstream and there is no published `0.26.x` package with
 matching `lumis.rev` metadata, the next `0.26.x` patch must be published.
 
-Usage: python3 scripts/wasm-needed.py [parser_name[,parser_name...]]
+Usage: python3 scripts/wasm-needed.py [parser_name[,parser_name...]] [force]
 """
 
 import subprocess
@@ -16,6 +16,10 @@ import tomllib
 import json
 
 SUPPORTED_TREE_SITTER_CLI = "0.26"
+
+
+def is_truthy(value: str) -> bool:
+    return value.lower() in {"1", "true", "yes", "on"}
 
 
 def wasm_package_suffix(wasm_name: str) -> str:
@@ -67,6 +71,7 @@ with open("languages.toml", "rb") as f:
 
 raw_filter = sys.argv[1] if len(sys.argv) > 1 else ""
 filter_parsers = {part.strip() for part in raw_filter.split(",") if part.strip()}
+force_publish = is_truthy(sys.argv[2]) if len(sys.argv) > 2 else False
 needed = []
 seen = set()
 
@@ -83,6 +88,10 @@ for pname, info in data.get("parsers", {}).items():
     if wasm_name in seen:
         continue
     seen.add(wasm_name)
+
+    if force_publish:
+        needed.append(wasm_name)
+        continue
 
     pkg = f"@lumis-sh/wasm-{wasm_package_suffix(wasm_name)}"
     result = subprocess.run(
