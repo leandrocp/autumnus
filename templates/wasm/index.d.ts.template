@@ -1,0 +1,2 @@
+declare const wasmBinary: Uint8Array
+export default wasmBinary
