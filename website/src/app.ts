@@ -6,6 +6,7 @@ import { renderTokenInspector, setupTokenInspector } from "./sections/token-insp
 import { renderStreaming, setupStreaming } from "./sections/streaming";
 import { renderQuickstart, setupQuickstart } from "./sections/quickstart";
 import { renderFormatters } from "./sections/formatters";
+import { renderDecorations, setupDecorations } from "./sections/decorations";
 import { renderInjections, setupInjections } from "./sections/injections";
 import { renderWasm } from "./sections/wasm";
 import { renderRuntimes } from "./sections/runtimes";
@@ -30,6 +31,8 @@ export async function mountApp(root: HTMLDivElement) {
     SECTION_DIVIDER,
     renderFormatters(),
     SECTION_DIVIDER,
+    renderDecorations(),
+    SECTION_DIVIDER,
     renderTokenInspector(),
     SECTION_DIVIDER,
     renderStreaming(),
@@ -51,5 +54,6 @@ export async function mountApp(root: HTMLDivElement) {
   void setupTokenInspector(root);
   void setupStreaming(root);
   void setupQuickstart(root);
+  void setupDecorations(root);
   void setupInjections(root);
 }

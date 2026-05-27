@@ -16,10 +16,9 @@
 //! See the [formatter](crate::formatter) module for more information and examples.
 
 use super::{Formatter, HtmlElement};
-use crate::highlight;
 use crate::languages::Language;
 use derive_builder::Builder;
-use lumis_core::formatter::Formatter as _;
+use lumis_core::highlight::LineView;
 use std::{
     io::{self, Write},
     ops::RangeInclusive,
@@ -182,27 +181,55 @@ impl Default for HtmlLinked {
 }
 
 impl Formatter for HtmlLinked {
-    fn format(&self, source: &str, output: &mut dyn Write) -> io::Result<()> {
-        let events =
-            highlight::highlight_events(source, self.language).map_err(io::Error::other)?;
+    fn language(&self) -> Language {
+        self.language
+    }
 
-        let core_formatter = lumis_core::formatter::html_linked::HtmlLinked::new(
-            self.language,
-            self.pre_class.clone(),
-            self.highlight_lines.clone().map(map_highlight_lines),
-            self.header.clone(),
-        );
+    fn prepare_line_view<'a>(
+        &self,
+        _source: &'a str,
+        builder: &mut crate::highlight::LineViewBuilder<'a>,
+    ) {
+        if let Some(highlight_lines) = &self.highlight_lines {
+            builder.line_highlights(super::html_inline::line_highlights(
+                &highlight_lines.lines,
+                Some(highlight_lines.class.clone()),
+                Default::default(),
+            ));
+        }
+    }
 
-        core_formatter.render(source, &events, output)
+    fn render(&self, view: &LineView, output: &mut dyn Write) -> io::Result<()> {
+        self.render_line_view(view, output)
     }
 }
 
-fn map_highlight_lines(
-    highlight_lines: HighlightLines,
-) -> lumis_core::formatter::html_linked::HighlightLines {
-    lumis_core::formatter::html_linked::HighlightLines {
-        lines: highlight_lines.lines,
-        class: highlight_lines.class,
+impl HtmlLinked {
+    fn render_line_view(&self, view: &LineView, output: &mut dyn Write) -> io::Result<()> {
+        if let Some(header) = &self.header {
+            write!(output, "{}", header.open_tag)?;
+        }
+        lumis_core::formatter::html::open_pre_tag(output, self.pre_class.as_deref(), None)?;
+        lumis_core::formatter::html::open_code_tag(output, &self.language)?;
+
+        for line in &view.lines {
+            let content = super::line_view::render_html_line(line, |scope| {
+                let Some(scope_name) = lumis_core::highlights::HIGHLIGHT_NAMES
+                    .get(scope.scope_index)
+                    .copied()
+                else {
+                    return String::new();
+                };
+                lumis_core::formatter::html::span_linked_attrs(scope_name)
+            });
+            super::line_view::write_html_line(output, line, &content, None)?;
+        }
+
+        lumis_core::formatter::html::closing_tags(output)?;
+        if let Some(header) = &self.header {
+            write!(output, "{}", header.close_tag)?;
+        }
+        Ok(())
     }
 }
 

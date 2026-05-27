@@ -125,7 +125,7 @@ impl Registry {
         lang_name: &str,
         cached_only: bool,
     ) -> Result<Option<HighlightConfiguration>> {
-        let (highlights, injections, locals) = get_queries(lang_name);
+        let (highlights, injections, locals, _brackets) = get_queries(lang_name);
         if highlights.is_empty() && injections.is_empty() && locals.is_empty() {
             return Ok(None);
         }
@@ -146,6 +146,11 @@ impl Registry {
         )?;
 
         Ok(Some(config))
+    }
+
+    pub fn brackets_query(&self, lang_name: &str) -> Option<&'static str> {
+        let (_highlights, _injections, _locals, brackets) = get_queries(lang_name);
+        (!brackets.trim().is_empty()).then_some(brackets)
     }
 
     fn build_highlight_config(

@@ -59,6 +59,26 @@ Detection can use file name hints and shebang/content heuristics.
 
 ## Token-level APIs
 
+### [`LineViewBuilder`](/usage/line-view-decorations)
+
+Use `LineViewBuilder` when you need a structured view before rendering. It runs highlighting internally and returns a `LineView` with spans, ranges, gutter text, virtual text, and decorator output.
+
+```rust
+use lumis::{highlight::LineViewBuilder, languages::Language};
+
+let view = LineViewBuilder::new()
+    .source("function main() {\n    // TODO: rewrite in Rust\n}\n")
+    .language(Language::JavaScript)
+    .highlight_lines([2..=2])
+    .line_numbers()
+    .build()
+    .unwrap();
+
+assert_eq!(view.lines[1].gutter_text[0].text, "2");
+```
+
+This is the Rust entry point for formatter-neutral decorators. See [LineView Decorations](/usage/line-view-decorations).
+
 ### [`Highlighter`](https://docs.rs/lumis/latest/lumis/highlight/struct.Highlighter.html)
 
 Use `Highlighter` when you want styled segments for custom processing.
@@ -84,7 +104,7 @@ highlight_iter(source, Language::Rust, themes::get("github_light").ok(), |text, 
 }).unwrap();
 ```
 
-This is also the base for advanced custom formatters.
+This is also useful for advanced custom formatters that only need token callbacks. Use `LineViewBuilder` when the formatter needs decorator output.
 
 ## [CSS generation from themes](https://docs.rs/lumis/latest/lumis/themes/struct.Theme.html)
 

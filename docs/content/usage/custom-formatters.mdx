@@ -18,19 +18,19 @@ import TabItem from '@theme/TabItem';
 Write your own formatter when the built-in ones don't produce the output you need. Common reasons:
 
 - wrap output with custom HTML
-- emit Markdown, LaTeX, or a structured AST
+- emit Markdown, LaTeX, or structured data
 - add annotations, data attributes, or extra classes
 - feed Lumis tokens into an existing rendering pipeline
 
 ## Rust
 
-Implement the [`Formatter`](https://docs.rs/lumis/latest/lumis/formatters/trait.Formatter.html) trait.
+Implement the [`Formatter`](https://docs.rs/lumis/latest/lumis/formatters/trait.Formatter.html) trait. A formatter declares the language it uses, then renders the projected `LineView`.
 
 ```rust
 use lumis::{
     formatters::Formatter,
-    formatters::html::{open_pre_tag, open_code_tag, closing_tags, span_inline},
-    highlight::highlight_iter,
+    formatters::html::{closing_tags, open_code_tag, open_pre_tag},
+    highlight::LineView,
     languages::Language,
     themes,
 };
@@ -42,18 +42,158 @@ struct MinimalHtmlFormatter {
 }
 
 impl Formatter for MinimalHtmlFormatter {
-    fn format(&self, source: &str, output: &mut dyn Write) -> io::Result<()> {
+    fn language(&self) -> Language {
+        self.language
+    }
+
+    fn render(&self, view: &LineView, output: &mut dyn Write) -> io::Result<()> {
         open_pre_tag(output, None, self.theme.as_ref())?;
         open_code_tag(output, &self.language)?;
-        highlight_iter(source, self.language, self.theme.clone(), |text, language, _range, scope, _style| {
-            write!(output, "{}", span_inline(text, Some(language), scope, self.theme.as_ref(), false, false))
-        })
-        .map_err(io::Error::other)?;
+        for line in &view.lines {
+            for span in &line.spans {
+                write!(output, "{}", span.text)?;
+            }
+        }
         closing_tags(output)?;
         Ok(())
     }
 }
 ```
+
+### Supporting LineView decorations
+
+Decorations produce formatter-neutral output: line highlights, signs, gutter text, virtual text, and inline span decorations. A formatter that supports them should render a `LineView`, not only the raw token stream.
+
+The split is deliberate:
+
+- decorators decide what extra data exists
+- formatters decide how that data appears
+
+The flow is:
+
+```text
+source + language + decorators
+  -> LineViewBuilder::new().source(...).language(...).decorators(...).build()
+  -> your formatter's HTML, ANSI, JSON, or review UI
+```
+
+At render time, handle the projected line data:
+
+- `Line.line_highlights` for whole-line state such as highlighted lines and diff backgrounds.
+- `Line.signs` for short gutter/status markers such as diff signs.
+- `Line.gutter_text` for gutter content such as line numbers.
+- `Line.virtual_text` for overlays such as indentation guides.
+- `Span.style` and `Span.decoration_kinds` for inline decorations such as rainbow brackets and changed diff spans.
+
+Built-in decorator labels are available from `lumis::highlight::annotation_kinds`. Match those constants when a formatter needs built-in behavior, and use your own strings for custom decorator labels.
+
+```rust
+use lumis::highlight::annotation_kinds;
+
+if highlight.kind.as_deref() == Some(annotation_kinds::LINE_HIGHLIGHT) {
+    // Render the built-in highlighted-line state.
+}
+```
+
+This is the flexible setup: a custom formatter adds the decorators it needs in `prepare_line_view`, then renders the resulting `LineView` as a review surface. The full example renders a code review card with line numbers, gutter signs, inline TODO/FIXME markers, and an annotation rail.
+
+```rust
+use lumis::{
+    formatters::Formatter,
+    formatters::html,
+    highlight::{
+        DecoratorContext, DecorationOutput, GutterText, LineHighlight, LineView,
+        LineViewBuilder, LineViewDecorator, StylePatch,
+    },
+    languages::Language,
+};
+use std::io::{self, Write};
+
+struct TodoDecorator;
+
+impl LineViewDecorator for TodoDecorator {
+    fn run(&self, context: DecoratorContext<'_>, output: &mut DecorationOutput) {
+        for (index, line) in context.source().split('\n').enumerate() {
+            if line.contains("TODO") {
+                output.line_highlights.push(LineHighlight {
+                    line: index + 1,
+                    kind: Some("todo.line".to_string()),
+                    class: Some("has-todo".to_string()),
+                    style: StylePatch {
+                        bg: Some("#2a2112".to_string()),
+                        ..StylePatch::default()
+                    },
+                });
+
+                output.gutter_text.push(GutterText {
+                    line: index + 1,
+                    kind: Some("todo.marker".to_string()),
+                    text: "TODO".to_string(),
+                    style: StylePatch {
+                        fg: Some("#f59e0b".to_string()),
+                        bold: Some(true),
+                        ..StylePatch::default()
+                    },
+                });
+            }
+        }
+    }
+}
+
+struct ReviewHtmlFormatter {
+    language: Language,
+    todo_decorator: TodoDecorator,
+}
+
+impl Formatter for ReviewHtmlFormatter {
+    fn language(&self) -> Language {
+        self.language
+    }
+
+    fn prepare_line_view<'a>(&self, source: &'a str, builder: &mut LineViewBuilder<'a>) {
+        let mut decoration_output = DecorationOutput::default();
+        self.todo_decorator
+            .run(DecoratorContext::new(source), &mut decoration_output);
+
+        builder.line_numbers().decoration_output(decoration_output);
+    }
+
+    fn render(&self, view: &LineView, output: &mut dyn Write) -> io::Result<()> {
+        writeln!(output, "<section class=\"review-card\">")?;
+        writeln!(output, "<pre class=\"review-code\"><code>")?;
+        for line in &view.lines {
+            let class = line
+                .line_highlights
+                .first()
+                .and_then(|highlight| highlight.class.as_deref())
+                .unwrap_or("line");
+
+            write!(output, "<span class=\"{}\">", html::escape(class))?;
+            if let Some(number) = line.gutter_text.first() {
+                write!(output, "<span class=\"line-number\">{}</span>", html::escape(&number.text))?;
+            }
+            if let Some(sign) = line.signs.first() {
+                write!(output, "<span class=\"sign\">{}</span>", html::escape(&sign.text))?;
+            }
+            for span in &line.spans {
+                write!(output, "{}", html::escape(&span.text))?;
+            }
+            writeln!(output, "</span>")?;
+        }
+        writeln!(output, "</code></pre>")?;
+        writeln!(output, "<aside class=\"review-notes\">...</aside>")?;
+        writeln!(output, "</section>")?;
+
+        Ok(())
+    }
+}
+```
+
+If your formatter uses `highlight_iter()` directly, it can still render syntax highlighting, but it will not see line decorations or inline decorator decorations.
+
+The full version, including CSS, inline `HighlightDecoration` rendering, and annotation extraction, is in [`crates/lumis/examples/custom_formatter_decorator.rs`](https://github.com/leandrocp/lumis/blob/main/crates/lumis/examples/custom_formatter_decorator.rs).
+
+See [LineView Decorations](/usage/line-view-decorations) for the custom decorator API.
 
 ## JavaScript
 

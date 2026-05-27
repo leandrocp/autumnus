@@ -16,11 +16,11 @@
 //! See the [formatter](crate::formatter) module for more information and examples.
 
 use super::{Formatter, HtmlElement};
-use crate::highlight;
+use crate::highlight::{LineHighlight, StylePatch};
 use crate::languages::Language;
 use crate::themes::Theme;
 use derive_builder::Builder;
-use lumis_core::formatter::Formatter as _;
+use lumis_core::highlight::LineView;
 use std::{
     io::{self, Write},
     ops::RangeInclusive,
@@ -221,24 +221,121 @@ impl Default for HtmlInline {
 }
 
 impl Formatter for HtmlInline {
-    fn format(&self, source: &str, output: &mut dyn Write) -> io::Result<()> {
-        let events =
-            highlight::highlight_events(source, self.language).map_err(io::Error::other)?;
-
-        let core_formatter = lumis_core::formatter::html_inline::HtmlInline::new(
-            self.language,
-            self.theme.clone(),
-            self.pre_class.clone(),
-            self.italic,
-            self.include_highlights,
-            self.highlight_lines
-                .clone()
-                .map(super::map_inline_highlight_lines),
-            self.header.clone(),
-        );
-
-        core_formatter.render(source, &events, output)
+    fn language(&self) -> Language {
+        self.language
     }
+
+    fn prepare_line_view<'a>(
+        &self,
+        _source: &'a str,
+        builder: &mut crate::highlight::LineViewBuilder<'a>,
+    ) {
+        if let Some(highlight_lines) = &self.highlight_lines {
+            let style = match &highlight_lines.style {
+                Some(HighlightLinesStyle::Theme) => self
+                    .theme
+                    .as_ref()
+                    .and_then(|theme| theme.get_style("highlighted"))
+                    .map(style_patch_from_theme_style)
+                    .unwrap_or_default(),
+                Some(HighlightLinesStyle::Style(_)) => StylePatch::default(),
+                None => StylePatch::default(),
+            };
+            builder.line_highlights(line_highlights(
+                &highlight_lines.lines,
+                highlight_lines.class.clone(),
+                style,
+            ));
+        }
+    }
+
+    fn render(&self, view: &LineView, output: &mut dyn Write) -> io::Result<()> {
+        self.render_line_view(view, output)
+    }
+}
+
+impl HtmlInline {
+    fn render_line_view(&self, view: &LineView, output: &mut dyn Write) -> io::Result<()> {
+        if let Some(header) = &self.header {
+            write!(output, "{}", header.open_tag)?;
+        }
+        lumis_core::formatter::html::open_pre_tag(
+            output,
+            self.pre_class.as_deref(),
+            self.theme.as_ref(),
+        )?;
+        lumis_core::formatter::html::open_code_tag(output, &self.language)?;
+
+        for line in &view.lines {
+            let content = super::line_view::render_html_line(line, |scope| {
+                let Some(scope_name) = lumis_core::highlights::HIGHLIGHT_NAMES
+                    .get(scope.scope_index)
+                    .copied()
+                else {
+                    return String::new();
+                };
+                lumis_core::formatter::html::span_inline_attrs(
+                    Some(scope.language.unwrap_or(self.language)),
+                    scope_name,
+                    self.theme.as_ref(),
+                    self.italic,
+                    self.include_highlights,
+                )
+            });
+            super::line_view::write_html_line(
+                output,
+                line,
+                &content,
+                self.custom_line_style(line.line_number),
+            )?;
+        }
+
+        lumis_core::formatter::html::closing_tags(output)?;
+        if let Some(header) = &self.header {
+            write!(output, "{}", header.close_tag)?;
+        }
+        Ok(())
+    }
+
+    fn custom_line_style(&self, line_number: usize) -> Option<&str> {
+        let highlight_lines = self.highlight_lines.as_ref()?;
+        let Some(HighlightLinesStyle::Style(style)) = &highlight_lines.style else {
+            return None;
+        };
+        highlight_lines
+            .lines
+            .iter()
+            .any(|range| range.contains(&line_number))
+            .then_some(style.as_str())
+    }
+}
+
+pub(crate) fn style_patch_from_theme_style(style: &crate::themes::Style) -> StylePatch {
+    let mut patch = StylePatch::default();
+    patch.fg.clone_from(&style.fg);
+    patch.bg.clone_from(&style.bg);
+    patch.bold = Some(style.bold);
+    patch.italic = Some(style.italic);
+    patch.text_decoration.underline = Some(style.text_decoration.underline);
+    patch.text_decoration.strikethrough = Some(style.text_decoration.strikethrough);
+    patch
+}
+
+pub(crate) fn line_highlights(
+    ranges: &[RangeInclusive<usize>],
+    class: Option<String>,
+    style: StylePatch,
+) -> Vec<LineHighlight> {
+    ranges
+        .iter()
+        .flat_map(|range| range.clone())
+        .map(|line| LineHighlight {
+            line,
+            kind: Some("line.highlight".to_string()),
+            class: class.clone(),
+            style: style.clone(),
+        })
+        .collect()
 }
 
 #[cfg(test)]

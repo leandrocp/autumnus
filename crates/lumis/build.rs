@@ -10,10 +10,12 @@
 // 2. `queries_constants.rs` (via `queries()`, included by `src/queries.rs`)
 //
 //    Reads processed .scm files from `queries/processed/<lang>/` and
-//    emits one `&str` constant per language per query type:
+//    emits one `&str` constant per language per syntax query type plus one
+//    shared bracket query:
 //      pub const RUST_HIGHLIGHTS: &str = "...";
 //      pub const RUST_INJECTIONS: &str = "...";
 //      pub const RUST_LOCALS: &str = "...";
+//      pub const DEFAULT_BRACKETS: &str = "...";
 //
 //    Also converts `#lua-match?` predicates to `#match?` with Lua-to-Rust
 //    regex conversion (this step only applies to the native Rust crate,
@@ -367,9 +369,20 @@ fn queries(toml: &LanguagesToml) {
     let dest_path = out_dir.join("queries_constants.rs");
 
     let queries_path = resolve_path("queries/processed");
+    let default_brackets_query_path = resolve_path("queries/brackets.scm");
     let mut generated_code = TokenStream::new();
 
+    let default_brackets_query = read_query_file(&default_brackets_query_path);
+    generated_code.extend(quote! {
+        #[doc(hidden)]
+        pub const DEFAULT_BRACKETS: &str = #default_brackets_query;
+    });
+
     println!("cargo:rerun-if-changed={}", queries_path.display());
+    println!(
+        "cargo:rerun-if-changed={}",
+        default_brackets_query_path.display()
+    );
 
     let entries = fs::read_dir(&queries_path).unwrap_or_else(|_| {
         panic!(

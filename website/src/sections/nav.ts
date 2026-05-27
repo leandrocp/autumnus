@@ -14,6 +14,7 @@ export function renderNav() {
           <a href="#runtimes" class="hidden text-zinc-500 transition-colors hover:text-zinc-900 dark:hover:text-white sm:inline-block">Runtimes</a>
           <a href="#integrations" class="hidden text-zinc-500 transition-colors hover:text-zinc-900 dark:hover:text-white sm:inline-block">Integrations</a>
           <a href="#formatters" class="hidden text-zinc-500 transition-colors hover:text-zinc-900 dark:hover:text-white sm:inline-block">Formatters</a>
+          <a href="#decorations" class="hidden text-zinc-500 transition-colors hover:text-zinc-900 dark:hover:text-white sm:inline-block">Decorations</a>
           <a href="/docs"
              class="hidden items-center border border-zinc-900 bg-zinc-900 px-3 py-1.5 text-white transition-colors hover:bg-white hover:text-zinc-900 dark:border-white dark:bg-white dark:text-zinc-900 dark:hover:bg-transparent dark:hover:text-white sm:inline-flex">
             Docs
@@ -36,6 +37,7 @@ export function renderNav() {
           <a href="#runtimes" class="mobile-menu-link block py-2 text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white">Runtimes</a>
           <a href="#integrations" class="mobile-menu-link block py-2 text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white">Integrations</a>
           <a href="#formatters" class="mobile-menu-link block py-2 text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white">Formatters</a>
+          <a href="#decorations" class="mobile-menu-link block py-2 text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white">Decorations</a>
         </div>
       </div>
     </nav>`;

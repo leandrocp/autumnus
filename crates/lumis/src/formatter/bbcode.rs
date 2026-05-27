@@ -16,10 +16,9 @@
 //! See the [formatter](crate::formatter) module for more information and examples.
 
 use super::Formatter;
-use crate::highlight;
 use crate::languages::Language;
 use derive_builder::Builder;
-use lumis_core::formatter::Formatter as _;
+use lumis_core::highlight::LineView;
 use std::io::{self, Write};
 
 /// BBCode formatter for syntax highlighting using highlight scope names as tags.
@@ -85,13 +84,122 @@ impl Default for BBCodeScoped {
 }
 
 impl Formatter for BBCodeScoped {
-    fn format(&self, source: &str, output: &mut dyn Write) -> io::Result<()> {
-        let events =
-            highlight::highlight_events(source, self.language).map_err(io::Error::other)?;
-
-        let core_formatter = lumis_core::formatter::bbcode::BBCodeScoped::new(self.language);
-        core_formatter.render(source, &events, output)
+    fn language(&self) -> Language {
+        self.language
     }
+
+    fn render(&self, view: &LineView, output: &mut dyn Write) -> io::Result<()> {
+        self.render_line_view(view, output)
+    }
+}
+
+impl BBCodeScoped {
+    fn render_line_view(&self, view: &LineView, output: &mut dyn Write) -> io::Result<()> {
+        for (index, line) in view.lines.iter().enumerate() {
+            for highlight in &line.line_highlights {
+                if let Some(kind) = &highlight.kind {
+                    write!(output, "[{}]", bbcode_tag(kind))?;
+                }
+            }
+            for gutter in &line.gutter_text {
+                write!(output, "[gutter]{}[/gutter] ", escape_bbcode(&gutter.text))?;
+            }
+            for sign in &line.signs {
+                write!(output, "[sign]{}[/sign] ", escape_bbcode(&sign.text))?;
+            }
+
+            let mut column = 0usize;
+            for span in &line.spans {
+                self.write_span(output, span, line, &mut column)?;
+            }
+            for virtual_text in &line.virtual_text {
+                if virtual_text.column >= column {
+                    write!(
+                        output,
+                        "[virtual]{}[/virtual]",
+                        escape_bbcode(&virtual_text.text)
+                    )?;
+                }
+            }
+
+            for highlight in line.line_highlights.iter().rev() {
+                if let Some(kind) = &highlight.kind {
+                    write!(output, "[/{}]", bbcode_tag(kind))?;
+                }
+            }
+            if index + 1 < view.lines.len() || view.trailing_newline {
+                writeln!(output)?;
+            }
+        }
+        Ok(())
+    }
+
+    fn write_span(
+        &self,
+        output: &mut dyn Write,
+        span: &lumis_core::highlight::Span,
+        line: &lumis_core::highlight::Line,
+        column: &mut usize,
+    ) -> io::Result<()> {
+        for kind in &span.decoration_kinds {
+            write!(output, "[{}]", bbcode_tag(kind))?;
+        }
+        if span.style.is_some() {
+            write!(output, "[decoration]")?;
+        }
+        if let Some(scope) = span.scopes.last() {
+            let scope_name = lumis_core::highlights::HIGHLIGHT_NAMES
+                .get(scope.scope_index)
+                .copied()
+                .unwrap_or("");
+            let language = scope.language.unwrap_or(self.language);
+            write!(
+                output,
+                "[{}]",
+                bbcode_tag(&format!("{scope_name}.{language}"))
+            )?;
+        }
+
+        for ch in span.text.chars() {
+            if let Some(virtual_text) = super::line_view::virtual_text_at_column(line, *column) {
+                write!(
+                    output,
+                    "[virtual]{}[/virtual]",
+                    escape_bbcode(&virtual_text.text)
+                )?;
+            }
+            write!(output, "{}", escape_bbcode(&ch.to_string()))?;
+            *column += super::line_view::char_display_width(ch);
+        }
+
+        if let Some(scope) = span.scopes.last() {
+            let scope_name = lumis_core::highlights::HIGHLIGHT_NAMES
+                .get(scope.scope_index)
+                .copied()
+                .unwrap_or("");
+            let language = scope.language.unwrap_or(self.language);
+            write!(
+                output,
+                "[/{}]",
+                bbcode_tag(&format!("{scope_name}.{language}"))
+            )?;
+        }
+        if span.style.is_some() {
+            write!(output, "[/decoration]")?;
+        }
+        for kind in span.decoration_kinds.iter().rev() {
+            write!(output, "[/{}]", bbcode_tag(kind))?;
+        }
+        Ok(())
+    }
+}
+
+fn bbcode_tag(value: &str) -> String {
+    value.replace(['.', '_', ' '], "-")
+}
+
+fn escape_bbcode(text: &str) -> String {
+    text.replace('[', "&#91;").replace(']', "&#93;")
 }
 
 #[cfg(test)]

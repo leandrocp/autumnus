@@ -256,7 +256,7 @@ Omit `{name}` to upgrade all queries at once.
 
 `just langs-update {name}` is the end-to-end command for a coordinated parser update. It fetches parsers first, syncs crate-backed Rust parser dependencies and Rust bundle features, then fetches and preprocesses queries, and regenerates `LANGUAGES.md`.
 
-Raw query sources live in `queries/upstream/`. Preprocessed tracked outputs live in `queries/processed/` and should be committed whenever upstream queries, replacements, or append patches change.
+Raw query sources live in `queries/upstream/`, including downloaded `brackets.scm` files. Preprocessed tracked outputs live in `queries/processed/` and should be committed whenever upstream queries, replacements, or append patches change.
 
 #### Query replacements and append patches
 

@@ -97,11 +97,15 @@ Line highlighting is not currently exposed by `lumis4j`.
   <TabItem value="cli" label="CLI">
 
 ```bash
-lumis highlight main.rs --formatter html-inline --highlight-lines 1,3-5,10
+lumis highlight main.rs --formatter html-inline
 ```
+
+Line highlighting is not currently exposed by the CLI.
 
   </TabItem>
 </Tabs>
+
+In Rust, use [`LineViewBuilder`](/usage/line-view-decorations) when line highlighting is part of a custom renderer or editor-like view.
 
 ## Custom style example
 
@@ -179,5 +183,5 @@ Lumis.highlight!(
 | HTML Inline | theme style or custom inline CSS |
 | HTML Linked | CSS class names |
 | HTML Multi-Themes | theme style or custom inline CSS |
-| Terminal | no line highlight styling |
+| Terminal | no formatter-owned line highlighting |
 | BBCode Scoped | no line highlight styling |

@@ -23,7 +23,7 @@ const FORMATTERS = [
   {
     name: "custom",
     description:
-      "Implement the formatter trait/interface to output any format. Markdown, LaTeX, whatever.",
+      "Implement the formatter trait/interface. Use LineView when you need gutters or decorators.",
   },
 ];
 

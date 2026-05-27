@@ -1,0 +1,61 @@
+<style>
+.review-card{background:#0f172a;border:1px solid #26344f;border-radius:14px;color:#dbeafe;font:13px/1.35 ui-monospace,SFMono-Regular,Menlo,monospace;overflow:hidden;max-width:1040px}
+.review-header{align-items:center;background:linear-gradient(135deg,#111827,#172554);border-bottom:1px solid #26344f;display:flex;justify-content:space-between;padding:18px 22px}
+.review-header h2{font-family:Inter,system-ui,sans-serif;font-size:18px;margin:2px 0 0}
+.review-eyebrow{color:#93c5fd;font-size:11px;letter-spacing:.14em;margin:0;text-transform:uppercase}
+.review-count{background:#1e3a8a;border:1px solid #3b82f6;border-radius:999px;color:#bfdbfe;padding:4px 10px}
+.review-layout{display:grid;grid-template-columns:minmax(0,1fr) 280px}
+.review-code{background:#020617;margin:0;overflow:auto;padding:10px 0}
+.review-code code{display:block}
+.review-row{display:grid;grid-template-columns:4.5ch 2.5ch minmax(0,1fr);min-height:21px;padding:0 16px}
+.review-row:hover{background:#0b1220}
+.review-line-todo{background:rgba(245,158,11,.12);box-shadow:inset 3px 0 #f59e0b}
+.review-line-fixme{background:rgba(239,68,68,.14);box-shadow:inset 3px 0 #ef4444}
+.review-ln{color:#64748b;text-align:right;user-select:none}
+.review-sign{color:#fbbf24;text-align:center;user-select:none}
+.review-line-fixme .review-sign{color:#f87171}
+.review-source{white-space:pre}
+mark{background:transparent;border-radius:4px;color:inherit;padding:0 2px}
+.review-marker-todo{background:#92400e;color:#fde68a}
+.review-marker-fixme{background:#991b1b;color:#fecaca}
+.review-notes{background:#0b1120;border-left:1px solid #26344f;padding:16px}
+.review-notes h3{font-family:Inter,system-ui,sans-serif;font-size:13px;margin:0 0 12px}
+.review-note{border:1px solid #26344f;border-radius:10px;margin-bottom:10px;padding:10px 12px}
+.review-note-todo{background:rgba(245,158,11,.08)}
+.review-note-fixme{background:rgba(239,68,68,.1)}
+.review-note-line{color:#93c5fd;font-size:12px}
+.review-note p{color:#cbd5e1;margin:5px 0 0;white-space:normal}
+</style>
+<section class="review-card">
+  <header class="review-header">
+    <div>
+      <p class="review-eyebrow">custom formatter + extension</p>
+      <h2>Checkout flow review</h2>
+    </div>
+    <span class="review-count">2 notes</span>
+  </header>
+  <div class="review-layout">
+  <div class="review-code"><code>
+<span class="review-row" data-line="1"><span class="review-ln">1</span><span class="review-sign"></span><span class="review-source"><span style="color: #cba6f7;">export</span><span> </span><span style="color: #cba6f7;">function</span><span> </span><span style="color: #89b4fa;">checkout</span><span style="color: #9399b2;">(</span><span style="color: #eba0ac;">cart</span><span style="color: #9399b2;">)</span><span> </span><span style="color: #9399b2;">&lbrace;</span></span></span>
+<span class="review-row" data-line="2"><span class="review-ln">2</span><span class="review-sign"></span><span class="review-source"><span>  </span><span style="color: #cba6f7;">const</span><span> </span><span style="color: #cdd6f4;">total</span><span> </span><span style="color: #89dceb;">=</span><span> </span><span style="color: #cdd6f4;">cart</span><span style="color: #9399b2;">.</span><span style="color: #b4befe;">items</span><span style="color: #9399b2;">.</span><span style="color: #89b4fa;">reduce</span><span style="color: #9399b2;">(</span><span style="color: #9399b2;">(</span><span style="color: #eba0ac;">sum</span><span style="color: #9399b2;">,</span><span> </span><span style="color: #eba0ac;">item</span><span style="color: #9399b2;">)</span><span> </span><span style="color: #89dceb;">=&gt;</span><span> </span><span style="color: #cdd6f4;">sum</span><span> </span><span style="color: #89dceb;">+</span><span> </span><span style="color: #cdd6f4;">item</span><span style="color: #9399b2;">.</span><span style="color: #b4befe;">price</span><span style="color: #9399b2;">,</span><span> </span><span style="color: #fab387;">0</span><span style="color: #9399b2;">)</span></span></span>
+<span class="review-row review-line review-line-todo" data-line="3"><span class="review-ln">3</span><span class="review-sign">?</span><span class="review-source"><span>  </span><span style="color: #9399b2;font-style: italic;">// </span><mark class="review-marker-todo" style="color: #1e1e2e;background-color: #f2cdcd;">TODO</mark><span style="color: #9399b2;">:</span><span style="color: #9399b2;font-style: italic;"> show tax and shipping before charging the card</span></span></span>
+<span class="review-row" data-line="4"><span class="review-ln">4</span><span class="review-sign"></span><span class="review-source"><span>  </span><span style="color: #89b4fa;">charge</span><span style="color: #9399b2;">(</span><span style="color: #cdd6f4;">total</span><span style="color: #9399b2;">)</span></span></span>
+<span class="review-row review-line review-line-fixme" data-line="5"><span class="review-ln">5</span><span class="review-sign">!</span><span class="review-source"><span>  </span><span style="color: #9399b2;font-style: italic;">// </span><mark class="review-marker-fixme" style="color: #1e1e2e;background-color: #f38ba8;">FIXME</mark><span style="color: #9399b2;">:</span><span style="color: #9399b2;font-style: italic;"> handle failed payments and retry safely</span></span></span>
+<span class="review-row" data-line="6"><span class="review-ln">6</span><span class="review-sign"></span><span class="review-source"><span>  </span><span style="color: #cba6f7;">return</span><span> </span><span style="color: #9399b2;">&lbrace;</span><span> </span><span style="color: #b4befe;">ok</span><span style="color: #9399b2;">:</span><span> </span><span style="color: #fab387;">true</span><span> </span><span style="color: #9399b2;">&rbrace;</span></span></span>
+<span class="review-row" data-line="7"><span class="review-ln">7</span><span class="review-sign"></span><span class="review-source"><span style="color: #9399b2;">&rbrace;</span></span></span>
+<span class="review-row" data-line="8"><span class="review-ln">8</span><span class="review-sign"></span><span class="review-source"></span></span>
+  </code></div>
+    <aside class="review-notes" aria-label="Review notes">
+      <h3>Annotations</h3>
+      <article class="review-note review-note-todo">
+        <span class="review-note-line">line 3</span>
+        <p>show tax and shipping before charging the card</p>
+      </article>
+      <article class="review-note review-note-fixme">
+        <span class="review-note-line">line 5</span>
+        <p>handle failed payments and retry safely</p>
+      </article>
+    </aside>
+  </div>
+</section>
+

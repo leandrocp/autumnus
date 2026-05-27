@@ -51,6 +51,72 @@
 //! write_highlight(&mut file, code, formatter).unwrap();
 //! ```
 //!
+//! ## Structured highlighting with LineView
+//!
+//! Formatters render [`highlight::LineView`], a structured view of highlighted
+//! source. `LineView` is AST-like because it is traversable and keeps lines,
+//! spans, source ranges, scopes, and decorations together. It is not a parser
+//! AST: tree-sitter nodes and parser state stay below this layer.
+//!
+//! Use [`highlight::LineViewBuilder`] when you want to inspect the highlighted
+//! document yourself or write a custom formatter that supports decorators.
+//!
+//! ```rust
+//! use lumis::highlight::{LineViewBuilder, RainbowBracketsOptions};
+//! use lumis::languages::Language;
+//!
+//! let view = LineViewBuilder::new()
+//!     .source("fn main() { println!(\"hi\"); }")
+//!     .language(Language::Rust)
+//!     .rainbow_brackets(RainbowBracketsOptions::default())
+//!     .build()
+//!     .unwrap();
+//!
+//! assert_eq!(view.lines[0].line_number, 1);
+//! assert!(view.lines[0].spans.iter().any(|span| !span.decoration_kinds.is_empty()));
+//! ```
+//!
+//! A simplified `LineView` looks like this:
+//!
+//! ```text
+//! LineView {
+//!     trailing_newline: false,
+//!     lines: [
+//!         Line {
+//!             line_number: 1,
+//!             range: 0..11,
+//!             gutter_text: [GutterText { kind: Some("line.number"), text: "1", ... }],
+//!             line_highlights: [],
+//!             spans: [
+//!                 Span { range: 0..2, text: "fn", scopes: ["keyword.function"], ... },
+//!                 Span { range: 2..3, text: " ", scopes: [], ... },
+//!                 Span { range: 3..7, text: "main", scopes: ["function"], ... },
+//!                 Span { range: 7..8, text: "(", scopes: ["punctuation.bracket"], ... },
+//!             ],
+//!             ..
+//!         },
+//!         Line {
+//!             line_number: 2,
+//!             range: 12..31,
+//!             gutter_text: [GutterText { kind: Some("line.number"), text: "2", ... }],
+//!             line_highlights: [
+//!                 LineHighlight {
+//!                     kind: Some("line.highlight"),
+//!                     class: Some("highlighted"),
+//!                     ..
+//!                 },
+//!             ],
+//!             spans: [
+//!                 Span { range: 16..23, text: "println", scopes: ["keyword.exception"], ... },
+//!                 Span { range: 23..24, text: "!", scopes: ["function.macro"], ... },
+//!                 Span { range: 25..29, text: "\"hi\"", scopes: ["string"], ... },
+//!             ],
+//!             ..
+//!         },
+//!     ],
+//! }
+//! ```
+//!
 //! ## Language Feature Flags
 //!
 //! By default, Lumis includes support for all languages, which can result in longer
@@ -361,8 +427,7 @@ pub use crate::formatters::{
 /// ```
 pub fn highlight<F: Formatter>(source: &str, formatter: F) -> String {
     let mut buffer = Vec::new();
-    formatter
-        .format(source, &mut buffer)
+    write_highlight(&mut buffer, source, formatter)
         .expect("formatter failed to format source code");
     String::from_utf8(buffer).expect("formatter produced invalid UTF-8")
 }

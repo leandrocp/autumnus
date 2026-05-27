@@ -148,10 +148,13 @@
 
 // Originally based on https://github.com/Colonial-Dev/inkjet/tree/da289fa8b68f11dffad176e4b8fabae8d6ac376d/src/formatter
 
+use crate::highlight::{LineView, LineViewBuilder};
+use crate::languages::Language;
 use std::io::{self, Write};
 
 pub mod ansi;
 pub mod html;
+pub(crate) mod line_view;
 
 pub mod html_inline;
 pub use html_inline::{HtmlInline, HtmlInlineBuilder};
@@ -172,23 +175,6 @@ pub use bbcode::{BBCodeScoped, BBCodeScopedBuilder};
 #[deprecated(note = "use `formatters::html::HtmlElement` instead")]
 pub use lumis_core::formatter::HtmlElement;
 
-pub(crate) fn map_inline_highlight_lines(
-    highlight_lines: html_inline::HighlightLines,
-) -> lumis_core::formatter::html_inline::HighlightLines {
-    lumis_core::formatter::html_inline::HighlightLines {
-        lines: highlight_lines.lines,
-        style: highlight_lines.style.map(|style| match style {
-            html_inline::HighlightLinesStyle::Theme => {
-                lumis_core::formatter::html_inline::HighlightLinesStyle::Theme
-            }
-            html_inline::HighlightLinesStyle::Style(style) => {
-                lumis_core::formatter::html_inline::HighlightLinesStyle::Style(style)
-            }
-        }),
-        class: highlight_lines.class,
-    }
-}
-
 /// Trait for implementing custom syntax highlighting formatters.
 ///
 /// The `Formatter` trait allows you to create custom output formats for syntax highlighted code.
@@ -207,8 +193,8 @@ pub(crate) fn map_inline_highlight_lines(
 /// ```rust
 /// use lumis::{
 ///     formatters::Formatter,
-///     formatters::html::{open_pre_tag, open_code_tag, closing_tags, span_inline},
-///     highlight::highlight_iter,
+///     formatters::html::{closing_tags, open_code_tag, open_pre_tag},
+///     highlight::LineView,
 ///     languages::Language,
 ///     themes,
 /// };
@@ -220,13 +206,18 @@ pub(crate) fn map_inline_highlight_lines(
 /// }
 ///
 /// impl Formatter for MinimalHtmlFormatter {
-///     fn format(&self, source: &str, output: &mut dyn Write) -> io::Result<()> {
+///     fn language(&self) -> Language {
+///         self.language
+///     }
+///
+///     fn render(&self, view: &LineView, output: &mut dyn Write) -> io::Result<()> {
 ///         open_pre_tag(output, None, self.theme.as_ref())?;
 ///         open_code_tag(output, &self.language)?;
-///         highlight_iter(source, self.language, self.theme.clone(), |text, language, _range, scope, _style| {
-///             write!(output, "{}", span_inline(text, Some(language), scope, self.theme.as_ref(), false, false))
-///         })
-///         .map_err(io::Error::other)?;
+///         for line in &view.lines {
+///             for span in &line.spans {
+///                 write!(output, "{}", span.text)?;
+///             }
+///         }
 ///         closing_tags(output)?;
 ///         Ok(())
 ///     }
@@ -239,33 +230,38 @@ pub(crate) fn map_inline_highlight_lines(
 /// - [`highlight_iter()`](crate::highlight::highlight_iter) - Streaming callback API
 /// - [Crate examples](https://github.com/leandrocp/lumis/tree/main/crates/lumis/examples) - Custom formatter implementations
 pub trait Formatter: Send + Sync {
-    /// Format source code with syntax highlighting.
-    ///
-    /// This is the main method for generating formatted output. Write the highlighted
-    /// code to the provided `output` writer.
-    ///
-    /// # Arguments
-    ///
-    /// * `source` - The source code to highlight
-    /// * `output` - Writer to send formatted output to
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// use lumis::{formatters::Formatter, HtmlInlineBuilder, languages::Language};
-    ///
-    /// let formatter = HtmlInlineBuilder::new()
-    ///     .language(Language::Rust)
-    ///     .build()
-    ///     .unwrap();
-    ///
-    /// let mut output = Vec::new();
-    /// formatter.format("fn main() {}", &mut output).unwrap();
-    /// ```
-    fn format(&self, source: &str, output: &mut dyn Write) -> io::Result<()>;
+    /// Language used when building a [`LineView`] for this formatter.
+    fn language(&self) -> Language;
+
+    /// Apply formatter-owned defaults before the view is built.
+    fn prepare_line_view<'a>(&self, _source: &'a str, _builder: &mut LineViewBuilder<'a>) {}
+
+    /// Render a structured highlighted view.
+    fn render(&self, view: &LineView, output: &mut dyn Write) -> io::Result<()>;
+
+    /// Build a `LineView` with this formatter's language/defaults, then render it.
+    fn format(&self, source: &str, output: &mut dyn Write) -> io::Result<()> {
+        let mut builder = LineViewBuilder::new();
+        builder.source(source).language(self.language());
+        self.prepare_line_view(source, &mut builder);
+        let view = builder.build().map_err(io::Error::other)?;
+        self.render(&view, output)
+    }
 }
 
 impl Formatter for Box<dyn Formatter> {
+    fn language(&self) -> Language {
+        (**self).language()
+    }
+
+    fn prepare_line_view<'a>(&self, source: &'a str, builder: &mut LineViewBuilder<'a>) {
+        (**self).prepare_line_view(source, builder)
+    }
+
+    fn render(&self, view: &LineView, output: &mut dyn Write) -> io::Result<()> {
+        (**self).render(view, output)
+    }
+
     fn format(&self, source: &str, output: &mut dyn Write) -> io::Result<()> {
         (**self).format(source, output)
     }

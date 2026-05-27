@@ -131,6 +131,19 @@ fn help_flag() {
 }
 
 #[test]
+fn highlight_help_lists_decorator_values() {
+    cmd()
+        .args(["highlight", "--help"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("rainbow-brackets"))
+        .stdout(predicate::str::contains("-d"))
+        .stdout(predicate::str::contains("--decorator"))
+        .stdout(predicate::str::contains("line-numbers").not())
+        .stdout(predicate::str::contains("--highlight-lines").not());
+}
+
+#[test]
 fn list_languages() {
     cmd()
         .args(["languages", "list"])
@@ -254,6 +267,48 @@ fn highlight_source_diff_html_inline() {
 }
 
 #[test]
+fn rainbow_brackets_decorator_terminal_uses_brackets_query() {
+    cmd()
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .args([
+            "highlight",
+            "-l",
+            "rust",
+            "--theme",
+            "dracula",
+            "-d",
+            "rainbow-brackets",
+        ])
+        .write_stdin("fn main() { let x = call([1]); }\n")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("\u{1b}[38;2;224;108;117m"));
+}
+
+#[test]
+fn decorators_are_terminal_only_for_now() {
+    cmd()
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .args([
+            "highlight",
+            "-l",
+            "rust",
+            "-f",
+            "html-inline",
+            "-d",
+            "rainbow-brackets",
+        ])
+        .write_stdin("fn main() {}\n")
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains(
+            "decorators currently render only with --formatter terminal",
+        ));
+}
+
+#[test]
 fn highlight_source_diff_html_linked() {
     cmd()
         .arg("--data-dir")
@@ -316,8 +371,6 @@ fn highlight_source_diff_html_multi_themes_with_all_options() {
             "--default-theme",
             "main",
             "--css-variable-prefix=--demo",
-            "-h",
-            "2",
         ])
         .write_stdin(DIFF_SNIPPET)
         .assert()
@@ -338,20 +391,6 @@ fn highlight_requires_themes_for_html_multi_themes() {
         .failure()
         .stderr(predicate::str::contains(
             "--formatter html-multi-themes requires --themes",
-        ));
-}
-
-#[test]
-fn highlight_rejects_invalid_highlight_line_ranges() {
-    cmd()
-        .arg("--data-dir")
-        .arg(fixtures_dir())
-        .args(["highlight", "-l", "diff", "-h", "3-1"])
-        .write_stdin(DIFF_SNIPPET)
-        .assert()
-        .failure()
-        .stderr(predicate::str::contains(
-            "Start line (3) must be less than or equal to end line (1)",
         ));
 }
 

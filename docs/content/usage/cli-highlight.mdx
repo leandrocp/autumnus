@@ -36,7 +36,7 @@ Use `--language` when piping content with no filename hint.
 ## Language selection
 
 - provide `--language` when you already know the language
-- omit it when file extension, filename, or source content should drive detection
+- omit it when file decorator, filename, or source content should drive detection
 - if detection fails, Lumis falls back to plaintext
 
 ```bash
@@ -53,6 +53,18 @@ lumis highlight main.rs --formatter html-linked
 lumis highlight main.rs --formatter html-multi-themes --themes light:github_light --themes dark:github_dark
 lumis highlight main.rs --formatter bbcode-scoped
 ```
+
+## Decorations
+
+Use `--decorator` (or `-d`) for built-in rendering decorators. This first slice supports rainbow brackets in terminal output.
+
+Decorators use the same line-view output model as the Rust API. For now, CLI decorator output is rendered only by the terminal formatter.
+
+```bash
+lumis highlight main.rs --decorator rainbow-brackets
+```
+
+See [LineView Decorations](/usage/line-view-decorations) for the Rust API behind this model.
 
 ## Parser availability
 

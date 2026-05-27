@@ -97,14 +97,14 @@ setup:
     echo ""
 
     echo "Installing website dependencies..."
-    (cd website && pnpm install)
+    (cd website && pnpm install --ignore-workspace)
     echo ""
 
     echo "Installing docs site dependencies..."
-    (cd docs && pnpm install)
+    (cd docs && pnpm install --ignore-workspace)
     echo ""
 
-    echo "Preprocessing shared queries..."
+    echo "Preprocessing shared syntax and bracket queries..."
     just langs-preprocess-queries
     echo ""
 
@@ -208,7 +208,7 @@ cli-install path:
     echo "Installed lumis to {{path}}/lumis"
 
 # Start website dev server
-dev:
+website:
     #!/usr/bin/env bash
     set -euo pipefail
     if [ ! -f packages/javascript/lumis/dist/bundles/full.js ]; then
@@ -250,7 +250,7 @@ docs:
     set -euo pipefail
     cargo doc --all-features --no-deps
     (cd packages/elixir/lumis && LUMIS_BUILD=1 mix docs)
-    pnpm --filter @lumis-sh/lumis docs
+    pnpm --filter @lumis-sh/lumis run docs
     echo ""
     echo "Docs generated:"
     echo "  lumis:           $(pwd)/target/doc/lumis/index.html"
@@ -288,11 +288,11 @@ langs-fetch-vendored-parsers name="":
     cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- fetch-parsers {{name}}
     cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- compress-parsers {{name}}
 
-# Fetch vendored query files at pinned revisions, eg: just langs-fetch-queries bash
+# Fetch vendored syntax and bracket query files at pinned revisions, eg: just langs-fetch-queries bash
 langs-fetch-queries name="":
     cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- fetch-queries {{name}}
 
-# Preprocess query files (resolve inheritance, apply fixes, strip unsupported predicates), eg: just langs-preprocess-queries bash
+# Preprocess query files, including brackets.scm, eg: just langs-preprocess-queries bash
 langs-preprocess-queries name="":
     cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- preprocess-queries {{name}}
 

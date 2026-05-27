@@ -6,19 +6,29 @@
 //! # Custom Formatters
 //!
 //! Custom formatters should implement [`Formatter`](crate::formatters::Formatter)
-//! and use [`highlight_iter()`] for streaming token access.
+//! and render [`LineView`].
 //!
 //! ```rust,no_run
-//! use lumis::{formatters::Formatter, highlight::highlight_iter};
+//! use lumis::{
+//!     formatters::Formatter,
+//!     highlight::LineView,
+//!     languages::Language,
+//! };
 //! use std::io::{self, Write};
 //!
 //! # struct MyFormatter { language: lumis::languages::Language, theme: Option<lumis::themes::Theme> }
 //! impl Formatter for MyFormatter {
-//!     fn format(&self, source: &str, output: &mut dyn Write) -> io::Result<()> {
-//!         highlight_iter(source, self.language, self.theme.clone(), |text, _language, _range, _scope, _style| {
-//!             write!(output, "{}", text)
-//!         })
-//!         .map_err(io::Error::other)
+//!     fn language(&self) -> Language {
+//!         self.language
+//!     }
+//!
+//!     fn render(&self, view: &LineView, output: &mut dyn Write) -> io::Result<()> {
+//!         for line in &view.lines {
+//!             for span in &line.spans {
+//!                 write!(output, "{}", span.text)?;
+//!             }
+//!         }
+//!         Ok(())
 //!     }
 //! }
 //! ```
@@ -72,12 +82,72 @@
 //!     Ok::<_, std::io::Error>(())
 //! }).unwrap();
 //! ```
+//!
+//! ## LineView
+//!
+//! [`LineView`] is Lumis' structured view of highlighted code. It turns source
+//! into lines and spans while keeping source ranges, active scopes, and
+//! formatter-neutral decorations. Use it when a renderer or application needs
+//! structured access before producing HTML, ANSI, or another output format.
+//!
+//! `LineView` is AST-like because it is structured and traversable, but it is
+//! not a parser AST. It does not expose tree-sitter nodes or parse state.
+//! Instead, it projects highlight events and decoration output into the shape
+//! renderers need: lines, spans, gutters, signs, virtual text, and decorations.
+//!
+//! ```rust
+//! use lumis::highlight::{LineViewBuilder, RainbowBracketsOptions};
+//! use lumis::languages::Language;
+//!
+//! let source = "fn main() { println!(\"hi\"); }";
+//! let view = LineViewBuilder::new()
+//!     .source(source)
+//!     .language(Language::Rust)
+//!     .rainbow_brackets(RainbowBracketsOptions::default())
+//!     .build()
+//!     .unwrap();
+//!
+//! assert!(view.lines[0].spans.iter().any(|span| !span.decoration_kinds.is_empty()));
+//! ```
+//!
+//! A simplified `LineView` has this shape:
+//!
+//! ```text
+//! LineView {
+//!     trailing_newline: false,
+//!     lines: [
+//!         Line {
+//!             line_number: 1,
+//!             range: 0..11,
+//!             gutter_text: [GutterText { kind: Some("line.number"), text: "1", ... }],
+//!             spans: [
+//!                 Span { range: 0..2, text: "fn", scopes: ["keyword.function"], ... },
+//!                 Span { range: 3..7, text: "main", scopes: ["function"], ... },
+//!             ],
+//!             ..
+//!         },
+//!         Line {
+//!             line_number: 2,
+//!             range: 12..31,
+//!             line_highlights: [
+//!                 LineHighlight { kind: Some("line.highlight"), class: Some("highlighted"), ... },
+//!             ],
+//!             spans: [
+//!                 Span { range: 16..23, text: "println", scopes: ["keyword.exception"], ... },
+//!                 Span { range: 25..29, text: "\"hi\"", scopes: ["string"], ... },
+//!             ],
+//!             ..
+//!         },
+//!     ],
+//! }
+//! ```
 
 use crate::languages::{Language, LanguageConfig};
 use crate::themes::Theme;
-use crate::vendor::tree_sitter_highlight::{HighlightEvent, Highlighter as TSHighlighter};
-use lumis_core::events::HighlightEvent as CoreHighlightEvent;
-use lumis_core::highlights::HIGHLIGHT_NAMES;
+use crate::vendor::tree_sitter_highlight::{
+    HighlightEvent as TsHighlightEvent, Highlighter as TSHighlighter,
+};
+pub use lumis_core::highlights::HIGHLIGHT_NAMES;
 use smol_str::format_smolstr;
 use std::cell::RefCell;
 use std::ops::Range;
@@ -85,6 +155,143 @@ use std::sync::{Arc, LazyLock};
 use thiserror::Error;
 
 pub use crate::themes::{Style, TextDecoration, UnderlineStyle};
+pub use lumis_core::decorators::annotation_kinds;
+pub use lumis_core::events::HighlightEvent;
+pub use lumis_core::highlight::{
+    DecorationOutput, DecoratorContext, GutterText, HighlightDecoration, Line, LineHighlight,
+    LineView, LineViewDecorator, LineViewOptions, LineViewOptionsBuilder, QueryCapture,
+    QueryFamily, RainbowBrackets, RainbowBracketsOptions, Scope, SignText, Span, StylePatch,
+    TextDecorationPatch, VirtualText,
+};
+
+/// Builder for a [`LineView`] of highlighted source.
+///
+/// This is the high-level Rust entry point for the structured highlighting
+/// pipeline:
+///
+/// ```text
+/// source + language + decorators -> LineView -> Formatter -> output
+/// ```
+///
+/// The builder runs syntax highlighting, applies built-in or custom line-view
+/// decorators, then projects everything into a read-only [`LineView`]. Built-in
+/// formatters use the same model, and custom formatters can render it directly
+/// by implementing [`Formatter`](crate::formatters::Formatter).
+///
+/// # Example
+///
+/// ```rust
+/// use lumis::highlight::LineViewBuilder;
+/// use lumis::languages::Language;
+///
+/// let view = LineViewBuilder::new()
+///     .source("fn main() {}")
+///     .language(Language::Rust)
+///     .rainbow_brackets(Default::default())
+///     .build()
+///     .unwrap();
+///
+/// assert_eq!(view.lines[0].line_number, 1);
+/// assert!(view.lines[0].spans.iter().any(|span| !span.decoration_kinds.is_empty()));
+/// ```
+#[derive(Clone, Debug)]
+pub struct LineViewBuilder<'a> {
+    source: &'a str,
+    language: Language,
+    options: LineViewOptions,
+}
+
+impl<'a> LineViewBuilder<'a> {
+    /// Create a builder for a [`LineView`].
+    pub fn new() -> Self {
+        Self {
+            source: "",
+            language: Language::PlainText,
+            options: LineViewOptions::default(),
+        }
+    }
+
+    /// Set the source text.
+    pub fn source(&mut self, source: &'a str) -> &mut Self {
+        self.source = source;
+        self
+    }
+
+    /// Set the source language.
+    pub fn language(&mut self, language: Language) -> &mut Self {
+        self.language = language;
+        self
+    }
+
+    /// Replace range decorations applied to spans.
+    pub fn highlight_decorations(
+        &mut self,
+        highlight_decorations: Vec<HighlightDecoration>,
+    ) -> &mut Self {
+        self.options.highlight_decorations = highlight_decorations;
+        self
+    }
+
+    /// Color matching brackets by nesting depth.
+    pub fn rainbow_brackets(&mut self, options: RainbowBracketsOptions) -> &mut Self {
+        self.decorators([&RainbowBrackets::new(options)])
+    }
+
+    /// Add built-in or custom line-view decorators.
+    pub fn decorators(
+        &mut self,
+        decorators: impl IntoIterator<Item = impl LineViewDecorator>,
+    ) -> &mut Self {
+        for decorator in decorators {
+            let mut output = DecorationOutput::default();
+            decorator.run(DecoratorContext::new(self.source), &mut output);
+            self.decoration_output(output);
+        }
+        self
+    }
+
+    /// Merge formatter-neutral decoration output into the projection options.
+    pub fn decoration_output(&mut self, output: DecorationOutput) -> &mut Self {
+        self.options
+            .highlight_decorations
+            .extend(output.highlight_decorations);
+        self.options.line_highlights.extend(output.line_highlights);
+        self.options.signs.extend(output.signs);
+        self.options.gutter_text.extend(output.gutter_text);
+        self.options.virtual_text.extend(output.virtual_text);
+        self
+    }
+
+    /// Replace whole-line highlights applied to projected lines.
+    pub fn line_highlights(&mut self, line_highlights: Vec<LineHighlight>) -> &mut Self {
+        self.options.line_highlights = line_highlights;
+        self
+    }
+
+    /// Replace gutter text applied to projected lines.
+    pub fn gutter_text(&mut self, gutter_text: Vec<GutterText>) -> &mut Self {
+        self.options.gutter_text = gutter_text;
+        self
+    }
+
+    /// Replace virtual text overlays applied to projected lines.
+    pub fn virtual_text(&mut self, virtual_text: Vec<VirtualText>) -> &mut Self {
+        self.options.virtual_text = virtual_text;
+        self
+    }
+
+    /// Build the line-oriented view.
+    pub fn build(&self) -> Result<LineView, HighlightError> {
+        let events = highlight_events(self.source, self.language)?;
+        Ok(LineView::from_events(self.source, &events, &self.options))
+    }
+}
+
+impl Default for LineViewBuilder<'_> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 fn resolve_style(theme: Option<&Theme>, scope: &str, language: &str) -> Style {
     let specialized_scope = format_smolstr!("{}.{}", scope, language);
@@ -243,7 +450,7 @@ impl Highlighter {
             let event = event.map_err(|e| HighlightError::EventProcessing(format!("{:?}", e)))?;
 
             match event {
-                HighlightEvent::HighlightStart {
+                TsHighlightEvent::HighlightStart {
                     highlight,
                     language,
                 } => {
@@ -257,14 +464,14 @@ impl Highlighter {
                         .unwrap_or_else(|| Arc::clone(&DEFAULT_STYLE));
                     style_stack.push(new_style);
                 }
-                HighlightEvent::Source { start, end } => {
+                TsHighlightEvent::Source { start, end } => {
                     let text = &source[start..end];
                     if !text.is_empty() {
                         let current_style = style_stack.last().map(Arc::clone).unwrap_or_default();
                         result.push((current_style, text));
                     }
                 }
-                HighlightEvent::HighlightEnd => {
+                TsHighlightEvent::HighlightEnd => {
                     if style_stack.len() > 1 {
                         style_stack.pop();
                     }
@@ -341,7 +548,7 @@ where
         let event = event.map_err(|e| HighlightError::EventProcessing(format!("{:?}", e)))?;
 
         match event {
-            HighlightEvent::HighlightStart {
+            TsHighlightEvent::HighlightStart {
                 highlight,
                 language: lang,
             } => {
@@ -352,7 +559,7 @@ where
                 scope_stack.push(scope);
                 language_stack.push(injected_language);
             }
-            HighlightEvent::Source { start, end } => {
+            TsHighlightEvent::Source { start, end } => {
                 let text = &source[start..end];
                 if !text.is_empty() {
                     let default_style = Style::default();
@@ -369,7 +576,7 @@ where
                     .map_err(|e| HighlightError::EventProcessing(e.to_string()))?;
                 }
             }
-            HighlightEvent::HighlightEnd => {
+            TsHighlightEvent::HighlightEnd => {
                 if style_stack.len() > 1 {
                     style_stack.pop();
                 }
@@ -386,11 +593,14 @@ where
     Ok(())
 }
 
-#[doc(hidden)]
+/// Highlight source code and return the raw event stream.
+///
+/// Use this when you need to build a [`LineView`] or write a formatter that
+/// works from highlight events instead of styled text callbacks.
 pub fn highlight_events(
     source: &str,
     language: Language,
-) -> Result<Vec<CoreHighlightEvent>, HighlightError> {
+) -> Result<Vec<HighlightEvent>, HighlightError> {
     DOCUMENT_TS_HIGHLIGHTER.with(|ts_highlighter| {
         let mut ts_highlighter = ts_highlighter.borrow_mut();
         highlight_events_with(&mut ts_highlighter, source, language)
@@ -401,7 +611,7 @@ fn highlight_events_with(
     ts_highlighter: &mut TSHighlighter,
     source: &str,
     language: Language,
-) -> Result<Vec<CoreHighlightEvent>, HighlightError> {
+) -> Result<Vec<HighlightEvent>, HighlightError> {
     let events = ts_highlighter
         .highlight(language.config(), source.as_bytes(), None, |injected| {
             Some(Language::guess(Some(injected), "").config())
@@ -413,17 +623,17 @@ fn highlight_events_with(
             event
                 .map_err(|e| HighlightError::EventProcessing(format!("{:?}", e)))
                 .map(|event| match event {
-                    HighlightEvent::HighlightStart {
+                    TsHighlightEvent::HighlightStart {
                         highlight,
                         language,
-                    } => CoreHighlightEvent::Start {
+                    } => HighlightEvent::Start {
                         scope_index: highlight.0,
                         language,
                     },
-                    HighlightEvent::Source { start, end } => {
-                        CoreHighlightEvent::Source { start, end }
+                    TsHighlightEvent::Source { start, end } => {
+                        HighlightEvent::Source { start, end }
                     }
-                    HighlightEvent::HighlightEnd => CoreHighlightEvent::End,
+                    TsHighlightEvent::HighlightEnd => HighlightEvent::End,
                 })
         })
         .collect::<Result<Vec<_>, _>>()?;
@@ -566,7 +776,7 @@ mod tests {
         let total_source_bytes = events
             .iter()
             .filter_map(|event| match event {
-                CoreHighlightEvent::Source { start, end } => Some(end - start),
+                HighlightEvent::Source { start, end } => Some(end - start),
                 _ => None,
             })
             .sum::<usize>();
@@ -590,7 +800,7 @@ mod tests {
 
         let mut cursor = 0;
         for event in events {
-            if let CoreHighlightEvent::Source { start, end } = event {
+            if let HighlightEvent::Source { start, end } = event {
                 assert_eq!(start, cursor);
                 assert!(end >= start);
                 cursor = end;

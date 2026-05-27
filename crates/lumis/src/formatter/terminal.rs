@@ -16,12 +16,11 @@
 //! See the [formatter](crate::formatter) module for more information and examples.
 
 use super::Formatter;
-use crate::highlight;
 use crate::languages::Language;
-use crate::themes::Theme;
+use crate::themes::{Style, Theme};
 use derive_builder::Builder;
 pub use lumis_core::formatter::terminal::Background;
-use lumis_core::formatter::Formatter as _;
+use lumis_core::highlight::LineView;
 use std::io::{self, Write};
 
 /// Terminal formatter for syntax highlighting with ANSI color codes.
@@ -101,18 +100,205 @@ impl Default for Terminal {
 }
 
 impl Formatter for Terminal {
-    fn format(&self, source: &str, output: &mut dyn Write) -> io::Result<()> {
-        let events =
-            highlight::highlight_events(source, self.language).map_err(io::Error::other)?;
-
-        let core_formatter = lumis_core::formatter::terminal::Terminal::new(
-            self.language,
-            self.theme.clone(),
-            self.background.clone(),
-            self.width,
-        );
-        core_formatter.render(source, &events, output)
+    fn language(&self) -> Language {
+        self.language
     }
+
+    fn render(&self, view: &LineView, output: &mut dyn Write) -> io::Result<()> {
+        self.render_line_view(view, output)
+    }
+}
+
+impl Terminal {
+    fn render_line_view(&self, view: &LineView, output: &mut dyn Write) -> io::Result<()> {
+        let fallback_bg = self.fallback_background();
+        for (index, line) in view.lines.iter().enumerate() {
+            let line_style = super::line_view::merged_line_style(line);
+            let mut line_width = 0usize;
+            let mut column = 0usize;
+
+            let gutter = self.render_gutter(line, &line_style);
+            line_width += display_width_without_ansi(&gutter);
+            write!(output, "{gutter}")?;
+
+            for span in &line.spans {
+                let mut style = self.span_theme_style(span);
+                if let Some(line_style) = &line_style {
+                    super::line_view::apply_style_patch(&mut style, line_style);
+                }
+                if let Some(patch) = &span.style {
+                    super::line_view::apply_style_patch(&mut style, patch);
+                }
+                if style.bg.is_none() {
+                    if let Some(bg) = fallback_bg.as_deref() {
+                        style.bg = Some(bg.to_string());
+                    }
+                }
+
+                let rendered = render_text_with_virtuals(&span.text, line, &mut column, &style);
+                line_width += super::line_view::display_width(&span.text);
+                write!(output, "{rendered}")?;
+            }
+
+            let remaining_virtuals = render_remaining_virtuals(line, &mut column);
+            line_width += display_width_without_ansi(&remaining_virtuals);
+            write!(output, "{remaining_virtuals}")?;
+
+            if let (Some(bg), Some(width)) = (fallback_bg.as_deref(), self.width) {
+                if line_width < width {
+                    write!(
+                        output,
+                        "{}",
+                        lumis_core::formatter::ansi::paint(
+                            &" ".repeat(width - line_width),
+                            &Style {
+                                bg: Some(bg.to_string()),
+                                ..Style::default()
+                            },
+                        ),
+                    )?;
+                }
+            }
+
+            if index + 1 < view.lines.len() || view.trailing_newline {
+                writeln!(output)?;
+            }
+        }
+        Ok(())
+    }
+
+    fn fallback_background(&self) -> Option<String> {
+        match &self.background {
+            Background::Inherit => None,
+            Background::Theme => self
+                .theme
+                .as_ref()
+                .and_then(Theme::bg)
+                .map(ToString::to_string),
+            Background::Color(color) => Some(color.clone()),
+        }
+    }
+
+    fn render_gutter(
+        &self,
+        line: &lumis_core::highlight::Line,
+        line_style: &Option<lumis_core::highlight::StylePatch>,
+    ) -> String {
+        if line.gutter_text.is_empty() && line.signs.is_empty() {
+            return String::new();
+        }
+
+        let mut output = String::new();
+        for item in &line.gutter_text {
+            output.push_str(&paint_terminal(&item.text, &style_from_patch(&item.style)));
+            output.push(' ');
+        }
+        for item in &line.signs {
+            let mut style = line_style
+                .as_ref()
+                .map(style_from_patch)
+                .unwrap_or_default();
+            super::line_view::apply_style_patch(&mut style, &item.style);
+            output.push_str(&paint_terminal(&item.text, &style));
+            output.push(' ');
+        }
+        output.push_str("│ ");
+        output
+    }
+
+    fn span_theme_style(&self, span: &lumis_core::highlight::Span) -> Style {
+        let Some(theme) = self.theme.as_ref() else {
+            return Style::default();
+        };
+        for scope in span.scopes.iter().rev() {
+            let scope_name = lumis_core::highlights::HIGHLIGHT_NAMES
+                .get(scope.scope_index)
+                .copied()
+                .unwrap_or("");
+            let language = scope.language.unwrap_or(self.language);
+            let specialized = format!("{}.{}", scope_name, language.id_name());
+            if let Some(style) = theme
+                .get_style(&specialized)
+                .or_else(|| theme.get_style(scope_name))
+            {
+                return style.clone();
+            }
+        }
+        Style::default()
+    }
+}
+
+fn render_text_with_virtuals(
+    text: &str,
+    line: &lumis_core::highlight::Line,
+    column: &mut usize,
+    style: &Style,
+) -> String {
+    let mut output = String::new();
+    let mut chunk = String::new();
+    for ch in text.chars() {
+        if let Some(virtual_text) = super::line_view::virtual_text_at_column(line, *column) {
+            output.push_str(&paint_terminal(&chunk, style));
+            chunk.clear();
+            let mut virtual_style = style.clone();
+            super::line_view::apply_style_patch(&mut virtual_style, &virtual_text.style);
+            output.push_str(&paint_terminal(&virtual_text.text, &virtual_style));
+        }
+        chunk.push(ch);
+        *column += super::line_view::char_display_width(ch);
+    }
+    output.push_str(&paint_terminal(&chunk, style));
+    output
+}
+
+fn render_remaining_virtuals(line: &lumis_core::highlight::Line, column: &mut usize) -> String {
+    let mut output = String::new();
+    for virtual_text in &line.virtual_text {
+        if virtual_text.column < *column {
+            continue;
+        }
+        while *column < virtual_text.column {
+            output.push(' ');
+            *column += 1;
+        }
+        output.push_str(&paint_terminal(
+            &virtual_text.text,
+            &style_from_patch(&virtual_text.style),
+        ));
+        *column += super::line_view::display_width(&virtual_text.text);
+    }
+    output
+}
+
+fn style_from_patch(patch: &lumis_core::highlight::StylePatch) -> Style {
+    let mut style = Style::default();
+    super::line_view::apply_style_patch(&mut style, patch);
+    style
+}
+
+fn paint_terminal(text: &str, style: &Style) -> String {
+    if style == &Style::default() {
+        text.to_string()
+    } else {
+        lumis_core::formatter::ansi::paint(text, style)
+    }
+}
+
+fn display_width_without_ansi(text: &str) -> usize {
+    let mut width = 0;
+    let mut chars = text.chars().peekable();
+    while let Some(ch) = chars.next() {
+        if ch == '\x1b' && chars.peek() == Some(&'[') {
+            for next in chars.by_ref() {
+                if next == 'm' {
+                    break;
+                }
+            }
+            continue;
+        }
+        width += super::line_view::char_display_width(ch);
+    }
+    width
 }
 
 #[cfg(test)]

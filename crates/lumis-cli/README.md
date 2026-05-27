@@ -65,14 +65,14 @@ lumis highlight -f html-multi-themes \
   --css-variable-prefix --code \
   src/main.rs
 
-# Highlight specific lines
-lumis highlight -h 1,3-5,10 src/main.rs
+# Apply the built-in terminal decorator
+lumis highlight -d rainbow-brackets src/main.rs
 ```
 
 Notes:
 
 - `lumis highlight [PATH]` reads from stdin when `PATH` is omitted.
-- If the detected language falls back to `plaintext`, the source is printed unchanged.
+- If the detected language falls back to `plaintext`, the source is printed unchanged unless a decorator is applied.
 - The default theme is `catppuccin_frappe` when a formatter needs a theme and you do not pass `--theme`.
 - `--background` / `-b` applies only to terminal output. Omit it to inherit the output background, pass `theme` to reuse the theme background, or pass a hex color like `#282a36`.
 - `--width` / `-w` applies only to terminal output. Pass a number or let it default to auto, which uses the current `COLUMNS` value when stdout is a TTY.
@@ -165,8 +165,8 @@ Override the location with `--data-dir` or `LUMIS_DATA_DIR`.
 ## Global options
 
 ```text
--d, --data-dir <PATH>   Override the data directory
- -V, --verbose           Show cache hits, downloads, and parser paths
+    --data-dir <PATH>   Override the data directory
+ -V, --verbose          Show cache hits, downloads, and parser paths
     --help              Print help
 -v, --version           Print version
 ```

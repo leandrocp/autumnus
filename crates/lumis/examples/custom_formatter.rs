@@ -5,7 +5,7 @@
 //! shows what data is available from `highlight_iter()`.
 
 use lumis::{
-    formatters::Formatter, highlight::highlight_iter, languages::Language, themes, write_highlight,
+    formatters::Formatter, highlight::LineView, languages::Language, themes, write_highlight,
 };
 use std::io::{self, Write};
 
@@ -22,28 +22,44 @@ impl TokenMetadataFormatter {
 }
 
 impl Formatter for TokenMetadataFormatter {
-    fn format(&self, source: &str, output: &mut dyn Write) -> io::Result<()> {
-        // Use highlight_iter() with a callback to process styled tokens
-        // The callback receives (text, language, range, scope, style) for each token
-        highlight_iter(
-            source,
-            self.language,
-            self.theme.clone(),
-            |text, language, range, scope, style| {
+    fn language(&self) -> Language {
+        self.language
+    }
+
+    fn render(&self, view: &LineView, output: &mut dyn Write) -> io::Result<()> {
+        for line in &view.lines {
+            for span in &line.spans {
+                let scope = span.scopes.last();
+                let scope_name = scope
+                    .and_then(|scope| lumis::highlight::HIGHLIGHT_NAMES.get(scope.scope_index))
+                    .copied()
+                    .unwrap_or("text");
+                let language = scope
+                    .and_then(|scope| scope.language)
+                    .unwrap_or(self.language);
+                let style = self.theme.as_ref().and_then(|theme| {
+                    theme
+                        .get_style(&format!("{}.{}", scope_name, language.id_name()))
+                        .or_else(|| theme.get_style(scope_name))
+                });
                 writeln!(
                     output,
                     "{} (lang:{} pos:{}..{} scope:{} fg:{} bg:{})",
-                    text.escape_debug(),
+                    span.text.escape_debug(),
                     language.id_name(),
-                    range.start,
-                    range.end,
-                    scope,
-                    style.fg.as_deref().unwrap_or("none"),
-                    style.bg.as_deref().unwrap_or("none"),
-                )
-            },
-        )
-        .map_err(io::Error::other)
+                    span.range.start,
+                    span.range.end,
+                    scope_name,
+                    style
+                        .and_then(|style| style.fg.as_deref())
+                        .unwrap_or("none"),
+                    style
+                        .and_then(|style| style.bg.as_deref())
+                        .unwrap_or("none"),
+                )?;
+            }
+        }
+        Ok(())
     }
 }
 

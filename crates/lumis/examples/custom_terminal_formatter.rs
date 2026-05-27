@@ -5,8 +5,7 @@
 //! tree-sitter or termcolor internals directly.
 
 use lumis::{
-    ansi, formatters::Formatter, highlight::highlight_iter, languages::Language, themes,
-    write_highlight,
+    ansi, formatters::Formatter, highlight::LineView, languages::Language, themes, write_highlight,
 };
 use std::io::{self, Write};
 
@@ -65,38 +64,47 @@ impl LineNumberedTerminal {
 }
 
 impl Formatter for LineNumberedTerminal {
-    fn format(&self, source: &str, output: &mut dyn Write) -> io::Result<()> {
+    fn language(&self) -> Language {
+        self.language
+    }
+
+    fn render(&self, view: &LineView, output: &mut dyn Write) -> io::Result<()> {
         // Print bat-style header with filename
         self.print_header(output)?;
 
-        let mut line_num = 1;
-        let mut at_line_start = true;
-
-        highlight_iter(
-            source,
-            self.language,
-            self.theme.clone(),
-            |text, _language, _range, _scope, style| {
-                let ansi_text = ansi::paint(text, style);
-
-                if at_line_start {
-                    // Add line number in gray using ANSI helpers
-                    let gray_fg = ansi::rgb_to_ansi(128, 128, 128, false);
-                    write!(output, "{}{:3} │ {}", gray_fg, line_num, ansi::ANSI_RESET)?;
-                    at_line_start = false;
-                }
-
+        let gray_fg = ansi::rgb_to_ansi(128, 128, 128, false);
+        for line in &view.lines {
+            write!(
+                output,
+                "{}{:3} │ {}",
+                gray_fg,
+                line.line_number,
+                ansi::ANSI_RESET
+            )?;
+            for span in &line.spans {
+                let scope = span.scopes.last();
+                let scope_name = scope
+                    .and_then(|scope| lumis::highlight::HIGHLIGHT_NAMES.get(scope.scope_index))
+                    .copied()
+                    .unwrap_or("text");
+                let language = scope
+                    .and_then(|scope| scope.language)
+                    .unwrap_or(self.language);
+                let style = self
+                    .theme
+                    .as_ref()
+                    .and_then(|theme| {
+                        theme
+                            .get_style(&format!("{}.{}", scope_name, language.id_name()))
+                            .or_else(|| theme.get_style(scope_name))
+                    })
+                    .cloned()
+                    .unwrap_or_default();
+                let ansi_text = ansi::paint(&span.text, &style);
                 write!(output, "{}", ansi_text)?;
-
-                if ansi_text.contains('\n') {
-                    line_num += ansi_text.matches('\n').count();
-                    at_line_start = true;
-                }
-
-                Ok::<_, io::Error>(())
-            },
-        )
-        .map_err(io::Error::other)?;
+            }
+            writeln!(output)?;
+        }
 
         Ok(())
     }

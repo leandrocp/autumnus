@@ -33,6 +33,23 @@ let html = highlight("const x = 1", formatter);`,
     },
   },
   {
+    id: "lineview",
+    label: "LineView",
+    install: { language: "bash", code: `cargo add lumis` },
+    usage: {
+      language: "rust",
+      code: `use lumis::{highlight::LineViewBuilder, languages::Language};
+
+let view = LineViewBuilder::new()
+    .source("function main() {\\n    // TODO: rewrite in Rust\\n}\\n")
+    .language(Language::JavaScript)
+    .highlight_lines([2..=2])
+    .line_numbers()
+    .build()
+    .unwrap();`,
+    },
+  },
+  {
     id: "javascript",
     label: "JavaScript",
     install: { language: "bash", code: `npm install @lumis-sh/lumis @lumis-sh/themes` },

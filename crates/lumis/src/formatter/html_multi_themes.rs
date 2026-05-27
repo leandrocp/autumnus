@@ -124,11 +124,10 @@
 
 use super::{Formatter, HtmlElement};
 use crate::formatters::html_inline::HighlightLines;
-use crate::highlight;
 use crate::languages::Language;
 use crate::themes::Theme;
 use derive_builder::Builder;
-use lumis_core::formatter::Formatter as _;
+use lumis_core::highlight::LineView;
 use std::collections::HashMap;
 use std::io::{self, Write};
 use std::str::FromStr;
@@ -336,39 +335,176 @@ impl Default for HtmlMultiThemes {
     }
 }
 
-impl Formatter for HtmlMultiThemes {
-    fn format(&self, source: &str, output: &mut dyn Write) -> io::Result<()> {
-        let events =
-            highlight::highlight_events(source, self.language).map_err(io::Error::other)?;
+impl HtmlMultiThemes {
+    fn generate_pre_classes(&self) -> String {
+        let mut classes = vec!["lumis".to_string(), "lumis-themes".to_string()];
 
-        let core_formatter = lumis_core::formatter::html_multi_themes::HtmlMultiThemes::new(
-            self.language,
-            self.themes.clone(),
-            self.default_theme.clone().map(map_default_theme),
-            self.css_variable_prefix.clone(),
-            self.pre_class.clone(),
-            self.italic,
-            self.include_highlights,
-            self.highlight_lines
-                .clone()
-                .map(super::map_inline_highlight_lines),
-            self.header.clone(),
-        );
+        if let Some(ref pre_class) = self.pre_class {
+            classes.push(pre_class.clone());
+        }
 
-        core_formatter.render(source, &events, output)
+        for theme_name in self.themes.keys() {
+            classes.push(theme_name.clone());
+        }
+
+        classes.join(" ")
+    }
+
+    fn generate_pre_style(&self) -> String {
+        let mut styles = Vec::new();
+
+        match &self.default_theme {
+            Some(DefaultTheme::Theme(default_name)) => {
+                if let Some(default_theme) = self.themes.get(default_name) {
+                    if let Some(fg) = default_theme.fg() {
+                        styles.push(format!("color:{};", fg));
+                    }
+                    if let Some(bg) = default_theme.bg() {
+                        styles.push(format!("background-color:{};", bg));
+                    }
+                }
+            }
+            Some(DefaultTheme::LightDark) => {
+                if let (Some(light), Some(dark)) =
+                    (self.themes.get("light"), self.themes.get("dark"))
+                {
+                    let light_fg = light.fg().unwrap_or("#000000");
+                    let light_bg = light.bg().unwrap_or("#ffffff");
+                    let dark_fg = dark.fg().unwrap_or("#ffffff");
+                    let dark_bg = dark.bg().unwrap_or("#000000");
+                    styles.push(format!("color: light-dark({}, {});", light_fg, dark_fg));
+                    styles.push(format!(
+                        "background-color: light-dark({}, {});",
+                        light_bg, dark_bg
+                    ));
+                }
+            }
+            None => {}
+        }
+
+        for (theme_name, theme) in &self.themes {
+            let sanitized = lumis_core::formatter::html::sanitize_theme_name(theme_name);
+            if let Some(fg) = theme.fg() {
+                styles.push(format!(
+                    "{}-{}: {};",
+                    self.css_variable_prefix, sanitized, fg
+                ));
+            }
+            if let Some(bg) = theme.bg() {
+                styles.push(format!(
+                    "{}-{}-bg: {};",
+                    self.css_variable_prefix, sanitized, bg
+                ));
+            }
+        }
+
+        styles.join(" ")
+    }
+
+    fn default_theme_name(&self) -> Option<&str> {
+        match &self.default_theme {
+            Some(DefaultTheme::Theme(name)) => Some(name.as_str()),
+            Some(DefaultTheme::LightDark) => Some("light-dark()"),
+            None => None,
+        }
     }
 }
 
-fn map_default_theme(
-    default_theme: DefaultTheme,
-) -> lumis_core::formatter::html_multi_themes::DefaultTheme {
-    match default_theme {
-        DefaultTheme::Theme(name) => {
-            lumis_core::formatter::html_multi_themes::DefaultTheme::Theme(name)
+impl Formatter for HtmlMultiThemes {
+    fn language(&self) -> Language {
+        self.language
+    }
+
+    fn prepare_line_view<'a>(
+        &self,
+        _source: &'a str,
+        builder: &mut crate::highlight::LineViewBuilder<'a>,
+    ) {
+        if let Some(highlight_lines) = &self.highlight_lines {
+            let mut style = Default::default();
+            if let Some(crate::formatters::html_inline::HighlightLinesStyle::Theme) =
+                &highlight_lines.style
+            {
+                style = self
+                    .default_theme_name()
+                    .and_then(|name| self.themes.get(name))
+                    .and_then(|theme| theme.get_style("highlighted"))
+                    .map(super::html_inline::style_patch_from_theme_style)
+                    .unwrap_or_default();
+            }
+            builder.line_highlights(super::html_inline::line_highlights(
+                &highlight_lines.lines,
+                highlight_lines.class.clone(),
+                style,
+            ));
         }
-        DefaultTheme::LightDark => {
-            lumis_core::formatter::html_multi_themes::DefaultTheme::LightDark
+    }
+
+    fn render(&self, view: &LineView, output: &mut dyn Write) -> io::Result<()> {
+        self.render_line_view(view, output)
+    }
+}
+
+impl HtmlMultiThemes {
+    fn render_line_view(&self, view: &LineView, output: &mut dyn Write) -> io::Result<()> {
+        if let Some(header) = &self.header {
+            write!(output, "{}", header.open_tag)?;
         }
+
+        let pre_class = self.generate_pre_classes();
+        let pre_style = self.generate_pre_style();
+        write!(output, "<pre class=\"{pre_class}\"")?;
+        if !pre_style.is_empty() {
+            write!(output, " style=\"{pre_style}\"")?;
+        }
+        write!(output, ">")?;
+        lumis_core::formatter::html::open_code_tag(output, &self.language)?;
+
+        for line in &view.lines {
+            let content = super::line_view::render_html_line(line, |scope| {
+                let Some(scope_name) = lumis_core::highlights::HIGHLIGHT_NAMES
+                    .get(scope.scope_index)
+                    .copied()
+                else {
+                    return String::new();
+                };
+                lumis_core::formatter::html::span_multi_themes_attrs(
+                    scope_name,
+                    Some(scope.language.unwrap_or(self.language)),
+                    &self.themes,
+                    self.default_theme_name(),
+                    &self.css_variable_prefix,
+                    self.italic,
+                    self.include_highlights,
+                )
+            });
+            super::line_view::write_html_line(
+                output,
+                line,
+                &content,
+                self.custom_line_style(line.line_number),
+            )?;
+        }
+
+        lumis_core::formatter::html::closing_tags(output)?;
+        if let Some(header) = &self.header {
+            write!(output, "{}", header.close_tag)?;
+        }
+        Ok(())
+    }
+
+    fn custom_line_style(&self, line_number: usize) -> Option<&str> {
+        let highlight_lines = self.highlight_lines.as_ref()?;
+        let Some(crate::formatters::html_inline::HighlightLinesStyle::Style(style)) =
+            &highlight_lines.style
+        else {
+            return None;
+        };
+        highlight_lines
+            .lines
+            .iter()
+            .any(|range| range.contains(&line_number))
+            .then_some(style.as_str())
     }
 }
 

@@ -25,12 +25,15 @@ It keeps the same core workflow across runtimes:
 3. pick a formatter
 4. render HTML or terminal output
 
+For editor-like output, Lumis can also build a [`LineView`](/usage/line-view-decorations): a line-oriented view with syntax spans, gutter text, line highlights, virtual text, and inline decorations from decorators.
+
 ## Why Lumis
 
 - Tree-sitter parsing instead of regex-based tokenization
 - 110+ languages with nested language support
 - 250+ themes sourced from Neovim colorschemes
 - 5 formatters: HTML Inline, HTML Linked, HTML Multi-Themes, Terminal, and BBCode Scoped
+- `LineView` decorations for line numbers, highlighted lines, gutter markers, indentation guides, diff notation, and rainbow brackets
 - handles incomplete code (useful for streaming)
 - one API across 6 runtimes: CLI, Rust, Elixir, JavaScript, Browsers / CDN, and Java
 

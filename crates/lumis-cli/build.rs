@@ -10,11 +10,12 @@
 //       pub const RUST_HIGHLIGHTS: &str = "...";
 //       pub const RUST_INJECTIONS: &str = "...";
 //       pub const RUST_LOCALS: &str = "";
+//       pub const RUST_BRACKETS: &str = "";
 //     Empty string when the .scm file doesn't exist for that language.
 //
-//   - `get_queries(lang_name) -> (highlights, injections, locals)`
-//     Match on the directory name (e.g. "rust") and return the three constants.
-//     Falls back to ("", "", "") for unknown languages.
+//   - `get_queries(lang_name) -> (highlights, injections, locals, brackets)`
+//     Match on the directory name (e.g. "rust") and return the four constants.
+//     Falls back to ("", "", "", "") for unknown languages.
 //
 //   - `language_to_query_name(lang: Language) -> &str`
 //     Maps the Language enum variant to its query directory name.
@@ -98,9 +99,14 @@ fn main() {
     let dest_path = out_dir.join("queries_constants.rs");
 
     let queries_path = resolve_path("queries/processed");
+    let default_brackets_query_path = resolve_path("queries/brackets.scm");
     let languages_toml_path = resolve_path("languages.toml");
 
     println!("cargo:rerun-if-changed={}", queries_path.display());
+    println!(
+        "cargo:rerun-if-changed={}",
+        default_brackets_query_path.display()
+    );
     println!("cargo:rerun-if-changed={}", languages_toml_path.display());
 
     let toml_content =
@@ -109,6 +115,12 @@ fn main() {
         toml::from_str(&toml_content).expect("failed to parse languages.toml");
 
     let mut generated_code = TokenStream::new();
+
+    let default_brackets_query =
+        convert_lua_matches(&fs::read_to_string(&default_brackets_query_path).unwrap());
+    generated_code.extend(quote! {
+        pub const DEFAULT_BRACKETS: &str = #default_brackets_query;
+    });
 
     // --- Part 1: per-language query constants ---
     let entries = fs::read_dir(&queries_path).unwrap_or_else(|_| {
@@ -130,7 +142,7 @@ fn main() {
 
         let language = path.file_name().unwrap().to_str().unwrap().to_string();
         let lang_upper = language.to_uppercase();
-        let queries = ["highlights", "injections", "locals"];
+        let queries = ["highlights", "injections", "locals", "brackets"];
 
         for query in queries {
             let file_path = path.join(format!("{query}.scm"));
@@ -159,15 +171,24 @@ fn main() {
             let h = format_ident!("{}_HIGHLIGHTS", upper);
             let i = format_ident!("{}_INJECTIONS", upper);
             let l = format_ident!("{}_LOCALS", upper);
-            quote! { #lang => (#h, #i, #l), }
+            let b = format_ident!("{}_BRACKETS", upper);
+            quote! { #lang => (#h, #i, #l, brackets_or_default(#b)), }
         })
         .collect();
 
     generated_code.extend(quote! {
-        pub fn get_queries(lang_name: &str) -> (&'static str, &'static str, &'static str) {
+        fn brackets_or_default(query: &'static str) -> &'static str {
+            if query.trim().is_empty() {
+                DEFAULT_BRACKETS
+            } else {
+                query
+            }
+        }
+
+        pub fn get_queries(lang_name: &str) -> (&'static str, &'static str, &'static str, &'static str) {
             match lang_name {
                 #(#get_queries_arms)*
-                _ => ("", "", ""),
+                _ => ("", "", "", DEFAULT_BRACKETS),
             }
         }
     });

@@ -19,6 +19,13 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
+      label: 'LineView',
+      items: [
+        'usage/line-view-decorations',
+      ],
+    },
+    {
+      type: 'category',
       label: 'Formatters',
       items: [
         'usage/formatters',

@@ -10,12 +10,14 @@ use lumis_core::events::HighlightEvent;
 use lumis_core::formatter::Formatter as CoreFormatter;
 use lumis_core::formatter::TerminalBackground;
 use lumis_core::languages::Language;
+use lumis_core::themes::{Style, Theme};
 use std::fmt::Display;
 use std::fs;
 use std::io::{IsTerminal, Read as _};
-use std::ops::RangeInclusive;
 use std::path::{Path, PathBuf};
+use std::str::FromStr;
 use terminal_size::{terminal_size, Width};
+use tree_sitter::StreamingIterator;
 
 #[derive(Parser)]
 #[command(
@@ -34,7 +36,7 @@ struct Cli {
     command: Commands,
 
     /// Where to look for WASM parsers and theme JSON files
-    #[arg(short = 'd', long, env("LUMIS_DATA_DIR"), global = true)]
+    #[arg(long, env("LUMIS_DATA_DIR"), global = true)]
     data_dir: Option<PathBuf>,
 
     /// Show extra output (downloads, cache hits, etc.)
@@ -49,9 +51,15 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     /// Highlight source code from a file or stdin
-    #[command(
-        after_help = "Examples:\n  lumis highlight main.rs\n  lumis highlight -l javascript main.txt\n  lumis highlight -f html-inline -t dracula main.rs\n  lumis highlight -b theme -w 120 main.rs\n  lumis highlight --background '#282a36' --width 120 main.rs\n  lumis highlight -h 1,3-5 lib.rs\n  cat main.rs | lumis highlight -l rust\n  echo 'fn main() {}' | lumis highlight -l rust"
-    )]
+    #[command(after_help = r#"Examples:
+  lumis highlight main.rs
+  lumis highlight -l javascript main.txt
+  lumis highlight -f html-inline -t dracula main.rs
+  lumis highlight -b theme -w 120 main.rs
+  lumis highlight --background '#282a36' --width 120 main.rs
+  lumis highlight -d rainbow-brackets main.rs
+  cat main.rs | lumis highlight -l rust
+  echo 'fn main() {}' | lumis highlight -l rust"#)]
     Highlight {
         /// File to highlight (reads from stdin if omitted)
         path: Option<String>,
@@ -88,9 +96,9 @@ enum Commands {
         #[arg(long, default_value = "--lumis")]
         css_variable_prefix: String,
 
-        /// Lines to highlight, e.g. "1,3-5,10"
-        #[arg(short = 'h', long)]
-        highlight_lines: Option<String>,
+        /// Built-in decorator to apply, can be repeated
+        #[arg(short = 'd', long = "decorator")]
+        decorators: Vec<DecoratorSpec>,
     },
 
     /// Manage languages
@@ -194,6 +202,58 @@ enum Formatter {
     BbcodeScoped,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq)]
+enum DecoratorSpec {
+    /// Color bracket pairs by nesting depth
+    RainbowBrackets,
+}
+
+impl FromStr for DecoratorSpec {
+    type Err = String;
+
+    fn from_str(input: &str) -> Result<Self, Self::Err> {
+        let input = input.trim();
+        match input {
+            "rainbow-brackets" => Ok(Self::RainbowBrackets),
+            _ => Err(format!(
+                "unknown decorator '{input}', expected rainbow-brackets"
+            )),
+        }
+    }
+}
+
+impl clap::builder::ValueParserFactory for DecoratorSpec {
+    type Parser = DecoratorSpecParser;
+
+    fn value_parser() -> Self::Parser {
+        DecoratorSpecParser
+    }
+}
+
+#[derive(Clone, Copy)]
+struct DecoratorSpecParser;
+
+impl clap::builder::TypedValueParser for DecoratorSpecParser {
+    type Value = DecoratorSpec;
+
+    fn parse_ref(
+        &self,
+        cmd: &clap::Command,
+        arg: Option<&clap::Arg>,
+        value: &std::ffi::OsStr,
+    ) -> Result<Self::Value, clap::Error> {
+        DecoratorSpec::from_str.parse_ref(cmd, arg, value)
+    }
+
+    fn possible_values(
+        &self,
+    ) -> Option<Box<dyn Iterator<Item = clap::builder::PossibleValue> + '_>> {
+        let values = vec![clap::builder::PossibleValue::new("rainbow-brackets")
+            .help("Color bracket pairs by nesting depth")];
+        Some(Box::new(values.into_iter()))
+    }
+}
+
 fn default_data_dir() -> PathBuf {
     etcetera::choose_base_strategy()
         .expect("failed to determine home directory")
@@ -217,7 +277,7 @@ fn main() -> Result<()> {
             themes,
             default_theme,
             css_variable_prefix,
-            highlight_lines,
+            decorators,
         } => {
             let reg = registry::Registry::new(data_dir)?;
             do_highlight(
@@ -231,7 +291,7 @@ fn main() -> Result<()> {
                 themes,
                 default_theme,
                 css_variable_prefix,
-                highlight_lines,
+                decorators,
             )
         }
         Commands::Languages { command } => match command {
@@ -476,7 +536,7 @@ fn do_highlight(
     themes: Vec<String>,
     default_theme: Option<String>,
     css_variable_prefix: String,
-    highlight_lines: Option<String>,
+    decorators: Vec<DecoratorSpec>,
 ) -> Result<()> {
     let (source, lang) = if let Some(path) = path {
         let bytes = read_or_die(Path::new(&path));
@@ -500,18 +560,19 @@ fn do_highlight(
         ));
     };
 
-    if lang == Language::PlainText {
+    if lang == Language::PlainText && decorators.is_empty() {
         print!("{}", source);
         return Ok(());
     }
 
-    let lang_name = registry::language_to_query_name(lang);
-    let events = highlight_to_events(reg, &source, lang_name)?;
-
-    let parsed_highlight_lines = if let Some(lines_str) = highlight_lines {
-        Some(parse_highlight_lines(&lines_str)?)
+    let events = if lang == Language::PlainText {
+        vec![HighlightEvent::Source {
+            start: 0,
+            end: source.len(),
+        }]
     } else {
-        None
+        let lang_name = registry::language_to_query_name(lang);
+        highlight_to_events(reg, &source, lang_name)?
     };
 
     render_output(
@@ -526,7 +587,7 @@ fn do_highlight(
         themes,
         default_theme,
         css_variable_prefix,
-        parsed_highlight_lines,
+        decorators,
     )
 }
 
@@ -543,27 +604,25 @@ fn render_output(
     themes: Vec<String>,
     default_theme: Option<String>,
     css_variable_prefix: String,
-    highlight_lines: Option<Vec<RangeInclusive<usize>>>,
+    decorators: Vec<DecoratorSpec>,
 ) -> Result<()> {
     let theme_obj = resolve_theme(theme, Some(reg.data_dir()));
+    let use_decorator_document = !decorators.is_empty();
 
     match formatter.unwrap_or_default() {
         Formatter::HtmlInline => {
+            if use_decorator_document {
+                return Err(anyhow::anyhow!(
+                    "decorators currently render only with --formatter terminal"
+                ));
+            }
+
             let mut builder = lumis_core::formatter::HtmlInlineBuilder::new();
             builder
                 .language(lang)
                 .theme(theme_obj)
                 .italic(false)
                 .include_highlights(false);
-
-            if let Some(lines) = highlight_lines {
-                let hl = lumis_core::formatter::html_inline::HighlightLines {
-                    lines,
-                    style: Some(lumis_core::formatter::html_inline::HighlightLinesStyle::Theme),
-                    class: None,
-                };
-                builder.highlight_lines(Some(hl));
-            }
 
             let fmt = builder.build().map_err(|e| anyhow::anyhow!("{}", e))?;
             let mut output = Vec::new();
@@ -594,6 +653,12 @@ fn render_output(
                 theme_map.insert(theme_name, theme_obj);
             }
 
+            if use_decorator_document {
+                return Err(anyhow::anyhow!(
+                    "decorators currently render only with --formatter terminal"
+                ));
+            }
+
             let mut builder = lumis_core::formatter::HtmlMultiThemesBuilder::new();
             builder
                 .language(lang)
@@ -604,15 +669,6 @@ fn render_output(
                 builder.default_theme(default);
             }
 
-            if let Some(lines) = highlight_lines {
-                let hl = lumis_core::formatter::html_inline::HighlightLines {
-                    lines,
-                    style: Some(lumis_core::formatter::html_inline::HighlightLinesStyle::Theme),
-                    class: None,
-                };
-                builder.highlight_lines(Some(hl));
-            }
-
             let fmt = builder.build().map_err(|e| anyhow::anyhow!("{}", e))?;
             let mut output = Vec::new();
             fmt.render(source, events, &mut output)?;
@@ -620,16 +676,14 @@ fn render_output(
         }
 
         Formatter::HtmlLinked => {
+            if use_decorator_document {
+                return Err(anyhow::anyhow!(
+                    "decorators currently render only with --formatter terminal"
+                ));
+            }
+
             let mut builder = lumis_core::formatter::HtmlLinkedBuilder::new();
             builder.language(lang);
-
-            if let Some(lines) = highlight_lines {
-                let hl = lumis_core::formatter::html_linked::HighlightLines {
-                    lines,
-                    class: "highlighted".to_string(),
-                };
-                builder.highlight_lines(Some(hl));
-            }
 
             let fmt = builder.build().map_err(|e| anyhow::anyhow!("{}", e))?;
             let mut output = Vec::new();
@@ -638,6 +692,21 @@ fn render_output(
         }
 
         Formatter::Terminal => {
+            if use_decorator_document {
+                let output = render_terminal_document(
+                    source,
+                    events,
+                    reg,
+                    lang,
+                    theme_obj.as_ref(),
+                    parse_terminal_background(background.as_deref()),
+                    resolve_terminal_width(width.as_deref())?,
+                    &decorators,
+                )?;
+                print!("{output}");
+                return Ok(());
+            }
+
             let mut builder = lumis_core::formatter::TerminalBuilder::new();
             builder
                 .language(lang)
@@ -652,6 +721,12 @@ fn render_output(
         }
 
         Formatter::BbcodeScoped => {
+            if use_decorator_document {
+                return Err(anyhow::anyhow!(
+                    "decorators currently render only with --formatter terminal"
+                ));
+            }
+
             let fmt = lumis_core::formatter::BBCodeScoped::new(lang);
             let mut output = Vec::new();
             fmt.render(source, events, &mut output)?;
@@ -668,6 +743,373 @@ fn parse_terminal_background(bg: Option<&str>) -> TerminalBackground {
         Some(color) => TerminalBackground::Color(color.to_string()),
         None => TerminalBackground::Inherit,
     }
+}
+
+#[allow(clippy::too_many_arguments)]
+fn render_terminal_document(
+    source: &str,
+    events: &[HighlightEvent],
+    reg: &registry::Registry,
+    fallback_language: Language,
+    theme: Option<&Theme>,
+    background: TerminalBackground,
+    width: Option<usize>,
+    decorators: &[DecoratorSpec],
+) -> Result<String> {
+    let document = line_view(source, events, reg, fallback_language, decorators)?;
+    let fallback_bg = terminal_fallback_bg(theme, &background);
+    let mut output = String::new();
+
+    for line in &document.lines {
+        let line_style = merged_line_style(line);
+        let mut line_width = 0usize;
+        let mut column = 0usize;
+        let gutter = render_terminal_gutter(line, &line_style);
+        line_width += display_width_without_ansi(&gutter);
+        output.push_str(&gutter);
+
+        for span in &line.spans {
+            let mut style = span_theme_style(span, fallback_language, theme);
+            if let Some(line_style) = &line_style {
+                merge_theme_style(&mut style, line_style);
+            }
+            if let Some(patch) = &span.style {
+                apply_style_patch(&mut style, patch);
+            }
+            if style.bg.is_none() {
+                if let Some(bg) = fallback_bg.as_deref() {
+                    style.bg = Some(bg.to_string());
+                }
+            }
+
+            let rendered =
+                render_terminal_text_with_virtuals(&span.text, line, &mut column, &style);
+            line_width += display_width(&span.text);
+            output.push_str(&rendered);
+        }
+
+        let remaining_virtuals = render_terminal_remaining_virtuals(line, &mut column);
+        line_width += display_width_without_ansi(&remaining_virtuals);
+        output.push_str(&remaining_virtuals);
+
+        if let (Some(bg), Some(width)) = (fallback_bg.as_deref(), width) {
+            if line_width < width {
+                let padding = " ".repeat(width - line_width);
+                output.push_str(&lumis_core::formatter::ansi::paint(
+                    &padding,
+                    &Style {
+                        bg: Some(bg.to_string()),
+                        ..Style::default()
+                    },
+                ));
+            }
+        }
+
+        output.push('\n');
+    }
+
+    Ok(output)
+}
+
+fn render_terminal_gutter(
+    line: &lumis_core::highlight::Line,
+    line_style: &Option<lumis_core::highlight::StylePatch>,
+) -> String {
+    if line.gutter_text.is_empty() && line_sign(line).is_none() {
+        return String::new();
+    }
+
+    let mut output = String::new();
+    for item in &line.gutter_text {
+        output.push_str(&paint_terminal(&item.text, &style_from_patch(&item.style)));
+        output.push(' ');
+    }
+    if let Some(sign) = line_sign(line) {
+        let style = line_style
+            .as_ref()
+            .map(style_from_patch)
+            .unwrap_or_default();
+        output.push_str(&paint_terminal(sign, &style));
+        output.push(' ');
+    }
+    output.push_str("│ ");
+    output
+}
+
+fn render_terminal_text_with_virtuals(
+    text: &str,
+    line: &lumis_core::highlight::Line,
+    column: &mut usize,
+    style: &Style,
+) -> String {
+    if line.virtual_text.is_empty() {
+        *column += display_width(text);
+        return paint_terminal(text, style);
+    }
+
+    let mut output = String::new();
+    for ch in text.chars() {
+        if let Some(virtual_text) = virtual_text_at_column(line, *column) {
+            let mut virtual_style = style.clone();
+            apply_style_patch(&mut virtual_style, &virtual_text.style);
+            output.push_str(&paint_terminal(&virtual_text.text, &virtual_style));
+        } else {
+            output.push_str(&paint_terminal(&ch.to_string(), style));
+        }
+        *column += char_display_width(ch);
+    }
+
+    output
+}
+
+fn render_terminal_remaining_virtuals(
+    line: &lumis_core::highlight::Line,
+    column: &mut usize,
+) -> String {
+    let mut output = String::new();
+    for virtual_text in &line.virtual_text {
+        if virtual_text.column < *column {
+            continue;
+        }
+        while *column < virtual_text.column {
+            output.push(' ');
+            *column += 1;
+        }
+        output.push_str(&paint_terminal(
+            &virtual_text.text,
+            &style_from_patch(&virtual_text.style),
+        ));
+        *column += display_width(&virtual_text.text);
+    }
+    output
+}
+
+fn line_sign(line: &lumis_core::highlight::Line) -> Option<&str> {
+    line.signs.iter().map(|sign| sign.text.as_str()).next()
+}
+
+fn line_view(
+    source: &str,
+    events: &[HighlightEvent],
+    reg: &registry::Registry,
+    lang: Language,
+    decorators: &[DecoratorSpec],
+) -> Result<lumis_core::highlight::LineView> {
+    let mut options = lumis_core::highlight::LineViewOptions::default();
+
+    for decorator in decorators {
+        match decorator {
+            DecoratorSpec::RainbowBrackets => {
+                let decorator = lumis_core::highlight::RainbowBrackets::from_pairs(
+                    rainbow_brackets_query_pairs(reg, source, lang)?,
+                    lumis_core::highlight::RainbowBracketsOptions::default(),
+                );
+                merge_decoration_output(&mut options, decoration_output(source, &decorator));
+            }
+        }
+    }
+
+    Ok(lumis_core::highlight::LineView::from_events(
+        source, events, &options,
+    ))
+}
+
+fn decoration_output(
+    source: &str,
+    decorator: &impl lumis_core::highlight::LineViewDecorator,
+) -> lumis_core::highlight::DecorationOutput {
+    let mut output = lumis_core::highlight::DecorationOutput::default();
+    decorator.run(
+        lumis_core::highlight::DecoratorContext::new(source),
+        &mut output,
+    );
+    output
+}
+
+fn merge_decoration_output(
+    options: &mut lumis_core::highlight::LineViewOptions,
+    output: lumis_core::highlight::DecorationOutput,
+) {
+    options
+        .highlight_decorations
+        .extend(output.highlight_decorations);
+}
+
+fn rainbow_brackets_query_pairs(
+    reg: &registry::Registry,
+    source: &str,
+    lang: Language,
+) -> Result<Vec<(std::ops::Range<usize>, std::ops::Range<usize>)>> {
+    let lang_name = registry::language_to_query_name(lang);
+    let brackets_query = reg.brackets_query(lang_name).ok_or_else(|| {
+        anyhow::anyhow!("rainbow-brackets requires a brackets.scm query for '{lang_name}'")
+    })?;
+    let config = reg
+        .load_config(lang_name)?
+        .ok_or_else(|| anyhow::anyhow!("failed to load parser config for '{lang_name}'"))?;
+
+    let mut parser = tree_sitter::Parser::new();
+    parser.set_wasm_store(reg.new_wasm_store()?)?;
+    parser.set_language(&config.language)?;
+    let tree = parser
+        .parse(source, None)
+        .ok_or_else(|| anyhow::anyhow!("failed to parse source for '{lang_name}'"))?;
+    let query = tree_sitter::Query::new(&config.language, brackets_query)?;
+    let open_index = query
+        .capture_index_for_name("open")
+        .ok_or_else(|| anyhow::anyhow!("brackets.scm for '{lang_name}' is missing @open"))?;
+    let close_index = query
+        .capture_index_for_name("close")
+        .ok_or_else(|| anyhow::anyhow!("brackets.scm for '{lang_name}' is missing @close"))?;
+    let mut cursor = tree_sitter::QueryCursor::new();
+    let mut pairs = Vec::new();
+
+    let mut query_matches = cursor.matches(&query, tree.root_node(), source.as_bytes());
+    while let Some(query_match) = query_matches.next() {
+        if query
+            .property_settings(query_match.pattern_index)
+            .iter()
+            .any(|property| property.key.as_ref() == "rainbow.exclude")
+        {
+            continue;
+        }
+
+        let mut open = None;
+        let mut close = None;
+        for capture in query_match.captures {
+            if capture.index == open_index {
+                open = Some(capture.node.byte_range());
+            } else if capture.index == close_index {
+                close = Some(capture.node.byte_range());
+            }
+        }
+        if let (Some(open), Some(close)) = (open, close) {
+            pairs.push((open, close));
+        }
+    }
+
+    Ok(pairs)
+}
+
+fn merged_line_style(
+    line: &lumis_core::highlight::Line,
+) -> Option<lumis_core::highlight::StylePatch> {
+    let mut style = lumis_core::highlight::StylePatch::default();
+    for highlight in &line.line_highlights {
+        style.merge(&highlight.style);
+    }
+
+    (!style.is_empty()).then_some(style)
+}
+
+fn style_from_patch(patch: &lumis_core::highlight::StylePatch) -> Style {
+    let mut style = Style::default();
+    apply_style_patch(&mut style, patch);
+    style
+}
+
+fn span_theme_style(
+    span: &lumis_core::highlight::Span,
+    fallback_language: Language,
+    theme: Option<&Theme>,
+) -> Style {
+    let Some(theme) = theme else {
+        return Style::default();
+    };
+    let Some(scope) = span.scopes.last() else {
+        return Style::default();
+    };
+    let scope_name = lumis_core::highlights::HIGHLIGHT_NAMES
+        .get(scope.scope_index)
+        .copied()
+        .unwrap_or("");
+    let language = scope.language.unwrap_or(fallback_language);
+    let specialized = format!("{}.{}", scope_name, language.id_name());
+    theme
+        .get_style(&specialized)
+        .or_else(|| theme.get_style(scope_name))
+        .cloned()
+        .unwrap_or_default()
+}
+
+fn merge_theme_style(base: &mut Style, patch: &lumis_core::highlight::StylePatch) {
+    if let Some(fg) = &patch.fg {
+        base.fg = Some(fg.clone());
+    }
+    if let Some(bg) = &patch.bg {
+        base.bg = Some(bg.clone());
+    }
+    if let Some(bold) = patch.bold {
+        base.bold = bold;
+    }
+    if let Some(italic) = patch.italic {
+        base.italic = italic;
+    }
+    if let Some(underline) = patch.text_decoration.underline {
+        base.text_decoration.underline = underline;
+    }
+    if let Some(strikethrough) = patch.text_decoration.strikethrough {
+        base.text_decoration.strikethrough = strikethrough;
+    }
+}
+
+fn apply_style_patch(base: &mut Style, patch: &lumis_core::highlight::StylePatch) {
+    merge_theme_style(base, patch);
+}
+
+fn terminal_fallback_bg(theme: Option<&Theme>, background: &TerminalBackground) -> Option<String> {
+    match background {
+        TerminalBackground::Inherit => None,
+        TerminalBackground::Theme => theme.and_then(Theme::bg).map(ToString::to_string),
+        TerminalBackground::Color(color) => Some(color.clone()),
+    }
+}
+
+fn paint_terminal(text: &str, style: &Style) -> String {
+    if style == &Style::default() {
+        text.to_string()
+    } else {
+        lumis_core::formatter::ansi::paint(text, style)
+    }
+}
+
+fn display_width(text: &str) -> usize {
+    text.chars().map(char_display_width).sum()
+}
+
+fn display_width_without_ansi(text: &str) -> usize {
+    let mut width = 0;
+    let mut chars = text.chars().peekable();
+
+    while let Some(ch) = chars.next() {
+        if ch == '\x1b' && chars.peek() == Some(&'[') {
+            for next in chars.by_ref() {
+                if next == 'm' {
+                    break;
+                }
+            }
+            continue;
+        }
+        width += char_display_width(ch);
+    }
+
+    width
+}
+
+fn char_display_width(ch: char) -> usize {
+    match ch {
+        '\t' => 4,
+        _ => 1,
+    }
+}
+
+fn virtual_text_at_column(
+    line: &lumis_core::highlight::Line,
+    column: usize,
+) -> Option<&lumis_core::highlight::VirtualText> {
+    line.virtual_text
+        .iter()
+        .find(|virtual_text| virtual_text.column == column)
 }
 
 fn resolve_terminal_width(width: Option<&str>) -> Result<Option<usize>> {
@@ -733,11 +1175,8 @@ fn eprint_read_error(file_arg: &FileArgument, e: &std::io::Error) {
     };
 }
 
-#[allow(dead_code)]
 enum FileArgument {
     NamedPath(std::path::PathBuf),
-    Stdin,
-    DevNull,
 }
 
 impl Display for FileArgument {
@@ -746,60 +1185,10 @@ impl Display for FileArgument {
             FileArgument::NamedPath(path) => {
                 write!(f, "{}", relative_to_current(path).display())
             }
-            FileArgument::Stdin => write!(f, "(stdin)"),
-            FileArgument::DevNull => write!(f, "/dev/null"),
         }
     }
 }
 
-fn parse_highlight_lines(input: &str) -> Result<Vec<RangeInclusive<usize>>> {
-    let mut ranges = Vec::new();
-
-    for part in input.split(',') {
-        let part = part.trim();
-        if part.is_empty() {
-            continue;
-        }
-
-        if let Some((start, end)) = part.split_once('-') {
-            let start: usize = start
-                .trim()
-                .parse()
-                .map_err(|_| anyhow::anyhow!("Invalid line number: '{}'", start.trim()))?;
-            let end: usize = end
-                .trim()
-                .parse()
-                .map_err(|_| anyhow::anyhow!("Invalid line number: '{}'", end.trim()))?;
-
-            if start == 0 || end == 0 {
-                return Err(anyhow::anyhow!("Line numbers must be greater than 0"));
-            }
-            if start > end {
-                return Err(anyhow::anyhow!(
-                    "Start line ({}) must be less than or equal to end line ({})",
-                    start,
-                    end
-                ));
-            }
-
-            ranges.push(start..=end);
-        } else {
-            let line: usize = part
-                .parse()
-                .map_err(|_| anyhow::anyhow!("Invalid line number: '{}'", part))?;
-
-            if line == 0 {
-                return Err(anyhow::anyhow!("Line numbers must be greater than 0"));
-            }
-
-            ranges.push(line..=line);
-        }
-    }
-
-    Ok(ranges)
-}
-
-#[allow(dead_code)]
 fn relative_to_current(path: &Path) -> PathBuf {
     if let Ok(current_path) = std::env::current_dir() {
         let path = path.canonicalize().unwrap_or_else(|_| path.into());
@@ -929,5 +1318,12 @@ end
             compute_auto_terminal_width(false, Some(120), Some(80)),
             None
         );
+    }
+
+    #[test]
+    fn decorator_spec_rejects_unknown_decorators() {
+        let error = "unknown".parse::<DecoratorSpec>().unwrap_err();
+
+        assert!(error.contains("unknown decorator 'unknown'"));
     }
 }

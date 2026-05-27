@@ -4,8 +4,7 @@
 //! the public APIs from the `html` module:
 
 use lumis::{
-    formatters::Formatter, highlight::highlight_iter, html, languages::Language, themes,
-    write_highlight,
+    formatters::Formatter, highlight::LineView, html, languages::Language, themes, write_highlight,
 };
 use std::io::{self, Write};
 
@@ -22,27 +21,39 @@ impl CustomHtmlFormatter {
 }
 
 impl Formatter for CustomHtmlFormatter {
-    fn format(&self, source: &str, output: &mut dyn Write) -> io::Result<()> {
+    fn language(&self) -> Language {
+        self.language
+    }
+
+    fn render(&self, view: &LineView, output: &mut dyn Write) -> io::Result<()> {
         html::open_pre_tag(output, None, self.theme.as_ref())?;
         html::open_code_tag(output, &self.language)?;
 
-        highlight_iter(
-            source,
-            self.language,
-            self.theme.clone(),
-            |text, language, _range, scope, _style| {
-                let span = html::span_inline(
-                    text,
-                    Some(language),
-                    scope,
-                    self.theme.as_ref(),
-                    false,
-                    true,
-                );
-                write!(output, "{}", span)
-            },
-        )
-        .map_err(io::Error::other)?;
+        for line in &view.lines {
+            for span in &line.spans {
+                let Some(scope) = span.scopes.last() else {
+                    write!(output, "{}", html::escape(&span.text))?;
+                    continue;
+                };
+                let scope_name = lumis::highlight::HIGHLIGHT_NAMES
+                    .get(scope.scope_index)
+                    .copied()
+                    .unwrap_or("text");
+                write!(
+                    output,
+                    "{}",
+                    html::span_inline(
+                        &span.text,
+                        scope.language.or(Some(self.language)),
+                        scope_name,
+                        self.theme.as_ref(),
+                        false,
+                        true,
+                    )
+                )?;
+            }
+            writeln!(output)?;
+        }
 
         html::closing_tags(output)?;
         Ok(())
