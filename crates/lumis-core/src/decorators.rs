@@ -1,7 +1,6 @@
 //! Built-in decorators for [`LineView`](crate::highlight::LineView).
 //!
-//! Decorators emit formatter-neutral data. The initial public slice keeps only
-//! rainbow brackets; more decorators can reuse the same output model later.
+//! Decorators emit formatter-neutral data.
 
 use crate::highlight::{
     GutterText, HighlightDecoration, LineHighlight, SignText, StylePatch, VirtualText,

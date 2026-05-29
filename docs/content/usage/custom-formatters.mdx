@@ -62,12 +62,12 @@ impl Formatter for MinimalHtmlFormatter {
 
 ### Supporting LineView decorations
 
-Decorations produce formatter-neutral output: line highlights, signs, gutter text, virtual text, and inline span decorations. A formatter that supports them should render a `LineView`, not only the raw token stream.
+Decorators add things that are not syntax tokens: line highlights, signs, gutter text, virtual text, and inline span decorations. A formatter that wants those should render a `LineView`, not just the raw token stream.
 
 The split is deliberate:
 
 - decorators decide what extra data exists
-- formatters decide how that data appears
+- formatters decide how that data looks
 
 The flow is:
 
@@ -77,33 +77,33 @@ source + language + decorators
   -> your formatter's HTML, ANSI, JSON, or review UI
 ```
 
-At render time, handle the projected line data:
+At render time, handle the line data:
 
-- `Line.line_highlights` for whole-line state such as highlighted lines and diff backgrounds.
-- `Line.signs` for short gutter/status markers such as diff signs.
-- `Line.gutter_text` for gutter content such as line numbers.
-- `Line.virtual_text` for overlays such as indentation guides.
-- `Span.style` and `Span.decoration_kinds` for inline decorations such as rainbow brackets and changed diff spans.
+- `Line.line_highlights` for whole-line state such as selected lines or review notes.
+- `Line.signs` for short status markers beside a line.
+- `Line.gutter_text` for optional custom gutter labels.
+- `Line.virtual_text` for overlays attached to display columns.
+- `Span.style` and `Span.decoration_kinds` for inline decorations such as rainbow brackets or custom review markers.
 
-Built-in decorator labels are available from `lumis::highlight::annotation_kinds`. Match those constants when a formatter needs built-in behavior, and use your own strings for custom decorator labels.
+Built-in decorator labels live in `lumis::highlight::annotation_kinds`. The built-in decorator today is rainbow brackets. Use your own strings for custom decorator labels.
 
 ```rust
 use lumis::highlight::annotation_kinds;
 
-if highlight.kind.as_deref() == Some(annotation_kinds::LINE_HIGHLIGHT) {
-    // Render the built-in highlighted-line state.
+if span.decoration_kinds.iter().any(|kind| kind.starts_with(annotation_kinds::RAINBOW_BRACKET_PREFIX)) {
+    // Render built-in rainbow-bracket styling.
 }
 ```
 
-This is the flexible setup: a custom formatter adds the decorators it needs in `prepare_line_view`, then renders the resulting `LineView` as a review surface. The full example renders a code review card with line numbers, gutter signs, inline TODO/FIXME markers, and an annotation rail.
+In practice, a custom formatter adds the decorators it needs in `prepare_line_view`, then renders the resulting `LineView`. The full example renders a review card with line numbers from `Line.line_number`, inline TODO/FIXME markers, and an annotation rail.
 
 ```rust
 use lumis::{
     formatters::Formatter,
     formatters::html,
     highlight::{
-        DecoratorContext, DecorationOutput, GutterText, LineHighlight, LineView,
-        LineViewBuilder, LineViewDecorator, StylePatch,
+        DecoratorContext, DecorationOutput, LineHighlight, LineView, LineViewBuilder,
+        LineViewDecorator, StylePatch,
     },
     languages::Language,
 };
@@ -121,17 +121,6 @@ impl LineViewDecorator for TodoDecorator {
                     class: Some("has-todo".to_string()),
                     style: StylePatch {
                         bg: Some("#2a2112".to_string()),
-                        ..StylePatch::default()
-                    },
-                });
-
-                output.gutter_text.push(GutterText {
-                    line: index + 1,
-                    kind: Some("todo.marker".to_string()),
-                    text: "TODO".to_string(),
-                    style: StylePatch {
-                        fg: Some("#f59e0b".to_string()),
-                        bold: Some(true),
                         ..StylePatch::default()
                     },
                 });
@@ -155,7 +144,7 @@ impl Formatter for ReviewHtmlFormatter {
         self.todo_decorator
             .run(DecoratorContext::new(source), &mut decoration_output);
 
-        builder.line_numbers().decoration_output(decoration_output);
+        builder.decoration_output(decoration_output);
     }
 
     fn render(&self, view: &LineView, output: &mut dyn Write) -> io::Result<()> {
@@ -169,12 +158,7 @@ impl Formatter for ReviewHtmlFormatter {
                 .unwrap_or("line");
 
             write!(output, "<span class=\"{}\">", html::escape(class))?;
-            if let Some(number) = line.gutter_text.first() {
-                write!(output, "<span class=\"line-number\">{}</span>", html::escape(&number.text))?;
-            }
-            if let Some(sign) = line.signs.first() {
-                write!(output, "<span class=\"sign\">{}</span>", html::escape(&sign.text))?;
-            }
+            write!(output, "<span class=\"line-number\">{}</span>", line.line_number)?;
             for span in &line.spans {
                 write!(output, "{}", html::escape(&span.text))?;
             }
@@ -189,7 +173,7 @@ impl Formatter for ReviewHtmlFormatter {
 }
 ```
 
-If your formatter uses `highlight_iter()` directly, it can still render syntax highlighting, but it will not see line decorations or inline decorator decorations.
+If your formatter uses `highlight_iter()` directly, it can still render syntax highlighting. It just will not see line decorations or inline decorator decorations.
 
 The full version, including CSS, inline `HighlightDecoration` rendering, and annotation extraction, is in [`crates/lumis/examples/custom_formatter_decorator.rs`](https://github.com/leandrocp/lumis/blob/main/crates/lumis/examples/custom_formatter_decorator.rs).
 

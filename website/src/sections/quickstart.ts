@@ -38,13 +38,12 @@ let html = highlight("const x = 1", formatter);`,
     install: { language: "bash", code: `cargo add lumis` },
     usage: {
       language: "rust",
-      code: `use lumis::{highlight::LineViewBuilder, languages::Language};
+      code: `use lumis::{highlight::{LineViewBuilder, RainbowBracketsOptions}, languages::Language};
 
 let view = LineViewBuilder::new()
-    .source("function main() {\\n    // TODO: rewrite in Rust\\n}\\n")
+    .source("function main() {\\n    return (1 + 2);\\n}\\n")
     .language(Language::JavaScript)
-    .highlight_lines([2..=2])
-    .line_numbers()
+    .rainbow_brackets(RainbowBracketsOptions::default())
     .build()
     .unwrap();`,
     },

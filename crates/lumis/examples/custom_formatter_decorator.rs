@@ -3,7 +3,8 @@
 //! This is the most flexible decorator path: the decorator detects review notes
 //! and emits formatter-neutral `LineView` decorations, while the formatter owns
 //! the final HTML shape. The output is a small code-review surface with line
-//! numbers, gutter signs, highlighted TODO/FIXME markers, and an annotation rail.
+//! numbers from `Line.line_number`, custom signs, highlighted TODO/FIXME markers,
+//! and an annotation rail.
 //! The formatter also applies theme colors from each span's syntax scopes, so the
 //! custom decorator layers on top of normal syntax highlighting instead of
 //! replacing it.
@@ -141,11 +142,6 @@ fn render_code(view: &LineView, theme: &Theme, output: &mut dyn Write) -> io::Re
 
 fn render_line(line: &Line, theme: &Theme, output: &mut dyn Write) -> io::Result<()> {
     let class = line_class(line);
-    let line_number = line
-        .gutter_text
-        .first()
-        .map(|gutter| gutter.text.as_str())
-        .unwrap_or("");
     let sign = line
         .signs
         .first()
@@ -161,7 +157,7 @@ fn render_line(line: &Line, theme: &Theme, output: &mut dyn Write) -> io::Result
     write!(
         output,
         "<span class=\"review-ln\">{}</span>",
-        html::escape(line_number)
+        line.line_number
     )?;
     write!(
         output,

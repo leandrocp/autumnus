@@ -61,23 +61,22 @@ Detection can use file name hints and shebang/content heuristics.
 
 ### [`LineViewBuilder`](/usage/line-view-decorations)
 
-Use `LineViewBuilder` when you need a structured view before rendering. It runs highlighting internally and returns a `LineView` with spans, ranges, gutter text, virtual text, and decorator output.
+Use `LineViewBuilder` when you need the structure before rendering. It runs highlighting and returns a `LineView` with spans, ranges, line data, virtual text, and decorator output.
 
 ```rust
-use lumis::{highlight::LineViewBuilder, languages::Language};
+use lumis::{highlight::{LineViewBuilder, RainbowBracketsOptions}, languages::Language};
 
 let view = LineViewBuilder::new()
-    .source("function main() {\n    // TODO: rewrite in Rust\n}\n")
+    .source("function main() {\n    return (1 + 2);\n}\n")
     .language(Language::JavaScript)
-    .highlight_lines([2..=2])
-    .line_numbers()
+    .rainbow_brackets(RainbowBracketsOptions::default())
     .build()
     .unwrap();
 
-assert_eq!(view.lines[1].gutter_text[0].text, "2");
+assert_eq!(view.lines[0].line_number, 1);
 ```
 
-This is the Rust entry point for formatter-neutral decorators. See [LineView Decorations](/usage/line-view-decorations).
+This is the Rust entry point for decorators. Rainbow brackets use it today. Custom Rust decorators can emit the same `DecorationOutput`, and more built-ins can use this model later. See [LineView Decorations](/usage/line-view-decorations).
 
 ### [`Highlighter`](https://docs.rs/lumis/latest/lumis/highlight/struct.Highlighter.html)
 

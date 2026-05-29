@@ -97,11 +97,11 @@ setup:
     echo ""
 
     echo "Installing website dependencies..."
-    (cd website && pnpm install --ignore-workspace)
+    (cd website && pnpm install)
     echo ""
 
     echo "Installing docs site dependencies..."
-    (cd docs && pnpm install --ignore-workspace)
+    (cd docs && pnpm install)
     echo ""
 
     echo "Preprocessing shared syntax and bracket queries..."

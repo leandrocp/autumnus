@@ -813,10 +813,14 @@ fn tmpdir() -> Result<String> {
 }
 
 fn query_names() -> Result<Vec<String>> {
+    query_names_in(Path::new("."))
+}
+
+fn query_names_in(root: &Path) -> Result<Vec<String>> {
     let mut names = std::collections::BTreeSet::new();
 
     for dir in ["queries/upstream", "queries/override", "queries/append"] {
-        let path = Path::new(dir);
+        let path = root.join(dir);
         if !path.exists() {
             continue;
         }
@@ -846,9 +850,18 @@ fn resolve_query_source<'a>(
 }
 
 fn has_local_override_query(lang: &str) -> bool {
+    has_local_override_query_in(Path::new("."), lang)
+}
+
+fn has_local_override_query_in(root: &Path, lang: &str) -> bool {
     ["highlights", "injections", "locals"]
         .iter()
-        .any(|query_type| Path::new("queries/override").join(lang).join(format!("{query_type}.scm")).exists())
+        .any(|query_type| {
+            root.join("queries/override")
+                .join(lang)
+                .join(format!("{query_type}.scm"))
+                .exists()
+        })
 }
 
 fn ensure_repo_clone(
@@ -2386,16 +2399,8 @@ mod tests {
         fs::write(override_lang_dir.join("locals.scm"), "(node) @local.scope\n")
             .expect("override query should be written");
 
-        let cwd = std::env::current_dir().expect("cwd should be available");
-        std::env::set_current_dir(&root).expect("should switch to temp dir");
-
-        let result = std::panic::catch_unwind(|| {
-            assert!(has_local_override_query("demo"));
-            assert!(!has_local_override_query("missing"));
-        });
-
-        std::env::set_current_dir(cwd).expect("should restore cwd");
-        assert!(result.is_ok());
+        assert!(has_local_override_query_in(&root, "demo"));
+        assert!(!has_local_override_query_in(&root, "missing"));
         let _ = fs::remove_dir_all(root);
     }
 
@@ -2408,15 +2413,7 @@ mod tests {
         fs::write(override_lang_dir.join("highlights.scm"), "((comment) @comment)\n")
             .expect("override query should be written");
 
-        let cwd = std::env::current_dir().expect("cwd should be available");
-        std::env::set_current_dir(&root).expect("should switch to temp dir");
-
-        let result = std::panic::catch_unwind(|| {
-            assert_eq!(query_names().expect("query names should load"), vec!["demo"]);
-        });
-
-        std::env::set_current_dir(cwd).expect("should restore cwd");
-        assert!(result.is_ok());
+        assert_eq!(query_names_in(&root).expect("query names should load"), vec!["demo"]);
         let _ = fs::remove_dir_all(root);
     }
 }
