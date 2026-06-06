@@ -7,17 +7,10 @@ const REVIEW_FORMATTER_CODE = `// 1. The decorator emits formatter-neutral annot
 impl LineViewDecorator for ReviewNotes {
     fn run(&self, ctx: DecoratorContext<'_>, out: &mut DecorationOutput) {
         for note in find_review_notes(ctx.source()) {
-            out.line_highlights.push(LineHighlight {
-                line: note.line,
-                kind: Some("review.note".to_string()),
-                class: Some("has-note".to_string()),
-                style: note.line_style,
-            });
-            out.signs.push(SignText {
-                line: note.line,
-                kind: Some("review.sign".to_string()),
-                text: note.sign,
-                style: note.sign_style,
+            out.highlight_decorations.push(HighlightDecoration {
+                range: note.marker_range,
+                kind: Some(note.kind),
+                style: note.style,
             });
         }
     }
@@ -33,8 +26,8 @@ let view = LineViewBuilder::new()
 // 3. The formatter owns the final UI.
 for line in &view.lines {
     render_line_number(line.line_number);
-    render_code_row(&line.spans, &line.signs);
-    render_annotation_cards(&line.line_highlights);
+    render_code_row(&line.spans);
+    render_annotation_cards(&line.spans);
 }`;
 
 const LINE_VIEW_SHAPE = `LineView {
@@ -71,7 +64,8 @@ const DECORATION_FEATURES = [
   },
   {
     name: "custom_decorators",
-    description: "Rust code can add line state, signs, gutter text, virtual text, or span output.",
+    description:
+      "Rust code can add its own span decorations. Line-level decorator output can come later.",
   },
   {
     name: "more_built_ins_soon",
@@ -83,10 +77,10 @@ const DECORATION_FEATURES = [
 const DECORATION_OUTPUT = [
   {
     name: "line_highlights",
-    description: "whole-line state for selected lines, diffs, or diagnostics",
+    description: "whole-line state owned by formatter configuration today",
   },
-  { name: "gutter_text", description: "optional gutter labels for custom formatters" },
-  { name: "virtual_text", description: "overlays attached to display columns" },
+  { name: "gutter_text", description: "available to custom renderers through LineViewOptions" },
+  { name: "virtual_text", description: "available to custom renderers through LineViewOptions" },
   {
     name: "span decorations",
     description: "inline styles for rainbow brackets and custom review markers",
@@ -114,7 +108,7 @@ export function renderDecorations() {
               Rainbow brackets now. Custom decorators now. More soon.
             </h2>
             <p class="mt-4 max-w-3xl font-mono text-sm leading-7 text-zinc-500">
-              LineView gives decorators a place to put extra line and span data before anything becomes HTML or ANSI.
+              LineView gives decorators a place to put source-range styling before anything becomes HTML or ANSI.
             </p>
           </div>
 
@@ -145,7 +139,7 @@ export function renderDecorations() {
                 <span class="font-mono text-[11px] tracking-wider text-zinc-500 uppercase dark:text-zinc-400">How it is wired</span>
               </div>
               <p class="px-5 pt-5 font-mono text-xs leading-6 text-zinc-500 dark:text-zinc-400">
-                The decorator marks lines and spans. Lumis merges that with syntax highlighting into LineView. The formatter chooses the final UI.
+                The decorator marks source ranges. Lumis merges that with syntax highlighting into LineView. The formatter chooses the final UI.
               </p>
               <div id="review-formatter-code" class="[&_code]:font-mono" data-code="${encodeURIComponent(REVIEW_FORMATTER_CODE)}">
                 <pre class="m-0 max-h-96 overflow-auto px-5 py-4 font-mono text-[11px] leading-5 text-zinc-700 dark:text-zinc-300"><code>${escapeHtml(REVIEW_FORMATTER_CODE)}</code></pre>
@@ -158,7 +152,7 @@ export function renderDecorations() {
           <div class="bg-white p-5 dark:bg-[#09090b]">
             <h3 class="font-mono text-xs font-bold tracking-wider text-zinc-900 uppercase dark:text-white">LineView shape</h3>
             <p class="mt-3 font-mono text-xs leading-6 text-zinc-500 dark:text-zinc-400">
-              LineView is what formatters receive: ranges, scopes, line state, signs, virtual text, optional gutter text, and inline decorations in one read-only model.
+              LineView is what formatters receive: ranges, scopes, line state, and inline decorations in one read-only model. Custom renderers can also project signs, virtual text, and gutter text through LineViewOptions.
             </p>
             <p class="mt-4 font-mono text-xs leading-6 text-zinc-500 dark:text-zinc-400">
               Built-in rainbow labels live in <code>lumis::highlight::annotation_kinds</code>. Custom decorators can use their own labels. Future built-ins can add more without changing the LineView shape.

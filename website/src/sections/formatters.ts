@@ -23,7 +23,7 @@ const FORMATTERS = [
   {
     name: "custom",
     description:
-      "Implement the formatter trait/interface. Use LineView when you need gutters or decorators.",
+      "Implement the formatter trait/interface. Use LineView when you need structured lines or decorators.",
   },
 ];
 

@@ -900,11 +900,12 @@ fn line_view(
     for decorator in decorators {
         match decorator {
             DecoratorSpec::RainbowBrackets => {
-                let decorator = lumis_core::highlight::RainbowBrackets::from_pairs(
-                    rainbow_brackets_query_pairs(reg, source, lang)?,
-                    lumis_core::highlight::RainbowBracketsOptions::default(),
+                options.highlight_decorations.extend(
+                    lumis_core::decorators::rainbow_brackets_decorations_from_pairs(
+                        rainbow_brackets_query_pairs(reg, source, lang)?,
+                        &lumis_core::highlight::RainbowBracketsOptions::default(),
+                    ),
                 );
-                merge_decoration_output(&mut options, decoration_output(source, &decorator));
             }
         }
     }
@@ -912,27 +913,6 @@ fn line_view(
     Ok(lumis_core::highlight::LineView::from_events(
         source, events, &options,
     ))
-}
-
-fn decoration_output(
-    source: &str,
-    decorator: &impl lumis_core::highlight::LineViewDecorator,
-) -> lumis_core::highlight::DecorationOutput {
-    let mut output = lumis_core::highlight::DecorationOutput::default();
-    decorator.run(
-        lumis_core::highlight::DecoratorContext::new(source),
-        &mut output,
-    );
-    output
-}
-
-fn merge_decoration_output(
-    options: &mut lumis_core::highlight::LineViewOptions,
-    output: lumis_core::highlight::DecorationOutput,
-) {
-    options
-        .highlight_decorations
-        .extend(output.highlight_decorations);
 }
 
 fn rainbow_brackets_query_pairs(

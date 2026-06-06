@@ -1,7 +1,7 @@
 use lumis::formatters::Formatter;
 use lumis::highlight::{
-    DecorationOutput, GutterText, HighlightDecoration, LineHighlight, LineView, LineViewBuilder,
-    SignText, StylePatch, VirtualText,
+    GutterText, HighlightDecoration, HighlightEvent, LineHighlight, LineView, LineViewOptions,
+    LineViewOptionsBuilder, SignText, StylePatch, VirtualText,
 };
 use lumis::{
     languages::Language, themes, BBCodeScopedBuilder, HtmlInlineBuilder, HtmlLinkedBuilder,
@@ -9,17 +9,17 @@ use lumis::{
 };
 use std::collections::HashMap;
 
-fn annotation_output() -> DecorationOutput {
-    DecorationOutput {
-        highlight_decorations: vec![HighlightDecoration {
+fn annotation_options() -> LineViewOptions {
+    LineViewOptionsBuilder::new()
+        .highlight_decorations(vec![HighlightDecoration {
             range: 0..3,
             kind: Some("review.note".to_string()),
             style: StylePatch {
                 fg: Some("#ff0000".to_string()),
                 ..StylePatch::default()
             },
-        }],
-        line_highlights: vec![LineHighlight {
+        }])
+        .line_highlights(vec![LineHighlight {
             line: 1,
             kind: Some("review.line".to_string()),
             class: Some("review-line".to_string()),
@@ -27,8 +27,8 @@ fn annotation_output() -> DecorationOutput {
                 bg: Some("#fff7cc".to_string()),
                 ..StylePatch::default()
             },
-        }],
-        signs: vec![SignText {
+        }])
+        .signs(vec![SignText {
             line: 1,
             kind: Some("review.sign".to_string()),
             text: "!".to_string(),
@@ -36,14 +36,14 @@ fn annotation_output() -> DecorationOutput {
                 fg: Some("#cc0000".to_string()),
                 ..StylePatch::default()
             },
-        }],
-        gutter_text: vec![GutterText {
+        }])
+        .gutter_text(vec![GutterText {
             line: 1,
             kind: Some("line.number".to_string()),
             text: "1".to_string(),
             style: StylePatch::default(),
-        }],
-        virtual_text: vec![VirtualText {
+        }])
+        .virtual_text(vec![VirtualText {
             line: 1,
             column: 3,
             kind: Some("inline.note".to_string()),
@@ -52,17 +52,18 @@ fn annotation_output() -> DecorationOutput {
                 fg: Some("#666666".to_string()),
                 ..StylePatch::default()
             },
-        }],
-    }
+        }])
+        .build()
+        .unwrap()
 }
 
 fn annotated_view() -> LineView {
-    LineViewBuilder::new()
-        .source("let x = 1;")
-        .language(Language::JavaScript)
-        .decoration_output(annotation_output())
-        .build()
-        .unwrap()
+    let source = "let x = 1;";
+    let events = vec![HighlightEvent::Source {
+        start: 0,
+        end: source.len(),
+    }];
+    LineView::from_events(source, &events, &annotation_options())
 }
 
 fn render(formatter: impl Formatter) -> String {

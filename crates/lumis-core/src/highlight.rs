@@ -13,7 +13,7 @@ use std::ops::Range;
 
 pub use crate::decorators::{
     DecorationOutput, DecoratorContext, LineViewDecorator, QueryCapture, QueryFamily,
-    RainbowBrackets, RainbowBracketsOptions,
+    RainbowBracketsOptions,
 };
 
 /// A highlight scope active over a span.
@@ -232,11 +232,6 @@ impl<'a> LineViewBuilder<'a> {
         self
     }
 
-    /// Color matching brackets by nesting depth.
-    pub fn rainbow_brackets(&mut self, options: RainbowBracketsOptions) -> &mut Self {
-        self.apply_decorator(&RainbowBrackets::new(options))
-    }
-
     /// Apply a built-in or custom line-view decorator.
     pub fn apply_decorator(&mut self, decorator: &impl LineViewDecorator) -> &mut Self {
         let mut output = DecorationOutput::default();
@@ -249,10 +244,6 @@ impl<'a> LineViewBuilder<'a> {
         self.options
             .highlight_decorations
             .extend(output.highlight_decorations);
-        self.options.line_highlights.extend(output.line_highlights);
-        self.options.signs.extend(output.signs);
-        self.options.gutter_text.extend(output.gutter_text);
-        self.options.virtual_text.extend(output.virtual_text);
         self
     }
 
@@ -724,9 +715,12 @@ mod tests {
             start: 0,
             end: source.len(),
         }];
-        let document = LineView::builder(source, &events)
-            .rainbow_brackets(RainbowBracketsOptions::default())
-            .build();
+        let mut builder = LineView::builder(source, &events);
+        builder.highlight_decorations(crate::decorators::rainbow_brackets_decorations_from_pairs(
+            vec![(4..5, 8..9), (5..6, 7..8)],
+            &RainbowBracketsOptions::default(),
+        ));
+        let document = builder.build();
         let lines = &document.lines;
         let decorated_spans: Vec<&Span> = lines[0]
             .spans

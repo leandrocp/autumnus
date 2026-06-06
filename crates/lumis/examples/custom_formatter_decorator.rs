@@ -3,16 +3,16 @@
 //! This is the most flexible decorator path: the decorator detects review notes
 //! and emits formatter-neutral `LineView` decorations, while the formatter owns
 //! the final HTML shape. The output is a small code-review surface with line
-//! numbers from `Line.line_number`, custom signs, highlighted TODO/FIXME markers,
-//! and an annotation rail.
+//! numbers from `Line.line_number`, highlighted TODO/FIXME markers, and an
+//! annotation rail.
 //! The formatter also applies theme colors from each span's syntax scopes, so the
 //! custom decorator layers on top of normal syntax highlighting instead of
 //! replacing it.
 
 use lumis::formatters::{html, Formatter};
 use lumis::highlight::{
-    DecorationOutput, DecoratorContext, HighlightDecoration, Line, LineHighlight, LineView,
-    LineViewBuilder, LineViewDecorator, SignText, Span, StylePatch, HIGHLIGHT_NAMES,
+    DecorationOutput, DecoratorContext, HighlightDecoration, Line, LineView, LineViewBuilder,
+    LineViewDecorator, Span, StylePatch, HIGHLIGHT_NAMES,
 };
 use lumis::languages::Language;
 use lumis::themes::{self, Style, Theme};
@@ -42,26 +42,11 @@ impl LineViewDecorator for ReviewNoteDecorator {
 
 fn push_review_note(
     output: &mut DecorationOutput,
-    line: usize,
+    _line: usize,
     start: usize,
     marker: &str,
     severity: &str,
 ) {
-    let class = format!("review-line review-line-{severity}");
-    let kind = format!("review.{severity}");
-
-    output.line_highlights.push(LineHighlight {
-        line,
-        kind: Some(kind.clone()),
-        class: Some(class),
-        style: StylePatch::default(),
-    });
-    output.signs.push(SignText {
-        line,
-        kind: Some(kind.clone()),
-        text: if severity == "fixme" { "!" } else { "?" }.to_string(),
-        style: StylePatch::default(),
-    });
     output.highlight_decorations.push(HighlightDecoration {
         range: start..start + marker.len(),
         kind: Some(format!("review.marker.{severity}")),
@@ -142,12 +127,6 @@ fn render_code(view: &LineView, theme: &Theme, output: &mut dyn Write) -> io::Re
 
 fn render_line(line: &Line, theme: &Theme, output: &mut dyn Write) -> io::Result<()> {
     let class = line_class(line);
-    let sign = line
-        .signs
-        .first()
-        .map(|sign| sign.text.as_str())
-        .unwrap_or("");
-
     write!(
         output,
         "<span class=\"{}\" data-line=\"{}\">",
@@ -158,11 +137,6 @@ fn render_line(line: &Line, theme: &Theme, output: &mut dyn Write) -> io::Result
         output,
         "<span class=\"review-ln\">{}</span>",
         line.line_number
-    )?;
-    write!(
-        output,
-        "<span class=\"review-sign\">{}</span>",
-        html::escape(sign)
     )?;
     write!(output, "<span class=\"review-source\">")?;
     for span in &line.spans {
@@ -261,10 +235,19 @@ fn render_annotations(annotations: &[ReviewAnnotation], output: &mut dyn Write) 
 
 fn line_class(line: &Line) -> String {
     let mut classes = vec!["review-row".to_string()];
-    for highlight in &line.line_highlights {
-        if let Some(class) = &highlight.class {
-            classes.extend(class.split_whitespace().map(str::to_string));
-        }
+    if line.spans.iter().any(|span| {
+        span.decoration_kinds
+            .iter()
+            .any(|kind| kind == "review.marker.todo")
+    }) {
+        classes.push("review-line-todo".to_string());
+    }
+    if line.spans.iter().any(|span| {
+        span.decoration_kinds
+            .iter()
+            .any(|kind| kind == "review.marker.fixme")
+    }) {
+        classes.push("review-line-fixme".to_string());
     }
     classes.join(" ")
 }
@@ -280,9 +263,10 @@ fn collect_annotations(view: &LineView) -> Vec<ReviewAnnotation> {
     view.lines
         .iter()
         .filter_map(|line| {
-            let severity = line.line_highlights.iter().find_map(|highlight| {
-                let kind = highlight.kind.as_deref()?;
-                kind.strip_prefix("review.")
+            let severity = line.spans.iter().find_map(|span| {
+                span.decoration_kinds
+                    .iter()
+                    .find_map(|kind| kind.strip_prefix("review.marker."))
             })?;
             let source = source_line(line);
             let message = source
@@ -314,13 +298,11 @@ const REVIEW_CSS: &str = r#"<style>
 .review-layout{display:grid;grid-template-columns:minmax(0,1fr) 280px}
 .review-code{background:#020617;margin:0;overflow:auto;padding:10px 0}
 .review-code code{display:block}
-.review-row{display:grid;grid-template-columns:4.5ch 2.5ch minmax(0,1fr);min-height:21px;padding:0 16px}
+.review-row{display:grid;grid-template-columns:4.5ch minmax(0,1fr);min-height:21px;padding:0 16px}
 .review-row:hover{background:#0b1220}
 .review-line-todo{background:rgba(245,158,11,.12);box-shadow:inset 3px 0 #f59e0b}
 .review-line-fixme{background:rgba(239,68,68,.14);box-shadow:inset 3px 0 #ef4444}
 .review-ln{color:#64748b;text-align:right;user-select:none}
-.review-sign{color:#fbbf24;text-align:center;user-select:none}
-.review-line-fixme .review-sign{color:#f87171}
 .review-source{white-space:pre}
 mark{background:transparent;border-radius:4px;color:inherit;padding:0 2px}
 .review-marker-todo{background:#92400e;color:#fde68a}

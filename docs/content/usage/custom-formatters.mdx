@@ -62,7 +62,7 @@ impl Formatter for MinimalHtmlFormatter {
 
 ### Supporting LineView decorations
 
-Decorators add things that are not syntax tokens: line highlights, signs, gutter text, virtual text, and inline span decorations. A formatter that wants those should render a `LineView`, not just the raw token stream.
+Decorators add things that are not syntax tokens. Today that means inline span decorations. A formatter that wants those should render a `LineView`, not just the raw token stream.
 
 The split is deliberate:
 
@@ -77,12 +77,10 @@ source + language + decorators
   -> your formatter's HTML, ANSI, JSON, or review UI
 ```
 
-At render time, handle the line data:
+At render time, handle the parts your formatter supports:
 
-- `Line.line_highlights` for whole-line state such as selected lines or review notes.
-- `Line.signs` for short status markers beside a line.
-- `Line.gutter_text` for optional custom gutter labels.
-- `Line.virtual_text` for overlays attached to display columns.
+- `Line.line_highlights` for whole-line state owned by formatter configuration.
+- `Line.signs`, `Line.gutter_text`, and `Line.virtual_text` for custom renderer data that you add through `LineViewOptions`.
 - `Span.style` and `Span.decoration_kinds` for inline decorations such as rainbow brackets or custom review markers.
 
 Built-in decorator labels live in `lumis::highlight::annotation_kinds`. The built-in decorator today is rainbow brackets. Use your own strings for custom decorator labels.
@@ -102,7 +100,7 @@ use lumis::{
     formatters::Formatter,
     formatters::html,
     highlight::{
-        DecoratorContext, DecorationOutput, LineHighlight, LineView, LineViewBuilder,
+        DecoratorContext, DecorationOutput, HighlightDecoration, LineView, LineViewBuilder,
         LineViewDecorator, StylePatch,
     },
     languages::Language,
@@ -113,18 +111,19 @@ struct TodoDecorator;
 
 impl LineViewDecorator for TodoDecorator {
     fn run(&self, context: DecoratorContext<'_>, output: &mut DecorationOutput) {
+        let mut byte_offset = 0;
         for (index, line) in context.source().split('\n').enumerate() {
-            if line.contains("TODO") {
-                output.line_highlights.push(LineHighlight {
-                    line: index + 1,
+            if let Some(column) = line.find("TODO") {
+                output.highlight_decorations.push(HighlightDecoration {
+                    range: byte_offset + column..byte_offset + column + "TODO".len(),
                     kind: Some("todo.line".to_string()),
-                    class: Some("has-todo".to_string()),
                     style: StylePatch {
                         bg: Some("#2a2112".to_string()),
                         ..StylePatch::default()
                     },
                 });
             }
+            byte_offset += line.len() + 1;
         }
     }
 }
@@ -151,11 +150,7 @@ impl Formatter for ReviewHtmlFormatter {
         writeln!(output, "<section class=\"review-card\">")?;
         writeln!(output, "<pre class=\"review-code\"><code>")?;
         for line in &view.lines {
-            let class = line
-                .line_highlights
-                .first()
-                .and_then(|highlight| highlight.class.as_deref())
-                .unwrap_or("line");
+            let class = "line";
 
             write!(output, "<span class=\"{}\">", html::escape(class))?;
             write!(output, "<span class=\"line-number\">{}</span>", line.line_number)?;
@@ -173,7 +168,7 @@ impl Formatter for ReviewHtmlFormatter {
 }
 ```
 
-If your formatter uses `highlight_iter()` directly, it can still render syntax highlighting. It just will not see line decorations or inline decorator decorations.
+If your formatter uses `highlight_iter()` directly, it can still render syntax highlighting. It just will not see `LineView` span decorations or line-view options.
 
 The full version, including CSS, inline `HighlightDecoration` rendering, and annotation extraction, is in [`crates/lumis/examples/custom_formatter_decorator.rs`](https://github.com/leandrocp/lumis/blob/main/crates/lumis/examples/custom_formatter_decorator.rs).
 

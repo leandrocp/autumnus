@@ -152,6 +152,7 @@ use smol_str::format_smolstr;
 use std::cell::RefCell;
 use std::ops::Range;
 use std::sync::{Arc, LazyLock};
+use streaming_iterator::StreamingIterator;
 use thiserror::Error;
 
 pub use crate::themes::{Style, TextDecoration, UnderlineStyle};
@@ -160,8 +161,8 @@ pub use lumis_core::events::HighlightEvent;
 pub use lumis_core::highlight::{
     DecorationOutput, DecoratorContext, GutterText, HighlightDecoration, Line, LineHighlight,
     LineView, LineViewDecorator, LineViewOptions, LineViewOptionsBuilder, QueryCapture,
-    QueryFamily, RainbowBrackets, RainbowBracketsOptions, Scope, SignText, Span, StylePatch,
-    TextDecorationPatch, VirtualText,
+    QueryFamily, RainbowBracketsOptions, Scope, SignText, Span, StylePatch, TextDecorationPatch,
+    VirtualText,
 };
 
 /// Builder for a [`LineView`] of highlighted source.
@@ -199,7 +200,10 @@ pub struct LineViewBuilder<'a> {
     source: &'a str,
     language: Language,
     options: LineViewOptions,
+    error: Option<HighlightError>,
 }
+
+type BracketPair = (Range<usize>, Range<usize>);
 
 impl<'a> LineViewBuilder<'a> {
     /// Create a builder for a [`LineView`].
@@ -208,6 +212,7 @@ impl<'a> LineViewBuilder<'a> {
             source: "",
             language: Language::PlainText,
             options: LineViewOptions::default(),
+            error: None,
         }
     }
 
@@ -234,7 +239,13 @@ impl<'a> LineViewBuilder<'a> {
 
     /// Color matching brackets by nesting depth.
     pub fn rainbow_brackets(&mut self, options: RainbowBracketsOptions) -> &mut Self {
-        self.decorators([&RainbowBrackets::new(options)])
+        match rainbow_brackets_query_pairs(self.source, self.language) {
+            Ok(pairs) => self.options.highlight_decorations.extend(
+                lumis_core::decorators::rainbow_brackets_decorations_from_pairs(pairs, &options),
+            ),
+            Err(error) => self.error = Some(error),
+        }
+        self
     }
 
     /// Add built-in or custom line-view decorators.
@@ -255,10 +266,6 @@ impl<'a> LineViewBuilder<'a> {
         self.options
             .highlight_decorations
             .extend(output.highlight_decorations);
-        self.options.line_highlights.extend(output.line_highlights);
-        self.options.signs.extend(output.signs);
-        self.options.gutter_text.extend(output.gutter_text);
-        self.options.virtual_text.extend(output.virtual_text);
         self
     }
 
@@ -282,6 +289,9 @@ impl<'a> LineViewBuilder<'a> {
 
     /// Build the line-oriented view.
     pub fn build(&self) -> Result<LineView, HighlightError> {
+        if let Some(error) = &self.error {
+            return Err(error.clone());
+        }
         let events = highlight_events(self.source, self.language)?;
         Ok(LineView::from_events(self.source, &events, &self.options))
     }
@@ -291,6 +301,56 @@ impl Default for LineViewBuilder<'_> {
     fn default() -> Self {
         Self::new()
     }
+}
+
+fn rainbow_brackets_query_pairs(
+    source: &str,
+    language: Language,
+) -> Result<Vec<BracketPair>, HighlightError> {
+    let config = language.config();
+    let mut parser = tree_sitter::Parser::new();
+    parser
+        .set_language(&config.language)
+        .map_err(|_| HighlightError::Decorator("failed to initialize parser".to_string()))?;
+    let tree = parser
+        .parse(source, None)
+        .ok_or_else(|| HighlightError::Decorator("failed to parse source".to_string()))?;
+    let query = tree_sitter::Query::new(&config.language, crate::languages::DEFAULT_BRACKETS)
+        .map_err(|error| HighlightError::Decorator(error.to_string()))?;
+    let open_index = query
+        .capture_index_for_name("open")
+        .ok_or_else(|| HighlightError::Decorator("brackets.scm is missing @open".to_string()))?;
+    let close_index = query
+        .capture_index_for_name("close")
+        .ok_or_else(|| HighlightError::Decorator("brackets.scm is missing @close".to_string()))?;
+    let mut cursor = tree_sitter::QueryCursor::new();
+    let mut pairs = Vec::new();
+
+    let mut query_matches = cursor.matches(&query, tree.root_node(), source.as_bytes());
+    while let Some(query_match) = query_matches.next() {
+        if query
+            .property_settings(query_match.pattern_index)
+            .iter()
+            .any(|property| property.key.as_ref() == "rainbow.exclude")
+        {
+            continue;
+        }
+
+        let mut open = None;
+        let mut close = None;
+        for capture in query_match.captures {
+            if capture.index == open_index {
+                open = Some(capture.node.byte_range());
+            } else if capture.index == close_index {
+                close = Some(capture.node.byte_range());
+            }
+        }
+        if let (Some(open), Some(close)) = (open, close) {
+            pairs.push((open, close));
+        }
+    }
+
+    Ok(pairs)
 }
 
 fn resolve_style(theme: Option<&Theme>, scope: &str, language: &str) -> Style {
@@ -329,6 +389,9 @@ thread_local! {
 ///     Err(HighlightError::EventProcessing(msg)) => {
 ///         eprintln!("Failed to process highlight event: {}", msg);
 ///     }
+///     Err(HighlightError::Decorator(msg)) => {
+///         eprintln!("Failed to apply decorator: {}", msg);
+///     }
 /// }
 /// ```
 #[derive(Debug, Clone, PartialEq, Eq, Error)]
@@ -340,6 +403,10 @@ pub enum HighlightError {
     /// Failed to process a highlight event during parsing.
     #[error("failed to process highlight event: {0}")]
     EventProcessing(String),
+
+    /// Failed to apply a decorator.
+    #[error("failed to apply decorator: {0}")]
+    Decorator(String),
 }
 
 /// High-level stateful highlighter for syntax highlighting.

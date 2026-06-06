@@ -2,15 +2,12 @@
 //!
 //! Decorators emit formatter-neutral data.
 
-use crate::highlight::{
-    GutterText, HighlightDecoration, LineHighlight, SignText, StylePatch, VirtualText,
-};
+use crate::highlight::{HighlightDecoration, StylePatch};
 use std::ops::Range;
 
 /// Stable `kind` labels emitted by built-in line-view decorators.
 pub mod annotation_kinds {
-    /// Prefix for rainbow bracket depth labels emitted by
-    /// [`RainbowBrackets`](super::RainbowBrackets).
+    /// Prefix for rainbow bracket depth labels.
     pub const RAINBOW_BRACKET_PREFIX: &str = "rainbow.bracket";
 
     /// Build a one-based rainbow bracket depth label.
@@ -62,14 +59,6 @@ impl<'a> DecoratorContext<'a> {
 pub struct DecorationOutput {
     /// Range decorations applied to projected spans.
     pub highlight_decorations: Vec<HighlightDecoration>,
-    /// Whole-line highlights.
-    pub line_highlights: Vec<LineHighlight>,
-    /// Sign text attached to source lines.
-    pub signs: Vec<SignText>,
-    /// Gutter text attached to source lines.
-    pub gutter_text: Vec<GutterText>,
-    /// Virtual text attached to source lines.
-    pub virtual_text: Vec<VirtualText>,
 }
 
 /// Runtime that emits formatter-neutral line-view output.
@@ -120,85 +109,8 @@ impl Default for RainbowBracketsOptions {
     }
 }
 
-/// Rainbow-brackets built-in decorator.
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct RainbowBrackets {
-    options: RainbowBracketsOptions,
-    bracket_pairs: Option<Vec<(Range<usize>, Range<usize>)>>,
-}
-
-impl RainbowBrackets {
-    /// Create the decorator using parser-free fallback bracket detection.
-    pub fn new(options: RainbowBracketsOptions) -> Self {
-        Self {
-            options,
-            bracket_pairs: None,
-        }
-    }
-
-    /// Create the decorator from parser/query-captured bracket pairs.
-    pub fn from_pairs(
-        pairs: Vec<(Range<usize>, Range<usize>)>,
-        options: RainbowBracketsOptions,
-    ) -> Self {
-        Self {
-            options,
-            bracket_pairs: Some(pairs),
-        }
-    }
-}
-
-impl Default for RainbowBrackets {
-    fn default() -> Self {
-        Self::new(RainbowBracketsOptions::default())
-    }
-}
-
-impl LineViewDecorator for RainbowBrackets {
-    fn run(&self, context: DecoratorContext<'_>, output: &mut DecorationOutput) {
-        let decorations = match &self.bracket_pairs {
-            Some(pairs) => rainbow_brackets_decorations_from_pairs(pairs.clone(), &self.options),
-            None => rainbow_brackets_decorations(context.source(), &self.options),
-        };
-        output.highlight_decorations.extend(decorations);
-    }
-}
-
-pub(crate) fn rainbow_brackets_decorations(
-    source: &str,
-    options: &RainbowBracketsOptions,
-) -> Vec<HighlightDecoration> {
-    if options.styles.is_empty() {
-        return Vec::new();
-    }
-
-    let mut decorations = Vec::new();
-    let mut stack = Vec::new();
-
-    for (start, ch) in source.char_indices() {
-        if TEXT_FALLBACK_BRACKET_PAIRS
-            .iter()
-            .any(|(open, _)| *open == ch)
-        {
-            let depth = stack.len();
-            stack.push(ch);
-            decorations.push(rainbow_brackets_decoration(start, ch, depth, options));
-        } else if TEXT_FALLBACK_BRACKET_PAIRS
-            .iter()
-            .any(|(_, close)| *close == ch)
-        {
-            let depth = stack.len().saturating_sub(1);
-            stack.pop();
-            decorations.push(rainbow_brackets_decoration(start, ch, depth, options));
-        }
-    }
-
-    decorations
-}
-
-const TEXT_FALLBACK_BRACKET_PAIRS: &[(char, char)] = &[('(', ')'), ('[', ']'), ('{', '}')];
-
-fn rainbow_brackets_decorations_from_pairs(
+/// Build rainbow-bracket span decorations from parser/query-captured bracket pairs.
+pub fn rainbow_brackets_decorations_from_pairs(
     mut pairs: Vec<(Range<usize>, Range<usize>)>,
     options: &RainbowBracketsOptions,
 ) -> Vec<HighlightDecoration> {
@@ -234,18 +146,4 @@ fn rainbow_brackets_decorations_from_pairs(
     }
 
     decorations
-}
-
-fn rainbow_brackets_decoration(
-    start: usize,
-    ch: char,
-    depth: usize,
-    options: &RainbowBracketsOptions,
-) -> HighlightDecoration {
-    let color_index = depth % options.styles.len();
-    HighlightDecoration {
-        range: start..start + ch.len_utf8(),
-        kind: Some(annotation_kinds::rainbow_bracket(color_index + 1)),
-        style: options.styles[color_index].clone(),
-    }
 }

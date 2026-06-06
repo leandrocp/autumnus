@@ -7,14 +7,13 @@ keywords:
   - lumis lineview
   - lineview ast
   - lumis decorations
-  - gutter text
-  - virtual text
+  - span decorations
   - custom decorators
 ---
 
 # LineView Decorations
 
-Most Lumis APIs render a string directly. `LineView` is for the cases where you need the shape first: lines, spans, source ranges, line state, virtual text, and decorations that do not belong to the syntax theme.
+Most Lumis APIs render a string directly. `LineView` is for the cases where you need the shape first: lines, spans, source ranges, line state, and decorations that do not belong to the syntax theme.
 
 Use it for editor views, terminal UIs, docs renderers, diff views, or custom formatters that need line data before choosing HTML, ANSI, or another output format.
 
@@ -22,9 +21,9 @@ Use it for editor views, terminal UIs, docs renderers, diff views, or custom for
 
 The normal highlighter output is an event stream: start a scope, copy this source range, end a scope. That is compact, and it is enough for renderers that write HTML or ANSI as they go.
 
-Decorations need more room. A rainbow bracket is an inline style over one character. A diagnostic marker sits beside a line. A TODO marker may affect both the whole line and one span inside it. Those features are awkward in a plain token stream because they are not syntax tokens.
+Decorations need more room. A rainbow bracket is an inline style over one character. A TODO marker may affect a span inside a line. Those features are awkward in a plain token stream because they are not syntax tokens.
 
-`LineView` sits between highlighting and formatting. Lumis still uses source text, tree-sitter queries, and highlight events underneath. `LineView` groups those facts into lines, spans, ranges, signs, virtual text, and decorations so decorators do not have to write HTML, ANSI, or renderer-specific markup.
+`LineView` sits between highlighting and formatting. Lumis still uses source text, tree-sitter queries, and highlight events underneath. `LineView` groups those facts into lines, spans, ranges, and decorations so renderers do not have to work from raw events.
 
 ## AST-like, not a parser AST
 
@@ -37,19 +36,17 @@ That distinction matters:
 - Tree-sitter trees describe language syntax.
 - Tree-sitter queries describe captures such as highlights, injections, brackets, and text objects.
 - Highlight events describe ordered syntax scopes over source ranges.
-- Decoration output describes extra formatter-neutral data such as signs, overlays, inline styles, and line state.
+- Decoration output describes extra formatter-neutral span styling. Broader line/sign/gutter output is future work.
 - `LineView` combines those pieces into the shape a formatter actually needs.
 
 ## What LineView contains
 
 - `Line.spans` contains highlighted source spans with byte ranges and scopes.
-- `Line.line_highlights` contains whole-line state, such as selected lines or review notes.
-- `Line.signs` contains short markers that sit beside a line.
-- `Line.gutter_text` contains optional gutter labels for custom formatters.
-- `Line.virtual_text` contains overlays attached to display columns.
+- `Line.line_highlights` contains whole-line state owned by formatter configuration.
+- `Line.signs`, `Line.gutter_text`, and `Line.virtual_text` are available for custom renderers that build a `LineView` from `LineViewOptions`.
 - `Span.style` and `Span.decoration_kinds` contain inline decorations, such as rainbow brackets or custom review markers.
 
-After it is built, the model is read-only. Decorators emit `DecorationOutput`; they do not mutate formatter output directly. The formatter consumes the finished `LineView` and decides how each part becomes HTML, ANSI, editor UI, or something else.
+After it is built, the model is read-only. Decorators currently emit span-level `DecorationOutput`; they do not mutate formatter output directly. The formatter consumes the finished `LineView` and decides how each part becomes HTML, ANSI, editor UI, or something else.
 
 A simplified `LineView` looks like this:
 
@@ -105,7 +102,7 @@ Right now the built-in decorator is rainbow brackets. Custom decorators can use 
 The split is simple:
 
 - The highlighter produces syntax spans from source text and language queries.
-- Decorators add line highlights, gutter text, signs, virtual text, or span decorations.
+- Decorators add span decorations. Broader line/sign/gutter output can be added later.
 - The formatter renders the final `LineView`.
 
 That keeps decorators portable. A decorator should not know whether the final target is terminal text, inline HTML, a docs site, or a custom review card. It emits `DecorationOutput`; the formatter decides what that looks like.
@@ -119,11 +116,11 @@ source + language
   -> formatter output
 ```
 
-For example, a review formatter can run a decorator that finds `TODO` and `FIXME` notes. The decorator marks the relevant lines and spans. The formatter turns the same `LineView` into a code panel and an annotations column.
+For example, a review formatter can run a decorator that finds `TODO` and `FIXME` notes. The decorator marks the relevant spans. The formatter turns the same `LineView` into a code panel and an annotations column.
 
 ## Rust
 
-The Rust builder takes source and language, runs the highlighter, applies decorators, and returns a `LineView`. The built-in decorator today is rainbow brackets. Custom decorators can emit the same `DecorationOutput`. More built-ins can use the same model later.
+The Rust builder takes source and language, runs the highlighter, applies decorators, and returns a `LineView`. The built-in decorator today is query-backed rainbow brackets. Custom decorators can emit the same span decorations. More built-ins can use the same model later.
 
 ```rust
 use lumis::highlight::{LineViewBuilder, RainbowBracketsOptions};
@@ -147,8 +144,8 @@ For custom decorators, implement `LineViewDecorator` and emit `DecorationOutput`
 
 ```rust
 use lumis::highlight::{
-    DecoratorContext, DecorationOutput, LineHighlight, LineViewBuilder, LineViewDecorator,
-    StylePatch,
+    DecoratorContext, DecorationOutput, HighlightDecoration, LineViewBuilder,
+    LineViewDecorator, StylePatch,
 };
 use lumis::languages::Language;
 
@@ -156,18 +153,19 @@ struct TodoLines;
 
 impl LineViewDecorator for TodoLines {
     fn run(&self, context: DecoratorContext<'_>, output: &mut DecorationOutput) {
+        let mut byte_offset = 0;
         for (index, line) in context.source().split('\n').enumerate() {
-            if line.contains("TODO") {
-                output.line_highlights.push(LineHighlight {
-                    line: index + 1,
+            if let Some(column) = line.find("TODO") {
+                output.highlight_decorations.push(HighlightDecoration {
+                    range: byte_offset + column..byte_offset + column + "TODO".len(),
                     kind: Some("todo.line".to_string()),
-                    class: Some("todo-line".to_string()),
                     style: StylePatch {
                         bg: Some("#3a2f16".to_string()),
                         ..StylePatch::default()
                     },
                 });
             }
+            byte_offset += line.len() + 1;
         }
     }
 }
@@ -180,7 +178,7 @@ let view = LineViewBuilder::new()
     .build()
     .unwrap();
 
-assert_eq!(view.lines[1].line_highlights[0].kind.as_deref(), Some("todo.line"));
+assert_eq!(view.lines[1].spans[1].decoration_kinds[0], "todo.line");
 ```
 
 For a complete formatter example that renders custom decorator output, see [`crates/lumis/examples/custom_formatter_decorator.rs`](https://github.com/leandrocp/lumis/blob/main/crates/lumis/examples/custom_formatter_decorator.rs).
@@ -199,7 +197,7 @@ For now, CLI decorators render only with the terminal formatter. More built-ins 
 
 A formatter that only uses `highlight_iter()` sees syntax tokens. That is fine for simple output.
 
-A formatter that wants decorator output should render a `LineView`. Then it can decide how to display line highlights, gutter text, signs, virtual text, and span decorations.
+A formatter that wants decorator output should render a `LineView`. Then it can decide how to display span decorations alongside the usual line and span data.
 
 For the full path, a custom formatter adds decorators in `prepare_line_view`, then renders the resulting `LineView`. See [Custom Formatters](/formatters/custom#supporting-lineview-decorations).
 
