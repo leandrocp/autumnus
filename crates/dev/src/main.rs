@@ -1608,8 +1608,8 @@ fn gen_languages_md() -> Result<()> {
         lines.push(String::new());
         lines.push("## Bundles".to_string());
         lines.push(String::new());
-        lines.push("| Bundle | Import | Languages |".to_string());
-        lines.push("|--------|--------|-----------|".to_string());
+        lines.push("| Bundle | Languages |".to_string());
+        lines.push("|--------|-----------|".to_string());
 
         let preferred_order = ["web", "web-extra", "system", "backend", "full"];
         let mut bundle_names: Vec<_> = preferred_order
@@ -1643,9 +1643,7 @@ fn gen_languages_md() -> Result<()> {
                 .map(|parser| format!("`{parser}`"))
                 .collect::<Vec<_>>()
                 .join(", ");
-            lines.push(format!(
-                "| `{bundle_name}` | `@lumis-sh/lumis/bundles/{bundle_name}` | {languages_col} |"
-            ));
+            lines.push(format!("| `{bundle_name}` | {languages_col} |"));
         }
     }
 
