@@ -227,10 +227,7 @@ docs-site:
 # Generate CSS files for HTML linked formatter
 css-gen:
     cargo run --manifest-path crates/dev/Cargo.toml --release -- gen-css
-
-# Copy CSS files to crates and packages
-css-sync:
-    cargo run --manifest-path crates/dev/Cargo.toml -- sync-css
+    cargo run --manifest-path crates/dev/Cargo.toml --release -- sync-css
 
 # Dump canonical Rust highlight events as JSON, eg: just conformance-dump-events samples/rust.rs rust
 conformance-dump-events source lang:
@@ -357,7 +354,7 @@ themes-gen theme_name="":
         [[ "$reply" =~ ^[Yy]$ ]] || { echo "Operation cancelled."; exit 0; }
         find themes -type f -name '*.json' -delete
         for name in $(cargo run --manifest-path crates/dev/Cargo.toml -- list-themes); do
-            echo "Generating $name..."
+            printf '\nGenerating %s...\n' "$name"
             nvim --clean --headless -V3 -u themes/init.lua -l themes/extract_theme.lua "$name"
         done
     else
@@ -367,15 +364,11 @@ themes-gen theme_name="":
         nvim --clean --headless -V3 -u themes/init.lua -l themes/extract_theme.lua {{theme_name}}
     fi
     cargo run --manifest-path crates/dev/Cargo.toml -- sync-themes
+    pnpm --filter @lumis-sh/themes build:themes
 
 # List all available themes
 themes-list:
     cargo run --manifest-path crates/dev/Cargo.toml -- list-themes
-
-# Copy theme JSON files to crates/lumis/themes and generate JS theme modules
-themes-sync:
-    cargo run --manifest-path crates/dev/Cargo.toml -- sync-themes
-    pnpm --filter @lumis-sh/themes build:themes
 
 # List packages with path-scoped commits since their latest release tag
 release-needed:

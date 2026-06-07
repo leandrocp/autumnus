@@ -1,5 +1,5 @@
 /* mellifluous_light
- * revision: 9948359e1536b4171615f7280e61e17620e3fd45
+ * revision: ec0575bdb63594c5e7fba6eb9607b009aa1fb74e
  */
 
 pre.lumis {
@@ -187,7 +187,8 @@ pre.lumis {
   font-weight: bold;
 }
 .markup-heading-gitcommit {
-  color: #a92136;
+  color: #9c792a;
+  font-weight: bold;
 }
 .markup-italic {
   font-style: italic;

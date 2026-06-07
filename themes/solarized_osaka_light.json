@@ -1,7 +1,7 @@
 {
   "name": "solarized_osaka_light",
   "appearance": "light",
-  "revision": "f0c2f0ba0bd56108d53c9bfae4bb28ff6c67bbdb",
+  "revision": "f675d9a5c58f3b0d6158d665a623f81a62e7bdaf",
   "highlights": {
     "attribute": {
       "fg": "#db302d"
@@ -57,19 +57,13 @@
       "fg": "#268bd3"
     },
     "diff.delta": {
-      "fg": "#b28500",
-      "bg": "#ede7d3",
-      "bold": true
+      "bg": "#ebffd7"
     },
     "diff.minus": {
-      "fg": "#db302d",
-      "bg": "#ede7d3",
-      "bold": true
+      "bg": "#ffd2d1"
     },
     "diff.plus": {
-      "fg": "#849900",
-      "bg": "#ede7d3",
-      "bold": true
+      "bg": "#b7fefa"
     },
     "function": {
       "fg": "#268bd3"

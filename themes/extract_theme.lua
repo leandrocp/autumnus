@@ -1,6 +1,14 @@
 local script_path = debug.getinfo(1, "S").source:sub(2)
 local script_dir = vim.fn.fnamemodify(script_path, ":p:h")
 local colliding_repo_names = {}
+local uv = vim.uv or vim.loop
+
+for _, signal in ipairs({ "sigint", "sigterm" }) do
+	local handler = uv.new_signal()
+	handler:start(signal, function()
+		os.exit(130)
+	end)
+end
 
 local function parse_repo_parts(repo_url)
 	local owner, repo = repo_url:match("github%.com/([^/]+)/([^/]+)$")
@@ -15,7 +23,7 @@ local function plugin_dir_name(repo_url)
 	if not repo then
 		return "unknown"
 	end
-	if owner and colliding_repo_names[repo] then
+	if owner and colliding_repo_names[repo:lower()] then
 		return owner .. "-" .. repo
 	end
 	return repo
@@ -289,20 +297,27 @@ end
 
 local function get_plugin_revision(repo_url)
 	local plugin_name = plugin_dir_name(repo_url)
-	local plugin_path = vim.fn.stdpath("data") .. "/site/pack/core/opt/" .. plugin_name
+	local plugins = vim.pack.get({ plugin_name }, { offline = true })
 
+	if not plugins[1] or not plugins[1].rev then
+		return "unknown"
+	end
+
+	return plugins[1].rev
+end
+
+local function is_incomplete_plugin_dir(plugin_path)
 	if vim.fn.isdirectory(plugin_path) == 0 then
-		return "unknown"
+		return false
 	end
 
-	local git_cmd = "cd " .. plugin_path .. " && git rev-parse HEAD 2>/dev/null"
-	local revision = vim.fn.system(git_cmd)
-
-	if vim.v.shell_error ~= 0 or revision == "" then
-		return "unknown"
+	for _, entry in ipairs(vim.fn.readdir(plugin_path)) do
+		if entry ~= ".git" then
+			return false
+		end
 	end
 
-	return vim.trim(revision)
+	return true
 end
 
 local function extract_colorscheme_colors(theme)
@@ -442,15 +457,17 @@ local repo_names = {}
 for _, theme_def in ipairs(themes) do
 	local _, repo = parse_repo_parts(theme_def.url)
 	if repo then
-		repo_names[repo] = repo_names[repo] or {}
-		repo_names[repo][theme_def.url] = true
+		local repo_key = repo:lower()
+		repo_names[repo_key] = repo_names[repo_key] or {}
+		repo_names[repo_key][theme_def.url] = true
 	end
 	if theme_def.dependencies then
 		for _, dep_url in ipairs(theme_def.dependencies) do
 			local _, dep_repo = parse_repo_parts(dep_url)
 			if dep_repo then
-				repo_names[dep_repo] = repo_names[dep_repo] or {}
-				repo_names[dep_repo][dep_url] = true
+				local dep_repo_key = dep_repo:lower()
+				repo_names[dep_repo_key] = repo_names[dep_repo_key] or {}
+				repo_names[dep_repo_key][dep_url] = true
 			end
 		end
 	end
@@ -458,7 +475,7 @@ end
 
 for repo, urls in pairs(repo_names) do
 	if table_size(urls) > 1 then
-		colliding_repo_names[repo] = true
+		colliding_repo_names[repo:lower()] = true
 	end
 end
 
@@ -486,10 +503,21 @@ end
 
 table.insert(plugins_to_install, { src = theme.url, name = plugin_dir_name(theme.url) })
 
-print("📦 Installing plugins...\n")
-vim.pack.add(plugins_to_install, { load = true, confirm = false })
-
 local pack_dir = vim.fn.stdpath("data") .. "/site/pack/core/opt"
+local plugin_names = {}
+
+for _, plugin in ipairs(plugins_to_install) do
+	table.insert(plugin_names, plugin.name)
+	local plugin_path = pack_dir .. "/" .. plugin.name
+	if is_incomplete_plugin_dir(plugin_path) then
+		vim.pack.del({ plugin.name }, { force = true })
+	end
+end
+
+print("📦 Installing plugins...\n")
+vim.pack.add(plugins_to_install, { load = false, confirm = false })
+vim.pack.update(plugin_names, { force = true })
+
 local plugin_name = plugin_dir_name(theme.url)
 
 local success = vim.wait(60000, function()
@@ -503,12 +531,37 @@ if not success then
 end
 
 for _, plugin in ipairs(plugins_to_install) do
+	vim.cmd.packadd(plugin.name)
 	local plugin_path = pack_dir .. "/" .. plugin.name
 	vim.opt.runtimepath:prepend(plugin_path)
+	package.path = table.concat({
+		plugin_path .. "/lua/?.lua",
+		plugin_path .. "/lua/?/init.lua",
+		package.path,
+	}, ";")
+end
+
+local original_pack_add = vim.pack.add
+vim.pack.add = function(specs, opts)
+	local specs_to_install = {}
+
+	for _, spec in ipairs(specs) do
+		local src = type(spec) == "string" and spec or spec.src
+		if not src or vim.fn.isdirectory(pack_dir .. "/" .. plugin_dir_name(src)) == 0 then
+			table.insert(specs_to_install, spec)
+		end
+	end
+
+	if #specs_to_install == 0 then
+		return {}
+	end
+
+	return original_pack_add(specs_to_install, opts)
 end
 
 if theme.config then
 	local success, err = pcall(theme.config)
+	vim.pack.add = original_pack_add
 	if not success then
 		print(string.format("❌ Failed to configure theme '%s'\n", theme.name))
 		print(string.format("   Error: %s\n", err))
@@ -516,6 +569,7 @@ if theme.config then
 		os.exit(0)
 	end
 else
+	vim.pack.add = original_pack_add
 	print("⚠️  No config function found for theme\n")
 end
 

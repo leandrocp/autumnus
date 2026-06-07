@@ -1,7 +1,7 @@
 {
   "name": "adwaita_light",
   "appearance": "light",
-  "revision": "93f3bed009f7fc4c57f8d710880b6cab9e0b0d15",
+  "revision": "c607954f7b2cf56b24e921db0dab4749f3430a22",
   "highlights": {
     "attribute": {
       "fg": "#e66100"
@@ -70,15 +70,12 @@
       "fg": "#e01b24"
     },
     "function": {
-      "fg": "#504e55"
+      "fg": "#4e9a06"
     },
     "function.builtin": {
       "fg": "#4e9a06"
     },
     "function.call": {
-      "fg": "#504e55"
-    },
-    "function.call.zig": {
       "fg": "#4e9a06"
     },
     "function.macro": {
@@ -86,7 +83,7 @@
       "bold": true
     },
     "function.method": {
-      "fg": "#504e55"
+      "fg": "#4e9a06"
     },
     "function.method.call": {
       "fg": "#4e9a06"
@@ -320,7 +317,7 @@
       "fg": "#504e55"
     },
     "type": {
-      "fg": "#504e55"
+      "fg": "#218787"
     },
     "type.builtin": {
       "fg": "#218787",

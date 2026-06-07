@@ -27,20 +27,20 @@
       "italic": true
     },
     "comment.error": {
-      "fg": "#ffc0b9"
+      "fg": "#e95678"
     },
     "comment.hint": {
       "fg": "#73797e",
       "italic": true
     },
     "comment.note": {
-      "fg": "#8cf8f7"
+      "fg": "#61afef"
     },
     "comment.todo": {
       "fg": "#cba6f7"
     },
     "comment.warning": {
-      "fg": "#fce094"
+      "fg": "#f7bb3b"
     },
     "constant": {
       "fg": "#36d0e0"
@@ -64,22 +64,22 @@
       "fg": "#b3f6c0"
     },
     "function": {
-      "fg": "#f7bb3b"
+      "fg": "#36d0e0"
     },
     "function.builtin": {
       "fg": "#f7bb3b"
     },
     "function.call": {
-      "fg": "#f7bb3b"
+      "fg": "#36d0e0"
     },
     "function.macro": {
-      "fg": "#f7bb3b"
+      "fg": "#36d0e0"
     },
     "function.method": {
-      "fg": "#f7bb3b"
+      "fg": "#36d0e0"
     },
     "function.method.call": {
-      "fg": "#f7bb3b"
+      "fg": "#36d0e0"
     },
     "highlighted": {
       "bg": "#2e323c"
@@ -112,7 +112,7 @@
       "fg": "#afd700"
     },
     "keyword.function": {
-      "fg": "#afd700"
+      "fg": "#e95678"
     },
     "keyword.import": {
       "fg": "#afd700"
@@ -234,10 +234,10 @@
       "fg": "#d16d9e"
     },
     "property": {
-      "fg": "#61afef"
+      "fg": "#f7bb3b"
     },
     "punctuation.bracket": {
-      "fg": "#bbc2cf"
+      "fg": "#80a0c2"
     },
     "punctuation.delimiter": {
       "fg": "#bbc2cf"
@@ -291,16 +291,16 @@
       "fg": "#1abc9c"
     },
     "variable": {
-      "fg": "#e0e2ea"
+      "fg": "#f2f2bf"
     },
     "variable.builtin": {
       "fg": "#f7bb3b"
     },
     "variable.member": {
-      "fg": "#e0e2ea"
+      "fg": "#f2f2bf"
     },
     "variable.parameter": {
-      "fg": "#e0e2ea"
+      "fg": "#f2f2bf"
     },
     "variable.parameter.builtin": {
       "fg": "#f7bb3b"

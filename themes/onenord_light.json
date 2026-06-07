@@ -1,7 +1,7 @@
 {
   "name": "onenord_light",
   "appearance": "light",
-  "revision": "b68f1e66736840e837c2a77ebff59c932fcb70c7",
+  "revision": "8b6fe1e0f260ca0b8201ef6a8e2c97e0f38ea35d",
   "highlights": {
     "attribute": {
       "fg": "#9f4aca"

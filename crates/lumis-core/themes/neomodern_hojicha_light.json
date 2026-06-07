@@ -1,7 +1,7 @@
 {
   "name": "neomodern_hojicha_light",
   "appearance": "light",
-  "revision": "cf93044775983b71dce31ad3179753b241470d3c",
+  "revision": "d41469578922a23d75a0d9e8deef1e34837230a6",
   "highlights": {
     "attribute": {
       "fg": "#9a836a"
@@ -19,54 +19,54 @@
       "fg": "#7f6956"
     },
     "comment": {
-      "fg": "#b77f76"
+      "fg": "#c29b9b"
     },
     "comment.documentation": {
-      "fg": "#b77f76"
+      "fg": "#c29b9b"
     },
     "comment.error": {
-      "fg": "#c77c77",
+      "fg": "#d38785",
       "bold": true,
       "italic": true
     },
     "comment.hint": {
-      "fg": "#b77f76"
+      "fg": "#c29b9b"
     },
     "comment.note": {
-      "fg": "#948db3",
+      "fg": "#9999c1",
       "bold": true,
       "italic": true
     },
     "comment.todo": {
-      "fg": "#996760",
+      "fg": "#a07876",
       "bold": true,
       "italic": true
     },
     "comment.warning": {
-      "fg": "#a68367",
+      "fg": "#ab8e76",
       "bold": true,
       "italic": true
     },
     "constant": {
-      "fg": "#617b5a"
+      "fg": "#be6454"
     },
     "constant.builtin": {
       "fg": "#675d99"
     },
     "constant.macro": {
-      "fg": "#617b5a"
+      "fg": "#be6454"
     },
     "constructor": {
       "fg": "#675d99"
     },
     "constructor.lua": {
-      "fg": "#4d6048"
+      "fg": "#617b5a"
     },
     "diff.delta": {
       "fg": "#7d97db"
     },
     "diff.minus": {
-      "fg": "#d17a78"
+      "fg": "#de7977"
     },
     "diff.plus": {
       "fg": "#648969"
@@ -114,7 +114,7 @@
       "fg": "#7f6956"
     },
     "keyword.exception": {
-      "fg": "#d17a78"
+      "fg": "#de7977"
     },
     "keyword.export": {
       "fg": "#7f6956"
@@ -202,7 +202,7 @@
       "fg": "#6c433f"
     },
     "markup.quote.markdown": {
-      "fg": "#b77f76"
+      "fg": "#c29b9b"
     },
     "markup.raw": {
       "fg": "#9a836a"
@@ -211,7 +211,7 @@
       "fg": "#9a836a"
     },
     "markup.strikethrough": {
-      "fg": "#b77f76",
+      "fg": "#c29b9b",
       "strikethrough": true
     },
     "markup.strong": {
@@ -308,7 +308,7 @@
       "fg": "#586885"
     },
     "variable.parameter": {
-      "fg": "#4d6048"
+      "fg": "#617b5a"
     },
     "variable.parameter.builtin": {
       "fg": "#675d99"

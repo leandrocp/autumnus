@@ -1,7 +1,7 @@
 {
   "name": "vague",
   "appearance": "dark",
-  "revision": "8c4643f8a5106dbc492918f86ff6b5c81111ce9a",
+  "revision": "8ee15ea4505d64ede559ff1cb112582a6f2ea138",
   "highlights": {
     "attribute": {
       "fg": "#aeaed1"
@@ -14,8 +14,7 @@
       "bold": true
     },
     "character": {
-      "fg": "#e8b589",
-      "italic": true
+      "fg": "#e8b589"
     },
     "character.special": {
       "fg": "#6e94b2"
@@ -184,7 +183,6 @@
       "bold": true
     },
     "markup.italic": {
-      "fg": "#cdcdcd",
       "italic": true
     },
     "markup.link.label": {
@@ -207,9 +205,6 @@
       "fg": "#e8b589"
     },
     "markup.quote": {
-      "fg": "#cdcdcd"
-    },
-    "markup.quote.markdown": {
       "fg": "#606079"
     },
     "markup.raw": {
@@ -219,15 +214,12 @@
       "fg": "#aeaed1"
     },
     "markup.strikethrough": {
-      "fg": "#606079",
       "strikethrough": true
     },
     "markup.strong": {
-      "fg": "#cdcdcd",
       "bold": true
     },
     "markup.underline": {
-      "fg": "#cdcdcd",
       "underline": true
     },
     "module": {

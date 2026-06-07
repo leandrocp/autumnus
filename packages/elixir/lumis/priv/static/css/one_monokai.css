@@ -1,5 +1,5 @@
 /* one_monokai
- * revision: 047a0239831458866945d5c2d111ff1d282d1966
+ * revision: 903b3e8923d67d3ee4b67f462b2b112012d7a69d
  */
 
 pre.lumis {
@@ -7,7 +7,7 @@ pre.lumis {
   background-color: #282c34;
 }
 .attribute {
-  color: #98c379;
+  color: #61afef;
 }
 .attribute-builtin {
   color: #c678dd;
@@ -33,8 +33,7 @@ pre.lumis {
   color: #f75f5f;
 }
 .comment-hint {
-  color: #676e7b;
-  font-style: italic;
+  color: #56b6c2;
 }
 .comment-note {
   color: #d7d7ff;
@@ -51,13 +50,13 @@ pre.lumis {
   color: #61afef;
 }
 .constant-builtin {
-  color: #c678dd;
-}
-.constant-macro {
   color: #61afef;
 }
+.constant-macro {
+  color: #e06c75;
+}
 .constructor {
-  color: #c678dd;
+  color: #61afef;
 }
 .diff-delta {
   color: #8cf8f7;
@@ -72,7 +71,7 @@ pre.lumis {
   color: #98c379;
 }
 .function-builtin {
-  color: #c678dd;
+  color: #98c379;
 }
 .function-call {
   color: #98c379;
@@ -93,49 +92,49 @@ pre.lumis {
   color: #56b6c2;
 }
 .keyword-conditional {
-  color: #56b6c2;
+  color: #e06c75;
 }
 .keyword-conditional-ternary {
-  color: #56b6c2;
+  color: #e06c75;
 }
 .keyword-coroutine {
   color: #56b6c2;
 }
 .keyword-debug {
-  color: #56b6c2;
+  color: #c678dd;
 }
 .keyword-directive {
-  color: #56b6c2;
+  color: #98c379;
 }
 .keyword-directive-define {
-  color: #56b6c2;
+  color: #98c379;
 }
 .keyword-exception {
-  color: #56b6c2;
+  color: #e06c75;
 }
 .keyword-export {
   color: #56b6c2;
 }
 .keyword-function {
-  color: #56b6c2;
+  color: #e06c75;
 }
 .keyword-import {
-  color: #56b6c2;
+  color: #e06c75;
 }
 .keyword-modifier {
-  color: #56b6c2;
+  color: #e06c75;
 }
 .keyword-operator {
-  color: #56b6c2;
+  color: #e06c75;
 }
 .keyword-repeat {
-  color: #56b6c2;
+  color: #e06c75;
 }
 .keyword-return {
-  color: #56b6c2;
+  color: #e06c75;
 }
 .keyword-type {
-  color: #56b6c2;
+  color: #61afef;
 }
 .label {
   color: #e06c75;
@@ -174,25 +173,23 @@ pre.lumis {
   font-style: italic;
 }
 .markup-link {
-  color: #98c379;
-  text-decoration: underline;
+  color: #61afef;
 }
 .markup-link-label {
-  color: #98c379;
-  text-decoration: underline;
+  color: #e06c75;
 }
 .markup-link-url {
-  color: #98c379;
-  text-decoration: underline;
+  color: #61afef;
+  text-decoration: underline wavy;
 }
 .markup-list {
-  color: #c678dd;
+  color: #e06c75;
 }
 .markup-list-checked {
-  color: #c678dd;
+  color: #98c379;
 }
 .markup-list-unchecked {
-  color: #c678dd;
+  color: #e06c75;
 }
 .markup-math {
   color: #c678dd;
@@ -201,10 +198,10 @@ pre.lumis {
   color: #c678dd;
 }
 .markup-raw {
-  color: #c678dd;
+  color: #e5c07b;
 }
 .markup-raw-block {
-  color: #c678dd;
+  color: #e5c07b;
 }
 .markup-strikethrough {
   text-decoration: line-through;
@@ -216,10 +213,10 @@ pre.lumis {
   text-decoration: underline;
 }
 .module {
-  color: #56b6c2;
+  color: #e06c75;
 }
 .module-builtin {
-  color: #c678dd;
+  color: #e06c75;
 }
 .normal {
   color: #abb2bf;
@@ -244,38 +241,39 @@ pre.lumis {
   color: #e06c75;
 }
 .punctuation-special {
-  color: #c678dd;
+  color: #e06c75;
 }
 .string {
   color: #e5c07b;
 }
 .string-documentation {
-  color: #e5c07b;
+  color: #56b6c2;
 }
 .string-escape {
   color: #e06c75;
 }
 .string-regexp {
-  color: #e06c75;
+  color: #e5c07b;
 }
 .string-special {
-  color: #e06c75;
+  color: #c678dd;
 }
 .string-special-path {
-  color: #e06c75;
+  color: #61afef;
+  text-decoration: underline wavy;
 }
 .string-special-symbol {
-  color: #e06c75;
+  color: #98c379;
 }
 .string-special-url {
-  color: #98c379;
-  text-decoration: underline;
+  color: #61afef;
+  text-decoration: underline wavy;
 }
 .tag {
   color: #e06c75;
 }
 .tag-attribute {
-  color: #e06c75;
+  color: #98c379;
 }
 .tag-builtin {
   color: #c678dd;
@@ -287,23 +285,25 @@ pre.lumis {
   color: #61afef;
 }
 .type-builtin {
-  color: #c678dd;
+  color: #e06c75;
 }
 .type-definition {
   color: #61afef;
 }
 .variable {
-  color: #e0e2ea;
+  color: #abb2bf;
 }
 .variable-builtin {
-  color: #c678dd;
+  color: #e06c75;
 }
 .variable-member {
-  color: #e0e2ea;
+  color: #98c379;
 }
 .variable-parameter {
-  color: #e0e2ea;
+  color: #d19a66;
+  font-style: italic;
 }
 .variable-parameter-builtin {
-  color: #c678dd;
+  color: #d19a66;
+  font-style: italic;
 }

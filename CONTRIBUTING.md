@@ -307,18 +307,16 @@ Themes are extracted from Neovim colorscheme plugins. Each theme is a JSON file 
 }
 ```
 
-2. Generate the JSON file:
+2. Generate the JSON file and sync package outputs:
 
 ```sh
 just themes-gen theme_name
 ```
 
-3. Sync themes and regenerate CSS:
+3. Regenerate CSS and sync package outputs:
 
 ```sh
-just themes-sync
 just css-gen
-just css-sync
 ```
 
 4. Regenerate docs:
@@ -336,10 +334,8 @@ just themes-gen
 just themes-gen theme_name
 ```
 
-After regenerating, sync the JSON and CSS files:
+After regenerating, refresh CSS outputs:
 
 ```sh
-just themes-sync
 just css-gen
-just css-sync
 ```

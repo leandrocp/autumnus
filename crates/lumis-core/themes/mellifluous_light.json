@@ -1,7 +1,7 @@
 {
   "name": "mellifluous_light",
   "appearance": "light",
-  "revision": "9948359e1536b4171615f7280e61e17620e3fd45",
+  "revision": "ec0575bdb63594c5e7fba6eb9607b009aa1fb74e",
   "highlights": {
     "attribute": {
       "fg": "#a16927"
@@ -184,7 +184,8 @@
       "bold": true
     },
     "markup.heading.gitcommit": {
-      "fg": "#a92136"
+      "fg": "#9c792a",
+      "bold": true
     },
     "markup.italic": {
       "italic": true

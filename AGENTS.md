@@ -37,6 +37,17 @@ The Rust implementation is the source of truth. When a cross-runtime API decisio
 - If a repeated workflow does not have a recipe yet, add or update the `justfile` instead of documenting an ad hoc command sequence.
 - Use the existing top-level entry points whenever possible: `just setup`, `just fmt`, `just lint`, `just test`, `just test-conformance`, `just docs`, `just dev`, and `just docs-site`.
 
+### Theme extraction and Neovim plugins
+
+Theme extraction uses Neovim's built-in plugin manager, `vim.pack`.
+
+- Read the upstream docs before changing this flow: https://neovim.io/doc/user/pack/#_plugin-manager
+- `vim.pack` manages plugins under `stdpath("data") .. "/site/pack/core/opt"`. In this repo, `themes/init.lua` sets `XDG_DATA_HOME` to the repo-local `nvim/data`, so extraction must not touch a user's normal Neovim install.
+- Do not manually mutate `vim.pack` managed plugin repositories with raw `git` commands unless there is no supported `vim.pack` API for the operation.
+- `vim.pack.add()` installs missing plugins and makes them available in the current session, but it does not update an existing plugin's revision.
+- Use `vim.pack.update()` when theme generation needs fresh upstream plugin revisions. Use non-interactive options in automation.
+- Keep plugin directory names explicit and collision-safe. The name field controls the managed directory name, and case-only repo differences can collide on macOS filesystems.
+
 ### Treat structural changes as design work
 
 Changes to repository layout, package boundaries, generated artifact flow, release mechanics, shared API shape, or build orchestration are structural changes.

@@ -1,7 +1,7 @@
 {
   "name": "kanagawa_paper_light",
   "appearance": "light",
-  "revision": "3a024e8fd7105ee9416aafcdb0a7787be1795d68",
+  "revision": "ecf19801a2673054c19421d82b766f7641688320",
   "highlights": {
     "attribute": {
       "fg": "#a7956a"
