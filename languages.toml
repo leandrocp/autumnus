@@ -788,7 +788,7 @@ display_name = "Javadoc"
 [parsers.jq]
 git = "https://github.com/flurie/tree-sitter-jq.git"
 rev = "c204e36d2c3c6fce1f57950b12cabcc24e5cc4d9"
-version = "1.0.2"
+version = "1.0.0"
 display_name = "jq"
 globs = ["*.jq"]
 
