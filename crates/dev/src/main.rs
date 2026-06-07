@@ -1604,6 +1604,51 @@ fn gen_languages_md() -> Result<()> {
         ));
     }
 
+    if !toml.bundles.is_empty() {
+        lines.push(String::new());
+        lines.push("## Bundles".to_string());
+        lines.push(String::new());
+        lines.push("| Bundle | Import | Languages |".to_string());
+        lines.push("|--------|--------|-----------|".to_string());
+
+        let preferred_order = ["web", "web-extra", "system", "backend", "full"];
+        let mut bundle_names: Vec<_> = preferred_order
+            .iter()
+            .filter(|name| toml.bundles.contains_key(**name))
+            .copied()
+            .collect();
+        bundle_names.extend(
+            toml.bundles
+                .keys()
+                .map(String::as_str)
+                .filter(|name| !preferred_order.contains(name)),
+        );
+
+        for bundle_name in bundle_names {
+            let bundle = toml
+                .bundles
+                .get(bundle_name)
+                .with_context(|| format!("missing bundle '{bundle_name}'"))?;
+            let parser_names = match &bundle.parsers {
+                BundleParsers::List(parsers) => parsers.clone(),
+                BundleParsers::All(value) => {
+                    if value != "all" {
+                        bail!("unsupported bundle parsers value for '{bundle_name}': {value}");
+                    }
+                    toml.parsers.keys().cloned().collect()
+                }
+            };
+            let languages_col = parser_names
+                .iter()
+                .map(|parser| format!("`{parser}`"))
+                .collect::<Vec<_>>()
+                .join(", ");
+            lines.push(format!(
+                "| `{bundle_name}` | `@lumis-sh/lumis/bundles/{bundle_name}` | {languages_col} |"
+            ));
+        }
+    }
+
     fs::write("LANGUAGES.md", lines.join("\n") + "\n")?;
     println!("Generated LANGUAGES.md");
     Ok(())

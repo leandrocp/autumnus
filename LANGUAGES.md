@@ -118,3 +118,13 @@
 | yaml | [tree-sitter-yaml](https://crates.io/crates/tree-sitter-yaml/0.7.2) | no | `0.7.2` | [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter/tree/4916d6592ede8c07973490d9322f187e07dfefac) `4916d65` | [@lumis-sh/wasm-yaml](https://www.npmjs.com/package/@lumis-sh/wasm-yaml) |
 | zig | [tree-sitter-zig](https://crates.io/crates/tree-sitter-zig/1.1.2) | no | `1.1.2` | [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter/tree/4916d6592ede8c07973490d9322f187e07dfefac) `4916d65` | [@lumis-sh/wasm-zig](https://www.npmjs.com/package/@lumis-sh/wasm-zig) |
 | zsh | [tree-sitter-zsh](https://crates.io/crates/tree-sitter-zsh/0.63.1) | no | `0.63.1` | [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter/tree/4916d6592ede8c07973490d9322f187e07dfefac) `4916d65` | [@lumis-sh/wasm-zsh](https://www.npmjs.com/package/@lumis-sh/wasm-zsh) |
+
+## Bundles
+
+| Bundle | Import | Languages |
+|--------|--------|-----------|
+| `web` | `@lumis-sh/lumis/bundles/web` | `css`, `html`, `javascript`, `json`, `tsx`, `typescript` |
+| `web-extra` | `@lumis-sh/lumis/bundles/web-extra` | `angular`, `astro`, `dart`, `eex`, `ejs`, `elm`, `erb`, `glimmer`, `graphql`, `heex`, `markdown`, `markdown_inline`, `php`, `prisma`, `scss`, `surface`, `svelte`, `vue`, `xml` |
+| `system` | `@lumis-sh/lumis/bundles/system` | `asm`, `bash`, `c`, `cmake`, `cpp`, `go`, `llvm`, `make`, `rust`, `wat`, `zig`, `zsh` |
+| `backend` | `@lumis-sh/lumis/bundles/backend` | `csharp`, `elixir`, `erlang`, `go`, `java`, `javadoc`, `javascript`, `kotlin`, `php`, `protobuf`, `python`, `ruby`, `rust`, `scala`, `sql`, `typescript` |
+| `full` | `@lumis-sh/lumis/bundles/full` | `angular`, `arduino`, `asm`, `astro`, `bash`, `bicep`, `c`, `caddy`, `clojure`, `cmake`, `comment`, `commonlisp`, `cpp`, `csharp`, `css`, `csv`, `d`, `dart`, `diff`, `dockerfile`, `dot`, `editorconfig`, `eex`, `ejs`, `elixir`, `elm`, `erb`, `erlang`, `fish`, `fortran`, `fsharp`, `gitattributes`, `gitignore`, `gleam`, `glimmer`, `glsl`, `go`, `graphql`, `haskell`, `hcl`, `heex`, `html`, `http`, `iex`, `ini`, `java`, `javadoc`, `javascript`, `jinja`, `jinja_inline`, `jq`, `json`, `json5`, `julia`, `just`, `kdl`, `kotlin`, `latex`, `liquid`, `llvm`, `lua`, `luadoc`, `make`, `markdown`, `markdown_inline`, `matlab`, `mermaid`, `nginx`, `nim`, `nix`, `nushell`, `objc`, `ocaml`, `ocaml_interface`, `pascal`, `perl`, `php`, `powershell`, `prisma`, `protobuf`, `puppet`, `python`, `qmljs`, `r`, `racket`, `regex`, `rst`, `ruby`, `rust`, `scala`, `scheme`, `scss`, `solidity`, `sql`, `surface`, `svelte`, `swift`, `systemverilog`, `tcl`, `terraform`, `toml`, `toon`, `tsx`, `typescript`, `typst`, `vhdl`, `vim`, `vue`, `wat`, `wgsl`, `xml`, `yaml`, `zig`, `zsh` |
