@@ -606,7 +606,7 @@ emacs = ["scala"]
 [parsers.scss]
 git = "https://github.com/serenadeai/tree-sitter-scss.git"
 rev = "c478c6868648eff49eb04a4df90d703dc45b312a"
-version = "0.1.0"
+version = "0.0.1"
 variant = "SCSS"
 globs = ["*.scss"]
 emacs = ["scss"]
