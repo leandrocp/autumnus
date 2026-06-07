@@ -721,7 +721,7 @@ emacs = ["nxml"]
 
 [parsers.yaml]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-yaml.git"
-rev = "7708026449bed86239b1cd5bce6e3c34dbca6415"
+rev = "4463985dfccc640f3d6991e3396a2047610cf5f8"
 crate = "tree-sitter-yaml"
 version = "0.7.2"
 variant = "YAML"
