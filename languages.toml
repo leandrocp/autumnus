@@ -629,7 +629,7 @@ emacs = ["surface"]
 
 [parsers.svelte]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-svelte.git"
-rev = "774a65aea563accc35f5d45fafa4d96ec5761f57"
+rev = "ae5199db47757f785e43a14b332118a5474de1a2"
 crate = "tree-sitter-svelte-ng"
 version = "1.0.2"
 globs = ["*.svelte"]
