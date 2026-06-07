@@ -556,7 +556,7 @@ globs = ["*.proto", "*.protobuf", "*.proto2", "*.proto3"]
 
 [parsers.python]
 git = "https://github.com/tree-sitter/tree-sitter-python.git"
-rev = "d326e4cad262cf681656e130960e49dfc04c03ea"
+rev = "v0.25.0"
 crate = "tree-sitter-python"
 version = "0.25.0"
 globs = ["*.py", "*.py3", "*.pyi", "*.bzl", "TARGETS", "BUCK", "DEPS"]
