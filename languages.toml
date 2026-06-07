@@ -1013,7 +1013,7 @@ globs = ["*.rst"]
 git = "https://github.com/6cdh/tree-sitter-scheme.git"
 rev = "c6cb7c7d7a04b3f5d999c28e2e9c0c31b2d50ece"
 crate = "tree-sitter-scheme"
-version = "0.24.7"
+version = "0.24.7-1"
 globs = ["*.scm", "*.sld", "*.ss"]
 shebang = ["guile", "scheme"]
 
