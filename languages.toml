@@ -539,7 +539,7 @@ globs = ["*.php", "*.phtml", "*.php3", "*.php4", "*.php5", "*.php7", "*.phps"]
 
 [parsers.powershell]
 git = "https://github.com/airbus-cert/tree-sitter-powershell.git"
-rev = "7212f47716ced384ac012b2cc428fd9f52f7c5d4"
+rev = "73800ecc8bddeee8f1079a5a2e0c13c3d00269bb"
 crate = "tree-sitter-powershell"
 version = "0.26.3"
 variant = "PowerShell"
