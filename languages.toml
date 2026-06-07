@@ -654,7 +654,7 @@ emacs = ["toml"]
 
 [parsers.tsx]
 git = "https://github.com/tree-sitter/tree-sitter-typescript.git"
-rev = "f975a621f4e7f532fe322e13c4f79495e0a7b2e7"
+rev = "75b3874edb2dc714fb1fd77a32013d0f8699989f"
 crate = "tree-sitter-typescript"
 version = "0.23.2"
 location = "tsx"
