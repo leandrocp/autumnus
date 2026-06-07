@@ -580,7 +580,7 @@ globs = ["*.regex"]
 
 [parsers.ruby]
 git = "https://github.com/tree-sitter/tree-sitter-ruby.git"
-rev = "71bd32fb7607035768799732addba884a37a6210"
+rev = "ad907a69da0c8a4f7a943a7fe012712208da6dee"
 crate = "tree-sitter-ruby"
 version = "0.23.1"
 globs = ["*.rb", "*.builder", "*.spec", "*.rake", "Gemfile", "Rakefile"]
