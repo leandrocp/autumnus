@@ -510,9 +510,9 @@ shebang = ["ocaml", "ocamlrun", "ocamlscript"]
 
 [parsers.ocaml_interface]
 git = "https://github.com/tree-sitter/tree-sitter-ocaml.git"
-rev = "432adf64cb083773619bce38835e0084cf484d36"
+rev = "5a979b3ec7f1fe990b8e8c4412294a0cf7228e45"
 crate = "tree-sitter-ocaml"
-version = "0.24.2"
+version = "0.25.0"
 location = "grammars/interface"
 variant = "OCamlInterface"
 display_name = "OCaml Interface"
