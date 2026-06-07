@@ -125,7 +125,7 @@ globs = ["*.cmake", "*.cmake.in", "CMakeLists.txt"]
 
 [parsers.comment]
 git = "https://github.com/stsewd/tree-sitter-comment.git"
-rev = "689be73775bd2dd57b938b8e12bf50fec35a6ca3"
+rev = "66272d2b6c73fb61157541b69dd0a7ce7b42a5ad"
 crate = "tree-sitter-comment"
 version = "0.3.0"
 
