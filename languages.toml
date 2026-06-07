@@ -759,7 +759,7 @@ globs = ["*.dot", "*.gv"]
 
 [parsers.editorconfig]
 git = "https://github.com/ValdezFOmar/tree-sitter-editorconfig.git"
-rev = "c4d5e725e1bbf683b223f4bebe83142cefe68da5"
+rev = "v2.0.0"
 version = "2.0.0"
 globs = [".editorconfig"]
 
