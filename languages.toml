@@ -964,7 +964,7 @@ globs = ["*.m"]
 [parsers.mermaid]
 git = "https://github.com/monaqa/tree-sitter-mermaid.git"
 rev = "90ae195b31933ceb9d079abfa8a3ad0a36fee4cc"
-version = "0.1.0"
+version = "0.0.2"
 globs = ["*.mmd", "*.mermaid"]
 
 [parsers.nginx]
