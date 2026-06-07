@@ -340,7 +340,7 @@ emacs = ["html"]
 [parsers.http]
 git = "https://github.com/rest-nvim/tree-sitter-http.git"
 rev = "db8b4398de90b6d0b6c780aba96aaa2cd8e9202c"
-version = "0.1.0"
+version = "3.0.0"
 variant = "HTTP"
 globs = ["*.http", "*.rest"]
 
