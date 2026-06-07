@@ -780,7 +780,7 @@ globs = [".gitattributes", "gitattributes"]
 
 [parsers.javadoc]
 git = "https://github.com/rmuir/tree-sitter-javadoc.git"
-rev = "d1a2efc871825ff29a1d241cdcac5713c99cfd54"
+rev = "e2f56b4d0df08f6ed5df8bae266f9e75b340a9ab"
 crate = "tree-sitter-javadoc"
 version = "0.3.1"
 display_name = "Javadoc"
