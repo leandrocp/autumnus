@@ -949,7 +949,7 @@ globs = ["*.json5"]
 
 [parsers.just]
 git = "https://github.com/casey/tree-sitter-just.git"
-rev = "d9da862c156020c1a83d3c6ccdda32be6d8a5d4a"
+rev = "5685543a6e64f66335e25518c9ae8ffa1dae3d01"
 version = "0.2.0"
 globs = ["*.just", ".just", ".justfile", ".JUSTFILE", ".Justfile", "justfile", "JUSTFILE", "Justfile"]
 
