@@ -46,7 +46,7 @@ path = "queries"
 
 [queries.wat]
 git = "https://github.com/helix-editor/helix.git"
-rev = "79c7203a388e1ac7aa6aebfc2e4c9a91b6efc97a"
+rev = "4c1f3ac87bc5fce29cb224ced6b1b2d438892517"
 path = "runtime/queries/wat"
 
 # -- Parsers
@@ -697,7 +697,7 @@ globs = ["*.vue"]
 [parsers.wat]
 git = "https://github.com/wasm-lsp/tree-sitter-wasm.git"
 rev = "2ca28a9f9d709847bf7a3de0942a84e912f59088"
-version = "0.1.0"
+version = "0.0.0"
 location = "wat"
 aliases = ["wasm", "webassembly"]
 display_name = "WAT"
