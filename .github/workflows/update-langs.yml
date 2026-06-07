@@ -1,4 +1,4 @@
-name: Update Languages
+name: Upgrade Languages
 
 on:
   schedule:
@@ -46,7 +46,7 @@ jobs:
           echo "Generated matrix for languages: $LANGS"
           echo "languages=$LANGS" >> "$GITHUB_OUTPUT"
 
-  update-parsers:
+  upgrade-languages:
     needs: generate-matrix
     runs-on: ubuntu-latest
     permissions:
@@ -87,7 +87,14 @@ jobs:
       - name: Install JavaScript dependencies
         run: pnpm install --frozen-lockfile
 
-      - run: just langs-update ${{ matrix.language }}
+      - name: Upgrade parser revision
+        run: just langs-upgrade-parsers ${{ matrix.language }}
+
+      - name: Upgrade query revisions
+        run: just langs-upgrade-queries ${{ matrix.language }}
+
+      - name: Regenerate language outputs
+        run: just langs-update ${{ matrix.language }}
 
       - name: Regenerate JavaScript outputs
         run: pnpm --filter @lumis-sh/lumis build:generate
@@ -121,12 +128,12 @@ jobs:
             packages/javascript/lumis/bundles
             packages/javascript/lumis/src/generated
             packages/javascript/wasm-bundle-*
-          commit-message: "chore: update ${{ matrix.language }}"
-          title: "chore: update ${{ matrix.language }}"
+          commit-message: "chore: upgrade ${{ matrix.language }}"
+          title: "chore: upgrade ${{ matrix.language }}"
           body: |
-            Automated PR to update parser and queries for **${{ matrix.language }}**.
+            Automated PR to upgrade parser and queries for **${{ matrix.language }}**.
 
-            This PR was created automatically by the update-langs workflow.
-          branch: update-langs-${{ matrix.language }}
+            This PR was created automatically by the upgrade-langs workflow.
+          branch: upgrade-langs-${{ matrix.language }}
           delete-branch: true
           base: main

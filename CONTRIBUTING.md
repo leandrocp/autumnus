@@ -240,7 +240,7 @@ just langs-upgrade-parsers {name}
 just langs-fetch-vendored-parsers {name}
 ```
 
-For parser and query updates, prefer `just langs-update {name}` or the `update-langs` GitHub workflow. Do not use Dependabot to bump `tree-sitter-*` Rust parser crates independently. Those versions are tied to the pinned parser and query state in `languages.toml`.
+For parser and query upgrades, prefer the `Upgrade Languages` GitHub workflow or run the upgrade recipes below before `just langs-update {name}`. Do not use Dependabot to bump `tree-sitter-*` Rust parser crates independently. Those versions are tied to the pinned parser and query state in `languages.toml`.
 
 `just langs-upgrade-parsers {name}` updates `languages.toml`, syncs any crate-backed Rust parser versions into `crates/lumis/Cargo.toml`, and refreshes Rust bundle features from `languages.toml`.
 
