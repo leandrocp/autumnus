@@ -1,7 +1,7 @@
 {
   "name": "eldritch",
   "appearance": "dark",
-  "revision": "0415fa72c348e814a7a6cc9405593a4f812fe12f",
+  "revision": "c9131a5a11f00a2f428f563a4eb2c4aeb680d963",
   "highlights": {
     "attribute": {
       "fg": "#10a1bd"
@@ -10,7 +10,7 @@
       "fg": "#04d1f9"
     },
     "boolean": {
-      "fg": "#f16c75"
+      "fg": "#04d1f9"
     },
     "character": {
       "fg": "#f7c67f"
@@ -78,7 +78,7 @@
       "fg": "#f265b5"
     },
     "function.macro": {
-      "fg": "#10a1bd"
+      "fg": "#37f499"
     },
     "function.method": {
       "fg": "#f265b5"
@@ -113,7 +113,7 @@
       "fg": "#10a1bd"
     },
     "keyword.exception": {
-      "fg": "#a48cf2"
+      "fg": "#37f499"
     },
     "keyword.export": {
       "fg": "#37f499",
@@ -123,7 +123,7 @@
       "fg": "#a48cf2"
     },
     "keyword.import": {
-      "fg": "#10a1bd"
+      "fg": "#37f499"
     },
     "keyword.modifier": {
       "fg": "#37f499",
@@ -147,7 +147,7 @@
       "fg": "#04d1f9"
     },
     "markup.environment": {
-      "fg": "#10a1bd"
+      "fg": "#37f499"
     },
     "markup.environment.name": {
       "fg": "#04d1f9"
@@ -244,7 +244,7 @@
       "underline": true
     },
     "module": {
-      "fg": "#10a1bd"
+      "fg": "#37f499"
     },
     "module.builtin": {
       "fg": "#f16c75"
@@ -257,7 +257,7 @@
       "fg": "#f16c75"
     },
     "number.float": {
-      "fg": "#f16c75"
+      "fg": "#f7c67f"
     },
     "operator": {
       "fg": "#04d1f9"
@@ -326,7 +326,7 @@
       "fg": "#0aaed2"
     },
     "type.definition": {
-      "fg": "#04d1f9"
+      "fg": "#f1fc79"
     },
     "variable": {
       "fg": "#04d1f9"

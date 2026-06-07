@@ -1,10 +1,10 @@
 {
   "name": "one_monokai",
   "appearance": "dark",
-  "revision": "047a0239831458866945d5c2d111ff1d282d1966",
+  "revision": "903b3e8923d67d3ee4b67f462b2b112012d7a69d",
   "highlights": {
     "attribute": {
-      "fg": "#98c379"
+      "fg": "#61afef"
     },
     "attribute.builtin": {
       "fg": "#c678dd"
@@ -30,8 +30,7 @@
       "fg": "#f75f5f"
     },
     "comment.hint": {
-      "fg": "#676e7b",
-      "italic": true
+      "fg": "#56b6c2"
     },
     "comment.note": {
       "fg": "#d7d7ff"
@@ -48,13 +47,13 @@
       "fg": "#61afef"
     },
     "constant.builtin": {
-      "fg": "#c678dd"
-    },
-    "constant.macro": {
       "fg": "#61afef"
     },
+    "constant.macro": {
+      "fg": "#e06c75"
+    },
     "constructor": {
-      "fg": "#c678dd"
+      "fg": "#61afef"
     },
     "diff.delta": {
       "fg": "#8cf8f7"
@@ -69,7 +68,7 @@
       "fg": "#98c379"
     },
     "function.builtin": {
-      "fg": "#c678dd"
+      "fg": "#98c379"
     },
     "function.call": {
       "fg": "#98c379"
@@ -90,49 +89,49 @@
       "fg": "#56b6c2"
     },
     "keyword.conditional": {
-      "fg": "#56b6c2"
+      "fg": "#e06c75"
     },
     "keyword.conditional.ternary": {
-      "fg": "#56b6c2"
+      "fg": "#e06c75"
     },
     "keyword.coroutine": {
       "fg": "#56b6c2"
     },
     "keyword.debug": {
-      "fg": "#56b6c2"
+      "fg": "#c678dd"
     },
     "keyword.directive": {
-      "fg": "#56b6c2"
+      "fg": "#98c379"
     },
     "keyword.directive.define": {
-      "fg": "#56b6c2"
+      "fg": "#98c379"
     },
     "keyword.exception": {
-      "fg": "#56b6c2"
+      "fg": "#e06c75"
     },
     "keyword.export": {
       "fg": "#56b6c2"
     },
     "keyword.function": {
-      "fg": "#56b6c2"
+      "fg": "#e06c75"
     },
     "keyword.import": {
-      "fg": "#56b6c2"
+      "fg": "#e06c75"
     },
     "keyword.modifier": {
-      "fg": "#56b6c2"
+      "fg": "#e06c75"
     },
     "keyword.operator": {
-      "fg": "#56b6c2"
+      "fg": "#e06c75"
     },
     "keyword.repeat": {
-      "fg": "#56b6c2"
+      "fg": "#e06c75"
     },
     "keyword.return": {
-      "fg": "#56b6c2"
+      "fg": "#e06c75"
     },
     "keyword.type": {
-      "fg": "#56b6c2"
+      "fg": "#61afef"
     },
     "label": {
       "fg": "#e06c75"
@@ -171,25 +170,23 @@
       "italic": true
     },
     "markup.link": {
-      "fg": "#98c379",
-      "underline": true
+      "fg": "#61afef"
     },
     "markup.link.label": {
-      "fg": "#98c379",
-      "underline": true
+      "fg": "#e06c75"
     },
     "markup.link.url": {
-      "fg": "#98c379",
-      "underline": true
+      "fg": "#61afef",
+      "undercurl": true
     },
     "markup.list": {
-      "fg": "#c678dd"
+      "fg": "#e06c75"
     },
     "markup.list.checked": {
-      "fg": "#c678dd"
+      "fg": "#98c379"
     },
     "markup.list.unchecked": {
-      "fg": "#c678dd"
+      "fg": "#e06c75"
     },
     "markup.math": {
       "fg": "#c678dd"
@@ -198,10 +195,10 @@
       "fg": "#c678dd"
     },
     "markup.raw": {
-      "fg": "#c678dd"
+      "fg": "#e5c07b"
     },
     "markup.raw.block": {
-      "fg": "#c678dd"
+      "fg": "#e5c07b"
     },
     "markup.strikethrough": {
       "strikethrough": true
@@ -213,10 +210,10 @@
       "underline": true
     },
     "module": {
-      "fg": "#56b6c2"
+      "fg": "#e06c75"
     },
     "module.builtin": {
-      "fg": "#c678dd"
+      "fg": "#e06c75"
     },
     "normal": {
       "fg": "#abb2bf",
@@ -241,38 +238,39 @@
       "fg": "#e06c75"
     },
     "punctuation.special": {
-      "fg": "#c678dd"
+      "fg": "#e06c75"
     },
     "string": {
       "fg": "#e5c07b"
     },
     "string.documentation": {
-      "fg": "#e5c07b"
+      "fg": "#56b6c2"
     },
     "string.escape": {
       "fg": "#e06c75"
     },
     "string.regexp": {
-      "fg": "#e06c75"
+      "fg": "#e5c07b"
     },
     "string.special": {
-      "fg": "#e06c75"
+      "fg": "#c678dd"
     },
     "string.special.path": {
-      "fg": "#e06c75"
+      "fg": "#61afef",
+      "undercurl": true
     },
     "string.special.symbol": {
-      "fg": "#e06c75"
+      "fg": "#98c379"
     },
     "string.special.url": {
-      "fg": "#98c379",
-      "underline": true
+      "fg": "#61afef",
+      "undercurl": true
     },
     "tag": {
       "fg": "#e06c75"
     },
     "tag.attribute": {
-      "fg": "#e06c75"
+      "fg": "#98c379"
     },
     "tag.builtin": {
       "fg": "#c678dd"
@@ -284,25 +282,27 @@
       "fg": "#61afef"
     },
     "type.builtin": {
-      "fg": "#c678dd"
+      "fg": "#e06c75"
     },
     "type.definition": {
       "fg": "#61afef"
     },
     "variable": {
-      "fg": "#e0e2ea"
+      "fg": "#abb2bf"
     },
     "variable.builtin": {
-      "fg": "#c678dd"
+      "fg": "#e06c75"
     },
     "variable.member": {
-      "fg": "#e0e2ea"
+      "fg": "#98c379"
     },
     "variable.parameter": {
-      "fg": "#e0e2ea"
+      "fg": "#d19a66",
+      "italic": true
     },
     "variable.parameter.builtin": {
-      "fg": "#c678dd"
+      "fg": "#d19a66",
+      "italic": true
     }
   }
 }

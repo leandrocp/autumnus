@@ -1,7 +1,7 @@
 {
   "name": "solarized_osaka_dark",
   "appearance": "dark",
-  "revision": "f0c2f0ba0bd56108d53c9bfae4bb28ff6c67bbdb",
+  "revision": "f675d9a5c58f3b0d6158d665a623f81a62e7bdaf",
   "highlights": {
     "attribute": {
       "fg": "#db302d"
@@ -57,19 +57,13 @@
       "fg": "#268bd3"
     },
     "diff.delta": {
-      "fg": "#b28500",
-      "bg": "#063540",
-      "bold": true
+      "bg": "#191d00"
     },
     "diff.minus": {
-      "fg": "#db302d",
-      "bg": "#063540",
-      "bold": true
+      "bg": "#380605"
     },
     "diff.plus": {
-      "fg": "#849900",
-      "bg": "#063540",
-      "bold": true
+      "bg": "#103a3c"
     },
     "function": {
       "fg": "#268bd3"

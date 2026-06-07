@@ -1,7 +1,7 @@
 {
   "name": "mfd_stealth",
   "appearance": "dark",
-  "revision": "a33f2140d8c4b89e5126579663d2b73dad6b6c29",
+  "revision": "72ae627792960a7e490cb5242a78c570d02ba775",
   "highlights": {
     "attribute": {
       "fg": "#7a9a7a"

@@ -23,7 +23,19 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
+
       - uses: taiki-e/install-action@just
+
+      - run: pnpm install --frozen-lockfile
 
       - name: Install Neovim
         run: |
@@ -40,7 +52,8 @@ jobs:
           token: ${{ secrets.CI_TOKEN }}
           add-paths: |
             themes
-            crates/lumis/themes
+            crates/lumis-core/themes
+            packages/javascript/themes/themes
           commit-message: "chore: generate themes"
           title: "chore: generate themes"
           body: |

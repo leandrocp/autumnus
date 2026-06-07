@@ -1,5 +1,5 @@
 /* solarized_osaka_storm
- * revision: f0c2f0ba0bd56108d53c9bfae4bb28ff6c67bbdb
+ * revision: f675d9a5c58f3b0d6158d665a623f81a62e7bdaf
  */
 
 pre.lumis {
@@ -59,19 +59,13 @@ pre.lumis {
   color: #268bd3;
 }
 .diff-delta {
-  color: #b28500;
-  background-color: #063540;
-  font-weight: bold;
+  background-color: #191d00;
 }
 .diff-minus {
-  color: #db302d;
-  background-color: #063540;
-  font-weight: bold;
+  background-color: #380605;
 }
 .diff-plus {
-  color: #849900;
-  background-color: #063540;
-  font-weight: bold;
+  background-color: #103a3c;
 }
 .function {
   color: #268bd3;

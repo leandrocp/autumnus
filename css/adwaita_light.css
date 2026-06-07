@@ -1,5 +1,5 @@
 /* adwaita_light
- * revision: 93f3bed009f7fc4c57f8d710880b6cab9e0b0d15
+ * revision: c607954f7b2cf56b24e921db0dab4749f3430a22
  */
 
 pre.lumis {
@@ -73,15 +73,12 @@ pre.lumis {
   color: #e01b24;
 }
 .function {
-  color: #504e55;
+  color: #4e9a06;
 }
 .function-builtin {
   color: #4e9a06;
 }
 .function-call {
-  color: #504e55;
-}
-.function-call-zig {
   color: #4e9a06;
 }
 .function-macro {
@@ -89,7 +86,7 @@ pre.lumis {
   font-weight: bold;
 }
 .function-method {
-  color: #504e55;
+  color: #4e9a06;
 }
 .function-method-call {
   color: #4e9a06;
@@ -323,7 +320,7 @@ pre.lumis {
   color: #504e55;
 }
 .type {
-  color: #504e55;
+  color: #218787;
 }
 .type-builtin {
   color: #218787;

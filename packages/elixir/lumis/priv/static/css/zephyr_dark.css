@@ -30,20 +30,20 @@ pre.lumis {
   font-style: italic;
 }
 .comment-error {
-  color: #ffc0b9;
+  color: #e95678;
 }
 .comment-hint {
   color: #73797e;
   font-style: italic;
 }
 .comment-note {
-  color: #8cf8f7;
+  color: #61afef;
 }
 .comment-todo {
   color: #cba6f7;
 }
 .comment-warning {
-  color: #fce094;
+  color: #f7bb3b;
 }
 .constant {
   color: #36d0e0;
@@ -67,22 +67,22 @@ pre.lumis {
   color: #b3f6c0;
 }
 .function {
-  color: #f7bb3b;
+  color: #36d0e0;
 }
 .function-builtin {
   color: #f7bb3b;
 }
 .function-call {
-  color: #f7bb3b;
+  color: #36d0e0;
 }
 .function-macro {
-  color: #f7bb3b;
+  color: #36d0e0;
 }
 .function-method {
-  color: #f7bb3b;
+  color: #36d0e0;
 }
 .function-method-call {
-  color: #f7bb3b;
+  color: #36d0e0;
 }
 .highlighted {
   background-color: #2e323c;
@@ -115,7 +115,7 @@ pre.lumis {
   color: #afd700;
 }
 .keyword-function {
-  color: #afd700;
+  color: #e95678;
 }
 .keyword-import {
   color: #afd700;
@@ -237,10 +237,10 @@ pre.lumis {
   color: #d16d9e;
 }
 .property {
-  color: #61afef;
+  color: #f7bb3b;
 }
 .punctuation-bracket {
-  color: #bbc2cf;
+  color: #80a0c2;
 }
 .punctuation-delimiter {
   color: #bbc2cf;
@@ -294,16 +294,16 @@ pre.lumis {
   color: #1abc9c;
 }
 .variable {
-  color: #e0e2ea;
+  color: #f2f2bf;
 }
 .variable-builtin {
   color: #f7bb3b;
 }
 .variable-member {
-  color: #e0e2ea;
+  color: #f2f2bf;
 }
 .variable-parameter {
-  color: #e0e2ea;
+  color: #f2f2bf;
 }
 .variable-parameter-builtin {
   color: #f7bb3b;

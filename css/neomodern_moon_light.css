@@ -1,25 +1,25 @@
 /* neomodern_moon_light
- * revision: cf93044775983b71dce31ad3179753b241470d3c
+ * revision: d41469578922a23d75a0d9e8deef1e34837230a6
  */
 
 pre.lumis {
-  color: #49497f;
-  background-color: #ebebeb;
+  color: #48487e;
+  background-color: #e6e6e6;
 }
 .attribute {
-  color: #7f7fac;
+  color: #6781ad;
 }
 .attribute-builtin {
   color: #6778aa;
 }
 .boolean {
-  color: #825b41;
+  color: #6f5532;
 }
 .character {
   color: #5e795e;
 }
 .character-special {
-  color: #62629b;
+  color: #506689;
 }
 .comment {
   color: #a1a1c0;
@@ -28,7 +28,7 @@ pre.lumis {
   color: #a1a1c0;
 }
 .comment-error {
-  color: #be8892;
+  color: #bc8790;
   font-weight: bold;
   font-style: italic;
 }
@@ -36,12 +36,12 @@ pre.lumis {
   color: #a1a1c0;
 }
 .comment-note {
-  color: #8d9ad3;
+  color: #8a9bd0;
   font-weight: bold;
   font-style: italic;
 }
 .comment-todo {
-  color: #7e7ea6;
+  color: #7d7da6;
   font-weight: bold;
   font-style: italic;
 }
@@ -63,121 +63,121 @@ pre.lumis {
   color: #6778aa;
 }
 .constructor-lua {
-  color: #2e2e5d;
+  color: #2d2d5c;
 }
 .diff-delta {
-  color: #7f96df;
+  color: #7b97db;
 }
 .diff-minus {
-  color: #d27773;
+  color: #ce7670;
 }
 .diff-plus {
   color: #64886a;
 }
 .function {
-  color: #7f7fac;
+  color: #6781ad;
 }
 .function-builtin {
-  color: #7f7fac;
+  color: #6781ad;
 }
 .function-call {
-  color: #7f7fac;
+  color: #6781ad;
 }
 .function-macro {
-  color: #7f7fac;
+  color: #6781ad;
 }
 .function-method {
-  color: #7f7fac;
+  color: #6781ad;
 }
 .function-method-call {
-  color: #7f7fac;
+  color: #6781ad;
 }
 .highlighted {
-  background-color: #ece4e5;
+  background-color: #e8dedf;
 }
 .keyword {
-  color: #62629b;
+  color: #506689;
 }
 .keyword-conditional {
-  color: #62629b;
+  color: #506689;
 }
 .keyword-conditional-ternary {
-  color: #62629b;
+  color: #506689;
 }
 .keyword-coroutine {
-  color: #62629b;
+  color: #506689;
 }
 .keyword-debug {
-  color: #62629b;
+  color: #506689;
 }
 .keyword-directive {
-  color: #62629b;
+  color: #506689;
 }
 .keyword-directive-define {
-  color: #62629b;
+  color: #506689;
 }
 .keyword-exception {
-  color: #d27773;
+  color: #ce7670;
 }
 .keyword-export {
-  color: #62629b;
+  color: #506689;
 }
 .keyword-function {
-  color: #62629b;
+  color: #506689;
 }
 .keyword-import {
-  color: #62629b;
+  color: #506689;
 }
 .keyword-modifier {
-  color: #62629b;
+  color: #506689;
 }
 .keyword-operator {
-  color: #62629b;
+  color: #506689;
 }
 .keyword-repeat {
-  color: #62629b;
+  color: #506689;
 }
 .keyword-return {
-  color: #62629b;
+  color: #506689;
 }
 .keyword-type {
-  color: #62629b;
+  color: #506689;
 }
 .label {
-  color: #62629b;
+  color: #506689;
 }
 .markup {
-  color: #49497f;
+  color: #48487e;
 }
 .markup-environment {
-  color: #49497f;
+  color: #48487e;
 }
 .markup-environment-name {
-  color: #49497f;
+  color: #48487e;
 }
 .markup-heading {
-  color: #62629b;
+  color: #506689;
 }
 .markup-heading-1 {
-  color: #62629b;
+  color: #506689;
 }
 .markup-heading-2 {
-  color: #62629b;
+  color: #506689;
 }
 .markup-heading-3 {
-  color: #62629b;
+  color: #506689;
 }
 .markup-heading-4 {
-  color: #62629b;
+  color: #506689;
 }
 .markup-heading-5 {
-  color: #62629b;
+  color: #506689;
 }
 .markup-heading-6 {
-  color: #62629b;
+  color: #506689;
 }
 .markup-italic {
-  color: #49497f;
+  color: #48487e;
   font-style: italic;
 }
 .markup-link {
@@ -190,39 +190,39 @@ pre.lumis {
   color: #6778aa;
 }
 .markup-list {
-  color: #7f7fac;
+  color: #6781ad;
 }
 .markup-list-checked {
-  color: #7f7fac;
+  color: #6781ad;
 }
 .markup-list-unchecked {
-  color: #7f7fac;
+  color: #6781ad;
 }
 .markup-math {
   color: #6778aa;
 }
 .markup-quote {
-  color: #49497f;
+  color: #48487e;
 }
 .markup-quote-markdown {
   color: #a1a1c0;
 }
 .markup-raw {
-  color: #7f7fac;
+  color: #6781ad;
 }
 .markup-raw-block {
-  color: #7f7fac;
+  color: #6781ad;
 }
 .markup-strikethrough {
   color: #a1a1c0;
   text-decoration: line-through;
 }
 .markup-strong {
-  color: #49497f;
+  color: #48487e;
   font-weight: bold;
 }
 .markup-underline {
-  color: #49497f;
+  color: #48487e;
   text-decoration: underline;
 }
 .module {
@@ -232,14 +232,14 @@ pre.lumis {
   color: #6778aa;
 }
 .normal {
-  color: #49497f;
-  background-color: #ebebeb;
+  color: #48487e;
+  background-color: #e6e6e6;
 }
 .number {
-  color: #825b41;
+  color: #6f5532;
 }
 .number-float {
-  color: #825b41;
+  color: #6f5532;
 }
 .operator {
   color: #8191be;
@@ -251,10 +251,10 @@ pre.lumis {
   color: #8191be;
 }
 .punctuation-delimiter {
-  color: #49497f;
+  color: #48487e;
 }
 .punctuation-special {
-  color: #62629b;
+  color: #506689;
 }
 .string {
   color: #5e795e;
@@ -263,16 +263,16 @@ pre.lumis {
   color: #5e795e;
 }
 .string-escape {
-  color: #62629b;
+  color: #506689;
 }
 .string-regexp {
-  color: #62629b;
+  color: #506689;
 }
 .string-special {
-  color: #62629b;
+  color: #506689;
 }
 .string-special-path {
-  color: #62629b;
+  color: #506689;
 }
 .string-special-symbol {
   color: #8d6691;
@@ -290,7 +290,7 @@ pre.lumis {
   color: #6778aa;
 }
 .tag-delimiter {
-  color: #49497f;
+  color: #48487e;
 }
 .type {
   color: #6778aa;
@@ -302,7 +302,7 @@ pre.lumis {
   color: #6778aa;
 }
 .variable {
-  color: #49497f;
+  color: #48487e;
 }
 .variable-builtin {
   color: #6778aa;
@@ -311,7 +311,7 @@ pre.lumis {
   color: #8d6691;
 }
 .variable-parameter {
-  color: #2e2e5d;
+  color: #2d2d5c;
 }
 .variable-parameter-builtin {
   color: #6778aa;

@@ -1,5 +1,5 @@
 /* neomodern_hojicha_light
- * revision: cf93044775983b71dce31ad3179753b241470d3c
+ * revision: d41469578922a23d75a0d9e8deef1e34837230a6
  */
 
 pre.lumis {
@@ -22,54 +22,54 @@ pre.lumis {
   color: #7f6956;
 }
 .comment {
-  color: #b77f76;
+  color: #c29b9b;
 }
 .comment-documentation {
-  color: #b77f76;
+  color: #c29b9b;
 }
 .comment-error {
-  color: #c77c77;
+  color: #d38785;
   font-weight: bold;
   font-style: italic;
 }
 .comment-hint {
-  color: #b77f76;
+  color: #c29b9b;
 }
 .comment-note {
-  color: #948db3;
+  color: #9999c1;
   font-weight: bold;
   font-style: italic;
 }
 .comment-todo {
-  color: #996760;
+  color: #a07876;
   font-weight: bold;
   font-style: italic;
 }
 .comment-warning {
-  color: #a68367;
+  color: #ab8e76;
   font-weight: bold;
   font-style: italic;
 }
 .constant {
-  color: #617b5a;
+  color: #be6454;
 }
 .constant-builtin {
   color: #675d99;
 }
 .constant-macro {
-  color: #617b5a;
+  color: #be6454;
 }
 .constructor {
   color: #675d99;
 }
 .constructor-lua {
-  color: #4d6048;
+  color: #617b5a;
 }
 .diff-delta {
   color: #7d97db;
 }
 .diff-minus {
-  color: #d17a78;
+  color: #de7977;
 }
 .diff-plus {
   color: #648969;
@@ -117,7 +117,7 @@ pre.lumis {
   color: #7f6956;
 }
 .keyword-exception {
-  color: #d17a78;
+  color: #de7977;
 }
 .keyword-export {
   color: #7f6956;
@@ -205,7 +205,7 @@ pre.lumis {
   color: #6c433f;
 }
 .markup-quote-markdown {
-  color: #b77f76;
+  color: #c29b9b;
 }
 .markup-raw {
   color: #9a836a;
@@ -214,7 +214,7 @@ pre.lumis {
   color: #9a836a;
 }
 .markup-strikethrough {
-  color: #b77f76;
+  color: #c29b9b;
   text-decoration: line-through;
 }
 .markup-strong {
@@ -311,7 +311,7 @@ pre.lumis {
   color: #586885;
 }
 .variable-parameter {
-  color: #4d6048;
+  color: #617b5a;
 }
 .variable-parameter-builtin {
   color: #675d99;

@@ -1,5 +1,5 @@
 /* vague
- * revision: 8c4643f8a5106dbc492918f86ff6b5c81111ce9a
+ * revision: 8ee15ea4505d64ede559ff1cb112582a6f2ea138
  */
 
 pre.lumis {
@@ -18,7 +18,6 @@ pre.lumis {
 }
 .character {
   color: #e8b589;
-  font-style: italic;
 }
 .character-special {
   color: #6e94b2;
@@ -187,7 +186,6 @@ pre.lumis {
   font-weight: bold;
 }
 .markup-italic {
-  color: #cdcdcd;
   font-style: italic;
 }
 .markup-link-label {
@@ -210,9 +208,6 @@ pre.lumis {
   color: #e8b589;
 }
 .markup-quote {
-  color: #cdcdcd;
-}
-.markup-quote-markdown {
   color: #606079;
 }
 .markup-raw {
@@ -222,15 +217,12 @@ pre.lumis {
   color: #aeaed1;
 }
 .markup-strikethrough {
-  color: #606079;
   text-decoration: line-through;
 }
 .markup-strong {
-  color: #cdcdcd;
   font-weight: bold;
 }
 .markup-underline {
-  color: #cdcdcd;
   text-decoration: underline;
 }
 .module {

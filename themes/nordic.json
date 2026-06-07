@@ -1,7 +1,7 @@
 {
   "name": "nordic",
   "appearance": "dark",
-  "revision": "4ce6bad95fde832f9bd10b991de846047a144628",
+  "revision": "9fb62116b891184049c50ca6ffb0d3bc100a1a6e",
   "highlights": {
     "attribute": {
       "fg": "#bf616a"
