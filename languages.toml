@@ -1036,7 +1036,7 @@ globs = ["*.sv", "*.svh"]
 [parsers.tcl]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-tcl.git"
 rev = "8f11ac7206a54ed11210491cee1e0657e2962c47"
-version = "0.1.0"
+version = "1.1.0"
 globs = ["*.itcl", "*.tcl", "*.tk"]
 shebang = ["tclsh", "wish"]
 
