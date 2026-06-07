@@ -330,7 +330,7 @@ globs = ["*.heex", "*.neex"]
 
 [parsers.html]
 git = "https://github.com/tree-sitter/tree-sitter-html.git"
-rev = "5a5ca8551a179998360b4a4ca2c0f366a35acc03"
+rev = "73a3947324f6efddf9e17c0ea58d454843590cc0"
 crate = "tree-sitter-html"
 version = "0.23.2"
 variant = "HTML"
