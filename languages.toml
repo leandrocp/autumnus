@@ -683,8 +683,8 @@ globs = ["*.typ", "*.typst"]
 
 [parsers.vim]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-vim.git"
-rev = "1cd0a0892b389bd314a9bd09545160e5ee3c9137"
-version = "0.1.0"
+rev = "3092fcd99eb87bbd0fc434aa03650ba58bd5b43b"
+version = "0.8.1"
 aliases = ["viml", "vimscript"]
 globs = ["*.vim", "*.viml"]
 
