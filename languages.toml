@@ -840,7 +840,7 @@ git = "https://github.com/MichaHoffmann/tree-sitter-hcl.git"
 rev = "64ad62785d442eb4d45df3a1764962dafd5bc98b"
 location = "dialects/terraform"
 query_name = "terraform"
-version = "0.1.0"
+version = "1.2.0"
 display_name = "Terraform"
 globs = ["*.tf", "*.tfvars", "*.tfvars.json"]
 
