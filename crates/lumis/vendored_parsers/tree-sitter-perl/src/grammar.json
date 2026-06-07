@@ -5557,8 +5557,17 @@
               ]
             },
             {
-              "type": "STRING",
-              "value": ")"
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "STRING",
+                  "value": ")"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "_RECOVER_PAREN_CLOSE"
+                }
+              ]
             }
           ]
         },
@@ -5594,8 +5603,17 @@
               }
             },
             {
-              "type": "STRING",
-              "value": ")"
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "STRING",
+                  "value": ")"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "_RECOVER_PAREN_CLOSE"
+                }
+              ]
             }
           ]
         }
@@ -5819,8 +5837,17 @@
                     ]
                   },
                   {
-                    "type": "STRING",
-                    "value": ")"
+                    "type": "CHOICE",
+                    "members": [
+                      {
+                        "type": "STRING",
+                        "value": ")"
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "_RECOVER_PAREN_CLOSE"
+                      }
+                    ]
                   }
                 ]
               },
@@ -9360,6 +9387,10 @@
     },
     {
       "type": "SYMBOL",
+      "name": "_RECOVER_PAREN_CLOSE"
+    },
+    {
+      "type": "SYMBOL",
       "name": "_ERROR"
     }
   ],
@@ -9381,5 +9412,6 @@
     "postfix_deref",
     "subscripted",
     "slices"
-  ]
+  ],
+  "reserved": {}
 }

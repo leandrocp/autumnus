@@ -521,8 +521,8 @@ globs = ["*.mli"]
 
 [parsers.perl]
 git = "https://github.com/tree-sitter-perl/tree-sitter-perl.git"
-rev = "0c24d001dd1921e418fb933d208a7bd7dd3f923a"
-version = "0.1.0"
+rev = "ea9667dc65a816acace002a2b1b099978785ca33"
+version = "1.0.0"
 globs = ["*.pm", "*.pl", "*.t"]
 emacs = ["perl"]
 shebang = ["perl"]
