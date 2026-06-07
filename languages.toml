@@ -488,7 +488,7 @@ shebang = ["nu"]
 
 [parsers.objc]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-objc.git"
-rev = "18802acf31d0b5c1c1d50bdbc9eb0e1636cab9ed"
+rev = "181a81b8f23a2d593e7ab4259981f50122909fda"
 crate = "tree-sitter-objc"
 version = "3.0.2"
 aliases = ["objective-c"]
