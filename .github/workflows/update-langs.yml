@@ -82,6 +82,8 @@ jobs:
           cache: "pnpm"
           cache-dependency-path: pnpm-lock.yaml
 
+      - run: npm install -g tree-sitter-cli@0.26
+
       - name: Install JavaScript dependencies
         run: pnpm install --frozen-lockfile
 
