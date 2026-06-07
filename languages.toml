@@ -238,7 +238,7 @@ emacs = ["elm"]
 
 [parsers.erb]
 git = "https://github.com/tree-sitter/tree-sitter-embedded-template.git"
-rev = "5bce9d580d3b78f48e13e331f69dfa0abd4ff68b"
+rev = "3499d85f0a0d937c507a4a65368f2f63772786e1"
 crate = "tree-sitter-embedded-template"
 version = "0.25.0"
 wasm_name = "tree-sitter-embedded-template"
