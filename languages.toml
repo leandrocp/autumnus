@@ -257,7 +257,7 @@ globs = ["*.erl", "*.app", "*.app.src", "*.es", "*.escript", "*.hrl", "*.xrl", "
 git = "https://github.com/ram02z/tree-sitter-fish.git"
 rev = "aa074a0bacde8b5823c592574d7138f156a95776"
 crate = "tree-sitter-fish"
-version = "0.1.0"
+version = "3.6.0"
 globs = ["*.fish"]
 
 [parsers.fsharp]
@@ -523,7 +523,6 @@ globs = ["*.mli"]
 git = "https://github.com/tree-sitter-perl/tree-sitter-perl.git"
 rev = "0c24d001dd1921e418fb933d208a7bd7dd3f923a"
 version = "0.1.0"
-generate = true
 globs = ["*.pm", "*.pl", "*.t"]
 emacs = ["perl"]
 shebang = ["perl"]
