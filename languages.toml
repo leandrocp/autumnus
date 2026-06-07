@@ -404,7 +404,7 @@ emacs = ["julia"]
 
 [parsers.kotlin]
 git = "https://github.com/fwcd/tree-sitter-kotlin.git"
-rev = "802fd920c153b02b9d266369a3ef061622f2bbf0"
+rev = "93bfeee1555d2b1442d68c44b0afde2a3b069e46"
 version = "0.4.0"
 globs = ["*.kt", "*.ktm", "*.kts"]
 
