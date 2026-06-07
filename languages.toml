@@ -175,7 +175,7 @@ emacs = ["css"]
 [parsers.csv]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-csv.git"
 rev = "f6bf6e35eb0b95fbadea4bb39cb9709507fcb181"
-version = "0.1.0"
+version = "1.2.0"
 location = "csv"
 variant = "CSV"
 globs = ["*.csv"]
