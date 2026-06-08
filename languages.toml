@@ -941,7 +941,7 @@ version = "0.12.0"
 
 [parsers.json5]
 git = "https://github.com/Joakker/tree-sitter-json5.git"
-rev = "aa630ef48903ab99e406a8acd2e2933077cc34e1"
+rev = "8cb4114a4d7e5bab75d74466422e032de31d83df"
 version = "0.1.0"
 variant = "JSON5"
 display_name = "JSON5"
