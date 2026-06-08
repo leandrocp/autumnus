@@ -102,7 +102,7 @@ shebang = ["tcc"]
 
 [parsers.caddy]
 git = "https://github.com/opa-oz/tree-sitter-caddy.git"
-rev = "2686186edb61be47960431c93a204fb249681360"
+rev = "b6e5870e059a09b1258712ad226a47be78f08d56"
 crate = "tree-sitter-caddy"
 version = "0.1.0"
 globs = ["Caddyfile", "caddyfile"]
