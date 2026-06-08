@@ -165,7 +165,7 @@ emacs = ["csharp"]
 
 [parsers.css]
 git = "https://github.com/tree-sitter/tree-sitter-css.git"
-rev = "147df05b08816a52b0ccf90b390506297f554b7d"
+rev = "dda5cfc5722c429eaba1c910ca32c2c0c5bb1a3f"
 crate = "tree-sitter-css"
 version = "0.25.0"
 variant = "CSS"
