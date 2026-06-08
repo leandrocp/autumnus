@@ -885,7 +885,7 @@ globs = ["*.d"]
 
 [parsers.fortran]
 git = "https://github.com/stadelmanma/tree-sitter-fortran.git"
-rev = "be30d90dc7dfa4080b9c4abed3f400c9163a88df"
+rev = "64e11001d7ef3e8ac18e55a3a2d811fe36430923"
 crate = "tree-sitter-fortran"
 version = "0.5.1"
 globs = ["*.f", "*.f03", "*.f08", "*.f90", "*.f95", "*.for", "*.ftn"]
