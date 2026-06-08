@@ -131,7 +131,7 @@ version = "0.3.0"
 
 [parsers.commonlisp]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-commonlisp.git"
-rev = "32323509b3d9fe96607d151c2da2c9009eb13a2f"
+rev = "9db594efb43574c5fe4a1f880568b1f0d0ee6057"
 crate = "tree-sitter-commonlisp"
 version = "0.4.1"
 variant = "CommonLisp"
