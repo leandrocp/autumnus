@@ -460,7 +460,7 @@ globs = ["*.md", ".MD", "README", "LICENSE"]
 
 [parsers.markdown_inline]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-markdown.git"
-rev = "cee71b8288f2ec09c29415219ac15a654bd571b9"
+rev = "f969cd3ae3f9fbd4e43205431d0ae286014c05b5"
 crate = "tree-sitter-md"
 version = "0.5.3"
 location = "tree-sitter-markdown-inline"
