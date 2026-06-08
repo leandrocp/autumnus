@@ -765,8 +765,8 @@ globs = [".editorconfig"]
 
 [parsers.gitattributes]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-gitattributes.git"
-rev = "1b7af09d45b579f9f288453b95ad555f1f431645"
-version = "0.2.0"
+rev = "0750b5904f37d6b2f47f6e4655001c2c35a172ec"
+version = "0.1.6"
 display_name = "Git Attributes"
 globs = [".gitattributes", "gitattributes"]
 

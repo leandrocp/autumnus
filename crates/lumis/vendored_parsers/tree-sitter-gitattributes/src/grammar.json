@@ -1,5 +1,4 @@
 {
-  "$schema": "https://tree-sitter.github.io/tree-sitter/assets/schemas/grammar.schema.json",
   "name": "gitattributes",
   "word": "attr_name",
   "rules": {
@@ -950,6 +949,10 @@
         }
       ]
     },
+    "_eol": {
+      "type": "PATTERN",
+      "value": "\\r?\\n"
+    },
     "_space": {
       "type": "PREC",
       "value": -1,
@@ -957,10 +960,6 @@
         "type": "PATTERN",
         "value": "[ \\t]+"
       }
-    },
-    "_eol": {
-      "type": "PATTERN",
-      "value": "\\r?\\n"
     },
     "_eof": {
       "type": "STRING",
@@ -972,6 +971,5 @@
   "precedences": [],
   "externals": [],
   "inline": [],
-  "supertypes": [],
-  "reserved": {}
+  "supertypes": []
 }
