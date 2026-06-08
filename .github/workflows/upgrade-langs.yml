@@ -46,8 +46,25 @@ jobs:
           echo "Generated matrix for languages: $LANGS"
           echo "languages=$LANGS" >> "$GITHUB_OUTPUT"
 
+  rust-cache:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "crates/dev -> target"
+          shared-key: upgrade-langs-dev
+
+      - name: Build dev tool
+        run: cargo build --manifest-path crates/dev/Cargo.toml --no-default-features
+
   upgrade-languages:
-    needs: generate-matrix
+    needs: [generate-matrix, rust-cache]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -62,6 +79,13 @@ jobs:
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "crates/dev -> target"
+          shared-key: upgrade-langs-dev
+          save-if: false
 
       - uses: taiki-e/install-action@just
 

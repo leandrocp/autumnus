@@ -851,6 +851,11 @@ fn git_resolve_version_tag(url: &str, version: &str) -> Option<String> {
     None
 }
 
+fn crates_io_version_exists(crate_name: &str, version: &str) -> bool {
+    let url = format!("https://crates.io/api/v1/crates/{crate_name}/{version}");
+    ureq::get(&url).call().is_ok()
+}
+
 fn tmpdir() -> Result<String> {
     run_cmd("mktemp -d")
 }
@@ -987,8 +992,14 @@ fn upgrade_parsers(name: &str) -> Result<()> {
         }
 
         let current_ver = info.version.as_deref().unwrap_or("");
-        let ver = resolve_upstream_version(git, &candidate_rev, info.location.as_deref())
-            .unwrap_or_else(|| current_ver.to_string());
+        let upstream_ver = resolve_upstream_version(git, &candidate_rev, info.location.as_deref());
+        let ver = if let Some(crate_name) = info.crate_field.as_deref() {
+            upstream_ver
+                .filter(|version| crates_io_version_exists(crate_name, version))
+                .unwrap_or_else(|| current_ver.to_string())
+        } else {
+            upstream_ver.unwrap_or_else(|| current_ver.to_string())
+        };
         let new_rev = if info.crate_field.is_some() {
             git_resolve_version_tag(git, &ver).unwrap_or(candidate_rev)
         } else {
