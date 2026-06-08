@@ -808,6 +808,12 @@ fn git_ls_remote(url: &str) -> Result<String> {
     run_cmd(&format!("git ls-remote {url} HEAD | cut -f1"))
 }
 
+fn normalize_git_url(url: &str) -> String {
+    url.trim_end_matches('/')
+        .trim_end_matches(".git")
+        .to_ascii_lowercase()
+}
+
 fn is_full_git_sha(rev: &str) -> bool {
     rev.len() == 40 && rev.bytes().all(|byte| byte.is_ascii_hexdigit())
 }
@@ -834,6 +840,15 @@ fn git_resolve_rev(url: &str, rev: &str) -> Result<String> {
         .map(str::to_string)
         .filter(|resolved| !resolved.is_empty())
         .with_context(|| format!("could not resolve git revision {rev} from {url}"))
+}
+
+fn git_resolve_version_tag(url: &str, version: &str) -> Option<String> {
+    for tag in [format!("v{version}"), version.to_string()] {
+        if let Ok(rev) = git_resolve_rev(url, &tag) {
+            return Some(rev);
+        }
+    }
+    None
 }
 
 fn tmpdir() -> Result<String> {
@@ -892,7 +907,7 @@ fn langs_list() -> Result<()> {
     Ok(())
 }
 
-fn resolve_upstream_version(git_url: &str, rev: &str, location: Option<&str>) -> String {
+fn resolve_upstream_version(git_url: &str, rev: &str, location: Option<&str>) -> Option<String> {
     let raw_base = git_url
         .trim_end_matches(".git")
         .replace("github.com", "raw.githubusercontent.com");
@@ -930,10 +945,10 @@ fn resolve_upstream_version(git_url: &str, rev: &str, location: Option<&str>) ->
     }
 
     if let Some(version) = versions.into_iter().max() {
-        return version.to_string();
+        return Some(version.to_string());
     }
 
-    "0.0.1".to_string()
+    None
 }
 
 fn upgrade_parsers(name: &str) -> Result<()> {
@@ -951,25 +966,35 @@ fn upgrade_parsers(name: &str) -> Result<()> {
         }
 
         let lua_code = format!(
-            "local parsers = dofile('{tmp}/parsers.lua'); local li = parsers['{parser_name}']; if li and li.install_info and li.install_info.revision then print(li.install_info.revision) end"
+            "local parsers = dofile('{tmp}/parsers.lua'); local li = parsers['{parser_name}']; if li and li.install_info then print((li.install_info.url or '') .. '\\t' .. (li.install_info.revision or '')) end"
         );
-        let rev_from_lua =
+        let install_info_from_lua =
             run_cmd(&format!("lua -e \"{lua_code}\" 2>/dev/null")).unwrap_or_default();
+        let (url_from_lua, rev_from_lua) =
+            install_info_from_lua.split_once('\t').unwrap_or(("", ""));
 
-        let new_rev = if !rev_from_lua.is_empty() {
+        let candidate_rev = if !rev_from_lua.is_empty()
+            && normalize_git_url(url_from_lua) == normalize_git_url(git)
+        {
             git_resolve_rev(git, &rev_from_lua)?
         } else {
             git_ls_remote(git)?
         };
 
-        if new_rev.is_empty() {
+        if candidate_rev.is_empty() {
             println!("Warning: could not resolve revision for {parser_name}, skipping");
             continue;
         }
 
-        let ver = resolve_upstream_version(git, &new_rev, info.location.as_deref());
-        let current_rev = info.rev.as_deref().unwrap_or("");
         let current_ver = info.version.as_deref().unwrap_or("");
+        let ver = resolve_upstream_version(git, &candidate_rev, info.location.as_deref())
+            .unwrap_or_else(|| current_ver.to_string());
+        let new_rev = if info.crate_field.is_some() {
+            git_resolve_version_tag(git, &ver).unwrap_or(candidate_rev)
+        } else {
+            candidate_rev
+        };
+        let current_rev = info.rev.as_deref().unwrap_or("");
         if current_rev == new_rev && ver == current_ver {
             println!("  {parser_name}: already up to date ({current_rev}, {current_ver})");
         } else {
@@ -1013,8 +1038,8 @@ fn fetch_parsers(name: &str) -> Result<()> {
 
         println!("Fetching {parser_name} from {git} at {rev}");
 
-        let _ = run_cmd_ok(&format!("git clone {git} {clone_dir} 2>/dev/null"));
-        let _ = run_cmd_ok(&format!("cd {clone_dir} && git checkout {rev} 2>/dev/null"));
+        run_cmd_ok(&format!("git clone {git} {clone_dir} 2>/dev/null"))?;
+        run_cmd_ok(&format!("cd {clone_dir} && git checkout {rev} 2>/dev/null"))?;
 
         let dest = format!("crates/lumis/vendored_parsers/{parser_dir}");
 
