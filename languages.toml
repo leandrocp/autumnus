@@ -353,7 +353,7 @@ globs = ["*.iex"]
 
 [parsers.ini]
 git = "https://github.com/justinmk/tree-sitter-ini.git"
-rev = "e4018b5176132b4f3c5d6e61cea383f42288d0f5"
+rev = "f0285fe577ad298ad79f8633e643ad60646e3027"
 crate = "tree-sitter-ini"
 version = "1.4.0"
 variant = "INI"
