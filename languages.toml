@@ -347,7 +347,7 @@ globs = ["*.http", "*.rest"]
 [parsers.iex]
 git = "https://github.com/elixir-lang/tree-sitter-iex.git"
 rev = "39f20bb51f502e32058684e893c0c0b00bb2332c"
-version = "0.1.0"
+version = "0.0.1"
 variant = "IEx"
 globs = ["*.iex"]
 
