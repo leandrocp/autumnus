@@ -955,7 +955,7 @@ globs = ["*.just", ".just", ".justfile", ".JUSTFILE", ".Justfile", "justfile", "
 
 [parsers.matlab]
 git = "https://github.com/acristoffers/tree-sitter-matlab.git"
-rev = "c2390a59016f74e7d5f75ef09510768b4f30217e"
+rev = "c892c8530e70e4a96e0b130c820e8989925fb9a1"
 crate = "tree-sitter-matlab"
 version = "1.3.0"
 display_name = "MATLAB"
