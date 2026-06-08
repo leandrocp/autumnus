@@ -282,8 +282,8 @@ emacs = ["gleam"]
 
 [parsers.glimmer]
 git = "https://github.com/ember-tooling/tree-sitter-glimmer.git"
-rev = "88af85568bde3b91acb5d4c352ed094d0c1f9d84"
-version = "1.6.0"
+rev = "3e66b67efeba1a2001859f6e02d16e0bbdbf4a9b"
+version = "1.3.0"
 aliases = ["ember", "handlebars"]
 globs = ["*.hbs", "*.handlebars", "*.html.handlebars", "*.glimmer"]
 
