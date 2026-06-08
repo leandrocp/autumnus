@@ -499,9 +499,9 @@ emacs = ["objc"]
 
 [parsers.ocaml]
 git = "https://github.com/tree-sitter/tree-sitter-ocaml.git"
-rev = "432adf64cb083773619bce38835e0084cf484d36"
+rev = "6902a86ab5b3b80c622030210aae2d8cb95eb775"
 crate = "tree-sitter-ocaml"
-version = "0.24.2"
+version = "0.25.0"
 location = "grammars/ocaml"
 variant = "OCaml"
 globs = ["*.ml"]
