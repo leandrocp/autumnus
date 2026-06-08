@@ -322,7 +322,7 @@ emacs = ["hcl"]
 
 [parsers.heex]
 git = "https://github.com/phoenixframework/tree-sitter-heex.git"
-rev = "b5a7cb5f74dc695a9ff5f04919f872ebc7a895e9"
+rev = "008626a3fad379d17c81d5ed576edd9bd7a4fbf7"
 crate = "tree-sitter-heex"
 version = "0.8.1"
 variant = "HEEx"
