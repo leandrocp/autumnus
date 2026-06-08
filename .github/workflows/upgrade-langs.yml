@@ -111,17 +111,8 @@ jobs:
       - name: Install JavaScript dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Upgrade parser revision
-        run: just langs-upgrade-parsers ${{ matrix.language }}
-
-      - name: Upgrade query revisions
-        run: just langs-upgrade-queries ${{ matrix.language }}
-
-      - name: Regenerate language outputs
-        run: just langs-update ${{ matrix.language }}
-
-      - name: Regenerate JavaScript outputs
-        run: pnpm --filter @lumis-sh/lumis build:generate
+      - name: Upgrade language
+        run: just langs-upgrade ${{ matrix.language }}
 
       - name: Check for changes
         id: check-changes

@@ -808,12 +808,6 @@ fn git_ls_remote(url: &str) -> Result<String> {
     run_cmd(&format!("git ls-remote {url} HEAD | cut -f1"))
 }
 
-fn normalize_git_url(url: &str) -> String {
-    url.trim_end_matches('/')
-        .trim_end_matches(".git")
-        .to_ascii_lowercase()
-}
-
 fn is_full_git_sha(rev: &str) -> bool {
     rev.len() == 40 && rev.bytes().all(|byte| byte.is_ascii_hexdigit())
 }
@@ -851,9 +845,85 @@ fn git_resolve_version_tag(url: &str, version: &str) -> Option<String> {
     None
 }
 
-fn crates_io_version_exists(crate_name: &str, version: &str) -> bool {
-    let url = format!("https://crates.io/api/v1/crates/{crate_name}/{version}");
-    ureq::get(&url).call().is_ok()
+fn semver_from_tag(tag: &str) -> Option<semver::Version> {
+    semver::Version::parse(tag.strip_prefix('v').unwrap_or(tag)).ok()
+}
+
+fn git_latest_release_rev(url: &str) -> Result<Option<(String, String)>> {
+    let output = Command::new("git")
+        .args(["ls-remote", "--tags", url])
+        .output()
+        .with_context(|| format!("failed to list git tags from {url}"))?;
+    if !output.status.success() {
+        bail!("failed to list git tags from {url}");
+    }
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let mut tags = BTreeMap::<semver::Version, String>::new();
+    for line in stdout.lines() {
+        let Some((_, reference)) = line.split_once('\t') else {
+            continue;
+        };
+        let Some(tag) = reference.strip_prefix("refs/tags/") else {
+            continue;
+        };
+        if tag.ends_with("^{}") {
+            continue;
+        }
+        let Some(version) = semver_from_tag(tag) else {
+            continue;
+        };
+        if !version.pre.is_empty() {
+            continue;
+        }
+        tags.insert(version, tag.to_string());
+    }
+
+    let Some((version, tag)) = tags.into_iter().next_back() else {
+        return Ok(None);
+    };
+    let rev = git_resolve_rev(url, &tag)?;
+    Ok(Some((version.to_string(), rev)))
+}
+
+fn latest_crate_version(crate_name: &str) -> Result<Option<String>> {
+    let url = format!("https://crates.io/api/v1/crates/{crate_name}");
+    let Ok(mut resp) = ureq::get(&url).call() else {
+        return Ok(None);
+    };
+    let body = resp.body_mut().read_to_string()?;
+    let value: Value = serde_json::from_str(&body)?;
+    let Some(versions) = value
+        .get("versions")
+        .and_then(|versions| versions.as_array())
+    else {
+        return Ok(None);
+    };
+
+    let mut latest = None;
+    for version in versions {
+        if version
+            .get("yanked")
+            .and_then(|yanked| yanked.as_bool())
+            .unwrap_or(true)
+        {
+            continue;
+        }
+        let Some(num) = version.get("num").and_then(|num| num.as_str()) else {
+            continue;
+        };
+        let Ok(parsed) = semver::Version::parse(num) else {
+            continue;
+        };
+        if !parsed.pre.is_empty() {
+            continue;
+        }
+        latest = Some(latest.map_or(parsed.clone(), |current: semver::Version| {
+            current.max(parsed)
+        }));
+    }
+
+    Ok(latest.map(|version| version.to_string()))
 }
 
 fn tmpdir() -> Result<String> {
@@ -912,57 +982,9 @@ fn langs_list() -> Result<()> {
     Ok(())
 }
 
-fn resolve_upstream_version(git_url: &str, rev: &str, location: Option<&str>) -> Option<String> {
-    let raw_base = git_url
-        .trim_end_matches(".git")
-        .replace("github.com", "raw.githubusercontent.com");
-
-    let mut urls = Vec::new();
-
-    if let Some(location) = location {
-        urls.push(format!("{raw_base}/{rev}/{location}/package.json"));
-        urls.push(format!("{raw_base}/{rev}/{location}/tree-sitter.json"));
-    }
-
-    urls.push(format!("{raw_base}/{rev}/package.json"));
-    urls.push(format!("{raw_base}/{rev}/tree-sitter.json"));
-
-    let mut versions = Vec::new();
-
-    for url in urls {
-        let Ok(mut resp) = ureq::get(&url).call() else {
-            continue;
-        };
-        let Ok(body) = resp.body_mut().read_to_string() else {
-            continue;
-        };
-        if let Ok(obj) = serde_json::from_str::<serde_json::Value>(&body) {
-            if let Some(ver) = obj.get("version").and_then(|v| v.as_str()).or_else(|| {
-                obj.get("metadata")
-                    .and_then(|m| m.get("version"))
-                    .and_then(|v| v.as_str())
-            }) {
-                if let Ok(parsed) = semver::Version::parse(ver) {
-                    versions.push(parsed);
-                }
-            }
-        }
-    }
-
-    if let Some(version) = versions.into_iter().max() {
-        return Some(version.to_string());
-    }
-
-    None
-}
-
 fn upgrade_parsers(name: &str) -> Result<()> {
     let mut doc = read_languages_toml_edit()?;
     let toml = read_languages_toml()?;
-
-    let tmp = tmpdir()?;
-    let parsers_lua_url = "https://raw.githubusercontent.com/nvim-treesitter/nvim-treesitter/main/lua/nvim-treesitter/parsers.lua";
-    run_cmd_ok(&format!("curl -sL {parsers_lua_url} -o {tmp}/parsers.lua"))?;
 
     for (parser_name, info) in &toml.parsers {
         let Some(ref git) = info.git else { continue };
@@ -970,42 +992,30 @@ fn upgrade_parsers(name: &str) -> Result<()> {
             continue;
         }
 
-        let lua_code = format!(
-            "local parsers = dofile('{tmp}/parsers.lua'); local li = parsers['{parser_name}']; if li and li.install_info then print((li.install_info.url or '') .. '\\t' .. (li.install_info.revision or '')) end"
-        );
-        let install_info_from_lua =
-            run_cmd(&format!("lua -e \"{lua_code}\" 2>/dev/null")).unwrap_or_default();
-        let (url_from_lua, rev_from_lua) =
-            install_info_from_lua.split_once('\t').unwrap_or(("", ""));
-
-        let candidate_rev = if !rev_from_lua.is_empty()
-            && normalize_git_url(url_from_lua) == normalize_git_url(git)
-        {
-            git_resolve_rev(git, &rev_from_lua)?
+        let current_ver = info.version.as_deref().unwrap_or("");
+        let current_rev = info.rev.as_deref().unwrap_or("");
+        let (ver, new_rev) = if let Some(crate_name) = info.crate_field.as_deref() {
+            let ver = latest_crate_version(crate_name)?.unwrap_or_else(|| current_ver.to_string());
+            let rev = git_resolve_version_tag(git, &ver)
+                .or_else(|| {
+                    git_latest_release_rev(git)
+                        .ok()
+                        .flatten()
+                        .map(|(_, rev)| rev)
+                })
+                .unwrap_or_else(|| git_ls_remote(git).unwrap_or_default());
+            (ver, rev)
+        } else if let Some((ver, rev)) = git_latest_release_rev(git)? {
+            (ver, rev)
         } else {
-            git_ls_remote(git)?
+            (current_ver.to_string(), git_ls_remote(git)?)
         };
 
-        if candidate_rev.is_empty() {
+        if new_rev.is_empty() {
             println!("Warning: could not resolve revision for {parser_name}, skipping");
             continue;
         }
 
-        let current_ver = info.version.as_deref().unwrap_or("");
-        let upstream_ver = resolve_upstream_version(git, &candidate_rev, info.location.as_deref());
-        let ver = if let Some(crate_name) = info.crate_field.as_deref() {
-            upstream_ver
-                .filter(|version| crates_io_version_exists(crate_name, version))
-                .unwrap_or_else(|| current_ver.to_string())
-        } else {
-            upstream_ver.unwrap_or_else(|| current_ver.to_string())
-        };
-        let new_rev = if info.crate_field.is_some() {
-            git_resolve_version_tag(git, &ver).unwrap_or(candidate_rev)
-        } else {
-            candidate_rev
-        };
-        let current_rev = info.rev.as_deref().unwrap_or("");
         if current_rev == new_rev && ver == current_ver {
             println!("  {parser_name}: already up to date ({current_rev}, {current_ver})");
         } else {
@@ -1013,16 +1023,14 @@ fn upgrade_parsers(name: &str) -> Result<()> {
                 println!("  {parser_name}: {current_rev} -> {new_rev}");
                 doc["parsers"][parser_name.as_str()]["rev"] = toml_edit::value(&new_rev);
             }
-        }
-
-        if ver != current_ver {
-            println!("    version: {current_ver} -> {ver}");
-            doc["parsers"][parser_name.as_str()]["version"] = toml_edit::value(&ver);
+            if ver != current_ver {
+                println!("    version: {current_ver} -> {ver}");
+                doc["parsers"][parser_name.as_str()]["version"] = toml_edit::value(&ver);
+            }
         }
     }
 
     write_languages_toml_edit(&doc)?;
-    let _ = run_cmd_ok(&format!("rm -rf {tmp}"));
     Ok(())
 }
 

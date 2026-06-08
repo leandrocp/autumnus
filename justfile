@@ -305,6 +305,13 @@ langs-list:
 cargo-update-features:
     cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- cargo-update-features
 
+# Upgrade language parser, queries, generated outputs, and docs, eg: just langs-upgrade bash
+langs-upgrade name:
+    just langs-upgrade-parsers {{name}}
+    just langs-upgrade-queries {{name}}
+    just langs-update {{name}}
+    pnpm --filter @lumis-sh/lumis build:generate
+
 # Upgrade parser revisions and sync crate-backed versions, eg: just langs-upgrade-parsers bash
 langs-upgrade-parsers name="":
     cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- upgrade-parsers {{name}}
