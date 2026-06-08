@@ -93,7 +93,7 @@ shebang = ["ash", "bash", "dash", "ksh", "mksh", "pdksh", "rc", "sh"]
 
 [parsers.c]
 git = "https://github.com/tree-sitter/tree-sitter-c.git"
-rev = "7fa1be1b694b6e763686793d97da01f36a0e5c12"
+rev = "ae19b676b13bdcc13b7665397e6d9b14975473dd"
 crate = "tree-sitter-c"
 version = "0.24.1"
 globs = ["*.c"]
