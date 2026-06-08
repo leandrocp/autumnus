@@ -69,7 +69,7 @@ globs = ["*.s", "*.asm", "*.assembly"]
 [parsers.astro]
 git = "https://github.com/virchau13/tree-sitter-astro.git"
 rev = "213f6e6973d9b456c6e50e86f19f66877e7ef0ee"
-version = "0.1.0"
+version = "0.0.1"
 globs = ["*.astro"]
 
 [parsers.bash]
