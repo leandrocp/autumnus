@@ -1001,7 +1001,7 @@ shebang = ["racket"]
 
 [parsers.rst]
 git = "https://github.com/stsewd/tree-sitter-rst.git"
-rev = "4e562e1598b95b93db4f3f64fe40ddefbc677a15"
+rev = "ab09cab886a947c62a8c6fa94d3ad375f3f6a73d"
 crate = "tree-sitter-rst"
 version = "0.2.0"
 aliases = ["restructuredtext"]
