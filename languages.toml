@@ -109,7 +109,7 @@ globs = ["Caddyfile", "caddyfile"]
 
 [parsers.clojure]
 git = "https://github.com/sogaiu/tree-sitter-clojure.git"
-rev = "e43eff80d17cf34852dcd92ca5e6986d23a7040f"
+rev = "3a1ace906c151dd631cf6f149b5083f2b60e6a9e"
 crate = "tree-sitter-clojure-orchard"
 version = "0.2.5"
 globs = ["*.bb", "*.boot", "*.clj", "*.cljc", "*.clje", "*.cljs", "*.cljx", "*.edn", "*.joke", "*.joker"]
