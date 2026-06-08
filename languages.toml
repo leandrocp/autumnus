@@ -1011,7 +1011,7 @@ globs = ["*.rst"]
 
 [parsers.scheme]
 git = "https://github.com/6cdh/tree-sitter-scheme.git"
-rev = "c6cb7c7d7a04b3f5d999c28e2e9c0c31b2d50ece"
+rev = "1e4d38d650bf6b53930ec9d41a7000775c134039"
 crate = "tree-sitter-scheme"
 version = "0.24.7"
 globs = ["*.scm", "*.sld", "*.ss"]
