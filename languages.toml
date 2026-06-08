@@ -46,7 +46,7 @@ path = "queries"
 
 [queries.wat]
 git = "https://github.com/helix-editor/helix.git"
-rev = "79c7203a388e1ac7aa6aebfc2e4c9a91b6efc97a"
+rev = "3d3aa794fd62c6355feb9c97499b67b0c8729f83"
 path = "runtime/queries/wat"
 
 # -- Parsers
