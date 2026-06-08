@@ -425,7 +425,7 @@ globs = ["*liquid"]
 
 [parsers.llvm]
 git = "https://github.com/benwilliamgraham/tree-sitter-llvm.git"
-rev = "2914786ae6774d4c4e25a230f4afe16aa68fe1c1"
+rev = "76529b44d8de1e91f49f1f3ed34ec823d8feab89"
 crate = "tree-sitter-llvm"
 version = "1.1.0"
 display_name = "LLVM"
