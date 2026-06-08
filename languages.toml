@@ -676,7 +676,7 @@ shebang = ["deno", "ts-node"]
 
 [parsers.typst]
 git = "https://github.com/uben0/tree-sitter-typst.git"
-rev = "46cf4ded12ee974a70bf8457263b67ad7ee0379d"
+rev = "13863ddcbaa7b68ee6221cea2e3143415e64aea4"
 crate = "codebook-tree-sitter-typst"
 version = "0.12.1"
 globs = ["*.typ", "*.typst"]
