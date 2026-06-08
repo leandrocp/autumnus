@@ -705,7 +705,7 @@ globs = ["*.wat"]
 
 [parsers.xml]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-xml.git"
-rev = "5000ae8f22d11fbe93939b05c1e37cf21117162d"
+rev = "4b64dd3a03ec002258d6268d712fd93716d6ab57"
 crate = "tree-sitter-xml"
 version = "0.7.0"
 location = "xml"
