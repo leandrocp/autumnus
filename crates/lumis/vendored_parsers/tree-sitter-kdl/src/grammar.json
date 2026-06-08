@@ -786,6 +786,80 @@
       "type": "PATTERN",
       "value": "[0-9a-fA-F]"
     },
+    "_raw_string": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "IMMEDIATE_TOKEN",
+                  "content": {
+                    "type": "SEQ",
+                    "members": [
+                      {
+                        "type": "STRING",
+                        "value": "r"
+                      },
+                      {
+                        "type": "REPEAT1",
+                        "content": {
+                          "type": "STRING",
+                          "value": "#"
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "PATTERN",
+                  "value": "[^#]*"
+                },
+                {
+                  "type": "REPEAT1",
+                  "content": {
+                    "type": "STRING",
+                    "value": "#"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "IMMEDIATE_TOKEN",
+                  "content": {
+                    "type": "SEQ",
+                    "members": [
+                      {
+                        "type": "STRING",
+                        "value": "r"
+                      },
+                      {
+                        "type": "STRING",
+                        "value": "\""
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "PATTERN",
+                  "value": "[^\"]*"
+                },
+                {
+                  "type": "STRING",
+                  "value": "\""
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
     "number": {
       "type": "CHOICE",
       "members": [
@@ -1256,12 +1330,9 @@
     {
       "type": "SYMBOL",
       "name": "multi_line_comment"
-    },
-    {
-      "type": "SYMBOL",
-      "name": "_raw_string"
     }
   ],
   "inline": [],
   "supertypes": []
 }
+
