@@ -289,7 +289,7 @@ globs = ["*.hbs", "*.handlebars", "*.html.handlebars", "*.glimmer"]
 
 [parsers.go]
 git = "https://github.com/tree-sitter/tree-sitter-go.git"
-rev = "6048bfc6e5238eaf062c2221bd934489c39fbb61"
+rev = "2346a3ab1bb3857b48b29d779a1ef9799a248cd7"
 crate = "tree-sitter-go"
 version = "0.25.0"
 globs = ["*.go"]
