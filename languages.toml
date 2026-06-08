@@ -211,7 +211,7 @@ globs = ["*.eex"]
 
 [parsers.ejs]
 git = "https://github.com/tree-sitter/tree-sitter-embedded-template.git"
-rev = "3499d85f0a0d937c507a4a65368f2f63772786e1"
+rev = "c70c1de07dedd532089c0c90835c8ed9fa694f5c"
 crate = "tree-sitter-embedded-template"
 version = "0.25.0"
 wasm_name = "tree-sitter-embedded-template"
