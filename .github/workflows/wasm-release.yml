@@ -22,7 +22,7 @@ on:
       - "packages/javascript/lumis/src/generated/**"
       - "packages/javascript/wasm-bundle-*/**"
       - ".github/workflows/wasm-release.yml"
-      - ".github/workflows/update-langs.yml"
+      - ".github/workflows/upgrade-langs.yml"
   workflow_dispatch:
     inputs:
       parser:

@@ -82,6 +82,10 @@ jobs:
               - 'languages.toml'
               - '.github/workflows/conformance.yml'
             elixir:
+              - 'crates/lumis/**'
+              - 'crates/lumis-core/**'
+              - 'queries/**'
+              - 'languages.toml'
               - 'packages/elixir/lumis/**'
               - 'fixtures/conformance/**'
               - '.github/workflows/conformance.yml'

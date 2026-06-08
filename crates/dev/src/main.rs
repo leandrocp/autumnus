@@ -808,6 +808,34 @@ fn git_ls_remote(url: &str) -> Result<String> {
     run_cmd(&format!("git ls-remote {url} HEAD | cut -f1"))
 }
 
+fn is_full_git_sha(rev: &str) -> bool {
+    rev.len() == 40 && rev.bytes().all(|byte| byte.is_ascii_hexdigit())
+}
+
+fn git_resolve_rev(url: &str, rev: &str) -> Result<String> {
+    if is_full_git_sha(rev) {
+        return Ok(rev.to_string());
+    }
+
+    let output = Command::new("git")
+        .args(["ls-remote", url, rev, &format!("{rev}^{{}}")])
+        .output()
+        .with_context(|| format!("failed to resolve git revision {rev} from {url}"))?;
+    if !output.status.success() {
+        bail!("failed to resolve git revision {rev} from {url}");
+    }
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    stdout
+        .lines()
+        .find(|line| line.ends_with("^{}"))
+        .or_else(|| stdout.lines().next())
+        .and_then(|line| line.split_whitespace().next())
+        .map(str::to_string)
+        .filter(|resolved| !resolved.is_empty())
+        .with_context(|| format!("could not resolve git revision {rev} from {url}"))
+}
+
 fn tmpdir() -> Result<String> {
     run_cmd("mktemp -d")
 }
@@ -848,7 +876,12 @@ fn resolve_query_source<'a>(
 fn has_local_override_query(lang: &str) -> bool {
     ["highlights", "injections", "locals"]
         .iter()
-        .any(|query_type| Path::new("queries/override").join(lang).join(format!("{query_type}.scm")).exists())
+        .any(|query_type| {
+            Path::new("queries/override")
+                .join(lang)
+                .join(format!("{query_type}.scm"))
+                .exists()
+        })
 }
 
 fn langs_list() -> Result<()> {
@@ -924,7 +957,7 @@ fn upgrade_parsers(name: &str) -> Result<()> {
             run_cmd(&format!("lua -e \"{lua_code}\" 2>/dev/null")).unwrap_or_default();
 
         let new_rev = if !rev_from_lua.is_empty() {
-            rev_from_lua
+            git_resolve_rev(git, &rev_from_lua)?
         } else {
             git_ls_remote(git)?
         };
@@ -2418,8 +2451,11 @@ mod tests {
         let override_lang_dir = root.join("queries/override/demo");
 
         fs::create_dir_all(&override_lang_dir).expect("override dir should be created");
-        fs::write(override_lang_dir.join("locals.scm"), "(node) @local.scope\n")
-            .expect("override query should be written");
+        fs::write(
+            override_lang_dir.join("locals.scm"),
+            "(node) @local.scope\n",
+        )
+        .expect("override query should be written");
 
         let cwd = std::env::current_dir().expect("cwd should be available");
         std::env::set_current_dir(&root).expect("should switch to temp dir");
@@ -2440,14 +2476,20 @@ mod tests {
         let override_lang_dir = root.join("queries/override/demo");
 
         fs::create_dir_all(&override_lang_dir).expect("override dir should be created");
-        fs::write(override_lang_dir.join("highlights.scm"), "((comment) @comment)\n")
-            .expect("override query should be written");
+        fs::write(
+            override_lang_dir.join("highlights.scm"),
+            "((comment) @comment)\n",
+        )
+        .expect("override query should be written");
 
         let cwd = std::env::current_dir().expect("cwd should be available");
         std::env::set_current_dir(&root).expect("should switch to temp dir");
 
         let result = (|| {
-            assert_eq!(query_names().expect("query names should load"), vec!["demo"]);
+            assert_eq!(
+                query_names().expect("query names should load"),
+                vec!["demo"]
+            );
         })();
 
         std::env::set_current_dir(cwd).expect("should restore cwd");
