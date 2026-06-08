@@ -433,7 +433,7 @@ globs = ["*.llvm", "*.ll"]
 
 [parsers.lua]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-lua.git"
-rev = "816840c592ab973500ae9750763c707b447e7fef"
+rev = "10fe0054734eec83049514ea2e718b2a56acd0c9"
 crate = "tree-sitter-lua"
 version = "0.5.0"
 globs = ["*.lua"]
