@@ -274,7 +274,7 @@ emacs = ["fsharp"]
 
 [parsers.gleam]
 git = "https://github.com/gleam-lang/tree-sitter-gleam.git"
-rev = "0bb1b0ae1a3555180ae7b0004851da747fc230d1"
+rev = "2012f294baacf30e7a62414754021284377366c6"
 crate = "tree-sitter-gleam"
 version = "1.0.0"
 globs = ["*.gleam"]
