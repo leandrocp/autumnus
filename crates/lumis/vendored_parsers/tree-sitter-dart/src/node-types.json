@@ -169,6 +169,10 @@
           "named": true
         },
         {
+          "type": "dot_shorthand",
+          "named": true
+        },
+        {
           "type": "equality_expression",
           "named": true
         },
@@ -336,6 +340,10 @@
         },
         {
           "type": "constructor_tearoff",
+          "named": true
+        },
+        {
+          "type": "dot_shorthand",
           "named": true
         },
         {
@@ -559,6 +567,10 @@
           "named": true
         },
         {
+          "type": "dot_shorthand",
+          "named": true
+        },
+        {
           "type": "equality_expression",
           "named": true
         },
@@ -679,6 +691,10 @@
         },
         {
           "type": "constructor_tearoff",
+          "named": true
+        },
+        {
+          "type": "dot_shorthand",
           "named": true
         },
         {
@@ -838,6 +854,10 @@
           },
           {
             "type": "constructor_tearoff",
+            "named": true
+          },
+          {
+            "type": "dot_shorthand",
             "named": true
           },
           {
@@ -1053,6 +1073,10 @@
             "named": true
           },
           {
+            "type": "dot_shorthand",
+            "named": true
+          },
+          {
             "type": "equality_expression",
             "named": true
           },
@@ -1158,6 +1182,10 @@
         },
         {
           "type": "constructor_tearoff",
+          "named": true
+        },
+        {
+          "type": "dot_shorthand",
           "named": true
         },
         {
@@ -1281,6 +1309,10 @@
         },
         {
           "type": "constructor_tearoff",
+          "named": true
+        },
+        {
+          "type": "dot_shorthand",
           "named": true
         },
         {
@@ -1412,6 +1444,10 @@
           "named": true
         },
         {
+          "type": "dot_shorthand",
+          "named": true
+        },
+        {
           "type": "equality_expression",
           "named": true
         },
@@ -1532,6 +1568,10 @@
         },
         {
           "type": "constructor_tearoff",
+          "named": true
+        },
+        {
+          "type": "dot_shorthand",
           "named": true
         },
         {
@@ -1708,6 +1748,10 @@
           "named": true
         },
         {
+          "type": "dot_shorthand",
+          "named": true
+        },
+        {
           "type": "equality_expression",
           "named": true
         },
@@ -1868,6 +1912,10 @@
         },
         {
           "type": "constructor_tearoff",
+          "named": true
+        },
+        {
+          "type": "dot_shorthand",
           "named": true
         },
         {
@@ -2253,6 +2301,10 @@
             "named": true
           },
           {
+            "type": "dot_shorthand",
+            "named": true
+          },
+          {
             "type": "equality_expression",
             "named": true
           },
@@ -2379,6 +2431,10 @@
             "named": true
           },
           {
+            "type": "dot_shorthand",
+            "named": true
+          },
+          {
             "type": "equality_expression",
             "named": true
           },
@@ -2499,6 +2555,10 @@
         },
         {
           "type": "constructor_tearoff",
+          "named": true
+        },
+        {
+          "type": "dot_shorthand",
           "named": true
         },
         {
@@ -2753,6 +2813,10 @@
         },
         {
           "type": "constructor_tearoff",
+          "named": true
+        },
+        {
+          "type": "dot_shorthand",
           "named": true
         },
         {
@@ -3077,6 +3141,10 @@
           "named": true
         },
         {
+          "type": "identifier",
+          "named": true
+        },
+        {
           "type": "identifier_list",
           "named": true
         },
@@ -3170,6 +3238,21 @@
     "named": true,
     "extra": true,
     "fields": {}
+  },
+  {
+    "type": "dot_shorthand",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "identifier",
+          "named": true
+        }
+      ]
+    }
   },
   {
     "type": "dotted_identifier_list",
@@ -3348,6 +3431,10 @@
           "named": true
         },
         {
+          "type": "dot_shorthand",
+          "named": true
+        },
+        {
           "type": "equality_expression",
           "named": true
         },
@@ -3485,6 +3572,10 @@
         },
         {
           "type": "constructor_tearoff",
+          "named": true
+        },
+        {
+          "type": "dot_shorthand",
           "named": true
         },
         {
@@ -3832,6 +3923,10 @@
           "named": true
         },
         {
+          "type": "dot_shorthand",
+          "named": true
+        },
+        {
           "type": "equality_expression",
           "named": true
         },
@@ -3943,6 +4038,10 @@
         "required": true,
         "types": [
           {
+            "type": "?",
+            "named": false
+          },
+          {
             "type": "_literal",
             "named": true
           },
@@ -3980,6 +4079,10 @@
           },
           {
             "type": "constructor_tearoff",
+            "named": true
+          },
+          {
+            "type": "dot_shorthand",
             "named": true
           },
           {
@@ -4153,6 +4256,10 @@
             "named": true
           },
           {
+            "type": "dot_shorthand",
+            "named": true
+          },
+          {
             "type": "equality_expression",
             "named": true
           },
@@ -4288,6 +4395,10 @@
           },
           {
             "type": "constructor_tearoff",
+            "named": true
+          },
+          {
+            "type": "dot_shorthand",
             "named": true
           },
           {
@@ -4443,6 +4554,10 @@
             "named": true
           },
           {
+            "type": "dot_shorthand",
+            "named": true
+          },
+          {
             "type": "equality_expression",
             "named": true
           },
@@ -4578,6 +4693,10 @@
           },
           {
             "type": "constructor_tearoff",
+            "named": true
+          },
+          {
+            "type": "dot_shorthand",
             "named": true
           },
           {
@@ -4725,6 +4844,10 @@
         },
         {
           "type": "constructor_tearoff",
+          "named": true
+        },
+        {
+          "type": "dot_shorthand",
           "named": true
         },
         {
@@ -5066,6 +5189,10 @@
           "named": true
         },
         {
+          "type": "dot_shorthand",
+          "named": true
+        },
+        {
           "type": "equality_expression",
           "named": true
         },
@@ -5240,6 +5367,10 @@
         },
         {
           "type": "constructor_tearoff",
+          "named": true
+        },
+        {
+          "type": "dot_shorthand",
           "named": true
         },
         {
@@ -5513,6 +5644,10 @@
         "required": false,
         "types": [
           {
+            "type": "?",
+            "named": false
+          },
+          {
             "type": "_literal",
             "named": true
           },
@@ -5550,6 +5685,10 @@
           },
           {
             "type": "constructor_tearoff",
+            "named": true
+          },
+          {
+            "type": "dot_shorthand",
             "named": true
           },
           {
@@ -5667,6 +5806,10 @@
         "required": true,
         "types": [
           {
+            "type": "?",
+            "named": false
+          },
+          {
             "type": "_literal",
             "named": true
           },
@@ -5704,6 +5847,10 @@
           },
           {
             "type": "constructor_tearoff",
+            "named": true
+          },
+          {
+            "type": "dot_shorthand",
             "named": true
           },
           {
@@ -5867,6 +6014,10 @@
         },
         {
           "type": "constructor_tearoff",
+          "named": true
+        },
+        {
+          "type": "dot_shorthand",
           "named": true
         },
         {
@@ -6049,6 +6200,10 @@
             "named": true
           },
           {
+            "type": "dot_shorthand",
+            "named": true
+          },
+          {
             "type": "equality_expression",
             "named": true
           },
@@ -6164,6 +6319,10 @@
           },
           {
             "type": "constructor_tearoff",
+            "named": true
+          },
+          {
+            "type": "dot_shorthand",
             "named": true
           },
           {
@@ -6325,6 +6484,10 @@
         },
         {
           "type": "constructor_tearoff",
+          "named": true
+        },
+        {
+          "type": "dot_shorthand",
           "named": true
         },
         {
@@ -6561,6 +6724,10 @@
           "named": true
         },
         {
+          "type": "dot_shorthand",
+          "named": true
+        },
+        {
           "type": "equality_expression",
           "named": true
         },
@@ -6706,6 +6873,10 @@
         },
         {
           "type": "constructor_tearoff",
+          "named": true
+        },
+        {
+          "type": "dot_shorthand",
           "named": true
         },
         {
@@ -6874,6 +7045,10 @@
           },
           {
             "type": "constructor_tearoff",
+            "named": true
+          },
+          {
+            "type": "dot_shorthand",
             "named": true
           },
           {
@@ -7264,6 +7439,10 @@
           "named": true
         },
         {
+          "type": "dot_shorthand",
+          "named": true
+        },
+        {
           "type": "equality_expression",
           "named": true
         },
@@ -7424,6 +7603,10 @@
         },
         {
           "type": "constructor_tearoff",
+          "named": true
+        },
+        {
+          "type": "dot_shorthand",
           "named": true
         },
         {
@@ -7644,6 +7827,10 @@
           "named": true
         },
         {
+          "type": "dot_shorthand",
+          "named": true
+        },
+        {
           "type": "equality_expression",
           "named": true
         },
@@ -7773,6 +7960,10 @@
         },
         {
           "type": "constructor_tearoff",
+          "named": true
+        },
+        {
+          "type": "dot_shorthand",
           "named": true
         },
         {
@@ -7921,6 +8112,10 @@
         },
         {
           "type": "constructor_tearoff",
+          "named": true
+        },
+        {
+          "type": "dot_shorthand",
           "named": true
         },
         {
@@ -8283,6 +8478,10 @@
           "named": true
         },
         {
+          "type": "dot_shorthand",
+          "named": true
+        },
+        {
           "type": "function_expression",
           "named": true
         },
@@ -8384,6 +8583,10 @@
         },
         {
           "type": "constructor_tearoff",
+          "named": true
+        },
+        {
+          "type": "dot_shorthand",
           "named": true
         },
         {
@@ -8640,6 +8843,10 @@
           "named": true
         },
         {
+          "type": "dot_shorthand",
+          "named": true
+        },
+        {
           "type": "equality_expression",
           "named": true
         },
@@ -8812,6 +9019,10 @@
         },
         {
           "type": "constructor_tearoff",
+          "named": true
+        },
+        {
+          "type": "dot_shorthand",
           "named": true
         },
         {
@@ -9002,6 +9213,10 @@
         },
         {
           "type": "constructor_tearoff",
+          "named": true
+        },
+        {
+          "type": "dot_shorthand",
           "named": true
         },
         {
@@ -9239,6 +9454,10 @@
           "named": true
         },
         {
+          "type": "dot_shorthand",
+          "named": true
+        },
+        {
           "type": "equality_expression",
           "named": true
         },
@@ -9420,6 +9639,10 @@
             "named": true
           },
           {
+            "type": "dot_shorthand",
+            "named": true
+          },
+          {
             "type": "equality_expression",
             "named": true
           },
@@ -9518,6 +9741,10 @@
         "required": true,
         "types": [
           {
+            "type": "?",
+            "named": false
+          },
+          {
             "type": "_literal",
             "named": true
           },
@@ -9555,6 +9782,10 @@
           },
           {
             "type": "constructor_tearoff",
+            "named": true
+          },
+          {
+            "type": "dot_shorthand",
             "named": true
           },
           {
@@ -9718,6 +9949,10 @@
         },
         {
           "type": "constructor_tearoff",
+          "named": true
+        },
+        {
+          "type": "dot_shorthand",
           "named": true
         },
         {
@@ -9918,6 +10153,10 @@
           "named": true
         },
         {
+          "type": "dot_shorthand",
+          "named": true
+        },
+        {
           "type": "equality_expression",
           "named": true
         },
@@ -10110,6 +10349,10 @@
         },
         {
           "type": "constructor_tearoff",
+          "named": true
+        },
+        {
+          "type": "dot_shorthand",
           "named": true
         },
         {
@@ -10512,6 +10755,10 @@
           "named": true
         },
         {
+          "type": "dot_shorthand",
+          "named": true
+        },
+        {
           "type": "equality_expression",
           "named": true
         },
@@ -10663,6 +10910,10 @@
           "named": true
         },
         {
+          "type": "dot_shorthand",
+          "named": true
+        },
+        {
           "type": "equality_expression",
           "named": true
         },
@@ -10811,6 +11062,10 @@
         },
         {
           "type": "constructor_tearoff",
+          "named": true
+        },
+        {
+          "type": "dot_shorthand",
           "named": true
         },
         {
@@ -11128,6 +11383,10 @@
           "named": true
         },
         {
+          "type": "dot_shorthand",
+          "named": true
+        },
+        {
           "type": "equality_expression",
           "named": true
         },
@@ -11336,6 +11595,10 @@
           "named": true
         },
         {
+          "type": "dot_shorthand",
+          "named": true
+        },
+        {
           "type": "equality_expression",
           "named": true
         },
@@ -11523,6 +11786,10 @@
         },
         {
           "type": "constructor_tearoff",
+          "named": true
+        },
+        {
+          "type": "dot_shorthand",
           "named": true
         },
         {
@@ -11740,6 +12007,10 @@
           "named": true
         },
         {
+          "type": "dot_shorthand",
+          "named": true
+        },
+        {
           "type": "equality_expression",
           "named": true
         },
@@ -11953,6 +12224,10 @@
           "named": true
         },
         {
+          "type": "dot_shorthand",
+          "named": true
+        },
+        {
           "type": "equality_expression",
           "named": true
         },
@@ -12090,6 +12365,10 @@
         },
         {
           "type": "constructor_tearoff",
+          "named": true
+        },
+        {
+          "type": "dot_shorthand",
           "named": true
         },
         {
@@ -12233,6 +12512,10 @@
         },
         {
           "type": "constructor_tearoff",
+          "named": true
+        },
+        {
+          "type": "dot_shorthand",
           "named": true
         },
         {
@@ -12581,6 +12864,10 @@
           "named": true
         },
         {
+          "type": "dot_shorthand",
+          "named": true
+        },
+        {
           "type": "equality_expression",
           "named": true
         },
@@ -12810,6 +13097,10 @@
           "named": true
         },
         {
+          "type": "dot_shorthand",
+          "named": true
+        },
+        {
           "type": "equality_expression",
           "named": true
         },
@@ -13035,6 +13326,10 @@
           "named": true
         },
         {
+          "type": "dot_shorthand",
+          "named": true
+        },
+        {
           "type": "equality_expression",
           "named": true
         },
@@ -13187,6 +13482,10 @@
           "named": true
         },
         {
+          "type": "dot_shorthand",
+          "named": true
+        },
+        {
           "type": "equality_expression",
           "named": true
         },
@@ -13323,6 +13622,10 @@
         },
         {
           "type": "constructor_tearoff",
+          "named": true
+        },
+        {
+          "type": "dot_shorthand",
           "named": true
         },
         {
@@ -13665,6 +13968,10 @@
           "named": true
         },
         {
+          "type": "dot_shorthand",
+          "named": true
+        },
+        {
           "type": "equality_expression",
           "named": true
         },
@@ -13869,6 +14176,10 @@
           "named": true
         },
         {
+          "type": "dot_shorthand",
+          "named": true
+        },
+        {
           "type": "equality_expression",
           "named": true
         },
@@ -14020,6 +14331,10 @@
         },
         {
           "type": "constructor_tearoff",
+          "named": true
+        },
+        {
+          "type": "dot_shorthand",
           "named": true
         },
         {
@@ -14260,6 +14575,10 @@
           "named": true
         },
         {
+          "type": "dot_shorthand",
+          "named": true
+        },
+        {
           "type": "equality_expression",
           "named": true
         },
@@ -14400,6 +14719,10 @@
         },
         {
           "type": "constructor_tearoff",
+          "named": true
+        },
+        {
+          "type": "dot_shorthand",
           "named": true
         },
         {
