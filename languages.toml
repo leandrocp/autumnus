@@ -977,7 +977,7 @@ globs = ["*.nginx", "nginx.conf"]
 
 [parsers.prisma]
 git = "https://github.com/LumaKernel/tree-sitter-prisma.git"
-rev = "3556b2c1f20ec9ac91e92d32c43d9d2a0ca3cc49"
+rev = "f1c30d82a5bf0b70ce33ef431f4acd7fd69968a3"
 version = "0.0.1"
 globs = ["*.prisma"]
 
