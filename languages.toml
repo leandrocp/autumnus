@@ -53,8 +53,8 @@ path = "runtime/queries/wat"
 
 [parsers.angular]
 git = "https://github.com/dlvandenberg/tree-sitter-angular.git"
-rev = "f0d0685701b70883fa2dfe94ee7dc27965cab841"
-version = "0.8.4"
+rev = "1446e647e50df96f6d4b1039f121b10b5c2b2976"
+version = "0.9.2"
 globs = ["*.angular", "component.html"]
 
 [parsers.asm]
