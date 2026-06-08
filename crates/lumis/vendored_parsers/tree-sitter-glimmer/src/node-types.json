@@ -1,10 +1,5 @@
 [
   {
-    "type": "attribute_name",
-    "named": true,
-    "fields": {}
-  },
-  {
     "type": "attribute_node",
     "named": true,
     "fields": {},
@@ -68,14 +63,6 @@
           },
           {
             "type": "mustache_statement",
-            "named": true
-          },
-          {
-            "type": "script_element",
-            "named": true
-          },
-          {
-            "type": "style_element",
             "named": true
           },
           {
@@ -233,14 +220,6 @@
           "named": true
         },
         {
-          "type": "script_element",
-          "named": true
-        },
-        {
-          "type": "style_element",
-          "named": true
-        },
-        {
           "type": "text_node",
           "named": true
         }
@@ -313,21 +292,6 @@
           "type": "mustache_statement",
           "named": true
         },
-        {
-          "type": "tag_name",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "end_tag",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
         {
           "type": "tag_name",
           "named": true
@@ -496,86 +460,9 @@
     }
   },
   {
-    "type": "script_element",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "end_tag",
-          "named": true
-        },
-        {
-          "type": "raw_text",
-          "named": true
-        },
-        {
-          "type": "start_tag",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "start_tag",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "attribute_node",
-          "named": true
-        },
-        {
-          "type": "block_params",
-          "named": true
-        },
-        {
-          "type": "comment_statement",
-          "named": true
-        },
-        {
-          "type": "mustache_statement",
-          "named": true
-        },
-        {
-          "type": "tag_name",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "string_literal",
     "named": true,
     "fields": {}
-  },
-  {
-    "type": "style_element",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "end_tag",
-          "named": true
-        },
-        {
-          "type": "raw_text",
-          "named": true
-        },
-        {
-          "type": "start_tag",
-          "named": true
-        }
-      ]
-    }
   },
   {
     "type": "sub_expression",
@@ -619,7 +506,6 @@
   {
     "type": "template",
     "named": true,
-    "root": true,
     "fields": {},
     "children": {
       "multiple": true,
@@ -639,14 +525,6 @@
         },
         {
           "type": "mustache_statement",
-          "named": true
-        },
-        {
-          "type": "script_element",
-          "named": true
-        },
-        {
-          "type": "style_element",
           "named": true
         },
         {
@@ -677,10 +555,6 @@
     "named": false
   },
   {
-    "type": "...attributes",
-    "named": false
-  },
-  {
     "type": "/>",
     "named": false
   },
@@ -705,6 +579,10 @@
     "named": false
   },
   {
+    "type": "attribute_name",
+    "named": true
+  },
+  {
     "type": "comment_statement",
     "named": true
   },
@@ -718,10 +596,6 @@
   },
   {
     "type": "number_literal",
-    "named": true
-  },
-  {
-    "type": "raw_text",
     "named": true
   },
   {
