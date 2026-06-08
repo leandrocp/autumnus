@@ -65,7 +65,6 @@
   {
     "type": "file",
     "named": true,
-    "root": true,
     "fields": {},
     "children": {
       "multiple": true,
@@ -289,10 +288,6 @@
         }
       ]
     }
-  },
-  {
-    "type": "\u0000",
-    "named": false
   },
   {
     "type": "\"",
