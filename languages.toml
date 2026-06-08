@@ -221,7 +221,7 @@ globs = ["*.ejs"]
 
 [parsers.elixir]
 git = "https://github.com/elixir-lang/tree-sitter-elixir.git"
-rev = "86ec2ed45d6d9433b4e0b88cd3d96796bd45625f"
+rev = "e2d9e6e0e76b0c436fa48a0b8c32a031d0cbdf49"
 crate = "tree-sitter-elixir"
 version = "0.3.5"
 globs = ["*.ex", "*.exs"]
