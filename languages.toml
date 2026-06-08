@@ -478,7 +478,7 @@ emacs = ["nix"]
 
 [parsers.nushell]
 git = "https://github.com/nushell/tree-sitter-nu.git"
-rev = "bb3f533e5792260291945e1f329e1f0a779def6e"
+rev = "348b787d8b0409091d85fe9d4eb007fe9f3406bb"
 version = "0.0.1"
 aliases = ["nu"]
 query_name = "nu"

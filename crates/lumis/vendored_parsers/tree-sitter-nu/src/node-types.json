@@ -231,10 +231,6 @@
       "required": false,
       "types": [
         {
-          "type": "assignment",
-          "named": true
-        },
-        {
           "type": "ctrl_for",
           "named": true
         },
@@ -481,6 +477,10 @@
         "multiple": true,
         "required": true,
         "types": [
+          {
+            "type": "%",
+            "named": false
+          },
           {
             "type": "^",
             "named": false
@@ -1038,6 +1038,20 @@
     "named": true,
     "fields": {
       "catch_branch": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "block",
+            "named": true
+          },
+          {
+            "type": "val_closure",
+            "named": true
+          }
+        ]
+      },
+      "finally_branch": {
         "multiple": false,
         "required": false,
         "types": [
@@ -1870,10 +1884,6 @@
       "required": false,
       "types": [
         {
-          "type": "assignment",
-          "named": true
-        },
-        {
           "type": "ctrl_for",
           "named": true
         },
@@ -1936,10 +1946,6 @@
       "multiple": true,
       "required": false,
       "types": [
-        {
-          "type": "assignment",
-          "named": true
-        },
         {
           "type": "cell_path",
           "named": true
@@ -2007,10 +2013,6 @@
       "multiple": true,
       "required": false,
       "types": [
-        {
-          "type": "assignment",
-          "named": true
-        },
         {
           "type": "ctrl_for",
           "named": true
@@ -2748,10 +2750,6 @@
       "required": false,
       "types": [
         {
-          "type": "assignment",
-          "named": true
-        },
-        {
           "type": "ctrl_for",
           "named": true
         },
@@ -3181,6 +3179,10 @@
       "multiple": true,
       "required": true,
       "types": [
+        {
+          "type": "assignment",
+          "named": true
+        },
         {
           "type": "command",
           "named": true
@@ -3907,10 +3909,6 @@
       "multiple": true,
       "required": false,
       "types": [
-        {
-          "type": "assignment",
-          "named": true
-        },
         {
           "type": "ctrl_for",
           "named": true
@@ -4686,6 +4684,10 @@
     "named": false
   },
   {
+    "type": "%",
+    "named": false
+  },
+  {
     "type": "'",
     "named": false
   },
@@ -5072,6 +5074,10 @@
   {
     "type": "filesize_unit",
     "named": true
+  },
+  {
+    "type": "finally",
+    "named": false
   },
   {
     "type": "float",
