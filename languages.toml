@@ -808,7 +808,7 @@ globs = ["*.kdl"]
 
 [parsers.luadoc]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-luadoc.git"
-rev = "873612aadd3f684dd4e631bdf42ea8990c57634e"
+rev = "818acda56809f994274de64a42f97f509b3c0ad2"
 version = "1.1.0"
 display_name = "LuaDoc"
 
