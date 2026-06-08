@@ -573,7 +573,7 @@ shebang = ["Rscript"]
 
 [parsers.regex]
 git = "https://github.com/tree-sitter/tree-sitter-regex.git"
-rev = "e51a4963a230af05222cb9c9e65e23778619cdab"
+rev = "b2ac15e27fce703d2f37a79ccd94a5c0cbe9720b"
 crate = "tree-sitter-regex"
 version = "0.25.0"
 globs = ["*.regex"]
