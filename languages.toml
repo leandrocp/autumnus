@@ -370,7 +370,7 @@ emacs = ["java"]
 
 [parsers.javascript]
 git = "https://github.com/tree-sitter/tree-sitter-javascript.git"
-rev = "f76aea6aa47322ea5c208c9c2e67f4a350d554f3"
+rev = "58404d8cf191d69f2674a8fd507bd5776f46cb11"
 crate = "tree-sitter-javascript"
 version = "0.25.0"
 aliases = ["js", "jsx"]
