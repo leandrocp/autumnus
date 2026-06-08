@@ -59,7 +59,7 @@ globs = ["*.angular", "component.html"]
 
 [parsers.asm]
 git = "https://github.com/RubixDev/tree-sitter-asm.git"
-rev = "3b2b86881b478c9416bb43c19ab5053edbea6e7d"
+rev = "5bb5b03e3c1ce5853b5282b9fba060f7c7bbf11e"
 crate = "tree-sitter-asm"
 version = "0.24.0"
 aliases = ["assembly"]
