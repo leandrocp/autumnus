@@ -993,7 +993,7 @@ globs = ["*.qml", "*.qmljs", "*.qmltypes"]
 
 [parsers.racket]
 git = "https://github.com/6cdh/tree-sitter-racket.git"
-rev = "54649be8b939341d2d5410b594ab954fe8814bd0"
+rev = "6d63a202602eb350e726b5e7814127ba22ed25fc"
 crate = "tree-sitter-racket"
 version = "0.24.7"
 globs = ["*.rkt", "*.rktd", "*.rktl"]
