@@ -589,7 +589,7 @@ shebang = ["ruby", "macruby", "rake", "jruby", "rbx"]
 
 [parsers.rust]
 git = "https://github.com/tree-sitter/tree-sitter-rust.git"
-rev = "18b0515fca567f5a10aee9978c6d2640e878671a"
+rev = "77a3747266f4d621d0757825e6b11edcbf991ca5"
 crate = "tree-sitter-rust"
 version = "0.24.2"
 globs = ["*.rs"]
