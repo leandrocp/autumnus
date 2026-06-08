@@ -877,7 +877,7 @@ shebang = ["zsh"]
 
 [parsers.d]
 git = "https://github.com/gdamore/tree-sitter-d.git"
-rev = "fb028c8f14f4188286c2eef143f105def6fbf24f"
+rev = "45e5f1e9d6de2c68591bc8e5ec662cf18e950b4a"
 crate = "tree-sitter-d"
 version = "0.8.2"
 display_name = "D"
