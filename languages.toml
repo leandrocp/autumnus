@@ -613,7 +613,7 @@ emacs = ["scss"]
 
 [parsers.sql]
 git = "https://github.com/derekstride/tree-sitter-sql.git"
-rev = "851e9cb257ba7c66cc8c14214a31c44d2f1e954e"
+rev = "7b51ecda191d36b92f5a90a8d1bc3faef1c7b8b8"
 crate = "tree-sitter-sequel"
 version = "0.3.11"
 variant = "SQL"
