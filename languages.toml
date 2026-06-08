@@ -419,7 +419,7 @@ globs = ["*.aux", "*.cls", "*.sty", "*.tex"]
 
 [parsers.liquid]
 git = "https://github.com/hankthetank27/tree-sitter-liquid.git"
-rev = "9566ca79911052919fce09d26f1f655b5e093857"
+rev = "e45dbac8c5fa95b1f0e00e7e0c04bc8855823391"
 version = "0.1.0"
 globs = ["*liquid"]
 
