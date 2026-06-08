@@ -144,8 +144,8 @@ jobs:
             packages/javascript/lumis/bundles
             packages/javascript/lumis/src/generated
             packages/javascript/wasm-bundle-*
-          commit-message: "chore: upgrade ${{ matrix.language }}"
-          title: "chore: upgrade ${{ matrix.language }}"
+          commit-message: "chore: upgrade lang ${{ matrix.language }}"
+          title: "chore: upgrade lang ${{ matrix.language }}"
           body: |
             Automated PR to upgrade parser and queries for **${{ matrix.language }}**.
 

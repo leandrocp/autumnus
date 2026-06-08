@@ -38,7 +38,7 @@ jobs:
           should_merge=$(gh pr view "$pr" \
             --repo "$REPO" \
             --json state,title,headRefName \
-            --jq 'select(.state == "OPEN" and (.headRefName | startswith("upgrade-langs-")) and (.title | startswith("chore: upgrade "))) | .state')
+            --jq 'select(.state == "OPEN" and (.headRefName | startswith("upgrade-langs-")) and ((.title | startswith("chore: upgrade ")) or (.title | startswith("chore: upgrade lang ")))) | .state')
 
           if [ "$should_merge" != "OPEN" ]; then
             exit 0
