@@ -396,7 +396,7 @@ globs = [
 
 [parsers.julia]
 git = "https://github.com/tree-sitter/tree-sitter-julia.git"
-rev = "e0f9dcd180fdcfcfa8d79a3531e11d99e79321d3"
+rev = "8454f266717232525ed03c7b09164b0404a03150"
 crate = "tree-sitter-julia"
 version = "0.23.1"
 globs = ["*.jl"]
