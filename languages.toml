@@ -900,7 +900,7 @@ globs = [".gitignore", ".ignore", ".fdignore", ".rgignore"]
 
 [parsers.glsl]
 git = "https://github.com/theHamsta/tree-sitter-glsl.git"
-rev = "24a6c8ef698e4480fecf8340d771fbcb5de8fbb4"
+rev = "e47b8b62b59d0e3529f1c31b03e025d6bd475044"
 crate = "tree-sitter-glsl"
 version = "0.2.0"
 display_name = "GLSL"
