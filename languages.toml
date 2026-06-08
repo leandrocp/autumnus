@@ -16,7 +16,7 @@ path = "queries"
 
 [queries.gleam]
 git = "https://github.com/gleam-lang/tree-sitter-gleam.git"
-rev = "0153f8b875cd02034b553f3a84a2f5ee67a80364"
+rev = "0ae061fea67cb39639b47c7acc46cbf5d109fda1"
 path = "queries"
 
 [queries.make]
