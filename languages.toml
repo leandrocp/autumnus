@@ -1026,7 +1026,7 @@ globs = ["*.sol"]
 
 [parsers.systemverilog]
 git = "https://github.com/gmlarumbe/tree-sitter-systemverilog.git"
-rev = "293928578cb27fbd0005fcc5f09c09a1e8628c89"
+rev = "e88937e66adc3ee7be0bfe40b7e937eafe4212bb"
 crate = "tree-sitter-systemverilog"
 version = "0.3.1"
 variant = "SystemVerilog"
