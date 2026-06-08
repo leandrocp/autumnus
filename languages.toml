@@ -196,7 +196,7 @@ globs = ["*.diff"]
 
 [parsers.dockerfile]
 git = "https://github.com/camdencheek/tree-sitter-dockerfile.git"
-rev = "971acdd908568b4531b0ba28a445bf0bb720aba5"
+rev = "868e44ce378deb68aac902a9db68ff82d2299dd0"
 version = "0.2.0"
 aliases = ["docker"]
 globs = ["Dockerfile", "dockerfile", "docker", "Containerfile", "container", "*.dockerfile", "*.docker", "*.container"]
