@@ -738,7 +738,7 @@ emacs = ["zig"]
 
 [parsers.arduino]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-arduino.git"
-rev = "53eb391da4c6c5857f8defa2c583c46c2594f565"
+rev = "2f0c1223c50aa4b754136db544204c6fc99ffc77"
 crate = "tree-sitter-arduino"
 version = "0.24.0"
 globs = ["*.ino", "*.pde"]
