@@ -1042,7 +1042,7 @@ shebang = ["tclsh", "wish"]
 
 [parsers.vhdl]
 git = "https://github.com/jpt13653903/tree-sitter-vhdl.git"
-rev = "c2d9be3d5ab7fb2cae8ad5ae604cd3606a4af0f2"
+rev = "58114f35d0865e348692256bfc5ae661fc1efb0c"
 crate = "tree-sitter-vhdl"
 version = "1.4.0"
 variant = "VHDL"
