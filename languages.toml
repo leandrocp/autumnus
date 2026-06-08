@@ -932,12 +932,12 @@ globs = ["*.j2", "*.jinja", "*.jinja2"]
 
 [parsers.jinja_inline]
 git = "https://github.com/cathaysia/tree-sitter-jinja.git"
-rev = "413dba9fea354b62f6adada1815b2f504e32ffb5"
+rev = "40bec50a9a0f1228226ed53be3f87f01da94a959"
 location = "tree-sitter-jinja_inline"
 wasm_name = "tree-sitter-jinja_inline"
 variant = "JinjaInline"
 display_name = "Jinja Inline"
-version = "0.12.0"
+version = "0.12.1"
 
 [parsers.json5]
 git = "https://github.com/Joakker/tree-sitter-json5.git"
