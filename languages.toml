@@ -622,8 +622,8 @@ emacs = ["sql"]
 
 [parsers.surface]
 git = "https://github.com/connorlay/tree-sitter-surface.git"
-rev = "f4586b35ac8548667a9aad4eae44456c1f43d032"
-version = "0.1.0"
+rev = "21b7676859c1187645a27ff301f76738af5dfd44"
+version = "0.2.0"
 globs = ["*.surface", "*.sface"]
 emacs = ["surface"]
 
