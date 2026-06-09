@@ -52,9 +52,7 @@ jobs:
           registry-url: "https://registry.npmjs.org"
 
       - name: Validate npm publish token
-        run: |
-          npm whoami >/dev/null
-          npm access list packages @lumis-sh >/dev/null
+        run: npm access list packages @lumis-sh --json >/dev/null
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
