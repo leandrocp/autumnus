@@ -51,11 +51,6 @@ jobs:
           node-version: "24"
           registry-url: "https://registry.npmjs.org"
 
-      - name: Validate npm publish token
-        run: npm access list packages @lumis-sh --json >/dev/null
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
       - name: Determine which parsers need publishing
         id: needed
         run: |
