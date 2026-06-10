@@ -62,6 +62,15 @@ Rust is the reference implementation and must follow the Rust API Guidelines:
 
 Prefer guideline-compliant naming, error behavior, builder patterns, documentation, and trait usage. Do not introduce a Rust API shortcut that other runtimes cannot sensibly mirror.
 
+### Tree-sitter is the driver
+
+Lumis is a Tree-sitter-based syntax highlighter. Language behavior must respect Tree-sitter's design, mechanics, and query model rather than bypassing them with ad hoc text scanning.
+
+- Use Tree-sitter parsers, syntax trees, captures, predicates, and query metadata as the source of truth for language-aware behavior.
+- Treat `.scm` query files as executable language behavior, not just generated assets to carry around.
+- For cross-runtime features, define the behavior in Rust first, then align JavaScript, Elixir, browser, Java, and CLI behavior to the Rust implementation.
+- Do not replace language-specific query semantics with generic string scanning unless it is an explicit fallback for plaintext or unavailable parser/query data.
+
 ## Documentation is part of the change
 
 Docs, specs, and examples are not cleanup work for later. They are part of the feature.

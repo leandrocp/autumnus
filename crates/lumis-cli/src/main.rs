@@ -91,6 +91,10 @@ enum Commands {
         /// Lines to highlight, e.g. "1,3-5,10"
         #[arg(short = 'h', long)]
         highlight_lines: Option<String>,
+
+        /// Render nested brackets using rainbow bracket scopes
+        #[arg(long)]
+        rainbow_brackets: bool,
     },
 
     /// Manage languages
@@ -218,6 +222,7 @@ fn main() -> Result<()> {
             default_theme,
             css_variable_prefix,
             highlight_lines,
+            rainbow_brackets,
         } => {
             let reg = registry::Registry::new(data_dir)?;
             do_highlight(
@@ -232,6 +237,7 @@ fn main() -> Result<()> {
                 default_theme,
                 css_variable_prefix,
                 highlight_lines,
+                rainbow_brackets,
             )
         }
         Commands::Languages { command } => match command {
@@ -477,6 +483,7 @@ fn do_highlight(
     default_theme: Option<String>,
     css_variable_prefix: String,
     highlight_lines: Option<String>,
+    rainbow_brackets: bool,
 ) -> Result<()> {
     let (source, lang) = if let Some(path) = path {
         let bytes = read_or_die(Path::new(&path));
@@ -506,7 +513,11 @@ fn do_highlight(
     }
 
     let lang_name = registry::language_to_query_name(lang);
-    let events = highlight_to_events(reg, &source, lang_name)?;
+    let mut events = highlight_to_events(reg, &source, lang_name)?;
+    if rainbow_brackets {
+        let ranges = reg.rainbow_ranges(lang_name, &source)?;
+        events = overlay_rainbow_ranges(&events, &ranges, lang.id_name());
+    }
 
     let parsed_highlight_lines = if let Some(lines_str) = highlight_lines {
         Some(parse_highlight_lines(&lines_str)?)
@@ -528,6 +539,68 @@ fn do_highlight(
         css_variable_prefix,
         parsed_highlight_lines,
     )
+}
+
+fn overlay_rainbow_ranges(
+    events: &[HighlightEvent],
+    ranges: &[registry::RainbowRange],
+    language: &str,
+) -> Vec<HighlightEvent> {
+    let mut output = Vec::with_capacity(events.len() + ranges.len() * 3);
+    let mut range_index = 0usize;
+
+    for event in events {
+        match event {
+            HighlightEvent::Source { start, end } => {
+                let mut cursor = *start;
+
+                while range_index < ranges.len() && ranges[range_index].end <= *start {
+                    range_index += 1;
+                }
+
+                let mut next_index = range_index;
+                while next_index < ranges.len() {
+                    let range = &ranges[next_index];
+                    if range.start >= *end {
+                        break;
+                    }
+                    if range.start < *start || range.end > *end {
+                        next_index += 1;
+                        continue;
+                    }
+
+                    if cursor < range.start {
+                        output.push(HighlightEvent::Source {
+                            start: cursor,
+                            end: range.start,
+                        });
+                    }
+
+                    output.push(HighlightEvent::Start {
+                        scope_index: range.scope_index,
+                        language: language.to_string(),
+                    });
+                    output.push(HighlightEvent::Source {
+                        start: range.start,
+                        end: range.end,
+                    });
+                    output.push(HighlightEvent::End);
+                    cursor = range.end;
+                    next_index += 1;
+                }
+
+                if cursor < *end {
+                    output.push(HighlightEvent::Source {
+                        start: cursor,
+                        end: *end,
+                    });
+                }
+            }
+            other => output.push(other.clone()),
+        }
+    }
+
+    output
 }
 
 #[allow(clippy::too_many_arguments)]

@@ -4,7 +4,8 @@ use lumis_core::highlights::HIGHLIGHT_NAMES;
 use lumis_core::languages::Language;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
-use tree_sitter::WasmStore;
+use streaming_iterator::StreamingIterator;
+use tree_sitter::{Parser, Query, QueryCursor, WasmStore};
 use wasmtime::{Cache, Config, Engine};
 
 include!(concat!(env!("OUT_DIR"), "/queries_constants.rs"));
@@ -15,6 +16,28 @@ pub struct Registry {
     engine: Engine,
     wasm_store: Mutex<WasmStore>,
 }
+
+#[derive(Clone, Debug)]
+pub struct RainbowRange {
+    pub start: usize,
+    pub end: usize,
+    pub scope_index: usize,
+}
+
+#[derive(Clone, Debug)]
+struct BracketPair {
+    open: std::ops::Range<usize>,
+    close: std::ops::Range<usize>,
+}
+
+const RAINBOW_BRACKET_SCOPES: [&str; 6] = [
+    "punctuation.bracket.rainbow.1",
+    "punctuation.bracket.rainbow.2",
+    "punctuation.bracket.rainbow.3",
+    "punctuation.bracket.rainbow.4",
+    "punctuation.bracket.rainbow.5",
+    "punctuation.bracket.rainbow.6",
+];
 
 impl Registry {
     pub fn new(data_dir: PathBuf) -> Result<Self> {
@@ -50,6 +73,77 @@ impl Registry {
 
     pub fn load_cached_config(&self, lang_name: &str) -> Result<Option<HighlightConfiguration>> {
         self.load_config_inner(lang_name, true)
+    }
+
+    pub fn rainbow_ranges(&self, lang_name: &str, source: &str) -> Result<Vec<RainbowRange>> {
+        let (_highlights, _injections, _locals, brackets) = get_queries(lang_name);
+        if brackets.trim().is_empty() {
+            return Ok(Vec::new());
+        }
+
+        let wasm_bytes = self
+            .ensure_parser(lang_name)
+            .with_context(|| format!("failed to load parser for '{lang_name}'"))?;
+        let mut store = self.wasm_store.lock().unwrap();
+        let language = store.load_language(lang_name, &wasm_bytes)?;
+        // A bracket query can reference anonymous nodes a grammar does not have
+        // (for example HTML has no "(" token). Treat a query that fails to compile
+        // as "no rainbow brackets for this language", matching the core library.
+        let Ok(query) = Query::new(&language, brackets) else {
+            return Ok(Vec::new());
+        };
+        let open_capture = query
+            .capture_names()
+            .iter()
+            .position(|name| *name == "open")
+            .map(|index| index as u32);
+        let close_capture = query
+            .capture_names()
+            .iter()
+            .position(|name| *name == "close")
+            .map(|index| index as u32);
+        let (Some(open_capture), Some(close_capture)) = (open_capture, close_capture) else {
+            return Ok(Vec::new());
+        };
+
+        let mut parser = Parser::new();
+        parser.set_wasm_store(WasmStore::new(&self.engine)?)?;
+        parser.set_language(&language)?;
+        let Some(tree) = parser.parse(source.as_bytes(), None) else {
+            return Ok(Vec::new());
+        };
+
+        let mut cursor = QueryCursor::new();
+        let mut matches = cursor.matches(&query, tree.root_node(), source.as_bytes());
+        let mut pairs = Vec::new();
+
+        while let Some(query_match) = matches.next() {
+            if query
+                .property_settings(query_match.pattern_index)
+                .iter()
+                .any(|property| property.key.as_ref() == "rainbow.exclude")
+            {
+                continue;
+            }
+
+            let mut opens = Vec::new();
+            let mut closes = Vec::new();
+            for capture in query_match.captures {
+                if capture.index == open_capture {
+                    opens.push(capture.node.byte_range());
+                } else if capture.index == close_capture {
+                    closes.push(capture.node.byte_range());
+                }
+            }
+
+            for (open, close) in opens.into_iter().zip(closes) {
+                if open.start < close.end && (open.len() == 1 || close.len() == 1) {
+                    pairs.push(BracketPair { open, close });
+                }
+            }
+        }
+
+        Ok(colorize_bracket_pairs(pairs))
     }
 
     /// Read a parser WASM from the local cache, if present.
@@ -125,7 +219,7 @@ impl Registry {
         lang_name: &str,
         cached_only: bool,
     ) -> Result<Option<HighlightConfiguration>> {
-        let (highlights, injections, locals) = get_queries(lang_name);
+        let (highlights, injections, locals, _brackets) = get_queries(lang_name);
         if highlights.is_empty() && injections.is_empty() && locals.is_empty() {
             return Ok(None);
         }
@@ -164,6 +258,57 @@ impl Registry {
 
         Ok(config)
     }
+}
+
+fn colorize_bracket_pairs(pairs: Vec<BracketPair>) -> Vec<RainbowRange> {
+    let mut opens: Vec<_> = pairs.iter().map(|pair| pair.open.clone()).collect();
+    opens.sort_by_key(|range| (range.start, range.end));
+    opens.dedup_by(|a, b| a.start == b.start && a.end == b.end);
+
+    let mut color_pairs: Vec<_> = pairs.into_iter().collect();
+    color_pairs.sort_by_key(|pair| pair.close.end);
+
+    let mut open_stack: Vec<std::ops::Range<usize>> = Vec::new();
+    let mut open_index = 0usize;
+    let mut ranges = Vec::new();
+
+    for pair in color_pairs {
+        while open_index < opens.len() && opens[open_index].start < pair.close.start {
+            open_stack.push(opens[open_index].clone());
+            open_index += 1;
+        }
+
+        if open_stack.last() == Some(&pair.open) {
+            let scope_index = rainbow_scope_index(open_stack.len() - 1);
+            ranges.push(RainbowRange {
+                start: pair.open.start,
+                end: pair.open.end,
+                scope_index,
+            });
+            ranges.push(RainbowRange {
+                start: pair.close.start,
+                end: pair.close.end,
+                scope_index,
+            });
+            open_stack.pop();
+        }
+    }
+
+    ranges.sort_by_key(|range| (range.start, range.end));
+    ranges
+}
+
+fn rainbow_scope_index(depth: usize) -> usize {
+    let scope = RAINBOW_BRACKET_SCOPES[depth % RAINBOW_BRACKET_SCOPES.len()];
+    HIGHLIGHT_NAMES
+        .iter()
+        .position(|candidate| *candidate == scope)
+        .unwrap_or_else(|| {
+            HIGHLIGHT_NAMES
+                .iter()
+                .position(|candidate| *candidate == "punctuation.bracket")
+                .unwrap_or(0)
+        })
 }
 
 /// Fetch bytes from a URL using ureq.

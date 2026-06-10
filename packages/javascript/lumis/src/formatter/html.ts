@@ -81,12 +81,14 @@ function getUnderlineDecoration(style: HighlightStyle): string | undefined {
  * @internal
  */
 export function getThemeStyle(theme: Theme | undefined, scope: string): HighlightStyle | undefined {
-  if (!theme) return undefined;
+  if (!theme) return RAINBOW_BRACKET_FALLBACKS[scope];
 
   let current = scope;
   while (current.length > 0) {
     const style = theme.highlights[current];
     if (style) return style;
+    const fallback = RAINBOW_BRACKET_FALLBACKS[current];
+    if (fallback) return fallback;
 
     const idx = current.lastIndexOf(".");
     if (idx === -1) {
@@ -97,6 +99,15 @@ export function getThemeStyle(theme: Theme | undefined, scope: string): Highligh
 
   return undefined;
 }
+
+const RAINBOW_BRACKET_FALLBACKS: Record<string, HighlightStyle> = {
+  "punctuation.bracket.rainbow.1": { fg: "#e06c75" },
+  "punctuation.bracket.rainbow.2": { fg: "#e5c07b" },
+  "punctuation.bracket.rainbow.3": { fg: "#61afef" },
+  "punctuation.bracket.rainbow.4": { fg: "#d19a66" },
+  "punctuation.bracket.rainbow.5": { fg: "#98c379" },
+  "punctuation.bracket.rainbow.6": { fg: "#c678dd" },
+};
 
 /**
  * Look up a scope's style, trying a language-specific scope first.

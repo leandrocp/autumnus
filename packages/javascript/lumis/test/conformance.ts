@@ -9,6 +9,7 @@ export interface ConformanceFixture {
   name: string;
   language: string;
   theme: string;
+  rainbowBrackets: boolean;
   events: SerializableHighlightEvent[];
   source: string;
   htmlInline: string;
@@ -22,6 +23,7 @@ interface FixtureMetadata {
   name: string;
   language: string;
   theme: string;
+  rainbowBrackets?: boolean;
   events: SerializableHighlightEvent[];
 }
 
@@ -38,6 +40,7 @@ export function loadConformanceFixtures(): ConformanceFixture[] {
 
       return {
         ...metadata,
+        rainbowBrackets: metadata.rainbowBrackets ?? false,
         source: readFileSync(new URL("source.txt", fixtureDir), "utf8"),
         htmlInline: readFileSync(new URL("html-inline.html", fixtureDir), "utf8"),
         htmlLinked: readFileSync(new URL("html-linked.html", fixtureDir), "utf8"),

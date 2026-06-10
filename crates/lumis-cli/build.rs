@@ -10,11 +10,14 @@
 //       pub const RUST_HIGHLIGHTS: &str = "...";
 //       pub const RUST_INJECTIONS: &str = "...";
 //       pub const RUST_LOCALS: &str = "";
-//     Empty string when the .scm file doesn't exist for that language.
+//       pub const RUST_BRACKETS: &str = "";
+//     Empty string when the .scm file doesn't exist, except brackets: languages
+//     without a specific brackets query use queries/brackets/default/brackets.scm.
 //
-//   - `get_queries(lang_name) -> (highlights, injections, locals)`
-//     Match on the directory name (e.g. "rust") and return the three constants.
-//     Falls back to ("", "", "") for unknown languages.
+//   - `get_queries(lang_name) -> (highlights, injections, locals, brackets)`
+//     Match on the directory name (e.g. "rust") and return the four constants.
+//     Known languages without a specific brackets query use the default brackets query;
+//     unknown languages fall back to ("", "", "", "").
 //
 //   - `language_to_query_name(lang: Language) -> &str`
 //     Maps the Language enum variant to its query directory name.
@@ -130,12 +133,16 @@ fn main() {
 
         let language = path.file_name().unwrap().to_str().unwrap().to_string();
         let lang_upper = language.to_uppercase();
-        let queries = ["highlights", "injections", "locals"];
+        let queries = ["highlights", "injections", "locals", "brackets"];
 
         for query in queries {
             let file_path = path.join(format!("{query}.scm"));
+            let default_brackets_path = queries_path.join("default/brackets.scm");
             let content = if file_path.exists() {
                 convert_lua_matches(&fs::read_to_string(&file_path).unwrap())
+            } else if query == "brackets" && language != "default" && default_brackets_path.exists()
+            {
+                convert_lua_matches(&fs::read_to_string(&default_brackets_path).unwrap())
             } else {
                 String::new()
             };
@@ -159,15 +166,16 @@ fn main() {
             let h = format_ident!("{}_HIGHLIGHTS", upper);
             let i = format_ident!("{}_INJECTIONS", upper);
             let l = format_ident!("{}_LOCALS", upper);
-            quote! { #lang => (#h, #i, #l), }
+            let b = format_ident!("{}_BRACKETS", upper);
+            quote! { #lang => (#h, #i, #l, #b), }
         })
         .collect();
 
     generated_code.extend(quote! {
-        pub fn get_queries(lang_name: &str) -> (&'static str, &'static str, &'static str) {
+        pub fn get_queries(lang_name: &str) -> (&'static str, &'static str, &'static str, &'static str) {
             match lang_name {
                 #(#get_queries_arms)*
-                _ => ("", "", ""),
+                _ => ("", "", "", ""),
             }
         }
     });

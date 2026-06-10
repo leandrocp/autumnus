@@ -25,6 +25,8 @@ defmodule Lumis.ConformanceTest do
     })
   end
 
+  defp rainbow_brackets(fixture), do: fixture["rainbowBrackets"] || false
+
   for name <- @fixture_names do
     describe name do
       @tag fixture: name
@@ -34,7 +36,9 @@ defmodule Lumis.ConformanceTest do
         assert Lumis.highlight!(fixture["source"],
                  formatter: {
                    :html_inline,
-                   language: fixture["language"], theme: fixture["theme"]
+                   language: fixture["language"],
+                   theme: fixture["theme"],
+                   rainbow_brackets: rainbow_brackets(fixture)
                  }
                ) == fixture["htmlInline"]
       end
@@ -44,7 +48,9 @@ defmodule Lumis.ConformanceTest do
         fixture = load_fixture(unquote(name))
 
         assert Lumis.highlight!(fixture["source"],
-                 formatter: {:html_linked, language: fixture["language"]}
+                 formatter:
+                   {:html_linked,
+                    language: fixture["language"], rainbow_brackets: rainbow_brackets(fixture)}
                ) == fixture["htmlLinked"]
       end
 
@@ -57,7 +63,8 @@ defmodule Lumis.ConformanceTest do
                    :html_multi_themes,
                    language: fixture["language"],
                    themes: [main: fixture["theme"]],
-                   default_theme: "main"
+                   default_theme: "main",
+                   rainbow_brackets: rainbow_brackets(fixture)
                  }
                ) == fixture["htmlMultiThemes"]
       end
@@ -69,7 +76,9 @@ defmodule Lumis.ConformanceTest do
         assert Lumis.highlight!(fixture["source"],
                  formatter: {
                    :terminal,
-                   language: fixture["language"], theme: fixture["theme"]
+                   language: fixture["language"],
+                   theme: fixture["theme"],
+                   rainbow_brackets: rainbow_brackets(fixture)
                  }
                ) == fixture["terminal"]
       end
@@ -79,7 +88,9 @@ defmodule Lumis.ConformanceTest do
         fixture = load_fixture(unquote(name))
 
         assert Lumis.highlight!(fixture["source"],
-                 formatter: {:bbcode_scoped, language: fixture["language"]}
+                 formatter:
+                   {:bbcode_scoped,
+                    language: fixture["language"], rainbow_brackets: rainbow_brackets(fixture)}
                ) == fixture["bbcode"]
       end
     end

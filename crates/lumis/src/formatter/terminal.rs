@@ -53,6 +53,7 @@ pub struct Terminal {
     #[builder(setter(custom))]
     language: Language,
     theme: Option<Theme>,
+    rainbow_brackets: bool,
     background: Background,
     width: Option<usize>,
 }
@@ -83,6 +84,7 @@ impl Terminal {
         Self {
             language,
             theme,
+            rainbow_brackets: false,
             background,
             width,
         }
@@ -94,6 +96,7 @@ impl Default for Terminal {
         Self {
             language: Language::PlainText,
             theme: None,
+            rainbow_brackets: false,
             background: Background::Inherit,
             width: None,
         }
@@ -102,8 +105,14 @@ impl Default for Terminal {
 
 impl Formatter for Terminal {
     fn format(&self, source: &str, output: &mut dyn Write) -> io::Result<()> {
-        let events =
-            highlight::highlight_events(source, self.language).map_err(io::Error::other)?;
+        let events = highlight::highlight_events_with_options(
+            source,
+            self.language,
+            highlight::HighlightOptions {
+                rainbow_brackets: self.rainbow_brackets,
+            },
+        )
+        .map_err(io::Error::other)?;
 
         let core_formatter = lumis_core::formatter::terminal::Terminal::new(
             self.language,

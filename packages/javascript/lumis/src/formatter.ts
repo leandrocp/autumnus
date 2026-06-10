@@ -34,7 +34,11 @@ export function htmlInline(options: HtmlInlineOptions = {}): HtmlInlineFormatter
   const formatter: HtmlInlineFormatter = {
     ...options,
     format(source: string): string {
-      return formatHtmlInline(source, highlightEvents(source, formatter.language), formatter);
+      return formatHtmlInline(
+        source,
+        highlightEvents(source, formatter.language, { rainbowBrackets: formatter.rainbowBrackets }),
+        formatter,
+      );
     },
   };
   return formatter;
@@ -57,7 +61,11 @@ export function htmlLinked(options: HtmlLinkedOptions = {}): HtmlLinkedFormatter
   const formatter: HtmlLinkedFormatter = {
     ...options,
     format(source: string): string {
-      return formatHtmlLinked(source, highlightEvents(source, formatter.language), formatter);
+      return formatHtmlLinked(
+        source,
+        highlightEvents(source, formatter.language, { rainbowBrackets: formatter.rainbowBrackets }),
+        formatter,
+      );
     },
   };
   return formatter;
@@ -85,7 +93,11 @@ export function htmlMultiThemes(options: HtmlMultiThemesOptions): HtmlMultiTheme
   const formatter: HtmlMultiThemesFormatter = {
     ...options,
     format(source: string): string {
-      return formatHtmlMultiThemes(source, highlightEvents(source, formatter.language), formatter);
+      return formatHtmlMultiThemes(
+        source,
+        highlightEvents(source, formatter.language, { rainbowBrackets: formatter.rainbowBrackets }),
+        formatter,
+      );
     },
   };
   return formatter;
@@ -108,7 +120,10 @@ export function bbcodeScoped(options: BBCodeScopedOptions = {}): BBCodeScopedFor
   const formatter: BBCodeScopedFormatter = {
     ...options,
     format(source: string): string {
-      return formatBBCode(source, highlightEvents(source, formatter.language));
+      return formatBBCode(
+        source,
+        highlightEvents(source, formatter.language, { rainbowBrackets: formatter.rainbowBrackets }),
+      );
     },
   };
   return formatter;

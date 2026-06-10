@@ -71,7 +71,11 @@ describe.each(conformanceFixtures.map((f) => [f.name, f]))(
     it("html-inline", () => {
       const output = highlighter.highlight(
         fixture.source,
-        htmlInline({ language: getLanguage(fixture.language), theme }),
+        htmlInline({
+          language: getLanguage(fixture.language),
+          theme,
+          rainbowBrackets: fixture.rainbowBrackets,
+        }),
       );
       expect(output).toBe(fixture.htmlInline);
     });
@@ -79,7 +83,10 @@ describe.each(conformanceFixtures.map((f) => [f.name, f]))(
     it("html-linked", () => {
       const output = highlighter.highlight(
         fixture.source,
-        htmlLinked({ language: getLanguage(fixture.language) }),
+        htmlLinked({
+          language: getLanguage(fixture.language),
+          rainbowBrackets: fixture.rainbowBrackets,
+        }),
       );
       expect(output).toBe(fixture.htmlLinked);
     });
@@ -91,6 +98,7 @@ describe.each(conformanceFixtures.map((f) => [f.name, f]))(
           language: getLanguage(fixture.language),
           themes: { main: theme },
           defaultTheme: "main",
+          rainbowBrackets: fixture.rainbowBrackets,
         }),
       );
       expect(output).toBe(fixture.htmlMultiThemes);
@@ -99,7 +107,10 @@ describe.each(conformanceFixtures.map((f) => [f.name, f]))(
     it("bbcodeScoped", () => {
       const output = highlighter.highlight(
         fixture.source,
-        bbcodeScoped({ language: getLanguage(fixture.language) }),
+        bbcodeScoped({
+          language: getLanguage(fixture.language),
+          rainbowBrackets: fixture.rainbowBrackets,
+        }),
       );
       expect(output).toBe(fixture.bbcode);
     });
@@ -107,7 +118,11 @@ describe.each(conformanceFixtures.map((f) => [f.name, f]))(
     it("terminal", () => {
       const output = highlighter.highlight(
         fixture.source,
-        terminal({ language: getLanguage(fixture.language), theme }),
+        terminal({
+          language: getLanguage(fixture.language),
+          theme,
+          rainbowBrackets: fixture.rainbowBrackets,
+        }),
       );
       expect(output).toBe(fixture.terminal);
     });
