@@ -3,7 +3,7 @@ use lumis::formatters::{
     HtmlLinkedBuilder, HtmlMultiThemesBuilder, TerminalBackground, TerminalBuilder,
 };
 use lumis::{languages::Language, themes};
-use rustler::{NifStruct, NifTaggedEnum, NifUnitEnum};
+use rustler::{NifMap, NifStruct, NifTaggedEnum, NifUnitEnum};
 use std::collections::HashMap;
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, NifUnitEnum)]
@@ -456,6 +456,16 @@ pub struct ExHtmlInlineHighlightLines {
 pub struct ExHtmlLinkedHighlightLines {
     pub lines: Vec<ExLineSpec>,
     pub class: String,
+}
+
+#[derive(Clone, Debug, NifMap)]
+pub struct ExCssOptions {
+    pub enable_italic: bool,
+    pub selector_prefix: String,
+    pub pre_selector: String,
+    pub scope_tokens: bool,
+    pub background: Option<String>,
+    pub base_rules: Vec<(String, String)>,
 }
 
 impl<'a> From<&'a themes::Style> for ExStyle {

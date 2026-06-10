@@ -110,6 +110,44 @@ defmodule Lumis.LumisTest do
     assert Lumis.available_themes() |> length() == expected_count
   end
 
+  describe "Theme.build_css" do
+    test "builds default linked CSS from a theme name" do
+      assert {:ok, css} = Lumis.Theme.build_css("github_light")
+
+      assert css =~ "pre.lumis {"
+      assert css =~ ".keyword {"
+      assert css =~ "color: #1f2328;"
+    end
+
+    test "builds scoped CSS with base rule overrides" do
+      css =
+        Lumis.Theme.build_css!("github_dark",
+          selector_prefix: ~s(html[data-theme="dark"] ),
+          pre_selector: ".lumis",
+          scope_tokens: true,
+          background: "var(--code-background)",
+          base_rules: [
+            {"border-radius", "0.375rem"},
+            {"padding", "1rem"}
+          ]
+        )
+
+      assert css =~ ~s(html[data-theme="dark"] .lumis {)
+      assert css =~ ~s|background-color: var(--code-background);|
+      assert css =~ ~s(border-radius: 0.375rem;)
+      assert css =~ ~s(html[data-theme="dark"] .lumis .keyword {)
+    end
+
+    test "returns error for unknown theme names" do
+      assert Lumis.Theme.build_css("unknown_theme") == {:error, :not_found}
+    end
+
+    test "returns error for invalid options" do
+      assert {:error, %NimbleOptions.ValidationError{}} =
+               Lumis.Theme.build_css("github_light", scope_tokens: "yes")
+    end
+  end
+
   test "default_options/0" do
     assert [formatter: {:html_inline, formatter_opts}] =
              Lumis.default_options()

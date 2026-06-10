@@ -7,6 +7,8 @@
 use serde::{Deserialize, Serialize};
 use std::{collections::BTreeMap, fs, path::Path, str::FromStr};
 
+use derive_builder::Builder;
+
 /// Error type for theme operations.
 #[derive(Debug, Clone)]
 pub enum ThemeError {
@@ -468,33 +470,9 @@ impl Theme {
         }
     }
 
+    #[deprecated(note = "use themes::CssBuilder instead")]
     pub fn css(&self, enable_italic: bool) -> String {
-        let mut rules = Vec::new();
-
-        rules.push(format!(
-            "/* {}\n * revision: {}\n */\n\npre.lumis",
-            self.name, self.revision
-        ));
-
-        if let Some(pre_style) = &self.pre_style("\n  ") {
-            rules.push(format!(" {{\n  {pre_style}\n}}\n"));
-        } else {
-            rules.push(" {}\n".to_string());
-        }
-
-        for (scope, style) in &self.highlights {
-            let style_css = style.css(enable_italic, "\n  ");
-
-            if !style_css.is_empty() {
-                rules.push(format!(
-                    ".{} {{\n  {}\n}}\n",
-                    scope.replace('.', "-"),
-                    style_css
-                ))
-            };
-        }
-
-        rules.join("")
+        CssBuilder::new(self).enable_italic(enable_italic).build()
     }
 
     /// Get style for a scope.
@@ -557,6 +535,131 @@ impl Theme {
         } else {
             Some(rules.join(separator))
         }
+    }
+}
+
+/// CSS configuration for rendering a theme stylesheet.
+///
+/// Create values with [`CssBuilder`]. Most applications should use the bundled CSS files, but the
+/// builder is useful when CSS needs to be embedded, scoped, or customized.
+#[derive(Builder, Clone, Debug)]
+#[builder(build_fn(name = "build_config", private))]
+pub struct Css<'a> {
+    #[builder(setter(custom))]
+    theme: &'a Theme,
+    /// Whether italic theme styles should be emitted.
+    #[builder(default = "true")]
+    enable_italic: bool,
+    /// Prefix prepended to every selector.
+    #[builder(default, setter(into))]
+    selector_prefix: String,
+    /// Selector used for the `<pre>` code block rule.
+    #[builder(default = "\"pre.lumis\".to_string()", setter(into))]
+    pre_selector: String,
+    /// Whether token selectors should be scoped under `pre_selector`.
+    #[builder(default)]
+    scope_tokens: bool,
+    /// Background override for the base code block rule.
+    #[builder(default, setter(into, strip_option))]
+    background: Option<String>,
+    /// Extra declarations appended to the base code block rule.
+    #[builder(default)]
+    base_rules: Vec<(String, String)>,
+}
+
+impl<'a> CssBuilder<'a> {
+    /// Create a CSS builder for `theme`.
+    pub fn new(theme: &'a Theme) -> Self {
+        let mut builder = Self::default();
+        builder.theme = Some(theme);
+        builder
+    }
+
+    /// Append a CSS declaration to the base code block rule.
+    pub fn base_rule(
+        &mut self,
+        property: impl Into<String>,
+        value: impl Into<String>,
+    ) -> &mut Self {
+        self.base_rules
+            .get_or_insert_default()
+            .push((property.into(), value.into()));
+        self
+    }
+
+    /// Build the CSS stylesheet.
+    pub fn build(&self) -> String {
+        let css = self
+            .build_config()
+            .expect("CssBuilder::new sets the required theme");
+
+        css.render()
+    }
+}
+
+impl Css<'_> {
+    fn render(&self) -> String {
+        let mut rules = Vec::new();
+
+        rules.push(format!(
+            "/* {}\n * revision: {}\n */\n\n{}{}",
+            self.theme.name, self.theme.revision, self.selector_prefix, self.pre_selector
+        ));
+
+        let base_style = self.base_style("\n  ");
+
+        if base_style.is_empty() {
+            rules.push(" {}\n".to_string());
+        } else {
+            rules.push(format!(" {{\n  {base_style}\n}}\n"));
+        }
+
+        let token_selector_prefix = if self.scope_tokens {
+            format!("{} ", self.pre_selector)
+        } else {
+            String::new()
+        };
+
+        for (scope, style) in &self.theme.highlights {
+            let style_css = style.css(self.enable_italic, "\n  ");
+
+            if !style_css.is_empty() {
+                rules.push(format!(
+                    "{}{}.{} {{\n  {}\n}}\n",
+                    self.selector_prefix,
+                    token_selector_prefix,
+                    scope.replace('.', "-"),
+                    style_css
+                ))
+            };
+        }
+
+        rules.join("")
+    }
+
+    fn base_style(&self, separator: &str) -> String {
+        let mut rules = Vec::new();
+
+        if let Some(fg) = self.theme.fg() {
+            rules.push(format!("color: {fg};"));
+        }
+
+        match &self.background {
+            Some(bg) => rules.push(format!("background-color: {bg};")),
+            None => {
+                if let Some(bg) = self.theme.bg() {
+                    rules.push(format!("background-color: {bg};"));
+                }
+            }
+        }
+
+        rules.extend(
+            self.base_rules
+                .iter()
+                .map(|(property, value)| format!("{property}: {value};")),
+        );
+
+        rules.join(separator)
     }
 }
 
@@ -706,7 +809,7 @@ mod tests {
     }
 
     #[test]
-    fn test_theme_css() {
+    fn test_css_builder_default_stylesheet() {
         let json = r#"{"name": "test", "appearance": "dark", "revision": "3e976b4", "highlights": {"normal": {"fg": "red", "bg": "green"}, "keyword": {"fg": "blue", "italic": true}, "tag.attribute": {"bg": "gray", "bold": true}}}"#;
         let theme = from_json(json).unwrap();
 
@@ -732,7 +835,56 @@ pre.lumis {
 }
 "#;
 
-        assert_eq!(theme.css(true), expected);
+        assert_eq!(
+            CssBuilder::new(&theme).enable_italic(true).build(),
+            expected
+        );
+    }
+
+    #[test]
+    fn test_css_builder_can_disable_italic() {
+        let json = r#"{"name": "test", "appearance": "dark", "revision": "3e976b4", "highlights": {"keyword": {"fg": "blue", "italic": true}}}"#;
+        let theme = from_json(json).unwrap();
+
+        let css = CssBuilder::new(&theme).enable_italic(false).build();
+
+        assert!(css.contains(".keyword {\n  color: blue;\n}"));
+        assert!(!css.contains("font-style: italic;"));
+    }
+
+    #[test]
+    fn test_css_builder_scopes_selectors_and_base_rules() {
+        let json = r##"{"name": "test", "appearance": "dark", "revision": "3e976b4", "highlights": {"normal": {"fg": "red", "bg": "green"}, "keyword": {"fg": "blue"}}}"##;
+        let theme = from_json(json).unwrap();
+
+        let expected = r#"/* test
+ * revision: 3e976b4
+ */
+
+html[data-theme="dark"] .lumis {
+  color: red;
+  background-color: var(--color-grey-900);
+  border-radius: 0.375rem;
+}
+html[data-theme="dark"] .lumis .keyword {
+  color: blue;
+}
+html[data-theme="dark"] .lumis .normal {
+  color: red;
+  background-color: green;
+}
+"#;
+
+        assert_eq!(
+            CssBuilder::new(&theme)
+                .selector_prefix("html[data-theme=\"dark\"] ")
+                .pre_selector(".lumis")
+                .scope_tokens(true)
+                .background("var(--color-grey-900)")
+                .base_rule("border-radius", "0.375rem")
+                .build(),
+            expected
+        );
     }
 
     #[test]

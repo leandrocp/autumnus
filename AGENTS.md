@@ -72,6 +72,15 @@ Docs, specs, and examples are not cleanup work for later. They are part of the f
 
 Prefer concrete explanations over marketing language. Show the real API. Keep examples runnable.
 
+### READMEs stay small, detail lives in the docs site
+
+READMEs are entry points, not manuals. Keep them small, direct, and targeted: the minimal usage to get started, then a link to the relevant page under `docs/content/`.
+
+- Put detailed guides, option references, multi-runtime examples, and edge cases in `docs/content/`, not in READMEs.
+- When a feature spans runtimes, document it once in `docs/content/` using runtime `Tabs` (`<Tabs groupId="runtime" ...>` with JavaScript, Rust, Elixir, Java, CLI), instead of repeating it in each package README.
+- A README mention of a new capability should be one or two lines plus a link to the docs page (use the published `https://lumis.sh/docs/<slug>` URL).
+- Internal docs cross-links use slug form, e.g. `/themes/css-files#build-custom-css`.
+
 ## Website and docs site
 
 This repo ships two documentation surfaces:

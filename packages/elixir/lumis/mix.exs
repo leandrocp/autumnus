@@ -76,6 +76,7 @@ defmodule Lumis.MixProject do
       extras: [
         "CHANGELOG.md",
         "examples/bbcode_scoped.livemd",
+        "examples/html_linked_scoped_css.livemd",
         "examples/light_dark_manual.livemd",
         "examples/light_dark_vars.livemd",
         "examples/light_dark_function.livemd"

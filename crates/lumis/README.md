@@ -128,7 +128,7 @@ let formatter = HtmlLinkedBuilder::new()
 let html = highlight(code, formatter);
 ```
 
-CSS theme files are available in the `css/` directory of the crate.
+CSS theme files are available in the crate's `css/` directory. Use `themes::CssBuilder` for custom selectors or embedded CSS ([docs](https://lumis.sh/docs/themes/css-files#build-custom-css)).
 
 ### HTML Multi-Themes
 
