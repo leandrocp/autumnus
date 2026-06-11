@@ -1206,6 +1206,7 @@ pre.lumis {}
             let css_path = css_dir.join(format!("{}.css", theme.name));
             let expected = std::fs::read_to_string(&css_path)
                 .unwrap_or_else(|e| panic!("missing bundled CSS for {}: {e}", theme.name));
+            let expected = expected.replace("\r\n", "\n");
 
             assert_eq!(
                 CssBuilder::new(theme).build(),
