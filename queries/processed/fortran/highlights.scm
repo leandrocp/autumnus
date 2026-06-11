@@ -259,19 +259,7 @@
   (assumed_rank)
 ] @operator
 
-[
-  "\\.and\\."
-  "\\.or\\."
-  "\\.eqv\\."
-  "\\.neqv\\."
-  "\\.lt\\."
-  "\\.gt\\."
-  "\\.le\\."
-  "\\.ge\\."
-  "\\.eq\\."
-  "\\.ne\\."
-  "\\.not\\."
-] @keyword.operator
+
 
 ; Punctuation
 [

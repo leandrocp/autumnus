@@ -238,30 +238,28 @@ fn ensure_source_file(
     let unpacked_dir = out_dir.join("vendored_parsers").join(parser_name);
     let unpacked_source = unpacked_dir.join(file_name);
 
-    if !unpacked_source.exists() {
-        fs::create_dir_all(&unpacked_dir).expect("failed to create decompressed parser directory");
+    fs::create_dir_all(&unpacked_dir).expect("failed to create decompressed parser directory");
 
-        let input = File::open(&compressed).unwrap_or_else(|err| {
-            panic!(
-                "failed to open compressed parser source '{file_name}' for '{key}' at {}: {err}",
-                compressed.display()
-            )
-        });
-        let mut decoder = XzDecoder::new(input);
-        let mut decoded = Vec::new();
-        decoder.read_to_end(&mut decoded).unwrap_or_else(|err| {
-            panic!(
-                "failed to decompress parser source '{file_name}' for '{key}' at {}: {err}",
-                compressed.display()
-            )
-        });
-        fs::write(&unpacked_source, decoded).unwrap_or_else(|err| {
-            panic!(
-                "failed to write decompressed parser source '{file_name}' for '{key}' at {}: {err}",
-                unpacked_source.display()
-            )
-        });
-    }
+    let input = File::open(&compressed).unwrap_or_else(|err| {
+        panic!(
+            "failed to open compressed parser source '{file_name}' for '{key}' at {}: {err}",
+            compressed.display()
+        )
+    });
+    let mut decoder = XzDecoder::new(input);
+    let mut decoded = Vec::new();
+    decoder.read_to_end(&mut decoded).unwrap_or_else(|err| {
+        panic!(
+            "failed to decompress parser source '{file_name}' for '{key}' at {}: {err}",
+            compressed.display()
+        )
+    });
+    fs::write(&unpacked_source, decoded).unwrap_or_else(|err| {
+        panic!(
+            "failed to write decompressed parser source '{file_name}' for '{key}' at {}: {err}",
+            unpacked_source.display()
+        )
+    });
 
     unpacked_source
 }
