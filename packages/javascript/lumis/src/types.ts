@@ -280,7 +280,7 @@ export interface HighlightLinesInline {
  */
 export interface HighlightLinesLinked {
   lines: LineSpec[];
-  /** Defaults to `"highlighted"`. */
+  /** Defaults to `"lumis-highlighted"`. */
   class?: string;
 }
 

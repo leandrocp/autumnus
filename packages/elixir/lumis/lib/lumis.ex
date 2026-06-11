@@ -89,7 +89,7 @@ defmodule Lumis do
   Available formatters: `:html_inline`, `:html_linked`, `:html_multi_themes`, `:terminal`, `:bbcode_scoped`
 
   * `:html_inline` - generates `<span>` tags with inline styles for each token, for example: `<span style="color: #6eb4bff;">Atom</span>`.
-  * `:html_linked` - generates `<span>` tags with `class` representing the token type, for example: `<span class="keyword-special">Atom</span>`.
+  * `:html_linked` - generates `<span>` tags with `class` representing the token type, for example: `<span class="lumis-keyword-special">Atom</span>`.
      Must link an external CSS in order to render colors, see more at [HTML Linked](https://hexdocs.pm/lumis/Lumis.html#module-html-linked).
   * `:html_multi_themes` - generates HTML with CSS custom properties (variables) for multiple themes, enabling light/dark mode support.
      Inspired by [Shiki Dual Themes](https://shiki.style/guide/dual-themes).
@@ -119,7 +119,7 @@ defmodule Lumis do
 
       - `:language` (`t:language/0` - default: `nil`) - the language used by the formatter. When omitted, Lumis tries to auto-detect it from the source.
       - `:pre_class` (`t:String.t/0` - default: `nil`) - the CSS class to append into the wrapping `<pre>` tag.
-      - `:highlight_lines` (`t:html_linked_highlight_lines/0` - default: `nil`) - highlight specific lines either using the `highlighted` class from themes or with a custom CSS class.
+      - `:highlight_lines` (`t:html_linked_highlight_lines/0` - default: `nil`) - highlight specific lines either using the `lumis-highlighted` class from themes or with a custom CSS class.
       - `:header` (`t:header/0` - default: `nil`) - wrap the highlighted code with custom open and close HTML tags.
 
   * `html_multi_themes`:
@@ -174,7 +174,7 @@ defmodule Lumis do
 
   ### HTML Linked: highlight specific lines
 
-      # use default `highlighted` class (already present in themes)
+      # use default `lumis-highlighted` class (already present in themes)
       {:html_linked, highlight_lines: %{lines: [2..4, 6]}}
 
       # use custom class
@@ -386,7 +386,7 @@ defmodule Lumis do
              nil,
              map: [
                lines: [type: {:list, {:custom, Lumis, :highlight_lines_type, []}}],
-               class: [type: :string, default: "highlighted"]
+               class: [type: :string, default: "lumis-highlighted"]
              ]
            ]},
         default: nil
@@ -636,7 +636,7 @@ defmodule Lumis do
             n when is_integer(n) -> {:single, n}
           end)
 
-        class = hl[:class] || "highlighted"
+        class = hl[:class] || "lumis-highlighted"
 
         opts
         |> Keyword.put(:highlight_lines, %Lumis.HtmlLinkedHighlightLines{
@@ -820,8 +820,8 @@ defmodule Lumis do
       ...> \"""
       iex> highlight_lines = %{lines: [2]}
       iex> Lumis.highlight(code, formatter: {:html_linked, language: "elixir", highlight_lines: highlight_lines})
-      # Line 2 will contain a `highlighted` class:
-      <div class=\"line highlighted\" data-line=\"2\">...
+      # Line 2 will contain a `lumis-highlighted` class:
+      <div class=\"line lumis-highlighted\" data-line=\"2\">...
 
   Wrapping with custom HTML:
 
