@@ -520,15 +520,15 @@ end
 end
 "#;
 
-        let expected = r#"<pre class="lumis"><code class="language-elixir" translate="no" tabindex="0"><div class="line" data-line="1"><span class="keyword-function">defmodule</span> <span class="module">Foo</span> <span class="keyword">do</span>
-</div><div class="line" data-line="2">  <span class="operator"><span class="comment-documentation"><span class="comment">@</span><span class="comment">moduledoc</span> <span class="comment">&quot;&quot;&quot;</span></span></span>
-</div><div class="line" data-line="3"><span class="operator"><span class="comment-documentation"><span class="comment">  Test Module</span></span></span>
-</div><div class="line" data-line="4"><span class="operator"><span class="comment-documentation"><span class="comment">  &quot;&quot;&quot;</span></span></span>
+        let expected = r#"<pre class="lumis"><code class="language-elixir" translate="no" tabindex="0"><div class="line" data-line="1"><span class="lumis-keyword-function">defmodule</span> <span class="lumis-module">Foo</span> <span class="lumis-keyword">do</span>
+</div><div class="line" data-line="2">  <span class="lumis-operator"><span class="lumis-comment-documentation"><span class="lumis-comment">@</span><span class="lumis-comment">moduledoc</span> <span class="lumis-comment">&quot;&quot;&quot;</span></span></span>
+</div><div class="line" data-line="3"><span class="lumis-operator"><span class="lumis-comment-documentation"><span class="lumis-comment">  Test Module</span></span></span>
+</div><div class="line" data-line="4"><span class="lumis-operator"><span class="lumis-comment-documentation"><span class="lumis-comment">  &quot;&quot;&quot;</span></span></span>
 </div><div class="line" data-line="5">
-</div><div class="line" data-line="6">  <span class="operator"><span class="constant">@<span class="function-call"><span class="constant">projects <span class="punctuation-bracket">[</span><span class="string">&quot;Phoenix&quot;</span><span class="punctuation-delimiter">,</span> <span class="string">&quot;MDEx&quot;</span><span class="punctuation-bracket">]</span></span></span></span></span>
+</div><div class="line" data-line="6">  <span class="lumis-operator"><span class="lumis-constant">@<span class="lumis-function-call"><span class="lumis-constant">projects <span class="lumis-punctuation-bracket">[</span><span class="lumis-string">&quot;Phoenix&quot;</span><span class="lumis-punctuation-delimiter">,</span> <span class="lumis-string">&quot;MDEx&quot;</span><span class="lumis-punctuation-bracket">]</span></span></span></span></span>
 </div><div class="line" data-line="7">
-</div><div class="line" data-line="8">  <span class="keyword-function">def</span> <span class="function">projects</span><span class="punctuation-delimiter">,</span> <span class="string-special-symbol">do: </span><span class="operator"><span class="constant">@<span class="constant">projects</span></span></span>
-</div><div class="line" data-line="9"><span class="keyword">end</span>
+</div><div class="line" data-line="8">  <span class="lumis-keyword-function">def</span> <span class="lumis-function">projects</span><span class="lumis-punctuation-delimiter">,</span> <span class="lumis-string-special-symbol">do: </span><span class="lumis-operator"><span class="lumis-constant">@<span class="lumis-constant">projects</span></span></span>
+</div><div class="line" data-line="9"><span class="lumis-keyword">end</span>
 </div><div class="line" data-line="10">
 </div></code></pre>"#;
 
@@ -545,7 +545,7 @@ end
     #[test]
     fn test_highlight_html_linked_escape_curly_braces() {
         let code = "{:ok, char: '{'}";
-        let expected = r#"<pre class="lumis"><code class="language-elixir" translate="no" tabindex="0"><div class="line" data-line="1"><span class="punctuation-bracket">&lbrace;</span><span class="string-special-symbol">:ok</span><span class="punctuation-delimiter">,</span> <span class="string-special-symbol">char: </span><span class="character">&#39;&lbrace;&#39;</span><span class="punctuation-bracket">&rbrace;</span>
+        let expected = r#"<pre class="lumis"><code class="language-elixir" translate="no" tabindex="0"><div class="line" data-line="1"><span class="lumis-punctuation-bracket">&lbrace;</span><span class="lumis-string-special-symbol">:ok</span><span class="lumis-punctuation-delimiter">,</span> <span class="lumis-string-special-symbol">char: </span><span class="lumis-character">&#39;&lbrace;&#39;</span><span class="lumis-punctuation-bracket">&rbrace;</span>
 </div></code></pre>"#;
 
         let formatter = HtmlLinkedBuilder::default()

@@ -259,7 +259,7 @@ export function escapeAttr(value: string): string {
  * Join CSS class names, filtering out falsy values.
  *
  * ```ts
- * joinClasses('line', undefined, 'highlighted')  // "line highlighted"
+ * joinClasses('line', undefined, 'lumis-highlighted')  // "line lumis-highlighted"
  * joinClasses(undefined, false)                   // undefined
  * ```
  */
@@ -301,7 +301,7 @@ export function attrsToString(attrs: HtmlAttrs): string {
  *
  * ```ts
  * openTag('span', { class: 'keyword', style: 'color: red' })
- * // '<span class="keyword" style="color: red">'
+ * // '<span class="lumis-keyword" style="color: red">'
  * ```
  */
 export function openTag(name: string, attrs: HtmlAttrs = {}): string {
@@ -324,7 +324,7 @@ export function closeTag(name: string): string {
  * Open a `<span>` tag with the given attributes.
  *
  * ```ts
- * openSpanTag({ class: 'keyword' })  // '<span class="keyword">'
+ * openSpanTag({ class: 'lumis-keyword' })  // '<span class="lumis-keyword">'
  * ```
  */
 export function openSpanTag(attrs: HtmlAttrs = {}): string {
@@ -443,11 +443,11 @@ export function escapeFragment(text: string): string {
  * Convert a dot-separated scope to a CSS class name.
  *
  * ```ts
- * scopeToClass('string.special.regex')  // "string-special-regex"
+ * scopeToClass('string.special.regex')  // "lumis-string-special-regex"
  * ```
  */
 export function scopeToClass(scope: string): string {
-  return HIGHLIGHT_NAMES.includes(scope) ? scope.replaceAll(".", "-") : "text";
+  return HIGHLIGHT_NAMES.includes(scope) ? `lumis-${scope.replaceAll(".", "-")}` : "lumis-text";
 }
 
 /**
@@ -509,7 +509,7 @@ export function spanInline(text: string, options: SpanInlineOptions): string {
  * Build HTML attributes for a class-based `<span>`.
  *
  * ```ts
- * spanLinkedAttrs('keyword')  // 'class="keyword"'
+ * spanLinkedAttrs('keyword')  // 'class="lumis-keyword"'
  * ```
  */
 export function spanLinkedAttrs(scope: string): string {
@@ -520,7 +520,7 @@ export function spanLinkedAttrs(scope: string): string {
  * Render a class-based `<span>` for a token.
  *
  * ```ts
- * spanLinked('const', 'keyword')  // '<span class="keyword">const</span>'
+ * spanLinked('const', 'keyword')  // '<span class="lumis-keyword">const</span>'
  * ```
  */
 export function spanLinked(text: string, scope: string): string {
@@ -789,8 +789,8 @@ export function renderHtmlBlock(options: {
  * Wrap a line of highlighted HTML in a `<div>` with line metadata.
  *
  * ```ts
- * wrapLine(1, '<span>const</span>', { className: 'highlighted' })
- * // '<div class="line highlighted" data-line="1"><span>const</span>\n</div>'
+ * wrapLine(1, '<span>const</span>', { className: 'lumis-highlighted' })
+ * // '<div class="line lumis-highlighted" data-line="1"><span>const</span>\n</div>'
  * ```
  */
 export function wrapLine(

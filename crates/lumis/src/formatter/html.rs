@@ -126,7 +126,7 @@ pub fn span_inline_attrs(
 /// use lumis::html;
 ///
 /// let span = html::span_linked("fn span", "keyword.function");
-/// assert_eq!(span, r#"<span class="keyword-function">fn span</span>"#);
+/// assert_eq!(span, r#"<span class="lumis-keyword-function">fn span</span>"#);
 /// ```
 pub fn span_linked(text: &str, scope: &str) -> String {
     let escaped = escape(text);
@@ -145,7 +145,7 @@ pub fn span_linked(text: &str, scope: &str) -> String {
 /// use lumis::html;
 ///
 /// let attrs = html::span_linked_attrs("keyword.function");
-/// assert_eq!(attrs, r#"class="keyword-function""#);
+/// assert_eq!(attrs, r#"class="lumis-keyword-function""#);
 /// ```
 pub fn span_linked_attrs(scope: &str) -> String {
     let class = scope_to_class(scope);
@@ -628,16 +628,16 @@ pub fn wrap_line(
 /// ```rust
 /// use lumis::html;
 ///
-/// assert_eq!(html::scope_to_class("string"), "string");
-/// assert_eq!(html::scope_to_class("function.method.call"), "function-method-call");
+/// assert_eq!(html::scope_to_class("string"), "lumis-string");
+/// assert_eq!(html::scope_to_class("function.method.call"), "lumis-function-method-call");
 /// ```
-pub fn scope_to_class(scope: &str) -> &str {
+pub fn scope_to_class(scope: &str) -> String {
     lumis_core::highlights::HIGHLIGHT_NAMES
         .iter()
         .position(|&s| s == scope)
         .and_then(|idx| lumis_core::highlights::CLASSES.get(idx))
-        .copied()
-        .unwrap_or("text")
+        .map(|class| format!("lumis-{class}"))
+        .unwrap_or_else(|| "lumis-text".to_string())
 }
 
 /// Generate an opening `<pre>` tag with optional class and theme styles.
@@ -825,19 +825,22 @@ mod tests {
 
     #[test]
     fn test_scope_to_class_keyword_conditional() {
-        assert_eq!(scope_to_class("keyword.conditional"), "keyword-conditional");
+        assert_eq!(
+            scope_to_class("keyword.conditional"),
+            "lumis-keyword-conditional"
+        );
     }
 
     #[test]
     fn test_scope_to_class_string_escape() {
-        assert_eq!(scope_to_class("string.escape"), "string-escape");
+        assert_eq!(scope_to_class("string.escape"), "lumis-string-escape");
     }
 
     #[test]
     fn test_scope_to_class_function_method_call() {
         assert_eq!(
             scope_to_class("function.method.call"),
-            "function-method-call"
+            "lumis-function-method-call"
         );
     }
 
@@ -845,18 +848,18 @@ mod tests {
     fn test_scope_to_class_comment_documentation() {
         assert_eq!(
             scope_to_class("comment.documentation"),
-            "comment-documentation"
+            "lumis-comment-documentation"
         );
     }
 
     #[test]
     fn test_scope_to_class_unknown_scope() {
-        assert_eq!(scope_to_class("unknown.scope.name"), "text");
+        assert_eq!(scope_to_class("unknown.scope.name"), "lumis-text");
     }
 
     #[test]
     fn test_scope_to_class_simple_scope() {
-        assert_eq!(scope_to_class("keyword"), "keyword");
+        assert_eq!(scope_to_class("keyword"), "lumis-keyword");
     }
 
     #[test]
@@ -929,6 +932,6 @@ mod tests {
     #[test]
     fn test_span_linked() {
         let result = span_linked("fn", "keyword.function");
-        assert_str_eq!(result, r#"<span class="keyword-function">fn</span>"#);
+        assert_str_eq!(result, r#"<span class="lumis-keyword-function">fn</span>"#);
     }
 }

@@ -535,7 +535,7 @@ impl Theme {
 
             if !style_css.is_empty() {
                 rules.push(format!(
-                    ".{} {{\n  {}\n}}\n",
+                    ".lumis-{} {{\n  {}\n}}\n",
                     scope.replace('.', "-"),
                     style_css
                 ))
@@ -769,15 +769,15 @@ pre.lumis {
   color: red;
   background-color: green;
 }
-.keyword {
+.lumis-keyword {
   color: blue;
   font-style: italic;
 }
-.normal {
+.lumis-normal {
   color: red;
   background-color: green;
 }
-.tag-attribute {
+.lumis-tag-attribute {
   background-color: gray;
   font-weight: bold;
 }

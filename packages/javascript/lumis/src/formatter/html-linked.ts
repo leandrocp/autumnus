@@ -19,7 +19,7 @@ function highlightLineClass(
     formatter.highlightLines?.lines,
     lineNumber,
     formatter.highlightLines?.class,
-    "highlighted",
+    "lumis-highlighted",
   );
 }
 
