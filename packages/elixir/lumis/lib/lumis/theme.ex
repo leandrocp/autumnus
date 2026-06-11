@@ -57,10 +57,10 @@ defmodule Lumis.Theme do
       doc:
         "When true, token selectors are scoped under `:pre_selector`, so `.keyword` becomes `.lumis .keyword` if `pre_selector: \".lumis\"`."
     ],
-    background: [
+    background_color: [
       type: {:or, [:string, nil]},
       default: nil,
-      doc: "Background override for the base code block rule."
+      doc: "Override for the `background-color` of the base code block rule."
     ],
     base_rules: [
       type: {:list, {:tuple, [:string, :string]}},

@@ -13,8 +13,8 @@ export interface BuildCssOptions {
    * becomes `.lumis .keyword` if `preSelector` is `".lumis"`. Defaults to `false`.
    */
   scopeTokens?: boolean;
-  /** Background override for the base code block rule. */
-  background?: string;
+  /** Override for the `background-color` of the base code block rule. */
+  backgroundColor?: string;
   /** Extra `[property, value]` declarations appended to the base code block rule. */
   baseRules?: [string, string][];
 }
@@ -34,7 +34,7 @@ export interface BuildCssOptions {
  *   selectorPrefix: 'html[data-theme="dark"] ',
  *   preSelector: '.lumis',
  *   scopeTokens: true,
- *   background: 'var(--code-background)',
+ *   backgroundColor: 'var(--code-background)',
  *   baseRules: [
  *     ['border-radius', '0.375rem'],
  *     ['padding', '1rem'],
@@ -48,7 +48,7 @@ export function buildCss(theme: ThemeData, options: BuildCssOptions = {}): strin
   const selectorPrefix = options.selectorPrefix ?? "";
   const preSelector = options.preSelector ?? "pre.lumis";
   const scopeTokens = options.scopeTokens ?? false;
-  const background = options.background;
+  const backgroundColor = options.backgroundColor;
   const baseRules = options.baseRules ?? [];
 
   const rules: string[] = [];
@@ -58,7 +58,7 @@ export function buildCss(theme: ThemeData, options: BuildCssOptions = {}): strin
   );
 
   const normal = theme.highlights["normal"];
-  const baseStyle = renderBaseStyle(normal, background, baseRules, "\n  ");
+  const baseStyle = renderBaseStyle(normal, backgroundColor, baseRules, "\n  ");
 
   if (baseStyle === "") {
     rules.push(" {}\n");
@@ -92,7 +92,7 @@ export function buildCss(theme: ThemeData, options: BuildCssOptions = {}): strin
 
 function renderBaseStyle(
   normal: StyleEntry | undefined,
-  background: string | undefined,
+  backgroundColor: string | undefined,
   baseRules: [string, string][],
   separator: string,
 ): string {
@@ -102,8 +102,8 @@ function renderBaseStyle(
     rules.push(`color: ${normal.fg};`);
   }
 
-  if (background !== undefined) {
-    rules.push(`background-color: ${background};`);
+  if (backgroundColor !== undefined) {
+    rules.push(`background-color: ${backgroundColor};`);
   } else if (normal?.bg) {
     rules.push(`background-color: ${normal.bg};`);
   }

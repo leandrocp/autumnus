@@ -65,7 +65,7 @@ html[data-theme="dark"] .lumis .tag-attribute {
         selectorPrefix: 'html[data-theme="dark"] ',
         preSelector: ".lumis",
         scopeTokens: true,
-        background: "var(--color-grey-900)",
+        backgroundColor: "var(--color-grey-900)",
         baseRules: [["border-radius", "0.375rem"]],
       }),
     ).toBe(expected);

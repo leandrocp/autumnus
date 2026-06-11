@@ -125,7 +125,7 @@ defmodule Lumis.LumisTest do
           selector_prefix: ~s(html[data-theme="dark"] ),
           pre_selector: ".lumis",
           scope_tokens: true,
-          background: "var(--code-background)",
+          background_color: "var(--code-background)",
           base_rules: [
             {"border-radius", "0.375rem"},
             {"padding", "1rem"}

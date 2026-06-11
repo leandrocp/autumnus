@@ -480,7 +480,7 @@ pub struct ExCssOptions {
     pub selector_prefix: String,
     pub pre_selector: String,
     pub scope_tokens: bool,
-    pub background: Option<String>,
+    pub background_color: Option<String>,
     pub base_rules: Vec<(String, String)>,
 }
 

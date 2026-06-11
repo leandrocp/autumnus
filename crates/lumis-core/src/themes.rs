@@ -604,8 +604,8 @@ impl Theme {
 /// let css = CssBuilder::new(&theme)
 ///     .pre_selector(".lumis")
 ///     .scope_tokens(true)
-///     .background("var(--code-background)")
-///     .base_rule("border-radius", "0.375rem")
+///     .background_color("var(--code-background)")
+///     .base_rules([("border-radius", "0.375rem")])
 ///     .build();
 ///
 /// assert!(css.contains(".lumis .keyword"));
@@ -632,10 +632,10 @@ struct Css<'a> {
     /// Whether token selectors should be scoped under the `<pre>` selector. Defaults to `false`.
     #[builder(default)]
     scope_tokens: bool,
-    /// Override the background of the base code block rule.
+    /// Override the `background-color` of the base code block rule.
     #[builder(default, setter(into, strip_option))]
-    background: Option<String>,
-    /// Extra declarations appended to the base code block rule via [`CssBuilder::base_rule`].
+    background_color: Option<String>,
+    /// Extra declarations appended to the base code block rule via [`CssBuilder::base_rules`].
     #[builder(default, setter(custom))]
     base_rules: Vec<(String, String)>,
 }
@@ -649,15 +649,20 @@ impl<'a> CssBuilder<'a> {
         }
     }
 
-    /// Append a CSS declaration to the base code block rule.
-    pub fn base_rule(
-        &mut self,
-        property: impl Into<String>,
-        value: impl Into<String>,
-    ) -> &mut Self {
-        self.base_rules
-            .get_or_insert_default()
-            .push((property.into(), value.into()));
+    /// Set the extra declarations appended to the base code block rule.
+    ///
+    /// Each item is a `(property, value)` pair, for example `("padding", "1rem")`.
+    pub fn base_rules<K, V>(&mut self, rules: impl IntoIterator<Item = (K, V)>) -> &mut Self
+    where
+        K: Into<String>,
+        V: Into<String>,
+    {
+        self.base_rules = Some(
+            rules
+                .into_iter()
+                .map(|(property, value)| (property.into(), value.into()))
+                .collect(),
+        );
         self
     }
 
@@ -728,7 +733,7 @@ impl Css<'_> {
             rules.push(format!("color: {fg};"));
         }
 
-        match &self.background {
+        match &self.background_color {
             Some(bg) => rules.push(format!("background-color: {bg};")),
             None => {
                 if let Some(bg) = self.theme.bg() {
@@ -956,8 +961,8 @@ html[data-theme="dark"] .lumis .keyword {
                 .selector_prefix("html[data-theme=\"dark\"] ")
                 .pre_selector(".lumis")
                 .scope_tokens(true)
-                .background("var(--color-grey-900)")
-                .base_rule("border-radius", "0.375rem")
+                .background_color("var(--color-grey-900)")
+                .base_rules([("border-radius", "0.375rem")])
                 .build(),
             expected
         );
@@ -1018,7 +1023,9 @@ pre.lumis {
 "#;
 
         assert_eq!(
-            CssBuilder::new(&theme).base_rule("padding", "1rem").build(),
+            CssBuilder::new(&theme)
+                .base_rules([("padding", "1rem")])
+                .build(),
             expected
         );
     }
@@ -1038,7 +1045,10 @@ pre.lumis {
 }
 "#;
 
-        assert_eq!(CssBuilder::new(&theme).background("#000").build(), expected);
+        assert_eq!(
+            CssBuilder::new(&theme).background_color("#000").build(),
+            expected
+        );
     }
 
     #[test]
@@ -1073,9 +1083,11 @@ pre.lumis {
 
         assert_eq!(
             CssBuilder::new(&theme)
-                .base_rule("border-radius", "0.375rem")
-                .base_rule("padding", "1rem")
-                .base_rule("overflow-x", "auto")
+                .base_rules([
+                    ("border-radius", "0.375rem"),
+                    ("padding", "1rem"),
+                    ("overflow-x", "auto"),
+                ])
                 .build(),
             expected
         );

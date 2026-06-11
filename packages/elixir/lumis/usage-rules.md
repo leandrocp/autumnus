@@ -160,11 +160,11 @@ css =
     selector_prefix: ~s(html[data-theme="dark"] ),
     pre_selector: ".lumis",
     scope_tokens: true,
-    background: "var(--code-background)"
+    background_color: "var(--code-background)"
   )
 ```
 
-Options: `:enable_italic`, `:selector_prefix`, `:pre_selector`, `:scope_tokens`, `:background`, `:base_rules`.
+Options: `:enable_italic`, `:selector_prefix`, `:pre_selector`, `:scope_tokens`, `:background_color`, `:base_rules`.
 
 ### HTML Multi-Themes
 

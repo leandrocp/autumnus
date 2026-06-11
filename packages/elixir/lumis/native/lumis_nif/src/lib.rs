@@ -116,13 +116,11 @@ fn build_theme_css(theme: &themes::Theme, options: ExCssOptions) -> String {
         .pre_selector(options.pre_selector)
         .scope_tokens(options.scope_tokens);
 
-    if let Some(background) = options.background {
-        builder.background(background);
+    if let Some(background_color) = options.background_color {
+        builder.background_color(background_color);
     }
 
-    for (property, value) in options.base_rules {
-        builder.base_rule(property, value);
-    }
+    builder.base_rules(options.base_rules);
 
     builder.build()
 }
