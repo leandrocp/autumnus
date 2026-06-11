@@ -372,6 +372,7 @@ themes-gen theme_name="":
     fi
     cargo run --manifest-path crates/dev/Cargo.toml -- sync-themes
     pnpm --filter @lumis-sh/themes build:themes
+    pnpm --filter @lumis-sh/themes build:assets
 
 # List all available themes
 themes-list:
