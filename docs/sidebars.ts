@@ -36,6 +36,7 @@ const sidebars: SidebarsConfig = {
       items: [
         'usage/themes',
         'usage/css-theme-files',
+        'usage/css-builder',
       ],
     },
     {

@@ -2,7 +2,7 @@
 sidebar_position: 5
 slug: /themes/css-files
 title: CSS Theme Files
-description: Use Lumis CSS theme files with htmlLinked output in JavaScript, Elixir, CDN, and repository workflows.
+description: Use Lumis CSS theme files with htmlLinked output in JavaScript, Elixir, and CDN workflows.
 keywords:
   - lumis css themes
   - html linked
@@ -76,3 +76,17 @@ That is why the same theme can be consumed from Rust assets, Elixir static files
 - smaller HTML output than inline styles
 
 If you want the block to be self-contained instead, use `htmlInline`.
+
+## Token classes
+
+Token classes use the `lumis-` prefix. Dots in Tree-sitter highlight scopes become dashes, so `comment` becomes `.lumis-comment`, and `tag.attribute` becomes `.lumis-tag-attribute`.
+
+The block and language classes stay bare: `pre.lumis` and `language-*`.
+
+```css
+.lumis-comment {
+  font-style: normal;
+}
+```
+
+If the pre-built files do not fit, generate a stylesheet at runtime with the [CSS Builder](/themes/css-builder). Use it for parent selectors, custom block selectors, or a background that comes from your app CSS.

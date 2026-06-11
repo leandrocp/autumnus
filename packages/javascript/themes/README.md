@@ -22,6 +22,10 @@ import dracula from '@lumis-sh/themes/dracula'
 https://unpkg.com/@lumis-sh/themes/dist/json/dracula.json
 ```
 
+### Build custom CSS
+
+Use `buildCss(theme, options)` to build a stylesheet you can inline or scope. See [CSS Builder](https://lumis.sh/docs/themes/css-builder).
+
 ## Browse
 
 - CSS: https://unpkg.com/browse/@lumis-sh/themes/dist/css/

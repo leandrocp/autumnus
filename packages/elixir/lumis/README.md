@@ -165,6 +165,8 @@ Then add the stylesheet to your template:
 <link phx-track-static rel="stylesheet" href={~p"/themes/dracula.css"} />
 ```
 
+CSS theme files are available in `priv/static/css/`. Use `Lumis.Theme.build_css/2` for custom selectors or embedded CSS ([docs](https://lumis.sh/docs/themes/css-builder)).
+
 ### HTML Multi-Themes
 
 Generates HTML with CSS custom properties (variables) for multiple themes, enabling light/dark mode support. Inspired by [Shiki Dual Themes](https://shiki.style/guide/dual-themes).

@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 mod elixir;
 
-use elixir::{ExFormatterOption, ExTheme};
+use elixir::{ExCssOptions, ExFormatterOption, ExTheme};
 use lumis::{languages, themes};
 use once_cell::sync::Lazy;
 use parking_lot::RwLock;
@@ -94,6 +94,30 @@ fn build_theme_from_json_string(json_string: &str) -> NifResult<ExTheme> {
     themes::from_json(json_string)
         .map(|theme| ExTheme::from(&theme))
         .map_err(|_e| Error::Atom("error"))
+}
+
+#[rustler::nif]
+fn theme_css_from_name(name: &str, options: ExCssOptions) -> NifResult<String> {
+    let theme = themes::get(name).map_err(|_e| Error::Atom("error"))?;
+    Ok(build_theme_css(&theme, options))
+}
+
+#[rustler::nif]
+fn theme_css_from_theme(theme: ExTheme, options: ExCssOptions) -> String {
+    build_theme_css(&theme.into(), options)
+}
+
+fn build_theme_css(theme: &themes::Theme, options: ExCssOptions) -> String {
+    let mut builder = themes::CssBuilder::new(theme);
+
+    builder
+        .enable_italic(options.enable_italic)
+        .selector_prefix(options.selector_prefix)
+        .pre_selector(options.pre_selector);
+
+    builder.base_rules(options.base_rules);
+
+    builder.build()
 }
 
 #[cfg(test)]

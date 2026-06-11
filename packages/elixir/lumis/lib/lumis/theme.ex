@@ -35,6 +35,30 @@ defmodule Lumis.Theme do
 
   @type appearance :: :light | :dark
 
+  @css_options_schema [
+    enable_italic: [
+      type: :boolean,
+      default: true,
+      doc: "Whether italic theme styles should be emitted."
+    ],
+    selector_prefix: [
+      type: :string,
+      default: "",
+      doc: "Prefix prepended to every generated selector."
+    ],
+    pre_selector: [
+      type: :string,
+      default: "pre.lumis",
+      doc: "Selector used for the `<pre>` code block rule. Defaults to `pre.lumis`."
+    ],
+    base_rules: [
+      type: {:list, {:tuple, [:string, :string]}},
+      default: [],
+      doc:
+        "Extra `{property, value}` declarations for the base code block rule. A property that matches one that the theme already sets (`color`, `background-color`) replaces that value."
+    ]
+  ]
+
   @typedoc "A Neovim theme with name, appearance (:light or :dark), revision, and highlight styles."
   @type t :: %Lumis.Theme{
           name: String.t(),
@@ -46,6 +70,52 @@ defmodule Lumis.Theme do
   defstruct name: nil, appearance: nil, revision: nil, highlights: %{}
 
   @doc """
+  Builds CSS for a Lumis theme.
+
+  Accepts a bundled theme name or a `Lumis.Theme` struct. Use this with the
+  `:html_linked` formatter when you need to embed CSS, scope selectors, or
+  customize the base code block rule.
+
+  ## Options
+
+  #{NimbleOptions.docs(@css_options_schema)}
+
+  ## Examples
+
+      iex> Lumis.Theme.build_css!("github_light") =~ "pre.lumis"
+      true
+
+      iex> Lumis.Theme.build_css!("github_dark", selector_prefix: ~s(html[data-theme="dark"] )) =~ ~s(html[data-theme="dark"] pre.lumis)
+      true
+
+      iex> Lumis.Theme.build_css!("github_light", selector_prefix: ".app ") =~ ".app .lumis-keyword"
+      true
+
+  """
+  @spec build_css(String.t() | t(), keyword()) :: {:ok, String.t()} | {:error, term()}
+  def build_css(theme, options \\ []) when is_list(options) do
+    with {:ok, options} <- build_css_options(options) do
+      case do_build_css(theme, options) do
+        :error -> {:error, :not_found}
+        css when is_binary(css) -> {:ok, css}
+      end
+    end
+  end
+
+  @doc """
+  Builds CSS for a Lumis theme, raising on errors.
+
+  See `build_css/2` for options.
+  """
+  @spec build_css!(String.t() | t(), keyword()) :: String.t()
+  def build_css!(theme, options \\ []) do
+    case build_css(theme, options) do
+      {:ok, css} -> css
+      {:error, reason} -> raise ArgumentError, "could not build theme CSS: #{inspect(reason)}"
+    end
+  end
+
+  @doc """
   Get a theme by name.
   """
   @spec get(String.t(), any()) :: Lumis.Theme.t() | nil
@@ -53,6 +123,23 @@ defmodule Lumis.Theme do
     case Lumis.Native.get_theme(name) do
       :error -> default
       theme -> theme
+    end
+  end
+
+  defp do_build_css(name, options) when is_binary(name) do
+    Lumis.Native.theme_css_from_name(name, options)
+  end
+
+  defp do_build_css(%Lumis.Theme{} = theme, options) do
+    Lumis.Native.theme_css_from_theme(theme, options)
+  end
+
+  defp build_css_options(options) do
+    options
+    |> NimbleOptions.validate(@css_options_schema)
+    |> case do
+      {:ok, options} -> {:ok, Map.new(options)}
+      {:error, error} -> {:error, error}
     end
   end
 

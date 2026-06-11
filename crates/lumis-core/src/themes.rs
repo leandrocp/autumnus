@@ -7,6 +7,8 @@
 use serde::{Deserialize, Serialize};
 use std::{collections::BTreeMap, fs, path::Path, str::FromStr};
 
+use derive_builder::Builder;
+
 /// Error type for theme operations.
 #[derive(Debug, Clone)]
 pub enum ThemeError {
@@ -516,33 +518,9 @@ impl Theme {
         }
     }
 
+    #[deprecated(note = "use themes::CssBuilder instead")]
     pub fn css(&self, enable_italic: bool) -> String {
-        let mut rules = Vec::new();
-
-        rules.push(format!(
-            "/* {}\n * revision: {}\n */\n\npre.lumis",
-            self.name, self.revision
-        ));
-
-        if let Some(pre_style) = &self.pre_style("\n  ") {
-            rules.push(format!(" {{\n  {pre_style}\n}}\n"));
-        } else {
-            rules.push(" {}\n".to_string());
-        }
-
-        for (scope, style) in &self.highlights {
-            let style_css = style.css(enable_italic, "\n  ");
-
-            if !style_css.is_empty() {
-                rules.push(format!(
-                    ".lumis-{} {{\n  {}\n}}\n",
-                    scope.replace('.', "-"),
-                    style_css
-                ))
-            };
-        }
-
-        rules.join("")
+        CssBuilder::new(self).enable_italic(enable_italic).build()
     }
 
     /// Get style for a scope.
@@ -608,6 +586,157 @@ impl Theme {
         } else {
             Some(rules.join(separator))
         }
+    }
+}
+
+/// Builder for a theme CSS stylesheet.
+///
+/// Most applications should use the bundled CSS files, but the builder is useful when CSS needs to
+/// be embedded, scoped, or customized.
+///
+/// # Examples
+///
+/// ```rust
+/// use lumis_core::themes::{self, CssBuilder};
+///
+/// let theme = themes::get("github_dark").unwrap();
+///
+/// let css = CssBuilder::new(&theme)
+///     .pre_selector(".lumis")
+///     .base_rules([("background-color", "var(--code-background)"), ("border-radius", "0.375rem")])
+///     .build();
+///
+/// assert!(css.contains(".lumis-keyword"));
+/// ```
+#[derive(Builder, Clone, Debug)]
+#[builder(
+    vis = "pub",
+    custom_constructor,
+    create_empty = "empty",
+    build_fn(private, name = "fallible_build")
+)]
+struct Css<'a> {
+    #[builder(setter(custom))]
+    theme: &'a Theme,
+    /// Whether italic theme styles should be emitted. Defaults to `true`.
+    #[builder(default = "true")]
+    enable_italic: bool,
+    /// Prefix prepended to every selector. Defaults to `""`.
+    #[builder(default, setter(into))]
+    selector_prefix: String,
+    /// Selector used for the `<pre>` code block rule. Defaults to `pre.lumis`.
+    #[builder(default = "\"pre.lumis\".to_string()", setter(into))]
+    pre_selector: String,
+    /// Extra declarations for the base code block rule, set via [`CssBuilder::base_rules`].
+    #[builder(default, setter(custom))]
+    base_rules: Vec<(String, String)>,
+}
+
+impl<'a> CssBuilder<'a> {
+    /// Create a CSS builder for `theme`.
+    pub fn new(theme: &'a Theme) -> Self {
+        CssBuilder {
+            theme: Some(theme),
+            ..CssBuilder::empty()
+        }
+    }
+
+    /// Set the extra declarations appended to the base code block rule.
+    ///
+    /// Each item is a `(property, value)` pair, for example `("padding", "1rem")`.
+    pub fn base_rules<K, V>(&mut self, rules: impl IntoIterator<Item = (K, V)>) -> &mut Self
+    where
+        K: Into<String>,
+        V: Into<String>,
+    {
+        self.base_rules = Some(
+            rules
+                .into_iter()
+                .map(|(property, value)| (property.into(), value.into()))
+                .collect(),
+        );
+        self
+    }
+
+    /// Build the CSS stylesheet.
+    #[must_use]
+    pub fn build(&self) -> String {
+        // `fallible_build` only errors when a required field is unset. `new` always sets `theme`,
+        // the sole required field, so this never fails unless a future required field is added
+        // without updating `new` (guarded by `test_css_builder_new_sets_required_fields`).
+        self.fallible_build()
+            .expect("CssBuilder::new initializes the required theme field")
+            .render()
+    }
+}
+
+impl Css<'_> {
+    fn render(&self) -> String {
+        let mut rules = Vec::new();
+
+        rules.push(format!(
+            "/* {}\n * revision: {}\n */\n\n{}{}",
+            self.theme.name, self.theme.revision, self.selector_prefix, self.pre_selector
+        ));
+
+        let base_style = self.base_style("\n  ");
+
+        if base_style.is_empty() {
+            rules.push(" {}\n".to_string());
+        } else {
+            rules.push(format!(" {{\n  {base_style}\n}}\n"));
+        }
+
+        for (scope, style) in &self.theme.highlights {
+            // `normal` defines the code block's base colors, already emitted in the base rule
+            // above and inherited by all text. It is never applied as a token class in highlighted
+            // output, so emitting a `.normal` rule here would be dead CSS.
+            if scope == "normal" {
+                continue;
+            }
+
+            let style_css = style.css(self.enable_italic, "\n  ");
+
+            if !style_css.is_empty() {
+                rules.push(format!(
+                    "{}.lumis-{} {{\n  {}\n}}\n",
+                    self.selector_prefix,
+                    scope.replace('.', "-"),
+                    style_css
+                ))
+            };
+        }
+
+        rules.join("")
+    }
+
+    fn base_style(&self, separator: &str) -> String {
+        // Start from the theme's base declarations, then merge `base_rules` over them: a rule whose
+        // property already exists replaces that value in place, otherwise it is appended. This keeps
+        // a single declaration per property (e.g. overriding `background-color` does not duplicate
+        // the theme's).
+        let mut decls: Vec<(String, String)> = Vec::new();
+
+        if let Some(fg) = self.theme.fg() {
+            decls.push(("color".to_string(), fg.to_string()));
+        }
+        if let Some(bg) = self.theme.bg() {
+            decls.push(("background-color".to_string(), bg.to_string()));
+        }
+
+        for (property, value) in &self.base_rules {
+            if let Some(existing) = decls.iter_mut().find(|(p, _)| p == property) {
+                existing.1 = value.clone();
+            } else {
+                decls.push((property.clone(), value.clone()));
+            }
+        }
+
+        decls
+            .iter()
+            .map(|(property, value)| format!("{property}: {value};"))
+            .collect::<Vec<_>>()
+            .join(separator)
     }
 }
 
@@ -757,7 +886,7 @@ mod tests {
     }
 
     #[test]
-    fn test_theme_css() {
+    fn test_css_builder_default_stylesheet() {
         let json = r#"{"name": "test", "appearance": "dark", "revision": "3e976b4", "highlights": {"normal": {"fg": "red", "bg": "green"}, "keyword": {"fg": "blue", "italic": true}, "tag.attribute": {"bg": "gray", "bold": true}}}"#;
         let theme = from_json(json).unwrap();
 
@@ -773,17 +902,319 @@ pre.lumis {
   color: blue;
   font-style: italic;
 }
-.lumis-normal {
-  color: red;
-  background-color: green;
-}
 .lumis-tag-attribute {
   background-color: gray;
   font-weight: bold;
 }
 "#;
 
-        assert_eq!(theme.css(true), expected);
+        assert_eq!(
+            CssBuilder::new(&theme).enable_italic(true).build(),
+            expected
+        );
+    }
+
+    #[test]
+    fn test_css_builder_can_disable_italic() {
+        let json = r#"{"name": "test", "appearance": "dark", "revision": "3e976b4", "highlights": {"keyword": {"fg": "blue", "italic": true}}}"#;
+        let theme = from_json(json).unwrap();
+
+        let css = CssBuilder::new(&theme).enable_italic(false).build();
+
+        assert!(css.contains(".lumis-keyword {\n  color: blue;\n}"));
+        assert!(!css.contains("font-style: italic;"));
+    }
+
+    #[test]
+    fn test_css_builder_scopes_selectors_and_base_rules() {
+        let json = r##"{"name": "test", "appearance": "dark", "revision": "3e976b4", "highlights": {"normal": {"fg": "red", "bg": "green"}, "keyword": {"fg": "blue"}}}"##;
+        let theme = from_json(json).unwrap();
+
+        let expected = r#"/* test
+ * revision: 3e976b4
+ */
+
+html[data-theme="dark"] .lumis {
+  color: red;
+  background-color: var(--color-grey-900);
+  border-radius: 0.375rem;
+}
+html[data-theme="dark"] .lumis-keyword {
+  color: blue;
+}
+"#;
+
+        assert_eq!(
+            CssBuilder::new(&theme)
+                .selector_prefix("html[data-theme=\"dark\"] ")
+                .pre_selector(".lumis")
+                .base_rules([
+                    ("background-color", "var(--color-grey-900)"),
+                    ("border-radius", "0.375rem"),
+                ])
+                .build(),
+            expected
+        );
+    }
+
+    #[test]
+    fn test_css_builder_emits_italic_by_default() {
+        let json = r#"{"name": "test", "appearance": "dark", "revision": "abc", "highlights": {"keyword": {"fg": "blue", "italic": true}}}"#;
+        let theme = from_json(json).unwrap();
+
+        let expected = r#"/* test
+ * revision: abc
+ */
+
+pre.lumis {}
+.lumis-keyword {
+  color: blue;
+  font-style: italic;
+}
+"#;
+
+        // No `enable_italic` call: the default must be `true`.
+        assert_eq!(CssBuilder::new(&theme).build(), expected);
+    }
+
+    #[test]
+    fn test_css_builder_empty_theme_renders_empty_base_rule() {
+        let json = r#"{"name": "test", "appearance": "dark", "revision": "abc", "highlights": {}}"#;
+        let theme = from_json(json).unwrap();
+
+        let expected = r#"/* test
+ * revision: abc
+ */
+
+pre.lumis {}
+"#;
+
+        assert_eq!(CssBuilder::new(&theme).build(), expected);
+    }
+
+    #[test]
+    fn test_css_builder_base_rule_keeps_theme_background() {
+        let json = r#"{"name": "test", "appearance": "dark", "revision": "abc", "highlights": {"normal": {"fg": "red", "bg": "green"}, "keyword": {"fg": "blue"}}}"#;
+        let theme = from_json(json).unwrap();
+
+        let expected = r#"/* test
+ * revision: abc
+ */
+
+pre.lumis {
+  color: red;
+  background-color: green;
+  padding: 1rem;
+}
+.lumis-keyword {
+  color: blue;
+}
+"#;
+
+        assert_eq!(
+            CssBuilder::new(&theme)
+                .base_rules([("padding", "1rem")])
+                .build(),
+            expected
+        );
+    }
+
+    #[test]
+    fn test_css_builder_base_rule_adds_background_when_theme_lacks_bg() {
+        let json = r#"{"name": "test", "appearance": "dark", "revision": "abc", "highlights": {"normal": {"fg": "red"}}}"#;
+        let theme = from_json(json).unwrap();
+
+        let expected = r#"/* test
+ * revision: abc
+ */
+
+pre.lumis {
+  color: red;
+  background-color: #000;
+}
+"#;
+
+        assert_eq!(
+            CssBuilder::new(&theme)
+                .base_rules([("background-color", "#000")])
+                .build(),
+            expected
+        );
+    }
+
+    #[test]
+    fn test_css_builder_base_rule_overrides_theme_background() {
+        let json = r#"{"name": "test", "appearance": "dark", "revision": "abc", "highlights": {"normal": {"fg": "red", "bg": "green"}}}"#;
+        let theme = from_json(json).unwrap();
+
+        let expected = r#"/* test
+ * revision: abc
+ */
+
+pre.lumis {
+  color: red;
+  background-color: #000;
+}
+"#;
+
+        // The theme's `background-color: green` is replaced in place, not duplicated.
+        let css = CssBuilder::new(&theme)
+            .base_rules([("background-color", "#000")])
+            .build();
+        assert_eq!(css, expected);
+        assert!(!css.contains("green"));
+    }
+
+    #[test]
+    fn test_css_builder_omits_rules_that_render_no_declarations() {
+        // `comment` only carries italic, so disabling italic leaves it with nothing to emit, while
+        // `function` keeps its color and must still be present.
+        let json = r#"{"name": "test", "appearance": "dark", "revision": "abc", "highlights": {"function": {"fg": "red"}, "comment": {"italic": true}}}"#;
+        let theme = from_json(json).unwrap();
+
+        let css = CssBuilder::new(&theme).enable_italic(false).build();
+
+        assert!(css.contains(".lumis-function {\n  color: red;\n}"));
+        assert!(!css.contains(".lumis-comment"));
+    }
+
+    #[test]
+    fn test_css_builder_base_rules_preserve_insertion_order() {
+        let json = r#"{"name": "test", "appearance": "dark", "revision": "abc", "highlights": {"normal": {"fg": "red"}}}"#;
+        let theme = from_json(json).unwrap();
+
+        let expected = r#"/* test
+ * revision: abc
+ */
+
+pre.lumis {
+  color: red;
+  border-radius: 0.375rem;
+  padding: 1rem;
+  overflow-x: auto;
+}
+"#;
+
+        assert_eq!(
+            CssBuilder::new(&theme)
+                .base_rules([
+                    ("border-radius", "0.375rem"),
+                    ("padding", "1rem"),
+                    ("overflow-x", "auto"),
+                ])
+                .build(),
+            expected
+        );
+    }
+
+    #[test]
+    fn test_css_builder_selector_prefix() {
+        let json = r#"{"name": "test", "appearance": "dark", "revision": "abc", "highlights": {"normal": {"fg": "red"}, "keyword": {"fg": "blue"}}}"#;
+        let theme = from_json(json).unwrap();
+
+        let expected = r#"/* test
+ * revision: abc
+ */
+
+.app pre.lumis {
+  color: red;
+}
+.app .lumis-keyword {
+  color: blue;
+}
+"#;
+
+        assert_eq!(
+            CssBuilder::new(&theme).selector_prefix(".app ").build(),
+            expected
+        );
+    }
+
+    #[test]
+    fn test_css_builder_renders_text_decorations() {
+        let json = r#"{"name": "test", "appearance": "dark", "revision": "abc", "highlights": {"keyword": {"fg": "blue", "bold": true, "italic": true, "underline": "double", "strikethrough": true}}}"#;
+        let theme = from_json(json).unwrap();
+
+        let expected = r#"/* test
+ * revision: abc
+ */
+
+pre.lumis {}
+.lumis-keyword {
+  color: blue;
+  font-weight: bold;
+  font-style: italic;
+  text-decoration: underline double line-through;
+}
+"#;
+
+        assert_eq!(CssBuilder::new(&theme).build(), expected);
+    }
+
+    #[test]
+    fn test_css_builder_nested_scope_dots_become_dashes() {
+        let json = r#"{"name": "test", "appearance": "dark", "revision": "abc", "highlights": {"markup.heading.1.markdown": {"fg": "red"}}}"#;
+        let theme = from_json(json).unwrap();
+
+        let css = CssBuilder::new(&theme).build();
+
+        assert!(css.contains(".lumis-markup-heading-1-markdown {\n  color: red;\n}"));
+    }
+
+    #[test]
+    fn test_css_builder_build_does_not_consume_and_setters_mutate_in_place() {
+        let json = r#"{"name": "test", "appearance": "dark", "revision": "abc", "highlights": {"keyword": {"fg": "blue", "italic": true}}}"#;
+        let theme = from_json(json).unwrap();
+
+        let mut builder = CssBuilder::new(&theme);
+
+        let first = builder.build();
+        let second = builder.build();
+        assert_eq!(first, second, "build(&self) must be repeatable");
+        assert!(first.contains("font-style: italic;"));
+
+        builder.enable_italic(false);
+        let third = builder.build();
+        assert!(
+            !third.contains("font-style: italic;"),
+            "mutating a setter must be reflected on the next build"
+        );
+    }
+
+    #[test]
+    fn test_css_builder_new_sets_required_fields() {
+        // `build()` calls the private `fallible_build().expect(...)`. That expect can only panic if
+        // a required field is left unset. This guards the invariant that `new` initializes every
+        // required field, so a future required field added without updating `new` fails here.
+        let json = r#"{"name": "test", "appearance": "dark", "revision": "abc", "highlights": {}}"#;
+        let theme = from_json(json).unwrap();
+
+        let _ = CssBuilder::new(&theme).build();
+    }
+
+    #[test]
+    fn test_css_builder_default_matches_bundled_css_files() {
+        // The bundled `crates/lumis/css/<theme>.css` files are generated by the `dev` tool using a
+        // default builder. A default `CssBuilder` must reproduce them byte-for-byte, which proves
+        // it emits the canonical, valid stylesheet for every bundled theme with no customization.
+        let css_dir = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("..")
+            .join("lumis")
+            .join("css");
+
+        for theme in available_themes() {
+            let css_path = css_dir.join(format!("{}.css", theme.name));
+            let expected = std::fs::read_to_string(&css_path)
+                .unwrap_or_else(|e| panic!("missing bundled CSS for {}: {e}", theme.name));
+            let expected = expected.replace("\r\n", "\n");
+
+            assert_eq!(
+                CssBuilder::new(theme).build(),
+                expected,
+                "default CssBuilder output drifted from {}",
+                css_path.display()
+            );
+        }
     }
 
     #[test]

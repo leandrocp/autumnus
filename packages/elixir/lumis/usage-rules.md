@@ -150,6 +150,24 @@ Available options for `:html_linked`:
 - `:highlight_lines` - Highlight specific lines with CSS class
 - `:header` - Wrap with custom HTML tags
 
+#### Building scoped CSS
+
+`Lumis.Theme.build_css!/2` builds a stylesheet from a theme name or `Lumis.Theme` struct, for when the bundled CSS files are not enough.
+
+```elixir
+css =
+  Lumis.Theme.build_css!("github_dark",
+    selector_prefix: ~s(html[data-theme="dark"] ),
+    pre_selector: ".lumis",
+    base_rules: [
+      {"background-color", "var(--code-background)"},
+      {"border-radius", "0.375rem"}
+    ]
+  )
+```
+
+Options: `:enable_italic`, `:selector_prefix`, `:pre_selector`, `:base_rules`. A `:base_rules` entry whose property matches one that the theme sets (`color`, `background-color`) replaces that value.
+
 ### HTML Multi-Themes
 
 Generates HTML with CSS custom properties (variables) for multiple themes, enabling light/dark mode support. Inspired by [Shiki Dual Themes](https://shiki.style/guide/dual-themes).
