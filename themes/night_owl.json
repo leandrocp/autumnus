@@ -338,6 +338,15 @@
     "punctuation.bracket": {
       "fg": "#d6deeb"
     },
+    "punctuation.bracket.rainbow.2": {
+      "fg": "#ffd602"
+    },
+    "punctuation.bracket.rainbow.3": {
+      "fg": "#169fff"
+    },
+    "punctuation.bracket.rainbow.6": {
+      "fg": "#da70d6"
+    },
     "punctuation.delimiter": {
       "fg": "#d6deeb"
     },

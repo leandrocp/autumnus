@@ -302,6 +302,24 @@ pre.lumis {
 .punctuation-bracket {
   color: #c6c6c6;
 }
+.punctuation-bracket-rainbow-1 {
+  color: #ff5d5d;
+}
+.punctuation-bracket-rainbow-2 {
+  color: #e3c78a;
+}
+.punctuation-bracket-rainbow-3 {
+  color: #80a0ff;
+}
+.punctuation-bracket-rainbow-4 {
+  color: #de935f;
+}
+.punctuation-bracket-rainbow-5 {
+  color: #8cc85f;
+}
+.punctuation-bracket-rainbow-6 {
+  color: #cf87e8;
+}
 .punctuation-delimiter {
   color: #c6c6c6;
 }
