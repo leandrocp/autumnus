@@ -113,12 +113,7 @@ fn build_theme_css(theme: &themes::Theme, options: ExCssOptions) -> String {
     builder
         .enable_italic(options.enable_italic)
         .selector_prefix(options.selector_prefix)
-        .pre_selector(options.pre_selector)
-        .scope_tokens(options.scope_tokens);
-
-    if let Some(background_color) = options.background_color {
-        builder.background_color(background_color);
-    }
+        .pre_selector(options.pre_selector);
 
     builder.base_rules(options.base_rules);
 

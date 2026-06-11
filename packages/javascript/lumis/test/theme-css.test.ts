@@ -50,11 +50,11 @@ html[data-theme="dark"] .lumis {
   background-color: var(--color-grey-900);
   border-radius: 0.375rem;
 }
-html[data-theme="dark"] .lumis .lumis-keyword {
+html[data-theme="dark"] .lumis-keyword {
   color: blue;
   font-style: italic;
 }
-html[data-theme="dark"] .lumis .lumis-tag-attribute {
+html[data-theme="dark"] .lumis-tag-attribute {
   background-color: gray;
   font-weight: bold;
 }
@@ -64,9 +64,10 @@ html[data-theme="dark"] .lumis .lumis-tag-attribute {
       buildCss(sample, {
         selectorPrefix: 'html[data-theme="dark"] ',
         preSelector: ".lumis",
-        scopeTokens: true,
-        backgroundColor: "var(--color-grey-900)",
-        baseRules: [["border-radius", "0.375rem"]],
+        baseRules: [
+          ["background-color", "var(--color-grey-900)"],
+          ["border-radius", "0.375rem"],
+        ],
       }),
     ).toBe(expected);
   });

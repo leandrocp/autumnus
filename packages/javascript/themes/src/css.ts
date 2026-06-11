@@ -9,13 +9,9 @@ export interface BuildCssOptions {
   /** Selector used for the `<pre>` code block rule. Defaults to `"pre.lumis"`. */
   preSelector?: string;
   /**
-   * When `true`, token selectors are scoped under `preSelector`, so `.keyword`
-   * becomes `.lumis .keyword` if `preSelector` is `".lumis"`. Defaults to `false`.
+   * Extra `[property, value]` declarations for the base code block rule. A property that matches
+   * one the theme already sets (`color`, `background-color`) replaces that value instead of duplicating it.
    */
-  scopeTokens?: boolean;
-  /** Override for the `background-color` of the base code block rule. */
-  backgroundColor?: string;
-  /** Extra `[property, value]` declarations appended to the base code block rule. */
   baseRules?: [string, string][];
 }
 
@@ -33,12 +29,10 @@ export interface BuildCssOptions {
  * const css = buildCss(githubDark, {
  *   selectorPrefix: 'html[data-theme="dark"] ',
  *   preSelector: '.lumis',
- *   scopeTokens: true,
- *   backgroundColor: 'var(--code-background)',
  *   baseRules: [
+ *     ['background-color', 'var(--code-background)'],
  *     ['border-radius', '0.375rem'],
  *     ['padding', '1rem'],
- *     ['overflow-x', 'auto'],
  *   ],
  * })
  * ```
@@ -47,8 +41,6 @@ export function buildCss(theme: ThemeData, options: BuildCssOptions = {}): strin
   const enableItalic = options.enableItalic ?? true;
   const selectorPrefix = options.selectorPrefix ?? "";
   const preSelector = options.preSelector ?? "pre.lumis";
-  const scopeTokens = options.scopeTokens ?? false;
-  const backgroundColor = options.backgroundColor;
   const baseRules = options.baseRules ?? [];
 
   const rules: string[] = [];
@@ -58,7 +50,7 @@ export function buildCss(theme: ThemeData, options: BuildCssOptions = {}): strin
   );
 
   const normal = theme.highlights["normal"];
-  const baseStyle = renderBaseStyle(normal, backgroundColor, baseRules, "\n  ");
+  const baseStyle = renderBaseStyle(normal, baseRules, "\n  ");
 
   if (baseStyle === "") {
     rules.push(" {}\n");
@@ -66,14 +58,11 @@ export function buildCss(theme: ThemeData, options: BuildCssOptions = {}): strin
     rules.push(` {\n  ${baseStyle}\n}\n`);
   }
 
-  const tokenSelectorPrefix = scopeTokens ? `${preSelector} ` : "";
-
   const entries = Object.entries(theme.highlights).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
 
   for (const [scope, style] of entries) {
     // `normal` defines the code block's base colors, already emitted above and inherited by all
-    // text. It is never applied as a token class, so a `.normal` rule would be dead CSS and would
-    // also shadow a `background` override for that one scope.
+    // text. It is never applied as a token class, so a `.normal` rule would be dead CSS.
     if (scope === "normal") {
       continue;
     }
@@ -81,9 +70,7 @@ export function buildCss(theme: ThemeData, options: BuildCssOptions = {}): strin
     const styleCss = renderStyle(style, enableItalic, "\n  ");
 
     if (styleCss !== "") {
-      rules.push(
-        `${selectorPrefix}${tokenSelectorPrefix}.lumis-${scope.replaceAll(".", "-")} {\n  ${styleCss}\n}\n`,
-      );
+      rules.push(`${selectorPrefix}.lumis-${scope.replaceAll(".", "-")} {\n  ${styleCss}\n}\n`);
     }
   }
 
@@ -92,27 +79,31 @@ export function buildCss(theme: ThemeData, options: BuildCssOptions = {}): strin
 
 function renderBaseStyle(
   normal: StyleEntry | undefined,
-  backgroundColor: string | undefined,
   baseRules: [string, string][],
   separator: string,
 ): string {
-  const rules: string[] = [];
+  // Start from the theme's base declarations, then merge `baseRules` over them: a rule whose
+  // property already exists replaces it in place, otherwise it is appended. This keeps a single
+  // declaration per property (overriding `background-color` does not duplicate the theme's).
+  const decls: [string, string][] = [];
 
   if (normal?.fg) {
-    rules.push(`color: ${normal.fg};`);
+    decls.push(["color", normal.fg]);
   }
-
-  if (backgroundColor !== undefined) {
-    rules.push(`background-color: ${backgroundColor};`);
-  } else if (normal?.bg) {
-    rules.push(`background-color: ${normal.bg};`);
+  if (normal?.bg) {
+    decls.push(["background-color", normal.bg]);
   }
 
   for (const [property, value] of baseRules) {
-    rules.push(`${property}: ${value};`);
+    const existing = decls.find(([p]) => p === property);
+    if (existing) {
+      existing[1] = value;
+    } else {
+      decls.push([property, value]);
+    }
   }
 
-  return rules.join(separator);
+  return decls.map(([property, value]) => `${property}: ${value};`).join(separator);
 }
 
 function renderStyle(style: StyleEntry, enableItalic: boolean, separator: string): string {

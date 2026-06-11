@@ -51,21 +51,11 @@ defmodule Lumis.Theme do
       default: "pre.lumis",
       doc: "Selector used for the `<pre>` code block rule. Defaults to `pre.lumis`."
     ],
-    scope_tokens: [
-      type: :boolean,
-      default: false,
-      doc:
-        "When true, token selectors are scoped under `:pre_selector`, so `.keyword` becomes `.lumis .keyword` if `pre_selector: \".lumis\"`."
-    ],
-    background_color: [
-      type: {:or, [:string, nil]},
-      default: nil,
-      doc: "Override for the `background-color` of the base code block rule."
-    ],
     base_rules: [
       type: {:list, {:tuple, [:string, :string]}},
       default: [],
-      doc: "Extra `{property, value}` declarations appended to the base code block rule."
+      doc:
+        "Extra `{property, value}` declarations for the base code block rule. A property that matches one that the theme already sets (`color`, `background-color`) replaces that value."
     ]
   ]
 
@@ -98,7 +88,7 @@ defmodule Lumis.Theme do
       iex> Lumis.Theme.build_css!("github_dark", selector_prefix: ~s(html[data-theme="dark"] )) =~ ~s(html[data-theme="dark"] pre.lumis)
       true
 
-      iex> Lumis.Theme.build_css!("github_light", pre_selector: ".lumis", scope_tokens: true) =~ ".lumis .keyword"
+      iex> Lumis.Theme.build_css!("github_light", selector_prefix: ".app ") =~ ".app .lumis-keyword"
       true
 
   """

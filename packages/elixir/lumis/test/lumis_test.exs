@@ -124,9 +124,8 @@ defmodule Lumis.LumisTest do
         Lumis.Theme.build_css!("github_dark",
           selector_prefix: ~s(html[data-theme="dark"] ),
           pre_selector: ".lumis",
-          scope_tokens: true,
-          background_color: "var(--code-background)",
           base_rules: [
+            {"background-color", "var(--code-background)"},
             {"border-radius", "0.375rem"},
             {"padding", "1rem"}
           ]
@@ -135,7 +134,7 @@ defmodule Lumis.LumisTest do
       assert css =~ ~s(html[data-theme="dark"] .lumis {)
       assert css =~ ~s|background-color: var(--code-background);|
       assert css =~ ~s(border-radius: 0.375rem;)
-      assert css =~ ~s(html[data-theme="dark"] .lumis .lumis-keyword {)
+      assert css =~ ~s(html[data-theme="dark"] .lumis-keyword {)
     end
 
     test "returns error for unknown theme names" do
@@ -144,7 +143,7 @@ defmodule Lumis.LumisTest do
 
     test "returns error for invalid options" do
       assert {:error, %NimbleOptions.ValidationError{}} =
-               Lumis.Theme.build_css("github_light", scope_tokens: "yes")
+               Lumis.Theme.build_css("github_light", selector_prefix: 1)
     end
   end
 

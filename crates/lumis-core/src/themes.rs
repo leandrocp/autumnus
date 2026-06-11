@@ -603,12 +603,10 @@ impl Theme {
 ///
 /// let css = CssBuilder::new(&theme)
 ///     .pre_selector(".lumis")
-///     .scope_tokens(true)
-///     .background_color("var(--code-background)")
-///     .base_rules([("border-radius", "0.375rem")])
+///     .base_rules([("background-color", "var(--code-background)"), ("border-radius", "0.375rem")])
 ///     .build();
 ///
-/// assert!(css.contains(".lumis .lumis-keyword"));
+/// assert!(css.contains(".lumis-keyword"));
 /// ```
 #[derive(Builder, Clone, Debug)]
 #[builder(
@@ -629,13 +627,7 @@ struct Css<'a> {
     /// Selector used for the `<pre>` code block rule. Defaults to `pre.lumis`.
     #[builder(default = "\"pre.lumis\".to_string()", setter(into))]
     pre_selector: String,
-    /// Whether token selectors should be scoped under the `<pre>` selector. Defaults to `false`.
-    #[builder(default)]
-    scope_tokens: bool,
-    /// Override the `background-color` of the base code block rule.
-    #[builder(default, setter(into, strip_option))]
-    background_color: Option<String>,
-    /// Extra declarations appended to the base code block rule via [`CssBuilder::base_rules`].
+    /// Extra declarations for the base code block rule, set via [`CssBuilder::base_rules`].
     #[builder(default, setter(custom))]
     base_rules: Vec<(String, String)>,
 }
@@ -695,17 +687,10 @@ impl Css<'_> {
             rules.push(format!(" {{\n  {base_style}\n}}\n"));
         }
 
-        let token_selector_prefix = if self.scope_tokens {
-            format!("{} ", self.pre_selector)
-        } else {
-            String::new()
-        };
-
         for (scope, style) in &self.theme.highlights {
             // `normal` defines the code block's base colors, already emitted in the base rule
             // above and inherited by all text. It is never applied as a token class in highlighted
-            // output, so emitting a `.normal` rule here would be dead CSS and would also shadow a
-            // `background` override for that one scope.
+            // output, so emitting a `.normal` rule here would be dead CSS.
             if scope == "normal" {
                 continue;
             }
@@ -714,9 +699,8 @@ impl Css<'_> {
 
             if !style_css.is_empty() {
                 rules.push(format!(
-                    "{}{}.lumis-{} {{\n  {}\n}}\n",
+                    "{}.lumis-{} {{\n  {}\n}}\n",
                     self.selector_prefix,
-                    token_selector_prefix,
                     scope.replace('.', "-"),
                     style_css
                 ))
@@ -727,28 +711,32 @@ impl Css<'_> {
     }
 
     fn base_style(&self, separator: &str) -> String {
-        let mut rules = Vec::new();
+        // Start from the theme's base declarations, then merge `base_rules` over them: a rule whose
+        // property already exists replaces that value in place, otherwise it is appended. This keeps
+        // a single declaration per property (e.g. overriding `background-color` does not duplicate
+        // the theme's).
+        let mut decls: Vec<(String, String)> = Vec::new();
 
         if let Some(fg) = self.theme.fg() {
-            rules.push(format!("color: {fg};"));
+            decls.push(("color".to_string(), fg.to_string()));
+        }
+        if let Some(bg) = self.theme.bg() {
+            decls.push(("background-color".to_string(), bg.to_string()));
         }
 
-        match &self.background_color {
-            Some(bg) => rules.push(format!("background-color: {bg};")),
-            None => {
-                if let Some(bg) = self.theme.bg() {
-                    rules.push(format!("background-color: {bg};"));
-                }
+        for (property, value) in &self.base_rules {
+            if let Some(existing) = decls.iter_mut().find(|(p, _)| p == property) {
+                existing.1 = value.clone();
+            } else {
+                decls.push((property.clone(), value.clone()));
             }
         }
 
-        rules.extend(
-            self.base_rules
-                .iter()
-                .map(|(property, value)| format!("{property}: {value};")),
-        );
-
-        rules.join(separator)
+        decls
+            .iter()
+            .map(|(property, value)| format!("{property}: {value};"))
+            .collect::<Vec<_>>()
+            .join(separator)
     }
 }
 
@@ -951,7 +939,7 @@ html[data-theme="dark"] .lumis {
   background-color: var(--color-grey-900);
   border-radius: 0.375rem;
 }
-html[data-theme="dark"] .lumis .lumis-keyword {
+html[data-theme="dark"] .lumis-keyword {
   color: blue;
 }
 "#;
@@ -960,9 +948,10 @@ html[data-theme="dark"] .lumis .lumis-keyword {
             CssBuilder::new(&theme)
                 .selector_prefix("html[data-theme=\"dark\"] ")
                 .pre_selector(".lumis")
-                .scope_tokens(true)
-                .background_color("var(--color-grey-900)")
-                .base_rules([("border-radius", "0.375rem")])
+                .base_rules([
+                    ("background-color", "var(--color-grey-900)"),
+                    ("border-radius", "0.375rem"),
+                ])
                 .build(),
             expected
         );
@@ -1031,7 +1020,7 @@ pre.lumis {
     }
 
     #[test]
-    fn test_css_builder_background_override_added_when_theme_lacks_bg() {
+    fn test_css_builder_base_rule_adds_background_when_theme_lacks_bg() {
         let json = r#"{"name": "test", "appearance": "dark", "revision": "abc", "highlights": {"normal": {"fg": "red"}}}"#;
         let theme = from_json(json).unwrap();
 
@@ -1046,9 +1035,34 @@ pre.lumis {
 "#;
 
         assert_eq!(
-            CssBuilder::new(&theme).background_color("#000").build(),
+            CssBuilder::new(&theme)
+                .base_rules([("background-color", "#000")])
+                .build(),
             expected
         );
+    }
+
+    #[test]
+    fn test_css_builder_base_rule_overrides_theme_background() {
+        let json = r#"{"name": "test", "appearance": "dark", "revision": "abc", "highlights": {"normal": {"fg": "red", "bg": "green"}}}"#;
+        let theme = from_json(json).unwrap();
+
+        let expected = r#"/* test
+ * revision: abc
+ */
+
+pre.lumis {
+  color: red;
+  background-color: #000;
+}
+"#;
+
+        // The theme's `background-color: green` is replaced in place, not duplicated.
+        let css = CssBuilder::new(&theme)
+            .base_rules([("background-color", "#000")])
+            .build();
+        assert_eq!(css, expected);
+        assert!(!css.contains("green"));
     }
 
     #[test]
@@ -1094,7 +1108,7 @@ pre.lumis {
     }
 
     #[test]
-    fn test_css_builder_prefix_applies_without_scope_tokens() {
+    fn test_css_builder_selector_prefix() {
         let json = r#"{"name": "test", "appearance": "dark", "revision": "abc", "highlights": {"normal": {"fg": "red"}, "keyword": {"fg": "blue"}}}"#;
         let theme = from_json(json).unwrap();
 

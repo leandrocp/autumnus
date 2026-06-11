@@ -159,12 +159,14 @@ css =
   Lumis.Theme.build_css!("github_dark",
     selector_prefix: ~s(html[data-theme="dark"] ),
     pre_selector: ".lumis",
-    scope_tokens: true,
-    background_color: "var(--code-background)"
+    base_rules: [
+      {"background-color", "var(--code-background)"},
+      {"border-radius", "0.375rem"}
+    ]
   )
 ```
 
-Options: `:enable_italic`, `:selector_prefix`, `:pre_selector`, `:scope_tokens`, `:background_color`, `:base_rules`.
+Options: `:enable_italic`, `:selector_prefix`, `:pre_selector`, `:base_rules`. A `:base_rules` entry whose property matches one that the theme sets (`color`, `background-color`) replaces that value.
 
 ### HTML Multi-Themes
 
