@@ -24,6 +24,8 @@ fn conformance_dir() -> PathBuf {
 struct FixtureMetadata {
     language: String,
     theme: String,
+    #[serde(default, rename = "rainbowBrackets")]
+    rainbow_brackets: bool,
 }
 
 struct Fixture {
@@ -58,7 +60,8 @@ fn load_fixture(name: &str) -> Fixture {
 }
 
 fn run_highlight_source(fixture: &Fixture, formatter: &str, extra_args: &[&str]) -> String {
-    let output = cmd()
+    let mut command = cmd();
+    command
         .arg("--data-dir")
         .arg(fixtures_dir())
         .arg("highlight")
@@ -66,7 +69,13 @@ fn run_highlight_source(fixture: &Fixture, formatter: &str, extra_args: &[&str])
         .arg(&fixture.metadata.language)
         .arg("-f")
         .arg(formatter)
-        .args(extra_args)
+        .args(extra_args);
+
+    if fixture.metadata.rainbow_brackets {
+        command.arg("--rainbow-brackets");
+    }
+
+    let output = command
         .write_stdin(fixture.source.as_str())
         .output()
         .unwrap();

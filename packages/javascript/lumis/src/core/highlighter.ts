@@ -62,6 +62,7 @@ async function loadLanguageDefinition(runtime: RuntimeLike, language: Language):
     highlights: language.highlights,
     injections: language.injections,
     locals: language.locals,
+    brackets: language.brackets,
   });
 }
 
@@ -194,9 +195,10 @@ function runHighlightEvents(
   runtime: RuntimeLike,
   source: string,
   language: LanguageRef | undefined,
+  options: { rainbowBrackets?: boolean } = {},
 ): HighlightEvent[] {
   const loaded = resolveLoadedLanguage(runtime, language);
-  return buildHighlightEvents(source, loaded, runtime) as HighlightEvent[];
+  return buildHighlightEvents(source, loaded, runtime, options) as HighlightEvent[];
 }
 
 // Ambient runtime for sync free functions called inside `Formatter.format()`.
@@ -242,9 +244,10 @@ export function highlightIter(
 export function highlightEvents(
   source: string,
   language: LanguageRef | undefined,
+  options: { rainbowBrackets?: boolean } = {},
 ): HighlightEvent[] {
   const runtime = requireCurrentRuntime("highlightEvents");
-  return runHighlightEvents(runtime, source, detectLanguageRef(source, language));
+  return runHighlightEvents(runtime, source, detectLanguageRef(source, language), options);
 }
 
 function runFormatter(

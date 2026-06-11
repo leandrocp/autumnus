@@ -134,6 +134,7 @@ pub struct HtmlLinked {
     #[builder(setter(custom))]
     language: Language,
     pre_class: Option<String>,
+    rainbow_brackets: bool,
     highlight_lines: Option<HighlightLines>,
     header: Option<HtmlElement>,
 }
@@ -164,6 +165,7 @@ impl HtmlLinked {
         Self {
             language,
             pre_class,
+            rainbow_brackets: false,
             highlight_lines,
             header,
         }
@@ -175,6 +177,7 @@ impl Default for HtmlLinked {
         Self {
             language: Language::PlainText,
             pre_class: None,
+            rainbow_brackets: false,
             highlight_lines: None,
             header: None,
         }
@@ -183,8 +186,14 @@ impl Default for HtmlLinked {
 
 impl Formatter for HtmlLinked {
     fn format(&self, source: &str, output: &mut dyn Write) -> io::Result<()> {
-        let events =
-            highlight::highlight_events(source, self.language).map_err(io::Error::other)?;
+        let events = highlight::highlight_events_with_options(
+            source,
+            self.language,
+            highlight::HighlightOptions {
+                rainbow_brackets: self.rainbow_brackets,
+            },
+        )
+        .map_err(io::Error::other)?;
 
         let core_formatter = lumis_core::formatter::html_linked::HtmlLinked::new(
             self.language,

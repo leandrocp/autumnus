@@ -3,7 +3,7 @@
 // Do not edit.
 
 /// Tree-sitter highlight scope names.
-pub const HIGHLIGHT_NAMES: [&str; 287] = [
+pub const HIGHLIGHT_NAMES: [&str; 293] = [
     "attribute",
     "attribute.builtin",
     "attribute.c_sharp",
@@ -204,6 +204,12 @@ pub const HIGHLIGHT_NAMES: [&str; 287] = [
     "punctuation.bracket",
     "punctuation.bracket.lua",
     "punctuation.bracket.python",
+    "punctuation.bracket.rainbow.1",
+    "punctuation.bracket.rainbow.2",
+    "punctuation.bracket.rainbow.3",
+    "punctuation.bracket.rainbow.4",
+    "punctuation.bracket.rainbow.5",
+    "punctuation.bracket.rainbow.6",
     "punctuation.bracket.regex",
     "punctuation.bracket.ruby",
     "punctuation.bracket.rust",
@@ -296,7 +302,7 @@ pub const HIGHLIGHT_NAMES: [&str; 287] = [
 /// CSS class names for syntax highlighting.
 ///
 /// Each class name corresponds to a scope name in [`HIGHLIGHT_NAMES`] at the same index.
-pub const CLASSES: [&str; 287] = [
+pub const CLASSES: [&str; 293] = [
     "attribute",
     "attribute-builtin",
     "attribute-c_sharp",
@@ -497,6 +503,12 @@ pub const CLASSES: [&str; 287] = [
     "punctuation-bracket",
     "punctuation-bracket-lua",
     "punctuation-bracket-python",
+    "punctuation-bracket-rainbow-1",
+    "punctuation-bracket-rainbow-2",
+    "punctuation-bracket-rainbow-3",
+    "punctuation-bracket-rainbow-4",
+    "punctuation-bracket-rainbow-5",
+    "punctuation-bracket-rainbow-6",
     "punctuation-bracket-regex",
     "punctuation-bracket-ruby",
     "punctuation-bracket-rust",

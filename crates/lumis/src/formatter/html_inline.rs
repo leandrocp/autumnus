@@ -163,6 +163,7 @@ pub struct HtmlInline {
     pre_class: Option<String>,
     italic: bool,
     include_highlights: bool,
+    rainbow_brackets: bool,
     highlight_lines: Option<HighlightLines>,
     header: Option<HtmlElement>,
 }
@@ -200,6 +201,7 @@ impl HtmlInline {
             pre_class,
             italic,
             include_highlights,
+            rainbow_brackets: false,
             highlight_lines,
             header,
         }
@@ -214,6 +216,7 @@ impl Default for HtmlInline {
             pre_class: None,
             italic: false,
             include_highlights: false,
+            rainbow_brackets: false,
             highlight_lines: None,
             header: None,
         }
@@ -222,8 +225,14 @@ impl Default for HtmlInline {
 
 impl Formatter for HtmlInline {
     fn format(&self, source: &str, output: &mut dyn Write) -> io::Result<()> {
-        let events =
-            highlight::highlight_events(source, self.language).map_err(io::Error::other)?;
+        let events = highlight::highlight_events_with_options(
+            source,
+            self.language,
+            highlight::HighlightOptions {
+                rainbow_brackets: self.rainbow_brackets,
+            },
+        )
+        .map_err(io::Error::other)?;
 
         let core_formatter = lumis_core::formatter::html_inline::HtmlInline::new(
             self.language,

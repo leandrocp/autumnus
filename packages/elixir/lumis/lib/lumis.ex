@@ -331,6 +331,7 @@ defmodule Lumis do
       pre_class: [type: {:or, [:string, nil]}, default: nil],
       italic: [type: :boolean, default: false],
       include_highlights: [type: :boolean, default: false],
+      rainbow_brackets: [type: :boolean, default: false],
       highlight_lines: [
         type:
           {:or,
@@ -377,6 +378,7 @@ defmodule Lumis do
     schema = [
       language: [type: {:or, [:string, nil]}, default: nil],
       pre_class: [type: {:or, [:string, nil]}, default: nil],
+      rainbow_brackets: [type: :boolean, default: false],
       highlight_lines: [
         type:
           {:or,
@@ -441,6 +443,7 @@ defmodule Lumis do
       pre_class: [type: {:or, [:string, nil]}, default: nil],
       italic: [type: :boolean, default: false],
       include_highlights: [type: :boolean, default: false],
+      rainbow_brackets: [type: :boolean, default: false],
       highlight_lines: [
         type:
           {:or,
@@ -488,7 +491,8 @@ defmodule Lumis do
       language: [type: {:or, [:string, nil]}, default: nil],
       theme: [type: {:or, [{:struct, Lumis.Theme}, :string, nil]}, default: @default_theme],
       background: [type: {:or, [:string, {:in, [:theme]}, nil]}, default: nil],
-      width: [type: {:or, [:pos_integer, nil]}, default: nil]
+      width: [type: {:or, [:pos_integer, nil]}, default: nil],
+      rainbow_brackets: [type: :boolean, default: false]
     ]
 
     case NimbleOptions.validate(options, schema) do
@@ -501,9 +505,12 @@ defmodule Lumis do
   end
 
   def formatter_type({:bbcode_scoped, options}) when is_list(options) do
-    case Keyword.keys(options) -- [:language] do
-      [] -> {:ok, {:bbcode_scoped, Keyword.merge([language: nil], options)}}
-      invalid -> {:error, "invalid options given to bbcode_scoped: #{inspect(invalid)}"}
+    case Keyword.keys(options) -- [:language, :rainbow_brackets] do
+      [] ->
+        {:ok, {:bbcode_scoped, Keyword.merge([language: nil, rainbow_brackets: false], options)}}
+
+      invalid ->
+        {:error, "invalid options given to bbcode_scoped: #{inspect(invalid)}"}
     end
   end
 
@@ -975,13 +982,14 @@ defmodule Lumis do
        :pre_class,
        :italic,
        :include_highlights,
+       :rainbow_brackets,
        :highlight_lines,
        :header
      ])}
   end
 
   defp convert_formatter_for_nif(:html_linked, opts) do
-    {:html_linked, Map.take(opts, [:pre_class, :highlight_lines, :header])}
+    {:html_linked, Map.take(opts, [:pre_class, :rainbow_brackets, :highlight_lines, :header])}
   end
 
   defp convert_formatter_for_nif(:terminal, opts) do
@@ -994,11 +1002,11 @@ defmodule Lumis do
         nil -> Map.put(opts, :background, nil)
       end
 
-    {:terminal, Map.take(opts, [:theme, :background, :width])}
+    {:terminal, Map.take(opts, [:theme, :background, :width, :rainbow_brackets])}
   end
 
-  defp convert_formatter_for_nif(:bbcode_scoped, _opts) do
-    {:bbcode_scoped, %{}}
+  defp convert_formatter_for_nif(:bbcode_scoped, opts) do
+    {:bbcode_scoped, Map.take(opts, [:rainbow_brackets])}
   end
 
   defp convert_formatter_for_nif(:html_multi_themes, opts) do
@@ -1010,6 +1018,7 @@ defmodule Lumis do
        :pre_class,
        :italic,
        :include_highlights,
+       :rainbow_brackets,
        :highlight_lines,
        :header
      ])}

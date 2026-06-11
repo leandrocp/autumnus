@@ -1,7 +1,8 @@
 use lumis::formatters::Formatter as _;
 use lumis::{
-    highlight, highlight::highlight_events, languages::Language, themes, BBCodeScopedBuilder,
-    HtmlInlineBuilder, HtmlLinkedBuilder, HtmlMultiThemesBuilder, TerminalBuilder,
+    highlight, highlight::highlight_events_with_options, highlight::HighlightOptions,
+    languages::Language, themes, BBCodeScopedBuilder, HtmlInlineBuilder, HtmlLinkedBuilder,
+    HtmlMultiThemesBuilder, TerminalBuilder,
 };
 use serde::Deserialize;
 use std::{collections::HashMap, fs, path::PathBuf};
@@ -13,6 +14,8 @@ struct FixtureMetadata {
     name: String,
     language: String,
     theme: String,
+    #[serde(default)]
+    rainbow_brackets: bool,
     events: Vec<SerializableHighlightEvent>,
 }
 
@@ -61,7 +64,14 @@ fn load_fixture(name: &str) -> Fixture {
 
 fn check_events(fixture: &Fixture) {
     let lang: Language = fixture.metadata.language.parse().expect("invalid language");
-    let events = highlight_events(&fixture.source, lang).expect("events should build");
+    let events = highlight_events_with_options(
+        &fixture.source,
+        lang,
+        HighlightOptions {
+            rainbow_brackets: fixture.metadata.rainbow_brackets,
+        },
+    )
+    .expect("events should build");
     let serialized = events
         .into_iter()
         .map(|event| match event {
@@ -87,6 +97,7 @@ fn check_html_inline(fixture: &Fixture) {
     let fmt = HtmlInlineBuilder::new()
         .language(lang)
         .theme(Some(theme))
+        .rainbow_brackets(fixture.metadata.rainbow_brackets)
         .build()
         .unwrap();
     assert_eq!(
@@ -97,7 +108,11 @@ fn check_html_inline(fixture: &Fixture) {
 
 fn check_html_linked(fixture: &Fixture) {
     let lang: Language = fixture.metadata.language.parse().unwrap();
-    let fmt = HtmlLinkedBuilder::new().language(lang).build().unwrap();
+    let fmt = HtmlLinkedBuilder::new()
+        .language(lang)
+        .rainbow_brackets(fixture.metadata.rainbow_brackets)
+        .build()
+        .unwrap();
     let mut out = Vec::new();
     fmt.format(&fixture.source, &mut out).unwrap();
     assert_eq!(
@@ -115,6 +130,7 @@ fn check_html_multi_themes(fixture: &Fixture) {
         .language(lang)
         .themes(map)
         .default_theme("main")
+        .rainbow_brackets(fixture.metadata.rainbow_brackets)
         .build()
         .unwrap();
     let mut out = Vec::new();
@@ -131,6 +147,7 @@ fn check_terminal(fixture: &Fixture) {
     let fmt = TerminalBuilder::new()
         .language(lang)
         .theme(Some(theme))
+        .rainbow_brackets(fixture.metadata.rainbow_brackets)
         .build()
         .unwrap();
     let mut out = Vec::new();
@@ -143,7 +160,11 @@ fn check_terminal(fixture: &Fixture) {
 
 fn check_bbcode(fixture: &Fixture) {
     let lang: Language = fixture.metadata.language.parse().unwrap();
-    let fmt = BBCodeScopedBuilder::new().language(lang).build().unwrap();
+    let fmt = BBCodeScopedBuilder::new()
+        .language(lang)
+        .rainbow_brackets(fixture.metadata.rainbow_brackets)
+        .build()
+        .unwrap();
     let mut out = Vec::new();
     fmt.format(&fixture.source, &mut out).unwrap();
     assert_eq!(

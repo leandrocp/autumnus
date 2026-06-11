@@ -4,6 +4,7 @@ import { HIGHLIGHT_NAMES } from "../highlights.js";
 import type { RuntimeEnvironment } from "../runtime/runtime.js";
 import type {
   CaptureMetadata,
+  CompiledBracketConfig,
   CompiledHighlightConfig,
   LanguageDefinition,
   LoadedLanguage,
@@ -20,12 +21,51 @@ export interface SharedRuntimeCache {
   wasmLoads: Map<string, Promise<Uint8Array>>;
 }
 
+async function compileBracketConfig(
+  language: Language,
+  bracketsQuery?: string,
+): Promise<CompiledBracketConfig | undefined> {
+  if (!bracketsQuery) return undefined;
+
+  const { Query } = await loadTreeSitter();
+
+  // A bracket query can reference anonymous nodes that do not exist in a given
+  // grammar (for example HTML has no "(" token). Treat a query that fails to
+  // compile as "no rainbow brackets for this language" instead of failing the
+  // whole language load, matching the Rust reference implementation.
+  let query: InstanceType<typeof Query>;
+  try {
+    query = new Query(language, bracketsQuery);
+  } catch {
+    return undefined;
+  }
+
+  const captureMetadata: CompiledBracketConfig["captureMetadata"] = {};
+
+  for (const captureName of query.captureNames) {
+    captureMetadata[captureName] = {
+      isOpen: matchesSpecialCapture(captureName, "open"),
+      isClose: matchesSpecialCapture(captureName, "close"),
+    };
+  }
+
+  // `(#set! rainbow.exclude)` has no value, so the property is stored as
+  // `{ "rainbow.exclude": null }`. Detect it by key presence, not by value.
+  const rainbowExcludePatterns = Array.from({ length: query.patternCount() }, (_, patternIndex) => {
+    const properties = query.setProperties[patternIndex];
+    return properties != null && "rainbow.exclude" in properties;
+  });
+
+  return { query, captureMetadata, rainbowExcludePatterns };
+}
+
 export interface LoadLanguageOptions {
   definition: LanguageDefinition;
   wasm: WasmRef | Uint8Array | ArrayBuffer | string | URL | Response;
   highlights: string;
   injections?: string;
   locals?: string;
+  brackets?: string;
 }
 
 export interface HighlighterRuntimeOptions {
@@ -335,6 +375,7 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
           opts.injections,
           opts.locals,
         ),
+        brackets: await compileBracketConfig(language, opts.brackets),
       };
 
       this.loadedLanguages.set(opts.definition.id, loaded);
