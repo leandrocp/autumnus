@@ -506,8 +506,11 @@ defmodule Lumis do
 
   def formatter_type({:bbcode_scoped, options}) when is_list(options) do
     case Keyword.keys(options) -- [:language, :rainbow_brackets] do
-      [] -> {:ok, {:bbcode_scoped, Keyword.merge([language: nil], options)}}
-      invalid -> {:error, "invalid options given to bbcode_scoped: #{inspect(invalid)}"}
+      [] ->
+        {:ok, {:bbcode_scoped, Keyword.merge([language: nil, rainbow_brackets: false], options)}}
+
+      invalid ->
+        {:error, "invalid options given to bbcode_scoped: #{inspect(invalid)}"}
     end
   end
 

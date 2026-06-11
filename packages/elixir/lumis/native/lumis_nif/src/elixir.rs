@@ -47,7 +47,9 @@ pub enum ExFormatterOption {
         width: Option<usize>,
         rainbow_brackets: bool,
     },
-    BbcodeScoped { rainbow_brackets: bool },
+    BbcodeScoped {
+        rainbow_brackets: bool,
+    },
 }
 
 #[derive(Debug, NifTaggedEnum)]
