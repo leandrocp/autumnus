@@ -608,7 +608,7 @@ impl Theme {
 ///     .base_rules([("border-radius", "0.375rem")])
 ///     .build();
 ///
-/// assert!(css.contains(".lumis .keyword"));
+/// assert!(css.contains(".lumis .lumis-keyword"));
 /// ```
 #[derive(Builder, Clone, Debug)]
 #[builder(
@@ -714,7 +714,7 @@ impl Css<'_> {
 
             if !style_css.is_empty() {
                 rules.push(format!(
-                    "{}{}.{} {{\n  {}\n}}\n",
+                    "{}{}.lumis-{} {{\n  {}\n}}\n",
                     self.selector_prefix,
                     token_selector_prefix,
                     scope.replace('.', "-"),
@@ -910,11 +910,11 @@ pre.lumis {
   color: red;
   background-color: green;
 }
-.keyword {
+.lumis-keyword {
   color: blue;
   font-style: italic;
 }
-.tag-attribute {
+.lumis-tag-attribute {
   background-color: gray;
   font-weight: bold;
 }
@@ -933,7 +933,7 @@ pre.lumis {
 
         let css = CssBuilder::new(&theme).enable_italic(false).build();
 
-        assert!(css.contains(".keyword {\n  color: blue;\n}"));
+        assert!(css.contains(".lumis-keyword {\n  color: blue;\n}"));
         assert!(!css.contains("font-style: italic;"));
     }
 
@@ -951,7 +951,7 @@ html[data-theme="dark"] .lumis {
   background-color: var(--color-grey-900);
   border-radius: 0.375rem;
 }
-html[data-theme="dark"] .lumis .keyword {
+html[data-theme="dark"] .lumis .lumis-keyword {
   color: blue;
 }
 "#;
@@ -978,7 +978,7 @@ html[data-theme="dark"] .lumis .keyword {
  */
 
 pre.lumis {}
-.keyword {
+.lumis-keyword {
   color: blue;
   font-style: italic;
 }
@@ -1017,7 +1017,7 @@ pre.lumis {
   background-color: green;
   padding: 1rem;
 }
-.keyword {
+.lumis-keyword {
   color: blue;
 }
 "#;
@@ -1060,8 +1060,8 @@ pre.lumis {
 
         let css = CssBuilder::new(&theme).enable_italic(false).build();
 
-        assert!(css.contains(".function {\n  color: red;\n}"));
-        assert!(!css.contains(".comment"));
+        assert!(css.contains(".lumis-function {\n  color: red;\n}"));
+        assert!(!css.contains(".lumis-comment"));
     }
 
     #[test]
@@ -1105,7 +1105,7 @@ pre.lumis {
 .app pre.lumis {
   color: red;
 }
-.app .keyword {
+.app .lumis-keyword {
   color: blue;
 }
 "#;
@@ -1126,7 +1126,7 @@ pre.lumis {
  */
 
 pre.lumis {}
-.keyword {
+.lumis-keyword {
   color: blue;
   font-weight: bold;
   font-style: italic;
@@ -1144,7 +1144,7 @@ pre.lumis {}
 
         let css = CssBuilder::new(&theme).build();
 
-        assert!(css.contains(".markup-heading-1-markdown {\n  color: red;\n}"));
+        assert!(css.contains(".lumis-markup-heading-1-markdown {\n  color: red;\n}"));
     }
 
     #[test]

@@ -378,7 +378,7 @@ The `:lines` option accepts:
 #### HTML Linked Line Highlighting
 
 ```elixir
-# Use default "highlighted" class from theme CSS
+# Use default "lumis-highlighted" class from theme CSS
 Lumis.highlight!(code,
   formatter: {:html_linked,
     language: "elixir",
@@ -713,7 +713,7 @@ opts = Lumis.default_options()
       pre_class: "my-class",
       highlight_lines: %{
         lines: [1, 2..5],
-        class: "highlighted"
+        class: "lumis-highlighted"
       },
       header: %{
         open_tag: "<div>",

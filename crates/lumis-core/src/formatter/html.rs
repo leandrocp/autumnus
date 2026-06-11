@@ -408,13 +408,13 @@ pub fn wrap_line(
 }
 
 /// Map tree-sitter scope to CSS class name.
-pub fn scope_to_class(scope: &str) -> &str {
+pub fn scope_to_class(scope: &str) -> String {
     crate::highlights::HIGHLIGHT_NAMES
         .iter()
         .position(|&s| s == scope)
         .and_then(|idx| crate::highlights::CLASSES.get(idx))
-        .copied()
-        .unwrap_or("text")
+        .map(|class| format!("lumis-{class}"))
+        .unwrap_or_else(|| "lumis-text".to_string())
 }
 
 /// Generate an opening `<pre>` tag with optional class and theme styles.
@@ -690,12 +690,15 @@ mod tests {
 
     #[test]
     fn test_scope_to_class_keyword_conditional() {
-        assert_eq!(scope_to_class("keyword.conditional"), "keyword-conditional");
+        assert_eq!(
+            scope_to_class("keyword.conditional"),
+            "lumis-keyword-conditional"
+        );
     }
 
     #[test]
     fn test_scope_to_class_unknown_scope() {
-        assert_eq!(scope_to_class("unknown.scope.name"), "text");
+        assert_eq!(scope_to_class("unknown.scope.name"), "lumis-text");
     }
 
     #[test]

@@ -65,7 +65,7 @@ JavaScript uses camelCase option names. Rust and Elixir use snake_case. They map
 | `enableItalic` / `enable_italic` | `true` | When `false`, `font-style: italic` is dropped. A scope whose only styling is italic produces no rule at all. |
 | `selectorPrefix` / `selector_prefix` | `""` | Text placed in front of every selector, both the base rule and each token rule. Use it to scope the whole stylesheet under a parent selector. |
 | `preSelector` / `pre_selector` | `"pre.lumis"` | The selector for the base code block rule. Change it to match the element your wrapper emits. |
-| `scopeTokens` / `scope_tokens` | `false` | When `true`, token rules are nested under the base selector, so `.keyword` becomes `.lumis .keyword`. This keeps the token classes from matching unrelated markup. |
+| `scopeTokens` / `scope_tokens` | `false` | When `true`, token rules are nested under the base selector, so `.lumis-keyword` becomes `.lumis .lumis-keyword`. This scopes the token rules to one block. |
 | `backgroundColor` / `background_color` | theme's `normal` background | Overrides the `background-color` of the base rule. Takes a color, so it is handy for pointing at a CSS variable. For gradients or images, use `base_rules` with the `background` shorthand instead. |
 | `baseRules` / `base_rules` | none | Extra `property, value` declarations appended to the base rule, such as `padding` or `border-radius`. |
 
@@ -136,7 +136,7 @@ css =
 
 ## What the output looks like
 
-The result starts with a comment carrying the theme name and revision, then the base rule for `preSelector`, then one rule per highlight scope. Scope names with dots become dashes, so `tag.attribute` turns into `.tag-attribute`.
+The result starts with a comment carrying the theme name and revision, then the base rule for `preSelector`, then one rule per highlight scope. Each token class is prefixed with `lumis-` and scope dots become dashes, so `tag.attribute` turns into `.lumis-tag-attribute`.
 
 The `normal` scope is the exception. It sets the block's base color and background, which the base rule already carries and every token inherits, so it is not emitted as its own `.normal` rule.
 
@@ -153,10 +153,10 @@ html[data-theme="dark"] .lumis {
   border-radius: 0.375rem;
   padding: 1rem;
 }
-html[data-theme="dark"] .lumis .keyword {
+html[data-theme="dark"] .lumis .lumis-keyword {
   color: #ff7b72;
 }
-html[data-theme="dark"] .lumis .string {
+html[data-theme="dark"] .lumis .lumis-string {
   color: #a5d6ff;
 }
 ```

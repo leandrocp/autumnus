@@ -115,7 +115,7 @@ defmodule Lumis.LumisTest do
       assert {:ok, css} = Lumis.Theme.build_css("github_light")
 
       assert css =~ "pre.lumis {"
-      assert css =~ ".keyword {"
+      assert css =~ ".lumis-keyword {"
       assert css =~ "color: #1f2328;"
     end
 
@@ -135,7 +135,7 @@ defmodule Lumis.LumisTest do
       assert css =~ ~s(html[data-theme="dark"] .lumis {)
       assert css =~ ~s|background-color: var(--code-background);|
       assert css =~ ~s(border-radius: 0.375rem;)
-      assert css =~ ~s(html[data-theme="dark"] .lumis .keyword {)
+      assert css =~ ~s(html[data-theme="dark"] .lumis .lumis-keyword {)
     end
 
     test "returns error for unknown theme names" do
@@ -418,9 +418,9 @@ defmodule Lumis.LumisTest do
       assert_output(
         "defmodule Test do\n  @lang :elixir\nend",
         ~s"""
-        <pre class="lumis"><code class="language-elixir" translate="no" tabindex="0"><div class="line" data-line="1"><span class="keyword-function">defmodule</span> <span class="module">Test</span> <span class="keyword">do</span>
-        </div><div class="line" data-line="2">  <span class="operator"><span class="constant">@<span class="function-call"><span class="constant">lang <span class="string-special-symbol">:elixir</span></span></span></span></span>
-        </div><div class="line" data-line="3"><span class="keyword">end</span>
+        <pre class="lumis"><code class="language-elixir" translate="no" tabindex="0"><div class="line" data-line="1"><span class="lumis-keyword-function">defmodule</span> <span class="lumis-module">Test</span> <span class="lumis-keyword">do</span>
+        </div><div class="line" data-line="2">  <span class="lumis-operator"><span class="lumis-constant">@<span class="lumis-function-call"><span class="lumis-constant">lang <span class="lumis-string-special-symbol">:elixir</span></span></span></span></span>
+        </div><div class="line" data-line="3"><span class="lumis-keyword">end</span>
         </div></code></pre>
         """,
         formatter: {:html_linked, language: "elixir"}
@@ -804,7 +804,7 @@ defmodule Lumis.LumisTest do
           formatter: {:html_linked, language: "text", highlight_lines: highlight_lines}
         )
 
-      assert String.contains?(result, ~s|<div class="line highlighted" data-line="1">|)
+      assert String.contains?(result, ~s|<div class="line lumis-highlighted" data-line="1">|)
     end
 
     test "html_linked with multiple lines and default theme " do
@@ -818,9 +818,9 @@ defmodule Lumis.LumisTest do
           formatter: {:html_linked, language: "text", highlight_lines: highlight_lines}
         )
 
-      assert String.contains?(result, ~s|<div class="line highlighted" data-line="1">|)
-      assert String.contains?(result, ~s|<div class="line highlighted" data-line="2">|)
-      refute String.contains?(result, ~s|<div class="line highlighted" data-line="3">|)
+      assert String.contains?(result, ~s|<div class="line lumis-highlighted" data-line="1">|)
+      assert String.contains?(result, ~s|<div class="line lumis-highlighted" data-line="2">|)
+      refute String.contains?(result, ~s|<div class="line lumis-highlighted" data-line="3">|)
     end
 
     test "html_linked with mixes lines and ranges and default theme " do
@@ -834,10 +834,10 @@ defmodule Lumis.LumisTest do
           formatter: {:html_linked, language: "text", highlight_lines: highlight_lines}
         )
 
-      assert String.contains?(result, ~s|<div class="line highlighted" data-line="1">|)
-      assert String.contains?(result, ~s|<div class="line highlighted" data-line="2">|)
-      assert String.contains?(result, ~s|<div class="line highlighted" data-line="3">|)
-      refute String.contains?(result, ~s|<div class="line highlighted" data-line="5">|)
+      assert String.contains?(result, ~s|<div class="line lumis-highlighted" data-line="1">|)
+      assert String.contains?(result, ~s|<div class="line lumis-highlighted" data-line="2">|)
+      assert String.contains?(result, ~s|<div class="line lumis-highlighted" data-line="3">|)
+      refute String.contains?(result, ~s|<div class="line lumis-highlighted" data-line="5">|)
     end
 
     test "html_linked with CSS class" do

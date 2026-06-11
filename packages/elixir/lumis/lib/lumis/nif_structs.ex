@@ -10,5 +10,5 @@ end
 
 defmodule Lumis.HtmlLinkedHighlightLines do
   @moduledoc false
-  defstruct lines: [], class: "highlighted"
+  defstruct lines: [], class: "lumis-highlighted"
 end

@@ -82,7 +82,7 @@ export function buildCss(theme: ThemeData, options: BuildCssOptions = {}): strin
 
     if (styleCss !== "") {
       rules.push(
-        `${selectorPrefix}${tokenSelectorPrefix}.${scope.replaceAll(".", "-")} {\n  ${styleCss}\n}\n`,
+        `${selectorPrefix}${tokenSelectorPrefix}.lumis-${scope.replaceAll(".", "-")} {\n  ${styleCss}\n}\n`,
       );
     }
   }
