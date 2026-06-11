@@ -256,16 +256,23 @@ Omit `{name}` to upgrade all queries at once.
 
 `just langs-update {name}` is the end-to-end command for a coordinated parser update. It fetches parsers first, syncs crate-backed Rust parser dependencies and Rust bundle features, then fetches and preprocesses queries, and regenerates `LANGUAGES.md`.
 
-Raw query sources live in `queries/upstream/`. Preprocessed tracked outputs live in `queries/processed/` and should be committed whenever upstream queries, replacements, or append patches change.
+Raw query sources live in `queries/upstream/`. First-class local bracket queries live in `queries/brackets/`. Preprocessed tracked outputs live in `queries/processed/` and should be committed whenever upstream queries, bracket queries, replacements, or append patches change.
+
+#### Bracket queries
+
+Upstream grammars and nvim-treesitter rarely ship a `brackets.scm`, so Lumis keeps its own as first-class local queries:
+
+- `queries/brackets/default/brackets.scm`: shared default, used by any language without its own bracket query
+- `queries/brackets/{name}/brackets.scm`: a language-specific query for when the default doesn't fit the grammar
+
+Bracket matching and rainbow brackets both read these queries. A query captures `@open`/`@close` pairs; a pattern tagged with `(#set! rainbow.exclude)` still matches but is skipped during rainbow coloring, so string and template delimiters stay uncolored.
 
 #### Query replacements and append patches
 
-If a query must diverge from upstream, use one of these directories:
+When a fetched upstream query needs to change, use one of these directories:
 
-- `queries/override/{name}/{query}.scm`: replace the upstream query entirely
-- `queries/append/{name}/{query}.scm`: append extra patterns after the upstream query, or after the replacement query when both exist
-
-Use `queries/override/` when the fetched upstream query is incompatible with the pinned parser. Use `queries/append/` when you only need to add local patterns.
+- `queries/override/{name}/{query}.scm`: replace the upstream query entirely when it's incompatible with the pinned parser
+- `queries/append/{name}/{query}.scm`: add local patterns after the upstream query, or after the replacement query when both exist
 
 ### Building WASMs
 

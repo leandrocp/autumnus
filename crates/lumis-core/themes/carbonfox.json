@@ -252,6 +252,21 @@
     "punctuation.bracket": {
       "fg": "#b6b8bb"
     },
+    "punctuation.bracket.rainbow.1": {
+      "fg": "#ee5396"
+    },
+    "punctuation.bracket.rainbow.2": {
+      "fg": "#08bdba"
+    },
+    "punctuation.bracket.rainbow.3": {
+      "fg": "#78a9ff"
+    },
+    "punctuation.bracket.rainbow.4": {
+      "fg": "#3ddbd9"
+    },
+    "punctuation.bracket.rainbow.5": {
+      "fg": "#25be6a"
+    },
     "punctuation.delimiter": {
       "fg": "#b6b8bb"
     },

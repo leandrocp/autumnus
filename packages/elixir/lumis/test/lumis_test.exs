@@ -160,6 +160,7 @@ defmodule Lumis.LumisTest do
                theme: "onedark",
                pre_class: nil,
                include_highlights: false,
+               rainbow_brackets: false,
                highlight_lines: nil
              ],
              formatter_opts
@@ -177,6 +178,7 @@ defmodule Lumis.LumisTest do
                  theme: "onedark",
                  pre_class: nil,
                  include_highlights: false,
+                 rainbow_brackets: false,
                  highlight_lines: nil,
                  header: nil
                ],
@@ -193,6 +195,7 @@ defmodule Lumis.LumisTest do
                [
                  language: nil,
                  pre_class: nil,
+                 rainbow_brackets: false,
                  highlight_lines: nil,
                  header: nil
                ],
@@ -206,7 +209,13 @@ defmodule Lumis.LumisTest do
       assert {:ok, {:terminal, formatter_opts}} = Lumis.formatter_type(:terminal)
 
       assert Keyword.equal?(
-               [language: nil, theme: "onedark", background: nil, width: nil],
+               [
+                 language: nil,
+                 theme: "onedark",
+                 background: nil,
+                 width: nil,
+                 rainbow_brackets: false
+               ],
                formatter_opts
              )
     end
@@ -214,7 +223,8 @@ defmodule Lumis.LumisTest do
 
   describe "formatter_type: :bbcode_scoped" do
     test "default opts" do
-      assert Lumis.formatter_type(:bbcode_scoped) == {:ok, {:bbcode_scoped, [language: nil]}}
+      assert Lumis.formatter_type(:bbcode_scoped) ==
+               {:ok, {:bbcode_scoped, [language: nil, rainbow_brackets: false]}}
     end
   end
 
@@ -1013,6 +1023,7 @@ defmodule Lumis.LumisTest do
                  header: nil,
                  highlight_lines: nil,
                  include_highlights: false,
+                 rainbow_brackets: false,
                  italic: false,
                  pre_class: nil,
                  theme: "onedark",
@@ -1031,6 +1042,7 @@ defmodule Lumis.LumisTest do
                  header: nil,
                  highlight_lines: nil,
                  include_highlights: false,
+                 rainbow_brackets: false,
                  italic: false,
                  pre_class: nil,
                  theme: "onedark",
@@ -1050,6 +1062,7 @@ defmodule Lumis.LumisTest do
                  header: nil,
                  highlight_lines: nil,
                  include_highlights: false,
+                 rainbow_brackets: false,
                  pre_class: nil,
                  theme: "dracula",
                  italic: true
@@ -1067,6 +1080,7 @@ defmodule Lumis.LumisTest do
                       language: nil,
                       header: nil,
                       highlight_lines: nil,
+                      rainbow_brackets: false,
                       include_highlights: false,
                       italic: false,
                       pre_class: nil,
@@ -1094,6 +1108,7 @@ defmodule Lumis.LumisTest do
                  header: nil,
                  highlight_lines: nil,
                  include_highlights: false,
+                 rainbow_brackets: false,
                  italic: false,
                  pre_class: nil,
                  theme: "onedark"
@@ -1116,6 +1131,7 @@ defmodule Lumis.LumisTest do
                    header: nil,
                    highlight_lines: nil,
                    include_highlights: false,
+                   rainbow_brackets: false,
                    italic: false,
                    pre_class: nil,
                    theme: "onedark"

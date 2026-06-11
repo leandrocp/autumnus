@@ -238,30 +238,28 @@ fn ensure_source_file(
     let unpacked_dir = out_dir.join("vendored_parsers").join(parser_name);
     let unpacked_source = unpacked_dir.join(file_name);
 
-    if !unpacked_source.exists() {
-        fs::create_dir_all(&unpacked_dir).expect("failed to create decompressed parser directory");
+    fs::create_dir_all(&unpacked_dir).expect("failed to create decompressed parser directory");
 
-        let input = File::open(&compressed).unwrap_or_else(|err| {
-            panic!(
-                "failed to open compressed parser source '{file_name}' for '{key}' at {}: {err}",
-                compressed.display()
-            )
-        });
-        let mut decoder = XzDecoder::new(input);
-        let mut decoded = Vec::new();
-        decoder.read_to_end(&mut decoded).unwrap_or_else(|err| {
-            panic!(
-                "failed to decompress parser source '{file_name}' for '{key}' at {}: {err}",
-                compressed.display()
-            )
-        });
-        fs::write(&unpacked_source, decoded).unwrap_or_else(|err| {
-            panic!(
-                "failed to write decompressed parser source '{file_name}' for '{key}' at {}: {err}",
-                unpacked_source.display()
-            )
-        });
-    }
+    let input = File::open(&compressed).unwrap_or_else(|err| {
+        panic!(
+            "failed to open compressed parser source '{file_name}' for '{key}' at {}: {err}",
+            compressed.display()
+        )
+    });
+    let mut decoder = XzDecoder::new(input);
+    let mut decoded = Vec::new();
+    decoder.read_to_end(&mut decoded).unwrap_or_else(|err| {
+        panic!(
+            "failed to decompress parser source '{file_name}' for '{key}' at {}: {err}",
+            compressed.display()
+        )
+    });
+    fs::write(&unpacked_source, decoded).unwrap_or_else(|err| {
+        panic!(
+            "failed to write decompressed parser source '{file_name}' for '{key}' at {}: {err}",
+            unpacked_source.display()
+        )
+    });
 
     unpacked_source
 }
@@ -324,6 +322,14 @@ fn read_query_file(path: &Path) -> String {
     lumis_build::convert_lua_matches(&content)
 }
 
+fn read_query_file_with_default(path: &Path, default_path: &Path) -> String {
+    if path.exists() {
+        read_query_file(path)
+    } else {
+        read_query_file(default_path)
+    }
+}
+
 fn require_highlights_query(path: &Path, language: &str) {
     assert!(
         path.exists(),
@@ -379,6 +385,7 @@ fn queries(toml: &LanguagesToml) {
     });
 
     let query_feature_map = build_query_feature_map(toml);
+    let mut bracket_query_arms = Vec::new();
 
     for entry in entries {
         let entry = entry.unwrap();
@@ -405,14 +412,18 @@ fn queries(toml: &LanguagesToml) {
         }
 
         let lang_upper = language.to_uppercase();
-        let queries = ["highlights", "injections", "locals"];
+        let queries = ["highlights", "injections", "locals", "brackets"];
 
         require_highlights_query(&path.join("highlights.scm"), language);
 
         for query in queries {
             let file_path = path.join(format!("{query}.scm"));
             let const_name = format_ident!("{}_{}", lang_upper, query.to_uppercase());
-            let processed_content = read_query_file(&file_path);
+            let processed_content = if query == "brackets" && language != "default" {
+                read_query_file_with_default(&file_path, &queries_path.join("default/brackets.scm"))
+            } else {
+                read_query_file(&file_path)
+            };
 
             generated_code.extend(quote! {
                 #[doc(hidden)]
@@ -422,8 +433,21 @@ fn queries(toml: &LanguagesToml) {
             generated_code.extend(quote! {});
         }
 
+        let brackets_const = format_ident!("{}_BRACKETS", lang_upper);
+        bracket_query_arms.push(quote! { #language => #brackets_const, });
+
         generated_code.extend(quote! {});
     }
+
+    generated_code.extend(quote! {
+        #[doc(hidden)]
+        pub fn bracket_query_for_language(language: &str) -> &'static str {
+            match language {
+                #(#bracket_query_arms)*
+                _ => "",
+            }
+        }
+    });
 
     let mut output_file = File::create(&dest_path).unwrap();
 

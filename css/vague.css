@@ -1,5 +1,5 @@
 /* vague
- * revision: 8ee15ea4505d64ede559ff1cb112582a6f2ea138
+ * revision: 788697064264bed8390b52ca2ac9906a96712120
  */
 
 pre.lumis {
@@ -7,7 +7,7 @@ pre.lumis {
   background-color: #141415;
 }
 .attribute {
-  color: #aeaed1;
+  color: #6e94b2;
 }
 .attribute-builtin {
   color: #b4d4cf;
@@ -85,7 +85,7 @@ pre.lumis {
   color: #bb9dbd;
 }
 .function-macro {
-  color: #aeaed1;
+  color: #6e94b2;
 }
 .function-method {
   color: #c48282;
@@ -127,7 +127,7 @@ pre.lumis {
   color: #6e94b2;
 }
 .keyword-import {
-  color: #aeaed1;
+  color: #6e94b2;
 }
 .keyword-modifier {
   color: #6e94b2;
@@ -249,6 +249,24 @@ pre.lumis {
 }
 .punctuation-bracket {
   color: #cdcdcd;
+}
+.punctuation-bracket-rainbow-1 {
+  color: #d8647e;
+}
+.punctuation-bracket-rainbow-2 {
+  color: #f3be7c;
+}
+.punctuation-bracket-rainbow-3 {
+  color: #7e98e8;
+}
+.punctuation-bracket-rainbow-4 {
+  color: #c48282;
+}
+.punctuation-bracket-rainbow-5 {
+  color: #7fa563;
+}
+.punctuation-bracket-rainbow-6 {
+  color: #bb9dbd;
 }
 .punctuation-delimiter {
   color: #cdcdcd;

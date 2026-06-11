@@ -1,10 +1,10 @@
 {
   "name": "vague",
   "appearance": "dark",
-  "revision": "8ee15ea4505d64ede559ff1cb112582a6f2ea138",
+  "revision": "788697064264bed8390b52ca2ac9906a96712120",
   "highlights": {
     "attribute": {
-      "fg": "#aeaed1"
+      "fg": "#6e94b2"
     },
     "attribute.builtin": {
       "fg": "#b4d4cf"
@@ -82,7 +82,7 @@
       "fg": "#bb9dbd"
     },
     "function.macro": {
-      "fg": "#aeaed1"
+      "fg": "#6e94b2"
     },
     "function.method": {
       "fg": "#c48282"
@@ -124,7 +124,7 @@
       "fg": "#6e94b2"
     },
     "keyword.import": {
-      "fg": "#aeaed1"
+      "fg": "#6e94b2"
     },
     "keyword.modifier": {
       "fg": "#6e94b2"
@@ -246,6 +246,24 @@
     },
     "punctuation.bracket": {
       "fg": "#cdcdcd"
+    },
+    "punctuation.bracket.rainbow.1": {
+      "fg": "#d8647e"
+    },
+    "punctuation.bracket.rainbow.2": {
+      "fg": "#f3be7c"
+    },
+    "punctuation.bracket.rainbow.3": {
+      "fg": "#7e98e8"
+    },
+    "punctuation.bracket.rainbow.4": {
+      "fg": "#c48282"
+    },
+    "punctuation.bracket.rainbow.5": {
+      "fg": "#7fa563"
+    },
+    "punctuation.bracket.rainbow.6": {
+      "fg": "#bb9dbd"
     },
     "punctuation.delimiter": {
       "fg": "#cdcdcd"

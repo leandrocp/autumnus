@@ -73,16 +73,19 @@
 //! }).unwrap();
 //! ```
 
-use crate::languages::{Language, LanguageConfig};
+use crate::languages::{bracket_query_for_language, Language, LanguageConfig};
 use crate::themes::Theme;
 use crate::vendor::tree_sitter_highlight::{HighlightEvent, Highlighter as TSHighlighter};
 use lumis_core::events::HighlightEvent as CoreHighlightEvent;
 use lumis_core::highlights::HIGHLIGHT_NAMES;
 use smol_str::format_smolstr;
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::ops::Range;
 use std::sync::{Arc, LazyLock};
+use streaming_iterator::StreamingIterator;
 use thiserror::Error;
+use tree_sitter::{Parser, Query, QueryCursor};
 
 pub use crate::themes::{Style, TextDecoration, UnderlineStyle};
 
@@ -96,8 +99,19 @@ fn resolve_style(theme: Option<&Theme>, scope: &str, language: &str) -> Style {
 
 static DEFAULT_STYLE: LazyLock<Arc<Style>> = LazyLock::new(|| Arc::new(Style::default()));
 
+/// Options that influence which highlight events are produced.
+///
+/// Exposed for conformance tooling; not part of the stable public API.
+#[doc(hidden)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct HighlightOptions {
+    pub rainbow_brackets: bool,
+}
+
 thread_local! {
     static DOCUMENT_TS_HIGHLIGHTER: RefCell<TSHighlighter> = RefCell::new(TSHighlighter::new());
+    static BRACKET_QUERY_CACHE: RefCell<HashMap<&'static str, Option<BracketQueryConfig>>> = RefCell::new(HashMap::new());
+    static RAINBOW_PARSER: RefCell<Parser> = RefCell::new(Parser::new());
 }
 
 /// Error type for syntax highlighting operations.
@@ -391,16 +405,72 @@ pub fn highlight_events(
     source: &str,
     language: Language,
 ) -> Result<Vec<CoreHighlightEvent>, HighlightError> {
+    highlight_events_with_options(source, language, HighlightOptions::default())
+}
+
+#[doc(hidden)]
+pub fn highlight_events_with_options(
+    source: &str,
+    language: Language,
+    options: HighlightOptions,
+) -> Result<Vec<CoreHighlightEvent>, HighlightError> {
     DOCUMENT_TS_HIGHLIGHTER.with(|ts_highlighter| {
         let mut ts_highlighter = ts_highlighter.borrow_mut();
-        highlight_events_with(&mut ts_highlighter, source, language)
+        highlight_events_with(&mut ts_highlighter, source, language, options)
     })
+}
+
+const RAINBOW_BRACKET_SCOPES: [&str; 6] = [
+    "punctuation.bracket.rainbow.1",
+    "punctuation.bracket.rainbow.2",
+    "punctuation.bracket.rainbow.3",
+    "punctuation.bracket.rainbow.4",
+    "punctuation.bracket.rainbow.5",
+    "punctuation.bracket.rainbow.6",
+];
+
+/// `HIGHLIGHT_NAMES` indices for the six rainbow bracket scopes, resolved once.
+///
+/// Each entry falls back to the generic `punctuation.bracket` scope (or `0`) if a
+/// rainbow scope is missing, so lookups during highlighting stay O(1).
+static RAINBOW_SCOPE_INDICES: LazyLock<[usize; 6]> = LazyLock::new(|| {
+    let fallback = HIGHLIGHT_NAMES
+        .iter()
+        .position(|candidate| *candidate == "punctuation.bracket")
+        .unwrap_or(0);
+    std::array::from_fn(|i| {
+        HIGHLIGHT_NAMES
+            .iter()
+            .position(|candidate| *candidate == RAINBOW_BRACKET_SCOPES[i])
+            .unwrap_or(fallback)
+    })
+});
+
+#[derive(Clone, Debug)]
+struct BracketPair {
+    open: Range<usize>,
+    close: Range<usize>,
+}
+
+#[derive(Clone, Debug)]
+struct RainbowRange {
+    start: usize,
+    end: usize,
+    scope_index: usize,
+}
+
+struct BracketQueryConfig {
+    query: Query,
+    open_capture: u32,
+    close_capture: u32,
+    rainbow_exclude_patterns: Vec<bool>,
 }
 
 fn highlight_events_with(
     ts_highlighter: &mut TSHighlighter,
     source: &str,
     language: Language,
+    options: HighlightOptions,
 ) -> Result<Vec<CoreHighlightEvent>, HighlightError> {
     let events = ts_highlighter
         .highlight(language.config(), source.as_bytes(), None, |injected| {
@@ -428,7 +498,222 @@ fn highlight_events_with(
         })
         .collect::<Result<Vec<_>, _>>()?;
 
-    Ok(core_events)
+    if options.rainbow_brackets {
+        Ok(apply_query_rainbow_brackets(source, core_events, language))
+    } else {
+        Ok(core_events)
+    }
+}
+
+fn apply_query_rainbow_brackets(
+    source: &str,
+    events: Vec<CoreHighlightEvent>,
+    language: Language,
+) -> Vec<CoreHighlightEvent> {
+    let ranges = query_rainbow_ranges(source, language);
+    if ranges.is_empty() {
+        return events;
+    }
+
+    overlay_rainbow_ranges(events, &ranges, language.id_name())
+}
+
+fn query_rainbow_ranges(source: &str, language: Language) -> Vec<RainbowRange> {
+    let config = language.config();
+    let tree = RAINBOW_PARSER.with(|parser| {
+        let mut parser = parser.borrow_mut();
+        if parser.set_language(&config.language).is_err() {
+            return None;
+        }
+        parser.parse(source.as_bytes(), None)
+    });
+    let Some(tree) = tree else {
+        return Vec::new();
+    };
+
+    with_bracket_query_config(config, |bracket_config| {
+        let Some(bracket_config) = bracket_config else {
+            return Vec::new();
+        };
+
+        let mut cursor = QueryCursor::new();
+        let mut matches =
+            cursor.matches(&bracket_config.query, tree.root_node(), source.as_bytes());
+        let mut pairs = Vec::new();
+
+        while let Some(query_match) = matches.next() {
+            if bracket_config.rainbow_exclude_patterns[query_match.pattern_index] {
+                continue;
+            }
+
+            let mut opens = Vec::new();
+            let mut closes = Vec::new();
+            for capture in query_match.captures {
+                if capture.index == bracket_config.open_capture {
+                    opens.push(capture.node.byte_range());
+                } else if capture.index == bracket_config.close_capture {
+                    closes.push(capture.node.byte_range());
+                }
+            }
+
+            for (open, close) in opens.into_iter().zip(closes) {
+                if open.start < close.end && (open.len() == 1 || close.len() == 1) {
+                    pairs.push(BracketPair { open, close });
+                }
+            }
+        }
+
+        colorize_bracket_pairs(pairs)
+    })
+}
+
+fn with_bracket_query_config<R>(
+    config: &'static crate::vendor::tree_sitter_highlight::HighlightConfiguration,
+    f: impl FnOnce(Option<&BracketQueryConfig>) -> R,
+) -> R {
+    BRACKET_QUERY_CACHE.with(|cache| {
+        let mut cache = cache.borrow_mut();
+        let entry = cache
+            .entry(config.language_name.as_str())
+            .or_insert_with(|| {
+                let query_source = bracket_query_for_language(config.language_name.as_str());
+                if query_source.trim().is_empty() {
+                    return None;
+                }
+
+                let query = Query::new(&config.language, query_source).ok()?;
+                let open_capture = query
+                    .capture_names()
+                    .iter()
+                    .position(|name| *name == "open")
+                    .map(|index| index as u32)?;
+                let close_capture = query
+                    .capture_names()
+                    .iter()
+                    .position(|name| *name == "close")
+                    .map(|index| index as u32)?;
+                let rainbow_exclude_patterns = (0..query.pattern_count())
+                    .map(|pattern_index| {
+                        query
+                            .property_settings(pattern_index)
+                            .iter()
+                            .any(|property| property.key.as_ref() == "rainbow.exclude")
+                    })
+                    .collect();
+
+                Some(BracketQueryConfig {
+                    query,
+                    open_capture,
+                    close_capture,
+                    rainbow_exclude_patterns,
+                })
+            });
+
+        f(entry.as_ref())
+    })
+}
+
+fn colorize_bracket_pairs(pairs: Vec<BracketPair>) -> Vec<RainbowRange> {
+    let mut opens: Vec<_> = pairs.iter().map(|pair| pair.open.clone()).collect();
+    opens.sort_by_key(|range| (range.start, range.end));
+    opens.dedup_by(|a, b| a.start == b.start && a.end == b.end);
+
+    let mut color_pairs: Vec<_> = pairs.into_iter().collect();
+    color_pairs.sort_by_key(|pair| pair.close.end);
+
+    let mut open_stack: Vec<Range<usize>> = Vec::new();
+    let mut open_index = 0usize;
+    let mut ranges = Vec::new();
+
+    for pair in color_pairs {
+        while open_index < opens.len() && opens[open_index].start < pair.close.start {
+            open_stack.push(opens[open_index].clone());
+            open_index += 1;
+        }
+
+        if open_stack.last() == Some(&pair.open) {
+            let depth = open_stack.len() - 1;
+            let scope_index = rainbow_scope_index(depth);
+            ranges.push(RainbowRange {
+                start: pair.open.start,
+                end: pair.open.end,
+                scope_index,
+            });
+            ranges.push(RainbowRange {
+                start: pair.close.start,
+                end: pair.close.end,
+                scope_index,
+            });
+            open_stack.pop();
+        }
+    }
+
+    ranges.sort_by_key(|range| (range.start, range.end));
+    ranges
+}
+
+fn overlay_rainbow_ranges(
+    events: Vec<CoreHighlightEvent>,
+    ranges: &[RainbowRange],
+    language: &str,
+) -> Vec<CoreHighlightEvent> {
+    let mut output = Vec::with_capacity(events.len() + ranges.len() * 3);
+    let mut range_index = 0usize;
+
+    for event in events {
+        let CoreHighlightEvent::Source { start, end } = event else {
+            // Move start/end events through untouched.
+            output.push(event);
+            continue;
+        };
+
+        let mut cursor = start;
+
+        while range_index < ranges.len() && ranges[range_index].end <= start {
+            range_index += 1;
+        }
+
+        let mut next_index = range_index;
+        while next_index < ranges.len() {
+            let range = &ranges[next_index];
+            if range.start >= end {
+                break;
+            }
+            if range.start < start || range.end > end {
+                next_index += 1;
+                continue;
+            }
+
+            if cursor < range.start {
+                output.push(CoreHighlightEvent::Source {
+                    start: cursor,
+                    end: range.start,
+                });
+            }
+
+            output.push(CoreHighlightEvent::Start {
+                scope_index: range.scope_index,
+                language: language.to_string(),
+            });
+            output.push(CoreHighlightEvent::Source {
+                start: range.start,
+                end: range.end,
+            });
+            output.push(CoreHighlightEvent::End);
+            cursor = range.end;
+            next_index += 1;
+        }
+
+        if cursor < end {
+            output.push(CoreHighlightEvent::Source { start: cursor, end });
+        }
+    }
+
+    output
+}
+
+fn rainbow_scope_index(depth: usize) -> usize {
+    RAINBOW_SCOPE_INDICES[depth % RAINBOW_SCOPE_INDICES.len()]
 }
 
 #[cfg(test)]

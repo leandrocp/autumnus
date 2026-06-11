@@ -253,6 +253,30 @@ pre.lumis {
 .punctuation-bracket {
   color: #888693;
 }
+.punctuation-bracket-rainbow-1 {
+  color: #ea83bf;
+  background-color: #161617;
+}
+.punctuation-bracket-rainbow-2 {
+  color: #e6a79d;
+  background-color: #161617;
+}
+.punctuation-bracket-rainbow-3 {
+  color: #92b3d5;
+  background-color: #161617;
+}
+.punctuation-bracket-rainbow-4 {
+  color: #f5919a;
+  background-color: #161617;
+}
+.punctuation-bracket-rainbow-5 {
+  color: #90b995;
+  background-color: #161617;
+}
+.punctuation-bracket-rainbow-6 {
+  color: #a1a1cf;
+  background-color: #161617;
+}
 .punctuation-delimiter {
   color: #b2b1ba;
 }

@@ -362,6 +362,24 @@
     "punctuation.bracket.python": {
       "fg": "#ee9025"
     },
+    "punctuation.bracket.rainbow.1": {
+      "fg": "#e05661"
+    },
+    "punctuation.bracket.rainbow.2": {
+      "fg": "#eea825"
+    },
+    "punctuation.bracket.rainbow.3": {
+      "fg": "#118dc3"
+    },
+    "punctuation.bracket.rainbow.4": {
+      "fg": "#ee9025"
+    },
+    "punctuation.bracket.rainbow.5": {
+      "fg": "#1da912"
+    },
+    "punctuation.bracket.rainbow.6": {
+      "fg": "#9a77cf"
+    },
     "punctuation.bracket.ruby": {
       "fg": "#ee9025"
     },

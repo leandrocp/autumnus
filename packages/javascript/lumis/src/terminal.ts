@@ -6,7 +6,11 @@ export function terminal(options: TerminalOptions = {}): TerminalFormatter {
   const formatter: TerminalFormatter = {
     ...options,
     format(source: string): string {
-      return formatTerminal(source, highlightEvents(source, formatter.language), formatter);
+      return formatTerminal(
+        source,
+        highlightEvents(source, formatter.language, { rainbowBrackets: formatter.rainbowBrackets }),
+        formatter,
+      );
     },
   };
   return formatter;

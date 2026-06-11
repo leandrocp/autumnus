@@ -41,6 +41,21 @@ local regular_groups = {
 	"Normal",
 	"Comment",
 	"CursorLine",
+	"RainbowDelimiterRed",
+	"RainbowDelimiterYellow",
+	"RainbowDelimiterBlue",
+	"RainbowDelimiterOrange",
+	"RainbowDelimiterGreen",
+	"RainbowDelimiterViolet",
+}
+
+local group_key_map = {
+	RainbowDelimiterRed = "punctuation.bracket.rainbow.1",
+	RainbowDelimiterYellow = "punctuation.bracket.rainbow.2",
+	RainbowDelimiterBlue = "punctuation.bracket.rainbow.3",
+	RainbowDelimiterOrange = "punctuation.bracket.rainbow.4",
+	RainbowDelimiterGreen = "punctuation.bracket.rainbow.5",
+	RainbowDelimiterViolet = "punctuation.bracket.rainbow.6",
 }
 
 local treesitter_groups = {
@@ -355,7 +370,7 @@ local function extract_colorscheme_colors(theme)
 		local style = extract_style(hl)
 
 		if next(style) ~= nil then
-			local key = string.lower(string.gsub(group, "@", ""))
+			local key = group_key_map[group] or string.lower(string.gsub(group, "@", ""))
 			if key == "cursorline" then
 				key = "highlighted"
 			end

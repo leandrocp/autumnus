@@ -278,6 +278,24 @@
     "punctuation.bracket": {
       "fg": "#88c0d0"
     },
+    "punctuation.bracket.rainbow.1": {
+      "fg": "#bf616a"
+    },
+    "punctuation.bracket.rainbow.2": {
+      "fg": "#ebcb8b"
+    },
+    "punctuation.bracket.rainbow.3": {
+      "fg": "#81a1c1"
+    },
+    "punctuation.bracket.rainbow.4": {
+      "fg": "#d08770"
+    },
+    "punctuation.bracket.rainbow.5": {
+      "fg": "#a3be8c"
+    },
+    "punctuation.bracket.rainbow.6": {
+      "fg": "#b48ead"
+    },
     "punctuation.delimiter": {
       "fg": "#88c0d0"
     },

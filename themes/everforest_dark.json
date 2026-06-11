@@ -313,6 +313,24 @@
     "punctuation.bracket": {
       "fg": "#d3c6aa"
     },
+    "punctuation.bracket.rainbow.1": {
+      "fg": "#e67e80"
+    },
+    "punctuation.bracket.rainbow.2": {
+      "fg": "#dbbc7f"
+    },
+    "punctuation.bracket.rainbow.3": {
+      "fg": "#7fbbb3"
+    },
+    "punctuation.bracket.rainbow.4": {
+      "fg": "#e69875"
+    },
+    "punctuation.bracket.rainbow.5": {
+      "fg": "#a7c080"
+    },
+    "punctuation.bracket.rainbow.6": {
+      "fg": "#d699b6"
+    },
     "punctuation.bracket.regex": {
       "fg": "#a7c080"
     },

@@ -627,13 +627,171 @@ export function buildHighlightEvents(
   source: string,
   language: LoadedLanguage,
   runtime: RuntimeLookup,
+  options: { rainbowBrackets?: boolean } = {},
 ): HighlightEvent[] {
   const maps = buildSourceMaps(source);
   const captures = normalizeCaptures(
     collectLayerCaptures(source, maps, runtime, language, 0),
     maps.sourceBytes,
   );
-  return buildNestedEvents(captures, maps.sourceUtf8ByteLength);
+  const events = buildNestedEvents(captures, maps.sourceUtf8ByteLength);
+  return options.rainbowBrackets ? applyRainbowBrackets(source, events, language, maps) : events;
+}
+
+const RAINBOW_BRACKET_SCOPES = [
+  "punctuation.bracket.rainbow.1",
+  "punctuation.bracket.rainbow.2",
+  "punctuation.bracket.rainbow.3",
+  "punctuation.bracket.rainbow.4",
+  "punctuation.bracket.rainbow.5",
+  "punctuation.bracket.rainbow.6",
+];
+
+interface BracketPair {
+  open: { startByte: number; endByte: number };
+  close: { startByte: number; endByte: number };
+}
+
+function queryRainbowBracketRanges(
+  source: string,
+  language: LoadedLanguage,
+  maps: SourceMaps,
+): Array<{ startByte: number; endByte: number; scope: string }> {
+  if (!language.brackets) return [];
+
+  const tree = language.parser.parse(source);
+  if (!tree) return [];
+
+  try {
+    const pairs: BracketPair[] = [];
+    for (const match of language.brackets.query.matches(tree.rootNode)) {
+      if (language.brackets.rainbowExcludePatterns[match.patternIndex]) {
+        continue;
+      }
+
+      const opens = [];
+      const closes = [];
+      for (const capture of match.captures) {
+        const metadata = language.brackets.captureMetadata[capture.name];
+        if (metadata?.isOpen) {
+          opens.push({
+            startByte: nodeStartByte(capture.node, maps),
+            endByte: nodeEndByte(capture.node, maps),
+          });
+        } else if (metadata?.isClose) {
+          closes.push({
+            startByte: nodeStartByte(capture.node, maps),
+            endByte: nodeEndByte(capture.node, maps),
+          });
+        }
+      }
+
+      for (let index = 0; index < Math.min(opens.length, closes.length); index += 1) {
+        const open = opens[index]!;
+        const close = closes[index]!;
+        if (
+          open.startByte < close.endByte &&
+          (open.endByte - open.startByte === 1 || close.endByte - close.startByte === 1)
+        ) {
+          pairs.push({ open, close });
+        }
+      }
+    }
+
+    return colorizeBracketPairs(pairs);
+  } finally {
+    tree.delete();
+  }
+}
+
+function colorizeBracketPairs(
+  pairs: BracketPair[],
+): Array<{ startByte: number; endByte: number; scope: string }> {
+  const opens = pairs
+    .map((pair) => pair.open)
+    .sort((a, b) => a.startByte - b.startByte || a.endByte - b.endByte)
+    .filter((range, index, all) => {
+      const previous = all[index - 1];
+      return (
+        !previous || previous.startByte !== range.startByte || previous.endByte !== range.endByte
+      );
+    });
+
+  const colorPairs = pairs.slice().sort((a, b) => a.close.endByte - b.close.endByte);
+  const openStack: Array<{ startByte: number; endByte: number }> = [];
+  const ranges: Array<{ startByte: number; endByte: number; scope: string }> = [];
+  let openIndex = 0;
+
+  for (const pair of colorPairs) {
+    while (openIndex < opens.length && opens[openIndex]!.startByte < pair.close.startByte) {
+      openStack.push(opens[openIndex]!);
+      openIndex += 1;
+    }
+
+    const lastOpen = openStack[openStack.length - 1];
+    if (
+      lastOpen &&
+      lastOpen.startByte === pair.open.startByte &&
+      lastOpen.endByte === pair.open.endByte
+    ) {
+      const scope = RAINBOW_BRACKET_SCOPES[(openStack.length - 1) % RAINBOW_BRACKET_SCOPES.length]!;
+      ranges.push({ startByte: pair.open.startByte, endByte: pair.open.endByte, scope });
+      ranges.push({ startByte: pair.close.startByte, endByte: pair.close.endByte, scope });
+      openStack.pop();
+    }
+  }
+
+  return ranges.sort((a, b) => a.startByte - b.startByte || a.endByte - b.endByte);
+}
+
+function applyRainbowBrackets(
+  source: string,
+  events: HighlightEvent[],
+  language: LoadedLanguage,
+  maps: SourceMaps,
+): HighlightEvent[] {
+  const ranges = queryRainbowBracketRanges(source, language, maps);
+  if (ranges.length === 0) return events;
+
+  const output: HighlightEvent[] = [];
+  let rangeIndex = 0;
+
+  for (const event of events) {
+    if (event.type !== "source") {
+      output.push(event);
+      continue;
+    }
+
+    let cursor = event.startByte;
+    while (rangeIndex < ranges.length && ranges[rangeIndex]!.endByte <= event.startByte) {
+      rangeIndex += 1;
+    }
+
+    let nextIndex = rangeIndex;
+    while (nextIndex < ranges.length) {
+      const range = ranges[nextIndex]!;
+      if (range.startByte >= event.endByte) break;
+      if (range.startByte < event.startByte || range.endByte > event.endByte) {
+        nextIndex += 1;
+        continue;
+      }
+
+      if (cursor < range.startByte) {
+        output.push({ type: "source", startByte: cursor, endByte: range.startByte });
+      }
+      output.push({ type: "start", scope: range.scope, language: language.definition.id });
+      output.push({ type: "source", startByte: range.startByte, endByte: range.endByte });
+      output.push({ type: "end" });
+      cursor = range.endByte;
+      nextIndex += 1;
+    }
+
+    if (cursor < event.endByte) {
+      output.push({ type: "source", startByte: cursor, endByte: event.endByte });
+    }
+  }
+
+  return output;
 }
 
 /**

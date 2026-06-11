@@ -2,7 +2,7 @@ use anyhow::{bail, Context, Result};
 use clap::{Parser, Subcommand};
 use lumis::events::HighlightEvent;
 use lumis::formatters::Formatter as _;
-use lumis::highlight::highlight_events;
+use lumis::highlight::{highlight_events_with_options, HighlightOptions};
 use lumis::languages::Language;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
@@ -81,6 +81,8 @@ enum Commands {
         themes: Vec<String>,
         #[arg(long)]
         default_theme: Option<String>,
+        #[arg(long)]
+        rainbow_brackets: bool,
     },
     DumpEvents {
         source: String,
@@ -127,13 +129,23 @@ fn main() -> Result<()> {
             theme,
             themes,
             default_theme,
-        } => render_conformance(&source, &language, &formatter, theme, themes, default_theme),
+            rainbow_brackets,
+        } => render_conformance(
+            &source,
+            &language,
+            &formatter,
+            theme,
+            themes,
+            default_theme,
+            rainbow_brackets,
+        ),
         Commands::DumpEvents { source, language } => dump_events(&source, &language),
         Commands::VerifyConformance { name } => verify_conformance(&name),
         Commands::RegenConformance { name } => regen_conformance(&name),
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn render_conformance(
     source: &str,
     language: &str,
@@ -141,11 +153,20 @@ fn render_conformance(
     theme: Option<String>,
     themes: Vec<String>,
     default_theme: Option<String>,
+    rainbow_brackets: bool,
 ) -> Result<()> {
     let language = parse_language(language)?;
     print!(
         "{}",
-        render_formatter_output(source, language, formatter, theme, themes, default_theme)?
+        render_formatter_output(
+            source,
+            language,
+            formatter,
+            theme,
+            themes,
+            default_theme,
+            rainbow_brackets,
+        )?
     );
     Ok(())
 }
@@ -164,6 +185,11 @@ struct FixtureMetadata {
     name: String,
     language: String,
     theme: String,
+    rainbow_brackets: bool,
+}
+
+fn is_false(value: &bool) -> bool {
+    !*value
 }
 
 #[derive(Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -172,6 +198,9 @@ struct FixtureFile {
     name: String,
     language: String,
     theme: String,
+    // Omitted from the JSON when false so non-rainbow fixtures stay unchanged.
+    #[serde(default, skip_serializing_if = "is_false")]
+    rainbow_brackets: bool,
     #[serde(default)]
     events: Vec<SerializableHighlightEvent>,
 }
@@ -183,6 +212,7 @@ struct FixtureOutputs {
     html_linked: String,
     html_multi_themes: String,
     terminal: String,
+    bbcode: String,
 }
 
 fn serialize_events(events: Vec<HighlightEvent>) -> Vec<SerializableHighlightEvent> {
@@ -237,6 +267,7 @@ fn selected_fixture_dirs(name: &str) -> Result<Vec<PathBuf>> {
     Ok(vec![dir])
 }
 
+#[allow(clippy::too_many_arguments)]
 fn render_formatter_output(
     source: &str,
     language: Language,
@@ -244,6 +275,7 @@ fn render_formatter_output(
     theme: Option<String>,
     themes: Vec<String>,
     default_theme: Option<String>,
+    rainbow_brackets: bool,
 ) -> Result<String> {
     let mut output = Vec::new();
 
@@ -254,6 +286,7 @@ fn render_formatter_output(
             let formatter = lumis::HtmlInlineBuilder::new()
                 .language(language)
                 .theme(Some(theme))
+                .rainbow_brackets(rainbow_brackets)
                 .build()
                 .map_err(|e| anyhow::anyhow!("{e}"))?;
             formatter.format(source, &mut output)?;
@@ -261,6 +294,7 @@ fn render_formatter_output(
         "html-linked" => {
             let formatter = lumis::HtmlLinkedBuilder::new()
                 .language(language)
+                .rainbow_brackets(rainbow_brackets)
                 .build()
                 .map_err(|e| anyhow::anyhow!("{e}"))?;
             formatter.format(source, &mut output)?;
@@ -279,7 +313,10 @@ fn render_formatter_output(
             }
 
             let mut builder = lumis::HtmlMultiThemesBuilder::new();
-            builder.language(language).themes(theme_map);
+            builder
+                .language(language)
+                .themes(theme_map)
+                .rainbow_brackets(rainbow_brackets);
 
             if let Some(default_theme) = default_theme {
                 builder.default_theme(default_theme);
@@ -294,6 +331,15 @@ fn render_formatter_output(
             let formatter = lumis::TerminalBuilder::new()
                 .language(language)
                 .theme(Some(theme))
+                .rainbow_brackets(rainbow_brackets)
+                .build()
+                .map_err(|e| anyhow::anyhow!("{e}"))?;
+            formatter.format(source, &mut output)?;
+        }
+        "bbcode-scoped" => {
+            let formatter = lumis::BBCodeScopedBuilder::new()
+                .language(language)
+                .rainbow_brackets(rainbow_brackets)
                 .build()
                 .map_err(|e| anyhow::anyhow!("{e}"))?;
             formatter.format(source, &mut output)?;
@@ -309,12 +355,15 @@ fn fixture_outputs(
     language: Language,
     theme: &str,
     name: &str,
+    rainbow_brackets: bool,
 ) -> Result<FixtureOutputs> {
-    let events = highlight_events(source, language)?;
+    let events =
+        highlight_events_with_options(source, language, HighlightOptions { rainbow_brackets })?;
     let metadata = FixtureMetadata {
         name: name.to_string(),
         language: language.id_name().to_string(),
         theme: theme.to_string(),
+        rainbow_brackets,
     };
 
     Ok(FixtureOutputs {
@@ -327,8 +376,17 @@ fn fixture_outputs(
             Some(theme.to_string()),
             vec![],
             None,
+            rainbow_brackets,
         )?,
-        html_linked: render_formatter_output(source, language, "html-linked", None, vec![], None)?,
+        html_linked: render_formatter_output(
+            source,
+            language,
+            "html-linked",
+            None,
+            vec![],
+            None,
+            rainbow_brackets,
+        )?,
         html_multi_themes: render_formatter_output(
             source,
             language,
@@ -336,6 +394,7 @@ fn fixture_outputs(
             None,
             vec![format!("main:{theme}")],
             Some("main".to_string()),
+            rainbow_brackets,
         )?,
         terminal: render_formatter_output(
             source,
@@ -344,6 +403,16 @@ fn fixture_outputs(
             Some(theme.to_string()),
             vec![],
             None,
+            rainbow_brackets,
+        )?,
+        bbcode: render_formatter_output(
+            source,
+            language,
+            "bbcode-scoped",
+            None,
+            vec![],
+            None,
+            rainbow_brackets,
         )?,
     })
 }
@@ -355,7 +424,11 @@ fn load_fixture_file(dir: &Path) -> Result<FixtureFile> {
 
 fn dump_events(source: &str, language: &str) -> Result<()> {
     let language = parse_language(language)?;
-    let events = serialize_events(highlight_events(source, language)?);
+    let events = serialize_events(highlight_events_with_options(
+        source,
+        language,
+        HighlightOptions::default(),
+    )?);
 
     println!("{}", serde_json::to_string_pretty(&events)?);
     Ok(())
@@ -368,7 +441,13 @@ fn verify_conformance(name: &str) -> Result<()> {
         let source = fs::read_to_string(dir.join("source.txt"))?;
         let stored = load_fixture_file(&dir)?;
         let language = parse_language(&stored.language)?;
-        let generated = fixture_outputs(&source, language, &stored.theme, &stored.name)?;
+        let generated = fixture_outputs(
+            &source,
+            language,
+            &stored.theme,
+            &stored.name,
+            stored.rainbow_brackets,
+        )?;
 
         ensure_fixture_file_match(
             &dir.join("fixture.json"),
@@ -377,6 +456,7 @@ fn verify_conformance(name: &str) -> Result<()> {
                 name: generated.metadata.name.clone(),
                 language: generated.metadata.language.clone(),
                 theme: generated.metadata.theme.clone(),
+                rainbow_brackets: generated.metadata.rainbow_brackets,
                 events: generated.events.clone(),
             },
         )?;
@@ -400,6 +480,11 @@ fn verify_conformance(name: &str) -> Result<()> {
             &fs::read_to_string(dir.join("terminal.txt"))?,
             &generated.terminal,
         )?;
+        ensure_fixture_match(
+            &dir.join("bbcode.txt"),
+            &fs::read_to_string(dir.join("bbcode.txt"))?,
+            &generated.bbcode,
+        )?;
 
         checked += 1;
         println!("ok {}", dir.display());
@@ -416,7 +501,13 @@ fn regen_conformance(name: &str) -> Result<()> {
         let source = fs::read_to_string(dir.join("source.txt"))?;
         let stored = load_fixture_file(&dir)?;
         let language = parse_language(&stored.language)?;
-        let generated = fixture_outputs(&source, language, &stored.theme, &stored.name)?;
+        let generated = fixture_outputs(
+            &source,
+            language,
+            &stored.theme,
+            &stored.name,
+            stored.rainbow_brackets,
+        )?;
 
         fs::write(
             dir.join("fixture.json"),
@@ -424,6 +515,7 @@ fn regen_conformance(name: &str) -> Result<()> {
                 name: generated.metadata.name,
                 language: generated.metadata.language,
                 theme: generated.metadata.theme,
+                rainbow_brackets: generated.metadata.rainbow_brackets,
                 events: generated.events,
             })? + "\n",
         )?;
@@ -434,6 +526,7 @@ fn regen_conformance(name: &str) -> Result<()> {
             generated.html_multi_themes,
         )?;
         fs::write(dir.join("terminal.txt"), generated.terminal)?;
+        fs::write(dir.join("bbcode.txt"), generated.bbcode)?;
 
         regenerated += 1;
         println!("regenerated {}", dir.display());
@@ -935,7 +1028,12 @@ fn tmpdir() -> Result<String> {
 fn query_names() -> Result<Vec<String>> {
     let mut names = std::collections::BTreeSet::new();
 
-    for dir in ["queries/upstream", "queries/override", "queries/append"] {
+    for dir in [
+        "queries/upstream",
+        "queries/brackets",
+        "queries/override",
+        "queries/append",
+    ] {
         let path = Path::new(dir);
         if !path.exists() {
             continue;
@@ -944,7 +1042,7 @@ fn query_names() -> Result<Vec<String>> {
         for entry in fs::read_dir(path)? {
             let entry = entry?;
             let name = entry.file_name().to_string_lossy().to_string();
-            if name != "README.md" && entry.file_type()?.is_dir() {
+            if name != "README.md" && name != "default" && entry.file_type()?.is_dir() {
                 names.insert(name);
             }
         }
@@ -1393,6 +1491,22 @@ fn apply_text_replacements(content: &str) -> String {
         (r"\(?i)", "(?i)"),
         ("^{[-]|[^|]", r"^\{[-]|^\{[^|]"),
         (r#"^\\if"#, r#"^if"#),
+        (
+            "[
+  \"\\\\.and\\\\.\"
+  \"\\\\.or\\\\.\"
+  \"\\\\.eqv\\\\.\"
+  \"\\\\.neqv\\\\.\"
+  \"\\\\.lt\\\\.\"
+  \"\\\\.gt\\\\.\"
+  \"\\\\.le\\\\.\"
+  \"\\\\.ge\\\\.\"
+  \"\\\\.eq\\\\.\"
+  \"\\\\.ne\\\\.\"
+  \"\\\\.not\\\\.\"
+] @keyword.operator",
+            "",
+        ),
     ];
 
     let mut s = content.to_string();
@@ -1476,7 +1590,11 @@ fn resolve_and_preprocess(
         return parts.join("\n");
     }
 
-    let raw = read_query_raw(src_dir, lang, query_type);
+    let raw = if query_type == "brackets" {
+        fs::read_to_string(format!("queries/brackets/{lang}/brackets.scm")).unwrap_or_default()
+    } else {
+        read_query_raw(src_dir, lang, query_type)
+    };
     let append_path = format!("{append_dir}/{lang}/{query_type}.scm");
     let append_content = fs::read_to_string(&append_path).ok();
 
@@ -1531,6 +1649,13 @@ fn preprocess_queries(name: &str) -> Result<()> {
 
     if name.is_empty() {
         let _ = fs::remove_dir_all(dest);
+        if let Ok(default_brackets) = fs::read_to_string("queries/brackets/default/brackets.scm") {
+            fs::create_dir_all(format!("{dest}/default"))?;
+            fs::write(
+                format!("{dest}/default/brackets.scm"),
+                format!("; This file is auto-generated. Do not edit.\n{default_brackets}"),
+            )?;
+        }
     }
 
     for lang in query_names()? {
@@ -1541,7 +1666,7 @@ fn preprocess_queries(name: &str) -> Result<()> {
 
         fs::create_dir_all(format!("{dest}/{lang}"))?;
         let mut wrote = false;
-        for query_type in &["highlights", "injections", "locals"] {
+        for query_type in &["highlights", "injections", "locals", "brackets"] {
             let mut seen = HashSet::new();
             let content =
                 resolve_and_preprocess(src, override_dir, append_dir, &lang, query_type, &mut seen);

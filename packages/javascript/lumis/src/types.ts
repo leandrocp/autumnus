@@ -131,6 +131,7 @@ export interface Language {
   highlights: string;
   injections?: string;
   locals?: string;
+  brackets?: string;
   /**
    * WASM parser source:
    * - `WasmRef` fetched from CDN (default for pre-built bundles)
@@ -219,11 +220,18 @@ export interface CompiledHighlightConfig {
   injectionOffsets: Array<Record<string, QueryCaptureOffset> | undefined>;
 }
 
+export interface CompiledBracketConfig {
+  query: Query;
+  captureMetadata: Record<string, { isOpen: boolean; isClose: boolean }>;
+  rainbowExcludePatterns: boolean[];
+}
+
 export interface LoadedLanguage {
   definition: LanguageDefinition;
   parser: Parser;
   language: TSLanguage;
   config: CompiledHighlightConfig;
+  brackets?: CompiledBracketConfig;
 }
 
 export const PLAINTEXT_LANG_ID = "plaintext";
@@ -336,6 +344,7 @@ export type HighlightIterFn = (
  */
 export interface Formatter {
   language?: LanguageRef;
+  rainbowBrackets?: boolean;
   format(source: string): string;
 }
 
@@ -371,6 +380,8 @@ export interface HtmlInlineOptions {
   italic?: boolean;
   /** Add `data-highlight` attributes with scope names. */
   includeHighlights?: boolean;
+  /** Render nested brackets with rainbow bracket scopes. */
+  rainbowBrackets?: boolean;
   highlightLines?: HighlightLinesInline;
   header?: HtmlElement;
 }
@@ -387,6 +398,7 @@ export interface HtmlInlineFormatter extends Formatter, HtmlInlineOptions {}
 export interface HtmlLinkedOptions {
   language?: LanguageRef;
   preClass?: string;
+  rainbowBrackets?: boolean;
   highlightLines?: HighlightLinesLinked;
   header?: HtmlElement;
 }
@@ -417,6 +429,7 @@ export interface HtmlMultiThemesOptions {
   preClass?: string;
   italic?: boolean;
   includeHighlights?: boolean;
+  rainbowBrackets?: boolean;
   highlightLines?: HighlightLinesInline;
   header?: HtmlElement;
 }
@@ -432,6 +445,7 @@ export interface HtmlMultiThemesFormatter extends Formatter, HtmlMultiThemesOpti
  */
 export interface BBCodeScopedOptions {
   language?: LanguageRef;
+  rainbowBrackets?: boolean;
 }
 
 export interface BBCodeScopedFormatter extends Formatter, BBCodeScopedOptions {}
@@ -446,6 +460,7 @@ export interface BBCodeScopedFormatter extends Formatter, BBCodeScopedOptions {}
 export interface TerminalOptions {
   language?: LanguageRef;
   theme?: Theme;
+  rainbowBrackets?: boolean;
 }
 
 export interface TerminalFormatter extends Formatter, TerminalOptions {}

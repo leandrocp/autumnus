@@ -455,6 +455,54 @@ impl FromStr for Theme {
     }
 }
 
+static RAINBOW_BRACKET_FALLBACKS: std::sync::LazyLock<BTreeMap<&'static str, Style>> =
+    std::sync::LazyLock::new(|| {
+        BTreeMap::from([
+            (
+                "punctuation.bracket.rainbow.1",
+                Style {
+                    fg: Some("#e06c75".to_string()),
+                    ..Default::default()
+                },
+            ),
+            (
+                "punctuation.bracket.rainbow.2",
+                Style {
+                    fg: Some("#e5c07b".to_string()),
+                    ..Default::default()
+                },
+            ),
+            (
+                "punctuation.bracket.rainbow.3",
+                Style {
+                    fg: Some("#61afef".to_string()),
+                    ..Default::default()
+                },
+            ),
+            (
+                "punctuation.bracket.rainbow.4",
+                Style {
+                    fg: Some("#d19a66".to_string()),
+                    ..Default::default()
+                },
+            ),
+            (
+                "punctuation.bracket.rainbow.5",
+                Style {
+                    fg: Some("#98c379".to_string()),
+                    ..Default::default()
+                },
+            ),
+            (
+                "punctuation.bracket.rainbow.6",
+                Style {
+                    fg: Some("#c678dd".to_string()),
+                    ..Default::default()
+                },
+            ),
+        ])
+    });
+
 impl Theme {
     pub fn new(
         name: String,
@@ -502,6 +550,9 @@ impl Theme {
         let mut current = scope;
         loop {
             if let Some(style) = self.highlights.get(current) {
+                return Some(style);
+            }
+            if let Some(style) = RAINBOW_BRACKET_FALLBACKS.get(current) {
                 return Some(style);
             }
             match current.rsplit_once('.') {
