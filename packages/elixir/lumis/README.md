@@ -165,7 +165,7 @@ Then add the stylesheet to your template:
 <link phx-track-static rel="stylesheet" href={~p"/themes/dracula.css"} />
 ```
 
-CSS theme files are available in `priv/static/css/`. Use `Lumis.Theme.build_css/2` for custom selectors or embedded CSS ([docs](https://lumis.sh/docs/themes/css-files#build-custom-css)).
+CSS theme files are available in `priv/static/css/`. Use `Lumis.Theme.build_css/2` for custom selectors or embedded CSS ([docs](https://lumis.sh/docs/themes/css-builder)).
 
 ### HTML Multi-Themes
 

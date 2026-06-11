@@ -31,10 +31,6 @@ pre.lumis {
   color: blue;
   font-style: italic;
 }
-.normal {
-  color: red;
-  background-color: green;
-}
 .tag-attribute {
   background-color: gray;
   font-weight: bold;
@@ -57,10 +53,6 @@ html[data-theme="dark"] .lumis {
 html[data-theme="dark"] .lumis .keyword {
   color: blue;
   font-style: italic;
-}
-html[data-theme="dark"] .lumis .normal {
-  color: red;
-  background-color: green;
 }
 html[data-theme="dark"] .lumis .tag-attribute {
   background-color: gray;

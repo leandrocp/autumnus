@@ -697,6 +697,14 @@ impl Css<'_> {
         };
 
         for (scope, style) in &self.theme.highlights {
+            // `normal` defines the code block's base colors, already emitted in the base rule
+            // above and inherited by all text. It is never applied as a token class in highlighted
+            // output, so emitting a `.normal` rule here would be dead CSS and would also shadow a
+            // `background` override for that one scope.
+            if scope == "normal" {
+                continue;
+            }
+
             let style_css = style.css(self.enable_italic, "\n  ");
 
             if !style_css.is_empty() {
@@ -901,10 +909,6 @@ pre.lumis {
   color: blue;
   font-style: italic;
 }
-.normal {
-  color: red;
-  background-color: green;
-}
 .tag-attribute {
   background-color: gray;
   font-weight: bold;
@@ -944,10 +948,6 @@ html[data-theme="dark"] .lumis {
 }
 html[data-theme="dark"] .lumis .keyword {
   color: blue;
-}
-html[data-theme="dark"] .lumis .normal {
-  color: red;
-  background-color: green;
 }
 "#;
 
@@ -1015,10 +1015,6 @@ pre.lumis {
 .keyword {
   color: blue;
 }
-.normal {
-  color: red;
-  background-color: green;
-}
 "#;
 
         assert_eq!(
@@ -1040,9 +1036,6 @@ pre.lumis {
   color: red;
   background-color: #000;
 }
-.normal {
-  color: red;
-}
 "#;
 
         assert_eq!(CssBuilder::new(&theme).background("#000").build(), expected);
@@ -1050,14 +1043,15 @@ pre.lumis {
 
     #[test]
     fn test_css_builder_omits_rules_that_render_no_declarations() {
-        // `keyword` only carries italic, so disabling italic leaves it with nothing to emit.
-        let json = r#"{"name": "test", "appearance": "dark", "revision": "abc", "highlights": {"normal": {"fg": "red"}, "keyword": {"italic": true}}}"#;
+        // `comment` only carries italic, so disabling italic leaves it with nothing to emit, while
+        // `function` keeps its color and must still be present.
+        let json = r#"{"name": "test", "appearance": "dark", "revision": "abc", "highlights": {"function": {"fg": "red"}, "comment": {"italic": true}}}"#;
         let theme = from_json(json).unwrap();
 
         let css = CssBuilder::new(&theme).enable_italic(false).build();
 
-        assert!(css.contains(".normal {\n  color: red;\n}"));
-        assert!(!css.contains(".keyword"));
+        assert!(css.contains(".function {\n  color: red;\n}"));
+        assert!(!css.contains(".comment"));
     }
 
     #[test]
@@ -1074,9 +1068,6 @@ pre.lumis {
   border-radius: 0.375rem;
   padding: 1rem;
   overflow-x: auto;
-}
-.normal {
-  color: red;
 }
 "#;
 
@@ -1104,9 +1095,6 @@ pre.lumis {
 }
 .app .keyword {
   color: blue;
-}
-.app .normal {
-  color: red;
 }
 "#;
 

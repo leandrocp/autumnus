@@ -71,6 +71,13 @@ export function buildCss(theme: ThemeData, options: BuildCssOptions = {}): strin
   const entries = Object.entries(theme.highlights).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
 
   for (const [scope, style] of entries) {
+    // `normal` defines the code block's base colors, already emitted above and inherited by all
+    // text. It is never applied as a token class, so a `.normal` rule would be dead CSS and would
+    // also shadow a `background` override for that one scope.
+    if (scope === "normal") {
+      continue;
+    }
+
     const styleCss = renderStyle(style, enableItalic, "\n  ");
 
     if (styleCss !== "") {
