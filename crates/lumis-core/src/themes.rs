@@ -621,9 +621,10 @@ pub struct Css<'a> {
 impl<'a> CssBuilder<'a> {
     /// Create a CSS builder for `theme`.
     pub fn new(theme: &'a Theme) -> Self {
-        let mut builder = Self::default();
-        builder.theme = Some(theme);
-        builder
+        Self {
+            theme: Some(theme),
+            ..Self::default()
+        }
     }
 
     /// Append a CSS declaration to the base code block rule.
