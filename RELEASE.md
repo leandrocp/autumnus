@@ -2,7 +2,7 @@
 
 Releases are prepared locally and published from tags.
 
-## Quick flow
+## TLDR
 
 ```sh
 just release-needed
@@ -14,7 +14,21 @@ git tag <package>/v<version>
 git push origin <package>/v<version>
 ```
 
+Example:
+
+```sh
+just release-needed
+just release-prepare cargo-lumis-cli 0.2.0
+git add crates/lumis-cli/Cargo.toml crates/lumis-cli/CHANGELOG.md
+git commit -m "chore(release): cargo-lumis-cli 0.2.0"
+git push origin main
+git tag cargo-lumis-cli/v0.2.0
+git push origin cargo-lumis-cli/v0.2.0
+```
+
 - Run `just release-needed` first to decide which packages ship together.
+- Pass the bare version to `just release-prepare`, for example `0.2.0`, not `v0.2.0`.
+- Include `v` only in the git tag, for example `cargo-lumis-cli/v0.2.0`.
 - Review each changed manifest and `CHANGELOG.md` after `just release-prepare`.
 - If one released package depends on another released package, update the dependent manifest in the same commit.
 - Push package tags in dependency order.
