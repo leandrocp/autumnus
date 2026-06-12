@@ -126,7 +126,7 @@ pub fn span_inline_attrs(
 /// use lumis::html;
 ///
 /// let span = html::span_linked("fn span", "keyword.function");
-/// assert_eq!(span, r#"<span class="lumis-keyword-function">fn span</span>"#);
+/// assert_eq!(span, r#"<span class="l-keyword-function">fn span</span>"#);
 /// ```
 pub fn span_linked(text: &str, scope: &str) -> String {
     let escaped = escape(text);
@@ -145,7 +145,7 @@ pub fn span_linked(text: &str, scope: &str) -> String {
 /// use lumis::html;
 ///
 /// let attrs = html::span_linked_attrs("keyword.function");
-/// assert_eq!(attrs, r#"class="lumis-keyword-function""#);
+/// assert_eq!(attrs, r#"class="l-keyword-function""#);
 /// ```
 pub fn span_linked_attrs(scope: &str) -> String {
     let class = scope_to_class(scope);
@@ -577,7 +577,7 @@ pub fn escape_braces(text: &str) -> String {
 
 /// Wrap content in a line div with optional class and style attributes.
 ///
-/// Creates a `<div class="line..." data-line="N">content</div>` element
+/// Creates a `<div class="l-line..." data-line="N">content</div>` element
 /// with optional additional CSS classes and inline styles.
 ///
 /// # Arguments
@@ -593,7 +593,7 @@ pub fn escape_braces(text: &str) -> String {
 /// use lumis::html;
 ///
 /// let line = html::wrap_line(1, "content", Some(" highlighted"), Some("background: yellow"));
-/// assert_eq!(line, r#"<div class="line highlighted" style="background: yellow" data-line="1">content</div>"#);
+/// assert_eq!(line, r#"<div class="l-line highlighted" style="background: yellow" data-line="1">content</div>"#);
 /// ```
 pub fn wrap_line(
     line_number: usize,
@@ -602,8 +602,8 @@ pub fn wrap_line(
     style: Option<&str>,
 ) -> String {
     let class_attr = match class_suffix {
-        Some(suffix) => format!("line{}", suffix),
-        None => "line".to_string(),
+        Some(suffix) => format!("l-line{}", suffix),
+        None => "l-line".to_string(),
     };
 
     match style {
@@ -628,16 +628,16 @@ pub fn wrap_line(
 /// ```rust
 /// use lumis::html;
 ///
-/// assert_eq!(html::scope_to_class("string"), "lumis-string");
-/// assert_eq!(html::scope_to_class("function.method.call"), "lumis-function-method-call");
+/// assert_eq!(html::scope_to_class("string"), "l-string");
+/// assert_eq!(html::scope_to_class("function.method.call"), "l-function-method-call");
 /// ```
 pub fn scope_to_class(scope: &str) -> String {
     lumis_core::highlights::HIGHLIGHT_NAMES
         .iter()
         .position(|&s| s == scope)
         .and_then(|idx| lumis_core::highlights::CLASSES.get(idx))
-        .map(|class| format!("lumis-{class}"))
-        .unwrap_or_else(|| "lumis-text".to_string())
+        .map(|class| format!("l-{class}"))
+        .unwrap_or_else(|| "l-text".to_string())
 }
 
 /// Generate an opening `<pre>` tag with optional class and theme styles.
@@ -827,20 +827,20 @@ mod tests {
     fn test_scope_to_class_keyword_conditional() {
         assert_eq!(
             scope_to_class("keyword.conditional"),
-            "lumis-keyword-conditional"
+            "l-keyword-conditional"
         );
     }
 
     #[test]
     fn test_scope_to_class_string_escape() {
-        assert_eq!(scope_to_class("string.escape"), "lumis-string-escape");
+        assert_eq!(scope_to_class("string.escape"), "l-string-escape");
     }
 
     #[test]
     fn test_scope_to_class_function_method_call() {
         assert_eq!(
             scope_to_class("function.method.call"),
-            "lumis-function-method-call"
+            "l-function-method-call"
         );
     }
 
@@ -848,24 +848,24 @@ mod tests {
     fn test_scope_to_class_comment_documentation() {
         assert_eq!(
             scope_to_class("comment.documentation"),
-            "lumis-comment-documentation"
+            "l-comment-documentation"
         );
     }
 
     #[test]
     fn test_scope_to_class_unknown_scope() {
-        assert_eq!(scope_to_class("unknown.scope.name"), "lumis-text");
+        assert_eq!(scope_to_class("unknown.scope.name"), "l-text");
     }
 
     #[test]
     fn test_scope_to_class_simple_scope() {
-        assert_eq!(scope_to_class("keyword"), "lumis-keyword");
+        assert_eq!(scope_to_class("keyword"), "l-keyword");
     }
 
     #[test]
     fn test_wrap_line_simple() {
         let result = wrap_line(1, "content", None, None);
-        assert_str_eq!(result, r#"<div class="line" data-line="1">content</div>"#);
+        assert_str_eq!(result, r#"<div class="l-line" data-line="1">content</div>"#);
     }
 
     #[test]
@@ -873,7 +873,7 @@ mod tests {
         let result = wrap_line(5, "highlighted content", Some(" highlighted"), None);
         assert_str_eq!(
             result,
-            r#"<div class="line highlighted" data-line="5">highlighted content</div>"#
+            r#"<div class="l-line highlighted" data-line="5">highlighted content</div>"#
         );
     }
 
@@ -882,7 +882,7 @@ mod tests {
         let result = wrap_line(3, "styled", None, Some("color: red;"));
         assert_str_eq!(
             result,
-            r#"<div class="line" style="color: red;" data-line="3">styled</div>"#
+            r#"<div class="l-line" style="color: red;" data-line="3">styled</div>"#
         );
     }
 
@@ -896,14 +896,14 @@ mod tests {
         );
         assert_str_eq!(
             result,
-            r#"<div class="line custom-class" style="background: yellow;" data-line="10">both</div>"#
+            r#"<div class="l-line custom-class" style="background: yellow;" data-line="10">both</div>"#
         );
     }
 
     #[test]
     fn test_wrap_line_empty_content() {
         let result = wrap_line(1, "", None, None);
-        assert_str_eq!(result, r#"<div class="line" data-line="1"></div>"#);
+        assert_str_eq!(result, r#"<div class="l-line" data-line="1"></div>"#);
     }
 
     #[test]
@@ -932,6 +932,6 @@ mod tests {
     #[test]
     fn test_span_linked() {
         let result = span_linked("fn", "keyword.function");
-        assert_str_eq!(result, r#"<span class="lumis-keyword-function">fn</span>"#);
+        assert_str_eq!(result, r#"<span class="l-keyword-function">fn</span>"#);
     }
 }

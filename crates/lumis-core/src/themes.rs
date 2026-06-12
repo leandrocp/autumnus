@@ -602,11 +602,11 @@ impl Theme {
 /// let theme = themes::get("github_dark").unwrap();
 ///
 /// let css = CssBuilder::new(&theme)
-///     .pre_selector(".lumis")
-///     .base_rules([("background-color", "var(--code-background)"), ("border-radius", "0.375rem")])
+///     .container_selector(".lumis")
+///     .container_style([("background-color", "var(--code-background)"), ("border-radius", "0.375rem")])
 ///     .build();
 ///
-/// assert!(css.contains(".lumis-keyword"));
+/// assert!(css.contains(".l-keyword"));
 /// ```
 #[derive(Builder, Clone, Debug)]
 #[builder(
@@ -621,15 +621,15 @@ struct Css<'a> {
     /// Whether italic theme styles should be emitted. Defaults to `true`.
     #[builder(default = "true")]
     enable_italic: bool,
-    /// Prefix prepended to every selector. Defaults to `""`.
+    /// Parent selector prepended to every generated selector. Defaults to `""`.
     #[builder(default, setter(into))]
-    selector_prefix: String,
-    /// Selector used for the `<pre>` code block rule. Defaults to `pre.lumis`.
-    #[builder(default = "\"pre.lumis\".to_string()", setter(into))]
-    pre_selector: String,
-    /// Extra declarations for the base code block rule, set via [`CssBuilder::base_rules`].
+    scope: String,
+    /// Selector used for the container code block rule. Defaults to `.lumis`.
+    #[builder(default = "\".lumis\".to_string()", setter(into))]
+    container_selector: String,
+    /// Extra declarations for the container code block rule, set via [`CssBuilder::container_style`].
     #[builder(default, setter(custom))]
-    base_rules: Vec<(String, String)>,
+    container_style: Vec<(String, String)>,
 }
 
 impl<'a> CssBuilder<'a> {
@@ -641,16 +641,19 @@ impl<'a> CssBuilder<'a> {
         }
     }
 
-    /// Set the extra declarations appended to the base code block rule.
+    /// Set extra declarations appended to the container code block rule.
     ///
     /// Each item is a `(property, value)` pair, for example `("padding", "1rem")`.
-    pub fn base_rules<K, V>(&mut self, rules: impl IntoIterator<Item = (K, V)>) -> &mut Self
+    pub fn container_style<K, V>(
+        &mut self,
+        declarations: impl IntoIterator<Item = (K, V)>,
+    ) -> &mut Self
     where
         K: Into<String>,
         V: Into<String>,
     {
-        self.base_rules = Some(
-            rules
+        self.container_style = Some(
+            declarations
                 .into_iter()
                 .map(|(property, value)| (property.into(), value.into()))
                 .collect(),
@@ -675,20 +678,22 @@ impl Css<'_> {
         let mut rules = Vec::new();
 
         rules.push(format!(
-            "/* {}\n * revision: {}\n */\n\n{}{}",
-            self.theme.name, self.theme.revision, self.selector_prefix, self.pre_selector
+            "/* {}\n * revision: {}\n */\n{}",
+            self.theme.name,
+            self.theme.revision,
+            self.scoped_selector(&self.container_selector),
         ));
 
-        let base_style = self.base_style("\n  ");
+        let container_style = self.container_style("\n  ");
 
-        if base_style.is_empty() {
+        if container_style.is_empty() {
             rules.push(" {}\n".to_string());
         } else {
-            rules.push(format!(" {{\n  {base_style}\n}}\n"));
+            rules.push(format!(" {{\n  {container_style}\n}}\n"));
         }
 
         for (scope, style) in &self.theme.highlights {
-            // `normal` defines the code block's base colors, already emitted in the base rule
+            // `normal` defines the code block's inherited colors, already emitted in the container rule
             // above and inherited by all text. It is never applied as a token class in highlighted
             // output, so emitting a `.normal` rule here would be dead CSS.
             if scope == "normal" {
@@ -699,8 +704,8 @@ impl Css<'_> {
 
             if !style_css.is_empty() {
                 rules.push(format!(
-                    "{}.lumis-{} {{\n  {}\n}}\n",
-                    self.selector_prefix,
+                    "{}.l-{} {{\n  {}\n}}\n",
+                    self.scope_prefix(),
                     scope.replace('.', "-"),
                     style_css
                 ))
@@ -710,8 +715,24 @@ impl Css<'_> {
         rules.join("")
     }
 
-    fn base_style(&self, separator: &str) -> String {
-        // Start from the theme's base declarations, then merge `base_rules` over them: a rule whose
+    fn scope_prefix(&self) -> String {
+        if self.scope.is_empty() {
+            String::new()
+        } else {
+            format!("{} ", self.scope)
+        }
+    }
+
+    fn scoped_selector(&self, selector: &str) -> String {
+        if self.scope.is_empty() {
+            selector.to_string()
+        } else {
+            format!("{} {}", self.scope, selector)
+        }
+    }
+
+    fn container_style(&self, separator: &str) -> String {
+        // Start from the theme's container declarations, then merge `container_style` over them: a rule whose
         // property already exists replaces that value in place, otherwise it is appended. This keeps
         // a single declaration per property (e.g. overriding `background-color` does not duplicate
         // the theme's).
@@ -724,7 +745,7 @@ impl Css<'_> {
             decls.push(("background-color".to_string(), bg.to_string()));
         }
 
-        for (property, value) in &self.base_rules {
+        for (property, value) in &self.container_style {
             if let Some(existing) = decls.iter_mut().find(|(p, _)| p == property) {
                 existing.1 = value.clone();
             } else {
@@ -893,16 +914,15 @@ mod tests {
         let expected = r#"/* test
  * revision: 3e976b4
  */
-
-pre.lumis {
+.lumis {
   color: red;
   background-color: green;
 }
-.lumis-keyword {
+.l-keyword {
   color: blue;
   font-style: italic;
 }
-.lumis-tag-attribute {
+.l-tag-attribute {
   background-color: gray;
   font-weight: bold;
 }
@@ -921,34 +941,33 @@ pre.lumis {
 
         let css = CssBuilder::new(&theme).enable_italic(false).build();
 
-        assert!(css.contains(".lumis-keyword {\n  color: blue;\n}"));
+        assert!(css.contains(".l-keyword {\n  color: blue;\n}"));
         assert!(!css.contains("font-style: italic;"));
     }
 
     #[test]
-    fn test_css_builder_scopes_selectors_and_base_rules() {
+    fn test_css_builder_scopes_selectors_and_container_style() {
         let json = r##"{"name": "test", "appearance": "dark", "revision": "3e976b4", "highlights": {"normal": {"fg": "red", "bg": "green"}, "keyword": {"fg": "blue"}}}"##;
         let theme = from_json(json).unwrap();
 
         let expected = r#"/* test
  * revision: 3e976b4
  */
-
 html[data-theme="dark"] .lumis {
   color: red;
   background-color: var(--color-grey-900);
   border-radius: 0.375rem;
 }
-html[data-theme="dark"] .lumis-keyword {
+html[data-theme="dark"] .l-keyword {
   color: blue;
 }
 "#;
 
         assert_eq!(
             CssBuilder::new(&theme)
-                .selector_prefix("html[data-theme=\"dark\"] ")
-                .pre_selector(".lumis")
-                .base_rules([
+                .scope("html[data-theme=\"dark\"]")
+                .container_selector(".lumis")
+                .container_style([
                     ("background-color", "var(--color-grey-900)"),
                     ("border-radius", "0.375rem"),
                 ])
@@ -965,9 +984,8 @@ html[data-theme="dark"] .lumis-keyword {
         let expected = r#"/* test
  * revision: abc
  */
-
-pre.lumis {}
-.lumis-keyword {
+.lumis {}
+.l-keyword {
   color: blue;
   font-style: italic;
 }
@@ -985,50 +1003,47 @@ pre.lumis {}
         let expected = r#"/* test
  * revision: abc
  */
-
-pre.lumis {}
+.lumis {}
 "#;
 
         assert_eq!(CssBuilder::new(&theme).build(), expected);
     }
 
     #[test]
-    fn test_css_builder_base_rule_keeps_theme_background() {
+    fn test_css_builder_container_rule_keeps_theme_background() {
         let json = r#"{"name": "test", "appearance": "dark", "revision": "abc", "highlights": {"normal": {"fg": "red", "bg": "green"}, "keyword": {"fg": "blue"}}}"#;
         let theme = from_json(json).unwrap();
 
         let expected = r#"/* test
  * revision: abc
  */
-
-pre.lumis {
+.lumis {
   color: red;
   background-color: green;
   padding: 1rem;
 }
-.lumis-keyword {
+.l-keyword {
   color: blue;
 }
 "#;
 
         assert_eq!(
             CssBuilder::new(&theme)
-                .base_rules([("padding", "1rem")])
+                .container_style([("padding", "1rem")])
                 .build(),
             expected
         );
     }
 
     #[test]
-    fn test_css_builder_base_rule_adds_background_when_theme_lacks_bg() {
+    fn test_css_builder_container_rule_adds_background_when_theme_lacks_bg() {
         let json = r#"{"name": "test", "appearance": "dark", "revision": "abc", "highlights": {"normal": {"fg": "red"}}}"#;
         let theme = from_json(json).unwrap();
 
         let expected = r#"/* test
  * revision: abc
  */
-
-pre.lumis {
+.lumis {
   color: red;
   background-color: #000;
 }
@@ -1036,22 +1051,21 @@ pre.lumis {
 
         assert_eq!(
             CssBuilder::new(&theme)
-                .base_rules([("background-color", "#000")])
+                .container_style([("background-color", "#000")])
                 .build(),
             expected
         );
     }
 
     #[test]
-    fn test_css_builder_base_rule_overrides_theme_background() {
+    fn test_css_builder_container_rule_overrides_theme_background() {
         let json = r#"{"name": "test", "appearance": "dark", "revision": "abc", "highlights": {"normal": {"fg": "red", "bg": "green"}}}"#;
         let theme = from_json(json).unwrap();
 
         let expected = r#"/* test
  * revision: abc
  */
-
-pre.lumis {
+.lumis {
   color: red;
   background-color: #000;
 }
@@ -1059,7 +1073,7 @@ pre.lumis {
 
         // The theme's `background-color: green` is replaced in place, not duplicated.
         let css = CssBuilder::new(&theme)
-            .base_rules([("background-color", "#000")])
+            .container_style([("background-color", "#000")])
             .build();
         assert_eq!(css, expected);
         assert!(!css.contains("green"));
@@ -1074,20 +1088,19 @@ pre.lumis {
 
         let css = CssBuilder::new(&theme).enable_italic(false).build();
 
-        assert!(css.contains(".lumis-function {\n  color: red;\n}"));
-        assert!(!css.contains(".lumis-comment"));
+        assert!(css.contains(".l-function {\n  color: red;\n}"));
+        assert!(!css.contains(".l-comment"));
     }
 
     #[test]
-    fn test_css_builder_base_rules_preserve_insertion_order() {
+    fn test_css_builder_container_style_preserves_insertion_order() {
         let json = r#"{"name": "test", "appearance": "dark", "revision": "abc", "highlights": {"normal": {"fg": "red"}}}"#;
         let theme = from_json(json).unwrap();
 
         let expected = r#"/* test
  * revision: abc
  */
-
-pre.lumis {
+.lumis {
   color: red;
   border-radius: 0.375rem;
   padding: 1rem;
@@ -1097,7 +1110,7 @@ pre.lumis {
 
         assert_eq!(
             CssBuilder::new(&theme)
-                .base_rules([
+                .container_style([
                     ("border-radius", "0.375rem"),
                     ("padding", "1rem"),
                     ("overflow-x", "auto"),
@@ -1108,26 +1121,22 @@ pre.lumis {
     }
 
     #[test]
-    fn test_css_builder_selector_prefix() {
+    fn test_css_builder_scope() {
         let json = r#"{"name": "test", "appearance": "dark", "revision": "abc", "highlights": {"normal": {"fg": "red"}, "keyword": {"fg": "blue"}}}"#;
         let theme = from_json(json).unwrap();
 
         let expected = r#"/* test
  * revision: abc
  */
-
-.app pre.lumis {
+.app .lumis {
   color: red;
 }
-.app .lumis-keyword {
+.app .l-keyword {
   color: blue;
 }
 "#;
 
-        assert_eq!(
-            CssBuilder::new(&theme).selector_prefix(".app ").build(),
-            expected
-        );
+        assert_eq!(CssBuilder::new(&theme).scope(".app").build(), expected);
     }
 
     #[test]
@@ -1138,9 +1147,8 @@ pre.lumis {
         let expected = r#"/* test
  * revision: abc
  */
-
-pre.lumis {}
-.lumis-keyword {
+.lumis {}
+.l-keyword {
   color: blue;
   font-weight: bold;
   font-style: italic;
@@ -1158,7 +1166,7 @@ pre.lumis {}
 
         let css = CssBuilder::new(&theme).build();
 
-        assert!(css.contains(".lumis-markup-heading-1-markdown {\n  color: red;\n}"));
+        assert!(css.contains(".l-markup-heading-1-markdown {\n  color: red;\n}"));
     }
 
     #[test]

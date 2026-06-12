@@ -62,7 +62,7 @@ describe("custom formatter", () => {
     expect(output).toContain('class="language-json"');
     expect(output).toContain('class="line-no"');
     expect(output).toContain('class="line-body"');
-    expect(output).toContain('class="line first-line"');
+    expect(output).toContain('class="l-line first-line"');
   }, 30_000);
 
   it("keeps built-in formatters as plain convenience objects", async () => {

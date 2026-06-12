@@ -153,7 +153,7 @@ describe('hl.highlight', () => {
     const html = hl.highlight('{"a": 1}', htmlLinked({ language: json }))
     expect(html).toContain('<pre class="lumis">')
     expect(html).toContain('class="language-json"')
-    expect(html).toMatch(/class="lumis-(string|number|punctuation)/)
+    expect(html).toMatch(/class="l-(string|number|punctuation)/)
   })
 
   it('produces nested bbcodeScoped tags and escapes raw brackets', async () => {

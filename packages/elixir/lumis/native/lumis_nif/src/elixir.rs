@@ -477,9 +477,9 @@ pub struct ExHtmlLinkedHighlightLines {
 #[derive(Clone, Debug, NifMap)]
 pub struct ExCssOptions {
     pub enable_italic: bool,
-    pub selector_prefix: String,
-    pub pre_selector: String,
-    pub base_rules: Vec<(String, String)>,
+    pub scope: String,
+    pub container_selector: String,
+    pub container_style: Vec<(String, String)>,
 }
 
 impl<'a> From<&'a themes::Style> for ExStyle {

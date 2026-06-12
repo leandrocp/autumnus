@@ -2,7 +2,7 @@
 sidebar_position: 6
 slug: /themes/css-builder
 title: CSS Builder
-description: Build a theme stylesheet at runtime in Rust, JavaScript, and Elixir, with custom selectors and base declarations.
+description: Build a theme stylesheet at runtime in Rust, JavaScript, and Elixir.
 keywords:
   - lumis css builder
   - buildCss
@@ -16,13 +16,104 @@ import TabItem from '@theme/TabItem';
 
 # CSS Builder
 
-Lumis ships a CSS file for every theme. See [CSS Theme Files](/themes/css-files). The CSS builder creates the same kind of stylesheet at runtime, but lets you change selectors and the base rule.
+Lumis ships one CSS file per theme. The CSS builder lets you scope selectors, change the container selector, and add container styles.
 
-Use it when the bundled file is too rigid: a dark theme under `html[data-theme="dark"]`, CSS embedded in a `<style>` tag, or a wrapper that is not `pre.lumis`.
+The builder works with the same theme data as the bundled files. With no options, it produces the same CSS shape as `@lumis-sh/themes/css/<theme>.css`.
+
+## Options
+
+JavaScript uses camelCase. Rust and Elixir use snake_case.
+
+| Option | Default | Use it for |
+| --- | --- | --- |
+| `scope` | `""` | Parent selector prepended to every generated selector. |
+| `containerSelector` / `container_selector` | `".lumis"` | Set the selector for the code block container rule. |
+| `containerStyle` / `container_style` | none | Add declarations to the container selector. Use this for layout-related CSS such as `padding`, `border-radius`, or `overflow-x`. If a property already exists, the new value replaces it. |
+| `enableItalic` / `enable_italic` | `true` | Drop italic declarations when set to `false`. |
+
+`containerStyle` / `container_style` is a list of `(property, value)` pairs. For example, `background-color: var(--code-background)` replaces the theme background, while `padding: 1rem` adds a new declaration.
+
+Token selectors are fixed as `l-*` classes, matching the built-in `htmlLinked` formatter output. Line wrappers use `l-line`, and highlighted lines use `l-highlighted` by default.
+
+## Use all options together
+
+<Tabs groupId="runtime-all-options" queryString="lang" defaultValue="javascript">
+  <TabItem value="javascript" label="JavaScript">
+
+```js
+import {buildCss} from '@lumis-sh/themes'
+import dracula from '@lumis-sh/themes/dracula'
+
+const css = buildCss(dracula, {
+  scope: '.docs-theme',
+  containerSelector: '.code-block',
+  containerStyle: [
+    ['background-color', 'var(--code-background)'],
+    ['border-radius', '0.5rem'],
+    ['padding', '1rem'],
+  ],
+  enableItalic: false,
+})
+```
+
+  </TabItem>
+  <TabItem value="rust" label="Rust">
+
+```rust
+use lumis::themes;
+
+let theme = themes::get("dracula").unwrap();
+
+let css = themes::CssBuilder::new(&theme)
+    .scope(".docs-theme")
+    .container_selector(".code-block")
+    .container_style([
+        ("background-color", "var(--code-background)"),
+        ("border-radius", "0.5rem"),
+        ("padding", "1rem"),
+    ])
+    .enable_italic(false)
+    .build();
+```
+
+  </TabItem>
+  <TabItem value="elixir" label="Elixir">
+
+```elixir
+css =
+  Lumis.Theme.build_css!("dracula",
+    scope: ".docs-theme",
+    container_selector: ".code-block",
+    container_style: [
+      {"background-color", "var(--code-background)"},
+      {"border-radius", "0.5rem"},
+      {"padding", "1rem"}
+    ],
+    enable_italic: false
+  )
+```
+
+  </TabItem>
+</Tabs>
+
+The output starts like this:
+
+```css
+/* dracula
+ * revision: ae752c13e95fb7c5f58da4b5123cb804ea7568ee
+ */
+.docs-theme .code-block {
+  color: #f8f8f2;
+  background-color: var(--code-background);
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+.docs-theme .l-keyword {
+  color: #ff79c6;
+}
+```
 
 ## Default output
-
-With no options, the builder produces the same stylesheet as the bundled file for that theme.
 
 <Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
   <TabItem value="javascript" label="JavaScript">
@@ -54,26 +145,29 @@ css = Lumis.Theme.build_css!("dracula")
   </TabItem>
 </Tabs>
 
-The theme can be a bundled one or one you loaded yourself. In JavaScript, pass any theme object (an import from `@lumis-sh/themes` or your own JSON). In Rust, pass a `&Theme` from `themes::get` or `themes::from_json`. In Elixir, pass a bundled theme name or a `Lumis.Theme` struct from `Lumis.Theme.from_json/1`.
+The output starts with the theme name and revision, then the container `.lumis` rule, then token rules:
 
-## Options
+```css
+/* dracula
+ * revision: ae752c13e95fb7c5f58da4b5123cb804ea7568ee
+ */
+.lumis {
+  color: #f8f8f2;
+  background-color: #282a36;
+}
+.l-keyword {
+  color: #ff79c6;
+}
+.l-string {
+  color: #f1fa8c;
+}
+```
 
-JavaScript uses camelCase option names. Rust and Elixir use snake_case. They map one to one.
+## Scope a stylesheet
 
-| Option | Default | What it changes |
-| --- | --- | --- |
-| `enableItalic` / `enable_italic` | `true` | When `false`, `font-style: italic` is dropped. A scope whose only styling is italic produces no rule at all. |
-| `selectorPrefix` / `selector_prefix` | `""` | Text placed in front of every selector, both the base rule and each token rule. Use it to scope the whole stylesheet under a parent selector. |
-| `preSelector` / `pre_selector` | `"pre.lumis"` | The selector for the base code block rule. Change it to match the element your wrapper emits. |
-| `baseRules` / `base_rules` | none | Extra `property, value` declarations for the base rule, such as `padding` or `border-radius`. If a property is already present, such as `color` or `background-color`, the new value replaces it. |
+Use `scope` when the same page needs more than one theme, or when a code block should inherit theme styles only inside part of your app. Do not include a trailing space; Lumis inserts the descendant combinator for you.
 
-All runtimes take `baseRules` / `base_rules` as a list of `(property, value)` pairs.
-
-## Example
-
-This example scopes a dark theme to `html[data-theme="dark"]` and reads the block background from a CSS variable:
-
-<Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
+<Tabs groupId="runtime-scoped" queryString="lang" defaultValue="javascript">
   <TabItem value="javascript" label="JavaScript">
 
 ```js
@@ -81,9 +175,8 @@ import {buildCss} from '@lumis-sh/themes'
 import githubDark from '@lumis-sh/themes/github_dark'
 
 const css = buildCss(githubDark, {
-  selectorPrefix: 'html[data-theme="dark"] ',
-  preSelector: '.code .lumis',
-  baseRules: [
+  scope: 'html[data-theme="dark"]',
+  containerStyle: [
     ['background-color', 'var(--code-background)'],
     ['border-radius', '0.375rem'],
     ['padding', '1rem'],
@@ -100,9 +193,8 @@ use lumis::themes;
 let theme = themes::get("github_dark").unwrap();
 
 let css = themes::CssBuilder::new(&theme)
-    .selector_prefix("html[data-theme=\"dark\"] ")
-    .pre_selector(".code .lumis")
-    .base_rules([
+    .scope("html[data-theme=\"dark\"]")
+    .container_style([
         ("background-color", "var(--code-background)"),
         ("border-radius", "0.375rem"),
         ("padding", "1rem"),
@@ -116,9 +208,8 @@ let css = themes::CssBuilder::new(&theme)
 ```elixir
 css =
   Lumis.Theme.build_css!("github_dark",
-    selector_prefix: ~s(html[data-theme="dark"] ),
-    pre_selector: ".code .lumis",
-    base_rules: [
+    scope: ~s(html[data-theme="dark"]),
+    container_style: [
       {"background-color", "var(--code-background)"},
       {"border-radius", "0.375rem"},
       {"padding", "1rem"}
@@ -129,33 +220,64 @@ css =
   </TabItem>
 </Tabs>
 
-## What the output looks like
-
-The result starts with a comment containing the theme name and revision. Then comes the base rule for `preSelector`, followed by one rule per styled token scope. Token classes use the `lumis-` prefix, and scope dots become dashes: `tag.attribute` becomes `.lumis-tag-attribute`.
-
-The options above produce CSS shaped like this (colors trimmed for brevity):
+That produces selectors like this:
 
 ```css
-/* github_dark
- * revision: 5620bfd
- */
-
-html[data-theme="dark"] .code .lumis {
+html[data-theme="dark"] .lumis {
   color: #e6edf3;
   background-color: var(--code-background);
   border-radius: 0.375rem;
   padding: 1rem;
 }
-html[data-theme="dark"] .lumis-keyword {
+html[data-theme="dark"] .l-keyword {
   color: #ff7b72;
-}
-html[data-theme="dark"] .lumis-string {
-  color: #a5d6ff;
 }
 ```
 
-The token classes are self-namespaced as `lumis-{token}`, for example `lumis-keyword`.
+## Change the container selector
+
+The container rule uses `.lumis` by default. Change it when your rendered HTML uses a different wrapper class.
+
+<Tabs groupId="runtime-container-selector" queryString="lang" defaultValue="javascript">
+  <TabItem value="javascript" label="JavaScript">
+
+```js
+const css = buildCss(dracula, {
+  containerSelector: '.code-block',
+})
+```
+
+  </TabItem>
+  <TabItem value="rust" label="Rust">
+
+```rust
+let css = themes::CssBuilder::new(&theme)
+    .container_selector(".code-block")
+    .build();
+```
+
+  </TabItem>
+  <TabItem value="elixir" label="Elixir">
+
+```elixir
+css = Lumis.Theme.build_css!("dracula", container_selector: ".code-block")
+```
+
+  </TabItem>
+</Tabs>
+
+That changes only the container rule selector:
+
+```css
+.code-block {
+  color: #f8f8f2;
+  background-color: #282a36;
+}
+.l-keyword {
+  color: #ff79c6;
+}
+```
 
 ## Other runtimes
 
-Java and the CLI do not expose the CSS builder at the moment.
+Java and the CLI do not expose the CSS builder yet.

@@ -10,7 +10,7 @@
 //! HTML with CSS classes like:
 //!
 //! ```html
-//! <pre class="lumis"><code class="language-rust" translate="no" tabindex="0"><div class="line" data-line="1"><span class="lumis-keyword-function">fn</span> <span class="lumis-function">main</span><span class="lumis-punctuation-bracket">(</span><span class="lumis-punctuation-bracket">)</span> <span class="lumis-punctuation-bracket">&lbrace;</span> <span class="lumis-keyword-exception">println</span><span class="lumis-function-macro">!</span><span class="lumis-punctuation-bracket">(</span><span class="lumis-string">&quot;Hello&quot;</span><span class="lumis-punctuation-bracket">)</span><span class="lumis-punctuation-delimiter">;</span> <span class="lumis-punctuation-bracket">&rbrace;</span></div></code></pre>
+//! <pre class="lumis"><code class="language-rust" translate="no" tabindex="0"><div class="l-line" data-line="1"><span class="l-keyword-function">fn</span> <span class="l-function">main</span><span class="l-punctuation-bracket">(</span><span class="l-punctuation-bracket">)</span> <span class="l-punctuation-bracket">&lbrace;</span> <span class="l-keyword-exception">println</span><span class="l-function-macro">!</span><span class="l-punctuation-bracket">(</span><span class="l-string">&quot;Hello&quot;</span><span class="l-punctuation-bracket">)</span><span class="l-punctuation-delimiter">;</span> <span class="l-punctuation-bracket">&rbrace;</span></div></code></pre>
 //! ```
 //!
 //! See the [formatter](crate::formatter) module for more information and examples.
@@ -33,7 +33,7 @@ use std::{
 ///
 /// # Examples
 ///
-/// With default "lumis-highlighted" class:
+/// With default "l-highlighted" class:
 /// ```rust
 /// use lumis::formatters::html_linked::HighlightLines;
 ///
@@ -44,7 +44,7 @@ use std::{
 /// ```
 /// The resulting HTML will look like:
 /// ```html
-/// <div class="line lumis-highlighted" data-line="2">...</div>
+/// <div class="l-line l-highlighted" data-line="2">...</div>
 /// ```
 ///
 /// Using a custom CSS class:
@@ -59,7 +59,7 @@ use std::{
 ///
 /// The resulting HTML will include the classes in line elements:
 /// ```html
-/// <div class="line transition-colors duration-500 w-full inline-block bg-yellow-500" data-line="2">...</div>
+/// <div class="l-line transition-colors duration-500 w-full inline-block bg-yellow-500" data-line="2">...</div>
 /// ```
 #[derive(Clone, Debug)]
 pub struct HighlightLines {
@@ -70,20 +70,20 @@ pub struct HighlightLines {
     pub lines: Vec<RangeInclusive<usize>>,
     /// The CSS class name to add to highlighted line elements.
     ///
-    /// Highlighted lines will have both "lumis-highlighted" and this custom class added to the existing "line" class,
-    /// resulting in elements like `<div class="line lumis-highlighted your-class-name" data-line="N">`.
+    /// Highlighted lines will have both "l-highlighted" and this custom class added to the existing "l-line" class,
+    /// resulting in elements like `<div class="l-line l-highlighted your-class-name" data-line="N">`.
     /// You can then style these classes in your CSS to achieve the desired highlighting effect.
     ///
-    /// Note that themes include a `lumis-highlighted` class for convenience,
+    /// Note that themes include a `l-highlighted` class for convenience,
     /// which contains the colors from the theme's "CursorLine" highlight from Neovim.
     ///
-    /// Defaults to `"lumis-highlighted"`.
+    /// Defaults to `"l-highlighted"`.
     /// ```rust
     /// use lumis::formatters::html_linked::HighlightLines;
     ///
     /// let highlight_lines = HighlightLines {
     ///     lines: vec![1..=2],
-    ///     class: "lumis-highlighted".to_string(),
+    ///     class: "l-highlighted".to_string(),
     /// };
     /// ```
     pub class: String,
@@ -93,7 +93,7 @@ impl Default for HighlightLines {
     fn default() -> Self {
         Self {
             lines: Vec::new(),
-            class: "lumis-highlighted".to_string(),
+            class: "l-highlighted".to_string(),
         }
     }
 }
@@ -230,7 +230,7 @@ mod tests {
         let mut buffer = Vec::new();
         formatter.format(code, &mut buffer).unwrap();
         let result = String::from_utf8(buffer).unwrap();
-        let expected = r#"<pre class="lumis"><code class="language-elixir" translate="no" tabindex="0"><div class="line" data-line="1"><span class="lumis-operator"><span class="lumis-constant">@<span class="lumis-function-call"><span class="lumis-constant">lang <span class="lumis-string-special-symbol">:rust</span></span></span></span></span>
+        let expected = r#"<pre class="lumis"><code class="language-elixir" translate="no" tabindex="0"><div class="l-line" data-line="1"><span class="l-operator"><span class="l-constant">@<span class="l-function-call"><span class="l-constant">lang <span class="l-string-special-symbol">:rust</span></span></span></span></span>
 </div></code></pre>"#;
         assert_eq!(result, expected)
     }
@@ -297,9 +297,9 @@ mod tests {
         formatter.format(code, &mut buffer).unwrap();
         let result = String::from_utf8(buffer).unwrap();
 
-        let expected = r#"<pre class="lumis"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">line 1
-</div><div class="line lumis-highlighted" data-line="2">line 2
-</div><div class="line" data-line="3">line 3
+        let expected = r#"<pre class="lumis"><code class="language-plaintext" translate="no" tabindex="0"><div class="l-line" data-line="1">line 1
+</div><div class="l-line l-highlighted" data-line="2">line 2
+</div><div class="l-line" data-line="3">line 3
 </div></code></pre>"#;
         assert_str_eq!(result, expected);
     }
@@ -317,11 +317,11 @@ mod tests {
         formatter.format(code, &mut buffer).unwrap();
         let result = String::from_utf8(buffer).unwrap();
 
-        let expected = r#"<pre class="lumis"><code class="language-plaintext" translate="no" tabindex="0"><div class="line custom-hl" data-line="1">line 1
-</div><div class="line" data-line="2">line 2
-</div><div class="line custom-hl" data-line="3">line 3
-</div><div class="line custom-hl" data-line="4">line 4
-</div><div class="line" data-line="5">line 5
+        let expected = r#"<pre class="lumis"><code class="language-plaintext" translate="no" tabindex="0"><div class="l-line custom-hl" data-line="1">line 1
+</div><div class="l-line" data-line="2">line 2
+</div><div class="l-line custom-hl" data-line="3">line 3
+</div><div class="l-line custom-hl" data-line="4">line 4
+</div><div class="l-line" data-line="5">line 5
 </div></code></pre>"#;
         assert_str_eq!(result, expected);
     }
@@ -339,8 +339,8 @@ mod tests {
         formatter.format(code, &mut buffer).unwrap();
         let result = String::from_utf8(buffer).unwrap();
 
-        let expected = r#"<div class="code-wrapper"><pre class="lumis"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">line 1
-</div><div class="line" data-line="2">line 2
+        let expected = r#"<div class="code-wrapper"><pre class="lumis"><code class="language-plaintext" translate="no" tabindex="0"><div class="l-line" data-line="1">line 1
+</div><div class="l-line" data-line="2">line 2
 </div></code></pre></div>"#;
         assert_str_eq!(result, expected);
     }
@@ -353,7 +353,7 @@ mod tests {
         };
         let highlight_lines = HighlightLines {
             lines: vec![1..=1],
-            class: "lumis-highlighted".to_string(),
+            class: "l-highlighted".to_string(),
         };
         let code = "line 1\nline 2";
         let formatter = HtmlLinked::new(
@@ -367,8 +367,8 @@ mod tests {
         formatter.format(code, &mut buffer).unwrap();
         let result = String::from_utf8(buffer).unwrap();
 
-        let expected = r#"<section class="code-section"><pre class="lumis custom-pre"><code class="language-plaintext" translate="no" tabindex="0"><div class="line lumis-highlighted" data-line="1">line 1
-</div><div class="line" data-line="2">line 2
+        let expected = r#"<section class="code-section"><pre class="lumis custom-pre"><code class="language-plaintext" translate="no" tabindex="0"><div class="l-line l-highlighted" data-line="1">line 1
+</div><div class="l-line" data-line="2">line 2
 </div></code></pre></section>"#;
         assert_str_eq!(result, expected);
     }

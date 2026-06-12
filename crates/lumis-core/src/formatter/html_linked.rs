@@ -25,7 +25,7 @@ impl Default for HighlightLines {
     fn default() -> Self {
         Self {
             lines: Vec::new(),
-            class: "lumis-highlighted".to_string(),
+            class: "l-highlighted".to_string(),
         }
     }
 }

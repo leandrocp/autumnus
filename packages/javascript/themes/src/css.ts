@@ -4,15 +4,15 @@ import type { StyleEntry, ThemeData } from "./types.js";
 export interface BuildCssOptions {
   /** Whether italic theme styles should be emitted. Defaults to `true`. */
   enableItalic?: boolean;
-  /** Prefix prepended to every generated selector. Defaults to `""`. */
-  selectorPrefix?: string;
-  /** Selector used for the `<pre>` code block rule. Defaults to `"pre.lumis"`. */
-  preSelector?: string;
+  /** Parent selector prepended to every generated selector. Defaults to `""`. */
+  scope?: string;
+  /** Selector used for the container code block rule. Defaults to `".lumis"`. */
+  containerSelector?: string;
   /**
-   * Extra `[property, value]` declarations for the base code block rule. A property that matches
+   * Extra `[property, value]` declarations for the container code block rule. A property that matches
    * one the theme already sets (`color`, `background-color`) replaces that value instead of duplicating it.
    */
-  baseRules?: [string, string][];
+  containerStyle?: [string, string][];
 }
 
 /**
@@ -27,9 +27,9 @@ export interface BuildCssOptions {
  * import githubDark from '@lumis-sh/themes/github_dark'
  *
  * const css = buildCss(githubDark, {
- *   selectorPrefix: 'html[data-theme="dark"] ',
- *   preSelector: '.lumis',
- *   baseRules: [
+ *   scope: 'html[data-theme="dark"]',
+ *   containerSelector: '.lumis',
+ *   containerStyle: [
  *     ['background-color', 'var(--code-background)'],
  *     ['border-radius', '0.375rem'],
  *     ['padding', '1rem'],
@@ -39,50 +39,58 @@ export interface BuildCssOptions {
  */
 export function buildCss(theme: ThemeData, options: BuildCssOptions = {}): string {
   const enableItalic = options.enableItalic ?? true;
-  const selectorPrefix = options.selectorPrefix ?? "";
-  const preSelector = options.preSelector ?? "pre.lumis";
-  const baseRules = options.baseRules ?? [];
+  const scope = options.scope ?? "";
+  const containerSelector = options.containerSelector ?? ".lumis";
+  const containerStyle = options.containerStyle ?? [];
 
   const rules: string[] = [];
 
   rules.push(
-    `/* ${theme.name}\n * revision: ${theme.revision ?? ""}\n */\n\n${selectorPrefix}${preSelector}`,
+    `/* ${theme.name}\n * revision: ${theme.revision ?? ""}\n */\n${scopedSelector(scope, containerSelector)}`,
   );
 
   const normal = theme.highlights["normal"];
-  const baseStyle = renderBaseStyle(normal, baseRules, "\n  ");
+  const scopeStyle = renderContainerStyle(normal, containerStyle, "\n  ");
 
-  if (baseStyle === "") {
+  if (scopeStyle === "") {
     rules.push(" {}\n");
   } else {
-    rules.push(` {\n  ${baseStyle}\n}\n`);
+    rules.push(` {\n  ${scopeStyle}\n}\n`);
   }
 
   const entries = Object.entries(theme.highlights).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
 
-  for (const [scope, style] of entries) {
+  for (const [scopeName, style] of entries) {
     // `normal` defines the code block's base colors, already emitted above and inherited by all
     // text. It is never applied as a token class, so a `.normal` rule would be dead CSS.
-    if (scope === "normal") {
+    if (scopeName === "normal") {
       continue;
     }
 
     const styleCss = renderStyle(style, enableItalic, "\n  ");
 
     if (styleCss !== "") {
-      rules.push(`${selectorPrefix}.lumis-${scope.replaceAll(".", "-")} {\n  ${styleCss}\n}\n`);
+      rules.push(`${scopePrefix(scope)}.l-${scopeName.replaceAll(".", "-")} {\n  ${styleCss}\n}\n`);
     }
   }
 
   return rules.join("");
 }
 
-function renderBaseStyle(
+function scopePrefix(scope: string): string {
+  return scope === "" ? "" : `${scope} `;
+}
+
+function scopedSelector(scope: string, selector: string): string {
+  return scope === "" ? selector : `${scope} ${selector}`;
+}
+
+function renderContainerStyle(
   normal: StyleEntry | undefined,
-  baseRules: [string, string][],
+  containerStyle: [string, string][],
   separator: string,
 ): string {
-  // Start from the theme's base declarations, then merge `baseRules` over them: a rule whose
+  // Start from the theme's container declarations, then merge `containerStyle` over them: a rule whose
   // property already exists replaces it in place, otherwise it is appended. This keeps a single
   // declaration per property (overriding `background-color` does not duplicate the theme's).
   const decls: [string, string][] = [];
@@ -94,7 +102,7 @@ function renderBaseStyle(
     decls.push(["background-color", normal.bg]);
   }
 
-  for (const [property, value] of baseRules) {
+  for (const [property, value] of containerStyle) {
     const existing = decls.find(([p]) => p === property);
     if (existing) {
       existing[1] = value;

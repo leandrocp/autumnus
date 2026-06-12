@@ -10,7 +10,7 @@
 //! the formatter generates self-contained HTML like:
 //!
 //! ```html
-//! <pre class="lumis" style="color: #f8f8f2; background-color: #282a36;"><code class="language-rust" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #8be9fd;">fn</span> <span style="color: #50fa7b;">main</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">&lbrace;</span> <span style="color: #bd93f9;">println</span><span style="color: #50fa7b;">!</span><span style="color: #f8f8f2;">(</span><span style="color: #f1fa8c;">&quot;Hello&quot;</span><span style="color: #f8f8f2;">)</span><span style="color: #f8f8f2;">;</span> <span style="color: #f8f8f2;">&rbrace;</span></div></code></pre>
+//! <pre class="lumis" style="color: #f8f8f2; background-color: #282a36;"><code class="language-rust" translate="no" tabindex="0"><div class="l-line" data-line="1"><span style="color: #8be9fd;">fn</span> <span style="color: #50fa7b;">main</span><span style="color: #f8f8f2;">(</span><span style="color: #f8f8f2;">)</span> <span style="color: #f8f8f2;">&lbrace;</span> <span style="color: #bd93f9;">println</span><span style="color: #50fa7b;">!</span><span style="color: #f8f8f2;">(</span><span style="color: #f1fa8c;">&quot;Hello&quot;</span><span style="color: #f8f8f2;">)</span><span style="color: #f8f8f2;">;</span> <span style="color: #f8f8f2;">&rbrace;</span></div></code></pre>
 //! ```
 //!
 //! See the [formatter](crate::formatter) module for more information and examples.
@@ -46,7 +46,7 @@ use std::{
 ///
 // The resulting HTML will include the theme style for highlighted lines:
 /// ```html
-/// <div class="line" style="background-color: #dae9f9;" data-line="1">fn main() {</div>
+/// <div class="l-line" style="background-color: #dae9f9;" data-line="1">fn main() {</div>
 /// ```
 ///
 /// Using both style and class:
@@ -62,7 +62,7 @@ use std::{
 ///
 /// The resulting HTML will look like:
 /// ```html
-/// <div class="line w-full inline-block bg-yellow-500" style="background-color: #dae9f9;" data-line="3">    let x = 42;</div>
+/// <div class="l-line w-full inline-block bg-yellow-500" style="background-color: #dae9f9;" data-line="3">    let x = 42;</div>
 /// ```
 ///
 /// Or disable either one of them:
@@ -266,7 +266,7 @@ mod tests {
         let mut buffer = Vec::new();
         formatter.format(code, &mut buffer).unwrap();
         let result = String::from_utf8(buffer).unwrap();
-        let expected = r#"<pre class="lumis"><code class="language-elixir" translate="no" tabindex="0"><div class="line" data-line="1"><span ><span >@<span ><span >lang <span >:rust</span></span></span></span></span>
+        let expected = r#"<pre class="lumis"><code class="language-elixir" translate="no" tabindex="0"><div class="l-line" data-line="1"><span ><span >@<span ><span >lang <span >:rust</span></span></span></span></span>
 </div></code></pre>"#;
         assert_eq!(result, expected)
     }
@@ -376,11 +376,11 @@ mod tests {
         formatter.format(code, &mut buffer).unwrap();
         let result = String::from_utf8(buffer).unwrap();
 
-        let expected = r#"<pre class="lumis" style="color: #1f2328; background-color: #ffffff;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" style="background-color: #e7eaf0;" data-line="1">line 1
-</div><div class="line" data-line="2">line 2
-</div><div class="line" style="background-color: #e7eaf0;" data-line="3">line 3
-</div><div class="line" style="background-color: #e7eaf0;" data-line="4">line 4
-</div><div class="line" data-line="5">line 5
+        let expected = r#"<pre class="lumis" style="color: #1f2328; background-color: #ffffff;"><code class="language-plaintext" translate="no" tabindex="0"><div class="l-line" style="background-color: #e7eaf0;" data-line="1">line 1
+</div><div class="l-line" data-line="2">line 2
+</div><div class="l-line" style="background-color: #e7eaf0;" data-line="3">line 3
+</div><div class="l-line" style="background-color: #e7eaf0;" data-line="4">line 4
+</div><div class="l-line" data-line="5">line 5
 </div></code></pre>"#;
         assert_str_eq!(result, expected);
     }
@@ -409,11 +409,11 @@ mod tests {
         formatter.format(code, &mut buffer).unwrap();
         let result = String::from_utf8(buffer).unwrap();
 
-        let expected = r#"<pre class="lumis"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" style="background-color: yellow" data-line="1">line 1
-</div><div class="line" data-line="2">line 2
-</div><div class="line" style="background-color: yellow" data-line="3">line 3
-</div><div class="line" style="background-color: yellow" data-line="4">line 4
-</div><div class="line" data-line="5">line 5
+        let expected = r#"<pre class="lumis"><code class="language-plaintext" translate="no" tabindex="0"><div class="l-line" style="background-color: yellow" data-line="1">line 1
+</div><div class="l-line" data-line="2">line 2
+</div><div class="l-line" style="background-color: yellow" data-line="3">line 3
+</div><div class="l-line" style="background-color: yellow" data-line="4">line 4
+</div><div class="l-line" data-line="5">line 5
 </div></code></pre>"#;
         assert_str_eq!(result, expected);
     }
@@ -442,10 +442,10 @@ mod tests {
         formatter.format(code, &mut buffer).unwrap();
         let result = String::from_utf8(buffer).unwrap();
 
-        let expected = r#"<pre class="lumis"><code class="language-plaintext" translate="no" tabindex="0"><div class="line custom-highlight" style="background-color: yellow" data-line="1">line 1
-</div><div class="line" data-line="2">line 2
-</div><div class="line custom-highlight" style="background-color: yellow" data-line="3">line 3
-</div><div class="line" data-line="4">line 4
+        let expected = r#"<pre class="lumis"><code class="language-plaintext" translate="no" tabindex="0"><div class="l-line custom-highlight" style="background-color: yellow" data-line="1">line 1
+</div><div class="l-line" data-line="2">line 2
+</div><div class="l-line custom-highlight" style="background-color: yellow" data-line="3">line 3
+</div><div class="l-line" data-line="4">line 4
 </div></code></pre>"#;
         assert_str_eq!(result, expected);
     }
@@ -472,10 +472,10 @@ mod tests {
         formatter.format(code, &mut buffer).unwrap();
         let result = String::from_utf8(buffer).unwrap();
 
-        let expected = r#"<pre class="lumis"><code class="language-rust" translate="no" tabindex="0"><div class="line custom-highlight" data-line="1"><span >fn</span> <span >main</span><span >(</span><span >)</span> <span >&lbrace;</span>
-</div><div class="line" data-line="2">    <span >println</span><span >!</span><span >(</span><span >&quot;Hello, world!&quot;</span><span >)</span><span >;</span>
-</div><div class="line custom-highlight" data-line="3">    <span >let</span> <span >x</span> <span >=</span> <span >42</span><span >;</span>
-</div><div class="line" data-line="4"><span >&rbrace;</span>
+        let expected = r#"<pre class="lumis"><code class="language-rust" translate="no" tabindex="0"><div class="l-line custom-highlight" data-line="1"><span >fn</span> <span >main</span><span >(</span><span >)</span> <span >&lbrace;</span>
+</div><div class="l-line" data-line="2">    <span >println</span><span >!</span><span >(</span><span >&quot;Hello, world!&quot;</span><span >)</span><span >;</span>
+</div><div class="l-line custom-highlight" data-line="3">    <span >let</span> <span >x</span> <span >=</span> <span >42</span><span >;</span>
+</div><div class="l-line" data-line="4"><span >&rbrace;</span>
 </div></code></pre>"#;
         assert_str_eq!(result, expected);
     }
@@ -501,8 +501,8 @@ mod tests {
         formatter.format(code, &mut buffer).unwrap();
         let result = String::from_utf8(buffer).unwrap();
 
-        let expected = r#"<div class="code-wrapper"><pre class="lumis"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">line 1
-</div><div class="line" data-line="2">line 2
+        let expected = r#"<div class="code-wrapper"><pre class="lumis"><code class="language-plaintext" translate="no" tabindex="0"><div class="l-line" data-line="1">line 1
+</div><div class="l-line" data-line="2">line 2
 </div></code></pre></div>"#;
         assert_str_eq!(result, expected);
     }
@@ -528,7 +528,7 @@ mod tests {
         formatter.format(code, &mut buffer).unwrap();
         let result = String::from_utf8(buffer).unwrap();
 
-        let expected = r#"<section class="highlight" data-lang="rust"><pre class="lumis custom-class"><code class="language-rust" translate="no" tabindex="0"><div class="line" data-line="1"><span >fn</span> <span >main</span><span >(</span><span >)</span> <span >&lbrace;</span> <span >&rbrace;</span>
+        let expected = r#"<section class="highlight" data-lang="rust"><pre class="lumis custom-class"><code class="language-rust" translate="no" tabindex="0"><div class="l-line" data-line="1"><span >fn</span> <span >main</span><span >(</span><span >)</span> <span >&lbrace;</span> <span >&rbrace;</span>
 </div></code></pre></section>"#;
         assert_str_eq!(result, expected);
     }
