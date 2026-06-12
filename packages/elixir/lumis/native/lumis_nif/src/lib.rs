@@ -112,10 +112,10 @@ fn build_theme_css(theme: &themes::Theme, options: ExCssOptions) -> String {
 
     builder
         .enable_italic(options.enable_italic)
-        .selector_prefix(options.selector_prefix)
-        .pre_selector(options.pre_selector);
+        .scope(options.scope)
+        .container_selector(options.container_selector);
 
-    builder.base_rules(options.base_rules);
+    builder.container_style(options.container_style);
 
     builder.build()
 }

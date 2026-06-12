@@ -138,8 +138,8 @@ describe("formatter shared helpers", () => {
   });
 
   it("turns scopes into linked formatter classes", () => {
-    expect(scopeToClass("keyword.operator")).toBe("lumis-keyword-operator");
-    expect(scopeToClass("unknown.scope.name")).toBe("lumis-text");
+    expect(scopeToClass("keyword.operator")).toBe("l-keyword-operator");
+    expect(scopeToClass("unknown.scope.name")).toBe("l-text");
   });
 
   it("matches single lines and inclusive ranges", () => {
@@ -150,7 +150,7 @@ describe("formatter shared helpers", () => {
 
   it("wraps lines with optional class and style", () => {
     expect(wrapLine(2, "code", { className: "highlighted", style: "color: red;" })).toBe(
-      '<div class="line highlighted" style="color: red;" data-line="2">code\n</div>',
+      '<div class="l-line highlighted" style="color: red;" data-line="2">code\n</div>',
     );
   });
 
@@ -273,12 +273,12 @@ describe("formatter shared helpers", () => {
   });
 
   it("generates linked span attrs", () => {
-    expect(spanLinkedAttrs("keyword.operator")).toBe('class="lumis-keyword-operator"');
+    expect(spanLinkedAttrs("keyword.operator")).toBe('class="l-keyword-operator"');
   });
 
   it("wraps text in linked span", () => {
     expect(spanLinked("if", "keyword.conditional")).toBe(
-      '<span class="lumis-keyword-conditional">if</span>',
+      '<span class="l-keyword-conditional">if</span>',
     );
   });
 

@@ -75,7 +75,7 @@ defmodule Lumis.LumisTest do
     test "inline_style option" do
       capture_io(:stderr, fn ->
         assert {:ok,
-                "<pre class=\"lumis\" style=\"color: #abb2bf; background-color: #282c34;\"><code class=\"language-elixir\" translate=\"no\" tabindex=\"0\"><div class=\"line\" data-line=\"1\"><span style=\"color: #e06c75;\">:test</span>\n</div></code></pre>"} =
+                "<pre class=\"lumis\" style=\"color: #abb2bf; background-color: #282c34;\"><code class=\"language-elixir\" translate=\"no\" tabindex=\"0\"><div class=\"l-line\" data-line=\"1\"><span style=\"color: #e06c75;\">:test</span>\n</div></code></pre>"} =
                  Lumis.highlight(":test", language: "elixir", inline_style: true)
       end)
     end
@@ -114,17 +114,17 @@ defmodule Lumis.LumisTest do
     test "builds default linked CSS from a theme name" do
       assert {:ok, css} = Lumis.Theme.build_css("github_light")
 
-      assert css =~ "pre.lumis {"
-      assert css =~ ".lumis-keyword {"
+      assert css =~ ".lumis {"
+      assert css =~ ".l-keyword {"
       assert css =~ "color: #1f2328;"
     end
 
-    test "builds scoped CSS with base rule overrides" do
+    test "builds scoped CSS with container style overrides" do
       css =
         Lumis.Theme.build_css!("github_dark",
-          selector_prefix: ~s(html[data-theme="dark"] ),
-          pre_selector: ".lumis",
-          base_rules: [
+          scope: ~s(html[data-theme="dark"]),
+          container_selector: ".lumis",
+          container_style: [
             {"background-color", "var(--code-background)"},
             {"border-radius", "0.375rem"},
             {"padding", "1rem"}
@@ -134,7 +134,7 @@ defmodule Lumis.LumisTest do
       assert css =~ ~s(html[data-theme="dark"] .lumis {)
       assert css =~ ~s|background-color: var(--code-background);|
       assert css =~ ~s(border-radius: 0.375rem;)
-      assert css =~ ~s(html[data-theme="dark"] .lumis-keyword {)
+      assert css =~ ~s(html[data-theme="dark"] .l-keyword {)
     end
 
     test "returns error for unknown theme names" do
@@ -143,7 +143,7 @@ defmodule Lumis.LumisTest do
 
     test "returns error for invalid options" do
       assert {:error, %NimbleOptions.ValidationError{}} =
-               Lumis.Theme.build_css("github_light", selector_prefix: 1)
+               Lumis.Theme.build_css("github_light", scope: 1)
     end
   end
 
@@ -355,9 +355,9 @@ defmodule Lumis.LumisTest do
       assert_output(
         "defmodule Test do\n  @lang :elixir\nend",
         ~s"""
-        <pre class="lumis" style="color: #abb2bf; background-color: #282c34;"><code class="language-elixir" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">defmodule</span> <span style="color: #e5c07b;">Test</span> <span style="color: #c678dd;">do</span>
-        </div><div class="line" data-line="2">  <span style="color: #56b6c2;"><span style="color: #d19a66;">@<span style="color: #61afef;"><span style="color: #d19a66;">lang <span style="color: #e06c75;">:elixir</span></span></span></span></span>
-        </div><div class="line" data-line="3"><span style="color: #c678dd;">end</span>
+        <pre class="lumis" style="color: #abb2bf; background-color: #282c34;"><code class="language-elixir" translate="no" tabindex="0"><div class="l-line" data-line="1"><span style="color: #c678dd;">defmodule</span> <span style="color: #e5c07b;">Test</span> <span style="color: #c678dd;">do</span>
+        </div><div class="l-line" data-line="2">  <span style="color: #56b6c2;"><span style="color: #d19a66;">@<span style="color: #61afef;"><span style="color: #d19a66;">lang <span style="color: #e06c75;">:elixir</span></span></span></span></span>
+        </div><div class="l-line" data-line="3"><span style="color: #c678dd;">end</span>
         </div></code></pre>
         """,
         formatter: {:html_inline, language: "elixir"}
@@ -368,9 +368,9 @@ defmodule Lumis.LumisTest do
       assert_output(
         "defmodule Test do\n  @lang :elixir\nend",
         ~s"""
-        <pre class="lumis" style="color: #f8f8f2; background-color: #282a36;"><code class="language-elixir" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #8be9fd;">defmodule</span> <span style="color: #ffb86c;">Test</span> <span style="color: #ff79c6;">do</span>
-        </div><div class="line" data-line="2">  <span style="color: #ff79c6;"><span style="color: #bd93f9;">@<span style="color: #50fa7b;"><span style="color: #bd93f9;">lang <span style="color: #bd93f9;">:elixir</span></span></span></span></span>
-        </div><div class="line" data-line="3"><span style="color: #ff79c6;">end</span>
+        <pre class="lumis" style="color: #f8f8f2; background-color: #282a36;"><code class="language-elixir" translate="no" tabindex="0"><div class="l-line" data-line="1"><span style="color: #8be9fd;">defmodule</span> <span style="color: #ffb86c;">Test</span> <span style="color: #ff79c6;">do</span>
+        </div><div class="l-line" data-line="2">  <span style="color: #ff79c6;"><span style="color: #bd93f9;">@<span style="color: #50fa7b;"><span style="color: #bd93f9;">lang <span style="color: #bd93f9;">:elixir</span></span></span></span></span>
+        </div><div class="l-line" data-line="3"><span style="color: #ff79c6;">end</span>
         </div></code></pre>
         """,
         formatter: {:html_inline, language: "elixir", theme: "dracula"}
@@ -381,9 +381,9 @@ defmodule Lumis.LumisTest do
       assert_output(
         "defmodule Test do\n  @lang :elixir\nend",
         ~s"""
-        <pre class="lumis" style="color: #f8f8f2; background-color: #282a36;"><code class="language-elixir" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #8be9fd;">defmodule</span> <span style="color: #ffb86c;">Test</span> <span style="color: #ff79c6;">do</span>
-        </div><div class="line" data-line="2">  <span style="color: #ff79c6;"><span style="color: #bd93f9;">@<span style="color: #50fa7b;"><span style="color: #bd93f9;">lang <span style="color: #bd93f9;">:elixir</span></span></span></span></span>
-        </div><div class="line" data-line="3"><span style="color: #ff79c6;">end</span>
+        <pre class="lumis" style="color: #f8f8f2; background-color: #282a36;"><code class="language-elixir" translate="no" tabindex="0"><div class="l-line" data-line="1"><span style="color: #8be9fd;">defmodule</span> <span style="color: #ffb86c;">Test</span> <span style="color: #ff79c6;">do</span>
+        </div><div class="l-line" data-line="2">  <span style="color: #ff79c6;"><span style="color: #bd93f9;">@<span style="color: #50fa7b;"><span style="color: #bd93f9;">lang <span style="color: #bd93f9;">:elixir</span></span></span></span></span>
+        </div><div class="l-line" data-line="3"><span style="color: #ff79c6;">end</span>
         </div></code></pre>
         """,
         formatter: {:html_inline, language: "elixir", theme: Lumis.Theme.get("dracula")}
@@ -402,9 +402,9 @@ defmodule Lumis.LumisTest do
       assert_output(
         "defmodule Test do\n  @lang :elixir\nend",
         ~s"""
-        <pre class="lumis" style="color: #abb2bf; background-color: #282c34;"><code class="language-elixir" translate="no" tabindex="0"><div class="line" data-line="1"><span data-highlight="keyword.function" style="color: #c678dd;">defmodule</span> <span data-highlight="module" style="color: #e5c07b;">Test</span> <span data-highlight="keyword" style="color: #c678dd;">do</span>
-        </div><div class="line" data-line="2">  <span data-highlight="operator" style="color: #56b6c2;"><span data-highlight="constant" style="color: #d19a66;">@<span data-highlight="function.call" style="color: #61afef;"><span data-highlight="constant" style="color: #d19a66;">lang <span data-highlight="string.special.symbol" style="color: #e06c75;">:elixir</span></span></span></span></span>
-        </div><div class="line" data-line="3"><span data-highlight="keyword" style="color: #c678dd;">end</span>
+        <pre class="lumis" style="color: #abb2bf; background-color: #282c34;"><code class="language-elixir" translate="no" tabindex="0"><div class="l-line" data-line="1"><span data-highlight="keyword.function" style="color: #c678dd;">defmodule</span> <span data-highlight="module" style="color: #e5c07b;">Test</span> <span data-highlight="keyword" style="color: #c678dd;">do</span>
+        </div><div class="l-line" data-line="2">  <span data-highlight="operator" style="color: #56b6c2;"><span data-highlight="constant" style="color: #d19a66;">@<span data-highlight="function.call" style="color: #61afef;"><span data-highlight="constant" style="color: #d19a66;">lang <span data-highlight="string.special.symbol" style="color: #e06c75;">:elixir</span></span></span></span></span>
+        </div><div class="l-line" data-line="3"><span data-highlight="keyword" style="color: #c678dd;">end</span>
         </div></code></pre>
         """,
         formatter: {:html_inline, language: "elixir", include_highlights: true}
@@ -417,9 +417,9 @@ defmodule Lumis.LumisTest do
       assert_output(
         "defmodule Test do\n  @lang :elixir\nend",
         ~s"""
-        <pre class="lumis"><code class="language-elixir" translate="no" tabindex="0"><div class="line" data-line="1"><span class="lumis-keyword-function">defmodule</span> <span class="lumis-module">Test</span> <span class="lumis-keyword">do</span>
-        </div><div class="line" data-line="2">  <span class="lumis-operator"><span class="lumis-constant">@<span class="lumis-function-call"><span class="lumis-constant">lang <span class="lumis-string-special-symbol">:elixir</span></span></span></span></span>
-        </div><div class="line" data-line="3"><span class="lumis-keyword">end</span>
+        <pre class="lumis"><code class="language-elixir" translate="no" tabindex="0"><div class="l-line" data-line="1"><span class="l-keyword-function">defmodule</span> <span class="l-module">Test</span> <span class="l-keyword">do</span>
+        </div><div class="l-line" data-line="2">  <span class="l-operator"><span class="l-constant">@<span class="l-function-call"><span class="l-constant">lang <span class="l-string-special-symbol">:elixir</span></span></span></span></span>
+        </div><div class="l-line" data-line="3"><span class="l-keyword">end</span>
         </div></code></pre>
         """,
         formatter: {:html_linked, language: "elixir"}
@@ -483,7 +483,7 @@ defmodule Lumis.LumisTest do
       assert_output(
         "test code",
         ~s"""
-        <pre class="lumis lumis-themes main" style="--lumis-main: #abb2bf; --lumis-main-bg: #282c34;"><code class="language-elixir" translate="no" tabindex="0"><div class="line" data-line="1"><span style="--lumis-main: #61afef; --lumis-main-font-style: normal; --lumis-main-font-weight: normal; --lumis-main-text-decoration: none;">test</span> <span style="--lumis-main: #e06c75; --lumis-main-font-style: normal; --lumis-main-font-weight: normal; --lumis-main-text-decoration: none;">code</span>
+        <pre class="lumis lumis-themes main" style="--lumis-main: #abb2bf; --lumis-main-bg: #282c34;"><code class="language-elixir" translate="no" tabindex="0"><div class="l-line" data-line="1"><span style="--lumis-main: #61afef; --lumis-main-font-style: normal; --lumis-main-font-weight: normal; --lumis-main-text-decoration: none;">test</span> <span style="--lumis-main: #e06c75; --lumis-main-font-style: normal; --lumis-main-font-weight: normal; --lumis-main-text-decoration: none;">code</span>
         </div></code></pre>
         """,
         formatter: {:html_multi_themes, language: "elixir", themes: [main: "onedark"]}
@@ -558,7 +558,7 @@ defmodule Lumis.LumisTest do
       assert_output(
         "test code",
         ~s"""
-        <pre class="lumis lumis-themes main" style="--lumis-main: #abb2bf; --lumis-main-bg: #282c34;"><code class="language-elixir" translate="no" tabindex="0"><div class="line" data-line="1"><span style="--lumis-main: #61afef; --lumis-main-font-style: normal; --lumis-main-font-weight: normal; --lumis-main-text-decoration: none;">test</span> <span style="--lumis-main: #e06c75; --lumis-main-font-style: normal; --lumis-main-font-weight: normal; --lumis-main-text-decoration: none;">code</span>
+        <pre class="lumis lumis-themes main" style="--lumis-main: #abb2bf; --lumis-main-bg: #282c34;"><code class="language-elixir" translate="no" tabindex="0"><div class="l-line" data-line="1"><span style="--lumis-main: #61afef; --lumis-main-font-style: normal; --lumis-main-font-weight: normal; --lumis-main-text-decoration: none;">test</span> <span style="--lumis-main: #e06c75; --lumis-main-font-style: normal; --lumis-main-font-weight: normal; --lumis-main-text-decoration: none;">code</span>
         </div></code></pre>
         """,
         formatter: {:html_multi_themes, language: "elixir", themes: [main: theme]}
@@ -616,7 +616,7 @@ defmodule Lumis.LumisTest do
 
       assert String.contains?(
                result,
-               ~s|<div class="line" style="background-color: yellow;" data-line="2">|
+               ~s|<div class="l-line" style="background-color: yellow;" data-line="2">|
              )
     end
 
@@ -634,17 +634,17 @@ defmodule Lumis.LumisTest do
 
       assert String.contains?(
                result,
-               ~s|<div class="line" style="background-color: yellow;" data-line="1">|
+               ~s|<div class="l-line" style="background-color: yellow;" data-line="1">|
              )
 
       refute String.contains?(
                result,
-               ~s|<div class="line" style="background-color: yellow;" data-line="2">|
+               ~s|<div class="l-line" style="background-color: yellow;" data-line="2">|
              )
 
       assert String.contains?(
                result,
-               ~s|<div class="line" style="background-color: yellow;" data-line="3">|
+               ~s|<div class="l-line" style="background-color: yellow;" data-line="3">|
              )
     end
 
@@ -662,37 +662,37 @@ defmodule Lumis.LumisTest do
 
       assert String.contains?(
                result,
-               ~s|<div class="line" style="background-color: yellow;" data-line="1">|
+               ~s|<div class="l-line" style="background-color: yellow;" data-line="1">|
              )
 
       refute String.contains?(
                result,
-               ~s|<div class="line" style="background-color: yellow;" data-line="2">|
+               ~s|<div class="l-line" style="background-color: yellow;" data-line="2">|
              )
 
       assert String.contains?(
                result,
-               ~s|<div class="line" style="background-color: yellow;" data-line="3">|
+               ~s|<div class="l-line" style="background-color: yellow;" data-line="3">|
              )
 
       assert String.contains?(
                result,
-               ~s|<div class="line" style="background-color: yellow;" data-line="4">|
+               ~s|<div class="l-line" style="background-color: yellow;" data-line="4">|
              )
 
       assert String.contains?(
                result,
-               ~s|<div class="line" style="background-color: yellow;" data-line="5">|
+               ~s|<div class="l-line" style="background-color: yellow;" data-line="5">|
              )
 
       refute String.contains?(
                result,
-               ~s|<div class="line" style="background-color: yellow;" data-line="6">|
+               ~s|<div class="l-line" style="background-color: yellow;" data-line="6">|
              )
 
       assert String.contains?(
                result,
-               ~s|<div class="line" style="background-color: yellow;" data-line="7">|
+               ~s|<div class="l-line" style="background-color: yellow;" data-line="7">|
              )
     end
 
@@ -711,7 +711,7 @@ defmodule Lumis.LumisTest do
 
       assert String.contains?(
                result,
-               ~s|<div class="line" style="background-color: #44475a;" data-line="1">|
+               ~s|<div class="l-line" style="background-color: #44475a;" data-line="1">|
              )
     end
 
@@ -730,7 +730,7 @@ defmodule Lumis.LumisTest do
 
       assert String.contains?(
                result,
-               ~s|<div class="line" style="background-color: #44475a;" data-line="1">|
+               ~s|<div class="l-line" style="background-color: #44475a;" data-line="1">|
              )
     end
 
@@ -748,12 +748,12 @@ defmodule Lumis.LumisTest do
 
       assert String.contains?(
                result,
-               ~s|<div class="line highlight-custom" style="background-color: #282c34;" data-line="1">|
+               ~s|<div class="l-line highlight-custom" style="background-color: #282c34;" data-line="1">|
              )
 
       assert String.contains?(
                result,
-               ~s|<div class="line highlight-custom" style="background-color: #282c34;" data-line="2">|
+               ~s|<div class="l-line highlight-custom" style="background-color: #282c34;" data-line="2">|
              )
     end
 
@@ -772,7 +772,7 @@ defmodule Lumis.LumisTest do
 
       assert String.contains?(
                result,
-               ~s|<div class="line error-line" style="background-color: #ffcccc;" data-line="2">|
+               ~s|<div class="l-line error-line" style="background-color: #ffcccc;" data-line="2">|
              )
     end
 
@@ -789,7 +789,7 @@ defmodule Lumis.LumisTest do
           formatter: {:html_inline, language: "ruby", highlight_lines: highlight_lines}
         )
 
-      assert String.contains?(result, ~s|<div class="line custom-highlight" data-line="1">|)
+      assert String.contains?(result, ~s|<div class="l-line custom-highlight" data-line="1">|)
     end
 
     test "html_linked with single line and default theme" do
@@ -803,7 +803,7 @@ defmodule Lumis.LumisTest do
           formatter: {:html_linked, language: "text", highlight_lines: highlight_lines}
         )
 
-      assert String.contains?(result, ~s|<div class="line lumis-highlighted" data-line="1">|)
+      assert String.contains?(result, ~s|<div class="l-line l-highlighted" data-line="1">|)
     end
 
     test "html_linked with multiple lines and default theme " do
@@ -817,9 +817,9 @@ defmodule Lumis.LumisTest do
           formatter: {:html_linked, language: "text", highlight_lines: highlight_lines}
         )
 
-      assert String.contains?(result, ~s|<div class="line lumis-highlighted" data-line="1">|)
-      assert String.contains?(result, ~s|<div class="line lumis-highlighted" data-line="2">|)
-      refute String.contains?(result, ~s|<div class="line lumis-highlighted" data-line="3">|)
+      assert String.contains?(result, ~s|<div class="l-line l-highlighted" data-line="1">|)
+      assert String.contains?(result, ~s|<div class="l-line l-highlighted" data-line="2">|)
+      refute String.contains?(result, ~s|<div class="l-line l-highlighted" data-line="3">|)
     end
 
     test "html_linked with mixes lines and ranges and default theme " do
@@ -833,10 +833,10 @@ defmodule Lumis.LumisTest do
           formatter: {:html_linked, language: "text", highlight_lines: highlight_lines}
         )
 
-      assert String.contains?(result, ~s|<div class="line lumis-highlighted" data-line="1">|)
-      assert String.contains?(result, ~s|<div class="line lumis-highlighted" data-line="2">|)
-      assert String.contains?(result, ~s|<div class="line lumis-highlighted" data-line="3">|)
-      refute String.contains?(result, ~s|<div class="line lumis-highlighted" data-line="5">|)
+      assert String.contains?(result, ~s|<div class="l-line l-highlighted" data-line="1">|)
+      assert String.contains?(result, ~s|<div class="l-line l-highlighted" data-line="2">|)
+      assert String.contains?(result, ~s|<div class="l-line l-highlighted" data-line="3">|)
+      refute String.contains?(result, ~s|<div class="l-line l-highlighted" data-line="5">|)
     end
 
     test "html_linked with CSS class" do
@@ -851,7 +851,7 @@ defmodule Lumis.LumisTest do
           formatter: {:html_linked, language: "ruby", highlight_lines: highlight_lines}
         )
 
-      assert String.contains?(result, ~s|<div class="line hl-test" data-line="1">|)
+      assert String.contains?(result, ~s|<div class="l-line hl-test" data-line="1">|)
     end
 
     test "invalid highlight_lines format raises error" do

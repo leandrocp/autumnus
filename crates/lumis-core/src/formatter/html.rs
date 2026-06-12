@@ -383,9 +383,9 @@ pub fn wrap_line(
     style: Option<&str>,
 ) -> String {
     let class_attr = if let Some(suffix) = class_suffix {
-        format!("line{}", suffix)
+        format!("l-line{}", suffix)
     } else {
-        "line".to_string()
+        "l-line".to_string()
     };
 
     let style_attr = if let Some(s) = style {
@@ -413,8 +413,8 @@ pub fn scope_to_class(scope: &str) -> String {
         .iter()
         .position(|&s| s == scope)
         .and_then(|idx| crate::highlights::CLASSES.get(idx))
-        .map(|class| format!("lumis-{class}"))
-        .unwrap_or_else(|| "lumis-text".to_string())
+        .map(|class| format!("l-{class}"))
+        .unwrap_or_else(|| "l-text".to_string())
 }
 
 /// Generate an opening `<pre>` tag with optional class and theme styles.
@@ -692,19 +692,19 @@ mod tests {
     fn test_scope_to_class_keyword_conditional() {
         assert_eq!(
             scope_to_class("keyword.conditional"),
-            "lumis-keyword-conditional"
+            "l-keyword-conditional"
         );
     }
 
     #[test]
     fn test_scope_to_class_unknown_scope() {
-        assert_eq!(scope_to_class("unknown.scope.name"), "lumis-text");
+        assert_eq!(scope_to_class("unknown.scope.name"), "l-text");
     }
 
     #[test]
     fn test_wrap_line_simple() {
         let result = wrap_line(1, "content", None, None);
-        assert_str_eq!(result, r#"<div class="line" data-line="1">content</div>"#);
+        assert_str_eq!(result, r#"<div class="l-line" data-line="1">content</div>"#);
     }
 
     #[test]
@@ -712,7 +712,7 @@ mod tests {
         let result = wrap_line(5, "highlighted content", Some(" highlighted"), None);
         assert_str_eq!(
             result,
-            r#"<div class="line highlighted" data-line="5">highlighted content</div>"#
+            r#"<div class="l-line highlighted" data-line="5">highlighted content</div>"#
         );
     }
 
@@ -721,7 +721,7 @@ mod tests {
         let result = wrap_line(3, "styled", None, Some("color: red;"));
         assert_str_eq!(
             result,
-            r#"<div class="line" style="color: red;" data-line="3">styled</div>"#
+            r#"<div class="l-line" style="color: red;" data-line="3">styled</div>"#
         );
     }
 }

@@ -157,16 +157,16 @@ Available options for `:html_linked`:
 ```elixir
 css =
   Lumis.Theme.build_css!("github_dark",
-    selector_prefix: ~s(html[data-theme="dark"] ),
-    pre_selector: ".lumis",
-    base_rules: [
+    scope: ~s(html[data-theme="dark"]),
+    container_selector: ".lumis",
+    container_style: [
       {"background-color", "var(--code-background)"},
       {"border-radius", "0.375rem"}
     ]
   )
 ```
 
-Options: `:enable_italic`, `:selector_prefix`, `:pre_selector`, `:base_rules`. A `:base_rules` entry whose property matches one that the theme sets (`color`, `background-color`) replaces that value.
+Options: `:scope`, `:container_selector`, `:container_style`, and `:enable_italic`. Use `:container_style` for declarations on the container selector, such as `padding`, `border-radius`, or a replacement `background-color`.
 
 ### HTML Multi-Themes
 
@@ -380,7 +380,7 @@ The `:lines` option accepts:
 #### HTML Linked Line Highlighting
 
 ```elixir
-# Use default "lumis-highlighted" class from theme CSS
+# Use default "l-highlighted" class from theme CSS
 Lumis.highlight!(code,
   formatter: {:html_linked,
     language: "elixir",
@@ -427,11 +427,11 @@ Lumis generates semantic HTML with line wrappers:
 ```html
 <pre class="lumis" style="color: #abb2bf; background-color: #282c34;">
   <code class="language-elixir" translate="no" tabindex="0">
-    <div class="line" data-line="1">
+    <div class="l-line" data-line="1">
       <span style="color: #c678dd;">defmodule</span>
       <span style="color: #e5c07b;">MyApp</span>
     </div>
-    <div class="line" data-line="2">
+    <div class="l-line" data-line="2">
       ...
     </div>
   </code>
@@ -439,7 +439,7 @@ Lumis generates semantic HTML with line wrappers:
 ```
 
 Key points:
-- Each line is wrapped in `<div class="line" data-line="N">`
+- Each line is wrapped in `<div class="l-line" data-line="N">`
 - The `data-line` attribute contains the line number (1-indexed)
 - The `<code>` tag has `translate="no"` to prevent browser translation
 - The `<code>` tag has `tabindex="0"` for keyboard accessibility
@@ -715,7 +715,7 @@ opts = Lumis.default_options()
       pre_class: "my-class",
       highlight_lines: %{
         lines: [1, 2..5],
-        class: "lumis-highlighted"
+        class: "l-highlighted"
       },
       header: %{
         open_tag: "<div>",

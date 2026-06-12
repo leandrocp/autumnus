@@ -218,7 +218,7 @@ HTML Inline emits the full block structure with inline styles on each token:
 ```html
 <pre class="lumis" style="background-color: #282c34; color: #abb2bf;">
   <code class="language-rust" translate="no" tabindex="0">
-    <div class="line" data-line="1">
+    <div class="l-line" data-line="1">
       <span style="color: #e5c07b;">fn</span>
       <span style="color: #61afef;">main</span>
     </div>
@@ -228,7 +228,7 @@ HTML Inline emits the full block structure with inline styles on each token:
 
 - `<pre class="lumis">` is the outer wrapper and carries the block background
 - `<code class="language-*">` identifies the language and keeps the block focusable
-- `<div class="line" data-line="N">` wraps each line
+- `<div class="l-line" data-line="N">` wraps each line
 - `<span style="...">` carries the token colors and font styles inline
 
 ## When to use it

@@ -1,338 +1,337 @@
 /* onedark_deep
  * revision: df4792accde9db0043121f32628bcf8e645d9aea
  */
-
-pre.lumis {
+.lumis {
   color: #93a4c3;
   background-color: #1a212e;
 }
-.lumis-attribute {
+.l-attribute {
   color: #34bfd0;
 }
-.lumis-attribute-builtin {
+.l-attribute-builtin {
   color: #41a7fc;
 }
-.lumis-boolean {
+.l-boolean {
   color: #dd9046;
 }
-.lumis-character {
+.l-character {
   color: #dd9046;
 }
-.lumis-character-special {
+.l-character-special {
   color: #f65866;
 }
-.lumis-comment {
+.l-comment {
   color: #455574;
   font-style: italic;
 }
-.lumis-comment-documentation {
+.l-comment-documentation {
   color: #455574;
   font-style: italic;
 }
-.lumis-comment-error {
+.l-comment-error {
   color: #f65866;
   font-style: italic;
 }
-.lumis-comment-hint {
+.l-comment-hint {
   color: #455574;
   font-style: italic;
 }
-.lumis-comment-note {
+.l-comment-note {
   color: #41a7fc;
   font-style: italic;
 }
-.lumis-comment-todo {
+.l-comment-todo {
   color: #c75ae8;
   font-style: italic;
 }
-.lumis-comment-warning {
+.l-comment-warning {
   color: #efbd5d;
   font-style: italic;
 }
-.lumis-constant {
+.l-constant {
   color: #dd9046;
 }
-.lumis-constant-builtin {
+.l-constant-builtin {
   color: #dd9046;
 }
-.lumis-constant-macro {
+.l-constant-macro {
   color: #dd9046;
 }
-.lumis-constructor {
+.l-constructor {
   color: #efbd5d;
   font-weight: bold;
 }
-.lumis-diff-delta {
+.l-diff-delta {
   color: #41a7fc;
 }
-.lumis-diff-minus {
+.l-diff-minus {
   color: #f65866;
 }
-.lumis-diff-plus {
+.l-diff-plus {
   color: #8bcd5b;
 }
-.lumis-function {
+.l-function {
   color: #41a7fc;
 }
-.lumis-function-builtin {
+.l-function-builtin {
   color: #34bfd0;
 }
-.lumis-function-call {
+.l-function-call {
   color: #41a7fc;
 }
-.lumis-function-macro {
+.l-function-macro {
   color: #34bfd0;
 }
-.lumis-function-method {
+.l-function-method {
   color: #41a7fc;
 }
-.lumis-function-method-call {
+.l-function-method-call {
   color: #41a7fc;
 }
-.lumis-highlighted {
+.l-highlighted {
   background-color: #21283b;
 }
-.lumis-keyword {
+.l-keyword {
   color: #c75ae8;
 }
-.lumis-keyword-conditional {
+.l-keyword-conditional {
   color: #c75ae8;
 }
-.lumis-keyword-conditional-ternary {
+.l-keyword-conditional-ternary {
   color: #c75ae8;
 }
-.lumis-keyword-coroutine {
+.l-keyword-coroutine {
   color: #c75ae8;
 }
-.lumis-keyword-debug {
+.l-keyword-debug {
   color: #f65866;
 }
-.lumis-keyword-directive {
+.l-keyword-directive {
   color: #c75ae8;
 }
-.lumis-keyword-directive-define {
+.l-keyword-directive-define {
   color: #c75ae8;
 }
-.lumis-keyword-exception {
+.l-keyword-exception {
   color: #c75ae8;
 }
-.lumis-keyword-export {
+.l-keyword-export {
   color: #c75ae8;
 }
-.lumis-keyword-function {
+.l-keyword-function {
   color: #c75ae8;
 }
-.lumis-keyword-import {
+.l-keyword-import {
   color: #c75ae8;
 }
-.lumis-keyword-modifier {
+.l-keyword-modifier {
   color: #c75ae8;
 }
-.lumis-keyword-operator {
+.l-keyword-operator {
   color: #c75ae8;
 }
-.lumis-keyword-repeat {
+.l-keyword-repeat {
   color: #c75ae8;
 }
-.lumis-keyword-return {
+.l-keyword-return {
   color: #c75ae8;
 }
-.lumis-keyword-type {
+.l-keyword-type {
   color: #c75ae8;
 }
-.lumis-label {
+.l-label {
   color: #f65866;
 }
-.lumis-markup {
+.l-markup {
   color: #f65866;
 }
-.lumis-markup-environment {
+.l-markup-environment {
   color: #f65866;
 }
-.lumis-markup-environment-name {
+.l-markup-environment-name {
   color: #f65866;
 }
-.lumis-markup-heading {
+.l-markup-heading {
   color: #dd9046;
   font-weight: bold;
 }
-.lumis-markup-heading-1 {
+.l-markup-heading-1 {
   color: #f65866;
   font-weight: bold;
 }
-.lumis-markup-heading-2 {
+.l-markup-heading-2 {
   color: #c75ae8;
   font-weight: bold;
 }
-.lumis-markup-heading-3 {
+.l-markup-heading-3 {
   color: #dd9046;
   font-weight: bold;
 }
-.lumis-markup-heading-4 {
+.l-markup-heading-4 {
   color: #f65866;
   font-weight: bold;
 }
-.lumis-markup-heading-5 {
+.l-markup-heading-5 {
   color: #c75ae8;
   font-weight: bold;
 }
-.lumis-markup-heading-6 {
+.l-markup-heading-6 {
   color: #dd9046;
   font-weight: bold;
 }
-.lumis-markup-italic {
+.l-markup-italic {
   color: #93a4c3;
   font-style: italic;
 }
-.lumis-markup-link {
+.l-markup-link {
   color: #41a7fc;
 }
-.lumis-markup-link-label {
+.l-markup-link-label {
   color: #34bfd0;
 }
-.lumis-markup-link-url {
+.l-markup-link-url {
   color: #34bfd0;
   text-decoration: underline;
 }
-.lumis-markup-list {
+.l-markup-list {
   color: #f65866;
 }
-.lumis-markup-list-checked {
+.l-markup-list-checked {
   color: #8bcd5b;
   font-style: italic;
 }
-.lumis-markup-list-unchecked {
+.l-markup-list-unchecked {
   color: #f65866;
   font-style: italic;
 }
-.lumis-markup-math {
+.l-markup-math {
   color: #93a4c3;
 }
-.lumis-markup-quote {
+.l-markup-quote {
   color: #455574;
   font-style: italic;
 }
-.lumis-markup-raw {
+.l-markup-raw {
   color: #8bcd5b;
 }
-.lumis-markup-raw-block {
+.l-markup-raw-block {
   color: #8bcd5b;
 }
-.lumis-markup-strikethrough {
+.l-markup-strikethrough {
   color: #93a4c3;
   text-decoration: line-through;
 }
-.lumis-markup-strong {
+.l-markup-strong {
   color: #93a4c3;
   font-weight: bold;
 }
-.lumis-markup-underline {
+.l-markup-underline {
   color: #93a4c3;
   text-decoration: underline;
 }
-.lumis-module {
+.l-module {
   color: #efbd5d;
 }
-.lumis-module-builtin {
+.l-module-builtin {
   color: #dd9046;
 }
-.lumis-number {
+.l-number {
   color: #dd9046;
 }
-.lumis-number-float {
+.l-number-float {
   color: #dd9046;
 }
-.lumis-operator {
+.l-operator {
   color: #93a4c3;
 }
-.lumis-property {
+.l-property {
   color: #34bfd0;
 }
-.lumis-punctuation-bracket {
+.l-punctuation-bracket {
   color: #6c7d9c;
 }
-.lumis-punctuation-bracket-rainbow-1 {
+.l-punctuation-bracket-rainbow-1 {
   color: #f65866;
 }
-.lumis-punctuation-bracket-rainbow-2 {
+.l-punctuation-bracket-rainbow-2 {
   color: #efbd5d;
 }
-.lumis-punctuation-bracket-rainbow-3 {
+.l-punctuation-bracket-rainbow-3 {
   color: #41a7fc;
 }
-.lumis-punctuation-bracket-rainbow-4 {
+.l-punctuation-bracket-rainbow-4 {
   color: #dd9046;
 }
-.lumis-punctuation-bracket-rainbow-5 {
+.l-punctuation-bracket-rainbow-5 {
   color: #8bcd5b;
 }
-.lumis-punctuation-bracket-rainbow-6 {
+.l-punctuation-bracket-rainbow-6 {
   color: #c75ae8;
 }
-.lumis-punctuation-delimiter {
+.l-punctuation-delimiter {
   color: #6c7d9c;
 }
-.lumis-punctuation-special {
+.l-punctuation-special {
   color: #f65866;
 }
-.lumis-string {
+.l-string {
   color: #8bcd5b;
 }
-.lumis-string-documentation {
+.l-string-documentation {
   color: #8bcd5b;
 }
-.lumis-string-escape {
+.l-string-escape {
   color: #f65866;
 }
-.lumis-string-regexp {
+.l-string-regexp {
   color: #dd9046;
 }
-.lumis-string-special {
+.l-string-special {
   color: #1b6a73;
 }
-.lumis-string-special-path {
+.l-string-special-path {
   color: #8bcd5b;
 }
-.lumis-string-special-symbol {
+.l-string-special-symbol {
   color: #34bfd0;
 }
-.lumis-string-special-url {
+.l-string-special-url {
   color: #34bfd0;
   text-decoration: underline;
 }
-.lumis-tag {
+.l-tag {
   color: #c75ae8;
 }
-.lumis-tag-attribute {
+.l-tag-attribute {
   color: #efbd5d;
 }
-.lumis-tag-builtin {
+.l-tag-builtin {
   color: #c75ae8;
 }
-.lumis-tag-delimiter {
+.l-tag-delimiter {
   color: #c75ae8;
 }
-.lumis-type {
+.l-type {
   color: #efbd5d;
 }
-.lumis-type-builtin {
+.l-type-builtin {
   color: #dd9046;
 }
-.lumis-type-definition {
+.l-type-definition {
   color: #efbd5d;
 }
-.lumis-variable {
+.l-variable {
   color: #93a4c3;
 }
-.lumis-variable-builtin {
+.l-variable-builtin {
   color: #f65866;
 }
-.lumis-variable-member {
+.l-variable-member {
   color: #34bfd0;
 }
-.lumis-variable-parameter {
+.l-variable-parameter {
   color: #f65866;
 }
-.lumis-variable-parameter-builtin {
+.l-variable-parameter-builtin {
   color: #dd9046;
 }

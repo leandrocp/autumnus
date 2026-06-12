@@ -30,7 +30,7 @@ describe("markdown-it-lumis", () => {
       expect(html).toMatch(/<span style="color: #[0-9a-f]+;">1<\/span>/);
       expect(html).toContain('translate="no"');
       expect(html).toContain('tabindex="0"');
-      expect(html).toContain('<div class="line" data-line="1">');
+      expect(html).toContain('<div class="l-line" data-line="1">');
       expect(html).toContain("</code></pre>");
     });
 

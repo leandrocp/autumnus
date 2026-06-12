@@ -699,7 +699,7 @@ fn render_output(
             if let Some(lines) = highlight_lines {
                 let hl = lumis_core::formatter::html_linked::HighlightLines {
                     lines,
-                    class: "lumis-highlighted".to_string(),
+                    class: "l-highlighted".to_string(),
                 };
                 builder.highlight_lines(Some(hl));
             }

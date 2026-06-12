@@ -41,21 +41,21 @@ defmodule Lumis.Theme do
       default: true,
       doc: "Whether italic theme styles should be emitted."
     ],
-    selector_prefix: [
+    scope: [
       type: :string,
       default: "",
-      doc: "Prefix prepended to every generated selector."
+      doc: "Parent selector prepended to every generated selector."
     ],
-    pre_selector: [
+    container_selector: [
       type: :string,
-      default: "pre.lumis",
-      doc: "Selector used for the `<pre>` code block rule. Defaults to `pre.lumis`."
+      default: ".lumis",
+      doc: "Selector used for the container code block rule. Defaults to `.lumis`."
     ],
-    base_rules: [
+    container_style: [
       type: {:list, {:tuple, [:string, :string]}},
       default: [],
       doc:
-        "Extra `{property, value}` declarations for the base code block rule. A property that matches one that the theme already sets (`color`, `background-color`) replaces that value."
+        "Extra `{property, value}` declarations for the container code block rule. A property that matches one that the theme already sets (`color`, `background-color`) replaces that value."
     ]
   ]
 
@@ -74,7 +74,7 @@ defmodule Lumis.Theme do
 
   Accepts a bundled theme name or a `Lumis.Theme` struct. Use this with the
   `:html_linked` formatter when you need to embed CSS, scope selectors, or
-  customize the base code block rule.
+  customize the container code block rule.
 
   ## Options
 
@@ -82,14 +82,41 @@ defmodule Lumis.Theme do
 
   ## Examples
 
-      iex> Lumis.Theme.build_css!("github_light") =~ "pre.lumis"
-      true
+      Lumis.Theme.build_css!("github_dark")
 
-      iex> Lumis.Theme.build_css!("github_dark", selector_prefix: ~s(html[data-theme="dark"] )) =~ ~s(html[data-theme="dark"] pre.lumis)
-      true
+  Produces CSS shaped like this:
 
-      iex> Lumis.Theme.build_css!("github_light", selector_prefix: ".app ") =~ ".app .lumis-keyword"
-      true
+      /* github_dark
+       * revision: ...
+       */
+      .lumis {
+        color: #e6edf3;
+        background-color: #0d1117;
+      }
+      .l-keyword {
+        color: #ff7b72;
+      }
+
+  Scope the generated stylesheet under a parent selector:
+
+      Lumis.Theme.build_css!("github_dark",
+        scope: ~s(html[data-theme="dark"]),
+        container_style: [
+          {"background-color", "var(--code-background)"},
+          {"border-radius", "0.375rem"}
+        ]
+      )
+
+  That produces selectors like:
+
+      html[data-theme="dark"] .lumis {
+        color: #e6edf3;
+        background-color: var(--code-background);
+        border-radius: 0.375rem;
+      }
+      html[data-theme="dark"] .l-keyword {
+        color: #ff7b72;
+      }
 
   """
   @spec build_css(String.t() | t(), keyword()) :: {:ok, String.t()} | {:error, term()}

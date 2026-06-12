@@ -22,16 +22,15 @@ describe("buildCss", () => {
     const expected = `/* test
  * revision: 3e976b4
  */
-
-pre.lumis {
+.lumis {
   color: red;
   background-color: green;
 }
-.lumis-keyword {
+.l-keyword {
   color: blue;
   font-style: italic;
 }
-.lumis-tag-attribute {
+.l-tag-attribute {
   background-color: gray;
   font-weight: bold;
 }
@@ -40,21 +39,20 @@ pre.lumis {
     expect(buildCss(sample)).toBe(expected);
   });
 
-  it("scopes selectors and applies base rules", () => {
+  it("scopes selectors and applies container style", () => {
     const expected = `/* test
  * revision: 3e976b4
  */
-
 html[data-theme="dark"] .lumis {
   color: red;
   background-color: var(--color-grey-900);
   border-radius: 0.375rem;
 }
-html[data-theme="dark"] .lumis-keyword {
+html[data-theme="dark"] .l-keyword {
   color: blue;
   font-style: italic;
 }
-html[data-theme="dark"] .lumis-tag-attribute {
+html[data-theme="dark"] .l-tag-attribute {
   background-color: gray;
   font-weight: bold;
 }
@@ -62,9 +60,9 @@ html[data-theme="dark"] .lumis-tag-attribute {
 
     expect(
       buildCss(sample, {
-        selectorPrefix: 'html[data-theme="dark"] ',
-        preSelector: ".lumis",
-        baseRules: [
+        scope: 'html[data-theme="dark"]',
+        containerSelector: ".lumis",
+        containerStyle: [
           ["background-color", "var(--color-grey-900)"],
           ["border-radius", "0.375rem"],
         ],
@@ -75,7 +73,7 @@ html[data-theme="dark"] .lumis-tag-attribute {
   it("omits italic styles when disabled", () => {
     const css = buildCss(sample, { enableItalic: false });
 
-    expect(css).toContain(".lumis-keyword {\n  color: blue;\n}");
+    expect(css).toContain(".l-keyword {\n  color: blue;\n}");
     expect(css).not.toContain("font-style: italic;");
   });
 
