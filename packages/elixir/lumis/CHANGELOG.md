@@ -1,3 +1,19 @@
+## [0.6.0](https://github.com/leandrocp/lumis/compare/hex-lumis/v0.5.0...hex-lumis/v0.6.0) (2026-06-12)
+
+### ⚠ BREAKING CHANGES
+
+- adopt the `l-` prefix on token class [#952](https://github.com/leandrocp/lumis/pull/952)
+
+### Bug Fixes
+
+- use vim.pack to update themes - [#751](https://github.com/leandrocp/lumis/pull/751)
+- fix build for glimmer and fortran
+
+### Features
+
+- rainbow brackets - [#949](https://github.com/leandrocp/lumis/pull/949)
+- css stylesheet builder - [#951](https://github.com/leandrocp/lumis/pull/951)
+
 ## [0.5.0](https://github.com/leandrocp/lumis/compare/hex-lumis/v0.4.0...hex-lumis/v0.5.0) (2026-04-22)
 
 ### Bug Fixes
