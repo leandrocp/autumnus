@@ -1,3 +1,19 @@
+## [2.0.0](https://github.com/leandrocp/lumis/compare/cargo-lumis-core/v1.1.0...cargo-lumis-core/v2.0.0) (2026-06-12)
+
+### ⚠ BREAKING CHANGES
+
+- adopt the `l-` prefix on token class - [#952](https://github.com/leandrocp/lumis/pull/952)
+
+### Bug Fixes
+
+- use vim.pack to update themes - [#751](https://github.com/leandrocp/lumis/pull/751)
+
+### Features
+
+- add toon language - [#734](https://github.com/leandrocp/lumis/pull/734)
+- rainbow brackets - [#949](https://github.com/leandrocp/lumis/pull/949)
+- css stylesheet builder - [#951](https://github.com/leandrocp/lumis/pull/951)
+
 ## [1.1.0](https://github.com/leandrocp/lumis/compare/cargo-lumis-core/v1.0.0...cargo-lumis-core/v1.1.0) (2026-04-22)
 
 ### Features
