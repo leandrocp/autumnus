@@ -1,3 +1,14 @@
+## [0.4.0](https://github.com/leandrocp/lumis/compare/cargo-lumis-cli/v0.3.0...cargo-lumis-cli/v0.4.0) (2026-06-12)
+
+### ⚠ BREAKING CHANGES
+
+- adopt the `l-` prefix on token class [#952](https://github.com/leandrocp/lumis/pull/952)
+
+### Features
+
+- add toon language - [#734](https://github.com/leandrocp/lumis/pull/734)
+- rainbow brackets - [#949](https://github.com/leandrocp/lumis/pull/949)
+
 ## [0.3.0](https://github.com/leandrocp/lumis/compare/cargo-lumis-cli/v0.2.0...cargo-lumis-cli/v0.3.0) (2026-04-22)
 
 ### Bug Fixes
