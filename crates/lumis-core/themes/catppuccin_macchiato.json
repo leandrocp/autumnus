@@ -1,7 +1,7 @@
 {
   "name": "catppuccin_macchiato",
   "appearance": "dark",
-  "revision": "0303a7208dba448c459767486a38a6ec05c4216b",
+  "revision": "49a926655a2f5579e9c276470fc300baaa49e524",
   "highlights": {
     "attribute": {
       "fg": "#f5a97f"
