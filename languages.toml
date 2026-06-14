@@ -547,7 +547,7 @@ globs = ["*.ps1", "*.psm1"]
 
 [parsers.protobuf]
 git = "https://github.com/coder3101/tree-sitter-proto.git"
-rev = "d65a18ce7c2242801f702770114ad08056c7f8c9"
+rev = "3ef027b83540c1c161bea64257654ab3d198ad54"
 version = "0.4.0"
 query_name = "proto"
 variant = "ProtoBuf"
