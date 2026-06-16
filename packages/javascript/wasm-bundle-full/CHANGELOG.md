@@ -1,3 +1,9 @@
+## [0.0.7](https://github.com/leandrocp/lumis/compare/npm-wasm-bundle-full/v0.0.6...npm-wasm-bundle-full/v0.0.7) (2026-06-16)
+
+### Features
+
+- add toon language - [#734](https://github.com/leandrocp/lumis/pull/734)
+
 ## [0.0.6](https://github.com/leandrocp/lumis/compare/wasm-bundle-full@v0.0.5...wasm-bundle-full@v0.0.6) (2026-04-07)
 
 
