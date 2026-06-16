@@ -1,3 +1,14 @@
+## [0.2.0](https://github.com/leandrocp/lumis/compare/npm-themes/v0.1.0...npm-themes/v0.2.0) (2026-06-16)
+
+### ⚠ BREAKING CHANGES
+
+- adopt the `l-` prefix on token class [#952](https://github.com/leandrocp/lumis/pull/952)
+
+### Features
+
+- rainbow brackets - [#949](https://github.com/leandrocp/lumis/pull/949)
+- css stylesheet builder - [#951](https://github.com/leandrocp/lumis/pull/951)
+
 ## [0.1.0](https://github.com/leandrocp/lumis/compare/npm-themes/v0.0.3...npm-themes/v0.1.0) (2026-04-22)
 
 Promote to v0.1.0
