@@ -1,3 +1,9 @@
+## [0.1.3](https://github.com/leandrocp/lumis/compare/npm-markdown-it-lumis/v0.1.2...npm-markdown-it-lumis/v0.1.3) (2026-06-16)
+
+### Features
+
+- l- prefix - [#952](https://github.com/leandrocp/lumis/pull/952)
+
 ## [0.1.2](https://github.com/leandrocp/lumis/compare/npm-markdown-it-lumis/v0.1.1...npm-markdown-it-lumis/v0.1.2) (2026-04-22)
 
 ### Features
