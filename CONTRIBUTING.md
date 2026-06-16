@@ -32,7 +32,7 @@ This installs the Rust, JS, and Elixir dependencies and checks the required tool
 
 Releases are prepared locally and published from tags.
 
-- Run `just release-needed` to list packages with path-scoped commits since their latest package tag.
+- Run `just release-needed` to list packages with non-chore path-scoped commits since their latest package tag.
 - Prepare each release with `just release-prepare <package> <version>`.
 - `just release-prepare` updates only the target package version file and prepends the next changelog entry.
 - If dependent manifests must move together, update them separately in the same release commit.

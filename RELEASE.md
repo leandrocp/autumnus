@@ -26,7 +26,7 @@ git tag cargo-lumis-cli/v0.2.0
 git push origin cargo-lumis-cli/v0.2.0
 ```
 
-- Run `just release-needed` first to decide which packages ship together.
+- Run `just release-needed` first to decide which packages ship together. It ignores `chore` commits.
 - Pass the bare version to `just release-prepare`, for example `0.2.0`, not `v0.2.0`.
 - Include `v` only in the git tag, for example `cargo-lumis-cli/v0.2.0`.
 - Review each changed manifest and `CHANGELOG.md` after `just release-prepare`.

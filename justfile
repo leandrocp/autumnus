@@ -378,7 +378,7 @@ themes-gen theme_name="":
 themes-list:
     cargo run --manifest-path crates/dev/Cargo.toml -- list-themes
 
-# List packages with path-scoped commits since their latest release tag
+# List packages with non-chore path-scoped commits since their latest release tag
 release-needed:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -409,9 +409,9 @@ release-needed:
         tag="$(git tag --list "$package/v*" --sort=-version:refname | head -n1)"
 
         if [ -n "$tag" ]; then
-            commits="$(git log --no-merges --format='%h %s' "$tag"..HEAD -- "$path")"
+            commits="$(git log --no-merges --extended-regexp --invert-grep --grep='^chore(\(.+\))?: ' --format='%h %s' "$tag"..HEAD -- "$path")"
         else
-            commits="$(git log --no-merges --format='%h %s' -- "$path")"
+            commits="$(git log --no-merges --extended-regexp --invert-grep --grep='^chore(\(.+\))?: ' --format='%h %s' -- "$path")"
         fi
 
         if [ -z "$commits" ]; then
@@ -432,7 +432,7 @@ release-needed:
     done
 
     if [ "$found" -eq 0 ]; then
-        echo "No package-scoped commits found since the latest package tags."
+        echo "No non-chore package-scoped commits found since the latest package tags."
     fi
 
 # Update package version files and regenerate the package changelog locally, eg: just release-prepare cargo-lumis-cli 0.2.1
