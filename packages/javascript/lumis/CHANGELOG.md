@@ -1,3 +1,15 @@
+## [0.5.0](https://github.com/leandrocp/lumis/compare/npm-lumis/v0.4.0...npm-lumis/v0.5.0) (2026-06-16)
+
+### ⚠ BREAKING CHANGES
+
+- adopt the `l-` prefix on token class [#952](https://github.com/leandrocp/lumis/pull/952)
+
+### Features
+
+- add toon language - [#734](https://github.com/leandrocp/lumis/pull/734)
+- rainbow brackets - [#949](https://github.com/leandrocp/lumis/pull/949)
+- css stylesheet builder - [#951](https://github.com/leandrocp/lumis/pull/951)
+
 ## [0.4.0](https://github.com/leandrocp/lumis/compare/npm-lumis/v0.3.0...npm-lumis/v0.4.0) (2026-04-22)
 
 ### Bug Fixes
