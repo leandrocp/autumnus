@@ -270,6 +270,57 @@ local function styles_equal(a, b)
 		and a.strikethrough == b.strikethrough
 end
 
+local function highlights_equal(a, b)
+	if type(a) ~= "table" or type(b) ~= "table" then
+		return false
+	end
+
+	for key, style in pairs(a) do
+		if not styles_equal(style, b[key]) then
+			return false
+		end
+	end
+
+	for key, style in pairs(b) do
+		if not styles_equal(style, a[key]) then
+			return false
+		end
+	end
+
+	return true
+end
+
+local function existing_theme_data(output_file)
+	local file = io.open(output_file, "r")
+	if not file then
+		return nil
+	end
+
+	local content = file:read("*a")
+	file:close()
+
+	local ok, data = pcall(vim.json.decode, content)
+	if not ok then
+		return nil
+	end
+
+	return data
+end
+
+local function clear_lua_modules(prefixes)
+	if not prefixes then
+		return
+	end
+
+	for _, prefix in ipairs(prefixes) do
+		for name in pairs(package.loaded) do
+			if name == prefix or vim.startswith(name, prefix .. ".") then
+				package.loaded[name] = nil
+			end
+		end
+	end
+end
+
 -- Helper function to extract style from highlight definition
 local function extract_style(hl)
 	local style = {}
@@ -400,6 +451,17 @@ local function extract_colorscheme_colors(theme)
 	end
 
 	local output_file = script_dir .. "/" .. theme.name .. ".json"
+	local existing = existing_theme_data(output_file)
+	if
+		existing
+		and existing.name == theme.name
+		and existing.appearance == appearance
+		and highlights_equal(existing.highlights, highlights)
+	then
+		revision = existing.revision
+		print("✓ Highlight rules unchanged; keeping existing revision\n")
+	end
+
 	local theme_data = {
 		name = theme.name,
 		appearance = appearance,
@@ -573,6 +635,8 @@ vim.pack.add = function(specs, opts)
 
 	return original_pack_add(specs_to_install, opts)
 end
+
+clear_lua_modules(theme.clear_modules)
 
 if theme.config then
 	local success, err = pcall(theme.config)

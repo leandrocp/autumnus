@@ -425,6 +425,7 @@ return {
 	{
 		url = "https://github.com/marko-cerovac/material.nvim",
 		name = "material_darker",
+		clear_modules = { "material" },
 		config = function()
 			vim.o.background = "dark"
 			vim.g.material_style = "darker"
@@ -435,6 +436,7 @@ return {
 	{
 		url = "https://github.com/marko-cerovac/material.nvim",
 		name = "material_lighter",
+		clear_modules = { "material" },
 		config = function()
 			vim.o.background = "light"
 			vim.g.material_style = "lighter"
@@ -445,6 +447,7 @@ return {
 	{
 		url = "https://github.com/marko-cerovac/material.nvim",
 		name = "material_oceanic",
+		clear_modules = { "material" },
 		config = function()
 			vim.o.background = "dark"
 			vim.g.material_style = "oceanic"
@@ -455,6 +458,7 @@ return {
 	{
 		url = "https://github.com/marko-cerovac/material.nvim",
 		name = "material_palenight",
+		clear_modules = { "material" },
 		config = function()
 			vim.o.background = "dark"
 			vim.g.material_style = "palenight"
@@ -465,6 +469,7 @@ return {
 	{
 		url = "https://github.com/marko-cerovac/material.nvim",
 		name = "material_deep_ocean",
+		clear_modules = { "material" },
 		config = function()
 			vim.o.background = "dark"
 			vim.g.material_style = "deep ocean"
