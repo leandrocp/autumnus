@@ -62,12 +62,20 @@ export async function setupPlayground(root: HTMLElement) {
 
     preview.setAttribute("data-state", "loading");
 
-    const themeData = await loadTheme(theme.id);
-    const html = await renderHighlight(language, themeData, getSample(language.id));
-    if (token !== renderToken) return;
+    try {
+      const themeData = await loadTheme(theme.id);
+      const html = await renderHighlight(language, themeData, getSample(language.id));
+      if (token !== renderToken) return;
 
-    preview.innerHTML = html;
-    preview.setAttribute("data-state", "ready");
+      preview.innerHTML = html;
+      preview.setAttribute("data-state", "ready");
+    } catch (err) {
+      if (token !== renderToken) return;
+
+      console.error(`Failed to highlight ${language.id}`, err);
+      preview.innerHTML = `<div class="p-6 font-mono text-xs text-red-500">Failed to highlight ${language.label}: ${String(err)}</div>`;
+      preview.setAttribute("data-state", "error");
+    }
   };
 
   languageSelect.addEventListener("change", () => void render());

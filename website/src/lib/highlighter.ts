@@ -23,8 +23,9 @@ function send(req: Omit<WorkerRequest, "id">): Promise<WorkerResponse> {
   });
 }
 
-export async function preloadAllLanguages(): Promise<void> {
-  await send({ type: "preloadAll" });
+export async function preloadLanguages(languageIds: string[]): Promise<void> {
+  const res = await send({ type: "preload", languageIds });
+  if (res.type === "error") throw new Error(res.message);
 }
 
 export async function renderHighlight(

@@ -1,4 +1,4 @@
-import { createHighlighter, withWasm } from "@lumis-sh/lumis";
+import { configureWasmResolver, createHighlighter } from "@lumis-sh/lumis";
 import { bundledLanguages } from "@lumis-sh/lumis/bundles/full";
 import { htmlInline, htmlMultiThemes } from "@lumis-sh/lumis/formatters";
 import type { Language, Theme } from "@lumis-sh/lumis";
@@ -6,27 +6,46 @@ import type { Language, Theme } from "@lumis-sh/lumis";
 const DEFAULT_PRE_CLASS =
   "m-0 overflow-x-auto p-5 font-mono text-[13px] leading-relaxed sm:p-6 sm:text-sm";
 
-const wasmModules = import.meta.glob<Uint8Array>(
+const wasmModules = import.meta.glob<string>(
   [
-    "../../node_modules/@lumis-sh/wasm-*/index.js",
-    "../../node_modules/@lumis-sh/wasm-bundle-full/node_modules/@lumis-sh/wasm-*/index.js",
+    "../../node_modules/@lumis-sh/wasm-*/*.wasm",
+    "../../node_modules/.pnpm/@lumis-sh+wasm-*/node_modules/@lumis-sh/wasm-*/*.wasm",
+    "!../../node_modules/@lumis-sh/wasm-bundle-*/*.wasm",
+    "!../../node_modules/.pnpm/@lumis-sh+wasm-bundle-*/node_modules/@lumis-sh/wasm-bundle-*/*.wasm",
   ],
-  { import: "default" },
+  { eager: true, import: "default", query: "?url" },
 );
 
-const wasmLoaders = new Map(
-  Object.entries(wasmModules).map(([path, loader]) => {
-    const match = path.match(/(@lumis-sh\/wasm-[^/]+)\/index\.js$/);
+const wasmUrls = new Map(
+  Object.entries(wasmModules).map(([path, url]) => {
+    const match = path.match(/(@lumis-sh\/wasm-[^/]+)\/([^/]+\.wasm)$/);
     if (!match) {
-      throw new Error(`Could not derive wasm package name from ${path}`);
+      throw new Error(`Could not derive wasm package name and file from ${path}`);
     }
 
-    return [match[1], loader];
+    return [`${match[1]}/${match[2]}`, url];
   }),
 );
 
+configureWasmResolver((_language, wasm) => {
+  const localUrl = wasmUrls.get(`${wasm.packageName}/${wasm.name}.wasm`);
+  if (localUrl) return localUrl;
+
+  return `https://cdn.jsdelivr.net/npm/${wasm.packageName}@${wasm.version}/${wasm.name}.wasm`;
+});
+
 const languageCache = new Map<string, Promise<Language>>();
 const highlighterPromise = createHighlighter();
+let highlighterQueue = Promise.resolve();
+
+function withHighlighter<T>(fn: () => Promise<T> | T): Promise<T> {
+  const task = highlighterQueue.then(fn, fn);
+  highlighterQueue = task.then(
+    () => undefined,
+    () => undefined,
+  );
+  return task;
+}
 
 async function getLanguage(languageId: string): Promise<Language> {
   const existing = languageCache.get(languageId);
@@ -38,15 +57,7 @@ async function getLanguage(languageId: string): Promise<Language> {
   }
 
   const promise = (async () => {
-    const language = await handle();
-    const loader = wasmLoaders.get(language.wasm.packageName);
-
-    if (!loader) {
-      return language;
-    }
-
-    const wasm = await loader();
-    return withWasm(language, wasm);
+    return await handle();
   })();
 
   languageCache.set(languageId, promise);
@@ -71,7 +82,7 @@ export type WorkerRequest =
       source: string;
       preClass?: string;
     }
-  | { id: number; type: "preloadAll" };
+  | { id: number; type: "preload"; languageIds: string[] };
 
 export type WorkerResponse =
   | { id: number; type: "result"; html: string }
@@ -83,43 +94,46 @@ async function handleMessage(req: WorkerRequest): Promise<WorkerResponse> {
 
   switch (req.type) {
     case "highlight": {
-      const lang = await getLanguage(req.languageId);
-      await hl.loadLanguage(lang);
-      const html = hl.highlight(
-        req.source,
-        htmlInline({
-          language: lang,
-          theme: req.theme,
-          preClass: req.preClass ?? DEFAULT_PRE_CLASS,
-          includeHighlights: true,
-          italic: false,
-        }),
-      );
+      const html = await withHighlighter(async () => {
+        const lang = await getLanguage(req.languageId);
+        await hl.loadLanguage(lang);
+        return hl.highlight(
+          req.source,
+          htmlInline({
+            language: lang,
+            theme: req.theme,
+            preClass: req.preClass ?? DEFAULT_PRE_CLASS,
+            includeHighlights: true,
+            italic: false,
+          }),
+        );
+      });
       return { id: req.id, type: "result", html };
     }
     case "highlightMultiTheme": {
-      const lang = await getLanguage(req.languageId);
-      await hl.loadLanguage(lang);
-      const html = hl.highlight(
-        req.source,
-        htmlMultiThemes({
-          language: lang,
-          themes: { light: req.lightTheme, dark: req.darkTheme },
-          defaultTheme: "light-dark()",
-          preClass: req.preClass ?? DEFAULT_PRE_CLASS,
-          italic: false,
-        }),
-      );
+      const html = await withHighlighter(async () => {
+        const lang = await getLanguage(req.languageId);
+        await hl.loadLanguage(lang);
+        return hl.highlight(
+          req.source,
+          htmlMultiThemes({
+            language: lang,
+            themes: { light: req.lightTheme, dark: req.darkTheme },
+            defaultTheme: "light-dark()",
+            preClass: req.preClass ?? DEFAULT_PRE_CLASS,
+            italic: false,
+          }),
+        );
+      });
       return { id: req.id, type: "result", html };
     }
-    case "preloadAll": {
-      await Promise.all(
-        Object.keys(bundledLanguages).map((id) =>
-          getLanguage(id)
-            .then((language) => hl.loadLanguage(language))
-            .catch(() => {}),
-        ),
-      );
+    case "preload": {
+      for (const id of req.languageIds) {
+        await withHighlighter(async () => {
+          const language = await getLanguage(id);
+          await hl.loadLanguage(language);
+        }).catch(() => {});
+      }
       return { id: req.id, type: "done" };
     }
   }

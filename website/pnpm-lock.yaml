@@ -346,8 +346,8 @@ packages:
   '@lumis-sh/wasm-haskell@0.26.0':
     resolution: {integrity: sha512-9OcR0ZPir+nEudjp1qjCB3sp1N67XkeVNTmFvPXZAv6JtCRiOBRSQbgnRzzT4AVmMaGr+gE69vjww8Xb4PoTnw==}
 
-  '@lumis-sh/wasm-hcl@0.26.0':
-    resolution: {integrity: sha512-d+gsxqa7hVrqzKGFc6fS6/HmMZKcuNKQqX6z/rgQI5uUf8q0jSZZF2KCnaiO+zEz2XS719oaMfFglFvRY71O8Q==}
+  '@lumis-sh/wasm-hcl@0.26.2':
+    resolution: {integrity: sha512-8A71CCpnP5GnloSgrtknkeEMnNjTXiavkxaxtZghCSQqcPHrrOjQaxsTP8+91ngOhfSBOAIGcVlW7d/PhK+Nrg==}
 
   '@lumis-sh/wasm-heex@0.26.0':
     resolution: {integrity: sha512-PdZHQazYfKBmiAKaoVM3dXhP//EiAkK/DGZQTzt57/umi+FUXc+j0ivUnGGJTWYc7HFFTtFCmiCog6VwmocvTQ==}
@@ -1422,7 +1422,7 @@ snapshots:
       '@lumis-sh/wasm-go': 0.26.0
       '@lumis-sh/wasm-graphql': 0.26.0
       '@lumis-sh/wasm-haskell': 0.26.0
-      '@lumis-sh/wasm-hcl': 0.26.0
+      '@lumis-sh/wasm-hcl': 0.26.2
       '@lumis-sh/wasm-heex': 0.26.0
       '@lumis-sh/wasm-html': 0.26.1
       '@lumis-sh/wasm-http': 0.26.0
@@ -1561,7 +1561,7 @@ snapshots:
 
   '@lumis-sh/wasm-haskell@0.26.0': {}
 
-  '@lumis-sh/wasm-hcl@0.26.0': {}
+  '@lumis-sh/wasm-hcl@0.26.2': {}
 
   '@lumis-sh/wasm-heex@0.26.0': {}
 
