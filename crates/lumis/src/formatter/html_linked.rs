@@ -287,7 +287,7 @@ mod tests {
     fn test_default_highlight_lines() {
         let code = "line 1\nline 2\nline 3";
         let highlight_lines = HighlightLines {
-            lines: vec![2..=2],
+            lines: std::iter::once(2..=2).collect(),
             ..Default::default()
         };
 
@@ -352,7 +352,7 @@ mod tests {
             close_tag: "</section>".to_string(),
         };
         let highlight_lines = HighlightLines {
-            lines: vec![1..=1],
+            lines: std::iter::once(1..=1).collect(),
             class: "l-highlighted".to_string(),
         };
         let code = "line 1\nline 2";
