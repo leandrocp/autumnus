@@ -84,11 +84,6 @@
     ]
   },
   {
-    "type": ">",
-    "named": false,
-    "fields": {}
-  },
-  {
     "type": "ambiguous_function_call_expression",
     "named": true,
     "fields": {
@@ -181,11 +176,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -218,6 +221,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -331,6 +338,10 @@
           {
             "type": "variable_declaration",
             "named": true
+          },
+          {
+            "type": "version",
+            "named": true
           }
         ]
       },
@@ -441,11 +452,19 @@
           "named": true
         },
         {
+          "type": "filehandle",
+          "named": true
+        },
+        {
           "type": "func0op_call_expression",
           "named": true
         },
         {
           "type": "func1op_call_expression",
+          "named": true
+        },
+        {
+          "type": "function",
           "named": true
         },
         {
@@ -478,6 +497,10 @@
         },
         {
           "type": "localization_expression",
+          "named": true
+        },
+        {
+          "type": "logical_not_expression",
           "named": true
         },
         {
@@ -590,6 +613,10 @@
         },
         {
           "type": "variable_declaration",
+          "named": true
+        },
+        {
+          "type": "version",
           "named": true
         }
       ]
@@ -680,11 +707,19 @@
           "named": true
         },
         {
+          "type": "filehandle",
+          "named": true
+        },
+        {
           "type": "func0op_call_expression",
           "named": true
         },
         {
           "type": "func1op_call_expression",
+          "named": true
+        },
+        {
+          "type": "function",
           "named": true
         },
         {
@@ -717,6 +752,10 @@
         },
         {
           "type": "localization_expression",
+          "named": true
+        },
+        {
+          "type": "logical_not_expression",
           "named": true
         },
         {
@@ -829,6 +868,10 @@
         },
         {
           "type": "variable_declaration",
+          "named": true
+        },
+        {
+          "type": "version",
           "named": true
         }
       ]
@@ -919,11 +962,19 @@
           "named": true
         },
         {
+          "type": "filehandle",
+          "named": true
+        },
+        {
           "type": "func0op_call_expression",
           "named": true
         },
         {
           "type": "func1op_call_expression",
+          "named": true
+        },
+        {
+          "type": "function",
           "named": true
         },
         {
@@ -956,6 +1007,10 @@
         },
         {
           "type": "localization_expression",
+          "named": true
+        },
+        {
+          "type": "logical_not_expression",
           "named": true
         },
         {
@@ -1068,6 +1123,10 @@
         },
         {
           "type": "variable_declaration",
+          "named": true
+        },
+        {
+          "type": "version",
           "named": true
         }
       ]
@@ -1206,11 +1265,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -1243,6 +1310,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -1356,6 +1427,10 @@
           {
             "type": "variable_declaration",
             "named": true
+          },
+          {
+            "type": "version",
+            "named": true
           }
         ]
       }
@@ -1441,11 +1516,19 @@
           "named": true
         },
         {
+          "type": "filehandle",
+          "named": true
+        },
+        {
           "type": "func0op_call_expression",
           "named": true
         },
         {
           "type": "func1op_call_expression",
+          "named": true
+        },
+        {
+          "type": "function",
           "named": true
         },
         {
@@ -1478,6 +1561,10 @@
         },
         {
           "type": "localization_expression",
+          "named": true
+        },
+        {
+          "type": "logical_not_expression",
           "named": true
         },
         {
@@ -1590,6 +1677,10 @@
         },
         {
           "type": "variable_declaration",
+          "named": true
+        },
+        {
+          "type": "version",
           "named": true
         }
       ]
@@ -1750,11 +1841,19 @@
           "named": true
         },
         {
+          "type": "filehandle",
+          "named": true
+        },
+        {
           "type": "func0op_call_expression",
           "named": true
         },
         {
           "type": "func1op_call_expression",
+          "named": true
+        },
+        {
+          "type": "function",
           "named": true
         },
         {
@@ -1787,6 +1886,10 @@
         },
         {
           "type": "localization_expression",
+          "named": true
+        },
+        {
+          "type": "logical_not_expression",
           "named": true
         },
         {
@@ -1899,6 +2002,10 @@
         },
         {
           "type": "variable_declaration",
+          "named": true
+        },
+        {
+          "type": "version",
           "named": true
         }
       ]
@@ -2007,11 +2114,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -2044,6 +2159,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -2157,6 +2276,10 @@
           {
             "type": "variable_declaration",
             "named": true
+          },
+          {
+            "type": "version",
+            "named": true
           }
         ]
       }
@@ -2242,11 +2365,19 @@
           "named": true
         },
         {
+          "type": "filehandle",
+          "named": true
+        },
+        {
           "type": "func0op_call_expression",
           "named": true
         },
         {
           "type": "func1op_call_expression",
+          "named": true
+        },
+        {
+          "type": "function",
           "named": true
         },
         {
@@ -2279,6 +2410,10 @@
         },
         {
           "type": "localization_expression",
+          "named": true
+        },
+        {
+          "type": "logical_not_expression",
           "named": true
         },
         {
@@ -2391,6 +2526,10 @@
         },
         {
           "type": "variable_declaration",
+          "named": true
+        },
+        {
+          "type": "version",
           "named": true
         }
       ]
@@ -2496,11 +2635,19 @@
           "named": true
         },
         {
+          "type": "filehandle",
+          "named": true
+        },
+        {
           "type": "func0op_call_expression",
           "named": true
         },
         {
           "type": "func1op_call_expression",
+          "named": true
+        },
+        {
+          "type": "function",
           "named": true
         },
         {
@@ -2533,6 +2680,10 @@
         },
         {
           "type": "localization_expression",
+          "named": true
+        },
+        {
+          "type": "logical_not_expression",
           "named": true
         },
         {
@@ -2646,6 +2797,10 @@
         {
           "type": "variable_declaration",
           "named": true
+        },
+        {
+          "type": "version",
+          "named": true
         }
       ]
     }
@@ -2743,11 +2898,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -2780,6 +2943,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -2892,6 +3059,10 @@
           },
           {
             "type": "variable_declaration",
+            "named": true
+          },
+          {
+            "type": "version",
             "named": true
           }
         ]
@@ -3059,11 +3230,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -3096,6 +3275,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -3208,6 +3391,10 @@
           },
           {
             "type": "variable_declaration",
+            "named": true
+          },
+          {
+            "type": "version",
             "named": true
           }
         ]
@@ -3350,11 +3537,19 @@
           "named": true
         },
         {
+          "type": "filehandle",
+          "named": true
+        },
+        {
           "type": "func0op_call_expression",
           "named": true
         },
         {
           "type": "func1op_call_expression",
+          "named": true
+        },
+        {
+          "type": "function",
           "named": true
         },
         {
@@ -3387,6 +3582,10 @@
         },
         {
           "type": "localization_expression",
+          "named": true
+        },
+        {
+          "type": "logical_not_expression",
           "named": true
         },
         {
@@ -3500,6 +3699,10 @@
         {
           "type": "variable_declaration",
           "named": true
+        },
+        {
+          "type": "version",
+          "named": true
         }
       ]
     }
@@ -3602,11 +3805,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -3639,6 +3850,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -3751,6 +3966,10 @@
           },
           {
             "type": "variable_declaration",
+            "named": true
+          },
+          {
+            "type": "version",
             "named": true
           }
         ]
@@ -3934,11 +4153,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -3971,6 +4198,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -4083,6 +4314,10 @@
           },
           {
             "type": "variable_declaration",
+            "named": true
+          },
+          {
+            "type": "version",
             "named": true
           }
         ]
@@ -4371,6 +4606,21 @@
     }
   },
   {
+    "type": "code_deref_expression",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "block",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "coderef_call_expression",
     "named": true,
     "fields": {
@@ -4463,11 +4713,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -4500,6 +4758,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -4613,6 +4875,10 @@
           {
             "type": "variable_declaration",
             "named": true
+          },
+          {
+            "type": "version",
+            "named": true
           }
         ]
       }
@@ -4698,11 +4964,19 @@
           "named": true
         },
         {
+          "type": "filehandle",
+          "named": true
+        },
+        {
           "type": "func0op_call_expression",
           "named": true
         },
         {
           "type": "func1op_call_expression",
+          "named": true
+        },
+        {
+          "type": "function",
           "named": true
         },
         {
@@ -4735,6 +5009,10 @@
         },
         {
           "type": "localization_expression",
+          "named": true
+        },
+        {
+          "type": "logical_not_expression",
           "named": true
         },
         {
@@ -4847,6 +5125,10 @@
         },
         {
           "type": "variable_declaration",
+          "named": true
+        },
+        {
+          "type": "version",
           "named": true
         }
       ]
@@ -4966,11 +5248,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -5003,6 +5293,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -5115,6 +5409,10 @@
           },
           {
             "type": "variable_declaration",
+            "named": true
+          },
+          {
+            "type": "version",
             "named": true
           }
         ]
@@ -5208,11 +5506,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -5245,6 +5551,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -5357,6 +5667,10 @@
           },
           {
             "type": "variable_declaration",
+            "named": true
+          },
+          {
+            "type": "version",
             "named": true
           }
         ]
@@ -5450,11 +5764,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -5487,6 +5809,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -5599,6 +5925,10 @@
           },
           {
             "type": "variable_declaration",
+            "named": true
+          },
+          {
+            "type": "version",
             "named": true
           }
         ]
@@ -5708,11 +6038,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -5745,6 +6083,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -5857,6 +6199,10 @@
           },
           {
             "type": "variable_declaration",
+            "named": true
+          },
+          {
+            "type": "version",
             "named": true
           }
         ]
@@ -6177,11 +6523,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -6214,6 +6568,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -6326,6 +6684,10 @@
           },
           {
             "type": "variable_declaration",
+            "named": true
+          },
+          {
+            "type": "version",
             "named": true
           }
         ]
@@ -6482,11 +6844,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -6519,6 +6889,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -6631,6 +7005,10 @@
           },
           {
             "type": "variable_declaration",
+            "named": true
+          },
+          {
+            "type": "version",
             "named": true
           }
         ]
@@ -6744,11 +7122,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -6781,6 +7167,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -6893,6 +7283,10 @@
           },
           {
             "type": "variable_declaration",
+            "named": true
+          },
+          {
+            "type": "version",
             "named": true
           }
         ]
@@ -7032,11 +7426,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -7069,6 +7471,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -7182,6 +7588,10 @@
           {
             "type": "variable_declaration",
             "named": true
+          },
+          {
+            "type": "version",
+            "named": true
           }
         ]
       }
@@ -7276,6 +7686,10 @@
           "named": true
         },
         {
+          "type": "filehandle",
+          "named": true
+        },
+        {
           "type": "filename",
           "named": true
         },
@@ -7285,6 +7699,10 @@
         },
         {
           "type": "func1op_call_expression",
+          "named": true
+        },
+        {
+          "type": "function",
           "named": true
         },
         {
@@ -7317,6 +7735,10 @@
         },
         {
           "type": "localization_expression",
+          "named": true
+        },
+        {
+          "type": "logical_not_expression",
           "named": true
         },
         {
@@ -7430,6 +7852,10 @@
         {
           "type": "variable_declaration",
           "named": true
+        },
+        {
+          "type": "version",
+          "named": true
         }
       ]
     }
@@ -7519,11 +7945,19 @@
           "named": true
         },
         {
+          "type": "filehandle",
+          "named": true
+        },
+        {
           "type": "func0op_call_expression",
           "named": true
         },
         {
           "type": "func1op_call_expression",
+          "named": true
+        },
+        {
+          "type": "function",
           "named": true
         },
         {
@@ -7556,6 +7990,10 @@
         },
         {
           "type": "localization_expression",
+          "named": true
+        },
+        {
+          "type": "logical_not_expression",
           "named": true
         },
         {
@@ -7680,6 +8118,10 @@
         },
         {
           "type": "variable_declaration",
+          "named": true
+        },
+        {
+          "type": "version",
           "named": true
         },
         {
@@ -7819,11 +8261,19 @@
           "named": true
         },
         {
+          "type": "filehandle",
+          "named": true
+        },
+        {
           "type": "func0op_call_expression",
           "named": true
         },
         {
           "type": "func1op_call_expression",
+          "named": true
+        },
+        {
+          "type": "function",
           "named": true
         },
         {
@@ -7856,6 +8306,10 @@
         },
         {
           "type": "localization_expression",
+          "named": true
+        },
+        {
+          "type": "logical_not_expression",
           "named": true
         },
         {
@@ -7968,6 +8422,10 @@
         },
         {
           "type": "variable_declaration",
+          "named": true
+        },
+        {
+          "type": "version",
           "named": true
         }
       ]
@@ -8086,11 +8544,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -8123,6 +8589,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -8236,6 +8706,10 @@
           {
             "type": "variable_declaration",
             "named": true
+          },
+          {
+            "type": "version",
+            "named": true
           }
         ]
       },
@@ -8243,6 +8717,10 @@
         "multiple": false,
         "required": false,
         "types": [
+          {
+            "type": "refalias_variable",
+            "named": true
+          },
           {
             "type": "scalar",
             "named": true
@@ -8725,11 +9203,19 @@
           "named": true
         },
         {
+          "type": "filehandle",
+          "named": true
+        },
+        {
           "type": "func0op_call_expression",
           "named": true
         },
         {
           "type": "func1op_call_expression",
+          "named": true
+        },
+        {
+          "type": "function",
           "named": true
         },
         {
@@ -8762,6 +9248,10 @@
         },
         {
           "type": "localization_expression",
+          "named": true
+        },
+        {
+          "type": "logical_not_expression",
           "named": true
         },
         {
@@ -8875,6 +9365,10 @@
         {
           "type": "variable_declaration",
           "named": true
+        },
+        {
+          "type": "version",
+          "named": true
         }
       ]
     }
@@ -8887,6 +9381,10 @@
       "multiple": false,
       "required": false,
       "types": [
+        {
+          "type": "code_deref_expression",
+          "named": true
+        },
         {
           "type": "varname",
           "named": true
@@ -8987,11 +9485,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -9024,6 +9530,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -9137,6 +9647,10 @@
           {
             "type": "variable_declaration",
             "named": true
+          },
+          {
+            "type": "version",
+            "named": true
           }
         ]
       },
@@ -9170,6 +9684,10 @@
       "multiple": false,
       "required": true,
       "types": [
+        {
+          "type": "glob_deref_expression",
+          "named": true
+        },
         {
           "type": "varname",
           "named": true
@@ -9234,6 +9752,10 @@
           "named": true
         },
         {
+          "type": "block",
+          "named": true
+        },
+        {
           "type": "command_heredoc_token",
           "named": true
         },
@@ -9262,11 +9784,19 @@
           "named": true
         },
         {
+          "type": "filehandle",
+          "named": true
+        },
+        {
           "type": "func0op_call_expression",
           "named": true
         },
         {
           "type": "func1op_call_expression",
+          "named": true
+        },
+        {
+          "type": "function",
           "named": true
         },
         {
@@ -9299,6 +9829,10 @@
         },
         {
           "type": "localization_expression",
+          "named": true
+        },
+        {
+          "type": "logical_not_expression",
           "named": true
         },
         {
@@ -9411,6 +9945,10 @@
         },
         {
           "type": "variable_declaration",
+          "named": true
+        },
+        {
+          "type": "version",
           "named": true
         }
       ]
@@ -9501,11 +10039,19 @@
           "named": true
         },
         {
+          "type": "filehandle",
+          "named": true
+        },
+        {
           "type": "func0op_call_expression",
           "named": true
         },
         {
           "type": "func1op_call_expression",
+          "named": true
+        },
+        {
+          "type": "function",
           "named": true
         },
         {
@@ -9538,6 +10084,10 @@
         },
         {
           "type": "localization_expression",
+          "named": true
+        },
+        {
+          "type": "logical_not_expression",
           "named": true
         },
         {
@@ -9650,6 +10200,10 @@
         },
         {
           "type": "variable_declaration",
+          "named": true
+        },
+        {
+          "type": "version",
           "named": true
         }
       ]
@@ -9740,11 +10294,19 @@
           "named": true
         },
         {
+          "type": "filehandle",
+          "named": true
+        },
+        {
           "type": "func0op_call_expression",
           "named": true
         },
         {
           "type": "func1op_call_expression",
+          "named": true
+        },
+        {
+          "type": "function",
           "named": true
         },
         {
@@ -9781,6 +10343,10 @@
         },
         {
           "type": "localization_expression",
+          "named": true
+        },
+        {
+          "type": "logical_not_expression",
           "named": true
         },
         {
@@ -9893,6 +10459,10 @@
         },
         {
           "type": "variable_declaration",
+          "named": true
+        },
+        {
+          "type": "version",
           "named": true
         }
       ]
@@ -9998,11 +10568,19 @@
           "named": true
         },
         {
+          "type": "filehandle",
+          "named": true
+        },
+        {
           "type": "func0op_call_expression",
           "named": true
         },
         {
           "type": "func1op_call_expression",
+          "named": true
+        },
+        {
+          "type": "function",
           "named": true
         },
         {
@@ -10035,6 +10613,10 @@
         },
         {
           "type": "localization_expression",
+          "named": true
+        },
+        {
+          "type": "logical_not_expression",
           "named": true
         },
         {
@@ -10147,6 +10729,10 @@
         },
         {
           "type": "variable_declaration",
+          "named": true
+        },
+        {
+          "type": "version",
           "named": true
         }
       ]
@@ -10255,11 +10841,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -10292,6 +10886,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -10405,6 +11003,10 @@
           {
             "type": "variable_declaration",
             "named": true
+          },
+          {
+            "type": "version",
+            "named": true
           }
         ]
       }
@@ -10490,11 +11092,19 @@
           "named": true
         },
         {
+          "type": "filehandle",
+          "named": true
+        },
+        {
           "type": "func0op_call_expression",
           "named": true
         },
         {
           "type": "func1op_call_expression",
+          "named": true
+        },
+        {
+          "type": "function",
           "named": true
         },
         {
@@ -10527,6 +11137,10 @@
         },
         {
           "type": "localization_expression",
+          "named": true
+        },
+        {
+          "type": "logical_not_expression",
           "named": true
         },
         {
@@ -10640,6 +11254,10 @@
         {
           "type": "variable_declaration",
           "named": true
+        },
+        {
+          "type": "version",
+          "named": true
         }
       ]
     }
@@ -10647,6 +11265,7 @@
   {
     "type": "heredoc_content",
     "named": true,
+    "extra": true,
     "fields": {},
     "children": {
       "multiple": true,
@@ -10662,6 +11281,10 @@
         },
         {
           "type": "array_element_expression",
+          "named": true
+        },
+        {
+          "type": "arraylen",
           "named": true
         },
         {
@@ -10747,6 +11370,10 @@
         },
         {
           "type": "expression_statement",
+          "named": true
+        },
+        {
+          "type": "filehandle",
           "named": true
         },
         {
@@ -10934,11 +11561,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -10971,6 +11606,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -11083,6 +11722,10 @@
           },
           {
             "type": "variable_declaration",
+            "named": true
+          },
+          {
+            "type": "version",
             "named": true
           }
         ]
@@ -11186,11 +11829,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -11223,6 +11874,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -11336,6 +11991,10 @@
           {
             "type": "variable_declaration",
             "named": true
+          },
+          {
+            "type": "version",
+            "named": true
           }
         ]
       }
@@ -11421,11 +12080,19 @@
           "named": true
         },
         {
+          "type": "filehandle",
+          "named": true
+        },
+        {
           "type": "func0op_call_expression",
           "named": true
         },
         {
           "type": "func1op_call_expression",
+          "named": true
+        },
+        {
+          "type": "function",
           "named": true
         },
         {
@@ -11458,6 +12125,10 @@
         },
         {
           "type": "localization_expression",
+          "named": true
+        },
+        {
+          "type": "logical_not_expression",
           "named": true
         },
         {
@@ -11570,6 +12241,10 @@
         },
         {
           "type": "variable_declaration",
+          "named": true
+        },
+        {
+          "type": "version",
           "named": true
         }
       ]
@@ -11665,11 +12340,19 @@
           "named": true
         },
         {
+          "type": "filehandle",
+          "named": true
+        },
+        {
           "type": "func0op_call_expression",
           "named": true
         },
         {
           "type": "func1op_call_expression",
+          "named": true
+        },
+        {
+          "type": "function",
           "named": true
         },
         {
@@ -11702,6 +12385,10 @@
         },
         {
           "type": "localization_expression",
+          "named": true
+        },
+        {
+          "type": "logical_not_expression",
           "named": true
         },
         {
@@ -11814,6 +12501,10 @@
         },
         {
           "type": "variable_declaration",
+          "named": true
+        },
+        {
+          "type": "version",
           "named": true
         }
       ]
@@ -11904,11 +12595,19 @@
           "named": true
         },
         {
+          "type": "filehandle",
+          "named": true
+        },
+        {
           "type": "func0op_call_expression",
           "named": true
         },
         {
           "type": "func1op_call_expression",
+          "named": true
+        },
+        {
+          "type": "function",
           "named": true
         },
         {
@@ -11941,6 +12640,10 @@
         },
         {
           "type": "localization_expression",
+          "named": true
+        },
+        {
+          "type": "logical_not_expression",
           "named": true
         },
         {
@@ -12054,8 +12757,286 @@
         {
           "type": "variable_declaration",
           "named": true
+        },
+        {
+          "type": "version",
+          "named": true
         }
       ]
+    }
+  },
+  {
+    "type": "logical_not_expression",
+    "named": true,
+    "fields": {
+      "operand": {
+        "multiple": true,
+        "required": true,
+        "types": [
+          {
+            "type": "(",
+            "named": false
+          },
+          {
+            "type": ")",
+            "named": false
+          },
+          {
+            "type": "ambiguous_function_call_expression",
+            "named": true
+          },
+          {
+            "type": "anonymous_array_expression",
+            "named": true
+          },
+          {
+            "type": "anonymous_hash_expression",
+            "named": true
+          },
+          {
+            "type": "anonymous_method_expression",
+            "named": true
+          },
+          {
+            "type": "anonymous_subroutine_expression",
+            "named": true
+          },
+          {
+            "type": "array",
+            "named": true
+          },
+          {
+            "type": "arraylen",
+            "named": true
+          },
+          {
+            "type": "assignment_expression",
+            "named": true
+          },
+          {
+            "type": "autoquoted_bareword",
+            "named": true
+          },
+          {
+            "type": "await_expression",
+            "named": true
+          },
+          {
+            "type": "bareword",
+            "named": true
+          },
+          {
+            "type": "binary_expression",
+            "named": true
+          },
+          {
+            "type": "command_heredoc_token",
+            "named": true
+          },
+          {
+            "type": "command_string",
+            "named": true
+          },
+          {
+            "type": "conditional_expression",
+            "named": true
+          },
+          {
+            "type": "do_expression",
+            "named": true
+          },
+          {
+            "type": "equality_expression",
+            "named": true
+          },
+          {
+            "type": "eval_expression",
+            "named": true
+          },
+          {
+            "type": "fileglob_expression",
+            "named": true
+          },
+          {
+            "type": "filehandle",
+            "named": true
+          },
+          {
+            "type": "func0op_call_expression",
+            "named": true
+          },
+          {
+            "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
+            "named": true
+          },
+          {
+            "type": "function_call_expression",
+            "named": true
+          },
+          {
+            "type": "glob",
+            "named": true
+          },
+          {
+            "type": "goto_expression",
+            "named": true
+          },
+          {
+            "type": "hash",
+            "named": true
+          },
+          {
+            "type": "heredoc_token",
+            "named": true
+          },
+          {
+            "type": "interpolated_string_literal",
+            "named": true
+          },
+          {
+            "type": "list_expression",
+            "named": true
+          },
+          {
+            "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
+            "named": true
+          },
+          {
+            "type": "loopex_expression",
+            "named": true
+          },
+          {
+            "type": "lowprec_logical_expression",
+            "named": true
+          },
+          {
+            "type": "map_grep_expression",
+            "named": true
+          },
+          {
+            "type": "match_regexp",
+            "named": true
+          },
+          {
+            "type": "method_call_expression",
+            "named": true
+          },
+          {
+            "type": "postfix_deref",
+            "named": true
+          },
+          {
+            "type": "postinc_expression",
+            "named": true
+          },
+          {
+            "type": "preinc_expression",
+            "named": true
+          },
+          {
+            "type": "primitive",
+            "named": true
+          },
+          {
+            "type": "quoted_regexp",
+            "named": true
+          },
+          {
+            "type": "quoted_word_list",
+            "named": true
+          },
+          {
+            "type": "readline_expression",
+            "named": true
+          },
+          {
+            "type": "refgen_expression",
+            "named": true
+          },
+          {
+            "type": "relational_expression",
+            "named": true
+          },
+          {
+            "type": "require_expression",
+            "named": true
+          },
+          {
+            "type": "require_version_expression",
+            "named": true
+          },
+          {
+            "type": "return_expression",
+            "named": true
+          },
+          {
+            "type": "scalar",
+            "named": true
+          },
+          {
+            "type": "slices",
+            "named": true
+          },
+          {
+            "type": "sort_expression",
+            "named": true
+          },
+          {
+            "type": "string_literal",
+            "named": true
+          },
+          {
+            "type": "stub_expression",
+            "named": true
+          },
+          {
+            "type": "subscripted",
+            "named": true
+          },
+          {
+            "type": "substitution_regexp",
+            "named": true
+          },
+          {
+            "type": "transliteration_expression",
+            "named": true
+          },
+          {
+            "type": "unary_expression",
+            "named": true
+          },
+          {
+            "type": "undef_expression",
+            "named": true
+          },
+          {
+            "type": "variable_declaration",
+            "named": true
+          },
+          {
+            "type": "version",
+            "named": true
+          }
+        ]
+      },
+      "operator": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "not",
+            "named": false
+          }
+        ]
+      }
     }
   },
   {
@@ -12161,11 +13142,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -12198,6 +13187,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -12310,6 +13303,10 @@
           },
           {
             "type": "variable_declaration",
+            "named": true
+          },
+          {
+            "type": "version",
             "named": true
           }
         ]
@@ -12430,11 +13427,19 @@
           "named": true
         },
         {
+          "type": "filehandle",
+          "named": true
+        },
+        {
           "type": "func0op_call_expression",
           "named": true
         },
         {
           "type": "func1op_call_expression",
+          "named": true
+        },
+        {
+          "type": "function",
           "named": true
         },
         {
@@ -12471,6 +13476,10 @@
         },
         {
           "type": "localization_expression",
+          "named": true
+        },
+        {
+          "type": "logical_not_expression",
           "named": true
         },
         {
@@ -12584,6 +13593,10 @@
         {
           "type": "variable_declaration",
           "named": true
+        },
+        {
+          "type": "version",
+          "named": true
         }
       ]
     }
@@ -12681,11 +13694,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -12718,6 +13739,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -12830,6 +13855,10 @@
           },
           {
             "type": "variable_declaration",
+            "named": true
+          },
+          {
+            "type": "version",
             "named": true
           }
         ]
@@ -12941,11 +13970,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -12978,6 +14015,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -13090,6 +14131,10 @@
           },
           {
             "type": "variable_declaration",
+            "named": true
+          },
+          {
+            "type": "version",
             "named": true
           }
         ]
@@ -13208,11 +14253,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -13245,6 +14298,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -13357,6 +14414,10 @@
           },
           {
             "type": "variable_declaration",
+            "named": true
+          },
+          {
+            "type": "version",
             "named": true
           }
         ]
@@ -13450,11 +14511,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -13487,6 +14556,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -13599,6 +14672,10 @@
           },
           {
             "type": "variable_declaration",
+            "named": true
+          },
+          {
+            "type": "version",
             "named": true
           }
         ]
@@ -13749,11 +14826,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -13786,6 +14871,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -13898,6 +14987,10 @@
           },
           {
             "type": "variable_declaration",
+            "named": true
+          },
+          {
+            "type": "version",
             "named": true
           }
         ]
@@ -13991,11 +15084,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -14028,6 +15129,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -14141,6 +15246,10 @@
           {
             "type": "variable_declaration",
             "named": true
+          },
+          {
+            "type": "version",
+            "named": true
           }
         ]
       },
@@ -14172,7 +15281,7 @@
       },
       "body": {
         "multiple": false,
-        "required": true,
+        "required": false,
         "types": [
           {
             "type": "block",
@@ -14309,11 +15418,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -14346,6 +15463,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -14458,6 +15579,10 @@
           },
           {
             "type": "variable_declaration",
+            "named": true
+          },
+          {
+            "type": "version",
             "named": true
           }
         ]
@@ -14567,11 +15692,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -14604,6 +15737,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -14716,6 +15853,10 @@
           },
           {
             "type": "variable_declaration",
+            "named": true
+          },
+          {
+            "type": "version",
             "named": true
           }
         ]
@@ -14912,11 +16053,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -14949,6 +16098,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -15062,6 +16215,10 @@
           {
             "type": "variable_declaration",
             "named": true
+          },
+          {
+            "type": "version",
+            "named": true
           }
         ]
       }
@@ -15147,11 +16304,19 @@
           "named": true
         },
         {
+          "type": "filehandle",
+          "named": true
+        },
+        {
           "type": "func0op_call_expression",
           "named": true
         },
         {
           "type": "func1op_call_expression",
+          "named": true
+        },
+        {
+          "type": "function",
           "named": true
         },
         {
@@ -15184,6 +16349,10 @@
         },
         {
           "type": "localization_expression",
+          "named": true
+        },
+        {
+          "type": "logical_not_expression",
           "named": true
         },
         {
@@ -15296,6 +16465,10 @@
         },
         {
           "type": "variable_declaration",
+          "named": true
+        },
+        {
+          "type": "version",
           "named": true
         }
       ]
@@ -15394,11 +16567,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -15431,6 +16612,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -15544,6 +16729,10 @@
           {
             "type": "variable_declaration",
             "named": true
+          },
+          {
+            "type": "version",
+            "named": true
           }
         ]
       }
@@ -15629,11 +16818,19 @@
           "named": true
         },
         {
+          "type": "filehandle",
+          "named": true
+        },
+        {
           "type": "func0op_call_expression",
           "named": true
         },
         {
           "type": "func1op_call_expression",
+          "named": true
+        },
+        {
+          "type": "function",
           "named": true
         },
         {
@@ -15666,6 +16863,10 @@
         },
         {
           "type": "localization_expression",
+          "named": true
+        },
+        {
+          "type": "logical_not_expression",
           "named": true
         },
         {
@@ -15778,6 +16979,10 @@
         },
         {
           "type": "variable_declaration",
+          "named": true
+        },
+        {
+          "type": "version",
           "named": true
         }
       ]
@@ -15876,11 +17081,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -15913,6 +17126,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -16026,6 +17243,10 @@
           {
             "type": "variable_declaration",
             "named": true
+          },
+          {
+            "type": "version",
+            "named": true
           }
         ]
       }
@@ -16111,11 +17332,19 @@
           "named": true
         },
         {
+          "type": "filehandle",
+          "named": true
+        },
+        {
           "type": "func0op_call_expression",
           "named": true
         },
         {
           "type": "func1op_call_expression",
+          "named": true
+        },
+        {
+          "type": "function",
           "named": true
         },
         {
@@ -16148,6 +17377,10 @@
         },
         {
           "type": "localization_expression",
+          "named": true
+        },
+        {
+          "type": "logical_not_expression",
           "named": true
         },
         {
@@ -16261,6 +17494,10 @@
         {
           "type": "variable_declaration",
           "named": true
+        },
+        {
+          "type": "version",
+          "named": true
         }
       ]
     }
@@ -16358,11 +17595,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -16395,6 +17640,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -16507,6 +17756,10 @@
           },
           {
             "type": "variable_declaration",
+            "named": true
+          },
+          {
+            "type": "version",
             "named": true
           }
         ]
@@ -16620,11 +17873,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -16657,6 +17918,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -16770,6 +18035,10 @@
           {
             "type": "variable_declaration",
             "named": true
+          },
+          {
+            "type": "version",
+            "named": true
           }
         ]
       },
@@ -16870,6 +18139,29 @@
     }
   },
   {
+    "type": "refalias_variable",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "array",
+          "named": true
+        },
+        {
+          "type": "hash",
+          "named": true
+        },
+        {
+          "type": "scalar",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "refgen_expression",
     "named": true,
     "fields": {},
@@ -16954,6 +18246,10 @@
           "named": true
         },
         {
+          "type": "filehandle",
+          "named": true
+        },
+        {
           "type": "func0op_call_expression",
           "named": true
         },
@@ -16995,6 +18291,10 @@
         },
         {
           "type": "localization_expression",
+          "named": true
+        },
+        {
+          "type": "logical_not_expression",
           "named": true
         },
         {
@@ -17108,6 +18408,10 @@
         {
           "type": "variable_declaration",
           "named": true
+        },
+        {
+          "type": "version",
+          "named": true
         }
       ]
     }
@@ -17130,6 +18434,10 @@
         },
         {
           "type": "array_element_expression",
+          "named": true
+        },
+        {
+          "type": "arraylen",
           "named": true
         },
         {
@@ -17252,11 +18560,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -17289,6 +18605,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -17401,6 +18721,10 @@
           },
           {
             "type": "variable_declaration",
+            "named": true
+          },
+          {
+            "type": "version",
             "named": true
           }
         ]
@@ -17536,11 +18860,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -17573,6 +18905,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -17686,6 +19022,10 @@
           {
             "type": "variable_declaration",
             "named": true
+          },
+          {
+            "type": "version",
+            "named": true
           }
         ]
       }
@@ -17709,6 +19049,10 @@
         },
         {
           "type": "array_element_expression",
+          "named": true
+        },
+        {
+          "type": "arraylen",
           "named": true
         },
         {
@@ -17823,11 +19167,19 @@
           "named": true
         },
         {
+          "type": "filehandle",
+          "named": true
+        },
+        {
           "type": "func0op_call_expression",
           "named": true
         },
         {
           "type": "func1op_call_expression",
+          "named": true
+        },
+        {
+          "type": "function",
           "named": true
         },
         {
@@ -17860,6 +19212,10 @@
         },
         {
           "type": "localization_expression",
+          "named": true
+        },
+        {
+          "type": "logical_not_expression",
           "named": true
         },
         {
@@ -17972,6 +19328,10 @@
         },
         {
           "type": "variable_declaration",
+          "named": true
+        },
+        {
+          "type": "version",
           "named": true
         }
       ]
@@ -18082,11 +19442,19 @@
           "named": true
         },
         {
+          "type": "filehandle",
+          "named": true
+        },
+        {
           "type": "func0op_call_expression",
           "named": true
         },
         {
           "type": "func1op_call_expression",
+          "named": true
+        },
+        {
+          "type": "function",
           "named": true
         },
         {
@@ -18119,6 +19487,10 @@
         },
         {
           "type": "localization_expression",
+          "named": true
+        },
+        {
+          "type": "logical_not_expression",
           "named": true
         },
         {
@@ -18231,6 +19603,10 @@
         },
         {
           "type": "variable_declaration",
+          "named": true
+        },
+        {
+          "type": "version",
           "named": true
         }
       ]
@@ -18390,11 +19766,19 @@
           "named": true
         },
         {
+          "type": "filehandle",
+          "named": true
+        },
+        {
           "type": "func0op_call_expression",
           "named": true
         },
         {
           "type": "func1op_call_expression",
+          "named": true
+        },
+        {
+          "type": "function",
           "named": true
         },
         {
@@ -18427,6 +19811,10 @@
         },
         {
           "type": "localization_expression",
+          "named": true
+        },
+        {
+          "type": "logical_not_expression",
           "named": true
         },
         {
@@ -18539,6 +19927,10 @@
         },
         {
           "type": "variable_declaration",
+          "named": true
+        },
+        {
+          "type": "version",
           "named": true
         }
       ]
@@ -18689,11 +20081,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -18726,6 +20126,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -18838,6 +20242,10 @@
           },
           {
             "type": "variable_declaration",
+            "named": true
+          },
+          {
+            "type": "version",
             "named": true
           }
         ]
@@ -18941,11 +20349,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -18978,6 +20394,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -19091,6 +20511,10 @@
           {
             "type": "variable_declaration",
             "named": true
+          },
+          {
+            "type": "version",
+            "named": true
           }
         ]
       }
@@ -19176,11 +20600,19 @@
           "named": true
         },
         {
+          "type": "filehandle",
+          "named": true
+        },
+        {
           "type": "func0op_call_expression",
           "named": true
         },
         {
           "type": "func1op_call_expression",
+          "named": true
+        },
+        {
+          "type": "function",
           "named": true
         },
         {
@@ -19213,6 +20645,10 @@
         },
         {
           "type": "localization_expression",
+          "named": true
+        },
+        {
+          "type": "logical_not_expression",
           "named": true
         },
         {
@@ -19325,6 +20761,10 @@
         },
         {
           "type": "variable_declaration",
+          "named": true
+        },
+        {
+          "type": "version",
           "named": true
         }
       ]
@@ -19460,11 +20900,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -19497,6 +20945,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -19609,6 +21061,10 @@
           },
           {
             "type": "variable_declaration",
+            "named": true
+          },
+          {
+            "type": "version",
             "named": true
           }
         ]
@@ -19834,6 +21290,10 @@
           "named": true
         },
         {
+          "type": "arraylen",
+          "named": true
+        },
+        {
           "type": "escape_sequence",
           "named": true
         },
@@ -19897,7 +21357,7 @@
       },
       "body": {
         "multiple": false,
-        "required": true,
+        "required": false,
         "types": [
           {
             "type": "block",
@@ -20159,11 +21619,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -20196,6 +21664,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -20308,6 +21780,10 @@
           },
           {
             "type": "variable_declaration",
+            "named": true
+          },
+          {
+            "type": "version",
             "named": true
           }
         ]
@@ -20427,11 +21903,19 @@
             "named": true
           },
           {
+            "type": "filehandle",
+            "named": true
+          },
+          {
             "type": "func0op_call_expression",
             "named": true
           },
           {
             "type": "func1op_call_expression",
+            "named": true
+          },
+          {
+            "type": "function",
             "named": true
           },
           {
@@ -20464,6 +21948,10 @@
           },
           {
             "type": "localization_expression",
+            "named": true
+          },
+          {
+            "type": "logical_not_expression",
             "named": true
           },
           {
@@ -20577,6 +22065,10 @@
           {
             "type": "variable_declaration",
             "named": true
+          },
+          {
+            "type": "version",
+            "named": true
           }
         ]
       },
@@ -20689,11 +22181,19 @@
           "named": true
         },
         {
+          "type": "filehandle",
+          "named": true
+        },
+        {
           "type": "func0op_call_expression",
           "named": true
         },
         {
           "type": "func1op_call_expression",
+          "named": true
+        },
+        {
+          "type": "function",
           "named": true
         },
         {
@@ -20726,6 +22226,10 @@
         },
         {
           "type": "localization_expression",
+          "named": true
+        },
+        {
+          "type": "logical_not_expression",
           "named": true
         },
         {
@@ -20838,6 +22342,10 @@
         },
         {
           "type": "variable_declaration",
+          "named": true
+        },
+        {
+          "type": "version",
           "named": true
         }
       ]
@@ -20953,11 +22461,19 @@
           "named": true
         },
         {
+          "type": "filehandle",
+          "named": true
+        },
+        {
           "type": "func0op_call_expression",
           "named": true
         },
         {
           "type": "func1op_call_expression",
+          "named": true
+        },
+        {
+          "type": "function",
           "named": true
         },
         {
@@ -20990,6 +22506,10 @@
         },
         {
           "type": "localization_expression",
+          "named": true
+        },
+        {
+          "type": "logical_not_expression",
           "named": true
         },
         {
@@ -21103,6 +22623,10 @@
         {
           "type": "variable_declaration",
           "named": true
+        },
+        {
+          "type": "version",
+          "named": true
         }
       ]
     }
@@ -21154,6 +22678,10 @@
             "named": true
           },
           {
+            "type": "refalias_variable",
+            "named": true
+          },
+          {
             "type": "scalar",
             "named": true
           }
@@ -21184,15 +22712,58 @@
             "named": true
           },
           {
+            "type": "refalias_variable",
+            "named": true
+          },
+          {
             "type": "scalar",
             "named": true
           },
           {
             "type": "undef_expression",
             "named": true
+          },
+          {
+            "type": "variable_group",
+            "named": true
           }
         ]
       }
+    }
+  },
+  {
+    "type": "variable_group",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "array",
+          "named": true
+        },
+        {
+          "type": "hash",
+          "named": true
+        },
+        {
+          "type": "refalias_variable",
+          "named": true
+        },
+        {
+          "type": "scalar",
+          "named": true
+        },
+        {
+          "type": "undef_expression",
+          "named": true
+        },
+        {
+          "type": "variable_group",
+          "named": true
+        }
+      ]
     }
   },
   {
@@ -21464,6 +23035,18 @@
     "named": false
   },
   {
+    "type": "STDERR",
+    "named": false
+  },
+  {
+    "type": "STDIN",
+    "named": false
+  },
+  {
+    "type": "STDOUT",
+    "named": false
+  },
+  {
     "type": "UNITCHECK",
     "named": false
   },
@@ -21512,6 +23095,10 @@
     "named": false
   },
   {
+    "type": "accept",
+    "named": false
+  },
+  {
     "type": "alarm",
     "named": false
   },
@@ -21524,11 +23111,27 @@
     "named": false
   },
   {
+    "type": "atan2",
+    "named": false
+  },
+  {
     "type": "attribute_value",
     "named": true
   },
   {
     "type": "await",
+    "named": false
+  },
+  {
+    "type": "bind",
+    "named": false
+  },
+  {
+    "type": "binmode",
+    "named": false
+  },
+  {
+    "type": "bless",
     "named": false
   },
   {
@@ -21548,11 +23151,19 @@
     "named": false
   },
   {
+    "type": "chmod",
+    "named": false
+  },
+  {
     "type": "chomp",
     "named": false
   },
   {
     "type": "chop",
+    "named": false
+  },
+  {
+    "type": "chown",
     "named": false
   },
   {
@@ -21581,7 +23192,12 @@
   },
   {
     "type": "comment",
-    "named": true
+    "named": true,
+    "extra": true
+  },
+  {
+    "type": "connect",
+    "named": false
   },
   {
     "type": "continue",
@@ -21592,11 +23208,19 @@
     "named": false
   },
   {
+    "type": "crypt",
+    "named": false
+  },
+  {
     "type": "data_section",
     "named": true
   },
   {
     "type": "dbmclose",
+    "named": false
+  },
+  {
+    "type": "dbmopen",
     "named": false
   },
   {
@@ -21609,6 +23233,10 @@
   },
   {
     "type": "delete",
+    "named": false
+  },
+  {
+    "type": "die",
     "named": false
   },
   {
@@ -21664,6 +23292,10 @@
     "named": false
   },
   {
+    "type": "exec",
+    "named": false
+  },
+  {
     "type": "exists",
     "named": false
   },
@@ -21688,6 +23320,10 @@
     "named": false
   },
   {
+    "type": "fcntl",
+    "named": false
+  },
+  {
     "type": "field",
     "named": false
   },
@@ -21700,6 +23336,10 @@
     "named": false
   },
   {
+    "type": "flock",
+    "named": false
+  },
+  {
     "type": "for",
     "named": false
   },
@@ -21709,6 +23349,10 @@
   },
   {
     "type": "fork",
+    "named": false
+  },
+  {
+    "type": "formline",
     "named": false
   },
   {
@@ -21728,6 +23372,14 @@
     "named": false
   },
   {
+    "type": "gethostbyaddr",
+    "named": false
+  },
+  {
+    "type": "getnetbyaddr",
+    "named": false
+  },
+  {
     "type": "getnetbyname",
     "named": false
   },
@@ -21744,7 +23396,15 @@
     "named": false
   },
   {
+    "type": "getpriority",
+    "named": false
+  },
+  {
     "type": "getprotobyname",
+    "named": false
+  },
+  {
+    "type": "getprotobynumber",
     "named": false
   },
   {
@@ -21756,7 +23416,23 @@
     "named": false
   },
   {
+    "type": "getservbyname",
+    "named": false
+  },
+  {
+    "type": "getservbyport",
+    "named": false
+  },
+  {
     "type": "getsockname",
+    "named": false
+  },
+  {
+    "type": "getsockopt",
+    "named": false
+  },
+  {
+    "type": "glob",
     "named": false
   },
   {
@@ -21788,7 +23464,15 @@
     "named": false
   },
   {
+    "type": "index",
+    "named": false
+  },
+  {
     "type": "int",
+    "named": false
+  },
+  {
+    "type": "ioctl",
     "named": false
   },
   {
@@ -21796,7 +23480,15 @@
     "named": false
   },
   {
+    "type": "join",
+    "named": false
+  },
+  {
     "type": "keys",
+    "named": false
+  },
+  {
+    "type": "kill",
     "named": false
   },
   {
@@ -21817,6 +23509,14 @@
   },
   {
     "type": "length",
+    "named": false
+  },
+  {
+    "type": "link",
+    "named": false
+  },
+  {
+    "type": "listen",
     "named": false
   },
   {
@@ -21860,6 +23560,26 @@
     "named": false
   },
   {
+    "type": "mkdir",
+    "named": false
+  },
+  {
+    "type": "msgctl",
+    "named": false
+  },
+  {
+    "type": "msgget",
+    "named": false
+  },
+  {
+    "type": "msgrcv",
+    "named": false
+  },
+  {
+    "type": "msgsend",
+    "named": false
+  },
+  {
     "type": "my",
     "named": false
   },
@@ -21876,6 +23596,10 @@
     "named": false
   },
   {
+    "type": "not",
+    "named": false
+  },
+  {
     "type": "not-interpolated",
     "named": false
   },
@@ -21885,6 +23609,14 @@
   },
   {
     "type": "oct",
+    "named": false
+  },
+  {
+    "type": "open",
+    "named": false
+  },
+  {
+    "type": "opendir",
     "named": false
   },
   {
@@ -21900,12 +23632,21 @@
     "named": false
   },
   {
+    "type": "pack",
+    "named": false
+  },
+  {
     "type": "package",
     "named": false
   },
   {
+    "type": "pipe",
+    "named": false
+  },
+  {
     "type": "pod",
-    "named": true
+    "named": true,
+    "extra": true
   },
   {
     "type": "pop",
@@ -21916,11 +23657,23 @@
     "named": false
   },
   {
+    "type": "print",
+    "named": false
+  },
+  {
+    "type": "printf",
+    "named": false
+  },
+  {
+    "type": "prototype",
+    "named": false
+  },
+  {
     "type": "prototype",
     "named": true
   },
   {
-    "type": "prototype",
+    "type": "push",
     "named": false
   },
   {
@@ -21956,6 +23709,10 @@
     "named": false
   },
   {
+    "type": "read",
+    "named": false
+  },
+  {
     "type": "readdir",
     "named": false
   },
@@ -21972,11 +23729,19 @@
     "named": false
   },
   {
+    "type": "recv",
+    "named": false
+  },
+  {
     "type": "redo",
     "named": false
   },
   {
     "type": "ref",
+    "named": false
+  },
+  {
+    "type": "rename",
     "named": false
   },
   {
@@ -21992,7 +23757,15 @@
     "named": false
   },
   {
+    "type": "reverse",
+    "named": false
+  },
+  {
     "type": "rewinddir",
+    "named": false
+  },
+  {
+    "type": "rindex",
     "named": false
   },
   {
@@ -22008,11 +23781,71 @@
     "named": false
   },
   {
+    "type": "say",
+    "named": false
+  },
+  {
     "type": "scalar",
     "named": false
   },
   {
+    "type": "seek",
+    "named": false
+  },
+  {
+    "type": "seekdir",
+    "named": false
+  },
+  {
+    "type": "select",
+    "named": false
+  },
+  {
+    "type": "semctl",
+    "named": false
+  },
+  {
+    "type": "semget",
+    "named": false
+  },
+  {
+    "type": "semop",
+    "named": false
+  },
+  {
+    "type": "send",
+    "named": false
+  },
+  {
+    "type": "setpgrp",
+    "named": false
+  },
+  {
+    "type": "setpriority",
+    "named": false
+  },
+  {
+    "type": "setsockopt",
+    "named": false
+  },
+  {
     "type": "shift",
+    "named": false
+  },
+  {
+    "type": "shmctl",
+    "named": false
+  },
+  {
+    "type": "shmread",
+    "named": false
+  },
+  {
+    "type": "shmwrite",
+    "named": false
+  },
+  {
+    "type": "shutdown",
     "named": false
   },
   {
@@ -22024,7 +23857,27 @@
     "named": false
   },
   {
+    "type": "socket",
+    "named": false
+  },
+  {
+    "type": "socketpair",
+    "named": false
+  },
+  {
     "type": "sort",
+    "named": false
+  },
+  {
+    "type": "splice",
+    "named": false
+  },
+  {
+    "type": "split",
+    "named": false
+  },
+  {
+    "type": "sprintf",
     "named": false
   },
   {
@@ -22056,11 +23909,47 @@
     "named": true
   },
   {
+    "type": "substr",
+    "named": false
+  },
+  {
+    "type": "symlink",
+    "named": false
+  },
+  {
+    "type": "syscall",
+    "named": false
+  },
+  {
+    "type": "sysopen",
+    "named": false
+  },
+  {
+    "type": "sysread",
+    "named": false
+  },
+  {
+    "type": "sysseek",
+    "named": false
+  },
+  {
+    "type": "system",
+    "named": false
+  },
+  {
+    "type": "syswrite",
+    "named": false
+  },
+  {
     "type": "tell",
     "named": false
   },
   {
     "type": "telldir",
+    "named": false
+  },
+  {
+    "type": "tie",
     "named": false
   },
   {
@@ -22088,6 +23977,10 @@
     "named": false
   },
   {
+    "type": "truncate",
+    "named": false
+  },
+  {
     "type": "try",
     "named": false
   },
@@ -22112,6 +24005,18 @@
     "named": false
   },
   {
+    "type": "unlink",
+    "named": false
+  },
+  {
+    "type": "unpack",
+    "named": false
+  },
+  {
+    "type": "unshift",
+    "named": false
+  },
+  {
     "type": "untie",
     "named": false
   },
@@ -22124,7 +24029,15 @@
     "named": false
   },
   {
+    "type": "utime",
+    "named": false
+  },
+  {
     "type": "values",
+    "named": false
+  },
+  {
+    "type": "vec",
     "named": false
   },
   {
@@ -22136,7 +24049,15 @@
     "named": false
   },
   {
+    "type": "waitpid",
+    "named": false
+  },
+  {
     "type": "wantarray",
+    "named": false
+  },
+  {
+    "type": "warn",
     "named": false
   },
   {
