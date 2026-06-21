@@ -536,6 +536,15 @@ end
 ```
 """
 
+# Lua sigil
+lua_script = ~LUA"""
+local function greet(name)
+  return "Hello, " .. name .. "!"
+end
+
+print(greet("Lumis"))
+"""
+
 # Zig sigils
 zig_code = ~z"""
 const std = @import("std");
