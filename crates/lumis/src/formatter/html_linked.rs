@@ -284,6 +284,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::single_range_in_vec_init)]
     fn test_default_highlight_lines() {
         let code = "line 1\nline 2\nline 3";
         let highlight_lines = HighlightLines {
@@ -346,6 +347,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::single_range_in_vec_init)]
     fn test_header_with_highlight_lines() {
         let header = HtmlElement {
             open_tag: "<section class=\"code-section\">".to_string(),
