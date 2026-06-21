@@ -160,7 +160,7 @@
 [
   (line_comment)
   (multiline_comment)
-] @comment 
+] @comment
 
 ((multiline_comment) @comment.documentation
   (#lua-match? @comment.documentation "^/[*][*][^*].*[*]/$"))
