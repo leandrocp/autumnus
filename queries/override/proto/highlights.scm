@@ -1,4 +1,3 @@
-; This file is auto-generated. Do not edit.
 (full_ident
   (identifier) @variable)
 
