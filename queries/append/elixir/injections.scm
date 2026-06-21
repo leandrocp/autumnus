@@ -22,6 +22,14 @@
  (#set! injection.language "markdown")
  (#set! injection.combined))
 
+; Lua
+((sigil
+  (sigil_name) @_sigil_name
+  (quoted_content) @injection.content)
+ (#eq? @_sigil_name "LUA")
+ (#set! injection.language "lua")
+ (#set! injection.combined))
+
 ; Python
 ((sigil
   (sigil_name) @_sigil_name
