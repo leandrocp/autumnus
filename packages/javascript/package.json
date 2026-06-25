@@ -7,7 +7,7 @@
   },
   "devDependencies": {
     "@microsoft/api-extractor": "^7.58.0",
-    "smol-toml": "^1.6.1",
+    "smol-toml": "^1.7.0",
     "tsx": "^4.19.0"
   }
 }
