@@ -1148,15 +1148,6 @@ return {
 		end,
 	},
 	{
-		url = "https://github.com/craftzdog/solarized-osaka.nvim",
-		name = "solarized_osaka_storm",
-		config = function()
-			vim.o.background = "dark"
-			require("solarized-osaka").setup({ style = "storm" })
-			vim.cmd([[colorscheme solarized-osaka]])
-		end,
-	},
-	{
 		url = "https://github.com/olivercederborg/poimandres.nvim",
 		name = "poimandres",
 		config = function()
