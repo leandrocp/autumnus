@@ -1,6 +1,6 @@
 {
   "name": "mfd_flir_bh",
-  "appearance": "dark",
+  "appearance": "light",
   "revision": "72ae627792960a7e490cb5242a78c570d02ba775",
   "highlights": {
     "attribute": {
@@ -63,13 +63,13 @@
       "bold": true
     },
     "diff.delta": {
-      "fg": "#8cf8f7"
+      "fg": "#007373"
     },
     "diff.minus": {
-      "fg": "#ffc0b9"
+      "fg": "#590008"
     },
     "diff.plus": {
-      "fg": "#b3f6c0"
+      "fg": "#005523"
     },
     "function": {
       "fg": "#383838",

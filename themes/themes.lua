@@ -1516,7 +1516,7 @@ return {
 		url = "https://github.com/kungfusheep/mfd.nvim",
 		name = "mfd_flir_bh",
 		config = function()
-			vim.o.background = "dark"
+			vim.o.background = "light"
 			vim.cmd([[colorscheme mfd-flir-bh]])
 		end,
 	},
