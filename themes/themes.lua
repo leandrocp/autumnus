@@ -2004,7 +2004,7 @@ return {
 		name = "flow_dark",
 		config = function()
 			vim.o.background = "dark"
-			require("flow").setup({ mode = "normal" })
+			require("flow").setup()
 			vim.cmd([[colorscheme flow]])
 		end,
 	},
@@ -2013,7 +2013,11 @@ return {
 		name = "flow_light",
 		config = function()
 			vim.o.background = "light"
-			require("flow").setup({ mode = "normal" })
+			require("flow").setup({
+				theme = {
+					style = "light",
+				}
+			})
 			vim.cmd([[colorscheme flow]])
 		end,
 	},
