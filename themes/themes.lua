@@ -1229,16 +1229,7 @@ return {
 	},
 	{
 		url = "https://github.com/zenbones-theme/zenbones.nvim",
-		name = "vimbones_dark",
-		config = function()
-			vim.o.background = "dark"
-			vim.cmd([[colorscheme vimbones]])
-		end,
-		dependencies = { "https://github.com/rktjmp/lush.nvim" },
-	},
-	{
-		url = "https://github.com/zenbones-theme/zenbones.nvim",
-		name = "vimbones_light",
+		name = "vimbones",
 		config = function()
 			vim.o.background = "light"
 			vim.cmd([[colorscheme vimbones]])
@@ -1283,18 +1274,9 @@ return {
 	},
 	{
 		url = "https://github.com/zenbones-theme/zenbones.nvim",
-		name = "nordbones_dark",
+		name = "nordbones",
 		config = function()
 			vim.o.background = "dark"
-			vim.cmd([[colorscheme nordbones]])
-		end,
-		dependencies = { "https://github.com/rktjmp/lush.nvim" },
-	},
-	{
-		url = "https://github.com/zenbones-theme/zenbones.nvim",
-		name = "nordbones_light",
-		config = function()
-			vim.o.background = "light"
 			vim.cmd([[colorscheme nordbones]])
 		end,
 		dependencies = { "https://github.com/rktjmp/lush.nvim" },
@@ -1337,18 +1319,9 @@ return {
 	},
 	{
 		url = "https://github.com/zenbones-theme/zenbones.nvim",
-		name = "duckbones_dark",
+		name = "duckbones",
 		config = function()
 			vim.o.background = "dark"
-			vim.cmd([[colorscheme duckbones]])
-		end,
-		dependencies = { "https://github.com/rktjmp/lush.nvim" },
-	},
-	{
-		url = "https://github.com/zenbones-theme/zenbones.nvim",
-		name = "duckbones_light",
-		config = function()
-			vim.o.background = "light"
 			vim.cmd([[colorscheme duckbones]])
 		end,
 		dependencies = { "https://github.com/rktjmp/lush.nvim" },
@@ -1364,18 +1337,9 @@ return {
 	},
 	{
 		url = "https://github.com/zenbones-theme/zenbones.nvim",
-		name = "kanagawabones_dark",
+		name = "kanagawabones",
 		config = function()
 			vim.o.background = "dark"
-			vim.cmd([[colorscheme kanagawabones]])
-		end,
-		dependencies = { "https://github.com/rktjmp/lush.nvim" },
-	},
-	{
-		url = "https://github.com/zenbones-theme/zenbones.nvim",
-		name = "kanagawabones_light",
-		config = function()
-			vim.o.background = "light"
 			vim.cmd([[colorscheme kanagawabones]])
 		end,
 		dependencies = { "https://github.com/rktjmp/lush.nvim" },
