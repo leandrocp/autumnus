@@ -1,7 +1,7 @@
 {
   "name": "astromars",
   "appearance": "dark",
-  "revision": "95c046b763266a4873bdf0cbf6a1824c929dec3a",
+  "revision": "37afa2a78ce4d8d3d70827f84710c14b78c5d071",
   "highlights": {
     "attribute": {
       "fg": "#c3963d"
@@ -305,24 +305,6 @@
     "punctuation.bracket.php": {
       "fg": "#cd87ba",
       "bold": true
-    },
-    "punctuation.bracket.rainbow.1": {
-      "fg": "#df8489"
-    },
-    "punctuation.bracket.rainbow.2": {
-      "fg": "#c3963d"
-    },
-    "punctuation.bracket.rainbow.3": {
-      "fg": "#4fa9c6"
-    },
-    "punctuation.bracket.rainbow.4": {
-      "fg": "#ef9474"
-    },
-    "punctuation.bracket.rainbow.5": {
-      "fg": "#84a860"
-    },
-    "punctuation.bracket.rainbow.6": {
-      "fg": "#cd87ba"
     },
     "punctuation.delimiter": {
       "fg": "#a5b2bc"

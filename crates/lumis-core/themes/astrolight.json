@@ -1,7 +1,7 @@
 {
   "name": "astrolight",
   "appearance": "light",
-  "revision": "95c046b763266a4873bdf0cbf6a1824c929dec3a",
+  "revision": "37afa2a78ce4d8d3d70827f84710c14b78c5d071",
   "highlights": {
     "attribute": {
       "fg": "#7300b8"
@@ -305,24 +305,6 @@
     "punctuation.bracket.php": {
       "fg": "#9e007c",
       "bold": true
-    },
-    "punctuation.bracket.rainbow.1": {
-      "fg": "#990000"
-    },
-    "punctuation.bracket.rainbow.2": {
-      "fg": "#7300b8"
-    },
-    "punctuation.bracket.rainbow.3": {
-      "fg": "#00508a"
-    },
-    "punctuation.bracket.rainbow.4": {
-      "fg": "#a34500"
-    },
-    "punctuation.bracket.rainbow.5": {
-      "fg": "#345e00"
-    },
-    "punctuation.bracket.rainbow.6": {
-      "fg": "#9e007c"
     },
     "punctuation.delimiter": {
       "fg": "#4f4f4f"
