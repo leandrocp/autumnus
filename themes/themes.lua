@@ -726,18 +726,9 @@ return {
 	},
 	{
 		url = "https://github.com/svrana/neosolarized.nvim",
-		name = "neosolarized_dark",
+		name = "neosolarized",
 		config = function()
 			vim.o.background = "dark"
-			vim.cmd([[colorscheme neosolarized]])
-		end,
-		dependencies = { "https://github.com/tjdevries/colorbuddy.nvim" },
-	},
-	{
-		url = "https://github.com/svrana/neosolarized.nvim",
-		name = "neosolarized_light",
-		config = function()
-			vim.o.background = "light"
 			vim.cmd([[colorscheme neosolarized]])
 		end,
 		dependencies = { "https://github.com/tjdevries/colorbuddy.nvim" },

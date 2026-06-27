@@ -1,6 +1,6 @@
 {
-  "name": "neosolarized_light",
-  "appearance": "light",
+  "name": "neosolarized",
+  "appearance": "dark",
   "revision": "0c01fd2ac2ab33918073f57c63bcb2ae5a31d8de",
   "highlights": {
     "attribute": {
@@ -56,13 +56,13 @@
       "fg": "#cb4b16"
     },
     "diff.delta": {
-      "fg": "#007373"
+      "fg": "#8cf8f7"
     },
     "diff.minus": {
-      "fg": "#590008"
+      "fg": "#ffc0b9"
     },
     "diff.plus": {
-      "fg": "#005523"
+      "fg": "#b3f6c0"
     },
     "error": {
       "fg": "#dc322f"
