@@ -65,13 +65,13 @@
   font-weight: bold;
 }
 .l-diff-delta {
-  color: #8cf8f7;
+  color: #007373;
 }
 .l-diff-minus {
-  color: #ffc0b9;
+  color: #590008;
 }
 .l-diff-plus {
-  color: #b3f6c0;
+  color: #005523;
 }
 .l-function {
   color: #383838;

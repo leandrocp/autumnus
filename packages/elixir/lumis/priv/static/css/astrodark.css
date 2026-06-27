@@ -1,5 +1,5 @@
 /* astrodark
- * revision: 95c046b763266a4873bdf0cbf6a1824c929dec3a
+ * revision: 37afa2a78ce4d8d3d70827f84710c14b78c5d071
  */
 .lumis {
   color: #adb0bb;
@@ -303,24 +303,6 @@
 .l-punctuation-bracket-php {
   color: #dd97f1;
   font-weight: bold;
-}
-.l-punctuation-bracket-rainbow-1 {
-  color: #ff838b;
-}
-.l-punctuation-bracket-rainbow-2 {
-  color: #dfab25;
-}
-.l-punctuation-bracket-rainbow-3 {
-  color: #5eb7ff;
-}
-.l-punctuation-bracket-rainbow-4 {
-  color: #f5983a;
-}
-.l-punctuation-bracket-rainbow-5 {
-  color: #87c05f;
-}
-.l-punctuation-bracket-rainbow-6 {
-  color: #dd97f1;
 }
 .l-punctuation-delimiter {
   color: #adb0bb;

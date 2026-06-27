@@ -1,8 +1,9 @@
-/* neosolarized_light
+/* neosolarized
  * revision: 0c01fd2ac2ab33918073f57c63bcb2ae5a31d8de
  */
 .lumis {
   color: #839496;
+  background-color: #002b36;
 }
 .l-attribute {
   color: #268bd2;
@@ -57,13 +58,13 @@
   color: #cb4b16;
 }
 .l-diff-delta {
-  color: #007373;
+  color: #8cf8f7;
 }
 .l-diff-minus {
-  color: #590008;
+  color: #ffc0b9;
 }
 .l-diff-plus {
-  color: #005523;
+  color: #b3f6c0;
 }
 .l-error {
   color: #dc322f;
