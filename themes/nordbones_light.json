@@ -1,7 +1,7 @@
 {
   "name": "nordbones_light",
   "appearance": "dark",
-  "revision": "239bdb9a09c8d38c752c43590d02f654ed0da2b0",
+  "revision": "8304d8df9b823ff11e103afa62f38c39f534abe6",
   "highlights": {
     "attribute": {
       "fg": "#81a1c1"

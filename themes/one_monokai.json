@@ -1,7 +1,7 @@
 {
   "name": "one_monokai",
   "appearance": "dark",
-  "revision": "903b3e8923d67d3ee4b67f462b2b112012d7a69d",
+  "revision": "26e95c14dd3dcd4bf5752d19a54a28817f7d8ea7",
   "highlights": {
     "attribute": {
       "fg": "#61afef"
