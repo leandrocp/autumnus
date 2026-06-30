@@ -42,7 +42,7 @@ jobs:
       parsers: ${{ steps.needed.outputs.parsers }}
       skip: ${{ steps.needed.outputs.skip }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: taiki-e/install-action@just
 
@@ -81,7 +81,7 @@ jobs:
         parser: ${{ fromJson(needs.detect.outputs.parsers) }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: taiki-e/install-action@just
 
