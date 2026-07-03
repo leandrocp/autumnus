@@ -10,7 +10,7 @@
 //! HTML with CSS classes like:
 //!
 //! ```html
-//! <pre class="lumis"><code class="language-rust" translate="no" tabindex="0"><div class="l-line" data-line="1"><span class="l-keyword-function">fn</span> <span class="l-function">main</span><span class="l-punctuation-bracket">(</span><span class="l-punctuation-bracket">)</span> <span class="l-punctuation-bracket">&lbrace;</span> <span class="l-keyword-exception">println</span><span class="l-function-macro">!</span><span class="l-punctuation-bracket">(</span><span class="l-string">&quot;Hello&quot;</span><span class="l-punctuation-bracket">)</span><span class="l-punctuation-delimiter">;</span> <span class="l-punctuation-bracket">&rbrace;</span></div></code></pre>
+//! <pre class="lumis"><code class="language-rust" translate="no" tabindex="0"><div class="l-line" data-line="1"><span class="l-keyword-function">fn</span> <span class="l-function">main</span><span class="l-punctuation-bracket">(</span><span class="l-punctuation-bracket">)</span> <span class="l-punctuation-bracket">{</span> <span class="l-keyword-exception">println</span><span class="l-function-macro">!</span><span class="l-punctuation-bracket">(</span><span class="l-string">&quot;Hello&quot;</span><span class="l-punctuation-bracket">)</span><span class="l-punctuation-delimiter">;</span> <span class="l-punctuation-bracket">}</span></div></code></pre>
 //! ```
 //!
 //! See the [formatter](crate::formatter) module for more information and examples.

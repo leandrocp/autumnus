@@ -491,9 +491,9 @@ end
     }
 
     #[test]
-    fn test_highlight_html_inline_escape_curly_braces() {
+    fn test_highlight_html_inline_preserves_curly_braces() {
         let code = "{:ok, char: '{'}";
-        let expected = r#"<pre class="lumis" style="color: #c6d0f5; background-color: #303446;"><code class="language-elixir" translate="no" tabindex="0"><div class="l-line" data-line="1"><span style="color: #949cbb;">&lbrace;</span><span style="color: #eebebe;">:ok</span><span style="color: #949cbb;">,</span> <span style="color: #eebebe;">char: </span><span style="color: #81c8be;">&#39;&lbrace;&#39;</span><span style="color: #949cbb;">&rbrace;</span>
+        let expected = r#"<pre class="lumis" style="color: #c6d0f5; background-color: #303446;"><code class="language-elixir" translate="no" tabindex="0"><div class="l-line" data-line="1"><span style="color: #949cbb;">{</span><span style="color: #eebebe;">:ok</span><span style="color: #949cbb;">,</span> <span style="color: #eebebe;">char: </span><span style="color: #81c8be;">&#39;{&#39;</span><span style="color: #949cbb;">}</span>
 </div></code></pre>"#;
 
         let formatter = HtmlInlineBuilder::default()
@@ -543,9 +543,9 @@ end
     }
 
     #[test]
-    fn test_highlight_html_linked_escape_curly_braces() {
+    fn test_highlight_html_linked_preserves_curly_braces() {
         let code = "{:ok, char: '{'}";
-        let expected = r#"<pre class="lumis"><code class="language-elixir" translate="no" tabindex="0"><div class="l-line" data-line="1"><span class="l-punctuation-bracket">&lbrace;</span><span class="l-string-special-symbol">:ok</span><span class="l-punctuation-delimiter">,</span> <span class="l-string-special-symbol">char: </span><span class="l-character">&#39;&lbrace;&#39;</span><span class="l-punctuation-bracket">&rbrace;</span>
+        let expected = r#"<pre class="lumis"><code class="language-elixir" translate="no" tabindex="0"><div class="l-line" data-line="1"><span class="l-punctuation-bracket">{</span><span class="l-string-special-symbol">:ok</span><span class="l-punctuation-delimiter">,</span> <span class="l-string-special-symbol">char: </span><span class="l-character">&#39;{&#39;</span><span class="l-punctuation-bracket">}</span>
 </div></code></pre>"#;
 
         let formatter = HtmlLinkedBuilder::default()

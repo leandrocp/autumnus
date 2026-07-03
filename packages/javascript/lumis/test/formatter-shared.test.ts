@@ -78,9 +78,9 @@ describe("formatter shared helpers", () => {
     expect(textDecoration({})).toBe("none");
   });
 
-  it("escapes HTML entities and braces", () => {
+  it("escapes HTML entities without touching braces", () => {
     expect(escape(`<tag attr='x'>&{"y"}`)).toBe(
-      "&lt;tag attr=&#39;x&#39;&gt;&amp;&lbrace;&quot;y&quot;&rbrace;",
+      "&lt;tag attr=&#39;x&#39;&gt;&amp;{&quot;y&quot;}",
     );
   });
 
@@ -201,10 +201,10 @@ describe("formatter shared helpers", () => {
     ]);
   });
 
-  it("escapes only braces", () => {
+  it("escapes braces only through the framework helper", () => {
     expect(escapeBraces("fn() {}")).toBe("fn() &lbrace;&rbrace;");
     expect(escapeBraces("<div>{x}</div>")).toBe("<div>&lbrace;x&rbrace;</div>");
-    expect(escapeFragment("<div>{x}</div>")).toBe("&lt;div&gt;&lbrace;x&rbrace;&lt;/div&gt;");
+    expect(escapeFragment("<div>{x}</div>")).toBe("&lt;div&gt;{x}&lt;/div&gt;");
   });
 
   it("renders HTML lines from events with span attrs callback", () => {

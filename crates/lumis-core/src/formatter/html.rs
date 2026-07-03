@@ -361,8 +361,6 @@ pub fn escape(text: &str) -> String {
             '>' => buf.push_str("&gt;"),
             '"' => buf.push_str("&quot;"),
             '\'' => buf.push_str("&#39;"),
-            '{' => buf.push_str("&lbrace;"),
-            '}' => buf.push_str("&rbrace;"),
             _ => buf.push(c),
         }
     }
@@ -480,7 +478,7 @@ pub fn append_fragment(lines: &mut Vec<String>, fragment: &str) {
     }
 }
 
-/// Escape text for use in HTML span content (escapes HTML entities and braces).
+/// Escape text for use in HTML span content.
 pub fn escape_fragment(text: &str) -> String {
     escape(text)
 }
@@ -659,10 +657,7 @@ mod tests {
 
     #[test]
     fn test_escape_all_entities() {
-        assert_eq!(
-            escape("&<>\"'{}"),
-            "&amp;&lt;&gt;&quot;&#39;&lbrace;&rbrace;"
-        );
+        assert_eq!(escape("&<>\"'{}"), "&amp;&lt;&gt;&quot;&#39;{}");
     }
 
     #[test]
@@ -674,7 +669,7 @@ mod tests {
     fn test_escape_mixed_content() {
         assert_eq!(
             escape("fn main() { println!(\"<html>\"); }"),
-            "fn main() &lbrace; println!(&quot;&lt;html&gt;&quot;); &rbrace;"
+            "fn main() { println!(&quot;&lt;html&gt;&quot;); }"
         );
     }
 
