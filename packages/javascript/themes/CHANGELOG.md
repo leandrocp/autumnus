@@ -1,3 +1,10 @@
+## [0.2.1](https://github.com/leandrocp/lumis/compare/npm-themes/v0.2.0...npm-themes/v0.2.1) (2026-07-03)
+
+
+### Bug Fixes
+
+- themes issues - [#977](https://github.com/leandrocp/lumis/pull/977) by @Fosox
+
 ## [0.2.0](https://github.com/leandrocp/lumis/compare/npm-themes/v0.1.0...npm-themes/v0.2.0) (2026-06-16)
 
 ### ⚠ BREAKING CHANGES
