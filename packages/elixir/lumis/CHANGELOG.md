@@ -1,3 +1,11 @@
+## [0.6.1](https://github.com/leandrocp/lumis/compare/hex-lumis/v0.6.0...hex-lumis/v0.6.1) (2026-07-03)
+
+
+### Bug Fixes
+
+- preserve curly braces - [#982](https://github.com/leandrocp/lumis/pull/982)
+- themes issues - [#977](https://github.com/leandrocp/lumis/pull/977) by @Fosox
+
 ## [0.6.0](https://github.com/leandrocp/lumis/compare/hex-lumis/v0.5.0...hex-lumis/v0.6.0) (2026-06-12)
 
 ### ⚠ BREAKING CHANGES
