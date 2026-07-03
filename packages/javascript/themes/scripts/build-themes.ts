@@ -50,6 +50,7 @@ function readThemes() {
 }
 
 function generateTS(themes: ReturnType<typeof readThemes>) {
+  fs.rmSync(THEMES_OUT, { recursive: true, force: true });
   fs.mkdirSync(THEMES_OUT, { recursive: true });
 
   for (const { name, data } of themes) {

@@ -3,7 +3,6 @@
  */
 .lumis {
   color: #002b36;
-  background-color: #fdf6e3;
 }
 .l-attribute {
   color: #d33682;
@@ -88,7 +87,7 @@
   font-weight: bold;
 }
 .l-highlighted {
-  background-color: #eee8d5;
+  background-color: #fdf6e3;
 }
 .l-keyword {
   color: #dc322f;

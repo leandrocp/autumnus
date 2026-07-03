@@ -881,7 +881,7 @@ mod tests {
         assert_eq!(
             theme.get_style("tag.attribute"),
             Some(&Style {
-                fg: Some("#e5c890".to_string()),
+                fg: Some("#e5c891".to_string()),
                 italic: true,
                 ..Default::default()
             })

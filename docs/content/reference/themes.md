@@ -61,8 +61,7 @@ For usage examples, see [Themes](/themes) and [CSS Theme Files](/themes/css-file
 | `doom_one_light` | [NTBBloodbath/doom-one.nvim](https://github.com/NTBBloodbath/doom-one.nvim) |
 | `dracula` | [Mofiqul/dracula.nvim](https://github.com/Mofiqul/dracula.nvim) |
 | `dracula_soft` | [Mofiqul/dracula.nvim](https://github.com/Mofiqul/dracula.nvim) |
-| `duckbones_dark` | [zenbones-theme/zenbones.nvim](https://github.com/zenbones-theme/zenbones.nvim) |
-| `duckbones_light` | [zenbones-theme/zenbones.nvim](https://github.com/zenbones-theme/zenbones.nvim) |
+| `duckbones` | [zenbones-theme/zenbones.nvim](https://github.com/zenbones-theme/zenbones.nvim) |
 | `duskfox` | [EdenEast/nightfox.nvim](https://github.com/EdenEast/nightfox.nvim) |
 | `edge_aura` | [sainnhe/edge](https://github.com/sainnhe/edge) |
 | `edge_dark` | [sainnhe/edge](https://github.com/sainnhe/edge) |
@@ -111,8 +110,7 @@ For usage examples, see [Themes](/themes) and [CSS Theme Files](/themes/css-file
 | `kanagawa_paper_dark` | [thesimonho/kanagawa-paper.nvim](https://github.com/thesimonho/kanagawa-paper.nvim) |
 | `kanagawa_paper_light` | [thesimonho/kanagawa-paper.nvim](https://github.com/thesimonho/kanagawa-paper.nvim) |
 | `kanagawa_wave` | [rebelot/kanagawa.nvim](https://github.com/rebelot/kanagawa.nvim) |
-| `kanagawabones_dark` | [zenbones-theme/zenbones.nvim](https://github.com/zenbones-theme/zenbones.nvim) |
-| `kanagawabones_light` | [zenbones-theme/zenbones.nvim](https://github.com/zenbones-theme/zenbones.nvim) |
+| `kanagawabones` | [zenbones-theme/zenbones.nvim](https://github.com/zenbones-theme/zenbones.nvim) |
 | `lackluster` | [slugbyte/lackluster.nvim](https://github.com/slugbyte/lackluster.nvim) |
 | `lackluster_hack` | [slugbyte/lackluster.nvim](https://github.com/slugbyte/lackluster.nvim) |
 | `lackluster_mint` | [slugbyte/lackluster.nvim](https://github.com/slugbyte/lackluster.nvim) |
@@ -181,10 +179,9 @@ For usage examples, see [Themes](/themes) and [CSS Theme Files](/themes/css-file
 | `neon_default` | [rafamadriz/neon](https://github.com/rafamadriz/neon) |
 | `neon_doom` | [rafamadriz/neon](https://github.com/rafamadriz/neon) |
 | `neon_light` | [rafamadriz/neon](https://github.com/rafamadriz/neon) |
+| `neosolarized` | [svrana/neosolarized.nvim](https://github.com/svrana/neosolarized.nvim) |
 | `neosolarized2_dark` | [Tsuzat/NeoSolarized.nvim](https://github.com/Tsuzat/NeoSolarized.nvim) |
 | `neosolarized2_light` | [Tsuzat/NeoSolarized.nvim](https://github.com/Tsuzat/NeoSolarized.nvim) |
-| `neosolarized_dark` | [svrana/neosolarized.nvim](https://github.com/svrana/neosolarized.nvim) |
-| `neosolarized_light` | [svrana/neosolarized.nvim](https://github.com/svrana/neosolarized.nvim) |
 | `neovim_dark` | [folke/lazy.nvim](https://github.com/folke/lazy.nvim) |
 | `neovim_light` | [folke/lazy.nvim](https://github.com/folke/lazy.nvim) |
 | `night_owl` | [oxfist/night-owl.nvim](https://github.com/oxfist/night-owl.nvim) |
@@ -192,8 +189,7 @@ For usage examples, see [Themes](/themes) and [CSS Theme Files](/themes/css-file
 | `nightfox` | [EdenEast/nightfox.nvim](https://github.com/EdenEast/nightfox.nvim) |
 | `no_clown_fiesta` | [aktersnurra/no-clown-fiesta.nvim](https://github.com/aktersnurra/no-clown-fiesta.nvim) |
 | `nord` | [shaunsingh/nord.nvim](https://github.com/shaunsingh/nord.nvim) |
-| `nordbones_dark` | [zenbones-theme/zenbones.nvim](https://github.com/zenbones-theme/zenbones.nvim) |
-| `nordbones_light` | [zenbones-theme/zenbones.nvim](https://github.com/zenbones-theme/zenbones.nvim) |
+| `nordbones` | [zenbones-theme/zenbones.nvim](https://github.com/zenbones-theme/zenbones.nvim) |
 | `nordfox` | [EdenEast/nightfox.nvim](https://github.com/EdenEast/nightfox.nvim) |
 | `nordic` | [AlexvZyl/nordic.nvim](https://github.com/AlexvZyl/nordic.nvim) |
 | `obscure` | [killitar/obscure.nvim](https://github.com/killitar/obscure.nvim) |
@@ -232,7 +228,6 @@ For usage examples, see [Themes](/themes) and [CSS Theme Files](/themes/css-file
 | `solarized_autumn_light` | [maxmx03/solarized.nvim](https://github.com/maxmx03/solarized.nvim) |
 | `solarized_osaka_dark` | [craftzdog/solarized-osaka.nvim](https://github.com/craftzdog/solarized-osaka.nvim) |
 | `solarized_osaka_light` | [craftzdog/solarized-osaka.nvim](https://github.com/craftzdog/solarized-osaka.nvim) |
-| `solarized_osaka_storm` | [craftzdog/solarized-osaka.nvim](https://github.com/craftzdog/solarized-osaka.nvim) |
 | `solarized_spring_dark` | [maxmx03/solarized.nvim](https://github.com/maxmx03/solarized.nvim) |
 | `solarized_spring_light` | [maxmx03/solarized.nvim](https://github.com/maxmx03/solarized.nvim) |
 | `solarized_summer_dark` | [maxmx03/solarized.nvim](https://github.com/maxmx03/solarized.nvim) |
@@ -258,8 +253,7 @@ For usage examples, see [Themes](/themes) and [CSS Theme Files](/themes/css-file
 | `tokyonight_storm` | [folke/tokyonight.nvim](https://github.com/folke/tokyonight.nvim) |
 | `vague` | [vague-theme/vague.nvim](https://github.com/vague-theme/vague.nvim) |
 | `vesper` | [datsfilipe/vesper.nvim](https://github.com/datsfilipe/vesper.nvim) |
-| `vimbones_dark` | [zenbones-theme/zenbones.nvim](https://github.com/zenbones-theme/zenbones.nvim) |
-| `vimbones_light` | [zenbones-theme/zenbones.nvim](https://github.com/zenbones-theme/zenbones.nvim) |
+| `vimbones` | [zenbones-theme/zenbones.nvim](https://github.com/zenbones-theme/zenbones.nvim) |
 | `vscode_dark` | [Mofiqul/vscode.nvim](https://github.com/Mofiqul/vscode.nvim) |
 | `vscode_light` | [Mofiqul/vscode.nvim](https://github.com/Mofiqul/vscode.nvim) |
 | `xcode_dark` | [nomis51/nvim-xcode-theme](https://github.com/nomis51/nvim-xcode-theme) |
