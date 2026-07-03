@@ -180,7 +180,7 @@ export function styleToCss(
 }
 
 /**
- * Escape HTML special characters including braces.
+ * Escape HTML special characters.
  *
  * ```ts
  * escape('<div class="a">')
@@ -206,12 +206,6 @@ export function escape(text: string): string {
         break;
       case "'":
         result += "&#39;";
-        break;
-      case "{":
-        result += "&lbrace;";
-        break;
-      case "}":
-        result += "&rbrace;";
         break;
       default:
         result += ch;
