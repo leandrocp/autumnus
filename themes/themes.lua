@@ -1962,7 +1962,7 @@ return {
 			require("flow").setup({
 				theme = {
 					style = "light",
-				}
+				},
 			})
 			vim.cmd([[colorscheme flow]])
 		end,
