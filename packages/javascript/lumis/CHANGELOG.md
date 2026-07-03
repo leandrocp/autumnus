@@ -1,3 +1,10 @@
+## [0.5.1](https://github.com/leandrocp/lumis/compare/npm-lumis/v0.5.0...npm-lumis/v0.5.1) (2026-07-03)
+
+
+### Bug Fixes
+
+- preserve curly braces - [#982](https://github.com/leandrocp/lumis/pull/982)
+
 ## [0.5.0](https://github.com/leandrocp/lumis/compare/npm-lumis/v0.4.0...npm-lumis/v0.5.0) (2026-06-16)
 
 ### ⚠ BREAKING CHANGES
