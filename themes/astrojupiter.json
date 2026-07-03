@@ -1,7 +1,7 @@
 {
   "name": "astrojupiter",
   "appearance": "light",
-  "revision": "95c046b763266a4873bdf0cbf6a1824c929dec3a",
+  "revision": "37afa2a78ce4d8d3d70827f84710c14b78c5d071",
   "highlights": {
     "attribute": {
       "fg": "#805c00"
@@ -305,24 +305,6 @@
     "punctuation.bracket.php": {
       "fg": "#90437a",
       "bold": true
-    },
-    "punctuation.bracket.rainbow.1": {
-      "fg": "#a13f37"
-    },
-    "punctuation.bracket.rainbow.2": {
-      "fg": "#805c00"
-    },
-    "punctuation.bracket.rainbow.3": {
-      "fg": "#006e89"
-    },
-    "punctuation.bracket.rainbow.4": {
-      "fg": "#954d00"
-    },
-    "punctuation.bracket.rainbow.5": {
-      "fg": "#467118"
-    },
-    "punctuation.bracket.rainbow.6": {
-      "fg": "#90437a"
     },
     "punctuation.delimiter": {
       "fg": "#815654"

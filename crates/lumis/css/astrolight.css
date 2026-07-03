@@ -1,5 +1,5 @@
 /* astrolight
- * revision: 95c046b763266a4873bdf0cbf6a1824c929dec3a
+ * revision: 37afa2a78ce4d8d3d70827f84710c14b78c5d071
  */
 .lumis {
   color: #4f4f4f;
@@ -303,24 +303,6 @@
 .l-punctuation-bracket-php {
   color: #9e007c;
   font-weight: bold;
-}
-.l-punctuation-bracket-rainbow-1 {
-  color: #990000;
-}
-.l-punctuation-bracket-rainbow-2 {
-  color: #7300b8;
-}
-.l-punctuation-bracket-rainbow-3 {
-  color: #00508a;
-}
-.l-punctuation-bracket-rainbow-4 {
-  color: #a34500;
-}
-.l-punctuation-bracket-rainbow-5 {
-  color: #345e00;
-}
-.l-punctuation-bracket-rainbow-6 {
-  color: #9e007c;
 }
 .l-punctuation-delimiter {
   color: #4f4f4f;

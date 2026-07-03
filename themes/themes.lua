@@ -726,18 +726,9 @@ return {
 	},
 	{
 		url = "https://github.com/svrana/neosolarized.nvim",
-		name = "neosolarized_dark",
+		name = "neosolarized",
 		config = function()
 			vim.o.background = "dark"
-			vim.cmd([[colorscheme neosolarized]])
-		end,
-		dependencies = { "https://github.com/tjdevries/colorbuddy.nvim" },
-	},
-	{
-		url = "https://github.com/svrana/neosolarized.nvim",
-		name = "neosolarized_light",
-		config = function()
-			vim.o.background = "light"
 			vim.cmd([[colorscheme neosolarized]])
 		end,
 		dependencies = { "https://github.com/tjdevries/colorbuddy.nvim" },
@@ -1148,15 +1139,6 @@ return {
 		end,
 	},
 	{
-		url = "https://github.com/craftzdog/solarized-osaka.nvim",
-		name = "solarized_osaka_storm",
-		config = function()
-			vim.o.background = "dark"
-			require("solarized-osaka").setup({ style = "storm" })
-			vim.cmd([[colorscheme solarized-osaka]])
-		end,
-	},
-	{
 		url = "https://github.com/olivercederborg/poimandres.nvim",
 		name = "poimandres",
 		config = function()
@@ -1229,16 +1211,7 @@ return {
 	},
 	{
 		url = "https://github.com/zenbones-theme/zenbones.nvim",
-		name = "vimbones_dark",
-		config = function()
-			vim.o.background = "dark"
-			vim.cmd([[colorscheme vimbones]])
-		end,
-		dependencies = { "https://github.com/rktjmp/lush.nvim" },
-	},
-	{
-		url = "https://github.com/zenbones-theme/zenbones.nvim",
-		name = "vimbones_light",
+		name = "vimbones",
 		config = function()
 			vim.o.background = "light"
 			vim.cmd([[colorscheme vimbones]])
@@ -1283,18 +1256,9 @@ return {
 	},
 	{
 		url = "https://github.com/zenbones-theme/zenbones.nvim",
-		name = "nordbones_dark",
+		name = "nordbones",
 		config = function()
 			vim.o.background = "dark"
-			vim.cmd([[colorscheme nordbones]])
-		end,
-		dependencies = { "https://github.com/rktjmp/lush.nvim" },
-	},
-	{
-		url = "https://github.com/zenbones-theme/zenbones.nvim",
-		name = "nordbones_light",
-		config = function()
-			vim.o.background = "light"
 			vim.cmd([[colorscheme nordbones]])
 		end,
 		dependencies = { "https://github.com/rktjmp/lush.nvim" },
@@ -1337,18 +1301,9 @@ return {
 	},
 	{
 		url = "https://github.com/zenbones-theme/zenbones.nvim",
-		name = "duckbones_dark",
+		name = "duckbones",
 		config = function()
 			vim.o.background = "dark"
-			vim.cmd([[colorscheme duckbones]])
-		end,
-		dependencies = { "https://github.com/rktjmp/lush.nvim" },
-	},
-	{
-		url = "https://github.com/zenbones-theme/zenbones.nvim",
-		name = "duckbones_light",
-		config = function()
-			vim.o.background = "light"
 			vim.cmd([[colorscheme duckbones]])
 		end,
 		dependencies = { "https://github.com/rktjmp/lush.nvim" },
@@ -1364,18 +1319,9 @@ return {
 	},
 	{
 		url = "https://github.com/zenbones-theme/zenbones.nvim",
-		name = "kanagawabones_dark",
+		name = "kanagawabones",
 		config = function()
 			vim.o.background = "dark"
-			vim.cmd([[colorscheme kanagawabones]])
-		end,
-		dependencies = { "https://github.com/rktjmp/lush.nvim" },
-	},
-	{
-		url = "https://github.com/zenbones-theme/zenbones.nvim",
-		name = "kanagawabones_light",
-		config = function()
-			vim.o.background = "light"
 			vim.cmd([[colorscheme kanagawabones]])
 		end,
 		dependencies = { "https://github.com/rktjmp/lush.nvim" },
@@ -1552,7 +1498,7 @@ return {
 		url = "https://github.com/kungfusheep/mfd.nvim",
 		name = "mfd_flir_bh",
 		config = function()
-			vim.o.background = "dark"
+			vim.o.background = "light"
 			vim.cmd([[colorscheme mfd-flir-bh]])
 		end,
 	},
@@ -2004,7 +1950,7 @@ return {
 		name = "flow_dark",
 		config = function()
 			vim.o.background = "dark"
-			require("flow").setup({ mode = "normal" })
+			require("flow").setup()
 			vim.cmd([[colorscheme flow]])
 		end,
 	},
@@ -2013,7 +1959,11 @@ return {
 		name = "flow_light",
 		config = function()
 			vim.o.background = "light"
-			require("flow").setup({ mode = "normal" })
+			require("flow").setup({
+				theme = {
+					style = "light",
+				}
+			})
 			vim.cmd([[colorscheme flow]])
 		end,
 	},

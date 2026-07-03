@@ -1,7 +1,7 @@
 {
   "name": "astrodark",
   "appearance": "dark",
-  "revision": "95c046b763266a4873bdf0cbf6a1824c929dec3a",
+  "revision": "37afa2a78ce4d8d3d70827f84710c14b78c5d071",
   "highlights": {
     "attribute": {
       "fg": "#dfab25"
@@ -305,24 +305,6 @@
     "punctuation.bracket.php": {
       "fg": "#dd97f1",
       "bold": true
-    },
-    "punctuation.bracket.rainbow.1": {
-      "fg": "#ff838b"
-    },
-    "punctuation.bracket.rainbow.2": {
-      "fg": "#dfab25"
-    },
-    "punctuation.bracket.rainbow.3": {
-      "fg": "#5eb7ff"
-    },
-    "punctuation.bracket.rainbow.4": {
-      "fg": "#f5983a"
-    },
-    "punctuation.bracket.rainbow.5": {
-      "fg": "#87c05f"
-    },
-    "punctuation.bracket.rainbow.6": {
-      "fg": "#dd97f1"
     },
     "punctuation.delimiter": {
       "fg": "#adb0bb"
