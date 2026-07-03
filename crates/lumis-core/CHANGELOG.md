@@ -1,3 +1,11 @@
+## [2.1.0](https://github.com/leandrocp/lumis/compare/cargo-lumis-core/v2.0.0...cargo-lumis-core/v2.1.0) (2026-07-03)
+
+
+### Bug Fixes
+
+- preserve curly braces - [#982](https://github.com/leandrocp/lumis/pull/982)
+- themes issues - [#977](https://github.com/leandrocp/lumis/pull/977) by @Fosox
+
 ## [2.0.0](https://github.com/leandrocp/lumis/compare/cargo-lumis-core/v1.1.0...cargo-lumis-core/v2.0.0) (2026-06-12)
 
 ### ⚠ BREAKING CHANGES
