@@ -262,9 +262,9 @@ globs = ["*.fish"]
 
 [parsers.fsharp]
 git = "https://github.com/ionide/tree-sitter-fsharp.git"
-rev = "5247c1197cb290fcaea0e0a793d32829c1396831"
+rev = "97205752445ac9c6566a768d97b21bc1078ae321"
 crate = "tree-sitter-fsharp"
-version = "0.3.0"
+version = "0.3.1"
 location = "fsharp"
 aliases = ["f#"]
 variant = "FSharp"
