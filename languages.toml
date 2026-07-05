@@ -923,9 +923,9 @@ globs = ["*.comp", "*.frag", "*.geom", "*.glsl", "*.tesc", "*.tese", "*.vert"]
 
 [parsers.jinja]
 git = "https://github.com/cathaysia/tree-sitter-jinja.git"
-rev = "40bec50a9a0f1228226ed53be3f87f01da94a959"
+rev = "c213d3745ccdcaaa858869181c7b1bf9557a025f"
 crate = "tree-sitter-jinja"
-version = "0.12.1"
+version = "0.13.0"
 location = "tree-sitter-jinja"
 aliases = ["jinja2"]
 display_name = "Jinja"
