@@ -46,13 +46,19 @@ jobs:
       - name: themes-gen
         run: echo "y" | just themes-gen
 
+      - name: css-gen
+        run: just css-gen
+
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.CI_TOKEN }}
           add-paths: |
             themes
+            css
             crates/lumis-core/themes
+            crates/lumis/css
+            packages/elixir/lumis/priv/static/css
             packages/javascript/themes/themes
           commit-message: "chore: generate themes"
           title: "chore: generate themes"

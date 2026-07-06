@@ -262,7 +262,7 @@ dependencies = [
 
 [[package]]
 name = "lumis"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "anyhow",
  "cc",
@@ -370,7 +370,7 @@ version = "1.0.0"
 
 [[package]]
 name = "lumis-core"
-version = "2.0.0"
+version = "2.1.0"
 dependencies = [
  "derive_builder",
  "glob",
