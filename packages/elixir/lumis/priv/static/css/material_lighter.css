@@ -112,6 +112,9 @@
 .l-keyword-directive-define {
   color: #39adb5;
 }
+.l-keyword-exception {
+  color: #e53935;
+}
 .l-keyword-export {
   color: #7c4dff;
 }
