@@ -406,6 +406,35 @@ mod tests {
     use super::*;
     use crate::languages::Language;
 
+    fn test_theme() -> themes::Theme {
+        themes::from_json(
+            r##"{
+                "name": "test_theme",
+                "appearance": "dark",
+                "revision": "test",
+                "highlights": {
+                    "normal": {"fg": "#c6d0f6", "bg": "#303447"},
+                    "character": {"fg": "#81c8bf"},
+                    "comment": {"fg": "#949cbc"},
+                    "comment.documentation": {"fg": "#949cbc"},
+                    "constant": {"fg": "#ef9f77"},
+                    "function": {"fg": "#8caaef"},
+                    "function.call": {"fg": "#8caaef"},
+                    "keyword": {"fg": "#ca9ee7"},
+                    "keyword.function": {"fg": "#ca9ee7"},
+                    "module": {"fg": "#e5c891"},
+                    "number": {"fg": "#ef9f77"},
+                    "operator": {"fg": "#99d1dc"},
+                    "punctuation.bracket": {"fg": "#949cbc"},
+                    "punctuation.delimiter": {"fg": "#949cbc"},
+                    "string": {"fg": "#a6d18a"},
+                    "string.special.symbol": {"fg": "#eebebf"}
+                }
+            }"##,
+        )
+        .unwrap()
+    }
+
     #[test]
     fn test_write_highlight() {
         let code = r#"const = 1"#;
@@ -417,7 +446,7 @@ mod tests {
 
         let formatter = HtmlInlineBuilder::default()
             .language(Language::JavaScript)
-            .theme(themes::get("catppuccin_frappe").ok())
+            .theme(Some(test_theme()))
             .build()
             .unwrap();
 
@@ -455,7 +484,7 @@ end
 
         let formatter = HtmlInlineBuilder::default()
             .language(Language::Elixir)
-            .theme(themes::get("catppuccin_frappe").ok())
+            .theme(Some(test_theme()))
             .build()
             .unwrap();
 
@@ -480,7 +509,7 @@ end
         let formatter = HtmlInlineBuilder::default()
             .language(Language::Elixir)
             .include_highlights(true)
-            .theme(themes::get("catppuccin_frappe").ok())
+            .theme(Some(test_theme()))
             .build()
             .unwrap();
 
@@ -497,7 +526,7 @@ end
 
         let formatter = HtmlInlineBuilder::default()
             .language(Language::Elixir)
-            .theme(themes::get("catppuccin_frappe").ok())
+            .theme(Some(test_theme()))
             .build()
             .unwrap();
 
