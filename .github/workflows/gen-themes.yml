@@ -49,6 +49,33 @@ jobs:
       - name: css-gen
         run: just css-gen
 
+      - name: Build pull request body
+        run: |
+          {
+            echo "Automated PR to update generated themes."
+            echo
+            echo "Updated themes:"
+
+            changed_themes=$(git diff --name-only -- \
+              themes \
+              css \
+              crates/lumis-core/themes \
+              crates/lumis/css \
+              packages/elixir/lumis/priv/static/css \
+              packages/javascript/themes/themes \
+              | awk '{ name = $0; sub(/^.*\//, "", name); sub(/\.(json|css|ts)$/, "", name); print name }' \
+              | sort -u)
+
+            if [ -n "$changed_themes" ]; then
+              printf '%s\n' "$changed_themes" | sed 's/^/- /'
+            else
+              echo "- No theme file changes detected"
+            fi
+
+            echo
+            echo "This PR was created automatically by the gen-themes workflow."
+          } > .github/gen-themes-pr-body.md
+
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v8
         with:
@@ -60,12 +87,9 @@ jobs:
             crates/lumis/css
             packages/elixir/lumis/priv/static/css
             packages/javascript/themes/themes
-          commit-message: "chore: generate themes"
-          title: "chore: generate themes"
-          body: |
-            Automated PR to generate themes.
-
-            This PR was created automatically by the gen-themes workflow.
+          commit-message: "feat(themes): update generated themes"
+          title: "feat(themes): update generated themes"
+          body-path: .github/gen-themes-pr-body.md
           branch: gen-themes
           delete-branch: true
           base: main
