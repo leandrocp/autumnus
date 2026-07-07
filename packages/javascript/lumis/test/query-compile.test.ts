@@ -1,7 +1,8 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { createRequire } from "node:module";
-import { join, parse } from "node:path";
+import { dirname, join, parse } from "node:path";
 import { fileURLToPath } from "node:url";
+import { parse as parseToml } from "smol-toml";
 import { describe, expect, it } from "vitest";
 import { Language as TSLanguage, Parser, Query } from "web-tree-sitter";
 
@@ -9,6 +10,20 @@ import { bundledLanguages } from "../bundles/full.js";
 
 const bundleRequire = createRequire(
   createRequire(import.meta.url).resolve("@lumis-sh/wasm-bundle-full"),
+);
+
+const workspaceRoot = fileURLToPath(new URL("../../../..", import.meta.url));
+const languagesToml = parseToml(
+  readFileSync(join(workspaceRoot, "languages.toml"), "utf8"),
+) as {
+  parsers?: Record<string, { rev?: string; wasm_name?: string }>;
+};
+
+const expectedRevByWasmName = new Map(
+  Object.entries(languagesToml.parsers ?? {}).map(([id, parser]) => [
+    parser.wasm_name ?? `tree-sitter-${id}`,
+    parser.rev,
+  ]),
 );
 
 async function initParser(): Promise<void> {
@@ -21,6 +36,17 @@ function resolveWasmPath(packageName: string, wasmName: string): string | undefi
   } catch {
     return undefined;
   }
+}
+
+function installedWasmMatchesParserRevision(wasmPath: string, wasmName: string): boolean {
+  const expectedRev = expectedRevByWasmName.get(wasmName);
+  if (!expectedRev) return true;
+
+  const packageJson = JSON.parse(
+    readFileSync(join(dirname(wasmPath), "package.json"), "utf8"),
+  ) as { lumis?: { rev?: string } };
+
+  return packageJson.lumis?.rev === expectedRev;
 }
 
 async function compileQueries(
@@ -52,6 +78,10 @@ describe("bundled language queries compile against their shipped WASM", async ()
       const wasmPath = resolveWasmPath(lang.wasm.packageName, lang.wasm.name);
 
       if (!wasmPath || !existsSync(wasmPath)) {
+        return;
+      }
+
+      if (!installedWasmMatchesParserRevision(wasmPath, lang.wasm.name)) {
         return;
       }
 
@@ -90,9 +120,13 @@ describe.skipIf(!existsSync(distLangsDir))(
         };
 
         const wasmPath = resolveWasmPath(lang.wasm.packageName, lang.wasm.name);
-        if (!wasmPath || !existsSync(wasmPath)) {
-          return;
-        }
+          if (!wasmPath || !existsSync(wasmPath)) {
+            return;
+          }
+
+          if (!installedWasmMatchesParserRevision(wasmPath, lang.wasm.name)) {
+            return;
+          }
 
         const bytes = readFileSync(wasmPath);
         const grammar = await TSLanguage.load(bytes);

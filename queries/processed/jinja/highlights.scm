@@ -14,7 +14,7 @@
 
 "defined" @constant
 
-(comment) @comment 
+(comment) @comment @spell
 
 [
   ","
@@ -51,14 +51,14 @@
 ] @keyword
 
 [
-  "endtrans"
-  "endblock"
-  "endwith"
-  "endfilter"
-  "endmacro"
-  "endcall"
-  "endset"
-  "endautoescape"
+  (endtrans_statement)
+  (endblock_statement)
+  (endwith_statement)
+  (endfilter_statement)
+  (endmacro_statement)
+  (endcall_statement)
+  (endset_statement)
+  (endautoescape_statement)
 ] @keyword
 
 (do_statement
@@ -77,7 +77,7 @@
 [
   "if"
   "else"
-  "endif"
+  (endif_statement)
   "elif"
 ] @keyword.conditional
 
@@ -86,7 +86,7 @@
   "in"
   "continue"
   "break"
-  "endfor"
+  (endfor_statement)
 ] @keyword.repeat
 
 "call" @function.call
@@ -141,7 +141,7 @@
 
 (raw_end) @keyword
 
-(raw_body) @markup.raw.block 
+(raw_body) @markup.raw.block @nospell
 
 (builtin_test
   [
@@ -174,6 +174,7 @@
     "sameas"
     "upper"
   ] @keyword.operator)
+
 
 [
   "{{"
