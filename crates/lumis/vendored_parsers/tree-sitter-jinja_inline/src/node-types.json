@@ -56,6 +56,73 @@
     "fields": {}
   },
   {
+    "type": "autoescape_block",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "autoescape_block",
+          "named": true
+        },
+        {
+          "type": "autoescape_statement",
+          "named": true
+        },
+        {
+          "type": "block_block",
+          "named": true
+        },
+        {
+          "type": "call_block",
+          "named": true
+        },
+        {
+          "type": "endautoescape_statement",
+          "named": true
+        },
+        {
+          "type": "filter_block",
+          "named": true
+        },
+        {
+          "type": "for_block",
+          "named": true
+        },
+        {
+          "type": "if_block",
+          "named": true
+        },
+        {
+          "type": "line_statement",
+          "named": true
+        },
+        {
+          "type": "macro_block",
+          "named": true
+        },
+        {
+          "type": "raw_block",
+          "named": true
+        },
+        {
+          "type": "set_block",
+          "named": true
+        },
+        {
+          "type": "trans_block",
+          "named": true
+        },
+        {
+          "type": "with_block",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "autoescape_statement",
     "named": true,
     "fields": {},
@@ -118,6 +185,73 @@
     "fields": {}
   },
   {
+    "type": "block_block",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "autoescape_block",
+          "named": true
+        },
+        {
+          "type": "block_block",
+          "named": true
+        },
+        {
+          "type": "block_statement",
+          "named": true
+        },
+        {
+          "type": "call_block",
+          "named": true
+        },
+        {
+          "type": "endblock_statement",
+          "named": true
+        },
+        {
+          "type": "filter_block",
+          "named": true
+        },
+        {
+          "type": "for_block",
+          "named": true
+        },
+        {
+          "type": "if_block",
+          "named": true
+        },
+        {
+          "type": "line_statement",
+          "named": true
+        },
+        {
+          "type": "macro_block",
+          "named": true
+        },
+        {
+          "type": "raw_block",
+          "named": true
+        },
+        {
+          "type": "set_block",
+          "named": true
+        },
+        {
+          "type": "trans_block",
+          "named": true
+        },
+        {
+          "type": "with_block",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "block_statement",
     "named": true,
     "fields": {},
@@ -147,6 +281,73 @@
       "types": [
         {
           "type": "expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "call_block",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "autoescape_block",
+          "named": true
+        },
+        {
+          "type": "block_block",
+          "named": true
+        },
+        {
+          "type": "call_block",
+          "named": true
+        },
+        {
+          "type": "call_statement",
+          "named": true
+        },
+        {
+          "type": "endcall_statement",
+          "named": true
+        },
+        {
+          "type": "filter_block",
+          "named": true
+        },
+        {
+          "type": "for_block",
+          "named": true
+        },
+        {
+          "type": "if_block",
+          "named": true
+        },
+        {
+          "type": "line_statement",
+          "named": true
+        },
+        {
+          "type": "macro_block",
+          "named": true
+        },
+        {
+          "type": "raw_block",
+          "named": true
+        },
+        {
+          "type": "set_block",
+          "named": true
+        },
+        {
+          "type": "trans_block",
+          "named": true
+        },
+        {
+          "type": "with_block",
           "named": true
         }
       ]
@@ -208,6 +409,152 @@
     }
   },
   {
+    "type": "elif_block",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "autoescape_block",
+          "named": true
+        },
+        {
+          "type": "block_block",
+          "named": true
+        },
+        {
+          "type": "call_block",
+          "named": true
+        },
+        {
+          "type": "elif_statement",
+          "named": true
+        },
+        {
+          "type": "filter_block",
+          "named": true
+        },
+        {
+          "type": "for_block",
+          "named": true
+        },
+        {
+          "type": "if_block",
+          "named": true
+        },
+        {
+          "type": "line_statement",
+          "named": true
+        },
+        {
+          "type": "macro_block",
+          "named": true
+        },
+        {
+          "type": "raw_block",
+          "named": true
+        },
+        {
+          "type": "set_block",
+          "named": true
+        },
+        {
+          "type": "trans_block",
+          "named": true
+        },
+        {
+          "type": "with_block",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "elif_statement",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "else_block",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "autoescape_block",
+          "named": true
+        },
+        {
+          "type": "block_block",
+          "named": true
+        },
+        {
+          "type": "call_block",
+          "named": true
+        },
+        {
+          "type": "else_statement",
+          "named": true
+        },
+        {
+          "type": "filter_block",
+          "named": true
+        },
+        {
+          "type": "for_block",
+          "named": true
+        },
+        {
+          "type": "if_block",
+          "named": true
+        },
+        {
+          "type": "line_statement",
+          "named": true
+        },
+        {
+          "type": "macro_block",
+          "named": true
+        },
+        {
+          "type": "raw_block",
+          "named": true
+        },
+        {
+          "type": "set_block",
+          "named": true
+        },
+        {
+          "type": "trans_block",
+          "named": true
+        },
+        {
+          "type": "with_block",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "else_statement",
+    "named": true,
+    "fields": {}
+  },
+  {
     "type": "expression",
     "named": true,
     "fields": {},
@@ -254,6 +601,73 @@
     }
   },
   {
+    "type": "filter_block",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "autoescape_block",
+          "named": true
+        },
+        {
+          "type": "block_block",
+          "named": true
+        },
+        {
+          "type": "call_block",
+          "named": true
+        },
+        {
+          "type": "endfilter_statement",
+          "named": true
+        },
+        {
+          "type": "filter_block",
+          "named": true
+        },
+        {
+          "type": "filter_statement",
+          "named": true
+        },
+        {
+          "type": "for_block",
+          "named": true
+        },
+        {
+          "type": "if_block",
+          "named": true
+        },
+        {
+          "type": "line_statement",
+          "named": true
+        },
+        {
+          "type": "macro_block",
+          "named": true
+        },
+        {
+          "type": "raw_block",
+          "named": true
+        },
+        {
+          "type": "set_block",
+          "named": true
+        },
+        {
+          "type": "trans_block",
+          "named": true
+        },
+        {
+          "type": "with_block",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "filter_statement",
     "named": true,
     "fields": {},
@@ -278,6 +692,77 @@
       "types": [
         {
           "type": "dec_literal",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "for_block",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "autoescape_block",
+          "named": true
+        },
+        {
+          "type": "block_block",
+          "named": true
+        },
+        {
+          "type": "call_block",
+          "named": true
+        },
+        {
+          "type": "else_block",
+          "named": true
+        },
+        {
+          "type": "endfor_statement",
+          "named": true
+        },
+        {
+          "type": "filter_block",
+          "named": true
+        },
+        {
+          "type": "for_block",
+          "named": true
+        },
+        {
+          "type": "for_statement",
+          "named": true
+        },
+        {
+          "type": "if_block",
+          "named": true
+        },
+        {
+          "type": "line_statement",
+          "named": true
+        },
+        {
+          "type": "macro_block",
+          "named": true
+        },
+        {
+          "type": "raw_block",
+          "named": true
+        },
+        {
+          "type": "set_block",
+          "named": true
+        },
+        {
+          "type": "trans_block",
+          "named": true
+        },
+        {
+          "type": "with_block",
           "named": true
         }
       ]
@@ -322,7 +807,82 @@
     }
   },
   {
-    "type": "if_expression",
+    "type": "if_block",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "autoescape_block",
+          "named": true
+        },
+        {
+          "type": "block_block",
+          "named": true
+        },
+        {
+          "type": "call_block",
+          "named": true
+        },
+        {
+          "type": "elif_block",
+          "named": true
+        },
+        {
+          "type": "else_block",
+          "named": true
+        },
+        {
+          "type": "endif_statement",
+          "named": true
+        },
+        {
+          "type": "filter_block",
+          "named": true
+        },
+        {
+          "type": "for_block",
+          "named": true
+        },
+        {
+          "type": "if_block",
+          "named": true
+        },
+        {
+          "type": "if_statement",
+          "named": true
+        },
+        {
+          "type": "line_statement",
+          "named": true
+        },
+        {
+          "type": "macro_block",
+          "named": true
+        },
+        {
+          "type": "raw_block",
+          "named": true
+        },
+        {
+          "type": "set_block",
+          "named": true
+        },
+        {
+          "type": "trans_block",
+          "named": true
+        },
+        {
+          "type": "with_block",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "if_statement",
     "named": true,
     "fields": {},
     "children": {
@@ -506,14 +1066,30 @@
     "fields": {},
     "children": {
       "multiple": false,
-      "required": true,
+      "required": false,
       "types": [
+        {
+          "type": "do_statement",
+          "named": true
+        },
         {
           "type": "expression",
           "named": true
         },
         {
-          "type": "statement",
+          "type": "extends_statement",
+          "named": true
+        },
+        {
+          "type": "import_statement",
+          "named": true
+        },
+        {
+          "type": "include_statement",
+          "named": true
+        },
+        {
+          "type": "set_statement",
           "named": true
         }
       ]
@@ -578,6 +1154,73 @@
     }
   },
   {
+    "type": "macro_block",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "autoescape_block",
+          "named": true
+        },
+        {
+          "type": "block_block",
+          "named": true
+        },
+        {
+          "type": "call_block",
+          "named": true
+        },
+        {
+          "type": "endmacro_statement",
+          "named": true
+        },
+        {
+          "type": "filter_block",
+          "named": true
+        },
+        {
+          "type": "for_block",
+          "named": true
+        },
+        {
+          "type": "if_block",
+          "named": true
+        },
+        {
+          "type": "line_statement",
+          "named": true
+        },
+        {
+          "type": "macro_block",
+          "named": true
+        },
+        {
+          "type": "macro_statement",
+          "named": true
+        },
+        {
+          "type": "raw_block",
+          "named": true
+        },
+        {
+          "type": "set_block",
+          "named": true
+        },
+        {
+          "type": "trans_block",
+          "named": true
+        },
+        {
+          "type": "with_block",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "macro_statement",
     "named": true,
     "fields": {},
@@ -623,6 +1266,69 @@
         },
         {
           "type": "oct_literal",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "pluralize_block",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "autoescape_block",
+          "named": true
+        },
+        {
+          "type": "block_block",
+          "named": true
+        },
+        {
+          "type": "call_block",
+          "named": true
+        },
+        {
+          "type": "filter_block",
+          "named": true
+        },
+        {
+          "type": "for_block",
+          "named": true
+        },
+        {
+          "type": "if_block",
+          "named": true
+        },
+        {
+          "type": "line_statement",
+          "named": true
+        },
+        {
+          "type": "macro_block",
+          "named": true
+        },
+        {
+          "type": "pluralize_statement",
+          "named": true
+        },
+        {
+          "type": "raw_block",
+          "named": true
+        },
+        {
+          "type": "set_block",
+          "named": true
+        },
+        {
+          "type": "trans_block",
+          "named": true
+        },
+        {
+          "type": "with_block",
           "named": true
         }
       ]
@@ -699,6 +1405,88 @@
     "fields": {}
   },
   {
+    "type": "set_block",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "autoescape_block",
+          "named": true
+        },
+        {
+          "type": "block_block",
+          "named": true
+        },
+        {
+          "type": "call_block",
+          "named": true
+        },
+        {
+          "type": "endset_statement",
+          "named": true
+        },
+        {
+          "type": "filter_block",
+          "named": true
+        },
+        {
+          "type": "for_block",
+          "named": true
+        },
+        {
+          "type": "if_block",
+          "named": true
+        },
+        {
+          "type": "line_statement",
+          "named": true
+        },
+        {
+          "type": "macro_block",
+          "named": true
+        },
+        {
+          "type": "raw_block",
+          "named": true
+        },
+        {
+          "type": "set_block",
+          "named": true
+        },
+        {
+          "type": "set_block_statement",
+          "named": true
+        },
+        {
+          "type": "trans_block",
+          "named": true
+        },
+        {
+          "type": "with_block",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "set_block_statement",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "set_statement",
     "named": true,
     "fields": {},
@@ -731,86 +1519,51 @@
       "required": false,
       "types": [
         {
+          "type": "autoescape_block",
+          "named": true
+        },
+        {
+          "type": "block_block",
+          "named": true
+        },
+        {
+          "type": "call_block",
+          "named": true
+        },
+        {
+          "type": "filter_block",
+          "named": true
+        },
+        {
+          "type": "for_block",
+          "named": true
+        },
+        {
+          "type": "if_block",
+          "named": true
+        },
+        {
           "type": "line_statement",
+          "named": true
+        },
+        {
+          "type": "macro_block",
           "named": true
         },
         {
           "type": "raw_block",
           "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "statement",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": false,
-      "types": [
+        },
         {
-          "type": "autoescape_statement",
+          "type": "set_block",
           "named": true
         },
         {
-          "type": "block_statement",
+          "type": "trans_block",
           "named": true
         },
         {
-          "type": "call_statement",
-          "named": true
-        },
-        {
-          "type": "do_statement",
-          "named": true
-        },
-        {
-          "type": "expression",
-          "named": true
-        },
-        {
-          "type": "extends_statement",
-          "named": true
-        },
-        {
-          "type": "filter_statement",
-          "named": true
-        },
-        {
-          "type": "for_statement",
-          "named": true
-        },
-        {
-          "type": "if_expression",
-          "named": true
-        },
-        {
-          "type": "import_statement",
-          "named": true
-        },
-        {
-          "type": "include_statement",
-          "named": true
-        },
-        {
-          "type": "macro_statement",
-          "named": true
-        },
-        {
-          "type": "pluralize_statement",
-          "named": true
-        },
-        {
-          "type": "set_statement",
-          "named": true
-        },
-        {
-          "type": "trans_statement",
-          "named": true
-        },
-        {
-          "type": "with_statement",
+          "type": "with_block",
           "named": true
         }
       ]
@@ -831,6 +1584,77 @@
       "types": [
         {
           "type": "expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "trans_block",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "autoescape_block",
+          "named": true
+        },
+        {
+          "type": "block_block",
+          "named": true
+        },
+        {
+          "type": "call_block",
+          "named": true
+        },
+        {
+          "type": "endtrans_statement",
+          "named": true
+        },
+        {
+          "type": "filter_block",
+          "named": true
+        },
+        {
+          "type": "for_block",
+          "named": true
+        },
+        {
+          "type": "if_block",
+          "named": true
+        },
+        {
+          "type": "line_statement",
+          "named": true
+        },
+        {
+          "type": "macro_block",
+          "named": true
+        },
+        {
+          "type": "pluralize_block",
+          "named": true
+        },
+        {
+          "type": "raw_block",
+          "named": true
+        },
+        {
+          "type": "set_block",
+          "named": true
+        },
+        {
+          "type": "trans_block",
+          "named": true
+        },
+        {
+          "type": "trans_statement",
+          "named": true
+        },
+        {
+          "type": "with_block",
           "named": true
         }
       ]
@@ -897,6 +1721,73 @@
     "type": "unary_operator",
     "named": true,
     "fields": {}
+  },
+  {
+    "type": "with_block",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "autoescape_block",
+          "named": true
+        },
+        {
+          "type": "block_block",
+          "named": true
+        },
+        {
+          "type": "call_block",
+          "named": true
+        },
+        {
+          "type": "endwith_statement",
+          "named": true
+        },
+        {
+          "type": "filter_block",
+          "named": true
+        },
+        {
+          "type": "for_block",
+          "named": true
+        },
+        {
+          "type": "if_block",
+          "named": true
+        },
+        {
+          "type": "line_statement",
+          "named": true
+        },
+        {
+          "type": "macro_block",
+          "named": true
+        },
+        {
+          "type": "raw_block",
+          "named": true
+        },
+        {
+          "type": "set_block",
+          "named": true
+        },
+        {
+          "type": "trans_block",
+          "named": true
+        },
+        {
+          "type": "with_block",
+          "named": true
+        },
+        {
+          "type": "with_statement",
+          "named": true
+        }
+      ]
+    }
   },
   {
     "type": "with_statement",
@@ -1114,44 +2005,44 @@
     "named": false
   },
   {
-    "type": "endautoescape",
-    "named": false
+    "type": "endautoescape_statement",
+    "named": true
   },
   {
-    "type": "endblock",
-    "named": false
+    "type": "endblock_statement",
+    "named": true
   },
   {
-    "type": "endcall",
-    "named": false
+    "type": "endcall_statement",
+    "named": true
   },
   {
-    "type": "endfilter",
-    "named": false
+    "type": "endfilter_statement",
+    "named": true
   },
   {
-    "type": "endfor",
-    "named": false
+    "type": "endfor_statement",
+    "named": true
   },
   {
-    "type": "endif",
-    "named": false
+    "type": "endif_statement",
+    "named": true
   },
   {
-    "type": "endmacro",
-    "named": false
+    "type": "endmacro_statement",
+    "named": true
   },
   {
-    "type": "endset",
-    "named": false
+    "type": "endset_statement",
+    "named": true
   },
   {
-    "type": "endtrans",
-    "named": false
+    "type": "endtrans_statement",
+    "named": true
   },
   {
-    "type": "endwith",
-    "named": false
+    "type": "endwith_statement",
+    "named": true
   },
   {
     "type": "eq",

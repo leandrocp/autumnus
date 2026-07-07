@@ -566,9 +566,9 @@ shebang = ["python", "python2", "python3"]
 
 [parsers.r]
 git = "https://github.com/r-lib/tree-sitter-r.git"
-rev = "e9944e9801595ad484f49be492daf0c4c81547ef"
+rev = "346d3707b8c9301f1051e8f6e32666e67529f7d2"
 crate = "tree-sitter-r"
-version = "1.2.0"
+version = "1.3.0"
 globs = ["*.R", "*.r", "*.rd", "*.rsx", ".Rprofile", "expr-dist"]
 shebang = ["Rscript"]
 
@@ -923,9 +923,9 @@ globs = ["*.comp", "*.frag", "*.geom", "*.glsl", "*.tesc", "*.tese", "*.vert"]
 
 [parsers.jinja]
 git = "https://github.com/cathaysia/tree-sitter-jinja.git"
-rev = "40bec50a9a0f1228226ed53be3f87f01da94a959"
+rev = "c213d3745ccdcaaa858869181c7b1bf9557a025f"
 crate = "tree-sitter-jinja"
-version = "0.12.1"
+version = "0.13.0"
 location = "tree-sitter-jinja"
 aliases = ["jinja2"]
 display_name = "Jinja"
@@ -933,12 +933,12 @@ globs = ["*.j2", "*.jinja", "*.jinja2"]
 
 [parsers.jinja_inline]
 git = "https://github.com/cathaysia/tree-sitter-jinja.git"
-rev = "40bec50a9a0f1228226ed53be3f87f01da94a959"
+rev = "c213d3745ccdcaaa858869181c7b1bf9557a025f"
 location = "tree-sitter-jinja_inline"
 wasm_name = "tree-sitter-jinja_inline"
 variant = "JinjaInline"
 display_name = "Jinja Inline"
-version = "0.12.1"
+version = "0.13.0"
 
 [parsers.json5]
 git = "https://github.com/Joakker/tree-sitter-json5.git"
