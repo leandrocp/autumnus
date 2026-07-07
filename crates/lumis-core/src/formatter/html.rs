@@ -438,6 +438,101 @@ pub fn open_pre_tag(
     )
 }
 
+/// Generate an opening `<pre>` tag with classes and styles for multiple themes.
+pub fn open_multi_themes_pre_tag(
+    output: &mut dyn Write,
+    pre_class: Option<&str>,
+    themes: &std::collections::HashMap<String, Theme>,
+    default_theme: Option<&str>,
+    css_variable_prefix: &str,
+) -> io::Result<()> {
+    let classes = multi_themes_pre_classes(pre_class, themes);
+    let style = multi_themes_pre_style(themes, default_theme, css_variable_prefix);
+
+    write!(output, "<pre class=\"{}\"", classes)?;
+    if !style.is_empty() {
+        write!(output, " style=\"{}\"", style)?;
+    }
+    write!(output, ">")
+}
+
+fn multi_themes_pre_classes(
+    pre_class: Option<&str>,
+    themes: &std::collections::HashMap<String, Theme>,
+) -> String {
+    let mut classes = vec!["lumis".to_string(), "lumis-themes".to_string()];
+
+    if let Some(pre_class) = pre_class {
+        classes.push(pre_class.to_string());
+    }
+
+    for theme_name in themes.keys() {
+        classes.push(theme_name.clone());
+    }
+
+    classes.join(" ")
+}
+
+fn multi_themes_pre_style(
+    themes: &std::collections::HashMap<String, Theme>,
+    default_theme: Option<&str>,
+    css_variable_prefix: &str,
+) -> String {
+    let mut styles = Vec::new();
+
+    match default_theme {
+        Some("light-dark()") => {
+            if let (Some(light), Some(dark)) = (themes.get("light"), themes.get("dark")) {
+                let light_fg = light.fg().unwrap_or("#000000");
+                let light_bg = light.bg().unwrap_or("#ffffff");
+                let dark_fg = dark.fg().unwrap_or("#ffffff");
+                let dark_bg = dark.bg().unwrap_or("#000000");
+
+                styles.push(format!("color: light-dark({}, {});", light_fg, dark_fg));
+                styles.push(format!(
+                    "background-color: light-dark({}, {});",
+                    light_bg, dark_bg
+                ));
+            }
+        }
+        Some(default_name) => {
+            if let Some(default_theme) = themes.get(default_name) {
+                if let Some(fg) = default_theme.fg() {
+                    styles.push(format!("color:{};", fg));
+                }
+                if let Some(bg) = default_theme.bg() {
+                    styles.push(format!("background-color:{};", bg));
+                }
+            }
+
+            for (theme_name, theme) in themes {
+                if theme_name != default_name {
+                    let sanitized = sanitize_theme_name(theme_name);
+                    if let Some(fg) = theme.fg() {
+                        styles.push(format!("{}-{}:{};", css_variable_prefix, sanitized, fg));
+                    }
+                    if let Some(bg) = theme.bg() {
+                        styles.push(format!("{}-{}-bg:{};", css_variable_prefix, sanitized, bg));
+                    }
+                }
+            }
+        }
+        None => {
+            for (theme_name, theme) in themes {
+                let sanitized = sanitize_theme_name(theme_name);
+                if let Some(fg) = theme.fg() {
+                    styles.push(format!("{}-{}: {};", css_variable_prefix, sanitized, fg));
+                }
+                if let Some(bg) = theme.bg() {
+                    styles.push(format!("{}-{}-bg: {};", css_variable_prefix, sanitized, bg));
+                }
+            }
+        }
+    }
+
+    styles.join(" ")
+}
+
 /// Generate an opening `<code>` tag with language class.
 pub fn open_code_tag(output: &mut dyn Write, lang: &Language) -> io::Result<()> {
     write!(
@@ -655,6 +750,23 @@ mod tests {
     use super::*;
     use pretty_assertions::assert_str_eq;
 
+    fn attr_value<'a>(tag: &'a str, attr: &str) -> &'a str {
+        let marker = format!(r#"{attr}=""#);
+        let start = tag.find(&marker).expect("missing attribute") + marker.len();
+        let end = tag[start..].find('"').expect("unterminated attribute");
+        &tag[start..start + end]
+    }
+
+    fn assert_classes(tag: &str, expected: &[&str]) {
+        let classes: std::collections::HashSet<&str> =
+            attr_value(tag, "class").split(' ').collect();
+
+        assert_eq!(classes.len(), expected.len());
+        for class in expected {
+            assert!(classes.contains(class), "missing class {class:?} in {tag}");
+        }
+    }
+
     #[test]
     fn test_escape_all_entities() {
         assert_eq!(escape("&<>\"'{}"), "&amp;&lt;&gt;&quot;&#39;{}");
@@ -717,6 +829,67 @@ mod tests {
         assert_str_eq!(
             result,
             r#"<div class="l-line" style="color: red;" data-line="3">styled</div>"#
+        );
+    }
+
+    #[test]
+    fn test_open_multi_themes_pre_tag_with_default_theme() {
+        let mut themes = std::collections::HashMap::new();
+        themes.insert(
+            "light".to_string(),
+            crate::themes::get("github_light").unwrap(),
+        );
+
+        let mut output = Vec::new();
+        open_multi_themes_pre_tag(
+            &mut output,
+            Some("custom-pre"),
+            &themes,
+            Some("light"),
+            "--lumis",
+        )
+        .unwrap();
+
+        let html = String::from_utf8(output).unwrap();
+
+        assert_classes(&html, &["lumis", "lumis-themes", "custom-pre", "light"]);
+        assert_eq!(
+            attr_value(&html, "style"),
+            "color:#1f2328; background-color:#ffffff;"
+        );
+    }
+
+    #[test]
+    fn test_open_multi_themes_pre_tag_with_light_dark() {
+        let mut themes = std::collections::HashMap::new();
+        themes.insert(
+            "light".to_string(),
+            crate::themes::get("catppuccin_latte").unwrap(),
+        );
+        themes.insert(
+            "dark".to_string(),
+            crate::themes::get("catppuccin_mocha").unwrap(),
+        );
+
+        let mut output = Vec::new();
+        open_multi_themes_pre_tag(
+            &mut output,
+            Some("custom-pre"),
+            &themes,
+            Some("light-dark()"),
+            "--lumis",
+        )
+        .unwrap();
+
+        let html = String::from_utf8(output).unwrap();
+
+        assert_classes(
+            &html,
+            &["lumis", "lumis-themes", "custom-pre", "light", "dark"],
+        );
+        assert_eq!(
+            attr_value(&html, "style"),
+            "color: light-dark(#4c4f69, #cdd6f4); background-color: light-dark(#eff1f5, #1e1e2e);"
         );
     }
 }
