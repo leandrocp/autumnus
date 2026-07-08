@@ -183,99 +183,22 @@ impl HtmlMultiThemes {
         }
     }
 
-    fn generate_pre_classes(&self) -> String {
-        let mut classes = vec!["lumis".to_string(), "lumis-themes".to_string()];
-
-        if let Some(ref pre_class) = self.pre_class {
-            classes.push(pre_class.clone());
-        }
-
-        for theme_name in self.themes.keys() {
-            classes.push(theme_name.clone());
-        }
-
-        classes.join(" ")
-    }
-
-    fn generate_pre_style(&self) -> io::Result<String> {
-        let mut styles = Vec::new();
-
-        match &self.default_theme {
-            Some(DefaultTheme::Theme(default_name)) => {
-                if let Some(default_theme) = self.themes.get(default_name) {
-                    if let Some(fg) = default_theme.fg() {
-                        styles.push(format!("color:{};", fg));
-                    }
-                    if let Some(bg) = default_theme.bg() {
-                        styles.push(format!("background-color:{};", bg));
-                    }
-                }
-
-                for (theme_name, theme) in &self.themes {
-                    if theme_name != default_name {
-                        let sanitized = crate::formatter::html::sanitize_theme_name(theme_name);
-                        if let Some(fg) = theme.fg() {
-                            styles.push(format!(
-                                "{}-{}:{};",
-                                self.css_variable_prefix, sanitized, fg
-                            ));
-                        }
-                        if let Some(bg) = theme.bg() {
-                            styles.push(format!(
-                                "{}-{}-bg:{};",
-                                self.css_variable_prefix, sanitized, bg
-                            ));
-                        }
-                    }
-                }
-            }
-            Some(DefaultTheme::LightDark) => {
-                if let (Some(light), Some(dark)) =
-                    (self.themes.get("light"), self.themes.get("dark"))
-                {
-                    let light_fg = light.fg().unwrap_or("#000000");
-                    let light_bg = light.bg().unwrap_or("#ffffff");
-                    let dark_fg = dark.fg().unwrap_or("#ffffff");
-                    let dark_bg = dark.bg().unwrap_or("#000000");
-
-                    styles.push(format!("color: light-dark({}, {});", light_fg, dark_fg));
-                    styles.push(format!(
-                        "background-color: light-dark({}, {});",
-                        light_bg, dark_bg
-                    ));
-                }
-            }
-            None => {
-                for (theme_name, theme) in &self.themes {
-                    let sanitized = crate::formatter::html::sanitize_theme_name(theme_name);
-                    if let Some(fg) = theme.fg() {
-                        styles.push(format!(
-                            "{}-{}: {};",
-                            self.css_variable_prefix, sanitized, fg
-                        ));
-                    }
-                    if let Some(bg) = theme.bg() {
-                        styles.push(format!(
-                            "{}-{}-bg: {};",
-                            self.css_variable_prefix, sanitized, bg
-                        ));
-                    }
-                }
-            }
-        }
-
-        Ok(styles.join(" "))
-    }
-
     fn open_pre_tag(&self, output: &mut dyn Write) -> io::Result<()> {
-        let classes = self.generate_pre_classes();
-        let style = self.generate_pre_style()?;
+        crate::formatter::html::open_multi_themes_pre_tag(
+            output,
+            self.pre_class.as_deref(),
+            &self.themes,
+            self.default_theme_name(),
+            &self.css_variable_prefix,
+        )
+    }
 
-        write!(output, "<pre class=\"{}\"", classes)?;
-        if !style.is_empty() {
-            write!(output, " style=\"{}\"", style)?;
+    fn default_theme_name(&self) -> Option<&str> {
+        match &self.default_theme {
+            Some(DefaultTheme::Theme(name)) => Some(name.as_str()),
+            Some(DefaultTheme::LightDark) => Some("light-dark()"),
+            None => None,
         }
-        write!(output, ">")
     }
 
     fn get_line_attrs(&self, line_number: usize) -> (Option<String>, Option<String>) {
@@ -325,16 +248,11 @@ impl HtmlMultiThemes {
             .copied()
             .unwrap_or("");
         let lang = language.parse::<Language>().ok();
-        let default_theme_str = match &self.default_theme {
-            Some(DefaultTheme::Theme(name)) => Some(name.as_str()),
-            Some(DefaultTheme::LightDark) => Some("light-dark()"),
-            None => None,
-        };
         crate::formatter::html::span_multi_themes_attrs(
             scope,
             lang,
             &self.themes,
-            default_theme_str,
+            self.default_theme_name(),
             &self.css_variable_prefix,
             self.italic,
             self.include_highlights,
@@ -385,5 +303,67 @@ impl Formatter for HtmlMultiThemes {
 
         output.write_all(&buffer)?;
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn attr_value<'a>(tag: &'a str, attr: &str) -> &'a str {
+        let marker = format!(r#"{attr}=""#);
+        let start = tag.find(&marker).expect("missing attribute") + marker.len();
+        let end = tag[start..].find('"').expect("unterminated attribute");
+        &tag[start..start + end]
+    }
+
+    fn assert_classes(tag: &str, expected: &[&str]) {
+        let classes: std::collections::HashSet<&str> =
+            attr_value(tag, "class").split(' ').collect();
+
+        assert_eq!(classes.len(), expected.len());
+        for class in expected {
+            assert!(classes.contains(class), "missing class {class:?} in {tag}");
+        }
+    }
+
+    #[test]
+    fn render_uses_multi_themes_pre_tag_helper() {
+        let mut themes = HashMap::new();
+        themes.insert(
+            "light".to_string(),
+            crate::themes::get("catppuccin_latte").unwrap(),
+        );
+        themes.insert(
+            "dark".to_string(),
+            crate::themes::get("catppuccin_mocha").unwrap(),
+        );
+
+        let formatter = HtmlMultiThemes::new(
+            Language::PlainText,
+            themes,
+            Some(DefaultTheme::LightDark),
+            "--lumis".to_string(),
+            Some("custom-pre".to_string()),
+            false,
+            false,
+            None,
+            None,
+        );
+        let mut output = Vec::new();
+
+        formatter.render("", &[], &mut output).unwrap();
+
+        let html = String::from_utf8(output).unwrap();
+        let pre_tag = html.split_once('>').expect("missing pre tag").0;
+
+        assert_classes(
+            pre_tag,
+            &["lumis", "lumis-themes", "custom-pre", "light", "dark"],
+        );
+        assert_eq!(
+            attr_value(pre_tag, "style"),
+            "color: light-dark(#4c4f69, #cdd6f4); background-color: light-dark(#eff1f5, #1e1e2e);"
+        );
     }
 }

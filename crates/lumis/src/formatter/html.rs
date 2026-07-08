@@ -678,6 +678,59 @@ pub fn open_pre_tag(
     )
 }
 
+/// Generate an opening `<pre>` tag with classes and styles for multiple themes.
+///
+/// Creates the opening `<pre>` tag used by `HtmlMultiThemes`, including the
+/// base `lumis lumis-themes` classes, one class per theme name, optional custom
+/// classes, and the theme foreground/background styles.
+///
+/// # Arguments
+///
+/// * `output` - Writer to send the tag to
+/// * `pre_class` - Optional additional CSS class to append
+/// * `themes` - Map of theme name to theme
+/// * `default_theme` - Optional default theme name, or `light-dark()`
+/// * `css_variable_prefix` - CSS variable prefix, e.g. `--lumis`
+///
+/// # Example
+///
+/// ```rust
+/// use lumis::{html, themes};
+/// use std::collections::HashMap;
+///
+/// let mut themes = HashMap::new();
+/// themes.insert("light".to_string(), themes::get("github_light").unwrap());
+/// themes.insert("dark".to_string(), themes::get("github_dark").unwrap());
+///
+/// let mut output = Vec::new();
+/// html::open_multi_themes_pre_tag(
+///     &mut output,
+///     Some("code-block"),
+///     &themes,
+///     Some("light-dark()"),
+///     "--lumis",
+/// )
+/// .unwrap();
+///
+/// let html = String::from_utf8(output).unwrap();
+/// assert!(html.starts_with(r#"<pre class="lumis lumis-themes code-block"#));
+/// ```
+pub fn open_multi_themes_pre_tag(
+    output: &mut dyn Write,
+    pre_class: Option<&str>,
+    themes: &std::collections::HashMap<String, Theme>,
+    default_theme: Option<&str>,
+    css_variable_prefix: &str,
+) -> io::Result<()> {
+    lumis_core::formatter::html::open_multi_themes_pre_tag(
+        output,
+        pre_class,
+        themes,
+        default_theme,
+        css_variable_prefix,
+    )
+}
+
 /// Generate an opening `<code>` tag with language class.
 ///
 /// Creates the opening `<code>` tag with the language class, translate="no",
