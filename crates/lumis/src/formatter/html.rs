@@ -691,6 +691,30 @@ pub fn open_pre_tag(
 /// * `themes` - Map of theme name to theme
 /// * `default_theme` - Optional default theme name, or `light-dark()`
 /// * `css_variable_prefix` - CSS variable prefix, e.g. `--lumis`
+///
+/// # Example
+///
+/// ```rust
+/// use lumis::{html, themes};
+/// use std::collections::HashMap;
+///
+/// let mut themes = HashMap::new();
+/// themes.insert("light".to_string(), themes::get("github_light").unwrap());
+/// themes.insert("dark".to_string(), themes::get("github_dark").unwrap());
+///
+/// let mut output = Vec::new();
+/// html::open_multi_themes_pre_tag(
+///     &mut output,
+///     Some("code-block"),
+///     &themes,
+///     Some("light-dark()"),
+///     "--lumis",
+/// )
+/// .unwrap();
+///
+/// let html = String::from_utf8(output).unwrap();
+/// assert!(html.starts_with(r#"<pre class="lumis lumis-themes code-block"#));
+/// ```
 pub fn open_multi_themes_pre_tag(
     output: &mut dyn Write,
     pre_class: Option<&str>,
