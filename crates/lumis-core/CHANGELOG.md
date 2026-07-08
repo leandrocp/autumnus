@@ -1,3 +1,11 @@
+## [2.2.0](https://github.com/leandrocp/lumis/compare/cargo-lumis-core/v2.1.0...cargo-lumis-core/v2.2.0) (2026-07-08)
+
+
+### Features
+
+- update generated themes - [#992](https://github.com/leandrocp/lumis/pull/992)
+- expose open_multi_themes_pre_tag - [#994](https://github.com/leandrocp/lumis/pull/994)
+
 ## [2.1.0](https://github.com/leandrocp/lumis/compare/cargo-lumis-core/v2.0.0...cargo-lumis-core/v2.1.0) (2026-07-03)
 
 
