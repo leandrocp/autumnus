@@ -1,3 +1,15 @@
+## [0.12.0](https://github.com/leandrocp/lumis/compare/cargo-lumis/v0.11.0...cargo-lumis/v0.12.0) (2026-07-08)
+
+
+### Features
+
+- upgrade lang nushell - [#990](https://github.com/leandrocp/lumis/pull/990)
+- upgrade lang perl - [#988](https://github.com/leandrocp/lumis/pull/988)
+- upgrade lang fsharp - [#984](https://github.com/leandrocp/lumis/pull/984)
+- update generated themes - [#992](https://github.com/leandrocp/lumis/pull/992)
+- update jinja and r langs - [#993](https://github.com/leandrocp/lumis/pull/993)
+- expose open_multi_themes_pre_tag - [#994](https://github.com/leandrocp/lumis/pull/994)
+
 ## [0.11.0](https://github.com/leandrocp/lumis/compare/cargo-lumis/v0.10.0...cargo-lumis/v0.11.0) (2026-07-03)
 
 
