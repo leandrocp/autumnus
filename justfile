@@ -432,7 +432,7 @@ release-needed:
     done
 
     if [ "$found" -eq 0 ]; then
-        echo "No non-chore package-scoped commits found since the latest package tags."
+        echo "No package-scoped commits found since the latest package tags."
     fi
 
 # Update package version files and regenerate the package changelog locally, eg: just release-prepare cargo-lumis-cli 0.2.1
