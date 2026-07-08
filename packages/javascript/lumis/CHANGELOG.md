@@ -1,3 +1,10 @@
+## [0.5.2](https://github.com/leandrocp/lumis/compare/npm-lumis/v0.5.1...npm-lumis/v0.5.2) (2026-07-08)
+
+
+### Features
+
+- update jinja and r langs - [#993](https://github.com/leandrocp/lumis/pull/993)
+
 ## [0.5.1](https://github.com/leandrocp/lumis/compare/npm-lumis/v0.5.0...npm-lumis/v0.5.1) (2026-07-03)
 
 
