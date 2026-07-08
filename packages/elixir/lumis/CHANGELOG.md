@@ -1,3 +1,11 @@
+## [0.6.2](https://github.com/leandrocp/lumis/compare/hex-lumis/v0.6.1...hex-lumis/v0.6.2) (2026-07-08)
+
+
+### Features
+
+- update generated themes - [#992](https://github.com/leandrocp/lumis/pull/992)
+- update jinja and r langs - [#993](https://github.com/leandrocp/lumis/pull/993)
+
 ## [0.6.1](https://github.com/leandrocp/lumis/compare/hex-lumis/v0.6.0...hex-lumis/v0.6.1) (2026-07-03)
 
 
