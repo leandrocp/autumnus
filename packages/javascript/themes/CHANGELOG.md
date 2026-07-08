@@ -1,3 +1,10 @@
+## [0.2.2](https://github.com/leandrocp/lumis/compare/npm-themes/v0.2.1...npm-themes/v0.2.2) (2026-07-08)
+
+
+### Features
+
+- update generated themes - [#992](https://github.com/leandrocp/lumis/pull/992)
+
 ## [0.2.1](https://github.com/leandrocp/lumis/compare/npm-themes/v0.2.0...npm-themes/v0.2.1) (2026-07-03)
 
 
