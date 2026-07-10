@@ -13,6 +13,7 @@ on:
       - "npm-markdown-it-lumis/v*"
       - "npm-rehype-lumis/v*"
       - "npm-react/v*"
+      - "npm-cli/v*"
       - "npm-themes/v*"
       - "npm-wasm-bundle-*/v*"
 
@@ -62,6 +63,9 @@ jobs:
           elif [ "$component" = "npm-react" ]; then
             set_output filter "@lumis-sh/react"
             set_output build_filters "@lumis-sh/themes @lumis-sh/lumis @lumis-sh/react"
+          elif [ "$component" = "npm-cli" ]; then
+            set_output filter "@lumis-sh/cli"
+            set_output build_filters ""
           elif [[ "$component" == npm-wasm-bundle-* ]]; then
             set_output filter "@lumis-sh/${component#npm-}"
             set_output build_filters "@lumis-sh/${component#npm-}"
@@ -73,6 +77,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build publish target workspace packages
+        if: steps.pkg.outputs.build_filters != ''
         run: |
           for pkg in ${{ steps.pkg.outputs.build_filters }}; do
             pnpm --filter "$pkg" run build

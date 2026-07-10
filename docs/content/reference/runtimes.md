@@ -17,7 +17,7 @@ keywords:
 
 | Runtime | Package | Reference |
 | --- | --- | --- |
-| CLI | `lumis-cli` (`lumis` binary) | [README](https://github.com/leandrocp/lumis/tree/main/crates/lumis-cli) |
+| CLI | `@lumis-sh/cli` (`lumis` binary), `lumis-cli` on crates.io | [npm](https://www.npmjs.com/package/@lumis-sh/cli) |
 | Rust | `lumis` | [docs.rs](https://docs.rs/lumis) |
 | Elixir | `lumis` | [HexDocs](https://hexdocs.pm/lumis) |
 | JavaScript | `@lumis-sh/lumis` | [npm](https://www.npmjs.com/package/@lumis-sh/lumis) |

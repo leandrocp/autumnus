@@ -1,0 +1,45 @@
+{
+  "name": "@lumis-sh/cli",
+  "version": "0.4.0",
+  "description": "Command line syntax highlighter powered by Tree-sitter and Neovim themes",
+  "author": "Leandro Pereira",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leandrocp/lumis.git",
+    "directory": "packages/javascript/cli"
+  },
+  "bugs": "https://github.com/leandrocp/lumis/issues",
+  "homepage": "https://lumis.sh",
+  "keywords": [
+    "lumis-sh",
+    "syntax-highlighting",
+    "tree-sitter",
+    "neovim",
+    "cli"
+  ],
+  "bin": {
+    "lumis": "./bin/lumis"
+  },
+  "files": [
+    "bin",
+    "scripts/install.js",
+    "vendor",
+    "CHANGELOG.md",
+    "README.md"
+  ],
+  "packageManager": "pnpm@10.31.0",
+  "scripts": {
+    "postinstall": "node scripts/install.js",
+    "test": "node scripts/test-shim.js"
+  },
+  "dependencies": {
+    "tar": "^7.5.2"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

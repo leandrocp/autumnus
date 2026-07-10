@@ -58,15 +58,18 @@ If multiple JS packages are part of the same release, use this order:
 3. `npm-markdown-it-lumis`
 4. `npm-rehype-lumis`
 5. `npm-react`
-6. `npm-wasm-bundle-web`
-7. `npm-wasm-bundle-web-extra`
-8. `npm-wasm-bundle-system`
-9. `npm-wasm-bundle-backend`
-10. `npm-wasm-bundle-full`
+6. `npm-cli`
+7. `npm-wasm-bundle-web`
+8. `npm-wasm-bundle-web-extra`
+9. `npm-wasm-bundle-system`
+10. `npm-wasm-bundle-backend`
+11. `npm-wasm-bundle-full`
 
 `@lumis-sh/lumis` builds against `@lumis-sh/themes`. `@lumis-sh/markdown-it-lumis`, `@lumis-sh/rehype-lumis`, and `@lumis-sh/react` depend on `@lumis-sh/lumis`. The `@lumis-sh/wasm-bundle-*` packages declare `@lumis-sh/lumis` as a peer dependency.
 
-After `npm-lumis` is published, the plugin packages and WASM bundle packages are independent. Keep the order above as the canonical release order.
+After `npm-lumis` is published, the plugin packages, CLI package, and WASM bundle packages are independent. Keep the order above as the canonical release order.
+
+`npm-cli` must use the same version as `cargo-lumis-cli`, and the matching `cargo-lumis-cli/v<version>` GitHub release must already contain prebuilt CLI archives before publishing `@lumis-sh/cli`.
 
 If a JS release also needs new parser WASM packages, publish those first through the WASM workflow. Run `just wasm-publish-needed` to see which parser packages still need publishing.
 
@@ -98,6 +101,7 @@ Use one tag per released package:
 - `npm-markdown-it-lumis/v0.1.0`
 - `npm-rehype-lumis/v0.1.0`
 - `npm-react/v0.1.0`
+- `npm-cli/v0.4.0`
 - `npm-themes/v0.0.3`
 - `npm-wasm-bundle-web/v0.0.4`
 - `npm-wasm-bundle-web-extra/v0.0.3`

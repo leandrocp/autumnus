@@ -6,6 +6,15 @@ The installed binary is `lumis`.
 
 ## Install
 
+Without a Rust toolchain:
+
+```sh
+npx @lumis-sh/cli --help
+npm install -g @lumis-sh/cli
+```
+
+From crates.io:
+
 ```sh
 cargo install lumis-cli
 ```

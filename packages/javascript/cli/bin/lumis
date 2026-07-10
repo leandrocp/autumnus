@@ -1,0 +1,24 @@
+#!/usr/bin/env node
+const { spawnSync } = require("node:child_process");
+const { existsSync } = require("node:fs");
+const { join } = require("node:path");
+
+const binary = join(__dirname, "..", "vendor", process.platform === "win32" ? "lumis.exe" : "lumis");
+
+if (!existsSync(binary)) {
+  console.error("lumis binary not found. Reinstall @lumis-sh/cli.");
+  process.exit(1);
+}
+
+const result = spawnSync(binary, process.argv.slice(2), { stdio: "inherit" });
+
+if (result.error) {
+  console.error(result.error.message);
+  process.exit(1);
+}
+
+if (result.signal) {
+  process.kill(process.pid, result.signal);
+}
+
+process.exit(result.status ?? 0);
