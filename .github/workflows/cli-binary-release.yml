@@ -1,0 +1,72 @@
+name: CLI Binary Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "CLI release tag to publish binaries for, for example: cargo-lumis-cli/v0.4.0"
+        required: true
+        type: string
+  push:
+    tags:
+      - "cargo-lumis-cli/v*"
+
+permissions:
+  attestations: write
+  contents: write
+  id-token: write
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ inputs.tag || github.ref_name }}
+          name: ${{ inputs.tag || github.ref_name }}
+          body: ""
+
+  upload-binaries:
+    needs: create-release
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: aarch64-apple-darwin
+            os: macos-latest
+          - target: x86_64-apple-darwin
+            os: macos-15-intel
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-latest
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+          - target: aarch64-pc-windows-msvc
+            os: windows-latest
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag || github.ref_name }}
+
+      - uses: taiki-e/upload-rust-binary-action@v1
+        id: upload
+        with:
+          bin: lumis
+          package: lumis-cli
+          target: ${{ matrix.target }}
+          archive: lumis-${{ matrix.target }}
+          checksum: sha256
+          tar: all
+          zip: none
+          locked: true
+          ref: refs/tags/${{ inputs.tag || github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: |
+            ${{ steps.upload.outputs.tar }}
+            ${{ steps.upload.outputs.sha256 }}

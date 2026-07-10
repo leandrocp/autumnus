@@ -393,6 +393,7 @@ release-needed:
         "npm-markdown-it-lumis|packages/javascript/markdown-it-lumis"
         "npm-rehype-lumis|packages/javascript/rehype-lumis"
         "npm-react|packages/javascript/react"
+        "npm-cli|packages/javascript/cli"
         "npm-wasm-bundle-web|packages/javascript/wasm-bundle-web"
         "npm-wasm-bundle-web-extra|packages/javascript/wasm-bundle-web-extra"
         "npm-wasm-bundle-system|packages/javascript/wasm-bundle-system"
@@ -493,6 +494,12 @@ release-prepare package version:
             manifest="packages/javascript/react/package.json"
             changelog="packages/javascript/react/CHANGELOG.md"
             include_path="packages/javascript/react/**/*"
+            kind="npm"
+            ;;
+        npm-cli)
+            manifest="packages/javascript/cli/package.json"
+            changelog="packages/javascript/cli/CHANGELOG.md"
+            include_path="packages/javascript/cli/**/*"
             kind="npm"
             ;;
         npm-themes)

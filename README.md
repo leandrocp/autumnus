@@ -39,10 +39,16 @@
 
 ## Quick Start
 
-### [CLI](https://crates.io/crates/lumis-cli)
+### [CLI](https://www.npmjs.com/package/@lumis-sh/cli)
 
 ```bash
-cargo install lumis-cli
+npx @lumis-sh/cli highlight app.js --theme dracula
+```
+
+For a global install:
+
+```bash
+npm install -g @lumis-sh/cli
 
 lumis highlight app.js --theme dracula
 ```
@@ -119,7 +125,7 @@ System.out.println(result.string());
 
 | Runtime | Install | Package | Docs |
 |----------|---------| ------- | -----|
-| **CLI** | `cargo install lumis-cli` | [crates.io/lumis-cli](https://crates.io/crates/lumis-cli) | [README.md](crates/lumis-cli/README.md) |
+| **CLI** | `npx @lumis-sh/cli` | [npmjs.com/@lumis-sh/cli](https://www.npmjs.com/package/@lumis-sh/cli) | [README.md](packages/javascript/cli/README.md) |
 | **Rust** | `cargo add lumis` | [crates.io/lumis](https://crates.io/crates/lumis) | [README.md](crates/lumis/README.md) &bull; [docs.rs](https://docs.rs/lumis) |
 | **Elixir** | `{:lumis, "~> 0.3"}` | [hex.pm/lumis](https://hex.pm/packages/lumis) | [README.md](packages/elixir/lumis/README.md) &bull; [hexdocs](https://hexdocs.pm/lumis) |
 | **JavaScript** | `npm install @lumis-sh/lumis` | [npmjs.com/@lumis-sh/lumis](https://www.npmjs.com/package/@lumis-sh/lumis) | [README.md](packages/javascript/lumis/README.md) |
