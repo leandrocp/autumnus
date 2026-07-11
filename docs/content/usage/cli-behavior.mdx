@@ -43,6 +43,17 @@ lumis highlight main.rs
 
 If no language can be inferred, plaintext is the safe fallback.
 
+## Theme selection
+
+When `--theme` is omitted, Lumis uses `[highlight].theme` from its config file. On macOS and Linux, the default path is `${XDG_CONFIG_HOME:-~/.config}/lumis/config.toml`; on Windows it is `%XDG_CONFIG_HOME%/lumis/config.toml`, or `%APPDATA%/lumis/config.toml` when XDG is unset. The default value, `auto`, queries the terminal background and chooses the built-in theme with the closest background color.
+
+```toml
+[highlight]
+theme = "auto"
+```
+
+If terminal color detection is unavailable, Lumis renders without a theme. An explicit `--theme` takes precedence. Set `XDG_CONFIG_HOME`, `LUMIS_CONFIG`, or `--config` to use a different config location.
+
 ## Parser cache lifecycle
 
 The CLI stores parser WASM files under the data directory.

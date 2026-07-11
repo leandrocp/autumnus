@@ -1,3 +1,4 @@
+mod config;
 mod gen_theme;
 mod registry;
 #[allow(clippy::all, dead_code)]
@@ -37,6 +38,10 @@ struct Cli {
     #[arg(short = 'd', long, env("LUMIS_DATA_DIR"), global = true)]
     data_dir: Option<PathBuf>,
 
+    /// Path to the configuration file
+    #[arg(long, env("LUMIS_CONFIG"), global = true)]
+    config: Option<PathBuf>,
+
     /// Show extra output (downloads, cache hits, etc.)
     #[arg(short = 'V', long, global = true)]
     verbose: bool,
@@ -64,7 +69,7 @@ enum Commands {
         #[arg(short = 'f', long)]
         formatter: Option<Formatter>,
 
-        /// Theme name, e.g. dracula, github_dark
+        /// Theme name, e.g. dracula, github_dark, or auto
         #[arg(short = 't', long)]
         theme: Option<String>,
 
@@ -208,6 +213,7 @@ fn default_data_dir() -> PathBuf {
 fn main() -> Result<()> {
     let cli = Cli::parse();
     let data_dir = cli.data_dir.unwrap_or_else(default_data_dir);
+    let config_path = cli.config.unwrap_or_else(config::default_path);
     let verbose = cli.verbose;
 
     match cli.command {
@@ -224,13 +230,14 @@ fn main() -> Result<()> {
             highlight_lines,
             rainbow_brackets,
         } => {
+            let config = config::Config::load(&config_path)?;
             let reg = registry::Registry::new(data_dir)?;
             do_highlight(
                 &reg,
                 path,
                 language,
                 formatter,
-                theme,
+                theme.or(config.highlight.theme),
                 background,
                 width,
                 themes,
@@ -238,6 +245,7 @@ fn main() -> Result<()> {
                 css_variable_prefix,
                 highlight_lines,
                 rainbow_brackets,
+                verbose,
             )
         }
         Commands::Languages { command } => match command {
@@ -451,11 +459,26 @@ fn list_languages() -> Result<()> {
 fn resolve_theme(
     name: Option<String>,
     data_dir: Option<&Path>,
+    verbose: bool,
 ) -> Option<lumis_core::themes::Theme> {
-    let name = name.unwrap_or_else(|| "catppuccin_frappe".to_string());
+    let name = match name.as_deref() {
+        None | Some("auto") => match guess_terminal_theme() {
+            Some(name) => name,
+            None => {
+                if verbose {
+                    eprintln!("theme: auto unavailable");
+                }
+                return None;
+            }
+        },
+        Some(name) => name.to_string(),
+    };
 
     // Try built-in theme first
     if let Ok(theme) = lumis_core::themes::get(&name) {
+        if verbose {
+            eprintln!("theme: {}", theme.name);
+        }
         return Some(theme);
     }
 
@@ -463,11 +486,62 @@ fn resolve_theme(
     if let Some(dir) = data_dir {
         let path = dir.join("themes").join(format!("{}.json", name));
         if let Ok(theme) = lumis_core::themes::from_file(&path) {
+            if verbose {
+                eprintln!("theme: {}", theme.name);
+            }
             return Some(theme);
         }
     }
 
+    if verbose {
+        eprintln!("theme: {name} not found");
+    }
+
     None
+}
+
+fn guess_terminal_theme() -> Option<String> {
+    let background =
+        terminal_colorsaurus::background_color(terminal_colorsaurus::QueryOptions::default())
+            .ok()?
+            .scale_to_8bit();
+
+    closest_builtin_theme(background)
+}
+
+fn closest_builtin_theme(background: (u8, u8, u8)) -> Option<String> {
+    lumis_core::themes::available_themes()
+        .filter_map(|theme| {
+            let theme_background = theme.bg().and_then(parse_hex_color)?;
+            Some((color_distance(background, theme_background), &theme.name))
+        })
+        .min_by_key(|(distance, _)| *distance)
+        .map(|(_, name)| name.clone())
+}
+
+fn parse_hex_color(color: &str) -> Option<(u8, u8, u8)> {
+    let color = color.strip_prefix('#')?;
+    if color.len() != 6 {
+        return None;
+    }
+
+    Some((
+        u8::from_str_radix(&color[0..2], 16).ok()?,
+        u8::from_str_radix(&color[2..4], 16).ok()?,
+        u8::from_str_radix(&color[4..6], 16).ok()?,
+    ))
+}
+
+// Redmean color distance weights RGB channels based on human perception.
+fn color_distance(left: (u8, u8, u8), right: (u8, u8, u8)) -> u64 {
+    let red_mean = (u64::from(left.0) + u64::from(right.0)) / 2;
+    let red = i64::from(left.0) - i64::from(right.0);
+    let green = i64::from(left.1) - i64::from(right.1);
+    let blue = i64::from(left.2) - i64::from(right.2);
+
+    (((512 + red_mean) * red.unsigned_abs().pow(2)) >> 8)
+        + 4 * green.unsigned_abs().pow(2)
+        + (((767 - red_mean) * blue.unsigned_abs().pow(2)) >> 8)
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -484,6 +558,7 @@ fn do_highlight(
     css_variable_prefix: String,
     highlight_lines: Option<String>,
     rainbow_brackets: bool,
+    verbose: bool,
 ) -> Result<()> {
     let (source, lang) = if let Some(path) = path {
         let bytes = read_or_die(Path::new(&path));
@@ -507,7 +582,15 @@ fn do_highlight(
         ));
     };
 
+    if verbose {
+        eprintln!("--");
+        eprintln!("language: {}", lang.id_name());
+    }
+
     if lang == Language::PlainText {
+        if verbose {
+            eprintln!("--\n");
+        }
         print!("{}", source);
         return Ok(());
     }
@@ -538,6 +621,7 @@ fn do_highlight(
         default_theme,
         css_variable_prefix,
         parsed_highlight_lines,
+        verbose,
     )
 }
 
@@ -617,11 +701,14 @@ fn render_output(
     default_theme: Option<String>,
     css_variable_prefix: String,
     highlight_lines: Option<Vec<RangeInclusive<usize>>>,
+    verbose: bool,
 ) -> Result<()> {
-    let theme_obj = resolve_theme(theme, Some(reg.data_dir()));
-
     match formatter.unwrap_or_default() {
         Formatter::HtmlInline => {
+            let theme_obj = resolve_theme(theme, Some(reg.data_dir()), verbose);
+            if verbose {
+                eprintln!("--\n");
+            }
             let mut builder = lumis_core::formatter::HtmlInlineBuilder::new();
             builder
                 .language(lang)
@@ -662,9 +749,13 @@ fn render_output(
                 }
                 let theme_name = parts[0].to_string();
                 let theme_id = parts[1];
-                let theme_obj = resolve_theme(Some(theme_id.to_string()), Some(reg.data_dir()))
-                    .ok_or_else(|| anyhow::anyhow!("Theme '{}' not found", theme_id))?;
+                let theme_obj =
+                    resolve_theme(Some(theme_id.to_string()), Some(reg.data_dir()), verbose)
+                        .ok_or_else(|| anyhow::anyhow!("Theme '{}' not found", theme_id))?;
                 theme_map.insert(theme_name, theme_obj);
+            }
+            if verbose {
+                eprintln!("--\n");
             }
 
             let mut builder = lumis_core::formatter::HtmlMultiThemesBuilder::new();
@@ -693,6 +784,9 @@ fn render_output(
         }
 
         Formatter::HtmlLinked => {
+            if verbose {
+                eprintln!("--\n");
+            }
             let mut builder = lumis_core::formatter::HtmlLinkedBuilder::new();
             builder.language(lang);
 
@@ -711,6 +805,10 @@ fn render_output(
         }
 
         Formatter::Terminal => {
+            let theme_obj = resolve_theme(theme, Some(reg.data_dir()), verbose);
+            if verbose {
+                eprintln!("--\n");
+            }
             let mut builder = lumis_core::formatter::TerminalBuilder::new();
             builder
                 .language(lang)
@@ -725,6 +823,9 @@ fn render_output(
         }
 
         Formatter::BbcodeScoped => {
+            if verbose {
+                eprintln!("--\n");
+            }
             let fmt = lumis_core::formatter::BBCodeScoped::new(lang);
             let mut output = Vec::new();
             fmt.render(source, events, &mut output)?;
@@ -981,6 +1082,21 @@ end
             event,
             HighlightEvent::Start { language, .. } if language == "heex"
         )));
+    }
+
+    #[test]
+    fn closest_builtin_theme_matches_exact_background() {
+        assert_eq!(
+            closest_builtin_theme((0x22, 0x24, 0x36)).as_deref(),
+            Some("tokyonight_moon")
+        );
+    }
+
+    #[test]
+    fn parse_hex_color_rejects_invalid_values() {
+        assert_eq!(parse_hex_color("#282a36"), Some((0x28, 0x2a, 0x36)));
+        assert_eq!(parse_hex_color("282a36"), None);
+        assert_eq!(parse_hex_color("#fff"), None);
     }
 
     #[test]

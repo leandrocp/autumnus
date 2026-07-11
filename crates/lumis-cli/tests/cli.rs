@@ -6,7 +6,9 @@ use std::path::Path;
 use std::path::PathBuf;
 
 fn cmd() -> assert_cmd::Command {
-    cargo_bin_cmd!("lumis")
+    let mut command = cargo_bin_cmd!("lumis");
+    command.env("LUMIS_CONFIG", fixtures_dir().join("missing-config.toml"));
+    command
 }
 
 fn fixtures_dir() -> PathBuf {
@@ -207,6 +209,199 @@ fn highlight_source_terminal_with_custom_background() {
         .assert()
         .success()
         .stdout(predicate::str::contains("\u{1b}[48;2;40;42;54m"));
+}
+
+#[test]
+fn highlight_uses_theme_from_config() {
+    let tmp = tempfile::tempdir().unwrap();
+    let config_path = tmp.path().join("config.toml");
+    write_file(&config_path, "[highlight]\ntheme = \"dracula\"\n");
+
+    cmd()
+        .env("LUMIS_CONFIG", &config_path)
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .args([
+            "highlight",
+            "-l",
+            "diff",
+            "--background",
+            "theme",
+            "--width",
+            "20",
+        ])
+        .write_stdin("abc\n")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("\u{1b}[48;2;40;42;54m"));
+}
+
+#[test]
+fn highlight_verbose_reports_resolved_theme() {
+    cmd()
+        .arg("--verbose")
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .args([
+            "highlight",
+            "-l",
+            "diff",
+            "--theme",
+            "dracula",
+            "--background",
+            "theme",
+            "--width",
+            "20",
+        ])
+        .write_stdin("abc\n")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("\u{1b}[48;2;40;42;54m"))
+        .stderr(predicate::str::contains("--\nlanguage: diff"))
+        .stderr(predicate::str::contains("language: diff"))
+        .stderr(predicate::str::contains("theme: dracula"))
+        .stderr(predicate::str::contains("theme: dracula\n--\n\n"));
+}
+
+#[test]
+fn highlight_theme_flag_overrides_config() {
+    let tmp = tempfile::tempdir().unwrap();
+    let config_path = tmp.path().join("config.toml");
+    write_file(&config_path, "[highlight]\ntheme = \"github_light\"\n");
+
+    cmd()
+        .env("LUMIS_CONFIG", &config_path)
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .args([
+            "highlight",
+            "-l",
+            "diff",
+            "--theme",
+            "dracula",
+            "--background",
+            "theme",
+            "--width",
+            "20",
+        ])
+        .write_stdin("abc\n")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("\u{1b}[48;2;40;42;54m"));
+}
+
+#[test]
+fn highlight_theme_flag_skips_configured_auto_theme() {
+    let tmp = tempfile::tempdir().unwrap();
+    let config_path = tmp.path().join("config.toml");
+    write_file(&config_path, "[highlight]\ntheme = \"auto\"\n");
+
+    cmd()
+        .env("LUMIS_CONFIG", &config_path)
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .arg("--verbose")
+        .args([
+            "highlight",
+            "-l",
+            "diff",
+            "--theme",
+            "dracula",
+            "--background",
+            "theme",
+            "--width",
+            "20",
+        ])
+        .write_stdin("abc\n")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("\u{1b}[48;2;40;42;54m"))
+        .stderr(predicate::str::contains("theme: dracula"))
+        .stderr(predicate::str::contains("theme: auto unavailable").not());
+}
+
+#[test]
+fn config_flag_overrides_config_environment_variable() {
+    let tmp = tempfile::tempdir().unwrap();
+    let env_config_path = tmp.path().join("env-config.toml");
+    let flag_config_path = tmp.path().join("flag-config.toml");
+    write_file(&env_config_path, "[highlight]\ntheme = \"github_light\"\n");
+    write_file(&flag_config_path, "[highlight]\ntheme = \"dracula\"\n");
+
+    cmd()
+        .env("LUMIS_CONFIG", &env_config_path)
+        .args(["--config", flag_config_path.to_str().unwrap()])
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .args([
+            "highlight",
+            "-l",
+            "diff",
+            "--background",
+            "theme",
+            "--width",
+            "20",
+        ])
+        .write_stdin("abc\n")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("\u{1b}[48;2;40;42;54m"));
+}
+
+#[test]
+fn highlight_auto_renders_without_theme_when_detection_is_unavailable() {
+    let tmp = tempfile::tempdir().unwrap();
+    let config_path = tmp.path().join("config.toml");
+    write_file(&config_path, "[highlight]\ntheme = \"auto\"\n");
+
+    cmd()
+        .env("LUMIS_CONFIG", &config_path)
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .args(["highlight", "-l", "diff"])
+        .write_stdin(DIFF_SNIPPET)
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("\u{1b}[").not());
+}
+
+#[test]
+fn highlight_verbose_reports_unavailable_auto_theme() {
+    let tmp = tempfile::tempdir().unwrap();
+    let config_path = tmp.path().join("config.toml");
+    write_file(&config_path, "[highlight]\ntheme = \"auto\"\n");
+
+    cmd()
+        .env("LUMIS_CONFIG", &config_path)
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .arg("--verbose")
+        .args(["highlight", "-l", "diff"])
+        .write_stdin(DIFF_SNIPPET)
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("\u{1b}[").not())
+        .stderr(predicate::str::contains("--\nlanguage: diff"))
+        .stderr(predicate::str::contains("language: diff"))
+        .stderr(predicate::str::contains("theme: auto unavailable"))
+        .stderr(predicate::str::contains("theme: auto unavailable\n--\n\n"));
+}
+
+#[test]
+fn highlight_reports_invalid_config() {
+    let tmp = tempfile::tempdir().unwrap();
+    let config_path = tmp.path().join("config.toml");
+    write_file(&config_path, "[highlight\ntheme = \"dracula\"\n");
+
+    cmd()
+        .env("LUMIS_CONFIG", &config_path)
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .args(["highlight", "-l", "diff"])
+        .write_stdin(DIFF_SNIPPET)
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("failed to parse config file"));
 }
 
 #[test]
