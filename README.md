@@ -42,7 +42,7 @@
 ### [CLI](https://www.npmjs.com/package/@lumis-sh/cli)
 
 ```bash
-npx @lumis-sh/cli highlight app.js --theme dracula
+npx @lumis-sh/cli highlight app.js
 ```
 
 For a global install:
@@ -50,7 +50,7 @@ For a global install:
 ```bash
 npm install -g @lumis-sh/cli
 
-lumis highlight app.js --theme dracula
+lumis highlight app.js
 ```
 
 ### [Rust](https://crates.io/crates/lumis)
