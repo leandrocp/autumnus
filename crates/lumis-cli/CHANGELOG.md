@@ -1,3 +1,10 @@
+## [0.4.1](https://github.com/leandrocp/lumis/compare/cargo-lumis-cli/v0.4.0...cargo-lumis-cli/v0.4.1) (2026-07-11)
+
+### Features
+
+- config file [#998](https://github.com/leandrocp/lumis/pull/998)
+- auto theme [#998](https://github.com/leandrocp/lumis/pull/998)
+
 ## [0.4.0](https://github.com/leandrocp/lumis/compare/cargo-lumis-cli/v0.3.0...cargo-lumis-cli/v0.4.0) (2026-06-12)
 
 ### ⚠ BREAKING CHANGES
