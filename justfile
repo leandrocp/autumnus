@@ -393,7 +393,7 @@ release-needed:
         "npm-markdown-it-lumis|packages/javascript/markdown-it-lumis"
         "npm-rehype-lumis|packages/javascript/rehype-lumis"
         "npm-react|packages/javascript/react"
-        "npm-cli|packages/javascript/cli"
+        "npm-cli|packages/javascript/cli|crates/lumis-cli"
         "npm-wasm-bundle-web|packages/javascript/wasm-bundle-web"
         "npm-wasm-bundle-web-extra|packages/javascript/wasm-bundle-web-extra"
         "npm-wasm-bundle-system|packages/javascript/wasm-bundle-system"
@@ -406,13 +406,14 @@ release-needed:
 
     for entry in "${packages[@]}"; do
         package="${entry%%|*}"
-        path="${entry#*|}"
+        paths="${entry#*|}"
+        IFS='|' read -r -a package_paths <<< "$paths"
         tag="$(git tag --list "$package/v*" --sort=-version:refname | head -n1)"
 
         if [ -n "$tag" ]; then
-            commits="$(git log --no-merges --extended-regexp --invert-grep --grep='^chore(\(.+\))?: ' --format='%h %s' "$tag"..HEAD -- "$path")"
+            commits="$(git log --no-merges --extended-regexp --invert-grep --grep='^chore(\(.+\))?: ' --format='%h %s' "$tag"..HEAD -- "${package_paths[@]}")"
         else
-            commits="$(git log --no-merges --extended-regexp --invert-grep --grep='^chore(\(.+\))?: ' --format='%h %s' -- "$path")"
+            commits="$(git log --no-merges --extended-regexp --invert-grep --grep='^chore(\(.+\))?: ' --format='%h %s' -- "${package_paths[@]}")"
         fi
 
         if [ -z "$commits" ]; then
@@ -548,6 +549,10 @@ release-prepare package version:
     esac
 
     tag="$package/v$version"
+    include_args=(--include-path "$include_path")
+    if [ "$package" = "npm-cli" ]; then
+        include_args+=(--include-path "crates/lumis-cli/**/*")
+    fi
 
     case "$kind" in
         cargo)
@@ -561,5 +566,5 @@ release-prepare package version:
             ;;
     esac
 
-    git-cliff --config cliff.toml --github-repo leandrocp/lumis --include-path "$include_path" --tag-pattern "$package/v[0-9].*" --tag "$tag" --prepend "$changelog" --strip header --unreleased
+    git-cliff --config cliff.toml --github-repo leandrocp/lumis --tag-pattern "$package/v[0-9].*" --tag "$tag" --prepend "$changelog" --strip header --unreleased "${include_args[@]}"
     printf 'Prepared %s %s\n' "$package" "$version"
