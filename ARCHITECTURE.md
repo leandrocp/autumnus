@@ -10,7 +10,7 @@
          |                   |                   |
          v                   v                   v
 +--------------------------------------------------------------+
-| justfile + benchmarks/mise.toml + crates/dev                 |
+| mise.toml + benchmarks/mise.toml + crates/dev                |
 | setup / lint / test / docs / codegen / packaging / benchmark |
 +-------+-------------------+-------------------+--------------+
         |                   |                   |
@@ -78,6 +78,6 @@ benchmarks/fixtures + deterministic generator
 
 The Rust benchmark package is its own Cargo workspace so syntect and Criterion do not enter normal production workspace builds. The private JavaScript benchmark package joins the pnpm workspace so it can consume locally built Lumis packages while keeping Shiki and Mitata out of published manifests.
 
-Fixture generation, optimized artifact builds, timed execution, memory sampling, cache preparation, and reporting are separate mise tasks. `benchmarks/mise.toml` pins the complete toolchain, models task dependencies and incremental sources/outputs, and owns shared paths. Root `just bench-*` recipes delegate to mise during the repository's gradual migration away from just. Timed families execute serially. CLI first-use owns an isolated data/cache directory and includes automatic parser WASM download; repeat-use starts from a prepared parser and Wasmtime cache.
+Fixture generation, optimized artifact builds, timed execution, memory sampling, cache preparation, and reporting are separate mise tasks. `benchmarks/mise.toml` pins the benchmark toolchain, models task dependencies and incremental sources/outputs, and owns shared paths. Root `mise run bench-*` tasks delegate to that benchmark configuration. The root `mise.toml` intentionally does not pin runtime versions. Timed families execute serially. CLI first-use owns an isolated data/cache directory and includes automatic parser WASM download; repeat-use starts from a prepared parser and Wasmtime cache.
 
 CI uses `jdx/mise-action` with the same benchmark config. Every pull request runs one observational, non-gating stable suite covering Rust, JavaScript, CLI repeat use, and memory. It appends available benchmark tables to the GitHub Actions job summary and retains raw report artifacts for seven days. The network-inclusive first-use scenario remains local-only.

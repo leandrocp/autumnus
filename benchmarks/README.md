@@ -13,7 +13,7 @@ The suite measures a shared small Rust fixture and a deterministic generated Rus
 
 ## Install
 
-The benchmark environment is pinned in [`benchmarks/mise.toml`](mise.toml), with cross-platform download metadata in [`benchmarks/mise.lock`](mise.lock). Install [mise](https://mise.jdx.dev/getting-started.html), trust the project config once, and let mise install Node, pnpm, Rust, just, Hyperfine, and bat:
+The benchmark environment is pinned in [`benchmarks/mise.toml`](mise.toml), with cross-platform download metadata in [`benchmarks/mise.lock`](mise.lock). Install [mise](https://mise.jdx.dev/getting-started.html), trust the project config once, and let mise install Node, pnpm, Rust, Hyperfine, and bat:
 
 ```sh
 mise trust benchmarks/mise.toml
@@ -24,14 +24,14 @@ mise run -C benchmarks setup
 The transitional root entry point is equivalent:
 
 ```sh
-just bench-setup
+mise run bench-setup
 ```
 
 Benchmark-only Rust dependencies live in an independent workspace under `benchmarks/rust/`. JavaScript competitors live in the private `@lumis-sh/benchmarks` workspace package. They are not dependencies of published Lumis packages.
 
 ## Commands
 
-Mise is the benchmark control plane. Root `just bench-*` recipes remain thin compatibility wrappers until the repository-wide just-to-mise migration happens.
+Mise is the benchmark control plane. Root `mise run bench-*` tasks are thin wrappers around the focused tasks in `benchmarks/mise.toml`.
 
 ```sh
 mise run -C benchmarks smoke            # short, offline integration run
@@ -102,7 +102,7 @@ Memory is secondary and informational. Reports include the platform measurement 
 `benchmarks/fixtures/manifest.json` pins encoding, line endings, minimum sizes, line counts, generator configuration, and SHA-256 values.
 
 ```sh
-just bench-fixtures
+mise run bench-fixtures
 ```
 
 This command:
@@ -140,10 +140,10 @@ Compare only runs with compatible fixture hashes, dependency versions, runtime v
 After a run, preserve its reports and optimized artifacts:
 
 ```sh
-just bench-stage main
+mise run bench-stage main
 # switch branch or worktree, rerun the suite
-just bench-stage candidate
-just bench-compare main candidate
+mise run bench-stage candidate
+mise run bench-compare main candidate
 ```
 
 Labels accept letters, numbers, `.`, `_`, and `-`. Comparison output is stored under `target/benchmarks/staged/`.

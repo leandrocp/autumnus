@@ -33,7 +33,10 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml
 
-      - uses: taiki-e/install-action@just
+      - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db
+        with:
+          version: 2026.7.3
+          install: false
 
       - run: pnpm install --frozen-lockfile
 
@@ -44,10 +47,10 @@ jobs:
           sudo apt-get install -y lua5.4 neovim
 
       - name: themes-gen
-        run: echo "y" | just themes-gen
+        run: echo "y" | mise run themes-gen
 
       - name: css-gen
-        run: just css-gen
+        run: mise run css-gen
 
       - name: Build pull request body
         run: |

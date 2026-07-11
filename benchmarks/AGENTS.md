@@ -18,4 +18,4 @@ These rules apply to everything under `benchmarks/`.
 - Record toolchain, dependency, fixture, host, output-size, and cache metadata with every run.
 - Do not add competitor dependencies to published Lumis packages.
 - Define benchmark tools, environment, dependencies, and workflows in `benchmarks/mise.toml`.
-- Keep root `just bench-*` recipes as thin mise wrappers until the repository-wide migration.
+- Keep root `mise run bench-*` tasks as thin wrappers around `benchmarks/mise.toml`.

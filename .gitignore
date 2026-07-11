@@ -6,8 +6,7 @@
 /themes/nvim
 /queries/**/folds.scm
 /queries/**/indents.scm
-mise.toml
-!benchmarks/mise.toml
+mise.local.toml
 .envrc
 .vite/
 /.claude/

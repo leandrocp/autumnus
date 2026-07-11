@@ -116,7 +116,7 @@ fn main() {
     // --- Part 1: per-language query constants ---
     let entries = fs::read_dir(&queries_path).unwrap_or_else(|_| {
         panic!(
-            "failed to read queries directory at {}. Run `just langs-preprocess-queries` first.",
+            "failed to read queries directory at {}. Run `mise run langs-preprocess-queries` first.",
             queries_path.display()
         )
     });

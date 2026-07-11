@@ -29,19 +29,19 @@ Lumis should present one mental model everywhere. Public APIs across languages s
 
 The Rust implementation is the source of truth. When a cross-runtime API decision is unclear, follow Rust first and bring other runtimes into line with it instead of inventing runtime-specific behavior.
 
-### Route work through `just`
+### Route work through `mise`
 
-`justfile` is the control plane for this repository.
+`mise.toml` is the control plane for this repository. It defines tasks without pinning runtime versions, so local commands use the developer's installed Rust, JavaScript, Elixir, and other toolchains.
 
-- Prefer `just` recipes over raw tool invocations.
-- If a repeated workflow does not have a recipe yet, add or update the `justfile` instead of documenting an ad hoc command sequence.
-- Use the existing top-level entry points whenever possible: `just setup`, `just fmt`, `just lint`, `just test`, `just test-conformance`, `just docs`, `just dev`, and `just docs-site`.
+- Prefer `mise run` tasks over raw tool invocations.
+- If a repeated workflow does not have a task yet, add or update `mise.toml` instead of documenting an ad hoc command sequence.
+- Use the existing top-level entry points whenever possible: `mise run setup`, `mise run fmt`, `mise run lint`, `mise run test`, `mise run test-conformance`, `mise run docs`, `mise run dev`, and `mise run docs-site`.
 
 ### Theme extraction and Neovim plugins
 
 Theme extraction uses Neovim's built-in plugin manager, `vim.pack`.
 
-- Read the upstream docs before changing this flow: https://neovim.io/doc/user/pack/#_plugin-manager
+- Read the upstream docs before changing this flow: <https://neovim.io/doc/user/pack/#_plugin-manager>
 - `vim.pack` manages plugins under `stdpath("data") .. "/site/pack/core/opt"`. In this repo, `themes/init.lua` sets `XDG_DATA_HOME` to the repo-local `nvim/data`, so extraction must not touch a user's normal Neovim install.
 - Do not manually mutate `vim.pack` managed plugin repositories with raw `git` commands unless there is no supported `vim.pack` API for the operation.
 - `vim.pack.add()` installs missing plugins and makes them available in the current session, but it does not update an existing plugin's revision.
@@ -58,7 +58,7 @@ Those changes require review. They also require checking whether `CONTRIBUTING.m
 
 Rust is the reference implementation and must follow the Rust API Guidelines:
 
-- https://rust-lang.github.io/api-guidelines/checklist.html
+- <https://rust-lang.github.io/api-guidelines/checklist.html>
 
 Prefer guideline-compliant naming, error behavior, builder patterns, documentation, and trait usage. Do not introduce a Rust API shortcut that other runtimes cannot sensibly mirror.
 
@@ -105,7 +105,7 @@ Large parts of the repository are generated from shared inputs such as `language
 
 - Edit the source inputs, not generated outputs, unless the generated file is the intended source.
 - For query changes, treat `queries/upstream/` as fetched source material, `queries/override/` as full replacements, and `queries/append/` as additive local patches.
-- Regenerate checked-in artifacts with the documented `just` workflows.
+- Regenerate checked-in artifacts with the documented `mise run` workflows.
 - Keep Rust, JavaScript, Elixir, docs, fixtures, and generated metadata in sync.
 
 ## Verification
@@ -114,11 +114,11 @@ Match verification to the scope of the change, but do not stop at a partial chec
 
 Common entry points:
 
-- `just fmt`
-- `just lint`
-- `just test`
-- `just test-conformance`
-- `just docs`
+- `mise run fmt`
+- `mise run lint`
+- `mise run test`
+- `mise run test-conformance`
+- `mise run docs`
 
 For language, theme, query, docs-generation, or bundle changes, run the relevant regeneration commands described in `CONTRIBUTING.md` and commit the resulting tracked files.
 
@@ -143,5 +143,5 @@ When in doubt:
 1. read the three core docs
 2. make the smallest correct change
 3. keep Rust as the reference
-4. run the work through `just`
+4. run the work through `mise`
 5. update docs, examples, website, and docs site before calling the work done

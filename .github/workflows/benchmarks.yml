@@ -33,7 +33,7 @@ jobs:
             .
             benchmarks/rust
       - name: Run benchmark suite
-        run: just bench-dev
+        run: mise run bench-dev
       - name: Publish benchmark values
         if: always()
         run: |

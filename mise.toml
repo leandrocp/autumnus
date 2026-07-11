@@ -1,0 +1,849 @@
+# Project task runner configuration. Runtime versions are intentionally not pinned.
+[tasks.'setup']
+description = "Install dependencies and check required tools"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+errors=0
+
+check_bin() {
+    if command -v "$1" &>/dev/null; then
+        echo "  ✓ $1"
+    else
+        echo "  ✗ $1 -- $2"
+        errors=$((errors + 1))
+    fi
+}
+
+check_python310() {
+    if ! command -v python3 &>/dev/null; then
+        echo "  ✗ python3 -- Python 3.10+ is needed for WASM builds"
+        errors=$((errors + 1))
+        return
+    fi
+
+    local version
+    version="$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[:3])))')"
+
+    if python3 -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)'; then
+        echo "  ✓ python3 ($version)"
+    else
+        echo "  ✗ python3 ($version) -- Python 3.10+ is needed for WASM builds"
+        errors=$((errors + 1))
+    fi
+}
+
+check_tree_sitter_cli() {
+    if ! command -v tree-sitter &>/dev/null; then
+        echo "  ✗ tree-sitter -- tree-sitter-cli >= 0.26 is needed for WASM builds"
+        errors=$((errors + 1))
+        return
+    fi
+
+    local version raw_version major minor
+    raw_version="$(tree-sitter --version 2>/dev/null)"
+    version="${raw_version#tree-sitter }"
+    version="${version%% *}"
+
+    if [[ ! "$version" =~ ^([0-9]+)\.([0-9]+)(\.[0-9]+)?$ ]]; then
+        echo "  ✗ tree-sitter ($raw_version) -- could not determine version; need >= 0.26"
+        errors=$((errors + 1))
+        return
+    fi
+
+    major="${BASH_REMATCH[1]}"
+    minor="${BASH_REMATCH[2]}"
+
+    if (( major > 0 || minor >= 26 )); then
+        echo "  ✓ tree-sitter ($version)"
+    else
+        echo "  ✗ tree-sitter ($version) -- tree-sitter-cli >= 0.26 is needed for WASM builds"
+        errors=$((errors + 1))
+    fi
+}
+
+echo "Checking required tools..."
+check_bin cargo "https://rustup.rs"
+check_bin node "https://nodejs.org"
+check_bin pnpm "https://pnpm.io/installation"
+check_bin mise "https://mise.jdx.dev/getting-started.html"
+check_bin mix "https://elixir-lang.org/install.html"
+check_bin stylua "cargo install stylua"
+echo ""
+
+echo "Checking optional tools..."
+check_tree_sitter_cli
+check_bin emcc "https://emscripten.org (needed for WASM builds)"
+check_bin git-cliff "https://git-cliff.org"
+check_python310
+check_bin nvim "https://neovim.io (needed for theme generation)"
+echo ""
+
+if [ "$errors" -gt 0 ]; then
+    echo "⚠ $errors tool(s) missing -- see above"
+    echo ""
+fi
+
+echo "Fetching Rust dependencies..."
+cargo fetch
+echo ""
+
+echo "Installing JS dependencies..."
+pnpm install
+echo ""
+
+echo "Installing website dependencies..."
+(cd website && pnpm install)
+echo ""
+
+echo "Installing docs site dependencies..."
+(cd docs && pnpm install)
+echo ""
+
+echo "Preprocessing shared queries..."
+mise run langs-preprocess-queries
+echo ""
+
+echo "Generating JS theme assets..."
+pnpm --filter @lumis-sh/themes build
+echo ""
+
+echo "Generating JS language/runtime artifacts..."
+pnpm --filter @lumis-sh/lumis build:generate
+pnpm --dir packages/javascript run build:wasm-bundles
+echo ""
+
+echo "Fetching Elixir dependencies..."
+(cd packages/elixir/lumis && mix deps.get)
+echo ""
+
+echo "Done."
+'''
+
+[tasks.'test']
+description = "Run all tests"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+echo "Running Rust tests..."
+cargo test --workspace
+echo ""
+echo "Running Elixir tests..."
+(cd packages/elixir/lumis && LUMIS_BUILD=1 mix test)
+echo ""
+echo "Running Javascript tests..."
+pnpm --filter @lumis-sh/lumis build
+pnpm -r --if-present test
+'''
+
+[tasks.'test-conformance']
+description = "Run conformance tests across all packages"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+echo "Rust conformance..."
+cargo test -p lumis --test formatter_conformance -- --ignored
+echo ""
+echo "CLI conformance..."
+cargo test -p lumis-cli --test conformance -- --ignored
+echo ""
+echo "JS conformance..."
+pnpm --filter @lumis-sh/lumis test:conformance
+echo ""
+echo "Elixir conformance..."
+(cd packages/elixir/lumis && LUMIS_BUILD=1 mix test --include conformance test/conformance_test.exs)
+'''
+
+[tasks.'lint']
+description = "Run all linters"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+echo "Running Rust clippy..."
+cargo clippy --workspace --all-targets --all-features -- -D warnings
+echo ""
+echo "Running Rust fmt check..."
+cargo fmt --all -- --check
+echo ""
+echo "Running Elixir format check..."
+(cd packages/elixir/lumis && mix format --check-formatted)
+echo ""
+echo "Running Elixir compile warnings..."
+(cd packages/elixir/lumis && LUMIS_BUILD=1 mix compile --warnings-as-errors)
+echo "Running Elixir credo..."
+(cd packages/elixir/lumis && LUMIS_BUILD=1 mix credo)
+echo ""
+echo "Running JS fmt check..."
+pnpm --filter @lumis-sh/lumis fmt:check
+pnpm --filter @lumis-sh/themes fmt:check
+echo ""
+echo "Running JS lint..."
+pnpm --filter @lumis-sh/lumis lint
+echo ""
+echo "Running benchmark checks through mise..."
+mise run -C benchmarks lint
+echo ""
+echo "Running Lua fmt check..."
+stylua --check themes/
+'''
+
+[tasks.'fmt']
+description = "Format all code"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+echo "Formatting Rust..."
+cargo fmt --all
+echo ""
+echo "Formatting Elixir..."
+(cd packages/elixir/lumis && mix format)
+echo ""
+echo "Formatting JS/TS..."
+pnpm --filter @lumis-sh/lumis fmt
+pnpm --filter @lumis-sh/themes fmt
+echo ""
+echo "Formatting benchmarks through mise..."
+mise run -C benchmarks format
+echo ""
+echo "Formatting Lua..."
+stylua themes/
+'''
+
+[tasks.'bench-fixtures']
+description = "Benchmark entry points delegate to the pinned benchmarks/mise.toml environment."
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+mise run -C benchmarks fixtures
+'''
+
+[tasks.'bench-build']
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+mise run -C benchmarks build
+'''
+
+[tasks.'bench-setup']
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+mise install -C benchmarks
+mise run -C benchmarks setup
+'''
+
+[tasks.'bench-check']
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+mise run -C benchmarks check
+'''
+
+[tasks.'bench-rust']
+usage = '''
+arg "[quick]" default="false"
+'''
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+if [ "${usage_quick?}" = "true" ]; then mise run -C benchmarks rust quick; else mise run -C benchmarks rust full; fi
+'''
+
+[tasks.'bench-js']
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+mise run -C benchmarks javascript
+'''
+
+[tasks.'bench-cli']
+usage = '''
+arg "[scenario]" default="repeat-use"
+'''
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+mise run -C benchmarks cli "${usage_scenario?}"
+'''
+
+[tasks.'bench-cli-first-use']
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+mise run -C benchmarks cli:first-use
+'''
+
+[tasks.'bench-memory']
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+mise run -C benchmarks memory
+'''
+
+[tasks.'bench-finalize']
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+mise run -C benchmarks finalize
+'''
+
+[tasks.'bench-smoke']
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+mise run -C benchmarks smoke
+'''
+
+[tasks.'bench-dev']
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+mise run -C benchmarks dev
+'''
+
+[tasks.'bench']
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+mise run -C benchmarks full
+'''
+
+[tasks.'bench-stage']
+usage = '''
+arg "<label>"
+'''
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+mise run -C benchmarks stage "${usage_label?}"
+'''
+
+[tasks.'bench-compare']
+usage = '''
+arg "<left>"
+arg "<right>"
+'''
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+mise run -C benchmarks compare "${usage_left?}" "${usage_right?}"
+'''
+
+[tasks.'cli-install']
+description = "Build lumis-cli in release mode and install to the given path"
+usage = '''
+arg "<path>"
+'''
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+cargo build -p lumis-cli --release
+mkdir -p "${usage_path?}"
+cp target/release/lumis "${usage_path?}/lumis"
+echo "Installed lumis to ${usage_path?}/lumis"
+'''
+
+[tasks.'dev']
+description = "Start website dev server"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+if [ ! -f packages/javascript/lumis/dist/bundles/full.js ]; then
+    echo "Building @lumis-sh/lumis for website imports..."
+    pnpm --filter @lumis-sh/lumis build
+    echo ""
+fi
+(cd website && pnpm dev)
+'''
+
+[tasks.'docs-site']
+description = "Start docs site dev server"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+(cd docs && pnpm start)
+'''
+
+[tasks.'css-gen']
+description = "Generate CSS files for HTML linked formatter"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+cargo run --manifest-path crates/dev/Cargo.toml --release -- gen-css
+cargo run --manifest-path crates/dev/Cargo.toml --release -- sync-css
+'''
+
+[tasks.'conformance-dump-events']
+description = "Dump canonical Rust highlight events as JSON"
+usage = '''
+arg "<source>"
+arg "<lang>"
+'''
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+cargo run --manifest-path crates/dev/Cargo.toml --features lumis-all-languages -- dump-events "${usage_source?}" -l ${usage_lang?}
+'''
+
+[tasks.'conformance-verify']
+description = "Verify shared conformance fixtures against canonical Rust output"
+usage = '''
+arg "[name]"
+'''
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+cargo run --manifest-path crates/dev/Cargo.toml --features lumis-all-languages -- verify-conformance ${usage_name:-}
+'''
+
+[tasks.'conformance-regen']
+description = "Regenerate shared conformance fixtures from canonical Rust output"
+usage = '''
+arg "[name]"
+'''
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+cargo run --manifest-path crates/dev/Cargo.toml --features lumis-all-languages -- regen-conformance ${usage_name:-}
+'''
+
+[tasks.'docs']
+description = "Generate documentation for all crates and packages"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+cargo doc --all-features --no-deps
+(cd packages/elixir/lumis && LUMIS_BUILD=1 mix docs)
+pnpm --filter @lumis-sh/lumis docs
+echo ""
+echo "Docs generated:"
+echo "  lumis:           $(pwd)/target/doc/lumis/index.html"
+echo "  lumis-core:      $(pwd)/target/doc/lumis_core/index.html"
+echo "  elixir:          $(pwd)/packages/elixir/lumis/doc/index.html"
+echo "  javascript:      $(pwd)/packages/javascript/lumis/doc/index.html"
+'''
+
+[tasks.'docs-gen-languages-md']
+description = "Generate LANGUAGES.md from languages.toml"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- gen-languages-md
+'''
+
+[tasks.'langs-update']
+description = "Update language parser, queries, and docs"
+usage = '''
+arg "<name>"
+'''
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+mise run langs-fetch-vendored-parsers ${usage_name?}
+cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- cargo-update-dep ${usage_name?}
+cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- cargo-update-features
+mise run langs-fetch-queries ${usage_name?}
+mise run langs-preprocess-queries ${usage_name?}
+mise run docs-gen-languages-md
+'''
+
+[tasks.'docs-gen-themes-md']
+description = "Generate THEMES.md from themes definition"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- gen-themes-md
+'''
+
+[tasks.'langs-extract-scopes']
+description = "Extract highlight scopes from query files"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+find queries/upstream -type f -name "*.scm" -exec grep -oh '@[^_ ][^ ]*' {} \; 2>/dev/null | sed 's/^@//; s/[^a-zA-Z0-9_.-]//g' | sort -u
+'''
+
+[tasks.'langs-fetch-vendored-parsers']
+description = "Fetch vendored parser sources at pinned revisions"
+usage = '''
+arg "[name]"
+'''
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- fetch-parsers ${usage_name:-}
+cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- compress-parsers ${usage_name:-}
+'''
+
+[tasks.'langs-fetch-queries']
+description = "Fetch vendored query files at pinned revisions"
+usage = '''
+arg "[name]"
+'''
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- fetch-queries ${usage_name:-}
+'''
+
+[tasks.'langs-preprocess-queries']
+description = "Preprocess query files (resolve inheritance, apply fixes, strip unsupported predicates)"
+usage = '''
+arg "[name]"
+'''
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- preprocess-queries ${usage_name:-}
+'''
+
+[tasks.'langs-gen-highlights']
+description = "Generate highlights.rs and highlights.ts from highlights.toml"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- gen-highlights
+'''
+
+[tasks.'langs-list']
+description = "List all languages declared in languages.toml"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- langs-list
+'''
+
+[tasks.'cargo-update-features']
+description = "Sync Rust bundle feature lists from languages.toml"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- cargo-update-features
+'''
+
+[tasks.'langs-upgrade']
+description = "Upgrade language parser, queries, generated outputs, and docs"
+usage = '''
+arg "<name>"
+'''
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+mise run langs-upgrade-parsers ${usage_name?}
+mise run langs-upgrade-queries ${usage_name?}
+mise run langs-update ${usage_name?}
+pnpm --filter @lumis-sh/lumis build:generate
+'''
+
+[tasks.'langs-upgrade-parsers']
+description = "Upgrade parser revisions and sync crate-backed versions"
+usage = '''
+arg "[name]"
+'''
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- upgrade-parsers ${usage_name:-}
+cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- cargo-update-dep ${usage_name:-}
+cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- cargo-update-features
+'''
+
+[tasks.'langs-upgrade-queries']
+description = "Upgrade vendored query revisions from upstream"
+usage = '''
+arg "[name]"
+'''
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- upgrade-queries ${usage_name:-}
+'''
+
+[tasks.'wasm-build']
+description = "Build WASM files for tree-sitter parsers (requires emscripten)"
+usage = '''
+arg "[name]"
+'''
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+cargo run --manifest-path crates/dev/Cargo.toml -- build-wasm ${usage_name:-}
+'''
+
+[tasks.'wasm-publish-needed']
+description = "List parsers whose current WASM packages still need publishing"
+usage = '''
+arg "[parser]"
+arg "[force]" default="false"
+'''
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+python3 scripts/wasm-needed.py "${usage_parser:-}" "${usage_force?}"
+'''
+
+[tasks.'wasm-publish-prepare']
+description = "Stage a WASM package for inspection before publishing"
+usage = '''
+arg "<parser>"
+'''
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+mise run wasm-build ${usage_parser?}
+cargo run --manifest-path crates/dev/Cargo.toml -- stage-wasm ${usage_parser?}
+'''
+
+[tasks.'wasm-publish']
+description = "Stage and publish a WASM package to npm"
+usage = '''
+arg "<parser>"
+'''
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+mise run wasm-publish-prepare ${usage_parser?}
+wasm_name=$(cargo run -q -p dev -- wasm-meta ${usage_parser?} | grep '^wasm_name=' | cut -d= -f2)
+cd tmp/wasm-publish/$wasm_name && npm publish --access public
+'''
+
+[tasks.'themes-extract-scopes']
+description = "Extract highlight scopes from theme files"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+jq -r '.highlights | keys[]' themes/*.json | sort -u
+'''
+
+[tasks.'themes-gen']
+description = "Generate theme JSON files from Neovim colorschemes"
+usage = '''
+arg "[theme_name]"
+'''
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+if [ -z "${usage_theme_name:-}" ]; then
+    echo "This will regenerate all theme files in themes/"
+    read -p "Do you want to proceed? (y/N) " reply
+    [[ "$reply" =~ ^[Yy]$ ]] || { echo "Operation cancelled."; exit 0; }
+    find themes -type f -name '*.json' -delete
+    for name in $(cargo run --manifest-path crates/dev/Cargo.toml -- list-themes); do
+        printf '\nGenerating %s...\n' "$name"
+        nvim --clean --headless -V3 -u themes/init.lua -l themes/extract_theme.lua "$name"
+    done
+else
+    echo "This will regenerate ${usage_theme_name:-} in themes/"
+    read -p "Do you want to proceed? (y/N) " reply
+    [[ "$reply" =~ ^[Yy]$ ]] || { echo "Operation cancelled."; exit 0; }
+    nvim --clean --headless -V3 -u themes/init.lua -l themes/extract_theme.lua ${usage_theme_name:-}
+fi
+cargo run --manifest-path crates/dev/Cargo.toml -- sync-themes
+pnpm --filter @lumis-sh/themes build:themes
+pnpm --filter @lumis-sh/themes build:assets
+'''
+
+[tasks.'themes-list']
+description = "List all available themes"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+cargo run --manifest-path crates/dev/Cargo.toml -- list-themes
+'''
+
+[tasks.'release-needed']
+description = "List packages with non-chore path-scoped commits since their latest release tag"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+packages=(
+    "cargo-lumis-core|crates/lumis-core"
+    "cargo-lumis-build|crates/lumis-build"
+    "cargo-lumis|crates/lumis"
+    "cargo-lumis-cli|crates/lumis-cli"
+    "npm-themes|packages/javascript/themes"
+    "npm-lumis|packages/javascript/lumis"
+    "npm-markdown-it-lumis|packages/javascript/markdown-it-lumis"
+    "npm-rehype-lumis|packages/javascript/rehype-lumis"
+    "npm-react|packages/javascript/react"
+    "npm-cli|packages/javascript/cli|crates/lumis-cli"
+    "npm-wasm-bundle-web|packages/javascript/wasm-bundle-web"
+    "npm-wasm-bundle-web-extra|packages/javascript/wasm-bundle-web-extra"
+    "npm-wasm-bundle-system|packages/javascript/wasm-bundle-system"
+    "npm-wasm-bundle-backend|packages/javascript/wasm-bundle-backend"
+    "npm-wasm-bundle-full|packages/javascript/wasm-bundle-full"
+    "hex-lumis|packages/elixir/lumis"
+)
+
+found=0
+
+for entry in "${packages[@]}"; do
+    package="${entry%%|*}"
+    paths="${entry#*|}"
+    IFS='|' read -r -a package_paths <<< "$paths"
+    tag="$(git tag --list "$package/v*" --sort=-version:refname | head -n1)"
+
+    if [ -n "$tag" ]; then
+        commits="$(git log --no-merges --extended-regexp --invert-grep --grep='^chore(\(.+\))?: ' --format='%h %s' "$tag"..HEAD -- "${package_paths[@]}")"
+    else
+        commits="$(git log --no-merges --extended-regexp --invert-grep --grep='^chore(\(.+\))?: ' --format='%h %s' -- "${package_paths[@]}")"
+    fi
+
+    if [ -z "$commits" ]; then
+        continue
+    fi
+
+    found=1
+    echo "$package"
+    if [ -n "$tag" ]; then
+        echo "  since: $tag"
+    else
+        echo "  since: no tags yet"
+    fi
+    while IFS= read -r line; do
+        echo "  $line"
+    done <<< "$commits"
+    echo ""
+done
+
+if [ "$found" -eq 0 ]; then
+    echo "No package-scoped commits found since the latest package tags."
+fi
+'''
+
+[tasks.'release-prepare']
+description = "Update package version files and regenerate the package changelog locally"
+usage = '''
+arg "<package>"
+arg "<version>"
+'''
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+package="${usage_package?}"
+version="${usage_version?}"
+case "$package" in
+    cargo-lumis)
+        manifest="crates/lumis/Cargo.toml"
+        changelog="crates/lumis/CHANGELOG.md"
+        include_path="crates/lumis/**/*"
+        kind="cargo"
+        cargo_package="lumis"
+        ;;
+    cargo-lumis-core)
+        manifest="crates/lumis-core/Cargo.toml"
+        changelog="crates/lumis-core/CHANGELOG.md"
+        include_path="crates/lumis-core/**/*"
+        kind="cargo"
+        cargo_package="lumis-core"
+        ;;
+    cargo-lumis-build)
+        manifest="crates/lumis-build/Cargo.toml"
+        changelog="crates/lumis-build/CHANGELOG.md"
+        include_path="crates/lumis-build/**/*"
+        kind="cargo"
+        cargo_package="lumis-build"
+        ;;
+    cargo-lumis-cli)
+        manifest="crates/lumis-cli/Cargo.toml"
+        changelog="crates/lumis-cli/CHANGELOG.md"
+        include_path="crates/lumis-cli/**/*"
+        kind="cargo"
+        cargo_package="lumis-cli"
+        ;;
+    npm-lumis)
+        manifest="packages/javascript/lumis/package.json"
+        changelog="packages/javascript/lumis/CHANGELOG.md"
+        include_path="packages/javascript/lumis/**/*"
+        kind="npm"
+        ;;
+    npm-markdown-it-lumis)
+        manifest="packages/javascript/markdown-it-lumis/package.json"
+        changelog="packages/javascript/markdown-it-lumis/CHANGELOG.md"
+        include_path="packages/javascript/markdown-it-lumis/**/*"
+        kind="npm"
+        ;;
+    npm-rehype-lumis)
+        manifest="packages/javascript/rehype-lumis/package.json"
+        changelog="packages/javascript/rehype-lumis/CHANGELOG.md"
+        include_path="packages/javascript/rehype-lumis/**/*"
+        kind="npm"
+        ;;
+    npm-react)
+        manifest="packages/javascript/react/package.json"
+        changelog="packages/javascript/react/CHANGELOG.md"
+        include_path="packages/javascript/react/**/*"
+        kind="npm"
+        ;;
+    npm-cli)
+        manifest="packages/javascript/cli/package.json"
+        changelog="packages/javascript/cli/CHANGELOG.md"
+        include_path="packages/javascript/cli/**/*"
+        kind="npm"
+        ;;
+    npm-themes)
+        manifest="packages/javascript/themes/package.json"
+        changelog="packages/javascript/themes/CHANGELOG.md"
+        include_path="packages/javascript/themes/**/*"
+        kind="npm"
+        ;;
+    npm-wasm-bundle-web)
+        manifest="packages/javascript/wasm-bundle-web/package.json"
+        changelog="packages/javascript/wasm-bundle-web/CHANGELOG.md"
+        include_path="packages/javascript/wasm-bundle-web/**/*"
+        kind="npm"
+        ;;
+    npm-wasm-bundle-web-extra)
+        manifest="packages/javascript/wasm-bundle-web-extra/package.json"
+        changelog="packages/javascript/wasm-bundle-web-extra/CHANGELOG.md"
+        include_path="packages/javascript/wasm-bundle-web-extra/**/*"
+        kind="npm"
+        ;;
+    npm-wasm-bundle-system)
+        manifest="packages/javascript/wasm-bundle-system/package.json"
+        changelog="packages/javascript/wasm-bundle-system/CHANGELOG.md"
+        include_path="packages/javascript/wasm-bundle-system/**/*"
+        kind="npm"
+        ;;
+    npm-wasm-bundle-backend)
+        manifest="packages/javascript/wasm-bundle-backend/package.json"
+        changelog="packages/javascript/wasm-bundle-backend/CHANGELOG.md"
+        include_path="packages/javascript/wasm-bundle-backend/**/*"
+        kind="npm"
+        ;;
+    npm-wasm-bundle-full)
+        manifest="packages/javascript/wasm-bundle-full/package.json"
+        changelog="packages/javascript/wasm-bundle-full/CHANGELOG.md"
+        include_path="packages/javascript/wasm-bundle-full/**/*"
+        kind="npm"
+        ;;
+    hex-lumis)
+        manifest="packages/elixir/lumis/mix.exs"
+        changelog="packages/elixir/lumis/CHANGELOG.md"
+        include_path="packages/elixir/lumis/**/*"
+        kind="hex"
+        ;;
+    *) echo "Unknown package: $package" >&2; exit 1 ;;
+esac
+
+tag="$package/v$version"
+include_args=(--include-path "$include_path")
+if [ "$package" = "npm-cli" ]; then
+    include_args+=(--include-path "crates/lumis-cli/**/*")
+fi
+
+case "$kind" in
+    cargo)
+        cargo set-version --manifest-path "$manifest" -p "$cargo_package" "$version"
+        ;;
+    npm)
+        npm --prefix "$(dirname "$manifest")" version --no-git-tag-version "$version"
+        ;;
+    hex)
+        python3 -c 'from pathlib import Path; import re, sys; path = Path(sys.argv[1]); version = sys.argv[2]; content = path.read_text(); content = re.sub(r"@version \"[^\"]+\"", f"@version \"{version}\"", content, count=1); path.write_text(content)' "$manifest" "$version"
+        ;;
+esac
+
+git-cliff --config cliff.toml --github-repo leandrocp/lumis --tag-pattern "$package/v[0-9].*" --tag "$tag" --prepend "$changelog" --strip header --unreleased "${include_args[@]}"
+printf 'Prepared %s %s\n' "$package" "$version"
+'''
