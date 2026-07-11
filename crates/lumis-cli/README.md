@@ -82,7 +82,7 @@ Notes:
 
 - `lumis highlight [PATH]` reads from stdin when `PATH` is omitted.
 - If the detected language falls back to `plaintext`, the source is printed unchanged.
-- The default theme is `catppuccin_frappe` when a formatter needs a theme and you do not pass `--theme`.
+- The default theme is read from `[highlight].theme` in the configuration file. Use `auto` (also the default when unset) to query the terminal background and choose the built-in theme with the closest background color. If detection is unavailable, Lumis renders without a theme; `--theme` takes precedence over the configuration file.
 - `--background` / `-b` applies only to terminal output. Omit it to inherit the output background, pass `theme` to reuse the theme background, or pass a hex color like `#282a36`.
 - `--width` / `-w` applies only to terminal output. Pass a number or let it default to auto, which uses the current `COLUMNS` value when stdout is a TTY.
 - `html-multi-themes` requires at least one `--themes name:theme_id` entry.
@@ -125,6 +125,25 @@ lumis themes generate -u https://github.com/catppuccin/nvim -c catppuccin-latte 
 ```
 
 `lumis themes generate` shells out to `nvim`, so Neovim must be installed and available on `PATH`.
+
+## Configuration
+
+Set defaults in `config.toml`:
+
+```toml
+[highlight]
+theme = "auto" # or a theme name such as "tokyonight_moon"
+```
+
+The `--theme` command-line option takes precedence over the configured theme.
+
+| Platform | Default path |
+|----------|--------------|
+| macOS | `~/.config/lumis/config.toml` |
+| Linux | `${XDG_CONFIG_HOME:-~/.config}/lumis/config.toml` |
+| Windows | `%XDG_CONFIG_HOME%/lumis/config.toml`, `%APPDATA%/lumis/config.toml` otherwise |
+
+Override the location with `--config` or `LUMIS_CONFIG`.
 
 ## Parser management
 
@@ -175,7 +194,8 @@ Override the location with `--data-dir` or `LUMIS_DATA_DIR`.
 
 ```text
 -d, --data-dir <PATH>   Override the data directory
- -V, --verbose           Show cache hits, downloads, and parser paths
+    --config <PATH>     Override the configuration file
+ -V, --verbose          Show cache hits, downloads, and parser paths
     --help              Print help
 -v, --version           Print version
 ```

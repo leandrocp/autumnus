@@ -18,8 +18,9 @@ These flags work with any subcommand:
 
 | Flag | Short | Description |
 | --- | --- | --- |
-| `--verbose` | `-v` | Show extra output: downloads, cache hits, parser paths |
+| `--verbose` | `-V` | Show extra output: downloads, cache hits, parser paths |
 | `--data-dir <path>` | `-d` | Override the data directory (also `LUMIS_DATA_DIR` env var) |
+| `--config <path>` | | Override the config file (also `LUMIS_CONFIG` env var) |
 | `--help` | | Print help for any command |
 
 ## Commands
@@ -50,7 +51,7 @@ echo 'const x = 1' | lumis highlight -l javascript --formatter html-inline --the
 | --- | --- | --- |
 | `--language <lang>` | `-l` | Language id (e.g., `rust`, `javascript`). Auto-detects from file if omitted. |
 | `--formatter <fmt>` | `-f` | Output format: `terminal` (default), `html-inline`, `html-linked`, `html-multi-themes`, `bbcode-scoped` |
-| `--theme <name>` | `-t` | Theme name (e.g., `dracula`, `github_dark`) |
+| `--theme <name>` | `-t` | Theme name (e.g., `dracula`, `github_dark`) or `auto` |
 | `--themes <key:theme>` | | Theme pair for multi-themes (repeatable, e.g., `--themes light:github_light --themes dark:github_dark`) |
 | `--default-theme <id>` | | Which `--themes` entry gets inline styles |
 | `--css-variable-prefix <prefix>` | | Prefix for CSS custom properties (default: `--lumis`) |
@@ -145,6 +146,17 @@ Re-download parsers to get the latest versions.
 lumis parsers update rust javascript
 lumis parsers update --all
 ```
+
+## Configuration
+
+Lumis reads `~/.config/lumis/config.toml` by default on macOS and Linux. Set `XDG_CONFIG_HOME` to change the base directory, or use `--config` / `LUMIS_CONFIG` to select another file.
+
+```toml
+[highlight]
+theme = "auto" # or a theme name such as "tokyonight_moon"
+```
+
+`auto` queries the terminal background and selects the built-in theme with the closest background color. If the terminal cannot be queried, Lumis renders without a theme. An explicit `--theme` takes precedence over the config file.
 
 ## Data directory
 

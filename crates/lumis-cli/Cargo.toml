@@ -27,10 +27,12 @@ clap = { version = "4", features = ["derive", "env"] }
 anyhow = "1"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+toml = "1.1"
 etcetera = "0.11"
 ureq = "3"
 tempfile = "3"
 terminal_size = "0.4"
+terminal-colorsaurus = "1.0.3"
 
 [dev-dependencies]
 assert_cmd = "2"
