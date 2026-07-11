@@ -1,0 +1,37 @@
+[workspace]
+
+[package]
+name = "lumis-benchmarks"
+version = "0.0.0"
+edition = "2021"
+rust-version = "1.91"
+publish = false
+
+[dependencies]
+lumis = { path = "../../crates/lumis", default-features = false, features = ["lang-rust"] }
+serde_json = "1"
+syntect = "5.3"
+
+[dev-dependencies]
+criterion = { version = "0.7", features = ["html_reports"] }
+
+[[bench]]
+name = "render"
+harness = false
+
+[[bin]]
+name = "lumis-first-render"
+path = "src/bin/lumis-first-render.rs"
+
+[[bin]]
+name = "syntect-first-render"
+path = "src/bin/syntect-first-render.rs"
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true
+
+[profile.bench]
+lto = true
+codegen-units = 1

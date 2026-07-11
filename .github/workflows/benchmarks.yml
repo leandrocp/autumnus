@@ -1,0 +1,51 @@
+name: Benchmarks
+
+concurrency:
+  group: >-
+    ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+
+jobs:
+  benchmark:
+    name: Benchmark suite
+    continue-on-error: true
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          persist-credentials: false
+      - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db
+        with:
+          version: 2026.7.3
+          working_directory: benchmarks
+          install_args: --locked
+          cache: true
+      - uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32
+        with:
+          workspaces: |
+            .
+            benchmarks/rust
+      - name: Run benchmark suite
+        run: just bench-dev
+      - name: Publish benchmark values
+        if: always()
+        run: |
+          summary=target/benchmarks/runs/current/summary.md
+          if [ -f "$summary" ]; then
+            cat "$summary" >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Upload benchmark reports
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: lumis-benchmarks-${{ github.sha }}
+          path: target/benchmarks/runs/current
+          if-no-files-found: warn
+          retention-days: 7

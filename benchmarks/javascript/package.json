@@ -1,0 +1,28 @@
+{
+  "name": "@lumis-sh/benchmarks",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node src/check.mjs",
+    "first-render": "node src/run-first-render.mjs",
+    "warm-render": "node --expose-gc src/warm-render.mjs",
+    "fmt": "cd ../.. && oxfmt benchmarks/javascript/src/ benchmarks/scripts/ benchmarks/cli/",
+    "fmt:check": "cd ../.. && oxfmt --check benchmarks/javascript/src/ benchmarks/scripts/ benchmarks/cli/",
+    "lint": "cd ../.. && oxlint benchmarks/javascript/src/ benchmarks/scripts/ benchmarks/cli/"
+  },
+  "dependencies": {
+    "@lumis-sh/lumis": "workspace:*",
+    "@lumis-sh/themes": "workspace:*",
+    "@lumis-sh/wasm-rust": "0.26.3",
+    "mitata": "1.0.34",
+    "shiki": "4.3.1"
+  },
+  "devDependencies": {
+    "oxfmt": "^0.43.0",
+    "oxlint": "1.58.0"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

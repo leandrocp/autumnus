@@ -71,6 +71,7 @@ setup:
     check_bin cargo "https://rustup.rs"
     check_bin node "https://nodejs.org"
     check_bin pnpm "https://pnpm.io/installation"
+    check_bin mise "https://mise.jdx.dev/getting-started.html"
     check_bin mix "https://elixir-lang.org/install.html"
     check_bin stylua "cargo install stylua"
     echo ""
@@ -178,6 +179,9 @@ lint:
     echo "Running JS lint..."
     pnpm --filter @lumis-sh/lumis lint
     echo ""
+    echo "Running benchmark checks through mise..."
+    mise run -C benchmarks lint
+    echo ""
     echo "Running Lua fmt check..."
     stylua --check themes/
 
@@ -195,8 +199,58 @@ fmt:
     pnpm --filter @lumis-sh/lumis fmt
     pnpm --filter @lumis-sh/themes fmt
     echo ""
+    echo "Formatting benchmarks through mise..."
+    mise run -C benchmarks format
+    echo ""
     echo "Formatting Lua..."
     stylua themes/
+
+# Benchmark entry points delegate to the pinned benchmarks/mise.toml environment.
+bench-fixtures:
+    mise run -C benchmarks fixtures
+
+bench-build:
+    mise run -C benchmarks build
+
+bench-setup:
+    mise install -C benchmarks
+    mise run -C benchmarks setup
+
+bench-check:
+    mise run -C benchmarks check
+
+bench-rust quick="false":
+    @if [ "{{quick}}" = "true" ]; then mise run -C benchmarks rust quick; else mise run -C benchmarks rust full; fi
+
+bench-js:
+    mise run -C benchmarks javascript
+
+bench-cli scenario="repeat-use":
+    mise run -C benchmarks cli "{{scenario}}"
+
+bench-cli-first-use:
+    mise run -C benchmarks cli:first-use
+
+bench-memory:
+    mise run -C benchmarks memory
+
+bench-finalize:
+    mise run -C benchmarks finalize
+
+bench-smoke:
+    mise run -C benchmarks smoke
+
+bench-dev:
+    mise run -C benchmarks dev
+
+bench:
+    mise run -C benchmarks full
+
+bench-stage label:
+    mise run -C benchmarks stage "{{label}}"
+
+bench-compare left right:
+    mise run -C benchmarks compare "{{left}}" "{{right}}"
 
 # Build lumis-cli in release mode and install to the given path, eg: just cli-install ~/.local/bin
 cli-install path:

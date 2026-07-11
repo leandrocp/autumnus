@@ -7,6 +7,7 @@
 /queries/**/folds.scm
 /queries/**/indents.scm
 mise.toml
+!benchmarks/mise.toml
 .envrc
 .vite/
 /.claude/
