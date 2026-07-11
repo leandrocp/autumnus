@@ -30,7 +30,10 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
-      - uses: taiki-e/install-action@just
+      - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db
+        with:
+          version: 2026.7.3
+          install: false
 
       - name: Install Neovim
         run: |
@@ -39,7 +42,7 @@ jobs:
           sudo apt-get install -y lua5.4 neovim
 
       - name: css-gen
-        run: echo "y" | just css-gen
+        run: echo "y" | mise run css-gen
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v8

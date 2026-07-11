@@ -10,7 +10,7 @@ env:
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - "languages.toml"
       - "crates/dev/**"
@@ -21,6 +21,7 @@ on:
       - "packages/javascript/lumis/langs/**"
       - "packages/javascript/lumis/src/generated/**"
       - "packages/javascript/wasm-bundle-*/**"
+      - "mise.toml"
       - ".github/workflows/wasm-release.yml"
       - ".github/workflows/upgrade-langs.yml"
   workflow_dispatch:
@@ -30,7 +31,8 @@ on:
         required: false
         default: ""
       force:
-        description: "Publish even when the current parser revision already exists"
+        description: >-
+          Publish even when the current parser revision already exists
         required: false
         default: false
         type: boolean
@@ -44,7 +46,10 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: taiki-e/install-action@just
+      - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db
+        with:
+          version: 2026.7.3
+          install: false
 
       - uses: actions/setup-node@v6
         with:
@@ -54,7 +59,9 @@ jobs:
       - name: Determine which parsers need publishing
         id: needed
         run: |
-          needed=$(just wasm-publish-needed "${{ inputs.parser }}" "${{ inputs.force || 'false' }}")
+          needed=$(mise run wasm-publish-needed \
+            "${{ inputs.parser }}" \
+            "${{ inputs.force || 'false' }}")
           if [ -z "$needed" ]; then
             echo "All packages already published, nothing to build"
             echo "skip=true" >> "$GITHUB_OUTPUT"
@@ -83,7 +90,10 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: taiki-e/install-action@just
+      - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db
+        with:
+          version: 2026.7.3
+          install: false
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -113,9 +123,10 @@ jobs:
 
       - run: npm install -g tree-sitter-cli@0.26
 
-      - run: just wasm-publish-prepare "${{ matrix.parser }}"
+      - run: mise run wasm-publish-prepare "${{ matrix.parser }}"
 
       - name: Publish to npm
-        run: cd "tmp/wasm-publish/${{ matrix.parser }}" && npm publish --access public --provenance
+        working-directory: tmp/wasm-publish/${{ matrix.parser }}
+        run: npm publish --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -1,5 +1,5 @@
 // This file is auto-generated from highlights.toml
-// Run: just langs-gen-highlights
+// Run: mise run langs-gen-highlights
 // Do not edit.
 
 /// Tree-sitter highlight scope names.

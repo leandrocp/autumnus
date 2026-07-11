@@ -39,16 +39,16 @@ lumis gen-theme \
   -o github-light.json
 ```
 
-### Using the Justfile
+### Using mise tasks
 
 Regenerate existing themes defined in `themes.lua`:
 
 ```bash
 # Regenerate all themes
-just themes-gen
+mise run themes-gen
 
 # Regenerate a single theme
-just themes-gen catppuccin_mocha
+mise run themes-gen catppuccin_mocha
 ```
 
 ### How It Works
@@ -76,6 +76,6 @@ To add a new theme to the built-in collection:
 }
 ```
 
-2. Run `just themes-gen theme_name` to generate the JSON file
+1. Run `mise run themes-gen theme_name` to generate the JSON file
 
-3. The theme will be automatically included in the next build via `build.rs`
+2. The theme will be automatically included in the next build via `build.rs`

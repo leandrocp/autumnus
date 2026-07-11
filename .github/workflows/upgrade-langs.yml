@@ -61,7 +61,9 @@ jobs:
           shared-key: upgrade-langs-dev
 
       - name: Build dev tool
-        run: cargo build --manifest-path crates/dev/Cargo.toml --no-default-features
+        run: >-
+          cargo build --manifest-path crates/dev/Cargo.toml
+          --no-default-features
 
   upgrade-languages:
     needs: [generate-matrix, rust-cache]
@@ -87,7 +89,10 @@ jobs:
           shared-key: upgrade-langs-dev
           save-if: false
 
-      - uses: taiki-e/install-action@just
+      - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db
+        with:
+          version: 2026.7.3
+          install: false
 
       - uses: leafo/gh-actions-lua@v13
 
@@ -112,7 +117,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Upgrade language
-        run: just langs-upgrade ${{ matrix.language }}
+        run: mise run langs-upgrade ${{ matrix.language }}
 
       - name: Check for changes
         id: check-changes
@@ -147,7 +152,8 @@ jobs:
           commit-message: "feat: upgrade lang ${{ matrix.language }}"
           title: "feat: upgrade lang ${{ matrix.language }}"
           body: |
-            Automated PR to upgrade parser and queries for **${{ matrix.language }}**.
+            Automated PR to upgrade parser and queries for
+            **${{ matrix.language }}**.
 
             This PR was created automatically by the upgrade-langs workflow.
           branch: upgrade-langs-${{ matrix.language }}

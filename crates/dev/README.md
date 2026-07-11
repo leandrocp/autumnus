@@ -8,4 +8,4 @@ Internal CLI for managing themes, languages, parsers, queries, and WASM builds. 
 cargo run --manifest-path crates/dev/Cargo.toml -- <command> [args]
 ```
 
-Most commands are wrapped by `justfile` recipes.
+Most commands are exposed as tasks in the root `mise.toml`.

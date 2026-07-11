@@ -21,10 +21,10 @@ See `ARCHITECTURE.md` for how the crates, packages, website, and build pipeline 
 
 ## Getting started
 
-This project uses [just](https://just.systems/man/en/) as its command runner. After cloning the repo, run:
+This project uses [mise](https://mise.jdx.dev/) as its task runner. The root configuration intentionally does not pin tool versions; tasks use the Rust, JavaScript, Elixir, and other toolchains already available in your environment. After cloning the repo, run:
 
 ```sh
-just setup
+mise run setup
 ```
 
 This installs the Rust, JS, and Elixir dependencies and checks the required tools.
@@ -33,14 +33,14 @@ This installs the Rust, JS, and Elixir dependencies and checks the required tool
 
 Releases are prepared locally and published from tags.
 
-- Run `just release-needed` to list packages with non-chore path-scoped commits since their latest package tag.
-- Prepare each release with `just release-prepare <package> <version>`.
-- `just release-prepare` updates only the target package version file and prepends the next changelog entry.
+- Run `mise run release-needed` to list packages with non-chore path-scoped commits since their latest package tag.
+- Prepare each release with `mise run release-prepare <package> <version>`.
+- `mise run release-prepare` updates only the target package version file and prepends the next changelog entry.
 - If dependent manifests must move together, update them separately in the same release commit.
 - Maintainers commit the release prep changes, then push package tags such as `cargo-lumis-cli/v0.2.0`.
 - Pushing a package tag triggers the publish workflows.
 
-Do not hand-edit release versions or changelog sections when `just release-prepare` can generate them.
+Do not hand-edit release versions or changelog sections when `mise run release-prepare` can generate them.
 
 ## Benchmarks
 
@@ -54,7 +54,7 @@ mise install -C benchmarks
 mise run -C benchmarks smoke
 ```
 
-Use `mise run -C benchmarks dev` for the shortened stable development loop and `mise run -C benchmarks full` for the complete suite, including the network-dependent first-use CLI case. `mise tasks ls -C benchmarks` lists focused tasks. Root `just bench-*` recipes are intentionally thin wrappers while the rest of the repository remains on just.
+Use `mise run -C benchmarks dev` for the shortened stable development loop and `mise run -C benchmarks full` for the complete suite, including the network-dependent first-use CLI case. `mise tasks ls -C benchmarks` lists focused tasks. Root `mise run bench-*` tasks are thin wrappers around the benchmark configuration.
 
 Benchmark generation and execution are separate. Never include fixture generation in timing, run timed families concurrently, or compare revisions with different fixture hashes. Full methodology, cache scenarios, result interpretation, and branch staging are documented in [`benchmarks/README.md`](benchmarks/README.md).
 
@@ -75,7 +75,7 @@ These files drive code generation, builds, detection metadata, and theme extract
 After changing `highlights.toml`, regenerate:
 
 ```sh
-just langs-gen-highlights
+mise run langs-gen-highlights
 ```
 
 This updates:
@@ -97,13 +97,13 @@ All language metadata lives in `languages.toml`. It is consumed by:
 
 Bundle definitions also live here under `[bundles.*]`.
 
-For Rust crates, bundle support is implemented as Cargo features such as `lang-bundle-web` and `lang-bundle-system`, which enable the related `lang-*` features transitively. The `lang-bundle-*` feature lists in `crates/lumis/Cargo.toml` and `crates/lumis-core/Cargo.toml` are generated from `languages.toml` by `just cargo-update-features`.
+For Rust crates, bundle support is implemented as Cargo features such as `lang-bundle-web` and `lang-bundle-system`, which enable the related `lang-*` features transitively. The `lang-bundle-*` feature lists in `crates/lumis/Cargo.toml` and `crates/lumis-core/Cargo.toml` are generated from `languages.toml` by `mise run cargo-update-features`.
 
 - Keep one parser ID per line in bundle arrays for cleaner diffs.
 - After changing parser or bundle entries, sync Rust feature manifests and regenerate the checked-in JavaScript outputs:
 
 ```sh
-just cargo-update-features
+mise run cargo-update-features
 pnpm --filter @lumis-sh/lumis build:generate
 pnpm --dir packages/javascript run build:wasm-bundles
 ```
@@ -207,15 +207,15 @@ In `crates/lumis/Cargo.toml`:
   ```
 
 - Add `lang-{name}` to `all-languages` in both `crates/lumis/Cargo.toml` and `crates/lumis-core/Cargo.toml`.
-- If the language belongs in an existing bundle, add it to the matching bundle in `languages.toml`, then run `just cargo-update-features` to regenerate the `lang-bundle-*` feature lists in both Cargo manifests.
+- If the language belongs in an existing bundle, add it to the matching bundle in `languages.toml`, then run `mise run cargo-update-features` to regenerate the `lang-bundle-*` feature lists in both Cargo manifests.
 
 #### 3. Fetch parser and queries
 
 ```sh
-just langs-fetch-vendored-parsers {name}
-just cargo-update-dep {name}
-just cargo-update-features
-just langs-fetch-queries {name}
+mise run langs-fetch-vendored-parsers {name}
+mise run cargo-update-dep {name}
+mise run cargo-update-features
+mise run langs-fetch-queries {name}
 ```
 
 #### 4. Wire up vendored parsers
@@ -244,7 +244,7 @@ Add `samples/{name}.{ext}` with representative code. It is used by tests and `we
 #### 7. Generate docs
 
 ```sh
-just docs-gen-languages-md
+mise run docs-gen-languages-md
 ```
 
 This updates `LANGUAGES.md`.
@@ -254,31 +254,31 @@ This updates `LANGUAGES.md`.
 ```sh
 cargo test --all-features
 cargo clippy --all-features -- -D warnings
-just test-conformance
+mise run test-conformance
 ```
 
 ### Updating parsers
 
 ```sh
-just langs-upgrade-parsers {name}
-just langs-fetch-vendored-parsers {name}
+mise run langs-upgrade-parsers {name}
+mise run langs-fetch-vendored-parsers {name}
 ```
 
-For parser and query upgrades, prefer the `Upgrade Languages` GitHub workflow or run the upgrade recipes below before `just langs-update {name}`. Do not use Dependabot to bump `tree-sitter-*` Rust parser crates independently. Those versions are tied to the pinned parser and query state in `languages.toml`.
+For parser and query upgrades, prefer the `Upgrade Languages` GitHub workflow or run the upgrade recipes below before `mise run langs-update {name}`. Do not use Dependabot to bump `tree-sitter-*` Rust parser crates independently. Those versions are tied to the pinned parser and query state in `languages.toml`.
 
-`just langs-upgrade-parsers {name}` updates `languages.toml`, syncs any crate-backed Rust parser versions into `crates/lumis/Cargo.toml`, and refreshes Rust bundle features from `languages.toml`.
+`mise run langs-upgrade-parsers {name}` updates `languages.toml`, syncs any crate-backed Rust parser versions into `crates/lumis/Cargo.toml`, and refreshes Rust bundle features from `languages.toml`.
 
 ### Updating queries
 
 ```sh
-just langs-upgrade-queries {name}
-just langs-fetch-queries {name}
-just langs-preprocess-queries
+mise run langs-upgrade-queries {name}
+mise run langs-fetch-queries {name}
+mise run langs-preprocess-queries
 ```
 
 Omit `{name}` to upgrade all queries at once.
 
-`just langs-update {name}` is the end-to-end command for a coordinated parser update. It fetches parsers first, syncs crate-backed Rust parser dependencies and Rust bundle features, then fetches and preprocesses queries, and regenerates `LANGUAGES.md`.
+`mise run langs-update {name}` is the end-to-end command for a coordinated parser update. It fetches parsers first, syncs crate-backed Rust parser dependencies and Rust bundle features, then fetches and preprocesses queries, and regenerates `LANGUAGES.md`.
 
 Raw query sources live in `queries/upstream/`. First-class local bracket queries live in `queries/brackets/`. Preprocessed tracked outputs live in `queries/processed/` and should be committed whenever upstream queries, bracket queries, replacements, or append patches change.
 
@@ -303,8 +303,8 @@ When a fetched upstream query needs to change, use one of these directories:
 WASMs are built in CI by the `wasm-release` workflow, but you can build them locally with emscripten:
 
 ```sh
-just wasm-build
-just wasm-build {name}
+mise run wasm-build
+mise run wasm-build {name}
 ```
 
 This requires `emcc` and `tree-sitter-cli`.
@@ -341,19 +341,19 @@ Themes are extracted from Neovim colorscheme plugins. Each theme is a JSON file 
 1. Generate the JSON file and sync package outputs:
 
 ```sh
-just themes-gen theme_name
+mise run themes-gen theme_name
 ```
 
 1. Regenerate CSS and sync package outputs:
 
 ```sh
-just css-gen
+mise run css-gen
 ```
 
 1. Regenerate docs:
 
 ```sh
-just docs-gen-themes-md
+mise run docs-gen-themes-md
 ```
 
 `build.rs` picks it up on the next build.
@@ -361,12 +361,12 @@ just docs-gen-themes-md
 ### Updating themes
 
 ```sh
-just themes-gen
-just themes-gen theme_name
+mise run themes-gen
+mise run themes-gen theme_name
 ```
 
 After regenerating, refresh CSS outputs:
 
 ```sh
-just css-gen
+mise run css-gen
 ```

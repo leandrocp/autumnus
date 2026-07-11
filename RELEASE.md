@@ -5,8 +5,8 @@ Releases are prepared locally and published from tags.
 ## TLDR
 
 ```sh
-just release-needed
-just release-prepare <package> <version>
+mise run release-needed
+mise run release-prepare <package> <version>
 git add <changed-files>
 git commit -m "chore(release): <package> <version>"
 git push origin main
@@ -17,8 +17,8 @@ git push origin <package>/v<version>
 Example:
 
 ```sh
-just release-needed
-just release-prepare cargo-lumis-cli 0.2.0
+mise run release-needed
+mise run release-prepare cargo-lumis-cli 0.2.0
 git add crates/lumis-cli/Cargo.toml crates/lumis-cli/CHANGELOG.md
 git commit -m "chore(release): cargo-lumis-cli 0.2.0"
 git push origin main
@@ -26,10 +26,10 @@ git tag cargo-lumis-cli/v0.2.0
 git push origin cargo-lumis-cli/v0.2.0
 ```
 
-- Run `just release-needed` first to decide which packages ship together. It ignores `chore` commits.
-- Pass the bare version to `just release-prepare`, for example `0.2.0`, not `v0.2.0`.
+- Run `mise run release-needed` first to decide which packages ship together. It ignores `chore` commits.
+- Pass the bare version to `mise run release-prepare`, for example `0.2.0`, not `v0.2.0`.
 - Include `v` only in the git tag, for example `cargo-lumis-cli/v0.2.0`.
-- Review each changed manifest and `CHANGELOG.md` after `just release-prepare`.
+- Review each changed manifest and `CHANGELOG.md` after `mise run release-prepare`.
 - If one released package depends on another released package, update the dependent manifest in the same commit.
 - Push package tags in dependency order.
 - Watch the tag-triggered publish workflows after pushing tags.
@@ -71,7 +71,7 @@ After `npm-lumis` is published, the plugin packages, CLI package, and WASM bundl
 
 `npm-cli` must use the same version as `cargo-lumis-cli`, and the matching `cargo-lumis-cli/v<version>` GitHub release must already contain prebuilt CLI archives before publishing `@lumis-sh/cli`.
 
-If a JS release also needs new parser WASM packages, publish those first through the WASM workflow. Run `just wasm-publish-needed` to see which parser packages still need publishing.
+If a JS release also needs new parser WASM packages, publish those first through the WASM workflow. Run `mise run wasm-publish-needed` to see which parser packages still need publishing.
 
 ### Elixir package
 
@@ -83,7 +83,7 @@ If a release fails before any registry accepts the new version:
 
 1. Delete every package tag from the failed attempt.
 2. Fix the mistake on `main`.
-3. Run `just release-prepare <package> <version>` again for each affected package.
+3. Run `mise run release-prepare <package> <version>` again for each affected package.
 4. Commit the updated changelog and version bump.
 5. Push the corrected package tags in dependency order.
 
@@ -114,7 +114,7 @@ Use one tag per released package:
 
 All packages share the root `cliff.toml` template.
 
-`just release-prepare` picks the right files for the package you name. For example, `cargo-lumis-cli` maps to:
+`mise run release-prepare` picks the right files for the package you name. For example, `cargo-lumis-cli` maps to:
 
 - version file: `crates/lumis-cli/Cargo.toml`
 - changelog: `crates/lumis-cli/CHANGELOG.md`
@@ -124,7 +124,7 @@ All packages share the root `cliff.toml` template.
 Example:
 
 ```sh
-just release-prepare cargo-lumis-cli 0.2.0
+mise run release-prepare cargo-lumis-cli 0.2.0
 ```
 
 `release-prepare` updates only the target package version file and prepends the next changelog entry with `git-cliff`.

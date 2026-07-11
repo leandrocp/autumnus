@@ -333,7 +333,7 @@ fn read_query_file_with_default(path: &Path, default_path: &Path) -> String {
 fn require_highlights_query(path: &Path, language: &str) {
     assert!(
         path.exists(),
-        "missing processed highlights query for language '{language}' at {}. Run `just langs-preprocess-queries` first.",
+        "missing processed highlights query for language '{language}' at {}. Run `mise run langs-preprocess-queries` first.",
         path.display()
     );
 
@@ -346,7 +346,7 @@ fn require_highlights_query(path: &Path, language: &str) {
 
     assert!(
         !content.trim().is_empty(),
-        "empty processed highlights query for language '{language}' at {}. Run `just langs-preprocess-queries` again.",
+        "empty processed highlights query for language '{language}' at {}. Run `mise run langs-preprocess-queries` again.",
         path.display()
     );
 }
@@ -379,7 +379,7 @@ fn queries(toml: &LanguagesToml) {
 
     let entries = fs::read_dir(&queries_path).unwrap_or_else(|_| {
         panic!(
-            "failed to read queries/processed directory at {}. Run `just langs-preprocess-queries` first.",
+            "failed to read queries/processed directory at {}. Run `mise run langs-preprocess-queries` first.",
             queries_path.display()
         )
     });

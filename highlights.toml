@@ -1,6 +1,6 @@
 # Canonical highlight scope names.
 # Used to generate each stack highlights file.
-# Run: just langs-gen-highlights
+# Run: mise run langs-gen-highlights
 #
 # References:
 #   https://tree-sitter.github.io/tree-sitter/3-syntax-highlighting.html#highlights
