@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "fixtures": [
+    {
+      "id": "rust-small",
+      "language": "rust",
+      "path": "benchmarks/fixtures/rust-small.rs",
+      "encoding": "utf-8",
+      "lineEnding": "lf",
+      "sha256": "97b810cf435a7a53aec5da2f32f6800a0c8ce55b71bb126cea195d50fc4a495b",
+      "minBytes": 1024,
+      "minLines": 40,
+      "generator": null
+    },
+    {
+      "id": "rust-large",
+      "language": "rust",
+      "path": "target/benchmarks/fixtures/rust-large.rs",
+      "encoding": "utf-8",
+      "lineEnding": "lf",
+      "sha256": "9726fadc0dbebdfe87d3a814b794775950fa3411a1e95e01dfb1560b0722a18d",
+      "minBytes": 1048576,
+      "minLines": 20000,
+      "generator": {
+        "name": "generate-fixtures.mjs",
+        "version": 1,
+        "seed": 20260711,
+        "modules": 1200
+      }
+    }
+  ]
+}

@@ -6,6 +6,7 @@ See `ARCHITECTURE.md` for how the crates, packages, website, and build pipeline 
 
 - [Getting started](#getting-started)
 - [Releases](#releases)
+- [Benchmarks](#benchmarks)
 - [Configuration files](#configuration-files)
   - [highlights.toml](#highlightstoml)
   - [languages.toml](#languagestoml)
@@ -41,12 +42,28 @@ Releases are prepared locally and published from tags.
 
 Do not hand-edit release versions or changelog sections when `just release-prepare` can generate them.
 
+## Benchmarks
+
+Performance is a primary Lumis development goal. The permanent suite under [`benchmarks/`](benchmarks/) compares the Rust library with syntect, the JavaScript package with Shiki, and the installed npm CLI with `bat` using identical small and large Rust fixtures.
+
+Install [mise](https://mise.jdx.dev/getting-started.html); `benchmarks/mise.toml` pins and installs the complete benchmark toolchain, including Hyperfine and bat:
+
+```sh
+mise trust benchmarks/mise.toml
+mise install -C benchmarks
+mise run -C benchmarks smoke
+```
+
+Use `mise run -C benchmarks dev` for the shortened stable development loop and `mise run -C benchmarks full` for the complete suite, including the network-dependent first-use CLI case. `mise tasks ls -C benchmarks` lists focused tasks. Root `just bench-*` recipes are intentionally thin wrappers while the rest of the repository remains on just.
+
+Benchmark generation and execution are separate. Never include fixture generation in timing, run timed families concurrently, or compare revisions with different fixture hashes. Full methodology, cache scenarios, result interpretation, and branch staging are documented in [`benchmarks/README.md`](benchmarks/README.md).
+
 ## Configuration files
 
 These files drive code generation, builds, detection metadata, and theme extraction.
 
 | File | Purpose |
-|------|---------|
+| ------ | --------- |
 | [`highlights.toml`](highlights.toml) | Tree-sitter highlight scope names |
 | [`languages.toml`](languages.toml) | Parser metadata, query sources, language bundles, feature flags |
 | [`themes/themes.lua`](themes/themes.lua) | Theme definitions from Neovim colorscheme sources |
@@ -172,17 +189,23 @@ version = "x.y.z"
 In `crates/lumis/Cargo.toml`:
 
 - If a crates.io package exists, add an optional dependency:
+
   ```toml
   tree-sitter-{lang} = { version = "x.y.z", optional = true }
   ```
+
   and a feature flag:
+
   ```toml
   lang-{name} = ["dep:tree-sitter-{lang}", "lumis-core/lang-{name}"]
   ```
+
 - If no crate exists, add an empty feature flag:
+
   ```toml
   lang-{name} = ["lumis-core/lang-{name}"]
   ```
+
 - Add `lang-{name}` to `all-languages` in both `crates/lumis/Cargo.toml` and `crates/lumis-core/Cargo.toml`.
 - If the language belongs in an existing bundle, add it to the matching bundle in `languages.toml`, then run `just cargo-update-features` to regenerate the `lang-bundle-*` feature lists in both Cargo manifests.
 
@@ -201,6 +224,7 @@ Do this only if there is no crates.io package:
 
 - Add compilation in `crates/lumis/build.rs` inside `vendored_parsers()`.
 - Add an `unsafe extern "C"` declaration in `crates/lumis/src/languages.rs`:
+
   ```rust
   #[cfg(feature = "lang-{name}")]
   fn tree_sitter_{name}() -> *const ();
@@ -314,19 +338,19 @@ Themes are extracted from Neovim colorscheme plugins. Each theme is a JSON file 
 }
 ```
 
-2. Generate the JSON file and sync package outputs:
+1. Generate the JSON file and sync package outputs:
 
 ```sh
 just themes-gen theme_name
 ```
 
-3. Regenerate CSS and sync package outputs:
+1. Regenerate CSS and sync package outputs:
 
 ```sh
 just css-gen
 ```
 
-4. Regenerate docs:
+1. Regenerate docs:
 
 ```sh
 just docs-gen-themes-md

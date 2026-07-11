@@ -1,5 +1,7 @@
 # Architecture
 
+<!-- markdownlint-disable MD013 -->
+
 ```text
 +------------------+ +---------------+ +------------------+
 | languages.toml   | | themes/*.json | | queries/**/*.scm |
@@ -8,8 +10,8 @@
          |                   |                   |
          v                   v                   v
 +--------------------------------------------------------------+
-| justfile + crates/dev                                        |
-| setup / lint / test / docs / codegen / packaging             |
+| justfile + benchmarks/mise.toml + crates/dev                 |
+| setup / lint / test / docs / codegen / packaging / benchmark |
 +-------+-------------------+-------------------+--------------+
         |                   |                   |
         v                   v                   v
@@ -52,3 +54,30 @@
                                          | docs + demos + examples   |
                                          +---------------------------+
 ```
+
+## Performance benchmark lane
+
+`benchmarks/` is an intentionally non-published comparison layer over the public Rust, JavaScript, and CLI surfaces.
+
+```text
+benchmarks/fixtures + deterministic generator
+                    |
+                    v
+       identical small and large Rust inputs
+          +---------+---------+
+          |         |         |
+          v         v         v
+   Rust/Criterion  JS/Mitata  CLI/Hyperfine
+   Lumis/syntect   Lumis/Shiki npm Lumis/bat
+          |         |         |
+          +---------+---------+
+                    |
+                    v
+ target/benchmarks/runs/<run>/ native reports + summary + metadata
+```
+
+The Rust benchmark package is its own Cargo workspace so syntect and Criterion do not enter normal production workspace builds. The private JavaScript benchmark package joins the pnpm workspace so it can consume locally built Lumis packages while keeping Shiki and Mitata out of published manifests.
+
+Fixture generation, optimized artifact builds, timed execution, memory sampling, cache preparation, and reporting are separate mise tasks. `benchmarks/mise.toml` pins the complete toolchain, models task dependencies and incremental sources/outputs, and owns shared paths. Root `just bench-*` recipes delegate to mise during the repository's gradual migration away from just. Timed families execute serially. CLI first-use owns an isolated data/cache directory and includes automatic parser WASM download; repeat-use starts from a prepared parser and Wasmtime cache.
+
+CI uses `jdx/mise-action` with the same benchmark config. Every pull request runs one observational, non-gating stable suite covering Rust, JavaScript, CLI repeat use, and memory. It appends available benchmark tables to the GitHub Actions job summary and retains raw report artifacts for seven days. The network-inclusive first-use scenario remains local-only.

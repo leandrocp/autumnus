@@ -1,0 +1,300 @@
+min_version = "2026.7.3"
+
+[tools]
+node = "24.18.0"
+pnpm = "10.31.0"
+rust = { version = "1.91.1", components = ["rustfmt", "clippy"] }
+just = "1.55.1"
+hyperfine = "1.20.0"
+bat = "0.26.1"
+
+[env]
+BENCH_RUN_DIR = "{{ config_root }}/../target/benchmarks/runs/current"
+CARGO_TARGET_DIR = "{{ config_root }}/../target/benchmarks/rust-target"
+
+[task_config]
+dir = "{{ config_root }}/.."
+
+[tasks.install]
+description = "Install locked JavaScript benchmark dependencies"
+env = { CI = "true" }
+run = "pnpm install --frozen-lockfile"
+sources = ["pnpm-lock.yaml", "pnpm-workspace.yaml", "benchmarks/javascript/package.json"]
+outputs = ["node_modules/.pnpm/lock.yaml"]
+
+[tasks.fixtures]
+description = "Generate and verify deterministic benchmark fixtures"
+run = "node benchmarks/scripts/verify-fixtures.mjs"
+sources = [
+  "benchmarks/fixtures/manifest.json",
+  "benchmarks/fixtures/rust-small.rs",
+  "benchmarks/scripts/generate-fixtures.mjs",
+  "benchmarks/scripts/verify-fixtures.mjs",
+]
+outputs = [
+  "target/benchmarks/fixtures/rust-large.rs",
+  "target/benchmarks/fixture-validation/rust-large.rmeta",
+]
+
+[tasks."build:themes"]
+description = "Build themes consumed by JavaScript benchmarks"
+depends = ["install"]
+run = "pnpm --filter @lumis-sh/themes build"
+sources = [
+  "packages/javascript/themes/package.json",
+  "packages/javascript/themes/src/**/*",
+  "packages/javascript/themes/scripts/**/*",
+  "packages/javascript/themes/themes/**/*",
+  "packages/javascript/themes/*.ts",
+  "themes/*.json",
+  "css/*.css",
+]
+outputs = ["packages/javascript/themes/dist/index.js"]
+
+[tasks."build:javascript"]
+description = "Build the local JavaScript package under benchmark"
+depends = ["install", "build:themes", "fixtures"]
+run = "pnpm --filter @lumis-sh/lumis build"
+sources = [
+  "packages/javascript/lumis/package.json",
+  "packages/javascript/lumis/src/**/*",
+  "packages/javascript/lumis/scripts/**/*",
+  "packages/javascript/lumis/langs/rust.ts",
+  "languages.toml",
+  "queries/processed/rust/*.scm",
+]
+outputs = ["packages/javascript/lumis/dist/index.js"]
+
+[tasks."build:rust"]
+description = "Build Rust benchmark binaries and Criterion harness"
+depends = ["fixtures"]
+run = '''
+cargo build --manifest-path benchmarks/rust/Cargo.toml --release --bins
+cargo bench --manifest-path benchmarks/rust/Cargo.toml --no-run
+touch "$CARGO_TARGET_DIR/release/lumis-first-render"
+touch "$CARGO_TARGET_DIR/release/syntect-first-render"
+'''
+sources = [
+  "benchmarks/rust/Cargo.toml",
+  "benchmarks/rust/Cargo.lock",
+  "benchmarks/rust/benches/**/*.rs",
+  "benchmarks/rust/src/**/*.rs",
+  "crates/lumis/src/**/*.rs",
+  "crates/lumis-core/src/**/*.rs",
+  "queries/processed/rust/*.scm",
+]
+outputs = [
+  "target/benchmarks/rust-target/release/lumis-first-render",
+  "target/benchmarks/rust-target/release/syntect-first-render",
+]
+
+[tasks."build:cli"]
+description = "Build the native Lumis CLI in release mode"
+depends = ["fixtures"]
+run = '''
+CARGO_TARGET_DIR=target cargo build -p lumis-cli --release
+touch target/release/lumis
+'''
+sources = [
+  "crates/lumis-cli/src/**/*.rs",
+  "crates/lumis-cli/Cargo.toml",
+  "crates/lumis-core/src/**/*.rs",
+  "languages.toml",
+  "queries/processed/rust/*.scm",
+]
+outputs = ["target/release/lumis"]
+
+[tasks."stage:npm-cli"]
+description = "Stage the tracked npm shim around the current native binary"
+depends = ["build:cli"]
+run = '''
+rm -rf target/benchmarks/npm-cli
+mkdir -p target/benchmarks/npm-cli/bin target/benchmarks/npm-cli/vendor
+cp packages/javascript/cli/bin/lumis target/benchmarks/npm-cli/bin/lumis
+cp target/release/lumis target/benchmarks/npm-cli/vendor/lumis
+chmod +x target/benchmarks/npm-cli/bin/lumis target/benchmarks/npm-cli/vendor/lumis
+'''
+sources = ["packages/javascript/cli/bin/lumis", "target/release/lumis"]
+outputs = [
+  "target/benchmarks/npm-cli/bin/lumis",
+  "target/benchmarks/npm-cli/vendor/lumis",
+]
+
+[tasks.build]
+description = "Build every optimized benchmark artifact"
+depends = ["build:javascript", "build:rust", "stage:npm-cli"]
+run = "echo 'Benchmark artifacts are ready.'"
+
+[tasks.setup]
+description = "Install tools/dependencies and build benchmark artifacts"
+depends = ["install", "build"]
+run = "echo 'Benchmark environment is ready.'"
+
+[tasks.format]
+description = "Format benchmark Rust, JavaScript, and orchestration code"
+depends = ["install"]
+run = '''
+cargo fmt --manifest-path benchmarks/rust/Cargo.toml
+pnpm --filter @lumis-sh/benchmarks fmt
+'''
+
+[tasks."format:check"]
+description = "Check benchmark formatting"
+depends = ["install"]
+run = '''
+cargo fmt --manifest-path benchmarks/rust/Cargo.toml -- --check
+pnpm --filter @lumis-sh/benchmarks fmt:check
+'''
+
+[tasks.lint]
+description = "Lint benchmark Rust, JavaScript, and orchestration code"
+depends = ["format:check"]
+run = '''
+cargo clippy --manifest-path benchmarks/rust/Cargo.toml --all-targets -- -D warnings
+pnpm --filter @lumis-sh/benchmarks lint
+'''
+
+[tasks.check]
+description = "Build, lint, and preflight every benchmark adapter"
+depends = ["build", "lint"]
+run = '''
+pnpm --filter @lumis-sh/benchmarks check
+node benchmarks/scripts/prepare-cli-cache.mjs repeat-use
+'''
+
+[tasks.rust]
+description = "Run Rust warm and fresh-process comparisons"
+depends = ["build:rust"]
+usage = 'arg "<mode>" help="full or quick" default="full"'
+shell = "bash -c"
+run = '''
+set -euo pipefail
+case "${usage_mode?}" in
+  full|quick) ;;
+  *) echo "Expected rust mode: full or quick" >&2; exit 2 ;;
+esac
+mkdir -p "$BENCH_RUN_DIR"
+args=()
+if [ "${usage_mode?}" = "quick" ]; then args+=(--quick); fi
+if [ "${BENCH_FIXTURE:-all}" != "all" ]; then args+=("$BENCH_FIXTURE"); fi
+rm -rf "$CARGO_TARGET_DIR/criterion"
+cargo bench --manifest-path benchmarks/rust/Cargo.toml --bench render -- "${args[@]}"
+rm -rf "$BENCH_RUN_DIR/criterion"
+cp -R "$CARGO_TARGET_DIR/criterion" "$BENCH_RUN_DIR/criterion"
+rm -f "$BENCH_RUN_DIR"/rust-first-render-*.json
+BENCH_OUTPUT_DIR="$BENCH_RUN_DIR" node benchmarks/scripts/run-rust-first-render.mjs
+'''
+
+[tasks.javascript]
+description = "Run JavaScript warm and fresh-process comparisons"
+depends = ["build:javascript", "fixtures"]
+run = '''
+mkdir -p "$BENCH_RUN_DIR"
+BENCH_OUTPUT="$BENCH_RUN_DIR/js-first-render.json" pnpm --filter @lumis-sh/benchmarks first-render
+node --expose-gc benchmarks/javascript/src/warm-render.mjs > "$BENCH_RUN_DIR/js-warm.json"
+'''
+
+[tasks.cli]
+description = "Run npm Lumis, native Lumis, and bat CLI comparisons"
+depends = ["stage:npm-cli", "fixtures"]
+usage = 'arg "<scenario>" help="repeat-use or first-use" default="repeat-use"'
+run = '''
+case "${usage_scenario?}" in
+  repeat-use|first-use) ;;
+  *) echo "Expected CLI scenario: repeat-use or first-use" >&2; exit 2 ;;
+esac
+rm -f "$BENCH_RUN_DIR"/cli-"${usage_scenario?}"-*.json
+if [ "${usage_scenario?}" = "first-use" ]; then
+  rm -f "$BENCH_RUN_DIR/cli-first-use-download.json"
+fi
+BENCH_OUTPUT_DIR="$BENCH_RUN_DIR" node benchmarks/cli/run.mjs "${usage_scenario?}"
+'''
+
+[tasks."cli:first-use"]
+description = "Run the network-dependent parser-download comparison"
+depends = ["stage:npm-cli", "fixtures"]
+run = '''
+echo "WARNING: repeatedly downloading the Rust parser WASM into isolated caches."
+mise run -C "$MISE_CONFIG_ROOT" cli first-use
+'''
+
+[tasks.memory]
+description = "Run the secondary peak-RSS pass where supported"
+depends = ["build"]
+run = 'BENCH_OUTPUT="$BENCH_RUN_DIR/memory.json" node benchmarks/scripts/measure-memory.mjs'
+
+[tasks.finalize]
+description = "Collect metadata and generate summary.json/summary.md"
+run = '''
+BENCH_OUTPUT="$BENCH_RUN_DIR/metadata.json" node benchmarks/scripts/collect-metadata.mjs
+node benchmarks/scripts/summarize.mjs
+echo "Benchmark summary: $BENCH_RUN_DIR/summary.md"
+'''
+
+[tasks.smoke]
+description = "Run the short offline CI/development integration benchmark"
+run = '''
+rm -rf "$BENCH_RUN_DIR"
+mise run -C "$MISE_CONFIG_ROOT" setup
+BENCH_FIXTURE=small BENCH_RUNS=3 BENCH_WARMUP=1 mise run -C "$MISE_CONFIG_ROOT" rust quick
+BENCH_FIXTURE=small BENCH_SAMPLES=1 BENCH_JS_SAMPLES=2 mise run -C "$MISE_CONFIG_ROOT" javascript
+BENCH_FIXTURE=small BENCH_RUNS=3 BENCH_WARMUP=1 mise run -C "$MISE_CONFIG_ROOT" cli repeat-use
+mise run -C "$MISE_CONFIG_ROOT" finalize
+'''
+
+[tasks.dev]
+description = "Run the shortened stable suite for everyday development"
+run = '''
+rm -rf "$BENCH_RUN_DIR"
+mise run -C "$MISE_CONFIG_ROOT" setup
+BENCH_RUNS=5 BENCH_WARMUP=1 mise run -C "$MISE_CONFIG_ROOT" rust quick
+BENCH_SAMPLES=3 BENCH_JS_SAMPLES=3 mise run -C "$MISE_CONFIG_ROOT" javascript
+BENCH_RUNS=5 BENCH_WARMUP=1 mise run -C "$MISE_CONFIG_ROOT" cli repeat-use
+mise run -C "$MISE_CONFIG_ROOT" memory
+mise run -C "$MISE_CONFIG_ROOT" finalize
+'''
+
+[tasks.full]
+description = "Run the complete suite including network and memory measurements"
+run = '''
+rm -rf "$BENCH_RUN_DIR"
+mise run -C "$MISE_CONFIG_ROOT" setup
+mise run -C "$MISE_CONFIG_ROOT" rust full
+mise run -C "$MISE_CONFIG_ROOT" javascript
+mise run -C "$MISE_CONFIG_ROOT" cli repeat-use
+mise run -C "$MISE_CONFIG_ROOT" memory
+mise run -C "$MISE_CONFIG_ROOT" cli:first-use
+mise run -C "$MISE_CONFIG_ROOT" finalize
+'''
+
+[tasks.stage]
+description = "Preserve current reports and optimized artifacts under a label"
+depends = ["build"]
+usage = 'arg "<label>" help="revision label"'
+shell = "bash -c"
+run = '''
+set -euo pipefail
+label="${usage_label?}"
+if [[ ! "$label" =~ ^[A-Za-z0-9._-]+$ ]]; then
+  echo "Invalid benchmark label: $label" >&2
+  exit 1
+fi
+stage="target/benchmarks/staged/$label"
+rm -rf "$stage"
+mkdir -p "$stage/artifacts"
+cp -R "$BENCH_RUN_DIR" "$stage/run"
+cp "$CARGO_TARGET_DIR/release/lumis-first-render" "$stage/artifacts/"
+cp "$CARGO_TARGET_DIR/release/syntect-first-render" "$stage/artifacts/"
+cp target/release/lumis "$stage/artifacts/lumis-native"
+cp -R target/benchmarks/npm-cli "$stage/artifacts/npm-cli"
+cp -R packages/javascript/lumis/dist "$stage/artifacts/lumis-js-dist"
+echo "Staged benchmark revision: $stage"
+'''
+
+[tasks.compare]
+description = "Compare two staged benchmark summaries"
+usage = '''
+arg "<left>" help="baseline label"
+arg "<right>" help="candidate label"
+'''
+run = 'node benchmarks/scripts/compare.mjs "${usage_left?}" "${usage_right?}"'
