@@ -50,12 +50,20 @@ write_highlight(&mut file, "fn main() {}", formatter).unwrap();
 ```rust
 use lumis::languages::Language;
 
-let lang = Language::guess(Some("main.rs"), source);
+let source = "defmodule Example do\nend";
+let lang = Language::guess(None, source);
 ```
 
-See [`Language::guess`](https://docs.rs/lumis/latest/lumis/languages/enum.Language.html).
+See [`Language::guess`](https://docs.rs/lumis/latest/lumis/languages/enum.Language.html#method.guess).
 
-Detection can use file name hints and shebang/content heuristics.
+Detection uses file name hints, shebangs, cheap content heuristics, and finally
+high-confidence Tree-sitter content rules for popular languages. Ambiguous shared
+syntax and unrelated matching rules fall back to plain text; query-declared
+specificity resolves families such as JavaScript, TypeScript, and TSX.
+
+See the runnable
+[`guess_language_by_content`](https://github.com/leandrocp/lumis/blob/main/crates/lumis/examples/guess_language_by_content.rs)
+example.
 
 ## Token-level APIs
 

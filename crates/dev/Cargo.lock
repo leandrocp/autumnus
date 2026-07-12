@@ -653,8 +653,11 @@ dependencies = [
  "regex",
  "serde",
  "serde_json",
+ "streaming-iterator",
  "syn 2.0.117",
  "toml",
+ "tree-sitter",
+ "tree-sitter-elixir",
  "v_htmlescape",
 ]
 

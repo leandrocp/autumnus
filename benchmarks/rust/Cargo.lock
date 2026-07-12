@@ -502,8 +502,11 @@ dependencies = [
  "regex",
  "serde",
  "serde_json",
+ "streaming-iterator",
  "syn",
  "toml",
+ "tree-sitter",
+ "tree-sitter-rust",
  "v_htmlescape",
 ]
 

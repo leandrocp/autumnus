@@ -100,6 +100,10 @@ Bundle definitions also live here under `[bundles.*]`.
 For Rust crates, bundle support is implemented as Cargo features such as `lang-bundle-web` and `lang-bundle-system`, which enable the related `lang-*` features transitively. The `lang-bundle-*` feature lists in `crates/lumis/Cargo.toml` and `crates/lumis-core/Cargo.toml` are generated from `languages.toml` by `mise run cargo-update-features`.
 
 - Keep one parser ID per line in bundle arrays for cleaner diffs.
+- Parser-backed language guessing rules live in `queries/guess/{name}/guess.scm`. These are high-confidence Tree-sitter queries used only after hints, Emacs headers, shebangs, and cheap content checks fail. Do not use regex or parser error rates for language guessing.
+- Guessing requires a crate-backed parser. Crates used by one guessing grammar expose `LANGUAGE`; when several guessing grammars share a crate, the build derives `LANGUAGE_{PARSER_ID}` (for example, `LANGUAGE_TYPESCRIPT` and `LANGUAGE_TSX`). The build fails when a guessing directory has no matching parser metadata, `guess.scm`, parser dependency, feature wiring, or conventional language constant.
+- If a more specific query should resolve matches from the same language family, declare the relationship on that query pattern with `(#set! guess.supersedes "javascript,typescript")`. Unrelated simultaneous matches intentionally fall back to plain text.
+- Adding a guessing rule also requires explicit Cargo changes: add the optional parser dependency and `detect-{name}` feature to `crates/lumis-core/Cargo.toml`, then forward that feature from the corresponding `lang-{name}` feature in `crates/lumis/Cargo.toml`. Remove the same wiring when removing the rule. Add positive and hard-negative cases to `fixtures/content-guess-cases.json`.
 - After changing parser or bundle entries, sync Rust feature manifests and regenerate the checked-in JavaScript outputs:
 
 ```sh

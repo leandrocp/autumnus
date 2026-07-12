@@ -146,4 +146,10 @@ mod tests {
             "Output should contain 'test' keyword"
         );
     }
+
+    #[test]
+    fn test_omitted_language_infers_elixir_content() {
+        let source = "defmodule Example do\n  def hello, do: :world\nend";
+        assert_eq!(Language::guess(None, source), Language::Elixir);
+    }
 }
