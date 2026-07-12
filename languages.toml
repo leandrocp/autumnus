@@ -984,9 +984,9 @@ globs = ["*.prisma"]
 
 [parsers.qmljs]
 git = "https://github.com/yuja/tree-sitter-qmljs.git"
-rev = "0bec4359a7eb2f6c9220cd57372d87d236f66d59"
+rev = "de96ed62abded51fcdfcbeaaa120e0dd0d20c697"
 crate = "tree-sitter-qmljs"
-version = "0.3.0"
+version = "0.3.1"
 aliases = ["qml"]
 variant = "QMLJS"
 display_name = "QML/JS"
