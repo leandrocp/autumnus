@@ -230,9 +230,9 @@ shebang = ["elixir"]
 
 [parsers.elm]
 git = "https://github.com/elm-tooling/tree-sitter-elm.git"
-rev = "027728466b8115cf807517af943cbeaed34053fc"
+rev = "34815684e37cf299477e86a7d1e10d3ecb5486f9"
 crate = "tree-sitter-elm"
-version = "5.9.0"
+version = "5.9.4"
 globs = ["*.elm"]
 emacs = ["elm"]
 
