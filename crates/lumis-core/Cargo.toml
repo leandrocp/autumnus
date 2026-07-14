@@ -90,6 +90,7 @@ all-languages = [
     "lang-mermaid",
     "lang-markdown",
     "lang-markdown-inline",
+    "lang-mdx",
     "lang-nginx",
     "lang-nim",
     "lang-nix",
@@ -212,6 +213,7 @@ lang-make = []
 lang-matlab = []
 lang-markdown = []
 lang-markdown-inline = []
+lang-mdx = []
 lang-mermaid = []
 lang-nginx = []
 lang-nim = []

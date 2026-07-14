@@ -8,6 +8,7 @@ import json from "../langs/json.ts";
 import lua from "../langs/lua.ts";
 import markdown from "../langs/markdown.ts";
 import markdownInline from "../langs/markdown_inline.ts";
+import mdx from "../langs/mdx.ts";
 import python from "../langs/python.ts";
 import { createHighlighter } from "../src/index.js";
 import { bbcodeScoped, htmlInline, htmlLinked, htmlMultiThemes, terminal } from "../src/formatters.js";
@@ -28,6 +29,7 @@ const langBundles: Record<string, Language> = {
   lua,
   markdown,
   markdownInline,
+  mdx,
   python,
 };
 
@@ -60,6 +62,7 @@ beforeAll(async () => {
       { ...lua, wasm: ensureLocalWasm("lua") },
       { ...markdown, wasm: ensureLocalWasm("markdown") },
       { ...markdownInline, wasm: ensureLocalWasm("markdown_inline") },
+      { ...mdx, wasm: ensureLocalWasm("markdown") },
       { ...python, wasm: ensureLocalWasm("python") },
     ],
   });

@@ -1,0 +1,231 @@
+{
+  "name": "mdx-esm-basic",
+  "language": "mdx",
+  "theme": "dracula",
+  "events": [
+    {
+      "type": "start",
+      "scope": "keyword.import",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 0,
+      "end": 6
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 6,
+      "end": 7
+    },
+    {
+      "type": "start",
+      "scope": "type",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 7,
+      "end": 13
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 13,
+      "end": 14
+    },
+    {
+      "type": "start",
+      "scope": "keyword.import",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 14,
+      "end": 18
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 18,
+      "end": 19
+    },
+    {
+      "type": "start",
+      "scope": "string",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 19,
+      "end": 35
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.delimiter",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 35,
+      "end": 36
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 36,
+      "end": 37
+    },
+    {
+      "type": "start",
+      "scope": "keyword.import",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 37,
+      "end": 43
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 43,
+      "end": 44
+    },
+    {
+      "type": "start",
+      "scope": "keyword",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 44,
+      "end": 49
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 49,
+      "end": 50
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 50,
+      "end": 56
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 56,
+      "end": 57
+    },
+    {
+      "type": "start",
+      "scope": "operator",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 57,
+      "end": 58
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 58,
+      "end": 59
+    },
+    {
+      "type": "start",
+      "scope": "number",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 59,
+      "end": 61
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.delimiter",
+      "language": "javascript"
+    },
+    {
+      "type": "source",
+      "start": 61,
+      "end": 62
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 62,
+      "end": 64
+    },
+    {
+      "type": "start",
+      "scope": "markup.heading.1",
+      "language": "mdx"
+    },
+    {
+      "type": "source",
+      "start": 64,
+      "end": 74
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 74,
+      "end": 80
+    },
+    {
+      "type": "start",
+      "scope": "markup.strong",
+      "language": "markdown_inline"
+    },
+    {
+      "type": "source",
+      "start": 80,
+      "end": 88
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 88,
+      "end": 95
+    }
+  ]
+}

@@ -51,6 +51,7 @@ export const bundledLanguages: LanguageBundle = {
   "make": lazy("make", [], () => import("../langs/make.js")),
   "markdown": lazy("markdown", [], () => import("../langs/markdown.js")),
   "markdown_inline": lazy("markdown_inline", [], () => import("../langs/markdown_inline.js")),
+  "mdx": lazy("mdx", [], () => import("../langs/mdx.js")),
   "nix": lazy("nix", [], () => import("../langs/nix.js")),
   "nushell": lazy("nushell", ["nu"], () => import("../langs/nushell.js")),
   "objc": lazy("objc", ["objective-c"], () => import("../langs/objc.js")),

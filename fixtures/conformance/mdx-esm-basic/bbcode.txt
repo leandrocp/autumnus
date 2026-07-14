@@ -1,0 +1,6 @@
+[keyword-import-javascript]import[/keyword-import-javascript] [type-javascript]Layout[/type-javascript] [keyword-import-javascript]from[/keyword-import-javascript] [string-javascript]"./Layout.astro"[/string-javascript][punctuation-delimiter-javascript];[/punctuation-delimiter-javascript]
+[keyword-import-javascript]export[/keyword-import-javascript] [keyword-javascript]const[/keyword-javascript] [variable-javascript]answer[/variable-javascript] [operator-javascript]=[/operator-javascript] [number-javascript]42[/number-javascript][punctuation-delimiter-javascript];[/punctuation-delimiter-javascript]
+
+[markup-heading-1-mdx]# Heading
+[/markup-heading-1-mdx]
+Some [markup-strong-markdown_inline]**bold**[/markup-strong-markdown_inline] text.

@@ -1,0 +1,5 @@
+[punctuation-bracket-javascript]{[/punctuation-bracket-javascript][comment-javascript]/* _class: hero */[/comment-javascript][punctuation-bracket-javascript]}[/punctuation-bracket-javascript]
+
+[markup-heading-1-mdx]# Heading
+[/markup-heading-1-mdx]
+[punctuation-bracket-javascript]{[/punctuation-bracket-javascript][variable-javascript]answer[/variable-javascript] [operator-javascript]*[/operator-javascript] [number-javascript]2[/number-javascript][punctuation-bracket-javascript]}[/punctuation-bracket-javascript]

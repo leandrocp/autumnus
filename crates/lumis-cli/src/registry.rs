@@ -85,7 +85,7 @@ impl Registry {
             .ensure_parser(lang_name)
             .with_context(|| format!("failed to load parser for '{lang_name}'"))?;
         let mut store = self.wasm_store.lock().unwrap();
-        let language = store.load_language(lang_name, &wasm_bytes)?;
+        let language = store.load_language(grammar_symbol_name(lang_name), &wasm_bytes)?;
         // A bracket query can reference anonymous nodes a grammar does not have
         // (for example HTML has no "(" token). Treat a query that fails to compile
         // as "no rainbow brackets for this language", matching the core library.
@@ -250,13 +250,23 @@ impl Registry {
         locals: &str,
         wasm_bytes: Vec<u8>,
     ) -> Result<HighlightConfiguration> {
-        let language = store.load_language(lang_name, &wasm_bytes)?;
+        let language = store.load_language(grammar_symbol_name(lang_name), &wasm_bytes)?;
         let mut config =
             HighlightConfiguration::new(language, lang_name, highlights, injections, locals)
                 .with_context(|| format!("failed to create highlight config for {}", lang_name))?;
         config.configure(&HIGHLIGHT_NAMES);
 
         Ok(config)
+    }
+}
+
+/// The `tree_sitter_<name>` symbol exported by a language's WASM module.
+/// Usually the query name, but a language that reuses another language's
+/// parser (mdx -> markdown) diverges.
+fn grammar_symbol_name(lang_name: &str) -> &str {
+    match lang_name {
+        "mdx" => "markdown",
+        other => other,
     }
 }
 
