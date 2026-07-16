@@ -470,7 +470,7 @@ display_name = "Markdown Inline"
 
 # MDX reuses the markdown parser; the MDX-specific surface (ESM import/export
 # blocks and {expression} lines, including {/* comments */}) is handled by
-# extra injection rules in queries/upstream/mdx/injections.scm.
+# extra injection rules in queries/override/mdx/injections.scm.
 [parsers.mdx]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-markdown.git"
 rev = "f969cd3ae3f9fbd4e43205431d0ae286014c05b5"

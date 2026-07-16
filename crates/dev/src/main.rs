@@ -1615,24 +1615,28 @@ fn resolve_and_preprocess(
     seen.insert(key);
 
     let override_path = format!("{override_dir}/{lang}/{query_type}.scm");
-    if let Ok(override_content) = fs::read_to_string(&override_path) {
-        let mut parts = vec![override_content];
+    let override_content = fs::read_to_string(&override_path).ok();
+    let append_path = format!("{append_dir}/{lang}/{query_type}.scm");
+    let append_content = fs::read_to_string(&append_path).ok();
 
-        let append_path = format!("{append_dir}/{lang}/{query_type}.scm");
-        if let Ok(append_content) = fs::read_to_string(&append_path) {
-            parts.push(append_content);
+    match &override_content {
+        Some(content) if !content.lines().any(|line| line.starts_with("; inherits: ")) => {
+            let mut parts = vec![content.clone()];
+            if let Some(append_content) = append_content {
+                parts.push(append_content);
+            }
+            return parts.join("\n");
         }
-
-        return parts.join("\n");
+        _ => {}
     }
 
-    let raw = if query_type == "brackets" {
+    let raw = if let Some(override_content) = override_content {
+        override_content
+    } else if query_type == "brackets" {
         fs::read_to_string(format!("queries/brackets/{lang}/brackets.scm")).unwrap_or_default()
     } else {
         read_query_raw(src_dir, lang, query_type)
     };
-    let append_path = format!("{append_dir}/{lang}/{query_type}.scm");
-    let append_content = fs::read_to_string(&append_path).ok();
 
     if raw.is_empty() && append_content.is_none() {
         return String::new();
@@ -2564,6 +2568,48 @@ mod tests {
         );
 
         assert_eq!(content, "((comment) @comment)\n");
+
+        let _ = fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn resolve_and_preprocess_resolves_inheritance_from_override() {
+        let root = unique_test_root();
+        let upstream = root.join("upstream");
+        let upstream_parent_dir = upstream.join("parent");
+        let override_root = root.join("override");
+        let override_lang_dir = override_root.join("demo");
+        let append_root = root.join("append");
+
+        fs::create_dir_all(&upstream_parent_dir).expect("parent upstream dir should be created");
+        fs::create_dir_all(&override_lang_dir).expect("override dir should be created");
+        fs::write(
+            upstream_parent_dir.join("highlights.scm"),
+            "((string) @string)\n",
+        )
+        .expect("parent query should be written");
+        fs::write(
+            override_lang_dir.join("highlights.scm"),
+            "; inherits: parent\n((comment) @comment)\n",
+        )
+        .expect("override query should be written");
+
+        let mut seen = HashSet::new();
+        let content = resolve_and_preprocess(
+            upstream.to_str().expect("upstream path should be valid"),
+            override_root
+                .to_str()
+                .expect("override path should be valid"),
+            append_root.to_str().expect("append path should be valid"),
+            "demo",
+            "highlights",
+            &mut seen,
+        );
+
+        assert_eq!(
+            content,
+            "; inherits: parent\n((string) @string)\n((comment) @comment)"
+        );
 
         let _ = fs::remove_dir_all(root);
     }

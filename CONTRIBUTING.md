@@ -295,7 +295,7 @@ Bracket matching and rainbow brackets both read these queries. A query captures 
 
 When a fetched upstream query needs to change, use one of these directories:
 
-- `queries/override/{name}/{query}.scm`: replace the upstream query entirely when it's incompatible with the pinned parser
+- `queries/override/{name}/{query}.scm`: replace the upstream query entirely when it's incompatible with the pinned parser, or provide a fully local query when no upstream source exists. Override queries may use `; inherits: {name}` to include another language's processed query.
 - `queries/append/{name}/{query}.scm`: add local patterns after the upstream query, or after the replacement query when both exist
 
 ### Building WASMs
