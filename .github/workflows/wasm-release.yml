@@ -51,7 +51,7 @@ jobs:
           version: 2026.7.3
           install: false
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: "24"
           registry-url: "https://registry.npmjs.org"
@@ -111,7 +111,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-tree-sitter-cli-0.26-
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: "24"
           registry-url: "https://registry.npmjs.org"
