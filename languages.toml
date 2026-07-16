@@ -183,7 +183,7 @@ emacs = ["csv"]
 
 [parsers.dart]
 git = "https://github.com/UserNobody14/tree-sitter-dart.git"
-rev = "a9bdfa3db2fbc9b9f12c93450d04a671f33a5102"
+rev = "be07cf7118d3dba06236a3f19541685a68209934"
 version = "1.0.0"
 globs = ["*.dart"]
 
