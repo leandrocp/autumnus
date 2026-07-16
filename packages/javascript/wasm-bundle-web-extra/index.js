@@ -31,6 +31,7 @@ export const bundledWasms = {
   "heex": wasmHeex,
   "markdown": wasmMarkdown,
   "markdown_inline": wasmMarkdownInline,
+  "mdx": wasmMarkdown,
   "php": wasmPhp,
   "prisma": wasmPrisma,
   "scss": wasmScss,

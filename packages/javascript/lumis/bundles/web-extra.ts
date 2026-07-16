@@ -15,6 +15,7 @@ export const bundledLanguages: LanguageBundle = {
   "heex": lazy("heex", [], () => import("../langs/heex.js")),
   "markdown": lazy("markdown", [], () => import("../langs/markdown.js")),
   "markdown_inline": lazy("markdown_inline", [], () => import("../langs/markdown_inline.js")),
+  "mdx": lazy("mdx", [], () => import("../langs/mdx.js")),
   "php": lazy("php", [], () => import("../langs/php.js")),
   "prisma": lazy("prisma", [], () => import("../langs/prisma.js")),
   "scss": lazy("scss", [], () => import("../langs/scss.js")),
