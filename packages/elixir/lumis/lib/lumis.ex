@@ -784,8 +784,8 @@ defmodule Lumis do
 
   Guessing the language based on the provided source code:
 
-      iex> Lumis.highlight("#!/usr/bin/env bash\\nID=1")
-      {:ok, "<pre class=\"lumis\" ...><code class=\"language-bash\" ...>...</code></pre>"}
+      iex> Lumis.highlight("defmodule Example do\\nend")
+      {:ok, "<pre class=\"lumis\" ...><code class=\"language-elixir\" ...>...</code></pre>"}
 
   With custom options:
 

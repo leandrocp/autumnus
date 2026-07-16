@@ -90,6 +90,12 @@ defmodule Lumis.LumisTest do
     end
   end
 
+  test "guesses language from source content" do
+    source = "defmodule Example do\nend"
+
+    assert Lumis.highlight!(source) =~ ~s|<code class="language-elixir"|
+  end
+
   test "available_languages" do
     available_languages = Lumis.available_languages()
 

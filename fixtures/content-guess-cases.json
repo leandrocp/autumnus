@@ -1,0 +1,164 @@
+[
+  {
+    "name": "javascript-module",
+    "input": null,
+    "source": "import { readFile } from 'node:fs';\nexport const load = readFile;",
+    "expected": "javascript"
+  },
+  {
+    "name": "jsx-expression",
+    "input": null,
+    "source": "export const App = ({name}) => <main>{name}</main>;",
+    "expected": "javascript"
+  },
+  {
+    "name": "typescript-exclusive-syntax",
+    "input": null,
+    "source": "interface User { id: number }\ntype UserId = User['id'];",
+    "expected": "typescript"
+  },
+  {
+    "name": "tsx-specificity",
+    "input": null,
+    "source": "interface Props { name: string }\nexport const App = ({name}: Props) => <main>{name}</main>;",
+    "expected": "tsx"
+  },
+  {
+    "name": "html-document",
+    "input": null,
+    "source": "<!doctype html><main><h1>Hello</h1></main>",
+    "expected": "html"
+  },
+  {
+    "name": "css-rule",
+    "input": null,
+    "source": ".app > h1 { color: red; display: grid; }",
+    "expected": "css"
+  },
+  {
+    "name": "rust-trait-impl",
+    "input": null,
+    "source": "impl Display for User { fn fmt(&self) {} }",
+    "expected": "rust"
+  },
+  {
+    "name": "go-package-import",
+    "input": null,
+    "source": "package main\nimport \"fmt\"\nfunc main() { fmt.Println(\"hi\") }",
+    "expected": "go"
+  },
+  {
+    "name": "ruby-singleton-method",
+    "input": null,
+    "source": "class User\n  def self.build = new\nend",
+    "expected": "ruby"
+  },
+  {
+    "name": "python-decorated-definition",
+    "input": null,
+    "source": "@dataclass\nclass User:\n    name: str",
+    "expected": "python"
+  },
+  {
+    "name": "java-package-class",
+    "input": null,
+    "source": "package com.example;\npublic class App { public App() {} }",
+    "expected": "java"
+  },
+  {
+    "name": "json-object",
+    "input": null,
+    "source": "{\"name\":\"lumis\",\"language\":\"rust\"}",
+    "expected": "json"
+  },
+  {
+    "name": "markdown-heading-code-fence",
+    "input": null,
+    "source": "# Example\n\n```rust\nfn main() {}\n```",
+    "expected": "markdown"
+  },
+  {
+    "name": "sql-select-from",
+    "input": null,
+    "source": "SELECT id FROM users WHERE enabled = true;",
+    "expected": "sql"
+  },
+  {
+    "name": "plain-text",
+    "input": null,
+    "source": "plain text",
+    "expected": "plaintext"
+  },
+  {
+    "name": "shared-javascript-expression",
+    "input": null,
+    "source": "const value = 42;",
+    "expected": "plaintext"
+  },
+  {
+    "name": "ambiguous-html-jsx-fragment",
+    "input": null,
+    "source": "<div>Hello</div>",
+    "expected": "plaintext"
+  },
+  {
+    "name": "isolated-css-declaration",
+    "input": null,
+    "source": "color: red;",
+    "expected": "plaintext"
+  },
+  {
+    "name": "single-css-declaration-rule",
+    "input": null,
+    "source": ".app { color: red; }",
+    "expected": "plaintext"
+  },
+  {
+    "name": "ordinary-rust-like-function",
+    "input": null,
+    "source": "fn add(a, b) { a + b }",
+    "expected": "plaintext"
+  },
+  {
+    "name": "go-short-declaration",
+    "input": null,
+    "source": "value := 1",
+    "expected": "plaintext"
+  },
+  {
+    "name": "ordinary-ruby-method",
+    "input": null,
+    "source": "def name = value",
+    "expected": "plaintext"
+  },
+  {
+    "name": "ordinary-python-function",
+    "input": null,
+    "source": "def name():\n    return value",
+    "expected": "plaintext"
+  },
+  {
+    "name": "ordinary-java-class",
+    "input": null,
+    "source": "class Example {}",
+    "expected": "plaintext"
+  },
+  {
+    "name": "small-json-object",
+    "input": null,
+    "source": "{\"value\":1}",
+    "expected": "plaintext"
+  },
+  {
+    "name": "markdown-heading-only",
+    "input": null,
+    "source": "# Heading",
+    "expected": "plaintext"
+  },
+  {
+    "name": "sql-expression-only",
+    "input": null,
+    "source": "SELECT 1;",
+    "expected": "plaintext"
+  }
+]

@@ -13,8 +13,9 @@
 //! 3. **File extension** - `".rs"`, `".js"`, `".py"`, etc.
 //! 4. **Emacs mode header** - `// -*- mode: rust -*-`
 //! 5. **Shebang** - `#!/usr/bin/env python`
-//! 6. **Content heuristics** - HTML doctype, XML declaration, etc.
-//! 7. **Fallback** - [`Language::PlainText`]
+//! 6. **Cheap content heuristics** - HTML doctype, XML declaration, etc.
+//! 7. **Tree-sitter content rules** - high-confidence language-specific structures
+//! 8. **Fallback** - [`Language::PlainText`]
 //!
 //! # Examples
 //!
@@ -1996,8 +1997,95 @@ mod tests {
         assert_eq!(lang.name(), "Plain Text");
     }
 
+    #[cfg(feature = "lang-elixir")]
+    #[test]
+    fn test_guess_elixir_from_content() {
+        let module = "defmodule Example do\n  def hello, do: :world\nend";
+        assert_eq!(Language::guess(None, module), Language::Elixir);
+        assert_eq!(Language::guess(Some("unknown"), module), Language::Elixir);
+
+        for definition in [
+            "def hello do\n  :world\nend",
+            "def foo, do: :ok",
+            "defp hello, do: :world",
+            "defmacro hello do\n  quote(do: :world)\nend",
+        ] {
+            assert_eq!(
+                Language::guess(None, definition),
+                Language::Elixir,
+                "source: {definition}"
+            );
+        }
+    }
+
+    #[cfg(feature = "lang-elixir")]
+    #[test]
+    fn test_explicit_language_wins_over_elixir_content() {
+        let source = "defmodule Example do\nend";
+        assert_eq!(Language::guess(Some(""), source), Language::PlainText);
+
+        #[cfg(feature = "lang-rust")]
+        assert_eq!(Language::guess(Some("rust"), source), Language::Rust);
+    }
+
+    #[cfg(all(feature = "lang-elixir", feature = "lang-bash"))]
+    #[test]
+    fn test_shebang_wins_over_elixir_content() {
+        let source = "#!/usr/bin/env bash\ndefmodule Example do\nend";
+        assert_eq!(Language::guess(None, source), Language::Bash);
+    }
+
+    #[cfg(feature = "lang-elixir")]
+    #[test]
+    fn test_elixir_content_detector_rejects_prose() {
+        for source in [
+            "plain text",
+            "This document mentions defmodule Example but contains no code.",
+            "defmodule",
+            "def foo, bar: :baz",
+            "...",
+            "",
+        ] {
+            assert_eq!(
+                Language::guess(None, source),
+                Language::PlainText,
+                "source: {source}"
+            );
+        }
+    }
+
+    #[cfg(all(
+        feature = "lang-css",
+        feature = "lang-go",
+        feature = "lang-html",
+        feature = "lang-java",
+        feature = "lang-javascript",
+        feature = "lang-json",
+        feature = "lang-markdown",
+        feature = "lang-python",
+        feature = "lang-ruby",
+        feature = "lang-rust",
+        feature = "lang-sql",
+        feature = "lang-tsx",
+        feature = "lang-typescript"
+    ))]
+    #[test]
+    fn guesses_popular_languages_from_distinctive_content() {
+        for case in content_guess_cases() {
+            let language = Language::guess(case.input.as_deref(), &case.source);
+            assert_eq!(language.id_name(), case.expected, "case: {}", case.name);
+        }
+    }
+
     fn samples_dir() -> PathBuf {
         PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../samples")
+    }
+
+    fn content_guess_cases() -> Vec<GuessCase> {
+        let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("../../fixtures/content-guess-cases.json");
+        serde_json::from_str(&fs::read_to_string(path).expect("content guess cases should exist"))
+            .expect("content guess cases should be valid json")
     }
 
     fn guess_cases() -> Vec<GuessCase> {

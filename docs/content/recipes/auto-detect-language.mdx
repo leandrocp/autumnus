@@ -23,14 +23,15 @@ const html = await highlight('#!/usr/bin/env bash\necho "hello"', htmlInline({th
 ```rust
 use lumis::languages::Language;
 
-let lang = Language::guess(Some("script.sh"), source);
+let source = "defmodule Example do\nend";
+let lang = Language::guess(None, source);
 ```
 
   </TabItem>
   <TabItem value="elixir" label="Elixir">
 
 ```elixir
-Lumis.highlight!("#!/usr/bin/env bash\necho 'hello'")
+Lumis.highlight!("defmodule Example do\nend")
 ```
 
   </TabItem>
@@ -42,3 +43,19 @@ lumis highlight main.rs
 
   </TabItem>
 </Tabs>
+
+Detection checks explicit language and path hints first, followed by Emacs
+headers, shebangs, and inexpensive content checks. The Rust library and Elixir
+binding then use high-confidence Tree-sitter queries as a final content-inference
+step. These rules cover CSS, Elixir, Go, HTML, Java, JavaScript and JSX, JSON,
+Markdown, Python, Ruby, Rust, SQL, TypeScript, and TSX. The CLI does not run
+parser-backed content inference because it normally receives a file path.
+
+The rules intentionally abstain on syntax shared by several languages. When
+multiple unrelated rules match, the result is plain text; a more specific rule
+wins only when its query declares that relationship. For example, TSX can
+supersede JavaScript and TypeScript matches, but JSX alone is reported as
+JavaScript rather than React because JSX does not identify a framework.
+
+Leave the language unspecified for unlabeled code. Passing a recognized language
+explicitly is an override and disables content inference.

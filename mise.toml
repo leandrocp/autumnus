@@ -414,7 +414,7 @@ run = '''
 set -euo pipefail
 cargo doc --all-features --no-deps
 (cd packages/elixir/lumis && LUMIS_BUILD=1 mix docs)
-pnpm --filter @lumis-sh/lumis docs
+pnpm --filter @lumis-sh/lumis run docs
 echo ""
 echo "Docs generated:"
 echo "  lumis:           $(pwd)/target/doc/lumis/index.html"

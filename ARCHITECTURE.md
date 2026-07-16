@@ -33,7 +33,7 @@
                                   v
 +--------------------------------------------------------------+
 | lumis-core (Rust crate)                                      |
-| language detection + theme/style logic + formatter behavior  |
+| language guessing + theme/style + formatter behavior         |
 +-----------------------------+--------------------------------+
                               |
                               v

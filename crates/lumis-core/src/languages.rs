@@ -4,8 +4,7 @@
 //! languages. It includes automatic language detection based on file extensions,
 //! file names, content analysis, and shebangs.
 //!
-//! This module is independent of tree-sitter. For tree-sitter configuration,
-//! see the `lumis` crate's `languages` module.
+//! Parser-backed content guessing is available when a `detect-*` feature is enabled.
 
 // Guess Language copied from https://github.com/Wilfred/difftastic/blob/f34a9014760efbaed01b972caba8b73754da16c9/src/parse/guess_language.rs
 
@@ -13,6 +12,9 @@ use regex::Regex;
 use std::collections::HashMap;
 use std::path::Path;
 use std::sync::LazyLock;
+
+#[cfg(feature = "content-detection")]
+mod detection;
 
 /// Declarative macro that generates the `Language` enum, iteration, `FromStr`,
 /// `name()`, `id_name()`, `language_globs()`, `from_emacs_mode_header()`,
@@ -275,8 +277,26 @@ impl Language {
     /// When `language` is `None` or parsing fails:
     /// 1. Check for Emacs mode header (`// -*- mode: rust -*-`)
     /// 2. Check for shebang (`#!/usr/bin/env python`)
-    /// 3. Apply content heuristics (HTML doctype, XML declaration, etc.)
-    /// 4. Default to `PlainText` if nothing matches
+    /// 3. Apply inexpensive content heuristics (HTML doctype, XML declaration, etc.)
+    /// 4. Apply every enabled high-confidence `detect-*` Tree-sitter query
+    /// 5. Return a unique match or a query-declared more-specific match
+    /// 6. Default to `PlainText` when nothing matches or unrelated rules conflict
+    ///
+    /// Recognized hints are authoritative and skip content guessing. Parser-backed guessing is
+    /// feature-dependent so lightweight consumers, including the CLI, do not compile native
+    /// guessing parsers. The queries intentionally prefer false negatives over false positives.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use lumis_core::languages::Language;
+    ///
+    /// # #[cfg(feature = "detect-elixir")]
+    /// # {
+    /// let source = "defmodule Example do\nend";
+    /// assert_eq!(Language::guess(None, source), Language::Elixir);
+    /// # }
+    /// ```
     pub fn guess(language: Option<&str>, src: &str) -> Self {
         if let Some(input) = language {
             if let Ok(lang) = input.parse() {
@@ -305,6 +325,11 @@ impl Language {
         #[cfg(feature = "lang-objc")]
         if Self::looks_like_objc(Path::new(""), src) {
             return Language::ObjC;
+        }
+
+        #[cfg(feature = "content-detection")]
+        if let Some(language) = detection::from_content(src) {
+            return language;
         }
 
         Language::PlainText
@@ -381,4 +406,15 @@ fn split_on_newlines(s: &str) -> impl Iterator<Item = &str> {
             l
         }
     })
+}
+
+#[cfg(all(test, not(feature = "content-detection")))]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn source_content_falls_back_without_guessing_features() {
+        let source = "defmodule Example do\nend";
+        assert_eq!(Language::guess(None, source), Language::PlainText);
+    }
 }
