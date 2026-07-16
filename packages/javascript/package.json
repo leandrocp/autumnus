@@ -6,7 +6,7 @@
     "build:wasm-bundles": "tsx scripts/build-wasm-bundles.ts"
   },
   "devDependencies": {
-    "@microsoft/api-extractor": "^7.58.0",
+    "@microsoft/api-extractor": "^7.58.10",
     "smol-toml": "^1.7.0",
     "tsx": "^4.23.0"
   }
