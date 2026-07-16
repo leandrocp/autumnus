@@ -152,9 +152,9 @@ jobs:
           commit-message: "feat: upgrade lang ${{ matrix.language }}"
           title: "feat: upgrade lang ${{ matrix.language }}"
           body: |
-            Automated PR to upgrade parser and queries for
-            **${{ matrix.language }}**.
-
+            Automated PR to upgrade parser and queries for **${{ matrix.language }}**.
+            
+            --  
             This PR was created automatically by the upgrade-langs workflow.
           branch: upgrade-langs-${{ matrix.language }}
           delete-branch: true
