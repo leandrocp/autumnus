@@ -468,6 +468,19 @@ wasm_name = "tree-sitter-markdown_inline"
 variant = "MarkdownInline"
 display_name = "Markdown Inline"
 
+# MDX reuses the markdown parser; the MDX-specific surface (ESM import/export
+# blocks and {expression} lines, including {/* comments */}) is handled by
+# extra injection rules in queries/upstream/mdx/injections.scm.
+[parsers.mdx]
+git = "https://github.com/tree-sitter-grammars/tree-sitter-markdown.git"
+rev = "f969cd3ae3f9fbd4e43205431d0ae286014c05b5"
+crate = "tree-sitter-md"
+version = "0.5.3"
+location = "tree-sitter-markdown"
+wasm_name = "tree-sitter-markdown"
+display_name = "MDX"
+globs = ["*.mdx"]
+
 [parsers.nix]
 git = "https://github.com/nix-community/tree-sitter-nix.git"
 rev = "ea1d87f7996be1329ef6555dcacfa63a69bd55c6"

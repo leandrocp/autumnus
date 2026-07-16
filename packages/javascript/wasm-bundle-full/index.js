@@ -161,6 +161,7 @@ export const bundledWasms = {
   "make": wasmMake,
   "markdown": wasmMarkdown,
   "markdown_inline": wasmMarkdownInline,
+  "mdx": wasmMarkdown,
   "nix": wasmNix,
   "nushell": wasmNushell,
   "objc": wasmObjc,

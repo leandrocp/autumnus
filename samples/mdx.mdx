@@ -1,0 +1,22 @@
+---
+title: An MDX sample
+tags: [mdx, lumis]
+---
+
+import Layout from "./Layout.astro";
+export const answer = 42;
+
+{/* _class: hero */}
+
+# Heading
+
+Some **bold** text with an {answer} expression.
+
+<Layout>
+  A JSX component block.
+</Layout>
+
+```python
+def hello() -> str:
+    return "world"
+```

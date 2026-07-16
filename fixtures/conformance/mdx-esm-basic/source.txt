@@ -1,0 +1,6 @@
+import Layout from "./Layout.astro";
+export const answer = 42;
+
+# Heading
+
+Some **bold** text.

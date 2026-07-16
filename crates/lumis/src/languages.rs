@@ -279,6 +279,8 @@ impl LanguageConfig for Language {
             Language::Markdown => &MARKDOWN_CONFIG,
             #[cfg(feature = "lang-markdown-inline")]
             Language::MarkdownInline => &MARKDOWN_INLINE_CONFIG,
+            #[cfg(feature = "lang-mdx")]
+            Language::Mdx => &MDX_CONFIG,
             #[cfg(feature = "lang-nginx")]
             Language::Nginx => &NGINX_CONFIG,
             #[cfg(feature = "lang-nim")]
@@ -1322,6 +1324,20 @@ static MARKDOWN_INLINE_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(
         MARKDOWN_INLINE_LOCALS,
     )
     .expect("failed to create markdown highlight configuration");
+    config.configure(&HIGHLIGHT_NAMES);
+    config
+});
+
+#[cfg(feature = "lang-mdx")]
+static MDX_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let mut config = HighlightConfiguration::new(
+        tree_sitter::Language::new(tree_sitter_md::LANGUAGE),
+        "mdx",
+        MDX_HIGHLIGHTS,
+        MDX_INJECTIONS,
+        MDX_LOCALS,
+    )
+    .expect("failed to create mdx highlight configuration");
     config.configure(&HIGHLIGHT_NAMES);
     config
 });

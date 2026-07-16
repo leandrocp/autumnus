@@ -114,6 +114,7 @@ all-languages = [
     "lang-mermaid",
     "lang-markdown",
     "lang-markdown-inline",
+    "lang-mdx",
     "lang-nginx",
     "lang-nim",
     "lang-nix",
@@ -236,6 +237,7 @@ lang-matlab = ["dep:tree-sitter-matlab", "lumis-core/lang-matlab"]
 lang-mermaid = ["lumis-core/lang-mermaid"]
 lang-markdown = ["dep:tree-sitter-md", "lumis-core/lang-markdown"]
 lang-markdown-inline = ["dep:tree-sitter-md", "lumis-core/lang-markdown-inline"]
+lang-mdx = ["dep:tree-sitter-md", "lumis-core/lang-mdx"]
 lang-nginx = ["dep:tree-sitter-nginx", "lumis-core/lang-nginx"]
 lang-nim = ["lumis-core/lang-nim"]
 lang-nix = ["dep:tree-sitter-nix", "lumis-core/lang-nix"]
