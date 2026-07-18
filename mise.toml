@@ -120,6 +120,21 @@ echo ""
 echo "Done."
 '''
 
+[tasks.'elixir-nif-lock-check']
+description = "Verify the packaged NIF crate resolves standalone with its lockfile"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+nif_dir="packages/elixir/lumis/native/lumis_nif"
+tmp_dir="$(mktemp -d)"
+trap 'rm -rf "$tmp_dir"' EXIT
+
+mkdir "$tmp_dir/lumis_nif"
+cp "$nif_dir/Cargo.toml" "$nif_dir/Cargo.lock" "$tmp_dir/lumis_nif"
+cp -R "$nif_dir/.cargo" "$nif_dir/src" "$tmp_dir/lumis_nif"
+cargo tree --manifest-path "$tmp_dir/lumis_nif/Cargo.toml" --locked --depth 0
+'''
+
 [tasks.'test']
 description = "Run all tests"
 run = '''
