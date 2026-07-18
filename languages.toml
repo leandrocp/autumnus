@@ -16,7 +16,7 @@ path = "queries"
 
 [queries.gleam]
 git = "https://github.com/gleam-lang/tree-sitter-gleam.git"
-rev = "c610c282ef73f830d80c1f0999dce8e83f024ef5"
+rev = "cefbd6863983b4df3214b7934bde5e9ca63d5b7f"
 path = "queries"
 
 [queries.make]
@@ -31,7 +31,7 @@ path = "queries"
 
 [queries.nu]
 git = "https://github.com/nushell/tree-sitter-nu.git"
-rev = "bb3f533e5792260291945e1f329e1f0a779def6e"
+rev = "d694570aa26b53d0d642460a0430e8aa07dcbea0"
 path = "queries"
 
 [queries.python]
@@ -46,7 +46,7 @@ path = "queries"
 
 [queries.wat]
 git = "https://github.com/helix-editor/helix.git"
-rev = "14d6bc0febed9c692048271a8ae2362ac969c6e0"
+rev = "f6f3eb1fe4a73933466f30175843059a4381a985"
 path = "runtime/queries/wat"
 
 # -- Parsers
@@ -111,7 +111,7 @@ globs = ["Caddyfile", "caddyfile"]
 git = "https://github.com/sogaiu/tree-sitter-clojure.git"
 rev = "3a1ace906c151dd631cf6f149b5083f2b60e6a9e"
 crate = "tree-sitter-clojure-orchard"
-version = "0.2.5"
+version = "0.2.8"
 globs = ["*.bb", "*.boot", "*.clj", "*.cljc", "*.clje", "*.cljs", "*.cljx", "*.edn", "*.joke", "*.joker"]
 emacs = ["clojure"]
 
