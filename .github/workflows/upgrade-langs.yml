@@ -1,10 +1,12 @@
-name: Upgrade Languages
+name: Update Languages
 
 on:
   schedule:
     - cron: "0 22 * * 0"
   workflow_dispatch:
   push:
+    branches:
+      - main
     tags-ignore:
       - "**"
     paths:
@@ -116,18 +118,69 @@ jobs:
       - name: Install JavaScript dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Upgrade language
-        run: mise run langs-upgrade ${{ matrix.language }}
+      - name: Resolve language metadata
+        id: language
+        env:
+          LANGUAGE: ${{ matrix.language }}
+        run: |
+          QUERY_NAME=$(lua -e "
+            local toml_edit = require('toml_edit')
+            local f = assert(io.open('languages.toml', 'r'))
+            local tbl = toml_edit.parse_as_tbl(f:read('*a'))
+            f:close()
+            local parser = assert(tbl.parsers[os.getenv('LANGUAGE')])
+            io.write(parser.query_name or os.getenv('LANGUAGE'))
+          ")
+          echo "query_name=$QUERY_NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Update parser
+        id: upgrade-parser
+        env:
+          LANGUAGE: ${{ matrix.language }}
+        run: |
+          mise run langs-upgrade-parsers "$LANGUAGE"
+
+          if git diff --quiet -- \
+            languages.toml \
+            crates/lumis/Cargo.toml \
+            crates/lumis-core/Cargo.toml; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Update language files
+        env:
+          LANGUAGE: ${{ matrix.language }}
+          QUERY_NAME: ${{ steps.language.outputs.query_name }}
+        run: |
+          mise run langs-upgrade-queries
+          mise run langs-fetch-vendored-parsers "$LANGUAGE"
+          mise run langs-fetch-queries "$QUERY_NAME"
+          mise run langs-preprocess-queries "$QUERY_NAME"
+          mise run docs-gen-languages-md
+          pnpm --filter @lumis-sh/lumis build:generate
 
       - name: Check for changes
         id: check-changes
+        env:
+          LANGUAGE: ${{ matrix.language }}
+          PARSER_CHANGED: ${{ steps.upgrade-parser.outputs.changed }}
+          QUERY_NAME: ${{ steps.language.outputs.query_name }}
         run: |
-          if git diff --quiet; then
+          PARSER_DIR="crates/lumis/vendored_parsers/tree-sitter-$QUERY_NAME"
+          LANGUAGE_CHANGES=$(git status --porcelain -- \
+            "$PARSER_DIR" \
+            "queries/upstream/$QUERY_NAME" \
+            "queries/processed/$QUERY_NAME")
+
+          if [ "$PARSER_CHANGED" != "true" ] && [ -z "$LANGUAGE_CHANGES" ]; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
-            echo "No changes for ${{ matrix.language }}, skipping PR"
+            echo "No parser or query changes for $LANGUAGE, skipping PR"
           else
             echo "skip=false" >> "$GITHUB_OUTPUT"
-            echo "Changes detected for ${{ matrix.language }}:"
+            echo "Changes detected for $LANGUAGE:"
+            git status --short
             git diff --stat
           fi
 
@@ -140,7 +193,9 @@ jobs:
           add-paths: |
             languages.toml
             crates/lumis/Cargo.toml
+            crates/lumis-core/Cargo.toml
             crates/lumis/vendored_parsers
+            LANGUAGES.md
             queries/upstream
             queries/processed
             queries/override
@@ -149,13 +204,13 @@ jobs:
             packages/javascript/lumis/bundles
             packages/javascript/lumis/src/generated
             packages/javascript/wasm-bundle-*
-          commit-message: "feat: upgrade lang ${{ matrix.language }}"
-          title: "feat: upgrade lang ${{ matrix.language }}"
+          commit-message: "feat: update lang ${{ matrix.language }}"
+          title: "feat: update lang ${{ matrix.language }}"
           body: |
-            Automated PR to upgrade parser and queries for **${{ matrix.language }}**.
+            Automated PR to update parser and queries for **${{ matrix.language }}**.
             
             --  
-            This PR was created automatically by the upgrade-langs workflow.
-          branch: upgrade-langs-${{ matrix.language }}
+            This PR was created automatically by the update-langs workflow.
+          branch: update-langs-${{ matrix.language }}
           delete-branch: true
           base: main

@@ -21,6 +21,10 @@
 
 (filename) @string.special.path
 
+(special) @string.special
+
+"\\" @punctuation.special
+
 (mode) @number
 
 ([
