@@ -1568,8 +1568,15 @@ fn strip_set_capture_patterns(content: &str) -> String {
 
             while j < len && depth > 0 {
                 let ch = bytes[j];
-                if ch == b'"' && (j == 0 || bytes[j - 1] != b'\\') {
-                    in_string = !in_string;
+                if ch == b'"' {
+                    let preceding_backslashes = bytes[..j]
+                        .iter()
+                        .rev()
+                        .take_while(|&&byte| byte == b'\\')
+                        .count();
+                    if preceding_backslashes % 2 == 0 {
+                        in_string = !in_string;
+                    }
                 } else if !in_string {
                     if ch == b'(' {
                         depth += 1;
@@ -2703,5 +2710,25 @@ mod tests {
         std::env::set_current_dir(cwd).expect("should restore cwd");
         result;
         let _ = fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn strip_set_capture_patterns_handles_escaped_backslashes() {
+        let content = r#"((hard_line_break
+  "\\" @conceal)
+  (#set! conceal ""))
+
+((inline_link
+  (link_destination) @_url) @_label
+  (#set! @_label url @_url))
+
+(comment) @comment
+"#;
+
+        let stripped = strip_set_capture_patterns(content);
+
+        assert!(stripped.contains("hard_line_break"));
+        assert!(!stripped.contains("inline_link"));
+        assert!(stripped.contains("(comment) @comment"));
     }
 }
