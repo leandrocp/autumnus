@@ -40,6 +40,11 @@ const CANCELLATION_CHECK_INTERVAL: usize = 100;
 const BUFFER_HTML_RESERVE_CAPACITY: usize = 10 * 1024;
 const BUFFER_LINES_RESERVE_CAPACITY: usize = 1000;
 
+// Bound the number of in-progress query matches so the capture list pool stays
+// within tree-sitter's 16-bit capture-list id space, which overflowed and
+// corrupted memory on very large inputs before tree-sitter 0.26.9.
+const MATCH_LIMIT: u32 = u16::MAX as u32;
+
 static STANDARD_CAPTURE_NAMES: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
     vec![
         "attribute",
@@ -578,6 +583,7 @@ impl<'a> HighlightIterLayer<'a> {
                     )
                     .ok_or(Error::Cancelled)?;
                 let mut cursor = highlighter.cursors.pop().unwrap_or_default();
+                cursor.set_match_limit(MATCH_LIMIT);
 
                 // Process combined injections.
                 if let Some(combined_injections_query) = &config.combined_injections_query {
