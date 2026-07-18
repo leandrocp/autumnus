@@ -12,16 +12,46 @@ on:
       - "packages/elixir/lumis/native/**"
       - "crates/**"
       - "queries/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
       - ".github/workflows/elixir-nif-rust.yml"
   pull_request:
     paths:
       - "packages/elixir/lumis/native/**"
       - "crates/**"
       - "queries/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
       - ".github/workflows/elixir-nif-rust.yml"
   workflow_dispatch:
 
 jobs:
+  standalone-lock:
+    name: Standalone packaged NIF lockfile
+    if: >-
+      ${{ github.event_name == 'workflow_dispatch' ||
+          (github.event_name == 'pull_request' && github.head_ref != 'knope/release') ||
+          (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore: prepare releases')) }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Copy NIF crate outside the workspace
+        run: |
+          mkdir "$RUNNER_TEMP/lumis_nif"
+          cp packages/elixir/lumis/native/lumis_nif/Cargo.* "$RUNNER_TEMP/lumis_nif"
+          cp -R packages/elixir/lumis/native/lumis_nif/.cargo "$RUNNER_TEMP/lumis_nif"
+          cp -R packages/elixir/lumis/native/lumis_nif/src "$RUNNER_TEMP/lumis_nif"
+
+      - name: Verify standalone NIF lockfile
+        run: >-
+          cargo tree
+          --manifest-path "$RUNNER_TEMP/lumis_nif/Cargo.toml"
+          --locked
+          --depth 0
+
   test:
     if: >-
       ${{ github.event_name == 'workflow_dispatch' ||
