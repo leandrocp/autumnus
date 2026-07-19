@@ -1502,7 +1502,7 @@ fn fetch_queries(name: &str) -> Result<()> {
     Ok(())
 }
 
-fn apply_text_replacements(content: &str) -> String {
+fn apply_text_replacements(content: &str, lang: &str) -> String {
     let replacements = [
         ("@nospell", ""),
         ("@spell", ""),
@@ -1549,6 +1549,12 @@ fn apply_text_replacements(content: &str) -> String {
     for (old, new) in &replacements {
         s = s.replace(old, new);
     }
+    if lang == "swift" {
+        s = s.replace(
+            "(nil_literal) @constant.builtin",
+            "\"nil\" @constant.builtin",
+        );
+    }
     s
 }
 
@@ -1568,8 +1574,15 @@ fn strip_set_capture_patterns(content: &str) -> String {
 
             while j < len && depth > 0 {
                 let ch = bytes[j];
-                if ch == b'"' && (j == 0 || bytes[j - 1] != b'\\') {
-                    in_string = !in_string;
+                if ch == b'"' {
+                    let preceding_backslashes = bytes[..j]
+                        .iter()
+                        .rev()
+                        .take_while(|&&byte| byte == b'\\')
+                        .count();
+                    if preceding_backslashes % 2 == 0 {
+                        in_string = !in_string;
+                    }
                 } else if !in_string {
                     if ch == b'(' {
                         depth += 1;
@@ -1640,7 +1653,7 @@ fn resolve_and_preprocess(
 
     let mut parts = Vec::new();
     if !raw.is_empty() {
-        let content = apply_text_replacements(&raw);
+        let content = apply_text_replacements(&raw, lang);
         let content = strip_set_capture_patterns(&content);
 
         let mut stripped_lines = Vec::new();
@@ -2703,5 +2716,36 @@ mod tests {
         std::env::set_current_dir(cwd).expect("should restore cwd");
         result;
         let _ = fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn strip_set_capture_patterns_handles_escaped_backslashes() {
+        let content = r#"((hard_line_break
+  "\\" @conceal)
+  (#set! conceal ""))
+
+((inline_link
+  (link_destination) @_url) @_label
+  (#set! @_label url @_url))
+
+(comment) @comment
+"#;
+
+        let stripped = strip_set_capture_patterns(content);
+
+        assert!(stripped.contains("hard_line_break"));
+        assert!(!stripped.contains("inline_link"));
+        assert!(stripped.contains("(comment) @comment"));
+    }
+
+    #[test]
+    fn apply_text_replacements_uses_published_swift_nil_node() {
+        let query = "(nil_literal) @constant.builtin";
+
+        assert_eq!(
+            apply_text_replacements(query, "swift"),
+            "\"nil\" @constant.builtin"
+        );
+        assert_eq!(apply_text_replacements(query, "nim"), query);
     }
 }

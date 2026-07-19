@@ -1,4 +1,4 @@
-name: Upgrade Languages
+name: Update Languages
 
 on:
   schedule:
@@ -18,33 +18,15 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-
-      - uses: leafo/gh-actions-lua@v13
-
-      - uses: leafo/gh-actions-luarocks@v6
-
-      - name: Install Lua dependencies
-        run: luarocks install toml-edit
-
       - name: Generate language matrix
         id: set-matrix
         run: |
-          LANGS=$(lua -e "
-            local toml_edit = require('toml_edit')
-            local f = io.open('languages.toml', 'r')
-            local tbl = toml_edit.parse_as_tbl(f:read('*a'))
-            f:close()
-            local names = {}
-            for k, v in pairs(tbl.parsers) do
-              if v.git then names[#names+1] = k end
-            end
-            table.sort(names)
-            io.write('[\"' .. table.concat(names, '\",\"') .. '\"]')
-          ")
-          echo "Generated matrix for languages: $LANGS"
-          echo "languages=$LANGS" >> "$GITHUB_OUTPUT"
+          set -euo pipefail
+          languages=$(yq -o=json -I=0 \
+            '[.parsers | to_entries[] | select(.value.git != null) | .key] | sort' \
+            languages.toml)
+          echo "Generated matrix for languages: $languages"
+          echo "languages=$languages" >> "$GITHUB_OUTPUT"
 
   rust-cache:
     runs-on: ubuntu-latest
@@ -58,14 +40,14 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: "crates/dev -> target"
-          shared-key: upgrade-langs-dev
+          shared-key: update-langs-dev
 
       - name: Build dev tool
         run: >-
           cargo build --manifest-path crates/dev/Cargo.toml
           --no-default-features
 
-  upgrade-languages:
+  update-languages:
     needs: [generate-matrix, rust-cache]
     runs-on: ubuntu-latest
     permissions:
@@ -86,20 +68,13 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: "crates/dev -> target"
-          shared-key: upgrade-langs-dev
+          shared-key: update-langs-dev
           save-if: false
 
       - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d
         with:
           version: 2026.7.3
           install: false
-
-      - uses: leafo/gh-actions-lua@v13
-
-      - uses: leafo/gh-actions-luarocks@v6
-
-      - name: Install Lua dependencies
-        run: luarocks install toml-edit && luarocks install dkjson
 
       - uses: pnpm/action-setup@v6
         with:
@@ -116,18 +91,49 @@ jobs:
       - name: Install JavaScript dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Upgrade language
-        run: mise run langs-upgrade ${{ matrix.language }}
+      - name: Update language
+        env:
+          LANGUAGE: ${{ matrix.language }}
+        run: |
+          set -euo pipefail
+          QUERY_NAME=$(yq -r \
+            '.parsers[strenv(LANGUAGE)].query_name // strenv(LANGUAGE)' \
+            languages.toml)
+          echo "QUERY_NAME=$QUERY_NAME" >> "$GITHUB_ENV"
+
+          mise run langs-upgrade-parsers "$LANGUAGE"
+          mise run langs-upgrade-queries "$QUERY_NAME"
+          mise run langs-fetch-vendored-parsers "$LANGUAGE"
+          mise run langs-fetch-queries "$QUERY_NAME"
+          mise run langs-preprocess-queries "$QUERY_NAME"
+          mise run docs-gen-languages-md
+          pnpm --filter @lumis-sh/lumis build:generate
 
       - name: Check for changes
         id: check-changes
+        env:
+          LANGUAGE: ${{ matrix.language }}
         run: |
-          if git diff --quiet; then
+          set -euo pipefail
+          parser_before=$(git show HEAD:languages.toml | \
+            yq -p=toml -o=json -I=0 '.parsers[strenv(LANGUAGE)]')
+          parser_after=$(yq -o=json -I=0 \
+            '.parsers[strenv(LANGUAGE)]' languages.toml)
+
+          LANGUAGE_CHANGES=$(git status --porcelain -- \
+            crates/lumis/Cargo.toml \
+            crates/lumis-core/Cargo.toml \
+            "crates/lumis/vendored_parsers/tree-sitter-$QUERY_NAME" \
+            "queries/upstream/$QUERY_NAME" \
+            "queries/processed/$QUERY_NAME")
+
+          if [ "$parser_before" = "$parser_after" ] && [ -z "$LANGUAGE_CHANGES" ]; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
-            echo "No changes for ${{ matrix.language }}, skipping PR"
+            echo "No parser or query changes for $LANGUAGE, skipping PR"
           else
             echo "skip=false" >> "$GITHUB_OUTPUT"
-            echo "Changes detected for ${{ matrix.language }}:"
+            echo "Changes detected for $LANGUAGE:"
+            git status --short
             git diff --stat
           fi
 
@@ -140,7 +146,9 @@ jobs:
           add-paths: |
             languages.toml
             crates/lumis/Cargo.toml
+            crates/lumis-core/Cargo.toml
             crates/lumis/vendored_parsers
+            LANGUAGES.md
             queries/upstream
             queries/processed
             queries/override
@@ -149,13 +157,13 @@ jobs:
             packages/javascript/lumis/bundles
             packages/javascript/lumis/src/generated
             packages/javascript/wasm-bundle-*
-          commit-message: "feat: upgrade lang ${{ matrix.language }}"
-          title: "feat: upgrade lang ${{ matrix.language }}"
+          commit-message: "feat: update lang ${{ matrix.language }}"
+          title: "feat: update lang ${{ matrix.language }}"
           body: |
-            Automated PR to upgrade parser and queries for **${{ matrix.language }}**.
+            Automated PR to update parser and queries for **${{ matrix.language }}**.
             
             --  
-            This PR was created automatically by the upgrade-langs workflow.
-          branch: upgrade-langs-${{ matrix.language }}
+            This PR was created automatically by the update-langs workflow.
+          branch: update-langs-${{ matrix.language }}
           delete-branch: true
           base: main

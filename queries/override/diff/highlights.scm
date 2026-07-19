@@ -1,4 +1,6 @@
-(comment) @comment @spell
+; Keep compatible with published tree-sitter-diff 0.1.0 (no special node).
+
+(comment) @comment
 
 [
   (addition)
@@ -19,10 +21,6 @@
   (argument) @variable.parameter)
 
 (filename) @string.special.path
-
-(special) @string.special
-
-"\\" @punctuation.special
 
 (mode) @number
 
