@@ -1,7 +1,7 @@
 {
   "name": "catppuccin_frappe",
   "appearance": "dark",
-  "revision": "e068ab5f8261f23f6f71ffd8791ae40315b77b9c",
+  "revision": "058e83dc009e4dd62f30807054de9cc849699e27",
   "highlights": {
     "attribute": {
       "fg": "#ef9f76"
@@ -334,24 +334,6 @@
     },
     "punctuation.bracket": {
       "fg": "#949cbb"
-    },
-    "punctuation.bracket.rainbow.1": {
-      "fg": "#e78284"
-    },
-    "punctuation.bracket.rainbow.2": {
-      "fg": "#e5c890"
-    },
-    "punctuation.bracket.rainbow.3": {
-      "fg": "#8caaee"
-    },
-    "punctuation.bracket.rainbow.4": {
-      "fg": "#ef9f76"
-    },
-    "punctuation.bracket.rainbow.5": {
-      "fg": "#a6d189"
-    },
-    "punctuation.bracket.rainbow.6": {
-      "fg": "#ca9ee6"
     },
     "punctuation.delimiter": {
       "fg": "#949cbb"

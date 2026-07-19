@@ -1,7 +1,7 @@
 {
   "name": "catppuccin_mocha",
   "appearance": "dark",
-  "revision": "e068ab5f8261f23f6f71ffd8791ae40315b77b9c",
+  "revision": "058e83dc009e4dd62f30807054de9cc849699e27",
   "highlights": {
     "attribute": {
       "fg": "#fab387"
@@ -334,24 +334,6 @@
     },
     "punctuation.bracket": {
       "fg": "#9399b2"
-    },
-    "punctuation.bracket.rainbow.1": {
-      "fg": "#f38ba8"
-    },
-    "punctuation.bracket.rainbow.2": {
-      "fg": "#f9e2af"
-    },
-    "punctuation.bracket.rainbow.3": {
-      "fg": "#89b4fa"
-    },
-    "punctuation.bracket.rainbow.4": {
-      "fg": "#fab387"
-    },
-    "punctuation.bracket.rainbow.5": {
-      "fg": "#a6e3a1"
-    },
-    "punctuation.bracket.rainbow.6": {
-      "fg": "#cba6f7"
     },
     "punctuation.delimiter": {
       "fg": "#9399b2"

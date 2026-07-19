@@ -1,5 +1,5 @@
 /* catppuccin_mocha
- * revision: e068ab5f8261f23f6f71ffd8791ae40315b77b9c
+ * revision: 058e83dc009e4dd62f30807054de9cc849699e27
  */
 .lumis {
   color: #cdd6f4;
@@ -332,24 +332,6 @@
 }
 .l-punctuation-bracket {
   color: #9399b2;
-}
-.l-punctuation-bracket-rainbow-1 {
-  color: #f38ba8;
-}
-.l-punctuation-bracket-rainbow-2 {
-  color: #f9e2af;
-}
-.l-punctuation-bracket-rainbow-3 {
-  color: #89b4fa;
-}
-.l-punctuation-bracket-rainbow-4 {
-  color: #fab387;
-}
-.l-punctuation-bracket-rainbow-5 {
-  color: #a6e3a1;
-}
-.l-punctuation-bracket-rainbow-6 {
-  color: #cba6f7;
 }
 .l-punctuation-delimiter {
   color: #9399b2;
