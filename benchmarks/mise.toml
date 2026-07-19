@@ -25,9 +25,13 @@ outputs = ["node_modules/.pnpm/lock.yaml"]
 
 [tasks."install:elixir"]
 description = "Install locked Elixir benchmark dependencies"
-run = "cd packages/elixir/lumis && MIX_ENV=prod mix deps.get --only prod"
-sources = ["packages/elixir/lumis/mix.exs", "packages/elixir/lumis/mix.lock"]
-outputs = ["packages/elixir/lumis/deps/rustler_precompiled/mix.exs"]
+run = "cd benchmarks/elixir && MIX_ENV=prod mix deps.get --only prod"
+sources = [
+  "benchmarks/elixir/mix.exs",
+  "benchmarks/elixir/mix.lock",
+  "packages/elixir/lumis/mix.exs",
+]
+outputs = ["benchmarks/elixir/deps/benchee/mix.exs"]
 
 [tasks.fixtures]
 description = "Generate and verify deterministic benchmark fixtures"
@@ -62,11 +66,18 @@ outputs = ["packages/javascript/themes/dist/index.js"]
 [tasks."build:javascript"]
 description = "Build the local JavaScript package under benchmark"
 depends = ["install", "build:themes", "fixtures"]
-run = "pnpm --filter @lumis-sh/lumis build"
+run = '''
+pnpm --filter @lumis-sh/lumis build:native
+pnpm --filter @lumis-sh/lumis build
+'''
 sources = [
   "packages/javascript/lumis/package.json",
   "packages/javascript/lumis/src/**/*",
   "packages/javascript/lumis/scripts/**/*",
+  "packages/javascript/lumis/native/**/*.rs",
+  "packages/javascript/lumis/native/Cargo.toml",
+  "crates/lumis-wasm-runtime/src/**/*.rs",
+  "crates/lumis-wasm-runtime/Cargo.toml",
   "packages/javascript/lumis/langs/javascript.ts",
   "packages/javascript/lumis/langs/json.ts",
   "packages/javascript/lumis/langs/rust.ts",
@@ -75,7 +86,10 @@ sources = [
   "queries/processed/json/*.scm",
   "queries/processed/rust/*.scm",
 ]
-outputs = ["packages/javascript/lumis/dist/index.js"]
+outputs = [
+  "packages/javascript/lumis/dist/index.js",
+  "packages/javascript/lumis/native/lumis-native.*.node",
+]
 
 [tasks."build:rust"]
 description = "Build Rust benchmark binaries and Criterion harness"
@@ -85,8 +99,7 @@ cargo build --manifest-path benchmarks/rust/Cargo.toml --release --bins
 cargo bench --manifest-path benchmarks/rust/Cargo.toml --no-run
 touch "$CARGO_TARGET_DIR/release/lumis-first-render"
 touch "$CARGO_TARGET_DIR/release/syntect-first-render"
-touch "$CARGO_TARGET_DIR/release/lumis-application"
-touch "$CARGO_TARGET_DIR/release/syntect-application"
+touch "$CARGO_TARGET_DIR/release/application-benchmark"
 '''
 sources = [
   "benchmarks/rust/Cargo.toml",
@@ -103,15 +116,17 @@ sources = [
 outputs = [
   "target/benchmarks/rust-target/release/lumis-first-render",
   "target/benchmarks/rust-target/release/syntect-first-render",
-  "target/benchmarks/rust-target/release/lumis-application",
-  "target/benchmarks/rust-target/release/syntect-application",
+  "target/benchmarks/rust-target/release/application-benchmark",
 ]
 
 [tasks."build:elixir"]
-description = "Build the local Elixir NIF benchmark in production mode"
+description = "Build the standalone Benchee project and local Elixir NIF"
 depends = ["install:elixir", "fixtures"]
-run = "cd packages/elixir/lumis && MIX_ENV=prod LUMIS_BUILD=1 mix compile --warnings-as-errors"
+run = "cd benchmarks/elixir && MIX_ENV=prod LUMIS_BUILD=1 mix compile --warnings-as-errors"
 sources = [
+  "benchmarks/elixir/mix.exs",
+  "benchmarks/elixir/mix.lock",
+  "benchmarks/elixir/application.exs",
   "packages/elixir/lumis/mix.exs",
   "packages/elixir/lumis/mix.lock",
   "packages/elixir/lumis/lib/**/*.ex",
@@ -120,10 +135,9 @@ sources = [
   "packages/elixir/lumis/native/lumis_nif/src/**/*.rs",
   "crates/lumis/src/**/*.rs",
   "crates/lumis-core/src/**/*.rs",
-  "benchmarks/elixir/application.exs",
   "benchmarks/fixtures/application.json",
 ]
-outputs = ["packages/elixir/lumis/_build/prod/lib/lumis/ebin/Elixir.Lumis.beam"]
+outputs = ["benchmarks/elixir/_build/prod/lib/lumis_benchmarks/ebin/lumis_benchmarks.app"]
 
 [tasks."build:cli"]
 description = "Build the native Lumis CLI in release mode"
@@ -173,7 +187,7 @@ depends = ["install"]
 run = '''
 cargo fmt --manifest-path benchmarks/rust/Cargo.toml
 pnpm --filter @lumis-sh/benchmarks fmt
-cd packages/elixir/lumis && mix format ../../../benchmarks/elixir/application.exs
+cd benchmarks/elixir && mix format mix.exs application.exs
 '''
 
 [tasks."format:check"]
@@ -182,7 +196,7 @@ depends = ["install"]
 run = '''
 cargo fmt --manifest-path benchmarks/rust/Cargo.toml -- --check
 pnpm --filter @lumis-sh/benchmarks fmt:check
-cd packages/elixir/lumis && mix format --check-formatted ../../../benchmarks/elixir/application.exs
+cd benchmarks/elixir && mix format --check-formatted mix.exs application.exs
 '''
 
 [tasks.lint]
@@ -198,7 +212,7 @@ description = "Build, lint, and preflight every benchmark adapter"
 depends = ["build", "lint"]
 run = '''
 pnpm --filter @lumis-sh/benchmarks check
-BENCH_SAMPLES=1 BENCH_OUTPUT="target/benchmarks/application-preflight.json" node benchmarks/javascript/src/run-application.mjs
+BENCH_SAMPLES=2 BENCH_TIME_SECONDS=0.05 BENCH_WARMUP_SECONDS=0.01 mise run -C "$MISE_CONFIG_ROOT" application
 node benchmarks/scripts/prepare-cli-cache.mjs repeat-use
 '''
 
@@ -234,12 +248,55 @@ BENCH_OUTPUT="$BENCH_RUN_DIR/js-first-render.json" pnpm --filter @lumis-sh/bench
 node --expose-gc benchmarks/javascript/src/warm-render.mjs > "$BENCH_RUN_DIR/js-warm.json"
 '''
 
+[tasks."application:javascript"]
+description = "Run Mitata application benchmarks for Lumis JS and Shiki"
+depends = ["build:javascript", "fixtures"]
+run = '''
+raw="$BENCH_RUN_DIR/application"
+mkdir -p "$raw"
+BENCH_APPLICATION_IMPLEMENTATION=lumis-js-native LUMIS_DISABLE_NATIVE=0 LUMIS_REQUIRE_NATIVE=1 BENCH_OUTPUT="$raw/lumis-js-native.json" pnpm --filter @lumis-sh/benchmarks application
+BENCH_APPLICATION_IMPLEMENTATION=lumis-js-wasm LUMIS_DISABLE_NATIVE=1 LUMIS_REQUIRE_NATIVE=0 BENCH_OUTPUT="$raw/lumis-js-wasm.json" pnpm --filter @lumis-sh/benchmarks application
+BENCH_APPLICATION_IMPLEMENTATION=shiki BENCH_OUTPUT="$raw/shiki.json" pnpm --filter @lumis-sh/benchmarks application
+'''
+
+[tasks."application:rust"]
+description = "Run Criterion application benchmarks for Lumis Rust and syntect"
+depends = ["build:rust", "fixtures"]
+run = '''
+raw="$BENCH_RUN_DIR/application"
+mkdir -p "$raw"
+rm -rf "$CARGO_TARGET_DIR/criterion/application" "$raw/criterion"
+BENCH_METADATA_DIR="$raw" cargo bench --manifest-path benchmarks/rust/Cargo.toml --bench application -- --noplot
+mkdir -p "$raw/criterion"
+cp -R "$CARGO_TARGET_DIR/criterion/application" "$raw/criterion/application"
+'''
+
+[tasks."application:elixir"]
+description = "Run the Benchee application benchmark for Lumis Elixir"
+depends = ["build:elixir", "fixtures"]
+run = '''
+raw="$BENCH_RUN_DIR/application"
+mkdir -p "$raw"
+cd benchmarks/elixir
+MIX_ENV=prod BENCH_APPLICATION_FIXTURE="$MISE_CONFIG_ROOT/fixtures/application.json" BENCH_OUTPUT="$raw/benchee.json" BENCH_METADATA_OUTPUT="$raw/lumis-elixir-metadata.json" mix run --no-compile application.exs
+'''
+
+[tasks."application:merge"]
+description = "Merge native application benchmark reports"
+run = '''
+BENCH_APPLICATION_RAW_DIR="$BENCH_RUN_DIR/application" BENCH_OUTPUT="$BENCH_RUN_DIR/application.json" node benchmarks/javascript/src/merge-application.mjs
+'''
+
 [tasks.application]
-description = "Run the cross-runtime two-language application workload"
+description = "Coordinate native runtime tools for the two-language application workload"
 depends = ["build:javascript", "build:rust", "build:elixir", "fixtures"]
 run = '''
+rm -rf "$BENCH_RUN_DIR/application"
 mkdir -p "$BENCH_RUN_DIR"
-BENCH_OUTPUT="$BENCH_RUN_DIR/application.json" node benchmarks/javascript/src/run-application.mjs
+mise run --skip-deps -C "$MISE_CONFIG_ROOT" application:javascript
+mise run --skip-deps -C "$MISE_CONFIG_ROOT" application:rust
+mise run --skip-deps -C "$MISE_CONFIG_ROOT" application:elixir
+mise run --skip-deps -C "$MISE_CONFIG_ROOT" application:merge
 '''
 
 [tasks.cli]
@@ -286,7 +343,7 @@ rm -rf "$BENCH_RUN_DIR"
 mise run -C "$MISE_CONFIG_ROOT" setup
 BENCH_FIXTURE=small BENCH_RUNS=3 BENCH_WARMUP=1 mise run -C "$MISE_CONFIG_ROOT" rust quick
 BENCH_FIXTURE=small BENCH_SAMPLES=1 BENCH_JS_SAMPLES=2 mise run -C "$MISE_CONFIG_ROOT" javascript
-BENCH_SAMPLES=1 mise run -C "$MISE_CONFIG_ROOT" application
+BENCH_SAMPLES=2 BENCH_TIME_SECONDS=0.05 BENCH_WARMUP_SECONDS=0.01 mise run -C "$MISE_CONFIG_ROOT" application
 BENCH_FIXTURE=small BENCH_RUNS=3 BENCH_WARMUP=1 mise run -C "$MISE_CONFIG_ROOT" cli repeat-use
 mise run -C "$MISE_CONFIG_ROOT" finalize
 '''
@@ -298,7 +355,7 @@ rm -rf "$BENCH_RUN_DIR"
 mise run -C "$MISE_CONFIG_ROOT" setup
 BENCH_RUNS=5 BENCH_WARMUP=1 mise run -C "$MISE_CONFIG_ROOT" rust quick
 BENCH_SAMPLES=3 BENCH_JS_SAMPLES=3 mise run -C "$MISE_CONFIG_ROOT" javascript
-BENCH_SAMPLES=3 mise run -C "$MISE_CONFIG_ROOT" application
+BENCH_SAMPLES=3 BENCH_TIME_SECONDS=0.5 BENCH_WARMUP_SECONDS=0.2 mise run -C "$MISE_CONFIG_ROOT" application
 BENCH_RUNS=5 BENCH_WARMUP=1 mise run -C "$MISE_CONFIG_ROOT" cli repeat-use
 mise run -C "$MISE_CONFIG_ROOT" memory
 mise run -C "$MISE_CONFIG_ROOT" finalize
@@ -336,8 +393,6 @@ mkdir -p "$stage/artifacts"
 cp -R "$BENCH_RUN_DIR" "$stage/run"
 cp "$CARGO_TARGET_DIR/release/lumis-first-render" "$stage/artifacts/"
 cp "$CARGO_TARGET_DIR/release/syntect-first-render" "$stage/artifacts/"
-cp "$CARGO_TARGET_DIR/release/lumis-application" "$stage/artifacts/"
-cp "$CARGO_TARGET_DIR/release/syntect-application" "$stage/artifacts/"
 cp target/release/lumis "$stage/artifacts/lumis-native"
 cp -R target/benchmarks/npm-cli "$stage/artifacts/npm-cli"
 cp -R packages/javascript/lumis/dist "$stage/artifacts/lumis-js-dist"

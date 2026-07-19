@@ -58,7 +58,9 @@ Useful environment controls:
 | `BENCH_FIXTURE` | `small`, `large`, or `all` | `all` |
 | `BENCH_RUNS` | Hyperfine run/minimum-run count | scenario-specific |
 | `BENCH_WARMUP` | Hyperfine warmup count | scenario-specific |
-| `BENCH_SAMPLES` | JavaScript fresh-process samples | `10` |
+| `BENCH_SAMPLES` | Sample count for JavaScript application and Criterion runs | runner-specific |
+| `BENCH_TIME_SECONDS` | Criterion/Benchee measurement duration per case | `2` |
+| `BENCH_WARMUP_SECONDS` | Criterion/Benchee warmup duration per case | `1` |
 | `BENCH_JS_SAMPLES` | Mitata samples per warm case | `5` |
 | `BENCH_RUN_DIR` | Result directory | `target/benchmarks/runs/current` |
 
@@ -83,9 +85,12 @@ These are parse, highlight, and HTML serialization measurements—not parser-onl
 
 ### Cross-runtime application workload
 
-A fresh process initializes JavaScript and JSON, then highlights three realistic small snippets in each language. The same versioned fixture bytes are consumed by Lumis Rust, Lumis JavaScript/native, Lumis JavaScript/Wasm, Lumis Elixir/NIF, Shiki, and syntect. This models a common website or application render more closely than either a single-snippet cold start or repeated rendering of one large file.
+Each benchmark initializes JavaScript and JSON, then highlights three realistic small snippets in each language. The same versioned fixture bytes are consumed by Lumis Rust, Lumis JavaScript/native, Lumis JavaScript/Wasm, Lumis Elixir/NIF, Shiki, and syntect. This models a common website or application render more closely than either a single-snippet cold start or repeated rendering of one large file.
 
-The report separates fixture loading, runtime import where applicable, initialization, six-snippet rendering, workload time inside the host runtime, complete process time, output size, and peak resident memory where the adapter exposes it. Implementations use the same `github-dark` theme intent where available and inline HTML output. Workload time is the headline application measurement; complete process time remains visible as a cold-launch diagnostic so Mix, Node, and native executable startup are not confused with library work.
+Each host runtime owns its measurements: Criterion runs Lumis Rust and syntect, Mitata runs the three JavaScript implementations, and Benchee runs Lumis Elixir. Every harness records initialization, six-snippet rendering, and the combined workload. `mise` invokes those harnesses serially, preserves their native JSON reports, and then merges comparable medians and workload metadata into `application.json`.
+
+The common report is an index, not a replacement statistical model. Sample collection, warmup, outlier behavior, and confidence calculations remain those of Criterion, Mitata, or Benchee. Implementations use the same `github-dark` theme intent where available and inline HTML output.
+Initialization, rendering, and total workload are independent benchmark cases, so their medians are not expected to add up exactly. The combined workload is the primary app-like comparison.
 
 ### CLI repeat use
 
@@ -132,6 +137,15 @@ criterion/
 js-warm.json
 js-first-render.json
 application.json
+application/
+  benchee.json
+  criterion/application/**/new/*.json
+  lumis-elixir-metadata.json
+  lumis-js-native.json
+  lumis-js-wasm.json
+  lumis-rust-metadata.json
+  shiki.json
+  syntect-metadata.json
 rust-first-render-*.json
 cli-repeat-use-*.json
 cli-first-use-*.json
@@ -140,7 +154,7 @@ summary.json
 summary.md
 ```
 
-Native runner reports are preserved. `summary.json` and `summary.md` are indexes; they do not pretend Criterion, Mitata, and Hyperfine use identical statistics.
+Native runner reports are preserved. `summary.json` and `summary.md` are indexes; they do not pretend Criterion, Mitata, Benchee, and Hyperfine use identical statistics.
 
 Compare only runs with compatible fixture hashes, dependency versions, runtime versions, output modes, operating systems, and cache scenarios. Different highlighters use different grammars, token boundaries, theme rules, and output sizes, so results are semantically comparable rather than byte-equivalent.
 

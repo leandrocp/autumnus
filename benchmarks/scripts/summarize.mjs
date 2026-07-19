@@ -98,30 +98,50 @@ for (const path of reportFiles) {
     }));
   } else if (path.endsWith("application.json")) {
     const report = await readJson(path);
-    const groups = new Map();
-    for (const result of report.results) {
-      const group = groups.get(result.implementation) ?? [];
-      group.push(result);
-      groups.set(result.implementation, group);
-    }
-    for (const [implementation, results] of groups) {
-      summary.application.push({
-        implementation,
-        samples: results.length,
-        languages: results[0].languages,
-        snippetCount: results[0].snippetCount,
-        inputBytes: results[0].inputBytes,
-        outputBytes: results[0].outputBytes,
-        externalMedianNs: median(results.map((result) => result.externalTotalNs)),
-        internalTotalMedianNs: median(results.map((result) => result.internalTotalNs)),
-        fixtureMedianNs: median(results.map((result) => result.fixtureNs)),
-        importMedianNs: median(results.map((result) => result.importNs)),
-        initMedianNs: median(results.map((result) => result.initNs)),
-        renderMedianNs: median(results.map((result) => result.renderNs)),
-        maxRssMedianBytes: median(
-          results.map((result) => result.maxRssBytes).filter(Number.isFinite),
-        ),
-      });
+    if (report.schemaVersion === 2) {
+      summary.application = report.results.map((result) => ({
+        implementation: result.implementation,
+        runner: result.runner,
+        samples: result.total.samples,
+        languages: result.languages,
+        snippetCount: result.snippetCount,
+        inputBytes: result.inputBytes,
+        outputBytes: result.outputBytes,
+        externalMedianNs: null,
+        internalTotalMedianNs: result.total.medianNs,
+        fixtureMedianNs: null,
+        importMedianNs: null,
+        initMedianNs: result.init.medianNs,
+        renderMedianNs: result.render.medianNs,
+        maxRssMedianBytes: null,
+      }));
+    } else {
+      const groups = new Map();
+      for (const result of report.results) {
+        const group = groups.get(result.implementation) ?? [];
+        group.push(result);
+        groups.set(result.implementation, group);
+      }
+      for (const [implementation, results] of groups) {
+        summary.application.push({
+          implementation,
+          runner: report.runner,
+          samples: results.length,
+          languages: results[0].languages,
+          snippetCount: results[0].snippetCount,
+          inputBytes: results[0].inputBytes,
+          outputBytes: results[0].outputBytes,
+          externalMedianNs: median(results.map((result) => result.externalTotalNs)),
+          internalTotalMedianNs: median(results.map((result) => result.internalTotalNs)),
+          fixtureMedianNs: median(results.map((result) => result.fixtureNs)),
+          importMedianNs: median(results.map((result) => result.importNs)),
+          initMedianNs: median(results.map((result) => result.initNs)),
+          renderMedianNs: median(results.map((result) => result.renderNs)),
+          maxRssMedianBytes: median(
+            results.map((result) => result.maxRssBytes).filter(Number.isFinite),
+          ),
+        });
+      }
     }
   } else if (/cli-(first-use|repeat-use)-(small|large)\.json$/.test(path)) {
     const report = await readJson(path);
@@ -206,15 +226,15 @@ const markdown = [
   "",
   "## Cross-runtime application workload",
   "",
-  "Two languages (JavaScript and JSON), three snippets per language, in a fresh process.",
+  "Two languages (JavaScript and JSON), three snippets per language. Each runtime uses its native benchmark tool.",
   "",
-  "| Implementation | Workload total (ms) | Process total (ms) | Init/load (ms) | Render 6 (ms) | Peak RSS (MiB) |",
-  "| --- | ---: | ---: | ---: | ---: | ---: |",
+  "| Implementation | Runner | Workload total (ms) | Init/load (ms) | Render 6 (ms) | Samples |",
+  "| --- | --- | ---: | ---: | ---: | ---: |",
   ...summary.application
     .toSorted((left, right) => left.internalTotalMedianNs - right.internalTotalMedianNs)
     .map(
       (row) =>
-        `| ${row.implementation} | ${(row.internalTotalMedianNs / 1e6).toFixed(3)} | ${(row.externalMedianNs / 1e6).toFixed(3)} | ${(row.initMedianNs / 1e6).toFixed(3)} | ${(row.renderMedianNs / 1e6).toFixed(3)} | ${row.maxRssMedianBytes === null ? "—" : (row.maxRssMedianBytes / 1024 / 1024).toFixed(1)} |`,
+        `| ${row.implementation} | ${row.runner} | ${(row.internalTotalMedianNs / 1e6).toFixed(3)} | ${(row.initMedianNs / 1e6).toFixed(3)} | ${(row.renderMedianNs / 1e6).toFixed(3)} | ${row.samples} |`,
     ),
   "",
   "## CLI",

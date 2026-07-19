@@ -65,6 +65,20 @@ checksum = "sha256:d3227232221e68aa8790666e915604269d5471b61792a5d78a043ac653351
 url = "https://github.com/erlang/otp/releases/download/OTP-28.5/otp_win64_28.5.zip"
 url_api = "https://api.github.com/repos/erlang/otp/releases/assets/403511532"
 
+[[tools.erlang]]
+version = "28.5"
+backend = "core:erlang"
+
+[tools.erlang.options]
+precompiled = "if_available"
+precompiled_os = "ubuntu-24.04"
+
+[tools.erlang."platforms.linux-arm64"]
+url = "https://builds.hex.pm/builds/otp/arm64/ubuntu-24.04/OTP-28.5.tar.gz"
+
+[tools.erlang."platforms.linux-x64"]
+url = "https://builds.hex.pm/builds/otp/amd64/ubuntu-24.04/OTP-28.5.tar.gz"
+
 [[tools.hyperfine]]
 version = "1.20.0"
 backend = "aqua:sharkdp/hyperfine"

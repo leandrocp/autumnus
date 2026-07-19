@@ -19,6 +19,10 @@ criterion = { version = "0.7", features = ["html_reports"] }
 name = "render"
 harness = false
 
+[[bench]]
+name = "application"
+harness = false
+
 [[bin]]
 name = "lumis-first-render"
 path = "src/bin/lumis-first-render.rs"
@@ -26,14 +30,6 @@ path = "src/bin/lumis-first-render.rs"
 [[bin]]
 name = "syntect-first-render"
 path = "src/bin/syntect-first-render.rs"
-
-[[bin]]
-name = "lumis-application"
-path = "src/bin/lumis-application.rs"
-
-[[bin]]
-name = "syntect-application"
-path = "src/bin/syntect-application.rs"
 
 [profile.release]
 lto = true

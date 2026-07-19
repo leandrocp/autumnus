@@ -6,7 +6,7 @@
   "scripts": {
     "check": "node src/check.mjs",
     "first-render": "node src/run-first-render.mjs",
-    "application": "node src/run-application.mjs",
+    "application": "node --expose-gc src/application-benchmark.mjs",
     "warm-render": "node --expose-gc src/warm-render.mjs",
     "fmt": "cd ../.. && oxfmt benchmarks/javascript/src/ benchmarks/scripts/ benchmarks/cli/",
     "fmt:check": "cd ../.. && oxfmt --check benchmarks/javascript/src/ benchmarks/scripts/ benchmarks/cli/",
