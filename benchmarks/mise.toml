@@ -67,7 +67,7 @@ outputs = ["packages/javascript/themes/dist/index.js"]
 description = "Build the local JavaScript package under benchmark"
 depends = ["install", "build:themes", "fixtures"]
 run = '''
-pnpm --filter @lumis-sh/lumis build:native
+CARGO_TARGET_DIR=target pnpm --filter @lumis-sh/lumis build:native
 pnpm --filter @lumis-sh/lumis build
 '''
 sources = [
