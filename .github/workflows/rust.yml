@@ -55,6 +55,15 @@ jobs:
     with:
       msrv: '1.91'
       manifest-path: 'crates/lumis-cli/Cargo.toml'
+  test-lumis-wasm-runtime:
+    if: >-
+      ${{ github.event_name == 'workflow_dispatch' ||
+          (github.event_name == 'pull_request' && github.head_ref != 'knope/release') ||
+          (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore: prepare releases')) }}
+    uses: leandrocp/github-actions/.github/workflows/rust-test.yml@main
+    with:
+      msrv: '1.91'
+      manifest-path: 'crates/lumis-wasm-runtime/Cargo.toml'
   lint:
     if: >-
       ${{ github.event_name == 'workflow_dispatch' ||

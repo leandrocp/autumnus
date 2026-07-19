@@ -1,6 +1,6 @@
 // Vendored from tree-sitter `crates/highlight/src/highlight.rs`.
 //
-// Keep this module internal to `lumis-cli`. The only change Lumis fundamentally needs is
+// Shared by Lumis runtimes. The only change Lumis fundamentally needs is
 // language-aware highlight events so injected-language layers keep the grammar that
 // produced each scope in the event stream itself.
 //

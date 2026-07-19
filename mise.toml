@@ -271,6 +271,13 @@ set -euo pipefail
 mise run -C benchmarks javascript
 '''
 
+[tasks.'bench-application']
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+mise run -C benchmarks application
+'''
+
 [tasks.'bench-cli']
 usage = '''
 arg "[scenario]" default="repeat-use"
@@ -677,7 +684,7 @@ packages=(
     "cargo-lumis|crates/lumis"
     "cargo-lumis-cli|crates/lumis-cli"
     "npm-themes|packages/javascript/themes"
-    "npm-lumis|packages/javascript/lumis"
+    "npm-lumis|packages/javascript/lumis|crates/lumis-wasm-runtime"
     "npm-markdown-it-lumis|packages/javascript/markdown-it-lumis"
     "npm-rehype-lumis|packages/javascript/rehype-lumis"
     "npm-react|packages/javascript/react"
@@ -845,6 +852,8 @@ tag="$package/v$version"
 include_args=(--include-path "$include_path")
 if [ "$package" = "npm-cli" ]; then
     include_args+=(--include-path "crates/lumis-cli/**/*")
+elif [ "$package" = "npm-lumis" ]; then
+    include_args+=(--include-path "crates/lumis-wasm-runtime/**/*")
 fi
 
 case "$kind" in
@@ -858,6 +867,13 @@ case "$kind" in
         python3 -c 'from pathlib import Path; import re, sys; path = Path(sys.argv[1]); version = sys.argv[2]; content = path.read_text(); content = re.sub(r"@version \"[^\"]+\"", f"@version \"{version}\"", content, count=1); path.write_text(content)' "$manifest" "$version"
         ;;
 esac
+
+if [ "$package" = "npm-lumis" ]; then
+    cargo set-version --manifest-path packages/javascript/lumis/native/Cargo.toml -p lumis-js-native "$version"
+    for native_manifest in packages/javascript/lumis/native/npm/*/package.json; do
+        npm --prefix "$(dirname "$native_manifest")" version --no-git-tag-version "$version"
+    done
+fi
 
 git-cliff --config cliff.toml --github-repo leandrocp/lumis --tag-pattern "$package/v[0-9].*" --tag "$tag" --prepend "$changelog" --strip header --unreleased "${include_args[@]}"
 printf 'Prepared %s %s\n' "$package" "$version"

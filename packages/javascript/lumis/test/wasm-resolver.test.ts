@@ -32,6 +32,7 @@ describe('Wasm resolver', () => {
 
     const hl = await createHighlighter({
       languages: [{ ...diff, wasm: ensureLocalWasm('diff') }],
+      wasmResolver: (language, wasm) => ensureLocalParserWasm(language, wasm.name),
     })
 
     const html = hl.highlight('- old\n+ new', htmlLinked({ language: diff }))
@@ -44,7 +45,10 @@ describe('Wasm resolver', () => {
     const { default: diff } = await import('../langs/diff.ts')
 
     const language = withWasm(diff, ensureLocalWasm('diff'))
-    const hl = await createHighlighter({ languages: [language] })
+    const hl = await createHighlighter({
+      languages: [language],
+      wasmResolver: (language, wasm) => ensureLocalParserWasm(language, wasm.name),
+    })
 
     const html = hl.highlight('- old\n+ new', htmlLinked({ language }))
     expect(html).toContain('class="language-diff"')
@@ -115,6 +119,7 @@ describe('Wasm resolver', () => {
     const { createHighlighter, configureWasmResolver } = await import('../src/index.js')
     const { default: html } = await import('../langs/html.ts')
 
+    configureWasmResolver((language, wasm) => ensureLocalParserWasm(language, wasm.name))
     const hl = await createHighlighter()
 
     const calls: string[] = []

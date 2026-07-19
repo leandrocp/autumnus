@@ -1,5 +1,6 @@
 import type { TerminalFormatter, TerminalOptions } from "./types.js";
 import { highlightEvents } from "./core/highlighter.js";
+import { markBuiltinFormatter } from "./core/builtin-formatter.js";
 import { formatTerminal } from "./formatter/terminal.js";
 
 export function terminal(options: TerminalOptions = {}): TerminalFormatter {
@@ -13,7 +14,7 @@ export function terminal(options: TerminalOptions = {}): TerminalFormatter {
       );
     },
   };
-  return formatter;
+  return markBuiltinFormatter(formatter, "terminal");
 }
 
 export type { TerminalFormatter, TerminalOptions } from "./types.js";

@@ -39,6 +39,32 @@ checksum = "sha256:0f729b4b6f5f28d395c641eacc2e9ff68d0096b85aa0eec344aa62425144b
 url = "https://github.com/sharkdp/bat/releases/download/v0.26.1/bat-v0.26.1-x86_64-pc-windows-msvc.zip"
 url_api = "https://api.github.com/repos/sharkdp/bat/releases/assets/323549116"
 
+[[tools.elixir]]
+version = "1.19.5-otp-28"
+backend = "asdf:elixir"
+
+[[tools.erlang]]
+version = "28.5"
+backend = "core:erlang"
+
+[tools.erlang.options]
+precompiled = "if_available"
+
+[tools.erlang."platforms.macos-arm64"]
+checksum = "sha256:f365335cf6c705b52557f4d3a4c4058e2e689a0e58d822160688d0cc8a736b92"
+url = "https://github.com/erlef/otp_builds/releases/download/OTP-28.5/otp-aarch64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/erlef/otp_builds/releases/assets/403427927"
+
+[tools.erlang."platforms.macos-x64"]
+checksum = "sha256:ded695f1d49c9e251b2afa0205dfdcb8ee16b4432aa1d5ffb38c6ee155bf7f6f"
+url = "https://github.com/erlef/otp_builds/releases/download/OTP-28.5/otp-x86_64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/erlef/otp_builds/releases/assets/403435001"
+
+[tools.erlang."platforms.windows-x64"]
+checksum = "sha256:d3227232221e68aa8790666e915604269d5471b61792a5d78a043ac653351140"
+url = "https://github.com/erlang/otp/releases/download/OTP-28.5/otp_win64_28.5.zip"
+url_api = "https://api.github.com/repos/erlang/otp/releases/assets/403511532"
+
 [[tools.hyperfine]]
 version = "1.20.0"
 backend = "aqua:sharkdp/hyperfine"

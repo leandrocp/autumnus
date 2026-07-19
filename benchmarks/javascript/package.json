@@ -6,6 +6,7 @@
   "scripts": {
     "check": "node src/check.mjs",
     "first-render": "node src/run-first-render.mjs",
+    "application": "node src/run-application.mjs",
     "warm-render": "node --expose-gc src/warm-render.mjs",
     "fmt": "cd ../.. && oxfmt benchmarks/javascript/src/ benchmarks/scripts/ benchmarks/cli/",
     "fmt:check": "cd ../.. && oxfmt --check benchmarks/javascript/src/ benchmarks/scripts/ benchmarks/cli/",
@@ -14,6 +15,9 @@
   "dependencies": {
     "@lumis-sh/lumis": "workspace:*",
     "@lumis-sh/themes": "workspace:*",
+    "@lumis-sh/wasm-diff": "0.26.1",
+    "@lumis-sh/wasm-javascript": "0.26.1",
+    "@lumis-sh/wasm-json": "0.26.2",
     "@lumis-sh/wasm-rust": "0.26.3",
     "mitata": "1.0.34",
     "shiki": "4.3.1"

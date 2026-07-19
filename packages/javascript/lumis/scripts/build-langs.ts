@@ -16,6 +16,7 @@ import { parse as parseToml } from "smol-toml";
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../../../..");
 const QUERIES_PROCESSED_DIR = path.join(WORKSPACE_ROOT, "queries", "processed");
 const OUT_DIR = path.resolve(import.meta.dirname, "../langs");
+const NATIVE_QUERIES_DIR = path.resolve(import.meta.dirname, "../native-queries");
 const LANGUAGES_TOML = path.join(WORKSPACE_ROOT, "languages.toml");
 const PACKAGE_JSON = path.resolve(import.meta.dirname, "../package.json");
 
@@ -192,19 +193,103 @@ function convertLuaMatches(content: string): string {
   });
 }
 
-function resolveQuery(language: string, queryType: string): string {
+function convertLuaPatternToRustRegex(lua: string): string {
+  let result = "";
+  const chars = [...lua];
+
+  for (let index = 0; index < chars.length; index += 1) {
+    const char = chars[index]!;
+    if (char === "%") {
+      const next = chars[index + 1];
+      if (next === undefined) {
+        result += "%";
+        continue;
+      }
+      const classes: Record<string, string> = {
+        d: "\\d",
+        s: "\\s",
+        l: "[a-z]",
+        u: "[A-Z]",
+        A: "[^a-zA-Z]",
+        S: "\\S",
+        ".": "\\.",
+        "%": "%",
+        "{": "\\{",
+        "}": "\\}",
+        $: "\\$",
+        "^": "\\^",
+      };
+      result += classes[next] ?? `\\${next}`;
+      index += 1;
+      if (next === "$" && chars[index + 1] === "{") result += "\\";
+      continue;
+    }
+    if (char === "\\") {
+      result += "\\\\";
+      if (chars[index + 1] !== undefined) {
+        result += chars[index + 1];
+        index += 1;
+      }
+      continue;
+    }
+    if (char === "$") {
+      result += "\\$";
+      if (chars[index + 1] === "{") result += "\\";
+      continue;
+    }
+    if (".*+?()[]{}|".includes(char) || (char === "^" && result.length > 0)) {
+      result += `\\${char}`;
+      continue;
+    }
+    result += char;
+  }
+  return result;
+}
+
+function convertLuaMatchesForRust(content: string): string {
+  const hadTrailingNewline = content.endsWith("\n");
+  const converted = content
+    .split("\n")
+    .map((line) => {
+      let updated = line
+        .replace(/#lua-match\?/g, "#match?")
+        .replace(/#not-lua-match\?/g, "#not-match?");
+      if (!updated.includes("#match?") && !updated.includes("#not-match?")) return updated;
+      const firstQuote = updated.indexOf('"');
+      const secondQuote = firstQuote === -1 ? -1 : updated.indexOf('"', firstQuote + 1);
+      if (firstQuote === -1 || secondQuote === -1) return updated;
+      const pattern = updated.slice(firstQuote + 1, secondQuote);
+      updated =
+        updated.slice(0, firstQuote + 1) +
+        convertLuaPatternToRustRegex(pattern) +
+        updated.slice(secondQuote);
+      return updated;
+    })
+    .join("\n");
+  return hadTrailingNewline || !converted.endsWith("\n") ? converted : converted.slice(0, -1);
+}
+
+function resolveQuerySource(language: string, queryType: string): string {
   const filePath = path.join(QUERIES_PROCESSED_DIR, language, `${queryType}.scm`);
   if (!fs.existsSync(filePath)) {
     if (queryType === "brackets") {
       const defaultPath = path.join(QUERIES_PROCESSED_DIR, "default", "brackets.scm");
       if (fs.existsSync(defaultPath)) {
-        return convertLuaMatches(fs.readFileSync(defaultPath, "utf-8"));
+        return fs.readFileSync(defaultPath, "utf-8");
       }
     }
     return "";
   }
-  const content = fs.readFileSync(filePath, "utf-8");
-  return convertLuaMatches(content);
+  return fs.readFileSync(filePath, "utf-8");
+}
+
+function queryHash(queries: string[]): number {
+  let hash = 0x811c9dc5;
+  for (const byte of Buffer.from(queries.join("\0"))) {
+    hash ^= byte;
+    hash = Math.imul(hash, 0x01000193) >>> 0;
+  }
+  return hash;
 }
 
 function escapeTemplateString(s: string): string {
@@ -213,6 +298,7 @@ function escapeTemplateString(s: string): string {
 
 function main() {
   fs.mkdirSync(OUT_DIR, { recursive: true });
+  fs.mkdirSync(NATIVE_QUERIES_DIR, { recursive: true });
 
   const config = readLanguagesToml();
   const tsCli = treeSitterWasmCli();
@@ -231,10 +317,14 @@ function main() {
     const wasmName = entry.wasm_name || `tree-sitter-${id}`;
     const aliases = entry.aliases || [];
 
-    const highlights = resolveQuery(queryName, "highlights");
-    const injections = resolveQuery(queryName, "injections");
-    const locals = resolveQuery(queryName, "locals");
-    const brackets = resolveQuery(queryName, "brackets");
+    const highlightSource = resolveQuerySource(queryName, "highlights");
+    const injectionSource = resolveQuerySource(queryName, "injections");
+    const localsSource = resolveQuerySource(queryName, "locals");
+    const bracketsSource = resolveQuerySource(queryName, "brackets");
+    const highlights = convertLuaMatches(highlightSource);
+    const injections = convertLuaMatches(injectionSource);
+    const locals = convertLuaMatches(localsSource);
+    const brackets = convertLuaMatches(bracketsSource);
 
     const injectionsStr = injections.trim();
     const localsStr = locals.trim();
@@ -254,6 +344,17 @@ export default language
 `;
 
     fs.writeFileSync(path.join(OUT_DIR, `${id}.ts`), module);
+    const nativeModule = `// Auto-generated by scripts/build-langs.ts — do not edit manually.
+export default {
+  hash: ${queryHash([highlights, injectionsStr ? injections : "", localsStr, bracketsStr])},
+  grammarName: ${JSON.stringify(wasmName.replace(/^tree-sitter-/, "").replaceAll("-", "_"))},
+  highlights: \`${escapeTemplateString(convertLuaMatchesForRust(highlightSource))}\`,
+  injections: \`${escapeTemplateString(convertLuaMatchesForRust(injectionSource))}\`,
+  locals: \`${escapeTemplateString(convertLuaMatchesForRust(localsSource))}\`,
+  brackets: \`${escapeTemplateString(convertLuaMatchesForRust(bracketsSource))}\`,
+}
+`;
+    fs.writeFileSync(path.join(NATIVE_QUERIES_DIR, `${id}.ts`), nativeModule);
     console.log(`  ${id}: langs/${id}.ts`);
   }
 
@@ -275,6 +376,12 @@ const language: Language = {
 export default language
 `;
   fs.writeFileSync(path.join(OUT_DIR, "plaintext.ts"), plaintextModule);
+  fs.writeFileSync(
+    path.join(NATIVE_QUERIES_DIR, "plaintext.ts"),
+    `// Auto-generated by scripts/build-langs.ts — do not edit manually.
+export default { hash: ${queryHash(["", "", "", ""])}, grammarName: "diff", highlights: "", injections: "", locals: "", brackets: "" }
+`,
+  );
   console.log(`  plaintext: langs/plaintext.ts`);
 
   // Generate language metadata
@@ -372,6 +479,29 @@ ${languageLoaderEntries}
 `;
   fs.writeFileSync(path.join(GENERATED_DIR, "language-loaders.ts"), languageLoadersModule);
   console.log(`  language loaders: src/generated/language-loaders.ts`);
+
+  const nativeQueryLoaderEntries = [...Object.keys(config.parsers), "plaintext"]
+    .map((id) => `  ${JSON.stringify(id)}: () => import('../../native-queries/${id}.js'),`)
+    .join("\n");
+  const nativeQueryLoadersModule = `// Auto-generated by scripts/build-langs.ts — do not edit manually.
+export interface NativeQueries {
+  hash: number
+  grammarName: string
+  highlights: string
+  injections: string
+  locals: string
+  brackets: string
+}
+
+export const NATIVE_QUERY_LOADERS: Record<string, () => Promise<{ default: NativeQueries }>> = {
+${nativeQueryLoaderEntries}
+}
+`;
+  fs.writeFileSync(
+    path.join(GENERATED_DIR, "native-query-loaders.ts"),
+    nativeQueryLoadersModule,
+  );
+  console.log(`  native query loaders: src/generated/native-query-loaders.ts`);
 
   // Generate theme metadata
   const THEMES_SRC = path.join(WORKSPACE_ROOT, "themes");

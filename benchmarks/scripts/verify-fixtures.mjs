@@ -52,15 +52,17 @@ for (const fixture of manifest.fixtures) {
     throw new Error(`${fixture.id} has too few lines: ${lines} < ${fixture.minLines}`);
   }
 
-  run("rustc", [
-    "--edition=2021",
-    "--crate-type=lib",
-    "--emit=metadata",
-    "-Awarnings",
-    path,
-    "-o",
-    resolve(rustcOutputDir, `${fixture.id}.rmeta`),
-  ]);
+  if (fixture.language === "rust") {
+    run("rustc", [
+      "--edition=2021",
+      "--crate-type=lib",
+      "--emit=metadata",
+      "-Awarnings",
+      path,
+      "-o",
+      resolve(rustcOutputDir, `${fixture.id}.rmeta`),
+    ]);
+  }
 
   verified.push({ id: fixture.id, path, sha256, bytes: source.length, lines });
 }

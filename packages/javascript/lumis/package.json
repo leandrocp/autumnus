@@ -78,6 +78,7 @@
     "build:langs": "tsx scripts/build-langs.ts",
     "precache-wasms": "tsx scripts/precache-wasms.ts",
     "build:runtime-wasm": "tsx scripts/build-runtime-wasm.ts",
+    "build:native": "cargo build -p lumis-js-native --release && tsx scripts/copy-native.ts",
     "build:generate": "pnpm run build:runtime-wasm && pnpm run build:langs",
     "build": "pnpm run build:generate && tsup && node scripts/patch-web-tree-sitter-bundle.mjs",
     "test": "vitest run --exclude test/conformance.test.ts",
@@ -92,6 +93,13 @@
   },
   "dependencies": {
     "web-tree-sitter": "0.26.8"
+  },
+  "optionalDependencies": {
+    "@lumis-sh/lumis-native-darwin-arm64": "workspace:*",
+    "@lumis-sh/lumis-native-darwin-x64": "workspace:*",
+    "@lumis-sh/lumis-native-linux-arm64-gnu": "workspace:*",
+    "@lumis-sh/lumis-native-linux-x64-gnu": "workspace:*",
+    "@lumis-sh/lumis-native-win32-x64-msvc": "workspace:*"
   },
   "engines": {
     "node": ">=18"

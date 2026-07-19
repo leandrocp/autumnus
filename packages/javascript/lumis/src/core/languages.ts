@@ -1,4 +1,5 @@
 import type { Language } from "web-tree-sitter";
+import { buildHighlightEvents } from "../events.js";
 import { LANGUAGES } from "../generated/languages-meta.js";
 import { HIGHLIGHT_NAMES } from "../highlights.js";
 import type { RuntimeEnvironment } from "../runtime/runtime.js";
@@ -6,6 +7,8 @@ import type {
   CaptureMetadata,
   CompiledBracketConfig,
   CompiledHighlightConfig,
+  Formatter,
+  HighlightEvent,
   LanguageDefinition,
   LoadedLanguage,
   QueryCaptureOffset,
@@ -82,6 +85,17 @@ export interface RuntimeLike {
   getLoadedLanguageIds(): string[];
   loadLanguage(opts: LoadLanguageOptions): Promise<LoadedLanguage>;
   loadPlaintext(): Promise<LoadedLanguage>;
+  highlightEvents(
+    source: string,
+    language: LoadedLanguage,
+    options?: { rainbowBrackets?: boolean },
+  ): HighlightEvent[];
+  format?(source: string, language: LoadedLanguage, formatter: Formatter): string | undefined;
+  formatAsync?(
+    source: string,
+    language: LoadedLanguage,
+    formatter: Formatter,
+  ): Promise<string | undefined>;
 }
 
 export interface LanguagesModule {
@@ -446,6 +460,14 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
         wasm: await this.resolveWasmRef("diff", PLAINTEXT_WASM),
         highlights: "",
       });
+    }
+
+    highlightEvents(
+      source: string,
+      language: LoadedLanguage,
+      options: { rainbowBrackets?: boolean } = {},
+    ): HighlightEvent[] {
+      return buildHighlightEvents(source, language, this, options) as HighlightEvent[];
     }
   }
 

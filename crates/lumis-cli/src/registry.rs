@@ -1,7 +1,7 @@
-use crate::vendor::tree_sitter_highlight::HighlightConfiguration;
 use anyhow::{bail, Context, Result};
 use lumis_core::highlights::HIGHLIGHT_NAMES;
 use lumis_core::languages::Language;
+use lumis_wasm_runtime::tree_sitter_highlight::HighlightConfiguration;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 use streaming_iterator::StreamingIterator;
@@ -331,7 +331,7 @@ fn fetch_bytes(url: &str) -> Result<Vec<u8>> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::vendor::tree_sitter_highlight::Highlighter;
+    use lumis_wasm_runtime::tree_sitter_highlight::Highlighter;
     use tempfile::tempdir;
     use tree_sitter::Parser;
 

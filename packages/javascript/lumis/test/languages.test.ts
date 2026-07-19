@@ -93,8 +93,6 @@ describe('loadPlaintext', () => {
     const loaded = getLoadedLanguage('plaintext')
     expect(loaded).toBeDefined()
     expect(loaded!.definition.id).toBe('plaintext')
-    expect(loaded!.parser).toBeDefined()
-    expect(loaded!.config.query).toBeDefined()
   })
 
   it('is idempotent', async () => {

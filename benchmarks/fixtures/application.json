@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "scenario": "application-two-languages-six-snippets",
+  "theme": "github-dark",
+  "languages": [
+    {
+      "id": "javascript",
+      "snippets": [
+        "export async function loadProfile(userId) {\n  const response = await fetch(`/api/users/${userId}`);\n  if (!response.ok) throw new Error(\"Could not load profile\");\n  return response.json();\n}",
+        "const visibleItems = items\n  .filter((item) => item.enabled)\n  .sort((left, right) => left.label.localeCompare(right.label));\n\ndocument.querySelector(\"#results\").replaceChildren(\n  ...visibleItems.map(renderItem),\n);",
+        "class Counter {\n  #value = 0;\n\n  increment(step = 1) {\n    this.#value += step;\n    return this.#value;\n  }\n}\n\nexport const counter = new Counter();"
+      ]
+    },
+    {
+      "id": "json",
+      "snippets": [
+        "{\n  \"name\": \"example-app\",\n  \"private\": true,\n  \"scripts\": {\n    \"dev\": \"vite\",\n    \"test\": \"vitest run\"\n  },\n  \"dependencies\": {\n    \"@lumis-sh/lumis\": \"^0.5.2\"\n  }\n}",
+        "{\n  \"data\": [\n    { \"id\": 101, \"name\": \"Ada\", \"active\": true },\n    { \"id\": 102, \"name\": \"Grace\", \"active\": false }\n  ],\n  \"page\": { \"number\": 1, \"total\": 2 }\n}",
+        "{\n  \"theme\": \"system\",\n  \"features\": {\n    \"search\": true,\n    \"analytics\": false,\n    \"experimentalEditor\": true\n  },\n  \"locales\": [\"en\", \"fr\", \"pt-BR\"]\n}"
+      ]
+    }
+  ]
+}

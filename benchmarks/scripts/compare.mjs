@@ -34,6 +34,12 @@ function rows(report) {
   for (const row of report.jsFirst ?? []) {
     values.set(`js-first/${row.id}`, row.externalMedianNs);
   }
+  for (const row of report.application ?? report.jsApplication ?? []) {
+    values.set(
+      `application/${row.implementation}`,
+      row.internalTotalMedianNs ?? row.externalMedianNs,
+    );
+  }
   for (const cliReport of report.cli ?? []) {
     for (const row of cliReport.results) {
       values.set(`cli/${cliReport.path}/${row.command}`, row.medianSeconds * 1e9);

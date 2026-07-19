@@ -27,6 +27,17 @@
         "seed": 20260711,
         "modules": 1200
       }
+    },
+    {
+      "id": "application",
+      "language": "javascript,json",
+      "path": "benchmarks/fixtures/application.json",
+      "encoding": "utf-8",
+      "lineEnding": "lf",
+      "sha256": "95aaee639b9106ad0eb7b770c73d719a04225debf0b4bd1490b9ccae296e3f4a",
+      "minBytes": 1400,
+      "minLines": 20,
+      "generator": null
     }
   ]
 }

@@ -2,8 +2,10 @@ node_modules/
 dist/
 doc/
 langs/
+native-queries/
 themes/
 wasm/
+native/*.node
 !test/fixtures/wasm/
 !test/fixtures/wasm/*.wasm
 queries/

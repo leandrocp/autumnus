@@ -12,6 +12,7 @@ import type {
   TerminalFormatter,
 } from "./types.js";
 import { highlightEvents } from "./core/highlighter.js";
+import { markBuiltinFormatter } from "./core/builtin-formatter.js";
 import { formatBBCode } from "./formatter/bbcode.js";
 import { formatHtmlInline } from "./formatter/html-inline.js";
 import { formatHtmlLinked } from "./formatter/html-linked.js";
@@ -41,7 +42,7 @@ export function htmlInline(options: HtmlInlineOptions = {}): HtmlInlineFormatter
       );
     },
   };
-  return formatter;
+  return markBuiltinFormatter(formatter, "html-inline");
 }
 
 /**
@@ -68,7 +69,7 @@ export function htmlLinked(options: HtmlLinkedOptions = {}): HtmlLinkedFormatter
       );
     },
   };
-  return formatter;
+  return markBuiltinFormatter(formatter, "html-linked");
 }
 
 /**
@@ -100,7 +101,7 @@ export function htmlMultiThemes(options: HtmlMultiThemesOptions): HtmlMultiTheme
       );
     },
   };
-  return formatter;
+  return markBuiltinFormatter(formatter, "html-multi-themes");
 }
 
 /**
@@ -126,7 +127,7 @@ export function bbcodeScoped(options: BBCodeScopedOptions = {}): BBCodeScopedFor
       );
     },
   };
-  return formatter;
+  return markBuiltinFormatter(formatter, "bbcode-scoped");
 }
 
 export type {

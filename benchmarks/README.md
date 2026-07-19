@@ -6,6 +6,7 @@ This directory contains Lumis's permanent cross-runtime performance suite. It co
 
 - the Rust `lumis` crate with `syntect`;
 - `@lumis-sh/lumis` with Shiki on Node;
+- Lumis through its Rust, JavaScript/native, and Elixir/NIF library APIs;
 - the installed `@lumis-sh/cli` command with `bat`;
 - the npm CLI shim with the native Lumis binary as a diagnostic.
 
@@ -39,6 +40,7 @@ mise run -C benchmarks dev              # shortened stable development suite
 mise run -C benchmarks full             # complete suite, including downloads
 mise run -C benchmarks rust full        # Rust warm and first-render cases
 mise run -C benchmarks javascript       # Lumis JS versus Shiki
+mise run -C benchmarks application      # six-way app-like library workload
 mise run -C benchmarks cli repeat-use   # npm/native Lumis versus bat
 mise run -C benchmarks cli:first-use    # cache miss and WASM download
 mise run -C benchmarks memory           # secondary peak-RSS pass
@@ -78,6 +80,12 @@ Language, runtime, syntax, and theme state is initialized before timing. Each sa
 - Mitata measures Lumis JS and Shiki.
 
 These are parse, highlight, and HTML serialization measurements—not parser-only measurements.
+
+### Cross-runtime application workload
+
+A fresh process initializes JavaScript and JSON, then highlights three realistic small snippets in each language. The same versioned fixture bytes are consumed by Lumis Rust, Lumis JavaScript/native, Lumis JavaScript/Wasm, Lumis Elixir/NIF, Shiki, and syntect. This models a common website or application render more closely than either a single-snippet cold start or repeated rendering of one large file.
+
+The report separates fixture loading, runtime import where applicable, initialization, six-snippet rendering, workload time inside the host runtime, complete process time, output size, and peak resident memory where the adapter exposes it. Implementations use the same `github-dark` theme intent where available and inline HTML output. Workload time is the headline application measurement; complete process time remains visible as a cold-launch diagnostic so Mix, Node, and native executable startup are not confused with library work.
 
 ### CLI repeat use
 
@@ -123,6 +131,7 @@ metadata.json
 criterion/
 js-warm.json
 js-first-render.json
+application.json
 rust-first-render-*.json
 cli-repeat-use-*.json
 cli-first-use-*.json

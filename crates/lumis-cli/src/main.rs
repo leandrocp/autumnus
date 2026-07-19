@@ -1,8 +1,6 @@
 mod config;
 mod gen_theme;
 mod registry;
-#[allow(clippy::all, dead_code)]
-mod vendor;
 
 use anyhow::Result;
 use clap::{ArgAction, Parser, Subcommand, ValueEnum};
@@ -1002,10 +1000,10 @@ fn highlight_to_events(
     let config = Box::leak(Box::new(config));
     let mut injected_configs: std::collections::HashMap<
         String,
-        &'static crate::vendor::tree_sitter_highlight::HighlightConfiguration,
+        &'static lumis_wasm_runtime::tree_sitter_highlight::HighlightConfiguration,
     > = std::collections::HashMap::new();
 
-    let mut highlighter = crate::vendor::tree_sitter_highlight::Highlighter::new();
+    let mut highlighter = lumis_wasm_runtime::tree_sitter_highlight::Highlighter::new();
     let wasm_store = reg.new_wasm_store()?;
     highlighter
         .parser()
@@ -1031,10 +1029,10 @@ fn highlight_to_events(
         let event = event.map_err(|e| anyhow::anyhow!("highlight event error: {:?}", e))?;
 
         match event {
-            crate::vendor::tree_sitter_highlight::HighlightEvent::Source { start, end } => {
+            lumis_wasm_runtime::tree_sitter_highlight::HighlightEvent::Source { start, end } => {
                 core_events.push(HighlightEvent::Source { start, end });
             }
-            crate::vendor::tree_sitter_highlight::HighlightEvent::HighlightStart {
+            lumis_wasm_runtime::tree_sitter_highlight::HighlightEvent::HighlightStart {
                 highlight,
                 language,
             } => {
@@ -1043,7 +1041,7 @@ fn highlight_to_events(
                     language,
                 });
             }
-            crate::vendor::tree_sitter_highlight::HighlightEvent::HighlightEnd => {
+            lumis_wasm_runtime::tree_sitter_highlight::HighlightEvent::HighlightEnd => {
                 core_events.push(HighlightEvent::End);
             }
         }

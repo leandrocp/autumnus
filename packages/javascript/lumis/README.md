@@ -4,7 +4,7 @@ Syntax Highlighter powered by Tree-sitter and Neovim themes.
 
 JavaScript/TypeScript package for [Lumis](https://lumis.sh). Works in Node.js, Bun, Deno, and browsers.
 
-Uses `web-tree-sitter` for parsing.
+Node.js automatically uses the native Rust runtime when a prebuilt addon is available. Browsers use `web-tree-sitter`; unsupported server platforms and unloadable addons transparently use the same WebAssembly fallback. The public API is identical in every environment.
 
 Parser `.wasm` files are runtime assets. By default, Lumis fetches versioned parser WASM packages from jsDelivr on demand and caches them locally in Node.
 
@@ -172,9 +172,10 @@ hl.highlight(code, htmlInline({ language: 'json', theme }))
 
 All three are equivalent at highlight time. The runtime resolves the language by its ID.
 
-## Runtime WASM Behavior
+## Runtime behavior
 
-- `@lumis-sh/lumis` ships the JS API and embedded `web-tree-sitter` runtime WASM.
+- `@lumis-sh/lumis` installs the matching native runtime automatically on supported Node.js platforms. No separate import or configuration is required.
+- Browser and edge bundles use the embedded `web-tree-sitter` runtime WASM. Node.js falls back to it automatically when no compatible native addon can be loaded.
 - Language parsers are separate versioned `.wasm` assets loaded at runtime.
 - By default, Lumis resolves parser WASM from `https://cdn.jsdelivr.net/npm/@lumis-sh/wasm-<parser-name-without-tree-sitter-prefix>@<tree-sitter-version>/<parser>.wasm`.
 - The `<tree-sitter-version>` segment is a partial version such as `0.26`, which CDNs resolve to the latest compatible patch release.

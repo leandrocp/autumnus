@@ -84,16 +84,25 @@ const metadata = {
     just: commandVersion("just"),
     hyperfine: commandVersion("hyperfine"),
     bat: commandVersion("bat") ?? commandVersion("batcat"),
+    erlang: commandVersion("erl", [
+      "-noshell",
+      "-eval",
+      'io:format("~s", [erlang:system_info(otp_release)]), halt().',
+    ]),
+    elixir: commandVersion("elixir"),
+    mix: commandVersion("mix"),
   },
   locks: {
     cargo: await sha256(resolve(benchmarksDir, "rust/Cargo.lock")),
     pnpm: await sha256(resolve(repoDir, "pnpm-lock.yaml")),
+    elixir: await sha256(resolve(repoDir, "packages/elixir/lumis/mix.lock")),
     miseConfig: await sha256(resolve(benchmarksDir, "mise.toml")),
     miseLock: await sha256(resolve(benchmarksDir, "mise.lock")),
   },
   fixtures: await Promise.all([
     fileMetadata(resolve(benchmarksDir, "fixtures/rust-small.rs")),
     fileMetadata(resolve(repoDir, "target/benchmarks/fixtures/rust-large.rs")),
+    fileMetadata(resolve(benchmarksDir, "fixtures/application.json")),
   ]),
   cliParserWasm: await fileMetadata(parserPath),
   cliFirstUseDownload: await readJsonIfExists(
