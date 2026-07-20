@@ -93,9 +93,9 @@ The runtime-native tools still run as a separate warm-process diagnostic: Criter
 
 Every measured invocation follows one validated execution contract:
 
-- **Init/load:** initialize the library while requesting JavaScript and JSON through its public API. Libraries with lazy query compilation may defer part of that cost to the first render.
-- **Render 6:** using a prepared runtime, highlight the same three JavaScript and three JSON fixture strings exactly once each.
-- **Total:** perform init/load followed by render 6, for exactly six highlight calls and the same 1,036 input bytes in every implementation.
+- **Workload total:** initialize the library through its public API, request JavaScript and JSON, then highlight the same three JavaScript and three JSON fixture strings exactly once each. This is the comparable ranking metric.
+- **Setup before first highlight:** time spent in the public setup call before any highlight call. This is a phase-placement diagnostic, because libraries may defer parser or query work.
+- **First six highlights:** time spent in the six exact fixture highlights, including any setup deferred until first use. This is also a phase-placement diagnostic, not a cross-library render-speed ranking.
 
 Fixture parsing, module imports, output validation, and report serialization are outside the timed operation. Validation metadata records the requested language count, highlight counts, input bytes, output bytes, language order, and language-loading scope; merging fails if the execution contracts differ. Syntect's public bundled-default API loads its complete default syntax and theme sets before highlighting the six fixtures, so its report explicitly records `bundled-defaults`. That is retained as a library limitation rather than hidden or approximated.
 
@@ -103,7 +103,7 @@ Fresh-process samples have one common statistical unit: one init/load plus exact
 
 Dedicated-tool sample counts are deliberately absent from the primary comparison table because they are not the same statistical unit. Criterion samples are aggregates over multiple iterations, Mitata observations may be time-budgeted single invocations, and Benchee collects as many invocations as fit its measurement duration. Raw reports retain sample counts, iterations, dispersion, and confidence data.
 
-Implementations use the same `github-dark` theme intent where available and inline HTML output. In the primary table, **Workload total** means fresh-process library init/load plus six renders; **Init/load** is the public setup phase; **Render 6** is the six exact fixture highlights; **Language loading** states whether the library loads only the requested languages or a larger built-in set. Phase medians need not add exactly to the total median because each column is summarized independently across samples.
+Implementations use the same `github-dark` theme intent where available and inline HTML output. The primary table ranks only **Workload total**, the end-to-end library operation shared by every implementation. **Runner** identifies the fresh-process internal-clock harness; **Language loading** states whether the library loads only the requested languages or a larger built-in set; **Output bytes** validates that output was produced but is not a performance metric because library HTML formats differ. A separate phase-placement table reports setup and first-six-highlight medians without treating them as comparable rankings. Phase medians need not add exactly to the total median because each column is summarized independently across samples.
 
 ### CLI repeat use
 

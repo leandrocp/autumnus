@@ -230,16 +230,27 @@ const markdown = [
   "## Cross-runtime application workload",
   "",
   "Two languages (JavaScript and JSON), three snippets per language. Each primary sample measures the library operation inside a fresh host process; dedicated-tool warm reports are retained in the raw artifacts.",
-  "Workload total = init/load + six renders; Init/load = public library setup (lazy work may move to render); Render 6 = the six exact fixture highlights; Language loading = requested-only versus a larger built-in set.",
+  "Workload total = the comparable fresh-process library operation: public setup plus the six exact fixture highlights. Runner = the harness and clock boundary. Language loading = requested-only versus a larger built-in set. Output bytes = output validation, not a performance metric, because library HTML formats differ.",
   "",
-  "| Implementation | Runner | Workload total (ms) | Init/load (ms) | Render 6 (ms) | Language loading | Output bytes |",
-  "| --- | --- | ---: | ---: | ---: | --- | ---: |",
+  "| Implementation | Runner | Workload total (ms) | Language loading | Output bytes |",
+  "| --- | --- | ---: | --- | ---: |",
   ...summary.application
     .toSorted((left, right) => left.internalTotalMedianNs - right.internalTotalMedianNs)
     .map(
       (row) =>
-        `| ${row.implementation} | ${row.runner} | ${(row.internalTotalMedianNs / 1e6).toFixed(3)} | ${(row.initMedianNs / 1e6).toFixed(3)} | ${(row.renderMedianNs / 1e6).toFixed(3)} | ${row.loadedLanguageScope} | ${row.outputBytes} |`,
+        `| ${row.implementation} | ${row.runner} | ${(row.internalTotalMedianNs / 1e6).toFixed(3)} | ${row.loadedLanguageScope} | ${row.outputBytes} |`,
     ),
+  "",
+  "### Phase placement diagnostic (not a performance ranking)",
+  "",
+  "Setup before first highlight = the public setup call before highlighting. First six highlights = the six fixture calls, including parser or query initialization deferred by the library until first use. These columns are not directly comparable across implementations because their APIs place lazy work in different phases.",
+  "",
+  "| Implementation | Setup before first highlight (ms) | First six highlights, including deferred initialization (ms) |",
+  "| --- | ---: | ---: |",
+  ...summary.application.map(
+    (row) =>
+      `| ${row.implementation} | ${(row.initMedianNs / 1e6).toFixed(3)} | ${(row.renderMedianNs / 1e6).toFixed(3)} |`,
+  ),
   "",
   "## CLI",
   "",
