@@ -126,6 +126,3 @@ jobs:
       - run: pnpm --filter @lumis-sh/lumis test
         env:
           LUMIS_REQUIRE_NATIVE: '1'
-      - run: pnpm --filter @lumis-sh/lumis test:conformance
-        env:
-          LUMIS_REQUIRE_NATIVE: '1'

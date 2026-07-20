@@ -142,6 +142,12 @@ for (const group of [results, warmResults]) {
   if (new Set(group.map((result) => result.inputBytes)).size !== 1) {
     throw new Error("application implementations did not consume the same input bytes");
   }
+  const lumisOutputBytes = group
+    .filter((result) => result.implementation.startsWith("lumis-"))
+    .map((result) => result.outputBytes);
+  if (new Set(lumisOutputBytes).size !== 1) {
+    throw new Error("Lumis implementations did not produce the same output bytes");
+  }
   for (const result of group) {
     const contract = result.executionContract;
     if (

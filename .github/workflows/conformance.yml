@@ -73,6 +73,7 @@ jobs:
               - '.github/workflows/conformance.yml'
             javascript:
               - 'packages/javascript/lumis/**'
+              - 'crates/lumis-wasm-runtime/**'
               - 'packages/javascript/package.json'
               - 'packages/javascript/themes/**'
               - 'pnpm-lock.yaml'
@@ -125,13 +126,29 @@ jobs:
       - run: cargo nextest run -p lumis-cli --test conformance --run-ignored ignored-only
 
   javascript:
-    name: JS conformance
+    name: JS ${{ matrix.runtime }} conformance
     needs: changes
     if: needs.changes.outputs.javascript == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runtime: Wasm
+            disable-native: '1'
+            require-native: '0'
+            build-native: false
+          - runtime: native
+            disable-native: '0'
+            require-native: '1'
+            build-native: true
     steps:
       - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        if: matrix.build-native
+      - uses: Swatinem/rust-cache@v2
+        if: matrix.build-native
       - uses: pnpm/action-setup@v6
         with:
           version: 10
@@ -143,7 +160,12 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @lumis-sh/themes build
       - run: pnpm --filter @lumis-sh/lumis build
+      - run: pnpm --filter @lumis-sh/lumis build:native
+        if: matrix.build-native
       - run: pnpm --filter @lumis-sh/lumis test:conformance
+        env:
+          LUMIS_DISABLE_NATIVE: ${{ matrix.disable-native }}
+          LUMIS_REQUIRE_NATIVE: ${{ matrix.require-native }}
 
   elixir:
     name: Elixir conformance
