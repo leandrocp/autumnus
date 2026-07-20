@@ -117,6 +117,7 @@ return {
 		name = "catppuccin_frappe",
 		config = function()
 			vim.o.background = "dark"
+			require("catppuccin").setup({ integrations = { rainbow_delimiters = true } })
 			vim.cmd([[colorscheme catppuccin-frappe]])
 		end,
 	},
@@ -125,6 +126,7 @@ return {
 		name = "catppuccin_macchiato",
 		config = function()
 			vim.o.background = "dark"
+			require("catppuccin").setup({ integrations = { rainbow_delimiters = true } })
 			vim.cmd([[colorscheme catppuccin-macchiato]])
 		end,
 	},
@@ -133,6 +135,7 @@ return {
 		name = "catppuccin_mocha",
 		config = function()
 			vim.o.background = "dark"
+			require("catppuccin").setup({ integrations = { rainbow_delimiters = true } })
 			vim.cmd([[colorscheme catppuccin-mocha]])
 		end,
 	},
@@ -141,6 +144,7 @@ return {
 		name = "catppuccin_latte",
 		config = function()
 			vim.o.background = "light"
+			require("catppuccin").setup({ integrations = { rainbow_delimiters = true } })
 			vim.cmd([[colorscheme catppuccin-latte]])
 		end,
 	},
