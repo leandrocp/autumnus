@@ -311,15 +311,13 @@ function isLanguageBundle(value: unknown): value is LanguageBundle {
 }
 
 /** Resolve a single LanguageInput into Language(s), registering lazy ones. */
-async function resolveLanguageInput(
+async function resolveInitialLanguage(
   input: LanguageInput,
-  runtime: RuntimeLike,
   lazyRegistry: Map<string, LazyLanguage>,
-): Promise<void> {
+): Promise<Language | undefined> {
   // Language object — load eagerly
   if (isLanguage(input)) {
-    await loadLanguageDefinition(runtime, input);
-    return;
+    return input;
   }
 
   // LanguageBundle (Record<string, LazyLanguage>) — register all lazily
@@ -332,19 +330,18 @@ async function resolveLanguageInput(
         }
       }
     }
-    return;
+    return undefined;
   }
 
   // () => Promise<{ default: Language }> — lazy function
   if (typeof input === "function") {
     const mod = await input();
-    await loadLanguageDefinition(runtime, mod.default);
-    return;
+    return mod.default;
   }
 
   // Promise<{ default: Language }> — eager dynamic import
   const mod = await input;
-  await loadLanguageDefinition(runtime, mod.default);
+  return mod.default;
 }
 
 function registerLazyBundle(bundle: LanguageBundle, lazyRegistry: Map<string, LazyLanguage>): void {
@@ -408,7 +405,7 @@ async function loadInitialLanguages(
   runtime: RuntimeLike,
   lazyRegistry: Map<string, LazyLanguage>,
 ): Promise<void> {
-  const eagerLoads: Array<Promise<void>> = [];
+  const eagerDefinitions: Array<Promise<Language | undefined>> = [];
 
   for (const input of inputs) {
     if (isLanguageBundle(input)) {
@@ -416,10 +413,20 @@ async function loadInitialLanguages(
       continue;
     }
 
-    eagerLoads.push(resolveLanguageInput(input, runtime, lazyRegistry));
+    eagerDefinitions.push(resolveInitialLanguage(input, lazyRegistry));
   }
 
-  await Promise.all([runtime.loadPlaintext(), ...eagerLoads]);
+  const languages = (await Promise.all(eagerDefinitions)).filter(
+    (language): language is Language => language !== undefined,
+  );
+  for (const language of languages) {
+    runtime.registerLanguage({ id: language.id, aliases: language.aliases });
+  }
+
+  await Promise.all([
+    runtime.loadPlaintext(),
+    ...languages.map((language) => loadLanguageDefinition(runtime, language)),
+  ]);
 }
 
 async function prepareRuntimeHighlight(

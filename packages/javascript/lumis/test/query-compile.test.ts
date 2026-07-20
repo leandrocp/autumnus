@@ -7,15 +7,14 @@ import { describe, expect, it } from "vitest";
 import { Language as TSLanguage, Parser, Query } from "web-tree-sitter";
 
 import { bundledLanguages } from "../bundles/full.js";
+import { specializeInjections } from "../src/core/injection-specialization.js";
 
 const bundleRequire = createRequire(
   createRequire(import.meta.url).resolve("@lumis-sh/wasm-bundle-full"),
 );
 
 const workspaceRoot = fileURLToPath(new URL("../../../..", import.meta.url));
-const languagesToml = parseToml(
-  readFileSync(join(workspaceRoot, "languages.toml"), "utf8"),
-) as {
+const languagesToml = parseToml(readFileSync(join(workspaceRoot, "languages.toml"), "utf8")) as {
   parsers?: Record<string, { rev?: string; wasm_name?: string }>;
 };
 
@@ -42,9 +41,9 @@ function installedWasmMatchesParserRevision(wasmPath: string, wasmName: string):
   const expectedRev = expectedRevByWasmName.get(wasmName);
   if (!expectedRev) return true;
 
-  const packageJson = JSON.parse(
-    readFileSync(join(dirname(wasmPath), "package.json"), "utf8"),
-  ) as { lumis?: { rev?: string } };
+  const packageJson = JSON.parse(readFileSync(join(dirname(wasmPath), "package.json"), "utf8")) as {
+    lumis?: { rev?: string };
+  };
 
   return packageJson.lumis?.rev === expectedRev;
 }
@@ -56,6 +55,8 @@ async function compileQueries(
   expect(() => new Query(grammar, lang.highlights)).not.toThrow();
   if (lang.injections) {
     expect(() => new Query(grammar, lang.injections!)).not.toThrow();
+    const specialized = specializeInjections(lang.injections, () => false);
+    expect(() => new Query(grammar, specialized.source)).not.toThrow();
   }
   if (lang.locals) {
     expect(() => new Query(grammar, lang.locals!)).not.toThrow();
@@ -120,13 +121,13 @@ describe.skipIf(!existsSync(distLangsDir))(
         };
 
         const wasmPath = resolveWasmPath(lang.wasm.packageName, lang.wasm.name);
-          if (!wasmPath || !existsSync(wasmPath)) {
-            return;
-          }
+        if (!wasmPath || !existsSync(wasmPath)) {
+          return;
+        }
 
-          if (!installedWasmMatchesParserRevision(wasmPath, lang.wasm.name)) {
-            return;
-          }
+        if (!installedWasmMatchesParserRevision(wasmPath, lang.wasm.name)) {
+          return;
+        }
 
         const bytes = readFileSync(wasmPath);
         const grammar = await TSLanguage.load(bytes);

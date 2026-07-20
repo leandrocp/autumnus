@@ -1,4 +1,4 @@
-import type { Language } from "web-tree-sitter";
+import type { Language, Query as TreeSitterQuery } from "web-tree-sitter";
 import { buildHighlightEvents } from "../events.js";
 import { LANGUAGES } from "../generated/languages-meta.js";
 import { HIGHLIGHT_NAMES } from "../highlights.js";
@@ -15,6 +15,7 @@ import type {
   WasmRef,
 } from "../types.js";
 import { PLAINTEXT_LANG_ID, type LanguageInfo } from "../types.js";
+import { specializeInjections } from "./injection-specialization.js";
 
 export type WasmResolver = (language: string, wasm: WasmRef) => string | URL;
 
@@ -24,13 +25,12 @@ export interface SharedRuntimeCache {
   wasmLoads: Map<string, Promise<Uint8Array>>;
 }
 
-async function compileBracketConfig(
+function compileBracketConfig(
   language: Language,
+  Query: typeof TreeSitterQuery,
   bracketsQuery?: string,
-): Promise<CompiledBracketConfig | undefined> {
+): CompiledBracketConfig | undefined {
   if (!bracketsQuery) return undefined;
-
-  const { Query } = await loadTreeSitter();
 
   // A bracket query can reference anonymous nodes that do not exist in a given
   // grammar (for example HTML has no "(" token). Treat a query that fails to
@@ -117,11 +117,7 @@ const DEFAULT_RESOLVER: WasmResolver = (_language, wasm) =>
 
 const HIGHLIGHT_NAMES_SET = new Set(HIGHLIGHT_NAMES);
 const PLAINTEXT_ALIASES = ["text", "txt", "plain"];
-const PLAINTEXT_WASM: WasmRef = {
-  packageName: "@lumis-sh/wasm-diff",
-  name: "tree-sitter-diff",
-  version: "0.26",
-};
+const encoder = new TextEncoder();
 
 function createSharedRuntimeCache(): SharedRuntimeCache {
   return {
@@ -207,13 +203,13 @@ function resolveHighlightName(captureName: string): string | undefined {
   return best;
 }
 
-async function compileHighlightConfig(
+function compileHighlightConfig(
   language: Language,
+  Query: typeof TreeSitterQuery,
   highlightsQuery: string,
   injectionsQuery = "",
   localsQuery = "",
-): Promise<CompiledHighlightConfig> {
-  const { Query } = await loadTreeSitter();
+): CompiledHighlightConfig {
   const querySource = `${injectionsQuery}${localsQuery}${highlightsQuery}`;
   const localsQueryOffset = injectionsQuery.length;
   const highlightsQueryOffset = injectionsQuery.length + localsQuery.length;
@@ -300,12 +296,27 @@ async function compileHighlightConfig(
 export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesModule {
   let configuredDefaultResolver: WasmResolver = DEFAULT_RESOLVER;
 
+  interface LanguageQueryState {
+    language: Language;
+    Query: typeof TreeSitterQuery;
+    highlights: string;
+    injections: string;
+    locals: string;
+    omittedLanguages: Set<string>;
+  }
+
   class HighlighterRuntime implements RuntimeLike {
     private explicitResolver: WasmResolver | undefined;
     private readonly sharedCache: SharedRuntimeCache;
     private readonly loadedLanguages = new Map<string, LoadedLanguage>();
     private readonly aliasMap = new Map<string, string>();
+    private readonly registeredLanguageIds = new Set<string>();
     private readonly languageLoads = new Map<string, Promise<LoadedLanguage>>();
+    private readonly bracketCompilers = new WeakMap<
+      LoadedLanguage,
+      () => CompiledBracketConfig | undefined
+    >();
+    private readonly queryStates = new WeakMap<LoadedLanguage, LanguageQueryState>();
 
     constructor(options: HighlighterRuntimeOptions = {}) {
       this.explicitResolver = options.wasmResolver;
@@ -374,23 +385,39 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
         throw new Error(`Unsupported WASM input for language "${opts.definition.id}"`);
       }
 
-      const { Language, Parser } = await loadTreeSitter();
+      const { Language, Parser, Query } = await loadTreeSitter();
       const language = await Language.load(wasmInput);
       const parser = new Parser();
       parser.setLanguage(language);
 
+      const specialized = specializeInjections(opts.injections ?? "", (languageId) =>
+        this.registeredLanguageIds.has(this.resolveLanguageId(languageId)),
+      );
       const loaded: LoadedLanguage = {
         definition: opts.definition,
         parser,
         language,
-        config: await compileHighlightConfig(
+        config: compileHighlightConfig(
           language,
+          Query,
           opts.highlights,
-          opts.injections,
+          specialized.source,
           opts.locals,
         ),
-        brackets: await compileBracketConfig(language, opts.brackets),
       };
+      this.queryStates.set(loaded, {
+        language,
+        Query,
+        highlights: opts.highlights,
+        injections: opts.injections ?? "",
+        locals: opts.locals ?? "",
+        omittedLanguages: specialized.omittedLanguages,
+      });
+      if (opts.brackets) {
+        this.bracketCompilers.set(loaded, () =>
+          compileBracketConfig(language, Query, opts.brackets),
+        );
+      }
 
       this.loadedLanguages.set(opts.definition.id, loaded);
       this.registerLanguage(opts.definition);
@@ -410,6 +437,7 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
     }
 
     registerLanguage(def: LanguageDefinition): void {
+      this.registeredLanguageIds.add(def.id);
       for (const alias of def.aliases) {
         this.aliasMap.set(alias, def.id);
       }
@@ -442,24 +470,67 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
     }
 
     async loadLanguage(opts: LoadLanguageOptions): Promise<LoadedLanguage> {
+      if (opts.definition.id === PLAINTEXT_LANG_ID) {
+        return this.createPlaintext(opts.definition);
+      }
       const existing = this.loadedLanguages.get(opts.definition.id);
       if (existing) return existing;
 
       const inFlight = this.languageLoads.get(opts.definition.id);
       if (inFlight) return inFlight;
 
-      return trackLoad(this.languageLoads, opts.definition.id, this.createLoadedLanguage(opts));
+      this.registerLanguage(opts.definition);
+      return trackLoad(
+        this.languageLoads,
+        opts.definition.id,
+        this.createLoadedLanguage(opts).then((loaded) => {
+          this.refreshInjectionsFor(opts.definition, loaded);
+          return loaded;
+        }),
+      );
+    }
+
+    private refreshInjectionsFor(
+      definition: LanguageDefinition,
+      newlyLoaded: LoadedLanguage,
+    ): void {
+      const activates = (languageId: string) =>
+        this.resolveLanguageId(languageId) === definition.id ||
+        definition.aliases.includes(languageId);
+
+      for (const loaded of this.loadedLanguages.values()) {
+        if (loaded === newlyLoaded) continue;
+        const state = this.queryStates.get(loaded);
+        if (!state || !Array.from(state.omittedLanguages).some(activates)) continue;
+
+        const specialized = specializeInjections(state.injections, (languageId) =>
+          this.registeredLanguageIds.has(this.resolveLanguageId(languageId)),
+        );
+        const config = compileHighlightConfig(
+          state.language,
+          state.Query,
+          state.highlights,
+          specialized.source,
+          state.locals,
+        );
+        loaded.config.query.delete();
+        loaded.config = config;
+        state.omittedLanguages = specialized.omittedLanguages;
+      }
     }
 
     async loadPlaintext(): Promise<LoadedLanguage> {
+      return this.createPlaintext({ id: PLAINTEXT_LANG_ID, aliases: PLAINTEXT_ALIASES });
+    }
+
+    private createPlaintext(definition: LanguageDefinition): LoadedLanguage {
       const existing = this.loadedLanguages.get(PLAINTEXT_LANG_ID);
       if (existing) return existing;
 
-      return this.loadLanguage({
-        definition: { id: PLAINTEXT_LANG_ID, aliases: PLAINTEXT_ALIASES },
-        wasm: await this.resolveWasmRef("diff", PLAINTEXT_WASM),
-        highlights: "",
-      });
+      const loaded = { definition } as LoadedLanguage;
+      this.loadedLanguages.set(PLAINTEXT_LANG_ID, loaded);
+      this.registerLanguage(definition);
+      return loaded;
     }
 
     highlightEvents(
@@ -467,6 +538,16 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
       language: LoadedLanguage,
       options: { rainbowBrackets?: boolean } = {},
     ): HighlightEvent[] {
+      if (language.definition.id === PLAINTEXT_LANG_ID) {
+        return [{ type: "source", startByte: 0, endByte: encoder.encode(source).byteLength }];
+      }
+      if (options.rainbowBrackets && !language.brackets) {
+        const compile = this.bracketCompilers.get(language);
+        if (compile) {
+          this.bracketCompilers.delete(language);
+          language.brackets = compile();
+        }
+      }
       return buildHighlightEvents(source, language, this, options) as HighlightEvent[];
     }
   }

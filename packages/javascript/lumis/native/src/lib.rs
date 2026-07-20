@@ -199,6 +199,34 @@ impl Task for LoadLanguageTask {
     }
 }
 
+pub struct ConfigureLanguageTask {
+    runtime: Arc<Runtime>,
+    language: String,
+    highlights: String,
+    injections: String,
+    locals: String,
+}
+
+impl Task for ConfigureLanguageTask {
+    type Output = ();
+    type JsValue = ();
+
+    fn compute(&mut self) -> Result<Self::Output> {
+        self.runtime
+            .configure_language(
+                &self.language,
+                &self.highlights,
+                &self.injections,
+                &self.locals,
+            )
+            .map_err(native_error)
+    }
+
+    fn resolve(&mut self, _env: Env, output: Self::Output) -> Result<Self::JsValue> {
+        Ok(output)
+    }
+}
+
 pub struct FormatTask {
     runtime: Arc<Runtime>,
     source: String,
@@ -303,6 +331,23 @@ impl NativeRuntime {
     #[napi(js_name = "hasLanguage")]
     pub fn has_language(&self, name_or_alias: String) -> bool {
         self.inner.has_language(&name_or_alias)
+    }
+
+    #[napi(js_name = "configureLanguageAsync")]
+    pub fn configure_language_async(
+        &self,
+        language: String,
+        highlights: String,
+        injections: String,
+        locals: String,
+    ) -> AsyncTask<ConfigureLanguageTask> {
+        AsyncTask::new(ConfigureLanguageTask {
+            runtime: Arc::clone(&self.inner),
+            language,
+            highlights,
+            injections,
+            locals,
+        })
     }
 
     /// Return the complete nested event stream as one compact binary value.

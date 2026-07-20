@@ -22,6 +22,12 @@ interface NativeRuntimeInstance {
     brackets?: string,
   ): Promise<void>;
   hasLanguage(nameOrAlias: string): boolean;
+  configureLanguageAsync(
+    language: string,
+    highlights: string,
+    injections: string,
+    locals: string,
+  ): Promise<void>;
   highlightEvents(source: string, language: string, rainbowBrackets?: boolean): Uint8Array;
   format(
     source: string,

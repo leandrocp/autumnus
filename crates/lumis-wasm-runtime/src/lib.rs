@@ -36,11 +36,13 @@ pub struct LanguageSpec {
 
 struct LoadedLanguage {
     highlight: HighlightConfiguration,
-    brackets: Option<Query>,
+    brackets_source: String,
+    brackets: OnceLock<Option<Query>>,
 }
 
 struct RuntimeState {
     wasm_store: WasmStore,
+    highlighter: Highlighter,
     languages: HashMap<String, LoadedLanguage>,
     aliases: HashMap<String, String>,
 }
@@ -91,10 +93,19 @@ impl Runtime {
     fn with_engine(engine: Engine) -> Result<Self, RuntimeError> {
         let wasm_store =
             WasmStore::new(&engine).map_err(|error| RuntimeError::TreeSitter(error.to_string()))?;
+        let mut highlighter = Highlighter::new();
+        highlighter
+            .parser()
+            .set_wasm_store(
+                WasmStore::new(&engine)
+                    .map_err(|error| RuntimeError::TreeSitter(error.to_string()))?,
+            )
+            .map_err(|error| RuntimeError::TreeSitter(error.to_string()))?;
         Ok(Self {
             engine,
             state: Mutex::new(RuntimeState {
                 wasm_store,
+                highlighter,
                 languages: HashMap::new(),
                 aliases: HashMap::new(),
             }),
@@ -127,14 +138,6 @@ impl Runtime {
         })?;
         highlight.configure(&HIGHLIGHT_NAMES);
 
-        // The default bracket query intentionally includes tokens absent from
-        // some grammars, so a compilation failure means "no rainbow brackets".
-        let brackets = if spec.brackets.trim().is_empty() {
-            None
-        } else {
-            Query::new(&language, &spec.brackets).ok()
-        };
-
         for alias in &spec.aliases {
             state.aliases.insert(alias.clone(), spec.id.clone());
         }
@@ -142,7 +145,8 @@ impl Runtime {
             spec.id,
             LoadedLanguage {
                 highlight,
-                brackets,
+                brackets_source: spec.brackets,
+                brackets: OnceLock::new(),
             },
         );
         Ok(())
@@ -158,40 +162,70 @@ impl Runtime {
         state.languages.contains_key(id)
     }
 
+    pub fn configure_language(
+        &self,
+        name_or_alias: &str,
+        highlights: &str,
+        injections: &str,
+        locals: &str,
+    ) -> Result<(), RuntimeError> {
+        let mut state = self.state.lock().expect("runtime lock poisoned");
+        let id = state
+            .aliases
+            .get(name_or_alias)
+            .cloned()
+            .unwrap_or_else(|| name_or_alias.to_string());
+        let language = state
+            .languages
+            .get(&id)
+            .ok_or_else(|| RuntimeError::LanguageNotLoaded(name_or_alias.to_string()))?
+            .highlight
+            .language
+            .clone();
+        let mut highlight =
+            HighlightConfiguration::new(language, id.clone(), highlights, injections, locals)
+                .map_err(|error| RuntimeError::Query {
+                    language: id.clone(),
+                    message: error.to_string(),
+                })?;
+        highlight.configure(&HIGHLIGHT_NAMES);
+        state
+            .languages
+            .get_mut(&id)
+            .expect("loaded language disappeared while locked")
+            .highlight = highlight;
+        Ok(())
+    }
+
     pub fn highlight(
         &self,
         source: &str,
         name_or_alias: &str,
         rainbow_brackets: bool,
     ) -> Result<Vec<HighlightEvent>, RuntimeError> {
-        let state = self.state.lock().expect("runtime lock poisoned");
+        let mut state = self.state.lock().expect("runtime lock poisoned");
         let root_id = state
             .aliases
             .get(name_or_alias)
-            .map(String::as_str)
-            .unwrap_or(name_or_alias);
-        let root = state
-            .languages
-            .get(root_id)
+            .cloned()
+            .unwrap_or_else(|| name_or_alias.to_string());
+        let RuntimeState {
+            highlighter,
+            languages,
+            aliases,
+            ..
+        } = &mut *state;
+        let root = languages
+            .get(&root_id)
             .ok_or_else(|| RuntimeError::LanguageNotLoaded(name_or_alias.to_string()))?;
-
-        let mut highlighter = Highlighter::new();
-        highlighter
-            .parser()
-            .set_wasm_store(
-                WasmStore::new(&self.engine)
-                    .map_err(|error| RuntimeError::TreeSitter(error.to_string()))?,
-            )
-            .map_err(|error| RuntimeError::Highlight(error.to_string()))?;
 
         let events = highlighter
             .highlight(&root.highlight, source.as_bytes(), None, |injected| {
-                let id = state
-                    .aliases
+                let id = aliases
                     .get(injected)
                     .map(String::as_str)
                     .unwrap_or(injected);
-                state.languages.get(id).map(|loaded| &loaded.highlight)
+                languages.get(id).map(|loaded| &loaded.highlight)
             })
             .map_err(|error| RuntimeError::Highlight(error.to_string()))?;
 
@@ -216,7 +250,7 @@ impl Runtime {
 
         if rainbow_brackets {
             let ranges = rainbow_ranges(&self.engine, root, source)?;
-            output = apply_rainbow_brackets(output, ranges, root_id);
+            output = apply_rainbow_brackets(output, ranges, &root_id);
         }
 
         Ok(output)
@@ -251,7 +285,17 @@ fn rainbow_ranges(
     language: &LoadedLanguage,
     source: &str,
 ) -> Result<Vec<RainbowRange>, RuntimeError> {
-    let Some(query) = &language.brackets else {
+    let query = language.brackets.get_or_init(|| {
+        if language.brackets_source.trim().is_empty() {
+            None
+        } else {
+            // The default bracket query intentionally includes tokens absent
+            // from some grammars, so a compilation failure means "no rainbow
+            // brackets" for that language.
+            Query::new(&language.highlight.language, &language.brackets_source).ok()
+        }
+    });
+    let Some(query) = query else {
         return Ok(Vec::new());
     };
     let open_capture = query

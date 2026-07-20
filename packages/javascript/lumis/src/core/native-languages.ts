@@ -21,20 +21,22 @@ import type {
   SharedRuntimeCache,
   WasmResolver,
 } from "./languages.js";
+import { specializeInjections } from "./injection-specialization.js";
 
 const DEFAULT_RESOLVER: WasmResolver = (_language, wasm) =>
   `https://cdn.jsdelivr.net/npm/${wasm.packageName}@${wasm.version}/${wasm.name}.wasm`;
 const PLAINTEXT_ALIASES = ["text", "txt", "plain"];
-const PLAINTEXT_WASM: WasmRef = {
-  packageName: "@lumis-sh/wasm-diff",
-  name: "tree-sitter-diff",
-  version: "0.26",
-};
 const decoder = new TextDecoder();
 const encoder = new TextEncoder();
 
 interface NativeLoadedLanguage {
   definition: LanguageDefinition;
+  queries?: {
+    highlights: string;
+    injections: string;
+    locals: string;
+    omittedLanguages: Set<string>;
+  };
 }
 
 function createSharedRuntimeCache(): SharedRuntimeCache {
@@ -137,6 +139,7 @@ export function createNativeLanguagesModule(
     private readonly sharedCache: SharedRuntimeCache;
     private readonly loadedLanguages = new Map<string, NativeLoadedLanguage>();
     private readonly aliasMap = new Map<string, string>();
+    private readonly registeredLanguageIds = new Set<string>();
     private readonly languageLoads = new Map<string, Promise<LoadedLanguage>>();
 
     constructor(options: HighlighterRuntimeOptions = {}) {
@@ -159,6 +162,7 @@ export function createNativeLanguagesModule(
     }
 
     registerLanguage(definition: LanguageDefinition): void {
+      this.registeredLanguageIds.add(definition.id);
       for (const alias of definition.aliases) this.aliasMap.set(alias, definition.id);
     }
 
@@ -262,38 +266,95 @@ export function createNativeLanguagesModule(
           brackets = nativeQueries.brackets;
         }
       }
+      const specialized = specializeInjections(injections ?? "", (languageId) =>
+        this.registeredLanguageIds.has(this.resolveLanguageId(languageId)),
+      );
       await this.native.loadLanguageAsync(
         opts.definition.id,
         opts.definition.aliases,
         nativeGrammarName,
         wasm,
         highlights,
-        injections,
+        specialized.source,
         locals,
         brackets,
       );
-      const loaded: NativeLoadedLanguage = { definition: opts.definition };
+      const loaded: NativeLoadedLanguage = {
+        definition: opts.definition,
+        queries: {
+          highlights,
+          injections: injections ?? "",
+          locals: locals ?? "",
+          omittedLanguages: specialized.omittedLanguages,
+        },
+      };
       this.loadedLanguages.set(opts.definition.id, loaded);
       this.registerLanguage(opts.definition);
       return loaded as LoadedLanguage;
     }
 
     async loadLanguage(opts: LoadLanguageOptions): Promise<LoadedLanguage> {
+      if (opts.definition.id === PLAINTEXT_LANG_ID) {
+        return this.createPlaintext(opts.definition);
+      }
       const existing = this.getLoadedLanguage(opts.definition.id);
       if (existing) return existing;
       const inFlight = this.languageLoads.get(opts.definition.id);
       if (inFlight) return inFlight;
-      return trackLoad(this.languageLoads, opts.definition.id, this.createLoadedLanguage(opts));
+      this.registerLanguage(opts.definition);
+      return trackLoad(
+        this.languageLoads,
+        opts.definition.id,
+        this.createLoadedLanguage(opts).then(async (loaded) => {
+          await this.refreshInjectionsFor(opts.definition, loaded);
+          return loaded;
+        }),
+      );
+    }
+
+    private async refreshInjectionsFor(
+      definition: LanguageDefinition,
+      newlyLoaded: LoadedLanguage,
+    ): Promise<void> {
+      const activates = (languageId: string) =>
+        this.resolveLanguageId(languageId) === definition.id ||
+        definition.aliases.includes(languageId);
+      const refreshes: Promise<void>[] = [];
+
+      for (const loaded of this.loadedLanguages.values()) {
+        if (loaded === (newlyLoaded as NativeLoadedLanguage)) continue;
+        const queries = loaded.queries;
+        if (!queries || !Array.from(queries.omittedLanguages).some(activates)) continue;
+
+        const specialized = specializeInjections(queries.injections, (languageId) =>
+          this.registeredLanguageIds.has(this.resolveLanguageId(languageId)),
+        );
+        queries.omittedLanguages = specialized.omittedLanguages;
+        refreshes.push(
+          this.native.configureLanguageAsync(
+            loaded.definition.id,
+            queries.highlights,
+            specialized.source,
+            queries.locals,
+          ),
+        );
+      }
+
+      await Promise.all(refreshes);
     }
 
     async loadPlaintext(): Promise<LoadedLanguage> {
+      return this.createPlaintext({ id: PLAINTEXT_LANG_ID, aliases: PLAINTEXT_ALIASES });
+    }
+
+    private createPlaintext(definition: LanguageDefinition): LoadedLanguage {
       const existing = this.getLoadedLanguage(PLAINTEXT_LANG_ID);
       if (existing) return existing;
-      return this.loadLanguage({
-        definition: { id: PLAINTEXT_LANG_ID, aliases: PLAINTEXT_ALIASES },
-        wasm: PLAINTEXT_WASM,
-        highlights: "",
-      });
+
+      const loaded: NativeLoadedLanguage = { definition };
+      this.loadedLanguages.set(PLAINTEXT_LANG_ID, loaded);
+      this.registerLanguage(definition);
+      return loaded as LoadedLanguage;
     }
 
     highlightEvents(
@@ -301,6 +362,9 @@ export function createNativeLanguagesModule(
       language: LoadedLanguage,
       options: { rainbowBrackets?: boolean } = {},
     ): HighlightEvent[] {
+      if (language.definition.id === PLAINTEXT_LANG_ID) {
+        return [{ type: "source", startByte: 0, endByte: encoder.encode(source).byteLength }];
+      }
       return decodeEvents(
         this.native.highlightEvents(
           source,
@@ -346,6 +410,7 @@ export function createNativeLanguagesModule(
       if (
         !kind ||
         kind === "html-multi-themes" ||
+        language.definition.id === PLAINTEXT_LANG_ID ||
         !LANGUAGES.some((candidate) => candidate.id === language.definition.id)
       ) {
         return undefined;

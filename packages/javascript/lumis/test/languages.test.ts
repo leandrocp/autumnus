@@ -88,11 +88,12 @@ describe('getLoadedLanguageIds', () => {
 })
 
 describe('loadPlaintext', () => {
-  it('loads plaintext with diff parser', async () => {
+  it('loads parser-free plaintext', async () => {
     await loadPlaintext()
     const loaded = getLoadedLanguage('plaintext')
     expect(loaded).toBeDefined()
     expect(loaded!.definition.id).toBe('plaintext')
+    expect(loaded!.parser).toBeUndefined()
   })
 
   it('is idempotent', async () => {
