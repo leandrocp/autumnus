@@ -230,15 +230,15 @@ const markdown = [
   "## Cross-runtime application workload",
   "",
   "Two languages (JavaScript and JSON), three snippets per language. Each primary sample measures the library operation inside a fresh host process; dedicated-tool warm reports are retained in the raw artifacts.",
-  "Workload total = the comparable fresh-process library operation: public setup plus the six exact fixture highlights. Runner = the harness and clock boundary. Language loading = requested-only versus a larger built-in set. Output bytes = output validation, not a performance metric, because library HTML formats differ.",
+  "Workload total = the comparable fresh-process library operation: public setup plus the six exact fixture highlights. Runner = the harness and clock boundary. Output bytes = output validation, not a performance metric, because library HTML formats differ.",
   "",
-  "| Implementation | Runner | Workload total (ms) | Language loading | Output bytes |",
-  "| --- | --- | ---: | --- | ---: |",
+  "| Implementation | Runner | Workload total (ms) | Output bytes |",
+  "| --- | --- | ---: | ---: |",
   ...summary.application
     .toSorted((left, right) => left.internalTotalMedianNs - right.internalTotalMedianNs)
     .map(
       (row) =>
-        `| ${row.implementation} | ${row.runner} | ${(row.internalTotalMedianNs / 1e6).toFixed(3)} | ${row.loadedLanguageScope} | ${row.outputBytes} |`,
+        `| ${row.implementation} | ${row.runner} | ${(row.internalTotalMedianNs / 1e6).toFixed(3)} | ${row.outputBytes} |`,
     ),
   "",
   "### Phase placement diagnostic (not a performance ranking)",
