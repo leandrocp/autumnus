@@ -31,6 +31,10 @@ path = "src/bin/lumis-first-render.rs"
 name = "syntect-first-render"
 path = "src/bin/syntect-first-render.rs"
 
+[[bin]]
+name = "application-once"
+path = "src/bin/application-once.rs"
+
 [profile.release]
 lto = true
 codegen-units = 1

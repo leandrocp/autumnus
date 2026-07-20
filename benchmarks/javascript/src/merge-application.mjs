@@ -94,7 +94,7 @@ const [lumisRustMetadata, syntectMetadata, elixirMetadata, bencheeReport] = awai
   readJson(resolve(rawDir, "benchee.json")),
 ]);
 
-const results = javascriptReports.map((report) => ({
+const warmResults = javascriptReports.map((report) => ({
   ...metadataFrom(report),
   init: mitataStats(report, "init"),
   render: mitataStats(report, "render"),
@@ -103,7 +103,7 @@ const results = javascriptReports.map((report) => ({
 
 for (const metadata of [lumisRustMetadata, syntectMetadata]) {
   const implementation = metadata.implementation;
-  results.push({
+  warmResults.push({
     ...metadataFrom({ ...metadata, runner: "criterion" }),
     init: await criterionStats(implementation, "init"),
     render: await criterionStats(implementation, "render"),
@@ -111,7 +111,7 @@ for (const metadata of [lumisRustMetadata, syntectMetadata]) {
   });
 }
 
-results.push({
+warmResults.push({
   ...metadataFrom(elixirMetadata),
   init: bencheeStats(bencheeReport, "lumis-elixir", "init"),
   render: bencheeStats(bencheeReport, "lumis-elixir", "render"),
@@ -126,31 +126,35 @@ const expectedImplementations = [
   "syntect",
   "lumis-elixir",
 ];
-if (
-  results.map((result) => result.implementation).join(",") !== expectedImplementations.join(",")
-) {
-  throw new Error("application benchmark implementations are incomplete or out of order");
-}
-if (new Set(results.map((result) => result.inputBytes)).size !== 1) {
-  throw new Error("application implementations did not consume the same input bytes");
-}
+const freshReport = await readJson(resolve(rawDir, "fresh.json"));
+const results = freshReport.results;
 const expectedExecutionContract = {
   requestedLanguages: 2,
   renderHighlights: 6,
   totalHighlights: 6,
 };
-for (const result of results) {
-  const contract = result.executionContract;
+for (const group of [results, warmResults]) {
   if (
-    result.languages?.join(",") !== "javascript,json" ||
-    result.snippetCount !== 6 ||
-    result.outputBytes <= result.inputBytes ||
-    !contract ||
-    Object.keys(contract).length !== Object.keys(expectedExecutionContract).length ||
-    Object.entries(expectedExecutionContract).some(([key, value]) => contract[key] !== value) ||
-    typeof result.loadedLanguageScope !== "string"
+    group.map((result) => result.implementation).join(",") !== expectedImplementations.join(",")
   ) {
-    throw new Error(`${result.implementation} returned incompatible application metadata`);
+    throw new Error("application benchmark implementations are incomplete or out of order");
+  }
+  if (new Set(group.map((result) => result.inputBytes)).size !== 1) {
+    throw new Error("application implementations did not consume the same input bytes");
+  }
+  for (const result of group) {
+    const contract = result.executionContract;
+    if (
+      result.languages?.join(",") !== "javascript,json" ||
+      result.snippetCount !== 6 ||
+      result.outputBytes <= result.inputBytes ||
+      !contract ||
+      Object.keys(contract).length !== Object.keys(expectedExecutionContract).length ||
+      Object.entries(expectedExecutionContract).some(([key, value]) => contract[key] !== value) ||
+      typeof result.loadedLanguageScope !== "string"
+    ) {
+      throw new Error(`${result.implementation} returned incompatible application metadata`);
+    }
   }
 }
 
@@ -160,8 +164,10 @@ const report = {
   scenario: "application-two-languages-six-snippets",
   fixture: resolve(repoDir, "benchmarks/fixtures/application.json"),
   runtimeDirectory: applicationRuntimeDir,
+  timingBoundary: freshReport.timingBoundary,
   rawDirectory: rawDir,
   rawReports: [
+    "fresh.json",
     ...javascriptReports.map((report) => `${report.implementation}.json`),
     "criterion/application",
     "lumis-rust-metadata.json",
@@ -170,6 +176,7 @@ const report = {
     "lumis-elixir-metadata.json",
   ],
   results,
+  warmResults,
 };
 
 await mkdir(dirname(outputPath), { recursive: true });

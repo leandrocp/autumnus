@@ -87,20 +87,23 @@ These are parse, highlight, and HTML serialization measurements—not parser-onl
 
 Each benchmark initializes JavaScript and JSON, then highlights three realistic small snippets in each language. The same versioned fixture bytes are consumed by Lumis Rust, Lumis JavaScript/native, Lumis JavaScript/Wasm, Lumis Elixir/NIF, Shiki, and syntect. This models a common website or application render more closely than either a single-snippet cold start or repeated rendering of one large file.
 
-Each host runtime owns its measurements: Criterion runs Lumis Rust and syntect, Mitata runs the three JavaScript implementations, and Benchee runs Lumis Elixir. `mise` invokes those harnesses serially, preserves their native JSON reports, and then merges comparable medians and workload metadata into `application.json`.
+The primary comparison runs every sample in a fresh host process and uses an internal clock around only the library operation. Host startup, module/application imports, fixture parsing, and report serialization are excluded. This is necessary because Rust, Elixir, and syntect keep process-global lazy parser/query state that Criterion or Benchee warmup cannot reset between iterations.
+
+The runtime-native tools still run as a separate warm-process diagnostic: Criterion owns Lumis Rust and syntect, Mitata owns the three JavaScript implementations, and Benchee owns Lumis Elixir. `mise` coordinates both layers, preserves every native JSON report, and writes the fresh-process results to `application.json` as `results` with the dedicated-tool data retained as `warmResults`.
 
 Every measured invocation follows one validated execution contract:
 
-- **Init/load:** initialize the library while requesting JavaScript and JSON through its public API. No synthetic highlights are used.
+- **Init/load:** initialize the library while requesting JavaScript and JSON through its public API. Libraries with lazy query compilation may defer part of that cost to the first render.
 - **Render 6:** using a prepared runtime, highlight the same three JavaScript and three JSON fixture strings exactly once each.
 - **Total:** perform init/load followed by render 6, for exactly six highlight calls and the same 1,036 input bytes in every implementation.
 
 Fixture parsing, module imports, output validation, and report serialization are outside the timed operation. Validation metadata records the requested language count, highlight counts, input bytes, output bytes, language order, and language-loading scope; merging fails if the execution contracts differ. Syntect's public bundled-default API loads its complete default syntax and theme sets before highlighting the six fixtures, so its report explicitly records `bundled-defaults`. That is retained as a library limitation rather than hidden or approximated.
 
-Runner sample counts are deliberately absent from the comparison table because they are not the same statistical unit. Criterion samples are aggregates over multiple iterations, Mitata observations may be time-budgeted single invocations, and Benchee collects as many invocations as fit its measurement duration. Every observation still executes the same six-highlight operation; runners repeat that operation as needed for their statistical model. Raw reports retain sample counts, iterations, dispersion, and confidence data. Default application runs request a two-second measurement target per case, with at least 20 Mitata observations and 20 Criterion statistical samples; runner-native warmup, batching, and garbage-collection policies may extend collection.
+Fresh-process samples have one common statistical unit: one init/load plus exactly six highlights in a newly started host. The coordinator runs implementations round-robin to reduce time drift and retains every raw internal and external duration. The external process duration is informational and is not compared because Node, BEAM, and native executable startup costs differ.
 
-The common report is an index, not a replacement statistical model. Sample collection, warmup, outlier behavior, and confidence calculations remain those of Criterion, Mitata, or Benchee. Implementations use the same `github-dark` theme intent where available and inline HTML output.
-Initialization, rendering, and total workload are independent benchmark cases, so their medians are not expected to add up exactly. The combined workload is the primary app-like comparison.
+Dedicated-tool sample counts are deliberately absent from the primary comparison table because they are not the same statistical unit. Criterion samples are aggregates over multiple iterations, Mitata observations may be time-budgeted single invocations, and Benchee collects as many invocations as fit its measurement duration. Raw reports retain sample counts, iterations, dispersion, and confidence data.
+
+Implementations use the same `github-dark` theme intent where available and inline HTML output. In the primary table, **Workload total** means fresh-process library init/load plus six renders; **Init/load** is the public setup phase; **Render 6** is the six exact fixture highlights; **Language loading** states whether the library loads only the requested languages or a larger built-in set. Phase medians need not add exactly to the total median because each column is summarized independently across samples.
 
 ### CLI repeat use
 

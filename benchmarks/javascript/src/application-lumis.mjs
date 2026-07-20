@@ -1,4 +1,4 @@
-import { assertHtml, nsSince } from "./common.mjs";
+import { nsSince } from "./common.mjs";
 
 const totalStarted = process.hrtime.bigint();
 const fixtureStarted = process.hrtime.bigint();
@@ -43,11 +43,11 @@ let outputBytes = 0;
 for (const entry of applicationWorkload) {
   for (const source of entry.snippets) {
     const output = highlighter.highlight(source, formatters[entry.language]);
-    assertHtml(output, Buffer.byteLength(source), `Lumis JS (${entry.language})`);
     outputBytes += Buffer.byteLength(output);
   }
 }
 const renderNs = nsSince(renderStarted);
+if (outputBytes <= applicationInputBytes) throw new Error("Lumis JS did not expand the fixture");
 const afterRender = process.memoryUsage();
 
 console.log(

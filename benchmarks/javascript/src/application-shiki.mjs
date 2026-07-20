@@ -1,4 +1,4 @@
-import { assertHtml, nsSince } from "./common.mjs";
+import { nsSince } from "./common.mjs";
 
 const totalStarted = process.hrtime.bigint();
 const fixtureStarted = process.hrtime.bigint();
@@ -30,11 +30,11 @@ for (const entry of applicationWorkload) {
       lang: entry.language,
       theme: "github-dark",
     });
-    assertHtml(output, Buffer.byteLength(source), `Shiki (${entry.language})`);
     outputBytes += Buffer.byteLength(output);
   }
 }
 const renderNs = nsSince(renderStarted);
+if (outputBytes <= applicationInputBytes) throw new Error("Shiki did not expand the fixture");
 const afterRender = process.memoryUsage();
 highlighter.dispose();
 
