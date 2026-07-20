@@ -13,7 +13,7 @@ defmodule Lumis.ApplicationBenchmark do
     end
 
     initialize()
-    metadata = render(workload)
+    metadata = render(workload, true)
     validate!(metadata)
 
     File.mkdir_p!(Path.dirname(output_path))
@@ -28,7 +28,10 @@ defmodule Lumis.ApplicationBenchmark do
         languages: @languages,
         snippetCount: metadata.snippet_count,
         inputBytes: metadata.input_bytes,
-        outputBytes: metadata.output_bytes
+        outputBytes: metadata.output_bytes,
+        executionContract: execution_contract(),
+        loadedLanguageScope: "requested-via-direct-call",
+        theme: "github_dark"
       }) <> "\n"
     )
 
@@ -59,20 +62,16 @@ defmodule Lumis.ApplicationBenchmark do
     Code.ensure_loaded!(Lumis.Native)
     available_languages = Lumis.available_languages()
 
-    for language <- @languages do
+    Enum.each(@languages, fn language ->
       unless Map.has_key?(available_languages, language) do
         raise "Lumis Elixir is missing #{language}"
       end
-
-      Lumis.highlight!("",
-        formatter: {:html_inline, language: language, theme: "github_dark"}
-      )
-    end
+    end)
 
     :ok
   end
 
-  defp render(workload) do
+  defp render(workload, validate_html \\ false) do
     {input_bytes, output_bytes, snippet_count} =
       Enum.reduce(workload, {0, 0, 0}, fn entry, totals ->
         language = Map.fetch!(entry, "id")
@@ -86,8 +85,9 @@ defmodule Lumis.ApplicationBenchmark do
                 formatter: {:html_inline, language: language, theme: "github_dark"}
               )
 
-            unless String.contains?(output, "<pre") and String.contains?(output, "<span") and
-                     byte_size(output) > byte_size(source) do
+            if validate_html and
+                 not (String.contains?(output, "<pre") and String.contains?(output, "<span") and
+                        byte_size(output) > byte_size(source)) do
               raise "Lumis Elixir did not produce highlighted HTML for #{language}"
             end
 
@@ -108,6 +108,14 @@ defmodule Lumis.ApplicationBenchmark do
        do: :ok
 
   defp validate!(metadata), do: raise("invalid Elixir benchmark output: #{inspect(metadata)}")
+
+  defp execution_contract do
+    %{
+      requestedLanguages: length(@languages),
+      renderHighlights: 6,
+      totalHighlights: 6
+    }
+  end
 
   defp duration(name, default) do
     case System.get_env(name) do

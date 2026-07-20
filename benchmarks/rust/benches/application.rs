@@ -15,6 +15,10 @@ use syntect::highlighting::ThemeSet;
 use syntect::html::highlighted_html_for_string;
 use syntect::parsing::SyntaxSet;
 
+const REQUESTED_LANGUAGES: usize = 2;
+const RENDER_HIGHLIGHTS: usize = 6;
+const TOTAL_HIGHLIGHTS: usize = RENDER_HIGHLIGHTS;
+
 struct Workload {
     languages: Vec<(String, Vec<String>)>,
     input_bytes: usize,
@@ -95,7 +99,7 @@ fn initialize_lumis() -> LumisRuntime {
     LumisRuntime { javascript, json }
 }
 
-fn render_lumis(runtime: &LumisRuntime, workload: &Workload) -> usize {
+fn render_lumis(runtime: &LumisRuntime, workload: &Workload, validate: bool) -> usize {
     let mut output_bytes = 0;
     for (language, snippets) in &workload.languages {
         let formatter = match language.as_str() {
@@ -108,10 +112,13 @@ fn render_lumis(runtime: &LumisRuntime, workload: &Workload) -> usize {
             formatter
                 .format(black_box(source), &mut output)
                 .expect("render application snippet");
-            assert!(
-                output.len() > source.len(),
-                "Lumis output must contain markup"
-            );
+            if validate {
+                let html = std::str::from_utf8(&output).expect("Lumis output must be UTF-8");
+                assert!(
+                    html.contains("<pre") && html.contains("<span") && output.len() > source.len(),
+                    "Lumis output must contain highlighted HTML"
+                );
+            }
             output_bytes += black_box(output.len());
         }
     }
@@ -125,7 +132,12 @@ fn initialize_syntect() -> SyntectRuntime {
     }
 }
 
-fn render_syntect(runtime: &SyntectRuntime, workload: &Workload) -> usize {
+fn syntect_syntaxes(
+    runtime: &SyntectRuntime,
+) -> (
+    &syntect::parsing::SyntaxReference,
+    &syntect::parsing::SyntaxReference,
+) {
     let javascript = runtime
         .syntaxes
         .find_syntax_by_extension("js")
@@ -134,6 +146,11 @@ fn render_syntect(runtime: &SyntectRuntime, workload: &Workload) -> usize {
         .syntaxes
         .find_syntax_by_extension("json")
         .expect("syntect built-in JSON syntax");
+    (javascript, json)
+}
+
+fn render_syntect(runtime: &SyntectRuntime, workload: &Workload, validate: bool) -> usize {
+    let (javascript, json) = syntect_syntaxes(runtime);
     let theme = &runtime.themes.themes["base16-ocean.dark"];
     let mut output_bytes = 0;
     for (language, snippets) in &workload.languages {
@@ -146,10 +163,14 @@ fn render_syntect(runtime: &SyntectRuntime, workload: &Workload) -> usize {
             let output =
                 highlighted_html_for_string(black_box(source), &runtime.syntaxes, syntax, theme)
                     .expect("render application snippet");
-            assert!(
-                output.len() > source.len(),
-                "syntect output must contain markup"
-            );
+            if validate {
+                assert!(
+                    output.contains("<pre")
+                        && output.contains("<span")
+                        && output.len() > source.len(),
+                    "syntect output must contain highlighted HTML"
+                );
+            }
             output_bytes += black_box(output.len());
         }
     }
@@ -165,7 +186,13 @@ fn duration(name: &str, default: f64) -> Duration {
     )
 }
 
-fn write_metadata(implementation: &str, workload: &Workload, output_bytes: usize) {
+fn write_metadata(
+    implementation: &str,
+    workload: &Workload,
+    output_bytes: usize,
+    loaded_language_scope: &str,
+    theme: &str,
+) {
     let Ok(directory) = env::var("BENCH_METADATA_DIR") else {
         return;
     };
@@ -195,6 +222,13 @@ fn write_metadata(implementation: &str, workload: &Workload, output_bytes: usize
                 "snippetCount": snippet_count,
                 "inputBytes": workload.input_bytes,
                 "outputBytes": output_bytes,
+                "executionContract": {
+                    "requestedLanguages": REQUESTED_LANGUAGES,
+                    "renderHighlights": RENDER_HIGHLIGHTS,
+                    "totalHighlights": TOTAL_HIGHLIGHTS,
+                },
+                "loadedLanguageScope": loaded_language_scope,
+                "theme": theme,
             })
         ),
     )
@@ -205,12 +239,24 @@ fn application(c: &mut Criterion) {
     let workload = load_workload();
     let lumis = initialize_lumis();
     let syntect = initialize_syntect();
-    let lumis_output_bytes = render_lumis(&lumis, &workload);
-    let syntect_output_bytes = render_syntect(&syntect, &workload);
+    let lumis_output_bytes = render_lumis(&lumis, &workload, true);
+    let syntect_output_bytes = render_syntect(&syntect, &workload, true);
     assert!(lumis_output_bytes > workload.input_bytes);
     assert!(syntect_output_bytes > workload.input_bytes);
-    write_metadata("lumis-rust", &workload, lumis_output_bytes);
-    write_metadata("syntect", &workload, syntect_output_bytes);
+    write_metadata(
+        "lumis-rust",
+        &workload,
+        lumis_output_bytes,
+        "requested-formatters",
+        "github_dark",
+    );
+    write_metadata(
+        "syntect",
+        &workload,
+        syntect_output_bytes,
+        "bundled-defaults",
+        "base16-ocean.dark",
+    );
 
     let sample_size = env::var("BENCH_SAMPLES")
         .ok()
@@ -226,12 +272,12 @@ fn application(c: &mut Criterion) {
         b.iter_with_large_drop(|| black_box(initialize_lumis()))
     });
     group.bench_function(BenchmarkId::new("lumis-rust", "render"), |b| {
-        b.iter(|| black_box(render_lumis(&lumis, &workload)))
+        b.iter(|| black_box(render_lumis(&lumis, &workload, false)))
     });
     group.bench_function(BenchmarkId::new("lumis-rust", "total"), |b| {
         b.iter_with_large_drop(|| {
             let runtime = initialize_lumis();
-            let output_bytes = black_box(render_lumis(&runtime, &workload));
+            let output_bytes = black_box(render_lumis(&runtime, &workload, false));
             (runtime, output_bytes)
         })
     });
@@ -239,12 +285,12 @@ fn application(c: &mut Criterion) {
         b.iter_with_large_drop(|| black_box(initialize_syntect()))
     });
     group.bench_function(BenchmarkId::new("syntect", "render"), |b| {
-        b.iter(|| black_box(render_syntect(&syntect, &workload)))
+        b.iter(|| black_box(render_syntect(&syntect, &workload, false)))
     });
     group.bench_function(BenchmarkId::new("syntect", "total"), |b| {
         b.iter_with_large_drop(|| {
             let runtime = initialize_syntect();
-            let output_bytes = black_box(render_syntect(&runtime, &workload));
+            let output_bytes = black_box(render_syntect(&runtime, &workload, false));
             (runtime, output_bytes)
         })
     });

@@ -10,12 +10,16 @@ import {
 } from "./common.mjs";
 
 const implementation = process.env.BENCH_APPLICATION_IMPLEMENTATION;
-const samples = Number.parseInt(process.env.BENCH_SAMPLES ?? "10", 10);
+const minimumSamples = Number.parseInt(process.env.BENCH_SAMPLES ?? "20", 10);
+const measurementSeconds = Number.parseFloat(process.env.BENCH_TIME_SECONDS ?? "2");
 const requestedOutput = process.env.BENCH_OUTPUT;
 
 if (!requestedOutput) throw new Error("BENCH_OUTPUT is required");
-if (!Number.isSafeInteger(samples) || samples < 2) {
-  throw new Error(`BENCH_SAMPLES must be an integer greater than one, got ${samples}`);
+if (!Number.isSafeInteger(minimumSamples) || minimumSamples < 2) {
+  throw new Error(`BENCH_SAMPLES must be an integer greater than one, got ${minimumSamples}`);
+}
+if (!Number.isFinite(measurementSeconds) || measurementSeconds <= 0) {
+  throw new Error(`BENCH_TIME_SECONDS must be positive, got ${measurementSeconds}`);
 }
 if (!["lumis-js-native", "lumis-js-wasm", "shiki"].includes(implementation)) {
   throw new Error(`unknown JavaScript application implementation: ${implementation}`);
@@ -29,15 +33,19 @@ await prepareApplicationRuntime();
 process.chdir(applicationRuntimeDir);
 
 const fixtureStarted = process.hrtime.bigint();
-const { applicationInputBytes, applicationSnippetCount, applicationWorkload } =
-  await import("./application-workload.mjs");
+const {
+  applicationExecutionContract,
+  applicationInputBytes,
+  applicationSnippetCount,
+  applicationWorkload,
+} = await import("./application-workload.mjs");
 const fixtureNs = nsSince(fixtureStarted);
 
 const importStarted = process.hrtime.bigint();
 const adapter = implementation === "shiki" ? await loadShiki() : await loadLumis();
 const importNs = nsSince(importStarted);
 const initialized = await adapter.initialize();
-const outputBytes = adapter.render(initialized);
+const outputBytes = adapter.render(initialized, true);
 adapter.validate(outputBytes);
 
 async function measureCase(run, dispose = () => {}) {
@@ -56,10 +64,10 @@ async function measureCase(run, dispose = () => {}) {
         do_not_optimize(result.outputBytes ?? result);
       },
       {
-        min_samples: samples,
-        max_samples: samples,
-        min_cpu_time: 0,
-        warmup_samples: 1,
+        min_samples: minimumSamples,
+        max_samples: 1_000_000,
+        min_cpu_time: measurementSeconds * 1e9,
+        warmup_samples: 2,
         batch_samples: 1,
         gc: cleanup,
         inner_gc: true,
@@ -73,7 +81,10 @@ async function measureCase(run, dispose = () => {}) {
 }
 
 const benchmarks = {
-  init: await measureCase(async () => adapter.initialize(), adapter.dispose),
+  init: await measureCase(
+    async () => ({ runtime: await adapter.initialize() }),
+    adapter.disposeResult,
+  ),
   render: await measureCase(() => adapter.render(initialized)),
   total: await measureCase(async () => {
     const runtime = await adapter.initialize();
@@ -92,10 +103,17 @@ const report = {
   snippetCount: applicationSnippetCount,
   inputBytes: applicationInputBytes,
   outputBytes,
+  executionContract: applicationExecutionContract,
+  loadedLanguageScope: "requested-only",
+  theme: "github-dark",
   fixtureNs,
   importNs,
   node: process.version,
-  samples,
+  measurement: {
+    minimumSamples,
+    measurementSeconds,
+    warmupSamples: 2,
+  },
   benchmarks,
 };
 
@@ -134,12 +152,12 @@ async function loadLumis() {
       );
       return { formatters, highlighter };
     },
-    render({ formatters, highlighter }) {
+    render({ formatters, highlighter }, validate = false) {
       let renderedBytes = 0;
       for (const entry of applicationWorkload) {
         for (const source of entry.snippets) {
           const output = highlighter.highlight(source, formatters[entry.language]);
-          assertHtml(output, Buffer.byteLength(source), implementation);
+          if (validate) assertHtml(output, Buffer.byteLength(source), implementation);
           renderedBytes += Buffer.byteLength(output);
         }
       }
@@ -168,12 +186,9 @@ async function loadShiki() {
         themes: ["github-dark"],
         engine: createOnigurumaEngine(import("shiki/wasm")),
       });
-      for (const { language } of applicationWorkload) {
-        highlighter.codeToHtml("", { lang: language, theme: "github-dark" });
-      }
       return highlighter;
     },
-    render(highlighter) {
+    render(highlighter, validate = false) {
       let renderedBytes = 0;
       for (const entry of applicationWorkload) {
         for (const source of entry.snippets) {
@@ -181,7 +196,7 @@ async function loadShiki() {
             lang: entry.language,
             theme: "github-dark",
           });
-          assertHtml(output, Buffer.byteLength(source), implementation);
+          if (validate) assertHtml(output, Buffer.byteLength(source), implementation);
           renderedBytes += Buffer.byteLength(output);
         }
       }

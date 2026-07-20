@@ -19,6 +19,12 @@ export const applicationSnippetCount = applicationWorkload.reduce(
   0,
 );
 
+export const applicationExecutionContract = {
+  requestedLanguages: applicationWorkload.length,
+  renderHighlights: applicationSnippetCount,
+  totalHighlights: applicationSnippetCount,
+};
+
 export const applicationInputBytes = applicationWorkload.reduce(
   (bytes, entry) =>
     bytes +

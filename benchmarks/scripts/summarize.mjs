@@ -107,6 +107,9 @@ for (const path of reportFiles) {
         snippetCount: result.snippetCount,
         inputBytes: result.inputBytes,
         outputBytes: result.outputBytes,
+        executionContract: result.executionContract,
+        loadedLanguageScope: result.loadedLanguageScope,
+        theme: result.theme,
         externalMedianNs: null,
         internalTotalMedianNs: result.total.medianNs,
         fixtureMedianNs: null,
@@ -228,13 +231,13 @@ const markdown = [
   "",
   "Two languages (JavaScript and JSON), three snippets per language. Each runtime uses its native benchmark tool.",
   "",
-  "| Implementation | Runner | Workload total (ms) | Init/load (ms) | Render 6 (ms) | Samples |",
-  "| --- | --- | ---: | ---: | ---: | ---: |",
+  "| Implementation | Runner | Workload total (ms) | Init/load (ms) | Render 6 (ms) | Language loading | Output bytes |",
+  "| --- | --- | ---: | ---: | ---: | --- | ---: |",
   ...summary.application
     .toSorted((left, right) => left.internalTotalMedianNs - right.internalTotalMedianNs)
     .map(
       (row) =>
-        `| ${row.implementation} | ${row.runner} | ${(row.internalTotalMedianNs / 1e6).toFixed(3)} | ${(row.initMedianNs / 1e6).toFixed(3)} | ${(row.renderMedianNs / 1e6).toFixed(3)} | ${row.samples} |`,
+        `| ${row.implementation} | ${row.runner} | ${(row.internalTotalMedianNs / 1e6).toFixed(3)} | ${(row.initMedianNs / 1e6).toFixed(3)} | ${(row.renderMedianNs / 1e6).toFixed(3)} | ${row.loadedLanguageScope} | ${row.outputBytes} |`,
     ),
   "",
   "## CLI",

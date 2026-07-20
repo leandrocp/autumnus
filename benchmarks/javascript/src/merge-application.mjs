@@ -19,8 +19,8 @@ async function readJson(path) {
   }
 }
 
-function stats({ meanNs, medianNs, minNs, maxNs, stdDevNs, samples }) {
-  return { meanNs, medianNs, minNs, maxNs, stdDevNs, samples };
+function stats({ meanNs, medianNs, minNs, maxNs, stdDevNs, samples, iterations }) {
+  return { meanNs, medianNs, minNs, maxNs, stdDevNs, samples, iterations };
 }
 
 function mitataStats(report, phase) {
@@ -32,6 +32,7 @@ function mitataStats(report, phase) {
     maxNs: phaseStats.max,
     stdDevNs: phaseStats.stddev ?? null,
     samples: phaseStats.samples.length,
+    iterations: phaseStats.ticks,
   });
 }
 
@@ -48,6 +49,7 @@ async function criterionStats(implementation, phase) {
     maxNs: null,
     stdDevNs: estimates.std_dev.point_estimate,
     samples: sample.times.length,
+    iterations: sample.iters.reduce((total, iterations) => total + iterations, 0),
   });
 }
 
@@ -62,6 +64,7 @@ function bencheeStats(report, implementation, phase) {
     maxNs: runStats.maximum,
     stdDevNs: runStats.std_dev,
     samples: runStats.sample_size,
+    iterations: runStats.sample_size,
   });
 }
 
@@ -73,6 +76,9 @@ function metadataFrom(report) {
     snippetCount: report.snippetCount,
     inputBytes: report.inputBytes,
     outputBytes: report.outputBytes,
+    executionContract: report.executionContract,
+    loadedLanguageScope: report.loadedLanguageScope,
+    theme: report.theme ?? null,
   };
 }
 
@@ -128,11 +134,21 @@ if (
 if (new Set(results.map((result) => result.inputBytes)).size !== 1) {
   throw new Error("application implementations did not consume the same input bytes");
 }
+const expectedExecutionContract = {
+  requestedLanguages: 2,
+  renderHighlights: 6,
+  totalHighlights: 6,
+};
 for (const result of results) {
+  const contract = result.executionContract;
   if (
     result.languages?.join(",") !== "javascript,json" ||
     result.snippetCount !== 6 ||
-    result.outputBytes <= result.inputBytes
+    result.outputBytes <= result.inputBytes ||
+    !contract ||
+    Object.keys(contract).length !== Object.keys(expectedExecutionContract).length ||
+    Object.entries(expectedExecutionContract).some(([key, value]) => contract[key] !== value) ||
+    typeof result.loadedLanguageScope !== "string"
   ) {
     throw new Error(`${result.implementation} returned incompatible application metadata`);
   }
