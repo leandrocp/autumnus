@@ -59,7 +59,7 @@ Useful environment controls:
 | `BENCH_RUNS` | Hyperfine run/minimum-run count | scenario-specific |
 | `BENCH_WARMUP` | Hyperfine warmup count | scenario-specific |
 | `BENCH_SAMPLES` | Minimum Mitata observations and Criterion statistical samples | `20` |
-| `BENCH_TIME_SECONDS` | Criterion/Benchee measurement duration per case | `2` |
+| `BENCH_TIME_SECONDS` | Application runner measurement target per case | `2` |
 | `BENCH_WARMUP_SECONDS` | Criterion/Benchee warmup duration per case | `1` |
 | `BENCH_JS_SAMPLES` | Mitata samples per warm case | `5` |
 | `BENCH_RUN_DIR` | Result directory | `target/benchmarks/runs/current` |
@@ -97,7 +97,7 @@ Every measured invocation follows one validated execution contract:
 
 Fixture parsing, module imports, output validation, and report serialization are outside the timed operation. Validation metadata records the requested language count, highlight counts, input bytes, output bytes, language order, and language-loading scope; merging fails if the execution contracts differ. Syntect's public bundled-default API loads its complete default syntax and theme sets before highlighting the six fixtures, so its report explicitly records `bundled-defaults`. That is retained as a library limitation rather than hidden or approximated.
 
-Runner sample counts are deliberately absent from the comparison table because they are not the same statistical unit. Criterion samples are aggregates over multiple iterations, Mitata observations may be time-budgeted single invocations, and Benchee collects as many invocations as fit its measurement duration. Raw reports retain sample counts, iterations, dispersion, and confidence data. Default application runs give every runner a two-second measurement budget per case, with at least 20 Mitata observations and 20 Criterion statistical samples.
+Runner sample counts are deliberately absent from the comparison table because they are not the same statistical unit. Criterion samples are aggregates over multiple iterations, Mitata observations may be time-budgeted single invocations, and Benchee collects as many invocations as fit its measurement duration. Every observation still executes the same six-highlight operation; runners repeat that operation as needed for their statistical model. Raw reports retain sample counts, iterations, dispersion, and confidence data. Default application runs request a two-second measurement target per case, with at least 20 Mitata observations and 20 Criterion statistical samples; runner-native warmup, batching, and garbage-collection policies may extend collection.
 
 The common report is an index, not a replacement statistical model. Sample collection, warmup, outlier behavior, and confidence calculations remain those of Criterion, Mitata, or Benchee. Implementations use the same `github-dark` theme intent where available and inline HTML output.
 Initialization, rendering, and total workload are independent benchmark cases, so their medians are not expected to add up exactly. The combined workload is the primary app-like comparison.
