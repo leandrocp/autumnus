@@ -399,20 +399,28 @@ impl HighlightConfiguration {
             }
         }
 
-        // Construct a separate query just for dealing with the 'combined injections'.
-        // Disable the combined injection patterns in the main query.
-        let mut combined_injections_query = Query::new(&language, injection_query)?;
-        let mut has_combined_queries = false;
-        for pattern_index in 0..locals_pattern_index {
-            let settings = query.property_settings(pattern_index);
-            if settings.iter().any(|s| &*s.key == "injection.combined") {
-                has_combined_queries = true;
-                query.disable_pattern(pattern_index);
-            } else {
-                combined_injections_query.disable_pattern(pattern_index);
-            }
-        }
+        // Construct a separate query only when the injections actually contain
+        // `injection.combined` patterns. Compiling large injection queries twice
+        // is otherwise pure initialization overhead.
+        let has_combined_queries = (0..locals_pattern_index).any(|pattern_index| {
+            query
+                .property_settings(pattern_index)
+                .iter()
+                .any(|setting| &*setting.key == "injection.combined")
+        });
         let combined_injections_query = if has_combined_queries {
+            let mut combined_injections_query = Query::new(&language, injection_query)?;
+            for pattern_index in 0..locals_pattern_index {
+                let combined = query
+                    .property_settings(pattern_index)
+                    .iter()
+                    .any(|setting| &*setting.key == "injection.combined");
+                if combined {
+                    query.disable_pattern(pattern_index);
+                } else {
+                    combined_injections_query.disable_pattern(pattern_index);
+                }
+            }
             Some(combined_injections_query)
         } else {
             None
