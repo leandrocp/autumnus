@@ -159,6 +159,16 @@ pub struct HighlightConfiguration {
 pub struct Highlighter {
     pub parser: Parser,
     cursors: Vec<QueryCursor>,
+    record_parsed_layers: bool,
+    parsed_layers: Vec<ParsedLayer>,
+}
+
+/// A syntax tree produced while highlighting a host or injected language.
+pub struct ParsedLayer {
+    pub tree: Tree,
+    pub language: String,
+    pub ranges: Vec<Range>,
+    pub depth: usize,
 }
 
 /// Converts a general-purpose syntax highlighting iterator into a sequence of lines of HTML.
@@ -297,11 +307,21 @@ impl Highlighter {
         Self {
             parser: Parser::new(),
             cursors: Vec::new(),
+            record_parsed_layers: false,
+            parsed_layers: Vec::new(),
         }
     }
 
     pub fn parser(&mut self) -> &mut Parser {
         &mut self.parser
+    }
+
+    pub fn record_parsed_layers(&mut self, record: bool) {
+        self.record_parsed_layers = record;
+    }
+
+    pub fn take_parsed_layers(&mut self) -> Vec<ParsedLayer> {
+        mem::take(&mut self.parsed_layers)
     }
 
     /// Iterate over the highlighted regions for a given slice of source code.
@@ -312,6 +332,7 @@ impl Highlighter {
         cancellation_flag: Option<&'a AtomicUsize>,
         mut injection_callback: impl FnMut(&str) -> Option<&'a HighlightConfiguration> + 'a,
     ) -> Result<impl Iterator<Item = Result<HighlightEvent, Error>> + 'a, Error> {
+        self.parsed_layers.clear();
         let layers = HighlightIterLayer::new(
             source,
             None,
@@ -632,6 +653,15 @@ impl<'a> HighlightIterLayer<'a> {
                     )
                 }
                 .peekable();
+
+                if highlighter.record_parsed_layers {
+                    highlighter.parsed_layers.push(ParsedLayer {
+                        tree: tree.clone(),
+                        language: config.language_name.clone(),
+                        ranges: ranges.clone(),
+                        depth,
+                    });
+                }
 
                 result.push(HighlightIterLayer {
                     highlight_end_stack: Vec::new(),
