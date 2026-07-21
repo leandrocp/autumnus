@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public final class AccountService {
+final class Example {
     public record Account(long id, String email, boolean verified) {}
 
-    private AccountService() {}
+    private Example() {}
 
     public static Map<Boolean, List<Account>> partitionByVerification(List<Account> accounts) {
         return accounts.stream()

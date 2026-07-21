@@ -129,7 +129,7 @@
           "syntax": "rs"
         },
         {
-          "path": "benchmarks/fixtures/languages/AccountService.java",
+          "path": "benchmarks/fixtures/languages/example.java",
           "language": "java",
           "syntax": "java"
         }
