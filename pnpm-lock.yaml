@@ -14,8 +14,23 @@ importers:
       '@lumis-sh/themes':
         specifier: workspace:*
         version: link:../../packages/javascript/themes
+      '@lumis-sh/wasm-c':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-css':
+        specifier: ^0.26.0
+        version: 0.26.1
       '@lumis-sh/wasm-diff':
         specifier: 0.26.1
+        version: 0.26.1
+      '@lumis-sh/wasm-go':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-html':
+        specifier: ^0.26.0
+        version: 0.26.1
+      '@lumis-sh/wasm-java':
+        specifier: ^0.26.0
         version: 0.26.1
       '@lumis-sh/wasm-javascript':
         specifier: 0.26.1
@@ -23,6 +38,12 @@ importers:
       '@lumis-sh/wasm-json':
         specifier: 0.26.2
         version: 0.26.2
+      '@lumis-sh/wasm-python':
+        specifier: ^0.26.0
+        version: 0.26.0
+      '@lumis-sh/wasm-ruby':
+        specifier: ^0.26.0
+        version: 0.26.1
       '@lumis-sh/wasm-rust':
         specifier: 0.26.3
         version: 0.26.3

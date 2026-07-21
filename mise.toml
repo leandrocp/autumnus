@@ -275,101 +275,11 @@ set -euo pipefail
 mise run -C benchmarks check
 '''
 
-[tasks.'bench-rust']
-usage = '''
-arg "[quick]" default="false"
-'''
-run = '''
-#!/usr/bin/env bash
-set -euo pipefail
-if [ "${usage_quick?}" = "true" ]; then mise run -C benchmarks rust quick; else mise run -C benchmarks rust full; fi
-'''
-
-[tasks.'bench-js']
-run = '''
-#!/usr/bin/env bash
-set -euo pipefail
-mise run -C benchmarks javascript
-'''
-
-[tasks.'bench-application']
-run = '''
-#!/usr/bin/env bash
-set -euo pipefail
-mise run -C benchmarks application
-'''
-
-[tasks.'bench-cli']
-usage = '''
-arg "[scenario]" default="repeat-use"
-'''
-run = '''
-#!/usr/bin/env bash
-set -euo pipefail
-mise run -C benchmarks cli "${usage_scenario?}"
-'''
-
-[tasks.'bench-cli-first-use']
-run = '''
-#!/usr/bin/env bash
-set -euo pipefail
-mise run -C benchmarks cli:first-use
-'''
-
-[tasks.'bench-memory']
-run = '''
-#!/usr/bin/env bash
-set -euo pipefail
-mise run -C benchmarks memory
-'''
-
-[tasks.'bench-finalize']
-run = '''
-#!/usr/bin/env bash
-set -euo pipefail
-mise run -C benchmarks finalize
-'''
-
-[tasks.'bench-smoke']
-run = '''
-#!/usr/bin/env bash
-set -euo pipefail
-mise run -C benchmarks smoke
-'''
-
-[tasks.'bench-dev']
-run = '''
-#!/usr/bin/env bash
-set -euo pipefail
-mise run -C benchmarks dev
-'''
-
 [tasks.'bench']
 run = '''
 #!/usr/bin/env bash
 set -euo pipefail
-mise run -C benchmarks full
-'''
-
-[tasks.'bench-stage']
-usage = '''
-arg "<label>"
-'''
-run = '''
-#!/usr/bin/env bash
-set -euo pipefail
-mise run -C benchmarks stage "${usage_label?}"
-'''
-
-[tasks.'bench-compare']
-usage = '''
-arg "<left>"
-arg "<right>"
-'''
-run = '''
-#!/usr/bin/env bash
-set -euo pipefail
-mise run -C benchmarks compare "${usage_left?}" "${usage_right?}"
+mise run -C benchmarks run
 '''
 
 [tasks.'cli-install']

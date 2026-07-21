@@ -1,0 +1,9 @@
+{
+  "name": "benchmark-fixture",
+  "private": true,
+  "scripts": {
+    "check": "mise run bench-check",
+    "bench": "mise run bench"
+  },
+  "features": ["rust", "javascript", "elixir"]
+}

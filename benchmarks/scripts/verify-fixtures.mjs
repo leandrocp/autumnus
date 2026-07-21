@@ -1,70 +1,90 @@
 #!/usr/bin/env node
 
 import { createHash } from "node:crypto";
-import { mkdir, readFile } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const benchmarksDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const repoDir = resolve(benchmarksDir, "..");
 const manifestPath = resolve(benchmarksDir, "fixtures/manifest.json");
-
-function parseJson(source, label) {
-  try {
-    return JSON.parse(source);
-  } catch (error) {
-    throw new Error(`invalid ${label}: ${error.message}`, { cause: error });
-  }
-}
+const outputDir = resolve(repoDir, "target/benchmarks/fixtures");
+const resolvedPath = resolve(outputDir, "scenarios.json");
 
 function run(command, args) {
   const result = spawnSync(command, args, { cwd: repoDir, encoding: "utf8" });
   if (result.status !== 0) {
-    throw new Error(
-      `${command} ${args.join(" ")} failed\n${result.stdout ?? ""}${result.stderr ?? ""}`,
-    );
+    throw new Error(`${command} ${args.join(" ")} failed\n${result.stdout}${result.stderr}`);
   }
 }
 
 run(process.execPath, [resolve(benchmarksDir, "scripts/generate-fixtures.mjs")]);
 
-const manifest = parseJson(await readFile(manifestPath, "utf8"), "fixture manifest");
-const rustcOutputDir = resolve(repoDir, "target/benchmarks/fixture-validation");
-await mkdir(rustcOutputDir, { recursive: true });
-
-const verified = [];
-for (const fixture of manifest.fixtures) {
-  const path = resolve(repoDir, fixture.path);
-  const source = await readFile(path);
-  const text = source.toString("utf8");
-  const sha256 = createHash("sha256").update(source).digest("hex");
-  const lines = text.split("\n").length - (text.endsWith("\n") ? 1 : 0);
-
-  if (text.includes("\r\n")) throw new Error(`${fixture.id} must use LF line endings`);
-  if (sha256 !== fixture.sha256) {
-    throw new Error(`${fixture.id} SHA-256 mismatch: expected ${fixture.sha256}, got ${sha256}`);
-  }
-  if (source.length < fixture.minBytes) {
-    throw new Error(`${fixture.id} is too small: ${source.length} < ${fixture.minBytes}`);
-  }
-  if (lines < fixture.minLines) {
-    throw new Error(`${fixture.id} has too few lines: ${lines} < ${fixture.minLines}`);
-  }
-
-  if (fixture.language === "rust") {
-    run("rustc", [
-      "--edition=2021",
-      "--crate-type=lib",
-      "--emit=metadata",
-      "-Awarnings",
-      path,
-      "-o",
-      resolve(rustcOutputDir, `${fixture.id}.rmeta`),
-    ]);
-  }
-
-  verified.push({ id: fixture.id, path, sha256, bytes: source.length, lines });
+const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+if (manifest.schemaVersion !== 1 || manifest.scenarios?.length !== 4) {
+  throw new Error("benchmark manifest must define exactly four scenarios");
 }
 
-console.log(JSON.stringify({ schemaVersion: manifest.schemaVersion, fixtures: verified }, null, 2));
+const compiledRust = new Set();
+const scenarios = [];
+for (const scenario of manifest.scenarios) {
+  const files = [];
+  for (const fixture of scenario.files) {
+    const path = resolve(repoDir, fixture.path);
+    const source = await readFile(path);
+    const text = source.toString("utf8");
+    if (source.length === 0) throw new Error(`${fixture.path} is empty`);
+    if (text.includes("\r\n")) throw new Error(`${fixture.path} must use LF line endings`);
+
+    const sha256 = createHash("sha256").update(source).digest("hex");
+    files.push({ ...fixture, bytes: source.length, sha256 });
+
+    if (fixture.language === "rust" && !compiledRust.has(path)) {
+      compiledRust.add(path);
+      const output = resolve(outputDir, "validation", `${sha256}.rmeta`);
+      await mkdir(dirname(output), { recursive: true });
+      run("rustc", [
+        "--edition=2021",
+        "--crate-type=lib",
+        "--emit=metadata",
+        "-Awarnings",
+        path,
+        "-o",
+        output,
+      ]);
+    }
+  }
+
+  if (scenario.id === "large-one-language" && files[0].bytes < 5 * 1024 * 1024) {
+    throw new Error("large-one-language must contain at least 5 MiB");
+  }
+  if (scenario.id.startsWith("ten-files") && files.length !== 10) {
+    throw new Error(`${scenario.id} must contain exactly ten files`);
+  }
+  if (
+    scenario.id.startsWith("ten-files") &&
+    new Set(files.map((fixture) => fixture.sha256)).size !== 10
+  ) {
+    throw new Error(`${scenario.id} must contain ten different files`);
+  }
+  if (
+    scenario.id === "ten-files-ten-languages" &&
+    new Set(files.map((fixture) => fixture.language)).size !== 10
+  ) {
+    throw new Error("ten-files-ten-languages must contain ten different languages");
+  }
+
+  scenarios.push({
+    id: scenario.id,
+    description: scenario.description,
+    fileCount: files.length,
+    languageCount: new Set(files.map((fixture) => fixture.language)).size,
+    inputBytes: files.reduce((total, fixture) => total + fixture.bytes, 0),
+    files,
+  });
+}
+
+await mkdir(outputDir, { recursive: true });
+await writeFile(resolvedPath, `${JSON.stringify({ schemaVersion: 1, scenarios }, null, 2)}\n`);
+console.log(resolvedPath);

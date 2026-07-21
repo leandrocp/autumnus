@@ -1,43 +1,139 @@
 {
   "schemaVersion": 1,
-  "fixtures": [
+  "scenarios": [
     {
-      "id": "rust-small",
-      "language": "rust",
-      "path": "benchmarks/fixtures/rust-small.rs",
-      "encoding": "utf-8",
-      "lineEnding": "lf",
-      "sha256": "97b810cf435a7a53aec5da2f32f6800a0c8ce55b71bb126cea195d50fc4a495b",
-      "minBytes": 1024,
-      "minLines": 40,
-      "generator": null
+      "id": "small-one-language",
+      "description": "Highlight one small Rust file.",
+      "files": [
+        {
+          "path": "benchmarks/fixtures/rust-small.rs",
+          "language": "rust",
+          "syntax": "rs"
+        }
+      ]
     },
     {
-      "id": "rust-large",
-      "language": "rust",
-      "path": "target/benchmarks/fixtures/rust-large.rs",
-      "encoding": "utf-8",
-      "lineEnding": "lf",
-      "sha256": "9726fadc0dbebdfe87d3a814b794775950fa3411a1e95e01dfb1560b0722a18d",
-      "minBytes": 1048576,
-      "minLines": 20000,
-      "generator": {
-        "name": "generate-fixtures.mjs",
-        "version": 1,
-        "seed": 20260711,
-        "modules": 1200
-      }
+      "id": "large-one-language",
+      "description": "Highlight one generated 5 MiB Rust file.",
+      "files": [
+        {
+          "path": "target/benchmarks/fixtures/rust-large.rs",
+          "language": "rust",
+          "syntax": "rs"
+        }
+      ]
     },
     {
-      "id": "application",
-      "language": "javascript,json",
-      "path": "benchmarks/fixtures/application.json",
-      "encoding": "utf-8",
-      "lineEnding": "lf",
-      "sha256": "95aaee639b9106ad0eb7b770c73d719a04225debf0b4bd1490b9ccae296e3f4a",
-      "minBytes": 1400,
-      "minLines": 20,
-      "generator": null
+      "id": "ten-files-one-language",
+      "description": "Highlight ten different small Rust files.",
+      "files": [
+        {
+          "path": "target/benchmarks/fixtures/rust/file-01.rs",
+          "language": "rust",
+          "syntax": "rs"
+        },
+        {
+          "path": "target/benchmarks/fixtures/rust/file-02.rs",
+          "language": "rust",
+          "syntax": "rs"
+        },
+        {
+          "path": "target/benchmarks/fixtures/rust/file-03.rs",
+          "language": "rust",
+          "syntax": "rs"
+        },
+        {
+          "path": "target/benchmarks/fixtures/rust/file-04.rs",
+          "language": "rust",
+          "syntax": "rs"
+        },
+        {
+          "path": "target/benchmarks/fixtures/rust/file-05.rs",
+          "language": "rust",
+          "syntax": "rs"
+        },
+        {
+          "path": "target/benchmarks/fixtures/rust/file-06.rs",
+          "language": "rust",
+          "syntax": "rs"
+        },
+        {
+          "path": "target/benchmarks/fixtures/rust/file-07.rs",
+          "language": "rust",
+          "syntax": "rs"
+        },
+        {
+          "path": "target/benchmarks/fixtures/rust/file-08.rs",
+          "language": "rust",
+          "syntax": "rs"
+        },
+        {
+          "path": "target/benchmarks/fixtures/rust/file-09.rs",
+          "language": "rust",
+          "syntax": "rs"
+        },
+        {
+          "path": "target/benchmarks/fixtures/rust/file-10.rs",
+          "language": "rust",
+          "syntax": "rs"
+        }
+      ]
+    },
+    {
+      "id": "ten-files-ten-languages",
+      "description": "Highlight ten different small files, each in a different language.",
+      "files": [
+        {
+          "path": "benchmarks/fixtures/languages/example.c",
+          "language": "c",
+          "syntax": "c"
+        },
+        {
+          "path": "benchmarks/fixtures/languages/example.css",
+          "language": "css",
+          "syntax": "css"
+        },
+        {
+          "path": "benchmarks/fixtures/languages/example.go",
+          "language": "go",
+          "syntax": "go"
+        },
+        {
+          "path": "benchmarks/fixtures/languages/example.html",
+          "language": "html",
+          "syntax": "html"
+        },
+        {
+          "path": "benchmarks/fixtures/languages/example.js",
+          "language": "javascript",
+          "syntax": "js"
+        },
+        {
+          "path": "benchmarks/fixtures/languages/example.json",
+          "language": "json",
+          "syntax": "json"
+        },
+        {
+          "path": "benchmarks/fixtures/languages/example.py",
+          "language": "python",
+          "syntax": "py"
+        },
+        {
+          "path": "benchmarks/fixtures/languages/example.rb",
+          "language": "ruby",
+          "syntax": "rb"
+        },
+        {
+          "path": "benchmarks/fixtures/languages/example.rs",
+          "language": "rust",
+          "syntax": "rs"
+        },
+        {
+          "path": "benchmarks/fixtures/languages/AccountService.java",
+          "language": "java",
+          "syntax": "java"
+        }
+      ]
     }
   ]
 }
