@@ -2953,9 +2953,9 @@ dependencies = [
 
 [[package]]
 name = "tree-sitter-clojure-orchard"
-version = "0.2.5"
+version = "0.2.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c3e2db28a1ab22649790656936325bdc69e992c38006258694ea39a7620e784d"
+checksum = "67b854ba5935d62a713280b867c09cae08c6ad2286895734b5550ed02122d8fd"
 dependencies = [
  "cc",
  "tree-sitter-language",

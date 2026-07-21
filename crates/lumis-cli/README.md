@@ -23,6 +23,8 @@ cargo install lumis-cli
 
 ```text
 lumis highlight          Highlight a file or stdin
+lumis dump tree          Print configurable Tree-sitter syntax trees
+lumis dump events        Print raw highlight events as JSON
 lumis languages list     List supported language ids and file patterns
 lumis themes list        List built-in themes and custom themes in the data dir
 lumis themes generate    Extract a theme JSON file from a Neovim colorscheme repo
@@ -87,6 +89,26 @@ Notes:
 - `--width` / `-w` applies only to terminal output. Pass a number or let it default to auto, which uses the current `COLUMNS` value when stdout is a TTY.
 - `html-multi-themes` requires at least one `--themes name:theme_id` entry.
 
+## Inspect Tree-sitter output
+
+Use `dump tree` to print named syntax nodes as branch lines with languages and
+ranges. Add source text, resolved highlights, and injected language trees only
+when needed. `--text` shows an 80-character middle preview; use `--text=<limit>`
+or `--text=full` to adjust it. Syntax nodes use `[name]`; resolved highlights
+use `@name`. Use the S-expression format for canonical parser output:
+
+```sh
+lumis dump tree src/main.js
+lumis dump tree component.svelte --text
+lumis dump tree component.svelte --injections --highlights
+lumis dump tree src/main.js --format sexp
+lumis dump events src/main.js
+```
+
+See the
+[CLI command reference](https://lumis.sh/docs/cli/commands#lumis-dump-tree)
+for output details.
+
 ## Languages
 
 List supported languages and the filename patterns used for autodetection:
@@ -138,7 +160,7 @@ theme = "auto" # or a theme name such as "tokyonight_moon"
 The `--theme` command-line option takes precedence over the configured theme.
 
 | Platform | Default path |
-|----------|--------------|
+| ---------- | -------------- |
 | macOS | `~/.config/lumis/config.toml` |
 | Linux | `${XDG_CONFIG_HOME:-~/.config}/lumis/config.toml` |
 | Windows | `%XDG_CONFIG_HOME%/lumis/config.toml`, `%APPDATA%/lumis/config.toml` otherwise |
@@ -178,7 +200,7 @@ Notes:
 Lumis stores parser WASM files and custom theme JSON files in a local data directory.
 
 | Platform | Default path |
-|----------|--------------|
+| ---------- | -------------- |
 | macOS | `~/Library/Application Support/lumis/` |
 | Linux | `~/.local/share/lumis/` |
 | Windows | `%APPDATA%/lumis/` |

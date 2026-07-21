@@ -17,8 +17,10 @@ keywords:
 
 - if a path is provided, Lumis reads that file
 - if no path is provided, Lumis reads from stdin
-- you can pipe content directly into `lumis highlight`
-- terminal output is the default formatter unless you pass `--formatter`
+- you can pipe content directly into `lumis highlight` or any `lumis dump`
+  command
+- terminal output is the default highlight formatter unless you pass
+  `--formatter`
 
 ```bash
 cat main.rs | lumis highlight -l rust
@@ -41,7 +43,29 @@ Omit `--language` when the path, shebang, or source content should drive detecti
 lumis highlight main.rs
 ```
 
-If no language can be inferred, plaintext is the safe fallback.
+If no language can be inferred, plaintext is the safe fallback for highlighting.
+Dump commands instead ask you to pass `--language`, because they need a parser.
+
+## Parser and query debugging
+
+Use `lumis dump tree` to inspect named syntax nodes as branch lines with
+language and range metadata. `--text`, `--highlights`, and `--injections` add
+source text, resolved highlight-query results, and injected syntax trees. Text
+uses an 80-character middle preview by default; use `--text=<limit>` or
+`--text=full` to change it. Syntax nodes use `[name]`; resolved highlights use
+`@name`. Use `lumis dump
+events` when you need the raw highlight event stream.
+
+```bash
+lumis dump tree component.svelte
+lumis dump tree component.svelte --injections --text --highlights
+lumis dump tree component.svelte --format sexp
+echo 'function increment() { count++; }' | lumis dump events -l svelte
+```
+
+Both commands use the same path, stdin, language detection, parser download,
+and cache behavior as `lumis highlight`. See the
+[CLI command reference](/cli/commands#lumis-dump-tree) for output details.
 
 ## Theme selection
 

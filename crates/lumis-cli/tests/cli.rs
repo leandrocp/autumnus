@@ -177,6 +177,372 @@ fn highlight_nonexistent_file() {
         .stderr(predicate::str::contains("No such file"));
 }
 
+#[test]
+fn dump_tree_from_stdin() {
+    cmd()
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .args(["dump", "tree", "-l", "javascript"])
+        .write_stdin("const answer = 42;\n")
+        .assert()
+        .success()
+        .stdout(predicate::str::starts_with(
+            "[program] language: javascript, range: 0:0-1:0",
+        ))
+        .stdout(predicate::str::contains("[lexical_declaration]"))
+        .stdout(predicate::str::contains("text:").not());
+}
+
+#[test]
+fn dump_tree_autodetects_language_from_path() {
+    let tmp = tempfile::tempdir().unwrap();
+    let source_path = tmp.path().join("example.js");
+    write_file(&source_path, "const answer = 42;\n");
+
+    cmd()
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .arg("dump")
+        .arg("tree")
+        .arg(source_path)
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(
+            "[program] language: javascript, range: 0:0-1:0",
+        ));
+}
+
+#[test]
+fn dump_tree_supports_canonical_sexp_format() {
+    cmd()
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .args(["dump", "tree", "--format", "sexp", "-l", "javascript"])
+        .write_stdin("const answer = 42;\n")
+        .assert()
+        .success()
+        .stdout(predicate::str::starts_with("(program\n"))
+        .stdout(predicate::str::contains("(lexical_declaration"));
+}
+
+#[test]
+fn dump_tree_text_uses_bounded_previews_by_default() {
+    let long_text = "a".repeat(100);
+    let source = format!("// {long_text}\n");
+    let output = cmd()
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .args(["dump", "tree", "--text", "-l", "javascript"])
+        .write_stdin(source)
+        .output()
+        .unwrap();
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8(output.stdout).unwrap();
+    assert!(stdout.contains("..."));
+    assert!(!stdout.contains(&long_text));
+}
+
+#[test]
+fn dump_tree_text_accepts_custom_limit_and_full_value() {
+    let source = "// abcdefghijklmnopqrstuvwxyz\n";
+
+    cmd()
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .args(["dump", "tree", "--text=10", "-l", "javascript"])
+        .write_stdin(source)
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("text: \"// a...yz\\n\""));
+
+    cmd()
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .args(["dump", "tree", "--text=full", "-l", "javascript"])
+        .write_stdin(source)
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(format!("text: {source:?}")));
+}
+
+#[test]
+fn dump_tree_text_does_not_consume_the_path() {
+    let tmp = tempfile::tempdir().unwrap();
+    let source_path = tmp.path().join("example.js");
+    write_file(&source_path, "const answer = 42;\n");
+
+    cmd()
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .args(["dump", "tree", "--text"])
+        .arg(source_path)
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("text: \"const answer = 42;\\n\""));
+}
+
+#[test]
+fn dump_tree_sexp_format_labels_injected_trees() {
+    cmd()
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .args([
+            "dump",
+            "tree",
+            "--format",
+            "sexp",
+            "--injections",
+            "-l",
+            "markdown",
+        ])
+        .write_stdin("```javascript\nconst answer = 42;\n```\n")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(
+            "language: markdown, depth: 0, range: 0:0-3:0",
+        ))
+        .stdout(predicate::str::contains("(document\n"))
+        .stdout(predicate::str::contains(
+            "language: javascript, depth: 1, range: 1:0-2:0",
+        ))
+        .stdout(predicate::str::contains("(program\n"));
+}
+
+#[test]
+fn dump_tree_injections_and_injected_highlights_are_opt_in() {
+    let source = "```javascript\nconst answer = 42;\n```\n";
+
+    cmd()
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .args(["dump", "tree", "--highlights", "-l", "markdown"])
+        .write_stdin(source)
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("language: javascript").not());
+
+    cmd()
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .args([
+            "dump",
+            "tree",
+            "--injections",
+            "--highlights",
+            "-l",
+            "markdown",
+        ])
+        .write_stdin(source)
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(
+            "[program] language: javascript, range: 1:0-2:0",
+        ))
+        .stdout(predicate::str::contains("@keyword language: javascript"));
+}
+
+#[test]
+fn dump_tree_rejects_annotations_in_sexp_format() {
+    cmd()
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .args([
+            "dump",
+            "tree",
+            "--format",
+            "sexp",
+            "--text",
+            "-l",
+            "javascript",
+        ])
+        .write_stdin("const answer = 42;\n")
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains(
+            "--format sexp cannot be combined with --text or --highlights",
+        ));
+}
+
+#[test]
+fn dump_events_as_json() {
+    cmd()
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .args(["dump", "events", "-l", "javascript"])
+        .write_stdin("const answer = 42;\n")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("\"type\": \"start\""))
+        .stdout(predicate::str::contains("\"scope\": \"keyword\""))
+        .stdout(predicate::str::contains("\"type\": \"source\""));
+}
+
+#[test]
+fn dump_tree_prints_exact_highlight_ranges_and_text() {
+    cmd()
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .args(["dump", "tree", "--text", "--highlights", "-l", "javascript"])
+        .write_stdin("const answer = 42;\n")
+        .assert()
+        .success()
+        .stdout(predicate::str::starts_with(
+            "[program] language: javascript, range: 0:0-1:0",
+        ))
+        .stdout(predicate::str::contains("[lexical_declaration]"))
+        .stdout(predicate::str::contains(
+            "@keyword language: javascript, range: 0:0-0:5, text: \"const\"",
+        ))
+        .stdout(predicate::str::contains(
+            "@punctuation.delimiter language: javascript, range: 0:17-0:18, text: \";\"",
+        ))
+        .stdout(predicate::str::contains(
+            "[identifier] field: name, language: javascript, range: 0:6-0:12, text: \"answer\"",
+        ))
+        .stdout(predicate::str::contains(
+            "@variable language: javascript, range: 0:6-0:12, text: \"answer\"",
+        ));
+}
+
+#[test]
+fn dump_tree_interleaves_highlights_and_children_in_source_order() {
+    let output = cmd()
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .args(["dump", "tree", "--text", "--highlights", "-l", "javascript"])
+        .write_stdin("const answer = 42;\n")
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let stdout = String::from_utf8(output.stdout).unwrap();
+    let ordered = [
+        "@keyword language: javascript, range: 0:0-0:5, text: \"const\"",
+        "[identifier] field: name",
+        "@operator language: javascript, range: 0:13-0:14, text: \"=\"",
+        "[number] field: value",
+        "@punctuation.delimiter language: javascript, range: 0:17-0:18, text: \";\"",
+    ]
+    .map(|text| stdout.find(text).unwrap());
+    assert!(ordered.windows(2).all(|pair| pair[0] < pair[1]));
+
+    let output = cmd()
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .args(["dump", "tree", "--text", "--highlights", "-l", "html"])
+        .write_stdin("<div>text</div>\n")
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let stdout = String::from_utf8(output.stdout).unwrap();
+    let ordered = [
+        "@punctuation.bracket language: html, range: 0:0-0:1, text: \"<\"",
+        "[tag_name]",
+        "@punctuation.bracket language: html, range: 0:4-0:5, text: \">\"",
+        "[text]",
+        "@punctuation.bracket language: html, range: 0:9-0:11, text: \"</\"",
+    ]
+    .map(|text| stdout.find(text).unwrap());
+    assert!(ordered.windows(2).all(|pair| pair[0] < pair[1]));
+}
+
+#[test]
+fn dump_tree_reports_exact_injected_highlight_ranges() {
+    cmd()
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .args([
+            "dump",
+            "tree",
+            "--injections",
+            "--text",
+            "--highlights",
+            "-l",
+            "markdown",
+        ])
+        .write_stdin("```javascript\nconst answer = 42;\n```\n")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("[code_fence_content]"))
+        .stdout(predicate::str::contains(
+            "[program] language: javascript, range: 1:0-2:0",
+        ))
+        .stdout(predicate::str::contains(
+            "@keyword language: javascript, range: 1:0-1:5, text: \"const\"",
+        ))
+        .stdout(predicate::str::contains(
+            "@variable language: javascript, range: 1:6-1:12, text: \"answer\"",
+        ));
+}
+
+#[test]
+fn dump_tree_reports_exact_highlights_across_languages() {
+    let cases = [
+        (
+            "python",
+            "def greet(name):\n    return name\n",
+            vec![
+                "@keyword language: python, range: 0:0-0:3, text: \"def\"",
+                "@function language: python, range: 0:4-0:9, text: \"greet\"",
+            ],
+        ),
+        (
+            "html",
+            "<div class=\"x\">hello</div>\n",
+            vec![
+                "@punctuation.bracket language: html, range: 0:0-0:1, text: \"<\"",
+                "@punctuation.bracket language: html, range: 0:14-0:15, text: \">\"",
+                "@string language: html, range: 0:11-0:14, text: \"\\\"x\\\"\"",
+            ],
+        ),
+        (
+            "json",
+            "{\"x\": true}\n",
+            vec![
+                "@punctuation.bracket language: json, range: 0:0-0:1, text: \"{\"",
+                "@punctuation.bracket language: json, range: 0:10-0:11, text: \"}\"",
+                "@boolean language: json, range: 0:6-0:10, text: \"true\"",
+            ],
+        ),
+        (
+            "css",
+            "body { color: red; }\n",
+            vec![
+                "@punctuation.bracket language: css, range: 0:5-0:6, text: \"{\"",
+                "@punctuation.bracket language: css, range: 0:19-0:20, text: \"}\"",
+                "@property language: css, range: 0:7-0:12, text: \"color\"",
+            ],
+        ),
+        (
+            "diff",
+            "--- a/x\n+++ b/x\n-old\n+new\n",
+            vec![
+                "@diff.minus language: diff, range: 0:0-0:7, text: \"--- a/x\"",
+                "@diff.plus language: diff, range: 1:0-1:7, text: \"+++ b/x\"",
+                "@punctuation.special language: diff, range: 2:0-2:1, text: \"-\"",
+            ],
+        ),
+    ];
+
+    for (language, source, expected) in cases {
+        let output = cmd()
+            .arg("--data-dir")
+            .arg(fixtures_dir())
+            .args(["dump", "tree", "--text", "--highlights", "-l", language])
+            .write_stdin(source)
+            .output()
+            .unwrap();
+        assert!(output.status.success(), "tree dump failed for {language}");
+        let stdout = String::from_utf8(output.stdout).unwrap();
+        for capture in expected {
+            assert!(
+                stdout.contains(capture),
+                "missing {capture:?} in {language} output:\n{stdout}"
+            );
+        }
+    }
+}
+
 const DIFF_SNIPPET: &str = "\
 --- a/foo.txt
 +++ b/foo.txt
