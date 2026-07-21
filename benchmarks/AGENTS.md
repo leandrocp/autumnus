@@ -3,8 +3,9 @@
 - Benchmark only the four scenarios in `fixtures/manifest.json`.
 - Generate and verify fixtures before timing.
 - Every implementation must consume the exact same fixture bytes and highlight count.
-- Track only Total: runtime setup/load plus every highlight in the scenario. Fixture reads are excluded.
+- Track only Total: runtime setup/load plus every highlight in the scenario. Harness fixture reads are excluded; real CLI file I/O remains inside each command.
 - Use Criterion for Rust, Mitata for JavaScript, Benchee for Elixir, and Hyperfine for CLI tools.
+- Hyperfine must invoke the public CLI commands directly; benchmark coordinator processes stay outside timing.
 - Run benchmark families serially through Mise.
 - Consume and validate every output.
 - Reject native-tool reports with fewer than three timing samples.

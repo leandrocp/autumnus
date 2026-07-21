@@ -60,7 +60,8 @@ for (const scenario of manifest.scenarios) {
 const report = {
   schemaVersion: 1,
   metric: "total",
-  timingBoundary: "runtime setup/load plus every highlight in the scenario; fixture reads excluded",
+  timingBoundary:
+    "runtime setup/load plus every highlight in the scenario; harness fixture reads excluded, CLI command file I/O included",
   results,
 };
 await mkdir(runDir, { recursive: true });

@@ -11,10 +11,25 @@ const outputDir = resolve(
   process.env.BENCH_OUTPUT_DIR ?? resolve(repoDir, "target/benchmarks/runs/current/cli"),
 );
 const commandScript = resolve(benchmarksDir, "cli/scenario-command.mjs");
+const cacheRoot = resolve(repoDir, "target/benchmarks/cli");
+const dataDir = resolve(cacheRoot, "data");
+const shim = resolve(repoDir, "target/benchmarks/npm-cli/bin/lumis");
+const bat = findBat();
 const manifest = JSON.parse(
   await readFile(resolve(repoDir, "target/benchmarks/fixtures/scenarios.json"), "utf8"),
 );
 const metadata = [];
+const benchmarkEnv = {
+  ...process.env,
+  XDG_CACHE_HOME: resolve(cacheRoot, "xdg-cache"),
+  LUMIS_DATA_DIR: dataDir,
+  LUMIS_CONFIG: resolve(cacheRoot, "missing-config.toml"),
+  BAT_OPTS: "",
+  BAT_PAGER: "cat",
+  PAGER: "cat",
+  CLICOLOR_FORCE: "1",
+};
+delete benchmarkEnv.NO_COLOR;
 
 await mkdir(outputDir, { recursive: true });
 for (const scenario of manifest.scenarios) {
@@ -41,13 +56,13 @@ for (const scenario of manifest.scenarios) {
     process.env.BENCH_RUNS ?? "5",
   ];
   for (const implementation of ["lumis-cli", "bat"]) {
-    args.push(
-      "--command-name",
-      implementation,
-      command([process.execPath, commandScript, implementation, scenario.id]),
-    );
+    args.push("--command-name", implementation, scenarioCommand(implementation, scenario));
   }
-  const result = spawnSync("hyperfine", args, { cwd: repoDir, encoding: "utf8" });
+  const result = spawnSync("hyperfine", args, {
+    cwd: repoDir,
+    env: benchmarkEnv,
+    encoding: "utf8",
+  });
   if (result.status !== 0) {
     throw new Error(`hyperfine failed for ${scenario.id}: ${result.stdout}${result.stderr}`);
   }
@@ -59,6 +74,48 @@ await writeFile(
   `${JSON.stringify({ schemaVersion: 1, runner: "hyperfine", results: metadata }, null, 2)}\n`,
 );
 
+function scenarioCommand(implementation, scenario) {
+  return scenario.files
+    .map((file) => {
+      const path = resolve(repoDir, file.path);
+      const parts =
+        implementation === "lumis-cli"
+          ? [
+              shim,
+              "--data-dir",
+              dataDir,
+              "highlight",
+              "--language",
+              file.language,
+              "--formatter",
+              "terminal",
+              "--theme",
+              "github_dark",
+              path,
+            ]
+          : [
+              bat,
+              "--no-config",
+              "--paging=never",
+              "--style=plain",
+              "--color=always",
+              `--language=${file.syntax}`,
+              "--theme=Monokai Extended",
+              path,
+            ];
+      return `${command(parts)} > /dev/null`;
+    })
+    .join(" && ");
+}
+
 function command(parts) {
   return parts.map((part) => `'${String(part).replaceAll("'", `'\\''`)}'`).join(" ");
+}
+
+function findBat() {
+  for (const candidate of ["bat", "batcat"]) {
+    const result = spawnSync(candidate, ["--version"], { stdio: "ignore" });
+    if (!result.error && result.status === 0) return candidate;
+  }
+  throw new Error("bat is required");
 }
