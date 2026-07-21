@@ -1,5 +1,7 @@
 # Benchmarks
 
+Run all benchmarks with `mise run -C benchmarks run`. Report: `target/benchmarks/runs/current/results.md`.
+
 ## 1 small file for 1 language
 
 Highlight one small Rust file.

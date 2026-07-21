@@ -12,6 +12,7 @@ on:
       - "cargo-lumis/v*"
       - "cargo-lumis-core/v*"
       - "cargo-lumis-build/v*"
+      - "cargo-lumis-wasm-runtime/v*"
       - "cargo-lumis-cli/v*"
 
 permissions:
@@ -44,6 +45,10 @@ jobs:
             cargo-lumis-build)
               crate="lumis-build"
               manifest="crates/lumis-build/Cargo.toml"
+              ;;
+            cargo-lumis-wasm-runtime)
+              crate="lumis-wasm-runtime"
+              manifest="crates/lumis-wasm-runtime/Cargo.toml"
               ;;
             cargo-lumis-cli)
               crate="lumis-cli"

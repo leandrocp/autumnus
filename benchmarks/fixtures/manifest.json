@@ -84,52 +84,52 @@
       "description": "Highlight ten different small files, each in a different language.",
       "files": [
         {
-          "path": "benchmarks/fixtures/languages/example.c",
+          "path": "benchmarks/fixtures/example.c",
           "language": "c",
           "syntax": "c"
         },
         {
-          "path": "benchmarks/fixtures/languages/example.css",
+          "path": "benchmarks/fixtures/example.css",
           "language": "css",
           "syntax": "css"
         },
         {
-          "path": "benchmarks/fixtures/languages/example.go",
+          "path": "benchmarks/fixtures/example.go",
           "language": "go",
           "syntax": "go"
         },
         {
-          "path": "benchmarks/fixtures/languages/example.html",
+          "path": "benchmarks/fixtures/example.html",
           "language": "html",
           "syntax": "html"
         },
         {
-          "path": "benchmarks/fixtures/languages/example.js",
+          "path": "benchmarks/fixtures/example.js",
           "language": "javascript",
           "syntax": "js"
         },
         {
-          "path": "benchmarks/fixtures/languages/example.json",
+          "path": "benchmarks/fixtures/example.json",
           "language": "json",
           "syntax": "json"
         },
         {
-          "path": "benchmarks/fixtures/languages/example.py",
+          "path": "benchmarks/fixtures/example.py",
           "language": "python",
           "syntax": "py"
         },
         {
-          "path": "benchmarks/fixtures/languages/example.rb",
+          "path": "benchmarks/fixtures/example.rb",
           "language": "ruby",
           "syntax": "rb"
         },
         {
-          "path": "benchmarks/fixtures/languages/example.rs",
+          "path": "benchmarks/fixtures/example.rs",
           "language": "rust",
           "syntax": "rs"
         },
         {
-          "path": "benchmarks/fixtures/languages/example.java",
+          "path": "benchmarks/fixtures/example.java",
           "language": "java",
           "syntax": "java"
         }

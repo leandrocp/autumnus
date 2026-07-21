@@ -612,6 +612,7 @@ set -euo pipefail
 packages=(
     "cargo-lumis-core|crates/lumis-core"
     "cargo-lumis-build|crates/lumis-build"
+    "cargo-lumis-wasm-runtime|crates/lumis-wasm-runtime"
     "cargo-lumis|crates/lumis"
     "cargo-lumis-cli|crates/lumis-cli|crates/lumis-wasm-runtime"
     "npm-themes|packages/javascript/themes"
@@ -696,6 +697,13 @@ case "$package" in
         include_path="crates/lumis-build/**/*"
         kind="cargo"
         cargo_package="lumis-build"
+        ;;
+    cargo-lumis-wasm-runtime)
+        manifest="crates/lumis-wasm-runtime/Cargo.toml"
+        changelog="crates/lumis-wasm-runtime/CHANGELOG.md"
+        include_path="crates/lumis-wasm-runtime/**/*"
+        kind="cargo"
+        cargo_package="lumis-wasm-runtime"
         ;;
     cargo-lumis-cli)
         manifest="crates/lumis-cli/Cargo.toml"

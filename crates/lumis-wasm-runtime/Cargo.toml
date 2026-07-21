@@ -7,12 +7,15 @@ license.workspace = true
 homepage.workspace = true
 repository.workspace = true
 authors.workspace = true
-description = "Internal Wasmtime-backed Tree-sitter runtime for Lumis"
-publish = false
+description = "Shared Tree-sitter highlighting runtime for Lumis"
+
+[features]
+default = ["wasm"]
+wasm = ["dep:lumis-core", "dep:wasmtime", "tree-sitter/wasm"]
 
 [dependencies]
-lumis-core = { path = "../lumis-core", version = "2", default-features = false }
+lumis-core = { path = "../lumis-core", version = "2", default-features = false, optional = true }
 streaming-iterator = "0.1"
 thiserror = "2"
-tree-sitter = { version = "^0.26.9", features = ["wasm"] }
-wasmtime = { version = "36", features = ["cache"] }
+tree-sitter = "^0.26.9"
+wasmtime = { version = "36", features = ["cache"], optional = true }

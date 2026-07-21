@@ -75,9 +75,9 @@
 
 use crate::languages::{bracket_query_for_language, Language, LanguageConfig};
 use crate::themes::Theme;
-use crate::vendor::tree_sitter_highlight::{HighlightEvent, Highlighter as TSHighlighter};
 use lumis_core::events::HighlightEvent as CoreHighlightEvent;
 use lumis_core::highlights::HIGHLIGHT_NAMES;
+use lumis_wasm_runtime::tree_sitter_highlight::{HighlightEvent, Highlighter as TSHighlighter};
 use smol_str::format_smolstr;
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -568,7 +568,7 @@ fn query_rainbow_ranges(source: &str, language: Language) -> Vec<RainbowRange> {
 }
 
 fn with_bracket_query_config<R>(
-    config: &'static crate::vendor::tree_sitter_highlight::HighlightConfiguration,
+    config: &'static lumis_wasm_runtime::tree_sitter_highlight::HighlightConfiguration,
     f: impl FnOnce(Option<&BracketQueryConfig>) -> R,
 ) -> R {
     BRACKET_QUERY_CACHE.with(|cache| {
