@@ -173,7 +173,30 @@ done
 [tasks.cli]
 description = "Run Hyperfine for Lumis CLI and bat"
 depends = ["prepare:cli", "fixtures"]
-run = "BENCH_OUTPUT_DIR=\"$BENCH_RUN_DIR/cli\" node benchmarks/cli/run.mjs"
+run = '''
+cli_root="$MISE_CONFIG_ROOT/../target/benchmarks/cli"
+mkdir -p "$BENCH_RUN_DIR/cli"
+cp "$cli_root/metadata.json" "$BENCH_RUN_DIR/cli/metadata.json"
+export XDG_CACHE_HOME="$cli_root/xdg-cache"
+export LUMIS_DATA_DIR="$cli_root/data"
+export LUMIS_CONFIG="$cli_root/missing-config.toml"
+export BAT_OPTS=""
+export BAT_PAGER="cat"
+export PAGER="cat"
+export CLICOLOR_FORCE="1"
+unset NO_COLOR
+for scenario in small-one-language large-one-language ten-files-one-language ten-files-ten-languages; do
+  . "$cli_root/commands/$scenario.sh"
+  hyperfine \
+    --output=null \
+    --style=basic \
+    --warmup "${BENCH_WARMUP:-1}" \
+    --min-runs "${BENCH_RUNS:-5}" \
+    --export-json "$BENCH_RUN_DIR/cli/$scenario.json" \
+    --command-name lumis-cli "$LUMIS_CLI_COMMAND" \
+    --command-name bat "$BAT_COMMAND"
+done
+'''
 
 [tasks.merge]
 description = "Merge Total results and validate execution metadata"

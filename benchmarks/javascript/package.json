@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "benchmark": "node --expose-gc src/scenarios.mjs",
-    "fmt": "cd ../.. && oxfmt benchmarks/javascript/src/ benchmarks/scripts/ benchmarks/cli/",
-    "fmt:check": "cd ../.. && oxfmt --check benchmarks/javascript/src/ benchmarks/scripts/ benchmarks/cli/",
-    "lint": "cd ../.. && oxlint benchmarks/javascript/src/ benchmarks/scripts/ benchmarks/cli/"
+    "fmt": "cd ../.. && oxfmt benchmarks/javascript/src/ benchmarks/scripts/",
+    "fmt:check": "cd ../.. && oxfmt --check benchmarks/javascript/src/ benchmarks/scripts/",
+    "lint": "cd ../.. && oxlint benchmarks/javascript/src/ benchmarks/scripts/"
   },
   "dependencies": {
     "@lumis-sh/cli-benchmark": "npm:@lumis-sh/cli@0.4.1",
