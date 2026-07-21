@@ -12,6 +12,7 @@ bat = "0.26.1"
 [env]
 BENCH_RUN_DIR = "{{ config_root }}/../target/benchmarks/runs/current"
 CARGO_TARGET_DIR = "{{ config_root }}/../target/benchmarks/rust-target"
+MIX_INSTALL_DIR = "{{ config_root }}/../target/benchmarks/elixir-install"
 
 [task_config]
 dir = "{{ config_root }}/.."
@@ -22,12 +23,6 @@ env = { CI = "true" }
 run = "pnpm install --frozen-lockfile"
 sources = ["pnpm-lock.yaml", "pnpm-workspace.yaml", "benchmarks/javascript/package.json"]
 outputs = ["node_modules/.pnpm/lock.yaml"]
-
-[tasks."install:elixir"]
-description = "Install locked Elixir benchmark dependencies"
-run = "cd benchmarks/elixir && MIX_ENV=prod mix deps.get --only prod"
-sources = ["benchmarks/elixir/mix.exs", "benchmarks/elixir/mix.lock"]
-outputs = ["benchmarks/elixir/deps/benchee/mix.exs"]
 
 [tasks.fixtures]
 description = "Generate and verify the four benchmark scenarios"
@@ -83,49 +78,20 @@ sources = [
   "benchmarks/rust/Cargo.toml",
   "benchmarks/rust/Cargo.lock",
   "benchmarks/rust/benches/scenarios.rs",
-  "crates/lumis/src/**/*.rs",
-  "crates/lumis-core/src/**/*.rs",
-  "queries/processed/**/*.scm",
 ]
 
 [tasks."build:elixir"]
-description = "Build the standalone Benchee project and local Elixir NIF"
-depends = ["install:elixir", "fixtures"]
-run = "cd benchmarks/elixir && MIX_ENV=prod LUMIS_BUILD=1 mix compile --warnings-as-errors"
+description = "Install the standalone Benchee script dependencies"
+run = "MIX_ENV=prod BENCH_INSTALL_ONLY=1 elixir benchmarks/elixir/scenario.exs"
 sources = [
-  "benchmarks/elixir/mix.exs",
   "benchmarks/elixir/mix.lock",
   "benchmarks/elixir/scenario.exs",
-  "packages/elixir/lumis/mix.exs",
-  "packages/elixir/lumis/lib/**/*.ex",
-  "packages/elixir/lumis/native/lumis_nif/**/*",
-  "crates/lumis/src/**/*.rs",
-  "crates/lumis-core/src/**/*.rs",
 ]
-outputs = ["benchmarks/elixir/_build/prod/lib/lumis_benchmarks/ebin/lumis_benchmarks.app"]
-
-[tasks."build:cli"]
-description = "Build and stage the public Lumis CLI"
-depends = ["install", "fixtures"]
-run = '''
-CARGO_TARGET_DIR=target cargo build -p lumis-cli --release
-rm -rf target/benchmarks/npm-cli
-mkdir -p target/benchmarks/npm-cli/bin target/benchmarks/npm-cli/vendor
-cp packages/javascript/cli/bin/lumis target/benchmarks/npm-cli/bin/lumis
-cp target/release/lumis target/benchmarks/npm-cli/vendor/lumis
-chmod +x target/benchmarks/npm-cli/bin/lumis target/benchmarks/npm-cli/vendor/lumis
-'''
-sources = [
-  "crates/lumis-cli/src/**/*.rs",
-  "crates/lumis-cli/Cargo.toml",
-  "crates/lumis-core/src/**/*.rs",
-  "packages/javascript/cli/bin/lumis",
-]
-outputs = ["target/benchmarks/npm-cli/bin/lumis", "target/benchmarks/npm-cli/vendor/lumis"]
+outputs = ["target/benchmarks/elixir-install"]
 
 [tasks."prepare:cli"]
 description = "Prepare and validate the offline CLI parser cache"
-depends = ["build:cli", "fixtures"]
+depends = ["install", "fixtures"]
 run = "node benchmarks/scripts/prepare-cli.mjs"
 
 [tasks.build]
@@ -142,7 +108,7 @@ depends = ["install"]
 run = '''
 cargo fmt --manifest-path benchmarks/rust/Cargo.toml
 pnpm --filter @lumis-sh/benchmarks fmt
-cd benchmarks/elixir && mix format mix.exs scenario.exs
+mix format benchmarks/elixir/scenario.exs
 '''
 
 [tasks."format:check"]
@@ -151,7 +117,7 @@ depends = ["install"]
 run = '''
 cargo fmt --manifest-path benchmarks/rust/Cargo.toml -- --check
 pnpm --filter @lumis-sh/benchmarks fmt:check
-cd benchmarks/elixir && mix format --check-formatted mix.exs scenario.exs
+mix format --check-formatted benchmarks/elixir/scenario.exs
 '''
 
 [tasks.lint]
@@ -200,9 +166,7 @@ depends = ["build:elixir", "fixtures"]
 run = '''
 mkdir -p "$BENCH_RUN_DIR/elixir"
 for scenario in small-one-language large-one-language ten-files-one-language ten-files-ten-languages; do
-  cd benchmarks/elixir
-  MIX_ENV=prod BENCH_SCENARIO="$scenario" BENCH_OUTPUT="$BENCH_RUN_DIR/elixir/$scenario.json" BENCH_METADATA_OUTPUT="$BENCH_RUN_DIR/elixir/$scenario-metadata.json" mix run --no-compile scenario.exs
-  cd "$MISE_CONFIG_ROOT/.."
+  MIX_ENV=prod BENCH_SCENARIO="$scenario" BENCH_OUTPUT="$BENCH_RUN_DIR/elixir/$scenario.json" BENCH_METADATA_OUTPUT="$BENCH_RUN_DIR/elixir/$scenario-metadata.json" elixir benchmarks/elixir/scenario.exs
 done
 '''
 

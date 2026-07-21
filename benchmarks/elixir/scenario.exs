@@ -1,3 +1,12 @@
+Mix.install(
+  [
+    {:lumis, "== 0.6.2"},
+    {:benchee, "~> 1.5"},
+    {:benchee_json, "~> 1.0"}
+  ],
+  lockfile: Path.expand("mix.lock", __DIR__)
+)
+
 defmodule Lumis.ScenarioBenchmark do
   def run do
     scenario_id = System.fetch_env!("BENCH_SCENARIO")
@@ -119,4 +128,6 @@ defmodule Lumis.ScenarioBenchmark do
   end
 end
 
-Lumis.ScenarioBenchmark.run()
+unless System.get_env("BENCH_INSTALL_ONLY") == "1" do
+  Lumis.ScenarioBenchmark.run()
+end

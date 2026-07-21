@@ -6,14 +6,14 @@ Highlight one small Rust file.
 
 | Tool | Total |
 | --- | ---: |
-| Lumis Rust | 751.832 µs |
-| Lumis Elixir | 3.571 ms |
-| syntect | 4.815 ms |
-| Shiki | 5.819 ms |
-| bat | 17.813 ms |
-| Lumis JS native | 40.355 ms |
-| Lumis JS Wasm | 46.561 ms |
-| Lumis CLI | 299.934 ms |
+| Lumis Rust | 739.947 µs |
+| Lumis Elixir | 970.167 µs |
+| syntect | 4.708 ms |
+| Shiki | 5.697 ms |
+| bat | 17.773 ms |
+| Lumis JS native | 39.814 ms |
+| Lumis JS Wasm | 46.497 ms |
+| Lumis CLI | 319.759 ms |
 
 ## 1 big file for 1 language
 
@@ -21,14 +21,14 @@ Highlight one generated 5 MiB Rust file.
 
 | Tool | Total |
 | --- | ---: |
-| Lumis Rust | 1.992 s |
-| Lumis CLI | 2.591 s |
-| Lumis JS native | 2.696 s |
-| syntect | 3.193 s |
-| bat | 4.886 s |
-| Lumis JS Wasm | 6.309 s |
-| Shiki | 8.152 s |
-| Lumis Elixir | 9.223 s |
+| Lumis Rust | 2.001 s |
+| Lumis Elixir | 2.030 s |
+| Lumis CLI | 2.642 s |
+| Lumis JS native | 2.688 s |
+| syntect | 3.183 s |
+| bat | 4.888 s |
+| Lumis JS Wasm | 6.257 s |
+| Shiki | 8.122 s |
 
 ## 10 different files for 1 language
 
@@ -36,14 +36,14 @@ Highlight ten different small Rust files.
 
 | Tool | Total |
 | --- | ---: |
-| Lumis Rust | 2.548 ms |
-| syntect | 6.994 ms |
-| Lumis Elixir | 11.809 ms |
-| Shiki | 13.867 ms |
-| Lumis JS native | 42.325 ms |
-| Lumis JS Wasm | 52.098 ms |
-| bat | 130.347 ms |
-| Lumis CLI | 2.472 s |
+| Lumis Rust | 2.580 ms |
+| Lumis Elixir | 3.024 ms |
+| syntect | 7.031 ms |
+| Shiki | 13.785 ms |
+| Lumis JS native | 42.064 ms |
+| Lumis JS Wasm | 51.485 ms |
+| bat | 128.889 ms |
+| Lumis CLI | 2.595 s |
 
 ## 10 different files for 10 languages
 
@@ -51,11 +51,11 @@ Highlight ten different small files: C, CSS, Go, HTML, Java, JavaScript, JSON, P
 
 | Tool | Total |
 | --- | ---: |
-| Lumis Rust | 1.693 ms |
-| Lumis Elixir | 8.982 ms |
-| syntect | 20.892 ms |
-| bat | 117.810 ms |
-| Shiki | 214.754 ms |
-| Lumis JS Wasm | 225.807 ms |
-| Lumis JS native | 272.554 ms |
-| Lumis CLI | 2.300 s |
+| Lumis Rust | 1.708 ms |
+| Lumis Elixir | 2.741 ms |
+| syntect | 20.752 ms |
+| bat | 117.933 ms |
+| Lumis JS native | 195.430 ms |
+| Shiki | 215.330 ms |
+| Lumis JS Wasm | 223.193 ms |
+| Lumis CLI | 2.262 s |

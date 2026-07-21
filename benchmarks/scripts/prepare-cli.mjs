@@ -11,8 +11,8 @@ const repoDir = resolve(benchmarksDir, "..");
 const cacheRoot = resolve(repoDir, "target/benchmarks/cli");
 const dataDir = resolve(cacheRoot, "data");
 const xdgCacheDir = resolve(cacheRoot, "xdg-cache");
-const shim = resolve(repoDir, "target/benchmarks/npm-cli/bin/lumis");
 const benchmarkRequire = createRequire(resolve(benchmarksDir, "javascript/package.json"));
+const shim = benchmarkRequire.resolve("@lumis-sh/cli-benchmark/bin/lumis");
 
 await rm(cacheRoot, { recursive: true, force: true });
 await mkdir(resolve(dataDir, "parsers"), { recursive: true });

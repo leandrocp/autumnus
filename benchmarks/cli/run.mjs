@@ -2,18 +2,20 @@
 
 import { spawnSync } from "node:child_process";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { createRequire } from "node:module";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const benchmarksDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const repoDir = resolve(benchmarksDir, "..");
+const benchmarkRequire = createRequire(resolve(benchmarksDir, "javascript/package.json"));
 const outputDir = resolve(
   process.env.BENCH_OUTPUT_DIR ?? resolve(repoDir, "target/benchmarks/runs/current/cli"),
 );
 const commandScript = resolve(benchmarksDir, "cli/scenario-command.mjs");
 const cacheRoot = resolve(repoDir, "target/benchmarks/cli");
 const dataDir = resolve(cacheRoot, "data");
-const shim = resolve(repoDir, "target/benchmarks/npm-cli/bin/lumis");
+const shim = benchmarkRequire.resolve("@lumis-sh/cli-benchmark/bin/lumis");
 const bat = findBat();
 const manifest = JSON.parse(
   await readFile(resolve(repoDir, "target/benchmarks/fixtures/scenarios.json"), "utf8"),

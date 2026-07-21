@@ -4,6 +4,7 @@ packages:
   - packages/javascript/lumis/native/npm/*
   - benchmarks/javascript
 allowBuilds:
+  '@lumis-sh/cli': true
   '@parcel/watcher': true
   better-sqlite3: true
   core-js: true

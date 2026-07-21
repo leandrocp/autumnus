@@ -8,6 +8,9 @@ importers:
 
   benchmarks/javascript:
     dependencies:
+      '@lumis-sh/cli-benchmark':
+        specifier: npm:@lumis-sh/cli@0.4.1
+        version: '@lumis-sh/cli@0.4.1'
       '@lumis-sh/lumis':
         specifier: workspace:*
         version: link:../../packages/javascript/lumis
@@ -1248,6 +1251,11 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
+
+  '@lumis-sh/cli@0.4.1':
+    resolution: {integrity: sha512-UqLtd8PA+ztZC0pH9BHTMgU1c1UJq6mS2Q9+A4cxtvfkcm2hS9RXY+7VFWoRBYOLz3MRRn6P3NGUJCyY6+pHNA==}
+    engines: {node: '>=18'}
+    hasBin: true
 
   '@lumis-sh/lumis@0.3.0':
     resolution: {integrity: sha512-BfT8mP7B2xHPfZXSgdvpK5HJNompn0VZ9VLA30015uf/EwnNbiF0RW9MhDgH/TijB8bXkYNIzDnqB8mY3Pd4xw==}
@@ -3633,6 +3641,10 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
+
+  '@lumis-sh/cli@0.4.1':
+    dependencies:
+      tar: 7.5.19
 
   '@lumis-sh/lumis@0.3.0':
     dependencies:
