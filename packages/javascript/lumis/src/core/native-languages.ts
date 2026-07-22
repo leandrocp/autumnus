@@ -1,7 +1,7 @@
 import { LANGUAGES } from "../generated/languages-meta.js";
 import { NATIVE_QUERY_LOADERS } from "../generated/native-query-loaders.js";
 import { HIGHLIGHT_NAMES } from "../highlights.js";
-import type { NativeBinding, NativeRuntimeInstance } from "../native-binding.js";
+import type { NativeBinding, NativeFormatter, NativeRuntimeInstance } from "../native-binding.js";
 import type { RuntimeEnvironment } from "../runtime/runtime.js";
 import type {
   Formatter,
@@ -376,14 +376,9 @@ export function createNativeLanguagesModule(
     }
 
     format(source: string, language: LoadedLanguage, formatter: Formatter): string | undefined {
-      const args = this.formatArgs(language, formatter);
-      return args
-        ? this.native.format(
-            source,
-            language.definition.id,
-            formatter.rainbowBrackets ?? false,
-            ...args,
-          )
+      const nativeFormatter = this.nativeFormatter(language, formatter);
+      return nativeFormatter
+        ? this.native.format(source, language.definition.id, nativeFormatter)
         : undefined;
     }
 
@@ -392,21 +387,16 @@ export function createNativeLanguagesModule(
       language: LoadedLanguage,
       formatter: Formatter,
     ): Promise<string | undefined> {
-      const args = this.formatArgs(language, formatter);
-      return args
-        ? this.native.formatAsync(
-            source,
-            language.definition.id,
-            formatter.rainbowBrackets ?? false,
-            ...args,
-          )
+      const nativeFormatter = this.nativeFormatter(language, formatter);
+      return nativeFormatter
+        ? this.native.formatAsync(source, language.definition.id, nativeFormatter)
         : undefined;
     }
 
-    private formatArgs(
+    private nativeFormatter(
       language: LoadedLanguage,
       formatter: Formatter,
-    ): [kind: string, optionsJson: string] | undefined {
+    ): NativeFormatter | undefined {
       const kind = builtinFormatterKind(formatter);
       if (
         !kind ||
@@ -419,8 +409,11 @@ export function createNativeLanguagesModule(
       const options = { ...formatter } as Record<string, unknown>;
       delete options.format;
       delete options.language;
-      const optionsJson = JSON.stringify(options);
-      return [kind, optionsJson];
+      return {
+        rainbowBrackets: formatter.rainbowBrackets,
+        kind,
+        options,
+      };
     }
   }
 

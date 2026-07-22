@@ -1,5 +1,11 @@
 import { createRequire } from "node:module";
 
+export interface NativeFormatter {
+  rainbowBrackets?: boolean;
+  kind: string;
+  options: Record<string, unknown>;
+}
+
 interface NativeRuntimeInstance {
   loadLanguage(
     id: string,
@@ -29,20 +35,8 @@ interface NativeRuntimeInstance {
     locals: string,
   ): Promise<void>;
   highlightEvents(source: string, language: string, rainbowBrackets?: boolean): Uint8Array;
-  format(
-    source: string,
-    language: string,
-    rainbowBrackets: boolean,
-    kind: string,
-    optionsJson: string,
-  ): string;
-  formatAsync(
-    source: string,
-    language: string,
-    rainbowBrackets: boolean,
-    kind: string,
-    optionsJson: string,
-  ): Promise<string>;
+  format(source: string, language: string, formatter: NativeFormatter): string;
+  formatAsync(source: string, language: string, formatter: NativeFormatter): Promise<string>;
 }
 
 export interface NativeBinding {

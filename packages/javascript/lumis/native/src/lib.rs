@@ -106,6 +106,19 @@ struct TerminalOptions {
     theme: Option<JsTheme>,
 }
 
+#[napi(object)]
+pub struct NativeFormatter {
+    pub rainbow_brackets: Option<bool>,
+    pub kind: String,
+    pub options: serde_json::Value,
+}
+
+struct FormatRequest {
+    source: String,
+    language: String,
+    formatter: NativeFormatter,
+}
+
 fn inline_highlight_lines(value: JsHighlightLines) -> InlineHighlightLines {
     InlineHighlightLines {
         lines: value.lines.into_iter().map(LineSpec::into_range).collect(),
@@ -119,23 +132,28 @@ fn inline_highlight_lines(value: JsHighlightLines) -> InlineHighlightLines {
 
 fn render_formatter(
     runtime: &Runtime,
-    source: &str,
-    language_name: &str,
-    rainbow_brackets: bool,
-    kind: &str,
-    options_json: &str,
+    request: FormatRequest,
 ) -> std::result::Result<String, Box<dyn std::error::Error + Send + Sync>> {
+    let FormatRequest {
+        source,
+        language: language_name,
+        formatter,
+    } = request;
     let language = if language_name == "plaintext" {
         Language::PlainText
     } else {
         language_name.parse()?
     };
-    let events = runtime.highlight(source, language_name, rainbow_brackets)?;
+    let events = runtime.highlight(
+        &source,
+        &language_name,
+        formatter.rainbow_brackets.unwrap_or(false),
+    )?;
     let mut output = Vec::new();
 
-    match kind {
+    match formatter.kind.as_str() {
         "html-inline" => {
-            let options: HtmlInlineOptions = serde_json::from_str(options_json)?;
+            let options: HtmlInlineOptions = serde_json::from_value(formatter.options)?;
             HtmlInline::new(
                 language,
                 options.theme.map(Theme::from),
@@ -145,10 +163,10 @@ fn render_formatter(
                 options.highlight_lines.map(inline_highlight_lines),
                 options.header.map(HtmlElement::from),
             )
-            .render(source, &events, &mut output)?;
+            .render(&source, &events, &mut output)?;
         }
         "html-linked" => {
-            let options: HtmlLinkedOptions = serde_json::from_str(options_json)?;
+            let options: HtmlLinkedOptions = serde_json::from_value(formatter.options)?;
             HtmlLinked::new(
                 language,
                 options.pre_class,
@@ -158,22 +176,24 @@ fn render_formatter(
                 }),
                 options.header.map(HtmlElement::from),
             )
-            .render(source, &events, &mut output)?;
+            .render(&source, &events, &mut output)?;
         }
         "bbcode-scoped" => {
-            BBCodeScoped::new(language).render(source, &events, &mut output)?;
+            BBCodeScoped::new(language).render(&source, &events, &mut output)?;
         }
         "terminal" => {
-            let options: TerminalOptions = serde_json::from_str(options_json)?;
+            let options: TerminalOptions = serde_json::from_value(formatter.options)?;
             Terminal::new(
                 language,
                 options.theme.map(Theme::from),
                 TerminalBackground::Inherit,
                 None,
             )
-            .render(source, &events, &mut output)?;
+            .render(&source, &events, &mut output)?;
         }
-        _ => return Err(format!("unsupported native formatter '{kind}'").into()),
+        _ => {
+            return Err(format!("unsupported native formatter '{}'", formatter.kind).into());
+        }
     }
 
     Ok(String::from_utf8(output)?)
@@ -229,11 +249,7 @@ impl Task for ConfigureLanguageTask {
 
 pub struct FormatTask {
     runtime: Arc<Runtime>,
-    source: String,
-    language: String,
-    rainbow_brackets: bool,
-    kind: String,
-    options_json: String,
+    request: Option<FormatRequest>,
 }
 
 impl Task for FormatTask {
@@ -243,11 +259,7 @@ impl Task for FormatTask {
     fn compute(&mut self) -> Result<Self::Output> {
         render_formatter(
             &self.runtime,
-            &self.source,
-            &self.language,
-            self.rainbow_brackets,
-            &self.kind,
-            &self.options_json,
+            self.request.take().expect("format task already consumed"),
         )
         .map_err(native_error)
     }
@@ -370,17 +382,15 @@ impl NativeRuntime {
         &self,
         source: String,
         language: String,
-        rainbow_brackets: bool,
-        kind: String,
-        options_json: String,
+        formatter: NativeFormatter,
     ) -> Result<String> {
         render_formatter(
             &self.inner,
-            &source,
-            &language,
-            rainbow_brackets,
-            &kind,
-            &options_json,
+            FormatRequest {
+                source,
+                language,
+                formatter,
+            },
         )
         .map_err(native_error)
     }
@@ -391,17 +401,15 @@ impl NativeRuntime {
         &self,
         source: String,
         language: String,
-        rainbow_brackets: bool,
-        kind: String,
-        options_json: String,
+        formatter: NativeFormatter,
     ) -> AsyncTask<FormatTask> {
         AsyncTask::new(FormatTask {
             runtime: Arc::clone(&self.inner),
-            source,
-            language,
-            rainbow_brackets,
-            kind,
-            options_json,
+            request: Some(FormatRequest {
+                source,
+                language,
+                formatter,
+            }),
         })
     }
 }
