@@ -96,6 +96,8 @@ unsafe extern "C" {
     fn tree_sitter_gitattributes() -> *const ();
     #[cfg(feature = "lang-glimmer")]
     fn tree_sitter_glimmer() -> *const ();
+    #[cfg(feature = "lang-haskell")]
+    fn tree_sitter_haskell() -> *const ();
     #[cfg(feature = "lang-http")]
     fn tree_sitter_http() -> *const ();
     #[cfg(feature = "lang-iex")]
@@ -907,8 +909,9 @@ static GRAPHQL_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-haskell")]
 static HASKELL_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_haskell) };
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(tree_sitter_haskell::LANGUAGE),
+        tree_sitter::Language::new(language_fn),
         "haskell",
         HASKELL_HIGHLIGHTS,
         HASKELL_INJECTIONS,

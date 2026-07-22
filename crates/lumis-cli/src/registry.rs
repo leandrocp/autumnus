@@ -5,7 +5,7 @@ use lumis_wasm_runtime::tree_sitter_highlight::HighlightConfiguration;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 use streaming_iterator::StreamingIterator;
-use tree_sitter::{Parser, Query, QueryCursor, WasmStore};
+use tree_sitter::{Parser, Query, QueryCursor, Tree, WasmStore};
 use wasmtime::{Cache, Config, Engine};
 
 include!(concat!(env!("OUT_DIR"), "/queries_constants.rs"));
@@ -65,6 +65,26 @@ impl Registry {
     /// Create a new WasmStore from the same engine, for use with a Parser.
     pub fn new_wasm_store(&self) -> Result<WasmStore> {
         Ok(WasmStore::new(&self.engine)?)
+    }
+
+    /// Parse source with a language's Tree-sitter WASM parser.
+    pub fn parse_tree(&self, lang_name: &str, source: &str) -> Result<Tree> {
+        let wasm_bytes = self
+            .ensure_parser(lang_name)
+            .with_context(|| format!("failed to load parser for '{lang_name}'"))?;
+        let mut store = self
+            .wasm_store
+            .lock()
+            .map_err(|_| anyhow::anyhow!("Tree-sitter WASM store lock was poisoned"))?;
+        let language = store.load_language(grammar_symbol_name(lang_name), &wasm_bytes)?;
+        drop(store);
+
+        let mut parser = Parser::new();
+        parser.set_wasm_store(self.new_wasm_store()?)?;
+        parser.set_language(&language)?;
+        parser
+            .parse(source.as_bytes(), None)
+            .ok_or_else(|| anyhow::anyhow!("parser returned no syntax tree for '{lang_name}'"))
     }
 
     pub fn load_config(&self, lang_name: &str) -> Result<Option<HighlightConfiguration>> {

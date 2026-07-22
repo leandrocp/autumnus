@@ -305,7 +305,6 @@ variant = "GraphQL"
 [parsers.haskell]
 git = "https://github.com/tree-sitter/tree-sitter-haskell.git"
 rev = "c30d812bc90827f1a54106a25bc9a6307f5cdcec"
-crate = "tree-sitter-haskell"
 version = "0.23.1"
 globs = ["*.hs", "*.hs-boot"]
 emacs = ["haskell"]

@@ -2,7 +2,9 @@
 sidebar_position: 1
 slug: /cli/commands
 title: CLI Commands
-description: Highlight files, manage parsers, and generate themes with the Lumis CLI.
+description: >-
+  Highlight files, inspect Tree-sitter output, manage parsers, and generate
+  themes with the Lumis CLI.
 keywords:
   - lumis cli
   - themes generate
@@ -28,6 +30,8 @@ These flags work with any subcommand:
 | Command | What it does |
 | --- | --- |
 | `lumis highlight` | Highlight a file or stdin |
+| `lumis dump tree` | Print configurable Tree-sitter syntax trees |
+| `lumis dump events` | Print raw highlight events as JSON |
 | `lumis languages list` | List supported languages and file patterns |
 | `lumis themes list` | List built-in and local themes |
 | `lumis themes generate` | Generate a theme from a Neovim colorscheme repo |
@@ -82,6 +86,82 @@ lumis highlight main.rs -f bbcode-scoped
 ```bash title="Verbose mode — see cache hits and parser paths"
 lumis highlight main.rs -v
 ```
+
+## `lumis dump tree`
+
+Print named syntax nodes as branch lines with language and zero-based range
+metadata. The host tree is shown by default. Options can add source text,
+resolved highlights, and query-driven injected language trees. Square brackets
+identify syntax nodes; `@name` lines identify resolved highlights.
+
+| Flag | Short | Description |
+| --- | --- | --- |
+| `--language <lang>` | `-l` | Language id. Auto-detects from the path if omitted. |
+| `--format <format>` | | `lines` (default) or canonical `sexp` output |
+| `--text[=<limit\|full>]` | | Add JSON-escaped middle previews; defaults to 80 characters |
+| `--highlights` | | Add resolved highlight-query results in source order |
+| `--injections` | | Add injected language trees and their highlights |
+
+```bash title="Parse a file with automatic language detection"
+lumis dump tree src/main.js
+```
+
+```bash title="Add source text previews"
+lumis dump tree component.svelte --text
+lumis dump tree component.svelte --text=120
+lumis dump tree component.svelte --text=full
+```
+
+Limits from 1 to 3 show leading characters only. Larger truncated previews use
+`...`, retaining both ends when space permits. Optional text values use `=` so
+`--text component.svelte` still treats the final argument as the input path.
+
+```bash title="Show a mixed-language annotated tree"
+lumis dump tree component.svelte --injections --text --highlights
+```
+
+```bash title="Use the canonical parser representation"
+lumis dump tree src/main.js --format sexp
+```
+
+`--format sexp` cannot be combined with `--text` or `--highlights`. With
+`--injections`, each actual parser tree is printed as a separately labeled
+S-expression section.
+
+```text title="Example mixed-language annotated tree"
+[document] language: svelte, range: 0:0-1:0, text: "function increment() { count++; }\n"
+├── [text] language: svelte, range: 0:0-0:20, text: "function increment()"
+└── [expression] language: svelte, range: 0:21-0:33, text: "{ count++; }"
+    ├── @punctuation.bracket language: svelte, range: 0:21-0:22, text: "{"
+    ├── [svelte_raw_text] language: svelte, range: 0:23-0:32, text: "count++; "
+    │   └── [program] language: javascript, range: 0:23-0:32, text: "count++; "
+    │       └── [expression_statement] language: javascript, range: 0:23-0:31, text: "count++;"
+    │           ├── [update_expression] language: javascript, range: 0:23-0:30, text: "count++"
+    │           │   ├── [identifier] field: argument, language: javascript, range: 0:23-0:28, text: "count"
+    │           │   │   └── @variable language: javascript, range: 0:23-0:28, text: "count"
+    │           │   └── @operator language: javascript, range: 0:28-0:30, text: "++"
+    │           └── @punctuation.delimiter language: javascript, range: 0:30-0:31, text: ";"
+    └── @punctuation.bracket language: svelte, range: 0:32-0:33, text: "}"
+```
+
+## `lumis dump events`
+
+Print the raw highlight event stream as JSON. Start events include the resolved
+highlight scope and language; source events use byte offsets into the original
+input.
+
+```bash title="Inspect highlight captures"
+lumis dump events src/main.js
+```
+
+```bash title="Debug a partial mixed-language snippet"
+echo 'function increment() { count++; }' | lumis dump events -l svelte
+```
+
+All dump commands accept an optional path and `--language` / `-l`. They read
+stdin when the path is omitted, using the same language detection behavior as
+`lumis highlight`. Parser WASMs are downloaded and cached on first use when
+needed.
 
 ## `lumis languages list`
 
@@ -170,5 +250,6 @@ Lumis stores parser WASM files and custom theme JSON in a local data directory.
 Override with `--data-dir` or `LUMIS_DATA_DIR`.
 
 Contents:
+
 - `parsers/` — cached Tree-sitter WASM files
 - `themes/` — custom theme JSON files (visible in `lumis themes list`)

@@ -158,6 +158,12 @@ impl TreeSitterParser {
         let mut build = cc::Build::new();
         build.include(&self.src_dir).warnings(false);
 
+        // Parsers generated with tree-sitter CLI < 0.26.4 ship an array.h
+        // whose macros violate strict aliasing; gcc -O2 miscompiles them on
+        // aarch64-linux into heap corruption (tree-sitter/tree-sitter@ed6e42c,
+        // tree-sitter/tree-sitter-haskell#144).
+        build.flag_if_supported("-fno-strict-aliasing");
+
         // Prefix TAG_TYPES_BY_TAG_NAME to avoid symbol conflicts between
         // parsers that share the same tag.h definitions (angular, astro, vue).
         let tag_h = self.src_dir.join("tag.h");
