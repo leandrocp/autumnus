@@ -247,8 +247,7 @@ function convertLuaPatternToRustRegex(lua: string): string {
 }
 
 function convertLuaMatchesForRust(content: string): string {
-  const hadTrailingNewline = content.endsWith("\n");
-  const converted = content
+  return content
     .split("\n")
     .map((line) => {
       let updated = line
@@ -266,7 +265,6 @@ function convertLuaMatchesForRust(content: string): string {
       return updated;
     })
     .join("\n");
-  return hadTrailingNewline || !converted.endsWith("\n") ? converted : converted.slice(0, -1);
 }
 
 function resolveQuerySource(language: string, queryType: string): string {
@@ -310,6 +308,14 @@ function main() {
     if (expectedLanguageIds.has(id)) continue;
     fs.unlinkSync(path.join(OUT_DIR, entry));
     console.log(`  removed stale language: langs/${entry}`);
+  }
+
+  for (const entry of fs.readdirSync(NATIVE_QUERIES_DIR)) {
+    if (!entry.endsWith(".ts")) continue;
+    const id = path.parse(entry).name;
+    if (expectedLanguageIds.has(id)) continue;
+    fs.unlinkSync(path.join(NATIVE_QUERIES_DIR, entry));
+    console.log(`  removed stale native query: native-queries/${entry}`);
   }
 
   for (const [id, entry] of Object.entries(config.parsers)) {

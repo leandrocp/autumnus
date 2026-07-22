@@ -16,7 +16,7 @@ on:
       - "cargo-lumis-cli/v*"
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   publish:
@@ -30,8 +30,10 @@ jobs:
 
       - name: Determine crate to publish
         id: crate
+        env:
+          RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
         run: |
-          tag="${{ inputs.tag || github.ref_name }}"
+          tag="$RELEASE_TAG"
           component="${tag%%/v*}"
           case "$component" in
             cargo-lumis)
@@ -63,6 +65,7 @@ jobs:
           echo "manifest=$manifest" >> "$GITHUB_OUTPUT"
 
       - name: Publish to crates.io
-        run: cargo publish -p ${{ steps.crate.outputs.name }}
+        run: cargo publish -p "$CRATE_NAME"
         env:
+          CRATE_NAME: ${{ steps.crate.outputs.name }}
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}

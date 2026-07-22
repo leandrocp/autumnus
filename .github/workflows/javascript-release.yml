@@ -19,7 +19,6 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
 jobs:
   build-native:
@@ -81,6 +80,9 @@ jobs:
       ${{ !cancelled() &&
           (needs.build-native.result == 'success' || needs.build-native.result == 'skipped') }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v7
         with:
@@ -99,8 +101,10 @@ jobs:
 
       - name: Determine package to publish
         id: pkg
+        env:
+          RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
         run: |
-          tag="${{ inputs.tag || github.ref_name }}"
+          tag="$RELEASE_TAG"
           component="${tag%%/v*}"
           set_output() {
             printf '%s=%s\n' "$1" "$2" >> "$GITHUB_OUTPUT"
@@ -136,8 +140,11 @@ jobs:
 
       - name: Build publish target workspace packages
         if: steps.pkg.outputs.build_filters != ''
+        env:
+          BUILD_FILTERS: ${{ steps.pkg.outputs.build_filters }}
         run: |
-          for pkg in ${{ steps.pkg.outputs.build_filters }}; do
+          read -r -a packages <<< "$BUILD_FILTERS"
+          for pkg in "${packages[@]}"; do
             pnpm --filter "$pkg" run build
           done
 
@@ -169,6 +176,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish to npm
-        run: pnpm --filter "${{ steps.pkg.outputs.filter }}" publish --access public --no-git-checks --provenance
+        run: pnpm --filter "$PACKAGE_FILTER" publish --access public --no-git-checks --provenance
         env:
+          PACKAGE_FILTER: ${{ steps.pkg.outputs.filter }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

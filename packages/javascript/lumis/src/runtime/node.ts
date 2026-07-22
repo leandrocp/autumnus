@@ -9,6 +9,11 @@ const nodeFsPromises = "node:fs" + "/promises";
 const nodePath = "node:path";
 const nodeUrl = "node:url";
 
+/** @internal */
+export function wasmCacheFilename(key: string): string {
+  return `${encodeURIComponent(key)}.wasm`;
+}
+
 export const nodeRuntime: RuntimeEnvironment = {
   async resolveWasm(wasm) {
     if (wasm instanceof URL) {
@@ -34,7 +39,7 @@ export const nodeRuntime: RuntimeEnvironment = {
     try {
       const { readFile } = await import(nodeFsPromises);
       const { join } = await import(nodePath);
-      const filePath = join("node_modules", ".cache", "lumis", key + ".wasm");
+      const filePath = join("node_modules", ".cache", "lumis", wasmCacheFilename(key));
       return new Uint8Array(await readFile(filePath));
     } catch {
       return undefined;
@@ -47,7 +52,7 @@ export const nodeRuntime: RuntimeEnvironment = {
       const { join } = await import(nodePath);
       const cacheDir = join("node_modules", ".cache", "lumis");
       await mkdir(cacheDir, { recursive: true });
-      await writeFile(join(cacheDir, key + ".wasm"), data);
+      await writeFile(join(cacheDir, wasmCacheFilename(key)), data);
     } catch {
       // cache write failures are non-fatal
     }

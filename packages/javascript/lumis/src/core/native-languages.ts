@@ -26,6 +26,7 @@ import { specializeInjections } from "./injection-specialization.js";
 const DEFAULT_RESOLVER: WasmResolver = (_language, wasm) =>
   `https://cdn.jsdelivr.net/npm/${wasm.packageName}@${wasm.version}/${wasm.name}.wasm`;
 const PLAINTEXT_ALIASES = ["text", "txt", "plain"];
+const BUILTIN_LANGUAGE_IDS = new Set(LANGUAGES.map(({ id }) => id));
 const decoder = new TextDecoder();
 const encoder = new TextEncoder();
 
@@ -411,7 +412,7 @@ export function createNativeLanguagesModule(
         !kind ||
         kind === "html-multi-themes" ||
         language.definition.id === PLAINTEXT_LANG_ID ||
-        !LANGUAGES.some((candidate) => candidate.id === language.definition.id)
+        !BUILTIN_LANGUAGE_IDS.has(language.definition.id)
       ) {
         return undefined;
       }

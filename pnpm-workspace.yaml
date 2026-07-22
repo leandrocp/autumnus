@@ -11,3 +11,6 @@ allowBuilds:
   core-js-pure: true
   esbuild: true
   sharp: true
+overrides:
+  linkify-it: 5.0.2
+  markdown-it: 14.3.0

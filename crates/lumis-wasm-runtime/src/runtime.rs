@@ -3,7 +3,7 @@
 use lumis_core::events::HighlightEvent;
 use lumis_core::highlights::HIGHLIGHT_NAMES;
 use std::collections::HashMap;
-use std::sync::{Mutex, OnceLock};
+use std::sync::{LazyLock, Mutex, OnceLock};
 use streaming_iterator::StreamingIterator;
 use thiserror::Error;
 use tree_sitter::{Parser, Query, QueryCursor, WasmStore};
@@ -19,6 +19,20 @@ const RAINBOW_BRACKET_SCOPES: [&str; 6] = [
     "punctuation.bracket.rainbow.5",
     "punctuation.bracket.rainbow.6",
 ];
+
+static RAINBOW_SCOPE_INDICES: LazyLock<[usize; RAINBOW_BRACKET_SCOPES.len()]> =
+    LazyLock::new(|| {
+        let fallback = HIGHLIGHT_NAMES
+            .iter()
+            .position(|candidate| *candidate == "punctuation.bracket")
+            .unwrap_or(0);
+        std::array::from_fn(|index| {
+            HIGHLIGHT_NAMES
+                .iter()
+                .position(|candidate| *candidate == RAINBOW_BRACKET_SCOPES[index])
+                .unwrap_or(fallback)
+        })
+    });
 
 /// Everything needed to register a parser and its highlighting queries.
 pub struct LanguageSpec {
@@ -373,12 +387,8 @@ fn colorize_bracket_pairs(pairs: Vec<BracketPair>) -> Vec<RainbowRange> {
         }
 
         if open_stack.last() == Some(&pair.open) {
-            let scope =
-                RAINBOW_BRACKET_SCOPES[(open_stack.len() - 1) % RAINBOW_BRACKET_SCOPES.len()];
-            let scope_index = HIGHLIGHT_NAMES
-                .iter()
-                .position(|candidate| *candidate == scope)
-                .unwrap_or(0);
+            let scope_index =
+                RAINBOW_SCOPE_INDICES[(open_stack.len() - 1) % RAINBOW_SCOPE_INDICES.len()];
             ranges.push(RainbowRange {
                 start: pair.open.start,
                 end: pair.open.end,
