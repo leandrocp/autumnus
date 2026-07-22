@@ -1,6 +1,6 @@
 Mix.install(
   [
-    {:lumis, "== 0.6.2"},
+    {:lumis, "~> 0.6"},
     {:benchee, "~> 1.5"},
     {:benchee_json, "~> 1.0"}
   ],
