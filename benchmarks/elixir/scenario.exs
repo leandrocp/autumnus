@@ -29,8 +29,9 @@ defmodule Lumis.ScenarioBenchmark do
         Map.put(file, "source", File.read!(Path.join(repo_dir, Map.fetch!(file, "path"))))
       end)
 
-    unless Enum.sum(Enum.map(workload, &byte_size(Map.fetch!(&1, "source")))) ==
-             Map.fetch!(scenario, "inputBytes") do
+    expected_input_bytes = Map.fetch!(scenario, "inputBytes")
+
+    unless input_bytes(workload) == expected_input_bytes do
       raise "#{scenario_id} input bytes changed after fixture verification"
     end
 
@@ -46,7 +47,7 @@ defmodule Lumis.ScenarioBenchmark do
         runner: "benchee",
         implementation: "lumis-elixir",
         scenario: scenario_id,
-        inputBytes: Map.fetch!(scenario, "inputBytes"),
+        inputBytes: expected_input_bytes,
         outputBytes: output_bytes,
         fileCount: Map.fetch!(scenario, "fileCount"),
         languageCount: Map.fetch!(scenario, "languageCount")
@@ -61,7 +62,7 @@ defmodule Lumis.ScenarioBenchmark do
              render(workload)
            end,
            after_each: fn bytes ->
-             if bytes <= Map.fetch!(scenario, "inputBytes"),
+             if bytes <= expected_input_bytes,
                do: raise("Lumis Elixir did not expand #{scenario_id}")
            end}
       },
@@ -83,6 +84,12 @@ defmodule Lumis.ScenarioBenchmark do
     |> Enum.uniq()
     |> Enum.each(fn language ->
       unless Map.has_key?(available, language), do: raise("Lumis Elixir is missing #{language}")
+    end)
+  end
+
+  defp input_bytes(workload) do
+    Enum.reduce(workload, 0, fn %{"source" => source}, total ->
+      total + byte_size(source)
     end)
   end
 
