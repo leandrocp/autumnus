@@ -82,6 +82,8 @@ import dracula from '@lumis-sh/themes/dracula'
 const html = await highlight('const x = 1', htmlInline({ language: javascript, theme: dracula }))
 ```
 
+The default JavaScript install loads parser WASM per language on demand. For an opt-in native Node.js runtime containing all supported parsers, install `@lumis-sh/lumis-native` alongside `@lumis-sh/lumis`.
+
 ### [Browsers / CDN](https://www.npmjs.com/package/@lumis-sh/lumis)
 
 Works in Browsers through bundlers or CDN imports.
@@ -129,6 +131,7 @@ System.out.println(result.string());
 | **Rust** | `cargo add lumis` | [crates.io/lumis](https://crates.io/crates/lumis) | [README.md](crates/lumis/README.md) &bull; [docs.rs](https://docs.rs/lumis) |
 | **Elixir** | `{:lumis, "~> 0.3"}` | [hex.pm/lumis](https://hex.pm/packages/lumis) | [README.md](packages/elixir/lumis/README.md) &bull; [hexdocs](https://hexdocs.pm/lumis) |
 | **JavaScript** | `npm install @lumis-sh/lumis` | [npmjs.com/@lumis-sh/lumis](https://www.npmjs.com/package/@lumis-sh/lumis) | [README.md](packages/javascript/lumis/README.md) |
+| **Node.js native (opt-in)** | `npm install @lumis-sh/lumis-native` | [npmjs.com/@lumis-sh/lumis-native](https://www.npmjs.com/package/@lumis-sh/lumis-native) | [README.md](packages/javascript/lumis/native/npm/meta/README.md) |
 | **Browsers / CDN** | `npm install @lumis-sh/lumis` | [npmjs.com/@lumis-sh/lumis](https://www.npmjs.com/package/@lumis-sh/lumis) | [README.md](packages/javascript/lumis/README.md) |
 | **Java** | `io.roastedroot:lumis4j:0.0.7` | [io.roastedroot/lumis4j](https://central.sonatype.com/artifact/io.roastedroot/lumis4j) | [README.md](https://github.com/roastedroot/lumis4j/blob/main/README.md) |
 

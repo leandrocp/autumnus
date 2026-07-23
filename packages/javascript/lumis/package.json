@@ -95,13 +95,6 @@
   "dependencies": {
     "web-tree-sitter": "0.26.8"
   },
-  "optionalDependencies": {
-    "@lumis-sh/lumis-native-darwin-arm64": "workspace:*",
-    "@lumis-sh/lumis-native-darwin-x64": "workspace:*",
-    "@lumis-sh/lumis-native-linux-arm64-gnu": "workspace:*",
-    "@lumis-sh/lumis-native-linux-x64-gnu": "workspace:*",
-    "@lumis-sh/lumis-native-win32-x64-msvc": "workspace:*"
-  },
   "engines": {
     "node": ">=18"
   },

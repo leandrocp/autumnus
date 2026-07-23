@@ -22,10 +22,11 @@ import TabItem from '@theme/TabItem';
 - `@lumis-sh/lumis` ships the JS API and embedded `web-tree-sitter` runtime WASM
 - parser grammars are separate `.wasm` files loaded at runtime
 - each parser also has its own npm package such as `@lumis-sh/wasm-rust`
+- the optional `@lumis-sh/lumis-native` package replaces this setup on supported Node.js platforms with one native addon containing all parsers
 
 ## Default JavaScript behavior
 
-By default, Lumis resolves parser WASM from jsDelivr using versioned packages.
+Without the optional native package, Lumis resolves parser WASM from jsDelivr using versioned packages.
 
 The default shape is:
 

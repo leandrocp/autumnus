@@ -147,6 +147,11 @@ export function renderQuickstart() {
               `
                   : ""
               }
+              ${
+                tab.id === "javascript"
+                  ? `<p class="font-mono text-xs leading-6 text-zinc-500 dark:text-zinc-400">This default install loads parser WASM per language. Add <code class="text-zinc-700 dark:text-zinc-300">@lumis-sh/lumis-native</code> for the larger, opt-in native Node.js runtime.</p>`
+                  : ""
+              }
               <div class="border border-zinc-200 dark:border-zinc-800">
                 <div class="flex items-center justify-between border-b border-zinc-200 px-4 py-2 dark:border-zinc-800">
                   <span class="font-mono text-[11px] tracking-wider text-zinc-500 uppercase dark:text-zinc-400">Usage</span>

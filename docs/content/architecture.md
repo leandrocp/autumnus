@@ -43,7 +43,7 @@ formatter (tokens + styles -> HTML / ANSI / BBCode Scoped / custom output)
 
 110+ Tree-sitter grammars. Each language has:
 
-- a parser (compiled to native code for Rust/Elixir, WASM for JavaScript/CLI)
+- a parser (compiled to native code for Rust/Elixir and the optional JavaScript native runtime, WASM for the default JavaScript runtime and CLI)
 - highlight queries (mostly from [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter))
 - injections for nested languages (e.g., CSS and JavaScript inside HTML)
 
@@ -75,5 +75,5 @@ lumis-build       build-time code generation
 ## Package layers
 
 - The Elixir package (`packages/elixir/lumis`) wraps the Rust crate via Rustler NIF.
-- The JavaScript runtime package (`packages/javascript/lumis`) uses `web-tree-sitter` and reimplements the formatter logic in TypeScript.
+- The JavaScript runtime package (`packages/javascript/lumis`) uses `web-tree-sitter` and per-language parser WASM by default. Node.js can opt into the all-language Rust addon through `@lumis-sh/lumis-native`.
 - The integration packages (`packages/javascript/markdown-it-lumis` and `packages/javascript/rehype-lumis`) build on top of that JavaScript runtime for Markdown and HAST pipelines.
