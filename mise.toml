@@ -176,7 +176,7 @@ run = '''
 #!/usr/bin/env bash
 set -euo pipefail
 echo "JS Wasm conformance..."
-LUMIS_DISABLE_NATIVE=1 LUMIS_REQUIRE_NATIVE=0 pnpm --filter @lumis-sh/lumis test:conformance
+LUMIS_TEST_RUNTIME=wasm pnpm --filter @lumis-sh/lumis test:conformance
 '''
 
 [tasks.'test-conformance-js-native']
@@ -187,7 +187,7 @@ set -euo pipefail
 echo "JS native conformance..."
 pnpm --filter @lumis-sh/lumis build:generate
 pnpm --filter @lumis-sh/lumis build:native
-LUMIS_DISABLE_NATIVE=0 LUMIS_REQUIRE_NATIVE=1 pnpm --filter @lumis-sh/lumis test:conformance
+LUMIS_TEST_RUNTIME=native pnpm --filter @lumis-sh/lumis test:conformance
 '''
 
 [tasks.'test-browser']

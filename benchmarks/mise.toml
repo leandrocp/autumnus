@@ -158,9 +158,9 @@ for implementation in lumis-js-native lumis-js-wasm shiki; do
   for scenario in small-one-language large-one-language ten-files-one-language ten-files-ten-languages; do
     output="$BENCH_RUN_DIR/javascript/$implementation/$scenario.json"
     if [ "$implementation" = "lumis-js-native" ]; then
-      BENCH_IMPLEMENTATION="$implementation" BENCH_SCENARIO="$scenario" BENCH_OUTPUT="$output" LUMIS_DISABLE_NATIVE=0 LUMIS_REQUIRE_NATIVE=1 pnpm --filter @lumis-sh/benchmarks benchmark
+      BENCH_IMPLEMENTATION="$implementation" BENCH_SCENARIO="$scenario" BENCH_OUTPUT="$output" LUMIS_TEST_RUNTIME=native pnpm --filter @lumis-sh/benchmarks benchmark
     elif [ "$implementation" = "lumis-js-wasm" ]; then
-      BENCH_IMPLEMENTATION="$implementation" BENCH_SCENARIO="$scenario" BENCH_OUTPUT="$output" LUMIS_DISABLE_NATIVE=1 LUMIS_REQUIRE_NATIVE=0 pnpm --filter @lumis-sh/benchmarks benchmark
+      BENCH_IMPLEMENTATION="$implementation" BENCH_SCENARIO="$scenario" BENCH_OUTPUT="$output" LUMIS_TEST_RUNTIME=wasm pnpm --filter @lumis-sh/benchmarks benchmark
     else
       BENCH_IMPLEMENTATION="$implementation" BENCH_SCENARIO="$scenario" BENCH_OUTPUT="$output" pnpm --filter @lumis-sh/benchmarks benchmark
     fi

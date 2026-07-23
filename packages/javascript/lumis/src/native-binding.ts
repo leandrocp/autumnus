@@ -45,7 +45,7 @@ export function loadNativeBinding(): NativeBinding | undefined {
   if (cachedBinding !== undefined) {
     return cachedBinding ?? undefined;
   }
-  if (process.env.LUMIS_DISABLE_NATIVE === "1") {
+  if (process.env.LUMIS_TEST_RUNTIME === "wasm") {
     cachedBinding = null;
     return undefined;
   }
@@ -71,7 +71,7 @@ export function loadNativeBinding(): NativeBinding | undefined {
   }
 
   cachedBinding = null;
-  if (process.env.LUMIS_REQUIRE_NATIVE === "1") {
+  if (process.env.LUMIS_TEST_RUNTIME === "native") {
     throw new Error(`Lumis native runtime is required but unavailable for ${target}`);
   }
   return undefined;

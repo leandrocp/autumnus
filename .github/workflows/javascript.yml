@@ -162,4 +162,4 @@ jobs:
       - run: pnpm --filter @lumis-sh/lumis build:native
       - run: pnpm --filter @lumis-sh/lumis test
         env:
-          LUMIS_REQUIRE_NATIVE: '1'
+          LUMIS_TEST_RUNTIME: native

@@ -14,7 +14,7 @@ afterEach(() => {
   vi.resetModules()
 })
 
-describe.skipIf(process.env.LUMIS_REQUIRE_NATIVE === '1')('Wasm resolver', () => {
+describe.skipIf(process.env.LUMIS_TEST_RUNTIME === 'native')('Wasm resolver', () => {
   it('uses parser name and version in the default resolver', async () => {
     const { default: diff } = await import('../langs/diff.ts')
 
@@ -134,7 +134,7 @@ describe.skipIf(process.env.LUMIS_REQUIRE_NATIVE === '1')('Wasm resolver', () =>
   }, 30_000)
 })
 
-it.runIf(process.env.LUMIS_REQUIRE_NATIVE === '1')(
+it.runIf(process.env.LUMIS_TEST_RUNTIME === 'native')(
   'does not resolve parser Wasm in the native runtime',
   async () => {
     const { createHighlighter, configureWasmResolver } = await import('../src/index.js')
@@ -152,7 +152,7 @@ it.runIf(process.env.LUMIS_REQUIRE_NATIVE === '1')(
   },
 )
 
-it.runIf(process.env.LUMIS_REQUIRE_NATIVE === '1')(
+it.runIf(process.env.LUMIS_TEST_RUNTIME === 'native')(
   'rejects languages not compiled into the native runtime',
   async () => {
     const { createHighlighter } = await import('../src/index.js')
