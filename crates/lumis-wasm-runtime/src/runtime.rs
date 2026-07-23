@@ -80,8 +80,6 @@ pub enum RuntimeError {
     LanguageNotLoaded(String),
     #[error("highlighting failed: {0}")]
     Highlight(String),
-    #[error("source or event offset exceeds the native event format limit")]
-    EventTooLarge,
 }
 
 impl Runtime {
@@ -266,16 +264,6 @@ impl Runtime {
         }
 
         Ok(output)
-    }
-
-    /// Encode events into one compact buffer for a single native boundary crossing.
-    pub fn highlight_encoded(
-        &self,
-        source: &str,
-        name_or_alias: &str,
-        rainbow_brackets: bool,
-    ) -> Result<Vec<u8>, RuntimeError> {
-        encode_events(&self.highlight(source, name_or_alias, rainbow_brackets)?)
     }
 }
 
@@ -466,54 +454,4 @@ fn apply_rainbow_brackets(
         }
     }
     output
-}
-
-fn encode_events(events: &[HighlightEvent]) -> Result<Vec<u8>, RuntimeError> {
-    let mut output = Vec::with_capacity(events.len() * 9);
-    for event in events {
-        match event {
-            HighlightEvent::Source { start, end } => {
-                let start = u32::try_from(*start).map_err(|_| RuntimeError::EventTooLarge)?;
-                let end = u32::try_from(*end).map_err(|_| RuntimeError::EventTooLarge)?;
-                output.push(0);
-                output.extend_from_slice(&start.to_le_bytes());
-                output.extend_from_slice(&end.to_le_bytes());
-            }
-            HighlightEvent::Start {
-                scope_index,
-                language,
-            } => {
-                let scope_index =
-                    u16::try_from(*scope_index).map_err(|_| RuntimeError::EventTooLarge)?;
-                let language_len =
-                    u16::try_from(language.len()).map_err(|_| RuntimeError::EventTooLarge)?;
-                output.push(1);
-                output.extend_from_slice(&scope_index.to_le_bytes());
-                output.extend_from_slice(&language_len.to_le_bytes());
-                output.extend_from_slice(language.as_bytes());
-            }
-            HighlightEvent::End => output.push(2),
-        }
-    }
-    Ok(output)
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn encodes_event_stream() {
-        let events = vec![
-            HighlightEvent::Start {
-                scope_index: 7,
-                language: "rust".to_string(),
-            },
-            HighlightEvent::Source { start: 1, end: 4 },
-            HighlightEvent::End,
-        ];
-        let encoded = encode_events(&events).unwrap();
-        assert_eq!(encoded[0], 1);
-        assert_eq!(encoded.last(), Some(&2));
-    }
 }

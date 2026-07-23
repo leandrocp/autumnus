@@ -1,5 +1,4 @@
 import { LANGUAGES } from "../generated/languages-meta.js";
-import { HIGHLIGHT_NAMES } from "../highlights.js";
 import type { NativeBinding, NativeFormatter, NativeRuntimeInstance } from "../native-binding.js";
 import type {
   Formatter,
@@ -9,54 +8,13 @@ import type {
   LoadedLanguage,
 } from "../types.js";
 import { builtinFormatterKind } from "./builtin-formatter.js";
+import { decodeNativeEvents } from "./native-event-codec.js";
 import { PLAINTEXT_LANG_ID } from "../types.js";
 import type { LanguagesModule, LoadLanguageOptions, RuntimeLike } from "./languages.js";
 
 const PLAINTEXT_ALIASES = ["text", "txt", "plain"];
 const BUILTIN_LANGUAGE_IDS = new Set(LANGUAGES.map(({ id }) => id));
-const decoder = new TextDecoder();
 const encoder = new TextEncoder();
-
-function decodeEvents(data: Uint8Array): HighlightEvent[] {
-  const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
-  const events: HighlightEvent[] = [];
-  let offset = 0;
-
-  while (offset < data.byteLength) {
-    const tag = view.getUint8(offset);
-    offset += 1;
-    if (tag === 0) {
-      if (offset + 8 > data.byteLength) throw new Error("Invalid native Lumis event buffer");
-      const startByte = view.getUint32(offset, true);
-      const endByte = view.getUint32(offset + 4, true);
-      offset += 8;
-      events.push({ type: "source", startByte, endByte });
-      continue;
-    }
-    if (tag === 1) {
-      if (offset + 4 > data.byteLength) throw new Error("Invalid native Lumis event buffer");
-      const scopeIndex = view.getUint16(offset, true);
-      const languageLength = view.getUint16(offset + 2, true);
-      offset += 4;
-      if (offset + languageLength > data.byteLength) {
-        throw new Error("Invalid native Lumis event buffer");
-      }
-      const scope = HIGHLIGHT_NAMES[scopeIndex];
-      if (!scope) throw new Error(`Unknown native Lumis highlight index ${scopeIndex}`);
-      const language = decoder.decode(data.subarray(offset, offset + languageLength));
-      offset += languageLength;
-      events.push({ type: "start", scope, language });
-      continue;
-    }
-    if (tag === 2) {
-      events.push({ type: "end" });
-      continue;
-    }
-    throw new Error(`Unknown native Lumis event tag ${tag}`);
-  }
-
-  return events;
-}
 
 export function createNativeLanguagesModule(binding: NativeBinding): LanguagesModule {
   class NativeHighlighterRuntime implements RuntimeLike {
@@ -132,7 +90,7 @@ export function createNativeLanguagesModule(binding: NativeBinding): LanguagesMo
       if (language.definition.id === PLAINTEXT_LANG_ID) {
         return [{ type: "source", startByte: 0, endByte: encoder.encode(source).byteLength }];
       }
-      return decodeEvents(
+      return decodeNativeEvents(
         this.native.highlightEvents(
           source,
           language.definition.id,

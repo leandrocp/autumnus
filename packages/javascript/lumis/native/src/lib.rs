@@ -121,6 +121,9 @@ struct FormatRequest {
 }
 
 type LoadedLanguages = Arc<RwLock<HashSet<Language>>>;
+const SOURCE_EVENT: u8 = 0;
+const START_EVENT: u8 = 1;
+const END_EVENT: u8 = 2;
 
 fn inline_highlight_lines(value: JsHighlightLines) -> InlineHighlightLines {
     InlineHighlightLines {
@@ -208,6 +211,8 @@ fn render_formatter(
     Ok(String::from_utf8(output)?)
 }
 
+/// Encode the event protocol documented and decoded in
+/// `src/core/native-event-codec.ts`.
 fn encode_events(events: &[HighlightEvent]) -> Result<Buffer> {
     let mut output = Vec::with_capacity(events.len() * 9);
     for event in events {
@@ -215,7 +220,7 @@ fn encode_events(events: &[HighlightEvent]) -> Result<Buffer> {
             HighlightEvent::Source { start, end } => {
                 let start = u32::try_from(*start).map_err(native_error)?;
                 let end = u32::try_from(*end).map_err(native_error)?;
-                output.push(0);
+                output.push(SOURCE_EVENT);
                 output.extend_from_slice(&start.to_le_bytes());
                 output.extend_from_slice(&end.to_le_bytes());
             }
@@ -225,12 +230,12 @@ fn encode_events(events: &[HighlightEvent]) -> Result<Buffer> {
             } => {
                 let scope_index = u16::try_from(*scope_index).map_err(native_error)?;
                 let language_len = u16::try_from(language.len()).map_err(native_error)?;
-                output.push(1);
+                output.push(START_EVENT);
                 output.extend_from_slice(&scope_index.to_le_bytes());
                 output.extend_from_slice(&language_len.to_le_bytes());
                 output.extend_from_slice(language.as_bytes());
             }
-            HighlightEvent::End => output.push(2),
+            HighlightEvent::End => output.push(END_EVENT),
         }
     }
     Ok(output.into())
