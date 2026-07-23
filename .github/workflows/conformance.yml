@@ -1,7 +1,12 @@
 name: Conformance
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: >-
+    ${{ format(
+      '{0}-{1}',
+      github.workflow,
+      github.event.pull_request.number || github.ref
+    ) }}
   cancel-in-progress: true
 
 permissions:
@@ -43,28 +48,67 @@ jobs:
   conformance:
     if: >-
       ${{ github.event_name == 'workflow_dispatch' ||
-          (github.event_name == 'pull_request' && github.head_ref != 'knope/release') ||
-          (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore: prepare releases')) }}
-    name: Conformance
+          (
+            github.event_name == 'pull_request' &&
+            github.head_ref != 'knope/release'
+          ) ||
+          (
+            github.event_name == 'push' &&
+            !startsWith(
+              github.event.head_commit.message,
+              'chore: prepare releases'
+            )
+          ) }}
+    name: Conformance (${{ matrix.name }})
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Rust
+            task: test-conformance-rust
+            rust: true
+          - name: CLI
+            task: test-conformance-cli
+            rust: true
+          - name: JavaScript Wasm
+            task: test-conformance-javascript-wasm
+            node: true
+          - name: JavaScript native
+            task: test-conformance-javascript-native
+            node: true
+            rust: true
+          - name: Browser
+            task: test-conformance-browser
+            node: true
+            browser: true
+          - name: Elixir
+            task: test-conformance-elixir
+            rust: true
+            elixir: true
     steps:
       - uses: actions/checkout@v7
 
       - uses: dtolnay/rust-toolchain@stable
+        if: matrix.rust
 
       - uses: Swatinem/rust-cache@v2
+        if: matrix.rust
 
       - uses: erlef/setup-beam@v1
+        if: matrix.elixir
         with:
           elixir-version: "1.19.x"
           otp-version: "28.x"
 
       - uses: pnpm/action-setup@v6
+        if: matrix.node
         with:
           version: 10
 
       - uses: actions/setup-node@v7
+        if: matrix.node
         with:
           node-version: "lts/*"
           cache: "pnpm"
@@ -76,14 +120,16 @@ jobs:
           install: false
 
       - run: pnpm install --frozen-lockfile
+        if: matrix.node
 
       - run: mix deps.get
+        if: matrix.elixir
         working-directory: packages/elixir/lumis
 
-      - run: mise run test-conformance
+      - run: mise run ${{ matrix.task }}
 
       - uses: actions/upload-artifact@v7
-        if: failure()
+        if: failure() && matrix.browser
         with:
           name: javascript-browser-conformance-results
           path: packages/javascript/lumis/test-results

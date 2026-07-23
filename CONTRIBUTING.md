@@ -45,7 +45,18 @@ mise run test-conformance
 mise run test-conformance-browser
 ```
 
-`test-conformance` includes the browser suite. Run `test-conformance-browser` directly to check only Chromium, Firefox, and WebKit; it installs the required browser builds before running.
+`test-conformance` includes the browser suite. Run an individual conformance task to check one runtime in isolation:
+
+```sh
+mise run test-conformance-rust
+mise run test-conformance-cli
+mise run test-conformance-javascript-wasm
+mise run test-conformance-javascript-native
+mise run test-conformance-browser
+mise run test-conformance-elixir
+```
+
+The browser task installs the required Chromium, Firefox, and WebKit builds before running. CI runs these six tasks as independent parallel jobs.
 
 ## Releases
 

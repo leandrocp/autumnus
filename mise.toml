@@ -156,27 +156,41 @@ description = "Run conformance tests across all packages"
 run = '''
 #!/usr/bin/env bash
 set -euo pipefail
-echo "Rust conformance..."
-cargo test -p lumis --test formatter_conformance -- --ignored
-echo ""
-echo "CLI conformance..."
-cargo test -p lumis-cli --test conformance -- --ignored
-echo ""
-echo "Preparing JS conformance..."
+mise run test-conformance-rust
+mise run test-conformance-cli
+mise run test-conformance-javascript-wasm
+mise run test-conformance-javascript-native
+mise run test-conformance-browser
+mise run test-conformance-elixir
+'''
+
+[tasks.'test-conformance-rust']
+description = "Run Rust library conformance tests"
+run = "cargo test -p lumis --test formatter_conformance -- --ignored"
+
+[tasks.'test-conformance-cli']
+description = "Run CLI conformance tests"
+run = "cargo test -p lumis-cli --test conformance -- --ignored"
+
+[tasks.'test-conformance-javascript-wasm']
+description = "Run JavaScript Wasm conformance tests"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
 pnpm --filter @lumis-sh/themes build
 pnpm --filter @lumis-sh/lumis build:generate
-echo ""
-echo "JS Wasm conformance..."
 LUMIS_TEST_RUNTIME=wasm pnpm --filter @lumis-sh/lumis test:conformance
-echo ""
-echo "JS native conformance..."
+'''
+
+[tasks.'test-conformance-javascript-native']
+description = "Run JavaScript native conformance tests"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+pnpm --filter @lumis-sh/themes build
+pnpm --filter @lumis-sh/lumis build:generate
 pnpm --filter @lumis-sh/lumis build:native
 LUMIS_TEST_RUNTIME=native pnpm --filter @lumis-sh/lumis test:conformance
-echo ""
-mise run test-conformance-browser
-echo ""
-echo "Elixir conformance..."
-(cd packages/elixir/lumis && LUMIS_BUILD=1 mix test --include conformance test/conformance_test.exs)
 '''
 
 [tasks.'test-conformance-browser']
@@ -191,6 +205,10 @@ fi
 packages/javascript/lumis/node_modules/.bin/playwright "${args[@]}"
 pnpm --filter @lumis-sh/lumis test:conformance:browser
 '''
+
+[tasks.'test-conformance-elixir']
+description = "Run Elixir conformance tests"
+run = "cd packages/elixir/lumis && LUMIS_BUILD=1 mix test --include conformance test/conformance_test.exs"
 
 [tasks.'lint']
 description = "Run all linters"
