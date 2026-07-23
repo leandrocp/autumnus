@@ -162,32 +162,19 @@ echo ""
 echo "CLI conformance..."
 cargo test -p lumis-cli --test conformance -- --ignored
 echo ""
-mise run test-conformance-js-wasm
+echo "Preparing JS conformance..."
+pnpm --filter @lumis-sh/themes build
+pnpm --filter @lumis-sh/lumis build:generate
 echo ""
-mise run test-conformance-js-native
+echo "JS Wasm conformance..."
+LUMIS_TEST_RUNTIME=wasm pnpm --filter @lumis-sh/lumis test:conformance
+echo ""
+echo "JS native conformance..."
+pnpm --filter @lumis-sh/lumis build:native
+LUMIS_TEST_RUNTIME=native pnpm --filter @lumis-sh/lumis test:conformance
 echo ""
 echo "Elixir conformance..."
 (cd packages/elixir/lumis && LUMIS_BUILD=1 mix test --include conformance test/conformance_test.exs)
-'''
-
-[tasks.'test-conformance-js-wasm']
-description = "Run JavaScript conformance tests against the Wasm runtime"
-run = '''
-#!/usr/bin/env bash
-set -euo pipefail
-echo "JS Wasm conformance..."
-LUMIS_TEST_RUNTIME=wasm pnpm --filter @lumis-sh/lumis test:conformance
-'''
-
-[tasks.'test-conformance-js-native']
-description = "Run JavaScript conformance tests against the native runtime"
-run = '''
-#!/usr/bin/env bash
-set -euo pipefail
-echo "JS native conformance..."
-pnpm --filter @lumis-sh/lumis build:generate
-pnpm --filter @lumis-sh/lumis build:native
-LUMIS_TEST_RUNTIME=native pnpm --filter @lumis-sh/lumis test:conformance
 '''
 
 [tasks.'test-browser']
