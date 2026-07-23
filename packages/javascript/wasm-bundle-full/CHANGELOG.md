@@ -1,3 +1,10 @@
+## [0.1.0](https://github.com/leandrocp/lumis/compare/npm-wasm-bundle-full/v0.0.7...npm-wasm-bundle-full/v0.1.0) (2026-07-23)
+
+
+### Features
+
+- add mdx language reusing the markdown parser - [#1012](https://github.com/leandrocp/lumis/pull/1012) by @benswift
+
 ## [0.0.7](https://github.com/leandrocp/lumis/compare/npm-wasm-bundle-full/v0.0.6...npm-wasm-bundle-full/v0.0.7) (2026-06-16)
 
 ### Features
