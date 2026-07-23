@@ -65,6 +65,7 @@ function compileBracketConfig(
 export interface LoadLanguageOptions {
   definition: LanguageDefinition;
   wasm: WasmRef | Uint8Array | ArrayBuffer | string | URL | Response;
+  grammarName?: string;
   highlights: string;
   injections?: string;
   locals?: string;

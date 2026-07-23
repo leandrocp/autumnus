@@ -127,6 +127,8 @@ export type RuntimeWasmBundle = Partial<Record<string, RuntimeWasmInput>>;
 export interface Language {
   id: string;
   aliases: string[];
+  /** Exported Tree-sitter grammar name. Inferred from the WASM reference when omitted. */
+  grammarName?: string;
   /** Tree-sitter highlight query (S-expression). */
   highlights: string;
   injections?: string;

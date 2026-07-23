@@ -1,5 +1,4 @@
 import { LANGUAGES } from "../generated/languages-meta.js";
-import { NATIVE_QUERY_LOADERS } from "../generated/native-query-loaders.js";
 import { HIGHLIGHT_NAMES } from "../highlights.js";
 import type { NativeBinding, NativeFormatter, NativeRuntimeInstance } from "../native-binding.js";
 import type { RuntimeEnvironment } from "../runtime/runtime.js";
@@ -73,18 +72,6 @@ function grammarName(wasm: LoadLanguageOptions["wasm"], languageId: string): str
     return wasm.name.replace(/^tree-sitter-/, "").replaceAll("-", "_");
   }
   return languageId.replaceAll("-", "_");
-}
-
-function queryHash(opts: LoadLanguageOptions): number {
-  const bytes = encoder.encode(
-    [opts.highlights, opts.injections ?? "", opts.locals ?? "", opts.brackets ?? ""].join("\0"),
-  );
-  let hash = 0x811c9dc5;
-  for (const byte of bytes) {
-    hash ^= byte;
-    hash = Math.imul(hash, 0x01000193) >>> 0;
-  }
-  return hash;
 }
 
 function decodeEvents(data: Uint8Array): HighlightEvent[] {
@@ -251,41 +238,25 @@ export function createNativeLanguagesModule(
 
     private async createLoadedLanguage(opts: LoadLanguageOptions): Promise<LoadedLanguage> {
       const wasm = await this.resolveWasmBytes(opts);
-      let nativeGrammarName = grammarName(opts.wasm, opts.definition.id);
-      let highlights = opts.highlights;
-      let injections = opts.injections;
-      let locals = opts.locals;
-      let brackets = opts.brackets;
-      const nativeQueryLoader = NATIVE_QUERY_LOADERS[opts.definition.id];
-      if (nativeQueryLoader) {
-        const nativeQueries = (await nativeQueryLoader()).default;
-        if (nativeQueries.hash === queryHash(opts)) {
-          nativeGrammarName = nativeQueries.grammarName;
-          highlights = nativeQueries.highlights;
-          injections = nativeQueries.injections;
-          locals = nativeQueries.locals;
-          brackets = nativeQueries.brackets;
-        }
-      }
-      const specialized = specializeInjections(injections ?? "", (languageId) =>
+      const specialized = specializeInjections(opts.injections ?? "", (languageId) =>
         this.registeredLanguageIds.has(this.resolveLanguageId(languageId)),
       );
       await this.native.loadLanguageAsync(
         opts.definition.id,
         opts.definition.aliases,
-        nativeGrammarName,
+        opts.grammarName ?? grammarName(opts.wasm, opts.definition.id),
         wasm,
-        highlights,
+        opts.highlights,
         specialized.source,
-        locals,
-        brackets,
+        opts.locals,
+        opts.brackets,
       );
       const loaded: NativeLoadedLanguage = {
         definition: opts.definition,
         queries: {
-          highlights,
-          injections: injections ?? "",
-          locals: locals ?? "",
+          highlights: opts.highlights,
+          injections: opts.injections ?? "",
+          locals: opts.locals ?? "",
           omittedLanguages: specialized.omittedLanguages,
         },
       };

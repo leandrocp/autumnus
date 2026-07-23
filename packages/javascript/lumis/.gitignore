@@ -2,7 +2,6 @@ node_modules/
 dist/
 doc/
 langs/
-native-queries/
 themes/
 wasm/
 native/*.node
