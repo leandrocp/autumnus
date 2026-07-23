@@ -1,3 +1,10 @@
+## [0.2.0](https://github.com/leandrocp/lumis/compare/npm-react/v0.1.3...npm-react/v0.2.0) (2026-07-23)
+
+
+### Features
+
+- Lumis JavaScript native (Rust bindings) - [#1083](https://github.com/leandrocp/lumis/pull/1083)
+
 ## [0.1.3](https://github.com/leandrocp/lumis/compare/npm-react/v0.1.2...npm-react/v0.1.3) (2026-06-16)
 
 ### Features
