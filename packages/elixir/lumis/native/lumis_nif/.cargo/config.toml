@@ -1,3 +1,8 @@
+# rustler-precompiled-action packages artifacts from this crate's target
+# directory, so keep it local even though the NIF is a root workspace member.
+[build]
+target-dir = "target"
+
 # Grammar crates generated with tree-sitter CLI < 0.26.4 ship an array.h whose
 # macros violate strict aliasing, which gcc -O2 miscompiles into heap
 # corruption (tree-sitter/tree-sitter@ed6e42c, tree-sitter/tree-sitter-haskell#144).
