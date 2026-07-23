@@ -36,6 +36,20 @@ async function createDeferredJavaScript() {
   return { deferred, language, lazy };
 }
 
+async function waitForHtml(container: HTMLElement, expected: string) {
+  const deadline = Date.now() + 2_000;
+
+  while (!container.innerHTML.includes(expected)) {
+    if (Date.now() >= deadline) {
+      throw new Error(`Timed out waiting for ${expected}`);
+    }
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    });
+  }
+}
+
 function HookHarness({
   children,
   formatter,
@@ -146,9 +160,9 @@ describe("@lumis-sh/react", () => {
 
     await act(async () => {
       deferred.resolve(language);
-      await deferred.promise;
     });
 
+    await waitForHtml(container, 'class="lumis"');
     expect(container.innerHTML).toContain('class="lumis"');
     expect(container.innerHTML).toContain('class="language-javascript"');
 
@@ -179,9 +193,9 @@ describe("@lumis-sh/react", () => {
 
     await act(async () => {
       deferred.resolve(language);
-      await deferred.promise;
     });
 
+    await waitForHtml(container, 'class="lumis"');
     expect(container.innerHTML).toContain('class="lumis"');
     expect(container.innerHTML).toContain('class="language-javascript"');
 
@@ -214,10 +228,9 @@ describe("@lumis-sh/react", () => {
 
     await act(async () => {
       deferred.resolve(highlighter);
-      await Promise.resolve();
-      await Promise.resolve();
     });
 
+    await waitForHtml(container, 'class="lumis"');
     expect(container.innerHTML).toContain('class="lumis"');
     expect(container.innerHTML).toContain('class="language-javascript"');
 
@@ -249,10 +262,9 @@ describe("@lumis-sh/react", () => {
 
     await act(async () => {
       deferred.resolve(highlighter);
-      await Promise.resolve();
-      await Promise.resolve();
     });
 
+    await waitForHtml(container, 'class="lumis"');
     expect(container.innerHTML).toContain('class="lumis"');
     expect(container.innerHTML).toContain('class="language-javascript"');
 
