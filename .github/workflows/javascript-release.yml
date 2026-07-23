@@ -58,7 +58,10 @@ jobs:
           targets: ${{ matrix.target }}
 
       - name: Build native runtime
-        run: cargo build --locked --release --target ${{ matrix.target }} -p lumis-js-native
+        run: >-
+          cargo build --locked --release
+          --target ${{ matrix.target }}
+          -p lumis-js-native
 
       - name: Stage native runtime
         shell: bash
@@ -77,8 +80,13 @@ jobs:
   publish:
     needs: build-native
     if: >-
-      ${{ !cancelled() &&
-          (needs.build-native.result == 'success' || needs.build-native.result == 'skipped') }}
+      ${{
+        !cancelled()
+        && (
+          needs.build-native.result == 'success'
+          || needs.build-native.result == 'skipped'
+        )
+      }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -118,19 +126,26 @@ jobs:
             set_output build_filters "@lumis-sh/themes @lumis-sh/lumis"
           elif [ "$component" = "npm-markdown-it-lumis" ]; then
             set_output filter "@lumis-sh/markdown-it-lumis"
-            set_output build_filters "@lumis-sh/themes @lumis-sh/lumis @lumis-sh/markdown-it-lumis"
+            build_filters="@lumis-sh/themes @lumis-sh/lumis"
+            build_filters="$build_filters @lumis-sh/markdown-it-lumis"
+            set_output build_filters "$build_filters"
           elif [ "$component" = "npm-rehype-lumis" ]; then
             set_output filter "@lumis-sh/rehype-lumis"
-            set_output build_filters "@lumis-sh/themes @lumis-sh/lumis @lumis-sh/rehype-lumis"
+            build_filters="@lumis-sh/themes @lumis-sh/lumis"
+            build_filters="$build_filters @lumis-sh/rehype-lumis"
+            set_output build_filters "$build_filters"
           elif [ "$component" = "npm-react" ]; then
             set_output filter "@lumis-sh/react"
-            set_output build_filters "@lumis-sh/themes @lumis-sh/lumis @lumis-sh/react"
+            build_filters="@lumis-sh/themes @lumis-sh/lumis"
+            build_filters="$build_filters @lumis-sh/react"
+            set_output build_filters "$build_filters"
           elif [ "$component" = "npm-cli" ]; then
             set_output filter "@lumis-sh/cli"
             set_output build_filters ""
           elif [[ "$component" == npm-wasm-bundle-* ]]; then
             set_output filter "@lumis-sh/${component#npm-}"
-            set_output build_filters "@lumis-sh/${component#npm-}"
+            # Bundle packages contain generated, publish-ready entry points.
+            set_output build_filters ""
           else
             echo "Unknown component: $component" && exit 1
           fi
@@ -163,7 +178,8 @@ jobs:
             filename="$(basename "$binary")"
             target="${filename#lumis-native.}"
             target="${target%.node}"
-            cp "$binary" "packages/javascript/lumis/native/npm/$target/$filename"
+            cp "$binary" \
+              "packages/javascript/lumis/native/npm/$target/$filename"
           done
 
       - name: Publish native runtime packages
@@ -176,7 +192,9 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish to npm
-        run: pnpm --filter "$PACKAGE_FILTER" publish --access public --no-git-checks --provenance
+        run: >-
+          pnpm --filter "$PACKAGE_FILTER" publish
+          --access public --no-git-checks --provenance
         env:
           PACKAGE_FILTER: ${{ steps.pkg.outputs.filter }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
