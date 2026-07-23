@@ -1,3 +1,17 @@
+## [0.4.2](https://github.com/leandrocp/lumis/compare/cargo-lumis-cli/v0.4.1...cargo-lumis-cli/v0.4.2) (2026-07-23)
+
+
+### Bug Fixes
+
+- prevent query capture list pool overflow on large inputs - [#1028](https://github.com/leandrocp/lumis/pull/1028) by @ericmj
+
+
+### Features
+
+- add mdx language reusing the markdown parser - [#1012](https://github.com/leandrocp/lumis/pull/1012) by @benswift
+- add dump commands - [#1087](https://github.com/leandrocp/lumis/pull/1087)
+- Lumis JavaScript native (Rust bindings) - [#1083](https://github.com/leandrocp/lumis/pull/1083)
+
 ## [0.4.1](https://github.com/leandrocp/lumis/compare/cargo-lumis-cli/v0.4.0...cargo-lumis-cli/v0.4.1) (2026-07-11)
 
 ### Features
