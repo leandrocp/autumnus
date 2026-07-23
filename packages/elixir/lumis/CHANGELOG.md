@@ -1,3 +1,12 @@
+## [0.6.3](https://github.com/leandrocp/lumis/compare/hex-lumis/v0.6.2...hex-lumis/v0.6.3) (2026-07-23)
+
+
+### Bug Fixes
+
+- prevent query capture list pool overflow on large inputs - [#1028](https://github.com/leandrocp/lumis/pull/1028) by @ericmj
+- keep Elixir NIF lockfile portable - [#1029](https://github.com/leandrocp/lumis/pull/1029)
+- haskell heap corruption on aarch64-linux - [#1086](https://github.com/leandrocp/lumis/pull/1086) by @ericmj
+
 ## [0.6.2](https://github.com/leandrocp/lumis/compare/hex-lumis/v0.6.1...hex-lumis/v0.6.2) (2026-07-08)
 
 
