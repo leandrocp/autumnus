@@ -114,7 +114,7 @@ function getRuntime(): LanguagesModule {
   const binding = loadNativeBinding();
   if (binding) {
     try {
-      runtime = createNativeLanguagesModule(nodeRuntime, binding);
+      runtime = createNativeLanguagesModule(binding);
     } catch (error) {
       // A present but unloadable addon must never prevent the universal fallback.
       if (process.env.LUMIS_REQUIRE_NATIVE === "1") throw error;

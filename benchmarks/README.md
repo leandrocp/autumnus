@@ -9,7 +9,7 @@ Highlight one small Rust file.
 | Tool | Total |
 | --- | ---: |
 | Lumis Rust | 742.151 µs |
-| Lumis JS native | 966.167 µs |
+| Lumis JS native | 959.041 µs |
 | Lumis Elixir | 981.291 µs |
 | syntect | 4.713 ms |
 | Shiki | 5.722 ms |

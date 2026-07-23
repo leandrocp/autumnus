@@ -153,10 +153,9 @@ it.runIf(process.env.LUMIS_REQUIRE_NATIVE === '1')(
 )
 
 it.runIf(process.env.LUMIS_REQUIRE_NATIVE === '1')(
-  'preserves custom languages through the Wasm fallback',
+  'rejects languages not compiled into the native runtime',
   async () => {
     const { createHighlighter } = await import('../src/index.js')
-    const { htmlLinked } = await import('../src/formatters.js')
     const { default: diff } = await import('../langs/diff.ts')
     const custom = {
       ...diff,
@@ -165,10 +164,8 @@ it.runIf(process.env.LUMIS_REQUIRE_NATIVE === '1')(
       wasm: ensureLocalWasm('diff'),
     }
 
-    const hl = await createHighlighter({ languages: [custom] })
-
-    expect(hl.highlight('- old\n+ new', htmlLinked({ language: custom }))).toContain(
-      'class="language-custom-diff"',
+    await expect(createHighlighter({ languages: [custom] })).rejects.toThrow(
+      'The native runtime does not include language "custom-diff"',
     )
   },
 )
