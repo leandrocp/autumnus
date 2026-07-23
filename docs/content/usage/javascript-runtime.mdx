@@ -172,14 +172,17 @@ Useful for dropdowns, config validation, and docs tooling:
 
 ## Runtime notes
 
-- the package uses conditional exports so Node and web-standard runtimes get the right runtime automatically
+- `@lumis-sh/lumis` uses `web-tree-sitter` and per-language parser WASM by default
+- install `@lumis-sh/lumis-native` to opt into the native Rust runtime on supported Node.js platforms; Lumis detects it automatically
+- the native addon contains all supported parsers and is much larger than the default per-language WASM setup
+- the package uses conditional exports so Node and web-standard runtimes get the right entry point automatically
 - Node caches fetched parser WASM locally when possible
 - Node can also auto-load installed parser packages such as `@lumis-sh/wasm-elixir` or bundle packages such as `@lumis-sh/wasm-bundle-web`
 - non-Node usage usually relies on remote parser assets unless you override the resolver, use `withWasm()` with a single npm parser package such as `@lumis-sh/wasm-json`, or use `withWasmBundle()` with a bundle package such as `@lumis-sh/wasm-bundle-web`
 - Bun and Deno are also supported
 
 :::note Edge is not supported yet
-Lumis still uses `web-tree-sitter` in the JavaScript runtime, but Edge runtimes are not supported yet because of an upstream Tree-sitter limitation: [tree-sitter/tree-sitter#2160](https://github.com/tree-sitter/tree-sitter/issues/2160).
+The portable JavaScript runtime uses `web-tree-sitter`, but Edge runtimes are not supported yet because of an upstream Tree-sitter limitation: [tree-sitter/tree-sitter#2160](https://github.com/tree-sitter/tree-sitter/issues/2160).
 :::
 
 For parser asset details, continue with [WASM and CDN](/advanced/wasm-and-cdn).

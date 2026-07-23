@@ -25,7 +25,15 @@ Pick the runtime you want to use first. The highlighting concepts stay the same 
 npm install @lumis-sh/lumis @lumis-sh/themes
 ```
 
-Use `@lumis-sh/lumis` for the runtime and `@lumis-sh/themes` for bundled themes.
+Use `@lumis-sh/lumis` for the default per-language WASM runtime and `@lumis-sh/themes` for bundled themes.
+
+For the optional native Node.js runtime:
+
+```bash
+npm install @lumis-sh/lumis-native
+```
+
+Lumis detects it automatically. The native addon contains all supported language parsers, so it has a much larger install size than the default WASM setup.
 
   </TabItem>
   <TabItem value="rust" label="Rust">
@@ -96,5 +104,6 @@ The installed binary is `lumis`. Rust users can also install from crates.io with
 ## Notes
 
 - JavaScript loads parser WASM files at runtime. By default they come from a CDN. See [WASM and CDN](/advanced/wasm-and-cdn).
+- On supported Node.js platforms, `@lumis-sh/lumis-native` replaces per-language parser WASM with an opt-in native addon containing all parsers.
 - For local JavaScript parser assets from npm, install per-language packages such as `@lumis-sh/wasm-rust` or bundle packages such as `@lumis-sh/wasm-bundle-web`.
 - The CLI caches parsers and custom themes in a local data directory.

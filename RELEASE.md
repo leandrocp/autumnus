@@ -70,6 +70,8 @@ If multiple JS packages are part of the same release, use this order:
 
 `@lumis-sh/lumis` builds against `@lumis-sh/themes`. `@lumis-sh/markdown-it-lumis`, `@lumis-sh/rehype-lumis`, and `@lumis-sh/react` depend on `@lumis-sh/lumis`. The `@lumis-sh/wasm-bundle-*` packages declare `@lumis-sh/lumis` as a peer dependency.
 
+The `npm-lumis` workflow also publishes the platform-specific `@lumis-sh/lumis-native-*` packages and then the `@lumis-sh/lumis-native` selector before publishing `@lumis-sh/lumis`. All of them share the `npm-lumis` version and tag.
+
 After `npm-lumis` is published, the plugin packages, CLI package, and WASM bundle packages are independent. Keep the order above as the canonical release order.
 
 `npm-cli` must use the same version as `cargo-lumis-cli`, and the matching `cargo-lumis-cli/v<version>` GitHub release must already contain prebuilt CLI archives before publishing `@lumis-sh/cli`.

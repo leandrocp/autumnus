@@ -57,7 +57,11 @@ export function loadNativeBinding(): NativeBinding | undefined {
   }
 
   const require = createRequire(import.meta.url);
-  const candidates = [`../native/lumis-native.${target}.node`, `@lumis-sh/lumis-native-${target}`];
+  const candidates = [
+    `../native/lumis-native.${target}.node`,
+    "@lumis-sh/lumis-native",
+    `@lumis-sh/lumis-native-${target}`,
+  ];
   for (const candidate of candidates) {
     try {
       const binding = require(candidate) as NativeBinding;

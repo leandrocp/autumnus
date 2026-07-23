@@ -186,8 +186,19 @@ jobs:
         if: steps.pkg.outputs.filter == '@lumis-sh/lumis'
         run: |
           for package_dir in packages/javascript/lumis/native/npm/*; do
+            if [ "$(basename "$package_dir")" = "meta" ]; then
+              continue
+            fi
             npm publish "$package_dir" --access public --provenance
           done
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish native runtime selector
+        if: steps.pkg.outputs.filter == '@lumis-sh/lumis'
+        run: >-
+          pnpm --filter @lumis-sh/lumis-native publish
+          --access public --no-git-checks --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

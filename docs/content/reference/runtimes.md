@@ -21,10 +21,11 @@ keywords:
 | Rust | `lumis` | [docs.rs](https://docs.rs/lumis) |
 | Elixir | `lumis` | [HexDocs](https://hexdocs.pm/lumis) |
 | JavaScript | `@lumis-sh/lumis` | [npm](https://www.npmjs.com/package/@lumis-sh/lumis) |
+| Node.js native (opt-in) | `@lumis-sh/lumis-native` | [npm](https://www.npmjs.com/package/@lumis-sh/lumis-native) |
 | Browsers / CDN | `@lumis-sh/lumis` | [npm](https://www.npmjs.com/package/@lumis-sh/lumis) |
 | Java | `lumis4j` | [GitHub](https://github.com/roastedroot/lumis4j) |
 
-`@lumis-sh/lumis` covers JavaScript runtimes such as Node.js, Bun, and Deno, plus browser usage through bundlers or CDN imports.
+`@lumis-sh/lumis` covers JavaScript runtimes such as Node.js, Bun, and Deno, plus browser usage through bundlers or CDN imports. It loads parser WASM per language by default. On supported Node.js platforms, installing `@lumis-sh/lumis-native` opts into one larger native addon containing all supported parsers.
 
 ## Themes
 
