@@ -25,6 +25,17 @@ function createDeferred<T>() {
   return { promise, resolve };
 }
 
+async function createDeferredJavaScript() {
+  const language = await bundledLanguages.javascript();
+  const deferred = createDeferred<typeof language>();
+  const lazy = Object.assign(() => deferred.promise, {
+    id: language.id,
+    aliases: language.aliases,
+  });
+
+  return { deferred, language, lazy };
+}
+
 function HookHarness({
   children,
   formatter,
@@ -114,7 +125,8 @@ describe("@lumis-sh/react", () => {
   });
 
   it("loads a lazy language then highlights on a resolved highlighter", async () => {
-    const highlighter = await createHighlighter({ languages: [bundledLanguages] });
+    const { deferred, language, lazy } = await createDeferredJavaScript();
+    const highlighter = await createHighlighter({ languages: [{ javascript: lazy }] });
     const container = document.createElement("div");
     document.body.append(container);
     const root = createRoot(container);
@@ -133,7 +145,8 @@ describe("@lumis-sh/react", () => {
     expect(container.innerHTML).toBe("");
 
     await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      deferred.resolve(language);
+      await deferred.promise;
     });
 
     expect(container.innerHTML).toContain('class="lumis"');
@@ -145,7 +158,8 @@ describe("@lumis-sh/react", () => {
   });
 
   it("loads a lazy language handle then highlights on a resolved highlighter", async () => {
-    const highlighter = await createHighlighter({ languages: [bundledLanguages] });
+    const { deferred, language, lazy } = await createDeferredJavaScript();
+    const highlighter = await createHighlighter({ languages: [{ javascript: lazy }] });
     const container = document.createElement("div");
     document.body.append(container);
     const root = createRoot(container);
@@ -154,7 +168,7 @@ describe("@lumis-sh/react", () => {
       root.render(
         <CodeBlock
           highlighter={highlighter}
-          formatter={htmlInline({ language: bundledLanguages.javascript, theme: dracula })}
+          formatter={htmlInline({ language: lazy, theme: dracula })}
         >
           {SOURCE}
         </CodeBlock>,
@@ -164,7 +178,8 @@ describe("@lumis-sh/react", () => {
     expect(container.innerHTML).toBe("");
 
     await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      deferred.resolve(language);
+      await deferred.promise;
     });
 
     expect(container.innerHTML).toContain('class="lumis"');

@@ -4,6 +4,13 @@ import { ensureLocalParserWasm, ensureLocalWasm } from './wasm.js'
 
 const CACHE_DIR = 'node_modules/.cache/lumis'
 
+vi.mock('../src/native-binding.js', async (importOriginal) => {
+  const binding = await importOriginal<typeof import('../src/native-binding.js')>()
+  return process.env.LUMIS_TEST_RUNTIME === 'native'
+    ? binding
+    : { ...binding, loadNativeBinding: () => undefined }
+})
+
 beforeEach(() => {
   // Clear FS cache so the resolver is always called
   try { rmSync(CACHE_DIR, { recursive: true }) } catch {}
