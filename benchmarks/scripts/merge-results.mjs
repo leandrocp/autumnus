@@ -151,12 +151,7 @@ function renderMarkdown(report) {
     "lumis-cli": "Lumis CLI",
     bat: "bat",
   };
-  const lines = [
-    "# Benchmarks",
-    "",
-    "Run all benchmarks with `mise run -C benchmarks run`.",
-    "",
-  ];
+  const lines = ["# Benchmarks", "", "Run all benchmarks with `mise run -C benchmarks run`.", ""];
   for (const scenario of report.results) {
     lines.push(
       `## ${scenarios[scenario.id]}`,
