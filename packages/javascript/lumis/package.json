@@ -83,7 +83,7 @@
     "build": "pnpm run build:generate && tsup && node scripts/patch-web-tree-sitter-bundle.mjs",
     "test": "vitest run --exclude test/conformance.test.ts --exclude 'test/browser/**'",
     "test:conformance": "vitest run test/conformance.test.ts",
-    "test:browser": "playwright test",
+    "test:conformance:browser": "playwright test",
     "test:all-languages": "vitest run test/all-languages.test.ts",
     "dev": "vite",
     "docs": "typedoc",

@@ -173,12 +173,14 @@ echo "JS native conformance..."
 pnpm --filter @lumis-sh/lumis build:native
 LUMIS_TEST_RUNTIME=native pnpm --filter @lumis-sh/lumis test:conformance
 echo ""
+mise run test-conformance-browser
+echo ""
 echo "Elixir conformance..."
 (cd packages/elixir/lumis && LUMIS_BUILD=1 mix test --include conformance test/conformance_test.exs)
 '''
 
-[tasks.'test-browser']
-description = "Run JavaScript tests in Chromium, Firefox, and WebKit"
+[tasks.'test-conformance-browser']
+description = "Run JavaScript conformance tests in Chromium, Firefox, and WebKit"
 run = '''
 #!/usr/bin/env bash
 set -euo pipefail
@@ -187,7 +189,7 @@ if [[ "${CI:-}" == "true" ]]; then
     args=(install --with-deps chromium firefox webkit)
 fi
 packages/javascript/lumis/node_modules/.bin/playwright "${args[@]}"
-pnpm --filter @lumis-sh/lumis test:browser
+pnpm --filter @lumis-sh/lumis test:conformance:browser
 '''
 
 [tasks.'lint']

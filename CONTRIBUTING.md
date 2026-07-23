@@ -42,10 +42,10 @@ Cross-runtime output compatibility and browser support have dedicated suites:
 
 ```sh
 mise run test-conformance
-mise run test-browser
+mise run test-conformance-browser
 ```
 
-`test-browser` installs the required Chromium, Firefox, and WebKit builds before running the browser tests.
+`test-conformance` includes the browser suite. Run `test-conformance-browser` directly to check only Chromium, Firefox, and WebKit; it installs the required browser builds before running.
 
 ## Releases
 

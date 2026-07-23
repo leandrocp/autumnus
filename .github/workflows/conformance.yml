@@ -81,3 +81,11 @@ jobs:
         working-directory: packages/elixir/lumis
 
       - run: mise run test-conformance
+
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: javascript-browser-conformance-results
+          path: packages/javascript/lumis/test-results
+          if-no-files-found: ignore
+          retention-days: 7
