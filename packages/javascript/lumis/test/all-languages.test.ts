@@ -1,12 +1,10 @@
 import { existsSync, readdirSync, statSync } from "node:fs";
-import { createRequire } from "node:module";
 import { join, parse } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
-import { availableLanguages, createHighlighter } from "../src/index.js";
-import type { Language } from "../src/types.js";
+import { availableLanguages } from "../src/index.js";
 
 type LanguageModule = {
   id: string;
@@ -17,16 +15,13 @@ type LanguageModule = {
 const repoRoot = fileURLToPath(new URL("../../../..", import.meta.url));
 const langsRoot = fileURLToPath(new URL("../langs/", import.meta.url));
 const samplesDir = join(repoRoot, "samples");
-const resolveFullBundleDependency = createRequire(
-  new URL("../../wasm-bundle-full/package.json", import.meta.url),
-).resolve;
 
-const sampleBaseNameOverrides = new Map<string, string>([["ocaml_interface", "ocamlinterface"]]);
+const sampleBaseNameOverrides = new Map<string, string>([
+  ["ocaml_interface", "ocamlinterface"],
+]);
 
 const sampleFiles = new Map(
-  readdirRecursive(samplesDir).map(
-    (filePath) => [parse(filePath).name.toLowerCase(), filePath] as const,
-  ),
+  readdirRecursive(samplesDir).map((filePath) => [parse(filePath).name.toLowerCase(), filePath] as const),
 );
 
 function readdirRecursive(dir: string): string[] {
@@ -87,36 +82,9 @@ describe.skipIf(languageFixtures.length === 0)("all languages", () => {
     expect(sourceLanguageIds).toEqual(availableLanguageIds);
   });
 
-  it.each(languageFixtures)(
-    "loads $id and has a sample fixture",
-    async ({ id, language, samplePath }) => {
-      expect(language.id).toBe(id);
-      expect(typeof language.highlights).toBe("string");
-      expect(existsSync(samplePath)).toBe(true);
-    },
-  );
-
-  it.runIf(process.env.LUMIS_REQUIRE_NATIVE === "1")(
-    "uses shared queries and explicit grammar names with the native runtime",
-    async () => {
-      const highlighter = await createHighlighter();
-      const nativeRegressionLanguages = new Set(["csharp", "elm", "nushell", "protobuf"]);
-
-      for (const { language } of languageFixtures.filter(({ id }) =>
-        nativeRegressionLanguages.has(id),
-      )) {
-        const definition = language as Language;
-        const wasm = definition.wasm;
-        if (typeof wasm !== "object" || wasm === null || !("packageName" in wasm)) {
-          throw new Error(`Expected a package reference for ${definition.id}`);
-        }
-
-        const localWasm = pathToFileURL(
-          resolveFullBundleDependency(`${wasm.packageName}/${wasm.name}.wasm`),
-        );
-        await highlighter.loadLanguage({ ...definition, wasm: localWasm });
-      }
-    },
-    60_000,
-  );
+  it.each(languageFixtures)("loads $id and has a sample fixture", async ({ id, language, samplePath }) => {
+    expect(language.id).toBe(id);
+    expect(typeof language.highlights).toBe("string");
+    expect(existsSync(samplePath)).toBe(true);
+  });
 });

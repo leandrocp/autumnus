@@ -7,7 +7,6 @@ import { describe, expect, it } from "vitest";
 import { Language as TSLanguage, Parser, Query } from "web-tree-sitter";
 
 import { bundledLanguages } from "../bundles/full.js";
-import { specializeInjections } from "../src/core/injection-specialization.js";
 
 const bundleRequire = createRequire(
   createRequire(import.meta.url).resolve("@lumis-sh/wasm-bundle-full"),
@@ -55,8 +54,6 @@ async function compileQueries(
   expect(() => new Query(grammar, lang.highlights)).not.toThrow();
   if (lang.injections) {
     expect(() => new Query(grammar, lang.injections!)).not.toThrow();
-    const specialized = specializeInjections(lang.injections, () => false);
-    expect(() => new Query(grammar, specialized.source)).not.toThrow();
   }
   if (lang.locals) {
     expect(() => new Query(grammar, lang.locals!)).not.toThrow();

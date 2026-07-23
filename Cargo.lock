@@ -1516,8 +1516,8 @@ dependencies = [
 name = "lumis-js-native"
 version = "0.5.2"
 dependencies = [
+ "lumis",
  "lumis-core",
- "lumis-wasm-runtime",
  "napi",
  "napi-build",
  "napi-derive",

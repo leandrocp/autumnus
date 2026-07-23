@@ -1,6 +1,8 @@
 /**
- * Reads preprocessed query .scm files from queries/processed/, converts
- * Lua patterns to JS regex, and emits one TypeScript module per language.
+ * Builds the language modules used by the browser/WebAssembly runtime. It reads
+ * preprocessed query .scm files, converts Lua patterns to JavaScript regexes,
+ * and emits one TypeScript module per language. The Node native runtime does
+ * not consume these queries or parser Wasm references.
  *
  * Preprocessing (inheritance, text replacements, overwrite merging) is done by
  * `mise run langs-preprocess-queries`, which is run before the JS generate commands.
@@ -31,7 +33,6 @@ interface ParserEntry {
   generate?: boolean;
   wasm_name?: string;
   query_name?: string;
-  grammar_name?: string;
   display_name?: string;
   variant?: string;
   globs?: string[];
@@ -103,17 +104,12 @@ function convertLuaPatternToRegex(lua: string): string {
         S: "\\S",
         ".": "\\.",
         "%": "%",
-        "{": "[{]",
-        "}": "[}]",
+        "{": "\\{",
+        "}": "\\}",
         $: "\\$",
         "^": "\\^",
       };
       result += map[next] ?? next;
-    } else if (chars[i] === "\\" && ["{", "}"].includes(chars[i + 1] ?? "")) {
-      result += `[${chars[i + 1]}]`;
-      i++;
-    } else if (["{", "}"].includes(chars[i] ?? "")) {
-      result += `[${chars[i]}]`;
     } else {
       result += chars[i];
     }
@@ -169,16 +165,15 @@ function normalizeRegexForJs(regex: string): string {
   return expandCaseInsensitiveAscii(regex.slice(4));
 }
 
-function convertLuaMatches(content: string): string {
+function convertLuaMatchesForBrowser(content: string): string {
   const converted = content
     .split("\n")
     .map((line) => {
-      const usesLuaPattern = line.includes("#lua-match?") || line.includes("#not-lua-match?");
       let updated = line
         .replace(/#lua-match\?/g, "#match?")
         .replace(/#not-lua-match\?/g, "#not-match?");
 
-      if (usesLuaPattern) {
+      if (updated.includes("#match?") || updated.includes("#not-match?")) {
         const firstQuote = updated.indexOf('"');
         if (firstQuote !== -1) {
           const secondQuote = updated.indexOf('"', firstQuote + 1);
@@ -235,18 +230,16 @@ function main() {
   for (const [id, entry] of Object.entries(config.parsers)) {
     const queryName = entry.query_name || id;
     const wasmName = entry.wasm_name || `tree-sitter-${id}`;
-    const grammarName =
-      entry.grammar_name ?? wasmName.replace(/^tree-sitter-/, "").replaceAll("-", "_");
     const aliases = entry.aliases || [];
 
     const highlightSource = resolveQuerySource(queryName, "highlights");
     const injectionSource = resolveQuerySource(queryName, "injections");
     const localsSource = resolveQuerySource(queryName, "locals");
     const bracketsSource = resolveQuerySource(queryName, "brackets");
-    const highlights = convertLuaMatches(highlightSource);
-    const injections = convertLuaMatches(injectionSource);
-    const locals = convertLuaMatches(localsSource);
-    const brackets = convertLuaMatches(bracketsSource);
+    const highlights = convertLuaMatchesForBrowser(highlightSource);
+    const injections = convertLuaMatchesForBrowser(injectionSource);
+    const locals = convertLuaMatchesForBrowser(localsSource);
+    const brackets = convertLuaMatchesForBrowser(bracketsSource);
 
     const injectionsStr = injections.trim();
     const localsStr = locals.trim();
@@ -258,7 +251,6 @@ import type { Language } from '../src/types.js'
 const language: Language = {
   id: ${JSON.stringify(id)},
   aliases: ${JSON.stringify(aliases)},
-  grammarName: ${JSON.stringify(grammarName)},
   highlights: \`${escapeTemplateString(highlights)}\`,${injectionsStr ? `\n  injections: \`${escapeTemplateString(injections)}\`,` : ""}${localsStr ? `\n  locals: \`${escapeTemplateString(localsStr)}\`,` : ""}${bracketsStr ? `\n  brackets: \`${escapeTemplateString(bracketsStr)}\`,` : ""}
   wasm: { packageName: ${JSON.stringify(wasmPackageName(wasmName))}, name: ${JSON.stringify(wasmName)}, version: ${JSON.stringify(tsCli)} },
 }
@@ -281,7 +273,6 @@ import type { Language } from '../src/types.js'
 const language: Language = {
   id: "plaintext",
   aliases: ["text", "txt", "plain"],
-  grammarName: "diff",
   highlights: "",
   wasm: { packageName: ${JSON.stringify(wasmPackageName(diffWasmName))}, name: ${JSON.stringify(diffWasmName)}, version: ${JSON.stringify(diffWasmVersion)} },
 }

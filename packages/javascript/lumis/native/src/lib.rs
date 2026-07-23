@@ -1,3 +1,6 @@
+use lumis::events::HighlightEvent;
+use lumis::highlight::{highlight_events_with_languages, HighlightOptions};
+use lumis::languages::Language;
 use lumis_core::formatter::bbcode::BBCodeScoped;
 use lumis_core::formatter::html_inline::{
     HighlightLines as InlineHighlightLines, HighlightLinesStyle as InlineHighlightLinesStyle,
@@ -6,16 +9,14 @@ use lumis_core::formatter::html_inline::{
 use lumis_core::formatter::html_linked::{HighlightLines as LinkedHighlightLines, HtmlLinked};
 use lumis_core::formatter::terminal::{Background as TerminalBackground, Terminal};
 use lumis_core::formatter::{Formatter as _, HtmlElement};
-use lumis_core::languages::Language;
 use lumis_core::themes::{Appearance, Style, Theme};
-use lumis_wasm_runtime::{LanguageSpec, Runtime};
 use napi::bindgen_prelude::{AsyncTask, Buffer};
 use napi::{Env, Error, Result, Status, Task};
 use napi_derive::napi;
 use serde::Deserialize;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashSet};
 use std::ops::RangeInclusive;
-use std::sync::Arc;
+use std::sync::{Arc, RwLock};
 
 fn native_error(error: impl std::fmt::Display) -> Error {
     Error::new(Status::GenericFailure, error.to_string())
@@ -119,6 +120,8 @@ struct FormatRequest {
     formatter: NativeFormatter,
 }
 
+type LoadedLanguages = Arc<RwLock<HashSet<Language>>>;
+
 fn inline_highlight_lines(value: JsHighlightLines) -> InlineHighlightLines {
     InlineHighlightLines {
         lines: value.lines.into_iter().map(LineSpec::into_range).collect(),
@@ -131,7 +134,7 @@ fn inline_highlight_lines(value: JsHighlightLines) -> InlineHighlightLines {
 }
 
 fn render_formatter(
-    runtime: &Runtime,
+    loaded_languages: &RwLock<HashSet<Language>>,
     request: FormatRequest,
 ) -> std::result::Result<String, Box<dyn std::error::Error + Send + Sync>> {
     let FormatRequest {
@@ -144,10 +147,16 @@ fn render_formatter(
     } else {
         language_name.parse()?
     };
-    let events = runtime.highlight(
+    let languages = loaded_languages
+        .read()
+        .map_err(|_| std::io::Error::other("native language lock poisoned"))?;
+    let events = highlight_events_with_languages(
         &source,
-        &language_name,
-        formatter.rainbow_brackets.unwrap_or(false),
+        language,
+        HighlightOptions {
+            rainbow_brackets: formatter.rainbow_brackets.unwrap_or(false),
+        },
+        &languages,
     )?;
     let mut output = Vec::new();
 
@@ -199,56 +208,36 @@ fn render_formatter(
     Ok(String::from_utf8(output)?)
 }
 
-pub struct LoadLanguageTask {
-    runtime: Arc<Runtime>,
-    spec: Option<LanguageSpec>,
-}
-
-impl Task for LoadLanguageTask {
-    type Output = ();
-    type JsValue = ();
-
-    fn compute(&mut self) -> Result<Self::Output> {
-        self.runtime
-            .load_language(self.spec.take().expect("language task already consumed"))
-            .map_err(native_error)
+fn encode_events(events: &[HighlightEvent]) -> Result<Buffer> {
+    let mut output = Vec::with_capacity(events.len() * 9);
+    for event in events {
+        match event {
+            HighlightEvent::Source { start, end } => {
+                let start = u32::try_from(*start).map_err(native_error)?;
+                let end = u32::try_from(*end).map_err(native_error)?;
+                output.push(0);
+                output.extend_from_slice(&start.to_le_bytes());
+                output.extend_from_slice(&end.to_le_bytes());
+            }
+            HighlightEvent::Start {
+                scope_index,
+                language,
+            } => {
+                let scope_index = u16::try_from(*scope_index).map_err(native_error)?;
+                let language_len = u16::try_from(language.len()).map_err(native_error)?;
+                output.push(1);
+                output.extend_from_slice(&scope_index.to_le_bytes());
+                output.extend_from_slice(&language_len.to_le_bytes());
+                output.extend_from_slice(language.as_bytes());
+            }
+            HighlightEvent::End => output.push(2),
+        }
     }
-
-    fn resolve(&mut self, _env: Env, output: Self::Output) -> Result<Self::JsValue> {
-        Ok(output)
-    }
-}
-
-pub struct ConfigureLanguageTask {
-    runtime: Arc<Runtime>,
-    language: String,
-    highlights: String,
-    injections: String,
-    locals: String,
-}
-
-impl Task for ConfigureLanguageTask {
-    type Output = ();
-    type JsValue = ();
-
-    fn compute(&mut self) -> Result<Self::Output> {
-        self.runtime
-            .configure_language(
-                &self.language,
-                &self.highlights,
-                &self.injections,
-                &self.locals,
-            )
-            .map_err(native_error)
-    }
-
-    fn resolve(&mut self, _env: Env, output: Self::Output) -> Result<Self::JsValue> {
-        Ok(output)
-    }
+    Ok(output.into())
 }
 
 pub struct FormatTask {
-    runtime: Arc<Runtime>,
+    loaded_languages: LoadedLanguages,
     request: Option<FormatRequest>,
 }
 
@@ -258,7 +247,7 @@ impl Task for FormatTask {
 
     fn compute(&mut self) -> Result<Self::Output> {
         render_formatter(
-            &self.runtime,
+            &self.loaded_languages,
             self.request.take().expect("format task already consumed"),
         )
         .map_err(native_error)
@@ -269,97 +258,28 @@ impl Task for FormatTask {
     }
 }
 
-/// A per-highlighter native runtime. The JavaScript layer owns parser asset
-/// resolution and passes the exact same language definitions used by browsers.
+/// A per-highlighter native runtime backed by Lumis's compiled Rust parsers and queries.
+#[derive(Default)]
 #[napi]
 pub struct NativeRuntime {
-    inner: Arc<Runtime>,
+    loaded_languages: LoadedLanguages,
 }
 
 #[napi]
 impl NativeRuntime {
     #[napi(constructor)]
-    pub fn new() -> Result<Self> {
-        Ok(Self {
-            inner: Arc::new(Runtime::new().map_err(native_error)?),
-        })
+    pub fn new() -> Self {
+        Self::default()
     }
 
     #[napi(js_name = "loadLanguage")]
-    #[allow(clippy::too_many_arguments)]
-    pub fn load_language(
-        &self,
-        id: String,
-        aliases: Vec<String>,
-        grammar_name: String,
-        wasm: Buffer,
-        highlights: String,
-        injections: Option<String>,
-        locals: Option<String>,
-        brackets: Option<String>,
-    ) -> Result<()> {
-        self.inner
-            .load_language(LanguageSpec {
-                id,
-                aliases,
-                grammar_name,
-                wasm: wasm.to_vec(),
-                highlights,
-                injections: injections.unwrap_or_default(),
-                locals: locals.unwrap_or_default(),
-                brackets: brackets.unwrap_or_default(),
-            })
-            .map_err(native_error)
-    }
-
-    #[napi(js_name = "loadLanguageAsync")]
-    #[allow(clippy::too_many_arguments)]
-    pub fn load_language_async(
-        &self,
-        id: String,
-        aliases: Vec<String>,
-        grammar_name: String,
-        wasm: Buffer,
-        highlights: String,
-        injections: Option<String>,
-        locals: Option<String>,
-        brackets: Option<String>,
-    ) -> AsyncTask<LoadLanguageTask> {
-        AsyncTask::new(LoadLanguageTask {
-            runtime: Arc::clone(&self.inner),
-            spec: Some(LanguageSpec {
-                id,
-                aliases,
-                grammar_name,
-                wasm: wasm.to_vec(),
-                highlights,
-                injections: injections.unwrap_or_default(),
-                locals: locals.unwrap_or_default(),
-                brackets: brackets.unwrap_or_default(),
-            }),
-        })
-    }
-
-    #[napi(js_name = "hasLanguage")]
-    pub fn has_language(&self, name_or_alias: String) -> bool {
-        self.inner.has_language(&name_or_alias)
-    }
-
-    #[napi(js_name = "configureLanguageAsync")]
-    pub fn configure_language_async(
-        &self,
-        language: String,
-        highlights: String,
-        injections: String,
-        locals: String,
-    ) -> AsyncTask<ConfigureLanguageTask> {
-        AsyncTask::new(ConfigureLanguageTask {
-            runtime: Arc::clone(&self.inner),
-            language,
-            highlights,
-            injections,
-            locals,
-        })
+    pub fn load_language(&self, id: String) -> Result<()> {
+        let language = id.parse().map_err(native_error)?;
+        self.loaded_languages
+            .write()
+            .map_err(|_| native_error("native language lock poisoned"))?
+            .insert(language);
+        Ok(())
     }
 
     /// Return the complete nested event stream as one compact binary value.
@@ -370,10 +290,21 @@ impl NativeRuntime {
         language: String,
         rainbow_brackets: Option<bool>,
     ) -> Result<Buffer> {
-        self.inner
-            .highlight_encoded(&source, &language, rainbow_brackets.unwrap_or(false))
-            .map(Buffer::from)
-            .map_err(native_error)
+        let language = language.parse().map_err(native_error)?;
+        let languages = self
+            .loaded_languages
+            .read()
+            .map_err(|_| native_error("native language lock poisoned"))?;
+        let events = highlight_events_with_languages(
+            &source,
+            language,
+            HighlightOptions {
+                rainbow_brackets: rainbow_brackets.unwrap_or(false),
+            },
+            &languages,
+        )
+        .map_err(native_error)?;
+        encode_events(&events)
     }
 
     /// Parse and render built-in formatters entirely in Rust, returning one string.
@@ -385,7 +316,7 @@ impl NativeRuntime {
         formatter: NativeFormatter,
     ) -> Result<String> {
         render_formatter(
-            &self.inner,
+            &self.loaded_languages,
             FormatRequest {
                 source,
                 language,
@@ -404,7 +335,7 @@ impl NativeRuntime {
         formatter: NativeFormatter,
     ) -> AsyncTask<FormatTask> {
         AsyncTask::new(FormatTask {
-            runtime: Arc::clone(&self.inner),
+            loaded_languages: Arc::clone(&self.loaded_languages),
             request: Some(FormatRequest {
                 source,
                 language,

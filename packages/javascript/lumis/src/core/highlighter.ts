@@ -59,7 +59,6 @@ async function loadLanguageDefinition(runtime: RuntimeLike, language: Language):
   await runtime.loadLanguage({
     definition: { id: language.id, aliases: language.aliases },
     wasm: language.wasm,
-    grammarName: language.grammarName,
     highlights: language.highlights,
     injections: language.injections,
     locals: language.locals,

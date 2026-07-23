@@ -416,7 +416,29 @@ pub fn highlight_events_with_options(
 ) -> Result<Vec<CoreHighlightEvent>, HighlightError> {
     DOCUMENT_TS_HIGHLIGHTER.with(|ts_highlighter| {
         let mut ts_highlighter = ts_highlighter.borrow_mut();
-        highlight_events_with(&mut ts_highlighter, source, language, options)
+        highlight_events_with(&mut ts_highlighter, source, language, options, |injected| {
+            Some(Language::guess(Some(injected), ""))
+        })
+    })
+}
+
+/// Highlight using only the supplied languages for injections.
+///
+/// This is used by stateful runtime bindings where loading a language controls
+/// whether it may be injected into another language.
+#[doc(hidden)]
+pub fn highlight_events_with_languages(
+    source: &str,
+    language: Language,
+    options: HighlightOptions,
+    languages: &std::collections::HashSet<Language>,
+) -> Result<Vec<CoreHighlightEvent>, HighlightError> {
+    DOCUMENT_TS_HIGHLIGHTER.with(|ts_highlighter| {
+        let mut ts_highlighter = ts_highlighter.borrow_mut();
+        highlight_events_with(&mut ts_highlighter, source, language, options, |injected| {
+            let language = Language::guess(Some(injected), "");
+            languages.contains(&language).then_some(language)
+        })
     })
 }
 
@@ -466,15 +488,19 @@ struct BracketQueryConfig {
     rainbow_exclude_patterns: Vec<bool>,
 }
 
-fn highlight_events_with(
+fn highlight_events_with<F>(
     ts_highlighter: &mut TSHighlighter,
     source: &str,
     language: Language,
     options: HighlightOptions,
-) -> Result<Vec<CoreHighlightEvent>, HighlightError> {
+    injected_language: F,
+) -> Result<Vec<CoreHighlightEvent>, HighlightError>
+where
+    F: Fn(&str) -> Option<Language>,
+{
     let events = ts_highlighter
         .highlight(language.config(), source.as_bytes(), None, |injected| {
-            Some(Language::guess(Some(injected), "").config())
+            injected_language(injected).map(|language| language.config())
         })
         .map_err(|e| HighlightError::HighlighterInit(format!("{:?}", e)))?;
 

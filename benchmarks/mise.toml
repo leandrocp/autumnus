@@ -55,11 +55,19 @@ CARGO_TARGET_DIR="$MISE_CONFIG_ROOT/../target" pnpm --filter @lumis-sh/lumis bui
 pnpm --filter @lumis-sh/lumis build
 '''
 sources = [
+  "Cargo.toml",
+  "Cargo.lock",
+  "languages.toml",
   "packages/javascript/lumis/package.json",
   "packages/javascript/lumis/src/**/*",
   "packages/javascript/lumis/scripts/**/*",
   "packages/javascript/lumis/native/**/*.rs",
   "packages/javascript/lumis/native/Cargo.toml",
+  "crates/lumis/src/**/*.rs",
+  "crates/lumis/Cargo.toml",
+  "crates/lumis/build.rs",
+  "crates/lumis-core/src/**/*.rs",
+  "crates/lumis-core/Cargo.toml",
   "crates/lumis-wasm-runtime/src/**/*.rs",
   "crates/lumis-wasm-runtime/Cargo.toml",
   "packages/javascript/lumis/langs/*.ts",

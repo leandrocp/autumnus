@@ -14,7 +14,7 @@ afterEach(() => {
   vi.resetModules()
 })
 
-describe('Wasm resolver', () => {
+describe.skipIf(process.env.LUMIS_REQUIRE_NATIVE === '1')('Wasm resolver', () => {
   it('uses parser name and version in the default resolver', async () => {
     const { default: diff } = await import('../langs/diff.ts')
 
@@ -133,3 +133,42 @@ describe('Wasm resolver', () => {
     expect(calls).toContain('html')
   }, 30_000)
 })
+
+it.runIf(process.env.LUMIS_REQUIRE_NATIVE === '1')(
+  'does not resolve parser Wasm in the native runtime',
+  async () => {
+    const { createHighlighter, configureWasmResolver } = await import('../src/index.js')
+    const { htmlLinked } = await import('../src/formatters.js')
+    const { default: diff } = await import('../langs/diff.ts')
+
+    configureWasmResolver(() => {
+      throw new Error('native runtime must not resolve parser Wasm')
+    })
+    const hl = await createHighlighter({ languages: [diff] })
+
+    expect(hl.highlight('- old\n+ new', htmlLinked({ language: diff }))).toContain(
+      'class="language-diff"',
+    )
+  },
+)
+
+it.runIf(process.env.LUMIS_REQUIRE_NATIVE === '1')(
+  'preserves custom languages through the Wasm fallback',
+  async () => {
+    const { createHighlighter } = await import('../src/index.js')
+    const { htmlLinked } = await import('../src/formatters.js')
+    const { default: diff } = await import('../langs/diff.ts')
+    const custom = {
+      ...diff,
+      id: 'custom-diff',
+      aliases: [],
+      wasm: ensureLocalWasm('diff'),
+    }
+
+    const hl = await createHighlighter({ languages: [custom] })
+
+    expect(hl.highlight('- old\n+ new', htmlLinked({ language: custom }))).toContain(
+      'class="language-custom-diff"',
+    )
+  },
+)

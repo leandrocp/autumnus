@@ -71,6 +71,12 @@ Lumis is a Tree-sitter-based syntax highlighter. Language behavior must respect 
 - For cross-runtime features, define the behavior in Rust first, then align JavaScript, Elixir, browser, Java, and CLI behavior to the Rust implementation.
 - Do not replace language-specific query semantics with generic string scanning unless it is an explicit fallback for plaintext or unavailable parser/query data.
 
+### Keep Emscripten compatible with Tree-sitter
+
+Pin Emscripten to `4.0.15` for the Tree-sitter browser runtime. Emscripten 6 is currently incompatible with Tree-sitter side modules because their mutable `env.__stack_pointer` import is not supplied as the required `WebAssembly.Global`; see <https://github.com/tree-sitter/tree-sitter/issues/5037>.
+
+Do not upgrade Emscripten until that incompatibility is resolved upstream and Lumis verifies loading real Tree-sitter parser side modules in browser conformance tests.
+
 ## Documentation is part of the change
 
 Docs, specs, and examples are not cleanup work for later. They are part of the feature.

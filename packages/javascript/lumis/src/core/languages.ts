@@ -15,7 +15,6 @@ import type {
   WasmRef,
 } from "../types.js";
 import { PLAINTEXT_LANG_ID, type LanguageInfo } from "../types.js";
-import { specializeInjections } from "./injection-specialization.js";
 
 export type WasmResolver = (language: string, wasm: WasmRef) => string | URL;
 
@@ -65,7 +64,6 @@ function compileBracketConfig(
 export interface LoadLanguageOptions {
   definition: LanguageDefinition;
   wasm: WasmRef | Uint8Array | ArrayBuffer | string | URL | Response;
-  grammarName?: string;
   highlights: string;
   injections?: string;
   locals?: string;
@@ -297,27 +295,16 @@ function compileHighlightConfig(
 export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesModule {
   let configuredDefaultResolver: WasmResolver = DEFAULT_RESOLVER;
 
-  interface LanguageQueryState {
-    language: Language;
-    Query: typeof TreeSitterQuery;
-    highlights: string;
-    injections: string;
-    locals: string;
-    omittedLanguages: Set<string>;
-  }
-
   class HighlighterRuntime implements RuntimeLike {
     private explicitResolver: WasmResolver | undefined;
     private readonly sharedCache: SharedRuntimeCache;
     private readonly loadedLanguages = new Map<string, LoadedLanguage>();
     private readonly aliasMap = new Map<string, string>();
-    private readonly registeredLanguageIds = new Set<string>();
     private readonly languageLoads = new Map<string, Promise<LoadedLanguage>>();
     private readonly bracketCompilers = new WeakMap<
       LoadedLanguage,
       () => CompiledBracketConfig | undefined
     >();
-    private readonly queryStates = new WeakMap<LoadedLanguage, LanguageQueryState>();
 
     constructor(options: HighlighterRuntimeOptions = {}) {
       this.explicitResolver = options.wasmResolver;
@@ -391,9 +378,6 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
       const parser = new Parser();
       parser.setLanguage(language);
 
-      const specialized = specializeInjections(opts.injections ?? "", (languageId) =>
-        this.registeredLanguageIds.has(this.resolveLanguageId(languageId)),
-      );
       const loaded: LoadedLanguage = {
         definition: opts.definition,
         parser,
@@ -402,18 +386,10 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
           language,
           Query,
           opts.highlights,
-          specialized.source,
+          opts.injections,
           opts.locals,
         ),
       };
-      this.queryStates.set(loaded, {
-        language,
-        Query,
-        highlights: opts.highlights,
-        injections: opts.injections ?? "",
-        locals: opts.locals ?? "",
-        omittedLanguages: specialized.omittedLanguages,
-      });
       if (opts.brackets) {
         this.bracketCompilers.set(loaded, () =>
           compileBracketConfig(language, Query, opts.brackets),
@@ -438,7 +414,6 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
     }
 
     registerLanguage(def: LanguageDefinition): void {
-      this.registeredLanguageIds.add(def.id);
       for (const alias of def.aliases) {
         this.aliasMap.set(alias, def.id);
       }
@@ -480,44 +455,7 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
       const inFlight = this.languageLoads.get(opts.definition.id);
       if (inFlight) return inFlight;
 
-      this.registerLanguage(opts.definition);
-      return trackLoad(
-        this.languageLoads,
-        opts.definition.id,
-        this.createLoadedLanguage(opts).then((loaded) => {
-          this.refreshInjectionsFor(opts.definition, loaded);
-          return loaded;
-        }),
-      );
-    }
-
-    private refreshInjectionsFor(
-      definition: LanguageDefinition,
-      newlyLoaded: LoadedLanguage,
-    ): void {
-      const activates = (languageId: string) =>
-        this.resolveLanguageId(languageId) === definition.id ||
-        definition.aliases.includes(languageId);
-
-      for (const loaded of this.loadedLanguages.values()) {
-        if (loaded === newlyLoaded) continue;
-        const state = this.queryStates.get(loaded);
-        if (!state || !Array.from(state.omittedLanguages).some(activates)) continue;
-
-        const specialized = specializeInjections(state.injections, (languageId) =>
-          this.registeredLanguageIds.has(this.resolveLanguageId(languageId)),
-        );
-        const config = compileHighlightConfig(
-          state.language,
-          state.Query,
-          state.highlights,
-          specialized.source,
-          state.locals,
-        );
-        loaded.config.query.delete();
-        loaded.config = config;
-        state.omittedLanguages = specialized.omittedLanguages;
-      }
+      return trackLoad(this.languageLoads, opts.definition.id, this.createLoadedLanguage(opts));
     }
 
     async loadPlaintext(): Promise<LoadedLanguage> {

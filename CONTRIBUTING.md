@@ -29,6 +29,14 @@ mise run setup
 
 This installs the Rust, JS, and Elixir dependencies and checks the required tools.
 
+Run the JavaScript browser suite with:
+
+```sh
+mise run test-browser
+```
+
+The task installs the required Chromium, Firefox, and WebKit builds before running the tests.
+
 ## Releases
 
 Releases are prepared locally and published from tags.

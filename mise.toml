@@ -190,6 +190,19 @@ pnpm --filter @lumis-sh/lumis build:native
 LUMIS_DISABLE_NATIVE=0 LUMIS_REQUIRE_NATIVE=1 pnpm --filter @lumis-sh/lumis test:conformance
 '''
 
+[tasks.'test-browser']
+description = "Run JavaScript tests in Chromium, Firefox, and WebKit"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+args=(install chromium firefox webkit)
+if [[ "${CI:-}" == "true" ]]; then
+    args=(install --with-deps chromium firefox webkit)
+fi
+packages/javascript/lumis/node_modules/.bin/playwright "${args[@]}"
+pnpm --filter @lumis-sh/lumis test:browser
+'''
+
 [tasks.'lint']
 description = "Run all linters"
 run = '''
@@ -616,7 +629,7 @@ packages=(
     "cargo-lumis|crates/lumis"
     "cargo-lumis-cli|crates/lumis-cli|crates/lumis-wasm-runtime"
     "npm-themes|packages/javascript/themes"
-    "npm-lumis|packages/javascript/lumis|crates/lumis-wasm-runtime"
+    "npm-lumis|packages/javascript/lumis|crates/lumis|crates/lumis-core|crates/lumis-wasm-runtime"
     "npm-markdown-it-lumis|packages/javascript/markdown-it-lumis"
     "npm-rehype-lumis|packages/javascript/rehype-lumis"
     "npm-react|packages/javascript/react"
@@ -800,7 +813,11 @@ case "$package" in
         )
         ;;
     npm-lumis)
-        include_args+=(--include-path "crates/lumis-wasm-runtime/**/*")
+        include_args+=(
+            --include-path "crates/lumis/**/*"
+            --include-path "crates/lumis-core/**/*"
+            --include-path "crates/lumis-wasm-runtime/**/*"
+        )
         ;;
 esac
 

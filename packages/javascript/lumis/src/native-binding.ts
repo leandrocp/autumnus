@@ -7,33 +7,7 @@ export interface NativeFormatter {
 }
 
 interface NativeRuntimeInstance {
-  loadLanguage(
-    id: string,
-    aliases: string[],
-    grammarName: string,
-    wasm: Uint8Array,
-    highlights: string,
-    injections?: string,
-    locals?: string,
-    brackets?: string,
-  ): void;
-  loadLanguageAsync(
-    id: string,
-    aliases: string[],
-    grammarName: string,
-    wasm: Uint8Array,
-    highlights: string,
-    injections?: string,
-    locals?: string,
-    brackets?: string,
-  ): Promise<void>;
-  hasLanguage(nameOrAlias: string): boolean;
-  configureLanguageAsync(
-    language: string,
-    highlights: string,
-    injections: string,
-    locals: string,
-  ): Promise<void>;
+  loadLanguage(id: string): void;
   highlightEvents(source: string, language: string, rainbowBrackets?: boolean): Uint8Array;
   format(source: string, language: string, formatter: NativeFormatter): string;
   formatAsync(source: string, language: string, formatter: NativeFormatter): Promise<string>;

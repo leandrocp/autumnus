@@ -73,6 +73,8 @@ jobs:
               - '.github/workflows/conformance.yml'
             javascript:
               - 'packages/javascript/lumis/**'
+              - 'crates/lumis/**'
+              - 'crates/lumis-core/**'
               - 'crates/lumis-wasm-runtime/**'
               - 'packages/javascript/package.json'
               - 'packages/javascript/themes/**'

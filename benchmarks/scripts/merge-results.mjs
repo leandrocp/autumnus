@@ -135,6 +135,12 @@ function runner(implementation) {
 }
 
 function renderMarkdown(report) {
+  const scenarios = {
+    "small-one-language": "1 small file for 1 language",
+    "large-one-language": "1 big file for 1 language",
+    "ten-files-one-language": "10 different files for 1 language",
+    "ten-files-ten-languages": "10 different files for 10 languages",
+  };
   const labels = {
     "lumis-rust": "Lumis Rust",
     "lumis-js-native": "Lumis JS native",
@@ -145,10 +151,15 @@ function renderMarkdown(report) {
     "lumis-cli": "Lumis CLI",
     bat: "bat",
   };
-  const lines = ["# Benchmark results", ""];
+  const lines = [
+    "# Benchmarks",
+    "",
+    "Run all benchmarks with `mise run -C benchmarks run`.",
+    "",
+  ];
   for (const scenario of report.results) {
     lines.push(
-      `## ${scenario.id}`,
+      `## ${scenarios[scenario.id]}`,
       "",
       scenario.description,
       "",
@@ -160,7 +171,7 @@ function renderMarkdown(report) {
     }
     lines.push("");
   }
-  return `${lines.join("\n")}\n`;
+  return `${lines.join("\n").trimEnd()}\n`;
 }
 
 function formatDuration(ns) {

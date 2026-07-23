@@ -8,7 +8,6 @@ import type {
   LanguageDefinition,
   LanguageInfo,
   LoadedLanguage,
-  WasmRef,
 } from "../types.js";
 import { builtinFormatterKind } from "./builtin-formatter.js";
 import { PLAINTEXT_LANG_ID } from "../types.js";
@@ -17,62 +16,14 @@ import type {
   LanguagesModule,
   LoadLanguageOptions,
   RuntimeLike,
-  SharedRuntimeCache,
   WasmResolver,
 } from "./languages.js";
-import { specializeInjections } from "./injection-specialization.js";
+import { createLanguagesModule } from "./languages.js";
 
-const DEFAULT_RESOLVER: WasmResolver = (_language, wasm) =>
-  `https://cdn.jsdelivr.net/npm/${wasm.packageName}@${wasm.version}/${wasm.name}.wasm`;
 const PLAINTEXT_ALIASES = ["text", "txt", "plain"];
 const BUILTIN_LANGUAGE_IDS = new Set(LANGUAGES.map(({ id }) => id));
 const decoder = new TextDecoder();
 const encoder = new TextEncoder();
-
-interface NativeLoadedLanguage {
-  definition: LanguageDefinition;
-  queries?: {
-    highlights: string;
-    injections: string;
-    locals: string;
-    omittedLanguages: Set<string>;
-  };
-}
-
-function createSharedRuntimeCache(): SharedRuntimeCache {
-  return {
-    wasmBytes: new Map<string, Uint8Array>(),
-    wasmLoads: new Map<string, Promise<Uint8Array>>(),
-  };
-}
-
-function cacheKey(name: string, version: string): string {
-  return `${name}-${version}`;
-}
-
-function isWasmRef(wasm: object): wasm is WasmRef {
-  return "packageName" in wasm && "name" in wasm && "version" in wasm;
-}
-
-async function trackLoad<T>(
-  loads: Map<string, Promise<T>>,
-  key: string,
-  promise: Promise<T>,
-): Promise<T> {
-  loads.set(key, promise);
-  try {
-    return await promise;
-  } finally {
-    loads.delete(key);
-  }
-}
-
-function grammarName(wasm: LoadLanguageOptions["wasm"], languageId: string): string {
-  if (typeof wasm === "object" && wasm !== null && isWasmRef(wasm)) {
-    return wasm.name.replace(/^tree-sitter-/, "").replaceAll("-", "_");
-  }
-  return languageId.replaceAll("-", "_");
-}
 
 function decodeEvents(data: Uint8Array): HighlightEvent[] {
   const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
@@ -119,39 +70,38 @@ export function createNativeLanguagesModule(
   environment: RuntimeEnvironment,
   binding: NativeBinding,
 ): LanguagesModule {
-  let configuredDefaultResolver: WasmResolver = DEFAULT_RESOLVER;
+  const wasmModule = createLanguagesModule(environment);
 
   class NativeHighlighterRuntime implements RuntimeLike {
     private readonly native: NativeRuntimeInstance = new binding.NativeRuntime();
-    private explicitResolver: WasmResolver | undefined;
-    private readonly sharedCache: SharedRuntimeCache;
-    private readonly loadedLanguages = new Map<string, NativeLoadedLanguage>();
+    private readonly loadedLanguages = new Map<string, LoadedLanguage>();
+    private readonly loadOptions = new Map<string, LoadLanguageOptions>();
+    private readonly registeredLanguages = new Map<string, LanguageDefinition>();
     private readonly aliasMap = new Map<string, string>();
-    private readonly registeredLanguageIds = new Set<string>();
-    private readonly languageLoads = new Map<string, Promise<LoadedLanguage>>();
+    private readonly options: HighlighterRuntimeOptions;
+    private explicitResolver: WasmResolver | undefined;
+    private wasmRuntime: RuntimeLike | undefined;
+    private wasmActivation: Promise<RuntimeLike> | undefined;
 
     constructor(options: HighlighterRuntimeOptions = {}) {
+      this.options = options;
       this.explicitResolver = options.wasmResolver;
-      this.sharedCache = options.sharedCache ?? createSharedRuntimeCache();
       for (const alias of PLAINTEXT_ALIASES) this.aliasMap.set(alias, PLAINTEXT_LANG_ID);
     }
 
-    private get resolver(): WasmResolver {
-      return this.explicitResolver ?? configuredDefaultResolver;
-    }
-
     configureWasmResolver(fn: WasmResolver): void {
-      // Preserve RuntimeLike semantics for callers that configure an instance directly.
       this.explicitResolver = fn;
+      this.wasmRuntime?.configureWasmResolver(fn);
     }
 
     async initParser(): Promise<void> {
-      // Loading the addon constructs its Wasmtime engine; no web parser initialization is needed.
+      // Native parsers and queries are compiled into the addon.
     }
 
     registerLanguage(definition: LanguageDefinition): void {
-      this.registeredLanguageIds.add(definition.id);
+      this.registeredLanguages.set(definition.id, definition);
       for (const alias of definition.aliases) this.aliasMap.set(alias, definition.id);
+      this.wasmRuntime?.registerLanguage(definition);
     }
 
     resolveLanguageId(nameOrAlias: string): string {
@@ -159,163 +109,68 @@ export function createNativeLanguagesModule(
     }
 
     getLoadedLanguage(nameOrAlias: string): LoadedLanguage | undefined {
-      const loaded = this.loadedLanguages.get(this.resolveLanguageId(nameOrAlias));
-      return loaded as LoadedLanguage | undefined;
+      if (this.wasmRuntime) return this.wasmRuntime.getLoadedLanguage(nameOrAlias);
+      return this.loadedLanguages.get(this.resolveLanguageId(nameOrAlias));
     }
 
     getLoadedLanguageIds(): string[] {
+      if (this.wasmRuntime) return this.wasmRuntime.getLoadedLanguageIds();
       return [...this.loadedLanguages.keys()];
     }
 
-    private async loadWasmRef(language: string, ref: WasmRef): Promise<Uint8Array> {
-      const key = cacheKey(ref.name, ref.version);
-      const cached = this.sharedCache.wasmBytes.get(key);
-      if (cached) return cached;
-      const inFlight = this.sharedCache.wasmLoads.get(key);
-      if (inFlight) return inFlight;
+    private activateWasmRuntime(): Promise<RuntimeLike> {
+      if (this.wasmRuntime) return Promise.resolve(this.wasmRuntime);
+      if (this.wasmActivation) return this.wasmActivation;
 
-      return trackLoad(
-        this.sharedCache.wasmLoads,
-        key,
-        (async () => {
-          const fsCached = await environment.readFsCache(key);
-          if (fsCached) {
-            this.sharedCache.wasmBytes.set(key, fsCached);
-            return fsCached;
-          }
+      this.wasmActivation = (async () => {
+        const runtime = wasmModule.createRuntime({
+          sharedCache: this.options.sharedCache,
+          wasmResolver: this.explicitResolver,
+        });
+        for (const definition of this.registeredLanguages.values()) {
+          runtime.registerLanguage(definition);
+        }
+        await Promise.all([
+          this.loadedLanguages.has(PLAINTEXT_LANG_ID) ? runtime.loadPlaintext() : Promise.resolve(),
+          ...this.loadOptions.values().map((options) => runtime.loadLanguage(options)),
+        ]);
+        this.wasmRuntime = runtime;
+        return runtime;
+      })();
 
-          try {
-            const mod = await import(
-              /* webpackIgnore: true */
-              /* turbopackIgnore: true */
-              /* @vite-ignore */
-              ref.packageName
-            );
-            if (mod.default instanceof Uint8Array) {
-              this.sharedCache.wasmBytes.set(key, mod.default);
-              return mod.default;
-            }
-          } catch {
-            // Package not installed; use the configured URL/path resolver.
-          }
-
-          const resolved = this.resolver(language, ref);
-          const diskData = await environment.readResolvedWasmFromDisk(resolved);
-          if (diskData) {
-            this.sharedCache.wasmBytes.set(key, diskData);
-            return diskData;
-          }
-
-          const response = await fetch(typeof resolved === "string" ? resolved : resolved.href);
-          if (!response.ok) {
-            throw new Error(
-              `Failed to fetch WASM for ${ref.name}@${ref.version}: ${response.status} ${response.statusText}`,
-            );
-          }
-          const data = new Uint8Array(await response.arrayBuffer());
-          this.sharedCache.wasmBytes.set(key, data);
-          await environment.writeFsCache(key, data);
-          return data;
-        })(),
-      );
+      return this.wasmActivation;
     }
 
-    private async resolveWasmBytes(opts: LoadLanguageOptions): Promise<Uint8Array> {
-      if (typeof opts.wasm === "object" && opts.wasm !== null && isWasmRef(opts.wasm)) {
-        return this.loadWasmRef(opts.definition.id, opts.wasm);
+    private createLoadedLanguage(opts: LoadLanguageOptions): LoadedLanguage {
+      if (!BUILTIN_LANGUAGE_IDS.has(opts.definition.id)) {
+        throw new Error(`The native runtime does not include language "${opts.definition.id}"`);
       }
-
-      const resolved = await environment.resolveWasm(opts.wasm);
-      if (resolved instanceof Uint8Array) return resolved;
-      const diskData = await environment.readResolvedWasmFromDisk(resolved);
-      if (diskData) return diskData;
-      const response = await fetch(resolved);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch WASM for ${opts.definition.id}: ${response.status}`);
-      }
-      return new Uint8Array(await response.arrayBuffer());
-    }
-
-    private async createLoadedLanguage(opts: LoadLanguageOptions): Promise<LoadedLanguage> {
-      const wasm = await this.resolveWasmBytes(opts);
-      const specialized = specializeInjections(opts.injections ?? "", (languageId) =>
-        this.registeredLanguageIds.has(this.resolveLanguageId(languageId)),
-      );
-      await this.native.loadLanguageAsync(
-        opts.definition.id,
-        opts.definition.aliases,
-        opts.grammarName ?? grammarName(opts.wasm, opts.definition.id),
-        wasm,
-        opts.highlights,
-        specialized.source,
-        opts.locals,
-        opts.brackets,
-      );
-      const loaded: NativeLoadedLanguage = {
-        definition: opts.definition,
-        queries: {
-          highlights: opts.highlights,
-          injections: opts.injections ?? "",
-          locals: opts.locals ?? "",
-          omittedLanguages: specialized.omittedLanguages,
-        },
-      };
+      this.native.loadLanguage(opts.definition.id);
+      const loaded = { definition: opts.definition } as LoadedLanguage;
       this.loadedLanguages.set(opts.definition.id, loaded);
+      this.loadOptions.set(opts.definition.id, opts);
       this.registerLanguage(opts.definition);
-      return loaded as LoadedLanguage;
+      return loaded;
     }
 
     async loadLanguage(opts: LoadLanguageOptions): Promise<LoadedLanguage> {
       if (opts.definition.id === PLAINTEXT_LANG_ID) {
-        return this.createPlaintext(opts.definition);
+        return this.loadPlaintext();
+      }
+      this.registerLanguage(opts.definition);
+      if (this.wasmRuntime) return this.wasmRuntime.loadLanguage(opts);
+      if (this.wasmActivation) return (await this.wasmActivation).loadLanguage(opts);
+      if (!BUILTIN_LANGUAGE_IDS.has(opts.definition.id)) {
+        return (await this.activateWasmRuntime()).loadLanguage(opts);
       }
       const existing = this.getLoadedLanguage(opts.definition.id);
       if (existing) return existing;
-      const inFlight = this.languageLoads.get(opts.definition.id);
-      if (inFlight) return inFlight;
-      this.registerLanguage(opts.definition);
-      return trackLoad(
-        this.languageLoads,
-        opts.definition.id,
-        this.createLoadedLanguage(opts).then(async (loaded) => {
-          await this.refreshInjectionsFor(opts.definition, loaded);
-          return loaded;
-        }),
-      );
-    }
-
-    private async refreshInjectionsFor(
-      definition: LanguageDefinition,
-      newlyLoaded: LoadedLanguage,
-    ): Promise<void> {
-      const activates = (languageId: string) =>
-        this.resolveLanguageId(languageId) === definition.id ||
-        definition.aliases.includes(languageId);
-      const refreshes: Promise<void>[] = [];
-
-      for (const loaded of this.loadedLanguages.values()) {
-        if (loaded === (newlyLoaded as NativeLoadedLanguage)) continue;
-        const queries = loaded.queries;
-        if (!queries || !Array.from(queries.omittedLanguages).some(activates)) continue;
-
-        const specialized = specializeInjections(queries.injections, (languageId) =>
-          this.registeredLanguageIds.has(this.resolveLanguageId(languageId)),
-        );
-        queries.omittedLanguages = specialized.omittedLanguages;
-        refreshes.push(
-          this.native.configureLanguageAsync(
-            loaded.definition.id,
-            queries.highlights,
-            specialized.source,
-            queries.locals,
-          ),
-        );
-      }
-
-      await Promise.all(refreshes);
+      return this.createLoadedLanguage(opts);
     }
 
     async loadPlaintext(): Promise<LoadedLanguage> {
+      if (this.wasmRuntime) return this.wasmRuntime.loadPlaintext();
+      if (this.wasmActivation) return (await this.wasmActivation).loadPlaintext();
       return this.createPlaintext({ id: PLAINTEXT_LANG_ID, aliases: PLAINTEXT_ALIASES });
     }
 
@@ -323,10 +178,10 @@ export function createNativeLanguagesModule(
       const existing = this.getLoadedLanguage(PLAINTEXT_LANG_ID);
       if (existing) return existing;
 
-      const loaded: NativeLoadedLanguage = { definition };
+      const loaded = { definition } as LoadedLanguage;
       this.loadedLanguages.set(PLAINTEXT_LANG_ID, loaded);
       this.registerLanguage(definition);
-      return loaded as LoadedLanguage;
+      return loaded;
     }
 
     highlightEvents(
@@ -334,6 +189,7 @@ export function createNativeLanguagesModule(
       language: LoadedLanguage,
       options: { rainbowBrackets?: boolean } = {},
     ): HighlightEvent[] {
+      if (this.wasmRuntime) return this.wasmRuntime.highlightEvents(source, language, options);
       if (language.definition.id === PLAINTEXT_LANG_ID) {
         return [{ type: "source", startByte: 0, endByte: encoder.encode(source).byteLength }];
       }
@@ -347,6 +203,7 @@ export function createNativeLanguagesModule(
     }
 
     format(source: string, language: LoadedLanguage, formatter: Formatter): string | undefined {
+      if (this.wasmRuntime) return this.wasmRuntime.format?.(source, language, formatter);
       const nativeFormatter = this.nativeFormatter(language, formatter);
       return nativeFormatter
         ? this.native.format(source, language.definition.id, nativeFormatter)
@@ -358,6 +215,7 @@ export function createNativeLanguagesModule(
       language: LoadedLanguage,
       formatter: Formatter,
     ): Promise<string | undefined> {
+      if (this.wasmRuntime) return this.wasmRuntime.formatAsync?.(source, language, formatter);
       const nativeFormatter = this.nativeFormatter(language, formatter);
       return nativeFormatter
         ? this.native.formatAsync(source, language.definition.id, nativeFormatter)
@@ -380,6 +238,7 @@ export function createNativeLanguagesModule(
       const options = { ...formatter } as Record<string, unknown>;
       delete options.format;
       delete options.language;
+      delete options.rainbowBrackets;
       return {
         rainbowBrackets: formatter.rainbowBrackets,
         kind,
@@ -388,15 +247,15 @@ export function createNativeLanguagesModule(
     }
   }
 
-  const defaultSharedCache = createSharedRuntimeCache();
-  const defaultRuntime = new NativeHighlighterRuntime({ sharedCache: defaultSharedCache });
+  const defaultRuntime = new NativeHighlighterRuntime();
 
   return {
     createRuntime(options = {}) {
       return new NativeHighlighterRuntime(options);
     },
     configureWasmResolver(fn) {
-      configuredDefaultResolver = fn;
+      wasmModule.configureWasmResolver(fn);
+      defaultRuntime.configureWasmResolver(fn);
     },
     initParser() {
       return defaultRuntime.initParser();
