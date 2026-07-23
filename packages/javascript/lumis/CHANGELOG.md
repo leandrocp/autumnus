@@ -1,3 +1,10 @@
+## [0.6.1](https://github.com/leandrocp/lumis/compare/npm-lumis/v0.6.0...npm-lumis/v0.6.1) (2026-07-23)
+
+
+### Bug Fixes
+
+- make native runtime opt-in (#1097)
+
 ## [0.6.0](https://github.com/leandrocp/lumis/compare/npm-lumis/v0.5.2...npm-lumis/v0.6.0) (2026-07-23)
 
 
