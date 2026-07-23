@@ -1,3 +1,11 @@
+## [2.3.0](https://github.com/leandrocp/lumis/compare/cargo-lumis-core/v2.2.0...cargo-lumis-core/v2.3.0) (2026-07-23)
+
+
+### Features
+
+- add mdx language reusing the markdown parser - [#1012](https://github.com/leandrocp/lumis/pull/1012) by @benswift
+- add mdx to web-extra - [#1025](https://github.com/leandrocp/lumis/pull/1025)
+
 ## [2.2.0](https://github.com/leandrocp/lumis/compare/cargo-lumis-core/v2.1.0...cargo-lumis-core/v2.2.0) (2026-07-08)
 
 
