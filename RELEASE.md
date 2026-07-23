@@ -44,10 +44,13 @@ If multiple Rust crates are part of the same release, use this order:
 
 1. `cargo-lumis-core`
 2. `cargo-lumis-build`
-3. `cargo-lumis`
-4. `cargo-lumis-cli`
+3. `cargo-lumis-wasm-runtime`
+4. `cargo-lumis`
+5. `cargo-lumis-cli`
 
-`lumis` depends on `lumis-core` and `lumis-build`. `lumis-cli` depends on `lumis-core` and `lumis-build`. `cargo-lumis-core` and `cargo-lumis-build` are independent, but keep the order above for consistency.
+`lumis-wasm-runtime` depends on `lumis-core`. `lumis` and `lumis-cli` depend on
+`lumis-core`, `lumis-build`, and `lumis-wasm-runtime`. `cargo-lumis-core` and
+`cargo-lumis-build` are independent, but keep the order above for consistency.
 
 ### JavaScript packages
 
