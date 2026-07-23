@@ -137,7 +137,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - runtime: Wasm
+          - runtime: wasm
             disable-native: '1'
             require-native: '0'
             build-native: false

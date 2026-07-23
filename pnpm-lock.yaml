@@ -4,10 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-overrides:
-  linkify-it: 5.0.2
-  markdown-it: 14.3.0
-
 importers:
 
   benchmarks/javascript:
@@ -173,7 +169,7 @@ importers:
         specifier: workspace:^
         version: link:../lumis
       markdown-it:
-        specifier: 14.3.0
+        specifier: ^14.0.0
         version: 14.3.0
     devDependencies:
       '@microsoft/api-extractor':
