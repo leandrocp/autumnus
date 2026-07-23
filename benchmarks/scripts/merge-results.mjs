@@ -12,9 +12,9 @@ const runDir = resolve(
 const manifest = await readJson(resolve(repoDir, "target/benchmarks/fixtures/scenarios.json"));
 const rustMetadata = await readJson(resolve(runDir, "rust-metadata.json"));
 const cliMetadata = await readJson(resolve(runDir, "cli/metadata.json"));
+const packageSizes = await readJson(resolve(runDir, "package-sizes.json"));
 const implementations = [
   "lumis-rust",
-  "lumis-js-native",
   "lumis-js-wasm",
   "lumis-elixir",
   "shiki",
@@ -66,7 +66,9 @@ const report = {
 };
 await mkdir(runDir, { recursive: true });
 await writeFile(resolve(runDir, "results.json"), `${JSON.stringify(report, null, 2)}\n`);
-await writeFile(resolve(runDir, "results.md"), renderMarkdown(report));
+const markdown = renderMarkdown(report, packageSizes);
+await writeFile(resolve(runDir, "results.md"), markdown);
+await writeFile(resolve(benchmarksDir, "README.md"), markdown);
 console.log(resolve(runDir, "results.json"));
 
 async function implementationMetadata(implementation, scenario) {
@@ -134,7 +136,7 @@ function runner(implementation) {
   return "mitata";
 }
 
-function renderMarkdown(report) {
+function renderMarkdown(report, sizes) {
   const scenarios = {
     "small-one-language": "1 small file for 1 language",
     "large-one-language": "1 big file for 1 language",
@@ -143,7 +145,6 @@ function renderMarkdown(report) {
   };
   const labels = {
     "lumis-rust": "Lumis Rust",
-    "lumis-js-native": "Lumis JS native",
     "lumis-js-wasm": "Lumis JS Wasm",
     "lumis-elixir": "Lumis Elixir",
     shiki: "Shiki",
@@ -151,7 +152,33 @@ function renderMarkdown(report) {
     "lumis-cli": "Lumis CLI",
     bat: "bat",
   };
-  const lines = ["# Benchmarks", "", "Run all benchmarks with `mise run -C benchmarks run`.", ""];
+  validatePackageSizes(sizes);
+  const lines = [
+    "# Benchmarks",
+    "",
+    "Run all benchmarks and regenerate this file with `mise run -C benchmarks run`.",
+    "",
+    "The timing rows use local workspace source for every Lumis runtime. The Elixir",
+    "rows use dynamic WASM; see the [focused before/after report](elixir-runtime.md)",
+    "for cold loading, concurrency, and memory measurements.",
+    "",
+    "## Package size",
+    "",
+    `Measured on ${sizes.system.cpu} (${sizes.system.architecture}, ${sizes.system.platform}).`,
+    "npm rows sum the packed and unpacked sizes of each unique production package.",
+    "Native rows compare the raw release artifact with deterministic gzip level 9.",
+    "Compare rows within the same artifact class; npm packages, executables, and a NIF",
+    "are not interchangeable distribution formats.",
+    "",
+    "| Tool | Measured artifact | Raw / unpacked | Download / gzip -9 |",
+    "| --- | --- | ---: | ---: |",
+  ];
+  for (const entry of sizes.entries) {
+    lines.push(
+      `| ${entry.label} | ${entry.artifact} | ${formatBytes(entry.rawBytes)} | ${formatBytes(entry.compressedBytes)} |`,
+    );
+  }
+  lines.push("");
   for (const scenario of report.results) {
     lines.push(
       `## ${scenarios[scenario.id]}`,
@@ -169,11 +196,51 @@ function renderMarkdown(report) {
   return `${lines.join("\n").trimEnd()}\n`;
 }
 
+function validatePackageSizes(report) {
+  const required = [
+    "Lumis JS WASM (runtime)",
+    "Lumis JS WASM (1 language)",
+    "Lumis JS WASM (10 languages)",
+    "Shiki 4.3.1",
+    "Lumis Rust",
+    "syntect 5.3",
+    "Lumis CLI",
+    "bat 0.26.1",
+    "Lumis Elixir",
+  ];
+  if (
+    report?.schemaVersion !== 1 ||
+    !report.system?.cpu ||
+    !Array.isArray(report.entries) ||
+    required.some((label) => !report.entries.some((entry) => entry.label === label)) ||
+    report.entries.some(
+      (entry) =>
+        !Number.isSafeInteger(entry.rawBytes) ||
+        entry.rawBytes <= 0 ||
+        !Number.isSafeInteger(entry.compressedBytes) ||
+        entry.compressedBytes <= 0,
+    )
+  ) {
+    throw new Error("package size report is missing or invalid");
+  }
+}
+
 function formatDuration(ns) {
   if (ns >= 1e9) return `${(ns / 1e9).toFixed(3)} s`;
   if (ns >= 1e6) return `${(ns / 1e6).toFixed(3)} ms`;
   if (ns >= 1e3) return `${(ns / 1e3).toFixed(3)} µs`;
   return `${ns.toFixed(0)} ns`;
+}
+
+function formatBytes(bytes) {
+  const units = ["B", "KiB", "MiB", "GiB"];
+  let value = bytes;
+  let unit = units.shift();
+  while (value >= 1024 && units.length > 0) {
+    value /= 1024;
+    unit = units.shift();
+  }
+  return `${value.toFixed(unit === "B" ? 0 : 2)} ${unit}`;
 }
 
 async function readJson(path) {

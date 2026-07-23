@@ -712,6 +712,24 @@ defmodule Lumis do
   def available_languages, do: Lumis.Native.available_languages()
 
   @doc """
+  Loads and verifies one language parser.
+
+  Parsers are cached by exact package version and SHA-256 digest. Calling this
+  function is optional because `highlight/2` loads missing root and injected
+  languages automatically.
+  """
+  @spec load_language(String.t()) :: :ok | {:error, term()}
+  def load_language(language), do: Lumis.LanguageLoader.load(language)
+
+  @doc """
+  Preloads a list of language parsers.
+
+  This is useful during application startup or before entering offline mode.
+  """
+  @spec preload_languages([String.t() | atom()]) :: :ok | {:error, term()}
+  def preload_languages(languages), do: Lumis.LanguageLoader.preload(languages)
+
+  @doc """
   Returns the list of all available themes.
 
   Use `Lumis.Theme.get/1` to get the actual theme struct.
@@ -845,15 +863,36 @@ defmodule Lumis do
       |> validate_options!()
       |> rust_options!()
 
-    case Lumis.Native.highlight(source, options) do
-      {:error, error} -> raise Lumis.HighlightError, error: error
-      output -> output
-    end
+    highlight_with_language_loading(source, options, MapSet.new())
   end
 
   def highlight(language, source)
       when is_binary(language) and is_binary(source) do
     highlight(source, language: language)
+  end
+
+  defp highlight_with_language_loading(source, options, attempted) do
+    case Lumis.Native.highlight(source, options) do
+      {:error, {:language_not_loaded, language}} ->
+        if MapSet.member?(attempted, language) or MapSet.size(attempted) >= 64 do
+          raise Lumis.HighlightError,
+            error: "could not load parser WASM for language '#{language}'"
+        end
+
+        case Lumis.LanguageLoader.load(language) do
+          :ok ->
+            highlight_with_language_loading(source, options, MapSet.put(attempted, language))
+
+          {:error, error} ->
+            raise Lumis.HighlightError, error: error
+        end
+
+      {:error, error} ->
+        raise Lumis.HighlightError, error: error
+
+      output ->
+        output
+    end
   end
 
   @doc """

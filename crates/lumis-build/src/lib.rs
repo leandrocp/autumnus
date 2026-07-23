@@ -3,19 +3,21 @@ pub fn convert_lua_matches(content: &str) -> String {
     let mut result = String::new();
 
     for line in content.lines() {
+        let is_lua_match = line.contains("#lua-match?") || line.contains("#not-lua-match?");
         let line = line
             .replace("#lua-match?", "#match?")
             .replace("#not-lua-match?", "#not-match?");
 
-        if line.contains("#match?") || line.contains("#not-match?") {
+        if is_lua_match {
             if let Some(pattern_start) = line.find('"') {
                 if let Some(pattern_end) = line[pattern_start + 1..].find('"') {
                     let pattern_end = pattern_start + 1 + pattern_end;
                     let lua_pattern = &line[pattern_start + 1..pattern_end];
                     let rust_pattern = convert_lua_pattern_to_rust_regex(lua_pattern);
+                    let query_pattern = escape_regex_for_query_string(&rust_pattern);
 
                     let mut new_line = line[..pattern_start + 1].to_string();
-                    new_line.push_str(&rust_pattern);
+                    new_line.push_str(&query_pattern);
                     new_line.push_str(&line[pattern_end..]);
                     result.push_str(&new_line);
                     result.push('\n');
@@ -39,6 +41,7 @@ pub fn convert_lua_matches(content: &str) -> String {
 fn convert_lua_pattern_to_rust_regex(lua_pattern: &str) -> String {
     let mut result = String::new();
     let mut chars = lua_pattern.chars().peekable();
+    let mut in_character_class = false;
 
     while let Some(c) = chars.next() {
         if c == '%' {
@@ -87,11 +90,6 @@ fn convert_lua_pattern_to_rust_regex(lua_pattern: &str) -> String {
                     '$' => {
                         result.push_str("\\$");
                         chars.next();
-                        if let Some(&next) = chars.peek() {
-                            if next == '{' {
-                                result.push('\\');
-                            }
-                        }
                     }
                     '^' => {
                         result.push_str("\\^");
@@ -108,23 +106,20 @@ fn convert_lua_pattern_to_rust_regex(lua_pattern: &str) -> String {
             }
         } else if c == '\\' {
             result.push('\\');
-            result.push('\\');
             if let Some(&next_char) = chars.peek() {
                 result.push(next_char);
                 chars.next();
             }
-        } else if c == '$' {
-            result.push_str("\\$");
-            if let Some(&next) = chars.peek() {
-                if next == '{' {
-                    result.push('\\');
-                }
-            }
-        } else if matches!(
-            c,
-            '.' | '*' | '+' | '?' | '(' | ')' | '[' | ']' | '{' | '}' | '|'
-        ) || (c == '^' && !result.is_empty())
-        {
+        } else if c == '[' {
+            in_character_class = true;
+            result.push(c);
+        } else if c == ']' {
+            in_character_class = false;
+            result.push(c);
+        } else if c == '-' && !in_character_class {
+            // Lua's non-greedy zero-or-more quantifier.
+            result.push_str("*?");
+        } else if matches!(c, '{' | '}' | '|') || (c == '^' && !result.is_empty()) {
             result.push('\\');
             result.push(c);
         } else {
@@ -133,6 +128,10 @@ fn convert_lua_pattern_to_rust_regex(lua_pattern: &str) -> String {
     }
 
     result
+}
+
+fn escape_regex_for_query_string(regex: &str) -> String {
+    regex.replace('\\', "\\\\").replace('"', "\\\"")
 }
 
 #[cfg(test)]
@@ -208,27 +207,27 @@ mod tests {
 
     #[test]
     fn regex_metachar_dot_escaped() {
-        assert_eq!(convert_lua_pattern_to_rust_regex("."), "\\.");
+        assert_eq!(convert_lua_pattern_to_rust_regex("."), ".");
     }
 
     #[test]
     fn regex_metachar_star_escaped() {
-        assert_eq!(convert_lua_pattern_to_rust_regex("*"), "\\*");
+        assert_eq!(convert_lua_pattern_to_rust_regex("*"), "*");
     }
 
     #[test]
     fn regex_metachar_plus_escaped() {
-        assert_eq!(convert_lua_pattern_to_rust_regex("+"), "\\+");
+        assert_eq!(convert_lua_pattern_to_rust_regex("+"), "+");
     }
 
     #[test]
     fn regex_metachar_parens_escaped() {
-        assert_eq!(convert_lua_pattern_to_rust_regex("()"), "\\(\\)");
+        assert_eq!(convert_lua_pattern_to_rust_regex("()"), "()");
     }
 
     #[test]
     fn regex_metachar_brackets_escaped() {
-        assert_eq!(convert_lua_pattern_to_rust_regex("[]"), "\\[\\]");
+        assert_eq!(convert_lua_pattern_to_rust_regex("[]"), "[]");
     }
 
     #[test]
@@ -237,8 +236,8 @@ mod tests {
     }
 
     #[test]
-    fn bare_dollar_escaped() {
-        assert_eq!(convert_lua_pattern_to_rust_regex("$"), "\\$");
+    fn bare_dollar_anchor_preserved() {
+        assert_eq!(convert_lua_pattern_to_rust_regex("$"), "$");
     }
 
     #[test]
@@ -252,8 +251,8 @@ mod tests {
     }
 
     #[test]
-    fn backslash_doubled() {
-        assert_eq!(convert_lua_pattern_to_rust_regex("\\n"), "\\\\n");
+    fn existing_regex_escape_preserved() {
+        assert_eq!(convert_lua_pattern_to_rust_regex("\\n"), "\\n");
     }
 
     #[test]
@@ -265,7 +264,7 @@ mod tests {
     fn mixed_pattern() {
         assert_eq!(
             convert_lua_pattern_to_rust_regex("^%u%l+%d"),
-            "^[A-Z][a-z]\\+\\d"
+            "^[A-Z][a-z]+\\d"
         );
     }
 
@@ -281,13 +280,40 @@ mod tests {
     #[test]
     fn not_lua_match_predicate_converted() {
         let input = r#"((identifier) @var (#not-lua-match? @var "^%d"))"#;
-        let expected = r#"((identifier) @var (#not-match? @var "^\d"))"#;
+        let expected = r#"((identifier) @var (#not-match? @var "^\\d"))"#;
         assert_eq!(convert_lua_matches(input), expected);
+    }
+
+    #[test]
+    fn query_string_preserves_literal_interpolation_marker() {
+        let input = r#"((text) @injection.content (#lua-match? @injection.content "%${"))"#;
+        let expected = r#"((text) @injection.content (#match? @injection.content "\\$\\{"))"#;
+        assert_eq!(convert_lua_matches(input), expected);
+    }
+
+    #[test]
+    fn lua_character_class_and_quantifier_remain_regex_operators() {
+        assert_eq!(
+            convert_lua_pattern_to_rust_regex("^on[a-z]+$"),
+            "^on[a-z]+$"
+        );
+    }
+
+    #[test]
+    fn lua_nongreedy_quantifier_is_converted() {
+        assert_eq!(convert_lua_pattern_to_rust_regex("a-b"), "a*?b");
     }
 
     #[test]
     fn non_matching_line_unchanged() {
         let input = "(identifier) @variable";
+        assert_eq!(convert_lua_matches(input), input);
+    }
+
+    #[test]
+    fn existing_regex_predicate_unchanged() {
+        let input =
+            r#"((inline) @injection.content (#match? @injection.content "^(import|export)\\s"))"#;
         assert_eq!(convert_lua_matches(input), input);
     }
 

@@ -1,8 +1,6 @@
 import type { RuntimeEnvironment } from "./runtime.js";
 import { createLanguagesModule } from "../core/languages.js";
 import type { LanguagesModule, WasmResolver } from "../core/languages.js";
-import { createNativeLanguagesModule } from "../core/native-languages.js";
-import { loadNativeBinding } from "../native-binding.js";
 import treeSitterWasmBinary from "../tree-sitter-wasm.js";
 
 const nodeFsPromises = "node:fs" + "/promises";
@@ -12,6 +10,23 @@ const nodeUrl = "node:url";
 /** @internal */
 export function wasmCacheFilename(key: string): string {
   return `${encodeURIComponent(key)}.wasm`;
+}
+
+async function wasmCacheDir(): Promise<string> {
+  const { join } = await import(nodePath);
+  if (process.env.LUMIS_WASM_CACHE_DIR) return process.env.LUMIS_WASM_CACHE_DIR;
+  if (process.env.XDG_CACHE_HOME) return join(process.env.XDG_CACHE_HOME, "lumis", "wasm");
+  if (process.platform === "win32" && process.env.LOCALAPPDATA) {
+    return join(process.env.LOCALAPPDATA, "lumis", "wasm");
+  }
+  const { homedir } = await import("node:os");
+  return process.platform === "darwin"
+    ? join(homedir(), "Library", "Caches", "lumis", "wasm")
+    : join(homedir(), ".cache", "lumis", "wasm");
+}
+
+function isNodeError(error: unknown, code: string): boolean {
+  return error instanceof Error && "code" in error && error.code === code;
 }
 
 export const nodeRuntime: RuntimeEnvironment = {
@@ -39,7 +54,7 @@ export const nodeRuntime: RuntimeEnvironment = {
     try {
       const { readFile } = await import(nodeFsPromises);
       const { join } = await import(nodePath);
-      const filePath = join("node_modules", ".cache", "lumis", wasmCacheFilename(key));
+      const filePath = join(await wasmCacheDir(), wasmCacheFilename(key));
       return new Uint8Array(await readFile(filePath));
     } catch {
       return undefined;
@@ -47,14 +62,63 @@ export const nodeRuntime: RuntimeEnvironment = {
   },
 
   async writeFsCache(key, data) {
+    const { join } = await import(nodePath);
+    const cacheDir = await wasmCacheDir();
+    const filePath = join(cacheDir, wasmCacheFilename(key));
+    const temporary = `${filePath}.${process.pid}.${Date.now()}.tmp`;
     try {
-      const { writeFile, mkdir } = await import(nodeFsPromises);
-      const { join } = await import(nodePath);
-      const cacheDir = join("node_modules", ".cache", "lumis");
+      const { writeFile, mkdir, rename, rm } = await import(nodeFsPromises);
       await mkdir(cacheDir, { recursive: true });
-      await writeFile(join(cacheDir, wasmCacheFilename(key)), data);
+      await writeFile(temporary, data, { flag: "wx" });
+      await rm(filePath, { force: true });
+      await rename(temporary, filePath);
     } catch {
       // cache write failures are non-fatal
+    } finally {
+      try {
+        const { rm } = await import(nodeFsPromises);
+        await rm(temporary, { force: true });
+      } catch {
+        // best-effort temporary cleanup
+      }
+    }
+  },
+
+  async withFsCacheLock(key, operation) {
+    const { mkdir, open, rm, stat } = await import(nodeFsPromises);
+    const { join } = await import(nodePath);
+    const cacheDir = await wasmCacheDir();
+    await mkdir(cacheDir, { recursive: true });
+    const lockPath = join(cacheDir, `${wasmCacheFilename(key)}.lock`);
+    const deadline = Date.now() + 120_000;
+    let lock: { close(): Promise<void> } | undefined;
+
+    while (!lock) {
+      try {
+        lock = await open(lockPath, "wx");
+      } catch (error) {
+        if (!isNodeError(error, "EEXIST")) return operation();
+        try {
+          const info = await stat(lockPath);
+          if (Date.now() - info.mtimeMs > 300_000) {
+            await rm(lockPath, { force: true });
+            continue;
+          }
+        } catch {
+          continue;
+        }
+        if (Date.now() >= deadline) {
+          throw new Error(`Timed out waiting for Lumis WASM cache lock: ${lockPath}`);
+        }
+        await new Promise((resolve) => setTimeout(resolve, 25));
+      }
+    }
+
+    try {
+      return await operation();
+    } finally {
+      await lock.close();
+      await rm(lockPath, { force: true });
     }
   },
 
@@ -105,28 +169,10 @@ export type {
   WasmResolver,
 } from "../core/languages.js";
 
-let runtime: LanguagesModule | undefined;
-let configuredResolver: WasmResolver | undefined;
-
-function getRuntime(): LanguagesModule {
-  if (runtime) return runtime;
-
-  const binding = loadNativeBinding();
-  if (binding) {
-    try {
-      runtime = createNativeLanguagesModule(binding);
-    } catch (error) {
-      // A present but unloadable addon must never prevent the universal fallback.
-      if (process.env.LUMIS_TEST_RUNTIME === "native") throw error;
-    }
-  }
-  runtime ??= createLanguagesModule(nodeRuntime);
-  if (configuredResolver) runtime.configureWasmResolver(configuredResolver);
-  return runtime;
-}
+const runtime: LanguagesModule = createLanguagesModule(nodeRuntime);
 
 export function createRuntime(...args: Parameters<LanguagesModule["createRuntime"]>) {
-  return getRuntime().createRuntime(...args);
+  return runtime.createRuntime(...args);
 }
 /**
  * Set a custom WASM resolver for parser binaries. Applies globally.
@@ -140,29 +186,28 @@ export function createRuntime(...args: Parameters<LanguagesModule["createRuntime
  * ```
  */
 export function configureWasmResolver(fn: WasmResolver) {
-  configuredResolver = fn;
-  return getRuntime().configureWasmResolver(fn);
+  return runtime.configureWasmResolver(fn);
 }
 export function initParser(...args: Parameters<LanguagesModule["initParser"]>) {
-  return getRuntime().initParser(...args);
+  return runtime.initParser(...args);
 }
 export function registerLanguage(...args: Parameters<LanguagesModule["registerLanguage"]>) {
-  return getRuntime().registerLanguage(...args);
+  return runtime.registerLanguage(...args);
 }
 export function resolveLanguageId(...args: Parameters<LanguagesModule["resolveLanguageId"]>) {
-  return getRuntime().resolveLanguageId(...args);
+  return runtime.resolveLanguageId(...args);
 }
 export function loadLanguage(...args: Parameters<LanguagesModule["loadLanguage"]>) {
-  return getRuntime().loadLanguage(...args);
+  return runtime.loadLanguage(...args);
 }
 export function loadPlaintext(...args: Parameters<LanguagesModule["loadPlaintext"]>) {
-  return getRuntime().loadPlaintext(...args);
+  return runtime.loadPlaintext(...args);
 }
 export function getLoadedLanguage(...args: Parameters<LanguagesModule["getLoadedLanguage"]>) {
-  return getRuntime().getLoadedLanguage(...args);
+  return runtime.getLoadedLanguage(...args);
 }
 export function getLoadedLanguageIds(...args: Parameters<LanguagesModule["getLoadedLanguageIds"]>) {
-  return getRuntime().getLoadedLanguageIds(...args);
+  return runtime.getLoadedLanguageIds(...args);
 }
 /**
  * List all supported languages with their ID, name, aliases, and file extensions.
@@ -174,8 +219,8 @@ export function getLoadedLanguageIds(...args: Parameters<LanguagesModule["getLoa
  * ```
  */
 export function availableLanguages(...args: Parameters<LanguagesModule["availableLanguages"]>) {
-  return getRuntime().availableLanguages(...args);
+  return runtime.availableLanguages(...args);
 }
 export function getDefaultRuntime(...args: Parameters<LanguagesModule["getDefaultRuntime"]>) {
-  return getRuntime().getDefaultRuntime(...args);
+  return runtime.getDefaultRuntime(...args);
 }

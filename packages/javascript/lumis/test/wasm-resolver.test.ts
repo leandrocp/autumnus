@@ -1,15 +1,10 @@
-import { rmSync } from 'node:fs'
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ensureLocalParserWasm, ensureLocalWasm } from './wasm.js'
 
-const CACHE_DIR = 'node_modules/.cache/lumis'
-
-vi.mock('../src/native-binding.js', async (importOriginal) => {
-  const binding = await importOriginal<typeof import('../src/native-binding.js')>()
-  return process.env.LUMIS_TEST_RUNTIME === 'native'
-    ? binding
-    : { ...binding, loadNativeBinding: () => undefined }
-})
+const CACHE_DIR = '.tmp/wasm-resolver-cache'
+process.env.LUMIS_WASM_CACHE_DIR = CACHE_DIR
 
 beforeEach(() => {
   // Clear FS cache so the resolver is always called
@@ -21,7 +16,7 @@ afterEach(() => {
   vi.resetModules()
 })
 
-describe.skipIf(process.env.LUMIS_TEST_RUNTIME === 'native')('Wasm resolver', () => {
+describe('Wasm resolver', () => {
   it('uses parser name and version in the default resolver', async () => {
     const { default: diff } = await import('../langs/diff.ts')
 
@@ -29,6 +24,8 @@ describe.skipIf(process.env.LUMIS_TEST_RUNTIME === 'native')('Wasm resolver', ()
       packageName: '@lumis-sh/wasm-diff',
       name: 'tree-sitter-diff',
       version: expect.any(String),
+      sha256: expect.stringMatching(/^[0-9a-f]{64}$/),
+      size: expect.any(Number),
     })
   })
 
@@ -75,6 +72,38 @@ describe.skipIf(process.env.LUMIS_TEST_RUNTIME === 'native')('Wasm resolver', ()
 
     const html = hl.highlight('- old\n+ new', htmlLinked({ language: diff }))
     expect(html).toContain('class="language-diff"')
+  }, 30_000)
+
+  it('replaces a corrupted persistent cache entry', async () => {
+    const { createHighlighter } = await import('../src/index.js')
+    const { htmlLinked } = await import('../src/formatters.js')
+    const { default: diff } = await import('../langs/diff.ts')
+    const key = `${diff.wasm.name}-${diff.wasm.version}-${diff.wasm.sha256}`
+    const cacheFile = join(CACHE_DIR, `${encodeURIComponent(key)}.wasm`)
+    mkdirSync(CACHE_DIR, { recursive: true })
+    writeFileSync(cacheFile, new Uint8Array([0, 1, 2, 3]))
+
+    const hl = await createHighlighter({
+      languages: [diff],
+      wasmResolver: (language, wasm) => ensureLocalParserWasm(language, wasm.name),
+    })
+
+    expect(hl.highlight('- old\n+ new', htmlLinked({ language: diff }))).toContain(
+      'class="language-diff"',
+    )
+    expect(readFileSync(cacheFile).byteLength).toBe(diff.wasm.size)
+  }, 30_000)
+
+  it('rejects parser bytes that do not match the exact manifest entry', async () => {
+    const { createHighlighter } = await import('../src/index.js')
+    const { default: diff } = await import('../langs/diff.ts')
+
+    await expect(
+      createHighlighter({
+        languages: [diff],
+        wasmResolver: (language) => ensureLocalParserWasm(language, 'tree-sitter-html'),
+      }),
+    ).rejects.toThrow(/Invalid WASM (size|integrity)/)
   }, 30_000)
 
   it('per-instance resolver is isolated from global resolver', async () => {
@@ -140,39 +169,3 @@ describe.skipIf(process.env.LUMIS_TEST_RUNTIME === 'native')('Wasm resolver', ()
     expect(calls).toContain('html')
   }, 30_000)
 })
-
-it.runIf(process.env.LUMIS_TEST_RUNTIME === 'native')(
-  'does not resolve parser Wasm in the native runtime',
-  async () => {
-    const { createHighlighter, configureWasmResolver } = await import('../src/index.js')
-    const { htmlLinked } = await import('../src/formatters.js')
-    const { default: diff } = await import('../langs/diff.ts')
-
-    configureWasmResolver(() => {
-      throw new Error('native runtime must not resolve parser Wasm')
-    })
-    const hl = await createHighlighter({ languages: [diff] })
-
-    expect(hl.highlight('- old\n+ new', htmlLinked({ language: diff }))).toContain(
-      'class="language-diff"',
-    )
-  },
-)
-
-it.runIf(process.env.LUMIS_TEST_RUNTIME === 'native')(
-  'rejects languages not compiled into the native runtime',
-  async () => {
-    const { createHighlighter } = await import('../src/index.js')
-    const { default: diff } = await import('../langs/diff.ts')
-    const custom = {
-      ...diff,
-      id: 'custom-diff',
-      aliases: [],
-      wasm: ensureLocalWasm('diff'),
-    }
-
-    await expect(createHighlighter({ languages: [custom] })).rejects.toThrow(
-      'The native runtime does not include language "custom-diff"',
-    )
-  },
-)

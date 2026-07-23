@@ -21,72 +21,7 @@ permissions:
   contents: read
 
 jobs:
-  build-native:
-    if: ${{ startsWith(inputs.tag || github.ref_name, 'npm-lumis/v') }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - package: darwin-arm64
-            target: aarch64-apple-darwin
-            os: macos-latest
-            library: liblumis_js_native.dylib
-          - package: darwin-x64
-            target: x86_64-apple-darwin
-            os: macos-15-intel
-            library: liblumis_js_native.dylib
-          - package: linux-arm64-gnu
-            target: aarch64-unknown-linux-gnu
-            os: ubuntu-24.04-arm
-            library: liblumis_js_native.so
-          - package: linux-x64-gnu
-            target: x86_64-unknown-linux-gnu
-            os: ubuntu-latest
-            library: liblumis_js_native.so
-          - package: win32-x64-msvc
-            target: x86_64-pc-windows-msvc
-            os: windows-latest
-            library: lumis_js_native.dll
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          ref: ${{ inputs.tag || github.ref_name }}
-
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: ${{ matrix.target }}
-
-      - name: Build native runtime
-        run: >-
-          cargo build --locked --release
-          --target ${{ matrix.target }}
-          -p lumis-js-native
-
-      - name: Stage native runtime
-        shell: bash
-        run: |
-          mkdir native-artifact
-          cp "target/${{ matrix.target }}/release/${{ matrix.library }}" \
-            "native-artifact/lumis-native.${{ matrix.package }}.node"
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: lumis-native-${{ matrix.package }}
-          path: native-artifact/*.node
-          if-no-files-found: error
-          retention-days: 1
-
   publish:
-    needs: build-native
-    if: >-
-      ${{
-        !cancelled()
-        && (
-          needs.build-native.result == 'success'
-          || needs.build-native.result == 'skipped'
-        )
-      }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -162,45 +97,6 @@ jobs:
           for pkg in "${packages[@]}"; do
             pnpm --filter "$pkg" run build
           done
-
-      - name: Download native runtimes
-        if: steps.pkg.outputs.filter == '@lumis-sh/lumis'
-        uses: actions/download-artifact@v4
-        with:
-          pattern: lumis-native-*
-          path: native-artifacts
-          merge-multiple: true
-
-      - name: Stage native runtime packages
-        if: steps.pkg.outputs.filter == '@lumis-sh/lumis'
-        run: |
-          for binary in native-artifacts/*.node; do
-            filename="$(basename "$binary")"
-            target="${filename#lumis-native.}"
-            target="${target%.node}"
-            cp "$binary" \
-              "packages/javascript/lumis/native/npm/$target/$filename"
-          done
-
-      - name: Publish native runtime packages
-        if: steps.pkg.outputs.filter == '@lumis-sh/lumis'
-        run: |
-          for package_dir in packages/javascript/lumis/native/npm/*; do
-            if [ "$(basename "$package_dir")" = "meta" ]; then
-              continue
-            fi
-            npm publish "$package_dir" --access public --provenance
-          done
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Publish native runtime selector
-        if: steps.pkg.outputs.filter == '@lumis-sh/lumis'
-        run: >-
-          pnpm --filter @lumis-sh/lumis-native publish
-          --access public --no-git-checks --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish to npm
         run: >-

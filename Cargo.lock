@@ -358,15 +358,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "convert_case"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "affbf0190ed2caf063e3def54ff444b449371d55c58e513a95ab98eca50adb49"
-dependencies = [
- "unicode-segmentation",
-]
-
-[[package]]
 name = "cpufeatures"
 version = "0.2.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -601,12 +592,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ctor"
-version = "1.0.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a394189d59f9befacce833f337f7b1eca5e9a91221bcdd4d28e0114d96e597b3"
-
-[[package]]
 name = "darling"
 version = "0.20.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -736,7 +721,7 @@ version = "2.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "799a97264921d8623a957f6c3b9011f3b5492f557bbb7a5a19b7fa6d06ba8dcb"
 dependencies = [
- "convert_case 0.10.0",
+ "convert_case",
  "proc-macro2",
  "quote",
  "rustc_version",
@@ -941,94 +926,6 @@ name = "foldhash"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "77ce24cb58228fbb8aa041425bb1050850ac19177686ea6e0f41a70416f56fdb"
-
-[[package]]
-name = "futures"
-version = "0.3.33"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a88cf1f829d945f548cf8fec32c61b1f202b6d93b45848602fc02af4b12ad218"
-dependencies = [
- "futures-channel",
- "futures-core",
- "futures-executor",
- "futures-io",
- "futures-sink",
- "futures-task",
- "futures-util",
-]
-
-[[package]]
-name = "futures-channel"
-version = "0.3.33"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "262590f4fe6afeb0bc83be1daa64e52657fe185690a958af7f3ad0e92085c5ae"
-dependencies = [
- "futures-core",
- "futures-sink",
-]
-
-[[package]]
-name = "futures-core"
-version = "0.3.33"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2cd50c473c80f6d7c3670a752354b8e569b1a7cbfdc0419ec88e5edad85e0dc7"
-
-[[package]]
-name = "futures-executor"
-version = "0.3.33"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6754879cc9f2c66f88c6e5c35344bb0bdb0708b0352b1201815667c7eabc7458"
-dependencies = [
- "futures-core",
- "futures-task",
- "futures-util",
-]
-
-[[package]]
-name = "futures-io"
-version = "0.3.33"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4577ecaa3c4f96589d473f679a71b596316f6641bc350038b962a5daf0085d7a"
-
-[[package]]
-name = "futures-macro"
-version = "0.3.33"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2d6d3cde68c518367be28956066ddfef33813991b77a55005a69dae04bf3b10b"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.119",
-]
-
-[[package]]
-name = "futures-sink"
-version = "0.3.33"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e34418ac499d6305c2fb5ad0ed2f6ac998c5f8ca209b4510f7f94242c647e307"
-
-[[package]]
-name = "futures-task"
-version = "0.3.33"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b231ed28831efb4a61a08580c4bc233ec56bc009f4cd8f52da2c3cb97df0c109"
-
-[[package]]
-name = "futures-util"
-version = "0.3.33"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a77a90a256fce34da66415271e30f94ee91c57b04b8a2c042d9cf3220179deaa"
-dependencies = [
- "futures-channel",
- "futures-core",
- "futures-io",
- "futures-macro",
- "futures-sink",
- "futures-task",
- "memchr",
- "pin-project-lite",
- "slab",
-]
 
 [[package]]
 name = "generic-array"
@@ -1513,19 +1410,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "lumis-js-native"
-version = "0.6.1"
-dependencies = [
- "lumis",
- "lumis-core",
- "napi",
- "napi-build",
- "napi-derive",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "lumis-wasm-runtime"
 version = "0.1.0"
 dependencies = [
@@ -1533,6 +1417,7 @@ dependencies = [
  "streaming-iterator",
  "thiserror 2.0.19",
  "tree-sitter",
+ "tree-sitter-json",
  "wasmtime",
 ]
 
@@ -1540,7 +1425,8 @@ dependencies = [
 name = "lumis_nif"
 version = "0.1.0"
 dependencies = [
- "lumis",
+ "lumis-core",
+ "lumis-wasm-runtime",
  "once_cell",
  "parking_lot",
  "rustler",
@@ -1635,65 +1521,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "napi"
-version = "3.10.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6826e5ddc15589b2d68c8ad5321c18e85d40488e93e32962f362e572669bccf6"
-dependencies = [
- "bitflags 2.13.0",
- "ctor",
- "futures",
- "napi-build",
- "napi-sys",
- "nohash-hasher",
- "rustc-hash",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "napi-build"
-version = "2.3.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c9c366d2c8c60b86fa632df75f745509b52f9128f91a6bad4c796e44abb505e1"
-
-[[package]]
-name = "napi-derive"
-version = "3.5.10"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b0fe526e81c105d3640516fcde83909dd1afe757c0d7a15af58830b5bc0fb9a1"
-dependencies = [
- "convert_case 0.11.0",
- "ctor",
- "napi-derive-backend",
- "proc-macro2",
- "quote",
- "syn 2.0.119",
-]
-
-[[package]]
-name = "napi-derive-backend"
-version = "5.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "514281397bcddd9ea9a876c7a21a57bff2374237a000ca9a64ea0211ec1993e2"
-dependencies = [
- "convert_case 0.11.0",
- "proc-macro2",
- "quote",
- "semver",
- "syn 2.0.119",
-]
-
-[[package]]
-name = "napi-sys"
-version = "3.2.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "73e43cf2eb0bd1bf95a43c07c076ebd2da5d1e015a71c3d201faeffffcc0ecac"
-dependencies = [
- "libloading",
-]
-
-[[package]]
 name = "nix"
 version = "0.29.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1705,12 +1532,6 @@ dependencies = [
  "libc",
  "memoffset",
 ]
-
-[[package]]
-name = "nohash-hasher"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2bf50223579dc7cdcfb3bfcacf7069ff68243f8c363f62ffa99cf000a6b9c451"
 
 [[package]]
 name = "nom"
@@ -2551,12 +2372,6 @@ name = "siphasher"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b2aa850e253778c88a04c3d7323b043aeda9d3e30d5971937c1855769763678e"
-
-[[package]]
-name = "slab"
-version = "0.4.12"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0c790de23124f9ab44544d7ac05d60440adc586479ce501c1d6d7da3cd8c9cf5"
 
 [[package]]
 name = "smallvec"

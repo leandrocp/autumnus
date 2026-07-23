@@ -48,12 +48,9 @@ sources = [
 outputs = ["packages/javascript/themes/dist/index.js"]
 
 [tasks."build:javascript"]
-description = "Build the JavaScript native and Wasm runtimes"
+description = "Build the JavaScript Wasm runtime"
 depends = ["install", "build:themes", "fixtures"]
-run = '''
-CARGO_TARGET_DIR="$MISE_CONFIG_ROOT/../target" pnpm --filter @lumis-sh/lumis build:native
-pnpm --filter @lumis-sh/lumis build
-'''
+run = "pnpm --filter @lumis-sh/lumis build"
 sources = [
   "Cargo.toml",
   "Cargo.lock",
@@ -61,8 +58,6 @@ sources = [
   "packages/javascript/lumis/package.json",
   "packages/javascript/lumis/src/**/*",
   "packages/javascript/lumis/scripts/**/*",
-  "packages/javascript/lumis/native/**/*.rs",
-  "packages/javascript/lumis/native/Cargo.toml",
   "crates/lumis/src/**/*.rs",
   "crates/lumis/Cargo.toml",
   "crates/lumis/build.rs",
@@ -73,10 +68,7 @@ sources = [
   "packages/javascript/lumis/langs/*.ts",
   "queries/processed/**/*.scm",
 ]
-outputs = [
-  "packages/javascript/lumis/dist/index.js",
-  "packages/javascript/lumis/native/lumis-native.*.node",
-]
+outputs = ["packages/javascript/lumis/dist/index.js"]
 
 [tasks."build:rust"]
 description = "Build the Criterion scenario benchmark"
@@ -88,23 +80,57 @@ sources = [
   "benchmarks/rust/benches/scenarios.rs",
 ]
 
+[tasks."build:rust-sizes"]
+description = "Build the stripped Rust package-size executables"
+run = "cargo build --manifest-path benchmarks/rust/Cargo.toml --release --bins"
+sources = [
+  "benchmarks/rust/Cargo.toml",
+  "benchmarks/rust/Cargo.lock",
+  "benchmarks/rust/src/bin/*.rs",
+]
+outputs = [
+  "target/benchmarks/rust-target/release/lumis-size",
+  "target/benchmarks/rust-target/release/syntect-size",
+]
+
+[tasks."build:cli"]
+description = "Build the local Lumis CLI"
+run = "cargo build --locked --release -p lumis-cli"
+sources = [
+  "Cargo.toml",
+  "Cargo.lock",
+  "crates/lumis-cli/**/*",
+  "crates/lumis-core/**/*",
+  "crates/lumis-wasm-runtime/**/*",
+]
+outputs = ["target/benchmarks/rust-target/release/lumis"]
+
 [tasks."build:elixir"]
-description = "Install the standalone Benchee script dependencies"
+description = "Build the local Elixir package and install Benchee dependencies"
 run = "MIX_ENV=prod BENCH_INSTALL_ONLY=1 elixir benchmarks/elixir/scenario.exs"
 sources = [
   "benchmarks/elixir/mix.lock",
   "benchmarks/elixir/scenario.exs",
+  "packages/elixir/lumis/lib/**/*.ex",
+  "packages/elixir/lumis/native/lumis_nif/Cargo.toml",
+  "packages/elixir/lumis/native/lumis_nif/src/**/*.rs",
 ]
 outputs = ["target/benchmarks/elixir-install"]
 
 [tasks."prepare:cli"]
 description = "Prepare and validate the offline CLI parser cache"
-depends = ["install", "fixtures"]
+depends = ["install", "fixtures", "build:cli"]
 run = "node benchmarks/scripts/prepare-cli.mjs"
 
 [tasks.build]
 description = "Build every benchmark implementation"
-depends = ["build:javascript", "build:rust", "build:elixir", "prepare:cli"]
+depends = [
+  "build:javascript",
+  "build:rust",
+  "build:rust-sizes",
+  "build:elixir",
+  "prepare:cli",
+]
 
 [tasks.setup]
 description = "Install and build the benchmark suite"
@@ -151,19 +177,13 @@ cp -R "$CARGO_TARGET_DIR/criterion" "$BENCH_RUN_DIR/criterion"
 '''
 
 [tasks.javascript]
-description = "Run Mitata for Lumis JS native, Lumis JS Wasm, and Shiki"
+description = "Run Mitata for Lumis JS Wasm and Shiki"
 depends = ["build:javascript", "fixtures"]
 run = '''
-for implementation in lumis-js-native lumis-js-wasm shiki; do
+for implementation in lumis-js-wasm shiki; do
   for scenario in small-one-language large-one-language ten-files-one-language ten-files-ten-languages; do
     output="$BENCH_RUN_DIR/javascript/$implementation/$scenario.json"
-    if [ "$implementation" = "lumis-js-native" ]; then
-      BENCH_IMPLEMENTATION="$implementation" BENCH_SCENARIO="$scenario" BENCH_OUTPUT="$output" LUMIS_TEST_RUNTIME=native pnpm --filter @lumis-sh/benchmarks benchmark
-    elif [ "$implementation" = "lumis-js-wasm" ]; then
-      BENCH_IMPLEMENTATION="$implementation" BENCH_SCENARIO="$scenario" BENCH_OUTPUT="$output" LUMIS_TEST_RUNTIME=wasm pnpm --filter @lumis-sh/benchmarks benchmark
-    else
-      BENCH_IMPLEMENTATION="$implementation" BENCH_SCENARIO="$scenario" BENCH_OUTPUT="$output" pnpm --filter @lumis-sh/benchmarks benchmark
-    fi
+    BENCH_IMPLEMENTATION="$implementation" BENCH_SCENARIO="$scenario" BENCH_OUTPUT="$output" pnpm --filter @lumis-sh/benchmarks benchmark
   done
 done
 '''
@@ -210,6 +230,11 @@ done
 description = "Merge Total results and validate execution metadata"
 run = "node benchmarks/scripts/merge-results.mjs"
 
+[tasks."package-sizes"]
+description = "Measure comparable local release and package artifacts"
+depends = ["install", "build:rust-sizes", "build:cli", "build:elixir"]
+run = 'BAT_BINARY="$(command -v bat)" node benchmarks/scripts/measure-package-sizes.mjs'
+
 [tasks.run]
 description = "Run all four benchmark scenarios"
 depends = ["build"]
@@ -220,5 +245,6 @@ mise run --skip-deps -C "$MISE_CONFIG_ROOT" rust
 mise run --skip-deps -C "$MISE_CONFIG_ROOT" javascript
 mise run --skip-deps -C "$MISE_CONFIG_ROOT" elixir
 mise run --skip-deps -C "$MISE_CONFIG_ROOT" cli
+mise run --skip-deps -C "$MISE_CONFIG_ROOT" package-sizes
 mise run --skip-deps -C "$MISE_CONFIG_ROOT" merge
 '''

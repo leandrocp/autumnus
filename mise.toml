@@ -15,9 +15,9 @@ check_bin() {
     fi
 }
 
-check_python310() {
+check_python311() {
     if ! command -v python3 &>/dev/null; then
-        echo "  ✗ python3 -- Python 3.10+ is needed for WASM builds"
+        echo "  ✗ python3 -- Python 3.11+ is needed for WASM builds"
         errors=$((errors + 1))
         return
     fi
@@ -25,10 +25,10 @@ check_python310() {
     local version
     version="$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[:3])))')"
 
-    if python3 -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)'; then
+    if python3 -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 11) else 1)'; then
         echo "  ✓ python3 ($version)"
     else
-        echo "  ✗ python3 ($version) -- Python 3.10+ is needed for WASM builds"
+        echo "  ✗ python3 ($version) -- Python 3.11+ is needed for WASM builds"
         errors=$((errors + 1))
     fi
 }
@@ -75,7 +75,7 @@ echo "Checking optional tools..."
 check_tree_sitter_cli
 check_bin emcc "https://emscripten.org (needed for WASM builds)"
 check_bin git-cliff "https://git-cliff.org"
-check_python310
+check_python311
 check_bin nvim "https://neovim.io (needed for theme generation)"
 echo ""
 
@@ -159,7 +159,6 @@ set -euo pipefail
 mise run test-conformance-rust
 mise run test-conformance-cli
 mise run test-conformance-javascript-wasm
-mise run test-conformance-javascript-native
 mise run test-conformance-browser
 mise run test-conformance-elixir
 '''
@@ -180,17 +179,6 @@ set -euo pipefail
 pnpm --filter @lumis-sh/themes build
 pnpm --filter @lumis-sh/lumis build:generate
 LUMIS_TEST_RUNTIME=wasm pnpm --filter @lumis-sh/lumis test:conformance
-'''
-
-[tasks.'test-conformance-javascript-native']
-description = "Run JavaScript native conformance tests"
-run = '''
-#!/usr/bin/env bash
-set -euo pipefail
-pnpm --filter @lumis-sh/themes build
-pnpm --filter @lumis-sh/lumis build:generate
-pnpm --filter @lumis-sh/lumis build:native
-LUMIS_TEST_RUNTIME=native pnpm --filter @lumis-sh/lumis test:conformance
 '''
 
 [tasks.'test-conformance-browser']
@@ -840,13 +828,6 @@ case "$kind" in
         python3 -c 'from pathlib import Path; import re, sys; path = Path(sys.argv[1]); version = sys.argv[2]; content = path.read_text(); content = re.sub(r"@version \"[^\"]+\"", f"@version \"{version}\"", content, count=1); path.write_text(content)' "$manifest" "$version"
         ;;
 esac
-
-if [ "$package" = "npm-lumis" ]; then
-    cargo set-version --manifest-path packages/javascript/lumis/native/Cargo.toml -p lumis-js-native "$version"
-    for native_manifest in packages/javascript/lumis/native/npm/*/package.json; do
-        npm --prefix "$(dirname "$native_manifest")" version --no-git-tag-version "$version"
-    done
-fi
 
 git-cliff --config cliff.toml --github-repo leandrocp/lumis --tag-pattern "$package/v[0-9].*" --tag "$tag" --prepend "$changelog" --strip header --unreleased "${include_args[@]}"
 printf 'Prepared %s %s\n' "$package" "$version"

@@ -269,7 +269,17 @@ function dedupeCaptures(captures: HighlightCapture[]): HighlightCapture[] {
     }
   }
 
-  return deduped;
+  // The same source can be highlighted by both a parent parser and an
+  // injected parser (for example `${name}` in a JavaScript-tagged HTML
+  // template). Identical semantic captures should render once even when they
+  // came from different layer depths.
+  const semanticCaptures = new Set<string>();
+  return deduped.filter((capture) => {
+    const key = `${capture.startByte}:${capture.endByte}:${capture.scope}:${capture.language}`;
+    if (semanticCaptures.has(key)) return false;
+    semanticCaptures.add(key);
+    return true;
+  });
 }
 
 function normalizeCaptures(

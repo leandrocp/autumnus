@@ -10,7 +10,6 @@
     "lint": "cd ../.. && oxlint benchmarks/javascript/src/ benchmarks/scripts/"
   },
   "dependencies": {
-    "@lumis-sh/cli-benchmark": "npm:@lumis-sh/cli@0.4.1",
     "@lumis-sh/lumis": "workspace:*",
     "@lumis-sh/themes": "workspace:*",
     "@lumis-sh/wasm-c": "^0.26.0",

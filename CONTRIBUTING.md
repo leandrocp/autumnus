@@ -51,12 +51,11 @@ mise run test-conformance-browser
 mise run test-conformance-rust
 mise run test-conformance-cli
 mise run test-conformance-javascript-wasm
-mise run test-conformance-javascript-native
 mise run test-conformance-browser
 mise run test-conformance-elixir
 ```
 
-The browser task installs the required Chromium, Firefox, and WebKit builds before running. CI runs these six tasks as independent parallel jobs.
+The browser task installs the required Chromium, Firefox, and WebKit builds before running. CI runs these five tasks as independent parallel jobs.
 
 ## Releases
 
@@ -73,7 +72,7 @@ Do not hand-edit release versions or changelog sections when `mise run release-p
 
 ## Benchmarks
 
-The suite under [`benchmarks/`](benchmarks/) runs four shared scenarios across Lumis Rust, Elixir, JavaScript native, JavaScript Wasm, and CLI, plus syntect, Shiki, and `bat`. It uses Criterion for Rust and syntect, Mitata for JavaScript and Shiki, Benchee for Elixir, and Hyperfine for the CLIs. mise installs the pinned toolchain and coordinates the runs.
+The suite under [`benchmarks/`](benchmarks/) runs four shared scenarios across Lumis Rust, Elixir, JavaScript Wasm, and CLI, plus syntect, Shiki, and `bat`. It uses Criterion for Rust and syntect, Mitata for JavaScript and Shiki, Benchee for Elixir, and Hyperfine for the CLIs. It also measures comparable package and release artifact sizes. mise installs the pinned toolchain and coordinates the runs.
 
 Run the complete suite with:
 

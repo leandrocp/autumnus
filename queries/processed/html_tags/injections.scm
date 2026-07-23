@@ -76,22 +76,6 @@
   (#eq? @_attr "style")
   (#set! injection.language "css"))
 
-; lit-html style template interpolation
-; <a @click=${e => console.log(e)}>
-; <a @click="${e => console.log(e)}">
-((attribute
-  (quoted_attribute_value
-    (attribute_value) @injection.content))
-  (#lua-match? @injection.content "%${")
-  (#offset! @injection.content 0 2 0 -1)
-  (#set! injection.language "javascript"))
-
-((attribute
-  (attribute_value) @injection.content)
-  (#lua-match? @injection.content "%${")
-  (#offset! @injection.content 0 2 0 -2)
-  (#set! injection.language "javascript"))
-
 ; <input pattern="[0-9]"> or <input pattern=[0-9]>
 (element
   (_

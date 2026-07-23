@@ -12,8 +12,12 @@ const cacheRoot = resolve(repoDir, "target/benchmarks/cli");
 const commandsDir = resolve(cacheRoot, "commands");
 const dataDir = resolve(cacheRoot, "data");
 const xdgCacheDir = resolve(cacheRoot, "xdg-cache");
+const lumis = resolve(
+  repoDir,
+  "target/benchmarks/rust-target/release",
+  process.platform === "win32" ? "lumis.exe" : "lumis",
+);
 const benchmarkRequire = createRequire(resolve(benchmarksDir, "javascript/package.json"));
-const lumis = benchmarkRequire.resolve("@lumis-sh/cli-benchmark/bin/lumis");
 const bat = findBat();
 const scenarioShell = findScenarioShell();
 

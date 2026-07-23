@@ -85,6 +85,19 @@ languages = Lumis.available_languages()
 Map.has_key?(Lumis.available_languages(), "elixir")
 ```
 
+### Parser Loading
+
+Root and injected parsers load automatically as exact, integrity-checked WASM
+assets. Preload the languages an application expects before entering offline
+mode:
+
+```elixir
+:ok = Lumis.preload_languages(["elixir", "html", "javascript", "css"])
+```
+
+Use `LUMIS_WASM_CACHE_DIR` to override the parser cache and
+`LUMIS_WASM_OFFLINE=1` to reject uncached parsers.
+
 ## Formatters
 
 Lumis supports five formatters. The formatter option controls the output format.
@@ -768,5 +781,6 @@ Lumis is a fast, reliable syntax highlighter for Elixir. Key points to remember:
 9. **250+ built-in Neovim themes** available
 10. **Line numbers** are 1-indexed in the `data-line` attribute
 11. **Validate options** with `validate_options!/1` when needed
+12. **Preload parser WASM** before entering offline mode
 
 For more information, see the [HexDocs](https://hexdocs.pm/lumis) or the [GitHub repository](https://github.com/leandrocp/lumis).

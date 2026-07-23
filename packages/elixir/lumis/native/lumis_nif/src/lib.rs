@@ -1,12 +1,17 @@
 use std::collections::HashMap;
+use std::sync::{mpsc, Arc, Mutex};
+use std::thread;
 
+mod catalog;
 mod elixir;
 
 use elixir::{ExCssOptions, ExFormatterOption, ExTheme};
-use lumis::{languages, themes};
+use lumis_core::events::HighlightEvent;
+use lumis_core::{languages, themes};
+use lumis_wasm_runtime::{LanguageSpec, Runtime, RuntimeError};
 use once_cell::sync::Lazy;
 use parking_lot::RwLock;
-use rustler::{Encoder, Env, Error, NifMap, NifResult, Term};
+use rustler::{Binary, Encoder, Env, Error, NifMap, NifResult, Term};
 
 /// Lazy per-theme cache to eliminate repeated allocations.
 /// Themes are converted and cached on first access, amortizing the cost.
@@ -21,9 +26,121 @@ static THEME_NAMES: Lazy<Vec<String>> = Lazy::new(|| {
         .collect()
 });
 
+static EXECUTOR: Lazy<Result<WasmExecutor, String>> = Lazy::new(WasmExecutor::new);
+
+enum WasmJob {
+    Load {
+        spec: LanguageSpec,
+        reply: mpsc::SyncSender<Result<(), RuntimeError>>,
+    },
+    Highlight {
+        source: String,
+        language: String,
+        rainbow_brackets: bool,
+        reply: mpsc::SyncSender<Result<Vec<HighlightEvent>, RuntimeError>>,
+    },
+}
+
+struct WasmExecutor {
+    runtime: Arc<Runtime>,
+    sender: mpsc::SyncSender<WasmJob>,
+}
+
+impl WasmExecutor {
+    fn new() -> Result<Self, String> {
+        let workers = thread::available_parallelism()
+            .map(usize::from)
+            .unwrap_or(1)
+            .min(4);
+        let runtime = thread::Builder::new()
+            .name("lumis-wasm-init".into())
+            .stack_size(8 * 1024 * 1024)
+            .spawn(move || -> Result<Runtime, RuntimeError> {
+                let runtime = Runtime::with_worker_limit(workers)?;
+                for language in catalog::LANGUAGES {
+                    runtime.declare_language(language.id, language.aliases);
+                }
+                Ok(runtime)
+            })
+            .map_err(|error| error.to_string())?
+            .join()
+            .map_err(|_| "Lumis WASM runtime initialization panicked".to_string())?
+            .map_err(|error| error.to_string())?;
+        let runtime = Arc::new(runtime);
+        let (sender, receiver) = mpsc::sync_channel::<WasmJob>(workers * 2);
+        let receiver = Arc::new(Mutex::new(receiver));
+
+        for index in 0..workers {
+            let runtime = Arc::clone(&runtime);
+            let receiver = Arc::clone(&receiver);
+            thread::Builder::new()
+                .name(format!("lumis-wasm-{index}"))
+                .stack_size(8 * 1024 * 1024)
+                .spawn(move || loop {
+                    let job = match receiver.lock().expect("executor lock poisoned").recv() {
+                        Ok(job) => job,
+                        Err(_) => return,
+                    };
+                    match job {
+                        WasmJob::Load { spec, reply } => {
+                            let _ = reply.send(runtime.load_language(spec));
+                        }
+                        WasmJob::Highlight {
+                            source,
+                            language,
+                            rainbow_brackets,
+                            reply,
+                        } => {
+                            let _ =
+                                reply.send(runtime.highlight(&source, &language, rainbow_brackets));
+                        }
+                    }
+                })
+                .map_err(|error| error.to_string())?;
+        }
+
+        Ok(Self { runtime, sender })
+    }
+
+    fn load_language(&self, spec: LanguageSpec) -> Result<(), RuntimeError> {
+        let language = spec.id.clone();
+        let (reply, result) = mpsc::sync_channel(1);
+        self.sender
+            .send(WasmJob::Load { spec, reply })
+            .map_err(|_| RuntimeError::Parser {
+                language,
+                message: "WASM executor is unavailable".into(),
+            })?;
+        result.recv().map_err(|_| {
+            RuntimeError::Highlight("WASM executor stopped before loading the language".into())
+        })?
+    }
+
+    fn highlight(
+        &self,
+        source: &str,
+        language: &str,
+        rainbow_brackets: bool,
+    ) -> Result<Vec<HighlightEvent>, RuntimeError> {
+        let (reply, result) = mpsc::sync_channel(1);
+        self.sender
+            .send(WasmJob::Highlight {
+                source: source.to_string(),
+                language: language.to_string(),
+                rainbow_brackets,
+                reply,
+            })
+            .map_err(|_| RuntimeError::Highlight("WASM executor is unavailable".into()))?;
+        result.recv().map_err(|_| {
+            RuntimeError::Highlight("WASM executor stopped before highlighting".into())
+        })?
+    }
+}
+
 rustler::atoms! {
     ok,
     error,
+    language_not_loaded,
 }
 
 rustler::init!("Elixir.Lumis.Native");
@@ -36,15 +153,80 @@ pub struct ExOptions<'a> {
 
 #[rustler::nif(schedule = "DirtyCpu")]
 pub fn highlight<'a>(env: Env<'a>, source: &'a str, options: ExOptions) -> NifResult<Term<'a>> {
-    let language = lumis::languages::Language::guess(options.language, source);
-    let formatter = options
-        .formatter
-        .into_formatter(language)
-        .map_err(|e| Error::Term(Box::new(e)))?;
+    let language = languages::Language::guess(options.language, source);
+    let (formatter, rainbow_brackets) = match options.formatter.into_formatter(language) {
+        Ok(formatter) => formatter,
+        Err(message) => return Ok((error(), message).encode(env)),
+    };
 
-    let output = lumis::highlight(source, formatter);
+    let events = if language == languages::Language::PlainText {
+        vec![HighlightEvent::Source {
+            start: 0,
+            end: source.len(),
+        }]
+    } else {
+        let executor = match executor() {
+            Ok(executor) => executor,
+            Err(message) => return Ok((error(), message).encode(env)),
+        };
+        match executor.highlight(source, language.id_name(), rainbow_brackets) {
+            Ok(events) => events,
+            Err(RuntimeError::LanguageNotLoaded(language)) => {
+                return Ok((error(), (language_not_loaded(), language)).encode(env));
+            }
+            Err(runtime_error) => {
+                return Ok((error(), runtime_error.to_string()).encode(env));
+            }
+        }
+    };
 
+    let mut output = Vec::new();
+    if let Err(render_error) = formatter.render(source, &events, &mut output) {
+        return Ok((error(), render_error.to_string()).encode(env));
+    }
+    let output = String::from_utf8(output)
+        .map_err(|error| Error::Term(Box::new(format!("invalid formatter output: {error}"))))?;
     Ok((ok(), output).encode(env))
+}
+
+fn executor() -> Result<&'static WasmExecutor, String> {
+    EXECUTOR.as_ref().map_err(Clone::clone)
+}
+
+#[rustler::nif(schedule = "DirtyCpu")]
+fn load_language<'a>(env: Env<'a>, name: &str, wasm: Binary<'a>) -> Term<'a> {
+    let Some(entry) = catalog::find(name) else {
+        return (error(), format!("unknown language '{name}'")).encode(env);
+    };
+    let executor = match executor() {
+        Ok(executor) => executor,
+        Err(message) => return (error(), message).encode(env),
+    };
+    let spec = LanguageSpec {
+        id: entry.id.to_string(),
+        aliases: entry
+            .aliases
+            .iter()
+            .map(|alias| (*alias).to_string())
+            .collect(),
+        grammar_name: entry.grammar_name.to_string(),
+        wasm: wasm.as_slice().to_vec(),
+        highlights: entry.highlights.to_string(),
+        injections: entry.injections.to_string(),
+        locals: entry.locals.to_string(),
+        brackets: entry.brackets.to_string(),
+    };
+    match executor.load_language(spec) {
+        Ok(()) => ok().encode(env),
+        Err(runtime_error) => (error(), runtime_error.to_string()).encode(env),
+    }
+}
+
+#[rustler::nif]
+fn has_language(name: &str) -> bool {
+    executor()
+        .map(|executor| executor.runtime.has_language(name))
+        .unwrap_or(false)
 }
 
 #[rustler::nif]
@@ -122,15 +304,23 @@ fn build_theme_css(theme: &themes::Theme, options: ExCssOptions) -> String {
 
 #[cfg(test)]
 mod tests {
-    use lumis::{languages::Language, HtmlInlineBuilder};
+    use super::{catalog, HighlightEvent};
+    use lumis_core::formatter::{Formatter, HtmlInlineBuilder};
+    use lumis_core::languages::Language;
+    use lumis_wasm_runtime::{LanguageSpec, Runtime};
 
     #[test]
-    fn test_highlight_works() {
+    fn test_formatter_works_with_precomputed_events() {
         let source = "@test :test";
         let lang = Language::guess(Some("elixir"), source);
         let formatter = HtmlInlineBuilder::new().language(lang).build().unwrap();
-
-        let result = lumis::highlight(source, formatter);
+        let events = [HighlightEvent::Source {
+            start: 0,
+            end: source.len(),
+        }];
+        let mut output = Vec::new();
+        formatter.render(source, &events, &mut output).unwrap();
+        let result = String::from_utf8(output).unwrap();
 
         assert!(!result.is_empty(), "Output should not be empty");
 
@@ -145,5 +335,31 @@ mod tests {
             result.contains("test"),
             "Output should contain 'test' keyword"
         );
+    }
+
+    #[test]
+    fn test_elixir_wasm_with_generated_queries() {
+        let entry = catalog::find("elixir").unwrap();
+        let runtime = Runtime::with_worker_limit(1).unwrap();
+        runtime
+            .load_language(LanguageSpec {
+                id: entry.id.into(),
+                aliases: Vec::new(),
+                grammar_name: entry.grammar_name.into(),
+                wasm: include_bytes!(
+                    "../../../../../javascript/lumis/test/fixtures/wasm/tree-sitter-elixir.wasm"
+                )
+                .to_vec(),
+                highlights: entry.highlights.into(),
+                injections: entry.injections.into(),
+                locals: entry.locals.into(),
+                brackets: entry.brackets.into(),
+            })
+            .unwrap();
+
+        let events = runtime
+            .highlight("defmodule Test do\nend", "elixir", false)
+            .unwrap();
+        assert!(!events.is_empty());
     }
 }

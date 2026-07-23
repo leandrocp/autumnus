@@ -6,6 +6,7 @@ export interface RuntimeEnvironment {
   ): Promise<Uint8Array | string>;
   readFsCache(key: string): Promise<Uint8Array | undefined>;
   writeFsCache(key: string, data: Uint8Array): Promise<void>;
+  withFsCacheLock<T>(key: string, operation: () => Promise<T>): Promise<T>;
   readResolvedWasmFromDisk(source: string | URL): Promise<Uint8Array | undefined>;
   parserInitOptions?(): Promise<Record<string, unknown> | undefined>;
 }

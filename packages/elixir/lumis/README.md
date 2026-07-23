@@ -45,6 +45,28 @@ def deps do
 end
 ```
 
+## Parser WASM
+
+Lumis loads missing root and injected language parsers automatically. Each
+parser is pinned to an exact npm package version, byte length, and SHA-256
+digest, then cached in the platform user cache directory.
+
+Preload expected languages before serving requests or entering offline mode:
+
+```elixir
+:ok = Lumis.preload_languages(["elixir", "html", "javascript", "css"])
+```
+
+Set `LUMIS_WASM_CACHE_DIR` to override the cache location and
+`LUMIS_WASM_OFFLINE=1` to reject uncached parsers. A custom resolver can return
+bytes, a local file, or a URL:
+
+```elixir
+config :lumis, :wasm_resolver, fn parser ->
+  {:file, Path.join("/app/wasm", "#{parser.wasm_name}.wasm")}
+end
+```
+
 ## Usage
 
 ### Basic Usage (HTML Inline)

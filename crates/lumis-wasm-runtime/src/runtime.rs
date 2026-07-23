@@ -2,12 +2,12 @@
 
 use lumis_core::events::HighlightEvent;
 use lumis_core::highlights::HIGHLIGHT_NAMES;
-use std::collections::HashMap;
-use std::sync::{LazyLock, Mutex, OnceLock};
+use std::collections::{HashMap, HashSet};
+use std::sync::{Arc, Condvar, LazyLock, Mutex, OnceLock, RwLock};
 use streaming_iterator::StreamingIterator;
 use thiserror::Error;
 use tree_sitter::{Parser, Query, QueryCursor, WasmStore};
-use wasmtime::{Cache, Config, Engine};
+use wasmtime::{Config, Engine};
 
 use crate::tree_sitter_highlight::{HighlightConfiguration, Highlighter};
 
@@ -52,18 +52,118 @@ struct LoadedLanguage {
     brackets: OnceLock<Option<Query>>,
 }
 
-struct RuntimeState {
-    wasm_store: WasmStore,
-    highlighter: Highlighter,
-    languages: HashMap<String, LoadedLanguage>,
+#[derive(Default)]
+struct Catalog {
+    languages: HashMap<String, Arc<LoadedLanguage>>,
     aliases: HashMap<String, String>,
+    known: HashSet<String>,
 }
 
-/// A reusable runtime. Calls on one instance are serialized because a Tree-sitter
-/// WASM store cannot be used concurrently; separate instances remain isolated.
-pub struct Runtime {
+struct Worker {
+    highlighter: Highlighter,
+}
+
+impl Worker {
+    fn new(engine: &Engine) -> Result<Self, RuntimeError> {
+        let mut highlighter = Highlighter::new();
+        highlighter
+            .parser()
+            .set_wasm_store(
+                WasmStore::new(engine)
+                    .map_err(|error| RuntimeError::TreeSitter(error.to_string()))?,
+            )
+            .map_err(|error| RuntimeError::TreeSitter(error.to_string()))?;
+        Ok(Self { highlighter })
+    }
+}
+
+#[derive(Default)]
+struct WorkerPoolState {
+    idle: Vec<Worker>,
+    total: usize,
+}
+
+struct WorkerPool {
     engine: Engine,
-    state: Mutex<RuntimeState>,
+    limit: usize,
+    state: Mutex<WorkerPoolState>,
+    available: Condvar,
+}
+
+impl WorkerPool {
+    fn new(engine: Engine, limit: usize) -> Self {
+        Self {
+            engine,
+            limit: limit.max(1),
+            state: Mutex::new(WorkerPoolState::default()),
+            available: Condvar::new(),
+        }
+    }
+
+    fn lease(&self) -> Result<WorkerLease<'_>, RuntimeError> {
+        let mut state = self.state.lock().expect("worker pool lock poisoned");
+        loop {
+            if let Some(worker) = state.idle.pop() {
+                return Ok(WorkerLease {
+                    pool: self,
+                    worker: Some(worker),
+                });
+            }
+
+            if state.total < self.limit {
+                state.total += 1;
+                drop(state);
+                match Worker::new(&self.engine) {
+                    Ok(worker) => {
+                        return Ok(WorkerLease {
+                            pool: self,
+                            worker: Some(worker),
+                        });
+                    }
+                    Err(error) => {
+                        let mut state = self.state.lock().expect("worker pool lock poisoned");
+                        state.total -= 1;
+                        self.available.notify_one();
+                        return Err(error);
+                    }
+                }
+            }
+
+            state = self
+                .available
+                .wait(state)
+                .expect("worker pool lock poisoned while waiting");
+        }
+    }
+}
+
+struct WorkerLease<'a> {
+    pool: &'a WorkerPool,
+    worker: Option<Worker>,
+}
+
+impl WorkerLease<'_> {
+    fn worker(&mut self) -> &mut Worker {
+        self.worker.as_mut().expect("worker lease is empty")
+    }
+}
+
+impl Drop for WorkerLease<'_> {
+    fn drop(&mut self) {
+        if let Some(worker) = self.worker.take() {
+            let mut state = self.pool.state.lock().expect("worker pool lock poisoned");
+            state.idle.push(worker);
+            self.pool.available.notify_one();
+        }
+    }
+}
+
+/// A reusable runtime with a shared Wasmtime engine, a lazy language catalog,
+/// and a bounded pool of independent highlighter workers.
+pub struct Runtime {
+    loader: Mutex<WasmStore>,
+    catalog: RwLock<Catalog>,
+    workers: WorkerPool,
 }
 
 #[derive(Debug, Error)]
@@ -84,52 +184,62 @@ pub enum RuntimeError {
 
 impl Runtime {
     pub fn new() -> Result<Self, RuntimeError> {
+        let workers = std::thread::available_parallelism()
+            .map(usize::from)
+            .unwrap_or(1)
+            .min(4);
+        Self::with_worker_limit(workers)
+    }
+
+    /// Construct a runtime whose concurrent highlighting is bounded by
+    /// `worker_limit`. Values below one are treated as one.
+    pub fn with_worker_limit(worker_limit: usize) -> Result<Self, RuntimeError> {
         static ENGINE: OnceLock<Engine> = OnceLock::new();
 
         if let Some(engine) = ENGINE.get() {
-            return Self::with_engine(engine.clone());
+            return Self::with_engine(engine.clone(), worker_limit);
         }
 
-        let mut config = Config::new();
-        if let Ok(cache) = Cache::from_file(None::<&std::path::Path>) {
-            config.cache(Some(cache));
-        }
-
-        let engine = Engine::new(&config)?;
+        let engine = Engine::new(&Config::new())?;
         let _ = ENGINE.set(engine.clone());
-        Self::with_engine(ENGINE.get().cloned().unwrap_or(engine))
+        Self::with_engine(ENGINE.get().cloned().unwrap_or(engine), worker_limit)
     }
 
-    fn with_engine(engine: Engine) -> Result<Self, RuntimeError> {
-        let wasm_store =
+    fn with_engine(engine: Engine, worker_limit: usize) -> Result<Self, RuntimeError> {
+        let loader =
             WasmStore::new(&engine).map_err(|error| RuntimeError::TreeSitter(error.to_string()))?;
-        let mut highlighter = Highlighter::new();
-        highlighter
-            .parser()
-            .set_wasm_store(
-                WasmStore::new(&engine)
-                    .map_err(|error| RuntimeError::TreeSitter(error.to_string()))?,
-            )
-            .map_err(|error| RuntimeError::TreeSitter(error.to_string()))?;
         Ok(Self {
-            engine,
-            state: Mutex::new(RuntimeState {
-                wasm_store,
-                highlighter,
-                languages: HashMap::new(),
-                aliases: HashMap::new(),
-            }),
+            loader: Mutex::new(loader),
+            catalog: RwLock::new(Catalog::default()),
+            workers: WorkerPool::new(engine, worker_limit),
         })
     }
 
     pub fn load_language(&self, spec: LanguageSpec) -> Result<(), RuntimeError> {
-        let mut state = self.state.lock().expect("runtime lock poisoned");
-        if state.languages.contains_key(&spec.id) {
+        if self
+            .catalog
+            .read()
+            .expect("language catalog lock poisoned")
+            .languages
+            .contains_key(&spec.id)
+        {
             return Ok(());
         }
 
-        let language = state
-            .wasm_store
+        // Loading is rare and WasmStore is not re-entrant. Keeping one loader
+        // also makes concurrent requests for the same language idempotent.
+        let mut loader = self.loader.lock().expect("language loader lock poisoned");
+        if self
+            .catalog
+            .read()
+            .expect("language catalog lock poisoned")
+            .languages
+            .contains_key(&spec.id)
+        {
+            return Ok(());
+        }
+
+        let language = loader
             .load_language(&spec.grammar_name, &spec.wasm)
             .map_err(|error| RuntimeError::Parser {
                 language: spec.id.clone(),
@@ -148,28 +258,48 @@ impl Runtime {
         })?;
         highlight.configure(&HIGHLIGHT_NAMES);
 
+        let mut catalog = self
+            .catalog
+            .write()
+            .expect("language catalog lock poisoned");
         for alias in &spec.aliases {
-            state.aliases.insert(alias.clone(), spec.id.clone());
+            catalog.aliases.insert(alias.clone(), spec.id.clone());
         }
-        state.languages.insert(
+        catalog.known.insert(spec.id.clone());
+        catalog.languages.insert(
             spec.id,
-            LoadedLanguage {
+            Arc::new(LoadedLanguage {
                 highlight,
                 brackets_source: spec.brackets,
                 brackets: OnceLock::new(),
-            },
+            }),
         );
         Ok(())
     }
 
+    /// Declare a supported language before its parser is loaded.
+    ///
+    /// Missing injected languages are reported only when they are declared;
+    /// query-specific pseudo-languages such as `printf` are ignored.
+    pub fn declare_language(&self, id: &str, aliases: &[&str]) {
+        let mut catalog = self
+            .catalog
+            .write()
+            .expect("language catalog lock poisoned");
+        catalog.known.insert(id.to_string());
+        for alias in aliases {
+            catalog.aliases.insert((*alias).to_string(), id.to_string());
+        }
+    }
+
     pub fn has_language(&self, name_or_alias: &str) -> bool {
-        let state = self.state.lock().expect("runtime lock poisoned");
-        let id = state
+        let catalog = self.catalog.read().expect("language catalog lock poisoned");
+        let id = catalog
             .aliases
             .get(name_or_alias)
             .map(String::as_str)
             .unwrap_or(name_or_alias);
-        state.languages.contains_key(id)
+        catalog.languages.contains_key(id)
     }
 
     pub fn configure_language(
@@ -179,19 +309,21 @@ impl Runtime {
         injections: &str,
         locals: &str,
     ) -> Result<(), RuntimeError> {
-        let mut state = self.state.lock().expect("runtime lock poisoned");
-        let id = state
+        let mut catalog = self
+            .catalog
+            .write()
+            .expect("language catalog lock poisoned");
+        let id = catalog
             .aliases
             .get(name_or_alias)
             .cloned()
             .unwrap_or_else(|| name_or_alias.to_string());
-        let language = state
+        let loaded = catalog
             .languages
             .get(&id)
-            .ok_or_else(|| RuntimeError::LanguageNotLoaded(name_or_alias.to_string()))?
-            .highlight
-            .language
-            .clone();
+            .ok_or_else(|| RuntimeError::LanguageNotLoaded(name_or_alias.to_string()))?;
+        let language = loaded.highlight.language.clone();
+        let brackets_source = loaded.brackets_source.clone();
         let mut highlight =
             HighlightConfiguration::new(language, id.clone(), highlights, injections, locals)
                 .map_err(|error| RuntimeError::Query {
@@ -199,11 +331,14 @@ impl Runtime {
                     message: error.to_string(),
                 })?;
         highlight.configure(&HIGHLIGHT_NAMES);
-        state
-            .languages
-            .get_mut(&id)
-            .expect("loaded language disappeared while locked")
-            .highlight = highlight;
+        catalog.languages.insert(
+            id,
+            Arc::new(LoadedLanguage {
+                highlight,
+                brackets_source,
+                brackets: OnceLock::new(),
+            }),
+        );
         Ok(())
     }
 
@@ -213,29 +348,47 @@ impl Runtime {
         name_or_alias: &str,
         rainbow_brackets: bool,
     ) -> Result<Vec<HighlightEvent>, RuntimeError> {
-        let mut state = self.state.lock().expect("runtime lock poisoned");
-        let root_id = state
-            .aliases
-            .get(name_or_alias)
-            .cloned()
-            .unwrap_or_else(|| name_or_alias.to_string());
-        let RuntimeState {
-            highlighter,
-            languages,
-            aliases,
-            ..
-        } = &mut *state;
-        let root = languages
-            .get(&root_id)
-            .ok_or_else(|| RuntimeError::LanguageNotLoaded(name_or_alias.to_string()))?;
+        let (root_id, root, languages, aliases, known) = {
+            let catalog = self.catalog.read().expect("language catalog lock poisoned");
+            let root_id = catalog
+                .aliases
+                .get(name_or_alias)
+                .cloned()
+                .unwrap_or_else(|| name_or_alias.to_string());
+            let root = catalog
+                .languages
+                .get(&root_id)
+                .cloned()
+                .ok_or_else(|| RuntimeError::LanguageNotLoaded(name_or_alias.to_string()))?;
+            (
+                root_id,
+                root,
+                catalog.languages.clone(),
+                catalog.aliases.clone(),
+                catalog.known.clone(),
+            )
+        };
 
-        let events = highlighter
+        let mut lease = self.workers.lease()?;
+        let worker = lease.worker();
+        let mut missing_language = None;
+        let events = worker
+            .highlighter
             .highlight(&root.highlight, source.as_bytes(), None, |injected| {
                 let id = aliases
                     .get(injected)
                     .map(String::as_str)
                     .unwrap_or(injected);
-                languages.get(id).map(|loaded| &loaded.highlight)
+                match languages.get(id) {
+                    Some(loaded) => Some(&loaded.highlight),
+                    None if known.contains(id) => {
+                        if missing_language.is_none() {
+                            missing_language = Some(id.to_string());
+                        }
+                        None
+                    }
+                    None => None,
+                }
             })
             .map_err(|error| RuntimeError::Highlight(error.to_string()))?;
 
@@ -258,8 +411,12 @@ impl Runtime {
             }
         }
 
+        if let Some(language) = missing_language {
+            return Err(RuntimeError::LanguageNotLoaded(language));
+        }
+
         if rainbow_brackets {
-            let ranges = rainbow_ranges(&self.engine, root, source)?;
+            let ranges = rainbow_ranges(worker.highlighter.parser(), &root, source)?;
             output = apply_rainbow_brackets(output, ranges, &root_id);
         }
 
@@ -281,7 +438,7 @@ struct BracketPair {
 }
 
 fn rainbow_ranges(
-    engine: &Engine,
+    parser: &mut Parser,
     language: &LoadedLanguage,
     source: &str,
 ) -> Result<Vec<RainbowRange>, RuntimeError> {
@@ -312,12 +469,6 @@ fn rainbow_ranges(
         return Ok(Vec::new());
     };
 
-    let mut parser = Parser::new();
-    parser
-        .set_wasm_store(
-            WasmStore::new(engine).map_err(|error| RuntimeError::TreeSitter(error.to_string()))?,
-        )
-        .map_err(|error| RuntimeError::TreeSitter(error.to_string()))?;
     parser
         .set_language(&language.highlight.language)
         .map_err(|error| RuntimeError::TreeSitter(error.to_string()))?;
@@ -454,4 +605,164 @@ fn apply_rainbow_brackets(
         }
     }
     output
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::sync::mpsc;
+    use std::thread;
+    use std::time::Duration;
+
+    fn install_json(runtime: &Runtime, injections: &str) {
+        let language = tree_sitter::Language::new(tree_sitter_json::LANGUAGE);
+        let mut highlight =
+            HighlightConfiguration::new(language, "json", "(string) @string", injections, "")
+                .unwrap();
+        highlight.configure(&HIGHLIGHT_NAMES);
+        runtime.catalog.write().unwrap().languages.insert(
+            "json".into(),
+            Arc::new(LoadedLanguage {
+                highlight,
+                brackets_source: String::new(),
+                brackets: OnceLock::new(),
+            }),
+        );
+    }
+
+    #[test]
+    fn worker_limit_allows_two_independent_leases() {
+        let runtime = Arc::new(Runtime::with_worker_limit(2).unwrap());
+        let (ready_tx, ready_rx) = mpsc::channel();
+        let (release_tx, release_rx) = mpsc::channel();
+        let release_rx = Arc::new(Mutex::new(release_rx));
+        let mut threads = Vec::new();
+
+        for _ in 0..2 {
+            let runtime = Arc::clone(&runtime);
+            let ready_tx = ready_tx.clone();
+            let release_rx = Arc::clone(&release_rx);
+            threads.push(thread::spawn(move || {
+                let _lease = runtime.workers.lease().unwrap();
+                ready_tx.send(()).unwrap();
+                release_rx.lock().unwrap().recv().unwrap();
+            }));
+        }
+
+        ready_rx.recv_timeout(Duration::from_secs(5)).unwrap();
+        ready_rx.recv_timeout(Duration::from_secs(5)).unwrap();
+        release_tx.send(()).unwrap();
+        release_tx.send(()).unwrap();
+        for thread in threads {
+            thread.join().unwrap();
+        }
+    }
+
+    #[test]
+    fn highlights_safely_from_multiple_threads() {
+        let runtime = Arc::new(Runtime::with_worker_limit(2).unwrap());
+        install_json(&runtime, "");
+        let mut threads = Vec::new();
+
+        for _ in 0..8 {
+            let runtime = Arc::clone(&runtime);
+            threads.push(thread::spawn(move || {
+                let events = runtime
+                    .highlight(r#"{"language":"json","value":42}"#, "json", false)
+                    .unwrap();
+                assert!(!events.is_empty());
+            }));
+        }
+
+        for thread in threads {
+            thread.join().unwrap();
+        }
+    }
+
+    #[test]
+    fn reports_the_missing_injected_language() {
+        let runtime = Runtime::with_worker_limit(1).unwrap();
+        runtime.declare_language("missing", &[]);
+        install_json(
+            &runtime,
+            r#"((string) @injection.content
+               (#set! injection.language "missing"))"#,
+        );
+
+        let error = runtime
+            .highlight(r#""embedded""#, "json", false)
+            .unwrap_err();
+        assert!(matches!(
+            error,
+            RuntimeError::LanguageNotLoaded(language) if language == "missing"
+        ));
+    }
+
+    #[test]
+    fn ignores_undeclared_query_specific_injections() {
+        let runtime = Runtime::with_worker_limit(1).unwrap();
+        install_json(
+            &runtime,
+            r#"((string) @injection.content
+               (#set! injection.language "printf"))"#,
+        );
+
+        let events = runtime.highlight(r#""%s""#, "json", false).unwrap();
+        assert!(!events.is_empty());
+    }
+
+    #[test]
+    fn reuses_a_worker_for_wasm_highlighting() {
+        let runtime = Runtime::with_worker_limit(1).unwrap();
+        runtime
+            .load_language(LanguageSpec {
+                id: "diff".into(),
+                aliases: Vec::new(),
+                grammar_name: "diff".into(),
+                wasm: include_bytes!(
+                    "../../lumis-cli/tests/fixtures/parsers/tree-sitter-diff.wasm"
+                )
+                .to_vec(),
+                highlights: "(addition) @diff.plus\n(deletion) @diff.minus".into(),
+                injections: String::new(),
+                locals: String::new(),
+                brackets: String::new(),
+            })
+            .unwrap();
+
+        for _ in 0..2 {
+            let events = runtime
+                .highlight("+ added\n- removed", "diff", false)
+                .unwrap();
+            assert!(!events.is_empty());
+        }
+    }
+
+    #[test]
+    fn reuses_elixir_wasm_highlighting() {
+        let runtime = Runtime::with_worker_limit(1).unwrap();
+        runtime
+            .load_language(LanguageSpec {
+                id: "elixir".into(),
+                aliases: Vec::new(),
+                grammar_name: "elixir".into(),
+                wasm: include_bytes!(
+                    "../../../packages/javascript/lumis/test/fixtures/wasm/tree-sitter-elixir.wasm"
+                )
+                .to_vec(),
+                highlights: "(identifier) @variable\n(alias) @module".into(),
+                injections: String::new(),
+                locals: String::new(),
+                brackets: String::new(),
+            })
+            .unwrap();
+
+        for source in [
+            "defmodule Test do\n  @lang :elixir\nend",
+            "defmodule Test do\nend",
+        ] {
+            let events = runtime.highlight(source, "elixir", false).unwrap();
+            assert!(!events.is_empty());
+        }
+    }
 }

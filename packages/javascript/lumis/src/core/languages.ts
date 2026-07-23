@@ -125,12 +125,18 @@ function createSharedRuntimeCache(): SharedRuntimeCache {
   };
 }
 
-function cacheKey(name: string, version: string): string {
-  return `${name}-${version}`;
+function cacheKey(ref: WasmRef): string {
+  return `${ref.name}-${ref.version}-${ref.sha256}`;
 }
 
 function isWasmRef(wasm: object): wasm is WasmRef {
-  return "packageName" in wasm && "name" in wasm && "version" in wasm;
+  return (
+    "packageName" in wasm &&
+    "name" in wasm &&
+    "version" in wasm &&
+    "sha256" in wasm &&
+    "size" in wasm
+  );
 }
 
 function isRuntimeWasmInput(
@@ -158,6 +164,28 @@ async function trackLoad<T>(
   } finally {
     loads.delete(key);
   }
+}
+
+async function sha256Hex(data: Uint8Array): Promise<string> {
+  const bytes = new Uint8Array(data.byteLength);
+  bytes.set(data);
+  const digest = await globalThis.crypto.subtle.digest("SHA-256", bytes.buffer);
+  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+async function verifyWasm(ref: WasmRef, data: Uint8Array): Promise<Uint8Array> {
+  if (data.byteLength !== ref.size) {
+    throw new Error(
+      `Invalid WASM size for ${ref.name}@${ref.version}: expected ${ref.size}, got ${data.byteLength}`,
+    );
+  }
+  const actual = await sha256Hex(data);
+  if (actual !== ref.sha256) {
+    throw new Error(
+      `Invalid WASM integrity for ${ref.name}@${ref.version}: expected sha256-${ref.sha256}, got sha256-${actual}`,
+    );
+  }
+  return data;
 }
 
 function matchesSpecialCapture(name: string, base: string): boolean {
@@ -319,13 +347,19 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
       return this.explicitResolver ?? configuredDefaultResolver;
     }
 
-    private async loadWasmBytes(language: string, ref: WasmRef, key: string): Promise<Uint8Array> {
+    private async readVerifiedCache(ref: WasmRef, key: string): Promise<Uint8Array | undefined> {
       const fsCached = await runtime.readFsCache(key);
       if (fsCached) {
-        this.sharedCache.wasmBytes.set(key, fsCached);
-        return fsCached;
+        try {
+          return await verifyWasm(ref, fsCached);
+        } catch {
+          // Ignore corrupted or stale cache entries. The locked writer replaces them atomically.
+        }
       }
+      return undefined;
+    }
 
+    private async loadInstalledPackage(ref: WasmRef): Promise<Uint8Array | undefined> {
       try {
         const mod = await import(
           /* webpackIgnore: true */
@@ -333,32 +367,55 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
           /* @vite-ignore */
           ref.packageName
         );
-        if (mod.default instanceof Uint8Array) {
-          this.sharedCache.wasmBytes.set(key, mod.default);
-          return mod.default;
+        const input = mod.default as unknown;
+        if (
+          input instanceof Uint8Array ||
+          input instanceof ArrayBuffer ||
+          input instanceof URL ||
+          typeof input === "string"
+        ) {
+          const resolved = await runtime.resolveWasm(input);
+          if (resolved instanceof Uint8Array) return resolved;
+          const disk = await runtime.readResolvedWasmFromDisk(resolved);
+          if (disk) return disk;
+          const response = await fetch(resolved);
+          if (!response.ok) return undefined;
+          return new Uint8Array(await response.arrayBuffer());
         }
       } catch {
-        // Package not installed - fall back to resolver URL
+        // Package not installed or not consumable in this runtime.
       }
+      return undefined;
+    }
+
+    private async fetchResolvedWasm(language: string, ref: WasmRef): Promise<Uint8Array> {
+      const installed = await this.loadInstalledPackage(ref);
+      if (installed) return installed;
 
       const url = this.resolver(language, ref);
       const diskData = await runtime.readResolvedWasmFromDisk(url);
-      if (diskData) {
-        this.sharedCache.wasmBytes.set(key, diskData);
-        return diskData;
-      }
-
+      if (diskData) return diskData;
       const response = await fetch(typeof url === "string" ? url : url.href);
       if (!response.ok) {
         throw new Error(
           `Failed to fetch WASM for ${ref.name}@${ref.version}: ${response.status} ${response.statusText}`,
         );
       }
+      return new Uint8Array(await response.arrayBuffer());
+    }
 
-      const data = new Uint8Array(await response.arrayBuffer());
-      this.sharedCache.wasmBytes.set(key, data);
-      await runtime.writeFsCache(key, data);
-      return data;
+    private async loadWasmBytes(language: string, ref: WasmRef, key: string): Promise<Uint8Array> {
+      const fsCached = await this.readVerifiedCache(ref, key);
+      if (fsCached) return fsCached;
+
+      return runtime.withFsCacheLock(key, async () => {
+        const lockedCache = await this.readVerifiedCache(ref, key);
+        if (lockedCache) return lockedCache;
+
+        const data = await verifyWasm(ref, await this.fetchResolvedWasm(language, ref));
+        await runtime.writeFsCache(key, data);
+        return data;
+      });
     }
 
     private async createLoadedLanguage(opts: LoadLanguageOptions): Promise<LoadedLanguage> {
@@ -433,7 +490,7 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
     }
 
     private async resolveWasmRef(language: string, ref: WasmRef): Promise<Uint8Array> {
-      const key = cacheKey(ref.name, ref.version);
+      const key = cacheKey(ref);
       const cached = this.sharedCache.wasmBytes.get(key);
       if (cached) return cached;
 
@@ -442,7 +499,11 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
         return existingLoad;
       }
 
-      return trackLoad(this.sharedCache.wasmLoads, key, this.loadWasmBytes(language, ref, key));
+      const load = this.loadWasmBytes(language, ref, key).then((data) => {
+        this.sharedCache.wasmBytes.set(key, data);
+        return data;
+      });
+      return trackLoad(this.sharedCache.wasmLoads, key, load);
     }
 
     async loadLanguage(opts: LoadLanguageOptions): Promise<LoadedLanguage> {

@@ -4,7 +4,8 @@ Syntax Highlighter powered by Tree-sitter and Neovim themes.
 
 JavaScript/TypeScript package for [Lumis](https://lumis.sh). Works in Node.js, Bun, Deno, and browsers.
 
-By default, Lumis uses `web-tree-sitter` and loads parser `.wasm` files per language on demand. Node.js users can opt into the native Rust runtime; the public API is identical in both modes.
+Lumis uses `web-tree-sitter` and loads parser `.wasm` files per language on
+demand in every JavaScript runtime.
 
 ## Install
 
@@ -18,15 +19,9 @@ Themes are published separately:
 npm install @lumis-sh/themes
 ```
 
-### Optional native Node.js runtime
-
-```sh
-npm install @lumis-sh/lumis-native
-```
-
-No code changes are required. On supported Node.js platforms, Lumis detects the package and uses its matching prebuilt addon automatically.
-
-The native addon includes all supported language parsers, so it is much larger than the default per-language WASM runtime. Without it, Lumis fetches versioned parser WASM packages from jsDelivr on demand and caches them locally in Node.
+Each language import contains an exact parser package version, byte length, and
+SHA-256 digest. Lumis verifies downloaded or installed parser bytes before use
+and caches valid downloads locally in Node.
 
 ## Quick Start
 
@@ -182,14 +177,11 @@ All three are equivalent at highlight time. The runtime resolves the language by
 
 ## Runtime behavior
 
-- `@lumis-sh/lumis` uses the portable `web-tree-sitter` runtime by default and does not install a native addon.
-- Install `@lumis-sh/lumis-native` to opt into the native Rust runtime on supported Node.js platforms. The selector installs the matching prebuilt platform addon; no code changes are required.
-- The native addon contains all supported language parsers and is intentionally much larger than the default per-language WASM setup.
-- Browser bundles always use `web-tree-sitter`. Node.js also uses it when the native package is absent, unsupported, or unloadable.
+- `@lumis-sh/lumis` uses one portable `web-tree-sitter` runtime in Node.js, Bun, Deno, and browsers.
 - Language parsers are separate versioned `.wasm` assets loaded at runtime.
-- By default, Lumis resolves parser WASM from `https://cdn.jsdelivr.net/npm/@lumis-sh/wasm-<parser-name-without-tree-sitter-prefix>@<tree-sitter-version>/<parser>.wasm`.
-- The `<tree-sitter-version>` segment is a partial version such as `0.26`, which CDNs resolve to the latest compatible patch release.
-- In Node, fetched parser WASM files are cached under `node_modules/.cache/lumis` when possible.
+- By default, Lumis resolves parser WASM from `https://cdn.jsdelivr.net/npm/@lumis-sh/wasm-<parser-name-without-tree-sitter-prefix>@<exact-version>/<parser>.wasm`.
+- Parser bytes are checked against their exact expected size and SHA-256 digest.
+- In Node, verified parser WASM is cached in the platform user cache directory. Set `LUMIS_WASM_CACHE_DIR` to override it.
 - In restricted or offline environments, set a custom resolver before calling `highlight()` or `createHighlighter()`.
 
 ## Output Formats

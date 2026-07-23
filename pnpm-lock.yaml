@@ -8,9 +8,6 @@ importers:
 
   benchmarks/javascript:
     dependencies:
-      '@lumis-sh/cli-benchmark':
-        specifier: npm:@lumis-sh/cli@0.4.1
-        version: '@lumis-sh/cli@0.4.1'
       '@lumis-sh/lumis':
         specifier: workspace:*
         version: link:../../packages/javascript/lumis
@@ -120,7 +117,7 @@ importers:
         version: 1.6.1
       tsup:
         specifier: ^8.3.0
-        version: 8.5.1(@microsoft/api-extractor@7.58.2(@types/node@25.6.0))(jiti@2.6.1)(postcss@8.5.10)(tsx@4.21.0)(typescript@6.0.2)(yaml@2.8.3)
+        version: 8.5.1(@microsoft/api-extractor@7.58.2(@types/node@25.6.0))(jiti@2.6.1)(postcss@8.5.10)(supports-color@8.1.1)(tsx@4.21.0)(typescript@6.0.2)(yaml@2.8.3)
       tsx:
         specifier: ^4.19.0
         version: 4.21.0
@@ -135,35 +132,7 @@ importers:
         version: 8.0.8(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.3)
       vitest:
         specifier: ^4.1.2
-        version: 4.1.4(@types/node@25.6.0)(jsdom@27.4.0)(vite@8.0.8(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.3))
-
-  packages/javascript/lumis/native/npm/darwin-arm64: {}
-
-  packages/javascript/lumis/native/npm/darwin-x64: {}
-
-  packages/javascript/lumis/native/npm/linux-arm64-gnu: {}
-
-  packages/javascript/lumis/native/npm/linux-x64-gnu: {}
-
-  packages/javascript/lumis/native/npm/meta:
-    optionalDependencies:
-      '@lumis-sh/lumis-native-darwin-arm64':
-        specifier: workspace:*
-        version: link:../darwin-arm64
-      '@lumis-sh/lumis-native-darwin-x64':
-        specifier: workspace:*
-        version: link:../darwin-x64
-      '@lumis-sh/lumis-native-linux-arm64-gnu':
-        specifier: workspace:*
-        version: link:../linux-arm64-gnu
-      '@lumis-sh/lumis-native-linux-x64-gnu':
-        specifier: workspace:*
-        version: link:../linux-x64-gnu
-      '@lumis-sh/lumis-native-win32-x64-msvc':
-        specifier: workspace:*
-        version: link:../win32-x64-msvc
-
-  packages/javascript/lumis/native/npm/win32-x64-msvc: {}
+        version: 4.1.4(@types/node@25.6.0)(jsdom@27.4.0(supports-color@8.1.1))(vite@8.0.8(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.3))
 
   packages/javascript/markdown-it-lumis:
     dependencies:
@@ -191,13 +160,13 @@ importers:
         version: 0.19.0
       tsup:
         specifier: ^8.5.0
-        version: 8.5.1(@microsoft/api-extractor@7.58.2(@types/node@25.6.0))(jiti@2.6.1)(postcss@8.5.10)(tsx@4.23.1)(typescript@6.0.2)(yaml@2.8.3)
+        version: 8.5.1(@microsoft/api-extractor@7.58.2(@types/node@25.6.0))(jiti@2.6.1)(postcss@8.5.10)(supports-color@8.1.1)(tsx@4.23.1)(typescript@6.0.2)(yaml@2.8.3)
       typescript:
         specifier: ^6.0.2
         version: 6.0.2
       vitest:
         specifier: ^4.1.2
-        version: 4.1.4(@types/node@25.6.0)(jsdom@27.4.0)(vite@8.0.8(@types/node@25.6.0)(esbuild@0.28.1)(jiti@2.6.1)(tsx@4.23.1)(yaml@2.8.3))
+        version: 4.1.4(@types/node@25.6.0)(jsdom@27.4.0(supports-color@8.1.1))(vite@8.0.8(@types/node@25.6.0)(esbuild@0.28.1)(jiti@2.6.1)(tsx@4.23.1)(yaml@2.8.3))
 
   packages/javascript/react:
     dependencies:
@@ -209,7 +178,7 @@ importers:
         version: 2.0.3
       hast-util-to-jsx-runtime:
         specifier: ^2.0.0
-        version: 2.3.6
+        version: 2.3.6(supports-color@8.1.1)
     devDependencies:
       '@microsoft/api-extractor':
         specifier: ^7.58.0
@@ -225,7 +194,7 @@ importers:
         version: 19.2.3(@types/react@19.2.14)
       jsdom:
         specifier: ^27.0.0
-        version: 27.4.0
+        version: 27.4.0(supports-color@8.1.1)
       oxfmt:
         specifier: ^0.43.0
         version: 0.43.0
@@ -246,7 +215,7 @@ importers:
         version: 6.0.2
       vitest:
         specifier: ^4.1.2
-        version: 4.1.4(@types/node@25.6.0)(jsdom@27.4.0)(vite@8.0.8(@types/node@25.6.0)(esbuild@0.28.1)(jiti@2.6.1)(tsx@4.23.1)(yaml@2.8.3))
+        version: 4.1.4(@types/node@25.6.0)(jsdom@27.4.0(supports-color@8.1.1))(vite@8.0.8(@types/node@25.6.0)(esbuild@0.28.1)(jiti@2.6.1)(tsx@4.23.1)(yaml@2.8.3))
 
   packages/javascript/rehype-lumis:
     dependencies:
@@ -283,13 +252,13 @@ importers:
         version: 0.19.0
       tsup:
         specifier: ^8.5.0
-        version: 8.5.1(@microsoft/api-extractor@7.58.2(@types/node@25.6.0))(jiti@2.6.1)(postcss@8.5.10)(tsx@4.23.1)(typescript@6.0.2)(yaml@2.8.3)
+        version: 8.5.1(@microsoft/api-extractor@7.58.2(@types/node@25.6.0))(jiti@2.6.1)(postcss@8.5.10)(supports-color@8.1.1)(tsx@4.23.1)(typescript@6.0.2)(yaml@2.8.3)
       typescript:
         specifier: ^6.0.2
         version: 6.0.2
       vitest:
         specifier: ^4.1.2
-        version: 4.1.4(@types/node@25.6.0)(jsdom@27.4.0)(vite@8.0.8(@types/node@25.6.0)(esbuild@0.28.1)(jiti@2.6.1)(tsx@4.23.1)(yaml@2.8.3))
+        version: 4.1.4(@types/node@25.6.0)(jsdom@27.4.0(supports-color@8.1.1))(vite@8.0.8(@types/node@25.6.0)(esbuild@0.28.1)(jiti@2.6.1)(tsx@4.23.1)(yaml@2.8.3))
 
   packages/javascript/themes:
     devDependencies:
@@ -307,7 +276,7 @@ importers:
         version: 0.19.0
       tsup:
         specifier: ^8.5
-        version: 8.5.1(@microsoft/api-extractor@7.58.2(@types/node@25.6.0))(jiti@2.6.1)(postcss@8.5.10)(tsx@4.21.0)(typescript@6.0.2)(yaml@2.8.3)
+        version: 8.5.1(@microsoft/api-extractor@7.58.2(@types/node@25.6.0))(jiti@2.6.1)(postcss@8.5.10)(supports-color@8.1.1)(tsx@4.21.0)(typescript@6.0.2)(yaml@2.8.3)
       tsx:
         specifier: ^4.21
         version: 4.21.0
@@ -1256,11 +1225,6 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
-
-  '@lumis-sh/cli@0.4.1':
-    resolution: {integrity: sha512-UqLtd8PA+ztZC0pH9BHTMgU1c1UJq6mS2Q9+A4cxtvfkcm2hS9RXY+7VFWoRBYOLz3MRRn6P3NGUJCyY6+pHNA==}
-    engines: {node: '>=18'}
-    hasBin: true
 
   '@lumis-sh/lumis@0.3.0':
     resolution: {integrity: sha512-BfT8mP7B2xHPfZXSgdvpK5HJNompn0VZ9VLA30015uf/EwnNbiF0RW9MhDgH/TijB8bXkYNIzDnqB8mY3Pd4xw==}
@@ -3704,10 +3668,6 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@lumis-sh/cli@0.4.1':
-    dependencies:
-      tar: 7.5.19
-
   '@lumis-sh/lumis@0.3.0':
     dependencies:
       web-tree-sitter: 0.26.8
@@ -4629,9 +4589,11 @@ snapshots:
       whatwg-mimetype: 5.0.0
       whatwg-url: 15.1.0
 
-  debug@4.4.3:
+  debug@4.4.3(supports-color@8.1.1):
     dependencies:
       ms: 2.1.3
+    optionalDependencies:
+      supports-color: 8.1.1
 
   decimal.js@10.6.0: {}
 
@@ -4803,7 +4765,7 @@ snapshots:
       stringify-entities: 4.0.4
       zwitch: 2.0.4
 
-  hast-util-to-jsx-runtime@2.3.6:
+  hast-util-to-jsx-runtime@2.3.6(supports-color@8.1.1):
     dependencies:
       '@types/estree': 1.0.8
       '@types/hast': 3.0.4
@@ -4812,9 +4774,9 @@ snapshots:
       devlop: 1.1.0
       estree-util-is-identifier-name: 3.0.0
       hast-util-whitespace: 3.0.0
-      mdast-util-mdx-expression: 2.0.1
-      mdast-util-mdx-jsx: 3.2.0
-      mdast-util-mdxjs-esm: 2.0.1
+      mdast-util-mdx-expression: 2.0.1(supports-color@8.1.1)
+      mdast-util-mdx-jsx: 3.2.0(supports-color@8.1.1)
+      mdast-util-mdxjs-esm: 2.0.1(supports-color@8.1.1)
       property-information: 7.1.0
       space-separated-tokens: 2.0.2
       style-to-js: 1.1.21
@@ -4847,17 +4809,17 @@ snapshots:
 
   html-void-elements@3.0.0: {}
 
-  http-proxy-agent@7.0.2:
+  http-proxy-agent@7.0.2(supports-color@8.1.1):
     dependencies:
       agent-base: 7.1.4
-      debug: 4.4.3
+      debug: 4.4.3(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
 
-  https-proxy-agent@7.0.6:
+  https-proxy-agent@7.0.6(supports-color@8.1.1):
     dependencies:
       agent-base: 7.1.4
-      debug: 4.4.3
+      debug: 4.4.3(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -4891,7 +4853,7 @@ snapshots:
 
   joycon@3.1.1: {}
 
-  jsdom@27.4.0:
+  jsdom@27.4.0(supports-color@8.1.1):
     dependencies:
       '@acemir/cssom': 0.9.31
       '@asamuzakjp/dom-selector': 6.8.1
@@ -4900,8 +4862,8 @@ snapshots:
       data-urls: 6.0.1
       decimal.js: 10.6.0
       html-encoding-sniffer: 6.0.0
-      http-proxy-agent: 7.0.2
-      https-proxy-agent: 7.0.6
+      http-proxy-agent: 7.0.2(supports-color@8.1.1)
+      https-proxy-agent: 7.0.6(supports-color@8.1.1)
       is-potential-custom-element-name: 1.0.1
       parse5: 8.0.0
       saxes: 6.0.0
@@ -5011,14 +4973,14 @@ snapshots:
       punycode.js: 2.3.1
       uc.micro: 2.1.0
 
-  mdast-util-from-markdown@2.0.3:
+  mdast-util-from-markdown@2.0.3(supports-color@8.1.1):
     dependencies:
       '@types/mdast': 4.0.4
       '@types/unist': 3.0.3
       decode-named-character-reference: 1.3.0
       devlop: 1.1.0
       mdast-util-to-string: 4.0.0
-      micromark: 4.0.2
+      micromark: 4.0.2(supports-color@8.1.1)
       micromark-util-decode-numeric-character-reference: 2.0.2
       micromark-util-decode-string: 2.0.1
       micromark-util-normalize-identifier: 2.0.1
@@ -5028,18 +4990,18 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  mdast-util-mdx-expression@2.0.1:
+  mdast-util-mdx-expression@2.0.1(supports-color@8.1.1):
     dependencies:
       '@types/estree-jsx': 1.0.5
       '@types/hast': 3.0.4
       '@types/mdast': 4.0.4
       devlop: 1.1.0
-      mdast-util-from-markdown: 2.0.3
+      mdast-util-from-markdown: 2.0.3(supports-color@8.1.1)
       mdast-util-to-markdown: 2.1.2
     transitivePeerDependencies:
       - supports-color
 
-  mdast-util-mdx-jsx@3.2.0:
+  mdast-util-mdx-jsx@3.2.0(supports-color@8.1.1):
     dependencies:
       '@types/estree-jsx': 1.0.5
       '@types/hast': 3.0.4
@@ -5047,7 +5009,7 @@ snapshots:
       '@types/unist': 3.0.3
       ccount: 2.0.1
       devlop: 1.1.0
-      mdast-util-from-markdown: 2.0.3
+      mdast-util-from-markdown: 2.0.3(supports-color@8.1.1)
       mdast-util-to-markdown: 2.1.2
       parse-entities: 4.0.2
       stringify-entities: 4.0.4
@@ -5056,13 +5018,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  mdast-util-mdxjs-esm@2.0.1:
+  mdast-util-mdxjs-esm@2.0.1(supports-color@8.1.1):
     dependencies:
       '@types/estree-jsx': 1.0.5
       '@types/hast': 3.0.4
       '@types/mdast': 4.0.4
       devlop: 1.1.0
-      mdast-util-from-markdown: 2.0.3
+      mdast-util-from-markdown: 2.0.3(supports-color@8.1.1)
       mdast-util-to-markdown: 2.1.2
     transitivePeerDependencies:
       - supports-color
@@ -5215,10 +5177,10 @@ snapshots:
 
   micromark-util-types@2.0.2: {}
 
-  micromark@4.0.2:
+  micromark@4.0.2(supports-color@8.1.1):
     dependencies:
       '@types/debug': 4.1.13
-      debug: 4.4.3
+      debug: 4.4.3(supports-color@8.1.1)
       decode-named-character-reference: 1.3.0
       devlop: 1.1.0
       micromark-core-commonmark: 2.0.3
@@ -5628,13 +5590,13 @@ snapshots:
   tslib@2.8.1:
     optional: true
 
-  tsup@8.5.1(@microsoft/api-extractor@7.58.2(@types/node@25.6.0))(jiti@2.6.1)(postcss@8.5.10)(tsx@4.21.0)(typescript@6.0.2)(yaml@2.8.3):
+  tsup@8.5.1(@microsoft/api-extractor@7.58.2(@types/node@25.6.0))(jiti@2.6.1)(postcss@8.5.10)(supports-color@8.1.1)(tsx@4.21.0)(typescript@6.0.2)(yaml@2.8.3):
     dependencies:
       bundle-require: 5.1.0(esbuild@0.27.7)
       cac: 6.7.14
       chokidar: 4.0.3
       consola: 3.4.2
-      debug: 4.4.3
+      debug: 4.4.3(supports-color@8.1.1)
       esbuild: 0.27.7
       fix-dts-default-cjs-exports: 1.0.1
       joycon: 3.1.1
@@ -5657,13 +5619,13 @@ snapshots:
       - tsx
       - yaml
 
-  tsup@8.5.1(@microsoft/api-extractor@7.58.2(@types/node@25.6.0))(jiti@2.6.1)(postcss@8.5.10)(tsx@4.23.1)(typescript@6.0.2)(yaml@2.8.3):
+  tsup@8.5.1(@microsoft/api-extractor@7.58.2(@types/node@25.6.0))(jiti@2.6.1)(postcss@8.5.10)(supports-color@8.1.1)(tsx@4.23.1)(typescript@6.0.2)(yaml@2.8.3):
     dependencies:
       bundle-require: 5.1.0(esbuild@0.27.7)
       cac: 6.7.14
       chokidar: 4.0.3
       consola: 3.4.2
-      debug: 4.4.3
+      debug: 4.4.3(supports-color@8.1.1)
       esbuild: 0.27.7
       fix-dts-default-cjs-exports: 1.0.1
       joycon: 3.1.1
@@ -5798,7 +5760,7 @@ snapshots:
       tsx: 4.23.1
       yaml: 2.8.3
 
-  vitest@4.1.4(@types/node@25.6.0)(jsdom@27.4.0)(vite@8.0.8(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.3)):
+  vitest@4.1.4(@types/node@25.6.0)(jsdom@27.4.0(supports-color@8.1.1))(vite@8.0.8(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.3)):
     dependencies:
       '@vitest/expect': 4.1.4
       '@vitest/mocker': 4.1.4(vite@8.0.8(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.3))
@@ -5822,11 +5784,11 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 25.6.0
-      jsdom: 27.4.0
+      jsdom: 27.4.0(supports-color@8.1.1)
     transitivePeerDependencies:
       - msw
 
-  vitest@4.1.4(@types/node@25.6.0)(jsdom@27.4.0)(vite@8.0.8(@types/node@25.6.0)(esbuild@0.28.1)(jiti@2.6.1)(tsx@4.23.1)(yaml@2.8.3)):
+  vitest@4.1.4(@types/node@25.6.0)(jsdom@27.4.0(supports-color@8.1.1))(vite@8.0.8(@types/node@25.6.0)(esbuild@0.28.1)(jiti@2.6.1)(tsx@4.23.1)(yaml@2.8.3)):
     dependencies:
       '@vitest/expect': 4.1.4
       '@vitest/mocker': 4.1.4(vite@8.0.8(@types/node@25.6.0)(esbuild@0.28.1)(jiti@2.6.1)(tsx@4.23.1)(yaml@2.8.3))
@@ -5850,7 +5812,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 25.6.0
-      jsdom: 27.4.0
+      jsdom: 27.4.0(supports-color@8.1.1)
     transitivePeerDependencies:
       - msw
 

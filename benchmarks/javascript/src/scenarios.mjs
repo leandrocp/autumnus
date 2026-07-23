@@ -19,7 +19,7 @@ if (!Number.isSafeInteger(minimumSamples) || minimumSamples < 2) {
 if (!Number.isFinite(measurementSeconds) || measurementSeconds <= 0) {
   throw new Error("BENCH_TIME_SECONDS must be positive");
 }
-if (!new Set(["lumis-js-native", "lumis-js-wasm", "shiki"]).has(implementation)) {
+if (!new Set(["lumis-js-wasm", "shiki"]).has(implementation)) {
   throw new Error(`unknown JavaScript benchmark implementation: ${implementation}`);
 }
 

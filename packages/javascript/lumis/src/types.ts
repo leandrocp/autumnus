@@ -101,13 +101,23 @@ export interface LanguageDefinition {
  * Pointer to a WASM parser binary on a CDN.
  *
  * ```ts
- * const ref: WasmRef = { packageName: '@lumis-sh/wasm-javascript', name: 'tree-sitter-javascript', version: '0.26' }
+ * const ref: WasmRef = {
+ *   packageName: '@lumis-sh/wasm-javascript',
+ *   name: 'tree-sitter-javascript',
+ *   version: '0.26.2',
+ *   sha256: '…',
+ *   size: 416499,
+ * }
  * ```
  */
 export interface WasmRef {
   packageName: string;
   name: string;
   version: string;
+  /** Lowercase SHA-256 of the exact parser bytes. */
+  sha256: string;
+  /** Exact parser size in bytes. */
+  size: number;
 }
 
 export type RuntimeWasmInput = Uint8Array | ArrayBuffer | string | URL | Response;

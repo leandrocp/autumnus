@@ -75,9 +75,6 @@ jobs:
           - name: JavaScript Wasm
             task: test-conformance-javascript-wasm
             node: true
-          - name: JavaScript native
-            task: test-conformance-javascript-native
-            node: true
             rust: true
           - name: Browser
             task: test-conformance-browser

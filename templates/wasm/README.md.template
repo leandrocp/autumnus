@@ -6,6 +6,9 @@ Built with [`tree-sitter build --wasm`](https://tree-sitter.github.io/tree-sitte
 
 Used by [Lumis](https://lumis.sh) and compatible with [web-tree-sitter](https://www.npmjs.com/package/web-tree-sitter) v{tree_sitter_cli} and other WASM runtimes.
 
+The default export is a `URL` pointing at `{wasm_name}.wasm`, so the parser is
+stored only once and can be handled as an asset by Node.js and browser bundlers.
+
 ## Parser
 
 | Parser | Version | Rev |

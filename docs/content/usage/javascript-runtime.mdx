@@ -173,10 +173,9 @@ Useful for dropdowns, config validation, and docs tooling:
 ## Runtime notes
 
 - `@lumis-sh/lumis` uses `web-tree-sitter` and per-language parser WASM by default
-- install `@lumis-sh/lumis-native` to opt into the native Rust runtime on supported Node.js platforms; Lumis detects it automatically
-- the native addon contains all supported parsers and is much larger than the default per-language WASM setup
 - the package uses conditional exports so Node and web-standard runtimes get the right entry point automatically
-- Node caches fetched parser WASM locally when possible
+- every language pins an exact parser version, size, and SHA-256 digest
+- Node caches verified parser WASM in the platform user cache directory; `LUMIS_WASM_CACHE_DIR` overrides it
 - Node can also auto-load installed parser packages such as `@lumis-sh/wasm-elixir` or bundle packages such as `@lumis-sh/wasm-bundle-web`
 - non-Node usage usually relies on remote parser assets unless you override the resolver, use `withWasm()` with a single npm parser package such as `@lumis-sh/wasm-json`, or use `withWasmBundle()` with a bundle package such as `@lumis-sh/wasm-bundle-web`
 - Bun and Deno are also supported

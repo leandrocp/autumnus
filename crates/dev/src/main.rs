@@ -1555,6 +1555,28 @@ fn apply_text_replacements(content: &str, lang: &str) -> String {
             "\"nil\" @constant.builtin",
         );
     }
+    if lang == "html_tags" {
+        s = s.replace(
+            r#"; lit-html style template interpolation
+; <a @click=${e => console.log(e)}>
+; <a @click="${e => console.log(e)}">
+((attribute
+  (quoted_attribute_value
+    (attribute_value) @injection.content))
+  (#lua-match? @injection.content "%${")
+  (#offset! @injection.content 0 2 0 -1)
+  (#set! injection.language "javascript"))
+
+((attribute
+  (attribute_value) @injection.content)
+  (#lua-match? @injection.content "%${")
+  (#offset! @injection.content 0 2 0 -2)
+  (#set! injection.language "javascript"))
+
+"#,
+            "",
+        );
+    }
     s
 }
 
@@ -2450,20 +2472,11 @@ fn stage_wasm(name: &str) -> Result<()> {
     let version = info.version.as_deref().unwrap_or("0.1.0");
     fs::copy(&wasm_file, format!("{out}/{wasm_name}.wasm"))?;
 
-    // Generate browser entry (base64-inlined wasm)
     let wasm_bytes = fs::read(&wasm_file)?;
-    let base64_wasm = {
-        use base64::prelude::*;
-        BASE64_STANDARD.encode(&wasm_bytes)
-    };
+    let wasm_sha256 = sha256_hex(&wasm_bytes);
     let browser_template = fs::read_to_string("templates/wasm/index.js.template")?;
-    let browser_entry = browser_template.replace("{base64_wasm}", &base64_wasm);
+    let browser_entry = browser_template.replace("{wasm_name}", wasm_name);
     fs::write(format!("{out}/index.js"), browser_entry)?;
-
-    // Generate Node.js entry (reads from disk)
-    let node_template = fs::read_to_string("templates/wasm/index.node.js.template")?;
-    let node_entry = node_template.replace("{wasm_name}", wasm_name);
-    fs::write(format!("{out}/index.node.js"), node_entry)?;
 
     fs::copy(
         "templates/wasm/index.d.ts.template",
@@ -2490,11 +2503,19 @@ fn stage_wasm(name: &str) -> Result<()> {
         .replace("{upstream_version}", version)
         .replace("{rev}", rev)
         .replace("{tree_sitter_cli}", &ts_cli_minor)
-        .replace("{wasm_name}", wasm_name);
+        .replace("{wasm_name}", wasm_name)
+        .replace("{sha256}", &wasm_sha256)
+        .replace("{wasm_size}", &wasm_bytes.len().to_string());
     fs::write(format!("{out}/package.json"), pkg)?;
 
     println!("Staged in {out}");
     Ok(())
+}
+
+fn sha256_hex(bytes: &[u8]) -> String {
+    use sha2::{Digest, Sha256};
+
+    format!("{:x}", Sha256::digest(bytes))
 }
 
 fn wasm_meta(name: &str) -> Result<()> {
@@ -2747,5 +2768,33 @@ mod tests {
             "\"nil\" @constant.builtin"
         );
         assert_eq!(apply_text_replacements(query, "nim"), query);
+    }
+
+    #[test]
+    fn apply_text_replacements_removes_redundant_html_javascript_reinjection() {
+        let query = r#"; lit-html style template interpolation
+; <a @click=${e => console.log(e)}>
+; <a @click="${e => console.log(e)}">
+((attribute
+  (quoted_attribute_value
+    (attribute_value) @injection.content))
+  (#lua-match? @injection.content "%${")
+  (#offset! @injection.content 0 2 0 -1)
+  (#set! injection.language "javascript"))
+
+((attribute
+  (attribute_value) @injection.content)
+  (#lua-match? @injection.content "%${")
+  (#offset! @injection.content 0 2 0 -2)
+  (#set! injection.language "javascript"))
+
+((comment) @injection.content)
+"#;
+
+        assert_eq!(
+            apply_text_replacements(query, "html_tags"),
+            "((comment) @injection.content)\n"
+        );
+        assert_eq!(apply_text_replacements(query, "html"), query);
     }
 }

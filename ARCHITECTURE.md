@@ -37,22 +37,25 @@
 +-----------------------------+--------------------------------+
                               |
                               v
-+--------------------------------------------------------------+
-| lumis (Rust crate)                                           |
-| public Rust API + tree-sitter adapter                        |
-+------+----------------+--------------------------+-----------+
-       |                |                          |
-       v                v                          v
-+-------------------+ +--------------------+ +---------------------------+
-| lumis-cli         | | elixir/lumis (hex) | | javascript/lumis (npm)    |
-| Rust binary crate | | Rustler NIF        | | WASM + opt-in native Rust |
-+-------------------+ +--------------------+ +------------+--------------+
-                                                       |
-                                                       v
-                                         +---------------------------+
-                                         | website/                  |
-                                         | docs + demos + examples   |
-                                         +---------------------------+
++--------------------------+   +--------------------------+   +-------------------------+
+| lumis (Rust crate)       |   | lumis-wasm-runtime      |   | javascript/lumis (npm)  |
+| native parser features   |   | shared dynamic WASM     |   | web-tree-sitter + WASM  |
++--------------------------+   +------------+-------------+   +------------+------------+
+                                               |                              |
+                                  +------------+------------+                 |
+                                  |                         |                 |
+                                  v                         v                 v
+                           +--------------+          +----------------+  +----------------+
+                           | lumis-cli    |          | elixir/lumis   |  | browser / Node |
+                           | Rust binary  |          | Rustler NIF    |  | runtime        |
+                           +--------------+          +----------------+  +----------------+
+                                  |                         |                 |
+                                  +-------------------------+-----------------+
+                                                            |
+                                                            v
+                                                 +---------------------------+
+                                                 | website / docs / examples|
+                                                 +---------------------------+
 ```
 
 ## Performance benchmark lane
@@ -64,16 +67,19 @@ benchmarks/fixtures + deterministic generator
                     |
                     v
        identical small and large Rust inputs
-          +---------+---------+
-          |         |         |
-          v         v         v
-   Rust/Criterion  JS/Mitata  CLI/Hyperfine
-   Lumis/syntect   Lumis/Shiki npm Lumis/bat
-          |         |         |
-          +---------+---------+
-                    |
-                    v
- target/benchmarks/runs/<run>/ native reports + summary + metadata
+       +----------+----------+----------+
+       |          |          |          |
+       v          v          v          v
+ Rust/Criterion JS/Mitata Elixir/Benchee CLI/Hyperfine
+ Lumis/syntect  Lumis/Shiki     Lumis     Lumis/bat
+       |          |          |          |
+       +----------+----------+----------+
+                         |
+                         v
+ target/benchmarks/runs/current/ raw reports + package sizes + metadata
+                         |
+                         v
+                 benchmarks/README.md
 ```
 
 The Rust benchmark package is its own Cargo workspace so syntect and Criterion do not enter normal production workspace builds. The private JavaScript benchmark package joins the pnpm workspace so it can consume locally built Lumis packages while keeping Shiki and Mitata out of published manifests.

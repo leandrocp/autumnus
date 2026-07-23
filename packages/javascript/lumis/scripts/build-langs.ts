@@ -1,8 +1,7 @@
 /**
- * Builds the language modules used by the browser/WebAssembly runtime. It reads
+ * Builds the language modules used by the portable WebAssembly runtime. It reads
  * preprocessed query .scm files, converts Lua patterns to JavaScript regexes,
- * and emits one TypeScript module per language. The Node native runtime does
- * not consume these queries or parser Wasm references.
+ * and emits one TypeScript module per language.
  *
  * Preprocessing (inheritance, text replacements, overwrite merging) is done by
  * `mise run langs-preprocess-queries`, which is run before the JS generate commands.
@@ -19,7 +18,16 @@ const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../../../..");
 const QUERIES_PROCESSED_DIR = path.join(WORKSPACE_ROOT, "queries", "processed");
 const OUT_DIR = path.resolve(import.meta.dirname, "../langs");
 const LANGUAGES_TOML = path.join(WORKSPACE_ROOT, "languages.toml");
+const WASM_MANIFEST = path.join(WORKSPACE_ROOT, "wasm-manifest.json");
 const PACKAGE_JSON = path.resolve(import.meta.dirname, "../package.json");
+const ELIXIR_CATALOG = path.join(
+  WORKSPACE_ROOT,
+  "packages/elixir/lumis/native/lumis_nif/src/catalog.rs",
+);
+const ELIXIR_MANIFEST = path.join(
+  WORKSPACE_ROOT,
+  "packages/elixir/lumis/lib/lumis/generated/language_manifest.ex",
+);
 
 interface ParserEntry {
   git: string;
@@ -48,6 +56,20 @@ interface LanguagesToml {
   bundles?: Record<string, BundleEntry>;
 }
 
+interface WasmManifestEntry {
+  packageName: string;
+  version: string;
+  sha256: string;
+  size: number;
+  grammarName: string;
+}
+
+interface WasmManifest {
+  schemaVersion: number;
+  treeSitter: string;
+  grammars: Record<string, WasmManifestEntry>;
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
@@ -67,6 +89,14 @@ function readLanguagesToml(): LanguagesToml {
   return parsed;
 }
 
+function readWasmManifest(): WasmManifest {
+  const manifest = JSON.parse(fs.readFileSync(WASM_MANIFEST, "utf-8")) as WasmManifest;
+  if (manifest.schemaVersion !== 1 || !isRecord(manifest.grammars)) {
+    throw new Error("Invalid wasm-manifest.json structure");
+  }
+  return manifest;
+}
+
 function treeSitterWasmCli(): string {
   const packageJson: { dependencies?: Record<string, string> } = JSON.parse(
     fs.readFileSync(PACKAGE_JSON, "utf-8"),
@@ -81,14 +111,11 @@ function treeSitterWasmCli(): string {
   return match[1];
 }
 
-function wasmPackageName(wasmName: string): string {
-  return `@lumis-sh/wasm-${wasmName.startsWith("tree-sitter-") ? wasmName.slice("tree-sitter-".length) : wasmName}`;
-}
-
 function convertLuaPatternToRegex(lua: string): string {
   let result = "";
   const chars = [...lua];
   let i = 0;
+  let inCharacterClass = false;
 
   while (i < chars.length) {
     if (chars[i] === "%") {
@@ -109,7 +136,27 @@ function convertLuaPatternToRegex(lua: string): string {
         $: "\\$",
         "^": "\\^",
       };
-      result += map[next] ?? next;
+      result += map[next] ?? `\\${next}`;
+    } else if (chars[i] === "\\") {
+      result += chars[i];
+      if (i + 1 < chars.length) {
+        result += chars[i + 1];
+        i++;
+      }
+    } else if (chars[i] === "[") {
+      inCharacterClass = true;
+      result += chars[i];
+    } else if (chars[i] === "]") {
+      inCharacterClass = false;
+      result += chars[i];
+    } else if (chars[i] === "-" && !inCharacterClass) {
+      // Lua's non-greedy zero-or-more quantifier.
+      result += "*?";
+    } else if ("{}|".includes(chars[i])) {
+      // These are literals in Lua patterns but operators in Rust/JS regexes.
+      result += `\\${chars[i]}`;
+    } else if (chars[i] === "^" && i > 0) {
+      result += "\\^";
     } else {
       result += chars[i];
     }
@@ -165,22 +212,30 @@ function normalizeRegexForJs(regex: string): string {
   return expandCaseInsensitiveAscii(regex.slice(4));
 }
 
-function convertLuaMatchesForBrowser(content: string): string {
+function escapeRegexForQueryString(regex: string): string {
+  return regex.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
+function convertLuaMatches(content: string): string {
   const converted = content
     .split("\n")
     .map((line) => {
+      const isLuaMatch = line.includes("#lua-match?") || line.includes("#not-lua-match?");
       let updated = line
         .replace(/#lua-match\?/g, "#match?")
         .replace(/#not-lua-match\?/g, "#not-match?");
 
-      if (updated.includes("#match?") || updated.includes("#not-match?")) {
+      if (isLuaMatch) {
         const firstQuote = updated.indexOf('"');
         if (firstQuote !== -1) {
           const secondQuote = updated.indexOf('"', firstQuote + 1);
           if (secondQuote !== -1) {
             const luaPattern = updated.slice(firstQuote + 1, secondQuote);
             const regex = normalizeRegexForJs(convertLuaPatternToRegex(luaPattern));
-            updated = updated.slice(0, firstQuote + 1) + regex + updated.slice(secondQuote);
+            updated =
+              updated.slice(0, firstQuote + 1) +
+              escapeRegexForQueryString(regex) +
+              updated.slice(secondQuote);
           }
         }
       }
@@ -190,7 +245,7 @@ function convertLuaMatchesForBrowser(content: string): string {
     .join("\n");
 
   return converted.replace(/"\(\?i\)([^"]*)"/g, (_match, regex: string) => {
-    return `"${expandCaseInsensitiveAscii(regex)}"`;
+    return `"${escapeRegexForQueryString(expandCaseInsensitiveAscii(regex))}"`;
   });
 }
 
@@ -208,8 +263,108 @@ function resolveQuerySource(language: string, queryType: string): string {
   return fs.readFileSync(filePath, "utf-8");
 }
 
-function escapeTemplateString(s: string): string {
-  return s.replace(/\\/g, "\\\\").replace(/`/g, "\\`").replace(/\$/g, "\\$");
+function rustRawString(value: string): string {
+  value = value.replace(/[ \t]+$/gm, "");
+  let hashes = "";
+  while (value.includes(`"${hashes}`)) hashes += "#";
+  return `r${hashes}"${value}"${hashes}`;
+}
+
+function elixirInteger(value: number): string {
+  return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "_");
+}
+
+interface RuntimeLanguageEntry {
+  id: string;
+  aliases: string[];
+  wasmName: string;
+  wasm: WasmManifestEntry;
+  highlights: string;
+  injections: string;
+  locals: string;
+  brackets: string;
+}
+
+function generateElixirLanguageFiles(entries: RuntimeLanguageEntry[]): void {
+  const rustEntries = entries
+    .map(
+      (entry) => `    LanguageEntry {
+        id: ${JSON.stringify(entry.id)},
+        aliases: &[${entry.aliases.map(JSON.stringify).join(", ")}],
+        grammar_name: ${JSON.stringify(entry.wasm.grammarName)},
+        highlights: ${rustRawString(entry.highlights)},
+        injections: ${rustRawString(entry.injections)},
+        locals: ${rustRawString(entry.locals)},
+        brackets: ${rustRawString(entry.brackets)},
+    },`,
+    )
+    .join("\n");
+
+  const rust = `// Auto-generated by packages/javascript/lumis/scripts/build-langs.ts.
+// Do not edit manually.
+
+pub struct LanguageEntry {
+    pub id: &'static str,
+    pub aliases: &'static [&'static str],
+    pub grammar_name: &'static str,
+    pub highlights: &'static str,
+    pub injections: &'static str,
+    pub locals: &'static str,
+    pub brackets: &'static str,
+}
+
+pub static LANGUAGES: &[LanguageEntry] = &[
+${rustEntries}
+];
+
+pub fn find(name: &str) -> Option<&'static LanguageEntry> {
+    LANGUAGES
+        .iter()
+        .find(|entry| entry.id == name || entry.aliases.contains(&name))
+}
+`;
+  fs.mkdirSync(path.dirname(ELIXIR_CATALOG), { recursive: true });
+  fs.writeFileSync(ELIXIR_CATALOG, rust);
+  console.log("  Elixir NIF language catalog");
+
+  const elixirEntries = entries
+    .map(
+      (entry, index) => `    %{
+      id: ${JSON.stringify(entry.id)},
+      aliases: [${entry.aliases.map(JSON.stringify).join(", ")}],
+      wasm_name: ${JSON.stringify(entry.wasmName)},
+      package_name: ${JSON.stringify(entry.wasm.packageName)},
+      version: ${JSON.stringify(entry.wasm.version)},
+      sha256: ${JSON.stringify(entry.wasm.sha256)},
+      size: ${elixirInteger(entry.wasm.size)}
+    }${index === entries.length - 1 ? "" : ","}`,
+    )
+    .join("\n");
+  const elixir = `# Auto-generated by packages/javascript/lumis/scripts/build-langs.ts.
+# Do not edit manually.
+
+defmodule Lumis.Generated.LanguageManifest do
+  @moduledoc false
+
+  @languages [
+${elixirEntries}
+  ]
+
+  @by_name for language <- @languages,
+               name <- [language.id | language.aliases],
+               into: %{},
+               do: {String.downcase(name), language}
+
+  def all, do: @languages
+
+  def fetch(name) when is_binary(name) do
+    Map.fetch(@by_name, String.downcase(name))
+  end
+end
+`;
+  fs.mkdirSync(path.dirname(ELIXIR_MANIFEST), { recursive: true });
+  fs.writeFileSync(ELIXIR_MANIFEST, elixir);
+  console.log("  Elixir language manifest");
 }
 
 function main() {
@@ -217,7 +372,14 @@ function main() {
 
   const config = readLanguagesToml();
   const tsCli = treeSitterWasmCli();
+  const wasmManifest = readWasmManifest();
+  if (wasmManifest.treeSitter !== tsCli) {
+    throw new Error(
+      `WASM manifest targets Tree-sitter ${wasmManifest.treeSitter}, expected ${tsCli}`,
+    );
+  }
   const expectedLanguageIds = new Set([...Object.keys(config.parsers), "plaintext"]);
+  const runtimeEntries: RuntimeLanguageEntry[] = [];
 
   for (const entry of fs.readdirSync(OUT_DIR)) {
     if (!entry.endsWith(".ts")) continue;
@@ -230,16 +392,28 @@ function main() {
   for (const [id, entry] of Object.entries(config.parsers)) {
     const queryName = entry.query_name || id;
     const wasmName = entry.wasm_name || `tree-sitter-${id}`;
+    const wasm = wasmManifest.grammars[wasmName];
+    if (!wasm) throw new Error(`Missing ${wasmName} in wasm-manifest.json`);
     const aliases = entry.aliases || [];
 
     const highlightSource = resolveQuerySource(queryName, "highlights");
     const injectionSource = resolveQuerySource(queryName, "injections");
     const localsSource = resolveQuerySource(queryName, "locals");
     const bracketsSource = resolveQuerySource(queryName, "brackets");
-    const highlights = convertLuaMatchesForBrowser(highlightSource);
-    const injections = convertLuaMatchesForBrowser(injectionSource);
-    const locals = convertLuaMatchesForBrowser(localsSource);
-    const brackets = convertLuaMatchesForBrowser(bracketsSource);
+    const highlights = convertLuaMatches(highlightSource);
+    const injections = convertLuaMatches(injectionSource);
+    const locals = convertLuaMatches(localsSource);
+    const brackets = convertLuaMatches(bracketsSource);
+    runtimeEntries.push({
+      id,
+      aliases,
+      wasmName,
+      wasm,
+      highlights,
+      injections,
+      locals,
+      brackets,
+    });
 
     const injectionsStr = injections.trim();
     const localsStr = locals.trim();
@@ -251,8 +425,8 @@ import type { Language } from '../src/types.js'
 const language: Language = {
   id: ${JSON.stringify(id)},
   aliases: ${JSON.stringify(aliases)},
-  highlights: \`${escapeTemplateString(highlights)}\`,${injectionsStr ? `\n  injections: \`${escapeTemplateString(injections)}\`,` : ""}${localsStr ? `\n  locals: \`${escapeTemplateString(localsStr)}\`,` : ""}${bracketsStr ? `\n  brackets: \`${escapeTemplateString(bracketsStr)}\`,` : ""}
-  wasm: { packageName: ${JSON.stringify(wasmPackageName(wasmName))}, name: ${JSON.stringify(wasmName)}, version: ${JSON.stringify(tsCli)} },
+  highlights: ${JSON.stringify(highlights)},${injectionsStr ? `\n  injections: ${JSON.stringify(injections)},` : ""}${localsStr ? `\n  locals: ${JSON.stringify(localsStr)},` : ""}${bracketsStr ? `\n  brackets: ${JSON.stringify(bracketsStr)},` : ""}
+  wasm: { packageName: ${JSON.stringify(wasm.packageName)}, name: ${JSON.stringify(wasmName)}, version: ${JSON.stringify(wasm.version)}, sha256: ${JSON.stringify(wasm.sha256)}, size: ${wasm.size} },
 }
 
 export default language
@@ -266,7 +440,8 @@ export default language
   const diffEntry = config.parsers["diff"];
   if (!diffEntry) throw new Error("diff parser entry not found in languages.toml");
   const diffWasmName = diffEntry.wasm_name || "tree-sitter-diff";
-  const diffWasmVersion = tsCli;
+  const diffWasm = wasmManifest.grammars[diffWasmName];
+  if (!diffWasm) throw new Error(`Missing ${diffWasmName} in wasm-manifest.json`);
   const plaintextModule = `// Auto-generated by scripts/build-langs.ts — do not edit manually.
 import type { Language } from '../src/types.js'
 
@@ -274,13 +449,14 @@ const language: Language = {
   id: "plaintext",
   aliases: ["text", "txt", "plain"],
   highlights: "",
-  wasm: { packageName: ${JSON.stringify(wasmPackageName(diffWasmName))}, name: ${JSON.stringify(diffWasmName)}, version: ${JSON.stringify(diffWasmVersion)} },
+  wasm: { packageName: ${JSON.stringify(diffWasm.packageName)}, name: ${JSON.stringify(diffWasmName)}, version: ${JSON.stringify(diffWasm.version)}, sha256: ${JSON.stringify(diffWasm.sha256)}, size: ${diffWasm.size} },
 }
 
 export default language
 `;
   fs.writeFileSync(path.join(OUT_DIR, "plaintext.ts"), plaintextModule);
   console.log(`  plaintext: langs/plaintext.ts`);
+  generateElixirLanguageFiles(runtimeEntries);
 
   // Generate language metadata
   const languageEntries: {

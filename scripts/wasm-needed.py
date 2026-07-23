@@ -16,6 +16,7 @@ import tomllib
 import json
 
 SUPPORTED_TREE_SITTER_CLI = "0.26"
+PACKAGE_FORMAT_VERSION = 2
 
 
 def is_truthy(value: str) -> bool:
@@ -61,6 +62,7 @@ def published_for_revision(pkg: str, versions: list[str], rev: str) -> bool:
             isinstance(lumis_meta, dict)
             and lumis_meta.get("rev") == rev
             and lumis_meta.get("treeSitter") == SUPPORTED_TREE_SITTER_CLI
+            and lumis_meta.get("formatVersion") == PACKAGE_FORMAT_VERSION
         ):
             return True
     return False

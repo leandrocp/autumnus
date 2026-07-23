@@ -24,6 +24,10 @@ export const browserRuntime: RuntimeEnvironment = {
     // browser runtime does not persist WASM to disk
   },
 
+  async withFsCacheLock(_key, operation) {
+    return operation();
+  },
+
   async readResolvedWasmFromDisk() {
     return undefined;
   },

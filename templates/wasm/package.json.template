@@ -14,7 +14,6 @@
   "exports": {
     ".": {
       "types": "./index.d.ts",
-      "node": "./index.node.js",
       "default": "./index.js"
     },
     "./{wasm_name}.wasm": "./{wasm_name}.wasm"
@@ -24,7 +23,10 @@
     "parser": "{wasm_name}",
     "upstreamVersion": "{upstream_version}",
     "rev": "{rev}",
-    "treeSitter": "{tree_sitter_cli}"
+    "treeSitter": "{tree_sitter_cli}",
+    "formatVersion": 2,
+    "sha256": "{sha256}",
+    "size": {wasm_size}
   },
   "keywords": ["lumis-sh", "wasm", "tree-sitter"],
   "files": ["*.wasm", "*.js", "*.d.ts", "README.md", "LICENSE"]
