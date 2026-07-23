@@ -1,3 +1,10 @@
+## [0.1.0](https://github.com/leandrocp/lumis/compare/npm-wasm-bundle-web-extra/v0.0.3...npm-wasm-bundle-web-extra/v0.1.0) (2026-07-23)
+
+
+### Features
+
+- add mdx to web-extra - [#1025](https://github.com/leandrocp/lumis/pull/1025)
+
 ## [0.0.3](https://github.com/leandrocp/lumis/compare/wasm-bundle-web-extra@v0.0.2...wasm-bundle-web-extra@v0.0.3) (2026-04-07)
 
 
