@@ -1,12 +1,20 @@
 {
   "name": "@lumis-sh/lumis-native-darwin-arm64",
-  "version": "0.5.2",
+  "version": "0.6.0",
   "description": "Native Lumis runtime for macOS arm64",
   "license": "MIT",
   "repository": "github:leandrocp/lumis",
   "main": "lumis-native.darwin-arm64.node",
-  "files": ["lumis-native.darwin-arm64.node"],
-  "os": ["darwin"],
-  "cpu": ["arm64"],
-  "engines": { "node": ">=18" }
+  "files": [
+    "lumis-native.darwin-arm64.node"
+  ],
+  "os": [
+    "darwin"
+  ],
+  "cpu": [
+    "arm64"
+  ],
+  "engines": {
+    "node": ">=18"
+  }
 }
