@@ -1,0 +1,5 @@
+export async function loadProfile(userId) {
+  const response = await fetch(`/api/users/${userId}`);
+  if (!response.ok) throw new Error("Could not load profile");
+  return response.json();
+}

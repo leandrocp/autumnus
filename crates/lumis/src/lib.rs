@@ -311,7 +311,6 @@ pub use formatters as formatter;
 pub mod highlight;
 pub mod languages;
 pub mod themes;
-mod vendor;
 
 pub use lumis_core::events;
 pub use lumis_core::highlights;

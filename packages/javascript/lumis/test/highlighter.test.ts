@@ -8,6 +8,7 @@ import { bbcodeScoped, htmlInline, htmlLinked, htmlMultiThemes, terminal } from 
 import * as formatterApi from '../src/formatters.js'
 import type { Highlighter, Theme } from '../src/index.js'
 import json from '../langs/json.ts'
+import html from '../langs/html.ts'
 import plaintext from '../langs/plaintext.ts'
 import javascript from '../langs/javascript.ts'
 import { configureLocalWasmResolver } from './wasm.js'
@@ -69,6 +70,17 @@ describe('createHighlighter', () => {
     expect(first.languages).toContain('json')
     expect(second.languages).toContain('plaintext')
     expect(second.languages).not.toContain('json')
+  })
+
+  it('restores specialized injections when a target language is loaded later', async () => {
+    const source = 'element.innerHTML = "<strong>hello</strong>"'
+    const dynamic = await createHighlighter({ languages: [javascript] })
+    await dynamic.loadLanguage(html)
+    const eager = await createHighlighter({ languages: [javascript, html] })
+
+    expect(dynamic.highlight(source, htmlLinked({ language: javascript }))).toBe(
+      eager.highlight(source, htmlLinked({ language: javascript }))
+    )
   })
 
 })

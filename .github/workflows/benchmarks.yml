@@ -21,7 +21,7 @@ jobs:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           persist-credentials: false
-      - uses: jdx/mise-action@dad1bfd3df957f44999b559dd69dc1671cb4e9ea
+      - uses: jdx/mise-action@v4.2.1
         with:
           version: 2026.7.3
           working_directory: benchmarks
@@ -33,11 +33,16 @@ jobs:
             .
             benchmarks/rust
       - name: Run benchmark suite
-        run: mise run bench-dev
+        env:
+          BENCH_RUNS: 3
+          BENCH_SAMPLES: 3
+          BENCH_WARMUP: 1
+          BENCH_WARMUP_SECONDS: 0.1
+        run: mise run bench
       - name: Publish benchmark values
         if: always()
         run: |
-          summary=target/benchmarks/runs/current/summary.md
+          summary=target/benchmarks/runs/current/results.md
           if [ -f "$summary" ]; then
             cat "$summary" >> "$GITHUB_STEP_SUMMARY"
           fi

@@ -45,7 +45,11 @@ async function loadLanguageModule(id: string): Promise<LanguageModule> {
 }
 
 function resolveSamplePath(language: LanguageModule): string | undefined {
-  const candidates = [language.id, sampleBaseNameOverrides.get(language.id), ...(language.aliases ?? [])]
+  const candidates = [
+    language.id,
+    sampleBaseNameOverrides.get(language.id),
+    ...(language.aliases ?? []),
+  ]
     .filter((value): value is string => value != null)
     .map((value) => value.toLowerCase());
 

@@ -1,9 +1,12 @@
 node_modules/
 dist/
 doc/
+playwright-report/
+test-results/
 langs/
 themes/
 wasm/
+native/*.node
 !test/fixtures/wasm/
 !test/fixtures/wasm/*.wasm
 queries/

@@ -4,16 +4,25 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "node src/check.mjs",
-    "first-render": "node src/run-first-render.mjs",
-    "warm-render": "node --expose-gc src/warm-render.mjs",
-    "fmt": "cd ../.. && oxfmt benchmarks/javascript/src/ benchmarks/scripts/ benchmarks/cli/",
-    "fmt:check": "cd ../.. && oxfmt --check benchmarks/javascript/src/ benchmarks/scripts/ benchmarks/cli/",
-    "lint": "cd ../.. && oxlint benchmarks/javascript/src/ benchmarks/scripts/ benchmarks/cli/"
+    "benchmark": "node --expose-gc src/scenarios.mjs",
+    "fmt": "cd ../.. && oxfmt benchmarks/javascript/src/ benchmarks/scripts/",
+    "fmt:check": "cd ../.. && oxfmt --check benchmarks/javascript/src/ benchmarks/scripts/",
+    "lint": "cd ../.. && oxlint benchmarks/javascript/src/ benchmarks/scripts/"
   },
   "dependencies": {
+    "@lumis-sh/cli-benchmark": "npm:@lumis-sh/cli@0.4.1",
     "@lumis-sh/lumis": "workspace:*",
     "@lumis-sh/themes": "workspace:*",
+    "@lumis-sh/wasm-c": "^0.26.0",
+    "@lumis-sh/wasm-css": "^0.26.0",
+    "@lumis-sh/wasm-diff": "0.26.1",
+    "@lumis-sh/wasm-go": "^0.26.0",
+    "@lumis-sh/wasm-html": "^0.26.0",
+    "@lumis-sh/wasm-java": "^0.26.0",
+    "@lumis-sh/wasm-javascript": "0.26.1",
+    "@lumis-sh/wasm-json": "0.26.2",
+    "@lumis-sh/wasm-python": "^0.26.0",
+    "@lumis-sh/wasm-ruby": "^0.26.0",
     "@lumis-sh/wasm-rust": "0.26.3",
     "mitata": "1.0.34",
     "shiki": "4.3.1"

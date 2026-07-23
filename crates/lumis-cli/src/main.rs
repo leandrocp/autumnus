@@ -1,10 +1,7 @@
 mod config;
 mod gen_theme;
 mod registry;
-#[allow(clippy::all, dead_code)]
-mod vendor;
 
-use crate::vendor::tree_sitter_highlight::ParsedLayer;
 use anyhow::Result;
 use clap::{ArgAction, Parser, Subcommand, ValueEnum};
 use etcetera::BaseStrategy;
@@ -12,6 +9,7 @@ use lumis_core::events::HighlightEvent;
 use lumis_core::formatter::Formatter as CoreFormatter;
 use lumis_core::formatter::TerminalBackground;
 use lumis_core::languages::Language;
+use lumis_wasm_runtime::tree_sitter_highlight::ParsedLayer;
 use serde::Serialize;
 use std::fmt::Display;
 use std::fs;
@@ -1657,7 +1655,7 @@ fn relative_to_current(path: &Path) -> PathBuf {
 
 struct HighlightOutput {
     events: Vec<HighlightEvent>,
-    layers: Vec<crate::vendor::tree_sitter_highlight::ParsedLayer>,
+    layers: Vec<ParsedLayer>,
 }
 
 fn highlight_output(
@@ -1675,10 +1673,10 @@ fn highlight_output(
     let config = Box::leak(Box::new(config));
     let mut injected_configs: std::collections::HashMap<
         String,
-        &'static crate::vendor::tree_sitter_highlight::HighlightConfiguration,
+        &'static lumis_wasm_runtime::tree_sitter_highlight::HighlightConfiguration,
     > = std::collections::HashMap::new();
 
-    let mut highlighter = crate::vendor::tree_sitter_highlight::Highlighter::new();
+    let mut highlighter = lumis_wasm_runtime::tree_sitter_highlight::Highlighter::new();
     highlighter.record_parsed_layers(record_parsed_layers);
     let wasm_store = reg.new_wasm_store()?;
     highlighter
@@ -1708,10 +1706,10 @@ fn highlight_output(
         let event = event.map_err(|e| anyhow::anyhow!("highlight event error: {:?}", e))?;
 
         match event {
-            crate::vendor::tree_sitter_highlight::HighlightEvent::Source { start, end } => {
+            lumis_wasm_runtime::tree_sitter_highlight::HighlightEvent::Source { start, end } => {
                 core_events.push(HighlightEvent::Source { start, end });
             }
-            crate::vendor::tree_sitter_highlight::HighlightEvent::HighlightStart {
+            lumis_wasm_runtime::tree_sitter_highlight::HighlightEvent::HighlightStart {
                 highlight,
                 language,
             } => {
@@ -1720,7 +1718,7 @@ fn highlight_output(
                     language,
                 });
             }
-            crate::vendor::tree_sitter_highlight::HighlightEvent::HighlightEnd => {
+            lumis_wasm_runtime::tree_sitter_highlight::HighlightEvent::HighlightEnd => {
                 core_events.push(HighlightEvent::End);
             }
         }

@@ -1,0 +1,21 @@
+[package]
+name = "lumis-wasm-runtime"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+authors.workspace = true
+description = "Shared Tree-sitter highlighting runtime for Lumis"
+
+[features]
+default = ["wasm"]
+wasm = ["dep:lumis-core", "dep:wasmtime", "tree-sitter/wasm"]
+
+[dependencies]
+lumis-core = { path = "../lumis-core", version = "2", default-features = false, optional = true }
+streaming-iterator = "0.1"
+thiserror = "2"
+tree-sitter = "^0.26.9"
+wasmtime = { version = "36", default-features = false, features = ["cache", "cranelift", "runtime", "std"], optional = true }

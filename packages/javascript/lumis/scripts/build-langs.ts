@@ -1,6 +1,8 @@
 /**
- * Reads preprocessed query .scm files from queries/processed/, converts
- * Lua patterns to JS regex, and emits one TypeScript module per language.
+ * Builds the language modules used by the browser/WebAssembly runtime. It reads
+ * preprocessed query .scm files, converts Lua patterns to JavaScript regexes,
+ * and emits one TypeScript module per language. The Node native runtime does
+ * not consume these queries or parser Wasm references.
  *
  * Preprocessing (inheritance, text replacements, overwrite merging) is done by
  * `mise run langs-preprocess-queries`, which is run before the JS generate commands.
@@ -163,7 +165,7 @@ function normalizeRegexForJs(regex: string): string {
   return expandCaseInsensitiveAscii(regex.slice(4));
 }
 
-function convertLuaMatches(content: string): string {
+function convertLuaMatchesForBrowser(content: string): string {
   const converted = content
     .split("\n")
     .map((line) => {
@@ -192,19 +194,18 @@ function convertLuaMatches(content: string): string {
   });
 }
 
-function resolveQuery(language: string, queryType: string): string {
+function resolveQuerySource(language: string, queryType: string): string {
   const filePath = path.join(QUERIES_PROCESSED_DIR, language, `${queryType}.scm`);
   if (!fs.existsSync(filePath)) {
     if (queryType === "brackets") {
       const defaultPath = path.join(QUERIES_PROCESSED_DIR, "default", "brackets.scm");
       if (fs.existsSync(defaultPath)) {
-        return convertLuaMatches(fs.readFileSync(defaultPath, "utf-8"));
+        return fs.readFileSync(defaultPath, "utf-8");
       }
     }
     return "";
   }
-  const content = fs.readFileSync(filePath, "utf-8");
-  return convertLuaMatches(content);
+  return fs.readFileSync(filePath, "utf-8");
 }
 
 function escapeTemplateString(s: string): string {
@@ -231,10 +232,14 @@ function main() {
     const wasmName = entry.wasm_name || `tree-sitter-${id}`;
     const aliases = entry.aliases || [];
 
-    const highlights = resolveQuery(queryName, "highlights");
-    const injections = resolveQuery(queryName, "injections");
-    const locals = resolveQuery(queryName, "locals");
-    const brackets = resolveQuery(queryName, "brackets");
+    const highlightSource = resolveQuerySource(queryName, "highlights");
+    const injectionSource = resolveQuerySource(queryName, "injections");
+    const localsSource = resolveQuerySource(queryName, "locals");
+    const bracketsSource = resolveQuerySource(queryName, "brackets");
+    const highlights = convertLuaMatchesForBrowser(highlightSource);
+    const injections = convertLuaMatchesForBrowser(injectionSource);
+    const locals = convertLuaMatchesForBrowser(localsSource);
+    const brackets = convertLuaMatchesForBrowser(bracketsSource);
 
     const injectionsStr = injections.trim();
     const localsStr = locals.trim();

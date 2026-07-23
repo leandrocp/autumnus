@@ -8,6 +8,9 @@ env:
   EMSDK_VERSION: "5.0.3"
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: [main]
@@ -46,22 +49,25 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: jdx/mise-action@dad1bfd3df957f44999b559dd69dc1671cb4e9ea
+      - uses: jdx/mise-action@v4.2.1
         with:
           version: 2026.7.3
           install: false
 
       - uses: actions/setup-node@v7
         with:
-          node-version: "24"
+          node-version: "lts/*"
           registry-url: "https://registry.npmjs.org"
 
       - name: Determine which parsers need publishing
         id: needed
+        env:
+          PARSER_FILTER: ${{ inputs.parser }}
+          FORCE_PUBLISH: ${{ inputs.force || 'false' }}
         run: |
           needed=$(mise run wasm-publish-needed \
-            "${{ inputs.parser }}" \
-            "${{ inputs.force || 'false' }}")
+            "$PARSER_FILTER" \
+            "$FORCE_PUBLISH")
           if [ -z "$needed" ]; then
             echo "All packages already published, nothing to build"
             echo "skip=true" >> "$GITHUB_OUTPUT"
@@ -79,6 +85,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
+      contents: read
       id-token: write
 
     strategy:
@@ -90,7 +97,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: jdx/mise-action@dad1bfd3df957f44999b559dd69dc1671cb4e9ea
+      - uses: jdx/mise-action@v4.2.1
         with:
           version: 2026.7.3
           install: false
@@ -113,7 +120,7 @@ jobs:
 
       - uses: actions/setup-node@v7
         with:
-          node-version: "24"
+          node-version: "lts/*"
           registry-url: "https://registry.npmjs.org"
 
       - uses: mymindstorm/setup-emsdk@v16
@@ -123,10 +130,14 @@ jobs:
 
       - run: npm install -g tree-sitter-cli@0.26
 
-      - run: mise run wasm-publish-prepare "${{ matrix.parser }}"
+      - run: mise run wasm-publish-prepare "$PARSER"
+        env:
+          PARSER: ${{ matrix.parser }}
 
       - name: Publish to npm
-        working-directory: tmp/wasm-publish/${{ matrix.parser }}
-        run: npm publish --access public --provenance
+        run: |
+          cd -- "tmp/wasm-publish/$PARSER"
+          npm publish --access public --provenance
         env:
+          PARSER: ${{ matrix.parser }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

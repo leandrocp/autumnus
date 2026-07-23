@@ -162,11 +162,34 @@ echo ""
 echo "CLI conformance..."
 cargo test -p lumis-cli --test conformance -- --ignored
 echo ""
-echo "JS conformance..."
-pnpm --filter @lumis-sh/lumis test:conformance
+echo "Preparing JS conformance..."
+pnpm --filter @lumis-sh/themes build
+pnpm --filter @lumis-sh/lumis build:generate
+echo ""
+echo "JS Wasm conformance..."
+LUMIS_TEST_RUNTIME=wasm pnpm --filter @lumis-sh/lumis test:conformance
+echo ""
+echo "JS native conformance..."
+pnpm --filter @lumis-sh/lumis build:native
+LUMIS_TEST_RUNTIME=native pnpm --filter @lumis-sh/lumis test:conformance
+echo ""
+mise run test-conformance-browser
 echo ""
 echo "Elixir conformance..."
 (cd packages/elixir/lumis && LUMIS_BUILD=1 mix test --include conformance test/conformance_test.exs)
+'''
+
+[tasks.'test-conformance-browser']
+description = "Run JavaScript conformance tests in Chromium, Firefox, and WebKit"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+args=(install chromium firefox webkit)
+if [[ "${CI:-}" == "true" ]]; then
+    args=(install --with-deps chromium firefox webkit)
+fi
+packages/javascript/lumis/node_modules/.bin/playwright "${args[@]}"
+pnpm --filter @lumis-sh/lumis test:conformance:browser
 '''
 
 [tasks.'lint']
@@ -254,94 +277,11 @@ set -euo pipefail
 mise run -C benchmarks check
 '''
 
-[tasks.'bench-rust']
-usage = '''
-arg "[quick]" default="false"
-'''
-run = '''
-#!/usr/bin/env bash
-set -euo pipefail
-if [ "${usage_quick?}" = "true" ]; then mise run -C benchmarks rust quick; else mise run -C benchmarks rust full; fi
-'''
-
-[tasks.'bench-js']
-run = '''
-#!/usr/bin/env bash
-set -euo pipefail
-mise run -C benchmarks javascript
-'''
-
-[tasks.'bench-cli']
-usage = '''
-arg "[scenario]" default="repeat-use"
-'''
-run = '''
-#!/usr/bin/env bash
-set -euo pipefail
-mise run -C benchmarks cli "${usage_scenario?}"
-'''
-
-[tasks.'bench-cli-first-use']
-run = '''
-#!/usr/bin/env bash
-set -euo pipefail
-mise run -C benchmarks cli:first-use
-'''
-
-[tasks.'bench-memory']
-run = '''
-#!/usr/bin/env bash
-set -euo pipefail
-mise run -C benchmarks memory
-'''
-
-[tasks.'bench-finalize']
-run = '''
-#!/usr/bin/env bash
-set -euo pipefail
-mise run -C benchmarks finalize
-'''
-
-[tasks.'bench-smoke']
-run = '''
-#!/usr/bin/env bash
-set -euo pipefail
-mise run -C benchmarks smoke
-'''
-
-[tasks.'bench-dev']
-run = '''
-#!/usr/bin/env bash
-set -euo pipefail
-mise run -C benchmarks dev
-'''
-
 [tasks.'bench']
 run = '''
 #!/usr/bin/env bash
 set -euo pipefail
-mise run -C benchmarks full
-'''
-
-[tasks.'bench-stage']
-usage = '''
-arg "<label>"
-'''
-run = '''
-#!/usr/bin/env bash
-set -euo pipefail
-mise run -C benchmarks stage "${usage_label?}"
-'''
-
-[tasks.'bench-compare']
-usage = '''
-arg "<left>"
-arg "<right>"
-'''
-run = '''
-#!/usr/bin/env bash
-set -euo pipefail
-mise run -C benchmarks compare "${usage_left?}" "${usage_right?}"
+mise run -C benchmarks run
 '''
 
 [tasks.'cli-install']
@@ -674,14 +614,15 @@ set -euo pipefail
 packages=(
     "cargo-lumis-core|crates/lumis-core"
     "cargo-lumis-build|crates/lumis-build"
+    "cargo-lumis-wasm-runtime|crates/lumis-wasm-runtime"
     "cargo-lumis|crates/lumis"
-    "cargo-lumis-cli|crates/lumis-cli"
+    "cargo-lumis-cli|crates/lumis-cli|crates/lumis-wasm-runtime"
     "npm-themes|packages/javascript/themes"
-    "npm-lumis|packages/javascript/lumis"
+    "npm-lumis|packages/javascript/lumis|crates/lumis|crates/lumis-core|crates/lumis-wasm-runtime"
     "npm-markdown-it-lumis|packages/javascript/markdown-it-lumis"
     "npm-rehype-lumis|packages/javascript/rehype-lumis"
     "npm-react|packages/javascript/react"
-    "npm-cli|packages/javascript/cli|crates/lumis-cli"
+    "npm-cli|packages/javascript/cli|crates/lumis-cli|crates/lumis-wasm-runtime"
     "npm-wasm-bundle-web|packages/javascript/wasm-bundle-web"
     "npm-wasm-bundle-web-extra|packages/javascript/wasm-bundle-web-extra"
     "npm-wasm-bundle-system|packages/javascript/wasm-bundle-system"
@@ -758,6 +699,13 @@ case "$package" in
         include_path="crates/lumis-build/**/*"
         kind="cargo"
         cargo_package="lumis-build"
+        ;;
+    cargo-lumis-wasm-runtime)
+        manifest="crates/lumis-wasm-runtime/Cargo.toml"
+        changelog="crates/lumis-wasm-runtime/CHANGELOG.md"
+        include_path="crates/lumis-wasm-runtime/**/*"
+        kind="cargo"
+        cargo_package="lumis-wasm-runtime"
         ;;
     cargo-lumis-cli)
         manifest="crates/lumis-cli/Cargo.toml"
@@ -843,9 +791,24 @@ esac
 
 tag="$package/v$version"
 include_args=(--include-path "$include_path")
-if [ "$package" = "npm-cli" ]; then
-    include_args+=(--include-path "crates/lumis-cli/**/*")
-fi
+case "$package" in
+    cargo-lumis-cli)
+        include_args+=(--include-path "crates/lumis-wasm-runtime/**/*")
+        ;;
+    npm-cli)
+        include_args+=(
+            --include-path "crates/lumis-cli/**/*"
+            --include-path "crates/lumis-wasm-runtime/**/*"
+        )
+        ;;
+    npm-lumis)
+        include_args+=(
+            --include-path "crates/lumis/**/*"
+            --include-path "crates/lumis-core/**/*"
+            --include-path "crates/lumis-wasm-runtime/**/*"
+        )
+        ;;
+esac
 
 case "$kind" in
     cargo)
@@ -858,6 +821,13 @@ case "$kind" in
         python3 -c 'from pathlib import Path; import re, sys; path = Path(sys.argv[1]); version = sys.argv[2]; content = path.read_text(); content = re.sub(r"@version \"[^\"]+\"", f"@version \"{version}\"", content, count=1); path.write_text(content)' "$manifest" "$version"
         ;;
 esac
+
+if [ "$package" = "npm-lumis" ]; then
+    cargo set-version --manifest-path packages/javascript/lumis/native/Cargo.toml -p lumis-js-native "$version"
+    for native_manifest in packages/javascript/lumis/native/npm/*/package.json; do
+        npm --prefix "$(dirname "$native_manifest")" version --no-git-tag-version "$version"
+    done
+fi
 
 git-cliff --config cliff.toml --github-repo leandrocp/lumis --tag-pattern "$package/v[0-9].*" --tag "$tag" --prepend "$changelog" --strip header --unreleased "${include_args[@]}"
 printf 'Prepared %s %s\n' "$package" "$version"

@@ -73,8 +73,8 @@
 //!
 pub use lumis_core::languages::{available_languages, Language, LanguageParseError};
 
-use crate::vendor::tree_sitter_highlight::HighlightConfiguration;
 use lumis_core::highlights::HIGHLIGHT_NAMES;
+use lumis_wasm_runtime::tree_sitter_highlight::HighlightConfiguration;
 use std::sync::LazyLock;
 
 unsafe extern "C" {
@@ -1954,7 +1954,7 @@ static ZSH_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::vendor::tree_sitter_highlight::Highlighter;
+    use lumis_wasm_runtime::tree_sitter_highlight::Highlighter;
     use serde::Deserialize;
     use std::{fs, path::PathBuf};
 

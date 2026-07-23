@@ -5,6 +5,7 @@ See `ARCHITECTURE.md` for how the crates, packages, website, and build pipeline 
 ## Table of contents
 
 - [Getting started](#getting-started)
+- [Testing](#testing)
 - [Releases](#releases)
 - [Benchmarks](#benchmarks)
 - [Configuration files](#configuration-files)
@@ -29,6 +30,23 @@ mise run setup
 
 This installs the Rust, JS, and Elixir dependencies and checks the required tools.
 
+## Testing
+
+Run the standard Rust, Elixir, and JavaScript test suites with:
+
+```sh
+mise run test
+```
+
+Cross-runtime output compatibility and browser support have dedicated suites:
+
+```sh
+mise run test-conformance
+mise run test-conformance-browser
+```
+
+`test-conformance` includes the browser suite. Run `test-conformance-browser` directly to check only Chromium, Firefox, and WebKit; it installs the required browser builds before running.
+
 ## Releases
 
 Releases are prepared locally and published from tags.
@@ -44,19 +62,17 @@ Do not hand-edit release versions or changelog sections when `mise run release-p
 
 ## Benchmarks
 
-Performance is a primary Lumis development goal. The permanent suite under [`benchmarks/`](benchmarks/) compares the Rust library with syntect, the JavaScript package with Shiki, and the installed npm CLI with `bat` using identical small and large Rust fixtures.
+The suite under [`benchmarks/`](benchmarks/) runs four shared scenarios across Lumis Rust, Elixir, JavaScript native, JavaScript Wasm, and CLI, plus syntect, Shiki, and `bat`. It uses Criterion for Rust and syntect, Mitata for JavaScript and Shiki, Benchee for Elixir, and Hyperfine for the CLIs. mise installs the pinned toolchain and coordinates the runs.
 
-Install [mise](https://mise.jdx.dev/getting-started.html); `benchmarks/mise.toml` pins and installs the complete benchmark toolchain, including Hyperfine and bat:
+Run the complete suite with:
 
 ```sh
 mise trust benchmarks/mise.toml
 mise install -C benchmarks
-mise run -C benchmarks smoke
+mise run -C benchmarks run
 ```
 
-Use `mise run -C benchmarks dev` for the shortened stable development loop and `mise run -C benchmarks full` for the complete suite, including the network-dependent first-use CLI case. `mise tasks ls -C benchmarks` lists focused tasks. Root `mise run bench-*` tasks are thin wrappers around the benchmark configuration.
-
-Benchmark generation and execution are separate. Never include fixture generation in timing, run timed families concurrently, or compare revisions with different fixture hashes. Full methodology, cache scenarios, result interpretation, and branch staging are documented in [`benchmarks/README.md`](benchmarks/README.md).
+The root `mise run bench` task runs the same suite. Scenarios and current results are listed in [`benchmarks/README.md`](benchmarks/README.md).
 
 ## Configuration files
 

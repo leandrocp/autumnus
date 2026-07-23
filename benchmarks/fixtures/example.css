@@ -1,0 +1,9 @@
+:root {
+  color-scheme: dark;
+  --accent: #7aa2f7;
+}
+
+.card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}

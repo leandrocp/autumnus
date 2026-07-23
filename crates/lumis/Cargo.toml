@@ -287,6 +287,7 @@ lang-zsh = ["dep:tree-sitter-zsh", "lumis-core/lang-zsh"]
 
 [dependencies]
 lumis-core = { path = "../lumis-core", version = "2", default-features = false }
+lumis-wasm-runtime = { path = "../lumis-wasm-runtime", version = "0.1.0", default-features = false }
 anyhow = "1.0"
 derive_builder = "0.20"
 glob = "0.3"
@@ -326,7 +327,6 @@ tree-sitter-glsl = { version = "0.2.0", optional = true }
 tree-sitter-graphql = { version = "0.1.0", optional = true }
 tree-sitter-hcl = { version = "1.1.0", optional = true }
 tree-sitter-heex = { version = "0.8.1", optional = true }
-tree-sitter-highlight = "^0.26.9"
 tree-sitter-html = { version = "0.23.2", optional = true }
 tree-sitter-ini = { version = "1.4.0", optional = true }
 tree-sitter-java = { version = "0.23.5", optional = true }

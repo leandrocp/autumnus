@@ -11,6 +11,7 @@ interface HighlightCapture {
   scope: string;
   language: string;
   depth: number;
+  localDepth: number;
 }
 
 interface SourceMaps {
@@ -201,7 +202,7 @@ function filterSpecialPunctuationCaptures(
       sourceBytes[capture.startByte] === 0x24 /* $ */ &&
       sourceBytes[capture.startByte + 1] === 0x7b /* { */
     ) {
-      let sameLayerString = false;
+      let sameLayerString: HighlightCapture | undefined;
       let nestedString = false;
 
       for (let i = activeStrings.length - 1; i >= 0; i -= 1) {
@@ -211,7 +212,7 @@ function filterSpecialPunctuationCaptures(
         }
 
         if (active.depth === capture.depth) {
-          sameLayerString = true;
+          sameLayerString = active;
         } else if (active.depth > capture.depth) {
           nestedString = true;
         }
@@ -221,7 +222,21 @@ function filterSpecialPunctuationCaptures(
         }
       }
 
-      keepCapture = !sameLayerString || nestedString;
+      const hasInjectedCaptures =
+        sameLayerString != null &&
+        captures.some(
+          (candidate) =>
+            candidate.depth > capture.depth &&
+            candidate.startByte >= sameLayerString.startByte &&
+            candidate.endByte <= sameLayerString.endByte,
+        );
+
+      // Rust keeps `${` inside local scopes, except where an injected language
+      // covers that part of a tagged template.
+      keepCapture =
+        !sameLayerString ||
+        nestedString ||
+        (!hasInjectedCaptures && sameLayerString.localDepth > 0);
     }
 
     if (keepCapture) {
@@ -376,6 +391,7 @@ function resolveLayerCaptures(
         scope: effectiveScope,
         language: language.definition.id,
         depth,
+        localDepth: scopeStack.length - 1,
       });
 
       if (definitionTarget) {

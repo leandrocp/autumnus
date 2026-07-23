@@ -12,4 +12,7 @@ mise.local.toml
 /.claude/
 __pycache__/
 node_modules/
+benchmarks/elixir/_build/
+benchmarks/elixir/deps/
+benchmarks/rust/target/
 examples/**/dist/
