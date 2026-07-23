@@ -1,3 +1,26 @@
+## [0.12.1](https://github.com/leandrocp/lumis/compare/cargo-lumis/v0.12.0...cargo-lumis/v0.12.1) (2026-07-23)
+
+
+### Bug Fixes
+
+- prevent query capture list pool overflow on large inputs - [#1028](https://github.com/leandrocp/lumis/pull/1028) by @ericmj
+- haskell heap corruption on aarch64-linux - [#1086](https://github.com/leandrocp/lumis/pull/1086) by @ericmj
+
+
+### Features
+
+- add mdx language reusing the markdown parser - [#1012](https://github.com/leandrocp/lumis/pull/1012) by @benswift
+- upgrade lang qmljs - [#1008](https://github.com/leandrocp/lumis/pull/1008)
+- upgrade lang perl - [#1006](https://github.com/leandrocp/lumis/pull/1006)
+- upgrade lang elm - [#1005](https://github.com/leandrocp/lumis/pull/1005)
+- upgrade lang latex - [#1004](https://github.com/leandrocp/lumis/pull/1004)
+- upgrade lang dart - [#1003](https://github.com/leandrocp/lumis/pull/1003)
+- add mdx to web-extra - [#1025](https://github.com/leandrocp/lumis/pull/1025)
+- upgrade lang cmake - [#1002](https://github.com/leandrocp/lumis/pull/1002)
+- update lang systemverilog - [#1082](https://github.com/leandrocp/lumis/pull/1082)
+- update lang clojure - [#1080](https://github.com/leandrocp/lumis/pull/1080)
+- Lumis JavaScript native (Rust bindings) - [#1083](https://github.com/leandrocp/lumis/pull/1083)
+
 ## [0.12.0](https://github.com/leandrocp/lumis/compare/cargo-lumis/v0.11.0...cargo-lumis/v0.12.0) (2026-07-08)
 
 
