@@ -19,6 +19,19 @@ const releaseDir = resolve(
   process.env.CARGO_TARGET_DIR ?? resolve(repoDir, "target/benchmarks/rust-target"),
   "release",
 );
+const requireFromScript = createRequire(import.meta.url);
+const npmPackLibrary = process.env.BENCH_LIBNPMPACK
+  ? requireFromScript(process.env.BENCH_LIBNPMPACK)
+  : undefined;
+const npmTarLibrary = process.env.BENCH_NPM_TAR
+  ? requireFromScript(process.env.BENCH_NPM_TAR)
+  : undefined;
+if (Boolean(npmPackLibrary) !== Boolean(npmTarLibrary)) {
+  throw new Error("BENCH_LIBNPMPACK and BENCH_NPM_TAR must be configured together");
+}
+const npmPackOptions = npmPackLibrary
+  ? JSON.parse((await execFile("npm", ["config", "list", "--json"])).stdout)
+  : undefined;
 const requestedGroup = process.env.BENCH_PACKAGE_SIZE_GROUP;
 const groups = requestedGroup
   ? new Set([requestedGroup])
@@ -218,6 +231,10 @@ async function resolvePackageDirectory(directory, name) {
 }
 
 async function packPackage(directory, key, packRoot) {
+  if (npmPackLibrary) {
+    return packPackageWithNpmLibrary(directory, packRoot);
+  }
+
   const destination = resolve(
     packRoot,
     key.replaceAll("/", "_").replaceAll("@", "_").replaceAll(":", "_"),
@@ -231,13 +248,10 @@ async function packPackage(directory, key, packRoot) {
     destination,
     directory,
   ];
-  const npmCli = process.env.BENCH_NPM_CLI;
-  const executable = npmCli ? process.execPath : "npm";
-  const commandArgs = npmCli ? [npmCli, ...args] : args;
   let stdout;
   for (let attempt = 1; attempt <= 2; attempt += 1) {
     try {
-      ({ stdout } = await execFile(executable, commandArgs, {
+      ({ stdout } = await execFile("npm", args, {
         env: {
           ...process.env,
           npm_config_cache: resolve(packRoot, "npm-cache"),
@@ -256,6 +270,26 @@ async function packPackage(directory, key, packRoot) {
     throw new Error(`npm pack returned invalid sizes for ${key}`);
   }
   return result;
+}
+
+async function packPackageWithNpmLibrary(directory, packRoot) {
+  const tarball = await npmPackLibrary(directory, {
+    ...npmPackOptions,
+    cache: resolve(packRoot, "npm-cache"),
+    ignoreScripts: true,
+  });
+  let unpackedSize = 0;
+  const parser = npmTarLibrary.list({
+    onReadEntry(entry) {
+      if (entry.type === "File" || entry.type === "OldFile") unpackedSize += entry.size;
+    },
+  });
+  await new Promise((resolvePromise, rejectPromise) => {
+    parser.on("end", resolvePromise);
+    parser.on("error", rejectPromise);
+    parser.end(tarball);
+  });
+  return { size: tarball.length, unpackedSize };
 }
 
 function combinePackages(...collections) {

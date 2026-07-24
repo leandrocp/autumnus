@@ -55,16 +55,12 @@ jobs:
           BENCH_WARMUP: 1
           BENCH_WARMUP_SECONDS: 0.1
         run: mise run -C benchmarks ${{ matrix.task }}
-      - name: Set up stable npm pack runtime
-        if: matrix.task == 'javascript'
-        uses: actions/setup-node@v7
-        with:
-          node-version: 20.19.5
       - name: Measure JavaScript package sizes
         if: matrix.task == 'javascript'
         run: |
-          npm_cli="$(mise where node@24.18.0)/lib/node_modules/npm/bin/npm-cli.js"
-          BENCH_NPM_CLI="$npm_cli" BENCH_PACKAGE_SIZE_GROUP=javascript \
+          npm_modules="$(mise where node@24.18.0)/lib/node_modules/npm/node_modules"
+          BENCH_LIBNPMPACK="$npm_modules/libnpmpack" BENCH_NPM_TAR="$npm_modules/tar" \
+            BENCH_PACKAGE_SIZE_GROUP=javascript \
             node benchmarks/scripts/measure-package-sizes.mjs
       - name: Measure native package sizes
         if: matrix.task != 'javascript'
