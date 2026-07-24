@@ -116,11 +116,7 @@ try {
         "stripped release executable",
         resolve(releaseDir, executableName("lumis")),
       ),
-      await binaryEntry(
-        "bat 0.26.1",
-        "release executable",
-        requiredEnvironment("BAT_BINARY"),
-      ),
+      await binaryEntry("bat 0.26.1", "release executable", requiredEnvironment("BAT_BINARY")),
     );
   }
 
@@ -232,7 +228,7 @@ async function resolvePackageDirectory(directory, name) {
 
 async function packPackage(directory, key, packRoot) {
   if (npmPackLibrary) {
-    return packPackageWithNpmLibrary(directory, packRoot);
+    return packPackageWithNpmLibrary(directory, key, packRoot);
   }
 
   const destination = resolve(
@@ -240,14 +236,7 @@ async function packPackage(directory, key, packRoot) {
     key.replaceAll("/", "_").replaceAll("@", "_").replaceAll(":", "_"),
   );
   await mkdir(destination, { recursive: true });
-  const args = [
-    "pack",
-    "--json",
-    "--ignore-scripts",
-    "--pack-destination",
-    destination,
-    directory,
-  ];
+  const args = ["pack", "--json", "--ignore-scripts", "--pack-destination", destination, directory];
   let stdout;
   for (let attempt = 1; attempt <= 2; attempt += 1) {
     try {
@@ -272,8 +261,17 @@ async function packPackage(directory, key, packRoot) {
   return result;
 }
 
-async function packPackageWithNpmLibrary(directory, packRoot) {
-  const tarball = await npmPackLibrary(directory, {
+async function packPackageWithNpmLibrary(directory, key, packRoot) {
+  const materializedDirectory = resolve(
+    packRoot,
+    "packages",
+    key.replaceAll("/", "_").replaceAll("@", "_").replaceAll(":", "_"),
+  );
+  await mkdir(materializedDirectory, { recursive: true });
+  // npm can hang while packing packages inside pnpm's symlinked store on Linux.
+  // Preserve the package metadata so the resulting npm archive remains identical.
+  await execFile("cp", ["-a", `${directory}/.`, `${materializedDirectory}/`]);
+  const tarball = await npmPackLibrary(materializedDirectory, {
     ...npmPackOptions,
     cache: resolve(packRoot, "npm-cache"),
     ignoreScripts: true,
