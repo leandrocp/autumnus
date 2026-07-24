@@ -231,11 +231,18 @@ async function packPackage(directory, key, packRoot) {
     destination,
     directory,
   ];
+  const npmCli = process.env.BENCH_NPM_CLI;
+  const executable = npmCli ? process.execPath : "npm";
+  const commandArgs = npmCli ? [npmCli, ...args] : args;
   let stdout;
   for (let attempt = 1; attempt <= 2; attempt += 1) {
     try {
-      ({ stdout } = await execFile("npm", args, {
-        env: { ...process.env, npm_config_cache: resolve(packRoot, "npm-cache") },
+      ({ stdout } = await execFile(executable, commandArgs, {
+        env: {
+          ...process.env,
+          npm_config_cache: resolve(packRoot, "npm-cache"),
+          npm_config_ignore_scripts: "true",
+        },
         maxBuffer: 10 * 1024 * 1024,
       }));
       break;
