@@ -281,14 +281,10 @@ async function packPackageWithNpmLibrary(directory, packRoot) {
   let unpackedSize = 0;
   const parser = npmTarLibrary.list({
     onReadEntry(entry) {
-      if (entry.type === "File" || entry.type === "OldFile") unpackedSize += entry.size;
+      unpackedSize += entry.size;
     },
   });
-  await new Promise((resolvePromise, rejectPromise) => {
-    parser.on("end", resolvePromise);
-    parser.on("error", rejectPromise);
-    parser.end(tarball);
-  });
+  parser.end(tarball);
   return { size: tarball.length, unpackedSize };
 }
 
