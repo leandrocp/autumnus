@@ -232,7 +232,7 @@ run = "node benchmarks/scripts/merge-results.mjs"
 
 [tasks."package-sizes"]
 description = "Measure comparable local release and package artifacts"
-depends = ["install", "build:rust-sizes", "build:cli", "build:elixir"]
+depends = ["install", "build:javascript", "build:rust-sizes", "build:cli", "build:elixir"]
 run = 'BAT_BINARY="$(command -v bat)" node benchmarks/scripts/measure-package-sizes.mjs'
 
 [tasks.run]

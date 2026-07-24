@@ -13,10 +13,24 @@ on:
 
 jobs:
   benchmark:
-    name: Benchmark suite
+    name: Benchmark / ${{ matrix.label }}
     continue-on-error: true
     runs-on: ubuntu-24.04
     timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: Rust and syntect
+            task: rust
+          - label: JavaScript and Shiki
+            task: javascript
+          - label: Elixir
+            task: elixir
+          - label: CLI and bat
+            task: cli
+          - label: Package sizes
+            task: package-sizes
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
@@ -38,7 +52,40 @@ jobs:
           BENCH_SAMPLES: 3
           BENCH_WARMUP: 1
           BENCH_WARMUP_SECONDS: 0.1
-        run: mise run bench
+        run: mise run ${{ matrix.task }}
+      - name: Upload partial benchmark report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: lumis-benchmark-part-${{ matrix.task }}-${{ github.sha }}
+          path: target/benchmarks/runs/current
+          if-no-files-found: error
+          retention-days: 1
+
+  report:
+    name: Benchmark suite
+    needs: benchmark
+    if: always()
+    continue-on-error: true
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24.18.0
+      - name: Download partial benchmark reports
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          pattern: lumis-benchmark-part-*-${{ github.sha }}
+          path: target/benchmarks/runs/current
+          merge-multiple: true
+      - name: Merge and validate benchmark reports
+        run: |
+          node benchmarks/scripts/verify-fixtures.mjs
+          node benchmarks/scripts/merge-results.mjs
       - name: Publish benchmark values
         if: always()
         run: |
