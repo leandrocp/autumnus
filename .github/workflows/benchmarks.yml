@@ -52,7 +52,7 @@ jobs:
           BENCH_SAMPLES: 3
           BENCH_WARMUP: 1
           BENCH_WARMUP_SECONDS: 0.1
-        run: mise run ${{ matrix.task }}
+        run: mise run -C benchmarks ${{ matrix.task }}
       - name: Upload partial benchmark report
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
