@@ -19,81 +19,111 @@ const releaseDir = resolve(
   process.env.CARGO_TARGET_DIR ?? resolve(repoDir, "target/benchmarks/rust-target"),
   "release",
 );
+const requestedGroup = process.env.BENCH_PACKAGE_SIZE_GROUP;
+const groups = requestedGroup
+  ? new Set([requestedGroup])
+  : new Set(["javascript", "rust", "cli", "elixir"]);
+const validGroups = new Set(["javascript", "rust", "cli", "elixir"]);
+if ([...groups].some((group) => !validGroups.has(group))) {
+  throw new Error(`unknown package-size group: ${requestedGroup}`);
+}
 const temporaryDir = await mkdtemp(join(tmpdir(), "lumis-package-sizes-"));
 
 try {
-  const lumisPackages = await packageClosure(
-    resolve(repoDir, "packages/javascript/lumis"),
-    temporaryDir,
-  );
-  const shikiPackages = await packageClosure(
-    resolve(repoDir, "benchmarks/javascript/node_modules/shiki"),
-    temporaryDir,
-  );
-  const parserPackages = new Map();
-  for (const language of [
-    "c",
-    "css",
-    "go",
-    "html",
-    "java",
-    "javascript",
-    "json",
-    "python",
-    "ruby",
-    "rust",
-  ]) {
-    parserPackages.set(
-      language,
-      await packageClosure(
-        resolve(repoDir, `benchmarks/javascript/node_modules/@lumis-sh/wasm-${language}`),
-        temporaryDir,
+  const entries = [];
+  if (groups.has("javascript")) {
+    const lumisPackages = await packageClosure(
+      resolve(repoDir, "packages/javascript/lumis"),
+      temporaryDir,
+    );
+    const shikiPackages = await packageClosure(
+      resolve(repoDir, "benchmarks/javascript/node_modules/shiki"),
+      temporaryDir,
+    );
+    const parserPackages = new Map();
+    for (const language of [
+      "c",
+      "css",
+      "go",
+      "html",
+      "java",
+      "javascript",
+      "json",
+      "python",
+      "ruby",
+      "rust",
+    ]) {
+      parserPackages.set(
+        language,
+        await packageClosure(
+          resolve(repoDir, `benchmarks/javascript/node_modules/@lumis-sh/wasm-${language}`),
+          temporaryDir,
+        ),
+      );
+    }
+    entries.push(
+      packageEntry(
+        "Lumis JS WASM (runtime)",
+        "npm production closure; parsers load on demand",
+        lumisPackages,
+      ),
+      packageEntry(
+        "Lumis JS WASM (1 language)",
+        "npm production closure plus Rust parser",
+        combinePackages(lumisPackages, parserPackages.get("rust")),
+      ),
+      packageEntry(
+        "Lumis JS WASM (10 languages)",
+        "npm production closure plus benchmark parsers",
+        combinePackages(lumisPackages, ...parserPackages.values()),
+      ),
+      packageEntry("Shiki 4.3.1", "npm production closure", shikiPackages),
+    );
+  }
+
+  if (groups.has("rust")) {
+    entries.push(
+      await binaryEntry(
+        "Lumis Rust",
+        "stripped 10-language benchmark executable",
+        resolve(releaseDir, "lumis-size"),
+      ),
+      await binaryEntry(
+        "syntect 5.3",
+        "stripped default-syntax benchmark executable",
+        resolve(releaseDir, "syntect-size"),
       ),
     );
   }
 
-  const entries = [
-    packageEntry(
-      "Lumis JS WASM (runtime)",
-      "npm production closure; parsers load on demand",
-      lumisPackages,
-    ),
-    packageEntry(
-      "Lumis JS WASM (1 language)",
-      "npm production closure plus Rust parser",
-      combinePackages(lumisPackages, parserPackages.get("rust")),
-    ),
-    packageEntry(
-      "Lumis JS WASM (10 languages)",
-      "npm production closure plus benchmark parsers",
-      combinePackages(lumisPackages, ...parserPackages.values()),
-    ),
-    packageEntry("Shiki 4.3.1", "npm production closure", shikiPackages),
-    await binaryEntry(
-      "Lumis Rust",
-      "stripped 10-language benchmark executable",
-      resolve(releaseDir, "lumis-size"),
-    ),
-    await binaryEntry(
-      "syntect 5.3",
-      "stripped default-syntax benchmark executable",
-      resolve(releaseDir, "syntect-size"),
-    ),
-    await binaryEntry(
-      "Lumis CLI",
-      "stripped release executable",
-      resolve(releaseDir, executableName("lumis")),
-    ),
-    await binaryEntry("bat 0.26.1", "release executable", requiredEnvironment("BAT_BINARY")),
-    await binaryEntry(
-      "Lumis Elixir",
-      "stripped release NIF shared library",
-      await nifPath(releaseDir),
-    ),
-  ];
+  if (groups.has("cli")) {
+    entries.push(
+      await binaryEntry(
+        "Lumis CLI",
+        "stripped release executable",
+        resolve(releaseDir, executableName("lumis")),
+      ),
+      await binaryEntry(
+        "bat 0.26.1",
+        "release executable",
+        requiredEnvironment("BAT_BINARY"),
+      ),
+    );
+  }
+
+  if (groups.has("elixir")) {
+    entries.push(
+      await binaryEntry(
+        "Lumis Elixir",
+        "stripped release NIF shared library",
+        await nifPath(releaseDir),
+      ),
+    );
+  }
 
   const report = {
     schemaVersion: 1,
+    group: requestedGroup ?? "all",
     system: {
       platform: platform(),
       release: release(),
@@ -107,8 +137,10 @@ try {
     },
     entries,
   };
-  await mkdir(runDir, { recursive: true });
-  const output = resolve(runDir, "package-sizes.json");
+  const output = requestedGroup
+    ? resolve(runDir, "package-sizes", `${requestedGroup}.json`)
+    : resolve(runDir, "package-sizes.json");
+  await mkdir(dirname(output), { recursive: true });
   await writeFile(output, `${JSON.stringify(report, null, 2)}\n`);
   console.log(output);
 } finally {
@@ -191,14 +223,27 @@ async function packPackage(directory, key, packRoot) {
     key.replaceAll("/", "_").replaceAll("@", "_").replaceAll(":", "_"),
   );
   await mkdir(destination, { recursive: true });
-  const { stdout } = await execFile(
-    "npm",
-    ["pack", "--json", "--ignore-scripts", "--pack-destination", destination, directory],
-    {
-      env: { ...process.env, npm_config_cache: resolve(packRoot, "npm-cache") },
-      maxBuffer: 10 * 1024 * 1024,
-    },
-  );
+  const args = [
+    "pack",
+    "--json",
+    "--ignore-scripts",
+    "--pack-destination",
+    destination,
+    directory,
+  ];
+  let stdout;
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    try {
+      ({ stdout } = await execFile("npm", args, {
+        env: { ...process.env, npm_config_cache: resolve(packRoot, "npm-cache") },
+        maxBuffer: 10 * 1024 * 1024,
+      }));
+      break;
+    } catch (error) {
+      if (attempt === 2 || !error.stderr?.includes("Exit handler never called")) throw error;
+      console.warn(`npm pack hit npm's exit-handler failure for ${key}; retrying once`);
+    }
+  }
   const result = JSON.parse(stdout).at(-1);
   if (!result || !Number.isSafeInteger(result.size) || !Number.isSafeInteger(result.unpackedSize)) {
     throw new Error(`npm pack returned invalid sizes for ${key}`);

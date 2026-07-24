@@ -23,14 +23,16 @@ jobs:
         include:
           - label: Rust and syntect
             task: rust
+            size_task: package-size:rust
           - label: JavaScript and Shiki
             task: javascript
+            size_task: package-size:javascript
           - label: Elixir
             task: elixir
+            size_task: package-size:elixir
           - label: CLI and bat
             task: cli
-          - label: Package sizes
-            task: package-sizes
+            size_task: package-size:cli
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
@@ -52,7 +54,9 @@ jobs:
           BENCH_SAMPLES: 3
           BENCH_WARMUP: 1
           BENCH_WARMUP_SECONDS: 0.1
-        run: mise run -C benchmarks ${{ matrix.task }}
+        run: |
+          mise run -C benchmarks ${{ matrix.task }}
+          mise run -C benchmarks ${{ matrix.size_task }}
       - name: Upload partial benchmark report
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
@@ -85,6 +89,7 @@ jobs:
       - name: Merge and validate benchmark reports
         run: |
           node benchmarks/scripts/verify-fixtures.mjs
+          node benchmarks/scripts/merge-package-sizes.mjs
           node benchmarks/scripts/merge-results.mjs
       - name: Publish benchmark values
         if: always()

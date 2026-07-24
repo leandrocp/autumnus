@@ -236,6 +236,34 @@ description = "Measure comparable local release and package artifacts"
 depends = ["install", "build:javascript", "build:rust-sizes", "build:cli", "build:elixir"]
 run = 'BAT_BINARY="$(command -v bat)" node benchmarks/scripts/measure-package-sizes.mjs'
 
+[tasks."package-size:javascript"]
+description = "Measure JavaScript and Shiki package artifacts"
+depends = ["build:javascript"]
+env = { BENCH_PACKAGE_SIZE_GROUP = "javascript" }
+run = "node benchmarks/scripts/measure-package-sizes.mjs"
+
+[tasks."package-size:rust"]
+description = "Measure Rust and syntect release artifacts"
+depends = ["build:rust-sizes"]
+env = { BENCH_PACKAGE_SIZE_GROUP = "rust" }
+run = "node benchmarks/scripts/measure-package-sizes.mjs"
+
+[tasks."package-size:cli"]
+description = "Measure Lumis CLI and bat release artifacts"
+depends = ["build:cli"]
+env = { BENCH_PACKAGE_SIZE_GROUP = "cli" }
+run = 'BAT_BINARY="$(command -v bat)" node benchmarks/scripts/measure-package-sizes.mjs'
+
+[tasks."package-size:elixir"]
+description = "Measure the Elixir NIF release artifact"
+depends = ["build:elixir"]
+env = { BENCH_PACKAGE_SIZE_GROUP = "elixir" }
+run = "node benchmarks/scripts/measure-package-sizes.mjs"
+
+[tasks."merge:package-sizes"]
+description = "Merge and validate parallel package-size reports"
+run = "node benchmarks/scripts/merge-package-sizes.mjs"
+
 [tasks.run]
 description = "Run all four benchmark scenarios"
 depends = ["build"]
