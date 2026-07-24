@@ -107,6 +107,7 @@ outputs = ["target/benchmarks/rust-target/release/lumis"]
 
 [tasks."build:elixir"]
 description = "Build the local Elixir package and install Benchee dependencies"
+depends = ["install"]
 run = "MIX_ENV=prod BENCH_INSTALL_ONLY=1 elixir benchmarks/elixir/scenario.exs"
 sources = [
   "benchmarks/elixir/mix.lock",
