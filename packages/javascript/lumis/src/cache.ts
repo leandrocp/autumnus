@@ -1,0 +1,127 @@
+import { cacheKey, DEFAULT_RESOLVER, verifyWasm, type WasmResolver } from "./core/languages.js";
+import { EXACT_LANGUAGE_MAP } from "./generated/language-detection.js";
+import { LANGUAGE_LOADERS } from "./generated/language-loaders.js";
+import {
+  readCachedWasm,
+  wasmCacheDir,
+  wasmCachePath,
+  withWasmCacheLock,
+  writeCachedWasm,
+} from "./runtime/node-cache.js";
+import type { Language, WasmRef } from "./types.js";
+
+export interface CacheLanguagesOptions {
+  /** Destination containing verified, content-addressed parser files. */
+  directory?: string;
+  /** Replace parser files even when the existing bytes pass integrity checks. */
+  force?: boolean;
+  /** Override the exact-version jsDelivr resolver. */
+  resolver?: WasmResolver;
+}
+
+export interface CachedLanguage {
+  language: string;
+  path: string;
+  downloaded: boolean;
+  wasm: WasmRef;
+}
+
+function wasmRef(language: Language): WasmRef {
+  const wasm = language.wasm;
+  if (
+    typeof wasm !== "object" ||
+    wasm === null ||
+    !("packageName" in wasm) ||
+    !("name" in wasm) ||
+    !("version" in wasm) ||
+    !("sha256" in wasm) ||
+    !("size" in wasm)
+  ) {
+    throw new Error(`Language "${language.id}" does not have exact parser metadata`);
+  }
+  return wasm;
+}
+
+async function loadLanguage(name: string): Promise<Language> {
+  const normalized = name.toLowerCase();
+  const id = EXACT_LANGUAGE_MAP[normalized] ?? normalized;
+  const loader = LANGUAGE_LOADERS[id];
+  if (!loader) throw new Error(`Unknown language "${name}"`);
+  return (await loader()).default;
+}
+
+async function fetchWasm(language: Language, ref: WasmRef, resolver: WasmResolver) {
+  const source = resolver(language.id, ref);
+  if (source instanceof URL ? source.protocol === "file:" : source.startsWith("file://")) {
+    const { readFile } = await import("node:fs/promises");
+    const { fileURLToPath } = await import("node:url");
+    const url = source instanceof URL ? source : new URL(source);
+    return verifyWasm(ref, new Uint8Array(await readFile(fileURLToPath(url))));
+  }
+  if (typeof source === "string" && !URL.canParse(source)) {
+    const { readFile } = await import("node:fs/promises");
+    return verifyWasm(ref, new Uint8Array(await readFile(source)));
+  }
+  const response = await fetch(typeof source === "string" ? source : source.href);
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch WASM for ${ref.name}@${ref.version}: ${response.status} ${response.statusText}`,
+    );
+  }
+  return verifyWasm(ref, new Uint8Array(await response.arrayBuffer()));
+}
+
+/**
+ * Download exact, integrity-pinned parser WASMs into a persistent directory.
+ *
+ * Point `LUMIS_WASM_CACHE_DIR` at the same directory in the deployed process
+ * and set `LUMIS_WASM_OFFLINE=1` when network fallback must be disabled.
+ */
+export async function cacheLanguages(
+  names: Iterable<string>,
+  options: CacheLanguagesOptions = {},
+): Promise<CachedLanguage[]> {
+  const directory = options.directory ?? (await wasmCacheDir());
+  const resolver = options.resolver ?? DEFAULT_RESOLVER;
+  const languages = await Promise.all([...names].map(loadLanguage));
+  const seen = new Set<string>();
+  const cached: CachedLanguage[] = [];
+
+  for (const language of languages) {
+    const ref = wasmRef(language);
+    const key = cacheKey(ref);
+    if (seen.has(key)) continue;
+    seen.add(key);
+
+    const result = await withWasmCacheLock(
+      key,
+      async () => {
+        if (!options.force) {
+          const existing = await readCachedWasm(key, directory);
+          if (existing) {
+            try {
+              await verifyWasm(ref, existing);
+              return {
+                path: await wasmCachePath(key, directory),
+                downloaded: false,
+              };
+            } catch {
+              // Replace corrupt cache entries below.
+            }
+          }
+        }
+
+        const bytes = await fetchWasm(language, ref, resolver);
+        return {
+          path: await writeCachedWasm(key, bytes, directory),
+          downloaded: true,
+        };
+      },
+      directory,
+    );
+
+    cached.push({ language: language.id, wasm: ref, ...result });
+  }
+
+  return cached;
+}

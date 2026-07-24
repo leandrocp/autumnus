@@ -111,7 +111,8 @@ export interface LanguagesModule {
   getDefaultRuntime(): RuntimeLike;
 }
 
-const DEFAULT_RESOLVER: WasmResolver = (_language, wasm) =>
+/** @internal */
+export const DEFAULT_RESOLVER: WasmResolver = (_language, wasm) =>
   `https://cdn.jsdelivr.net/npm/${wasm.packageName}@${wasm.version}/${wasm.name}.wasm`;
 
 const HIGHLIGHT_NAMES_SET = new Set(HIGHLIGHT_NAMES);
@@ -125,7 +126,8 @@ function createSharedRuntimeCache(): SharedRuntimeCache {
   };
 }
 
-function cacheKey(ref: WasmRef): string {
+/** @internal */
+export function cacheKey(ref: WasmRef): string {
   return `${ref.name}-${ref.version}-${ref.sha256}`;
 }
 
@@ -173,7 +175,8 @@ async function sha256Hex(data: Uint8Array): Promise<string> {
   return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
-async function verifyWasm(ref: WasmRef, data: Uint8Array): Promise<Uint8Array> {
+/** @internal */
+export async function verifyWasm(ref: WasmRef, data: Uint8Array): Promise<Uint8Array> {
   if (data.byteLength !== ref.size) {
     throw new Error(
       `Invalid WASM size for ${ref.name}@${ref.version}: expected ${ref.size}, got ${data.byteLength}`,
@@ -395,6 +398,9 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
       const url = this.resolver(language, ref);
       const diskData = await runtime.readResolvedWasmFromDisk(url);
       if (diskData) return diskData;
+      if (runtime.networkFallbackEnabled?.() === false) {
+        throw new Error(`Parser WASM for "${language}" is not cached and offline mode is enabled`);
+      }
       const response = await fetch(typeof url === "string" ? url : url.href);
       if (!response.ok) {
         throw new Error(

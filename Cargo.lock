@@ -1379,6 +1379,7 @@ dependencies = [
  "quote",
  "serde",
  "serde_json",
+ "sha2",
  "streaming-iterator",
  "syn 2.0.119",
  "tempfile",

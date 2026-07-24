@@ -26,6 +26,7 @@ test.describe("browser runtime", () => {
   let context: BrowserContext;
   let page: Page;
   let result: BrowserTestResult;
+  let reloadedResult: BrowserTestResult;
   const externalRequests: string[] = [];
   const pageErrors: string[] = [];
 
@@ -51,6 +52,17 @@ test.describe("browser runtime", () => {
 
     expect(outcome.error).toBeUndefined();
     result = outcome.result as BrowserTestResult;
+
+    await page.reload();
+    await page.waitForFunction(
+      () => window.__lumisBrowserResult !== undefined || window.__lumisBrowserError !== undefined,
+    );
+    const reloadedOutcome = await page.evaluate(() => ({
+      error: window.__lumisBrowserError,
+      result: window.__lumisBrowserResult,
+    }));
+    expect(reloadedOutcome.error).toBeUndefined();
+    reloadedResult = reloadedOutcome.result as BrowserTestResult;
   });
 
   test.afterAll(async () => {
@@ -66,6 +78,10 @@ test.describe("browser runtime", () => {
     expect(result.requestedWasms).toEqual(
       expect.arrayContaining(["tree-sitter-javascript", "tree-sitter-html", "tree-sitter-css"]),
     );
+  });
+
+  test("reuses verified parser bytes after a page reload", () => {
+    expect(reloadedResult.requestedWasms).toEqual([]);
   });
 
   test("renders with htmlInline", () => {

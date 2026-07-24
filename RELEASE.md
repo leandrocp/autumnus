@@ -76,6 +76,11 @@ After `npm-lumis` is published, the plugin packages, CLI package, and WASM bundl
 
 If a JS release also needs new parser WASM packages, publish those first through the WASM workflow. Run `mise run wasm-publish-needed` to see which parser packages still need publishing.
 
+After changing `wasm-manifest.json`, run `pnpm --filter @lumis-sh/lumis
+build:langs` and commit every generated manifest, including
+`crates/lumis-wasm-runtime/src/manifest.rs`. CLI, JavaScript, and Elixir must
+ship the same exact parser versions and digests.
+
 ### Elixir package
 
 Publish `hex-lumis` after the required `cargo-lumis-wasm-runtime` release.

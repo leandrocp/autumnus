@@ -31,6 +31,8 @@ export default defineConfig({
   entry: {
     index: 'src/index.ts',
     'index.browser': 'src/index.browser.ts',
+    cache: 'src/cache.ts',
+    'cache-cli': 'src/cache-cli.ts',
     formatters: 'src/formatters.ts',
     'formatters/html': 'src/formatter/html.ts',
     'formatters/ansi': 'src/formatter/ansi.ts',

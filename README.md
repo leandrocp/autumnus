@@ -82,8 +82,9 @@ import dracula from '@lumis-sh/themes/dracula'
 const html = await highlight('const x = 1', htmlInline({ language: javascript, theme: dracula }))
 ```
 
-JavaScript loads exact, integrity-checked parser WASM per language on demand and
-caches it locally in Node.js.
+JavaScript loads exact, integrity-checked parser WASM per language on demand.
+Node uses a persistent user cache, browsers use CacheStorage, and
+`lumis-wasm-cache` can prepare deployment-local parser assets ahead of time.
 
 ### [Browsers / CDN](https://www.npmjs.com/package/@lumis-sh/lumis)
 
@@ -105,8 +106,9 @@ Lumis.highlight!("const x = 1", formatter: {:html_inline, language: "javascript"
 ```
 
 Elixir uses the same per-language parser WASM model. Missing root and injected
-languages load automatically; use `Lumis.preload_languages/1` before entering
-offline mode.
+languages load automatically. Use `mix lumis.parsers.fetch ...` while building
+an OTP release, then `Lumis.preload_languages/1` to compile expected parsers at
+application startup.
 
 ### [Java](https://github.com/roastedroot/lumis4j)
 

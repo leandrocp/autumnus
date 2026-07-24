@@ -41,10 +41,29 @@ https://unpkg.com/@lumis-sh/wasm-<parser-name-without-tree-sitter-prefix>@<tree-
 ```
 
 Lumis rejects bytes whose size or SHA-256 digest differs from the language
-manifest. In Node.js, verified parser files are cached in the platform user
-cache directory; set `LUMIS_WASM_CACHE_DIR` to override it.
+manifest. Resolution follows a persistent hierarchy:
+
+```text
+installed or deployment-local parser
+  -> verified platform cache (CacheStorage or IndexedDB in browsers)
+  -> exact-version CDN fallback
+```
+
+Set `LUMIS_WASM_CACHE_DIR` to override the Node cache. Set
+`LUMIS_WASM_OFFLINE=1` to prohibit the final network fallback.
 
 If a matching npm parser package is installed, such as `@lumis-sh/wasm-elixir`, Node can load that package directly before falling back to the resolver URL.
+
+## Prepare a Node deployment
+
+```bash
+npx lumis-wasm-cache rust javascript elixir --output ./wasm-cache
+LUMIS_WASM_CACHE_DIR=./wasm-cache LUMIS_WASM_OFFLINE=1 node app.mjs
+```
+
+Use `--all` to prepare every parser. The command and the
+`cacheLanguages()` API from `@lumis-sh/lumis/cache` write the same
+content-addressed files that the runtime reads.
 
 ## NPM WASM packages
 
@@ -205,7 +224,13 @@ The CLI does not expose a custom WASM resolver hook. Use the parser cache comman
 
 ## Browsers / CDN usage
 
-This works well when your app can fetch parser WASM files from the default CDN. If you need a different host or local assets, set a custom resolver first. If you want bundler-managed parser assets from npm instead, prefer `withWasm()` for single languages or `withWasmBundle()` for preset bundles.
+This works well when your app can fetch parser WASM files from the default CDN.
+Verified bytes are stored in persistent browser storage and reused across page
+reloads and browser restarts when the browser permits it. Lumis uses
+CacheStorage with an IndexedDB fallback for WebKit. If you need a different host
+or local assets, set a custom resolver first. For bundler-managed parser assets
+from npm, prefer `withWasm()` for single languages or `withWasmBundle()` for
+preset bundles.
 
 ```html title="ESM CDN"
 <script type="module">

@@ -53,15 +53,32 @@ Omitting `language` from the formatter enables auto-detection.
 
 Lumis loads missing root and injected languages automatically. Parser WASM is
 pinned to an exact package version, size, and SHA-256 digest, then cached in the
-platform user cache directory.
+platform user cache directory. It first checks release-local `priv/wasm`, so
+production releases do not need a runtime download.
+
+```bash title="Build an offline-ready release"
+MIX_ENV=prod mix do compile, lumis.parsers.fetch elixir html javascript css, release
+```
+
+Alternatively, configure the build-time set and run the task without arguments:
+
+```elixir title="config/prod.exs"
+config :lumis, bundled_languages: ~w(elixir html javascript css)
+```
+
+```bash
+MIX_ENV=prod mix do compile, lumis.parsers.fetch, release
+```
 
 ```elixir
 :ok = Lumis.preload_languages(["elixir", "html", "javascript", "css"])
 ```
 
 Preload expected languages during application startup when request latency
-matters. Set `LUMIS_WASM_CACHE_DIR` to override the cache location and
-`LUMIS_WASM_OFFLINE=1` to reject uncached parsers.
+matters. Wasmtime persists compiled modules across VM restarts. Set
+`LUMIS_WASM_CACHE_DIR` to override the parser and compiled-module cache root,
+and `LUMIS_WASM_OFFLINE=1` to reject parsers absent from both `priv/wasm` and
+the user cache.
 
 A custom `:wasm_resolver` application setting can return `{:ok, bytes}`,
 `{:file, path}`, or a URL:

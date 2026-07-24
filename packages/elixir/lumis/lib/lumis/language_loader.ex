@@ -31,6 +31,34 @@ defmodule Lumis.LanguageLoader do
     end)
   end
 
+  def prefetch(names, options \\ []) when is_list(names) and is_list(options) do
+    directory = Keyword.get(options, :directory, bundled_dir())
+    force? = Keyword.get(options, :force, false)
+
+    names
+    |> Enum.map(&to_string/1)
+    |> Enum.reduce_while({:ok, [], MapSet.new()}, fn name, {:ok, paths, seen} ->
+      with {:ok, entry} <- LanguageManifest.fetch(name) do
+        key = {entry.wasm_name, entry.version, entry.sha256}
+
+        if MapSet.member?(seen, key) do
+          {:cont, {:ok, paths, seen}}
+        else
+          case prefetch_entry(entry, directory, force?) do
+            {:ok, path} -> {:cont, {:ok, [path | paths], MapSet.put(seen, key)}}
+            {:error, reason} -> {:halt, {:error, reason}}
+          end
+        end
+      else
+        :error -> {:halt, {:error, "unknown language '#{name}'"}}
+      end
+    end)
+    |> case do
+      {:ok, paths, _seen} -> {:ok, Enum.reverse(paths)}
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
   defp load_entry(entry) do
     if Native.has_language(entry.id) do
       :ok
@@ -43,9 +71,16 @@ defmodule Lumis.LanguageLoader do
   end
 
   defp cached_or_resolved(entry) do
+    case read_verified(bundled_file(entry), entry, false) do
+      {:ok, bytes} -> {:ok, bytes}
+      :miss -> cached_or_downloaded(entry)
+    end
+  end
+
+  defp cached_or_downloaded(entry) do
     cache_file = cache_file(entry)
 
-    case read_verified(cache_file, entry) do
+    case read_verified(cache_file, entry, true) do
       {:ok, bytes} ->
         {:ok, bytes}
 
@@ -54,7 +89,7 @@ defmodule Lumis.LanguageLoader do
           {:error, "parser WASM for '#{entry.id}' is not cached and offline mode is enabled"}
         else
           with_cache_lock(cache_file, fn ->
-            case read_verified(cache_file, entry) do
+            case read_verified(cache_file, entry, true) do
               {:ok, bytes} ->
                 {:ok, bytes}
 
@@ -70,7 +105,34 @@ defmodule Lumis.LanguageLoader do
     end
   end
 
-  defp read_verified(path, entry) do
+  defp prefetch_entry(entry, directory, force?) do
+    destination = Path.join(directory, cache_filename(entry))
+
+    with_cache_lock(destination, fn ->
+      if force? do
+        resolve_and_write(entry, destination)
+      else
+        case read_verified(destination, entry, true) do
+          {:ok, _bytes} -> {:ok, destination}
+          :miss -> resolve_and_write(entry, destination)
+        end
+      end
+    end)
+  end
+
+  defp resolve_and_write(entry, destination) do
+    if offline?() do
+      {:error, "parser WASM for '#{entry.id}' is not cached and offline mode is enabled"}
+    else
+      with {:ok, bytes} <- resolve(entry),
+           :ok <- verify(bytes, entry),
+           :ok <- write_atomic(destination, bytes) do
+        {:ok, destination}
+      end
+    end
+  end
+
+  defp read_verified(path, entry, remove_invalid?) do
     case File.read(path) do
       {:ok, bytes} ->
         case verify(bytes, entry) do
@@ -78,7 +140,7 @@ defmodule Lumis.LanguageLoader do
             {:ok, bytes}
 
           {:error, _reason} ->
-            _ = File.rm(path)
+            if remove_invalid?, do: File.rm(path)
             :miss
         end
 
@@ -148,8 +210,15 @@ defmodule Lumis.LanguageLoader do
   end
 
   defp cache_file(entry) do
-    filename = "#{entry.wasm_name}-#{entry.version}-#{entry.sha256}.wasm"
-    Path.join(cache_dir(), filename)
+    Path.join(cache_dir(), cache_filename(entry))
+  end
+
+  defp bundled_file(entry) do
+    Path.join(bundled_dir(), cache_filename(entry))
+  end
+
+  defp cache_filename(entry) do
+    "#{entry.wasm_name}-#{entry.version}-#{entry.sha256}.wasm"
   end
 
   defp cache_dir do
@@ -157,11 +226,16 @@ defmodule Lumis.LanguageLoader do
       :filename.basedir(:user_cache, "lumis") |> to_string() |> Path.join("wasm")
   end
 
+  defp bundled_dir do
+    Application.get_env(:lumis, :wasm_bundle_dir) ||
+      Application.app_dir(:lumis, "priv/wasm")
+  end
+
   defp offline? do
     Application.get_env(
       :lumis,
       :wasm_offline,
-      System.get_env("LUMIS_WASM_OFFLINE") in ["1", "true"]
+      String.downcase(System.get_env("LUMIS_WASM_OFFLINE", "")) in ["1", "true"]
     )
   end
 

@@ -88,15 +88,23 @@ Map.has_key?(Lumis.available_languages(), "elixir")
 ### Parser Loading
 
 Root and injected parsers load automatically as exact, integrity-checked WASM
-assets. Preload the languages an application expects before entering offline
-mode:
+assets. For releases, fetch them at build time:
+
+```sh
+MIX_ENV=prod mix do compile, lumis.parsers.fetch elixir html javascript css, release
+```
+
+Then preload the languages an application expects so Wasmtime compilation
+happens during startup:
 
 ```elixir
 :ok = Lumis.preload_languages(["elixir", "html", "javascript", "css"])
 ```
 
-Use `LUMIS_WASM_CACHE_DIR` to override the parser cache and
-`LUMIS_WASM_OFFLINE=1` to reject uncached parsers.
+The runtime checks release-local `priv/wasm`, then the persistent user cache,
+then the network. Use `LUMIS_WASM_CACHE_DIR` to override both parser and
+compiled-module cache roots and `LUMIS_WASM_OFFLINE=1` to reject missing
+parsers.
 
 ## Formatters
 

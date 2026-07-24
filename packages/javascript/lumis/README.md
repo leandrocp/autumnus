@@ -21,7 +21,14 @@ npm install @lumis-sh/themes
 
 Each language import contains an exact parser package version, byte length, and
 SHA-256 digest. Lumis verifies downloaded or installed parser bytes before use
-and caches valid downloads locally in Node.
+and caches valid downloads persistently in Node and browser storage.
+
+Prepare a deployment cache before starting the application:
+
+```sh
+npx lumis-wasm-cache javascript html css --output ./wasm-cache
+LUMIS_WASM_CACHE_DIR=./wasm-cache LUMIS_WASM_OFFLINE=1 node app.mjs
+```
 
 ## Quick Start
 
@@ -182,7 +189,9 @@ All three are equivalent at highlight time. The runtime resolves the language by
 - By default, Lumis resolves parser WASM from `https://cdn.jsdelivr.net/npm/@lumis-sh/wasm-<parser-name-without-tree-sitter-prefix>@<exact-version>/<parser>.wasm`.
 - Parser bytes are checked against their exact expected size and SHA-256 digest.
 - In Node, verified parser WASM is cached in the platform user cache directory. Set `LUMIS_WASM_CACHE_DIR` to override it.
-- In restricted or offline environments, set a custom resolver before calling `highlight()` or `createHighlighter()`.
+- In browsers, verified parser WASM survives reloads and restarts through CacheStorage with an IndexedDB fallback.
+- Use `lumis-wasm-cache` or `cacheLanguages()` from `@lumis-sh/lumis/cache` during deployment, then set `LUMIS_WASM_OFFLINE=1` to prohibit network fallback.
+- A custom resolver remains available for self-hosted assets.
 
 ## Output Formats
 

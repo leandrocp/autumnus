@@ -99,7 +99,7 @@ export function renderRuntimes() {
           </div>
           <p class="mt-6 max-w-3xl font-mono text-xs leading-6 text-zinc-500 dark:text-zinc-400">
             JavaScript and Elixir load exact, integrity-checked parser WASM per language.
-            Applications download only the languages they use.
+            Applications fetch only the languages they use and persist them across restarts.
           </p>
         </div>
       </div>

@@ -2,7 +2,7 @@ min_version = "2026.7.3"
 
 [tools]
 node = "24.18.0"
-pnpm = "10.31.0"
+pnpm = "11.15.1"
 rust = { version = "1.91.1", components = ["rustfmt", "clippy"] }
 erlang = "28.5"
 elixir = "1.19.5-otp-28"

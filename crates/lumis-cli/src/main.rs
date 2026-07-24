@@ -1760,26 +1760,32 @@ mod tests {
     fn highlight_to_events_uses_cached_injection_parsers() {
         let dir = tempdir().unwrap();
         let reg = registry::Registry::new(dir.path().to_path_buf()).unwrap();
-        reg.download_parser("elixir").unwrap();
-        reg.download_parser("heex").unwrap();
+        std::fs::write(
+            reg.parser_path("html"),
+            include_bytes!(
+                "../../../packages/javascript/lumis/test/fixtures/wasm/tree-sitter-html.wasm"
+            ),
+        )
+        .unwrap();
+        std::fs::write(
+            reg.parser_path("javascript"),
+            include_bytes!(
+                "../../../packages/javascript/lumis/test/fixtures/wasm/tree-sitter-javascript.wasm"
+            ),
+        )
+        .unwrap();
 
         let source = r#"
-defmodule MyAppWeb.CounterLive do
-  use MyAppWeb, :live_view
-
-  def render(assigns) do
-    ~H"""
-    <div>{@count}</div>
-    """
-  end
-end
+<script>
+  const count = 1
+</script>
 "#;
 
-        let events = highlight_to_events(&reg, source, "elixir").unwrap();
+        let events = highlight_to_events(&reg, source, "html").unwrap();
 
         assert!(events.iter().any(|event| matches!(
             event,
-            HighlightEvent::Start { language, .. } if language == "heex"
+            HighlightEvent::Start { language, .. } if language == "javascript"
         )));
     }
 

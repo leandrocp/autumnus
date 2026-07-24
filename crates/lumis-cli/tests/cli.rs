@@ -1040,7 +1040,7 @@ fn fetch_parsers_already_cached_verbose() {
         .args(["parsers", "fetch", "diff"])
         .assert()
         .success()
-        .stderr(predicate::str::contains("tree-sitter-diff.wasm"));
+        .stderr(predicate::str::contains("tree-sitter-diff-0.26.1-"));
 }
 
 #[test]
@@ -1065,7 +1065,13 @@ fn fetch_parsers_to_temp_dir() {
         .success();
 
     // Verify the WASM file was cached
-    assert!(tmp.path().join("parsers/tree-sitter-json.wasm").exists());
+    assert!(fs::read_dir(tmp.path().join("parsers"))
+        .unwrap()
+        .any(|entry| entry
+            .unwrap()
+            .file_name()
+            .to_string_lossy()
+            .starts_with("tree-sitter-json-0.26.2-")));
 }
 
 #[test]
@@ -1078,9 +1084,15 @@ fn fetch_parsers_to_temp_dir_verbose() {
         .args(["parsers", "fetch", "json"])
         .assert()
         .success()
-        .stderr(predicate::str::contains("tree-sitter-json.wasm"));
+        .stderr(predicate::str::contains("tree-sitter-json-0.26.2-"));
 
-    assert!(tmp.path().join("parsers/tree-sitter-json.wasm").exists());
+    assert!(fs::read_dir(tmp.path().join("parsers"))
+        .unwrap()
+        .any(|entry| entry
+            .unwrap()
+            .file_name()
+            .to_string_lossy()
+            .starts_with("tree-sitter-json-0.26.2-")));
 }
 
 #[test]
@@ -1103,7 +1115,7 @@ fn fetch_parsers_then_update() {
         .args(["parsers", "update", "json"])
         .assert()
         .success()
-        .stderr(predicate::str::contains("tree-sitter-json.wasm"));
+        .stderr(predicate::str::contains("tree-sitter-json-0.26.2-"));
 }
 
 #[test]

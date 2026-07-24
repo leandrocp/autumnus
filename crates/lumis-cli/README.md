@@ -169,7 +169,10 @@ Override the location with `--config` or `LUMIS_CONFIG`.
 
 ## Parser management
 
-Parser WASM files are downloaded on demand the first time a language is needed. You can also manage the cache explicitly.
+Parser WASM files are downloaded on demand the first time a language is needed.
+Every URL uses the exact generated manifest version, and cached filenames
+include the version and SHA-256 digest. Corrupt bytes are rejected before use.
+You can also prepare the cache explicitly.
 
 ```sh
 # Download specific parsers ahead of time
@@ -192,7 +195,7 @@ lumis parsers update --verbose rust
 Notes:
 
 - `parsers fetch --all` downloads all supported parsers.
-- `parsers update --all` only updates parsers already present in the cache.
+- `parsers update --all` only refreshes parsers already present in the cache.
 - Injection highlighting works best when related parsers are already cached.
 
 ## Data directory
@@ -207,7 +210,7 @@ Lumis stores parser WASM files and custom theme JSON files in a local data direc
 
 Contents:
 
-- `parsers/` cached Tree-sitter WASM files
+- `parsers/` verified, content-addressed Tree-sitter WASM files
 - `themes/` custom theme JSON files visible in `lumis themes list`
 
 Override the location with `--data-dir` or `LUMIS_DATA_DIR`.

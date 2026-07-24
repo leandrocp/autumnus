@@ -57,6 +57,17 @@ Preload expected languages before serving requests or entering offline mode:
 :ok = Lumis.preload_languages(["elixir", "html", "javascript", "css"])
 ```
 
+For OTP releases, fetch the exact parsers into the release-local `priv/wasm`
+directory at build time:
+
+```sh
+MIX_ENV=prod mix do compile, lumis.parsers.fetch elixir html javascript css, release
+```
+
+The runtime checks release-local assets first, then the persistent user cache,
+and finally the exact CDN URL. Wasmtime also persists compiled modules, so a
+later VM start does not have to compile the same parser again.
+
 Set `LUMIS_WASM_CACHE_DIR` to override the cache location and
 `LUMIS_WASM_OFFLINE=1` to reject uncached parsers. A custom resolver can return
 bytes, a local file, or a URL:

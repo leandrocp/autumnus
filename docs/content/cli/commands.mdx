@@ -160,8 +160,8 @@ echo 'function increment() { count++; }' | lumis dump events -l svelte
 
 All dump commands accept an optional path and `--language` / `-l`. They read
 stdin when the path is omitted, using the same language detection behavior as
-`lumis highlight`. Parser WASMs are downloaded and cached on first use when
-needed.
+`lumis highlight`. Exact-version parser WASMs are verified and cached on first
+use when needed.
 
 ## `lumis languages list`
 
@@ -208,7 +208,8 @@ lumis themes generate \
 
 ## `lumis parsers fetch`
 
-Pre-download parser WASM files so highlighting doesn't trigger downloads at runtime.
+Pre-download exact, integrity-checked parser WASM files so highlighting doesn't
+trigger downloads at runtime.
 
 ```bash title="Selected parsers"
 lumis parsers fetch rust javascript elixir
@@ -220,7 +221,7 @@ lumis parsers fetch --all
 
 ## `lumis parsers update`
 
-Re-download parsers to get the latest versions.
+Refresh cached parsers at the versions pinned by this Lumis CLI release.
 
 ```bash
 lumis parsers update rust javascript
@@ -251,5 +252,5 @@ Override with `--data-dir` or `LUMIS_DATA_DIR`.
 
 Contents:
 
-- `parsers/` — cached Tree-sitter WASM files
+- `parsers/` — verified Tree-sitter WASM files keyed by version and SHA-256
 - `themes/` — custom theme JSON files (visible in `lumis themes list`)

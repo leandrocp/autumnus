@@ -18,7 +18,7 @@ lumis-core = { path = "../lumis-core", version = "2", default-features = false, 
 streaming-iterator = "0.1"
 thiserror = "2"
 tree-sitter = "^0.26.9"
-wasmtime = { version = "36", default-features = false, features = ["cranelift", "runtime", "std"], optional = true }
+wasmtime = { version = "36", default-features = false, features = ["cache", "cranelift", "runtime", "std"], optional = true }
 
 [dev-dependencies]
 tree-sitter-json = "0.24.8"

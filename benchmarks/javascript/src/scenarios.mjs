@@ -1,6 +1,6 @@
-import { copyFile, mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, isAbsolute, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { do_not_optimize, measure } from "mitata";
 
 const benchmarksDir = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
@@ -99,10 +99,14 @@ console.log(outputPath);
 
 async function prepareRuntime() {
   const runtimeDir = resolve(repoDir, "target/benchmarks/javascript-runtime");
-  const cacheDir = resolve(runtimeDir, "node_modules/.cache/lumis");
+  const cacheDir = resolve(runtimeDir, "wasm-cache");
   const diffWasm = fileURLToPath(import.meta.resolve("@lumis-sh/wasm-diff/tree-sitter-diff.wasm"));
-  await mkdir(cacheDir, { recursive: true });
-  await copyFile(diffWasm, resolve(cacheDir, "tree-sitter-diff-0.26.wasm"));
+  process.env.LUMIS_WASM_CACHE_DIR = cacheDir;
+  const { cacheLanguages } = await import("@lumis-sh/lumis/cache");
+  await cacheLanguages(["plaintext"], {
+    directory: cacheDir,
+    resolver: () => pathToFileURL(diffWasm),
+  });
   process.chdir(runtimeDir);
 }
 

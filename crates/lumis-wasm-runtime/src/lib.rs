@@ -1,5 +1,6 @@
 //! Tree-sitter highlighting shared by Lumis runtimes.
 
+pub mod manifest;
 pub mod tree_sitter_highlight;
 
 #[cfg(feature = "wasm")]

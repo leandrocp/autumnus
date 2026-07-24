@@ -43,6 +43,13 @@
       "require": "./dist/index.cjs",
       "default": "./dist/index.js"
     },
+    "./cache": {
+      "types": "./dist/cache.d.ts",
+      "node": "./dist/cache.js",
+      "import": "./dist/cache.js",
+      "require": "./dist/cache.cjs",
+      "default": "./dist/cache.js"
+    },
     "./formatters": {
       "types": "./dist/formatters.d.ts",
       "import": "./dist/formatters.js",
@@ -73,10 +80,13 @@
     "dist",
     "CHANGELOG.md"
   ],
-  "packageManager": "pnpm@10.31.0",
+  "bin": {
+    "lumis-wasm-cache": "./dist/cache-cli.js"
+  },
+  "packageManager": "pnpm@11.15.1",
   "scripts": {
     "build:langs": "tsx scripts/build-langs.ts",
-    "precache-wasms": "tsx scripts/precache-wasms.ts",
+    "cache-wasms": "tsx src/cache-cli.ts",
     "build:runtime-wasm": "tsx scripts/build-runtime-wasm.ts",
     "build:generate": "pnpm run build:runtime-wasm && pnpm run build:langs",
     "build": "pnpm run build:generate && tsup && node scripts/patch-web-tree-sitter-bundle.mjs",
@@ -101,7 +111,7 @@
     "@microsoft/api-extractor": "^7.58.0",
     "@lumis-sh/themes": "workspace:*",
     "@lumis-sh/wasm-bundle-full": "workspace:*",
-    "@lumis-sh/wasm-json": "^0.24.8",
+    "@lumis-sh/wasm-json": "0.26.2",
     "@playwright/test": "1.61.1",
     "@types/node": "^25.5.0",
     "oxfmt": "^0.43.0",

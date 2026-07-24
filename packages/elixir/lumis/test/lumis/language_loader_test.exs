@@ -1,6 +1,8 @@
 defmodule Lumis.LanguageLoaderTest do
   use ExUnit.Case, async: false
 
+  import ExUnit.CaptureIO
+
   alias Lumis.Generated.LanguageManifest
 
   test "treats plaintext names as parser-free languages" do
@@ -25,6 +27,44 @@ defmodule Lumis.LanguageLoaderTest do
 
     assert :ok = Lumis.load_language("dockerfile")
     assert byte_size(File.read!(cache_file)) == entry.size
+  end
+
+  test "prefetches release-local parsers and loads them offline" do
+    refute Lumis.Native.has_language("xml")
+    bundle_dir = Application.fetch_env!(:lumis, :wasm_bundle_dir)
+
+    assert {:ok, [path]} =
+             Lumis.LanguageLoader.prefetch(["xml", "xml"], directory: bundle_dir)
+
+    assert File.exists?(path)
+
+    previous = Application.get_env(:lumis, :wasm_offline)
+    Application.put_env(:lumis, :wasm_offline, true)
+
+    on_exit(fn ->
+      if is_nil(previous) do
+        Application.delete_env(:lumis, :wasm_offline)
+      else
+        Application.put_env(:lumis, :wasm_offline, previous)
+      end
+    end)
+
+    assert :ok = Lumis.load_language("xml")
+    assert Lumis.Native.has_language("xml")
+  end
+
+  test "Mix task prepares exact release-local parser files" do
+    output_dir = Path.join(Application.fetch_env!(:lumis, :wasm_bundle_dir), "mix-task")
+
+    output =
+      capture_io(fn ->
+        Mix.Task.reenable("lumis.parsers.fetch")
+        Mix.Task.run("lumis.parsers.fetch", ["comment", "--output", output_dir])
+      end)
+
+    assert output =~ "tree-sitter-comment-"
+    assert [path] = Path.wildcard(Path.join(output_dir, "tree-sitter-comment-*.wasm"))
+    assert File.exists?(path)
   end
 
   test "loads an injected language and retries highlighting" do

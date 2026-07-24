@@ -56,7 +56,8 @@ lumis highlight main.rs --formatter bbcode-scoped
 
 ## Parser availability
 
-The CLI downloads parser WASM files on demand and caches them in the data directory.
+The CLI downloads exact-version parser WASM files on demand and stores them
+under content-addressed, integrity-checked names in the data directory.
 
 - first use may trigger a parser download
 - `lumis parsers fetch ...` pre-downloads parsers

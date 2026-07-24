@@ -7,7 +7,7 @@ use std::sync::{Arc, Condvar, LazyLock, Mutex, OnceLock, RwLock};
 use streaming_iterator::StreamingIterator;
 use thiserror::Error;
 use tree_sitter::{Parser, Query, QueryCursor, WasmStore};
-use wasmtime::{Config, Engine};
+use wasmtime::{Cache, CacheConfig, Config, Engine};
 
 use crate::tree_sitter_highlight::{HighlightConfiguration, Highlighter};
 
@@ -200,7 +200,7 @@ impl Runtime {
             return Self::with_engine(engine.clone(), worker_limit);
         }
 
-        let engine = Engine::new(&Config::new())?;
+        let engine = cached_engine()?;
         let _ = ENGINE.set(engine.clone());
         Self::with_engine(ENGINE.get().cloned().unwrap_or(engine), worker_limit)
     }
@@ -422,6 +422,23 @@ impl Runtime {
 
         Ok(output)
     }
+}
+
+fn cached_engine() -> Result<Engine, wasmtime::Error> {
+    let mut config = Config::new();
+    let cache = std::env::var_os("LUMIS_WASM_CACHE_DIR")
+        .map(|root| {
+            let mut cache_config = CacheConfig::new();
+            cache_config.with_directory(std::path::PathBuf::from(root).join("compiled"));
+            Cache::new(cache_config)
+        })
+        .unwrap_or_else(|| Cache::from_file(None::<&std::path::Path>));
+
+    if let Ok(cache) = cache {
+        config.cache(Some(cache));
+    }
+
+    Engine::new(&config)
 }
 
 #[derive(Clone, Debug)]

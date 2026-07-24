@@ -169,6 +169,7 @@ export default bundledWasms
     keywords: ["lumis-sh", "tree-sitter", "wasm", "bundle"],
     sideEffects: false,
     type: "module",
+    packageManager: "pnpm@11.15.1",
     exports: {
       ".": {
         types: "./index.d.ts",

@@ -15,34 +15,34 @@ importers:
         specifier: workspace:*
         version: link:../../packages/javascript/themes
       '@lumis-sh/wasm-c':
-        specifier: ^0.26.0
-        version: 0.26.0
-      '@lumis-sh/wasm-css':
-        specifier: ^0.26.0
+        specifier: 0.26.1
         version: 0.26.1
+      '@lumis-sh/wasm-css':
+        specifier: 0.26.2
+        version: 0.26.2
       '@lumis-sh/wasm-diff':
         specifier: 0.26.1
         version: 0.26.1
       '@lumis-sh/wasm-go':
-        specifier: ^0.26.0
-        version: 0.26.0
-      '@lumis-sh/wasm-html':
-        specifier: ^0.26.0
-        version: 0.26.1
-      '@lumis-sh/wasm-java':
-        specifier: ^0.26.0
-        version: 0.26.1
-      '@lumis-sh/wasm-javascript':
         specifier: 0.26.1
         version: 0.26.1
+      '@lumis-sh/wasm-html':
+        specifier: 0.26.1
+        version: 0.26.1
+      '@lumis-sh/wasm-java':
+        specifier: 0.26.1
+        version: 0.26.1
+      '@lumis-sh/wasm-javascript':
+        specifier: 0.26.2
+        version: 0.26.2
       '@lumis-sh/wasm-json':
         specifier: 0.26.2
         version: 0.26.2
       '@lumis-sh/wasm-python':
-        specifier: ^0.26.0
-        version: 0.26.0
+        specifier: 0.26.1
+        version: 0.26.1
       '@lumis-sh/wasm-ruby':
-        specifier: ^0.26.0
+        specifier: 0.26.1
         version: 0.26.1
       '@lumis-sh/wasm-rust':
         specifier: 0.26.3
@@ -92,8 +92,8 @@ importers:
         specifier: workspace:*
         version: link:../wasm-bundle-full
       '@lumis-sh/wasm-json':
-        specifier: ^0.24.8
-        version: 0.24.8
+        specifier: 0.26.2
+        version: 0.26.2
       '@microsoft/api-extractor':
         specifier: ^7.58.0
         version: 7.58.2(@types/node@25.6.0)
@@ -1251,6 +1251,9 @@ packages:
   '@lumis-sh/wasm-c@0.26.0':
     resolution: {integrity: sha512-wfvGeNdQHLsB5rVLr9mlXlGgLQvVW+utLJiSjjRVwK4J2CCesIXiwsTWWkXbO30AeskpCm6C9T9I8g2ElX5Tnw==}
 
+  '@lumis-sh/wasm-c@0.26.1':
+    resolution: {integrity: sha512-3WJB71iJk4CXkrUGrQNz1xUzAyY6ykzp0przLGhAmjdfJoagIHawgt51hGaL4E7mxvC/tO2zxMYVlkVYEDmB4w==}
+
   '@lumis-sh/wasm-caddy@0.26.1':
     resolution: {integrity: sha512-PPuSTf2xcJEoLRMAcSr3ftHTorlXgnsvYrI4p2/6nvgG41N1GvIalipdMWJn+XyZPzToLkcUPXNk92fSTSj38w==}
 
@@ -1274,6 +1277,9 @@ packages:
 
   '@lumis-sh/wasm-css@0.26.1':
     resolution: {integrity: sha512-XxMXs5UnfMAgF7msdQn7prl+DQIh+rrgCetbg6TrZlzx0IGYH+D/VpkMt3mIImFRcwxlzFFPYqTdEtodgFufQQ==}
+
+  '@lumis-sh/wasm-css@0.26.2':
+    resolution: {integrity: sha512-BH7pFMWLrwhVMOD5X2Kn8LWnsjXT+o1yXmiw9KF4Chjbl6bHvxwHGKSjn8WyDmPxnLDOLEy75tjU4wapDT2dZQ==}
 
   '@lumis-sh/wasm-csv@0.26.0':
     resolution: {integrity: sha512-fS0tmLSe1G4BbeEIsfShQaStGCKPFol/ForksfBArLD7J9RA+zDmltfwFEz2ooBPY6+IKkIaz6A2JVpLJZPhMg==}
@@ -1338,6 +1344,9 @@ packages:
   '@lumis-sh/wasm-go@0.26.0':
     resolution: {integrity: sha512-1++ZZkkYGNWOIPIQ+6/LtiKtW3i7LnAHhJhvPvq0+KAssl2xuTPEajEtfOcqQNAy85lfk4BsRKTqG5TEaG/gUg==}
 
+  '@lumis-sh/wasm-go@0.26.1':
+    resolution: {integrity: sha512-0y/6e07WFHnLLrYq/ibdSnEU6+7vgcaY19s55+0FeBHlg8jvHEF3i1b1aKfJsSdWdkyIn2SV0WZ9+Tnjqtii2Q==}
+
   '@lumis-sh/wasm-graphql@0.26.0':
     resolution: {integrity: sha512-VfSlTmys1SPa9dICH8s6io2BIZmzMMbN6L9oUbizkW7dMCX8pi2xad49E7QpqQKUD1F3/r9OI1TnQOoKBHTCnA==}
 
@@ -1371,6 +1380,9 @@ packages:
   '@lumis-sh/wasm-javascript@0.26.1':
     resolution: {integrity: sha512-O7sEbhj77CXiSb0DdmmzSW/ggFjQrYUywDjg7O3m0X4J7SCALOqyOiAgsRv2rfA3oBXf1zBqCgrstiYf/opUfQ==}
 
+  '@lumis-sh/wasm-javascript@0.26.2':
+    resolution: {integrity: sha512-bwvOg4bQxDGocUaCbj8u4nYffHxH2sJpxQc3IsNFoXRa7doJD7uGc1t3HS6SjPXNimsDMAnb0gAoST9yuWP6BA==}
+
   '@lumis-sh/wasm-jinja@0.26.2':
     resolution: {integrity: sha512-P3EXOVm2vEfGJ5KyXv4Ndr/+ZjgTjlQjJg3WhNzks7sXlM6zHSFuSw0td5fow0bbIKXunfc9yHVp1lOdBvXKWw==}
 
@@ -1382,9 +1394,6 @@ packages:
 
   '@lumis-sh/wasm-json5@0.26.0':
     resolution: {integrity: sha512-5PnCx5C3FWJGC6lcFK876lIK6cLJoXYV5JQ8EQrjHxJ4lj4aU0jPkCEh2YKHwrEXtGiKK3lsqG02/ciuj58E2Q==}
-
-  '@lumis-sh/wasm-json@0.24.8':
-    resolution: {integrity: sha512-P8QQ5juTAfvx2iClusxC1ZD8J4dZ+X1u0FzcAR4fiKN4m+W6PVIyf3JjRRp2iX5M768L9thw4q/ORnVqYywFoA==}
 
   '@lumis-sh/wasm-json@0.26.2':
     resolution: {integrity: sha512-W6AvLDlMnSiSpgRmO8a6qmkApZkzEylXA4QEPefgL7NCkfk5sHZuhcWkR/J2z1Y4kOt+qZA8OvjqVZi2gp+uBQ==}
@@ -1475,6 +1484,9 @@ packages:
 
   '@lumis-sh/wasm-python@0.26.0':
     resolution: {integrity: sha512-ltynaOG0TH8EvmEjsj4Za3VvIA3eKR3IZgr3owEf0ZRILYrJocP7vuPWv14zR/sB7DcBz6uZPmaFT/4ikg863g==}
+
+  '@lumis-sh/wasm-python@0.26.1':
+    resolution: {integrity: sha512-wmXkntGD9iPohhGOGxvKxBPYVPIbU89OQwiN4wO088SGpftBO100qTbmdjECQSUYk90XBSBWo5IrGWMvIfSDGA==}
 
   '@lumis-sh/wasm-qmljs@0.26.0':
     resolution: {integrity: sha512-uxDkbeWZcV4l75qIdP5KxJ6KEBgINGNIp15mtsz/xExFs7vceX62JyXyIqGq7aQ2GYZYquLFtZ0SohxZyw9Fuw==}
@@ -3686,6 +3698,8 @@ snapshots:
 
   '@lumis-sh/wasm-c@0.26.0': {}
 
+  '@lumis-sh/wasm-c@0.26.1': {}
+
   '@lumis-sh/wasm-caddy@0.26.1': {}
 
   '@lumis-sh/wasm-clojure@0.26.0': {}
@@ -3701,6 +3715,8 @@ snapshots:
   '@lumis-sh/wasm-csharp@0.26.0': {}
 
   '@lumis-sh/wasm-css@0.26.1': {}
+
+  '@lumis-sh/wasm-css@0.26.2': {}
 
   '@lumis-sh/wasm-csv@0.26.0': {}
 
@@ -3744,6 +3760,8 @@ snapshots:
 
   '@lumis-sh/wasm-go@0.26.0': {}
 
+  '@lumis-sh/wasm-go@0.26.1': {}
+
   '@lumis-sh/wasm-graphql@0.26.0': {}
 
   '@lumis-sh/wasm-haskell@0.26.0': {}
@@ -3766,6 +3784,8 @@ snapshots:
 
   '@lumis-sh/wasm-javascript@0.26.1': {}
 
+  '@lumis-sh/wasm-javascript@0.26.2': {}
+
   '@lumis-sh/wasm-jinja@0.26.2': {}
 
   '@lumis-sh/wasm-jinja_inline@0.26.1': {}
@@ -3773,8 +3793,6 @@ snapshots:
   '@lumis-sh/wasm-jq@0.26.0': {}
 
   '@lumis-sh/wasm-json5@0.26.0': {}
-
-  '@lumis-sh/wasm-json@0.24.8': {}
 
   '@lumis-sh/wasm-json@0.26.2': {}
 
@@ -3835,6 +3853,8 @@ snapshots:
   '@lumis-sh/wasm-puppet@0.26.0': {}
 
   '@lumis-sh/wasm-python@0.26.0': {}
+
+  '@lumis-sh/wasm-python@0.26.1': {}
 
   '@lumis-sh/wasm-qmljs@0.26.0': {}
 

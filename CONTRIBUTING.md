@@ -339,9 +339,15 @@ This requires `emcc` and `tree-sitter-cli`.
 
 Each grammar WASM is published as `@lumis-sh/wasm-{name}`.
 
-`@lumis-sh/lumis` does not bundle parser WASMs. Language bundles contain a `WasmRef` (`packageName`, `name`, `version`) that is resolved at runtime by the WASM resolver. The default resolver fetches from jsDelivr. Use `configureWasmResolver()` to point to your own server.
+`@lumis-sh/lumis` does not bundle parser WASMs. Language bundles contain a
+`WasmRef` (`packageName`, `name`, `version`, `size`, `sha256`) generated from
+`wasm-manifest.json`. The default resolver fetches the exact version from
+jsDelivr and rejects bytes that do not match the manifest.
 
-`lumis-cli` also fetches parser WASMs on first use from unpkg and caches them in the data directory.
+The CLI, JavaScript, and Elixir runtimes use the same generated manifest and
+content-addressed filename. CLI and Node caches persist on disk, browsers use
+CacheStorage, and Elixir can embed selected parsers under release-local
+`priv/wasm`. Do not add an unpinned `@latest` fallback.
 
 The `wasm-release` workflow publishes packages automatically. It detects which parsers still need publishing with `scripts/wasm-needed.py` and builds and publishes them in parallel.
 

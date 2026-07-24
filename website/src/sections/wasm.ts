@@ -33,8 +33,8 @@ export function renderWasm() {
                 <dd class="mt-1 font-mono text-xs leading-relaxed text-zinc-500">Every language includes highlight queries and injection support, tested for conformance.</dd>
               </div>
               <div class="border-l-2 border-zinc-200 py-1 pl-5 dark:border-zinc-800">
-                <dt class="font-mono text-sm font-medium text-zinc-900 dark:text-white">Works everywhere</dt>
-                <dd class="mt-1 font-mono text-xs leading-relaxed text-zinc-500">Node.js, Bun, Deno, and browsers. Ship parsers with your app, no runtime downloads or CDN dependency.</dd>
+                <dt class="font-mono text-sm font-medium text-zinc-900 dark:text-white">Persistent and deployable</dt>
+                <dd class="mt-1 font-mono text-xs leading-relaxed text-zinc-500">Node.js, Bun, Deno, browsers, and Elixir persist verified parsers. Prefetch selected languages for network-free deployments.</dd>
               </div>
               <div class="border-l-2 border-zinc-200 py-1 pl-5 dark:border-zinc-800">
                 <dt class="font-mono text-sm font-medium text-zinc-900 dark:text-white">Verified on npm</dt>

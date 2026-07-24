@@ -27,7 +27,7 @@ jobs:
 
       - uses: pnpm/action-setup@v6
         with:
-          version: 10
+          version: 11.15.1
 
       - uses: actions/setup-node@v7
         with:
@@ -37,10 +37,10 @@ jobs:
             website/pnpm-lock.yaml
             docs/pnpm-lock.yaml
 
-      - run: pnpm install --ignore-workspace --no-frozen-lockfile
+      - run: pnpm install --no-frozen-lockfile
         working-directory: website
 
-      - run: pnpm install --ignore-workspace --frozen-lockfile
+      - run: pnpm install --frozen-lockfile
         working-directory: docs
 
       - run: pnpm build

@@ -26,7 +26,9 @@ keywords:
 
 `@lumis-sh/lumis` covers Node.js, Bun, Deno, and browsers through one portable
 runtime. JavaScript and Elixir load exact, integrity-checked parser WASM per
-language instead of shipping an all-language binary.
+language instead of shipping an all-language binary. Node, browsers, Elixir,
+and the CLI persist verified assets across process restarts; Node and Elixir
+also provide build-time prefetch paths for network-free deployment.
 
 ## Themes
 

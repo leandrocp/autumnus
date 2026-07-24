@@ -29,15 +29,20 @@ await mkdir(xdgCacheDir, { recursive: true });
 const manifest = JSON.parse(
   await readFile(resolve(repoDir, "target/benchmarks/fixtures/scenarios.json"), "utf8"),
 );
+const wasmManifest = JSON.parse(await readFile(resolve(repoDir, "wasm-manifest.json"), "utf8"));
 const languages = [
   ...new Set(manifest.scenarios.flatMap(({ files }) => files.map(({ language }) => language))),
 ];
 
 for (const language of languages) {
-  const wasmPath = benchmarkRequire.resolve(
-    `@lumis-sh/wasm-${language}/tree-sitter-${language}.wasm`,
+  const wasmName = `tree-sitter-${language}`;
+  const parser = wasmManifest.grammars[wasmName];
+  if (!parser) throw new Error(`missing ${wasmName} in wasm-manifest.json`);
+  const wasmPath = benchmarkRequire.resolve(`@lumis-sh/wasm-${language}/${wasmName}.wasm`);
+  await copyFile(
+    wasmPath,
+    resolve(dataDir, "parsers", `${wasmName}-${parser.version}-${parser.sha256}.wasm`),
   );
-  await copyFile(wasmPath, resolve(dataDir, "parsers", `tree-sitter-${language}.wasm`));
 }
 
 const benchmarkEnv = {
