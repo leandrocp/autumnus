@@ -23,6 +23,7 @@ const requireFromScript = createRequire(import.meta.url);
 const npmTarLibrary = process.env.BENCH_NPM_TAR
   ? requireFromScript(process.env.BENCH_NPM_TAR)
   : undefined;
+const pnpmExecutable = process.env.BENCH_PNPM ?? "pnpm";
 const requestedGroup = process.env.BENCH_PACKAGE_SIZE_GROUP;
 const groups = requestedGroup
   ? new Set([requestedGroup])
@@ -256,7 +257,7 @@ async function packPackageWithPnpm(directory, key, packRoot) {
   const pnpmDestination = resolve(packRoot, "pnpm");
   await mkdir(pnpmDestination, { recursive: true });
   const { stdout } = await execFile(
-    "pnpm",
+    pnpmExecutable,
     [
       "-C",
       directory,

@@ -59,8 +59,9 @@ jobs:
         if: matrix.task == 'javascript'
         run: |
           node_root="$(mise where node@24.18.0)"
+          pnpm_root="$(mise where pnpm@11.15.1)"
           npm_modules="$node_root/lib/node_modules/npm/node_modules"
-          BENCH_NPM_TAR="$npm_modules/tar" \
+          BENCH_NPM_TAR="$npm_modules/tar" BENCH_PNPM="$pnpm_root/pnpm" \
             BENCH_PACKAGE_SIZE_GROUP=javascript \
             "$node_root/bin/node" benchmarks/scripts/measure-package-sizes.mjs
       - name: Measure native package sizes
