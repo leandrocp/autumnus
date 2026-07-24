@@ -11,7 +11,6 @@ interface HighlightCapture {
   scope: string;
   language: string;
   depth: number;
-  localDepth: number;
 }
 
 interface SourceMaps {
@@ -179,77 +178,6 @@ function mergeSortedCaptures(
   return merged;
 }
 
-function filterSpecialPunctuationCaptures(
-  captures: HighlightCapture[],
-  sourceBytes: Uint8Array,
-): HighlightCapture[] {
-  const activeStrings: HighlightCapture[] = [];
-  const filtered: HighlightCapture[] = [];
-
-  for (const capture of captures) {
-    while (
-      activeStrings.length > 0 &&
-      activeStrings[activeStrings.length - 1]!.endByte <= capture.startByte
-    ) {
-      activeStrings.pop();
-    }
-
-    let keepCapture = true;
-
-    if (
-      capture.scope === "punctuation.special" &&
-      capture.endByte - capture.startByte === 2 &&
-      sourceBytes[capture.startByte] === 0x24 /* $ */ &&
-      sourceBytes[capture.startByte + 1] === 0x7b /* { */
-    ) {
-      let sameLayerString: HighlightCapture | undefined;
-      let nestedString = false;
-
-      for (let i = activeStrings.length - 1; i >= 0; i -= 1) {
-        const active = activeStrings[i]!;
-        if (active.endByte < capture.endByte) {
-          continue;
-        }
-
-        if (active.depth === capture.depth) {
-          sameLayerString = active;
-        } else if (active.depth > capture.depth) {
-          nestedString = true;
-        }
-
-        if (sameLayerString && nestedString) {
-          break;
-        }
-      }
-
-      const hasInjectedCaptures =
-        sameLayerString != null &&
-        captures.some(
-          (candidate) =>
-            candidate.depth > capture.depth &&
-            candidate.startByte >= sameLayerString.startByte &&
-            candidate.endByte <= sameLayerString.endByte,
-        );
-
-      // Rust keeps `${` inside local scopes, except where an injected language
-      // covers that part of a tagged template.
-      keepCapture =
-        !sameLayerString ||
-        nestedString ||
-        (!hasInjectedCaptures && sameLayerString.localDepth > 0);
-    }
-
-    if (keepCapture) {
-      filtered.push(capture);
-      if (capture.scope === "string") {
-        activeStrings.push(capture);
-      }
-    }
-  }
-
-  return filtered;
-}
-
 function dedupeCaptures(captures: HighlightCapture[]): HighlightCapture[] {
   const deduped: HighlightCapture[] = [];
   let lastCapture: HighlightCapture | undefined;
@@ -280,13 +208,6 @@ function dedupeCaptures(captures: HighlightCapture[]): HighlightCapture[] {
     semanticCaptures.add(key);
     return true;
   });
-}
-
-function normalizeCaptures(
-  captures: HighlightCapture[],
-  sourceBytes: Uint8Array,
-): HighlightCapture[] {
-  return dedupeCaptures(filterSpecialPunctuationCaptures(captures, sourceBytes));
 }
 
 function resolveLayerCaptures(
@@ -404,7 +325,6 @@ function resolveLayerCaptures(
         scope: effectiveScope,
         language: language.definition.id,
         depth,
-        localDepth: scopeStack.length - 1,
       });
 
       if (definitionTarget) {
@@ -659,10 +579,7 @@ export function buildHighlightEvents(
   options: { rainbowBrackets?: boolean } = {},
 ): HighlightEvent[] {
   const maps = buildSourceMaps(source);
-  const captures = normalizeCaptures(
-    collectLayerCaptures(source, maps, runtime, language, 0),
-    maps.sourceBytes,
-  );
+  const captures = dedupeCaptures(collectLayerCaptures(source, maps, runtime, language, 0));
   const events = buildNestedEvents(captures, maps.sourceUtf8ByteLength);
   return options.rainbowBrackets ? applyRainbowBrackets(source, events, language, maps) : events;
 }
