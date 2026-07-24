@@ -20,17 +20,8 @@ const releaseDir = resolve(
   "release",
 );
 const requireFromScript = createRequire(import.meta.url);
-const npmPackLibrary = process.env.BENCH_LIBNPMPACK
-  ? requireFromScript(process.env.BENCH_LIBNPMPACK)
-  : undefined;
 const npmTarLibrary = process.env.BENCH_NPM_TAR
   ? requireFromScript(process.env.BENCH_NPM_TAR)
-  : undefined;
-if (Boolean(npmPackLibrary) !== Boolean(npmTarLibrary)) {
-  throw new Error("BENCH_LIBNPMPACK and BENCH_NPM_TAR must be configured together");
-}
-const npmPackOptions = npmPackLibrary
-  ? JSON.parse((await execFile("npm", ["config", "list", "--json"])).stdout)
   : undefined;
 const requestedGroup = process.env.BENCH_PACKAGE_SIZE_GROUP;
 const groups = requestedGroup
@@ -227,8 +218,8 @@ async function resolvePackageDirectory(directory, name) {
 }
 
 async function packPackage(directory, key, packRoot) {
-  if (npmPackLibrary) {
-    return packPackageWithNpmLibrary(directory, key, packRoot);
+  if (npmTarLibrary) {
+    return packPackageWithPnpm(directory, key, packRoot);
   }
 
   const destination = resolve(
@@ -261,28 +252,65 @@ async function packPackage(directory, key, packRoot) {
   return result;
 }
 
-async function packPackageWithNpmLibrary(directory, key, packRoot) {
-  const materializedDirectory = resolve(
-    packRoot,
-    "packages",
-    key.replaceAll("/", "_").replaceAll("@", "_").replaceAll(":", "_"),
+async function packPackageWithPnpm(directory, key, packRoot) {
+  const pnpmDestination = resolve(packRoot, "pnpm");
+  await mkdir(pnpmDestination, { recursive: true });
+  const { stdout } = await execFile(
+    "pnpm",
+    [
+      "-C",
+      directory,
+      "--config.ignore-scripts=true",
+      "pack",
+      "--json",
+      "--skip-manifest-obfuscation",
+      "--pack-destination",
+      pnpmDestination,
+    ],
+    { maxBuffer: 10 * 1024 * 1024 },
   );
-  await mkdir(materializedDirectory, { recursive: true });
-  // npm can hang while packing packages inside pnpm's symlinked store on Linux.
-  // Preserve the package metadata so the resulting npm archive remains identical.
-  await execFile("cp", ["-a", `${directory}/.`, `${materializedDirectory}/`]);
-  const tarball = await npmPackLibrary(materializedDirectory, {
-    ...npmPackOptions,
-    cache: resolve(packRoot, "npm-cache"),
-    ignoreScripts: true,
+  const packed = JSON.parse(stdout);
+  if (!packed.filename) {
+    throw new Error(`pnpm pack returned no archive for ${key}`);
+  }
+
+  // pnpm's archive has the same files as npm but different tar metadata.
+  // Repack its ordered file list with npm's settings to retain exact npm sizes.
+  const files = [];
+  const fileListParser = npmTarLibrary.list({
+    onReadEntry(entry) {
+      files.push(entry.path.replace(/^package\//, ""));
+    },
   });
+  fileListParser.end(await readFile(packed.filename));
+  const manifest = JSON.parse(await readFile(resolve(directory, "package.json"), "utf8"));
+  const bins = new Set(
+    typeof manifest.bin === "string" ? [manifest.bin] : Object.values(manifest.bin ?? {}),
+  );
+  const tarball = await npmTarLibrary
+    .create(
+      {
+        cwd: directory,
+        prefix: "package/",
+        portable: true,
+        sync: true,
+        gzip: { level: 9 },
+        mtime: new Date("1985-10-26T08:15:00.000Z"),
+        filter(path, details) {
+          if (bins.has(path.replace(/^[^\\/]*[\\/]/, ""))) details.mode |= 0o111;
+          return true;
+        },
+      },
+      files,
+    )
+    .concat();
   let unpackedSize = 0;
-  const parser = npmTarLibrary.list({
+  const sizeParser = npmTarLibrary.list({
     onReadEntry(entry) {
       unpackedSize += entry.size;
     },
   });
-  parser.end(tarball);
+  sizeParser.end(tarball);
   return { size: tarball.length, unpackedSize };
 }
 
