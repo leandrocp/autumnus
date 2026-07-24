@@ -45,6 +45,10 @@ try {
       resolve(repoDir, "benchmarks/javascript/node_modules/shiki"),
       temporaryDir,
     );
+    const highlightJsPackages = await packageClosure(
+      resolve(repoDir, "benchmarks/javascript/node_modules/highlight.js"),
+      temporaryDir,
+    );
     const parserPackages = new Map();
     for (const language of [
       "c",
@@ -83,6 +87,7 @@ try {
         combinePackages(lumisPackages, ...parserPackages.values()),
       ),
       packageEntry("Shiki 4.3.1", "npm production closure", shikiPackages),
+      packageEntry("highlight.js 11.11.1", "npm production closure", highlightJsPackages),
     );
   }
 
@@ -94,7 +99,7 @@ try {
         resolve(releaseDir, "lumis-size"),
       ),
       await binaryEntry(
-        "syntect 5.3",
+        "syntect 5.3.0",
         "stripped default-syntax benchmark executable",
         resolve(releaseDir, "syntect-size"),
       ),
@@ -367,7 +372,7 @@ function executableName(name) {
 
 function requiredEnvironment(name) {
   const value = process.env[name];
-  if (!value) throw new Error(`${name} must point to the competitor artifact`);
+  if (!value) throw new Error(`${name} must point to the comparison artifact`);
   return value;
 }
 

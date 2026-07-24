@@ -54,9 +54,9 @@ struct LoadedLanguage {
 
 #[derive(Default)]
 struct Catalog {
-    languages: HashMap<String, Arc<LoadedLanguage>>,
-    aliases: HashMap<String, String>,
-    known: HashSet<String>,
+    languages: Arc<HashMap<String, Arc<LoadedLanguage>>>,
+    aliases: Arc<HashMap<String, String>>,
+    known: Arc<HashSet<String>>,
 }
 
 struct Worker {
@@ -263,10 +263,10 @@ impl Runtime {
             .write()
             .expect("language catalog lock poisoned");
         for alias in &spec.aliases {
-            catalog.aliases.insert(alias.clone(), spec.id.clone());
+            Arc::make_mut(&mut catalog.aliases).insert(alias.clone(), spec.id.clone());
         }
-        catalog.known.insert(spec.id.clone());
-        catalog.languages.insert(
+        Arc::make_mut(&mut catalog.known).insert(spec.id.clone());
+        Arc::make_mut(&mut catalog.languages).insert(
             spec.id,
             Arc::new(LoadedLanguage {
                 highlight,
@@ -282,13 +282,14 @@ impl Runtime {
     /// Missing injected languages are reported only when they are declared;
     /// query-specific pseudo-languages such as `printf` are ignored.
     pub fn declare_language(&self, id: &str, aliases: &[&str]) {
+        let id = id.to_string();
         let mut catalog = self
             .catalog
             .write()
             .expect("language catalog lock poisoned");
-        catalog.known.insert(id.to_string());
+        Arc::make_mut(&mut catalog.known).insert(id.clone());
         for alias in aliases {
-            catalog.aliases.insert((*alias).to_string(), id.to_string());
+            Arc::make_mut(&mut catalog.aliases).insert((*alias).to_string(), id.clone());
         }
     }
 
@@ -309,21 +310,23 @@ impl Runtime {
         injections: &str,
         locals: &str,
     ) -> Result<(), RuntimeError> {
-        let mut catalog = self
-            .catalog
-            .write()
-            .expect("language catalog lock poisoned");
-        let id = catalog
-            .aliases
-            .get(name_or_alias)
-            .cloned()
-            .unwrap_or_else(|| name_or_alias.to_string());
-        let loaded = catalog
-            .languages
-            .get(&id)
-            .ok_or_else(|| RuntimeError::LanguageNotLoaded(name_or_alias.to_string()))?;
-        let language = loaded.highlight.language.clone();
-        let brackets_source = loaded.brackets_source.clone();
+        let (id, language, brackets_source) = {
+            let catalog = self.catalog.read().expect("language catalog lock poisoned");
+            let id = catalog
+                .aliases
+                .get(name_or_alias)
+                .cloned()
+                .unwrap_or_else(|| name_or_alias.to_string());
+            let loaded = catalog
+                .languages
+                .get(&id)
+                .ok_or_else(|| RuntimeError::LanguageNotLoaded(name_or_alias.to_string()))?;
+            (
+                id,
+                loaded.highlight.language.clone(),
+                loaded.brackets_source.clone(),
+            )
+        };
         let mut highlight =
             HighlightConfiguration::new(language, id.clone(), highlights, injections, locals)
                 .map_err(|error| RuntimeError::Query {
@@ -331,7 +334,12 @@ impl Runtime {
                     message: error.to_string(),
                 })?;
         highlight.configure(&HIGHLIGHT_NAMES);
-        catalog.languages.insert(
+
+        let mut catalog = self
+            .catalog
+            .write()
+            .expect("language catalog lock poisoned");
+        Arc::make_mut(&mut catalog.languages).insert(
             id,
             Arc::new(LoadedLanguage {
                 highlight,
@@ -363,9 +371,9 @@ impl Runtime {
             (
                 root_id,
                 root,
-                catalog.languages.clone(),
-                catalog.aliases.clone(),
-                catalog.known.clone(),
+                Arc::clone(&catalog.languages),
+                Arc::clone(&catalog.aliases),
+                Arc::clone(&catalog.known),
             )
         };
 
@@ -637,7 +645,7 @@ mod tests {
             HighlightConfiguration::new(language, "json", "(string) @string", injections, "")
                 .unwrap();
         highlight.configure(&HIGHLIGHT_NAMES);
-        runtime.catalog.write().unwrap().languages.insert(
+        Arc::make_mut(&mut runtime.catalog.write().unwrap().languages).insert(
             "json".into(),
             Arc::new(LoadedLanguage {
                 highlight,

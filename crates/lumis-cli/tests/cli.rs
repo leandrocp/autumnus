@@ -436,11 +436,11 @@ fn dump_tree_interleaves_highlights_and_children_in_source_order() {
     assert!(output.status.success());
     let stdout = String::from_utf8(output.stdout).unwrap();
     let ordered = [
-        "@punctuation.bracket language: html, range: 0:0-0:1, text: \"<\"",
+        "@tag.delimiter language: html, range: 0:0-0:1, text: \"<\"",
         "[tag_name]",
-        "@punctuation.bracket language: html, range: 0:4-0:5, text: \">\"",
+        "@tag.delimiter language: html, range: 0:4-0:5, text: \">\"",
         "[text]",
-        "@punctuation.bracket language: html, range: 0:9-0:11, text: \"</\"",
+        "@tag.delimiter language: html, range: 0:9-0:11, text: \"</\"",
     ]
     .map(|text| stdout.find(text).unwrap());
     assert!(ordered.windows(2).all(|pair| pair[0] < pair[1]));
@@ -490,8 +490,8 @@ fn dump_tree_reports_exact_highlights_across_languages() {
             "html",
             "<div class=\"x\">hello</div>\n",
             vec![
-                "@punctuation.bracket language: html, range: 0:0-0:1, text: \"<\"",
-                "@punctuation.bracket language: html, range: 0:14-0:15, text: \">\"",
+                "@tag.delimiter language: html, range: 0:0-0:1, text: \"<\"",
+                "@tag.delimiter language: html, range: 0:14-0:15, text: \">\"",
                 "@string language: html, range: 0:11-0:14, text: \"\\\"x\\\"\"",
             ],
         ),

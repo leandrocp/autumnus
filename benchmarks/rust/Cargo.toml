@@ -28,6 +28,10 @@ path = "src/bin/lumis-size.rs"
 name = "syntect-size"
 path = "src/bin/syntect-size.rs"
 
+[[bin]]
+name = "showcase"
+path = "src/bin/showcase.rs"
+
 [profile.release]
 lto = true
 codegen-units = 1

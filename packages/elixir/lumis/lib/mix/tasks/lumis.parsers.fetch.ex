@@ -1,4 +1,8 @@
 defmodule Mix.Tasks.Lumis.Parsers.Fetch do
+  @moduledoc """
+  Fetches exact, integrity-checked Lumis parser WASMs for an OTP release.
+  """
+
   use Mix.Task
 
   @shortdoc "Fetches exact Lumis parser WASMs for an OTP release"
@@ -8,38 +12,47 @@ defmodule Mix.Tasks.Lumis.Parsers.Fetch do
 
   @impl Mix.Task
   def run(arguments) do
-    {options, languages, invalid} =
-      OptionParser.parse(arguments, strict: @switches, aliases: @aliases)
+    {options, languages} = parse_arguments(arguments)
+    selected = select_languages(options, languages)
+    validate_selection!(selected)
+    prefetch(selected, options)
+  end
 
-    if invalid != [] do
-      Mix.raise("invalid options: #{inspect(invalid)}")
+  defp parse_arguments(arguments) do
+    case OptionParser.parse(arguments, strict: @switches, aliases: @aliases) do
+      {options, languages, []} -> {options, languages}
+      {_options, _languages, invalid} -> Mix.raise("invalid options: #{inspect(invalid)}")
     end
+  end
 
-    selected =
-      cond do
-        options[:all] && languages != [] ->
-          Mix.raise("pass language names or --all, not both")
+  defp select_languages(options, languages) do
+    cond do
+      options[:all] && languages != [] ->
+        Mix.raise("pass language names or --all, not both")
 
-        options[:all] ->
-          Enum.map(Lumis.Generated.LanguageManifest.all(), & &1.id)
+      options[:all] ->
+        Enum.map(Lumis.Generated.LanguageManifest.all(), & &1.id)
 
-        languages != [] ->
-          languages
+      languages != [] ->
+        languages
 
-        true ->
-          Application.get_env(:lumis, :bundled_languages, [])
-      end
-
-    if selected == [] do
-      Mix.raise("pass language names, --all, or configure :lumis, :bundled_languages")
+      true ->
+        Application.get_env(:lumis, :bundled_languages, [])
     end
+  end
 
+  defp validate_selection!([]) do
+    Mix.raise("pass language names, --all, or configure :lumis, :bundled_languages")
+  end
+
+  defp validate_selection!(_languages), do: :ok
+
+  defp prefetch(languages, options) do
     prefetch_options =
-      []
+      [force: options[:force] || false]
       |> maybe_put(:directory, options[:output])
-      |> Keyword.put(:force, options[:force] || false)
 
-    case Lumis.LanguageLoader.prefetch(selected, prefetch_options) do
+    case Lumis.LanguageLoader.prefetch(languages, prefetch_options) do
       {:ok, paths} ->
         Enum.each(paths, fn path -> Mix.shell().info(path) end)
 

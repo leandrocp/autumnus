@@ -169,9 +169,13 @@ async function trackLoad<T>(
 }
 
 async function sha256Hex(data: Uint8Array): Promise<string> {
-  const bytes = new Uint8Array(data.byteLength);
-  bytes.set(data);
-  const digest = await globalThis.crypto.subtle.digest("SHA-256", bytes.buffer);
+  const bytes =
+    data.buffer instanceof ArrayBuffer &&
+    data.byteOffset === 0 &&
+    data.byteLength === data.buffer.byteLength
+      ? data.buffer
+      : data.slice().buffer;
+  const digest = await globalThis.crypto.subtle.digest("SHA-256", bytes);
   return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
@@ -325,6 +329,7 @@ function compileHighlightConfig(
 
 export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesModule {
   let configuredDefaultResolver: WasmResolver = DEFAULT_RESOLVER;
+  const moduleCache = createSharedRuntimeCache();
 
   class HighlighterRuntime implements RuntimeLike {
     private explicitResolver: WasmResolver | undefined;
@@ -339,7 +344,7 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
 
     constructor(options: HighlighterRuntimeOptions = {}) {
       this.explicitResolver = options.wasmResolver;
-      this.sharedCache = options.sharedCache ?? createSharedRuntimeCache();
+      this.sharedCache = options.sharedCache ?? moduleCache;
 
       for (const alias of PLAINTEXT_ALIASES) {
         this.aliasMap.set(alias, PLAINTEXT_LANG_ID);
@@ -558,8 +563,7 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
     }
   }
 
-  const defaultSharedCache = createSharedRuntimeCache();
-  const defaultRuntime = new HighlighterRuntime({ sharedCache: defaultSharedCache });
+  const defaultRuntime = new HighlighterRuntime();
 
   return {
     createRuntime(options = {}) {

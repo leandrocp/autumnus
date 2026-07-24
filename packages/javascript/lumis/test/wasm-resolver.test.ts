@@ -74,6 +74,19 @@ describe('Wasm resolver', () => {
     expect(html).toContain('class="language-diff"')
   }, 30_000)
 
+  it('shares verified parser bytes across highlighter instances', async () => {
+    const { createHighlighter } = await import('../src/index.js')
+    const { default: diff } = await import('../langs/diff.ts')
+    const resolver = vi.fn((language: string, wasm: { name: string }) =>
+      ensureLocalParserWasm(language, wasm.name)
+    )
+
+    await createHighlighter({ languages: [diff], wasmResolver: resolver })
+    await createHighlighter({ languages: [diff], wasmResolver: resolver })
+
+    expect(resolver).toHaveBeenCalledTimes(1)
+  }, 30_000)
+
   it('replaces a corrupted persistent cache entry', async () => {
     const { createHighlighter } = await import('../src/index.js')
     const { htmlLinked } = await import('../src/formatters.js')

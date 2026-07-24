@@ -3,6 +3,7 @@ import { createLanguagesModule } from "../core/languages.js";
 import type { LanguagesModule, WasmResolver } from "../core/languages.js";
 import treeSitterWasmBinary from "../tree-sitter-wasm.js";
 import {
+  isUrlString,
   readCachedWasm,
   wasmCacheFilename,
   withWasmCacheLock,
@@ -69,7 +70,7 @@ export const nodeRuntime: RuntimeEnvironment = {
       );
     }
 
-    if (URL.canParse(source)) {
+    if (isUrlString(source)) {
       return undefined;
     }
 

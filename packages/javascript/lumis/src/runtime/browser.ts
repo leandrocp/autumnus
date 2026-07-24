@@ -6,41 +6,59 @@ const WASM_CACHE_NAME = "lumis-wasm-v1";
 const WASM_DATABASE_NAME = "lumis-wasm-v1";
 const WASM_DATABASE_STORE = "parsers";
 const cacheLocks = new Map<string, Promise<unknown>>();
+let wasmCache: Promise<Cache | undefined> | undefined;
 let wasmDatabase: Promise<IDBDatabase | undefined> | undefined;
+let indexedDbPreferred: boolean | undefined;
 
 function cacheRequest(key: string): Request {
   const origin = globalThis.location?.origin ?? "https://lumis.invalid";
   return new Request(`${origin}/.lumis-cache/${encodeURIComponent(key)}`);
 }
 
-async function openWasmCache(): Promise<Cache | undefined> {
-  if (!("caches" in globalThis)) return undefined;
-  try {
-    return await globalThis.caches.open(WASM_CACHE_NAME);
-  } catch {
-    return undefined;
-  }
+function openWasmCache(): Promise<Cache | undefined> {
+  if (!("caches" in globalThis)) return Promise.resolve(undefined);
+  return (wasmCache ??= globalThis.caches.open(WASM_CACHE_NAME).catch(() => undefined));
 }
 
 function prefersIndexedDb(): boolean {
+  if (indexedDbPreferred !== undefined) return indexedDbPreferred;
   const userAgent = globalThis.navigator?.userAgent ?? "";
-  return /\bSafari\//.test(userAgent) && !/\b(?:Chrome|Chromium|CriOS|Edg|OPR)\//.test(userAgent);
+  indexedDbPreferred =
+    /\bSafari\//.test(userAgent) && !/\b(?:Chrome|Chromium|CriOS|Edg|OPR)\//.test(userAgent);
+  return indexedDbPreferred;
 }
 
 async function openWasmDatabase(): Promise<IDBDatabase | undefined> {
   if (!("indexedDB" in globalThis)) return undefined;
   wasmDatabase ??= new Promise((resolve) => {
     const request = globalThis.indexedDB.open(WASM_DATABASE_NAME, 1);
+    let settled = false;
+    const finish = (database: IDBDatabase | undefined) => {
+      if (settled) {
+        database?.close();
+        return;
+      }
+      settled = true;
+      resolve(database);
+    };
     request.onupgradeneeded = () => {
       if (!request.result.objectStoreNames.contains(WASM_DATABASE_STORE)) {
         request.result.createObjectStore(WASM_DATABASE_STORE);
       }
     };
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => resolve(undefined);
-    request.onblocked = () => resolve(undefined);
+    request.onsuccess = () => finish(request.result);
+    request.onerror = () => finish(undefined);
+    request.onblocked = () => finish(undefined);
   });
   return wasmDatabase;
+}
+
+function exactArrayBuffer(data: Uint8Array): ArrayBuffer {
+  return data.buffer instanceof ArrayBuffer &&
+    data.byteOffset === 0 &&
+    data.byteLength === data.buffer.byteLength
+    ? data.buffer
+    : data.slice().buffer;
 }
 
 async function readCacheStorage(key: string): Promise<Uint8Array | undefined> {
@@ -60,7 +78,7 @@ async function writeCacheStorage(key: string, data: Uint8Array): Promise<boolean
   try {
     await cache.put(
       cacheRequest(key),
-      new Response(data.slice(), {
+      new Response(exactArrayBuffer(data), {
         headers: {
           "Content-Type": "application/wasm",
           "Cache-Control": "public, max-age=31536000, immutable",
@@ -94,7 +112,7 @@ async function writeIndexedDb(key: string, data: Uint8Array): Promise<boolean> {
   if (!database) return false;
   return new Promise((resolve) => {
     const transaction = database.transaction(WASM_DATABASE_STORE, "readwrite");
-    transaction.objectStore(WASM_DATABASE_STORE).put(data.slice().buffer, key);
+    transaction.objectStore(WASM_DATABASE_STORE).put(exactArrayBuffer(data), key);
     transaction.oncomplete = () => resolve(true);
     transaction.onerror = () => resolve(false);
     transaction.onabort = () => resolve(false);
@@ -130,18 +148,15 @@ export const browserRuntime: RuntimeEnvironment = {
   },
 
   async withFsCacheLock(key, operation) {
-    const existing = cacheLocks.get(key);
-    if (existing) {
-      await existing;
-      return operation();
-    }
-
-    const pending = operation();
+    const previous = cacheLocks.get(key);
+    const pending = (previous ?? Promise.resolve()).catch(() => undefined).then(operation);
     cacheLocks.set(key, pending);
     try {
       return await pending;
     } finally {
-      cacheLocks.delete(key);
+      if (cacheLocks.get(key) === pending) {
+        cacheLocks.delete(key);
+      }
     }
   },
 

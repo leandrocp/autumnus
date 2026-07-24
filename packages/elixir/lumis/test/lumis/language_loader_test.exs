@@ -53,6 +53,42 @@ defmodule Lumis.LanguageLoaderTest do
     assert Lumis.Native.has_language("xml")
   end
 
+  test "serializes concurrent cache misses" do
+    {:ok, entry} = LanguageManifest.fetch("comment")
+    original_resolver = Application.fetch_env!(:lumis, :wasm_resolver)
+    {:file, fixture} = original_resolver.(entry)
+    bytes = File.read!(fixture)
+
+    output_dir =
+      Path.join(System.tmp_dir!(), "lumis-prefetch-#{System.unique_integer([:positive])}")
+
+    test_process = self()
+
+    Application.put_env(:lumis, :wasm_resolver, fn _entry ->
+      send(test_process, {:resolver_started, self()})
+      receive do: (:release -> {:ok, bytes})
+    end)
+
+    on_exit(fn ->
+      Application.put_env(:lumis, :wasm_resolver, original_resolver)
+      File.rm_rf(output_dir)
+    end)
+
+    first =
+      Task.async(fn -> Lumis.LanguageLoader.prefetch(["comment"], directory: output_dir) end)
+
+    assert_receive {:resolver_started, resolver_process}
+
+    second =
+      Task.async(fn -> Lumis.LanguageLoader.prefetch(["comment"], directory: output_dir) end)
+
+    refute_receive {:resolver_started, _other_process}, 100
+    send(resolver_process, :release)
+
+    assert {:ok, [path]} = Task.await(first)
+    assert {:ok, [^path]} = Task.await(second)
+  end
+
   test "Mix task prepares exact release-local parser files" do
     output_dir = Path.join(Application.fetch_env!(:lumis, :wasm_bundle_dir), "mix-task")
 

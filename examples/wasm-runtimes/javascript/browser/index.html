@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lumis dynamic WASM — browser</title>
+    <style>
+      body { font-family: system-ui, sans-serif; margin: 2rem; background: #f4f4f5; }
+      main { max-width: 960px; margin: 0 auto; }
+      section { margin-block: 1.5rem; }
+      pre.lumis { overflow-x: auto; padding: 1rem; border-radius: 0.5rem; }
+      #error { display: none; color: #b91c1c; white-space: pre-wrap; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Browser dynamic parser WASMs</h1>
+      <p>
+        A real 1,397-line Three.js file with injected CSS, JSON, and JavaScript,
+        rendered with <code>html-inline</code>.
+      </p>
+      <p id="fixture"></p>
+      <p id="status">Loading all four parsers…</p>
+      <pre id="error"></pre>
+      <div id="output"></div>
+    </main>
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>

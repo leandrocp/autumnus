@@ -1,6 +1,16 @@
 repo_dir = Path.expand("../..", __DIR__)
 System.put_env("LUMIS_BUILD", "1")
 
+System.put_env(
+  "CARGO_PATCH_CRATES_IO_LUMIS_WASM_RUNTIME_PATH",
+  Path.join(repo_dir, "crates/lumis-wasm-runtime")
+)
+
+System.put_env(
+  "CARGO_PATCH_CRATES_IO_LUMIS_CORE_PATH",
+  Path.join(repo_dir, "crates/lumis-core")
+)
+
 Mix.install(
   [
     {:lumis, path: Path.join(repo_dir, "packages/elixir/lumis")},

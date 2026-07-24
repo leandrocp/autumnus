@@ -142,3 +142,68 @@ jobs:
         env:
           PARSER: ${{ matrix.parser }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  sync-manifest:
+    needs: [detect, build]
+    if: >-
+      always() &&
+      github.ref == 'refs/heads/main' &&
+      needs.detect.outputs.skip == 'false' &&
+      needs.build.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "lts/*"
+          cache: "pnpm"
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install JavaScript dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Refresh exact parser metadata
+        run: |
+          set -euo pipefail
+          for attempt in {1..10}; do
+            if python3 scripts/update-wasm-manifest.py; then
+              break
+            fi
+            if [ "$attempt" -eq 10 ]; then
+              echo "Published parser metadata did not become available in time" >&2
+              exit 1
+            fi
+            sleep 30
+          done
+          python3 scripts/update-wasm-manifest.py --sync-fixtures
+          pnpm --filter @lumis-sh/lumis build:langs
+
+      - name: Create manifest pull request
+        uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ secrets.CI_TOKEN }}
+          add-paths: |
+            wasm-manifest.json
+            crates/lumis-wasm-runtime/src/manifest.rs
+            crates/lumis-cli/tests/fixtures/parsers
+            packages/elixir/lumis/lib/lumis/generated/language_manifest.ex
+            packages/javascript/lumis/langs
+            packages/javascript/lumis/test/fixtures/wasm
+          commit-message: "chore: sync published WASM parsers"
+          title: "chore: sync published WASM parsers"
+          body: |
+            Refreshes exact parser versions, integrity metadata, and test fixtures
+            after the WASM parser packages were published from `main`.
+          branch: sync-wasm-manifest
+          delete-branch: true
+          base: main

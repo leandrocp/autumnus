@@ -13,10 +13,14 @@ from urllib.request import Request, urlopen
 
 
 TREE_SITTER_SERIES = "0.26"
+PACKAGE_FORMAT_VERSION = 2
 ROOT = Path(__file__).resolve().parent.parent
 OUTPUT = ROOT / "wasm-manifest.json"
 CACHE = ROOT / "tmp" / "wasm-manifest-cache"
-FIXTURES = ROOT / "packages" / "javascript" / "lumis" / "test" / "fixtures" / "wasm"
+FIXTURE_DIRS = (
+    ROOT / "packages" / "javascript" / "lumis" / "test" / "fixtures" / "wasm",
+    ROOT / "crates" / "lumis-cli" / "tests" / "fixtures" / "parsers",
+)
 
 
 def package_suffix(wasm_name: str) -> str:
@@ -98,35 +102,24 @@ def grammar_name(wasm: bytes) -> str:
     return candidates[0]
 
 
-def matching_version(metadata: dict, revision: str) -> tuple[str, str]:
+def matching_version(metadata: dict, revision: str) -> str:
     matches = []
-    compatible = []
     for version, release in metadata.get("versions", {}).items():
         lumis = release.get("lumis", {})
         if version.startswith(f"{TREE_SITTER_SERIES}.") and (
             lumis.get("treeSitter") == TREE_SITTER_SERIES
+            and lumis.get("formatVersion") == PACKAGE_FORMAT_VERSION
         ):
-            compatible.append(version)
             if lumis.get("rev") == revision:
                 matches.append(version)
 
-    if matches:
-        version = max(matches, key=version_key)
-    elif compatible:
-        version = max(compatible, key=version_key)
-        print(
-            f"warning: {metadata.get('name')}@{version} does not match "
-            f"current parser revision {revision}",
-            file=sys.stderr,
-            flush=True,
-        )
-    else:
+    if not matches:
         raise RuntimeError(
-            f"no published {TREE_SITTER_SERIES}.x package is available"
+            f"no published {TREE_SITTER_SERIES}.x package for "
+            f"{metadata.get('name')} matches parser revision {revision}"
         )
 
-    published_revision = metadata["versions"][version].get("lumis", {}).get("rev", "")
-    return version, published_revision
+    return max(matches, key=version_key)
 
 
 def backfill_grammar_names() -> None:
@@ -143,11 +136,14 @@ def backfill_grammar_names() -> None:
 
 def sync_fixtures() -> None:
     manifest = json.loads(OUTPUT.read_text(encoding="utf-8"))
-    fixture_names = {fixture.stem for fixture in FIXTURES.glob("*.wasm")}
+    fixture_names = {
+        fixture.stem
+        for directory in FIXTURE_DIRS
+        for fixture in directory.glob("*.wasm")
+    }
     fixture_names.add("tree-sitter-comment")
 
     for wasm_name in sorted(fixture_names):
-        fixture = FIXTURES / f"{wasm_name}.wasm"
         entry = manifest["grammars"][wasm_name]
         url = (
             f"https://cdn.jsdelivr.net/npm/{entry['packageName']}@{entry['version']}/"
@@ -156,7 +152,10 @@ def sync_fixtures() -> None:
         wasm = fetch_bytes(url)
         if len(wasm) != entry["size"] or hashlib.sha256(wasm).hexdigest() != entry["sha256"]:
             raise RuntimeError(f"{wasm_name} does not match wasm-manifest.json")
-        fixture.write_bytes(wasm)
+        for directory in FIXTURE_DIRS:
+            fixture = directory / f"{wasm_name}.wasm"
+            if fixture.exists() or wasm_name == "tree-sitter-comment":
+                fixture.write_bytes(wasm)
         print(f"{wasm_name}: synced {len(wasm)} bytes", flush=True)
 
 
@@ -186,7 +185,7 @@ def main() -> None:
         package_name = f"@lumis-sh/wasm-{package_suffix(wasm_name)}"
         encoded = quote(package_name, safe="")
         metadata = fetch_json(f"https://registry.npmjs.org/{encoded}")
-        version, published_revision = matching_version(metadata, revision)
+        version = matching_version(metadata, revision)
         url = (
             f"https://cdn.jsdelivr.net/npm/{package_name}@{version}/"
             f"{wasm_name}.wasm"
@@ -198,10 +197,8 @@ def main() -> None:
             "sha256": hashlib.sha256(wasm).hexdigest(),
             "size": len(wasm),
             "grammarName": grammar_name(wasm),
-            "revision": published_revision,
+            "revision": revision,
         }
-        if published_revision != revision:
-            grammars[wasm_name]["expectedRevision"] = revision
         print(f"{wasm_name}: {version} ({len(wasm)} bytes)", flush=True)
 
     manifest = {

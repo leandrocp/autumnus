@@ -3,6 +3,7 @@ import { EXACT_LANGUAGE_MAP } from "./generated/language-detection.js";
 import { LANGUAGE_LOADERS } from "./generated/language-loaders.js";
 import {
   readCachedWasm,
+  isUrlString,
   wasmCacheDir,
   wasmCachePath,
   withWasmCacheLock,
@@ -58,7 +59,7 @@ async function fetchWasm(language: Language, ref: WasmRef, resolver: WasmResolve
     const url = source instanceof URL ? source : new URL(source);
     return verifyWasm(ref, new Uint8Array(await readFile(fileURLToPath(url))));
   }
-  if (typeof source === "string" && !URL.canParse(source)) {
+  if (typeof source === "string" && !isUrlString(source)) {
     const { readFile } = await import("node:fs/promises");
     return verifyWasm(ref, new Uint8Array(await readFile(source)));
   }

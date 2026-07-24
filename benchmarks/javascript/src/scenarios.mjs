@@ -1,6 +1,6 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, isAbsolute, resolve } from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 import { do_not_optimize, measure } from "mitata";
 
 const benchmarksDir = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
@@ -19,7 +19,7 @@ if (!Number.isSafeInteger(minimumSamples) || minimumSamples < 2) {
 if (!Number.isFinite(measurementSeconds) || measurementSeconds <= 0) {
   throw new Error("BENCH_TIME_SECONDS must be positive");
 }
-if (!new Set(["lumis-js-wasm", "shiki"]).has(implementation)) {
+if (!new Set(["lumis-js-wasm", "shiki", "highlight-js"]).has(implementation)) {
   throw new Error(`unknown JavaScript benchmark implementation: ${implementation}`);
 }
 
@@ -46,7 +46,12 @@ if (
 }
 
 await prepareRuntime();
-const adapter = implementation === "shiki" ? await loadShiki() : await loadLumis();
+const adapter =
+  implementation === "shiki"
+    ? await loadShiki()
+    : implementation === "highlight-js"
+      ? await loadHighlightJs()
+      : await loadLumis();
 const validationRuntime = await adapter.initialize();
 const outputBytes = adapter.render(validationRuntime, true);
 adapter.dispose(validationRuntime);
@@ -99,14 +104,8 @@ console.log(outputPath);
 
 async function prepareRuntime() {
   const runtimeDir = resolve(repoDir, "target/benchmarks/javascript-runtime");
-  const cacheDir = resolve(runtimeDir, "wasm-cache");
-  const diffWasm = fileURLToPath(import.meta.resolve("@lumis-sh/wasm-diff/tree-sitter-diff.wasm"));
-  process.env.LUMIS_WASM_CACHE_DIR = cacheDir;
-  const { cacheLanguages } = await import("@lumis-sh/lumis/cache");
-  await cacheLanguages(["plaintext"], {
-    directory: cacheDir,
-    resolver: () => pathToFileURL(diffWasm),
-  });
+  await mkdir(runtimeDir, { recursive: true });
+  process.env.LUMIS_WASM_CACHE_DIR = resolve(runtimeDir, "wasm-cache");
   process.chdir(runtimeDir);
 }
 
@@ -184,6 +183,42 @@ async function loadShiki() {
     disposeResult(measured) {
       measured.runtime.dispose();
     },
+  };
+}
+
+async function loadHighlightJs() {
+  const { default: highlightJs } = await import("highlight.js/lib/core");
+  const languageNames = [...new Set(scenario.files.map(({ language }) => language))];
+  const languageModules = Object.fromEntries(
+    await Promise.all(
+      languageNames.map(async (language) => {
+        const moduleName = language === "html" ? "xml" : language;
+        const { default: definition } = await import(`highlight.js/lib/languages/${moduleName}`);
+        return [language, definition];
+      }),
+    ),
+  );
+
+  return {
+    async initialize() {
+      const highlighter = highlightJs.newInstance();
+      for (const [language, definition] of Object.entries(languageModules)) {
+        highlighter.registerLanguage(language, definition);
+      }
+      return highlighter;
+    },
+    render(highlighter, validate = false) {
+      let renderedBytes = 0;
+      for (const file of scenario.files) {
+        const highlighted = highlighter.highlight(file.source, { language: file.language }).value;
+        const output = `<pre><code class="hljs language-${file.language}">${highlighted}</code></pre>`;
+        if (validate) assertHtml(output, file.source, implementation);
+        renderedBytes += Buffer.byteLength(output);
+      }
+      return renderedBytes;
+    },
+    dispose() {},
+    disposeResult() {},
   };
 }
 

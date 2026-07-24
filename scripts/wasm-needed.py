@@ -76,9 +76,20 @@ filter_parsers = {part.strip() for part in raw_filter.split(",") if part.strip()
 force_publish = is_truthy(sys.argv[2]) if len(sys.argv) > 2 else False
 needed = []
 seen = set()
+revisions = {}
 
 for pname, info in data.get("parsers", {}).items():
     wasm_name = info.get("wasm_name") or f"tree-sitter-{pname}"
+    revision = info.get("wasm_rev") or info.get("rev", "")
+    previous = revisions.setdefault(wasm_name, revision)
+    if previous != revision:
+        raise RuntimeError(
+            f"{wasm_name} is shared by different revisions: {previous} and {revision}"
+        )
+
+for pname, info in data.get("parsers", {}).items():
+    wasm_name = info.get("wasm_name") or f"tree-sitter-{pname}"
+    revision = revisions[wasm_name]
 
     if (
         filter_parsers
@@ -117,11 +128,11 @@ for pname, info in data.get("parsers", {}).items():
     else:
         versions = [v for v in versions_data if isinstance(v, str)]
 
-    published = published_for_revision(pkg, versions, info.get("rev", ""))
+    published = published_for_revision(pkg, versions, revision)
 
     if not published:
         print(
-            f"Need to publish {pkg}@{next_patch_version(versions)} for {info.get('rev', '')}",
+            f"Need to publish {pkg}@{next_patch_version(versions)} for {revision}",
             file=sys.stderr,
         )
         needed.append(wasm_name)

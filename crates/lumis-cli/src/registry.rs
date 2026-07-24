@@ -192,15 +192,29 @@ impl Registry {
             return Ok(bytes);
         }
 
-        self.download_parser(lang_name)
+        let cache_path = self.parser_path(lang_name);
+        with_cache_lock(&cache_path, || {
+            // Another process may have populated the cache while this process
+            // waited for the lock.
+            if let Some(bytes) = self.read_cached_parser(lang_name) {
+                return Ok(bytes);
+            }
+            self.fetch_and_cache_parser(lang_name, &cache_path)
+        })
     }
 
     /// Download a parser WASM from CDN and cache it locally.
     /// Returns the WASM bytes.
     pub fn download_parser(&self, lang_name: &str) -> Result<Vec<u8>> {
+        let cache_path = self.parser_path(lang_name);
+        with_cache_lock(&cache_path, || {
+            self.fetch_and_cache_parser(lang_name, &cache_path)
+        })
+    }
+
+    fn fetch_and_cache_parser(&self, lang_name: &str, cache_path: &Path) -> Result<Vec<u8>> {
         let metadata = parser_metadata(lang_name)
             .with_context(|| format!("missing WASM metadata for '{lang_name}'"))?;
-        let cache_path = self.parser_path(lang_name);
         let url = self.parser_download_url(lang_name);
 
         let bytes = match fetch_bytes(&url) {
@@ -209,7 +223,7 @@ impl Registry {
         };
 
         verify_parser(&bytes, metadata)?;
-        with_cache_lock(&cache_path, || write_atomic(&cache_path, &bytes))?;
+        write_atomic(cache_path, &bytes)?;
 
         Ok(bytes)
     }
@@ -470,6 +484,7 @@ fn fetch_bytes(url: &str) -> Result<Vec<u8>> {
 mod tests {
     use super::*;
     use lumis_wasm_runtime::tree_sitter_highlight::Highlighter;
+    use std::sync::mpsc;
     use tempfile::tempdir;
     use tree_sitter::Parser;
 
@@ -567,5 +582,42 @@ mod tests {
         assert!(url.contains(metadata.package_name));
         assert!(url.contains(&format!("@{}/", metadata.version)));
         assert!(!url.contains("@latest"));
+    }
+
+    #[test]
+    fn parser_cache_lock_serializes_writers() {
+        let dir = tempdir().unwrap();
+        let cache_path = dir.path().join("parser.wasm");
+        let (first_started_tx, first_started_rx) = mpsc::channel();
+        let (release_first_tx, release_first_rx) = mpsc::channel();
+
+        let first_path = cache_path.clone();
+        let first = std::thread::spawn(move || {
+            with_cache_lock(&first_path, || {
+                first_started_tx.send(()).unwrap();
+                release_first_rx.recv().unwrap();
+                Ok(())
+            })
+        });
+        first_started_rx.recv().unwrap();
+
+        let (second_started_tx, second_started_rx) = mpsc::channel();
+        let second = std::thread::spawn(move || {
+            with_cache_lock(&cache_path, || {
+                second_started_tx.send(()).unwrap();
+                Ok(())
+            })
+        });
+
+        assert!(second_started_rx
+            .recv_timeout(Duration::from_millis(100))
+            .is_err());
+        release_first_tx.send(()).unwrap();
+        second_started_rx
+            .recv_timeout(Duration::from_secs(2))
+            .unwrap();
+
+        first.join().unwrap().unwrap();
+        second.join().unwrap().unwrap();
     }
 }

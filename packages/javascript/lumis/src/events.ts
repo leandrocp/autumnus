@@ -314,6 +314,7 @@ function resolveLayerCaptures(
     }
 
     let selectedScope: string | undefined;
+    let selectedPatternIndex = -1;
     let referenceHighlight: string | undefined;
     let definitionTarget: LocalDef | undefined;
     let definitionName: string | undefined;
@@ -376,9 +377,11 @@ function resolveLayerCaptures(
 
       if (
         currentScope &&
+        capture.patternIndex >= selectedPatternIndex &&
         !(isLocalNode && language.config.nonLocalVariablePatterns[capture.patternIndex])
       ) {
         selectedScope = currentScope;
+        selectedPatternIndex = capture.patternIndex;
       }
 
       nextIndex += 1;

@@ -2,6 +2,17 @@ const nodeFsPromises = "node:fs" + "/promises";
 const nodePath = "node:path";
 
 /** @internal */
+export function isUrlString(source: string): boolean {
+  if (/^[a-zA-Z]:/.test(source)) return false;
+  try {
+    new URL(source);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** @internal */
 export function wasmCacheFilename(key: string): string {
   return `${encodeURIComponent(key)}.wasm`;
 }
@@ -112,7 +123,10 @@ export async function withWasmCacheLock<T>(
   try {
     return await operation();
   } finally {
-    await lock.close();
-    await rm(lockPath, { force: true });
+    try {
+      await lock.close();
+    } finally {
+      await rm(lockPath, { force: true });
+    }
   }
 }

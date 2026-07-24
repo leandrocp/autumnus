@@ -11,13 +11,8 @@ defmodule Lumis.LanguageLoader do
   def load(name) when name in @plaintext_names, do: :ok
 
   def load(name) when is_binary(name) do
-    with {:ok, entry} <- LanguageManifest.fetch(name) do
-      if Native.has_language(entry.id) do
-        :ok
-      else
-        :global.trans({__MODULE__, entry.id}, fn -> load_entry(entry) end)
-      end
-    else
+    case LanguageManifest.fetch(name) do
+      {:ok, entry} -> load_manifest_entry(entry)
       :error -> {:error, "unknown language '#{name}'"}
     end
   end
@@ -35,27 +30,46 @@ defmodule Lumis.LanguageLoader do
     directory = Keyword.get(options, :directory, bundled_dir())
     force? = Keyword.get(options, :force, false)
 
-    names
-    |> Enum.map(&to_string/1)
-    |> Enum.reduce_while({:ok, [], MapSet.new()}, fn name, {:ok, paths, seen} ->
-      with {:ok, entry} <- LanguageManifest.fetch(name) do
-        key = {entry.wasm_name, entry.version, entry.sha256}
+    result =
+      Enum.reduce_while(names, {:ok, [], MapSet.new()}, fn name, {:ok, paths, seen} ->
+        prefetch_name(to_string(name), paths, seen, directory, force?)
+      end)
 
-        if MapSet.member?(seen, key) do
-          {:cont, {:ok, paths, seen}}
-        else
-          case prefetch_entry(entry, directory, force?) do
-            {:ok, path} -> {:cont, {:ok, [path | paths], MapSet.put(seen, key)}}
-            {:error, reason} -> {:halt, {:error, reason}}
-          end
-        end
-      else
-        :error -> {:halt, {:error, "unknown language '#{name}'"}}
-      end
-    end)
-    |> case do
-      {:ok, paths, _seen} -> {:ok, Enum.reverse(paths)}
+    case result do
       {:error, reason} -> {:error, reason}
+      {:ok, paths, _seen} -> {:ok, Enum.reverse(paths)}
+    end
+  end
+
+  defp load_manifest_entry(entry) do
+    if Native.has_language(entry.id) do
+      :ok
+    else
+      :global.trans({__MODULE__, entry.id}, fn -> load_entry(entry) end)
+    end
+  end
+
+  defp prefetch_name(name, paths, seen, directory, force?) do
+    case LanguageManifest.fetch(name) do
+      {:ok, entry} -> prefetch_manifest_entry(entry, paths, seen, directory, force?)
+      :error -> {:halt, {:error, "unknown language '#{name}'"}}
+    end
+  end
+
+  defp prefetch_manifest_entry(entry, paths, seen, directory, force?) do
+    key = {entry.wasm_name, entry.version, entry.sha256}
+
+    if MapSet.member?(seen, key) do
+      {:cont, {:ok, paths, seen}}
+    else
+      prefetch_new_entry(entry, key, paths, seen, directory, force?)
+    end
+  end
+
+  defp prefetch_new_entry(entry, key, paths, seen, directory, force?) do
+    case prefetch_entry(entry, directory, force?) do
+      {:ok, path} -> {:cont, {:ok, [path | paths], MapSet.put(seen, key)}}
+      {:error, reason} -> {:halt, {:error, reason}}
     end
   end
 
@@ -63,9 +77,9 @@ defmodule Lumis.LanguageLoader do
     if Native.has_language(entry.id) do
       :ok
     else
-      with {:ok, bytes} <- cached_or_resolved(entry),
-           :ok <- Native.load_language(entry.id, bytes) do
-        :ok
+      case cached_or_resolved(entry) do
+        {:ok, bytes} -> Native.load_language(entry.id, bytes)
+        {:error, reason} -> {:error, reason}
       end
     end
   end
@@ -85,66 +99,78 @@ defmodule Lumis.LanguageLoader do
         {:ok, bytes}
 
       :miss ->
-        if offline?() do
-          {:error, "parser WASM for '#{entry.id}' is not cached and offline mode is enabled"}
-        else
-          with_cache_lock(cache_file, fn ->
-            case read_verified(cache_file, entry, true) do
-              {:ok, bytes} ->
-                {:ok, bytes}
+        resolve_cache_miss(entry, cache_file)
+    end
+  end
 
-              :miss ->
-                with {:ok, bytes} <- resolve(entry),
-                     :ok <- verify(bytes, entry),
-                     :ok <- write_atomic(cache_file, bytes) do
-                  {:ok, bytes}
-                end
-            end
-          end)
-        end
+  defp resolve_cache_miss(entry, cache_file) do
+    if offline?() do
+      offline_error(entry)
+    else
+      with_cache_lock(cache_file, fn -> cached_after_lock(entry, cache_file) end)
+    end
+  end
+
+  defp cached_after_lock(entry, cache_file) do
+    case read_verified(cache_file, entry, true) do
+      {:ok, bytes} -> {:ok, bytes}
+      :miss -> resolve_verified_and_write(entry, cache_file)
+    end
+  end
+
+  defp resolve_verified_and_write(entry, cache_file) do
+    with {:ok, bytes} <- resolve(entry),
+         :ok <- verify(bytes, entry),
+         :ok <- write_atomic(cache_file, bytes) do
+      {:ok, bytes}
     end
   end
 
   defp prefetch_entry(entry, directory, force?) do
     destination = Path.join(directory, cache_filename(entry))
+    with_cache_lock(destination, fn -> ensure_prefetched(entry, destination, force?) end)
+  end
 
-    with_cache_lock(destination, fn ->
-      if force? do
-        resolve_and_write(entry, destination)
-      else
-        case read_verified(destination, entry, true) do
-          {:ok, _bytes} -> {:ok, destination}
-          :miss -> resolve_and_write(entry, destination)
-        end
-      end
-    end)
+  defp ensure_prefetched(entry, destination, true) do
+    resolve_and_write(entry, destination)
+  end
+
+  defp ensure_prefetched(entry, destination, false) do
+    case read_verified(destination, entry, true) do
+      {:ok, _bytes} -> {:ok, destination}
+      :miss -> resolve_and_write(entry, destination)
+    end
   end
 
   defp resolve_and_write(entry, destination) do
     if offline?() do
-      {:error, "parser WASM for '#{entry.id}' is not cached and offline mode is enabled"}
+      offline_error(entry)
     else
-      with {:ok, bytes} <- resolve(entry),
-           :ok <- verify(bytes, entry),
-           :ok <- write_atomic(destination, bytes) do
-        {:ok, destination}
+      case resolve_verified_and_write(entry, destination) do
+        {:ok, _bytes} -> {:ok, destination}
+        {:error, reason} -> {:error, reason}
       end
     end
   end
 
+  defp offline_error(entry) do
+    {:error, "parser WASM for '#{entry.id}' is not cached and offline mode is enabled"}
+  end
+
   defp read_verified(path, entry, remove_invalid?) do
     case File.read(path) do
-      {:ok, bytes} ->
-        case verify(bytes, entry) do
-          :ok ->
-            {:ok, bytes}
+      {:ok, bytes} -> validate_cached(path, bytes, entry, remove_invalid?)
+      {:error, _reason} -> :miss
+    end
+  end
 
-          {:error, _reason} ->
-            if remove_invalid?, do: File.rm(path)
-            :miss
-        end
+  defp validate_cached(path, bytes, entry, remove_invalid?) do
+    case verify(bytes, entry) do
+      :ok ->
+        {:ok, bytes}
 
       {:error, _reason} ->
+        if remove_invalid?, do: File.rm(path)
         :miss
     end
   end
@@ -245,9 +271,8 @@ defmodule Lumis.LanguageLoader do
 
     try do
       with :ok <- File.mkdir_p(directory),
-           :ok <- File.write(temporary, bytes, [:exclusive]),
-           :ok <- replace_file(temporary, path) do
-        :ok
+           :ok <- File.write(temporary, bytes, [:exclusive]) do
+        replace_file(temporary, path)
       end
     after
       _ = File.rm(temporary)
