@@ -26,12 +26,72 @@ pub fn convert_lua_matches(content: &str) -> String {
             }
         }
 
-        result.push_str(&line);
+        result.push_str(&expand_query_case_insensitive_regexes(&line));
         result.push('\n');
     }
 
     if !content.ends_with('\n') && result.ends_with('\n') {
         result.pop();
+    }
+
+    result
+}
+
+fn expand_query_case_insensitive_regexes(line: &str) -> String {
+    let mut result = String::with_capacity(line.len());
+    let mut rest = line;
+
+    while let Some(start) = rest.find("\"(?i)") {
+        result.push_str(&rest[..start + 1]);
+        rest = &rest[start + 5..];
+        let Some(end) = rest.find('"') else {
+            result.push_str("(?i)");
+            result.push_str(rest);
+            return result;
+        };
+        result.push_str(&expand_case_insensitive_ascii(&rest[..end]));
+        result.push('"');
+        rest = &rest[end + 1..];
+    }
+
+    result.push_str(rest);
+    result
+}
+
+fn expand_case_insensitive_ascii(regex: &str) -> String {
+    let mut result = String::with_capacity(regex.len());
+    let mut chars = regex.chars();
+    let mut in_character_class = false;
+
+    while let Some(c) = chars.next() {
+        match c {
+            '\\' => {
+                result.push(c);
+                if let Some(escaped) = chars.next() {
+                    result.push(escaped);
+                    if escaped == '\\' {
+                        if let Some(regex_escape) = chars.next() {
+                            result.push(regex_escape);
+                        }
+                    }
+                }
+            }
+            '[' => {
+                in_character_class = true;
+                result.push(c);
+            }
+            ']' => {
+                in_character_class = false;
+                result.push(c);
+            }
+            c if !in_character_class && c.is_ascii_alphabetic() => {
+                result.push('[');
+                result.push(c.to_ascii_lowercase());
+                result.push(c.to_ascii_uppercase());
+                result.push(']');
+            }
+            _ => result.push(c),
+        }
     }
 
     result
@@ -315,6 +375,20 @@ mod tests {
         let input =
             r#"((inline) @injection.content (#match? @injection.content "^(import|export)\\s"))"#;
         assert_eq!(convert_lua_matches(input), input);
+    }
+
+    #[test]
+    fn case_insensitive_regex_is_portable() {
+        let input = r#"((identifier) @keyword (#match? @keyword "(?i)^(continue|break)$"))"#;
+        let expected = r#"((identifier) @keyword (#match? @keyword "^([cC][oO][nN][tT][iI][nN][uU][eE]|[bB][rR][eE][aA][kK])$"))"#;
+        assert_eq!(convert_lua_matches(input), expected);
+    }
+
+    #[test]
+    fn case_insensitive_expansion_preserves_character_classes_and_escapes() {
+        let input = r#"((identifier) @x (#match? @x "(?i)^[a-z]\\sFoo$"))"#;
+        let expected = r#"((identifier) @x (#match? @x "^[a-z]\\s[fF][oO][oO]$"))"#;
+        assert_eq!(convert_lua_matches(input), expected);
     }
 
     #[test]

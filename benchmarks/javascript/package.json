@@ -15,6 +15,7 @@
     "@lumis-sh/lumis": "workspace:*",
     "@lumis-sh/themes": "workspace:*",
     "@lumis-sh/wasm-c": "0.26.1",
+    "@lumis-sh/wasm-comment": "0.26.1",
     "@lumis-sh/wasm-css": "0.26.2",
     "@lumis-sh/wasm-diff": "0.26.1",
     "@lumis-sh/wasm-go": "0.26.1",

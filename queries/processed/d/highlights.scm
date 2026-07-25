@@ -234,7 +234,7 @@
   (identifier) @type)
 
 ((identifier) @type
-  (#lua-match? @type "^[A-Z].*"))
+  (#match? @type "^[A-Z].*"))
 
 (type
   .
@@ -365,13 +365,13 @@
 (comment) @comment 
 
 ((comment) @comment.documentation
-  (#lua-match? @comment.documentation "^///[^/]"))
+  (#match? @comment.documentation "^///[\\^/]"))
 
 ((comment) @comment.documentation
-  (#lua-match? @comment.documentation "^///$"))
+  (#match? @comment.documentation "^///$"))
 
 ((comment) @comment.documentation
-  (#lua-match? @comment.documentation "^/[*][*][^*].*[*]/$"))
+  (#match? @comment.documentation "^/[*][*][\\^*].*[*]/$"))
 
 ((comment) @comment.documentation
-  (#lua-match? @comment.documentation "^/[+][+][^+].*[+]/$"))
+  (#match? @comment.documentation "^/[+][+][\\^+].*[+]/$"))

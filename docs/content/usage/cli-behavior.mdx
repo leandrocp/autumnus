@@ -80,8 +80,10 @@ If terminal color detection is unavailable, Lumis renders without a theme. An ex
 
 ## Parser cache lifecycle
 
-The CLI stores integrity-verified parser WASM files under the data directory.
-Filenames contain the exact parser version and SHA-256 digest.
+The CLI stores language-package metadata and integrity-verified parser WASM
+files under the data directory. It refreshes package metadata independently,
+then loads the exact parser version and matching queries named there. Parser
+filenames contain the package version and SHA-256 digest.
 
 - first use may trigger a parser download
 - `lumis parsers cache ...` persists selected parsers ahead of time

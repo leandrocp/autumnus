@@ -9,22 +9,29 @@ defmodule Lumis.LanguageLoaderTest do
     end
   end
 
-  test "reads parser metadata and aliases from the Rust manifest" do
+  test "resolves package metadata from the Rust catalog" do
     assert %{
              id: "dockerfile",
              aliases: ["docker"],
-             wasm_name: "tree-sitter-dockerfile",
-             package_name: "@lumis-sh/wasm-dockerfile",
-             version: version,
-             sha256: sha256,
-             size: size
-           } = Lumis.Native.language_manifest("DOCKER")
+             package_name: "@lumis-sh/wasm-dockerfile"
+           } = handle = Lumis.Native.language_package_ref("DOCKER")
 
-    assert is_binary(version)
+    assert {:ok, package_json} =
+             Application.fetch_env!(:lumis, :language_package_resolver).(handle)
+
+    assert {:ok,
+            %{
+              id: "dockerfile",
+              wasm_name: "tree-sitter-dockerfile",
+              version: "test",
+              sha256: sha256,
+              size: size
+            }} = Lumis.Native.resolve_language_package(handle.id, package_json)
+
     assert is_binary(sha256)
     assert is_integer(size)
-    assert Enum.any?(Lumis.Native.language_manifests(), &(&1.id == "dockerfile"))
-    assert is_nil(Lumis.Native.language_manifest("not-a-language"))
+    assert Enum.any?(Lumis.Native.language_package_refs(), &(&1.id == "dockerfile"))
+    assert is_nil(Lumis.Native.language_package_ref("not-a-language"))
   end
 
   test "loads an exact parser and reuses it" do
@@ -39,7 +46,7 @@ defmodule Lumis.LanguageLoaderTest do
   end
 
   test "replaces a corrupt cache entry" do
-    entry = Lumis.Native.language_manifest("dockerfile")
+    entry = resolved_entry("dockerfile")
     cache_dir = System.fetch_env!("LUMIS_WASM_CACHE_DIR")
     cache_file = Path.join(cache_dir, cache_filename(entry))
     File.mkdir_p!(cache_dir)
@@ -74,7 +81,7 @@ defmodule Lumis.LanguageLoaderTest do
   end
 
   test "serializes concurrent cache misses" do
-    entry = Lumis.Native.language_manifest("comment")
+    entry = resolved_entry("comment")
     original_resolver = Application.fetch_env!(:lumis, :wasm_resolver)
     {:file, fixture} = original_resolver.(entry)
     bytes = File.read!(fixture)
@@ -152,5 +159,12 @@ defmodule Lumis.LanguageLoaderTest do
 
   defp cache_filename(entry) do
     "#{entry.wasm_name}-#{entry.version}-#{entry.sha256}.wasm"
+  end
+
+  defp resolved_entry(name) do
+    handle = Lumis.Native.language_package_ref(name)
+    {:ok, package_json} = Application.fetch_env!(:lumis, :language_package_resolver).(handle)
+    {:ok, entry} = Lumis.Native.resolve_language_package(handle.id, package_json)
+    entry
   end
 end

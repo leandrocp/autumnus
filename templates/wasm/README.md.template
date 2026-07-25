@@ -1,6 +1,6 @@
-# @lumis-sh/wasm-{lang}
+# {pkg_name}
 
-Tree-sitter WASM grammar for {lang}
+Self-contained Lumis language package for {languages_text}.
 
 Built with [`tree-sitter build --wasm`](https://tree-sitter.github.io/tree-sitter/cli/build.html) `v{tree_sitter_cli_version}`
 
@@ -8,6 +8,8 @@ Used by [Lumis](https://lumis.sh) and compatible with [web-tree-sitter](https://
 
 The default export is a `URL` pointing at `{wasm_name}.wasm`, so the parser is
 stored only once and can be handled as an asset by Node.js and browser bundlers.
+`language.json` keeps the parser version, integrity, grammar name, aliases, and
+matching highlight, injection, locals, and bracket queries together.
 
 ## Parser
 
@@ -17,8 +19,8 @@ stored only once and can be handled as an asset by Node.js and browser bundlers.
 
 ## CDN
 
-- [https://unpkg.com/@lumis-sh/wasm-{lang}@{tree_sitter_cli}/{wasm_name}.wasm](https://unpkg.com/@lumis-sh/wasm-{lang}@{tree_sitter_cli}/{wasm_name}.wasm)
-- [https://cdn.jsdelivr.net/npm/@lumis-sh/wasm-{lang}@{tree_sitter_cli}/{wasm_name}.wasm](https://cdn.jsdelivr.net/npm/@lumis-sh/wasm-{lang}@{tree_sitter_cli}/{wasm_name}.wasm)
+- [https://unpkg.com/{pkg_name}@{npm_version}/{wasm_name}.wasm](https://unpkg.com/{pkg_name}@{npm_version}/{wasm_name}.wasm)
+- [https://cdn.jsdelivr.net/npm/{pkg_name}@{npm_version}/{wasm_name}.wasm](https://cdn.jsdelivr.net/npm/{pkg_name}@{npm_version}/{wasm_name}.wasm)
 
 ## License
 

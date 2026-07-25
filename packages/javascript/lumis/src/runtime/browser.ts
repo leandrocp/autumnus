@@ -188,6 +188,11 @@ export function createRuntime(...args: Parameters<typeof runtime.createRuntime>)
 export function configureWasmResolver(...args: Parameters<typeof runtime.configureWasmResolver>) {
   return runtime.configureWasmResolver(...args);
 }
+export function configureLanguagePackageResolver(
+  ...args: Parameters<typeof runtime.configureLanguagePackageResolver>
+) {
+  return runtime.configureLanguagePackageResolver(...args);
+}
 export function initParser(...args: Parameters<typeof runtime.initParser>) {
   return runtime.initParser(...args);
 }

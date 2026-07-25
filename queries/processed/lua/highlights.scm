@@ -134,7 +134,7 @@
 
 ; Constants
 ((identifier) @constant
-  (#lua-match? @constant "^[A-Z][A-Z_0-9]*$"))
+  (#match? @constant "^[A-Z][A-Z_0-9]*$"))
 
 (nil) @constant.builtin
 
@@ -214,10 +214,10 @@
 (comment) @comment 
 
 ((comment) @comment.documentation
-  (#lua-match? @comment.documentation "^[-][-][-]"))
+  (#match? @comment.documentation "^[-][-][-]"))
 
 ((comment) @comment.documentation
-  (#lua-match? @comment.documentation "^[-][-](%s?)@"))
+  (#match? @comment.documentation "^[-][-](\\s?)@"))
 
 (hash_bang_line) @keyword.directive
 

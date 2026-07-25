@@ -185,11 +185,11 @@ All three are equivalent at highlight time. The runtime resolves the language by
 ## Runtime behavior
 
 - `@lumis-sh/lumis` uses one portable `web-tree-sitter` runtime in Node.js, Bun, Deno, and browsers.
-- Language parsers are separate versioned `.wasm` assets loaded at runtime.
-- By default, Lumis resolves parser WASM from `https://cdn.jsdelivr.net/npm/@lumis-sh/wasm-<parser-name-without-tree-sitter-prefix>@<exact-version>/<parser>.wasm`.
-- Parser bytes are checked against their exact expected size and SHA-256 digest.
-- In Node, verified parser WASM is cached in the platform user cache directory. Set `LUMIS_WASM_CACHE_DIR` to override it.
-- In browsers, verified parser WASM survives reloads and restarts through CacheStorage with an IndexedDB fallback.
+- Each `@lumis-sh/wasm-*` package contains a parser, its matching queries, and integrity metadata.
+- Lumis resolves current package metadata, then loads the exact versioned parser it names.
+- Parser bytes are checked against the package's expected size and SHA-256 digest.
+- In Node, package metadata and verified parser WASM are cached in the platform user cache directory. Set `LUMIS_WASM_CACHE_DIR` to override it.
+- In browsers, package metadata and verified parser WASM survive reloads and restarts through CacheStorage with an IndexedDB fallback.
 - Use `lumis-wasm-cache` or `cacheLanguages()` from `@lumis-sh/lumis/cache` during deployment, then set `LUMIS_WASM_OFFLINE=1` to prohibit network fallback.
 - A custom resolver remains available for self-hosted assets.
 

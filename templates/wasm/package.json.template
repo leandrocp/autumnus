@@ -3,7 +3,7 @@
   "version": "{npm_version}",
   "type": "module",
   "types": "./index.d.ts",
-  "description": "Tree-sitter WASM grammar for {lang}",
+  "description": "Self-contained Lumis language package for {languages_text}",
   "author": "Leandro Pereira",
   "license": "MIT",
   "homepage": "https://lumis.sh",
@@ -16,18 +16,20 @@
       "types": "./index.d.ts",
       "default": "./index.js"
     },
-    "./{wasm_name}.wasm": "./{wasm_name}.wasm"
+    "./{wasm_name}.wasm": "./{wasm_name}.wasm",
+    "./language.json": "./language.json"
   },
   "lumis": {
-    "language": "{lang}",
+    "languages": {languages_json},
     "parser": "{wasm_name}",
     "upstreamVersion": "{upstream_version}",
     "rev": "{rev}",
     "treeSitter": "{tree_sitter_cli}",
-    "formatVersion": 2,
+    "formatVersion": 3,
+    "definitionHash": "{definition_hash}",
     "sha256": "{sha256}",
     "size": {wasm_size}
   },
   "keywords": ["lumis-sh", "wasm", "tree-sitter"],
-  "files": ["*.wasm", "*.js", "*.d.ts", "README.md", "LICENSE"]
+  "files": ["*.wasm", "*.json", "*.js", "*.d.ts", "README.md", "LICENSE"]
 }

@@ -382,10 +382,7 @@ fn cache_parsers(
     }
 
     let names: Vec<&str> = if all {
-        registry::all_wasm_names()
-            .iter()
-            .map(|(qn, _)| *qn)
-            .collect()
+        registry::all_language_ids().collect()
     } else {
         if languages.is_empty() {
             return Err(anyhow::anyhow!(
@@ -397,21 +394,21 @@ fn cache_parsers(
 
     let mut errors = Vec::new();
     for name in &names {
-        let query_name = resolve_query_name(name);
-        let parser_path = reg.parser_path(query_name);
-        if !force && reg.is_cached(query_name) {
+        let language_id = resolve_language_id(name);
+        let parser_path = reg.parser_path(language_id)?;
+        if !force && reg.is_cached(language_id) {
             if verbose {
                 eprintln!("{}: {}", name, parser_path.display());
             }
             continue;
         }
-        match reg.download_parser(query_name) {
+        match reg.download_parser(language_id) {
             Ok(_) => {
                 if verbose {
                     eprintln!(
                         "{}: {} -> {}",
                         name,
-                        reg.parser_download_url(query_name),
+                        reg.parser_download_url(language_id)?,
                         parser_path.display()
                     );
                 }
@@ -433,16 +430,11 @@ fn cache_parsers(
     Ok(())
 }
 
-/// Resolve a user-provided language name to the query name used internally.
-/// Tries Language::guess first (handles aliases), falls back to the input as-is.
-fn resolve_query_name(name: &str) -> &str {
-    // For caching we just need the query name mapping.
-    // If the user passes a known language id, use the enum mapping.
-    // Otherwise pass through (the user might be using the query name directly).
+/// Resolve a user-provided language name to its stable package language ID.
+fn resolve_language_id(name: &str) -> &str {
     let lang = Language::guess(Some(name), "");
     if lang != Language::PlainText || name == "plaintext" {
-        // Return the static query name from the generated code
-        registry::language_to_query_name(lang)
+        lang.id_name()
     } else {
         name
     }
@@ -609,7 +601,7 @@ fn dump_language(lang: Language) -> Result<&'static str> {
         ));
     }
 
-    Ok(registry::language_to_query_name(lang))
+    Ok(lang.id_name())
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -1194,7 +1186,7 @@ fn do_highlight(
         return Ok(());
     }
 
-    let lang_name = registry::language_to_query_name(lang);
+    let lang_name = lang.id_name();
     let mut events = highlight_to_events(reg, &source, lang_name)?;
     if rainbow_brackets {
         let ranges = reg.rainbow_ranges(lang_name, &source)?;
@@ -1695,20 +1687,26 @@ mod tests {
     fn highlight_to_events_uses_cached_injection_parsers() {
         let dir = tempdir().unwrap();
         let reg = registry::Registry::new(dir.path().to_path_buf()).unwrap();
-        std::fs::write(
-            reg.parser_path("html"),
+        reg.cache_test_language(
+            "html",
+            "html",
             include_bytes!(
                 "../../../packages/javascript/lumis/test/fixtures/wasm/tree-sitter-html.wasm"
             ),
-        )
-        .unwrap();
-        std::fs::write(
-            reg.parser_path("javascript"),
+            include_str!("../../../queries/processed/html/highlights.scm"),
+            include_str!("../../../queries/processed/html/injections.scm"),
+            "",
+        );
+        reg.cache_test_language(
+            "javascript",
+            "javascript",
             include_bytes!(
                 "../../../packages/javascript/lumis/test/fixtures/wasm/tree-sitter-javascript.wasm"
             ),
-        )
-        .unwrap();
+            include_str!("../../../queries/processed/javascript/highlights.scm"),
+            include_str!("../../../queries/processed/javascript/injections.scm"),
+            include_str!("../../../queries/processed/javascript/locals.scm"),
+        );
 
         let source = r#"
 <script>

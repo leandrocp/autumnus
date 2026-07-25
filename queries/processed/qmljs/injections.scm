@@ -1,7 +1,7 @@
 ; This file is auto-generated. Do not edit.
 ; inherits: ecma
 (((comment) @_jsdoc_comment
-  (#lua-match? @_jsdoc_comment "^/[*][*][^*].*[*]/$")) @injection.content
+  (#match? @_jsdoc_comment "^/[*][*][\\^*].*[*]/$")) @injection.content
   (#set! injection.language "jsdoc"))
 
 ((comment) @injection.content
@@ -15,7 +15,7 @@
       (template_string) @injection.content)
     (template_string) @injection.content
   ]
-  (#lua-match? @injection.language "^[a-zA-Z][a-zA-Z0-9]*$")
+  (#match? @injection.language "^[a-zA-Z][a-zA-Z0-9]*$")
   (#offset! @injection.content 0 1 0 -1)
   (#set! injection.include-children)
   ; Languages excluded from auto-injection due to special rules
@@ -143,7 +143,7 @@
 ;   (template_string) @injection.content
 ;   (#set! injection.language "graphql"))
 ((template_string) @injection.content
-  (#lua-match? @injection.content "^`#graphql")
+  (#match? @injection.content "^`#graphql")
   (#offset! @injection.content 0 1 0 -1)
   (#set! injection.include-children)
   (#set! injection.language "graphql"))

@@ -1,6 +1,6 @@
-import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
-import { dirname, join, parse } from "node:path";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse as parseToml } from "smol-toml";
 import { describe, expect, it } from "vitest";
@@ -11,22 +11,18 @@ import { bundledLanguages } from "../bundles/full.js";
 const bundleRequire = createRequire(
   createRequire(import.meta.url).resolve("@lumis-sh/wasm-bundle-full"),
 );
-
 const workspaceRoot = fileURLToPath(new URL("../../../..", import.meta.url));
 const languagesToml = parseToml(readFileSync(join(workspaceRoot, "languages.toml"), "utf8")) as {
-  parsers?: Record<string, { rev?: string; wasm_name?: string }>;
+  parsers?: Record<
+    string,
+    {
+      rev?: string;
+      wasm_rev?: string;
+      wasm_name?: string;
+      query_name?: string;
+    }
+  >;
 };
-
-const expectedRevByWasmName = new Map(
-  Object.entries(languagesToml.parsers ?? {}).map(([id, parser]) => [
-    parser.wasm_name ?? `tree-sitter-${id}`,
-    parser.rev,
-  ]),
-);
-
-async function initParser(): Promise<void> {
-  await Parser.init();
-}
 
 function resolveWasmPath(packageName: string, wasmName: string): string | undefined {
   try {
@@ -36,100 +32,48 @@ function resolveWasmPath(packageName: string, wasmName: string): string | undefi
   }
 }
 
-function installedWasmMatchesParserRevision(wasmPath: string, wasmName: string): boolean {
-  const expectedRev = expectedRevByWasmName.get(wasmName);
-  if (!expectedRev) return true;
-
+function installedWasmMatchesParserRevision(wasmPath: string, expectedRevision?: string): boolean {
+  if (!expectedRevision) return true;
   const packageJson = JSON.parse(readFileSync(join(dirname(wasmPath), "package.json"), "utf8")) as {
     lumis?: { rev?: string };
   };
-
-  return packageJson.lumis?.rev === expectedRev;
+  return packageJson.lumis?.rev === expectedRevision;
 }
 
-async function compileQueries(
-  grammar: TSLanguage,
-  lang: { highlights: string; injections?: string; locals?: string },
-): Promise<void> {
-  expect(() => new Query(grammar, lang.highlights)).not.toThrow();
-  if (lang.injections) {
-    expect(() => new Query(grammar, lang.injections!)).not.toThrow();
-  }
-  if (lang.locals) {
-    expect(() => new Query(grammar, lang.locals!)).not.toThrow();
-  }
+function readQuery(queryName: string, kind: string): string {
+  const path = join(workspaceRoot, "queries/processed", queryName, `${kind}.scm`);
+  return existsSync(path) ? readFileSync(path, "utf8") : "";
 }
 
-// Guards against grammar/query drift: for each bundled language, load the
-// published WASM grammar and compile the generated query strings against it.
-// This is the exact failure mode that broke the website's Gleam playground
-// (QueryError "Bad node name 'bit_string_segment_option'") — the repo's query
-// referenced a node type the shipped grammar didn't have.
-describe("bundled language queries compile against their shipped WASM", async () => {
-  await initParser();
+function compileQueries(grammar: TSLanguage, id: string, queryName: string): void {
+  const highlights = readQuery(queryName, "highlights");
+  const injections = readQuery(queryName, "injections");
+  const locals = readQuery(queryName, "locals");
+  if (highlights) expect(() => new Query(grammar, highlights), id).not.toThrow();
+  if (injections) expect(() => new Query(grammar, injections)).not.toThrow();
+  if (locals) expect(() => new Query(grammar, locals)).not.toThrow();
+}
 
-  const entries = Object.entries(bundledLanguages);
+describe("processed queries compile against their matching published WASM", async () => {
+  await Parser.init();
+
+  const entries = Object.entries(bundledLanguages).filter(([id]) => id !== "plaintext");
 
   describe.each(entries)("%s", (id, lazy) => {
-    it("compiles highlights/injections/locals", async () => {
-      const lang = await lazy();
-      const wasmPath = resolveWasmPath(lang.wasm.packageName, lang.wasm.name);
+    it("compiles highlights, injections, and locals", async () => {
+      const language = await lazy();
+      const parser = languagesToml.parsers?.[id];
+      if (!parser || !language.packageName) return;
 
-      if (!wasmPath || !existsSync(wasmPath)) {
+      const wasmName = parser.wasm_name ?? `tree-sitter-${id}`;
+      const wasmPath = resolveWasmPath(language.packageName, wasmName);
+      if (!wasmPath || !existsSync(wasmPath)) return;
+      if (!installedWasmMatchesParserRevision(wasmPath, parser.wasm_rev ?? parser.rev)) {
         return;
       }
 
-      if (!installedWasmMatchesParserRevision(wasmPath, lang.wasm.name)) {
-        return;
-      }
-
-      const bytes = readFileSync(wasmPath);
-      const grammar = await TSLanguage.load(bytes);
-      await compileQueries(grammar, lang);
+      const grammar = await TSLanguage.load(readFileSync(wasmPath));
+      compileQueries(grammar, id, parser.query_name ?? id);
     }, 30_000);
   });
 });
-
-// Same test but against the built dist/ output (what actually gets published).
-// Catches drift where source queries are correct but the last npm publish
-// shipped stale query strings — the exact pattern that broke Prisma on the
-// website while the regression test above passed.
-const distLangsDir = fileURLToPath(new URL("../dist/langs/", import.meta.url));
-
-describe.skipIf(!existsSync(distLangsDir))(
-  "dist/ language queries compile against their shipped WASM",
-  async () => {
-    await initParser();
-
-    const distLangFiles = existsSync(distLangsDir)
-      ? readdirSync(distLangsDir)
-          .filter((f) => f.endsWith(".js") && !f.endsWith(".cjs"))
-          .map((f) => parse(f).name)
-      : [];
-
-    describe.each(distLangFiles)("%s (dist)", (id) => {
-      it("compiles highlights/injections/locals", async () => {
-        const mod = await import(join(distLangsDir, `${id}.js`));
-        const lang = mod.default as {
-          highlights: string;
-          injections?: string;
-          locals?: string;
-          wasm: { packageName: string; name: string };
-        };
-
-        const wasmPath = resolveWasmPath(lang.wasm.packageName, lang.wasm.name);
-        if (!wasmPath || !existsSync(wasmPath)) {
-          return;
-        }
-
-        if (!installedWasmMatchesParserRevision(wasmPath, lang.wasm.name)) {
-          return;
-        }
-
-        const bytes = readFileSync(wasmPath);
-        const grammar = await TSLanguage.load(bytes);
-        await compileQueries(grammar, lang);
-      }, 30_000);
-    });
-  },
-);

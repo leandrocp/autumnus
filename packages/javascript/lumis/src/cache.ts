@@ -1,4 +1,15 @@
-import { cacheKey, DEFAULT_RESOLVER, verifyWasm, type WasmResolver } from "./core/languages.js";
+import {
+  cacheKey,
+  DEFAULT_LANGUAGE_PACKAGE_RESOLVER,
+  DEFAULT_RESOLVER,
+  languagePackageCacheKey,
+  parseLanguagePackage,
+  serializeLanguagePackageCache,
+  verifyWasm,
+  type LanguagePackage,
+  type LanguagePackageResolver,
+  type WasmResolver,
+} from "./core/languages.js";
 import { EXACT_LANGUAGE_MAP } from "./generated/language-detection.js";
 import { LANGUAGE_LOADERS } from "./generated/language-loaders.js";
 import {
@@ -18,6 +29,8 @@ export interface CacheLanguagesOptions {
   force?: boolean;
   /** Override the exact-version jsDelivr resolver. */
   resolver?: WasmResolver;
+  /** Override the latest language-package metadata resolver. */
+  languagePackageResolver?: LanguagePackageResolver;
 }
 
 export interface CachedLanguage {
@@ -27,20 +40,11 @@ export interface CachedLanguage {
   wasm: WasmRef;
 }
 
-function wasmRef(language: Language): WasmRef {
-  const wasm = language.wasm;
-  if (
-    typeof wasm !== "object" ||
-    wasm === null ||
-    !("packageName" in wasm) ||
-    !("name" in wasm) ||
-    !("version" in wasm) ||
-    !("sha256" in wasm) ||
-    !("size" in wasm)
-  ) {
-    throw new Error(`Language "${language.id}" does not have exact parser metadata`);
+function languagePackageName(language: Language): string {
+  if (!language.packageName) {
+    throw new Error(`Language "${language.id}" does not have a language package`);
   }
-  return wasm;
+  return language.packageName;
 }
 
 async function loadLanguage(name: string): Promise<Language> {
@@ -72,6 +76,30 @@ async function fetchWasm(language: Language, ref: WasmRef, resolver: WasmResolve
   return verifyWasm(ref, new Uint8Array(await response.arrayBuffer()));
 }
 
+async function fetchLanguagePackage(
+  packageName: string,
+  resolver: LanguagePackageResolver,
+): Promise<LanguagePackage> {
+  const source = resolver(packageName);
+  if (source instanceof URL ? source.protocol === "file:" : source.startsWith("file://")) {
+    const { readFile } = await import("node:fs/promises");
+    const { fileURLToPath } = await import("node:url");
+    const url = source instanceof URL ? source : new URL(source);
+    return parseLanguagePackage(new Uint8Array(await readFile(fileURLToPath(url))), packageName);
+  }
+  if (typeof source === "string" && !isUrlString(source)) {
+    const { readFile } = await import("node:fs/promises");
+    return parseLanguagePackage(new Uint8Array(await readFile(source)), packageName);
+  }
+  const response = await fetch(typeof source === "string" ? source : source.href);
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch language package ${packageName}: ${response.status} ${response.statusText}`,
+    );
+  }
+  return parseLanguagePackage(new Uint8Array(await response.arrayBuffer()), packageName);
+}
+
 /**
  * Cache exact, integrity-pinned parser WASMs in a persistent directory.
  *
@@ -84,12 +112,39 @@ export async function cacheLanguages(
 ): Promise<CachedLanguage[]> {
   const directory = options.directory ?? (await wasmCacheDir());
   const resolver = options.resolver ?? DEFAULT_RESOLVER;
+  const packageResolver = options.languagePackageResolver ?? DEFAULT_LANGUAGE_PACKAGE_RESOLVER;
   const languages = await Promise.all([...names].map(loadLanguage));
   const seen = new Set<string>();
+  const packages = new Map<string, LanguagePackage>();
   const cached: CachedLanguage[] = [];
 
   for (const language of languages) {
-    const ref = wasmRef(language);
+    if (language.id === "plaintext") continue;
+
+    const packageName = languagePackageName(language);
+    let packageMetadata = packages.get(packageName);
+    if (!packageMetadata) {
+      packageMetadata = await fetchLanguagePackage(packageName, packageResolver);
+      packages.set(packageName, packageMetadata);
+      await writeCachedWasm(
+        languagePackageCacheKey(packageName),
+        serializeLanguagePackageCache(packageMetadata),
+        directory,
+      );
+    }
+    const packaged = packageMetadata.languages[language.id];
+    if (!packaged) {
+      throw new Error(
+        `Language "${language.id}" is not provided by ${packageMetadata.packageName}@${packageMetadata.version}`,
+      );
+    }
+    const ref: WasmRef = {
+      packageName,
+      name: packageMetadata.parser.name,
+      version: packageMetadata.version,
+      sha256: packageMetadata.parser.sha256,
+      size: packageMetadata.parser.size,
+    };
     const key = cacheKey(ref);
     if (seen.has(key)) continue;
     seen.add(key);

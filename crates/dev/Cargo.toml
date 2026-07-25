@@ -21,6 +21,8 @@ lumis-all-languages = ["lumis/all-languages"]
 
 [dependencies]
 lumis = { path = "../lumis", default-features = false }
+lumis-build = { path = "../lumis-build" }
+lumis-wasm-runtime = { path = "../lumis-wasm-runtime", default-features = false }
 anyhow = "1"
 clap = { version = "4", features = ["derive"] }
 full_moon = "2"
@@ -35,3 +37,4 @@ toml = "1.1"
 toml_edit = "0.25"
 ureq = "3"
 xz2 = "0.1"
+wasmparser = "0.244"

@@ -125,20 +125,22 @@ export type RuntimeWasmInput = Uint8Array | ArrayBuffer | string | URL | Respons
 export type RuntimeWasmBundle = Partial<Record<string, RuntimeWasmInput>>;
 
 /**
- * A language definition with Tree-sitter queries and a WASM parser reference.
+ * A built-in language package handle or a complete custom language definition.
  *
  * ```ts
  * import javascript from '@lumis-sh/lumis/langs/javascript'
  * // javascript.id         → "javascript"
  * // javascript.aliases    → ["js", "jsx"]
- * // javascript.highlights → "(identifier) @variable ..."
+ * // javascript.packageName → "@lumis-sh/wasm-javascript"
  * ```
  */
 export interface Language {
   id: string;
   aliases: string[];
+  /** Independently released package containing the parser and matching queries. */
+  packageName?: string;
   /** Tree-sitter highlight query (S-expression). */
-  highlights: string;
+  highlights?: string;
   injections?: string;
   locals?: string;
   brackets?: string;
@@ -149,7 +151,7 @@ export interface Language {
    * - `URL` fetched directly (`file://` works in Node.js)
    * - `string` treated as file path (Node.js) or URL (browser)
    */
-  wasm: WasmRef | RuntimeWasmInput;
+  wasm?: WasmRef | RuntimeWasmInput;
 }
 
 /**

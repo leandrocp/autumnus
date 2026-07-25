@@ -52,7 +52,7 @@ Omitting `language` from the formatter enables auto-detection.
 ## Parser loading
 
 Lumis loads missing root and injected languages automatically. Parser WASM is
-pinned to an exact package version, size, and SHA-256 digest, then cached in the
+packaged with matching queries and integrity metadata, then cached in the
 platform user cache directory. It first checks release-local `priv/wasm`, so
 production releases do not need a runtime download.
 
@@ -84,6 +84,10 @@ A custom `:wasm_resolver` application setting can return `{:ok, bytes}`,
 `{:file, path}`, or a URL:
 
 ```elixir
+config :lumis, :language_package_resolver, fn language ->
+  {:file, Path.join("/app/wasm", "#{Path.basename(language.package_name)}.language.json")}
+end
+
 config :lumis, :wasm_resolver, fn parser ->
   {:file, Path.join("/app/wasm", "#{parser.wasm_name}.wasm")}
 end

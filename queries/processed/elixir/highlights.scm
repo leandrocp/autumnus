@@ -23,7 +23,7 @@
 
 ; Unused Identifiers
 ((identifier) @comment
-  (#lua-match? @comment "^_"))
+  (#match? @comment "^_"))
 
 ; Comments
 (comment) @comment 

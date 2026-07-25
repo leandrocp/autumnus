@@ -21,36 +21,8 @@ Mix.install(
   lockfile: Path.expand("mix.lock", __DIR__)
 )
 
-fixture_root = Path.join(repo_dir, "packages/javascript/lumis/test/fixtures/wasm")
-node_modules = Path.join(repo_dir, "node_modules/.pnpm")
-
-Application.put_env(:lumis, :wasm_resolver, fn entry ->
-  candidates = [
-    Path.join(fixture_root, "#{entry.wasm_name}.wasm")
-    | Path.wildcard(
-        Path.join([
-          node_modules,
-          "@lumis-sh+wasm-*",
-          "node_modules",
-          "@lumis-sh",
-          "wasm-*",
-          "#{entry.wasm_name}.wasm"
-        ])
-      )
-  ]
-
-  case Enum.find(candidates, fn path ->
-         with {:ok, bytes} <- File.read(path) do
-           byte_size(bytes) == entry.size and
-             Base.encode16(:crypto.hash(:sha256, bytes), case: :lower) == entry.sha256
-         else
-           _ -> false
-         end
-       end) do
-    nil -> raise "missing exact parser fixture for #{entry.id}"
-    path -> {:file, path}
-  end
-end)
+Code.require_file("runtime.exs", __DIR__)
+Lumis.BenchmarkRuntime.configure(repo_dir)
 
 defmodule Lumis.ScenarioBenchmark do
   def run do

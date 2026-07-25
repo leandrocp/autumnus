@@ -174,9 +174,9 @@ Useful for dropdowns, config validation, and docs tooling:
 
 - `@lumis-sh/lumis` uses `web-tree-sitter` and per-language parser WASM by default
 - the package uses conditional exports so Node and web-standard runtimes get the right entry point automatically
-- every language pins an exact parser version, size, and SHA-256 digest
-- Node caches verified parser WASM in the platform user cache directory; `LUMIS_WASM_CACHE_DIR` overrides it
-- browsers persist verified parser bytes in CacheStorage with an IndexedDB fallback
+- every language package contains matching queries plus an exact parser version, size, and SHA-256 digest
+- Node caches language-package metadata and verified parser WASM in the platform user cache directory; `LUMIS_WASM_CACHE_DIR` overrides it
+- browsers persist package metadata and verified parser bytes in CacheStorage with an IndexedDB fallback
 - Node can also auto-load installed parser packages such as `@lumis-sh/wasm-elixir` or bundle packages such as `@lumis-sh/wasm-bundle-web`
 - non-Node usage usually relies on remote parser assets unless you override the resolver, use `withWasm()` with a single npm parser package such as `@lumis-sh/wasm-json`, or use `withWasmBundle()` with a bundle package such as `@lumis-sh/wasm-bundle-web`
 - Bun and Deno are also supported
@@ -201,9 +201,9 @@ await cacheLanguages(['javascript', 'html', 'css'], {
 })
 ```
 
-Both paths use the exact manifest version and verify size plus SHA-256 before
-writing. `LUMIS_WASM_OFFLINE=1` turns a missing parser into an error instead of
-a network request.
+Both paths cache the current language package and verify its exact parser size
+plus SHA-256 before writing. `LUMIS_WASM_OFFLINE=1` turns missing metadata or
+parser bytes into an error instead of a network request.
 
 :::note Edge is not supported yet
 The portable JavaScript runtime uses `web-tree-sitter`, but Edge runtimes are not supported yet because of an upstream Tree-sitter limitation: [tree-sitter/tree-sitter#2160](https://github.com/tree-sitter/tree-sitter/issues/2160).

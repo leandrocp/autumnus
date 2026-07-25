@@ -15,6 +15,16 @@ import fixtureSource from "../../../../../fixtures/conformance/javascript-html-t
 import cssWasm from "../fixtures/wasm/tree-sitter-css.wasm?url";
 import htmlWasm from "../fixtures/wasm/tree-sitter-html.wasm?url";
 import javascriptWasm from "../fixtures/wasm/tree-sitter-javascript.wasm?url";
+import cssBrackets from "../../../../../queries/processed/css/brackets.scm?raw";
+import cssHighlights from "../../../../../queries/processed/css/highlights.scm?raw";
+import cssInjections from "../../../../../queries/processed/css/injections.scm?raw";
+import htmlBrackets from "../../../../../queries/processed/html/brackets.scm?raw";
+import htmlHighlights from "../../../../../queries/processed/html/highlights.scm?raw";
+import htmlInjections from "../../../../../queries/processed/html/injections.scm?raw";
+import javascriptBrackets from "../../../../../queries/processed/javascript/brackets.scm?raw";
+import javascriptHighlights from "../../../../../queries/processed/javascript/highlights.scm?raw";
+import javascriptInjections from "../../../../../queries/processed/javascript/injections.scm?raw";
+import javascriptLocals from "../../../../../queries/processed/javascript/locals.scm?raw";
 
 interface CustomFormatterResult {
   balancedEvents: boolean;
@@ -70,8 +80,40 @@ async function run(): Promise<void> {
     "tree-sitter-html": htmlWasm,
     "tree-sitter-javascript": javascriptWasm,
   };
+  const languagePackages = new Map([
+    [
+      "@lumis-sh/wasm-css",
+      await languagePackageDataUrl("css", cssWasm, {
+        highlights: cssHighlights,
+        injections: cssInjections,
+        brackets: cssBrackets,
+      }),
+    ],
+    [
+      "@lumis-sh/wasm-html",
+      await languagePackageDataUrl("html", htmlWasm, {
+        highlights: htmlHighlights,
+        injections: htmlInjections,
+        brackets: htmlBrackets,
+      }),
+    ],
+    [
+      "@lumis-sh/wasm-javascript",
+      await languagePackageDataUrl("javascript", javascriptWasm, {
+        highlights: javascriptHighlights,
+        injections: javascriptInjections,
+        locals: javascriptLocals,
+        brackets: javascriptBrackets,
+      }),
+    ],
+  ]);
   const highlighter = await createHighlighter({
     languages: [javascript, html, css],
+    languagePackageResolver: (packageName) => {
+      const url = languagePackages.get(packageName);
+      if (!url) throw new Error(`Unexpected language package request: ${packageName}`);
+      return url;
+    },
     wasmResolver: (_language, wasm) => {
       requestedWasms.push(wasm.name);
       const url = wasmUrls[wasm.name];
@@ -188,6 +230,48 @@ async function run(): Promise<void> {
     languages: highlighter.languages,
     requestedWasms,
   };
+}
+
+async function languagePackageDataUrl(
+  language: string,
+  wasmUrl: string,
+  queries: {
+    highlights: string;
+    injections?: string;
+    locals?: string;
+    brackets?: string;
+  },
+): Promise<string> {
+  const wasm = new Uint8Array(await (await fetch(wasmUrl)).arrayBuffer());
+  const digest = await crypto.subtle.digest("SHA-256", wasm);
+  const sha256 = Array.from(new Uint8Array(digest), (byte) =>
+    byte.toString(16).padStart(2, "0"),
+  ).join("");
+  const metadata = JSON.stringify({
+    formatVersion: 3,
+    packageName: `@lumis-sh/wasm-${language}`,
+    version: "test",
+    definitionHash: sha256,
+    parser: {
+      name: `tree-sitter-${language}`,
+      grammarName: language,
+      sha256,
+      size: wasm.byteLength,
+    },
+    languages: {
+      [language]: {
+        aliases: [],
+        highlights: queries.highlights,
+        injections: queries.injections ?? "",
+        locals: queries.locals ?? "",
+        brackets: queries.brackets ?? "",
+      },
+    },
+  });
+  const bytes = new TextEncoder().encode(metadata);
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return `data:application/json;base64,${btoa(binary)}`;
 }
 
 run().catch((error: unknown) => {

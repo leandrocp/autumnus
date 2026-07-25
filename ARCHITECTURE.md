@@ -23,9 +23,10 @@
           |                   |                    |
           v                   |                    v
 +-------------------------+   |     +---------------------------+
-| generated runtime data  |   |     | wasm packages / exact     |
-| JS langs / bundles +    |   |     | parser distribution       |
-| Rust / Elixir manifests |   |     +---------------------------+
+| generated runtime data  |   |     | language packages         |
+| JS language handles +   |   |     | parser + queries +        |
+| shared Rust catalog     |   |     | integrity metadata        |
++------------+------------+   |     +---------------------------+
 +------------+------------+   |                    |
              |                |                    |
              +----------------+--------------------+
@@ -88,19 +89,38 @@ Fixture generation, optimized artifact builds, timed execution, memory sampling,
 
 CI uses `jdx/mise-action` with the same benchmark config. Every pull request runs one observational, non-gating stable suite covering Rust, JavaScript, CLI, Elixir, package size, and memory. It appends available benchmark tables to the GitHub Actions job summary and retains raw report artifacts for seven days.
 
-## Parser cache hierarchy
+## Dynamic language packages
 
-`wasm-manifest.json` is the authority for package version, byte length, and
-SHA-256. Generated JavaScript, Elixir, and Rust metadata all derive from it.
-Dynamic runtimes resolve a parser through this hierarchy:
+`languages.toml` is the repository source of truth. Generated runtime catalogs
+contain only stable language IDs, aliases, and npm package names. Each
+`@lumis-sh/wasm-*` release is the independently versioned, atomic unit containing:
+
+- one parser WASM
+- every Lumis language backed by that parser
+- the matching highlight, injection, locals, and bracket queries
+- parser size, SHA-256, grammar name, and package version
+
+Changing a parser or one of its queries publishes only that language package.
+It does not require a JavaScript, CLI, Rust, or Elixir runtime release unless
+the language-package format itself changes.
+
+Dynamic runtimes resolve and cache the current package metadata, then load the
+exact parser identified by that metadata:
 
 ```text
-deployment-local parser -> persistent verified cache -> exact CDN fallback
+stable language catalog
+         |
+         v
+installed/local language package -> persistent metadata cache -> current package metadata
+         |
+         v
+installed/local parser -> persistent verified parser cache -> exact-version CDN parser
                                   |
                                   +-> persistent Wasmtime compiled cache
 ```
 
 Node and the CLI use platform directories, browsers use CacheStorage, and
-Elixir checks release-local `priv/wasm` before the user cache. Cache keys contain
-the parser name, version, and digest, so upgrades do not overwrite older
-verified assets.
+Elixir checks release-local `priv/wasm` before the user cache. Parser cache keys
+contain the parser name, package version, and digest, so upgrades do not
+overwrite older verified assets. Cached metadata can be refreshed independently
+while stale validated metadata remains available offline.

@@ -337,17 +337,21 @@ This requires `emcc` and `tree-sitter-cli`.
 
 #### WASM distribution
 
-Each grammar WASM is published as `@lumis-sh/wasm-{name}`.
+Each grammar is published as a self-contained `@lumis-sh/wasm-{name}` language
+package. It contains the parser WASM, matching processed queries, aliases,
+grammar metadata, byte length, and SHA-256 in `language.json`.
 
-`@lumis-sh/lumis` does not bundle parser WASMs. Language bundles contain a
-`WasmRef` (`packageName`, `name`, `version`, `size`, `sha256`) generated from
-`wasm-manifest.json`. The default resolver fetches the exact version from
-jsDelivr and rejects bytes that do not match the manifest.
+Runtime catalogs generated from `languages.toml` contain only stable IDs,
+aliases, and package names. JavaScript, CLI, and Elixir resolve the current
+`language.json`, cache it, then fetch the exact versioned parser named by that
+metadata and verify its bytes. Parser or query updates therefore publish only
+the affected language package, without a runtime release.
 
-The CLI, JavaScript, and Elixir runtimes use the same generated manifest and
-content-addressed filename. CLI and Node caches persist on disk, browsers use
-CacheStorage, and Elixir can embed selected parsers under release-local
-`priv/wasm`. Do not add an unpinned `@latest` fallback.
+CLI and Node caches persist on disk, browsers use CacheStorage with an IndexedDB
+fallback, and Elixir can embed selected package metadata and parsers under
+release-local `priv/wasm`. Local and benchmark execution should provide both
+`language.json` and its matching parser so queries and parser bytes remain
+atomic.
 
 The `wasm-release` workflow publishes packages automatically. It detects which parsers still need publishing with `scripts/wasm-needed.py` and builds and publishes them in parallel.
 

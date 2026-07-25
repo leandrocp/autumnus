@@ -1,6 +1,6 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, isAbsolute, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { do_not_optimize, measure } from "mitata";
 import { implementations } from "../../scripts/implementations.mjs";
 
@@ -116,7 +116,15 @@ async function loadLumis() {
     import("@lumis-sh/lumis/formatters"),
     import("@lumis-sh/themes/github_dark"),
   ]);
-  const uniqueIds = [...new Set(scenario.files.map(({ language }) => language))];
+  const uniqueIds = [...new Set(["comment", ...scenario.files.map(({ language }) => language)])];
+  const localPackages = JSON.parse(
+    await readFile(resolve(repoDir, "target/benchmarks/language-packages/index.json"), "utf8"),
+  );
+  const languagePackageResolver = (packageName) => {
+    const local = localPackages[packageName];
+    if (!local) throw new Error(`missing local language package ${packageName}`);
+    return pathToFileURL(local.metadataPath);
+  };
   const languages = Object.fromEntries(
     await Promise.all(
       uniqueIds.map(async (id) => {
@@ -131,7 +139,10 @@ async function loadLumis() {
 
   return {
     async initialize() {
-      const highlighter = await createHighlighter({ languages: Object.values(languages) });
+      const highlighter = await createHighlighter({
+        languages: Object.values(languages),
+        languagePackageResolver,
+      });
       const formatters = Object.fromEntries(
         Object.entries(languages).map(([id, language]) => [id, htmlInline({ language, theme })]),
       );

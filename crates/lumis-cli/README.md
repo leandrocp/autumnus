@@ -169,9 +169,11 @@ Override the location with `--config` or `LUMIS_CONFIG`.
 ## Parser management
 
 Parser WASM files are downloaded on demand the first time a language is needed.
-Every URL uses the exact generated manifest version, and cached filenames
-include the version and SHA-256 digest. Corrupt bytes are rejected before use.
-You can also prepare the cache explicitly.
+The CLI first resolves the current self-contained language package metadata,
+then downloads the exact parser version named there. Both metadata and parser
+bytes persist across starts; cached parser filenames include the version and
+SHA-256 digest. Corrupt bytes are rejected before use. You can also prepare the
+cache explicitly.
 
 ```sh
 # Cache specific parsers
@@ -192,6 +194,9 @@ Notes:
 - `parsers cache --all` caches all supported parsers.
 - `--force` replaces valid cached parsers instead of reusing them.
 - Injection highlighting works best when related parsers are already cached.
+- `LUMIS_WASM_OFFLINE=1` rejects language packages and parsers missing from the cache.
+- `LUMIS_WASM_SOURCE_DIR` points to a local language-package tree containing
+  `parsers/<package>.language.json` and the matching parser files.
 
 ## Data directory
 

@@ -1,6 +1,6 @@
 import type { RuntimeEnvironment } from "./runtime.js";
 import { createLanguagesModule } from "../core/languages.js";
-import type { LanguagesModule, WasmResolver } from "../core/languages.js";
+import type { LanguagePackageResolver, LanguagesModule, WasmResolver } from "../core/languages.js";
 import treeSitterWasmBinary from "../tree-sitter-wasm.js";
 import {
   isUrlString,
@@ -101,6 +101,7 @@ export type {
   LoadLanguageOptions,
   SharedRuntimeCache,
   RuntimeLike,
+  LanguagePackageResolver,
   WasmResolver,
 } from "../core/languages.js";
 
@@ -122,6 +123,9 @@ export function createRuntime(...args: Parameters<LanguagesModule["createRuntime
  */
 export function configureWasmResolver(fn: WasmResolver) {
   return runtime.configureWasmResolver(fn);
+}
+export function configureLanguagePackageResolver(fn: LanguagePackageResolver) {
+  return runtime.configureLanguagePackageResolver(fn);
 }
 export function initParser(...args: Parameters<LanguagesModule["initParser"]>) {
   return runtime.initParser(...args);

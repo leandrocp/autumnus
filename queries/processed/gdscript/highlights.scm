@@ -112,10 +112,10 @@
 ; - Make sure the following query is below the attribute queries so that it
 ;   takes precedence on a `(type (attribute (identifier)))`
 ((identifier) @type
-  (#lua-match? @type "^[A-Z]"))
+  (#match? @type "^[A-Z]"))
 
 ((identifier) @constant
-  (#lua-match? @constant "^[A-Z][A-Z_0-9]*$"))
+  (#match? @constant "^[A-Z][A-Z_0-9]*$"))
 
 ; Enums
 (enumerator

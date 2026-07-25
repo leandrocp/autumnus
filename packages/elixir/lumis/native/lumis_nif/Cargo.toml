@@ -17,6 +17,9 @@ rustler = "0.38"
 lumis-core = { version = "2.3", default-features = false, features = ["all-languages"] }
 lumis-wasm-runtime = "0.1"
 
+[dev-dependencies]
+sha2 = "0.10"
+
 [features]
 default = ["nif_version_2_15"]
 nif_version_2_15 = ["rustler/nif_version_2_15"]

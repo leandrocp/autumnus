@@ -1,13 +1,8 @@
 /**
- * Builds the language modules used by the portable WebAssembly runtime. It reads
- * preprocessed query .scm files, converts Lua patterns to JavaScript regexes,
- * and emits one TypeScript module per language.
+ * Generates stable language-to-package mappings from languages.toml.
  *
- * Preprocessing (inheritance, text replacements, overwrite merging) is done by
- * `mise run langs-preprocess-queries`, which is run before the JS generate commands.
- *
- * Language list and metadata (aliases, wasm_name, query_name) are read from
- * languages.toml at the repo root.
+ * Parser bytes, queries, integrity metadata, and exact versions belong to the
+ * independently released @lumis-sh/wasm-* packages, not the runtimes.
  */
 
 import fs from "node:fs";
@@ -15,29 +10,15 @@ import path from "node:path";
 import { parse as parseToml } from "smol-toml";
 
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../../../..");
-const QUERIES_PROCESSED_DIR = path.join(WORKSPACE_ROOT, "queries", "processed");
 const OUT_DIR = path.resolve(import.meta.dirname, "../langs");
 const LANGUAGES_TOML = path.join(WORKSPACE_ROOT, "languages.toml");
-const WASM_MANIFEST = path.join(WORKSPACE_ROOT, "wasm-manifest.json");
-const PACKAGE_JSON = path.resolve(import.meta.dirname, "../package.json");
-const ELIXIR_CATALOG = path.join(
-  WORKSPACE_ROOT,
-  "packages/elixir/lumis/native/lumis_nif/src/catalog.rs",
-);
-const RUST_WASM_MANIFEST = path.join(WORKSPACE_ROOT, "crates/lumis-wasm-runtime/src/manifest.rs");
+const RUST_LANGUAGE_CATALOG = path.join(WORKSPACE_ROOT, "crates/lumis-wasm-runtime/src/catalog.rs");
 
 interface ParserEntry {
-  git: string;
-  rev: string;
-  crate?: string;
-  version: string;
   aliases?: string[];
   emacs?: string[];
   shebang?: string[];
-  location?: string;
-  generate?: boolean;
   wasm_name?: string;
-  query_name?: string;
   display_name?: string;
   variant?: string;
   globs?: string[];
@@ -48,23 +29,8 @@ interface BundleEntry {
 }
 
 interface LanguagesToml {
-  queries: Record<string, { git: string; rev: string; path: string }>;
   parsers: Record<string, ParserEntry>;
   bundles?: Record<string, BundleEntry>;
-}
-
-interface WasmManifestEntry {
-  packageName: string;
-  version: string;
-  sha256: string;
-  size: number;
-  grammarName: string;
-}
-
-interface WasmManifest {
-  schemaVersion: number;
-  treeSitter: string;
-  grammars: Record<string, WasmManifestEntry>;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -73,8 +39,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function isLanguagesToml(value: unknown): value is LanguagesToml {
   if (!isRecord(value)) return false;
-  if (!isRecord(value.queries) || !isRecord(value.parsers)) return false;
-  return true;
+  return isRecord(value.parsers);
 }
 
 function readLanguagesToml(): LanguagesToml {
@@ -86,292 +51,37 @@ function readLanguagesToml(): LanguagesToml {
   return parsed;
 }
 
-function readWasmManifest(): WasmManifest {
-  const manifest = JSON.parse(fs.readFileSync(WASM_MANIFEST, "utf-8")) as WasmManifest;
-  if (manifest.schemaVersion !== 1 || !isRecord(manifest.grammars)) {
-    throw new Error("Invalid wasm-manifest.json structure");
-  }
-  return manifest;
-}
-
-function treeSitterWasmCli(): string {
-  const packageJson: { dependencies?: Record<string, string> } = JSON.parse(
-    fs.readFileSync(PACKAGE_JSON, "utf-8"),
-  );
-  const spec = packageJson.dependencies?.["web-tree-sitter"];
-  const match = spec?.match(/(\d+\.\d+)/);
-
-  if (!match) {
-    throw new Error("Could not determine web-tree-sitter compatibility from package.json");
-  }
-
-  return match[1];
-}
-
-function convertLuaPatternToRegex(lua: string): string {
-  let result = "";
-  const chars = [...lua];
-  let i = 0;
-  let inCharacterClass = false;
-
-  while (i < chars.length) {
-    if (chars[i] === "%") {
-      i++;
-      if (i >= chars.length) break;
-      const next = chars[i];
-      const map: Record<string, string> = {
-        d: "\\d",
-        s: "\\s",
-        l: "[a-z]",
-        u: "[A-Z]",
-        A: "[^a-zA-Z]",
-        S: "\\S",
-        ".": "\\.",
-        "%": "%",
-        "{": "\\{",
-        "}": "\\}",
-        $: "\\$",
-        "^": "\\^",
-      };
-      result += map[next] ?? `\\${next}`;
-    } else if (chars[i] === "\\") {
-      result += chars[i];
-      if (i + 1 < chars.length) {
-        result += chars[i + 1];
-        i++;
-      }
-    } else if (chars[i] === "[") {
-      inCharacterClass = true;
-      result += chars[i];
-    } else if (chars[i] === "]") {
-      inCharacterClass = false;
-      result += chars[i];
-    } else if (chars[i] === "-" && !inCharacterClass) {
-      // Lua's non-greedy zero-or-more quantifier.
-      result += "*?";
-    } else if ("{}|".includes(chars[i])) {
-      // These are literals in Lua patterns but operators in Rust/JS regexes.
-      result += `\\${chars[i]}`;
-    } else if (chars[i] === "^" && i > 0) {
-      result += "\\^";
-    } else {
-      result += chars[i];
-    }
-    i++;
-  }
-
-  return result;
-}
-
-function expandCaseInsensitiveAscii(regex: string): string {
-  let result = "";
-  let inCharClass = false;
-
-  for (let i = 0; i < regex.length; i++) {
-    const char = regex[i];
-
-    if (char === "\\") {
-      result += char;
-      if (i + 1 < regex.length) {
-        result += regex[i + 1];
-        i++;
-      }
-      continue;
-    }
-
-    if (char === "[") {
-      inCharClass = true;
-      result += char;
-      continue;
-    }
-
-    if (char === "]") {
-      inCharClass = false;
-      result += char;
-      continue;
-    }
-
-    if (!inCharClass && /[A-Za-z]/.test(char)) {
-      const lower = char.toLowerCase();
-      const upper = char.toUpperCase();
-      result += lower === upper ? char : `[${lower}${upper}]`;
-      continue;
-    }
-
-    result += char;
-  }
-
-  return result;
-}
-
-function normalizeRegexForJs(regex: string): string {
-  if (!regex.startsWith("(?i)")) return regex;
-  return expandCaseInsensitiveAscii(regex.slice(4));
-}
-
-function escapeRegexForQueryString(regex: string): string {
-  return regex.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-}
-
-function convertLuaMatches(content: string): string {
-  const converted = content
-    .split("\n")
-    .map((line) => {
-      const isLuaMatch = line.includes("#lua-match?") || line.includes("#not-lua-match?");
-      let updated = line
-        .replace(/#lua-match\?/g, "#match?")
-        .replace(/#not-lua-match\?/g, "#not-match?");
-
-      if (isLuaMatch) {
-        const firstQuote = updated.indexOf('"');
-        if (firstQuote !== -1) {
-          const secondQuote = updated.indexOf('"', firstQuote + 1);
-          if (secondQuote !== -1) {
-            const luaPattern = updated.slice(firstQuote + 1, secondQuote);
-            const regex = normalizeRegexForJs(convertLuaPatternToRegex(luaPattern));
-            updated =
-              updated.slice(0, firstQuote + 1) +
-              escapeRegexForQueryString(regex) +
-              updated.slice(secondQuote);
-          }
-        }
-      }
-
-      return updated;
-    })
-    .join("\n");
-
-  return converted.replace(/"\(\?i\)([^"]*)"/g, (_match, regex: string) => {
-    return `"${escapeRegexForQueryString(expandCaseInsensitiveAscii(regex))}"`;
-  });
-}
-
-function resolveQuerySource(language: string, queryType: string): string {
-  const filePath = path.join(QUERIES_PROCESSED_DIR, language, `${queryType}.scm`);
-  if (!fs.existsSync(filePath)) {
-    if (queryType === "brackets") {
-      const defaultPath = path.join(QUERIES_PROCESSED_DIR, "default", "brackets.scm");
-      if (fs.existsSync(defaultPath)) {
-        return fs.readFileSync(defaultPath, "utf-8");
-      }
-    }
-    return "";
-  }
-  return fs.readFileSync(filePath, "utf-8");
-}
-
-function rustRawString(value: string): string {
-  value = value.replace(/[ \t]+$/gm, "");
-  let hashes = "";
-  while (value.includes(`"${hashes}`)) hashes += "#";
-  return `r${hashes}"${value}"${hashes}`;
-}
-
 interface RuntimeLanguageEntry {
   id: string;
   aliases: string[];
-  wasmName: string;
-  wasm: WasmManifestEntry;
-  highlights: string;
-  injections: string;
-  locals: string;
-  brackets: string;
+  packageName: string;
 }
 
-function generateRustLanguageFiles(entries: RuntimeLanguageEntry[]): void {
-  const rustEntries = entries
-    .map(
-      (entry) => `    LanguageEntry {
-        id: ${JSON.stringify(entry.id)},
-        highlights: ${rustRawString(entry.highlights)},
-        injections: ${rustRawString(entry.injections)},
-        locals: ${rustRawString(entry.locals)},
-        brackets: ${rustRawString(entry.brackets)},
-    },`,
-    )
-    .join("\n");
-
-  const rust = `// Auto-generated by packages/javascript/lumis/scripts/build-langs.ts.
-// Do not edit manually.
-
-pub struct LanguageEntry {
-    pub id: &'static str,
-    pub highlights: &'static str,
-    pub injections: &'static str,
-    pub locals: &'static str,
-    pub brackets: &'static str,
-}
-
-pub static LANGUAGES: &[LanguageEntry] = &[
-${rustEntries}
-];
-
-pub fn find(name: &str) -> Option<&'static LanguageEntry> {
-    LANGUAGES.iter().find(|entry| entry.id == name)
-}
-`;
-  fs.mkdirSync(path.dirname(ELIXIR_CATALOG), { recursive: true });
-  fs.writeFileSync(ELIXIR_CATALOG, rust);
-  console.log("  Elixir NIF language catalog");
-
-  const uniqueWasms = [
-    ...new Map(entries.map((entry) => [entry.wasmName, entry] as const)).values(),
-  ].sort((left, right) => left.wasmName.localeCompare(right.wasmName));
-  const wasmIndexes = new Map(uniqueWasms.map((entry, index) => [entry.wasmName, index]));
-  const wasmEntries = uniqueWasms
-    .map(
-      (entry) => `    WasmMetadata {
-        name: ${JSON.stringify(entry.wasmName)},
-        package_name: ${JSON.stringify(entry.wasm.packageName)},
-        version: ${JSON.stringify(entry.wasm.version)},
-        sha256: ${JSON.stringify(entry.wasm.sha256)},
-        size: ${entry.wasm.size},
-        grammar_name: ${JSON.stringify(entry.wasm.grammarName)},
-    },`,
-    )
-    .join("\n");
+function generateRustLanguageCatalog(entries: RuntimeLanguageEntry[]): void {
   const languageEntries = entries
     .map(
-      (entry) => `    LanguageMetadata {
+      (entry) => `    LanguagePackageRef {
         id: ${JSON.stringify(entry.id)},
         aliases: &[${entry.aliases.map(JSON.stringify).join(", ")}],
-        parser: &PARSERS[${wasmIndexes.get(entry.wasmName)}],
+        package_name: ${JSON.stringify(entry.packageName)},
     },`,
     )
     .join("\n");
-  const rustManifest = `// Auto-generated by packages/javascript/lumis/scripts/build-langs.ts.
+  const rustCatalog = `// Auto-generated from languages.toml by packages/javascript/lumis/scripts/build-langs.ts.
 // Do not edit manually.
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct WasmMetadata {
-    pub name: &'static str,
-    pub package_name: &'static str,
-    pub version: &'static str,
-    pub sha256: &'static str,
-    pub size: usize,
-    pub grammar_name: &'static str,
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct LanguageMetadata {
+pub struct LanguagePackageRef {
     pub id: &'static str,
     pub aliases: &'static [&'static str],
-    pub parser: &'static WasmMetadata,
+    pub package_name: &'static str,
 }
 
-pub static PARSERS: &[WasmMetadata] = &[
-${wasmEntries}
-];
-
-pub static LANGUAGES: &[LanguageMetadata] = &[
+pub static LANGUAGES: &[LanguagePackageRef] = &[
 ${languageEntries}
 ];
 
-pub fn find(name: &str) -> Option<&'static WasmMetadata> {
-    PARSERS.iter().find(|entry| entry.name == name)
-}
-
-pub fn find_language(name: &str) -> Option<&'static LanguageMetadata> {
+pub fn find(name: &str) -> Option<&'static LanguagePackageRef> {
     LANGUAGES.iter().find(|entry| {
         entry.id.eq_ignore_ascii_case(name)
             || entry
@@ -381,21 +91,14 @@ pub fn find_language(name: &str) -> Option<&'static LanguageMetadata> {
     })
 }
 `;
-  fs.writeFileSync(RUST_WASM_MANIFEST, rustManifest);
-  console.log("  Rust WASM manifest");
+  fs.writeFileSync(RUST_LANGUAGE_CATALOG, rustCatalog);
+  console.log("  Rust language catalog");
 }
 
 function main() {
   fs.mkdirSync(OUT_DIR, { recursive: true });
 
   const config = readLanguagesToml();
-  const tsCli = treeSitterWasmCli();
-  const wasmManifest = readWasmManifest();
-  if (wasmManifest.treeSitter !== tsCli) {
-    throw new Error(
-      `WASM manifest targets Tree-sitter ${wasmManifest.treeSitter}, expected ${tsCli}`,
-    );
-  }
   const expectedLanguageIds = new Set([...Object.keys(config.parsers), "plaintext"]);
   const runtimeEntries: RuntimeLanguageEntry[] = [];
 
@@ -408,34 +111,15 @@ function main() {
   }
 
   for (const [id, entry] of Object.entries(config.parsers)) {
-    const queryName = entry.query_name || id;
     const wasmName = entry.wasm_name || `tree-sitter-${id}`;
-    const wasm = wasmManifest.grammars[wasmName];
-    if (!wasm) throw new Error(`Missing ${wasmName} in wasm-manifest.json`);
+    const packageName = `@lumis-sh/wasm-${wasmName.replace(/^tree-sitter-/, "")}`;
     const aliases = entry.aliases || [];
 
-    const highlightSource = resolveQuerySource(queryName, "highlights");
-    const injectionSource = resolveQuerySource(queryName, "injections");
-    const localsSource = resolveQuerySource(queryName, "locals");
-    const bracketsSource = resolveQuerySource(queryName, "brackets");
-    const highlights = convertLuaMatches(highlightSource);
-    const injections = convertLuaMatches(injectionSource);
-    const locals = convertLuaMatches(localsSource);
-    const brackets = convertLuaMatches(bracketsSource);
     runtimeEntries.push({
       id,
       aliases,
-      wasmName,
-      wasm,
-      highlights,
-      injections,
-      locals,
-      brackets,
+      packageName,
     });
-
-    const injectionsStr = injections.trim();
-    const localsStr = locals.trim();
-    const bracketsStr = brackets.trim();
 
     const module = `// Auto-generated by scripts/build-langs.ts — do not edit manually.
 import type { Language } from '../src/types.js'
@@ -443,8 +127,7 @@ import type { Language } from '../src/types.js'
 const language: Language = {
   id: ${JSON.stringify(id)},
   aliases: ${JSON.stringify(aliases)},
-  highlights: ${JSON.stringify(highlights)},${injectionsStr ? `\n  injections: ${JSON.stringify(injections)},` : ""}${localsStr ? `\n  locals: ${JSON.stringify(localsStr)},` : ""}${bracketsStr ? `\n  brackets: ${JSON.stringify(bracketsStr)},` : ""}
-  wasm: { packageName: ${JSON.stringify(wasm.packageName)}, name: ${JSON.stringify(wasmName)}, version: ${JSON.stringify(wasm.version)}, sha256: ${JSON.stringify(wasm.sha256)}, size: ${wasm.size} },
+  packageName: ${JSON.stringify(packageName)},
 }
 
 export default language
@@ -454,27 +137,19 @@ export default language
     console.log(`  ${id}: langs/${id}.ts`);
   }
 
-  // Plaintext — uses diff parser with empty queries (same as Rust crate)
-  const diffEntry = config.parsers["diff"];
-  if (!diffEntry) throw new Error("diff parser entry not found in languages.toml");
-  const diffWasmName = diffEntry.wasm_name || "tree-sitter-diff";
-  const diffWasm = wasmManifest.grammars[diffWasmName];
-  if (!diffWasm) throw new Error(`Missing ${diffWasmName} in wasm-manifest.json`);
   const plaintextModule = `// Auto-generated by scripts/build-langs.ts — do not edit manually.
 import type { Language } from '../src/types.js'
 
 const language: Language = {
   id: "plaintext",
   aliases: ["text", "txt", "plain"],
-  highlights: "",
-  wasm: { packageName: ${JSON.stringify(diffWasm.packageName)}, name: ${JSON.stringify(diffWasmName)}, version: ${JSON.stringify(diffWasm.version)}, sha256: ${JSON.stringify(diffWasm.sha256)}, size: ${diffWasm.size} },
 }
 
 export default language
 `;
   fs.writeFileSync(path.join(OUT_DIR, "plaintext.ts"), plaintextModule);
   console.log(`  plaintext: langs/plaintext.ts`);
-  generateRustLanguageFiles(runtimeEntries);
+  generateRustLanguageCatalog(runtimeEntries);
 
   // Generate language metadata
   const languageEntries: {

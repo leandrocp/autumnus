@@ -25,13 +25,13 @@
 ; Special identifiers
 ;--------------------
 ((identifier) @type
-  (#lua-match? @type "^[A-Z]"))
+  (#match? @type "^[A-Z]"))
 
 ((identifier) @constant
-  (#lua-match? @constant "^_*[A-Z][A-Z%d_]*$"))
+  (#match? @constant "^_*[A-Z][A-Z\\d_]*$"))
 
 ((shorthand_property_identifier) @constant
-  (#lua-match? @constant "^_*[A-Z][A-Z%d_]*$"))
+  (#match? @constant "^_*[A-Z][A-Z\\d_]*$"))
 
 ((identifier) @variable.builtin
   (#any-of? @variable.builtin "arguments" "module" "console" "window" "document"))
@@ -191,7 +191,7 @@
 ] @comment 
 
 ((comment) @comment.documentation
-  (#lua-match? @comment.documentation "^/[*][*][^*].*[*]/$"))
+  (#match? @comment.documentation "^/[*][*][\\^*].*[*]/$"))
 
 (hash_bang_line) @keyword.directive
 
@@ -635,7 +635,7 @@
 
 (jsx_opening_element
   ((identifier) @tag
-    (#lua-match? @tag "^[A-Z]")))
+    (#match? @tag "^[A-Z]")))
 
 ; Handle the dot operator effectively - <My.Component>
 (jsx_opening_element
@@ -645,7 +645,7 @@
 
 (jsx_closing_element
   ((identifier) @tag
-    (#lua-match? @tag "^[A-Z]")))
+    (#match? @tag "^[A-Z]")))
 
 ; Handle the dot operator effectively - </My.Component>
 (jsx_closing_element
@@ -655,7 +655,7 @@
 
 (jsx_self_closing_element
   ((identifier) @tag
-    (#lua-match? @tag "^[A-Z]")))
+    (#match? @tag "^[A-Z]")))
 
 ; Handle the dot operator effectively - <My.Component />
 (jsx_self_closing_element

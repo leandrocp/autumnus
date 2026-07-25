@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 """Determine which WASM parsers need building/publishing.
 
-Reads languages.toml, inspects published npm metadata, and prints the parsers
-that need a new release in the current tree-sitter CLI series.
-
-If a parser rev changed upstream and there is no published `0.26.x` package with
-matching `lumis.rev` metadata, the next `0.26.x` patch must be published.
+Reads languages.toml and processed queries, inspects published npm metadata,
+and prints the parsers whose complete language-package definition needs a new
+release in the current tree-sitter CLI series.
 
 Usage: python3 scripts/wasm-needed.py [parser_name[,parser_name...]] [force]
 """
@@ -14,9 +12,11 @@ import subprocess
 import sys
 import tomllib
 import json
+import hashlib
+from pathlib import Path
 
 SUPPORTED_TREE_SITTER_CLI = "0.26"
-PACKAGE_FORMAT_VERSION = 2
+PACKAGE_FORMAT_VERSION = 3
 
 
 def is_truthy(value: str) -> bool:
@@ -45,7 +45,49 @@ def next_patch_version(versions: list[str]) -> str:
     return f"{SUPPORTED_TREE_SITTER_CLI}.{highest_patch + 1}"
 
 
-def published_for_revision(pkg: str, versions: list[str], rev: str) -> bool:
+def hash_field(digest: "hashlib._Hash", value: bytes) -> None:
+    digest.update(len(value).to_bytes(8, "big"))
+    digest.update(value)
+
+
+def query_text(query_name: str, kind: str) -> bytes:
+    path = Path("queries/processed") / query_name / f"{kind}.scm"
+    if path.exists():
+        return path.read_bytes()
+    if kind == "brackets":
+        default = Path("queries/processed/default/brackets.scm")
+        if default.exists():
+            return default.read_bytes()
+    return b""
+
+
+def definition_hash(
+    data: dict, wasm_name: str, revision: str
+) -> str:
+    digest = hashlib.sha256()
+    hash_field(digest, b"lumis-language-package-v3")
+    hash_field(digest, wasm_name.encode())
+    hash_field(digest, revision.encode())
+
+    languages = []
+    for language, info in data.get("parsers", {}).items():
+        parser_wasm = info.get("wasm_name") or f"tree-sitter-{language}"
+        if parser_wasm == wasm_name:
+            languages.append((language, info))
+
+    for language, info in sorted(languages):
+        hash_field(digest, language.encode())
+        for alias in sorted(info.get("aliases", [])):
+            hash_field(digest, alias.encode())
+        query_name = info.get("query_name") or language
+        for kind in ("highlights", "injections", "locals", "brackets"):
+            hash_field(digest, query_text(query_name, kind))
+    return digest.hexdigest()
+
+
+def published_for_definition(
+    pkg: str, versions: list[str], expected_hash: str
+) -> bool:
     for npm_version in current_series_versions(versions):
         meta = subprocess.run(
             ["npm", "view", f"{pkg}@{npm_version}", "lumis", "--json"],
@@ -60,7 +102,7 @@ def published_for_revision(pkg: str, versions: list[str], rev: str) -> bool:
             continue
         if (
             isinstance(lumis_meta, dict)
-            and lumis_meta.get("rev") == rev
+            and lumis_meta.get("definitionHash") == expected_hash
             and lumis_meta.get("treeSitter") == SUPPORTED_TREE_SITTER_CLI
             and lumis_meta.get("formatVersion") == PACKAGE_FORMAT_VERSION
         ):
@@ -128,11 +170,12 @@ for pname, info in data.get("parsers", {}).items():
     else:
         versions = [v for v in versions_data if isinstance(v, str)]
 
-    published = published_for_revision(pkg, versions, revision)
+    expected_hash = definition_hash(data, wasm_name, revision)
+    published = published_for_definition(pkg, versions, expected_hash)
 
     if not published:
         print(
-            f"Need to publish {pkg}@{next_patch_version(versions)} for {revision}",
+            f"Need to publish {pkg}@{next_patch_version(versions)} for {expected_hash}",
             file=sys.stderr,
         )
         needed.append(wasm_name)

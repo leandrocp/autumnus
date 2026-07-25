@@ -2,7 +2,6 @@
 
 import { spawnSync } from "node:child_process";
 import { copyFile, mkdir, readFile, rm, writeFile } from "node:fs/promises";
-import { createRequire } from "node:module";
 import { basename, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -17,7 +16,6 @@ const lumis = resolve(
   "target/benchmarks/rust-target/release",
   process.platform === "win32" ? "lumis.exe" : "lumis",
 );
-const benchmarkRequire = createRequire(resolve(benchmarksDir, "javascript/package.json"));
 const bat = findBat();
 const scenarioShell = findScenarioShell();
 
@@ -29,19 +27,21 @@ await mkdir(xdgCacheDir, { recursive: true });
 const manifest = JSON.parse(
   await readFile(resolve(repoDir, "target/benchmarks/fixtures/scenarios.json"), "utf8"),
 );
-const wasmManifest = JSON.parse(await readFile(resolve(repoDir, "wasm-manifest.json"), "utf8"));
-const languages = [
-  ...new Set(manifest.scenarios.flatMap(({ files }) => files.map(({ language }) => language))),
-];
+const localPackages = JSON.parse(
+  await readFile(resolve(repoDir, "target/benchmarks/language-packages/index.json"), "utf8"),
+);
+const languages = [...new Set(Object.values(localPackages).map(({ language }) => language))];
 
 for (const language of languages) {
-  const wasmName = `tree-sitter-${language}`;
-  const parser = wasmManifest.grammars[wasmName];
-  if (!parser) throw new Error(`missing ${wasmName} in wasm-manifest.json`);
-  const wasmPath = benchmarkRequire.resolve(`@lumis-sh/wasm-${language}/${wasmName}.wasm`);
+  const packageName = `@lumis-sh/wasm-${language}`;
+  const local = localPackages[packageName];
+  if (!local) throw new Error(`missing local language package ${packageName}`);
+  const metadata = JSON.parse(await readFile(local.metadataPath, "utf8"));
+  const parser = metadata.parser;
+  await copyFile(local.metadataPath, resolve(dataDir, "parsers", `${language}.language.json`));
   await copyFile(
-    wasmPath,
-    resolve(dataDir, "parsers", `${wasmName}-${parser.version}-${parser.sha256}.wasm`),
+    local.wasmPath,
+    resolve(dataDir, "parsers", `${parser.name}-${metadata.version}-${parser.sha256}.wasm`),
   );
 }
 

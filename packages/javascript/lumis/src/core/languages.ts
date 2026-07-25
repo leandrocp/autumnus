@@ -16,11 +16,50 @@ import type {
 import { PLAINTEXT_LANG_ID, type LanguageInfo } from "../types.js";
 
 export type WasmResolver = (language: string, wasm: WasmRef) => string | URL;
+export type LanguagePackageResolver = (packageName: string) => string | URL;
+
+export interface PackagedLanguage {
+  aliases: string[];
+  highlights: string;
+  injections?: string;
+  locals?: string;
+  brackets?: string;
+}
+
+export interface LanguagePackage {
+  formatVersion: number;
+  packageName: string;
+  version: string;
+  definitionHash: string;
+  parser: {
+    name: string;
+    grammarName: string;
+    sha256: string;
+    size: number;
+  };
+  languages: Record<string, PackagedLanguage>;
+}
+
+interface CachedLanguagePackage {
+  checkedAt: number;
+  package: LanguagePackage;
+}
+
+export interface ResolvedLanguagePackage {
+  definition: LanguageDefinition;
+  wasm: WasmRef;
+  highlights: string;
+  injections?: string;
+  locals?: string;
+  brackets?: string;
+}
 
 export interface SharedRuntimeCache {
   parserInit?: Promise<void>;
   wasmBytes: Map<string, Uint8Array>;
   wasmLoads: Map<string, Promise<Uint8Array>>;
+  packages: Map<string, LanguagePackage>;
+  packageLoads: Map<string, Promise<LanguagePackage>>;
 }
 
 function compileBracketConfig(
@@ -62,8 +101,9 @@ function compileBracketConfig(
 
 export interface LoadLanguageOptions {
   definition: LanguageDefinition;
-  wasm: WasmRef | Uint8Array | ArrayBuffer | string | URL | Response;
-  highlights: string;
+  packageName?: string;
+  wasm?: WasmRef | Uint8Array | ArrayBuffer | string | URL | Response;
+  highlights?: string;
   injections?: string;
   locals?: string;
   brackets?: string;
@@ -71,17 +111,23 @@ export interface LoadLanguageOptions {
 
 export interface HighlighterRuntimeOptions {
   wasmResolver?: WasmResolver;
+  languagePackageResolver?: LanguagePackageResolver;
   sharedCache?: SharedRuntimeCache;
 }
 
 export interface RuntimeLike {
   configureWasmResolver(fn: WasmResolver): void;
+  configureLanguagePackageResolver(fn: LanguagePackageResolver): void;
   initParser(): Promise<void>;
   registerLanguage(def: LanguageDefinition): void;
   resolveLanguageId(nameOrAlias: string): string;
   getLoadedLanguage(nameOrAlias: string): LoadedLanguage | undefined;
   getLoadedLanguageIds(): string[];
   loadLanguage(opts: LoadLanguageOptions): Promise<LoadedLanguage>;
+  resolveLanguagePackage(
+    language: LanguageDefinition,
+    packageName: string,
+  ): Promise<ResolvedLanguagePackage>;
   loadPlaintext(): Promise<LoadedLanguage>;
   highlightEvents(
     source: string,
@@ -99,10 +145,15 @@ export interface RuntimeLike {
 export interface LanguagesModule {
   createRuntime(options?: HighlighterRuntimeOptions): RuntimeLike;
   configureWasmResolver(fn: WasmResolver): void;
+  configureLanguagePackageResolver(fn: LanguagePackageResolver): void;
   initParser(): Promise<void>;
   registerLanguage(def: LanguageDefinition): void;
   resolveLanguageId(nameOrAlias: string): string;
   loadLanguage(opts: LoadLanguageOptions): Promise<LoadedLanguage>;
+  resolveLanguagePackage(
+    language: LanguageDefinition,
+    packageName: string,
+  ): Promise<ResolvedLanguagePackage>;
   loadPlaintext(): Promise<LoadedLanguage>;
   getLoadedLanguage(nameOrAlias: string): LoadedLanguage | undefined;
   getLoadedLanguageIds(): string[];
@@ -113,15 +164,22 @@ export interface LanguagesModule {
 /** @internal */
 export const DEFAULT_RESOLVER: WasmResolver = (_language, wasm) =>
   `https://cdn.jsdelivr.net/npm/${wasm.packageName}@${wasm.version}/${wasm.name}.wasm`;
+export const DEFAULT_LANGUAGE_PACKAGE_RESOLVER: LanguagePackageResolver = (packageName) =>
+  `https://cdn.jsdelivr.net/npm/${packageName}@latest/language.json`;
 
 const HIGHLIGHT_NAMES_SET = new Set(HIGHLIGHT_NAMES);
 const PLAINTEXT_ALIASES = ["text", "txt", "plain"];
+const LANGUAGE_PACKAGE_FORMAT_VERSION = 3;
+const LANGUAGE_PACKAGE_TTL_MS = 60 * 60 * 1000;
 const encoder = new TextEncoder();
+const decoder = new TextDecoder();
 
 function createSharedRuntimeCache(): SharedRuntimeCache {
   return {
     wasmBytes: new Map<string, Uint8Array>(),
     wasmLoads: new Map<string, Promise<Uint8Array>>(),
+    packages: new Map<string, LanguagePackage>(),
+    packageLoads: new Map<string, Promise<LanguagePackage>>(),
   };
 }
 
@@ -141,9 +199,90 @@ function isWasmRef(wasm: object): wasm is WasmRef {
 }
 
 function isRuntimeWasmInput(
-  wasm: LoadLanguageOptions["wasm"],
+  wasm: NonNullable<LoadLanguageOptions["wasm"]>,
 ): wasm is Uint8Array | ArrayBuffer | string | URL | Response {
   return !(typeof wasm === "object" && wasm !== null && isWasmRef(wasm));
+}
+
+export function languagePackageCacheKey(packageName: string): string {
+  return `language-package-${packageName}`;
+}
+
+export function parseLanguagePackage(
+  data: Uint8Array,
+  expectedPackageName: string,
+): LanguagePackage {
+  const value = JSON.parse(decoder.decode(data)) as LanguagePackage;
+  const languages =
+    typeof value.languages === "object" && value.languages !== null
+      ? Object.values(value.languages)
+      : [];
+  if (
+    value.formatVersion !== LANGUAGE_PACKAGE_FORMAT_VERSION ||
+    value.packageName !== expectedPackageName ||
+    typeof value.version !== "string" ||
+    !isSafePackagePathSegment(value.version) ||
+    typeof value.definitionHash !== "string" ||
+    value.definitionHash.length === 0 ||
+    typeof value.parser?.name !== "string" ||
+    !isSafePackagePathSegment(value.parser.name) ||
+    typeof value.parser?.grammarName !== "string" ||
+    value.parser.grammarName.length === 0 ||
+    typeof value.parser?.sha256 !== "string" ||
+    !/^[0-9a-f]{64}$/.test(value.parser.sha256) ||
+    !Number.isSafeInteger(value.parser?.size) ||
+    value.parser.size <= 0 ||
+    languages.length === 0 ||
+    languages.some(
+      (language) =>
+        !Array.isArray(language.aliases) ||
+        language.aliases.some((alias) => typeof alias !== "string") ||
+        typeof language.highlights !== "string" ||
+        (language.injections !== undefined && typeof language.injections !== "string") ||
+        (language.locals !== undefined && typeof language.locals !== "string") ||
+        (language.brackets !== undefined && typeof language.brackets !== "string"),
+    )
+  ) {
+    throw new Error(`Invalid Lumis language package: ${expectedPackageName}`);
+  }
+  return value;
+}
+
+function isSafePackagePathSegment(value: string): boolean {
+  return (
+    value !== "" &&
+    value !== "." &&
+    value !== ".." &&
+    !value.includes("/") &&
+    !value.includes("\\") &&
+    !value.includes("\0")
+  );
+}
+
+export function serializeLanguagePackageCache(packageMetadata: LanguagePackage): Uint8Array {
+  return encoder.encode(
+    JSON.stringify({
+      checkedAt: Date.now(),
+      package: packageMetadata,
+    } satisfies CachedLanguagePackage),
+  );
+}
+
+function packagedLanguage(
+  language: LanguageDefinition,
+  packageMetadata: LanguagePackage,
+): [string, PackagedLanguage] {
+  for (const [id, definition] of Object.entries(packageMetadata.languages)) {
+    if (
+      id.toLowerCase() === language.id.toLowerCase() ||
+      definition.aliases.some((alias) => alias.toLowerCase() === language.id.toLowerCase())
+    ) {
+      return [id, definition];
+    }
+  }
+  throw new Error(
+    `Language "${language.id}" is not provided by ${packageMetadata.packageName}@${packageMetadata.version}`,
+  );
 }
 
 let treeSitterPromise: Promise<typeof import("web-tree-sitter")> | undefined;
@@ -290,10 +429,13 @@ function compileHighlightConfig(
 
 export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesModule {
   let configuredDefaultResolver: WasmResolver = DEFAULT_RESOLVER;
+  let configuredLanguagePackageResolver: LanguagePackageResolver =
+    DEFAULT_LANGUAGE_PACKAGE_RESOLVER;
   const moduleCache = createSharedRuntimeCache();
 
   class HighlighterRuntime implements RuntimeLike {
     private explicitResolver: WasmResolver | undefined;
+    private explicitLanguagePackageResolver: LanguagePackageResolver | undefined;
     private readonly sharedCache: SharedRuntimeCache;
     private readonly loadedLanguages = new Map<string, LoadedLanguage>();
     private readonly aliasMap = new Map<string, string>();
@@ -305,6 +447,7 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
 
     constructor(options: HighlighterRuntimeOptions = {}) {
       this.explicitResolver = options.wasmResolver;
+      this.explicitLanguagePackageResolver = options.languagePackageResolver;
       this.sharedCache = options.sharedCache ?? moduleCache;
 
       for (const alias of PLAINTEXT_ALIASES) {
@@ -314,6 +457,106 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
 
     private get resolver(): WasmResolver {
       return this.explicitResolver ?? configuredDefaultResolver;
+    }
+
+    private get languagePackageResolver(): LanguagePackageResolver {
+      return this.explicitLanguagePackageResolver ?? configuredLanguagePackageResolver;
+    }
+
+    private async readCachedLanguagePackage(
+      packageName: string,
+    ): Promise<CachedLanguagePackage | undefined> {
+      const bytes = await runtime.readFsCache(languagePackageCacheKey(packageName));
+      if (!bytes) return undefined;
+      try {
+        const cached = JSON.parse(decoder.decode(bytes)) as CachedLanguagePackage;
+        const serialized = encoder.encode(JSON.stringify(cached.package));
+        return {
+          checkedAt: cached.checkedAt,
+          package: parseLanguagePackage(serialized, packageName),
+        };
+      } catch {
+        return undefined;
+      }
+    }
+
+    private async loadInstalledLanguagePackage(
+      packageName: string,
+    ): Promise<LanguagePackage | undefined> {
+      try {
+        const mod = await import(
+          /* webpackIgnore: true */
+          /* turbopackIgnore: true */
+          /* @vite-ignore */
+          packageName
+        );
+        const base = mod.default as unknown;
+        if (!(base instanceof URL) && typeof base !== "string") return undefined;
+        const source = new URL("./language.json", base instanceof URL ? base : new URL(base));
+        const disk = await runtime.readResolvedWasmFromDisk(source);
+        if (disk) return parseLanguagePackage(disk, packageName);
+        const response = await fetch(source);
+        if (!response.ok) return undefined;
+        return parseLanguagePackage(new Uint8Array(await response.arrayBuffer()), packageName);
+      } catch {
+        return undefined;
+      }
+    }
+
+    private async fetchLanguagePackage(packageName: string): Promise<LanguagePackage> {
+      const source = this.languagePackageResolver(packageName);
+      const disk = await runtime.readResolvedWasmFromDisk(source);
+      if (disk) return parseLanguagePackage(disk, packageName);
+      const response = await fetch(typeof source === "string" ? source : source.href);
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch language package ${packageName}: ${response.status} ${response.statusText}`,
+        );
+      }
+      return parseLanguagePackage(new Uint8Array(await response.arrayBuffer()), packageName);
+    }
+
+    private async resolvePackage(packageName: string): Promise<LanguagePackage> {
+      const memory = this.sharedCache.packages.get(packageName);
+      if (memory) return memory;
+      const inFlight = this.sharedCache.packageLoads.get(packageName);
+      if (inFlight) return inFlight;
+
+      const load = (async () => {
+        const installed = await this.loadInstalledLanguagePackage(packageName);
+        if (installed) return installed;
+
+        const cached = await this.readCachedLanguagePackage(packageName);
+        const networkEnabled = runtime.networkFallbackEnabled?.() !== false;
+        if (
+          cached &&
+          (!networkEnabled || Date.now() - cached.checkedAt < LANGUAGE_PACKAGE_TTL_MS)
+        ) {
+          return cached.package;
+        }
+        if (!networkEnabled) {
+          throw new Error(
+            `Language package "${packageName}" is not cached and offline mode is enabled`,
+          );
+        }
+
+        try {
+          const packageMetadata = await this.fetchLanguagePackage(packageName);
+          await runtime.writeFsCache(
+            languagePackageCacheKey(packageName),
+            serializeLanguagePackageCache(packageMetadata),
+          );
+          return packageMetadata;
+        } catch (error) {
+          if (cached) return cached.package;
+          throw error;
+        }
+      })().then((value) => {
+        this.sharedCache.packages.set(packageName, value);
+        return value;
+      });
+
+      return trackLoad(this.sharedCache.packageLoads, packageName, load);
     }
 
     private async readVerifiedCache(ref: WasmRef, key: string): Promise<Uint8Array | undefined> {
@@ -393,11 +636,23 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
     private async createLoadedLanguage(opts: LoadLanguageOptions): Promise<LoadedLanguage> {
       await this.initParser();
 
+      const resolved = opts.packageName
+        ? {
+            ...(await this.resolveLanguagePackage(opts.definition, opts.packageName)),
+            ...(opts.wasm === undefined ? {} : { wasm: opts.wasm }),
+          }
+        : opts;
+      if (!resolved.wasm || resolved.highlights === undefined) {
+        throw new Error(
+          `Language "${opts.definition.id}" requires packageName or complete queries and WASM`,
+        );
+      }
+
       let wasmInput: Uint8Array | string;
-      if (typeof opts.wasm === "object" && opts.wasm !== null && isWasmRef(opts.wasm)) {
-        wasmInput = await this.resolveWasmRef(opts.definition.id, opts.wasm);
-      } else if (isRuntimeWasmInput(opts.wasm)) {
-        wasmInput = await runtime.resolveWasm(opts.wasm);
+      if (typeof resolved.wasm === "object" && resolved.wasm !== null && isWasmRef(resolved.wasm)) {
+        wasmInput = await this.resolveWasmRef(resolved.definition.id, resolved.wasm);
+      } else if (isRuntimeWasmInput(resolved.wasm)) {
+        wasmInput = await runtime.resolveWasm(resolved.wasm);
       } else {
         throw new Error(`Unsupported WASM input for language "${opts.definition.id}"`);
       }
@@ -408,30 +663,56 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
       parser.setLanguage(language);
 
       const loaded: LoadedLanguage = {
-        definition: opts.definition,
+        definition: resolved.definition,
         parser,
         language,
         config: compileHighlightConfig(
           language,
           Query,
-          opts.highlights,
-          opts.injections,
-          opts.locals,
+          resolved.highlights,
+          resolved.injections,
+          resolved.locals,
         ),
       };
-      if (opts.brackets) {
+      if (resolved.brackets) {
         this.bracketCompilers.set(loaded, () =>
-          compileBracketConfig(language, Query, opts.brackets),
+          compileBracketConfig(language, Query, resolved.brackets),
         );
       }
 
-      this.loadedLanguages.set(opts.definition.id, loaded);
-      this.registerLanguage(opts.definition);
+      this.loadedLanguages.set(resolved.definition.id, loaded);
+      this.registerLanguage(resolved.definition);
       return loaded;
     }
 
     configureWasmResolver(fn: WasmResolver): void {
       this.explicitResolver = fn;
+    }
+
+    configureLanguagePackageResolver(fn: LanguagePackageResolver): void {
+      this.explicitLanguagePackageResolver = fn;
+    }
+
+    async resolveLanguagePackage(
+      language: LanguageDefinition,
+      packageName: string,
+    ): Promise<ResolvedLanguagePackage> {
+      const packageMetadata = await this.resolvePackage(packageName);
+      const [id, packaged] = packagedLanguage(language, packageMetadata);
+      return {
+        definition: { id, aliases: packaged.aliases },
+        wasm: {
+          packageName: packageMetadata.packageName,
+          name: packageMetadata.parser.name,
+          version: packageMetadata.version,
+          sha256: packageMetadata.parser.sha256,
+          size: packageMetadata.parser.size,
+        },
+        highlights: packaged.highlights,
+        injections: packaged.injections,
+        locals: packaged.locals,
+        brackets: packaged.brackets,
+      };
     }
 
     async initParser(): Promise<void> {
@@ -534,6 +815,10 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
       configuredDefaultResolver = fn;
       defaultRuntime.configureWasmResolver(fn);
     },
+    configureLanguagePackageResolver(fn) {
+      configuredLanguagePackageResolver = fn;
+      defaultRuntime.configureLanguagePackageResolver(fn);
+    },
     initParser() {
       return defaultRuntime.initParser();
     },
@@ -545,6 +830,9 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
     },
     loadLanguage(opts) {
       return defaultRuntime.loadLanguage(opts);
+    },
+    resolveLanguagePackage(language, packageName) {
+      return defaultRuntime.resolveLanguagePackage(language, packageName);
     },
     loadPlaintext() {
       return defaultRuntime.loadPlaintext();

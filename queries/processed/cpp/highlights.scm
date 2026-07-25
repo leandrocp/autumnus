@@ -192,11 +192,11 @@
   type: _?)
 
 ((identifier) @constant
-  (#lua-match? @constant "^[A-Z][A-Z0-9_]+$"))
+  (#match? @constant "^[A-Z][A-Z0-9_]+$"))
 
 (preproc_def
   (preproc_arg) @constant
-  (#lua-match? @constant "^[A-Z][A-Z0-9_]+$"))
+  (#match? @constant "^[A-Z][A-Z0-9_]+$"))
 
 (enumerator
   name: (identifier) @constant)
@@ -246,7 +246,7 @@
 
 ((call_expression
   function: (identifier) @function.builtin)
-  (#lua-match? @function.builtin "^__builtin_"))
+  (#match? @function.builtin "^__builtin_"))
 
 ((call_expression
   function: (identifier) @function.builtin)
@@ -291,7 +291,7 @@
 (comment) @comment 
 
 ((comment) @comment.documentation
-  (#lua-match? @comment.documentation "^/[*][*][^*].*[*]/$"))
+  (#match? @comment.documentation "^/[*][*][\\^*].*[*]/$"))
 
 ; Parameters
 (parameter_declaration
@@ -343,7 +343,7 @@
 ] @attribute
 
 ((identifier) @variable.member
-  (#lua-match? @variable.member "^m_.*$"))
+  (#match? @variable.member "^m_.*$"))
 
 (parameter_declaration
   declarator: (reference_declarator) @variable.parameter)
@@ -382,7 +382,7 @@
 (namespace_identifier) @module
 
 ((namespace_identifier) @type
-  (#lua-match? @type "^[%u]"))
+  (#match? @type "^[[A-Z]]"))
 
 (case_statement
   value: (qualified_identifier
@@ -505,27 +505,27 @@
 ((function_declarator
   (qualified_identifier
     (identifier) @constructor))
-  (#lua-match? @constructor "^%u"))
+  (#match? @constructor "^[A-Z]"))
 
 ((call_expression
   function: (identifier) @constructor)
-  (#lua-match? @constructor "^%u"))
+  (#match? @constructor "^[A-Z]"))
 
 ((call_expression
   function: (qualified_identifier
     name: (identifier) @constructor))
-  (#lua-match? @constructor "^%u"))
+  (#match? @constructor "^[A-Z]"))
 
 ((call_expression
   function: (field_expression
     field: (field_identifier) @constructor))
-  (#lua-match? @constructor "^%u"))
+  (#match? @constructor "^[A-Z]"))
 
 ; constructing a type in an initializer list: Constructor ():  **SuperType (1)**
 ((field_initializer
   (field_identifier) @constructor
   (argument_list))
-  (#lua-match? @constructor "^%u"))
+  (#match? @constructor "^[A-Z]"))
 
 ; Constants
 (this) @variable.builtin

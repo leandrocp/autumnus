@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from 'vitest'
+import { describe, it, expect, beforeAll } from "vitest";
 import {
   initParser,
   loadLanguage,
@@ -6,112 +6,109 @@ import {
   getLoadedLanguage,
   getLoadedLanguageIds,
   resolveLanguageId,
-} from '../src/runtime/node.js'
-import json from '../langs/json.ts'
-import { configureLocalWasmResolver } from './wasm.js'
+} from "../src/runtime/node.js";
+import json from "../langs/json.ts";
+import { configureLocalWasmResolver } from "./wasm.js";
 
 beforeAll(async () => {
-  configureLocalWasmResolver(['diff', 'json'])
-  await initParser()
-}, 120_000)
+  configureLocalWasmResolver(["diff", "json"]);
+  await initParser();
+}, 120_000);
 
-describe('resolveLanguageId', () => {
-  it('returns the id itself when no alias registered', () => {
-    expect(resolveLanguageId('unknown')).toBe('unknown')
-  })
+describe("resolveLanguageId", () => {
+  it("returns the id itself when no alias registered", () => {
+    expect(resolveLanguageId("unknown")).toBe("unknown");
+  });
 
-  it('resolves plaintext aliases', () => {
-    expect(resolveLanguageId('text')).toBe('plaintext')
-    expect(resolveLanguageId('txt')).toBe('plaintext')
-    expect(resolveLanguageId('plain')).toBe('plaintext')
-  })
+  it("resolves plaintext aliases", () => {
+    expect(resolveLanguageId("text")).toBe("plaintext");
+    expect(resolveLanguageId("txt")).toBe("plaintext");
+    expect(resolveLanguageId("plain")).toBe("plaintext");
+  });
 
-  it('resolves aliases after language is loaded', async () => {
+  it("resolves aliases after language is loaded", async () => {
     await loadLanguage({
       definition: { id: json.id, aliases: json.aliases },
-      wasm: json.wasm,
-      highlights: json.highlights,
-    })
+      packageName: json.packageName,
+    });
     for (const alias of json.aliases) {
-      expect(resolveLanguageId(alias)).toBe('json')
+      expect(resolveLanguageId(alias)).toBe("json");
     }
-  })
-})
+  });
+});
 
-describe('loadLanguage', () => {
-  it('loads and registers a language', async () => {
+describe("loadLanguage", () => {
+  it("loads and registers a language", async () => {
     await loadLanguage({
       definition: { id: json.id, aliases: json.aliases },
-      wasm: json.wasm,
-      highlights: json.highlights,
-    })
-    expect(getLoadedLanguage('json')).toBeDefined()
-    expect(getLoadedLanguage('json')!.definition.id).toBe('json')
-  })
+      packageName: json.packageName,
+    });
+    expect(getLoadedLanguage("json")).toBeDefined();
+    expect(getLoadedLanguage("json")!.definition.id).toBe("json");
+  });
 
-  it('is idempotent', async () => {
-    const first = getLoadedLanguage('json')
+  it("is idempotent", async () => {
+    const first = getLoadedLanguage("json");
     await loadLanguage({
       definition: { id: json.id, aliases: json.aliases },
-      wasm: json.wasm,
-      highlights: json.highlights,
-    })
-    expect(getLoadedLanguage('json')).toBe(first)
-  })
-})
+      packageName: json.packageName,
+    });
+    expect(getLoadedLanguage("json")).toBe(first);
+  });
+});
 
-describe('getLoadedLanguage', () => {
-  it('returns undefined for unloaded language', () => {
-    expect(getLoadedLanguage('python')).toBeUndefined()
-  })
+describe("getLoadedLanguage", () => {
+  it("returns undefined for unloaded language", () => {
+    expect(getLoadedLanguage("python")).toBeUndefined();
+  });
 
-  it('resolves by alias', () => {
-    const byId = getLoadedLanguage('json')
+  it("resolves by alias", () => {
+    const byId = getLoadedLanguage("json");
     for (const alias of json.aliases) {
-      expect(getLoadedLanguage(alias)).toBe(byId)
+      expect(getLoadedLanguage(alias)).toBe(byId);
     }
-  })
-})
+  });
+});
 
-describe('getLoadedLanguageIds', () => {
-  it('includes loaded languages', () => {
-    expect(getLoadedLanguageIds()).toContain('json')
-  })
+describe("getLoadedLanguageIds", () => {
+  it("includes loaded languages", () => {
+    expect(getLoadedLanguageIds()).toContain("json");
+  });
 
-  it('does not eagerly load plaintext during initParser', () => {
-    expect(getLoadedLanguage('plaintext')).toBeUndefined()
-  })
+  it("does not eagerly load plaintext during initParser", () => {
+    expect(getLoadedLanguage("plaintext")).toBeUndefined();
+  });
 
-  it('does not include unloaded languages', () => {
-    expect(getLoadedLanguageIds()).not.toContain('python')
-  })
-})
+  it("does not include unloaded languages", () => {
+    expect(getLoadedLanguageIds()).not.toContain("python");
+  });
+});
 
-describe('loadPlaintext', () => {
-  it('loads parser-free plaintext', async () => {
-    await loadPlaintext()
-    const loaded = getLoadedLanguage('plaintext')
-    expect(loaded).toBeDefined()
-    expect(loaded!.definition.id).toBe('plaintext')
-    expect(loaded!.parser).toBeUndefined()
-  })
+describe("loadPlaintext", () => {
+  it("loads parser-free plaintext", async () => {
+    await loadPlaintext();
+    const loaded = getLoadedLanguage("plaintext");
+    expect(loaded).toBeDefined();
+    expect(loaded!.definition.id).toBe("plaintext");
+    expect(loaded!.parser).toBeUndefined();
+  });
 
-  it('is idempotent', async () => {
-    const first = getLoadedLanguage('plaintext')
-    await loadPlaintext()
-    expect(getLoadedLanguage('plaintext')).toBe(first)
-  })
+  it("is idempotent", async () => {
+    const first = getLoadedLanguage("plaintext");
+    await loadPlaintext();
+    expect(getLoadedLanguage("plaintext")).toBe(first);
+  });
 
-  it('is accessible via aliases', async () => {
-    await loadPlaintext()
-    const byId = getLoadedLanguage('plaintext')
-    expect(getLoadedLanguage('text')).toBe(byId)
-    expect(getLoadedLanguage('txt')).toBe(byId)
-    expect(getLoadedLanguage('plain')).toBe(byId)
-  })
+  it("is accessible via aliases", async () => {
+    await loadPlaintext();
+    const byId = getLoadedLanguage("plaintext");
+    expect(getLoadedLanguage("text")).toBe(byId);
+    expect(getLoadedLanguage("txt")).toBe(byId);
+    expect(getLoadedLanguage("plain")).toBe(byId);
+  });
 
-  it('appears in loaded language ids', async () => {
-    await loadPlaintext()
-    expect(getLoadedLanguageIds()).toContain('plaintext')
-  })
-})
+  it("appears in loaded language ids", async () => {
+    await loadPlaintext();
+    expect(getLoadedLanguageIds()).toContain("plaintext");
+  });
+});

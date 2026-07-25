@@ -5,14 +5,14 @@ defmodule Lumis.LanguageLoader do
 
   @lock_timeout_ms 120_000
   @stale_lock_ms 300_000
+  @package_ttl_seconds 3_600
   @plaintext_names ~w(plaintext text txt plain)
 
   def load(name) when name in @plaintext_names, do: :ok
 
   def load(name) when is_binary(name) do
-    case Native.language_manifest(name) do
-      nil -> {:error, "unknown language '#{name}'"}
-      entry -> load_manifest_entry(entry)
+    with {:ok, entry, package_json} <- language_entry(name, false) do
+      load_entry(entry, package_json)
     end
   end
 
@@ -40,120 +40,254 @@ defmodule Lumis.LanguageLoader do
     end
   end
 
-  defp load_manifest_entry(entry) do
+  defp language_entry(name, force?) do
+    case Native.language_package_ref(name) do
+      nil ->
+        {:error, "unknown language '#{name}'"}
+
+      handle ->
+        with {:ok, package_json} <- package_json(handle, force?),
+             {:ok, entry} <- Native.resolve_language_package(handle.id, package_json) do
+          {:ok, entry, package_json}
+        end
+    end
+  end
+
+  defp package_json(handle, true) do
+    if offline?(), do: package_offline_error(handle), else: resolve_package(handle)
+  end
+
+  defp package_json(handle, false) do
+    case read_valid_package(bundled_package_file(handle), handle, false) do
+      {:ok, package_json} -> {:ok, package_json}
+      :miss -> cached_package(handle)
+    end
+  end
+
+  defp cached_package(handle) do
+    path = package_cache_file(handle)
+
+    case read_valid_package(path, handle, true) do
+      {:ok, package_json} ->
+        if offline?() or fresh?(path) do
+          {:ok, package_json}
+        else
+          refresh_package(handle, path, package_json)
+        end
+
+      :miss ->
+        if offline?(), do: package_offline_error(handle), else: refresh_package(handle, path, nil)
+    end
+  end
+
+  defp refresh_package(handle, path, stale) do
+    with_cache_lock(path, fn ->
+      case read_valid_package(path, handle, true) do
+        {:ok, package_json} ->
+          if package_json != stale and fresh?(path) do
+            {:ok, package_json}
+          else
+            resolve_or_reuse_package(handle, path, stale)
+          end
+
+        :miss ->
+          resolve_or_reuse_package(handle, path, stale)
+      end
+    end)
+  end
+
+  defp resolve_or_reuse_package(handle, path, stale) do
+    case resolve_package(handle) do
+      {:ok, package_json} ->
+        with :ok <- write_atomic(path, package_json), do: {:ok, package_json}
+
+      {:error, _reason} when is_binary(stale) ->
+        {:ok, stale}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  defp read_valid_package(path, handle, remove_invalid?) do
+    case File.read(path) do
+      {:ok, package_json} ->
+        case Native.resolve_language_package(handle.id, package_json) do
+          {:ok, _entry} ->
+            {:ok, package_json}
+
+          {:error, _reason} ->
+            if remove_invalid?, do: File.rm(path)
+            :miss
+        end
+
+      {:error, _reason} ->
+        :miss
+    end
+  end
+
+  defp resolve_package(handle) do
+    resolver =
+      Application.get_env(:lumis, :language_package_resolver, &default_package_url/1)
+
+    case resolver.(handle) do
+      {:ok, package_json} when is_binary(package_json) ->
+        validate_resolved_package(handle, package_json)
+
+      {:file, path} when is_binary(path) ->
+        with {:ok, package_json} <- File.read(path),
+             do: validate_resolved_package(handle, package_json)
+
+      url when is_binary(url) ->
+        with {:ok, package_json} <- download(url, "language package"),
+             do: validate_resolved_package(handle, package_json)
+
+      other ->
+        {:error, "invalid :language_package_resolver result: #{inspect(other)}"}
+    end
+  rescue
+    exception -> {:error, "language package resolver failed: #{Exception.message(exception)}"}
+  end
+
+  defp validate_resolved_package(handle, package_json) do
+    case Native.resolve_language_package(handle.id, package_json) do
+      {:ok, _entry} -> {:ok, package_json}
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
+  defp load_entry(entry, package_json) do
     if Native.has_language(entry.id) do
       :ok
     else
-      :global.trans({__MODULE__, entry.id}, fn -> load_entry(entry) end)
+      :global.trans({__MODULE__, entry.id}, fn ->
+        if Native.has_language(entry.id) do
+          :ok
+        else
+          with {:ok, bytes} <- cached_or_resolved(entry) do
+            Native.load_language(entry.id, package_json, bytes)
+          end
+        end
+      end)
     end
   end
 
   defp cache_name(name, paths, seen, directory, force?) do
-    case Native.language_manifest(name) do
-      nil -> {:halt, {:error, "unknown language '#{name}'"}}
-      entry -> cache_manifest_entry(entry, paths, seen, directory, force?)
+    case language_entry(name, force?) do
+      {:ok, entry, package_json} ->
+        key = {entry.package_name, entry.version, entry.definition_hash}
+
+        if MapSet.member?(seen, key) do
+          {:cont, {:ok, paths, seen}}
+        else
+          cache_new_entry(entry, package_json, key, paths, seen, directory, force?)
+        end
+
+      {:error, reason} ->
+        {:halt, {:error, reason}}
     end
   end
 
-  defp cache_manifest_entry(entry, paths, seen, directory, force?) do
-    key = {entry.wasm_name, entry.version, entry.sha256}
-
-    if MapSet.member?(seen, key) do
-      {:cont, {:ok, paths, seen}}
+  defp cache_new_entry(entry, package_json, key, paths, seen, directory, force?) do
+    with :ok <- cache_package(entry, package_json, directory, force?),
+         {:ok, path} <- cache_parser(entry, directory, force?) do
+      {:cont, {:ok, [path | paths], MapSet.put(seen, key)}}
     else
-      cache_new_entry(entry, key, paths, seen, directory, force?)
-    end
-  end
-
-  defp cache_new_entry(entry, key, paths, seen, directory, force?) do
-    case cache_entry(entry, directory, force?) do
-      {:ok, path} -> {:cont, {:ok, [path | paths], MapSet.put(seen, key)}}
       {:error, reason} -> {:halt, {:error, reason}}
     end
   end
 
-  defp load_entry(entry) do
-    if Native.has_language(entry.id) do
-      :ok
-    else
-      case cached_or_resolved(entry) do
-        {:ok, bytes} -> Native.load_language(entry.id, bytes)
-        {:error, reason} -> {:error, reason}
+  defp cache_package(entry, package_json, directory, force?) do
+    destination = Path.join(directory, package_filename(entry))
+
+    with_cache_lock(destination, fn ->
+      if force? or not valid_package_file?(destination, entry.id) do
+        write_atomic(destination, package_json)
+      else
+        :ok
       end
+    end)
+  end
+
+  defp valid_package_file?(path, language) do
+    case File.read(path) do
+      {:ok, package_json} ->
+        match?({:ok, _}, Native.resolve_language_package(language, package_json))
+
+      {:error, _reason} ->
+        false
     end
   end
 
   defp cached_or_resolved(entry) do
-    case read_verified(bundled_file(entry), entry, false) do
+    case read_verified(bundled_parser_file(entry), entry, false) do
       {:ok, bytes} -> {:ok, bytes}
       :miss -> cached_or_downloaded(entry)
     end
   end
 
   defp cached_or_downloaded(entry) do
-    cache_file = cache_file(entry)
+    path = parser_cache_file(entry)
 
-    case read_verified(cache_file, entry, true) do
-      {:ok, bytes} ->
-        {:ok, bytes}
-
-      :miss ->
-        resolve_cache_miss(entry, cache_file)
-    end
-  end
-
-  defp resolve_cache_miss(entry, cache_file) do
-    if offline?() do
-      offline_error(entry)
-    else
-      with_cache_lock(cache_file, fn -> cached_after_lock(entry, cache_file) end)
-    end
-  end
-
-  defp cached_after_lock(entry, cache_file) do
-    case read_verified(cache_file, entry, true) do
+    case read_verified(path, entry, true) do
       {:ok, bytes} -> {:ok, bytes}
-      :miss -> resolve_verified_and_write(entry, cache_file)
+      :miss -> resolve_parser_cache_miss(entry, path)
     end
   end
 
-  defp resolve_verified_and_write(entry, cache_file) do
-    with {:ok, bytes} <- resolve(entry),
+  defp resolve_parser_cache_miss(entry, path) do
+    if offline?() do
+      parser_offline_error(entry)
+    else
+      with_cache_lock(path, fn ->
+        case read_verified(path, entry, true) do
+          {:ok, bytes} -> {:ok, bytes}
+          :miss -> resolve_verified_and_write(entry, path)
+        end
+      end)
+    end
+  end
+
+  defp cache_parser(entry, directory, force?) do
+    destination = Path.join(directory, parser_filename(entry))
+
+    with_cache_lock(destination, fn ->
+      cond do
+        offline?() and force? ->
+          parser_offline_error(entry)
+
+        force? ->
+          resolve_parser_and_write(entry, destination)
+
+        true ->
+          case read_verified(destination, entry, true) do
+            {:ok, _bytes} ->
+              {:ok, destination}
+
+            :miss ->
+              if offline?() do
+                parser_offline_error(entry)
+              else
+                resolve_parser_and_write(entry, destination)
+              end
+          end
+      end
+    end)
+  end
+
+  defp resolve_parser_and_write(entry, destination) do
+    case resolve_verified_and_write(entry, destination) do
+      {:ok, _bytes} -> {:ok, destination}
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
+  defp resolve_verified_and_write(entry, path) do
+    with {:ok, bytes} <- resolve_parser(entry),
          :ok <- verify(bytes, entry),
-         :ok <- write_atomic(cache_file, bytes) do
+         :ok <- write_atomic(path, bytes) do
       {:ok, bytes}
     end
-  end
-
-  defp cache_entry(entry, directory, force?) do
-    destination = Path.join(directory, cache_filename(entry))
-    with_cache_lock(destination, fn -> ensure_cached(entry, destination, force?) end)
-  end
-
-  defp ensure_cached(entry, destination, true) do
-    resolve_and_write(entry, destination)
-  end
-
-  defp ensure_cached(entry, destination, false) do
-    case read_verified(destination, entry, true) do
-      {:ok, _bytes} -> {:ok, destination}
-      :miss -> resolve_and_write(entry, destination)
-    end
-  end
-
-  defp resolve_and_write(entry, destination) do
-    if offline?() do
-      offline_error(entry)
-    else
-      case resolve_verified_and_write(entry, destination) do
-        {:ok, _bytes} -> {:ok, destination}
-        {:error, reason} -> {:error, reason}
-      end
-    end
-  end
-
-  defp offline_error(entry) do
-    {:error, "parser WASM for '#{entry.id}' is not cached and offline mode is enabled"}
   end
 
   defp read_verified(path, entry, remove_invalid?) do
@@ -190,24 +324,28 @@ defmodule Lumis.LanguageLoader do
     end
   end
 
-  defp resolve(entry) do
-    resolver = Application.get_env(:lumis, :wasm_resolver, &default_url/1)
+  defp resolve_parser(entry) do
+    resolver = Application.get_env(:lumis, :wasm_resolver, &default_wasm_url/1)
 
     case resolver.(entry) do
       {:ok, bytes} when is_binary(bytes) -> {:ok, bytes}
       {:file, path} when is_binary(path) -> File.read(path)
-      url when is_binary(url) -> download(url)
+      url when is_binary(url) -> download(url, "parser WASM")
       other -> {:error, "invalid :wasm_resolver result: #{inspect(other)}"}
     end
   rescue
     exception -> {:error, "parser WASM resolver failed: #{Exception.message(exception)}"}
   end
 
-  defp default_url(entry) do
+  defp default_package_url(handle) do
+    "https://cdn.jsdelivr.net/npm/#{handle.package_name}@latest/language.json"
+  end
+
+  defp default_wasm_url(entry) do
     "https://cdn.jsdelivr.net/npm/#{entry.package_name}@#{entry.version}/#{entry.wasm_name}.wasm"
   end
 
-  defp download(url) do
+  defp download(url, description) do
     request = {String.to_charlist(url), []}
 
     http_options = [
@@ -227,22 +365,23 @@ defmodule Lumis.LanguageLoader do
         {:ok, body}
 
       {:ok, {{_version, status, reason}, _headers, _body}} ->
-        {:error, "failed to download parser WASM: HTTP #{status} #{reason}"}
+        {:error, "failed to download #{description}: HTTP #{status} #{reason}"}
 
       {:error, reason} ->
-        {:error, "failed to download parser WASM: #{inspect(reason)}"}
+        {:error, "failed to download #{description}: #{inspect(reason)}"}
     end
   end
 
-  defp cache_file(entry) do
-    Path.join(cache_dir(), cache_filename(entry))
+  defp package_cache_file(handle), do: Path.join(cache_dir(), package_filename(handle))
+  defp parser_cache_file(entry), do: Path.join(cache_dir(), parser_filename(entry))
+  defp bundled_package_file(handle), do: Path.join(bundled_dir(), package_filename(handle))
+  defp bundled_parser_file(entry), do: Path.join(bundled_dir(), parser_filename(entry))
+
+  defp package_filename(package) do
+    "#{Path.basename(package.package_name)}.language.json"
   end
 
-  defp bundled_file(entry) do
-    Path.join(bundled_dir(), cache_filename(entry))
-  end
-
-  defp cache_filename(entry) do
+  defp parser_filename(entry) do
     "#{entry.wasm_name}-#{entry.version}-#{entry.sha256}.wasm"
   end
 
@@ -262,6 +401,21 @@ defmodule Lumis.LanguageLoader do
       :wasm_offline,
       String.downcase(System.get_env("LUMIS_WASM_OFFLINE", "")) in ["1", "true"]
     )
+  end
+
+  defp package_offline_error(handle) do
+    {:error, "language package for '#{handle.id}' is not cached and offline mode is enabled"}
+  end
+
+  defp parser_offline_error(entry) do
+    {:error, "parser WASM for '#{entry.id}' is not cached and offline mode is enabled"}
+  end
+
+  defp fresh?(path) do
+    case File.stat(path, time: :posix) do
+      {:ok, stat} -> System.system_time(:second) - stat.mtime <= @package_ttl_seconds
+      {:error, _reason} -> false
+    end
   end
 
   defp write_atomic(path, bytes) do
@@ -287,7 +441,7 @@ defmodule Lumis.LanguageLoader do
         with :ok <- File.rm(path), do: File.rename(temporary, path)
 
       {:error, reason} ->
-        {:error, "failed to cache parser WASM: #{inspect(reason)}"}
+        {:error, "failed to cache language package: #{inspect(reason)}"}
     end
   end
 
@@ -316,14 +470,14 @@ defmodule Lumis.LanguageLoader do
         clear_stale_lock(lock_file)
 
         if now_ms() >= deadline do
-          {:error, "timed out waiting for parser WASM cache lock"}
+          {:error, "timed out waiting for language cache lock"}
         else
           Process.sleep(25)
           acquire_lock(lock_file, deadline)
         end
 
       {:error, reason} ->
-        {:error, "failed to lock parser WASM cache: #{inspect(reason)}"}
+        {:error, "failed to lock language cache: #{inspect(reason)}"}
     end
   end
 

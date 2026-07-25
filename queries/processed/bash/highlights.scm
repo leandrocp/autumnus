@@ -233,7 +233,7 @@
 (variable_name) @variable
 
 ((variable_name) @constant
-  (#lua-match? @constant "^[A-Z][A-Z_0-9]*$"))
+  (#match? @constant "^[A-Z][A-Z_0-9]*$"))
 
 ((variable_name) @variable.builtin
   (#any-of? @variable.builtin
@@ -263,7 +263,7 @@
   argument: (word) @variable)
   (#eq? @_printf "printf")
   (#eq? @_v "-v")
-  (#lua-match? @variable "^[a-zA-Z_][a-zA-Z0-9_]*$"))
+  (#match? @variable "^[a-zA-Z_][a-zA-Z0-9_]*$"))
 
 (case_item
   value: (word) @variable.parameter)
@@ -276,4 +276,4 @@
 ((program
   .
   (comment) @keyword.directive )
-  (#lua-match? @keyword.directive "^#![ \t]*/"))
+  (#match? @keyword.directive "^#![ \\t]*/"))

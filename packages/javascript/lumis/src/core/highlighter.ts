@@ -10,7 +10,7 @@ import type {
   Theme,
 } from "../types.js";
 import { PLAINTEXT_LANG_ID } from "../types.js";
-import type { RuntimeLike, WasmResolver } from "./languages.js";
+import type { LanguagePackageResolver, RuntimeLike, WasmResolver } from "./languages.js";
 import { getScopedThemeStyle } from "../formatter/html.js";
 import { LANGUAGE_LOADERS } from "../generated/language-loaders.js";
 import { guessLanguage } from "../guess-language.js";
@@ -43,7 +43,10 @@ export interface Highlighter {
 }
 
 export interface HighlighterModuleFactory {
-  createRuntime(options?: { wasmResolver?: WasmResolver }): RuntimeLike;
+  createRuntime(options?: {
+    wasmResolver?: WasmResolver;
+    languagePackageResolver?: LanguagePackageResolver;
+  }): RuntimeLike;
   getDefaultRuntime(): RuntimeLike;
 }
 
@@ -53,11 +56,14 @@ export interface CreateHighlighterOptions {
   languages?: LanguageInput[];
   /** Optional resolver for external WASM assets. */
   wasmResolver?: WasmResolver;
+  /** Optional resolver for self-contained language package metadata. */
+  languagePackageResolver?: LanguagePackageResolver;
 }
 
 async function loadLanguageDefinition(runtime: RuntimeLike, language: Language): Promise<void> {
   await runtime.loadLanguage({
     definition: { id: language.id, aliases: language.aliases },
+    packageName: language.packageName,
     wasm: language.wasm,
     highlights: language.highlights,
     injections: language.injections,
@@ -288,21 +294,22 @@ async function runFormatterAsync(
   return runFormatter(runtime, source, fmt, detectedRef);
 }
 
-/** Check if a value is a Language object (has highlights and wasm). */
+/** Check if a value is a built-in package handle or complete custom language. */
 function isLanguage(value: unknown): value is Language {
   return (
     typeof value === "object" &&
     value !== null &&
     "id" in value &&
-    "highlights" in value &&
-    "wasm" in value
+    ("packageName" in value || ("highlights" in value && "wasm" in value))
   );
 }
 
 /** Check if a value is a LanguageBundle (Record<string, LazyLanguage>). */
 function isLanguageBundle(value: unknown): value is LanguageBundle {
   if (typeof value !== "object" || value === null) return false;
-  if ("id" in value || "highlights" in value || "default" in value) return false;
+  if ("id" in value || "packageName" in value || "highlights" in value || "default" in value) {
+    return false;
+  }
   const keys = Object.keys(value);
   const firstKey = keys[0];
   return (
@@ -444,7 +451,10 @@ async function prepareRuntimeHighlight(
 export function createHighlighterModule(factory: HighlighterModuleFactory) {
   return {
     async createHighlighter(init: CreateHighlighterOptions = {}): Promise<Highlighter> {
-      const runtime = factory.createRuntime({ wasmResolver: init.wasmResolver });
+      const runtime = factory.createRuntime({
+        wasmResolver: init.wasmResolver,
+        languagePackageResolver: init.languagePackageResolver,
+      });
       await runtime.initParser();
 
       const lazyRegistry = new Map<string, LazyLanguage>();

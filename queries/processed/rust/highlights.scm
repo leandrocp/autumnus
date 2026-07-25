@@ -8,14 +8,14 @@
 (identifier) @variable
 
 ((identifier) @type
-  (#lua-match? @type "^[A-Z]"))
+  (#match? @type "^[A-Z]"))
 
 (const_item
   name: (identifier) @constant)
 
 ; Assume all-caps names are constants
 ((identifier) @constant
-  (#lua-match? @constant "^[A-Z][A-Z%d_]*$"))
+  (#match? @constant "^[A-Z][A-Z\\d_]*$"))
 
 ; Other identifiers
 (type_identifier) @type
@@ -91,7 +91,7 @@
 
 ; Assume other uppercase names are enum constructors
 ((field_identifier) @constant
-  (#lua-match? @constant "^[A-Z]"))
+  (#match? @constant "^[A-Z]"))
 
 (enum_variant
   name: (identifier) @constant)
@@ -109,7 +109,7 @@
 
 (scoped_type_identifier
   path: (identifier) @type
-  (#lua-match? @type "^[A-Z]"))
+  (#match? @type "^[A-Z]"))
 
 (scoped_type_identifier
   (scoped_identifier
@@ -117,27 +117,27 @@
 
 ((scoped_identifier
   path: (identifier) @type)
-  (#lua-match? @type "^[A-Z]"))
+  (#match? @type "^[A-Z]"))
 
 ((scoped_identifier
   name: (identifier) @type)
-  (#lua-match? @type "^[A-Z]"))
+  (#match? @type "^[A-Z]"))
 
 ((scoped_identifier
   name: (identifier) @constant)
-  (#lua-match? @constant "^[A-Z][A-Z%d_]*$"))
+  (#match? @constant "^[A-Z][A-Z\\d_]*$"))
 
 ((scoped_identifier
   path: (identifier) @type
   name: (identifier) @constant)
-  (#lua-match? @type "^[A-Z]")
-  (#lua-match? @constant "^[A-Z]"))
+  (#match? @type "^[A-Z]")
+  (#match? @constant "^[A-Z]"))
 
 ((scoped_type_identifier
   path: (identifier) @type
   name: (type_identifier) @constant)
-  (#lua-match? @type "^[A-Z]")
-  (#lua-match? @constant "^[A-Z]"))
+  (#match? @type "^[A-Z]")
+  (#match? @constant "^[A-Z]"))
 
 [
   (crate)
@@ -159,30 +159,30 @@
 
 (use_list
   (identifier) @type
-  (#lua-match? @type "^[A-Z]"))
+  (#match? @type "^[A-Z]"))
 
 (use_as_clause
   alias: (identifier) @type
-  (#lua-match? @type "^[A-Z]"))
+  (#match? @type "^[A-Z]"))
 
 ; Correct enum constructors
 (call_expression
   function: (scoped_identifier
     "::"
     name: (identifier) @constant)
-  (#lua-match? @constant "^[A-Z]"))
+  (#match? @constant "^[A-Z]"))
 
 ; Assume uppercase names in a match arm are constants.
 ((match_arm
   pattern: (match_pattern
     (identifier) @constant))
-  (#lua-match? @constant "^[A-Z]"))
+  (#match? @constant "^[A-Z]"))
 
 ((match_arm
   pattern: (match_pattern
     (scoped_identifier
       name: (identifier) @constant)))
-  (#lua-match? @constant "^[A-Z]"))
+  (#match? @constant "^[A-Z]"))
 
 ((identifier) @constant.builtin
   (#any-of? @constant.builtin "Some" "None" "Ok" "Err"))

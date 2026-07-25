@@ -5,16 +5,25 @@ use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
 
+mod common;
+
 fn cmd() -> assert_cmd::Command {
     let mut command = cargo_bin_cmd!("lumis");
-    command.env("LUMIS_CONFIG", fixtures_dir().join("missing-config.toml"));
+    command.env(
+        "LUMIS_CONFIG",
+        source_fixtures_dir().join("missing-config.toml"),
+    );
+    command.env("LUMIS_WASM_SOURCE_DIR", fixtures_dir());
+    command.env("LUMIS_DATA_DIR", common::data_dir());
     command
 }
 
 fn fixtures_dir() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("tests")
-        .join("fixtures")
+    common::language_fixtures_dir()
+}
+
+fn source_fixtures_dir() -> PathBuf {
+    common::source_fixtures_dir()
 }
 
 fn write_file(path: &Path, content: &str) {
@@ -1032,7 +1041,7 @@ fn cache_parsers_rejects_languages_with_all() {
 
 #[test]
 fn cache_parsers_already_cached() {
-    // The fixtures dir already has diff.wasm cached — silent without -v
+    // The fixtures dir already has the diff package cached — silent without -v.
     cmd()
         .arg("--data-dir")
         .arg(fixtures_dir())
@@ -1051,7 +1060,7 @@ fn cache_parsers_already_cached_verbose() {
         .args(["parsers", "cache", "diff"])
         .assert()
         .success()
-        .stderr(predicate::str::contains("tree-sitter-diff-0.26.1-"));
+        .stderr(predicate::str::contains("tree-sitter-diff-test-"));
 }
 
 #[test]
@@ -1071,7 +1080,7 @@ fn cache_parsers_to_temp_dir() {
             .unwrap()
             .file_name()
             .to_string_lossy()
-            .starts_with("tree-sitter-json-0.26.2-")));
+            .starts_with("tree-sitter-json-test-")));
 }
 
 #[test]
@@ -1084,7 +1093,7 @@ fn cache_parsers_to_temp_dir_verbose() {
         .args(["parsers", "cache", "json"])
         .assert()
         .success()
-        .stderr(predicate::str::contains("tree-sitter-json-0.26.2-"));
+        .stderr(predicate::str::contains("tree-sitter-json-test-"));
 
     assert!(fs::read_dir(tmp.path().join("parsers"))
         .unwrap()
@@ -1092,7 +1101,7 @@ fn cache_parsers_to_temp_dir_verbose() {
             .unwrap()
             .file_name()
             .to_string_lossy()
-            .starts_with("tree-sitter-json-0.26.2-")));
+            .starts_with("tree-sitter-json-test-")));
 }
 
 #[test]
@@ -1115,7 +1124,7 @@ fn cache_parsers_force_replaces_existing_file() {
         .args(["parsers", "cache", "json", "--force"])
         .assert()
         .success()
-        .stderr(predicate::str::contains("tree-sitter-json-0.26.2-"));
+        .stderr(predicate::str::contains("tree-sitter-json-test-"));
 }
 
 #[test]

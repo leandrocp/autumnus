@@ -3,14 +3,20 @@ use serde::Deserialize;
 use std::fs;
 use std::path::PathBuf;
 
+mod common;
+
 fn cmd() -> assert_cmd::Command {
-    cargo_bin_cmd!("lumis")
+    let mut command = cargo_bin_cmd!("lumis");
+    command.env(
+        "LUMIS_CONFIG",
+        common::source_fixtures_dir().join("missing-config.toml"),
+    );
+    command.env("LUMIS_WASM_SOURCE_DIR", common::language_fixtures_dir());
+    command
 }
 
 fn fixtures_dir() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("tests")
-        .join("fixtures")
+    common::data_dir()
 }
 
 fn conformance_dir() -> PathBuf {

@@ -97,20 +97,20 @@
 
 ((method_invocation
   object: (identifier) @type)
-  (#lua-match? @type "^[A-Z]"))
+  (#match? @type "^[A-Z]"))
 
 ((method_reference
   .
   (identifier) @type)
-  (#lua-match? @type "^[A-Z]"))
+  (#match? @type "^[A-Z]"))
 
 ((field_access
   object: (identifier) @type)
-  (#lua-match? @type "^[A-Z]"))
+  (#match? @type "^[A-Z]"))
 
 (scoped_identifier
   (identifier) @type
-  (#lua-match? @type "^[A-Z]"))
+  (#match? @type "^[A-Z]"))
 
 ; Fields
 (field_declaration
@@ -129,7 +129,7 @@
 
 ; Variables
 ((identifier) @constant
-  (#lua-match? @constant "^[A-Z_][A-Z%d_]+$"))
+  (#match? @constant "^[A-Z_][A-Z\\d_]+$"))
 
 (this) @variable.builtin
 
@@ -325,10 +325,10 @@
 ] @comment 
 
 ((block_comment) @comment.documentation
-  (#lua-match? @comment.documentation "^/[*][*][^*].*[*]/$"))
+  (#match? @comment.documentation "^/[*][*][\\^*].*[*]/$"))
 
 ((line_comment) @comment.documentation
-  (#lua-match? @comment.documentation "^///[^/]"))
+  (#match? @comment.documentation "^///[\\^/]"))
 
 ((line_comment) @comment.documentation
-  (#lua-match? @comment.documentation "^///$"))
+  (#match? @comment.documentation "^///$"))

@@ -14,7 +14,8 @@ export function isUrlString(source: string): boolean {
 
 /** @internal */
 export function wasmCacheFilename(key: string): string {
-  return `${encodeURIComponent(key)}.wasm`;
+  const extension = key.startsWith("language-package-") ? "json" : "wasm";
+  return `${encodeURIComponent(key)}.${extension}`;
 }
 
 /** @internal */

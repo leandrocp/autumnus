@@ -34,6 +34,18 @@ sources = [
 ]
 outputs = ["target/benchmarks/fixtures/scenarios.json"]
 
+[tasks."prepare:languages"]
+description = "Build local self-contained language packages for every benchmark runtime"
+depends = ["install"]
+run = "node benchmarks/scripts/prepare-language-packages.mjs"
+sources = [
+  "benchmarks/javascript/package.json",
+  "benchmarks/scripts/prepare-language-packages.mjs",
+  "pnpm-lock.yaml",
+  "queries/processed/**/*.scm",
+]
+outputs = ["target/benchmarks/language-packages/index.json"]
+
 [tasks."build:themes"]
 description = "Build the theme consumed by JavaScript benchmarks"
 depends = ["install"]
@@ -136,12 +148,13 @@ outputs = ["target/benchmarks/rust-target/release/lumis"]
 
 [tasks."build:elixir"]
 description = "Build the local Elixir package and install Benchee dependencies"
-depends = ["install"]
+depends = ["install", "prepare:languages"]
 run = "MIX_ENV=prod MIX_INSTALL_FORCE=1 BENCH_INSTALL_ONLY=1 elixir benchmarks/elixir/scenario.exs"
 sources = [
   "Cargo.toml",
   "Cargo.lock",
   "benchmarks/elixir/mix.lock",
+  "benchmarks/elixir/runtime.exs",
   "benchmarks/elixir/scenario.exs",
   "packages/elixir/lumis/lib/**/*.ex",
   "packages/elixir/lumis/native/lumis_nif/Cargo.toml",
@@ -154,7 +167,7 @@ sources = [
 
 [tasks."prepare:cli"]
 description = "Prepare and validate the offline CLI parser cache"
-depends = ["install", "fixtures", "build:cli"]
+depends = ["prepare:languages", "fixtures", "build:cli"]
 run = "node benchmarks/scripts/prepare-cli.mjs"
 
 [tasks."prepare:showcase"]
@@ -205,7 +218,7 @@ depends = ["install"]
 run = '''
 cargo fmt --manifest-path benchmarks/rust/Cargo.toml
 pnpm --filter @lumis-sh/benchmarks fmt
-mix format benchmarks/elixir/scenario.exs benchmarks/elixir/showcase.exs
+mix format benchmarks/elixir/runtime.exs benchmarks/elixir/scenario.exs benchmarks/elixir/showcase.exs
 '''
 
 [tasks."format:check"]
@@ -214,7 +227,7 @@ depends = ["install"]
 run = '''
 cargo fmt --manifest-path benchmarks/rust/Cargo.toml -- --check
 pnpm --filter @lumis-sh/benchmarks fmt:check
-mix format --check-formatted benchmarks/elixir/scenario.exs benchmarks/elixir/showcase.exs
+mix format --check-formatted benchmarks/elixir/runtime.exs benchmarks/elixir/scenario.exs benchmarks/elixir/showcase.exs
 '''
 
 [tasks.lint]
@@ -241,7 +254,7 @@ cp -R "$CARGO_TARGET_DIR/criterion" "$BENCH_RUN_DIR/criterion"
 
 [tasks.javascript]
 description = "Run Mitata for Lumis JS Wasm, Shiki, and highlight.js"
-depends = ["build:javascript", "fixtures"]
+depends = ["build:javascript", "prepare:languages", "fixtures"]
 run = '''
 for implementation in lumis-js-wasm shiki highlight-js; do
   for scenario in small-one-language large-one-language ten-files-one-language ten-files-ten-languages; do
@@ -253,7 +266,7 @@ done
 
 [tasks.elixir]
 description = "Run Benchee for Lumis Elixir"
-depends = ["build:elixir", "fixtures"]
+depends = ["build:elixir", "prepare:languages", "fixtures"]
 run = '''
 mkdir -p "$BENCH_RUN_DIR/elixir"
 for scenario in small-one-language large-one-language ten-files-one-language ten-files-ten-languages; do

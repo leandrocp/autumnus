@@ -48,8 +48,10 @@ end
 ## Parser WASM
 
 Lumis loads missing root and injected language parsers automatically. Each
-parser is pinned to an exact npm package version, byte length, and SHA-256
-digest, then cached in the platform user cache directory.
+`@lumis-sh/wasm-*` language package contains the parser, matching queries, and
+integrity metadata. Lumis caches the package metadata, then loads and verifies
+the exact parser version it names. Parser and query updates do not require a
+new Elixir package release.
 
 Load expected languages before serving requests:
 
@@ -64,15 +66,20 @@ directory at build time:
 MIX_ENV=prod mix do compile, lumis.parsers.cache elixir html javascript css, release
 ```
 
-The runtime checks release-local assets first, then the persistent user cache,
-and finally the exact CDN URL. Wasmtime also persists compiled modules, so a
+The runtime checks release-local assets first, then the persistent user cache.
+Missing metadata resolves to the current language package; missing parser bytes
+resolve to its exact CDN URL. Wasmtime also persists compiled modules, so a
 later VM start does not have to compile the same parser again.
 
 Set `LUMIS_WASM_CACHE_DIR` to override the cache location and
-`LUMIS_WASM_OFFLINE=1` to reject uncached parsers. A custom resolver can return
-bytes, a local file, or a URL:
+`LUMIS_WASM_OFFLINE=1` to reject uncached language packages or parsers. Custom
+resolvers can return bytes, a local file, or a URL:
 
 ```elixir
+config :lumis, :language_package_resolver, fn language ->
+  {:file, Path.join("/app/wasm", "#{Path.basename(language.package_name)}.language.json")}
+end
+
 config :lumis, :wasm_resolver, fn parser ->
   {:file, Path.join("/app/wasm", "#{parser.wasm_name}.wasm")}
 end

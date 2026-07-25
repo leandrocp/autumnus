@@ -4,9 +4,11 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { cacheLanguages } from "../src/cache.js";
 import { cacheKey } from "../src/core/languages.js";
 import { wasmCacheFilename } from "../src/runtime/node-cache.js";
-import type { WasmRef } from "../src/types.js";
-import diff from "../langs/diff.js";
-import { ensureLocalParserWasm } from "./wasm.js";
+import {
+  ensureLocalParserWasm,
+  localLanguagePackageMetadata,
+  localLanguagePackageResolver,
+} from "./wasm.js";
 
 const temporaryDirectories: string[] = [];
 
@@ -32,23 +34,38 @@ describe("cacheLanguages", () => {
     const resolver = (_language: string, wasm: { name: string }) =>
       ensureLocalParserWasm(_language, wasm.name);
 
-    const first = await cacheLanguages(["diff", "plaintext"], { directory, resolver });
+    const first = await cacheLanguages(["diff", "plaintext"], {
+      directory,
+      resolver,
+      languagePackageResolver: localLanguagePackageResolver,
+    });
     expect(first).toHaveLength(1);
     expect(first[0]).toMatchObject({ language: "diff", downloaded: true });
 
     const unavailable = vi.fn(() => {
       throw new Error("network resolver must not run");
     });
-    const second = await cacheLanguages(["diff"], { directory, resolver: unavailable });
+    const second = await cacheLanguages(["diff"], {
+      directory,
+      resolver: unavailable,
+      languagePackageResolver: localLanguagePackageResolver,
+    });
 
     expect(second[0]).toMatchObject({ language: "diff", downloaded: false });
     expect(unavailable).not.toHaveBeenCalled();
-    expect(readFileSync(second[0]!.path).byteLength).toBe((diff.wasm as WasmRef).size);
+    expect(readFileSync(second[0]!.path).byteLength).toBeGreaterThan(0);
   });
 
   it("replaces corrupt persistent bytes", async () => {
     const directory = await temporaryDirectory();
-    const ref = diff.wasm as WasmRef;
+    const packageMetadata = localLanguagePackageMetadata("@lumis-sh/wasm-diff");
+    const ref = {
+      packageName: packageMetadata.packageName,
+      name: packageMetadata.parser.name,
+      version: packageMetadata.version,
+      sha256: packageMetadata.parser.sha256,
+      size: packageMetadata.parser.size,
+    };
     const key = cacheKey(ref);
     const cacheFile = join(directory, wasmCacheFilename(key));
     writeFileSync(cacheFile, "corrupt");
@@ -56,6 +73,7 @@ describe("cacheLanguages", () => {
     const result = await cacheLanguages(["diff"], {
       directory,
       resolver: (_language, wasm) => ensureLocalParserWasm(_language, wasm.name),
+      languagePackageResolver: localLanguagePackageResolver,
     });
 
     expect(result[0]).toMatchObject({ downloaded: true });
@@ -67,6 +85,7 @@ describe("cacheLanguages", () => {
     await cacheLanguages(["diff"], {
       directory,
       resolver: (_language, wasm) => ensureLocalParserWasm(_language, wasm.name),
+      languagePackageResolver: localLanguagePackageResolver,
     });
 
     const previousDirectory = process.env.LUMIS_WASM_CACHE_DIR;

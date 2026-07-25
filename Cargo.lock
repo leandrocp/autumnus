@@ -1370,18 +1370,13 @@ dependencies = [
  "assert_cmd",
  "clap",
  "etcetera",
- "lumis-build",
  "lumis-core",
  "lumis-wasm-runtime",
  "predicates",
- "prettyplease",
- "proc-macro2",
- "quote",
  "serde",
  "serde_json",
  "sha2",
  "streaming-iterator",
- "syn 2.0.119",
  "tempfile",
  "terminal-colorsaurus",
  "terminal_size",
@@ -1415,6 +1410,9 @@ name = "lumis-wasm-runtime"
 version = "0.1.0"
 dependencies = [
  "lumis-core",
+ "serde",
+ "serde_json",
+ "sha2",
  "streaming-iterator",
  "thiserror 2.0.19",
  "tree-sitter",
@@ -1431,6 +1429,7 @@ dependencies = [
  "once_cell",
  "parking_lot",
  "rustler",
+ "sha2",
 ]
 
 [[package]]

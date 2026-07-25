@@ -25,15 +25,20 @@ Lumis uses two terms consistently:
 ## What ships where
 
 - `@lumis-sh/lumis` ships the JS API and embedded `web-tree-sitter` runtime WASM
-- parser grammars are separate `.wasm` files loaded at runtime
-- each parser also has its own npm package such as `@lumis-sh/wasm-rust`
-- each language pins the exact parser package version, byte length, and SHA-256 digest
+- dynamic languages are separate npm packages such as `@lumis-sh/wasm-rust`
+- each package contains its parser WASM, matching queries, aliases, and integrity metadata
+- runtime packages keep only a stable language-to-package catalog
 
 ## Default JavaScript behavior
 
-Lumis resolves parser WASM from jsDelivr using exact package versions.
+Lumis first resolves the current `language.json` for a language package:
 
-The default shape is:
+```text title="Language package metadata"
+https://cdn.jsdelivr.net/npm/@lumis-sh/wasm-<name>@latest/language.json
+```
+
+That metadata names an exact package version, parser filename, byte length, and
+SHA-256. Lumis then resolves the immutable parser:
 
 ```text title="Default resolver pattern"
 https://cdn.jsdelivr.net/npm/@lumis-sh/wasm-<parser-name-without-tree-sitter-prefix>@<exact-version>/<parser>.wasm
@@ -45,17 +50,22 @@ Equivalent URLs also work on other CDNs such as unpkg:
 https://unpkg.com/@lumis-sh/wasm-<parser-name-without-tree-sitter-prefix>@<tree-sitter-version>/<parser>.wasm
 ```
 
-Lumis rejects bytes whose size or SHA-256 digest differs from the language
-manifest. Resolution follows a persistent hierarchy:
+Lumis rejects bytes whose size or SHA-256 digest differs from its package
+metadata. Parser and queries are one atomic package release, so updating either
+does not require a Lumis runtime release. Resolution follows a persistent
+hierarchy:
 
 ```text
-installed or deployment-local parser
-  -> verified platform cache (CacheStorage or IndexedDB in browsers)
-  -> exact-version CDN fallback
+installed or deployment-local language package
+  -> persistent package-metadata cache
+  -> current package metadata
+  -> installed or deployment-local parser
+  -> persistent verified parser cache
+  -> exact-version parser fallback
 ```
 
 Set `LUMIS_WASM_CACHE_DIR` to override the Node cache. Set
-`LUMIS_WASM_OFFLINE=1` to prohibit the final network fallback.
+`LUMIS_WASM_OFFLINE=1` to prohibit metadata and parser network fallback.
 
 If a matching npm parser package is installed, such as `@lumis-sh/wasm-elixir`, Node can load that package directly before falling back to the resolver URL.
 
@@ -70,12 +80,12 @@ Use `--all` to prepare every parser. The command and the
 `cacheLanguages()` API from `@lumis-sh/lumis/cache` write the same
 content-addressed files that the runtime reads.
 
-## NPM WASM packages
+## NPM language packages
 
 Lumis supports two good npm-based workflows:
 
-- Node: install the parser package and use the normal language import
-- non-Node runtimes with bundled assets: import the parser package explicitly and apply it with `withWasm()`
+- Node: install the language package and use the normal language import
+- non-Node runtimes with bundled assets: import its parser explicitly and apply it with `withWasm()`
 
 For multiple languages, install a bundle package such as `@lumis-sh/wasm-bundle-web` and pair it with the matching Lumis bundle.
 

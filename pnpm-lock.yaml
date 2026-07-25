@@ -17,6 +17,9 @@ importers:
       '@lumis-sh/wasm-c':
         specifier: 0.26.1
         version: 0.26.1
+      '@lumis-sh/wasm-comment':
+        specifier: 0.26.1
+        version: 0.26.1
       '@lumis-sh/wasm-css':
         specifier: 0.26.2
         version: 0.26.2

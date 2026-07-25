@@ -2,13 +2,12 @@ use std::collections::HashMap;
 use std::sync::{mpsc, Arc, Mutex};
 use std::thread;
 
-mod catalog;
 mod elixir;
 
 use elixir::{ExCssOptions, ExFormatterOption, ExTheme};
 use lumis_core::events::HighlightEvent;
 use lumis_core::{languages, themes};
-use lumis_wasm_runtime::{manifest, LanguageSpec, Runtime, RuntimeError};
+use lumis_wasm_runtime::{catalog, LanguagePackage, LanguageSpec, Runtime, RuntimeError};
 use once_cell::sync::Lazy;
 use parking_lot::RwLock;
 use rustler::{Binary, Encoder, Env, Error, NifMap, NifResult, Term};
@@ -57,7 +56,7 @@ impl WasmExecutor {
             .stack_size(8 * 1024 * 1024)
             .spawn(move || -> Result<Runtime, RuntimeError> {
                 let runtime = Runtime::with_worker_limit(workers)?;
-                for language in manifest::LANGUAGES {
+                for language in catalog::LANGUAGES {
                     runtime.declare_language(language.id, language.aliases);
                 }
                 Ok(runtime)
@@ -152,28 +151,32 @@ pub struct ExOptions<'a> {
 }
 
 #[derive(Clone, Debug, NifMap)]
-pub struct ExLanguageManifest<'a> {
+pub struct ExLanguagePackageRef<'a> {
     pub id: &'a str,
     pub aliases: Vec<&'a str>,
-    pub wasm_name: &'a str,
     pub package_name: &'a str,
-    pub version: &'a str,
-    pub sha256: &'a str,
-    pub size: usize,
 }
 
-impl From<&manifest::LanguageMetadata> for ExLanguageManifest<'static> {
-    fn from(language: &manifest::LanguageMetadata) -> Self {
+impl From<&catalog::LanguagePackageRef> for ExLanguagePackageRef<'static> {
+    fn from(language: &catalog::LanguagePackageRef) -> Self {
         Self {
             id: language.id,
             aliases: language.aliases.to_vec(),
-            wasm_name: language.parser.name,
-            package_name: language.parser.package_name,
-            version: language.parser.version,
-            sha256: language.parser.sha256,
-            size: language.parser.size,
+            package_name: language.package_name,
         }
     }
+}
+
+#[derive(Clone, Debug, NifMap)]
+pub struct ExResolvedLanguagePackage {
+    pub id: String,
+    pub aliases: Vec<String>,
+    pub package_name: String,
+    pub version: String,
+    pub definition_hash: String,
+    pub wasm_name: String,
+    pub sha256: String,
+    pub size: usize,
 }
 
 #[rustler::nif(schedule = "DirtyCpu")]
@@ -219,34 +222,18 @@ fn executor() -> Result<&'static WasmExecutor, String> {
 }
 
 #[rustler::nif(schedule = "DirtyCpu")]
-fn load_language<'a>(env: Env<'a>, name: &str, wasm: Binary<'a>) -> Term<'a> {
-    let Some(language) = manifest::find_language(name) else {
-        return (error(), format!("unknown language '{name}'")).encode(env);
-    };
-    let Some(entry) = catalog::find(language.id) else {
-        return (
-            error(),
-            format!("language catalog is missing '{}'", language.id),
-        )
-            .encode(env);
+fn load_language<'a>(env: Env<'a>, name: &str, package_json: &str, wasm: Binary<'a>) -> Term<'a> {
+    let (language, package) = match parse_language_package(name, package_json) {
+        Ok(result) => result,
+        Err(message) => return (error(), message).encode(env),
     };
     let executor = match executor() {
         Ok(executor) => executor,
         Err(message) => return (error(), message).encode(env),
     };
-    let spec = LanguageSpec {
-        id: language.id.to_string(),
-        aliases: language
-            .aliases
-            .iter()
-            .map(|alias| (*alias).to_string())
-            .collect(),
-        grammar_name: language.parser.grammar_name.to_string(),
-        wasm: wasm.as_slice().to_vec(),
-        highlights: entry.highlights.to_string(),
-        injections: entry.injections.to_string(),
-        locals: entry.locals.to_string(),
-        brackets: entry.brackets.to_string(),
+    let spec = match package.language_spec(language.id, wasm.as_slice().to_vec()) {
+        Ok(spec) => spec,
+        Err(package_error) => return (error(), package_error.to_string()).encode(env),
     };
     match executor.load_language(spec) {
         Ok(()) => ok().encode(env),
@@ -262,16 +249,64 @@ fn has_language(name: &str) -> bool {
 }
 
 #[rustler::nif]
-fn language_manifest(name: &str) -> Option<ExLanguageManifest<'static>> {
-    manifest::find_language(name).map(ExLanguageManifest::from)
+fn language_package_ref(name: &str) -> Option<ExLanguagePackageRef<'static>> {
+    catalog::find(name).map(ExLanguagePackageRef::from)
 }
 
 #[rustler::nif]
-fn language_manifests() -> Vec<ExLanguageManifest<'static>> {
-    manifest::LANGUAGES
+fn language_package_refs() -> Vec<ExLanguagePackageRef<'static>> {
+    catalog::LANGUAGES
         .iter()
-        .map(ExLanguageManifest::from)
+        .map(ExLanguagePackageRef::from)
         .collect()
+}
+
+#[rustler::nif]
+fn resolve_language_package<'a>(env: Env<'a>, name: &str, package_json: &str) -> Term<'a> {
+    match parse_language_package(name, package_json) {
+        Ok((language, package)) => {
+            let packaged = package
+                .languages
+                .get(language.id)
+                .expect("validated language package entry");
+            (
+                ok(),
+                ExResolvedLanguagePackage {
+                    id: language.id.to_string(),
+                    aliases: packaged.aliases.clone(),
+                    package_name: package.package_name,
+                    version: package.version,
+                    definition_hash: package.definition_hash,
+                    wasm_name: package.parser.name,
+                    sha256: package.parser.sha256,
+                    size: package.parser.size,
+                },
+            )
+                .encode(env)
+        }
+        Err(message) => (error(), message).encode(env),
+    }
+}
+
+fn parse_language_package(
+    name: &str,
+    package_json: &str,
+) -> Result<(&'static catalog::LanguagePackageRef, LanguagePackage), String> {
+    let language = catalog::find(name).ok_or_else(|| format!("unknown language '{name}'"))?;
+    let package = LanguagePackage::from_json(package_json).map_err(|error| error.to_string())?;
+    if package.package_name != language.package_name {
+        return Err(format!(
+            "language package mismatch for '{}': expected {}, got {}",
+            language.id, language.package_name, package.package_name
+        ));
+    }
+    package.languages.get(language.id).ok_or_else(|| {
+        format!(
+            "language '{}' is not provided by {}",
+            language.id, package.package_name
+        )
+    })?;
+    Ok((language, package))
 }
 
 #[rustler::nif]
@@ -349,10 +384,14 @@ fn build_theme_css(theme: &themes::Theme, options: ExCssOptions) -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::{catalog, HighlightEvent};
+    use super::HighlightEvent;
     use lumis_core::formatter::{Formatter, HtmlInlineBuilder};
     use lumis_core::languages::Language;
-    use lumis_wasm_runtime::{manifest, LanguageSpec, Runtime};
+    use lumis_wasm_runtime::{
+        LanguagePackage, PackagedLanguage, ParserMetadata, Runtime, LANGUAGE_PACKAGE_FORMAT_VERSION,
+    };
+    use sha2::{Digest, Sha256};
+    use std::collections::BTreeMap;
 
     #[test]
     fn test_formatter_works_with_precomputed_events() {
@@ -384,23 +423,44 @@ mod tests {
 
     #[test]
     fn test_elixir_wasm_with_generated_queries() {
-        let entry = catalog::find("elixir").unwrap();
-        let language = manifest::find_language("elixir").unwrap();
+        let wasm = include_bytes!(
+            "../../../../../javascript/lumis/test/fixtures/wasm/tree-sitter-elixir.wasm"
+        )
+        .to_vec();
+        let package = LanguagePackage {
+            format_version: LANGUAGE_PACKAGE_FORMAT_VERSION,
+            package_name: "@lumis-sh/wasm-elixir".into(),
+            version: "test".into(),
+            definition_hash: "test".into(),
+            parser: ParserMetadata {
+                name: "tree-sitter-elixir".into(),
+                grammar_name: "elixir".into(),
+                sha256: format!("{:x}", Sha256::digest(&wasm)),
+                size: wasm.len(),
+            },
+            languages: BTreeMap::from([(
+                "elixir".into(),
+                PackagedLanguage {
+                    aliases: Vec::new(),
+                    highlights: include_str!(
+                        "../../../../../../queries/processed/elixir/highlights.scm"
+                    )
+                    .into(),
+                    injections: include_str!(
+                        "../../../../../../queries/processed/elixir/injections.scm"
+                    )
+                    .into(),
+                    locals: String::new(),
+                    brackets: include_str!(
+                        "../../../../../../queries/processed/default/brackets.scm"
+                    )
+                    .into(),
+                },
+            )]),
+        };
         let runtime = Runtime::with_worker_limit(1).unwrap();
         runtime
-            .load_language(LanguageSpec {
-                id: entry.id.into(),
-                aliases: Vec::new(),
-                grammar_name: language.parser.grammar_name.into(),
-                wasm: include_bytes!(
-                    "../../../../../javascript/lumis/test/fixtures/wasm/tree-sitter-elixir.wasm"
-                )
-                .to_vec(),
-                highlights: entry.highlights.into(),
-                injections: entry.injections.into(),
-                locals: entry.locals.into(),
-                brackets: entry.brackets.into(),
-            })
+            .load_language(package.language_spec("elixir", wasm).unwrap())
             .unwrap();
 
         let events = runtime

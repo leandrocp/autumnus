@@ -4,6 +4,9 @@ use lumis::events::HighlightEvent;
 use lumis::formatters::Formatter as _;
 use lumis::highlight::{highlight_events_with_options, HighlightOptions};
 use lumis::languages::Language;
+use lumis_wasm_runtime::{
+    LanguagePackage, PackagedLanguage, ParserMetadata, LANGUAGE_PACKAGE_FORMAT_VERSION,
+};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::collections::{BTreeMap, HashSet};
@@ -788,6 +791,7 @@ struct QueryInfo {
 struct ParserInfo {
     git: Option<String>,
     rev: Option<String>,
+    wasm_rev: Option<String>,
     version: Option<String>,
     #[serde(rename = "crate")]
     crate_field: Option<String>,
@@ -1720,6 +1724,7 @@ fn preprocess_queries(name: &str) -> Result<()> {
             let content =
                 resolve_and_preprocess(src, override_dir, append_dir, &lang, query_type, &mut seen);
             if !content.is_empty() {
+                let content = lumis_build::convert_lua_matches(&content);
                 let full = format!("; This file is auto-generated. Do not edit.\n{content}");
                 fs::write(format!("{dest}/{lang}/{query_type}.scm"), &full)?;
                 wrote = true;
@@ -2369,49 +2374,6 @@ fn parse_npm_versions_json(input: &str) -> Result<Vec<String>> {
     }
 }
 
-fn parser_revision_published(pkg_name: &str, ts_cli: &str, rev: &str) -> Result<bool> {
-    let output = Command::new("npm")
-        .args(["view", pkg_name, "versions", "--json"])
-        .output()
-        .with_context(|| format!("failed to inspect published versions for {pkg_name}"))?;
-
-    if !output.status.success() {
-        return Ok(false);
-    }
-
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    let versions = parse_npm_versions_json(&stdout)?;
-    let prefix = format!("{ts_cli}.");
-
-    for version in versions
-        .iter()
-        .filter(|version| version.starts_with(&prefix))
-    {
-        let field_output = Command::new("npm")
-            .args(["view", &format!("{pkg_name}@{version}"), "lumis", "--json"])
-            .output()
-            .with_context(|| format!("failed to inspect metadata for {pkg_name}@{version}"))?;
-
-        if !field_output.status.success() {
-            continue;
-        }
-
-        let fields: Value = serde_json::from_slice(&field_output.stdout)
-            .with_context(|| format!("invalid metadata for {pkg_name}@{version}"))?;
-        let published_rev = fields.get("rev").and_then(Value::as_str).unwrap_or("");
-        let published_ts = fields
-            .get("treeSitter")
-            .and_then(Value::as_str)
-            .unwrap_or("");
-
-        if published_rev == rev && published_ts == ts_cli {
-            return Ok(true);
-        }
-    }
-
-    Ok(false)
-}
-
 fn stage_wasm(name: &str) -> Result<()> {
     let toml = read_languages_toml()?;
     let (parser_name, info) = toml
@@ -2452,6 +2414,31 @@ fn stage_wasm(name: &str) -> Result<()> {
 
     let wasm_bytes = fs::read(&wasm_file)?;
     let wasm_sha256 = sha256_hex(&wasm_bytes);
+    let grammar_name = wasm_grammar_name(&wasm_bytes)?;
+    let languages = packaged_languages(&toml, wasm_name)?;
+    let definition_hash = language_definition_hash(&toml, wasm_name, &languages)?;
+    let language_ids = languages.keys().cloned().collect::<Vec<_>>();
+    let languages_json = serde_json::to_string(&language_ids)?;
+    let languages_text = language_ids.join(", ");
+    let language_package = LanguagePackage {
+        format_version: LANGUAGE_PACKAGE_FORMAT_VERSION,
+        package_name: pkg_name.clone(),
+        version: npm_version.clone(),
+        definition_hash: definition_hash.clone(),
+        parser: ParserMetadata {
+            name: wasm_name.to_string(),
+            grammar_name,
+            sha256: wasm_sha256.clone(),
+            size: wasm_bytes.len(),
+        },
+        languages,
+    };
+    language_package.validate()?;
+    fs::write(
+        format!("{out}/language.json"),
+        format!("{}\n", serde_json::to_string_pretty(&language_package)?),
+    )?;
+
     let browser_template = fs::read_to_string("templates/wasm/index.js.template")?;
     let browser_entry = browser_template.replace("{wasm_name}", wasm_name);
     fs::write(format!("{out}/index.js"), browser_entry)?;
@@ -2463,7 +2450,8 @@ fn stage_wasm(name: &str) -> Result<()> {
 
     let readme = readme_template
         .replace("{wasm_name}", wasm_name)
-        .replace("{lang}", parser_name)
+        .replace("{pkg_name}", &pkg_name)
+        .replace("{languages_text}", &languages_text)
         .replace("{git_url}", git_url)
         .replace("{rev}", rev)
         .replace("{upstream_version}", version)
@@ -2477,17 +2465,144 @@ fn stage_wasm(name: &str) -> Result<()> {
     let pkg = pkg_template
         .replace("{pkg_name}", &pkg_name)
         .replace("{npm_version}", &npm_version)
-        .replace("{lang}", parser_name)
+        .replace("{languages_json}", &languages_json)
+        .replace("{languages_text}", &languages_text)
         .replace("{upstream_version}", version)
         .replace("{rev}", rev)
         .replace("{tree_sitter_cli}", &ts_cli_minor)
         .replace("{wasm_name}", wasm_name)
         .replace("{sha256}", &wasm_sha256)
-        .replace("{wasm_size}", &wasm_bytes.len().to_string());
+        .replace("{wasm_size}", &wasm_bytes.len().to_string())
+        .replace("{definition_hash}", &definition_hash);
     fs::write(format!("{out}/package.json"), pkg)?;
 
     println!("Staged in {out}");
     Ok(())
+}
+
+fn packaged_languages(
+    toml: &LanguagesToml,
+    wasm_name: &str,
+) -> Result<BTreeMap<String, PackagedLanguage>> {
+    let default_brackets =
+        fs::read_to_string("queries/processed/default/brackets.scm").unwrap_or_default();
+    let mut languages = BTreeMap::new();
+
+    for (id, info) in &toml.parsers {
+        let default_name = format!("tree-sitter-{id}");
+        if info.wasm_name.as_deref().unwrap_or(&default_name) != wasm_name {
+            continue;
+        }
+
+        let query_name = info.query_name.as_deref().unwrap_or(id);
+        let query = |kind: &str| {
+            fs::read_to_string(format!("queries/processed/{query_name}/{kind}.scm"))
+                .unwrap_or_default()
+        };
+        let brackets = {
+            let language_brackets = query("brackets");
+            if language_brackets.is_empty() {
+                default_brackets.clone()
+            } else {
+                language_brackets
+            }
+        };
+
+        languages.insert(
+            id.clone(),
+            PackagedLanguage {
+                aliases: info.aliases.clone(),
+                highlights: query("highlights"),
+                injections: query("injections"),
+                locals: query("locals"),
+                brackets,
+            },
+        );
+    }
+
+    if languages.is_empty() {
+        bail!("no languages use WASM parser '{wasm_name}'");
+    }
+    Ok(languages)
+}
+
+fn language_definition_hash(
+    toml: &LanguagesToml,
+    wasm_name: &str,
+    languages: &BTreeMap<String, PackagedLanguage>,
+) -> Result<String> {
+    use sha2::{Digest, Sha256};
+
+    let revisions = toml
+        .parsers
+        .iter()
+        .filter_map(|(id, info)| {
+            let default_name = format!("tree-sitter-{id}");
+            (info.wasm_name.as_deref().unwrap_or(&default_name) == wasm_name).then_some(
+                info.wasm_rev
+                    .as_deref()
+                    .or(info.rev.as_deref())
+                    .unwrap_or(""),
+            )
+        })
+        .collect::<HashSet<_>>();
+    if revisions.len() != 1 {
+        bail!("WASM parser '{wasm_name}' must have one shared parser revision");
+    }
+
+    let mut digest = Sha256::new();
+    hash_definition_field(&mut digest, b"lumis-language-package-v3");
+    hash_definition_field(&mut digest, wasm_name.as_bytes());
+    hash_definition_field(
+        &mut digest,
+        revisions.into_iter().next().unwrap_or_default().as_bytes(),
+    );
+    for (id, language) in languages {
+        hash_definition_field(&mut digest, id.as_bytes());
+        let mut aliases = language.aliases.clone();
+        aliases.sort();
+        for alias in aliases {
+            hash_definition_field(&mut digest, alias.as_bytes());
+        }
+        hash_definition_field(&mut digest, language.highlights.as_bytes());
+        hash_definition_field(&mut digest, language.injections.as_bytes());
+        hash_definition_field(&mut digest, language.locals.as_bytes());
+        hash_definition_field(&mut digest, language.brackets.as_bytes());
+    }
+    Ok(format!("{:x}", digest.finalize()))
+}
+
+fn hash_definition_field(digest: &mut sha2::Sha256, value: &[u8]) {
+    use sha2::Digest;
+
+    digest.update((value.len() as u64).to_be_bytes());
+    digest.update(value);
+}
+
+fn wasm_grammar_name(wasm: &[u8]) -> Result<String> {
+    use wasmparser::{Parser as WasmParser, Payload};
+
+    let mut names = Vec::new();
+    for payload in WasmParser::new(0).parse_all(wasm) {
+        if let Payload::ExportSection(exports) = payload? {
+            for export in exports {
+                let name = export?.name;
+                if let Some(grammar) = name.strip_prefix("tree_sitter_") {
+                    if !grammar.starts_with("external_scanner_") {
+                        names.push(grammar.to_string());
+                    }
+                }
+            }
+        }
+    }
+    match names.as_slice() {
+        [name] => Ok(name.clone()),
+        [] => bail!("WASM parser does not export a tree_sitter_* language symbol"),
+        _ => bail!(
+            "WASM parser exports multiple tree-sitter languages: {}",
+            names.join(", ")
+        ),
+    }
 }
 
 fn sha256_hex(bytes: &[u8]) -> String {
@@ -2510,20 +2625,8 @@ fn wasm_meta(name: &str) -> Result<()> {
 
     let default_wasm_name = format!("tree-sitter-{parser_name}");
     let wasm_name = info.wasm_name.as_deref().unwrap_or(&default_wasm_name);
-    let rev = info.rev.as_deref().unwrap_or("");
-    let pkg_name = format!("@lumis-sh/wasm-{}", wasm_package_suffix(wasm_name));
-    let ts_cli_version = run_cmd("tree-sitter --version")
-        .unwrap_or_default()
-        .replace("tree-sitter ", "");
-    let ts_cli_minor = tree_sitter_cli_minor(&ts_cli_version)?;
-    let npm_version = next_wasm_npm_version(&pkg_name, &ts_cli_minor)?;
-    let published = parser_revision_published(&pkg_name, &ts_cli_minor, rev)?;
 
     println!("wasm_name={wasm_name}");
-    println!("pkg_name={pkg_name}");
-    println!("npm_version={npm_version}");
-    println!("tree_sitter_cli={ts_cli_minor}");
-    println!("published={published}");
     Ok(())
 }
 
@@ -2680,14 +2783,14 @@ mod tests {
         let cwd = std::env::current_dir().expect("cwd should be available");
         std::env::set_current_dir(&root).expect("should switch to temp dir");
 
-        let result = (|| {
+        let result = std::panic::catch_unwind(|| {
             assert!(has_local_override_query("demo"));
             assert!(!has_local_override_query("missing"));
-        })();
+        });
 
         std::env::set_current_dir(cwd).expect("should restore cwd");
-        result;
         let _ = fs::remove_dir_all(root);
+        result.unwrap();
     }
 
     #[test]
@@ -2705,16 +2808,16 @@ mod tests {
         let cwd = std::env::current_dir().expect("cwd should be available");
         std::env::set_current_dir(&root).expect("should switch to temp dir");
 
-        let result = (|| {
+        let result = std::panic::catch_unwind(|| {
             assert_eq!(
                 query_names().expect("query names should load"),
                 vec!["demo"]
             );
-        })();
+        });
 
         std::env::set_current_dir(cwd).expect("should restore cwd");
-        result;
         let _ = fs::remove_dir_all(root);
+        result.unwrap();
     }
 
     #[test]

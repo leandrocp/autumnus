@@ -2,7 +2,7 @@
 (identifier) @variable
 
 ((identifier) @constant
-  (#lua-match? @constant "^[A-Z][A-Z_0-9]*$"))
+  (#match? @constant "^[A-Z][A-Z_0-9]*$"))
 
 ; Keywords
 [
@@ -349,7 +349,7 @@
 
 ; Options
 ((set_value) @number
-  (#lua-match? @number "^[%d]+(%.[%d]+)?$"))
+  (#match? @number "^[\\d]+(\\.[\\d]+)?$"))
 
 (inv_option
   "!" @operator)

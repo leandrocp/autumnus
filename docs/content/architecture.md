@@ -47,6 +47,12 @@ formatter (tokens + styles -> HTML / ANSI / BBCode Scoped / custom output)
 - highlight queries (mostly from [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter))
 - injections for nested languages (e.g., CSS and JavaScript inside HTML)
 
+Dynamic runtimes receive parser and queries together in a self-contained,
+independently versioned `@lumis-sh/wasm-*` package. A small stable catalog maps
+language IDs to package names; the package supplies current queries and the
+exact integrity-pinned parser. Updating one language does not require a runtime
+package release.
+
 ### Themes
 
 250+ themes extracted from Neovim colorschemes. Each theme is a JSON file mapping Tree-sitter scopes to styles. Themes have a `name` and `appearance` (light or dark).

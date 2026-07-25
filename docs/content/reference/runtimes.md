@@ -46,7 +46,11 @@ also provide build-time cache commands for network-free deployment.
 
 ## WASM language packages
 
-JavaScript parser grammars are also published as per-language WASM packages such as `@lumis-sh/wasm-rust`, `@lumis-sh/wasm-javascript`, and `@lumis-sh/wasm-elixir`.
+Dynamic parser grammars are published as self-contained language packages such
+as `@lumis-sh/wasm-rust`, `@lumis-sh/wasm-javascript`, and
+`@lumis-sh/wasm-elixir`. Each package keeps its parser, queries, aliases, and
+integrity metadata at one version so JavaScript, CLI, and Elixir load the same
+language definition.
 
 Preset bundle packages are also available, such as `@lumis-sh/wasm-bundle-web`, `@lumis-sh/wasm-bundle-web-extra`, `@lumis-sh/wasm-bundle-system`, and `@lumis-sh/wasm-bundle-backend`.
 
