@@ -34,6 +34,10 @@ defmodule Lumis.LanguageLoaderTest do
     assert :ok = Lumis.load_language("diff")
   end
 
+  test "loads multiple languages" do
+    assert :ok = Lumis.load_languages([:plaintext, "text"])
+  end
+
   test "replaces a corrupt cache entry" do
     entry = Lumis.Native.language_manifest("dockerfile")
     cache_dir = System.fetch_env!("LUMIS_WASM_CACHE_DIR")
@@ -45,12 +49,12 @@ defmodule Lumis.LanguageLoaderTest do
     assert byte_size(File.read!(cache_file)) == entry.size
   end
 
-  test "prefetches release-local parsers and loads them offline" do
+  test "caches release-local parsers and loads them offline" do
     refute Lumis.Native.has_language("xml")
     bundle_dir = Application.fetch_env!(:lumis, :wasm_bundle_dir)
 
     assert {:ok, [path]} =
-             Lumis.LanguageLoader.prefetch(["xml", "xml"], directory: bundle_dir)
+             Lumis.LanguageLoader.cache(["xml", "xml"], directory: bundle_dir)
 
     assert File.exists?(path)
 
@@ -76,7 +80,7 @@ defmodule Lumis.LanguageLoaderTest do
     bytes = File.read!(fixture)
 
     output_dir =
-      Path.join(System.tmp_dir!(), "lumis-prefetch-#{System.unique_integer([:positive])}")
+      Path.join(System.tmp_dir!(), "lumis-cache-#{System.unique_integer([:positive])}")
 
     test_process = self()
 
@@ -91,12 +95,12 @@ defmodule Lumis.LanguageLoaderTest do
     end)
 
     first =
-      Task.async(fn -> Lumis.LanguageLoader.prefetch(["comment"], directory: output_dir) end)
+      Task.async(fn -> Lumis.LanguageLoader.cache(["comment"], directory: output_dir) end)
 
     assert_receive {:resolver_started, resolver_process}
 
     second =
-      Task.async(fn -> Lumis.LanguageLoader.prefetch(["comment"], directory: output_dir) end)
+      Task.async(fn -> Lumis.LanguageLoader.cache(["comment"], directory: output_dir) end)
 
     refute_receive {:resolver_started, _other_process}, 100
     send(resolver_process, :release)
@@ -110,8 +114,8 @@ defmodule Lumis.LanguageLoaderTest do
 
     output =
       capture_io(fn ->
-        Mix.Task.reenable("lumis.parsers.fetch")
-        Mix.Task.run("lumis.parsers.fetch", ["comment", "--output", output_dir])
+        Mix.Task.reenable("lumis.parsers.cache")
+        Mix.Task.run("lumis.parsers.cache", ["comment", "--output", output_dir])
       end)
 
     assert output =~ "tree-sitter-comment-"

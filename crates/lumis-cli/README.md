@@ -28,8 +28,7 @@ lumis dump events        Print raw highlight events as JSON
 lumis languages list     List supported language ids and file patterns
 lumis themes list        List built-in themes and custom themes in the data dir
 lumis themes generate    Extract a theme JSON file from a Neovim colorscheme repo
-lumis parsers fetch      Pre-download parser WASM files
-lumis parsers update     Re-download cached parser WASM files
+lumis parsers cache      Cache parser WASM files for later or offline use
 ```
 
 ## Highlight code
@@ -175,27 +174,23 @@ include the version and SHA-256 digest. Corrupt bytes are rejected before use.
 You can also prepare the cache explicitly.
 
 ```sh
-# Download specific parsers ahead of time
-lumis parsers fetch rust javascript elixir
+# Cache specific parsers
+lumis parsers cache rust javascript elixir
 
-# Download every supported parser
-lumis parsers fetch --all
+# Cache every supported parser
+lumis parsers cache --all
 
-# Re-download specific cached parsers
-lumis parsers update rust javascript
+# Replace valid cached parsers
+lumis parsers cache rust javascript --force
 
-# Re-download all cached parsers
-lumis parsers update --all
-
-# Show cache paths while fetching or updating
-lumis parsers fetch --verbose rust
-lumis parsers update --verbose rust
+# Show cache paths and downloads
+lumis parsers cache --verbose rust
 ```
 
 Notes:
 
-- `parsers fetch --all` downloads all supported parsers.
-- `parsers update --all` only refreshes parsers already present in the cache.
+- `parsers cache --all` caches all supported parsers.
+- `--force` replaces valid cached parsers instead of reusing them.
 - Injection highlighting works best when related parsers are already cached.
 
 ## Data directory

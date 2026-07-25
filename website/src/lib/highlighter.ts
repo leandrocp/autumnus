@@ -23,8 +23,8 @@ function send(req: Omit<WorkerRequest, "id">): Promise<WorkerResponse> {
   });
 }
 
-export async function preloadLanguages(languageIds: string[]): Promise<void> {
-  const res = await send({ type: "preload", languageIds });
+export async function loadLanguages(languageIds: string[]): Promise<void> {
+  const res = await send({ type: "loadLanguages", languageIds });
   if (res.type === "error") throw new Error(res.message);
 }
 

@@ -23,7 +23,7 @@ function decodeSlice(sourceBytes: Uint8Array, startByte: number, endByte: number
   return decoder.decode(sourceBytes.subarray(startByte, endByte));
 }
 
-/** A reusable highlighter with preloaded or lazily registered languages. */
+/** A reusable highlighter with loaded or lazily registered languages. */
 export interface Highlighter {
   /** Highlight source code synchronously. The language must already be loaded. */
   highlight(source: string, formatter: Formatter): string;
@@ -49,7 +49,7 @@ export interface HighlighterModuleFactory {
 
 /** Options for {@link createHighlighter}. */
 export interface CreateHighlighterOptions {
-  /** Languages to preload or register lazily. */
+  /** Languages to load during setup or register lazily. */
   languages?: LanguageInput[];
   /** Optional resolver for external WASM assets. */
   wasmResolver?: WasmResolver;

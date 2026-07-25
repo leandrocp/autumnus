@@ -18,7 +18,7 @@ const reference = reports[0];
 for (const [index, report] of reports.entries()) {
   const group = groups[index];
   if (
-    report.schemaVersion !== 1 ||
+    report.schemaVersion !== 2 ||
     report.group !== group ||
     report.system?.platform !== reference.system?.platform ||
     report.system?.architecture !== reference.system?.architecture ||
@@ -31,7 +31,7 @@ for (const [index, report] of reports.entries()) {
 }
 
 const report = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   system: reference.system,
   boundaries: reference.boundaries,
   entries: reports.flatMap(({ entries }) => entries),

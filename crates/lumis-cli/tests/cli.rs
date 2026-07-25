@@ -995,12 +995,23 @@ fn themes_generate_supports_output_setup_and_appearance_options() {
     assert!(themes_lua.contains("vim.g.test_setup = true"));
 }
 
-// -- fetch-parsers / update-parsers --
+// -- parsers cache --
 
 #[test]
-fn fetch_parsers_no_args_fails() {
+fn parsers_help_uses_cache_terminology() {
     cmd()
-        .args(["parsers", "fetch"])
+        .args(["parsers", "--help"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("cache"))
+        .stdout(predicate::str::contains("fetch").not())
+        .stdout(predicate::str::contains("update").not());
+}
+
+#[test]
+fn cache_parsers_no_args_fails() {
+    cmd()
+        .args(["parsers", "cache"])
         .assert()
         .failure()
         .stderr(predicate::str::contains(
@@ -1009,58 +1020,47 @@ fn fetch_parsers_no_args_fails() {
 }
 
 #[test]
-fn update_parsers_no_args_fails() {
+fn cache_parsers_rejects_languages_with_all() {
     cmd()
-        .args(["parsers", "update"])
+        .args(["parsers", "cache", "rust", "--all"])
         .assert()
         .failure()
         .stderr(predicate::str::contains(
-            "specify language names or use --all",
+            "pass language names or --all, not both",
         ));
 }
 
 #[test]
-fn fetch_parsers_already_cached() {
+fn cache_parsers_already_cached() {
     // The fixtures dir already has diff.wasm cached — silent without -v
     cmd()
         .arg("--data-dir")
         .arg(fixtures_dir())
-        .args(["parsers", "fetch", "diff"])
+        .args(["parsers", "cache", "diff"])
         .assert()
         .success();
 }
 
 #[test]
-fn fetch_parsers_already_cached_verbose() {
+fn cache_parsers_already_cached_verbose() {
     // With -V it shows the cached path
     cmd()
         .arg("--data-dir")
         .arg(fixtures_dir())
         .arg("-V")
-        .args(["parsers", "fetch", "diff"])
+        .args(["parsers", "cache", "diff"])
         .assert()
         .success()
         .stderr(predicate::str::contains("tree-sitter-diff-0.26.1-"));
 }
 
 #[test]
-fn update_parsers_all_empty_data_dir() {
+fn cache_parsers_to_temp_dir() {
     let tmp = tempfile::tempdir().unwrap();
     cmd()
         .arg("--data-dir")
         .arg(tmp.path())
-        .args(["parsers", "update", "--all"])
-        .assert()
-        .success();
-}
-
-#[test]
-fn fetch_parsers_to_temp_dir() {
-    let tmp = tempfile::tempdir().unwrap();
-    cmd()
-        .arg("--data-dir")
-        .arg(tmp.path())
-        .args(["parsers", "fetch", "json"])
+        .args(["parsers", "cache", "json"])
         .assert()
         .success();
 
@@ -1075,13 +1075,13 @@ fn fetch_parsers_to_temp_dir() {
 }
 
 #[test]
-fn fetch_parsers_to_temp_dir_verbose() {
+fn cache_parsers_to_temp_dir_verbose() {
     let tmp = tempfile::tempdir().unwrap();
     cmd()
         .arg("--data-dir")
         .arg(tmp.path())
         .arg("-V")
-        .args(["parsers", "fetch", "json"])
+        .args(["parsers", "cache", "json"])
         .assert()
         .success()
         .stderr(predicate::str::contains("tree-sitter-json-0.26.2-"));
@@ -1096,37 +1096,37 @@ fn fetch_parsers_to_temp_dir_verbose() {
 }
 
 #[test]
-fn fetch_parsers_then_update() {
+fn cache_parsers_force_replaces_existing_file() {
     let tmp = tempfile::tempdir().unwrap();
 
-    // First fetch
+    // Cache once.
     cmd()
         .arg("--data-dir")
         .arg(tmp.path())
-        .args(["parsers", "fetch", "json"])
+        .args(["parsers", "cache", "json"])
         .assert()
         .success();
 
-    // Then update (verbose to verify path output)
+    // Then replace it.
     cmd()
         .arg("--data-dir")
         .arg(tmp.path())
         .arg("-V")
-        .args(["parsers", "update", "json"])
+        .args(["parsers", "cache", "json", "--force"])
         .assert()
         .success()
         .stderr(predicate::str::contains("tree-sitter-json-0.26.2-"));
 }
 
 #[test]
-fn fetch_parsers_then_highlight() {
+fn cache_parsers_then_highlight() {
     let tmp = tempfile::tempdir().unwrap();
 
-    // Fetch the parser first
+    // Cache the parser first.
     cmd()
         .arg("--data-dir")
         .arg(tmp.path())
-        .args(["parsers", "fetch", "json"])
+        .args(["parsers", "cache", "json"])
         .assert()
         .success();
 

@@ -1,6 +1,6 @@
 import { loadTheme } from "../data/themes";
 import { LANGUAGES_BY_ID } from "../data/languages";
-import { preloadLanguages, renderHighlightMultiTheme } from "../lib/highlighter";
+import { loadLanguages, renderHighlightMultiTheme } from "../lib/highlighter";
 
 const HTML_CSS_JS_SOURCE = `<section class="greeting-card">
   <style>
@@ -67,7 +67,7 @@ export function renderInjections() {
 }
 
 export async function setupInjections(_root: HTMLElement) {
-  await preloadLanguages(["html", "css", "javascript"]);
+  await loadLanguages(["html", "css", "javascript"]);
 
   const [lightTheme, darkTheme] = await Promise.all([
     loadTheme("catppuccin_latte"),

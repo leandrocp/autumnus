@@ -51,7 +51,7 @@ Application.put_env(:lumis, :wasm_resolver, fn entry ->
   end
 end)
 
-:ok = Lumis.preload_languages(["html", "css", "json", "javascript"])
+:ok = Lumis.load_languages(["html", "css", "json", "javascript"])
 source = File.read!(Path.join(generated_dir, "assets/webgpu_compute_reduce.html"))
 
 output =

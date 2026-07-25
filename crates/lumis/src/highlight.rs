@@ -836,63 +836,6 @@ mod tests {
         assert!(has_colors, "Expected at least some segments with colors");
     }
 
-    #[cfg(all(feature = "lang-css", feature = "lang-html"))]
-    #[test]
-    fn test_html_scopes_follow_neovim_query_precedence() {
-        let code = r#"<html lang="en"><head><title>three.js webgpu - compute reduction</title><style>#reduction-panel { background-color: #111; }</style></head></html>"#;
-        let theme = themes::get("dracula").unwrap();
-        let mut segments = Vec::new();
-
-        highlight_iter(
-            code,
-            Language::HTML,
-            Some(theme),
-            |text, language, _range, scope, style| {
-                segments.push((
-                    text.to_string(),
-                    language,
-                    scope,
-                    style.fg.clone(),
-                    style.bold,
-                ));
-                Ok::<_, std::io::Error>(())
-            },
-        )
-        .unwrap();
-
-        assert!(segments.iter().any(|(text, language, scope, fg, _)| {
-            text == "<"
-                && *language == Language::HTML
-                && *scope == "tag.delimiter"
-                && fg.as_deref() == Some("#8be9fd")
-        }));
-        assert!(segments.iter().any(|(text, language, scope, fg, _)| {
-            text == "title"
-                && *language == Language::HTML
-                && *scope == "tag"
-                && fg.as_deref() == Some("#8be9fd")
-        }));
-        assert!(segments.iter().any(|(text, language, scope, fg, _)| {
-            text == "lang"
-                && *language == Language::HTML
-                && *scope == "tag.attribute"
-                && fg.as_deref() == Some("#50fa7b")
-        }));
-        assert!(segments.iter().any(|(text, language, scope, fg, bold)| {
-            text == "three.js webgpu - compute reduction"
-                && *language == Language::HTML
-                && *scope == "markup.heading"
-                && fg.as_deref() == Some("#ff79c6")
-                && *bold
-        }));
-        assert!(segments.iter().any(|(text, language, scope, fg, _)| {
-            text == "background-color"
-                && *language == Language::CSS
-                && *scope == "property"
-                && fg.as_deref() == Some("#bd93f9")
-        }));
-    }
-
     #[test]
     fn test_empty_source() {
         let code = "";

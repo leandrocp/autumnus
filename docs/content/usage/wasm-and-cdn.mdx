@@ -17,6 +17,11 @@ import TabItem from '@theme/TabItem';
 
 # WASM and CDN
 
+Lumis uses two terms consistently:
+
+- **load** makes a language available in the current runtime
+- **cache** persists verified parser bytes for later starts or offline use
+
 ## What ships where
 
 - `@lumis-sh/lumis` ships the JS API and embedded `web-tree-sitter` runtime WASM
@@ -205,19 +210,20 @@ const hl = await createHighlighter({
   </TabItem>
   <TabItem value="cli" label="CLI">
 
-```bash title="Pre-download parsers"
-lumis parsers fetch rust javascript elixir
+```bash title="Cache parsers"
+lumis parsers cache rust javascript elixir
 ```
 
-```bash title="Download all parsers"
-lumis parsers fetch --all
+```bash title="Cache all parsers"
+lumis parsers cache --all
 ```
 
-```bash title="Refresh cached parsers"
-lumis parsers update rust
+```bash title="Replace cached parsers"
+lumis parsers cache rust --force
 ```
 
-The CLI does not expose a custom WASM resolver hook. Use the parser cache commands and `--data-dir` when you need local control over parser files.
+The CLI does not expose a custom WASM resolver hook. Use `lumis parsers cache`
+and `--data-dir` when you need local control over parser files.
 
   </TabItem>
 </Tabs>

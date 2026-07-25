@@ -11,7 +11,6 @@ import type {
   HighlightEvent,
   LanguageDefinition,
   LoadedLanguage,
-  QueryCaptureOffset,
   WasmRef,
 } from "../types.js";
 import { PLAINTEXT_LANG_ID, type LanguageInfo } from "../types.js";
@@ -280,50 +279,12 @@ function compileHighlightConfig(
     return Object.prototype.hasOwnProperty.call(refuted, "local");
   });
 
-  const injectionOffsets = Array.from(
-    { length: query.patternCount() },
-    (): Record<string, QueryCaptureOffset> | undefined => undefined,
-  );
-
-  for (let patternIndex = 0; patternIndex < injectionPatternEnd; patternIndex += 1) {
-    const predicates = query.predicatesForPattern(patternIndex) ?? [];
-    let offsetsByCapture: Record<string, QueryCaptureOffset> | undefined;
-
-    for (const predicate of predicates) {
-      if (predicate.operator !== "offset!" || predicate.operands.length !== 5) {
-        continue;
-      }
-
-      const [captureStep, startRow, startColumn, endRow, endColumn] = predicate.operands;
-      if (
-        captureStep?.type !== "capture" ||
-        startRow?.type !== "string" ||
-        startColumn?.type !== "string" ||
-        endRow?.type !== "string" ||
-        endColumn?.type !== "string"
-      ) {
-        continue;
-      }
-
-      offsetsByCapture ??= {};
-      offsetsByCapture[captureStep.name] = {
-        startRow: Number.parseInt(startRow.value, 10),
-        startColumn: Number.parseInt(startColumn.value, 10),
-        endRow: Number.parseInt(endRow.value, 10),
-        endColumn: Number.parseInt(endColumn.value, 10),
-      };
-    }
-
-    injectionOffsets[patternIndex] = offsetsByCapture;
-  }
-
   return {
     query,
     injectionPatternEnd,
     localsPatternEnd,
     captureMetadata,
     nonLocalVariablePatterns,
-    injectionOffsets,
   };
 }
 

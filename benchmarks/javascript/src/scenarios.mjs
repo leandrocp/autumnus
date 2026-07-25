@@ -2,6 +2,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, isAbsolute, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { do_not_optimize, measure } from "mitata";
+import { implementations } from "../../scripts/implementations.mjs";
 
 const benchmarksDir = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const repoDir = resolve(benchmarksDir, "..");
@@ -19,7 +20,7 @@ if (!Number.isSafeInteger(minimumSamples) || minimumSamples < 2) {
 if (!Number.isFinite(measurementSeconds) || measurementSeconds <= 0) {
   throw new Error("BENCH_TIME_SECONDS must be positive");
 }
-if (!new Set(["lumis-js-wasm", "shiki", "highlight-js"]).has(implementation)) {
+if (!implementations.some(({ id, runner }) => id === implementation && runner === "mitata")) {
   throw new Error(`unknown JavaScript benchmark implementation: ${implementation}`);
 }
 

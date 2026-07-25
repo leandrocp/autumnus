@@ -213,30 +213,21 @@ enum ThemesCommands {
 
 #[derive(Subcommand)]
 enum ParsersCommands {
-    /// Download parser WASMs ahead of time
+    /// Cache parser WASMs for later or offline use
     #[command(
-        after_help = "Examples:\n  lumis parsers fetch rust javascript\n  lumis parsers fetch --all"
+        after_help = "Examples:\n  lumis parsers cache rust javascript\n  lumis parsers cache --all\n  lumis parsers cache rust --force"
     )]
-    Fetch {
-        /// Language names to download (e.g. rust javascript elixir)
+    Cache {
+        /// Language names to cache (e.g. rust javascript elixir)
         languages: Vec<String>,
 
-        /// Download all supported parsers
+        /// Cache all supported parsers
         #[arg(long)]
         all: bool,
-    },
 
-    /// Re-download parser WASMs to get the latest versions
-    #[command(
-        after_help = "Examples:\n  lumis parsers update rust javascript\n  lumis parsers update --all"
-    )]
-    Update {
-        /// Language names to update (e.g. rust javascript elixir)
-        languages: Vec<String>,
-
-        /// Update all cached parsers
+        /// Replace valid cached parsers
         #[arg(long)]
-        all: bool,
+        force: bool,
     },
 }
 
@@ -367,24 +358,29 @@ fn main() -> Result<()> {
             ),
         },
         Commands::Parsers { command } => match command {
-            ParsersCommands::Fetch { languages, all } => {
+            ParsersCommands::Cache {
+                languages,
+                all,
+                force,
+            } => {
                 let reg = registry::Registry::new(data_dir)?;
-                fetch_parsers(&reg, &languages, all, verbose)
-            }
-            ParsersCommands::Update { languages, all } => {
-                let reg = registry::Registry::new(data_dir)?;
-                update_parsers(&reg, &languages, all, verbose)
+                cache_parsers(&reg, &languages, all, force, verbose)
             }
         },
     }
 }
 
-fn fetch_parsers(
+fn cache_parsers(
     reg: &registry::Registry,
     languages: &[String],
     all: bool,
+    force: bool,
     verbose: bool,
 ) -> Result<()> {
+    if all && !languages.is_empty() {
+        return Err(anyhow::anyhow!("pass language names or --all, not both"));
+    }
+
     let names: Vec<&str> = if all {
         registry::all_wasm_names()
             .iter()
@@ -393,7 +389,7 @@ fn fetch_parsers(
     } else {
         if languages.is_empty() {
             return Err(anyhow::anyhow!(
-                "specify language names or use --all to download all parsers"
+                "specify language names or use --all to cache all parsers"
             ));
         }
         languages.iter().map(|s| s.as_str()).collect()
@@ -403,7 +399,7 @@ fn fetch_parsers(
     for name in &names {
         let query_name = resolve_query_name(name);
         let parser_path = reg.parser_path(query_name);
-        if reg.is_cached(query_name) {
+        if !force && reg.is_cached(query_name) {
             if verbose {
                 eprintln!("{}: {}", name, parser_path.display());
             }
@@ -429,68 +425,7 @@ fn fetch_parsers(
 
     if !errors.is_empty() {
         return Err(anyhow::anyhow!(
-            "failed to download {} parser(s)",
-            errors.len()
-        ));
-    }
-
-    Ok(())
-}
-
-fn update_parsers(
-    reg: &registry::Registry,
-    languages: &[String],
-    all: bool,
-    verbose: bool,
-) -> Result<()> {
-    let names: Vec<&str> = if all {
-        // When --all, only update parsers that are already cached
-        registry::all_wasm_names()
-            .iter()
-            .filter(|(qn, _)| reg.is_cached(qn))
-            .map(|(qn, _)| *qn)
-            .collect()
-    } else {
-        if languages.is_empty() {
-            return Err(anyhow::anyhow!(
-                "specify language names or use --all to update all cached parsers"
-            ));
-        }
-        languages.iter().map(|s| s.as_str()).collect()
-    };
-
-    if names.is_empty() {
-        if verbose {
-            eprintln!("No cached parsers to update.");
-        }
-        return Ok(());
-    }
-
-    let mut errors = Vec::new();
-    for name in &names {
-        let query_name = resolve_query_name(name);
-        let parser_path = reg.parser_path(query_name);
-        match reg.update_parser(query_name) {
-            Ok(_) => {
-                if verbose {
-                    eprintln!(
-                        "{}: {} -> {}",
-                        name,
-                        reg.parser_download_url(query_name),
-                        parser_path.display()
-                    );
-                }
-            }
-            Err(e) => {
-                eprintln!("{}: failed", name);
-                errors.push((*name, e));
-            }
-        }
-    }
-
-    if !errors.is_empty() {
-        return Err(anyhow::anyhow!(
-            "failed to update {} parser(s)",
+            "failed to cache {} parser(s)",
             errors.len()
         ));
     }
@@ -501,7 +436,7 @@ fn update_parsers(
 /// Resolve a user-provided language name to the query name used internally.
 /// Tries Language::guess first (handles aliases), falls back to the input as-is.
 fn resolve_query_name(name: &str) -> &str {
-    // For fetch/update we just need the query name mapping.
+    // For caching we just need the query name mapping.
     // If the user passes a known language id, use the enum mapping.
     // Otherwise pass through (the user might be using the query name directly).
     let lang = Language::guess(Some(name), "");

@@ -8,6 +8,7 @@ import { cpus, platform, release, tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
+import { implementationById } from "./implementations.mjs";
 
 const execFile = promisify(execFileCallback);
 const benchmarksDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -25,10 +26,8 @@ const npmTarLibrary = process.env.BENCH_NPM_TAR
   : undefined;
 const pnpmExecutable = process.env.BENCH_PNPM ?? "pnpm";
 const requestedGroup = process.env.BENCH_PACKAGE_SIZE_GROUP;
-const groups = requestedGroup
-  ? new Set([requestedGroup])
-  : new Set(["javascript", "rust", "cli", "elixir"]);
 const validGroups = new Set(["javascript", "rust", "cli", "elixir"]);
+const groups = requestedGroup ? new Set([requestedGroup]) : validGroups;
 if ([...groups].some((group) => !validGroups.has(group))) {
   throw new Error(`unknown package-size group: ${requestedGroup}`);
 }
@@ -72,34 +71,37 @@ try {
     }
     entries.push(
       packageEntry(
-        "Lumis JS WASM (runtime)",
+        "lumis-js-wasm",
+        "runtime",
         "npm production closure; parsers load on demand",
         lumisPackages,
       ),
       packageEntry(
-        "Lumis JS WASM (1 language)",
+        "lumis-js-wasm",
+        "1 language",
         "npm production closure plus Rust parser",
         combinePackages(lumisPackages, parserPackages.get("rust")),
       ),
       packageEntry(
-        "Lumis JS WASM (10 languages)",
+        "lumis-js-wasm",
+        "10 languages",
         "npm production closure plus benchmark parsers",
         combinePackages(lumisPackages, ...parserPackages.values()),
       ),
-      packageEntry("Shiki 4.3.1", "npm production closure", shikiPackages),
-      packageEntry("highlight.js 11.11.1", "npm production closure", highlightJsPackages),
+      packageEntry("shiki", undefined, "npm production closure", shikiPackages),
+      packageEntry("highlight-js", undefined, "npm production closure", highlightJsPackages),
     );
   }
 
   if (groups.has("rust")) {
     entries.push(
       await binaryEntry(
-        "Lumis Rust",
+        "lumis-rust",
         "stripped 10-language benchmark executable",
         resolve(releaseDir, "lumis-size"),
       ),
       await binaryEntry(
-        "syntect 5.3.0",
+        "syntect",
         "stripped default-syntax benchmark executable",
         resolve(releaseDir, "syntect-size"),
       ),
@@ -109,18 +111,18 @@ try {
   if (groups.has("cli")) {
     entries.push(
       await binaryEntry(
-        "Lumis CLI",
+        "lumis-cli",
         "stripped release executable",
         resolve(releaseDir, executableName("lumis")),
       ),
-      await binaryEntry("bat 0.26.1", "release executable", requiredEnvironment("BAT_BINARY")),
+      await binaryEntry("bat", "release executable", requiredEnvironment("BAT_BINARY")),
     );
   }
 
   if (groups.has("elixir")) {
     entries.push(
       await binaryEntry(
-        "Lumis Elixir",
+        "lumis-elixir",
         "stripped release NIF shared library",
         await nifPath(releaseDir),
       ),
@@ -128,7 +130,7 @@ try {
   }
 
   const report = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     group: requestedGroup ?? "all",
     system: {
       platform: platform(),
@@ -328,9 +330,11 @@ function combinePackages(...collections) {
   return combined;
 }
 
-function packageEntry(label, artifact, packages) {
+function packageEntry(implementation, variant, artifact, packages) {
+  implementationById(implementation);
   return {
-    label,
+    implementation,
+    ...(variant && { variant }),
     artifact,
     format: "npm",
     rawBytes: sum(packages, "unpackedBytes"),
@@ -339,14 +343,15 @@ function packageEntry(label, artifact, packages) {
   };
 }
 
-async function binaryEntry(label, artifact, path) {
+async function binaryEntry(implementation, artifact, path) {
+  const label = implementationById(implementation).label;
   const bytes = await readFile(path);
   const details = await stat(path);
   if (!details.isFile() || bytes.length === 0) {
     throw new Error(`${label} artifact is missing or empty: ${path}`);
   }
   return {
-    label,
+    implementation,
     artifact,
     format: "native",
     rawBytes: bytes.length,

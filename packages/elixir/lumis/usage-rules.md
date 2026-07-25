@@ -88,17 +88,17 @@ Map.has_key?(Lumis.available_languages(), "elixir")
 ### Parser Loading
 
 Root and injected parsers load automatically as exact, integrity-checked WASM
-assets. For releases, fetch them at build time:
+assets. For releases, cache them at build time:
 
 ```sh
-MIX_ENV=prod mix do compile, lumis.parsers.fetch elixir html javascript css, release
+MIX_ENV=prod mix do compile, lumis.parsers.cache elixir html javascript css, release
 ```
 
-Then preload the languages an application expects so Wasmtime compilation
+Then load the languages an application expects so Wasmtime compilation
 happens during startup:
 
 ```elixir
-:ok = Lumis.preload_languages(["elixir", "html", "javascript", "css"])
+:ok = Lumis.load_languages(["elixir", "html", "javascript", "css"])
 ```
 
 The runtime checks release-local `priv/wasm`, then the persistent user cache,
@@ -789,6 +789,6 @@ Lumis is a fast, reliable syntax highlighter for Elixir. Key points to remember:
 9. **250+ built-in Neovim themes** available
 10. **Line numbers** are 1-indexed in the `data-line` attribute
 11. **Validate options** with `validate_options!/1` when needed
-12. **Preload parser WASM** before entering offline mode
+12. **Cache parser WASM** before entering offline mode
 
 For more information, see the [HexDocs](https://hexdocs.pm/lumis) or the [GitHub repository](https://github.com/leandrocp/lumis).

@@ -106,8 +106,8 @@ Lumis.highlight!("const x = 1", formatter: {:html_inline, language: "javascript"
 ```
 
 Elixir uses the same per-language parser WASM model. Missing root and injected
-languages load automatically. Use `mix lumis.parsers.fetch ...` while building
-an OTP release, then `Lumis.preload_languages/1` to compile expected parsers at
+languages load automatically. Use `mix lumis.parsers.cache ...` while building
+an OTP release, then `Lumis.load_languages/1` to compile expected parsers at
 application startup.
 
 ### [Java](https://github.com/roastedroot/lumis4j)

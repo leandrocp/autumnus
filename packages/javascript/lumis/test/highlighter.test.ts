@@ -7,7 +7,6 @@ import {
 import { bbcodeScoped, htmlInline, htmlLinked, htmlMultiThemes, terminal } from '../src/formatters.js'
 import * as formatterApi from '../src/formatters.js'
 import type { Highlighter, Theme } from '../src/index.js'
-import css from '../langs/css.ts'
 import json from '../langs/json.ts'
 import html from '../langs/html.ts'
 import plaintext from '../langs/plaintext.ts'
@@ -34,7 +33,7 @@ const draculaTheme: Theme = dracula
 let hl: Highlighter
 
 beforeAll(async () => {
-  configureLocalWasmResolver(['diff', 'json', 'javascript', 'bash', 'dockerfile', 'elixir', 'html', 'css', 'python', 'ruby', 'rust', 'xml'])
+  configureLocalWasmResolver(['diff', 'json', 'javascript', 'bash', 'dockerfile', 'elixir', 'html', 'python', 'ruby', 'rust', 'xml'])
 
   hl = await createHighlighter({
     languages: [json],
@@ -55,7 +54,7 @@ describe('createHighlighter', () => {
     expect(multi.languages).toContain('javascript')
   })
 
-  it('always preloads plaintext for fallback highlighting', () => {
+  it('always loads plaintext for fallback highlighting', () => {
     expect(hl.languages).toContain('plaintext')
   })
 
@@ -144,30 +143,6 @@ describe('hl.highlight', () => {
       htmlInline({ language: json, theme, includeHighlights: true })
     )
     expect(html).toContain('data-highlight=')
-  })
-
-  it('follows Neovim query precedence for HTML and injected CSS', async () => {
-    const htmlHighlighter = await createHighlighter({
-      languages: [html, css],
-    })
-    const output = htmlHighlighter.highlight(
-      '<html lang="en"><head><title>three.js webgpu - compute reduction</title><style>#reduction-panel { background-color: #111; }</style></head></html>',
-      htmlInline({
-        language: html,
-        theme: draculaTheme,
-        includeHighlights: true,
-      })
-    )
-
-    expect(output).toContain('data-highlight="tag.delimiter" style="color: #8be9fd;">&lt;</span>')
-    expect(output).toContain('data-highlight="tag" style="color: #8be9fd;">title</span>')
-    expect(output).toContain('data-highlight="tag.attribute" style="color: #50fa7b;">lang</span>')
-    expect(output).toContain(
-      'data-highlight="markup.heading" style="color: #ff79c6; font-weight: bold;">three.js webgpu - compute reduction</span>'
-    )
-    expect(output).toContain(
-      'data-highlight="property" style="color: #bd93f9;">background-color</span>'
-    )
   })
 
   it('wraps output with header element', () => {

@@ -54,6 +54,6 @@ elixir examples/wasm-runtimes/elixir/demo.exs
 ```
 
 Open the localhost URL printed by Phoenix Playground. The single-file app uses
-the local Lumis checkout, preloads all four parsers, and serves the highlighted
+the local Lumis checkout, loads all four parsers, and serves the highlighted
 result with Phoenix LiveView. Set `LUMIS_WASM_CACHE_DIR` to inspect or isolate
 the persistent parser and compiled Wasmtime caches.

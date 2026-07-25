@@ -8,7 +8,7 @@ description: >-
 keywords:
   - lumis cli
   - themes generate
-  - parsers fetch
+  - parsers cache
   - highlight command
 ---
 
@@ -35,8 +35,7 @@ These flags work with any subcommand:
 | `lumis languages list` | List supported languages and file patterns |
 | `lumis themes list` | List built-in and local themes |
 | `lumis themes generate` | Generate a theme from a Neovim colorscheme repo |
-| `lumis parsers fetch` | Pre-download parser WASM files |
-| `lumis parsers update` | Refresh cached parser WASM files |
+| `lumis parsers cache` | Cache parser WASM files for later or offline use |
 
 ## `lumis highlight`
 
@@ -206,26 +205,21 @@ lumis themes generate \
   -o github-light.json
 ```
 
-## `lumis parsers fetch`
+## `lumis parsers cache`
 
-Pre-download exact, integrity-checked parser WASM files so highlighting doesn't
-trigger downloads at runtime.
+Cache exact, integrity-checked parser WASM files so highlighting doesn't trigger
+downloads at runtime.
 
 ```bash title="Selected parsers"
-lumis parsers fetch rust javascript elixir
+lumis parsers cache rust javascript elixir
 ```
 
 ```bash title="All parsers"
-lumis parsers fetch --all
+lumis parsers cache --all
 ```
 
-## `lumis parsers update`
-
-Refresh cached parsers at the versions pinned by this Lumis CLI release.
-
-```bash
-lumis parsers update rust javascript
-lumis parsers update --all
+```bash title="Replace valid cached parsers"
+lumis parsers cache rust javascript --force
 ```
 
 ## Configuration

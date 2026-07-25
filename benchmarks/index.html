@@ -83,48 +83,47 @@
   <body>
     <header>
       <h1>Visual output comparison</h1>
-      <p>
-        Dracula · HTML + CSS + JSON + JavaScript · 1,397 lines ·
-        <a
-          href="https://github.com/mrdoob/three.js/blob/6365c1a0af6a32ed45f99712197555fee2f4b24a/examples/webgpu_compute_reduce.html"
-          target="_blank"
-          rel="noreferrer"
-          >Original source</a
-        >.
-      </p>
+      <p id="fixture"></p>
       <p class="notice">
         Generate once with <code>mise run -C benchmarks showcase</code>, then open this file
         directly.
       </p>
     </header>
-    <nav aria-label="Implementation">
-      <button data-page="lumis-rust" aria-selected="true">Lumis Rust</button>
-      <button data-page="lumis-javascript">Lumis JavaScript WASM</button>
-      <button data-page="lumis-elixir">Lumis Elixir</button>
-      <button data-page="lumis-cli">Lumis CLI</button>
-      <button data-page="shiki">Shiki 4.3.1</button>
-      <button data-page="highlight-js">highlight.js 11.11.1</button>
-      <button data-page="syntect">syntect 5.3.0</button>
-      <button data-page="bat">bat 0.26.1</button>
-    </nav>
+    <nav aria-label="Implementation"></nav>
     <main>
-      <iframe
-        title="Highlighted output"
-        src="showcase/generated/lumis-rust.html"
-        loading="eager"
-      ></iframe>
+      <iframe title="Highlighted output" loading="eager"></iframe>
     </main>
+    <script src="showcase/generated/manifest.js"></script>
     <script>
+      const { fixture, implementations, theme } = globalThis.LUMIS_BENCHMARK_SHOWCASE;
+      const fixtureSummary = document.querySelector("#fixture");
+      fixtureSummary.append(
+        `${theme.name} · HTML + ${fixture.injections.join(" + ")} · ${fixture.lines.toLocaleString()} lines · `,
+      );
+      const sourceLink = document.createElement("a");
+      sourceLink.href = fixture.source;
+      sourceLink.target = "_blank";
+      sourceLink.rel = "noreferrer";
+      sourceLink.textContent = "Original source";
+      fixtureSummary.append(sourceLink, ".");
+
+      const navigation = document.querySelector("nav");
       const frame = document.querySelector("iframe");
-      for (const button of document.querySelectorAll("button[data-page]")) {
+      for (const [index, implementation] of implementations.entries()) {
+        const button = document.createElement("button");
+        button.dataset.page = implementation.id;
+        button.textContent = implementation.label;
+        button.setAttribute("aria-selected", String(index === 0));
         button.addEventListener("click", () => {
-          for (const candidate of document.querySelectorAll("button[data-page]")) {
+          for (const candidate of navigation.children) {
             candidate.setAttribute("aria-selected", String(candidate === button));
           }
           frame.src = `showcase/generated/${button.dataset.page}.html`;
           frame.title = `${button.textContent} highlighted output`;
         });
+        navigation.append(button);
       }
+      navigation.firstElementChild.click();
     </script>
   </body>
 </html>

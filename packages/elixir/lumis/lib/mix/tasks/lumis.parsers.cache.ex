@@ -1,11 +1,11 @@
-defmodule Mix.Tasks.Lumis.Parsers.Fetch do
+defmodule Mix.Tasks.Lumis.Parsers.Cache do
   @moduledoc """
-  Fetches exact, integrity-checked Lumis parser WASMs for an OTP release.
+  Caches exact, integrity-checked Lumis parser WASMs for an OTP release.
   """
 
   use Mix.Task
 
-  @shortdoc "Fetches exact Lumis parser WASMs for an OTP release"
+  @shortdoc "Caches exact Lumis parser WASMs for an OTP release"
 
   @switches [all: :boolean, force: :boolean, output: :string]
   @aliases [o: :output]
@@ -15,7 +15,7 @@ defmodule Mix.Tasks.Lumis.Parsers.Fetch do
     {options, languages} = parse_arguments(arguments)
     selected = select_languages(options, languages)
     validate_selection!(selected)
-    prefetch(selected, options)
+    cache(selected, options)
   end
 
   defp parse_arguments(arguments) do
@@ -47,12 +47,12 @@ defmodule Mix.Tasks.Lumis.Parsers.Fetch do
 
   defp validate_selection!(_languages), do: :ok
 
-  defp prefetch(languages, options) do
-    prefetch_options =
+  defp cache(languages, options) do
+    cache_options =
       [force: options[:force] || false]
       |> maybe_put(:directory, options[:output])
 
-    case Lumis.LanguageLoader.prefetch(languages, prefetch_options) do
+    case Lumis.LanguageLoader.cache(languages, cache_options) do
       {:ok, paths} ->
         Enum.each(paths, fn path -> Mix.shell().info(path) end)
 

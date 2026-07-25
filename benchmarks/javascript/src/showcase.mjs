@@ -31,7 +31,7 @@ await mkdir(resolve(generatedDir, "fragments"), { recursive: true });
 const lumis = await createHighlighter({ languages });
 const lumisOutput = lumis.highlight(source, htmlInline({ language: languages[0], theme }));
 validate(lumisOutput, "Lumis JavaScript WASM");
-await writeFile(resolve(generatedDir, "fragments/lumis-javascript.html"), lumisOutput);
+await writeFile(resolve(generatedDir, "fragments/lumis-js-wasm.html"), lumisOutput);
 
 const shiki = await createShikiHighlighter({
   langs: ["html"],

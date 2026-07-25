@@ -214,20 +214,12 @@ export interface CaptureMetadata {
   isLocalReference: boolean;
 }
 
-export interface QueryCaptureOffset {
-  startRow: number;
-  startColumn: number;
-  endRow: number;
-  endColumn: number;
-}
-
 export interface CompiledHighlightConfig {
   query: Query;
   injectionPatternEnd: number;
   localsPatternEnd: number;
   captureMetadata: Record<string, CaptureMetadata>;
   nonLocalVariablePatterns: boolean[];
-  injectionOffsets: Array<Record<string, QueryCaptureOffset> | undefined>;
 }
 
 export interface CompiledBracketConfig {

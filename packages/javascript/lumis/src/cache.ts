@@ -73,7 +73,7 @@ async function fetchWasm(language: Language, ref: WasmRef, resolver: WasmResolve
 }
 
 /**
- * Download exact, integrity-pinned parser WASMs into a persistent directory.
+ * Cache exact, integrity-pinned parser WASMs in a persistent directory.
  *
  * Point `LUMIS_WASM_CACHE_DIR` at the same directory in the deployed process
  * and set `LUMIS_WASM_OFFLINE=1` when network fallback must be disabled.

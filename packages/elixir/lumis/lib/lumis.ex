@@ -722,12 +722,13 @@ defmodule Lumis do
   def load_language(language), do: Lumis.LanguageLoader.load(language)
 
   @doc """
-  Preloads a list of language parsers.
+  Loads and verifies a list of language parsers.
 
-  This is useful during application startup or before entering offline mode.
+  This is useful during application startup. Use `mix lumis.parsers.cache`
+  at build time when the release must run without network access.
   """
-  @spec preload_languages([String.t() | atom()]) :: :ok | {:error, term()}
-  def preload_languages(languages), do: Lumis.LanguageLoader.preload(languages)
+  @spec load_languages([String.t() | atom()]) :: :ok | {:error, term()}
+  def load_languages(languages), do: Lumis.LanguageLoader.load_languages(languages)
 
   @doc """
   Returns the list of all available themes.

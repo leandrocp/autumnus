@@ -28,7 +28,7 @@
     },
     {
       "type": "start",
-      "scope": "tag.delimiter",
+      "scope": "punctuation.bracket",
       "language": "html"
     },
     {
@@ -59,7 +59,7 @@
     },
     {
       "type": "start",
-      "scope": "tag.attribute",
+      "scope": "attribute",
       "language": "html"
     },
     {
@@ -91,6 +91,24 @@
     {
       "type": "source",
       "start": 16,
+      "end": 17
+    },
+    {
+      "type": "start",
+      "scope": "string",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 17,
+      "end": 21
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 21,
       "end": 22
     },
     {
@@ -98,7 +116,7 @@
     },
     {
       "type": "start",
-      "scope": "tag.delimiter",
+      "scope": "punctuation.bracket",
       "language": "html"
     },
     {
@@ -111,7 +129,7 @@
     },
     {
       "type": "start",
-      "scope": "tag.delimiter",
+      "scope": "punctuation.bracket",
       "language": "html"
     },
     {
@@ -137,7 +155,7 @@
     },
     {
       "type": "start",
-      "scope": "tag.delimiter",
+      "scope": "punctuation.bracket",
       "language": "html"
     },
     {

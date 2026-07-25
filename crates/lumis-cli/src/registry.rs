@@ -233,12 +233,6 @@ impl Registry {
         self.read_cached_parser(lang_name).is_some()
     }
 
-    /// Re-download a parser WASM from CDN, replacing the cached version.
-    pub fn update_parser(&self, lang_name: &str) -> Result<()> {
-        self.download_parser(lang_name)?;
-        Ok(())
-    }
-
     /// Return the cached path for a parser WASM.
     pub fn parser_path(&self, lang_name: &str) -> PathBuf {
         let metadata =

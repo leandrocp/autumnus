@@ -17,7 +17,7 @@ const highlighter = createHighlighterModule({
 });
 
 /**
- * Create a reusable highlighter with preloaded languages.
+ * Create a reusable highlighter with languages loaded during setup.
  *
  * `createHighlighter` is async; the returned `hl.highlight()` is synchronous.
  *

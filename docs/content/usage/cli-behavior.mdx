@@ -84,12 +84,12 @@ The CLI stores integrity-verified parser WASM files under the data directory.
 Filenames contain the exact parser version and SHA-256 digest.
 
 - first use may trigger a parser download
-- `lumis parsers fetch ...` downloads ahead of time
-- `lumis parsers update ...` refreshes cached parsers
+- `lumis parsers cache ...` persists selected parsers ahead of time
+- `lumis parsers cache ... --force` replaces valid cached parsers
 
 ```bash
-lumis parsers fetch rust javascript elixir
-lumis parsers update rust
+lumis parsers cache rust javascript elixir
+lumis parsers cache rust --force
 ```
 
 ## Data directory
@@ -116,7 +116,7 @@ See [CLI Commands](/cli/commands#lumis-themes-generate) for theme generation fla
 
 Some formats depend on nested parsers. If embedded languages are missing from the cache, those nested regions cannot be fully highlighted.
 
-If you work with mixed-language content, prefetch all relevant parsers.
+If you work with mixed-language content, cache all relevant parsers.
 
 ## Verbose mode
 

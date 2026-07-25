@@ -62,7 +62,7 @@ describe("cacheLanguages", () => {
     expect(readFileSync(cacheFile).byteLength).toBe(ref.size);
   });
 
-  it("loads a prefetched parser after a runtime restart in offline mode", async () => {
+  it("loads a cached parser after a runtime restart in offline mode", async () => {
     const directory = await temporaryDirectory();
     await cacheLanguages(["diff"], {
       directory,

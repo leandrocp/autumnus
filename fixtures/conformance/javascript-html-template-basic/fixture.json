@@ -28,7 +28,7 @@
     },
     {
       "type": "start",
-      "scope": "tag.delimiter",
+      "scope": "punctuation.bracket",
       "language": "html"
     },
     {
@@ -54,7 +54,7 @@
     },
     {
       "type": "start",
-      "scope": "tag.delimiter",
+      "scope": "punctuation.bracket",
       "language": "html"
     },
     {
@@ -72,7 +72,7 @@
     },
     {
       "type": "start",
-      "scope": "tag.delimiter",
+      "scope": "punctuation.bracket",
       "language": "html"
     },
     {
@@ -98,7 +98,7 @@
     },
     {
       "type": "start",
-      "scope": "tag.delimiter",
+      "scope": "punctuation.bracket",
       "language": "html"
     },
     {

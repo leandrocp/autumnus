@@ -77,7 +77,7 @@ const sidebars: SidebarsConfig = {
         'recipes/generate-css-from-a-theme-rust',
         'recipes/list-languages-and-themes',
         'recipes/generate-theme-from-neovim-colorscheme',
-        'recipes/pre-download-parsers-cli',
+        'recipes/cache-parsers-cli',
         'recipes/repeated-highlighting-javascript',
         'recipes/browser-cdn',
         'recipes/local-wasm-bundle',

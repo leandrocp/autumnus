@@ -60,12 +60,12 @@ The CLI downloads exact-version parser WASM files on demand and stores them
 under content-addressed, integrity-checked names in the data directory.
 
 - first use may trigger a parser download
-- `lumis parsers fetch ...` pre-downloads parsers
-- `lumis parsers update ...` refreshes cached parsers
+- `lumis parsers cache ...` persists selected parsers ahead of time
+- `lumis parsers cache ... --force` replaces valid cached parsers
 
 ```bash
-lumis parsers fetch rust javascript elixir
-lumis parsers update rust
+lumis parsers cache rust javascript elixir
+lumis parsers cache rust --force
 ```
 
 ## Related pages

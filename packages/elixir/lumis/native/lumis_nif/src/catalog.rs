@@ -354,6 +354,22 @@ pub static LANGUAGES: &[LanguageEntry] = &[
   (#eq? @_attr "style")
   (#set! injection.language "css"))
 
+; lit-html style template interpolation
+; <a @click=${e => console.log(e)}>
+; <a @click="${e => console.log(e)}">
+((attribute
+  (quoted_attribute_value
+    (attribute_value) @injection.content))
+  (#match? @injection.content "\\$\\{")
+  (#offset! @injection.content 0 2 0 -1)
+  (#set! injection.language "javascript"))
+
+((attribute
+  (attribute_value) @injection.content)
+  (#match? @injection.content "\\$\\{")
+  (#offset! @injection.content 0 2 0 -2)
+  (#set! injection.language "javascript"))
+
 ; <input pattern="[0-9]"> or <input pattern=[0-9]>
 (element
   (_
@@ -692,6 +708,22 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     (attribute_value) @injection.content))
   (#eq? @_attr "style")
   (#set! injection.language "css"))
+
+; lit-html style template interpolation
+; <a @click=${e => console.log(e)}>
+; <a @click="${e => console.log(e)}">
+((attribute
+  (quoted_attribute_value
+    (attribute_value) @injection.content))
+  (#match? @injection.content "\\$\\{")
+  (#offset! @injection.content 0 2 0 -1)
+  (#set! injection.language "javascript"))
+
+((attribute
+  (attribute_value) @injection.content)
+  (#match? @injection.content "\\$\\{")
+  (#offset! @injection.content 0 2 0 -2)
+  (#set! injection.language "javascript"))
 
 ; <input pattern="[0-9]"> or <input pattern=[0-9]>
 (element
@@ -8922,7 +8954,19 @@ pub static LANGUAGES: &[LanguageEntry] = &[
 "<!" @tag.delimiter
 
 (entity) @character.special
+(tag_name) @tag
 (erroneous_end_tag_name) @tag.error
+(doctype) @constant
+(attribute_name) @attribute
+(attribute_value) @string
+(comment) @comment
+
+[
+  "<"
+  ">"
+  "</"
+  "/>"
+] @punctuation.bracket
 "#,
         injections: r#"; This file is auto-generated. Do not edit.
 ; inherits: html_tags
@@ -9002,6 +9046,22 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     (attribute_value) @injection.content))
   (#eq? @_attr "style")
   (#set! injection.language "css"))
+
+; lit-html style template interpolation
+; <a @click=${e => console.log(e)}>
+; <a @click="${e => console.log(e)}">
+((attribute
+  (quoted_attribute_value
+    (attribute_value) @injection.content))
+  (#match? @injection.content "\\$\\{")
+  (#offset! @injection.content 0 2 0 -1)
+  (#set! injection.language "javascript"))
+
+((attribute
+  (attribute_value) @injection.content)
+  (#match? @injection.content "\\$\\{")
+  (#offset! @injection.content 0 2 0 -2)
+  (#set! injection.language "javascript"))
 
 ; <input pattern="[0-9]"> or <input pattern=[0-9]>
 (element
@@ -20749,6 +20809,22 @@ function: (extract_operator
   (#eq? @_attr "style")
   (#set! injection.language "css"))
 
+; lit-html style template interpolation
+; <a @click=${e => console.log(e)}>
+; <a @click="${e => console.log(e)}">
+((attribute
+  (quoted_attribute_value
+    (attribute_value) @injection.content))
+  (#match? @injection.content "\\$\\{")
+  (#offset! @injection.content 0 2 0 -1)
+  (#set! injection.language "javascript"))
+
+((attribute
+  (attribute_value) @injection.content)
+  (#match? @injection.content "\\$\\{")
+  (#offset! @injection.content 0 2 0 -2)
+  (#set! injection.language "javascript"))
+
 ; <input pattern="[0-9]"> or <input pattern=[0-9]>
 (element
   (_
@@ -24214,6 +24290,22 @@ function: (extract_operator
     (attribute_value) @injection.content))
   (#eq? @_attr "style")
   (#set! injection.language "css"))
+
+; lit-html style template interpolation
+; <a @click=${e => console.log(e)}>
+; <a @click="${e => console.log(e)}">
+((attribute
+  (quoted_attribute_value
+    (attribute_value) @injection.content))
+  (#match? @injection.content "\\$\\{")
+  (#offset! @injection.content 0 2 0 -1)
+  (#set! injection.language "javascript"))
+
+((attribute
+  (attribute_value) @injection.content)
+  (#match? @injection.content "\\$\\{")
+  (#offset! @injection.content 0 2 0 -2)
+  (#set! injection.language "javascript"))
 
 ; <input pattern="[0-9]"> or <input pattern=[0-9]>
 (element

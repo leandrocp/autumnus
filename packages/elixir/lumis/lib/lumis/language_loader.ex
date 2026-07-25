@@ -16,7 +16,7 @@ defmodule Lumis.LanguageLoader do
     end
   end
 
-  def preload(names) when is_list(names) do
+  def load_languages(names) when is_list(names) do
     Enum.reduce_while(names, :ok, fn name, :ok ->
       case load(to_string(name)) do
         :ok -> {:cont, :ok}
@@ -25,13 +25,13 @@ defmodule Lumis.LanguageLoader do
     end)
   end
 
-  def prefetch(names, options \\ []) when is_list(names) and is_list(options) do
+  def cache(names, options \\ []) when is_list(names) and is_list(options) do
     directory = Keyword.get(options, :directory, bundled_dir())
     force? = Keyword.get(options, :force, false)
 
     result =
       Enum.reduce_while(names, {:ok, [], MapSet.new()}, fn name, {:ok, paths, seen} ->
-        prefetch_name(to_string(name), paths, seen, directory, force?)
+        cache_name(to_string(name), paths, seen, directory, force?)
       end)
 
     case result do
@@ -48,25 +48,25 @@ defmodule Lumis.LanguageLoader do
     end
   end
 
-  defp prefetch_name(name, paths, seen, directory, force?) do
+  defp cache_name(name, paths, seen, directory, force?) do
     case Native.language_manifest(name) do
       nil -> {:halt, {:error, "unknown language '#{name}'"}}
-      entry -> prefetch_manifest_entry(entry, paths, seen, directory, force?)
+      entry -> cache_manifest_entry(entry, paths, seen, directory, force?)
     end
   end
 
-  defp prefetch_manifest_entry(entry, paths, seen, directory, force?) do
+  defp cache_manifest_entry(entry, paths, seen, directory, force?) do
     key = {entry.wasm_name, entry.version, entry.sha256}
 
     if MapSet.member?(seen, key) do
       {:cont, {:ok, paths, seen}}
     else
-      prefetch_new_entry(entry, key, paths, seen, directory, force?)
+      cache_new_entry(entry, key, paths, seen, directory, force?)
     end
   end
 
-  defp prefetch_new_entry(entry, key, paths, seen, directory, force?) do
-    case prefetch_entry(entry, directory, force?) do
+  defp cache_new_entry(entry, key, paths, seen, directory, force?) do
+    case cache_entry(entry, directory, force?) do
       {:ok, path} -> {:cont, {:ok, [path | paths], MapSet.put(seen, key)}}
       {:error, reason} -> {:halt, {:error, reason}}
     end
@@ -125,16 +125,16 @@ defmodule Lumis.LanguageLoader do
     end
   end
 
-  defp prefetch_entry(entry, directory, force?) do
+  defp cache_entry(entry, directory, force?) do
     destination = Path.join(directory, cache_filename(entry))
-    with_cache_lock(destination, fn -> ensure_prefetched(entry, destination, force?) end)
+    with_cache_lock(destination, fn -> ensure_cached(entry, destination, force?) end)
   end
 
-  defp ensure_prefetched(entry, destination, true) do
+  defp ensure_cached(entry, destination, true) do
     resolve_and_write(entry, destination)
   end
 
-  defp ensure_prefetched(entry, destination, false) do
+  defp ensure_cached(entry, destination, false) do
     case read_verified(destination, entry, true) do
       {:ok, _bytes} -> {:ok, destination}
       :miss -> resolve_and_write(entry, destination)

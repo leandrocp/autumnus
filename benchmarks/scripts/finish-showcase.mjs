@@ -5,6 +5,7 @@ import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { basename, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { implementations } from "./implementations.mjs";
 
 const benchmarksDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const repoDir = resolve(benchmarksDir, "..");
@@ -64,18 +65,8 @@ const batHtml = `<pre style="background-color:#282a36;color:#f8f8f2"><code>${ans
 validateHtml(batHtml, "bat");
 await writeFile(resolve(fragmentsDir, "bat.html"), batHtml);
 
-const implementations = [
-  ["lumis-rust", "Lumis Rust"],
-  ["lumis-javascript", "Lumis JavaScript WASM"],
-  ["lumis-elixir", "Lumis Elixir"],
-  ["lumis-cli", "Lumis CLI"],
-  ["shiki", "Shiki 4.3.1"],
-  ["highlight-js", "highlight.js 11.11.1"],
-  ["syntect", "syntect 5.3.0"],
-  ["bat", "bat 0.26.1"],
-];
 const manifest = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   fixture: {
     name: "Three.js webgpu_compute_reduce.html",
     source:
@@ -93,20 +84,27 @@ const manifest = {
   implementations: [],
 };
 
-for (const [id, name] of implementations) {
+for (const { id, label } of implementations) {
   const fragment = await readFile(resolve(fragmentsDir, `${id}.html`), "utf8");
-  validateHtml(fragment, name);
-  if (id.startsWith("lumis-")) validateLumisScopes(fragment, name);
-  const page = pageHtml({ fragment, name });
+  validateHtml(fragment, label);
+  if (id.startsWith("lumis-")) validateLumisScopes(fragment, label);
+  const page = pageHtml({ fragment, label });
   await writeFile(resolve(generatedDir, `${id}.html`), page);
   manifest.implementations.push({
     id,
-    name,
+    label,
     outputBytes: Buffer.byteLength(fragment),
   });
 }
 
-await writeFile(resolve(generatedDir, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`);
+const serializedManifest = JSON.stringify(manifest, null, 2);
+await Promise.all([
+  writeFile(resolve(generatedDir, "manifest.json"), `${serializedManifest}\n`),
+  writeFile(
+    resolve(generatedDir, "manifest.js"),
+    `globalThis.LUMIS_BENCHMARK_SHOWCASE = ${serializedManifest};\n`,
+  ),
+]);
 console.log(
   `Generated ${implementations.length} visual comparisons from ${sourceLines.toLocaleString()} lines (${sourceBytes.toLocaleString()} bytes).`,
 );
@@ -161,13 +159,13 @@ function validateLumisScopes(output, implementation) {
   }
 }
 
-function pageHtml({ fragment, name }) {
+function pageHtml({ fragment, label }) {
   return `<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>${escapeHtml(name)} · Lumis visual comparison</title>
+  <title>${escapeHtml(label)} · Lumis visual comparison</title>
   <style>
     * { box-sizing: border-box; }
     html { background: #171821; color: #f8f8f2; font: 14px/1.5 Inter, ui-sans-serif, system-ui, sans-serif; }

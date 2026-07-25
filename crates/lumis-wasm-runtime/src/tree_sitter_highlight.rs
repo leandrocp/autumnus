@@ -1110,10 +1110,10 @@ where
             }
 
             // Once a highlighting pattern is found for the current node, keep iterating over
-            // any other highlighting patterns that also match this node. QueryCursor does not
-            // guarantee pattern-index order, so explicitly keep the last recognized highlight
-            // pattern in the query. Predicate-only captures such as `@_tag` and unsupported
-            // captures such as `@none` must not replace a renderable highlight.
+            // any later highlighting patterns that also match this node and set the match to it.
+            // Captures for a given node are ordered by pattern index, so these subsequent
+            // captures are guaranteed to be for highlighting, not injections or
+            // local variables.
             while let Some((next_match, next_capture_index)) = layer.captures.peek() {
                 let next_capture = next_match.captures[*next_capture_index];
                 if next_capture.node == capture.node {
@@ -1126,18 +1126,9 @@ where
                     {
                         continue;
                     }
-                    let current_is_highlight =
-                        layer.config.highlight_indices[capture.index as usize].is_some();
-                    let following_is_highlight =
-                        layer.config.highlight_indices[next_capture.index as usize].is_some();
-                    if following_is_highlight
-                        && (!current_is_highlight
-                            || following_match.pattern_index >= match_.pattern_index)
-                    {
-                        match_.remove();
-                        capture = next_capture;
-                        match_ = following_match;
-                    }
+                    match_.remove();
+                    capture = next_capture;
+                    match_ = following_match;
                 } else {
                     break;
                 }

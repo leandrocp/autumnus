@@ -50,7 +50,7 @@ const html = await highlight(
 
 ## Reuse A Highlighter
 
-Use `createHighlighter()` when you want to preload languages and highlight synchronously after setup.
+Use `createHighlighter()` when you want to load languages during setup and highlight synchronously afterward.
 
 ```typescript
 import { createHighlighter } from '@lumis-sh/lumis'

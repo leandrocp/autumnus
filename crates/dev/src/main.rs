@@ -1555,28 +1555,6 @@ fn apply_text_replacements(content: &str, lang: &str) -> String {
             "\"nil\" @constant.builtin",
         );
     }
-    if lang == "html_tags" {
-        s = s.replace(
-            r#"; lit-html style template interpolation
-; <a @click=${e => console.log(e)}>
-; <a @click="${e => console.log(e)}">
-((attribute
-  (quoted_attribute_value
-    (attribute_value) @injection.content))
-  (#lua-match? @injection.content "%${")
-  (#offset! @injection.content 0 2 0 -1)
-  (#set! injection.language "javascript"))
-
-((attribute
-  (attribute_value) @injection.content)
-  (#lua-match? @injection.content "%${")
-  (#offset! @injection.content 0 2 0 -2)
-  (#set! injection.language "javascript"))
-
-"#,
-            "",
-        );
-    }
     s
 }
 
@@ -2768,33 +2746,5 @@ mod tests {
             "\"nil\" @constant.builtin"
         );
         assert_eq!(apply_text_replacements(query, "nim"), query);
-    }
-
-    #[test]
-    fn apply_text_replacements_removes_redundant_html_javascript_reinjection() {
-        let query = r#"; lit-html style template interpolation
-; <a @click=${e => console.log(e)}>
-; <a @click="${e => console.log(e)}">
-((attribute
-  (quoted_attribute_value
-    (attribute_value) @injection.content))
-  (#lua-match? @injection.content "%${")
-  (#offset! @injection.content 0 2 0 -1)
-  (#set! injection.language "javascript"))
-
-((attribute
-  (attribute_value) @injection.content)
-  (#lua-match? @injection.content "%${")
-  (#offset! @injection.content 0 2 0 -2)
-  (#set! injection.language "javascript"))
-
-((comment) @injection.content)
-"#;
-
-        assert_eq!(
-            apply_text_replacements(query, "html_tags"),
-            "((comment) @injection.content)\n"
-        );
-        assert_eq!(apply_text_replacements(query, "html"), query);
     }
 }

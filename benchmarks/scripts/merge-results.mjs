@@ -3,6 +3,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { implementationById, implementations } from "./implementations.mjs";
 
 const benchmarksDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const repoDir = resolve(benchmarksDir, "..");
@@ -13,36 +14,23 @@ const manifest = await readJson(resolve(repoDir, "target/benchmarks/fixtures/sce
 const rustMetadata = await readJson(resolve(runDir, "rust-metadata.json"));
 const cliMetadata = await readJson(resolve(runDir, "cli/metadata.json"));
 const packageSizes = await readJson(resolve(runDir, "package-sizes.json"));
-const implementations = [
-  "lumis-rust",
-  "lumis-js-wasm",
-  "lumis-elixir",
-  "shiki",
-  "highlight-js",
-  "syntect",
-  "lumis-cli",
-  "bat",
-];
-
 const results = [];
 for (const scenario of manifest.scenarios) {
   const scenarioResults = [];
-  for (const implementation of implementations) {
-    const metadata = await implementationMetadata(implementation, scenario.id);
-    validateMetadata(metadata, scenario, implementation);
-    const measurement = await measurementFor(implementation, scenario.id);
+  for (const { id, runner } of implementations) {
+    const metadata = await implementationMetadata(id, runner, scenario.id);
+    validateMetadata(metadata, scenario, id);
+    const measurement = await measurementFor(id, runner, scenario.id);
     if (
       !Number.isFinite(measurement.totalNs) ||
       measurement.totalNs <= 0 ||
       measurement.samples < 3
     ) {
-      throw new Error(
-        `${implementation}/${scenario.id} has an invalid Total or fewer than three samples`,
-      );
+      throw new Error(`${id}/${scenario.id} has an invalid Total or fewer than three samples`);
     }
     scenarioResults.push({
-      implementation,
-      runner: runner(implementation),
+      implementation: id,
+      runner,
       totalNs: measurement.totalNs,
       outputBytes: metadata.outputBytes,
     });
@@ -72,25 +60,25 @@ await writeFile(resolve(runDir, "results.md"), markdown);
 await writeFile(resolve(benchmarksDir, "README.md"), markdown);
 console.log(resolve(runDir, "results.json"));
 
-async function implementationMetadata(implementation, scenario) {
-  if (implementation === "lumis-rust" || implementation === "syntect") {
+async function implementationMetadata(implementation, runner, scenario) {
+  if (runner === "criterion") {
     return rustMetadata.implementations
       .find((entry) => entry.implementation === implementation)
       .scenarios.find((entry) => entry.scenario === scenario);
   }
-  if (implementation === "lumis-cli" || implementation === "bat") {
+  if (runner === "hyperfine") {
     return cliMetadata.results.find(
       (entry) => entry.implementation === implementation && entry.scenario === scenario,
     );
   }
-  if (implementation === "lumis-elixir") {
+  if (runner === "benchee") {
     return readJson(resolve(runDir, `elixir/${scenario}-metadata.json`));
   }
   return readJson(resolve(runDir, `javascript/${implementation}/${scenario}.json`));
 }
 
-async function measurementFor(implementation, scenario) {
-  if (implementation === "lumis-rust" || implementation === "syntect") {
+async function measurementFor(implementation, runner, scenario) {
+  if (runner === "criterion") {
     const directory = resolve(runDir, `criterion/${scenario}/${implementation}/total/new`);
     const [estimates, sample] = await Promise.all([
       readJson(resolve(directory, "estimates.json")),
@@ -98,13 +86,13 @@ async function measurementFor(implementation, scenario) {
     ]);
     return { totalNs: estimates.median.point_estimate, samples: sample.times.length };
   }
-  if (implementation === "lumis-cli" || implementation === "bat") {
+  if (runner === "hyperfine") {
     const report = await readJson(resolve(runDir, `cli/${scenario}.json`));
     const result = report.results.find(({ command }) => command === implementation);
     if (!result) throw new Error(`Hyperfine is missing ${implementation}/${scenario}`);
     return { totalNs: result.median * 1e9, samples: result.times.length };
   }
-  if (implementation === "lumis-elixir") {
+  if (runner === "benchee") {
     const report = await readJson(resolve(runDir, `elixir/${scenario}.json`));
     const result = report.find(({ job_name: job }) => job === "lumis-elixir/total");
     if (!result) throw new Error(`Benchee is missing lumis-elixir/${scenario}`);
@@ -130,29 +118,12 @@ function validateMetadata(metadata, scenario, implementation) {
   }
 }
 
-function runner(implementation) {
-  if (implementation === "lumis-rust" || implementation === "syntect") return "criterion";
-  if (implementation === "lumis-elixir") return "benchee";
-  if (implementation === "lumis-cli" || implementation === "bat") return "hyperfine";
-  return "mitata";
-}
-
 function renderMarkdown(report, sizes) {
   const scenarios = {
     "small-one-language": "1 small file for 1 language",
     "large-one-language": "1 big file for 1 language",
     "ten-files-one-language": "10 different files for 1 language",
     "ten-files-ten-languages": "10 different files for 10 languages",
-  };
-  const labels = {
-    "lumis-rust": "Lumis Rust",
-    "lumis-js-wasm": "Lumis JS WASM",
-    "lumis-elixir": "Lumis Elixir",
-    shiki: "Shiki",
-    "highlight-js": "highlight.js",
-    syntect: "syntect",
-    "lumis-cli": "Lumis CLI",
-    bat: "bat",
   };
   validatePackageSizes(sizes);
   const lines = [
@@ -172,8 +143,7 @@ function renderMarkdown(report, sizes) {
     "This comparison is separate from timing. Every implementation highlights the",
     "same pinned 1,397-line Three.js HTML file, including injected CSS, JSON, and",
     "JavaScript, with the Dracula theme. The gallery covers Lumis Rust, JavaScript",
-    "WASM, Elixir, and CLI alongside Shiki 4.3.1, highlight.js 11.11.1, syntect",
-    "5.3.0, and bat 0.26.1—the latest releases at the time of measurement. Its",
+    "WASM, Elixir, and CLI alongside Shiki, highlight.js, syntect, and bat. Its",
     "preparation step verifies SHA-256 hashes for both the fixture and syntect's",
     "official Dracula theme before rendering.",
     "",
@@ -190,7 +160,7 @@ function renderMarkdown(report, sizes) {
   ];
   for (const entry of sizes.entries) {
     lines.push(
-      `| ${entry.label} | ${entry.artifact} | ${formatBytes(entry.rawBytes)} | ${formatBytes(entry.compressedBytes)} |`,
+      `| ${packageSizeLabel(entry)} | ${entry.artifact} | ${formatBytes(entry.rawBytes)} | ${formatBytes(entry.compressedBytes)} |`,
     );
   }
   lines.push("");
@@ -204,7 +174,9 @@ function renderMarkdown(report, sizes) {
       "| --- | ---: |",
     );
     for (const result of scenario.results.toSorted((left, right) => left.totalNs - right.totalNs)) {
-      lines.push(`| ${labels[result.implementation]} | ${formatDuration(result.totalNs)} |`);
+      lines.push(
+        `| ${implementationById(result.implementation).label} | ${formatDuration(result.totalNs)} |`,
+      );
     }
     lines.push("");
   }
@@ -212,25 +184,14 @@ function renderMarkdown(report, sizes) {
 }
 
 function validatePackageSizes(report) {
-  const required = [
-    "Lumis JS WASM (runtime)",
-    "Lumis JS WASM (1 language)",
-    "Lumis JS WASM (10 languages)",
-    "Shiki 4.3.1",
-    "highlight.js 11.11.1",
-    "Lumis Rust",
-    "syntect 5.3.0",
-    "Lumis CLI",
-    "bat 0.26.1",
-    "Lumis Elixir",
-  ];
   if (
-    report?.schemaVersion !== 1 ||
+    report?.schemaVersion !== 2 ||
     !report.system?.cpu ||
     !Array.isArray(report.entries) ||
-    required.some((label) => !report.entries.some((entry) => entry.label === label)) ||
+    report.entries.length === 0 ||
     report.entries.some(
       (entry) =>
+        !entry.implementation ||
         !Number.isSafeInteger(entry.rawBytes) ||
         entry.rawBytes <= 0 ||
         !Number.isSafeInteger(entry.compressedBytes) ||
@@ -239,6 +200,12 @@ function validatePackageSizes(report) {
   ) {
     throw new Error("package size report is missing or invalid");
   }
+  for (const entry of report.entries) implementationById(entry.implementation);
+}
+
+function packageSizeLabel(entry) {
+  const label = implementationById(entry.implementation).label;
+  return entry.variant ? `${label} (${entry.variant})` : label;
 }
 
 function formatDuration(ns) {

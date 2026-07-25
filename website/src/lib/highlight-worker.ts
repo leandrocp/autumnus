@@ -82,7 +82,7 @@ export type WorkerRequest =
       source: string;
       preClass?: string;
     }
-  | { id: number; type: "preload"; languageIds: string[] };
+  | { id: number; type: "loadLanguages"; languageIds: string[] };
 
 export type WorkerResponse =
   | { id: number; type: "result"; html: string }
@@ -127,7 +127,7 @@ async function handleMessage(req: WorkerRequest): Promise<WorkerResponse> {
       });
       return { id: req.id, type: "result", html };
     }
-    case "preload": {
+    case "loadLanguages": {
       for (const id of req.languageIds) {
         await withHighlighter(async () => {
           const language = await getLanguage(id);
