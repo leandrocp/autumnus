@@ -213,7 +213,7 @@ const output = hl.highlight('const x = "[url=x]"', bbcodeScoped({ language: java
 
 ## Custom Formatters
 
-A formatter is an object with `language` and `format(source)`. Inside `format()`, call the sync free functions `highlightIter` (for flat token callbacks) or `highlightEvents` (for nested open/close events) imported from `@lumis-sh/lumis`. Built-in formatters are regular objects. Custom ones work the same way.
+A formatter is an object with `language` and `format(source, context)`. Inside `format()`, call the sync free functions `highlightIter` (for flat token callbacks) or `highlightEvents` (for nested open/close events) imported from `@lumis-sh/lumis`. Built-in formatters are regular objects. Custom ones work the same way.
 
 Minimal example that wraps each token in a colored `<span>`:
 
@@ -267,6 +267,34 @@ ANSI helpers (`@lumis-sh/lumis/formatters/ansi`):
 ```typescript
 import { hexToRgb, paint, rgbToAnsi, styleToAnsi } from '@lumis-sh/lumis/formatters/ansi'
 ```
+
+## Annotations
+
+Pass typed semantic ranges through the per-call `HighlightOptions`. Lumis
+composes them with syntax events; it does not determine the ranges.
+
+```typescript
+const annotations = [{
+  range: { type: 'offset', start: 12, end: 23 },
+  properties: { change: 'added' },
+}, {
+  range: {
+    type: 'position',
+    start: { line: 1, column: 0 },
+    end: { line: 1, column: 11 },
+  },
+  properties: { change: 'added' },
+}]
+
+const html = hl.highlight(source, formatter, { annotations })
+```
+
+Both forms are zero-based, half-open, and use UTF-8 byte units. Annotation
+events always contain a resolved `{ start, end }` offset range.
+
+See [`examples/diff_viewer.ts`](examples/diff_viewer.ts) for an executable
+side-by-side diff viewer with added, removed, and changed lines, changed spans,
+gutter markers, and an annotation.
 
 ## Custom WASM Resolution
 

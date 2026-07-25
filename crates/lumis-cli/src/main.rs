@@ -5,7 +5,7 @@ mod registry;
 use anyhow::Result;
 use clap::{ArgAction, Parser, Subcommand, ValueEnum};
 use etcetera::BaseStrategy;
-use lumis_core::events::HighlightEvent;
+use lumis_core::events::HighlightEvent as CoreHighlightEvent;
 use lumis_core::formatter::Formatter as CoreFormatter;
 use lumis_core::formatter::TerminalBackground;
 use lumis_core::languages::Language;
@@ -18,6 +18,8 @@ use std::ops::RangeInclusive;
 use std::path::{Path, PathBuf};
 use terminal_size::{terminal_size, Width};
 use tree_sitter::Node;
+
+type HighlightEvent = CoreHighlightEvent<'static>;
 
 #[derive(Parser)]
 #[command(
@@ -761,6 +763,9 @@ fn dump_events(
                 SerializableHighlightEvent::Source { start, end }
             }
             HighlightEvent::End => SerializableHighlightEvent::End,
+            HighlightEvent::AnnotationStart { .. } | HighlightEvent::AnnotationEnd => {
+                unreachable!("syntax highlighting does not emit caller-provided events")
+            }
         })
         .collect::<Vec<_>>();
 
@@ -930,6 +935,9 @@ fn tree_highlights(events: Vec<HighlightEvent>) -> Result<Vec<TreeHighlight>> {
                         order: highlight.order,
                     });
                 }
+            }
+            HighlightEvent::AnnotationStart { .. } | HighlightEvent::AnnotationEnd => {
+                unreachable!("syntax highlighting does not emit caller-provided events")
             }
         }
     }

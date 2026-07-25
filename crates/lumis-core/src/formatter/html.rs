@@ -579,9 +579,9 @@ pub fn escape_fragment(text: &str) -> String {
 }
 
 /// Render highlight events into HTML lines, reopening active spans at line boundaries.
-pub fn render_lines_from_events<F>(
+pub fn render_lines_from_events<T, F>(
     source: &str,
-    events: &[crate::events::HighlightEvent],
+    events: &[crate::events::HighlightEvent<'_, T>],
     span_attrs: F,
 ) -> Vec<String>
 where
@@ -610,6 +610,8 @@ where
                 let e = (*end).min(source.len()).max(s);
                 render_source_event(&mut lines, &source[s..e], &stack, &span_attrs);
             }
+            crate::events::HighlightEvent::AnnotationStart { .. }
+            | crate::events::HighlightEvent::AnnotationEnd => {}
         }
     }
 
@@ -668,9 +670,9 @@ where
 ///
 /// This is a simplified version of the vendored HtmlRenderer that works with
 /// pre-computed `HighlightEvent` slices instead of tree-sitter iterators.
-pub fn render_events<F>(
+pub fn render_events<T, F>(
     source: &str,
-    events: &[crate::events::HighlightEvent],
+    events: &[crate::events::HighlightEvent<'_, T>],
     attribute_callback: &F,
 ) -> (Vec<u8>, Vec<u32>)
 where
@@ -721,6 +723,8 @@ where
                     }
                 }
             }
+            crate::events::HighlightEvent::AnnotationStart { .. }
+            | crate::events::HighlightEvent::AnnotationEnd => {}
         }
     }
 

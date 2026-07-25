@@ -49,6 +49,8 @@ export function withWasmBundle(
 
 export type { Highlighter } from "./core/highlighter.js";
 export type {
+  Annotation,
+  AnnotationRange,
   HighlightEvent,
   HighlightIterFn,
   HtmlElement,
@@ -56,6 +58,11 @@ export type {
   HighlightLinesLinked,
   LineSpec,
   HighlightRange,
+  OffsetAnnotationRange,
+  Position,
+  PositionAnnotationRange,
+  ResolvedAnnotation,
+  HighlightOptions,
   HighlightStyle,
   Language,
   LanguageBundle,
@@ -66,6 +73,7 @@ export type {
   WasmRef,
   RuntimeWasmInput,
   RuntimeWasmBundle,
+  SyntaxHighlightEvent,
   LanguageInfo,
   ThemeInfo,
 } from "./types.js";

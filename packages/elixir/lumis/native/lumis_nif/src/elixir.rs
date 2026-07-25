@@ -20,13 +20,11 @@ pub enum ExFormatterOption {
         pre_class: Option<String>,
         italic: bool,
         include_highlights: bool,
-        rainbow_brackets: bool,
         highlight_lines: Option<ExHtmlInlineHighlightLines>,
         header: Option<ExHtmlElement>,
     },
     HtmlLinked {
         pre_class: Option<String>,
-        rainbow_brackets: bool,
         highlight_lines: Option<ExHtmlLinkedHighlightLines>,
         header: Option<ExHtmlElement>,
     },
@@ -37,7 +35,6 @@ pub enum ExFormatterOption {
         pre_class: Option<String>,
         italic: bool,
         include_highlights: bool,
-        rainbow_brackets: bool,
         highlight_lines: Option<ExHtmlInlineHighlightLines>,
         header: Option<ExHtmlElement>,
     },
@@ -45,11 +42,8 @@ pub enum ExFormatterOption {
         theme: Option<ThemeOrString>,
         background: Option<ExTerminalBackground>,
         width: Option<usize>,
-        rainbow_brackets: bool,
     },
-    BbcodeScoped {
-        rainbow_brackets: bool,
-    },
+    BbcodeScoped {},
 }
 
 #[derive(Debug, NifTaggedEnum)]
@@ -65,7 +59,6 @@ impl Default for ExFormatterOption {
             pre_class: None,
             italic: false,
             include_highlights: false,
-            rainbow_brackets: false,
             highlight_lines: None,
             header: None,
         }
@@ -112,14 +105,13 @@ fn convert_inline_style(
 }
 
 impl ExFormatterOption {
-    pub fn into_formatter(self, language: Language) -> Result<Box<dyn Formatter>, String> {
+    pub fn into_formatter<T>(self, language: Language) -> Result<Box<dyn Formatter<T>>, String> {
         match self {
             ExFormatterOption::HtmlInline {
                 theme,
                 pre_class,
                 italic,
                 include_highlights,
-                rainbow_brackets,
                 highlight_lines,
                 header,
             } => {
@@ -142,7 +134,6 @@ impl ExFormatterOption {
                     .pre_class(pre_class)
                     .italic(italic)
                     .include_highlights(include_highlights)
-                    .rainbow_brackets(rainbow_brackets)
                     .highlight_lines(highlight_lines)
                     .header(header)
                     .build()
@@ -152,7 +143,6 @@ impl ExFormatterOption {
             }
             ExFormatterOption::HtmlLinked {
                 pre_class,
-                rainbow_brackets,
                 highlight_lines,
                 header,
             } => {
@@ -169,7 +159,6 @@ impl ExFormatterOption {
                 let formatter = HtmlLinkedBuilder::new()
                     .language(language)
                     .pre_class(pre_class)
-                    .rainbow_brackets(rainbow_brackets)
                     .highlight_lines(highlight_lines)
                     .header(header)
                     .build()
@@ -184,7 +173,6 @@ impl ExFormatterOption {
                 pre_class,
                 italic,
                 include_highlights,
-                rainbow_brackets,
                 highlight_lines,
                 header,
             } => {
@@ -210,7 +198,6 @@ impl ExFormatterOption {
                     .pre_class(pre_class)
                     .italic(italic)
                     .include_highlights(include_highlights)
-                    .rainbow_brackets(rainbow_brackets)
                     .highlight_lines(highlight_lines)
                     .header(header);
 
@@ -228,7 +215,6 @@ impl ExFormatterOption {
                 theme,
                 background,
                 width,
-                rainbow_brackets,
             } => {
                 let theme = theme.and_then(resolve_theme);
                 let background = match background {
@@ -242,16 +228,14 @@ impl ExFormatterOption {
                     .theme(theme)
                     .background(background)
                     .width(width)
-                    .rainbow_brackets(rainbow_brackets)
                     .build()
                     .map_err(|e| format!("Terminal builder error: {:?}", e))?;
 
                 Ok(Box::new(formatter))
             }
-            ExFormatterOption::BbcodeScoped { rainbow_brackets } => {
+            ExFormatterOption::BbcodeScoped {} => {
                 let formatter = BBCodeScopedBuilder::new()
                     .language(language)
-                    .rainbow_brackets(rainbow_brackets)
                     .build()
                     .map_err(|e| format!("BBCode scoped builder error: {:?}", e))?;
 

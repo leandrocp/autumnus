@@ -148,7 +148,11 @@ defmodule Lumis.LumisTest do
   end
 
   test "default_options/0" do
-    assert [formatter: {:html_inline, formatter_opts}] =
+    assert [
+             formatter: {:html_inline, formatter_opts},
+             rainbow_brackets: false,
+             annotations: []
+           ] =
              Lumis.default_options()
 
     assert Keyword.equal?(
@@ -159,7 +163,6 @@ defmodule Lumis.LumisTest do
                theme: "onedark",
                pre_class: nil,
                include_highlights: false,
-               rainbow_brackets: false,
                highlight_lines: nil
              ],
              formatter_opts
@@ -177,7 +180,6 @@ defmodule Lumis.LumisTest do
                  theme: "onedark",
                  pre_class: nil,
                  include_highlights: false,
-                 rainbow_brackets: false,
                  highlight_lines: nil,
                  header: nil
                ],
@@ -194,7 +196,6 @@ defmodule Lumis.LumisTest do
                [
                  language: nil,
                  pre_class: nil,
-                 rainbow_brackets: false,
                  highlight_lines: nil,
                  header: nil
                ],
@@ -212,8 +213,7 @@ defmodule Lumis.LumisTest do
                  language: nil,
                  theme: "onedark",
                  background: nil,
-                 width: nil,
-                 rainbow_brackets: false
+                 width: nil
                ],
                formatter_opts
              )
@@ -223,7 +223,7 @@ defmodule Lumis.LumisTest do
   describe "formatter_type: :bbcode_scoped" do
     test "default opts" do
       assert Lumis.formatter_type(:bbcode_scoped) ==
-               {:ok, {:bbcode_scoped, [language: nil, rainbow_brackets: false]}}
+               {:ok, {:bbcode_scoped, [language: nil]}}
     end
   end
 
@@ -1014,7 +1014,11 @@ defmodule Lumis.LumisTest do
 
   describe "validate_options!/1" do
     test "validates valid options" do
-      assert [formatter: {:html_inline, formatter_opts}] =
+      assert [
+               formatter: {:html_inline, formatter_opts},
+               rainbow_brackets: false,
+               annotations: []
+             ] =
                Lumis.validate_options!(formatter: {:html_inline, language: "elixir"})
 
       assert Keyword.equal?(
@@ -1022,7 +1026,6 @@ defmodule Lumis.LumisTest do
                  header: nil,
                  highlight_lines: nil,
                  include_highlights: false,
-                 rainbow_brackets: false,
                  italic: false,
                  pre_class: nil,
                  theme: "onedark",
@@ -1033,7 +1036,11 @@ defmodule Lumis.LumisTest do
     end
 
     test "validates options with default values" do
-      assert [formatter: {:html_inline, formatter_opts}] =
+      assert [
+               formatter: {:html_inline, formatter_opts},
+               rainbow_brackets: false,
+               annotations: []
+             ] =
                Lumis.validate_options!([])
 
       assert Keyword.equal?(
@@ -1041,7 +1048,6 @@ defmodule Lumis.LumisTest do
                  header: nil,
                  highlight_lines: nil,
                  include_highlights: false,
-                 rainbow_brackets: false,
                  italic: false,
                  pre_class: nil,
                  theme: "onedark",
@@ -1052,7 +1058,11 @@ defmodule Lumis.LumisTest do
     end
 
     test "validates formatter options" do
-      assert [formatter: {:html_inline, formatter_opts}] =
+      assert [
+               formatter: {:html_inline, formatter_opts},
+               rainbow_brackets: false,
+               annotations: []
+             ] =
                Lumis.validate_options!(formatter: {:html_inline, theme: "dracula", italic: true})
 
       assert Keyword.equal?(
@@ -1061,7 +1071,6 @@ defmodule Lumis.LumisTest do
                  header: nil,
                  highlight_lines: nil,
                  include_highlights: false,
-                 rainbow_brackets: false,
                  pre_class: nil,
                  theme: "dracula",
                  italic: true
@@ -1079,12 +1088,13 @@ defmodule Lumis.LumisTest do
                       language: nil,
                       header: nil,
                       highlight_lines: nil,
-                      rainbow_brackets: false,
                       include_highlights: false,
                       italic: false,
                       pre_class: nil,
                       theme: "onedark"
                     ]},
+                 rainbow_brackets: false,
+                 annotations: [],
                  theme: "dracula",
                  inline_style: true,
                  pre_class: "custom"
@@ -1098,7 +1108,12 @@ defmodule Lumis.LumisTest do
     end
 
     test "copies deprecated language into formatter language" do
-      assert [formatter: {:html_inline, formatter_opts}, language: "rust"] =
+      assert [
+               formatter: {:html_inline, formatter_opts},
+               rainbow_brackets: false,
+               annotations: [],
+               language: "rust"
+             ] =
                Lumis.validate_options!(language: "rust")
 
       assert Keyword.equal?(
@@ -1107,7 +1122,6 @@ defmodule Lumis.LumisTest do
                  header: nil,
                  highlight_lines: nil,
                  include_highlights: false,
-                 rainbow_brackets: false,
                  italic: false,
                  pre_class: nil,
                  theme: "onedark"
@@ -1118,7 +1132,12 @@ defmodule Lumis.LumisTest do
 
     test "formatter language takes precedence over deprecated language" do
       capture_io(:stderr, fn ->
-        assert [formatter: {:html_inline, formatter_opts}, language: "elixir"] =
+        assert [
+                 formatter: {:html_inline, formatter_opts},
+                 rainbow_brackets: false,
+                 annotations: [],
+                 language: "elixir"
+               ] =
                  Lumis.validate_options!(
                    language: "elixir",
                    formatter: {:html_inline, language: "rust"}
@@ -1130,7 +1149,6 @@ defmodule Lumis.LumisTest do
                    header: nil,
                    highlight_lines: nil,
                    include_highlights: false,
-                   rainbow_brackets: false,
                    italic: false,
                    pre_class: nil,
                    theme: "onedark"

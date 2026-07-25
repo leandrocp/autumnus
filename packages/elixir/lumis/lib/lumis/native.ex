@@ -66,4 +66,5 @@ defmodule Lumis.Native do
   def theme_css_from_name(_name, _options), do: :erlang.nif_error(:nif_not_loaded)
   def theme_css_from_theme(_theme, _options), do: :erlang.nif_error(:nif_not_loaded)
   def highlight(_source, _options), do: :erlang.nif_error(:nif_not_loaded)
+  def highlight_events(_source, _options), do: :erlang.nif_error(:nif_not_loaded)
 end

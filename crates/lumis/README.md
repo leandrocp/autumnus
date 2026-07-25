@@ -287,36 +287,70 @@ let theme = themes::from_json(json).unwrap();
 
 ## Custom Formatters
 
-Implement the `Formatter` trait. Minimal example that wraps each token in a colored `<span>`:
+Implement the `Formatter` trait to consume Lumis's unified syntax and decoration
+event stream:
 
 ```rust
 use lumis::{
+    events::HighlightEvent,
     formatters::Formatter,
-    formatters::html::{open_pre_tag, open_code_tag, closing_tags, span_inline},
-    highlight::highlight_iter,
     languages::Language,
-    themes,
 };
 use std::io::{self, Write};
 
-struct MinimalHtmlFormatter {
-    language: Language,
-    theme: Option<themes::Theme>,
-}
+struct SourceFormatter;
 
-impl Formatter for MinimalHtmlFormatter {
-    fn format(&self, source: &str, output: &mut dyn Write) -> io::Result<()> {
-        open_pre_tag(output, None, self.theme.as_ref())?;
-        open_code_tag(output, &self.language)?;
-        highlight_iter(source, self.language, self.theme.clone(), |text, language, _range, scope, _style| {
-            write!(output, "{}", span_inline(text, Some(language), scope, self.theme.as_ref(), false, false))
-        })
-        .map_err(io::Error::other)?;
-        closing_tags(output)?;
+impl Formatter for SourceFormatter {
+    fn language(&self) -> Language {
+        Language::Rust
+    }
+
+    fn render(
+        &self,
+        source: &str,
+        events: &[HighlightEvent<'_>],
+        output: &mut dyn Write,
+    ) -> io::Result<()> {
+        for event in events {
+            if let HighlightEvent::Source { start, end } = event {
+                output.write_all(&source.as_bytes()[*start..*end])?;
+            }
+        }
         Ok(())
     }
 }
 ```
+
+### Annotations
+
+Callers can add typed semantic ranges to the formatter event stream with
+`Annotation` and `HighlightOptions`. Lumis composes those ranges with syntax
+highlighting; it does not determine which ranges changed. Ranges can use
+absolute offsets measured in UTF-8 bytes or zero-based lines and UTF-8 byte
+columns:
+
+```rust
+use lumis::annotations::Position;
+use lumis::{HighlightOptions, Annotation};
+
+let offset_annotation = Annotation::new(4..9, "changed")?;
+let position_annotation = Annotation::new(
+    Position::new(1, 0)..Position::new(1, 11),
+    "changed",
+)?;
+let annotations = [offset_annotation, position_annotation];
+let options = HighlightOptions::new().annotations(&annotations);
+
+# Ok::<(), lumis::AnnotationError>(())
+```
+
+Pass `options` to `highlight_with_options()` or
+`write_highlight_with_options()`.
+Formatter events always contain the resolved offset range.
+
+See [`examples/diff_viewer.rs`](examples/diff_viewer.rs) for an executable
+side-by-side diff viewer with added, removed, and changed lines, changed spans,
+gutter markers, and an annotation.
 
 ## CLI Usage
 

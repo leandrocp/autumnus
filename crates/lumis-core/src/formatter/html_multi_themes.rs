@@ -260,11 +260,11 @@ impl HtmlMultiThemes {
     }
 }
 
-impl Formatter for HtmlMultiThemes {
+impl<T> Formatter<T> for HtmlMultiThemes {
     fn render(
         &self,
         source: &str,
-        events: &[HighlightEvent],
+        events: &[HighlightEvent<'_, T>],
         output: &mut dyn Write,
     ) -> io::Result<()> {
         let mut buffer = Vec::new();
@@ -351,8 +351,9 @@ mod tests {
             None,
         );
         let mut output = Vec::new();
+        let events: [HighlightEvent<'_, ()>; 0] = [];
 
-        formatter.render("", &[], &mut output).unwrap();
+        formatter.render("", &events, &mut output).unwrap();
 
         let html = String::from_utf8(output).unwrap();
         let pre_tag = html.split_once('>').expect("missing pre tag").0;

@@ -1,10 +1,11 @@
 import type {
-  HighlightEvent,
   HighlightStyle,
   HighlightSpan,
+  HighlightEvent,
   HtmlElement,
   LineSpec,
   LanguageRef,
+  SyntaxHighlightEvent,
   Theme,
 } from "../types.js";
 import { HIGHLIGHT_NAMES } from "../highlights.js";
@@ -916,7 +917,7 @@ function renderSourceEvent(
 /** @internal */
 export function formatHighlightIterLines(
   source: string,
-  events: HighlightEvent[],
+  events: readonly HighlightEvent[],
   languageRef: LanguageRef | undefined,
   theme: Theme | undefined,
   options: {
@@ -951,6 +952,10 @@ export function formatHighlightIterLines(
       continue;
     }
 
+    if (event.type === "annotationStart" || event.type === "annotationEnd") {
+      continue;
+    }
+
     // source event
     if (!language || language === "plaintext") {
       const top = stack[stack.length - 1];
@@ -979,7 +984,7 @@ export function formatHighlightIterLines(
  */
 export function renderLinesFromEvents(
   source: string,
-  events: HighlightEvent[],
+  events: readonly HighlightEvent[],
   spanAttrs: (scope: string, language: string) => string,
 ): string[] {
   return formatHighlightIterLines(source, events, undefined, undefined, {
@@ -997,7 +1002,7 @@ export function renderLinesFromEvents(
  */
 export function renderEvents(
   source: string,
-  events: HighlightEvent[],
+  events: SyntaxHighlightEvent[],
   attributeCallback: (scope: string, language: string, html: string[]) => void,
 ): [Uint8Array, number[]] {
   const sourceBytes = encodeSource(source);

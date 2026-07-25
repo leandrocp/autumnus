@@ -2,10 +2,11 @@ import { LANGUAGES } from "../generated/languages-meta.js";
 import type { NativeBinding, NativeFormatter, NativeRuntimeInstance } from "../native-binding.js";
 import type {
   Formatter,
-  HighlightEvent,
+  HighlightOptions,
   LanguageDefinition,
   LanguageInfo,
   LoadedLanguage,
+  SyntaxHighlightEvent,
 } from "../types.js";
 import { builtinFormatterKind } from "./builtin-formatter.js";
 import { decodeNativeEvents } from "./native-event-codec.js";
@@ -86,7 +87,7 @@ export function createNativeLanguagesModule(binding: NativeBinding): LanguagesMo
       source: string,
       language: LoadedLanguage,
       options: { rainbowBrackets?: boolean } = {},
-    ): HighlightEvent[] {
+    ): SyntaxHighlightEvent[] {
       if (language.definition.id === PLAINTEXT_LANG_ID) {
         return [{ type: "source", startByte: 0, endByte: encoder.encode(source).byteLength }];
       }
@@ -99,8 +100,13 @@ export function createNativeLanguagesModule(binding: NativeBinding): LanguagesMo
       );
     }
 
-    format(source: string, language: LoadedLanguage, formatter: Formatter): string | undefined {
-      const nativeFormatter = this.nativeFormatter(language, formatter);
+    format(
+      source: string,
+      language: LoadedLanguage,
+      formatter: Formatter,
+      options: HighlightOptions = {},
+    ): string | undefined {
+      const nativeFormatter = this.nativeFormatter(language, formatter, options);
       return nativeFormatter
         ? this.native.format(source, language.definition.id, nativeFormatter)
         : undefined;
@@ -110,8 +116,9 @@ export function createNativeLanguagesModule(binding: NativeBinding): LanguagesMo
       source: string,
       language: LoadedLanguage,
       formatter: Formatter,
+      options: HighlightOptions = {},
     ): Promise<string | undefined> {
-      const nativeFormatter = this.nativeFormatter(language, formatter);
+      const nativeFormatter = this.nativeFormatter(language, formatter, options);
       return nativeFormatter
         ? this.native.formatAsync(source, language.definition.id, nativeFormatter)
         : undefined;
@@ -120,17 +127,17 @@ export function createNativeLanguagesModule(binding: NativeBinding): LanguagesMo
     private nativeFormatter(
       language: LoadedLanguage,
       formatter: Formatter,
+      highlightOptions: HighlightOptions,
     ): NativeFormatter | undefined {
       const kind = builtinFormatterKind(formatter);
       if (!kind || kind === "html-multi-themes" || language.definition.id === PLAINTEXT_LANG_ID) {
         return undefined;
       }
       const options = { ...formatter } as Record<string, unknown>;
-      delete options.format;
+      delete options.render;
       delete options.language;
-      delete options.rainbowBrackets;
       return {
-        rainbowBrackets: formatter.rainbowBrackets,
+        rainbowBrackets: highlightOptions.rainbowBrackets,
         kind,
         options,
       };

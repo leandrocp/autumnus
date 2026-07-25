@@ -57,6 +57,41 @@ iex> Lumis.highlight!("Atom.to_string(:elixir)", formatter: {:html_inline, langu
 
 See the HTML Linked and Terminal formatters below for more options.
 
+### Annotations and Custom Formatters
+
+Annotations are options for one highlight operation. They use either absolute
+UTF-8 offsets or zero-based lines and UTF-8 byte columns, with caller-owned
+`properties`:
+
+```elixir
+annotations = [
+  Lumis.Annotation.new(
+    Lumis.Range.Offset.new(7, 12),
+    %{type: :span, kind: :added}
+  ),
+  Lumis.Annotation.new(
+    Lumis.Range.Position.new(
+      Lumis.Position.new(1, 0),
+      Lumis.Position.new(1, 11)
+    ),
+    %{type: :span, kind: :added}
+  )
+]
+
+Lumis.highlight(source,
+  formatter: {MyFormatter, language: "elixir"},
+  annotations: annotations
+)
+```
+
+Formatter events always contain a resolved `%Lumis.Range.Offset{}`.
+
+Custom formatter modules implement `Lumis.Formatter`. Lumis composes syntax and
+annotation ranges in Rust, then passes one sequential event stream to
+`render/3`. See the complete
+[`diff_viewer.exs`](https://github.com/leandrocp/lumis/blob/main/packages/elixir/lumis/examples/diff_viewer.exs)
+example for line markers, changed spans, and annotations.
+
 ### Language Auto-detection
 
 ```elixir

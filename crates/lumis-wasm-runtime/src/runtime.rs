@@ -212,7 +212,7 @@ impl Runtime {
         source: &str,
         name_or_alias: &str,
         rainbow_brackets: bool,
-    ) -> Result<Vec<HighlightEvent>, RuntimeError> {
+    ) -> Result<Vec<HighlightEvent<'static>>, RuntimeError> {
         let mut state = self.state.lock().expect("runtime lock poisoned");
         let root_id = state
             .aliases
@@ -396,10 +396,10 @@ fn colorize_bracket_pairs(pairs: Vec<BracketPair>) -> Vec<RainbowRange> {
 }
 
 fn apply_rainbow_brackets(
-    events: Vec<HighlightEvent>,
+    events: Vec<HighlightEvent<'static>>,
     ranges: Vec<RainbowRange>,
     language: &str,
-) -> Vec<HighlightEvent> {
+) -> Vec<HighlightEvent<'static>> {
     if ranges.is_empty() {
         return events;
     }

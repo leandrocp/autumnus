@@ -8,10 +8,11 @@ import type {
   CompiledBracketConfig,
   CompiledHighlightConfig,
   Formatter,
-  HighlightEvent,
+  HighlightOptions,
   LanguageDefinition,
   LoadedLanguage,
   QueryCaptureOffset,
+  SyntaxHighlightEvent,
   WasmRef,
 } from "../types.js";
 import { PLAINTEXT_LANG_ID, type LanguageInfo } from "../types.js";
@@ -88,12 +89,18 @@ export interface RuntimeLike {
     source: string,
     language: LoadedLanguage,
     options?: { rainbowBrackets?: boolean },
-  ): HighlightEvent[];
-  format?(source: string, language: LoadedLanguage, formatter: Formatter): string | undefined;
+  ): SyntaxHighlightEvent[];
+  format?(
+    source: string,
+    language: LoadedLanguage,
+    formatter: Formatter,
+    options?: HighlightOptions,
+  ): string | undefined;
   formatAsync?(
     source: string,
     language: LoadedLanguage,
     formatter: Formatter,
+    options?: HighlightOptions,
   ): Promise<string | undefined>;
 }
 
@@ -476,7 +483,7 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
       source: string,
       language: LoadedLanguage,
       options: { rainbowBrackets?: boolean } = {},
-    ): HighlightEvent[] {
+    ): SyntaxHighlightEvent[] {
       if (language.definition.id === PLAINTEXT_LANG_ID) {
         return [{ type: "source", startByte: 0, endByte: encoder.encode(source).byteLength }];
       }
@@ -487,7 +494,7 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
           language.brackets = compile();
         }
       }
-      return buildHighlightEvents(source, language, this, options) as HighlightEvent[];
+      return buildHighlightEvents(source, language, this, options) as SyntaxHighlightEvent[];
     }
   }
 

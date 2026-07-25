@@ -1,0 +1,138 @@
+defmodule Lumis.AnnotationsTest do
+  use ExUnit.Case, async: false
+
+  import ExUnit.CaptureIO
+
+  defmodule TestFormatter do
+    @behaviour Lumis.Formatter
+
+    @impl true
+    def render(source, events, _options) do
+      Enum.map(events, fn
+        {:start, %{scope: "punctuation.bracket.rainbow." <> _level}} ->
+          send(self(), :saw_rainbow_bracket)
+          []
+
+        {:source, %{start: start, end: end_offset}} ->
+          binary_part(source, start, end_offset - start)
+
+        {:annotation_start, %Lumis.Annotation{range: range, properties: %{id: id}}} ->
+          send(self(), {:resolved_range, id, range})
+          ["<annotation:", Integer.to_string(id), ">"]
+
+        :annotation_end ->
+          "</annotation>"
+
+        _syntax_event ->
+          []
+      end)
+    end
+  end
+
+  test "annotations and their Elixir properties reach a custom formatter" do
+    source = "(price + tax)"
+
+    annotations = [
+      Lumis.Annotation.new(
+        Lumis.Range.Offset.new(1, byte_size(source) - 1),
+        %{id: 7}
+      )
+    ]
+
+    assert {:ok, output} =
+             Lumis.highlight(source,
+               formatter: {TestFormatter, language: "elixir"},
+               annotations: annotations,
+               rainbow_brackets: true
+             )
+
+    assert output == "(<annotation:7>price + tax</annotation>)"
+    assert_received {:resolved_range, 7, %Lumis.Range.Offset{start: 1, end: 12}}
+    assert_received :saw_rainbow_bracket
+  end
+
+  test "invalid UTF-8 byte boundaries are rejected against the source" do
+    annotations = [
+      Lumis.Annotation.new(
+        Lumis.Range.Offset.new(1, 2),
+        %{}
+      )
+    ]
+
+    assert_raise Lumis.HighlightError, ~r/not a UTF-8 character boundary/, fn ->
+      Lumis.highlight!("π",
+        formatter: {TestFormatter, language: "elixir"},
+        annotations: annotations
+      )
+    end
+  end
+
+  test "position ranges use zero-based UTF-8 byte columns" do
+    source = "π\ncafé"
+
+    annotations = [
+      Lumis.Annotation.new(
+        Lumis.Range.Position.new(
+          Lumis.Position.new(1, 0),
+          Lumis.Position.new(1, 5)
+        ),
+        %{id: 8}
+      )
+    ]
+
+    assert {:ok, output} =
+             Lumis.highlight(source,
+               formatter: {TestFormatter, language: "elixir"},
+               annotations: annotations
+             )
+
+    assert output == "π\n<annotation:8>café</annotation>"
+    assert_received {:resolved_range, 8, %Lumis.Range.Offset{start: 3, end: 8}}
+  end
+
+  test "position columns must be UTF-8 byte boundaries" do
+    annotations = [
+      Lumis.Annotation.new(
+        Lumis.Range.Position.new(
+          Lumis.Position.new(1, 0),
+          Lumis.Position.new(1, 4)
+        ),
+        %{}
+      )
+    ]
+
+    assert_raise Lumis.HighlightError, ~r/not a UTF-8 character boundary/, fn ->
+      Lumis.highlight!("π\ncafé",
+        formatter: {TestFormatter, language: "elixir"},
+        annotations: annotations
+      )
+    end
+  end
+
+  test "range constructors reject empty ranges" do
+    assert_raise ArgumentError, ~r/offset range start must be before its end/, fn ->
+      Lumis.Range.Offset.new(4, 4)
+    end
+
+    position = Lumis.Position.new(1, 4)
+
+    assert_raise ArgumentError, ~r/position range start must be before its end/, fn ->
+      Lumis.Range.Position.new(position, position)
+    end
+  end
+
+  test "the diff viewer example renders the complete annotation flow" do
+    example = Path.expand("../examples/diff_viewer.exs", __DIR__)
+    output = capture_io(fn -> Code.require_file(example) end)
+
+    assert output =~ "calculator.ex · before"
+    assert output =~ "calculator.ex · after"
+    assert output =~ ~s(data-marker="-")
+    assert output =~ ~s(data-marker="+")
+    assert output =~ ~s(data-marker="~")
+    assert output =~ "diff-span-removed"
+    assert output =~ "diff-span-added"
+    assert output =~ ~s(data-label="New service fee")
+    assert output =~ ~s(<span class="l-)
+  end
+end

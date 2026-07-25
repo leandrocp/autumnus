@@ -14,10 +14,14 @@ interface HighlightCapture {
   localDepth: number;
 }
 
-interface SourceMaps {
+/** @internal */
+export interface SourceIndex {
+  sourceBytes: Uint8Array;
   utf8Offsets: number[];
   lineStarts: number[];
-  sourceBytes: Uint8Array;
+}
+
+interface SourceMaps extends SourceIndex {
   sourceUtf8ByteLength: number;
 }
 
@@ -100,12 +104,18 @@ function buildLineStartMap(source: string): number[] {
 
 function buildSourceMaps(source: string): SourceMaps {
   const utf8Offsets = buildUtf8OffsetMap(source);
+  const lineStarts = buildLineStartMap(source);
   return {
     utf8Offsets,
-    lineStarts: buildLineStartMap(source),
+    lineStarts,
     sourceBytes: encoder.encode(source),
     sourceUtf8ByteLength: utf8Offsets[source.length] ?? 0,
   };
+}
+
+/** @internal */
+export function buildSourceIndex(source: string): SourceIndex {
+  return buildSourceMaps(source);
 }
 
 function nodeStartByte(node: Node, maps: SourceMaps): number {
@@ -639,19 +649,32 @@ function makeRange(
   return { startIndex, endIndex, startPosition, endPosition };
 }
 
-export function buildHighlightEvents(
+/** @internal */
+export function buildHighlightEventsWithSourceIndex(
   source: string,
   language: LoadedLanguage,
   runtime: RuntimeLookup,
   options: { rainbowBrackets?: boolean } = {},
-): HighlightEvent[] {
+): { events: HighlightEvent[]; sourceIndex: SourceIndex } {
   const maps = buildSourceMaps(source);
   const captures = normalizeCaptures(
     collectLayerCaptures(source, maps, runtime, language, 0),
     maps.sourceBytes,
   );
   const events = buildNestedEvents(captures, maps.sourceUtf8ByteLength);
-  return options.rainbowBrackets ? applyRainbowBrackets(source, events, language, maps) : events;
+  return {
+    events: options.rainbowBrackets ? applyRainbowBrackets(source, events, language, maps) : events,
+    sourceIndex: maps,
+  };
+}
+
+export function buildHighlightEvents(
+  source: string,
+  language: LoadedLanguage,
+  runtime: RuntimeLookup,
+  options: { rainbowBrackets?: boolean } = {},
+): HighlightEvent[] {
+  return buildHighlightEventsWithSourceIndex(source, language, runtime, options).events;
 }
 
 const RAINBOW_BRACKET_SCOPES = [

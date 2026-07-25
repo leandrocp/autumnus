@@ -1,22 +1,25 @@
 import type {
   HighlightCallback,
   HighlightEvent,
+  HighlightOptions,
   Language,
   LanguageBundle,
   LanguageInput,
   LanguageRef,
   LazyLanguage,
   Formatter,
+  SyntaxHighlightEvent,
   Theme,
 } from "../types.js";
 import { PLAINTEXT_LANG_ID } from "../types.js";
 import type { RuntimeLike, WasmResolver } from "./languages.js";
+import { composeAnnotations } from "../annotations.js";
+import { buildSourceIndex } from "../events.js";
 import { getScopedThemeStyle } from "../formatter/html.js";
 import { LANGUAGE_LOADERS } from "../generated/language-loaders.js";
 import { guessLanguage } from "../guess-language.js";
 import { builtinFormatterKind } from "./builtin-formatter.js";
 
-const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
 function decodeSlice(sourceBytes: Uint8Array, startByte: number, endByte: number): string {
@@ -26,7 +29,7 @@ function decodeSlice(sourceBytes: Uint8Array, startByte: number, endByte: number
 /** A reusable highlighter with preloaded or lazily registered languages. */
 export interface Highlighter {
   /** Highlight source code synchronously. The language must already be loaded. */
-  highlight(source: string, formatter: Formatter): string;
+  highlight<T>(source: string, formatter: Formatter<T>, options?: HighlightOptions<T>): string;
   /** Low-level token iterator. Calls `onToken` for each highlighted span. Languages must already be loaded. */
   highlightIter(
     source: string,
@@ -163,7 +166,7 @@ function runHighlightIter(
 ): void {
   const loaded = resolveLoadedLanguage(runtime, language);
   const events = runtime.highlightEvents(source, loaded);
-  const bytes = encoder.encode(source);
+  const bytes = buildSourceIndex(source).sourceBytes;
   const scopeStack: Array<{ scope: string; language: string }> = [];
 
   for (const event of events) {
@@ -191,17 +194,23 @@ function runHighlightIter(
   }
 }
 
-function runHighlightEvents(
+function runHighlightEvents<T>(
   runtime: RuntimeLike,
   source: string,
   language: LanguageRef | undefined,
-  options: { rainbowBrackets?: boolean } = {},
-): HighlightEvent[] {
+  options: HighlightOptions<T> = {},
+): HighlightEvent<T>[] {
   const loaded = resolveLoadedLanguage(runtime, language);
-  return runtime.highlightEvents(source, loaded, options);
+  const events = runtime.highlightEvents(source, loaded, {
+    rainbowBrackets: options.rainbowBrackets,
+  }) as SyntaxHighlightEvent[];
+  const annotations = options.annotations ?? [];
+  if (annotations.length === 0) return events;
+
+  return composeAnnotations(events, annotations, buildSourceIndex(source));
 }
 
-// Ambient runtime for sync free functions called inside `Formatter.format()`.
+// Ambient runtime for sync free functions called inside `Formatter.render()`.
 // JS is single-threaded, so swapping a module-level reference around the call
 // gives the same guarantee Rust gets from `thread_local!` in `highlight.rs`.
 let currentRuntime: RuntimeLike | undefined;
@@ -209,7 +218,7 @@ let currentRuntime: RuntimeLike | undefined;
 function requireCurrentRuntime(fnName: string): RuntimeLike {
   if (!currentRuntime) {
     throw new Error(
-      `${fnName}() must be called inside Formatter.format(). ` +
+      `${fnName}() must be called inside Formatter.render(). ` +
         `For top-level token iteration, create a highlighter with ` +
         `createHighlighter({ languages: [...] }) and call hl.highlightIter().`,
     );
@@ -220,7 +229,7 @@ function requireCurrentRuntime(fnName: string): RuntimeLike {
 /**
  * Iterate over highlighted tokens for `source`, calling `onToken` for each flat span.
  *
- * Sync free function usable inside {@link Formatter.format}. For top-level
+ * Sync free function usable inside {@link Formatter.render}. For top-level
  * (non-formatter) iteration, use `hl.highlightIter` on a {@link Highlighter}
  * instance instead.
  */
@@ -237,55 +246,68 @@ export function highlightIter(
 /**
  * Return the nested highlight event stream for `source`.
  *
- * Sync free function usable inside {@link Formatter.format}. Use this when your
+ * Sync free function usable inside {@link Formatter.render}. Use this when your
  * formatter needs paired open/close markers around nested scopes (e.g. BBCode
  * tags) that the flat {@link highlightIter} callback API would lose.
  */
 export function highlightEvents(
   source: string,
   language: LanguageRef | undefined,
-  options: { rainbowBrackets?: boolean } = {},
-): HighlightEvent[] {
+  options?: { rainbowBrackets?: boolean },
+): SyntaxHighlightEvent[];
+export function highlightEvents<T>(
+  source: string,
+  language: LanguageRef | undefined,
+  options: HighlightOptions<T>,
+): HighlightEvent<T>[];
+export function highlightEvents<T>(
+  source: string,
+  language: LanguageRef | undefined,
+  options: HighlightOptions<T> = {},
+): HighlightEvent<T>[] {
   const runtime = requireCurrentRuntime("highlightEvents");
   return runHighlightEvents(runtime, source, detectLanguageRef(source, language), options);
 }
 
-function runFormatter(
+function runFormatter<T>(
   runtime: RuntimeLike,
   source: string,
-  fmt: Formatter,
+  fmt: Formatter<T>,
   detectedRef: LanguageRef | string,
+  options: HighlightOptions<T>,
 ): string {
   const loaded = resolveLoadedLanguage(runtime, detectedRef);
   if (builtinFormatterKind(fmt)) {
-    const nativeOutput = runtime.format?.(source, loaded, fmt);
+    const nativeOutput = runtime.format?.(source, loaded, fmt, options);
     if (nativeOutput !== undefined) return nativeOutput;
   }
 
+  const events = runHighlightEvents(runtime, source, detectedRef, options);
   const prevRuntime = currentRuntime;
   const prevLanguage = fmt.language;
   currentRuntime = runtime;
   fmt.language = detectedRef;
   try {
-    return fmt.format(source);
+    return fmt.render(source, events);
   } finally {
     fmt.language = prevLanguage;
     currentRuntime = prevRuntime;
   }
 }
 
-async function runFormatterAsync(
+async function runFormatterAsync<T>(
   runtime: RuntimeLike,
   source: string,
-  fmt: Formatter,
+  fmt: Formatter<T>,
   detectedRef: LanguageRef | string,
+  options: HighlightOptions<T>,
 ): Promise<string> {
   const loaded = resolveLoadedLanguage(runtime, detectedRef);
   if (builtinFormatterKind(fmt)) {
-    const nativeOutput = await runtime.formatAsync?.(source, loaded, fmt);
+    const nativeOutput = await runtime.formatAsync?.(source, loaded, fmt, options);
     if (nativeOutput !== undefined) return nativeOutput;
   }
-  return runFormatter(runtime, source, fmt, detectedRef);
+  return runFormatter(runtime, source, fmt, detectedRef, options);
 }
 
 /** Check if a value is a Language object (has highlights and wasm). */
@@ -451,9 +473,9 @@ export function createHighlighterModule(factory: HighlighterModuleFactory) {
       await loadInitialLanguages(init.languages ?? [], runtime, lazyRegistry);
 
       return {
-        highlight: (source, fmt) => {
+        highlight: (source, fmt, options = {}) => {
           const detectedRef = detectLanguageRef(source, fmt.language);
-          return runFormatter(runtime, source, fmt, detectedRef);
+          return runFormatter(runtime, source, fmt, detectedRef, options);
         },
         highlightIter: (source, language, theme, onToken) =>
           runHighlightIter(runtime, source, detectLanguageRef(source, language), theme, onToken),
@@ -469,11 +491,15 @@ export function createHighlighterModule(factory: HighlighterModuleFactory) {
       };
     },
 
-    async highlight(source: string, fmt: Formatter): Promise<string> {
+    async highlight<T>(
+      source: string,
+      fmt: Formatter<T>,
+      options: HighlightOptions<T> = {},
+    ): Promise<string> {
       const runtime = factory.getDefaultRuntime();
       const detectedRef = await prepareRuntimeHighlight(runtime, source, fmt.language);
 
-      return runFormatterAsync(runtime, source, fmt, detectedRef);
+      return runFormatterAsync(runtime, source, fmt, detectedRef, options);
     },
   };
 }

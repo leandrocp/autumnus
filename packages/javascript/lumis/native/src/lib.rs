@@ -156,9 +156,7 @@ fn render_formatter(
     let events = highlight_events_with_languages(
         &source,
         language,
-        HighlightOptions {
-            rainbow_brackets: formatter.rainbow_brackets.unwrap_or(false),
-        },
+        HighlightOptions::new().rainbow_brackets(formatter.rainbow_brackets.unwrap_or(false)),
         &languages,
     )?;
     let mut output = Vec::new();
@@ -236,6 +234,11 @@ fn encode_events(events: &[HighlightEvent]) -> Result<Buffer> {
                 output.extend_from_slice(language.as_bytes());
             }
             HighlightEvent::End => output.push(END_EVENT),
+            HighlightEvent::AnnotationStart { .. } | HighlightEvent::AnnotationEnd => {
+                return Err(native_error(
+                    "the native event protocol only supports syntax events",
+                ));
+            }
         }
     }
     Ok(output.into())
@@ -303,9 +306,7 @@ impl NativeRuntime {
         let events = highlight_events_with_languages(
             &source,
             language,
-            HighlightOptions {
-                rainbow_brackets: rainbow_brackets.unwrap_or(false),
-            },
+            HighlightOptions::new().rainbow_brackets(rainbow_brackets.unwrap_or(false)),
             &languages,
         )
         .map_err(native_error)?;

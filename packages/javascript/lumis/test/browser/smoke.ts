@@ -104,7 +104,7 @@ async function run(): Promise<void> {
   const customFormatter: Formatter = {
     language: "js",
     rainbowBrackets: true,
-    format(source: string): string {
+    render(source: string): string {
       const events = highlightEvents(source, this.language, {
         rainbowBrackets: this.rainbowBrackets,
       });

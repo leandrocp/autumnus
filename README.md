@@ -56,7 +56,7 @@ lumis highlight app.js
 ### [Rust](https://crates.io/crates/lumis)
 
 ```rust
-use lumis::{highlight, HtmlInlineBuilder, languages::Language, themes};
+use lumis::{highlight, Context, HtmlInlineBuilder, languages::Language, themes};
 
 let theme = themes::get("dracula").unwrap();
 
@@ -66,7 +66,7 @@ let formatter = HtmlInlineBuilder::new()
     .build()
     .unwrap();
 
-let html = highlight("const x = 1", formatter);
+let html = highlight("const x = 1", formatter, Context::new());
 ```
 
 ### [JavaScript](https://www.npmjs.com/package/@lumis-sh/lumis)

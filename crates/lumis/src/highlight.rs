@@ -6,25 +6,13 @@
 //! # Custom Formatters
 //!
 //! Custom formatters should implement [`Formatter`](crate::formatters::Formatter)
-//! and use [`highlight_iter()`] for streaming token access.
-//!
-//! ```rust,no_run
-//! use lumis::{formatters::Formatter, highlight::highlight_iter};
-//! use std::io::{self, Write};
-//!
-//! # struct MyFormatter { language: lumis::languages::Language, theme: Option<lumis::themes::Theme> }
-//! impl Formatter for MyFormatter {
-//!     fn format(&self, source: &str, output: &mut dyn Write) -> io::Result<()> {
-//!         highlight_iter(source, self.language, self.theme.clone(), |text, _language, _range, _scope, _style| {
-//!             write!(output, "{}", text)
-//!         })
-//!         .map_err(io::Error::other)
-//!     }
-//! }
-//! ```
+//! and render the unified syntax and annotation event stream. Lumis owns
+//! highlighting and event composition before calling the formatter's
+//! [`render()`](crate::formatters::Formatter::render) method.
 //!
 //! See also:
 //! - [`Formatter`](crate::formatters::Formatter) trait documentation
+//! - [`HighlightEvent`](crate::events::HighlightEvent) event contract
 //! - [`formatters::html`](crate::formatters::html) module for HTML-specific helpers
 //! - [`formatters::ansi`](crate::formatters::ansi) module for terminal/ANSI-specific helpers
 //!
@@ -75,6 +63,7 @@
 
 use crate::languages::{bracket_query_for_language, Language, LanguageConfig};
 use crate::themes::Theme;
+use lumis_core::annotations::Annotation;
 use lumis_core::events::HighlightEvent as CoreHighlightEvent;
 use lumis_core::highlights::HIGHLIGHT_NAMES;
 use lumis_wasm_runtime::tree_sitter_highlight::{HighlightEvent, Highlighter as TSHighlighter};
@@ -99,13 +88,60 @@ fn resolve_style(theme: Option<&Theme>, scope: &str, language: &str) -> Style {
 
 static DEFAULT_STYLE: LazyLock<Arc<Style>> = LazyLock::new(|| Arc::new(Style::default()));
 
-/// Options that influence which highlight events are produced.
-///
-/// Exposed for conformance tooling; not part of the stable public API.
-#[doc(hidden)]
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
-pub struct HighlightOptions {
-    pub rainbow_brackets: bool,
+/// Options for one highlighting operation.
+#[derive(Debug, PartialEq, Eq)]
+#[must_use]
+pub struct HighlightOptions<'a, T = ()> {
+    annotations: &'a [Annotation<T>],
+    rainbow_brackets: bool,
+}
+
+impl<T> Copy for HighlightOptions<'_, T> {}
+
+impl<T> Clone for HighlightOptions<'_, T> {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+
+impl Default for HighlightOptions<'static> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl HighlightOptions<'static> {
+    /// Creates options with no annotations and rainbow brackets disabled.
+    pub const fn new() -> Self {
+        Self {
+            annotations: &[],
+            rainbow_brackets: false,
+        }
+    }
+
+    /// Adds caller-provided annotations to this highlighting operation.
+    pub fn annotations<'a, T>(self, annotations: &'a [Annotation<T>]) -> HighlightOptions<'a, T> {
+        HighlightOptions {
+            annotations,
+            rainbow_brackets: self.rainbow_brackets,
+        }
+    }
+}
+
+impl<'a, T> HighlightOptions<'a, T> {
+    /// Enables or disables rainbow bracket highlighting for this operation.
+    pub const fn rainbow_brackets(mut self, enabled: bool) -> Self {
+        self.rainbow_brackets = enabled;
+        self
+    }
+
+    pub(crate) const fn annotation_items(&self) -> &'a [Annotation<T>] {
+        self.annotations
+    }
+
+    pub(crate) const fn rainbow_brackets_enabled(&self) -> bool {
+        self.rainbow_brackets
+    }
 }
 
 thread_local! {
@@ -404,16 +440,16 @@ where
 pub fn highlight_events(
     source: &str,
     language: Language,
-) -> Result<Vec<CoreHighlightEvent>, HighlightError> {
-    highlight_events_with_options(source, language, HighlightOptions::default())
+) -> Result<Vec<CoreHighlightEvent<'static>>, HighlightError> {
+    highlight_events_with_options(source, language, HighlightOptions::new())
 }
 
 #[doc(hidden)]
-pub fn highlight_events_with_options(
+pub fn highlight_events_with_options<T>(
     source: &str,
     language: Language,
-    options: HighlightOptions,
-) -> Result<Vec<CoreHighlightEvent>, HighlightError> {
+    options: HighlightOptions<'_, T>,
+) -> Result<Vec<CoreHighlightEvent<'static>>, HighlightError> {
     DOCUMENT_TS_HIGHLIGHTER.with(|ts_highlighter| {
         let mut ts_highlighter = ts_highlighter.borrow_mut();
         highlight_events_with(&mut ts_highlighter, source, language, options, |injected| {
@@ -427,12 +463,12 @@ pub fn highlight_events_with_options(
 /// This is used by stateful runtime bindings where loading a language controls
 /// whether it may be injected into another language.
 #[doc(hidden)]
-pub fn highlight_events_with_languages(
+pub fn highlight_events_with_languages<T>(
     source: &str,
     language: Language,
-    options: HighlightOptions,
+    options: HighlightOptions<'_, T>,
     languages: &std::collections::HashSet<Language>,
-) -> Result<Vec<CoreHighlightEvent>, HighlightError> {
+) -> Result<Vec<CoreHighlightEvent<'static>>, HighlightError> {
     DOCUMENT_TS_HIGHLIGHTER.with(|ts_highlighter| {
         let mut ts_highlighter = ts_highlighter.borrow_mut();
         highlight_events_with(&mut ts_highlighter, source, language, options, |injected| {
@@ -488,13 +524,13 @@ struct BracketQueryConfig {
     rainbow_exclude_patterns: Vec<bool>,
 }
 
-fn highlight_events_with<F>(
+fn highlight_events_with<T, F>(
     ts_highlighter: &mut TSHighlighter,
     source: &str,
     language: Language,
-    options: HighlightOptions,
+    options: HighlightOptions<'_, T>,
     injected_language: F,
-) -> Result<Vec<CoreHighlightEvent>, HighlightError>
+) -> Result<Vec<CoreHighlightEvent<'static>>, HighlightError>
 where
     F: Fn(&str) -> Option<Language>,
 {
@@ -524,7 +560,7 @@ where
         })
         .collect::<Result<Vec<_>, _>>()?;
 
-    if options.rainbow_brackets {
+    if options.rainbow_brackets_enabled() {
         Ok(apply_query_rainbow_brackets(source, core_events, language))
     } else {
         Ok(core_events)
@@ -533,9 +569,9 @@ where
 
 fn apply_query_rainbow_brackets(
     source: &str,
-    events: Vec<CoreHighlightEvent>,
+    events: Vec<CoreHighlightEvent<'static>>,
     language: Language,
-) -> Vec<CoreHighlightEvent> {
+) -> Vec<CoreHighlightEvent<'static>> {
     let ranges = query_rainbow_ranges(source, language);
     if ranges.is_empty() {
         return events;
@@ -679,10 +715,10 @@ fn colorize_bracket_pairs(pairs: Vec<BracketPair>) -> Vec<RainbowRange> {
 }
 
 fn overlay_rainbow_ranges(
-    events: Vec<CoreHighlightEvent>,
+    events: Vec<CoreHighlightEvent<'static>>,
     ranges: &[RainbowRange],
     language: &str,
-) -> Vec<CoreHighlightEvent> {
+) -> Vec<CoreHighlightEvent<'static>> {
     let mut output = Vec::with_capacity(events.len() + ranges.len() * 3);
     let mut range_index = 0usize;
 
