@@ -8,7 +8,7 @@ mod elixir;
 use elixir::{ExCssOptions, ExFormatterOption, ExTheme};
 use lumis_core::events::HighlightEvent;
 use lumis_core::{languages, themes};
-use lumis_wasm_runtime::{LanguageSpec, Runtime, RuntimeError};
+use lumis_wasm_runtime::{manifest, LanguageSpec, Runtime, RuntimeError};
 use once_cell::sync::Lazy;
 use parking_lot::RwLock;
 use rustler::{Binary, Encoder, Env, Error, NifMap, NifResult, Term};
@@ -57,7 +57,7 @@ impl WasmExecutor {
             .stack_size(8 * 1024 * 1024)
             .spawn(move || -> Result<Runtime, RuntimeError> {
                 let runtime = Runtime::with_worker_limit(workers)?;
-                for language in catalog::LANGUAGES {
+                for language in manifest::LANGUAGES {
                     runtime.declare_language(language.id, language.aliases);
                 }
                 Ok(runtime)
@@ -151,6 +151,31 @@ pub struct ExOptions<'a> {
     pub formatter: ExFormatterOption,
 }
 
+#[derive(Clone, Debug, NifMap)]
+pub struct ExLanguageManifest<'a> {
+    pub id: &'a str,
+    pub aliases: Vec<&'a str>,
+    pub wasm_name: &'a str,
+    pub package_name: &'a str,
+    pub version: &'a str,
+    pub sha256: &'a str,
+    pub size: usize,
+}
+
+impl From<&manifest::LanguageMetadata> for ExLanguageManifest<'static> {
+    fn from(language: &manifest::LanguageMetadata) -> Self {
+        Self {
+            id: language.id,
+            aliases: language.aliases.to_vec(),
+            wasm_name: language.parser.name,
+            package_name: language.parser.package_name,
+            version: language.parser.version,
+            sha256: language.parser.sha256,
+            size: language.parser.size,
+        }
+    }
+}
+
 #[rustler::nif(schedule = "DirtyCpu")]
 pub fn highlight<'a>(env: Env<'a>, source: &'a str, options: ExOptions) -> NifResult<Term<'a>> {
     let language = languages::Language::guess(options.language, source);
@@ -195,21 +220,28 @@ fn executor() -> Result<&'static WasmExecutor, String> {
 
 #[rustler::nif(schedule = "DirtyCpu")]
 fn load_language<'a>(env: Env<'a>, name: &str, wasm: Binary<'a>) -> Term<'a> {
-    let Some(entry) = catalog::find(name) else {
+    let Some(language) = manifest::find_language(name) else {
         return (error(), format!("unknown language '{name}'")).encode(env);
+    };
+    let Some(entry) = catalog::find(language.id) else {
+        return (
+            error(),
+            format!("language catalog is missing '{}'", language.id),
+        )
+            .encode(env);
     };
     let executor = match executor() {
         Ok(executor) => executor,
         Err(message) => return (error(), message).encode(env),
     };
     let spec = LanguageSpec {
-        id: entry.id.to_string(),
-        aliases: entry
+        id: language.id.to_string(),
+        aliases: language
             .aliases
             .iter()
             .map(|alias| (*alias).to_string())
             .collect(),
-        grammar_name: entry.grammar_name.to_string(),
+        grammar_name: language.parser.grammar_name.to_string(),
         wasm: wasm.as_slice().to_vec(),
         highlights: entry.highlights.to_string(),
         injections: entry.injections.to_string(),
@@ -227,6 +259,19 @@ fn has_language(name: &str) -> bool {
     executor()
         .map(|executor| executor.runtime.has_language(name))
         .unwrap_or(false)
+}
+
+#[rustler::nif]
+fn language_manifest(name: &str) -> Option<ExLanguageManifest<'static>> {
+    manifest::find_language(name).map(ExLanguageManifest::from)
+}
+
+#[rustler::nif]
+fn language_manifests() -> Vec<ExLanguageManifest<'static>> {
+    manifest::LANGUAGES
+        .iter()
+        .map(ExLanguageManifest::from)
+        .collect()
 }
 
 #[rustler::nif]
@@ -307,7 +352,7 @@ mod tests {
     use super::{catalog, HighlightEvent};
     use lumis_core::formatter::{Formatter, HtmlInlineBuilder};
     use lumis_core::languages::Language;
-    use lumis_wasm_runtime::{LanguageSpec, Runtime};
+    use lumis_wasm_runtime::{manifest, LanguageSpec, Runtime};
 
     #[test]
     fn test_formatter_works_with_precomputed_events() {
@@ -340,12 +385,13 @@ mod tests {
     #[test]
     fn test_elixir_wasm_with_generated_queries() {
         let entry = catalog::find("elixir").unwrap();
+        let language = manifest::find_language("elixir").unwrap();
         let runtime = Runtime::with_worker_limit(1).unwrap();
         runtime
             .load_language(LanguageSpec {
                 id: entry.id.into(),
                 aliases: Vec::new(),
-                grammar_name: entry.grammar_name.into(),
+                grammar_name: language.parser.grammar_name.into(),
                 wasm: include_bytes!(
                     "../../../../../javascript/lumis/test/fixtures/wasm/tree-sitter-elixir.wasm"
                 )

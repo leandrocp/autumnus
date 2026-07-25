@@ -11,6 +11,13 @@ pub struct WasmMetadata {
     pub grammar_name: &'static str,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct LanguageMetadata {
+    pub id: &'static str,
+    pub aliases: &'static [&'static str],
+    pub parser: &'static WasmMetadata,
+}
+
 pub static PARSERS: &[WasmMetadata] = &[
     WasmMetadata {
         name: "tree-sitter-angular",
@@ -918,6 +925,594 @@ pub static PARSERS: &[WasmMetadata] = &[
     },
 ];
 
+pub static LANGUAGES: &[LanguageMetadata] = &[
+    LanguageMetadata {
+        id: "angular",
+        aliases: &[],
+        parser: &PARSERS[0],
+    },
+    LanguageMetadata {
+        id: "asm",
+        aliases: &["assembly"],
+        parser: &PARSERS[2],
+    },
+    LanguageMetadata {
+        id: "astro",
+        aliases: &[],
+        parser: &PARSERS[3],
+    },
+    LanguageMetadata {
+        id: "bash",
+        aliases: &["sh"],
+        parser: &PARSERS[4],
+    },
+    LanguageMetadata {
+        id: "c",
+        aliases: &[],
+        parser: &PARSERS[6],
+    },
+    LanguageMetadata {
+        id: "caddy",
+        aliases: &[],
+        parser: &PARSERS[7],
+    },
+    LanguageMetadata {
+        id: "clojure",
+        aliases: &[],
+        parser: &PARSERS[8],
+    },
+    LanguageMetadata {
+        id: "cmake",
+        aliases: &[],
+        parser: &PARSERS[9],
+    },
+    LanguageMetadata {
+        id: "comment",
+        aliases: &[],
+        parser: &PARSERS[10],
+    },
+    LanguageMetadata {
+        id: "commonlisp",
+        aliases: &[],
+        parser: &PARSERS[11],
+    },
+    LanguageMetadata {
+        id: "cpp",
+        aliases: &["c++"],
+        parser: &PARSERS[12],
+    },
+    LanguageMetadata {
+        id: "csharp",
+        aliases: &["c#"],
+        parser: &PARSERS[13],
+    },
+    LanguageMetadata {
+        id: "css",
+        aliases: &[],
+        parser: &PARSERS[14],
+    },
+    LanguageMetadata {
+        id: "csv",
+        aliases: &[],
+        parser: &PARSERS[15],
+    },
+    LanguageMetadata {
+        id: "dart",
+        aliases: &[],
+        parser: &PARSERS[17],
+    },
+    LanguageMetadata {
+        id: "diff",
+        aliases: &[],
+        parser: &PARSERS[18],
+    },
+    LanguageMetadata {
+        id: "dockerfile",
+        aliases: &["docker"],
+        parser: &PARSERS[19],
+    },
+    LanguageMetadata {
+        id: "eex",
+        aliases: &[],
+        parser: &PARSERS[22],
+    },
+    LanguageMetadata {
+        id: "ejs",
+        aliases: &[],
+        parser: &PARSERS[25],
+    },
+    LanguageMetadata {
+        id: "elixir",
+        aliases: &[],
+        parser: &PARSERS[23],
+    },
+    LanguageMetadata {
+        id: "elm",
+        aliases: &[],
+        parser: &PARSERS[24],
+    },
+    LanguageMetadata {
+        id: "erb",
+        aliases: &[],
+        parser: &PARSERS[25],
+    },
+    LanguageMetadata {
+        id: "erlang",
+        aliases: &[],
+        parser: &PARSERS[26],
+    },
+    LanguageMetadata {
+        id: "fish",
+        aliases: &[],
+        parser: &PARSERS[27],
+    },
+    LanguageMetadata {
+        id: "fsharp",
+        aliases: &["f#"],
+        parser: &PARSERS[29],
+    },
+    LanguageMetadata {
+        id: "gleam",
+        aliases: &[],
+        parser: &PARSERS[32],
+    },
+    LanguageMetadata {
+        id: "glimmer",
+        aliases: &["ember", "handlebars"],
+        parser: &PARSERS[33],
+    },
+    LanguageMetadata {
+        id: "go",
+        aliases: &[],
+        parser: &PARSERS[35],
+    },
+    LanguageMetadata {
+        id: "graphql",
+        aliases: &[],
+        parser: &PARSERS[36],
+    },
+    LanguageMetadata {
+        id: "haskell",
+        aliases: &[],
+        parser: &PARSERS[37],
+    },
+    LanguageMetadata {
+        id: "hcl",
+        aliases: &[],
+        parser: &PARSERS[38],
+    },
+    LanguageMetadata {
+        id: "heex",
+        aliases: &[],
+        parser: &PARSERS[39],
+    },
+    LanguageMetadata {
+        id: "html",
+        aliases: &[],
+        parser: &PARSERS[40],
+    },
+    LanguageMetadata {
+        id: "http",
+        aliases: &[],
+        parser: &PARSERS[41],
+    },
+    LanguageMetadata {
+        id: "iex",
+        aliases: &[],
+        parser: &PARSERS[42],
+    },
+    LanguageMetadata {
+        id: "ini",
+        aliases: &[],
+        parser: &PARSERS[43],
+    },
+    LanguageMetadata {
+        id: "java",
+        aliases: &[],
+        parser: &PARSERS[44],
+    },
+    LanguageMetadata {
+        id: "javascript",
+        aliases: &["js", "jsx"],
+        parser: &PARSERS[46],
+    },
+    LanguageMetadata {
+        id: "json",
+        aliases: &[],
+        parser: &PARSERS[50],
+    },
+    LanguageMetadata {
+        id: "julia",
+        aliases: &[],
+        parser: &PARSERS[52],
+    },
+    LanguageMetadata {
+        id: "kotlin",
+        aliases: &[],
+        parser: &PARSERS[55],
+    },
+    LanguageMetadata {
+        id: "latex",
+        aliases: &["tex"],
+        parser: &PARSERS[56],
+    },
+    LanguageMetadata {
+        id: "liquid",
+        aliases: &[],
+        parser: &PARSERS[57],
+    },
+    LanguageMetadata {
+        id: "llvm",
+        aliases: &[],
+        parser: &PARSERS[58],
+    },
+    LanguageMetadata {
+        id: "lua",
+        aliases: &[],
+        parser: &PARSERS[59],
+    },
+    LanguageMetadata {
+        id: "make",
+        aliases: &[],
+        parser: &PARSERS[61],
+    },
+    LanguageMetadata {
+        id: "markdown",
+        aliases: &[],
+        parser: &PARSERS[62],
+    },
+    LanguageMetadata {
+        id: "markdown_inline",
+        aliases: &[],
+        parser: &PARSERS[63],
+    },
+    LanguageMetadata {
+        id: "mdx",
+        aliases: &[],
+        parser: &PARSERS[62],
+    },
+    LanguageMetadata {
+        id: "nix",
+        aliases: &[],
+        parser: &PARSERS[68],
+    },
+    LanguageMetadata {
+        id: "nushell",
+        aliases: &["nu"],
+        parser: &PARSERS[69],
+    },
+    LanguageMetadata {
+        id: "objc",
+        aliases: &["objective-c"],
+        parser: &PARSERS[70],
+    },
+    LanguageMetadata {
+        id: "ocaml",
+        aliases: &[],
+        parser: &PARSERS[71],
+    },
+    LanguageMetadata {
+        id: "ocaml_interface",
+        aliases: &[],
+        parser: &PARSERS[72],
+    },
+    LanguageMetadata {
+        id: "perl",
+        aliases: &[],
+        parser: &PARSERS[74],
+    },
+    LanguageMetadata {
+        id: "php",
+        aliases: &[],
+        parser: &PARSERS[75],
+    },
+    LanguageMetadata {
+        id: "powershell",
+        aliases: &[],
+        parser: &PARSERS[76],
+    },
+    LanguageMetadata {
+        id: "protobuf",
+        aliases: &[],
+        parser: &PARSERS[78],
+    },
+    LanguageMetadata {
+        id: "python",
+        aliases: &[],
+        parser: &PARSERS[80],
+    },
+    LanguageMetadata {
+        id: "r",
+        aliases: &[],
+        parser: &PARSERS[82],
+    },
+    LanguageMetadata {
+        id: "regex",
+        aliases: &[],
+        parser: &PARSERS[84],
+    },
+    LanguageMetadata {
+        id: "ruby",
+        aliases: &[],
+        parser: &PARSERS[86],
+    },
+    LanguageMetadata {
+        id: "rust",
+        aliases: &[],
+        parser: &PARSERS[87],
+    },
+    LanguageMetadata {
+        id: "scala",
+        aliases: &[],
+        parser: &PARSERS[88],
+    },
+    LanguageMetadata {
+        id: "scss",
+        aliases: &[],
+        parser: &PARSERS[90],
+    },
+    LanguageMetadata {
+        id: "sql",
+        aliases: &[],
+        parser: &PARSERS[92],
+    },
+    LanguageMetadata {
+        id: "surface",
+        aliases: &[],
+        parser: &PARSERS[93],
+    },
+    LanguageMetadata {
+        id: "svelte",
+        aliases: &[],
+        parser: &PARSERS[94],
+    },
+    LanguageMetadata {
+        id: "swift",
+        aliases: &[],
+        parser: &PARSERS[95],
+    },
+    LanguageMetadata {
+        id: "toml",
+        aliases: &[],
+        parser: &PARSERS[99],
+    },
+    LanguageMetadata {
+        id: "tsx",
+        aliases: &[],
+        parser: &PARSERS[101],
+    },
+    LanguageMetadata {
+        id: "typescript",
+        aliases: &["ts"],
+        parser: &PARSERS[102],
+    },
+    LanguageMetadata {
+        id: "typst",
+        aliases: &[],
+        parser: &PARSERS[103],
+    },
+    LanguageMetadata {
+        id: "vim",
+        aliases: &["viml", "vimscript"],
+        parser: &PARSERS[105],
+    },
+    LanguageMetadata {
+        id: "vue",
+        aliases: &[],
+        parser: &PARSERS[106],
+    },
+    LanguageMetadata {
+        id: "wat",
+        aliases: &["wasm", "webassembly"],
+        parser: &PARSERS[107],
+    },
+    LanguageMetadata {
+        id: "xml",
+        aliases: &[],
+        parser: &PARSERS[109],
+    },
+    LanguageMetadata {
+        id: "yaml",
+        aliases: &[],
+        parser: &PARSERS[110],
+    },
+    LanguageMetadata {
+        id: "zig",
+        aliases: &[],
+        parser: &PARSERS[111],
+    },
+    LanguageMetadata {
+        id: "arduino",
+        aliases: &[],
+        parser: &PARSERS[1],
+    },
+    LanguageMetadata {
+        id: "bicep",
+        aliases: &[],
+        parser: &PARSERS[5],
+    },
+    LanguageMetadata {
+        id: "dot",
+        aliases: &[],
+        parser: &PARSERS[20],
+    },
+    LanguageMetadata {
+        id: "editorconfig",
+        aliases: &[],
+        parser: &PARSERS[21],
+    },
+    LanguageMetadata {
+        id: "gitattributes",
+        aliases: &[],
+        parser: &PARSERS[30],
+    },
+    LanguageMetadata {
+        id: "javadoc",
+        aliases: &[],
+        parser: &PARSERS[45],
+    },
+    LanguageMetadata {
+        id: "jq",
+        aliases: &[],
+        parser: &PARSERS[49],
+    },
+    LanguageMetadata {
+        id: "kdl",
+        aliases: &[],
+        parser: &PARSERS[54],
+    },
+    LanguageMetadata {
+        id: "luadoc",
+        aliases: &[],
+        parser: &PARSERS[60],
+    },
+    LanguageMetadata {
+        id: "nim",
+        aliases: &[],
+        parser: &PARSERS[67],
+    },
+    LanguageMetadata {
+        id: "pascal",
+        aliases: &[],
+        parser: &PARSERS[73],
+    },
+    LanguageMetadata {
+        id: "puppet",
+        aliases: &[],
+        parser: &PARSERS[79],
+    },
+    LanguageMetadata {
+        id: "terraform",
+        aliases: &[],
+        parser: &PARSERS[98],
+    },
+    LanguageMetadata {
+        id: "toon",
+        aliases: &[],
+        parser: &PARSERS[100],
+    },
+    LanguageMetadata {
+        id: "wgsl",
+        aliases: &[],
+        parser: &PARSERS[108],
+    },
+    LanguageMetadata {
+        id: "zsh",
+        aliases: &[],
+        parser: &PARSERS[112],
+    },
+    LanguageMetadata {
+        id: "d",
+        aliases: &[],
+        parser: &PARSERS[16],
+    },
+    LanguageMetadata {
+        id: "fortran",
+        aliases: &[],
+        parser: &PARSERS[28],
+    },
+    LanguageMetadata {
+        id: "gitignore",
+        aliases: &[],
+        parser: &PARSERS[31],
+    },
+    LanguageMetadata {
+        id: "glsl",
+        aliases: &[],
+        parser: &PARSERS[34],
+    },
+    LanguageMetadata {
+        id: "jinja",
+        aliases: &["jinja2"],
+        parser: &PARSERS[47],
+    },
+    LanguageMetadata {
+        id: "jinja_inline",
+        aliases: &[],
+        parser: &PARSERS[48],
+    },
+    LanguageMetadata {
+        id: "json5",
+        aliases: &[],
+        parser: &PARSERS[51],
+    },
+    LanguageMetadata {
+        id: "just",
+        aliases: &[],
+        parser: &PARSERS[53],
+    },
+    LanguageMetadata {
+        id: "matlab",
+        aliases: &[],
+        parser: &PARSERS[64],
+    },
+    LanguageMetadata {
+        id: "mermaid",
+        aliases: &[],
+        parser: &PARSERS[65],
+    },
+    LanguageMetadata {
+        id: "nginx",
+        aliases: &[],
+        parser: &PARSERS[66],
+    },
+    LanguageMetadata {
+        id: "prisma",
+        aliases: &[],
+        parser: &PARSERS[77],
+    },
+    LanguageMetadata {
+        id: "qmljs",
+        aliases: &["qml"],
+        parser: &PARSERS[81],
+    },
+    LanguageMetadata {
+        id: "racket",
+        aliases: &[],
+        parser: &PARSERS[83],
+    },
+    LanguageMetadata {
+        id: "rst",
+        aliases: &["restructuredtext"],
+        parser: &PARSERS[85],
+    },
+    LanguageMetadata {
+        id: "scheme",
+        aliases: &[],
+        parser: &PARSERS[89],
+    },
+    LanguageMetadata {
+        id: "solidity",
+        aliases: &[],
+        parser: &PARSERS[91],
+    },
+    LanguageMetadata {
+        id: "systemverilog",
+        aliases: &[],
+        parser: &PARSERS[96],
+    },
+    LanguageMetadata {
+        id: "tcl",
+        aliases: &[],
+        parser: &PARSERS[97],
+    },
+    LanguageMetadata {
+        id: "vhdl",
+        aliases: &[],
+        parser: &PARSERS[104],
+    },
+];
+
 pub fn find(name: &str) -> Option<&'static WasmMetadata> {
     PARSERS.iter().find(|entry| entry.name == name)
+}
+
+pub fn find_language(name: &str) -> Option<&'static LanguageMetadata> {
+    LANGUAGES.iter().find(|entry| {
+        entry.id.eq_ignore_ascii_case(name)
+            || entry
+                .aliases
+                .iter()
+                .any(|alias| alias.eq_ignore_ascii_case(name))
+    })
 }

@@ -31,7 +31,7 @@ defmodule Mix.Tasks.Lumis.Parsers.Fetch do
         Mix.raise("pass language names or --all, not both")
 
       options[:all] ->
-        Enum.map(Lumis.Generated.LanguageManifest.all(), & &1.id)
+        Enum.map(Lumis.Native.language_manifests(), & &1.id)
 
       languages != [] ->
         languages

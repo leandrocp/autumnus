@@ -1,7 +1,6 @@
 defmodule Lumis.LanguageLoader do
   @moduledoc false
 
-  alias Lumis.Generated.LanguageManifest
   alias Lumis.Native
 
   @lock_timeout_ms 120_000
@@ -11,9 +10,9 @@ defmodule Lumis.LanguageLoader do
   def load(name) when name in @plaintext_names, do: :ok
 
   def load(name) when is_binary(name) do
-    case LanguageManifest.fetch(name) do
-      {:ok, entry} -> load_manifest_entry(entry)
-      :error -> {:error, "unknown language '#{name}'"}
+    case Native.language_manifest(name) do
+      nil -> {:error, "unknown language '#{name}'"}
+      entry -> load_manifest_entry(entry)
     end
   end
 
@@ -50,9 +49,9 @@ defmodule Lumis.LanguageLoader do
   end
 
   defp prefetch_name(name, paths, seen, directory, force?) do
-    case LanguageManifest.fetch(name) do
-      {:ok, entry} -> prefetch_manifest_entry(entry, paths, seen, directory, force?)
-      :error -> {:halt, {:error, "unknown language '#{name}'"}}
+    case Native.language_manifest(name) do
+      nil -> {:halt, {:error, "unknown language '#{name}'"}}
+      entry -> prefetch_manifest_entry(entry, paths, seen, directory, force?)
     end
   end
 

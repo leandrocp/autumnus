@@ -196,7 +196,6 @@ jobs:
             wasm-manifest.json
             crates/lumis-wasm-runtime/src/manifest.rs
             crates/lumis-cli/tests/fixtures/parsers
-            packages/elixir/lumis/lib/lumis/generated/language_manifest.ex
             packages/javascript/lumis/langs
             packages/javascript/lumis/test/fixtures/wasm
           commit-message: "chore: sync published WASM parsers"

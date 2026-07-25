@@ -3,8 +3,6 @@
 
 pub struct LanguageEntry {
     pub id: &'static str,
-    pub aliases: &'static [&'static str],
-    pub grammar_name: &'static str,
     pub highlights: &'static str,
     pub injections: &'static str,
     pub locals: &'static str,
@@ -14,8 +12,6 @@ pub struct LanguageEntry {
 pub static LANGUAGES: &[LanguageEntry] = &[
     LanguageEntry {
         id: "angular",
-        aliases: &[],
-        grammar_name: "angular",
         highlights: r##"; This file is auto-generated. Do not edit.
 ; inherits: html_tags
 (tag_name) @tag
@@ -398,8 +394,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "asm",
-        aliases: &["assembly"],
-        grammar_name: "asm",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; General
 (label
@@ -487,8 +481,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "astro",
-        aliases: &[],
-        grammar_name: "astro",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; inherits: html_tags
 (tag_name) @tag
@@ -771,8 +763,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "bash",
-        aliases: &["sh"],
-        grammar_name: "bash",
         highlights: r#"; This file is auto-generated. Do not edit.
 [
   "("
@@ -1224,8 +1214,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "c",
-        aliases: &[],
-        grammar_name: "c",
         highlights: r##"; This file is auto-generated. Do not edit.
 ; Lower priority to prefer @variable.parameter when identifier appears in parameter_declaration.
 ((identifier) @variable
@@ -1785,8 +1773,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "caddy",
-        aliases: &[],
-        grammar_name: "caddy",
         highlights: r#"; This file is auto-generated. Do not edit.
 (comment) @comment
 
@@ -1860,8 +1846,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "clojure",
-        aliases: &[],
-        grammar_name: "clojure",
         highlights: r##"; This file is auto-generated. Do not edit.
 ; >> Explanation
 ; Parsers for lisps are a bit weird in that they just return the raw forms.
@@ -2228,8 +2212,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "cmake",
-        aliases: &[],
-        grammar_name: "cmake",
         highlights: r#"; This file is auto-generated. Do not edit.
 (normal_command
   (identifier)
@@ -2472,8 +2454,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "comment",
-        aliases: &[],
-        grammar_name: "comment",
         highlights: r#"; This file is auto-generated. Do not edit.
 ((tag
   (name) @comment.todo
@@ -2539,8 +2519,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "commonlisp",
-        aliases: &[],
-        grammar_name: "commonlisp",
         highlights: r##"; This file is auto-generated. Do not edit.
 (sym_lit) @variable
 
@@ -2985,8 +2963,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "cpp",
-        aliases: &["c++"],
-        grammar_name: "cpp",
         highlights: r##"; This file is auto-generated. Do not edit.
 ; inherits: c
 ; Lower priority to prefer @variable.parameter when identifier appears in parameter_declaration.
@@ -3909,8 +3885,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "csharp",
-        aliases: &["c#"],
-        grammar_name: "c_sharp",
         highlights: r##"; This file is auto-generated. Do not edit.
 [
   (identifier)
@@ -4564,8 +4538,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "css",
-        aliases: &[],
-        grammar_name: "css",
         highlights: r##"; This file is auto-generated. Do not edit.
 [
   "@media"
@@ -4700,8 +4672,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "csv",
-        aliases: &[],
-        grammar_name: "csv",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; inherits: tsv
 (text) @string
@@ -4728,8 +4698,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "dart",
-        aliases: &[],
-        grammar_name: "dart",
         highlights: r#"; This file is auto-generated. Do not edit.
 (identifier) @variable
 
@@ -5083,8 +5051,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "diff",
-        aliases: &[],
-        grammar_name: "diff",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; Keep compatible with published tree-sitter-diff 0.1.0 (no special node).
 
@@ -5155,8 +5121,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "dockerfile",
-        aliases: &["docker"],
-        grammar_name: "dockerfile",
         highlights: r#"; This file is auto-generated. Do not edit.
 [
   "FROM"
@@ -5253,8 +5217,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "eex",
-        aliases: &[],
-        grammar_name: "eex",
         highlights: r#"; This file is auto-generated. Do not edit.
 [
   "%>"
@@ -5291,8 +5253,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "ejs",
-        aliases: &[],
-        grammar_name: "embedded_template",
         highlights: r#"; This file is auto-generated. Do not edit.
 (comment_directive) @comment
 
@@ -5328,8 +5288,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "elixir",
-        aliases: &[],
-        grammar_name: "elixir",
         highlights: r##"; This file is auto-generated. Do not edit.
 ; Punctuation
 [
@@ -5902,8 +5860,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "elm",
-        aliases: &[],
-        grammar_name: "elm",
         highlights: r#"; This file is auto-generated. Do not edit.
 [
   (line_comment)
@@ -6157,8 +6113,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "erb",
-        aliases: &[],
-        grammar_name: "embedded_template",
         highlights: r#"; This file is auto-generated. Do not edit.
 (comment_directive) @comment
 
@@ -6194,8 +6148,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "erlang",
-        aliases: &[],
-        grammar_name: "erlang",
         highlights: r##"; This file is auto-generated. Do not edit.
 ((atom) @constant
   (#set! priority "90"))
@@ -6398,8 +6350,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "fish",
-        aliases: &[],
-        grammar_name: "fish",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; Fish highlighting
 ; Operators
@@ -6643,8 +6593,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "fsharp",
-        aliases: &["f#"],
-        grammar_name: "fsharp",
         highlights: r##"; This file is auto-generated. Do not edit.
 [
   (line_comment)
@@ -7084,8 +7032,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "gleam",
-        aliases: &[],
-        grammar_name: "gleam",
         highlights: r##"; This file is auto-generated. Do not edit.
 ; Punctuation
 [
@@ -7260,8 +7206,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "glimmer",
-        aliases: &["ember", "handlebars"],
-        grammar_name: "glimmer",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; === Tag Names ===
 ; Tags that start with a lower case letter are HTML tags
@@ -7408,8 +7352,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "go",
-        aliases: &[],
-        grammar_name: "go",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; Forked from tree-sitter-go
 ; Copyright (c) 2014 Max Brunsfeld (The MIT License)
@@ -7815,8 +7757,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "graphql",
-        aliases: &[],
-        grammar_name: "graphql",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; Types
 ;------
@@ -7998,8 +7938,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "haskell",
-        aliases: &[],
-        grammar_name: "haskell",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; ----------------------------------------------------------------------------
 ; Parameters and variables
@@ -8618,8 +8556,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "hcl",
-        aliases: &[],
-        grammar_name: "hcl",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; highlights.scm
 [
@@ -8760,8 +8696,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "heex",
-        aliases: &[],
-        grammar_name: "heex",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; HEEx delimiters
 [
@@ -8877,8 +8811,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "html",
-        aliases: &[],
-        grammar_name: "html",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; inherits: html_tags
 (tag_name) @tag
@@ -9136,8 +9068,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "http",
-        aliases: &[],
-        grammar_name: "http",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; Methods
 (method) @function.method
@@ -9242,8 +9172,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "iex",
-        aliases: &[],
-        grammar_name: "iex",
         highlights: r"; This file is auto-generated. Do not edit.
 (prompt) @comment",
         injections: r#"; This file is auto-generated. Do not edit.
@@ -9267,8 +9195,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "ini",
-        aliases: &[],
-        grammar_name: "ini",
         highlights: r#"; This file is auto-generated. Do not edit.
 (section_name
   (text) @markup.heading)
@@ -9304,8 +9230,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "java",
-        aliases: &[],
-        grammar_name: "java",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; CREDITS @maxbrunsfeld (maxbrunsfeld@gmail.com)
 ; Variables
@@ -9786,8 +9710,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "javascript",
-        aliases: &["js", "jsx"],
-        grammar_name: "javascript",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; inherits: ecma
 ; Types
@@ -10784,8 +10706,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "json",
-        aliases: &[],
-        grammar_name: "json",
         highlights: r#"; This file is auto-generated. Do not edit.
 [
   (true)
@@ -10848,8 +10768,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "julia",
-        aliases: &[],
-        grammar_name: "julia",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; Identifiers
 (identifier) @variable
@@ -11354,8 +11272,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "kotlin",
-        aliases: &[],
-        grammar_name: "kotlin",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; Identifiers
 (simple_identifier) @variable
@@ -11895,8 +11811,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "latex",
-        aliases: &["tex"],
-        grammar_name: "latex",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; General syntax
 (command_name) @function
@@ -12346,8 +12260,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "liquid",
-        aliases: &[],
-        grammar_name: "liquid",
         highlights: r#"; This file is auto-generated. Do not edit.
 ((comment) @comment
   (#set! priority 110))
@@ -12525,8 +12437,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "llvm",
-        aliases: &[],
-        grammar_name: "llvm",
         highlights: r"",
         injections: r"",
         locals: r"",
@@ -12543,8 +12453,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "lua",
-        aliases: &[],
-        grammar_name: "lua",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; Keywords
 "return" @keyword.return
@@ -13066,8 +12974,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "make",
-        aliases: &[],
-        grammar_name: "make",
         highlights: r#"; This file is auto-generated. Do not edit.
 (comment) @comment
 
@@ -13261,8 +13167,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "markdown",
-        aliases: &[],
-        grammar_name: "markdown",
         highlights: r#"; This file is auto-generated. Do not edit.
 ;From MDeiml/tree-sitter-markdown & Helix
 (setext_heading
@@ -13442,8 +13346,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "markdown_inline",
-        aliases: &[],
-        grammar_name: "markdown_inline",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; From MDeiml/tree-sitter-markdown
 (code_span) @markup.raw
@@ -13589,8 +13491,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "mdx",
-        aliases: &[],
-        grammar_name: "markdown",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; inherits: markdown
 ;From MDeiml/tree-sitter-markdown & Helix
@@ -13770,8 +13670,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "nix",
-        aliases: &[],
-        grammar_name: "nix",
         highlights: r#"; This file is auto-generated. Do not edit.
 (comment) @comment
 
@@ -13959,8 +13857,6 @@ pub static LANGUAGES: &[LanguageEntry] = &[
     },
     LanguageEntry {
         id: "nushell",
-        aliases: &["nu"],
-        grammar_name: "nu",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; ---
 ; keywords
@@ -14431,8 +14327,6 @@ key: (identifier) @property
     },
     LanguageEntry {
         id: "objc",
-        aliases: &["objective-c"],
-        grammar_name: "objc",
         highlights: r##"; This file is auto-generated. Do not edit.
 ; inherits: c
 ; Lower priority to prefer @variable.parameter when identifier appears in parameter_declaration.
@@ -15265,8 +15159,6 @@ key: (identifier) @property
     },
     LanguageEntry {
         id: "ocaml",
-        aliases: &[],
-        grammar_name: "ocaml",
         highlights: r##"; This file is auto-generated. Do not edit.
 ; Modules
 ;--------
@@ -15700,8 +15592,6 @@ key: (identifier) @property
     },
     LanguageEntry {
         id: "ocaml_interface",
-        aliases: &[],
-        grammar_name: "ocaml_interface",
         highlights: r##"; This file is auto-generated. Do not edit.
 ; Modules
 ;--------
@@ -16137,8 +16027,6 @@ key: (identifier) @property
     },
     LanguageEntry {
         id: "perl",
-        aliases: &[],
-        grammar_name: "perl",
         highlights: r#"; This file is auto-generated. Do not edit.
 ((source_file
   .
@@ -16519,8 +16407,6 @@ key: (identifier) @property
     },
     LanguageEntry {
         id: "php",
-        aliases: &[],
-        grammar_name: "php",
         highlights: r##"; This file is auto-generated. Do not edit.
 ; Keywords
 [
@@ -17142,8 +17028,6 @@ key: (identifier) @property
     },
     LanguageEntry {
         id: "powershell",
-        aliases: &[],
-        grammar_name: "powershell",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; Punctuation
 ;------------
@@ -17600,8 +17484,6 @@ key: (identifier) @property
     },
     LanguageEntry {
         id: "protobuf",
-        aliases: &[],
-        grammar_name: "proto",
         highlights: r#"; This file is auto-generated. Do not edit.
 (full_ident
   (identifier) @variable)
@@ -17734,8 +17616,6 @@ key: (identifier) @property
     },
     LanguageEntry {
         id: "python",
-        aliases: &[],
-        grammar_name: "python",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; Identifier naming conventions
 
@@ -18034,8 +17914,6 @@ key: (identifier) @property
     },
     LanguageEntry {
         id: "r",
-        aliases: &[],
-        grammar_name: "r",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; Literals
 (integer) @number
@@ -18226,8 +18104,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "regex",
-        aliases: &[],
-        grammar_name: "regex",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; Forked from tree-sitter-regex
 ; The MIT License (MIT) Copyright (c) 2014 Max Brunsfeld
@@ -18296,8 +18172,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "ruby",
-        aliases: &[],
-        grammar_name: "ruby",
         highlights: r##"; This file is auto-generated. Do not edit.
 ; Variables
 [
@@ -18764,8 +18638,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "rust",
-        aliases: &[],
-        grammar_name: "rust",
         highlights: r##"; This file is auto-generated. Do not edit.
 ; Forked from https://github.com/tree-sitter/tree-sitter-rust
 ; Copyright (c) 2017 Maxim Sokolov
@@ -19517,8 +19389,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "scala",
-        aliases: &[],
-        grammar_name: "scala",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; CREDITS @stumash (stuart.mashaal@gmail.com)
 (class_definition
@@ -19899,8 +19769,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "scss",
-        aliases: &[],
-        grammar_name: "scss",
         highlights: r##"; This file is auto-generated. Do not edit.
 ; inherits: css
 [
@@ -20115,8 +19983,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "sql",
-        aliases: &[],
-        grammar_name: "sql",
         highlights: r#"; This file is auto-generated. Do not edit.
 (invocation
   (object_reference
@@ -20566,8 +20432,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "surface",
-        aliases: &[],
-        grammar_name: "surface",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; Surface text is not highlighted
 (text) @none
@@ -20638,8 +20502,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "svelte",
-        aliases: &[],
-        grammar_name: "svelte",
         highlights: r##"; This file is auto-generated. Do not edit.
 ; inherits: html
 ; inherits: html_tags
@@ -20972,8 +20834,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "swift",
-        aliases: &[],
-        grammar_name: "swift",
         highlights: r#"; This file is auto-generated. Do not edit.
 [
   "."
@@ -21355,8 +21215,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "toml",
-        aliases: &[],
-        grammar_name: "toml",
         highlights: r#"; This file is auto-generated. Do not edit.
 (bare_key) @property
 
@@ -21418,8 +21276,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "tsx",
-        aliases: &[],
-        grammar_name: "tsx",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; inherits: typescript
 ; inherits: ecma
@@ -22568,8 +22424,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "typescript",
-        aliases: &["ts"],
-        grammar_name: "typescript",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; inherits: ecma
 ; Types
@@ -23529,8 +23383,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "typst",
-        aliases: &[],
-        grammar_name: "typst",
         highlights: r##"; This file is auto-generated. Do not edit.
 ; punctuation
 "#" @punctuation.special
@@ -23686,8 +23538,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "vim",
-        aliases: &["viml", "vimscript"],
-        grammar_name: "vim",
         highlights: r##"; This file is auto-generated. Do not edit.
 (identifier) @variable
 
@@ -24129,8 +23979,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "vue",
-        aliases: &[],
-        grammar_name: "vue",
         highlights: r##"; This file is auto-generated. Do not edit.
 ; inherits: html_tags
 (tag_name) @tag
@@ -24480,8 +24328,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "wat",
-        aliases: &["wasm", "webassembly"],
-        grammar_name: "wat",
         highlights: r#"; This file is auto-generated. Do not edit.
 [
   "module" "func" "param" "result" "type" "memory" "elem" "data" "table" "global"
@@ -24518,8 +24364,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "xml",
-        aliases: &[],
-        grammar_name: "xml",
         highlights: r##"; This file is auto-generated. Do not edit.
 ; XML declaration
 (XMLDecl
@@ -24801,8 +24645,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "yaml",
-        aliases: &[],
-        grammar_name: "yaml",
         highlights: r#"; This file is auto-generated. Do not edit.
 (boolean_scalar) @boolean
 
@@ -25012,8 +24854,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "zig",
-        aliases: &[],
-        grammar_name: "zig",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; Variables
 (identifier) @variable
@@ -25417,8 +25257,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "arduino",
-        aliases: &[],
-        grammar_name: "arduino",
         highlights: r##"; This file is auto-generated. Do not edit.
 ; inherits: cpp
 ; inherits: c
@@ -26388,8 +26226,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "bicep",
-        aliases: &[],
-        grammar_name: "bicep",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; Includes
 [
@@ -26718,8 +26554,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "dot",
-        aliases: &[],
-        grammar_name: "dot",
         highlights: r#"; This file is auto-generated. Do not edit.
 (identifier) @type
 
@@ -26790,8 +26624,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "editorconfig",
-        aliases: &[],
-        grammar_name: "editorconfig",
         highlights: r#"; This file is auto-generated. Do not edit.
 (comment) @comment
 
@@ -26845,8 +26677,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "gitattributes",
-        aliases: &[],
-        grammar_name: "gitattributes",
         highlights: r#"; This file is auto-generated. Do not edit.
 (dir_sep) @punctuation.delimiter
 
@@ -26928,8 +26758,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "javadoc",
-        aliases: &[],
-        grammar_name: "javadoc",
         highlights: r###"; This file is auto-generated. Do not edit.
 [
   (tag_name)
@@ -27062,8 +26890,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "jq",
-        aliases: &[],
-        grammar_name: "jq",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; Variables
 (variable) @variable
@@ -27271,8 +27097,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "kdl",
-        aliases: &[],
-        grammar_name: "kdl",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; Types
 ; Variables
@@ -27381,8 +27205,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "luadoc",
-        aliases: &[],
-        grammar_name: "luadoc",
         highlights: r##"; This file is auto-generated. Do not edit.
 ; Keywords
 [
@@ -27596,8 +27418,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "nim",
-        aliases: &[],
-        grammar_name: "nim",
         highlights: r###"; This file is auto-generated. Do not edit.
 ; SPDX-FileCopyrightText: 2023 Leorize <leorize+oss@disroot.org>, aMOPel <>
 ; SPDX-License-Identifier: MPL-2.0
@@ -28947,8 +28767,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "pascal",
-        aliases: &[],
-        grammar_name: "pascal",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; -- Keywords
 [
@@ -29547,8 +29365,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "puppet",
-        aliases: &[],
-        grammar_name: "puppet",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; Variables
 (identifier) @variable
@@ -29873,8 +29689,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "terraform",
-        aliases: &[],
-        grammar_name: "terraform",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; inherits: hcl
 ; highlights.scm
@@ -30058,8 +29872,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "toon",
-        aliases: &[],
-        grammar_name: "toon",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; TOON highlight query tuned for lumis and aligned to the
 ; 3swordman/tree-sitter-toon grammar.
@@ -30126,8 +29938,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "wgsl",
-        aliases: &[],
-        grammar_name: "wgsl",
         highlights: r#"; This file is auto-generated. Do not edit.
 (identifier) @variable
 
@@ -30276,8 +30086,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "zsh",
-        aliases: &[],
-        grammar_name: "zsh",
         highlights: r##"; This file is auto-generated. Do not edit.
 [
   "("
@@ -30713,8 +30521,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "d",
-        aliases: &[],
-        grammar_name: "d",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; Keywords
 [
@@ -31205,8 +31011,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "fortran",
-        aliases: &[],
-        grammar_name: "fortran",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; Preprocs
 (preproc_directive) @keyword.directive
@@ -31544,8 +31348,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "gitignore",
-        aliases: &[],
-        grammar_name: "gitignore",
         highlights: r#"; This file is auto-generated. Do not edit.
 (comment) @comment
 
@@ -31600,8 +31402,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "glsl",
-        aliases: &[],
-        grammar_name: "glsl",
         highlights: r##"; This file is auto-generated. Do not edit.
 ; inherits: c
 ; Lower priority to prefer @variable.parameter when identifier appears in parameter_declaration.
@@ -32193,8 +31993,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "jinja",
-        aliases: &["jinja2"],
-        grammar_name: "jinja",
         highlights: r##"; This file is auto-generated. Do not edit.
 ; inherits: jinja_inline
 "#" @keyword.directive
@@ -32410,8 +32208,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "jinja_inline",
-        aliases: &[],
-        grammar_name: "jinja_inline",
         highlights: r##"; This file is auto-generated. Do not edit.
 "#" @keyword.directive
 
@@ -32605,8 +32401,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "json5",
-        aliases: &[],
-        grammar_name: "json5",
         highlights: r"; This file is auto-generated. Do not edit.
 [
   (true)
@@ -32640,8 +32434,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "just",
-        aliases: &[],
-        grammar_name: "just",
         highlights: r#"; This file is auto-generated. Do not edit.
 [
   "true"
@@ -32876,8 +32668,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "matlab",
-        aliases: &[],
-        grammar_name: "matlab",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; Includes
 ((command_name) @keyword.import
@@ -33147,8 +32937,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "mermaid",
-        aliases: &[],
-        grammar_name: "mermaid",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; adapted from https://github.com/monaqa/tree-sitter-mermaid
 [
@@ -33415,8 +33203,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "nginx",
-        aliases: &[],
-        grammar_name: "nginx",
         highlights: r#"; This file is auto-generated. Do not edit.
 (comment) @comment
 
@@ -33494,8 +33280,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "prisma",
-        aliases: &[],
-        grammar_name: "prisma",
         highlights: r#"; This file is auto-generated. Do not edit.
 (identifier) @variable
 
@@ -33560,8 +33344,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "qmljs",
-        aliases: &["qml"],
-        grammar_name: "qmljs",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; inherits: ecma
 ; Types
@@ -34307,8 +34089,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "racket",
-        aliases: &[],
-        grammar_name: "racket",
         highlights: r##"; This file is auto-generated. Do not edit.
 ; A highlight query can override the highlights queries before it.
 ; So the order is important.
@@ -35014,8 +34794,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "rst",
-        aliases: &["restructuredtext"],
-        grammar_name: "rst",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; Marks
 [
@@ -35291,8 +35069,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "scheme",
-        aliases: &[],
-        grammar_name: "scheme",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; A highlight query can override the highlights queries before it.
 ; So the order is important.
@@ -35472,8 +35248,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "solidity",
-        aliases: &[],
-        grammar_name: "solidity",
         highlights: r#"; This file is auto-generated. Do not edit.
 ; Pragma
 [
@@ -35816,8 +35590,6 @@ function: (extract_operator
     },
     LanguageEntry {
         id: "systemverilog",
-        aliases: &[],
-        grammar_name: "systemverilog",
         highlights: r##"; This file is auto-generated. Do not edit.
 ; Keywords
 [
@@ -36447,8 +36219,6 @@ c_name: (c_identifier) @function
     },
     LanguageEntry {
         id: "tcl",
-        aliases: &[],
-        grammar_name: "tcl",
         highlights: r#"; This file is auto-generated. Do not edit.
 (comment) @comment
 
@@ -36581,8 +36351,6 @@ c_name: (c_identifier) @function
     },
     LanguageEntry {
         id: "vhdl",
-        aliases: &[],
-        grammar_name: "vhdl",
         highlights: r#"; This file is auto-generated. Do not edit.
 (line_comment
   (comment_content) ) @comment
@@ -37035,7 +36803,5 @@ c_name: (c_identifier) @function
 ];
 
 pub fn find(name: &str) -> Option<&'static LanguageEntry> {
-    LANGUAGES
-        .iter()
-        .find(|entry| entry.id == name || entry.aliases.contains(&name))
+    LANGUAGES.iter().find(|entry| entry.id == name)
 }

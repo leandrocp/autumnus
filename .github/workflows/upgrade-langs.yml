@@ -156,7 +156,6 @@ jobs:
             packages/javascript/lumis/langs
             packages/javascript/lumis/bundles
             packages/javascript/lumis/src/generated
-            packages/elixir/lumis/lib/lumis/generated/language_manifest.ex
             packages/elixir/lumis/native/lumis_nif/src/catalog.rs
             crates/lumis-wasm-runtime/src/manifest.rs
             packages/javascript/wasm-bundle-*
