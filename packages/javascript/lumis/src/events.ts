@@ -29,6 +29,11 @@ interface LayerQueryCapture {
   setProperties?: Record<string, string | null>;
 }
 
+interface CaptureSnapshot {
+  captures: LayerQueryCapture[];
+  matchCount: number;
+}
+
 interface SourceMaps {
   utf8Offsets: number[];
   lineStarts: number[];
@@ -146,7 +151,7 @@ function snapshotCapturesWithMatches(
   matches: QueryMatch[],
   maps: SourceMaps,
   firstHighlightPattern: number,
-): LayerQueryCapture[] {
+): CaptureSnapshot {
   const queues: CaptureMatchQueues = new Map();
 
   for (const [matchIndex, match] of matches.entries()) {
@@ -175,15 +180,22 @@ function snapshotCapturesWithMatches(
   }
 
   const result: LayerQueryCapture[] = [];
+  let nextMatchIndex = matches.length;
+
   for (const capture of captures) {
     if (capture.patternIndex < firstHighlightPattern) continue;
 
     const queue = queues.get(capture.patternIndex)?.get(capture.node.id)?.get(capture.name);
-    const matchIndex = queue?.indexes[queue.cursor];
-    if (queue == null || matchIndex == null) {
-      throw new Error("tree-sitter returned inconsistent query captures and matches");
+    let matchIndex = queue?.indexes[queue.cursor];
+    if (queue && matchIndex != null) {
+      queue.cursor += 1;
+    } else {
+      // web-tree-sitter can omit valid captures from matches(). Give each
+      // unmatched capture its own identity while preserving captures() order.
+      matchIndex = nextMatchIndex;
+      nextMatchIndex += 1;
     }
-    queue.cursor += 1;
+
     result.push({
       matchIndex,
       patternIndex: capture.patternIndex,
@@ -194,7 +206,8 @@ function snapshotCapturesWithMatches(
       setProperties: capture.setProperties,
     });
   }
-  return result;
+
+  return { captures: result, matchCount: nextMatchIndex };
 }
 
 function resolveInjection(
@@ -250,7 +263,13 @@ function collectHighlightLayers(
     const rootNode = tree.rootNode;
     const queryMatches = language.config.query.matches(rootNode);
     const queryCaptures = language.config.query.captures(rootNode);
-    const localDefinitionValueEnds = new Uint32Array(queryMatches.length);
+    const snapshot = snapshotCapturesWithMatches(
+      queryCaptures,
+      queryMatches,
+      maps,
+      language.config.injectionPatternEnd,
+    );
+    const localDefinitionValueEnds = new Uint32Array(snapshot.matchCount);
 
     for (const [matchIndex, match] of queryMatches.entries()) {
       const value = match.captures.find(
@@ -265,12 +284,7 @@ function collectHighlightLayers(
       {
         depth,
         language,
-        captures: snapshotCapturesWithMatches(
-          queryCaptures,
-          queryMatches,
-          maps,
-          language.config.injectionPatternEnd,
-        ),
+        captures: snapshot.captures,
         localDefinitionValueEnds,
       },
     ];

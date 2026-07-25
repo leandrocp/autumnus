@@ -11,6 +11,7 @@ import json from '../langs/json.ts'
 import html from '../langs/html.ts'
 import plaintext from '../langs/plaintext.ts'
 import javascript from '../langs/javascript.ts'
+import python from '../langs/python.ts'
 import { configureLocalWasmResolver } from './wasm.js'
 
 import tokyonightMoon from '../../themes/dist/json/tokyonight_moon.json'
@@ -117,6 +118,26 @@ describe('hl.highlight', () => {
     )
 
     expect(html).toContain('class="language-javascript"')
+    expect(html).toContain('<span')
+  })
+
+  it('highlights Python class scopes when captures omit match metadata', async () => {
+    const pythonHighlighter = await createHighlighter({ languages: [python] })
+    const source = `from dataclasses import dataclass
+
+@dataclass(frozen=True)
+class User:
+    name: str
+    active: bool = True
+`
+
+    const html = pythonHighlighter.highlight(
+      source,
+      htmlInline({ language: python, theme })
+    )
+
+    expect(html).toContain('class="language-python"')
+    expect(html).toContain('User')
     expect(html).toContain('<span')
   })
 
