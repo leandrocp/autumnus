@@ -638,6 +638,7 @@ dependencies = [
  "once_cell",
  "parking_lot",
  "rustler",
+ "sha2",
 ]
 
 [[package]]

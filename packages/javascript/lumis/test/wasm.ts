@@ -1,14 +1,23 @@
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join, resolve, sep } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { parse as parseToml } from "smol-toml";
 
-import { configureLanguagePackageResolver, configureWasmResolver } from "../src/index.js";
-import type { LanguagePackage } from "../src/core/languages.js";
+import {
+  configureLanguagePackageResolver as configureDefaultLanguagePackageResolver,
+  configureWasmResolver as configureDefaultWasmResolver,
+} from "../src/index.js";
+import type {
+  LanguagePackage,
+  LanguagePackageResolver,
+  WasmResolver,
+} from "../src/core/languages.js";
 
-const fixturesRoot = new URL("./fixtures/wasm/", import.meta.url);
-const repositoryRoot = fileURLToPath(new URL("../../../..", import.meta.url));
+const repositoryRoot = resolve(process.cwd(), "../../..");
+const fixturesRoot = pathToFileURL(
+  join(repositoryRoot, "packages/javascript/lumis/test/fixtures/wasm") + sep,
+);
 const packageDataUrls = new Map<string, string>();
 const packageMetadataCache = new Map<string, LanguagePackage>();
 const parserDefinitions = (
@@ -38,13 +47,27 @@ export function ensureLocalParserWasm(language: string, parser: string): URL {
   return wasmUrl;
 }
 
-export function configureLocalWasmResolver(languages: string[]): void {
+interface ResolverConfiguration {
+  configureLanguagePackageResolver(resolver: LanguagePackageResolver): void;
+  configureWasmResolver(resolver: WasmResolver): void;
+}
+
+const defaultResolverConfiguration: ResolverConfiguration = {
+  configureLanguagePackageResolver: configureDefaultLanguagePackageResolver,
+  configureWasmResolver: configureDefaultWasmResolver,
+};
+
+export function configureLocalWasmResolver(
+  languages: string[],
+  configuration: ResolverConfiguration = defaultResolverConfiguration,
+  wasmResolver: WasmResolver = (language, wasm) => ensureLocalParserWasm(language, wasm.name),
+): void {
   for (const language of languages) {
     ensureLocalWasm(language);
   }
 
-  configureLanguagePackageResolver(localLanguagePackageResolver);
-  configureWasmResolver((_language, wasm) => new URL(`${wasm.name}.wasm`, fixturesRoot));
+  configuration.configureLanguagePackageResolver(localLanguagePackageResolver);
+  configuration.configureWasmResolver(wasmResolver);
 }
 
 export function localLanguagePackageResolver(packageName: string): string {

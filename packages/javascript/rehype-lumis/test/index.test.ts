@@ -4,8 +4,15 @@ import dracula from "../../themes/dist/json/dracula.json";
 import githubLight from "../../themes/dist/json/github_light.json";
 import javascript from "../../lumis/langs/javascript.ts";
 import json from "../../lumis/langs/json.ts";
+import { configureLocalWasmResolver } from "../../lumis/test/wasm.ts";
+import { configureLanguagePackageResolver, configureWasmResolver } from "@lumis-sh/lumis";
 import { htmlInline, htmlLinked, htmlMultiThemes, terminal } from "@lumis-sh/lumis/formatters";
 import rehypeLumis from "../src/index.js";
+
+configureLocalWasmResolver(["javascript", "json"], {
+  configureLanguagePackageResolver,
+  configureWasmResolver,
+});
 
 function codeBlockTree({
   code = "const answer = 42",
