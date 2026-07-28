@@ -1,6 +1,6 @@
 # {pkg_name}
 
-Self-contained Lumis language package for {languages_text}.
+Self-contained Lumis language package for {languages_text}, with its parser and queries.
 
 Built with [`tree-sitter build --wasm`](https://tree-sitter.github.io/tree-sitter/cli/build.html) `v{tree_sitter_cli_version}`
 
