@@ -88,8 +88,8 @@ importers:
   packages/javascript/lumis:
     dependencies:
       web-tree-sitter:
-        specifier: 0.26.8
-        version: 0.26.8
+        specifier: 0.26.11
+        version: 0.26.11
     devDependencies:
       '@lumis-sh/themes':
         specifier: workspace:*
@@ -3386,6 +3386,9 @@ packages:
   web-namespaces@2.0.1:
     resolution: {integrity: sha512-bKr1DkiNa2krS7qxNtdrtHAmzuYGFQLiQ13TsorsdT6ULTkPLKuu5+GsFpDlg6JFjUTwX2DyhMPG2be8uPrqsQ==}
 
+  web-tree-sitter@0.26.11:
+    resolution: {integrity: sha512-Q5Dm3YTIXSXuH6FxX6RuzX2Qwpc4DPGiYMU87Wg5Z8OIStiQFiUex4zMDc0vBTw78EphaYJacncJghCHzbZptg==}
+
   web-tree-sitter@0.26.8:
     resolution: {integrity: sha512-4sUwi7ZyOrIk5KLgYLkc2A/F0LFMQnBhfb+2Cdl7ik4ePJ6JD+fk4ofI2sA5eGawBKBaK4Vntt7Ww5KcEsay4A==}
 
@@ -5853,6 +5856,8 @@ snapshots:
       xml-name-validator: 5.0.0
 
   web-namespaces@2.0.1: {}
+
+  web-tree-sitter@0.26.11: {}
 
   web-tree-sitter@0.26.8: {}
 
