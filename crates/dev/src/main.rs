@@ -62,6 +62,10 @@ enum Commands {
     },
     GenHighlights,
     GenLanguagesMd,
+    GenLanguageCatalog {
+        #[arg(long)]
+        check: bool,
+    },
     BuildWasm {
         #[arg(default_value = "")]
         name: String,
@@ -122,6 +126,7 @@ fn main() -> Result<()> {
         Commands::PreprocessQueries { name } => preprocess_queries(&name),
         Commands::GenHighlights => gen_highlights(),
         Commands::GenLanguagesMd => gen_languages_md(),
+        Commands::GenLanguageCatalog { check } => gen_language_catalog(check),
         Commands::BuildWasm { name } => build_wasm(&name),
         Commands::StageWasm { name } => stage_wasm(&name),
         Commands::WasmMeta { name } => wasm_meta(&name),
@@ -787,11 +792,10 @@ struct QueryInfo {
     path: Option<String>,
 }
 
-#[derive(Debug, Clone, serde::Deserialize)]
+#[derive(Debug, Clone, Default, serde::Deserialize)]
 struct ParserInfo {
     git: Option<String>,
     rev: Option<String>,
-    wasm_rev: Option<String>,
     version: Option<String>,
     #[serde(rename = "crate")]
     crate_field: Option<String>,
@@ -1171,6 +1175,7 @@ fn upgrade_parsers(name: &str) -> Result<()> {
     }
 
     write_languages_toml_edit(&doc)?;
+    gen_language_catalog(false)?;
     Ok(())
 }
 
@@ -1911,6 +1916,70 @@ fn gen_languages_md() -> Result<()> {
     Ok(())
 }
 
+fn gen_language_catalog(check: bool) -> Result<()> {
+    let toml = read_languages_toml()?;
+    let document = read_languages_toml_edit()?;
+    let parser_order = document["parsers"]
+        .as_table()
+        .context("languages.toml must contain a parsers table")?
+        .iter()
+        .map(|(id, _)| id.to_string())
+        .collect::<Vec<_>>();
+    let output = render_language_catalog(&toml.parsers, &parser_order)?;
+    let path = "crates/lumis-wasm-runtime/src/catalog.rs";
+
+    if check {
+        let current = fs::read_to_string(path)
+            .with_context(|| format!("failed to read generated catalog at {path}"))?;
+        if current != output {
+            bail!("language catalog is stale; run `mise run langs-gen-catalog`");
+        }
+        println!("Verified {path}");
+    } else {
+        fs::write(path, output)?;
+        println!("Generated {path}");
+    }
+    Ok(())
+}
+
+fn render_language_catalog(
+    parsers: &BTreeMap<String, ParserInfo>,
+    parser_order: &[String],
+) -> Result<String> {
+    let mut lines = vec![
+        "// Auto-generated from languages.toml by `mise run langs-gen-catalog`.".to_string(),
+        "// Do not edit manually.".to_string(),
+        String::new(),
+        "define_catalog! {".to_string(),
+    ];
+
+    for id in parser_order {
+        let info = parsers
+            .get(id)
+            .with_context(|| format!("missing parser metadata for '{id}'"))?;
+        let default_wasm_name = format!("tree-sitter-{id}");
+        let wasm_name = info.wasm_name.as_deref().unwrap_or(&default_wasm_name);
+        let package_name = format!("@lumis-sh/wasm-{}", wasm_package_suffix(wasm_name));
+        let aliases = info
+            .aliases
+            .iter()
+            .map(|alias| format!("{alias:?}"))
+            .collect::<Vec<_>>()
+            .join(", ");
+
+        lines.extend([
+            format!("    {id:?} => {{"),
+            format!("        aliases: [{aliases}],"),
+            format!("        package_name: {package_name:?}"),
+            "    },".to_string(),
+        ]);
+    }
+
+    lines.push("}".to_string());
+    lines.push(String::new());
+    Ok(lines.join("\n"))
+}
+
 fn build_wasm(name: &str) -> Result<()> {
     let toml = read_languages_toml()?;
     let tmp = tmpdir()?;
@@ -2418,7 +2487,6 @@ fn stage_wasm(name: &str) -> Result<()> {
     let languages = packaged_languages(&toml, wasm_name)?;
     let definition_hash = language_definition_hash(&toml, wasm_name, &languages)?;
     let language_ids = languages.keys().cloned().collect::<Vec<_>>();
-    let languages_json = serde_json::to_string(&language_ids)?;
     let languages_text = language_ids.join(", ");
     let language_package = LanguagePackage {
         format_version: LANGUAGE_PACKAGE_FORMAT_VERSION,
@@ -2428,6 +2496,8 @@ fn stage_wasm(name: &str) -> Result<()> {
         parser: ParserMetadata {
             name: wasm_name.to_string(),
             grammar_name,
+            upstream_version: info.version.clone(),
+            revision: info.rev.clone(),
             sha256: wasm_sha256.clone(),
             size: wasm_bytes.len(),
         },
@@ -2465,14 +2535,9 @@ fn stage_wasm(name: &str) -> Result<()> {
     let pkg = pkg_template
         .replace("{pkg_name}", &pkg_name)
         .replace("{npm_version}", &npm_version)
-        .replace("{languages_json}", &languages_json)
         .replace("{languages_text}", &languages_text)
-        .replace("{upstream_version}", version)
-        .replace("{rev}", rev)
         .replace("{tree_sitter_cli}", &ts_cli_minor)
         .replace("{wasm_name}", wasm_name)
-        .replace("{sha256}", &wasm_sha256)
-        .replace("{wasm_size}", &wasm_bytes.len().to_string())
         .replace("{definition_hash}", &definition_hash);
     fs::write(format!("{out}/package.json"), pkg)?;
 
@@ -2538,12 +2603,8 @@ fn language_definition_hash(
         .iter()
         .filter_map(|(id, info)| {
             let default_name = format!("tree-sitter-{id}");
-            (info.wasm_name.as_deref().unwrap_or(&default_name) == wasm_name).then_some(
-                info.wasm_rev
-                    .as_deref()
-                    .or(info.rev.as_deref())
-                    .unwrap_or(""),
-            )
+            (info.wasm_name.as_deref().unwrap_or(&default_name) == wasm_name)
+                .then_some(info.rev.as_deref().unwrap_or(""))
         })
         .collect::<HashSet<_>>();
     if revisions.len() != 1 {
@@ -2569,7 +2630,7 @@ fn language_definition_hash(
         hash_definition_field(&mut digest, language.locals.as_bytes());
         hash_definition_field(&mut digest, language.brackets.as_bytes());
     }
-    Ok(format!("{:x}", digest.finalize()))
+    Ok(lower_hex(&digest.finalize()))
 }
 
 fn hash_definition_field(digest: &mut sha2::Sha256, value: &[u8]) {
@@ -2606,9 +2667,18 @@ fn wasm_grammar_name(wasm: &[u8]) -> Result<String> {
 }
 
 fn sha256_hex(bytes: &[u8]) -> String {
-    use sha2::{Digest, Sha256};
+    lumis_wasm_runtime::sha256_hex(bytes)
+}
 
-    format!("{:x}", Sha256::digest(bytes))
+fn lower_hex(bytes: &[u8]) -> String {
+    const HEX: &[u8; 16] = b"0123456789abcdef";
+
+    let mut output = String::with_capacity(bytes.len() * 2);
+    for byte in bytes {
+        output.push(HEX[(byte >> 4) as usize] as char);
+        output.push(HEX[(byte & 0x0f) as usize] as char);
+    }
+    output
 }
 
 fn wasm_meta(name: &str) -> Result<()> {
@@ -2849,5 +2919,33 @@ mod tests {
             "\"nil\" @constant.builtin"
         );
         assert_eq!(apply_text_replacements(query, "nim"), query);
+    }
+
+    #[test]
+    fn language_catalog_preserves_source_order_and_package_overrides() {
+        let parsers = BTreeMap::from([
+            (
+                "alpha".to_string(),
+                ParserInfo {
+                    aliases: vec!["a".to_string()],
+                    ..ParserInfo::default()
+                },
+            ),
+            (
+                "zeta".to_string(),
+                ParserInfo {
+                    wasm_name: Some("tree-sitter-shared".to_string()),
+                    ..ParserInfo::default()
+                },
+            ),
+        ]);
+        let order = vec!["zeta".to_string(), "alpha".to_string()];
+
+        let catalog =
+            render_language_catalog(&parsers, &order).expect("catalog should be generated");
+
+        assert!(catalog.find("\"zeta\"").unwrap() < catalog.find("\"alpha\"").unwrap());
+        assert!(catalog.contains("package_name: \"@lumis-sh/wasm-shared\""));
+        assert!(catalog.contains("aliases: [\"a\"]"));
     }
 }

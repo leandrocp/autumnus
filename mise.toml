@@ -1,4 +1,8 @@
-# Project task runner configuration. Runtime versions are intentionally not pinned.
+# Project task runner configuration. Runtime versions are generally not pinned.
+
+[tools]
+tree-sitter = "0.26"
+
 [tasks.'setup']
 description = "Install dependencies and check required tools"
 run = '''
@@ -393,6 +397,22 @@ set -euo pipefail
 cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- gen-languages-md
 '''
 
+[tasks.'langs-gen-catalog']
+description = "Generate the Rust language package catalog from languages.toml"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- gen-language-catalog
+'''
+
+[tasks.'langs-check-catalog']
+description = "Verify the Rust language package catalog matches languages.toml"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- gen-language-catalog --check
+'''
+
 [tasks.'langs-update']
 description = "Update language parser, queries, and docs"
 usage = '''
@@ -404,6 +424,7 @@ set -euo pipefail
 mise run langs-fetch-vendored-parsers ${usage_name?}
 cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- cargo-update-dep ${usage_name?}
 cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- cargo-update-features
+mise run langs-gen-catalog
 mise run langs-fetch-queries ${usage_name?}
 mise run langs-preprocess-queries ${usage_name?}
 mise run docs-gen-languages-md
@@ -529,6 +550,7 @@ arg "[name]"
 run = '''
 #!/usr/bin/env bash
 set -euo pipefail
+export PATH="$(mise where tree-sitter):$PATH"
 cargo run --manifest-path crates/dev/Cargo.toml -- build-wasm ${usage_name:-}
 '''
 
@@ -552,6 +574,7 @@ arg "<parser>"
 run = '''
 #!/usr/bin/env bash
 set -euo pipefail
+export PATH="$(mise where tree-sitter):$PATH"
 mise run wasm-build ${usage_parser?}
 cargo run --manifest-path crates/dev/Cargo.toml -- stage-wasm ${usage_parser?}
 '''

@@ -47,11 +47,10 @@ end
 
 ## Parser WASM
 
-Lumis loads missing root and injected language parsers automatically. Each
-`@lumis-sh/wasm-*` language package contains the parser, matching queries, and
-integrity metadata. Lumis caches the package metadata, then loads and verifies
-the exact parser version it names. Parser and query updates do not require a
-new Elixir package release.
+Lumis loads missing languages automatically. Each `@lumis-sh/wasm-*` language
+package contains the parser, matching queries, and integrity metadata. Lumis
+caches the package metadata, then loads and verifies the exact parser version
+it names. Parser and query updates do not require a new Elixir package release.
 
 Load expected languages before serving requests:
 

@@ -92,13 +92,21 @@ CI uses `jdx/mise-action` with the same benchmark config. Every pull request run
 ## Dynamic language packages
 
 `languages.toml` is the repository source of truth. Generated runtime catalogs
-contain only stable language IDs, aliases, and npm package names. Each
-`@lumis-sh/wasm-*` release is the independently versioned, atomic unit containing:
+contain only stable language IDs, aliases, and npm package names. `crates/dev`
+generates the checked-in Rust catalog data, which `lumis-wasm-runtime` expands
+through a declarative macro. JavaScript generation owns only JavaScript runtime
+metadata.
+
+Each `@lumis-sh/wasm-*` release is the independently versioned, atomic unit
+containing:
 
 - one parser WASM
 - every Lumis language backed by that parser
 - the matching highlight, injection, locals, and bracket queries
 - parser size, SHA-256, grammar name, and package version
+
+During staging, `crates/dev` serializes those inputs into `language.json`. The
+manifest is published inside the language package and is not checked in.
 
 Changing a parser or one of its queries publishes only that language package.
 It does not require a JavaScript, CLI, Rust, or Elixir runtime release unless

@@ -113,7 +113,7 @@ This updates:
 
 All language metadata lives in `languages.toml`. It is consumed by:
 
-- `crates/dev`: fetches vendored parsers, preprocesses queries, builds WASMs, and generates docs
+- `crates/dev`: fetches vendored parsers, preprocesses queries, builds WASMs, and generates the Rust package catalog and docs
 - `crates/lumis/build.rs`: reads `queries/processed/` to embed query constants, including Lua-to-Rust regex conversion
 - `crates/lumis-cli/build.rs`: reads `queries/processed/` to embed query constants
 - `crates/lumis-core/build.rs`: generates the `Language` enum and Rust detection metadata
@@ -126,20 +126,25 @@ Bundle definitions also live here under `[bundles.*]`.
 For Rust crates, bundle support is implemented as Cargo features such as `lang-bundle-web` and `lang-bundle-system`, which enable the related `lang-*` features transitively. The `lang-bundle-*` feature lists in `crates/lumis/Cargo.toml` and `crates/lumis-core/Cargo.toml` are generated from `languages.toml` by `mise run cargo-update-features`.
 
 - Keep one parser ID per line in bundle arrays for cleaner diffs.
-- After changing parser or bundle entries, sync Rust feature manifests and regenerate the checked-in JavaScript outputs:
+- After changing parser or bundle entries, sync the generated Rust and JavaScript outputs:
 
 ```sh
 mise run cargo-update-features
+mise run langs-gen-catalog
 pnpm --filter @lumis-sh/lumis build:generate
 pnpm --dir packages/javascript run build:wasm-bundles
 ```
 
 This updates files such as:
 
+- `crates/lumis-wasm-runtime/src/catalog.rs`
 - `packages/javascript/lumis/langs/*.ts`
 - `packages/javascript/lumis/bundles/*.ts`
 - `packages/javascript/lumis/src/generated/*`
 - `packages/javascript/wasm-bundle-*/`
+
+Automated parser upgrades regenerate the Rust catalog. CI also runs
+`mise run langs-check-catalog` and rejects stale data.
 
 #### Parser entry fields
 
@@ -241,6 +246,7 @@ In `crates/lumis/Cargo.toml`:
 mise run langs-fetch-vendored-parsers {name}
 mise run cargo-update-dep {name}
 mise run cargo-update-features
+mise run langs-gen-catalog
 mise run langs-fetch-queries {name}
 ```
 
@@ -339,7 +345,9 @@ This requires `emcc` and `tree-sitter-cli`.
 
 Each grammar is published as a self-contained `@lumis-sh/wasm-{name}` language
 package. It contains the parser WASM, matching processed queries, aliases,
-grammar metadata, byte length, and SHA-256 in `language.json`.
+grammar metadata, byte length, and SHA-256. During staging, `crates/dev`
+generates `tmp/wasm-publish/{name}/language.json`; it is published with the
+package rather than checked in.
 
 Runtime catalogs generated from `languages.toml` contain only stable IDs,
 aliases, and package names. JavaScript, CLI, and Elixir resolve the current

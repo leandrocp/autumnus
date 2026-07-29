@@ -76,15 +76,18 @@ After `npm-lumis` is published, the plugin packages, CLI package, and WASM bundl
 
 If a JS release also needs new parser WASM packages, publish those first through the WASM workflow. Run `mise run wasm-publish-needed` to see which parser packages still need publishing.
 
-Each `@lumis-sh/wasm-*` package contains its parser, matching processed queries,
-and integrity metadata in `language.json`. A parser revision or query change
+Each `@lumis-sh/wasm-*` package contains its parser and matching processed
+queries. During staging, `crates/dev` generates `language.json` from
+`languages.toml`, the processed queries, and the built parser. It is a published
+package artifact, not checked-in source. A parser revision or query change
 publishes only the affected language package; it does not require runtime
 package releases. `mise run wasm-publish-needed` compares the complete package
-definition with published package metadata.
+definition with the package's small `package.json#lumis` release marker.
 
 After changing language IDs, aliases, or parser package assignments in
-`languages.toml`, run `pnpm --filter @lumis-sh/lumis build:langs` and commit the
-generated JavaScript handles and shared Rust catalog.
+`languages.toml`, run `mise run langs-gen-catalog` and
+`pnpm --filter @lumis-sh/lumis build:langs`, then commit the generated Rust
+catalog data and JavaScript handles.
 
 ### Elixir package
 

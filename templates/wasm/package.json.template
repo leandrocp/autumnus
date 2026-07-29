@@ -20,15 +20,9 @@
     "./language.json": "./language.json"
   },
   "lumis": {
-    "languages": {languages_json},
-    "parser": "{wasm_name}",
-    "upstreamVersion": "{upstream_version}",
-    "rev": "{rev}",
     "treeSitter": "{tree_sitter_cli}",
     "formatVersion": 3,
-    "definitionHash": "{definition_hash}",
-    "sha256": "{sha256}",
-    "size": {wasm_size}
+    "definitionHash": "{definition_hash}"
   },
   "keywords": ["lumis-sh", "wasm", "tree-sitter"],
   "files": ["*.wasm", "*.json", "*.js", "*.d.ts", "README.md", "LICENSE"]

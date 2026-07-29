@@ -51,10 +51,10 @@ Omitting `language` from the formatter enables auto-detection.
 
 ## Parser loading
 
-Lumis loads missing root and injected languages automatically. Parser WASM is
-packaged with matching queries and integrity metadata, then cached in the
-platform user cache directory. It first checks release-local `priv/wasm`, so
-production releases do not need a runtime download.
+Lumis loads missing languages automatically. Parser WASM is packaged with
+matching queries and integrity metadata, then cached in the platform user cache
+directory. It first checks release-local `priv/wasm`, so production releases do
+not need a runtime download.
 
 ```bash title="Build an offline-ready release"
 MIX_ENV=prod mix do compile, lumis.parsers.cache elixir html javascript css, release

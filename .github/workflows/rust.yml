@@ -9,11 +9,13 @@ on:
     branches: [ main ]
     paths:
       - "crates/**"
+      - "languages.toml"
       - "queries/**"
       - ".github/workflows/rust.yml"
   pull_request:
     paths:
       - "crates/**"
+      - "languages.toml"
       - "queries/**"
       - ".github/workflows/rust.yml"
   workflow_dispatch:
@@ -64,6 +66,24 @@ jobs:
     with:
       msrv: '1.91'
       manifest-path: 'crates/lumis-wasm-runtime/Cargo.toml'
+  check-language-catalog:
+    if: >-
+      ${{ github.event_name == 'workflow_dispatch' ||
+          (github.event_name == 'pull_request' && github.head_ref != 'knope/release') ||
+          (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore: prepare releases')) }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: '1.91'
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "crates/dev -> target"
+          shared-key: language-catalog
+      - run: >-
+          cargo run --manifest-path crates/dev/Cargo.toml
+          --locked --no-default-features -- gen-language-catalog --check
   lint:
     if: >-
       ${{ github.event_name == 'workflow_dispatch' ||

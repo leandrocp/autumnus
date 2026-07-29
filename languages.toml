@@ -425,7 +425,6 @@ globs = ["*liquid"]
 [parsers.llvm]
 git = "https://github.com/benwilliamgraham/tree-sitter-llvm.git"
 rev = "76529b44d8de1e91f49f1f3ed34ec823d8feab89"
-wasm_rev = "2914786ae6774d4c4e25a230f4afe16aa68fe1c1"
 crate = "tree-sitter-llvm"
 version = "1.1.0"
 display_name = "LLVM"
@@ -720,7 +719,6 @@ globs = ["*.wat"]
 [parsers.xml]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-xml.git"
 rev = "4b64dd3a03ec002258d6268d712fd93716d6ab57"
-wasm_rev = "5000ae8f22d11fbe93939b05c1e37cf21117162d"
 crate = "tree-sitter-xml"
 version = "0.7.0"
 location = "xml"
@@ -884,7 +882,6 @@ globs = ["*.wgsl"]
 [parsers.zsh]
 git = "https://github.com/georgeharker/tree-sitter-zsh.git"
 rev = "9cae17bbc92fe9872f68bdb4550707b5fd5ad85d"
-wasm_rev = "bd344c23a7683e293d077c6648e88f209782fedb"
 crate = "tree-sitter-zsh"
 version = "0.63.4"
 display_name = "Zsh"

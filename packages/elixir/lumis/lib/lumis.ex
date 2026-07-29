@@ -715,8 +715,8 @@ defmodule Lumis do
   Loads and verifies one language parser.
 
   Parsers are cached by exact package version and SHA-256 digest. Calling this
-  function is optional because `highlight/2` loads missing root and injected
-  languages automatically.
+  function is optional because `highlight/2` loads missing languages
+  automatically.
   """
   @spec load_language(String.t()) :: :ok | {:error, term()}
   def load_language(language), do: Lumis.LanguageLoader.load(language)

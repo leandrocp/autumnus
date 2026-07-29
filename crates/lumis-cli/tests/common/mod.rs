@@ -1,8 +1,7 @@
 use lumis_wasm_runtime::catalog;
 use lumis_wasm_runtime::{
-    LanguagePackage, PackagedLanguage, ParserMetadata, LANGUAGE_PACKAGE_FORMAT_VERSION,
+    sha256_hex, LanguagePackage, PackagedLanguage, ParserMetadata, LANGUAGE_PACKAGE_FORMAT_VERSION,
 };
-use sha2::{Digest, Sha256};
 use std::collections::BTreeMap;
 use std::fs;
 use std::path::PathBuf;
@@ -56,7 +55,7 @@ fn build_language_fixtures() -> PathBuf {
         };
         let location = catalog::find(parser_id).unwrap();
         let wasm = fs::read(&wasm_path).unwrap();
-        let sha256 = format!("{:x}", Sha256::digest(&wasm));
+        let sha256 = sha256_hex(&wasm);
         let package_languages = catalog::LANGUAGES
             .iter()
             .filter(|language| language.package_name == location.package_name)
@@ -97,6 +96,8 @@ fn build_language_fixtures() -> PathBuf {
             parser: ParserMetadata {
                 name: stem.into(),
                 grammar_name: parser_id.into(),
+                upstream_version: None,
+                revision: None,
                 sha256: sha256.clone(),
                 size: wasm.len(),
             },

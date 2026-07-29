@@ -53,7 +53,7 @@ jobs:
       - uses: jdx/mise-action@v4.2.1
         with:
           version: 2026.7.3
-          install: false
+          install: true
 
       - uses: actions/setup-node@v7
         with:
@@ -115,9 +115,9 @@ jobs:
         uses: actions/cache@v6
         with:
           path: ~/.cache/tree-sitter
-          key: ${{ runner.os }}-tree-sitter-cli-0.26-v1
+          key: ${{ runner.os }}-tree-sitter-cli-${{ hashFiles('mise.toml') }}
           restore-keys: |
-            ${{ runner.os }}-tree-sitter-cli-0.26-
+            ${{ runner.os }}-tree-sitter-cli-
 
       - uses: actions/setup-node@v7
         with:
@@ -128,8 +128,6 @@ jobs:
         with:
           version: ${{ env.EMSDK_VERSION }}
           actions-cache-folder: emsdk-cache
-
-      - run: npm install -g tree-sitter-cli@0.26
 
       - run: mise run wasm-publish-prepare "$PARSER"
         env:

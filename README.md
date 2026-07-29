@@ -105,10 +105,10 @@ const html = await highlight('const x = 1', htmlInline({ language: javascript, t
 Lumis.highlight!("const x = 1", formatter: {:html_inline, language: "javascript", theme: "dracula"})
 ```
 
-Elixir uses the same per-language parser WASM model. Missing root and injected
-languages load automatically. Use `mix lumis.parsers.cache ...` while building
-an OTP release, then `Lumis.load_languages/1` to compile expected parsers at
-application startup.
+Elixir uses the same per-language parser WASM model. Missing languages load
+automatically. Use `mix lumis.parsers.cache ...` while building an OTP release,
+then `Lumis.load_languages/1` to compile expected parsers at application
+startup.
 
 ### [Java](https://github.com/roastedroot/lumis4j)
 

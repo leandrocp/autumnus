@@ -8,8 +8,8 @@ Used by [Lumis](https://lumis.sh) and compatible with [web-tree-sitter](https://
 
 The default export is a `URL` pointing at `{wasm_name}.wasm`, so the parser is
 stored only once and can be handled as an asset by Node.js and browser bundlers.
-`language.json` keeps the parser version, integrity, grammar name, aliases, and
-matching highlight, injection, locals, and bracket queries together.
+The generated `language.json` keeps parser provenance, integrity, grammar name,
+aliases, and matching highlight, injection, locals, and bracket queries together.
 
 ## Parser
 

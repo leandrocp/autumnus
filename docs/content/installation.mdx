@@ -98,6 +98,6 @@ The installed binary is `lumis`. Rust users can also install from crates.io with
 ## Notes
 
 - JavaScript loads parser WASM files at runtime, persists verified bytes in Node or browser caches, and supports build-time caching. See [WASM and CDN](/advanced/wasm-and-cdn).
-- Elixir loads missing root and injected parser WASM on demand; OTP releases can embed selected parsers with `mix lumis.parsers.cache`.
+- Elixir loads missing languages on demand; OTP releases can embed selected parsers with `mix lumis.parsers.cache`.
 - For local JavaScript parser assets from npm, install per-language packages such as `@lumis-sh/wasm-rust` or bundle packages such as `@lumis-sh/wasm-bundle-web`.
 - The CLI stores verified, content-addressed parsers and custom themes in a local data directory.

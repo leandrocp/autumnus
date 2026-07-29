@@ -1,6 +1,8 @@
 use anyhow::{bail, Context, Result};
 use lumis_core::highlights::HIGHLIGHT_NAMES;
 use lumis_wasm_runtime::catalog;
+#[cfg(test)]
+use lumis_wasm_runtime::sha256_hex;
 use lumis_wasm_runtime::tree_sitter_highlight::HighlightConfiguration;
 use lumis_wasm_runtime::LanguagePackage;
 use std::collections::HashMap;
@@ -393,7 +395,6 @@ impl Registry {
         use lumis_wasm_runtime::{
             PackagedLanguage, ParserMetadata, LANGUAGE_PACKAGE_FORMAT_VERSION,
         };
-        use sha2::{Digest, Sha256};
 
         let location = catalog::find(id).unwrap();
         let parser_name = format!("tree-sitter-{grammar_name}");
@@ -405,7 +406,9 @@ impl Registry {
             parser: ParserMetadata {
                 name: parser_name,
                 grammar_name: grammar_name.into(),
-                sha256: format!("{:x}", Sha256::digest(wasm)),
+                upstream_version: None,
+                revision: None,
+                sha256: sha256_hex(wasm),
                 size: wasm.len(),
             },
             languages: std::collections::BTreeMap::from([(
@@ -592,7 +595,6 @@ fn fetch_bytes(url: &str) -> Result<Vec<u8>> {
 mod tests {
     use super::*;
     use lumis_wasm_runtime::{PackagedLanguage, ParserMetadata, LANGUAGE_PACKAGE_FORMAT_VERSION};
-    use sha2::{Digest, Sha256};
     use tempfile::tempdir;
 
     const RUST_WASM: &[u8] = include_bytes!(
@@ -610,7 +612,9 @@ mod tests {
             parser: ParserMetadata {
                 name: "tree-sitter-rust".into(),
                 grammar_name: "rust".into(),
-                sha256: format!("{:x}", Sha256::digest(RUST_WASM)),
+                upstream_version: None,
+                revision: None,
+                sha256: sha256_hex(RUST_WASM),
                 size: RUST_WASM.len(),
             },
             languages: std::collections::BTreeMap::from([(

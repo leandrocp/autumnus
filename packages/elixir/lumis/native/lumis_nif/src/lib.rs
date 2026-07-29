@@ -388,9 +388,9 @@ mod tests {
     use lumis_core::formatter::{Formatter, HtmlInlineBuilder};
     use lumis_core::languages::Language;
     use lumis_wasm_runtime::{
-        LanguagePackage, PackagedLanguage, ParserMetadata, Runtime, LANGUAGE_PACKAGE_FORMAT_VERSION,
+        sha256_hex, LanguagePackage, PackagedLanguage, ParserMetadata, Runtime,
+        LANGUAGE_PACKAGE_FORMAT_VERSION,
     };
-    use sha2::{Digest, Sha256};
     use std::collections::BTreeMap;
 
     #[test]
@@ -435,7 +435,9 @@ mod tests {
             parser: ParserMetadata {
                 name: "tree-sitter-elixir".into(),
                 grammar_name: "elixir".into(),
-                sha256: format!("{:x}", Sha256::digest(&wasm)),
+                upstream_version: None,
+                revision: None,
+                sha256: sha256_hex(&wasm),
                 size: wasm.len(),
             },
             languages: BTreeMap::from([(

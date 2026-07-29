@@ -87,8 +87,8 @@ Map.has_key?(Lumis.available_languages(), "elixir")
 
 ### Parser Loading
 
-Root and injected parsers load automatically as exact, integrity-checked WASM
-assets. For releases, cache them at build time:
+Missing languages load automatically as exact, integrity-checked WASM assets.
+For releases, cache them at build time:
 
 ```sh
 MIX_ENV=prod mix do compile, lumis.parsers.cache elixir html javascript css, release

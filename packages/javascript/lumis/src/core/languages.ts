@@ -34,6 +34,8 @@ export interface LanguagePackage {
   parser: {
     name: string;
     grammarName: string;
+    upstreamVersion?: string;
+    revision?: string;
     sha256: string;
     size: number;
   };

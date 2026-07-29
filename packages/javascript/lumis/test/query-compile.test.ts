@@ -17,7 +17,6 @@ const languagesToml = parseToml(readFileSync(join(workspaceRoot, "languages.toml
     string,
     {
       rev?: string;
-      wasm_rev?: string;
       wasm_name?: string;
       query_name?: string;
     }
@@ -34,7 +33,20 @@ function resolveWasmPath(packageName: string, wasmName: string): string | undefi
 
 function installedWasmMatchesParserRevision(wasmPath: string, expectedRevision?: string): boolean {
   if (!expectedRevision) return true;
-  const packageJson = JSON.parse(readFileSync(join(dirname(wasmPath), "package.json"), "utf8")) as {
+  const packageDirectory = dirname(wasmPath);
+  const manifestPath = join(packageDirectory, "language.json");
+  if (existsSync(manifestPath)) {
+    const languagePackage = JSON.parse(readFileSync(manifestPath, "utf8")) as {
+      parser?: { revision?: string };
+    };
+    if (languagePackage.parser?.revision) {
+      return languagePackage.parser.revision === expectedRevision;
+    }
+  }
+
+  // Published packages predating language.json kept the revision in
+  // package.json. Remove this fallback after those packages age out.
+  const packageJson = JSON.parse(readFileSync(join(packageDirectory, "package.json"), "utf8")) as {
     lumis?: { rev?: string };
   };
   return packageJson.lumis?.rev === expectedRevision;
@@ -68,7 +80,7 @@ describe("processed queries compile against their matching published WASM", asyn
       const wasmName = parser.wasm_name ?? `tree-sitter-${id}`;
       const wasmPath = resolveWasmPath(language.packageName, wasmName);
       if (!wasmPath || !existsSync(wasmPath)) return;
-      if (!installedWasmMatchesParserRevision(wasmPath, parser.wasm_rev ?? parser.rev)) {
+      if (!installedWasmMatchesParserRevision(wasmPath, parser.rev)) {
         return;
       }
 

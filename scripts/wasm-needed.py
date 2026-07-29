@@ -15,7 +15,9 @@ import json
 import hashlib
 from pathlib import Path
 
-SUPPORTED_TREE_SITTER_CLI = "0.26"
+with open("mise.toml", "rb") as f:
+    SUPPORTED_TREE_SITTER_CLI = tomllib.load(f)["tools"]["tree-sitter"]
+
 PACKAGE_FORMAT_VERSION = 3
 
 
@@ -122,7 +124,7 @@ revisions = {}
 
 for pname, info in data.get("parsers", {}).items():
     wasm_name = info.get("wasm_name") or f"tree-sitter-{pname}"
-    revision = info.get("wasm_rev") or info.get("rev", "")
+    revision = info.get("rev", "")
     previous = revisions.setdefault(wasm_name, revision)
     if previous != revision:
         raise RuntimeError(

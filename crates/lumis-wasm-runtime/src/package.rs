@@ -23,6 +23,10 @@ pub struct LanguagePackage {
 pub struct ParserMetadata {
     pub name: String,
     pub grammar_name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub upstream_version: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub revision: Option<String>,
     pub sha256: String,
     pub size: usize,
 }
@@ -149,7 +153,7 @@ impl LanguagePackage {
             });
         }
 
-        let actual = format!("{:x}", Sha256::digest(bytes));
+        let actual = sha256_hex(bytes);
         if actual != self.parser.sha256 {
             return Err(LanguagePackageError::InvalidIntegrity {
                 parser: self.parser.name.clone(),
@@ -181,6 +185,19 @@ impl LanguagePackage {
     }
 }
 
+/// Returns the lowercase hexadecimal SHA-256 digest used by language packages.
+pub fn sha256_hex(bytes: &[u8]) -> String {
+    const HEX: &[u8; 16] = b"0123456789abcdef";
+
+    let digest = Sha256::digest(bytes);
+    let mut output = String::with_capacity(digest.len() * 2);
+    for byte in digest {
+        output.push(HEX[(byte >> 4) as usize] as char);
+        output.push(HEX[(byte & 0x0f) as usize] as char);
+    }
+    output
+}
+
 fn is_safe_path_segment(value: &str) -> bool {
     !matches!(value, "" | "." | "..") && !value.contains(['/', '\\', '\0'])
 }
@@ -198,7 +215,9 @@ mod tests {
             parser: ParserMetadata {
                 name: "tree-sitter-json".into(),
                 grammar_name: "json".into(),
-                sha256: format!("{:x}", Sha256::digest(b"wasm")),
+                upstream_version: None,
+                revision: None,
+                sha256: sha256_hex(b"wasm"),
                 size: 4,
             },
             languages: BTreeMap::from([(
@@ -217,6 +236,23 @@ mod tests {
         let package = package();
         assert_eq!(package.require_language("json").unwrap().0, "json");
         assert_eq!(package.require_language("JSONC").unwrap().0, "json");
+    }
+
+    #[test]
+    fn sha256_uses_lowercase_hex() {
+        assert_eq!(
+            sha256_hex(b"wasm"),
+            "336154bf67f765f8f75d16a0accee61b5ee5f6a75b2a2905703df913bd550f3e"
+        );
+    }
+
+    #[test]
+    fn parser_provenance_is_optional_for_existing_packages() {
+        let json = serde_json::to_string(&package()).unwrap();
+        let parsed = LanguagePackage::from_json(&json).unwrap();
+
+        assert_eq!(parsed.parser.upstream_version, None);
+        assert_eq!(parsed.parser.revision, None);
     }
 
     #[test]
