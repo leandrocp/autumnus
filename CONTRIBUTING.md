@@ -176,6 +176,20 @@ feature = "lang-ocaml"            # optional -- override feature name (default: 
 1. If `crate` is set, it is the crate version synced into `crates/lumis/Cargo.toml`.
 2. It always drives the npm package version for `@lumis-sh/wasm-{name}`.
 
+#### Vendoring unreleased parser fixes
+
+Lumis can deliberately vendor a grammar that also has a crates.io package when
+an unreleased source fix is required. Its C sources are then compiled by
+`crates/lumis/build.rs`, including Lumis's compiler flags, instead of by the
+external crate's build script.
+
+Forks inherit upstream tags, so the newest release tag can point behind the
+recorded fork revision. `upgrade-parsers` checks Git ancestry and never replaces
+the recorded revision with one of its ancestors. This protects unreleased fork
+fixes without separate configuration while still allowing a later descendant
+release to advance normally. When the fix ships in an upstream crate release,
+return the parser entry to the upstream repository and crate.
+
 #### Query entry fields
 
 ```toml
@@ -247,7 +261,9 @@ mise run langs-fetch-queries {name}
 
 #### 4. Wire up vendored parsers
 
-Do this only if there is no crates.io package:
+Do this when there is no crates.io package or when Lumis intentionally vendors
+an unreleased source fix as described in
+[Vendoring unreleased parser fixes](#vendoring-unreleased-parser-fixes):
 
 - Add compilation in `crates/lumis/build.rs` inside `vendored_parsers()`.
 - Add an `unsafe extern "C"` declaration in `crates/lumis/src/languages.rs`:
