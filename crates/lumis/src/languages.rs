@@ -84,6 +84,8 @@ unsafe extern "C" {
     fn tree_sitter_angular() -> *const ();
     #[cfg(feature = "lang-astro")]
     fn tree_sitter_astro() -> *const ();
+    #[cfg(feature = "lang-bash")]
+    fn tree_sitter_bash() -> *const ();
     #[cfg(feature = "lang-csv")]
     fn tree_sitter_csv() -> *const ();
     #[cfg(feature = "lang-dart")]
@@ -122,14 +124,20 @@ unsafe extern "C" {
     fn tree_sitter_nim() -> *const ();
     #[cfg(feature = "lang-protobuf")]
     fn tree_sitter_proto() -> *const ();
+    #[cfg(feature = "lang-python")]
+    fn tree_sitter_python() -> *const ();
     #[cfg(feature = "lang-perl")]
     fn tree_sitter_perl() -> *const ();
+    #[cfg(feature = "lang-ruby")]
+    fn tree_sitter_ruby() -> *const ();
     #[cfg(feature = "lang-scss")]
     fn tree_sitter_scss() -> *const ();
     #[cfg(feature = "lang-surface")]
     fn tree_sitter_surface() -> *const ();
     #[cfg(feature = "lang-terraform")]
     fn tree_sitter_terraform() -> *const ();
+    #[cfg(feature = "lang-toon")]
+    fn tree_sitter_toon() -> *const ();
     #[cfg(feature = "lang-nushell")]
     fn tree_sitter_nu() -> *const ();
     #[cfg(feature = "lang-vim")]
@@ -140,6 +148,10 @@ unsafe extern "C" {
     fn tree_sitter_wat() -> *const ();
     #[cfg(feature = "lang-wgsl")]
     fn tree_sitter_wgsl() -> *const ();
+    #[cfg(feature = "lang-xml")]
+    fn tree_sitter_xml() -> *const ();
+    #[cfg(feature = "lang-yaml")]
+    fn tree_sitter_yaml() -> *const ();
 }
 
 include!(concat!(env!("OUT_DIR"), "/queries_constants.rs"));
@@ -433,8 +445,9 @@ static ASTRO_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-bash")]
 static BASH_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_bash) };
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(tree_sitter_bash::LANGUAGE),
+        tree_sitter::Language::new(language_fn),
         "bash",
         BASH_HIGHLIGHTS,
         BASH_INJECTIONS,
@@ -1492,8 +1505,9 @@ static PLAIN_TEXT_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-python")]
 static PYTHON_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_python) };
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(tree_sitter_python::LANGUAGE),
+        tree_sitter::Language::new(language_fn),
         "python",
         PYTHON_HIGHLIGHTS,
         PYTHON_INJECTIONS,
@@ -1576,8 +1590,9 @@ static RST_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-ruby")]
 static RUBY_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_ruby) };
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(tree_sitter_ruby::LANGUAGE),
+        tree_sitter::Language::new(language_fn),
         "ruby",
         RUBY_HIGHLIGHTS,
         RUBY_INJECTIONS,
@@ -1749,8 +1764,9 @@ static TERRAFORM_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-toon")]
 static TOON_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_toon) };
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(tree_sitter_toon::LANGUAGE),
+        tree_sitter::Language::new(language_fn),
         "toon",
         TOON_HIGHLIGHTS,
         TOON_INJECTIONS,
@@ -1897,8 +1913,9 @@ static WGSL_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-xml")]
 static XML_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_xml) };
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(tree_sitter_xml::LANGUAGE_XML),
+        tree_sitter::Language::new(language_fn),
         "xml",
         XML_HIGHLIGHTS,
         XML_INJECTIONS,
@@ -1911,8 +1928,9 @@ static XML_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-yaml")]
 static YAML_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_yaml) };
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(tree_sitter_yaml::LANGUAGE),
+        tree_sitter::Language::new(language_fn),
         "yaml",
         YAML_HIGHLIGHTS,
         YAML_INJECTIONS,

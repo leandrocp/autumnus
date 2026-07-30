@@ -1272,11 +1272,28 @@ fn fetch_parsers(name: &str) -> Result<()> {
                 println!("  Warning: no generated src directory found for {parser_name}");
             }
         } else if let Some(ref location) = info.location {
-            fs::create_dir_all(&dest)?;
+            let _ = run_cmd_ok(&format!("rm -rf {dest}"));
+            let location_dest = format!("{dest}/{location}");
+            fs::create_dir_all(&location_dest)?;
             let src = format!("{clone_dir}/{location}/src");
             if Path::new(&src).is_dir() {
-                let _ = run_cmd_ok(&format!("rm -rf {dest}/src"));
-                let _ = run_cmd_ok(&format!("cp -r {src} {dest}/"));
+                let _ = run_cmd_ok(&format!("cp -r {src} {location_dest}/"));
+
+                // Multi-grammar repositories can share scanner support files
+                // from a root-level common directory (for example XML).
+                let common = format!("{clone_dir}/common");
+                if Path::new(&common).is_dir() {
+                    let common_dest = Path::new(&dest).join("common");
+                    fs::create_dir_all(&common_dest)?;
+                    for entry in fs::read_dir(&common)? {
+                        let entry = entry?;
+                        let path = entry.path();
+                        if path.extension().and_then(|extension| extension.to_str()) == Some("h") {
+                            fs::copy(&path, common_dest.join(entry.file_name()))?;
+                        }
+                    }
+                }
+
                 println!("  Updated {parser_name} (location: {location})");
             } else {
                 println!(
