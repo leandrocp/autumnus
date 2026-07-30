@@ -4,6 +4,7 @@
     "angular",
     "arduino",
     "asm",
+    "bash",
     "c",
     "caddy",
     "clojure",
@@ -29,6 +30,7 @@
     "go",
     "hcl",
     "heex",
+    "html",
     "ini",
     "javadoc",
     "javascript",
@@ -63,12 +65,14 @@
     "racket",
     "regex",
     "rst",
+    "ruby",
     "rust",
     "scala",
     "scheme",
     "solidity",
     "sql",
     "surface",
+    "svelte",
     "swift",
     "systemverilog",
     "terraform",
@@ -77,6 +81,7 @@
     "vhdl",
     "vim",
     "xml",
+    "yaml",
     "zsh"
   ]
 }
