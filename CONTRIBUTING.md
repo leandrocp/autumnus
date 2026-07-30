@@ -152,6 +152,7 @@ crate = "tree-sitter-bash"        # optional -- Rust crate name on crates.io
 version = "0.25.1"                # required -- crate version (if crate) and WASM release version
 location = "bash"                 # optional -- subdirectory in multi-grammar repos
 generate = true                   # optional -- run `tree-sitter generate` before build
+pin = true                        # optional -- skip automated rev/version upgrades
 aliases = ["sh", "zsh"]           # optional -- alternative names (extra from_str matches)
 wasm_name = "tree-sitter-bash"    # optional -- override WASM filename (default: tree-sitter-{name})
 query_name = "bash"               # optional -- override query directory name (default: parser name)
@@ -175,6 +176,23 @@ feature = "lang-ocaml"            # optional -- override feature name (default: 
 
 1. If `crate` is set, it is the crate version synced into `crates/lumis/Cargo.toml`.
 2. It always drives the npm package version for `@lumis-sh/wasm-{name}`.
+
+#### Parsers pinned to a fork
+
+Set `pin = true` when Lumis deliberately vendors a fork revision that must not
+follow ordinary release tags, such as an unreleased source fix. Forks inherit
+upstream tags, so `upgrade-parsers` would otherwise resolve the fork's newest
+release tag and can move `rev` back to the unfixed upstream release commit. The
+weekly `Update Languages` workflow runs that upgrade unattended.
+
+`pin = true` makes `upgrade-parsers` preserve the recorded `rev` and `version`;
+`fetch-vendored-parsers` still fetches that exact revision. When the fix ships
+in an upstream crate release, point `git` back to upstream, restore `crate`, and
+remove `pin`.
+
+Vendoring a grammar that has a crates.io package is intentional in this case:
+the grammar's C sources are then compiled by `crates/lumis/build.rs`, including
+Lumis's compiler flags, instead of by the external crate's build script.
 
 #### Query entry fields
 
@@ -247,7 +265,9 @@ mise run langs-fetch-queries {name}
 
 #### 4. Wire up vendored parsers
 
-Do this only if there is no crates.io package:
+Do this when there is no crates.io package or when Lumis intentionally vendors
+a pinned source fix as described in
+[Parsers pinned to a fork](#parsers-pinned-to-a-fork):
 
 - Add compilation in `crates/lumis/build.rs` inside `vendored_parsers()`.
 - Add an `unsafe extern "C"` declaration in `crates/lumis/src/languages.rs`:

@@ -856,6 +856,11 @@ struct ParserInfo {
     location: Option<String>,
     query_name: Option<String>,
     generate: Option<bool>,
+    /// Hold `rev` and `version` at their recorded values during automated upgrades.
+    ///
+    /// Forks inherit upstream tags, so resolving their latest release can otherwise
+    /// move a source-fix pin back to the unfixed upstream release commit.
+    pin: Option<bool>,
     wasm_name: Option<String>,
     feature: Option<String>,
     #[allow(dead_code)]
@@ -1190,6 +1195,11 @@ fn upgrade_parsers(name: &str) -> Result<()> {
             continue;
         }
 
+        if info.pin.unwrap_or(false) {
+            println!("  {parser_name}: pinned, skipping upgrade");
+            continue;
+        }
+
         let current_ver = info.version.as_deref().unwrap_or("");
         let current_rev = info.rev.as_deref().unwrap_or("");
         let (ver, new_rev) = if let Some(crate_name) = info.crate_field.as_deref() {
@@ -1261,55 +1271,46 @@ fn fetch_parsers(name: &str) -> Result<()> {
         let dest = format!("crates/lumis/vendored_parsers/{parser_dir}");
 
         if info.generate.unwrap_or(false) {
-            let _ = run_cmd_ok(&format!("rm -rf {dest}"));
-            fs::create_dir_all(&dest)?;
             run_cmd_ok(&format!("cd {clone_dir} && tree-sitter generate"))?;
             let src = format!("{clone_dir}/src");
-            if Path::new(&src).is_dir() {
-                let _ = run_cmd_ok(&format!("cp -r {src} {dest}/"));
-                println!("  Updated {parser_name} (generated)");
-            } else {
-                println!("  Warning: no generated src directory found for {parser_name}");
+            if !Path::new(&src).is_dir() {
+                bail!("no generated src directory found for {parser_name} at {src}");
             }
+
+            let _ = run_cmd_ok(&format!("rm -rf {dest}"));
+            fs::create_dir_all(&dest)?;
+            run_cmd_ok(&format!("cp -r {src} {dest}/"))?;
+            println!("  Updated {parser_name} (generated)");
         } else if let Some(ref location) = info.location {
+            let src = format!("{clone_dir}/{location}/src");
+            if !Path::new(&src).is_dir() {
+                bail!("no src directory found for {parser_name} in location {location}");
+            }
+
             let _ = run_cmd_ok(&format!("rm -rf {dest}"));
             let location_dest = format!("{dest}/{location}");
             fs::create_dir_all(&location_dest)?;
-            let src = format!("{clone_dir}/{location}/src");
-            if Path::new(&src).is_dir() {
-                let _ = run_cmd_ok(&format!("cp -r {src} {location_dest}/"));
+            run_cmd_ok(&format!("cp -r {src} {location_dest}/"))?;
 
-                // Multi-grammar repositories can share scanner support files
-                // from a root-level common directory (for example XML).
-                let common = format!("{clone_dir}/common");
-                if Path::new(&common).is_dir() {
-                    let common_dest = Path::new(&dest).join("common");
-                    fs::create_dir_all(&common_dest)?;
-                    for entry in fs::read_dir(&common)? {
-                        let entry = entry?;
-                        let path = entry.path();
-                        if path.extension().and_then(|extension| extension.to_str()) == Some("h") {
-                            fs::copy(&path, common_dest.join(entry.file_name()))?;
-                        }
-                    }
-                }
-
-                println!("  Updated {parser_name} (location: {location})");
-            } else {
-                println!(
-                    "  Warning: no src directory found for {parser_name} in location {location}"
-                );
+            // Multi-grammar repositories can share support files from a root-level
+            // common directory (for example XML). Preserve the complete directory:
+            // scanners may include or otherwise depend on non-header files too.
+            let common = format!("{clone_dir}/common");
+            if Path::new(&common).is_dir() {
+                run_cmd_ok(&format!("cp -r {common} {dest}/"))?;
             }
+
+            println!("  Updated {parser_name} (location: {location})");
         } else {
-            fs::create_dir_all(&dest)?;
             let src = format!("{clone_dir}/src");
-            if Path::new(&src).is_dir() {
-                let _ = run_cmd_ok(&format!("rm -rf {dest}/src"));
-                let _ = run_cmd_ok(&format!("cp -r {src} {dest}/"));
-                println!("  Updated {parser_name}");
-            } else {
-                println!("  Warning: no src directory found for {parser_name}");
+            if !Path::new(&src).is_dir() {
+                bail!("no src directory found for {parser_name} at {src}");
             }
+
+            fs::create_dir_all(&dest)?;
+            let _ = run_cmd_ok(&format!("rm -rf {dest}/src"));
+            run_cmd_ok(&format!("cp -r {src} {dest}/"))?;
+            println!("  Updated {parser_name}");
         }
 
         let _ = run_cmd_ok(&format!("rm -rf {clone_dir}"));

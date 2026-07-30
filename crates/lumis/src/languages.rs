@@ -2121,6 +2121,55 @@ mod tests {
         }
     }
 
+    #[cfg(feature = "lang-python")]
+    #[test]
+    fn python_class_attributes_are_local_fields() {
+        use streaming_iterator::StreamingIterator;
+        use tree_sitter::{Parser, Query, QueryCursor};
+
+        let source: &[u8] = b"class Human:\n    species = \"H. sapiens\"\n";
+        let config = Language::Python.config();
+
+        let mut parser = Parser::new();
+        parser
+            .set_language(&config.language)
+            .expect("Python parser language should load");
+        let tree = parser
+            .parse(source, None)
+            .expect("Python source should parse");
+
+        let query = Query::new(&config.language, PYTHON_LOCALS)
+            .expect("Python locals query should compile");
+        let field_capture = query
+            .capture_names()
+            .iter()
+            .position(|name| *name == "local.definition.field")
+            .expect("Python locals query should define the field capture")
+            as u32;
+
+        let mut cursor = QueryCursor::new();
+        let mut matches = cursor.matches(&query, tree.root_node(), source);
+        let mut fields = Vec::new();
+
+        while let Some(query_match) = matches.next() {
+            for capture in query_match.captures {
+                if capture.index == field_capture {
+                    fields.push(
+                        capture
+                            .node
+                            .utf8_text(source)
+                            .expect("captured Python field should be UTF-8"),
+                    );
+                }
+            }
+        }
+
+        assert!(
+            fields.contains(&"species"),
+            "expected class attribute to be captured as a local field, got {fields:?}"
+        );
+    }
+
     language_sample_tests! {
         #[cfg(feature = "lang-arduino")]
         test_arduino_config_loads => (Language::Arduino, "Arduino", "arduino.ino");
