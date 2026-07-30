@@ -183,11 +183,12 @@ an unreleased source fix is required. Its C sources are then compiled by
 `crates/lumis/build.rs`, including Lumis's compiler flags, instead of by the
 external crate's build script.
 
-Forks inherit upstream tags, so an automated release-tag upgrade can move a
-fork back to an unfixed upstream revision. Keep temporary exceptions for these
-forks in the `Update Languages` workflow while continuing to refresh their
-queries. When the fix ships in an upstream crate release, return the parser
-entry to the upstream repository and crate and remove its workflow exception.
+Forks inherit upstream tags, so the newest release tag can point behind the
+recorded fork revision. `upgrade-parsers` checks Git ancestry and never replaces
+the recorded revision with one of its ancestors. This protects unreleased fork
+fixes without separate configuration while still allowing a later descendant
+release to advance normally. When the fix ships in an upstream crate release,
+return the parser entry to the upstream repository and crate.
 
 #### Query entry fields
 

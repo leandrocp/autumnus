@@ -1079,6 +1079,73 @@ fn git_latest_release_rev(url: &str) -> Result<Option<(String, String)>> {
     Ok(Some((version.to_string(), rev)))
 }
 
+fn git_is_ancestor(url: &str, ancestor: &str, descendant: &str) -> Result<bool> {
+    if ancestor == descendant {
+        return Ok(true);
+    }
+
+    let repo = tmpdir()?;
+    let result = (|| {
+        let init = Command::new("git")
+            .args(["init", "--bare", &repo])
+            .output()
+            .with_context(|| format!("failed to initialize temporary git repository at {repo}"))?;
+        if !init.status.success() {
+            bail!("failed to initialize temporary git repository at {repo}");
+        }
+
+        let ancestor_ref = "refs/lumis/ancestor";
+        let descendant_ref = "refs/lumis/descendant";
+        let fetch = Command::new("git")
+            .args([
+                "-C",
+                &repo,
+                "fetch",
+                "--quiet",
+                "--filter=blob:none",
+                "--no-tags",
+                url,
+                &format!("{ancestor}:{ancestor_ref}"),
+                &format!("{descendant}:{descendant_ref}"),
+            ])
+            .output()
+            .with_context(|| {
+                format!("failed to fetch parser revisions {ancestor} and {descendant} from {url}")
+            })?;
+        if !fetch.status.success() {
+            bail!(
+                "failed to fetch parser revisions {ancestor} and {descendant} from {url}: {}",
+                String::from_utf8_lossy(&fetch.stderr).trim()
+            );
+        }
+
+        let status = Command::new("git")
+            .args([
+                "-C",
+                &repo,
+                "merge-base",
+                "--is-ancestor",
+                ancestor_ref,
+                descendant_ref,
+            ])
+            .status()
+            .with_context(|| {
+                format!("failed to compare parser revisions {ancestor} and {descendant} from {url}")
+            })?;
+
+        match status.code() {
+            Some(0) => Ok(true),
+            Some(1) => Ok(false),
+            _ => bail!(
+                "git merge-base failed while comparing parser revisions {ancestor} and {descendant} from {url}"
+            ),
+        }
+    })();
+
+    let _ = fs::remove_dir_all(&repo);
+    result
+}
+
 fn latest_crate_version(crate_name: &str) -> Result<Option<String>> {
     let url = format!("https://crates.io/api/v1/crates/{crate_name}");
     let Ok(mut resp) = ureq::get(&url).call() else {
@@ -1211,6 +1278,18 @@ fn upgrade_parsers(name: &str) -> Result<()> {
 
         if new_rev.is_empty() {
             println!("Warning: could not resolve revision for {parser_name}, skipping");
+            continue;
+        }
+
+        // Forks inherit upstream tags. Never replace a recorded fork revision
+        // with an older tagged commit that it already contains.
+        if !current_rev.is_empty()
+            && current_rev != new_rev
+            && git_is_ancestor(git, &new_rev, current_rev)?
+        {
+            println!(
+                "  {parser_name}: keeping {current_rev}; candidate {new_rev} is an ancestor"
+            );
             continue;
         }
 
@@ -2605,8 +2684,34 @@ fn wasm_package_suffix(wasm_name: &str) -> &str {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::path::Path;
     use std::sync::atomic::{AtomicU64, Ordering};
     use std::time::{SystemTime, UNIX_EPOCH};
+
+    fn run_test_git(repo: &Path, args: &[&str]) -> String {
+        let output = Command::new("git")
+            .arg("-C")
+            .arg(repo)
+            .args(args)
+            .output()
+            .expect("test git command should run");
+
+        assert!(
+            output.status.success(),
+            "git {} failed: {}",
+            args.join(" "),
+            String::from_utf8_lossy(&output.stderr)
+        );
+
+        String::from_utf8_lossy(&output.stdout).trim().to_string()
+    }
+
+    fn commit_test_revision(repo: &Path, contents: &str) -> String {
+        fs::write(repo.join("parser.c"), contents).expect("test revision should be written");
+        run_test_git(repo, &["add", "parser.c"]);
+        run_test_git(repo, &["commit", "--quiet", "-m", contents.trim()]);
+        run_test_git(repo, &["rev-parse", "HEAD"])
+    }
 
     #[test]
     fn release_version_from_tag_accepts_short_stable_tags() {
@@ -2630,6 +2735,32 @@ mod tests {
             .as_nanos();
         let counter = COUNTER.fetch_add(1, Ordering::Relaxed);
         std::env::temp_dir().join(format!("lumis-dev-query-test-{unique}-{counter}"))
+    }
+
+    #[test]
+    fn git_ancestry_detects_backward_parser_updates() {
+        let root = unique_test_root();
+        let source = root.join("source");
+        fs::create_dir_all(&source).expect("test repository should be created");
+
+        run_test_git(&source, &["init", "--quiet"]);
+        run_test_git(&source, &["config", "commit.gpgsign", "false"]);
+        run_test_git(&source, &["config", "user.name", "Lumis"]);
+        run_test_git(&source, &["config", "user.email", "dev@lumis.sh"]);
+        let first = commit_test_revision(&source, "first\n");
+        let second = commit_test_revision(&source, "second\n");
+        let source_url = source.to_string_lossy();
+
+        assert!(
+            git_is_ancestor(&source_url, &first, &second)
+                .expect("forward ancestry check should succeed")
+        );
+        assert!(
+            !git_is_ancestor(&source_url, &second, &first)
+                .expect("backward ancestry check should succeed")
+        );
+
+        let _ = fs::remove_dir_all(root);
     }
 
     #[test]
