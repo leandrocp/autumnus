@@ -101,7 +101,20 @@ jobs:
             languages.toml)
           echo "QUERY_NAME=$QUERY_NAME" >> "$GITHUB_ENV"
 
-          mise run langs-upgrade-parsers "$LANGUAGE"
+          # These grammars temporarily use fork commits with unreleased parser
+          # fixes. Forks inherit upstream tags, so upgrading by release tag
+          # would move them back to vulnerable revisions. Keep query refreshes
+          # running, but preserve these parser revisions until upstream releases
+          # contain the fixes.
+          case "$LANGUAGE" in
+            bash|html|python|ruby|svelte|toon|xml|yaml)
+              echo "Preserving vendored source-fix revision for $LANGUAGE"
+              ;;
+            *)
+              mise run langs-upgrade-parsers "$LANGUAGE"
+              ;;
+          esac
+
           mise run langs-upgrade-queries "$QUERY_NAME"
           mise run langs-fetch-vendored-parsers "$LANGUAGE"
           mise run langs-fetch-queries "$QUERY_NAME"

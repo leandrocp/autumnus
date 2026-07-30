@@ -856,11 +856,6 @@ struct ParserInfo {
     location: Option<String>,
     query_name: Option<String>,
     generate: Option<bool>,
-    /// Hold `rev` and `version` at their recorded values during automated upgrades.
-    ///
-    /// Forks inherit upstream tags, so resolving their latest release can otherwise
-    /// move a source-fix pin back to the unfixed upstream release commit.
-    pin: Option<bool>,
     wasm_name: Option<String>,
     feature: Option<String>,
     #[allow(dead_code)]
@@ -1192,11 +1187,6 @@ fn upgrade_parsers(name: &str) -> Result<()> {
     for (parser_name, info) in &toml.parsers {
         let Some(ref git) = info.git else { continue };
         if !name.is_empty() && parser_name != name {
-            continue;
-        }
-
-        if info.pin.unwrap_or(false) {
-            println!("  {parser_name}: pinned, skipping upgrade");
             continue;
         }
 
