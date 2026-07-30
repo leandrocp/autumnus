@@ -2192,18 +2192,24 @@ fn build_wasm(name: &str) -> Result<()> {
 
         if has_grammar_source || info.generate.unwrap_or(false) {
             if has_package_json {
-                let npm_cmd = if has_package_lock {
-                    "npm ci --ignore-scripts"
-                } else {
-                    "npm install --ignore-scripts"
-                };
                 let install_dir = if Path::new(&repo_dir).join("package.json").exists() {
                     &repo_dir
                 } else {
                     &metadata_dir
                 };
                 println!("* installing npm dependencies in {install_dir}");
-                let _ = run_cmd_ok(&format!("cd {install_dir} && {npm_cmd}"));
+                // `npm ci` refuses to run when a grammar repository ships a
+                // `package-lock.json` that has drifted from its `package.json`, which
+                // several upstream grammars do. Fall back to `npm install` so the parser
+                // stays buildable instead of silently generating without dependencies.
+                let ci_failed = has_package_lock
+                    && run_cmd_ok(&format!("cd {install_dir} && npm ci --ignore-scripts")).is_err();
+                if ci_failed {
+                    println!("  npm ci failed, retrying with npm install");
+                }
+                if ci_failed || !has_package_lock {
+                    let _ = run_cmd_ok(&format!("cd {install_dir} && npm install --ignore-scripts"));
+                }
             }
             println!("* generating parser sources in {repo_dir}");
             let _ = run_cmd_ok(&format!("cd {repo_dir} && tree-sitter generate"));
