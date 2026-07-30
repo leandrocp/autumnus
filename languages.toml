@@ -327,9 +327,8 @@ variant = "HEEx"
 globs = ["*.heex", "*.neex"]
 
 [parsers.html]
-git = "https://github.com/tree-sitter/tree-sitter-html.git"
-rev = "5a5ca8551a179998360b4a4ca2c0f366a35acc03"
-crate = "tree-sitter-html"
+git = "https://github.com/leandrocp/tree-sitter-html.git"
+rev = "7dfafded732a8ee82e8d8776619a56ddadb0bdd0"
 version = "0.23.2"
 variant = "HTML"
 globs = ["*.html", "*.htm", "*.xhtml"]
@@ -638,9 +637,8 @@ globs = ["*.surface", "*.sface"]
 emacs = ["surface"]
 
 [parsers.svelte]
-git = "https://github.com/tree-sitter-grammars/tree-sitter-svelte.git"
-rev = "774a65aea563accc35f5d45fafa4d96ec5761f57"
-crate = "tree-sitter-svelte-ng"
+git = "https://github.com/leandrocp/tree-sitter-svelte.git"
+rev = "bf4eff70e5297506e9f255389ce77fa393ed744b"
 version = "1.0.2"
 globs = ["*.svelte"]
 

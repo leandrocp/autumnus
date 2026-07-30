@@ -100,6 +100,8 @@ unsafe extern "C" {
     fn tree_sitter_glimmer() -> *const ();
     #[cfg(feature = "lang-haskell")]
     fn tree_sitter_haskell() -> *const ();
+    #[cfg(feature = "lang-html")]
+    fn tree_sitter_html() -> *const ();
     #[cfg(feature = "lang-http")]
     fn tree_sitter_http() -> *const ();
     #[cfg(feature = "lang-iex")]
@@ -134,6 +136,8 @@ unsafe extern "C" {
     fn tree_sitter_scss() -> *const ();
     #[cfg(feature = "lang-surface")]
     fn tree_sitter_surface() -> *const ();
+    #[cfg(feature = "lang-svelte")]
+    fn tree_sitter_svelte() -> *const ();
     #[cfg(feature = "lang-terraform")]
     fn tree_sitter_terraform() -> *const ();
     #[cfg(feature = "lang-toon")]
@@ -965,8 +969,9 @@ static HEEX_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-html")]
 static HTML_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_html) };
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(tree_sitter_html::LANGUAGE),
+        tree_sitter::Language::new(language_fn),
         "html",
         HTML_HIGHLIGHTS,
         HTML_INJECTIONS,
@@ -1707,8 +1712,9 @@ static SURFACE_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-svelte")]
 static SVELTE_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_svelte) };
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(tree_sitter_svelte_ng::LANGUAGE),
+        tree_sitter::Language::new(language_fn),
         "svelte",
         SVELTE_HIGHLIGHTS,
         SVELTE_INJECTIONS,
