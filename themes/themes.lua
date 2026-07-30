@@ -6,6 +6,31 @@
 -- - config: Function to set up and activate the theme (required)
 -- - dependencies: Optional array of dependency URLs
 
+local function load_material(colorscheme)
+	require("material").setup({ async_loading = false })
+
+	local original_set_hl = vim.api.nvim_set_hl
+	vim.api.nvim_set_hl = function(namespace_id, name, value)
+		local link = type(value) == "table" and value.link or nil
+
+		-- material.nvim defines a lowercase "exception" legacy alias.
+		-- Highlight names are case-insensitive, so applying that self-link
+		-- clears the concrete Exception style depending on iteration order.
+		if type(link) == "string" and string.lower(name) == string.lower(link) then
+			return
+		end
+
+		return original_set_hl(namespace_id, name, value)
+	end
+
+	local success, err = pcall(vim.cmd.colorscheme, colorscheme)
+	vim.api.nvim_set_hl = original_set_hl
+
+	if not success then
+		error(err)
+	end
+end
+
 return {
 	{
 		url = "https://github.com/folke/lazy.nvim",
@@ -432,8 +457,7 @@ return {
 		config = function()
 			vim.o.background = "dark"
 			vim.g.material_style = "darker"
-			require("material").setup({ async_loading = false })
-			vim.cmd([[colorscheme material-darker]])
+			load_material("material-darker")
 		end,
 	},
 	{
@@ -442,8 +466,7 @@ return {
 		config = function()
 			vim.o.background = "light"
 			vim.g.material_style = "lighter"
-			require("material").setup({ async_loading = false })
-			vim.cmd([[colorscheme material-lighter]])
+			load_material("material-lighter")
 		end,
 	},
 	{
@@ -452,8 +475,7 @@ return {
 		config = function()
 			vim.o.background = "dark"
 			vim.g.material_style = "oceanic"
-			require("material").setup({ async_loading = false })
-			vim.cmd([[colorscheme material-oceanic]])
+			load_material("material-oceanic")
 		end,
 	},
 	{
@@ -462,8 +484,7 @@ return {
 		config = function()
 			vim.o.background = "dark"
 			vim.g.material_style = "palenight"
-			require("material").setup({ async_loading = false })
-			vim.cmd([[colorscheme material-palenight]])
+			load_material("material-palenight")
 		end,
 	},
 	{
@@ -472,8 +493,7 @@ return {
 		config = function()
 			vim.o.background = "dark"
 			vim.g.material_style = "deep ocean"
-			require("material").setup({ async_loading = false })
-			vim.cmd([[colorscheme material-deep-ocean]])
+			load_material("material-deep-ocean")
 		end,
 	},
 	{

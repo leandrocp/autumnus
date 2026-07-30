@@ -8,12 +8,18 @@ on:
   push:
     branches: [ main ]
     paths:
+      - ".cargo/config.toml"
+      - "Cargo.lock"
+      - "Cargo.toml"
       - "crates/**"
       - "languages.toml"
       - "queries/**"
       - ".github/workflows/rust.yml"
   pull_request:
     paths:
+      - ".cargo/config.toml"
+      - "Cargo.lock"
+      - "Cargo.toml"
       - "crates/**"
       - "languages.toml"
       - "queries/**"
@@ -84,6 +90,126 @@ jobs:
       - run: >-
           cargo run --manifest-path crates/dev/Cargo.toml
           --locked --no-default-features -- gen-language-catalog --check
+  test-packaged-parsers:
+    if: >-
+      ${{ github.event_name == 'workflow_dispatch' ||
+          (github.event_name == 'pull_request' && github.head_ref != 'knope/release') ||
+          (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore: prepare releases')) }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.os }}
+    env:
+      MALLOC_CHECK_: "3"
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Package Lumis
+        run: cargo package -p lumis --no-verify
+
+      - name: Test and audit the extracted package
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          package_root="$RUNNER_TEMP/lumis-package"
+          archive="$(find target/package -maxdepth 1 -name 'lumis-*.crate' -print -quit)"
+          test -n "$archive"
+
+          mkdir -p "$package_root"
+          tar -xzf "$archive" -C "$package_root"
+          package_dir="$(find "$package_root" -mindepth 1 -maxdepth 1 -type d -name 'lumis-*' -print -quit)"
+          test -n "$package_dir"
+          test ! -e "$package_dir/.cargo/config.toml"
+
+          cp -R samples "$RUNNER_TEMP/samples"
+
+          cd "$package_dir"
+          export CARGO_TARGET_DIR="$RUNNER_TEMP/lumis-package-target"
+          cargo test \
+            --release \
+            --no-default-features \
+            --features all-languages \
+            languages::tests::test_all_available_languages_have_samples_and_highlight \
+            -- --exact --nocapture
+
+          metadata="$RUNNER_TEMP/lumis-package-metadata.json"
+          offenders="$RUNNER_TEMP/unsafe-tree-sitter-scanners.txt"
+          cargo metadata \
+            --format-version 1 \
+            --all-features \
+            >"$metadata"
+          : >"$offenders"
+
+          while IFS=$'\t' read -r package_name package_version package_manifest; do
+            dependency_dir="${package_manifest%/Cargo.toml}"
+
+            while IFS= read -r -d '' header; do
+              if ! grep -Eq \
+                '_array__grow\(\(Array[[:space:]]*\*\)\(self\)' \
+                "$header"; then
+                continue
+              fi
+
+              source_dir="${header%/tree_sitter/array.h}"
+              scanners=()
+              while IFS= read -r -d '' scanner; do
+                if grep -Eq \
+                  'array_(assign|extend|grow_by|insert|push|reserve|splice)[[:space:]]*\(' \
+                  "$scanner"; then
+                  scanners+=("${scanner#"$dependency_dir"/}")
+                fi
+              done < <(
+                find "$source_dir" \
+                  -maxdepth 1 \
+                  -type f \
+                  \( -name 'scanner.c' -o -name 'scanner.cc' -o -name 'scanner.cpp' \) \
+                  -print0
+              )
+
+              if ((${#scanners[@]} > 0)); then
+                scanner_list="$(IFS=', '; echo "${scanners[*]}")"
+                printf '%s\t%s\t%s\t%s\n' \
+                  "$package_name" \
+                  "$package_version" \
+                  "$scanner_list" \
+                  "${header#"$dependency_dir"/}" \
+                  >>"$offenders"
+              fi
+            done < <(
+              find "$dependency_dir" \
+                -type f \
+                -path '*/tree_sitter/array.h' \
+                -print0
+            )
+          done < <(
+            jq -r '
+              .packages[]
+              | select(.source != null)
+              | [.name, .version, .manifest_path]
+              | @tsv
+            ' "$metadata"
+          )
+
+          if [[ -s "$offenders" ]]; then
+            echo "External Tree-sitter scanners still use an aliasing-unsafe array header:" >&2
+            while IFS=$'\t' read -r package_name package_version scanners header; do
+              printf '  - %s %s: %s -> %s\n' \
+                "$package_name" \
+                "$package_version" \
+                "$scanners" \
+                "$header" \
+                >&2
+            done <"$offenders"
+            exit 1
+          fi
+
+          echo "All external Tree-sitter scanners use strict-aliasing-safe array headers."
   lint:
     if: >-
       ${{ github.event_name == 'workflow_dispatch' ||

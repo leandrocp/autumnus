@@ -15,13 +15,10 @@ include = [
     "/build.rs",
     "/languages.toml",
     "/src/",
-    "/vendored_parsers/tree-sitter-*/src/tree_sitter/*.h",
-    "/vendored_parsers/tree-sitter-*/src/*.h",
-    "/vendored_parsers/tree-sitter-*/src/*.c",
-    "/vendored_parsers/tree-sitter-*/src/*.cc",
-    "/vendored_parsers/tree-sitter-*/src/*.xz",
-    "/vendored_parsers/tree-sitter-comment/src/tree_sitter_comment/*.h",
-    "/vendored_parsers/tree-sitter-comment/src/tree_sitter_comment/*.c",
+    "/vendored_parsers/tree-sitter-*/**/*.h",
+    "/vendored_parsers/tree-sitter-*/**/*.c",
+    "/vendored_parsers/tree-sitter-*/**/*.cc",
+    "/vendored_parsers/tree-sitter-*/**/*.xz",
     "/queries/override/**/highlights.scm",
     "/queries/override/**/injections.scm",
     "/queries/override/**/locals.scm",
@@ -174,7 +171,7 @@ lang-arduino = ["dep:tree-sitter-arduino", "lumis-core/lang-arduino"]
 lang-angular = ["lumis-core/lang-angular"]
 lang-asm = ["dep:tree-sitter-asm", "lumis-core/lang-asm"]
 lang-astro = ["lumis-core/lang-astro"]
-lang-bash = ["dep:tree-sitter-bash", "lumis-core/lang-bash"]
+lang-bash = ["lumis-core/lang-bash"]
 lang-bicep = ["dep:tree-sitter-bicep", "lumis-core/lang-bicep"]
 lang-c = ["dep:tree-sitter-c", "lumis-core/lang-c"]
 lang-caddy = ["dep:tree-sitter-caddy", "lumis-core/lang-caddy"]
@@ -211,7 +208,7 @@ lang-graphql = ["dep:tree-sitter-graphql", "lumis-core/lang-graphql"]
 lang-haskell = ["lumis-core/lang-haskell"]
 lang-hcl = ["dep:tree-sitter-hcl", "lumis-core/lang-hcl"]
 lang-heex = ["dep:tree-sitter-heex", "lumis-core/lang-heex"]
-lang-html = ["dep:tree-sitter-html", "lumis-core/lang-html"]
+lang-html = ["lumis-core/lang-html"]
 lang-http = ["lumis-core/lang-http"]
 lang-iex = ["lumis-core/lang-iex"]
 lang-ini = ["dep:tree-sitter-ini", "lumis-core/lang-ini"]
@@ -251,13 +248,13 @@ lang-powershell = ["dep:tree-sitter-powershell", "lumis-core/lang-powershell"]
 lang-prisma = ["lumis-core/lang-prisma"]
 lang-protobuf = ["lumis-core/lang-protobuf"]
 lang-puppet = ["dep:tree-sitter-puppet", "lumis-core/lang-puppet"]
-lang-python = ["dep:tree-sitter-python", "lumis-core/lang-python"]
+lang-python = ["lumis-core/lang-python"]
 lang-qmljs = ["dep:tree-sitter-qmljs", "lumis-core/lang-qmljs"]
 lang-r = ["dep:tree-sitter-r", "lumis-core/lang-r"]
 lang-racket = ["dep:tree-sitter-racket", "lumis-core/lang-racket"]
 lang-regex = ["dep:tree-sitter-regex", "lumis-core/lang-regex"]
 lang-rst = ["dep:tree-sitter-rst", "lumis-core/lang-rst"]
-lang-ruby = ["dep:tree-sitter-ruby", "lumis-core/lang-ruby"]
+lang-ruby = ["lumis-core/lang-ruby"]
 lang-rust = ["dep:tree-sitter-rust", "lumis-core/lang-rust"]
 lang-scala = ["dep:tree-sitter-scala", "lumis-core/lang-scala"]
 lang-scss = ["lumis-core/lang-scss"]
@@ -265,12 +262,12 @@ lang-scheme = ["dep:tree-sitter-scheme", "lumis-core/lang-scheme"]
 lang-sql = ["dep:tree-sitter-sequel", "lumis-core/lang-sql"]
 lang-solidity = ["dep:tree-sitter-solidity", "lumis-core/lang-solidity"]
 lang-surface = ["lumis-core/lang-surface"]
-lang-svelte = ["dep:tree-sitter-svelte-ng", "lumis-core/lang-svelte"]
+lang-svelte = ["lumis-core/lang-svelte"]
 lang-swift = ["dep:tree-sitter-swift", "lumis-core/lang-swift"]
 lang-systemverilog = ["dep:tree-sitter-systemverilog", "lumis-core/lang-systemverilog"]
 lang-tcl = ["lumis-core/lang-tcl"]
 lang-terraform = ["lumis-core/lang-terraform"]
-lang-toon = ["dep:tree-sitter-toon", "lumis-core/lang-toon"]
+lang-toon = ["lumis-core/lang-toon"]
 lang-toml = ["dep:tree-sitter-toml-ng", "lumis-core/lang-toml"]
 lang-tsx = ["dep:tree-sitter-typescript", "lumis-core/lang-tsx"]
 lang-typescript = ["dep:tree-sitter-typescript", "lumis-core/lang-typescript"]
@@ -280,8 +277,8 @@ lang-vhdl = ["dep:tree-sitter-vhdl", "lumis-core/lang-vhdl"]
 lang-vue = ["lumis-core/lang-vue"]
 lang-wat = ["lumis-core/lang-wat"]
 lang-wgsl = ["lumis-core/lang-wgsl"]
-lang-xml = ["dep:tree-sitter-xml", "lumis-core/lang-xml"]
-lang-yaml = ["dep:tree-sitter-yaml", "lumis-core/lang-yaml"]
+lang-xml = ["lumis-core/lang-xml"]
+lang-yaml = ["lumis-core/lang-yaml"]
 lang-zig = ["dep:tree-sitter-zig", "lumis-core/lang-zig"]
 lang-zsh = ["dep:tree-sitter-zsh", "lumis-core/lang-zsh"]
 
@@ -301,7 +298,6 @@ thiserror = "2"
 tree-sitter = "^0.26.9"
 tree-sitter-asm = { version = "0.24.0", optional = true }
 tree-sitter-arduino = { version = "0.24.0", optional = true }
-tree-sitter-bash = { version = "0.25.1", optional = true }
 tree-sitter-bicep = { version = "1.1.0", optional = true }
 tree-sitter-c = { version = "0.24.2", optional = true }
 tree-sitter-caddy = { version = "0.1.0", optional = true }
@@ -317,9 +313,9 @@ tree-sitter-diff = "0.1.0"
 tree-sitter-elixir = { version = "0.3.5", optional = true }
 tree-sitter-elm = { version = "5.9.4", optional = true }
 tree-sitter-embedded-template = { version = "0.25.0", optional = true }
-tree-sitter-erlang = { version = "0.19.0", optional = true }
+tree-sitter-erlang = { version = "0.20.0", optional = true }
 tree-sitter-fish = { version = "3.6.0", optional = true }
-tree-sitter-fsharp = { version = "0.3.1", optional = true }
+tree-sitter-fsharp = { version = "0.3.2", optional = true }
 tree-sitter-fortran = { version = "0.6.0", optional = true }
 tree-sitter-gleam = { version = "1.0.0", optional = true }
 tree-sitter-go = { version = "0.25.0", optional = true }
@@ -327,7 +323,6 @@ tree-sitter-glsl = { version = "0.2.0", optional = true }
 tree-sitter-graphql = { version = "0.1.0", optional = true }
 tree-sitter-hcl = { version = "1.1.0", optional = true }
 tree-sitter-heex = { version = "0.8.1", optional = true }
-tree-sitter-html = { version = "0.23.2", optional = true }
 tree-sitter-ini = { version = "1.4.0", optional = true }
 tree-sitter-java = { version = "0.23.5", optional = true }
 tree-sitter-javascript = { version = "0.25.0", optional = true }
@@ -351,28 +346,22 @@ tree-sitter-powershell = { version = "0.26.4", optional = true }
 tree-sitter-puppet = { version = "1.3.0", optional = true }
 codebook-tree-sitter-typst = { version = "0.12.1", optional = true }
 
-tree-sitter-python = { version = "0.25.0", optional = true }
 tree-sitter-qmljs = { version = "0.3.1", optional = true }
 tree-sitter-r = { version = "1.3.0", optional = true }
 tree-sitter-racket = { version = "0.24.7", optional = true }
 tree-sitter-regex = { version = "0.25.0", optional = true }
 tree-sitter-rst = { version = "0.2.0", optional = true }
-tree-sitter-ruby = { version = "0.23.1", optional = true }
 tree-sitter-rust = { version = "0.24.2", optional = true }
 tree-sitter-scala = { version = "0.26.0", optional = true }
 tree-sitter-scheme = { version = "0.24.7", optional = true }
 tree-sitter-sequel = { version = "0.3.11", optional = true }
 
 tree-sitter-solidity = { version = "1.2.13", optional = true }
-tree-sitter-svelte-ng = { version = "1.0.2", optional = true }
 tree-sitter-swift = { version = "0.7.3", optional = true }
 tree-sitter-systemverilog = { version = "0.4.0", optional = true }
-tree-sitter-toon = { version = "0.1.3", optional = true }
 tree-sitter-toml-ng = { version = "0.7.0", optional = true }
 tree-sitter-typescript = { version = "0.23.2", optional = true }
 tree-sitter-vhdl = { version = "1.4.0", optional = true }
-tree-sitter-xml = { version = "0.7.0", optional = true }
-tree-sitter-yaml = { version = "0.7.2", optional = true }
 
 tree-sitter-zig = { version = "1.1.2", optional = true }
 tree-sitter-zsh = { version = "0.63.4", optional = true }

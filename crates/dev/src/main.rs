@@ -26,6 +26,10 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     GenCss,
+    FilterThemeUpdates {
+        #[arg(default_value = "")]
+        name: String,
+    },
     SyncThemes,
     SyncCss,
     ListThemes,
@@ -111,6 +115,7 @@ fn main() -> Result<()> {
 
     match cli.command {
         Commands::GenCss => gen_css(),
+        Commands::FilterThemeUpdates { name } => filter_theme_updates(&name),
         Commands::SyncThemes => sync_themes(),
         Commands::SyncCss => sync_css(),
         Commands::ListThemes => list_themes(),
@@ -583,6 +588,63 @@ fn gen_css() -> Result<()> {
     Ok(())
 }
 
+fn without_revision(mut theme: Value) -> Value {
+    if let Value::Object(fields) = &mut theme {
+        fields.remove("revision");
+    }
+    theme
+}
+
+fn is_revision_only_theme_update(previous: &Value, current: &Value) -> bool {
+    previous != current && without_revision(previous.clone()) == without_revision(current.clone())
+}
+
+fn filter_theme_updates(name: &str) -> Result<()> {
+    let mut theme_paths = if name.is_empty() {
+        glob::glob("themes/*.json")?.collect::<Result<Vec<_>, _>>()?
+    } else {
+        vec![PathBuf::from(format!("themes/{name}.json"))]
+    };
+    theme_paths.sort();
+
+    for path in theme_paths {
+        if !path.exists() {
+            continue;
+        }
+
+        let previous = Command::new("git")
+            .args(["show", &format!("HEAD:{}", path.display())])
+            .output()
+            .with_context(|| {
+                format!("failed to read the previous version of {}", path.display())
+            })?;
+
+        // A new theme has no version at HEAD and should always be kept.
+        if !previous.status.success() {
+            continue;
+        }
+
+        let previous_source = String::from_utf8(previous.stdout)
+            .with_context(|| format!("previous theme is not UTF-8: {}", path.display()))?;
+        let current_source = fs::read_to_string(&path)
+            .with_context(|| format!("failed to read generated theme {}", path.display()))?;
+        let previous_theme: Value = serde_json::from_str(&previous_source)
+            .with_context(|| format!("invalid previous theme JSON: {}", path.display()))?;
+        let current_theme: Value = serde_json::from_str(&current_source)
+            .with_context(|| format!("invalid generated theme JSON: {}", path.display()))?;
+
+        if is_revision_only_theme_update(&previous_theme, &current_theme) {
+            fs::write(&path, previous_source)?;
+            println!(
+                "Ignored revision-only theme update: {}",
+                path.file_stem().unwrap().to_string_lossy()
+            );
+        }
+    }
+
+    Ok(())
+}
+
 fn sync_themes() -> Result<()> {
     let dest = Path::new("crates/lumis-core/themes");
     fs::create_dir_all(dest)?;
@@ -975,20 +1037,12 @@ fn git_resolve_rev(url: &str, rev: &str) -> Result<String> {
         .with_context(|| format!("could not resolve git revision {rev} from {url}"))
 }
 
-fn git_resolve_version_tag(url: &str, version: &str) -> Option<String> {
-    for tag in [format!("v{version}"), version.to_string()] {
-        if let Ok(rev) = git_resolve_rev(url, &tag) {
-            return Some(rev);
-        }
-    }
-    None
+fn release_version_from_tag(tag: &str) -> Option<semver::Version> {
+    let version = lenient_semver::parse(tag).ok()?;
+    version.pre.is_empty().then_some(version)
 }
 
-fn semver_from_tag(tag: &str) -> Option<semver::Version> {
-    semver::Version::parse(tag.strip_prefix('v').unwrap_or(tag)).ok()
-}
-
-fn git_latest_release_rev(url: &str) -> Result<Option<(String, String)>> {
+fn git_release_tags(url: &str) -> Result<BTreeMap<semver::Version, String>> {
     let output = Command::new("git")
         .args(["ls-remote", "--tags", url])
         .output()
@@ -1009,20 +1063,95 @@ fn git_latest_release_rev(url: &str) -> Result<Option<(String, String)>> {
         if tag.ends_with("^{}") {
             continue;
         }
-        let Some(version) = semver_from_tag(tag) else {
+        let Some(version) = release_version_from_tag(tag) else {
             continue;
         };
-        if !version.pre.is_empty() {
-            continue;
-        }
         tags.insert(version, tag.to_string());
     }
 
+    Ok(tags)
+}
+
+fn git_resolve_version_tag(url: &str, version: &str) -> Option<String> {
+    let version = semver::Version::parse(version).ok()?;
+    let tag = git_release_tags(url).ok()?.remove(&version)?;
+    git_resolve_rev(url, &tag).ok()
+}
+
+fn git_latest_release_rev(url: &str) -> Result<Option<(String, String)>> {
+    let tags = git_release_tags(url)?;
     let Some((version, tag)) = tags.into_iter().next_back() else {
         return Ok(None);
     };
     let rev = git_resolve_rev(url, &tag)?;
     Ok(Some((version.to_string(), rev)))
+}
+
+fn git_is_ancestor(url: &str, ancestor: &str, descendant: &str) -> Result<bool> {
+    if ancestor == descendant {
+        return Ok(true);
+    }
+
+    let repo = tmpdir()?;
+    let result = (|| {
+        let init = Command::new("git")
+            .args(["init", "--bare", &repo])
+            .output()
+            .with_context(|| format!("failed to initialize temporary git repository at {repo}"))?;
+        if !init.status.success() {
+            bail!("failed to initialize temporary git repository at {repo}");
+        }
+
+        let ancestor_ref = "refs/lumis/ancestor";
+        let descendant_ref = "refs/lumis/descendant";
+        let fetch = Command::new("git")
+            .args([
+                "-C",
+                &repo,
+                "fetch",
+                "--quiet",
+                "--filter=blob:none",
+                "--no-tags",
+                url,
+                &format!("{ancestor}:{ancestor_ref}"),
+                &format!("{descendant}:{descendant_ref}"),
+            ])
+            .output()
+            .with_context(|| {
+                format!("failed to fetch parser revisions {ancestor} and {descendant} from {url}")
+            })?;
+        if !fetch.status.success() {
+            bail!(
+                "failed to fetch parser revisions {ancestor} and {descendant} from {url}: {}",
+                String::from_utf8_lossy(&fetch.stderr).trim()
+            );
+        }
+
+        let status = Command::new("git")
+            .args([
+                "-C",
+                &repo,
+                "merge-base",
+                "--is-ancestor",
+                ancestor_ref,
+                descendant_ref,
+            ])
+            .status()
+            .with_context(|| {
+                format!("failed to compare parser revisions {ancestor} and {descendant} from {url}")
+            })?;
+
+        match status.code() {
+            Some(0) => Ok(true),
+            Some(1) => Ok(false),
+            _ => bail!(
+                "git merge-base failed while comparing parser revisions {ancestor} and {descendant} from {url}"
+            ),
+        }
+    })();
+
+    let _ = fs::remove_dir_all(&repo);
+    result
 }
 
 fn latest_crate_version(crate_name: &str) -> Result<Option<String>> {
@@ -1160,6 +1289,18 @@ fn upgrade_parsers(name: &str) -> Result<()> {
             continue;
         }
 
+        // Forks inherit upstream tags. Never replace a recorded fork revision
+        // with an older tagged commit that it already contains.
+        if !current_rev.is_empty()
+            && current_rev != new_rev
+            && git_is_ancestor(git, &new_rev, current_rev)?
+        {
+            println!(
+                "  {parser_name}: keeping {current_rev}; candidate {new_rev} is an ancestor"
+            );
+            continue;
+        }
+
         if current_rev == new_rev && ver == current_ver {
             println!("  {parser_name}: already up to date ({current_rev}, {current_ver})");
         } else {
@@ -1208,38 +1349,46 @@ fn fetch_parsers(name: &str) -> Result<()> {
         let dest = format!("crates/lumis/vendored_parsers/{parser_dir}");
 
         if info.generate.unwrap_or(false) {
-            let _ = run_cmd_ok(&format!("rm -rf {dest}"));
-            fs::create_dir_all(&dest)?;
             run_cmd_ok(&format!("cd {clone_dir} && tree-sitter generate"))?;
             let src = format!("{clone_dir}/src");
-            if Path::new(&src).is_dir() {
-                let _ = run_cmd_ok(&format!("cp -r {src} {dest}/"));
-                println!("  Updated {parser_name} (generated)");
-            } else {
-                println!("  Warning: no generated src directory found for {parser_name}");
+            if !Path::new(&src).is_dir() {
+                bail!("no generated src directory found for {parser_name} at {src}");
             }
+
+            let _ = run_cmd_ok(&format!("rm -rf {dest}"));
+            fs::create_dir_all(&dest)?;
+            run_cmd_ok(&format!("cp -r {src} {dest}/"))?;
+            println!("  Updated {parser_name} (generated)");
         } else if let Some(ref location) = info.location {
-            fs::create_dir_all(&dest)?;
             let src = format!("{clone_dir}/{location}/src");
-            if Path::new(&src).is_dir() {
-                let _ = run_cmd_ok(&format!("rm -rf {dest}/src"));
-                let _ = run_cmd_ok(&format!("cp -r {src} {dest}/"));
-                println!("  Updated {parser_name} (location: {location})");
-            } else {
-                println!(
-                    "  Warning: no src directory found for {parser_name} in location {location}"
-                );
+            if !Path::new(&src).is_dir() {
+                bail!("no src directory found for {parser_name} in location {location}");
             }
+
+            let _ = run_cmd_ok(&format!("rm -rf {dest}"));
+            let location_dest = format!("{dest}/{location}");
+            fs::create_dir_all(&location_dest)?;
+            run_cmd_ok(&format!("cp -r {src} {location_dest}/"))?;
+
+            // Multi-grammar repositories can share support files from a root-level
+            // common directory (for example XML). Preserve the complete directory:
+            // scanners may include or otherwise depend on non-header files too.
+            let common = format!("{clone_dir}/common");
+            if Path::new(&common).is_dir() {
+                run_cmd_ok(&format!("cp -r {common} {dest}/"))?;
+            }
+
+            println!("  Updated {parser_name} (location: {location})");
         } else {
-            fs::create_dir_all(&dest)?;
             let src = format!("{clone_dir}/src");
-            if Path::new(&src).is_dir() {
-                let _ = run_cmd_ok(&format!("rm -rf {dest}/src"));
-                let _ = run_cmd_ok(&format!("cp -r {src} {dest}/"));
-                println!("  Updated {parser_name}");
-            } else {
-                println!("  Warning: no src directory found for {parser_name}");
+            if !Path::new(&src).is_dir() {
+                bail!("no src directory found for {parser_name} at {src}");
             }
+
+            fs::create_dir_all(&dest)?;
+            let _ = run_cmd_ok(&format!("rm -rf {dest}/src"));
+            run_cmd_ok(&format!("cp -r {src} {dest}/"))?;
+            println!("  Updated {parser_name}");
         }
 
         let _ = run_cmd_ok(&format!("rm -rf {clone_dir}"));
@@ -2712,8 +2861,47 @@ fn wasm_package_suffix(wasm_name: &str) -> &str {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::path::Path;
     use std::sync::atomic::{AtomicU64, Ordering};
     use std::time::{SystemTime, UNIX_EPOCH};
+
+    fn run_test_git(repo: &Path, args: &[&str]) -> String {
+        let output = Command::new("git")
+            .arg("-C")
+            .arg(repo)
+            .args(args)
+            .output()
+            .expect("test git command should run");
+
+        assert!(
+            output.status.success(),
+            "git {} failed: {}",
+            args.join(" "),
+            String::from_utf8_lossy(&output.stderr)
+        );
+
+        String::from_utf8_lossy(&output.stdout).trim().to_string()
+    }
+
+    fn commit_test_revision(repo: &Path, contents: &str) -> String {
+        fs::write(repo.join("parser.c"), contents).expect("test revision should be written");
+        run_test_git(repo, &["add", "parser.c"]);
+        run_test_git(repo, &["commit", "--quiet", "-m", contents.trim()]);
+        run_test_git(repo, &["rev-parse", "HEAD"])
+    }
+
+    #[test]
+    fn release_version_from_tag_accepts_short_stable_tags() {
+        let expected = semver::Version::new(0, 20, 0);
+
+        assert_eq!(release_version_from_tag("0.20"), Some(expected.clone()));
+        assert_eq!(release_version_from_tag("v0.20"), Some(expected));
+        assert_eq!(
+            release_version_from_tag("v0.20.1"),
+            Some(semver::Version::new(0, 20, 1))
+        );
+        assert_eq!(release_version_from_tag("0.20-beta"), None);
+    }
 
     fn unique_test_root() -> std::path::PathBuf {
         static COUNTER: AtomicU64 = AtomicU64::new(0);
@@ -2724,6 +2912,32 @@ mod tests {
             .as_nanos();
         let counter = COUNTER.fetch_add(1, Ordering::Relaxed);
         std::env::temp_dir().join(format!("lumis-dev-query-test-{unique}-{counter}"))
+    }
+
+    #[test]
+    fn git_ancestry_detects_backward_parser_updates() {
+        let root = unique_test_root();
+        let source = root.join("source");
+        fs::create_dir_all(&source).expect("test repository should be created");
+
+        run_test_git(&source, &["init", "--quiet"]);
+        run_test_git(&source, &["config", "commit.gpgsign", "false"]);
+        run_test_git(&source, &["config", "user.name", "Lumis"]);
+        run_test_git(&source, &["config", "user.email", "dev@lumis.sh"]);
+        let first = commit_test_revision(&source, "first\n");
+        let second = commit_test_revision(&source, "second\n");
+        let source_url = source.to_string_lossy();
+
+        assert!(
+            git_is_ancestor(&source_url, &first, &second)
+                .expect("forward ancestry check should succeed")
+        );
+        assert!(
+            !git_is_ancestor(&source_url, &second, &first)
+                .expect("backward ancestry check should succeed")
+        );
+
+        let _ = fs::remove_dir_all(root);
     }
 
     #[test]
@@ -2952,5 +3166,50 @@ mod tests {
         assert!(catalog.find("\"zeta\"").unwrap() < catalog.find("\"alpha\"").unwrap());
         assert!(catalog.contains("package_name: \"@lumis-sh/wasm-shared\""));
         assert!(catalog.contains("aliases: [\"a\"]"));
+    }
+
+    #[test]
+    fn revision_only_theme_updates_are_ignored() {
+        let previous = json!({
+            "name": "demo",
+            "appearance": "dark",
+            "revision": "old",
+            "highlights": {
+                "normal": { "fg": "#ffffff", "bg": "#000000" }
+            }
+        });
+        let current = json!({
+            "name": "demo",
+            "appearance": "dark",
+            "revision": "new",
+            "highlights": {
+                "normal": { "fg": "#ffffff", "bg": "#000000" }
+            }
+        });
+
+        assert!(is_revision_only_theme_update(&previous, &current));
+    }
+
+    #[test]
+    fn actual_theme_updates_are_kept() {
+        let previous = json!({
+            "name": "demo",
+            "appearance": "dark",
+            "revision": "old",
+            "highlights": {
+                "normal": { "fg": "#ffffff", "bg": "#000000" }
+            }
+        });
+        let current = json!({
+            "name": "demo",
+            "appearance": "dark",
+            "revision": "new",
+            "highlights": {
+                "normal": { "fg": "#eeeeee", "bg": "#000000" }
+            }
+        });
+
+        assert!(!is_revision_only_theme_update(&previous, &current));
+        assert!(!is_revision_only_theme_update(&previous, &previous));
     }
 }

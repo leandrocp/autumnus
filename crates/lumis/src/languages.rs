@@ -84,6 +84,8 @@ unsafe extern "C" {
     fn tree_sitter_angular() -> *const ();
     #[cfg(feature = "lang-astro")]
     fn tree_sitter_astro() -> *const ();
+    #[cfg(feature = "lang-bash")]
+    fn tree_sitter_bash() -> *const ();
     #[cfg(feature = "lang-csv")]
     fn tree_sitter_csv() -> *const ();
     #[cfg(feature = "lang-dart")]
@@ -98,6 +100,8 @@ unsafe extern "C" {
     fn tree_sitter_glimmer() -> *const ();
     #[cfg(feature = "lang-haskell")]
     fn tree_sitter_haskell() -> *const ();
+    #[cfg(feature = "lang-html")]
+    fn tree_sitter_html() -> *const ();
     #[cfg(feature = "lang-http")]
     fn tree_sitter_http() -> *const ();
     #[cfg(feature = "lang-iex")]
@@ -122,14 +126,22 @@ unsafe extern "C" {
     fn tree_sitter_nim() -> *const ();
     #[cfg(feature = "lang-protobuf")]
     fn tree_sitter_proto() -> *const ();
+    #[cfg(feature = "lang-python")]
+    fn tree_sitter_python() -> *const ();
     #[cfg(feature = "lang-perl")]
     fn tree_sitter_perl() -> *const ();
+    #[cfg(feature = "lang-ruby")]
+    fn tree_sitter_ruby() -> *const ();
     #[cfg(feature = "lang-scss")]
     fn tree_sitter_scss() -> *const ();
     #[cfg(feature = "lang-surface")]
     fn tree_sitter_surface() -> *const ();
+    #[cfg(feature = "lang-svelte")]
+    fn tree_sitter_svelte() -> *const ();
     #[cfg(feature = "lang-terraform")]
     fn tree_sitter_terraform() -> *const ();
+    #[cfg(feature = "lang-toon")]
+    fn tree_sitter_toon() -> *const ();
     #[cfg(feature = "lang-nushell")]
     fn tree_sitter_nu() -> *const ();
     #[cfg(feature = "lang-vim")]
@@ -140,6 +152,10 @@ unsafe extern "C" {
     fn tree_sitter_wat() -> *const ();
     #[cfg(feature = "lang-wgsl")]
     fn tree_sitter_wgsl() -> *const ();
+    #[cfg(feature = "lang-xml")]
+    fn tree_sitter_xml() -> *const ();
+    #[cfg(feature = "lang-yaml")]
+    fn tree_sitter_yaml() -> *const ();
 }
 
 include!(concat!(env!("OUT_DIR"), "/queries_constants.rs"));
@@ -433,8 +449,9 @@ static ASTRO_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-bash")]
 static BASH_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_bash) };
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(tree_sitter_bash::LANGUAGE),
+        tree_sitter::Language::new(language_fn),
         "bash",
         BASH_HIGHLIGHTS,
         BASH_INJECTIONS,
@@ -952,8 +969,9 @@ static HEEX_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-html")]
 static HTML_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_html) };
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(tree_sitter_html::LANGUAGE),
+        tree_sitter::Language::new(language_fn),
         "html",
         HTML_HIGHLIGHTS,
         HTML_INJECTIONS,
@@ -1492,8 +1510,9 @@ static PLAIN_TEXT_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-python")]
 static PYTHON_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_python) };
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(tree_sitter_python::LANGUAGE),
+        tree_sitter::Language::new(language_fn),
         "python",
         PYTHON_HIGHLIGHTS,
         PYTHON_INJECTIONS,
@@ -1576,8 +1595,9 @@ static RST_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-ruby")]
 static RUBY_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_ruby) };
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(tree_sitter_ruby::LANGUAGE),
+        tree_sitter::Language::new(language_fn),
         "ruby",
         RUBY_HIGHLIGHTS,
         RUBY_INJECTIONS,
@@ -1692,8 +1712,9 @@ static SURFACE_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-svelte")]
 static SVELTE_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_svelte) };
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(tree_sitter_svelte_ng::LANGUAGE),
+        tree_sitter::Language::new(language_fn),
         "svelte",
         SVELTE_HIGHLIGHTS,
         SVELTE_INJECTIONS,
@@ -1749,8 +1770,9 @@ static TERRAFORM_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-toon")]
 static TOON_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_toon) };
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(tree_sitter_toon::LANGUAGE),
+        tree_sitter::Language::new(language_fn),
         "toon",
         TOON_HIGHLIGHTS,
         TOON_INJECTIONS,
@@ -1897,8 +1919,9 @@ static WGSL_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-xml")]
 static XML_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_xml) };
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(tree_sitter_xml::LANGUAGE_XML),
+        tree_sitter::Language::new(language_fn),
         "xml",
         XML_HIGHLIGHTS,
         XML_INJECTIONS,
@@ -1911,8 +1934,9 @@ static XML_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
 
 #[cfg(feature = "lang-yaml")]
 static YAML_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let language_fn = unsafe { tree_sitter_language::LanguageFn::from_raw(tree_sitter_yaml) };
     let mut config = HighlightConfiguration::new(
-        tree_sitter::Language::new(tree_sitter_yaml::LANGUAGE),
+        tree_sitter::Language::new(language_fn),
         "yaml",
         YAML_HIGHLIGHTS,
         YAML_INJECTIONS,
@@ -2095,6 +2119,55 @@ mod tests {
 
             assert_language_sample_highlights(language, language.name(), &sample_file);
         }
+    }
+
+    #[cfg(feature = "lang-python")]
+    #[test]
+    fn python_class_attributes_are_local_fields() {
+        use streaming_iterator::StreamingIterator;
+        use tree_sitter::{Parser, Query, QueryCursor};
+
+        let source: &[u8] = b"class Human:\n    species = \"H. sapiens\"\n";
+        let config = Language::Python.config();
+
+        let mut parser = Parser::new();
+        parser
+            .set_language(&config.language)
+            .expect("Python parser language should load");
+        let tree = parser
+            .parse(source, None)
+            .expect("Python source should parse");
+
+        let query = Query::new(&config.language, PYTHON_LOCALS)
+            .expect("Python locals query should compile");
+        let field_capture = query
+            .capture_names()
+            .iter()
+            .position(|name| *name == "local.definition.field")
+            .expect("Python locals query should define the field capture")
+            as u32;
+
+        let mut cursor = QueryCursor::new();
+        let mut matches = cursor.matches(&query, tree.root_node(), source);
+        let mut fields = Vec::new();
+
+        while let Some(query_match) = matches.next() {
+            for capture in query_match.captures {
+                if capture.index == field_capture {
+                    fields.push(
+                        capture
+                            .node
+                            .utf8_text(source)
+                            .expect("captured Python field should be UTF-8"),
+                    );
+                }
+            }
+        }
+
+        assert!(
+            fields.contains(&"species"),
+            "expected class attribute to be captured as a local field, got {fields:?}"
+        );
     }
 
     language_sample_tests! {
