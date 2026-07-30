@@ -967,46 +967,12 @@ fn git_resolve_rev(url: &str, rev: &str) -> Result<String> {
         .with_context(|| format!("could not resolve git revision {rev} from {url}"))
 }
 
-fn git_resolve_version_tag(url: &str, version: &str) -> Option<String> {
-    for tag in version_tag_candidates(version) {
-        if let Ok(rev) = git_resolve_rev(url, &tag) {
-            return Some(rev);
-        }
-    }
-    None
+fn release_version_from_tag(tag: &str) -> Option<semver::Version> {
+    let version = lenient_semver::parse(tag).ok()?;
+    version.pre.is_empty().then_some(version)
 }
 
-fn version_tag_candidates(version: &str) -> Vec<String> {
-    let mut versions = vec![version.to_string()];
-    if let Ok(parsed) = semver::Version::parse(version) {
-        if parsed.patch == 0 && parsed.pre.is_empty() && parsed.build.is_empty() {
-            versions.push(format!("{}.{}", parsed.major, parsed.minor));
-        }
-    }
-
-    versions
-        .into_iter()
-        .flat_map(|version| [format!("v{version}"), version])
-        .collect()
-}
-
-fn semver_from_tag(tag: &str) -> Option<semver::Version> {
-    let version = tag.strip_prefix('v').unwrap_or(tag);
-    semver::Version::parse(version).ok().or_else(|| {
-        let mut parts = version.split('.');
-        let major = parts.next()?;
-        let minor = parts.next()?;
-        if parts.next().is_some()
-            || !major.bytes().all(|byte| byte.is_ascii_digit())
-            || !minor.bytes().all(|byte| byte.is_ascii_digit())
-        {
-            return None;
-        }
-        semver::Version::parse(&format!("{version}.0")).ok()
-    })
-}
-
-fn git_latest_release_rev(url: &str) -> Result<Option<(String, String)>> {
+fn git_release_tags(url: &str) -> Result<BTreeMap<semver::Version, String>> {
     let output = Command::new("git")
         .args(["ls-remote", "--tags", url])
         .output()
@@ -1027,15 +993,23 @@ fn git_latest_release_rev(url: &str) -> Result<Option<(String, String)>> {
         if tag.ends_with("^{}") {
             continue;
         }
-        let Some(version) = semver_from_tag(tag) else {
+        let Some(version) = release_version_from_tag(tag) else {
             continue;
         };
-        if !version.pre.is_empty() {
-            continue;
-        }
         tags.insert(version, tag.to_string());
     }
 
+    Ok(tags)
+}
+
+fn git_resolve_version_tag(url: &str, version: &str) -> Option<String> {
+    let version = semver::Version::parse(version).ok()?;
+    let tag = git_release_tags(url).ok()?.remove(&version)?;
+    git_resolve_rev(url, &tag).ok()
+}
+
+fn git_latest_release_rev(url: &str) -> Result<Option<(String, String)>> {
+    let tags = git_release_tags(url)?;
     let Some((version, tag)) = tags.into_iter().next_back() else {
         return Ok(None);
     };
@@ -2565,25 +2539,16 @@ mod tests {
     use std::time::{SystemTime, UNIX_EPOCH};
 
     #[test]
-    fn version_tag_candidates_include_short_zero_patch_tags() {
-        assert_eq!(
-            version_tag_candidates("0.20.0"),
-            ["v0.20.0", "0.20.0", "v0.20", "0.20"]
-        );
-        assert_eq!(version_tag_candidates("0.20.1"), ["v0.20.1", "0.20.1"]);
-    }
-
-    #[test]
-    fn semver_from_tag_accepts_short_stable_tags() {
+    fn release_version_from_tag_accepts_short_stable_tags() {
         let expected = semver::Version::new(0, 20, 0);
 
-        assert_eq!(semver_from_tag("0.20"), Some(expected.clone()));
-        assert_eq!(semver_from_tag("v0.20"), Some(expected));
+        assert_eq!(release_version_from_tag("0.20"), Some(expected.clone()));
+        assert_eq!(release_version_from_tag("v0.20"), Some(expected));
         assert_eq!(
-            semver_from_tag("v0.20.1"),
+            release_version_from_tag("v0.20.1"),
             Some(semver::Version::new(0, 20, 1))
         );
-        assert_eq!(semver_from_tag("0.20-beta"), None);
+        assert_eq!(release_version_from_tag("0.20-beta"), None);
     }
 
     fn unique_test_root() -> std::path::PathBuf {
