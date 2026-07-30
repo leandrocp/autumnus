@@ -11,6 +11,7 @@ import type {
   HighlightEvent,
   LanguageDefinition,
   LoadedLanguage,
+  QueryCaptureOffset,
   WasmRef,
 } from "../types.js";
 import { PLAINTEXT_LANG_ID, type LanguageInfo } from "../types.js";
@@ -428,12 +429,49 @@ function compileHighlightConfig(
     return Object.prototype.hasOwnProperty.call(refuted, "local");
   });
 
+  // `(#offset! @capture r c r c)` shifts a capture's range. Neovim applies it to
+  // injection ranges *and* highlight ranges, so unlike the previous implementation
+  // this collects offsets for every pattern, not just the injection ones.
+  // Mirrors the parsing in `crates/lumis-wasm-runtime/src/tree_sitter_highlight.rs`.
+  const captureOffsets = Array.from(
+    { length: query.patternCount() },
+    (_, patternIndex): Record<string, QueryCaptureOffset> | undefined => {
+      let offsets: Record<string, QueryCaptureOffset> | undefined;
+
+      for (const predicate of query.predicatesForPattern(patternIndex) ?? []) {
+        if (predicate.operator !== "offset!" || predicate.operands.length !== 5) continue;
+
+        const [captureStep, startRow, startColumn, endRow, endColumn] = predicate.operands;
+        if (
+          captureStep?.type !== "capture" ||
+          startRow?.type !== "string" ||
+          startColumn?.type !== "string" ||
+          endRow?.type !== "string" ||
+          endColumn?.type !== "string"
+        ) {
+          continue;
+        }
+
+        offsets ??= {};
+        offsets[captureStep.name] = {
+          startRow: Number.parseInt(startRow.value, 10),
+          startColumn: Number.parseInt(startColumn.value, 10),
+          endRow: Number.parseInt(endRow.value, 10),
+          endColumn: Number.parseInt(endColumn.value, 10),
+        };
+      }
+
+      return offsets;
+    },
+  );
+
   return {
     query,
     injectionPatternEnd,
     localsPatternEnd,
     captureMetadata,
     nonLocalVariablePatterns,
+    captureOffsets,
   };
 }
 

@@ -8,6 +8,12 @@
 // - `HighlightEvent::HighlightStart` carries `language: String`
 // - `String::from_utf8_lossy` is used where upstream uses newer tree-sitter helpers
 // - Only exclude named children from injections like nvim (https://github.com/leandrocp/lumis/issues/429)
+// - `#offset!` is applied to injection ranges and highlight capture ranges, which upstream
+//   ignores entirely. nvim-treesitter queries rely on it to strip delimiters (backticks,
+//   `${`/`}`, code-fence lines) before the injected grammar sees the text. Neovim applies it
+//   in both places: `highlighter.lua` -> `get_range`, and `languagetree.lua` ->
+//   `get_node_ranges` -> `get_range`. Note the stale TODO at `languagetree.lua:1087` claiming
+//   injections do not support offsets; the code above it does.
 //
 // When touching this file, prefer minimizing the diff against upstream rather than extending it.
 //
@@ -18,7 +24,7 @@
 
 use core::slice;
 use std::{
-    collections::HashSet,
+    collections::{HashMap, HashSet},
     iter,
     marker::PhantomData,
     mem::{self, MaybeUninit},
@@ -33,7 +39,7 @@ use streaming_iterator::StreamingIterator;
 use thiserror::Error;
 use tree_sitter::{
     ffi, Language, Node, ParseOptions, Parser, Point, Query, QueryCapture, QueryCaptures,
-    QueryCursor, QueryError, QueryMatch, Range, TextProvider, Tree,
+    QueryCursor, QueryError, QueryMatch, QueryPredicateArg, Range, TextProvider, Tree,
 };
 
 const CANCELLATION_CHECK_INTERVAL: usize = 100;
@@ -154,6 +160,104 @@ pub struct HighlightConfiguration {
     local_def_capture_index: Option<u32>,
     local_def_value_capture_index: Option<u32>,
     local_ref_capture_index: Option<u32>,
+    /// `(#offset! @capture start_row start_col end_row end_col)` per pattern and capture.
+    offsets: HashMap<(usize, u32), [i32; 4]>,
+}
+
+/// An `@injection.content` capture together with its `#offset!`-adjusted range.
+#[derive(Clone, Copy)]
+struct InjectionContent<'a> {
+    node: Node<'a>,
+    range: Range,
+}
+
+/// Applies Neovim's `#offset!` directive to a node's range.
+///
+/// Mirrors `apply_range_offset` in Neovim's `runtime/lua/vim/treesitter.lua`: the four
+/// deltas are added to `(start_row, start_col, end_row, end_col)`, and a shift that
+/// inverts the range is discarded rather than reported. Tree-sitter columns are byte
+/// offsets within a row, so a same-row shift is a plain byte shift; a row shift has to
+/// walk to the target line.
+fn apply_range_offset(node: Node, offset: [i32; 4], source: &[u8]) -> Range {
+    let original = node.range();
+    let start = shift_point(
+        source,
+        original.start_byte,
+        original.start_point,
+        offset[0],
+        offset[1],
+    );
+    let end = shift_point(
+        source,
+        original.end_byte,
+        original.end_point,
+        offset[2],
+        offset[3],
+    );
+
+    match (start, end) {
+        (Some((start_byte, start_point)), Some((end_byte, end_point)))
+            if start_byte <= end_byte =>
+        {
+            Range {
+                start_byte,
+                start_point,
+                end_byte,
+                end_point,
+            }
+        }
+        // Neovim silently keeps the original range when the offset would invert it.
+        _ => original,
+    }
+}
+
+/// Shifts one endpoint by `row_delta` rows and `column_delta` byte columns.
+fn shift_point(
+    source: &[u8],
+    byte: usize,
+    point: Point,
+    row_delta: i32,
+    column_delta: i32,
+) -> Option<(usize, Point)> {
+    if row_delta == 0 {
+        // Same row: a byte column delta is a byte delta.
+        let column = point.column.checked_add_signed(column_delta as isize)?;
+        let byte = byte.checked_add_signed(column_delta as isize)?;
+        if byte > source.len() {
+            return None;
+        }
+        return Some((byte, Point::new(point.row, column)));
+    }
+
+    let row = point.row.checked_add_signed(row_delta as isize)?;
+    let line_start = line_start_byte(source, byte, point, row)?;
+    let column = usize::try_from(column_delta).ok()?;
+    let byte = line_start.checked_add(column)?;
+    (byte <= source.len()).then_some((byte, Point::new(row, column)))
+}
+
+/// Byte offset of the first character of `target_row`, walking from a known anchor.
+fn line_start_byte(source: &[u8], byte: usize, point: Point, target_row: usize) -> Option<usize> {
+    let mut cursor = byte.checked_sub(point.column)?;
+    let mut row = point.row;
+
+    while row < target_row {
+        let newline = source.get(cursor..)?.iter().position(|b| *b == b'\n')?;
+        cursor += newline + 1;
+        row += 1;
+    }
+    while row > target_row {
+        // `cursor` sits on a line start, so step back over that newline and find the
+        // start of the line before it.
+        let previous = cursor.checked_sub(1)?;
+        cursor = source
+            .get(..previous)?
+            .iter()
+            .rposition(|b| *b == b'\n')
+            .map_or(0, |index| index + 1);
+        row -= 1;
+    }
+    Some(cursor)
 }
 
 /// Performs syntax highlighting, recognizing a given list of highlight names.
@@ -478,8 +582,38 @@ impl HighlightConfiguration {
             }
         }
 
+        // `#offset!` is a directive, so tree-sitter leaves it in `general_predicates`
+        // rather than parsing it into `property_settings` like `#set!`.
+        let mut offsets = HashMap::new();
+        for pattern_index in 0..query.pattern_count() {
+            for predicate in query.general_predicates(pattern_index) {
+                if predicate.operator.as_ref() != "offset!" {
+                    continue;
+                }
+                let [QueryPredicateArg::Capture(capture), deltas @ ..] = &*predicate.args else {
+                    continue;
+                };
+                let parsed: Vec<i32> = deltas
+                    .iter()
+                    .filter_map(|arg| match arg {
+                        QueryPredicateArg::String(value) => value.parse().ok(),
+                        QueryPredicateArg::Capture(_) => None,
+                    })
+                    .collect();
+                // Neovim defaults any missing delta to 0.
+                if parsed.len() == deltas.len() && !parsed.is_empty() {
+                    let mut offset = [0i32; 4];
+                    for (slot, value) in offset.iter_mut().zip(parsed) {
+                        *slot = value;
+                    }
+                    offsets.insert((pattern_index, *capture), offset);
+                }
+            }
+        }
+
         let highlight_indices = vec![None; query.capture_names().len()];
         Ok(Self {
+            offsets,
             language,
             language_name: name.into(),
             query,
@@ -617,7 +751,10 @@ impl<'a> HighlightIterLayer<'a> {
                 // Process combined injections.
                 if let Some(combined_injections_query) = &config.combined_injections_query {
                     let mut injections_by_pattern_index =
-                        vec![(None, Vec::new(), false); combined_injections_query.pattern_count()];
+                        vec![
+                            (None, Vec::<InjectionContent>::new(), false);
+                            combined_injections_query.pattern_count()
+                        ];
                     let mut matches =
                         cursor.matches(combined_injections_query, tree.root_node(), source);
                     while let Some(mat) = matches.next() {
@@ -717,25 +854,28 @@ impl<'a> HighlightIterLayer<'a> {
     //   of their children.
     fn intersect_ranges(
         parent_ranges: &[Range],
-        nodes: &[Node],
+        contents: &[InjectionContent],
         includes_children: bool,
     ) -> Vec<Range> {
-        let mut cursor = nodes[0].walk();
+        let mut cursor = contents[0].node.walk();
         let mut result = Vec::new();
         let mut parent_range_iter = parent_ranges.iter();
         let mut parent_range = parent_range_iter
             .next()
             .expect("Layers should only be constructed with non-empty ranges vectors");
-        for node in nodes {
+        for content in contents {
+            let node = content.node;
+            // The outer bounds come from the `#offset!`-adjusted range; children are still
+            // masked out from the node itself, as in Neovim's `get_node_ranges`.
             let mut preceding_range = Range {
                 start_byte: 0,
                 start_point: Point::new(0, 0),
-                end_byte: node.start_byte(),
-                end_point: node.start_position(),
+                end_byte: content.range.start_byte,
+                end_point: content.range.start_point,
             };
             let following_range = Range {
-                start_byte: node.end_byte(),
-                start_point: node.end_position(),
+                start_byte: content.range.end_byte,
+                start_point: content.range.end_point,
                 end_byte: usize::MAX,
                 end_point: Point::new(usize::MAX, usize::MAX),
             };
@@ -935,7 +1075,20 @@ where
             let layer = &mut self.layers[0];
             if let Some((next_match, capture_index)) = layer.captures.peek() {
                 let next_capture = next_match.captures[*capture_index];
-                range = next_capture.node.byte_range();
+                // Neovim's highlighter resolves a capture's range through `get_range`, so
+                // `#offset!` narrows the highlighted span too, not just injections.
+                range = layer
+                    .config
+                    .offsets
+                    .get(&(next_match.pattern_index, next_capture.index))
+                    .map_or_else(
+                        || next_capture.node.byte_range(),
+                        |offset| {
+                            let adjusted =
+                                apply_range_offset(next_capture.node, *offset, self.source);
+                            adjusted.start_byte..adjusted.end_byte
+                        },
+                    );
 
                 // If any previous highlight ends before this node starts, then before
                 // processing this capture, emit the source code up until the end of the
@@ -1331,7 +1484,7 @@ fn injection_for_match<'a>(
     query: &'a Query,
     query_match: &QueryMatch<'a, 'a>,
     source: &'a [u8],
-) -> (Option<&'a str>, Option<Node<'a>>, bool) {
+) -> (Option<&'a str>, Option<InjectionContent<'a>>, bool) {
     let content_capture_index = config.injection_content_capture_index;
     let language_capture_index = config.injection_language_capture_index;
 
@@ -1343,7 +1496,19 @@ fn injection_for_match<'a>(
         if index == language_capture_index {
             language_name = capture.node.utf8_text(source).ok();
         } else if index == content_capture_index {
-            content_node = Some(capture.node);
+            // Neovim narrows the injected range with `#offset!` before parsing it, so
+            // delimiters such as backticks or `${`/`}` never reach the injected grammar.
+            let range = config
+                .offsets
+                .get(&(query_match.pattern_index, capture.index))
+                .map_or_else(
+                    || capture.node.range(),
+                    |offset| apply_range_offset(capture.node, *offset, source),
+                );
+            content_node = Some(InjectionContent {
+                node: capture.node,
+                range,
+            });
         }
     }
 
@@ -1413,5 +1578,56 @@ mod tests {
         } else {
             panic!("Expected HighlightStart");
         }
+    }
+
+    // `#offset!` arithmetic, pinned against Neovim's `apply_range_offset`. The
+    // conformance fixtures cover the common same-row case end to end; these cover the
+    // row-shifting and degenerate cases they do not reach.
+
+    #[test]
+    fn same_row_offset_is_a_byte_shift() {
+        let source = b"html`<div>`";
+        // Start of the template string, shifted right one byte past the backtick.
+        let shifted = shift_point(source, 4, Point::new(0, 4), 0, 1).unwrap();
+        assert_eq!(shifted, (5, Point::new(0, 5)));
+        // End shifted left one byte, off the closing backtick.
+        let shifted = shift_point(source, 11, Point::new(0, 11), 0, -1).unwrap();
+        assert_eq!(shifted, (10, Point::new(0, 10)));
+    }
+
+    #[test]
+    fn row_offset_walks_to_the_target_line() {
+        // The `(#offset! @injection.content 1 0 -1 0)` shape used to strip fence lines.
+        let source = b"```lua\nprint(1)\n```\n";
+        // Start on row 0 moves to the beginning of row 1.
+        assert_eq!(
+            shift_point(source, 0, Point::new(0, 0), 1, 0).unwrap(),
+            (7, Point::new(1, 0))
+        );
+        // End on row 2 moves back to the beginning of row 1.
+        assert_eq!(
+            shift_point(source, 16, Point::new(2, 0), -1, 0).unwrap(),
+            (7, Point::new(1, 0))
+        );
+    }
+
+    #[test]
+    fn multibyte_rows_are_walked_by_byte_not_character() {
+        // "é" is two bytes, so row 1 starts at byte 4, not byte 3.
+        let source = "é\nx\n".as_bytes();
+        assert_eq!(
+            shift_point(source, 0, Point::new(0, 0), 1, 0).unwrap(),
+            (3, Point::new(1, 0))
+        );
+        assert_eq!(line_start_byte(source, 3, Point::new(1, 0), 1), Some(3));
+    }
+
+    #[test]
+    fn offsets_that_run_off_the_document_are_rejected() {
+        let source = b"ab";
+        assert_eq!(shift_point(source, 0, Point::new(0, 0), 0, -1), None);
+        assert_eq!(shift_point(source, 2, Point::new(0, 2), 0, 5), None);
+        // No such row to walk to.
+        assert_eq!(shift_point(source, 0, Point::new(0, 0), 3, 0), None);
     }
 }

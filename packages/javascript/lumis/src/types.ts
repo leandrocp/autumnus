@@ -216,12 +216,22 @@ export interface CaptureMetadata {
   isLocalReference: boolean;
 }
 
+/** Deltas from `(#offset! @capture start_row start_col end_row end_col)`. */
+export interface QueryCaptureOffset {
+  startRow: number;
+  startColumn: number;
+  endRow: number;
+  endColumn: number;
+}
+
 export interface CompiledHighlightConfig {
   query: Query;
   injectionPatternEnd: number;
   localsPatternEnd: number;
   captureMetadata: Record<string, CaptureMetadata>;
   nonLocalVariablePatterns: boolean[];
+  /** Per pattern index, the `#offset!` deltas keyed by capture name. */
+  captureOffsets: Array<Record<string, QueryCaptureOffset> | undefined>;
 }
 
 export interface CompiledBracketConfig {

@@ -320,11 +320,6 @@
     },
     {
       "type": "start",
-      "scope": "variable",
-      "language": "javascript"
-    },
-    {
-      "type": "start",
       "scope": "string",
       "language": "html"
     },
@@ -336,23 +331,7 @@
     {
       "type": "source",
       "start": 72,
-      "end": 73
-    },
-    {
-      "type": "end"
-    },
-    {
-      "type": "start",
-      "scope": "punctuation.bracket",
-      "language": "javascript"
-    },
-    {
-      "type": "source",
-      "start": 73,
       "end": 74
-    },
-    {
-      "type": "end"
     },
     {
       "type": "end"
@@ -372,7 +351,7 @@
     },
     {
       "type": "start",
-      "scope": "punctuation.bracket",
+      "scope": "punctuation.special",
       "language": "javascript"
     },
     {

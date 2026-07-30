@@ -1,5 +1,5 @@
 import type { Node, Point, QueryCapture, QueryMatch, Range } from "web-tree-sitter";
-import type { LoadedLanguage } from "./types.js";
+import type { LoadedLanguage, QueryCaptureOffset } from "./types.js";
 
 interface RuntimeLookup {
   getLoadedLanguage(nameOrAlias: string): LoadedLanguage | undefined;
@@ -151,6 +151,7 @@ function snapshotCapturesWithMatches(
   matches: QueryMatch[],
   maps: SourceMaps,
   firstHighlightPattern: number,
+  captureOffsets: Array<Record<string, QueryCaptureOffset> | undefined>,
 ): CaptureSnapshot {
   const queues: CaptureMatchQueues = new Map();
 
@@ -196,13 +197,24 @@ function snapshotCapturesWithMatches(
       nextMatchIndex += 1;
     }
 
+    // Neovim resolves a highlight capture's range through `get_range`, so `#offset!`
+    // narrows the highlighted span as well as injection ranges.
+    const offset = captureOffsets[capture.patternIndex]?.[capture.name];
+    const adjusted = offset
+      ? applyCaptureOffset(nodeToRange(capture.node), offset, maps.lineStarts)
+      : undefined;
+
     result.push({
       matchIndex,
       patternIndex: capture.patternIndex,
       name: capture.name,
       nodeId: capture.node.id,
-      startByte: nodeStartByte(capture.node, maps),
-      endByte: nodeEndByte(capture.node, maps),
+      startByte: adjusted
+        ? (maps.utf8Offsets[adjusted.startIndex] ?? nodeStartByte(capture.node, maps))
+        : nodeStartByte(capture.node, maps),
+      endByte: adjusted
+        ? (maps.utf8Offsets[adjusted.endIndex] ?? nodeEndByte(capture.node, maps))
+        : nodeEndByte(capture.node, maps),
       setProperties: capture.setProperties,
     });
   }
@@ -240,8 +252,9 @@ function resolveInjection(
   }
 
   const includeChildren = "injection.include-children" in setProperties;
+  const offsets = language.config.captureOffsets[match.patternIndex];
   const ranges = contentCaptures.flatMap((capture) =>
-    getCaptureRanges(capture, lineStarts, includeChildren),
+    getCaptureRanges(capture, lineStarts, includeChildren, offsets?.[capture.name]),
   );
 
   return { languageName, ranges };
@@ -268,6 +281,7 @@ function collectHighlightLayers(
       queryMatches,
       maps,
       language.config.injectionPatternEnd,
+      language.config.captureOffsets,
     );
     const localDefinitionValueEnds = new Uint32Array(snapshot.matchCount);
 
@@ -330,8 +344,11 @@ function getCaptureRanges(
   capture: QueryCapture,
   lineStarts: number[],
   includeChildren: boolean,
+  offset?: QueryCaptureOffset,
 ): Range[] {
-  const range = nodeToRange(capture.node);
+  // The outer bounds come from the `#offset!`-adjusted range; children are still masked
+  // out from the node itself, matching Neovim's `get_node_ranges`.
+  const range = applyCaptureOffset(nodeToRange(capture.node), offset, lineStarts);
 
   if (includeChildren || capture.node.childCount === 0) {
     return [range];
@@ -340,6 +357,44 @@ function getCaptureRanges(
   return getInjectionRanges(capture.node, false)
     .map((nodeRange) => intersectRange(nodeRange, range, lineStarts))
     .filter((range): range is Range => range != null);
+}
+
+/**
+ * Applies `#offset!` to a range.
+ *
+ * Mirrors `apply_range_offset` in Neovim's `runtime/lua/vim/treesitter.lua`, including
+ * the part the previous implementation omitted: a shift that inverts the range, or that
+ * lands outside the document, is discarded rather than propagated.
+ */
+function applyCaptureOffset(
+  range: Range,
+  offset: QueryCaptureOffset | undefined,
+  lineStarts: number[],
+): Range {
+  if (!offset) return range;
+
+  const startPosition = {
+    row: range.startPosition.row + offset.startRow,
+    column: range.startPosition.column + offset.startColumn,
+  };
+  const endPosition = {
+    row: range.endPosition.row + offset.endRow,
+    column: range.endPosition.column + offset.endColumn,
+  };
+
+  const startIndex = pointToIndex(startPosition, lineStarts);
+  const endIndex = pointToIndex(endPosition, lineStarts);
+  if (startIndex == null || endIndex == null || startIndex > endIndex) {
+    return range;
+  }
+
+  return makeRange(startIndex, endIndex, startPosition, endPosition);
+}
+
+function pointToIndex(point: Point, lineStarts: number[]): number | undefined {
+  const lineStart = lineStarts[point.row];
+  if (lineStart == null || point.column < 0) return undefined;
+  return lineStart + point.column;
 }
 
 function intersectRange(range: Range, bounds: Range, lineStarts: number[]): Range | undefined {

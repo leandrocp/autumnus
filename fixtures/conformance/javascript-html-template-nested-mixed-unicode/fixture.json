@@ -95,11 +95,6 @@
     },
     {
       "type": "start",
-      "scope": "variable",
-      "language": "javascript"
-    },
-    {
-      "type": "start",
       "scope": "string",
       "language": "html"
     },
@@ -111,23 +106,7 @@
     {
       "type": "source",
       "start": 17,
-      "end": 18
-    },
-    {
-      "type": "end"
-    },
-    {
-      "type": "start",
-      "scope": "punctuation.bracket",
-      "language": "javascript"
-    },
-    {
-      "type": "source",
-      "start": 18,
       "end": 19
-    },
-    {
-      "type": "end"
     },
     {
       "type": "end"
@@ -147,7 +126,7 @@
     },
     {
       "type": "start",
-      "scope": "punctuation.bracket",
+      "scope": "punctuation.special",
       "language": "javascript"
     },
     {
@@ -282,11 +261,6 @@
     },
     {
       "type": "start",
-      "scope": "variable",
-      "language": "javascript"
-    },
-    {
-      "type": "start",
       "scope": "string",
       "language": "html"
     },
@@ -298,23 +272,7 @@
     {
       "type": "source",
       "start": 58,
-      "end": 59
-    },
-    {
-      "type": "end"
-    },
-    {
-      "type": "start",
-      "scope": "punctuation.bracket",
-      "language": "javascript"
-    },
-    {
-      "type": "source",
-      "start": 59,
       "end": 60
-    },
-    {
-      "type": "end"
     },
     {
       "type": "end"
@@ -334,7 +292,7 @@
     },
     {
       "type": "start",
-      "scope": "punctuation.bracket",
+      "scope": "punctuation.special",
       "language": "javascript"
     },
     {
