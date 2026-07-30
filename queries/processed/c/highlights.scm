@@ -290,7 +290,7 @@
 (comment) @comment 
 
 ((comment) @comment.documentation
-  (#match? @comment.documentation "^/[*][*][\\^*].*[*]/$"))
+  (#match? @comment.documentation "^/[*][*][^*][\\s\\S]*[*]/$"))
 
 ; Parameters
 (parameter_declaration

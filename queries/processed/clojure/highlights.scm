@@ -74,18 +74,18 @@
 
 ; Used in destructure pattern
 ((sym_lit) @variable.parameter
-  (#match? @variable.parameter "^[&]"))
+  (#match? @variable.parameter "^[\\&]"))
 
 ; Inline function variables
 ((sym_lit) @variable.builtin
-  (#match? @variable.builtin "^%\\d*$"))
+  (#match? @variable.builtin "^%[0-9]*$"))
 
 ((sym_lit) @variable.builtin
   (#eq? @variable.builtin "%&"))
 
 ; Constructor
 ((sym_lit) @constructor
-  (#match? @constructor "^*?\\>[\\^>].*"))
+  (#match? @constructor "^->[^>][\\s\\S]*"))
 
 ; Builtin dynamic variables
 ((sym_lit) @variable.builtin
@@ -105,29 +105,29 @@
 ; Types
 (sym_lit
   name: (sym_name) @_name
-  (#match? @_name "^[[A-Z]][\\^/\\s]*$")) @type
+  (#match? @_name "^[A-Z][^/\\t-\\r ]*$")) @type
 
 ; Symbols with `.` but not `/`
 (sym_lit
   !namespace
   name: (sym_name) @_name
-  (#match? @_name "^[\\^.]+[.]")) @type
+  (#match? @_name "^[^.]+[.]")) @type
 
 ; Interop
 ; (.instanceMember instance args*)
 ; (.instanceMember Classname args*)
 ((sym_lit
   name: (sym_name) @_name) @function.method
-  (#match? @_name "^\\.[\\^-]"))
+  (#match? @_name "^\\.[^-]"))
 
 ; (.-instanceField instance)
 ((sym_name) @variable.member
-  (#match? @variable.member "^\\.\\-\\S*"))
+  (#match? @variable.member "^\\.-[^\\t-\\r ]*"))
 
 ;  Classname/staticField
 (sym_lit
   namespace: (sym_ns) @_namespace
-  (#match? @_namespace "^[[A-Z]]\\S*$")) @variable.member
+  (#match? @_namespace "^[A-Z][^\\t-\\r ]*$")) @variable.member
 
 ; (Classname/staticMethod args*)
 (list_lit

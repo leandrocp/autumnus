@@ -217,7 +217,7 @@
   (#match? @comment.documentation "^[-][-][-]"))
 
 ((comment) @comment.documentation
-  (#match? @comment.documentation "^[-][-](\\s?)@"))
+  (#match? @comment.documentation "^[-][-]([\\t-\\r ]?)@"))
 
 (hash_bang_line) @keyword.directive
 

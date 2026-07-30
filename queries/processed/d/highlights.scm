@@ -234,7 +234,7 @@
   (identifier) @type)
 
 ((identifier) @type
-  (#match? @type "^[A-Z].*"))
+  (#match? @type "^[A-Z][\\s\\S]*"))
 
 (type
   .
@@ -365,13 +365,13 @@
 (comment) @comment 
 
 ((comment) @comment.documentation
-  (#match? @comment.documentation "^///[\\^/]"))
+  (#match? @comment.documentation "^///[^/]"))
 
 ((comment) @comment.documentation
   (#match? @comment.documentation "^///$"))
 
 ((comment) @comment.documentation
-  (#match? @comment.documentation "^/[*][*][\\^*].*[*]/$"))
+  (#match? @comment.documentation "^/[*][*][^*][\\s\\S]*[*]/$"))
 
 ((comment) @comment.documentation
-  (#match? @comment.documentation "^/[+][+][\\^+].*[+]/$"))
+  (#match? @comment.documentation "^/[+][+][^+][\\s\\S]*[+]/$"))

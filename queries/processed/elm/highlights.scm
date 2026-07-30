@@ -5,7 +5,7 @@
 ] @comment 
 
 ((block_comment) @comment.documentation
-  (#match? @comment.documentation "^\\{[-]\\|\\^\\{[\\^\\|]"))
+  (#match? @comment.documentation "^\\\\\\{[-]\\|\\^\\\\\\{[^|]"))
 
 ; Keywords
 ;---------

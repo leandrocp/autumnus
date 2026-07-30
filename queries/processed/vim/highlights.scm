@@ -349,7 +349,7 @@
 
 ; Options
 ((set_value) @number
-  (#match? @number "^[\\d]+(\\.[\\d]+)?$"))
+  (#match? @number "^[0-9]+(\\.[0-9]+)\\?$"))
 
 (inv_option
   "!" @operator)
@@ -361,3 +361,11 @@
   option: (option_name) @_option
   value: (set_value) @function)
   (#any-of? @_option "tagfunc" "tfu" "completefunc" "cfu" "omnifunc" "ofu" "operatorfunc" "opfunc"))
+; Upstream nvim-treesitter matches option values with
+; `(#match? @number "^[0-9]+(\\.[0-9]+)\\?$")`, but Lua patterns cannot quantify a
+; capture: the `?` after `)` is a literal, so that predicate matches nothing in
+; Neovim either. Verified with `string.find("42", "^[%d]+(%.[%d]+)?$")` -> nil.
+;
+; Add a working equivalent instead of overriding the whole upstream file.
+((set_value) @number
+  (#match? @number "^[0-9]+\\.?[0-9]*$"))

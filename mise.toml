@@ -155,6 +155,40 @@ pnpm --filter @lumis-sh/lumis build
 pnpm -r --if-present test
 '''
 
+[tasks.'test-queries']
+description = "Compile every processed query against a parser built from languages.toml"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Query validation must not depend on what is published to npm. Building every
+# parser from the pinned revisions gives complete, publication-independent
+# coverage, which empties the waiver in
+# packages/javascript/lumis/test/unverified-parsers.json.
+echo "Checking regex portability across the whole corpus..."
+cargo test -p lumis-build --test processed_queries
+pnpm --filter @lumis-sh/lumis exec vitest run test/query-patterns.test.ts
+echo ""
+
+# Published packages are used when their revision matches languages.toml, so only
+# the lagging ones are built. The cost scales with the release lag, not with the
+# size of the catalog, and reaches zero once every package is republished.
+echo "Building parsers whose published package cannot verify itself..."
+missing=$(pnpm --filter @lumis-sh/lumis exec node scripts/list-unverified-parsers.mjs --parsers)
+if [ -n "$missing" ]; then
+    echo "$missing" | wc -l | xargs echo "  parsers to build:"
+    while read -r parser; do
+        [ -n "$parser" ] && mise run wasm-build "$parser"
+    done <<< "$missing"
+else
+    echo "  none, every package is at its pinned revision"
+fi
+echo ""
+
+echo "Compiling every query against its pinned grammar..."
+LUMIS_QUERY_COVERAGE=complete pnpm --filter @lumis-sh/lumis exec vitest run test/query-compile.test.ts
+'''
+
 [tasks.'test-conformance']
 description = "Run conformance tests across all packages"
 run = '''

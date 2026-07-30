@@ -292,7 +292,7 @@
 (comment) @comment 
 
 ((comment) @comment.documentation
-  (#match? @comment.documentation "^/[*][*][\\^*].*[*]/$"))
+  (#match? @comment.documentation "^/[*][*][^*][\\s\\S]*[*]/$"))
 
 ; Parameters
 (parameter_declaration
@@ -344,7 +344,7 @@
 ] @attribute
 
 ((identifier) @variable.member
-  (#match? @variable.member "^m_.*$"))
+  (#match? @variable.member "^m_[\\s\\S]*$"))
 
 (parameter_declaration
   declarator: (reference_declarator) @variable.parameter)
@@ -383,7 +383,7 @@
 (namespace_identifier) @module
 
 ((namespace_identifier) @type
-  (#match? @type "^[[A-Z]]"))
+  (#match? @type "^[A-Z]"))
 
 (case_statement
   value: (qualified_identifier

@@ -138,7 +138,7 @@
     "$true"))
 
 ((variable) @variable.builtin
-  (#match? @variable.builtin "^$env:"))
+  (#match? @variable.builtin "^\\$env:"))
 
 (data_name
   (simple_name) @constant)

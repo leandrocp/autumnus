@@ -3,7 +3,7 @@
   (#set! injection.language "comment"))
 
 ((regex) @injection.content
-  (#not-match? @injection.content "\\$\\{.*\\}")
+  (#not-match? @injection.content "\\$\\{[\\s\\S]*\\}")
   (#set! injection.language "regex"))
 
 (heredoc_redirect

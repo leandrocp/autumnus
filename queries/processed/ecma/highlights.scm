@@ -26,10 +26,10 @@
   (#match? @type "^[A-Z]"))
 
 ((identifier) @constant
-  (#match? @constant "^_*[A-Z][A-Z\\d_]*$"))
+  (#match? @constant "^_*[A-Z][A-Z0-9_]*$"))
 
 ((shorthand_property_identifier) @constant
-  (#match? @constant "^_*[A-Z][A-Z\\d_]*$"))
+  (#match? @constant "^_*[A-Z][A-Z0-9_]*$"))
 
 ((identifier) @variable.builtin
   (#any-of? @variable.builtin "arguments" "module" "console" "window" "document"))
@@ -189,7 +189,7 @@
 ] @comment 
 
 ((comment) @comment.documentation
-  (#match? @comment.documentation "^/[*][*][\\^*].*[*]/$"))
+  (#match? @comment.documentation "^/[*][*][^*][\\s\\S]*[*]/$"))
 
 (hash_bang_line) @keyword.directive
 

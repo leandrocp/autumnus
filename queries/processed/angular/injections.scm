@@ -10,8 +10,8 @@
 ((style_element
   (start_tag) @_no_type_lang
   (raw_text) @injection.content)
-  (#not-match? @_no_type_lang "\\slang\\s*=")
-  (#not-match? @_no_type_lang "\\stype\\s*=")
+  (#not-match? @_no_type_lang "[\\t-\\r ]lang[\\t-\\r ]*=")
+  (#not-match? @_no_type_lang "[\\t-\\r ]type[\\t-\\r ]*=")
   (#set! injection.language "css"))
 
 ((style_element
@@ -30,8 +30,8 @@
 ((script_element
   (start_tag) @_no_type_lang
   (raw_text) @injection.content)
-  (#not-match? @_no_type_lang "\\slang\\s*=")
-  (#not-match? @_no_type_lang "\\stype\\s*=")
+  (#not-match? @_no_type_lang "[\\t-\\r ]lang[\\t-\\r ]*=")
+  (#not-match? @_no_type_lang "[\\t-\\r ]type[\\t-\\r ]*=")
   (#set! injection.language "javascript"))
 
 ; <script type="foo/bar">

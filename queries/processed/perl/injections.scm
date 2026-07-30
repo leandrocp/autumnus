@@ -11,7 +11,7 @@
   (substitution_regexp_modifiers) @_modifiers)
   ; match if there's a single `e` in the modifiers list
   (#match? @_modifiers "e")
-  (#not-match? @_modifiers "e.*e")
+  (#not-match? @_modifiers "e[\\s\\S]*e")
   (#set! injection.language "perl")
   (#set! injection.include-children))
 

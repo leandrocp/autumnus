@@ -163,7 +163,7 @@
 ] @comment
 
 ((multiline_comment) @comment.documentation
-  (#match? @comment.documentation "^/[*][*][\\^*].*[*]/$"))
+  (#match? @comment.documentation "^/[*][*][^*][\\s\\S]*[*]/$"))
 
 (shebang_line) @keyword.directive
 

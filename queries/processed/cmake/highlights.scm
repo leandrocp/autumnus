@@ -4,7 +4,7 @@
   (argument_list
     (argument
       (unquoted_argument)) @constant)
-  (#match? @constant "^[[A-Z]@][[A-Z]\\d_]+$"))
+  (#match? @constant "^[A-Z@][A-Z0-9_]+$"))
 
 [
   (quoted_argument)

@@ -127,7 +127,7 @@
 
 (attribute
   (attribute_name) @variable.member
-  (#match? @variable.member "#.*"))
+  (#match? @variable.member "#[\\s\\S]*"))
 
 (binding_name
   (identifier) @keyword)

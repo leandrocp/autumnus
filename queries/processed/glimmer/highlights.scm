@@ -3,7 +3,7 @@
 ; Tags that start with a lower case letter are HTML tags
 ; We'll also use this highlighting for named blocks (which start with `:`)
 ((tag_name) @tag
-  (#match? @tag "^:?[[a-z]]"))
+  (#match? @tag "^:?[a-z]"))
 
 ; Tags that start with a capital letter are Glimmer components
 ((tag_name) @constructor

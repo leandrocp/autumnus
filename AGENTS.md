@@ -29,6 +29,15 @@ Lumis should present one mental model everywhere. Public APIs across languages s
 
 The Rust implementation is the source of truth. When a cross-runtime API decision is unclear, follow Rust first and bring other runtimes into line with it instead of inventing runtime-specific behavior.
 
+### Reuse the Rust core instead of reimplementing it
+
+Shared behavior belongs in one Rust crate that every runtime consumes. A second implementation of the same logic in another language, or in another Rust crate, is a divergence that will drift.
+
+- Before writing logic in JavaScript, Elixir, the CLI, or a build script, check whether `crates/lumis-core`, `crates/lumis`, `crates/lumis-wasm-runtime`, or `crates/lumis-build` already owns it, and extend that crate instead.
+- Prefer moving work to generation time in Rust over duplicating it per runtime. Query preprocessing is the model: `crates/lumis-build` converts Lua patterns once, and every runtime then reads byte-identical `.scm` files.
+- When a runtime genuinely cannot call into Rust, such as the browser, the Rust crate still defines the behavior, and the port must be covered by a test that pins both against the same input.
+- Two copies of the same algorithm require a test that pins them to each other. `scripts/wasm-needed.py` and `crates/dev` computing the same `definitionHash` is exactly the kind of pair that needs one.
+
 ### Route work through `mise`
 
 `mise.toml` is the control plane for this repository. It defines tasks without pinning runtime versions, so local commands use the developer's installed Rust, JavaScript, Elixir, and other toolchains.
@@ -70,6 +79,29 @@ Lumis is a Tree-sitter-based syntax highlighter. Language behavior must respect 
 - Treat `.scm` query files as executable language behavior, not just generated assets to carry around.
 - For cross-runtime features, define the behavior in Rust first, then align JavaScript, Elixir, browser, Java, and CLI behavior to the Rust implementation.
 - Do not replace language-specific query semantics with generic string scanning unless it is an explicit fallback for plaintext or unavailable parser/query data.
+
+### Neovim is the reference for query semantics
+
+Lumis queries are fetched from <https://github.com/nvim-treesitter/nvim-treesitter>, so those `.scm` files mean whatever Neovim's highlighting engine says they mean. Neovim, not Tree-sitter's documentation and not a plausible reading of the pattern, decides the intended behavior.
+
+- Before changing predicate handling, query preprocessing, or capture resolution, read the upstream implementation. Clone it locally: `git clone --depth 1 --filter=blob:none --sparse https://github.com/neovim/neovim.git "$(mktemp -d)/nvim"`, then `git sparse-checkout set runtime/lua/vim/treesitter`.
+- The predicate handlers live in `runtime/lua/vim/treesitter/query.lua`. Two of them are easy to conflate:
+  - `#lua-match?` is `string.find(node_text, pattern)`, so its argument is a **Lua 5.1 pattern**, matched unanchored unless it starts with `^`.
+  - `#match?` (aliased as `#vim-match?`) is `vim.regex('\v' .. pattern)`, a **Vim very-magic regex**. Lumis instead evaluates `#match?` with Tree-sitter's own implementation: the `regex` crate in Rust and `RegExp` in `web-tree-sitter`.
+- A Lua pattern is not a regex. `-` is the lazy `*` only after a pattern item, `^` anchors only at the start, `$` only at the end, `.` matches newlines, and `%d`/`%s`/`%w` are ASCII in the C locale. `crates/lumis-build` owns that translation; extend it rather than hand-editing generated queries.
+- Any translated pattern must be valid **and equivalent** in both the `regex` crate and JavaScript `RegExp` with no flags. The two disagree on nested character classes, `\d`/`\w`/`\s` width, and inline `(?i)` groups. `crates/lumis-build/tests/processed_queries.rs` and `packages/javascript/lumis/test/query-patterns.test.ts` enforce this over the whole corpus and must not be allowed to skip languages.
+- Settle a question about pattern semantics by running it, not by reasoning about it: `nvim --headless -c 'lua print(string.find(subject, pattern))' -c q`.
+- The converter stays faithful to Neovim even when upstream is wrong. Fix an authoring mistake in `queries/override/` or `queries/append/` instead, where it is visible in review, and say in a comment what upstream does and why it is wrong.
+
+### A test that cannot fail is worse than no test
+
+A test that skips silently reports the same green as a test that verified something. That is how the defects in `CLAUDE_REVIEW.md` §1 shipped: the only per-language query check `return`ed early for 77 of 115 languages.
+
+- Never `return` or `continue` out of a test body to handle a missing prerequisite. Fail, or record the gap in a checked-in file that the test enforces.
+- A gap that genuinely cannot be closed yet gets an explicit waiver that can only shrink. The test must fail on an undeclared gap **and** on a waiver entry that is no longer needed. `packages/javascript/lumis/test/unverified-parsers.json` is the pattern.
+- Assert corpus size. `expect(patterns.length).toBeGreaterThan(200)` is what catches a discovery bug that silently finds nothing.
+- Prove a new guard fails: inject the defect it is meant to catch, watch it go red, then revert. A guard that has never failed has not been tested.
+- Do not let published artifacts gate correctness checks. Build what you need from the pinned source instead, as `mise run test-queries` does, otherwise coverage silently tracks the release cycle.
 
 ### Keep Emscripten compatible with Tree-sitter
 

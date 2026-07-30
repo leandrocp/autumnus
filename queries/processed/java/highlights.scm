@@ -129,7 +129,7 @@
 
 ; Variables
 ((identifier) @constant
-  (#match? @constant "^[A-Z_][A-Z\\d_]+$"))
+  (#match? @constant "^[A-Z_][A-Z0-9_]+$"))
 
 (this) @variable.builtin
 
@@ -325,10 +325,10 @@
 ] @comment 
 
 ((block_comment) @comment.documentation
-  (#match? @comment.documentation "^/[*][*][\\^*].*[*]/$"))
+  (#match? @comment.documentation "^/[*][*][^*][\\s\\S]*[*]/$"))
 
 ((line_comment) @comment.documentation
-  (#match? @comment.documentation "^///[\\^/]"))
+  (#match? @comment.documentation "^///[^/]"))
 
 ((line_comment) @comment.documentation
   (#match? @comment.documentation "^///$"))

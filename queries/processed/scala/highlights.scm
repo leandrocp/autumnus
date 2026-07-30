@@ -283,7 +283,7 @@
 ] @comment 
 
 ((block_comment) @comment.documentation
-  (#match? @comment.documentation "^/[*][*][\\^*].*[*]/$"))
+  (#match? @comment.documentation "^/[*][*][^*][\\s\\S]*[*]/$"))
 
 ; `case` is a conditional keyword in case_block
 (case_block

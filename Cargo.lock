@@ -1414,6 +1414,9 @@ dependencies = [
 [[package]]
 name = "lumis-build"
 version = "1.0.0"
+dependencies = [
+ "regex",
+]
 
 [[package]]
 name = "lumis-cli"

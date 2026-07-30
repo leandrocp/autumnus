@@ -224,13 +224,13 @@
 ] @comment 
 
 ((comment) @comment.documentation
-  (#match? @comment.documentation "^///[\\^/]"))
+  (#match? @comment.documentation "^///[^/]"))
 
 ((comment) @comment.documentation
   (#match? @comment.documentation "^///$"))
 
 ((multiline_comment) @comment.documentation
-  (#match? @comment.documentation "^/[*][*][\\^*].*[*]/$"))
+  (#match? @comment.documentation "^/[*][*][^*][\\s\\S]*[*]/$"))
 
 ; String literals
 (line_str_text) @string

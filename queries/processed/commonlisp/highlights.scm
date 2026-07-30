@@ -103,7 +103,7 @@
 
 ; dynamic variables
 ((sym_lit) @variable.builtin
-  (#match? @variable.builtin "^[*].+[*]$"))
+  (#match? @variable.builtin "^[*][\\s\\S]+[*]$"))
 
 ; quote
 (format_specifier) @string.escape
@@ -164,7 +164,7 @@
 
 ; constant
 ((sym_lit) @constant
-  (#match? @constant "^[+].+[+]$"))
+  (#match? @constant "^[+][\\s\\S]+[+]$"))
 
 (var_quoting_lit
   marker: "#'" @string.special.symbol
@@ -304,7 +304,7 @@
   (#match? @operator "^([+*-+=<>]|<=|>=|/=)$"))
 
 ((sym_lit) @string.special.symbol
-  (#match? @string.special.symbol "^[&]"))
+  (#match? @string.special.symbol "^[\\&]"))
 
 [
   (array_dimension)

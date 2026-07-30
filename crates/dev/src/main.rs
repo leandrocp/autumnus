@@ -1729,7 +1729,12 @@ fn preprocess_queries(name: &str) -> Result<()> {
             let content =
                 resolve_and_preprocess(src, override_dir, append_dir, &lang, query_type, &mut seen);
             if !content.is_empty() {
-                let content = lumis_build::convert_lua_matches(&content);
+                // Reject rather than approximate: a Lua pattern that cannot be
+                // translated faithfully would ship a regex that means something
+                // else in every runtime.
+                let content = lumis_build::try_convert_lua_matches(&content).with_context(|| {
+                    format!("failed to convert Lua patterns in {lang}/{query_type}.scm")
+                })?;
                 let full = format!("; This file is auto-generated. Do not edit.\n{content}");
                 fs::write(format!("{dest}/{lang}/{query_type}.scm"), &full)?;
                 wrote = true;

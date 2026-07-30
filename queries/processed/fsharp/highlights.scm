@@ -124,7 +124,7 @@
 ((argument_patterns
   (long_identifier
     (identifier) @character.special))
-  (#match? @character.special "^_.*"))
+  (#match? @character.special "^_[\\s\\S]*"))
 
 (member_defn
   (method_or_prop_defn
