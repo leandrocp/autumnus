@@ -23,6 +23,10 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     GenCss,
+    FilterThemeUpdates {
+        #[arg(default_value = "")]
+        name: String,
+    },
     SyncThemes,
     SyncCss,
     ListThemes,
@@ -104,6 +108,7 @@ fn main() -> Result<()> {
 
     match cli.command {
         Commands::GenCss => gen_css(),
+        Commands::FilterThemeUpdates { name } => filter_theme_updates(&name),
         Commands::SyncThemes => sync_themes(),
         Commands::SyncCss => sync_css(),
         Commands::ListThemes => list_themes(),
@@ -570,6 +575,63 @@ fn gen_css() -> Result<()> {
         let css_path = css_dir.join(format!("{}.css", theme.name));
         fs::write(&css_path, css)?;
         println!("{}", css_path.display());
+    }
+
+    Ok(())
+}
+
+fn without_revision(mut theme: Value) -> Value {
+    if let Value::Object(fields) = &mut theme {
+        fields.remove("revision");
+    }
+    theme
+}
+
+fn is_revision_only_theme_update(previous: &Value, current: &Value) -> bool {
+    previous != current && without_revision(previous.clone()) == without_revision(current.clone())
+}
+
+fn filter_theme_updates(name: &str) -> Result<()> {
+    let mut theme_paths = if name.is_empty() {
+        glob::glob("themes/*.json")?.collect::<Result<Vec<_>, _>>()?
+    } else {
+        vec![PathBuf::from(format!("themes/{name}.json"))]
+    };
+    theme_paths.sort();
+
+    for path in theme_paths {
+        if !path.exists() {
+            continue;
+        }
+
+        let previous = Command::new("git")
+            .args(["show", &format!("HEAD:{}", path.display())])
+            .output()
+            .with_context(|| {
+                format!("failed to read the previous version of {}", path.display())
+            })?;
+
+        // A new theme has no version at HEAD and should always be kept.
+        if !previous.status.success() {
+            continue;
+        }
+
+        let previous_source = String::from_utf8(previous.stdout)
+            .with_context(|| format!("previous theme is not UTF-8: {}", path.display()))?;
+        let current_source = fs::read_to_string(&path)
+            .with_context(|| format!("failed to read generated theme {}", path.display()))?;
+        let previous_theme: Value = serde_json::from_str(&previous_source)
+            .with_context(|| format!("invalid previous theme JSON: {}", path.display()))?;
+        let current_theme: Value = serde_json::from_str(&current_source)
+            .with_context(|| format!("invalid generated theme JSON: {}", path.display()))?;
+
+        if is_revision_only_theme_update(&previous_theme, &current_theme) {
+            fs::write(&path, previous_source)?;
+            println!(
+                "Ignored revision-only theme update: {}",
+                path.file_stem().unwrap().to_string_lossy()
+            );
+        }
     }
 
     Ok(())
@@ -2747,5 +2809,50 @@ mod tests {
             "\"nil\" @constant.builtin"
         );
         assert_eq!(apply_text_replacements(query, "nim"), query);
+    }
+
+    #[test]
+    fn revision_only_theme_updates_are_ignored() {
+        let previous = json!({
+            "name": "demo",
+            "appearance": "dark",
+            "revision": "old",
+            "highlights": {
+                "normal": { "fg": "#ffffff", "bg": "#000000" }
+            }
+        });
+        let current = json!({
+            "name": "demo",
+            "appearance": "dark",
+            "revision": "new",
+            "highlights": {
+                "normal": { "fg": "#ffffff", "bg": "#000000" }
+            }
+        });
+
+        assert!(is_revision_only_theme_update(&previous, &current));
+    }
+
+    #[test]
+    fn actual_theme_updates_are_kept() {
+        let previous = json!({
+            "name": "demo",
+            "appearance": "dark",
+            "revision": "old",
+            "highlights": {
+                "normal": { "fg": "#ffffff", "bg": "#000000" }
+            }
+        });
+        let current = json!({
+            "name": "demo",
+            "appearance": "dark",
+            "revision": "new",
+            "highlights": {
+                "normal": { "fg": "#eeeeee", "bg": "#000000" }
+            }
+        });
+
+        assert!(!is_revision_only_theme_update(&previous, &current));
+        assert!(!is_revision_only_theme_update(&previous, &previous));
     }
 }
