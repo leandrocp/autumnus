@@ -1,29 +1,123 @@
 # Review: PR #1099 — `feat: unify dynamic WASM language loading`
 
-Scope reviewed: 305 files, +11556/-5103, 26 commits, `main...lp-unified-wasm-languages`.
+Scope reviewed: `main...lp-unified-wasm-languages`, starting at `fdd756949` (after merging
+`origin/main` at `6cc5386a2`).
 
-**Verdict: do not merge as-is.** The architecture is sound and the packaging win is real, but
-three defects in this branch are user-visible breakage today, and one of them is a hard crash.
-All three are independently reproducible with the commands below. Separately, the branch removes
-the only Node fast path and the test that would have caught the crash, which is why CI is green.
+Fixes from the second pass are committed on this branch:
+
+| Commit | Closes |
+| --- | --- |
+| `fix: make every runtime accept the same language package` | §4.7, §4.8, §4.9 |
+| `fix: apply the #offset! directive in every runtime` | §3 |
+
+**Verdict: do not merge as-is.** The architecture is right — one package format carrying parser +
+queries + integrity + provenance, released atomically, is a genuine improvement, and moving
+Lua→regex translation to generation time so every runtime consumes byte-identical `.scm` is the
+correct call. The remaining blockers are narrower than they were: the branch is still red on its own
+test suite (§0), and the PR's own thesis — one portable language-loading architecture — is not met,
+because the loading pipeline exists three times (§8).
 
 This document is a living guideline. Items are fixed in place and marked **DONE** only once a
 reproducible test pins the behavior.
+
+## Against the stated objectives
+
+| Objective | State |
+| --- | --- |
+| Reuse the Rust core | **Not met.** resolve→verify→cache exists three times (CLI Rust, JS, Elixir). Only the JS copy is forced. §8 |
+| Safety | Mostly good. No new `unsafe`. Integrity checking is real, but its trust anchor is weaker than the docs imply. §4.1 |
+| All runtimes produce the same output | **Met, as far as conformance can show.** §3, §4.7 and §4.8 fixed; all five runtimes pass `mise run test-conformance`. |
+| Performance | Known regressions, some avoidable. §4.3a is a concrete N+1. |
+| No silly mistakes | A handful. §6, §7 |
+| Reduce code | Net +8.8k. Some unavoidable; the triplicated pipeline is not. §8. `formatVersion` gate deleted, 4 copies → 2. §4.9 |
 
 ## Status
 
 | Item | State |
 | --- | --- |
-| 1.1 Clojure throws on load in JS | **DONE** |
-| 1.2 Negated character classes inverted | **DONE** |
-| 1.3 Nested classes diverge between Rust and JS | **DONE** |
-| 1.4 `.` and mid-pattern `$` mistranslated (found while fixing 1.1) | **DONE** |
-| 1.6 Query-string escapes not resolved before translation | **DONE** |
-| 1.7 Two dead query patterns in `vim` and `sql` | **DONE** |
-| 2 Query compilation silently skips 67% of languages | **DONE** |
-| 3 `#offset!` removed, regression blessed into fixtures | open |
-| 4.x Production risks | open |
-| 5, 6 Medium / low | open |
+| 0 Branch fails its own JS test suite after merging `main` | **open — blocking** |
+| 1.1 Clojure throws on load in JS | **DONE** (re-verified) |
+| 1.2 Negated character classes inverted | **DONE** (re-verified) |
+| 1.3 Nested classes diverge between Rust and JS | **DONE** (re-verified) |
+| 1.4 `.` and mid-pattern `$` mistranslated (found while fixing 1.1) | **DONE** (re-verified) |
+| 1.6 Query-string escapes not resolved before translation | **DONE** (re-verified) |
+| 1.7 Two dead query patterns in `vim` and `sql` | **DONE** (re-verified) |
+| 2 Query compilation silently skips 67% of languages | **DONE**, but the waiver is now stale — see §0 |
+| 3 `#offset!` removed, regression blessed into fixtures | **DONE** |
+| 4.1 `@latest` at runtime | open — the format-bump half is closed by §4.9; pinning remains |
+| 4.2–4.6 Production risks | open, all re-verified present |
+| 4.7 Same `language.json` accepted by Rust, rejected by JS | **DONE** |
+| 4.8 Package resolution precedence differs per runtime | **DONE** |
+| 4.9 `formatVersion` runtime gate removed | **DONE** |
+| 5, 6, 7 Medium / low / nits | open |
+| 8 Three copies of the loading pipeline | **open — new**, the largest remaining item |
+
+## Evidence base
+
+What was actually run for the second pass, so the claims can be weighed:
+
+| Check | Result |
+| --- | --- |
+| `cargo check --workspace --locked --all-targets` | pass |
+| `cargo check --manifest-path crates/dev/Cargo.toml --locked --all-targets` | pass |
+| `cargo test -p lumis-build --locked` | 36 unit + 7 corpus + 3 doctests pass |
+| `cargo test -p lumis-wasm-runtime --locked` | 14 pass |
+| `cargo test --manifest-path crates/dev/Cargo.toml --locked` | 12 pass |
+| `cargo test -p lumis --test strict_aliasing_headers` | 1 pass |
+| `cargo run -p dev -- gen-language-catalog --check` | catalog current |
+| `pnpm install --frozen-lockfile` | lockfile in sync |
+| JS package suite (`vitest run`, the package's own excludes) | **1 failed** (§0), 359 passed, 1 skipped |
+| `cargo test --workspace --locked` | all pass — first complete run, after the disk was freed |
+| `mix test` (Elixir, `LUMIS_BUILD=1`) | 123 passed, 115 conformance excluded |
+| `npx tsc --noEmit` | clean |
+| `cargo fmt --check` / `cargo clippy --all-targets` on both changed crates | clean |
+| §4.7 divergence, Rust vs JS validator on one crafted `language.json` | reproduced, then fixed and pinned |
+| §4.7 / §4.8 guards, four injected faults | every guard observed failing, then reverted |
+| §1 DONE items, against checked-in `queries/processed/` | all verified |
+| `mise run test-conformance` (Rust, CLI, JS WASM, browser, Elixir) | **all five pass** after the §3 fix: Rust 138, CLI 115, JS 115, browser 24, Elixir 115 |
+
+`mise run test-conformance` is the guard that substantiates "all runtimes produce the same output"
+end to end. It now runs green across all five runtimes with the §4.7/§4.8/§4.9 changes applied,
+including the removal of a field from the shared package format. That is the strongest evidence in
+this document, and it was the gap flagged in the previous pass.
+
+Note the PR body claims "JavaScript: 514 Lumis tests passed". The package's own `test` script runs
+361. Reconcile the number before merge.
+
+---
+
+## 0. The branch does not pass its own tests
+
+After merging `origin/main`:
+
+```
+$ pnpm install --frozen-lockfile
+$ npx vitest run --exclude test/conformance.test.ts --exclude 'test/browser/**'
+
+FAIL test/query-compile.test.ts > unverified parser waiver
+  > lists every language whose published package cannot verify it
+AssertionError: add these to test/unverified-parsers.json, or publish the parser packages
++ [ "bash: installed package is at rev a06c2e44, languages.toml pins 382ed871",
++   "html: ...", "ruby: ...", "svelte: ...", "yaml: ..." ]
+
+Test Files  1 failed | 15 passed (16)
+      Tests  1 failed | 359 passed | 1 skipped (361)
+```
+
+(Counts are after this review's §4.7 corpus tests were added; the failure itself is unchanged.)
+
+Cause: `main`'s #1117 (`fix: vendor strict-aliasing-unsafe parsers`) repointed bash, html, python,
+ruby, svelte, and xml at forked repositories with new revisions. `languages.toml` now pins revisions
+ahead of the published `@lumis-sh/wasm-*` packages, so five languages dropped out of query coverage
+without being declared.
+
+**This is the §2 guard working exactly as designed** — "a parser bump silently drops a language out
+of coverage" is the case it was built for, and it failed loudly instead of quietly checking less.
+
+Remedy: regenerate with `node packages/javascript/lumis/scripts/list-unverified-parsers.mjs`. That
+moves the waiver from 77 to 82 of 115 languages — **71% of the catalog** — which deserves a
+conscious decision rather than a mechanical regeneration. It also invalidates the coverage figures
+quoted in §2 below (`41/115 verified, 74 without a usable parser`); re-measure after regenerating.
 
 ---
 
@@ -55,7 +149,7 @@ motivated 1.4.
 
 Verification (all non-skipping):
 
-- `crates/lumis-build/src/lib.rs` — 34 unit tests, 3 doctests
+- `crates/lumis-build/src/lib.rs` — 36 unit tests, 3 doctests (re-measured; was 34 when first written)
 - `crates/lumis-build/tests/processed_queries.rs` — 7 corpus tests over all 120 query directories
   and 244 predicates: every regex compiles under the `regex` crate, none nests a character class,
   none uses an inline flag group, no `#lua-match?` survives, every upstream Lua pattern is
@@ -431,12 +525,12 @@ so it cannot be masked by the release cycle again.
 
 ---
 
-## 3. `#offset!` support was removed, and the regression was blessed into fixtures
+## 3. `#offset!` support was removed, and the regression was blessed into fixtures — DONE
 
 `events.ts` drops `applyOffset`, `pointToIndex`, `QueryCaptureOffset`, and
 `CompiledHighlightConfig.injectionOffsets`. The Rust highlighter never implemented `#offset!`, so
-this makes JS match Rust — by deleting the feature. There are **130 active `#offset!` directives**
-in `queries/processed/` that are now dead in every runtime.
+this makes JS match Rust — by deleting the feature. Re-counted at `fdd756949`: **136 active
+`#offset!` directives across 32 files** in `queries/processed/`, all now dead in every runtime.
 
 Concrete result, from the branch's own regenerated fixture
 (`fixtures/conformance/javascript-html-template-attribute-interpolation-basic`), source
@@ -457,9 +551,58 @@ The fixtures were regenerated to accept this. That's the wrong direction: `#offs
 mdx (strips fence lines), qmljs, angular, and template-literal injections, and dropping it makes
 the injected source syntactically wrong, not just differently coloured.
 
-Recommendation: implement `#offset!` in `crates/lumis-wasm-runtime/src/tree_sitter_highlight.rs`
-and restore it in JS, or explicitly scope it out of this PR and revert the JS removal so nothing
-regresses while the architecture lands.
+**Fixed.** `#offset!` is implemented in `crates/lumis-wasm-runtime/src/tree_sitter_highlight.rs`
+and restored in `events.ts`, so every runtime applies it.
+
+Neovim is the reference, and it applies the directive in **both** places. Verified by reading the
+code path, not the comments:
+
+- highlights: `highlighter.lua:406` -> `get_range` -> `apply_range_offset`
+- injections: `languagetree.lua:1073` -> `get_node_ranges:903` -> `get_range` -> `apply_range_offset`
+
+Note the stale TODO at `languagetree.lua:1087` claiming injections do not support offsets. The code
+immediately above it does. Reading only the comment gives the wrong answer here.
+
+Semantics, from `treesitter.lua:162`: add the four deltas to
+`(start_row, start_col, end_row, end_col)`; if the shift inverts the range, **silently keep the
+original**. The previous JavaScript implementation on `main` omitted that fallback; the new one has
+it in both runtimes.
+
+Scope in this repository: 130 live directives across 32 languages, plus 6 commented out upstream.
+
+| Target | Count | Note |
+| --- | ---: | --- |
+| `@injection.content` | 126 | strips backticks, `${`/`}`, fence lines before the injected grammar parses |
+| highlight captures | 4 | solidity import path, powershell regex and here-string, markdown_inline conceal |
+
+125 of the 130 have zero row deltas, which is a plain byte-column shift; 5 use `1 0 -1 0` and have to
+walk to the target line. Both paths are covered.
+
+Because tree-sitter's Rust API leaves `#offset!` in `general_predicates` rather than parsing it into
+`property_settings` like `#set!`, the directive is read from there and stored per
+`(pattern_index, capture_index)`. Injection ranges take their outer bounds from the adjusted range
+while children are still masked out from the node itself, matching `get_node_ranges`.
+
+Verification:
+
+- `mise run conformance-regen` un-blessed the 3 degraded fixtures, and all 15 regenerated files are
+  now **byte-identical to `origin/main`** — the output this PR had regressed away from
+- `mise run test-conformance` passes on all five runtimes: Rust 138, CLI 115, JavaScript WASM 115,
+  browser 24 across Chromium/Firefox/WebKit, Elixir 115
+- 4 new unit tests pin the arithmetic the fixtures do not reach: same-row byte shift, row walking,
+  multi-byte rows walked by byte, and offsets that run off the document
+- proven by injection, per `AGENTS.md`: disabling offset parsing in Rust fails 15 CLI conformance
+  cases; short-circuiting `applyCaptureOffset` in JavaScript fails the same 15. Both restored.
+
+One caveat worth recording: `main`'s Rust used this same offset-unaware highlighter, yet `main`'s
+fixtures contain the offset-applied output. The likeliest explanation is that `crates/lumis/build.rs`
+preprocessed queries differently before this PR moved that to generation time. That was not run to
+ground. It does not affect the result — the branch without this change produced the degraded output,
+and with it reproduces `main`'s byte-for-byte.
+
+Also worth knowing for anyone touching the NIF: `mix compile` did **not** pick up the Rust
+path-dependency change. Elixir conformance failed 15 cases against a stale `lumis_nif.so` until
+`mix compile --force`, after which it passed 115/115.
 
 ---
 
@@ -486,17 +629,48 @@ reproducible. Now every deployment resolves whatever is newest, with a 1-hour TT
   stronger guarantees than this provides.
 - A single bad language-package publish propagates to every running deployment within an hour,
   with no client-side pin and no rollback lever short of unpublishing.
-- `LANGUAGE_PACKAGE_FORMAT_VERSION` is a hard equality check
-  (`package.rs:84`, `languages.ts:223`). The day a package publishes `formatVersion: 4`, **every
-  already-deployed older client breaks**, because they all follow `@latest`. There is no
-  negotiation, no `@format-3` dist-tag, and no `language.v3.json` path. This needs solving before
-  the format can ever be bumped.
+- ~~`LANGUAGE_PACKAGE_FORMAT_VERSION` is a hard equality check. The day a package publishes
+  `formatVersion: 4`, **every already-deployed older client breaks**, because they all follow
+  `@latest`.~~ **DONE — the runtime gate was removed entirely.** See §4.9.
 - Warm-cache-then-offline is the safe pattern and works. Warm-cache-then-*online* does not: a
   publish between image build and pod start invalidates every prefetched parser and re-downloads
   at runtime. Document this; it is the failure mode people will actually hit.
 
-Minimum ask: publish under a format-scoped dist-tag, accept a version *range*, and make the
-version resolvable/pinnable by the consumer.
+Minimum ask for what remains: make the resolved version pinnable by the consumer, so a deployment
+can stop tracking `@latest`. The format-bump half of this item is closed by §4.9.
+
+### 4.9 `formatVersion` removed from the runtime — DONE
+
+`formatVersion` was two unrelated things sharing a name, with opposite verdicts.
+
+**The runtime gate** lived in `language.json` and was read by *nothing* except two equality checks
+(`package.rs`, `languages.ts`). Since neither runtime sets `deny_unknown_fields` — and JavaScript
+ignores extra keys — additive format changes already worked; the gate was what blocked them. Against
+`@latest` it guaranteed a simultaneous fleet-wide break on any bump, in exchange for catching one
+narrow case: a semantics change with identical shape. Every other incompatible change is already
+caught by structural validation, with a better message that names the missing field.
+
+Removed. The format is now **additive-only by contract**, and compatibility is decided by the
+document's shape. Both `LanguagePackage` doc comments record the reasoning so the gate is not
+reintroduced, and the rule it implies: a change to the *meaning* of an existing field must ship as a
+new field instead.
+
+Safe to do now precisely because the v3 format has never been published — §2 measured "0 carrying
+`language.json`". There is no deployed client expecting the field, in either direction.
+
+**The release-time signal** is kept. `lumis.formatVersion` in the published npm `package.json` is
+read by `scripts/wasm-needed.py` to decide whether an artifact needs republishing. No client ever
+sees it, so it carries no fleet risk, and it covers an axis `definitionHash` does not: the artifact
+*layout* changed while query content did not. That is what forces republication into a new package
+shape.
+
+Removed from: `LanguagePackage` (Rust) and its `UnsupportedFormat` error variant, the
+`LANGUAGE_PACKAGE_FORMAT_VERSION` constant and its re-export, `crates/dev`'s generator, the CLI
+registry, the Elixir NIF, the TypeScript interface and validator, and five test helpers. Kept in
+`templates/wasm/package.json.template` and `scripts/wasm-needed.py`.
+
+Verified: `cargo test --workspace` (all pass, first complete run), `mix test` (123 passed), JS
+typecheck plus 359 passing tests, and `gen-language-catalog --check`.
 
 ### 4.2 Elixir highlighting throughput is now hard-capped at 4 threads
 
@@ -523,6 +697,42 @@ Related: `Lumis.highlight/2` now performs blocking network I/O inside the caller
 markdown doc with six injected languages that is seven full passes on first use. Combined with the
 global lock, first traffic after a deploy is the worst case. `mix lumis.parsers.cache` +
 `:wasm_offline` should be the *documented default* for releases, not an option.
+
+### 4.3a The seven passes are not the retry loop's fault — new
+
+`crates/lumis-wasm-runtime/src/runtime.rs:382-424`. The root cause is narrower than "the retry loop
+re-highlights", and the fix is cheap.
+
+The injection callback records only the **first** unloaded language:
+
+```rust
+None if known.contains(id) => {
+    if missing_language.is_none() {
+        missing_language = Some(id.to_string());   // first one only
+    }
+    None
+}
+```
+
+The highlighter then runs to completion, every event is materialised into `output`, and only then:
+
+```rust
+if let Some(language) = missing_language {
+    return Err(RuntimeError::LanguageNotLoaded(language));   // output thrown away
+}
+```
+
+So each pass discovers exactly one missing name out of however many the pass already walked past,
+and a fully built `Vec<HighlightEvent>` is constructed purely to be discarded. Elixir
+(`lib/lumis.ex:875-897`) then loads that one language and retries.
+
+Two local changes:
+
+- Collect **all** missing languages into a `Vec` and return them together, so Elixir can call
+  `load_languages/1` once. Seven passes become two.
+- Move the `missing_language` check **before** the event drain.
+
+Neither requires touching the retry loop's structure.
 
 ### 4.4 The CLI reimplements the runtime instead of using it
 
@@ -579,6 +789,144 @@ be stated in the PR body, the changelog, and an npm deprecation notice on
 `benchmarks/elixir-runtime.md` is a model of how to present this: honest numbers, both directions.
 Do the same for JS.
 
+### 4.7 The same `language.json` is accepted by Rust and rejected by JavaScript — new
+
+**Reproduced, not inferred.** This is the clearest violation of "all runtimes produce the same
+output": one input, two verdicts.
+
+`LanguagePackage::validate` (`crates/lumis-wasm-runtime/src/package.rs:83`) and
+`parseLanguagePackage` (`packages/javascript/lumis/src/core/languages.ts:213`) are two hand-written
+validators for one format. Given a language entry with no `aliases` key and `parser.size: 0`:
+
+```json
+{ "formatVersion": 3, "packageName": "@lumis-sh/wasm-json", "version": "0.26.3",
+  "definitionHash": "abc",
+  "parser": { "name": "tree-sitter-json", "grammarName": "json",
+              "sha256": "336154bf...0f3e", "size": 0 },
+  "languages": { "json": { "highlights": "(string) @string" } } }
+```
+
+```
+RUST: ACCEPTED (aliases=[], size=0)
+JS:   REJECTED -> Invalid Lumis language package: @lumis-sh/wasm-json
+```
+
+Two independent causes:
+
+- `PackagedLanguage::aliases` carries `#[serde(default)]` (`package.rs:37`), so a missing `aliases`
+  key deserialises to an empty vector. TypeScript requires `Array.isArray(language.aliases)`
+  (`languages.ts:240`) and throws.
+- TypeScript requires `Number.isSafeInteger(parser.size) && parser.size > 0` (`languages.ts:235`).
+  Rust never validates `size`; a zero-size package is accepted and only fails later inside
+  `verify_wasm`, with a different error.
+
+Today's generator always emits `aliases` and a non-zero size, so this is latent rather than live.
+It matters because it is *structural*: the format has three validators — Rust, TypeScript, and
+`PACKAGE_FORMAT_VERSION` in `scripts/wasm-needed.py` — and **no shared fixture corpus** pinning them
+to each other. `crates/lumis-wasm-runtime/tests/catalog.rs` is 15 lines and does not cover it;
+`package.rs` and the JS tests each exercise their own validator only.
+
+`AGENTS.md` states the rule this breaks: *"Two copies of the same algorithm require a test that pins
+them to each other."*
+
+**Fixed.** Both documents are now rejected by both runtimes, and the class is closed rather than the
+two instances.
+
+`fixtures/language-packages/` holds 5 valid and 19 invalid documents covering the format gate,
+required non-empty strings, path-segment safety on the values that become cache filenames, digest
+shape, and the languages map. Two tests read the same corpus and must reach the same verdict on
+every file:
+
+- `crates/lumis-wasm-runtime/tests/language_package_corpus.rs` — the CLI and the Elixir NIF both
+  validate through this crate
+- `packages/javascript/lumis/test/language-package-corpus.test.ts` — Node and browser
+
+Both assert a corpus-size floor, so a discovery bug that finds no fixtures fails rather than passes.
+`scripts/wasm-needed.py` is not a third validator after all — it only compares `formatVersion` in
+published npm metadata — so the corpus binds the two implementations that actually parse packages.
+
+Alignment went toward the stricter reading in both cases, since the objective is safety:
+
+- `PackagedLanguage::aliases` lost `#[serde(default)]`. JavaScript already required the field; Rust
+  tolerating its absence was the divergence. No compatibility risk — no v3 package is published yet,
+  and the generator always emits `aliases`.
+- `validate()` now rejects `parser.size == 0`, which JavaScript already did. Previously the failure
+  surfaced much later as a confusing `InvalidSize` from `verify_wasm`, and only in runtimes that got
+  that far.
+
+Proven by injection, per `AGENTS.md`:
+
+| Injected fault | Result |
+| --- | --- |
+| restore `#[serde(default)]` on `aliases` | Rust corpus: 2 tests fail on `language-missing-aliases` |
+| remove the `parser.size == 0` check | Rust corpus: 2 tests fail on `parser-size-zero` |
+| drop JS `size` validation | JS corpus: 2 tests fail on `parser-size-zero` |
+| normalise missing `aliases` to `[]` in JS | JS corpus: 2 tests fail on `language-missing-aliases` |
+
+One note for whoever touches the JS validator next: with the explicit `Array.isArray(aliases)` check
+removed, missing `aliases` is still rejected — but only incidentally, as a `TypeError` from calling
+`.some()` on `undefined`. The explicit check is what makes the rejection intentional. Keep it.
+
+Still worth doing later: generate both validators, or the schema they share, from one source. The
+corpus makes drift fail loudly; it does not make drift impossible.
+
+### 4.8 Package resolution precedence differs per runtime — new
+
+Same inputs, different language package, therefore different queries and different output.
+
+| Runtime | Order |
+| --- | --- |
+| CLI (`registry.rs:290-324`) | **fresh disk cache** → `LUMIS_WASM_SOURCE_DIR` → network |
+| JavaScript (`languages.ts:521-562`) | **installed npm package** → disk cache → network |
+| Elixir (`language_loader.ex:60-65`) | **bundled `priv/wasm`** → user cache → network |
+
+In the CLI, `ensure_package` returns the cached copy when `fresh || offline()` *before* reaching
+`fetch_package`, and `fetch_package` is the only place `source_asset()` — i.e.
+`LUMIS_WASM_SOURCE_DIR` — is consulted. So for the CLI a warm cache beats the explicitly configured
+local source; for JS and Elixir the local copy always wins.
+
+Consequences:
+
+- A user who pins a local parser set and also has a warm cache gets one package in Node and Elixir
+  and a different one in the CLI, inside the same hour-long TTL window.
+- `LUMIS_WASM_SOURCE_DIR` reads as an override but behaves as a fallback. The CLI's own conformance
+  suite only works because `--data-dir` points at an empty temp directory.
+
+**Fixed.** The CLI now consults `LUMIS_WASM_SOURCE_DIR` before the cache, matching Node and Elixir.
+
+The order was never actually in dispute — `ARCHITECTURE.md:122` already documents it:
+
+```text
+installed/local language package -> persistent metadata cache -> current package metadata
+```
+
+The CLI was the one implementation violating its own documented architecture, so this is code
+conforming to the docs rather than a new decision. No doc change was needed.
+
+Changes in `crates/lumis-cli/src/registry.rs`:
+
+- `ensure_package` calls a new `read_source_package` before the cache-freshness short-circuit.
+- `LUMIS_WASM_SOURCE_DIR` is now resolved once into a `Registry::source_dir` field instead of being
+  re-read from the environment on every call, so the precedence is testable and cannot change
+  mid-process.
+- `fetch_package` and `read_source_package` share one `parse_package` helper, which removes the
+  duplicated UTF-8 → parse → name-match sequence.
+- The local source is deliberately *not* written to the cache: it is consulted first on every call,
+  so caching it would only add a copy that can go stale.
+
+Parser *bytes* keep cache-first ordering in every runtime. That is already consistent, and safe,
+because the parser cache is content-addressed by the digest the package declares — once the package
+agrees, cache and local source hold byte-identical, verified content.
+
+Pinned by `configured_local_source_outranks_a_fresh_cache`. Proven by injection: restoring the
+cache-before-source order makes it fail with "the configured local source must win over a fresh
+cache".
+
+`LUMIS_WASM_SOURCE_DIR` turns out to be undocumented in `docs/`, `CONTRIBUTING.md`, and the CLI
+README — it appears only in code, tests, and workflows. That limits the blast radius of the old
+behaviour, but the Node "installed package" and Elixir `priv/wasm` paths it now matches *are*
+user-facing. Worth documenting the whole chain in one place.
+
 ---
 
 ## 5. Medium
@@ -608,9 +956,11 @@ Do the same for JS.
   republishes forever or never. They currently agree, with one divergence: for a `brackets.scm`
   that exists but is empty, Rust substitutes the default query and Python does not. Add a test that
   pins both against a fixture.
-- **`formatVersion: 3` is hardcoded in `templates/wasm/package.json.template`** while
-  `LANGUAGE_PACKAGE_FORMAT_VERSION` lives in Rust and `PACKAGE_FORMAT_VERSION` in Python. Three
-  copies.
+- ~~**`formatVersion: 3` is hardcoded in three places.**~~ Down to two after §4.9, both release-time
+  and neither read by a client: `templates/wasm/package.json.template` and
+  `PACKAGE_FORMAT_VERSION` in `scripts/wasm-needed.py`. They still have to agree — bumping the
+  package layout means editing both, and disagreeing means the release tooling either republishes
+  forever or never. Worth folding into the same fixture test as the `definitionHash` pair above.
 - **Breaking CLI change, no alias:** `lumis parsers fetch` and `lumis parsers update` are replaced
   by `lumis parsers cache`. Needs a changelog entry and ideally a deprecated alias.
 - **`lumis-build` output changed for every Lua pattern** as part of the §1 fixes. The crate is
@@ -628,6 +978,35 @@ Do the same for JS.
   `new URL(..., import.meta.url)`. Call it out as breaking.
 
 ## 6. Low / nits
+
+New in the second pass:
+
+- **The lock deadline is shorter than the staleness threshold**, in all three implementations: they
+  wait 120 s for a lock but only treat it as stale after 300 s (`registry.rs:558/575`,
+  `node-cache.ts:100/110`, `language_loader.ex:6-7`). If a process dies holding the lock there is a
+  **180-second window where every other process fails outright** instead of waiting. Make the
+  deadline exceed the staleness threshold, or release on holder-PID disappearance. At least the
+  three agree with each other.
+- **`matchesSpecialCapture(name, base)` is `name === base`** (`languages.ts:338`) — a function
+  wrapping `===`, called at 12 sites. It presumably used to do prefix matching. Inline it.
+- **Inconsistent lock-poison handling in the CLI `Registry`**: `load_wasm_language` turns a poisoned
+  mutex into an error (`registry.rs:231-234`) while `ensure_package`, `cached_package`, and the
+  constructor use `.lock().unwrap()` (`registry.rs:293, 319, 330, 341`). Pick one.
+- **Redundant lookup and an unreachable `expect` in the NIF**: `parse_language_package` already
+  proves the key exists (`lib.rs:303-308`), then `resolve_language_package` looks it up again with
+  `.expect("validated language package entry")` (`lib.rs:270`). Have `parse_language_package` return
+  the `&PackagedLanguage` it resolved; the `expect` disappears with it. A panic in a NIF is worth
+  removing even when unreachable.
+- **Untrusted `checkedAt` can pin the JS metadata cache forever**: `readCachedLanguagePackage`
+  (`languages.ts:468-483`) re-validates the package but takes `cached.checkedAt` as-is. A future
+  timestamp — clock skew, a restored backup, a tampered cache file — makes
+  `Date.now() - checkedAt < TTL` true indefinitely. Clamp to `<= Date.now()`.
+- **Elixir re-downloads after a peer wrote identical content**: `refresh_package`
+  (`language_loader.ex:83-97`) only reuses the freshly re-read file when `package_json != stale`, so
+  two processes racing on an unchanged package both re-fetch. Drop the inequality; `fresh?(path)` is
+  the condition that matters.
+
+From the first pass:
 
 - `node-cache.ts:113-114`: in `withWasmCacheLock`, the `catch { continue; }` around `stat` skips
   both the deadline check and the 25 ms sleep. If `open` keeps returning `EEXIST` while `stat`
@@ -692,9 +1071,57 @@ Do the same for JS.
 - Blocking release workflows on `main`/tags is a good catch.
 - Docs, README, and RELEASE.md were updated in the same change, as the repo rules require.
 
+Added in the second pass:
+
+- Content-addressed parser filenames (`{name}-{version}-{sha256}.wasm`) mean an upgrade cannot
+  silently overwrite a verified asset, and a corrupt entry is deleted on read rather than trusted.
+- The CLI derives cache paths from the **static catalog** `package_name`, not the parsed one, so a
+  hostile `packageName` cannot traverse even though `validate()` does not check it. That is the
+  right layering, but it is currently implicit — worth a comment before someone "simplifies" it.
+- The §2 waiver mechanism proved itself during this review: merging `main` moved five revisions and
+  the test failed loudly instead of quietly checking less (§0). That is exactly the property
+  `AGENTS.md` asks for.
+- `RAINBOW_SCOPE_INDICES` (`runtime.rs:23`) and the CLI's `rainbow_scope_index`
+  (`registry.rs:512`) are duplicated but do **not** diverge: both resolve against the same
+  `HIGHLIGHT_NAMES` with the same `punctuation.bracket` fallback. Duplication to remove (§4.4), not
+  a correctness bug.
+
 ---
 
-## 8. Pre-merge checklist
+## 8. On the first objective: reuse the Rust core
+
+This is the objective the branch misses most clearly, and it is worth being precise about why,
+because §4.4 reads as a CLI-specific complaint when it is actually structural.
+
+The resolve → verify → cache → lock state machine now exists three times:
+
+- `crates/lumis-cli/src/registry.rs` — Rust, 664 lines
+- `packages/javascript/lumis/src/core/languages.ts` + `runtime/node-cache.ts` — TypeScript
+- `packages/elixir/lumis/lib/lumis/language_loader.ex` — Elixir, 495 lines
+
+**Only the JavaScript one is forced.** The browser cannot call Rust, so that port is justified, and
+`AGENTS.md` already prescribes the remedy for it — "the port must be covered by a test that pins
+both against the same input" — which §4.7 shows does not exist yet.
+
+The other two are not forced. The Elixir NIF already links `lumis-wasm-runtime`; it calls in for
+`resolve_language_package`, `load_language`, and `has_language`, then reimplements the entire
+fetch/verify/cache pipeline in Elixir *around* those calls. The CLI links the same crate and
+reimplements the same pipeline in Rust, next to the original.
+
+The tell is that all three independently chose 120 000 ms, 300 000 ms, 25 ms, and a 3600 s TTL.
+Those constants agree today because one person wrote all three inside one PR. Nothing keeps them in
+step, and §4.8 is what it looks like when they have already drifted.
+
+The shape that meets the objective: move the pipeline into `lumis-wasm-runtime` behind a small host
+trait (read file, write file, fetch URL, now), have the CLI and the NIF call it, and keep exactly
+one port — JavaScript — pinned to it by the shared fixture corpus from §4.7. That also deletes most
+of `registry.rs` and most of `language_loader.ex`, which is the "reduce code" objective.
+
+This is better done deliberately, after the correctness items, than squeezed in beside them.
+
+---
+
+## 9. Pre-merge checklist
 
 1. ~~Fix `-` → `*?` (Lua quantifier position), `[^...]` negation, and `[%u]` nesting in
    `crates/lumis-build/src/lib.rs`; regenerate `queries/processed/` and diff every `#match?` line.~~
@@ -703,17 +1130,40 @@ Do the same for JS.
    both `RegExp` and `regex::bytes::Regex`, and make `query-compile.test.ts` fail instead of
    `return` when a parser is missing or at the wrong rev.~~ **DONE** — see §2. Wired into CI as
    `.github/workflows/queries.yml`.
-3. Decide on `#offset!`: implement in Rust, or revert the JS removal. Do not ship the
-   template-literal regression.
-4. Replace `@latest` with a format-scoped dist-tag or an accepted version range, and add a
-   consumer-visible pin. Resolve how a `formatVersion` bump reaches already-deployed clients.
-5. Guard `crypto.subtle` for non-secure contexts.
-6. Make the Elixir worker cap configurable; replace `:global.trans` with a node-local lock.
-7. Add conformance fixtures for locals/shadowing and multi-level injections before the
-   `buildNestedEvents` rewrite lands.
-8. Publish an npm deprecation for `@lumis-sh/lumis-native`, and state the native→WASM performance
-   delta in the PR body, changelog, and `benchmarks/README.md`.
-9. Cache `tree_sitter::Language` and `HighlightConfiguration` in the CLI `Registry`; honour
-   `LUMIS_WASM_CACHE_DIR` there.
-10. Fix the stale `CONTRIBUTING.md` build.rs descriptions, the `ARCHITECTURE.md` mise claim, the
-    conformance matrix indentation, and the three.js attribution.
+Blocking:
+
+3. Regenerate `unverified-parsers.json` for the five languages `main` moved, and decide consciously
+   about a waiver covering 71% of the catalog (§0). The branch is red until this is done.
+4. ~~Decide on `#offset!`: implement in Rust, or revert the JS removal.~~ **DONE** — implemented in
+   Rust and restored in JS; see §3. All five runtimes pass conformance.
+5. Replace `@latest` with a format-scoped dist-tag or an accepted version range, and add a
+   consumer-visible pin. Resolve how a `formatVersion` bump reaches already-deployed clients (§4.1).
+6. Guard `crypto.subtle` for non-secure contexts (§4.5).
+7. ~~Add the shared language-package fixture corpus and align the Rust/TS validators.~~
+   **DONE** — see §4.7. 24 fixtures, two test suites, four injected faults.
+
+Before release:
+
+8. Return all missing injected languages at once, and check before draining events (§4.3a).
+9. ~~Unify package resolution precedence across the three runtimes.~~ **DONE** — see §4.8. The CLI
+   now matches the order `ARCHITECTURE.md` already documented.
+10. Make the Elixir worker cap configurable; replace `:global.trans` with a node-local lock
+    (§4.2, §4.3).
+11. Add conformance fixtures for locals/shadowing and multi-level injections before the
+    `buildNestedEvents` rewrite lands (§5).
+12. Publish an npm deprecation for `@lumis-sh/lumis-native`, and state the native→WASM performance
+    delta in the PR body, changelog, and `benchmarks/README.md` (§4.6).
+13. Cache `tree_sitter::Language` and `HighlightConfiguration` in the CLI `Registry`; honour
+    `LUMIS_WASM_CACHE_DIR` there (§4.4).
+14. Pin `wasm-needed.py`'s `definitionHash` to `crates/dev`'s with a fixture test (§5).
+
+Cleanup:
+
+15. The §6 items, plus the stale `CONTRIBUTING.md` build.rs descriptions, the `ARCHITECTURE.md`
+    mise claim, the conformance matrix `rust: true`, the Emscripten `4.0.15` vs `5.0.3`
+    contradiction, and the three.js attribution.
+
+Then:
+
+16. Collapse the three cache pipelines into one (§8). This is the change that makes the PR's own
+    thesis true.
