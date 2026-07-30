@@ -119,6 +119,7 @@ fn main() {
 
 struct TreeSitterParser {
     name: String,
+    parser_dir: PathBuf,
     src_dir: PathBuf,
     parser_file: PathBuf,
     extra_files: Vec<PathBuf>,
@@ -156,6 +157,9 @@ impl TreeSitterParser {
         }
 
         let mut build = cc::Build::new();
+        // Keep the original source directory on the include path even when a
+        // compressed scanner is built from OUT_DIR. Nested grammars can use
+        // relative includes outside src/, such as XML's ../../common/scanner.h.
         build.include(&self.src_dir).warnings(false);
 
         // Parsers generated with tree-sitter CLI < 0.26.4 ship an array.h
@@ -303,6 +307,7 @@ fn vendored_parsers(toml: &LanguagesToml) {
 
             Some(TreeSitterParser {
                 name: dir_name,
+                parser_dir,
                 src_dir,
                 parser_file,
                 extra_files,
@@ -311,7 +316,9 @@ fn vendored_parsers(toml: &LanguagesToml) {
         .collect();
 
     for parser in &parsers {
-        println!("cargo:rerun-if-changed={}", parser.src_dir.display());
+        // Watch the whole parser tree because scanners can include shared files
+        // outside src/ (for example tree-sitter-xml/common/scanner.h).
+        println!("cargo:rerun-if-changed={}", parser.parser_dir.display());
     }
 
     parsers.par_iter().for_each(|p| p.build());
