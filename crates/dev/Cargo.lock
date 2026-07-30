@@ -535,7 +535,7 @@ checksum = "5e5032e24019045c762d3c0f28f5b6b8bbf38563a65908389bf7978758920897"
 
 [[package]]
 name = "lumis"
-version = "0.12.0"
+version = "0.12.1"
 dependencies = [
  "anyhow",
  "cc",
@@ -642,7 +642,7 @@ version = "1.0.0"
 
 [[package]]
 name = "lumis-core"
-version = "2.2.0"
+version = "2.3.0"
 dependencies = [
  "derive_builder",
  "glob",
@@ -1257,9 +1257,9 @@ dependencies = [
 
 [[package]]
 name = "tree-sitter-erlang"
-version = "0.19.0"
+version = "0.20.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a5c42fa011acaeb36d0be0f3ebc87d7a4009cd92a6969cbc63320bcfd989df69"
+checksum = "3107efc581d335488dc38d2f51ca8b7a6a98e36f07f95a8e963f031edda6f568"
 dependencies = [
  "cc",
  "tree-sitter-language",

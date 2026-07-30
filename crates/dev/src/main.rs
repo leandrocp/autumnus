@@ -968,7 +968,7 @@ fn git_resolve_rev(url: &str, rev: &str) -> Result<String> {
 }
 
 fn git_resolve_version_tag(url: &str, version: &str) -> Option<String> {
-    for tag in [format!("v{version}"), version.to_string()] {
+    for tag in version_tag_candidates(version) {
         if let Ok(rev) = git_resolve_rev(url, &tag) {
             return Some(rev);
         }
@@ -976,8 +976,34 @@ fn git_resolve_version_tag(url: &str, version: &str) -> Option<String> {
     None
 }
 
+fn version_tag_candidates(version: &str) -> Vec<String> {
+    let mut versions = vec![version.to_string()];
+    if let Ok(parsed) = semver::Version::parse(version) {
+        if parsed.patch == 0 && parsed.pre.is_empty() && parsed.build.is_empty() {
+            versions.push(format!("{}.{}", parsed.major, parsed.minor));
+        }
+    }
+
+    versions
+        .into_iter()
+        .flat_map(|version| [format!("v{version}"), version])
+        .collect()
+}
+
 fn semver_from_tag(tag: &str) -> Option<semver::Version> {
-    semver::Version::parse(tag.strip_prefix('v').unwrap_or(tag)).ok()
+    let version = tag.strip_prefix('v').unwrap_or(tag);
+    semver::Version::parse(version).ok().or_else(|| {
+        let mut parts = version.split('.');
+        let major = parts.next()?;
+        let minor = parts.next()?;
+        if parts.next().is_some()
+            || !major.bytes().all(|byte| byte.is_ascii_digit())
+            || !minor.bytes().all(|byte| byte.is_ascii_digit())
+        {
+            return None;
+        }
+        semver::Version::parse(&format!("{version}.0")).ok()
+    })
 }
 
 fn git_latest_release_rev(url: &str) -> Result<Option<(String, String)>> {
@@ -2537,6 +2563,28 @@ mod tests {
     use super::*;
     use std::sync::atomic::{AtomicU64, Ordering};
     use std::time::{SystemTime, UNIX_EPOCH};
+
+    #[test]
+    fn version_tag_candidates_include_short_zero_patch_tags() {
+        assert_eq!(
+            version_tag_candidates("0.20.0"),
+            ["v0.20.0", "0.20.0", "v0.20", "0.20"]
+        );
+        assert_eq!(version_tag_candidates("0.20.1"), ["v0.20.1", "0.20.1"]);
+    }
+
+    #[test]
+    fn semver_from_tag_accepts_short_stable_tags() {
+        let expected = semver::Version::new(0, 20, 0);
+
+        assert_eq!(semver_from_tag("0.20"), Some(expected.clone()));
+        assert_eq!(semver_from_tag("v0.20"), Some(expected));
+        assert_eq!(
+            semver_from_tag("v0.20.1"),
+            Some(semver::Version::new(0, 20, 1))
+        );
+        assert_eq!(semver_from_tag("0.20-beta"), None);
+    }
 
     fn unique_test_root() -> std::path::PathBuf {
         static COUNTER: AtomicU64 = AtomicU64::new(0);
