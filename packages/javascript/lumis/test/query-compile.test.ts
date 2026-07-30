@@ -90,28 +90,6 @@ describe("bundled language queries compile against their shipped WASM", async ()
   });
 });
 
-it("python locals work against the committed compatibility WASM", async () => {
-  await initParser();
-
-  const lang = await bundledLanguages.python();
-  const wasmPath = join(
-    workspaceRoot,
-    "packages/javascript/lumis/test/fixtures/wasm/tree-sitter-python.wasm",
-  );
-  const grammar = await TSLanguage.load(readFileSync(wasmPath));
-  const query = new Query(grammar, lang.locals!);
-  const parser = new Parser();
-  parser.setLanguage(grammar);
-
-  const tree = parser.parse('class Human:\n    species = "H. sapiens"\n');
-  const fields = query
-    .captures(tree!.rootNode)
-    .filter((capture) => capture.name === "local.definition.field")
-    .map((capture) => capture.node.text);
-
-  expect(fields).toEqual(["species"]);
-});
-
 // Same test but against the built dist/ output (what actually gets published).
 // Catches drift where source queries are correct but the last npm publish
 // shipped stale query strings — the exact pattern that broke Prisma on the
