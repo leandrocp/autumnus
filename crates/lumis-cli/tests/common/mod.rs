@@ -1,7 +1,5 @@
 use lumis_wasm_runtime::catalog;
-use lumis_wasm_runtime::{
-    sha256_hex, LanguagePackage, PackagedLanguage, ParserMetadata, LANGUAGE_PACKAGE_FORMAT_VERSION,
-};
+use lumis_wasm_runtime::{sha256_hex, LanguagePackage, PackagedLanguage, ParserMetadata};
 use std::collections::BTreeMap;
 use std::fs;
 use std::path::PathBuf;
@@ -89,7 +87,6 @@ fn build_language_fixtures() -> PathBuf {
             })
             .collect::<BTreeMap<_, _>>();
         let package = LanguagePackage {
-            format_version: LANGUAGE_PACKAGE_FORMAT_VERSION,
             package_name: location.package_name.into(),
             version: "test".into(),
             definition_hash: sha256.clone(),

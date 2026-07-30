@@ -18,6 +18,9 @@ const PACKAGE_CACHE_TTL: Duration = Duration::from_secs(60 * 60);
 /// Manages dynamic loading and persistent caching of self-contained language packages.
 pub struct Registry {
     data_dir: PathBuf,
+    /// Resolved once from `LUMIS_WASM_SOURCE_DIR`. Held as state rather than re-read
+    /// per call so resolution order is testable and cannot change mid-process.
+    source_dir: Option<PathBuf>,
     engine: Engine,
     wasm_store: Mutex<WasmStore>,
     packages: Mutex<HashMap<&'static str, Arc<LanguagePackage>>>,
@@ -61,6 +64,7 @@ impl Registry {
         std::fs::create_dir_all(data_dir.join("themes"))?;
         Ok(Self {
             data_dir,
+            source_dir: language_source_dir(),
             engine,
             wasm_store,
             packages: Mutex::new(HashMap::new()),
@@ -266,7 +270,7 @@ impl Registry {
     }
 
     fn fetch_and_cache_parser(&self, package: &LanguagePackage, path: &Path) -> Result<Vec<u8>> {
-        let bytes = if let Some(source) = source_asset(&parser_filename(package)) {
+        let bytes = if let Some(source) = self.source_asset(&parser_filename(package)) {
             std::fs::read(&source)
                 .with_context(|| format!("could not read parser source {}", source.display()))?
         } else if offline() {
@@ -296,6 +300,15 @@ impl Registry {
 
         let path = self.package_path(location.package_name);
         let package = with_cache_lock(&path, || {
+            // An explicitly configured local source outranks the cache. Node resolves
+            // an installed `@lumis-sh/wasm-*` package first and Elixir reads release-local
+            // `priv/wasm` first, so consulting the cache before `LUMIS_WASM_SOURCE_DIR`
+            // would let the CLI pick a different package than the other runtimes for the
+            // same inputs, and therefore produce different output.
+            if let Some(package) = self.read_source_package(location.package_name)? {
+                return Ok(package);
+            }
+
             let cached = self.read_package_file(&path, location.package_name);
             let fresh = package_cache_is_fresh(&path);
             if fresh || offline() {
@@ -303,7 +316,7 @@ impl Registry {
                     return Ok(package.clone());
                 }
             }
-            if offline() && language_source_dir().is_none() {
+            if offline() {
                 bail!(
                     "language package '{}' is not cached and offline mode is enabled",
                     location.package_name
@@ -345,27 +358,32 @@ impl Registry {
         Ok(package)
     }
 
-    fn fetch_package(&self, package_name: &str, path: &Path) -> Result<LanguagePackage> {
-        let bytes = if let Some(source) =
-            source_asset(&format!("{}.language.json", package_suffix(package_name)))
-        {
-            std::fs::read(&source)
-                .with_context(|| format!("could not read language package {}", source.display()))?
-        } else if offline() {
-            bail!("language package '{package_name}' is not available in the local source");
-        } else {
-            let url = format!("https://cdn.jsdelivr.net/npm/{package_name}@latest/language.json");
-            fetch_bytes(&url)
-                .with_context(|| format!("could not fetch language package '{package_name}'"))?
+    fn source_asset(&self, filename: &str) -> Option<PathBuf> {
+        let path = self.source_dir.as_ref()?.join("parsers").join(filename);
+        path.is_file().then_some(path)
+    }
+
+    /// Read the language package from `LUMIS_WASM_SOURCE_DIR`, when one is configured
+    /// and contains this package. Deliberately does not write to the cache: the local
+    /// source is consulted first on every call, so caching it would only add a copy that
+    /// can go stale.
+    fn read_source_package(&self, package_name: &str) -> Result<Option<LanguagePackage>> {
+        let Some(source) =
+            self.source_asset(&format!("{}.language.json", package_suffix(package_name)))
+        else {
+            return Ok(None);
         };
-        let json = std::str::from_utf8(&bytes).context("language package is not UTF-8 JSON")?;
-        let package = LanguagePackage::from_json(json)?;
-        if package.package_name != package_name {
-            bail!(
-                "language package name mismatch: expected '{package_name}', got '{}'",
-                package.package_name
-            );
-        }
+        let bytes = std::fs::read(&source)
+            .with_context(|| format!("could not read language package {}", source.display()))?;
+        parse_package(&bytes, package_name).map(Some)
+    }
+
+    /// Callers must rule out offline mode first; `ensure_package` is the only one.
+    fn fetch_package(&self, package_name: &str, path: &Path) -> Result<LanguagePackage> {
+        let url = format!("https://cdn.jsdelivr.net/npm/{package_name}@latest/language.json");
+        let bytes = fetch_bytes(&url)
+            .with_context(|| format!("could not fetch language package '{package_name}'"))?;
+        let package = parse_package(&bytes, package_name)?;
         write_atomic(path, &bytes)?;
         Ok(package)
     }
@@ -392,14 +410,11 @@ impl Registry {
         injections: &str,
         locals: &str,
     ) {
-        use lumis_wasm_runtime::{
-            PackagedLanguage, ParserMetadata, LANGUAGE_PACKAGE_FORMAT_VERSION,
-        };
+        use lumis_wasm_runtime::{PackagedLanguage, ParserMetadata};
 
         let location = catalog::find(id).unwrap();
         let parser_name = format!("tree-sitter-{grammar_name}");
         let package = LanguagePackage {
-            format_version: LANGUAGE_PACKAGE_FORMAT_VERSION,
             package_name: location.package_name.into(),
             version: "test".into(),
             definition_hash: "test".into(),
@@ -448,6 +463,18 @@ fn parser_filename(package: &LanguagePackage) -> String {
     )
 }
 
+fn parse_package(bytes: &[u8], package_name: &str) -> Result<LanguagePackage> {
+    let json = std::str::from_utf8(bytes).context("language package is not UTF-8 JSON")?;
+    let package = LanguagePackage::from_json(json)?;
+    if package.package_name != package_name {
+        bail!(
+            "language package name mismatch: expected '{package_name}', got '{}'",
+            package.package_name
+        );
+    }
+    Ok(package)
+}
+
 fn package_suffix(package_name: &str) -> &str {
     package_name
         .strip_prefix("@lumis-sh/wasm-")
@@ -456,11 +483,6 @@ fn package_suffix(package_name: &str) -> &str {
 
 fn language_source_dir() -> Option<PathBuf> {
     std::env::var_os("LUMIS_WASM_SOURCE_DIR").map(PathBuf::from)
-}
-
-fn source_asset(filename: &str) -> Option<PathBuf> {
-    let path = language_source_dir()?.join("parsers").join(filename);
-    path.is_file().then_some(path)
 }
 
 fn package_cache_is_fresh(path: &Path) -> bool {
@@ -594,7 +616,7 @@ fn fetch_bytes(url: &str) -> Result<Vec<u8>> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use lumis_wasm_runtime::{PackagedLanguage, ParserMetadata, LANGUAGE_PACKAGE_FORMAT_VERSION};
+    use lumis_wasm_runtime::{PackagedLanguage, ParserMetadata};
     use tempfile::tempdir;
 
     const RUST_WASM: &[u8] = include_bytes!(
@@ -605,7 +627,6 @@ mod tests {
         let dir = tempdir().unwrap();
         let registry = Registry::new(dir.path().to_path_buf()).unwrap();
         let package = LanguagePackage {
-            format_version: LANGUAGE_PACKAGE_FORMAT_VERSION,
             package_name: "@lumis-sh/wasm-rust".into(),
             version: "test".into(),
             definition_hash: "test".into(),
@@ -660,5 +681,36 @@ mod tests {
         let url = registry.parser_download_url("rust").unwrap();
         assert!(url.contains("@lumis-sh/wasm-rust@test/"));
         assert!(!url.contains("@latest"));
+    }
+
+    /// Node prefers an installed `@lumis-sh/wasm-*` package over its cache and Elixir prefers
+    /// release-local `priv/wasm`, so the CLI must prefer `LUMIS_WASM_SOURCE_DIR` over a fresh
+    /// cache too. Otherwise the same inputs resolve to different packages per runtime.
+    #[test]
+    fn configured_local_source_outranks_a_fresh_cache() {
+        let (_dir, mut registry) = cached_rust_registry();
+
+        // The cache written by `cached_rust_registry` is brand new, so it is "fresh".
+        let mut package = (*registry.ensure_package("rust").unwrap()).clone();
+        assert_eq!(package.version, "test");
+
+        let source = tempdir().unwrap();
+        std::fs::create_dir_all(source.path().join("parsers")).unwrap();
+        package.version = "from-source".into();
+        std::fs::write(
+            source.path().join("parsers").join("rust.language.json"),
+            serde_json::to_string(&package).unwrap(),
+        )
+        .unwrap();
+
+        registry.source_dir = Some(source.path().to_path_buf());
+        // Drop the in-process memo so the on-disk precedence is what is exercised.
+        registry.packages.lock().unwrap().clear();
+
+        assert_eq!(
+            registry.ensure_package("rust").unwrap().version,
+            "from-source",
+            "the configured local source must win over a fresh cache"
+        );
     }
 }

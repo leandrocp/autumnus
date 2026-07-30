@@ -248,7 +248,6 @@ async function languagePackageDataUrl(
     byte.toString(16).padStart(2, "0"),
   ).join("");
   const metadata = JSON.stringify({
-    formatVersion: 3,
     packageName: `@lumis-sh/wasm-${language}`,
     version: "test",
     definitionHash: sha256,

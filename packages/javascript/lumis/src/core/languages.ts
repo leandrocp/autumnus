@@ -26,8 +26,18 @@ export interface PackagedLanguage {
   brackets?: string;
 }
 
+/**
+ * A language package as published inside `@lumis-sh/wasm-*`.
+ *
+ * There is deliberately no `formatVersion` gate. Runtimes resolve this document from
+ * a floating tag, so a hard version equality check would break every already-deployed
+ * client the moment a new version was published. Compatibility is decided by the
+ * document's shape instead: unknown fields are ignored, so additive changes are safe,
+ * and a missing required field fails `parseLanguagePackage`. The format is therefore
+ * additive-only by contract. Mirrors `LanguagePackage` in
+ * `crates/lumis-wasm-runtime/src/package.rs`.
+ */
 export interface LanguagePackage {
-  formatVersion: number;
   packageName: string;
   version: string;
   definitionHash: string;
@@ -171,7 +181,6 @@ export const DEFAULT_LANGUAGE_PACKAGE_RESOLVER: LanguagePackageResolver = (packa
 
 const HIGHLIGHT_NAMES_SET = new Set(HIGHLIGHT_NAMES);
 const PLAINTEXT_ALIASES = ["text", "txt", "plain"];
-const LANGUAGE_PACKAGE_FORMAT_VERSION = 3;
 const LANGUAGE_PACKAGE_TTL_MS = 60 * 60 * 1000;
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
@@ -220,7 +229,6 @@ export function parseLanguagePackage(
       ? Object.values(value.languages)
       : [];
   if (
-    value.formatVersion !== LANGUAGE_PACKAGE_FORMAT_VERSION ||
     value.packageName !== expectedPackageName ||
     typeof value.version !== "string" ||
     !isSafePackagePathSegment(value.version) ||

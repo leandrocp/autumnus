@@ -5,7 +5,7 @@ use lumis::formatters::Formatter as _;
 use lumis::highlight::{highlight_events_with_options, HighlightOptions};
 use lumis::languages::Language;
 use lumis_wasm_runtime::{
-    LanguagePackage, PackagedLanguage, ParserMetadata, LANGUAGE_PACKAGE_FORMAT_VERSION,
+    LanguagePackage, PackagedLanguage, ParserMetadata,
 };
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
@@ -2643,7 +2643,6 @@ fn stage_wasm(name: &str) -> Result<()> {
     let language_ids = languages.keys().cloned().collect::<Vec<_>>();
     let languages_text = language_ids.join(", ");
     let language_package = LanguagePackage {
-        format_version: LANGUAGE_PACKAGE_FORMAT_VERSION,
         package_name: pkg_name.clone(),
         version: npm_version.clone(),
         definition_hash: definition_hash.clone(),

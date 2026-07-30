@@ -389,7 +389,6 @@ mod tests {
     use lumis_core::languages::Language;
     use lumis_wasm_runtime::{
         sha256_hex, LanguagePackage, PackagedLanguage, ParserMetadata, Runtime,
-        LANGUAGE_PACKAGE_FORMAT_VERSION,
     };
     use std::collections::BTreeMap;
 
@@ -428,7 +427,6 @@ mod tests {
         )
         .to_vec();
         let package = LanguagePackage {
-            format_version: LANGUAGE_PACKAGE_FORMAT_VERSION,
             package_name: "@lumis-sh/wasm-elixir".into(),
             version: "test".into(),
             definition_hash: "test".into(),

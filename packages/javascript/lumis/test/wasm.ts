@@ -115,7 +115,6 @@ export function localLanguagePackageMetadata(packageName: string): LanguagePacka
   }
 
   const packageMetadata: LanguagePackage = {
-    formatVersion: 3,
     packageName,
     version: "test",
     definitionHash: createHash("sha256").update(wasm).digest("hex"),

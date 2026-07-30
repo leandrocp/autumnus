@@ -47,7 +47,6 @@ mod runtime;
 
 pub use package::{
     sha256_hex, LanguagePackage, LanguagePackageError, PackagedLanguage, ParserMetadata,
-    LANGUAGE_PACKAGE_FORMAT_VERSION,
 };
 #[cfg(feature = "wasm")]
 pub use runtime::{LanguageSpec, Runtime, RuntimeError};

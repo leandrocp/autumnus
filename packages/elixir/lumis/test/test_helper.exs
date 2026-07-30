@@ -50,7 +50,6 @@ Application.put_env(:lumis, :language_package_resolver, fn handle ->
     end)
 
   package = %{
-    formatVersion: 3,
     packageName: handle.package_name,
     version: "test",
     definitionHash: "test",

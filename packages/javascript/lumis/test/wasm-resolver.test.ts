@@ -31,7 +31,6 @@ describe("Wasm resolver", () => {
     const packageName = "@lumis-sh/wasm-invalid";
     const bytes = new TextEncoder().encode(
       JSON.stringify({
-        formatVersion: 3,
         packageName,
         version: "0.26.0",
         definitionHash: "definition",

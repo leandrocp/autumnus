@@ -47,7 +47,6 @@ for (const packageName of packageNames) {
     metadataPath,
     `${JSON.stringify(
       {
-        formatVersion: 3,
         packageName,
         version: packageJson.version,
         definitionHash,

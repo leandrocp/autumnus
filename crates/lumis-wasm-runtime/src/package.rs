@@ -5,12 +5,26 @@ use sha2::{Digest, Sha256};
 use std::collections::BTreeMap;
 use thiserror::Error;
 
-pub const LANGUAGE_PACKAGE_FORMAT_VERSION: u32 = 3;
-
+/// A language package as published inside `@lumis-sh/wasm-*`.
+///
+/// There is deliberately **no `formatVersion` gate here**. Runtimes resolve this
+/// document from a floating tag, so a hard version equality check would break every
+/// already-deployed client the moment a new version was published, with no way to
+/// negotiate. Compatibility is decided by the document's shape instead: neither
+/// runtime rejects unknown fields, so additive changes are already safe, and a
+/// change that removes or renames a required field fails `validate` with a message
+/// naming the field.
+///
+/// That makes the format additive-only by contract. A change that alters the
+/// *meaning* of an existing field without changing its shape cannot be detected
+/// here and must be shipped as a new field instead.
+///
+/// The published npm `package.json` still carries `lumis.formatVersion`. That one is
+/// release tooling (`scripts/wasm-needed.py`) deciding whether an artifact needs
+/// republishing; no client reads it.
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct LanguagePackage {
-    pub format_version: u32,
     pub package_name: String,
     pub version: String,
     pub definition_hash: String,
@@ -34,7 +48,9 @@ pub struct ParserMetadata {
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PackagedLanguage {
-    #[serde(default)]
+    // Deliberately not `#[serde(default)]`. The JavaScript validator requires
+    // `aliases`, so tolerating its absence here would accept packages that the
+    // browser and Node runtimes reject. See `tests/language_package_corpus.rs`.
     pub aliases: Vec<String>,
     pub highlights: String,
     #[serde(default, skip_serializing_if = "String::is_empty")]
@@ -49,8 +65,6 @@ pub struct PackagedLanguage {
 pub enum LanguagePackageError {
     #[error("invalid language package JSON: {0}")]
     Json(#[from] serde_json::Error),
-    #[error("unsupported language package format {actual}; expected {expected}")]
-    UnsupportedFormat { actual: u32, expected: u32 },
     #[error("language package is missing {0}")]
     Missing(&'static str),
     #[error("language package has invalid {0}")]
@@ -81,12 +95,6 @@ impl LanguagePackage {
     }
 
     pub fn validate(&self) -> Result<(), LanguagePackageError> {
-        if self.format_version != LANGUAGE_PACKAGE_FORMAT_VERSION {
-            return Err(LanguagePackageError::UnsupportedFormat {
-                actual: self.format_version,
-                expected: LANGUAGE_PACKAGE_FORMAT_VERSION,
-            });
-        }
         for (value, field) in [
             (&self.package_name, "packageName"),
             (&self.version, "version"),
@@ -116,6 +124,12 @@ impl LanguagePackage {
                 .all(|byte| matches!(byte, b'0'..=b'9' | b'a'..=b'f'))
         {
             return Err(LanguagePackageError::Invalid("parser.sha256"));
+        }
+        // A zero-size parser is meaningless metadata. Without this the failure
+        // surfaces much later, as a confusing `InvalidSize` from `verify_wasm`,
+        // and only for runtimes that reach that point.
+        if self.parser.size == 0 {
+            return Err(LanguagePackageError::Invalid("parser.size"));
         }
         Ok(())
     }
@@ -208,7 +222,6 @@ mod tests {
 
     fn package() -> LanguagePackage {
         LanguagePackage {
-            format_version: LANGUAGE_PACKAGE_FORMAT_VERSION,
             package_name: "@lumis-sh/wasm-json".into(),
             version: "0.26.3".into(),
             definition_hash: "definition".into(),
