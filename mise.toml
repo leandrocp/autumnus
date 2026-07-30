@@ -612,6 +612,7 @@ else
     [[ "$reply" =~ ^[Yy]$ ]] || { echo "Operation cancelled."; exit 0; }
     nvim --clean --headless -V3 -u themes/init.lua -l themes/extract_theme.lua ${usage_theme_name:-}
 fi
+cargo run --manifest-path crates/dev/Cargo.toml -- filter-theme-updates "${usage_theme_name:-}"
 cargo run --manifest-path crates/dev/Cargo.toml -- sync-themes
 pnpm --filter @lumis-sh/themes build:themes
 pnpm --filter @lumis-sh/themes build:assets

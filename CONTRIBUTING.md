@@ -397,3 +397,6 @@ After regenerating, refresh CSS outputs:
 ```sh
 mise run css-gen
 ```
+
+Theme generation keeps the previous revision when an upstream commit produces
+identical theme data, so revision-only changes do not create update PRs.
