@@ -664,38 +664,43 @@ mod tests {
         let target = dir.path().join("swap.bin");
         write_atomic(&target, OLD).unwrap();
 
-        let done = Arc::new(std::sync::atomic::AtomicBool::new(false));
+        use std::sync::atomic::{AtomicBool, Ordering};
+
+        let done = Arc::new(AtomicBool::new(false));
+        let seen_old = Arc::new(AtomicBool::new(false));
+        let seen_new = Arc::new(AtomicBool::new(false));
         let reader = {
             let target = target.clone();
             let done = Arc::clone(&done);
+            let seen_old = Arc::clone(&seen_old);
+            let seen_new = Arc::clone(&seen_new);
             std::thread::spawn(move || {
-                let mut seen_old = false;
-                let mut seen_new = false;
-                while !done.load(std::sync::atomic::Ordering::Relaxed) {
+                while !done.load(Ordering::Relaxed) {
                     match std::fs::read(&target) {
-                        Ok(bytes) if bytes == OLD => seen_old = true,
-                        Ok(bytes) if bytes == NEW => seen_new = true,
+                        Ok(bytes) if bytes == OLD => seen_old.store(true, Ordering::Relaxed),
+                        Ok(bytes) if bytes == NEW => seen_new.store(true, Ordering::Relaxed),
                         // A miss is fine; a third value means a torn read.
                         Ok(bytes) => panic!("torn read: {bytes:?}"),
                         Err(_) => {}
                     }
                     std::thread::yield_now();
                 }
-                (seen_old, seen_new)
             })
         };
 
-        for _ in 0..100 {
+        // Swap until the reader has caught both states rather than a fixed number of
+        // times, which on a fast machine can finish before it is ever scheduled.
+        let deadline = std::time::Instant::now() + Duration::from_secs(30);
+        while !(seen_old.load(Ordering::Relaxed) && seen_new.load(Ordering::Relaxed)) {
+            assert!(
+                std::time::Instant::now() < deadline,
+                "the reader never observed both states, so this proved nothing"
+            );
             write_atomic(&target, NEW).unwrap();
             write_atomic(&target, OLD).unwrap();
         }
-        done.store(true, std::sync::atomic::Ordering::Relaxed);
-
-        let (seen_old, seen_new) = reader.join().unwrap();
-        assert!(
-            seen_old && seen_new,
-            "the reader must have observed both states, or it proved nothing"
-        );
+        done.store(true, Ordering::Relaxed);
+        reader.join().unwrap();
     }
 
     fn tempdir() -> tempfile::TempDir {
