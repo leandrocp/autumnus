@@ -6,9 +6,15 @@
  * `mise run test-queries` builds only these parsers, so the cost scales with the
  * release lag instead of with the size of the catalog.
  *
- * Usage: node scripts/list-unverified-parsers.mjs [--parsers]
+ * Usage: node scripts/list-unverified-parsers.mjs [--parsers|--pairs]
  *   default    language ids, one per line
  *   --parsers  tree-sitter parser names, deduplicated, for `mise run wasm-build`
+ *   --pairs    `<language>\t<parser>`, for callers that must keep the two in step
+ *
+ * Several languages share one parser, so the language list and the parser list have
+ * different lengths. Anything that shards this work must shard `--pairs` and derive
+ * both sides from it; sharding the two lists independently puts a language in one
+ * shard and its parser in another.
  */
 import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
@@ -47,11 +53,14 @@ function isVerifiable(id, entry) {
 }
 
 const wantParsers = process.argv.includes("--parsers");
+const wantPairs = process.argv.includes("--pairs");
 const output = new Set();
 
 for (const [id, entry] of Object.entries(parsers)) {
   if (isVerifiable(id, entry)) continue;
-  output.add(wantParsers ? (entry.wasm_name ?? `tree-sitter-${id}`) : id);
+  const parser = entry.wasm_name ?? `tree-sitter-${id}`;
+  if (wantPairs) output.add(`${id}\t${parser}`);
+  else output.add(wantParsers ? parser : id);
 }
 
 for (const value of [...output].sort()) console.log(value);

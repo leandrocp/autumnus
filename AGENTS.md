@@ -105,7 +105,9 @@ A test that skips silently reports the same green as a test that verified someth
 
 ### Keep Emscripten compatible with Tree-sitter
 
-Pin Emscripten to `4.0.15` for the Tree-sitter browser runtime. Emscripten 6 is currently incompatible with Tree-sitter side modules because their mutable `env.__stack_pointer` import is not supplied as the required `WebAssembly.Global`; see <https://github.com/tree-sitter/tree-sitter/issues/5037>.
+Emscripten is pinned to `5.0.3`, declared once as `EMSDK_VERSION` in `.github/workflows/wasm-release.yml` and `.github/workflows/queries.yml`. Change it in both or not at all.
+
+Emscripten 6 is incompatible with Tree-sitter side modules because their mutable `env.__stack_pointer` import is not supplied as the required `WebAssembly.Global`; see <https://github.com/tree-sitter/tree-sitter/issues/5037>. A local Emscripten 6 is why a parser built on a developer machine can fail to load with `bad export type for tree_sitter_<lang>_external_scanner_create` while the same parser built in CI works.
 
 Do not upgrade Emscripten until that incompatibility is resolved upstream and Lumis verifies loading real Tree-sitter parser side modules in browser conformance tests.
 

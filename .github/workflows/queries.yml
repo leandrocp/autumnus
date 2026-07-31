@@ -119,12 +119,19 @@ jobs:
         run: |
           set -euo pipefail
           cd packages/javascript/lumis
-          node scripts/list-unverified-parsers.mjs > /tmp/languages.txt
-          node scripts/list-unverified-parsers.mjs --parsers > /tmp/parsers.txt
-          awk -v s="$SHARD" -v n="$SHARDS" 'NR % n == s % n' /tmp/languages.txt > /tmp/shard-languages.txt
+          # Several languages share one parser, so the language and parser lists have
+          # different lengths. Shard the parsers, then take exactly the languages those
+          # parsers serve. Sharding the two lists separately put a language in one shard
+          # and its parser in another, so every shard tried to verify languages it had
+          # never built.
+          node scripts/list-unverified-parsers.mjs --pairs > /tmp/pairs.txt
+          cut -f2 /tmp/pairs.txt | sort -u > /tmp/parsers.txt
           awk -v s="$SHARD" -v n="$SHARDS" 'NR % n == s % n' /tmp/parsers.txt > /tmp/shard-parsers.txt
+          awk 'NR == FNR { keep[$0]; next } ($2 in keep) { print $1 }' \
+            /tmp/shard-parsers.txt /tmp/pairs.txt > /tmp/shard-languages.txt
           echo "languages=$(paste -sd, /tmp/shard-languages.txt)" >> "$GITHUB_OUTPUT"
           echo "parser count: $(wc -l < /tmp/shard-parsers.txt)"
+          echo "language count: $(wc -l < /tmp/shard-languages.txt)"
         env:
           SHARD: ${{ matrix.shard }}
           SHARDS: ${{ env.QUERY_SHARDS }}
