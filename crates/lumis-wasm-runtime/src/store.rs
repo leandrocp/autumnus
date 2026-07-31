@@ -31,6 +31,11 @@ pub const PACKAGE_CACHE_TTL: Duration = Duration::from_secs(60 * 60);
 /// npm CDNs, tried in order. Both serve the same `<package>@<version>/<file>`
 /// layout, so one mirror being unreachable or missing a just-published version
 /// does not stop a language from loading.
+/// Attempts to replace the target before giving up. Only Windows needs more
+/// than one, and only while another handle holds the file open.
+const REPLACE_ATTEMPTS: u32 = 20;
+const REPLACE_RETRY_DELAY: Duration = Duration::from_millis(5);
+
 const CDNS: [&str; 2] = ["https://cdn.jsdelivr.net/npm", "https://unpkg.com"];
 
 #[derive(Debug, Error)]
@@ -412,9 +417,30 @@ pub fn write_atomic(path: &Path, bytes: &[u8]) -> Result<(), StoreError> {
         .map_err(|error| StoreError::io(context(), error))?;
     file.write_all(bytes)
         .map_err(|error| StoreError::io(context(), error))?;
-    file.persist(path)
-        .map_err(|error| StoreError::io(context(), error.error))?;
-    Ok(())
+
+    // Windows refuses to replace a file another handle still has open, so the
+    // rename can fail with a sharing violation that clears on its own. Retry the
+    // atomic replace rather than falling back to remove-then-rename: that would
+    // leave a window where the path does not exist, which is exactly the torn
+    // read this function exists to prevent.
+    let mut pending = file;
+    for attempt in 0..REPLACE_ATTEMPTS {
+        match pending.persist(path) {
+            Ok(_) => return Ok(()),
+            Err(error)
+                if attempt + 1 < REPLACE_ATTEMPTS
+                    && matches!(
+                        error.error.kind(),
+                        std::io::ErrorKind::PermissionDenied | std::io::ErrorKind::AlreadyExists
+                    ) =>
+            {
+                pending = error.file;
+                std::thread::sleep(REPLACE_RETRY_DELAY);
+            }
+            Err(error) => return Err(StoreError::io(context(), error.error)),
+        }
+    }
+    unreachable!("the loop returns on the final attempt")
 }
 
 #[cfg(test)]
@@ -655,30 +681,51 @@ mod tests {
     }
 
     /// A reader must never observe a partially written file.
+    ///
+    /// The reader yields between reads rather than holding a handle continuously:
+    /// on Windows a permanently open handle blocks the replacing rename outright,
+    /// which tests the retry budget rather than the atomicity this is about.
     #[test]
     fn a_reader_sees_either_the_old_or_the_new_bytes() {
+        const OLD: &[u8] = b"old";
+        const NEW: &[u8] = b"new-and-longer";
+
         let dir = tempdir();
         let target = dir.path().join("swap.bin");
-        write_atomic(&target, b"old").unwrap();
+        write_atomic(&target, OLD).unwrap();
 
+        let done = Arc::new(std::sync::atomic::AtomicBool::new(false));
         let reader = {
             let target = target.clone();
+            let done = Arc::clone(&done);
             std::thread::spawn(move || {
-                for _ in 0..200 {
-                    if let Ok(bytes) = std::fs::read(&target) {
-                        assert!(
-                            bytes == b"old" || bytes == b"new-and-longer",
-                            "torn read: {bytes:?}"
-                        );
+                let mut seen_old = false;
+                let mut seen_new = false;
+                while !done.load(std::sync::atomic::Ordering::Relaxed) {
+                    match std::fs::read(&target) {
+                        Ok(bytes) if bytes == OLD => seen_old = true,
+                        Ok(bytes) if bytes == NEW => seen_new = true,
+                        // A miss is fine; a third value means a torn read.
+                        Ok(bytes) => panic!("torn read: {bytes:?}"),
+                        Err(_) => {}
                     }
+                    std::thread::yield_now();
                 }
+                (seen_old, seen_new)
             })
         };
-        for _ in 0..200 {
-            write_atomic(&target, b"new-and-longer").unwrap();
-            write_atomic(&target, b"old").unwrap();
+
+        for _ in 0..100 {
+            write_atomic(&target, NEW).unwrap();
+            write_atomic(&target, OLD).unwrap();
         }
-        reader.join().unwrap();
+        done.store(true, std::sync::atomic::Ordering::Relaxed);
+
+        let (seen_old, seen_new) = reader.join().unwrap();
+        assert!(
+            seen_old && seen_new,
+            "the reader must have observed both states, or it proved nothing"
+        );
     }
 
     fn tempdir() -> tempfile::TempDir {
