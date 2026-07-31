@@ -126,13 +126,13 @@ Not worth keeping, because the code already says it:
 
 Rationale that is about the change rather than the code belongs in the commit message. `mise.toml` takes no comments at all.
 
-### Formatting is enforced for every language, and coverage is opt-out
+### Formatter coverage is opt-out, not opt-in
 
-Every language the repo authors is format-checked in CI: Rust (`cargo fmt`), Elixir (`mix format`), JavaScript and TypeScript (`mise run fmt-js`), Lua (`mise run fmt-lua`). `mise run fmt` fixes all of them, `mise run lint` checks all of them.
+`mise run fmt` formats every language, `mise run lint` checks them. Run those before pushing; CI only checks.
 
-The JS and Lua checks take **no per-package path list**. They match by extension from the repo root, so a new package, script, example, or test directory is covered the day it is added. Exclusions live in one place, `.oxfmtrc.json`, and only for files that are generated or vendored — those are guarded by regenerating and diffing, not by the formatter.
+`fmt-js` and `fmt-lua` take **no per-package path list**. They match by extension from the repo root, so a new package, script, example, or test directory is covered the day it is added. Exclusions live in one place, `.oxfmtrc.json`, and only for generated or vendored files, which are guarded by regenerating and diffing instead.
 
-This replaced a per-package `fmt:check` that named `src/` only. Every `test/`, `scripts/` and `examples/` directory in the repo had therefore never been formatted, and nobody could tell, because the check was green. When adding a formatter or a linter, make the default "everything" and subtract, never "this directory" and hope the list is maintained.
+They replaced a per-package `fmt:check` that named `src/` only. Every `test/`, `scripts/` and `examples/` directory in the repo had therefore never been formatted, and nobody could tell, because the check was green. When adding a formatter or a linter, make the default "everything" and subtract; never name a directory and hope the list is maintained.
 
 `oxlint` runs with `--deny-warnings`, so a warning fails the build. Silence a genuinely intentional one at the line with `// oxlint-disable-next-line <rule> -- <why>`; do not let it sit in the output.
 
