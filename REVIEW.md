@@ -949,7 +949,9 @@ user-facing. Worth documenting the whole chain in one place.
 - **`definitionHash` is inert at runtime.** It is validated non-empty and used in an Elixir dedupe
   key, but never compared to anything. It exists to drive `wasm-needed.py`; either verify it
   client-side or drop it from the runtime schema so it isn't mistaken for an integrity control.
-- **Two implementations of the same hash.** `scripts/wasm-needed.py:definition_hash` and
+- ~~**Two implementations of the same hash.**~~ **Pinned.** `mise run test-definition-hash` diffs
+  `dev definition-hash` against `wasm-needed.py --hashes` over every parser, and `rust.yml` runs it.
+  Original finding: `scripts/wasm-needed.py:definition_hash` and
   `crates/dev/src/main.rs:language_definition_hash` must agree byte-for-byte or CI either
   republishes forever or never. They currently agree, with one divergence: for a `brackets.scm`
   that exists but is empty, Rust substitutes the default query and Python does not. Add a test that
@@ -1207,7 +1209,7 @@ Before release:
     delta in the PR body, changelog, and `benchmarks/README.md` (§4.6).
 13. Cache `tree_sitter::Language` and `HighlightConfiguration` in the CLI `Registry`; honour
     `LUMIS_WASM_CACHE_DIR` there (§4.4).
-14. Pin `wasm-needed.py`'s `definitionHash` to `crates/dev`'s with a fixture test (§5).
+14. ~~Pin `wasm-needed.py`'s `definitionHash` to `crates/dev`'s.~~ **DONE** — `mise run test-definition-hash` diffs both implementations over all 113 parsers, in `rust.yml`.
 
 Cleanup:
 

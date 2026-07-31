@@ -396,6 +396,8 @@ atomic.
 
 The `wasm-release` workflow publishes packages automatically. It detects which parsers still need publishing with `scripts/wasm-needed.py` and builds and publishes them in parallel.
 
+That script computes `definitionHash` in Python because the detect job has no Rust toolchain, so the same hash exists twice. `mise run test-definition-hash` diffs `dev definition-hash` against `python3 scripts/wasm-needed.py --hashes` across every parser, and `rust.yml` runs it. Change one implementation and that check fails until the other matches.
+
 ## Themes
 
 Themes are extracted from Neovim colorscheme plugins. Each theme is a JSON file in `themes/`. Theme definitions live in [`themes/themes.lua`](themes/themes.lua), which follows the `vim.pack` convention so Neovim can install them automatically.

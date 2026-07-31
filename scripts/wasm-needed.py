@@ -130,74 +130,93 @@ def published_for_definition(
     return False
 
 
-with open("languages.toml", "rb") as f:
-    data = tomllib.load(f)
+def print_definition_hashes(data: dict) -> None:
+    """Same table as `dev definition-hash`, so the two can be diffed."""
+    revisions: dict[str, str] = {}
+    for language, info in data.get("parsers", {}).items():
+        wasm_name = info.get("wasm_name") or f"tree-sitter-{language}"
+        revisions.setdefault(wasm_name, info.get("rev", ""))
+    for wasm_name in sorted(revisions):
+        print(f"{wasm_name}\t{definition_hash(data, wasm_name, revisions[wasm_name])}")
 
-raw_filter = sys.argv[1] if len(sys.argv) > 1 else ""
-filter_parsers = {part.strip() for part in raw_filter.split(",") if part.strip()}
-force_publish = is_truthy(sys.argv[2]) if len(sys.argv) > 2 else False
-needed = []
-seen = set()
-revisions = {}
 
-for pname, info in data.get("parsers", {}).items():
-    wasm_name = info.get("wasm_name") or f"tree-sitter-{pname}"
-    revision = info.get("rev", "")
-    previous = revisions.setdefault(wasm_name, revision)
-    if previous != revision:
-        raise RuntimeError(
-            f"{wasm_name} is shared by different revisions: {previous} and {revision}"
+def main() -> None:
+    with open("languages.toml", "rb") as f:
+        data = tomllib.load(f)
+
+    if "--hashes" in sys.argv[1:]:
+        print_definition_hashes(data)
+        return
+
+    raw_filter = sys.argv[1] if len(sys.argv) > 1 else ""
+    filter_parsers = {part.strip() for part in raw_filter.split(",") if part.strip()}
+    force_publish = is_truthy(sys.argv[2]) if len(sys.argv) > 2 else False
+    needed = []
+    seen = set()
+    revisions = {}
+
+    for pname, info in data.get("parsers", {}).items():
+        wasm_name = info.get("wasm_name") or f"tree-sitter-{pname}"
+        revision = info.get("rev", "")
+        previous = revisions.setdefault(wasm_name, revision)
+        if previous != revision:
+            raise RuntimeError(
+                f"{wasm_name} is shared by different revisions: {previous} and {revision}"
+            )
+
+    for pname, info in data.get("parsers", {}).items():
+        wasm_name = info.get("wasm_name") or f"tree-sitter-{pname}"
+        revision = revisions[wasm_name]
+
+        if (
+            filter_parsers
+            and pname not in filter_parsers
+            and wasm_name not in filter_parsers
+        ):
+            continue
+
+        if wasm_name in seen:
+            continue
+        seen.add(wasm_name)
+
+        if force_publish:
+            needed.append(wasm_name)
+            continue
+
+        pkg = f"@lumis-sh/wasm-{wasm_package_suffix(wasm_name)}"
+        result = subprocess.run(
+            ["npm", "view", pkg, "versions", "--json"],
+            capture_output=True,
+            text=True,
         )
 
-for pname, info in data.get("parsers", {}).items():
-    wasm_name = info.get("wasm_name") or f"tree-sitter-{pname}"
-    revision = revisions[wasm_name]
+        if result.returncode != 0:
+            needed.append(wasm_name)
+            continue
 
-    if (
-        filter_parsers
-        and pname not in filter_parsers
-        and wasm_name not in filter_parsers
-    ):
-        continue
+        try:
+            versions_data = json.loads(result.stdout or "[]")
+        except Exception:
+            needed.append(wasm_name)
+            continue
 
-    if wasm_name in seen:
-        continue
-    seen.add(wasm_name)
+        if isinstance(versions_data, str):
+            versions = [versions_data]
+        else:
+            versions = [v for v in versions_data if isinstance(v, str)]
 
-    if force_publish:
-        needed.append(wasm_name)
-        continue
+        expected_hash = definition_hash(data, wasm_name, revision)
+        published = published_for_definition(pkg, versions, expected_hash)
 
-    pkg = f"@lumis-sh/wasm-{wasm_package_suffix(wasm_name)}"
-    result = subprocess.run(
-        ["npm", "view", pkg, "versions", "--json"],
-        capture_output=True,
-        text=True,
-    )
+        if not published:
+            print(
+                f"Need to publish {pkg}@{next_patch_version(versions)} for {expected_hash}",
+                file=sys.stderr,
+            )
+            needed.append(wasm_name)
 
-    if result.returncode != 0:
-        needed.append(wasm_name)
-        continue
+    print(" ".join(needed))
 
-    try:
-        versions_data = json.loads(result.stdout or "[]")
-    except Exception:
-        needed.append(wasm_name)
-        continue
 
-    if isinstance(versions_data, str):
-        versions = [versions_data]
-    else:
-        versions = [v for v in versions_data if isinstance(v, str)]
-
-    expected_hash = definition_hash(data, wasm_name, revision)
-    published = published_for_definition(pkg, versions, expected_hash)
-
-    if not published:
-        print(
-            f"Need to publish {pkg}@{next_patch_version(versions)} for {expected_hash}",
-            file=sys.stderr,
-        )
-        needed.append(wasm_name)
-
-print(" ".join(needed))
+if __name__ == "__main__":
+    main()

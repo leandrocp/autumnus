@@ -75,6 +75,8 @@ enum Commands {
     StageWasm {
         name: String,
     },
+    /// Print `<wasm_name>\t<definitionHash>` for every parser.
+    DefinitionHash,
     WasmMeta {
         name: String,
     },
@@ -132,6 +134,7 @@ fn main() -> Result<()> {
         Commands::GenLanguageCatalog { check } => gen_language_catalog(check),
         Commands::BuildWasm { name } => build_wasm(&name),
         Commands::StageWasm { name } => stage_wasm(&name),
+        Commands::DefinitionHash => definition_hash(),
         Commands::WasmMeta { name } => wasm_meta(&name),
         Commands::RenderConformance {
             source,
@@ -2867,6 +2870,27 @@ fn wasm_meta(name: &str) -> Result<()> {
     let wasm_name = info.wasm_name.as_deref().unwrap_or(&default_wasm_name);
 
     println!("wasm_name={wasm_name}");
+    Ok(())
+}
+
+/// The same value `scripts/wasm-needed.py` computes, so the two can be diffed.
+fn definition_hash() -> Result<()> {
+    let toml = read_languages_toml()?;
+    let mut seen = BTreeMap::new();
+    for (id, info) in &toml.parsers {
+        let default_name = format!("tree-sitter-{id}");
+        let wasm_name = info
+            .wasm_name
+            .as_deref()
+            .unwrap_or(&default_name)
+            .to_string();
+        seen.entry(wasm_name).or_insert_with(Vec::new).push(id);
+    }
+    for wasm_name in seen.keys() {
+        let languages = packaged_languages(&toml, wasm_name)?;
+        let hash = language_definition_hash(&toml, wasm_name, &languages)?;
+        println!("{wasm_name}\t{hash}");
+    }
     Ok(())
 }
 

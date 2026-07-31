@@ -14,6 +14,8 @@ on:
       - "crates/**"
       - "languages.toml"
       - "queries/**"
+      - "scripts/wasm-needed.py"
+      - "mise.toml"
       - ".github/workflows/rust.yml"
   pull_request:
     paths:
@@ -23,6 +25,8 @@ on:
       - "crates/**"
       - "languages.toml"
       - "queries/**"
+      - "scripts/wasm-needed.py"
+      - "mise.toml"
       - ".github/workflows/rust.yml"
   workflow_dispatch:
 
@@ -80,6 +84,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - uses: jdx/mise-action@v4
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:
@@ -88,6 +93,8 @@ jobs:
       - run: >-
           cargo run --manifest-path crates/dev/Cargo.toml
           --locked --no-default-features -- gen-language-catalog --check
+      - name: definitionHash agrees between crates/dev and wasm-needed.py
+        run: mise run test-definition-hash
   test-packaged-parsers:
     if: >-
       ${{ github.event_name == 'workflow_dispatch' ||
