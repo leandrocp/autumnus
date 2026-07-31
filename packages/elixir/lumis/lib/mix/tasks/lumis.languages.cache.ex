@@ -32,6 +32,7 @@ defmodule Mix.Tasks.Lumis.Languages.Cache do
 
   @impl Mix.Task
   def run(arguments) do
+    Mix.Task.run("app.start")
     options = parse_arguments(arguments)
 
     options

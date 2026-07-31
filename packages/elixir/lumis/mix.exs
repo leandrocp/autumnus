@@ -23,6 +23,7 @@ defmodule Lumis.MixProject do
 
   def application do
     [
+      mod: {Lumis.Application, []},
       extra_applications: [:logger, :crypto, :inets, :ssl]
     ]
   end

@@ -44,7 +44,8 @@ reproducible test pins the behavior.
 | 2 Query compilation silently skips 67% of languages | **DONE**, but the waiver is now stale — see §0 |
 | 3 `#offset!` removed, regression blessed into fixtures | **DONE** |
 | 4.1 `@latest` at runtime | **Won't fix, by design** — pinning would undo release-free parser updates; the guard is pre-publish CI |
-| 4.2, 4.3, 4.4, 4.6 Production risks | open |
+| 4.2, 4.4, 4.6 Production risks | open |
+| 4.3 `:global.trans` cluster-wide lock | **DONE** — node-local `Lumis.Loader`, one key at a time |
 | 4.5 `crypto.subtle` on non-secure origins | **DONE** — pure-JS SHA-256 fallback, pinned against `crypto.subtle` |
 | 4.7 Same `language.json` accepted by Rust, rejected by JS | **DONE** |
 | 4.8 Package resolution precedence differs per runtime | **DONE** |
@@ -670,7 +671,7 @@ previous NIF ran on the dirty CPU schedulers directly. The 8 MiB stacks are a le
 own the threads; the `min(4)` cap is not, and there is no config knob. Make it configurable and
 default to `available_parallelism()`.
 
-### 4.3 `:global.trans` serializes parser loading across the whole cluster
+### 4.3 `:global.trans` serializes parser loading across the whole cluster — DONE
 
 `packages/elixir/lumis/lib/lumis/language_loader.ex:163` wraps language loading in
 `:global.trans({__MODULE__, id}, ...)`. That is a **cluster-wide** lock, and the critical section
@@ -1200,8 +1201,8 @@ Before release:
 8. Return all missing injected languages at once, and check before draining events (§4.3a).
 9. ~~Unify package resolution precedence across the three runtimes.~~ **DONE** — see §4.8. The CLI
    now matches the order `ARCHITECTURE.md` already documented.
-10. Make the Elixir worker cap configurable; replace `:global.trans` with a node-local lock
-    (§4.2, §4.3).
+10. Make the Elixir worker cap configurable (§4.2). ~~Replace `:global.trans` with a node-local
+    lock.~~ **DONE** — `Lumis.Loader`, a Registry-named process per key (§4.3).
 11. Add conformance fixtures for locals/shadowing and multi-level injections before the
     `buildNestedEvents` rewrite lands (§5).
 12. Publish an npm deprecation for `@lumis-sh/lumis-native`, and state the native→WASM performance

@@ -20,7 +20,9 @@ defmodule Lumis.Languages do
   ## Where parsers come from
 
   Each is taken from the first place that has it: `$LUMIS_WASM_PATH/parsers`,
-  release-local `priv/wasm`, the user cache directory, then the CDN. Bytes are checked against the
+  release-local `priv/wasm`, the user cache directory, then the CDN. Concurrent
+  requests for the same uncached language wait for the first rather than each
+  downloading it. Bytes are checked against the
   size and digest their package declares before use, and anything that fails is
   discarded rather than trusted, so a corrupted cache repairs itself.
 
@@ -222,7 +224,7 @@ defmodule Lumis.Languages do
     if Native.has_language(entry.id) do
       :ok
     else
-      :global.trans({__MODULE__, entry.id}, fn -> load_once(entry, package_json) end)
+      Lumis.Loader.run({:load, entry.id}, fn -> load_once(entry, package_json) end)
     end
   end
 
@@ -495,6 +497,6 @@ defmodule Lumis.Languages do
   end
 
   defp claim(entry, operation) do
-    :global.trans({{__MODULE__, :cache, entry.package_name, entry.version}, self()}, operation)
+    Lumis.Loader.run({:cache, entry.package_name, entry.version}, operation)
   end
 end
