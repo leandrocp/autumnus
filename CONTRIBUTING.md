@@ -394,9 +394,7 @@ release-local `priv/wasm`. Local and benchmark execution should provide both
 `language.json` and its matching parser so queries and parser bytes remain
 atomic.
 
-The `wasm-release` workflow publishes packages automatically. It detects which parsers still need publishing with `scripts/wasm-needed.py` and builds and publishes them in parallel.
-
-That script computes `definitionHash` in Python because the detect job has no Rust toolchain, so the same hash exists twice. `mise run test-definition-hash` diffs `dev definition-hash` against `python3 scripts/wasm-needed.py --hashes` across every parser, and `rust.yml` runs it. Change one implementation and that check fails until the other matches.
+The `wasm-release` workflow publishes packages automatically. It detects which parsers still need publishing with `mise run wasm-publish-needed`, which compares each published package's `definitionHash` against the one `crates/dev` computes from `languages.toml` and the processed queries, then builds and publishes the rest in parallel.
 
 ## Themes
 

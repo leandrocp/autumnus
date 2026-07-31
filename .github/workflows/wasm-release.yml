@@ -18,7 +18,7 @@ on:
       - "crates/dev/**"
       - "crates/lumis/vendored_parsers/**"
       - "queries/**"
-      - "scripts/wasm-needed.py"
+      - "crates/dev/**"
       - "packages/javascript/lumis/bundles/**"
       - "packages/javascript/lumis/langs/**"
       - "packages/javascript/lumis/src/generated/**"
@@ -55,6 +55,15 @@ jobs:
         with:
           node-version: "lts/*"
           registry-url: "https://registry.npmjs.org"
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust build artifacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "crates/dev -> target"
+          shared-key: wasm-release-detect
 
       - name: Determine which parsers need publishing
         id: needed

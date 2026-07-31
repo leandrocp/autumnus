@@ -54,3 +54,4 @@ jobs:
           components: rustfmt
       - run: cargo fmt --manifest-path crates/dev/Cargo.toml --check
       - run: cargo fmt --manifest-path crates/autumnus/Cargo.toml --check
+      - run: cargo test --manifest-path crates/dev/Cargo.toml --no-default-features

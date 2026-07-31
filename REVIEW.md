@@ -949,13 +949,12 @@ user-facing. Worth documenting the whole chain in one place.
 - **`definitionHash` is inert at runtime.** It is validated non-empty and used in an Elixir dedupe
   key, but never compared to anything. It exists to drive `wasm-needed.py`; either verify it
   client-side or drop it from the runtime schema so it isn't mistaken for an integrity control.
-- ~~**Two implementations of the same hash.**~~ **Pinned.** `mise run test-definition-hash` diffs
-  `dev definition-hash` against `wasm-needed.py --hashes` over every parser, and `rust.yml` runs it.
-  Original finding: `scripts/wasm-needed.py:definition_hash` and
-  `crates/dev/src/main.rs:language_definition_hash` must agree byte-for-byte or CI either
-  republishes forever or never. They currently agree, with one divergence: for a `brackets.scm`
-  that exists but is empty, Rust substitutes the default query and Python does not. Add a test that
-  pins both against a fixture.
+- ~~**Two implementations of the same hash.**~~ **Removed.** `scripts/wasm-needed.py` is ported into
+  `crates/dev` as the `wasm-needed` subcommand, reusing `language_definition_hash`,
+  `packaged_languages` and `parse_npm_versions_json`. The Python file is deleted, so the hash exists
+  once. The release `detect` job gains a Rust toolchain and a build cache, which is the cost of
+  removing the duplicate rather than testing around it. Verified identical over all 113 parsers
+  before deleting.
 - ~~**`formatVersion: 3` is hardcoded in three places.**~~ Down to two after §4.9, both release-time
   and neither read by a client: `templates/wasm/package.json.template` and
   `PACKAGE_FORMAT_VERSION` in `scripts/wasm-needed.py`. They still have to agree — bumping the
@@ -1209,7 +1208,7 @@ Before release:
     delta in the PR body, changelog, and `benchmarks/README.md` (§4.6).
 13. Cache `tree_sitter::Language` and `HighlightConfiguration` in the CLI `Registry`; honour
     `LUMIS_WASM_CACHE_DIR` there (§4.4).
-14. ~~Pin `wasm-needed.py`'s `definitionHash` to `crates/dev`'s.~~ **DONE** — `mise run test-definition-hash` diffs both implementations over all 113 parsers, in `rust.yml`.
+14. ~~Pin `wasm-needed.py`'s `definitionHash` to `crates/dev`'s.~~ **DONE, better** — the script is ported into `crates/dev` as `wasm-needed`, so there is one implementation and nothing to pin.
 
 Cleanup:
 

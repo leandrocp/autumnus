@@ -198,22 +198,6 @@ echo "Compiling every query against its pinned grammar..."
 LUMIS_QUERY_COVERAGE=complete pnpm --filter @lumis-sh/lumis exec vitest run test/query-compile.test.ts
 '''
 
-[tasks.'test-definition-hash']
-description = "Pin the Python definitionHash to the Rust one"
-run = '''
-#!/usr/bin/env bash
-set -euo pipefail
-rust=$(cargo run -q --manifest-path crates/dev/Cargo.toml --no-default-features -- definition-hash)
-python=$(python3 scripts/wasm-needed.py --hashes)
-count=$(printf '%s\n' "$rust" | wc -l | tr -d ' ')
-if [ "$count" -lt 100 ]; then
-    echo "only $count parsers hashed; languages.toml did not load" >&2
-    exit 1
-fi
-diff <(printf '%s\n' "$rust") <(printf '%s\n' "$python")
-echo "definitionHash agrees for $count parsers"
-'''
-
 [tasks.'test-conformance']
 description = "Run conformance tests across all packages"
 run = '''
@@ -655,7 +639,8 @@ arg "[force]" default="false"
 run = '''
 #!/usr/bin/env bash
 set -euo pipefail
-python3 scripts/wasm-needed.py "${usage_parser:-}" "${usage_force?}"
+cargo run -q --manifest-path crates/dev/Cargo.toml --no-default-features -- \
+    wasm-needed "${usage_parser:-}" "${usage_force?}"
 '''
 
 [tasks.'wasm-publish-prepare']

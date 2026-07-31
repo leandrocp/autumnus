@@ -20,7 +20,7 @@ use thiserror::Error;
 /// here and must be shipped as a new field instead.
 ///
 /// The published npm `package.json` still carries `lumis.formatVersion`. That one is
-/// release tooling (`scripts/wasm-needed.py`) deciding whether an artifact needs
+/// release tooling (`dev wasm-needed`) deciding whether an artifact needs
 /// republishing; no client reads it.
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]

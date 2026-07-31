@@ -36,7 +36,7 @@ Shared behavior belongs in one Rust crate that every runtime consumes. A second 
 - Before writing logic in JavaScript, Elixir, the CLI, or a build script, check whether `crates/lumis-core`, `crates/lumis`, `crates/lumis-wasm-runtime`, or `crates/lumis-build` already owns it, and extend that crate instead.
 - Prefer moving work to generation time in Rust over duplicating it per runtime. Query preprocessing is the model: `crates/lumis-build` converts Lua patterns once, and every runtime then reads byte-identical `.scm` files.
 - When a runtime genuinely cannot call into Rust, such as the browser, the Rust crate still defines the behavior, and the port must be covered by a test that pins both against the same input.
-- Two copies of the same algorithm require a test that pins them to each other. `scripts/wasm-needed.py` and `crates/dev` computing the same `definitionHash` is exactly the kind of pair that needs one.
+- Two copies of the same algorithm require a test that pins them to each other, and deleting one copy is better still. `definitionHash` was computed in both `crates/dev` and a Python release script until the script was ported into `crates/dev`; "the CI job has no Rust toolchain" is a workflow line to add, not a reason to reimplement.
 
 ### Route work through `mise`
 

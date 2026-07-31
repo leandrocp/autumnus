@@ -75,8 +75,13 @@ enum Commands {
     StageWasm {
         name: String,
     },
-    /// Print `<wasm_name>\t<definitionHash>` for every parser.
-    DefinitionHash,
+    /// List parsers whose published package no longer matches languages.toml.
+    WasmNeeded {
+        #[arg(default_value = "")]
+        filter: String,
+        #[arg(default_value = "false")]
+        force: String,
+    },
     WasmMeta {
         name: String,
     },
@@ -134,7 +139,7 @@ fn main() -> Result<()> {
         Commands::GenLanguageCatalog { check } => gen_language_catalog(check),
         Commands::BuildWasm { name } => build_wasm(&name),
         Commands::StageWasm { name } => stage_wasm(&name),
-        Commands::DefinitionHash => definition_hash(),
+        Commands::WasmNeeded { filter, force } => wasm_needed(&filter, &force),
         Commands::WasmMeta { name } => wasm_meta(&name),
         Commands::RenderConformance {
             source,
@@ -2873,24 +2878,138 @@ fn wasm_meta(name: &str) -> Result<()> {
     Ok(())
 }
 
-/// The same value `scripts/wasm-needed.py` computes, so the two can be diffed.
-fn definition_hash() -> Result<()> {
+const PACKAGE_FORMAT_VERSION: u32 = 3;
+
+/// The `major.minor` series published packages are versioned within.
+///
+/// Read from the `mise.toml` pin rather than the installed CLI, so this answers
+/// the same question on a machine that has no tree-sitter installed. A pin that
+/// is not a version — `latest`, which `mise use tree-sitter@latest` writes —
+/// is rejected, because it silently produced package versions like `latest.1`.
+fn supported_tree_sitter_series() -> Result<String> {
+    let mise: toml::Value =
+        toml::from_str(&fs::read_to_string("mise.toml").context("could not read mise.toml")?)?;
+    let pin = mise
+        .get("tools")
+        .and_then(|tools| tools.get("tree-sitter"))
+        .context("mise.toml does not pin tree-sitter")?;
+    let pin = pin
+        .as_str()
+        .map(ToOwned::to_owned)
+        .unwrap_or_else(|| pin.to_string());
+    let pin = pin.trim_matches(['^', '~', '=', 'v', '"']);
+    let parts: Vec<&str> = pin.split('.').collect();
+    if parts.len() < 2
+        || !parts[..2]
+            .iter()
+            .all(|p| p.chars().all(|c| c.is_ascii_digit()))
+    {
+        bail!(
+            "mise.toml pins tree-sitter = {pin:?}; it must be a version such as \"0.26\" so the \
+             published package series can be derived from it"
+        );
+    }
+    Ok(format!("{}.{}", parts[0], parts[1]))
+}
+
+/// Whether some published version in the current series already carries this
+/// exact language definition.
+fn published_for_definition(pkg: &str, versions: &[String], expected: &str, series: &str) -> bool {
+    let prefix = format!("{series}.");
+    for version in versions.iter().filter(|v| v.starts_with(&prefix)) {
+        let Ok(output) = Command::new("npm")
+            .args(["view", &format!("{pkg}@{version}"), "lumis", "--json"])
+            .output()
+        else {
+            continue;
+        };
+        if !output.status.success() {
+            continue;
+        }
+        let Ok(meta) = serde_json::from_slice::<Value>(&output.stdout) else {
+            continue;
+        };
+        if definition_matches(&meta, expected, series) {
+            return true;
+        }
+    }
+    false
+}
+
+/// Packages published before the v3 format carry no `definitionHash`, so they
+/// never match and are always rebuilt.
+fn definition_matches(meta: &Value, expected: &str, series: &str) -> bool {
+    meta.get("definitionHash").and_then(Value::as_str) == Some(expected)
+        && meta.get("treeSitter").and_then(Value::as_str) == Some(series)
+        && meta.get("formatVersion").and_then(Value::as_u64) == Some(PACKAGE_FORMAT_VERSION.into())
+}
+
+/// Parsers whose published package no longer matches `languages.toml`.
+fn wasm_needed(filter: &str, force: &str) -> Result<()> {
+    let series = supported_tree_sitter_series()?;
     let toml = read_languages_toml()?;
-    let mut seen = BTreeMap::new();
+    let force = matches!(
+        force.to_ascii_lowercase().as_str(),
+        "1" | "true" | "yes" | "on"
+    );
+    let wanted: HashSet<&str> = filter
+        .split(',')
+        .map(str::trim)
+        .filter(|part| !part.is_empty())
+        .collect();
+
+    let mut revisions: BTreeMap<String, &str> = BTreeMap::new();
     for (id, info) in &toml.parsers {
         let default_name = format!("tree-sitter-{id}");
-        let wasm_name = info
-            .wasm_name
-            .as_deref()
-            .unwrap_or(&default_name)
-            .to_string();
-        seen.entry(wasm_name).or_insert_with(Vec::new).push(id);
+        let wasm_name = info.wasm_name.as_deref().unwrap_or(&default_name);
+        let revision = info.rev.as_deref().unwrap_or("");
+        if let Some(previous) = revisions.insert(wasm_name.to_string(), revision) {
+            if previous != revision {
+                bail!("{wasm_name} is shared by different revisions: {previous} and {revision}");
+            }
+        }
     }
-    for wasm_name in seen.keys() {
+
+    let mut needed = Vec::new();
+    let mut seen = HashSet::new();
+    for (id, info) in &toml.parsers {
+        let default_name = format!("tree-sitter-{id}");
+        let wasm_name = info.wasm_name.as_deref().unwrap_or(&default_name);
+        if !wanted.is_empty() && !wanted.contains(id.as_str()) && !wanted.contains(wasm_name) {
+            continue;
+        }
+        if !seen.insert(wasm_name.to_string()) {
+            continue;
+        }
+        if force {
+            needed.push(wasm_name.to_string());
+            continue;
+        }
+
+        let pkg = format!("@lumis-sh/wasm-{}", wasm_package_suffix(wasm_name));
+        let output = Command::new("npm")
+            .args(["view", &pkg, "versions", "--json"])
+            .output();
+        let versions = match &output {
+            Ok(output) if output.status.success() => {
+                parse_npm_versions_json(&String::from_utf8_lossy(&output.stdout))
+                    .unwrap_or_default()
+            }
+            _ => {
+                needed.push(wasm_name.to_string());
+                continue;
+            }
+        };
+
         let languages = packaged_languages(&toml, wasm_name)?;
-        let hash = language_definition_hash(&toml, wasm_name, &languages)?;
-        println!("{wasm_name}\t{hash}");
+        let expected = language_definition_hash(&toml, wasm_name, &languages)?;
+        if !published_for_definition(&pkg, &versions, &expected, &series) {
+            eprintln!("Need to publish {pkg} for {expected}");
+            needed.push(wasm_name.to_string());
+        }
     }
+
+    println!("{}", needed.join(" "));
     Ok(())
 }
 
@@ -2901,6 +3020,39 @@ fn wasm_package_suffix(wasm_name: &str) -> &str {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn published(hash: &str) -> Value {
+        serde_json::json!({
+            "definitionHash": hash,
+            "treeSitter": "0.26",
+            "formatVersion": 3,
+        })
+    }
+
+    #[test]
+    fn a_matching_package_needs_no_republish() {
+        assert!(definition_matches(&published("abc"), "abc", "0.26"));
+    }
+
+    #[test]
+    fn every_field_must_agree() {
+        assert!(!definition_matches(&published("abc"), "def", "0.26"));
+        assert!(!definition_matches(&published("abc"), "abc", "0.27"));
+        let mut old_format = published("abc");
+        old_format["formatVersion"] = serde_json::json!(2);
+        assert!(!definition_matches(&old_format, "abc", "0.26"));
+    }
+
+    #[test]
+    fn a_package_predating_the_format_never_matches() {
+        // What npm actually returns for the published catalog today.
+        let legacy = serde_json::json!({
+            "language": "json",
+            "parser": "tree-sitter-json",
+            "treeSitter": "0.26",
+        });
+        assert!(!definition_matches(&legacy, "abc", "0.26"));
+    }
     use std::path::Path;
     use std::sync::atomic::{AtomicU64, Ordering};
     use std::time::{SystemTime, UNIX_EPOCH};
