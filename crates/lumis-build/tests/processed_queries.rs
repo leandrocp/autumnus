@@ -1,7 +1,7 @@
 //! Corpus checks over every generated query in `queries/processed`.
 //!
 //! These tests deliberately fail instead of skipping. The regressions in
-//! `CLAUDE_REVIEW.md` §1 reached the branch because the only per-language query
+//! `REVIEW.md` §1 reached the branch because the only per-language query
 //! check silently skipped two thirds of the catalog, so nothing here is allowed to
 //! opt out.
 //!
@@ -295,7 +295,7 @@ fn every_upstream_lua_pattern_is_translatable() {
 
 #[test]
 fn documented_defects_stay_fixed() {
-    // CLAUDE_REVIEW.md §1.1: a leading `-` is a literal dash, not Lua's lazy `*`.
+    // REVIEW.md §1.1: a leading `-` is a literal dash, not Lua's lazy `*`.
     let clojure = convert_lua_pattern("^-%>[^>].*").expect("clojure constructor pattern");
     assert_eq!(clojure, "^->[^>][\\s\\S]*");
     regex::bytes::Regex::new(&clojure).expect("must compile");
@@ -303,7 +303,7 @@ fn documented_defects_stay_fixed() {
         .unwrap()
         .is_match(b"->foo"));
 
-    // CLAUDE_REVIEW.md §1.2: `[^*]` must stay a negated class.
+    // REVIEW.md §1.2: `[^*]` must stay a negated class.
     let documentation =
         convert_lua_pattern("^/[*][*][^*].*[*]/$").expect("documentation comment pattern");
     let documentation = regex::bytes::Regex::new(&documentation).expect("must compile");
@@ -313,12 +313,12 @@ fn documented_defects_stay_fixed() {
     assert!(documentation.is_match(b"/**x hi */"));
     assert!(!documentation.is_match(b"/*** hi */"));
 
-    // CLAUDE_REVIEW.md §1.3: `[%u]` must not become the nested `[[A-Z]]`.
+    // REVIEW.md §1.3: `[%u]` must not become the nested `[[A-Z]]`.
     let upper = convert_lua_pattern("^[%u]").expect("uppercase pattern");
     assert_eq!(upper, "^[A-Z]");
     assert!(!has_nested_character_class(&upper));
 
-    // CLAUDE_REVIEW.md §1.4: Lua's `.` crosses newlines and `$` only anchors last.
+    // REVIEW.md §1.4: Lua's `.` crosses newlines and `$` only anchors last.
     let multiline = regex::bytes::Regex::new(
         &convert_lua_pattern("^/[*][*][^*].*[*]/$").expect("documentation comment pattern"),
     )

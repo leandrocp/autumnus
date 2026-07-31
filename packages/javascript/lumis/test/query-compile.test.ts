@@ -4,7 +4,7 @@
  * This test must never report success while checking nothing. It previously
  * `return`ed from the test body whenever a parser was missing or at the wrong
  * revision, which silently skipped 77 of 115 languages and let an invalid regex
- * reach the branch (see CLAUDE_REVIEW.md §1 and §2).
+ * reach the branch (see REVIEW.md §1 and §2).
  *
  * Coverage is now enforced two ways:
  *

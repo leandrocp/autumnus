@@ -159,7 +159,7 @@ describe("processed query predicates", () => {
 
 describe("documented defects stay fixed", () => {
   it("compiles the Clojure threading-macro predicate", () => {
-    // CLAUDE_REVIEW.md §1.1: this was `^*?\>[\^>].*`, which RegExp rejects with
+    // REVIEW.md §1.1: this was `^*?\>[\^>].*`, which RegExp rejects with
     // "Nothing to repeat", so the whole Clojure query failed to compile.
     const clojure = predicates.find(
       ({ file, regex }) => file.startsWith("clojure/") && regex.includes("->"),
@@ -170,7 +170,7 @@ describe("documented defects stay fixed", () => {
   });
 
   it("keeps the documentation-comment predicate negated", () => {
-    // CLAUDE_REVIEW.md §1.2: `[^*]` had become `[\^*]`, inverting the predicate.
+    // REVIEW.md §1.2: `[^*]` had become `[\^*]`, inverting the predicate.
     const documentation = predicates.find(
       ({ file, regex }) => file === "javascript/highlights.scm" && regex.includes("[*][*]"),
     );
@@ -178,12 +178,12 @@ describe("documented defects stay fixed", () => {
     const compiled = new RegExp(documentation!.regex);
     expect(compiled.test("/** hi */")).toBe(true);
     expect(compiled.test("/*** hi */")).toBe(false);
-    // CLAUDE_REVIEW.md §1.4: Lua's `.` crosses newlines, regex `.` does not.
+    // REVIEW.md §1.4: Lua's `.` crosses newlines, regex `.` does not.
     expect(compiled.test("/**\n * hi\n */")).toBe(true);
   });
 
   it("matches uppercase types the same way Rust does", () => {
-    // CLAUDE_REVIEW.md §1.3: `^[[A-Z]]` matched in Rust and never in JavaScript.
+    // REVIEW.md §1.3: `^[[A-Z]]` matched in Rust and never in JavaScript.
     const cpp = predicates.find(
       ({ file, regex }) => file === "cpp/highlights.scm" && regex === "^[A-Z]",
     );
@@ -192,7 +192,7 @@ describe("documented defects stay fixed", () => {
   });
 
   it("treats a mid-pattern dollar sign as a literal", () => {
-    // CLAUDE_REVIEW.md §1.4: `^$env:` anchored at end and could never match.
+    // REVIEW.md §1.4: `^$env:` anchored at end and could never match.
     const powershell = predicates.find(
       ({ file, regex }) => file === "powershell/highlights.scm" && regex.includes("env:"),
     );

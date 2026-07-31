@@ -95,7 +95,7 @@ Lumis queries are fetched from <https://github.com/nvim-treesitter/nvim-treesitt
 
 ### A test that cannot fail is worse than no test
 
-A test that skips silently reports the same green as a test that verified something. That is how the defects in `CLAUDE_REVIEW.md` §1 shipped: the only per-language query check `return`ed early for 77 of 115 languages.
+A test that skips silently reports the same green as a test that verified something. That is how the defects in `REVIEW.md` §1 shipped: the only per-language query check `return`ed early for 77 of 115 languages.
 
 - Never `return` or `continue` out of a test body to handle a missing prerequisite. Fail, or record the gap in a checked-in file that the test enforces.
 - A gap that genuinely cannot be closed yet gets an explicit waiver that can only shrink. The test must fail on an undeclared gap **and** on a waiver entry that is no longer needed. `packages/javascript/lumis/test/unverified-parsers.json` is the pattern.

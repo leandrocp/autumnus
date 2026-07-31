@@ -1134,6 +1134,27 @@ held against `store.rs` by `test/cache-timing.test.ts`, which parses the Rust
 unpinned is the cache *state machine* -- the order of source, cache and network
 lookups -- not the constants it runs on.
 
+---
+
+## 10. Review follow-ups
+
+Raised during review, tracked here and fixed one at a time.
+
+| # | Item | State |
+| --- | --- | --- |
+| 10.1 | Query shards: 8 → 10 | open |
+| 10.2 | `rust.yml` pins `toolchain: '1.91'`; should be `stable` | open |
+| 10.3 | Emscripten version read with an inline `python3 -c tomllib` hack; mise should report it | open |
+| 10.4 | `wasmparser` is not on the latest version | open |
+| 10.5 | `store.rs` uses a single CDN with no fallback | open |
+| 10.6 | `LUMIS_WASM_OFFLINE` adds an env var; reduce instead | open |
+| 10.7 | `write_atomic` is hand-rolled; check for a crate or std equivalent | open |
+| 10.8 | `webgpu_compute_reduce.html` is vendored; the demo should not need it in-repo | open |
+| 10.9 | Elixir has two sources of truth for which languages to cache | open |
+| 10.10 | `Lumis.LanguageLoader` → `Lumis.Languages`, a proper context with a public `load` | open |
+
+---
+
 ## 9. Pre-merge checklist
 
 1. ~~Fix `-` → `*?` (Lua quantifier position), `[^...]` negation, and `[%u]` nesting in
