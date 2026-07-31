@@ -55,6 +55,18 @@ const unverified = JSON.parse(
 ) as { reason: string; languages: string[] };
 const waived = new Set(unverified.languages);
 
+/**
+ * Parsers too large to build on a GitHub-hosted runner. Excluded from the
+ * complete-coverage requirement because the runner is killed rather than the
+ * build failing, so there is nothing for the shard to report.
+ */
+const oversized: { reason: string; parsers: string[] } = JSON.parse(
+  readFileSync(new URL("./oversized-parsers.json", import.meta.url), "utf8"),
+);
+const oversizedParsers = new Set(oversized.parsers);
+const parserName = (id: string, entry: { wasm_name?: string }) =>
+  entry.wasm_name ?? `tree-sitter-${id}`;
+
 function wasmName(id: string, entry: ParserEntry): string {
   return entry.wasm_name ?? `tree-sitter-${id}`;
 }
@@ -190,9 +202,9 @@ describe("processed queries compile against their pinned grammar", () => {
   it.runIf(requireCompleteCoverage)("verifies every selected language", () => {
     // `mise run test-queries` builds every parser first, so a gap here means a
     // parser build failed rather than a package lagging behind.
-    const missing = unavailable.map(
-      ([id]) => `${id}: ${(resolved.get(id) as { unavailable: string }).unavailable}`,
-    );
+    const missing = unavailable
+      .filter(([id, entry]) => !oversizedParsers.has(parserName(id, entry)))
+      .map(([id]) => `${id}: ${(resolved.get(id) as { unavailable: string }).unavailable}`);
     expect(missing, "every parser should have been built from languages.toml").toEqual([]);
   });
 
@@ -254,5 +266,29 @@ describe("unverified parser waiver", () => {
   it("names only real languages", () => {
     const known = new Set(parsers.map(([id]) => id));
     expect(unverified.languages.filter((id) => !known.has(id))).toEqual([]);
+  });
+});
+
+describe("oversized parser waiver", () => {
+  it("names only real parsers", () => {
+    const known = new Set(parsers.map(([id, entry]) => parserName(id, entry)));
+    expect(
+      oversized.parsers.filter((name) => !known.has(name)),
+      "these are not parsers in languages.toml",
+    ).toEqual([]);
+  });
+
+  it("stays small", () => {
+    // A growing list means CI is verifying less and less. Keep it exceptional.
+    expect(oversized.parsers.length).toBeLessThanOrEqual(5);
+  });
+
+  it("excuses nothing that the published package already verifies", () => {
+    // If the package matches the pinned revision there is no build to skip.
+    const pointless = parsers
+      .filter(([id, entry]) => oversizedParsers.has(parserName(id, entry)))
+      .filter(([id]) => "path" in published.get(id)!)
+      .map(([id]) => id);
+    expect(pointless, "these need no build, remove them from the list").toEqual([]);
   });
 });
