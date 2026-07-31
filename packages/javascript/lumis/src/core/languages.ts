@@ -596,6 +596,11 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
       if (inFlight) return inFlight;
 
       const load = (async () => {
+        const staged = await runtime.readStagedAsset?.(
+          `${packageName.replace(/^@lumis-sh\/wasm-/, "")}.language.json`,
+        );
+        if (staged) return parseLanguagePackage(staged, packageName);
+
         const installed = await this.loadInstalledLanguagePackage(packageName);
         if (installed) return installed;
 
@@ -663,6 +668,11 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
     }
 
     private async fetchResolvedWasm(language: string, ref: WasmRef): Promise<Uint8Array> {
+      const staged = await runtime.readStagedAsset?.(
+        `${ref.name}-${ref.version}-${ref.sha256}.wasm`,
+      );
+      if (staged) return staged;
+
       const installed = await this.loadInstalledPackage(ref);
       if (installed) return installed;
 

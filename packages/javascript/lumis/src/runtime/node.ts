@@ -51,6 +51,18 @@ export const nodeRuntime: RuntimeEnvironment = {
     return withWasmCacheLock(key, operation);
   },
 
+  async readStagedAsset(filename) {
+    const root = process.env.LUMIS_WASM_PATH;
+    if (!root) return undefined;
+    const { join } = await import(nodePath);
+    const { readFile } = await import(nodeFsPromises);
+    try {
+      return new Uint8Array(await readFile(join(root, "parsers", filename)));
+    } catch {
+      return undefined;
+    }
+  },
+
   async readResolvedWasmFromDisk(source) {
     const { isAbsolute } = await import(nodePath);
 

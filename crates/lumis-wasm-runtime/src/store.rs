@@ -103,10 +103,10 @@ impl LanguageStore {
         }
     }
 
-    /// Read `LUMIS_WASM_SOURCE_DIR`, the pre-staged asset directory.
+    /// Read `LUMIS_WASM_PATH`, a directory of pre-staged language packages.
     #[must_use]
     pub fn source_dir_from_env() -> Option<PathBuf> {
-        std::env::var_os("LUMIS_WASM_SOURCE_DIR").map(PathBuf::from)
+        std::env::var_os("LUMIS_WASM_PATH").map(PathBuf::from)
     }
 
     #[must_use]

@@ -19,8 +19,8 @@ defmodule Lumis.Languages do
 
   ## Where parsers come from
 
-  Each is taken from the first place that has it: release-local `priv/wasm`,
-  then the user cache directory, then the CDN. Bytes are checked against the
+  Each is taken from the first place that has it: `$LUMIS_WASM_PATH/parsers`,
+  release-local `priv/wasm`, the user cache directory, then the CDN. Bytes are checked against the
   size and digest their package declares before use, and anything that fails is
   discarded rather than trusted, so a corrupted cache repairs itself.
 
@@ -103,10 +103,19 @@ defmodule Lumis.Languages do
   defp package_json(handle, true), do: resolve_package(handle)
 
   defp package_json(handle, false) do
-    case read_valid_package(bundled_package_file(handle), handle, false) do
+    case first_valid_package(local_package_files(handle), handle) do
       {:ok, package_json} -> {:ok, package_json}
       :miss -> cached_package(handle)
     end
+  end
+
+  defp first_valid_package(paths, handle) do
+    Enum.find_value(paths, :miss, fn path ->
+      case read_valid_package(path, handle, false) do
+        {:ok, package_json} -> {:ok, package_json}
+        :miss -> nil
+      end
+    end)
   end
 
   defp cached_package(handle) do
@@ -273,10 +282,19 @@ defmodule Lumis.Languages do
   end
 
   defp cached_or_resolved(entry) do
-    case read_verified(bundled_parser_file(entry), entry, false) do
+    case first_verified_parser(local_parser_files(entry), entry) do
       {:ok, bytes} -> {:ok, bytes}
       :miss -> cached_or_downloaded(entry)
     end
+  end
+
+  defp first_verified_parser(paths, entry) do
+    Enum.find_value(paths, :miss, fn path ->
+      case read_verified(path, entry, false) do
+        {:ok, bytes} -> {:ok, bytes}
+        :miss -> nil
+      end
+    end)
   end
 
   defp cached_or_downloaded(entry) do
@@ -452,11 +470,23 @@ defmodule Lumis.Languages do
   defp nif_ok({:error, reason}), do: {:error, reason}
 
   defp parser_cache_file(entry), do: Path.join(cache_dir(), parser_filename(entry))
-  defp bundled_package_file(handle), do: Path.join(bundled_dir(), package_filename(handle))
-  defp bundled_parser_file(entry), do: Path.join(bundled_dir(), parser_filename(entry))
+
+  defp local_package_files(handle),
+    do: Enum.map(local_dirs(), &Path.join(&1, package_filename(handle)))
+
+  defp local_parser_files(entry),
+    do: Enum.map(local_dirs(), &Path.join(&1, parser_filename(entry)))
+
+  defp local_dirs do
+    case System.get_env("LUMIS_WASM_PATH") do
+      nil -> [bundled_dir()]
+      path -> [Path.join(path, "parsers"), bundled_dir()]
+    end
+  end
 
   defp package_filename(package) do
-    "#{Path.basename(package.package_name)}.language.json"
+    suffix = String.replace_prefix(package.package_name, "@lumis-sh/wasm-", "")
+    "#{suffix}.language.json"
   end
 
   defp cache_dir do

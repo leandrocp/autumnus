@@ -194,8 +194,8 @@ Notes:
 - `parsers cache --all` caches all supported parsers.
 - `--force` replaces valid cached parsers instead of reusing them.
 - Injection highlighting works best when related parsers are already cached.
-- `LUMIS_WASM_SOURCE_DIR` points to a local language-package tree containing
-  `parsers/<package>.language.json` and the matching parser files.
+- `LUMIS_WASM_PATH` points to a directory of pre-staged language packages,
+  read before the cache. Every runtime honours it; see `CONTRIBUTING.md`.
 
 ## Data directory
 

@@ -435,7 +435,7 @@ do not need a grammar, so they are checked for every language in both runtimes:
 - languages are enumerated from `languages.toml`, not from the installed bundle, so a language
   cannot disappear from the run
 - parsers resolve from the installed package first, so the check exercises the artifact that ships,
-  and fall back to `$LUMIS_WASM_SOURCE_DIR/parsers/` then `tmp/wasms/` when the package is missing
+  and fall back to `$LUMIS_WASM_PATH/parsers/` then `tmp/wasms/` when the package is missing
   or lagging. A locally built parser needs no revision check because it was built from the pinned
   revision
 - a compile error fails the run with the language and query kind named
@@ -875,23 +875,23 @@ Same inputs, different language package, therefore different queries and differe
 
 | Runtime | Order |
 | --- | --- |
-| CLI (`registry.rs:290-324`) | **fresh disk cache** → `LUMIS_WASM_SOURCE_DIR` → network |
+| CLI (`registry.rs:290-324`) | **fresh disk cache** → `LUMIS_WASM_PATH` → network |
 | JavaScript (`languages.ts:521-562`) | **installed npm package** → disk cache → network |
 | Elixir (`language_loader.ex:60-65`) | **bundled `priv/wasm`** → user cache → network |
 
 In the CLI, `ensure_package` returns the cached copy when `fresh || offline()` *before* reaching
 `fetch_package`, and `fetch_package` is the only place `source_asset()` — i.e.
-`LUMIS_WASM_SOURCE_DIR` — is consulted. So for the CLI a warm cache beats the explicitly configured
+`LUMIS_WASM_PATH` — is consulted. So for the CLI a warm cache beats the explicitly configured
 local source; for JS and Elixir the local copy always wins.
 
 Consequences:
 
 - A user who pins a local parser set and also has a warm cache gets one package in Node and Elixir
   and a different one in the CLI, inside the same hour-long TTL window.
-- `LUMIS_WASM_SOURCE_DIR` reads as an override but behaves as a fallback. The CLI's own conformance
+- `LUMIS_WASM_PATH` reads as an override but behaves as a fallback. The CLI's own conformance
   suite only works because `--data-dir` points at an empty temp directory.
 
-**Fixed.** The CLI now consults `LUMIS_WASM_SOURCE_DIR` before the cache, matching Node and Elixir.
+**Fixed.** The CLI now consults `LUMIS_WASM_PATH` before the cache, matching Node and Elixir.
 
 The order was never actually in dispute — `ARCHITECTURE.md:122` already documents it:
 
@@ -905,7 +905,7 @@ conforming to the docs rather than a new decision. No doc change was needed.
 Changes in `crates/lumis-cli/src/registry.rs`:
 
 - `ensure_package` calls a new `read_source_package` before the cache-freshness short-circuit.
-- `LUMIS_WASM_SOURCE_DIR` is now resolved once into a `Registry::source_dir` field instead of being
+- `LUMIS_WASM_PATH` is now resolved once into a `Registry::source_dir` field instead of being
   re-read from the environment on every call, so the precedence is testable and cannot change
   mid-process.
 - `fetch_package` and `read_source_package` share one `parse_package` helper, which removes the
@@ -921,7 +921,7 @@ Pinned by `configured_local_source_outranks_a_fresh_cache`. Proven by injection:
 cache-before-source order makes it fail with "the configured local source must win over a fresh
 cache".
 
-`LUMIS_WASM_SOURCE_DIR` turns out to be undocumented in `docs/`, `CONTRIBUTING.md`, and the CLI
+`LUMIS_WASM_PATH` turns out to be undocumented in `docs/`, `CONTRIBUTING.md`, and the CLI
 README — it appears only in code, tests, and workflows. That limits the blast radius of the old
 behaviour, but the Node "installed package" and Elixir `priv/wasm` paths it now matches *are*
 user-facing. Worth documenting the whole chain in one place.
@@ -1167,7 +1167,7 @@ The other two stay:
 | Variable | Read by | What breaks without it |
 | --- | --- | --- |
 | `LUMIS_WASM_CACHE_DIR` | Rust, JavaScript, Elixir | nowhere to persist |
-| `LUMIS_WASM_SOURCE_DIR` | Rust only | `lumis parsers cache --directory` prefetches *into another directory*, so it needs somewhere to read from that is not the cache it is writing. Removing it fails `cache_parsers_to_temp_dir` and `cache_parsers_force_replaces_existing_file`. |
+| `LUMIS_WASM_PATH` | Rust only | `lumis parsers cache --directory` prefetches *into another directory*, so it needs somewhere to read from that is not the cache it is writing. Removing it fails `cache_parsers_to_temp_dir` and `cache_parsers_force_replaces_existing_file`. |
 
 `SOURCE_DIR` looked redundant, since it shares an on-disk layout with the cache and the CLI tests copy fixtures into the data directory anyway. Conformance does pass without it. The two prefetch tests do not, and that is a real user-facing command rather than a test artifact.
 

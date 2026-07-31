@@ -21,7 +21,7 @@
  *
  * 1. the installed `@lumis-sh/wasm-*` package, when its recorded parser revision
  *    matches `languages.toml`
- * 2. `$LUMIS_WASM_SOURCE_DIR/parsers/<name>.wasm`
+ * 2. `$LUMIS_WASM_PATH/parsers/<name>.wasm`
  * 3. `tmp/wasms/<name>.wasm`, the output of `mise run wasm-build`
  *
  * `mise run test-queries` builds only the parsers whose packages cannot verify
@@ -137,7 +137,7 @@ function resolveParser(id: string, entry: ParserEntry): { path: string } | { una
 
   const parser = wasmName(id, entry);
 
-  const sourceDirectory = process.env.LUMIS_WASM_SOURCE_DIR;
+  const sourceDirectory = process.env.LUMIS_WASM_PATH;
   if (sourceDirectory) {
     const prepared = join(sourceDirectory, "parsers", `${parser}.wasm`);
     if (existsSync(prepared)) return { path: prepared };

@@ -11,7 +11,7 @@ fn cmd() -> assert_cmd::Command {
         "LUMIS_CONFIG",
         common::source_fixtures_dir().join("missing-config.toml"),
     );
-    command.env("LUMIS_WASM_SOURCE_DIR", common::language_fixtures_dir());
+    command.env("LUMIS_WASM_PATH", common::language_fixtures_dir());
     command
 }
 

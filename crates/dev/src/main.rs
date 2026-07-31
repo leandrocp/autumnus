@@ -2698,7 +2698,20 @@ fn stage_wasm(name: &str) -> Result<()> {
         .replace("{definition_hash}", &definition_hash);
     fs::write(format!("{out}/package.json"), pkg)?;
 
+    let local = "tmp/wasm-local/parsers";
+    fs::create_dir_all(local)?;
+    let suffix = wasm_package_suffix(wasm_name);
+    fs::copy(
+        format!("{out}/language.json"),
+        format!("{local}/{suffix}.language.json"),
+    )?;
+    fs::copy(
+        &wasm_file,
+        format!("{local}/{wasm_name}-{npm_version}-{wasm_sha256}.wasm"),
+    )?;
+
     println!("Staged in {out}");
+    println!("Runtime-ready copy in {local}");
     Ok(())
 }
 
