@@ -52,21 +52,26 @@ describe("withWasmCacheLock", () => {
     expect(Date.now() - started).toBeLessThan(1_000);
   });
 
-  it("serializes two callers in the same process", async () => {
-    const order: string[] = [];
-    const slow = withWasmCacheLock(
-      "shared",
-      async () => {
-        order.push("first-in");
-        await new Promise((resolve) => setTimeout(resolve, 50));
-        order.push("first-out");
-      },
-      directory,
-    );
-    const fast = withWasmCacheLock("shared", async () => void order.push("second"), directory);
+  it("never runs two callers at once", async () => {
+    // Which caller wins the lock is a race, so assert the guarantee that is
+    // actually made: the critical sections do not overlap.
+    let running = 0;
+    let overlapped = false;
 
-    await Promise.all([slow, fast]);
-    expect(order).toEqual(["first-in", "first-out", "second"]);
+    const hold = (ms: number) =>
+      withWasmCacheLock(
+        "shared",
+        async () => {
+          running += 1;
+          if (running > 1) overlapped = true;
+          await new Promise((resolve) => setTimeout(resolve, ms));
+          running -= 1;
+        },
+        directory,
+      );
+
+    await Promise.all([hold(50), hold(0), hold(10)]);
+    expect(overlapped).toBe(false);
   });
 });
 
