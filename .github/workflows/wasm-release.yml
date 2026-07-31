@@ -5,7 +5,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  EMSDK_VERSION: "5.0.3"
+  EMSDK_VERSION: "4.0.15"
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 permissions:
