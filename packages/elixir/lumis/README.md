@@ -55,7 +55,7 @@ it names. Parser and query updates do not require a new Elixir package release.
 Load expected languages before serving requests:
 
 ```elixir
-:ok = Lumis.load_languages(["elixir", "html", "javascript", "css"])
+:ok = Lumis.Languages.load(["elixir", "html", "javascript", "css"])
 ```
 
 For OTP releases, cache the exact parsers in the release-local `priv/wasm`

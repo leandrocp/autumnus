@@ -1,63 +1,78 @@
 defmodule Mix.Tasks.Lumis.Parsers.Cache do
   @moduledoc """
   Caches exact, integrity-checked Lumis parser WASMs for an OTP release.
+
+  Which languages to cache comes from configuration, so a release and a
+  development machine cannot disagree:
+
+      config :lumis, bundled_languages: ~w(elixir html javascript css)
+
+  Use `:all` to cache every language in the catalog:
+
+      config :lumis, bundled_languages: :all
+
+  This task only fetches what that configuration names. It takes no language
+  arguments, so there is one place to look when a release ships the wrong set.
+
+      mix lumis.parsers.cache
+      mix lumis.parsers.cache --force
+      mix lumis.parsers.cache --output priv/wasm
+
+  Parsers are verified against the size and SHA-256 in their language package
+  before being written, and an existing valid file is left alone unless
+  `--force` is given.
   """
 
   use Mix.Task
 
   @shortdoc "Caches exact Lumis parser WASMs for an OTP release"
 
-  @switches [all: :boolean, force: :boolean, output: :string]
+  @switches [force: :boolean, output: :string]
   @aliases [o: :output]
 
   @impl Mix.Task
   def run(arguments) do
-    {options, languages} = parse_arguments(arguments)
-    selected = select_languages(options, languages)
-    validate_selection!(selected)
-    cache(selected, options)
+    options = parse_arguments(arguments)
+
+    options
+    |> cache_options()
+    |> cache(configured_languages())
   end
 
   defp parse_arguments(arguments) do
     case OptionParser.parse(arguments, strict: @switches, aliases: @aliases) do
-      {options, languages, []} -> {options, languages}
-      {_options, _languages, invalid} -> Mix.raise("invalid options: #{inspect(invalid)}")
+      {options, [], []} ->
+        options
+
+      {_options, [_ | _] = languages, _} ->
+        Mix.raise("""
+        this task takes no language arguments, it caches what is configured:
+
+            config :lumis, bundled_languages: #{inspect(languages)}
+        """)
+
+      {_options, _languages, invalid} ->
+        Mix.raise("invalid options: #{inspect(invalid)}")
     end
   end
 
-  defp select_languages(options, languages) do
-    cond do
-      options[:all] && languages != [] ->
-        Mix.raise("pass language names or --all, not both")
-
-      options[:all] ->
-        Enum.map(Lumis.Native.language_package_refs(), & &1.id)
-
-      languages != [] ->
-        languages
-
-      true ->
-        Application.get_env(:lumis, :bundled_languages, [])
+  defp configured_languages do
+    case Application.get_env(:lumis, :bundled_languages) do
+      :all -> Enum.map(Lumis.Native.language_package_refs(), & &1.id)
+      [_ | _] = languages -> Enum.map(languages, &to_string/1)
+      _ -> Mix.raise("configure :lumis, :bundled_languages with a list of languages or :all")
     end
   end
 
-  defp validate_selection!([]) do
-    Mix.raise("pass language names, --all, or configure :lumis, :bundled_languages")
+  defp cache_options(options) do
+    [force: options[:force] || false]
+    |> maybe_put(:directory, options[:output])
   end
 
-  defp validate_selection!(_languages), do: :ok
-
-  defp cache(languages, options) do
-    cache_options =
-      [force: options[:force] || false]
-      |> maybe_put(:directory, options[:output])
-
-    case Lumis.LanguageLoader.cache(languages, cache_options) do
-      {:ok, paths} ->
-        Enum.each(paths, fn path -> Mix.shell().info(path) end)
-
-      {:error, reason} ->
-        Mix.raise(reason)
+  defp cache(cache_options, languages) do
+    case Lumis.Languages.cache(languages, cache_options) do
+      {:ok, paths} -> Enum.each(paths, fn path -> Mix.shell().info(path) end)
+      {:error, reason} -> Mix.raise(reason)
     end
   end
 

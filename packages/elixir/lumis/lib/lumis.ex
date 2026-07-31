@@ -712,25 +712,6 @@ defmodule Lumis do
   def available_languages, do: Lumis.Native.available_languages()
 
   @doc """
-  Loads and verifies one language parser.
-
-  Parsers are cached by exact package version and SHA-256 digest. Calling this
-  function is optional because `highlight/2` loads missing languages
-  automatically.
-  """
-  @spec load_language(String.t()) :: :ok | {:error, term()}
-  def load_language(language), do: Lumis.LanguageLoader.load(language)
-
-  @doc """
-  Loads and verifies a list of language parsers.
-
-  This is useful during application startup. Use `mix lumis.parsers.cache`
-  at build time when the release must run without network access.
-  """
-  @spec load_languages([String.t() | atom()]) :: :ok | {:error, term()}
-  def load_languages(languages), do: Lumis.LanguageLoader.load_languages(languages)
-
-  @doc """
   Returns the list of all available themes.
 
   Use `Lumis.Theme.get/1` to get the actual theme struct.
@@ -880,7 +861,7 @@ defmodule Lumis do
             error: "could not load parser WASM for language '#{language}'"
         end
 
-        case Lumis.LanguageLoader.load(language) do
+        case Lumis.Languages.load(language) do
           :ok ->
             highlight_with_language_loading(source, options, MapSet.put(attempted, language))
 

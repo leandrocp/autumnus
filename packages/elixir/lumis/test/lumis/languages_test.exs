@@ -1,11 +1,11 @@
-defmodule Lumis.LanguageLoaderTest do
+defmodule Lumis.LanguagesTest do
   use ExUnit.Case, async: false
 
   import ExUnit.CaptureIO
 
   test "treats plaintext names as parser-free languages" do
     for name <- ~w(plaintext text txt plain) do
-      assert :ok = Lumis.load_language(name)
+      assert :ok = Lumis.Languages.load(name)
     end
   end
 
@@ -36,13 +36,13 @@ defmodule Lumis.LanguageLoaderTest do
 
   test "loads an exact parser and reuses it" do
     refute Lumis.Native.has_language("diff")
-    assert :ok = Lumis.load_language("diff")
+    assert :ok = Lumis.Languages.load("diff")
     assert Lumis.Native.has_language("diff")
-    assert :ok = Lumis.load_language("diff")
+    assert :ok = Lumis.Languages.load("diff")
   end
 
   test "loads multiple languages" do
-    assert :ok = Lumis.load_languages([:plaintext, "text"])
+    assert :ok = Lumis.Languages.load([:plaintext, "text"])
   end
 
   test "replaces a corrupt cache entry" do
@@ -52,7 +52,7 @@ defmodule Lumis.LanguageLoaderTest do
     File.mkdir_p!(cache_dir)
     File.write!(cache_file, "corrupt")
 
-    assert :ok = Lumis.load_language("dockerfile")
+    assert :ok = Lumis.Languages.load("dockerfile")
     assert byte_size(File.read!(cache_file)) == entry.size
   end
 
@@ -61,7 +61,7 @@ defmodule Lumis.LanguageLoaderTest do
     bundle_dir = Application.fetch_env!(:lumis, :wasm_bundle_dir)
 
     assert {:ok, [path]} =
-             Lumis.LanguageLoader.cache(["xml", "xml"], directory: bundle_dir)
+             Lumis.Languages.cache(["xml", "xml"], directory: bundle_dir)
 
     assert File.exists?(path)
 
@@ -76,7 +76,7 @@ defmodule Lumis.LanguageLoaderTest do
       end
     end)
 
-    assert :ok = Lumis.load_language("xml")
+    assert :ok = Lumis.Languages.load("xml")
     assert Lumis.Native.has_language("xml")
   end
 
@@ -102,12 +102,12 @@ defmodule Lumis.LanguageLoaderTest do
     end)
 
     first =
-      Task.async(fn -> Lumis.LanguageLoader.cache(["comment"], directory: output_dir) end)
+      Task.async(fn -> Lumis.Languages.cache(["comment"], directory: output_dir) end)
 
     assert_receive {:resolver_started, resolver_process}
 
     second =
-      Task.async(fn -> Lumis.LanguageLoader.cache(["comment"], directory: output_dir) end)
+      Task.async(fn -> Lumis.Languages.cache(["comment"], directory: output_dir) end)
 
     refute_receive {:resolver_started, _other_process}, 100
     send(resolver_process, :release)
@@ -122,7 +122,9 @@ defmodule Lumis.LanguageLoaderTest do
     output =
       capture_io(fn ->
         Mix.Task.reenable("lumis.parsers.cache")
-        Mix.Task.run("lumis.parsers.cache", ["comment", "--output", output_dir])
+        Application.put_env(:lumis, :bundled_languages, ["comment"])
+        on_exit(fn -> Application.delete_env(:lumis, :bundled_languages) end)
+        Mix.Task.run("lumis.parsers.cache", ["--output", output_dir])
       end)
 
     assert output =~ "tree-sitter-comment-"
@@ -153,7 +155,7 @@ defmodule Lumis.LanguageLoaderTest do
       end
     end)
 
-    assert {:error, message} = Lumis.load_language("c")
+    assert {:error, message} = Lumis.Languages.load("c")
     assert message =~ "offline mode is enabled"
   end
 

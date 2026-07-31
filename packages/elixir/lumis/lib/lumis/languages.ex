@@ -1,12 +1,68 @@
-defmodule Lumis.LanguageLoader do
-  @moduledoc false
+defmodule Lumis.Languages do
+  @moduledoc """
+  Loads and caches Tree-sitter parsers.
+
+  A language is a parser WASM plus the queries that drive highlighting, released
+  together as a `@lumis-sh/wasm-*` package with its size and SHA-256. Nothing
+  here needs calling for normal use: `Lumis.highlight/2` loads what a document
+  needs on demand.
+
+  Reach for it in two situations.
+
+  Load ahead of the first request, so latency does not land on a user:
+
+      :ok = Lumis.Languages.load(["elixir", "html"])
+
+  Or cache parsers at build time, for a release that must run without network
+  access. `mix lumis.parsers.cache` is the usual entry point and reads
+  `config :lumis, :bundled_languages`.
+
+  ## Where parsers come from
+
+  Each is taken from the first place that has it: release-local `priv/wasm`,
+  then the user cache directory, then the CDN. Bytes are checked against the
+  size and digest their package declares before use, and anything that fails is
+  discarded rather than trusted, so a corrupted cache repairs itself.
+
+  ## Configuration
+
+    * `:bundled_languages` — languages `mix lumis.parsers.cache` should fetch,
+      a list or `:all`
+    * `:wasm_bundle_dir` — where release-local parsers live, default
+      `priv/wasm`
+    * `:wasm_offline` — refuse network access; also settable with
+      `LUMIS_WASM_OFFLINE=1`
+    * `:wasm_resolver` and `:language_package_resolver` — replace where parsers
+      and package metadata are fetched from
+  """
 
   alias Lumis.Native
 
   @package_ttl_seconds 3_600
   @plaintext_names ~w(plaintext text txt plain)
 
-  def load(name) when name in @plaintext_names, do: :ok
+  @doc """
+  Loads one language or a list of them, verifying each parser before use.
+
+  Already-loaded languages return immediately, so this is safe to call on every
+  request or at startup. Loading stops at the first failure and returns it.
+
+      :ok = Lumis.Languages.load("elixir")
+      :ok = Lumis.Languages.load(["elixir", :html])
+  """
+  @spec load(String.t() | atom() | [String.t() | atom()]) :: :ok | {:error, term()}
+  def load(names) when is_list(names) do
+    Enum.reduce_while(names, :ok, fn name, :ok ->
+      case load(name) do
+        :ok -> {:cont, :ok}
+        {:error, reason} -> {:halt, {:error, reason}}
+      end
+    end)
+  end
+
+  def load(name) when is_atom(name), do: load(Atom.to_string(name))
+
+  def load(name) when is_binary(name) and name in @plaintext_names, do: :ok
 
   def load(name) when is_binary(name) do
     with {:ok, entry, package_json} <- language_entry(name, false) do
@@ -14,14 +70,7 @@ defmodule Lumis.LanguageLoader do
     end
   end
 
-  def load_languages(names) when is_list(names) do
-    Enum.reduce_while(names, :ok, fn name, :ok ->
-      case load(to_string(name)) do
-        :ok -> {:cont, :ok}
-        {:error, reason} -> {:halt, {:error, reason}}
-      end
-    end)
-  end
+  @doc false
 
   def cache(names, options \\ []) when is_list(names) and is_list(options) do
     directory = Keyword.get(options, :directory, bundled_dir())
@@ -108,16 +157,20 @@ defmodule Lumis.LanguageLoader do
   defp read_valid_package(path, handle, remove_invalid?) do
     case File.read(path) do
       {:ok, package_json} ->
-        case Native.resolve_language_package(handle.id, package_json) do
-          {:ok, _entry} ->
-            {:ok, package_json}
-
-          {:error, _reason} ->
-            if remove_invalid?, do: File.rm(path)
-            :miss
-        end
+        validate_package_file(path, handle, package_json, remove_invalid?)
 
       {:error, _reason} ->
+        :miss
+    end
+  end
+
+  defp validate_package_file(path, handle, package_json, remove_invalid?) do
+    case Native.resolve_language_package(handle.id, package_json) do
+      {:ok, _entry} ->
+        {:ok, package_json}
+
+      {:error, _reason} ->
+        if remove_invalid?, do: File.rm(path)
         :miss
     end
   end
@@ -160,15 +213,18 @@ defmodule Lumis.LanguageLoader do
     if Native.has_language(entry.id) do
       :ok
     else
-      :global.trans({__MODULE__, entry.id}, fn ->
-        if Native.has_language(entry.id) do
-          :ok
-        else
-          with {:ok, bytes} <- cached_or_resolved(entry) do
-            Native.load_language(entry.id, package_json, bytes)
-          end
-        end
-      end)
+      :global.trans({__MODULE__, entry.id}, fn -> load_once(entry, package_json) end)
+    end
+  end
+
+  # Re-checked inside the claim: another process may have loaded it while we waited.
+  defp load_once(entry, package_json) do
+    if Native.has_language(entry.id) do
+      :ok
+    else
+      with {:ok, bytes} <- cached_or_resolved(entry) do
+        Native.load_language(entry.id, package_json, bytes)
+      end
     end
   end
 
@@ -258,17 +314,22 @@ defmodule Lumis.LanguageLoader do
         resolve_parser_and_write(entry, destination)
 
       true ->
-        case read_verified(destination, entry, true) do
-          {:ok, _bytes} ->
-            {:ok, destination}
+        cache_parser_if_missing(entry, destination)
+    end
+  end
 
-          :miss ->
-            if offline?() do
-              parser_offline_error(entry)
-            else
-              resolve_parser_and_write(entry, destination)
-            end
-        end
+  defp cache_parser_if_missing(entry, destination) do
+    case read_verified(destination, entry, true) do
+      {:ok, _bytes} -> {:ok, destination}
+      :miss -> resolve_or_offline_error(entry, destination)
+    end
+  end
+
+  defp resolve_or_offline_error(entry, destination) do
+    if offline?() do
+      parser_offline_error(entry)
+    else
+      resolve_parser_and_write(entry, destination)
     end
   end
 

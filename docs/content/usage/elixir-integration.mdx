@@ -56,22 +56,23 @@ matching queries and integrity metadata, then cached in the platform user cache
 directory. It first checks release-local `priv/wasm`, so production releases do
 not need a runtime download.
 
-```bash title="Build an offline-ready release"
-MIX_ENV=prod mix do compile, lumis.parsers.cache elixir html javascript css, release
-```
-
-Alternatively, configure the build-time set and run the task without arguments:
+Configure which languages a release bundles, then run the task. Configuration is
+the only place the set is defined, so a release cannot disagree with development:
 
 ```elixir title="config/prod.exs"
 config :lumis, bundled_languages: ~w(elixir html javascript css)
 ```
 
-```bash
+```bash title="Build an offline-ready release"
 MIX_ENV=prod mix do compile, lumis.parsers.cache, release
 ```
 
+Use `bundled_languages: :all` to bundle the whole catalog, `--force` to replace
+files that already verify, and `--output` to write somewhere other than
+`priv/wasm`.
+
 ```elixir
-:ok = Lumis.load_languages(["elixir", "html", "javascript", "css"])
+:ok = Lumis.Languages.load(["elixir", "html", "javascript", "css"])
 ```
 
 Load expected languages during application startup when request latency

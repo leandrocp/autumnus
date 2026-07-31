@@ -23,7 +23,7 @@ Mix.install(
 Code.require_file("runtime.exs", __DIR__)
 Lumis.BenchmarkRuntime.configure(repo_dir)
 
-:ok = Lumis.load_languages(["html", "comment", "css", "json", "javascript"])
+:ok = Lumis.Languages.load(["html", "comment", "css", "json", "javascript"])
 source = File.read!(Path.join(generated_dir, "assets/webgpu_compute_reduce.html"))
 
 output =

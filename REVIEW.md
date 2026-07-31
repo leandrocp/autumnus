@@ -1150,8 +1150,8 @@ Raised during review, tracked here and fixed one at a time.
 | 10.6 | `LUMIS_WASM_OFFLINE` adds an env var; reduce instead | **Won't fix, with evidence** — all three wasm env vars are load-bearing; see below |
 | 10.7 | `write_atomic` is hand-rolled; check for a crate or std equivalent | **DONE** — `tempfile::NamedTempFile::persist`, 40 lines → 22 |
 | 10.8 | `webgpu_compute_reduce.html` is vendored; the demo should not need it in-repo | **DONE** — all three demos read the vendored copy; MIT notice added |
-| 10.9 | Elixir has two sources of truth for which languages to cache | open |
-| 10.10 | `Lumis.LanguageLoader` → `Lumis.Languages`, a proper context with a public `load` | open |
+| 10.9 | Elixir has two sources of truth for which languages to cache | **DONE** — the task reads :bundled_languages only |
+| 10.10 | `Lumis.LanguageLoader` → `Lumis.Languages`, a proper context with a public `load` | **DONE** — Lumis.Languages with a public load/1 |
 
 ### 10.6 — why the three wasm env vars all stay
 

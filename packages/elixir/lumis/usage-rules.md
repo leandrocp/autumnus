@@ -98,7 +98,7 @@ Then load the languages an application expects so Wasmtime compilation
 happens during startup:
 
 ```elixir
-:ok = Lumis.load_languages(["elixir", "html", "javascript", "css"])
+:ok = Lumis.Languages.load(["elixir", "html", "javascript", "css"])
 ```
 
 The runtime checks release-local `priv/wasm`, then the persistent user cache,

@@ -19,7 +19,7 @@ defmodule LumisDemoLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    :ok = Lumis.load_languages(["html", "css", "json", "javascript"])
+    :ok = Lumis.Languages.load(["html", "css", "json", "javascript"])
     source = load_source()
 
     highlighted =
