@@ -188,7 +188,7 @@ application starts:
 
 ```bash
 npx lumis-wasm-cache javascript html css --output ./wasm-cache
-LUMIS_WASM_CACHE_DIR=./wasm-cache LUMIS_WASM_OFFLINE=1 node app.mjs
+LUMIS_WASM_CACHE_DIR=./wasm-cache node app.mjs
 ```
 
 The equivalent API is available from `@lumis-sh/lumis/cache`:
@@ -202,8 +202,8 @@ await cacheLanguages(['javascript', 'html', 'css'], {
 ```
 
 Both paths cache the current language package and verify its exact parser size
-plus SHA-256 before writing. `LUMIS_WASM_OFFLINE=1` turns missing metadata or
-parser bytes into an error instead of a network request.
+plus SHA-256 before writing. A cached parser is served without a network
+request, so caching every language a deployment needs makes it self-contained.
 
 :::note Edge is not supported yet
 The portable JavaScript runtime uses `web-tree-sitter`, but Edge runtimes are not supported yet because of an upstream Tree-sitter limitation: [tree-sitter/tree-sitter#2160](https://github.com/tree-sitter/tree-sitter/issues/2160).

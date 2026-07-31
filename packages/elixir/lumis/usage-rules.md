@@ -103,8 +103,7 @@ happens during startup:
 
 The runtime checks release-local `priv/wasm`, then the persistent user cache,
 then the network. Use `LUMIS_WASM_CACHE_DIR` to override both parser and
-compiled-module cache roots and `LUMIS_WASM_OFFLINE=1` to reject missing
-parsers.
+compiled-module cache roots.
 
 ## Formatters
 

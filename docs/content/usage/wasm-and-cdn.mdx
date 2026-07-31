@@ -65,8 +65,7 @@ installed or deployment-local language package
   -> exact-version parser fallback
 ```
 
-Set `LUMIS_WASM_CACHE_DIR` to override the Node cache. Set
-`LUMIS_WASM_OFFLINE=1` to prohibit metadata and parser network fallback.
+Set `LUMIS_WASM_CACHE_DIR` to override the Node cache.
 
 If a matching npm parser package is installed, such as `@lumis-sh/wasm-elixir`, Node can load that package directly before falling back to the resolver URL.
 
@@ -74,7 +73,7 @@ If a matching npm parser package is installed, such as `@lumis-sh/wasm-elixir`, 
 
 ```bash
 npx lumis-wasm-cache rust javascript elixir --output ./wasm-cache
-LUMIS_WASM_CACHE_DIR=./wasm-cache LUMIS_WASM_OFFLINE=1 node app.mjs
+LUMIS_WASM_CACHE_DIR=./wasm-cache node app.mjs
 ```
 
 Use `--all` to prepare every parser. The command and the

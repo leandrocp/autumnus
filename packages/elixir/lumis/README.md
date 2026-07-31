@@ -70,8 +70,7 @@ Missing metadata resolves to the current language package; missing parser bytes
 resolve to its exact CDN URL. Wasmtime also persists compiled modules, so a
 later VM start does not have to compile the same parser again.
 
-Set `LUMIS_WASM_CACHE_DIR` to override the cache location and
-`LUMIS_WASM_OFFLINE=1` to reject uncached language packages or parsers. Custom
+Set `LUMIS_WASM_CACHE_DIR` to override the cache location. Custom
 resolvers can return bytes, a local file, or a URL:
 
 ```elixir

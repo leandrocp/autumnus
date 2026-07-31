@@ -182,17 +182,28 @@ export const DEFAULT_LANGUAGE_PACKAGE_RESOLVER: LanguagePackageResolver = (packa
 /** Only used with the default resolver; a custom resolver names one location. */
 async function fetchFromCdns(primary: string, isDefault: boolean): Promise<Response> {
   const urls = isDefault ? CDNS.map((base) => primary.replace(CDNS[0], base)) : [primary];
-  const failures: string[] = [];
+  const failures: { host: string; reason: string }[] = [];
   for (const url of urls) {
+    const host = new URL(url).host;
     try {
       const response = await fetch(url);
       if (response.ok) return response;
-      failures.push(`${url}: ${response.status} ${response.statusText}`);
+      failures.push({ host, reason: `HTTP ${response.status} ${response.statusText}`.trim() });
     } catch (error) {
-      failures.push(`${url}: ${error instanceof Error ? error.message : String(error)}`);
+      failures.push({ host, reason: error instanceof Error ? error.message : String(error) });
     }
   }
-  throw new Error(failures.join("; "));
+  throw new Error(describeFailures(failures));
+}
+
+/** Every mirror serving the same 404 is one fact, not two, so say it once. */
+function describeFailures(failures: { host: string; reason: string }[]): string {
+  const hosts = failures.map(({ host }) => host).join(", ");
+  const first = failures[0]?.reason;
+  if (first !== undefined && failures.every(({ reason }) => reason === first)) {
+    return `${first} (tried ${hosts})`;
+  }
+  return failures.map(({ host, reason }) => `${host}: ${reason}`).join("; ");
 }
 
 const HIGHLIGHT_NAMES_SET = new Set(HIGHLIGHT_NAMES);
@@ -573,7 +584,7 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
         href,
         this.languagePackageResolver === DEFAULT_LANGUAGE_PACKAGE_RESOLVER,
       ).catch((error: Error) => {
-        throw new Error(`Failed to fetch language package ${packageName}: ${error.message}`);
+        throw new Error(`could not download language package ${packageName}: ${error.message}`);
       });
       return parseLanguagePackage(new Uint8Array(await response.arrayBuffer()), packageName);
     }
@@ -589,14 +600,8 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
         if (installed) return installed;
 
         const cached = await this.readCachedLanguagePackage(packageName);
-        const networkEnabled = runtime.networkFallbackEnabled?.() !== false;
-        if (cached && (!networkEnabled || Date.now() - cached.checkedAt < PACKAGE_CACHE_TTL_MS)) {
+        if (cached && Date.now() - cached.checkedAt < PACKAGE_CACHE_TTL_MS) {
           return cached.package;
-        }
-        if (!networkEnabled) {
-          throw new Error(
-            `Language package "${packageName}" is not cached and offline mode is enabled`,
-          );
         }
 
         try {
@@ -664,13 +669,12 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
       const url = this.resolver(language, ref);
       const diskData = await runtime.readResolvedWasmFromDisk(url);
       if (diskData) return diskData;
-      if (runtime.networkFallbackEnabled?.() === false) {
-        throw new Error(`Parser WASM for "${language}" is not cached and offline mode is enabled`);
-      }
       const href = typeof url === "string" ? url : url.href;
       const response = await fetchFromCdns(href, this.resolver === DEFAULT_RESOLVER).catch(
         (error: Error) => {
-          throw new Error(`Failed to fetch WASM for ${ref.name}@${ref.version}: ${error.message}`);
+          throw new Error(
+            `could not download parser WASM ${ref.name}@${ref.version}: ${error.message}`,
+          );
         },
       );
       return new Uint8Array(await response.arrayBuffer());

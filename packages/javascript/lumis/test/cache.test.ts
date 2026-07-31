@@ -89,9 +89,7 @@ describe("cacheLanguages", () => {
     });
 
     const previousDirectory = process.env.LUMIS_WASM_CACHE_DIR;
-    const previousOffline = process.env.LUMIS_WASM_OFFLINE;
     process.env.LUMIS_WASM_CACHE_DIR = directory;
-    process.env.LUMIS_WASM_OFFLINE = "1";
     vi.resetModules();
     const network = vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("network disabled"));
 
@@ -105,8 +103,6 @@ describe("cacheLanguages", () => {
     } finally {
       if (previousDirectory === undefined) delete process.env.LUMIS_WASM_CACHE_DIR;
       else process.env.LUMIS_WASM_CACHE_DIR = previousDirectory;
-      if (previousOffline === undefined) delete process.env.LUMIS_WASM_OFFLINE;
-      else process.env.LUMIS_WASM_OFFLINE = previousOffline;
     }
   });
 });

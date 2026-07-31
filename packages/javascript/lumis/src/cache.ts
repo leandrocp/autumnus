@@ -70,7 +70,7 @@ async function fetchWasm(language: Language, ref: WasmRef, resolver: WasmResolve
   const response = await fetch(typeof source === "string" ? source : source.href);
   if (!response.ok) {
     throw new Error(
-      `Failed to fetch WASM for ${ref.name}@${ref.version}: ${response.status} ${response.statusText}`,
+      `could not download parser WASM ${ref.name}@${ref.version}: HTTP ${response.status} ${response.statusText}`,
     );
   }
   return verifyWasm(ref, new Uint8Array(await response.arrayBuffer()));
@@ -94,7 +94,7 @@ async function fetchLanguagePackage(
   const response = await fetch(typeof source === "string" ? source : source.href);
   if (!response.ok) {
     throw new Error(
-      `Failed to fetch language package ${packageName}: ${response.status} ${response.statusText}`,
+      `could not download language package ${packageName}: HTTP ${response.status} ${response.statusText}`,
     );
   }
   return parseLanguagePackage(new Uint8Array(await response.arrayBuffer()), packageName);
@@ -103,8 +103,7 @@ async function fetchLanguagePackage(
 /**
  * Cache exact, integrity-pinned parser WASMs in a persistent directory.
  *
- * Point `LUMIS_WASM_CACHE_DIR` at the same directory in the deployed process
- * and set `LUMIS_WASM_OFFLINE=1` when network fallback must be disabled.
+ * Point `LUMIS_WASM_CACHE_DIR` at the same directory in the deployed process.
  */
 export async function cacheLanguages(
   names: Iterable<string>,

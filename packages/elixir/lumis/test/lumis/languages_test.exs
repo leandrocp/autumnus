@@ -56,7 +56,7 @@ defmodule Lumis.LanguagesTest do
     assert byte_size(File.read!(cache_file)) == entry.size
   end
 
-  test "caches release-local parsers and loads them offline" do
+  test "loads a release-local parser without resolving it again" do
     refute Lumis.Native.has_language("xml")
     bundle_dir = Application.fetch_env!(:lumis, :wasm_bundle_dir)
 
@@ -65,16 +65,12 @@ defmodule Lumis.LanguagesTest do
 
     assert File.exists?(path)
 
-    previous = Application.get_env(:lumis, :wasm_offline)
-    Application.put_env(:lumis, :wasm_offline, true)
+    # A resolver that always fails proves the parser came from bundle_dir.
+    previous = Application.fetch_env!(:lumis, :wasm_resolver)
 
-    on_exit(fn ->
-      if is_nil(previous) do
-        Application.delete_env(:lumis, :wasm_offline)
-      else
-        Application.put_env(:lumis, :wasm_offline, previous)
-      end
-    end)
+    Application.put_env(:lumis, :wasm_resolver, fn _entry -> {:error, "resolver must not run"} end)
+
+    on_exit(fn -> Application.put_env(:lumis, :wasm_resolver, previous) end)
 
     assert :ok = Lumis.Languages.load("xml")
     assert Lumis.Native.has_language("xml")
@@ -141,22 +137,6 @@ defmodule Lumis.LanguagesTest do
     assert html =~ "language-html"
     assert Lumis.Native.has_language("html")
     assert Lumis.Native.has_language("javascript")
-  end
-
-  test "offline mode rejects an uncached parser" do
-    previous = Application.get_env(:lumis, :wasm_offline)
-    Application.put_env(:lumis, :wasm_offline, true)
-
-    on_exit(fn ->
-      if is_nil(previous) do
-        Application.delete_env(:lumis, :wasm_offline)
-      else
-        Application.put_env(:lumis, :wasm_offline, previous)
-      end
-    end)
-
-    assert {:error, message} = Lumis.Languages.load("c")
-    assert message =~ "offline mode is enabled"
   end
 
   defp cache_filename(entry) do

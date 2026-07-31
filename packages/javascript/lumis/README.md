@@ -27,7 +27,7 @@ Prepare a deployment cache before starting the application:
 
 ```sh
 npx lumis-wasm-cache javascript html css --output ./wasm-cache
-LUMIS_WASM_CACHE_DIR=./wasm-cache LUMIS_WASM_OFFLINE=1 node app.mjs
+LUMIS_WASM_CACHE_DIR=./wasm-cache node app.mjs
 ```
 
 ## Quick Start
@@ -190,7 +190,7 @@ All three are equivalent at highlight time. The runtime resolves the language by
 - Parser bytes are checked against the package's expected size and SHA-256 digest.
 - In Node, package metadata and verified parser WASM are cached in the platform user cache directory. Set `LUMIS_WASM_CACHE_DIR` to override it.
 - In browsers, package metadata and verified parser WASM survive reloads and restarts through CacheStorage with an IndexedDB fallback.
-- Use `lumis-wasm-cache` or `cacheLanguages()` from `@lumis-sh/lumis/cache` during deployment, then set `LUMIS_WASM_OFFLINE=1` to prohibit network fallback.
+- Use `lumis-wasm-cache` or `cacheLanguages()` from `@lumis-sh/lumis/cache` during deployment so the deployed process serves every language from its cache.
 - A custom resolver remains available for self-hosted assets.
 
 ## Output Formats

@@ -83,10 +83,6 @@ export const nodeRuntime: RuntimeEnvironment = {
     }
   },
 
-  networkFallbackEnabled() {
-    return !["1", "true"].includes(process.env.LUMIS_WASM_OFFLINE?.toLowerCase() ?? "");
-  },
-
   async parserInitOptions() {
     return {
       wasmBinary: treeSitterWasmBinary,

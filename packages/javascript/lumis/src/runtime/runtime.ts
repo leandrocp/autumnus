@@ -8,7 +8,6 @@ export interface RuntimeEnvironment {
   writeFsCache(key: string, data: Uint8Array): Promise<void>;
   withFsCacheLock<T>(key: string, operation: () => Promise<T>): Promise<T>;
   readResolvedWasmFromDisk(source: string | URL): Promise<Uint8Array | undefined>;
-  networkFallbackEnabled?(): boolean;
   parserInitOptions?(): Promise<Record<string, unknown> | undefined>;
 }
 

@@ -31,10 +31,6 @@ const CDNS: [&str; 2] = ["https://cdn.jsdelivr.net/npm", "https://unpkg.com"];
 pub enum StoreError {
     #[error("unknown language '{0}'")]
     UnknownLanguage(String),
-    #[error("language package '{0}' is not cached and offline mode is enabled")]
-    OfflinePackage(String),
-    #[error("parser WASM for '{0}' is not cached and offline mode is enabled")]
-    OfflineParser(String),
     #[error("language package name mismatch: expected '{expected}', got '{actual}'")]
     PackageNameMismatch { expected: String, actual: String },
     #[error("language package is not UTF-8 JSON")]
@@ -47,8 +43,11 @@ pub enum StoreError {
         #[source]
         source: std::io::Error,
     },
-    #[error("could not fetch {url}: {message}")]
-    Fetch { url: String, message: String },
+    #[error("could not download {description}: {message}")]
+    Fetch {
+        description: String,
+        message: String,
+    },
     #[error(transparent)]
     Package(#[from] LanguagePackageError),
 }
@@ -69,7 +68,7 @@ pub trait Fetcher: Send + Sync {
     fn get(&self, url: &str) -> Result<Vec<u8>, String>;
 }
 
-/// A [`Fetcher`] that refuses every request, for offline hosts and tests.
+/// A [`Fetcher`] that refuses every request.
 pub struct NoNetwork;
 
 impl Fetcher for NoNetwork {
@@ -85,8 +84,6 @@ pub struct StoreConfig {
     /// Consulted before the cache, matching Node and Elixir, which prefer an
     /// installed package and release-local `priv/wasm` respectively.
     pub source_dir: Option<PathBuf>,
-    /// Refuse any network access.
-    pub offline: bool,
 }
 
 /// Resolves language packages and parser bytes, caching both on disk.
@@ -104,13 +101,6 @@ impl LanguageStore {
             fetcher,
             packages: Mutex::new(HashMap::new()),
         }
-    }
-
-    /// Read `LUMIS_WASM_OFFLINE`, the switch every runtime honours.
-    #[must_use]
-    pub fn offline_from_env() -> bool {
-        std::env::var("LUMIS_WASM_OFFLINE")
-            .is_ok_and(|value| matches!(value.to_ascii_lowercase().as_str(), "1" | "true"))
     }
 
     /// Read `LUMIS_WASM_SOURCE_DIR`, the pre-staged asset directory.
@@ -140,13 +130,10 @@ impl LanguageStore {
             }
 
             let cached = read_package_file(&path, package_name);
-            if cache_is_fresh(&path, PACKAGE_CACHE_TTL) || self.config.offline {
+            if cache_is_fresh(&path, PACKAGE_CACHE_TTL) {
                 if let Some(package) = cached.as_ref() {
                     return Ok(package.clone());
                 }
-            }
-            if self.config.offline {
-                return Err(StoreError::OfflinePackage(package_name.to_string()));
             }
 
             match self.fetch_package(package_name, &path) {
@@ -240,18 +227,17 @@ impl LanguageStore {
     }
 
     /// Fetch `path` from the first CDN that serves it.
-    fn fetch_from_cdn(&self, path: &str) -> Result<Vec<u8>, StoreError> {
+    fn fetch_from_cdn(&self, path: &str, description: &str) -> Result<Vec<u8>, StoreError> {
         let mut failures = Vec::new();
         for base in CDNS {
-            let url = format!("{base}/{path}");
-            match self.fetcher.get(&url) {
+            match self.fetcher.get(&format!("{base}/{path}")) {
                 Ok(bytes) => return Ok(bytes),
-                Err(message) => failures.push(format!("{url}: {message}")),
+                Err(message) => failures.push((host_of(base), message)),
             }
         }
         Err(StoreError::Fetch {
-            url: path.to_string(),
-            message: failures.join("; "),
+            description: description.to_string(),
+            message: describe_failures(&failures),
         })
     }
 
@@ -297,7 +283,10 @@ impl LanguageStore {
         package_name: &str,
         path: &Path,
     ) -> Result<LanguagePackage, StoreError> {
-        let bytes = self.fetch_from_cdn(&format!("{package_name}@latest/language.json"))?;
+        let bytes = self.fetch_from_cdn(
+            &format!("{package_name}@latest/language.json"),
+            &format!("language package {package_name}"),
+        )?;
         let package = parse_package(&bytes, package_name)?;
         write_atomic(path, &bytes)?;
         Ok(package)
@@ -308,15 +297,40 @@ impl LanguageStore {
             std::fs::read(&source).map_err(|error| {
                 StoreError::io(format!("could not read {}", source.display()), error)
             })?
-        } else if self.config.offline {
-            return Err(StoreError::OfflineParser(package.parser.name.clone()));
         } else {
-            self.fetch_from_cdn(&parser_path(package))?
+            self.fetch_from_cdn(
+                &parser_path(package),
+                &format!("parser WASM {}@{}", package.package_name, package.version),
+            )?
         };
         package.verify_wasm(&bytes)?;
         write_atomic(path, &bytes)?;
         Ok(bytes)
     }
+}
+
+/// `https://cdn.jsdelivr.net/npm` becomes `cdn.jsdelivr.net`.
+fn host_of(base: &str) -> &str {
+    base.trim_start_matches("https://")
+        .trim_start_matches("http://")
+        .split('/')
+        .next()
+        .unwrap_or(base)
+}
+
+/// Every mirror serving the same 404 is one fact, not two, so say it once.
+fn describe_failures(failures: &[(&str, String)]) -> String {
+    let hosts: Vec<&str> = failures.iter().map(|(host, _)| *host).collect();
+    if let Some((_, first)) = failures.first() {
+        if failures.iter().all(|(_, message)| message == first) {
+            return format!("{first} (tried {})", hosts.join(", "));
+        }
+    }
+    failures
+        .iter()
+        .map(|(host, message)| format!("{host}: {message}"))
+        .collect::<Vec<_>>()
+        .join("; ")
 }
 
 /// `@lumis-sh/wasm-rust` becomes `rust`, so cache filenames stay readable.
@@ -468,12 +482,11 @@ mod tests {
         }
     }
 
-    fn make(dir: &Path, fetcher: Box<dyn Fetcher>, offline: bool) -> LanguageStore {
+    fn make(dir: &Path, fetcher: Box<dyn Fetcher>) -> LanguageStore {
         LanguageStore::new(
             StoreConfig {
                 cache_dir: dir.to_path_buf(),
                 source_dir: None,
-                offline,
             },
             fetcher,
         )
@@ -486,7 +499,7 @@ mod tests {
             bytes: WASM.to_vec(),
             tried: Mutex::new(Vec::new()),
         });
-        let store = make(dir.path(), fetcher, false);
+        let store = make(dir.path(), fetcher);
 
         assert_eq!(store.parser(&package()).unwrap(), WASM);
     }
@@ -494,11 +507,21 @@ mod tests {
     #[test]
     fn every_cdn_failure_is_reported_together() {
         let dir = tempdir();
-        let store = make(dir.path(), Box::new(NoNetwork), false);
+        let store = make(dir.path(), Box::new(NoNetwork));
         let error = store.parser(&package()).unwrap_err().to_string();
         for base in CDNS {
-            assert!(error.contains(base), "{base} missing from: {error}");
+            let host = host_of(base);
+            assert!(error.contains(host), "{host} missing from: {error}");
         }
+        assert!(
+            error.contains("parser WASM @lumis-sh/wasm-json@1.2.3"),
+            "the error must name what failed: {error}"
+        );
+        assert_eq!(
+            error.matches("network access is disabled").count(),
+            1,
+            "one shared reason must be stated once: {error}"
+        );
     }
 
     #[test]
@@ -524,7 +547,7 @@ mod tests {
     #[test]
     fn a_corrupt_cached_parser_is_deleted_rather_than_returned() {
         let dir = tempdir();
-        let store = make(dir.path(), Box::new(NoNetwork), true);
+        let store = make(dir.path(), Box::new(NoNetwork));
         let package = package();
         let path = store.parser_path(&package);
         write_atomic(&path, b"corrupt").unwrap();
@@ -536,19 +559,19 @@ mod tests {
     #[test]
     fn a_verified_parser_round_trips() {
         let dir = tempdir();
-        let store = make(dir.path(), Box::new(Canned(WASM.to_vec())), false);
+        let store = make(dir.path(), Box::new(Canned(WASM.to_vec())));
         let package = package();
 
         assert_eq!(store.parser(&package).unwrap(), WASM);
         // Second call is served from disk, so it must succeed without the network.
-        let offline = make(dir.path(), Box::new(NoNetwork), true);
-        assert_eq!(offline.parser(&package).unwrap(), WASM);
+        let from_disk = make(dir.path(), Box::new(NoNetwork));
+        assert_eq!(from_disk.parser(&package).unwrap(), WASM);
     }
 
     #[test]
     fn fetched_parser_bytes_are_verified_before_use() {
         let dir = tempdir();
-        let store = make(dir.path(), Box::new(Canned(b"wrong".to_vec())), false);
+        let store = make(dir.path(), Box::new(Canned(b"wrong".to_vec())));
         assert!(matches!(
             store.parser(&package()),
             Err(StoreError::Package(_))
@@ -556,20 +579,10 @@ mod tests {
     }
 
     #[test]
-    fn offline_refuses_an_uncached_parser() {
-        let dir = tempdir();
-        let store = make(dir.path(), Box::new(NoNetwork), true);
-        assert!(matches!(
-            store.parser(&package()),
-            Err(StoreError::OfflineParser(_))
-        ));
-    }
-
-    #[test]
     fn a_package_naming_someone_else_is_rejected() {
         let dir = tempdir();
         let json = serde_json::to_vec(&package()).unwrap();
-        let store = make(dir.path(), Box::new(Canned(json)), false);
+        let store = make(dir.path(), Box::new(Canned(json)));
         assert!(matches!(
             store.package("@lumis-sh/wasm-rust"),
             Err(StoreError::PackageNameMismatch { .. })
@@ -586,7 +599,7 @@ mod tests {
         let name = "@lumis-sh/wasm-json";
 
         let cached = package();
-        let store_a = make(dir.path(), Box::new(NoNetwork), true);
+        let store_a = make(dir.path(), Box::new(NoNetwork));
         write_atomic(
             &store_a.package_path(name),
             &serde_json::to_vec(&cached).unwrap(),
@@ -607,7 +620,6 @@ mod tests {
             StoreConfig {
                 cache_dir: dir.path().to_path_buf(),
                 source_dir: Some(source.path().to_path_buf()),
-                offline: true,
             },
             Box::new(NoNetwork),
         );

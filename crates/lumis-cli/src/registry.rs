@@ -58,7 +58,6 @@ impl Registry {
             StoreConfig {
                 cache_dir: data_dir.clone(),
                 source_dir: LanguageStore::source_dir_from_env(),
-                offline: LanguageStore::offline_from_env(),
             },
             Box::new(UreqFetcher),
         );

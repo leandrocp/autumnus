@@ -694,8 +694,8 @@ blocks every other node. This is node-local work; use a node-local mechanism (Ge
 Related: `Lumis.highlight/2` now performs blocking network I/O inside the caller
 (`highlight_with_language_loading`), and re-runs the full native highlight after each load — for a
 markdown doc with six injected languages that is seven full passes on first use. Combined with the
-global lock, first traffic after a deploy is the worst case. `mix lumis.languages.cache` +
-`:wasm_offline` should be the *documented default* for releases, not an option.
+global lock, first traffic after a deploy is the worst case. `mix lumis.languages.cache`
+should be the *documented default* for releases, not an option.
 
 ### 4.3a The seven passes are not the retry loop's fault — new
 
@@ -1147,25 +1147,29 @@ Raised during review, tracked here and fixed one at a time.
 | 10.3 | Emscripten version read with an inline `python3 -c tomllib` hack; mise should report it | **DONE** — `mise exec -- printenv LUMIS_EMSDK_VERSION` |
 | 10.4 | `wasmparser` is not on the latest version | **DONE** — 0.244 → 0.255 |
 | 10.5 | `store.rs` uses a single CDN with no fallback | **DONE** — jsDelivr then unpkg, in all three runtimes |
-| 10.6 | `LUMIS_WASM_OFFLINE` adds an env var; reduce instead | **Won't fix, with evidence** — all three wasm env vars are load-bearing; see below |
+| 10.6 | `LUMIS_WASM_OFFLINE` adds an env var; reduce instead | **DONE** — removed from all three runtimes, along with Elixir's `:wasm_offline`; see below |
 | 10.7 | `write_atomic` is hand-rolled; check for a crate or std equivalent | **DONE** — `tempfile::NamedTempFile::persist`, 40 lines → 22 |
 | 10.8 | `webgpu_compute_reduce.html` is vendored; the demo should not need it in-repo | **DONE** — all three demos read the vendored copy; MIT notice added |
 | 10.9 | Elixir has two sources of truth for which languages to cache | **DONE** — the task reads :bundled_languages only |
 | 10.10 | `Lumis.LanguageLoader` → `Lumis.Languages`, a proper context with a public `load` | **DONE** — Lumis.Languages with a public load/1 |
 
-### 10.6 — why the three wasm env vars all stay
+### 10.6 — the offline switch is gone; the other two stay
 
-Reducing the count would cost capability. Each was tested by removing it:
+`LUMIS_WASM_OFFLINE` was removed. Network access is the expected case, and a
+deployment that cannot reach the network caches its languages in advance, which
+already works: a cached parser is served from disk and never fetched. The switch
+only bought a *different error message* for the uncached case, at the cost of an
+env var, an Elixir config key, two error variants, and a branch in three
+codebases.
+
+The other two stay:
 
 | Variable | Read by | What breaks without it |
 | --- | --- | --- |
 | `LUMIS_WASM_CACHE_DIR` | Rust, JavaScript, Elixir | nowhere to persist |
 | `LUMIS_WASM_SOURCE_DIR` | Rust only | `lumis parsers cache --directory` prefetches *into another directory*, so it needs somewhere to read from that is not the cache it is writing. Removing it fails `cache_parsers_to_temp_dir` and `cache_parsers_force_replaces_existing_file`. |
-| `LUMIS_WASM_OFFLINE` | Rust, JavaScript, Elixir | no way to enforce "never touch the network at runtime", which §4.1 identifies as the safe deployment pattern |
 
 `SOURCE_DIR` looked redundant, since it shares an on-disk layout with the cache and the CLI tests copy fixtures into the data directory anyway. Conformance does pass without it. The two prefetch tests do not, and that is a real user-facing command rather than a test artifact.
-
-`OFFLINE` is also layered rather than duplicated in Elixir: `config :lumis, wasm_offline: true` takes precedence and the variable is the default, which is what containers want.
 
 
 ---

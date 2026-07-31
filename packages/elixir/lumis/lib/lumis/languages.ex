@@ -30,8 +30,6 @@ defmodule Lumis.Languages do
       a list or `:all`
     * `:wasm_bundle_dir` — where release-local parsers live, default
       `priv/wasm`
-    * `:wasm_offline` — refuse network access; also settable with
-      `LUMIS_WASM_OFFLINE=1`
     * `:wasm_resolver` and `:language_package_resolver` — replace where parsers
       and package metadata are fetched from
   """
@@ -68,6 +66,10 @@ defmodule Lumis.Languages do
     with {:ok, entry, package_json} <- language_entry(name, false) do
       load_entry(entry, package_json)
     end
+    |> case do
+      :ok -> :ok
+      {:error, reason} -> {:error, "could not load language #{inspect(name)}: #{reason}"}
+    end
   end
 
   @doc false
@@ -100,9 +102,7 @@ defmodule Lumis.Languages do
     end
   end
 
-  defp package_json(handle, true) do
-    if offline?(), do: package_offline_error(handle), else: resolve_package(handle)
-  end
+  defp package_json(handle, true), do: resolve_package(handle)
 
   defp package_json(handle, false) do
     case read_valid_package(bundled_package_file(handle), handle, false) do
@@ -116,14 +116,14 @@ defmodule Lumis.Languages do
 
     case read_valid_package(path, handle, true) do
       {:ok, package_json} ->
-        if offline?() or fresh?(path) do
+        if fresh?(path) do
           {:ok, package_json}
         else
           refresh_package(handle, path, package_json)
         end
 
       :miss ->
-        if offline?(), do: package_offline_error(handle), else: refresh_package(handle, path, nil)
+        refresh_package(handle, path, nil)
     end
   end
 
@@ -188,11 +188,13 @@ defmodule Lumis.Languages do
              do: validate_resolved_package(handle, package_json)
 
       {:urls, urls} when is_list(urls) ->
-        with {:ok, package_json} <- download_first(urls, "language package"),
+        with {:ok, package_json} <-
+               download_first(urls, "language package #{handle.package_name}"),
              do: validate_resolved_package(handle, package_json)
 
       url when is_binary(url) ->
-        with {:ok, package_json} <- download(url, "language package"),
+        with {:ok, package_json} <-
+               download_one(url, "language package #{handle.package_name}"),
              do: validate_resolved_package(handle, package_json)
 
       other ->
@@ -289,43 +291,26 @@ defmodule Lumis.Languages do
   end
 
   defp resolve_parser_cache_miss(entry, path) do
-    if offline?() do
-      parser_offline_error(entry)
-    else
-      case read_verified(path, entry, true) do
-        {:ok, bytes} -> {:ok, bytes}
-        :miss -> resolve_verified_and_write(entry, path)
-      end
+    case read_verified(path, entry, true) do
+      {:ok, bytes} -> {:ok, bytes}
+      :miss -> resolve_verified_and_write(entry, path)
     end
   end
 
   defp cache_parser(entry, directory, force?) do
     destination = Path.join(directory, parser_filename(entry))
 
-    cond do
-      offline?() and force? ->
-        parser_offline_error(entry)
-
-      force? ->
-        resolve_parser_and_write(entry, destination)
-
-      true ->
-        cache_parser_if_missing(entry, destination)
+    if force? do
+      resolve_parser_and_write(entry, destination)
+    else
+      cache_parser_if_missing(entry, destination)
     end
   end
 
   defp cache_parser_if_missing(entry, destination) do
     case read_verified(destination, entry, true) do
       {:ok, _bytes} -> {:ok, destination}
-      :miss -> resolve_or_offline_error(entry, destination)
-    end
-  end
-
-  defp resolve_or_offline_error(entry, destination) do
-    if offline?() do
-      parser_offline_error(entry)
-    else
-      resolve_parser_and_write(entry, destination)
+      :miss -> resolve_parser_and_write(entry, destination)
     end
   end
 
@@ -368,8 +353,8 @@ defmodule Lumis.Languages do
     case resolver.(entry) do
       {:ok, bytes} when is_binary(bytes) -> {:ok, bytes}
       {:file, path} when is_binary(path) -> File.read(path)
-      {:urls, urls} when is_list(urls) -> download_first(urls, "parser WASM")
-      url when is_binary(url) -> download(url, "parser WASM")
+      {:urls, urls} when is_list(urls) -> download_first(urls, parser_description(entry))
+      url when is_binary(url) -> download_one(url, parser_description(entry))
       other -> {:error, "invalid :wasm_resolver result: #{inspect(other)}"}
     end
   rescue
@@ -392,18 +377,46 @@ defmodule Lumis.Languages do
 
   defp download_first(urls, description) do
     Enum.reduce_while(urls, {:error, []}, fn url, {:error, failures} ->
-      case download(url, description) do
+      case download(url) do
         {:ok, body} -> {:halt, {:ok, body}}
-        {:error, reason} -> {:cont, {:error, [reason | failures]}}
+        {:error, reason} -> {:cont, {:error, [{url, reason} | failures]}}
       end
     end)
     |> case do
       {:ok, body} -> {:ok, body}
-      {:error, failures} -> {:error, failures |> Enum.reverse() |> Enum.join("; ")}
+      {:error, failures} -> {:error, download_error(description, Enum.reverse(failures))}
     end
   end
 
-  defp download(url, description) do
+  # Every mirror serving the same 404 is one fact, not two, so say it once.
+  defp download_error(description, failures) do
+    case failures |> Enum.map(fn {_url, reason} -> reason end) |> Enum.uniq() do
+      [reason] ->
+        hosts = Enum.map_join(failures, ", ", fn {url, _} -> URI.parse(url).host end)
+        "could not download #{description}: #{reason} (tried #{hosts})"
+
+      _ ->
+        detail =
+          Enum.map_join(failures, "; ", fn {url, reason} ->
+            "#{URI.parse(url).host}: #{reason}"
+          end)
+
+        "could not download #{description}: #{detail}"
+    end
+  end
+
+  defp parser_description(entry) do
+    "parser WASM #{entry.package_name}@#{entry.version}"
+  end
+
+  defp download_one(url, description) do
+    case download(url) do
+      {:ok, body} -> {:ok, body}
+      {:error, reason} -> {:error, download_error(description, [{url, reason}])}
+    end
+  end
+
+  defp download(url) do
     request = {String.to_charlist(url), []}
 
     http_options = [
@@ -423,10 +436,10 @@ defmodule Lumis.Languages do
         {:ok, body}
 
       {:ok, {{_version, status, reason}, _headers, _body}} ->
-        {:error, "failed to download #{description}: HTTP #{status} #{reason}"}
+        {:error, "HTTP #{status} #{reason}"}
 
       {:error, reason} ->
-        {:error, "failed to download #{description}: #{inspect(reason)}"}
+        {:error, inspect(reason)}
     end
   end
 
@@ -456,22 +469,6 @@ defmodule Lumis.Languages do
   defp bundled_dir do
     Application.get_env(:lumis, :wasm_bundle_dir) ||
       Application.app_dir(:lumis, "priv/wasm")
-  end
-
-  defp offline? do
-    Application.get_env(
-      :lumis,
-      :wasm_offline,
-      String.downcase(System.get_env("LUMIS_WASM_OFFLINE", "")) in ["1", "true"]
-    )
-  end
-
-  defp package_offline_error(handle) do
-    {:error, "language package for '#{handle.id}' is not cached and offline mode is enabled"}
-  end
-
-  defp parser_offline_error(entry) do
-    {:error, "parser WASM for '#{entry.id}' is not cached and offline mode is enabled"}
   end
 
   defp fresh?(path) do

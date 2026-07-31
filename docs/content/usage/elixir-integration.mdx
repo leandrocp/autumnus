@@ -77,9 +77,7 @@ files that already verify, and `--output` to write somewhere other than
 
 Load expected languages during application startup when request latency
 matters. Wasmtime persists compiled modules across VM restarts. Set
-`LUMIS_WASM_CACHE_DIR` to override the parser and compiled-module cache root,
-and `LUMIS_WASM_OFFLINE=1` to reject parsers absent from both `priv/wasm` and
-the user cache.
+`LUMIS_WASM_CACHE_DIR` to override the parser and compiled-module cache root.
 
 A custom `:wasm_resolver` application setting can return `{:ok, bytes}`,
 `{:file, path}`, or a URL:
