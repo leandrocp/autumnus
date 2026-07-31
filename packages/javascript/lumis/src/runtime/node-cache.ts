@@ -1,8 +1,4 @@
-import {
-  LOCK_RETRY_MS,
-  LOCK_STALE_AFTER_MS,
-  LOCK_TIMEOUT_MS,
-} from "../cache-timing.js";
+import { LOCK_RETRY_MS, LOCK_STALE_AFTER_MS, LOCK_TIMEOUT_MS } from "../cache-timing.js";
 
 const nodeFsPromises = "node:fs" + "/promises";
 const nodePath = "node:path";

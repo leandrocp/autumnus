@@ -577,10 +577,7 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
 
         const cached = await this.readCachedLanguagePackage(packageName);
         const networkEnabled = runtime.networkFallbackEnabled?.() !== false;
-        if (
-          cached &&
-          (!networkEnabled || Date.now() - cached.checkedAt < PACKAGE_CACHE_TTL_MS)
-        ) {
+        if (cached && (!networkEnabled || Date.now() - cached.checkedAt < PACKAGE_CACHE_TTL_MS)) {
           return cached.package;
         }
         if (!networkEnabled) {
