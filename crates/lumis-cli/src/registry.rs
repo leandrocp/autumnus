@@ -1,7 +1,7 @@
 use anyhow::{Context, Result};
 use lumis_core::highlights::HIGHLIGHT_NAMES;
 pub use lumis_wasm_runtime::brackets::RainbowRange;
-use lumis_wasm_runtime::brackets::{bracket_pairs, colorize_bracket_pairs};
+use lumis_wasm_runtime::brackets::{self, bracket_pairs, colorize_bracket_pairs};
 use lumis_wasm_runtime::catalog;
 #[cfg(test)]
 use lumis_wasm_runtime::sha256_hex;
@@ -240,9 +240,7 @@ impl Registry {
             return Ok(query.clone());
         }
 
-        // The default bracket query intentionally names tokens some grammars do
-        // not have, so a compile failure means "no rainbow brackets", not an error.
-        let query = Query::new(grammar, brackets).ok().map(Arc::new);
+        let query = brackets::compile(grammar, brackets).map(Arc::new);
         self.lock(&self.brackets)?
             .insert(name.clone(), query.clone());
         Ok(query)

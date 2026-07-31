@@ -4,16 +4,16 @@
 //! ranges. They previously carried byte-identical copies of this logic, which is
 //! exactly the drift `AGENTS.md` warns about, so it lives here once.
 //!
-//! Callers still own their own `Query`, because how a compiled query is cached
-//! differs: the `Runtime` keeps one per loaded language, while the CLI compiles it
-//! per invocation.
+//! Callers still own the cache their compiled `Query` lives in, because how they
+//! hold it differs: the `Runtime` keeps one per loaded language in a `OnceLock`,
+//! the CLI keeps one per grammar name. The compile rule itself is [`compile`].
 
 use std::ops::Range;
 use std::sync::LazyLock;
 
 use lumis_core::highlights::HIGHLIGHT_NAMES;
 use streaming_iterator::StreamingIterator;
-use tree_sitter::{Node, Query, QueryCursor};
+use tree_sitter::{Language, Node, Query, QueryCursor};
 
 /// Scope names cycled through by nesting depth.
 pub const RAINBOW_BRACKET_SCOPES: [&str; 6] = [
@@ -54,6 +54,22 @@ pub struct RainbowRange {
 pub struct BracketPair {
     pub open: Range<usize>,
     pub close: Range<usize>,
+}
+
+/// Compile a bracket query, or decide the language has no rainbow brackets.
+///
+/// Both outcomes are ordinary, not errors. An empty query means the language
+/// never defined one, and the shared default query deliberately names tokens
+/// that some grammars lack -- HTML has no `(` -- so a compile failure means the
+/// same thing. Callers cache the result themselves, because how they hold it
+/// differs: the pooled `Runtime` keeps one per loaded language, the CLI keeps one
+/// per grammar name.
+#[must_use]
+pub fn compile(grammar: &Language, source: &str) -> Option<Query> {
+    if source.trim().is_empty() {
+        return None;
+    }
+    Query::new(grammar, source).ok()
 }
 
 /// The `@open` and `@close` capture indices, when the query defines both.
@@ -177,6 +193,26 @@ mod tests {
         let ranges = colorize_bracket_pairs(pairs);
         let opens: Vec<_> = ranges.iter().filter(|r| r.start < 7).collect();
         assert_eq!(opens[0].scope_index, opens[6].scope_index);
+    }
+
+    #[test]
+    fn an_empty_query_means_no_rainbow_brackets() {
+        let grammar: Language = tree_sitter_json::LANGUAGE.into();
+        assert!(compile(&grammar, "").is_none());
+        assert!(compile(&grammar, "   \n  ").is_none());
+    }
+
+    #[test]
+    fn a_query_naming_tokens_the_grammar_lacks_means_no_rainbow_brackets() {
+        // Not an error: the shared default query names tokens some grammars lack.
+        let grammar: Language = tree_sitter_json::LANGUAGE.into();
+        assert!(compile(&grammar, "(\"nonexistent_token_xyz\" @open)").is_none());
+    }
+
+    #[test]
+    fn a_valid_query_compiles() {
+        let grammar: Language = tree_sitter_json::LANGUAGE.into();
+        assert!(compile(&grammar, "(\"[\" @open \"]\" @close)").is_some());
     }
 
     #[test]

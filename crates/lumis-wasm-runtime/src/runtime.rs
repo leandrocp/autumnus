@@ -432,14 +432,7 @@ fn rainbow_ranges(
     source: &str,
 ) -> Result<Vec<RainbowRange>, RuntimeError> {
     let query = language.brackets.get_or_init(|| {
-        if language.brackets_source.trim().is_empty() {
-            None
-        } else {
-            // The default bracket query intentionally includes tokens absent
-            // from some grammars, so a compilation failure means "no rainbow
-            // brackets" for that language.
-            Query::new(&language.highlight.language, &language.brackets_source).ok()
-        }
+        crate::brackets::compile(&language.highlight.language, &language.brackets_source)
     });
     let Some(query) = query else {
         return Ok(Vec::new());
