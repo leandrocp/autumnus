@@ -29,15 +29,12 @@ export interface PackagedLanguage {
 }
 
 /**
- * A language package as published inside `@lumis-sh/wasm-*`.
+ * A language package as published inside `@lumis-sh/wasm-*`. Mirrors
+ * `LanguagePackage` in `crates/lumis-wasm-runtime/src/package.rs`.
  *
- * There is deliberately no `formatVersion` gate. Runtimes resolve this document from
- * a floating tag, so a hard version equality check would break every already-deployed
- * client the moment a new version was published. Compatibility is decided by the
- * document's shape instead: unknown fields are ignored, so additive changes are safe,
- * and a missing required field fails `parseLanguagePackage`. The format is therefore
- * additive-only by contract. Mirrors `LanguagePackage` in
- * `crates/lumis-wasm-runtime/src/package.rs`.
+ * There is deliberately no `formatVersion` gate: runtimes resolve this document
+ * from a floating tag, so the format is additive-only by contract and
+ * compatibility is decided by shape.
  */
 export interface LanguagePackage {
   packageName: string;
@@ -83,10 +80,8 @@ function compileBracketConfig(
 ): CompiledBracketConfig | undefined {
   if (!bracketsQuery) return undefined;
 
-  // A bracket query can reference anonymous nodes that do not exist in a given
-  // grammar (for example HTML has no "(" token). Treat a query that fails to
-  // compile as "no rainbow brackets for this language" instead of failing the
-  // whole language load, matching the Rust reference implementation.
+  // A bracket query can name tokens a grammar lacks, such as "(" in HTML, so a
+  // compile failure means "no rainbow brackets here" rather than a load failure.
   let query: InstanceType<typeof Query>;
   try {
     query = new Query(language, bracketsQuery);
@@ -175,11 +170,7 @@ export interface LanguagesModule {
   getDefaultRuntime(): RuntimeLike;
 }
 
-/**
- * npm CDNs, tried in order. Both serve the same `<package>@<version>/<file>`
- * layout, so one mirror being unreachable does not stop a language from loading.
- * Mirrors `CDNS` in `crates/lumis-wasm-runtime/src/store.rs`.
- */
+/** Tried in order; both serve the same `<package>@<version>/<file>` layout. */
 export const CDNS = ["https://cdn.jsdelivr.net/npm", "https://unpkg.com"] as const;
 
 /** @internal */
@@ -188,10 +179,7 @@ export const DEFAULT_RESOLVER: WasmResolver = (_language, wasm) =>
 export const DEFAULT_LANGUAGE_PACKAGE_RESOLVER: LanguagePackageResolver = (packageName) =>
   `${CDNS[0]}/${packageName}@latest/language.json`;
 
-/**
- * Try each CDN in turn. Only used when the caller kept the default resolver: a
- * custom resolver names one exact location and is not second-guessed.
- */
+/** Only used with the default resolver; a custom resolver names one location. */
 async function fetchFromCdns(primary: string, isDefault: boolean): Promise<Response> {
   const urls = isDefault ? CDNS.map((base) => primary.replace(CDNS[0], base)) : [primary];
   const failures: string[] = [];
@@ -456,10 +444,8 @@ function compileHighlightConfig(
     return Object.prototype.hasOwnProperty.call(refuted, "local");
   });
 
-  // `(#offset! @capture r c r c)` shifts a capture's range. Neovim applies it to
-  // injection ranges *and* highlight ranges, so unlike the previous implementation
-  // this collects offsets for every pattern, not just the injection ones.
-  // Mirrors the parsing in `crates/lumis-wasm-runtime/src/tree_sitter_highlight.rs`.
+  // Neovim applies `#offset!` to injection ranges *and* highlight ranges, so this
+  // collects offsets for every pattern, not just the injection ones.
   const captureOffsets = Array.from(
     { length: query.patternCount() },
     (_, patternIndex): Record<string, QueryCaptureOffset> | undefined => {
@@ -638,7 +624,7 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
         try {
           return await verifyWasm(ref, fsCached);
         } catch {
-          // Ignore corrupted or stale cache entries. The locked writer replaces them atomically.
+          // Corrupt or stale entries are replaced atomically by the locked writer.
         }
       }
       return undefined;
@@ -667,9 +653,7 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
           if (!response.ok) return undefined;
           return new Uint8Array(await response.arrayBuffer());
         }
-      } catch {
-        // Package not installed or not consumable in this runtime.
-      }
+      } catch {}
       return undefined;
     }
 

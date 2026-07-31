@@ -6,8 +6,6 @@ import javascript from "../../../../packages/javascript/lumis/dist/langs/javascr
 import json from "../../../../packages/javascript/lumis/dist/langs/json.js";
 import dracula from "../../../../packages/javascript/themes/dist/themes/dracula.js";
 
-// Inlined by Vite at transform time, so the demo needs no network and no
-// server access outside its root.
 import rawSource from "../../../../benchmarks/webgpu_compute_reduce.html?raw";
 import { sourceUrl, verifySource } from "../source.mjs";
 

@@ -15,7 +15,6 @@ use std::sync::{Arc, Mutex};
 use tree_sitter::{Parser, Query, Tree, WasmStore};
 use wasmtime::{Cache, Config, Engine};
 
-/// The CLI's HTTP client. `LanguageStore` owns the caching; this only fetches.
 struct UreqFetcher;
 
 impl Fetcher for UreqFetcher {
@@ -35,14 +34,9 @@ pub struct Registry {
     store: LanguageStore,
     engine: Engine,
     wasm_store: Mutex<WasmStore>,
-    /// Grammars already loaded into `wasm_store`, keyed by grammar name.
-    ///
-    /// `WasmStore::load_language` re-instantiates the module, so without this
-    /// every parse, highlight and rainbow call paid for it again.
+    /// `WasmStore::load_language` re-instantiates the module, so these are kept.
     grammars: Mutex<HashMap<String, tree_sitter::Language>>,
-    /// Compiled bracket queries, keyed by grammar name. `None` records a query
-    /// that does not compile against this grammar, which means "no rainbow
-    /// brackets here" rather than an error, so it is not retried either.
+    /// `None` records a grammar with no usable bracket query, so it is not retried.
     brackets: Mutex<HashMap<String, Option<Arc<Query>>>>,
 }
 
@@ -147,14 +141,12 @@ impl Registry {
         Ok(LanguageStore::parser_url(&package))
     }
 
-    /// Resolve `language` to its package, fetching and caching as needed.
     fn package(&self, language: &str) -> Result<Arc<LanguagePackage>> {
         let location =
             catalog::find(language).with_context(|| format!("unknown language '{language}'"))?;
         Ok(self.store.package(location.package_name)?)
     }
 
-    /// The package for `language` if it is already resolved or on disk.
     fn cached_package(&self, language: &str) -> Option<Arc<LanguagePackage>> {
         let location = catalog::find(language)?;
         self.store.cached_package(location.package_name)
@@ -228,7 +220,6 @@ impl Registry {
         Ok(grammar)
     }
 
-    /// The bracket query for this package, compiled once per grammar.
     fn bracket_query(
         &self,
         package: &LanguagePackage,

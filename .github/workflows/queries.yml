@@ -38,9 +38,6 @@ env:
   QUERY_SHARDS: 10
 
 jobs:
-  # Regex validity and cross-engine portability need no grammar, so this covers
-  # every language in seconds and is the guard that catches a bad Lua-pattern
-  # translation. It also checks the waiver, which only depends on npm state.
   portability:
     if: >-
       ${{ github.event_name == 'workflow_dispatch' ||
@@ -73,10 +70,8 @@ jobs:
       - name: Every predicate compiles under RegExp
         run: pnpm --filter @lumis-sh/lumis exec vitest run test/query-patterns.test.ts
 
-  # Grammar-aware compilation needs a parser per language. Published packages are
-  # used when their revision matches, and only the lagging ones are built, so this
-  # shrinks as the catalog is republished. Sharded because building a parser takes
-  # roughly 13 seconds and the lag is currently most of the catalog.
+  # Sharded because a parser build takes roughly 13 seconds and only languages
+  # whose published package lags languages.toml need one.
   compile:
     if: >-
       ${{ github.event_name == 'workflow_dispatch' ||
@@ -119,14 +114,11 @@ jobs:
         run: |
           set -euo pipefail
           cd packages/javascript/lumis
-          # Several languages share one parser, so the language and parser lists have
-          # different lengths. Shard the parsers, then take exactly the languages those
-          # parsers serve. Sharding the two lists separately put a language in one shard
-          # and its parser in another, so every shard tried to verify languages it had
-          # never built.
+          # Several languages share one parser, so the two lists differ in length.
+          # Shard the parsers, then take the languages those parsers serve; sharding
+          # both separately splits a language from its parser.
           node scripts/list-unverified-parsers.mjs --pairs > /tmp/pairs.txt
-          # Drop parsers that cannot be built on a hosted runner. tree-sitter-llvm
-          # peaks at 12.7 GiB against 16 GB of RAM, so the runner is terminated
+          # tree-sitter-llvm peaks at 12.7 GiB against 16 GB, so the runner is killed
           # mid-build and the step reports exit 143 with no compiler error.
           python3 -c "import json;print('\n'.join(json.load(open('test/oversized-parsers.json'))['parsers']))" \
             > /tmp/oversized.txt
@@ -149,15 +141,11 @@ jobs:
           done < /tmp/shard-parsers.txt
 
       - name: Compile queries for this shard
-        # Every language in the shard had its parser built above, so anything left
-        # unverified is a build failure rather than a lagging package.
         run: pnpm --filter @lumis-sh/lumis exec vitest run test/query-compile.test.ts
         env:
           LUMIS_QUERY_LANGUAGES: ${{ steps.shard.outputs.languages }}
           LUMIS_QUERY_COVERAGE: complete
 
-  # Languages whose published package already matches languages.toml need no
-  # parser build, so they are checked in one fast job.
   compile-published:
     if: >-
       ${{ github.event_name == 'workflow_dispatch' ||

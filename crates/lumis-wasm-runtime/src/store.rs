@@ -1,17 +1,10 @@
 //! Resolve, verify and cache language packages and parser WASM on disk.
 //!
-//! Every native runtime needs the same state machine: consult a configured local
-//! source, fall back to a persistent cache, fetch from the CDN as a last resort,
-//! verify the bytes before use, and replace the cached file atomically. It lives
-//! here once so the CLI and the Elixir NIF cannot drift apart.
+//! Shared by the CLI and the Elixir NIF.
 //!
-//! There is deliberately **no file lock**. Concurrent writers are safe without one:
-//! every write goes to a PID-suffixed temporary file and is renamed into place, and
-//! parser bytes are verified against the digest before the rename, so two processes
-//! racing on the same content-addressed path are writing identical bytes. A lock
-//! would only save a duplicate download, and would cost a multi-minute stall
-//! whenever a process died holding it. Work inside one process is already
-//! de-duplicated by the in-memory package map.
+//! There is deliberately no file lock. Writes rename a uniquely named temporary
+//! into place and parser bytes are verified first, so concurrent writers converge
+//! on identical content; a lock would only save a duplicate download.
 //!
 //! Networking is behind [`Fetcher`] so a host can supply its own HTTP client, or
 //! none at all in tests.
@@ -28,14 +21,10 @@ use crate::package::{LanguagePackage, LanguagePackageError};
 /// How long a cached `language.json` is trusted before it is refreshed.
 pub const PACKAGE_CACHE_TTL: Duration = Duration::from_secs(60 * 60);
 
-/// npm CDNs, tried in order. Both serve the same `<package>@<version>/<file>`
-/// layout, so one mirror being unreachable or missing a just-published version
-/// does not stop a language from loading.
-/// Attempts to replace the target before giving up. Only Windows needs more
-/// than one, and only while another handle holds the file open.
 const REPLACE_ATTEMPTS: u32 = 20;
 const REPLACE_RETRY_DELAY: Duration = Duration::from_millis(5);
 
+/// Tried in order; both serve the same `<package>@<version>/<file>` layout.
 const CDNS: [&str; 2] = ["https://cdn.jsdelivr.net/npm", "https://unpkg.com"];
 
 #[derive(Debug, Error)]
@@ -93,13 +82,8 @@ impl Fetcher for NoNetwork {
 pub struct StoreConfig {
     /// Directory holding cached `language.json` and parser files.
     pub cache_dir: PathBuf,
-    /// Optional pre-staged source, consulted **before** the cache.
-    ///
-    /// An explicitly configured local source outranks a cached copy in every
-    /// runtime: Node resolves an installed `@lumis-sh/wasm-*` package first and
-    /// Elixir reads release-local `priv/wasm` first. Consulting the cache first
-    /// would let one runtime pick a different package than another for the same
-    /// inputs, and so produce different output.
+    /// Consulted before the cache, matching Node and Elixir, which prefer an
+    /// installed package and release-local `priv/wasm` respectively.
     pub source_dir: Option<PathBuf>,
     /// Refuse any network access.
     pub offline: bool,
@@ -165,7 +149,6 @@ impl LanguageStore {
                 return Err(StoreError::OfflinePackage(package_name.to_string()));
             }
 
-            // A stale copy still beats no highlighting when the CDN is unreachable.
             match self.fetch_package(package_name, &path) {
                 Ok(package) => Ok(package),
                 Err(error) => cached.ok_or(error),
@@ -199,10 +182,8 @@ impl LanguageStore {
         self.fetch_parser(package, &self.parser_path(package))
     }
 
-    /// Verified parser bytes already on disk, if any.
-    ///
-    /// A file that fails verification is deleted rather than returned, so a corrupt
-    /// cache repairs itself on the next call.
+    /// Verified parser bytes already on disk, if any. A file that fails
+    /// verification is deleted rather than returned.
     #[must_use]
     pub fn cached_parser(&self, package: &LanguagePackage) -> Option<Vec<u8>> {
         let path = self.parser_path(package);
@@ -296,8 +277,6 @@ impl LanguageStore {
         path.is_file().then_some(path)
     }
 
-    /// Deliberately does not write to the cache: the local source is consulted
-    /// first on every call, so a copy would only add something that can go stale.
     fn read_source_package(
         &self,
         package_name: &str,
@@ -392,11 +371,6 @@ fn cache_is_fresh(path: &Path, ttl: Duration) -> bool {
 
 /// Replace `path` atomically, so a reader never sees a partial file.
 ///
-/// `NamedTempFile` supplies the unique name and `persist` the replacing rename,
-/// including on Windows where a plain rename onto an existing file fails. Doing
-/// this by hand is what let several threads in one process share a temporary and
-/// clobber each other, so it is worth the dependency.
-///
 /// # Errors
 /// Fails when the parent cannot be created, or the file cannot be written or moved.
 pub fn write_atomic(path: &Path, bytes: &[u8]) -> Result<(), StoreError> {
@@ -412,17 +386,13 @@ pub fn write_atomic(path: &Path, bytes: &[u8]) -> Result<(), StoreError> {
         .map_err(|error| StoreError::io(format!("could not create {}", parent.display()), error))?;
 
     let context = || format!("failed to cache asset at {}", path.display());
-    // Created beside the target so the rename stays on one filesystem.
     let mut file = tempfile::NamedTempFile::new_in(parent)
         .map_err(|error| StoreError::io(context(), error))?;
     file.write_all(bytes)
         .map_err(|error| StoreError::io(context(), error))?;
 
-    // Windows refuses to replace a file another handle still has open, so the
-    // rename can fail with a sharing violation that clears on its own. Retry the
-    // atomic replace rather than falling back to remove-then-rename: that would
-    // leave a window where the path does not exist, which is exactly the torn
-    // read this function exists to prevent.
+    // Windows refuses to replace a file another handle still has open. Retrying
+    // keeps this atomic; remove-then-rename would not.
     let mut pending = file;
     for attempt in 0..REPLACE_ATTEMPTS {
         match pending.persist(path) {

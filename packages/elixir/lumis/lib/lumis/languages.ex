@@ -217,7 +217,6 @@ defmodule Lumis.Languages do
     end
   end
 
-  # Re-checked inside the claim: another process may have loaded it while we waited.
   defp load_once(entry, package_json) do
     if Native.has_language(entry.id) do
       :ok
@@ -245,9 +244,6 @@ defmodule Lumis.Languages do
   end
 
   defp cache_new_entry(entry, package_json, key, paths, seen, directory, force?) do
-    # Serialise per package so concurrent callers share one download rather than
-    # each fetching the same bytes. This is process-based rather than a lock file:
-    # it needs no stale-entry recovery, and it releases the moment the owner dies.
     with :ok <- claim(entry, fn -> cache_package(entry, package_json, directory, force?) end),
          {:ok, path} <- claim(entry, fn -> cache_parser(entry, directory, force?) end) do
       {:cont, {:ok, [path | paths], MapSet.put(seen, key)}}
@@ -380,9 +376,6 @@ defmodule Lumis.Languages do
     exception -> {:error, "parser WASM resolver failed: #{Exception.message(exception)}"}
   end
 
-  # npm CDNs, tried in order. Both serve the same `<package>@<version>/<file>`
-  # layout, so one mirror being unreachable does not stop a language from loading.
-  # Mirrors `CDNS` in `crates/lumis-wasm-runtime/src/store.rs`.
   @cdns ["https://cdn.jsdelivr.net/npm", "https://unpkg.com"]
 
   defp default_package_url(handle) do
@@ -397,7 +390,6 @@ defmodule Lumis.Languages do
      )}
   end
 
-  # Try each URL in turn, reporting every failure if none works.
   defp download_first(urls, description) do
     Enum.reduce_while(urls, {:error, []}, fn url, {:error, failures} ->
       case download(url, description) do
@@ -439,7 +431,6 @@ defmodule Lumis.Languages do
   end
 
   defp package_cache_file(handle), do: Path.join(cache_dir(), package_filename(handle))
-  # Must match `lumis_wasm_runtime::store::parser_filename`, which the CLI uses.
   defp parser_filename(entry) do
     "#{entry.wasm_name}-#{entry.version}-#{entry.sha256}.wasm"
   end
@@ -489,11 +480,6 @@ defmodule Lumis.Languages do
     end
   end
 
-  # Correctness needs no lock: `write_atomic` in lumis-wasm-runtime renames a
-  # uniquely named temporary into place and verifies parser bytes before the
-  # rename, so concurrent writers converge on identical content. What `claim/2`
-  # buys is narrower and worth having anyway: concurrent callers share one
-  # download instead of each fetching the same bytes.
   defp claim(entry, operation) do
     :global.trans({{__MODULE__, :cache, entry.package_name, entry.version}, self()}, operation)
   end

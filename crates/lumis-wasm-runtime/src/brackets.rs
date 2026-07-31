@@ -1,12 +1,7 @@
-//! Rainbow-bracket resolution shared by the Rust runtimes.
+//! Rainbow-bracket resolution shared by the CLI and the pooled WASM `Runtime`.
 //!
-//! The CLI and the pooled WASM `Runtime` both turn a bracket query into coloured
-//! ranges. They previously carried byte-identical copies of this logic, which is
-//! exactly the drift `AGENTS.md` warns about, so it lives here once.
-//!
-//! Callers still own the cache their compiled `Query` lives in, because how they
-//! hold it differs: the `Runtime` keeps one per loaded language in a `OnceLock`,
-//! the CLI keeps one per grammar name. The compile rule itself is [`compile`].
+//! Callers own the cache their compiled `Query` lives in; the compile rule
+//! itself is [`compile`].
 
 use std::ops::Range;
 use std::sync::LazyLock;
@@ -25,8 +20,8 @@ pub const RAINBOW_BRACKET_SCOPES: [&str; 6] = [
     "punctuation.bracket.rainbow.6",
 ];
 
-/// `RAINBOW_BRACKET_SCOPES` resolved to highlight indices once, falling back to
-/// `punctuation.bracket` for themes that do not define the rainbow scopes.
+/// Resolved once, falling back to `punctuation.bracket` for themes without the
+/// rainbow scopes.
 pub static RAINBOW_SCOPE_INDICES: LazyLock<[usize; RAINBOW_BRACKET_SCOPES.len()]> =
     LazyLock::new(|| {
         let fallback = HIGHLIGHT_NAMES
@@ -58,12 +53,8 @@ pub struct BracketPair {
 
 /// Compile a bracket query, or decide the language has no rainbow brackets.
 ///
-/// Both outcomes are ordinary, not errors. An empty query means the language
-/// never defined one, and the shared default query deliberately names tokens
-/// that some grammars lack -- HTML has no `(` -- so a compile failure means the
-/// same thing. Callers cache the result themselves, because how they hold it
-/// differs: the pooled `Runtime` keeps one per loaded language, the CLI keeps one
-/// per grammar name.
+/// A compile failure is not an error: the shared default query deliberately
+/// names tokens that some grammars lack, such as `(` in HTML.
 #[must_use]
 pub fn compile(grammar: &Language, source: &str) -> Option<Query> {
     if source.trim().is_empty() {
@@ -85,10 +76,7 @@ pub fn capture_indices(query: &Query) -> Option<(u32, u32)> {
     Some((index("open")?, index("close")?))
 }
 
-/// Collect bracket pairs from an already-parsed tree.
-///
-/// Patterns carrying `(#set! rainbow.exclude)` are skipped, matching Neovim's
-/// rainbow-delimiter behaviour.
+/// Collect bracket pairs, skipping patterns that carry `(#set! rainbow.exclude)`.
 #[must_use]
 pub fn bracket_pairs(query: &Query, root: Node<'_>, source: &[u8]) -> Vec<BracketPair> {
     let Some((open_capture, close_capture)) = capture_indices(query) else {
@@ -204,7 +192,6 @@ mod tests {
 
     #[test]
     fn a_query_naming_tokens_the_grammar_lacks_means_no_rainbow_brackets() {
-        // Not an error: the shared default query names tokens some grammars lack.
         let grammar: Language = tree_sitter_json::LANGUAGE.into();
         assert!(compile(&grammar, "(\"nonexistent_token_xyz\" @open)").is_none());
     }

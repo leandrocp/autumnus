@@ -48,9 +48,8 @@ pub struct ParserMetadata {
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PackagedLanguage {
-    // Deliberately not `#[serde(default)]`. The JavaScript validator requires
-    // `aliases`, so tolerating its absence here would accept packages that the
-    // browser and Node runtimes reject. See `tests/language_package_corpus.rs`.
+    // Deliberately not `#[serde(default)]`: the JavaScript validator requires
+    // `aliases`, so tolerating its absence would accept packages Node rejects.
     pub aliases: Vec<String>,
     pub highlights: String,
     #[serde(default, skip_serializing_if = "String::is_empty")]
@@ -125,9 +124,8 @@ impl LanguagePackage {
         {
             return Err(LanguagePackageError::Invalid("parser.sha256"));
         }
-        // A zero-size parser is meaningless metadata. Without this the failure
-        // surfaces much later, as a confusing `InvalidSize` from `verify_wasm`,
-        // and only for runtimes that reach that point.
+        // Otherwise this surfaces much later as a confusing `InvalidSize` from
+        // `verify_wasm`, and only for runtimes that reach that point.
         if self.parser.size == 0 {
             return Err(LanguagePackageError::Invalid("parser.size"));
         }

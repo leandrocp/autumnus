@@ -103,6 +103,29 @@ A test that skips silently reports the same green as a test that verified someth
 - Prove a new guard fails: inject the defect it is meant to catch, watch it go red, then revert. A guard that has never failed has not been tested.
 - Do not let published artifacts gate correctness checks. Build what you need from the pinned source instead, as `mise run test-queries` does, otherwise coverage silently tracks the release cycle.
 
+### Comments are a last resort
+
+Do not narrate code. A comment is justified only when the code is genuinely hard to follow, or when it does something a reader would not expect and would otherwise "fix". Everything else should be carried by naming and structure.
+
+Worth keeping, because the behaviour is surprising:
+
+```rust
+// Windows refuses to replace a file another handle still has open.
+```
+
+```elixir
+# Rustler encodes `Result<(), String>` as `{:ok, {}}`, not `:ok`.
+```
+
+Not worth keeping, because the code already says it:
+
+```elixir
+# Read from the copy vendored in this repository, so the demo runs offline.
+@source_path Path.expand("../../../benchmarks/webgpu_compute_reduce.html", __DIR__)
+```
+
+Rationale that is about the change rather than the code belongs in the commit message. `mise.toml` takes no comments at all.
+
 ### Validate workflow changes with `actionlint` before pushing
 
 Run `mise run lint-workflows` after **any** edit under `.github/workflows/`. It is also part of `mise run lint`, and CI runs it, but CI finding it costs a full round trip.

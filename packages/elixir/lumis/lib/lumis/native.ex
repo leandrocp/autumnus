@@ -70,8 +70,6 @@ defmodule Lumis.Native do
   def resolve_language_package(_name, _package_json), do: :erlang.nif_error(:nif_not_loaded)
   def load_language(_name, _package_json, _wasm), do: :erlang.nif_error(:nif_not_loaded)
 
-  # Cache mechanics live in lumis-wasm-runtime so this loader and the CLI cannot
-  # drift on verification, atomic writes or locking.
   def cache_verify(_sha256, _size, _wasm), do: :erlang.nif_error(:nif_not_loaded)
   def cache_write(_path, _contents), do: :erlang.nif_error(:nif_not_loaded)
   def has_language(_name), do: :erlang.nif_error(:nif_not_loaded)

@@ -1,12 +1,4 @@
-/**
- * Pins the JavaScript cache timings to the Rust definitions they port.
- *
- * The browser cannot call Rust, so `src/cache-timing.ts` is a genuine port —
- * the kind `AGENTS.md` requires to be held against its original by a test.
- * These constants previously appeared as bare numbers in `node-cache.ts` and
- * `core/languages.ts` and agreed with `crates/lumis-wasm-runtime` only because
- * one person wrote both.
- */
+/** Pins the JavaScript cache timings to the Rust definitions they port. */
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
