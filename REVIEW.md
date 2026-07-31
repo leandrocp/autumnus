@@ -981,12 +981,16 @@ user-facing. Worth documenting the whole chain in one place.
 
 New in the second pass:
 
-- **The lock deadline is shorter than the staleness threshold**, in all three implementations: they
-  wait 120 s for a lock but only treat it as stale after 300 s (`registry.rs:558/575`,
-  `node-cache.ts:100/110`, `language_loader.ex:6-7`). If a process dies holding the lock there is a
-  **180-second window where every other process fails outright** instead of waiting. Make the
-  deadline exceed the staleness threshold, or release on holder-PID disappearance. At least the
-  three agree with each other.
+- **The lock deadline is shorter than the staleness threshold**, now only in Node
+  (`node-cache.ts`): it waits 120 s for a lock but treats one as stale only after 300 s, so a
+  process that dies holding it makes every other process **fail outright for 180 seconds**. Make
+  the deadline exceed the staleness threshold, or record the holder's pid and release when it
+  disappears.
+
+  The other two runtimes no longer share this. Rust dropped its file lock entirely — `store.rs`
+  converges without one — and Elixir's `Lumis.Loader` monitors the holder, so a dead caller
+  releases the key immediately, with a test for it. Node is the last place a dead holder is
+  invisible, because a lock file cannot tell you whether its owner is alive.
 - **`matchesSpecialCapture(name, base)` is `name === base`** (`languages.ts:338`) — a function
   wrapping `===`, called at 12 sites. It presumably used to do prefix matching. Inline it.
 - **Inconsistent lock-poison handling in the CLI `Registry`**: `load_wasm_language` turns a poisoned

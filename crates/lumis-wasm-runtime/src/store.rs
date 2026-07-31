@@ -35,8 +35,6 @@ pub enum StoreError {
     PackageNameMismatch { expected: String, actual: String },
     #[error("language package is not UTF-8 JSON")]
     NotUtf8,
-    #[error("timed out waiting for cache lock: {0}")]
-    LockTimeout(String),
     #[error("{context}: {source}")]
     Io {
         context: String,
