@@ -43,8 +43,9 @@ reproducible test pins the behavior.
 | 1.7 Two dead query patterns in `vim` and `sql` | **DONE** (re-verified) |
 | 2 Query compilation silently skips 67% of languages | **DONE**, but the waiver is now stale — see §0 |
 | 3 `#offset!` removed, regression blessed into fixtures | **DONE** |
-| 4.1 `@latest` at runtime | open — the format-bump half is closed by §4.9; pinning remains |
-| 4.2–4.6 Production risks | open, all re-verified present |
+| 4.1 `@latest` at runtime | **Won't fix, by design** — pinning would undo release-free parser updates; the guard is pre-publish CI |
+| 4.2, 4.3, 4.4, 4.6 Production risks | open |
+| 4.5 `crypto.subtle` on non-secure origins | **DONE** — pure-JS SHA-256 fallback, pinned against `crypto.subtle` |
 | 4.7 Same `language.json` accepted by Rust, rejected by JS | **DONE** |
 | 4.8 Package resolution precedence differs per runtime | **DONE** |
 | 4.9 `formatVersion` runtime gate removed | **DONE** |
@@ -607,36 +608,22 @@ path-dependency change. Elixir conformance failed 15 cases against a stale `lumi
 
 ## 4. Production risks worth a decision before release
 
-### 4.1 `@latest` at runtime is the biggest architectural change nobody has flagged
+### 4.1 `@latest` at runtime — won't fix, by design
 
-Three independent implementations resolve language metadata from a floating tag:
+Resolving `@latest` means a bad publish reaches every deployed client within the
+one-hour metadata TTL, with no consumer-side pin to roll back to. That is the
+cost of the feature rather than a defect: shipping parser and query updates
+without a runtime release is the point of this change, and pinning versions in
+the generated catalog would reintroduce exactly the release coupling it removes.
 
-- `packages/javascript/lumis/src/core/languages.ts:170`
-- `crates/lumis-cli/src/registry.rs:357`
-- `packages/elixir/lumis/lib/lumis/language_loader.ex:341`
+Integrity metadata does not help either. The SHA-256 is read from the same
+`language.json` that `@latest` resolved, so a bad-but-self-consistent publish
+verifies cleanly. The guard has to sit before publication, not after.
 
-```
-https://cdn.jsdelivr.net/npm/<pkg>@latest/language.json
-```
-
-On `main`, `WasmRef.version` was baked into the shipped runtime package, so a deployed build was
-reproducible. Now every deployment resolves whatever is newest, with a 1-hour TTL.
-
-- The SHA-256 check is **not** a pinned trust anchor. The digest comes from the same
-  `language.json` that `@latest` served, so it protects against a corrupted transfer or cache, not
-  against a bad or compromised publish. Worth saying plainly in the docs, which currently imply
-  stronger guarantees than this provides.
-- A single bad language-package publish propagates to every running deployment within an hour,
-  with no client-side pin and no rollback lever short of unpublishing.
-- ~~`LANGUAGE_PACKAGE_FORMAT_VERSION` is a hard equality check. The day a package publishes
-  `formatVersion: 4`, **every already-deployed older client breaks**, because they all follow
-  `@latest`.~~ **DONE — the runtime gate was removed entirely.** See §4.9.
-- Warm-cache-then-offline is the safe pattern and works. Warm-cache-then-*online* does not: a
-  publish between image build and pod start invalidates every prefetched parser and re-downloads
-  at runtime. Document this; it is the failure mode people will actually hit.
-
-Minimum ask for what remains: make the resolved version pinnable by the consumer, so a deployment
-can stop tracking `@latest`. The format-bump half of this item is closed by §4.9.
+That guard is `queries.yml`: every language compiles its processed queries
+against its pinned grammar and then runs them over that language's `samples/`
+file, so a query that compiles but fails on real input is caught before the
+package is built.
 
 ### 4.9 `formatVersion` removed from the runtime — DONE
 
@@ -757,16 +744,23 @@ Also in the CLI:
   **583 ms for ten**. Cache `tree_sitter::Language` + `HighlightConfiguration` per package and
   reuse one store.
 
-### 4.5 `crypto.subtle` is secure-context-only — parser loading breaks on plain HTTP
+### 4.5 `crypto.subtle` is secure-context-only — DONE
 
-`languages.ts:318` calls `globalThis.crypto.subtle.digest` unconditionally. In browsers
-`crypto.subtle` is `undefined` on non-secure origins, so `verifyWasm` throws a `TypeError` and
-**every** language load fails on `http://` pages (intranet, LAN dev servers, some embedded
-webviews). `CacheStorage` is guarded for exactly this (`browser.ts:19` falls back to IndexedDB);
-`crypto.subtle` is not. On `main` there was no digest at all, so this is a new failure mode.
+`sha256Hex` called `globalThis.crypto.subtle.digest` unconditionally. Browsers withhold
+`crypto.subtle` from non-secure origins, so `verifyWasm` threw `TypeError: Cannot read properties
+of undefined (reading 'digest')` and **every** language load failed on `http://` pages (intranet,
+LAN dev servers, some embedded webviews). `CacheStorage` was already guarded for exactly this
+(`browser.ts` falls back to IndexedDB); `crypto.subtle` was not.
 
-Decide the policy explicitly: fail closed with a clear error, or fall back to size-only
-verification with a warning. Don't `TypeError`.
+**Fixed.** `src/core/sha256.ts` is a self-contained SHA-256 used when `crypto.subtle` is
+unavailable, so verification never weakens and never has to be opted out of. No new dependency and
+no configuration.
+
+Per the porting rule in `AGENTS.md`, `test/sha256.test.ts` pins it against the implementation it
+stands in for: the published test vectors, then `crypto.subtle` itself over every padding boundary
+and 50 random inputs. A fourth test deletes `crypto.subtle` from `globalThis` and asserts
+`verifyWasm` both accepts correct bytes and still rejects wrong ones. Restoring the unguarded call
+turns that test red with the original `TypeError`.
 
 ### 4.6 Node loses its fast path with no replacement
 
@@ -1189,9 +1183,9 @@ Blocking:
    about a waiver covering 71% of the catalog (§0). The branch is red until this is done.
 4. ~~Decide on `#offset!`: implement in Rust, or revert the JS removal.~~ **DONE** — implemented in
    Rust and restored in JS; see §3. All five runtimes pass conformance.
-5. Replace `@latest` with a format-scoped dist-tag or an accepted version range, and add a
-   consumer-visible pin. Resolve how a `formatVersion` bump reaches already-deployed clients (§4.1).
-6. Guard `crypto.subtle` for non-secure contexts (§4.5).
+5. ~~Replace `@latest` with a pinned range.~~ **Won't fix** — see §4.1. The `formatVersion`
+   half is closed by §4.9.
+6. ~~Guard `crypto.subtle` for non-secure contexts.~~ **DONE** — see §4.5.
 7. ~~Add the shared language-package fixture corpus and align the Rust/TS validators.~~
    **DONE** — see §4.7. 24 fixtures, two test suites, four injected faults.
 

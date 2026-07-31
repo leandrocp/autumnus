@@ -2,6 +2,7 @@ import type { Language, Query as TreeSitterQuery } from "web-tree-sitter";
 import { PACKAGE_CACHE_TTL_MS } from "../cache-timing.js";
 import { buildHighlightEvents } from "../events.js";
 import { LANGUAGES } from "../generated/languages-meta.js";
+import { sha256 } from "./sha256.js";
 import { HIGHLIGHT_NAMES } from "../highlights.js";
 import type { RuntimeEnvironment } from "../runtime/runtime.js";
 import type {
@@ -343,15 +344,22 @@ async function trackLoad<T>(
   }
 }
 
+function hex(bytes: Uint8Array): string {
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
 async function sha256Hex(data: Uint8Array): Promise<string> {
+  // Browsers withhold crypto.subtle from non-secure origins, so plain HTTP
+  // reaches here with it undefined rather than merely slower.
+  if (!globalThis.crypto?.subtle) return hex(sha256(data));
+
   const bytes =
     data.buffer instanceof ArrayBuffer &&
     data.byteOffset === 0 &&
     data.byteLength === data.buffer.byteLength
       ? data.buffer
       : data.slice().buffer;
-  const digest = await globalThis.crypto.subtle.digest("SHA-256", bytes);
-  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+  return hex(new Uint8Array(await globalThis.crypto.subtle.digest("SHA-256", bytes)));
 }
 
 /** @internal */
