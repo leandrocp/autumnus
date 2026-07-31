@@ -103,6 +103,18 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
 
+      - name: Emscripten version from mise.toml
+        id: emsdk
+        run: |
+          set -euo pipefail
+          version="$(python3 -c "import tomllib;print(tomllib.load(open('mise.toml','rb'))['env']['LUMIS_EMSDK_VERSION'])")"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - uses: mymindstorm/setup-emsdk@v16
+        with:
+          version: ${{ steps.emsdk.outputs.version }}
+          actions-cache-folder: emsdk-cache
+
       - name: Select this shard
         id: shard
         run: |

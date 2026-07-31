@@ -2,9 +2,13 @@
 
 [tools]
 tree-sitter = "0.26"
-# Emscripten 5 and 6 build Tree-sitter side modules whose external scanner exports
-# web-tree-sitter cannot bind. See the Emscripten section in AGENTS.md.
-emsdk = "4.0.15"
+
+[env]
+# Emscripten used to build parser WASM. Declared here so the workflows and a
+# developer machine agree on one version, but deliberately not a [tools] entry:
+# mise's asdf emsdk plugin fails to install on Linux runners, so CI reads this
+# value and installs it with setup-emsdk instead.
+LUMIS_EMSDK_VERSION = "4.0.15"
 
 [tasks.'setup']
 description = "Install dependencies and check required tools"

@@ -105,7 +105,7 @@ A test that skips silently reports the same green as a test that verified someth
 
 ### Keep Emscripten compatible with Tree-sitter
 
-Emscripten is pinned as `emsdk` in the root `mise.toml`, so every runner and every developer builds parsers with the same toolchain. There is no `setup-emsdk` step; `mise run wasm-build` puts `emcc` on `PATH`.
+Emscripten is pinned once, as `LUMIS_EMSDK_VERSION` under `[env]` in the root `mise.toml`. The workflows read that value and install it with `setup-emsdk`. It is deliberately not a `[tools]` entry: mise's asdf `emsdk` plugin fails to install on Linux runners (`plugins/emsdk/bin/install exited with non-zero status`), which takes every job that runs `mise install` down with it.
 
 This failure looks like a toolchain problem and usually is not:
 
