@@ -3,8 +3,6 @@ defmodule Lumis.LanguageLoader do
 
   alias Lumis.Native
 
-  @lock_timeout_ms 120_000
-  @stale_lock_ms 300_000
   @package_ttl_seconds 3_600
   @plaintext_names ~w(plaintext text txt plain)
 
@@ -99,7 +97,7 @@ defmodule Lumis.LanguageLoader do
   defp resolve_or_reuse_package(handle, path, stale) do
     case resolve_package(handle) do
       {:ok, package_json} ->
-        with :ok <- write_atomic(path, package_json), do: {:ok, package_json}
+        with :ok <- nif_ok(Native.cache_write(path, package_json)), do: {:ok, package_json}
 
       {:error, _reason} when is_binary(stale) ->
         {:ok, stale}
@@ -202,7 +200,7 @@ defmodule Lumis.LanguageLoader do
 
     with_cache_lock(destination, fn ->
       if force? or not valid_package_file?(destination, entry.id) do
-        write_atomic(destination, package_json)
+        nif_ok(Native.cache_write(destination, package_json))
       else
         :ok
       end
@@ -284,8 +282,8 @@ defmodule Lumis.LanguageLoader do
 
   defp resolve_verified_and_write(entry, path) do
     with {:ok, bytes} <- resolve_parser(entry),
-         :ok <- verify(bytes, entry),
-         :ok <- write_atomic(path, bytes) do
+         :ok <- nif_ok(Native.cache_verify(entry.sha256, entry.size, bytes)),
+         :ok <- nif_ok(Native.cache_write(path, bytes)) do
       {:ok, bytes}
     end
   end
@@ -298,29 +296,13 @@ defmodule Lumis.LanguageLoader do
   end
 
   defp validate_cached(path, bytes, entry, remove_invalid?) do
-    case verify(bytes, entry) do
+    case nif_ok(Native.cache_verify(entry.sha256, entry.size, bytes)) do
       :ok ->
         {:ok, bytes}
 
       {:error, _reason} ->
         if remove_invalid?, do: File.rm(path)
         :miss
-    end
-  end
-
-  defp verify(bytes, entry) when byte_size(bytes) != entry.size do
-    {:error,
-     "invalid parser WASM size for '#{entry.id}': expected #{entry.size}, got #{byte_size(bytes)}"}
-  end
-
-  defp verify(bytes, entry) do
-    actual = :sha256 |> :crypto.hash(bytes) |> Base.encode16(case: :lower)
-
-    if actual == entry.sha256 do
-      :ok
-    else
-      {:error,
-       "invalid parser WASM integrity for '#{entry.id}': expected sha256-#{entry.sha256}, got sha256-#{actual}"}
     end
   end
 
@@ -373,16 +355,21 @@ defmodule Lumis.LanguageLoader do
   end
 
   defp package_cache_file(handle), do: Path.join(cache_dir(), package_filename(handle))
+  # Must match `lumis_wasm_runtime::store::parser_filename`, which the CLI uses.
+  defp parser_filename(entry) do
+    "#{entry.wasm_name}-#{entry.version}-#{entry.sha256}.wasm"
+  end
+
+  # Rustler encodes `Result<(), String>` as `{:ok, {}}`, so normalise it.
+  defp nif_ok({:ok, _}), do: :ok
+  defp nif_ok({:error, reason}), do: {:error, reason}
+
   defp parser_cache_file(entry), do: Path.join(cache_dir(), parser_filename(entry))
   defp bundled_package_file(handle), do: Path.join(bundled_dir(), package_filename(handle))
   defp bundled_parser_file(entry), do: Path.join(bundled_dir(), parser_filename(entry))
 
   defp package_filename(package) do
     "#{Path.basename(package.package_name)}.language.json"
-  end
-
-  defp parser_filename(entry) do
-    "#{entry.wasm_name}-#{entry.version}-#{entry.sha256}.wasm"
   end
 
   defp cache_dir do
@@ -418,78 +405,19 @@ defmodule Lumis.LanguageLoader do
     end
   end
 
-  defp write_atomic(path, bytes) do
-    directory = Path.dirname(path)
-    temporary = "#{path}.#{System.unique_integer([:positive])}.tmp"
-
-    try do
-      with :ok <- File.mkdir_p(directory),
-           :ok <- File.write(temporary, bytes, [:exclusive]) do
-        replace_file(temporary, path)
-      end
-    after
-      _ = File.rm(temporary)
-    end
-  end
-
-  defp replace_file(temporary, path) do
-    case File.rename(temporary, path) do
-      :ok ->
-        :ok
-
-      {:error, :eexist} ->
-        with :ok <- File.rm(path), do: File.rename(temporary, path)
-
-      {:error, reason} ->
-        {:error, "failed to cache language package: #{inspect(reason)}"}
-    end
-  end
-
+  # The lock itself is `lumis_wasm_runtime::store`, shared with the CLI. The
+  # sequence around it stays here, because that is where the search order across
+  # `priv/wasm` and the user cache lives.
   defp with_cache_lock(cache_file, operation) do
-    lock_file = cache_file <> ".lock"
-    deadline = now_ms() + @lock_timeout_ms
-
     with :ok <- File.mkdir_p(Path.dirname(cache_file)),
-         {:ok, io} <- acquire_lock(lock_file, deadline) do
+         :ok <- nif_ok(Native.cache_lock(cache_file)) do
       try do
         operation.()
       after
-        File.close(io)
-        _ = File.rm(lock_file)
+        Native.cache_unlock(cache_file)
       end
-    end
-  end
-
-  defp acquire_lock(lock_file, deadline) do
-    case File.open(lock_file, [:write, :exclusive]) do
-      {:ok, io} ->
-        IO.write(io, Integer.to_string(now_ms()))
-        {:ok, io}
-
-      {:error, :eexist} ->
-        clear_stale_lock(lock_file)
-
-        if now_ms() >= deadline do
-          {:error, "timed out waiting for language cache lock"}
-        else
-          Process.sleep(25)
-          acquire_lock(lock_file, deadline)
-        end
-
-      {:error, reason} ->
-        {:error, "failed to lock language cache: #{inspect(reason)}"}
-    end
-  end
-
-  defp clear_stale_lock(lock_file) do
-    with {:ok, contents} <- File.read(lock_file),
-         {created_at, ""} <- Integer.parse(contents),
-         true <- now_ms() - created_at > @stale_lock_ms do
-      File.rm(lock_file)
     else
-      _ -> :ok
+      {:error, reason} -> {:error, "failed to lock language cache: #{inspect(reason)}"}
     end
   end
-
-  defp now_ms, do: System.system_time(:millisecond)
 end

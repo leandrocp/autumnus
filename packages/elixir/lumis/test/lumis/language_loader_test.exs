@@ -167,4 +167,45 @@ defmodule Lumis.LanguageLoaderTest do
     {:ok, entry} = Lumis.Native.resolve_language_package(handle.id, package_json)
     entry
   end
+
+  describe "shared cache primitives" do
+    # lumis-wasm-runtime owns verification, atomic writes and locking so this
+    # loader and the CLI cannot drift. Rustler encodes `Result<(), String>` as
+    # `{:ok, {}}` rather than `:ok`, which silently broke every `with :ok <-`
+    # until these pinned it.
+    test "verification rejects bytes that do not match the digest" do
+      assert {:error, reason} =
+               Lumis.Native.cache_verify(String.duplicate("0", 64), 2, "hi")
+
+      assert reason =~ "integrity"
+    end
+
+    test "verification rejects a size mismatch" do
+      assert {:error, reason} =
+               Lumis.Native.cache_verify(String.duplicate("0", 64), 99, "hi")
+
+      assert reason =~ "size"
+    end
+
+    test "writes are atomic and readable" do
+      path = Path.join(tmp_dir(), "asset.json")
+      assert {:ok, _} = Lumis.Native.cache_write(path, "contents")
+      assert File.read!(path) == "contents"
+    end
+
+    test "a lock can be taken, released and retaken" do
+      path = Path.join(tmp_dir(), "locked.json")
+      assert {:ok, _} = Lumis.Native.cache_lock(path)
+      assert {:ok, _} = Lumis.Native.cache_unlock(path)
+      assert {:ok, _} = Lumis.Native.cache_lock(path)
+      assert {:ok, _} = Lumis.Native.cache_unlock(path)
+    end
+
+    defp tmp_dir do
+      dir = Path.join(System.tmp_dir!(), "lumis-cache-#{:erlang.unique_integer([:positive])}")
+      File.mkdir_p!(dir)
+      on_exit(fn -> File.rm_rf(dir) end)
+      dir
+    end
+  end
 end

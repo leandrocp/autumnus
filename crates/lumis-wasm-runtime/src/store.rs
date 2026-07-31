@@ -434,6 +434,20 @@ pub fn with_cache_lock<T>(
     path: &Path,
     operation: impl FnOnce() -> Result<T, StoreError>,
 ) -> Result<T, StoreError> {
+    lock_acquire(path)?;
+    let result = operation();
+    lock_release(path);
+    result
+}
+
+/// Take the cache lock for `path`, blocking until it is free or stale.
+///
+/// Exposed separately for hosts that cannot pass a closure across their FFI
+/// boundary, such as the Elixir NIF. Pair every call with [`lock_release`].
+///
+/// # Errors
+/// Fails when the lock cannot be taken within [`LOCK_TIMEOUT`].
+pub fn lock_acquire(path: &Path) -> Result<(), StoreError> {
     let lock_path = path.with_extension("lock");
     if let Some(parent) = lock_path.parent() {
         std::fs::create_dir_all(parent).map_err(|error| {
@@ -449,10 +463,8 @@ pub fn with_cache_lock<T>(
             .open(&lock_path)
         {
             Ok(lock) => {
-                let result = operation();
                 drop(lock);
-                let _ = std::fs::remove_file(&lock_path);
-                return result;
+                return Ok(());
             }
             Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => {
                 if cache_is_fresh(&lock_path, LOCK_STALE_AFTER) {
@@ -468,6 +480,11 @@ pub fn with_cache_lock<T>(
             Err(error) => return Err(StoreError::io("failed to lock cache", error)),
         }
     }
+}
+
+/// Release a lock taken with [`lock_acquire`]. Safe to call when it is already gone.
+pub fn lock_release(path: &Path) {
+    let _ = std::fs::remove_file(path.with_extension("lock"));
 }
 
 #[cfg(test)]

@@ -7,7 +7,7 @@ mod elixir;
 use elixir::{ExCssOptions, ExFormatterOption, ExTheme};
 use lumis_core::events::HighlightEvent;
 use lumis_core::{languages, themes};
-use lumis_wasm_runtime::{catalog, LanguagePackage, LanguageSpec, Runtime, RuntimeError};
+use lumis_wasm_runtime::{catalog, store, LanguagePackage, LanguageSpec, Runtime, RuntimeError};
 use once_cell::sync::Lazy;
 use parking_lot::RwLock;
 use rustler::{Binary, Encoder, Env, Error, NifMap, NifResult, Term};
@@ -140,6 +140,7 @@ rustler::atoms! {
     ok,
     error,
     language_not_loaded,
+    miss,
 }
 
 rustler::init!("Elixir.Lumis.Native");
@@ -259,6 +260,53 @@ fn language_package_refs() -> Vec<ExLanguagePackageRef<'static>> {
         .iter()
         .map(ExLanguagePackageRef::from)
         .collect()
+}
+
+/// Cache mechanics shared with the CLI, exposed so the Elixir loader does not
+/// reimplement verification, atomic writes and locking in another language.
+/// Deliberately layout-independent -- Elixir passes explicit paths -- because the
+/// Elixir release layout is not the CLI's. Elixir keeps what is genuinely its own:
+/// the configurable `:wasm_resolver` and `:language_package_resolver` hooks, the
+/// download, and the search order across `priv/wasm` and the user cache.
+/// Check parser bytes against the declared size and digest. Takes the two fields
+/// directly rather than the package, because Elixir carries a resolved entry.
+#[rustler::nif(schedule = "DirtyCpu")]
+fn cache_verify(sha256: &str, size: usize, wasm: Binary) -> Result<(), String> {
+    let bytes = wasm.as_slice();
+    if bytes.len() != size {
+        return Err(format!(
+            "invalid parser WASM size: expected {size}, got {}",
+            bytes.len()
+        ));
+    }
+    let actual = lumis_wasm_runtime::sha256_hex(bytes);
+    if actual != sha256 {
+        return Err(format!(
+            "invalid parser WASM integrity: expected sha256-{sha256}, got sha256-{actual}"
+        ));
+    }
+    Ok(())
+}
+
+/// Write through a temporary file and rename, so a reader never sees a partial file.
+#[rustler::nif(schedule = "DirtyIo")]
+fn cache_write(path: &str, contents: Binary) -> Result<(), String> {
+    store::write_atomic(std::path::Path::new(path), contents.as_slice())
+        .map_err(|error| error.to_string())
+}
+
+/// Take the cache lock for `path`, waiting for a live holder and taking over a
+/// stale one. Paired with `cache_unlock`; Elixir keeps the surrounding sequence
+/// because that is where its search order lives.
+#[rustler::nif(schedule = "DirtyIo")]
+fn cache_lock(path: &str) -> Result<(), String> {
+    store::lock_acquire(std::path::Path::new(path)).map_err(|error| error.to_string())
+}
+
+#[rustler::nif(schedule = "DirtyIo")]
+fn cache_unlock(path: &str) -> Result<(), String> {
+    store::lock_release(std::path::Path::new(path));
+    Ok(())
 }
 
 #[rustler::nif]
