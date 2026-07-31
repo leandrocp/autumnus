@@ -1,4 +1,4 @@
-defmodule Mix.Tasks.Lumis.Parsers.Cache do
+defmodule Mix.Tasks.Lumis.Languages.Cache do
   @moduledoc """
   Caches exact, integrity-checked Lumis parser WASMs for an OTP release.
 
@@ -14,9 +14,9 @@ defmodule Mix.Tasks.Lumis.Parsers.Cache do
   This task only fetches what that configuration names. It takes no language
   arguments, so there is one place to look when a release ships the wrong set.
 
-      mix lumis.parsers.cache
-      mix lumis.parsers.cache --force
-      mix lumis.parsers.cache --output priv/wasm
+      mix lumis.languages.cache
+      mix lumis.languages.cache --force
+      mix lumis.languages.cache --output priv/wasm
 
   Parsers are verified against the size and SHA-256 in their language package
   before being written, and an existing valid file is left alone unless

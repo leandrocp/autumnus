@@ -14,7 +14,7 @@ defmodule Lumis.Languages do
       :ok = Lumis.Languages.load(["elixir", "html"])
 
   Or cache parsers at build time, for a release that must run without network
-  access. `mix lumis.parsers.cache` is the usual entry point and reads
+  access. `mix lumis.languages.cache` is the usual entry point and reads
   `config :lumis, :bundled_languages`.
 
   ## Where parsers come from
@@ -26,7 +26,7 @@ defmodule Lumis.Languages do
 
   ## Configuration
 
-    * `:bundled_languages` — languages `mix lumis.parsers.cache` should fetch,
+    * `:bundled_languages` — languages `mix lumis.languages.cache` should fetch,
       a list or `:all`
     * `:wasm_bundle_dir` — where release-local parsers live, default
       `priv/wasm`

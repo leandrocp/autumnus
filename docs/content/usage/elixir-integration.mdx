@@ -64,7 +64,7 @@ config :lumis, bundled_languages: ~w(elixir html javascript css)
 ```
 
 ```bash title="Build an offline-ready release"
-MIX_ENV=prod mix do compile, lumis.parsers.cache, release
+MIX_ENV=prod mix do compile, lumis.languages.cache, release
 ```
 
 Use `bundled_languages: :all` to bundle the whole catalog, `--force` to replace

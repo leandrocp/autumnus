@@ -62,7 +62,7 @@ For OTP releases, cache the exact parsers in the release-local `priv/wasm`
 directory at build time:
 
 ```sh
-MIX_ENV=prod mix do compile, lumis.parsers.cache elixir html javascript css, release
+MIX_ENV=prod mix do compile, lumis.languages.cache, release
 ```
 
 The runtime checks release-local assets first, then the persistent user cache.

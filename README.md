@@ -106,7 +106,7 @@ Lumis.highlight!("const x = 1", formatter: {:html_inline, language: "javascript"
 ```
 
 Elixir uses the same per-language parser WASM model. Missing languages load
-automatically. Use `mix lumis.parsers.cache ...` while building an OTP release,
+automatically. Use `mix lumis.languages.cache` while building an OTP release,
 then `Lumis.Languages.load/1` to compile expected parsers at application
 startup.
 

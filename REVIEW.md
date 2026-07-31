@@ -694,7 +694,7 @@ blocks every other node. This is node-local work; use a node-local mechanism (Ge
 Related: `Lumis.highlight/2` now performs blocking network I/O inside the caller
 (`highlight_with_language_loading`), and re-runs the full native highlight after each load — for a
 markdown doc with six injected languages that is seven full passes on first use. Combined with the
-global lock, first traffic after a deploy is the worst case. `mix lumis.parsers.cache` +
+global lock, first traffic after a deploy is the worst case. `mix lumis.languages.cache` +
 `:wasm_offline` should be the *documented default* for releases, not an option.
 
 ### 4.3a The seven passes are not the retry loop's fault — new

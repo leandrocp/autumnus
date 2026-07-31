@@ -121,10 +121,10 @@ defmodule Lumis.LanguagesTest do
 
     output =
       capture_io(fn ->
-        Mix.Task.reenable("lumis.parsers.cache")
+        Mix.Task.reenable("lumis.languages.cache")
         Application.put_env(:lumis, :bundled_languages, ["comment"])
         on_exit(fn -> Application.delete_env(:lumis, :bundled_languages) end)
-        Mix.Task.run("lumis.parsers.cache", ["--output", output_dir])
+        Mix.Task.run("lumis.languages.cache", ["--output", output_dir])
       end)
 
     assert output =~ "tree-sitter-comment-"

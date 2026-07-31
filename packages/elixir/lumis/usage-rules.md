@@ -91,7 +91,7 @@ Missing languages load automatically as exact, integrity-checked WASM assets.
 For releases, cache them at build time:
 
 ```sh
-MIX_ENV=prod mix do compile, lumis.parsers.cache elixir html javascript css, release
+MIX_ENV=prod mix do compile, lumis.languages.cache, release
 ```
 
 Then load the languages an application expects so Wasmtime compilation
