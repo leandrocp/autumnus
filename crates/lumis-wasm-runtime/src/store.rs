@@ -385,11 +385,18 @@ fn cache_is_fresh(path: &Path, ttl: Duration) -> bool {
         .is_ok_and(|elapsed| elapsed < ttl)
 }
 
-/// Write via a temporary file and rename, so a reader never sees a partial file.
+/// Replace `path` atomically, so a reader never sees a partial file.
+///
+/// `NamedTempFile` supplies the unique name and `persist` the replacing rename,
+/// including on Windows where a plain rename onto an existing file fails. Doing
+/// this by hand is what let several threads in one process share a temporary and
+/// clobber each other, so it is worth the dependency.
 ///
 /// # Errors
-/// Fails when the parent cannot be created or the rename cannot be completed.
+/// Fails when the parent cannot be created, or the file cannot be written or moved.
 pub fn write_atomic(path: &Path, bytes: &[u8]) -> Result<(), StoreError> {
+    use std::io::Write;
+
     let parent = path.parent().ok_or_else(|| {
         StoreError::io(
             format!("cache path has no parent: {}", path.display()),
@@ -399,42 +406,15 @@ pub fn write_atomic(path: &Path, bytes: &[u8]) -> Result<(), StoreError> {
     std::fs::create_dir_all(parent)
         .map_err(|error| StoreError::io(format!("could not create {}", parent.display()), error))?;
 
-    // Unique per call, not merely per process: several threads in one process
-    // write the same cache path, and a shared temporary name makes them clobber
-    // each other's partial writes.
-    static WRITE_SEQUENCE: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
-    let temporary = parent.join(format!(
-        ".{}.{}.{}.tmp",
-        path.file_name()
-            .and_then(|name| name.to_str())
-            .unwrap_or("asset"),
-        std::process::id(),
-        WRITE_SEQUENCE.fetch_add(1, std::sync::atomic::Ordering::Relaxed)
-    ));
-
-    let result = (|| -> Result<(), std::io::Error> {
-        std::fs::write(&temporary, bytes)?;
-        if let Err(error) = std::fs::rename(&temporary, path) {
-            // Windows refuses to rename onto an existing file.
-            if matches!(
-                error.kind(),
-                std::io::ErrorKind::AlreadyExists | std::io::ErrorKind::PermissionDenied
-            ) {
-                std::fs::remove_file(path)?;
-                std::fs::rename(&temporary, path)?;
-            } else {
-                return Err(error);
-            }
-        }
-        Ok(())
-    })();
-    let _ = std::fs::remove_file(&temporary);
-    result.map_err(|error| {
-        StoreError::io(
-            format!("failed to cache asset at {}", path.display()),
-            error,
-        )
-    })
+    let context = || format!("failed to cache asset at {}", path.display());
+    // Created beside the target so the rename stays on one filesystem.
+    let mut file = tempfile::NamedTempFile::new_in(parent)
+        .map_err(|error| StoreError::io(context(), error))?;
+    file.write_all(bytes)
+        .map_err(|error| StoreError::io(context(), error))?;
+    file.persist(path)
+        .map_err(|error| StoreError::io(context(), error.error))?;
+    Ok(())
 }
 
 #[cfg(test)]

@@ -1,14 +1,8 @@
-# Project task runner configuration. Runtime versions are generally not pinned.
-
 [tools]
 actionlint = "1.7.12"
-tree-sitter = "0.26"
+tree-sitter = "latest"
 
 [env]
-# Emscripten used to build parser WASM. Declared here so the workflows and a
-# developer machine agree on one version, but deliberately not a [tools] entry:
-# mise's asdf emsdk plugin fails to install on Linux runners, so CI reads this
-# value and installs it with setup-emsdk instead.
 LUMIS_EMSDK_VERSION = "4.0.15"
 
 [tasks.'setup']

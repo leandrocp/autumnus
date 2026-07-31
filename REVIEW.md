@@ -1147,11 +1147,26 @@ Raised during review, tracked here and fixed one at a time.
 | 10.3 | Emscripten version read with an inline `python3 -c tomllib` hack; mise should report it | **DONE** — `mise exec -- printenv LUMIS_EMSDK_VERSION` |
 | 10.4 | `wasmparser` is not on the latest version | **DONE** — 0.244 → 0.255 |
 | 10.5 | `store.rs` uses a single CDN with no fallback | **DONE** — jsDelivr then unpkg, in all three runtimes |
-| 10.6 | `LUMIS_WASM_OFFLINE` adds an env var; reduce instead | open |
-| 10.7 | `write_atomic` is hand-rolled; check for a crate or std equivalent | open |
+| 10.6 | `LUMIS_WASM_OFFLINE` adds an env var; reduce instead | **Won't fix, with evidence** — all three wasm env vars are load-bearing; see below |
+| 10.7 | `write_atomic` is hand-rolled; check for a crate or std equivalent | **DONE** — `tempfile::NamedTempFile::persist`, 40 lines → 22 |
 | 10.8 | `webgpu_compute_reduce.html` is vendored; the demo should not need it in-repo | open |
 | 10.9 | Elixir has two sources of truth for which languages to cache | open |
 | 10.10 | `Lumis.LanguageLoader` → `Lumis.Languages`, a proper context with a public `load` | open |
+
+### 10.6 — why the three wasm env vars all stay
+
+Reducing the count would cost capability. Each was tested by removing it:
+
+| Variable | Read by | What breaks without it |
+| --- | --- | --- |
+| `LUMIS_WASM_CACHE_DIR` | Rust, JavaScript, Elixir | nowhere to persist |
+| `LUMIS_WASM_SOURCE_DIR` | Rust only | `lumis parsers cache --directory` prefetches *into another directory*, so it needs somewhere to read from that is not the cache it is writing. Removing it fails `cache_parsers_to_temp_dir` and `cache_parsers_force_replaces_existing_file`. |
+| `LUMIS_WASM_OFFLINE` | Rust, JavaScript, Elixir | no way to enforce "never touch the network at runtime", which §4.1 identifies as the safe deployment pattern |
+
+`SOURCE_DIR` looked redundant, since it shares an on-disk layout with the cache and the CLI tests copy fixtures into the data directory anyway. Conformance does pass without it. The two prefetch tests do not, and that is a real user-facing command rather than a test artifact.
+
+`OFFLINE` is also layered rather than duplicated in Elixir: `config :lumis, wasm_offline: true` takes precedence and the variable is the default, which is what containers want.
+
 
 ---
 
