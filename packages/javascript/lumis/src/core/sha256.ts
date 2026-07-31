@@ -11,7 +11,9 @@ const K = new Uint32Array([
 
 /**
  * SHA-256 for hosts without `crypto.subtle`, which browsers withhold from
- * non-secure origins. Pinned against `crypto.subtle` in `test/sha256.test.ts`.
+ * non-secure origins. This is a fallback, not a second implementation: only one
+ * path runs per environment, and `test/sha256.test.ts` pins this one against
+ * `crypto.subtle` so they cannot drift.
  */
 export function sha256(data: Uint8Array): Uint8Array {
   const h = new Uint32Array([

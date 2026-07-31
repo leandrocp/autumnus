@@ -350,7 +350,8 @@ function hex(bytes: Uint8Array): string {
 
 async function sha256Hex(data: Uint8Array): Promise<string> {
   // Browsers withhold crypto.subtle from non-secure origins, so plain HTTP
-  // reaches here with it undefined rather than merely slower.
+  // reaches here with it undefined. Keep the native path: on a 1.6 MiB parser
+  // it is 1.3 ms against 35.9 ms, and this runs on every load, cache hits too.
   if (!globalThis.crypto?.subtle) return hex(sha256(data));
 
   const bytes =

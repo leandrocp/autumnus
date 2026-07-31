@@ -756,6 +756,11 @@ LAN dev servers, some embedded webviews). `CacheStorage` was already guarded for
 unavailable, so verification never weakens and never has to be opted out of. No new dependency and
 no configuration.
 
+The native path stays because it is not free to drop: on a 1.6 MiB parser `crypto.subtle` takes
+1.3 ms against 35.9 ms, and `verifyWasm` runs on every load, cache hits included. Only one path
+runs per environment, the same shape as `browser.ts` falling back from `CacheStorage` to
+IndexedDB.
+
 Per the porting rule in `AGENTS.md`, `test/sha256.test.ts` pins it against the implementation it
 stands in for: the published test vectors, then `crypto.subtle` itself over every padding boundary
 and 50 random inputs. A fourth test deletes `crypto.subtle` from `globalThis` and asserts
