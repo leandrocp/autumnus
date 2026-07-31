@@ -406,19 +406,10 @@ defmodule Lumis.Languages do
 
   # Every mirror serving the same 404 is one fact, not two, so say it once.
   defp download_error(description, failures) do
-    case failures |> Enum.map(fn {_url, reason} -> reason end) |> Enum.uniq() do
-      [reason] ->
-        hosts = Enum.map_join(failures, ", ", fn {url, _} -> URI.parse(url).host end)
-        "could not download #{description}: #{reason} (tried #{hosts})"
+    reasons =
+      failures |> Enum.map(fn {_url, reason} -> reason end) |> Enum.uniq() |> Enum.join("; ")
 
-      _ ->
-        detail =
-          Enum.map_join(failures, "; ", fn {url, reason} ->
-            "#{URI.parse(url).host}: #{reason}"
-          end)
-
-        "could not download #{description}: #{detail}"
-    end
+    "could not download #{description}: #{reasons}"
   end
 
   defp parser_description(entry) do

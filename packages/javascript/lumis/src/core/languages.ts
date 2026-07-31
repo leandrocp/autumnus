@@ -183,42 +183,17 @@ export const DEFAULT_LANGUAGE_PACKAGE_RESOLVER: LanguagePackageResolver = (packa
 /** Only used with the default resolver; a custom resolver names one location. */
 async function fetchFromCdns(primary: string, isDefault: boolean): Promise<Response> {
   const urls = isDefault ? CDNS.map((base) => primary.replace(CDNS[0], base)) : [primary];
-  const failures: { host: string; reason: string }[] = [];
+  const failures: string[] = [];
   for (const url of urls) {
-    const host = cdnHost(url);
     try {
       const response = await fetch(url);
       if (response.ok) return response;
-      failures.push({ host, reason: `HTTP ${response.status} ${response.statusText}`.trim() });
+      failures.push(`HTTP ${response.status} ${response.statusText}`.trim());
     } catch (error) {
-      failures.push({ host, reason: error instanceof Error ? error.message : String(error) });
+      failures.push(error instanceof Error ? error.message : String(error));
     }
   }
-  throw new Error(describeFailures(failures));
-}
-
-/**
- * A resolver may return a relative URL, which `new URL` alone rejects, so fall
- * back to the value itself rather than failing the download over a label.
- *
- * @internal
- */
-export function cdnHost(url: string): string {
-  try {
-    return new URL(url, globalThis.location?.href).host || url;
-  } catch {
-    return url;
-  }
-}
-
-/** Every mirror serving the same 404 is one fact, not two, so say it once. */
-function describeFailures(failures: { host: string; reason: string }[]): string {
-  const hosts = failures.map(({ host }) => host).join(", ");
-  const first = failures[0]?.reason;
-  if (first !== undefined && failures.every(({ reason }) => reason === first)) {
-    return `${first} (tried ${hosts})`;
-  }
-  return failures.map(({ host, reason }) => `${host}: ${reason}`).join("; ");
+  throw new Error([...new Set(failures)].join("; "));
 }
 
 const HIGHLIGHT_NAMES_SET = new Set(HIGHLIGHT_NAMES);

@@ -63,13 +63,3 @@ describe("verifyWasm without crypto.subtle", () => {
     }
   });
 });
-
-describe("cdnHost", () => {
-  it("labels a relative resolver URL instead of throwing", async () => {
-    const { cdnHost } = await import("../src/core/languages.js");
-    // A custom resolver may return a path; `new URL` alone rejects it, which
-    // previously failed every browser parser load with "Invalid URL".
-    expect(cdnHost("/wasm/tree-sitter-javascript.wasm")).toBe("/wasm/tree-sitter-javascript.wasm");
-    expect(cdnHost("https://cdn.jsdelivr.net/npm/x.wasm")).toBe("cdn.jsdelivr.net");
-  });
-});

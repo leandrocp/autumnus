@@ -232,12 +232,13 @@ impl LanguageStore {
         for base in CDNS {
             match self.fetcher.get(&format!("{base}/{path}")) {
                 Ok(bytes) => return Ok(bytes),
-                Err(message) => failures.push((host_of(base), message)),
+                Err(message) => failures.push(message),
             }
         }
+        failures.dedup();
         Err(StoreError::Fetch {
             description: description.to_string(),
-            message: describe_failures(&failures),
+            message: failures.join("; "),
         })
     }
 
@@ -307,30 +308,6 @@ impl LanguageStore {
         write_atomic(path, &bytes)?;
         Ok(bytes)
     }
-}
-
-/// `https://cdn.jsdelivr.net/npm` becomes `cdn.jsdelivr.net`.
-fn host_of(base: &str) -> &str {
-    base.trim_start_matches("https://")
-        .trim_start_matches("http://")
-        .split('/')
-        .next()
-        .unwrap_or(base)
-}
-
-/// Every mirror serving the same 404 is one fact, not two, so say it once.
-fn describe_failures(failures: &[(&str, String)]) -> String {
-    let hosts: Vec<&str> = failures.iter().map(|(host, _)| *host).collect();
-    if let Some((_, first)) = failures.first() {
-        if failures.iter().all(|(_, message)| message == first) {
-            return format!("{first} (tried {})", hosts.join(", "));
-        }
-    }
-    failures
-        .iter()
-        .map(|(host, message)| format!("{host}: {message}"))
-        .collect::<Vec<_>>()
-        .join("; ")
 }
 
 /// `@lumis-sh/wasm-rust` becomes `rust`, so cache filenames stay readable.
@@ -509,10 +486,6 @@ mod tests {
         let dir = tempdir();
         let store = make(dir.path(), Box::new(NoNetwork));
         let error = store.parser(&package()).unwrap_err().to_string();
-        for base in CDNS {
-            let host = host_of(base);
-            assert!(error.contains(host), "{host} missing from: {error}");
-        }
         assert!(
             error.contains("parser WASM @lumis-sh/wasm-json@1.2.3"),
             "the error must name what failed: {error}"
