@@ -1,6 +1,6 @@
 [tools]
 actionlint = "1.7.12"
-tree-sitter = "latest"
+tree-sitter = "0.26"
 
 [env]
 LUMIS_EMSDK_VERSION = "4.0.15"
@@ -40,14 +40,20 @@ check_python311() {
 }
 
 check_tree_sitter_cli() {
-    if ! command -v tree-sitter &>/dev/null; then
-        echo "  ✗ tree-sitter -- tree-sitter-cli >= 0.26 is needed for WASM builds"
+    local binary mise_dir
+    mise_dir="$(mise where tree-sitter 2>/dev/null || true)"
+    if [[ -n "$mise_dir" && -x "$mise_dir/tree-sitter" ]]; then
+        binary="$mise_dir/tree-sitter"
+    elif command -v tree-sitter &>/dev/null; then
+        binary="tree-sitter"
+    else
+        echo "  ✗ tree-sitter -- run 'mise install', or tree-sitter-cli >= 0.26 for WASM builds"
         errors=$((errors + 1))
         return
     fi
 
     local version raw_version major minor
-    raw_version="$(tree-sitter --version 2>/dev/null)"
+    raw_version="$("$binary" --version 2>/dev/null)"
     version="${raw_version#tree-sitter }"
     version="${version%% *}"
 

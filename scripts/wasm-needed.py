@@ -15,8 +15,26 @@ import json
 import hashlib
 from pathlib import Path
 
-with open("mise.toml", "rb") as f:
-    SUPPORTED_TREE_SITTER_CLI = tomllib.load(f)["tools"]["tree-sitter"]
+def _tree_sitter_series() -> str:
+    """The `major.minor` series the pinned Tree-sitter CLI belongs to.
+
+    Published WASM packages are versioned within this series, so a pin of
+    "0.26", "0.26.11" or "^0.26" all mean the same thing here. A pin that is not
+    a version at all -- "latest", which `mise use tree-sitter@latest` writes --
+    is rejected, because it silently produced package versions like "latest.1".
+    """
+    with open("mise.toml", "rb") as f:
+        pin = str(tomllib.load(f)["tools"]["tree-sitter"]).lstrip("^~=v")
+    parts = pin.split(".")
+    if len(parts) < 2 or not all(part.isdigit() for part in parts[:2]):
+        raise SystemExit(
+            f"mise.toml pins tree-sitter = {pin!r}; it must be a version such as "
+            '"0.26" so the published package series can be derived from it'
+        )
+    return ".".join(parts[:2])
+
+
+SUPPORTED_TREE_SITTER_CLI = _tree_sitter_series()
 
 PACKAGE_FORMAT_VERSION = 3
 
