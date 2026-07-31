@@ -103,6 +103,24 @@ A test that skips silently reports the same green as a test that verified someth
 - Prove a new guard fails: inject the defect it is meant to catch, watch it go red, then revert. A guard that has never failed has not been tested.
 - Do not let published artifacts gate correctness checks. Build what you need from the pinned source instead, as `mise run test-queries` does, otherwise coverage silently tracks the release cycle.
 
+### Validate workflow changes with `actionlint` before pushing
+
+Run `mise run lint-workflows` after **any** edit under `.github/workflows/`. It is also part of `mise run lint`, and CI runs it, but CI finding it costs a full round trip.
+
+This matters most for bulk edits. Rewriting action inputs with `sed` or a regex is exactly how a `with:` key gets separated from the block it belongs to:
+
+```yaml
+- uses: jdx/mise-action@v4
+    working_directory: benchmarks   # `with:` removed -> invalid YAML
+```
+
+That file no longer parses, and the failure surfaces as an unrelated-looking lint error rather than at the step you edited. Two rules follow:
+
+- A workflow edit is not done until `actionlint` passes.
+- When changing an action's inputs, check **every** call site rather than the one that prompted the change. Inputs differ per job — `install: true` may be droppable in one place while `install: false` and `working_directory` next door are load-bearing.
+
+Version pins in workflows deserve the same suspicion. `jdx/mise-action`'s `version:` input pins **mise itself**, not the action, and dropping it can break tool installs that the pinned mise handled.
+
 ### Keep Emscripten compatible with Tree-sitter
 
 Emscripten is pinned once, as `LUMIS_EMSDK_VERSION` under `[env]` in the root `mise.toml`. The workflows read that value and install it with `setup-emsdk`. It is deliberately not a `[tools]` entry: mise's asdf `emsdk` plugin fails to install on Linux runners (`plugins/emsdk/bin/install exited with non-zero status`), which takes every job that runs `mise install` down with it.

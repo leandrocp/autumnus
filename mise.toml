@@ -1,6 +1,7 @@
 # Project task runner configuration. Runtime versions are generally not pinned.
 
 [tools]
+actionlint = "1.7.12"
 tree-sitter = "0.26"
 
 [env]
@@ -244,11 +245,18 @@ pnpm --filter @lumis-sh/lumis test:conformance:browser
 description = "Run Elixir conformance tests"
 run = "cd packages/elixir/lumis && LUMIS_BUILD=1 mix test --include conformance test/conformance_test.exs"
 
+[tasks.'lint-workflows']
+description = "Validate GitHub Actions workflows with actionlint"
+run = "actionlint -color"
+
 [tasks.'lint']
 description = "Run all linters"
 run = '''
 #!/usr/bin/env bash
 set -euo pipefail
+echo "Running actionlint..."
+actionlint -color
+echo ""
 echo "Running Rust clippy..."
 cargo clippy --workspace --all-targets --all-features -- -D warnings
 echo ""
