@@ -3,11 +3,9 @@ defmodule Lumis.Application do
 
   use Application
 
-  @impl Application
+  @impl true
   def start(_type, _args) do
-    Supervisor.start_link(Lumis.Loader.child_specs(),
-      strategy: :one_for_one,
-      name: Lumis.Supervisor
-    )
+    opts = [strategy: :one_for_one, name: Lumis.Supervisor]
+    Supervisor.start_link(Lumis.Loader.child_specs(), opts)
   end
 end
