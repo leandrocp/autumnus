@@ -28,8 +28,6 @@ defmodule Lumis.Languages do
 
     * `:bundled_languages` — languages `mix lumis.languages.cache` should fetch,
       a list or `:all`
-    * `:wasm_bundle_dir` — where release-local parsers live, default
-      `priv/wasm`
     * `:wasm_resolver` and `:language_package_resolver` — replace where parsers
       and package metadata are fetched from
   """
@@ -466,10 +464,7 @@ defmodule Lumis.Languages do
       :filename.basedir(:user_cache, "lumis") |> to_string() |> Path.join("wasm")
   end
 
-  defp bundled_dir do
-    Application.get_env(:lumis, :wasm_bundle_dir) ||
-      Application.app_dir(:lumis, "priv/wasm")
-  end
+  defp bundled_dir, do: Application.app_dir(:lumis, "priv/wasm")
 
   defp fresh?(path) do
     case File.stat(path, time: :posix) do

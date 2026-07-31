@@ -43,3 +43,6 @@ checksum-*.exs
 
 # AI
 /.claude/
+
+# Release-local parsers cached during development and tests.
+/priv/wasm/

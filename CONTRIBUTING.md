@@ -368,7 +368,7 @@ Build and stage:
 
 ```sh
 mise run wasm-build kdl
-cargo run --manifest-path crates/dev/Cargo.toml -- stage-wasm kdl
+mise run wasm-stage kdl
 ```
 
 That writes `tmp/wasm-publish/tree-sitter-kdl/`, containing `language.json`, the
@@ -392,8 +392,8 @@ suffix = pkg["packageName"].removeprefix("@lumis-sh/wasm-")
 shutil.copy(f"{staged}/language.json", f"{cli}/{suffix}.language.json")
 shutil.copy(f"{staged}/{parser['name']}.wasm", f"{cli}/{wasm}")
 
-# Elixir: <bundle>/<basename>.language.json
-bundle = "/tmp/lumis-bundle"
+# Elixir: <app priv>/wasm/<basename>.language.json
+bundle = "packages/elixir/lumis/priv/wasm"
 os.makedirs(bundle, exist_ok=True)
 name = os.path.basename(pkg["packageName"])
 shutil.copy(f"{staged}/language.json", f"{bundle}/{name}.language.json")
@@ -408,13 +408,8 @@ LUMIS_WASM_SOURCE_DIR=/tmp/lumis-local cargo run -p lumis-cli -- \
   highlight --language kdl file.kdl
 ```
 
-Elixir reads release-local packages from `:wasm_bundle_dir`, which defaults to
-`priv/wasm`:
-
-```elixir
-# config/dev.exs, or Application.put_env/3 in IEx
-config :lumis, wasm_bundle_dir: "/tmp/lumis-bundle"
-```
+Elixir reads release-local packages from its own `priv/wasm`, which is not
+configurable, so copy them there and load with no further setup:
 
 ```elixir
 iex> Lumis.Languages.load("kdl")
@@ -430,8 +425,8 @@ pnpm --filter @lumis-sh/lumis add ./tmp/wasm-publish/tree-sitter-kdl
 
 The two on-disk layouts differ: the CLI expects a `parsers/` subdirectory and
 names the metadata after the package suffix (`kdl.language.json`), while Elixir
-reads the bundle directory directly and names it after the package basename
-(`wasm-kdl.language.json`).
+reads `priv/wasm` directly and names it after the package basename
+(`wasm-kdl.language.json`). `priv/wasm` is gitignored.
 
 #### WASM distribution
 

@@ -58,7 +58,7 @@ defmodule Lumis.LanguagesTest do
 
   test "loads a release-local parser without resolving it again" do
     refute Lumis.Native.has_language("xml")
-    bundle_dir = Application.fetch_env!(:lumis, :wasm_bundle_dir)
+    bundle_dir = Application.app_dir(:lumis, "priv/wasm")
 
     assert {:ok, [path]} =
              Lumis.Languages.cache(["xml", "xml"], directory: bundle_dir)
@@ -113,7 +113,8 @@ defmodule Lumis.LanguagesTest do
   end
 
   test "Mix task prepares exact release-local parser files" do
-    output_dir = Path.join(Application.fetch_env!(:lumis, :wasm_bundle_dir), "mix-task")
+    output_dir =
+      Path.join(System.tmp_dir!(), "lumis-mix-task-#{System.unique_integer([:positive])}")
 
     output =
       capture_io(fn ->

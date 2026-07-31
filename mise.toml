@@ -623,6 +623,13 @@ export PATH="$(mise where tree-sitter):$PATH"
 cargo run --manifest-path crates/dev/Cargo.toml -- build-wasm ${usage_name:-}
 '''
 
+[tasks.'wasm-stage']
+description = "Stage a built parser WASM into a local language package"
+usage = '''
+arg "<name>"
+'''
+run = "cargo run --manifest-path crates/dev/Cargo.toml -- stage-wasm {{arg(name='name')}}"
+
 [tasks.'wasm-publish-needed']
 description = "List parsers whose current WASM packages still need publishing"
 usage = '''

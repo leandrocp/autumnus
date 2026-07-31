@@ -6,11 +6,13 @@ query_fixtures = Path.expand("../../../../queries/processed", __DIR__)
 wasm_cache =
   Path.join(System.tmp_dir!(), "lumis-elixir-test-#{System.unique_integer([:positive])}")
 
-wasm_bundle =
-  Path.join(System.tmp_dir!(), "lumis-elixir-bundle-#{System.unique_integer([:positive])}")
-
 System.put_env("LUMIS_WASM_CACHE_DIR", wasm_cache)
-Application.put_env(:lumis, :wasm_bundle_dir, wasm_bundle)
+
+# Release-local parsers are only ever read from the app's own priv/wasm, so
+# tests use the real directory and start from empty.
+wasm_bundle = Application.app_dir(:lumis, "priv/wasm")
+File.rm_rf!(wasm_bundle)
+File.mkdir_p!(wasm_bundle)
 
 Application.put_env(:lumis, :language_package_resolver, fn handle ->
   wasm_name =
