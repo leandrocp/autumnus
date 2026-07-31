@@ -1124,9 +1124,15 @@ the port to the Rust original — and §4.7's shared fixture corpus is the start
 covering package validation. The cache state machine itself is not yet pinned that
 way, so `node-cache.ts` and `core/languages.ts` remain the place drift could appear.
 
-Two smaller items also remain: the CLI still compiles the bracket query per
-invocation where the `Runtime` caches it per language, and `LanguageStore` is
-constructed per NIF call in Elixir rather than held.
+One smaller item remains: the CLI still compiles the bracket query per invocation
+where the `Runtime` caches it per language in a `OnceLock`. That is a performance
+gap rather than duplication -- both now call the same `bracket_pairs`.
+
+The JavaScript port is also no longer wholly unpinned. `src/cache-timing.ts` is
+held against `store.rs` by `test/cache-timing.test.ts`, which parses the Rust
+`Duration::from_secs` constants and fails if either side moves. What remains
+unpinned is the cache *state machine* -- the order of source, cache and network
+lookups -- not the constants it runs on.
 
 ## 9. Pre-merge checklist
 
