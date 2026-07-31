@@ -185,7 +185,7 @@ async function fetchFromCdns(primary: string, isDefault: boolean): Promise<Respo
   const urls = isDefault ? CDNS.map((base) => primary.replace(CDNS[0], base)) : [primary];
   const failures: { host: string; reason: string }[] = [];
   for (const url of urls) {
-    const host = new URL(url).host;
+    const host = cdnHost(url);
     try {
       const response = await fetch(url);
       if (response.ok) return response;
@@ -195,6 +195,20 @@ async function fetchFromCdns(primary: string, isDefault: boolean): Promise<Respo
     }
   }
   throw new Error(describeFailures(failures));
+}
+
+/**
+ * A resolver may return a relative URL, which `new URL` alone rejects, so fall
+ * back to the value itself rather than failing the download over a label.
+ *
+ * @internal
+ */
+export function cdnHost(url: string): string {
+  try {
+    return new URL(url, globalThis.location?.href).host || url;
+  } catch {
+    return url;
+  }
 }
 
 /** Every mirror serving the same 404 is one fact, not two, so say it once. */
