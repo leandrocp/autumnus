@@ -37,9 +37,7 @@
     "build": "tsup",
     "prelint": "pnpm --filter @lumis-sh/lumis build",
     "test": "vitest run",
-    "lint": "oxlint --type-aware src/",
-    "fmt": "oxfmt src/ *.ts",
-    "fmt:check": "oxfmt --check src/ *.ts",
+    "lint": "oxlint --type-aware --deny-warnings src/ test/",
     "prepack": "pnpm run build"
   },
   "dependencies": {

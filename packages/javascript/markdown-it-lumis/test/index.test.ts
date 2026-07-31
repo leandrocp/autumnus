@@ -113,6 +113,7 @@ describe("markdown-it-lumis", () => {
       const html = md.render(JS_SOURCE);
 
       // terminal output has ANSI codes, no HTML tags
+      // oxlint-disable-next-line no-control-regex -- matching ANSI escapes is the point
       expect(html).toMatch(/\u001b\[38;2;\d+;\d+;\d+m/);
       expect(html).toContain("\u001b[0m");
       expect(html).not.toContain("<pre");

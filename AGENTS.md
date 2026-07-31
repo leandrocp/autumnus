@@ -126,6 +126,16 @@ Not worth keeping, because the code already says it:
 
 Rationale that is about the change rather than the code belongs in the commit message. `mise.toml` takes no comments at all.
 
+### Formatting is enforced for every language, and coverage is opt-out
+
+Every language the repo authors is format-checked in CI: Rust (`cargo fmt`), Elixir (`mix format`), JavaScript and TypeScript (`mise run fmt-js`), Lua (`mise run fmt-lua`). `mise run fmt` fixes all of them, `mise run lint` checks all of them.
+
+The JS and Lua checks take **no per-package path list**. They match by extension from the repo root, so a new package, script, example, or test directory is covered the day it is added. Exclusions live in one place, `.oxfmtrc.json`, and only for files that are generated or vendored — those are guarded by regenerating and diffing, not by the formatter.
+
+This replaced a per-package `fmt:check` that named `src/` only. Every `test/`, `scripts/` and `examples/` directory in the repo had therefore never been formatted, and nobody could tell, because the check was green. When adding a formatter or a linter, make the default "everything" and subtract, never "this directory" and hope the list is maintained.
+
+`oxlint` runs with `--deny-warnings`, so a warning fails the build. Silence a genuinely intentional one at the line with `// oxlint-disable-next-line <rule> -- <why>`; do not let it sit in the output.
+
 ### Validate workflow changes with `actionlint` before pushing
 
 Run `mise run lint-workflows` after **any** edit under `.github/workflows/`. It is also part of `mise run lint`, and CI runs it, but CI finding it costs a full round trip.

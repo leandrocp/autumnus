@@ -1,145 +1,144 @@
-import {themes as prismThemes} from 'prism-react-renderer';
-import type {Config} from '@docusaurus/types';
-import type * as Preset from '@docusaurus/preset-classic';
+import { themes as prismThemes } from "prism-react-renderer";
+import type { Config } from "@docusaurus/types";
+import type * as Preset from "@docusaurus/preset-classic";
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const remarkLumis = require('./plugins/remark-lumis.cjs');
+const remarkLumis = require("./plugins/remark-lumis.cjs");
 
 const config: Config = {
-  title: 'Lumis Docs',
-  tagline: 'One syntax highlighting guide across every Lumis runtime.',
-  favicon: 'img/favicon.ico',
+  title: "Lumis Docs",
+  tagline: "One syntax highlighting guide across every Lumis runtime.",
+  favicon: "img/favicon.ico",
 
   future: {
     v4: true,
   },
 
-  url: 'https://lumis.sh',
-  baseUrl: '/docs/',
+  url: "https://lumis.sh",
+  baseUrl: "/docs/",
 
-  organizationName: 'leandrocp',
-  projectName: 'lumis',
+  organizationName: "leandrocp",
+  projectName: "lumis",
 
-  onBrokenLinks: 'throw',
+  onBrokenLinks: "throw",
 
   i18n: {
-    defaultLocale: 'en',
-    locales: ['en'],
+    defaultLocale: "en",
+    locales: ["en"],
   },
 
   presets: [
     [
-      'classic',
+      "classic",
       {
         docs: {
-          path: 'content',
-          routeBasePath: '/',
-          sidebarPath: './sidebars.ts',
-          editUrl:
-            'https://github.com/leandrocp/lumis/tree/main/docs/',
+          path: "content",
+          routeBasePath: "/",
+          sidebarPath: "./sidebars.ts",
+          editUrl: "https://github.com/leandrocp/lumis/tree/main/docs/",
           remarkPlugins: [remarkLumis],
         },
         blog: false,
         theme: {
-          customCss: './src/css/custom.css',
+          customCss: "./src/css/custom.css",
         },
       } satisfies Preset.Options,
     ],
   ],
 
   themeConfig: {
-    image: 'img/intro.jpg',
+    image: "img/intro.jpg",
     metadata: [
       {
-        name: 'keywords',
-        content: 'lumis, syntax highlighting, tree-sitter, rust, elixir, javascript, java',
+        name: "keywords",
+        content: "lumis, syntax highlighting, tree-sitter, rust, elixir, javascript, java",
       },
-      {name: 'twitter:card', content: 'summary_large_image'},
+      { name: "twitter:card", content: "summary_large_image" },
     ],
     colorMode: {
       respectPrefersColorScheme: true,
     },
     navbar: {
-      title: 'Lumis',
+      title: "Lumis",
       logo: {
-        alt: 'Lumis logo',
-        src: 'img/logo.svg',
+        alt: "Lumis logo",
+        src: "img/logo.svg",
       },
       items: [
         {
-          type: 'docSidebar',
-          sidebarId: 'docsSidebar',
-          position: 'left',
-          label: 'Docs',
+          type: "docSidebar",
+          sidebarId: "docsSidebar",
+          position: "left",
+          label: "Docs",
         },
-        {to: '/', label: 'Intro', position: 'left'},
-        {to: '/installation', label: 'Installation', position: 'left'},
+        { to: "/", label: "Intro", position: "left" },
+        { to: "/installation", label: "Installation", position: "left" },
         {
-          href: 'https://lumis.sh',
-          label: 'Website',
-          position: 'right',
+          href: "https://lumis.sh",
+          label: "Website",
+          position: "right",
         },
         {
-          href: 'https://github.com/leandrocp/lumis',
-          label: 'GitHub',
-          position: 'right',
+          href: "https://github.com/leandrocp/lumis",
+          label: "GitHub",
+          position: "right",
         },
       ],
     },
     footer: {
-      style: 'dark',
+      style: "dark",
       links: [
         {
-          title: 'Docs',
+          title: "Docs",
           items: [
             {
-              label: 'Intro',
-              to: '/',
+              label: "Intro",
+              to: "/",
             },
             {
-              label: 'Installation',
-              to: '/installation',
+              label: "Installation",
+              to: "/installation",
             },
             {
-              label: 'Highlight',
-              to: '/usage/highlight',
+              label: "Highlight",
+              to: "/usage/highlight",
             },
           ],
         },
         {
-          title: 'Packages',
+          title: "Packages",
           items: [
             {
-              label: 'CLI',
-              href: 'https://crates.io/crates/lumis-cli',
+              label: "CLI",
+              href: "https://crates.io/crates/lumis-cli",
             },
             {
-              label: 'Rust',
-              href: 'https://crates.io/crates/lumis',
+              label: "Rust",
+              href: "https://crates.io/crates/lumis",
             },
             {
-              label: 'JavaScript',
-              href: 'https://www.npmjs.com/package/@lumis-sh/lumis',
+              label: "JavaScript",
+              href: "https://www.npmjs.com/package/@lumis-sh/lumis",
             },
             {
-              label: 'Elixir',
-              href: 'https://hex.pm/packages/lumis',
+              label: "Elixir",
+              href: "https://hex.pm/packages/lumis",
             },
             {
-              label: 'Java',
-              href: 'https://github.com/roastedroot/lumis4j',
-            }
+              label: "Java",
+              href: "https://github.com/roastedroot/lumis4j",
+            },
           ],
         },
         {
-          title: 'More',
+          title: "More",
           items: [
             {
-              label: 'Website',
-              href: 'https://lumis.sh',
+              label: "Website",
+              href: "https://lumis.sh",
             },
             {
-              label: 'GitHub',
-              href: 'https://github.com/leandrocp/lumis',
+              label: "GitHub",
+              href: "https://github.com/leandrocp/lumis",
             },
           ],
         },
@@ -150,7 +149,7 @@ const config: Config = {
     prism: {
       theme: prismThemes.github,
       darkTheme: prismThemes.dracula,
-      additionalLanguages: ['bash', 'rust', 'elixir', 'java', 'toml'],
+      additionalLanguages: ["bash", "rust", "elixir", "java", "toml"],
     },
   } satisfies Preset.ThemeConfig,
 };

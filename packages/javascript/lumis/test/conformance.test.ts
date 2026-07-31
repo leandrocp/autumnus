@@ -11,7 +11,13 @@ import markdownInline from "../langs/markdown_inline.ts";
 import mdx from "../langs/mdx.ts";
 import python from "../langs/python.ts";
 import { createHighlighter } from "../src/index.js";
-import { bbcodeScoped, htmlInline, htmlLinked, htmlMultiThemes, terminal } from "../src/formatters.js";
+import {
+  bbcodeScoped,
+  htmlInline,
+  htmlLinked,
+  htmlMultiThemes,
+  terminal,
+} from "../src/formatters.js";
 import type { Highlighter } from "../src/core/highlighter.js";
 import type { Language, Theme } from "../src/types.js";
 
@@ -68,66 +74,63 @@ beforeAll(async () => {
   });
 }, 120_000);
 
-describe.each(conformanceFixtures.map((f) => [f.name, f]))(
-  "%s",
-  (_name, fixture) => {
-    it("html-inline", () => {
-      const output = highlighter.highlight(
-        fixture.source,
-        htmlInline({
-          language: getLanguage(fixture.language),
-          theme,
-          rainbowBrackets: fixture.rainbowBrackets,
-        }),
-      );
-      expect(output).toBe(fixture.htmlInline);
-    });
+describe.each(conformanceFixtures.map((f) => [f.name, f]))("%s", (_name, fixture) => {
+  it("html-inline", () => {
+    const output = highlighter.highlight(
+      fixture.source,
+      htmlInline({
+        language: getLanguage(fixture.language),
+        theme,
+        rainbowBrackets: fixture.rainbowBrackets,
+      }),
+    );
+    expect(output).toBe(fixture.htmlInline);
+  });
 
-    it("html-linked", () => {
-      const output = highlighter.highlight(
-        fixture.source,
-        htmlLinked({
-          language: getLanguage(fixture.language),
-          rainbowBrackets: fixture.rainbowBrackets,
-        }),
-      );
-      expect(output).toBe(fixture.htmlLinked);
-    });
+  it("html-linked", () => {
+    const output = highlighter.highlight(
+      fixture.source,
+      htmlLinked({
+        language: getLanguage(fixture.language),
+        rainbowBrackets: fixture.rainbowBrackets,
+      }),
+    );
+    expect(output).toBe(fixture.htmlLinked);
+  });
 
-    it("html-multi-themes", () => {
-      const output = highlighter.highlight(
-        fixture.source,
-        htmlMultiThemes({
-          language: getLanguage(fixture.language),
-          themes: { main: theme },
-          defaultTheme: "main",
-          rainbowBrackets: fixture.rainbowBrackets,
-        }),
-      );
-      expect(output).toBe(fixture.htmlMultiThemes);
-    });
+  it("html-multi-themes", () => {
+    const output = highlighter.highlight(
+      fixture.source,
+      htmlMultiThemes({
+        language: getLanguage(fixture.language),
+        themes: { main: theme },
+        defaultTheme: "main",
+        rainbowBrackets: fixture.rainbowBrackets,
+      }),
+    );
+    expect(output).toBe(fixture.htmlMultiThemes);
+  });
 
-    it("bbcodeScoped", () => {
-      const output = highlighter.highlight(
-        fixture.source,
-        bbcodeScoped({
-          language: getLanguage(fixture.language),
-          rainbowBrackets: fixture.rainbowBrackets,
-        }),
-      );
-      expect(output).toBe(fixture.bbcode);
-    });
+  it("bbcodeScoped", () => {
+    const output = highlighter.highlight(
+      fixture.source,
+      bbcodeScoped({
+        language: getLanguage(fixture.language),
+        rainbowBrackets: fixture.rainbowBrackets,
+      }),
+    );
+    expect(output).toBe(fixture.bbcode);
+  });
 
-    it("terminal", () => {
-      const output = highlighter.highlight(
-        fixture.source,
-        terminal({
-          language: getLanguage(fixture.language),
-          theme,
-          rainbowBrackets: fixture.rainbowBrackets,
-        }),
-      );
-      expect(output).toBe(fixture.terminal);
-    });
-  },
-);
+  it("terminal", () => {
+    const output = highlighter.highlight(
+      fixture.source,
+      terminal({
+        language: getLanguage(fixture.language),
+        theme,
+        rainbowBrackets: fixture.rainbowBrackets,
+      }),
+    );
+    expect(output).toBe(fixture.terminal);
+  });
+});

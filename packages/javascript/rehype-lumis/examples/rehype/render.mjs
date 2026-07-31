@@ -1,14 +1,14 @@
-import { writeFile } from 'node:fs/promises'
-import { unified } from 'unified'
-import remarkParse from 'remark-parse'
-import remarkRehype from 'remark-rehype'
-import rehypeStringify from 'rehype-stringify'
-import rehypeLumis from '@lumis-sh/rehype-lumis'
-import { htmlInline } from '@lumis-sh/lumis/formatters'
-import javascript from '@lumis-sh/lumis/langs/javascript'
-import rust from '@lumis-sh/lumis/langs/rust'
-import plaintext from '@lumis-sh/lumis/langs/plaintext'
-import githubLight from '@lumis-sh/themes/github_light'
+import { writeFile } from "node:fs/promises";
+import { unified } from "unified";
+import remarkParse from "remark-parse";
+import remarkRehype from "remark-rehype";
+import rehypeStringify from "rehype-stringify";
+import rehypeLumis from "@lumis-sh/rehype-lumis";
+import { htmlInline } from "@lumis-sh/lumis/formatters";
+import javascript from "@lumis-sh/lumis/langs/javascript";
+import rust from "@lumis-sh/lumis/langs/rust";
+import plaintext from "@lumis-sh/lumis/langs/plaintext";
+import githubLight from "@lumis-sh/themes/github_light";
 
 const source = `# Demo
 
@@ -23,7 +23,7 @@ fn main() {
     println!("Hello, world!");
 }
 \`\`\`
-`
+`;
 
 const file = await unified()
   .use(remarkParse)
@@ -33,7 +33,7 @@ const file = await unified()
     languages: [javascript, rust, plaintext],
   })
   .use(rehypeStringify)
-  .process(source)
+  .process(source);
 
-await writeFile(new URL('./output.html', import.meta.url), String(file))
-console.log('Wrote packages/javascript/rehype-lumis/examples/rehype/output.html')
+await writeFile(new URL("./output.html", import.meta.url), String(file));
+console.log("Wrote packages/javascript/rehype-lumis/examples/rehype/output.html");

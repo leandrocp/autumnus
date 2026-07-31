@@ -1,5 +1,6 @@
 [tools]
 actionlint = "1.7.12"
+stylua = "2.5.2"
 tree-sitter = "0.26"
 
 [env]
@@ -80,7 +81,7 @@ check_bin node "https://nodejs.org"
 check_bin pnpm "https://pnpm.io/installation"
 check_bin mise "https://mise.jdx.dev/getting-started.html"
 check_bin mix "https://elixir-lang.org/install.html"
-check_bin stylua "cargo install stylua"
+check_bin stylua "run 'mise install'"
 echo ""
 
 echo "Checking optional tools..."
@@ -249,6 +250,19 @@ run = "cd packages/elixir/lumis && LUMIS_BUILD=1 mix test --include conformance 
 description = "Validate GitHub Actions workflows with actionlint"
 run = "actionlint -color"
 
+[tasks.'fmt-lua']
+description = "Format every Lua file"
+run = "stylua themes/ crates/lumis-cli/themes/"
+
+[tasks.'fmt-js']
+description = "Format every authored JavaScript and TypeScript file"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+exec packages/javascript/lumis/node_modules/.bin/oxfmt "$@" \
+  --no-error-on-unmatched-pattern "**/*.{ts,tsx,mjs,cjs,js,jsx}"
+'''
+
 [tasks.'lint']
 description = "Run all linters"
 run = '''
@@ -272,17 +286,20 @@ echo "Running Elixir credo..."
 (cd packages/elixir/lumis && LUMIS_BUILD=1 mix credo)
 echo ""
 echo "Running JS fmt check..."
-pnpm --filter @lumis-sh/lumis fmt:check
-pnpm --filter @lumis-sh/themes fmt:check
+mise run fmt-js -- --check
 echo ""
 echo "Running JS lint..."
 pnpm --filter @lumis-sh/lumis lint
+pnpm --filter @lumis-sh/markdown-it-lumis lint
+pnpm --filter @lumis-sh/rehype-lumis lint
+pnpm --filter @lumis-sh/react lint
+pnpm --filter @lumis-sh/themes lint
 echo ""
 echo "Running benchmark checks through mise..."
 mise run -C benchmarks lint
 echo ""
 echo "Running Lua fmt check..."
-stylua --check themes/
+mise run fmt-lua -- --check
 '''
 
 [tasks.'fmt']
@@ -297,14 +314,13 @@ echo "Formatting Elixir..."
 (cd packages/elixir/lumis && mix format)
 echo ""
 echo "Formatting JS/TS..."
-pnpm --filter @lumis-sh/lumis fmt
-pnpm --filter @lumis-sh/themes fmt
+mise run fmt-js
 echo ""
 echo "Formatting benchmarks through mise..."
 mise run -C benchmarks format
 echo ""
 echo "Formatting Lua..."
-stylua themes/
+mise run fmt-lua
 '''
 
 [tasks.'bench-fixtures']

@@ -15,11 +15,12 @@ function rustDurationMs(source: string, name: string): number {
   );
   if (!match) throw new Error(`${name} not found in store.rs`);
   const expression = match[1]!.trim();
-  if (!/^[\d\s*+]+$/.test(expression)) {
-    throw new Error(`${name} is not a plain arithmetic expression: ${expression}`);
+  if (!/^\d+(\s*\*\s*\d+)*(\s*\+\s*\d+(\s*\*\s*\d+)*)*$/.test(expression)) {
+    throw new Error(`${name} is not a sum of products of integers: ${expression}`);
   }
-  // Only digits and * + reach here, so this is a constant fold, not arbitrary code.
-  const seconds = Function(`"use strict";return (${expression})`)() as number;
+  const seconds = expression
+    .split("+")
+    .reduce((sum, term) => sum + term.split("*").reduce((product, n) => product * Number(n), 1), 0);
   return seconds * 1000;
 }
 

@@ -5,7 +5,14 @@ import diff from "../langs/diff.ts";
 import json from "../langs/json.ts";
 import { createHighlighter, highlightIter } from "../src/index.js";
 import { type Formatter, htmlInline } from "../src/formatters.js";
-import { closeTag, closingTags, openCodeTag, openPreTag, openSpanTag, wrapLine } from "../src/formatter/html.js";
+import {
+  closeTag,
+  closingTags,
+  openCodeTag,
+  openPreTag,
+  openSpanTag,
+  wrapLine,
+} from "../src/formatter/html.js";
 import type { Theme } from "../src/types.js";
 import { configureLocalWasmResolver } from "./wasm.js";
 
@@ -36,19 +43,30 @@ describe("custom formatter", () => {
           }
         };
 
-        highlightIter(source, this.language, undefined, (text, _language, _range, scope, _style) => {
-          if (scope.length === 0) {
-            append(text);
-          } else {
-            append(`${openSpanTag({ class: `tok ${scope.replaceAll(".", "-")}` })}${text}${closeTag("span")}`);
-          }
-        });
+        highlightIter(
+          source,
+          this.language,
+          undefined,
+          (text, _language, _range, scope, _style) => {
+            if (scope.length === 0) {
+              append(text);
+            } else {
+              append(
+                `${openSpanTag({ class: `tok ${scope.replaceAll(".", "-")}` })}${text}${closeTag("span")}`,
+              );
+            }
+          },
+        );
 
         const body = lines
           .map((line, index) =>
-            wrapLine(index + 1, `${openSpanTag({ class: "line-no" })}${index + 1}${closeTag("span")}${openSpanTag({ class: "line-body" })}${line}${closeTag("span")}`, {
-              className: index === 0 ? "first-line" : undefined,
-            }),
+            wrapLine(
+              index + 1,
+              `${openSpanTag({ class: "line-no" })}${index + 1}${closeTag("span")}${openSpanTag({ class: "line-body" })}${line}${closeTag("span")}`,
+              {
+                className: index === 0 ? "first-line" : undefined,
+              },
+            ),
           )
           .join("");
 

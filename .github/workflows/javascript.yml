@@ -66,15 +66,10 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @lumis-sh/lumis fmt:check
       - run: pnpm --filter @lumis-sh/lumis lint
-      - run: pnpm --filter @lumis-sh/markdown-it-lumis fmt:check
       - run: pnpm --filter @lumis-sh/markdown-it-lumis lint
-      - run: pnpm --filter @lumis-sh/rehype-lumis fmt:check
       - run: pnpm --filter @lumis-sh/rehype-lumis lint
-      - run: pnpm --filter @lumis-sh/react fmt:check
       - run: pnpm --filter @lumis-sh/react lint
-      - run: pnpm --filter @lumis-sh/themes fmt:check
       - run: pnpm --filter @lumis-sh/themes lint
       - run: pnpm --dir packages/javascript run build:wasm-bundles && git diff --exit-code -- packages/javascript/wasm-bundle-*
 

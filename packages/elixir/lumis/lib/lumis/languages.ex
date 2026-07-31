@@ -431,6 +431,7 @@ defmodule Lumis.Languages do
   end
 
   defp package_cache_file(handle), do: Path.join(cache_dir(), package_filename(handle))
+
   defp parser_filename(entry) do
     "#{entry.wasm_name}-#{entry.version}-#{entry.sha256}.wasm"
   end

@@ -63,4 +63,4 @@ for (const [id, entry] of Object.entries(parsers)) {
   else output.add(wantParsers ? parser : id);
 }
 
-for (const value of [...output].sort()) console.log(value);
+for (const value of [...output].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))) console.log(value);
