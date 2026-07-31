@@ -130,9 +130,16 @@ Rationale that is about the change rather than the code belongs in the commit me
 
 Every file the repo authors is formatted and linted, including generated ones. `mise run fmt` formats every language, `mise run lint` checks them. Run those before pushing; CI only checks.
 
-There is no per-package path list. The checks match by extension from the repo root, so a new package, script, example, test or generated directory is covered the day it is added. The only files `.oxfmtrc.json` skips are ones this repo does not author: vendored parsers, vendored site assets, build output, and the `samples/` and `fixtures/` corpora, whose exact bytes are the point.
+There is no per-package path list. `fmt-js` takes its files from `git ls-files`, so coverage is everything committed: a new package, script, example, test or generated directory is covered the day it is added, and untracked build output is excluded without anyone maintaining a list.
 
-**Generated files are not an exception.** A generator writes its output and then formats it, so regenerating and format-checking agree. If you add a generator, format what it emits; do not add an ignore entry.
+**Generated files are not an exception.** A generator writes its output and then formats it, so regenerating and format-checking agree. If you add a generator, format what it emits.
+
+`.oxfmtrc.json` holds the only exclusions, and each needs a reason to be there:
+
+- vendored parsers and vendored site assets — not ours to restyle
+- `dist/` — bundler output, which the next build would rewrite anyway
+- `samples/` and `fixtures/` — corpora whose exact bytes are the test
+- `packages/javascript/themes/themes/` — 246 modules holding one long `JSON.stringify` line each; formatting them costs 28k lines for no readability, since nobody reads generated theme data
 
 This replaced a per-package `fmt:check` that named `src/` only. Every `test/`, `scripts/` and `examples/` directory in the repo had therefore never been formatted, and nobody could tell, because the check was green. When adding a formatter or a linter, make the default "everything" and subtract; never name a directory and hope the list is maintained.
 

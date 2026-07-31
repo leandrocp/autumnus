@@ -4,6 +4,7 @@
     "**/vendored_parsers/**",
     "fixtures/**",
     "packages/elixir/lumis/examples/**/vendor/**",
+    "packages/javascript/themes/themes/**",
     "samples/**"
   ]
 }

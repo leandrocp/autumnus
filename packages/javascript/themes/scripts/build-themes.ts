@@ -8,7 +8,6 @@
  *   (no flag)    Run both steps
  */
 
-import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import type { ThemeData } from "../src/types.js";
@@ -65,7 +64,6 @@ export default theme
     fs.writeFileSync(path.join(THEMES_OUT, `${name}.ts`), module);
   }
 
-  execFileSync("oxfmt", [THEMES_OUT], { stdio: "inherit" });
   console.log(`  ${themes.length} theme modules generated`);
 }
 
