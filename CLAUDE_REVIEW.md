@@ -13,9 +13,8 @@ Fixes from the second pass are committed on this branch:
 **Verdict: do not merge as-is.** The architecture is right — one package format carrying parser +
 queries + integrity + provenance, released atomically, is a genuine improvement, and moving
 Lua→regex translation to generation time so every runtime consumes byte-identical `.scm` is the
-correct call. CI is now fully green. The remaining objection is the PR's own thesis — one portable
-language-loading architecture — which is not met, because the loading pipeline exists three times
-(§8).
+correct call. CI is fully green, and the loading pipeline is now one Rust implementation that the
+CLI and Elixir share, leaving JavaScript as the single port the browser forces (§8).
 
 This document is a living guideline. Items are fixed in place and marked **DONE** only once a
 reproducible test pins the behavior.
@@ -24,7 +23,7 @@ reproducible test pins the behavior.
 
 | Objective | State |
 | --- | --- |
-| Reuse the Rust core | **Not met.** resolve→verify→cache exists three times (CLI Rust, JS, Elixir). Only the JS copy is forced. §8 |
+| Reuse the Rust core | **Largely met.** resolve→verify→cache is one Rust implementation; the CLI and Elixir both use it. JavaScript remains a port, which is the forced one. §8 |
 | Safety | Mostly good. No new `unsafe`. Integrity checking is real, but its trust anchor is weaker than the docs imply. §4.1 |
 | All runtimes produce the same output | **Met, as far as conformance can show.** §3, §4.7 and §4.8 fixed; all five runtimes pass `mise run test-conformance`. |
 | Performance | Known regressions, some avoidable. §4.3a is a concrete N+1. |
@@ -50,7 +49,7 @@ reproducible test pins the behavior.
 | 4.8 Package resolution precedence differs per runtime | **DONE** |
 | 4.9 `formatVersion` runtime gate removed | **DONE** |
 | 5, 6, 7 Medium / low / nits | open |
-| 8 Three copies of the loading pipeline | **open — new**, the largest remaining item |
+| 8 Three copies of the loading pipeline | **largely DONE** — one Rust implementation, Elixir delegates, JS is the remaining port |
 
 ## Evidence base
 
@@ -1088,38 +1087,46 @@ Added in the second pass:
 
 ---
 
-## 8. On the first objective: reuse the Rust core
+## 8. On the first objective: reuse the Rust core — largely DONE
 
-This is the objective the branch misses most clearly, and it is worth being precise about why,
-because §4.4 reads as a CLI-specific complaint when it is actually structural.
+The pipeline existed three times. It now exists once in Rust, with one port.
 
-The resolve → verify → cache → lock state machine now exists three times:
+**Shared, in `lumis-wasm-runtime`:**
 
-- `crates/lumis-cli/src/registry.rs` — Rust, 664 lines
-- `packages/javascript/lumis/src/core/languages.ts` + `runtime/node-cache.ts` — TypeScript
-- `packages/elixir/lumis/lib/lumis/language_loader.ex` — Elixir, 495 lines
+- `brackets` — the scope list, depth mapping, `BracketPair`, `RainbowRange`, the
+  query walk and `colorize_bracket_pairs`. The CLI and the pooled `Runtime` had
+  byte-identical copies; merging them also caught the CLI re-resolving scope indices
+  per call where the `Runtime` precomputed them.
+- `store` — resolve, verify, cache, lock, atomic write, TTL freshness, content-addressed
+  filenames and exact-version URLs, behind a `Fetcher` trait so hosts bring their own
+  HTTP client and tests bring none.
 
-**Only the JavaScript one is forced.** The browser cannot call Rust, so that port is justified, and
-`AGENTS.md` already prescribes the remedy for it — "the port must be covered by a test that pins
-both against the same input" — which §4.7 shows does not exist yet.
+**Who uses it:**
 
-The other two are not forced. The Elixir NIF already links `lumis-wasm-runtime`; it calls in for
-`resolve_language_package`, `load_language`, and `has_language`, then reimplements the entire
-fetch/verify/cache pipeline in Elixir *around* those calls. The CLI links the same crate and
-reimplements the same pipeline in Rust, next to the original.
+| | before | after |
+| --- | ---: | --- |
+| `crates/lumis-cli/src/registry.rs` | 716 | 327 — wasmtime setup and highlight config only |
+| `crates/lumis-wasm-runtime/src/runtime.rs` | 793 | 678 |
+| `packages/elixir/.../language_loader.ex` | 495 | 420 — no verify, write_atomic, replace_file, acquire_lock, clear_stale_lock, now_ms |
 
-The tell is that all three independently chose 120 000 ms, 300 000 ms, 25 ms, and a 3600 s TTL.
-Those constants agree today because one person wrote all three inside one PR. Nothing keeps them in
-step, and §4.8 is what it looks like when they have already drifted.
+Elixir reaches the same code through NIFs that take explicit paths, because its
+release layout is not the CLI's, and through split `lock_acquire`/`lock_release`,
+because a closure cannot cross the FFI boundary. It keeps what is genuinely its
+own: the configurable resolver hooks, the download, and the search order across
+`priv/wasm` and the user cache.
 
-The shape that meets the objective: move the pipeline into `lumis-wasm-runtime` behind a small host
-trait (read file, write file, fetch URL, now), have the CLI and the NIF call it, and keep exactly
-one port — JavaScript — pinned to it by the shared fixture corpus from §4.7. That also deletes most
-of `registry.rs` and most of `language_loader.ex`, which is the "reduce code" objective.
+The constants that were restated per runtime — 3600 s package TTL, 120 s lock
+timeout, 300 s stale-lock threshold — are now named exports with one definition.
 
-This is better done deliberately, after the correctness items, than squeezed in beside them.
+**What is left.** JavaScript still ports the pipeline, and that one is forced: the
+browser cannot call Rust. `AGENTS.md` already prescribes the remedy — a test pinning
+the port to the Rust original — and §4.7's shared fixture corpus is the start of it,
+covering package validation. The cache state machine itself is not yet pinned that
+way, so `node-cache.ts` and `core/languages.ts` remain the place drift could appear.
 
----
+Two smaller items also remain: the CLI still compiles the bracket query per
+invocation where the `Runtime` caches it per language, and `LanguageStore` is
+constructed per NIF call in Elixir rather than held.
 
 ## 9. Pre-merge checklist
 
