@@ -255,14 +255,8 @@ description = "Format every Lua file"
 run = "stylua themes/ crates/lumis-cli/themes/"
 
 [tasks.'fmt-js']
-description = "Format every JavaScript and TypeScript file git would keep"
-run = '''
-#!/usr/bin/env bash
-set -euo pipefail
-git ls-files -z --cached --others --exclude-standard \
-  '*.ts' '*.tsx' '*.mjs' '*.cjs' '*.js' '*.jsx' \
-  | xargs -0 packages/javascript/lumis/node_modules/.bin/oxfmt "$@"
-'''
+description = "Format every JavaScript and TypeScript file"
+run = 'packages/javascript/lumis/node_modules/.bin/oxfmt "**/*.{ts,tsx,mjs,cjs,js,jsx}"'
 
 [tasks.'lint']
 description = "Run all linters"

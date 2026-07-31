@@ -130,7 +130,7 @@ Rationale that is about the change rather than the code belongs in the commit me
 
 Every file the repo authors is formatted and linted, including generated ones. `mise run fmt` formats every language, `mise run lint` checks them. Run those before pushing; CI only checks.
 
-There is no per-package path list. `fmt-js` takes its files from `git ls-files --cached --others --exclude-standard`, so coverage is everything git would keep: a new package, script, example, test or generated directory is covered the day it is added, a brand-new file is covered before it is staged, and ignored build output is excluded without anyone maintaining a list.
+There is no per-package path list. `fmt-js` is `oxfmt "**/*.{ts,tsx,mjs,cjs,js,jsx}"` from the repo root, so a new package, script, example or test directory is covered the day it is added, whether or not the file has been staged yet.
 
 **Generated files are not an exception.** A generator writes its output and then formats it, so regenerating and format-checking agree. If you add a generator, format what it emits.
 
@@ -140,6 +140,7 @@ There is no per-package path list. `fmt-js` takes its files from `git ls-files -
 - `dist/` — bundler output, which the next build would rewrite anyway
 - `samples/` and `fixtures/` — corpora whose exact bytes are the test
 - `packages/javascript/themes/themes/` — 246 modules holding one long `JSON.stringify` line each; formatting them costs 28k lines for no readability, since nobody reads generated theme data
+- `lumis/langs/`, `lumis/src/generated/`, `lumis/src/tree-sitter-wasm.ts` — build output that is never committed. oxfmt reads only the `.gitignore` in its working directory, so paths ignored by a nested one have to be named here.
 
 This replaced a per-package `fmt:check` that named `src/` only. Every `test/`, `scripts/` and `examples/` directory in the repo had therefore never been formatted, and nobody could tell, because the check was green. When adding a formatter or a linter, make the default "everything" and subtract; never name a directory and hope the list is maintained.
 
