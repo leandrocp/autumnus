@@ -38,6 +38,8 @@ macro_rules! define_catalog {
     };
 }
 
+#[cfg(feature = "wasm")]
+pub mod brackets;
 pub mod catalog;
 pub mod package;
 pub mod tree_sitter_highlight;
@@ -45,6 +47,11 @@ pub mod tree_sitter_highlight;
 #[cfg(feature = "wasm")]
 mod runtime;
 
+#[cfg(feature = "wasm")]
+pub use brackets::{
+    bracket_pairs, capture_indices, colorize_bracket_pairs, BracketPair, RainbowRange,
+    RAINBOW_BRACKET_SCOPES, RAINBOW_SCOPE_INDICES,
+};
 pub use package::{
     sha256_hex, LanguagePackage, LanguagePackageError, PackagedLanguage, ParserMetadata,
 };

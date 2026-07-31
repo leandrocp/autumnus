@@ -13,9 +13,9 @@ Fixes from the second pass are committed on this branch:
 **Verdict: do not merge as-is.** The architecture is right — one package format carrying parser +
 queries + integrity + provenance, released atomically, is a genuine improvement, and moving
 Lua→regex translation to generation time so every runtime consumes byte-identical `.scm` is the
-correct call. The remaining blockers are narrower than they were: the branch is still red on its own
-test suite (§0), and the PR's own thesis — one portable language-loading architecture — is not met,
-because the loading pipeline exists three times (§8).
+correct call. CI is now fully green. The remaining objection is the PR's own thesis — one portable
+language-loading architecture — which is not met, because the loading pipeline exists three times
+(§8).
 
 This document is a living guideline. Items are fixed in place and marked **DONE** only once a
 reproducible test pins the behavior.
@@ -35,7 +35,7 @@ reproducible test pins the behavior.
 
 | Item | State |
 | --- | --- |
-| 0 Branch fails its own JS test suite after merging `main` | **open — blocking** |
+| 0 Branch fails its own JS test suite after merging `main` | **DONE** — CI fully green at `b228ef8e5` (105 pass, 0 fail) |
 | 1.1 Clojure throws on load in JS | **DONE** (re-verified) |
 | 1.2 Negated character classes inverted | **DONE** (re-verified) |
 | 1.3 Nested classes diverge between Rust and JS | **DONE** (re-verified) |

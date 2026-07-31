@@ -3,36 +3,13 @@
 use lumis_core::events::HighlightEvent;
 use lumis_core::highlights::HIGHLIGHT_NAMES;
 use std::collections::{HashMap, HashSet};
-use std::sync::{Arc, Condvar, LazyLock, Mutex, OnceLock, RwLock};
-use streaming_iterator::StreamingIterator;
+use std::sync::{Arc, Condvar, Mutex, OnceLock, RwLock};
 use thiserror::Error;
-use tree_sitter::{Parser, Query, QueryCursor, WasmStore};
+use tree_sitter::{Parser, Query, WasmStore};
 use wasmtime::{Cache, CacheConfig, Config, Engine};
 
+use crate::brackets::{bracket_pairs, colorize_bracket_pairs, RainbowRange};
 use crate::tree_sitter_highlight::{HighlightConfiguration, Highlighter};
-
-const RAINBOW_BRACKET_SCOPES: [&str; 6] = [
-    "punctuation.bracket.rainbow.1",
-    "punctuation.bracket.rainbow.2",
-    "punctuation.bracket.rainbow.3",
-    "punctuation.bracket.rainbow.4",
-    "punctuation.bracket.rainbow.5",
-    "punctuation.bracket.rainbow.6",
-];
-
-static RAINBOW_SCOPE_INDICES: LazyLock<[usize; RAINBOW_BRACKET_SCOPES.len()]> =
-    LazyLock::new(|| {
-        let fallback = HIGHLIGHT_NAMES
-            .iter()
-            .position(|candidate| *candidate == "punctuation.bracket")
-            .unwrap_or(0);
-        std::array::from_fn(|index| {
-            HIGHLIGHT_NAMES
-                .iter()
-                .position(|candidate| *candidate == RAINBOW_BRACKET_SCOPES[index])
-                .unwrap_or(fallback)
-        })
-    });
 
 /// Everything needed to register a parser and its highlighting queries.
 pub struct LanguageSpec {
@@ -449,19 +426,6 @@ fn cached_engine() -> Result<Engine, wasmtime::Error> {
     Engine::new(&config)
 }
 
-#[derive(Clone, Debug)]
-struct RainbowRange {
-    start: usize,
-    end: usize,
-    scope_index: usize,
-}
-
-#[derive(Clone, Debug)]
-struct BracketPair {
-    open: std::ops::Range<usize>,
-    close: std::ops::Range<usize>,
-}
-
 fn rainbow_ranges(
     parser: &mut Parser,
     language: &LoadedLanguage,
@@ -480,19 +444,6 @@ fn rainbow_ranges(
     let Some(query) = query else {
         return Ok(Vec::new());
     };
-    let open_capture = query
-        .capture_names()
-        .iter()
-        .position(|name| *name == "open")
-        .map(|index| index as u32);
-    let close_capture = query
-        .capture_names()
-        .iter()
-        .position(|name| *name == "close")
-        .map(|index| index as u32);
-    let (Some(open_capture), Some(close_capture)) = (open_capture, close_capture) else {
-        return Ok(Vec::new());
-    };
 
     parser
         .set_language(&language.highlight.language)
@@ -501,74 +452,8 @@ fn rainbow_ranges(
         return Ok(Vec::new());
     };
 
-    let mut cursor = QueryCursor::new();
-    let mut matches = cursor.matches(query, tree.root_node(), source.as_bytes());
-    let mut pairs = Vec::new();
-    while let Some(query_match) = matches.next() {
-        if query
-            .property_settings(query_match.pattern_index)
-            .iter()
-            .any(|property| property.key.as_ref() == "rainbow.exclude")
-        {
-            continue;
-        }
-
-        let mut opens = Vec::new();
-        let mut closes = Vec::new();
-        for capture in query_match.captures {
-            if capture.index == open_capture {
-                opens.push(capture.node.byte_range());
-            } else if capture.index == close_capture {
-                closes.push(capture.node.byte_range());
-            }
-        }
-
-        for (open, close) in opens.into_iter().zip(closes) {
-            if open.start < close.end && (open.len() == 1 || close.len() == 1) {
-                pairs.push(BracketPair { open, close });
-            }
-        }
-    }
-
+    let pairs = bracket_pairs(query, tree.root_node(), source.as_bytes());
     Ok(colorize_bracket_pairs(pairs))
-}
-
-fn colorize_bracket_pairs(pairs: Vec<BracketPair>) -> Vec<RainbowRange> {
-    let mut opens: Vec<_> = pairs.iter().map(|pair| pair.open.clone()).collect();
-    opens.sort_by_key(|range| (range.start, range.end));
-    opens.dedup_by(|a, b| a.start == b.start && a.end == b.end);
-
-    let mut color_pairs = pairs;
-    color_pairs.sort_by_key(|pair| pair.close.end);
-    let mut open_stack = Vec::new();
-    let mut open_index = 0usize;
-    let mut ranges = Vec::new();
-
-    for pair in color_pairs {
-        while open_index < opens.len() && opens[open_index].start < pair.close.start {
-            open_stack.push(opens[open_index].clone());
-            open_index += 1;
-        }
-
-        if open_stack.last() == Some(&pair.open) {
-            let scope_index =
-                RAINBOW_SCOPE_INDICES[(open_stack.len() - 1) % RAINBOW_SCOPE_INDICES.len()];
-            ranges.push(RainbowRange {
-                start: pair.open.start,
-                end: pair.open.end,
-                scope_index,
-            });
-            ranges.push(RainbowRange {
-                start: pair.close.start,
-                end: pair.close.end,
-                scope_index,
-            });
-            open_stack.pop();
-        }
-    }
-
-    ranges.sort_by_key(|range| (range.start, range.end));
-    ranges
 }
 
 fn apply_rainbow_brackets(
