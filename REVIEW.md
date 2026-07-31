@@ -958,10 +958,25 @@ user-facing. Worth documenting the whole chain in one place.
   by **16 conformance fixtures, 3 of which this PR changed and 0 of which it adds**. Add fixtures
   for locals/shadowing (Rust, JS, Go), multi-level injections, and at least one language per
   injection style before shipping.
-- **Double query execution.** `snapshotCapturesWithMatches` runs both `query.matches()` and
-  `query.captures()` on every layer, then builds a three-level `Map<pattern, Map<nodeId,
-  Map<name, queue>>>`. On `main`, `matches()` ran only when `injectionPatternEnd > 0`. Files with
-  no injections now pay a second full query pass plus the map construction. Worth measuring.
+- ~~**Double query execution.**~~ **Won't fix — measured.** `events.ts` runs both
+  `query.matches()` and `query.captures()` on every layer. On an 11 KiB JSON document in Node:
+
+  | phase | time |
+  | --- | ---: |
+  | `parser.parse()` | 2.55 ms |
+  | `query.matches()` | 3.91 ms |
+  | `query.captures()` | 3.84 ms |
+  | full highlight | 23.55 ms |
+
+  So the second pass is about 15% of a highlight, and that is the ceiling on any fix. The two calls
+  are also not redundant: `captures()` carries Tree-sitter's stream order but not match identity,
+  `matches()` the reverse, and the highlighter has to discard a whole match when a predicate fails
+  exactly as the Rust reference does. `web-tree-sitter` additionally omits some valid captures from
+  `matches()` (`events.ts:193`), so the two lists differ. Collapsing them means reimplementing that
+  join for a sixth of the time, in the riskiest code in the file.
+
+  The remaining ~13 ms is `buildNestedEvents` and formatting, which is where the next entry already
+  points.
 - **No cache eviction anywhere.** Node, CLI, and Elixir accumulate one file per
   `{parser, version, sha}` forever; browsers accumulate CacheStorage/IndexedDB entries. Content
   addressing means every upgrade leaves the old blob behind. There is no `lumis-wasm-cache --prune`
