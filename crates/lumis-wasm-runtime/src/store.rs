@@ -28,7 +28,10 @@ use crate::package::{LanguagePackage, LanguagePackageError};
 /// How long a cached `language.json` is trusted before it is refreshed.
 pub const PACKAGE_CACHE_TTL: Duration = Duration::from_secs(60 * 60);
 
-const CDN: &str = "https://cdn.jsdelivr.net/npm";
+/// npm CDNs, tried in order. Both serve the same `<package>@<version>/<file>`
+/// layout, so one mirror being unreachable or missing a just-published version
+/// does not stop a language from loading.
+const CDNS: [&str; 2] = ["https://cdn.jsdelivr.net/npm", "https://unpkg.com"];
 
 #[derive(Debug, Error)]
 pub enum StoreError {
@@ -242,13 +245,28 @@ impl LanguageStore {
             .join(format!("{}.language.json", package_suffix(package_name)))
     }
 
-    /// Exact-version CDN URL for this package's parser.
+    /// Exact-version URL for this package's parser on the primary CDN.
+    ///
+    /// Reported to users; [`Self::parser`] additionally falls back to the mirrors.
     #[must_use]
     pub fn parser_url(package: &LanguagePackage) -> String {
-        format!(
-            "{CDN}/{}@{}/{}.wasm",
-            package.package_name, package.version, package.parser.name
-        )
+        format!("{}/{}", CDNS[0], parser_path(package))
+    }
+
+    /// Fetch `path` from the first CDN that serves it.
+    fn fetch_from_cdn(&self, path: &str) -> Result<Vec<u8>, StoreError> {
+        let mut failures = Vec::new();
+        for base in CDNS {
+            let url = format!("{base}/{path}");
+            match self.fetcher.get(&url) {
+                Ok(bytes) => return Ok(bytes),
+                Err(message) => failures.push(format!("{url}: {message}")),
+            }
+        }
+        Err(StoreError::Fetch {
+            url: path.to_string(),
+            message: failures.join("; "),
+        })
     }
 
     fn memo(&self, package_name: &str) -> Option<Arc<LanguagePackage>> {
@@ -295,14 +313,7 @@ impl LanguageStore {
         package_name: &str,
         path: &Path,
     ) -> Result<LanguagePackage, StoreError> {
-        let url = format!("{CDN}/{package_name}@latest/language.json");
-        let bytes = self
-            .fetcher
-            .get(&url)
-            .map_err(|message| StoreError::Fetch {
-                url: url.clone(),
-                message,
-            })?;
+        let bytes = self.fetch_from_cdn(&format!("{package_name}@latest/language.json"))?;
         let package = parse_package(&bytes, package_name)?;
         write_atomic(path, &bytes)?;
         Ok(package)
@@ -316,13 +327,7 @@ impl LanguageStore {
         } else if self.config.offline {
             return Err(StoreError::OfflineParser(package.parser.name.clone()));
         } else {
-            let url = Self::parser_url(package);
-            self.fetcher
-                .get(&url)
-                .map_err(|message| StoreError::Fetch {
-                    url: url.clone(),
-                    message,
-                })?
+            self.fetch_from_cdn(&parser_path(package))?
         };
         package.verify_wasm(&bytes)?;
         write_atomic(path, &bytes)?;
@@ -336,6 +341,14 @@ pub fn package_suffix(package_name: &str) -> &str {
     package_name
         .strip_prefix("@lumis-sh/wasm-")
         .unwrap_or(package_name)
+}
+
+/// CDN-relative path to a package's parser, shared by every mirror.
+fn parser_path(package: &LanguagePackage) -> String {
+    format!(
+        "{}@{}/{}.wasm",
+        package.package_name, package.version, package.parser.name
+    )
 }
 
 /// Content-addressed parser filename: name, version and digest.
@@ -463,6 +476,22 @@ mod tests {
         }
     }
 
+    /// Fails every request to the primary CDN, serves the rest.
+    struct PrimaryDown {
+        bytes: Vec<u8>,
+        tried: Mutex<Vec<String>>,
+    }
+
+    impl Fetcher for PrimaryDown {
+        fn get(&self, url: &str) -> Result<Vec<u8>, String> {
+            self.tried.lock().unwrap().push(url.to_string());
+            if url.starts_with(CDNS[0]) {
+                return Err("503".to_string());
+            }
+            Ok(self.bytes.clone())
+        }
+    }
+
     fn make(dir: &Path, fetcher: Box<dyn Fetcher>, offline: bool) -> LanguageStore {
         LanguageStore::new(
             StoreConfig {
@@ -472,6 +501,28 @@ mod tests {
             },
             fetcher,
         )
+    }
+
+    #[test]
+    fn a_parser_is_fetched_from_the_mirror_when_the_primary_is_down() {
+        let dir = tempdir();
+        let fetcher = Box::new(PrimaryDown {
+            bytes: WASM.to_vec(),
+            tried: Mutex::new(Vec::new()),
+        });
+        let store = make(dir.path(), fetcher, false);
+
+        assert_eq!(store.parser(&package()).unwrap(), WASM);
+    }
+
+    #[test]
+    fn every_cdn_failure_is_reported_together() {
+        let dir = tempdir();
+        let store = make(dir.path(), Box::new(NoNetwork), false);
+        let error = store.parser(&package()).unwrap_err().to_string();
+        for base in CDNS {
+            assert!(error.contains(base), "{base} missing from: {error}");
+        }
     }
 
     #[test]

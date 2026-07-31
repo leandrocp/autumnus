@@ -134,6 +134,10 @@ defmodule Lumis.LanguageLoader do
         with {:ok, package_json} <- File.read(path),
              do: validate_resolved_package(handle, package_json)
 
+      {:urls, urls} when is_list(urls) ->
+        with {:ok, package_json} <- download_first(urls, "language package"),
+             do: validate_resolved_package(handle, package_json)
+
       url when is_binary(url) ->
         with {:ok, package_json} <- download(url, "language package"),
              do: validate_resolved_package(handle, package_json)
@@ -307,6 +311,7 @@ defmodule Lumis.LanguageLoader do
     case resolver.(entry) do
       {:ok, bytes} when is_binary(bytes) -> {:ok, bytes}
       {:file, path} when is_binary(path) -> File.read(path)
+      {:urls, urls} when is_list(urls) -> download_first(urls, "parser WASM")
       url when is_binary(url) -> download(url, "parser WASM")
       other -> {:error, "invalid :wasm_resolver result: #{inspect(other)}"}
     end
@@ -314,12 +319,35 @@ defmodule Lumis.LanguageLoader do
     exception -> {:error, "parser WASM resolver failed: #{Exception.message(exception)}"}
   end
 
+  # npm CDNs, tried in order. Both serve the same `<package>@<version>/<file>`
+  # layout, so one mirror being unreachable does not stop a language from loading.
+  # Mirrors `CDNS` in `crates/lumis-wasm-runtime/src/store.rs`.
+  @cdns ["https://cdn.jsdelivr.net/npm", "https://unpkg.com"]
+
   defp default_package_url(handle) do
-    "https://cdn.jsdelivr.net/npm/#{handle.package_name}@latest/language.json"
+    {:urls, Enum.map(@cdns, &"#{&1}/#{handle.package_name}@latest/language.json")}
   end
 
   defp default_wasm_url(entry) do
-    "https://cdn.jsdelivr.net/npm/#{entry.package_name}@#{entry.version}/#{entry.wasm_name}.wasm"
+    {:urls,
+     Enum.map(
+       @cdns,
+       &"#{&1}/#{entry.package_name}@#{entry.version}/#{entry.wasm_name}.wasm"
+     )}
+  end
+
+  # Try each URL in turn, reporting every failure if none works.
+  defp download_first(urls, description) do
+    Enum.reduce_while(urls, {:error, []}, fn url, {:error, failures} ->
+      case download(url, description) do
+        {:ok, body} -> {:halt, {:ok, body}}
+        {:error, reason} -> {:cont, {:error, [reason | failures]}}
+      end
+    end)
+    |> case do
+      {:ok, body} -> {:ok, body}
+      {:error, failures} -> {:error, failures |> Enum.reverse() |> Enum.join("; ")}
+    end
   end
 
   defp download(url, description) do

@@ -35,7 +35,7 @@ on:
   workflow_dispatch:
 
 env:
-  QUERY_SHARDS: 8
+  QUERY_SHARDS: 10
 
 jobs:
   # Regex validity and cross-engine portability need no grammar, so this covers
@@ -88,7 +88,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3, 4, 5, 6, 7, 8]
+        shard: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     steps:
       - uses: actions/checkout@v7
       - uses: jdx/mise-action@v4
@@ -107,10 +107,7 @@ jobs:
 
       - name: Emscripten version from mise.toml
         id: emsdk
-        run: |
-          set -euo pipefail
-          version="$(python3 -c "import tomllib;print(tomllib.load(open('mise.toml','rb'))['env']['LUMIS_EMSDK_VERSION'])")"
-          echo "version=$version" >> "$GITHUB_OUTPUT"
+        run: echo "version=$(mise exec -- printenv LUMIS_EMSDK_VERSION)" >> "$GITHUB_OUTPUT"
 
       - uses: mymindstorm/setup-emsdk@v16
         with:

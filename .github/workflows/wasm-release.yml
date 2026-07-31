@@ -122,10 +122,7 @@ jobs:
 
       - name: Emscripten version from mise.toml
         id: emsdk
-        run: |
-          set -euo pipefail
-          version="$(python3 -c "import tomllib;print(tomllib.load(open('mise.toml','rb'))['env']['LUMIS_EMSDK_VERSION'])")"
-          echo "version=$version" >> "$GITHUB_OUTPUT"
+        run: echo "version=$(mise exec -- printenv LUMIS_EMSDK_VERSION)" >> "$GITHUB_OUTPUT"
 
       - uses: mymindstorm/setup-emsdk@v16
         with:

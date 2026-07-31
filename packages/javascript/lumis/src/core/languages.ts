@@ -175,11 +175,37 @@ export interface LanguagesModule {
   getDefaultRuntime(): RuntimeLike;
 }
 
+/**
+ * npm CDNs, tried in order. Both serve the same `<package>@<version>/<file>`
+ * layout, so one mirror being unreachable does not stop a language from loading.
+ * Mirrors `CDNS` in `crates/lumis-wasm-runtime/src/store.rs`.
+ */
+export const CDNS = ["https://cdn.jsdelivr.net/npm", "https://unpkg.com"] as const;
+
 /** @internal */
 export const DEFAULT_RESOLVER: WasmResolver = (_language, wasm) =>
-  `https://cdn.jsdelivr.net/npm/${wasm.packageName}@${wasm.version}/${wasm.name}.wasm`;
+  `${CDNS[0]}/${wasm.packageName}@${wasm.version}/${wasm.name}.wasm`;
 export const DEFAULT_LANGUAGE_PACKAGE_RESOLVER: LanguagePackageResolver = (packageName) =>
-  `https://cdn.jsdelivr.net/npm/${packageName}@latest/language.json`;
+  `${CDNS[0]}/${packageName}@latest/language.json`;
+
+/**
+ * Try each CDN in turn. Only used when the caller kept the default resolver: a
+ * custom resolver names one exact location and is not second-guessed.
+ */
+async function fetchFromCdns(primary: string, isDefault: boolean): Promise<Response> {
+  const urls = isDefault ? CDNS.map((base) => primary.replace(CDNS[0], base)) : [primary];
+  const failures: string[] = [];
+  for (const url of urls) {
+    try {
+      const response = await fetch(url);
+      if (response.ok) return response;
+      failures.push(`${url}: ${response.status} ${response.statusText}`);
+    } catch (error) {
+      failures.push(`${url}: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+  throw new Error(failures.join("; "));
+}
 
 const HIGHLIGHT_NAMES_SET = new Set(HIGHLIGHT_NAMES);
 const PLAINTEXT_ALIASES = ["text", "txt", "plain"];
@@ -556,12 +582,13 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
       const source = this.languagePackageResolver(packageName);
       const disk = await runtime.readResolvedWasmFromDisk(source);
       if (disk) return parseLanguagePackage(disk, packageName);
-      const response = await fetch(typeof source === "string" ? source : source.href);
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch language package ${packageName}: ${response.status} ${response.statusText}`,
-        );
-      }
+      const href = typeof source === "string" ? source : source.href;
+      const response = await fetchFromCdns(
+        href,
+        this.languagePackageResolver === DEFAULT_LANGUAGE_PACKAGE_RESOLVER,
+      ).catch((error: Error) => {
+        throw new Error(`Failed to fetch language package ${packageName}: ${error.message}`);
+      });
       return parseLanguagePackage(new Uint8Array(await response.arrayBuffer()), packageName);
     }
 
@@ -656,12 +683,12 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
       if (runtime.networkFallbackEnabled?.() === false) {
         throw new Error(`Parser WASM for "${language}" is not cached and offline mode is enabled`);
       }
-      const response = await fetch(typeof url === "string" ? url : url.href);
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch WASM for ${ref.name}@${ref.version}: ${response.status} ${response.statusText}`,
-        );
-      }
+      const href = typeof url === "string" ? url : url.href;
+      const response = await fetchFromCdns(href, this.resolver === DEFAULT_RESOLVER).catch(
+        (error: Error) => {
+          throw new Error(`Failed to fetch WASM for ${ref.name}@${ref.version}: ${error.message}`);
+        },
+      );
       return new Uint8Array(await response.arrayBuffer());
     }
 

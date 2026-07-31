@@ -1142,11 +1142,11 @@ Raised during review, tracked here and fixed one at a time.
 
 | # | Item | State |
 | --- | --- | --- |
-| 10.1 | Query shards: 8 → 10 | open |
-| 10.2 | `rust.yml` pins `toolchain: '1.91'`; should be `stable` | open |
-| 10.3 | Emscripten version read with an inline `python3 -c tomllib` hack; mise should report it | open |
-| 10.4 | `wasmparser` is not on the latest version | open |
-| 10.5 | `store.rs` uses a single CDN with no fallback | open |
+| 10.1 | Query shards: 8 → 10 | **DONE** — 10 shards |
+| 10.2 | `rust.yml` pins `toolchain: '1.91'`; should be `stable` | **DONE** — `dtolnay/rust-toolchain@stable` with no override; `msrv:` inputs stay, they pin the MSRV job deliberately |
+| 10.3 | Emscripten version read with an inline `python3 -c tomllib` hack; mise should report it | **DONE** — `mise exec -- printenv LUMIS_EMSDK_VERSION` |
+| 10.4 | `wasmparser` is not on the latest version | **DONE** — 0.244 → 0.255 |
+| 10.5 | `store.rs` uses a single CDN with no fallback | **DONE** — jsDelivr then unpkg, in all three runtimes |
 | 10.6 | `LUMIS_WASM_OFFLINE` adds an env var; reduce instead | open |
 | 10.7 | `write_atomic` is hand-rolled; check for a crate or std equivalent | open |
 | 10.8 | `webgpu_compute_reduce.html` is vendored; the demo should not need it in-repo | open |
