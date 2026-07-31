@@ -33,12 +33,6 @@ on:
   workflow_dispatch:
 
 env:
-  # Must match wasm-release.yml. Emscripten 5 and 6 produce side modules whose
-  # external scanner exports web-tree-sitter cannot bind. Such a parser compiles
-  # cleanly and only fails when loaded, with
-  # `bad export type for tree_sitter_<lang>_external_scanner_create`, and only for
-  # grammars that have a scanner -- so a green build proves nothing here.
-  EMSDK_VERSION: "4.0.15"
   QUERY_SHARDS: 8
 
 jobs:
@@ -95,10 +89,7 @@ jobs:
         shard: [1, 2, 3, 4, 5, 6, 7, 8]
     steps:
       - uses: actions/checkout@v7
-      - uses: jdx/mise-action@v4.2.1
-        with:
-          version: 2026.7.3
-          install: true
+      - uses: jdx/mise-action@v4
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - uses: pnpm/action-setup@v6
@@ -111,10 +102,6 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
 
-      - uses: mymindstorm/setup-emsdk@v16
-        with:
-          version: ${{ env.EMSDK_VERSION }}
-          actions-cache-folder: emsdk-cache
 
       - name: Select this shard
         id: shard

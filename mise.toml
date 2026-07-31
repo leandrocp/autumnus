@@ -2,6 +2,9 @@
 
 [tools]
 tree-sitter = "0.26"
+# Emscripten 5 and 6 build Tree-sitter side modules whose external scanner exports
+# web-tree-sitter cannot bind. See the Emscripten section in AGENTS.md.
+emsdk = "4.0.15"
 
 [tasks.'setup']
 description = "Install dependencies and check required tools"

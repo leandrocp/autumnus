@@ -105,19 +105,24 @@ A test that skips silently reports the same green as a test that verified someth
 
 ### Keep Emscripten compatible with Tree-sitter
 
-Pin Emscripten to `4.0.15` for the Tree-sitter browser runtime, declared as `EMSDK_VERSION` in `.github/workflows/wasm-release.yml` and `.github/workflows/queries.yml`. Change it in both or not at all.
+Emscripten is pinned as `emsdk` in the root `mise.toml`, so every runner and every developer builds parsers with the same toolchain. There is no `setup-emsdk` step; `mise run wasm-build` puts `emcc` on `PATH`.
 
-Emscripten 5 and 6 are incompatible with Tree-sitter side modules because their mutable `env.__stack_pointer` import is not supplied as the required `WebAssembly.Global`; see <https://github.com/tree-sitter/tree-sitter/issues/5037>.
-
-The failure is easy to misread. A parser built with an incompatible Emscripten **compiles cleanly** and only fails when something tries to load it:
+This failure looks like a toolchain problem and usually is not:
 
 ```
-bad export type for 'tree_sitter_hcl_external_scanner_create': undefined
+bad export type for 'tree_sitter_<lang>_external_scanner_create': undefined
 ```
 
-Only grammars with an external scanner are affected, so a build can look entirely green while every scanner-bearing language is broken. "The parsers built without errors" is not evidence that the toolchain is correct; loading one is.
+A parser that triggers it **compiles cleanly** and only fails when something loads it, and only when the grammar has an external scanner. So a green build proves nothing — load the parser.
 
-Do not upgrade Emscripten until that incompatibility is resolved upstream and Lumis verifies loading real Tree-sitter parser side modules in browser conformance tests.
+Historically this was blamed on Emscripten (<https://github.com/tree-sitter/tree-sitter/issues/5037>). That is no longer reproducible with the pinned Tree-sitter CLI. Measured on `tree-sitter-hcl`, holding the toolchain fixed and varying only the grammar revision:
+
+| Grammar revision | emsdk 4.0.15 | emsdk 6.0.5 |
+| --- | --- | --- |
+| `636dbe70`, pinned in `languages.toml` | fails to load | fails to load |
+| `64ad6278`, what the published package ships | loads | loads |
+
+So the cause is a **stale grammar revision**, not the Emscripten version. When a scanner-bearing language fails to load, check whether `languages.toml` has fallen behind the revision the published package was built from before touching the toolchain.
 
 ## Documentation is part of the change
 

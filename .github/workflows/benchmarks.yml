@@ -37,9 +37,7 @@ jobs:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           persist-credentials: false
-      - uses: jdx/mise-action@v4.2.3
-        with:
-          version: 2026.7.3
+      - uses: jdx/mise-action@v4
           working_directory: benchmarks
           install_args: --locked
           cache: true
