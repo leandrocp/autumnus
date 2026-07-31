@@ -2,14 +2,8 @@
   "ignorePatterns": [
     "**/dist/**",
     "**/vendored_parsers/**",
-    "docs/build/**",
     "fixtures/**",
     "packages/elixir/lumis/examples/**/vendor/**",
-    "packages/javascript/lumis/bundles/**",
-    "packages/javascript/lumis/src/tree-sitter-wasm.ts",
-    "packages/javascript/themes/themes/**",
-    "packages/javascript/wasm-bundle-*/index.d.ts",
-    "packages/javascript/wasm-bundle-*/index.js",
     "samples/**"
   ]
 }

@@ -72,6 +72,9 @@ importers:
       '@microsoft/api-extractor':
         specifier: ^7.58.12
         version: 7.58.12(@types/node@25.6.0)
+      oxfmt:
+        specifier: ^0.43.0
+        version: 0.43.0
       smol-toml:
         specifier: ^1.7.1
         version: 1.7.1

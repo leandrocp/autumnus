@@ -4,9 +4,7 @@ use lumis::events::HighlightEvent;
 use lumis::formatters::Formatter as _;
 use lumis::highlight::{highlight_events_with_options, HighlightOptions};
 use lumis::languages::Language;
-use lumis_wasm_runtime::{
-    LanguagePackage, PackagedLanguage, ParserMetadata,
-};
+use lumis_wasm_runtime::{LanguagePackage, PackagedLanguage, ParserMetadata};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::collections::{BTreeMap, HashSet};
@@ -1295,9 +1293,7 @@ fn upgrade_parsers(name: &str) -> Result<()> {
             && current_rev != new_rev
             && git_is_ancestor(git, &new_rev, current_rev)?
         {
-            println!(
-                "  {parser_name}: keeping {current_rev}; candidate {new_rev} is an ancestor"
-            );
+            println!("  {parser_name}: keeping {current_rev}; candidate {new_rev} is an ancestor");
             continue;
         }
 
@@ -1881,9 +1877,10 @@ fn preprocess_queries(name: &str) -> Result<()> {
                 // Reject rather than approximate: a Lua pattern that cannot be
                 // translated faithfully would ship a regex that means something
                 // else in every runtime.
-                let content = lumis_build::try_convert_lua_matches(&content).with_context(|| {
-                    format!("failed to convert Lua patterns in {lang}/{query_type}.scm")
-                })?;
+                let content =
+                    lumis_build::try_convert_lua_matches(&content).with_context(|| {
+                        format!("failed to convert Lua patterns in {lang}/{query_type}.scm")
+                    })?;
                 let full = format!("; This file is auto-generated. Do not edit.\n{content}");
                 fs::write(format!("{dest}/{lang}/{query_type}.scm"), &full)?;
                 wrote = true;
@@ -2208,7 +2205,8 @@ fn build_wasm(name: &str) -> Result<()> {
                     println!("  npm ci failed, retrying with npm install");
                 }
                 if ci_failed || !has_package_lock {
-                    let _ = run_cmd_ok(&format!("cd {install_dir} && npm install --ignore-scripts"));
+                    let _ =
+                        run_cmd_ok(&format!("cd {install_dir} && npm install --ignore-scripts"));
                 }
             }
             println!("* generating parser sources in {repo_dir}");
@@ -2933,14 +2931,10 @@ mod tests {
         let second = commit_test_revision(&source, "second\n");
         let source_url = source.to_string_lossy();
 
-        assert!(
-            git_is_ancestor(&source_url, &first, &second)
-                .expect("forward ancestry check should succeed")
-        );
-        assert!(
-            !git_is_ancestor(&source_url, &second, &first)
-                .expect("backward ancestry check should succeed")
-        );
+        assert!(git_is_ancestor(&source_url, &first, &second)
+            .expect("forward ancestry check should succeed"));
+        assert!(!git_is_ancestor(&source_url, &second, &first)
+            .expect("backward ancestry check should succeed"));
 
         let _ = fs::remove_dir_all(root);
     }

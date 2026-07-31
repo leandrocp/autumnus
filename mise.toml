@@ -255,12 +255,12 @@ description = "Format every Lua file"
 run = "stylua themes/ crates/lumis-cli/themes/"
 
 [tasks.'fmt-js']
-description = "Format every authored JavaScript and TypeScript file"
+description = "Format every tracked JavaScript and TypeScript file"
 run = '''
 #!/usr/bin/env bash
 set -euo pipefail
-exec packages/javascript/lumis/node_modules/.bin/oxfmt "$@" \
-  --no-error-on-unmatched-pattern "**/*.{ts,tsx,mjs,cjs,js,jsx}"
+git ls-files -z '*.ts' '*.tsx' '*.mjs' '*.cjs' '*.js' '*.jsx' \
+  | xargs -0 packages/javascript/lumis/node_modules/.bin/oxfmt "$@"
 '''
 
 [tasks.'lint']
@@ -276,6 +276,8 @@ cargo clippy --workspace --all-targets --all-features -- -D warnings
 echo ""
 echo "Running Rust fmt check..."
 cargo fmt --all -- --check
+cargo fmt --manifest-path crates/dev/Cargo.toml --check
+cargo fmt --manifest-path crates/autumnus/Cargo.toml --check
 echo ""
 echo "Running Elixir format check..."
 (cd packages/elixir/lumis && mix format --check-formatted)
@@ -309,6 +311,8 @@ run = '''
 set -euo pipefail
 echo "Formatting Rust..."
 cargo fmt --all
+cargo fmt --manifest-path crates/dev/Cargo.toml
+cargo fmt --manifest-path crates/autumnus/Cargo.toml
 echo ""
 echo "Formatting Elixir..."
 (cd packages/elixir/lumis && mix format)

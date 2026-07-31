@@ -1,0 +1,56 @@
+name: Lint
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "**/*.lua"
+      - ".github/actionlint.yaml"
+      - ".github/workflows/**"
+      - "crates/autumnus/**"
+      - "crates/dev/**"
+      - "mise.toml"
+  pull_request:
+    paths:
+      - "**/*.lua"
+      - ".github/actionlint.yaml"
+      - ".github/workflows/**"
+      - "crates/autumnus/**"
+      - "crates/dev/**"
+      - "mise.toml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  actionlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Run actionlint
+        uses: docker://rhysd/actionlint:1.7.12
+        with:
+          args: -color
+
+  lua:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: jdx/mise-action@v4
+      - run: mise run fmt-lua -- --check
+
+  rust-outside-workspace:
+    name: Rust crates outside the workspace
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - run: cargo fmt --manifest-path crates/dev/Cargo.toml --check
+      - run: cargo fmt --manifest-path crates/autumnus/Cargo.toml --check

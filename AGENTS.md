@@ -126,13 +126,15 @@ Not worth keeping, because the code already says it:
 
 Rationale that is about the change rather than the code belongs in the commit message. `mise.toml` takes no comments at all.
 
-### Formatter coverage is opt-out, not opt-in
+### Formatting and linting are enforced everywhere
 
-`mise run fmt` formats every language, `mise run lint` checks them. Run those before pushing; CI only checks.
+Every file the repo authors is formatted and linted, including generated ones. `mise run fmt` formats every language, `mise run lint` checks them. Run those before pushing; CI only checks.
 
-`fmt-js` and `fmt-lua` take **no per-package path list**. They match by extension from the repo root, so a new package, script, example, or test directory is covered the day it is added. Exclusions live in one place, `.oxfmtrc.json`, and only for generated or vendored files, which are guarded by regenerating and diffing instead.
+There is no per-package path list. The checks match by extension from the repo root, so a new package, script, example, test or generated directory is covered the day it is added. The only files `.oxfmtrc.json` skips are ones this repo does not author: vendored parsers, vendored site assets, build output, and the `samples/` and `fixtures/` corpora, whose exact bytes are the point.
 
-They replaced a per-package `fmt:check` that named `src/` only. Every `test/`, `scripts/` and `examples/` directory in the repo had therefore never been formatted, and nobody could tell, because the check was green. When adding a formatter or a linter, make the default "everything" and subtract; never name a directory and hope the list is maintained.
+**Generated files are not an exception.** A generator writes its output and then formats it, so regenerating and format-checking agree. If you add a generator, format what it emits; do not add an ignore entry.
+
+This replaced a per-package `fmt:check` that named `src/` only. Every `test/`, `scripts/` and `examples/` directory in the repo had therefore never been formatted, and nobody could tell, because the check was green. When adding a formatter or a linter, make the default "everything" and subtract; never name a directory and hope the list is maintained.
 
 `oxlint` runs with `--deny-warnings`, so a warning fails the build. Silence a genuinely intentional one at the line with `// oxlint-disable-next-line <rule> -- <why>`; do not let it sit in the output.
 
