@@ -1,4 +1,5 @@
 import type { Language, Query as TreeSitterQuery } from "web-tree-sitter";
+import { PACKAGE_CACHE_TTL_MS } from "../cache-timing.js";
 import { buildHighlightEvents } from "../events.js";
 import { LANGUAGES } from "../generated/languages-meta.js";
 import { HIGHLIGHT_NAMES } from "../highlights.js";
@@ -182,7 +183,7 @@ export const DEFAULT_LANGUAGE_PACKAGE_RESOLVER: LanguagePackageResolver = (packa
 
 const HIGHLIGHT_NAMES_SET = new Set(HIGHLIGHT_NAMES);
 const PLAINTEXT_ALIASES = ["text", "txt", "plain"];
-const LANGUAGE_PACKAGE_TTL_MS = 60 * 60 * 1000;
+
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
@@ -578,7 +579,7 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
         const networkEnabled = runtime.networkFallbackEnabled?.() !== false;
         if (
           cached &&
-          (!networkEnabled || Date.now() - cached.checkedAt < LANGUAGE_PACKAGE_TTL_MS)
+          (!networkEnabled || Date.now() - cached.checkedAt < PACKAGE_CACHE_TTL_MS)
         ) {
           return cached.package;
         }

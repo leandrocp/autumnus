@@ -1,3 +1,9 @@
+import {
+  LOCK_RETRY_MS,
+  LOCK_STALE_AFTER_MS,
+  LOCK_TIMEOUT_MS,
+} from "../cache-timing.js";
+
 const nodeFsPromises = "node:fs" + "/promises";
 const nodePath = "node:path";
 
@@ -97,7 +103,7 @@ export async function withWasmCacheLock<T>(
   const { join } = await import(nodePath);
   await mkdir(resolvedDirectory, { recursive: true });
   const lockPath = join(resolvedDirectory, `${wasmCacheFilename(key)}.lock`);
-  const deadline = Date.now() + 120_000;
+  const deadline = Date.now() + LOCK_TIMEOUT_MS;
   let lock: { close(): Promise<void> } | undefined;
 
   while (!lock) {
@@ -107,7 +113,7 @@ export async function withWasmCacheLock<T>(
       if (!isNodeError(error, "EEXIST")) throw error;
       try {
         const info = await stat(lockPath);
-        if (Date.now() - info.mtimeMs > 300_000) {
+        if (Date.now() - info.mtimeMs > LOCK_STALE_AFTER_MS) {
           await rm(lockPath, { force: true });
           continue;
         }
@@ -117,7 +123,7 @@ export async function withWasmCacheLock<T>(
       if (Date.now() >= deadline) {
         throw new Error(`Timed out waiting for Lumis WASM cache lock: ${lockPath}`);
       }
-      await new Promise((resolve) => setTimeout(resolve, 25));
+      await new Promise((resolve) => setTimeout(resolve, LOCK_RETRY_MS));
     }
   }
 
