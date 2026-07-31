@@ -7,8 +7,10 @@ dynamic parser-WASM architecture:
 - JavaScript in a browser
 - Elixir
 
-Each demo downloads the same pinned, SHA-256-verified
-[Three.js WebGPU compute-reduction example](https://github.com/mrdoob/three.js/blob/6365c1a0af6a32ed45f99712197555fee2f4b24a/examples/webgpu_compute_reduce.html).
+Each demo highlights the same pinned, SHA-256-verified
+[Three.js WebGPU compute-reduction example](https://github.com/mrdoob/three.js/blob/6365c1a0af6a32ed45f99712197555fee2f4b24a/examples/webgpu_compute_reduce.html),
+read from the copy already vendored at `benchmarks/webgpu_compute_reduce.html`,
+so the demos run offline and highlight exactly what the benchmarks measure.
 It is a real 1,397-line MIT-licensed file with substantial HTML and injected
 CSS, JSON import-map, and JavaScript module scopes. All four parsers are loaded
 before one `html-inline` highlighting call.
@@ -31,8 +33,8 @@ node ../../examples/wasm-runtimes/javascript/node.mjs
 open ../../examples/wasm-runtimes/javascript/output.html
 ```
 
-The first run downloads the source fixture and may download four parser WASMs.
-Later processes reuse the
+The first run may download four parser WASMs. The source fixture is read from
+the repository. Later processes reuse the
 persistent platform cache. Set `LUMIS_WASM_CACHE_DIR` to inspect or isolate it.
 
 ## Browser

@@ -10,7 +10,10 @@ Mix.install([
 defmodule LumisDemoLive do
   use Phoenix.LiveView
 
-  @source_url "https://raw.githubusercontent.com/mrdoob/three.js/6365c1a0af6a32ed45f99712197555fee2f4b24a/examples/webgpu_compute_reduce.html"
+  @source_url "https://github.com/mrdoob/three.js/blob/6365c1a0af6a32ed45f99712197555fee2f4b24a/examples/webgpu_compute_reduce.html"
+  # Read from the copy vendored in this repository, so the demo runs offline and
+  # highlights exactly what the benchmarks measure.
+  @source_path Path.expand("../../../benchmarks/webgpu_compute_reduce.html", __DIR__)
   @expected_sha256 "e1b31d91c25e9103931d7e830b9dfb9e075d97c175623e3e44fb3dc3685067af"
   @expected_lines 1397
 
@@ -49,7 +52,7 @@ defmodule LumisDemoLive do
   end
 
   defp load_source do
-    source = Req.get!(@source_url).body
+    source = File.read!(@source_path)
     sha256 = :crypto.hash(:sha256, source) |> Base.encode16(case: :lower)
     line_count = source |> String.trim_trailing("\n") |> String.split("\n") |> length()
 

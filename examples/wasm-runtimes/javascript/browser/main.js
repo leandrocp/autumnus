@@ -6,7 +6,10 @@ import javascript from "../../../../packages/javascript/lumis/dist/langs/javascr
 import json from "../../../../packages/javascript/lumis/dist/langs/json.js";
 import dracula from "../../../../packages/javascript/themes/dist/themes/dracula.js";
 
-import { loadSource, sourceUrl } from "../source.mjs";
+// Inlined by Vite at transform time, so the demo needs no network and no
+// server access outside its root.
+import rawSource from "../../../../benchmarks/webgpu_compute_reduce.html?raw";
+import { sourceUrl, verifySource } from "../source.mjs";
 
 const output = document.querySelector("#output");
 const status = document.querySelector("#status");
@@ -21,7 +24,7 @@ try {
   });
 
   output.innerHTML = highlighter.highlight(
-    await loadSource(),
+    await verifySource(rawSource),
     htmlInline({ language: htmlLanguage, theme: dracula }),
   );
   status.textContent =
