@@ -22,6 +22,45 @@ Lumis uses two terms consistently:
 - **load** makes a language available in the current runtime
 - **cache** persists verified parser bytes so later starts skip the download
 
+## Cache and load in advance
+
+Loading a language on demand costs a metadata request, a parser download, and a
+grammar compile, all while the request that triggered it waits. Do it at build
+or boot time instead, for every language you expect to render:
+
+<Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
+  <TabItem value="javascript" label="JavaScript">
+
+```js title="At deploy time"
+import {cacheLanguages} from '@lumis-sh/lumis/cache'
+
+await cacheLanguages(['rust', 'javascript', 'elixir'], {directory: './wasm-cache'})
+```
+
+  </TabItem>
+  <TabItem value="elixir" label="Elixir">
+
+```elixir title="config/prod.exs, then mix lumis.languages.cache before release"
+config :lumis, bundled_languages: ~w(elixir html javascript css)
+```
+
+```elixir title="lib/my_app/application.ex"
+:ok = Lumis.Languages.load(~w(elixir html javascript css))
+```
+
+  </TabItem>
+  <TabItem value="cli" label="CLI">
+
+```bash
+lumis parsers cache rust javascript elixir
+```
+
+  </TabItem>
+</Tabs>
+
+Injected languages count too: highlighting Markdown with fenced Rust needs the
+Rust parser, and an HTML page needs CSS and JavaScript.
+
 ## What ships where
 
 - `@lumis-sh/lumis` ships the JS API and embedded `web-tree-sitter` runtime WASM

@@ -75,8 +75,10 @@ files that already verify, and `--output` to write somewhere other than
 :ok = Lumis.Languages.load(["elixir", "html", "javascript", "css"])
 ```
 
-Load expected languages during application startup when request latency
-matters. Wasmtime persists compiled modules across VM restarts. Set
+Load every language you expect to render during application startup. On-demand
+loading makes the first request that needs a language wait for its download and
+compile — see [Cache and load in advance](/advanced/wasm-and-cdn#cache-and-load-in-advance).
+Wasmtime persists compiled modules across VM restarts. Set
 `LUMIS_WASM_CACHE_DIR` to override the parser and compiled-module cache root.
 
 A custom `:wasm_resolver` application setting can return `{:ok, bytes}`,
