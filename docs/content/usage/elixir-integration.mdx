@@ -63,7 +63,7 @@ the only place the set is defined, so a release cannot disagree with development
 config :lumis, bundled_languages: ~w(elixir html javascript css)
 ```
 
-```bash title="Build an offline-ready release"
+```bash title="Bundle parsers into the release"
 MIX_ENV=prod mix do compile, lumis.languages.cache, release
 ```
 

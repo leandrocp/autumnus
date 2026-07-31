@@ -20,7 +20,7 @@ import TabItem from '@theme/TabItem';
 Lumis uses two terms consistently:
 
 - **load** makes a language available in the current runtime
-- **cache** persists verified parser bytes for later starts or offline use
+- **cache** persists verified parser bytes so later starts skip the download
 
 ## What ships where
 
@@ -194,7 +194,7 @@ Use this when you want local, bundler-managed parser assets for a whole preset i
 
 ## Override the resolver
 
-Override [`configureWasmResolver`](https://github.com/leandrocp/lumis/blob/main/packages/javascript/lumis/src/index.ts) to use your own CDN, local files, or work offline.
+Override [`configureWasmResolver`](https://github.com/leandrocp/lumis/blob/main/packages/javascript/lumis/src/index.ts) to serve parsers from your own CDN or from local files.
 
 <Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
   <TabItem value="javascript" label="JavaScript">

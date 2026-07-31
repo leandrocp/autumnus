@@ -131,4 +131,4 @@ Node and the CLI use platform directories, browsers use CacheStorage, and
 Elixir checks release-local `priv/wasm` before the user cache. Parser cache keys
 contain the parser name, package version, and digest, so upgrades do not
 overwrite older verified assets. Cached metadata can be refreshed independently
-while stale validated metadata remains available offline.
+while stale validated metadata remains usable if the refresh fails.

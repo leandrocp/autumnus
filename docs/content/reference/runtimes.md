@@ -28,7 +28,7 @@ keywords:
 runtime. JavaScript and Elixir load exact, integrity-checked parser WASM per
 language instead of shipping an all-language binary. Node, browsers, Elixir,
 and the CLI persist verified assets across process restarts; Node and Elixir
-also provide build-time cache commands for network-free deployment.
+also provide build-time cache commands so the first request does not download.
 
 ## Themes
 

@@ -28,7 +28,7 @@ lumis dump events        Print raw highlight events as JSON
 lumis languages list     List supported language ids and file patterns
 lumis themes list        List built-in themes and custom themes in the data dir
 lumis themes generate    Extract a theme JSON file from a Neovim colorscheme repo
-lumis parsers cache      Cache parser WASM files for later or offline use
+lumis parsers cache      Cache parser WASMs so later runs skip the download
 ```
 
 ## Highlight code
@@ -172,8 +172,8 @@ Parser WASM files are downloaded on demand the first time a language is needed.
 The CLI first resolves the current self-contained language package metadata,
 then downloads the exact parser version named there. Both metadata and parser
 bytes persist across starts; cached parser filenames include the version and
-SHA-256 digest. Corrupt bytes are rejected before use. You can also prepare the
-cache explicitly.
+SHA-256 digest. Corrupt bytes are rejected before use. Cache them ahead of time
+to keep that download off the first run.
 
 ```sh
 # Cache specific parsers

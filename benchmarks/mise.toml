@@ -166,7 +166,7 @@ sources = [
 ]
 
 [tasks."prepare:cli"]
-description = "Prepare and validate the offline CLI parser cache"
+description = "Prepare and validate the CLI parser cache"
 depends = ["prepare:languages", "fixtures", "build:cli"]
 run = "node benchmarks/scripts/prepare-cli.mjs"
 

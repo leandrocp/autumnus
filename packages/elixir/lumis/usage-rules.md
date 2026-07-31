@@ -788,6 +788,6 @@ Lumis is a fast, reliable syntax highlighter for Elixir. Key points to remember:
 9. **250+ built-in Neovim themes** available
 10. **Line numbers** are 1-indexed in the `data-line` attribute
 11. **Validate options** with `validate_options!/1` when needed
-12. **Cache parser WASM** before entering offline mode
+12. **Cache parser WASMs** at build time so the first request does not download
 
 For more information, see the [HexDocs](https://hexdocs.pm/lumis) or the [GitHub repository](https://github.com/leandrocp/lumis).

@@ -213,7 +213,7 @@ enum ThemesCommands {
 
 #[derive(Subcommand)]
 enum ParsersCommands {
-    /// Cache parser WASMs for later or offline use
+    /// Cache parser WASMs so later runs skip the download
     #[command(
         after_help = "Examples:\n  lumis parsers cache rust javascript\n  lumis parsers cache --all\n  lumis parsers cache rust --force"
     )]
