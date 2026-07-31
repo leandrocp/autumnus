@@ -1,4 +1,0 @@
-{
-  "reason": "Parsers whose WASM build exceeds a GitHub-hosted runner. Measured on tree-sitter-llvm at rev 76529b44: 12.7 GiB peak RSS over 5m18s from a 5.8 MB parser.c, against 16 GB of runner memory. The job does not fail with a compiler error; the runner is terminated and the step reports exit 143. These are excluded from the sharded build and from the complete-coverage requirement, so their queries are not compiled against a real grammar in CI. Every other guard still covers them, including the parser-free predicate checks in query-patterns.test.ts. Remove an entry as soon as its parser fits, or once the published package matches the pinned revision and no build is needed.",
-  "parsers": ["tree-sitter-llvm", "tree-sitter-vim", "tree-sitter-zsh"]
-}

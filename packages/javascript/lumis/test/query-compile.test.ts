@@ -8,8 +8,9 @@
  *
  * Coverage is now enforced two ways:
  *
- * - every language that has a usable parser is compiled, and a compile error
- *   fails the run with the language named;
+ * - every language that has a usable parser has its queries compiled, and then
+ *   run over that language's `samples/` file, since predicates and directives
+ *   only execute against a real tree;
  * - every language that has no usable parser must be listed in
  *   `unverified-parsers.json`, and that list can only shrink.
  *
@@ -24,7 +25,7 @@
  * `mise run test-queries` builds only the parsers whose packages cannot verify
  * themselves, then requires complete coverage.
  */
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -43,6 +44,7 @@ interface ParserEntry {
   rev?: string;
   wasm_name?: string;
   query_name?: string;
+  aliases?: string[];
 }
 
 const languagesToml = parseToml(readFileSync(join(workspaceRoot, "languages.toml"), "utf8")) as {
@@ -54,18 +56,6 @@ const unverified = JSON.parse(
   readFileSync(new URL("./unverified-parsers.json", import.meta.url), "utf8"),
 ) as { reason: string; languages: string[] };
 const waived = new Set(unverified.languages);
-
-/**
- * Parsers too large to build on a GitHub-hosted runner. Excluded from the
- * complete-coverage requirement because the runner is killed rather than the
- * build failing, so there is nothing for the shard to report.
- */
-const oversized: { reason: string; parsers: string[] } = JSON.parse(
-  readFileSync(new URL("./oversized-parsers.json", import.meta.url), "utf8"),
-);
-const oversizedParsers = new Set(oversized.parsers);
-const parserName = (id: string, entry: { wasm_name?: string }) =>
-  entry.wasm_name ?? `tree-sitter-${id}`;
 
 function wasmName(id: string, entry: ParserEntry): string {
   return entry.wasm_name ?? `tree-sitter-${id}`;
@@ -161,6 +151,24 @@ function queryPath(entry: ParserEntry, id: string, kind: string): string {
   return join(workspaceRoot, "queries", "processed", entry.query_name ?? id, `${kind}.scm`);
 }
 
+const samplesDir = join(workspaceRoot, "samples");
+const sampleFiles = readdirSync(samplesDir).filter(
+  (name) => name !== "README.md" && name !== "LICENSE.md",
+);
+
+/**
+ * The website keys samples by the filename before the first dot. A few predate
+ * their language id, so an alias and the id without underscores are tried too.
+ */
+function samplePath(id: string, aliases: string[]): string | undefined {
+  const stems = [id, ...aliases, id.replaceAll("_", "")];
+  for (const stem of stems) {
+    const file = sampleFiles.find((name) => name.slice(0, name.indexOf(".")) === stem);
+    if (file) return join(samplesDir, file);
+  }
+  return undefined;
+}
+
 /** Restrict the run to one language, so CI can shard the parser builds. */
 const only = process.env.LUMIS_QUERY_LANGUAGES?.split(",")
   .map((value) => value.trim())
@@ -202,9 +210,9 @@ describe("processed queries compile against their pinned grammar", () => {
   it.runIf(requireCompleteCoverage)("verifies every selected language", () => {
     // `mise run test-queries` builds every parser first, so a gap here means a
     // parser build failed rather than a package lagging behind.
-    const missing = unavailable
-      .filter(([id, entry]) => !oversizedParsers.has(parserName(id, entry)))
-      .map(([id]) => `${id}: ${(resolved.get(id) as { unavailable: string }).unavailable}`);
+    const missing = unavailable.map(
+      ([id]) => `${id}: ${(resolved.get(id) as { unavailable: string }).unavailable}`,
+    );
     expect(missing, "every parser should have been built from languages.toml").toEqual([]);
   });
 
@@ -227,6 +235,32 @@ describe("processed queries compile against their pinned grammar", () => {
       }
 
       expect(failures, `${id} queries failed to compile`).toEqual([]);
+    },
+    30_000,
+  );
+
+  it.each(verifiable)(
+    "highlights the %s sample",
+    async (id, entry) => {
+      const sample = samplePath(id, entry.aliases ?? []);
+      expect(sample, `no samples/ file for ${id}`).toBeDefined();
+
+      const grammar = await TSLanguage.load(
+        readFileSync((resolved.get(id) as { path: string }).path),
+      );
+      const parser = new Parser();
+      parser.setLanguage(grammar);
+      const source = readFileSync(sample!, "utf8");
+      const tree = parser.parse(source);
+      expect(tree, `${id} sample did not parse`).not.toBeNull();
+
+      const query = new Query(grammar, readFileSync(queryPath(entry, id, "highlights"), "utf8"));
+      // Predicates and directives only run here, so compiling is not enough.
+      const captures = query.captures(tree!.rootNode);
+      expect(captures.length, `${id} highlights matched nothing in its sample`).toBeGreaterThan(0);
+
+      tree!.delete();
+      parser.delete();
     },
     30_000,
   );
@@ -266,29 +300,5 @@ describe("unverified parser waiver", () => {
   it("names only real languages", () => {
     const known = new Set(parsers.map(([id]) => id));
     expect(unverified.languages.filter((id) => !known.has(id))).toEqual([]);
-  });
-});
-
-describe("oversized parser waiver", () => {
-  it("names only real parsers", () => {
-    const known = new Set(parsers.map(([id, entry]) => parserName(id, entry)));
-    expect(
-      oversized.parsers.filter((name) => !known.has(name)),
-      "these are not parsers in languages.toml",
-    ).toEqual([]);
-  });
-
-  it("stays small", () => {
-    // A growing list means CI is verifying less and less. Keep it exceptional.
-    expect(oversized.parsers.length).toBeLessThanOrEqual(5);
-  });
-
-  it("excuses nothing that the published package already verifies", () => {
-    // If the package matches the pinned revision there is no build to skip.
-    const pointless = parsers
-      .filter(([id, entry]) => oversizedParsers.has(parserName(id, entry)))
-      .filter(([id]) => "path" in published.get(id)!)
-      .map(([id]) => id);
-    expect(pointless, "these need no build, remove them from the list").toEqual([]);
   });
 });

@@ -15,7 +15,6 @@ on:
       - "packages/javascript/lumis/test/query-compile.test.ts"
       - "packages/javascript/lumis/test/query-patterns.test.ts"
       - "packages/javascript/lumis/test/unverified-parsers.json"
-      - "packages/javascript/lumis/test/oversized-parsers.json"
       - "packages/javascript/lumis/scripts/list-unverified-parsers.mjs"
       - "mise.toml"
       - ".github/workflows/queries.yml"
@@ -28,7 +27,6 @@ on:
       - "packages/javascript/lumis/test/query-compile.test.ts"
       - "packages/javascript/lumis/test/query-patterns.test.ts"
       - "packages/javascript/lumis/test/unverified-parsers.json"
-      - "packages/javascript/lumis/test/oversized-parsers.json"
       - "packages/javascript/lumis/scripts/list-unverified-parsers.mjs"
       - "mise.toml"
       - ".github/workflows/queries.yml"
@@ -118,11 +116,7 @@ jobs:
           # Shard the parsers, then take the languages those parsers serve; sharding
           # both separately splits a language from its parser.
           node scripts/list-unverified-parsers.mjs --pairs > /tmp/pairs.txt
-          # tree-sitter-llvm peaks at 12.7 GiB against 16 GB, so the runner is killed
-          # mid-build and the step reports exit 143 with no compiler error.
-          python3 -c "import json;print('\n'.join(json.load(open('test/oversized-parsers.json'))['parsers']))" \
-            > /tmp/oversized.txt
-          cut -f2 /tmp/pairs.txt | sort -u | grep -vxF -f /tmp/oversized.txt > /tmp/parsers.txt
+          cut -f2 /tmp/pairs.txt | sort -u > /tmp/parsers.txt
           awk -v s="$SHARD" -v n="$SHARDS" 'NR % n == s % n' /tmp/parsers.txt > /tmp/shard-parsers.txt
           awk 'NR == FNR { keep[$0]; next } ($2 in keep) { print $1 }' \
             /tmp/shard-parsers.txt /tmp/pairs.txt > /tmp/shard-languages.txt
