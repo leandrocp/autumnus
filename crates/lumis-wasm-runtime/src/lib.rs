@@ -42,6 +42,7 @@ macro_rules! define_catalog {
 pub mod brackets;
 pub mod catalog;
 pub mod package;
+pub mod store;
 pub mod tree_sitter_highlight;
 
 #[cfg(feature = "wasm")]
@@ -57,3 +58,7 @@ pub use package::{
 };
 #[cfg(feature = "wasm")]
 pub use runtime::{LanguageSpec, Runtime, RuntimeError};
+pub use store::{
+    package_suffix, parser_filename, with_cache_lock, write_atomic, Fetcher, LanguageStore,
+    NoNetwork, StoreConfig, StoreError,
+};
