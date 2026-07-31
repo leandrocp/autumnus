@@ -130,7 +130,7 @@ Rationale that is about the change rather than the code belongs in the commit me
 
 Every file the repo authors is formatted and linted, including generated ones. `mise run fmt` formats every language, `mise run lint` checks them. Run those before pushing; CI only checks.
 
-There is no per-package path list. `fmt-js` takes its files from `git ls-files`, so coverage is everything committed: a new package, script, example, test or generated directory is covered the day it is added, and untracked build output is excluded without anyone maintaining a list.
+There is no per-package path list. `fmt-js` takes its files from `git ls-files --cached --others --exclude-standard`, so coverage is everything git would keep: a new package, script, example, test or generated directory is covered the day it is added, a brand-new file is covered before it is staged, and ignored build output is excluded without anyone maintaining a list.
 
 **Generated files are not an exception.** A generator writes its output and then formats it, so regenerating and format-checking agree. If you add a generator, format what it emits.
 

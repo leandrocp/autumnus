@@ -136,8 +136,9 @@ export async function withWasmCacheLock<T>(
 
   while (!lock) {
     try {
-      lock = await open(lockPath, "wx");
-      await lock.writeFile(JSON.stringify({ host, pid: process.pid } satisfies LockOwner));
+      const opened = await open(lockPath, "wx");
+      await opened.writeFile(JSON.stringify({ host, pid: process.pid } satisfies LockOwner));
+      lock = opened;
     } catch (error) {
       if (!isNodeError(error, "EEXIST")) throw error;
 
@@ -147,7 +148,7 @@ export async function withWasmCacheLock<T>(
       }
 
       const age = await stat(lockPath)
-        .then((info) => Date.now() - info.mtimeMs)
+        .then((info: { mtimeMs: number }) => Date.now() - info.mtimeMs)
         .catch(() => 0);
       if (age > LOCK_STALE_AFTER_MS) {
         await rm(lockPath, { force: true });

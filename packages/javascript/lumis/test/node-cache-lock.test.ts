@@ -7,18 +7,19 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { hostname, tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
-import { lockOwnerIsGone, wasmCacheFilename, withWasmCacheLock } from "../src/runtime/node-cache.js";
+import {
+  lockOwnerIsGone,
+  wasmCacheFilename,
+  withWasmCacheLock,
+} from "../src/runtime/node-cache.js";
 
 const directory = mkdtempSync(join(tmpdir(), "lumis-lock-"));
 afterAll(() => rmSync(directory, { recursive: true, force: true }));
 
 const lockPath = (key: string) => join(directory, `${wasmCacheFilename(key)}.lock`);
 
-/** A pid that cannot be running: allocate one, then let the process exit. */
-function deadPid(): number {
-  // 2^22 is above every platform's default pid_max, so nothing holds it.
-  return 4_194_305;
-}
+/** Above every platform's default pid_max, so nothing can hold it. */
+const DEAD_PID = 4_194_305;
 
 describe("withWasmCacheLock", () => {
   it("records the holder so peers can tell whether it is alive", async () => {
@@ -43,7 +44,7 @@ describe("withWasmCacheLock", () => {
   });
 
   it("takes over immediately from a holder that died on this machine", async () => {
-    writeFileSync(lockPath("dead"), JSON.stringify({ host: hostname(), pid: deadPid() }));
+    writeFileSync(lockPath("dead"), JSON.stringify({ host: hostname(), pid: DEAD_PID }));
 
     const started = Date.now();
     expect(await withWasmCacheLock("dead", async () => "taken", directory)).toBe("taken");
@@ -77,13 +78,13 @@ describe("lockOwnerIsGone", () => {
   });
 
   it("is true for a pid that is not running here", () => {
-    expect(lockOwnerIsGone({ host, pid: deadPid() }, host)).toBe(true);
+    expect(lockOwnerIsGone({ host, pid: DEAD_PID }, host)).toBe(true);
   });
 
   it("never judges a pid from another machine", () => {
     // A shared cache directory can hold a lock written on a different host,
     // where that pid means nothing; the staleness timer covers it instead.
-    expect(lockOwnerIsGone({ host: "somewhere-else", pid: deadPid() }, host)).toBe(false);
+    expect(lockOwnerIsGone({ host: "somewhere-else", pid: DEAD_PID }, host)).toBe(false);
   });
 
   it("falls back to the staleness timer for an unreadable lock", () => {
