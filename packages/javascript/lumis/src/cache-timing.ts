@@ -2,9 +2,14 @@
  * Timing shared with the native runtimes.
  *
  * The browser cannot call Rust, so this is a port. `crates/lumis-wasm-runtime`
- * defines these once as `PACKAGE_CACHE_TTL`, `LOCK_TIMEOUT` and
- * `LOCK_STALE_AFTER`, and `test/cache-timing.test.ts` reads that file to check
- * these values still agree. Change them there first.
+ * defines `PACKAGE_CACHE_TTL`, and `test/cache-timing.test.ts` reads that file to
+ * check the two still agree. Change it there first.
+ *
+ * The lock timings below have no Rust counterpart. The native store needs no lock:
+ * writes rename a uniquely named temporary into place and parser bytes are
+ * verified first, so concurrent writers converge. The browser and Node keep a
+ * lock only to avoid duplicate downloads, which is a cost concern, not a
+ * correctness one.
  */
 
 /** How long a cached `language.json` is trusted before it is refreshed. */

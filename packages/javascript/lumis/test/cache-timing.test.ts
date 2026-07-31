@@ -10,11 +10,7 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import {
-  LOCK_STALE_AFTER_MS,
-  LOCK_TIMEOUT_MS,
-  PACKAGE_CACHE_TTL_MS,
-} from "../src/cache-timing.js";
+import { LOCK_STALE_AFTER_MS, LOCK_TIMEOUT_MS, PACKAGE_CACHE_TTL_MS } from "../src/cache-timing.js";
 
 const STORE_RS = fileURLToPath(
   new URL("../../../../crates/lumis-wasm-runtime/src/store.rs", import.meta.url),
@@ -41,20 +37,14 @@ describe("cache timings match the Rust runtime", () => {
   it("finds the Rust definitions", () => {
     // Guards against the regex silently matching nothing if store.rs is reshaped.
     expect(source).toContain("pub const PACKAGE_CACHE_TTL");
-    expect(source).toContain("pub const LOCK_TIMEOUT");
-    expect(source).toContain("pub const LOCK_STALE_AFTER");
   });
 
-  it.each([
-    ["PACKAGE_CACHE_TTL", PACKAGE_CACHE_TTL_MS],
-    ["LOCK_TIMEOUT", LOCK_TIMEOUT_MS],
-    ["LOCK_STALE_AFTER", LOCK_STALE_AFTER_MS],
-  ])("%s agrees", (name, javascript) => {
-    expect(rustDurationMs(source, name)).toBe(javascript);
+  it("PACKAGE_CACHE_TTL agrees", () => {
+    expect(rustDurationMs(source, "PACKAGE_CACHE_TTL")).toBe(PACKAGE_CACHE_TTL_MS);
   });
 
   it("keeps the stale threshold above the wait", () => {
-    // A dead lock holder must eventually be taken over rather than block forever.
+    // JavaScript-only: a dead lock holder must be taken over, not block forever.
     expect(LOCK_STALE_AFTER_MS).toBeGreaterThan(LOCK_TIMEOUT_MS);
   });
 });

@@ -193,14 +193,6 @@ defmodule Lumis.LanguageLoaderTest do
       assert File.read!(path) == "contents"
     end
 
-    test "a lock can be taken, released and retaken" do
-      path = Path.join(tmp_dir(), "locked.json")
-      assert {:ok, _} = Lumis.Native.cache_lock(path)
-      assert {:ok, _} = Lumis.Native.cache_unlock(path)
-      assert {:ok, _} = Lumis.Native.cache_lock(path)
-      assert {:ok, _} = Lumis.Native.cache_unlock(path)
-    end
-
     defp tmp_dir do
       dir = Path.join(System.tmp_dir!(), "lumis-cache-#{:erlang.unique_integer([:positive])}")
       File.mkdir_p!(dir)

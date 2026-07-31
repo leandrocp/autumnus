@@ -295,20 +295,6 @@ fn cache_write(path: &str, contents: Binary) -> Result<(), String> {
         .map_err(|error| error.to_string())
 }
 
-/// Take the cache lock for `path`, waiting for a live holder and taking over a
-/// stale one. Paired with `cache_unlock`; Elixir keeps the surrounding sequence
-/// because that is where its search order lives.
-#[rustler::nif(schedule = "DirtyIo")]
-fn cache_lock(path: &str) -> Result<(), String> {
-    store::lock_acquire(std::path::Path::new(path)).map_err(|error| error.to_string())
-}
-
-#[rustler::nif(schedule = "DirtyIo")]
-fn cache_unlock(path: &str) -> Result<(), String> {
-    store::lock_release(std::path::Path::new(path));
-    Ok(())
-}
-
 #[rustler::nif]
 fn resolve_language_package<'a>(env: Env<'a>, name: &str, package_json: &str) -> Term<'a> {
     match parse_language_package(name, package_json) {

@@ -2,9 +2,16 @@
 //!
 //! Every native runtime needs the same state machine: consult a configured local
 //! source, fall back to a persistent cache, fetch from the CDN as a last resort,
-//! verify the bytes before use, and write atomically under a lock so concurrent
-//! processes cannot tear each other's files. It lives here once so the CLI and the
-//! Elixir NIF cannot drift apart.
+//! verify the bytes before use, and replace the cached file atomically. It lives
+//! here once so the CLI and the Elixir NIF cannot drift apart.
+//!
+//! There is deliberately **no file lock**. Concurrent writers are safe without one:
+//! every write goes to a PID-suffixed temporary file and is renamed into place, and
+//! parser bytes are verified against the digest before the rename, so two processes
+//! racing on the same content-addressed path are writing identical bytes. A lock
+//! would only save a duplicate download, and would cost a multi-minute stall
+//! whenever a process died holding it. Work inside one process is already
+//! de-duplicated by the in-memory package map.
 //!
 //! Networking is behind [`Fetcher`] so a host can supply its own HTTP client, or
 //! none at all in tests.
@@ -12,7 +19,7 @@
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
-use std::time::{Duration, SystemTime};
+use std::time::Duration;
 
 use thiserror::Error;
 
@@ -20,13 +27,6 @@ use crate::package::{LanguagePackage, LanguagePackageError};
 
 /// How long a cached `language.json` is trusted before it is refreshed.
 pub const PACKAGE_CACHE_TTL: Duration = Duration::from_secs(60 * 60);
-/// How long to wait for another process to release a cache lock.
-pub const LOCK_TIMEOUT: Duration = Duration::from_secs(120);
-/// When a lock file is old enough that its owner is presumed dead.
-///
-/// Deliberately longer than [`LOCK_TIMEOUT`]: a process that dies holding the lock
-/// makes its peers fail for the difference rather than wait forever.
-pub const LOCK_STALE_AFTER: Duration = Duration::from_secs(300);
 
 const CDN: &str = "https://cdn.jsdelivr.net/npm";
 
@@ -142,7 +142,7 @@ impl LanguageStore {
         }
 
         let path = self.package_path(package_name);
-        let package = with_cache_lock(&path, || {
+        let package = (|| {
             if let Some(package) = self.read_source_package(package_name)? {
                 return Ok(package);
             }
@@ -162,7 +162,7 @@ impl LanguageStore {
                 Ok(package) => Ok(package),
                 Err(error) => cached.ok_or(error),
             }
-        })?;
+        })()?;
 
         Ok(self.remember(package_name, package))
     }
@@ -188,14 +188,7 @@ impl LanguageStore {
         if let Some(bytes) = self.cached_parser(package) {
             return Ok(bytes);
         }
-        let path = self.parser_path(package);
-        with_cache_lock(&path, || {
-            // Another process may have written it while we waited for the lock.
-            if let Some(bytes) = self.cached_parser(package) {
-                return Ok(bytes);
-            }
-            self.fetch_parser(package, &path)
-        })
+        self.fetch_parser(package, &self.parser_path(package))
     }
 
     /// Verified parser bytes already on disk, if any.
@@ -228,7 +221,7 @@ impl LanguageStore {
     /// Fails when the parser cannot be fetched or fails verification.
     pub fn refresh_parser(&self, package: &LanguagePackage) -> Result<Vec<u8>, StoreError> {
         let path = self.parser_path(package);
-        with_cache_lock(&path, || self.fetch_parser(package, &path))
+        self.fetch_parser(package, &path)
     }
 
     /// Path a verified parser is cached at. Content-addressed, so upgrading a
@@ -393,12 +386,17 @@ pub fn write_atomic(path: &Path, bytes: &[u8]) -> Result<(), StoreError> {
     std::fs::create_dir_all(parent)
         .map_err(|error| StoreError::io(format!("could not create {}", parent.display()), error))?;
 
+    // Unique per call, not merely per process: several threads in one process
+    // write the same cache path, and a shared temporary name makes them clobber
+    // each other's partial writes.
+    static WRITE_SEQUENCE: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
     let temporary = parent.join(format!(
-        ".{}.{}.tmp",
+        ".{}.{}.{}.tmp",
         path.file_name()
             .and_then(|name| name.to_str())
             .unwrap_or("asset"),
-        std::process::id()
+        std::process::id(),
+        WRITE_SEQUENCE.fetch_add(1, std::sync::atomic::Ordering::Relaxed)
     ));
 
     let result = (|| -> Result<(), std::io::Error> {
@@ -424,67 +422,6 @@ pub fn write_atomic(path: &Path, bytes: &[u8]) -> Result<(), StoreError> {
             error,
         )
     })
-}
-
-/// Run `operation` holding an exclusive lock beside `path`.
-///
-/// # Errors
-/// Fails when the lock cannot be taken within [`LOCK_TIMEOUT`], or from `operation`.
-pub fn with_cache_lock<T>(
-    path: &Path,
-    operation: impl FnOnce() -> Result<T, StoreError>,
-) -> Result<T, StoreError> {
-    lock_acquire(path)?;
-    let result = operation();
-    lock_release(path);
-    result
-}
-
-/// Take the cache lock for `path`, blocking until it is free or stale.
-///
-/// Exposed separately for hosts that cannot pass a closure across their FFI
-/// boundary, such as the Elixir NIF. Pair every call with [`lock_release`].
-///
-/// # Errors
-/// Fails when the lock cannot be taken within [`LOCK_TIMEOUT`].
-pub fn lock_acquire(path: &Path) -> Result<(), StoreError> {
-    let lock_path = path.with_extension("lock");
-    if let Some(parent) = lock_path.parent() {
-        std::fs::create_dir_all(parent).map_err(|error| {
-            StoreError::io(format!("could not create {}", parent.display()), error)
-        })?;
-    }
-    let deadline = SystemTime::now() + LOCK_TIMEOUT;
-
-    loop {
-        match std::fs::OpenOptions::new()
-            .write(true)
-            .create_new(true)
-            .open(&lock_path)
-        {
-            Ok(lock) => {
-                drop(lock);
-                return Ok(());
-            }
-            Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => {
-                if cache_is_fresh(&lock_path, LOCK_STALE_AFTER) {
-                    if SystemTime::now() >= deadline {
-                        return Err(StoreError::LockTimeout(lock_path.display().to_string()));
-                    }
-                    std::thread::sleep(Duration::from_millis(25));
-                } else {
-                    // The owner is presumed dead; take the lock over.
-                    let _ = std::fs::remove_file(&lock_path);
-                }
-            }
-            Err(error) => return Err(StoreError::io("failed to lock cache", error)),
-        }
-    }
-}
-
-/// Release a lock taken with [`lock_acquire`]. Safe to call when it is already gone.
-pub fn lock_release(path: &Path) {
-    let _ = std::fs::remove_file(path.with_extension("lock"));
 }
 
 #[cfg(test)]
@@ -612,21 +549,6 @@ mod tests {
         ));
     }
 
-    #[test]
-    fn a_stale_lock_is_taken_over() {
-        let dir = tempdir();
-        let target = dir.path().join("asset.json");
-        let lock = target.with_extension("lock");
-        std::fs::write(&lock, b"").unwrap();
-        // Backdate it well past the staleness threshold.
-        let old = SystemTime::now() - LOCK_STALE_AFTER - Duration::from_secs(60);
-        filetime::set_file_mtime(&lock, filetime::FileTime::from_system_time(old)).unwrap();
-
-        let ran = with_cache_lock(&target, || Ok(42)).unwrap();
-        assert_eq!(ran, 42);
-        assert!(!lock.exists(), "the lock must be released");
-    }
-
     /// Node prefers an installed `@lumis-sh/wasm-*` package over its cache and Elixir
     /// prefers release-local `priv/wasm`, so a configured source must outrank a fresh
     /// cache here too. Otherwise the same inputs resolve differently per runtime.
@@ -667,6 +589,65 @@ mod tests {
             "from-source",
             "a configured local source must win over a fresh cache"
         );
+    }
+
+    /// The property that lets the file lock go: many processes writing the same
+    /// cache path at once converge, because each writes a PID-suffixed temporary
+    /// and renames it over, and parser bytes are verified before that rename.
+    #[test]
+    fn concurrent_writers_converge_without_a_lock() {
+        let dir = tempdir();
+        let target = dir.path().join("parsers").join("contended.wasm");
+        let threads: Vec<_> = (0..16)
+            .map(|_| {
+                let target = target.clone();
+                std::thread::spawn(move || write_atomic(&target, WASM))
+            })
+            .collect();
+
+        for thread in threads {
+            thread
+                .join()
+                .expect("writer panicked")
+                .expect("write failed");
+        }
+
+        assert_eq!(std::fs::read(&target).unwrap(), WASM);
+        // No temporary files left behind for a reader to trip over.
+        let leftovers: Vec<_> = std::fs::read_dir(target.parent().unwrap())
+            .unwrap()
+            .filter_map(|entry| entry.ok())
+            .map(|entry| entry.file_name().to_string_lossy().into_owned())
+            .filter(|name| name.ends_with(".tmp"))
+            .collect();
+        assert!(leftovers.is_empty(), "temporary files left: {leftovers:?}");
+    }
+
+    /// A reader must never observe a partially written file.
+    #[test]
+    fn a_reader_sees_either_the_old_or_the_new_bytes() {
+        let dir = tempdir();
+        let target = dir.path().join("swap.bin");
+        write_atomic(&target, b"old").unwrap();
+
+        let reader = {
+            let target = target.clone();
+            std::thread::spawn(move || {
+                for _ in 0..200 {
+                    if let Ok(bytes) = std::fs::read(&target) {
+                        assert!(
+                            bytes == b"old" || bytes == b"new-and-longer",
+                            "torn read: {bytes:?}"
+                        );
+                    }
+                }
+            })
+        };
+        for _ in 0..200 {
+            write_atomic(&target, b"new-and-longer").unwrap();
+            write_atomic(&target, b"old").unwrap();
+        }
+        reader.join().unwrap();
     }
 
     fn tempdir() -> tempfile::TempDir {

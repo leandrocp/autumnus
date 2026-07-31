@@ -79,19 +79,17 @@ defmodule Lumis.LanguageLoader do
   end
 
   defp refresh_package(handle, path, stale) do
-    with_cache_lock(path, fn ->
-      case read_valid_package(path, handle, true) do
-        {:ok, package_json} ->
-          if package_json != stale and fresh?(path) do
-            {:ok, package_json}
-          else
-            resolve_or_reuse_package(handle, path, stale)
-          end
-
-        :miss ->
+    case read_valid_package(path, handle, true) do
+      {:ok, package_json} ->
+        if package_json != stale and fresh?(path) do
+          {:ok, package_json}
+        else
           resolve_or_reuse_package(handle, path, stale)
-      end
-    end)
+        end
+
+      :miss ->
+        resolve_or_reuse_package(handle, path, stale)
+    end
   end
 
   defp resolve_or_reuse_package(handle, path, stale) do
@@ -187,8 +185,11 @@ defmodule Lumis.LanguageLoader do
   end
 
   defp cache_new_entry(entry, package_json, key, paths, seen, directory, force?) do
-    with :ok <- cache_package(entry, package_json, directory, force?),
-         {:ok, path} <- cache_parser(entry, directory, force?) do
+    # Serialise per package so concurrent callers share one download rather than
+    # each fetching the same bytes. This is process-based rather than a lock file:
+    # it needs no stale-entry recovery, and it releases the moment the owner dies.
+    with :ok <- claim(entry, fn -> cache_package(entry, package_json, directory, force?) end),
+         {:ok, path} <- claim(entry, fn -> cache_parser(entry, directory, force?) end) do
       {:cont, {:ok, [path | paths], MapSet.put(seen, key)}}
     else
       {:error, reason} -> {:halt, {:error, reason}}
@@ -198,13 +199,11 @@ defmodule Lumis.LanguageLoader do
   defp cache_package(entry, package_json, directory, force?) do
     destination = Path.join(directory, package_filename(entry))
 
-    with_cache_lock(destination, fn ->
-      if force? or not valid_package_file?(destination, entry.id) do
-        nif_ok(Native.cache_write(destination, package_json))
-      else
-        :ok
-      end
-    end)
+    if force? or not valid_package_file?(destination, entry.id) do
+      nif_ok(Native.cache_write(destination, package_json))
+    else
+      :ok
+    end
   end
 
   defp valid_package_file?(path, language) do
@@ -237,40 +236,36 @@ defmodule Lumis.LanguageLoader do
     if offline?() do
       parser_offline_error(entry)
     else
-      with_cache_lock(path, fn ->
-        case read_verified(path, entry, true) do
-          {:ok, bytes} -> {:ok, bytes}
-          :miss -> resolve_verified_and_write(entry, path)
-        end
-      end)
+      case read_verified(path, entry, true) do
+        {:ok, bytes} -> {:ok, bytes}
+        :miss -> resolve_verified_and_write(entry, path)
+      end
     end
   end
 
   defp cache_parser(entry, directory, force?) do
     destination = Path.join(directory, parser_filename(entry))
 
-    with_cache_lock(destination, fn ->
-      cond do
-        offline?() and force? ->
-          parser_offline_error(entry)
+    cond do
+      offline?() and force? ->
+        parser_offline_error(entry)
 
-        force? ->
-          resolve_parser_and_write(entry, destination)
+      force? ->
+        resolve_parser_and_write(entry, destination)
 
-        true ->
-          case read_verified(destination, entry, true) do
-            {:ok, _bytes} ->
-              {:ok, destination}
+      true ->
+        case read_verified(destination, entry, true) do
+          {:ok, _bytes} ->
+            {:ok, destination}
 
-            :miss ->
-              if offline?() do
-                parser_offline_error(entry)
-              else
-                resolve_parser_and_write(entry, destination)
-              end
-          end
-      end
-    end)
+          :miss ->
+            if offline?() do
+              parser_offline_error(entry)
+            else
+              resolve_parser_and_write(entry, destination)
+            end
+        end
+    end
   end
 
   defp resolve_parser_and_write(entry, destination) do
@@ -405,19 +400,12 @@ defmodule Lumis.LanguageLoader do
     end
   end
 
-  # The lock itself is `lumis_wasm_runtime::store`, shared with the CLI. The
-  # sequence around it stays here, because that is where the search order across
-  # `priv/wasm` and the user cache lives.
-  defp with_cache_lock(cache_file, operation) do
-    with :ok <- File.mkdir_p(Path.dirname(cache_file)),
-         :ok <- nif_ok(Native.cache_lock(cache_file)) do
-      try do
-        operation.()
-      after
-        Native.cache_unlock(cache_file)
-      end
-    else
-      {:error, reason} -> {:error, "failed to lock language cache: #{inspect(reason)}"}
-    end
+  # Correctness needs no lock: `write_atomic` in lumis-wasm-runtime renames a
+  # uniquely named temporary into place and verifies parser bytes before the
+  # rename, so concurrent writers converge on identical content. What `claim/2`
+  # buys is narrower and worth having anyway: concurrent callers share one
+  # download instead of each fetching the same bytes.
+  defp claim(entry, operation) do
+    :global.trans({{__MODULE__, :cache, entry.package_name, entry.version}, self()}, operation)
   end
 end

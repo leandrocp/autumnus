@@ -9,6 +9,7 @@ use lumis_wasm_runtime::tree_sitter_highlight::HighlightConfiguration;
 #[cfg(test)]
 use lumis_wasm_runtime::write_atomic;
 use lumis_wasm_runtime::{Fetcher, LanguagePackage, LanguageStore, StoreConfig};
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
 use tree_sitter::{Parser, Query, Tree, WasmStore};
@@ -34,6 +35,15 @@ pub struct Registry {
     store: LanguageStore,
     engine: Engine,
     wasm_store: Mutex<WasmStore>,
+    /// Grammars already loaded into `wasm_store`, keyed by grammar name.
+    ///
+    /// `WasmStore::load_language` re-instantiates the module, so without this
+    /// every parse, highlight and rainbow call paid for it again.
+    grammars: Mutex<HashMap<String, tree_sitter::Language>>,
+    /// Compiled bracket queries, keyed by grammar name. `None` records a query
+    /// that does not compile against this grammar, which means "no rainbow
+    /// brackets here" rather than an error, so it is not retried either.
+    brackets: Mutex<HashMap<String, Option<Arc<Query>>>>,
 }
 
 impl Registry {
@@ -63,6 +73,8 @@ impl Registry {
             store,
             engine,
             wasm_store,
+            grammars: Mutex::new(HashMap::new()),
+            brackets: Mutex::new(HashMap::new()),
         })
     }
 
@@ -100,7 +112,7 @@ impl Registry {
 
         let wasm = self.store.parser(&package)?;
         let grammar = self.load_wasm_language(&package, &wasm)?;
-        let Ok(query) = Query::new(&grammar, &definition.brackets) else {
+        let Some(query) = self.bracket_query(&package, &definition.brackets, &grammar)? else {
             return Ok(Vec::new());
         };
 
@@ -199,11 +211,46 @@ impl Registry {
         package: &LanguagePackage,
         wasm: &[u8],
     ) -> Result<tree_sitter::Language> {
-        let mut store = self
-            .wasm_store
-            .lock()
-            .map_err(|_| anyhow::anyhow!("Tree-sitter WASM store lock was poisoned"))?;
-        Ok(store.load_language(&package.parser.grammar_name, wasm)?)
+        let name = &package.parser.grammar_name;
+        if let Some(grammar) = self.lock(&self.grammars)?.get(name) {
+            return Ok(grammar.clone());
+        }
+
+        let grammar = {
+            let mut store = self
+                .wasm_store
+                .lock()
+                .map_err(|_| anyhow::anyhow!("Tree-sitter WASM store lock was poisoned"))?;
+            store.load_language(name, wasm)?
+        };
+        self.lock(&self.grammars)?
+            .insert(name.clone(), grammar.clone());
+        Ok(grammar)
+    }
+
+    /// The bracket query for this package, compiled once per grammar.
+    fn bracket_query(
+        &self,
+        package: &LanguagePackage,
+        brackets: &str,
+        grammar: &tree_sitter::Language,
+    ) -> Result<Option<Arc<Query>>> {
+        let name = &package.parser.grammar_name;
+        if let Some(query) = self.lock(&self.brackets)?.get(name) {
+            return Ok(query.clone());
+        }
+
+        // The default bracket query intentionally names tokens some grammars do
+        // not have, so a compile failure means "no rainbow brackets", not an error.
+        let query = Query::new(grammar, brackets).ok().map(Arc::new);
+        self.lock(&self.brackets)?
+            .insert(name.clone(), query.clone());
+        Ok(query)
+    }
+
+    fn lock<'a, T>(&self, cell: &'a Mutex<T>) -> Result<std::sync::MutexGuard<'a, T>> {
+        cell.lock()
+            .map_err(|_| anyhow::anyhow!("registry cache lock was poisoned"))
     }
 
     #[cfg(test)]

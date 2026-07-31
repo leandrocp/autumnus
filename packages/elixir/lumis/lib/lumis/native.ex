@@ -74,8 +74,6 @@ defmodule Lumis.Native do
   # drift on verification, atomic writes or locking.
   def cache_verify(_sha256, _size, _wasm), do: :erlang.nif_error(:nif_not_loaded)
   def cache_write(_path, _contents), do: :erlang.nif_error(:nif_not_loaded)
-  def cache_lock(_path), do: :erlang.nif_error(:nif_not_loaded)
-  def cache_unlock(_path), do: :erlang.nif_error(:nif_not_loaded)
   def has_language(_name), do: :erlang.nif_error(:nif_not_loaded)
   def highlight(_source, _options), do: :erlang.nif_error(:nif_not_loaded)
 end
