@@ -2,6 +2,7 @@ import { LOCK_RETRY_MS, LOCK_STALE_AFTER_MS, LOCK_TIMEOUT_MS } from "../cache-ti
 
 const nodeFsPromises = "node:fs" + "/promises";
 const nodePath = "node:path";
+const nodeOs = "node:os";
 
 /** @internal */
 export function isUrlString(source: string): boolean {
@@ -88,6 +89,35 @@ function isNodeError(error: unknown, code: string): boolean {
   return error instanceof Error && "code" in error && error.code === code;
 }
 
+interface LockOwner {
+  host: string;
+  pid: number;
+}
+
+/** @internal */
+export function lockOwnerIsGone(owner: LockOwner | undefined, host: string): boolean {
+  // A pid is only meaningful on the machine that wrote it. Anywhere else, and
+  // for an unreadable lock, fall back to the staleness timer.
+  if (!owner || owner.host !== host) return false;
+  try {
+    process.kill(owner.pid, 0);
+    return false;
+  } catch (error) {
+    // EPERM means the process exists but belongs to someone else.
+    return !isNodeError(error, "EPERM");
+  }
+}
+
+async function readLockOwner(lockPath: string): Promise<LockOwner | undefined> {
+  const { readFile } = await import(nodeFsPromises);
+  try {
+    const owner = JSON.parse(await readFile(lockPath, "utf8")) as LockOwner;
+    return typeof owner?.host === "string" && typeof owner?.pid === "number" ? owner : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 /** @internal */
 export async function withWasmCacheLock<T>(
   key: string,
@@ -97,25 +127,33 @@ export async function withWasmCacheLock<T>(
   const resolvedDirectory = directory ?? (await wasmCacheDir());
   const { mkdir, open, rm, stat } = await import(nodeFsPromises);
   const { join } = await import(nodePath);
+  const { hostname } = await import(nodeOs);
   await mkdir(resolvedDirectory, { recursive: true });
   const lockPath = join(resolvedDirectory, `${wasmCacheFilename(key)}.lock`);
+  const host = hostname();
   const deadline = Date.now() + LOCK_TIMEOUT_MS;
-  let lock: { close(): Promise<void> } | undefined;
+  let lock: { close(): Promise<void>; writeFile(data: string): Promise<void> } | undefined;
 
   while (!lock) {
     try {
       lock = await open(lockPath, "wx");
+      await lock.writeFile(JSON.stringify({ host, pid: process.pid } satisfies LockOwner));
     } catch (error) {
       if (!isNodeError(error, "EEXIST")) throw error;
-      try {
-        const info = await stat(lockPath);
-        if (Date.now() - info.mtimeMs > LOCK_STALE_AFTER_MS) {
-          await rm(lockPath, { force: true });
-          continue;
-        }
-      } catch {
+
+      if (lockOwnerIsGone(await readLockOwner(lockPath), host)) {
+        await rm(lockPath, { force: true });
         continue;
       }
+
+      const age = await stat(lockPath)
+        .then((info) => Date.now() - info.mtimeMs)
+        .catch(() => 0);
+      if (age > LOCK_STALE_AFTER_MS) {
+        await rm(lockPath, { force: true });
+        continue;
+      }
+
       if (Date.now() >= deadline) {
         throw new Error(`Timed out waiting for Lumis WASM cache lock: ${lockPath}`);
       }

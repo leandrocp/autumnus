@@ -36,8 +36,9 @@ describe("cache timings match the Rust runtime", () => {
     expect(rustDurationMs(source, "PACKAGE_CACHE_TTL")).toBe(PACKAGE_CACHE_TTL_MS);
   });
 
-  it("keeps the stale threshold above the wait", () => {
-    // JavaScript-only: a dead lock holder must be taken over, not block forever.
-    expect(LOCK_STALE_AFTER_MS).toBeGreaterThan(LOCK_TIMEOUT_MS);
+  it("waits past the point where a stale lock may be broken", () => {
+    // Giving up first would fail callers during the window in which they were
+    // already entitled to take the dead holder's lock.
+    expect(LOCK_TIMEOUT_MS).toBeGreaterThan(LOCK_STALE_AFTER_MS);
   });
 });

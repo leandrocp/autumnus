@@ -981,16 +981,14 @@ user-facing. Worth documenting the whole chain in one place.
 
 New in the second pass:
 
-- **The lock deadline is shorter than the staleness threshold**, now only in Node
-  (`node-cache.ts`): it waits 120 s for a lock but treats one as stale only after 300 s, so a
-  process that dies holding it makes every other process **fail outright for 180 seconds**. Make
-  the deadline exceed the staleness threshold, or record the holder's pid and release when it
-  disappears.
+- ~~**The lock deadline is shorter than the staleness threshold**~~ **Fixed.** Node's lock file now
+  records the holder's host and pid, so a peer on the same machine takes over the instant that
+  process dies rather than failing for the 180-second gap. A pid written on another host is never
+  judged, because it means nothing there; that case is covered by making `LOCK_TIMEOUT_MS` exceed
+  `LOCK_STALE_AFTER_MS`, so a waiter never gives up while it is already entitled to break the lock.
 
-  The other two runtimes no longer share this. Rust dropped its file lock entirely — `store.rs`
-  converges without one — and Elixir's `Lumis.Loader` monitors the holder, so a dead caller
-  releases the key immediately, with a test for it. Node is the last place a dead holder is
-  invisible, because a lock file cannot tell you whether its owner is alive.
+  All three runtimes now recover from a dead holder instead of waiting one out: Rust takes no file
+  lock at all, Elixir monitors the holder, Node checks the pid.
 - **`matchesSpecialCapture(name, base)` is `name === base`** (`languages.ts:338`) — a function
   wrapping `===`, called at 12 sites. It presumably used to do prefix matching. Inline it.
 - **Inconsistent lock-poison handling in the CLI `Registry`**: `load_wasm_language` turns a poisoned
@@ -1012,9 +1010,10 @@ New in the second pass:
 
 From the first pass:
 
-- `node-cache.ts:113-114`: in `withWasmCacheLock`, the `catch { continue; }` around `stat` skips
-  both the deadline check and the 25 ms sleep. If `open` keeps returning `EEXIST` while `stat`
-  keeps failing (EACCES on a shared cache dir), this is an unbounded 100%-CPU spin with no timeout.
+- ~~`node-cache.ts`: in `withWasmCacheLock`, the `catch { continue; }` around `stat` skips both the
+  deadline check and the 25 ms sleep, an unbounded 100%-CPU spin if `stat` keeps failing.~~
+  **Fixed** with the lock rewrite above: a failed `stat` now yields age 0 and falls through to the
+  deadline check and the sleep.
   Move the deadline check and sleep before the `continue`.
 - `runtime.rs:437-443` (`cached_engine`): `Cache::from_file(None)` enables wasmtime's **default**
   on-disk cache for every library consumer with no opt-out. A library writing to `~/.cache/wasmtime`
