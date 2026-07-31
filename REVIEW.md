@@ -44,7 +44,8 @@ reproducible test pins the behavior.
 | 2 Query compilation silently skips 67% of languages | **DONE**, but the waiver is now stale — see §0 |
 | 3 `#offset!` removed, regression blessed into fixtures | **DONE** |
 | 4.1 `@latest` at runtime | **Won't fix, by design** — pinning would undo release-free parser updates; the guard is pre-publish CI |
-| 4.2, 4.4, 4.6 Production risks | open |
+| 4.4, 4.6 Production risks | open |
+| 4.2 Elixir capped at 4 threads | **DONE** — private pool removed; the BEAM's dirty CPU schedulers decide |
 | 4.3 `:global.trans` cluster-wide lock | **DONE** — node-local `Lumis.Loader`, one key at a time |
 | 4.5 `crypto.subtle` on non-secure origins | **DONE** — pure-JS SHA-256 fallback, pinned against `crypto.subtle` |
 | 4.7 Same `language.json` accepted by Rust, rejected by JS | **DONE** |
@@ -659,17 +660,39 @@ registry, the Elixir NIF, the TypeScript interface and validator, and five test 
 Verified: `cargo test --workspace` (all pass, first complete run), `mix test` (123 passed), JS
 typecheck plus 359 passing tests, and `gen-language-catalog --check`.
 
-### 4.2 Elixir highlighting throughput is now hard-capped at 4 threads
+### 4.2 Elixir highlighting throughput is now hard-capped at 4 threads — DONE
 
 `packages/elixir/lumis/native/lumis_nif/src/lib.rs` builds a `WasmExecutor` with
 `available_parallelism().min(4)` OS threads feeding a `sync_channel(workers * 2)`, on top of the
 `Runtime`'s own `WorkerPool` (also `min(4)`). Two queues, and the outer one blocks the dirty
 scheduler when full.
 
-On a 32-core box, Lumis will use at most 4 threads for highlighting regardless of load. The
-previous NIF ran on the dirty CPU schedulers directly. The 8 MiB stacks are a legitimate reason to
-own the threads; the `min(4)` cap is not, and there is no config knob. Make it configurable and
-default to `available_parallelism()`.
+On a 32-core box, Lumis will use at most 4 threads for highlighting regardless of load.
+
+**Fixed by deleting the pool rather than resizing it.** Every NIF is already
+`schedule = "DirtyCpu"`, so calls arrive on a dirty CPU scheduler and were then handed to a private
+thread, with the scheduler blocking on the reply — two queues where the narrow one decided
+throughput. The runtime is now called directly and the BEAM sizes the parallelism, tunable with
+`+SDcpu` like everything else on that VM.
+
+The 8 MiB stacks were the pool's only justification, and they were not needed: with the executor
+stack cut to 320 KB, the BEAM dirty-scheduler default, the full suite passes and 50,000-deep JSON
+nesting still highlights. 200,000 does not overflow either, it times out, so throughput is the wall
+rather than stack. `+sssdcpu` raises it if a grammar ever proves otherwise.
+
+Measured on 10 cores, 16 concurrent highlights of the same document:
+
+| | speedup over serial |
+| --- | ---: |
+| 4-thread pool | 4.44x |
+| dirty schedulers | 5.75x - 5.95x |
+
+The worker limit passed to `with_worker_limit` now matches `available_parallelism()`, so no caller
+blocks waiting for an instance. That is affordable because a worker costs about 110 KB resident,
+measured, against roughly 15 MB for each loaded language; the pool was never the memory driver.
+
+`Runtime::new()`, which carried its own `min(4)`, was dead — no runtime, benchmark or example ever
+called it. Removed.
 
 ### 4.3 `:global.trans` serializes parser loading across the whole cluster — DONE
 
@@ -1204,8 +1227,9 @@ Before release:
 8. Return all missing injected languages at once, and check before draining events (§4.3a).
 9. ~~Unify package resolution precedence across the three runtimes.~~ **DONE** — see §4.8. The CLI
    now matches the order `ARCHITECTURE.md` already documented.
-10. Make the Elixir worker cap configurable (§4.2). ~~Replace `:global.trans` with a node-local
-    lock.~~ **DONE** — `Lumis.Loader`, a Registry-named process per key (§4.3).
+10. ~~Make the Elixir worker cap configurable; replace `:global.trans` with a node-local lock.~~
+    **DONE** — the cap is gone rather than configurable (§4.2), and `Lumis.Loader` replaced the
+    cluster lock (§4.3).
 11. Add conformance fixtures for locals/shadowing and multi-level injections before the
     `buildNestedEvents` rewrite lands (§5).
 12. Publish an npm deprecation for `@lumis-sh/lumis-native`, and state the native→WASM performance

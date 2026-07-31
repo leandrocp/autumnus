@@ -160,16 +160,12 @@ pub enum RuntimeError {
 }
 
 impl Runtime {
-    pub fn new() -> Result<Self, RuntimeError> {
-        let workers = std::thread::available_parallelism()
-            .map(usize::from)
-            .unwrap_or(1)
-            .min(4);
-        Self::with_worker_limit(workers)
-    }
-
     /// Construct a runtime whose concurrent highlighting is bounded by
-    /// `worker_limit`. Values below one are treated as one.
+    /// `worker_limit`, which should match the number of threads that will call
+    /// it. A worker costs roughly 110 KB of resident memory, against about
+    /// 15 MB for each loaded language, so this is a cheap dial.
+    ///
+    /// Values below one are treated as one.
     pub fn with_worker_limit(worker_limit: usize) -> Result<Self, RuntimeError> {
         static ENGINE: OnceLock<Engine> = OnceLock::new();
 
