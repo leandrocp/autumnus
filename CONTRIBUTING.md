@@ -16,6 +16,7 @@ See `ARCHITECTURE.md` for how the crates, packages, website, and build pipeline 
   - [Updating parsers](#updating-parsers)
   - [Updating queries](#updating-queries)
   - [Building WASMs](#building-wasms)
+  - [Using a locally built parser](#using-a-locally-built-parser)
 - [Themes](#themes)
   - [Adding a new theme](#adding-a-new-theme)
   - [Updating themes](#updating-themes)
@@ -356,6 +357,81 @@ mise run wasm-build {name}
 ```
 
 This requires `emcc` and `tree-sitter-cli`.
+
+### Using a locally built parser
+
+Every runtime resolves languages from published `@lumis-sh/wasm-*` packages, so a
+parser you have only built locally is not found and the load fails with a 404.
+Stage it into a real language package first, then point the runtime at it.
+
+Build and stage:
+
+```sh
+mise run wasm-build kdl
+cargo run --manifest-path crates/dev/Cargo.toml -- stage-wasm kdl
+```
+
+That writes `tmp/wasm-publish/tree-sitter-kdl/`, containing `language.json`, the
+parser WASM, and a `package.json` — a complete language package.
+
+The parser filename each runtime looks for is derived from `language.json`, so
+lay it out with a script rather than by hand:
+
+```sh
+python3 - <<'EOF'
+import json, os, shutil
+staged = "tmp/wasm-publish/tree-sitter-kdl"
+pkg = json.load(open(f"{staged}/language.json"))
+parser = pkg["parser"]
+wasm = f"{parser['name']}-{pkg['version']}-{parser['sha256']}.wasm"
+
+# CLI: <source>/parsers/<suffix>.language.json
+cli = "/tmp/lumis-local/parsers"
+os.makedirs(cli, exist_ok=True)
+suffix = pkg["packageName"].removeprefix("@lumis-sh/wasm-")
+shutil.copy(f"{staged}/language.json", f"{cli}/{suffix}.language.json")
+shutil.copy(f"{staged}/{parser['name']}.wasm", f"{cli}/{wasm}")
+
+# Elixir: <bundle>/<basename>.language.json
+bundle = "/tmp/lumis-bundle"
+os.makedirs(bundle, exist_ok=True)
+name = os.path.basename(pkg["packageName"])
+shutil.copy(f"{staged}/language.json", f"{bundle}/{name}.language.json")
+shutil.copy(f"{staged}/{parser['name']}.wasm", f"{bundle}/{wasm}")
+EOF
+```
+
+The CLI reads a local package tree from `LUMIS_WASM_SOURCE_DIR`:
+
+```sh
+LUMIS_WASM_SOURCE_DIR=/tmp/lumis-local cargo run -p lumis-cli -- \
+  highlight --language kdl file.kdl
+```
+
+Elixir reads release-local packages from `:wasm_bundle_dir`, which defaults to
+`priv/wasm`:
+
+```elixir
+# config/dev.exs, or Application.put_env/3 in IEx
+config :lumis, wasm_bundle_dir: "/tmp/lumis-bundle"
+```
+
+```elixir
+iex> Lumis.Languages.load("kdl")
+:ok
+```
+
+Node resolves an installed `@lumis-sh/wasm-*` package before the network, so
+installing the staged directory is enough:
+
+```sh
+pnpm --filter @lumis-sh/lumis add ./tmp/wasm-publish/tree-sitter-kdl
+```
+
+The two on-disk layouts differ: the CLI expects a `parsers/` subdirectory and
+names the metadata after the package suffix (`kdl.language.json`), while Elixir
+reads the bundle directory directly and names it after the package basename
+(`wasm-kdl.language.json`).
 
 #### WASM distribution
 
