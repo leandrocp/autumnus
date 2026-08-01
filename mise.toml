@@ -200,23 +200,23 @@ cargo test -p lumis-build --test processed_queries
 pnpm --filter @lumis-sh/lumis exec vitest run test/query-patterns.test.ts
 echo ""
 
-# Published packages are used when their revision matches languages.toml, so only
-# the lagging ones are built. The cost scales with the release lag, not with the
-# size of the catalog, and reaches zero once every package is republished.
-echo "Building parsers whose published package cannot verify itself..."
-missing=$(pnpm --filter @lumis-sh/lumis exec node scripts/list-unverified-parsers.mjs --parsers)
-if [ -n "$missing" ]; then
-    echo "$missing" | wc -l | xargs echo "  parsers to build:"
-    while read -r parser; do
-        [ -n "$parser" ] && mise run wasm-build "$parser"
-    done <<< "$missing"
-else
-    echo "  none, every package is at its pinned revision"
-fi
+# Every parser, from the revision languages.toml pins, which is what CI checks
+# the queries against. A parser already in tmp/wasm/build is left alone, so a
+# second run is quick; rm -rf tmp/wasm/build to rebuild from scratch.
+echo "Building every parser from languages.toml..."
+# Run node directly: `pnpm exec` writes its unsupported-platform warnings for
+# the optional native packages to stdout, which would land in this list.
+(cd packages/javascript/lumis && node scripts/list-unverified-parsers.mjs --parsers --all) > /tmp/lumis-parsers.txt
+while read -r parser; do
+    [ -n "$parser" ] || continue
+    [ -f "tmp/wasm/build/$parser.wasm" ] && continue
+    [ -f "fixtures/parsers/$parser.wasm" ] && continue
+    mise run wasm-build "$parser"
+done < /tmp/lumis-parsers.txt
 echo ""
 
 echo "Compiling every query against its pinned grammar..."
-LUMIS_QUERY_COVERAGE=complete pnpm --filter @lumis-sh/lumis exec vitest run test/query-compile.test.ts
+LUMIS_QUERY_COVERAGE=complete pnpm --filter @lumis-sh/lumis run test:queries
 '''
 
 [tasks.'test-conformance']

@@ -25,8 +25,13 @@
  * 3. `tmp/wasm/build/<name>.wasm`, the output of `mise run wasm-build`
  * 4. `fixtures/parsers/<name>.wasm`, committed for grammars CI cannot build
  *
- * `mise run test-queries` builds only the parsers whose packages cannot verify
- * themselves, then requires complete coverage.
+ * `mise run test-queries` builds every parser, then requires complete coverage.
+ *
+ * Not part of `pnpm test`. Every grammar this file loads stays compiled in V8
+ * for the life of the process -- web-tree-sitter gives no way to free a
+ * Language -- so running all 115 in one process exhausts a CI runner's memory.
+ * `.github/workflows/queries.yml` shards it instead, twelve ways against
+ * parsers built from languages.toml and four against what npm publishes.
  */
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";

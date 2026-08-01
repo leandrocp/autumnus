@@ -154,7 +154,7 @@ jobs:
           fi
 
       - name: Compile queries for this shard
-        run: pnpm --filter @lumis-sh/lumis exec vitest run test/query-compile.test.ts
+        run: pnpm --filter @lumis-sh/lumis run test:queries
         env:
           LUMIS_QUERY_LANGUAGES: ${{ steps.shard.outputs.languages }}
           LUMIS_QUERY_COVERAGE: complete
@@ -200,7 +200,7 @@ jobs:
           SHARD: ${{ matrix.shard }}
 
       - name: Compile queries and check the waiver
-        run: pnpm --filter @lumis-sh/lumis exec vitest run test/query-compile.test.ts
+        run: pnpm --filter @lumis-sh/lumis run test:queries
         env:
           LUMIS_QUERY_PARSERS: published
           LUMIS_QUERY_LANGUAGES: ${{ steps.shard.outputs.languages }}
