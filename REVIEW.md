@@ -711,7 +711,7 @@ markdown doc with six injected languages that is seven full passes on first use.
 global lock, first traffic after a deploy is the worst case. `mix lumis.languages.cache`
 should be the *documented default* for releases, not an option.
 
-### 4.3a The seven passes are not the retry loop's fault — new
+### 4.3a The seven passes are not the retry loop's fault — DONE, differently
 
 `crates/lumis-wasm-runtime/src/runtime.rs:382-424`. The root cause is narrower than "the retry loop
 re-highlights", and the fix is cheap.
@@ -739,13 +739,25 @@ So each pass discovers exactly one missing name out of however many the pass alr
 and a fully built `Vec<HighlightEvent>` is constructed purely to be discarded. Elixir
 (`lib/lumis.ex:875-897`) then loads that one language and retries.
 
-Two local changes:
+**Resolved by removing the retry loop, not by batching it.** The passes existed because Elixir
+loaded languages a document implied; it no longer does. Nothing is loaded implicitly in any
+runtime, so there is one pass and no discovery.
 
-- Collect **all** missing languages into a `Vec` and return them together, so Elixir can call
-  `load_languages/1` once. Seven passes become two.
-- Move the `missing_language` check **before** the event drain.
+That closed a divergence the review had not caught: the three runtimes disagreed about an injected
+language that is not loaded. The CLI used `load_cached_config` and skipped it, JavaScript's
+`getLoadedLanguage` returned undefined and skipped it, and only Elixir loaded it and retried. Two
+runtimes silently produced less highlighting than the third for the same input, which objective 3
+forbids. All three now skip, and the caller decides what is loaded.
 
-Neither requires touching the retry loop's structure.
+Consequences worth knowing:
+
+- `Lumis.highlight/2` raises for a language that is not loaded, naming it and how to load it.
+- `lumis highlight` errors instead of downloading; `lumis parsers cache` is the only path in.
+- `lumis parsers cache` now also writes `language.json`, so a cache is self-sufficient. It was
+  writing only the parser, which worked solely because highlighting could re-fetch the metadata.
+- `Lumis.Languages.load(:all)` exists for callers who want the whole catalog.
+- `LanguageStore` distinguishes *reachable without the network* (source directory or cache) from
+  *in this cache*; `lumis parsers cache --directory` needs the second, highlighting the first.
 
 ### 4.4 The CLI reimplements the runtime instead of using it
 

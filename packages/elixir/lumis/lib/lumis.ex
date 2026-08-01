@@ -845,29 +845,13 @@ defmodule Lumis do
       |> validate_options!()
       |> rust_options!()
 
-    highlight_with_language_loading(source, options, MapSet.new())
-  end
-
-  def highlight(language, source)
-      when is_binary(language) and is_binary(source) do
-    highlight(source, language: language)
-  end
-
-  defp highlight_with_language_loading(source, options, attempted) do
     case Lumis.Native.highlight(source, options) do
       {:error, {:language_not_loaded, language}} ->
-        if MapSet.member?(attempted, language) or MapSet.size(attempted) >= 64 do
-          raise Lumis.HighlightError,
-            error: "could not load parser WASM for language '#{language}'"
-        end
-
-        case Lumis.Languages.load(language) do
-          :ok ->
-            highlight_with_language_loading(source, options, MapSet.put(attempted, language))
-
-          {:error, error} ->
-            raise Lumis.HighlightError, error: error
-        end
+        raise Lumis.HighlightError,
+          error:
+            "language #{inspect(language)} is not loaded. Call " <>
+              "Lumis.Languages.load(#{inspect(language)}) first, or configure " <>
+              ":bundled_languages and load them at startup"
 
       {:error, error} ->
         raise Lumis.HighlightError, error: error
@@ -875,6 +859,11 @@ defmodule Lumis do
       output ->
         output
     end
+  end
+
+  def highlight(language, source)
+      when is_binary(language) and is_binary(source) do
+    highlight(source, language: language)
   end
 
   @doc """

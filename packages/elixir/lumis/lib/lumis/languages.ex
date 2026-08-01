@@ -40,15 +40,25 @@ defmodule Lumis.Languages do
   @plaintext_names ~w(plaintext text txt plain)
 
   @doc """
-  Loads one language or a list of them, verifying each parser before use.
+  Loads one language, a list of them, or `:all`, verifying each parser first.
+
+  Nothing is ever loaded implicitly: a language that is not loaded is not
+  highlighted, and an injected one that is not loaded is left as plain text. Load
+  what a document can contain, including its injected languages.
 
   Already-loaded languages return immediately, so this is safe to call on every
   request or at startup. Loading stops at the first failure and returns it.
 
       :ok = Lumis.Languages.load("elixir")
       :ok = Lumis.Languages.load(["elixir", :html])
+      :ok = Lumis.Languages.load(:all)
+
+  `:all` fetches every language in the catalog, which is rarely what a
+  deployment wants; prefer naming them, or `config :lumis, :bundled_languages`.
   """
-  @spec load(String.t() | atom() | [String.t() | atom()]) :: :ok | {:error, term()}
+  @spec load(:all | String.t() | atom() | [String.t() | atom()]) :: :ok | {:error, term()}
+  def load(:all), do: load(Enum.map(Native.language_package_refs(), & &1.id))
+
   def load(names) when is_list(names) do
     Enum.reduce_while(names, :ok, fn name, :ok ->
       case load(name) do

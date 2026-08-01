@@ -2,7 +2,7 @@
 
 use lumis_core::events::HighlightEvent;
 use lumis_core::highlights::HIGHLIGHT_NAMES;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::sync::{Arc, Condvar, Mutex, OnceLock, RwLock};
 use thiserror::Error;
 use tree_sitter::{Parser, Query, WasmStore};
@@ -33,7 +33,6 @@ struct LoadedLanguage {
 struct Catalog {
     languages: Arc<HashMap<String, Arc<LoadedLanguage>>>,
     aliases: Arc<HashMap<String, String>>,
-    known: Arc<HashSet<String>>,
 }
 
 struct Worker {
@@ -238,7 +237,6 @@ impl Runtime {
         for alias in &spec.aliases {
             Arc::make_mut(&mut catalog.aliases).insert(alias.clone(), spec.id.clone());
         }
-        Arc::make_mut(&mut catalog.known).insert(spec.id.clone());
         Arc::make_mut(&mut catalog.languages).insert(
             spec.id,
             Arc::new(LoadedLanguage {
@@ -252,15 +250,14 @@ impl Runtime {
 
     /// Declare a supported language before its parser is loaded.
     ///
-    /// Missing injected languages are reported only when they are declared;
-    /// query-specific pseudo-languages such as `printf` are ignored.
+    /// Register a language's aliases so `#{lang}` in an injection query and a
+    /// caller's name resolve to the same id. Declaring does not load anything.
     pub fn declare_language(&self, id: &str, aliases: &[&str]) {
         let id = id.to_string();
         let mut catalog = self
             .catalog
             .write()
             .expect("language catalog lock poisoned");
-        Arc::make_mut(&mut catalog.known).insert(id.clone());
         for alias in aliases {
             Arc::make_mut(&mut catalog.aliases).insert((*alias).to_string(), id.clone());
         }
@@ -329,7 +326,7 @@ impl Runtime {
         name_or_alias: &str,
         rainbow_brackets: bool,
     ) -> Result<Vec<HighlightEvent>, RuntimeError> {
-        let (root_id, root, languages, aliases, known) = {
+        let (root_id, root, languages, aliases) = {
             let catalog = self.catalog.read().expect("language catalog lock poisoned");
             let root_id = catalog
                 .aliases
@@ -346,13 +343,11 @@ impl Runtime {
                 root,
                 Arc::clone(&catalog.languages),
                 Arc::clone(&catalog.aliases),
-                Arc::clone(&catalog.known),
             )
         };
 
         let mut lease = self.workers.lease()?;
         let worker = lease.worker();
-        let mut missing_language = None;
         let events = worker
             .highlighter
             .highlight(&root.highlight, source.as_bytes(), None, |injected| {
@@ -360,16 +355,9 @@ impl Runtime {
                     .get(injected)
                     .map(String::as_str)
                     .unwrap_or(injected);
-                match languages.get(id) {
-                    Some(loaded) => Some(&loaded.highlight),
-                    None if known.contains(id) => {
-                        if missing_language.is_none() {
-                            missing_language = Some(id.to_string());
-                        }
-                        None
-                    }
-                    None => None,
-                }
+                // An injected language that is not loaded is left unhighlighted,
+                // the same as the CLI and JavaScript. Nothing is loaded implicitly.
+                languages.get(id).map(|loaded| &loaded.highlight)
             })
             .map_err(|error| RuntimeError::Highlight(error.to_string()))?;
 
@@ -390,10 +378,6 @@ impl Runtime {
                     output.push(HighlightEvent::End);
                 }
             }
-        }
-
-        if let Some(language) = missing_language {
-            return Err(RuntimeError::LanguageNotLoaded(language));
         }
 
         if rainbow_brackets {
@@ -578,8 +562,10 @@ mod tests {
         }
     }
 
+    /// Nothing is loaded implicitly, so an injected language that was never
+    /// loaded leaves its content unhighlighted rather than failing the document.
     #[test]
-    fn reports_the_missing_injected_language() {
+    fn an_unloaded_injected_language_is_left_unhighlighted() {
         let runtime = Runtime::with_worker_limit(1).unwrap();
         runtime.declare_language("missing", &[]);
         install_json(
@@ -588,12 +574,27 @@ mod tests {
                (#set! injection.language "missing"))"#,
         );
 
-        let error = runtime
-            .highlight(r#""embedded""#, "json", false)
-            .unwrap_err();
+        let events = runtime.highlight(r#""embedded""#, "json", false).unwrap();
+        assert!(
+            events
+                .iter()
+                .all(|event| !matches!(event, HighlightEvent::Start { language, .. } if language == "missing")),
+            "the unloaded language must not appear: {events:?}"
+        );
+        assert!(
+            !events.is_empty(),
+            "the rest of the document still highlights"
+        );
+    }
+
+    #[test]
+    fn the_root_language_must_be_loaded() {
+        let runtime = Runtime::with_worker_limit(1).unwrap();
+        runtime.declare_language("json", &[]);
+        let error = runtime.highlight("{}", "json", false).unwrap_err();
         assert!(matches!(
             error,
-            RuntimeError::LanguageNotLoaded(language) if language == "missing"
+            RuntimeError::LanguageNotLoaded(language) if language == "json"
         ));
     }
 

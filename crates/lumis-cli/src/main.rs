@@ -1592,9 +1592,13 @@ fn highlight_output(
     record_parsed_layers: bool,
     include_injections: bool,
 ) -> Result<HighlightOutput> {
-    let config = reg
-        .load_config(lang_name)?
-        .ok_or_else(|| anyhow::anyhow!("no config for language '{}'", lang_name))?;
+    // Nothing is downloaded implicitly. `lumis parsers cache` is how a language
+    // gets here, so that highlighting is the same whatever the network is doing.
+    let config = reg.load_cached_config(lang_name)?.ok_or_else(|| {
+        anyhow::anyhow!(
+            "language '{lang_name}' is not cached; run `lumis parsers cache {lang_name}`"
+        )
+    })?;
     // Leak configs to satisfy the 'static lifetime required by the highlight callback.
     // Acceptable because the CLI process exits after highlighting.
     let config = Box::leak(Box::new(config));

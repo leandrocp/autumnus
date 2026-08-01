@@ -168,12 +168,16 @@ Override the location with `--config` or `LUMIS_CONFIG`.
 
 ## Parser management
 
-Parser WASM files are downloaded on demand the first time a language is needed.
-The CLI first resolves the current self-contained language package metadata,
-then downloads the exact parser version named there. Both metadata and parser
-bytes persist across starts; cached parser filenames include the version and
-SHA-256 digest. Corrupt bytes are rejected before use. Cache them ahead of time
-to keep that download off the first run.
+Highlighting never downloads. `lumis parsers cache <language>` resolves the
+self-contained language package, downloads the exact parser version it names,
+verifies it, and stores both; `--all` takes the whole catalog. Cached parser
+filenames include the version and SHA-256 digest, and corrupt bytes are rejected
+before use.
+
+A language that is not cached is an error rather than a download, so the same
+command produces the same output whatever the network is doing. Languages
+injected inside a document follow the same rule: cache them too, or their blocks
+stay unhighlighted.
 
 ```sh
 # Cache specific parsers

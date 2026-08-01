@@ -11,6 +11,18 @@ defmodule Lumis.ConformanceTest do
                  |> Enum.map(&Path.basename/1)
                  |> Enum.sort()
 
+  # The same nine the JavaScript conformance suite declares. The fixtures were
+  # generated with exactly these loaded, so anything the documents inject beyond
+  # them is expected to stay unhighlighted.
+  setup_all do
+    :ok =
+      Lumis.Languages.load(~w(
+        json html javascript css lua markdown markdown_inline mdx python
+      ))
+
+    :ok
+  end
+
   defp load_fixture(name) do
     dir = Path.join(@conformance_dir, name)
     metadata = dir |> Path.join("fixture.json") |> File.read!() |> Jason.decode!()

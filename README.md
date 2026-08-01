@@ -82,9 +82,10 @@ import dracula from '@lumis-sh/themes/dracula'
 const html = await highlight('const x = 1', htmlInline({ language: javascript, theme: dracula }))
 ```
 
-JavaScript loads exact, integrity-checked parser WASM per language on demand.
-Node uses a persistent user cache, browsers use CacheStorage, and
-`lumis-wasm-cache` can prepare deployment-local parser assets ahead of time.
+JavaScript loads exact, integrity-checked parser WASM for the languages you
+declare. Nothing loads implicitly, so a language you did not ask for is not
+highlighted. Node uses a persistent user cache, browsers use CacheStorage, and
+`lumis-wasm-cache` prepares deployment-local parser assets ahead of time.
 
 ### [Browsers / CDN](https://www.npmjs.com/package/@lumis-sh/lumis)
 
@@ -105,10 +106,10 @@ const html = await highlight('const x = 1', htmlInline({ language: javascript, t
 Lumis.highlight!("const x = 1", formatter: {:html_inline, language: "javascript", theme: "dracula"})
 ```
 
-Elixir uses the same per-language parser WASM model. Missing languages load
-automatically. Use `mix lumis.languages.cache` while building an OTP release,
-then `Lumis.Languages.load/1` to compile expected parsers at application
-startup.
+Elixir uses the same per-language parser WASM model. Load what you intend to
+highlight, including languages injected inside other ones: `Lumis.Languages.load/1`
+at application startup, or `mix lumis.languages.cache` while building an OTP
+release. `Lumis.Languages.load(:all)` takes the whole catalog.
 
 ### [Java](https://github.com/roastedroot/lumis4j)
 

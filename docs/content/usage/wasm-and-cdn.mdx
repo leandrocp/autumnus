@@ -22,11 +22,14 @@ Lumis uses two terms consistently:
 - **load** makes a language available in the current runtime
 - **cache** persists verified parser bytes so later starts skip the download
 
-## Cache and load in advance
+## Load what you intend to highlight
 
-Loading a language on demand costs a metadata request, a parser download, and a
-grammar compile, all while the request that triggered it waits. Do it at build
-or boot time instead, for every language you expect to render:
+Nothing is ever loaded implicitly. A language you have not loaded is not
+highlighted, and that includes languages **injected inside** another one: a
+Markdown document with a fenced Rust block needs Rust loaded, and an HTML page
+needs CSS and JavaScript. Every runtime behaves the same way.
+
+Load at build or boot time, never in the middle of serving a request:
 
 <Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
   <TabItem value="javascript" label="JavaScript">
@@ -58,8 +61,9 @@ lumis parsers cache rust javascript elixir
   </TabItem>
 </Tabs>
 
-Injected languages count too: highlighting Markdown with fenced Rust needs the
-Rust parser, and an HTML page needs CSS and JavaScript.
+If you want every language available without listing them, take the whole
+catalog: `bundledLanguages` from `@lumis-sh/wasm-bundle-full` in JavaScript,
+`Lumis.Languages.load(:all)` in Elixir, `lumis parsers cache --all` for the CLI.
 
 ## What ships where
 

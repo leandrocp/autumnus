@@ -51,10 +51,19 @@ Omitting `language` from the formatter enables auto-detection.
 
 ## Parser loading
 
-Lumis loads missing languages automatically. Parser WASM is packaged with
-matching queries and integrity metadata, then cached in the platform user cache
-directory. It first checks release-local `priv/wasm`, so production releases do
-not need a runtime download.
+Lumis highlights only what you have loaded. `Lumis.highlight/2` raises for a
+language that is not loaded, and a language injected inside a document is left
+unhighlighted unless it was loaded too, so load a document's injected languages
+as well as its own.
+
+Parser WASM is packaged with matching queries and integrity metadata, then
+cached in the platform user cache directory. It first checks release-local
+`priv/wasm`, so production releases do not need a runtime download.
+
+```elixir
+:ok = Lumis.Languages.load(["markdown", "elixir", "json"])
+:ok = Lumis.Languages.load(:all)
+```
 
 Configure which languages a release bundles, then run the task. Configuration is
 the only place the set is defined, so a release cannot disagree with development:
@@ -75,9 +84,8 @@ files that already verify, and `--output` to write somewhere other than
 :ok = Lumis.Languages.load(["elixir", "html", "javascript", "css"])
 ```
 
-Load every language you expect to render during application startup. On-demand
-loading makes the first request that needs a language wait for its download and
-compile — see [Cache and load in advance](/advanced/wasm-and-cdn#cache-and-load-in-advance).
+Load every language you expect to render during application startup — see
+[Load what you intend to highlight](/advanced/wasm-and-cdn#load-what-you-intend-to-highlight).
 Wasmtime persists compiled modules across VM restarts. Set
 `LUMIS_WASM_CACHE_DIR` to override the parser and compiled-module cache root.
 

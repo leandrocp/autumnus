@@ -71,6 +71,20 @@ Application.put_env(:lumis, :wasm_resolver, fn entry ->
   {:file, Path.join(wasm_fixtures, "#{entry.wasm_name}.wasm")}
 end)
 
+# Nothing is loaded implicitly, so the suite declares what it uses, the way a
+# real caller has to. Only languages with a local wasm fixture can load here, and
+# these four are left unloaded for the tests that exercise loading itself.
+reserved = ~w(comment diff dockerfile xml)
+
+fixture_languages =
+  wasm_fixtures
+  |> File.ls!()
+  |> Enum.map(&String.replace_suffix(String.replace_prefix(&1, "tree-sitter-", ""), ".wasm", ""))
+  |> Enum.reject(&(&1 in reserved))
+  |> Enum.sort()
+
+:ok = Lumis.Languages.load(fixture_languages)
+
 ExUnit.start(exclude: [:conformance])
 
 ExUnit.after_suite(fn _results ->

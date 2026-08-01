@@ -147,11 +147,19 @@ impl LanguageStore {
     ///
     /// Never touches the network, so callers can render from cache alone.
     #[must_use]
-    pub fn cached_package(&self, package_name: &str) -> Option<Arc<LanguagePackage>> {
+    /// The package from memory, a configured source directory, or the cache.
+    ///
+    /// Everything except the network: a staged package is as explicit as a
+    /// cached one, so both count as available without downloading.
+    pub fn local_package(&self, package_name: &str) -> Option<Arc<LanguagePackage>> {
         if let Some(package) = self.memo(package_name) {
             return Some(package);
         }
-        let package = read_package_file(&self.package_path(package_name), package_name)?;
+        let package = self
+            .read_source_package(package_name)
+            .ok()
+            .flatten()
+            .or_else(|| read_package_file(&self.package_path(package_name), package_name))?;
         Some(self.remember(package_name, package))
     }
 
@@ -161,7 +169,7 @@ impl LanguageStore {
     /// Fails when the parser cannot be obtained, or its bytes do not match the
     /// size and digest the package declares.
     pub fn parser(&self, package: &LanguagePackage) -> Result<Vec<u8>, StoreError> {
-        if let Some(bytes) = self.cached_parser(package) {
+        if let Some(bytes) = self.local_parser(package) {
             return Ok(bytes);
         }
         self.fetch_parser(package, &self.parser_path(package))
@@ -170,6 +178,24 @@ impl LanguageStore {
     /// Verified parser bytes already on disk, if any. A file that fails
     /// verification is deleted rather than returned.
     #[must_use]
+    /// Verified parser bytes from a configured source directory or the cache,
+    /// never the network.
+    pub fn local_parser(&self, package: &LanguagePackage) -> Option<Vec<u8>> {
+        if let Some(source) = self.source_asset(&parser_filename(package)) {
+            if let Ok(bytes) = std::fs::read(&source) {
+                if package.verify_wasm(&bytes).is_ok() {
+                    return Some(bytes);
+                }
+            }
+        }
+
+        self.cached_parser(package)
+    }
+
+    /// Verified parser bytes from this store's own cache directory only.
+    ///
+    /// `lumis parsers cache --directory` copies *into* a directory, so it has to
+    /// ask whether its own cache holds the parser, not whether one is reachable.
     pub fn cached_parser(&self, package: &LanguagePackage) -> Option<Vec<u8>> {
         let path = self.parser_path(package);
         if let Ok(bytes) = std::fs::read(&path) {
@@ -196,6 +222,16 @@ impl LanguageStore {
     pub fn refresh_parser(&self, package: &LanguagePackage) -> Result<Vec<u8>, StoreError> {
         let path = self.parser_path(package);
         self.fetch_parser(package, &path)
+    }
+
+    /// Write `package` into the cache, so a later run needs neither a source
+    /// directory nor the network. A parser without its metadata is unusable.
+    pub fn cache_package(&self, package: &LanguagePackage) -> Result<(), StoreError> {
+        let bytes = serde_json::to_vec(package).map_err(|error| StoreError::Io {
+            context: format!("could not serialize {}", package.package_name),
+            source: std::io::Error::other(error),
+        })?;
+        write_atomic(&self.package_path(&package.package_name), &bytes)
     }
 
     /// Path a verified parser is cached at. Content-addressed, so upgrading a
@@ -516,14 +552,14 @@ mod tests {
     }
 
     #[test]
-    fn a_corrupt_cached_parser_is_deleted_rather_than_returned() {
+    fn a_corrupt_local_parser_is_deleted_rather_than_returned() {
         let dir = tempdir();
         let store = make(dir.path(), Box::new(NoNetwork));
         let package = package();
         let path = store.parser_path(&package);
         write_atomic(&path, b"corrupt").unwrap();
 
-        assert!(store.cached_parser(&package).is_none());
+        assert!(store.local_parser(&package).is_none());
         assert!(!path.exists(), "a failing parser must not be left behind");
     }
 

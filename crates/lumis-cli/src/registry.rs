@@ -88,12 +88,10 @@ impl Registry {
             .ok_or_else(|| anyhow::anyhow!("parser returned no syntax tree for '{language}'"))
     }
 
-    pub fn load_config(&self, language: &str) -> Result<Option<HighlightConfiguration>> {
-        self.load_config_inner(language, false)
-    }
-
+    /// Highlighting never downloads, so this is the only loading path. `lumis
+    /// parsers cache` is what puts a language here.
     pub fn load_cached_config(&self, language: &str) -> Result<Option<HighlightConfiguration>> {
-        self.load_config_inner(language, true)
+        self.load_config_inner(language)
     }
 
     pub fn rainbow_ranges(&self, language: &str, source: &str) -> Result<Vec<RainbowRange>> {
@@ -122,11 +120,13 @@ impl Registry {
 
     pub fn download_parser(&self, language: &str) -> Result<Vec<u8>> {
         let package = self.package(language)?;
-        Ok(self.store.refresh_parser(&package)?)
+        let parser = self.store.refresh_parser(&package)?;
+        self.store.cache_package(&package)?;
+        Ok(parser)
     }
 
     pub fn is_cached(&self, language: &str) -> bool {
-        self.cached_package(language)
+        self.local_package(language)
             .is_some_and(|package| self.store.cached_parser(&package).is_some())
     }
 
@@ -146,27 +146,18 @@ impl Registry {
         Ok(self.store.package(location.package_name)?)
     }
 
-    fn cached_package(&self, language: &str) -> Option<Arc<LanguagePackage>> {
+    fn local_package(&self, language: &str) -> Option<Arc<LanguagePackage>> {
         let location = catalog::find(language)?;
-        self.store.cached_package(location.package_name)
+        self.store.local_package(location.package_name)
     }
 
     pub fn data_dir(&self) -> &Path {
         &self.data_dir
     }
 
-    fn load_config_inner(
-        &self,
-        language: &str,
-        cached_only: bool,
-    ) -> Result<Option<HighlightConfiguration>> {
-        let package = if cached_only {
-            let Some(package) = self.cached_package(language) else {
-                return Ok(None);
-            };
-            package
-        } else {
-            self.package(language)?
+    fn load_config_inner(&self, language: &str) -> Result<Option<HighlightConfiguration>> {
+        let Some(package) = self.local_package(language) else {
+            return Ok(None);
         };
         let (id, definition) = package.require_language(language)?;
         if definition.highlights.is_empty()
@@ -176,13 +167,8 @@ impl Registry {
             return Ok(None);
         }
 
-        let wasm = if cached_only {
-            let Some(bytes) = self.store.cached_parser(&package) else {
-                return Ok(None);
-            };
-            bytes
-        } else {
-            self.store.parser(&package)?
+        let Some(wasm) = self.store.local_parser(&package) else {
+            return Ok(None);
         };
         let grammar = self.load_wasm_language(&package, &wasm)?;
         let mut config = HighlightConfiguration::new(
@@ -335,11 +321,11 @@ mod tests {
     }
 
     #[test]
-    fn cached_package_parses_and_highlights() {
+    fn local_package_parses_and_highlights() {
         let (_dir, registry) = cached_rust_registry();
         let tree = registry.parse_tree("rust", "fn main() {}").unwrap();
         assert_eq!(tree.root_node().kind(), "source_file");
-        assert!(registry.load_config("rust").unwrap().is_some());
+        assert!(registry.load_cached_config("rust").unwrap().is_some());
     }
 
     #[test]

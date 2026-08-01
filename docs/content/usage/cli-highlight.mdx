@@ -56,12 +56,14 @@ lumis highlight main.rs --formatter bbcode-scoped
 
 ## Parser availability
 
-The CLI downloads exact-version parser WASM files on demand and stores them
-under content-addressed, integrity-checked names in the data directory.
+Highlighting never downloads. `lumis parsers cache` stores exact-version parser
+WASM under content-addressed, integrity-checked names in the data directory, and
+highlighting uses only what is there.
 
-- first use may trigger a parser download
-- `lumis parsers cache ...` persists selected parsers ahead of time
+- a language that is not cached is an error, not a download
+- `lumis parsers cache ...` persists selected parsers, `--all` takes every one
 - `lumis parsers cache ... --force` replaces valid cached parsers
+- languages injected inside a document need caching too, or they stay plain
 
 ```bash
 lumis parsers cache rust javascript elixir
