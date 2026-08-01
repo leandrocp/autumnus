@@ -11,9 +11,10 @@ defmodule Lumis.ConformanceTest do
                  |> Enum.map(&Path.basename/1)
                  |> Enum.sort()
 
-  # The same nine the JavaScript conformance suite declares. The fixtures were
-  # generated with exactly these loaded, so anything the documents inject beyond
-  # them is expected to stay unhighlighted.
+  # The same nine the JavaScript conformance suite declares. Highlighting would
+  # load them anyway; naming them keeps this suite comparing formatter output
+  # rather than measuring a first load, and matches what the browser has to do,
+  # since it cannot load inside the walk.
   setup_all do
     :ok =
       Lumis.Languages.load(~w(
