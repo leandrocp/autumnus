@@ -36,9 +36,17 @@ const temporaryDir = await mkdtemp(join(tmpdir(), "lumis-package-sizes-"));
 try {
   const entries = [];
   if (groups.has("javascript")) {
-    const lumisPackages = await packageClosure(
+    // The platform addon is an optional dependency, so a Node install pulls it
+    // and a browser bundle does not. Measuring one closure for both would
+    // attribute the addon's bytes to a runtime that never downloads it.
+    const lumisNodePackages = await packageClosure(
       resolve(repoDir, "packages/javascript/lumis"),
       temporaryDir,
+    );
+    const lumisWasmPackages = await packageClosure(
+      resolve(repoDir, "packages/javascript/lumis"),
+      temporaryDir,
+      { includeOptional: false },
     );
     const shikiPackages = await packageClosure(
       resolve(repoDir, "benchmarks/javascript/node_modules/shiki"),
@@ -71,22 +79,34 @@ try {
     }
     entries.push(
       packageEntry(
+        "lumis-js-node",
+        "runtime",
+        "npm production closure including the platform addon; parsers load on demand",
+        lumisNodePackages,
+      ),
+      packageEntry(
+        "lumis-js-node",
+        "10 languages",
+        "npm production closure including the platform addon, plus benchmark parsers",
+        combinePackages(lumisNodePackages, ...parserPackages.values()),
+      ),
+      packageEntry(
         "lumis-js-wasm",
         "runtime",
-        "npm production closure; parsers load on demand",
-        lumisPackages,
+        "npm production closure without the platform addon; parsers load on demand",
+        lumisWasmPackages,
       ),
       packageEntry(
         "lumis-js-wasm",
         "1 language",
         "npm production closure plus Rust parser",
-        combinePackages(lumisPackages, parserPackages.get("rust")),
+        combinePackages(lumisWasmPackages, parserPackages.get("rust")),
       ),
       packageEntry(
         "lumis-js-wasm",
         "10 languages",
         "npm production closure plus benchmark parsers",
-        combinePackages(lumisPackages, ...parserPackages.values()),
+        combinePackages(lumisWasmPackages, ...parserPackages.values()),
       ),
       packageEntry("shiki", undefined, "npm production closure", shikiPackages),
       packageEntry("highlight-js", undefined, "npm production closure", highlightJsPackages),
@@ -155,7 +175,7 @@ try {
   await rm(temporaryDir, { recursive: true, force: true });
 }
 
-async function packageClosure(packageDir, packRoot) {
+async function packageClosure(packageDir, packRoot, { includeOptional = true } = {}) {
   const packages = new Map();
   const queue = [await realpath(packageDir)];
   while (queue.length > 0) {
@@ -175,7 +195,7 @@ async function packageClosure(packageDir, packRoot) {
 
     for (const dependency of Object.keys({
       ...manifest.dependencies,
-      ...manifest.optionalDependencies,
+      ...(includeOptional ? manifest.optionalDependencies : {}),
     })) {
       try {
         queue.push(await resolvePackageDirectory(directory, dependency));

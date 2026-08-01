@@ -131,6 +131,22 @@ const runtime: LanguagesModule = binding
   ? createNativeLanguagesModule(binding)
   : createLanguagesModule(nodeRuntime);
 
+/**
+ * Which runtime is highlighting: the native addon, or `web-tree-sitter`.
+ *
+ * Node prefers the addon and falls back silently, so anything that needs to
+ * know which one it got — a benchmark reporting a number, a bug report — has to
+ * be able to ask.
+ *
+ * ```ts
+ * import { runtimeKind } from '@lumis-sh/lumis'
+ * runtimeKind() // 'native' | 'wasm'
+ * ```
+ */
+export function runtimeKind(): "native" | "wasm" {
+  return binding ? "native" : "wasm";
+}
+
 export function createRuntime(...args: Parameters<LanguagesModule["createRuntime"]>) {
   return runtime.createRuntime(...args);
 }

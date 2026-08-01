@@ -1,6 +1,7 @@
 export const implementations = [
   { id: "lumis-rust", label: "Lumis Rust", runner: "criterion" },
-  { id: "lumis-js-wasm", label: "Lumis JavaScript WASM", runner: "mitata" },
+  { id: "lumis-js-wasm", label: "Lumis JavaScript Wasm", runner: "mitata" },
+  { id: "lumis-js-node", label: "Lumis JavaScript Node", runner: "mitata" },
   { id: "lumis-elixir", label: "Lumis Elixir", runner: "benchee" },
   { id: "lumis-cli", label: "Lumis CLI", runner: "hyperfine" },
   { id: "shiki", label: "Shiki", runner: "mitata" },

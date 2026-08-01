@@ -60,9 +60,12 @@ sources = [
 outputs = ["packages/javascript/themes/dist/index.js"]
 
 [tasks."build:javascript"]
-description = "Build the JavaScript Wasm runtime"
+description = "Build the JavaScript runtimes, native addon and Wasm"
 depends = ["install", "build:themes", "fixtures"]
-run = "pnpm --filter @lumis-sh/lumis build"
+run = '''
+pnpm --filter @lumis-sh/lumis build:native
+pnpm --filter @lumis-sh/lumis build
+'''
 sources = [
   "Cargo.toml",
   "Cargo.lock",
@@ -253,10 +256,10 @@ cp -R "$CARGO_TARGET_DIR/criterion" "$BENCH_RUN_DIR/criterion"
 '''
 
 [tasks.javascript]
-description = "Run Mitata for Lumis JS Wasm, Shiki, and highlight.js"
+description = "Run Mitata for Lumis JS Node and Wasm, Shiki, and highlight.js"
 depends = ["build:javascript", "prepare:languages", "fixtures"]
 run = '''
-for implementation in lumis-js-wasm shiki highlight-js; do
+for implementation in lumis-js-node lumis-js-wasm shiki highlight-js; do
   for scenario in small-one-language large-one-language ten-files-one-language ten-files-ten-languages; do
     output="$BENCH_RUN_DIR/javascript/$implementation/$scenario.json"
     BENCH_IMPLEMENTATION="$implementation" BENCH_SCENARIO="$scenario" BENCH_OUTPUT="$output" pnpm --filter @lumis-sh/benchmarks benchmark

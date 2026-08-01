@@ -107,15 +107,36 @@ async function prepareRuntime() {
   const runtimeDir = resolve(repoDir, "target/benchmarks/javascript-runtime");
   await mkdir(runtimeDir, { recursive: true });
   process.env.LUMIS_DATA_DIR = resolve(runtimeDir, "wasm-cache");
+
+  // Which runtime `@lumis-sh/lumis` picks on Node. The addon is the default, so
+  // the Wasm row has to ask for the other one; the addon resolves parsers in
+  // Rust rather than through the JavaScript resolver the Wasm row configures,
+  // and reads them from the tree `prepare:languages` writes.
+  if (implementation === "lumis-js-wasm") {
+    process.env.LUMIS_TEST_RUNTIME = "wasm";
+  } else if (implementation === "lumis-js-node") {
+    delete process.env.LUMIS_TEST_RUNTIME;
+    process.env.LUMIS_WASM_PATH = resolve(repoDir, "target/benchmarks/language-packages");
+  }
+
   process.chdir(runtimeDir);
 }
 
 async function loadLumis() {
-  const [{ createHighlighter, withWasm }, { htmlInline }, { default: theme }] = await Promise.all([
+  const [lumis, { htmlInline }, { default: theme }] = await Promise.all([
     import("@lumis-sh/lumis"),
     import("@lumis-sh/lumis/formatters"),
     import("@lumis-sh/themes/github_dark"),
   ]);
+  const { createHighlighter, withWasm, runtimeKind } = lumis;
+
+  // Node picks the addon and falls back to Wasm silently, so a row that cannot
+  // confirm which one it measured would quietly report the other one's numbers.
+  const expected = implementation === "lumis-js-node" ? "native" : "wasm";
+  const actual = runtimeKind();
+  if (actual !== expected) {
+    throw new Error(`${implementation} needs the ${expected} runtime, got ${actual}`);
+  }
   const uniqueIds = [...new Set(["comment", ...scenario.files.map(({ language }) => language)])];
   const localPackages = JSON.parse(
     await readFile(resolve(repoDir, "target/benchmarks/language-packages/index.json"), "utf8"),

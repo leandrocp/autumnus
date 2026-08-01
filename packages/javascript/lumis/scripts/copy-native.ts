@@ -32,3 +32,11 @@ const destination = path.join(nativeDir, `lumis-native.${target}.node`);
 mkdirSync(nativeDir, { recursive: true });
 copyFileSync(source, destination);
 console.log(destination);
+
+// Also where the platform package's `main` points, so a local run resolves the
+// addon the way an install does, and the package-size benchmark measures what
+// a Node install actually downloads rather than an empty shell.
+const platformPackage = path.join(nativeDir, "npm", target, `lumis-native.${target}.node`);
+mkdirSync(path.dirname(platformPackage), { recursive: true });
+copyFileSync(source, platformPackage);
+console.log(platformPackage);

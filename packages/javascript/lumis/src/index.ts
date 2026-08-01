@@ -10,6 +10,8 @@ import {
   getDefaultRuntime,
 } from "./runtime/node.js";
 
+export { runtimeKind } from "./runtime/node.js";
+
 export { highlightIter, highlightEvents } from "./core/highlighter.js";
 
 const highlighter = createHighlighterModule({
