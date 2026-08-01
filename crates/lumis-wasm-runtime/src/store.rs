@@ -66,6 +66,25 @@ pub trait Fetcher: Send + Sync {
     fn get(&self, url: &str) -> Result<Vec<u8>, String>;
 }
 
+/// The default [`Fetcher`]: an HTTP client.
+///
+/// Lives here rather than in each host so the CLI, the Elixir NIF and the Node
+/// addon download, verify and cache through exactly the same code.
+#[cfg(feature = "wasm")]
+pub struct HttpFetcher;
+
+#[cfg(feature = "wasm")]
+impl Fetcher for HttpFetcher {
+    fn get(&self, url: &str) -> Result<Vec<u8>, String> {
+        ureq::get(url)
+            .call()
+            .map_err(|error| error.to_string())?
+            .into_body()
+            .read_to_vec()
+            .map_err(|error| error.to_string())
+    }
+}
+
 /// A [`Fetcher`] that refuses every request.
 pub struct NoNetwork;
 

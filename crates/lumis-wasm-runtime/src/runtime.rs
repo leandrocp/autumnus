@@ -9,6 +9,7 @@ use tree_sitter::{Parser, Query, WasmStore};
 use wasmtime::{Cache, CacheConfig, Config, Engine};
 
 use crate::brackets::{bracket_pairs, colorize_bracket_pairs, RainbowRange};
+use crate::store::{LanguageStore, StoreConfig};
 use crate::tree_sitter_highlight::{HighlightConfiguration, Highlighter};
 
 /// Everything needed to register a parser and its highlighting queries.
@@ -140,6 +141,10 @@ pub struct Runtime {
     loader: Mutex<WasmStore>,
     catalog: RwLock<Catalog>,
     workers: WorkerPool,
+    /// Resolves, verifies and caches language packages. Present so an injected
+    /// language can be loaded during the walk that discovered it, which is what
+    /// lets one pass highlight a document whatever it turns out to contain.
+    store: Option<LanguageStore>,
 }
 
 #[derive(Debug, Error)]
@@ -184,7 +189,43 @@ impl Runtime {
             loader: Mutex::new(loader),
             catalog: RwLock::new(Catalog::default()),
             workers: WorkerPool::new(engine, worker_limit),
+            store: None,
         })
+    }
+
+    /// Attach the store this runtime downloads and caches through.
+    #[must_use]
+    pub fn with_store(mut self, store: LanguageStore) -> Self {
+        self.store = Some(store);
+        self
+    }
+
+    /// Resolve, download and load `id` through the store, if one is attached.
+    ///
+    /// Returns `None` when there is no store, the id is not a known language, or
+    /// the package cannot be obtained. A document is never failed over an
+    /// injected language that could not be fetched.
+    fn load_through_store(&self, id: &str) -> Option<Arc<LoadedLanguage>> {
+        let store = self.store.as_ref()?;
+        let location = crate::catalog::find(id)?;
+        let package = store.package(location.package_name).ok()?;
+        let (resolved_id, definition) = package.language(id)?;
+        let wasm = store.parser(&package).ok()?;
+
+        self.load_language(LanguageSpec {
+            id: resolved_id.to_string(),
+            aliases: definition.aliases.clone(),
+            grammar_name: package.parser.grammar_name.clone(),
+            wasm,
+            highlights: definition.highlights.clone(),
+            injections: definition.injections.clone(),
+            locals: definition.locals.clone(),
+            brackets: definition.brackets.clone(),
+        })
+        .ok()?;
+
+        let catalog = self.catalog.read().expect("language catalog lock poisoned");
+        catalog.languages.get(resolved_id).cloned()
     }
 
     pub fn load_language(&self, spec: LanguageSpec) -> Result<(), RuntimeError> {
@@ -348,6 +389,11 @@ impl Runtime {
 
         let mut lease = self.workers.lease()?;
         let worker = lease.worker();
+        // Holds languages loaded during this walk. The callback has to hand back a
+        // reference that outlives it, and an arena gives a stable address while
+        // still allowing inserts, which a RefCell<Vec<_>> cannot.
+        let loaded_here: typed_arena::Arena<Arc<LoadedLanguage>> = typed_arena::Arena::new();
+
         let events = worker
             .highlighter
             .highlight(&root.highlight, source.as_bytes(), None, |injected| {
@@ -355,9 +401,16 @@ impl Runtime {
                     .get(injected)
                     .map(String::as_str)
                     .unwrap_or(injected);
-                // An injected language that is not loaded is left unhighlighted,
-                // the same as the CLI and JavaScript. Nothing is loaded implicitly.
-                languages.get(id).map(|loaded| &loaded.highlight)
+
+                if let Some(loaded) = languages.get(id) {
+                    return Some(&loaded.highlight);
+                }
+
+                // Loading here is what makes one pass enough: the walk descends
+                // into the language it just fetched and finds whatever that
+                // contains, however deeply nested.
+                let loaded = self.load_through_store(id)?;
+                Some(&loaded_here.alloc(loaded).highlight)
             })
             .map_err(|error| RuntimeError::Highlight(error.to_string()))?;
 
@@ -564,6 +617,35 @@ mod tests {
 
     /// Nothing is loaded implicitly, so an injected language that was never
     /// loaded leaves its content unhighlighted rather than failing the document.
+    /// With a store attached the walk loads what it finds, so one call is
+    /// enough however deep the injections go.
+    #[test]
+    fn an_injected_language_is_loaded_during_the_walk() {
+        let dir = tempfile::tempdir().unwrap();
+        let parsers = dir.path().join("parsers");
+        std::fs::create_dir_all(&parsers).unwrap();
+
+        let store = LanguageStore::new(
+            StoreConfig {
+                cache_dir: dir.path().to_path_buf(),
+                source_dir: None,
+            },
+            Box::new(crate::store::NoNetwork),
+        );
+        let runtime = Runtime::with_worker_limit(1).unwrap().with_store(store);
+        runtime.declare_language("missing", &[]);
+        install_json(
+            &runtime,
+            r#"((string) @injection.content
+               (#set! injection.language "missing"))"#,
+        );
+
+        // Nothing is fetchable, so this must still succeed rather than fail the
+        // document; the injected block simply stays unhighlighted.
+        let events = runtime.highlight(r#""embedded""#, "json", false).unwrap();
+        assert!(!events.is_empty());
+    }
+
     #[test]
     fn an_unloaded_injected_language_is_left_unhighlighted() {
         let runtime = Runtime::with_worker_limit(1).unwrap();

@@ -58,6 +58,8 @@ pub use package::{
 };
 #[cfg(feature = "wasm")]
 pub use runtime::{LanguageSpec, Runtime, RuntimeError};
+#[cfg(feature = "wasm")]
+pub use store::HttpFetcher;
 pub use store::{
     package_suffix, parser_filename, write_atomic, Fetcher, LanguageStore, NoNetwork, StoreConfig,
     StoreError,

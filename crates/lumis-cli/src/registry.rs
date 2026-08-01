@@ -8,25 +8,12 @@ use lumis_wasm_runtime::sha256_hex;
 use lumis_wasm_runtime::tree_sitter_highlight::HighlightConfiguration;
 #[cfg(test)]
 use lumis_wasm_runtime::write_atomic;
-use lumis_wasm_runtime::{Fetcher, LanguagePackage, LanguageStore, StoreConfig};
+use lumis_wasm_runtime::{HttpFetcher, LanguagePackage, LanguageStore, StoreConfig};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
 use tree_sitter::{Parser, Query, Tree, WasmStore};
 use wasmtime::{Cache, Config, Engine};
-
-struct UreqFetcher;
-
-impl Fetcher for UreqFetcher {
-    fn get(&self, url: &str) -> Result<Vec<u8>, String> {
-        ureq::get(url)
-            .call()
-            .map_err(|error| error.to_string())?
-            .into_body()
-            .read_to_vec()
-            .map_err(|error| error.to_string())
-    }
-}
 
 /// Highlighting on top of [`LanguageStore`], which owns resolution and caching.
 pub struct Registry {
@@ -59,7 +46,7 @@ impl Registry {
                 cache_dir: data_dir.clone(),
                 source_dir: LanguageStore::source_dir_from_env(),
             },
-            Box::new(UreqFetcher),
+            Box::new(HttpFetcher),
         );
         Ok(Self {
             data_dir,
