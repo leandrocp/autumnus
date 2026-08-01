@@ -142,6 +142,50 @@ importers:
       vitest:
         specifier: ^4.1.2
         version: 4.1.4(@types/node@25.6.0)(jsdom@27.4.0(supports-color@8.1.1))(vite@8.0.8(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.3))
+    optionalDependencies:
+      '@lumis-sh/lumis-native-darwin-arm64':
+        specifier: workspace:*
+        version: link:native/npm/darwin-arm64
+      '@lumis-sh/lumis-native-darwin-x64':
+        specifier: workspace:*
+        version: link:native/npm/darwin-x64
+      '@lumis-sh/lumis-native-linux-arm64-gnu':
+        specifier: workspace:*
+        version: link:native/npm/linux-arm64-gnu
+      '@lumis-sh/lumis-native-linux-x64-gnu':
+        specifier: workspace:*
+        version: link:native/npm/linux-x64-gnu
+      '@lumis-sh/lumis-native-win32-x64-msvc':
+        specifier: workspace:*
+        version: link:native/npm/win32-x64-msvc
+
+  packages/javascript/lumis/native/npm/darwin-arm64: {}
+
+  packages/javascript/lumis/native/npm/darwin-x64: {}
+
+  packages/javascript/lumis/native/npm/linux-arm64-gnu: {}
+
+  packages/javascript/lumis/native/npm/linux-x64-gnu: {}
+
+  packages/javascript/lumis/native/npm/meta:
+    optionalDependencies:
+      '@lumis-sh/lumis-native-darwin-arm64':
+        specifier: workspace:*
+        version: link:../darwin-arm64
+      '@lumis-sh/lumis-native-darwin-x64':
+        specifier: workspace:*
+        version: link:../darwin-x64
+      '@lumis-sh/lumis-native-linux-arm64-gnu':
+        specifier: workspace:*
+        version: link:../linux-arm64-gnu
+      '@lumis-sh/lumis-native-linux-x64-gnu':
+        specifier: workspace:*
+        version: link:../linux-x64-gnu
+      '@lumis-sh/lumis-native-win32-x64-msvc':
+        specifier: workspace:*
+        version: link:../win32-x64-msvc
+
+  packages/javascript/lumis/native/npm/win32-x64-msvc: {}
 
   packages/javascript/markdown-it-lumis:
     dependencies:

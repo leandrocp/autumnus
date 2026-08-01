@@ -148,8 +148,13 @@ cp -R "$nif_dir/.cargo" "$nif_dir/src" "$tmp_dir/lumis_nif"
 cargo tree --manifest-path "$tmp_dir/lumis_nif/Cargo.toml" --locked --depth 0
 '''
 
+[tasks.'stage-test-parsers']
+description = "Lay the committed parser fixtures out as a LUMIS_WASM_PATH tree"
+run = "cargo run -q --manifest-path crates/dev/Cargo.toml -- stage-test-parsers target/test-parsers"
+
 [tasks.'test']
 description = "Run all tests"
+depends = ["stage-test-parsers"]
 run = '''
 #!/usr/bin/env bash
 set -euo pipefail
@@ -157,11 +162,27 @@ echo "Running Rust tests..."
 cargo test --workspace
 echo ""
 echo "Running Elixir tests..."
-(cd packages/elixir/lumis && LUMIS_BUILD=1 mix test)
+mise run test-elixir
 echo ""
 echo "Running Javascript tests..."
+mise run test-javascript
+'''
+
+[tasks.'test-elixir']
+description = "Run the Elixir test suite"
+depends = ["stage-test-parsers"]
+run = "cd packages/elixir/lumis && LUMIS_BUILD=1 mix test"
+
+[tasks.'test-javascript']
+description = "Run the JavaScript test suites on both the native and Wasm runtimes"
+depends = ["stage-test-parsers"]
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+pnpm --filter @lumis-sh/lumis build:native
 pnpm --filter @lumis-sh/lumis build
 pnpm -r --if-present test
+LUMIS_TEST_RUNTIME=wasm pnpm --filter @lumis-sh/lumis test
 '''
 
 [tasks.'test-queries']

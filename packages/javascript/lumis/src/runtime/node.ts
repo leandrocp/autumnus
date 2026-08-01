@@ -1,6 +1,8 @@
 import type { RuntimeEnvironment } from "./runtime.js";
 import { createLanguagesModule } from "../core/languages.js";
 import type { LanguagePackageResolver, LanguagesModule, WasmResolver } from "../core/languages.js";
+import { createNativeLanguagesModule } from "../core/native-languages.js";
+import { loadNativeBinding } from "../native-binding.js";
 import treeSitterWasmBinary from "../tree-sitter-wasm.js";
 import {
   isUrlString,
@@ -113,7 +115,21 @@ export type {
   WasmResolver,
 } from "../core/languages.js";
 
-const runtime: LanguagesModule = createLanguagesModule(nodeRuntime);
+const binding = loadNativeBinding();
+
+/**
+ * Node highlights through the native addon, the same Wasmtime runtime the CLI
+ * and the Elixir bindings use, so all three produce identical output from
+ * identical input and load parsers the same way.
+ *
+ * Platforms with no prebuilt addon fall back to `web-tree-sitter`, which the
+ * browser uses too. It cannot load a language during the walk that discovers
+ * it, so an injected language has to be loaded before the document mentioning
+ * it is highlighted.
+ */
+const runtime: LanguagesModule = binding
+  ? createNativeLanguagesModule(binding)
+  : createLanguagesModule(nodeRuntime);
 
 export function createRuntime(...args: Parameters<LanguagesModule["createRuntime"]>) {
   return runtime.createRuntime(...args);

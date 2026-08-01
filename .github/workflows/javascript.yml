@@ -83,6 +83,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
       - uses: pnpm/action-setup@v6
         with:
           version: 11
@@ -93,6 +94,10 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @lumis-sh/themes build
+      # Node highlights through the addon, so the tests build it and the parser
+      # tree it resolves against.
+      - run: cargo run -q --manifest-path crates/dev/Cargo.toml -- stage-test-parsers target/test-parsers
+      - run: pnpm --filter @lumis-sh/lumis build:native
       - run: pnpm --filter @lumis-sh/lumis build
       - run: pnpm --filter @lumis-sh/markdown-it-lumis build
       - run: pnpm --filter @lumis-sh/rehype-lumis build

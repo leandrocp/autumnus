@@ -4,7 +4,7 @@ use lumis::events::HighlightEvent;
 use lumis::formatters::Formatter as _;
 use lumis::highlight::{highlight_events_with_options, HighlightOptions};
 use lumis::languages::Language;
-use lumis_wasm_runtime::{LanguagePackage, PackagedLanguage, ParserMetadata};
+use lumis_wasm_runtime::{parser_filename, LanguagePackage, PackagedLanguage, ParserMetadata};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::collections::{BTreeMap, HashSet};
@@ -75,6 +75,11 @@ enum Commands {
     StageWasm {
         name: String,
     },
+    /// Write the committed test parsers as a `LUMIS_WASM_PATH` tree.
+    StageTestParsers {
+        #[arg(default_value = "target/test-parsers")]
+        out: String,
+    },
     /// List parsers whose published package no longer matches languages.toml.
     WasmNeeded {
         #[arg(default_value = "")]
@@ -139,6 +144,7 @@ fn main() -> Result<()> {
         Commands::GenLanguageCatalog { check } => gen_language_catalog(check),
         Commands::BuildWasm { name } => build_wasm(&name),
         Commands::StageWasm { name } => stage_wasm(&name),
+        Commands::StageTestParsers { out } => stage_test_parsers(Path::new(&out)),
         Commands::WasmNeeded { filter, force } => wasm_needed(&filter, &force),
         Commands::WasmMeta { name } => wasm_meta(&name),
         Commands::RenderConformance {
@@ -2720,6 +2726,61 @@ fn stage_wasm(name: &str) -> Result<()> {
 
     println!("Staged in {out}");
     println!("Runtime-ready copy in {local}");
+    Ok(())
+}
+
+/// Lay the committed parser fixtures out the way a published package would be,
+/// so every runtime's tests exercise the real resolve, verify and load path
+/// without a network.
+fn stage_test_parsers(out: &Path) -> Result<()> {
+    const FIXTURES: &str = "packages/javascript/lumis/test/fixtures/wasm";
+
+    let toml = read_languages_toml()?;
+    let parsers = out.join("parsers");
+    fs::create_dir_all(&parsers)?;
+
+    let mut staged = 0usize;
+    for entry in fs::read_dir(FIXTURES)? {
+        let path = entry?.path();
+        if path.extension().and_then(|ext| ext.to_str()) != Some("wasm") {
+            continue;
+        }
+        let wasm_name = path
+            .file_stem()
+            .and_then(|stem| stem.to_str())
+            .with_context(|| format!("unreadable fixture name: {}", path.display()))?
+            .to_string();
+
+        let wasm = fs::read(&path)?;
+        let languages = packaged_languages(&toml, &wasm_name)?;
+        let package = LanguagePackage {
+            package_name: format!("@lumis-sh/wasm-{}", wasm_package_suffix(&wasm_name)),
+            version: "test".into(),
+            definition_hash: language_definition_hash(&toml, &wasm_name, &languages)?,
+            parser: ParserMetadata {
+                name: wasm_name.clone(),
+                grammar_name: wasm_grammar_name(&wasm)?,
+                upstream_version: None,
+                revision: None,
+                sha256: sha256_hex(&wasm),
+                size: wasm.len(),
+            },
+            languages,
+        };
+        package.validate()?;
+
+        fs::write(
+            parsers.join(format!("{}.language.json", wasm_package_suffix(&wasm_name))),
+            serde_json::to_vec(&package)?,
+        )?;
+        fs::write(parsers.join(parser_filename(&package)), &wasm)?;
+        staged += 1;
+    }
+
+    if staged == 0 {
+        bail!("no parser fixtures found in {FIXTURES}");
+    }
+    println!("{}", out.display());
     Ok(())
 }
 

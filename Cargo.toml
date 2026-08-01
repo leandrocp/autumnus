@@ -7,6 +7,7 @@ members = [
     "crates/lumis-cli",
     "crates/lumis-wasm-runtime",
     "packages/elixir/lumis/native/lumis_nif",
+    "packages/javascript/lumis/native",
 ]
 
 [workspace.package]
