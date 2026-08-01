@@ -44,14 +44,19 @@ reproducible test pins the behavior.
 | 2 Query compilation silently skips 67% of languages | **DONE**, but the waiver is now stale — see §0 |
 | 3 `#offset!` removed, regression blessed into fixtures | **DONE** |
 | 4.1 `@latest` at runtime | **Won't fix, by design** — pinning would undo release-free parser updates; the guard is pre-publish CI |
-| 4.4, 4.6 Production risks | open |
 | 4.2 Elixir capped at 4 threads | **DONE** — cap removed, pool kept; its 8 MiB stacks are load-bearing for injections |
 | 4.3 `:global.trans` cluster-wide lock | **DONE** — node-local `Lumis.Loader`, one key at a time |
+| 4.3a N+1 passes for N injected languages | **DONE** — no retry loop at all; nothing loads implicitly |
+| 4.4 The CLI reimplements the runtime | **partly** — shared `store.rs` and `brackets.rs`; the CLI still keys its cache off `LUMIS_DATA_DIR` while Node and Elixir use `LUMIS_WASM_CACHE_DIR` |
 | 4.5 `crypto.subtle` on non-secure origins | **DONE** — pure-JS SHA-256 fallback, pinned against `crypto.subtle` |
+| 4.6 Node loses its fast path | **open** — deprecation dropped by choice; `benchmarks/README.md` still omits the native row |
 | 4.7 Same `language.json` accepted by Rust, rejected by JS | **DONE** |
 | 4.8 Package resolution precedence differs per runtime | **DONE** |
 | 4.9 `formatVersion` runtime gate removed | **DONE** |
-| 5, 6, 7 Medium / low / nits | open |
+| Injected languages behaved differently per runtime — **not in the original review** | **DONE** — the CLI and JS silently skipped one that was not loaded while Elixir fetched it; all runtimes now require explicit loading |
+| 5 Medium | mostly open; double query execution closed with measurements |
+| 6 Low / nits | both lock findings closed; ~18 remain |
+| 7 What's good | n/a |
 | 8 Three copies of the loading pipeline | **largely DONE** — one Rust implementation, Elixir delegates, JS is the remaining port |
 
 ## Evidence base
@@ -1254,7 +1259,9 @@ Blocking:
 
 Before release:
 
-8. Return all missing injected languages at once, and check before draining events (§4.3a).
+8. ~~Return all missing injected languages at once.~~ **DONE, differently** — there is no retry
+   loop to batch. Nothing is loaded implicitly in any runtime, so one pass renders whatever the
+   caller loaded (§4.3a).
 9. ~~Unify package resolution precedence across the three runtimes.~~ **DONE** — see §4.8. The CLI
    now matches the order `ARCHITECTURE.md` already documented.
 10. ~~Make the Elixir worker cap configurable; replace `:global.trans` with a node-local lock.~~
@@ -1262,17 +1269,28 @@ Before release:
     cluster lock (§4.3).
 11. Add conformance fixtures for locals/shadowing and multi-level injections before the
     `buildNestedEvents` rewrite lands (§5).
-12. Publish an npm deprecation for `@lumis-sh/lumis-native`, and state the native→WASM performance
-    delta in the PR body, changelog, and `benchmarks/README.md` (§4.6).
-13. Cache `tree_sitter::Language` and `HighlightConfiguration` in the CLI `Registry`; honour
-    `LUMIS_WASM_CACHE_DIR` there (§4.4).
+12. State the native→WASM delta in `benchmarks/README.md`, which still omits the native row.
+    The npm deprecation was dropped deliberately: the package is recent and little used (§4.6).
+13. ~~Cache `tree_sitter::Language` and `HighlightConfiguration` in the CLI `Registry`~~ **DONE**;
+    it still keys its cache off `LUMIS_DATA_DIR` while Node and Elixir use `LUMIS_WASM_CACHE_DIR`,
+    which is the last env-var divergence (§4.4).
 14. ~~Pin `wasm-needed.py`'s `definitionHash` to `crates/dev`'s.~~ **DONE, better** — the script is ported into `crates/dev` as `wasm-needed`, so there is one implementation and nothing to pin.
 
 Cleanup:
 
-15. The §6 items, plus the stale `CONTRIBUTING.md` build.rs descriptions, the `ARCHITECTURE.md`
-    mise claim, the conformance matrix `rust: true`, the Emscripten `4.0.15` vs `5.0.3`
-    contradiction, and the three.js attribution.
+15. The §6 items, ~18 of them now that both lock findings are closed, plus the stale
+    `CONTRIBUTING.md` build.rs description and the conformance matrix `rust: true` leftovers. The
+    `ARCHITECTURE.md` mise claim, the Emscripten contradiction and the three.js attribution are
+    done.
+
+Added since the review was written:
+
+17. Publish `llvm`, `vim` and `zsh`. Deleting `oversized-parsers.json` means the query shards build
+    them, and they exhaust a hosted runner, so those four shards stay red until the packages are
+    republished. Nothing else blocks the branch.
+18. Decide whether `rehype-lumis` needs a migration note beyond its changelog entry: it no longer
+    fetches a parser named by a code fence, so a pipeline that relied on that renders those blocks
+    unhighlighted until the language is passed in `languages`.
 
 Then:
 
