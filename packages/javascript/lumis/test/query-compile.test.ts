@@ -235,30 +235,33 @@ describe("processed queries compile against their pinned grammar", () => {
       const entry = Object.fromEntries(parsers)[id] as ParserEntry | undefined;
       expect(entry, `${id} is waived but no longer in languages.toml`).toBeDefined();
 
-      const parser = resolveParser(id, entry!);
-      if ("unavailable" in parser) return;
+      // Every path returns whether the check now succeeds, so a missing parser or
+      // a missing query file reads as "still cannot check" rather than as a skip.
+      const nowWorks = await (async () => {
+        const parser = resolveParser(id, entry!);
+        if ("unavailable" in parser) return false;
 
-      const highlights = queryPath(entry!, id, "highlights");
-      if (!existsSync(highlights)) return;
+        const highlights = queryPath(entry!, id, "highlights");
+        if (!existsSync(highlights)) return false;
 
-      const grammar = await TSLanguage.load(readFileSync(parser.path));
-      const sample = samplePath(id, entry!.aliases ?? []);
-      if (!sample) return;
+        const sample = samplePath(id, entry!.aliases ?? []);
+        if (!sample) return false;
 
-      let worked = false;
-      try {
-        const instance = new Parser();
-        instance.setLanguage(grammar);
-        const tree = instance.parse(readFileSync(sample, "utf8"));
-        new Query(grammar, readFileSync(highlights, "utf8")).captures(tree!.rootNode);
-        tree!.delete();
-        instance.delete();
-        worked = true;
-      } catch {
-        // Still broken, which is what the waiver claims.
-      }
+        try {
+          const grammar = await TSLanguage.load(readFileSync(parser.path));
+          const instance = new Parser();
+          instance.setLanguage(grammar);
+          const tree = instance.parse(readFileSync(sample, "utf8"));
+          new Query(grammar, readFileSync(highlights, "utf8")).captures(tree!.rootNode);
+          tree!.delete();
+          instance.delete();
+          return true;
+        } catch {
+          return false;
+        }
+      })();
 
-      expect(worked, `${id} now works; remove it from cannotCompile`).toBe(false);
+      expect(nowWorks, `${id} now works; remove it from cannotCompile`).toBe(false);
     },
     30_000,
   );
