@@ -8,7 +8,7 @@ npm install @lumis-sh/lumis @lumis-sh/lumis-native
 
 `@lumis-sh/lumis` already declares the per-platform addons as optional dependencies, so most installs get this without asking. Install it explicitly when a package manager has been told to skip optional dependencies.
 
-The addon carries no parsers. It runs the same Wasmtime-backed highlighting the Lumis CLI and the Elixir bindings use, downloading and caching each parser WASM on first use, so it is about 11 MiB per platform rather than one binary per language.
+The addon carries no parsers. It runs the same Wasmtime-backed highlighting the Lumis CLI and the Elixir bindings use, downloading and caching each parser WASM on first use, so one build serves every language rather than one binary per language. Installing it costs about 4.7 MB of download; `benchmarks/README.md` has the measured figures.
 
 Supported targets:
 

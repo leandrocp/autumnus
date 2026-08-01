@@ -174,7 +174,7 @@ Useful for dropdowns, config validation, and docs tooling:
 
 - on Node, `@lumis-sh/lumis` highlights through a native addon, the same Wasmtime runtime the Lumis CLI and Elixir bindings use, so all three produce identical output and load parsers the same way
 - browsers and any platform with no prebuilt addon use `web-tree-sitter` and per-language parser WASM
-- the addon carries no parsers: it is about 11 MiB per platform and downloads each parser on first use
+- the addon carries no parsers and downloads each on first use, so it costs about 4.7 MB of download on top of the Wasm runtime rather than one binary per language
 - the package uses conditional exports so Node and web-standard runtimes get the right entry point automatically
 - every language package contains matching queries plus an exact parser version, size, and SHA-256 digest
 - Node caches language-package metadata and verified parser WASM in the platform user cache directory; `LUMIS_DATA_DIR` overrides it
