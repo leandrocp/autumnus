@@ -1149,3 +1149,42 @@ fn cache_parsers_then_highlight() {
         .success()
         .stdout(predicate::str::is_empty().not());
 }
+
+/// Highlighting an HTML document loads JavaScript for its `<script>` block
+/// during the same pass, from a data directory that has never held either
+/// parser. Before this, the block stayed plain until `parsers cache javascript`
+/// had been run.
+#[test]
+fn highlighting_loads_an_injected_language_that_was_never_cached() {
+    let empty_cache = tempfile::tempdir().unwrap();
+
+    cmd()
+        .arg("--data-dir")
+        .arg(empty_cache.path())
+        .args(["dump", "events", "-l", "html"])
+        .write_stdin("<script>const answer = 42</script>")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("\"language\": \"javascript\""));
+}
+
+/// A document is worth more than the one block Lumis cannot highlight, so a
+/// block naming a language it cannot load leaves that block plain and the rest
+/// standing.
+///
+/// Named so no catalog lookup can succeed, which also keeps the test off the
+/// network; `lumis-wasm-runtime` covers the known-but-unfetchable case against
+/// a fetcher that refuses everything.
+#[test]
+fn an_unloadable_injected_language_does_not_fail_the_document() {
+    let empty_cache = tempfile::tempdir().unwrap();
+
+    cmd()
+        .arg("--data-dir")
+        .arg(empty_cache.path())
+        .args(["dump", "events", "-l", "markdown"])
+        .write_stdin("# Title\n\n```notalanguage\nx = 1\n```\n")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("\"language\": \"markdown\""));
+}
