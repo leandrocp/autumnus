@@ -367,7 +367,7 @@ up on the CDN and fails with a 404. Stage it into a language package and point
 ```sh
 mise run wasm-build kdl
 mise run wasm-stage kdl
-export LUMIS_WASM_PATH=$PWD/tmp/wasm-local
+export LUMIS_WASM_PATH=$PWD/tmp/wasm/local
 ```
 
 The CLI, Elixir and Node all read that directory before anything else, so
@@ -386,7 +386,7 @@ mise run stage-test-parsers
 Each grammar is published as a self-contained `@lumis-sh/wasm-{name}` language
 package. It contains the parser WASM, matching processed queries, aliases,
 grammar metadata, byte length, and SHA-256. During staging, `crates/dev`
-generates `tmp/wasm-publish/{name}/language.json`; it is published with the
+generates `tmp/wasm/publish/{name}/language.json`; it is published with the
 package rather than checked in.
 
 Runtime catalogs generated from `languages.toml` contain only stable IDs,

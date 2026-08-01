@@ -144,7 +144,7 @@ jobs:
 
       - name: Publish to npm
         run: |
-          cd -- "tmp/wasm-publish/$PARSER"
+          cd -- "tmp/wasm/publish/$PARSER"
           npm publish --access public --provenance
         env:
           PARSER: ${{ matrix.parser }}

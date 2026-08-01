@@ -22,7 +22,7 @@
  * 1. the installed `@lumis-sh/wasm-*` package, when its recorded parser revision
  *    matches `languages.toml`
  * 2. `$LUMIS_WASM_PATH/parsers/<name>.wasm`
- * 3. `tmp/wasms/<name>.wasm`, the output of `mise run wasm-build`
+ * 3. `tmp/wasm/build/<name>.wasm`, the output of `mise run wasm-build`
  *
  * `mise run test-queries` builds only the parsers whose packages cannot verify
  * themselves, then requires complete coverage.
@@ -91,7 +91,7 @@ function installedRevision(wasmPath: string): string | undefined {
  * The waiver describes the state of npm, so it must be judged only against the
  * installed package. Building a parser locally makes a language verifiable
  * without making its package published, and conflating the two would force the
- * waiver to be both full and empty depending on whether `tmp/wasms` exists.
+ * waiver to be both full and empty depending on whether `tmp/wasm/build` exists.
  */
 function publishedParser(
   id: string,

@@ -2149,8 +2149,8 @@ fn build_wasm(name: &str) -> Result<()> {
     let toml = read_languages_toml()?;
     let tmp = tmpdir()?;
     let cwd = std::env::current_dir()?;
-    let out_dir = cwd.join("tmp/wasms");
-    let log_dir = cwd.join("tmp/wasm-build-logs");
+    let out_dir = cwd.join("tmp/wasm/build");
+    let log_dir = cwd.join("tmp/wasm/logs");
     fs::create_dir_all(&out_dir)?;
     fs::create_dir_all(&log_dir)?;
     let mut built_wasm_names = HashSet::new();
@@ -2631,12 +2631,12 @@ fn stage_wasm(name: &str) -> Result<()> {
     let wasm_name = info.wasm_name.as_deref().unwrap_or(&default_wasm_name);
     let pkg_name = format!("@lumis-sh/wasm-{}", wasm_package_suffix(wasm_name));
 
-    let wasm_file = format!("tmp/wasms/{wasm_name}.wasm");
+    let wasm_file = format!("tmp/wasm/build/{wasm_name}.wasm");
     if !Path::new(&wasm_file).exists() {
         bail!("ERROR: {wasm_file} not found. Run 'mise run wasm-build {wasm_name}' first.");
     }
 
-    let out = format!("tmp/wasm-publish/{wasm_name}");
+    let out = format!("tmp/wasm/publish/{wasm_name}");
     let _ = fs::remove_dir_all(&out);
     fs::create_dir_all(&out)?;
 
@@ -2712,7 +2712,7 @@ fn stage_wasm(name: &str) -> Result<()> {
         .replace("{definition_hash}", &definition_hash);
     fs::write(format!("{out}/package.json"), pkg)?;
 
-    let local = "tmp/wasm-local/parsers";
+    let local = "tmp/wasm/local/parsers";
     fs::create_dir_all(local)?;
     let suffix = wasm_package_suffix(wasm_name);
     fs::copy(

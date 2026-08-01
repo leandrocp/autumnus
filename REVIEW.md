@@ -443,7 +443,7 @@ do not need a grammar, so they are checked for every language in both runtimes:
 - languages are enumerated from `languages.toml`, not from the installed bundle, so a language
   cannot disappear from the run
 - parsers resolve from the installed package first, so the check exercises the artifact that ships,
-  and fall back to `$LUMIS_WASM_PATH/parsers/` then `tmp/wasms/` when the package is missing
+  and fall back to `$LUMIS_WASM_PATH/parsers/` then `tmp/wasm/build/` when the package is missing
   or lagging. A locally built parser needs no revision check because it was built from the pinned
   revision
 - a compile error fails the run with the language and query kind named
