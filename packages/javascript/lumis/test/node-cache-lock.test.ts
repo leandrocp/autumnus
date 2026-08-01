@@ -16,7 +16,7 @@ import {
 const directory = mkdtempSync(join(tmpdir(), "lumis-lock-"));
 afterAll(() => rmSync(directory, { recursive: true, force: true }));
 
-const lockPath = (key: string) => join(directory, `${wasmCacheFilename(key)}.lock`);
+const lockPath = (key: string) => join(directory, "parsers", `${wasmCacheFilename(key)}.lock`);
 
 /** Above every platform's default pid_max, so nothing can hold it. */
 const DEAD_PID = 4_194_305;

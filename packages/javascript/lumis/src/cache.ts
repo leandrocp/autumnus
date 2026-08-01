@@ -15,7 +15,6 @@ import { LANGUAGE_LOADERS } from "./generated/language-loaders.js";
 import {
   readCachedWasm,
   isUrlString,
-  wasmCacheDir,
   wasmCachePath,
   withWasmCacheLock,
   writeCachedWasm,
@@ -103,13 +102,13 @@ async function fetchLanguagePackage(
 /**
  * Cache exact, integrity-pinned parser WASMs in a persistent directory.
  *
- * Point `LUMIS_WASM_CACHE_DIR` at the same directory in the deployed process.
+ * Point `LUMIS_DATA_DIR` at the same directory in the deployed process.
  */
 export async function cacheLanguages(
   names: Iterable<string>,
   options: CacheLanguagesOptions = {},
 ): Promise<CachedLanguage[]> {
-  const directory = options.directory ?? (await wasmCacheDir());
+  const directory = options.directory;
   const resolver = options.resolver ?? DEFAULT_RESOLVER;
   const packageResolver = options.languagePackageResolver ?? DEFAULT_LANGUAGE_PACKAGE_RESOLVER;
   const languages = await Promise.all([...names].map(loadLanguage));

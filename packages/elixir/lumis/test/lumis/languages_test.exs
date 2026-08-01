@@ -47,8 +47,8 @@ defmodule Lumis.LanguagesTest do
 
   test "replaces a corrupt cache entry" do
     entry = resolved_entry("dockerfile")
-    cache_dir = System.fetch_env!("LUMIS_WASM_CACHE_DIR")
-    cache_file = Path.join(cache_dir, cache_filename(entry))
+    cache_dir = System.fetch_env!("LUMIS_DATA_DIR")
+    cache_file = Path.join([cache_dir, "parsers", cache_filename(entry)])
     File.mkdir_p!(cache_dir)
     File.write!(cache_file, "corrupt")
 

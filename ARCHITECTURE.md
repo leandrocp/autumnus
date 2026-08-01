@@ -148,8 +148,12 @@ Each runtime has a whole-catalog escape hatch — `@lumis-sh/wasm-bundle-full`,
 `Lumis.Languages.load(:all)`, `lumis parsers cache --all` — so the strict
 default costs one explicit line, not a per-language inventory.
 
-Node and the CLI use platform directories, browsers use CacheStorage, and
-Elixir checks release-local `priv/wasm` before the user cache. Parser cache keys
+Everything a runtime persists lives under one directory, named by
+`LUMIS_DATA_DIR`: `parsers/` for language packages and parser WASM, `themes/`
+for the CLI's custom themes, `compiled/` for Wasmtime's module cache. The CLI,
+Elixir and Node write the same filenames into `parsers/`, so one prepared
+directory serves all three. Browsers use CacheStorage instead, having no
+filesystem, and Elixir still checks release-local `priv/wasm` first. Parser cache keys
 contain the parser name, package version, and digest, so upgrades do not
 overwrite older verified assets. Cached metadata can be refreshed independently
 while stale validated metadata remains usable if the refresh fails.

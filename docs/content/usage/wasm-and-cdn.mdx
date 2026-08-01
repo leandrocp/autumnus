@@ -127,7 +127,10 @@ installed or deployment-local language package
   -> exact-version parser fallback
 ```
 
-Set `LUMIS_WASM_CACHE_DIR` to override the Node cache.
+`LUMIS_DATA_DIR` is the one directory Lumis persists anything under, in every
+runtime. Language packages and parser WASM go in `parsers/`, the CLI's custom
+themes in `themes/`, and Wasmtime's compiled modules in `compiled/`, so the CLI,
+Elixir and Node can share a single prepared directory.
 
 If a matching npm parser package is installed, such as `@lumis-sh/wasm-elixir`, Node can load that package directly before falling back to the resolver URL.
 
@@ -135,7 +138,7 @@ If a matching npm parser package is installed, such as `@lumis-sh/wasm-elixir`, 
 
 ```bash
 npx lumis-wasm-cache rust javascript elixir --output ./wasm-cache
-LUMIS_WASM_CACHE_DIR=./wasm-cache node app.mjs
+LUMIS_DATA_DIR=./wasm-cache node app.mjs
 ```
 
 Use `--all` to prepare every parser. The command and the

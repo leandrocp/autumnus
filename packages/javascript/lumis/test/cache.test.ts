@@ -1,9 +1,9 @@
-import { readFileSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join, dirname } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cacheLanguages } from "../src/cache.js";
 import { cacheKey } from "../src/core/languages.js";
-import { wasmCacheFilename } from "../src/runtime/node-cache.js";
+import { wasmCachePath } from "../src/runtime/node-cache.js";
 import {
   ensureLocalParserWasm,
   localLanguagePackageMetadata,
@@ -67,7 +67,8 @@ describe("cacheLanguages", () => {
       size: packageMetadata.parser.size,
     };
     const key = cacheKey(ref);
-    const cacheFile = join(directory, wasmCacheFilename(key));
+    const cacheFile = await wasmCachePath(key, directory);
+    mkdirSync(dirname(cacheFile), { recursive: true });
     writeFileSync(cacheFile, "corrupt");
 
     const result = await cacheLanguages(["diff"], {
@@ -88,8 +89,8 @@ describe("cacheLanguages", () => {
       languagePackageResolver: localLanguagePackageResolver,
     });
 
-    const previousDirectory = process.env.LUMIS_WASM_CACHE_DIR;
-    process.env.LUMIS_WASM_CACHE_DIR = directory;
+    const previousDirectory = process.env.LUMIS_DATA_DIR;
+    process.env.LUMIS_DATA_DIR = directory;
     vi.resetModules();
     const network = vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("network disabled"));
 
@@ -101,8 +102,8 @@ describe("cacheLanguages", () => {
       expect(highlighter.languages).toContain("diff");
       expect(network).not.toHaveBeenCalled();
     } finally {
-      if (previousDirectory === undefined) delete process.env.LUMIS_WASM_CACHE_DIR;
-      else process.env.LUMIS_WASM_CACHE_DIR = previousDirectory;
+      if (previousDirectory === undefined) delete process.env.LUMIS_DATA_DIR;
+      else process.env.LUMIS_DATA_DIR = previousDirectory;
     }
   });
 });

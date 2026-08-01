@@ -47,7 +47,7 @@ reproducible test pins the behavior.
 | 4.2 Elixir capped at 4 threads | **DONE** — cap removed, pool kept; its 8 MiB stacks are load-bearing for injections |
 | 4.3 `:global.trans` cluster-wide lock | **DONE** — node-local `Lumis.Loader`, one key at a time |
 | 4.3a N+1 passes for N injected languages | **DONE** — no retry loop at all; nothing loads implicitly |
-| 4.4 The CLI reimplements the runtime | **partly** — shared `store.rs` and `brackets.rs`; the CLI still keys its cache off `LUMIS_DATA_DIR` while Node and Elixir use `LUMIS_WASM_CACHE_DIR` |
+| 4.4 The CLI reimplements the runtime | **DONE** — shared `store.rs` and `brackets.rs`, and one `LUMIS_DATA_DIR` with the same `parsers/` layout in all three |
 | 4.5 `crypto.subtle` on non-secure origins | **DONE** — pure-JS SHA-256 fallback, pinned against `crypto.subtle` |
 | 4.6 Node loses its fast path | **open** — deprecation dropped by choice; `benchmarks/README.md` still omits the native row |
 | 4.7 Same `language.json` accepted by Rust, rejected by JS | **DONE** |
@@ -1271,9 +1271,10 @@ Before release:
     `buildNestedEvents` rewrite lands (§5).
 12. State the native→WASM delta in `benchmarks/README.md`, which still omits the native row.
     The npm deprecation was dropped deliberately: the package is recent and little used (§4.6).
-13. ~~Cache `tree_sitter::Language` and `HighlightConfiguration` in the CLI `Registry`~~ **DONE**;
-    it still keys its cache off `LUMIS_DATA_DIR` while Node and Elixir use `LUMIS_WASM_CACHE_DIR`,
-    which is the last env-var divergence (§4.4).
+13. ~~Cache `tree_sitter::Language` and `HighlightConfiguration` in the CLI `Registry`; honour the
+    same cache directory variable.~~ **DONE** — `LUMIS_WASM_CACHE_DIR` is gone; `LUMIS_DATA_DIR` is
+    the single base directory in every runtime, with `parsers/`, `themes/` and `compiled/` inside
+    it, and the CLI, Elixir and Node share the same filenames under `parsers/` (§4.4).
 14. ~~Pin `wasm-needed.py`'s `definitionHash` to `crates/dev`'s.~~ **DONE, better** — the script is ported into `crates/dev` as `wasm-needed`, so there is one implementation and nothing to pin.
 
 Cleanup:

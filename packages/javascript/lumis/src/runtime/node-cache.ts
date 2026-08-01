@@ -22,23 +22,35 @@ export function wasmCacheFilename(key: string): string {
 }
 
 /** @internal */
-export async function wasmCacheDir(): Promise<string> {
+/** Everything Lumis persists lives under one directory, `LUMIS_DATA_DIR`. */
+export async function dataDir(): Promise<string> {
   const { join } = await import(nodePath);
-  if (process.env.LUMIS_WASM_CACHE_DIR) return process.env.LUMIS_WASM_CACHE_DIR;
-  if (process.env.XDG_CACHE_HOME) return join(process.env.XDG_CACHE_HOME, "lumis", "wasm");
+  if (process.env.LUMIS_DATA_DIR) return process.env.LUMIS_DATA_DIR;
+  if (process.env.XDG_DATA_HOME) return join(process.env.XDG_DATA_HOME, "lumis");
   if (process.platform === "win32" && process.env.LOCALAPPDATA) {
-    return join(process.env.LOCALAPPDATA, "lumis", "wasm");
+    return join(process.env.LOCALAPPDATA, "lumis");
   }
   const { homedir } = await import("node:os");
   return process.platform === "darwin"
-    ? join(homedir(), "Library", "Caches", "lumis", "wasm")
-    : join(homedir(), ".cache", "lumis", "wasm");
+    ? join(homedir(), "Library", "Application Support", "lumis")
+    : join(homedir(), ".local", "share", "lumis");
+}
+
+/**
+ * Language packages and parser WASM, the same subdirectory every runtime uses.
+ *
+ * A `directory` argument anywhere in this module means a data directory, the
+ * thing `LUMIS_DATA_DIR` names, so writers and readers cannot disagree.
+ */
+export async function wasmCacheDir(directory?: string): Promise<string> {
+  const { join } = await import(nodePath);
+  return join(directory ?? (await dataDir()), "parsers");
 }
 
 /** @internal */
 export async function wasmCachePath(key: string, directory?: string): Promise<string> {
   const { join } = await import(nodePath);
-  return join(directory ?? (await wasmCacheDir()), wasmCacheFilename(key));
+  return join(await wasmCacheDir(directory), wasmCacheFilename(key));
 }
 
 /** @internal */
@@ -60,8 +72,9 @@ export async function writeCachedWasm(
   data: Uint8Array,
   directory?: string,
 ): Promise<string> {
-  const resolvedDirectory = directory ?? (await wasmCacheDir());
-  const filePath = await wasmCachePath(key, resolvedDirectory);
+  const { join } = await import(nodePath);
+  const resolvedDirectory = await wasmCacheDir(directory);
+  const filePath = join(resolvedDirectory, wasmCacheFilename(key));
   const temporary = `${filePath}.${process.pid}.${Date.now()}.tmp`;
   try {
     const { writeFile, mkdir, rename, rm } = await import(nodeFsPromises);
@@ -124,7 +137,7 @@ export async function withWasmCacheLock<T>(
   operation: () => Promise<T>,
   directory?: string,
 ): Promise<T> {
-  const resolvedDirectory = directory ?? (await wasmCacheDir());
+  const resolvedDirectory = await wasmCacheDir(directory);
   const { mkdir, open, rm, stat } = await import(nodeFsPromises);
   const { join } = await import(nodePath);
   const { hostname } = await import(nodeOs);

@@ -35,7 +35,7 @@ open ../../examples/wasm-runtimes/javascript/output.html
 
 The first run may download four parser WASMs. The source fixture is read from
 the repository. Later processes reuse the
-persistent platform cache. Set `LUMIS_WASM_CACHE_DIR` to inspect or isolate it.
+persistent platform cache. Set `LUMIS_DATA_DIR` to inspect or isolate it.
 
 ## Browser
 
@@ -57,5 +57,5 @@ elixir examples/wasm-runtimes/elixir/demo.exs
 
 Open the localhost URL printed by Phoenix Playground. The single-file app uses
 the local Lumis checkout, loads all four parsers, and serves the highlighted
-result with Phoenix LiveView. Set `LUMIS_WASM_CACHE_DIR` to inspect or isolate
+result with Phoenix LiveView. Set `LUMIS_DATA_DIR` to inspect or isolate
 the persistent parser and compiled Wasmtime caches.

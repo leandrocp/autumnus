@@ -9,7 +9,7 @@ import {
 } from "./wasm.js";
 
 const CACHE_DIR = ".tmp/wasm-resolver-cache";
-process.env.LUMIS_WASM_CACHE_DIR = CACHE_DIR;
+process.env.LUMIS_DATA_DIR = CACHE_DIR;
 
 beforeEach(async () => {
   // Clear FS cache so the resolver is always called
@@ -144,8 +144,9 @@ describe("Wasm resolver", () => {
     const { default: diff } = await import("../langs/diff.ts");
     const packageMetadata = localLanguagePackageMetadata(diff.packageName);
     const key = `${packageMetadata.parser.name}-${packageMetadata.version}-${packageMetadata.parser.sha256}`;
-    const cacheFile = join(CACHE_DIR, `${encodeURIComponent(key)}.wasm`);
-    mkdirSync(CACHE_DIR, { recursive: true });
+    const parsers = join(CACHE_DIR, "parsers");
+    const cacheFile = join(parsers, `${encodeURIComponent(key)}.wasm`);
+    mkdirSync(parsers, { recursive: true });
     writeFileSync(cacheFile, new Uint8Array([0, 1, 2, 3]));
 
     const hl = await createHighlighter({

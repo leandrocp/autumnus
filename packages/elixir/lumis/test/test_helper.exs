@@ -6,7 +6,7 @@ query_fixtures = Path.expand("../../../../queries/processed", __DIR__)
 wasm_cache =
   Path.join(System.tmp_dir!(), "lumis-elixir-test-#{System.unique_integer([:positive])}")
 
-System.put_env("LUMIS_WASM_CACHE_DIR", wasm_cache)
+System.put_env("LUMIS_DATA_DIR", wasm_cache)
 
 # Release-local parsers are only ever read from the app's own priv/wasm, so
 # tests use the real directory and start from empty.

@@ -493,8 +493,8 @@ defmodule Lumis.Languages do
   end
 
   defp cache_dir do
-    System.get_env("LUMIS_WASM_CACHE_DIR") ||
-      :filename.basedir(:user_cache, "lumis") |> to_string() |> Path.join("wasm")
+    base = System.get_env("LUMIS_DATA_DIR") || to_string(:filename.basedir(:user_data, "lumis"))
+    Path.join(base, "parsers")
   end
 
   defp bundled_dir, do: Application.app_dir(:lumis, "priv/wasm")

@@ -87,7 +87,7 @@ files that already verify, and `--output` to write somewhere other than
 Load every language you expect to render during application startup — see
 [Load what you intend to highlight](/advanced/wasm-and-cdn#load-what-you-intend-to-highlight).
 Wasmtime persists compiled modules across VM restarts. Set
-`LUMIS_WASM_CACHE_DIR` to override the parser and compiled-module cache root.
+`LUMIS_DATA_DIR` to override the parser and compiled-module cache root.
 
 A custom `:wasm_resolver` application setting can return `{:ok, bytes}`,
 `{:file, path}`, or a URL:

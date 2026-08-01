@@ -391,7 +391,7 @@ impl Runtime {
 
 fn cached_engine() -> Result<Engine, wasmtime::Error> {
     let mut config = Config::new();
-    let cache = std::env::var_os("LUMIS_WASM_CACHE_DIR")
+    let cache = std::env::var_os("LUMIS_DATA_DIR")
         .map(|root| {
             let mut cache_config = CacheConfig::new();
             cache_config.with_directory(std::path::PathBuf::from(root).join("compiled"));

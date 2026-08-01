@@ -106,7 +106,7 @@ console.log(outputPath);
 async function prepareRuntime() {
   const runtimeDir = resolve(repoDir, "target/benchmarks/javascript-runtime");
   await mkdir(runtimeDir, { recursive: true });
-  process.env.LUMIS_WASM_CACHE_DIR = resolve(runtimeDir, "wasm-cache");
+  process.env.LUMIS_DATA_DIR = resolve(runtimeDir, "wasm-cache");
   process.chdir(runtimeDir);
 }
 

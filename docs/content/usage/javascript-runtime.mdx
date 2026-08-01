@@ -175,7 +175,7 @@ Useful for dropdowns, config validation, and docs tooling:
 - `@lumis-sh/lumis` uses `web-tree-sitter` and per-language parser WASM by default
 - the package uses conditional exports so Node and web-standard runtimes get the right entry point automatically
 - every language package contains matching queries plus an exact parser version, size, and SHA-256 digest
-- Node caches language-package metadata and verified parser WASM in the platform user cache directory; `LUMIS_WASM_CACHE_DIR` overrides it
+- Node caches language-package metadata and verified parser WASM in the platform user cache directory; `LUMIS_DATA_DIR` overrides it
 - browsers persist package metadata and verified parser bytes in CacheStorage with an IndexedDB fallback
 - Node can also auto-load installed parser packages such as `@lumis-sh/wasm-elixir` or bundle packages such as `@lumis-sh/wasm-bundle-web`
 - non-Node usage usually relies on remote parser assets unless you override the resolver, use `withWasm()` with a single npm parser package such as `@lumis-sh/wasm-json`, or use `withWasmBundle()` with a bundle package such as `@lumis-sh/wasm-bundle-web`
@@ -191,7 +191,7 @@ application starts:
 
 ```bash
 npx lumis-wasm-cache javascript html css --output ./wasm-cache
-LUMIS_WASM_CACHE_DIR=./wasm-cache node app.mjs
+LUMIS_DATA_DIR=./wasm-cache node app.mjs
 ```
 
 The equivalent API is available from `@lumis-sh/lumis/cache`:
