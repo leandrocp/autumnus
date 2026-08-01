@@ -87,7 +87,14 @@ Map.has_key?(Lumis.available_languages(), "elixir")
 
 ### Parser Loading
 
-Missing languages load automatically as exact, integrity-checked WASM assets.
+Load the languages you intend to highlight, including any injected inside a
+document; nothing loads implicitly, and a parser is compiled code, so which ones
+run is your decision. `Lumis.Languages.load(:all)` takes the whole catalog.
+
+```elixir
+:ok = Lumis.Languages.load(["markdown", "elixir", "json"])
+```
+
 For releases, cache them at build time:
 
 ```sh

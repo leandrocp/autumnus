@@ -127,6 +127,27 @@ installed/local parser -> persistent verified parser cache -> exact-version CDN 
                                   +-> persistent Wasmtime compiled cache
 ```
 
+### Loading is explicit in every runtime
+
+A caller loads the languages it intends to highlight; nothing is loaded because
+a document asked for it. That applies to injected languages too, so a Markdown
+file with a fenced Rust block renders that block unhighlighted unless Rust was
+loaded. The three runtimes previously disagreed here — the CLI and JavaScript
+skipped an unloaded injection while Elixir fetched it and re-highlighted — which
+made the same input produce different output per runtime.
+
+Two reasons for the stricter rule. A parser is a WebAssembly module fetched from
+a registry and executed in the host process, so which modules run is a decision
+the application should make rather than one untrusted input makes for it;
+integrity metadata proves a parser is the one its package named, not that you
+wanted that parser. And a load is a download, a verification and a grammar
+compile, so doing it implicitly moves that cost into whichever request first
+mentions the language.
+
+Each runtime has a whole-catalog escape hatch — `@lumis-sh/wasm-bundle-full`,
+`Lumis.Languages.load(:all)`, `lumis parsers cache --all` — so the strict
+default costs one explicit line, not a per-language inventory.
+
 Node and the CLI use platform directories, browsers use CacheStorage, and
 Elixir checks release-local `priv/wasm` before the user cache. Parser cache keys
 contain the parser name, package version, and digest, so upgrades do not

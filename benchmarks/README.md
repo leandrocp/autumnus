@@ -28,7 +28,7 @@ are not interchangeable distribution formats.
 
 | Tool | Measured artifact | Raw / unpacked | Download / gzip -9 |
 | --- | --- | ---: | ---: |
-| Lumis JavaScript WASM (runtime) | npm production closure; parsers load on demand | 7.19 MiB | 1.75 MiB |
+| Lumis JavaScript WASM (runtime) | npm production closure; parsers ship separately | 7.19 MiB | 1.75 MiB |
 | Lumis JavaScript WASM (1 language) | npm production closure plus Rust parser | 9.68 MiB | 2.02 MiB |
 | Lumis JavaScript WASM (10 languages) | npm production closure plus benchmark parsers | 19.63 MiB | 3.17 MiB |
 | Shiki | npm production closure | 13.65 MiB | 2.66 MiB |

@@ -29,6 +29,25 @@ highlighted, and that includes languages **injected inside** another one: a
 Markdown document with a fenced Rust block needs Rust loaded, and an HTML page
 needs CSS and JavaScript. Every runtime behaves the same way.
 
+Two reasons it works like this.
+
+**A parser is compiled code.** Each language is a WebAssembly module fetched
+from a registry and executed in your process. Which modules that is should be a
+decision you make, not one a document makes for you: without this rule, the
+contents of untrusted input decide what gets downloaded and run. Lumis verifies
+every parser against the size and SHA-256 in its package before executing it,
+but verification only proves a parser is the one the package named. Choosing
+which parsers you allow at all is yours.
+
+**Implicit loading moves work into the request.** A parser is a download, a
+verification, and a grammar compile. Doing that while a request waits is the
+worst moment for it, and it makes latency depend on which languages a document
+happens to mention. Loading up front makes highlighting a pure function of what
+you loaded.
+
+If you want everything, say so once — every runtime has that escape hatch, shown
+at the end of this section.
+
 Load at build or boot time, never in the middle of serving a request:
 
 <Tabs groupId="runtime" queryString="lang" defaultValue="javascript">

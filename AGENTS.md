@@ -38,6 +38,19 @@ Shared behavior belongs in one Rust crate that every runtime consumes. A second 
 - When a runtime genuinely cannot call into Rust, such as the browser, the Rust crate still defines the behavior, and the port must be covered by a test that pins both against the same input.
 - Two copies of the same algorithm require a test that pins them to each other, and deleting one copy is better still. `definitionHash` was computed in both `crates/dev` and a Python release script until the script was ported into `crates/dev`; "the CI job has no Rust toolchain" is a workflow line to add, not a reason to reimplement.
 
+### Loading a language is the caller's decision
+
+A parser is a WebAssembly module fetched from a registry and executed in the
+host process. Nothing loads one implicitly: not the named language, not a
+language injected inside a document. An injected language that was not loaded
+leaves its content unhighlighted, in every runtime.
+
+Do not add a convenience path that loads on demand. It hands the choice of what
+compiled code runs to whatever input arrived, and it moves a download, a
+verification and a grammar compile into the request that first mentions the
+language. `ARCHITECTURE.md` has the full reasoning; each runtime already has a
+whole-catalog escape hatch for callers who do not want to enumerate.
+
 ### Route work through `mise`
 
 `mise.toml` is the control plane for this repository. It defines tasks without pinning runtime versions, so local commands use the developer's installed Rust, JavaScript, Elixir, and other toolchains.

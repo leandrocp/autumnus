@@ -27,14 +27,18 @@ export function renderWasm() {
               </div>
             </div>
           </div>
-          <dl class="mt-10 grid gap-6 lg:grid-cols-3">
+          <dl class="mt-10 grid gap-6 lg:grid-cols-2">
               <div class="border-l-2 border-zinc-200 py-1 pl-5 dark:border-zinc-800">
                 <dt class="font-mono text-sm font-medium text-zinc-900 dark:text-white">110+ grammars</dt>
                 <dd class="mt-1 font-mono text-xs leading-relaxed text-zinc-500">Every language includes highlight queries and injection support, tested for conformance.</dd>
               </div>
               <div class="border-l-2 border-zinc-200 py-1 pl-5 dark:border-zinc-800">
-                <dt class="font-mono text-sm font-medium text-zinc-900 dark:text-white">Persistent and deployable</dt>
-                <dd class="mt-1 font-mono text-xs leading-relaxed text-zinc-500">Node.js, Bun, Deno, browsers, and Elixir persist verified parsers. Cache selected languages for network-free deployments.</dd>
+                <dt class="font-mono text-sm font-medium text-zinc-900 dark:text-white">Loaded only when you say so</dt>
+                <dd class="mt-1 font-mono text-xs leading-relaxed text-zinc-500">A parser is compiled code, so you choose which ones run, not the document. Nothing loads implicitly in any runtime, and a preset bundle covers you when you want them all.</dd>
+              </div>
+              <div class="border-l-2 border-zinc-200 py-1 pl-5 dark:border-zinc-800">
+                <dt class="font-mono text-sm font-medium text-zinc-900 dark:text-white">Persistent and verified</dt>
+                <dd class="mt-1 font-mono text-xs leading-relaxed text-zinc-500">Every parser is checked against the size and SHA-256 its package declares before it runs. Node.js, Bun, Deno, browsers, and Elixir persist verified bytes across restarts.</dd>
               </div>
               <div class="border-l-2 border-zinc-200 py-1 pl-5 dark:border-zinc-800">
                 <dt class="font-mono text-sm font-medium text-zinc-900 dark:text-white">Verified on npm</dt>
