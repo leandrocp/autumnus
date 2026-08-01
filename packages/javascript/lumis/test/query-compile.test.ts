@@ -23,6 +23,7 @@
  *    matches `languages.toml`
  * 2. `$LUMIS_WASM_PATH/parsers/<name>.wasm`
  * 3. `tmp/wasm/build/<name>.wasm`, the output of `mise run wasm-build`
+ * 4. `fixtures/parsers/<name>.wasm`, committed for grammars CI cannot build
  *
  * `mise run test-queries` builds only the parsers whose packages cannot verify
  * themselves, then requires complete coverage.
@@ -145,6 +146,11 @@ function resolveParser(id: string, entry: ParserEntry): { path: string } | { una
 
   const built = join(workspaceRoot, "tmp", "wasm", "build", `${parser}.wasm`);
   if (existsSync(built)) return { path: built };
+
+  // Last, because a grammar that builds anywhere should be checked as built
+  // rather than as whatever was committed months ago.
+  const committed = join(workspaceRoot, "fixtures", "parsers", `${parser}.wasm`);
+  if (existsSync(committed)) return { path: committed };
 
   return fromPackage;
 }
