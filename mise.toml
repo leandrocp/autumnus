@@ -226,6 +226,7 @@ run = '''
 set -euo pipefail
 mise run test-conformance-rust
 mise run test-conformance-cli
+mise run test-conformance-javascript-native
 mise run test-conformance-javascript-wasm
 mise run test-conformance-browser
 mise run test-conformance-elixir
@@ -238,6 +239,21 @@ run = "cargo test -p lumis --test formatter_conformance -- --ignored"
 [tasks.'test-conformance-cli']
 description = "Run CLI conformance tests"
 run = "cargo test -p lumis-cli --test conformance -- --ignored"
+
+[tasks.'test-conformance-javascript-native']
+description = "Run JavaScript conformance on the native addon, Node's default runtime"
+depends = ["stage-test-parsers"]
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+pnpm --filter @lumis-sh/themes build
+pnpm --filter @lumis-sh/lumis build:generate
+pnpm --filter @lumis-sh/lumis build:native
+LUMIS_TEST_RUNTIME=native \
+    LUMIS_WASM_PATH="$PWD/target/test-parsers" \
+    LUMIS_DATA_DIR="$(mktemp -d)" \
+    pnpm --filter @lumis-sh/lumis test:conformance
+'''
 
 [tasks.'test-conformance-javascript-wasm']
 description = "Run JavaScript Wasm conformance tests"

@@ -1,24 +1,31 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { expect, test, type BrowserContext, type Page } from "@playwright/test";
-import type { BrowserTestResult } from "./smoke.js";
+import type { BrowserTestResult, FixtureOutput } from "./smoke.js";
 
-const fixtureDir = new URL(
-  "../../../../../fixtures/conformance/javascript-html-template-nested-script-css/",
-  import.meta.url,
-);
+const conformanceDir = new URL("../../../../../fixtures/conformance/", import.meta.url);
+const CUSTOM_FORMATTER_FIXTURE = "javascript-html-template-nested-script-css";
 
-function readFixture(name: string): string {
-  return readFileSync(new URL(name, fixtureDir), "utf8");
+function readFixture(fixture: string, name: string): string {
+  return readFileSync(new URL(`${fixture}/${name}`, conformanceDir), "utf8");
 }
 
-const expectedFormatters: BrowserTestResult["formatters"] = {
-  bbcodeScoped: readFixture("bbcode.txt"),
-  htmlInline: readFixture("html-inline.html"),
-  htmlLinked: readFixture("html-linked.html"),
-  htmlMultiThemes: readFixture("html-multi-themes.html"),
-  terminal: readFixture("terminal.txt"),
-};
-const fixtureSource = readFixture("source.txt");
+function expectedOutput(fixture: string): FixtureOutput {
+  return {
+    bbcodeScoped: readFixture(fixture, "bbcode.txt"),
+    htmlInline: readFixture(fixture, "html-inline.html"),
+    htmlLinked: readFixture(fixture, "html-linked.html"),
+    htmlMultiThemes: readFixture(fixture, "html-multi-themes.html"),
+    terminal: readFixture(fixture, "terminal.txt"),
+  };
+}
+
+/** The whole corpus, so the browser is held to what every other runtime is. */
+const fixtureNames = readdirSync(conformanceDir, { withFileTypes: true })
+  .filter((entry) => entry.isDirectory())
+  .map((entry) => entry.name)
+  .sort();
+
+const fixtureSource = readFixture(CUSTOM_FORMATTER_FIXTURE, "source.txt");
 const customSource =
   `const nested = foo(bar([1, 2], { a: "3" }));\n` + `const view = ${fixtureSource.trim()};\n`;
 
@@ -84,24 +91,14 @@ test.describe("browser runtime", () => {
     expect(reloadedResult.requestedWasms).toEqual([]);
   });
 
-  test("renders with htmlInline", () => {
-    expect(result.formatters.htmlInline).toBe(expectedFormatters.htmlInline);
-  });
+  test("renders every conformance fixture exactly as the other runtimes do", () => {
+    // A discovery bug that found nothing would otherwise pass silently.
+    expect(fixtureNames.length).toBeGreaterThan(20);
+    expect(Object.keys(result.fixtures).sort()).toEqual(fixtureNames);
 
-  test("renders with htmlLinked", () => {
-    expect(result.formatters.htmlLinked).toBe(expectedFormatters.htmlLinked);
-  });
-
-  test("renders with htmlMultiThemes", () => {
-    expect(result.formatters.htmlMultiThemes).toBe(expectedFormatters.htmlMultiThemes);
-  });
-
-  test("renders with bbcodeScoped", () => {
-    expect(result.formatters.bbcodeScoped).toBe(expectedFormatters.bbcodeScoped);
-  });
-
-  test("renders with terminal", () => {
-    expect(result.formatters.terminal).toBe(expectedFormatters.terminal);
+    for (const fixture of fixtureNames) {
+      expect(result.fixtures[fixture], fixture).toEqual(expectedOutput(fixture));
+    }
   });
 
   test("supports a stateful custom formatter", () => {
