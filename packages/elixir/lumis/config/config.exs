@@ -5,5 +5,7 @@ if config_env() == :test do
   # test_helper.exs: `System.put_env` is invisible to the NIF.
   config :lumis,
     data_dir: Path.join(System.tmp_dir!(), "lumis-test-#{System.pid()}"),
-    wasm_path: Path.expand("../../../../target/test-parsers", __DIR__)
+    wasm_path:
+      System.get_env("LUMIS_WASM_PATH") ||
+        Path.expand("../../../../target/test-parsers", __DIR__)
 end

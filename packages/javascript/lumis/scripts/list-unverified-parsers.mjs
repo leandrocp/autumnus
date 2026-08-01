@@ -6,10 +6,13 @@
  * `mise run test-queries` builds only these parsers, so the cost scales with the
  * release lag instead of with the size of the catalog.
  *
- * Usage: node scripts/list-unverified-parsers.mjs [--parsers|--pairs]
+ * Usage: node scripts/list-unverified-parsers.mjs [--parsers|--pairs] [--all]
  *   default    language ids, one per line
  *   --parsers  tree-sitter parser names, deduplicated, for `mise run wasm-build`
  *   --pairs    `<language>\t<parser>`, for callers that must keep the two in step
+ *   --all      every language, not just the unverifiable ones, for a CI run that
+ *              builds the whole catalog rather than only what npm has fallen
+ *              behind on
  *
  * Several languages share one parser, so the language list and the parser list have
  * different lengths. Anything that shards this work must shard `--pairs` and derive
@@ -54,10 +57,11 @@ function isVerifiable(id, entry) {
 
 const wantParsers = process.argv.includes("--parsers");
 const wantPairs = process.argv.includes("--pairs");
+const wantAll = process.argv.includes("--all");
 const output = new Set();
 
 for (const [id, entry] of Object.entries(parsers)) {
-  if (isVerifiable(id, entry)) continue;
+  if (!wantAll && isVerifiable(id, entry)) continue;
   const parser = entry.wasm_name ?? `tree-sitter-${id}`;
   if (wantPairs) output.add(`${id}\t${parser}`);
   else output.add(wantParsers ? parser : id);

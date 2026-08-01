@@ -250,7 +250,7 @@ pnpm --filter @lumis-sh/themes build
 pnpm --filter @lumis-sh/lumis build:generate
 pnpm --filter @lumis-sh/lumis build:native
 LUMIS_TEST_RUNTIME=native \
-    LUMIS_WASM_PATH="$PWD/target/test-parsers" \
+    LUMIS_WASM_PATH="${LUMIS_WASM_PATH:-$PWD/target/test-parsers}" \
     LUMIS_DATA_DIR="$(mktemp -d)" \
     pnpm --filter @lumis-sh/lumis test:conformance
 '''

@@ -143,7 +143,7 @@ function resolveParser(id: string, entry: ParserEntry): { path: string } | { una
     if (existsSync(prepared)) return { path: prepared };
   }
 
-  const built = join(workspaceRoot, "tmp", "wasms", `${parser}.wasm`);
+  const built = join(workspaceRoot, "tmp", "wasm", "build", `${parser}.wasm`);
   if (existsSync(built)) return { path: built };
 
   return fromPackage;
