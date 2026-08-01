@@ -45,7 +45,7 @@ reproducible test pins the behavior.
 | 3 `#offset!` removed, regression blessed into fixtures | **DONE** |
 | 4.1 `@latest` at runtime | **Won't fix, by design** — pinning would undo release-free parser updates; the guard is pre-publish CI |
 | 4.4, 4.6 Production risks | open |
-| 4.2 Elixir capped at 4 threads | **DONE** — private pool removed; the BEAM's dirty CPU schedulers decide |
+| 4.2 Elixir capped at 4 threads | **DONE** — cap removed, pool kept; its 8 MiB stacks are load-bearing for injections |
 | 4.3 `:global.trans` cluster-wide lock | **DONE** — node-local `Lumis.Loader`, one key at a time |
 | 4.5 `crypto.subtle` on non-secure origins | **DONE** — pure-JS SHA-256 fallback, pinned against `crypto.subtle` |
 | 4.7 Same `language.json` accepted by Rust, rejected by JS | **DONE** |
@@ -669,23 +669,22 @@ scheduler when full.
 
 On a 32-core box, Lumis will use at most 4 threads for highlighting regardless of load.
 
-**Fixed by deleting the pool rather than resizing it.** Every NIF is already
-`schedule = "DirtyCpu"`, so calls arrive on a dirty CPU scheduler and were then handed to a private
-thread, with the scheduler blocking on the reply — two queues where the narrow one decided
-throughput. The runtime is now called directly and the BEAM sizes the parallelism, tunable with
-`+SDcpu` like everything else on that VM.
+**Fixed by removing the cap, keeping the pool.** The threads are sized to the machine now instead
+of `min(4)`.
 
-The 8 MiB stacks were the pool's only justification, and they were not needed: with the executor
-stack cut to 320 KB, the BEAM dirty-scheduler default, the full suite passes and 50,000-deep JSON
-nesting still highlights. 200,000 does not overflow either, it times out, so throughput is the wall
-rather than stack. `+sssdcpu` raises it if a grammar ever proves otherwise.
+Deleting the pool entirely and running on the dirty CPU schedulers was tried first and **reverted**:
+it crashes the VM. Nested injections recurse per layer and overflow the BEAM dirty-scheduler stack,
+which is 320 KB by default, and the failure is a SIGILL that takes the whole node down rather than
+an error. Deep *single-layer* nesting is not the case that needs the stack — 50,000-deep JSON
+highlights fine at 320 KB — so the first stack measurement was misleading. A markdown document with
+four fenced languages is what finds it. The 8 MiB stacks are the reason the pool exists.
 
 Measured on 10 cores, 16 concurrent highlights of the same document:
 
 | | speedup over serial |
 | --- | ---: |
 | 4-thread pool | 4.44x |
-| dirty schedulers | 5.75x - 5.95x |
+| uncapped pool | 5.66x - 5.97x |
 
 The worker limit passed to `with_worker_limit` now matches `available_parallelism()`, so no caller
 blocks waiting for an instance. That is affordable because a worker costs about 110 KB resident,

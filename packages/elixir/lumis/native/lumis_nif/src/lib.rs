@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::sync::{mpsc, Arc, Mutex};
 use std::thread;
 
 mod elixir;
@@ -6,7 +7,7 @@ mod elixir;
 use elixir::{ExCssOptions, ExFormatterOption, ExTheme};
 use lumis_core::events::HighlightEvent;
 use lumis_core::{languages, themes};
-use lumis_wasm_runtime::{catalog, store, LanguagePackage, Runtime, RuntimeError};
+use lumis_wasm_runtime::{catalog, store, LanguagePackage, LanguageSpec, Runtime, RuntimeError};
 use once_cell::sync::Lazy;
 use parking_lot::RwLock;
 use rustler::{Binary, Encoder, Env, Error, NifMap, NifResult, Term};
@@ -24,23 +25,118 @@ static THEME_NAMES: Lazy<Vec<String>> = Lazy::new(|| {
         .collect()
 });
 
-/// The Tree-sitter WASM runtime, built once.
-///
-/// Every NIF that touches it is `schedule = "DirtyCpu"`, so calls already
-/// arrive on a dirty CPU scheduler thread and the BEAM decides how many run at
-/// once. Sizing the worker pool to match means no caller ever blocks waiting
-/// for an instance. Raise `+SDcpu` to change the parallelism, and `+sssdcpu` if
-/// a grammar ever needs more stack than the scheduler default.
-static RUNTIME: Lazy<Result<Runtime, String>> = Lazy::new(|| {
-    let workers = thread::available_parallelism()
-        .map(usize::from)
-        .unwrap_or(1);
-    let runtime = Runtime::with_worker_limit(workers).map_err(|error| error.to_string())?;
-    for language in catalog::LANGUAGES {
-        runtime.declare_language(language.id, language.aliases);
+static EXECUTOR: Lazy<Result<WasmExecutor, String>> = Lazy::new(WasmExecutor::new);
+
+enum WasmJob {
+    Load {
+        spec: LanguageSpec,
+        reply: mpsc::SyncSender<Result<(), RuntimeError>>,
+    },
+    Highlight {
+        source: String,
+        language: String,
+        rainbow_brackets: bool,
+        reply: mpsc::SyncSender<Result<Vec<HighlightEvent>, RuntimeError>>,
+    },
+}
+
+struct WasmExecutor {
+    runtime: Arc<Runtime>,
+    sender: mpsc::SyncSender<WasmJob>,
+}
+
+impl WasmExecutor {
+    fn new() -> Result<Self, String> {
+        // Sized to the machine, not capped. These threads exist for their 8 MiB
+        // stacks: nested injections recurse per layer and overflow the BEAM
+        // dirty-scheduler default, which crashes the VM rather than erroring.
+        let workers = thread::available_parallelism()
+            .map(usize::from)
+            .unwrap_or(1);
+        let runtime = thread::Builder::new()
+            .name("lumis-wasm-init".into())
+            .stack_size(8 * 1024 * 1024)
+            .spawn(move || -> Result<Runtime, RuntimeError> {
+                let runtime = Runtime::with_worker_limit(workers)?;
+                for language in catalog::LANGUAGES {
+                    runtime.declare_language(language.id, language.aliases);
+                }
+                Ok(runtime)
+            })
+            .map_err(|error| error.to_string())?
+            .join()
+            .map_err(|_| "Lumis WASM runtime initialization panicked".to_string())?
+            .map_err(|error| error.to_string())?;
+        let runtime = Arc::new(runtime);
+        let (sender, receiver) = mpsc::sync_channel::<WasmJob>(workers * 2);
+        let receiver = Arc::new(Mutex::new(receiver));
+
+        for index in 0..workers {
+            let runtime = Arc::clone(&runtime);
+            let receiver = Arc::clone(&receiver);
+            thread::Builder::new()
+                .name(format!("lumis-wasm-{index}"))
+                .stack_size(8 * 1024 * 1024)
+                .spawn(move || loop {
+                    let job = match receiver.lock().expect("executor lock poisoned").recv() {
+                        Ok(job) => job,
+                        Err(_) => return,
+                    };
+                    match job {
+                        WasmJob::Load { spec, reply } => {
+                            let _ = reply.send(runtime.load_language(spec));
+                        }
+                        WasmJob::Highlight {
+                            source,
+                            language,
+                            rainbow_brackets,
+                            reply,
+                        } => {
+                            let _ =
+                                reply.send(runtime.highlight(&source, &language, rainbow_brackets));
+                        }
+                    }
+                })
+                .map_err(|error| error.to_string())?;
+        }
+
+        Ok(Self { runtime, sender })
     }
-    Ok(runtime)
-});
+
+    fn load_language(&self, spec: LanguageSpec) -> Result<(), RuntimeError> {
+        let language = spec.id.clone();
+        let (reply, result) = mpsc::sync_channel(1);
+        self.sender
+            .send(WasmJob::Load { spec, reply })
+            .map_err(|_| RuntimeError::Parser {
+                language,
+                message: "WASM executor is unavailable".into(),
+            })?;
+        result.recv().map_err(|_| {
+            RuntimeError::Highlight("WASM executor stopped before loading the language".into())
+        })?
+    }
+
+    fn highlight(
+        &self,
+        source: &str,
+        language: &str,
+        rainbow_brackets: bool,
+    ) -> Result<Vec<HighlightEvent>, RuntimeError> {
+        let (reply, result) = mpsc::sync_channel(1);
+        self.sender
+            .send(WasmJob::Highlight {
+                source: source.to_string(),
+                language: language.to_string(),
+                rainbow_brackets,
+                reply,
+            })
+            .map_err(|_| RuntimeError::Highlight("WASM executor is unavailable".into()))?;
+        result.recv().map_err(|_| {
+            RuntimeError::Highlight("WASM executor stopped before highlighting".into())
+        })?
+    }
+}
 
 rustler::atoms! {
     ok,
@@ -124,8 +220,8 @@ pub fn highlight<'a>(env: Env<'a>, source: &'a str, options: ExOptions) -> NifRe
     Ok((ok(), output).encode(env))
 }
 
-fn executor() -> Result<&'static Runtime, String> {
-    RUNTIME.as_ref().map_err(Clone::clone)
+fn executor() -> Result<&'static WasmExecutor, String> {
+    EXECUTOR.as_ref().map_err(Clone::clone)
 }
 
 #[rustler::nif(schedule = "DirtyCpu")]
@@ -151,7 +247,7 @@ fn load_language<'a>(env: Env<'a>, name: &str, package_json: &str, wasm: Binary<
 #[rustler::nif]
 fn has_language(name: &str) -> bool {
     executor()
-        .map(|runtime| runtime.has_language(name))
+        .map(|executor| executor.runtime.has_language(name))
         .unwrap_or(false)
 }
 
