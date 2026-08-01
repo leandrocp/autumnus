@@ -140,6 +140,27 @@ defmodule Lumis.LanguagesTest do
     assert Lumis.Native.has_language("javascript")
   end
 
+  # Nothing else covers a document that injects more than one language, which is
+  # both the retry loop's worst case and the deepest the executor stack recurses.
+  test "highlights a document with several injected languages" do
+    fenced =
+      ~w(python css c bash)
+      |> Enum.map_join("\n", fn language ->
+        "```#{language}\n" <> String.duplicate("x = 1\n", 50) <> "```"
+      end)
+
+    source = String.duplicate(fenced <> "\n\n", 5)
+
+    assert {:ok, html} =
+             Lumis.highlight(source, formatter: {:html_inline, language: "markdown"})
+
+    assert html =~ "language-markdown"
+
+    for language <- ~w(markdown python css c bash) do
+      assert Lumis.Native.has_language(language), "#{language} should have been loaded"
+    end
+  end
+
   defp cache_filename(entry) do
     "#{entry.wasm_name}-#{entry.version}-#{entry.sha256}.wasm"
   end

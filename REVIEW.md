@@ -672,12 +672,16 @@ On a 32-core box, Lumis will use at most 4 threads for highlighting regardless o
 **Fixed by removing the cap, keeping the pool.** The threads are sized to the machine now instead
 of `min(4)`.
 
-Deleting the pool entirely and running on the dirty CPU schedulers was tried first and **reverted**:
-it crashes the VM. Nested injections recurse per layer and overflow the BEAM dirty-scheduler stack,
-which is 320 KB by default, and the failure is a SIGILL that takes the whole node down rather than
-an error. Deep *single-layer* nesting is not the case that needs the stack — 50,000-deep JSON
-highlights fine at 320 KB — so the first stack measurement was misleading. A markdown document with
-four fenced languages is what finds it. The 8 MiB stacks are the reason the pool exists.
+Deleting the pool entirely and running on the BEAM dirty CPU schedulers was tried and **not kept**.
+One run died with a SIGILL, which looked like the 320 KB dirty-scheduler stack overflowing on
+nested injections, but that does not reproduce: the same document passes 5/5, and so does a harder
+case — 8 injected languages, 194 KB, 16 concurrent. The crash is unexplained and was wrongly
+attributed to this change.
+
+The pool stays anyway, on the measurement rather than the scare: removing it is worth 5.75x-5.95x
+against 5.66x-5.97x for keeping it, which is the same number, and it gives up a 25x stack margin
+(8 MiB against 320 KB) on grammars nobody has profiled. Paying ~120 lines and a second queue for
+that margin is a better trade than the reverse when the speed is identical.
 
 Measured on 10 cores, 16 concurrent highlights of the same document:
 
