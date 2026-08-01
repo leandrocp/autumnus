@@ -61,7 +61,7 @@ jobs:
           ) }}
     name: Conformance (${{ matrix.name }})
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
@@ -133,16 +133,13 @@ jobs:
       # can be pointed at parsers built here rather than at the committed
       # fixtures. That is what proves a parser built from languages.toml renders
       # byte-identically to the one the fixtures were generated with.
-      - name: Emscripten version from mise.toml
-        id: emsdk
+      # mise-action runs with install: false here, so the parser toolchain has
+      # to be asked for explicitly. Emscripten is deliberately not installed:
+      # `tree-sitter build --wasm` compiles through its own WASI SDK, verified
+      # by building a scanner-bearing grammar with emcc absent from PATH.
+      - name: Install the Tree-sitter CLI
         if: matrix.build-parsers
-        run: echo "version=$(mise exec -- printenv LUMIS_EMSDK_VERSION)" >> "$GITHUB_OUTPUT"
-
-      - uses: mymindstorm/setup-emsdk@v16
-        if: matrix.build-parsers
-        with:
-          version: ${{ steps.emsdk.outputs.version }}
-          actions-cache-folder: emsdk-cache
+        run: mise install tree-sitter
 
       - name: Build and stage the parsers the corpus uses
         if: matrix.build-parsers
