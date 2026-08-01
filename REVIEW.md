@@ -1281,8 +1281,12 @@ Before release:
     including all three browsers now runs all of them rather than the browser running one. Two new
     fixtures cover markdown fenced blocks, which nothing covered: five languages in one document,
     and an injected language that injects two more.
-12. State the native→WASM delta in `benchmarks/README.md`, which still omits the native row.
-    The npm deprecation was dropped deliberately: the package is recent and little used (§4.6).
+12. ~~State the native→WASM delta in `benchmarks/README.md`, which still omits the native row.~~
+    **DONE** — `lumis-js-node` is its own timing and package-size row, every number regenerated on
+    this branch. 1.55 ms against 57.40 ms on one small file, 4.49 ms against 267.04 ms on ten files
+    in ten languages, for 4.71 MiB more download. Each row asserts which runtime it measured, since
+    Node falls back to Wasm silently. The npm deprecation was dropped deliberately: the package is
+    recent and little used (§4.6).
 13. ~~Cache `tree_sitter::Language` and `HighlightConfiguration` in the CLI `Registry`; honour the
     same cache directory variable.~~ **DONE** — `LUMIS_WASM_CACHE_DIR` is gone; `LUMIS_DATA_DIR` is
     the single base directory in every runtime, with `parsers/`, `themes/` and `compiled/` inside
