@@ -41,7 +41,7 @@ reproducible test pins the behavior.
 | 1.4 `.` and mid-pattern `$` mistranslated (found while fixing 1.1) | **DONE** (re-verified) |
 | 1.6 Query-string escapes not resolved before translation | **DONE** (re-verified) |
 | 1.7 Two dead query patterns in `vim` and `sql` | **DONE** (re-verified) |
-| 2 Query compilation silently skips 67% of languages | **DONE**, but the waiver is now stale — see §0 |
+| 2 Query compilation silently skips 67% of languages | **DONE** — CI builds all 113 parsers, so every language is checked against its pinned revision; the waiver is down to two entries with stated reasons |
 | 3 `#offset!` removed, regression blessed into fixtures | **DONE** |
 | 4.1 `@latest` at runtime | **Won't fix, by design** — pinning would undo release-free parser updates; the guard is pre-publish CI |
 | 4.2 Elixir capped at 4 threads | **DONE** — cap removed, pool kept; its 8 MiB stacks are load-bearing for injections |
@@ -94,38 +94,41 @@ Note the PR body claims "JavaScript: 514 Lumis tests passed". The package's own 
 
 ---
 
-## 0. The branch does not pass its own tests
+## 0. The branch passes its own tests
 
-After merging `origin/main`:
+Every check on the PR is green: 115 passing, 0 failing.
 
-```
-$ pnpm install --frozen-lockfile
-$ npx vitest run --exclude test/conformance.test.ts --exclude 'test/browser/**'
+The original finding — that `main`'s #1117 repointed six grammars at forked
+revisions ahead of the published packages, dropping five languages out of query
+coverage — is closed, and not by regenerating the waiver to cover 71% of the
+catalog. **CI builds all 113 parsers from `languages.toml`**, so coverage no
+longer tracks what npm has published:
 
-FAIL test/query-compile.test.ts > unverified parser waiver
-  > lists every language whose published package cannot verify it
-AssertionError: add these to test/unverified-parsers.json, or publish the parser packages
-+ [ "bash: installed package is at rev a06c2e44, languages.toml pins 382ed871",
-+   "html: ...", "ruby: ...", "svelte: ...", "yaml: ..." ]
+| Job | Coverage |
+| --- | --- |
+| Compile queries, 12 shards | every one of the 115 languages, against a parser built from the pinned revision, `LUMIS_QUERY_COVERAGE=complete` |
+| Compile queries (published), 4 shards | what the published packages can still verify, which is what the waiver describes |
+| Conformance ×6 | the CLI, Elixir and Node native suites render from parsers built in that run |
 
-Test Files  1 failed | 15 passed (16)
-      Tests  1 failed | 359 passed | 1 skipped (361)
-```
+Requiring complete coverage surfaced two failures the waiver had been hiding,
+because a language with no usable published package was skipped rather than
+checked. Both are recorded in `cannotCompile`, with a test that fails when
+either starts working:
 
-(Counts are after this review's §4.7 corpus tests were added; the failure itself is unchanged.)
+- **llvm** has no queries. nvim-treesitter ships none, so there is nothing to compile.
+- **php** traps parsing its own sample, `memory access out of bounds`, at the
+  pinned revision. It reproduces under web-tree-sitter and wasmtime alike, and
+  with the published package, so it is the grammar rather than our build.
 
-Cause: `main`'s #1117 (`fix: vendor strict-aliasing-unsafe parsers`) repointed bash, html, python,
-ruby, svelte, and xml at forked repositories with new revisions. `languages.toml` now pins revisions
-ahead of the published `@lumis-sh/wasm-*` packages, so five languages dropped out of query coverage
-without being declared.
+Three grammars are committed to `fixtures/parsers/` because a runner cannot
+build them — measured peak resident size: `vim` 18.3 GB, `zsh` 13.4 GB, `llvm`
+10.5 GB, against a runner's 16 GB. That list may only shrink.
 
-**This is the §2 guard working exactly as designed** — "a parser bump silently drops a language out
-of coverage" is the case it was built for, and it failed loudly instead of quietly checking less.
-
-Remedy: regenerate with `node packages/javascript/lumis/scripts/list-unverified-parsers.mjs`. That
-moves the waiver from 77 to 82 of 115 languages — **71% of the catalog** — which deserves a
-conscious decision rather than a mechanical regeneration. It also invalidates the coverage figures
-quoted in §2 below (`41/115 verified, 74 without a usable parser`); re-measure after regenerating.
+One constraint shaped several of the CI fixes and is worth stating plainly: **a
+Node process holds a few dozen compiled grammars, not a hundred.** Every
+grammar a run loads stays compiled for the life of the process, because
+`web-tree-sitter` exposes no way to free a `Language`. Query compilation is
+therefore sharded, scoped, and kept out of the unsharded `pnpm test`.
 
 ---
 
@@ -1213,7 +1216,7 @@ Raised during review, tracked here and fixed one at a time.
 | 10.6 | `LUMIS_WASM_OFFLINE` adds an env var; reduce instead | **DONE** — removed from all three runtimes, along with Elixir's `:wasm_offline`; see below |
 | 10.7 | `write_atomic` is hand-rolled; check for a crate or std equivalent | **DONE** — `tempfile::NamedTempFile::persist`, 40 lines → 22 |
 | 10.8 | `webgpu_compute_reduce.html` is vendored; the demo should not need it in-repo | **DONE** — all three demos read the vendored copy; MIT notice added |
-| 10.9 | Elixir has two sources of truth for which languages to cache | **DONE** — the task reads :bundled_languages only |
+| 10.9 | Elixir has two sources of truth for which languages to cache | **DONE** — `:bundled_languages` is gone; `mix lumis.languages.cache` takes names or `--all`, matching `lumis parsers cache` |
 | 10.10 | `Lumis.LanguageLoader` → `Lumis.Languages`, a proper context with a public `load` | **DONE** — Lumis.Languages with a public load/1 |
 
 ### 10.6 — the offline switch is gone; the other two stay
@@ -1229,7 +1232,7 @@ The other two stay:
 
 | Variable | Read by | What breaks without it |
 | --- | --- | --- |
-| `LUMIS_WASM_CACHE_DIR` | Rust, JavaScript, Elixir | nowhere to persist |
+| `LUMIS_DATA_DIR` | Rust, JavaScript, Elixir | nowhere to persist |
 | `LUMIS_WASM_PATH` | Rust only | `lumis parsers cache --directory` prefetches *into another directory*, so it needs somewhere to read from that is not the cache it is writing. Removing it fails `cache_parsers_to_temp_dir` and `cache_parsers_force_replaces_existing_file`. |
 
 `SOURCE_DIR` looked redundant, since it shares an on-disk layout with the cache and the CLI tests copy fixtures into the data directory anyway. Conformance does pass without it. The two prefetch tests do not, and that is a real user-facing command rather than a test artifact.
@@ -1246,10 +1249,15 @@ The other two stay:
    both `RegExp` and `regex::bytes::Regex`, and make `query-compile.test.ts` fail instead of
    `return` when a parser is missing or at the wrong rev.~~ **DONE** — see §2. Wired into CI as
    `.github/workflows/queries.yml`.
+3. ~~Regenerate `unverified-parsers.json` for the five languages `main` moved, and decide
+   consciously about a waiver covering 71% of the catalog.~~ **DONE, differently** — CI builds
+   every parser from `languages.toml`, so query coverage no longer depends on what npm has
+   published. The waiver is two languages with stated reasons rather than 82 (§0).
+
 Blocking:
 
-3. Regenerate `unverified-parsers.json` for the five languages `main` moved, and decide consciously
-   about a waiver covering 71% of the catalog (§0). The branch is red until this is done.
+None. Every check on the PR is green.
+
 4. ~~Decide on `#offset!`: implement in Rust, or revert the JS removal.~~ **DONE** — implemented in
    Rust and restored in JS; see §3. All five runtimes pass conformance.
 5. ~~Replace `@latest` with a pinned range.~~ **Won't fix** — see §4.1. The `formatVersion`
@@ -1261,15 +1269,18 @@ Blocking:
 Before release:
 
 8. ~~Return all missing injected languages at once.~~ **DONE, differently** — there is no retry
-   loop to batch. Nothing is loaded implicitly in any runtime, so one pass renders whatever the
-   caller loaded (§4.3a).
+   loop to batch. One pass loads each injected language where it finds it, so there is nothing to
+   return and nothing to batch (§4.3a).
 9. ~~Unify package resolution precedence across the three runtimes.~~ **DONE** — see §4.8. The CLI
    now matches the order `ARCHITECTURE.md` already documented.
 10. ~~Make the Elixir worker cap configurable; replace `:global.trans` with a node-local lock.~~
     **DONE** — the cap is gone rather than configurable (§4.2), and `Lumis.Loader` replaced the
     cluster lock (§4.3).
-11. Add conformance fixtures for locals/shadowing and multi-level injections before the
-    `buildNestedEvents` rewrite lands (§5).
+11. ~~Add conformance fixtures for locals/shadowing and multi-level injections before the
+    `buildNestedEvents` rewrite lands.~~ **DONE** — the corpus is 25 fixtures, and every runtime
+    including all three browsers now runs all of them rather than the browser running one. Two new
+    fixtures cover markdown fenced blocks, which nothing covered: five languages in one document,
+    and an injected language that injects two more.
 12. State the native→WASM delta in `benchmarks/README.md`, which still omits the native row.
     The npm deprecation was dropped deliberately: the package is recent and little used (§4.6).
 13. ~~Cache `tree_sitter::Language` and `HighlightConfiguration` in the CLI `Registry`; honour the
@@ -1287,14 +1298,29 @@ Cleanup:
 
 Added since the review was written:
 
-17. Publish `llvm`, `vim` and `zsh`. Deleting `oversized-parsers.json` means the query shards build
-    them, and they exhaust a hosted runner, so those four shards stay red until the packages are
-    republished. Nothing else blocks the branch.
-18. Decide whether `rehype-lumis` needs a migration note beyond its changelog entry: it no longer
-    fetches a parser named by a code fence, so a pipeline that relied on that renders those blocks
-    unhighlighted until the language is passed in `languages`.
+17. ~~Publish `llvm`, `vim` and `zsh` — the query shards build them and they exhaust a hosted
+    runner.~~ **DONE, differently** — all three are committed to `fixtures/parsers/` with their
+    measured build memory, and the shards use the committed copy rather than rebuilding. Publishing
+    them would let those files be deleted, which is the only way that list is meant to shrink.
+18. ~~Decide whether `rehype-lumis` needs a migration note: it no longer fetches a parser named by
+    a code fence.~~ **Moot** — it does fetch one again. Highlighting loads what a document names,
+    including a language inside a fence, so the behaviour that note would have described is back.
+
+Raised by the CI work itself:
+
+19. Publishing the language packages is what unblocks the last of this. Nothing has shipped a
+    `language.json` yet, so every resolve falls to a CDN 404 unless a parser is staged or cached.
+    That is why the suites point at staged parsers rather than the network, and why an end-to-end
+    download has never run. Not a blocker — CI validates the packaging by building it — but the
+    first publish is the first real proof.
+20. `php` traps on its own sample at the pinned revision, in every runtime and in the published
+    package. Its queries are unchecked until the grammar is fixed or the pin moves.
+21. `llvm` has no queries at all. Either write them or drop the language.
 
 Then:
 
-16. Collapse the three cache pipelines into one (§8). This is the change that makes the PR's own
-    thesis true.
+16. ~~Collapse the three cache pipelines into one (§8). This is the change that makes the PR's own
+    thesis true.~~ **DONE for three of four** — `LanguageStore` resolves and caches, `Runtime`
+    loads and highlights, and the CLI, the Elixir NIF and the Node addon all call them. The browser
+    keeps its `web-tree-sitter` port, pinned against the same corpus in all three engines, because
+    loading is asynchronous there and cannot happen inside a synchronous walk.
