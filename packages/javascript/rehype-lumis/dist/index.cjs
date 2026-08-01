@@ -37,11 +37,9 @@ function parseCodeBlock(node) {
 function parseFragment(html) {
   return hastUtilFromHtml.fromHtml(html, { fragment: true }).children;
 }
-async function renderBlock(highlighter, code, language, formatter) {
-  if (language != null) {
-    await highlighter.loadLanguage(language);
-  }
-  const html = highlighter.highlight(code, formatter(language));
+function renderBlock(highlighter, code, language, formatter) {
+  const loaded = language != null && highlighter.languages.includes(language);
+  const html = highlighter.highlight(code, formatter(loaded ? language : void 0));
   return parseFragment(html);
 }
 var rehypeLumis = function rehypeLumis2(options) {
@@ -62,15 +60,13 @@ var rehypeLumis = function rehypeLumis2(options) {
       targets.push({ parent, index, parsed });
       return "skip";
     });
-    const replacements = await Promise.all(
-      targets.map(async ({ parsed }) => {
-        try {
-          return await renderBlock(highlighter, parsed.code, parsed.language, options.formatter);
-        } catch {
-          return void 0;
-        }
-      })
-    );
+    const replacements = targets.map(({ parsed }) => {
+      try {
+        return renderBlock(highlighter, parsed.code, parsed.language, options.formatter);
+      } catch {
+        return void 0;
+      }
+    });
     for (let i = targets.length - 1; i >= 0; i -= 1) {
       const target = targets[i];
       const replacement = replacements[i];

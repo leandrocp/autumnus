@@ -1,5 +1,5 @@
 import type { Element, Root } from "hast";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import dracula from "../../themes/dist/json/dracula.json";
 import githubLight from "../../themes/dist/json/github_light.json";
 import javascript from "../../lumis/langs/javascript.ts";
@@ -78,6 +78,26 @@ function assertSpansExist(tree: Root) {
 }
 
 describe("rehype-lumis", () => {
+  describe("undeclared fence languages", () => {
+    it("renders the block without fetching a parser the document named", async () => {
+      const transform = rehypeLumis({
+        formatter: (language) => htmlInline({ language, theme: dracula }),
+        languages: [javascript],
+      });
+      // The document asks for python; the caller never declared it.
+      const tree = codeBlockTree({ codeClassName: ["language-python"] });
+      const network = vi.spyOn(globalThis, "fetch");
+
+      await transform(tree);
+
+      expect(network).not.toHaveBeenCalled();
+      network.mockRestore();
+
+      const pre = assertLumisPreElement(tree);
+      expect(pre).toBeDefined();
+    });
+  });
+
   describe("htmlInline formatter", () => {
     it("produces pre.lumis with inline styles and colored spans", async () => {
       const transform = rehypeLumis({
