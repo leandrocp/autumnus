@@ -409,9 +409,8 @@ revision bump is validated before it is published rather than after.
 
 - **Queries CI** builds all 113 parsers across 12 shards and compiles every
   processed query against the grammar its language actually pins. A parser that
-  cannot be built does not fail its shard; the check falls back to the published
-  package, and `unverified-parsers.json` is what fails the build when neither
-  exists.
+  cannot be built does not fail its shard; the check falls back to a copy in
+  `fixtures/parsers/`, then to the published package.
 - **Conformance CI** builds the seventeen parsers the committed fixtures supply,
   stages them with `wasm-stage`, and points `LUMIS_WASM_PATH` at the result, so
   the CLI, Elixir and Node native suites render from parsers built in that run.
@@ -420,6 +419,16 @@ That parser set comes from the fixture filenames, not from the languages named
 in the fixtures' expected events. A document can attempt a language that never
 appears in its output — every Lua comment injects the `comment` parser — and
 leaving it out sends the runtime to the network mid-suite.
+
+Two files record what these checks cannot cover, and both may only shrink:
+
+- `fixtures/parsers/` holds a committed build for a grammar CI cannot compile.
+  `tree-sitter-vim` needs 18.3 GB of memory against a runner's 16 GB.
+- `unverified-parsers.json` has two lists: `languages`, which npm has fallen
+  behind on, and `cannotCompile`, for a language a built parser still cannot
+  check. `llvm` has no queries upstream; `php` traps while parsing its own
+  sample at the pinned revision, published package included. A test fails when
+  either entry starts working.
 
 The `wasm-release` workflow publishes packages automatically. It detects which parsers still need publishing with `mise run wasm-publish-needed`, which compares each published package's `definitionHash` against the one `crates/dev` computes from `languages.toml` and the processed queries, then builds and publishes the rest in parallel.
 
