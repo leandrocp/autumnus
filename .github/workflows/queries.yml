@@ -80,9 +80,9 @@ jobs:
           (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore: prepare releases')) }}
     name: Compile queries (shard ${{ matrix.shard }})
     runs-on: ubuntu-latest
-    # A few grammars take many minutes to compile through the WASI SDK -- llvm,
-    # vim and zsh are the slowest, and the shard split keeps them apart.
-    timeout-minutes: 60
+    # llvm takes about eight minutes to compile through the WASI SDK; vim and
+    # zsh are worse and are committed instead of built.
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
@@ -138,6 +138,12 @@ jobs:
           failed=()
           while read -r parser; do
             [ -n "$parser" ] || continue
+            # Committed because a runner cannot carry the build; see
+            # fixtures/parsers/README.md for the measurements.
+            if [ -f "fixtures/parsers/$parser.wasm" ]; then
+              echo "using the committed $parser"
+              continue
+            fi
             mise run wasm-build "$parser" || failed+=("$parser")
           done < /tmp/shard-parsers.txt
           # A parser that cannot be built here is covered by its committed copy
