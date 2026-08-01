@@ -275,50 +275,43 @@ describe("processed queries compile against their pinned grammar", () => {
     expect(missing, "every parser should have been built from languages.toml").toEqual([]);
   });
 
+  // One test per language, not two, because a grammar is loaded per test and
+  // web-tree-sitter gives no way to free one. Splitting these compiled every
+  // shard's parsers twice, which exhausted V8's zone memory on a runner.
   it.each(verifiable)(
-    "compiles every query for %s",
+    "compiles and runs every query for %s",
     async (id, entry) => {
       const parser = resolved.get(id)!;
       expect(parser).toHaveProperty("path");
       const grammar = await TSLanguage.load(readFileSync((parser as { path: string }).path));
 
       const failures: string[] = [];
+      const compiled = new Map<string, Query>();
       for (const kind of QUERY_KINDS) {
         const path = queryPath(entry, id, kind);
         if (!existsSync(path)) continue;
         try {
-          new Query(grammar, readFileSync(path, "utf8"));
+          compiled.set(kind, new Query(grammar, readFileSync(path, "utf8")));
         } catch (error) {
           failures.push(`${kind}: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
-
       expect(failures, `${id} queries failed to compile`).toEqual([]);
-    },
-    30_000,
-  );
 
-  it.each(verifiable)(
-    "highlights the %s sample",
-    async (id, entry) => {
+      // Predicates and directives only run against a tree, so compiling is not
+      // enough on its own.
       const sample = samplePath(id, entry.aliases ?? []);
       expect(sample, `no samples/ file for ${id}`).toBeDefined();
 
-      const grammar = await TSLanguage.load(
-        readFileSync((resolved.get(id) as { path: string }).path),
-      );
-      const parser = new Parser();
-      parser.setLanguage(grammar);
-      const source = readFileSync(sample!, "utf8");
-      const tree = parser.parse(source);
+      const instance = new Parser();
+      instance.setLanguage(grammar);
+      const tree = instance.parse(readFileSync(sample!, "utf8"));
       expect(tree, `${id} sample did not parse`).not.toBeNull();
+      compiled.get("highlights")?.captures(tree!.rootNode);
 
-      // Predicates and directives only run here, so compiling is not enough.
-      const query = new Query(grammar, readFileSync(queryPath(entry, id, "highlights"), "utf8"));
-      query.captures(tree!.rootNode);
-
+      for (const query of compiled.values()) query.delete();
       tree!.delete();
-      parser.delete();
+      instance.delete();
     },
     30_000,
   );

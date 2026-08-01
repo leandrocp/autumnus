@@ -17,7 +17,9 @@ than a GitHub runner's 16 GB. Measured peak resident size while building:
 | `tree-sitter-llvm` | 10.5 GB | ~8 min |
 | everything else | under 6 GB | seconds |
 
-`llvm` still fits and is left to build. The other 110 grammars build in seconds.
+The other 110 grammars build in seconds and are built in CI. llvm was measured
+at 10.5 GB and looked like it would fit; a runner killed it anyway, with exit
+143 after five minutes, so the measurement is a guide rather than the rule.
 
 Each file is built from the revision `languages.toml` pins at the time it is
 committed, with `mise run wasm-build <parser>`, and copied from
