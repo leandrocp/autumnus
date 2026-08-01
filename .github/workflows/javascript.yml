@@ -102,8 +102,16 @@ jobs:
       - run: pnpm --filter @lumis-sh/markdown-it-lumis build
       - run: pnpm --filter @lumis-sh/rehype-lumis build
       - run: pnpm --filter @lumis-sh/react build
+      # The addon resolves parsers in Rust, so the downstream packages need the
+      # staged tree rather than the JavaScript resolvers the Wasm runtime uses.
       - run: pnpm --filter @lumis-sh/markdown-it-lumis test
+        env:
+          LUMIS_WASM_PATH: ${{ github.workspace }}/target/test-parsers
       - run: pnpm --filter @lumis-sh/rehype-lumis test
+        env:
+          LUMIS_WASM_PATH: ${{ github.workspace }}/target/test-parsers
       - run: pnpm --filter @lumis-sh/lumis test
       - run: pnpm --filter @lumis-sh/react test
+        env:
+          LUMIS_WASM_PATH: ${{ github.workspace }}/target/test-parsers
       - run: pnpm --dir packages/javascript run build:wasm-bundles && git diff --exit-code -- packages/javascript/wasm-bundle-*

@@ -338,6 +338,39 @@ impl NativeRuntime {
         Self
     }
 
+    /// Load `id` from a language package the caller already has, verifying the
+    /// parser against the size and digest that package declares.
+    ///
+    /// Node resolves an installed `@lumis-sh/wasm-*` package itself, so this is
+    /// how those bytes reach the runtime without a download.
+    #[napi(js_name = "loadLanguagePackage")]
+    pub fn load_language_package(
+        &self,
+        id: String,
+        package_json: String,
+        wasm: Buffer,
+    ) -> Result<()> {
+        let package =
+            lumis_wasm_runtime::LanguagePackage::from_json(&package_json).map_err(native_error)?;
+        package.verify_wasm(wasm.as_ref()).map_err(native_error)?;
+        let (resolved, definition) = package.language(&id).ok_or_else(|| {
+            native_error(format!("{} does not define {id:?}", package.package_name))
+        })?;
+
+        runtime()?
+            .load_language(lumis_wasm_runtime::LanguageSpec {
+                id: resolved.to_string(),
+                aliases: definition.aliases.clone(),
+                grammar_name: package.parser.grammar_name.clone(),
+                wasm: wasm.to_vec(),
+                highlights: definition.highlights.clone(),
+                injections: definition.injections.clone(),
+                locals: definition.locals.clone(),
+                brackets: definition.brackets.clone(),
+            })
+            .map_err(native_error)
+    }
+
     /// Download, verify and load `id` ahead of a highlight that would do it
     /// anyway, so the cost does not land on a request.
     #[napi(js_name = "loadLanguage")]

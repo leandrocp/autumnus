@@ -8,6 +8,7 @@ export interface NativeFormatter {
 
 interface NativeRuntimeInstance {
   loadLanguage(id: string): void;
+  loadLanguagePackage(id: string, packageJson: string, wasm: Uint8Array): void;
   hasLanguage(id: string): boolean;
   cacheLanguage(id: string, directory?: string, force?: boolean): string;
   highlightEvents(source: string, language: string, rainbowBrackets?: boolean): Uint8Array;

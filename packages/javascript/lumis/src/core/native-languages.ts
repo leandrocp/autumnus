@@ -57,11 +57,15 @@ export function createNativeLanguagesModule(binding: NativeBinding): LanguagesMo
       return [...this.loadedLanguages.keys()];
     }
 
-    private createLoadedLanguage(opts: LoadLanguageOptions): LoadedLanguage {
+    private async createLoadedLanguage(opts: LoadLanguageOptions): Promise<LoadedLanguage> {
       if (!CATALOG_LANGUAGE_IDS.has(opts.definition.id)) {
         throw new Error(`Lumis has no language "${opts.definition.id}"`);
       }
-      this.native.loadLanguage(opts.definition.id);
+      // An installed @lumis-sh/wasm-* package is what the caller asked for, so
+      // it wins over anything the addon would resolve for itself.
+      if (!(await this.loadInstalled(opts))) {
+        this.native.loadLanguage(opts.definition.id);
+      }
       const loaded = { definition: opts.definition } as LoadedLanguage;
       this.loadedLanguages.set(opts.definition.id, loaded);
       this.registerLanguage(opts.definition);
@@ -75,6 +79,44 @@ export function createNativeLanguagesModule(binding: NativeBinding): LanguagesMo
       const existing = this.getLoadedLanguage(opts.definition.id);
       if (existing) return existing;
       return this.createLoadedLanguage(opts);
+    }
+
+    /**
+     * Whether an installed `@lumis-sh/wasm-*` package supplied this language.
+     *
+     * Node can resolve one and the addon cannot, since a package sits wherever
+     * the package manager put it rather than under a directory the store scans.
+     */
+    private async loadInstalled(opts: LoadLanguageOptions): Promise<boolean> {
+      const { packageName } = opts;
+      const id = opts.definition.id;
+      if (!packageName) return false;
+      try {
+        const module = (await import(
+          /* webpackIgnore: true */
+          /* turbopackIgnore: true */
+          /* @vite-ignore */
+          packageName
+        )) as { default?: unknown };
+        const base = module.default;
+        if (!(base instanceof URL) && typeof base !== "string") return false;
+
+        const root = base instanceof URL ? base : new URL(base);
+        const { readFile } = await import("node:fs/promises");
+        const { fileURLToPath } = await import("node:url");
+        const read = async (name: string) => readFile(fileURLToPath(new URL(name, root)));
+
+        const manifest = await read("language.json");
+        const parser = JSON.parse(manifest.toString("utf8")) as { parser: { name: string } };
+        this.native.loadLanguagePackage(
+          id,
+          manifest.toString("utf8"),
+          await read(`${parser.parser.name}.wasm`),
+        );
+        return true;
+      } catch {
+        return false;
+      }
     }
 
     async loadPlaintext(): Promise<LoadedLanguage> {
