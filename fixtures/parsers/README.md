@@ -10,11 +10,14 @@ The reason is memory. `tree-sitter build --wasm` compiles the generated
 `parser.c` through a WASI SDK it fetches itself, and a few grammars need more
 than a GitHub runner's 16 GB. Measured peak resident size while building:
 
-| Grammar | Peak RSS |
-| --- | --- |
-| `tree-sitter-vim` | 18.3 GB |
-| `tree-sitter-llvm` | 10.5 GB |
-| everything else | under 6 GB |
+| Grammar | Peak RSS | Wall clock |
+| --- | --- | --- |
+| `tree-sitter-vim` | 18.3 GB | ~12 min |
+| `tree-sitter-zsh` | 13.4 GB | ~25 min |
+| `tree-sitter-llvm` | 10.5 GB | ~8 min |
+| everything else | under 6 GB | seconds |
+
+`llvm` still fits and is left to build. The other 110 grammars build in seconds.
 
 Each file is built from the revision `languages.toml` pins at the time it is
 committed, with `mise run wasm-build <parser>`, and copied from
