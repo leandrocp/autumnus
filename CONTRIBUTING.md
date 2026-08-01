@@ -17,6 +17,7 @@ See `ARCHITECTURE.md` for how the crates, packages, website, and build pipeline 
   - [Updating queries](#updating-queries)
   - [Building WASMs](#building-wasms)
   - [Using a locally built parser](#using-a-locally-built-parser)
+  - [Parsers in CI](#parsers-in-ci)
 - [Themes](#themes)
   - [Adding a new theme](#adding-a-new-theme)
   - [Updating themes](#updating-themes)
@@ -400,6 +401,25 @@ layout, so one prepared directory serves all three; browsers use CacheStorage
 with an IndexedDB fallback. Local and benchmark execution should provide both
 `language.json` and its matching parser so queries and parser bytes remain
 atomic.
+
+#### Parsers in CI
+
+CI builds parsers from `languages.toml` rather than taking them from npm, so a
+revision bump is validated before it is published rather than after.
+
+- **Queries CI** builds all 113 parsers across 12 shards and compiles every
+  processed query against the grammar its language actually pins. A parser that
+  cannot be built does not fail its shard; the check falls back to the published
+  package, and `unverified-parsers.json` is what fails the build when neither
+  exists.
+- **Conformance CI** builds the seventeen parsers the committed fixtures supply,
+  stages them with `wasm-stage`, and points `LUMIS_WASM_PATH` at the result, so
+  the CLI, Elixir and Node native suites render from parsers built in that run.
+
+That parser set comes from the fixture filenames, not from the languages named
+in the fixtures' expected events. A document can attempt a language that never
+appears in its output — every Lua comment injects the `comment` parser — and
+leaving it out sends the runtime to the network mid-suite.
 
 The `wasm-release` workflow publishes packages automatically. It detects which parsers still need publishing with `mise run wasm-publish-needed`, which compares each published package's `definitionHash` against the one `crates/dev` computes from `languages.toml` and the processed queries, then builds and publishes the rest in parallel.
 
