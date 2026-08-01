@@ -57,8 +57,19 @@ const parsers = Object.entries(languagesToml.parsers ?? {});
 
 const unverified = JSON.parse(
   readFileSync(new URL("./unverified-parsers.json", import.meta.url), "utf8"),
-) as { reason: string; languages: string[] };
+) as {
+  reason: string;
+  languages: string[];
+  cannotCompile: Record<string, string>;
+  cannotCompileReason: string;
+};
 const waived = new Set(unverified.languages);
+/**
+ * Languages a built parser still cannot check, with the reason for each. Held
+ * apart from `languages`, which is about what npm has published, because these
+ * two are properties of the grammar and would never clear by republishing.
+ */
+const cannotCompile = new Set(Object.keys(unverified.cannotCompile));
 
 function wasmName(id: string, entry: ParserEntry): string {
   return entry.wasm_name ?? `tree-sitter-${id}`;
@@ -181,7 +192,8 @@ function samplePath(id: string, aliases: string[]): string | undefined {
 const only = process.env.LUMIS_QUERY_LANGUAGES?.split(",")
   .map((value) => value.trim())
   .filter(Boolean);
-const selected = only?.length ? parsers.filter(([id]) => only.includes(id)) : parsers;
+const chosen = only?.length ? parsers.filter(([id]) => only.includes(id)) : parsers;
+const selected = chosen.filter(([id]) => !cannotCompile.has(id));
 
 /**
  * Set when every parser was built from `languages.toml` first, which means the
@@ -214,6 +226,42 @@ describe("processed queries compile against their pinned grammar", () => {
     );
     expect(verifiable.length + unavailable.length).toBe(selected.length);
   });
+
+  // Entries here would otherwise sit forever: the check that excuses them has to
+  // be the check that notices they are no longer needed.
+  it.each([...cannotCompile])(
+    "still cannot check %s",
+    async (id) => {
+      const entry = Object.fromEntries(parsers)[id] as ParserEntry | undefined;
+      expect(entry, `${id} is waived but no longer in languages.toml`).toBeDefined();
+
+      const parser = resolveParser(id, entry!);
+      if ("unavailable" in parser) return;
+
+      const highlights = queryPath(entry!, id, "highlights");
+      if (!existsSync(highlights)) return;
+
+      const grammar = await TSLanguage.load(readFileSync(parser.path));
+      const sample = samplePath(id, entry!.aliases ?? []);
+      if (!sample) return;
+
+      let worked = false;
+      try {
+        const instance = new Parser();
+        instance.setLanguage(grammar);
+        const tree = instance.parse(readFileSync(sample, "utf8"));
+        new Query(grammar, readFileSync(highlights, "utf8")).captures(tree!.rootNode);
+        tree!.delete();
+        instance.delete();
+        worked = true;
+      } catch {
+        // Still broken, which is what the waiver claims.
+      }
+
+      expect(worked, `${id} now works; remove it from cannotCompile`).toBe(false);
+    },
+    30_000,
+  );
 
   it.runIf(requireCompleteCoverage)("verifies every selected language", () => {
     // `mise run test-queries` builds every parser first, so a gap here means a
