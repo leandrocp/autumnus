@@ -46,18 +46,19 @@ reproducible test pins the behavior.
 | 4.1 `@latest` at runtime | **Won't fix, by design** — pinning would undo release-free parser updates; the guard is pre-publish CI |
 | 4.2 Elixir capped at 4 threads | **DONE** — cap removed, pool kept; its 8 MiB stacks are load-bearing for injections |
 | 4.3 `:global.trans` cluster-wide lock | **DONE** — node-local `Lumis.Loader`, one key at a time |
-| 4.3a N+1 passes for N injected languages | **DONE** — no retry loop at all; nothing loads implicitly |
+| 4.3a N+1 passes for N injected languages | **DONE** — one pass; the walk loads an injected language where it finds it |
 | 4.4 The CLI reimplements the runtime | **DONE** — shared `store.rs` and `brackets.rs`, and one `LUMIS_DATA_DIR` with the same `parsers/` layout in all three |
 | 4.5 `crypto.subtle` on non-secure origins | **DONE** — pure-JS SHA-256 fallback, pinned against `crypto.subtle` |
-| 4.6 Node loses its fast path | **open** — deprecation dropped by choice; `benchmarks/README.md` still omits the native row |
+| 4.6 Node loses its fast path | **DONE** — the addon is back over `lumis-wasm-runtime`, 11 MiB rather than 140 MB, and a default optional dependency again |
 | 4.7 Same `language.json` accepted by Rust, rejected by JS | **DONE** |
 | 4.8 Package resolution precedence differs per runtime | **DONE** |
 | 4.9 `formatVersion` runtime gate removed | **DONE** |
-| Injected languages behaved differently per runtime — **not in the original review** | **DONE** — the CLI and JS silently skipped one that was not loaded while Elixir fetched it; all runtimes now require explicit loading |
+| Injected languages behaved differently per runtime — **not in the original review** | **DONE** — the CLI and JS silently skipped one that was not loaded while Elixir fetched it; all four wasmtime runtimes now load it mid-walk from one implementation |
+| CI could not validate a parser before it was published — **not in the original review** | **DONE** — queries builds all 113 parsers from `languages.toml`, conformance builds the 17 the fixtures supply and renders from them |
 | 5 Medium | mostly open; double query execution closed with measurements |
 | 6 Low / nits | both lock findings closed; ~18 remain |
 | 7 What's good | n/a |
-| 8 Three copies of the loading pipeline | **largely DONE** — one Rust implementation, Elixir delegates, JS is the remaining port |
+| 8 Three copies of the loading pipeline | **DONE** — one Rust implementation; the CLI, Elixir and Node all call it, and the browser port is pinned by the full conformance corpus |
 
 ## Evidence base
 
