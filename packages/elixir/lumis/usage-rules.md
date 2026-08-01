@@ -87,30 +87,25 @@ Map.has_key?(Lumis.available_languages(), "elixir")
 
 ### Parser Loading
 
-Load the languages you intend to highlight, including any injected inside a
-document; nothing loads implicitly, and a parser is compiled code, so which ones
-run is your decision. `Lumis.Languages.load(:all)` takes the whole catalog.
+Highlighting loads what a document needs, including languages injected inside
+it, so nothing has to be declared up front. Loading is global to the VM, so the
+cost is paid once.
+
+Load ahead of time to keep the first download off a user's request:
 
 ```elixir
 :ok = Lumis.Languages.load(["markdown", "elixir", "json"])
 ```
 
-For releases, cache them at build time:
+For a host with no network access, download at build time:
 
 ```sh
-MIX_ENV=prod mix do compile, lumis.languages.cache, release
+mix lumis.languages.cache markdown elixir json
 ```
 
-Then load the languages an application expects so Wasmtime compilation
-happens during startup:
-
-```elixir
-:ok = Lumis.Languages.load(["elixir", "html", "javascript", "css"])
-```
-
-The runtime checks release-local `priv/wasm`, then the persistent user cache,
-then the network. Use `LUMIS_DATA_DIR` to override both parser and
-compiled-module cache roots.
+The store checks `:wasm_path`, then the cache under `:data_dir`, then the CDN.
+Both default to `LUMIS_WASM_PATH` and `LUMIS_DATA_DIR`, and `:data_dir` is also
+where Wasmtime persists compiled modules.
 
 ## Formatters
 

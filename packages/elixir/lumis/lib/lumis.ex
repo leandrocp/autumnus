@@ -849,9 +849,9 @@ defmodule Lumis do
       {:error, {:language_not_loaded, language}} ->
         raise Lumis.HighlightError,
           error:
-            "language #{inspect(language)} is not loaded. Call " <>
-              "Lumis.Languages.load(#{inspect(language)}) first, or configure " <>
-              ":bundled_languages and load them at startup"
+            "language #{inspect(language)} could not be loaded. Cache it ahead of " <>
+              "time with `mix lumis.languages.cache #{language}` if this host has " <>
+              "no network access"
 
       {:error, error} ->
         raise Lumis.HighlightError, error: error

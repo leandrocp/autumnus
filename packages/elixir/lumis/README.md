@@ -47,43 +47,43 @@ end
 
 ## Parser WASM
 
-Nothing loads implicitly: highlighting a language you have not loaded raises,
-and a language injected inside a document is left unhighlighted unless it was
-loaded too. Each `@lumis-sh/wasm-*` language package contains the parser,
-matching queries, and integrity metadata. Lumis caches the package metadata,
-then loads and verifies the exact parser version it names. Parser and query
-updates do not require a new Elixir package release.
+Highlighting downloads, verifies and loads whatever a document turns out to
+need, including languages injected inside it, and caches them for every later
+request. Each `@lumis-sh/wasm-*` language package contains the parser, matching
+queries and integrity metadata, so parser and query updates do not require a new
+Elixir package release.
 
-Load expected languages before serving requests:
+Loading is global to the VM: the first process to need a language pays for it,
+and every process after it does not. Load ahead of time to keep that cost off a
+user's request:
 
 ```elixir
 :ok = Lumis.Languages.load(["elixir", "html", "javascript", "css"])
 ```
 
-For OTP releases, cache the exact parsers in the release-local `priv/wasm`
-directory at build time:
+For a host with no network access, download at build time instead:
 
 ```sh
-MIX_ENV=prod mix do compile, lumis.languages.cache, release
+mix lumis.languages.cache elixir html javascript css
 ```
 
-The runtime checks release-local assets first, then the persistent user cache.
-Missing metadata resolves to the current language package; missing parser bytes
-resolve to its exact CDN URL. Wasmtime also persists compiled modules, so a
-later VM start does not have to compile the same parser again.
+Parsers land under `LUMIS_DATA_DIR`, which defaults to the user data directory.
+Point it at a directory inside your image and the cache travels with the
+release. Wasmtime also persists compiled modules there, so a later VM start does
+not have to compile the same parser again.
 
-Set `LUMIS_DATA_DIR` to override the cache location. Custom
-resolvers can return bytes, a local file, or a URL:
+Both directories can be set in config instead:
 
 ```elixir
-config :lumis, :language_package_resolver, fn language ->
-  {:file, Path.join("/app/wasm", "#{Path.basename(language.package_name)}.language.json")}
-end
-
-config :lumis, :wasm_resolver, fn parser ->
-  {:file, Path.join("/app/wasm", "#{parser.wasm_name}.wasm")}
-end
+config :lumis,
+  data_dir: "/app/lumis",
+  wasm_path: "/app/parsers"
 ```
+
+`:wasm_path` is read before the cache and never written to, for parsers you
+build or vendor yourself. See
+[Elixir integration](https://lumis.sh/docs/usage/elixir-integration) for the
+whole picture.
 
 ## Usage
 

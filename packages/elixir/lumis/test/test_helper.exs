@@ -1,93 +1,71 @@
-wasm_fixtures =
-  Path.expand("../../../javascript/lumis/test/fixtures/wasm", __DIR__)
-
+wasm_fixtures = Path.expand("../../../javascript/lumis/test/fixtures/wasm", __DIR__)
 query_fixtures = Path.expand("../../../../queries/processed", __DIR__)
 
-wasm_cache =
-  Path.join(System.tmp_dir!(), "lumis-elixir-test-#{System.unique_integer([:positive])}")
+# The suite never downloads: it stages the fixture parsers where the store looks
+# first, so what it exercises is the real resolve-verify-load path. The
+# directories come from config/config.exs, which runs before the store is built.
+staged = Application.fetch_env!(:lumis, :wasm_path)
+parsers = Path.join(staged, "parsers")
+File.mkdir_p!(parsers)
 
-System.put_env("LUMIS_DATA_DIR", wasm_cache)
+query = fn language, name ->
+  path = Path.join([query_fixtures, language, "#{name}.scm"])
+  if File.exists?(path), do: File.read!(path), else: ""
+end
 
-# Release-local parsers are only ever read from the app's own priv/wasm, so
-# tests use the real directory and start from empty.
-wasm_bundle = Application.app_dir(:lumis, "priv/wasm")
-File.rm_rf!(wasm_bundle)
-File.mkdir_p!(wasm_bundle)
+brackets = fn language ->
+  case query.(language, "brackets") do
+    "" -> query.("default", "brackets")
+    brackets -> brackets
+  end
+end
 
-Application.put_env(:lumis, :language_package_resolver, fn handle ->
+Lumis.Native.language_package_refs()
+|> Enum.group_by(& &1.package_name)
+|> Enum.each(fn {package_name, refs} ->
   wasm_name =
-    handle.package_name
-    |> Path.basename()
-    |> String.replace_prefix("wasm-", "tree-sitter-")
+    package_name |> Path.basename() |> String.replace_prefix("wasm-", "tree-sitter-")
 
   wasm_path = Path.join(wasm_fixtures, "#{wasm_name}.wasm")
-  wasm = File.read!(wasm_path)
 
-  languages =
-    Lumis.Native.language_package_refs()
-    |> Enum.filter(&(&1.package_name == handle.package_name))
-    |> Map.new(fn language ->
-      query = fn name ->
-        path = Path.join([query_fixtures, language.id, "#{name}.scm"])
-        if File.exists?(path), do: File.read!(path), else: ""
-      end
+  if File.exists?(wasm_path) do
+    wasm = File.read!(wasm_path)
+    sha256 = :sha256 |> :crypto.hash(wasm) |> Base.encode16(case: :lower)
+    version = "test"
 
-      brackets_path = Path.join([query_fixtures, language.id, "brackets.scm"])
+    languages =
+      Map.new(refs, fn language ->
+        {language.id,
+         %{
+           aliases: language.aliases,
+           highlights: query.(language.id, "highlights"),
+           injections: query.(language.id, "injections"),
+           locals: query.(language.id, "locals"),
+           brackets: brackets.(language.id)
+         }}
+      end)
 
-      brackets =
-        if File.exists?(brackets_path) do
-          File.read!(brackets_path)
-        else
-          File.read!(Path.join([query_fixtures, "default", "brackets.scm"]))
-        end
+    package = %{
+      packageName: package_name,
+      version: version,
+      definitionHash: "test",
+      parser: %{
+        name: wasm_name,
+        grammarName: String.replace_prefix(wasm_name, "tree-sitter-", ""),
+        sha256: sha256,
+        size: byte_size(wasm)
+      },
+      languages: languages
+    }
 
-      {language.id,
-       %{
-         aliases: language.aliases,
-         highlights: query.("highlights"),
-         injections: query.("injections"),
-         locals: query.("locals"),
-         brackets: brackets
-       }}
-    end)
-
-  package = %{
-    packageName: handle.package_name,
-    version: "test",
-    definitionHash: "test",
-    parser: %{
-      name: wasm_name,
-      grammarName: String.replace_prefix(wasm_name, "tree-sitter-", ""),
-      sha256: :sha256 |> :crypto.hash(wasm) |> Base.encode16(case: :lower),
-      size: byte_size(wasm)
-    },
-    languages: languages
-  }
-
-  {:ok, Jason.encode!(package)}
+    suffix = String.replace_prefix(package_name, "@lumis-sh/wasm-", "")
+    File.write!(Path.join(parsers, "#{suffix}.language.json"), Jason.encode!(package))
+    File.write!(Path.join(parsers, "#{wasm_name}-#{version}-#{sha256}.wasm"), wasm)
+  end
 end)
-
-Application.put_env(:lumis, :wasm_resolver, fn entry ->
-  {:file, Path.join(wasm_fixtures, "#{entry.wasm_name}.wasm")}
-end)
-
-# Nothing is loaded implicitly, so the suite declares what it uses, the way a
-# real caller has to. Only languages with a local wasm fixture can load here, and
-# these four are left unloaded for the tests that exercise loading itself.
-reserved = ~w(comment diff dockerfile xml)
-
-fixture_languages =
-  wasm_fixtures
-  |> File.ls!()
-  |> Enum.map(&String.replace_suffix(String.replace_prefix(&1, "tree-sitter-", ""), ".wasm", ""))
-  |> Enum.reject(&(&1 in reserved))
-  |> Enum.sort()
-
-:ok = Lumis.Languages.load(fixture_languages)
 
 ExUnit.start(exclude: [:conformance])
 
 ExUnit.after_suite(fn _results ->
-  File.rm_rf(wasm_cache)
-  File.rm_rf(wasm_bundle)
+  File.rm_rf(Path.dirname(staged))
 end)

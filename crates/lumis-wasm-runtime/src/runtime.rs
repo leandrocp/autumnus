@@ -9,7 +9,7 @@ use tree_sitter::{Parser, Query, WasmStore};
 use wasmtime::{Cache, CacheConfig, Config, Engine};
 
 use crate::brackets::{bracket_pairs, colorize_bracket_pairs, RainbowRange};
-use crate::store::{LanguageStore, StoreConfig};
+use crate::store::LanguageStore;
 use crate::tree_sitter_highlight::{HighlightConfiguration, Highlighter};
 
 /// Everything needed to register a parser and its highlighting queries.
@@ -145,6 +145,9 @@ pub struct Runtime {
     /// language can be loaded during the walk that discovered it, which is what
     /// lets one pass highlight a document whatever it turns out to contain.
     store: Option<LanguageStore>,
+    /// One gate per language, so ten requests that all mention `rust` produce
+    /// one download rather than ten.
+    loading: Mutex<HashMap<String, Arc<Mutex<()>>>>,
 }
 
 #[derive(Debug, Error)]
@@ -190,6 +193,7 @@ impl Runtime {
             catalog: RwLock::new(Catalog::default()),
             workers: WorkerPool::new(engine, worker_limit),
             store: None,
+            loading: Mutex::new(HashMap::new()),
         })
     }
 
@@ -200,17 +204,58 @@ impl Runtime {
         self
     }
 
+    /// The store this runtime downloads and caches through, if any.
+    #[must_use]
+    pub fn store(&self) -> Option<&LanguageStore> {
+        self.store.as_ref()
+    }
+
+    /// Resolve, download, verify and load `name` through the store.
+    ///
+    /// # Errors
+    /// Fails when no store is attached, the name is unknown, or the package or
+    /// parser cannot be obtained or verified.
+    pub fn load_named_language(&self, name: &str) -> Result<(), String> {
+        self.load_through_store(name)
+            .map(|_| ())
+            .map_err(|error| error.to_string())
+    }
+
     /// Resolve, download and load `id` through the store, if one is attached.
     ///
-    /// Returns `None` when there is no store, the id is not a known language, or
-    /// the package cannot be obtained. A document is never failed over an
-    /// injected language that could not be fetched.
-    fn load_through_store(&self, id: &str) -> Option<Arc<LoadedLanguage>> {
-        let store = self.store.as_ref()?;
-        let location = crate::catalog::find(id)?;
-        let package = store.package(location.package_name).ok()?;
-        let (resolved_id, definition) = package.language(id)?;
-        let wasm = store.parser(&package).ok()?;
+    /// # Errors
+    /// Fails when there is no store, the id is not a known language, or the
+    /// package or parser cannot be obtained.
+    fn load_through_store(&self, id: &str) -> Result<Arc<LoadedLanguage>, RuntimeError> {
+        if let Some(loaded) = self.loaded(id) {
+            return Ok(loaded);
+        }
+
+        let gate = self.load_gate(id);
+        let _guard = gate.lock().expect("language load gate poisoned");
+        if let Some(loaded) = self.loaded(id) {
+            return Ok(loaded);
+        }
+
+        let store = self
+            .store
+            .as_ref()
+            .ok_or_else(|| RuntimeError::LanguageNotLoaded(id.into()))?;
+        let parser_error = |message: String| RuntimeError::Parser {
+            language: id.to_string(),
+            message,
+        };
+        let location =
+            crate::catalog::find(id).ok_or_else(|| RuntimeError::LanguageNotLoaded(id.into()))?;
+        let package = store
+            .package(location.package_name)
+            .map_err(|error| parser_error(error.to_string()))?;
+        let (resolved_id, definition) = package
+            .language(id)
+            .ok_or_else(|| RuntimeError::LanguageNotLoaded(id.into()))?;
+        let wasm = store
+            .parser(&package)
+            .map_err(|error| parser_error(error.to_string()))?;
 
         self.load_language(LanguageSpec {
             id: resolved_id.to_string(),
@@ -221,11 +266,25 @@ impl Runtime {
             injections: definition.injections.clone(),
             locals: definition.locals.clone(),
             brackets: definition.brackets.clone(),
-        })
-        .ok()?;
+        })?;
 
+        self.loaded(resolved_id)
+            .ok_or_else(|| RuntimeError::LanguageNotLoaded(id.into()))
+    }
+
+    fn loaded(&self, name_or_alias: &str) -> Option<Arc<LoadedLanguage>> {
         let catalog = self.catalog.read().expect("language catalog lock poisoned");
-        catalog.languages.get(resolved_id).cloned()
+        let id = catalog
+            .aliases
+            .get(name_or_alias)
+            .map(String::as_str)
+            .unwrap_or(name_or_alias);
+        catalog.languages.get(id).cloned()
+    }
+
+    fn load_gate(&self, id: &str) -> Arc<Mutex<()>> {
+        let mut loading = self.loading.lock().expect("language load table poisoned");
+        Arc::clone(loading.entry(id.to_string()).or_default())
     }
 
     pub fn load_language(&self, spec: LanguageSpec) -> Result<(), RuntimeError> {
@@ -305,13 +364,7 @@ impl Runtime {
     }
 
     pub fn has_language(&self, name_or_alias: &str) -> bool {
-        let catalog = self.catalog.read().expect("language catalog lock poisoned");
-        let id = catalog
-            .aliases
-            .get(name_or_alias)
-            .map(String::as_str)
-            .unwrap_or(name_or_alias);
-        catalog.languages.contains_key(id)
+        self.loaded(name_or_alias).is_some()
     }
 
     pub fn configure_language(
@@ -367,21 +420,16 @@ impl Runtime {
         name_or_alias: &str,
         rainbow_brackets: bool,
     ) -> Result<Vec<HighlightEvent>, RuntimeError> {
-        let (root_id, root, languages, aliases) = {
+        let root = self.load_through_store(name_or_alias)?;
+        let (root_id, languages, aliases) = {
             let catalog = self.catalog.read().expect("language catalog lock poisoned");
             let root_id = catalog
                 .aliases
                 .get(name_or_alias)
                 .cloned()
                 .unwrap_or_else(|| name_or_alias.to_string());
-            let root = catalog
-                .languages
-                .get(&root_id)
-                .cloned()
-                .ok_or_else(|| RuntimeError::LanguageNotLoaded(name_or_alias.to_string()))?;
             (
                 root_id,
-                root,
                 Arc::clone(&catalog.languages),
                 Arc::clone(&catalog.aliases),
             )
@@ -408,8 +456,10 @@ impl Runtime {
 
                 // Loading here is what makes one pass enough: the walk descends
                 // into the language it just fetched and finds whatever that
-                // contains, however deeply nested.
-                let loaded = self.load_through_store(id)?;
+                // contains, however deeply nested. A language that cannot be
+                // fetched leaves its block unhighlighted rather than failing the
+                // document around it.
+                let loaded = self.load_through_store(id).ok()?;
                 Some(&loaded_here.alloc(loaded).highlight)
             })
             .map_err(|error| RuntimeError::Highlight(error.to_string()))?;
@@ -546,9 +596,36 @@ fn apply_rainbow_brackets(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::store::StoreConfig;
     use std::sync::mpsc;
     use std::thread;
     use std::time::Duration;
+
+    const JSON_WASM: &[u8] =
+        include_bytes!("../../lumis-cli/tests/fixtures/parsers/tree-sitter-json.wasm");
+
+    fn json_package(wasm: &[u8]) -> crate::LanguagePackage {
+        crate::LanguagePackage {
+            package_name: "@lumis-sh/wasm-json".into(),
+            version: "1.0.0".into(),
+            definition_hash: "test".into(),
+            parser: crate::ParserMetadata {
+                name: "tree-sitter-json".into(),
+                grammar_name: "json".into(),
+                upstream_version: None,
+                revision: None,
+                sha256: crate::sha256_hex(wasm),
+                size: wasm.len(),
+            },
+            languages: std::collections::BTreeMap::from([(
+                "json".into(),
+                crate::PackagedLanguage {
+                    highlights: "(string) @string".into(),
+                    ..crate::PackagedLanguage::default()
+                },
+            )]),
+        }
+    }
 
     fn install_json(runtime: &Runtime, injections: &str) {
         let language = tree_sitter::Language::new(tree_sitter_json::LANGUAGE);
@@ -615,10 +692,9 @@ mod tests {
         }
     }
 
-    /// Nothing is loaded implicitly, so an injected language that was never
-    /// loaded leaves its content unhighlighted rather than failing the document.
-    /// With a store attached the walk loads what it finds, so one call is
-    /// enough however deep the injections go.
+    /// The walk loads what it finds, so one call is enough however deep the
+    /// injections go, and a language it cannot fetch costs that block its
+    /// highlighting rather than failing the whole document.
     #[test]
     fn an_injected_language_is_loaded_during_the_walk() {
         let dir = tempfile::tempdir().unwrap();
@@ -669,6 +745,56 @@ mod tests {
         );
     }
 
+    /// Ten requests naming the same uncached language must not become ten
+    /// downloads of it.
+    #[test]
+    fn concurrent_loads_of_one_language_fetch_it_once() {
+        struct CountingFetcher {
+            wasm: Vec<u8>,
+            parser_requests: Arc<Mutex<usize>>,
+        }
+
+        impl crate::store::Fetcher for CountingFetcher {
+            fn get(&self, url: &str) -> Result<Vec<u8>, String> {
+                if url.ends_with(".wasm") {
+                    *self.parser_requests.lock().unwrap() += 1;
+                    // Wide enough that an ungated peer would start its own.
+                    thread::sleep(Duration::from_millis(50));
+                    return Ok(self.wasm.clone());
+                }
+                Ok(serde_json::to_vec(&json_package(&self.wasm)).unwrap())
+            }
+        }
+
+        let dir = tempfile::tempdir().unwrap();
+        let parser_requests = Arc::new(Mutex::new(0));
+        let store = LanguageStore::new(
+            StoreConfig {
+                cache_dir: dir.path().to_path_buf(),
+                source_dir: None,
+            },
+            Box::new(CountingFetcher {
+                wasm: JSON_WASM.to_vec(),
+                parser_requests: Arc::clone(&parser_requests),
+            }),
+        );
+        let runtime = Arc::new(Runtime::with_worker_limit(4).unwrap().with_store(store));
+
+        let threads: Vec<_> = (0..8)
+            .map(|_| {
+                let runtime = Arc::clone(&runtime);
+                thread::spawn(move || runtime.load_named_language("json").unwrap())
+            })
+            .collect();
+        for thread in threads {
+            thread.join().unwrap();
+        }
+
+        assert_eq!(*parser_requests.lock().unwrap(), 1);
+    }
+
+    /// Without a store there is nowhere to load from, so the caller is told
+    /// rather than handed an unhighlighted document.
     #[test]
     fn the_root_language_must_be_loaded() {
         let runtime = Runtime::with_worker_limit(1).unwrap();

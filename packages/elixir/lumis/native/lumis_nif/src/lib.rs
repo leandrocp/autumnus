@@ -7,10 +7,10 @@ mod elixir;
 use elixir::{ExCssOptions, ExFormatterOption, ExTheme};
 use lumis_core::events::HighlightEvent;
 use lumis_core::{languages, themes};
-use lumis_wasm_runtime::{catalog, store, LanguagePackage, LanguageSpec, Runtime, RuntimeError};
+use lumis_wasm_runtime::{catalog, store, Runtime, RuntimeError};
 use once_cell::sync::Lazy;
 use parking_lot::RwLock;
-use rustler::{Binary, Encoder, Env, Error, NifMap, NifResult, Term};
+use rustler::{Encoder, Env, Error, NifMap, NifResult, Term};
 
 /// Lazy per-theme cache to eliminate repeated allocations.
 /// Themes are converted and cached on first access, amortizing the cost.
@@ -28,9 +28,15 @@ static THEME_NAMES: Lazy<Vec<String>> = Lazy::new(|| {
 static EXECUTOR: Lazy<Result<WasmExecutor, String>> = Lazy::new(WasmExecutor::new);
 
 enum WasmJob {
-    Load {
-        spec: LanguageSpec,
-        reply: mpsc::SyncSender<Result<(), RuntimeError>>,
+    LoadNamed {
+        name: String,
+        reply: mpsc::SyncSender<Result<(), String>>,
+    },
+    CacheNamed {
+        name: String,
+        directory: Option<std::path::PathBuf>,
+        force: bool,
+        reply: mpsc::SyncSender<Result<String, String>>,
     },
     Highlight {
         source: String,
@@ -38,6 +44,47 @@ enum WasmJob {
         rainbow_brackets: bool,
         reply: mpsc::SyncSender<Result<Vec<HighlightEvent>, RuntimeError>>,
     },
+}
+
+/// Directories the store reads and writes, as `Lumis.Application` configured
+/// them. Elixir cannot set an OS environment variable the emulator's NIFs can
+/// see, so `config :lumis` arrives here instead.
+#[derive(Default)]
+struct StorePaths {
+    data_dir: Option<std::path::PathBuf>,
+    wasm_path: Option<std::path::PathBuf>,
+}
+
+static STORE_PATHS: Lazy<RwLock<StorePaths>> = Lazy::new(|| RwLock::new(StorePaths::default()));
+
+/// The same resolve, verify and cache path the CLI uses, pointed at the
+/// directories Lumis persists under.
+fn language_store(cache_dir: Option<std::path::PathBuf>) -> store::LanguageStore {
+    let paths = STORE_PATHS.read();
+    let cache_dir = cache_dir
+        .or_else(|| paths.data_dir.clone())
+        .or_else(|| std::env::var_os("LUMIS_DATA_DIR").map(std::path::PathBuf::from))
+        .unwrap_or_else(default_data_dir);
+    let source_dir = paths
+        .wasm_path
+        .clone()
+        .or_else(store::LanguageStore::source_dir_from_env);
+
+    store::LanguageStore::new(
+        store::StoreConfig {
+            cache_dir,
+            source_dir,
+        },
+        Box::new(store::HttpFetcher),
+    )
+}
+
+fn default_data_dir() -> std::path::PathBuf {
+    use etcetera::BaseStrategy;
+
+    etcetera::choose_base_strategy()
+        .map(|strategy| strategy.data_dir().join("lumis"))
+        .unwrap_or_else(|_| std::path::PathBuf::from(".lumis"))
 }
 
 struct WasmExecutor {
@@ -57,7 +104,7 @@ impl WasmExecutor {
             .name("lumis-wasm-init".into())
             .stack_size(8 * 1024 * 1024)
             .spawn(move || -> Result<Runtime, RuntimeError> {
-                let runtime = Runtime::with_worker_limit(workers)?;
+                let runtime = Runtime::with_worker_limit(workers)?.with_store(language_store(None));
                 for language in catalog::LANGUAGES {
                     runtime.declare_language(language.id, language.aliases);
                 }
@@ -83,8 +130,21 @@ impl WasmExecutor {
                         Err(_) => return,
                     };
                     match job {
-                        WasmJob::Load { spec, reply } => {
-                            let _ = reply.send(runtime.load_language(spec));
+                        WasmJob::LoadNamed { name, reply } => {
+                            let _ = reply.send(runtime.load_named_language(&name));
+                        }
+                        WasmJob::CacheNamed {
+                            name,
+                            directory,
+                            force,
+                            reply,
+                        } => {
+                            let _ = reply.send(cache_named_language(
+                                runtime.as_ref(),
+                                &name,
+                                directory,
+                                force,
+                            ));
                         }
                         WasmJob::Highlight {
                             source,
@@ -103,18 +163,39 @@ impl WasmExecutor {
         Ok(Self { runtime, sender })
     }
 
-    fn load_language(&self, spec: LanguageSpec) -> Result<(), RuntimeError> {
-        let language = spec.id.clone();
+    /// Resolving a language does a TLS handshake, which needs far more stack
+    /// than a BEAM dirty scheduler has; run it on the executor's own threads.
+    fn load_named_language(&self, name: &str) -> Result<(), String> {
         let (reply, result) = mpsc::sync_channel(1);
         self.sender
-            .send(WasmJob::Load { spec, reply })
-            .map_err(|_| RuntimeError::Parser {
-                language,
-                message: "WASM executor is unavailable".into(),
-            })?;
-        result.recv().map_err(|_| {
-            RuntimeError::Highlight("WASM executor stopped before loading the language".into())
-        })?
+            .send(WasmJob::LoadNamed {
+                name: name.to_string(),
+                reply,
+            })
+            .map_err(|_| "WASM executor is unavailable".to_string())?;
+        result
+            .recv()
+            .map_err(|_| "WASM executor stopped while loading the language".to_string())?
+    }
+
+    fn cache_named_language(
+        &self,
+        name: &str,
+        directory: Option<std::path::PathBuf>,
+        force: bool,
+    ) -> Result<String, String> {
+        let (reply, result) = mpsc::sync_channel(1);
+        self.sender
+            .send(WasmJob::CacheNamed {
+                name: name.to_string(),
+                directory,
+                force,
+                reply,
+            })
+            .map_err(|_| "WASM executor is unavailable".to_string())?;
+        result
+            .recv()
+            .map_err(|_| "WASM executor stopped while caching the language".to_string())?
     }
 
     fn highlight(
@@ -142,7 +223,6 @@ rustler::atoms! {
     ok,
     error,
     language_not_loaded,
-    miss,
 }
 
 rustler::init!("Elixir.Lumis.Native");
@@ -168,18 +248,6 @@ impl From<&catalog::LanguagePackageRef> for ExLanguagePackageRef<'static> {
             package_name: language.package_name,
         }
     }
-}
-
-#[derive(Clone, Debug, NifMap)]
-pub struct ExResolvedLanguagePackage {
-    pub id: String,
-    pub aliases: Vec<String>,
-    pub package_name: String,
-    pub version: String,
-    pub definition_hash: String,
-    pub wasm_name: String,
-    pub sha256: String,
-    pub size: usize,
 }
 
 #[rustler::nif(schedule = "DirtyCpu")]
@@ -224,24 +292,81 @@ fn executor() -> Result<&'static WasmExecutor, String> {
     EXECUTOR.as_ref().map_err(Clone::clone)
 }
 
+/// Point the store at `data_dir` and `wasm_path`, overriding `LUMIS_DATA_DIR`
+/// and `LUMIS_WASM_PATH`.
+///
+/// Returns false once the store exists, since the paths are read when it is
+/// built. `Lumis.Application` calls this before anything can use it.
+#[rustler::nif]
+fn configure_store(data_dir: Option<String>, wasm_path: Option<String>) -> bool {
+    if Lazy::get(&EXECUTOR).is_some() {
+        return false;
+    }
+    let mut paths = STORE_PATHS.write();
+    paths.data_dir = data_dir.map(std::path::PathBuf::from);
+    paths.wasm_path = wasm_path.map(std::path::PathBuf::from);
+    true
+}
+
+/// Resolve, download, verify and load `name` through the shared store.
+///
+/// Elixir no longer fetches anything: this is the same path the CLI takes, so
+/// both cache the same bytes in the same place under the same names.
 #[rustler::nif(schedule = "DirtyCpu")]
-fn load_language<'a>(env: Env<'a>, name: &str, package_json: &str, wasm: Binary<'a>) -> Term<'a> {
-    let (language, package) = match parse_language_package(name, package_json) {
-        Ok(result) => result,
+fn load_language_by_name<'a>(env: Env<'a>, name: &str) -> Term<'a> {
+    let runtime = match executor() {
+        Ok(runtime) => runtime,
         Err(message) => return (error(), message).encode(env),
     };
+    match runtime.load_named_language(name) {
+        Ok(()) => ok().encode(env),
+        Err(message) => (error(), message).encode(env),
+    }
+}
+
+/// Download and cache without loading, for `mix lumis.languages.cache`.
+///
+/// Returns the path the parser was written to.
+#[rustler::nif(schedule = "DirtyIo")]
+fn cache_language_by_name<'a>(
+    env: Env<'a>,
+    name: &str,
+    directory: Option<&str>,
+    force: bool,
+) -> Term<'a> {
     let executor = match executor() {
         Ok(executor) => executor,
         Err(message) => return (error(), message).encode(env),
     };
-    let spec = match package.language_spec(language.id, wasm.as_slice().to_vec()) {
-        Ok(spec) => spec,
-        Err(package_error) => return (error(), package_error.to_string()).encode(env),
-    };
-    match executor.load_language(spec) {
-        Ok(()) => ok().encode(env),
-        Err(runtime_error) => (error(), runtime_error.to_string()).encode(env),
+    let directory = directory.map(std::path::PathBuf::from);
+    match executor.cache_named_language(name, directory, force) {
+        Ok(path) => (ok(), path).encode(env),
+        Err(message) => (error(), message).encode(env),
     }
+}
+
+/// Caching needs no Wasmtime runtime, but it does do a TLS handshake, so it
+/// still runs on an executor thread rather than a dirty scheduler.
+fn cache_named_language(
+    runtime: &Runtime,
+    name: &str,
+    directory: Option<std::path::PathBuf>,
+    force: bool,
+) -> Result<String, String> {
+    let owned;
+    let store = match directory {
+        Some(directory) => {
+            owned = language_store(Some(directory));
+            &owned
+        }
+        None => runtime
+            .store()
+            .ok_or_else(|| "this runtime has no language store".to_string())?,
+    };
+    store
+        .cache_language(name, force)
+        .map(|path| path.display().to_string())
+        .map_err(|error| error.to_string())
 }
 
 #[rustler::nif]
@@ -252,97 +377,11 @@ fn has_language(name: &str) -> bool {
 }
 
 #[rustler::nif]
-fn language_package_ref(name: &str) -> Option<ExLanguagePackageRef<'static>> {
-    catalog::find(name).map(ExLanguagePackageRef::from)
-}
-
-#[rustler::nif]
 fn language_package_refs() -> Vec<ExLanguagePackageRef<'static>> {
     catalog::LANGUAGES
         .iter()
         .map(ExLanguagePackageRef::from)
         .collect()
-}
-
-/// Cache mechanics shared with the CLI, exposed so the Elixir loader does not
-/// reimplement verification, atomic writes and locking in another language.
-/// Deliberately layout-independent -- Elixir passes explicit paths -- because the
-/// Elixir release layout is not the CLI's. Elixir keeps what is genuinely its own:
-/// the configurable `:wasm_resolver` and `:language_package_resolver` hooks, the
-/// download, and the search order across `priv/wasm` and the user cache.
-/// Check parser bytes against the declared size and digest. Takes the two fields
-/// directly rather than the package, because Elixir carries a resolved entry.
-#[rustler::nif(schedule = "DirtyCpu")]
-fn cache_verify(sha256: &str, size: usize, wasm: Binary) -> Result<(), String> {
-    let bytes = wasm.as_slice();
-    if bytes.len() != size {
-        return Err(format!(
-            "invalid parser WASM size: expected {size}, got {}",
-            bytes.len()
-        ));
-    }
-    let actual = lumis_wasm_runtime::sha256_hex(bytes);
-    if actual != sha256 {
-        return Err(format!(
-            "invalid parser WASM integrity: expected sha256-{sha256}, got sha256-{actual}"
-        ));
-    }
-    Ok(())
-}
-
-/// Write through a temporary file and rename, so a reader never sees a partial file.
-#[rustler::nif(schedule = "DirtyIo")]
-fn cache_write(path: &str, contents: Binary) -> Result<(), String> {
-    store::write_atomic(std::path::Path::new(path), contents.as_slice())
-        .map_err(|error| error.to_string())
-}
-
-#[rustler::nif]
-fn resolve_language_package<'a>(env: Env<'a>, name: &str, package_json: &str) -> Term<'a> {
-    match parse_language_package(name, package_json) {
-        Ok((language, package)) => {
-            let packaged = package
-                .languages
-                .get(language.id)
-                .expect("validated language package entry");
-            (
-                ok(),
-                ExResolvedLanguagePackage {
-                    id: language.id.to_string(),
-                    aliases: packaged.aliases.clone(),
-                    package_name: package.package_name,
-                    version: package.version,
-                    definition_hash: package.definition_hash,
-                    wasm_name: package.parser.name,
-                    sha256: package.parser.sha256,
-                    size: package.parser.size,
-                },
-            )
-                .encode(env)
-        }
-        Err(message) => (error(), message).encode(env),
-    }
-}
-
-fn parse_language_package(
-    name: &str,
-    package_json: &str,
-) -> Result<(&'static catalog::LanguagePackageRef, LanguagePackage), String> {
-    let language = catalog::find(name).ok_or_else(|| format!("unknown language '{name}'"))?;
-    let package = LanguagePackage::from_json(package_json).map_err(|error| error.to_string())?;
-    if package.package_name != language.package_name {
-        return Err(format!(
-            "language package mismatch for '{}': expected {}, got {}",
-            language.id, language.package_name, package.package_name
-        ));
-    }
-    package.languages.get(language.id).ok_or_else(|| {
-        format!(
-            "language '{}' is not provided by {}",
-            language.id, package.package_name
-        )
-    })?;
-    Ok((language, package))
 }
 
 #[rustler::nif]

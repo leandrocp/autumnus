@@ -1,80 +1,67 @@
 defmodule Mix.Tasks.Lumis.Languages.Cache do
   @moduledoc """
-  Caches exact, integrity-checked Lumis parser WASMs for an OTP release.
+  Downloads exact, integrity-checked Lumis parser WASMs ahead of time.
 
-  Which languages to cache comes from configuration, so a release and a
-  development machine cannot disagree:
+  Highlighting downloads what it needs on demand, so this is for deployments
+  that would rather pay at build time, or that run without network access.
 
-      config :lumis, bundled_languages: ~w(elixir html javascript css)
+      mix lumis.languages.cache elixir html javascript css
+      mix lumis.languages.cache --all
+      mix lumis.languages.cache --force elixir
+      mix lumis.languages.cache --output /app/lumis elixir
 
-  Use `:all` to cache every language in the catalog:
+  Parsers land under `$LUMIS_DATA_DIR` unless `--output` names a directory, and
+  are verified against the size and SHA-256 in their language package before
+  being written. An existing valid file is left alone unless `--force` is given.
 
-      config :lumis, bundled_languages: :all
-
-  This task only fetches what that configuration names. It takes no language
-  arguments, so there is one place to look when a release ships the wrong set.
-
-      mix lumis.languages.cache
-      mix lumis.languages.cache --force
-      mix lumis.languages.cache --output priv/wasm
-
-  Parsers are verified against the size and SHA-256 in their language package
-  before being written, and an existing valid file is left alone unless
-  `--force` is given.
+  A directory written here is complete: point `LUMIS_DATA_DIR` at it, or
+  `LUMIS_WASM_PATH` at its parent, and nothing needs the network.
   """
 
   use Mix.Task
 
-  @shortdoc "Caches exact Lumis parser WASMs for an OTP release"
+  @shortdoc "Downloads Lumis parser WASMs ahead of time"
 
-  @switches [force: :boolean, output: :string]
+  @switches [all: :boolean, force: :boolean, output: :string]
   @aliases [o: :output]
 
   @impl Mix.Task
   def run(arguments) do
     Mix.Task.run("app.start")
-    options = parse_arguments(arguments)
+    {options, languages} = parse_arguments(arguments)
 
-    options
-    |> cache_options()
-    |> cache(configured_languages())
+    case Lumis.Languages.cache(languages(options, languages), cache_options(options)) do
+      {:ok, paths} -> Enum.each(paths, fn path -> Mix.shell().info(path) end)
+      {:error, reason} -> Mix.raise(reason)
+    end
   end
 
   defp parse_arguments(arguments) do
     case OptionParser.parse(arguments, strict: @switches, aliases: @aliases) do
-      {options, [], []} ->
-        options
-
-      {_options, [_ | _] = languages, _} ->
-        Mix.raise("""
-        this task takes no language arguments, it caches what is configured:
-
-            config :lumis, bundled_languages: #{inspect(languages)}
-        """)
-
-      {_options, _languages, invalid} ->
-        Mix.raise("invalid options: #{inspect(invalid)}")
+      {options, languages, []} -> {options, languages}
+      {_options, _languages, invalid} -> Mix.raise("invalid options: #{inspect(invalid)}")
     end
   end
 
-  defp configured_languages do
-    case Application.get_env(:lumis, :bundled_languages) do
-      :all -> Enum.map(Lumis.Native.language_package_refs(), & &1.id)
-      [_ | _] = languages -> Enum.map(languages, &to_string/1)
-      _ -> Mix.raise("configure :lumis, :bundled_languages with a list of languages or :all")
+  defp languages(options, []) do
+    if options[:all] do
+      Lumis.Languages.all_names()
+    else
+      Mix.raise("name the languages to cache, or pass --all")
+    end
+  end
+
+  defp languages(options, languages) do
+    if options[:all] do
+      Mix.raise("pass language names or --all, not both")
+    else
+      languages
     end
   end
 
   defp cache_options(options) do
     [force: options[:force] || false]
     |> maybe_put(:directory, options[:output])
-  end
-
-  defp cache(cache_options, languages) do
-    case Lumis.Languages.cache(languages, cache_options) do
-      {:ok, paths} -> Enum.each(paths, fn path -> Mix.shell().info(path) end)
-      {:error, reason} -> Mix.raise(reason)
-    end
   end
 
   defp maybe_put(options, _key, nil), do: options

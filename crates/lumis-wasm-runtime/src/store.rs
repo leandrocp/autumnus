@@ -200,15 +200,14 @@ impl LanguageStore {
     /// Verified parser bytes from a configured source directory or the cache,
     /// never the network.
     pub fn local_parser(&self, package: &LanguagePackage) -> Option<Vec<u8>> {
-        if let Some(source) = self.source_asset(&parser_filename(package)) {
-            if let Ok(bytes) = std::fs::read(&source) {
-                if package.verify_wasm(&bytes).is_ok() {
-                    return Some(bytes);
-                }
-            }
-        }
+        self.source_parser(package)
+            .or_else(|| self.cached_parser(package))
+    }
 
-        self.cached_parser(package)
+    fn source_parser(&self, package: &LanguagePackage) -> Option<Vec<u8>> {
+        let source = self.source_asset(&parser_filename(package))?;
+        let bytes = std::fs::read(&source).ok()?;
+        package.verify_wasm(&bytes).ok().map(|()| bytes)
     }
 
     /// Verified parser bytes from this store's own cache directory only.
@@ -241,6 +240,35 @@ impl LanguageStore {
     pub fn refresh_parser(&self, package: &LanguagePackage) -> Result<Vec<u8>, StoreError> {
         let path = self.parser_path(package);
         self.fetch_parser(package, &path)
+    }
+
+    /// Download and cache `name` and its parser without loading either.
+    ///
+    /// Caching is pure I/O, so it needs no Wasmtime runtime: `lumis parsers
+    /// cache` and `mix lumis.languages.cache` both land here.
+    ///
+    /// # Errors
+    /// Fails when the name is unknown, or the package or parser cannot be
+    /// obtained or verified.
+    pub fn cache_language(&self, name: &str, force: bool) -> Result<PathBuf, StoreError> {
+        let location =
+            crate::catalog::find(name).ok_or_else(|| StoreError::UnknownLanguage(name.into()))?;
+        let package = self.package(location.package_name)?;
+        let path = self.parser_path(&package);
+
+        if force {
+            self.refresh_parser(&package)?;
+        } else if self.cached_parser(&package).is_none() {
+            match self.source_parser(&package) {
+                Some(bytes) => write_atomic(&path, &bytes)?,
+                None => {
+                    self.fetch_parser(&package, &path)?;
+                }
+            }
+        }
+
+        self.cache_package(&package)?;
+        Ok(path)
     }
 
     /// Write `package` into the cache, so a later run needs neither a source
@@ -739,6 +767,67 @@ mod tests {
         }
         done.store(true, Ordering::Relaxed);
         reader.join().unwrap();
+    }
+
+    /// A cache that holds a parser but not its metadata cannot be used offline,
+    /// so `cache_language` writes both.
+    #[test]
+    fn caching_a_language_leaves_the_cache_self_sufficient() {
+        let dir = tempdir();
+        let package = package();
+        let served = serde_json::to_vec(&package).unwrap();
+
+        struct Serve {
+            package: Vec<u8>,
+        }
+        impl Fetcher for Serve {
+            fn get(&self, url: &str) -> Result<Vec<u8>, String> {
+                if url.ends_with(".wasm") {
+                    return Ok(WASM.to_vec());
+                }
+                Ok(self.package.clone())
+            }
+        }
+
+        let store = make(dir.path(), Box::new(Serve { package: served }));
+        let path = store.cache_language("json", false).unwrap();
+        assert_eq!(std::fs::read(&path).unwrap(), WASM);
+
+        let offline = make(dir.path(), Box::new(NoNetwork));
+        assert_eq!(offline.parser(&package).unwrap(), WASM);
+        assert_eq!(offline.package("@lumis-sh/wasm-json").unwrap().version, "1.2.3");
+    }
+
+    /// A parser staged in a source directory belongs in the cache too; a release
+    /// that runs `cache` must not still need that directory.
+    #[test]
+    fn caching_copies_a_staged_parser_into_the_cache() {
+        let cache = tempdir();
+        let source = tempdir();
+        let package = package();
+        std::fs::create_dir_all(source.path().join("parsers")).unwrap();
+        std::fs::write(
+            source.path().join("parsers").join("json.language.json"),
+            serde_json::to_vec(&package).unwrap(),
+        )
+        .unwrap();
+        std::fs::write(
+            source.path().join("parsers").join(parser_filename(&package)),
+            WASM,
+        )
+        .unwrap();
+
+        let store = LanguageStore::new(
+            StoreConfig {
+                cache_dir: cache.path().to_path_buf(),
+                source_dir: Some(source.path().to_path_buf()),
+            },
+            Box::new(NoNetwork),
+        );
+        store.cache_language("json", false).unwrap();
+
+        let offline = make(cache.path(), Box::new(NoNetwork));
+        assert_eq!(offline.parser(&package).unwrap(), WASM);
     }
 
     fn tempdir() -> tempfile::TempDir {
