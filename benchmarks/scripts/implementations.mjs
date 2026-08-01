@@ -1,7 +1,10 @@
 export const implementations = [
   { id: "lumis-rust", label: "Lumis Rust", runner: "criterion" },
-  { id: "lumis-js-wasm", label: "Lumis JavaScript Wasm", runner: "mitata" },
-  { id: "lumis-js-node", label: "Lumis JavaScript Node", runner: "mitata" },
+  // Both load the same WebAssembly parsers. What differs is the engine that
+  // runs them and where the highlight pass happens: Wasmtime and Rust in the
+  // Node addon, V8 and JavaScript in web-tree-sitter.
+  { id: "lumis-js-node", label: "Lumis JavaScript (Node, Wasmtime)", runner: "mitata" },
+  { id: "lumis-js-wasm", label: "Lumis JavaScript (web-tree-sitter)", runner: "mitata" },
   { id: "lumis-elixir", label: "Lumis Elixir", runner: "benchee" },
   { id: "lumis-cli", label: "Lumis CLI", runner: "hyperfine" },
   { id: "shiki", label: "Shiki", runner: "mitata" },

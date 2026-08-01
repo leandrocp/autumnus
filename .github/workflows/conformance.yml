@@ -73,12 +73,12 @@ jobs:
             task: test-conformance-cli
             rust: true
             build-parsers: true
-          - name: JavaScript native
+          - name: JavaScript (Node, Wasmtime)
             task: test-conformance-javascript-native
             node: true
             rust: true
             build-parsers: true
-          - name: JavaScript Wasm
+          - name: JavaScript (web-tree-sitter)
             task: test-conformance-javascript-wasm
             node: true
             rust: true

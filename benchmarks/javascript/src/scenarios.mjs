@@ -62,14 +62,20 @@ if (outputBytes <= scenario.inputBytes) {
 
 let result;
 const cleanup = () => {
-  if (result !== undefined) adapter.disposeResult(result);
   result = undefined;
   globalThis.gc?.();
 };
+// Setup is measured once and reported separately, never inside the loop. Lumis
+// keeps its parser catalog for the life of the process while web-tree-sitter
+// rebuilds one per highlighter, so timing setup per sample would compare how
+// each runtime caches rather than how fast either highlights.
+const setupStart = performance.now();
+const measuredRuntime = await adapter.initialize();
+const setupNanoseconds = (performance.now() - setupStart) * 1e6;
+
 const stats = await measure(
   async () => {
-    const runtime = await adapter.initialize();
-    result = { runtime, outputBytes: adapter.render(runtime) };
+    result = { runtime: measuredRuntime, outputBytes: adapter.render(measuredRuntime) };
     do_not_optimize(result.outputBytes);
   },
   {
@@ -83,6 +89,7 @@ const stats = await measure(
   },
 );
 cleanup();
+adapter.dispose(measuredRuntime);
 
 const { debug: _debug, ...serializableStats } = stats;
 const report = {
@@ -95,6 +102,7 @@ const report = {
   fileCount: scenario.fileCount,
   languageCount: scenario.languageCount,
   total: serializableStats,
+  setupNanoseconds,
 };
 const outputPath = isAbsolute(requestedOutput)
   ? requestedOutput
@@ -179,7 +187,6 @@ async function loadLumis() {
       return renderedBytes;
     },
     dispose() {},
-    disposeResult() {},
   };
 }
 
@@ -212,9 +219,6 @@ async function loadShiki() {
     },
     dispose(highlighter) {
       highlighter.dispose();
-    },
-    disposeResult(measured) {
-      measured.runtime.dispose();
     },
   };
 }
@@ -251,7 +255,6 @@ async function loadHighlightJs() {
       return renderedBytes;
     },
     dispose() {},
-    disposeResult() {},
   };
 }
 

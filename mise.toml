@@ -241,7 +241,7 @@ description = "Run CLI conformance tests"
 run = "cargo test -p lumis-cli --test conformance -- --ignored"
 
 [tasks.'test-conformance-javascript-native']
-description = "Run JavaScript conformance on the native addon, Node's default runtime"
+description = "Run JavaScript conformance on the Wasmtime addon, Node's default runtime"
 depends = ["stage-test-parsers"]
 run = '''
 #!/usr/bin/env bash
@@ -256,7 +256,7 @@ LUMIS_TEST_RUNTIME=native \
 '''
 
 [tasks.'test-conformance-javascript-wasm']
-description = "Run JavaScript Wasm conformance tests"
+description = "Run JavaScript conformance on web-tree-sitter, what browsers use"
 run = '''
 #!/usr/bin/env bash
 set -euo pipefail

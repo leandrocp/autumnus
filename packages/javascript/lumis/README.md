@@ -192,7 +192,7 @@ All three are equivalent at highlight time. The runtime resolves the language by
 
 ## Runtime behavior
 
-- `@lumis-sh/lumis` uses one portable `web-tree-sitter` runtime in Node.js, Bun, Deno, and browsers.
+- Every runtime loads the same `@lumis-sh/wasm-*` parsers. What differs is the engine: Node runs them under Wasmtime in a native addon and walks and formats in Rust, the same code the Lumis CLI and Elixir bindings run; browsers, Bun, Deno and any platform without a prebuilt addon run them under the host's own WebAssembly through `web-tree-sitter`, and walk and format in JavaScript.
 - Each `@lumis-sh/wasm-*` package contains a parser, its matching queries, and integrity metadata.
 - Lumis resolves current package metadata, then loads the exact versioned parser it names.
 - Parser bytes are checked against the package's expected size and SHA-256 digest.

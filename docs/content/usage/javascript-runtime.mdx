@@ -172,8 +172,9 @@ Useful for dropdowns, config validation, and docs tooling:
 
 ## Runtime notes
 
-- on Node, `@lumis-sh/lumis` highlights through a native addon, the same Wasmtime runtime the Lumis CLI and Elixir bindings use, so all three produce identical output and load parsers the same way
-- browsers and any platform with no prebuilt addon use `web-tree-sitter` and per-language parser WASM
+- every runtime loads the same per-language parser WASM; what differs is the engine that runs it
+- on Node, `@lumis-sh/lumis` runs those parsers under Wasmtime in a native addon and walks and formats in Rust, the same code the Lumis CLI and Elixir bindings run, so all three produce identical output
+- browsers, and any platform with no prebuilt addon, run them under the host's own WebAssembly through `web-tree-sitter`, and walk and format in JavaScript
 - the addon carries no parsers and downloads each on first use, so it costs about 4.7 MB of download on top of the Wasm runtime rather than one binary per language
 - the package uses conditional exports so Node and web-standard runtimes get the right entry point automatically
 - every language package contains matching queries plus an exact parser version, size, and SHA-256 digest

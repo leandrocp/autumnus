@@ -32,6 +32,7 @@ for (const scenario of manifest.scenarios) {
       implementation: id,
       runner,
       totalNs: measurement.totalNs,
+      setupNs: metadata.setupNanoseconds,
       outputBytes: metadata.outputBytes,
     });
   }
@@ -133,13 +134,19 @@ function renderMarkdown(report, sizes) {
     "",
     "The timing rows use local workspace source for every Lumis runtime.",
     "",
-    "Four of the five run the same Wasmtime engine and load parsers as WebAssembly",
-    "at runtime: **Lumis JavaScript Node** through a native addon, plus the CLI and",
-    "Elixir. **Lumis JavaScript Wasm** is the `web-tree-sitter` runtime that browsers",
-    "use, and that Node falls back to where no addon is built; it assembles events",
-    "and formats them in JavaScript, which is most of the gap between the two rows.",
-    "**Lumis Rust** compiles its parsers in, so it is the floor rather than a",
-    "distribution anyone installs.",
+    "**Highlight** is the per-call cost with a prepared highlighter. **Setup** is",
+    "what building that highlighter costs once the process is warm. They are",
+    "separated because the runtimes cache very differently, and timing them",
+    "together compares caching rather than highlighting.",
+    "",
+    "Every Lumis row except Rust loads the same WebAssembly parsers; Rust compiles",
+    "its own in and is the floor rather than something anyone installs. What differs",
+    "between the two JavaScript rows is which engine runs those parsers and where",
+    "the highlight pass happens: **(Node, Wasmtime)** runs them under Wasmtime in a",
+    "native addon and walks and formats in Rust, the same code the CLI and Elixir",
+    "run; **(web-tree-sitter)** runs them under V8 and walks and formats in",
+    "JavaScript. That second one is what browsers use, and what Node falls back to",
+    "where no addon is built.",
     "",
     "See the [focused before/after report](elixir-runtime.md) for Elixir cold",
     "loading, concurrency, and memory.",
@@ -179,12 +186,13 @@ function renderMarkdown(report, sizes) {
       "",
       scenario.description,
       "",
-      "| Tool | Total |",
-      "| --- | ---: |",
+      "| Tool | Highlight | Setup |",
+      "| --- | ---: | ---: |",
     );
     for (const result of scenario.results.toSorted((left, right) => left.totalNs - right.totalNs)) {
+      const setup = Number.isFinite(result.setupNs) ? formatDuration(result.setupNs) : "—";
       lines.push(
-        `| ${implementationById(result.implementation).label} | ${formatDuration(result.totalNs)} |`,
+        `| ${implementationById(result.implementation).label} | ${formatDuration(result.totalNs)} | ${setup} |`,
       );
     }
     lines.push("");
