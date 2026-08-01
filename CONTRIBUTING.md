@@ -371,8 +371,15 @@ export LUMIS_WASM_PATH=$PWD/tmp/wasm-local
 ```
 
 The CLI, Elixir and Node all read that directory before anything else, so
-`Lumis.Languages.load("kdl")`, `createHighlighter`, and `lumis highlight` now
-work. Staging more languages adds to the same directory.
+`lumis highlight`, `Lumis.highlight/2` and `createHighlighter` now work,
+including when the parser is only reached as an injected language. Staging more
+languages adds to the same directory.
+
+Tests use the same mechanism against the committed parser fixtures:
+
+```sh
+mise run stage-test-parsers
+```
 
 #### WASM distribution
 
@@ -388,9 +395,9 @@ aliases, and package names. JavaScript, CLI, and Elixir resolve the current
 metadata and verify its bytes. Parser or query updates therefore publish only
 the affected language package, without a runtime release.
 
-CLI and Node caches persist on disk, browsers use CacheStorage with an IndexedDB
-fallback, and Elixir can embed selected package metadata and parsers under
-release-local `priv/wasm`. Local and benchmark execution should provide both
+CLI, Node and Elixir caches persist on disk under `LUMIS_DATA_DIR`, in the same
+layout, so one prepared directory serves all three; browsers use CacheStorage
+with an IndexedDB fallback. Local and benchmark execution should provide both
 `language.json` and its matching parser so queries and parser bytes remain
 atomic.
 

@@ -1,47 +1,19 @@
 defmodule Lumis.BenchmarkRuntime do
+  @moduledoc """
+  Points Lumis at the parsers `mise run prepare:languages` laid out, so nothing
+  in a timed run depends on the network.
+  """
+
   def configure(repo_dir) do
-    packages =
-      repo_dir
-      |> Path.join("target/benchmarks/language-packages/index.json")
-      |> File.read!()
-      |> :json.decode()
+    packages = Path.join(repo_dir, "target/benchmarks/language-packages")
 
-    fixture_root = Path.join(repo_dir, "packages/javascript/lumis/test/fixtures/wasm")
-    node_modules = Path.join(repo_dir, "node_modules/.pnpm")
-
-    Application.put_env(:lumis, :language_package_resolver, fn handle ->
-      metadata_path = packages |> Map.fetch!(handle.package_name) |> Map.fetch!("metadataPath")
-      {:file, metadata_path}
-    end)
-
-    Application.put_env(:lumis, :wasm_resolver, fn entry ->
-      candidates = [
-        Path.join(fixture_root, "#{entry.wasm_name}.wasm")
-        | Path.wildcard(
-            Path.join([
-              node_modules,
-              "@lumis-sh+wasm-*",
-              "node_modules",
-              "@lumis-sh",
-              "wasm-*",
-              "#{entry.wasm_name}.wasm"
-            ])
-          )
-      ]
-
-      case Enum.find(candidates, &verified?(&1, entry)) do
-        nil -> raise "missing exact parser fixture for #{entry.id}"
-        path -> {:file, path}
-      end
-    end)
-  end
-
-  defp verified?(path, entry) do
-    with {:ok, bytes} <- File.read(path) do
-      byte_size(bytes) == entry.size and
-        Base.encode16(:crypto.hash(:sha256, bytes), case: :lower) == entry.sha256
-    else
-      _ -> false
+    unless File.dir?(Path.join(packages, "parsers")) do
+      raise "run `mise run -C benchmarks prepare:languages` first, no parsers at #{packages}"
     end
+
+    # After Application.start, so the NIF store is configured here rather than
+    # from config; it is built lazily on first use, which has not happened yet.
+    true =
+      Lumis.Native.configure_store(Path.join(repo_dir, "target/benchmarks/lumis-data"), packages)
   end
 end

@@ -24,11 +24,14 @@ keywords:
 | Browsers / CDN | `@lumis-sh/lumis` | [npm](https://www.npmjs.com/package/@lumis-sh/lumis) |
 | Java | `lumis4j` | [GitHub](https://github.com/roastedroot/lumis4j) |
 
-`@lumis-sh/lumis` covers Node.js, Bun, Deno, and browsers through one portable
-runtime. JavaScript and Elixir load exact, integrity-checked parser WASM per
-language instead of shipping an all-language binary. Node, browsers, Elixir,
-and the CLI persist verified assets across process restarts; Node and Elixir
-also provide build-time cache commands so the first request does not download.
+`@lumis-sh/lumis` covers Node.js, Bun, Deno, and browsers. Node, the CLI and
+Elixir all run the same Wasmtime highlighting from `lumis-wasm-runtime`, so
+identical input produces identical output; browsers use `web-tree-sitter`.
+
+Every dynamic runtime loads exact, integrity-checked parser WASM per language
+rather than shipping an all-language binary, downloading what a document turns
+out to need and persisting verified assets across process restarts. Build-time
+cache commands move that download ahead of the first request.
 
 ## Themes
 

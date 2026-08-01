@@ -96,12 +96,18 @@ defmodule Lumis.ScenarioBenchmark do
     Code.ensure_loaded!(Lumis.Native)
     available = Lumis.available_languages()
 
-    workload
-    |> Enum.map(&Map.fetch!(&1, "language"))
-    |> Enum.uniq()
-    |> Enum.each(fn language ->
+    languages =
+      workload
+      |> Enum.map(&Map.fetch!(&1, "language"))
+      |> Enum.uniq()
+
+    Enum.each(languages, fn language ->
       unless Map.has_key?(available, language), do: raise("Lumis Elixir is missing #{language}")
     end)
+
+    # Highlighting would load these anyway; doing it here keeps the download and
+    # the grammar compile out of the timed run.
+    :ok = Lumis.Languages.load(languages)
   end
 
   defp input_bytes(workload) do

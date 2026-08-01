@@ -207,8 +207,9 @@ lumis themes generate \
 
 ## `lumis parsers cache`
 
-Cache exact, integrity-checked parser WASM files so highlighting doesn't trigger
-downloads at runtime.
+Download exact, integrity-checked parser WASM files ahead of time. Highlighting
+downloads what it needs anyway, so this is for machines with no network access,
+or to keep the download out of the first run.
 
 ```bash title="Selected parsers"
 lumis parsers cache rust javascript elixir

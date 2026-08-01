@@ -33,8 +33,8 @@ export function renderWasm() {
                 <dd class="mt-1 font-mono text-xs leading-relaxed text-zinc-500">Every language includes highlight queries and injection support, tested for conformance.</dd>
               </div>
               <div class="border-l-2 border-zinc-200 py-1 pl-5 dark:border-zinc-800">
-                <dt class="font-mono text-sm font-medium text-zinc-900 dark:text-white">Loaded only when you say so</dt>
-                <dd class="mt-1 font-mono text-xs leading-relaxed text-zinc-500">A parser is compiled code, so you choose which ones run, not the document. Nothing loads implicitly in any runtime, and a preset bundle covers you when you want them all.</dd>
+                <dt class="font-mono text-sm font-medium text-zinc-900 dark:text-white">Loaded when a document needs them</dt>
+                <dd class="mt-1 font-mono text-xs leading-relaxed text-zinc-500">Highlighting fetches, verifies and loads what a document turns out to name, including languages injected inside it, in a single pass. One it cannot fetch costs that block, not the document. Load ahead of time to keep the download off a first request.</dd>
               </div>
               <div class="border-l-2 border-zinc-200 py-1 pl-5 dark:border-zinc-800">
                 <dt class="font-mono text-sm font-medium text-zinc-900 dark:text-white">Persistent and verified</dt>

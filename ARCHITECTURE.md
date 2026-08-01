@@ -38,20 +38,26 @@
 +-----------------------------+--------------------------------+
                               |
                               v
-+--------------------------+   +--------------------------+   +-------------------------+
-| lumis (Rust crate)       |   | lumis-wasm-runtime      |   | javascript/lumis (npm)  |
-| native parser features   |   | shared dynamic WASM     |   | web-tree-sitter + WASM  |
-+--------------------------+   +------------+-------------+   +------------+------------+
-                                               |                              |
-                                  +------------+------------+                 |
-                                  |                         |                 |
-                                  v                         v                 v
-                           +--------------+          +----------------+  +----------------+
-                           | lumis-cli    |          | elixir/lumis   |  | browser / Node |
-                           | Rust binary  |          | Rustler NIF    |  | runtime        |
-                           +--------------+          +----------------+  +----------------+
-                                  |                         |                 |
-                                  +-------------------------+-----------------+
++--------------------------+   +---------------------------------------------------+
+| lumis (Rust crate)       |   | lumis-wasm-runtime                                |
+| native parser features   |   | resolve + verify + cache + one-pass highlighting  |
++--------------------------+   +----+-------------------+----------------------+---+
+                                    |                   |                      |
+                                    v                   v                      v
+                            +--------------+   +----------------+   +--------------------+
+                            | lumis-cli    |   | elixir/lumis   |   | lumis-js-native    |
+                            | Rust binary  |   | Rustler NIF    |   | Node napi addon    |
+                            +------+-------+   +--------+-------+   +---------+----------+
+                                   |                    |                     |
+                                   |                    |                     v
+                                   |                    |          +------------------------+
+                                   |                    |          | javascript/lumis (npm) |
+                                   |                    |          | addon on Node,         |
+                                   |                    |          | web-tree-sitter in the |
+                                   |                    |          | browser                |
+                                   |                    |          +-----------+------------+
+                                   |                    |                      |
+                                   +--------------------+----------------------+
                                                             |
                                                             v
                                                  +---------------------------+
@@ -127,33 +133,68 @@ installed/local parser -> persistent verified parser cache -> exact-version CDN 
                                   +-> persistent Wasmtime compiled cache
 ```
 
-### Loading is explicit in every runtime
+### Highlighting loads what a document needs, in one pass
 
-A caller loads the languages it intends to highlight; nothing is loaded because
-a document asked for it. That applies to injected languages too, so a Markdown
-file with a fenced Rust block renders that block unhighlighted unless Rust was
-loaded. The three runtimes previously disagreed here — the CLI and JavaScript
-skipped an unloaded injection while Elixir fetched it and re-highlighted — which
-made the same input produce different output per runtime.
+Highlighting a document resolves, downloads, verifies and loads whatever it
+turns out to name. A Markdown file with a fenced Rust block highlights that
+block, without Rust having been mentioned anywhere in the calling code. Nothing
+is configured, nothing is enumerated.
 
-Two reasons for the stricter rule. A parser is a WebAssembly module fetched from
-a registry and executed in the host process, so which modules run is a decision
-the application should make rather than one untrusted input makes for it;
-integrity metadata proves a parser is the one its package named, not that you
-wanted that parser. And a load is a download, a verification and a grammar
-compile, so doing it implicitly moves that cost into whichever request first
-mentions the language.
+The three runtimes used to disagree here — the CLI and JavaScript skipped an
+unloaded injection while Elixir fetched it and re-highlighted — so the same
+input produced different output per runtime. What removed the disagreement was
+making one implementation serve all three, not making the rule stricter.
 
-Each runtime has a whole-catalog escape hatch — `@lumis-sh/wasm-bundle-full`,
-`Lumis.Languages.load(:all)`, `lumis parsers cache --all` — so the strict
-default costs one explicit line, not a per-language inventory.
+**One pass, not two.** `Runtime::highlight` hands Tree-sitter a callback for
+injected languages, and that callback loads. So the walk descends into the
+language it just fetched and finds whatever *that* language injects, however
+deep the nesting goes. The alternatives were both worse: highlighting twice
+throws away the first pass, and a separate discovery pass has to re-run the
+injections query per nesting level, which measured at 32% of a full pass and
+still cannot see past the layers it has already loaded.
+
+**A failure costs one block.** A thousand-line document with ten languages must
+not fail because one fenced block names something unpublished. An injected
+language that cannot be fetched leaves its content plain and the walk carries
+on. Only the root language failing is an error the caller sees.
+
+**Loading is cheap; downloading is not.** A load is 3-15 ms the first time and
+about 0.3 ms after, against a download measured in hundreds. That is why loading
+in the request path is fine and why `load` still exists: to move the *download*
+off a user's first request, not to gate anything.
+
+In Elixir it is cheaper still, because loading is global to the VM. One
+`Runtime` lives in the NIF, so the first process to need a language pays, and
+every process after it does not.
+
+Browsers are the exception. `web-tree-sitter` loads asynchronously, so a parser
+cannot be fetched inside a synchronous walk; an injected language has to be
+loaded before the document mentioning it. Node runs the native addon
+specifically so it does not inherit that limit, and falls back to
+`web-tree-sitter` only where no addon is built.
 
 Everything a runtime persists lives under one directory, named by
 `LUMIS_DATA_DIR`: `parsers/` for language packages and parser WASM, `themes/`
 for the CLI's custom themes, `compiled/` for Wasmtime's module cache. The CLI,
 Elixir and Node write the same filenames into `parsers/`, so one prepared
-directory serves all three. Browsers use CacheStorage instead, having no
-filesystem, and Elixir still checks release-local `priv/wasm` first. Parser cache keys
-contain the parser name, package version, and digest, so upgrades do not
+directory serves all three, and `LUMIS_WASM_PATH` names a second directory that
+is read before the cache and never written to, for parsers you build or vendor
+yourself. Browsers use CacheStorage instead, having no filesystem. Parser cache
+keys contain the parser name, package version, and digest, so upgrades do not
 overwrite older verified assets. Cached metadata can be refreshed independently
 while stale validated metadata remains usable if the refresh fails.
+
+### Preparing a cache instead of downloading
+
+A host with no network access downloads at build time instead:
+
+```sh
+lumis parsers cache rust javascript      # CLI
+mix lumis.languages.cache rust javascript # Elixir
+```
+
+Both write a self-sufficient directory — parser bytes plus the `language.json`
+that names them — so pointing `LUMIS_DATA_DIR` at it is all a deployment needs.
+Both go through `LanguageStore::cache_language`, which needs no Wasmtime
+runtime, so the two commands cannot disagree about what a prepared cache
+contains.

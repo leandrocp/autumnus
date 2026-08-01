@@ -38,18 +38,37 @@ Shared behavior belongs in one Rust crate that every runtime consumes. A second 
 - When a runtime genuinely cannot call into Rust, such as the browser, the Rust crate still defines the behavior, and the port must be covered by a test that pins both against the same input.
 - Two copies of the same algorithm require a test that pins them to each other, and deleting one copy is better still. `definitionHash` was computed in both `crates/dev` and a Python release script until the script was ported into `crates/dev`; "the CI job has no Rust toolchain" is a workflow line to add, not a reason to reimplement.
 
-### Loading a language is the caller's decision
+### Highlighting loads what a document needs, in one pass
 
 A parser is a WebAssembly module fetched from a registry and executed in the
-host process. Nothing loads one implicitly: not the named language, not a
-language injected inside a document. An injected language that was not loaded
-leaves its content unhighlighted, in every runtime.
+host process. Highlighting resolves, downloads, verifies and loads whatever a
+document turns out to name, including languages injected inside it, and caches
+them for every later request. Nothing has to be declared up front.
 
-Do not add a convenience path that loads on demand. It hands the choice of what
-compiled code runs to whatever input arrived, and it moves a download, a
-verification and a grammar compile into the request that first mentions the
-language. `ARCHITECTURE.md` has the full reasoning; each runtime already has a
-whole-catalog escape hatch for callers who do not want to enumerate.
+Three rules hold that together, and a change that breaks any of them is wrong:
+
+- **One pass.** An injected language is loaded during the walk that discovered
+  it, not by highlighting the document twice or by scanning it first. That is
+  why `Runtime::highlight` takes a callback that can load: the walk descends
+  into the language it just fetched and finds whatever *that* contains, however
+  deep the nesting goes.
+- **A failure costs one block, not the document.** A thousand-line Markdown file
+  with one fenced block in an unpublished language still highlights; that block
+  stays plain. Only the root language failing is an error.
+- **One implementation.** `LanguageStore` resolves and caches; `Runtime` loads
+  and highlights. The CLI, the Elixir NIF and the Node addon all call them, so
+  none of them can drift.
+
+Browsers are the exception, and only because loading is asynchronous there:
+`web-tree-sitter` cannot fetch a parser inside a synchronous walk, so an
+injected language has to be loaded before the document mentioning it. Node uses
+the native addon precisely so it does not inherit that limit. Do not "fix" the
+browser by making the other runtimes match it.
+
+`ARCHITECTURE.md` has the full reasoning, including why pre-loading is an
+optimization rather than a requirement: loading is 3-15 ms and downloading is
+the expensive stage, so `load` exists to move a download off the first request,
+not to gate anything.
 
 ### Route work through `mise`
 

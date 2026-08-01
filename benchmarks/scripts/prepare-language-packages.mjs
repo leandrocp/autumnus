@@ -17,8 +17,13 @@ const packageNames = Object.keys(benchmarkPackage.dependencies)
   .filter((name) => name.startsWith("@lumis-sh/wasm-"))
   .sort();
 
+// Also laid out the way LanguageStore reads a source directory, so the CLI,
+// Elixir and Node benchmarks all resolve from these bytes without a network.
+const storeDir = resolve(outputDir, "parsers");
+
 await rm(outputDir, { recursive: true, force: true });
 await mkdir(outputDir, { recursive: true });
+await mkdir(storeDir, { recursive: true });
 
 const index = {};
 for (const packageName of packageNames) {
@@ -43,30 +48,30 @@ for (const packageName of packageNames) {
 
   await mkdir(directory, { recursive: true });
   await copyFile(wasmPath, localWasmPath);
-  await writeFile(
-    metadataPath,
-    `${JSON.stringify(
-      {
-        packageName,
-        version: packageJson.version,
-        definitionHash,
-        parser: {
-          name: wasmName,
-          grammarName,
-          sha256,
-          size: wasm.byteLength,
-        },
-        languages: {
-          [language]: {
-            aliases: [],
-            ...queries,
-          },
+  await copyFile(wasmPath, resolve(storeDir, `${wasmName}-${packageJson.version}-${sha256}.wasm`));
+  const document = `${JSON.stringify(
+    {
+      packageName,
+      version: packageJson.version,
+      definitionHash,
+      parser: {
+        name: wasmName,
+        grammarName,
+        sha256,
+        size: wasm.byteLength,
+      },
+      languages: {
+        [language]: {
+          aliases: [],
+          ...queries,
         },
       },
-      null,
-      2,
-    )}\n`,
-  );
+    },
+    null,
+    2,
+  )}\n`;
+  await writeFile(metadataPath, document);
+  await writeFile(resolve(storeDir, `${language}.language.json`), document);
 
   index[packageName] = {
     language,

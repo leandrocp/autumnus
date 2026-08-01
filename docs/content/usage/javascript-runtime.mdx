@@ -172,7 +172,9 @@ Useful for dropdowns, config validation, and docs tooling:
 
 ## Runtime notes
 
-- `@lumis-sh/lumis` uses `web-tree-sitter` and per-language parser WASM by default
+- on Node, `@lumis-sh/lumis` highlights through a native addon, the same Wasmtime runtime the Lumis CLI and Elixir bindings use, so all three produce identical output and load parsers the same way
+- browsers and any platform with no prebuilt addon use `web-tree-sitter` and per-language parser WASM
+- the addon carries no parsers: it is about 11 MiB per platform and downloads each parser on first use
 - the package uses conditional exports so Node and web-standard runtimes get the right entry point automatically
 - every language package contains matching queries plus an exact parser version, size, and SHA-256 digest
 - Node caches language-package metadata and verified parser WASM in the platform user cache directory; `LUMIS_DATA_DIR` overrides it
@@ -181,13 +183,22 @@ Useful for dropdowns, config validation, and docs tooling:
 - non-Node usage usually relies on remote parser assets unless you override the resolver, use `withWasm()` with a single npm parser package such as `@lumis-sh/wasm-json`, or use `withWasmBundle()` with a bundle package such as `@lumis-sh/wasm-bundle-web`
 - Bun and Deno are also supported
 
+## Injected languages
+
+On Node, highlighting loads a language injected inside a document during the
+same pass that finds it, so a Markdown file with a fenced Rust block highlights
+that block without Rust being named anywhere in your code. A language that
+cannot be fetched leaves its own block plain rather than failing the document.
+
+In a browser this does not happen: loading is asynchronous there and cannot run
+inside a synchronous walk, so load the injected languages yourself, or use a
+bundle such as `@lumis-sh/wasm-bundle-web`. See
+[Highlighting loads what a document needs](/advanced/wasm-and-cdn#highlighting-loads-what-a-document-needs).
+
 ## Prepare parsers for deployment
 
-Do this for every language you expect to render, including languages injected
-inside another. Nothing loads implicitly — see
-[Load what you intend to highlight](/advanced/wasm-and-cdn#load-what-you-intend-to-highlight).
-For Node deployments, populate a project or image-local cache before the
-application starts:
+For a host with no network access, populate a project or image-local cache
+before the application starts:
 
 ```bash
 npx lumis-wasm-cache javascript html css --output ./wasm-cache

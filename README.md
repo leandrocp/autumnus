@@ -82,9 +82,11 @@ import dracula from '@lumis-sh/themes/dracula'
 const html = await highlight('const x = 1', htmlInline({ language: javascript, theme: dracula }))
 ```
 
-JavaScript loads exact, integrity-checked parser WASM for the languages you
-declare. Nothing loads implicitly, so a language you did not ask for is not
-highlighted. Node uses a persistent user cache, browsers use CacheStorage, and
+On Node, highlighting runs through a native addon over the same Wasmtime runtime
+the CLI and Elixir use. It downloads, verifies and loads whatever a document
+turns out to need, including languages injected inside it, and caches them for
+every later call. Browsers use `web-tree-sitter` and CacheStorage, where an
+injected language has to be loaded first because loading is asynchronous there.
 `lumis-wasm-cache` prepares deployment-local parser assets ahead of time.
 
 ### [Browsers / CDN](https://www.npmjs.com/package/@lumis-sh/lumis)
@@ -106,10 +108,11 @@ const html = await highlight('const x = 1', htmlInline({ language: javascript, t
 Lumis.highlight!("const x = 1", formatter: {:html_inline, language: "javascript", theme: "dracula"})
 ```
 
-Elixir uses the same per-language parser WASM model. Load what you intend to
-highlight, including languages injected inside other ones: `Lumis.Languages.load/1`
-at application startup, or `mix lumis.languages.cache` while building an OTP
-release. `Lumis.Languages.load(:all)` takes the whole catalog.
+Elixir runs the same Wasmtime runtime through a NIF, so it highlights a document
+and everything injected inside it in one pass, downloading what it needs.
+Loading is global to the VM. Use `Lumis.Languages.load/1` at startup to keep the
+first download off a user's request, or `mix lumis.languages.cache` while
+building a release that has to run without network access.
 
 ### [Java](https://github.com/roastedroot/lumis4j)
 

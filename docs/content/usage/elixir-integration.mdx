@@ -51,56 +51,93 @@ Omitting `language` from the formatter enables auto-detection.
 
 ## Parser loading
 
-Lumis highlights only what you have loaded. `Lumis.highlight/2` raises for a
-language that is not loaded, and a language injected inside a document is left
-unhighlighted unless it was loaded too, so load a document's injected languages
-as well as its own.
+`Lumis.highlight/2` downloads, verifies and loads whatever a document turns out
+to name, including languages injected inside it, and caches them for every later
+request. Nothing has to be declared up front:
 
-Parser WASM is packaged with matching queries and integrity metadata, then
-cached in the platform user cache directory. It first checks release-local
-`priv/wasm`, so production releases do not need a runtime download.
+````elixir
+# Loads markdown, then elixir for the fenced block, in one pass.
+Lumis.highlight!("""
+# Title
 
 ```elixir
+defmodule Demo do
+end
+```
+""", formatter: {:html_inline, language: "markdown"})
+````
+
+A language that cannot be fetched leaves its own block plain rather than failing
+the document. Only the document's own language failing raises.
+
+Loading is global to the VM. One runtime lives in the NIF, so the first process
+to need a language pays for it and every process after it does not.
+
+### Loading ahead of time
+
+Loading a parser takes 3-15 ms the first time and about 0.3 ms after;
+*downloading* one is the expensive part. Load at startup when you would rather
+not have a first request pay for it:
+
+```elixir title="lib/my_app/application.ex"
 :ok = Lumis.Languages.load(["markdown", "elixir", "json"])
 :ok = Lumis.Languages.load(:all)
 ```
 
-Configure which languages a release bundles, then run the task. Configuration is
-the only place the set is defined, so a release cannot disagree with development:
+### Releases without network access
 
-```elixir title="config/prod.exs"
-config :lumis, bundled_languages: ~w(elixir html javascript css)
+```bash
+mix lumis.languages.cache elixir html javascript css
+mix lumis.languages.cache --all
 ```
 
-```bash title="Bundle parsers into the release"
-MIX_ENV=prod mix do compile, lumis.languages.cache, release
+Parsers land under `LUMIS_DATA_DIR`, which defaults to the user data directory.
+The result is self-sufficient — parser bytes plus the metadata naming them — so
+pointing a container at it needs nothing else. `--force` replaces files that
+already verify, and `--output` writes somewhere other than `LUMIS_DATA_DIR`.
+
+Wasmtime persists compiled modules under the same directory, so a later VM start
+does not recompile the same parser.
+
+### Where parsers come from
+
+Each is taken from the first place that has it:
+
+1. `:wasm_path`, for parsers you build or vendor yourself
+2. the cache under `:data_dir`
+3. the CDN
+
+Both directories default to `LUMIS_WASM_PATH` and `LUMIS_DATA_DIR`, and both can
+be set in configuration instead, which is what a release usually wants:
+
+```elixir title="config/runtime.exs"
+config :lumis,
+  data_dir: "/app/lumis",
+  wasm_path: "/app/parsers"
 ```
 
-Use `bundled_languages: :all` to bundle the whole catalog, `--force` to replace
-files that already verify, and `--output` to write somewhere other than
-`priv/wasm`.
+Bytes are checked against the size and SHA-256 their package declares before
+use, and anything that fails is discarded rather than trusted, so a corrupted
+cache repairs itself.
 
-```elixir
-:ok = Lumis.Languages.load(["elixir", "html", "javascript", "css"])
-```
+### Upgrading from 0.6
 
-Load every language you expect to render during application startup — see
-[Load what you intend to highlight](/advanced/wasm-and-cdn#load-what-you-intend-to-highlight).
-Wasmtime persists compiled modules across VM restarts. Set
-`LUMIS_DATA_DIR` to override the parser and compiled-module cache root.
+Highlighting used to raise for a language that had not been loaded, and left
+injected languages unhighlighted. It now loads them, so `Lumis.Languages.load/1`
+becomes an optimization rather than a requirement.
 
-A custom `:wasm_resolver` application setting can return `{:ok, bytes}`,
-`{:file, path}`, or a URL:
+Four things were removed along with the Elixir-side download code, which now
+lives in the shared Rust store:
 
-```elixir
-config :lumis, :language_package_resolver, fn language ->
-  {:file, Path.join("/app/wasm", "#{Path.basename(language.package_name)}.language.json")}
-end
+| Removed | Use instead |
+| --- | --- |
+| `config :lumis, :bundled_languages` | name the languages: `mix lumis.languages.cache elixir html`, or `--all` |
+| `config :lumis, :wasm_resolver` | `config :lumis, wasm_path: "/app/parsers"` |
+| `config :lumis, :language_package_resolver` | `config :lumis, wasm_path: "/app/parsers"` |
+| release-local `priv/wasm` | `config :lumis, data_dir: "/app/lumis"`, or `LUMIS_DATA_DIR` |
 
-config :lumis, :wasm_resolver, fn parser ->
-  {:file, Path.join("/app/wasm", "#{parser.wasm_name}.wasm")}
-end
-```
+`mix lumis.languages.cache` takes language names or `--all` rather than reading
+configuration, matching `lumis parsers cache`.
 
 ## Discover supported languages and themes
 

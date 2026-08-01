@@ -4,8 +4,10 @@ Syntax Highlighter powered by Tree-sitter and Neovim themes.
 
 JavaScript/TypeScript package for [Lumis](https://lumis.sh). Works in Node.js, Bun, Deno, and browsers.
 
-Lumis uses `web-tree-sitter` and loads parser `.wasm` files per language on
-demand in every JavaScript runtime.
+On Node, Lumis highlights through a native addon over the same Wasmtime runtime
+the Lumis CLI and Elixir bindings use, so all three produce identical output.
+Browsers, and any platform with no prebuilt addon, use `web-tree-sitter`. Both
+load parser `.wasm` files per language on demand.
 
 ## Install
 
@@ -23,7 +25,13 @@ Each language import contains an exact parser package version, byte length, and
 SHA-256 digest. Lumis verifies downloaded or installed parser bytes before use
 and caches valid downloads persistently in Node and browser storage.
 
-Prepare a deployment cache before starting the application:
+On Node, highlighting also loads languages **injected inside** a document during
+the same pass, so a Markdown file with a fenced Rust block highlights that block
+without Rust being named in your code. In a browser, load injected languages
+first, or use a bundle. See
+[JavaScript runtime](https://lumis.sh/docs/usage/javascript-runtime).
+
+For a host with no network access, prepare a cache before starting:
 
 ```sh
 npx lumis-wasm-cache javascript html css --output ./wasm-cache
