@@ -98,8 +98,8 @@ impl Fetcher for NoNetwork {
 pub struct StoreConfig {
     /// Directory holding cached `language.json` and parser files.
     pub cache_dir: PathBuf,
-    /// Consulted before the cache, matching Node and Elixir, which prefer an
-    /// installed package and release-local `priv/wasm` respectively.
+    /// Consulted before the cache and never written to, for parsers a caller
+    /// builds or vendors. `LUMIS_WASM_PATH` sets it in every runtime.
     pub source_dir: Option<PathBuf>,
 }
 
@@ -162,14 +162,11 @@ impl LanguageStore {
         Ok(self.remember(package_name, package))
     }
 
-    /// The package for `package_name` if it is already in memory or on disk.
-    ///
-    /// Never touches the network, so callers can render from cache alone.
-    #[must_use]
     /// The package from memory, a configured source directory, or the cache.
     ///
-    /// Everything except the network: a staged package is as explicit as a
-    /// cached one, so both count as available without downloading.
+    /// Everything except the network, so a caller can tell what is available
+    /// offline.
+    #[must_use]
     pub fn local_package(&self, package_name: &str) -> Option<Arc<LanguagePackage>> {
         if let Some(package) = self.memo(package_name) {
             return Some(package);
@@ -194,11 +191,10 @@ impl LanguageStore {
         self.fetch_parser(package, &self.parser_path(package))
     }
 
-    /// Verified parser bytes already on disk, if any. A file that fails
-    /// verification is deleted rather than returned.
-    #[must_use]
     /// Verified parser bytes from a configured source directory or the cache,
-    /// never the network.
+    /// never the network. A file that fails verification is deleted rather than
+    /// returned.
+    #[must_use]
     pub fn local_parser(&self, package: &LanguagePackage) -> Option<Vec<u8>> {
         self.source_parser(package)
             .or_else(|| self.cached_parser(package))
@@ -212,8 +208,8 @@ impl LanguageStore {
 
     /// Verified parser bytes from this store's own cache directory only.
     ///
-    /// `lumis parsers cache --directory` copies *into* a directory, so it has to
-    /// ask whether its own cache holds the parser, not whether one is reachable.
+    /// Caching copies *into* this directory, so it has to ask whether its own
+    /// cache holds the parser, not whether one is reachable from anywhere.
     pub fn cached_parser(&self, package: &LanguagePackage) -> Option<Vec<u8>> {
         let path = self.parser_path(package);
         if let Ok(bytes) = std::fs::read(&path) {
@@ -795,7 +791,10 @@ mod tests {
 
         let offline = make(dir.path(), Box::new(NoNetwork));
         assert_eq!(offline.parser(&package).unwrap(), WASM);
-        assert_eq!(offline.package("@lumis-sh/wasm-json").unwrap().version, "1.2.3");
+        assert_eq!(
+            offline.package("@lumis-sh/wasm-json").unwrap().version,
+            "1.2.3"
+        );
     }
 
     /// A parser staged in a source directory belongs in the cache too; a release
@@ -812,7 +811,10 @@ mod tests {
         )
         .unwrap();
         std::fs::write(
-            source.path().join("parsers").join(parser_filename(&package)),
+            source
+                .path()
+                .join("parsers")
+                .join(parser_filename(&package)),
             WASM,
         )
         .unwrap();

@@ -10,6 +10,7 @@ use lumis_core::formatter::Formatter as CoreFormatter;
 use lumis_core::formatter::TerminalBackground;
 use lumis_core::languages::Language;
 use lumis_wasm_runtime::tree_sitter_highlight::ParsedLayer;
+use lumis_wasm_runtime::{HighlightOptions, HighlightOutput};
 use serde::Serialize;
 use std::fmt::Display;
 use std::fs;
@@ -395,21 +396,17 @@ fn cache_parsers(
     let mut errors = Vec::new();
     for name in &names {
         let language_id = resolve_language_id(name);
-        let parser_path = reg.parser_path(language_id)?;
-        if !force && reg.is_cached(language_id) {
-            if verbose {
-                eprintln!("{}: {}", name, parser_path.display());
-            }
-            continue;
-        }
-        match reg.download_parser(language_id) {
-            Ok(_) => {
-                if verbose {
+        let already_cached = !force && reg.is_cached(language_id);
+        match reg.cache_parser(language_id, force) {
+            Ok(path) => {
+                if verbose && already_cached {
+                    eprintln!("{}: {}", name, path.display());
+                } else if verbose {
                     eprintln!(
                         "{}: {} -> {}",
                         name,
                         reg.parser_download_url(language_id)?,
-                        parser_path.display()
+                        path.display()
                     );
                 }
             }
@@ -674,7 +671,7 @@ fn dump_events(
     language: Option<String>,
 ) -> Result<()> {
     let (source, lang) = read_source(path, language)?;
-    let events = highlight_to_events(reg, &source, dump_language(lang)?)?
+    let events = highlight_to_events(reg, &source, dump_language(lang)?, false)?
         .into_iter()
         .map(|event| match event {
             HighlightEvent::Start {
@@ -1187,11 +1184,7 @@ fn do_highlight(
     }
 
     let lang_name = lang.id_name();
-    let mut events = highlight_to_events(reg, &source, lang_name)?;
-    if rainbow_brackets {
-        let ranges = reg.rainbow_ranges(lang_name, &source)?;
-        events = overlay_rainbow_ranges(&events, &ranges, lang.id_name());
-    }
+    let events = highlight_to_events(reg, &source, lang_name, rainbow_brackets)?;
 
     let parsed_highlight_lines = if let Some(lines_str) = highlight_lines {
         Some(parse_highlight_lines(&lines_str)?)
@@ -1214,68 +1207,6 @@ fn do_highlight(
         parsed_highlight_lines,
         verbose,
     )
-}
-
-fn overlay_rainbow_ranges(
-    events: &[HighlightEvent],
-    ranges: &[registry::RainbowRange],
-    language: &str,
-) -> Vec<HighlightEvent> {
-    let mut output = Vec::with_capacity(events.len() + ranges.len() * 3);
-    let mut range_index = 0usize;
-
-    for event in events {
-        match event {
-            HighlightEvent::Source { start, end } => {
-                let mut cursor = *start;
-
-                while range_index < ranges.len() && ranges[range_index].end <= *start {
-                    range_index += 1;
-                }
-
-                let mut next_index = range_index;
-                while next_index < ranges.len() {
-                    let range = &ranges[next_index];
-                    if range.start >= *end {
-                        break;
-                    }
-                    if range.start < *start || range.end > *end {
-                        next_index += 1;
-                        continue;
-                    }
-
-                    if cursor < range.start {
-                        output.push(HighlightEvent::Source {
-                            start: cursor,
-                            end: range.start,
-                        });
-                    }
-
-                    output.push(HighlightEvent::Start {
-                        scope_index: range.scope_index,
-                        language: language.to_string(),
-                    });
-                    output.push(HighlightEvent::Source {
-                        start: range.start,
-                        end: range.end,
-                    });
-                    output.push(HighlightEvent::End);
-                    cursor = range.end;
-                    next_index += 1;
-                }
-
-                if cursor < *end {
-                    output.push(HighlightEvent::Source {
-                        start: cursor,
-                        end: *end,
-                    });
-                }
-            }
-            other => output.push(other.clone()),
-        }
-    }
-
-    output
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -1580,93 +1511,40 @@ fn relative_to_current(path: &Path) -> PathBuf {
     path.into()
 }
 
-struct HighlightOutput {
-    events: Vec<HighlightEvent>,
-    layers: Vec<ParsedLayer>,
-}
-
 fn highlight_output(
     reg: &registry::Registry,
     source: &str,
     lang_name: &str,
-    record_parsed_layers: bool,
-    include_injections: bool,
+    layers: bool,
+    injections: bool,
 ) -> Result<HighlightOutput> {
-    // Nothing is downloaded implicitly. `lumis parsers cache` is how a language
-    // gets here, so that highlighting is the same whatever the network is doing.
-    let config = reg.load_cached_config(lang_name)?.ok_or_else(|| {
-        anyhow::anyhow!(
-            "language '{lang_name}' is not cached; run `lumis parsers cache {lang_name}`"
-        )
-    })?;
-    // Leak configs to satisfy the 'static lifetime required by the highlight callback.
-    // Acceptable because the CLI process exits after highlighting.
-    let config = Box::leak(Box::new(config));
-    let mut injected_configs: std::collections::HashMap<
-        String,
-        &'static lumis_wasm_runtime::tree_sitter_highlight::HighlightConfiguration,
-    > = std::collections::HashMap::new();
-
-    let mut highlighter = lumis_wasm_runtime::tree_sitter_highlight::Highlighter::new();
-    highlighter.record_parsed_layers(record_parsed_layers);
-    let wasm_store = reg.new_wasm_store()?;
-    highlighter
-        .parser()
-        .set_wasm_store(wasm_store)
-        .map_err(|e| anyhow::anyhow!("failed to set wasm store: {:?}", e))?;
-
-    // Injected languages are loaded lazily and only if their parsers were cached already.
-    let events = highlighter
-        .highlight(config, source.as_bytes(), None, |injected| {
-            if !include_injections {
-                return None;
-            }
-            if !injected_configs.contains_key(injected) {
-                if let Ok(Some(cfg)) = reg.load_cached_config(injected) {
-                    injected_configs.insert(injected.to_string(), Box::leak(Box::new(cfg)));
-                }
-            }
-
-            injected_configs.get(injected).copied()
-        })
-        .map_err(|e| anyhow::anyhow!("highlight init failed: {:?}", e))?;
-
-    let mut core_events = Vec::new();
-
-    for event in events {
-        let event = event.map_err(|e| anyhow::anyhow!("highlight event error: {:?}", e))?;
-
-        match event {
-            lumis_wasm_runtime::tree_sitter_highlight::HighlightEvent::Source { start, end } => {
-                core_events.push(HighlightEvent::Source { start, end });
-            }
-            lumis_wasm_runtime::tree_sitter_highlight::HighlightEvent::HighlightStart {
-                highlight,
-                language,
-            } => {
-                core_events.push(HighlightEvent::Start {
-                    scope_index: highlight.0,
-                    language,
-                });
-            }
-            lumis_wasm_runtime::tree_sitter_highlight::HighlightEvent::HighlightEnd => {
-                core_events.push(HighlightEvent::End);
-            }
-        }
-    }
-
-    Ok(HighlightOutput {
-        events: core_events,
-        layers: highlighter.take_parsed_layers(),
-    })
+    reg.highlight(
+        source,
+        lang_name,
+        &HighlightOptions {
+            layers,
+            injections,
+            ..HighlightOptions::default()
+        },
+    )
 }
 
 fn highlight_to_events(
     reg: &registry::Registry,
     source: &str,
     lang_name: &str,
+    rainbow_brackets: bool,
 ) -> Result<Vec<HighlightEvent>> {
-    Ok(highlight_output(reg, source, lang_name, false, true)?.events)
+    Ok(reg
+        .highlight(
+            source,
+            lang_name,
+            &HighlightOptions {
+                rainbow_brackets,
+                ..HighlightOptions::default()
+            },
+        )?
+        .events)
 }
 
 #[cfg(test)]
@@ -1718,7 +1596,7 @@ mod tests {
 </script>
 "#;
 
-        let events = highlight_to_events(&reg, source, "html").unwrap();
+        let events = highlight_to_events(&reg, source, "html", false).unwrap();
 
         assert!(events.iter().any(|event| matches!(
             event,

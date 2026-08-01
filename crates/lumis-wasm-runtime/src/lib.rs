@@ -57,7 +57,7 @@ pub use package::{
     sha256_hex, LanguagePackage, LanguagePackageError, PackagedLanguage, ParserMetadata,
 };
 #[cfg(feature = "wasm")]
-pub use runtime::{LanguageSpec, Runtime, RuntimeError};
+pub use runtime::{HighlightOptions, HighlightOutput, LanguageSpec, Runtime, RuntimeError};
 #[cfg(feature = "wasm")]
 pub use store::HttpFetcher;
 pub use store::{

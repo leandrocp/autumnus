@@ -1,44 +1,22 @@
 use anyhow::{Context, Result};
-use lumis_core::highlights::HIGHLIGHT_NAMES;
-pub use lumis_wasm_runtime::brackets::RainbowRange;
-use lumis_wasm_runtime::brackets::{self, bracket_pairs, colorize_bracket_pairs};
 use lumis_wasm_runtime::catalog;
-#[cfg(test)]
-use lumis_wasm_runtime::sha256_hex;
-use lumis_wasm_runtime::tree_sitter_highlight::HighlightConfiguration;
-#[cfg(test)]
-use lumis_wasm_runtime::write_atomic;
-use lumis_wasm_runtime::{HttpFetcher, LanguagePackage, LanguageStore, StoreConfig};
-use std::collections::HashMap;
+use lumis_wasm_runtime::{
+    HighlightOptions, HighlightOutput, HttpFetcher, LanguagePackage, LanguageStore, Runtime,
+    StoreConfig,
+};
 use std::path::{Path, PathBuf};
-use std::sync::{Arc, Mutex};
-use tree_sitter::{Parser, Query, Tree, WasmStore};
-use wasmtime::{Cache, Config, Engine};
+use std::sync::Arc;
+use tree_sitter::Tree;
 
-/// Highlighting on top of [`LanguageStore`], which owns resolution and caching.
+/// The CLI's view of [`Runtime`]: the same one-pass highlighting Elixir and Node
+/// use, plus the paths and cache reporting `lumis parsers` prints.
 pub struct Registry {
     data_dir: PathBuf,
-    store: LanguageStore,
-    engine: Engine,
-    wasm_store: Mutex<WasmStore>,
-    /// `WasmStore::load_language` re-instantiates the module, so these are kept.
-    grammars: Mutex<HashMap<String, tree_sitter::Language>>,
-    /// `None` records a grammar with no usable bracket query, so it is not retried.
-    brackets: Mutex<HashMap<String, Option<Arc<Query>>>>,
+    runtime: Runtime,
 }
 
 impl Registry {
     pub fn new(data_dir: PathBuf) -> Result<Self> {
-        let mut config = Config::new();
-        if let Ok(cache) = Cache::from_file(None::<&Path>) {
-            config.cache(Some(cache));
-        }
-        let engine = Engine::new(&config).unwrap_or_else(|error| {
-            eprintln!("warning: wasmtime cache config failed ({error}), using defaults");
-            Engine::default()
-        });
-        let wasm_store = Mutex::new(WasmStore::new(&engine)?);
-
         std::fs::create_dir_all(data_dir.join("parsers"))?;
         std::fs::create_dir_all(data_dir.join("themes"))?;
         let store = LanguageStore::new(
@@ -48,170 +26,64 @@ impl Registry {
             },
             Box::new(HttpFetcher),
         );
-        Ok(Self {
-            data_dir,
-            store,
-            engine,
-            wasm_store,
-            grammars: Mutex::new(HashMap::new()),
-            brackets: Mutex::new(HashMap::new()),
-        })
-    }
 
-    pub fn new_wasm_store(&self) -> Result<WasmStore> {
-        Ok(WasmStore::new(&self.engine)?)
-    }
-
-    pub fn parse_tree(&self, language: &str, source: &str) -> Result<Tree> {
-        let package = self.package(language)?;
-        let wasm = self.store.parser(&package)?;
-        let grammar = self.load_wasm_language(&package, &wasm)?;
-
-        let mut parser = Parser::new();
-        parser.set_wasm_store(self.new_wasm_store()?)?;
-        parser.set_language(&grammar)?;
-        parser
-            .parse(source.as_bytes(), None)
-            .ok_or_else(|| anyhow::anyhow!("parser returned no syntax tree for '{language}'"))
-    }
-
-    /// Highlighting never downloads, so this is the only loading path. `lumis
-    /// parsers cache` is what puts a language here.
-    pub fn load_cached_config(&self, language: &str) -> Result<Option<HighlightConfiguration>> {
-        self.load_config_inner(language)
-    }
-
-    pub fn rainbow_ranges(&self, language: &str, source: &str) -> Result<Vec<RainbowRange>> {
-        let package = self.package(language)?;
-        let (_, definition) = package.require_language(language)?;
-        if definition.brackets.trim().is_empty() {
-            return Ok(Vec::new());
+        let runtime = Runtime::with_worker_limit(1)?.with_store(store);
+        for language in catalog::LANGUAGES {
+            runtime.declare_language(language.id, language.aliases);
         }
 
-        let wasm = self.store.parser(&package)?;
-        let grammar = self.load_wasm_language(&package, &wasm)?;
-        let Some(query) = self.bracket_query(&package, &definition.brackets, &grammar)? else {
-            return Ok(Vec::new());
-        };
-
-        let mut parser = Parser::new();
-        parser.set_wasm_store(self.new_wasm_store()?)?;
-        parser.set_language(&grammar)?;
-        let Some(tree) = parser.parse(source.as_bytes(), None) else {
-            return Ok(Vec::new());
-        };
-
-        let pairs = bracket_pairs(&query, tree.root_node(), source.as_bytes());
-        Ok(colorize_bracket_pairs(pairs))
-    }
-
-    pub fn download_parser(&self, language: &str) -> Result<Vec<u8>> {
-        let package = self.package(language)?;
-        let parser = self.store.refresh_parser(&package)?;
-        self.store.cache_package(&package)?;
-        Ok(parser)
-    }
-
-    pub fn is_cached(&self, language: &str) -> bool {
-        self.local_package(language)
-            .is_some_and(|package| self.store.cached_parser(&package).is_some())
-    }
-
-    pub fn parser_path(&self, language: &str) -> Result<PathBuf> {
-        let package = self.package(language)?;
-        Ok(self.store.parser_path(&package))
-    }
-
-    pub fn parser_download_url(&self, language: &str) -> Result<String> {
-        let package = self.package(language)?;
-        Ok(LanguageStore::parser_url(&package))
-    }
-
-    fn package(&self, language: &str) -> Result<Arc<LanguagePackage>> {
-        let location =
-            catalog::find(language).with_context(|| format!("unknown language '{language}'"))?;
-        Ok(self.store.package(location.package_name)?)
-    }
-
-    fn local_package(&self, language: &str) -> Option<Arc<LanguagePackage>> {
-        let location = catalog::find(language)?;
-        self.store.local_package(location.package_name)
+        Ok(Self { data_dir, runtime })
     }
 
     pub fn data_dir(&self) -> &Path {
         &self.data_dir
     }
 
-    fn load_config_inner(&self, language: &str) -> Result<Option<HighlightConfiguration>> {
-        let Some(package) = self.local_package(language) else {
-            return Ok(None);
-        };
-        let (id, definition) = package.require_language(language)?;
-        if definition.highlights.is_empty()
-            && definition.injections.is_empty()
-            && definition.locals.is_empty()
-        {
-            return Ok(None);
-        }
-
-        let Some(wasm) = self.store.local_parser(&package) else {
-            return Ok(None);
-        };
-        let grammar = self.load_wasm_language(&package, &wasm)?;
-        let mut config = HighlightConfiguration::new(
-            grammar,
-            id,
-            &definition.highlights,
-            &definition.injections,
-            &definition.locals,
-        )
-        .with_context(|| format!("failed to create highlight config for {id}"))?;
-        config.configure(&HIGHLIGHT_NAMES);
-        Ok(Some(config))
+    pub fn parse_tree(&self, language: &str, source: &str) -> Result<Tree> {
+        Ok(self.runtime.parse_tree(source, language)?)
     }
 
-    fn load_wasm_language(
+    pub fn highlight(
         &self,
-        package: &LanguagePackage,
-        wasm: &[u8],
-    ) -> Result<tree_sitter::Language> {
-        let name = &package.parser.grammar_name;
-        if let Some(grammar) = self.lock(&self.grammars)?.get(name) {
-            return Ok(grammar.clone());
-        }
-
-        let grammar = {
-            let mut store = self
-                .wasm_store
-                .lock()
-                .map_err(|_| anyhow::anyhow!("Tree-sitter WASM store lock was poisoned"))?;
-            store.load_language(name, wasm)?
-        };
-        self.lock(&self.grammars)?
-            .insert(name.clone(), grammar.clone());
-        Ok(grammar)
+        source: &str,
+        language: &str,
+        options: &HighlightOptions,
+    ) -> Result<HighlightOutput> {
+        Ok(self.runtime.highlight_with(source, language, options)?)
     }
 
-    fn bracket_query(
-        &self,
-        package: &LanguagePackage,
-        brackets: &str,
-        grammar: &tree_sitter::Language,
-    ) -> Result<Option<Arc<Query>>> {
-        let name = &package.parser.grammar_name;
-        if let Some(query) = self.lock(&self.brackets)?.get(name) {
-            return Ok(query.clone());
-        }
-
-        let query = brackets::compile(grammar, brackets).map(Arc::new);
-        self.lock(&self.brackets)?
-            .insert(name.clone(), query.clone());
-        Ok(query)
+    /// Download and cache `language`, returning where its parser landed.
+    pub fn cache_parser(&self, language: &str, force: bool) -> Result<PathBuf> {
+        Ok(self.store().cache_language(language, force)?)
     }
 
-    fn lock<'a, T>(&self, cell: &'a Mutex<T>) -> Result<std::sync::MutexGuard<'a, T>> {
-        cell.lock()
-            .map_err(|_| anyhow::anyhow!("registry cache lock was poisoned"))
+    pub fn is_cached(&self, language: &str) -> bool {
+        self.local_package(language)
+            .is_some_and(|package| self.store().cached_parser(&package).is_some())
+    }
+
+    #[cfg(test)]
+    pub fn parser_path(&self, language: &str) -> Result<PathBuf> {
+        Ok(self.store().parser_path(self.package(language)?.as_ref()))
+    }
+
+    pub fn parser_download_url(&self, language: &str) -> Result<String> {
+        Ok(LanguageStore::parser_url(self.package(language)?.as_ref()))
+    }
+
+    fn store(&self) -> &LanguageStore {
+        self.runtime.store().expect("the CLI always has a store")
+    }
+
+    fn package(&self, language: &str) -> Result<Arc<LanguagePackage>> {
+        let location =
+            catalog::find(language).with_context(|| format!("unknown language '{language}'"))?;
+        Ok(self.store().package(location.package_name)?)
+    }
+
+    fn local_package(&self, language: &str) -> Option<Arc<LanguagePackage>> {
+        let location = catalog::find(language)?;
+        self.store().local_package(location.package_name)
     }
 
     #[cfg(test)]
@@ -224,16 +96,15 @@ impl Registry {
         injections: &str,
         locals: &str,
     ) {
-        use lumis_wasm_runtime::{PackagedLanguage, ParserMetadata};
+        use lumis_wasm_runtime::{sha256_hex, write_atomic, PackagedLanguage, ParserMetadata};
 
         let location = catalog::find(id).unwrap();
-        let parser_name = format!("tree-sitter-{grammar_name}");
         let package = LanguagePackage {
             package_name: location.package_name.into(),
             version: "test".into(),
             definition_hash: "test".into(),
             parser: ParserMetadata {
-                name: parser_name,
+                name: format!("tree-sitter-{grammar_name}"),
                 grammar_name: grammar_name.into(),
                 upstream_version: None,
                 revision: None,
@@ -251,11 +122,11 @@ impl Registry {
             )]),
         };
         write_atomic(
-            &self.store.package_path(location.package_name),
+            &self.store().package_path(location.package_name),
             serde_json::to_string(&package).unwrap().as_bytes(),
         )
         .unwrap();
-        write_atomic(&self.store.parser_path(&package), wasm).unwrap();
+        write_atomic(&self.store().parser_path(&package), wasm).unwrap();
     }
 }
 
@@ -266,7 +137,6 @@ pub fn all_language_ids() -> impl Iterator<Item = &'static str> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use lumis_wasm_runtime::{PackagedLanguage, ParserMetadata};
     use tempfile::tempdir;
 
     const RUST_WASM: &[u8] = include_bytes!(
@@ -276,34 +146,14 @@ mod tests {
     fn cached_rust_registry() -> (tempfile::TempDir, Registry) {
         let dir = tempdir().unwrap();
         let registry = Registry::new(dir.path().to_path_buf()).unwrap();
-        let package = LanguagePackage {
-            package_name: "@lumis-sh/wasm-rust".into(),
-            version: "test".into(),
-            definition_hash: "test".into(),
-            parser: ParserMetadata {
-                name: "tree-sitter-rust".into(),
-                grammar_name: "rust".into(),
-                upstream_version: None,
-                revision: None,
-                sha256: sha256_hex(RUST_WASM),
-                size: RUST_WASM.len(),
-            },
-            languages: std::collections::BTreeMap::from([(
-                "rust".into(),
-                PackagedLanguage {
-                    highlights: "(function_item \"fn\" @keyword.function)".into(),
-                    brackets: "(\"(\" @open \")\" @close)".into(),
-                    ..PackagedLanguage::default()
-                },
-            )]),
-        };
-        let package_path = registry.store.package_path(&package.package_name);
-        write_atomic(
-            &package_path,
-            serde_json::to_string(&package).unwrap().as_bytes(),
-        )
-        .unwrap();
-        write_atomic(&registry.store.parser_path(&package), RUST_WASM).unwrap();
+        registry.cache_test_language(
+            "rust",
+            "rust",
+            RUST_WASM,
+            "(function_item \"fn\" @keyword.function)",
+            "",
+            "",
+        );
         (dir, registry)
     }
 
@@ -312,7 +162,11 @@ mod tests {
         let (_dir, registry) = cached_rust_registry();
         let tree = registry.parse_tree("rust", "fn main() {}").unwrap();
         assert_eq!(tree.root_node().kind(), "source_file");
-        assert!(registry.load_cached_config("rust").unwrap().is_some());
+
+        let output = registry
+            .highlight("fn main() {}", "rust", &HighlightOptions::default())
+            .unwrap();
+        assert!(!output.events.is_empty());
     }
 
     #[test]

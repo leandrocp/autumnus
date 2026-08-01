@@ -5,7 +5,7 @@ use lumis_core::highlights::HIGHLIGHT_NAMES;
 use std::collections::HashMap;
 use std::sync::{Arc, Condvar, Mutex, OnceLock, RwLock};
 use thiserror::Error;
-use tree_sitter::{Parser, Query, WasmStore};
+use tree_sitter::{Parser, Query, Tree, WasmStore};
 use wasmtime::{Cache, CacheConfig, Config, Engine};
 
 use crate::brackets::{bracket_pairs, colorize_bracket_pairs, RainbowRange};
@@ -420,6 +420,46 @@ impl Runtime {
         name_or_alias: &str,
         rainbow_brackets: bool,
     ) -> Result<Vec<HighlightEvent>, RuntimeError> {
+        self.highlight_with(
+            source,
+            name_or_alias,
+            &HighlightOptions {
+                rainbow_brackets,
+                ..HighlightOptions::default()
+            },
+        )
+        .map(|output| output.events)
+    }
+
+    /// Parse `source` without highlighting it, for tools that want the tree.
+    ///
+    /// # Errors
+    /// Fails when the language cannot be loaded or the parser returns no tree.
+    pub fn parse_tree(&self, source: &str, name_or_alias: &str) -> Result<Tree, RuntimeError> {
+        let loaded = self.load_through_store(name_or_alias)?;
+        let mut lease = self.workers.lease()?;
+        let parser = lease.worker().highlighter.parser();
+        parser
+            .set_language(&loaded.highlight.language)
+            .map_err(|error| RuntimeError::Parser {
+                language: name_or_alias.to_string(),
+                message: error.to_string(),
+            })?;
+        parser.parse(source.as_bytes(), None).ok_or_else(|| {
+            RuntimeError::Highlight(format!("parser returned no tree for '{name_or_alias}'"))
+        })
+    }
+
+    /// Highlight, with control over injections and the parsed layers.
+    ///
+    /// # Errors
+    /// Fails when the root language cannot be loaded, or highlighting does.
+    pub fn highlight_with(
+        &self,
+        source: &str,
+        name_or_alias: &str,
+        options: &HighlightOptions,
+    ) -> Result<HighlightOutput, RuntimeError> {
         let root = self.load_through_store(name_or_alias)?;
         let (root_id, languages, aliases) = {
             let catalog = self.catalog.read().expect("language catalog lock poisoned");
@@ -437,6 +477,7 @@ impl Runtime {
 
         let mut lease = self.workers.lease()?;
         let worker = lease.worker();
+        worker.highlighter.record_parsed_layers(options.layers);
         // Holds languages loaded during this walk. The callback has to hand back a
         // reference that outlives it, and an arena gives a stable address while
         // still allowing inserts, which a RefCell<Vec<_>> cannot.
@@ -445,6 +486,9 @@ impl Runtime {
         let events = worker
             .highlighter
             .highlight(&root.highlight, source.as_bytes(), None, |injected| {
+                if !options.injections {
+                    return None;
+                }
                 let id = aliases
                     .get(injected)
                     .map(String::as_str)
@@ -464,32 +508,63 @@ impl Runtime {
             })
             .map_err(|error| RuntimeError::Highlight(error.to_string()))?;
 
-        let mut output = Vec::new();
+        let mut collected = Vec::new();
         for event in events {
             match event.map_err(|error| RuntimeError::Highlight(error.to_string()))? {
                 crate::tree_sitter_highlight::HighlightEvent::Source { start, end } => {
-                    output.push(HighlightEvent::Source { start, end });
+                    collected.push(HighlightEvent::Source { start, end });
                 }
                 crate::tree_sitter_highlight::HighlightEvent::HighlightStart {
                     highlight,
                     language,
-                } => output.push(HighlightEvent::Start {
+                } => collected.push(HighlightEvent::Start {
                     scope_index: highlight.0,
                     language,
                 }),
                 crate::tree_sitter_highlight::HighlightEvent::HighlightEnd => {
-                    output.push(HighlightEvent::End);
+                    collected.push(HighlightEvent::End);
                 }
             }
         }
 
-        if rainbow_brackets {
+        if options.rainbow_brackets {
             let ranges = rainbow_ranges(worker.highlighter.parser(), &root, source)?;
-            output = apply_rainbow_brackets(output, ranges, &root_id);
+            collected = apply_rainbow_brackets(collected, ranges, &root_id);
         }
 
-        Ok(output)
+        Ok(HighlightOutput {
+            events: collected,
+            layers: worker.highlighter.take_parsed_layers(),
+        })
     }
+}
+
+/// What a highlight pass should do beyond producing events.
+#[derive(Debug)]
+pub struct HighlightOptions {
+    /// Colourize matching bracket pairs in the root language.
+    pub rainbow_brackets: bool,
+    /// Descend into languages injected inside the document.
+    pub injections: bool,
+    /// Keep the tree parsed for each layer, for tools that inspect them.
+    pub layers: bool,
+}
+
+impl Default for HighlightOptions {
+    fn default() -> Self {
+        Self {
+            rainbow_brackets: false,
+            injections: true,
+            layers: false,
+        }
+    }
+}
+
+/// The result of a highlight pass. `layers` is empty unless
+/// [`HighlightOptions::layers`] asked for them.
+pub struct HighlightOutput {
+    pub events: Vec<HighlightEvent>,
+    pub layers: Vec<crate::tree_sitter_highlight::ParsedLayer>,
 }
 
 fn cached_engine() -> Result<Engine, wasmtime::Error> {
