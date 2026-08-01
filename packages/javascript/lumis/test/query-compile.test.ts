@@ -146,6 +146,9 @@ function publishedParser(
 function resolveParser(id: string, entry: ParserEntry): { path: string } | { unavailable: string } {
   const fromPackage = publishedParser(id, entry);
   if ("path" in fromPackage) return fromPackage;
+  // `compile-published` asks what npm ships can do, so a locally built or
+  // committed parser must not answer for it.
+  if (publishedOnly) return fromPackage;
 
   const parser = wasmName(id, entry);
 
@@ -200,6 +203,9 @@ const selected = chosen.filter(([id]) => !cannotCompile.has(id));
  * run must reach complete coverage and the waiver must not excuse anything.
  */
 const requireCompleteCoverage = process.env.LUMIS_QUERY_COVERAGE === "complete";
+
+/** Judge only what npm publishes, ignoring built and committed parsers. */
+const publishedOnly = process.env.LUMIS_QUERY_PARSERS === "published";
 
 const resolved = new Map<string, { path: string } | { unavailable: string }>(
   selected.map(([id, entry]) => [id, resolveParser(id, entry)]),
