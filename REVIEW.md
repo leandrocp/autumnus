@@ -390,6 +390,7 @@ the synchronous API cannot deliver.
 | Missing native selector, drifted version, missing optional dependency, unexpected directory | each fails `check-native-versions`, which CI and the release workflow both run |
 | Failure injection | removing the store validation, `take(4)`, the per-instance addon id, or the exact-set check makes the corresponding guard red |
 | GitHub CI at `c4b1f195b` | 114 success, 1 skipped (a release-only publish job), 1 failure — a pre-existing flaky test, below |
+| GitHub CI at `e0a1d1b07` | **115 success, 1 skipped, 0 failing**; the skip is the release-tag-only NIF publish job |
 
 #### F14 — two `crates/dev` tests race on the process working directory — DONE
 
