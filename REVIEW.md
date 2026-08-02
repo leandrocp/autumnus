@@ -12,11 +12,16 @@ Fixes from the second pass are committed on this branch:
 | `fix: apply the #offset! directive in every runtime` | §3 |
 | `fix: close the eight findings from the final review` | F1–F8 |
 
-**Final verdict: do not merge.** The architecture is still the right direction — one package
-format carrying parser + queries + integrity + provenance, with one Rust implementation shared by
-the CLI, Elixir and the Node addon, is a genuine improvement. The final pass nevertheless found
-seven independently reproducible merge blockers. The current GitHub check suite is fully green,
-but it does not exercise the inputs and release transition that expose them.
+**Final verdict, at `2e5fe5253`: do not merge.** The architecture is still the right direction — one
+package format carrying parser + queries + integrity + provenance, with one Rust implementation
+shared by the CLI, Elixir and the Node addon, is a genuine improvement. The final pass nevertheless
+found seven independently reproducible merge blockers. The current GitHub check suite is fully
+green, but it does not exercise the inputs and release transition that expose them.
+
+**All eight are closed as of `9aed03b5d`**, along with a ninth found while making F3's test matrix
+real. The verdict above is kept as written, at the revision it was written against; see
+[Resolution pass](#resolution-pass--2026-08-02) for what changed and for two of the pass's
+conclusions that did not survive verification.
 
 This document is a living guideline. Items are fixed in place and marked **DONE** only once a
 reproducible test pins the behavior.
@@ -874,8 +879,9 @@ so it cannot be masked by the release cycle again.
   `node packages/javascript/lumis/scripts/list-unverified-parsers.mjs`.
 - `all-languages.test.ts` still has no per-language content assertion now that queries live in the
   language packages rather than the runtime package.
-- `AGENTS.md` pins Emscripten to `4.0.15`, but `wasm-release.yml` and the new `queries.yml` use
-  `EMSDK_VERSION: 5.0.3`. One of the two is wrong and should be reconciled.
+- ~~`AGENTS.md` pins Emscripten to `4.0.15`, but `wasm-release.yml` and the new `queries.yml` use
+  `EMSDK_VERSION: 5.0.3`.~~ **DONE** — there is one pin, `LUMIS_EMSDK_VERSION` in `mise.toml`, and
+  both workflows read it with `mise exec -- printenv` rather than hardcoding a second copy.
 
 ---
 
