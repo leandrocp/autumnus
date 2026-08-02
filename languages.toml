@@ -6,7 +6,7 @@
 
 [queries.default]
 git = "https://github.com/nvim-treesitter/nvim-treesitter.git"
-rev = "61df84986b4b4ec469ee745a182e433d49f8c27e"
+rev = "7b6cc8949f9999c5ed91436cbe24aa5f99c42025"
 path = "runtime/queries"
 
 [queries.iex]
@@ -46,7 +46,7 @@ path = "queries"
 
 [queries.wat]
 git = "https://github.com/helix-editor/helix.git"
-rev = "14d6bc0febed9c692048271a8ae2362ac969c6e0"
+rev = "079a789e8cb08ead67f19e1971a1b7438b37354b"
 path = "runtime/queries/wat"
 
 # -- Parsers
