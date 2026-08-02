@@ -55,6 +55,7 @@ reproducible test pins the behavior.
 | F11 | Blocker | Node native highlighters share custom language definitions process-wide | **DONE** — a caller-written definition gets a per-instance id inside the addon |
 | F12 | Medium | `#offset!` extra operands do not match Neovim and the new guard is not end-to-end | **DONE** — only the first four operands are read, and both guards compile the real query |
 | F13 | Medium | The native-version guard accepts a missing package and is not run by CI | **DONE** — the exact set is named, and CI and the release workflow both run it |
+| F14 | Medium | Two `crates/dev` tests race on the process working directory — **not in either review** | **DONE** — both take one lock; 4 failures in 40 runs before, 0 after |
 
 The details below distinguish a defect from a missing guard. Closing a defect without first making
 its stated guard fail would repeat the coverage problem this review was created to prevent.
@@ -388,6 +389,24 @@ the synchronous API cannot deliver.
 | Non-numeric fifth `#offset!` operand | matches Neovim in both implementations, compiled through the real query path |
 | Missing native selector, drifted version, missing optional dependency, unexpected directory | each fails `check-native-versions`, which CI and the release workflow both run |
 | Failure injection | removing the store validation, `take(4)`, the per-instance addon id, or the exact-set check makes the corresponding guard red |
+| GitHub CI at `c4b1f195b` | 114 success, 1 skipped (a release-only publish job), 1 failure — a pre-existing flaky test, below |
+
+#### F14 — two `crates/dev` tests race on the process working directory — DONE
+
+Not from either review; found by reading the one red check on the pushed fix. `Rust crates outside
+the workspace` failed on `query_names_includes_override_only_languages`, which asserts against a
+temporary tree and got an empty result.
+
+`local_override_query_detection_checks_any_query_file` and
+`query_names_includes_override_only_languages` both `std::env::set_current_dir` into their own
+temporary directory and then read relative query paths. The working directory is per-process and the
+test harness runs them in parallel, so whichever finishes first restores the old directory out from
+under the other. It reproduced locally 1 run in 5 and had simply been getting away with it: the same
+job was green at `2e5fe5253`, `bfac882b4` and `f3540e059`.
+
+Both now go through one `in_directory` helper holding a shared `Mutex`. Proven by targeting just the
+two tests with eight threads: **4 failures in 40 runs without the lock, 0 in 40 with it**, and 0 in
+25 full runs of the crate.
 | `git diff --check` before updating this ledger | clean |
 
 ### F1 — multi-row `#offset!` arithmetic is wrong in Rust

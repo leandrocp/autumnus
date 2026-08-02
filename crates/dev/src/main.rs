@@ -3095,6 +3095,7 @@ mod tests {
     }
     use std::path::Path;
     use std::sync::atomic::{AtomicU64, Ordering};
+    use std::sync::Mutex;
     use std::time::{SystemTime, UNIX_EPOCH};
 
     fn run_test_git(repo: &Path, args: &[&str]) -> String {
@@ -3285,6 +3286,23 @@ mod tests {
         let _ = fs::remove_dir_all(root);
     }
 
+    /// The working directory is process-wide, so tests that read relative query
+    /// paths have to take turns. Without this they race each other and one of
+    /// them intermittently sees the other's empty temporary tree.
+    static CWD: Mutex<()> = Mutex::new(());
+
+    fn in_directory<T>(root: &Path, body: impl FnOnce() -> T + std::panic::UnwindSafe) -> T {
+        let guard = CWD.lock().unwrap_or_else(|error| error.into_inner());
+        let cwd = std::env::current_dir().expect("cwd should be available");
+        std::env::set_current_dir(root).expect("should switch to temp dir");
+
+        let result = std::panic::catch_unwind(body);
+
+        std::env::set_current_dir(cwd).expect("should restore cwd");
+        drop(guard);
+        result.unwrap()
+    }
+
     #[test]
     fn local_override_query_detection_checks_any_query_file() {
         let root = unique_test_root();
@@ -3297,17 +3315,12 @@ mod tests {
         )
         .expect("override query should be written");
 
-        let cwd = std::env::current_dir().expect("cwd should be available");
-        std::env::set_current_dir(&root).expect("should switch to temp dir");
-
-        let result = std::panic::catch_unwind(|| {
+        in_directory(&root, || {
             assert!(has_local_override_query("demo"));
             assert!(!has_local_override_query("missing"));
         });
 
-        std::env::set_current_dir(cwd).expect("should restore cwd");
         let _ = fs::remove_dir_all(root);
-        result.unwrap();
     }
 
     #[test]
@@ -3322,19 +3335,14 @@ mod tests {
         )
         .expect("override query should be written");
 
-        let cwd = std::env::current_dir().expect("cwd should be available");
-        std::env::set_current_dir(&root).expect("should switch to temp dir");
-
-        let result = std::panic::catch_unwind(|| {
+        in_directory(&root, || {
             assert_eq!(
                 query_names().expect("query names should load"),
                 vec!["demo"]
             );
         });
 
-        std::env::set_current_dir(cwd).expect("should restore cwd");
         let _ = fs::remove_dir_all(root);
-        result.unwrap();
     }
 
     #[test]
