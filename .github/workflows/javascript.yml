@@ -68,11 +68,15 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
       - run: mise run fmt-js -- --check
-      - run: pnpm --filter @lumis-sh/lumis lint
-      - run: pnpm --filter @lumis-sh/markdown-it-lumis lint
-      - run: pnpm --filter @lumis-sh/rehype-lumis lint
-      - run: pnpm --filter @lumis-sh/react lint
-      - run: pnpm --filter @lumis-sh/themes lint
+      - run: pnpm --filter @lumis-sh/lumis run lint
+      - run: pnpm --filter @lumis-sh/markdown-it-lumis run lint
+      - run: pnpm --filter @lumis-sh/rehype-lumis run lint
+      - run: pnpm --filter @lumis-sh/react run lint
+      - run: pnpm --filter @lumis-sh/themes run lint
+      # `mise run docs` is the only caller of this script, and a pnpm upgrade
+      # once made it unrunnable without any check going red.
+      - run: pnpm --filter @lumis-sh/lumis run build:generate
+      - run: pnpm --filter @lumis-sh/lumis run docs
       - run: pnpm --dir packages/javascript run build:wasm-bundles && git diff --exit-code -- packages/javascript/wasm-bundle-*
 
   test:
@@ -93,25 +97,25 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @lumis-sh/themes build
+      - run: pnpm --filter @lumis-sh/themes run build
       # Node highlights through the addon, so the tests build it and the parser
       # tree it resolves against.
       - run: cargo run -q --manifest-path crates/dev/Cargo.toml -- stage-test-parsers target/test-parsers
-      - run: pnpm --filter @lumis-sh/lumis build:native
-      - run: pnpm --filter @lumis-sh/lumis build
-      - run: pnpm --filter @lumis-sh/markdown-it-lumis build
-      - run: pnpm --filter @lumis-sh/rehype-lumis build
-      - run: pnpm --filter @lumis-sh/react build
+      - run: pnpm --filter @lumis-sh/lumis run build:native
+      - run: pnpm --filter @lumis-sh/lumis run build
+      - run: pnpm --filter @lumis-sh/markdown-it-lumis run build
+      - run: pnpm --filter @lumis-sh/rehype-lumis run build
+      - run: pnpm --filter @lumis-sh/react run build
       # The addon resolves parsers in Rust, so the downstream packages need the
       # staged tree rather than the JavaScript resolvers the Wasm runtime uses.
-      - run: pnpm --filter @lumis-sh/markdown-it-lumis test
+      - run: pnpm --filter @lumis-sh/markdown-it-lumis run test
         env:
           LUMIS_WASM_PATH: ${{ github.workspace }}/target/test-parsers
-      - run: pnpm --filter @lumis-sh/rehype-lumis test
+      - run: pnpm --filter @lumis-sh/rehype-lumis run test
         env:
           LUMIS_WASM_PATH: ${{ github.workspace }}/target/test-parsers
-      - run: pnpm --filter @lumis-sh/lumis test
-      - run: pnpm --filter @lumis-sh/react test
+      - run: pnpm --filter @lumis-sh/lumis run test
+      - run: pnpm --filter @lumis-sh/react run test
         env:
           LUMIS_WASM_PATH: ${{ github.workspace }}/target/test-parsers
       - run: pnpm --dir packages/javascript run build:wasm-bundles && git diff --exit-code -- packages/javascript/wasm-bundle-*

@@ -6,9 +6,21 @@ export interface NativeFormatter {
   options: Record<string, unknown>;
 }
 
+export interface NativeLanguageSpec {
+  id: string;
+  aliases: string[];
+  /** Read from the parser's exports when omitted. */
+  grammarName?: string;
+  highlights: string;
+  injections?: string;
+  locals?: string;
+  brackets?: string;
+}
+
 interface NativeRuntimeInstance {
   loadLanguage(id: string): void;
   loadLanguagePackage(id: string, packageJson: string, wasm: Uint8Array): void;
+  loadLanguageDefinition(spec: NativeLanguageSpec, wasm: Uint8Array): void;
   hasLanguage(id: string): boolean;
   cacheLanguage(id: string, directory?: string, force?: boolean): string;
   highlightEvents(source: string, language: string, rainbowBrackets?: boolean): Uint8Array;
@@ -19,6 +31,8 @@ interface NativeRuntimeInstance {
 export interface NativeBinding {
   NativeRuntime: new () => NativeRuntimeInstance;
   runtimeKind(): string;
+  /** `false` once the runtime has read them, which it does on first use. */
+  configureStore(dataDir?: string, wasmPath?: string): boolean;
 }
 
 let cachedBinding: NativeBinding | null | undefined;

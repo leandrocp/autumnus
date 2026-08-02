@@ -2880,29 +2880,8 @@ fn hash_definition_field(digest: &mut sha2::Sha256, value: &[u8]) {
 }
 
 fn wasm_grammar_name(wasm: &[u8]) -> Result<String> {
-    use wasmparser::{Parser as WasmParser, Payload};
-
-    let mut names = Vec::new();
-    for payload in WasmParser::new(0).parse_all(wasm) {
-        if let Payload::ExportSection(exports) = payload? {
-            for export in exports {
-                let name = export?.name;
-                if let Some(grammar) = name.strip_prefix("tree_sitter_") {
-                    if !grammar.starts_with("external_scanner_") {
-                        names.push(grammar.to_string());
-                    }
-                }
-            }
-        }
-    }
-    match names.as_slice() {
-        [name] => Ok(name.clone()),
-        [] => bail!("WASM parser does not export a tree_sitter_* language symbol"),
-        _ => bail!(
-            "WASM parser exports multiple tree-sitter languages: {}",
-            names.join(", ")
-        ),
-    }
+    lumis_wasm_runtime::grammar_name(wasm)
+        .context("WASM parser must export exactly one tree_sitter_* language symbol")
 }
 
 fn sha256_hex(bytes: &[u8]) -> String {

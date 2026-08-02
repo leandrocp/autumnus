@@ -1,0 +1,265 @@
+{
+  "$description": "Neovim's `#offset!` semantics, pinned so the Rust runtime and the browser port cannot drift. Every expected range was produced by running the query through Neovim itself (`vim.treesitter.get_range`) on the JSON grammar, not derived by hand. Sources are ASCII on purpose: Rust reports byte columns and web-tree-sitter reports UTF-16 code-unit columns, so only ASCII makes the two directly comparable. Rust covers the multibyte row walk in its own unit test.",
+  "$generatedBy": "nvim --headless, vim.treesitter.get_range on tree-sitter-json",
+  "cases": [
+    {
+      "name": "row shift keeps the capture's own column",
+      "source": "{\n  \"a\": {\n    \"b\": 1\n  }\n}\n",
+      "offset": [
+        "1",
+        "0",
+        "-1",
+        "0"
+      ],
+      "original": {
+        "startRow": 1,
+        "startColumn": 7,
+        "startByte": 9,
+        "endRow": 3,
+        "endColumn": 3,
+        "endByte": 25
+      },
+      "expected": {
+        "startRow": 1,
+        "startColumn": 7,
+        "startByte": 9,
+        "endRow": 3,
+        "endColumn": 3,
+        "endByte": 25
+      }
+    },
+    {
+      "name": "row shift adds the column deltas to the original columns",
+      "source": "{\n  \"a\": {\n    \"b\": 1\n  }\n}\n",
+      "offset": [
+        "1",
+        "2",
+        "-1",
+        "-1"
+      ],
+      "original": {
+        "startRow": 0,
+        "startColumn": 0,
+        "startByte": 0,
+        "endRow": 4,
+        "endColumn": 1,
+        "endByte": 27
+      },
+      "expected": {
+        "startRow": 1,
+        "startColumn": 2,
+        "startByte": 4,
+        "endRow": 3,
+        "endColumn": 0,
+        "endByte": 22
+      }
+    },
+    {
+      "name": "row shift that inverts once the column is kept is discarded",
+      "source": "{\n  \"a\": {\n    \"b\": 1\n  }\n}\n",
+      "offset": [
+        "1",
+        "2",
+        "-1",
+        "-1"
+      ],
+      "original": {
+        "startRow": 1,
+        "startColumn": 7,
+        "startByte": 9,
+        "endRow": 3,
+        "endColumn": 3,
+        "endByte": 25
+      },
+      "expected": {
+        "startRow": 1,
+        "startColumn": 7,
+        "startByte": 9,
+        "endRow": 3,
+        "endColumn": 3,
+        "endByte": 25
+      }
+    },
+    {
+      "name": "frontmatter-shaped row shift from column zero",
+      "source": "{\n  \"a\": 1\n}\n",
+      "offset": [
+        "1",
+        "0",
+        "-1",
+        "0"
+      ],
+      "original": {
+        "startRow": 0,
+        "startColumn": 0,
+        "startByte": 0,
+        "endRow": 2,
+        "endColumn": 1,
+        "endByte": 12
+      },
+      "expected": {
+        "startRow": 1,
+        "startColumn": 0,
+        "startByte": 2,
+        "endRow": 1,
+        "endColumn": 1,
+        "endByte": 3
+      }
+    },
+    {
+      "name": "same-row shift strips the delimiters",
+      "source": "{\"a\": \"xyz\"}\n",
+      "offset": [
+        "0",
+        "1",
+        "0",
+        "-1"
+      ],
+      "original": {
+        "startRow": 0,
+        "startColumn": 6,
+        "startByte": 6,
+        "endRow": 0,
+        "endColumn": 11,
+        "endByte": 11
+      },
+      "expected": {
+        "startRow": 0,
+        "startColumn": 7,
+        "startByte": 7,
+        "endRow": 0,
+        "endColumn": 10,
+        "endByte": 10
+      }
+    },
+    {
+      "name": "omitted operands default to zero",
+      "source": "{\"a\": \"xyz\"}\n",
+      "offset": [
+        "0",
+        "1"
+      ],
+      "original": {
+        "startRow": 0,
+        "startColumn": 6,
+        "startByte": 6,
+        "endRow": 0,
+        "endColumn": 11,
+        "endByte": 11
+      },
+      "expected": {
+        "startRow": 0,
+        "startColumn": 7,
+        "startByte": 7,
+        "endRow": 0,
+        "endColumn": 11,
+        "endByte": 11
+      }
+    },
+    {
+      "name": "a fifth operand is ignored",
+      "source": "{\"a\": \"xyz\"}\n",
+      "offset": [
+        "0",
+        "1",
+        "0",
+        "-1",
+        "99"
+      ],
+      "original": {
+        "startRow": 0,
+        "startColumn": 6,
+        "startByte": 6,
+        "endRow": 0,
+        "endColumn": 11,
+        "endByte": 11
+      },
+      "expected": {
+        "startRow": 0,
+        "startColumn": 7,
+        "startByte": 7,
+        "endRow": 0,
+        "endColumn": 10,
+        "endByte": 10
+      }
+    },
+    {
+      "name": "a shift that inverts the range keeps the original",
+      "source": "{\"a\": 1}\n",
+      "offset": [
+        "5",
+        "0",
+        "-5",
+        "0"
+      ],
+      "original": {
+        "startRow": 0,
+        "startColumn": 0,
+        "startByte": 0,
+        "endRow": 0,
+        "endColumn": 8,
+        "endByte": 8
+      },
+      "expected": {
+        "startRow": 0,
+        "startColumn": 0,
+        "startByte": 0,
+        "endRow": 0,
+        "endColumn": 8,
+        "endByte": 8
+      }
+    },
+    {
+      "name": "a row shift past the end of the document keeps the original",
+      "source": "{\"a\": 1}\n",
+      "offset": [
+        "9",
+        "0",
+        "0",
+        "0"
+      ],
+      "original": {
+        "startRow": 0,
+        "startColumn": 0,
+        "startByte": 0,
+        "endRow": 0,
+        "endColumn": 8,
+        "endByte": 8
+      },
+      "expected": {
+        "startRow": 0,
+        "startColumn": 0,
+        "startByte": 0,
+        "endRow": 0,
+        "endColumn": 8,
+        "endByte": 8
+      }
+    },
+    {
+      "name": "row shift preserves a non-zero column when the range stays valid",
+      "source": "{\n  \"a\": {\n    \"b\": 1,\n    \"c\": 2\n  }\n}\n",
+      "offset": [
+        "1",
+        "0",
+        "-1",
+        "0"
+      ],
+      "original": {
+        "startRow": 1,
+        "startColumn": 7,
+        "startByte": 9,
+        "endRow": 4,
+        "endColumn": 3,
+        "endByte": 37
+      },
+      "expected": {
+        "startRow": 2,
+        "startColumn": 7,
+        "startByte": 18,
+        "endRow": 3,
+        "endColumn": 3,
+        "endByte": 26
+      }
+    }
+  ]
+}

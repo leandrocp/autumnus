@@ -179,7 +179,12 @@ struct InjectionContent<'a> {
 /// offsets within a row, so a same-row shift is a plain byte shift; a row shift has to
 /// walk to the target line.
 fn apply_range_offset(node: Node, offset: [i32; 4], source: &[u8]) -> Range {
-    let original = node.range();
+    offset_range(node.range(), offset, source)
+}
+
+/// The range arithmetic of [`apply_range_offset`], on a range rather than a node,
+/// so `fixtures/offset-directive.json` can pin it against Neovim and the browser.
+fn offset_range(original: Range, offset: [i32; 4], source: &[u8]) -> Range {
     let start = shift_point(
         source,
         original.start_byte,
@@ -229,11 +234,29 @@ fn shift_point(
         return Some((byte, Point::new(point.row, column)));
     }
 
+    // Neovim adds the column delta to the endpoint's own column whatever the row
+    // delta is, so the column survives the row shift rather than being replaced.
     let row = point.row.checked_add_signed(row_delta as isize)?;
     let line_start = line_start_byte(source, byte, point, row)?;
-    let column = usize::try_from(column_delta).ok()?;
+    let column = point.column.checked_add_signed(column_delta as isize)?;
     let byte = line_start.checked_add(column)?;
     (byte <= source.len()).then_some((byte, Point::new(row, column)))
+}
+
+/// The four numeric operands of `#offset!`.
+///
+/// Neovim reads them as `pred[3] or 0` through `pred[6] or 0`, so an omitted one
+/// is zero and a fifth is ignored. A non-numeric operand makes the directive
+/// unusable rather than partially applied.
+fn parse_offset_operands(deltas: &[&str]) -> Option<[i32; 4]> {
+    let mut offset = [0i32; 4];
+    for (index, value) in deltas.iter().enumerate() {
+        let parsed = value.parse().ok()?;
+        if let Some(slot) = offset.get_mut(index) {
+            *slot = parsed;
+        }
+    }
+    Some(offset)
 }
 
 /// Byte offset of the first character of `target_row`, walking from a known anchor.
@@ -593,19 +616,17 @@ impl HighlightConfiguration {
                 let [QueryPredicateArg::Capture(capture), deltas @ ..] = &*predicate.args else {
                     continue;
                 };
-                let parsed: Vec<i32> = deltas
+                let Some(deltas) = deltas
                     .iter()
-                    .filter_map(|arg| match arg {
-                        QueryPredicateArg::String(value) => value.parse().ok(),
+                    .map(|arg| match arg {
+                        QueryPredicateArg::String(value) => Some(value.as_ref()),
                         QueryPredicateArg::Capture(_) => None,
                     })
-                    .collect();
-                // Neovim defaults any missing delta to 0.
-                if parsed.len() == deltas.len() && !parsed.is_empty() {
-                    let mut offset = [0i32; 4];
-                    for (slot, value) in offset.iter_mut().zip(parsed) {
-                        *slot = value;
-                    }
+                    .collect::<Option<Vec<&str>>>()
+                else {
+                    continue;
+                };
+                if let Some(offset) = parse_offset_operands(&deltas) {
                     offsets.insert((pattern_index, *capture), offset);
                 }
             }
@@ -1580,6 +1601,81 @@ mod tests {
         }
     }
 
+    /// Every case in `fixtures/offset-directive.json` was produced by running the
+    /// query through Neovim, so this fails whenever Rust stops agreeing with the
+    /// implementation the queries were written against.
+    /// `packages/javascript/lumis/test/offset-directive.test.ts` reads the same file.
+    #[test]
+    fn offset_arithmetic_matches_neovim() {
+        #[derive(serde::Deserialize)]
+        #[serde(rename_all = "camelCase")]
+        struct Endpoint {
+            start_row: usize,
+            start_column: usize,
+            start_byte: usize,
+            end_row: usize,
+            end_column: usize,
+            end_byte: usize,
+        }
+
+        #[derive(serde::Deserialize)]
+        struct Case {
+            name: String,
+            source: String,
+            offset: Vec<String>,
+            original: Endpoint,
+            expected: Endpoint,
+        }
+
+        #[derive(serde::Deserialize)]
+        struct Fixture {
+            cases: Vec<Case>,
+        }
+
+        let raw = include_str!("../../../fixtures/offset-directive.json");
+        let fixture: Fixture = serde_json::from_str(raw).expect("offset fixture is valid JSON");
+        assert!(
+            fixture.cases.len() >= 10,
+            "the fixture must not silently shrink: {} cases",
+            fixture.cases.len()
+        );
+
+        for case in &fixture.cases {
+            let operands: Vec<&str> = case.offset.iter().map(String::as_str).collect();
+            let offset = parse_offset_operands(&operands)
+                .unwrap_or_else(|| panic!("{}: operands are unusable", case.name));
+
+            let original = Range {
+                start_byte: case.original.start_byte,
+                start_point: Point::new(case.original.start_row, case.original.start_column),
+                end_byte: case.original.end_byte,
+                end_point: Point::new(case.original.end_row, case.original.end_column),
+            };
+            let actual = offset_range(original, offset, case.source.as_bytes());
+
+            assert_eq!(
+                (
+                    actual.start_point.row,
+                    actual.start_point.column,
+                    actual.start_byte,
+                    actual.end_point.row,
+                    actual.end_point.column,
+                    actual.end_byte,
+                ),
+                (
+                    case.expected.start_row,
+                    case.expected.start_column,
+                    case.expected.start_byte,
+                    case.expected.end_row,
+                    case.expected.end_column,
+                    case.expected.end_byte,
+                ),
+                "{}",
+                case.name
+            );
+        }
+    }
+
     // `#offset!` arithmetic, pinned against Neovim's `apply_range_offset`. The
     // conformance fixtures cover the common same-row case end to end; these cover the
     // row-shifting and degenerate cases they do not reach.
@@ -1609,6 +1705,51 @@ mod tests {
             shift_point(source, 16, Point::new(2, 0), -1, 0).unwrap(),
             (7, Point::new(1, 0))
         );
+    }
+
+    /// Neovim's `apply_range_offset` does `range[2] = range[2] + start_col_offset`
+    /// whatever the row delta is, so a row shift keeps the capture's own column
+    /// instead of resetting it to the start of the target line. Every row-shifting
+    /// pattern in the shipped corpus captures frontmatter, which always begins at
+    /// column zero, so only a custom query reaches this.
+    #[test]
+    fn a_row_offset_keeps_the_original_column() {
+        //                    row 0        row 1        row 2
+        let source = b"  {\n    \"a\": 1,\n  }\n";
+
+        // A capture at (0, 2) shifted down one row lands at (1, 2), not (1, 0).
+        assert_eq!(
+            shift_point(source, 2, Point::new(0, 2), 1, 0).unwrap(),
+            (6, Point::new(1, 2))
+        );
+        // And the column delta still applies on top of the original column.
+        assert_eq!(
+            shift_point(source, 2, Point::new(0, 2), 1, 2).unwrap(),
+            (8, Point::new(1, 4))
+        );
+        // Including a negative one, which the row branch used to reject outright.
+        assert_eq!(
+            shift_point(source, 6, Point::new(1, 2), 1, -1).unwrap(),
+            (17, Point::new(2, 1))
+        );
+    }
+
+    /// Neovim defaults an omitted numeric operand to zero (`pred[3] or 0`).
+    #[test]
+    fn omitted_offset_operands_default_to_zero() {
+        assert_eq!(parse_offset_operands(&[]), Some([0, 0, 0, 0]));
+        assert_eq!(parse_offset_operands(&["1"]), Some([1, 0, 0, 0]));
+        assert_eq!(parse_offset_operands(&["0", "1", "0"]), Some([0, 1, 0, 0]));
+        assert_eq!(
+            parse_offset_operands(&["0", "1", "0", "-1"]),
+            Some([0, 1, 0, -1])
+        );
+        // Neovim reads exactly four operands and never looks at a fifth.
+        assert_eq!(
+            parse_offset_operands(&["0", "1", "0", "-1", "9"]),
+            Some([0, 1, 0, -1])
+        );
+        assert_eq!(parse_offset_operands(&["not-a-number"]), None);
     }
 
     #[test]

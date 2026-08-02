@@ -122,7 +122,7 @@ impl Registry {
             )]),
         };
         write_atomic(
-            &self.store().package_path(location.package_name),
+            &self.store().package_path(location.package_name).unwrap(),
             serde_json::to_string(&package).unwrap().as_bytes(),
         )
         .unwrap();

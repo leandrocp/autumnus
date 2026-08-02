@@ -6,35 +6,122 @@ import type {
   LanguageDefinition,
   LanguageInfo,
   LoadedLanguage,
+  WasmRef,
 } from "../types.js";
 import { builtinFormatterKind } from "./builtin-formatter.js";
 import { decodeNativeEvents } from "./native-event-codec.js";
 import { PLAINTEXT_LANG_ID } from "../types.js";
-import type { LanguagesModule, LoadLanguageOptions, RuntimeLike } from "./languages.js";
+import type {
+  HighlighterRuntimeOptions,
+  LanguagePackageResolver,
+  LanguagesModule,
+  LoadLanguageOptions,
+  ResolvedLanguagePackage,
+  RuntimeLike,
+  WasmResolver,
+} from "./languages.js";
 
 const PLAINTEXT_ALIASES = ["text", "txt", "plain"];
 const CATALOG_LANGUAGE_IDS = new Set(LANGUAGES.map(({ id }) => id));
 const encoder = new TextEncoder();
 
-export function createNativeLanguagesModule(binding: NativeBinding): LanguagesModule {
+function isWasmRef(wasm: NonNullable<LoadLanguageOptions["wasm"]>): wasm is WasmRef {
+  return typeof wasm === "object" && wasm !== null && "sha256" in wasm && "packageName" in wasm;
+}
+
+type RuntimeWasmInput = Exclude<NonNullable<LoadLanguageOptions["wasm"]>, WasmRef>;
+
+/** Parser bytes from whatever the caller handed over: buffer, path, URL or Response. */
+async function readWasmInput(wasm: RuntimeWasmInput): Promise<Uint8Array> {
+  if (wasm instanceof Uint8Array) return wasm;
+  if (wasm instanceof ArrayBuffer) return new Uint8Array(wasm);
+  if (wasm instanceof Response) return new Uint8Array(await wasm.arrayBuffer());
+
+  const { readFile } = await import("node:fs/promises");
+  const { fileURLToPath } = await import("node:url");
+
+  if (wasm instanceof URL) {
+    if (wasm.protocol !== "file:") {
+      return new Uint8Array(await (await fetch(wasm)).arrayBuffer());
+    }
+    return new Uint8Array(await readFile(fileURLToPath(wasm)));
+  }
+
+  if (wasm.startsWith("file://")) {
+    return new Uint8Array(await readFile(fileURLToPath(new URL(wasm))));
+  }
+  if (/^https?:\/\//.test(wasm)) {
+    return new Uint8Array(await (await fetch(wasm)).arrayBuffer());
+  }
+  return new Uint8Array(await readFile(wasm));
+}
+
+/**
+ * Node highlighting over the Wasmtime addon.
+ *
+ * Rust resolves, verifies, caches and loads parsers by default, which is what
+ * lets an injected language load during the walk that finds it. A caller can
+ * still take that over — `configureWasmResolver`, `configureLanguagePackageResolver`,
+ * an explicit `wasm`, or a complete custom `Language` — and those all mean the
+ * same thing here as under `web-tree-sitter`. When one is in play the JavaScript
+ * pipeline in `createLanguagesModule` does the resolving, and hands the addon
+ * bytes it has already verified.
+ *
+ * `resolvers` is that pipeline: the same module the `web-tree-sitter` runtime
+ * uses, so there is one implementation of resolve, verify and cache rather than
+ * a native copy that can drift.
+ */
+export function createNativeLanguagesModule(
+  binding: NativeBinding,
+  resolvers: LanguagesModule,
+): LanguagesModule {
+  // A resolver configured globally applies to runtimes that already exist, so
+  // this cannot live on the instance that happened to be current at the time.
+  let globalResolverConfigured = false;
+
+  /**
+   * Hand the addon the directories the environment names before it builds its
+   * store, which it does once and never revisits. `LUMIS_DATA_DIR` can be set
+   * at any point in a Node process, and a caller that sets it late would
+   * otherwise silently keep writing to the platform cache directory.
+   */
+  function newNativeRuntime(): NativeRuntimeInstance {
+    binding.configureStore(process.env.LUMIS_DATA_DIR, process.env.LUMIS_WASM_PATH);
+    return new binding.NativeRuntime();
+  }
+
   class NativeHighlighterRuntime implements RuntimeLike {
-    private readonly native: NativeRuntimeInstance = new binding.NativeRuntime();
+    private readonly native: NativeRuntimeInstance = newNativeRuntime();
     private readonly loadedLanguages = new Map<string, LoadedLanguage>();
     private readonly aliasMap = new Map<string, string>();
+    private readonly resolver: RuntimeLike;
+    private hasJsResolver: boolean;
 
-    constructor() {
+    constructor(options: HighlighterRuntimeOptions = {}) {
       for (const alias of PLAINTEXT_ALIASES) this.aliasMap.set(alias, PLAINTEXT_LANG_ID);
+      this.resolver = resolvers.createRuntime(options);
+      this.hasJsResolver = Boolean(options.wasmResolver ?? options.languagePackageResolver);
     }
 
-    // Resolution happens in Rust, against LUMIS_WASM_PATH and LUMIS_DATA_DIR,
-    // so a JavaScript resolver has nothing to configure here.
-    configureWasmResolver(): void {}
-    configureLanguagePackageResolver(): void {}
+    configureWasmResolver(fn: WasmResolver): void {
+      this.hasJsResolver = true;
+      this.resolver.configureWasmResolver(fn);
+    }
 
-    resolveLanguagePackage(): Promise<never> {
-      return Promise.reject(
-        new Error("the native runtime resolves language packages itself, in Rust"),
-      );
+    configureLanguagePackageResolver(fn: LanguagePackageResolver): void {
+      this.hasJsResolver = true;
+      this.resolver.configureLanguagePackageResolver(fn);
+    }
+
+    resolveLanguagePackage(
+      language: LanguageDefinition,
+      packageName: string,
+    ): Promise<ResolvedLanguagePackage> {
+      return this.resolver.resolveLanguagePackage(language, packageName);
+    }
+
+    resolveParserWasm(language: string, wasm: WasmRef): Promise<Uint8Array> {
+      return this.resolver.resolveParserWasm(language, wasm);
     }
 
     async initParser(): Promise<void> {
@@ -58,18 +145,69 @@ export function createNativeLanguagesModule(binding: NativeBinding): LanguagesMo
     }
 
     private async createLoadedLanguage(opts: LoadLanguageOptions): Promise<LoadedLanguage> {
-      if (!CATALOG_LANGUAGE_IDS.has(opts.definition.id)) {
-        throw new Error(`Lumis has no language "${opts.definition.id}"`);
-      }
-      // An installed @lumis-sh/wasm-* package is what the caller asked for, so
-      // it wins over anything the addon would resolve for itself.
-      if (!(await this.loadInstalled(opts))) {
-        this.native.loadLanguage(opts.definition.id);
-      }
+      await this.loadThroughAddon(opts);
       const loaded = { definition: opts.definition } as LoadedLanguage;
       this.loadedLanguages.set(opts.definition.id, loaded);
       this.registerLanguage(opts.definition);
       return loaded;
+    }
+
+    /**
+     * Whether the caller has taken over resolution for this load.
+     *
+     * Rust cannot see a JavaScript resolver, a `Uint8Array` of parser bytes, or
+     * a query string the caller wrote, so anything carrying one has to be
+     * resolved here instead. Everything else stays on the Rust path, where a
+     * language injected inside the document still loads mid-walk.
+     */
+    private isCallerResolved(opts: LoadLanguageOptions): boolean {
+      return (
+        this.hasJsResolver ||
+        globalResolverConfigured ||
+        opts.wasm !== undefined ||
+        opts.highlights !== undefined ||
+        !CATALOG_LANGUAGE_IDS.has(opts.definition.id)
+      );
+    }
+
+    private async loadThroughAddon(opts: LoadLanguageOptions): Promise<void> {
+      if (!this.isCallerResolved(opts)) {
+        // An installed @lumis-sh/wasm-* package is what the caller asked for, so
+        // it wins over anything the addon would resolve for itself.
+        if (!(await this.loadInstalled(opts))) {
+          this.native.loadLanguage(opts.definition.id);
+        }
+        return;
+      }
+
+      const resolved = opts.packageName
+        ? {
+            ...(await this.resolveLanguagePackage(opts.definition, opts.packageName)),
+            ...(opts.wasm === undefined ? {} : { wasm: opts.wasm }),
+          }
+        : opts;
+
+      if (!resolved.wasm || resolved.highlights === undefined) {
+        throw new Error(
+          `Language "${opts.definition.id}" requires packageName or complete queries and WASM`,
+        );
+      }
+
+      const wasm = isWasmRef(resolved.wasm)
+        ? await this.resolveParserWasm(resolved.definition.id, resolved.wasm)
+        : await readWasmInput(resolved.wasm);
+
+      this.native.loadLanguageDefinition(
+        {
+          id: resolved.definition.id,
+          aliases: resolved.definition.aliases,
+          highlights: resolved.highlights,
+          injections: resolved.injections,
+          locals: resolved.locals,
+          brackets: resolved.brackets,
+        },
+        wasm,
+      );
     }
 
     async loadLanguage(opts: LoadLanguageOptions): Promise<LoadedLanguage> {
@@ -178,7 +316,16 @@ export function createNativeLanguagesModule(binding: NativeBinding): LanguagesMo
       formatter: Formatter,
     ): NativeFormatter | undefined {
       const kind = builtinFormatterKind(formatter);
-      if (!kind || kind === "html-multi-themes" || language.definition.id === PLAINTEXT_LANG_ID) {
+      // Rust names the `language-*` class from `lumis_core::Language`, which has
+      // no variant for a language the caller defined. Highlighting still runs
+      // natively; only the string assembly falls back to JavaScript, exactly as
+      // it already does for `html-multi-themes`.
+      if (
+        !kind ||
+        kind === "html-multi-themes" ||
+        language.definition.id === PLAINTEXT_LANG_ID ||
+        !CATALOG_LANGUAGE_IDS.has(language.definition.id)
+      ) {
         return undefined;
       }
       const options = { ...formatter } as Record<string, unknown>;
@@ -196,13 +343,26 @@ export function createNativeLanguagesModule(binding: NativeBinding): LanguagesMo
   const defaultRuntime = new NativeHighlighterRuntime();
 
   return {
-    createRuntime() {
-      return new NativeHighlighterRuntime();
+    createRuntime(options) {
+      return new NativeHighlighterRuntime(options);
     },
-    configureWasmResolver() {},
-    configureLanguagePackageResolver() {},
-    resolveLanguagePackage() {
-      return defaultRuntime.resolveLanguagePackage();
+    // Applies to the default runtime and to every runtime created afterwards,
+    // matching the web-tree-sitter module this delegates to.
+    configureWasmResolver(fn) {
+      globalResolverConfigured = true;
+      resolvers.configureWasmResolver(fn);
+      defaultRuntime.configureWasmResolver(fn);
+    },
+    configureLanguagePackageResolver(fn) {
+      globalResolverConfigured = true;
+      resolvers.configureLanguagePackageResolver(fn);
+      defaultRuntime.configureLanguagePackageResolver(fn);
+    },
+    resolveLanguagePackage(language, packageName) {
+      return defaultRuntime.resolveLanguagePackage(language, packageName);
+    },
+    resolveParserWasm(language, wasm) {
+      return defaultRuntime.resolveParserWasm(language, wasm);
     },
     initParser() {
       return defaultRuntime.initParser();

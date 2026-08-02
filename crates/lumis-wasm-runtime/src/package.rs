@@ -210,6 +210,39 @@ pub fn sha256_hex(bytes: &[u8]) -> String {
     output
 }
 
+/// The grammar a parser WASM module provides, read from its exports.
+///
+/// A Tree-sitter parser exports exactly one `tree_sitter_<grammar>` symbol, and
+/// loading it requires that name. Callers that build or vendor a parser have the
+/// bytes but not the name, so this reads it rather than making them declare it.
+///
+/// # Errors
+/// Fails when the module is not valid WASM, exports no such symbol, or exports
+/// more than one.
+pub fn grammar_name(wasm: &[u8]) -> Result<String, LanguagePackageError> {
+    use wasmparser::{Parser, Payload};
+
+    let mut names = Vec::new();
+    for payload in Parser::new(0).parse_all(wasm) {
+        let Ok(Payload::ExportSection(exports)) = payload else {
+            continue;
+        };
+        for export in exports {
+            let Ok(export) = export else { continue };
+            if let Some(grammar) = export.name.strip_prefix("tree_sitter_") {
+                if !grammar.starts_with("external_scanner_") {
+                    names.push(grammar.to_string());
+                }
+            }
+        }
+    }
+
+    match names.as_slice() {
+        [name] => Ok(name.clone()),
+        _ => Err(LanguagePackageError::Invalid("parser grammar export")),
+    }
+}
+
 fn is_safe_path_segment(value: &str) -> bool {
     !matches!(value, "" | "." | "..") && !value.contains(['/', '\\', '\0'])
 }

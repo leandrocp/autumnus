@@ -127,9 +127,11 @@ const binding = loadNativeBinding();
  * it, so an injected language has to be loaded before the document mentioning
  * it is highlighted.
  */
+const wasmRuntime = createLanguagesModule(nodeRuntime);
+
 const runtime: LanguagesModule = binding
-  ? createNativeLanguagesModule(binding)
-  : createLanguagesModule(nodeRuntime);
+  ? createNativeLanguagesModule(binding, wasmRuntime)
+  : wasmRuntime;
 
 /**
  * Which runtime is highlighting: the native addon, or `web-tree-sitter`.

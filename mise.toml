@@ -118,11 +118,11 @@ mise run langs-preprocess-queries
 echo ""
 
 echo "Generating JS theme assets..."
-pnpm --filter @lumis-sh/themes build
+pnpm --filter @lumis-sh/themes run build
 echo ""
 
 echo "Generating JS language/runtime artifacts..."
-pnpm --filter @lumis-sh/lumis build:generate
+pnpm --filter @lumis-sh/lumis run build:generate
 pnpm --dir packages/javascript run build:wasm-bundles
 echo ""
 
@@ -179,10 +179,17 @@ depends = ["stage-test-parsers"]
 run = '''
 #!/usr/bin/env bash
 set -euo pipefail
-pnpm --filter @lumis-sh/lumis build:native
-pnpm --filter @lumis-sh/lumis build
-pnpm -r --if-present test
-LUMIS_TEST_RUNTIME=wasm pnpm --filter @lumis-sh/lumis test
+pnpm --filter @lumis-sh/lumis run build:native
+pnpm --filter @lumis-sh/lumis run build
+
+# The whole Lumis suite twice, once per runtime. vite.config.mjs defaults to
+# `wasm`, so leaving this unset would run the same runtime both times.
+LUMIS_TEST_RUNTIME=native pnpm --filter @lumis-sh/lumis run test
+LUMIS_TEST_RUNTIME=wasm pnpm --filter @lumis-sh/lumis run test
+
+# Downstream packages use the default Node runtime, which resolves parsers in
+# Rust against a staged tree rather than through a JavaScript resolver.
+LUMIS_WASM_PATH="$PWD/target/test-parsers" pnpm -r --if-present --filter '!@lumis-sh/lumis' test
 '''
 
 [tasks.'test-queries']
@@ -246,13 +253,13 @@ depends = ["stage-test-parsers"]
 run = '''
 #!/usr/bin/env bash
 set -euo pipefail
-pnpm --filter @lumis-sh/themes build
-pnpm --filter @lumis-sh/lumis build:generate
-pnpm --filter @lumis-sh/lumis build:native
+pnpm --filter @lumis-sh/themes run build
+pnpm --filter @lumis-sh/lumis run build:generate
+pnpm --filter @lumis-sh/lumis run build:native
 LUMIS_TEST_RUNTIME=native \
     LUMIS_WASM_PATH="${LUMIS_WASM_PATH:-$PWD/target/test-parsers}" \
     LUMIS_DATA_DIR="$(mktemp -d)" \
-    pnpm --filter @lumis-sh/lumis test:conformance
+    pnpm --filter @lumis-sh/lumis run test:conformance
 '''
 
 [tasks.'test-conformance-javascript-wasm']
@@ -260,9 +267,9 @@ description = "Run JavaScript conformance on web-tree-sitter, what browsers use"
 run = '''
 #!/usr/bin/env bash
 set -euo pipefail
-pnpm --filter @lumis-sh/themes build
-pnpm --filter @lumis-sh/lumis build:generate
-LUMIS_TEST_RUNTIME=wasm pnpm --filter @lumis-sh/lumis test:conformance
+pnpm --filter @lumis-sh/themes run build
+pnpm --filter @lumis-sh/lumis run build:generate
+LUMIS_TEST_RUNTIME=wasm pnpm --filter @lumis-sh/lumis run test:conformance
 '''
 
 [tasks.'test-conformance-browser']
@@ -270,13 +277,13 @@ description = "Run JavaScript conformance tests in Chromium, Firefox, and WebKit
 run = '''
 #!/usr/bin/env bash
 set -euo pipefail
-pnpm --filter @lumis-sh/lumis build:generate
+pnpm --filter @lumis-sh/lumis run build:generate
 args=(install chromium firefox webkit)
 if [[ "${CI:-}" == "true" ]]; then
     args=(install --with-deps chromium firefox webkit)
 fi
 packages/javascript/lumis/node_modules/.bin/playwright "${args[@]}"
-pnpm --filter @lumis-sh/lumis test:conformance:browser
+pnpm --filter @lumis-sh/lumis run test:conformance:browser
 '''
 
 [tasks.'test-conformance-elixir']
@@ -323,17 +330,28 @@ echo "Running JS fmt check..."
 mise run fmt-js -- --check
 echo ""
 echo "Running JS lint..."
-pnpm --filter @lumis-sh/lumis lint
-pnpm --filter @lumis-sh/markdown-it-lumis lint
-pnpm --filter @lumis-sh/rehype-lumis lint
-pnpm --filter @lumis-sh/react lint
-pnpm --filter @lumis-sh/themes lint
+pnpm --filter @lumis-sh/lumis run lint
+pnpm --filter @lumis-sh/markdown-it-lumis run lint
+pnpm --filter @lumis-sh/rehype-lumis run lint
+pnpm --filter @lumis-sh/react run lint
+pnpm --filter @lumis-sh/themes run lint
 echo ""
 echo "Running benchmark checks through mise..."
 mise run -C benchmarks lint
 echo ""
 echo "Running Lua fmt check..."
 mise run fmt-lua -- --check
+echo ""
+echo "Checking native package versions..."
+mise run check-native-versions
+'''
+
+[tasks.'check-native-versions']
+description = "Check the native addon packages are versioned in lockstep with @lumis-sh/lumis"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+node packages/javascript/scripts/check-native-versions.mjs
 '''
 
 [tasks.'fmt']
@@ -417,7 +435,7 @@ run = '''
 set -euo pipefail
 if [ ! -f packages/javascript/lumis/dist/bundles/full.js ]; then
     echo "Building @lumis-sh/lumis for website imports..."
-    pnpm --filter @lumis-sh/lumis build
+    pnpm --filter @lumis-sh/lumis run build
     echo ""
 fi
 (cd website && pnpm dev)
@@ -481,7 +499,7 @@ run = '''
 set -euo pipefail
 cargo doc --all-features --no-deps
 (cd packages/elixir/lumis && LUMIS_BUILD=1 mix docs)
-pnpm --filter @lumis-sh/lumis docs
+pnpm --filter @lumis-sh/lumis run docs
 echo ""
 echo "Docs generated:"
 echo "  lumis:           $(pwd)/target/doc/lumis/index.html"
@@ -616,7 +634,7 @@ set -euo pipefail
 mise run langs-upgrade-parsers ${usage_name?}
 mise run langs-upgrade-queries ${usage_name?}
 mise run langs-update ${usage_name?}
-pnpm --filter @lumis-sh/lumis build:generate
+pnpm --filter @lumis-sh/lumis run build:generate
 '''
 
 [tasks.'langs-upgrade-parsers']
@@ -734,8 +752,8 @@ else
 fi
 cargo run --manifest-path crates/dev/Cargo.toml -- filter-theme-updates "${usage_theme_name:-}"
 cargo run --manifest-path crates/dev/Cargo.toml -- sync-themes
-pnpm --filter @lumis-sh/themes build:themes
-pnpm --filter @lumis-sh/themes build:assets
+pnpm --filter @lumis-sh/themes run build:themes
+pnpm --filter @lumis-sh/themes run build:assets
 '''
 
 [tasks.'themes-list']
@@ -961,6 +979,13 @@ case "$kind" in
         python3 -c 'from pathlib import Path; import re, sys; path = Path(sys.argv[1]); version = sys.argv[2]; content = path.read_text(); content = re.sub(r"@version \"[^\"]+\"", f"@version \"{version}\"", content, count=1); path.write_text(content)' "$manifest" "$version"
         ;;
 esac
+
+if [ "$package" = "npm-lumis" ]; then
+    cargo set-version --manifest-path packages/javascript/lumis/native/Cargo.toml -p lumis-js-native "$version"
+    for native_manifest in packages/javascript/lumis/native/npm/*/package.json; do
+        npm --prefix "$(dirname "$native_manifest")" version --no-git-tag-version "$version"
+    done
+fi
 
 git-cliff --config cliff.toml --github-repo leandrocp/lumis --tag-pattern "$package/v[0-9].*" --tag "$tag" --prepend "$changelog" --strip header --unreleased "${include_args[@]}"
 printf 'Prepared %s %s\n' "$package" "$version"

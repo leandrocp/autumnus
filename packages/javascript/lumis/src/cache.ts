@@ -15,6 +15,7 @@ import { LANGUAGE_LOADERS } from "./generated/language-loaders.js";
 import {
   readCachedWasm,
   isUrlString,
+  wasmCacheDir,
   wasmCachePath,
   withWasmCacheLock,
   writeCachedWasm,
@@ -100,6 +101,34 @@ async function fetchLanguagePackage(
 }
 
 /**
+ * Also write the package where the Rust store reads it, as `<suffix>.language.json`.
+ *
+ * Node highlights through the Wasmtime addon by default, and that store names
+ * this file differently from the JavaScript cache. Prefetching would otherwise
+ * fill a cache the runtime doing the highlighting never looks in, and the first
+ * request would download it all again.
+ */
+async function writeSharedLanguagePackage(
+  packageName: string,
+  packageMetadata: LanguagePackage,
+  directory?: string,
+): Promise<void> {
+  const { join } = await import("node:path");
+  const { mkdir, writeFile } = await import("node:fs/promises");
+
+  const suffix = packageName.replace(/^@lumis-sh\/wasm-/, "");
+  if (suffix.includes("/")) return;
+
+  const parsers = await wasmCacheDir(directory);
+  await mkdir(parsers, { recursive: true });
+  await writeFile(
+    join(parsers, `${suffix}.language.json`),
+    JSON.stringify(packageMetadata),
+    "utf8",
+  );
+}
+
+/**
  * Cache exact, integrity-pinned parser WASMs in a persistent directory.
  *
  * Point `LUMIS_DATA_DIR` at the same directory in the deployed process.
@@ -129,6 +158,7 @@ export async function cacheLanguages(
         serializeLanguagePackageCache(packageMetadata),
         directory,
       );
+      await writeSharedLanguagePackage(packageName, packageMetadata, directory);
     }
     const packaged = packageMetadata.languages[language.id];
     if (!packaged) {

@@ -49,7 +49,7 @@ outputs = ["target/benchmarks/language-packages/index.json"]
 [tasks."build:themes"]
 description = "Build the theme consumed by JavaScript benchmarks"
 depends = ["install"]
-run = "pnpm --filter @lumis-sh/themes build"
+run = "pnpm --filter @lumis-sh/themes run build"
 sources = [
   "packages/javascript/themes/package.json",
   "packages/javascript/themes/src/**/*",
@@ -63,8 +63,8 @@ outputs = ["packages/javascript/themes/dist/index.js"]
 description = "Build the JavaScript runtimes, native addon and Wasm"
 depends = ["install", "build:themes", "fixtures"]
 run = '''
-pnpm --filter @lumis-sh/lumis build:native
-pnpm --filter @lumis-sh/lumis build
+pnpm --filter @lumis-sh/lumis run build:native
+pnpm --filter @lumis-sh/lumis run build
 '''
 sources = [
   "Cargo.toml",
@@ -196,7 +196,7 @@ depends = [
 run = '''
 export BENCH_SHOWCASE_DIR="$MISE_CONFIG_ROOT/showcase/generated"
 cargo run --manifest-path benchmarks/rust/Cargo.toml --bin showcase
-pnpm --filter @lumis-sh/benchmarks showcase
+pnpm --filter @lumis-sh/benchmarks run showcase
 MIX_ENV=prod elixir benchmarks/elixir/showcase.exs
 node benchmarks/scripts/finish-showcase.mjs
 '''
@@ -220,7 +220,7 @@ description = "Format benchmark code"
 depends = ["install"]
 run = '''
 cargo fmt --manifest-path benchmarks/rust/Cargo.toml
-pnpm --filter @lumis-sh/benchmarks fmt
+pnpm --filter @lumis-sh/benchmarks run fmt
 mix format benchmarks/elixir/runtime.exs benchmarks/elixir/scenario.exs benchmarks/elixir/showcase.exs
 '''
 
@@ -229,7 +229,7 @@ description = "Check benchmark formatting"
 depends = ["install"]
 run = '''
 cargo fmt --manifest-path benchmarks/rust/Cargo.toml -- --check
-pnpm --filter @lumis-sh/benchmarks fmt:check
+pnpm --filter @lumis-sh/benchmarks run fmt:check
 mix format --check-formatted benchmarks/elixir/runtime.exs benchmarks/elixir/scenario.exs benchmarks/elixir/showcase.exs
 '''
 
@@ -238,7 +238,7 @@ description = "Lint benchmark code"
 depends = ["format:check"]
 run = '''
 cargo clippy --manifest-path benchmarks/rust/Cargo.toml --all-targets -- -D warnings
-pnpm --filter @lumis-sh/benchmarks lint
+pnpm --filter @lumis-sh/benchmarks run lint
 '''
 
 [tasks.check]
@@ -262,7 +262,7 @@ run = '''
 for implementation in lumis-js-node lumis-js-wasm shiki highlight-js; do
   for scenario in small-one-language large-one-language ten-files-one-language ten-files-ten-languages; do
     output="$BENCH_RUN_DIR/javascript/$implementation/$scenario.json"
-    BENCH_IMPLEMENTATION="$implementation" BENCH_SCENARIO="$scenario" BENCH_OUTPUT="$output" pnpm --filter @lumis-sh/benchmarks benchmark
+    BENCH_IMPLEMENTATION="$implementation" BENCH_SCENARIO="$scenario" BENCH_OUTPUT="$output" pnpm --filter @lumis-sh/benchmarks run benchmark
   done
 done
 '''

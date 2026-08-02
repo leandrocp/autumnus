@@ -72,6 +72,10 @@ If multiple JS packages are part of the same release, use this order:
 
 After `npm-lumis` is published, the plugin packages, CLI package, and WASM bundle packages are independent. Keep the order above as the canonical release order.
 
+The `npm-lumis` workflow also publishes the five platform-specific `@lumis-sh/lumis-native-*` packages and then the `@lumis-sh/lumis-native` selector, before publishing `@lumis-sh/lumis` itself. All of them share the `npm-lumis` version and tag, and `mise run prepare-release npm-lumis <version>` bumps them together.
+
+That lockstep is not cosmetic. `@lumis-sh/lumis` depends on the platform packages with `workspace:*`, which pnpm replaces with the workspace version when it packs, so a main package bumped on its own would ship optional dependencies pointing at the previous release — and npm refuses to republish a version that already exists, so the workflow would fail before reaching the main package. `mise run lint` runs `mise run check-native-versions`, which fails if any of them drift.
+
 `npm-cli` must use the same version as `cargo-lumis-cli`, and the matching `cargo-lumis-cli/v<version>` GitHub release must already contain prebuilt CLI archives before publishing `@lumis-sh/cli`.
 
 If a JS release also needs new parser WASM packages, publish those first through the WASM workflow. Run `mise run wasm-publish-needed` to see which parser packages still need publishing.

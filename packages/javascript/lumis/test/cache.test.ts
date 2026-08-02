@@ -81,6 +81,9 @@ describe("cacheLanguages", () => {
     expect(readFileSync(cacheFile).byteLength).toBe(ref.size);
   });
 
+  // A real child process, not `vi.resetModules()`. The native addon builds its
+  // store once per process, so re-importing the JavaScript is not a restart for
+  // it, and the assertion would pass for the wrong reason.
   it("loads a cached parser after a runtime restart without the network", async () => {
     const directory = await temporaryDirectory();
     await cacheLanguages(["diff"], {
@@ -89,21 +92,27 @@ describe("cacheLanguages", () => {
       languagePackageResolver: localLanguagePackageResolver,
     });
 
-    const previousDirectory = process.env.LUMIS_DATA_DIR;
-    process.env.LUMIS_DATA_DIR = directory;
-    vi.resetModules();
-    const network = vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("network disabled"));
+    const script = `
+      globalThis.fetch = () => { throw new Error("network disabled"); };
+      const { createHighlighter } = await import("./dist/index.js");
+      const { default: diff } = await import("./dist/langs/diff.js");
+      const highlighter = await createHighlighter({ languages: [diff] });
+      if (!highlighter.languages.includes("diff")) throw new Error("diff was not loaded");
+      console.log("ok");
+    `;
 
-    try {
-      const { createHighlighter } = await import("../src/index.js");
-      const { default: restartedDiff } = await import("../langs/diff.js");
-      const highlighter = await createHighlighter({ languages: [restartedDiff] });
+    const { execFileSync } = await import("node:child_process");
+    const output = execFileSync(process.execPath, ["--input-type=module", "-e", script], {
+      cwd: new URL("..", import.meta.url).pathname,
+      env: {
+        ...process.env,
+        LUMIS_DATA_DIR: directory,
+        // Nothing may come from a staged tree; the point is the cache above.
+        LUMIS_WASM_PATH: "",
+      },
+      encoding: "utf8",
+    });
 
-      expect(highlighter.languages).toContain("diff");
-      expect(network).not.toHaveBeenCalled();
-    } finally {
-      if (previousDirectory === undefined) delete process.env.LUMIS_DATA_DIR;
-      else process.env.LUMIS_DATA_DIR = previousDirectory;
-    }
-  });
+    expect(output).toContain("ok");
+  }, 60_000);
 });

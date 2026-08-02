@@ -146,8 +146,10 @@ pub struct Runtime {
     /// lets one pass highlight a document whatever it turns out to contain.
     store: Option<LanguageStore>,
     /// One gate per language, so ten requests that all mention `rust` produce
-    /// one download rather than ten.
-    loading: Mutex<HashMap<String, Arc<Mutex<()>>>>,
+    /// one download rather than ten. Keyed by `&'static str` so the table is
+    /// bounded by the catalog: a Markdown fence can name anything, and an
+    /// owned key would let a caller grow this map without limit.
+    loading: Mutex<HashMap<&'static str, Arc<Mutex<()>>>>,
 }
 
 #[derive(Debug, Error)]
@@ -231,22 +233,23 @@ impl Runtime {
             return Ok(loaded);
         }
 
-        let gate = self.load_gate(id);
+        let store = self
+            .store
+            .as_ref()
+            .ok_or_else(|| RuntimeError::LanguageNotLoaded(id.into()))?;
+        let location =
+            crate::catalog::find(id).ok_or_else(|| RuntimeError::LanguageNotLoaded(id.into()))?;
+
+        let gate = self.load_gate(location.id);
         let _guard = gate.lock().expect("language load gate poisoned");
         if let Some(loaded) = self.loaded(id) {
             return Ok(loaded);
         }
 
-        let store = self
-            .store
-            .as_ref()
-            .ok_or_else(|| RuntimeError::LanguageNotLoaded(id.into()))?;
         let parser_error = |message: String| RuntimeError::Parser {
             language: id.to_string(),
             message,
         };
-        let location =
-            crate::catalog::find(id).ok_or_else(|| RuntimeError::LanguageNotLoaded(id.into()))?;
         let package = store
             .package(location.package_name)
             .map_err(|error| parser_error(error.to_string()))?;
@@ -282,9 +285,17 @@ impl Runtime {
         catalog.languages.get(id).cloned()
     }
 
-    fn load_gate(&self, id: &str) -> Arc<Mutex<()>> {
+    fn load_gate(&self, id: &'static str) -> Arc<Mutex<()>> {
         let mut loading = self.loading.lock().expect("language load table poisoned");
-        Arc::clone(loading.entry(id.to_string()).or_default())
+        Arc::clone(loading.entry(id).or_default())
+    }
+
+    #[cfg(test)]
+    fn load_gate_count(&self) -> usize {
+        self.loading
+            .lock()
+            .expect("language load table poisoned")
+            .len()
     }
 
     pub fn load_language(&self, spec: LanguageSpec) -> Result<(), RuntimeError> {
@@ -817,6 +828,59 @@ mod tests {
         assert!(
             !events.is_empty(),
             "the rest of the document still highlights"
+        );
+    }
+
+    /// A Markdown fence names its own language, so the injected name is
+    /// attacker-controlled. Failing to load one must not leave anything behind.
+    #[test]
+    fn unknown_injected_languages_leave_no_load_gate() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = LanguageStore::new(
+            StoreConfig {
+                cache_dir: dir.path().to_path_buf(),
+                source_dir: None,
+            },
+            Box::new(crate::store::NoNetwork),
+        );
+        let runtime = Runtime::with_worker_limit(1).unwrap().with_store(store);
+        install_json(
+            &runtime,
+            r#"(pair
+                 key: (string (string_content) @injection.language)
+                 value: (string (string_content) @injection.content))"#,
+        );
+
+        let document = (0..200)
+            .map(|index| format!(r#""no-such-language-{index}":"body""#))
+            .collect::<Vec<_>>()
+            .join(",");
+        let events = runtime
+            .highlight(&format!("{{{document}}}"), "json", false)
+            .unwrap();
+        assert!(!events.is_empty(), "the document still highlights");
+        assert_eq!(
+            runtime.load_gate_count(),
+            0,
+            "200 unknown injected names must not allocate 200 gates"
+        );
+
+        for index in 0..200 {
+            assert!(runtime
+                .load_named_language(&format!("no-such-language-{index}"))
+                .is_err());
+        }
+        assert_eq!(runtime.load_gate_count(), 0, "the public path leaks too");
+
+        // The other direction: a catalog language still takes a gate, so this
+        // test fails if the deduplication it protects is removed outright.
+        assert!(runtime.load_named_language("rust").is_err());
+        assert_eq!(runtime.load_gate_count(), 1);
+        assert!(runtime.load_named_language("rs").is_err());
+        assert_eq!(
+            runtime.load_gate_count(),
+            1,
+            "an alias shares the canonical id's gate"
         );
     }
 

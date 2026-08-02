@@ -54,7 +54,8 @@ pub use brackets::{
     RAINBOW_BRACKET_SCOPES, RAINBOW_SCOPE_INDICES,
 };
 pub use package::{
-    sha256_hex, LanguagePackage, LanguagePackageError, PackagedLanguage, ParserMetadata,
+    grammar_name, sha256_hex, LanguagePackage, LanguagePackageError, PackagedLanguage,
+    ParserMetadata,
 };
 #[cfg(feature = "wasm")]
 pub use runtime::{HighlightOptions, HighlightOutput, LanguageSpec, Runtime, RuntimeError};

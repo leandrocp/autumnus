@@ -17,7 +17,7 @@ use serde::Deserialize;
 use std::collections::BTreeMap;
 use std::ops::RangeInclusive;
 use std::path::PathBuf;
-use std::sync::LazyLock;
+use std::sync::{LazyLock, Mutex};
 
 fn native_error(error: impl std::fmt::Display) -> Error {
     Error::new(Status::GenericFailure, error.to_string())
@@ -115,6 +115,19 @@ pub struct NativeFormatter {
     pub options: serde_json::Value,
 }
 
+/// A language defined entirely by the caller, with no package behind it.
+#[napi(object)]
+pub struct NativeLanguageSpec {
+    pub id: String,
+    pub aliases: Vec<String>,
+    /// Read from the parser's exports when omitted.
+    pub grammar_name: Option<String>,
+    pub highlights: String,
+    pub injections: Option<String>,
+    pub locals: Option<String>,
+    pub brackets: Option<String>,
+}
+
 struct FormatRequest {
     source: String,
     language: String,
@@ -124,6 +137,21 @@ struct FormatRequest {
 /// One runtime per process, so a parser is downloaded, verified and compiled
 /// once however many highlighters the caller creates.
 static RUNTIME: LazyLock<std::result::Result<Runtime, String>> = LazyLock::new(build_runtime);
+
+/// Where the store looks, when the caller names it rather than the environment.
+/// Read once, when the runtime is built.
+static STORE_PATHS: Mutex<StorePaths> = Mutex::new(StorePaths {
+    data_dir: None,
+    wasm_path: None,
+    consumed: false,
+});
+
+struct StorePaths {
+    data_dir: Option<PathBuf>,
+    wasm_path: Option<PathBuf>,
+    /// Set when the runtime read them, which it does exactly once.
+    consumed: bool,
+}
 
 fn build_runtime() -> std::result::Result<Runtime, String> {
     let workers = std::thread::available_parallelism()
@@ -142,16 +170,41 @@ fn runtime() -> Result<&'static Runtime> {
     RUNTIME.as_ref().map_err(native_error)
 }
 
+/// Point the store at explicit directories, overriding `LUMIS_DATA_DIR` and
+/// `LUMIS_WASM_PATH`.
+///
+/// The runtime reads these once, when it is first used, so this returns `false`
+/// if that has already happened. Node sets a directory through the environment
+/// at any time; the addon cannot, and silently ignoring the difference is how a
+/// caller ends up writing to a directory it did not choose.
+#[napi(js_name = "configureStore")]
+pub fn configure_store(data_dir: Option<String>, wasm_path: Option<String>) -> bool {
+    let mut paths = STORE_PATHS.lock().expect("store path lock poisoned");
+    if paths.consumed {
+        return false;
+    }
+    paths.data_dir = data_dir.map(PathBuf::from);
+    paths.wasm_path = wasm_path.map(PathBuf::from);
+    true
+}
+
 /// The same resolve, verify and cache path the CLI and the Elixir NIF use.
 fn language_store(cache_dir: Option<PathBuf>) -> store::LanguageStore {
+    let mut configured = STORE_PATHS.lock().expect("store path lock poisoned");
+    configured.consumed = true;
     let cache_dir = cache_dir
+        .or_else(|| configured.data_dir.clone())
         .or_else(|| std::env::var_os("LUMIS_DATA_DIR").map(PathBuf::from))
         .unwrap_or_else(default_data_dir);
+    let source_dir = configured
+        .wasm_path
+        .clone()
+        .or_else(store::LanguageStore::source_dir_from_env);
 
     store::LanguageStore::new(
         store::StoreConfig {
             cache_dir,
-            source_dir: store::LanguageStore::source_dir_from_env(),
+            source_dir,
         },
         Box::new(store::HttpFetcher),
     )
@@ -367,6 +420,35 @@ impl NativeRuntime {
                 injections: definition.injections.clone(),
                 locals: definition.locals.clone(),
                 brackets: definition.brackets.clone(),
+            })
+            .map_err(native_error)
+    }
+
+    /// Load a language the caller defined entirely itself: its own parser bytes
+    /// and its own queries, with no package metadata behind them.
+    ///
+    /// `@lumis-sh/lumis` accepts a complete custom `Language`, and a custom
+    /// grammar has no published `language.json` to verify against, so this is
+    /// the entry point for one. The grammar symbol is read from the module
+    /// rather than declared, since a caller who built the parser has the bytes
+    /// but not the export name.
+    #[napi(js_name = "loadLanguageDefinition")]
+    pub fn load_language_definition(&self, spec: NativeLanguageSpec, wasm: Buffer) -> Result<()> {
+        let grammar_name = match spec.grammar_name {
+            Some(name) => name,
+            None => lumis_wasm_runtime::grammar_name(wasm.as_ref()).map_err(native_error)?,
+        };
+
+        runtime()?
+            .load_language(lumis_wasm_runtime::LanguageSpec {
+                id: spec.id,
+                aliases: spec.aliases,
+                grammar_name,
+                wasm: wasm.to_vec(),
+                highlights: spec.highlights,
+                injections: spec.injections.unwrap_or_default(),
+                locals: spec.locals.unwrap_or_default(),
+                brackets: spec.brackets.unwrap_or_default(),
             })
             .map_err(native_error)
     }

@@ -106,7 +106,7 @@ function buildUtf8OffsetMap(source: string): number[] {
   return offsets;
 }
 
-function buildLineStartMap(source: string): number[] {
+export function buildLineStartMap(source: string): number[] {
   const starts = [0];
 
   for (let i = 0; i < source.length; i += 1) {
@@ -366,7 +366,7 @@ function getCaptureRanges(
  * the part the previous implementation omitted: a shift that inverts the range, or that
  * lands outside the document, is discarded rather than propagated.
  */
-function applyCaptureOffset(
+export function applyCaptureOffset(
   range: Range,
   offset: QueryCaptureOffset | undefined,
   lineStarts: number[],

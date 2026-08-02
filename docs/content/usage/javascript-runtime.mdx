@@ -148,20 +148,6 @@ const html = await highlight(source, htmlInline({theme: dracula}))
 
 Useful when rendering user-provided content or pasted snippets.
 
-## Injected languages
-
-Lumis can highlight embedded languages such as HTML with CSS and JavaScript inside it.
-
-Important rule: load every participating language, not just the outer one.
-
-```ts
-const hl = await createHighlighter({languages: [html, css, javascript]})
-
-const htmlOutput = hl.highlight(source, htmlInline({language: html, theme: dracula}))
-```
-
-If nested languages are missing, Lumis cannot fully highlight those embedded regions.
-
 ## Metadata APIs
 
 Useful for dropdowns, config validation, and docs tooling:
@@ -192,9 +178,16 @@ that block without Rust being named anywhere in your code. A language that
 cannot be fetched leaves its own block plain rather than failing the document.
 
 In a browser this does not happen: loading is asynchronous there and cannot run
-inside a synchronous walk, so load the injected languages yourself, or use a
-bundle such as `@lumis-sh/wasm-bundle-web`. See
-[Highlighting loads what a document needs](/advanced/wasm-and-cdn#highlighting-loads-what-a-document-needs).
+inside a synchronous walk, so load every participating language yourself, or use
+a bundle such as `@lumis-sh/wasm-bundle-web`:
+
+```ts
+const hl = await createHighlighter({languages: [html, css, javascript]})
+
+const htmlOutput = hl.highlight(source, htmlInline({language: html, theme: dracula}))
+```
+
+See [Highlighting loads what a document needs](/advanced/wasm-and-cdn#highlighting-loads-what-a-document-needs).
 
 ## Prepare parsers for deployment
 

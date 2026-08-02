@@ -1,4 +1,4 @@
-import type { Language, Query as TreeSitterQuery } from "web-tree-sitter";
+import type { Language, PredicateStep, Query as TreeSitterQuery } from "web-tree-sitter";
 import { PACKAGE_CACHE_TTL_MS } from "../cache-timing.js";
 import { buildHighlightEvents } from "../events.js";
 import { LANGUAGES } from "../generated/languages-meta.js";
@@ -138,6 +138,8 @@ export interface RuntimeLike {
     language: LanguageDefinition,
     packageName: string,
   ): Promise<ResolvedLanguagePackage>;
+  /** Parser bytes for `wasm`, resolved through this runtime's resolver, verified and cached. */
+  resolveParserWasm(language: string, wasm: WasmRef): Promise<Uint8Array>;
   loadPlaintext(): Promise<LoadedLanguage>;
   highlightEvents(
     source: string,
@@ -164,6 +166,7 @@ export interface LanguagesModule {
     language: LanguageDefinition,
     packageName: string,
   ): Promise<ResolvedLanguagePackage>;
+  resolveParserWasm(language: string, wasm: WasmRef): Promise<Uint8Array>;
   loadPlaintext(): Promise<LoadedLanguage>;
   getLoadedLanguage(nameOrAlias: string): LoadedLanguage | undefined;
   getLoadedLanguageIds(): string[];
@@ -453,34 +456,48 @@ function compileHighlightConfig(
     return Object.prototype.hasOwnProperty.call(refuted, "local");
   });
 
+  /**
+   * Neovim reads `#offset!`'s four numeric operands as `pred[3] or 0` through
+   * `pred[6] or 0`, so an omitted one is zero and a fifth is ignored. A
+   * non-numeric operand makes the directive unusable rather than half applied.
+   */
+  function parseOffsetDeltas(deltas: PredicateStep[]): QueryCaptureOffset | undefined {
+    const values = [0, 0, 0, 0];
+
+    for (const [index, delta] of deltas.entries()) {
+      if (delta.type !== "string") return undefined;
+      const value = Number.parseInt(delta.value, 10);
+      if (!Number.isInteger(value)) return undefined;
+      if (index < values.length) values[index] = value;
+    }
+
+    return {
+      startRow: values[0] as number,
+      startColumn: values[1] as number,
+      endRow: values[2] as number,
+      endColumn: values[3] as number,
+    };
+  }
+
   // Neovim applies `#offset!` to injection ranges *and* highlight ranges, so this
-  // collects offsets for every pattern, not just the injection ones.
+  // collects offsets for every pattern, not just the injection ones. It has to
+  // agree with `parse_offset_operands` in `crates/lumis-wasm-runtime`.
   const captureOffsets = Array.from(
     { length: query.patternCount() },
     (_, patternIndex): Record<string, QueryCaptureOffset> | undefined => {
       let offsets: Record<string, QueryCaptureOffset> | undefined;
 
       for (const predicate of query.predicatesForPattern(patternIndex) ?? []) {
-        if (predicate.operator !== "offset!" || predicate.operands.length !== 5) continue;
+        if (predicate.operator !== "offset!") continue;
 
-        const [captureStep, startRow, startColumn, endRow, endColumn] = predicate.operands;
-        if (
-          captureStep?.type !== "capture" ||
-          startRow?.type !== "string" ||
-          startColumn?.type !== "string" ||
-          endRow?.type !== "string" ||
-          endColumn?.type !== "string"
-        ) {
-          continue;
-        }
+        const [captureStep, ...deltas] = predicate.operands;
+        if (captureStep?.type !== "capture") continue;
+
+        const parsed = parseOffsetDeltas(deltas);
+        if (!parsed) continue;
 
         offsets ??= {};
-        offsets[captureStep.name] = {
-          startRow: Number.parseInt(startRow.value, 10),
-          startColumn: Number.parseInt(startColumn.value, 10),
-          endRow: Number.parseInt(endRow.value, 10),
-          endColumn: Number.parseInt(endColumn.value, 10),
-        };
+        offsets[captureStep.name] = parsed;
       }
 
       return offsets;
@@ -719,7 +736,7 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
 
       let wasmInput: Uint8Array | string;
       if (typeof resolved.wasm === "object" && resolved.wasm !== null && isWasmRef(resolved.wasm)) {
-        wasmInput = await this.resolveWasmRef(resolved.definition.id, resolved.wasm);
+        wasmInput = await this.resolveParserWasm(resolved.definition.id, resolved.wasm);
       } else if (isRuntimeWasmInput(resolved.wasm)) {
         wasmInput = await runtime.resolveWasm(resolved.wasm);
       } else {
@@ -811,7 +828,7 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
       return [...this.loadedLanguages.keys()];
     }
 
-    private async resolveWasmRef(language: string, ref: WasmRef): Promise<Uint8Array> {
+    async resolveParserWasm(language: string, ref: WasmRef): Promise<Uint8Array> {
       const key = cacheKey(ref);
       const cached = this.sharedCache.wasmBytes.get(key);
       if (cached) return cached;
@@ -902,6 +919,9 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
     },
     resolveLanguagePackage(language, packageName) {
       return defaultRuntime.resolveLanguagePackage(language, packageName);
+    },
+    resolveParserWasm(language, wasm) {
+      return defaultRuntime.resolveParserWasm(language, wasm);
     },
     loadPlaintext() {
       return defaultRuntime.loadPlaintext();

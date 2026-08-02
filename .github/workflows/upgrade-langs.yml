@@ -103,7 +103,7 @@ jobs:
           mise run langs-preprocess-queries "$QUERY_NAME"
           mise run langs-gen-catalog
           mise run docs-gen-languages-md
-          pnpm --filter @lumis-sh/lumis build:generate
+          pnpm --filter @lumis-sh/lumis run build:generate
 
       - name: Check for changes
         id: check-changes

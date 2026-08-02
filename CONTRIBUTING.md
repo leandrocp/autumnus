@@ -40,6 +40,12 @@ Run the standard Rust, Elixir, and JavaScript test suites with:
 mise run test
 ```
 
+That builds the Node addon first and runs the whole `@lumis-sh/lumis` suite twice,
+once per runtime, because Node highlights through the addon by default and falls
+back to `web-tree-sitter` where none is built. It also stages parsers into
+`target/test-parsers` and points the dependent packages at them, so nothing in
+the suite depends on what is currently published to npm.
+
 Cross-runtime output compatibility and browser support have dedicated suites:
 
 ```sh
@@ -52,12 +58,17 @@ mise run test-conformance-browser
 ```sh
 mise run test-conformance-rust
 mise run test-conformance-cli
+mise run test-conformance-javascript-native
 mise run test-conformance-javascript-wasm
 mise run test-conformance-browser
 mise run test-conformance-elixir
 ```
 
-The browser task installs the required Chromium, Firefox, and WebKit builds before running. CI runs these five tasks as independent parallel jobs.
+Node has two of them because it has two runtimes: the Wasmtime addon it uses by
+default, and `web-tree-sitter` where no addon is built. Both must produce the
+same bytes as Rust.
+
+The browser task installs the required Chromium, Firefox, and WebKit builds before running. CI runs these six tasks as independent parallel jobs.
 
 ## Releases
 
