@@ -6,7 +6,7 @@
 
 [queries.default]
 git = "https://github.com/nvim-treesitter/nvim-treesitter.git"
-rev = "61df84986b4b4ec469ee745a182e433d49f8c27e"
+rev = "7b6cc8949f9999c5ed91436cbe24aa5f99c42025"
 path = "runtime/queries"
 
 [queries.iex]
@@ -261,9 +261,9 @@ globs = ["*.fish"]
 
 [parsers.fsharp]
 git = "https://github.com/ionide/tree-sitter-fsharp.git"
-rev = "4796da9ebaafc21399594f705631261f8a5adea5"
+rev = "789d8ea1481345d6f3bc1a06985dbf6a6b202744"
 crate = "tree-sitter-fsharp"
-version = "0.3.2"
+version = "0.3.11"
 location = "fsharp"
 aliases = ["f#"]
 variant = "FSharp"
