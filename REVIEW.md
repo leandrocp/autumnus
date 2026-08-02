@@ -1,7 +1,8 @@
 # Review: PR #1099 — `feat: unify dynamic WASM language loading`
 
-Scope reviewed: `main...lp-unified-wasm-languages`, starting at `fdd756949` (after merging
-`origin/main` at `6cc5386a2`).
+Scope reviewed: PR #1099 at head `2e5fe5253f07c352e39a491d1c8c5926ade2f741`
+against base `6cc5386a2b7248f3d279c9929db2d4897f51862d`. The final pass covered the
+current 419-file diff, not the earlier `fdd756949` snapshot on which this review began.
 
 Fixes from the second pass are committed on this branch:
 
@@ -10,31 +11,291 @@ Fixes from the second pass are committed on this branch:
 | `fix: make every runtime accept the same language package` | §4.7, §4.8, §4.9 |
 | `fix: apply the #offset! directive in every runtime` | §3 |
 
-**Verdict: do not merge as-is.** The architecture is right — one package format carrying parser +
-queries + integrity + provenance, released atomically, is a genuine improvement, and moving
-Lua→regex translation to generation time so every runtime consumes byte-identical `.scm` is the
-correct call. CI is fully green, and the loading pipeline is now one Rust implementation that the
-CLI and Elixir share, leaving JavaScript as the single port the browser forces (§8).
+**Final verdict: do not merge.** The architecture is still the right direction — one package
+format carrying parser + queries + integrity + provenance, with one Rust implementation shared by
+the CLI, Elixir and the Node addon, is a genuine improvement. The final pass nevertheless found
+seven independently reproducible merge blockers. The current GitHub check suite is fully green,
+but it does not exercise the inputs and release transition that expose them.
 
 This document is a living guideline. Items are fixed in place and marked **DONE** only once a
 reproducible test pins the behavior.
+
+## Final review — 2026-08-02
+
+### Merge gate
+
+| ID | Severity | Finding | State |
+| --- | --- | --- | --- |
+| F1 | Blocker | Rust applies multi-row `#offset!` columns differently from Neovim and JavaScript | **OPEN** |
+| F2 | Blocker | Node's default native runtime rejects complete custom languages and ignores both documented resolvers | **OPEN** |
+| F3 | Blocker | The task described as testing native and Wasm tests Wasm twice, while `mise run test` is red | **OPEN** |
+| F4 | Blocker | The next `npm-lumis` release republishes already-published native package versions | **OPEN** |
+| F5 | Blocker | Failed injected-language names accumulate permanently in `Runtime.loading` | **OPEN** |
+| F6 | Blocker | Public `LanguageStore` package names can escape the parser cache/source directory | **OPEN** |
+| F7 | Blocker | `mise run docs` is incompatible with the pnpm 11 version pinned by this PR | **OPEN** |
+| F8 | Required | The PR body and contributor/runtime/release docs describe an earlier architecture | **OPEN** |
+
+The details below distinguish a defect from a missing guard. Closing a defect without first making
+its stated guard fail would repeat the coverage problem this review was created to prevent.
+
+### F1 — multi-row `#offset!` arithmetic is wrong in Rust
+
+`crates/lumis-wasm-runtime/src/tree_sitter_highlight.rs:214-236` handles a non-zero row delta by
+setting the target column to `column_delta`. It should add that delta to the capture endpoint's
+existing column. The browser implementation in `packages/javascript/lumis/src/events.ts` adds the
+row and column deltas independently.
+
+That is also what Neovim does: its current
+[`apply_range_offset`](https://github.com/neovim/neovim/blob/master/runtime/lua/vim/treesitter.lua)
+adds `offset[1]` to `range[2]` and `offset[3]` to `range[4]`. Neovim's
+[`offset!` handler](https://github.com/neovim/neovim/blob/master/runtime/lua/vim/treesitter/query.lua)
+also defaults omitted numeric operands to zero, while
+`packages/javascript/lumis/src/core/languages.ts:456-487` ignores every directive whose operand
+count is not exactly five.
+
+The mismatch was reproduced with the same JSON parser, source and query in both implementations:
+
+```scm
+((object) @markup.raw.block (#offset! @markup.raw.block 1 0 -1 0))
+```
+
+For an indented multi-line object, Rust emitted the highlighted range at bytes `5..5`; the
+web-tree-sitter path emitted `8..9`, matching Neovim's non-zero starting column. A direct Neovim
+run on a table starting at `(0, 10)` and ending at `(2, 11)` produced adjusted points
+`(1, 10)..(1, 11)`.
+
+Why green conformance missed it: the row-shifting patterns in the checked-in corpus operate on
+captures beginning at column zero. The unit test at
+`crates/lumis-wasm-runtime/src/tree_sitter_highlight.rs:1598-1612` does the same, so it cannot fail
+when the original column is discarded.
+
+Required closure:
+
+1. Add an end-to-end custom-query case with a multi-row capture beginning away from column zero to
+   the shared conformance contract.
+2. Observe it fail in Rust while passing under Neovim and web-tree-sitter.
+3. Fix the arithmetic and cover Neovim's omitted-operand defaults in both Rust and JavaScript.
+
+### F2 — the Node native adapter breaks the public custom-language and resolver contract
+
+The public `Language` type accepts either a built-in handle or a complete custom definition, and
+`createHighlighter` passes its parser and query fields to the selected runtime. The default Node
+runtime nevertheless rejects every id outside the generated static catalog at
+`packages/javascript/lumis/src/core/native-languages.ts:60-68`. Its global and per-runtime
+`configureWasmResolver` and `configureLanguagePackageResolver` methods are no-ops at lines 29-32
+and 198-203. `loadInstalled` handles only an importable npm package and ignores the explicit
+custom definition, even though the native binding exposes `loadLanguagePackage`.
+
+The documented behavior has no native-runtime exception:
+
+- `packages/javascript/lumis/README.md:280-294` says the resolver applies to `highlight()`,
+  `createHighlighter()`, and existing highlighters.
+- `docs/content/usage/wasm-and-cdn.mdx:280-303` documents both global and per-highlighter
+  resolvers.
+
+The same complete `custom-json` definition, fixture parser and `(string) @string` query produced:
+
+```text
+runtime=native
+Error: Lumis has no language "custom-json"
+
+runtime=wasm
+{"runtime":"wasm","languages":["plaintext","custom-json"]}
+```
+
+Forcing the existing resolver suite through the native adapter is red:
+
+```text
+LUMIS_TEST_RUNTIME=native \
+LUMIS_WASM_PATH=$PWD/target/test-parsers \
+LUMIS_DATA_DIR=<empty-temp-dir> \
+pnpm --filter @lumis-sh/lumis exec vitest run test/wasm-resolver.test.ts --reporter=verbose
+
+6 failed, 6 passed
+```
+
+Failures include both resolver call-count contracts, per-instance isolation, replacing a corrupt
+cache entry, rejecting wrong parser bytes, and configuration after highlighter creation.
+
+Required closure: either make the addon honor the same complete-definition and resolver API, or
+make the public API/runtime selection explicitly different and update all docs and types. Because
+the stated goal is one mental model across runtimes, the former is the consistent result. Pin the
+custom-language repro and the full resolver suite under the default Node runtime.
+
+### F3 — the JavaScript test gate does not test what it says, and the canonical suite is red
+
+`mise.toml:176-186` describes `test-javascript` as testing both native and Wasm. In reality:
+
+1. `vite.config.mjs:7-12` defaults the Lumis package suite to `LUMIS_TEST_RUNTIME=wasm`.
+2. `pnpm -r --if-present test` therefore tests Lumis under Wasm.
+3. The next command explicitly tests it under Wasm again.
+4. The small native-specific file is a smoke test; it does not run the custom-language or resolver
+   contract from F2.
+
+The top-level task also stages parsers but does not export the staged directory to the recursive
+JavaScript tests. `mise run test` completed the entire Rust workspace and all 127 Elixir tests,
+then failed 8 of 9 React tests because the default native runtime requested the not-yet-published
+`@lumis-sh/wasm-javascript/language.json` from the CDN and received 404. JavaScript CI passes only
+because its downstream-package step separately supplies `LUMIS_WASM_PATH`.
+
+Setting `LUMIS_WASM_PATH=$PWD/target/test-parsers` makes the intended local parser source visible,
+but then exposes the native resolver failures instead of making the task valid. This is not a
+network flake; it is a false test-matrix claim plus an unreproducible canonical entry point.
+
+Required closure: run the complete Lumis package contract once with native and once with Wasm,
+give every dependent-package test the staged parser path, and observe both variants fail for an
+injected defect before relying on the gate.
+
+### F4 — `npm-lumis` release preparation no longer versions the native packages
+
+This branch restored the Node addon and its platform packages, but removed the lockstep versioning
+from `mise run prepare-release`. For `npm-lumis`, `mise.toml:944-959` now bumps only the main
+JavaScript package. `.github/workflows/javascript-release.yml:167-212` still publishes all five
+platform packages, then `@lumis-sh/lumis-native`, then the main package.
+
+The current main package, selector and five platform packages are all version `0.6.1`, and the
+registry already contains `0.6.1` for every one of them. The next `npm-lumis` release therefore
+tries to publish an existing immutable native version before it reaches the main package. npm
+documents that a published name/version combination cannot be reused in
+[`npm publish`](https://docs.npmjs.com/cli/publish/). Skipping those publishes is not sufficient:
+pnpm replaces `workspace:*` with the actual workspace version when packing or publishing, as its
+official [workspace publication documentation](https://pnpm.io/workspaces#publishing-workspace-packages)
+states and a local `pnpm pack` confirmed. A `0.6.2` main tarball would still depend on native
+`0.6.1` packages.
+
+`mise run wasm-publish-needed` also reports that all 115 parser packages need publishing, so the
+unpublished-package transition is the release path this PR must survive rather than a hypothetical
+edge.
+
+Required closure: restore lockstep version preparation for the selector and every platform
+package, restore the release documentation, and dry-run/inspect the packed manifests for a new
+version before triggering publication.
+
+### F5 — failed language loads create an unbounded, persistent table
+
+`Runtime.loading` is a `HashMap<String, Arc<Mutex<()>>>` at
+`crates/lumis-wasm-runtime/src/runtime.rs:140-150`. `load_through_store` inserts its gate before the
+static catalog rejects an unknown id, and `load_gate` at lines 285-288 never removes entries.
+During highlighting, lines 486-507 pass arbitrary injected language names through this path and
+intentionally suppress the load error so only that block remains plain.
+
+Markdown makes the input attacker-controlled: its processed injection query uses a fence's info
+string as `@injection.language`. A long-lived server can therefore accumulate a new gate for every
+unique unknown fence name. An external harness calling the same public path measured:
+
+| Unique failed ids | Maximum RSS |
+| ---: | ---: |
+| 0 | 22,298,624 bytes |
+| 500,000 | 137,560,064 bytes |
+
+The roughly 115 MB increase remained owned by the runtime after every request had failed. This is
+a persistent memory-exhaustion primitive, not the intentional loaded-language cache.
+
+Required closure: reject/canonicalize unknown catalog ids before allocating a gate, or remove a
+failed gate without breaking concurrent same-language deduplication. Add a regression assertion
+against the table's size after many distinct failures, including the highlighting callback path.
+
+### F6 — public package names can escape the configured parser directory
+
+`LanguageStore::package(&str)` is public. `package_path` and `read_source_package` derive a filename
+from `package_suffix(package_name)` at `crates/lumis-wasm-runtime/src/store.rs:291-296` and
+344-356. `package_suffix` at lines 390-396 strips the known scope when present, but otherwise
+accepts path separators and `..` unchanged. `fetch_package` then writes fetched bytes to that path.
+
+The direct public-API repro was:
+
+```text
+package_path("../../escape")
+=> /tmp/lumis-cache-root/parsers/parsers/../../escape.language.json
+```
+
+After normalization, that is outside the intended `parsers/` directory. The CLI, Elixir and Node
+hosts currently pass static catalog package names, so their ordinary language-id paths are not an
+exploit route. The public crate API nevertheless promises no such precondition and can read or
+write outside the configured source/cache subtree when its caller accepts an arbitrary name.
+
+Required closure: validate a complete npm package name before any path or URL construction, derive
+the cache filename from a validated catalog/package object, and add traversal/absolute-path tests
+for both source reads and cache writes.
+
+### F7 — `mise run docs` is red after the pnpm upgrade
+
+The PR pins `pnpm@11.15.1` in `packages/javascript/package.json`. The canonical docs task still
+runs `pnpm --filter @lumis-sh/lumis docs` at `mise.toml:477-490`. Rust and Elixir documentation
+completed, after which pnpm failed with:
+
+```text
+[ERROR] Unknown option: 'recursive'
+```
+
+`pnpm --filter @lumis-sh/lumis run docs` passes (with only the existing TypeDoc warning). This is
+the documented distinction: pnpm's script shorthand works only when the script name does not
+collide with an existing pnpm command; see the official [`pnpm run` documentation](https://pnpm.io/cli/run).
+
+Required closure: use the explicit `run docs` spelling and keep `mise run docs` in the validation
+gate for pnpm/toolchain upgrades.
+
+### F8 — review and public documentation describe an obsolete revision
+
+The PR body says the native addon, package, build and release machinery were removed. They are now
+present and central to the design. It also reports stale validation counts. `RELEASE.md` deleted
+the native lockstep-version rule even though the release workflow still publishes the packages.
+`CONTRIBUTING.md` has stale conformance counts and build/query-generation descriptions.
+`docs/content/usage/javascript-runtime.mdx:151-163` tells every JavaScript user to preload nested
+languages, while lines 189-197 correctly say Node loads them in the discovering pass and only the
+browser needs preloading.
+
+Required closure: refresh the PR body, `CONTRIBUTING.md`, `RELEASE.md`, and the runtime guide after
+F1-F7 settle. Do not preserve claims from an intermediate design merely because they were true
+when the PR opened.
+
+### Final-pass evidence
+
+| Check | Result at `2e5fe5253` |
+| --- | --- |
+| Current GitHub PR/check state | Draft, open, mergeable; every reported check green; no reviews, comments or unresolved threads |
+| `mise run lint` | pass, including actionlint, Rust, Elixir, JavaScript, benchmark and Lua checks |
+| `mise run test-conformance` | pass: Rust 150; CLI 125; Node native 125; Node web-tree-sitter 125; browsers 12; Elixir 125 |
+| `mise run test` | **fail**: Rust and Elixir pass; 8 React tests fail on unpublished-parser CDN 404s (F3) |
+| `mise run docs` | **fail**: pnpm treats `docs` as its own command (F7) |
+| `pnpm --filter @lumis-sh/lumis run docs` | pass, confirming the task-command defect |
+| Native `wasm-resolver.test.ts` | **6 failed, 6 passed** (F2) |
+| Complete custom JSON language, native vs Wasm | **diverges**: native rejects the id; Wasm loads it (F2) |
+| Indented multi-row custom `#offset!`, Rust vs browser/Neovim | **diverges** (F1) |
+| `mise run wasm-publish-needed` | pass; reports all 115 packages need publication |
+| Live npm version check | main, selector and all five platform packages already published at `0.6.1` (F4) |
+| Failed-load memory harness | 22.3 MB → 137.6 MB after 500,000 unique unknown ids (F5) |
+| Public `package_path("../../escape")` harness | resolves outside the intended parser directory (F6) |
+| `git diff --check` before documenting this pass | clean |
+
+Green conformance remains valuable evidence for the checked-in corpus. It is not evidence for an
+input the corpus cannot generate, a runtime configuration the task does not select, or a release
+version transition CI has not attempted.
 
 ## Against the stated objectives
 
 | Objective | State |
 | --- | --- |
-| Reuse the Rust core | **Largely met.** resolve→verify→cache is one Rust implementation; the CLI and Elixir both use it. JavaScript remains a port, which is the forced one. §8 |
-| Safety | Mostly good. No new `unsafe`. Integrity checking is real, but its trust anchor is weaker than the docs imply. §4.1 |
-| All runtimes produce the same output | **Met, as far as conformance can show.** §3, §4.7 and §4.8 fixed; all five runtimes pass `mise run test-conformance`. |
+| Reuse the Rust core | **Largely met.** resolve→verify→cache is one Rust implementation shared by the CLI, Elixir and Node. The browser remains the forced JavaScript port. §8 |
+| Safety | **Not yet met.** Integrity checking is real and there is no new `unsafe`, but F5 is a persistent memory-exhaustion path and F6 permits cache/source path traversal. §4.1 |
+| All runtimes produce the same output | **Not met.** The checked-in conformance corpus passes in all six consumers, but F1 and F2 provide cross-runtime counterexamples. |
 | Performance | Known regressions, some avoidable. §4.3a is a concrete N+1. |
-| No silly mistakes | A handful. §6, §7 |
+| No silly mistakes | **Not met.** Required `mise` entry points are red (F3, F7), and release preparation no longer matches the publish workflow (F4). |
 | Reduce code | Net +8.8k. Some unavoidable; the triplicated pipeline is not. §8. `formatVersion` gate deleted, 4 copies → 2. §4.9 |
 
 ## Status
 
 | Item | State |
 | --- | --- |
-| 0 Branch fails its own JS test suite after merging `main` | **DONE** — CI fully green at `b228ef8e5` (105 pass, 0 fail) |
+| F1 Multi-row `#offset!` discards the original column in Rust | **OPEN — BLOCKER** |
+| F2 Node native ignores custom definitions and resolver configuration | **OPEN — BLOCKER** |
+| F3 Native/Wasm test matrix is false and `mise run test` fails | **OPEN — BLOCKER** |
+| F4 Native npm packages are not versioned for the next release | **OPEN — BLOCKER** |
+| F5 Failed injected-language ids leak load gates | **OPEN — BLOCKER** |
+| F6 Public language package names allow path traversal | **OPEN — BLOCKER** |
+| F7 `mise run docs` fails with the PR's pnpm version | **OPEN — BLOCKER** |
+| F8 PR body and repository docs are stale | **OPEN — REQUIRED** |
+| 0 Earlier JS failure immediately after merging `main` | **DONE** — CI was fully green at `b228ef8e5` (105 pass, 0 fail); F3 is a distinct final-pass failure |
 | 1.1 Clojure throws on load in JS | **DONE** (re-verified) |
 | 1.2 Negated character classes inverted | **DONE** (re-verified) |
 | 1.3 Nested classes diverge between Rust and JS | **DONE** (re-verified) |
@@ -60,7 +321,7 @@ reproducible test pins the behavior.
 | 7 What's good | n/a |
 | 8 Three copies of the loading pipeline | **DONE** — one Rust implementation; the CLI, Elixir and Node all call it, and the browser port is pinned by the full conformance corpus |
 
-## Evidence base
+## Evidence base from the second pass
 
 What was actually run for the second pass, so the claims can be weighed:
 
@@ -92,11 +353,16 @@ this document, and it was the gap flagged in the previous pass.
 Note the PR body claims "JavaScript: 514 Lumis tests passed". The package's own `test` script runs
 361. Reconcile the number before merge.
 
+This section is retained as the evidence ledger for the earlier pass. The final-pass evidence and
+counterexamples above supersede its runtime counts and merge conclusion.
+
 ---
 
-## 0. The branch passes its own tests
+## 0. Historical second-pass CI and query coverage
 
-Every check on the PR is green: 115 passing, 0 failing.
+At the second-pass revision, every reported check on the PR was green: 115 passing, 0 failing.
+The final pass still sees green GitHub checks, but F3 shows that the canonical local task and the
+claimed native matrix are not covered by that state.
 
 The original finding — that `main`'s #1117 repointed six grammars at forked
 revisions ahead of the published packages, dropping five languages out of query
@@ -1256,10 +1522,21 @@ The other two stay:
 
 Blocking:
 
-None. Every check on the PR is green.
+- F1: make multi-row `#offset!` preserve the capture endpoint's column and pin it against Neovim.
+- F2: honor complete custom definitions and resolver configuration under the default Node runtime.
+- F3: make the advertised native/Wasm matrix real and make `mise run test` pass from staged assets.
+- F4: version and dry-run all native npm packages in lockstep with `npm-lumis`.
+- F5: bound or remove failed per-language load gates.
+- F6: reject package names that can escape the configured source/cache tree.
+- F7: repair and run the canonical `mise run docs` task under pnpm 11.
 
-4. ~~Decide on `#offset!`: implement in Rust, or revert the JS removal.~~ **DONE** — implemented in
-   Rust and restored in JS; see §3. All five runtimes pass conformance.
+F8 is also required before merge: refresh the PR body and repository documentation after the
+behavioral and release fixes settle. GitHub's current green check state does not close any of the
+reproductions above.
+
+4. ~~Decide on `#offset!`: implement in Rust, or revert the JS removal.~~ **INCOMPLETE** — the
+   directive exists in both implementations, but F1 shows that Rust's multi-row arithmetic still
+   diverges from Neovim and JavaScript. The current conformance corpus cannot detect it.
 5. ~~Replace `@latest` with a pinned range.~~ **Won't fix** — see §4.1. The `formatVersion`
    half is closed by §4.9.
 6. ~~Guard `crypto.subtle` for non-secure contexts.~~ **DONE** — see §4.5.
