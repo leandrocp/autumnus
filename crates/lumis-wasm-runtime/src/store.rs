@@ -187,10 +187,11 @@ impl LanguageStore {
     /// Fails when the parser cannot be obtained, or its bytes do not match the
     /// size and digest the package declares.
     pub fn parser(&self, package: &LanguagePackage) -> Result<Vec<u8>, StoreError> {
+        let path = self.parser_path(package)?;
         if let Some(bytes) = self.local_parser(package) {
             return Ok(bytes);
         }
-        self.fetch_parser(package, &self.parser_path(package))
+        self.fetch_parser(package, &path)
     }
 
     /// Verified parser bytes from a configured source directory or the cache,
@@ -203,6 +204,7 @@ impl LanguageStore {
     }
 
     fn source_parser(&self, package: &LanguagePackage) -> Option<Vec<u8>> {
+        package.validate().ok()?;
         let source = self.source_asset(&parser_filename(package))?;
         let bytes = std::fs::read(&source).ok()?;
         package.verify_wasm(&bytes).ok().map(|()| bytes)
@@ -213,7 +215,7 @@ impl LanguageStore {
     /// Caching copies *into* this directory, so it has to ask whether its own
     /// cache holds the parser, not whether one is reachable from anywhere.
     pub fn cached_parser(&self, package: &LanguagePackage) -> Option<Vec<u8>> {
-        let path = self.parser_path(package);
+        let path = self.parser_path(package).ok()?;
         if let Ok(bytes) = std::fs::read(&path) {
             if package.verify_wasm(&bytes).is_ok() {
                 return Some(bytes);
@@ -236,7 +238,7 @@ impl LanguageStore {
     /// # Errors
     /// Fails when the parser cannot be fetched or fails verification.
     pub fn refresh_parser(&self, package: &LanguagePackage) -> Result<Vec<u8>, StoreError> {
-        let path = self.parser_path(package);
+        let path = self.parser_path(package)?;
         self.fetch_parser(package, &path)
     }
 
@@ -252,7 +254,7 @@ impl LanguageStore {
         let location =
             crate::catalog::find(name).ok_or_else(|| StoreError::UnknownLanguage(name.into()))?;
         let package = self.package(location.package_name)?;
-        let path = self.parser_path(&package);
+        let path = self.parser_path(&package)?;
 
         if force {
             self.refresh_parser(&package)?;
@@ -276,17 +278,25 @@ impl LanguageStore {
             context: format!("could not serialize {}", package.package_name),
             source: std::io::Error::other(error),
         })?;
+        package.validate()?;
         write_atomic(&self.package_path(&package.package_name)?, &bytes)
     }
 
     /// Path a verified parser is cached at. Content-addressed, so upgrading a
     /// package never overwrites an older verified asset.
-    #[must_use]
-    pub fn parser_path(&self, package: &LanguagePackage) -> PathBuf {
-        self.config
+    ///
+    /// # Errors
+    /// Fails when the package would not name a single file inside the cache.
+    /// [`LanguagePackage`] has public fields, so a caller can build one that
+    /// never went through [`LanguagePackage::validate`]; this is the boundary
+    /// that refuses it rather than a precondition callers have to remember.
+    pub fn parser_path(&self, package: &LanguagePackage) -> Result<PathBuf, StoreError> {
+        package.validate()?;
+        Ok(self
+            .config
             .cache_dir
             .join("parsers")
-            .join(parser_filename(package))
+            .join(parser_filename(package)))
     }
 
     /// Path this package's metadata is cached at.
@@ -306,9 +316,11 @@ impl LanguageStore {
     /// Exact-version URL for this package's parser on the primary CDN.
     ///
     /// Reported to users; [`Self::parser`] additionally falls back to the mirrors.
-    #[must_use]
-    pub fn parser_url(package: &LanguagePackage) -> String {
-        format!("{}/{}", CDNS[0], parser_path(package))
+    /// # Errors
+    /// Fails when the package would not name a single file, as [`Self::parser_path`].
+    pub fn parser_url(package: &LanguagePackage) -> Result<String, StoreError> {
+        package.validate()?;
+        Ok(format!("{}/{}", CDNS[0], parser_path(package)))
     }
 
     /// Fetch `path` from the first CDN that serves it.
@@ -694,9 +706,76 @@ mod tests {
         }
     }
 
+    /// `LanguagePackage` has public fields, so `validate` runs only on the JSON
+    /// path. A caller that builds one directly reaches the store having skipped
+    /// it, and every store method that derives a path has to refuse it itself.
+    #[test]
+    fn a_directly_constructed_package_cannot_escape_the_cache() {
+        struct AnyBytes(Vec<u8>);
+        impl Fetcher for AnyBytes {
+            fn get(&self, _url: &str) -> Result<Vec<u8>, String> {
+                Ok(self.0.clone())
+            }
+        }
+
+        for field in ["parser.name", "version"] {
+            let dir = tempdir();
+            let store = make(dir.path(), Box::new(AnyBytes(WASM.to_vec())));
+
+            // Never parsed from JSON, so `validate` has not run on it.
+            let mut hostile = package();
+            if field == "parser.name" {
+                hostile.parser.name = "../../escaped".into();
+            } else {
+                hostile.version = "../../escaped".into();
+            }
+            assert!(hostile.validate().is_err(), "{field} is invalid");
+
+            assert!(store.parser_path(&hostile).is_err(), "{field}: parser_path");
+            assert!(store.parser(&hostile).is_err(), "{field}: parser");
+            assert!(
+                store.refresh_parser(&hostile).is_err(),
+                "{field}: refresh_parser"
+            );
+            assert!(
+                store.cache_package(&hostile).is_err(),
+                "{field}: cache_package"
+            );
+            assert!(
+                LanguageStore::parser_url(&hostile).is_err(),
+                "{field}: parser_url"
+            );
+            assert!(
+                store.local_parser(&hostile).is_none(),
+                "{field}: local_parser"
+            );
+            assert!(
+                store.cached_parser(&hostile).is_none(),
+                "{field}: cached_parser"
+            );
+
+            // Nothing may appear outside the cache directory it was given.
+            let escaped: Vec<_> = std::fs::read_dir(dir.path().parent().unwrap())
+                .unwrap()
+                .filter_map(|entry| entry.ok())
+                .map(|entry| entry.file_name().to_string_lossy().into_owned())
+                .filter(|name| name.contains("escaped"))
+                .collect();
+            assert!(
+                escaped.is_empty(),
+                "{field} wrote outside the cache: {escaped:?}"
+            );
+        }
+
+        // The valid package still works, so this is not blanket rejection.
+        let dir = tempdir();
+        let store = make(dir.path(), Box::new(AnyBytes(WASM.to_vec())));
+        assert!(store.parser_path(&package()).is_ok());
+        assert!(store.parser(&package()).is_ok());
+    }
+
     /// `parser_filename` and the CDN path are built from the fetched JSON, so a
     /// hostile package must not be able to choose where its bytes are written.
-    /// `LanguagePackage::validate` owns this; the store depends on it holding.
     #[test]
     fn package_fields_that_would_escape_are_rejected() {
         for value in ["../../../evil", "/etc/passwd", ".", "..", "a/b", ""] {
@@ -723,7 +802,7 @@ mod tests {
 
     #[test]
     fn parser_url_pins_the_exact_version() {
-        let url = LanguageStore::parser_url(&package());
+        let url = LanguageStore::parser_url(&package()).unwrap();
         assert!(url.contains("@lumis-sh/wasm-json@1.2.3/"));
         assert!(!url.contains("@latest"));
     }
@@ -733,7 +812,7 @@ mod tests {
         let dir = tempdir();
         let store = make(dir.path(), Box::new(NoNetwork));
         let package = package();
-        let path = store.parser_path(&package);
+        let path = store.parser_path(&package).unwrap();
         write_atomic(&path, b"corrupt").unwrap();
 
         assert!(store.local_parser(&package).is_none());

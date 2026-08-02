@@ -493,6 +493,7 @@ impl Runtime {
         // reference that outlives it, and an arena gives a stable address while
         // still allowing inserts, which a RefCell<Vec<_>> cannot.
         let loaded_here: typed_arena::Arena<Arc<LoadedLanguage>> = typed_arena::Arena::new();
+        let unresolved: std::cell::RefCell<Vec<String>> = std::cell::RefCell::new(Vec::new());
 
         let events = worker
             .highlighter
@@ -514,8 +515,16 @@ impl Runtime {
                 // contains, however deeply nested. A language that cannot be
                 // fetched leaves its block unhighlighted rather than failing the
                 // document around it.
-                let loaded = self.load_through_store(id).ok()?;
-                Some(&loaded_here.alloc(loaded).highlight)
+                match self.load_through_store(id) {
+                    Ok(loaded) => Some(&loaded_here.alloc(loaded).highlight),
+                    Err(_) => {
+                        let mut unresolved = unresolved.borrow_mut();
+                        if !unresolved.iter().any(|name| name == id) {
+                            unresolved.push(id.to_string());
+                        }
+                        None
+                    }
+                }
             })
             .map_err(|error| RuntimeError::Highlight(error.to_string()))?;
 
@@ -546,6 +555,7 @@ impl Runtime {
         Ok(HighlightOutput {
             events: collected,
             layers: worker.highlighter.take_parsed_layers(),
+            unresolved: unresolved.into_inner(),
         })
     }
 }
@@ -576,6 +586,10 @@ impl Default for HighlightOptions {
 pub struct HighlightOutput {
     pub events: Vec<HighlightEvent>,
     pub layers: Vec<crate::tree_sitter_highlight::ParsedLayer>,
+    /// Injected languages this walk found but could not load, so a caller that
+    /// resolves parsers itself can tell what the store could not reach. Empty
+    /// when everything the document named was available.
+    pub unresolved: Vec<String>,
 }
 
 fn cached_engine() -> Result<Engine, wasmtime::Error> {

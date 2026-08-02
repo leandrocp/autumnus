@@ -23,9 +23,21 @@ interface NativeRuntimeInstance {
   loadLanguageDefinition(spec: NativeLanguageSpec, wasm: Uint8Array): void;
   hasLanguage(id: string): boolean;
   cacheLanguage(id: string, directory?: string, force?: boolean): string;
-  highlightEvents(source: string, language: string, rainbowBrackets?: boolean): Uint8Array;
-  format(source: string, language: string, formatter: NativeFormatter): string;
-  formatAsync(source: string, language: string, formatter: NativeFormatter): Promise<string>;
+  highlightEvents(
+    source: string,
+    language: string,
+    rainbowBrackets?: boolean,
+  ): { events: Uint8Array; unresolved: string[] };
+  format(
+    source: string,
+    language: string,
+    formatter: NativeFormatter,
+  ): { output: string; unresolved: string[] };
+  formatAsync(
+    source: string,
+    language: string,
+    formatter: NativeFormatter,
+  ): Promise<{ output: string; unresolved: string[] }>;
 }
 
 export interface NativeBinding {

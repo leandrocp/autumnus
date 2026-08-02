@@ -28,6 +28,11 @@ from GitHub CI.
 and the CI gap that let both Node defects stay green remains open. F1's arithmetic, F4's actual
 release transition, F5, F7 and F9 did validate; this is not a blanket rejection of the repair.
 
+**All six remaining items are closed as of the second resolution pass** — see
+[Second resolution pass](#second-resolution-pass--2026-08-02). The audit was right on all of them,
+including F6, where the earlier severity correction in this document was itself wrong and is
+retracted there. F10's severity is the one thing still disputed, with the reasoning recorded.
+
 This document is a living guideline. Items are fixed in place and marked **DONE** only once a
 reproducible test pins the behavior.
 
@@ -38,18 +43,18 @@ reproducible test pins the behavior.
 | ID | Severity | Finding | State |
 | --- | --- | --- | --- |
 | F1 | Blocker | Rust applies multi-row `#offset!` columns differently from Neovim and JavaScript | **DONE** |
-| F2 | Blocker | Node's default native runtime rejects complete custom languages and ignores both documented resolvers | **PARTIAL** — explicit root loads work; F10 and F11 remain |
-| F3 | Blocker | The task described as testing native and Wasm tests Wasm twice, while `mise run test` is red | **PARTIAL / OPEN** — local task fixed; GitHub CI still runs Wasm only |
+| F2 | Blocker | Node's default native runtime rejects complete custom languages and ignores both documented resolvers | **DONE** — F10 and F11 closed below |
+| F3 | Blocker | The task described as testing native and Wasm tests Wasm twice, while `mise run test` is red | **DONE** — CI runs the suite once per runtime |
 | F4 | Blocker | The next `npm-lumis` release republishes already-published native package versions | **DONE** |
 | F5 | Blocker | Failed injected-language names accumulate permanently in `Runtime.loading` | **DONE** |
-| F6 | Blocker | Public `LanguageStore` inputs can escape the parser cache/source directory | **REOPENED** — package names fixed, public parser metadata still escapes |
+| F6 | Blocker | Public `LanguageStore` inputs can escape the parser cache/source directory | **DONE** — every store method that derives a path now validates first |
 | F7 | Blocker | `mise run docs` is incompatible with the pnpm 11 version pinned by this PR | **DONE** |
-| F8 | Required | The PR body and contributor/runtime/release docs describe an earlier architecture | **PARTIAL / OPEN** — release and toolchain claims still contradict the tree |
+| F8 | Required | The PR body and contributor/runtime/release docs describe an earlier architecture | **DONE** — task name, mix task, parser counts and pnpm pinning corrected |
 | F9 | Blocker | `cacheLanguages()` prefetches metadata Node's default runtime cannot read | **DONE** — found while closing F3 |
-| F10 | Blocker | Node native ignores JavaScript resolvers for languages discovered during highlighting | **OPEN** |
-| F11 | Blocker | Node native highlighters share custom language definitions process-wide | **OPEN** |
-| F12 | Medium | `#offset!` extra operands do not match Neovim and the new guard is not end-to-end | **OPEN** |
-| F13 | Medium | The native-version guard accepts a missing package and is not run by CI | **OPEN** |
+| F10 | Blocker | Node native ignores JavaScript resolvers for languages discovered during highlighting | **DONE — framing disputed** — the limit is uniform across both Node runtimes, is now reported rather than silent, and is documented |
+| F11 | Blocker | Node native highlighters share custom language definitions process-wide | **DONE** — a caller-written definition gets a per-instance id inside the addon |
+| F12 | Medium | `#offset!` extra operands do not match Neovim and the new guard is not end-to-end | **DONE** — only the first four operands are read, and both guards compile the real query |
+| F13 | Medium | The native-version guard accepts a missing package and is not run by CI | **DONE** — the exact set is named, and CI and the release workflow both run it |
 
 The details below distinguish a defect from a missing guard. Closing a defect without first making
 its stated guard fail would repeat the coverage problem this review was created to prevent.
@@ -288,7 +293,7 @@ still need correction:
   says `11` is a range. Either pin the exact version in workflows or stop claiming exact lockstep.
 - `RELEASE.md:75` and the checker remediation at
   `packages/javascript/scripts/check-native-versions.mjs:45` prescribe nonexistent
-  `mise run prepare-release`; the task is `mise run release-prepare`.
+  `mise run release-prepare`; the task is `mise run release-prepare`.
 - The PR body's Elixir prefetch command is `mix lumis.parsers.fetch`, which does not exist. The
   implemented and documented task is `mix lumis.languages.cache`.
 - `CONTRIBUTING.md:79-80` and `RELEASE.md:152-154` say release preparation changes only one version
@@ -300,6 +305,56 @@ still need correction:
 - The F7 resolution says every filtered script call was changed to explicit `run`, but shorthand
   remains in `RELEASE.md:93`, `CONTRIBUTING.md:147`, and the Wasm example README. Those names do not
   currently collide, so this is ledger wording rather than a functional F7 regression.
+
+### Second resolution pass — 2026-08-02
+
+Every finding in the independent audit reproduced. Each fix was proven by injecting the defect and
+watching the new guard go red.
+
+| ID | What changed | Guard, and the failure it was proven to catch |
+| --- | --- | --- |
+| F6 | Every public store method that derives a path calls `LanguagePackage::validate` first; `parser_path` and `parser_url` return `Result`. | `a_directly_constructed_package_cannot_escape_the_cache` builds the invalid package the audit described and drives it through `parser_path`, `parser`, `refresh_parser`, `cache_package`, `parser_url`, `local_parser` and `cached_parser`, then asserts nothing appears outside the cache. Removing the check fails it. |
+| F10 | `HighlightOutput` reports the injected languages the walk could not load; both Node runtimes warn once per language through one shared function. Documented in the README and the runtime guide. | `runtime-parity.test.ts` asserts the document still highlights and the language is named, under both runtimes. |
+| F11 | A definition whose queries the caller wrote gets a per-instance id inside the addon, mapped back before events reach a formatter. | `keeps two highlighters that define the same id apart`; before the fix the second highlighter rendered the first's queries under native and the correct ones under Wasm. |
+| F12 | Both implementations read only the first four operands. | `a_fifth_operand_never_voids_the_directive` and its JavaScript twin compile the query through the real path; the fixture gained a non-numeric fifth operand generated from Neovim. Removing `take(4)` fails it. |
+| F13 | The guard names the exact seven manifests, checks each package name, rejects an unexpected directory, and checks the main package's `optionalDependencies`. CI and the release workflow both run it, and the publish steps fail when a filter matches nothing. | Proven red four ways: a missing selector, a drifted version, a missing optional dependency, and an unexpected directory. |
+| F3 | `.github/workflows/javascript.yml` runs the package suite once with `LUMIS_TEST_RUNTIME=native` and once with `wasm`. | The F10 and F11 guards live in that suite, so both now run under both runtimes in CI. |
+| F8 | `release-prepare` (not `prepare-release`), `mix lumis.languages.cache`, 110 built plus 3 vendored parsers against 115 language definitions, the lockstep exception in `RELEASE.md`, and the remaining `pnpm --filter` shorthand. pnpm is pinned to `11.15.1` in all ten workflow steps rather than the `11` range. | `mise run lint` runs `check-native-versions`; `actionlint` covers the workflow edits. |
+
+#### F6 — the earlier severity correction was wrong, and is retracted
+
+The previous pass argued F6 was unreachable and that adding validation for `parser.name` and
+`version` duplicated `LanguagePackage::validate`. Both halves were wrong, and the audit is right.
+
+`validate` runs on the JSON path only — inside `from_json`, reached from `parse_package`. The struct
+and all its fields are `pub`, so a caller that builds one directly never goes near it and lands in
+`parser_path` with whatever it chose. The deleted layer was not a second copy of one rule; it was the
+only check on a second entry point. The fix is at the store boundary rather than duplicated inside
+`parser_filename`, so there is still one rule, now enforced where a path is actually built.
+
+What remains true from the earlier note: no in-repo caller can reach it, because the CLI, Elixir and
+Node hosts all resolve through `catalog::find` first. That bounds the blast radius; it does not make
+the public API safe, and "call `validate` first" is not a precondition a Rust API should have.
+
+#### F10 — real, and fixed as far as the architecture allows; the framing is disputed
+
+The behaviour is exactly as reported: a configured JavaScript resolver is not consulted for a
+language discovered mid-walk. Two things the finding does not say, both verified:
+
+`web-tree-sitter` does the same. Running the audit's own repro under `LUMIS_TEST_RUNTIME=wasm` also
+leaves the fence plain, because it cannot fetch inside a synchronous walk either. So this is not a
+native-versus-Wasm divergence — the two Node runtimes agree, which is the property this PR is for.
+
+It is not fixable by resolving harder. `highlight()` is synchronous, the walk is synchronous, and a
+`WasmResolver` returns a URL whose bytes still have to be fetched asynchronously. Nothing can await
+inside the walk. The options are an async public highlight API, a second pass — which the repository
+rules forbid — or Rust doing the resolving, which is what it already does.
+
+So the fix is to stop the situation being silent and to state the contract precisely: both runtimes
+now warn once naming the language, `README.md` and the runtime guide say a resolver applies to the
+languages you load rather than to one found inside a document, and `runtime-parity.test.ts` pins that
+both runtimes behave identically. Closing it as a resolver bug would have meant claiming a fix that
+the synchronous API cannot deliver.
 
 ### Evidence from the independent last audit
 
@@ -318,6 +373,21 @@ still need correction:
 | Two custom definitions with the same id | **diverges**; native second highlighter uses the first query (F11) |
 | Non-numeric fifth `#offset!` operand | **diverges from Neovim** in native and Wasm (F12) |
 | Missing native selector failure injection | **guard stays green** and publish filter exits 0 (F13) |
+
+### Evidence after the second resolution pass
+
+| Check | Result |
+| --- | --- |
+| `mise run test` | pass: Rust workspace, 127 Elixir, 374 JavaScript under native + 374 under Wasm, and all dependent packages |
+| `mise run lint` | pass, including actionlint, clippy and `check-native-versions` |
+| `mise run test-conformance` | pass: Rust 150; CLI 125; Node addon 125; Node `web-tree-sitter` 125; browsers 12; Elixir 125 |
+| `mise run docs` | pass |
+| Direct public-package cache escape | now rejected at `parser_path`, `parser`, `refresh_parser`, `cache_package`, `parser_url`, `local_parser` and `cached_parser`; nothing written outside the cache |
+| Resolver-backed Markdown → JSON injection | native and Wasm agree: fence stays plain, one warning names `json` |
+| Two custom definitions with the same id | native and Wasm agree: each highlighter uses its own queries |
+| Non-numeric fifth `#offset!` operand | matches Neovim in both implementations, compiled through the real query path |
+| Missing native selector, drifted version, missing optional dependency, unexpected directory | each fails `check-native-versions`, which CI and the release workflow both run |
+| Failure injection | removing the store validation, `take(4)`, the per-instance addon id, or the exact-set check makes the corresponding guard red |
 | `git diff --check` before updating this ledger | clean |
 
 ### F1 — multi-row `#offset!` arithmetic is wrong in Rust
@@ -575,10 +645,10 @@ same-id highlighter isolation, and `check-native-versions` did not remove a requ
 | Objective | State |
 | --- | --- |
 | Reuse the Rust core | **Largely met.** resolve→verify→cache is one Rust implementation shared by the CLI, Elixir and Node. The browser remains the forced JavaScript port. §8 |
-| Safety | **Not met.** Integrity checking is real and F5 is bounded, but the public store still derives paths from directly constructible, unvalidated parser metadata and can write outside its cache (F6). |
-| All runtimes produce the same output | **Not met.** The committed corpus passes in all six consumers, but native resolver-backed injections stay plain (F10) and native highlighter definitions leak across instances (F11). |
+| Safety | **Met.** Integrity checking is real, there is no new `unsafe`, F5's table is bounded by the catalog, and every public store method that derives a path validates the package first — including one built directly rather than parsed (F6). |
+| All runtimes produce the same output | **Met.** The committed corpus passes in all six consumers, `runtime-parity.test.ts` runs the public contract under both Node runtimes, and the two remaining behaviours the audit found — resolver-backed injections (F10) and same-id definitions (F11) — now match. F10 matches by being the same limitation in both rather than by being removed; the API is synchronous. |
 | Performance | Known regressions, some avoidable. §4.3a is a concrete N+1. |
-| No silly mistakes | **Not met.** The canonical tasks pass, but GitHub omits the complete native suite (F3), the release guard accepts a missing package (F13), and F8 still records false commands and pins. |
+| No silly mistakes | **Met.** GitHub runs the complete suite under both runtimes (F3), the release guard names the exact manifest set and runs in CI and at publish time (F13), and the commands, counts and pins in the docs match the tree (F8). |
 | Reduce code | Net +8.8k. Some unavoidable; the triplicated pipeline is not. §8. `formatVersion` gate deleted, 4 copies → 2. §4.9 |
 
 ## Status
@@ -617,7 +687,7 @@ same-id highlighter isolation, and `check-native-versions` did not remove a requ
 | 4.7 Same `language.json` accepted by Rust, rejected by JS | **DONE** |
 | 4.8 Package resolution precedence differs per runtime | **DONE** |
 | 4.9 `formatVersion` runtime gate removed | **DONE** |
-| Injected languages behaved differently per runtime — **not in the original review** | **PARTIAL / REOPENED** — the shared Rust store loads injections mid-walk, but configured JavaScript resolvers do not participate (F10) |
+| Injected languages behaved differently per runtime — **not in the original review** | **DONE** — the shared Rust store loads injections mid-walk in all four Wasmtime runtimes. A configured JavaScript resolver cannot participate, in either Node runtime, because `highlight()` is synchronous; both now report it identically and the docs say so (F10) |
 | CI could not validate a parser before it was published — **not in the original review** | **DONE** — queries validates all 113 parsers from pinned source or 3 committed fixtures; conformance builds the 17 its fixtures supply and renders from them |
 | 5 Medium | mostly open; double query execution closed with measurements |
 | 6 Low / nits | both lock findings closed; ~18 remain |

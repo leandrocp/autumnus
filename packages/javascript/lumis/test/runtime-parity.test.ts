@@ -71,6 +71,25 @@ describe("runtime parity", () => {
     expect(hl.languages).toContain("custom-json");
   }, 30_000);
 
+  // The addon has one process-wide catalog keyed by id, so without per-instance
+  // ids the second highlighter silently gets the first one's queries.
+  it("keeps two highlighters that define the same id apart", async () => {
+    const wasm = new Uint8Array(readFileSync(fileURLToPath(ensureLocalWasm("json"))));
+    const strings: Language = { id: "dup", aliases: [], highlights: "(string) @string", wasm };
+    const numbers: Language = { id: "dup", aliases: [], highlights: "(number) @number", wasm };
+
+    const first = await index.createHighlighter({ languages: [strings] });
+    const second = await index.createHighlighter({ languages: [numbers] });
+
+    const firstHtml = first.highlight('{"a": 1}', htmlLinked({ language: strings }));
+    const secondHtml = second.highlight('{"a": 1}', htmlLinked({ language: numbers }));
+
+    expect(firstHtml).toContain('class="l-string"');
+    expect(firstHtml).not.toContain('class="l-number"');
+    expect(secondHtml).toContain('class="l-number"');
+    expect(secondHtml).not.toContain('class="l-string"');
+  }, 30_000);
+
   it("rejects a custom language with no queries and no package", async () => {
     const hl = await index.createHighlighter({
       languages: [
@@ -103,6 +122,37 @@ describe("runtime parity", () => {
     expect(hl.highlight("- old\n+ new", htmlLinked({ language: diff }))).toContain(
       'class="language-diff"',
     );
+  }, 30_000);
+
+  /**
+   * `highlight()` is synchronous, so neither runtime can await the URL a
+   * resolver returns for a language it only discovers mid-document. Both leave
+   * the block plain and say which language it was; neither may do it silently,
+   * and neither may differ from the other.
+   */
+  it("reports an injected language it could not load, rather than failing or hiding it", async () => {
+    const { default: markdown } = await import("../langs/markdown.ts");
+    const warnings: string[] = [];
+    const warn = console.warn;
+    console.warn = (message: unknown) => warnings.push(String(message));
+
+    try {
+      const hl = await index.createHighlighter({
+        languages: [{ ...markdown, wasm: ensureLocalWasm("markdown") }],
+        wasmResolver: (language, wasm) => ensureLocalParserWasm(language, wasm.name),
+      });
+
+      const html = hl.highlight(
+        "```no-such-language\nplain\n```\n",
+        htmlLinked({ language: markdown }),
+      );
+
+      // The document still highlights; only the fence is plain.
+      expect(html).toContain('class="language-markdown"');
+      expect(warnings.join("\n")).toContain("no-such-language");
+    } finally {
+      console.warn = warn;
+    }
   }, 30_000);
 
   it("applies a globally configured resolver to later highlighters", async () => {

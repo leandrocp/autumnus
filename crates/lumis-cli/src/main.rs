@@ -1079,6 +1079,7 @@ fn dump_tree_lines(
                 ranges: vec![range],
                 depth: 0,
             }],
+            unresolved: Vec::new(),
         }
     };
     let resolved_highlights = if highlights {

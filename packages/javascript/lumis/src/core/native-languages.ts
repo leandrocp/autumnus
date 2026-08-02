@@ -9,6 +9,7 @@ import type {
   WasmRef,
 } from "../types.js";
 import { builtinFormatterKind } from "./builtin-formatter.js";
+import { warnUnresolvedInjection } from "../events.js";
 import { decodeNativeEvents } from "./native-event-codec.js";
 import { PLAINTEXT_LANG_ID } from "../types.js";
 import type {
@@ -71,6 +72,8 @@ async function readWasmInput(wasm: RuntimeWasmInput): Promise<Uint8Array> {
  * uses, so there is one implementation of resolve, verify and cache rather than
  * a native copy that can drift.
  */
+let instanceCount = 0;
+
 export function createNativeLanguagesModule(
   binding: NativeBinding,
   resolvers: LanguagesModule,
@@ -96,11 +99,48 @@ export function createNativeLanguagesModule(
     private readonly aliasMap = new Map<string, string>();
     private readonly resolver: RuntimeLike;
     private hasJsResolver: boolean;
+    private readonly instance = ++instanceCount;
+    /** Internal addon id for a language whose queries this instance supplied. */
+    private readonly ownDefinitions = new Map<string, string>();
 
     constructor(options: HighlighterRuntimeOptions = {}) {
       for (const alias of PLAINTEXT_ALIASES) this.aliasMap.set(alias, PLAINTEXT_LANG_ID);
       this.resolver = resolvers.createRuntime(options);
       this.hasJsResolver = Boolean(options.wasmResolver ?? options.languagePackageResolver);
+    }
+
+    /**
+     * What to call this language inside the addon.
+     *
+     * The addon has one process-wide catalog, keyed by id, and a language
+     * already in it is not reloaded. Two highlighters may legitimately define
+     * the same id with different queries, so a definition the caller wrote gets
+     * an id of its own. A package-backed language keeps its public id, because
+     * every instance would compile identical bytes and queries and sharing them
+     * is the point of the shared runtime.
+     */
+    private addonId(opts: LoadLanguageOptions): string {
+      if (opts.highlights === undefined) return opts.definition.id;
+      const id = `${opts.definition.id}\u0001${this.instance}`;
+      this.ownDefinitions.set(opts.definition.id, id);
+      return id;
+    }
+
+    private addonIdFor(language: LoadedLanguage): string {
+      return this.ownDefinitions.get(language.definition.id) ?? language.definition.id;
+    }
+
+    /**
+     * Say so when a document named a language the Rust store could not reach.
+     *
+     * `highlight()` is synchronous and so is the walk, so a JavaScript resolver
+     * — whose URL still has to be fetched asynchronously — cannot answer from
+     * inside it. `web-tree-sitter` cannot either, for the same reason, so both
+     * Node runtimes leave the block plain. Silence here is what made that look
+     * like the resolver being ignored rather than a documented limit.
+     */
+    private reportUnresolved(unresolved: string[]): void {
+      for (const id of unresolved) warnUnresolvedInjection(id);
     }
 
     configureWasmResolver(fn: WasmResolver): void {
@@ -199,7 +239,7 @@ export function createNativeLanguagesModule(
 
       this.native.loadLanguageDefinition(
         {
-          id: resolved.definition.id,
+          id: this.addonId(opts),
           aliases: resolved.definition.aliases,
           highlights: resolved.highlights,
           injections: resolved.injections,
@@ -284,20 +324,32 @@ export function createNativeLanguagesModule(
       if (language.definition.id === PLAINTEXT_LANG_ID) {
         return [{ type: "source", startByte: 0, endByte: encoder.encode(source).byteLength }];
       }
-      return decodeNativeEvents(
-        this.native.highlightEvents(
-          source,
-          language.definition.id,
-          options.rainbowBrackets ?? false,
-        ),
+      const addonId = this.addonIdFor(language);
+      const highlighted = this.native.highlightEvents(
+        source,
+        addonId,
+        options.rainbowBrackets ?? false,
+      );
+      this.reportUnresolved(highlighted.unresolved);
+      const events = decodeNativeEvents(highlighted.events);
+      if (addonId === language.definition.id) return events;
+
+      // The addon knows this language by an id of its own; formatters and themes
+      // look scopes up by the public one.
+      return events.map((event) =>
+        "language" in event && event.language === addonId
+          ? { ...event, language: language.definition.id }
+          : event,
       );
     }
 
     format(source: string, language: LoadedLanguage, formatter: Formatter): string | undefined {
       const nativeFormatter = this.nativeFormatter(language, formatter);
-      return nativeFormatter
-        ? this.native.format(source, language.definition.id, nativeFormatter)
-        : undefined;
+      if (!nativeFormatter) return undefined;
+
+      const formatted = this.native.format(source, this.addonIdFor(language), nativeFormatter);
+      this.reportUnresolved(formatted.unresolved);
+      return formatted.output;
     }
 
     async formatAsync(
@@ -306,9 +358,15 @@ export function createNativeLanguagesModule(
       formatter: Formatter,
     ): Promise<string | undefined> {
       const nativeFormatter = this.nativeFormatter(language, formatter);
-      return nativeFormatter
-        ? this.native.formatAsync(source, language.definition.id, nativeFormatter)
-        : undefined;
+      if (!nativeFormatter) return undefined;
+
+      const formatted = await this.native.formatAsync(
+        source,
+        this.addonIdFor(language),
+        nativeFormatter,
+      );
+      this.reportUnresolved(formatted.unresolved);
+      return formatted.output;
     }
 
     private nativeFormatter(

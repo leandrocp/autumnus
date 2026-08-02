@@ -175,7 +175,15 @@ Useful for dropdowns, config validation, and docs tooling:
 On Node, highlighting loads a language injected inside a document during the
 same pass that finds it, so a Markdown file with a fenced Rust block highlights
 that block without Rust being named anywhere in your code. A language that
-cannot be fetched leaves its own block plain rather than failing the document.
+cannot be fetched leaves its own block plain rather than failing the document,
+and Lumis warns once naming it.
+
+That one-pass loading is done by the Rust store. A custom
+[`configureWasmResolver`](/advanced/wasm-and-cdn#override-the-resolver) applies
+to the languages you load, not to one discovered mid-document: `highlight()` is
+synchronous, so there is nowhere to await the URL a resolver returns. With a
+custom resolver, load injected languages up front, prefetch them with
+`cacheLanguages()`, or point `LUMIS_WASM_PATH` at a directory containing them.
 
 In a browser this does not happen: loading is asynchronous there and cannot run
 inside a synchronous walk, so load every participating language yourself, or use

@@ -99,7 +99,7 @@ jobs:
 
       - uses: pnpm/action-setup@v6
         with:
-          version: 11
+          version: 11.15.1
 
       - uses: actions/setup-node@v7
         with:
@@ -183,23 +183,40 @@ jobs:
               "packages/javascript/lumis/native/npm/$target/$filename"
           done
 
+      # The main package pins these as optionalDependencies and pnpm rewrites
+      # `workspace:*` at pack time, so publishing it against an incomplete or
+      # drifted native set ships a tarball that cannot install.
+      - name: Check native runtime packages are complete and in lockstep
+        if: steps.pkg.outputs.filter == '@lumis-sh/lumis'
+        run: node packages/javascript/scripts/check-native-versions.mjs
+
       - name: Publish native runtime packages
         if: steps.pkg.outputs.filter == '@lumis-sh/lumis'
         run: |
+          published=0
           for package_dir in packages/javascript/lumis/native/npm/*; do
             if [ "$(basename "$package_dir")" = "meta" ]; then
               continue
             fi
             npm publish "$package_dir" --access public --provenance
+            published=$((published + 1))
           done
+          if [ "$published" -ne 5 ]; then
+            echo "expected 5 platform packages, published $published" >&2
+            exit 1
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+      # `pnpm --filter` exits 0 when nothing matches, so a renamed or deleted
+      # selector would silently skip publishing and leave the main package
+      # depending on a version that does not exist.
       - name: Publish native runtime selector
         if: steps.pkg.outputs.filter == '@lumis-sh/lumis'
-        run: >-
-          pnpm --filter @lumis-sh/lumis-native publish
-          --access public --no-git-checks --provenance
+        run: |
+          test -f packages/javascript/lumis/native/npm/meta/package.json
+          pnpm --filter @lumis-sh/lumis-native publish \
+            --access public --no-git-checks --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

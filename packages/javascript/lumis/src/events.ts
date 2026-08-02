@@ -106,6 +106,26 @@ function buildUtf8OffsetMap(source: string): number[] {
   return offsets;
 }
 
+/** One warning per language per process, not one per document. */
+const warnedUnresolved = new Set<string>();
+
+/**
+ * Say so when a document named a language that is not loaded.
+ *
+ * `web-tree-sitter` cannot fetch a parser inside a synchronous walk, so the
+ * block stays plain. The native addon reports the same thing from Rust, so both
+ * Node runtimes behave and sound identical.
+ */
+export function warnUnresolvedInjection(id: string): void {
+  if (warnedUnresolved.has(id)) return;
+  warnedUnresolved.add(id);
+  console.warn(
+    `Lumis could not load "${id}", injected inside the document being highlighted. ` +
+      "Load it up front, prefetch it with cacheLanguages(), or use a bundle. " +
+      "See https://lumis.sh/docs/advanced/wasm-and-cdn#highlighting-loads-what-a-document-needs",
+  );
+}
+
 export function buildLineStartMap(source: string): number[] {
   const starts = [0];
 
@@ -319,6 +339,7 @@ function collectHighlightLayers(
 
       const injectedLanguage = runtime.getLoadedLanguage(resolved.languageName);
       if (!injectedLanguage) {
+        warnUnresolvedInjection(resolved.languageName);
         continue;
       }
 

@@ -115,6 +115,20 @@ pub struct NativeFormatter {
     pub options: serde_json::Value,
 }
 
+/// A rendered document plus the injected languages the walk could not load.
+#[napi(object)]
+pub struct NativeFormatted {
+    pub output: String,
+    pub unresolved: Vec<String>,
+}
+
+/// Highlight events plus the injected languages the walk could not load.
+#[napi(object)]
+pub struct NativeHighlight {
+    pub events: Buffer,
+    pub unresolved: Vec<String>,
+}
+
 /// A language defined entirely by the caller, with no package behind it.
 #[napi(object)]
 pub struct NativeLanguageSpec {
@@ -235,7 +249,7 @@ fn inline_highlight_lines(value: JsHighlightLines) -> InlineHighlightLines {
 
 fn render_formatter(
     request: FormatRequest,
-) -> std::result::Result<String, Box<dyn std::error::Error + Send + Sync>> {
+) -> std::result::Result<(String, Vec<String>), Box<dyn std::error::Error + Send + Sync>> {
     let FormatRequest {
         source,
         language: language_name,
@@ -246,7 +260,7 @@ fn render_formatter(
     } else {
         language_name.parse()?
     };
-    let events = highlight_events(
+    let (events, unresolved) = highlight_events(
         &source,
         &language_name,
         formatter.rainbow_brackets.unwrap_or(false),
@@ -298,7 +312,7 @@ fn render_formatter(
         }
     }
 
-    Ok(String::from_utf8(output)?)
+    Ok((String::from_utf8(output)?, unresolved))
 }
 
 /// Encode the event protocol documented and decoded in
@@ -336,8 +350,8 @@ pub struct FormatTask {
 }
 
 impl Task for FormatTask {
-    type Output = String;
-    type JsValue = String;
+    type Output = (String, Vec<String>);
+    type JsValue = NativeFormatted;
 
     fn compute(&mut self) -> Result<Self::Output> {
         render_formatter(self.request.take().expect("format task already consumed"))
@@ -345,7 +359,10 @@ impl Task for FormatTask {
     }
 
     fn resolve(&mut self, _env: Env, output: Self::Output) -> Result<Self::JsValue> {
-        Ok(output)
+        Ok(NativeFormatted {
+            output: output.0,
+            unresolved: output.1,
+        })
     }
 }
 
@@ -357,25 +374,28 @@ fn highlight_events(
     source: &str,
     language: &str,
     rainbow_brackets: bool,
-) -> std::result::Result<Vec<HighlightEvent>, Box<dyn std::error::Error + Send + Sync>> {
+) -> std::result::Result<(Vec<HighlightEvent>, Vec<String>), Box<dyn std::error::Error + Send + Sync>>
+{
     if language == "plaintext" {
-        return Ok(vec![HighlightEvent::Source {
-            start: 0,
-            end: source.len(),
-        }]);
+        return Ok((
+            vec![HighlightEvent::Source {
+                start: 0,
+                end: source.len(),
+            }],
+            Vec::new(),
+        ));
     }
 
     let runtime = RUNTIME.as_ref().map_err(|error| error.clone())?;
-    Ok(runtime
-        .highlight_with(
-            source,
-            language,
-            &HighlightOptions {
-                rainbow_brackets,
-                ..HighlightOptions::default()
-            },
-        )?
-        .events)
+    let output = runtime.highlight_with(
+        source,
+        language,
+        &HighlightOptions {
+            rainbow_brackets,
+            ..HighlightOptions::default()
+        },
+    )?;
+    Ok((output.events, output.unresolved))
 }
 
 /// Highlighting over Lumis's shared Wasmtime runtime, which every Lumis runtime
@@ -490,17 +510,26 @@ impl NativeRuntime {
             .map_err(native_error)
     }
 
-    /// Return the complete nested event stream as one compact binary value.
+    /// The complete nested event stream as one compact binary value, plus any
+    /// injected language the walk found and could not load.
+    ///
+    /// `unresolved` is what lets a caller who supplied its own resolver finish
+    /// the job: the Rust store cannot call a JavaScript resolver from inside a
+    /// synchronous walk, so it reports what it could not reach instead.
     #[napi(js_name = "highlightEvents")]
     pub fn highlight_events(
         &self,
         source: String,
         language: String,
         rainbow_brackets: Option<bool>,
-    ) -> Result<Buffer> {
-        let events = highlight_events(&source, &language, rainbow_brackets.unwrap_or(false))
-            .map_err(native_error)?;
-        encode_events(&events)
+    ) -> Result<NativeHighlight> {
+        let (events, unresolved) =
+            highlight_events(&source, &language, rainbow_brackets.unwrap_or(false))
+                .map_err(native_error)?;
+        Ok(NativeHighlight {
+            events: encode_events(&events)?,
+            unresolved,
+        })
     }
 
     /// Parse and render built-in formatters entirely in Rust, returning one string.
@@ -510,13 +539,14 @@ impl NativeRuntime {
         source: String,
         language: String,
         formatter: NativeFormatter,
-    ) -> Result<String> {
-        render_formatter(FormatRequest {
+    ) -> Result<NativeFormatted> {
+        let (output, unresolved) = render_formatter(FormatRequest {
             source,
             language,
             formatter,
         })
-        .map_err(native_error)
+        .map_err(native_error)?;
+        Ok(NativeFormatted { output, unresolved })
     }
 
     /// Run async API formatting on Node's worker pool.

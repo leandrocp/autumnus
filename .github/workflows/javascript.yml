@@ -60,7 +60,7 @@ jobs:
       - uses: jdx/mise-action@v4.2.3
       - uses: pnpm/action-setup@v6
         with:
-          version: 11
+          version: 11.15.1
       - uses: actions/setup-node@v7
         with:
           node-version: 'lts/*'
@@ -77,6 +77,9 @@ jobs:
       # once made it unrunnable without any check going red.
       - run: pnpm --filter @lumis-sh/lumis run build:generate
       - run: pnpm --filter @lumis-sh/lumis run docs
+      # The release workflow publishes seven native manifests before the main
+      # package, and npm will not republish an existing version.
+      - run: node packages/javascript/scripts/check-native-versions.mjs
       - run: pnpm --dir packages/javascript run build:wasm-bundles && git diff --exit-code -- packages/javascript/wasm-bundle-*
 
   test:
@@ -90,7 +93,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: pnpm/action-setup@v6
         with:
-          version: 11
+          version: 11.15.1
       - uses: actions/setup-node@v7
         with:
           node-version: 'lts/*'
@@ -114,7 +117,15 @@ jobs:
       - run: pnpm --filter @lumis-sh/rehype-lumis run test
         env:
           LUMIS_WASM_PATH: ${{ github.workspace }}/target/test-parsers
+      # Both runtimes, explicitly. vite.config.mjs defaults to Wasm, so leaving
+      # this unset would run the same one twice and leave every native-only
+      # resolver and lifetime behaviour uncovered.
       - run: pnpm --filter @lumis-sh/lumis run test
+        env:
+          LUMIS_TEST_RUNTIME: native
+      - run: pnpm --filter @lumis-sh/lumis run test
+        env:
+          LUMIS_TEST_RUNTIME: wasm
       - run: pnpm --filter @lumis-sh/react run test
         env:
           LUMIS_WASM_PATH: ${{ github.workspace }}/target/test-parsers

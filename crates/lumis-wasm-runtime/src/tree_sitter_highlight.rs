@@ -245,16 +245,14 @@ fn shift_point(
 
 /// The four numeric operands of `#offset!`.
 ///
-/// Neovim reads them as `pred[3] or 0` through `pred[6] or 0`, so an omitted one
-/// is zero and a fifth is ignored. A non-numeric operand makes the directive
-/// unusable rather than partially applied.
+/// Neovim reads exactly `pred[3]` through `pred[6]` and never looks further, so
+/// an omitted operand is zero and anything after the fourth is untouched —
+/// including a non-numeric one. Only a value in one of the four slots that is
+/// not a number makes the directive unusable.
 fn parse_offset_operands(deltas: &[&str]) -> Option<[i32; 4]> {
     let mut offset = [0i32; 4];
-    for (index, value) in deltas.iter().enumerate() {
-        let parsed = value.parse().ok()?;
-        if let Some(slot) = offset.get_mut(index) {
-            *slot = parsed;
-        }
+    for (slot, value) in offset.iter_mut().zip(deltas) {
+        *slot = value.parse().ok()?;
     }
     Some(offset)
 }
@@ -618,6 +616,7 @@ impl HighlightConfiguration {
                 };
                 let Some(deltas) = deltas
                     .iter()
+                    .take(4)
                     .map(|arg| match arg {
                         QueryPredicateArg::String(value) => Some(value.as_ref()),
                         QueryPredicateArg::Capture(_) => None,
@@ -1622,6 +1621,7 @@ mod tests {
         struct Case {
             name: String,
             source: String,
+            query: String,
             offset: Vec<String>,
             original: Endpoint,
             expected: Endpoint,
@@ -1640,10 +1640,26 @@ mod tests {
             fixture.cases.len()
         );
 
+        let language = tree_sitter::Language::new(tree_sitter_json::LANGUAGE);
+
         for case in &fixture.cases {
+            // Compiled through the real query path, so a change to how operands
+            // are extracted from a predicate fails here too.
+            let config =
+                HighlightConfiguration::new(language.clone(), "json", &case.query, "", "").unwrap();
+            let offset = *config
+                .offsets
+                .values()
+                .next()
+                .unwrap_or_else(|| panic!("{}: the directive was dropped", case.name));
+
             let operands: Vec<&str> = case.offset.iter().map(String::as_str).collect();
-            let offset = parse_offset_operands(&operands)
-                .unwrap_or_else(|| panic!("{}: operands are unusable", case.name));
+            assert_eq!(
+                parse_offset_operands(&operands),
+                Some(offset),
+                "{}: the compiled query and the operand parser disagree",
+                case.name
+            );
 
             let original = Range {
                 start_byte: case.original.start_byte,
@@ -1732,6 +1748,36 @@ mod tests {
             shift_point(source, 6, Point::new(1, 2), 1, -1).unwrap(),
             (17, Point::new(2, 1))
         );
+    }
+
+    /// Neovim reads `pred[3]` through `pred[6]` and stops, so a fifth operand of
+    /// any kind is untouched. Inspecting every argument instead made a capture
+    /// there void the whole directive.
+    #[test]
+    fn a_fifth_operand_never_voids_the_directive() {
+        let language = tree_sitter::Language::new(tree_sitter_json::LANGUAGE);
+        let compile = |query: &str| {
+            HighlightConfiguration::new(language.clone(), "json", query, "", "")
+                .unwrap()
+                .offsets
+                .values()
+                .next()
+                .copied()
+        };
+
+        for query in [
+            "((string) @cap (#offset! @cap 0 1 0 -1))",
+            "((string) @cap (#offset! @cap 0 1 0 -1 99))",
+            "((string) @cap (#offset! @cap 0 1 0 -1 nope))",
+            "((string) @cap (#offset! @cap 0 1 0 -1 @cap))",
+        ] {
+            assert_eq!(compile(query), Some([0, 1, 0, -1]), "{query}");
+        }
+
+        // A value in one of the four slots still has to be a number. Neovim
+        // raises a Lua error here rather than defining a result.
+        assert_eq!(compile("((string) @cap (#offset! @cap 0 nope 0 -1))"), None);
+        assert_eq!(compile("((string) @cap (#offset! @cap 0 @cap 0 -1))"), None);
     }
 
     /// Neovim defaults an omitted numeric operand to zero (`pred[3] or 0`).

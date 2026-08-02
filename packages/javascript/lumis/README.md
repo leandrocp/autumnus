@@ -293,6 +293,14 @@ This can be called at any time. It applies to `highlight()`, `createHighlighter(
 
 For advanced use cases that need isolated resolution (e.g., tests, multiple CDNs), pass `wasmResolver` directly to `createHighlighter()`.
 
+A resolver applies to the languages you load. It cannot apply to a language
+discovered *inside* a document while it is being highlighted: `highlight()` is
+synchronous, so there is nowhere to await the URL a resolver returns. Both Node
+runtimes behave the same way here — the block stays plain and Lumis warns once
+naming the language. Load it up front, prefetch it with `cacheLanguages()`, or
+point `LUMIS_WASM_PATH` at a directory containing it. See
+[Highlighting loads what a document needs](https://lumis.sh/docs/advanced/wasm-and-cdn#highlighting-loads-what-a-document-needs).
+
 ## `htmlLinked()` CSS
 
 `htmlLinked()` emits semantic classes instead of inline styles. Include a theme stylesheet on the page, for example:

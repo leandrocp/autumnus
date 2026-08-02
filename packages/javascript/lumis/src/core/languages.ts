@@ -413,7 +413,7 @@ function resolveHighlightName(captureName: string): string | undefined {
   return best;
 }
 
-function compileHighlightConfig(
+export function compileHighlightConfig(
   language: Language,
   Query: typeof TreeSitterQuery,
   highlightsQuery: string,
@@ -457,18 +457,19 @@ function compileHighlightConfig(
   });
 
   /**
-   * Neovim reads `#offset!`'s four numeric operands as `pred[3] or 0` through
-   * `pred[6] or 0`, so an omitted one is zero and a fifth is ignored. A
-   * non-numeric operand makes the directive unusable rather than half applied.
+   * Neovim reads exactly `pred[3]` through `pred[6]` and never looks further,
+   * so an omitted operand is zero and anything after the fourth is untouched —
+   * including a non-numeric one. Only a value in one of the four slots that is
+   * not a number makes the directive unusable.
    */
   function parseOffsetDeltas(deltas: PredicateStep[]): QueryCaptureOffset | undefined {
     const values = [0, 0, 0, 0];
 
-    for (const [index, delta] of deltas.entries()) {
+    for (const [index, delta] of deltas.slice(0, values.length).entries()) {
       if (delta.type !== "string") return undefined;
       const value = Number.parseInt(delta.value, 10);
       if (!Number.isInteger(value)) return undefined;
-      if (index < values.length) values[index] = value;
+      values[index] = value;
     }
 
     return {

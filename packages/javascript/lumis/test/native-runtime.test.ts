@@ -53,7 +53,11 @@ describe("native runtime", () => {
   it.runIf(binding)("leaves a document alone when an injected language is unavailable", () => {
     const runtime = new binding!.NativeRuntime();
     // `comment` is staged, `regex` is not, and markdown injects both.
-    const events = runtime.highlightEvents("```regex\n[a-z]+\n```\n", "markdown", false);
-    expect(events.length).toBeGreaterThan(0);
+    const highlighted = runtime.highlightEvents("```regex\n[a-z]+\n```\n", "markdown", false);
+
+    expect(highlighted.events.length).toBeGreaterThan(0);
+    // Reported rather than swallowed, so a caller that resolves parsers itself
+    // can tell the difference between "no injection" and "could not load it".
+    expect(highlighted.unresolved).toContain("regex");
   });
 });

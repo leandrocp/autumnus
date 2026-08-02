@@ -64,11 +64,11 @@ impl Registry {
 
     #[cfg(test)]
     pub fn parser_path(&self, language: &str) -> Result<PathBuf> {
-        Ok(self.store().parser_path(self.package(language)?.as_ref()))
+        Ok(self.store().parser_path(self.package(language)?.as_ref())?)
     }
 
     pub fn parser_download_url(&self, language: &str) -> Result<String> {
-        Ok(LanguageStore::parser_url(self.package(language)?.as_ref()))
+        Ok(LanguageStore::parser_url(self.package(language)?.as_ref())?)
     }
 
     fn store(&self) -> &LanguageStore {
@@ -126,7 +126,7 @@ impl Registry {
             serde_json::to_string(&package).unwrap().as_bytes(),
         )
         .unwrap();
-        write_atomic(&self.store().parser_path(&package), wasm).unwrap();
+        write_atomic(&self.store().parser_path(&package).unwrap(), wasm).unwrap();
     }
 }
 

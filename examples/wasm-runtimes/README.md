@@ -27,8 +27,8 @@ Build the local JavaScript packages, then generate an HTML page:
 
 ```sh
 cd packages/javascript
-pnpm --filter @lumis-sh/themes build
-pnpm --filter @lumis-sh/lumis build
+pnpm --filter @lumis-sh/themes run build
+pnpm --filter @lumis-sh/lumis run build
 node ../../examples/wasm-runtimes/javascript/node.mjs
 open ../../examples/wasm-runtimes/javascript/output.html
 ```

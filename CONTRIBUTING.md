@@ -144,7 +144,7 @@ For Rust crates, bundle support is implemented as Cargo features such as `lang-b
 ```sh
 mise run cargo-update-features
 mise run langs-gen-catalog
-pnpm --filter @lumis-sh/lumis build:generate
+pnpm --filter @lumis-sh/lumis run build:generate
 pnpm --dir packages/javascript run build:wasm-bundles
 ```
 
@@ -418,10 +418,12 @@ atomic.
 CI builds parsers from `languages.toml` rather than taking them from npm, so a
 revision bump is validated before it is published rather than after.
 
-- **Queries CI** builds all 113 parsers across 12 shards and compiles every
-  processed query against the grammar its language actually pins. A parser that
-  cannot be built does not fail its shard; the check falls back to a copy in
-  `fixtures/parsers/`, then to the published package.
+- **Queries CI** builds 110 of the 113 parsers across 12 shards and compiles
+  every processed query for all 115 language definitions against the grammar its
+  language actually pins. `llvm`, `vim` and `zsh` exceed a runner's memory and
+  are committed under `fixtures/parsers/` with their measured peak RSS; a parser
+  that cannot be built does not fail its shard, but falls back to that copy and
+  then to the published package.
 - **Conformance CI** builds the seventeen parsers the committed fixtures supply,
   stages them with `wasm-stage`, and points `LUMIS_WASM_PATH` at the result, so
   the CLI, Elixir and Node native suites render from parsers built in that run.
