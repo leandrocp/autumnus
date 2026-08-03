@@ -1,16 +1,36 @@
 # Review: PR #1099 — `feat: unify dynamic WASM language loading`
 
-Scope reviewed: PR #1099 through code head `f3540e059a9cea343e9761f266cb10175dd710a1`
-against base `6cc5386a2b7248f3d279c9929db2d4897f51862d`. The independent last pass covered
-the current 423-file diff, not the earlier snapshots on which this review began.
+Scope reviewed: PR #1099 against base `6cc5386a2b7248f3d279c9929db2d4897f51862d`. Each review pass
+below is dated and pinned to the revision it examined; verdicts are left as written at that revision
+rather than edited afterwards, so the record shows what was true when and what changed it.
 
-Fixes from the second pass are committed on this branch:
+## How to read this document
+
+Three review passes and two repair passes are interleaved here, oldest first within each section.
+The fastest route in:
+
+- **[Merge gate](#merge-gate)** — every finding, its severity, and its current state, in one table.
+- **[Second resolution pass](#second-resolution-pass--2026-08-02)** — what the last round of fixes
+  changed, where the code is, and which alternatives were rejected.
+- **[Reproducing any of this](#reproducing-any-of-this)** — the commands, including how to make each
+  new guard fail on purpose.
+- **[Known and deliberately open](#known-and-deliberately-open)** — decisions, not oversights.
+
+Two conventions carried throughout. A finding is marked **DONE** only once a test pins the behaviour
+*and* that test has been shown to fail against the defect it covers; a guard that has never failed is
+not evidence. And where a repair pass disagreed with a finding, the disagreement is recorded with its
+evidence rather than settled silently — including one case where the disagreement was itself wrong
+and is retracted in place.
+
+Fixes are committed on this branch:
 
 | Commit | Closes |
 | --- | --- |
 | `fix: make every runtime accept the same language package` | §4.7, §4.8, §4.9 |
 | `fix: apply the #offset! directive in every runtime` | §3 |
-| `fix: close the eight findings from the final review` | F1–F8 |
+| `fix: close the eight findings from the final review` | F1–F9 |
+| `fix: close the independent audit's six remaining findings` | F3, F6, F8, F10–F13 |
+| `fix(dev): stop two tests racing on the process working directory` | F14 |
 
 **Final verdict, at `2e5fe5253`: do not merge.** The architecture is still the right direction — one
 package format carrying parser + queries + integrity + provenance, with one Rust implementation
@@ -28,10 +48,18 @@ from GitHub CI.
 and the CI gap that let both Node defects stay green remains open. F1's arithmetic, F4's actual
 release transition, F5, F7 and F9 did validate; this is not a blanket rejection of the repair.
 
-**All six remaining items are closed as of the second resolution pass** — see
-[Second resolution pass](#second-resolution-pass--2026-08-02). The audit was right on all of them,
-including F6, where the earlier severity correction in this document was itself wrong and is
-retracted there. F10's severity is the one thing still disputed, with the reasoning recorded.
+**All fourteen items are closed as of the second resolution pass**, and GitHub CI is green at
+`e0a1d1b07`: 115 success, 1 skipped, 0 failing, the skip being a job that only runs on a release tag.
+
+The audit that produced F10–F13 was right on every count, including F6, where the *earlier* repair
+pass in this document argued the finding was unreachable and duplicated existing validation. Both
+halves of that argument were wrong; it is retracted in place with the reasoning, because a review
+ledger that quietly drops its own mistakes is worth less than one that keeps them.
+
+One thing remains disputed rather than accepted: F10's severity. The behaviour is real and is fixed
+as far as a synchronous API permits, but it is not the native-versus-Wasm divergence it was filed as
+— both Node runtimes do the same thing, which was verified rather than assumed. The evidence and the
+rejected alternatives are recorded so the call can be overturned on its merits.
 
 This document is a living guideline. Items are fixed in place and marked **DONE** only once a
 reproducible test pins the behavior.
@@ -309,8 +337,23 @@ still need correction:
 
 ### Second resolution pass — 2026-08-02
 
-Every finding in the independent audit reproduced. Each fix was proven by injecting the defect and
-watching the new guard go red.
+Every finding in the independent audit reproduced before it was touched, and each fix was proven by
+injecting the defect and watching the new guard go red. Two of the audit's conclusions were tested
+rather than accepted, and one of them changed what the fix should be; both are written up below with
+the evidence, so a later reader can disagree with the reasoning rather than just the outcome.
+
+Where each fix lives, for anyone reading the diff rather than the ledger:
+
+| ID | Change | Files |
+| --- | --- | --- |
+| F6 | Validate at the store boundary | `crates/lumis-wasm-runtime/src/store.rs`, `crates/lumis-cli/src/registry.rs` |
+| F10 | Report unresolved injections, warn once, document the contract | `crates/lumis-wasm-runtime/src/runtime.rs`, `packages/javascript/lumis/native/src/lib.rs`, `packages/javascript/lumis/src/events.ts`, `packages/javascript/lumis/README.md`, `docs/content/usage/javascript-runtime.mdx` |
+| F11 | Per-instance addon ids for caller-written definitions | `packages/javascript/lumis/src/core/native-languages.ts` |
+| F12 | Read only the first four `#offset!` operands | `crates/lumis-wasm-runtime/src/tree_sitter_highlight.rs`, `packages/javascript/lumis/src/core/languages.ts`, `fixtures/offset-directive.json` |
+| F13 | Name the exact native manifest set; run it in CI and at publish | `packages/javascript/scripts/check-native-versions.mjs`, `.github/workflows/javascript.yml`, `.github/workflows/javascript-release.yml` |
+| F3 | Run the package suite once per runtime in CI | `.github/workflows/javascript.yml` |
+| F8 | Correct task names, counts, pins and shorthand | `RELEASE.md`, `CONTRIBUTING.md`, `.github/workflows/*.yml`, PR body |
+| F14 | Serialize the working-directory tests | `crates/dev/src/main.rs` |
 
 | ID | What changed | Guard, and the failure it was proven to catch |
 | --- | --- | --- |
@@ -321,6 +364,51 @@ watching the new guard go red.
 | F13 | The guard names the exact seven manifests, checks each package name, rejects an unexpected directory, and checks the main package's `optionalDependencies`. CI and the release workflow both run it, and the publish steps fail when a filter matches nothing. | Proven red four ways: a missing selector, a drifted version, a missing optional dependency, and an unexpected directory. |
 | F3 | `.github/workflows/javascript.yml` runs the package suite once with `LUMIS_TEST_RUNTIME=native` and once with `wasm`. | The F10 and F11 guards live in that suite, so both now run under both runtimes in CI. |
 | F8 | `release-prepare` (not `prepare-release`), `mix lumis.languages.cache`, 110 built plus 3 vendored parsers against 115 language definitions, the lockstep exception in `RELEASE.md`, and the remaining `pnpm --filter` shorthand. pnpm is pinned to `11.15.1` in all ten workflow steps rather than the `11` range. | `mise run lint` runs `check-native-versions`; `actionlint` covers the workflow edits. |
+
+#### Design decisions, and the alternatives that were rejected
+
+Each of these had a cheaper option that was not taken. The reasoning is here so a reviewer can
+challenge the choice rather than reverse-engineer it from the diff.
+
+**F6 — validate at the store boundary, not inside `parser_filename`.** `parser_filename` is the one
+place the filename is built, so putting the check there looks tighter. It returns `String` and is
+used both for reads and writes, so it would have had to panic or silently return a sentinel. The
+store methods already return `Result` or `Option`, so the boundary is where a rejection can be
+reported. The alternative the audit suggested — making an invalid `LanguagePackage` unconstructable
+by privatising its fields — is the strongest fix and was rejected only on blast radius: the struct is
+built by hand in `crates/dev`, the CLI test helper and the Elixir NIF, and turning it into a builder
+is a bigger API change than this PR should carry. If that is wanted, it is a clean follow-up and the
+new test moves over unchanged.
+
+**F10 — report and document, rather than resolve.** Three fixes were considered. A second pass when
+a resolver is configured was rejected because `AGENTS.md` makes one-pass loading a hard rule, and a
+fallback that only triggers for some callers is exactly the kind of per-runtime special case this PR
+exists to remove. Calling the JavaScript resolver synchronously from the Rust walk was rejected
+because napi cannot: a threadsafe function in blocking mode would deadlock against the JS thread
+that is already blocked inside `highlightEvents`. Making the public `highlight()` async was rejected
+as a breaking change to every runtime for one configuration. What remained was to make the situation
+observable and state the contract, which is what shipped.
+
+**F11 — namespace the id, rather than one runtime per highlighter.** Giving each JavaScript
+highlighter its own Rust `Runtime` would isolate everything, and costs a separate compiled copy of
+every parser — roughly 15 MB per language per highlighter — which defeats the shared Wasmtime cache
+that makes the addon worth having. Only a definition whose queries the caller wrote gets an id of its
+own; a package-backed language still shares, because every instance would compile identical bytes and
+queries. The internal id is mapped back before events reach a formatter, so themes and CSS classes
+still key off the public id; that is asserted by checking all four formatters for the separator and
+for a live theme lookup.
+
+**F12 — `take(4)` and the `zip` are both kept.** They overlap: either alone handles a numeric fifth
+operand. They cover different inputs, which is why both are there and both are tested. `zip` stops
+the parser reading past the fourth value; `take(4)` stops the *collector* rejecting the directive
+when the fifth operand is a capture rather than a string. Removing `take(4)` and re-running
+`a_fifth_operand_never_voids_the_directive` shows the difference.
+
+**F13 — name the set, rather than count it.** The previous guard asserted a minimum count, which is
+what let a deleted selector pass. Counting cannot distinguish "five platforms and a selector" from
+"six platforms", so the check now names all seven, verifies each package name, rejects a directory
+nobody publishes, and cross-checks the main package's `optionalDependencies`. It runs in `mise run
+lint`, in the JavaScript CI lint job, and again in the release workflow before anything is published.
 
 #### F6 — the earlier severity correction was wrong, and is retracted
 
@@ -357,6 +445,35 @@ languages you load rather than to one found inside a document, and `runtime-pari
 both runtimes behave identically. Closing it as a resolver bug would have meant claiming a fix that
 the synchronous API cannot deliver.
 
+### Known and deliberately open
+
+Not defects found and left; decisions, with the reasoning, so a reviewer can weigh them instead of
+re-finding them.
+
+**The language packages are not published yet.** Nothing ships a `language.json`, so no end-to-end
+download has ever run against the real CDN. Every test resolves from a staged tree, a committed
+fixture, or a local resolver, which is deliberate — `AGENTS.md` forbids letting published artifacts
+gate correctness checks — but it does mean the first real publish is the first exercise of the CDN
+path. `mise run wasm-publish-needed` reports all 115 packages as needing publication. Publishing also
+lets `fixtures/parsers/` shrink.
+
+**`php` traps parsing its own sample at the pinned revision.** It reproduces under `web-tree-sitter`,
+under Wasmtime, and in the published package, so it is an upstream grammar defect rather than
+anything this PR introduced. Recorded in `unverified-parsers.json` with its reason.
+
+**`llvm` has no upstream queries.** Same file, same treatment. The waiver can only shrink: a test
+fails if an entry starts working.
+
+**`llvm`, `vim` and `zsh` are committed rather than built in CI.** They exceed a runner's memory —
+peak RSS measured and recorded in `fixtures/parsers/README.md`. Query CI builds the other 110 from
+the revision `languages.toml` pins and validates all 115 language definitions.
+
+**Making `LanguagePackage` unconstructable-when-invalid is a follow-up, not this PR.** See the F6
+design note above.
+
+**Roughly eighteen §6 nits remain.** They are listed in that section and none of them changes
+behaviour.
+
 ### Evidence from the independent last audit
 
 | Check | Result at `f3540e059` |
@@ -391,6 +508,51 @@ the synchronous API cannot deliver.
 | Failure injection | removing the store validation, `take(4)`, the per-instance addon id, or the exact-set check makes the corresponding guard red |
 | GitHub CI at `c4b1f195b` | 114 success, 1 skipped (a release-only publish job), 1 failure — a pre-existing flaky test, below |
 | GitHub CI at `e0a1d1b07` | **115 success, 1 skipped, 0 failing**; the skip is the release-tag-only NIF publish job |
+
+#### Reproducing any of this
+
+Every claim above is a command. Nothing here needs network access or published packages.
+
+```sh
+mise run test              # Rust workspace, Elixir, and the JS suite once per runtime
+mise run test-conformance  # the same corpus through all six consumers
+mise run lint              # includes actionlint, clippy and check-native-versions
+mise run docs
+```
+
+The guards on their own:
+
+```sh
+cargo test -p lumis-wasm-runtime --all-features a_directly_constructed   # F6
+cargo test -p lumis-wasm-runtime --all-features a_fifth_operand          # F12
+cargo test -p lumis-wasm-runtime --all-features offset_arithmetic        # F1, F12
+cargo test -p lumis-wasm-runtime --all-features unknown_injected         # F5
+
+# F10 and F11 are cross-runtime, so they only mean anything run twice.
+LUMIS_TEST_RUNTIME=native pnpm --filter @lumis-sh/lumis exec vitest run test/runtime-parity.test.ts
+LUMIS_TEST_RUNTIME=wasm   pnpm --filter @lumis-sh/lumis exec vitest run test/runtime-parity.test.ts
+
+node packages/javascript/scripts/check-native-versions.mjs               # F13
+```
+
+To confirm a guard can actually fail, reintroduce the defect it covers and re-run it:
+
+| Guard | Defect to reintroduce |
+| --- | --- |
+| F6 | drop `package.validate()?` from `parser_path` |
+| F10 | stop calling `warnUnresolvedInjection` |
+| F11 | return `opts.definition.id` unconditionally from `addonId` |
+| F12 | drop `.take(4)` from the operand collector, or restore the `enumerate` form of `parse_offset_operands` |
+| F13 | delete `native/npm/meta`, or bump one platform manifest on its own |
+| F14 | replace the `CWD` lock in `in_directory` with `()` and run `-- --test-threads=8 override_only local_override` about forty times |
+
+`fixtures/offset-directive.json` is regenerated rather than hand-edited. Each case records the query
+it came from, and the expected range is whatever `vim.treesitter.get_range` returned for that query
+on the JSON grammar. Sources are ASCII on purpose: Rust reports byte columns and `web-tree-sitter`
+reports UTF-16 code-unit columns, so only ASCII lets both assert the same numbers. Neovim raises a
+Lua error when one of the four operand slots is not a number, so there is no ground truth for that
+case and it is deliberately absent from the shared corpus; both implementations discard the directive
+there, pinned separately in each language.
 
 #### F14 — two `crates/dev` tests race on the process working directory — DONE
 
