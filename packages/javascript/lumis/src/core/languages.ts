@@ -60,6 +60,7 @@ interface CachedLanguagePackage {
 export interface ResolvedLanguagePackage {
   definition: LanguageDefinition;
   wasm: WasmRef;
+  grammarName: string;
   highlights: string;
   injections?: string;
   locals?: string;
@@ -112,11 +113,8 @@ function compileBracketConfig(
 export interface LoadLanguageOptions {
   definition: LanguageDefinition;
   packageName?: string;
+  /** Where the parser bytes come from. Queries always come from the package. */
   wasm?: WasmRef | Uint8Array | ArrayBuffer | string | URL | Response;
-  highlights?: string;
-  injections?: string;
-  locals?: string;
-  brackets?: string;
 }
 
 export interface HighlighterRuntimeOptions {
@@ -201,9 +199,11 @@ async function fetchFromCdns(primary: string, isDefault: boolean): Promise<Respo
 
 const HIGHLIGHT_NAMES_SET = new Set(HIGHLIGHT_NAMES);
 const PLAINTEXT_ALIASES = ["text", "txt", "plain"];
+const MAX_JSON_CONTAINER_DEPTH = 127;
+const JSON_NUMBER = /-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/y;
 
 const encoder = new TextEncoder();
-const decoder = new TextDecoder();
+const decoder = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true });
 
 function createSharedRuntimeCache(): SharedRuntimeCache {
   return {
@@ -243,13 +243,24 @@ export function parseLanguagePackage(
   data: Uint8Array,
   expectedPackageName: string,
 ): LanguagePackage {
-  const value = JSON.parse(decoder.decode(data)) as LanguagePackage;
+  const json = decoder.decode(data);
+  if (!hasValidRawJsonProfile(json)) {
+    throw new Error(`Invalid Lumis language package: ${expectedPackageName}`);
+  }
+  const parsed = JSON.parse(json) as unknown;
+  if (!hasOnlyUnicodeScalarStrings(parsed)) {
+    throw new Error(`Invalid Lumis language package: ${expectedPackageName}`);
+  }
+  const value = parsed as LanguagePackage;
   const languages =
-    typeof value.languages === "object" && value.languages !== null
+    typeof value.languages === "object" &&
+    value.languages !== null &&
+    !Array.isArray(value.languages)
       ? Object.values(value.languages)
       : [];
   if (
     value.packageName !== expectedPackageName ||
+    !isValidPackageName(expectedPackageName) ||
     typeof value.version !== "string" ||
     !isSafePackagePathSegment(value.version) ||
     typeof value.definitionHash !== "string" ||
@@ -258,6 +269,12 @@ export function parseLanguagePackage(
     !isSafePackagePathSegment(value.parser.name) ||
     typeof value.parser?.grammarName !== "string" ||
     value.parser.grammarName.length === 0 ||
+    (value.parser.upstreamVersion !== undefined &&
+      value.parser.upstreamVersion !== null &&
+      typeof value.parser.upstreamVersion !== "string") ||
+    (value.parser.revision !== undefined &&
+      value.parser.revision !== null &&
+      typeof value.parser.revision !== "string") ||
     typeof value.parser?.sha256 !== "string" ||
     !/^[0-9a-f]{64}$/.test(value.parser.sha256) ||
     !Number.isSafeInteger(value.parser?.size) ||
@@ -275,17 +292,129 @@ export function parseLanguagePackage(
   ) {
     throw new Error(`Invalid Lumis language package: ${expectedPackageName}`);
   }
+  const owners = new Map<string, string>();
+  for (const [id, language] of Object.entries(value.languages)) {
+    const owner = normalizeLanguageName(id);
+    if (owners.has(owner)) {
+      throw new Error(`Invalid Lumis language package: ${expectedPackageName}`);
+    }
+    owners.set(owner, owner);
+    for (const alias of language.aliases) {
+      const existing = owners.get(normalizeLanguageName(alias));
+      if (existing !== undefined && existing !== owner) {
+        throw new Error(`Invalid Lumis language package: ${expectedPackageName}`);
+      }
+      owners.set(normalizeLanguageName(alias), owner);
+    }
+  }
+  if (value.parser.upstreamVersion === null) delete value.parser.upstreamVersion;
+  if (value.parser.revision === null) delete value.parser.revision;
   return value;
 }
 
+// JSON.parse discards overwritten members and turns 1e400 into Infinity, so
+// validate raw tokens before it collapses the document.
+function hasValidRawJsonProfile(json: string): boolean {
+  let depth = 0;
+  let index = 0;
+  while (index < json.length) {
+    const character = json[index]!;
+    if (character === '"') {
+      let end = index + 1;
+      while (end < json.length && json[end] !== '"') {
+        end += json[end] === "\\" ? 2 : 1;
+      }
+      if (end >= json.length) return false;
+
+      let decoded: unknown;
+      try {
+        decoded = JSON.parse(json.slice(index, end + 1));
+      } catch {
+        return false;
+      }
+      if (!hasOnlyUnicodeScalarStrings(decoded)) return false;
+      index = end + 1;
+      continue;
+    }
+
+    if (character === "{" || character === "[") {
+      depth += 1;
+      if (depth > MAX_JSON_CONTAINER_DEPTH) return false;
+    } else if (character === "}" || character === "]") {
+      depth -= 1;
+    } else if (character === "-" || (character >= "0" && character <= "9")) {
+      JSON_NUMBER.lastIndex = index;
+      const number = JSON_NUMBER.exec(json);
+      if (number !== null) {
+        if (!Number.isFinite(Number(number[0]))) return false;
+        index = JSON_NUMBER.lastIndex;
+        continue;
+      }
+    }
+    index += 1;
+  }
+  return true;
+}
+
+function hasOnlyUnicodeScalarStrings(value: unknown): boolean {
+  if (typeof value === "string") {
+    for (let index = 0; index < value.length; index += 1) {
+      const unit = value.charCodeAt(index);
+      if (unit >= 0xd800 && unit <= 0xdbff) {
+        const next = value.charCodeAt(index + 1);
+        if (!(next >= 0xdc00 && next <= 0xdfff)) return false;
+        index += 1;
+      } else if (unit >= 0xdc00 && unit <= 0xdfff) {
+        return false;
+      }
+    }
+    return true;
+  }
+  if (Array.isArray(value)) return value.every(hasOnlyUnicodeScalarStrings);
+  if (typeof value === "object" && value !== null) {
+    return Object.entries(value).every(
+      ([key, child]) => hasOnlyUnicodeScalarStrings(key) && hasOnlyUnicodeScalarStrings(child),
+    );
+  }
+  return true;
+}
+
+function isValidPackageName(value: string): boolean {
+  if (value.length === 0 || encoder.encode(value).byteLength > 214) return false;
+
+  let segments: string[];
+  if (value.startsWith("@")) {
+    const scoped = value.slice(1);
+    const slash = scoped.indexOf("/");
+    if (slash < 0 || scoped.indexOf("/", slash + 1) >= 0) return false;
+    segments = [scoped.slice(0, slash), scoped.slice(slash + 1)];
+  } else {
+    if (value.includes("/")) return false;
+    segments = [value];
+  }
+  return segments.every((segment) => /^[a-z0-9][a-z0-9._-]*$/.test(segment));
+}
+
+export function normalizeLanguageName(value: string): string {
+  return value.replace(/[A-Z]/g, (character) => character.toLowerCase());
+}
+
 function isSafePackagePathSegment(value: string): boolean {
+  const stem = value.split(".", 1)[0]!.replace(/[ .]+$/, "");
+  let hasForbiddenCharacter = false;
+  for (let index = 0; index < value.length; index += 1) {
+    if (value.charCodeAt(index) <= 0x1f || '<>:"/\\|?*'.includes(value[index]!)) {
+      hasForbiddenCharacter = true;
+      break;
+    }
+  }
   return (
     value !== "" &&
     value !== "." &&
     value !== ".." &&
-    !value.includes("/") &&
-    !value.includes("\\") &&
-    !value.includes("\0")
+    !/[ .]$/.test(value) &&
+    !hasForbiddenCharacter &&
+    !/^(?:con|prn|aux|nul|clock\$|conin\$|conout\$|com[1-9¹²³]|lpt[1-9¹²³])$/i.test(stem)
   );
 }
 
@@ -302,10 +431,11 @@ function packagedLanguage(
   language: LanguageDefinition,
   packageMetadata: LanguagePackage,
 ): [string, PackagedLanguage] {
+  const requested = normalizeLanguageName(language.id);
   for (const [id, definition] of Object.entries(packageMetadata.languages)) {
     if (
-      id.toLowerCase() === language.id.toLowerCase() ||
-      definition.aliases.some((alias) => alias.toLowerCase() === language.id.toLowerCase())
+      normalizeLanguageName(id) === requested ||
+      definition.aliases.some((alias) => normalizeLanguageName(alias) === requested)
     ) {
       return [id, definition];
     }
@@ -353,6 +483,55 @@ async function sha256Hex(data: Uint8Array): Promise<string> {
       ? data.buffer
       : data.slice().buffer;
   return hex(new Uint8Array(await globalThis.crypto.subtle.digest("SHA-256", bytes)));
+}
+
+type ParserGrammar = { ok: true; name: string } | { ok: false; detail: string };
+
+interface CachedParserModule {
+  grammar?: ParserGrammar;
+  language?: Promise<Language>;
+}
+
+function inspectParserGrammar(data: Uint8Array): ParserGrammar {
+  let module: WebAssembly.Module;
+  try {
+    const bytes =
+      data.buffer instanceof ArrayBuffer &&
+      data.byteOffset === 0 &&
+      data.byteLength === data.buffer.byteLength
+        ? data.buffer
+        : data.slice().buffer;
+    module = new WebAssembly.Module(bytes);
+  } catch (error) {
+    return { ok: false, detail: error instanceof Error ? error.message : String(error) };
+  }
+
+  const names = WebAssembly.Module.exports(module)
+    .filter(({ kind }) => kind === "function")
+    .map(({ name }) => name)
+    .filter((name) => name.startsWith("tree_sitter_"))
+    .map((name) => name.slice("tree_sitter_".length))
+    .filter((name) => !name.startsWith("external_scanner_"));
+  return names.length === 1
+    ? { ok: true, name: names[0]! }
+    : { ok: false, detail: `expected one grammar export, got ${names.length}` };
+}
+
+function requireParserGrammar(
+  cached: CachedParserModule,
+  data: Uint8Array,
+  parser: WasmRef,
+  expected: string,
+): void {
+  cached.grammar ??= inspectParserGrammar(data);
+  if (!cached.grammar.ok) {
+    throw new Error(`invalid parser grammar export for '${parser.name}': ${cached.grammar.detail}`);
+  }
+  if (cached.grammar.name !== expected) {
+    throw new Error(
+      `invalid parser grammar for '${parser.name}': expected '${expected}', got '${cached.grammar.name}'`,
+    );
+  }
 }
 
 /** @internal */
@@ -413,6 +592,114 @@ function resolveHighlightName(captureName: string): string | undefined {
   return best;
 }
 
+const DECIMAL_OFFSET = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE]([+-]?\d+))?$/;
+const BINARY_OFFSET = /^([+-]?)0[bB]([01]+)$/;
+const HEX_OFFSET = /^([+-]?)0[xX]([\da-fA-F]+(?:\.[\da-fA-F]*)?|\.[\da-fA-F]+)(?:[pP]([+-]?\d+))?$/;
+const MAX_LUA_EXPONENT = "1048575";
+
+function isLuaExponent(value: string | undefined): boolean {
+  if (value === undefined) return true;
+  const magnitude = value.replace(/^[+-]/, "").replace(/^0+/, "");
+  return (
+    magnitude.length < MAX_LUA_EXPONENT.length ||
+    (magnitude.length === MAX_LUA_EXPONENT.length && magnitude <= MAX_LUA_EXPONENT)
+  );
+}
+
+function parseBinaryOffset(match: RegExpExecArray): number {
+  let value = 0;
+  for (const digit of match[2]!) {
+    value = value * 2 + Number(digit);
+  }
+  return match[1] === "-" ? -value : value;
+}
+
+function parseHexOffset(match: RegExpExecArray): number {
+  let significand = 0n;
+  let binaryExponent = Number(match[3] ?? 0);
+  let seenPoint = false;
+  let inexact = false;
+
+  for (const character of match[2]!) {
+    if (character === ".") {
+      seenPoint = true;
+      continue;
+    }
+
+    const digit = BigInt(Number.parseInt(character, 16));
+    if (significand >> 124n === 0n) {
+      significand = (significand << 4n) | digit;
+    } else {
+      binaryExponent += 4;
+      inexact ||= digit !== 0n;
+    }
+    if (seenPoint) binaryExponent -= 4;
+  }
+
+  if (significand === 0n) return match[1] === "-" ? -0 : 0;
+  if (inexact) significand |= 1n;
+
+  const significandBits = 52;
+  const minimumSubnormalExponent = -1074;
+  const infinityBits = 0x7ffn << 52n;
+  let roundBits = significand.toString(2).length - 1 - significandBits;
+  if (binaryExponent < minimumSubnormalExponent - roundBits) {
+    roundBits = minimumSubnormalExponent - binaryExponent;
+  }
+  binaryExponent += roundBits;
+
+  if (roundBits > 0) {
+    if (roundBits === 1) {
+      significand <<= 1n;
+    } else if (roundBits > 2) {
+      const shift = roundBits - 2;
+      if (shift < 128) {
+        const discarded = significand & ((1n << BigInt(shift)) - 1n);
+        significand = (significand >> BigInt(shift)) | BigInt(discarded !== 0n);
+      } else {
+        significand = 1n;
+      }
+    }
+
+    const trailing = Number(significand & 0b111n);
+    significand >>= 2n;
+    significand += BigInt((0b11001000 >> trailing) & 1);
+  } else if (roundBits < 0) {
+    significand <<= BigInt(-roundBits);
+  }
+
+  const encodedExponent = BigInt(binaryExponent - minimumSubnormalExponent) << 52n;
+  let bits = significand + encodedExponent;
+  if (bits >= infinityBits) bits = infinityBits;
+  if (match[1] === "-") bits |= 1n << 63n;
+
+  const buffer = new ArrayBuffer(8);
+  const view = new DataView(buffer);
+  view.setBigUint64(0, bits);
+  return view.getFloat64(0);
+}
+
+function parseOffsetDelta(input: string): number | undefined {
+  const value = input.replace(/^[\t\n\v\f\r ]+/, "").replace(/[\t\n\v\f\r ]+$/, "");
+  if (value.length === 0) return undefined;
+
+  const binary = BINARY_OFFSET.exec(value);
+  const hex = HEX_OFFSET.exec(value);
+  const decimal = DECIMAL_OFFSET.exec(value);
+  let parsed = NaN;
+  if (binary) {
+    parsed = parseBinaryOffset(binary);
+  } else if (hex && isLuaExponent(hex[3])) {
+    parsed = parseHexOffset(hex);
+  } else if (decimal && isLuaExponent(decimal[1])) {
+    parsed = Number(value);
+  }
+
+  // LuaJIT accepts fractional and non-finite numeric strings, but Neovim's
+  // highlighter cannot turn their coordinates into integral extmarks.
+  return Number.isSafeInteger(parsed) ? (parsed === 0 ? 0 : parsed) : undefined;
+}
+
 export function compileHighlightConfig(
   language: Language,
   Query: typeof TreeSitterQuery,
@@ -459,16 +746,22 @@ export function compileHighlightConfig(
   /**
    * Neovim reads exactly `pred[3]` through `pred[6]` and never looks further,
    * so an omitted operand is zero and anything after the fourth is untouched —
-   * including a non-numeric one. Only a value in one of the four slots that is
-   * not a number makes the directive unusable.
+   * including a non-numeric one. The operands use LuaJIT's numeric-string
+   * coercion, narrowed only where an integral Tree-sitter point cannot hold the
+   * result.
    */
   function parseOffsetDeltas(deltas: PredicateStep[]): QueryCaptureOffset | undefined {
     const values = [0, 0, 0, 0];
 
     for (const [index, delta] of deltas.slice(0, values.length).entries()) {
-      if (delta.type !== "string") return undefined;
-      const value = Number.parseInt(delta.value, 10);
-      if (!Number.isInteger(value)) return undefined;
+      let value: number | undefined;
+      if (delta.type === "capture") {
+        const captureIndex = query.captureIndexForName(delta.name);
+        value = captureIndex >= 0 ? captureIndex + 1 : undefined;
+      } else {
+        value = parseOffsetDelta(delta.value);
+      }
+      if (value === undefined) return undefined;
       values[index] = value;
     }
 
@@ -520,6 +813,7 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
   let configuredLanguagePackageResolver: LanguagePackageResolver =
     DEFAULT_LANGUAGE_PACKAGE_RESOLVER;
   const moduleCache = createSharedRuntimeCache();
+  const parserModules = new Map<string, CachedParserModule>();
 
   class HighlighterRuntime implements RuntimeLike {
     private explicitResolver: WasmResolver | undefined;
@@ -539,7 +833,7 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
       this.sharedCache = options.sharedCache ?? moduleCache;
 
       for (const alias of PLAINTEXT_ALIASES) {
-        this.aliasMap.set(alias, PLAINTEXT_LANG_ID);
+        this.aliasMap.set(normalizeLanguageName(alias), PLAINTEXT_LANG_ID);
       }
     }
 
@@ -723,43 +1017,84 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
     private async createLoadedLanguage(opts: LoadLanguageOptions): Promise<LoadedLanguage> {
       await this.initParser();
 
-      const resolved = opts.packageName
-        ? {
-            ...(await this.resolveLanguagePackage(opts.definition, opts.packageName)),
-            ...(opts.wasm === undefined ? {} : { wasm: opts.wasm }),
-          }
-        : opts;
-      if (!resolved.wasm || resolved.highlights === undefined) {
-        throw new Error(
-          `Language "${opts.definition.id}" requires packageName or complete queries and WASM`,
-        );
+      // Queries always come from the package, so a parser can only ever run
+      // against the queries it was released and tested with.
+      if (!opts.packageName) {
+        throw new Error(`Language "${opts.definition.id}" has no packageName`);
       }
 
-      let wasmInput: Uint8Array | string;
+      const packaged = await this.resolveLanguagePackage(opts.definition, opts.packageName);
+      const resolved = { ...packaged, ...(opts.wasm === undefined ? {} : { wasm: opts.wasm }) };
+      if (!resolved.wasm || resolved.highlights === undefined) {
+        throw new Error(`Language package "${opts.packageName}" has no parser or highlights query`);
+      }
+
+      let wasmInput: Uint8Array;
       if (typeof resolved.wasm === "object" && resolved.wasm !== null && isWasmRef(resolved.wasm)) {
         wasmInput = await this.resolveParserWasm(resolved.definition.id, resolved.wasm);
       } else if (isRuntimeWasmInput(resolved.wasm)) {
-        wasmInput = await runtime.resolveWasm(resolved.wasm);
+        const source = await runtime.resolveWasm(resolved.wasm);
+        if (source instanceof Uint8Array) {
+          wasmInput = source;
+        } else {
+          const disk = await runtime.readResolvedWasmFromDisk(source);
+          if (disk) {
+            wasmInput = disk;
+          } else {
+            const response = await fetch(source);
+            if (!response.ok) {
+              throw new Error(
+                `could not download parser WASM for ${resolved.definition.id}: HTTP ${response.status} ${response.statusText}`,
+              );
+            }
+            wasmInput = new Uint8Array(await response.arrayBuffer());
+          }
+        }
       } else {
         throw new Error(`Unsupported WASM input for language "${opts.definition.id}"`);
       }
+      if (packaged) await verifyWasm(packaged.wasm, wasmInput);
 
       const { Language, Parser, Query } = await loadTreeSitter();
-      const language = await Language.load(wasmInput);
-      const parser = new Parser();
-      parser.setLanguage(language);
+      const parserKey =
+        packaged?.wasm.sha256 ??
+        (typeof resolved.wasm === "object" && resolved.wasm !== null && isWasmRef(resolved.wasm)
+          ? resolved.wasm.sha256
+          : await sha256Hex(wasmInput));
+      let parserModule = parserModules.get(parserKey);
+      if (!parserModule) {
+        parserModule = {};
+        parserModules.set(parserKey, parserModule);
+      }
+      if (packaged) {
+        requireParserGrammar(parserModule, wasmInput, packaged.wasm, packaged.grammarName);
+      }
+      // web-tree-sitter cannot reclaim a failed dynamic-linker load. Retaining
+      // the rejection prevents identical bad bytes from growing its global store.
+      parserModule.language ??= Language.load(wasmInput);
+      const language = await parserModule.language;
+      const config = compileHighlightConfig(
+        language,
+        Query,
+        resolved.highlights,
+        resolved.injections,
+        resolved.locals,
+      );
+      let parser: InstanceType<typeof Parser> | undefined;
+      try {
+        parser = new Parser();
+        parser.setLanguage(language);
+      } catch (error) {
+        config.query.delete();
+        parser?.delete();
+        throw error;
+      }
 
       const loaded: LoadedLanguage = {
         definition: resolved.definition,
         parser,
         language,
-        config: compileHighlightConfig(
-          language,
-          Query,
-          resolved.highlights,
-          resolved.injections,
-          resolved.locals,
-        ),
+        config,
       };
       if (resolved.brackets) {
         this.bracketCompilers.set(loaded, () =>
@@ -795,6 +1130,7 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
           sha256: packageMetadata.parser.sha256,
           size: packageMetadata.parser.size,
         },
+        grammarName: packageMetadata.parser.grammarName,
         highlights: packaged.highlights,
         injections: packaged.injections,
         locals: packaged.locals,
@@ -811,13 +1147,14 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
     }
 
     registerLanguage(def: LanguageDefinition): void {
+      this.aliasMap.set(normalizeLanguageName(def.id), def.id);
       for (const alias of def.aliases) {
-        this.aliasMap.set(alias, def.id);
+        this.aliasMap.set(normalizeLanguageName(alias), def.id);
       }
     }
 
     resolveLanguageId(nameOrAlias: string): string {
-      return this.aliasMap.get(nameOrAlias) ?? nameOrAlias;
+      return this.aliasMap.get(normalizeLanguageName(nameOrAlias)) ?? nameOrAlias;
     }
 
     getLoadedLanguage(nameOrAlias: string): LoadedLanguage | undefined {
@@ -850,13 +1187,14 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
       if (opts.definition.id === PLAINTEXT_LANG_ID) {
         return this.createPlaintext(opts.definition);
       }
-      const existing = this.loadedLanguages.get(opts.definition.id);
+      const existing = this.getLoadedLanguage(opts.definition.id);
       if (existing) return existing;
 
-      const inFlight = this.languageLoads.get(opts.definition.id);
+      const loadKey = normalizeLanguageName(opts.definition.id);
+      const inFlight = this.languageLoads.get(loadKey);
       if (inFlight) return inFlight;
 
-      return trackLoad(this.languageLoads, opts.definition.id, this.createLoadedLanguage(opts));
+      return trackLoad(this.languageLoads, loadKey, this.createLoadedLanguage(opts));
     }
 
     async loadPlaintext(): Promise<LoadedLanguage> {

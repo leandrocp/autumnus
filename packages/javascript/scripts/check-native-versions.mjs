@@ -21,10 +21,16 @@ const PLATFORM_DIRS = [
   "win32-x64-msvc",
 ];
 const SELECTOR_DIR = "meta";
+const EXPECTED_PLATFORM_NAMES = PLATFORM_DIRS.map((target) => `@lumis-sh/lumis-native-${target}`);
+const EXPECTED_PLATFORM_NAME_SET = new Set(EXPECTED_PLATFORM_NAMES);
 
-const EXPECTED_NAMES = new Set([
-  "@lumis-sh/lumis-native",
-  ...PLATFORM_DIRS.map((target) => `@lumis-sh/lumis-native-${target}`),
+// Directory -> the exact package name that directory must declare. A set would
+// let two directories swap names and still pass, and the release workflow
+// publishes by directory, so it would publish the selector name from a platform
+// directory before the selector step got there.
+const EXPECTED_NAME = new Map([
+  [SELECTOR_DIR, "@lumis-sh/lumis-native"],
+  ...PLATFORM_DIRS.map((target, index) => [target, EXPECTED_PLATFORM_NAMES[index]]),
 ]);
 
 function readJson(path) {
@@ -51,8 +57,10 @@ for (const directory of [SELECTOR_DIR, ...PLATFORM_DIRS]) {
   present.delete(directory);
 
   const manifest = readJson(join(nativeNpmDir, directory, "package.json"));
-  if (!EXPECTED_NAMES.has(manifest.name)) {
-    problems.push(`${relative}: unexpected name ${manifest.name}`);
+  if (manifest.name !== EXPECTED_NAME.get(directory)) {
+    problems.push(
+      `${relative}: declares ${manifest.name}, expected ${EXPECTED_NAME.get(directory)}`,
+    );
   }
   if (manifest.version !== expected) {
     problems.push(`${relative}: ${manifest.version}`);
@@ -65,15 +73,35 @@ for (const extra of present) {
   );
 }
 
-// The main package pins these as optional dependencies, and pnpm rewrites
-// `workspace:*` at pack time, so a missing entry ships a broken tarball.
-const optional = Object.keys(mainPackage.optionalDependencies ?? {});
-for (const target of PLATFORM_DIRS) {
-  const name = `@lumis-sh/lumis-native-${target}`;
-  if (!optional.includes(name)) {
-    problems.push(`packages/javascript/lumis/package.json: ${name} is not an optionalDependency`);
+// The main package and the selector both pin the platform packages, and pnpm
+// rewrites `workspace:*` to the workspace version at pack time. A missing key
+// ships a tarball that cannot install; a key pinned to anything other than
+// `workspace:*` falls outside the release's lockstep version.
+function checkPlatformDependencies(label, dependencies) {
+  for (const name of EXPECTED_PLATFORM_NAMES) {
+    const range = dependencies?.[name];
+    if (range === undefined) {
+      problems.push(`${label}: ${name} is not an optionalDependency`);
+    } else if (range !== "workspace:*") {
+      problems.push(`${label}: ${name} is "${range}", expected "workspace:*"`);
+    }
+  }
+
+  for (const name of Object.keys(dependencies ?? {})) {
+    if (!EXPECTED_PLATFORM_NAME_SET.has(name)) {
+      problems.push(`${label}: unexpected optionalDependency ${name}`);
+    }
   }
 }
+
+checkPlatformDependencies(
+  "packages/javascript/lumis/package.json",
+  mainPackage.optionalDependencies,
+);
+checkPlatformDependencies(
+  `packages/javascript/lumis/native/npm/${SELECTOR_DIR}/package.json`,
+  readJson(join(nativeNpmDir, SELECTOR_DIR, "package.json")).optionalDependencies,
+);
 
 if (problems.length > 0) {
   console.error(

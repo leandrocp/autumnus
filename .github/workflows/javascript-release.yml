@@ -183,9 +183,9 @@ jobs:
               "packages/javascript/lumis/native/npm/$target/$filename"
           done
 
-      # The main package pins these as optionalDependencies and pnpm rewrites
-      # `workspace:*` at pack time, so publishing it against an incomplete or
-      # drifted native set ships a tarball that cannot install.
+      # The selector and main package pin these as optionalDependencies and pnpm
+      # rewrites `workspace:*` at pack time, so publishing either against an
+      # incomplete or drifted native set ships a tarball that cannot install.
       - name: Check native runtime packages are complete and in lockstep
         if: steps.pkg.outputs.filter == '@lumis-sh/lumis'
         run: node packages/javascript/scripts/check-native-versions.mjs
@@ -213,16 +213,15 @@ jobs:
       # depending on a version that does not exist.
       - name: Publish native runtime selector
         if: steps.pkg.outputs.filter == '@lumis-sh/lumis'
-        run: |
-          test -f packages/javascript/lumis/native/npm/meta/package.json
-          pnpm --filter @lumis-sh/lumis-native publish \
-            --access public --no-git-checks --provenance
+        run: >-
+          pnpm --filter @lumis-sh/lumis-native --fail-if-no-match publish
+          --access public --no-git-checks --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish to npm
         run: >-
-          pnpm --filter "$PACKAGE_FILTER" publish
+          pnpm --filter "$PACKAGE_FILTER" --fail-if-no-match publish
           --access public --no-git-checks --provenance
         env:
           PACKAGE_FILTER: ${{ steps.pkg.outputs.filter }}

@@ -42,7 +42,73 @@ pub struct ParserMetadata {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub revision: Option<String>,
     pub sha256: String,
-    pub size: usize,
+    #[serde(deserialize_with = "deserialize_parser_size")]
+    pub size: u64,
+}
+
+const JAVASCRIPT_MAX_SAFE_INTEGER: u64 = (1_u64 << 53) - 1;
+
+fn deserialize_parser_size<'de, D>(deserializer: D) -> Result<u64, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    struct ParserSizeVisitor;
+
+    impl<'de> serde::de::Visitor<'de> for ParserSizeVisitor {
+        type Value = u64;
+
+        fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            write!(
+                formatter,
+                "an integral parser size no greater than {JAVASCRIPT_MAX_SAFE_INTEGER}"
+            )
+        }
+
+        fn visit_u64<E>(self, value: u64) -> Result<Self::Value, E>
+        where
+            E: serde::de::Error,
+        {
+            parser_size_from_u64(value)
+        }
+
+        fn visit_i64<E>(self, value: i64) -> Result<Self::Value, E>
+        where
+            E: serde::de::Error,
+        {
+            let value = u64::try_from(value).map_err(E::custom)?;
+            parser_size_from_u64(value)
+        }
+
+        fn visit_f64<E>(self, value: f64) -> Result<Self::Value, E>
+        where
+            E: serde::de::Error,
+        {
+            if !value.is_finite()
+                || value < 0.0
+                || value.fract() != 0.0
+                || value > JAVASCRIPT_MAX_SAFE_INTEGER as f64
+            {
+                return Err(E::custom(format!(
+                    "parser size must be an integer from 0 through {JAVASCRIPT_MAX_SAFE_INTEGER}"
+                )));
+            }
+            parser_size_from_u64(value as u64)
+        }
+    }
+
+    deserializer.deserialize_any(ParserSizeVisitor)
+}
+
+fn parser_size_from_u64<E>(value: u64) -> Result<u64, E>
+where
+    E: serde::de::Error,
+{
+    if value > JAVASCRIPT_MAX_SAFE_INTEGER {
+        return Err(E::custom(format!(
+            "parser size exceeds {JAVASCRIPT_MAX_SAFE_INTEGER}"
+        )));
+    }
+    Ok(value)
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
@@ -73,7 +139,7 @@ pub enum LanguagePackageError {
     #[error("invalid parser WASM size for '{parser}': expected {expected}, got {actual}")]
     InvalidSize {
         parser: String,
-        expected: usize,
+        expected: u64,
         actual: usize,
     },
     #[error(
@@ -84,11 +150,21 @@ pub enum LanguagePackageError {
         expected: String,
         actual: String,
     },
+    #[error("invalid parser grammar for '{parser}': expected '{expected}', got '{actual}'")]
+    InvalidGrammar {
+        parser: String,
+        expected: String,
+        actual: String,
+    },
 }
 
 impl LanguagePackage {
     pub fn from_json(json: &str) -> Result<Self, LanguagePackageError> {
-        let package: Self = serde_json::from_str(json)?;
+        // Typed deserialization skips unknown values. Parsing through Value
+        // validates every raw token and gives duplicate members last-wins
+        // behavior, matching JSON.parse and serde_json::Value maps.
+        let value: serde_json::Value = serde_json::from_str(json)?;
+        let package: Self = serde_json::from_value(value)?;
         package.validate()?;
         Ok(package)
     }
@@ -109,6 +185,12 @@ impl LanguagePackage {
         if self.languages.is_empty() {
             return Err(LanguagePackageError::Missing("languages"));
         }
+        if has_ambiguous_language_names(&self.languages) {
+            return Err(LanguagePackageError::Invalid("languages"));
+        }
+        if !is_valid_package_name(&self.package_name) {
+            return Err(LanguagePackageError::Invalid("packageName"));
+        }
         if !is_safe_path_segment(&self.version) {
             return Err(LanguagePackageError::Invalid("version"));
         }
@@ -126,7 +208,7 @@ impl LanguagePackage {
         }
         // Otherwise this surfaces much later as a confusing `InvalidSize` from
         // `verify_wasm`, and only for runtimes that reach that point.
-        if self.parser.size == 0 {
+        if self.parser.size == 0 || self.parser.size > JAVASCRIPT_MAX_SAFE_INTEGER {
             return Err(LanguagePackageError::Invalid("parser.size"));
         }
         Ok(())
@@ -157,7 +239,7 @@ impl LanguagePackage {
     }
 
     pub fn verify_wasm(&self, bytes: &[u8]) -> Result<(), LanguagePackageError> {
-        if bytes.len() != self.parser.size {
+        if u64::try_from(bytes.len()).ok() != Some(self.parser.size) {
             return Err(LanguagePackageError::InvalidSize {
                 parser: self.parser.name.clone(),
                 expected: self.parser.size,
@@ -170,6 +252,15 @@ impl LanguagePackage {
             return Err(LanguagePackageError::InvalidIntegrity {
                 parser: self.parser.name.clone(),
                 expected: self.parser.sha256.clone(),
+                actual,
+            });
+        }
+
+        let actual = grammar_name(bytes)?;
+        if actual != self.parser.grammar_name {
+            return Err(LanguagePackageError::InvalidGrammar {
+                parser: self.parser.name.clone(),
+                expected: self.parser.grammar_name.clone(),
                 actual,
             });
         }
@@ -220,16 +311,22 @@ pub fn sha256_hex(bytes: &[u8]) -> String {
 /// Fails when the module is not valid WASM, exports no such symbol, or exports
 /// more than one.
 pub fn grammar_name(wasm: &[u8]) -> Result<String, LanguagePackageError> {
-    use wasmparser::{Parser, Payload};
+    use wasmparser::{ExternalKind, Parser, Payload};
 
     let mut names = Vec::new();
     for payload in Parser::new(0).parse_all(wasm) {
-        let Ok(Payload::ExportSection(exports)) = payload else {
+        let payload =
+            payload.map_err(|_| LanguagePackageError::Invalid("parser grammar export"))?;
+        let Payload::ExportSection(exports) = payload else {
             continue;
         };
         for export in exports {
-            let Ok(export) = export else { continue };
+            let export =
+                export.map_err(|_| LanguagePackageError::Invalid("parser grammar export"))?;
             if let Some(grammar) = export.name.strip_prefix("tree_sitter_") {
+                if export.kind != ExternalKind::Func {
+                    continue;
+                }
                 if !grammar.starts_with("external_scanner_") {
                     names.push(grammar.to_string());
                 }
@@ -243,13 +340,93 @@ pub fn grammar_name(wasm: &[u8]) -> Result<String, LanguagePackageError> {
     }
 }
 
-fn is_safe_path_segment(value: &str) -> bool {
-    !matches!(value, "" | "." | "..") && !value.contains(['/', '\\', '\0'])
+fn has_ambiguous_language_names(languages: &BTreeMap<String, PackagedLanguage>) -> bool {
+    let mut owners = BTreeMap::<String, String>::new();
+    for (id, language) in languages {
+        let owner = id.to_ascii_lowercase();
+        if owners.insert(owner.clone(), owner.clone()).is_some() {
+            return true;
+        }
+        for alias in &language.aliases {
+            let alias = alias.to_ascii_lowercase();
+            match owners.get(&alias) {
+                Some(existing) if existing != &owner => return true,
+                Some(_) => {}
+                None => {
+                    owners.insert(alias, owner.clone());
+                }
+            }
+        }
+    }
+    false
+}
+
+pub(crate) fn is_safe_path_segment(value: &str) -> bool {
+    !matches!(value, "" | "." | "..")
+        && !value.ends_with([' ', '.'])
+        && !value.chars().any(|character| {
+            matches!(
+                character,
+                '\0'..='\u{1f}' | '<' | '>' | ':' | '"' | '/' | '\\' | '|' | '?' | '*'
+            )
+        })
+        && !is_windows_device_name(value)
+}
+
+/// npm package-name grammar shared by package validation and cache-path derivation.
+pub(crate) fn is_valid_package_name(package_name: &str) -> bool {
+    if package_name.is_empty() || package_name.len() > 214 {
+        return false;
+    }
+
+    let segments = match package_name.strip_prefix('@') {
+        Some(scoped) => {
+            let Some((scope, unscoped)) = scoped.split_once('/') else {
+                return false;
+            };
+            [scope, unscoped]
+        }
+        None => [package_name, ""],
+    };
+
+    let valid_segment = |segment: &str| {
+        segment.starts_with(|first: char| first.is_ascii_lowercase() || first.is_ascii_digit())
+            && segment.bytes().all(|byte| {
+                byte.is_ascii_lowercase() || byte.is_ascii_digit() || b"-._".contains(&byte)
+            })
+    };
+    valid_segment(segments[0]) && (!package_name.starts_with('@') || valid_segment(segments[1]))
+}
+
+fn is_windows_device_name(value: &str) -> bool {
+    let stem = value
+        .split('.')
+        .next()
+        .unwrap_or(value)
+        .trim_end_matches([' ', '.']);
+    if ["con", "prn", "aux", "nul", "clock$", "conin$", "conout$"]
+        .iter()
+        .any(|name| stem.eq_ignore_ascii_case(name))
+    {
+        return true;
+    }
+
+    let (Some(prefix), Some(number)) = (stem.get(..3), stem.get(3..)) else {
+        return false;
+    };
+    (prefix.eq_ignore_ascii_case("com") || prefix.eq_ignore_ascii_case("lpt"))
+        && matches!(
+            number,
+            "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "¹" | "²" | "³"
+        )
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    const JSON_WASM: &[u8] =
+        include_bytes!("../../lumis-cli/tests/fixtures/parsers/tree-sitter-json.wasm");
 
     fn package() -> LanguagePackage {
         LanguagePackage {
@@ -261,8 +438,8 @@ mod tests {
                 grammar_name: "json".into(),
                 upstream_version: None,
                 revision: None,
-                sha256: sha256_hex(b"wasm"),
-                size: 4,
+                sha256: sha256_hex(JSON_WASM),
+                size: u64::try_from(JSON_WASM.len()).expect("parser size fits in u64"),
             },
             languages: BTreeMap::from([(
                 "json".into(),
@@ -306,7 +483,34 @@ mod tests {
             package.verify_wasm(b"bad"),
             Err(LanguagePackageError::InvalidSize { .. })
         ));
-        assert!(package.verify_wasm(b"wasm").is_ok());
+        let mut wrong = JSON_WASM.to_vec();
+        let last = wrong.len() - 1;
+        wrong[last] ^= 1;
+        assert!(matches!(
+            package.verify_wasm(&wrong),
+            Err(LanguagePackageError::InvalidIntegrity { .. })
+        ));
+        assert!(package.verify_wasm(JSON_WASM).is_ok());
+    }
+
+    #[test]
+    fn rejects_parser_bytes_whose_grammar_disagrees_with_metadata() {
+        let mut package = package();
+        package.parser.grammar_name = "not_json".into();
+
+        let error = package.verify_wasm(JSON_WASM).unwrap_err();
+        assert!(matches!(
+            &error,
+            LanguagePackageError::InvalidGrammar {
+                parser,
+                expected,
+                actual,
+            } if parser == "tree-sitter-json" && expected == "not_json" && actual == "json"
+        ));
+        assert_eq!(
+            error.to_string(),
+            "invalid parser grammar for 'tree-sitter-json': expected 'not_json', got 'json'"
+        );
     }
 
     #[test]
@@ -325,6 +529,45 @@ mod tests {
                 package.validate(),
                 Err(LanguagePackageError::Invalid(actual)) if actual == field
             ));
+        }
+    }
+
+    #[test]
+    fn rejects_metadata_that_cannot_name_a_portable_file() {
+        for value in [
+            "C:",
+            "C:parser",
+            "tree<sitter",
+            "tree>sitter",
+            "tree\"sitter",
+            "tree|sitter",
+            "tree?sitter",
+            "tree*sitter",
+            "tree\u{1f}sitter",
+            "tree-sitter-json ",
+            "tree-sitter-json.",
+            "CON",
+            "nul.json",
+            "Com1",
+            "COM¹",
+            "LPT9.log",
+            "lpt³.log",
+        ] {
+            for field in ["version", "parser.name"] {
+                let mut package = package();
+                match field {
+                    "version" => package.version = value.into(),
+                    "parser.name" => package.parser.name = value.into(),
+                    _ => unreachable!(),
+                }
+                assert!(
+                    matches!(
+                        package.validate(),
+                        Err(LanguagePackageError::Invalid(actual)) if actual == field
+                    ),
+                    "{field} accepted {value:?}"
+                );
+            }
         }
     }
 }

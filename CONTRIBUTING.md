@@ -77,7 +77,7 @@ Releases are prepared locally and published from tags.
 - Run `mise run release-needed` to list packages with non-chore path-scoped commits since their latest package tag.
 - Prepare each release with `mise run release-prepare <package> <version>`.
 - `mise run release-prepare` updates only the target package version file and prepends the next changelog entry.
-- If dependent manifests must move together, update them separately in the same release commit.
+- If dependent manifests must move together, update them separately in the same release commit. `npm-lumis` is the exception: it also bumps the native crate, the `@lumis-sh/lumis-native` selector and all five platform packages, because the release workflow publishes them under the same version first.
 - Maintainers commit the release prep changes, then push package tags such as `cargo-lumis-cli/v0.2.0`.
 - Pushing a package tag triggers the publish workflows.
 
@@ -420,13 +420,20 @@ revision bump is validated before it is published rather than after.
 
 - **Queries CI** builds 110 of the 113 parsers across 12 shards and compiles
   every processed query for all 115 language definitions against the grammar its
-  language actually pins. `llvm`, `vim` and `zsh` exceed a runner's memory and
-  are committed under `fixtures/parsers/` with their measured peak RSS; a parser
-  that cannot be built does not fail its shard, but falls back to that copy and
-  then to the published package.
+  language actually pins. Each shard runs in fresh batches of four selected
+  languages; the global `cannotCompile` check may load PHP as a fifth grammar,
+  so no process retains more than five. `llvm`, `vim` and `zsh` exceed a runner's
+  memory and are committed under `fixtures/parsers/` with their measured peak
+  RSS; a parser that cannot be built does not fail its shard, but falls back to
+  that copy and then to the published package.
 - **Conformance CI** builds the seventeen parsers the committed fixtures supply,
   stages them with `wasm-stage`, and points `LUMIS_WASM_PATH` at the result, so
   the CLI, Elixir and Node native suites render from parsers built in that run.
+- **JavaScript CI** runs the direct-addon store tests in their own process against
+  that staged tree, then runs the remaining native-selected tests without
+  `LUMIS_WASM_PATH` before running the full Wasm-selected suite. The split is
+  intentional: staged assets take precedence over configured JavaScript
+  resolvers, so one process cannot honestly prove both paths.
 
 That parser set comes from the fixture filenames, not from the languages named
 in the fixtures' expected events. A document can attempt a language that never

@@ -1,6 +1,8 @@
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { RuntimeWasmInput } from "../src/types.js";
 import {
   ensureLocalParserWasm,
   ensureLocalWasm,
@@ -171,6 +173,28 @@ describe("Wasm resolver", () => {
       }),
     ).rejects.toThrow(/Invalid WASM (size|integrity)/);
   }, 30_000);
+
+  it.each(["Uint8Array", "ArrayBuffer", "string", "URL", "Response"] as const)(
+    "verifies an explicit %s parser against the package entry",
+    async (kind) => {
+      const { createHighlighter } = await import("../src/index.js");
+      const { default: json } = await import("../langs/json.ts");
+      const url = ensureLocalWasm("markdown");
+      const bytes = new Uint8Array(readFileSync(url));
+      const inputs: Record<typeof kind, RuntimeWasmInput> = {
+        Uint8Array: bytes,
+        ArrayBuffer: bytes.buffer,
+        string: fileURLToPath(url),
+        URL: url,
+        Response: new Response(bytes),
+      };
+
+      await expect(
+        createHighlighter({ languages: [{ ...json, wasm: inputs[kind] }] }),
+      ).rejects.toThrow(/Invalid WASM (size|integrity)/);
+    },
+    30_000,
+  );
 
   it("per-instance resolver is isolated from global resolver", async () => {
     const { createHighlighter, configureWasmResolver } = await import("../src/index.js");

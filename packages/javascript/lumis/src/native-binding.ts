@@ -19,19 +19,34 @@ export interface NativeLanguageSpec {
 
 interface NativeRuntimeInstance {
   loadLanguage(id: string): void;
-  loadLanguagePackage(id: string, packageJson: string, wasm: Uint8Array): void;
-  loadLanguageDefinition(spec: NativeLanguageSpec, wasm: Uint8Array): void;
+  loadLanguagePackage(
+    id: string,
+    expectedPackageName: string,
+    packageJson: string,
+    wasm: Uint8Array,
+  ): string;
+  loadInstalledLanguagePackage(
+    id: string,
+    expectedPackageName: string,
+    packageJson: string,
+    wasm: Uint8Array,
+  ): string;
+  loadLanguageDefinition(spec: NativeLanguageSpec, wasm: Uint8Array): string;
   hasLanguage(id: string): boolean;
   cacheLanguage(id: string, directory?: string, force?: boolean): string;
   highlightEvents(
     source: string,
     language: string,
     rainbowBrackets?: boolean,
+    packageResolver?: (packageName: string) => string | undefined,
+    wasmResolver?: (language: string, wasmJson: string) => string | undefined,
   ): { events: Uint8Array; unresolved: string[] };
   format(
     source: string,
     language: string,
     formatter: NativeFormatter,
+    packageResolver?: (packageName: string) => string | undefined,
+    wasmResolver?: (language: string, wasmJson: string) => string | undefined,
   ): { output: string; unresolved: string[] };
   formatAsync(
     source: string,

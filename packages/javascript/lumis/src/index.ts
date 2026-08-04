@@ -110,7 +110,7 @@ export function withWasmBundle(
   });
 }
 
-export type { Highlighter } from "./core/highlighter.js";
+export type { CreateHighlighterOptions, Highlighter } from "./core/highlighter.js";
 export type {
   HighlightEvent,
   HighlightIterFn,
@@ -121,6 +121,10 @@ export type {
   HighlightRange,
   HighlightStyle,
   Language,
+  LanguageDefinition,
+  LanguagePackageHandle,
+  PlaintextLanguage,
+  LoadableLanguage,
   LanguageBundle,
   LanguageInput,
   LanguageRef,

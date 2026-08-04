@@ -34,10 +34,13 @@ interface CaptureSnapshot {
   matchCount: number;
 }
 
-interface SourceMaps {
+export interface SourceMaps {
   utf8Offsets: number[];
+  utf16Indices: Array<number | undefined>;
   lineStarts: number[];
+  byteLineStarts: number[];
   sourceBytes: Uint8Array;
+  sourceLength: number;
   sourceUtf8ByteLength: number;
 }
 
@@ -138,13 +141,22 @@ export function buildLineStartMap(source: string): number[] {
   return starts;
 }
 
-function buildSourceMaps(source: string): SourceMaps {
+export function buildSourceMaps(source: string): SourceMaps {
   const utf8Offsets = buildUtf8OffsetMap(source);
+  const lineStarts = buildLineStartMap(source);
+  const sourceUtf8ByteLength = utf8Offsets[source.length] ?? 0;
+  const utf16Indices = Array.from<number | undefined>({ length: sourceUtf8ByteLength + 1 });
+  for (const [index, byte] of utf8Offsets.entries()) {
+    utf16Indices[byte] ??= index;
+  }
   return {
     utf8Offsets,
-    lineStarts: buildLineStartMap(source),
+    utf16Indices,
+    lineStarts,
+    byteLineStarts: lineStarts.map((index) => utf8Offsets[index] ?? 0),
     sourceBytes: encoder.encode(source),
-    sourceUtf8ByteLength: utf8Offsets[source.length] ?? 0,
+    sourceLength: source.length,
+    sourceUtf8ByteLength,
   };
 }
 
@@ -221,7 +233,7 @@ function snapshotCapturesWithMatches(
     // narrows the highlighted span as well as injection ranges.
     const offset = captureOffsets[capture.patternIndex]?.[capture.name];
     const adjusted = offset
-      ? applyCaptureOffset(nodeToRange(capture.node), offset, maps.lineStarts)
+      ? applyCaptureOffset(nodeToRange(capture.node), offset, maps)
       : undefined;
 
     result.push({
@@ -245,7 +257,7 @@ function snapshotCapturesWithMatches(
 function resolveInjection(
   match: QueryMatch,
   language: LoadedLanguage,
-  lineStarts: number[],
+  maps: SourceMaps,
   parentLanguageName?: string,
 ): { languageName?: string; ranges: Range[] } {
   let languageName: string | undefined;
@@ -274,7 +286,7 @@ function resolveInjection(
   const includeChildren = "injection.include-children" in setProperties;
   const offsets = language.config.captureOffsets[match.patternIndex];
   const ranges = contentCaptures.flatMap((capture) =>
-    getCaptureRanges(capture, lineStarts, includeChildren, offsets?.[capture.name]),
+    getCaptureRanges(capture, maps, includeChildren, offsets?.[capture.name]),
   );
 
   return { languageName, ranges };
@@ -332,7 +344,7 @@ function collectHighlightLayers(
         continue;
       }
 
-      const resolved = resolveInjection(match, language, maps.lineStarts, parentLanguageName);
+      const resolved = resolveInjection(match, language, maps, parentLanguageName);
       if (!resolved.languageName || resolved.ranges.length === 0) {
         continue;
       }
@@ -363,59 +375,90 @@ function collectHighlightLayers(
 
 function getCaptureRanges(
   capture: QueryCapture,
-  lineStarts: number[],
+  maps: SourceMaps,
   includeChildren: boolean,
   offset?: QueryCaptureOffset,
 ): Range[] {
   // The outer bounds come from the `#offset!`-adjusted range; children are still masked
   // out from the node itself, matching Neovim's `get_node_ranges`.
-  const range = applyCaptureOffset(nodeToRange(capture.node), offset, lineStarts);
+  const range = applyCaptureOffset(nodeToRange(capture.node), offset, maps);
 
   if (includeChildren || capture.node.childCount === 0) {
     return [range];
   }
 
   return getInjectionRanges(capture.node, false)
-    .map((nodeRange) => intersectRange(nodeRange, range, lineStarts))
+    .map((nodeRange) => intersectRange(nodeRange, range, maps.lineStarts))
     .filter((range): range is Range => range != null);
 }
 
 /**
  * Applies `#offset!` to a range.
  *
- * Mirrors `apply_range_offset` in Neovim's `runtime/lua/vim/treesitter.lua`, including
- * the part the previous implementation omitted: a shift that inverts the range, or that
- * lands outside the document, is discarded rather than propagated.
+ * Neovim applies the deltas to UTF-8 byte columns. Lumis also requires both
+ * adjusted endpoints to remain valid UTF-8 boundaries and inside the document;
+ * otherwise it keeps the capture's original range.
  */
 export function applyCaptureOffset(
   range: Range,
   offset: QueryCaptureOffset | undefined,
-  lineStarts: number[],
+  maps: SourceMaps,
 ): Range {
   if (!offset) return range;
 
-  const startPosition = {
-    row: range.startPosition.row + offset.startRow,
-    column: range.startPosition.column + offset.startColumn,
-  };
-  const endPosition = {
-    row: range.endPosition.row + offset.endRow,
-    column: range.endPosition.column + offset.endColumn,
-  };
-
-  const startIndex = pointToIndex(startPosition, lineStarts);
-  const endIndex = pointToIndex(endPosition, lineStarts);
-  if (startIndex == null || endIndex == null || startIndex > endIndex) {
+  const start = shiftEndpoint(
+    range.startIndex,
+    range.startPosition.row,
+    offset.startRow,
+    offset.startColumn,
+    maps,
+  );
+  const end = shiftEndpoint(
+    range.endIndex,
+    range.endPosition.row,
+    offset.endRow,
+    offset.endColumn,
+    maps,
+  );
+  if (!start || !end || start.byte > end.byte) {
     return range;
   }
 
-  return makeRange(startIndex, endIndex, startPosition, endPosition);
+  return makeRange(start.index, end.index, start.position, end.position);
 }
 
-function pointToIndex(point: Point, lineStarts: number[]): number | undefined {
-  const lineStart = lineStarts[point.row];
-  if (lineStart == null || point.column < 0) return undefined;
-  return lineStart + point.column;
+function shiftEndpoint(
+  index: number,
+  row: number,
+  rowDelta: number,
+  columnDelta: number,
+  maps: SourceMaps,
+): { byte: number; index: number; position: Point } | undefined {
+  const byte = maps.utf8Offsets[index];
+  const originalLineStart = maps.byteLineStarts[row];
+  const targetRow = row + rowDelta;
+  const targetLineStart = maps.byteLineStarts[targetRow];
+  if (byte == null || originalLineStart == null || targetLineStart == null) return undefined;
+
+  const byteColumn = byte - originalLineStart + columnDelta;
+  if (!Number.isSafeInteger(targetRow) || !Number.isSafeInteger(byteColumn) || byteColumn < 0) {
+    return undefined;
+  }
+
+  const targetByte = targetLineStart + byteColumn;
+  const nextLineStart = maps.byteLineStarts[targetRow + 1];
+  const lineEnd = nextLineStart == null ? maps.sourceUtf8ByteLength : nextLineStart - 1;
+  if (!Number.isSafeInteger(targetByte) || targetByte > lineEnd) return undefined;
+
+  const targetIndex = maps.utf16Indices[targetByte];
+  const targetUtf16LineStart = maps.lineStarts[targetRow];
+  if (targetIndex == null || targetUtf16LineStart == null) return undefined;
+
+  return {
+    byte: targetByte,
+    index: targetIndex,
+    position: { row: targetRow, column: targetIndex - targetUtf16LineStart },
+  };
 }
 
 function intersectRange(range: Range, bounds: Range, lineStarts: number[]): Range | undefined {

@@ -182,10 +182,34 @@ set -euo pipefail
 pnpm --filter @lumis-sh/lumis run build:native
 pnpm --filter @lumis-sh/lumis run build
 
-# The whole Lumis suite twice, once per runtime. vite.config.mjs defaults to
-# `wasm`, so leaving this unset would run the same runtime both times.
-LUMIS_TEST_RUNTIME=native pnpm --filter @lumis-sh/lumis run test
-LUMIS_TEST_RUNTIME=wasm pnpm --filter @lumis-sh/lumis run test
+# The direct-addon tests need the staged Rust store. Resolver-precedence tests
+# deliberately do not: LUMIS_WASM_PATH is checked before a JavaScript resolver.
+# Separate processes make both prerequisites deterministic while running every
+# native-selected test exactly once.
+native_runtime_data_dir="$(mktemp -d)"
+native_suite_data_dir="$(mktemp -d)"
+wasm_suite_data_dir="$(mktemp -d)"
+trap 'rm -rf "$native_runtime_data_dir" "$native_suite_data_dir" "$wasm_suite_data_dir"' EXIT
+LUMIS_TEST_RUNTIME=native \
+    LUMIS_WASM_PATH="$PWD/target/test-parsers" \
+    LUMIS_DATA_DIR="$native_runtime_data_dir" \
+    pnpm --filter @lumis-sh/lumis exec vitest run test/native-runtime.test.ts
+env -u LUMIS_WASM_PATH \
+    LUMIS_TEST_RUNTIME=native \
+    LUMIS_DATA_DIR="$native_suite_data_dir" \
+    pnpm --filter @lumis-sh/lumis exec vitest run \
+        --exclude test/conformance.test.ts \
+        --exclude test/query-compile.test.ts \
+        --exclude 'test/browser/**' \
+        --exclude test/native-runtime.test.ts
+
+# The whole package suite under web-tree-sitter. vite.config.mjs defaults to
+# `wasm`, but keep the selection explicit so this gate cannot silently duplicate
+# the native run.
+env -u LUMIS_WASM_PATH \
+    LUMIS_TEST_RUNTIME=wasm \
+    LUMIS_DATA_DIR="$wasm_suite_data_dir" \
+    pnpm --filter @lumis-sh/lumis run test
 
 # Downstream packages use the default Node runtime, which resolves parsers in
 # Rust against a staged tree rather than through a JavaScript resolver.

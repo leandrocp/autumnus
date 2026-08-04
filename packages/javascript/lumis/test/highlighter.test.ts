@@ -9,12 +9,13 @@ import {
   terminal,
 } from "../src/formatters.js";
 import * as formatterApi from "../src/formatters.js";
-import type { Highlighter, Theme } from "../src/index.js";
+import type { Highlighter, Language, LanguageBundle, LanguageInput, Theme } from "../src/index.js";
 import json from "../langs/json.ts";
 import html from "../langs/html.ts";
 import plaintext from "../langs/plaintext.ts";
 import javascript from "../langs/javascript.ts";
 import python from "../langs/python.ts";
+import { bundledLanguages } from "../bundles/web.ts";
 import { configureLocalWasmResolver } from "./wasm.js";
 
 import tokyonightMoon from "../../themes/dist/json/tokyonight_moon.json";
@@ -70,6 +71,178 @@ describe("createHighlighter", () => {
     expect(multi.languages).toContain("javascript");
   });
 
+  it("resolves an identifier-only initial language by id", async () => {
+    const identifierOnly = await createHighlighter({
+      languages: [{ id: "JSON", aliases: [] }],
+    });
+
+    expect(identifierOnly.languages).toContain("json");
+    expect(identifierOnly.highlight('{"a": 1}', htmlLinked({ language: "JSON" }))).toContain(
+      'class="l-number"',
+    );
+  });
+
+  it.each([
+    { id: "json", aliases: [], packageName: "" },
+    { id: "json", aliases: [], highlights: "(string) @string" },
+    {
+      id: "json",
+      aliases: [],
+      packageName: "@lumis-sh/wasm-json",
+      highlights: "(string) @string",
+    },
+    {
+      id: "json",
+      aliases: [],
+      packageName: undefined,
+      highlights: "(string) @string",
+      wasm: new Uint8Array(),
+    },
+  ])("rejects an incomplete initial language definition", async (language) => {
+    await expect(createHighlighter({ languages: [language] })).rejects.toThrow(
+      'Language "json" has an incomplete or conflicting load definition.',
+    );
+  });
+
+  it.each([
+    { aliases: [] },
+    { id: "", aliases: [] },
+    { id: "json" },
+    { id: "json", aliases: "json" },
+    { id: "json", aliases: [1] },
+  ])("rejects a malformed initial language definition", async (language) => {
+    await expect(
+      createHighlighter({ languages: [language as unknown as Language] }),
+    ).rejects.toThrow('Language definition has an invalid or missing "id" or "aliases".');
+  });
+
+  it.each(["injections", "locals", "brackets"] as const)(
+    "rejects a non-string $field query at the shared boundary",
+    async (field) => {
+      const language = {
+        id: `invalid-${field}`,
+        aliases: [],
+        highlights: "(string) @string",
+        wasm: new Uint8Array(),
+        [field]: {},
+      } as unknown as Language;
+
+      await expect(createHighlighter({ languages: [language] })).rejects.toThrow(
+        `Language "invalid-${field}" has an incomplete or conflicting load definition.`,
+      );
+    },
+  );
+
+  it.each([
+    Promise.resolve({ default: { id: "json" } }),
+    async () => ({ default: { id: "json" } }),
+  ])("validates the language returned by an import input", async (input) => {
+    await expect(
+      createHighlighter({ languages: [input as unknown as LanguageInput] }),
+    ).rejects.toThrow('Language definition has an invalid or missing "id" or "aliases".');
+  });
+
+  it("validates every lazy handle in a language bundle", async () => {
+    const valid = Object.assign(async () => json, { id: "json", aliases: [] });
+    const invalid = Object.assign(async () => python, {
+      id: "python",
+      aliases: "python",
+    });
+    const bundle = { json: valid, python: invalid } as unknown as LanguageBundle;
+
+    await expect(createHighlighter({ languages: [bundle] })).rejects.toThrow(
+      'Language definition has an invalid or missing "id" or "aliases".',
+    );
+  });
+
+  it("validates a language returned by a lazy bundle handle", async () => {
+    const invalid = Object.assign(async () => ({ id: "json" }) as unknown as Language, {
+      id: "json",
+      aliases: [],
+    });
+    const highlighter = await createHighlighter({
+      languages: [{ json: invalid }],
+    });
+
+    await expect(highlighter.loadLanguage("json")).rejects.toThrow(
+      'Language definition has an invalid or missing "id" or "aliases".',
+    );
+  });
+
+  it("validates a lazy bundle result resolved by an identifier-only input", async () => {
+    const invalid = Object.assign(async () => ({ id: "json" }) as unknown as Language, {
+      id: "json",
+      aliases: [],
+    });
+
+    await expect(
+      createHighlighter({
+        languages: [{ json: invalid }, { id: "json", aliases: [] }],
+      }),
+    ).rejects.toThrow('Language definition has an invalid or missing "id" or "aliases".');
+  });
+
+  it("validates a language returned by a lazy async-helper reference", async () => {
+    const invalid = Object.assign(async () => ({ id: "json" }) as unknown as Language, {
+      id: "json",
+      aliases: [],
+    });
+
+    await expect(highlight('{"a": 1}', htmlLinked({ language: invalid }))).rejects.toThrow(
+      'Language definition has an invalid or missing "id" or "aliases".',
+    );
+  });
+
+  it("rejects an incomplete language definition loaded later", async () => {
+    const highlighter = await createHighlighter();
+
+    await expect(
+      highlighter.loadLanguage({ id: "python", aliases: [], packageName: "" }),
+    ).rejects.toThrow('Language "python" has an incomplete or conflicting load definition.');
+  });
+
+  it("rejects a malformed language definition loaded later", async () => {
+    const highlighter = await createHighlighter();
+
+    await expect(highlighter.loadLanguage({ id: "python" } as unknown as Language)).rejects.toThrow(
+      'Language definition has an invalid or missing "id" or "aliases".',
+    );
+  });
+
+  it("rejects an incomplete language definition used by the async helper", async () => {
+    const language: Language = { id: "json", aliases: [], packageName: "" };
+
+    await expect(highlight('{"a": 1}', htmlLinked({ language }))).rejects.toThrow(
+      'Language "json" has an incomplete or conflicting load definition.',
+    );
+  });
+
+  it("rejects a malformed language definition used by the async helper", async () => {
+    const language = { id: "json" } as unknown as Language;
+
+    await expect(highlight('{"a": 1}', htmlLinked({ language }))).rejects.toThrow(
+      'Language definition has an invalid or missing "id" or "aliases".',
+    );
+  });
+
+  it("rejects an incomplete language definition used by a sync highlighter", async () => {
+    const highlighter = await createHighlighter({ languages: [json] });
+    const language: Language = { id: "json", aliases: [], highlights: "" };
+
+    expect(() => highlighter.highlight('{"a": 1}', htmlLinked({ language }))).toThrow(
+      'Language "json" has an incomplete or conflicting load definition.',
+    );
+  });
+
+  it("rejects a malformed language definition used by a sync highlighter", async () => {
+    const highlighter = await createHighlighter({ languages: [json] });
+    const language = { id: "json" } as unknown as Language;
+
+    expect(() => highlighter.highlight('{"a": 1}', htmlLinked({ language }))).toThrow(
+      'Language definition has an invalid or missing "id" or "aliases".',
+    );
+  });
+
   it("always loads plaintext for fallback highlighting", () => {
     expect(hl.languages).toContain("plaintext");
   });
@@ -77,6 +250,17 @@ describe("createHighlighter", () => {
   it("loads languages dynamically via loadLanguage", async () => {
     await hl.loadLanguage(json);
     expect(hl.languages).toContain("json");
+  });
+
+  it("loads a lazy bundle through an ASCII-case-insensitive alias", async () => {
+    const lazy = await createHighlighter({ languages: [bundledLanguages] });
+
+    await lazy.loadLanguage("JS");
+
+    expect(lazy.languages).toContain("javascript");
+    expect(
+      lazy.highlight("const value = 1", htmlInline({ language: "JS", theme: draculaTheme })),
+    ).toContain('class="language-javascript"');
   });
 
   it("keeps loaded languages isolated per instance", async () => {
@@ -221,10 +405,7 @@ class User:
 
   it("throws for unloaded language", () => {
     expect(() =>
-      hl.highlight(
-        "code",
-        htmlInline({ language: { id: "python", aliases: [], highlights: "" }, theme }),
-      ),
+      hl.highlight("code", htmlInline({ language: { id: "python", aliases: [] }, theme })),
     ).toThrow(/not loaded/);
   });
 

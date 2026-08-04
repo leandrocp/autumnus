@@ -1,7 +1,131 @@
 {
-  "$description": "Neovim's `#offset!` semantics, pinned so the Rust runtime and the browser port cannot drift. Every expected range was produced by running `query` through Neovim itself (`vim.treesitter.get_range`) on the JSON grammar, not derived by hand. Sources are ASCII on purpose: Rust reports byte columns and web-tree-sitter reports UTF-16 code-unit columns, so only ASCII makes the two directly comparable. Rust covers the multibyte row walk in its own unit test.",
+  "$description": "Neovim's `#offset!` parsing and representable range semantics, pinned so the Rust runtime and the browser port cannot drift. Ground-truth ranges were produced by running each query through Neovim (`vim.treesitter.get_range`) on the JSON grammar. The explicitly named invalid-range cases instead pin Lumis's safety policy below.",
   "$generatedBy": "nvim --headless, vim.treesitter.get_range on tree-sitter-json",
-  "$note": "Neovim raises a Lua error when one of the four slots is not a number, so there is no ground truth for that case and it is not in this corpus. Both Lumis implementations discard the directive instead.",
+  "$note": "Neovim raises a Lua error when one of the four slots cannot be coerced to a number, so there is no ground truth for that case and it is not in this corpus. Capture operands are already numeric one-based capture IDs when the directive runs and are covered below.",
+  "$safetyPolicy": "Neovim can return negative, out-of-document, fractional, inverted, or mid-codepoint coordinates that cannot safely become Lumis event byte ranges. Lumis keeps the original capture unless both adjusted endpoints are ordered, in bounds, integral, and UTF-8 boundaries. The Rust and browser ports must make that same choice.",
+  "$coercionNote": "Neovim's LuaJIT arithmetic produced each accepted numeric value below. Lumis keeps only finite integral values because Tree-sitter points and byte ranges are integral; Neovim's highlighter also rejects fractional coordinates when it creates an extmark.",
+  "operandCoercions": [
+    {
+      "name": "signed decimal",
+      "operand": "+1",
+      "expected": 1
+    },
+    {
+      "name": "negative zero",
+      "operand": "-0",
+      "expected": 0
+    },
+    {
+      "name": "hexadecimal",
+      "operand": "0x1",
+      "expected": 1
+    },
+    {
+      "name": "signed hexadecimal",
+      "operand": "-0Xf",
+      "expected": -15
+    },
+    {
+      "name": "binary",
+      "operand": "0b10",
+      "expected": 2
+    },
+    {
+      "name": "hexadecimal exponent",
+      "operand": "0x1p2",
+      "expected": 4
+    },
+    {
+      "name": "decimal exponent",
+      "operand": "1e2",
+      "expected": 100
+    },
+    {
+      "name": "quoted surrounding whitespace",
+      "operand": " \t1\r\n",
+      "expected": 1
+    },
+    {
+      "name": "integer wider than i32",
+      "operand": "99999999999",
+      "expected": 99999999999
+    },
+    {
+      "name": "maximum shared exact integer",
+      "operand": "9007199254740991",
+      "expected": 9007199254740991
+    },
+    {
+      "name": "largest LuaJIT decimal exponent magnitude",
+      "operand": "1e-1048575",
+      "expected": 0
+    },
+    {
+      "name": "decimal exponent outside LuaJIT's scanner range",
+      "operand": "1e-1048576",
+      "expected": null
+    },
+    {
+      "name": "largest LuaJIT hexadecimal exponent magnitude",
+      "operand": "0x1p-1048575",
+      "expected": 0
+    },
+    {
+      "name": "hexadecimal exponent outside LuaJIT's scanner range",
+      "operand": "0x1p-1048576",
+      "expected": null
+    },
+    {
+      "name": "long fractional hexadecimal mantissa compensated by exponent",
+      "operand": "0x0.0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001p1204",
+      "expected": 1
+    },
+    {
+      "name": "long whole hexadecimal mantissa compensated by exponent",
+      "operand": "0x1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000p-1200",
+      "expected": 1
+    },
+    {
+      "name": "smallest hexadecimal subnormal does not round to an integer",
+      "operand": "0x0.00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008",
+      "expected": null
+    },
+    {
+      "name": "zero remains zero with an overflowing hexadecimal exponent",
+      "operand": "0x0p1024",
+      "expected": 0
+    },
+    {
+      "name": "fractional decimal cannot form a Tree-sitter point",
+      "operand": "1.5",
+      "expected": null
+    },
+    {
+      "name": "fractional hexadecimal cannot form a Tree-sitter point",
+      "operand": "0x1.8",
+      "expected": null
+    },
+    {
+      "name": "malformed numeric tail",
+      "operand": "1x",
+      "expected": null
+    },
+    {
+      "name": "numeric separator is not LuaJIT numeric syntax",
+      "operand": "1_0",
+      "expected": null
+    },
+    {
+      "name": "non-finite value cannot form a Tree-sitter point",
+      "operand": "inf",
+      "expected": null
+    },
+    {
+      "name": "value outside the shared exact-integer range",
+      "operand": "9007199254740992",
+      "expected": null
+    }
+  ],
   "cases": [
     {
       "name": "row shift keeps the capture's own column",
@@ -271,6 +395,114 @@
         "startByte": 0,
         "endRow": 0,
         "endColumn": 8
+      }
+    },
+    {
+      "name": "the first capture operand is its one-based capture ID",
+      "source": "[\"a\",\"b\"]",
+      "query": "((array (string) @first (string) @second) @cap (#offset! @cap 0 @first 0 -1))",
+      "offset": [
+        "0",
+        "1",
+        "0",
+        "-1"
+      ],
+      "original": {
+        "endByte": 9,
+        "startRow": 0,
+        "startColumn": 0,
+        "startByte": 0,
+        "endRow": 0,
+        "endColumn": 9
+      },
+      "expected": {
+        "endByte": 8,
+        "startRow": 0,
+        "startColumn": 1,
+        "startByte": 1,
+        "endRow": 0,
+        "endColumn": 8
+      }
+    },
+    {
+      "name": "the second capture operand is its one-based capture ID",
+      "source": "[\"a\",\"b\"]",
+      "query": "((array (string) @first (string) @second) @cap (#offset! @cap 0 @second 0 -1))",
+      "offset": [
+        "0",
+        "2",
+        "0",
+        "-1"
+      ],
+      "original": {
+        "endByte": 9,
+        "startRow": 0,
+        "startColumn": 0,
+        "startByte": 0,
+        "endRow": 0,
+        "endColumn": 9
+      },
+      "expected": {
+        "endByte": 8,
+        "startRow": 0,
+        "startColumn": 2,
+        "startByte": 2,
+        "endRow": 0,
+        "endColumn": 8
+      }
+    },
+    {
+      "name": "multibyte row shifts use UTF-8 byte columns",
+      "source": "{\"é\": {\n        \"x\": 1,\n        \"y\": 2\n      }}",
+      "query": "((object) @cap (#offset! @cap 1 0 -1 0))",
+      "offset": [
+        "1",
+        "0",
+        "-1",
+        "0"
+      ],
+      "original": {
+        "endByte": 47,
+        "startRow": 0,
+        "startColumn": 7,
+        "startByte": 7,
+        "endRow": 3,
+        "endColumn": 7
+      },
+      "expected": {
+        "endByte": 32,
+        "startRow": 1,
+        "startColumn": 7,
+        "startByte": 16,
+        "endRow": 2,
+        "endColumn": 7
+      }
+    },
+    {
+      "name": "an offset inside a UTF-8 code point keeps the original range",
+      "source": "{\"a\":\"éx\"}",
+      "query": "((string_content) @cap (#offset! @cap 0 1 0 0))",
+      "offset": [
+        "0",
+        "1",
+        "0",
+        "0"
+      ],
+      "original": {
+        "endByte": 9,
+        "startRow": 0,
+        "startColumn": 6,
+        "startByte": 6,
+        "endRow": 0,
+        "endColumn": 9
+      },
+      "expected": {
+        "endByte": 9,
+        "startRow": 0,
+        "startColumn": 6,
+        "startByte": 6,
+        "endRow": 0,
+        "endColumn": 9
       }
     },
     {

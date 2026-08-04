@@ -5,7 +5,7 @@ use lumis_core::highlights::HIGHLIGHT_NAMES;
 use std::collections::HashMap;
 use std::sync::{Arc, Condvar, Mutex, OnceLock, RwLock};
 use thiserror::Error;
-use tree_sitter::{Parser, Query, Tree, WasmStore};
+use tree_sitter::{Language, Parser, Query, Tree, WasmStore};
 use wasmtime::{Cache, CacheConfig, Config, Engine};
 
 use crate::brackets::{bracket_pairs, colorize_bracket_pairs, RainbowRange};
@@ -13,6 +13,7 @@ use crate::store::LanguageStore;
 use crate::tree_sitter_highlight::{HighlightConfiguration, Highlighter};
 
 /// Everything needed to register a parser and its highlighting queries.
+#[derive(Clone)]
 pub struct LanguageSpec {
     pub id: String,
     pub aliases: Vec<String>,
@@ -28,6 +29,13 @@ struct LoadedLanguage {
     highlight: HighlightConfiguration,
     brackets_source: String,
     brackets: OnceLock<Option<Query>>,
+}
+
+struct Loader {
+    modules: HashMap<(String, String), Result<Language, String>>,
+    store: WasmStore,
+    #[cfg(test)]
+    module_load_attempts: usize,
 }
 
 #[derive(Default)]
@@ -138,7 +146,7 @@ impl Drop for WorkerLease<'_> {
 /// A reusable runtime with a shared Wasmtime engine, a lazy language catalog,
 /// and a bounded pool of independent highlighter workers.
 pub struct Runtime {
-    loader: Mutex<WasmStore>,
+    loader: Mutex<Loader>,
     catalog: RwLock<Catalog>,
     workers: WorkerPool,
     /// Resolves, verifies and caches language packages. Present so an injected
@@ -188,10 +196,15 @@ impl Runtime {
     }
 
     fn with_engine(engine: Engine, worker_limit: usize) -> Result<Self, RuntimeError> {
-        let loader =
+        let store =
             WasmStore::new(&engine).map_err(|error| RuntimeError::TreeSitter(error.to_string()))?;
         Ok(Self {
-            loader: Mutex::new(loader),
+            loader: Mutex::new(Loader {
+                modules: HashMap::new(),
+                store,
+                #[cfg(test)]
+                module_load_attempts: 0,
+            }),
             catalog: RwLock::new(Catalog::default()),
             workers: WorkerPool::new(engine, worker_limit),
             store: None,
@@ -322,12 +335,54 @@ impl Runtime {
             return Ok(());
         }
 
-        let language = loader
-            .load_language(&spec.grammar_name, &spec.wasm)
-            .map_err(|error| RuntimeError::Parser {
+        let module_key = (spec.grammar_name.clone(), crate::sha256_hex(&spec.wasm));
+        let language = if let Some(module) = loader.modules.get(&module_key) {
+            module.clone().map_err(|message| RuntimeError::Parser {
                 language: spec.id.clone(),
-                message: error.to_string(),
+                message,
+            })?
+        } else {
+            let actual_grammar = crate::grammar_name(&spec.wasm).map_err(|error| {
+                let message = error.to_string();
+                loader
+                    .modules
+                    .insert(module_key.clone(), Err(message.clone()));
+                RuntimeError::Parser {
+                    language: spec.id.clone(),
+                    message,
+                }
             })?;
+            if actual_grammar != spec.grammar_name {
+                let message = format!(
+                    "invalid parser grammar: expected '{}', got '{actual_grammar}'",
+                    spec.grammar_name
+                );
+                loader.modules.insert(module_key, Err(message.clone()));
+                return Err(RuntimeError::Parser {
+                    language: spec.id,
+                    message,
+                });
+            }
+
+            #[cfg(test)]
+            {
+                loader.module_load_attempts += 1;
+            }
+            match loader.store.load_language(&spec.grammar_name, &spec.wasm) {
+                Ok(language) => {
+                    loader.modules.insert(module_key, Ok(language.clone()));
+                    language
+                }
+                Err(error) => {
+                    let message = error.to_string();
+                    loader.modules.insert(module_key, Err(message.clone()));
+                    return Err(RuntimeError::Parser {
+                        language: spec.id,
+                        message,
+                    });
+                }
+            }
+        };
         let mut highlight = HighlightConfiguration::new(
             language.clone(),
             spec.id.clone(),
@@ -357,6 +412,14 @@ impl Runtime {
             }),
         );
         Ok(())
+    }
+
+    #[cfg(test)]
+    fn module_load_attempt_count(&self) -> usize {
+        self.loader
+            .lock()
+            .expect("language loader lock poisoned")
+            .module_load_attempts
     }
 
     /// Declare a supported language before its parser is loaded.
@@ -471,6 +534,28 @@ impl Runtime {
         name_or_alias: &str,
         options: &HighlightOptions,
     ) -> Result<HighlightOutput, RuntimeError> {
+        self.highlight_with_resolver(source, name_or_alias, options, |_| {
+            InjectionResolution::Fallback
+        })
+    }
+
+    /// Highlight while allowing a host to resolve an injected public id to a
+    /// language it loaded into this runtime.
+    ///
+    /// The callback runs during the same tree walk that discovered the
+    /// injection. [`InjectionResolution::Loaded`] only selects an
+    /// already-loaded language; the host performs any resolution and calls
+    /// [`Self::load_language`] before it returns.
+    ///
+    /// # Errors
+    /// Fails when the root language cannot be loaded, or highlighting does.
+    pub fn highlight_with_resolver(
+        &self,
+        source: &str,
+        name_or_alias: &str,
+        options: &HighlightOptions,
+        mut resolve_injected: impl FnMut(&str) -> InjectionResolution,
+    ) -> Result<HighlightOutput, RuntimeError> {
         let root = self.load_through_store(name_or_alias)?;
         let (root_id, languages, aliases) = {
             let catalog = self.catalog.read().expect("language catalog lock poisoned");
@@ -501,6 +586,28 @@ impl Runtime {
                 if !options.injections {
                     return None;
                 }
+
+                // A host resolver has precedence over the process catalog. In
+                // particular, two Node highlighters may resolve the same
+                // public id to different packages, each loaded under its own
+                // internal id. Calling this before the shared alias map keeps
+                // one instance from selecting another instance's definition.
+                match resolve_injected(injected) {
+                    InjectionResolution::Loaded(resolved) => {
+                        if let Some(loaded) = self.loaded(&resolved) {
+                            return Some(&loaded_here.alloc(loaded).highlight);
+                        }
+                    }
+                    InjectionResolution::Unresolved => {
+                        let mut unresolved = unresolved.borrow_mut();
+                        if !unresolved.iter().any(|name| name == injected) {
+                            unresolved.push(injected.to_string());
+                        }
+                        return None;
+                    }
+                    InjectionResolution::Fallback => {}
+                }
+
                 let id = aliases
                     .get(injected)
                     .map(String::as_str)
@@ -558,6 +665,17 @@ impl Runtime {
             unresolved: unresolved.into_inner(),
         })
     }
+}
+
+/// How a host handled a language named by an injection query.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum InjectionResolution {
+    /// The host has no override, so the runtime should use its catalog store.
+    Fallback,
+    /// The host loaded the language under this internal id.
+    Loaded(String),
+    /// The host owns this resolution but could not load the language.
+    Unresolved,
 }
 
 /// What a highlight pass should do beyond producing events.
@@ -715,7 +833,7 @@ mod tests {
                 upstream_version: None,
                 revision: None,
                 sha256: crate::sha256_hex(wasm),
-                size: wasm.len(),
+                size: u64::try_from(wasm.len()).expect("parser size fits in u64"),
             },
             languages: std::collections::BTreeMap::from([(
                 "json".into(),
@@ -741,6 +859,115 @@ mod tests {
                 brackets: OnceLock::new(),
             }),
         );
+    }
+
+    #[test]
+    fn a_parser_module_survives_query_failure_for_a_corrected_retry() {
+        let runtime = Runtime::with_worker_limit(1).unwrap();
+        let spec = LanguageSpec {
+            id: "retry-json".into(),
+            aliases: Vec::new(),
+            grammar_name: "json".into(),
+            wasm: JSON_WASM.to_vec(),
+            highlights: "(definitely_not_a_json_node) @string".into(),
+            injections: String::new(),
+            locals: String::new(),
+            brackets: String::new(),
+        };
+
+        assert!(matches!(
+            runtime.load_language(spec.clone()),
+            Err(RuntimeError::Query { .. })
+        ));
+        let mut second_invalid = spec.clone();
+        second_invalid.id = "retry-json-second".into();
+        assert!(matches!(
+            runtime.load_language(second_invalid),
+            Err(RuntimeError::Query { .. })
+        ));
+
+        let mut corrected = spec;
+        corrected.id = "retry-json-corrected".into();
+        corrected.highlights = "(number) @number".into();
+        runtime.load_language(corrected).unwrap();
+        assert_eq!(
+            runtime.module_load_attempt_count(),
+            1,
+            "query retries over identical parser bytes must not grow the Wasm store"
+        );
+
+        let wrong_grammar = LanguageSpec {
+            id: "retry-json-wrong-grammar".into(),
+            aliases: Vec::new(),
+            grammar_name: "not_json".into(),
+            wasm: JSON_WASM.to_vec(),
+            highlights: "(number) @number".into(),
+            injections: String::new(),
+            locals: String::new(),
+            brackets: String::new(),
+        };
+        let error = runtime.load_language(wrong_grammar.clone()).unwrap_err();
+        assert!(matches!(
+            error,
+            RuntimeError::Parser { language, message }
+                if language == "retry-json-wrong-grammar"
+                    && message == "invalid parser grammar: expected 'not_json', got 'json'"
+        ));
+        let mut repeated_wrong_grammar = wrong_grammar;
+        repeated_wrong_grammar.id = "retry-json-wrong-grammar-again".into();
+        assert!(matches!(
+            runtime.load_language(repeated_wrong_grammar),
+            Err(RuntimeError::Parser { language, message })
+                if language == "retry-json-wrong-grammar-again"
+                    && message == "invalid parser grammar: expected 'not_json', got 'json'"
+        ));
+        assert_eq!(
+            runtime.module_load_attempt_count(),
+            1,
+            "a grammar mismatch must be rejected before the Wasm store grows"
+        );
+    }
+
+    #[test]
+    fn a_failed_parser_module_load_is_cached_by_content() {
+        const INVALID_TREE_SITTER_WASM: &[u8] = &[
+            0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00, 0x01, 0x05, 0x01, 0x60, 0x00, 0x01,
+            0x7f, 0x03, 0x02, 0x01, 0x00, 0x07, 0x16, 0x01, 0x12, 0x74, 0x72, 0x65, 0x65, 0x5f,
+            0x73, 0x69, 0x74, 0x74, 0x65, 0x72, 0x5f, 0x62, 0x72, 0x6f, 0x6b, 0x65, 0x6e, 0x00,
+            0x00, 0x0a, 0x06, 0x01, 0x04, 0x00, 0x41, 0x00, 0x0b,
+        ];
+        let runtime = Runtime::with_worker_limit(1).unwrap();
+        let spec = LanguageSpec {
+            id: "broken-first".into(),
+            aliases: Vec::new(),
+            grammar_name: "broken".into(),
+            wasm: INVALID_TREE_SITTER_WASM.to_vec(),
+            highlights: "(_) @variable".into(),
+            injections: String::new(),
+            locals: String::new(),
+            brackets: String::new(),
+        };
+
+        let first_error = runtime.load_language(spec.clone()).unwrap_err();
+        let mut repeated = spec;
+        repeated.id = "broken-second".into();
+        let second_error = runtime.load_language(repeated).unwrap_err();
+        assert!(matches!(
+            (&first_error, &second_error),
+            (
+                RuntimeError::Parser {
+                    language: first_language,
+                    message: first_message,
+                },
+                RuntimeError::Parser {
+                    language: second_language,
+                    message: second_message,
+                },
+            ) if first_language == "broken-first"
+                && second_language == "broken-second"
+                && first_message == second_message
+        ));
+        assert_eq!(runtime.module_load_attempt_count(), 1);
     }
 
     #[test]

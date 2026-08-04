@@ -16,7 +16,9 @@ use std::time::Duration;
 
 use thiserror::Error;
 
-use crate::package::{LanguagePackage, LanguagePackageError};
+use crate::package::{
+    is_safe_path_segment, is_valid_package_name, LanguagePackage, LanguagePackageError,
+};
 
 /// How long a cached `language.json` is trusted before it is refreshed.
 pub const PACKAGE_CACHE_TTL: Duration = Duration::from_secs(60 * 60);
@@ -410,51 +412,18 @@ impl LanguageStore {
 /// `@lumis-sh/wasm-rust` becomes `rust`, so cache filenames stay readable.
 ///
 /// `None` for anything that is not a valid npm package name, or whose suffix
-/// would not be a single path component. The result names a file under the
-/// cache and source directories, and [`LanguageStore`] takes the package name
-/// from its caller, so `..` or a separator here would escape both.
+/// cannot portably name a single path component. The result names a file under
+/// the cache and source directories, and [`LanguageStore`] takes the package
+/// name from its caller, so `..` or a separator here would escape both.
 #[must_use]
 pub fn package_suffix(package_name: &str) -> Option<&str> {
-    validate_package_name(package_name).ok()?;
+    if !is_valid_package_name(package_name) {
+        return None;
+    }
     let suffix = package_name
         .strip_prefix("@lumis-sh/wasm-")
         .unwrap_or(package_name);
-    (!suffix.contains('/')).then_some(suffix)
-}
-
-/// npm allows at most 214 characters, no leading `.` or `_`, no uppercase, and
-/// only URL-unreserved characters, optionally under one `@scope/`.
-fn validate_package_name(package_name: &str) -> Result<(), StoreError> {
-    let invalid = || StoreError::InvalidPackageName(package_name.to_string());
-
-    if package_name.is_empty() || package_name.len() > 214 {
-        return Err(invalid());
-    }
-
-    let segments = match package_name.strip_prefix('@') {
-        Some(scoped) => {
-            let (scope, unscoped) = scoped.split_once('/').ok_or_else(invalid)?;
-            [scope, unscoped]
-        }
-        None => [package_name, ""],
-    };
-
-    for segment in segments.into_iter().filter(|segment| !segment.is_empty()) {
-        let starts_well =
-            segment.starts_with(|first: char| first.is_ascii_lowercase() || first.is_ascii_digit());
-        let body_is_safe = segment.bytes().all(|byte| {
-            byte.is_ascii_lowercase() || byte.is_ascii_digit() || b"-._".contains(&byte)
-        });
-        if !starts_well || !body_is_safe {
-            return Err(invalid());
-        }
-    }
-
-    if segments[0].is_empty() || (package_name.starts_with('@') && segments[1].is_empty()) {
-        return Err(invalid());
-    }
-
-    Ok(())
+    is_safe_path_segment(suffix).then_some(suffix)
 }
 
 /// CDN-relative path to a package's parser, shared by every mirror.
@@ -548,7 +517,8 @@ mod tests {
     use crate::package::{sha256_hex, PackagedLanguage, ParserMetadata};
     use std::collections::BTreeMap;
 
-    const WASM: &[u8] = b"parser-bytes";
+    const WASM: &[u8] =
+        include_bytes!("../../lumis-cli/tests/fixtures/parsers/tree-sitter-json.wasm");
 
     fn package() -> LanguagePackage {
         LanguagePackage {
@@ -561,7 +531,7 @@ mod tests {
                 upstream_version: None,
                 revision: None,
                 sha256: sha256_hex(WASM),
-                size: WASM.len(),
+                size: u64::try_from(WASM.len()).expect("parser size fits in u64"),
             },
             languages: BTreeMap::from([(
                 "json".into(),
@@ -648,6 +618,31 @@ mod tests {
         assert_eq!(package_suffix("something-else"), Some("something-else"));
     }
 
+    #[test]
+    fn package_suffix_rejects_names_that_cannot_portably_name_the_metadata_file() {
+        let dir = tempdir();
+        let store = make(dir.path(), Box::new(NoNetwork));
+        for name in [
+            "con",
+            "nul.json",
+            "com1",
+            "lpt9.log",
+            "trailing.",
+            "@lumis-sh/wasm-con",
+            "@lumis-sh/wasm-lpt9.log",
+            "@lumis-sh/wasm-trailing.",
+        ] {
+            assert_eq!(package_suffix(name), None, "{name} must have no cache name");
+            assert!(
+                matches!(
+                    store.package_path(name),
+                    Err(StoreError::InvalidPackageName(_))
+                ),
+                "{name} must not resolve to a metadata path"
+            );
+        }
+    }
+
     /// `LanguageStore::package` is public and takes the name from its caller,
     /// so a name that is not a package name must never become a path.
     #[test]
@@ -718,16 +713,21 @@ mod tests {
             }
         }
 
-        for field in ["parser.name", "version"] {
+        for (field, value) in [
+            ("parser.name", "../../escaped"),
+            ("parser.name", "C:"),
+            ("version", "../../escaped"),
+            ("version", "1:2"),
+        ] {
             let dir = tempdir();
             let store = make(dir.path(), Box::new(AnyBytes(WASM.to_vec())));
 
             // Never parsed from JSON, so `validate` has not run on it.
             let mut hostile = package();
             if field == "parser.name" {
-                hostile.parser.name = "../../escaped".into();
+                hostile.parser.name = value.into();
             } else {
-                hostile.version = "../../escaped".into();
+                hostile.version = value.into();
             }
             assert!(hostile.validate().is_err(), "{field} is invalid");
 
@@ -772,6 +772,37 @@ mod tests {
         let store = make(dir.path(), Box::new(AnyBytes(WASM.to_vec())));
         assert!(store.parser_path(&package()).is_ok());
         assert!(store.parser(&package()).is_ok());
+    }
+
+    #[test]
+    fn a_direct_package_cannot_read_outside_the_source_directory() {
+        let root = tempdir();
+        let source_dir = root.path().join("source");
+        let parser_dir = source_dir.join("parsers");
+        std::fs::create_dir_all(&parser_dir).unwrap();
+
+        let mut hostile = package();
+        hostile.parser.name = "../../escaped".into();
+        let escaped_path = root.path().join(format!(
+            "escaped-{}-{}.wasm",
+            hostile.version, hostile.parser.sha256
+        ));
+        std::fs::write(&escaped_path, WASM).unwrap();
+        assert!(!escaped_path.starts_with(&source_dir));
+        assert_eq!(
+            std::fs::canonicalize(parser_dir.join(parser_filename(&hostile))).unwrap(),
+            std::fs::canonicalize(&escaped_path).unwrap()
+        );
+
+        let store = LanguageStore::new(
+            StoreConfig {
+                cache_dir: root.path().join("cache"),
+                source_dir: Some(source_dir),
+            },
+            Box::new(NoNetwork),
+        );
+        assert!(hostile.validate().is_err());
+        assert!(store.local_parser(&hostile).is_none());
     }
 
     /// `parser_filename` and the CDN path are built from the fetched JSON, so a

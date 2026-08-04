@@ -12,11 +12,16 @@ on:
       - "languages.toml"
       - "crates/lumis-build/**"
       - "crates/dev/**"
+      - "packages/javascript/package.json"
+      - "packages/javascript/lumis/package.json"
+      - "packages/javascript/wasm-bundle-full/package.json"
       - "packages/javascript/lumis/test/query-compile.test.ts"
       - "packages/javascript/lumis/test/query-patterns.test.ts"
       - "packages/javascript/lumis/test/unverified-parsers.json"
       - "fixtures/parsers/**"
       - "packages/javascript/lumis/scripts/list-unverified-parsers.mjs"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
       - "mise.toml"
       - ".github/workflows/queries.yml"
   pull_request:
@@ -25,17 +30,25 @@ on:
       - "languages.toml"
       - "crates/lumis-build/**"
       - "crates/dev/**"
+      - "packages/javascript/package.json"
+      - "packages/javascript/lumis/package.json"
+      - "packages/javascript/wasm-bundle-full/package.json"
       - "packages/javascript/lumis/test/query-compile.test.ts"
       - "packages/javascript/lumis/test/query-patterns.test.ts"
       - "packages/javascript/lumis/test/unverified-parsers.json"
       - "fixtures/parsers/**"
       - "packages/javascript/lumis/scripts/list-unverified-parsers.mjs"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
       - "mise.toml"
       - ".github/workflows/queries.yml"
   workflow_dispatch:
 
 env:
   QUERY_SHARDS: 12
+  # Selected languages per process. The global cannotCompile check also loads
+  # PHP, so a full batch retains at most five grammars before the process exits.
+  QUERY_BATCH: 4
 
 jobs:
   portability:
@@ -113,7 +126,6 @@ jobs:
           actions-cache-folder: emsdk-cache
 
       - name: Select this shard
-        id: shard
         run: |
           set -euo pipefail
           cd packages/javascript/lumis
@@ -125,7 +137,8 @@ jobs:
           awk -v s="$SHARD" -v n="$SHARDS" 'NR % n == s % n' /tmp/parsers.txt > /tmp/shard-parsers.txt
           awk 'NR == FNR { keep[$0]; next } ($2 in keep) { print $1 }' \
             /tmp/shard-parsers.txt /tmp/pairs.txt > /tmp/shard-languages.txt
-          echo "languages=$(paste -sd, /tmp/shard-languages.txt)" >> "$GITHUB_OUTPUT"
+          [ -s /tmp/shard-parsers.txt ] || { echo "shard selected no parsers" >&2; exit 1; }
+          [ -s /tmp/shard-languages.txt ] || { echo "shard selected no languages" >&2; exit 1; }
           echo "parser count: $(wc -l < /tmp/shard-parsers.txt)"
           echo "language count: $(wc -l < /tmp/shard-languages.txt)"
         env:
@@ -153,11 +166,33 @@ jobs:
             printf 'could not build: %s\n' "${failed[*]}"
           fi
 
+      # Every grammar a run loads stays compiled for the life of the process, so
+      # what has to be bounded is grammars per process, not per shard. Sharding
+      # balances parser *count*, and shard 5 has repeatedly exhausted V8's zone
+      # allocator because its ten grammars are unusually large. Run the shard in
+      # batches of four selected languages. The global waiver check can load PHP
+      # too, so each process retains at most five grammars, whatever they weigh.
       - name: Compile queries for this shard
-        run: pnpm --filter @lumis-sh/lumis run test:queries
+        run: |
+          set -euo pipefail
+          batch=()
+          run_batch() {
+            [ ${#batch[@]} -gt 0 ] || return 0
+            printf 'compiling: %s\n' "${batch[*]}"
+            LUMIS_QUERY_LANGUAGES="$(IFS=,; echo "${batch[*]}")" \
+              pnpm --filter @lumis-sh/lumis run test:queries
+            batch=()
+          }
+          while read -r language; do
+            [ -n "$language" ] || continue
+            batch+=("$language")
+            [ ${#batch[@]} -lt "$QUERY_BATCH" ] || run_batch
+          done < /tmp/shard-languages.txt
+          run_batch
         env:
-          LUMIS_QUERY_LANGUAGES: ${{ steps.shard.outputs.languages }}
           LUMIS_QUERY_COVERAGE: complete
+          LUMIS_QUERY_BATCH_LIMIT: ${{ env.QUERY_BATCH }}
+          QUERY_BATCH: ${{ env.QUERY_BATCH }}
 
   # Sharded for the same reason the build is: every grammar a run loads stays
   # compiled in V8 for the life of the process, and a few dozen of them exhaust
@@ -186,7 +221,6 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - name: Select this shard
-        id: shard
         run: |
           set -euo pipefail
           cd packages/javascript/lumis
@@ -195,12 +229,29 @@ jobs:
           awk -v s="$SHARD" -v n=4 'NR % n == s % n' /tmp/parsers.txt > /tmp/shard-parsers.txt
           awk 'NR == FNR { keep[$0]; next } ($2 in keep) { print $1 }' \
             /tmp/shard-parsers.txt /tmp/pairs.txt > /tmp/shard-languages.txt
-          echo "languages=$(paste -sd, /tmp/shard-languages.txt)" >> "$GITHUB_OUTPUT"
+          [ -s /tmp/shard-parsers.txt ] || { echo "shard selected no parsers" >&2; exit 1; }
+          [ -s /tmp/shard-languages.txt ] || { echo "shard selected no languages" >&2; exit 1; }
         env:
           SHARD: ${{ matrix.shard }}
 
       - name: Compile queries and check the waiver
-        run: pnpm --filter @lumis-sh/lumis run test:queries
+        run: |
+          set -euo pipefail
+          batch=()
+          run_batch() {
+            [ ${#batch[@]} -gt 0 ] || return 0
+            printf 'compiling published: %s\n' "${batch[*]}"
+            LUMIS_QUERY_LANGUAGES="$(IFS=,; echo "${batch[*]}")" \
+              pnpm --filter @lumis-sh/lumis run test:queries
+            batch=()
+          }
+          while read -r language; do
+            [ -n "$language" ] || continue
+            batch+=("$language")
+            [ ${#batch[@]} -lt "$QUERY_BATCH" ] || run_batch
+          done < /tmp/shard-languages.txt
+          run_batch
         env:
           LUMIS_QUERY_PARSERS: published
-          LUMIS_QUERY_LANGUAGES: ${{ steps.shard.outputs.languages }}
+          LUMIS_QUERY_BATCH_LIMIT: ${{ env.QUERY_BATCH }}
+          QUERY_BATCH: ${{ env.QUERY_BATCH }}

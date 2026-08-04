@@ -38,7 +38,12 @@ import { sanitizeThemeName } from "../src/themes.js";
 import { hexToRgb, paint, rgbToAnsi, styleToAnsi, wrapWithAnsi } from "../src/formatter/ansi.js";
 import type { Language } from "../src/types.js";
 
-const jsonLang: Language = { id: "json", aliases: [], highlights: "", wasm: "json.wasm" };
+const jsonLang: Language = {
+  id: "json",
+  aliases: [],
+  highlights: "",
+  wasm: "json.wasm",
+};
 
 const theme = {
   name: "test",
@@ -120,7 +125,7 @@ describe("formatter shared helpers", () => {
     expect(openPreTag({ preClass: "custom", theme })).toBe(
       '<pre class="lumis custom" style="color: #ffffff; background-color: #000000;">',
     );
-    expect(openCodeTag({ id: "json", aliases: [], highlights: "" })).toBe(
+    expect(openCodeTag({ id: "json", aliases: [] })).toBe(
       '<code class="language-json" translate="no" tabindex="0">',
     );
   });

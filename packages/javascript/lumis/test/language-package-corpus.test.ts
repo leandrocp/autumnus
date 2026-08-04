@@ -13,12 +13,9 @@ import { parseLanguagePackage } from "../src/core/languages.js";
 
 const CORPUS = fileURLToPath(new URL("../../../../fixtures/language-packages", import.meta.url));
 
-/** Every fixture declares this name; the corpus covers document validity only. */
-const PACKAGE_NAME = "@lumis-sh/wasm-json";
-
 /** Lower bounds, matching the Rust half. They catch a discovery bug that finds nothing. */
-const MIN_VALID = 5;
-const MIN_INVALID = 17;
+const MIN_VALID = 9;
+const MIN_INVALID = 34;
 
 function fixtures(kind: "valid" | "invalid"): [string, Uint8Array][] {
   return readdirSync(join(CORPUS, kind))
@@ -40,11 +37,11 @@ describe("shared language-package corpus", () => {
   });
 
   it.each(valid)("accepts valid/%s", (_name, bytes) => {
-    expect(() => parseLanguagePackage(bytes, PACKAGE_NAME)).not.toThrow();
+    expect(() => parseLanguagePackage(bytes, declaredPackageName(bytes))).not.toThrow();
   });
 
   it.each(invalid)("rejects invalid/%s", (_name, bytes) => {
-    expect(() => parseLanguagePackage(bytes, PACKAGE_NAME)).toThrow();
+    expect(() => parseLanguagePackage(bytes, declaredPackageName(bytes))).toThrow();
   });
 
   // Rust used to accept both of these while JavaScript rejected them. Pinned by name
@@ -53,7 +50,63 @@ describe("shared language-package corpus", () => {
     "rejects the formerly divergent %s",
     (name) => {
       const bytes = new Uint8Array(readFileSync(join(CORPUS, "invalid", `${name}.json`)));
-      expect(() => parseLanguagePackage(bytes, PACKAGE_NAME)).toThrow();
+      expect(() => parseLanguagePackage(bytes, declaredPackageName(bytes))).toThrow();
     },
   );
+
+  it("rejects malformed UTF-8 instead of replacing it", () => {
+    const bytes = new Uint8Array(readFileSync(join(CORPUS, "valid", "minimal.json")));
+    const index = Buffer.from(bytes).indexOf("d41d8cd98f00");
+    expect(index).toBeGreaterThan(0);
+    bytes[index] = 0xff;
+
+    expect(() => parseLanguagePackage(bytes, "@lumis-sh/wasm-json")).toThrow();
+  });
+
+  it("rejects a UTF-8 BOM like Rust's JSON parser", () => {
+    const json = new Uint8Array(readFileSync(join(CORPUS, "valid", "minimal.json")));
+    const bytes = new Uint8Array(json.byteLength + 3);
+    bytes.set([0xef, 0xbb, 0xbf]);
+    bytes.set(json, 3);
+
+    expect(() => parseLanguagePackage(bytes, "@lumis-sh/wasm-json")).toThrow();
+  });
+
+  it.each([
+    "language-id-case-collision",
+    "language-alias-collision",
+    "language-alias-id-collision",
+  ])("rejects ambiguous ASCII case-insensitive names in %s", (name) => {
+    const bytes = new Uint8Array(readFileSync(join(CORPUS, "invalid", `${name}.json`)));
+    expect(() => parseLanguagePackage(bytes, declaredPackageName(bytes))).toThrow();
+  });
+
+  it.each(["unpaired-surrogate", "unpaired-surrogate-unknown-field"])(
+    "rejects unpaired surrogates anywhere in %s",
+    (name) => {
+      const bytes = new Uint8Array(readFileSync(join(CORPUS, "invalid", `${name}.json`)));
+      expect(() => parseLanguagePackage(bytes, declaredPackageName(bytes))).toThrow();
+    },
+  );
+
+  it.each(["duplicate-members-last-wins", "maximum-nesting-depth"])(
+    "accepts the raw-profile boundary %s",
+    (name) => {
+      const bytes = new Uint8Array(readFileSync(join(CORPUS, "valid", `${name}.json`)));
+      expect(() => parseLanguagePackage(bytes, declaredPackageName(bytes))).not.toThrow();
+    },
+  );
+
+  it.each([
+    "duplicate-member-overwritten-surrogate",
+    "nesting-depth-exceeded",
+    "unknown-number-out-of-range",
+  ])("rejects the raw-profile violation %s", (name) => {
+    const bytes = new Uint8Array(readFileSync(join(CORPUS, "invalid", `${name}.json`)));
+    expect(() => parseLanguagePackage(bytes, declaredPackageName(bytes))).toThrow();
+  });
 });
+
+function declaredPackageName(bytes: Uint8Array): string {
+  return (JSON.parse(new TextDecoder().decode(bytes)) as { packageName: string }).packageName;
+}

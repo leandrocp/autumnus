@@ -33,7 +33,9 @@ describe("resolveLanguageId", () => {
     });
     for (const alias of json.aliases) {
       expect(resolveLanguageId(alias)).toBe("json");
+      expect(resolveLanguageId(alias.toUpperCase())).toBe("json");
     }
+    expect(resolveLanguageId("JSON")).toBe("json");
   });
 });
 
@@ -66,7 +68,9 @@ describe("getLoadedLanguage", () => {
     const byId = getLoadedLanguage("json");
     for (const alias of json.aliases) {
       expect(getLoadedLanguage(alias)).toBe(byId);
+      expect(getLoadedLanguage(alias.toUpperCase())).toBe(byId);
     }
+    expect(getLoadedLanguage("JSON")).toBe(byId);
   });
 });
 

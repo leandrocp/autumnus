@@ -153,6 +153,46 @@ throws away the first pass, and a separate discovery pass has to re-run the
 injections query per nesting level, which measured at 32% of a full pass and
 still cannot see past the layers it has already loaded.
 
+Configured JavaScript language-package and WASM resolvers are part of that Node
+path too. A language first named by an injection is resolved and loaded before
+the walk descends into it. The native walk can synchronously read local paths
+and `file:`, `data:`, `http:`, and `https:` URLs returned by those resolvers.
+JavaScript-owned resources such as `blob:` URLs have to be resolved by
+`loadLanguage` before the walk because Rust cannot access JavaScript's blob
+registry.
+
+Ordinary Node highlighters share one `Runtime`, so loading Markdown forty times
+does not create forty Tree-sitter Wasm stores. A highlighter is promoted to its
+own runtime only when it accepts caller-selected parser bytes, a different
+package, or resolver callbacks. Definitions use a content-derived internal id,
+and catalog roots or canonical installed packages loaded before promotion are
+replayed into the private runtime. The Wasmtime engine and persistent caches
+remain shared.
+
+That private store is the lifetime boundary. Tree-sitter exposes no operation
+that reclaims one language from a Wasm store, and loading another module advances
+the store's memory allocation monotonically. Removing an id from Lumis's catalog
+therefore does not free its parser. Dropping the whole private runtime does, so
+caller-resolved definitions are isolated between highlighters and reclaimed when
+their highlighter and any in-flight formatting task are gone.
+
+Queries are not part of that surface. A parser and the queries written against it
+are released together in one package, so a caller names a package and, at most,
+where its parser bytes come from. Supplying queries directly is a planned
+cross-runtime capability; it existed in JavaScript alone and was removed rather
+than shipped half-designed.
+
+Parser modules are retained before query compilation. Rust keys both successful
+and failed store loads by the declared grammar and the SHA-256 of the actual
+bytes; `web-tree-sitter` retains the corresponding `Language.load` promise by
+byte digest within its JavaScript realm. An invalid query can therefore be
+corrected without loading the parser again, while repeating the same parser-load
+failure cannot grow Tree-sitter's store. Fetch, resolver and integrity failures
+happen before this cache and remain retryable. Package-backed loads also inspect
+the module's single `tree_sitter_*` function export and require it to match
+`parser.grammarName`, so native and browser runtimes interpret the same package
+metadata identically.
+
 **A failure costs one block.** A thousand-line document with ten languages must
 not fail because one fenced block names something unpublished. An injected
 language that cannot be fetched leaves its content plain and the walk carries

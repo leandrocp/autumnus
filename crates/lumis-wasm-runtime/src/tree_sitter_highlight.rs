@@ -161,7 +161,7 @@ pub struct HighlightConfiguration {
     local_def_value_capture_index: Option<u32>,
     local_ref_capture_index: Option<u32>,
     /// `(#offset! @capture start_row start_col end_row end_col)` per pattern and capture.
-    offsets: HashMap<(usize, u32), [i32; 4]>,
+    offsets: HashMap<(usize, u32), [i64; 4]>,
 }
 
 /// An `@injection.content` capture together with its `#offset!`-adjusted range.
@@ -173,18 +173,18 @@ struct InjectionContent<'a> {
 
 /// Applies Neovim's `#offset!` directive to a node's range.
 ///
-/// Mirrors `apply_range_offset` in Neovim's `runtime/lua/vim/treesitter.lua`: the four
-/// deltas are added to `(start_row, start_col, end_row, end_col)`, and a shift that
-/// inverts the range is discarded rather than reported. Tree-sitter columns are byte
-/// offsets within a row, so a same-row shift is a plain byte shift; a row shift has to
-/// walk to the target line.
-fn apply_range_offset(node: Node, offset: [i32; 4], source: &[u8]) -> Range {
+/// The four deltas are added to `(start_row, start_col, end_row, end_col)` as in
+/// Neovim. Lumis keeps the original range when the adjusted endpoints cannot be
+/// represented safely. Tree-sitter columns are byte offsets within a row, so a
+/// same-row shift is a plain byte shift; a row shift has to walk to the target line.
+fn apply_range_offset(node: Node, offset: [i64; 4], source: &[u8]) -> Range {
     offset_range(node.range(), offset, source)
 }
 
 /// The range arithmetic of [`apply_range_offset`], on a range rather than a node,
-/// so `fixtures/offset-directive.json` can pin it against Neovim and the browser.
-fn offset_range(original: Range, offset: [i32; 4], source: &[u8]) -> Range {
+/// so `fixtures/offset-directive.json` can pin Neovim-compatible results and
+/// Lumis's invalid-range safety policy across both runtimes.
+fn offset_range(original: Range, offset: [i64; 4], source: &[u8]) -> Range {
     let start = shift_point(
         source,
         original.start_byte,
@@ -202,7 +202,9 @@ fn offset_range(original: Range, offset: [i32; 4], source: &[u8]) -> Range {
 
     match (start, end) {
         (Some((start_byte, start_point)), Some((end_byte, end_point)))
-            if start_byte <= end_byte =>
+            if start_byte <= end_byte
+                && is_utf8_boundary(source, start_byte)
+                && is_utf8_boundary(source, end_byte) =>
         {
             Range {
                 start_byte,
@@ -211,9 +213,16 @@ fn offset_range(original: Range, offset: [i32; 4], source: &[u8]) -> Range {
                 end_point,
             }
         }
-        // Neovim silently keeps the original range when the offset would invert it.
+        // Event byte ranges must be ordered UTF-8 slice boundaries.
         _ => original,
     }
+}
+
+fn is_utf8_boundary(source: &[u8], byte: usize) -> bool {
+    byte == source.len()
+        || source
+            .get(byte)
+            .is_some_and(|value| value & 0b1100_0000 != 0b1000_0000)
 }
 
 /// Shifts one endpoint by `row_delta` rows and `column_delta` byte columns.
@@ -221,40 +230,252 @@ fn shift_point(
     source: &[u8],
     byte: usize,
     point: Point,
-    row_delta: i32,
-    column_delta: i32,
+    row_delta: i64,
+    column_delta: i64,
 ) -> Option<(usize, Point)> {
-    if row_delta == 0 {
-        // Same row: a byte column delta is a byte delta.
-        let column = point.column.checked_add_signed(column_delta as isize)?;
-        let byte = byte.checked_add_signed(column_delta as isize)?;
-        if byte > source.len() {
-            return None;
-        }
-        return Some((byte, Point::new(point.row, column)));
-    }
+    let row = add_offset_delta(point.row, row_delta)?;
+    let column = add_offset_delta(point.column, column_delta)?;
 
-    // Neovim adds the column delta to the endpoint's own column whatever the row
-    // delta is, so the column survives the row shift rather than being replaced.
-    let row = point.row.checked_add_signed(row_delta as isize)?;
-    let line_start = line_start_byte(source, byte, point, row)?;
-    let column = point.column.checked_add_signed(column_delta as isize)?;
+    let line_start = if row_delta == 0 {
+        byte.checked_sub(point.column)?
+    } else {
+        // Neovim adds the column delta to the endpoint's own column whatever the
+        // row delta is, so the column survives the row shift.
+        line_start_byte(source, byte, point, row)?
+    };
+    let line_length = source
+        .get(line_start..)?
+        .iter()
+        .position(|byte| *byte == b'\n')
+        .unwrap_or(source.len() - line_start);
+    if column > line_length {
+        return None;
+    }
     let byte = line_start.checked_add(column)?;
-    (byte <= source.len()).then_some((byte, Point::new(row, column)))
+    Some((byte, Point::new(row, column)))
+}
+
+fn add_offset_delta(value: usize, delta: i64) -> Option<usize> {
+    let value = i128::try_from(value).ok()?;
+    usize::try_from(value + i128::from(delta)).ok()
 }
 
 /// The four numeric operands of `#offset!`.
 ///
 /// Neovim reads exactly `pred[3]` through `pred[6]` and never looks further, so
 /// an omitted operand is zero and anything after the fourth is untouched —
-/// including a non-numeric one. Only a value in one of the four slots that is
-/// not a number makes the directive unusable.
-fn parse_offset_operands(deltas: &[&str]) -> Option<[i32; 4]> {
-    let mut offset = [0i32; 4];
+/// including a non-numeric one. Operands use LuaJIT's numeric-string coercion;
+/// values that cannot form an integral Tree-sitter point make the directive
+/// unusable instead of reaching range arithmetic.
+fn parse_offset_operands(deltas: &[&str]) -> Option<[i64; 4]> {
+    let mut offset = [0i64; 4];
     for (slot, value) in offset.iter_mut().zip(deltas) {
-        *slot = value.parse().ok()?;
+        *slot = parse_offset_delta(value)?;
     }
     Some(offset)
+}
+
+fn parse_query_offset_operands(deltas: &[QueryPredicateArg]) -> Option<[i64; 4]> {
+    let mut offset = [0i64; 4];
+    for (slot, value) in offset.iter_mut().zip(deltas) {
+        *slot = match value {
+            QueryPredicateArg::String(value) => parse_offset_delta(value)?,
+            QueryPredicateArg::Capture(capture) => i64::from(*capture) + 1,
+        };
+    }
+    Some(offset)
+}
+
+const MAX_EXACT_OFFSET: f64 = 9_007_199_254_740_991.0;
+const MAX_LUA_EXPONENT: &str = "1048575";
+
+fn parse_offset_delta(value: &str) -> Option<i64> {
+    let value = value.trim_ascii();
+    if value.is_empty() {
+        return None;
+    }
+
+    let unsigned = value.strip_prefix(['+', '-']).unwrap_or(value);
+    let parsed = if unsigned.starts_with("0b") || unsigned.starts_with("0B") {
+        parse_binary_integer(value)?
+    } else if unsigned.starts_with("0x") || unsigned.starts_with("0X") {
+        parse_hex_float(value)?
+    } else {
+        if !is_decimal_float(value) {
+            return None;
+        }
+        value.parse::<f64>().ok()?
+    };
+
+    (parsed.is_finite()
+        && parsed.fract() == 0.0
+        && (-MAX_EXACT_OFFSET..=MAX_EXACT_OFFSET).contains(&parsed))
+    .then_some(parsed as i64)
+}
+
+fn parse_binary_integer(value: &str) -> Option<f64> {
+    let (sign, value) = if let Some(value) = value.strip_prefix('-') {
+        (-1.0, value)
+    } else {
+        (1.0, value.strip_prefix('+').unwrap_or(value))
+    };
+    let value = value
+        .strip_prefix("0b")
+        .or_else(|| value.strip_prefix("0B"))?;
+    if value.is_empty() {
+        return None;
+    }
+
+    let mut result = 0.0;
+    for byte in value.bytes() {
+        result = result * 2.0
+            + match byte {
+                b'0' => 0.0,
+                b'1' => 1.0,
+                _ => return None,
+            };
+    }
+    Some(sign * result)
+}
+
+fn is_decimal_float(value: &str) -> bool {
+    let value = value.strip_prefix(['+', '-']).unwrap_or(value);
+    let (mantissa, exponent) = value.find(['e', 'E']).map_or((value, None), |index| {
+        (&value[..index], Some(&value[index + 1..]))
+    });
+
+    if exponent.is_some_and(|exponent| !is_lua_exponent(exponent)) || mantissa.contains(['e', 'E'])
+    {
+        return false;
+    }
+
+    let mut parts = mantissa.split('.');
+    let before = parts.next().unwrap_or_default();
+    let after = parts.next();
+    if parts.next().is_some() {
+        return false;
+    }
+
+    let before_is_digits = before.bytes().all(|byte| byte.is_ascii_digit());
+    let after_is_digits = after.is_none_or(|part| part.bytes().all(|byte| byte.is_ascii_digit()));
+    before_is_digits
+        && after_is_digits
+        && (!before.is_empty() || after.is_some_and(|part| !part.is_empty()))
+}
+
+fn is_signed_decimal(value: &str) -> bool {
+    let value = value.strip_prefix(['+', '-']).unwrap_or(value);
+    !value.is_empty() && value.bytes().all(|byte| byte.is_ascii_digit())
+}
+
+fn is_lua_exponent(value: &str) -> bool {
+    if !is_signed_decimal(value) {
+        return false;
+    }
+    let value = value
+        .strip_prefix(['+', '-'])
+        .unwrap_or(value)
+        .trim_start_matches('0');
+    value.len() < MAX_LUA_EXPONENT.len()
+        || (value.len() == MAX_LUA_EXPONENT.len() && value <= MAX_LUA_EXPONENT)
+}
+
+fn parse_hex_float(value: &str) -> Option<f64> {
+    let (negative, value) = if let Some(value) = value.strip_prefix('-') {
+        (true, value)
+    } else {
+        (false, value.strip_prefix('+').unwrap_or(value))
+    };
+    let value = value
+        .strip_prefix("0x")
+        .or_else(|| value.strip_prefix("0X"))?;
+    let (mantissa, exponent) = value.find(['p', 'P']).map_or((value, None), |index| {
+        (&value[..index], Some(&value[index + 1..]))
+    });
+    if mantissa.contains(['p', 'P']) || exponent.is_some_and(|value| !is_lua_exponent(value)) {
+        return None;
+    }
+
+    let mut significand = 0u128;
+    let mut binary_exponent =
+        i64::from(exponent.map_or(Some(0), |value| value.parse::<i32>().ok())?);
+    let mut seen_point = false;
+    let mut inexact = false;
+    let mut digits = 0;
+    for byte in mantissa.bytes() {
+        if byte == b'.' {
+            if seen_point {
+                return None;
+            }
+            seen_point = true;
+            continue;
+        }
+
+        let digit = char::from(byte).to_digit(16)? as u128;
+        digits += 1;
+        if significand >> 124 == 0 {
+            significand = (significand << 4) | digit;
+        } else {
+            binary_exponent += 4;
+            inexact |= digit != 0;
+        }
+        if seen_point {
+            binary_exponent -= 4;
+        }
+    }
+    if digits == 0 {
+        return None;
+    }
+
+    if significand == 0 {
+        return Some(if negative { -0.0 } else { 0.0 });
+    }
+    significand |= u128::from(inexact);
+
+    let mut bits = rounded_hex_f64_bits(significand, binary_exponent);
+    if negative {
+        bits |= 1 << 63;
+    }
+    Some(f64::from_bits(bits))
+}
+
+fn rounded_hex_f64_bits(mut significand: u128, mut exponent: i64) -> u64 {
+    const SIGNIFICAND_BITS: i64 = 52;
+    const MIN_SUBNORMAL_EXPONENT: i64 = -1074;
+    const INFINITY_BITS: u128 = 0x7ff << SIGNIFICAND_BITS;
+
+    let mut round_bits = i64::from(significand.ilog2()) - SIGNIFICAND_BITS;
+    if exponent < MIN_SUBNORMAL_EXPONENT - round_bits {
+        round_bits = MIN_SUBNORMAL_EXPONENT - exponent;
+    }
+    exponent += round_bits;
+
+    if round_bits > 0 {
+        if round_bits == 1 {
+            significand <<= 1;
+        } else if round_bits > 2 {
+            significand = if round_bits - 2 < 128 {
+                let shift = u32::try_from(round_bits - 2).expect("bounded significand shift");
+                (significand >> shift) | u128::from(significand.trailing_zeros() < shift)
+            } else {
+                1
+            };
+        }
+
+        let trailing = (significand & 0b111) as u32;
+        significand >>= 2;
+        significand += u128::from((0b1100_1000_u8 >> trailing) & 1);
+    } else if round_bits < 0 {
+        significand <<= u32::try_from(-round_bits).expect("bounded significand shift");
+    }
+
+    let encoded_exponent = u128::try_from(exponent - MIN_SUBNORMAL_EXPONENT)
+        .expect("rounded exponent is representable")
+        << SIGNIFICAND_BITS;
+    significand
+        .checked_add(encoded_exponent)
+        .filter(|bits| *bits < INFINITY_BITS)
+        .unwrap_or(INFINITY_BITS) as u64
 }
 
 /// Byte offset of the first character of `target_row`, walking from a known anchor.
@@ -614,18 +835,7 @@ impl HighlightConfiguration {
                 let [QueryPredicateArg::Capture(capture), deltas @ ..] = &*predicate.args else {
                     continue;
                 };
-                let Some(deltas) = deltas
-                    .iter()
-                    .take(4)
-                    .map(|arg| match arg {
-                        QueryPredicateArg::String(value) => Some(value.as_ref()),
-                        QueryPredicateArg::Capture(_) => None,
-                    })
-                    .collect::<Option<Vec<&str>>>()
-                else {
-                    continue;
-                };
-                if let Some(offset) = parse_offset_operands(&deltas) {
+                if let Some(offset) = parse_query_offset_operands(deltas) {
                     offsets.insert((pattern_index, *capture), offset);
                 }
             }
@@ -1600,9 +1810,8 @@ mod tests {
         }
     }
 
-    /// Every case in `fixtures/offset-directive.json` was produced by running the
-    /// query through Neovim, so this fails whenever Rust stops agreeing with the
-    /// implementation the queries were written against.
+    /// Representable cases in `fixtures/offset-directive.json` came from Neovim;
+    /// invalid-range cases pin Lumis's documented safety fallback.
     /// `packages/javascript/lumis/test/offset-directive.test.ts` reads the same file.
     #[test]
     fn offset_arithmetic_matches_neovim() {
@@ -1635,7 +1844,7 @@ mod tests {
         let raw = include_str!("../../../fixtures/offset-directive.json");
         let fixture: Fixture = serde_json::from_str(raw).expect("offset fixture is valid JSON");
         assert!(
-            fixture.cases.len() >= 10,
+            fixture.cases.len() >= 15,
             "the fixture must not silently shrink: {} cases",
             fixture.cases.len()
         );
@@ -1692,9 +1901,10 @@ mod tests {
         }
     }
 
-    // `#offset!` arithmetic, pinned against Neovim's `apply_range_offset`. The
-    // conformance fixtures cover the common same-row case end to end; these cover the
-    // row-shifting and degenerate cases they do not reach.
+    // `#offset!` arithmetic, pinned to Neovim where the result is representable
+    // and to Lumis's shared safety policy otherwise. The conformance fixtures
+    // cover the common same-row case end to end; these cover row shifts and
+    // degenerate cases they do not reach.
 
     #[test]
     fn same_row_offset_is_a_byte_shift() {
@@ -1774,10 +1984,63 @@ mod tests {
             assert_eq!(compile(query), Some([0, 1, 0, -1]), "{query}");
         }
 
-        // A value in one of the four slots still has to be a number. Neovim
-        // raises a Lua error here rather than defining a result.
+        // A literal in one of the four slots still has to be numeric. Capture
+        // operands arrive at Neovim's Lua directive as one-based capture IDs.
         assert_eq!(compile("((string) @cap (#offset! @cap 0 nope 0 -1))"), None);
-        assert_eq!(compile("((string) @cap (#offset! @cap 0 @cap 0 -1))"), None);
+        assert_eq!(
+            compile("((string) @cap (#offset! @cap 0 @cap 0 -1))"),
+            Some([0, 1, 0, -1])
+        );
+        assert_eq!(
+            compile(
+                "((array (string) @first (string) @second) @cap \
+                 (#offset! @cap 0 @second 0 -1))"
+            ),
+            Some([0, 2, 0, -1])
+        );
+    }
+
+    /// LuaJIT's numeric-string coercion is broader than signed decimal, but a
+    /// fractional or non-finite result cannot form a Tree-sitter point. The
+    /// browser reads the same cases from the fixture.
+    #[test]
+    fn offset_operand_coercion_matches_neovim() {
+        #[derive(serde::Deserialize)]
+        struct OperandCoercion {
+            name: String,
+            operand: String,
+            expected: Option<i64>,
+        }
+
+        #[derive(serde::Deserialize)]
+        #[serde(rename_all = "camelCase")]
+        struct Fixture {
+            operand_coercions: Vec<OperandCoercion>,
+        }
+
+        let raw = include_str!("../../../fixtures/offset-directive.json");
+        let fixture: Fixture = serde_json::from_str(raw).expect("offset fixture is valid JSON");
+        assert!(
+            fixture.operand_coercions.len() >= 24,
+            "the operand fixture must not silently shrink"
+        );
+        let language = tree_sitter::Language::new(tree_sitter_json::LANGUAGE);
+
+        for case in fixture.operand_coercions {
+            let parsed =
+                parse_offset_operands(&["0", &case.operand, "0", "-1"]).map(|offset| offset[1]);
+            assert_eq!(parsed, case.expected, "{} parser", case.name);
+
+            let operand = serde_json::to_string(&case.operand).unwrap();
+            let query = format!("((string) @cap (#offset! @cap 0 {operand} 0 -1))");
+            let compiled = HighlightConfiguration::new(language.clone(), "json", &query, "", "")
+                .unwrap()
+                .offsets
+                .values()
+                .next()
+                .map(|offset| offset[1]);
+            assert_eq!(compiled, case.expected, "{} compiled query", case.name);
+        }
     }
 
     /// Neovim defaults an omitted numeric operand to zero (`pred[3] or 0`).
@@ -1800,7 +2063,7 @@ mod tests {
 
     #[test]
     fn multibyte_rows_are_walked_by_byte_not_character() {
-        // "é" is two bytes, so row 1 starts at byte 4, not byte 3.
+        // "é" is two bytes, so row 1 starts at byte 3, not code-unit offset 2.
         let source = "é\nx\n".as_bytes();
         assert_eq!(
             shift_point(source, 0, Point::new(0, 0), 1, 0).unwrap(),
@@ -1814,7 +2077,35 @@ mod tests {
         let source = b"ab";
         assert_eq!(shift_point(source, 0, Point::new(0, 0), 0, -1), None);
         assert_eq!(shift_point(source, 2, Point::new(0, 2), 0, 5), None);
+        assert_eq!(
+            shift_point(source, 0, Point::new(0, 0), 0, 99_999_999_999),
+            None
+        );
         // No such row to walk to.
         assert_eq!(shift_point(source, 0, Point::new(0, 0), 3, 0), None);
+
+        let original = Range {
+            start_byte: 0,
+            start_point: Point::new(0, 0),
+            end_byte: 2,
+            end_point: Point::new(0, 2),
+        };
+        assert_eq!(
+            offset_range(original, [0, 99_999_999_999, 0, 0], source),
+            original
+        );
+        assert_eq!(
+            offset_range(original, [0, 0, 0, 99_999_999_999], source),
+            original
+        );
+
+        let source = b"a\nb";
+        let original = Range {
+            start_byte: 0,
+            start_point: Point::new(0, 0),
+            end_byte: 1,
+            end_point: Point::new(0, 1),
+        };
+        assert_eq!(offset_range(original, [0, 0, 0, 1], source), original);
     }
 }

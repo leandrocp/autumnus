@@ -8,12 +8,13 @@ keywords:
   - parser wasm
   - jsdelivr
   - withWasm
+  - configureLanguagePackageResolver
   - configureWasmResolver
   - cdn
 ---
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
 
 # WASM and CDN
 
@@ -31,7 +32,7 @@ highlights that block, and an HTML page highlights its `<style>` and `<script>`
 contents, without any of them being mentioned in your code.
 
 It happens in one pass. Lumis loads an injected language during the walk that
-found it, so the walk then descends into that language and finds whatever *it*
+found it, so the walk then descends into that language and finds whatever _it_
 injects, however deep the nesting goes. The document is never parsed twice.
 
 A language that cannot be fetched costs its own block, not the document. A
@@ -41,23 +42,25 @@ names something unpublished; that block stays plain.
 Browsers are the one exception, because loading is asynchronous there and cannot
 happen inside a synchronous walk. In a browser, load an injected language before
 highlighting the document that mentions it, or use a bundle. Node does not have
-this limit: it highlights through a native addon.
+this limit: it highlights through a native addon, including when configured
+`configureLanguagePackageResolver()` and `configureWasmResolver()` callbacks
+supply the injected language.
 
 ### Loading ahead of time
 
 Loading a parser takes 3-15 ms the first time and about 0.3 ms after.
-*Downloading* one is the expensive part, so load ahead of time when you would
+_Downloading_ one is the expensive part, so load ahead of time when you would
 rather not have a first request pay for it:
 
 <Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
   <TabItem value="javascript" label="JavaScript">
 
 ```js
-import {createHighlighter} from '@lumis-sh/lumis'
-import rust from '@lumis-sh/lumis/langs/rust'
+import { createHighlighter } from "@lumis-sh/lumis";
+import rust from "@lumis-sh/lumis/langs/rust";
 
-const hl = await createHighlighter({languages: [rust]})
-await hl.loadLanguage(rust)
+const hl = await createHighlighter({ languages: [rust] });
+await hl.loadLanguage(rust);
 ```
 
   </TabItem>
@@ -117,6 +120,35 @@ them — so pointing `LUMIS_DATA_DIR` at it is all the deployment needs. Pass
 - dynamic languages are separate npm packages such as `@lumis-sh/wasm-rust`
 - each package contains its parser WASM, matching queries, aliases, and integrity metadata
 - runtime packages keep only a stable language-to-package catalog
+
+## Where a language comes from
+
+A language import is a package handle: `packageName` selects its `language.json`,
+and that package supplies the parser metadata and the queries as one unit.
+
+Queries are not something a caller supplies. A parser and the queries written
+against it are released together and tested together, so pairing a parser with
+queries it was never released with is not expressible:
+
+```ts title="A language is a package handle"
+import { createHighlighter, withWasm } from "@lumis-sh/lumis";
+import json from "@lumis-sh/lumis/langs/json";
+import jsonParser from "@lumis-sh/wasm-json";
+
+// Where the parser bytes come from is yours to choose.
+const hl = await createHighlighter({ languages: [withWasm(json, jsonParser)] });
+```
+
+`withWasm()` changes only where the bytes come from. Lumis still checks their
+size and SHA-256 against the package before loading them, so a parser that does
+not match the package it claims to be is rejected.
+
+:::note
+Supplying your own parser and queries for a grammar Lumis does not publish is a
+planned feature, not a supported one. It previously existed in JavaScript only
+and was removed rather than shipped half-designed; it will return as a
+cross-runtime capability with a package-shaped input.
+:::
 
 ## Default JavaScript behavior
 
@@ -178,20 +210,20 @@ For multiple languages, install a bundle package such as `@lumis-sh/wasm-bundle-
   <TabItem value="node" label="Node">
 
 ```js title="Installed package autoload"
-import {createHighlighter} from '@lumis-sh/lumis'
-import {htmlInline} from '@lumis-sh/lumis/formatters'
-import elixir from '@lumis-sh/lumis/langs/elixir'
-import githubLight from '@lumis-sh/themes/github_light'
-import '@lumis-sh/wasm-elixir'
+import { createHighlighter } from "@lumis-sh/lumis";
+import { htmlInline } from "@lumis-sh/lumis/formatters";
+import elixir from "@lumis-sh/lumis/langs/elixir";
+import githubLight from "@lumis-sh/themes/github_light";
+import "@lumis-sh/wasm-elixir";
 
 const hl = await createHighlighter({
   languages: [elixir],
-})
+});
 
 const html = hl.highlight(
-  'defmodule Demo do\nend',
-  htmlInline({language: elixir, theme: githubLight})
-)
+  "defmodule Demo do\nend",
+  htmlInline({ language: elixir, theme: githubLight }),
+);
 ```
 
 This is the optimized Node DX. Once `@lumis-sh/wasm-elixir` is installed, Lumis can load it automatically.
@@ -202,22 +234,22 @@ See [`packages/javascript/lumis/examples/npm-wasm-node`](https://github.com/lean
   <TabItem value="node-bundle" label="Node bundle">
 
 ```js title="Installed bundle autoload"
-import {createHighlighter} from '@lumis-sh/lumis'
-import {htmlInline} from '@lumis-sh/lumis/formatters'
-import {bundledLanguages} from '@lumis-sh/lumis/bundles/web'
-import githubLight from '@lumis-sh/themes/github_light'
-import '@lumis-sh/wasm-bundle-web'
+import { createHighlighter } from "@lumis-sh/lumis";
+import { htmlInline } from "@lumis-sh/lumis/formatters";
+import { bundledLanguages } from "@lumis-sh/lumis/bundles/web";
+import githubLight from "@lumis-sh/themes/github_light";
+import "@lumis-sh/wasm-bundle-web";
 
 const hl = await createHighlighter({
   languages: [bundledLanguages],
-})
+});
 
-await hl.loadLanguage(bundledLanguages.javascript)
+await hl.loadLanguage(bundledLanguages.javascript);
 
 const html = hl.highlight(
   'const theme = "github-light"',
-  htmlInline({language: bundledLanguages.javascript, theme: githubLight})
-)
+  htmlInline({ language: bundledLanguages.javascript, theme: githubLight }),
+);
 ```
 
 Use this when you want one package in `package.json` to cover a whole preset. Lumis still imports only `@lumis-sh/lumis/bundles/web`; Node resolves the installed parser packages automatically.
@@ -226,22 +258,22 @@ Use this when you want one package in `package.json` to cover a whole preset. Lu
   <TabItem value="browser" label="Bundlers">
 
 ```js title="withWasm helper"
-import {createHighlighter, withWasm} from '@lumis-sh/lumis'
-import {htmlInline} from '@lumis-sh/lumis/formatters'
-import elixir from '@lumis-sh/lumis/langs/elixir'
-import githubLight from '@lumis-sh/themes/github_light'
-import elixirWasm from '@lumis-sh/wasm-elixir'
+import { createHighlighter, withWasm } from "@lumis-sh/lumis";
+import { htmlInline } from "@lumis-sh/lumis/formatters";
+import elixir from "@lumis-sh/lumis/langs/elixir";
+import githubLight from "@lumis-sh/themes/github_light";
+import elixirWasm from "@lumis-sh/wasm-elixir";
 
-const elixirFromNpm = withWasm(elixir, elixirWasm)
+const elixirFromNpm = withWasm(elixir, elixirWasm);
 
 const hl = await createHighlighter({
   languages: [elixirFromNpm],
-})
+});
 
 const html = hl.highlight(
-  'defmodule Demo do\nend',
-  htmlInline({language: elixirFromNpm, theme: githubLight})
-)
+  "defmodule Demo do\nend",
+  htmlInline({ language: elixirFromNpm, theme: githubLight }),
+);
 ```
 
 Use this when you want bundler-managed parser assets instead of a CDN fetch in browsers or similar non-Node environments.
@@ -252,24 +284,24 @@ See [`packages/javascript/lumis/examples/npm-wasm-browser`](https://github.com/l
   <TabItem value="browser-bundle" label="Bundle">
 
 ```js title="withWasmBundle helper"
-import {createHighlighter, withWasmBundle} from '@lumis-sh/lumis'
-import {htmlInline} from '@lumis-sh/lumis/formatters'
-import {bundledLanguages} from '@lumis-sh/lumis/bundles/web'
-import {bundledWasms} from '@lumis-sh/wasm-bundle-web'
-import githubLight from '@lumis-sh/themes/github_light'
+import { createHighlighter, withWasmBundle } from "@lumis-sh/lumis";
+import { htmlInline } from "@lumis-sh/lumis/formatters";
+import { bundledLanguages } from "@lumis-sh/lumis/bundles/web";
+import { bundledWasms } from "@lumis-sh/wasm-bundle-web";
+import githubLight from "@lumis-sh/themes/github_light";
 
-const languages = withWasmBundle(bundledLanguages, bundledWasms)
+const languages = withWasmBundle(bundledLanguages, bundledWasms);
 
 const hl = await createHighlighter({
   languages: [languages],
-})
+});
 
-await hl.loadLanguage(languages.javascript)
+await hl.loadLanguage(languages.javascript);
 
 const html = hl.highlight(
   'const theme = "github-light"',
-  htmlInline({language: languages.javascript, theme: githubLight})
-)
+  htmlInline({ language: languages.javascript, theme: githubLight }),
+);
 ```
 
 Use this when you want local, bundler-managed parser assets for a whole preset in browsers or similar non-Node environments instead of wiring each language one by one.
@@ -279,28 +311,50 @@ Use this when you want local, bundler-managed parser assets for a whole preset i
 
 ## Override the resolver
 
-Override [`configureWasmResolver`](https://github.com/leandrocp/lumis/blob/main/packages/javascript/lumis/src/index.ts) to serve parsers from your own CDN or from local files.
+Override [`configureLanguagePackageResolver()` and `configureWasmResolver()`](https://github.com/leandrocp/lumis/blob/main/packages/javascript/lumis/src/index.ts) to serve language-package metadata and parsers from your own CDN or from local files.
 
 <Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
   <TabItem value="javascript" label="JavaScript">
 
 ```js title="Global resolver"
-import {configureWasmResolver} from '@lumis-sh/lumis'
+import { configureLanguagePackageResolver, configureWasmResolver } from "@lumis-sh/lumis";
 
-configureWasmResolver((_language, wasm) =>
-  `https://unpkg.com/${wasm.packageName}@${wasm.version}/${wasm.name}.wasm`
-)
+configureLanguagePackageResolver(
+  (packageName) => `https://unpkg.com/${packageName}@latest/language.json`,
+);
+
+configureWasmResolver(
+  (_language, wasm) => `https://unpkg.com/${wasm.packageName}@${wasm.version}/${wasm.name}.wasm`,
+);
 ```
 
 ```js title="Per-highlighter resolver"
-import {createHighlighter} from '@lumis-sh/lumis'
-import rust from '@lumis-sh/lumis/langs/rust'
+import { createHighlighter } from "@lumis-sh/lumis";
+import rust from "@lumis-sh/lumis/langs/rust";
 
 const hl = await createHighlighter({
   languages: [rust],
+  languagePackageResolver: (packageName) =>
+    `/wasm/${encodeURIComponent(packageName)}/language.json`,
   wasmResolver: (_language, wasm) => `/wasm/${wasm.name}.wasm`,
-})
+});
 ```
+
+On Node, configured `configureLanguagePackageResolver()` and
+`configureWasmResolver()` callbacks also apply to languages first discovered
+inside the document. Lumis resolves and loads each one during the same walk.
+Browser runtimes still require those languages to be loaded before highlighting.
+
+Node highlighters using the catalog and canonical installed packages share one
+Wasmtime runtime. Supplying parser bytes, a different package, or a resolver
+callback isolates that highlighter's Tree-sitter Wasm store. The shared Wasmtime
+engine and persistent caches still avoid repeated downloads and compilation,
+while caller-resolved definitions are released with the highlighter.
+
+That same-walk Node path can read local paths and `file:`, `data:`, `http:`, or
+`https:` URLs synchronously. Preload a language before highlighting when its
+resolver returns a JavaScript-owned URL such as `blob:`; the asynchronous setup
+can read it, while the native walk cannot access JavaScript's blob registry.
 
   </TabItem>
   <TabItem value="cli" label="CLI">
@@ -335,15 +389,12 @@ preset bundles.
 
 ```html title="ESM CDN"
 <script type="module">
-  import {highlight} from 'https://esm.sh/@lumis-sh/lumis'
-  import {htmlInline} from 'https://esm.sh/@lumis-sh/lumis/formatters'
-  import javascript from 'https://esm.sh/@lumis-sh/lumis/langs/javascript'
-  import dracula from 'https://esm.sh/@lumis-sh/themes/dracula'
+  import { highlight } from "https://esm.sh/@lumis-sh/lumis";
+  import { htmlInline } from "https://esm.sh/@lumis-sh/lumis/formatters";
+  import javascript from "https://esm.sh/@lumis-sh/lumis/langs/javascript";
+  import dracula from "https://esm.sh/@lumis-sh/themes/dracula";
 
-  const html = await highlight(
-    'const x = 1',
-    htmlInline({language: javascript, theme: dracula})
-  )
+  const html = await highlight("const x = 1", htmlInline({ language: javascript, theme: dracula }));
 </script>
 ```
 

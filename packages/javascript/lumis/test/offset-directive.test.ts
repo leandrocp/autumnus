@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { beforeAll, describe, expect, it } from "vitest";
 
-import { applyCaptureOffset, buildLineStartMap } from "../src/events.js";
+import { applyCaptureOffset, buildSourceMaps } from "../src/events.js";
 import { compileHighlightConfig } from "../src/core/languages.js";
 import { ensureLocalWasm } from "./wasm.js";
 
@@ -24,10 +24,19 @@ interface Case {
   expected: Endpoint;
 }
 
+interface OperandCoercion {
+  name: string;
+  operand: string;
+  expected: number | null;
+}
+
 const fixturePath = fileURLToPath(
   new URL("../../../../fixtures/offset-directive.json", import.meta.url),
 );
-const { cases } = JSON.parse(readFileSync(fixturePath, "utf8")) as { cases: Case[] };
+const { cases, operandCoercions } = JSON.parse(readFileSync(fixturePath, "utf8")) as {
+  cases: Case[];
+  operandCoercions: OperandCoercion[];
+};
 
 let Query: typeof import("web-tree-sitter").Query;
 let language: import("web-tree-sitter").Language;
@@ -42,16 +51,17 @@ beforeAll(async () => {
 }, 60_000);
 
 /**
- * Every expected range in the fixture came out of Neovim itself, and
- * `crates/lumis-wasm-runtime/src/tree_sitter_highlight.rs` asserts the same file.
- * A change that makes one implementation drift fails in both.
+ * Representable ranges in the fixture came out of Neovim itself. Cases named as
+ * invalid ranges pin Lumis's documented safety fallback. The Rust runtime reads
+ * the same file, so either implementation drifting fails here.
  *
  * The offsets are read back through `compileHighlightConfig`, the path the
  * runtime actually uses, so breaking predicate extraction fails here too.
  */
 describe("#offset! matches Neovim", () => {
   it("has a corpus", () => {
-    expect(cases.length).toBeGreaterThanOrEqual(10);
+    expect(cases.length).toBeGreaterThanOrEqual(15);
+    expect(operandCoercions.length).toBeGreaterThanOrEqual(24);
   });
 
   it.each(cases.map((entry) => [entry.name, entry] as const))("%s", (_name, entry) => {
@@ -59,25 +69,38 @@ describe("#offset! matches Neovim", () => {
     const offset = Object.values(config.captureOffsets[0] ?? {})[0];
     expect(offset, "the directive must survive compilation").toBeDefined();
 
-    const lineStarts = buildLineStartMap(entry.source);
+    const maps = buildSourceMaps(entry.source);
+    const startIndex = maps.utf16Indices[entry.original.startByte];
+    const endIndex = maps.utf16Indices[entry.original.endByte];
+    expect(startIndex, "the original start must be a UTF-8 boundary").toBeDefined();
+    expect(endIndex, "the original end must be a UTF-8 boundary").toBeDefined();
     const actual = applyCaptureOffset(
       {
-        startIndex: entry.original.startByte,
-        endIndex: entry.original.endByte,
-        startPosition: { row: entry.original.startRow, column: entry.original.startColumn },
-        endPosition: { row: entry.original.endRow, column: entry.original.endColumn },
+        startIndex: startIndex!,
+        endIndex: endIndex!,
+        startPosition: {
+          row: entry.original.startRow,
+          column: startIndex! - maps.lineStarts[entry.original.startRow]!,
+        },
+        endPosition: {
+          row: entry.original.endRow,
+          column: endIndex! - maps.lineStarts[entry.original.endRow]!,
+        },
       },
       offset,
-      lineStarts,
+      maps,
     );
+
+    const actualStartByte = maps.utf8Offsets[actual.startIndex]!;
+    const actualEndByte = maps.utf8Offsets[actual.endIndex]!;
 
     expect({
       startRow: actual.startPosition.row,
-      startColumn: actual.startPosition.column,
-      startByte: actual.startIndex,
+      startColumn: actualStartByte - maps.byteLineStarts[actual.startPosition.row]!,
+      startByte: actualStartByte,
       endRow: actual.endPosition.row,
-      endColumn: actual.endPosition.column,
-      endByte: actual.endIndex,
+      endColumn: actualEndByte - maps.byteLineStarts[actual.endPosition.row]!,
+      endByte: actualEndByte,
     }).toEqual(entry.expected);
   });
 
@@ -98,12 +121,76 @@ describe("#offset! matches Neovim", () => {
     });
   });
 
-  // Neovim raises a Lua error rather than defining a behaviour here, so this is
-  // Lumis's own choice and only has to be the same in both implementations.
+  it.each(operandCoercions.map((entry) => [entry.name, entry] as const))(
+    "coerces %s like Neovim where Tree-sitter points can represent it",
+    (_name, entry) => {
+      const operand = JSON.stringify(entry.operand);
+      const config = compileHighlightConfig(
+        language,
+        Query,
+        `((string) @cap (#offset! @cap 0 ${operand} 0 -1))`,
+        "",
+        "",
+      );
+      const offset = Object.values(config.captureOffsets[0] ?? {})[0];
+
+      if (entry.expected == null) {
+        expect(offset).toBeUndefined();
+      } else {
+        expect(offset?.startColumn).toBe(entry.expected);
+      }
+    },
+  );
+
   it.each([
-    "((string) @cap (#offset! @cap 0 nope 0 -1))",
-    "((string) @cap (#offset! @cap 0 @cap 0 -1))",
-  ])("discards %s, whose slot is not a number", (query) => {
+    ["start", '0 "99999999999" 0 -1'],
+    ["end", '0 1 0 "99999999999"'],
+  ])(
+    "discards a wide adjusted %s point instead of constructing an invalid range",
+    (_name, operands) => {
+      const config = compileHighlightConfig(
+        language,
+        Query,
+        `((string) @cap (#offset! @cap ${operands}))`,
+        "",
+        "",
+      );
+      const offset = Object.values(config.captureOffsets[0] ?? {})[0];
+      const source = '"abc"';
+      const original = {
+        startIndex: 0,
+        endIndex: source.length,
+        startPosition: { row: 0, column: 0 },
+        endPosition: { row: 0, column: source.length },
+      };
+
+      expect(applyCaptureOffset(original, offset, buildSourceMaps(source))).toEqual(original);
+    },
+  );
+
+  it("does not carry a column offset into the next row", () => {
+    const source = "a\nb";
+    const original = {
+      startIndex: 0,
+      endIndex: 1,
+      startPosition: { row: 0, column: 0 },
+      endPosition: { row: 0, column: 1 },
+    };
+
+    expect(
+      applyCaptureOffset(
+        original,
+        { startRow: 0, startColumn: 0, endRow: 0, endColumn: 1 },
+        buildSourceMaps(source),
+      ),
+    ).toEqual(original);
+  });
+
+  // Neovim raises a Lua error rather than defining a behaviour for a literal
+  // that cannot coerce to a number. Capture operands are numeric IDs and are
+  // covered by the shared range fixture above.
+  it("discards a literal whose slot is not a number", () => {
+    const query = "((string) @cap (#offset! @cap 0 nope 0 -1))";
     const config = compileHighlightConfig(language, Query, query, "", "");
     expect(config.captureOffsets[0]).toBeUndefined();
   });

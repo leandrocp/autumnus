@@ -1560,12 +1560,14 @@ dependencies = [
 name = "lumis-js-native"
 version = "0.6.1"
 dependencies = [
+ "base64",
  "etcetera",
  "lumis-core",
  "lumis-wasm-runtime",
  "napi",
  "napi-build",
  "napi-derive",
+ "percent-encoding",
  "serde",
  "serde_json",
 ]

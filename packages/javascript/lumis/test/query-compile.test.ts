@@ -30,8 +30,10 @@
  * Not part of `pnpm test`. Every grammar this file loads stays compiled in V8
  * for the life of the process -- web-tree-sitter gives no way to free a
  * Language -- so running all 115 in one process exhausts a CI runner's memory.
- * `.github/workflows/queries.yml` shards it instead, twelve ways against
- * parsers built from languages.toml and four against what npm publishes.
+ * `.github/workflows/queries.yml` shards the parser work twelve ways against
+ * parsers built from languages.toml and four against what npm publishes, then
+ * starts a fresh test process for each batch of four selected languages. The
+ * global `cannotCompile` check can retain PHP as a fifth grammar.
  */
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
@@ -202,6 +204,9 @@ const only = process.env.LUMIS_QUERY_LANGUAGES?.split(",")
   .filter(Boolean);
 const chosen = only?.length ? parsers.filter(([id]) => only.includes(id)) : parsers;
 const selected = chosen.filter(([id]) => !cannotCompile.has(id));
+const parserIds = new Set(parsers.map(([id]) => id));
+const unknownSelections = only?.filter((id) => !parserIds.has(id)) ?? [];
+const batchLimit = Number(process.env.LUMIS_QUERY_BATCH_LIMIT);
 
 /**
  * Set when every parser was built from `languages.toml` first, which means the
@@ -228,6 +233,17 @@ beforeAll(async () => {
 describe("processed queries compile against their pinned grammar", () => {
   it("has a parser catalog to check", () => {
     expect(parsers.length).toBeGreaterThan(100);
+  });
+
+  it("recognizes every requested language", () => {
+    expect(unknownSelections).toEqual([]);
+  });
+
+  it("keeps the selected-language batch within its configured limit", () => {
+    const limitIsValid =
+      process.env.LUMIS_QUERY_BATCH_LIMIT === undefined ||
+      (Number.isSafeInteger(batchLimit) && batchLimit > 0 && chosen.length <= batchLimit);
+    expect(limitIsValid).toBe(true);
   });
 
   it("reports coverage", () => {

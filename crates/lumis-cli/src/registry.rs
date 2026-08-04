@@ -109,7 +109,7 @@ impl Registry {
                 upstream_version: None,
                 revision: None,
                 sha256: sha256_hex(wasm),
-                size: wasm.len(),
+                size: u64::try_from(wasm.len()).expect("parser size fits in u64"),
             },
             languages: std::collections::BTreeMap::from([(
                 id.into(),

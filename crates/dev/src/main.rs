@@ -2670,7 +2670,7 @@ fn stage_wasm(name: &str) -> Result<()> {
             upstream_version: info.version.clone(),
             revision: info.rev.clone(),
             sha256: wasm_sha256.clone(),
-            size: wasm_bytes.len(),
+            size: u64::try_from(wasm_bytes.len()).expect("parser size fits in u64"),
         },
         languages,
     };
@@ -2763,7 +2763,7 @@ fn stage_test_parsers(out: &Path) -> Result<()> {
                 upstream_version: None,
                 revision: None,
                 sha256: sha256_hex(&wasm),
-                size: wasm.len(),
+                size: u64::try_from(wasm.len()).expect("parser size fits in u64"),
             },
             languages,
         };

@@ -14,6 +14,7 @@ on:
       - "packages/javascript/react/**"
       - "packages/javascript/themes/**"
       - "packages/javascript/package.json"
+      - "packages/javascript/scripts/check-native-versions.mjs"
       - "packages/javascript/wasm-bundle-*/**"
       - "crates/lumis-core/**"
       - "crates/lumis/**"
@@ -34,6 +35,7 @@ on:
       - "packages/javascript/react/**"
       - "packages/javascript/themes/**"
       - "packages/javascript/package.json"
+      - "packages/javascript/scripts/check-native-versions.mjs"
       - "packages/javascript/wasm-bundle-*/**"
       - "crates/lumis-core/**"
       - "crates/lumis/**"
@@ -77,7 +79,7 @@ jobs:
       # once made it unrunnable without any check going red.
       - run: pnpm --filter @lumis-sh/lumis run build:generate
       - run: pnpm --filter @lumis-sh/lumis run docs
-      # The release workflow publishes seven native manifests before the main
+      # The release workflow publishes six native npm packages before the main
       # package, and npm will not republish an existing version.
       - run: node packages/javascript/scripts/check-native-versions.mjs
       - run: pnpm --dir packages/javascript run build:wasm-bundles && git diff --exit-code -- packages/javascript/wasm-bundle-*
@@ -120,12 +122,29 @@ jobs:
       # Both runtimes, explicitly. vite.config.mjs defaults to Wasm, so leaving
       # this unset would run the same one twice and leave every native-only
       # resolver and lifetime behaviour uncovered.
-      - run: pnpm --filter @lumis-sh/lumis run test
-        env:
-          LUMIS_TEST_RUNTIME: native
-      - run: pnpm --filter @lumis-sh/lumis run test
-        env:
-          LUMIS_TEST_RUNTIME: wasm
+      - run: |
+          native_runtime_data_dir="$(mktemp -d)"
+          native_suite_data_dir="$(mktemp -d)"
+          trap 'rm -rf "$native_runtime_data_dir" "$native_suite_data_dir"' EXIT
+          LUMIS_TEST_RUNTIME=native \
+            LUMIS_WASM_PATH="$GITHUB_WORKSPACE/target/test-parsers" \
+            LUMIS_DATA_DIR="$native_runtime_data_dir" \
+            pnpm --filter @lumis-sh/lumis exec vitest run test/native-runtime.test.ts
+          env -u LUMIS_WASM_PATH \
+            LUMIS_TEST_RUNTIME=native \
+            LUMIS_DATA_DIR="$native_suite_data_dir" \
+            pnpm --filter @lumis-sh/lumis exec vitest run \
+              --exclude test/conformance.test.ts \
+              --exclude test/query-compile.test.ts \
+              --exclude 'test/browser/**' \
+              --exclude test/native-runtime.test.ts
+      - run: |
+          wasm_suite_data_dir="$(mktemp -d)"
+          trap 'rm -rf "$wasm_suite_data_dir"' EXIT
+          env -u LUMIS_WASM_PATH \
+            LUMIS_TEST_RUNTIME=wasm \
+            LUMIS_DATA_DIR="$wasm_suite_data_dir" \
+            pnpm --filter @lumis-sh/lumis run test
       - run: pnpm --filter @lumis-sh/react run test
         env:
           LUMIS_WASM_PATH: ${{ github.workspace }}/target/test-parsers

@@ -58,7 +58,9 @@ pub use package::{
     ParserMetadata,
 };
 #[cfg(feature = "wasm")]
-pub use runtime::{HighlightOptions, HighlightOutput, LanguageSpec, Runtime, RuntimeError};
+pub use runtime::{
+    HighlightOptions, HighlightOutput, InjectionResolution, LanguageSpec, Runtime, RuntimeError,
+};
 #[cfg(feature = "wasm")]
 pub use store::HttpFetcher;
 pub use store::{

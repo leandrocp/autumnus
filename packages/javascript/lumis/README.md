@@ -21,9 +21,11 @@ Themes are published separately:
 npm install @lumis-sh/themes
 ```
 
-Each language import contains an exact parser package version, byte length, and
-SHA-256 digest. Lumis verifies downloaded or installed parser bytes before use
-and caches valid downloads persistently in Node and browser storage.
+Each language import is a stable handle to an independently released parser
+package. Lumis resolves that package's current metadata to obtain the exact
+parser version, byte length, and SHA-256 digest, verifies downloaded or
+installed parser bytes before use, and caches valid downloads persistently in
+Node and browser storage.
 
 On Node, highlighting also loads languages **injected inside** a document during
 the same pass, so a Markdown file with a fenced Rust block highlights that block
@@ -200,6 +202,7 @@ All three are equivalent at highlight time. The runtime resolves the language by
 - In browsers, package metadata and verified parser WASM survive reloads and restarts through CacheStorage with an IndexedDB fallback.
 - Use `lumis-wasm-cache` or `cacheLanguages()` from `@lumis-sh/lumis/cache` during deployment so the deployed process serves every language from its cache.
 - A custom resolver remains available for self-hosted assets.
+- A language is a package handle; `withWasm()` changes where its verified parser bytes come from. See [Where a language comes from](https://lumis.sh/docs/advanced/wasm-and-cdn#where-a-language-comes-from).
 
 ## Output Formats
 
@@ -277,28 +280,36 @@ ANSI helpers (`@lumis-sh/lumis/formatters/ansi`):
 import { hexToRgb, paint, rgbToAnsi, styleToAnsi } from '@lumis-sh/lumis/formatters/ansi'
 ```
 
-## Custom WASM Resolution
+## Custom package resolution
 
-Override the resolver when you want to serve parser WASM files yourself, switch CDNs, or avoid network fetches in locked-down environments:
+Override both resolvers when you want to serve language-package metadata and parser WASM yourself, switch CDNs, or avoid public network fetches in locked-down environments:
 
 ```typescript
-import { configureWasmResolver } from '@lumis-sh/lumis'
+import {
+  configureLanguagePackageResolver,
+  configureWasmResolver,
+} from '@lumis-sh/lumis'
+
+configureLanguagePackageResolver(
+  packageName => `https://unpkg.com/${packageName}@latest/language.json`
+)
 
 configureWasmResolver((_language, wasm) =>
   `https://unpkg.com/${wasm.packageName}@${wasm.version}/${wasm.name}.wasm`
 )
 ```
 
-This can be called at any time. It applies to `highlight()`, `createHighlighter()`, and any existing highlighter instances.
+These can be called at any time. They apply to `highlight()`, `createHighlighter()`, and any existing highlighter instances.
 
-For advanced use cases that need isolated resolution (e.g., tests, multiple CDNs), pass `wasmResolver` directly to `createHighlighter()`.
+For advanced use cases that need isolated resolution (e.g., tests, multiple CDNs), pass `languagePackageResolver` and `wasmResolver` directly to `createHighlighter()`.
 
-A resolver applies to the languages you load. It cannot apply to a language
-discovered *inside* a document while it is being highlighted: `highlight()` is
-synchronous, so there is nowhere to await the URL a resolver returns. Both Node
-runtimes behave the same way here — the block stays plain and Lumis warns once
-naming the language. Load it up front, prefetch it with `cacheLanguages()`, or
-point `LUMIS_WASM_PATH` at a directory containing it. See
+On Node's native runtime, configured `configureLanguagePackageResolver()` and
+`configureWasmResolver()` callbacks apply to languages first discovered *inside*
+a document as well as to its root language. Lumis resolves and loads each one
+during the same walk when the resolver returns a local path or a `file:`,
+`data:`, `http:`, or `https:` URL. Preload a language when its resolver returns
+a JavaScript-owned URL such as `blob:`. Browser runtimes still require injected
+languages to be loaded before highlighting. See
 [Highlighting loads what a document needs](https://lumis.sh/docs/advanced/wasm-and-cdn#highlighting-loads-what-a-document-needs).
 
 ## `htmlLinked()` CSS

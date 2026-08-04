@@ -125,7 +125,10 @@ export type RuntimeWasmInput = Uint8Array | ArrayBuffer | string | URL | Respons
 export type RuntimeWasmBundle = Partial<Record<string, RuntimeWasmInput>>;
 
 /**
- * A built-in language package handle or a complete custom language definition.
+ * A language accepted by Lumis.
+ *
+ * Queries live in the package alongside the parser they were tested against, so
+ * this carries a package name rather than query text.
  *
  * ```ts
  * import javascript from '@lumis-sh/lumis/langs/javascript'
@@ -134,16 +137,9 @@ export type RuntimeWasmBundle = Partial<Record<string, RuntimeWasmInput>>;
  * // javascript.packageName → "@lumis-sh/wasm-javascript"
  * ```
  */
-export interface Language {
-  id: string;
-  aliases: string[];
+export interface Language extends LanguageDefinition {
   /** Independently released package containing the parser and matching queries. */
   packageName?: string;
-  /** Tree-sitter highlight query (S-expression). */
-  highlights?: string;
-  injections?: string;
-  locals?: string;
-  brackets?: string;
   /**
    * WASM parser source:
    * - `WasmRef` fetched from CDN (default for pre-built bundles)
@@ -153,6 +149,35 @@ export interface Language {
    */
   wasm?: WasmRef | RuntimeWasmInput;
 }
+
+/**
+ * A handle to a published language package.
+ *
+ * Use `wasm` to override where the package's parser bytes come from. The bytes
+ * are still checked against the package's size and SHA-256 before loading.
+ */
+export interface LanguagePackageHandle extends LanguageDefinition {
+  packageName: string;
+  /** Optional caller-selected source for the package's verified parser bytes. */
+  wasm?: WasmRef | RuntimeWasmInput;
+}
+
+export interface PlaintextLanguage extends LanguageDefinition {
+  id: "plaintext";
+}
+
+/**
+ * A language definition that contains everything the runtime needs to load it.
+ *
+ * Each variant declares only the fields it owns, so an object literal cannot
+ * pass a forbidden discriminator or load field as explicit `undefined`.
+ *
+ * Queries are not a variant. A parser and the queries written against it are
+ * released together inside a package, so a caller names the package and, at
+ * most, where its parser bytes come from. Supplying queries directly is a
+ * planned feature rather than a supported one; see `ARCHITECTURE.md`.
+ */
+export type LoadableLanguage = LanguagePackageHandle | PlaintextLanguage;
 
 /**
  * A lazy language handle from a bundle. Callable to load the full {@link Language}.
@@ -200,11 +225,11 @@ export type LanguageInput =
 /**
  * How formatters and `hl.highlight()` identify a language.
  *
- * - `Language` — the full language object
+ * - `LanguageDefinition` — a language object or identifier-only `{ id, aliases }`
  * - `LazyLanguage` — a handle from a bundle
  * - `string` — a language ID like `"javascript"`
  */
-export type LanguageRef = Language | LazyLanguage | string;
+export type LanguageRef = LanguageDefinition | LazyLanguage | string;
 
 export interface CaptureMetadata {
   highlightScope?: string;
