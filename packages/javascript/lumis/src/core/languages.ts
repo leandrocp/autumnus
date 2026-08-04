@@ -1053,7 +1053,9 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
       } else {
         throw new Error(`Unsupported WASM input for language "${opts.definition.id}"`);
       }
-      if (packaged) await verifyWasm(packaged.wasm, wasmInput);
+      // Always, including when the caller chose where the bytes come from:
+      // `withWasm()` selects a source, it does not waive the package's digest.
+      await verifyWasm(packaged.wasm, wasmInput);
 
       const { Language, Parser, Query } = await loadTreeSitter();
       const parserKey =

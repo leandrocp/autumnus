@@ -22,7 +22,7 @@ import type { Highlighter } from "../src/core/highlighter.js";
 import type { Language, Theme } from "../src/types.js";
 
 import { loadConformanceFixtures } from "./conformance.js";
-import { configureLocalWasmResolver, ensureLocalWasm } from "./wasm.js";
+import { configureLocalWasmResolver } from "./wasm.js";
 
 const conformanceFixtures = loadConformanceFixtures();
 const theme: Theme = dracula;
@@ -59,18 +59,12 @@ beforeAll(async () => {
     "markdown_inline",
     "python",
   ]);
+  // No `wasm` overrides. Parser bytes and the package that describes them have
+  // to come from the same place, or the integrity check rejects the pair: CI
+  // stages freshly built parsers while `ensureLocalWasm` returns the committed
+  // fixture, which is a different build of the same grammar.
   highlighter = await createHighlighter({
-    languages: [
-      json,
-      { ...html, wasm: ensureLocalWasm("html") },
-      { ...javascript, wasm: ensureLocalWasm("javascript") },
-      { ...css, wasm: ensureLocalWasm("css") },
-      { ...lua, wasm: ensureLocalWasm("lua") },
-      { ...markdown, wasm: ensureLocalWasm("markdown") },
-      { ...markdownInline, wasm: ensureLocalWasm("markdown_inline") },
-      { ...mdx, wasm: ensureLocalWasm("markdown") },
-      { ...python, wasm: ensureLocalWasm("python") },
-    ],
+    languages: [json, html, javascript, css, lua, markdown, markdownInline, mdx, python],
   });
 }, 120_000);
 
