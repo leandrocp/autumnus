@@ -27,7 +27,7 @@ const { parsers = {} } = parseToml(readFileSync(join(workspaceRoot, "languages.t
 
 function installedRevision(wasmPath) {
   const packageDirectory = dirname(wasmPath);
-  const manifestPath = join(packageDirectory, "language.json");
+  const manifestPath = join(packageDirectory, "lumis.json");
   if (existsSync(manifestPath)) {
     const revision = JSON.parse(readFileSync(manifestPath, "utf8"))?.parser?.revision;
     if (revision) return revision;

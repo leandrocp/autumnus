@@ -43,7 +43,7 @@ for (const packageName of packageNames) {
     .update(Object.values(queries).join("\0"))
     .digest("hex");
   const directory = resolve(outputDir, `wasm-${language}`);
-  const metadataPath = resolve(directory, "language.json");
+  const metadataPath = resolve(directory, "lumis.json");
   const localWasmPath = resolve(directory, `${wasmName}.wasm`);
 
   await mkdir(directory, { recursive: true });
@@ -71,7 +71,7 @@ for (const packageName of packageNames) {
     2,
   )}\n`;
   await writeFile(metadataPath, document);
-  await writeFile(resolve(storeDir, `${language}.language.json`), document);
+  await writeFile(resolve(storeDir, `${language}.lumis.json`), document);
 
   index[packageName] = {
     language,

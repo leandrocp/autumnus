@@ -44,7 +44,7 @@ export const packageHandleRejectsQueries: LanguagePackageHandle = {
   id: "json",
   aliases: ["jsonc"],
   packageName: "@lumis-sh/wasm-json",
-  // @ts-expect-error -- package-owned queries come only from language.json.
+  // @ts-expect-error -- package-owned queries come only from lumis.json.
   highlights: undefined,
 };
 

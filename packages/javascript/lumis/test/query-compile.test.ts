@@ -89,7 +89,7 @@ function packageName(parser: string): string {
 /** The parser revision an installed package was built from. */
 function installedRevision(wasmPath: string): string | undefined {
   const packageDirectory = dirname(wasmPath);
-  const manifestPath = join(packageDirectory, "language.json");
+  const manifestPath = join(packageDirectory, "lumis.json");
   if (existsSync(manifestPath)) {
     const languagePackage = JSON.parse(readFileSync(manifestPath, "utf8")) as {
       parser?: { revision?: string };
@@ -97,7 +97,7 @@ function installedRevision(wasmPath: string): string | undefined {
     if (languagePackage.parser?.revision) return languagePackage.parser.revision;
   }
 
-  // Packages published before `language.json` kept the revision in package.json.
+  // Packages published before `lumis.json` kept the revision in package.json.
   const packageJson = JSON.parse(readFileSync(join(packageDirectory, "package.json"), "utf8")) as {
     lumis?: { rev?: string };
   };

@@ -17,7 +17,7 @@
       "default": "./index.js"
     },
     "./{wasm_name}.wasm": "./{wasm_name}.wasm",
-    "./language.json": "./language.json"
+    "./lumis.json": "./lumis.json"
   },
   "lumis": {
     "treeSitter": "{tree_sitter_cli}",

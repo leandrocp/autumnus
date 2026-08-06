@@ -125,7 +125,7 @@ the compiled forms travel with it and the first request pays neither cost.
 
 ## Where a language comes from
 
-A language import is a package handle: `packageName` selects its `language.json`,
+A language import is a package handle: `packageName` selects its `lumis.json`,
 and that package supplies the parser metadata and the queries as one unit.
 
 Queries are not something a caller supplies. A parser and the queries written
@@ -160,9 +160,9 @@ looks for there first. There is no second location to configure.
 ```
 $LUMIS_DATA_DIR/
   parsers/
-    elixir.language.json                              # package metadata
-    tree-sitter-elixir-0.26.2-<sha256>.wasm           # the parser
-  compiled/                                            # wasmtime's compiled modules
+    elixir.lumis.json                        # package metadata
+    tree-sitter-elixir-0.26.2-<sha256>.wasm  # the parser
+  compiled/                                  # wasmtime's compiled modules
   themes/
 ```
 
@@ -211,11 +211,11 @@ trusted — so a corrupted directory repairs itself.
 
 ## Default JavaScript behavior
 
-Lumis first resolves the current `language.json` for a language package. This
+Lumis first resolves the current `lumis.json` for a language package. This
 manifest is generated while staging the package and published with it:
 
 ```text title="Language package metadata"
-https://cdn.jsdelivr.net/npm/@lumis-sh/wasm-<name>@latest/language.json
+https://cdn.jsdelivr.net/npm/@lumis-sh/wasm-<name>@latest/lumis.json
 ```
 
 That metadata names an exact package version, parser filename, byte length, and
@@ -375,7 +375,7 @@ Override [`configureLanguagePackageResolver()` and `configureWasmResolver()`](ht
 import { configureLanguagePackageResolver, configureWasmResolver } from "@lumis-sh/lumis";
 
 configureLanguagePackageResolver(
-  (packageName) => `https://unpkg.com/${packageName}@latest/language.json`,
+  (packageName) => `https://unpkg.com/${packageName}@latest/lumis.json`,
 );
 
 configureWasmResolver(
@@ -390,7 +390,7 @@ import rust from "@lumis-sh/lumis/langs/rust";
 const hl = await createHighlighter({
   languages: [rust],
   languagePackageResolver: (packageName) =>
-    `/wasm/${encodeURIComponent(packageName)}/language.json`,
+    `/wasm/${encodeURIComponent(packageName)}/lumis.json`,
   wasmResolver: (_language, wasm) => `/wasm/${wasm.name}.wasm`,
 });
 ```

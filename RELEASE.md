@@ -81,7 +81,7 @@ That lockstep is not cosmetic. `@lumis-sh/lumis` depends on the platform package
 If a JS release also needs new parser WASM packages, publish those first through the WASM workflow. Run `mise run wasm-publish-needed` to see which parser packages still need publishing.
 
 Each `@lumis-sh/wasm-*` package contains its parser and matching processed
-queries. During staging, `crates/dev` generates `language.json` from
+queries. During staging, `crates/dev` generates `lumis.json` from
 `languages.toml`, the processed queries, and the built parser. It is a published
 package artifact, not checked-in source. A parser revision or query change
 publishes only the affected language package; it does not require runtime

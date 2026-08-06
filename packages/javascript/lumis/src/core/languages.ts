@@ -184,7 +184,7 @@ export const CDNS = ["https://cdn.jsdelivr.net/npm", "https://unpkg.com"] as con
 export const DEFAULT_RESOLVER: WasmResolver = (_language, wasm) =>
   `${CDNS[0]}/${wasm.packageName}@${wasm.version}/${wasm.name}.wasm`;
 export const DEFAULT_LANGUAGE_PACKAGE_RESOLVER: LanguagePackageResolver = (packageName, version) =>
-  `${CDNS[0]}/${packageName}@${version ?? "latest"}/language.json`;
+  `${CDNS[0]}/${packageName}@${version ?? "latest"}/lumis.json`;
 
 /** Only used with the default resolver; a custom resolver names one location. */
 async function fetchFromCdns(primary: string, isDefault: boolean): Promise<Response> {
@@ -883,7 +883,7 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
         );
         const base = mod.default as unknown;
         if (!(base instanceof URL) && typeof base !== "string") return undefined;
-        const source = new URL("./language.json", base instanceof URL ? base : new URL(base));
+        const source = new URL("./lumis.json", base instanceof URL ? base : new URL(base));
         const disk = await runtime.readResolvedWasmFromDisk(source);
         if (disk) return parseLanguagePackage(disk, packageName);
         const response = await fetch(source);
@@ -916,7 +916,7 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
 
       const load = (async () => {
         const staged = await runtime.readStagedAsset?.(
-          `${packageName.replace(/^@lumis-sh\/wasm-/, "")}.language.json`,
+          `${packageName.replace(/^@lumis-sh\/wasm-/, "")}.lumis.json`,
         );
         if (staged) return parseLanguagePackage(staged, packageName);
 

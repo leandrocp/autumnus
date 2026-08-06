@@ -398,19 +398,19 @@ mise run stage-test-parsers
 Each grammar is published as a self-contained `@lumis-sh/wasm-{name}` language
 package. It contains the parser WASM, matching processed queries, aliases,
 grammar metadata, byte length, and SHA-256. During staging, `crates/dev`
-generates `tmp/wasm/publish/{name}/language.json`; it is published with the
+generates `tmp/wasm/publish/{name}/lumis.json`; it is published with the
 package rather than checked in.
 
 Runtime catalogs generated from `languages.toml` contain only stable IDs,
 aliases, and package names. JavaScript, CLI, and Elixir resolve the current
-`language.json`, cache it, then fetch the exact versioned parser named by that
+`lumis.json`, cache it, then fetch the exact versioned parser named by that
 metadata and verify its bytes. Parser or query updates therefore publish only
 the affected language package, without a runtime release.
 
 CLI, Node and Elixir caches persist on disk under `LUMIS_DATA_DIR`, in the same
 layout, so one prepared directory serves all three; browsers use CacheStorage
 with an IndexedDB fallback. Local and benchmark execution should provide both
-`language.json` and its matching parser so queries and parser bytes remain
+`lumis.json` and its matching parser so queries and parser bytes remain
 atomic.
 
 #### Parsers in CI

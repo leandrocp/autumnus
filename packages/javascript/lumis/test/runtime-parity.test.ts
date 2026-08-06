@@ -389,7 +389,7 @@ describe("runtime parity", () => {
   it("reads file resolver URLs without treating their query or fragment as path bytes", async () => {
     const { default: markdown } = await import("../langs/markdown.ts");
     const { default: json } = await import("../langs/json.ts");
-    const packagePath = join(parityDirectory, "json.language.json");
+    const packagePath = join(parityDirectory, "json.lumis.json");
     writeFileSync(packagePath, JSON.stringify(localLanguagePackageMetadata("@lumis-sh/wasm-json")));
     const packageUrl = pathToFileURL(packagePath);
     packageUrl.search = "?cache=test";

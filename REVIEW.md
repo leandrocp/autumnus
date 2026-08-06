@@ -34,7 +34,7 @@ convention — cannot work for something that runs in a release.
 
 ### Why versions are pinned
 
-The store fetched `{package}@latest/language.json` and trusted a cached copy for
+The store fetched `{package}@latest/lumis.json` and trusted a cached copy for
 one hour (`PACKAGE_CACHE_TTL`). Two consequences, both measured:
 
 - The parser filename is version-addressed (`{name}-{version}-{sha256}.wasm`), so
@@ -127,7 +127,7 @@ directory; a second way to name it bought nothing.
 
 ### The published packages predate this format
 
-`{package}@{version}/language.json` returns 404 for all 115 pins on both CDNs,
+`{package}@{version}/lumis.json` returns 404 for all 115 pins on both CDNs,
 because every published `@lumis-sh/wasm-*` still carries the older shape:
 metadata in `package.json`'s `lumis` key, no queries, no parser digest. So the
 runtime download path cannot work against the registry as it stands, pinned or
@@ -138,7 +138,7 @@ fetch attempt in development 404s. It is not caused by version pinning; pinning
 only makes the target explicit.
 
 `mise run langs-check-versions` checks the URL the runtime actually fetches. It
-is deliberately quiet while **zero** packages serve `language.json`, since that
+is deliberately quiet while **zero** packages serve `lumis.json`, since that
 is the expected pre-publish state, and fails as soon as some but not all do — a
 partial republish means one runtime resolves a language and another cannot. The
 waiver can therefore only shrink.
@@ -787,7 +787,7 @@ reproducible test pins the behavior.
 | F16 | Blocker | Query shard 5 recurrently exhausts V8 zone memory; count-based sharding does not bound retained grammar load — **found verifying the exact-head checks** | **FIXED LOCALLY / CI REVALIDATION REQUIRED** — three batch processes pass and peak RSS falls; a process can hold five, not the claimed four, and no GitHub run contains the uncommitted fix |
 | F17 | Decision | Remove caller-supplied queries from JavaScript `Language` | **DONE** — taken as a deliberate breaking change. It shipped in npm `0.6.1`, so the next `npm-lumis` is a minor with a `BREAKING CHANGE:` footer, and the docs now describe caller-supplied queries as planned rather than supported |
 | F18 | Blocker | An explicit `Language.wasm` replaces the package-declared parser reference while retaining the package's queries — **found verifying F17** | **OPEN / BLOCKER** — native and Wasm both accept a parser whose size, digest and grammar differ from the package metadata |
-| F19 | Medium | Rust and JavaScript accept different `language.json` shapes — **found checking the shared validator** | **OPEN / MEDIUM** — array-valued languages, lexical integer form and large sizes have opposite acceptance across runtimes |
+| F19 | Medium | Rust and JavaScript accept different `lumis.json` shapes — **found checking the shared validator** | **OPEN / MEDIUM** — array-valued languages, lexical integer form and large sizes have opposite acceptance across runtimes |
 | F20 | Medium | Strict signed-decimal `i32` offsets do not implement Neovim's numeric-coercion semantics — **found verifying F15 against the reference** | **OPEN / MEDIUM** — Neovim accepts hexadecimal, fractional, surrounding-whitespace and wider numeric forms that both Lumis implementations now reject |
 
 The details below distinguish a defect from a missing guard. Closing a defect without first making
@@ -810,7 +810,7 @@ and F3 are only partially closed.
 | F6 | `package_suffix` validates a complete npm package name and requires a single-component suffix; `package_path` returns `Result`. | The guard covers package names only. Public `LanguagePackage` parser fields still reach `parser_filename` and store paths without validation; F6 is reopened below. |
 | F7 | The colliding docs call and the task/workflow calls in scope use explicit `run`, and CI now runs the TypeDoc script. | The JavaScript lint job runs `pnpm --filter @lumis-sh/lumis run docs`. |
 | F8 | PR body rewritten; `RELEASE.md` lockstep rule restored with its rationale; `CONTRIBUTING.md` lists six conformance tasks; the duplicate "Injected languages" section in `javascript-runtime.mdx` is gone. | — |
-| F9 | `cacheLanguages()` also writes `<suffix>.language.json`, the name the Rust store reads. | `cache.test.ts` restarts a real child process; before the fix the native runtime went to the network and got a 404. |
+| F9 | `cacheLanguages()` also writes `<suffix>.lumis.json`, the name the Rust store reads. | `cache.test.ts` restarts a real child process; before the fix the native runtime went to the network and got a 404. |
 
 #### F6 — the package-name fix is real; the severity correction is withdrawn
 
@@ -1496,7 +1496,7 @@ accepted, the title/body and eventual commit must identify the breaking API chan
 Not defects found and left; decisions, with the reasoning, so a reviewer can weigh them instead of
 re-finding them.
 
-**The language packages are not published yet.** Nothing ships a `language.json`, so no end-to-end
+**The language packages are not published yet.** Nothing ships a `lumis.json`, so no end-to-end
 download has ever run against the real CDN. Every test resolves from a staged tree, a committed
 fixture, or a local resolver, which is deliberate — `AGENTS.md` forbids letting published artifacts
 gate correctness checks — but it does mean the first real publish is the first exercise of the CDN
@@ -1946,7 +1946,7 @@ custom-language repro and the full resolver suite under the default Node runtime
 The top-level task also stages parsers but does not export the staged directory to the recursive
 JavaScript tests. `mise run test` completed the entire Rust workspace and all 127 Elixir tests,
 then failed 8 of 9 React tests because the default native runtime requested the not-yet-published
-`@lumis-sh/wasm-javascript/language.json` from the CDN and received 404. JavaScript CI passes only
+`@lumis-sh/wasm-javascript/lumis.json` from the CDN and received 404. JavaScript CI passes only
 because its downstream-package step separately supplies `LUMIS_WASM_PATH`.
 
 Setting `LUMIS_WASM_PATH=$PWD/target/test-parsers` makes the intended local parser source visible,
@@ -2017,7 +2017,7 @@ The direct public-API repro was:
 
 ```text
 package_path("../../escape")
-=> /tmp/lumis-cache-root/parsers/parsers/../../escape.language.json
+=> /tmp/lumis-cache-root/parsers/parsers/../../escape.lumis.json
 ```
 
 After normalization, that is outside the intended `parsers/` directory. The CLI, Elixir and Node
@@ -2127,7 +2127,7 @@ Historical snapshot retained at its audited revision; it does not supersede the 
 | F6 Public language-package inputs allow path traversal | **FIXED / GUARD REQUIRED** — direct metadata is rejected at every current filesystem boundary; the source-directory branch is not exercised by the guard |
 | F7 `mise run docs` fails with the PR's pnpm version | **DONE** — the canonical and CI docs calls use explicit `run`; remaining safe shorthand is an F8 wording correction |
 | F8 PR body and repository docs are stale | **PARTIAL / REQUIRED** — PR body, commands, counts and pins are corrected; `CONTRIBUTING.md` omits the `npm-lumis` lockstep exception and the F10 docs disagree |
-| F9 `cacheLanguages()` writes a cache the default Node runtime cannot read — **not in the review** | **DONE** — it also writes `<suffix>.language.json`; `cache.test.ts` restarts a real process |
+| F9 `cacheLanguages()` writes a cache the default Node runtime cannot read — **not in the review** | **DONE** — it also writes `<suffix>.lumis.json`; `cache.test.ts` restarts a real process |
 | F10 Native resolver-backed injected language stays plain | **OPEN / BLOCKER, framing corrected** — both JS-resolver paths fail alike, but that still violates the one-pass Node contract |
 | F11 Native highlighters share same-id custom definitions | **PARTIAL / OPEN / BLOCKER** — inline roots are isolated; injected custom and package-resolver definitions still diverge |
 | F12 Extra `#offset!` operands and the extraction guard | **DONE** — both real compilers ignore everything after the fourth operand |
@@ -2151,7 +2151,7 @@ Historical snapshot retained at its audited revision; it does not supersede the 
 | 4.4 The CLI reimplements the runtime | **DONE** — shared `store.rs` and `brackets.rs`, and one `LUMIS_DATA_DIR` with the same `parsers/` layout in all three |
 | 4.5 `crypto.subtle` on non-secure origins | **DONE** — pure-JS SHA-256 fallback, pinned against `crypto.subtle` |
 | 4.6 Node loses its fast path | **DONE** — the addon is back over `lumis-wasm-runtime`, 11 MiB rather than 140 MB, and a default optional dependency again |
-| 4.7 Same `language.json` accepted by Rust, rejected by JS | **DONE** |
+| 4.7 Same `lumis.json` accepted by Rust, rejected by JS | **DONE** |
 | 4.8 Package resolution precedence differs per runtime | **DONE** |
 | 4.9 `formatVersion` runtime gate removed | **DONE** |
 | Injected languages behaved differently per runtime — **not in the original review** | **PARTIAL / OPEN** — default Rust-store loading works in one pass; JavaScript resolvers violate the stated Node contract (F10), and namespaced custom children now diverge (F11) |
@@ -2180,7 +2180,7 @@ What was actually run for the second pass, so the claims can be weighed:
 | `mix test` (Elixir, `LUMIS_BUILD=1`) | 123 passed, 115 conformance excluded |
 | `npx tsc --noEmit` | clean |
 | `cargo fmt --check` / `cargo clippy --all-targets` on both changed crates | clean |
-| §4.7 divergence, Rust vs JS validator on one crafted `language.json` | reproduced, then fixed and pinned |
+| §4.7 divergence, Rust vs JS validator on one crafted `lumis.json` | reproduced, then fixed and pinned |
 | §4.7 / §4.8 guards, four injected faults | every guard observed failing, then reverted |
 | §1 DONE items, against checked-in `queries/processed/` | all verified |
 | `mise run test-conformance` (Rust, CLI, JS WASM, browser, Elixir) | **all five pass** after the §3 fix: Rust 138, CLI 115, JS 115, browser 24, Elixir 115 |
@@ -2526,7 +2526,7 @@ rev lag alone. Measured against the current workspace:
 all 115 parser packages installed
  38 at the revision languages.toml pins
  77 built from an older revision
-  0 carrying language.json
+  0 carrying lumis.json
 ```
 
 No `@lumis-sh/wasm-*` package has been republished in the new format yet, and 77 predate the
@@ -2735,7 +2735,7 @@ without a runtime release is the point of this change, and pinning versions in
 the generated catalog would reintroduce exactly the release coupling it removes.
 
 Integrity metadata does not help either. The SHA-256 is read from the same
-`language.json` that `@latest` resolved, so a bad-but-self-consistent publish
+`lumis.json` that `@latest` resolved, so a bad-but-self-consistent publish
 verifies cleanly. The guard has to sit before publication, not after.
 
 That guard is `queries.yml`: every language compiles its processed queries
@@ -2747,7 +2747,7 @@ package is built.
 
 `formatVersion` was two unrelated things sharing a name, with opposite verdicts.
 
-**The runtime gate** lived in `language.json` and was read by *nothing* except two equality checks
+**The runtime gate** lived in `lumis.json` and was read by *nothing* except two equality checks
 (`package.rs`, `languages.ts`). Since neither runtime sets `deny_unknown_fields` — and JavaScript
 ignores extra keys — additive format changes already worked; the gate was what blocked them. Against
 `@latest` it guaranteed a simultaneous fleet-wide break on any bump, in exchange for catching one
@@ -2760,7 +2760,7 @@ reintroduced, and the rule it implies: a change to the *meaning* of an existing 
 new field instead.
 
 Safe to do now precisely because the v3 format has never been published — §2 measured "0 carrying
-`language.json`". There is no deployed client expecting the field, in either direction.
+`lumis.json`". There is no deployed client expecting the field, in either direction.
 
 **The release-time signal** is kept. `lumis.formatVersion` in the published npm `package.json` is
 read by `scripts/wasm-needed.py` to decide whether an artifact needs republishing. No client ever
@@ -2869,7 +2869,7 @@ Consequences worth knowing:
 
 - `Lumis.highlight/2` raises for a language that is not loaded, naming it and how to load it.
 - `lumis highlight` errors instead of downloading; `lumis parsers cache` is the only path in.
-- `lumis parsers cache` now also writes `language.json`, so a cache is self-sufficient. It was
+- `lumis parsers cache` now also writes `lumis.json`, so a cache is self-sufficient. It was
   writing only the parser, which worked solely because highlighting could re-fetch the metadata.
 - `Lumis.Languages.load(:all)` exists for callers who want the whole catalog.
 - `LanguageStore` distinguishes *reachable without the network* (source directory or cache) from
@@ -2942,7 +2942,7 @@ be stated in the PR body, the changelog, and an npm deprecation notice on
 `benchmarks/elixir-runtime.md` is a model of how to present this: honest numbers, both directions.
 Do the same for JS.
 
-### 4.7 The same `language.json` is accepted by Rust and rejected by JavaScript — new
+### 4.7 The same `lumis.json` is accepted by Rust and rejected by JavaScript — new
 
 **Reproduced, not inferred.** This is the clearest violation of "all runtimes produce the same
 output": one input, two verdicts.
@@ -3217,7 +3217,7 @@ From the first pass:
 
 ## 7. What's good
 
-- The `language.json` package format is the right unit: parser + queries + integrity + provenance
+- The `lumis.json` package format is the right unit: parser + queries + integrity + provenance
   released atomically, so a query fix ships without a runtime release. That is a genuine
   improvement over the old split.
 - `wasm-needed.py` hashing the full definition (rev + aliases + all four query files) instead of
@@ -3434,7 +3434,7 @@ Added since the review was written:
 Raised by the CI work itself:
 
 19. Publishing the language packages is what unblocks the last of this. Nothing has shipped a
-    `language.json` yet, so every resolve falls to a CDN 404 unless a parser is staged or cached.
+    `lumis.json` yet, so every resolve falls to a CDN 404 unless a parser is staged or cached.
     That is why the suites point at staged parsers rather than the network, and why an end-to-end
     download has never run. Not a blocker — CI validates the packaging by building it — but the
     first publish is the first real proof.

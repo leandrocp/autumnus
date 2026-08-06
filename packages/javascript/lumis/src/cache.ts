@@ -101,7 +101,7 @@ async function fetchLanguagePackage(
 }
 
 /**
- * Also write the package where the Rust store reads it, as `<suffix>.language.json`.
+ * Also write the package where the Rust store reads it, as `<suffix>.lumis.json`.
  *
  * Node highlights through the Wasmtime addon by default, and that store names
  * this file differently from the JavaScript cache. Prefetching would otherwise
@@ -121,11 +121,7 @@ async function writeSharedLanguagePackage(
 
   const parsers = await wasmCacheDir(directory);
   await mkdir(parsers, { recursive: true });
-  await writeFile(
-    join(parsers, `${suffix}.language.json`),
-    JSON.stringify(packageMetadata),
-    "utf8",
-  );
+  await writeFile(join(parsers, `${suffix}.lumis.json`), JSON.stringify(packageMetadata), "utf8");
 }
 
 /**

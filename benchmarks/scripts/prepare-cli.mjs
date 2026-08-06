@@ -38,7 +38,7 @@ for (const language of languages) {
   if (!local) throw new Error(`missing local language package ${packageName}`);
   const metadata = JSON.parse(await readFile(local.metadataPath, "utf8"));
   const parser = metadata.parser;
-  await copyFile(local.metadataPath, resolve(dataDir, "parsers", `${language}.language.json`));
+  await copyFile(local.metadataPath, resolve(dataDir, "parsers", `${language}.lumis.json`));
   await copyFile(
     local.wasmPath,
     resolve(dataDir, "parsers", `${parser.name}-${metadata.version}-${parser.sha256}.wasm`),

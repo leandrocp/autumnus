@@ -1,6 +1,6 @@
 # Language-package validation corpus
 
-One `language.json` document per file. Every runtime that parses a language package must reach the
+One `lumis.json` document per file. Every runtime that parses a language package must reach the
 **same accept/reject verdict** on every file here.
 
 - `valid/` — must parse and validate.

@@ -6,7 +6,7 @@
  * while Node keeps one to avoid duplicate downloads.
  */
 
-/** How long a cached `language.json` is trusted before it is refreshed. */
+/** How long a cached `lumis.json` is trusted before it is refreshed. */
 export const PACKAGE_CACHE_TTL_MS = 60 * 60 * 1000;
 
 /** When a lock file is old enough that its owner is presumed dead. */

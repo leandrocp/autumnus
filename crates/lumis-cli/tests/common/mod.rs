@@ -110,7 +110,7 @@ fn build_language_fixtures() -> PathBuf {
             .strip_prefix("@lumis-sh/wasm-")
             .unwrap();
         fs::write(
-            parsers.join(format!("{suffix}.language.json")),
+            parsers.join(format!("{suffix}.lumis.json")),
             serde_json::to_vec(&package).unwrap(),
         )
         .unwrap();

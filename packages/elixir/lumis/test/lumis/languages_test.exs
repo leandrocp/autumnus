@@ -134,7 +134,7 @@ defmodule Lumis.LanguagesTest do
       assert {:ok, [path]} = Lumis.Languages.cache(["python"])
 
       assert File.exists?(path)
-      assert File.exists?(Path.join([@store, "parsers", "python.language.json"]))
+      assert File.exists?(Path.join([@store, "parsers", "python.lumis.json"]))
     end
 
     test "reports an unknown language" do

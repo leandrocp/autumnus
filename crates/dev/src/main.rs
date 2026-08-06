@@ -2772,7 +2772,7 @@ fn stage_wasm(name: &str) -> Result<()> {
     };
     language_package.validate()?;
     fs::write(
-        format!("{out}/language.json"),
+        format!("{out}/lumis.json"),
         format!("{}\n", serde_json::to_string_pretty(&language_package)?),
     )?;
 
@@ -2812,8 +2812,8 @@ fn stage_wasm(name: &str) -> Result<()> {
     fs::create_dir_all(local)?;
     let suffix = wasm_package_suffix(wasm_name);
     fs::copy(
-        format!("{out}/language.json"),
-        format!("{local}/{suffix}.language.json"),
+        format!("{out}/lumis.json"),
+        format!("{local}/{suffix}.lumis.json"),
     )?;
     fs::copy(
         &wasm_file,
@@ -2874,7 +2874,7 @@ fn stage_test_parsers(out: &Path) -> Result<()> {
         package.validate()?;
 
         fs::write(
-            parsers.join(format!("{}.language.json", wasm_package_suffix(&wasm_name))),
+            parsers.join(format!("{}.lumis.json", wasm_package_suffix(&wasm_name))),
             serde_json::to_vec(&package)?,
         )?;
         fs::write(parsers.join(parser_filename(&package)), &wasm)?;
@@ -3514,7 +3514,12 @@ mod tests {
             ),
         ]);
 
-        let catalog = render_language_catalog(&parsers, &order, &bundles)
+        let versions = BTreeMap::from([
+            ("@lumis-sh/wasm-alpha".to_string(), "1.2.3".to_string()),
+            ("@lumis-sh/wasm-shared".to_string(), "4.5.6".to_string()),
+        ]);
+
+        let catalog = render_language_catalog(&parsers, &order, &bundles, &versions)
             .expect("catalog should be generated");
 
         assert!(catalog.find("\"zeta\"").unwrap() < catalog.find("\"alpha\"").unwrap());
@@ -3523,6 +3528,9 @@ mod tests {
         // `parsers = "all"` expands to the catalog, in the same order.
         assert!(catalog.contains("\"full\" => [\"zeta\", \"alpha\"]"));
         assert!(catalog.contains("\"web\" => [\"alpha\"]"));
+        // A pin per package, so the runtime asks for a version rather than @latest.
+        assert!(catalog.contains("version: \"1.2.3\""));
+        assert!(catalog.contains("version: \"4.5.6\""));
     }
 
     // Bundle membership is a cross-runtime promise: `@lumis-sh/wasm-bundle-web` and

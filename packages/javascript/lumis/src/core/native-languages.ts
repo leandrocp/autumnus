@@ -366,7 +366,7 @@ export function createNativeLanguagesModule(
         const { fileURLToPath } = await import("node:url");
         const read = async (name: string) => readFile(fileURLToPath(new URL(name, root)));
 
-        const manifest = await read("language.json");
+        const manifest = await read("lumis.json");
         const packageJson = manifest.toString("utf8");
         const metadata = parseLanguagePackage(manifest, packageName);
         const packaged = Object.entries(metadata.languages).find(

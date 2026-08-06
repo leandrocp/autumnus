@@ -111,7 +111,7 @@ containing:
 - the matching highlight, injection, locals, and bracket queries
 - parser size, SHA-256, grammar name, and package version
 
-During staging, `crates/dev` serializes those inputs into `language.json`. The
+During staging, `crates/dev` serializes those inputs into `lumis.json`. The
 manifest is published inside the language package and is not checked in.
 
 Changing a parser or one of its queries publishes only that language package.
@@ -237,7 +237,7 @@ lumis parsers cache rust javascript      # CLI
 mix lumis.languages.cache rust javascript # Elixir
 ```
 
-Both write a self-sufficient directory — parser bytes plus the `language.json`
+Both write a self-sufficient directory — parser bytes plus the `lumis.json`
 that names them — so pointing `LUMIS_DATA_DIR` at it is all a deployment needs.
 Both go through `LanguageStore::cache_language`, which needs no Wasmtime
 runtime, so the two commands cannot disagree about what a prepared cache

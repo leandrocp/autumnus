@@ -111,7 +111,7 @@ impl Fetcher for NoNetwork {
 
 /// Where a store keeps and looks for assets.
 pub struct StoreConfig {
-    /// Directory holding `language.json` and parser files, both the ones this
+    /// Directory holding `lumis.json` and parser files, both the ones this
     /// store downloads and any staged into it ahead of time.
     pub cache_dir: PathBuf,
 }
@@ -295,7 +295,7 @@ impl LanguageStore {
             .config
             .cache_dir
             .join("parsers")
-            .join(format!("{suffix}.language.json")))
+            .join(format!("{suffix}.lumis.json")))
     }
 
     /// Exact-version URL for this package's parser on the primary CDN.
@@ -343,13 +343,13 @@ impl LanguageStore {
     ) -> Result<LanguagePackage, StoreError> {
         let latest = || {
             self.fetch_from_cdn(
-                &format!("{package_name}@latest/language.json"),
+                &format!("{package_name}@latest/lumis.json"),
                 &format!("language package {package_name}"),
             )
         };
         let bytes = match crate::catalog::pinned_version(package_name) {
             Some(version) => match self.fetch_from_cdn(
-                &format!("{package_name}@{version}/language.json"),
+                &format!("{package_name}@{version}/lumis.json"),
                 &format!("language package {package_name}@{version}"),
             ) {
                 Ok(bytes) => bytes,

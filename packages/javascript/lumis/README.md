@@ -291,7 +291,7 @@ import {
 } from '@lumis-sh/lumis'
 
 configureLanguagePackageResolver(
-  packageName => `https://unpkg.com/${packageName}@latest/language.json`
+  packageName => `https://unpkg.com/${packageName}@latest/lumis.json`
 )
 
 configureWasmResolver((_language, wasm) =>
