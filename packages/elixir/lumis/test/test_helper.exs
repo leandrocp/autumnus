@@ -1,29 +1,40 @@
-# The suite never downloads: it points the store at the parser tree
-# `mise run stage-test-parsers` lays out, so what it exercises is the real
-# resolve-verify-load path. `config/config.exs` sets the paths, because it runs
-# before the store is built and `System.put_env` is invisible to the NIF.
-staged = Application.fetch_env!(:lumis, :wasm_path)
-repository_root = Path.expand("../../../..", __DIR__)
+# The suite never downloads: it copies the parser tree the `stage.test_parsers`
+# alias lays out into the store directory, so what it exercises is the real
+# resolve-verify-load path against packages that are already present.
+# `config/config.exs` sets the directory, because it runs before the store is
+# built and `System.put_env` is invisible to the NIF.
+data_dir = Application.fetch_env!(:lumis, :data_dir)
+staged = Path.expand("../../../../target/test-parsers/parsers", __DIR__)
 
-unless File.dir?(Path.join(staged, "parsers")) do
-  args = [
-    "run",
-    "-q",
-    "--manifest-path",
-    "crates/dev/Cargo.toml",
-    "--",
-    "stage-test-parsers",
-    staged
-  ]
+staged_parsers = Path.wildcard(Path.join(staged, "*.wasm"))
 
-  case System.cmd("cargo", args, cd: repository_root, stderr_to_stdout: true) do
-    {_output, 0} -> :ok
-    {output, status} -> raise "could not stage test parsers (exit #{status}):\n#{output}"
-  end
+if staged_parsers == [] do
+  raise """
+  no staged parsers at #{staged}
+
+  Run `mix test` from packages/elixir/lumis, which stages them first.
+  """
+end
+
+# A previous run that was interrupted leaves this behind, and a half-copied
+# store fails one unrelated test rather than announcing itself.
+File.rm_rf!(data_dir)
+File.mkdir_p!(Path.join(data_dir, "parsers"))
+File.cp_r!(staged, Path.join(data_dir, "parsers"))
+
+copied = Path.wildcard(Path.join([data_dir, "parsers", "*.wasm"]))
+
+if length(copied) != length(staged_parsers) do
+  raise """
+  staged store copied incompletely: #{length(copied)} of #{length(staged_parsers)} parsers
+
+  from: #{staged}
+  to:   #{Path.join(data_dir, "parsers")}
+  """
 end
 
 ExUnit.start(exclude: [:conformance])
 
 ExUnit.after_suite(fn _results ->
-  File.rm_rf(Application.fetch_env!(:lumis, :data_dir))
+  File.rm_rf(data_dir)
 end)

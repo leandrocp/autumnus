@@ -25,23 +25,9 @@ interface LanguagesToml {
   bundles?: Record<string, BundleEntry>;
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
-}
-
-function isLanguagesToml(value: unknown): value is LanguagesToml {
-  if (!isRecord(value)) return false;
-  if (!isRecord(value.parsers)) return false;
-  return true;
-}
-
 function readLanguagesToml(): LanguagesToml {
   const text = fs.readFileSync(LANGUAGES_TOML, "utf-8");
-  const parsed = parseToml(text);
-  if (!isLanguagesToml(parsed)) {
-    throw new Error("Invalid languages.toml structure");
-  }
-  return parsed;
+  return parseToml(text) as unknown as LanguagesToml;
 }
 
 function treeSitterCompatRange(): string {

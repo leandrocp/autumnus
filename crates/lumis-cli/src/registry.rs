@@ -22,7 +22,6 @@ impl Registry {
         let store = LanguageStore::new(
             StoreConfig {
                 cache_dir: data_dir.clone(),
-                source_dir: LanguageStore::source_dir_from_env(),
             },
             Box::new(HttpFetcher),
         );

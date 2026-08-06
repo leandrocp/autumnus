@@ -98,16 +98,22 @@ function injectedLanguages(markdown: Language, json: Language): Language[] {
   return index.runtimeKind() === "native" ? [markdown] : [markdown, json];
 }
 
+/// Point the store at an empty directory rather than unsetting it: unset falls
+/// back to the platform data directory, which on a developer machine already
+/// holds parsers and would quietly stop testing the resolver path.
 async function withoutStagedParsers<T>(run: () => Promise<T>): Promise<T> {
-  const staged = process.env.LUMIS_WASM_PATH;
-  delete process.env.LUMIS_WASM_PATH;
+  const previous = process.env.LUMIS_DATA_DIR;
+  const { mkdtempSync } = await import("node:fs");
+  const { tmpdir } = await import("node:os");
+  const { join } = await import("node:path");
+  process.env.LUMIS_DATA_DIR = mkdtempSync(join(tmpdir(), "lumis-empty-store-"));
   try {
     return await run();
   } finally {
-    if (staged === undefined) {
-      delete process.env.LUMIS_WASM_PATH;
+    if (previous === undefined) {
+      delete process.env.LUMIS_DATA_DIR;
     } else {
-      process.env.LUMIS_WASM_PATH = staged;
+      process.env.LUMIS_DATA_DIR = previous;
     }
   }
 }
@@ -519,17 +525,24 @@ describe("runtime parity", () => {
     try {
       const hl = await index.createHighlighter({
         languages: [{ ...markdown, wasm: ensureLocalWasm("markdown") }],
-        wasmResolver: (language, wasm) => ensureLocalParserWasm(language, wasm.name),
+        wasmResolver: (language, wasm) => {
+          if (language === "erlang") throw new Error("no erlang parser in this test");
+          return ensureLocalParserWasm(language, wasm.name);
+        },
       });
 
       const html = hl.highlight(
-        "```no-such-language\nplain\n```\n",
+        "```erlang\nplain\n```\n\n```no-such-language\nplain\n```\n",
         htmlLinked({ language: markdown }),
       );
 
-      // The document still highlights; only the fence is plain.
+      // The document still highlights; only the two fences are plain.
       expect(html).toContain('class="language-markdown"');
-      expect(warnings.join("\n")).toContain("no-such-language");
+      expect(warnings.join("\n")).toContain("erlang");
+      // "Load it up front, prefetch it, or use a bundle" is not advice that can
+      // apply to a name which is not a language, and injection queries produce
+      // those routinely: html asks for the raw `<script type=...>` value.
+      expect(warnings.join("\n")).not.toContain("no-such-language");
     } finally {
       console.warn = warn;
     }

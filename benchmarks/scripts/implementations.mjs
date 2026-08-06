@@ -7,11 +7,20 @@ export const implementations = [
   { id: "lumis-js-wasm", label: "Lumis JavaScript (web-tree-sitter)", runner: "mitata" },
   { id: "lumis-elixir", label: "Lumis Elixir", runner: "benchee" },
   { id: "lumis-cli", label: "Lumis CLI", runner: "hyperfine" },
+  { id: "syntect", label: "syntect", runner: "criterion" },
   { id: "shiki", label: "Shiki", runner: "mitata" },
   { id: "highlight-js", label: "highlight.js", runner: "mitata" },
-  { id: "syntect", label: "syntect", runner: "criterion" },
-  { id: "bat", label: "bat", runner: "hyperfine" },
+  // bat is a syntect front-end, and the showcase now gives syntect the same
+  // syntax set bat bundles, so it would render a second copy of that column.
+  // It stays here because timing a CLI against another CLI, and comparing their
+  // binary sizes, are still worth doing.
+  { id: "bat", label: "bat", runner: "hyperfine", showcase: false },
 ];
+
+/** The implementations the visual comparison renders, in display order. */
+export const showcaseImplementations = implementations.filter(
+  (implementation) => implementation.showcase !== false,
+);
 
 const implementationsById = new Map(
   implementations.map((implementation) => [implementation.id, implementation]),

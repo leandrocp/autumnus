@@ -11,3 +11,12 @@ allowBuilds:
   core-js-pure: true
   esbuild: true
   sharp: true
+minimumReleaseAgeExclude:
+  - '@shikijs/core@4.4.2'
+  - '@shikijs/engine-javascript@4.4.2'
+  - '@shikijs/engine-oniguruma@4.4.2'
+  - '@shikijs/langs@4.4.2'
+  - '@shikijs/primitive@4.4.2'
+  - '@shikijs/themes@4.4.2'
+  - '@shikijs/types@4.4.2'
+  - shiki@4.4.2

@@ -110,7 +110,7 @@ export function createNativeLanguagesModule(
    * writing to the platform cache directory.
    */
   function newNativeRuntime(): NativeRuntimeInstance {
-    binding.configureStore(process.env.LUMIS_DATA_DIR, process.env.LUMIS_WASM_PATH);
+    binding.configureStore(process.env.LUMIS_DATA_DIR);
     return new binding.NativeRuntime();
   }
 

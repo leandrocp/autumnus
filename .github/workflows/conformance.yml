@@ -129,7 +129,7 @@ jobs:
         if: matrix.elixir
         working-directory: packages/elixir/lumis
 
-      # The wasmtime runtimes resolve parsers through LUMIS_WASM_PATH, so they
+      # The wasmtime runtimes read parsers from the store directory, so they
       # can be pointed at parsers built here rather than at the committed
       # fixtures. That is what proves a parser built from languages.toml renders
       # byte-identically to the one the fixtures were generated with.
@@ -161,7 +161,7 @@ jobs:
 
       - run: mise run ${{ matrix.task }}
         env:
-          LUMIS_WASM_PATH: ${{ steps.parsers.outputs.path }}
+          LUMIS_DATA_DIR: ${{ steps.parsers.outputs.path }}
 
       - uses: actions/upload-artifact@v7
         if: failure() && matrix.browser

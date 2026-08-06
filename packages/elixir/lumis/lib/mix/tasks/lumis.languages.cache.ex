@@ -2,42 +2,61 @@ defmodule Mix.Tasks.Lumis.Languages.Cache do
   @moduledoc """
   Downloads exact, integrity-checked Lumis parser WASMs ahead of time.
 
-  Highlighting downloads what it needs on demand, so this is for deployments
-  that would rather pay at build time, or that run without network access.
+  Highlighting downloads what it needs on demand, so the first request for a
+  language pays for it. This moves that cost to build time: both the download
+  and the Wasmtime compile that follows it, which is the larger half. A host
+  with no network at all is then a side effect rather than the point.
 
       mix lumis.languages.cache elixir html javascript css
       mix lumis.languages.cache --all
       mix lumis.languages.cache --force elixir
-      mix lumis.languages.cache --output /app/lumis elixir
 
-  Parsers land under `$LUMIS_DATA_DIR` unless `--output` names a directory, and
-  are verified against the size and SHA-256 in their language package before
-  being written. An existing valid file is left alone unless `--force` is given.
+  Parsers land under `$LUMIS_DATA_DIR`, or wherever `config :lumis, data_dir:`
+  points, and are verified against the size and SHA-256 in their language
+  package before being written. An existing valid file is left alone unless `--force` is given.
 
-  A directory written here is complete: point `LUMIS_DATA_DIR` at it, or
-  `LUMIS_WASM_PATH` at its parent, and nothing needs the network.
+  A directory written here is complete: point `LUMIS_DATA_DIR` at it, or set
+  `config :lumis, data_dir:`, and nothing needs the network. It expects the
+  directory holding `parsers/`, not `parsers/` itself.
+
+  Each parser is also loaded once, so Wasmtime writes its compiled form beside
+  it and the first request pays neither the download nor the compile. Pass
+  `--no-compile` to skip that.
   """
 
   use Mix.Task
 
   @shortdoc "Downloads Lumis parser WASMs ahead of time"
 
-  @switches [all: :boolean, force: :boolean, output: :string]
-  @aliases [o: :output]
+  @switches [all: :boolean, force: :boolean, compile: :boolean]
 
   @impl Mix.Task
   def run(arguments) do
     Mix.Task.run("app.start")
     {options, languages} = parse_arguments(arguments)
 
-    case Lumis.Languages.cache(languages(options, languages), cache_options(options)) do
+    names = languages(options, languages)
+
+    case Lumis.Languages.cache(names, cache_options(options)) do
       {:ok, paths} -> Enum.each(paths, fn path -> Mix.shell().info(path) end)
+      {:error, reason} -> Mix.raise(reason)
+    end
+
+    if Keyword.get(options, :compile, true), do: compile(names)
+  end
+
+  # Downloading is only half the first-request cost: Wasmtime still compiles each
+  # parser to native code, which is the larger half. Loading them here writes
+  # that into `compiled/` beside the parsers, so an image ships both.
+  defp compile(names) do
+    case Lumis.Languages.load(names) do
+      :ok -> Mix.shell().info("compiled #{length(names)} parser(s)")
       {:error, reason} -> Mix.raise(reason)
     end
   end
 
   defp parse_arguments(arguments) do
-    case OptionParser.parse(arguments, strict: @switches, aliases: @aliases) do
+    case OptionParser.parse(arguments, strict: @switches) do
       {options, languages, []} -> {options, languages}
       {_options, _languages, invalid} -> Mix.raise("invalid options: #{inspect(invalid)}")
     end
@@ -61,9 +80,5 @@ defmodule Mix.Tasks.Lumis.Languages.Cache do
 
   defp cache_options(options) do
     [force: options[:force] || false]
-    |> maybe_put(:directory, options[:output])
   end
-
-  defp maybe_put(options, _key, nil), do: options
-  defp maybe_put(options, key, value), do: Keyword.put(options, key, value)
 end

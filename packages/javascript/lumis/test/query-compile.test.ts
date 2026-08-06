@@ -21,7 +21,7 @@
  *
  * 1. the installed `@lumis-sh/wasm-*` package, when its recorded parser revision
  *    matches `languages.toml`
- * 2. `$LUMIS_WASM_PATH/parsers/<name>.wasm`
+ * 2. `$LUMIS_DATA_DIR/parsers/<name>.wasm`
  * 3. `tmp/wasm/build/<name>.wasm`, the output of `mise run wasm-build`
  * 4. `fixtures/parsers/<name>.wasm`, committed for grammars CI cannot build
  *
@@ -159,7 +159,7 @@ function resolveParser(id: string, entry: ParserEntry): { path: string } | { una
 
   const parser = wasmName(id, entry);
 
-  const sourceDirectory = process.env.LUMIS_WASM_PATH;
+  const sourceDirectory = process.env.LUMIS_DATA_DIR;
   if (sourceDirectory) {
     const prepared = join(sourceDirectory, "parsers", `${parser}.wasm`);
     if (existsSync(prepared)) return { path: prepared };

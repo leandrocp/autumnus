@@ -2,18 +2,29 @@
 
 macro_rules! define_catalog {
     (
-        $(
-            $id:literal => {
-                aliases: [$($alias:literal),* $(,)?],
-                package_name: $package_name:literal
-            }
-        ),* $(,)?
+        languages: {
+            $(
+                $id:literal => {
+                    aliases: [$($alias:literal),* $(,)?],
+                    package_name: $package_name:literal,
+                    version: $version:literal
+                }
+            ),* $(,)?
+        },
+        bundles: {
+            $($bundle:literal => [$($member:literal),* $(,)?]),* $(,)?
+        } $(,)?
     ) => {
         #[derive(Clone, Copy, Debug, Eq, PartialEq)]
         pub struct LanguagePackageRef {
             pub id: &'static str,
             pub aliases: &'static [&'static str],
             pub package_name: &'static str,
+            /// The published version this build of Lumis expects. Requesting it
+            /// by name rather than `@latest` is what makes two machines render
+            /// a document identically, and what lets a staged directory be
+            /// complete instead of merely current.
+            pub version: &'static str,
         }
 
         pub static LANGUAGES: &[LanguagePackageRef] = &[
@@ -22,9 +33,24 @@ macro_rules! define_catalog {
                     id: $id,
                     aliases: &[$($alias),*],
                     package_name: $package_name,
+                    version: $version,
                 },
             )*
         ];
+
+        /// The language sets the `@lumis-sh/wasm-bundle-*` packages publish, so
+        /// every runtime can name the same group instead of listing members.
+        pub static BUNDLES: &[(&str, &[&str])] = &[
+            $(($bundle, &[$($member),*]),)*
+        ];
+
+        /// The version pinned for `package_name`, if the catalog knows it.
+        pub fn pinned_version(package_name: &str) -> Option<&'static str> {
+            LANGUAGES
+                .iter()
+                .find(|entry| entry.package_name == package_name)
+                .map(|entry| entry.version)
+        }
 
         pub fn find(name: &str) -> Option<&'static LanguagePackageRef> {
             LANGUAGES.iter().find(|entry| {
@@ -59,7 +85,8 @@ pub use package::{
 };
 #[cfg(feature = "wasm")]
 pub use runtime::{
-    HighlightOptions, HighlightOutput, InjectionResolution, LanguageSpec, Runtime, RuntimeError,
+    set_compile_cache_dir, HighlightOptions, HighlightOutput, InjectionResolution, LanguageSpec,
+    Runtime, RuntimeError,
 };
 #[cfg(feature = "wasm")]
 pub use store::HttpFetcher;

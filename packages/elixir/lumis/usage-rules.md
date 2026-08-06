@@ -97,15 +97,18 @@ Load ahead of time to keep the first download off a user's request:
 :ok = Lumis.Languages.load(["markdown", "elixir", "json"])
 ```
 
-For a host with no network access, download at build time:
+Better still, do it at image-build time so no request ever pays. A cold parser
+costs a download *and* a Wasmtime compile — the compile is the larger half, about
+8 s for seven parsers against 1.3 s once cached:
 
 ```sh
 mix lumis.languages.cache markdown elixir json
 ```
 
-The store checks `:wasm_path`, then the cache under `:data_dir`, then the CDN.
-Both default to `LUMIS_WASM_PATH` and `LUMIS_DATA_DIR`, and `:data_dir` is also
-where Wasmtime persists compiled modules.
+The store checks `:data_dir` and then the CDN. It defaults to `LUMIS_DATA_DIR`,
+and is also where Wasmtime persists compiled modules. Because the catalog pins
+an exact package version, anything already in that directory is served without
+revalidating it.
 
 ## Formatters
 

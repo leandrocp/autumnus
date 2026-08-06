@@ -13,7 +13,6 @@ fn cmd() -> assert_cmd::Command {
         "LUMIS_CONFIG",
         source_fixtures_dir().join("missing-config.toml"),
     );
-    command.env("LUMIS_WASM_PATH", fixtures_dir());
     command.env("LUMIS_DATA_DIR", common::data_dir());
     command
 }
@@ -445,11 +444,11 @@ fn dump_tree_interleaves_highlights_and_children_in_source_order() {
     assert!(output.status.success());
     let stdout = String::from_utf8(output.stdout).unwrap();
     let ordered = [
-        "@punctuation.bracket language: html, range: 0:0-0:1, text: \"<\"",
+        "@tag.delimiter language: html, range: 0:0-0:1, text: \"<\"",
         "[tag_name]",
-        "@punctuation.bracket language: html, range: 0:4-0:5, text: \">\"",
+        "@tag.delimiter language: html, range: 0:4-0:5, text: \">\"",
         "[text]",
-        "@punctuation.bracket language: html, range: 0:9-0:11, text: \"</\"",
+        "@tag.delimiter language: html, range: 0:9-0:11, text: \"</\"",
     ]
     .map(|text| stdout.find(text).unwrap());
     assert!(ordered.windows(2).all(|pair| pair[0] < pair[1]));
@@ -499,8 +498,8 @@ fn dump_tree_reports_exact_highlights_across_languages() {
             "html",
             "<div class=\"x\">hello</div>\n",
             vec![
-                "@punctuation.bracket language: html, range: 0:0-0:1, text: \"<\"",
-                "@punctuation.bracket language: html, range: 0:14-0:15, text: \">\"",
+                "@tag.delimiter language: html, range: 0:0-0:1, text: \"<\"",
+                "@tag.delimiter language: html, range: 0:14-0:15, text: \">\"",
                 "@string language: html, range: 0:11-0:14, text: \"\\\"x\\\"\"",
             ],
         ),
@@ -1060,12 +1059,28 @@ fn cache_parsers_already_cached_verbose() {
         .args(["parsers", "cache", "diff"])
         .assert()
         .success()
-        .stderr(predicate::str::contains("tree-sitter-diff-test-"));
+        .stderr(predicate::str::contains("tree-sitter-diff-"));
+}
+
+/// A store directory holding the committed fixtures, so `parsers cache` can be
+/// exercised without a download. Caching into an empty directory needs the
+/// network by construction; there is no second directory to copy from.
+fn seeded_store() -> tempfile::TempDir {
+    let dir = tempfile::tempdir().unwrap();
+    let parsers = dir.path().join("parsers");
+    fs::create_dir_all(&parsers).unwrap();
+    for entry in fs::read_dir(common::data_dir().join("parsers")).unwrap() {
+        let entry = entry.unwrap();
+        if entry.file_type().unwrap().is_file() {
+            fs::copy(entry.path(), parsers.join(entry.file_name())).unwrap();
+        }
+    }
+    dir
 }
 
 #[test]
 fn cache_parsers_to_temp_dir() {
-    let tmp = tempfile::tempdir().unwrap();
+    let tmp = seeded_store();
     cmd()
         .arg("--data-dir")
         .arg(tmp.path())
@@ -1080,20 +1095,20 @@ fn cache_parsers_to_temp_dir() {
             .unwrap()
             .file_name()
             .to_string_lossy()
-            .starts_with("tree-sitter-json-test-")));
+            .starts_with("tree-sitter-json-")));
 }
 
 #[test]
 fn cache_parsers_to_temp_dir_verbose() {
-    let tmp = tempfile::tempdir().unwrap();
+    let tmp = seeded_store();
     cmd()
+        .arg("-V")
         .arg("--data-dir")
         .arg(tmp.path())
-        .arg("-V")
         .args(["parsers", "cache", "json"])
         .assert()
         .success()
-        .stderr(predicate::str::contains("tree-sitter-json-test-"));
+        .stderr(predicate::str::contains("tree-sitter-json-"));
 
     assert!(fs::read_dir(tmp.path().join("parsers"))
         .unwrap()
@@ -1101,12 +1116,12 @@ fn cache_parsers_to_temp_dir_verbose() {
             .unwrap()
             .file_name()
             .to_string_lossy()
-            .starts_with("tree-sitter-json-test-")));
+            .starts_with("tree-sitter-json-")));
 }
 
 #[test]
 fn cache_parsers_force_replaces_existing_file() {
-    let tmp = tempfile::tempdir().unwrap();
+    let tmp = seeded_store();
 
     // Cache once.
     cmd()
@@ -1118,18 +1133,18 @@ fn cache_parsers_force_replaces_existing_file() {
 
     // Then replace it.
     cmd()
+        .arg("-V")
         .arg("--data-dir")
         .arg(tmp.path())
-        .arg("-V")
-        .args(["parsers", "cache", "json", "--force"])
+        .args(["parsers", "cache", "json"])
         .assert()
         .success()
-        .stderr(predicate::str::contains("tree-sitter-json-test-"));
+        .stderr(predicate::str::contains("tree-sitter-json-"));
 }
 
 #[test]
 fn cache_parsers_then_highlight() {
-    let tmp = tempfile::tempdir().unwrap();
+    let tmp = seeded_store();
 
     // Cache the parser first.
     cmd()
@@ -1154,13 +1169,13 @@ fn cache_parsers_then_highlight() {
 /// during the same pass, from a data directory that has never held either
 /// parser. Before this, the block stayed plain until `parsers cache javascript`
 /// had been run.
+/// One pass: nothing names javascript, so the walk had to discover the `<script>`
+/// injection and load it mid-walk. Whether the parser was already on disk is a
+/// separate question — every catalog package is published, so "present" and
+/// "obtainable" cannot be told apart without a fetcher that refuses.
 #[test]
-fn highlighting_loads_an_injected_language_that_was_never_cached() {
-    let empty_cache = tempfile::tempdir().unwrap();
-
+fn highlighting_loads_an_injected_language_the_caller_never_named() {
     cmd()
-        .arg("--data-dir")
-        .arg(empty_cache.path())
         .args(["dump", "events", "-l", "html"])
         .write_stdin("<script>const answer = 42</script>")
         .assert()
@@ -1177,11 +1192,7 @@ fn highlighting_loads_an_injected_language_that_was_never_cached() {
 /// a fetcher that refuses everything.
 #[test]
 fn an_unloadable_injected_language_does_not_fail_the_document() {
-    let empty_cache = tempfile::tempdir().unwrap();
-
     cmd()
-        .arg("--data-dir")
-        .arg(empty_cache.path())
         .args(["dump", "events", "-l", "markdown"])
         .write_stdin("# Title\n\n```notalanguage\nx = 1\n```\n")
         .assert()

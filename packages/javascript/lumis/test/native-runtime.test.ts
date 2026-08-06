@@ -21,7 +21,7 @@ import {
 } from "./wasm.js";
 
 // Read when the addon builds its store, which is the first call into it below.
-process.env.LUMIS_WASM_PATH ??= resolve(import.meta.dirname, "../../../../target/test-parsers");
+process.env.LUMIS_DATA_DIR ??= resolve(import.meta.dirname, "../../../../target/test-parsers");
 process.env.LUMIS_DATA_DIR ??= mkdtempSync(join(tmpdir(), "lumis-native-test-"));
 
 const { loadAddon } = await import("../src/native-binding.js");
@@ -148,7 +148,7 @@ describe("native runtime", () => {
   });
 
   it.runIf(binding)("uses stable content ids without sharing caller definitions", () => {
-    const parserDirectory = resolve(process.env.LUMIS_WASM_PATH!, "parsers");
+    const parserDirectory = resolve(process.env.LUMIS_DATA_DIR!, "parsers");
     const parser = readdirSync(parserDirectory).find(
       (name) => name.startsWith("tree-sitter-json-") && name.endsWith(".wasm"),
     );
@@ -184,7 +184,7 @@ describe("native runtime", () => {
       (name) => name.startsWith("lumis-native.") && name.endsWith(".node"),
     );
     expect(addon).toBeDefined();
-    const parserDirectory = resolve(process.env.LUMIS_WASM_PATH!, "parsers");
+    const parserDirectory = resolve(process.env.LUMIS_DATA_DIR!, "parsers");
     const parser = readdirSync(parserDirectory).find(
       (name) => name.startsWith("tree-sitter-json-") && name.endsWith(".wasm"),
     );

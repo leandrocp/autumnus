@@ -10,6 +10,7 @@ import markdown from "../langs/markdown.ts";
 import markdownInline from "../langs/markdown_inline.ts";
 import mdx from "../langs/mdx.ts";
 import python from "../langs/python.ts";
+import rust from "../langs/rust.ts";
 import { createHighlighter } from "../src/index.js";
 import {
   bbcodeScoped,
@@ -37,6 +38,7 @@ const langBundles: Record<string, Language> = {
   markdownInline,
   mdx,
   python,
+  rust,
 };
 
 function getLanguage(id: string): Language {
@@ -58,13 +60,14 @@ beforeAll(async () => {
     "markdown",
     "markdown_inline",
     "python",
+    "rust",
   ]);
   // No `wasm` overrides. Parser bytes and the package that describes them have
   // to come from the same place, or the integrity check rejects the pair: CI
   // stages freshly built parsers while `ensureLocalWasm` returns the committed
   // fixture, which is a different build of the same grammar.
   highlighter = await createHighlighter({
-    languages: [json, html, javascript, css, lua, markdown, markdownInline, mdx, python],
+    languages: [json, html, javascript, css, lua, markdown, markdownInline, mdx, python, rust],
   });
 }, 120_000);
 

@@ -46,3 +46,7 @@ checksum-*.exs
 
 # Release-local parsers cached during development and tests.
 /priv/wasm/
+
+# Parsers the store downloads. `_build/*/lib/lumis/priv` symlinks here when
+# Lumis is the project being built, so they would land in the working tree.
+priv/lumis/

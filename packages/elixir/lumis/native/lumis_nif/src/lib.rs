@@ -34,7 +34,6 @@ enum WasmJob {
     },
     CacheNamed {
         name: String,
-        directory: Option<std::path::PathBuf>,
         force: bool,
         reply: mpsc::SyncSender<Result<String, String>>,
     },
@@ -52,7 +51,6 @@ enum WasmJob {
 #[derive(Default)]
 struct StorePaths {
     data_dir: Option<std::path::PathBuf>,
-    wasm_path: Option<std::path::PathBuf>,
 }
 
 static STORE_PATHS: Lazy<RwLock<StorePaths>> = Lazy::new(|| RwLock::new(StorePaths::default()));
@@ -65,16 +63,8 @@ fn language_store(cache_dir: Option<std::path::PathBuf>) -> store::LanguageStore
         .or_else(|| paths.data_dir.clone())
         .or_else(|| std::env::var_os("LUMIS_DATA_DIR").map(std::path::PathBuf::from))
         .unwrap_or_else(default_data_dir);
-    let source_dir = paths
-        .wasm_path
-        .clone()
-        .or_else(store::LanguageStore::source_dir_from_env);
-
     store::LanguageStore::new(
-        store::StoreConfig {
-            cache_dir,
-            source_dir,
-        },
+        store::StoreConfig { cache_dir },
         Box::new(store::HttpFetcher),
     )
 }
@@ -133,18 +123,9 @@ impl WasmExecutor {
                         WasmJob::LoadNamed { name, reply } => {
                             let _ = reply.send(runtime.load_named_language(&name));
                         }
-                        WasmJob::CacheNamed {
-                            name,
-                            directory,
-                            force,
-                            reply,
-                        } => {
-                            let _ = reply.send(cache_named_language(
-                                runtime.as_ref(),
-                                &name,
-                                directory,
-                                force,
-                            ));
+                        WasmJob::CacheNamed { name, force, reply } => {
+                            let _ =
+                                reply.send(cache_named_language(runtime.as_ref(), &name, force));
                         }
                         WasmJob::Highlight {
                             source,
@@ -178,17 +159,11 @@ impl WasmExecutor {
             .map_err(|_| "WASM executor stopped while loading the language".to_string())?
     }
 
-    fn cache_named_language(
-        &self,
-        name: &str,
-        directory: Option<std::path::PathBuf>,
-        force: bool,
-    ) -> Result<String, String> {
+    fn cache_named_language(&self, name: &str, force: bool) -> Result<String, String> {
         let (reply, result) = mpsc::sync_channel(1);
         self.sender
             .send(WasmJob::CacheNamed {
                 name: name.to_string(),
-                directory,
                 force,
                 reply,
             })
@@ -292,19 +267,24 @@ fn executor() -> Result<&'static WasmExecutor, String> {
     EXECUTOR.as_ref().map_err(Clone::clone)
 }
 
-/// Point the store at `data_dir` and `wasm_path`, overriding `LUMIS_DATA_DIR`
-/// and `LUMIS_WASM_PATH`.
+/// Point the store at `data_dir`, overriding `LUMIS_DATA_DIR`.
 ///
 /// Returns false once the store exists, since the paths are read when it is
 /// built. `Lumis.Application` calls this before anything can use it.
 #[rustler::nif]
-fn configure_store(data_dir: Option<String>, wasm_path: Option<String>) -> bool {
+fn configure_store(data_dir: Option<String>) -> bool {
     if Lazy::get(&EXECUTOR).is_some() {
         return false;
     }
     let mut paths = STORE_PATHS.write();
     paths.data_dir = data_dir.map(std::path::PathBuf::from);
-    paths.wasm_path = wasm_path.map(std::path::PathBuf::from);
+
+    let compile_cache = paths
+        .data_dir
+        .clone()
+        .or_else(|| std::env::var_os("LUMIS_DATA_DIR").map(std::path::PathBuf::from))
+        .unwrap_or_else(default_data_dir);
+    lumis_wasm_runtime::set_compile_cache_dir(compile_cache);
     true
 }
 
@@ -328,18 +308,12 @@ fn load_language_by_name<'a>(env: Env<'a>, name: &str) -> Term<'a> {
 ///
 /// Returns the path the parser was written to.
 #[rustler::nif(schedule = "DirtyIo")]
-fn cache_language_by_name<'a>(
-    env: Env<'a>,
-    name: &str,
-    directory: Option<&str>,
-    force: bool,
-) -> Term<'a> {
+fn cache_language_by_name<'a>(env: Env<'a>, name: &str, force: bool) -> Term<'a> {
     let executor = match executor() {
         Ok(executor) => executor,
         Err(message) => return (error(), message).encode(env),
     };
-    let directory = directory.map(std::path::PathBuf::from);
-    match executor.cache_named_language(name, directory, force) {
+    match executor.cache_named_language(name, force) {
         Ok(path) => (ok(), path).encode(env),
         Err(message) => (error(), message).encode(env),
     }
@@ -347,23 +321,10 @@ fn cache_language_by_name<'a>(
 
 /// Caching needs no Wasmtime runtime, but it does do a TLS handshake, so it
 /// still runs on an executor thread rather than a dirty scheduler.
-fn cache_named_language(
-    runtime: &Runtime,
-    name: &str,
-    directory: Option<std::path::PathBuf>,
-    force: bool,
-) -> Result<String, String> {
-    let owned;
-    let store = match directory {
-        Some(directory) => {
-            owned = language_store(Some(directory));
-            &owned
-        }
-        None => runtime
-            .store()
-            .ok_or_else(|| "this runtime has no language store".to_string())?,
-    };
-    store
+fn cache_named_language(runtime: &Runtime, name: &str, force: bool) -> Result<String, String> {
+    runtime
+        .store()
+        .ok_or_else(|| "this runtime has no language store".to_string())?
         .cache_language(name, force)
         .map(|path| path.display().to_string())
         .map_err(|error| error.to_string())
@@ -381,6 +342,14 @@ fn language_package_refs() -> Vec<ExLanguagePackageRef<'static>> {
     catalog::LANGUAGES
         .iter()
         .map(ExLanguagePackageRef::from)
+        .collect()
+}
+
+#[rustler::nif]
+fn language_bundles() -> HashMap<&'static str, Vec<&'static str>> {
+    catalog::BUNDLES
+        .iter()
+        .map(|(name, members)| (*name, members.to_vec()))
         .collect()
 }
 

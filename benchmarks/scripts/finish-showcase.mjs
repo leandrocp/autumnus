@@ -5,95 +5,207 @@ import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { basename, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { implementations } from "./implementations.mjs";
+import { showcaseImplementations } from "./implementations.mjs";
 
 const benchmarksDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const repoDir = resolve(benchmarksDir, "..");
 const generatedDir = resolve(benchmarksDir, "showcase/generated");
-const fragmentsDir = resolve(generatedDir, "fragments");
-const sourcePath = resolve(generatedDir, "assets/webgpu_compute_reduce.html");
-const source = await readFile(sourcePath, "utf8");
-const sourceBytes = Buffer.byteLength(source);
-const sourceLines = source.split("\n").length;
+const assetsDir = resolve(generatedDir, "assets");
+const documents = JSON.parse(await readFile(resolve(assetsDir, "documents.json"), "utf8"));
 
-await mkdir(fragmentsDir, { recursive: true });
+// A theme is only worth comparing if it actually reached the scopes a language
+// turns on, so every document names fragments that must appear. A document with
+// no entry here fails rather than being silently exempt from the check.
+const scopeExpectations = {
+  webgpu: [
+    ["HTML tag delimiter", '<span style="color: #8be9fd;">&lt;</span>'],
+    ["HTML tag", '<span style="color: #8be9fd;">title</span>'],
+    ["HTML attribute", '<span style="color: #50fa7b;">lang</span>'],
+    [
+      "HTML title text",
+      '<span style="color: #ff79c6; font-weight: bold;">three.js webgpu - compute reduction</span>',
+    ],
+    ["injected CSS property", '<span style="color: #bd93f9;">background-color</span>'],
+    ["injected JSON key", '<span style="color: #bd93f9;">&quot;imports&quot;</span>'],
+    ["injected JavaScript keyword", '<span style="color: #ff79c6;">import</span>'],
+  ],
+  ripgrep: [
+    ["Rust keyword", '<span style="color: #ff79c6;">pub</span>'],
+    ["Rust type", '<span style="color: #a4ffff;">SearcherBuilder</span>'],
+    ["Rust builtin type", '<span style="color: #8be9fd;">usize</span>'],
+    ["Rust function", '<span style="color: #50fa7b;">new</span>'],
+    ["Rust field", '<span style="color: #ffb86c;">config</span>'],
+    ["Rust attribute", '<span style="color: #50fa7b;">derive</span>'],
+    ["Rust comment", '<span style="color: #6272a4;">// always required.</span>'],
+  ],
+  phoenix: [
+    ["Elixir keyword", '<span style="color: #ff79c6;">end</span>'],
+    ["Elixir module", '<span style="color: #ffb86c;">Phoenix.Component</span>'],
+    ["Elixir atom", '<span style="color: #bd93f9;">:string</span>'],
+    ["Elixir sigil", '<span style="color: #50fa7b;">~</span>'],
+    ["injected HEEx tag", '<span style="color: #8be9fd;">div</span>'],
+    ["injected HEEx attribute", '<span style="color: #50fa7b;">class</span>'],
+  ],
+  go: [
+    ["Go keyword", '<span style="color: #ff79c6;">return</span>'],
+    ["Go builtin type", '<span style="color: #8be9fd;">string</span>'],
+    ["Go type", '<span style="color: #a4ffff;">encodeState</span>'],
+    ["Go function", '<span style="color: #50fa7b;">WriteString</span>'],
+    ["Go parameter", '<span style="color: #ffb86c;">opts</span>'],
+    ["Go comment", '<span style="color: #6272a4;">// an error.</span>'],
+  ],
+  readme: [
+    ["Markdown heading", '<span style="color: #ff79c6;">## Features</span>'],
+    ["injected HTML tag", '<span style="color: #8be9fd;">img</span>'],
+    ["injected Rust type", '<span style="color: #a4ffff;">HtmlInlineBuilder</span>'],
+    ["injected Elixir atom", '<span style="color: #bd93f9;">:html_inline</span>'],
+    ["injected JavaScript keyword", '<span style="color: #ff79c6;">await</span>'],
+  ],
+  shadcn: [
+    ["TSX keyword", '<span style="color: #ff79c6;">const</span>'],
+    ["TSX type", '<span style="color: #a4ffff;">ComponentProps</span>'],
+    ["TSX builtin type", '<span style="color: #8be9fd;">boolean</span>'],
+    ["JSX attribute", '<span style="color: #50fa7b;">className</span>'],
+    ["TSX constant", '<span style="color: #bd93f9;">SIDEBAR_WIDTH</span>'],
+    ["TSX string", '<span style="color: #f1fa8c;">&quot;button&quot;</span>'],
+  ],
+};
 
 const commandEnv = {
   ...process.env,
   XDG_CACHE_HOME: resolve(repoDir, "target/benchmarks/cli/xdg-cache"),
   LUMIS_DATA_DIR: resolve(repoDir, "target/benchmarks/cli/data"),
   LUMIS_CONFIG: resolve(repoDir, "target/benchmarks/cli/missing-config.toml"),
-  BAT_OPTS: "",
-  BAT_PAGER: "cat",
-  PAGER: "cat",
-  CLICOLOR_FORCE: "1",
 };
-delete commandEnv.NO_COLOR;
 
 const lumisBinary = resolve(
   repoDir,
   "target/benchmarks/rust-target/release",
   process.platform === "win32" ? "lumis.exe" : "lumis",
 );
-const lumisCli = run(lumisBinary, [
-  "--data-dir",
-  commandEnv.LUMIS_DATA_DIR,
-  "highlight",
-  "--language",
-  "html",
-  "--formatter",
-  "html-inline",
-  "--theme",
-  "dracula",
-  sourcePath,
-]);
-validateHtml(lumisCli, "Lumis CLI");
-await writeFile(resolve(fragmentsDir, "lumis-cli.html"), lumisCli);
 
-const bat = run(findBat(), [
-  "--no-config",
-  "--paging=never",
-  "--style=plain",
-  "--color=always",
-  "--language=html",
-  "--theme=Dracula",
-  sourcePath,
-]);
-const batHtml = `<pre style="background-color:#282a36;color:#f8f8f2"><code>${ansiToHtml(
-  bat,
-)}</code></pre>`;
-validateHtml(batHtml, "bat");
-await writeFile(resolve(fragmentsDir, "bat.html"), batHtml);
+// Each implementation renders with its own Dracula, because each consumes a
+// different theme format. Some colour differences are therefore about the theme
+// rather than the parse, and the page has to say so rather than let a reader
+// assume otherwise.
+const benchmarkDependencies = JSON.parse(
+  await readFile(resolve(benchmarksDir, "javascript/package.json"), "utf8"),
+).dependencies;
+const benchmarkCargo = await readFile(resolve(benchmarksDir, "rust/Cargo.toml"), "utf8");
+const crateVersion = (name) =>
+  benchmarkCargo.match(new RegExp(`^${name} = "([^"]+)"`, "m"))?.[1] ?? "unknown";
+const lumisVersion = JSON.parse(
+  await readFile(resolve(repoDir, "packages/javascript/lumis/package.json"), "utf8"),
+).version;
+
+const provenance = {
+  syntect: {
+    version: `syntect ${crateVersion("syntect")} with two-face ${crateVersion("two-face")}`,
+    theme: "dracula/sublime Dracula.tmTheme, pinned by SHA-256",
+  },
+  shiki: {
+    version: `shiki ${benchmarkDependencies.shiki}`,
+    theme: "Shiki's bundled dracula theme",
+  },
+  "highlight-js": {
+    version: `highlight.js ${benchmarkDependencies["highlight.js"]}`,
+    theme: "highlight.js styles/base16/dracula.css",
+  },
+};
 
 const manifest = {
-  schemaVersion: 2,
-  fixture: {
-    name: "Three.js webgpu_compute_reduce.html",
-    source:
-      "https://github.com/mrdoob/three.js/blob/6365c1a0af6a32ed45f99712197555fee2f4b24a/examples/webgpu_compute_reduce.html",
-    sha256: createHash("sha256").update(source).digest("hex"),
-    bytes: sourceBytes,
-    lines: sourceLines,
-    injections: ["CSS", "JSON", "JavaScript"],
-  },
+  schemaVersion: 4,
   theme: {
     name: "Dracula",
     source:
       "https://github.com/dracula/sublime/blob/d490b57c08f3d110ff61a07ec6edcc1ed9e24a63/Dracula.tmTheme",
   },
-  implementations: [],
-};
-
-for (const { id, label } of implementations) {
-  const fragment = await readFile(resolve(fragmentsDir, `${id}.html`), "utf8");
-  validateHtml(fragment, label);
-  if (id.startsWith("lumis-")) validateLumisScopes(fragment, label);
-  const page = pageHtml({ fragment, label });
-  await writeFile(resolve(generatedDir, `${id}.html`), page);
-  manifest.implementations.push({
+  implementations: showcaseImplementations.map(({ id, label }) => ({
     id,
     label,
-    outputBytes: Buffer.byteLength(fragment),
+    version: provenance[id]?.version ?? `Lumis ${lumisVersion}`,
+    theme: provenance[id]?.theme ?? "Neovim Dracula colorscheme, extracted by this repository",
+  })),
+  documents: [],
+};
+
+for (const document of documents) {
+  const expectations = scopeExpectations[document.id];
+  if (!expectations) {
+    throw new Error(`showcase document ${document.id} has no scope expectations`);
+  }
+
+  const sourcePath = resolve(assetsDir, document.file);
+  const source = await readFile(sourcePath, "utf8");
+  const sourceBytes = Buffer.byteLength(source);
+  const sourceLines = source.split("\n").length;
+  const fragmentsDir = resolve(generatedDir, "fragments", document.id);
+  await mkdir(fragmentsDir, { recursive: true });
+  await mkdir(resolve(generatedDir, document.id), { recursive: true });
+
+  const lumisCli = run(lumisBinary, [
+    "--data-dir",
+    commandEnv.LUMIS_DATA_DIR,
+    "highlight",
+    "--language",
+    document.language,
+    "--formatter",
+    "html-inline",
+    "--theme",
+    "dracula",
+    sourcePath,
+  ]);
+  validateHtml(lumisCli, sourceBytes, "Lumis CLI");
+  await writeFile(resolve(fragmentsDir, "lumis-cli.html"), lumisCli);
+
+  const outputs = [];
+  const lumisFragments = [];
+
+  const unsupported = new Set(document.unsupported);
+
+  for (const { id, label } of showcaseImplementations) {
+    // An implementation that renders nothing has to have said so: silence is only
+    // acceptable where it was declared, and a declaration that stops being true
+    // fails too, so the list can only shrink.
+    const fragment = await readFile(resolve(fragmentsDir, `${id}.html`), "utf8").catch(
+      () => undefined,
+    );
+    if (fragment === undefined) {
+      if (!unsupported.has(id)) {
+        throw new Error(`${label} produced no output for ${document.id}`);
+      }
+      continue;
+    }
+    if (unsupported.has(id)) {
+      throw new Error(
+        `${label} is declared unsupported for ${document.id} but produced output; remove it from the list`,
+      );
+    }
+
+    validateHtml(fragment, sourceBytes, label);
+    if (id.startsWith("lumis-")) {
+      validateLumisScopes(fragment, label, document, expectations);
+      lumisFragments.push({ label, fragment });
+    }
+    const page = pageHtml({ fragment, label });
+    await writeFile(resolve(generatedDir, document.id, `${id}.html`), page);
+    outputs.push({ id, outputBytes: Buffer.byteLength(fragment) });
+  }
+
+  validateLumisAgreement(lumisFragments, document);
+
+  manifest.documents.push({
+    id: document.id,
+    label: document.label,
+    language: document.language,
+    languageLabel: document.languageLabel,
+    source: document.source,
+    sha256: createHash("sha256").update(source).digest("hex"),
+    bytes: sourceBytes,
+    lines: sourceLines,
+    injections: document.injections,
+    unsupported: document.unsupported,
+    outputs,
   });
 }
 
@@ -106,7 +218,8 @@ await Promise.all([
   ),
 ]);
 console.log(
-  `Generated ${implementations.length} visual comparisons from ${sourceLines.toLocaleString()} lines (${sourceBytes.toLocaleString()} bytes).`,
+  `Generated ${showcaseImplementations.length} visual comparisons of ${documents.length} documents ` +
+    `(${manifest.documents.map((d) => `${d.lines.toLocaleString()} lines`).join(", ")}).`,
 );
 
 function run(command, args) {
@@ -123,15 +236,7 @@ function run(command, args) {
   return result.stdout;
 }
 
-function findBat() {
-  for (const candidate of ["bat", "batcat"]) {
-    const result = spawnSync(candidate, ["--version"], { stdio: "ignore" });
-    if (!result.error && result.status === 0) return candidate;
-  }
-  throw new Error("bat is required");
-}
-
-function validateHtml(output, implementation) {
+function validateHtml(output, sourceBytes, implementation) {
   if (
     Buffer.byteLength(output) <= sourceBytes ||
     !output.includes("<pre") ||
@@ -141,21 +246,33 @@ function validateHtml(output, implementation) {
   }
 }
 
-function validateLumisScopes(output, implementation) {
-  const expected = [
-    ["HTML tag delimiter", '<span style="color: #8be9fd;">&lt;</span>'],
-    ["HTML tag", '<span style="color: #8be9fd;">title</span>'],
-    ["HTML attribute", '<span style="color: #50fa7b;">lang</span>'],
-    [
-      "HTML title text",
-      '<span style="color: #ff79c6; font-weight: bold;">three.js webgpu - compute reduction</span>',
-    ],
-    ["injected CSS property", '<span style="color: #bd93f9;">background-color</span>'],
-  ];
-  for (const [scope, fragment] of expected) {
+function validateLumisScopes(output, implementation, document, expectations) {
+  for (const [scope, fragment] of expectations) {
     if (!output.includes(fragment)) {
-      throw new Error(`${implementation} has the wrong Dracula style for ${scope}`);
+      throw new Error(
+        `${implementation} has the wrong Dracula style for ${scope} in ${document.id}`,
+      );
     }
+  }
+}
+
+// Every Lumis runtime has to render this document identically. The comparison is
+// the point of the showcase, so a divergence names the line rather than only
+// reporting that two hashes differ.
+function validateLumisAgreement(fragments, document) {
+  const [reference, ...rest] = fragments;
+  if (!reference) throw new Error(`the showcase produced no Lumis output for ${document.id}`);
+  const referenceLines = reference.fragment.split("\n");
+  for (const { label, fragment } of rest) {
+    if (fragment === reference.fragment) continue;
+    const lines = fragment.split("\n");
+    const differing = lines.findIndex((line, index) => line !== referenceLines[index]);
+    const at = differing === -1 ? Math.min(lines.length, referenceLines.length) : differing;
+    throw new Error(
+      `${label} does not match ${reference.label} on line ${at + 1} of ${document.id}\n` +
+        `  ${label}: ${lines[at] ?? "<no line>"}\n` +
+        `  ${reference.label}: ${referenceLines[at] ?? "<no line>"}`,
+    );
   }
 }
 
@@ -172,111 +289,25 @@ function pageHtml({ fragment, label }) {
     body { margin: 0; }
     main { padding: 16px; min-width: max-content; }
     pre { margin: 0 !important; padding: 20px !important; border: 1px solid #44475a; border-radius: 10px; overflow: visible !important; font: 13px/1.55 "SFMono-Regular", Consolas, "Liberation Mono", monospace !important; tab-size: 4; }
+    /* Every highlight.js theme ships a 1em pad on pre code.hljs, which would inset
+       one panel by 20px plus 1em while the rest are inset by 20px. */
+    pre code { padding: 0 !important; }
   </style>
 </head>
 <body>
   <main>${fragment}</main>
+  <script>
+    (function () {
+      var at = location.hash.match(/^#at=(\\d+),(\\d+)$/);
+      if (at) window.scrollTo(Number(at[1]), Number(at[2]));
+      addEventListener("scroll", function () {
+        parent.postMessage({ lumisShowcaseScroll: { x: scrollX, y: scrollY } }, "*");
+      }, { passive: true });
+    })();
+  </script>
 </body>
 </html>
 `;
-}
-
-function ansiToHtml(input) {
-  const foreground = {
-    30: "#21222c",
-    31: "#ff5555",
-    32: "#50fa7b",
-    33: "#f1fa8c",
-    34: "#bd93f9",
-    35: "#ff79c6",
-    36: "#8be9fd",
-    37: "#f8f8f2",
-    90: "#6272a4",
-    91: "#ff6e6e",
-    92: "#69ff94",
-    93: "#ffffa5",
-    94: "#d6acff",
-    95: "#ff92df",
-    96: "#a4ffff",
-    97: "#ffffff",
-  };
-  let style = {};
-  let html = "";
-  let offset = 0;
-  const pattern = new RegExp(`${String.fromCharCode(27)}\\[([0-9;]*)m`, "g");
-
-  for (const match of input.matchAll(pattern)) {
-    html += span(input.slice(offset, match.index), style);
-    const codes = (match[1] || "0").split(";").map(Number);
-    for (let index = 0; index < codes.length; index += 1) {
-      const code = codes[index];
-      if (code === 0) style = {};
-      else if (code === 1) style.bold = true;
-      else if (code === 3) style.italic = true;
-      else if (code === 4) style.underline = true;
-      else if (code === 22) delete style.bold;
-      else if (code === 23) delete style.italic;
-      else if (code === 24) delete style.underline;
-      else if (code === 39) delete style.color;
-      else if (foreground[code]) style.color = foreground[code];
-      else if (code === 38 && codes[index + 1] === 5) {
-        style.color = xtermColor(codes[index + 2]);
-        index += 2;
-      } else if (code === 38 && codes[index + 1] === 2) {
-        style.color = `rgb(${codes[index + 2]},${codes[index + 3]},${codes[index + 4]})`;
-        index += 4;
-      }
-    }
-    offset = match.index + match[0].length;
-  }
-  html += span(input.slice(offset), style);
-  if (html.includes("\u001b")) throw new Error("unsupported ANSI escape sequence in bat output");
-  return html;
-}
-
-function xtermColor(index) {
-  const basic = [
-    "#000000",
-    "#800000",
-    "#008000",
-    "#808000",
-    "#000080",
-    "#800080",
-    "#008080",
-    "#c0c0c0",
-    "#808080",
-    "#ff0000",
-    "#00ff00",
-    "#ffff00",
-    "#0000ff",
-    "#ff00ff",
-    "#00ffff",
-    "#ffffff",
-  ];
-  if (index < 16) return basic[index];
-  if (index < 232) {
-    const value = index - 16;
-    const levels = [0, 95, 135, 175, 215, 255];
-    return `rgb(${levels[Math.floor(value / 36)]},${levels[Math.floor((value % 36) / 6)]},${
-      levels[value % 6]
-    })`;
-  }
-  const gray = 8 + (index - 232) * 10;
-  return `rgb(${gray},${gray},${gray})`;
-}
-
-function span(value, style) {
-  if (!value) return "";
-  const declarations = [
-    style.color && `color:${style.color}`,
-    style.bold && "font-weight:700",
-    style.italic && "font-style:italic",
-    style.underline && "text-decoration:underline",
-  ].filter(Boolean);
-  const escaped = escapeHtml(value);
-  return declarations.length
-    ? `<span style="${declarations.join(";")}">${escaped}</span>`
-    : escaped;
 }
 
 function escapeHtml(value) {

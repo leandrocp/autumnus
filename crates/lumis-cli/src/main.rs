@@ -216,7 +216,7 @@ enum ThemesCommands {
 enum ParsersCommands {
     /// Cache parser WASMs so later runs skip the download
     #[command(
-        after_help = "Examples:\n  lumis parsers cache rust javascript\n  lumis parsers cache --all\n  lumis parsers cache rust --force"
+        after_help = "Examples:\n  lumis parsers cache rust javascript\n  lumis parsers cache --all\n  lumis parsers cache rust --force\n  lumis --data-dir /app/lumis parsers cache rust"
     )]
     Cache {
         /// Language names to cache (e.g. rust javascript elixir)
@@ -290,6 +290,7 @@ fn default_data_dir() -> PathBuf {
 fn main() -> Result<()> {
     let cli = Cli::parse();
     let data_dir = cli.data_dir.unwrap_or_else(default_data_dir);
+    lumis_wasm_runtime::set_compile_cache_dir(data_dir.clone());
     let config_path = cli.config.unwrap_or_else(config::default_path);
     let verbose = cli.verbose;
 

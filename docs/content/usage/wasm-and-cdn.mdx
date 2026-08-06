@@ -21,7 +21,7 @@ import TabItem from "@theme/TabItem";
 Lumis uses two terms consistently:
 
 - **load** makes a language available in the current runtime
-- **cache** persists verified parser bytes so later starts skip the download
+- **cache** persists verified parser bytes, and their compiled form, so later starts skip both
 
 ## Highlighting loads what a document needs
 
@@ -48,9 +48,10 @@ supply the injected language.
 
 ### Loading ahead of time
 
-Loading a parser takes 3-15 ms the first time and about 0.3 ms after.
-_Downloading_ one is the expensive part, so load ahead of time when you would
-rather not have a first request pay for it:
+A cold parser costs a download and then a Wasmtime compile. The compile is the
+larger half — seven parsers already on disk take about 8 s to compile, and 1.3 s
+once their compiled forms are cached — so load ahead of time rather than letting
+a first request pay for either:
 
 <Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
   <TabItem value="javascript" label="JavaScript">
@@ -83,7 +84,7 @@ lumis parsers cache rust javascript elixir
   </TabItem>
 </Tabs>
 
-### Preparing a cache for a host with no network
+### Filling the store at build time
 
 <Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
   <TabItem value="javascript" label="JavaScript">
@@ -112,7 +113,8 @@ lumis parsers cache rust javascript elixir
 
 Each writes a self-sufficient directory — parser bytes plus the metadata naming
 them — so pointing `LUMIS_DATA_DIR` at it is all the deployment needs. Pass
-`--all` to take the whole catalog.
+`--all` to take the whole catalog. The Elixir task also loads each parser, so
+the compiled forms travel with it and the first request pays neither cost.
 
 ## What ships where
 
@@ -149,6 +151,63 @@ planned feature, not a supported one. It previously existed in JavaScript only
 and was removed rather than shipped half-designed; it will return as a
 cross-runtime capability with a package-shaped input.
 :::
+
+## The store directory
+
+Everything Lumis downloads lives in one directory, and everything it needs it
+looks for there first. There is no second location to configure.
+
+```
+$LUMIS_DATA_DIR/
+  parsers/
+    elixir.language.json                              # package metadata
+    tree-sitter-elixir-0.26.2-<sha256>.wasm           # the parser
+  compiled/                                            # wasmtime's compiled modules
+  themes/
+```
+
+It defaults to your platform's data directory — `~/.local/share/lumis` on Linux
+and macOS, `%LOCALAPPDATA%\lumis` on Windows — and `LUMIS_DATA_DIR` points it
+somewhere else. In Elixir, `config :lumis, data_dir: "/app/lumis"` does the same
+and takes precedence. The CLI takes `--data-dir`. Every runtime that runs
+natively — the CLI, the Elixir NIF and the Node addon — shares it, so a parser
+downloaded by one is already there for the others.
+
+### Versions are pinned, so nothing is revalidated
+
+Each Lumis release records the exact package version it expects, and asks the
+CDN for that version rather than `@latest`. Two consequences worth relying on:
+
+- **A request never waits on the network for something already on disk.** A
+  package in the directory is the pinned one, so there is nothing to check.
+- **Two machines render a document identically.** Under `@latest`, which parser
+  you got depended on when your cache was last refreshed.
+
+Parser updates therefore arrive when you upgrade Lumis, not on their own. If a
+pinned version has been unpublished, Lumis warns and falls back to `@latest` so
+the language still works, but that machine is no longer guaranteed to match the
+others.
+
+### Warming it at build time
+
+Because the runtime only reads this one directory, filling it during a build is
+all that pre-warming requires:
+
+```dockerfile
+ENV LUMIS_DATA_DIR=/app/lumis
+RUN mix lumis.languages.cache elixir heex markdown json
+
+COPY --from=builder --chown=nobody:root /app/lumis /app/lumis
+ENV LUMIS_DATA_DIR=/app/lumis
+```
+
+The CLI writes the same layout with `lumis --data-dir /app/lumis parsers cache`.
+There is one directory and one way to name it, so a directory written this way is
+self-sufficient: parser bytes plus the metadata naming them.
+
+Bytes are checked against the size and SHA-256 their package declares before
+use, wherever they came from, and anything that fails is discarded rather than
+trusted — so a corrupted directory repairs itself.
 
 ## Default JavaScript behavior
 
@@ -190,10 +249,6 @@ installed or deployment-local language package
 runtime. Language packages and parser WASM go in `parsers/`, the CLI's custom
 themes in `themes/`, and Wasmtime's compiled modules in `compiled/`, so the CLI,
 Elixir and Node can share a single prepared directory.
-
-`LUMIS_WASM_PATH` names a second directory, read before the cache and never
-written to, for parsers you build or vendor yourself. It has the same
-`parsers/` layout.
 
 If a matching npm parser package is installed, such as `@lumis-sh/wasm-elixir`, Node can load that package directly before falling back to the resolver URL.
 

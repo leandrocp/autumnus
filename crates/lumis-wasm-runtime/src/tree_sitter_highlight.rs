@@ -1353,6 +1353,18 @@ where
                     self.source,
                 );
 
+                // `captures()` yields a match as soon as its first capture is found,
+                // so the content capture may still be ahead of us. Removing the match
+                // now would take that capture with it and lose the injection: Rust's
+                // macro rule captures `@_macro_name` before `(token_tree)
+                // @injection.content`, and its `#not-any-of?` can be decided from the
+                // name alone, so the match arrives holding only the name. Leave it in
+                // the stream and act on it when the content capture shows up.
+                if content_node.is_none() {
+                    self.sort_layers();
+                    continue 'main;
+                }
+
                 // Explicitly remove this match so that none of its other captures will remain
                 // in the stream of captures.
                 match_.remove();
@@ -1509,12 +1521,31 @@ where
                     {
                         continue;
                     }
+                    // MODIFICATION: a capture with no recognized highlight does not
+                    // win the node. nvim-treesitter marks helper captures `@_name`,
+                    // and Neovim skips them because they resolve to no highlight
+                    // group. Letting one win here would blank the node and, through
+                    // `remove()`, discard its match's other captures as well.
+                    if layer.config.highlight_indices[next_capture.index as usize].is_none() {
+                        continue;
+                    }
                     match_.remove();
                     capture = next_capture;
                     match_ = following_match;
                 } else {
                     break;
                 }
+            }
+
+            // A MISSING node is synthesised by error recovery, spans no bytes, and so
+            // can only ever produce an empty span. Skip it: this runtime and
+            // `web-tree-sitter` do not recover identically — given `write!(x, "y")`,
+            // the injected macro body parses to an `ERROR` here and to a
+            // `MISSING ";"` there — and highlighting the artefact would leak that
+            // disagreement into output the two are required to render identically.
+            if capture.node.is_missing() {
+                self.sort_layers();
+                continue 'main;
             }
 
             let current_highlight = layer.config.highlight_indices[capture.index as usize];

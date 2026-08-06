@@ -59,7 +59,7 @@ export interface NativeBinding {
   NativeRuntime: new () => NativeRuntimeInstance;
   runtimeKind(): string;
   /** `false` once the runtime has read them, which it does on first use. */
-  configureStore(dataDir?: string, wasmPath?: string): boolean;
+  configureStore(dataDir?: string): boolean;
 }
 
 let cachedBinding: NativeBinding | null | undefined;

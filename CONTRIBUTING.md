@@ -374,12 +374,12 @@ This requires `emcc` and `tree-sitter-cli`.
 
 A parser you have only built locally is not published, so every runtime looks it
 up on the CDN and fails with a 404. Stage it into a language package and point
-`LUMIS_WASM_PATH` at it:
+the store at it:
 
 ```sh
 mise run wasm-build kdl
 mise run wasm-stage kdl
-export LUMIS_WASM_PATH=$PWD/tmp/wasm/local
+export LUMIS_DATA_DIR=$PWD/tmp/wasm/local
 ```
 
 The CLI, Elixir and Node all read that directory before anything else, so
@@ -427,13 +427,13 @@ revision bump is validated before it is published rather than after.
   RSS; a parser that cannot be built does not fail its shard, but falls back to
   that copy and then to the published package.
 - **Conformance CI** builds the seventeen parsers the committed fixtures supply,
-  stages them with `wasm-stage`, and points `LUMIS_WASM_PATH` at the result, so
+  stages them with `wasm-stage`, and points `LUMIS_DATA_DIR` at the result, so
   the CLI, Elixir and Node native suites render from parsers built in that run.
 - **JavaScript CI** runs the direct-addon store tests in their own process against
-  that staged tree, then runs the remaining native-selected tests without
-  `LUMIS_WASM_PATH` before running the full Wasm-selected suite. The split is
-  intentional: staged assets take precedence over configured JavaScript
-  resolvers, so one process cannot honestly prove both paths.
+  a seeded copy of that store, then runs the remaining native-selected tests
+  against an empty one before running the full Wasm-selected suite. The split is
+  intentional: a parser already in the store takes precedence over configured
+  JavaScript resolvers, so one process cannot honestly prove both paths.
 
 That parser set comes from the fixture filenames, not from the languages named
 in the fixtures' expected events. A document can attempt a language that never

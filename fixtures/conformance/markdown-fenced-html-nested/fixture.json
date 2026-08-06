@@ -67,7 +67,7 @@
     },
     {
       "type": "start",
-      "scope": "punctuation.bracket",
+      "scope": "tag.delimiter",
       "language": "html"
     },
     {
@@ -101,7 +101,7 @@
     },
     {
       "type": "start",
-      "scope": "punctuation.bracket",
+      "scope": "tag.delimiter",
       "language": "html"
     },
     {
@@ -114,7 +114,7 @@
     },
     {
       "type": "start",
-      "scope": "punctuation.bracket",
+      "scope": "tag.delimiter",
       "language": "html"
     },
     {
@@ -140,7 +140,7 @@
     },
     {
       "type": "start",
-      "scope": "punctuation.bracket",
+      "scope": "tag.delimiter",
       "language": "html"
     },
     {
@@ -264,7 +264,7 @@
     },
     {
       "type": "start",
-      "scope": "punctuation.bracket",
+      "scope": "tag.delimiter",
       "language": "html"
     },
     {
@@ -290,7 +290,7 @@
     },
     {
       "type": "start",
-      "scope": "punctuation.bracket",
+      "scope": "tag.delimiter",
       "language": "html"
     },
     {
@@ -303,7 +303,7 @@
     },
     {
       "type": "start",
-      "scope": "punctuation.bracket",
+      "scope": "tag.delimiter",
       "language": "html"
     },
     {
@@ -329,7 +329,7 @@
     },
     {
       "type": "start",
-      "scope": "punctuation.bracket",
+      "scope": "tag.delimiter",
       "language": "html"
     },
     {
@@ -409,7 +409,7 @@
     },
     {
       "type": "start",
-      "scope": "punctuation.bracket",
+      "scope": "tag.delimiter",
       "language": "html"
     },
     {
@@ -435,7 +435,7 @@
     },
     {
       "type": "start",
-      "scope": "punctuation.bracket",
+      "scope": "tag.delimiter",
       "language": "html"
     },
     {
@@ -448,7 +448,7 @@
     },
     {
       "type": "start",
-      "scope": "punctuation.bracket",
+      "scope": "tag.delimiter",
       "language": "html"
     },
     {
@@ -474,7 +474,7 @@
     },
     {
       "type": "start",
-      "scope": "punctuation.bracket",
+      "scope": "tag.delimiter",
       "language": "html"
     },
     {

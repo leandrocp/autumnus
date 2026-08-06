@@ -66,9 +66,10 @@ the native addon precisely so it does not inherit that limit. Do not "fix" the
 browser by making the other runtimes match it.
 
 `ARCHITECTURE.md` has the full reasoning, including why pre-loading is an
-optimization rather than a requirement: loading is 3-15 ms and downloading is
-the expensive stage, so `load` exists to move a download off the first request,
-not to gate anything.
+optimization rather than a requirement. A cold parser costs a download and then
+a Wasmtime compile, and the compile is the larger half: seven parsers already on
+disk take about 8 s to compile and 1.3 s once `compiled/` is warm. `load` exists
+to move both off the first request, not to gate anything.
 
 ### Route work through `mise`
 
@@ -171,6 +172,9 @@ There is no per-package path list. `fmt-js` is `oxfmt "**/*.{ts,tsx,mjs,cjs,js,j
 - vendored parsers and vendored site assets — not ours to restyle
 - `dist/` — bundler output, which the next build would rewrite anyway
 - `samples/` and `fixtures/` — corpora whose exact bytes are the test
+- `benchmarks/shadcn_sidebar.tsx` — a vendored third-party file the showcase pins by SHA-256, so
+  formatting it would break the pin. The other vendored showcase documents are not JavaScript and
+  never matched the glob
 - `packages/javascript/themes/themes/` — 246 modules holding one long `JSON.stringify` line each; formatting them costs 28k lines for no readability, since nobody reads generated theme data
 - `lumis/langs/`, `lumis/src/generated/`, `lumis/src/tree-sitter-wasm.ts` — build output that is never committed. oxfmt reads only the `.gitignore` in its working directory, so paths ignored by a nested one have to be named here.
 

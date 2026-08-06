@@ -111,14 +111,14 @@ jobs:
       - run: pnpm --filter @lumis-sh/markdown-it-lumis run build
       - run: pnpm --filter @lumis-sh/rehype-lumis run build
       - run: pnpm --filter @lumis-sh/react run build
-      # The addon resolves parsers in Rust, so the downstream packages need the
-      # staged tree rather than the JavaScript resolvers the Wasm runtime uses.
+      # The addon resolves parsers in Rust, so the downstream packages read the
+      # store directly rather than the JavaScript resolvers the Wasm runtime uses.
       - run: pnpm --filter @lumis-sh/markdown-it-lumis run test
         env:
-          LUMIS_WASM_PATH: ${{ github.workspace }}/target/test-parsers
+          LUMIS_DATA_DIR: ${{ github.workspace }}/target/test-parsers
       - run: pnpm --filter @lumis-sh/rehype-lumis run test
         env:
-          LUMIS_WASM_PATH: ${{ github.workspace }}/target/test-parsers
+          LUMIS_DATA_DIR: ${{ github.workspace }}/target/test-parsers
       # Both runtimes, explicitly. vite.config.mjs defaults to Wasm, so leaving
       # this unset would run the same one twice and leave every native-only
       # resolver and lifetime behaviour uncovered.
@@ -126,12 +126,11 @@ jobs:
           native_runtime_data_dir="$(mktemp -d)"
           native_suite_data_dir="$(mktemp -d)"
           trap 'rm -rf "$native_runtime_data_dir" "$native_suite_data_dir"' EXIT
+          cp -R "$GITHUB_WORKSPACE/target/test-parsers/parsers" "$native_runtime_data_dir/"
           LUMIS_TEST_RUNTIME=native \
-            LUMIS_WASM_PATH="$GITHUB_WORKSPACE/target/test-parsers" \
             LUMIS_DATA_DIR="$native_runtime_data_dir" \
             pnpm --filter @lumis-sh/lumis exec vitest run test/native-runtime.test.ts
-          env -u LUMIS_WASM_PATH \
-            LUMIS_TEST_RUNTIME=native \
+          LUMIS_TEST_RUNTIME=native \
             LUMIS_DATA_DIR="$native_suite_data_dir" \
             pnpm --filter @lumis-sh/lumis exec vitest run \
               --exclude test/conformance.test.ts \
@@ -141,11 +140,11 @@ jobs:
       - run: |
           wasm_suite_data_dir="$(mktemp -d)"
           trap 'rm -rf "$wasm_suite_data_dir"' EXIT
-          env -u LUMIS_WASM_PATH \
-            LUMIS_TEST_RUNTIME=wasm \
+          cp -R "$GITHUB_WORKSPACE/target/test-parsers/parsers" "$wasm_suite_data_dir/"
+          LUMIS_TEST_RUNTIME=wasm \
             LUMIS_DATA_DIR="$wasm_suite_data_dir" \
             pnpm --filter @lumis-sh/lumis run test
       - run: pnpm --filter @lumis-sh/react run test
         env:
-          LUMIS_WASM_PATH: ${{ github.workspace }}/target/test-parsers
+          LUMIS_DATA_DIR: ${{ github.workspace }}/target/test-parsers
       - run: pnpm --dir packages/javascript run build:wasm-bundles && git diff --exit-code -- packages/javascript/wasm-bundle-*

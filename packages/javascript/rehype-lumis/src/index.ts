@@ -67,17 +67,25 @@ function parseFragment(html: string): RootContent[] {
   return fromHtml(html, { fragment: true }).children;
 }
 
-function renderBlock(
+async function renderBlock(
   highlighter: Highlighter,
   code: string,
   language: string | undefined,
   formatter: (language: string | undefined) => Formatter,
-): RootContent[] {
-  // A fence names its language, but a document does not get to decide which
-  // parsers are fetched and run. Anything not in `options.languages` renders
-  // unhighlighted, the same as an injected language the caller did not load.
-  const loaded = language != null && highlighter.languages.includes(language);
-  const html = highlighter.highlight(code, formatter(loaded ? language : undefined));
+): Promise<RootContent[]> {
+  // Every other runtime loads whatever a document names, and this plugin is not
+  // the place to invent a second rule. A fence naming something that cannot be
+  // loaded costs that block its highlighting, not the document its render.
+  let resolved = language;
+  if (resolved != null) {
+    try {
+      await highlighter.loadLanguage(resolved);
+    } catch {
+      resolved = undefined;
+    }
+  }
+
+  const html = highlighter.highlight(code, formatter(resolved));
 
   return parseFragment(html);
 }
@@ -109,13 +117,15 @@ const rehypeLumis: Plugin<[RehypeLumisOptions], Root> = function rehypeLumis(opt
       return "skip";
     });
 
-    const replacements = targets.map(({ parsed }) => {
-      try {
-        return renderBlock(highlighter, parsed.code, parsed.language, options.formatter);
-      } catch {
-        return undefined;
-      }
-    });
+    const replacements = await Promise.all(
+      targets.map(async ({ parsed }) => {
+        try {
+          return await renderBlock(highlighter, parsed.code, parsed.language, options.formatter);
+        } catch {
+          return undefined;
+        }
+      }),
+    );
 
     for (let i = targets.length - 1; i >= 0; i -= 1) {
       const target = targets[i];

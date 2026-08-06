@@ -580,6 +580,22 @@ impl Runtime {
         let loaded_here: typed_arena::Arena<Arc<LoadedLanguage>> = typed_arena::Arena::new();
         let unresolved: std::cell::RefCell<Vec<String>> = std::cell::RefCell::new(Vec::new());
 
+        // An injection query can name something that is not a language at all.
+        // html captures the raw `<script type=...>` value, so `type="module"`
+        // asks for "module" and `type="importmap"` for "importmap", each just
+        // before a more specific pattern injects javascript or json into the
+        // same block. Those blocks do highlight, so reporting the discarded
+        // name would warn about output that is correct.
+        let record_unresolved = |name: &str| {
+            if crate::catalog::find(name).is_none() {
+                return;
+            }
+            let mut unresolved = unresolved.borrow_mut();
+            if !unresolved.iter().any(|existing| existing == name) {
+                unresolved.push(name.to_string());
+            }
+        };
+
         let events = worker
             .highlighter
             .highlight(&root.highlight, source.as_bytes(), None, |injected| {
@@ -599,10 +615,7 @@ impl Runtime {
                         }
                     }
                     InjectionResolution::Unresolved => {
-                        let mut unresolved = unresolved.borrow_mut();
-                        if !unresolved.iter().any(|name| name == injected) {
-                            unresolved.push(injected.to_string());
-                        }
+                        record_unresolved(injected);
                         return None;
                     }
                     InjectionResolution::Fallback => {}
@@ -625,10 +638,7 @@ impl Runtime {
                 match self.load_through_store(id) {
                     Ok(loaded) => Some(&loaded_here.alloc(loaded).highlight),
                     Err(_) => {
-                        let mut unresolved = unresolved.borrow_mut();
-                        if !unresolved.iter().any(|name| name == id) {
-                            unresolved.push(id.to_string());
-                        }
+                        record_unresolved(id);
                         None
                     }
                 }
@@ -710,12 +720,31 @@ pub struct HighlightOutput {
     pub unresolved: Vec<String>,
 }
 
+static COMPILE_CACHE_DIR: RwLock<Option<std::path::PathBuf>> = RwLock::new(None);
+
+/// Keep compiled parser modules under `dir`, alongside the parsers themselves.
+///
+/// The engine is process-global and built once, so the last value set before the
+/// first [`Runtime`] is the one that takes effect and later calls do nothing.
+/// Callers that resolve a data directory of their own should pass it here,
+/// otherwise the cache follows `LUMIS_DATA_DIR` and a caller-supplied directory
+/// would hold the parsers while their compiled forms went somewhere unrelated.
+pub fn set_compile_cache_dir(dir: std::path::PathBuf) {
+    *COMPILE_CACHE_DIR
+        .write()
+        .expect("compile cache lock poisoned") = Some(dir);
+}
+
 fn cached_engine() -> Result<Engine, wasmtime::Error> {
     let mut config = Config::new();
-    let cache = std::env::var_os("LUMIS_DATA_DIR")
+    let cache = COMPILE_CACHE_DIR
+        .read()
+        .expect("compile cache lock poisoned")
+        .clone()
+        .or_else(|| std::env::var_os("LUMIS_DATA_DIR").map(std::path::PathBuf::from))
         .map(|root| {
             let mut cache_config = CacheConfig::new();
-            cache_config.with_directory(std::path::PathBuf::from(root).join("compiled"));
+            cache_config.with_directory(root.join("compiled"));
             Cache::new(cache_config)
         })
         .unwrap_or_else(|| Cache::from_file(None::<&std::path::Path>));
@@ -1031,7 +1060,6 @@ mod tests {
         let store = LanguageStore::new(
             StoreConfig {
                 cache_dir: dir.path().to_path_buf(),
-                source_dir: None,
             },
             Box::new(crate::store::NoNetwork),
         );
@@ -1072,6 +1100,51 @@ mod tests {
         );
     }
 
+    /// html asks for "module" and "importmap" before a later pattern injects
+    /// javascript or json into the same block, so a name the catalog does not
+    /// know is not evidence that anything failed to highlight.
+    #[test]
+    fn only_catalog_languages_are_reported_unresolved() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = LanguageStore::new(
+            StoreConfig {
+                cache_dir: dir.path().to_path_buf(),
+            },
+            Box::new(crate::store::NoNetwork),
+        );
+        let runtime = Runtime::with_worker_limit(1).unwrap().with_store(store);
+        install_json(
+            &runtime,
+            r#"(pair
+                 key: (string (string_content) @injection.language)
+                 value: (string (string_content) @injection.content))"#,
+        );
+
+        let output = runtime
+            .highlight_with(
+                r#"{"module":"a","importmap":"b","rust":"c"}"#,
+                "json",
+                &HighlightOptions {
+                    injections: true,
+                    ..HighlightOptions::default()
+                },
+            )
+            .unwrap();
+
+        assert!(
+            crate::catalog::find("rust").is_some()
+                && crate::catalog::find("module").is_none()
+                && crate::catalog::find("importmap").is_none(),
+            "the test needs one catalog language and two names that are not"
+        );
+        assert_eq!(
+            output.unresolved,
+            vec!["rust".to_string()],
+            "a catalog language that could not be fetched is worth reporting; \
+             a name that is not a language at all is not"
+        );
+    }
+
     /// A Markdown fence names its own language, so the injected name is
     /// attacker-controlled. Failing to load one must not leave anything behind.
     #[test]
@@ -1080,7 +1153,6 @@ mod tests {
         let store = LanguageStore::new(
             StoreConfig {
                 cache_dir: dir.path().to_path_buf(),
-                source_dir: None,
             },
             Box::new(crate::store::NoNetwork),
         );
@@ -1151,7 +1223,6 @@ mod tests {
         let store = LanguageStore::new(
             StoreConfig {
                 cache_dir: dir.path().to_path_buf(),
-                source_dir: None,
             },
             Box::new(CountingFetcher {
                 wasm: JSON_WASM.to_vec(),

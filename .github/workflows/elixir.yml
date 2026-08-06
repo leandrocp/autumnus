@@ -9,10 +9,14 @@ on:
     branches: [ main ]
     paths:
       - "packages/elixir/lumis/**"
+      - "packages/javascript/lumis/bundles/**"
+      - "crates/lumis-wasm-runtime/**"
       - ".github/workflows/elixir.yml"
   pull_request:
     paths:
       - "packages/elixir/lumis/**"
+      - "packages/javascript/lumis/bundles/**"
+      - "crates/lumis-wasm-runtime/**"
       - ".github/workflows/elixir.yml"
   workflow_dispatch:
 

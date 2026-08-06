@@ -1,5 +1,6 @@
 import type { Language, PredicateStep, Query as TreeSitterQuery } from "web-tree-sitter";
 import { PACKAGE_CACHE_TTL_MS } from "../cache-timing.js";
+import { PACKAGE_VERSIONS } from "../generated/package-versions.js";
 import { buildHighlightEvents } from "../events.js";
 import { LANGUAGES } from "../generated/languages-meta.js";
 import { sha256 } from "./sha256.js";
@@ -19,7 +20,11 @@ import type {
 import { PLAINTEXT_LANG_ID, type LanguageInfo } from "../types.js";
 
 export type WasmResolver = (language: string, wasm: WasmRef) => string | URL;
-export type LanguagePackageResolver = (packageName: string) => string | URL;
+export type LanguagePackageResolver = (
+  packageName: string,
+  /** The version this build pins, when the catalog knows one. */
+  version?: string,
+) => string | URL;
 
 export interface PackagedLanguage {
   aliases: string[];
@@ -178,8 +183,8 @@ export const CDNS = ["https://cdn.jsdelivr.net/npm", "https://unpkg.com"] as con
 /** @internal */
 export const DEFAULT_RESOLVER: WasmResolver = (_language, wasm) =>
   `${CDNS[0]}/${wasm.packageName}@${wasm.version}/${wasm.name}.wasm`;
-export const DEFAULT_LANGUAGE_PACKAGE_RESOLVER: LanguagePackageResolver = (packageName) =>
-  `${CDNS[0]}/${packageName}@latest/language.json`;
+export const DEFAULT_LANGUAGE_PACKAGE_RESOLVER: LanguagePackageResolver = (packageName, version) =>
+  `${CDNS[0]}/${packageName}@${version ?? "latest"}/language.json`;
 
 /** Only used with the default resolver; a custom resolver names one location. */
 async function fetchFromCdns(primary: string, isDefault: boolean): Promise<Response> {
@@ -841,6 +846,10 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
       return this.explicitResolver ?? configuredDefaultResolver;
     }
 
+    private pinnedVersion(packageName: string): string | undefined {
+      return PACKAGE_VERSIONS[packageName];
+    }
+
     private get languagePackageResolver(): LanguagePackageResolver {
       return this.explicitLanguagePackageResolver ?? configuredLanguagePackageResolver;
     }
@@ -886,7 +895,7 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
     }
 
     private async fetchLanguagePackage(packageName: string): Promise<LanguagePackage> {
-      const source = this.languagePackageResolver(packageName);
+      const source = this.languagePackageResolver(packageName, this.pinnedVersion(packageName));
       const disk = await runtime.readResolvedWasmFromDisk(source);
       if (disk) return parseLanguagePackage(disk, packageName);
       const href = typeof source === "string" ? source : source.href;
@@ -914,9 +923,19 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
         const installed = await this.loadInstalledLanguagePackage(packageName);
         if (installed) return installed;
 
+        // A cached package that already is the pinned version cannot be stale,
+        // so it is served without asking the network. Only an unpinned package
+        // falls back to a time-based check, which is what the Rust store does.
         const cached = await this.readCachedLanguagePackage(packageName);
-        if (cached && Date.now() - cached.checkedAt < PACKAGE_CACHE_TTL_MS) {
-          return cached.package;
+        if (cached) {
+          const pinned = this.pinnedVersion(packageName);
+          if (
+            pinned
+              ? cached.package.version === pinned
+              : Date.now() - cached.checkedAt < PACKAGE_CACHE_TTL_MS
+          ) {
+            return cached.package;
+          }
         }
 
         try {
@@ -978,10 +997,18 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
     }
 
     private async fetchResolvedWasm(language: string, ref: WasmRef): Promise<Uint8Array> {
+      // Verified here rather than by the caller: the store directory holds both
+      // staged and downloaded parsers, so a corrupt file found this way has to
+      // fall through to a refetch instead of failing the load. `cached_parser`
+      // in the Rust store discards such a file for the same reason.
       const staged = await runtime.readStagedAsset?.(
         `${ref.name}-${ref.version}-${ref.sha256}.wasm`,
       );
-      if (staged) return staged;
+      if (staged) {
+        try {
+          return await verifyWasm(ref, staged);
+        } catch {}
+      }
 
       const installed = await this.loadInstalledPackage(ref);
       if (installed) return installed;

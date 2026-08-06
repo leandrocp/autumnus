@@ -91,8 +91,8 @@ then loads the exact parser version and matching queries named there. Parser
 filenames contain the package version and SHA-256 digest.
 
 - first use of a language downloads its parser
-- `lumis parsers cache ...` persists selected parsers ahead of time, for a
-  machine with no network access or to keep the download out of the first run
+- `lumis parsers cache ...` persists selected parsers ahead of time, so no run
+  pays for a download and the Wasmtime compile that follows it
 - `lumis parsers cache ... --force` replaces valid cached parsers
 
 ```bash
@@ -100,8 +100,8 @@ lumis parsers cache rust javascript elixir
 lumis parsers cache rust --force
 ```
 
-`LUMIS_WASM_PATH` names a directory read before the cache and never written to,
-for parsers you build yourself.
+Parsers you build or vendor yourself go in the same `parsers/` directory as
+downloaded ones; `lumis --data-dir <dir> parsers cache ...` writes that layout.
 
 ## Data directory
 

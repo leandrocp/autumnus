@@ -4,6 +4,272 @@ Scope reviewed: PR #1099 against base `6cc5386a2b7248f3d279c9929db2d4897f51862d`
 below is dated and pinned to the revision it examined; verdicts are left as written at that revision
 rather than edited afterwards, so the record shows what was true when and what changed it.
 
+## One store directory, pinned package versions — 2026-08-06
+
+In progress. This section is the design of record; the work below it is partly
+landed and the outstanding list at the end is authoritative.
+
+### What this replaces
+
+`wasm_path` / `LUMIS_WASM_PATH` is removed. It named a second directory with the
+same `<root>/parsers/` layout as `data_dir`, differing only in that it was never
+written to and, decisively, never revalidated. That second property is what made
+it look like the answer to first-request latency; the read-only part was
+incidental. One directory now serves both roles: a build step stages packages
+into it, and the runtime downloads into the same place.
+
+The requirement that settled it is zero configuration. The Phoenix release
+Dockerfile copies exactly one path:
+
+```dockerfile
+COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/<otp_app> ./
+```
+
+Measured in a real release, `Application.app_dir(:lumis, "priv")` resolves inside
+that copied tree, `mix release` copies `priv/` as a real directory rather than a
+symlink, `Code.ensure_loaded?(Mix.Project)` is false, and `Path.expand("_build/…")`
+is cwd-relative and never copied. So `priv` is the only placement that survives
+with no env var and no second `COPY`, and `_build` — the esbuild/tailwind
+convention — cannot work for something that runs in a release.
+
+### Why versions are pinned
+
+The store fetched `{package}@latest/language.json` and trusted a cached copy for
+one hour (`PACKAGE_CACHE_TTL`). Two consequences, both measured:
+
+- The parser filename is version-addressed (`{name}-{version}-{sha256}.wasm`), so
+  the TTL *was* the update mechanism: on expiry a republished package changed the
+  filename and the new parser downloaded.
+- Which version a machine runs therefore depends on when its cache was last
+  refreshed. Across the catalog today that is not hypothetical: **113 of 113
+  packages resolve, spread over five versions** — 59 at 0.26.1, 26 at 0.26.0, 22
+  at 0.26.2, 4 at 0.26.3, 2 at 0.26.4. Two pods started a week apart can render
+  the same document differently, and there is deliberately no `formatVersion`
+  gate (`package.rs:10`) to notice.
+
+Simply dropping revalidation was tried first and is wrong: it freezes each
+machine at whatever `@latest` resolved to on *its* first fetch, which is
+arbitrary rather than reproducible — worse than either alternative.
+
+So the catalog records an exact version per package and the store requests
+`@<version>`. Nothing needs revalidating, so no request ever waits on the
+network for something already on disk, and a pre-populated directory is complete
+by construction.
+
+**Fallback.** A pinned version that 404s falls back to `@latest`. Versions are
+resolved from the registry at generation time, so every pin exists when written;
+a 404 means it was unpublished or yanked afterwards. The fallback must warn
+loudly — a silent fallback reintroduces exactly the nondeterminism pinning
+removes — and, being a failure-only path, needs a test that exercises it rather
+than only the happy path.
+
+**Revalidation splits accordingly:** a pinned hit needs no TTL; a language that
+fell back to `@latest` keeps one, or it re-freezes arbitrarily.
+
+### Trade-offs accepted
+
+- A broken parser is fixed by regenerating `catalog.rs` and releasing Lumis,
+  rather than republishing the wasm package and waiting an hour.
+- The catalog can go stale against the registry. A guard has to assert every pin
+  still resolves, in the shape of `shipped_bundles_match_languages_toml`.
+- `mix lumis.languages.cache --output` and `lumis parsers cache` into an empty
+  directory now require the network, because there is no second local directory
+  to copy from. `LanguageStore::cache_language_into` reuses the calling store's
+  own directory first, which covers the real case; the empty-directory case is
+  genuinely a download.
+
+### Landed so far
+
+- `StoreConfig` is one field. `source_asset`, `read_source_package`,
+  `source_parser`, `source_dir_from_env`, `PACKAGE_CACHE_TTL` and
+  `cache_is_fresh` are gone.
+- `configure_store` takes one argument in the Elixir NIF and the Node addon;
+  `Lumis.Native.configure_store/1`; `Lumis.Application` no longer reads
+  `:wasm_path`.
+- `LanguageStore::cache_language_into(name, out_dir, force)` added, so caching
+  elsewhere reuses the store instead of re-downloading.
+- Elixir `config/config.exs` sets only `data_dir`; `test_helper.exs` copies the
+  staged tree into it, so the suite still never downloads.
+- The wasmtime compiled-module cache follows the resolved data dir rather than
+  only the environment variable (`set_compile_cache_dir`), wired through the CLI,
+  the NIF and the Node addon. Measured: 8130 ms cold, 1349 ms warm for 7 parsers,
+  with no network in either case.
+- Both lockfiles pinned to wasmtime 36.0.13, guarded by `elixir-nif-lock-check`,
+  because the compiled cache is keyed by wasmtime version and the CLI and NIF
+  were on 36.0.12 and 36.0.13.
+
+Green at the time of writing: Rust lib tests 208, CLI conformance 14, Elixir 129.
+
+### Outstanding
+
+Everything from the original list has landed: version pinning, the `HttpFetcher`
+timeout, the Elixir `priv/lumis` default, warming `compiled/` from the mix task,
+and the removal of every `wasm_path` reference. Three things surfaced while doing
+it, all fixed:
+
+- `stage-test-parsers` and the CLI's own fixture builder labelled packages
+  `version: "test"`, which no longer matches a pin, so every suite reached for
+  the network and fell back. Both now claim the pinned version, and the CLI
+  fixture derives its filename from `parser_filename` rather than hardcoding it,
+  so metadata and file cannot disagree again.
+- The JavaScript runtime kept its own `@latest` + one-hour TTL. `cache-timing.test.ts`
+  — the test that exists to pin the two implementations together — caught it.
+  `build-langs.ts` now emits `PACKAGE_VERSIONS` from the catalog and the browser
+  path resolves the pinned version like every other runtime.
+- `readStagedAsset` pointing at the store meant a corrupt cache file was reachable
+  through a path that threw instead of discarding it. Staged bytes are verified
+  before use now, matching `cached_parser`.
+
+`--output` was removed from `lumis parsers cache`, `mix lumis.languages.cache`,
+`Lumis.Languages.cache/2`, the NIF and `LanguageStore::cache_language_into`.
+`--data-dir` / `LUMIS_DATA_DIR` / `config :lumis, data_dir:` already named that
+directory; a second way to name it bought nothing.
+
+### The published packages predate this format
+
+`{package}@{version}/language.json` returns 404 for all 115 pins on both CDNs,
+because every published `@lumis-sh/wasm-*` still carries the older shape:
+metadata in `package.json`'s `lumis` key, no queries, no parser digest. So the
+runtime download path cannot work against the registry as it stands, pinned or
+not, and has not been exercised end to end in this branch.
+
+This is why `test/unverified-parsers.json` waives 77 languages and why every
+fetch attempt in development 404s. It is not caused by version pinning; pinning
+only makes the target explicit.
+
+`mise run langs-check-versions` checks the URL the runtime actually fetches. It
+is deliberately quiet while **zero** packages serve `language.json`, since that
+is the expected pre-publish state, and fails as soon as some but not all do — a
+partial republish means one runtime resolves a language and another cannot. The
+waiver can therefore only shrink.
+
+An earlier claim in this document that "113 of 113 packages resolve" was
+measured with `npm view <package> version`, which proves a version exists rather
+than that the CDN serves the file Lumis reads. Those are different claims.
+
+## Follow-up convergence — 2026-08-05
+
+Candidate reviewed: the uncommitted worktree diff atop `4818b21421515d05c5a21a857d9968ef366fdc5f`,
+continuing from the 2026-08-03 section below. Nothing in this pass was staged, committed, or pushed.
+
+**Verdict: no new merge blocker.** Everything here is a project decision or a cleanup rather than a
+defect found by review, so nothing takes a new `F` number. Two new guards were added and both were
+proven red before being kept.
+
+### Elixir names bundles instead of `:all` — project decision
+
+`Lumis.Languages.load(:all)` is gone. It is replaced by `:bundle_web`, `:bundle_web_extra`,
+`:bundle_system`, `:bundle_backend` and `:bundle_full`, which name exactly the language sets the
+`@lumis-sh/wasm-bundle-*` packages publish, so a bundle means the same thing in every runtime. The
+reason is objective 3: `:all` was a fifth way to say "some languages" that no other runtime had.
+
+- `define_catalog!` now takes `languages: { … }, bundles: { … }` and exposes
+  `pub static BUNDLES: &[(&str, &[&str])]`; `crates/dev` renders it from the `[bundles]` table in
+  `languages.toml`, expanding `parsers = "all"` through the catalog's own order.
+- New NIF `language_bundles/0`; new `Lumis.Languages.bundles/0`; `load/1` accepts any `:bundle_*`
+  atom and reports the valid ones for anything else.
+- `:all` never shipped. It was added on this branch and is unreleased, so removing it reverses the
+  `BREAKING CHANGE:` footer on `0b7a6e520` — both unreleased, so nothing published changes.
+- Regenerating required breaking a cycle: `crates/dev` depends on `lumis-wasm-runtime`, which could
+  not compile against the old flat `catalog.rs`, which only the generator could replace. The file
+  was shaped once by hand and the generator then had to reproduce it; it did, differing only in
+  bundle ordering, so the generator's `BTreeMap` order is what is checked in.
+
+### Deletions
+
+- `examples/wasm-runtimes/` removed, and with it the now-empty `examples/`. Both demos opened with
+  `createHighlighter({ languages: [html, css, json, javascript] })` — a worked example of the
+  pre-declaration model this PR exists to remove — and no task, workflow, or test ran them. The
+  browser case they illustrated is exercised continuously by `website/src/lib/highlight-worker.ts`
+  and `website/src/sections/injections.ts`; the "highlight a large real file" case is now the
+  showcase comparison across six documents. `benchmarks/webgpu_compute_reduce.LICENSE` keeps the
+  MIT notice and no longer points at the deleted directory; the dead `examples/**/dist/` line was
+  dropped from the root `.gitignore`.
+- `isRecord` removed from `packages/javascript/lumis/scripts/build-langs.ts` and
+  `packages/javascript/scripts/build-wasm-bundles.ts`. It asserted only that the top level and
+  `.parsers` were objects — true for arrays — while every field the scripts actually read came from
+  the cast. `smol-toml` already throws on malformed input, and a missing `[parsers]` table threw a
+  clearer error than the one the guard substituted. Both generators reproduce their committed output
+  byte-for-byte without it. `isObjectLike` in `src/core/highlighter.ts` is a different thing and
+  stays: it guards caller-supplied input to `createHighlighter`, its callers check `id` and
+  `aliases` for real, and five assertions in `test/highlighter.test.ts` pin the resulting errors.
+
+### Test staging moved out of the Elixir test helper
+
+`packages/elixir/lumis/test/test_helper.exs` no longer shells out to `cargo`. Staging is now the
+`stage.test_parsers` alias in `mix.exs`, composed into `test`, which follows the `format.rust`,
+`lint.rust` and `test.rust` aliases already there and keeps `mix test` working under the external
+reusable workflow that `elixir.yml` calls. The helper now fails with the command to run instead of
+silently triggering a cold build. `mix cmd --cd ../../..` is load-bearing: `stage-test-parsers`
+resolves its fixture directory relative to the repository root.
+
+The alias carries a `TODO`. Staging exists only because the suite has no published parsers to
+fetch; once it can download them, the alias should go and the tests should exercise the real
+registry path.
+
+### `list-unverified-parsers.mjs` renamed to `list-parsers.mjs`
+
+The script did two jobs and was named after the one nothing automated used. All three callers —
+`mise.toml` and both `queries.yml` shard steps — passed `--all`, the mode that enumerates
+`languages.toml` and checks nothing. The default is now that enumeration and the installed-package
+check is `--unverified`, which is what maintains the 77-entry waiver in
+`test/unverified-parsers.json`. All four modes were confirmed byte-identical to the old script
+before it was deleted.
+
+Moving the enumeration into `crates/dev` was considered and rejected: `queries.yml`'s
+`compile-published` job has no Rust toolchain, so four shards would gain one to print a list, and
+the installed-package half cannot move at all without reimplementing pnpm module resolution in Rust.
+`crates/dev`'s existing `wasm-needed` answers the neighbouring question against the registry.
+
+### This pass's guards were made red, not merely added green
+
+| Guard | Deliberate old-red proof |
+| --- | --- |
+| `shipped_bundles_match_languages_toml` (`crates/dev`) | Deleting `css` from the `web` bundle in the checked-in `catalog.rs` fails the comparison against `languages.toml`; restoring it passes. Catches the generator not having been re-run. |
+| `bundles name the same languages as the matching npm bundle package` (Elixir) | Deleting the `css` entry from `packages/javascript/lumis/bundles/web.ts` fails with `:bundle_web disagrees with web.ts`; restoring it passes. Catches Elixir and npm drifting apart. |
+| `test_helper.exs` staging check | Removing `target/test-parsers` and running the helper directly raises and names the fix, rather than proceeding into a confusing download error. |
+
+Both bundle guards would have been skipped by the workflow path filters that existed when they were
+written, so `lint.yml` now also triggers on `languages.toml` and `crates/lumis-wasm-runtime/src/catalog.rs`,
+and `elixir.yml` on `packages/javascript/lumis/bundles/**` and `crates/lumis-wasm-runtime/**`.
+
+### Formatter churn reverted
+
+An earlier local run invoked `oxfmt` through `npx`, which resolved 0.62.0 rather than the pinned
+0.43.0 and reformatted 22 files under `packages/javascript/rehype-lumis/`. All 22 were pure churn
+and were restored from `HEAD`. Two mattered beyond noise: `CHANGELOG.md` is `git-cliff` output that
+`AGENTS.md` forbids hand-editing, and `examples/*/output.html` are recorded example outputs whose
+`style="…;"` attributes were rewritten. The pinned formatter reports the whole tree clean.
+
+### Statements earlier in this document that this pass superseded
+
+Per the reading convention above, those entries are left as written. What changed:
+
+- §2 "Fix" — `mise run test-queries` does not build "only the parsers whose packages cannot verify
+  themselves". It builds every parser in `languages.toml`, and did so before this pass; the flag it
+  passes is now `--parsers` rather than `--parsers --all`.
+- §2 "Remaining" — the regeneration command is now
+  `node packages/javascript/lumis/scripts/list-parsers.mjs --unverified`. The same bullet's
+  `wasm-needed.py` was already gone; that logic is `wasm-needed` in `crates/dev`.
+- §4.3a — "`Lumis.Languages.load(:all)` exists for callers who want the whole catalog" is no longer
+  true; see the bundles section above.
+- §6 — `examples/wasm-runtimes/README.md` no longer attributes the vendored three.js file. The MIT
+  notice travels with the copy in `benchmarks/webgpu_compute_reduce.LICENSE`.
+
+### Local validation for this pass
+
+- `mise run langs-check-catalog`, `mise run lint-workflows`, `mise run fmt-js -- --check`
+- `cargo test --manifest-path crates/dev/Cargo.toml --no-default-features`: 16 passed
+- `cargo clippy` on `lumis-wasm-runtime`, `crates/dev` and the Elixir NIF: clean
+- Elixir: `mix test` 129 passed, `mise run test-conformance-elixir` 135 passed,
+  `mix format --check-formatted`, `mix credo` no issues
+- `pnpm --filter @lumis-sh/lumis run lint` (`oxlint --type-aware --deny-warnings`): 0 warnings
+- both language generators re-run with an empty `git status` for `bundles/` and all five
+  `wasm-bundle-*` packages
+
+This pass did not re-run the full `mise run test`, `test-conformance` or `test-queries` matrices
+recorded in the 2026-08-03 section; it ran the suites covering what it changed.
+
 ## Final local convergence — 2026-08-03
 
 Candidate reviewed: the uncommitted worktree diff atop `4818b21421515d05c5a21a857d9968ef366fdc5f`.
@@ -44,6 +310,139 @@ What that changes in this candidate:
 **This is a breaking change to a surface that shipped in npm `0.6.1`**, where `highlights` was a
 required field. The next `npm-lumis` must be a minor with a `BREAKING CHANGE:` footer; `CHANGELOG.md`
 is git-cliff output and is not hand-edited.
+
+### The showcase was the only check nothing ran — F27, F28, F29
+
+`mise run -C benchmarks showcase` failed on the pushed branch. No workflow references the showcase,
+so nothing had run it since it was written, and it had accumulated three separate defects.
+
+**F27 — the runtimes did not all produce the same output.** `benchmarks/rust` builds against the
+static `lumis` crate with an explicit feature list, and `lang-comment` was not in it. Every other
+implementation loads parsers dynamically and picked `comment` up on demand, so the CLI, Elixir and
+both Node runtimes highlighted URLs inside comments and Rust did not. Exactly two of 1,397 lines
+differed. Adding the feature makes all five byte-identical. It does not move the size comparison:
+`lumis-size` never names `Language::Comment`, the linker drops it, and the executable is unchanged
+byte for byte.
+
+The interesting part is that this was invisible. Conformance renders 25 fixtures through six
+consumers and compares them byte for byte, and it passes — because every consumer in that harness
+loads languages the same way. The showcase is the only place a *statically built* Lumis is compared
+against a dynamically loading one on the same document, which is precisely why it caught something
+conformance structurally cannot. `finish-showcase.mjs` now asserts that agreement directly rather
+than leaving it to be noticed.
+
+**F28 — the assertions were pinned to a state that was reverted.** `34dd11781` stripped
+`queries/append/html/highlights.scm`, which let upstream's `@tag.delimiter` win over the local
+`@punctuation.bracket` override, and the showcase's expected Dracula colours were written against
+that output. `8cd542ed6` restored the append file and regenerated the conformance fixtures with it,
+correctly — the net query diff against `main` is empty, and an HTML query change does not belong in
+a parser-loading PR. The showcase was not updated to match, so three of its five expectations
+described output no revision produces. They now match the shipped queries. Separately,
+`implementations.mjs` listed `lumis-js-node` while `showcase.mjs` only ever wrote `lumis-js-wasm`;
+the task now runs it under both Node runtimes.
+
+**F29 — a name that is not a language was reported as unresolved.** html's generic
+`<script type="foo/bar">` rule captures the raw attribute value as `@injection.language`, and more
+specific patterns later map `importmap` to json and `module` to javascript. Both names reached the
+callback, failed, and were reported, so highlighting a normal HTML page printed "Lumis could not
+load" for two blocks that had highlighted correctly. The advice in that message — load it up front,
+prefetch it, use a bundle — cannot apply to a string that is not a Lumis language, so the report is
+now gated on the catalog in `lumis-wasm-runtime` and on the same id/alias set in the JavaScript port.
+A catalog language that genuinely could not be fetched still warns: the browser suite still reports
+`comment`, which a synchronous walk cannot load.
+
+This narrowed one documented behaviour. A Markdown fence naming a language that does not exist is
+now silent rather than warning, which is what Neovim does with an unknown injection language, and
+`runtime-parity.test.ts` was changed to assert both halves of the rule under both Node runtimes.
+
+### Lumis did not match Neovim on the same parser and the same queries — F30
+
+Comparing the showcase against Neovim on the same file showed three differences in HTML: delimiters
+were `punctuation.bracket` rather than `tag.delimiter`, attribute names were `attribute` rather than
+`tag.attribute`, and the text of `<title>` and `<h1>` carried no highlight at all where Neovim gives
+it `markup.heading`.
+
+The engine resolves overlapping captures the way Neovim does — the last capture on a node wins — but
+it applied that rule to captures that resolve to **no** highlight. nvim-treesitter names its helper
+captures `@_tag`, `@_attr` and so on, and Neovim skips them precisely because they resolve to no
+highlight group. Lumis let one win, which blanked the node, and the loop that advances to a later
+capture calls `remove()` on the match it leaves behind, so the discarded match's *other* captures
+were never yielded either.
+
+Both halves are visible in HTML. `((element (start_tag (tag_name) @_tag) (text) @markup.heading)
+(#eq? @_tag "title"))` captures the tag name as `@_tag` and the text as `@markup.heading`. Resolving
+the tag-name node ended on `@_tag`, so tag names went unstyled; `queries/append/html/highlights.scm`
+compensated by re-adding `(tag_name) @tag` last. That restored tag names and, by removing the match
+it stepped over, destroyed `@markup.heading` on the text. The two were mutually exclusive — measured
+directly, keeping the override gave correct tag names and no heading, dropping it gave the heading
+and unstyled tag names.
+
+The override also downgraded `tag.attribute` to `attribute` and `tag.delimiter` to
+`punctuation.bracket`, which is where the two remaining colour differences came from.
+
+The fix is one condition in each implementation: a capture with no recognized highlight does not win
+the node. With it, the whole append file is unnecessary — every line was either already in upstream
+or a downgrade of it — so it is deleted and HTML now means what nvim-treesitter says it means.
+`tag.error`, the one capture upstream does not provide, is not a recognized highlight name and was
+never rendering.
+
+This changed 12 of the 25 conformance fixtures, all of them HTML-bearing; no other language in the
+corpus had an unrecognized capture displacing a real one. Two CLI assertions that pinned the old
+`punctuation.bracket` delimiters were updated.
+
+### Two ways this stayed hidden
+
+**F31.** The JavaScript suite writes `version: "test"` packages into the developer's real
+`LUMIS_DATA_DIR`, and the runtime reads that persistent cache before it consults a configured
+JavaScript resolver. After the query change, conformance kept failing against a cached copy of the
+published `@lumis-sh/wasm-html@0.26.1` — the local resolver was returning the new query and never
+being asked. Clearing the cache turned 60 failures into 125 passes. A clean CI runner has no cache
+and is correct; a developer machine can validate the published queries instead of the repository's,
+in either direction.
+
+**F32.** `LUMIS_BUILD=1 mix test` left the NIF at its previous build when only a Rust dependency had
+changed, so Elixir conformance ran the old engine against regenerated fixtures and reported 25
+failures that were not real. `mix compile --force` was needed to copy the rebuilt library.
+
+### A second showcase document found the Rust core dropping injections — F34, F35
+
+The visual comparison rendered one HTML document, so it could only ever exercise the languages that
+document contains. A second document was added — 1,054 lines of ripgrep's `searcher/mod.rs`, pinned
+by SHA-256 and carrying its licence — and the cross-runtime check failed on it immediately.
+
+Only `web-tree-sitter` disagreed. Every runtime that goes through the Rust core, including the Node
+addon, produced the same bytes; the browser port produced different ones. That pointed at the port,
+and it was wrong: **the port was correct and the Rust core was not**.
+
+`captures()` hands over a match as soon as its first capture is found, not when the match is
+complete. The Rust core called `injection_for_match` on that partial match, found no content node,
+and then unconditionally called `match_.remove()` — destroying the match before
+`@injection.content` ever arrived. Instrumenting it shows the whole story:
+
+```
+content_idx=Some(1) lang_idx=Some(2) captures=[(0, "_macro_name")]
+```
+
+Rust's macro rule captures `@_macro_name` before `(token_tree) @injection.content`, and its
+`#not-any-of?` can be decided from the name alone, so the match is handed over holding only the
+name. Every Rust macro body therefore lost its injected layer. HTML into CSS was unaffected, which
+is why nothing noticed. The port avoids this by joining `captures()` with `matches()` to rebuild
+whole matches — the reason for the comment at `events.ts:195`.
+
+Neovim settles which behaviour is right: inside `assert!(self.config.multi_line)` it reports
+`@variable` from the parent layer and `@variable.member` from the injected one, and the injected
+capture wins. That is now what Lumis produces, on every runtime.
+
+F35 came out of the same investigation. A `MISSING` node is synthesised by error recovery and spans
+no bytes, so it can only ever produce an empty span — and the two Tree-sitter runtimes do not
+synthesise them alike. Given the same grammar bytes and the same injected range, `write!(x, "y")`
+recovers to an `ERROR` in one and a `MISSING ";"` in the other. Both implementations now skip them,
+so a recovery disagreement cannot reach output.
+
+**Why conformance missed both.** The corpus had no Rust at all. `fixtures/conformance/
+rust-macro-injection` closes that: it asserts `variable.member` inside macro bodies, and with the
+repair reverted all five of its outputs fail. `tree-sitter-rust.wasm` joined the CLI's committed
+parser fixtures and `rust` joined the JavaScript harness, so all six consumers render it.
 
 ### Recovery after the independent review
 
@@ -101,6 +500,17 @@ were retained.
 | F24 | **DONE LOCALLY — new final-audit finding** | Query and JavaScript workflow filters include every manifest, workspace/lock input, full bundle, checker, and workflow file whose changes can alter their result. A hosted trigger still requires a pushed SHA. |
 | F25 | **DONE — new final-audit finding** | Successful and failed parser-module loads are cached at the irreversible store boundary; corrected queries reuse the parser, corrected bytes can retry, and transient resolver/fetch/integrity failures remain retryable. |
 | F26 | **DONE — new final-audit finding** | Package `grammarName` must match the module's one non-scanner `tree_sitter_*` **function** export. A same-named global export is not accepted as a grammar. |
+| F27 | **DONE — found by running the showcase after the push** | The visual comparison rendered the same document differently in Rust than in the CLI, Elixir and both Node runtimes. All five now agree byte for byte, and `finish-showcase.mjs` fails naming the first differing line if they ever stop agreeing. |
+| F28 | **DONE — found with F27** | The showcase's scope assertions were pinned to output from an intermediate commit whose query change was later reverted, and `lumis-js-node` was listed as an implementation with nothing producing its fragment. The task now renders under both Node runtimes and the assertions match the shipped queries. |
+| F29 | **DONE — found with F27** | An injection query naming something that is not a language no longer reports as unresolved. `<script type="module">` and `type="importmap"` warned on blocks that had in fact highlighted. |
+| F30 | **DONE — found by comparing against Neovim** | A capture with no recognized highlight no longer wins its node. nvim-treesitter's `@_helper` captures were blanking real scopes and, through the match removal that follows, discarding their match's other captures. HTML now resolves `tag.delimiter`, `tag.attribute` and `markup.heading` exactly as Neovim does, and the local override that compensated for the defect is gone. |
+| F31 | **OPEN / TEST ISOLATION** | The JavaScript suite writes `version: "test"` language packages into the developer's real `LUMIS_DATA_DIR`, and the runtime reads that cache before consulting a JavaScript resolver. Conformance can therefore validate against the published package's queries rather than the repository's. Clean CI is correct; a populated developer machine is not. |
+| F32 | **OPEN / BUILD** | `LUMIS_BUILD=1 mix test` does not rebuild the NIF when only a Rust dependency changed, so Elixir conformance can run a stale engine against current fixtures. `mix compile --force` was required. |
+| F33 | **OPEN / SEPARATE CHANGE** | Query preprocessing deletes any pattern carrying a capture-scoped `#set!`, losing `@string.special.url` on HTML `href`/`src` and `@markup.link.url` in Markdown. Ten patterns across six languages. Written up in full in `QUERIES_REVIEW.md`; it predates this branch and wants its own change. |
+| F34 | **DONE — found by the second showcase document** | The Rust core silently dropped every injection whose content capture is not the first one its match yields, which is exactly the shape of Rust's macro rule. Macro bodies were left unhighlighted, and the browser port — which reconstructs whole matches — was the only runtime getting them right. |
+| F36 | **DONE — found by the Markdown showcase document** | The browser port ignored `injection.combined`, so each match of such a pattern became its own layer. Markdown injects every html tag separately, so `</h1>` was parsed alone and never became a closing tag. 16 languages and 33 patterns rely on the directive, including elixir, heex, eex, mdx and xml. |
+| F37 | **DONE — found with F36** | The showcase ran its JavaScript and Elixir producers without `LUMIS_DATA_DIR`, so it wrote published packages into the developer's real cache, where the JavaScript suite then read them instead of the repository's. It now uses the in-repo benchmark data directory. |
+| F35 | **DONE — found with F34** | A `MISSING` node synthesised by error recovery is no longer highlighted. It spans no bytes, and the two Tree-sitter runtimes do not synthesise them alike, so the artefact leaked a parser disagreement into output the runtimes must render identically. |
 
 F21–F26 were found while trying to prove the preceding repairs, not invented as post-hoc labels for
 the implementation. They are recorded because the same rule applies to this pass as to every prior

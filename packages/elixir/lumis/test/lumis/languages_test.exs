@@ -32,6 +32,51 @@ defmodule Lumis.LanguagesTest do
     assert length(names) > 100
   end
 
+  describe "bundles" do
+    @bundles_dir Path.expand("../../../../javascript/lumis/bundles", __DIR__)
+
+    test "name the same languages as the matching npm bundle package" do
+      bundles = Lumis.Languages.bundles()
+
+      published =
+        @bundles_dir
+        |> Path.join("*.ts")
+        |> Path.wildcard()
+        |> Map.new(fn path ->
+          names =
+            path
+            |> File.read!()
+            |> then(&Regex.scan(~r/lazy\("([^"]+)"/, &1))
+            |> Enum.map(fn [_, name] -> name end)
+            # `plaintext` needs no parser, so it is not a catalog language and
+            # every runtime answers for it without a bundle saying so.
+            |> Enum.reject(&(&1 == "plaintext"))
+
+          {bundle_atom(Path.basename(path, ".ts")), {Path.basename(path), names}}
+        end)
+
+      assert map_size(published) == 5, "expected five published bundles"
+
+      assert Map.keys(bundles) |> Enum.sort() == Map.keys(published) |> Enum.sort()
+
+      for {bundle, {file, names}} <- published do
+        assert Enum.sort(bundles[bundle]) == Enum.sort(names),
+               "#{inspect(bundle)} disagrees with #{file}"
+      end
+    end
+
+    test "load/1 accepts a bundle and rejects an unknown one" do
+      assert %{bundle_web: web} = Lumis.Languages.bundles()
+      assert "html" in web
+      assert length(Lumis.Languages.bundles()[:bundle_full]) > 100
+
+      assert {:error, reason} = Lumis.Languages.load(:bundle_nope)
+      assert reason =~ ":bundle_web"
+    end
+
+    defp bundle_atom(name), do: String.to_atom("bundle_" <> String.replace(name, "-", "_"))
+  end
+
   test "highlighting loads what a document names" do
     refute Lumis.Native.has_language("xml")
 
@@ -73,48 +118,40 @@ defmodule Lumis.LanguagesTest do
   end
 
   describe "cache/2" do
-    test "writes verified parsers into a directory" do
-      directory = tmp_dir()
+    @store Application.compile_env!(:lumis, :data_dir)
 
-      assert {:ok, [path]} = Lumis.Languages.cache(["comment"], directory: directory)
+    test "writes verified parsers into the store" do
+      assert {:ok, [path]} = Lumis.Languages.cache(["comment"])
       assert String.starts_with?(Path.basename(path), "tree-sitter-comment-")
       assert File.exists?(path)
     end
 
     test "collapses languages that share one parser" do
-      directory = tmp_dir()
-
-      assert {:ok, [_only_one]} =
-               Lumis.Languages.cache(["markdown", "markdown"], directory: directory)
+      assert {:ok, [_only_one]} = Lumis.Languages.cache(["markdown", "markdown"])
     end
 
-    test "leaves a cached directory usable on its own" do
-      directory = tmp_dir()
-      assert {:ok, [path]} = Lumis.Languages.cache(["python"], directory: directory)
+    test "leaves the store usable on its own" do
+      assert {:ok, [path]} = Lumis.Languages.cache(["python"])
 
       assert File.exists?(path)
-      assert File.exists?(Path.join([directory, "parsers", "python.language.json"]))
+      assert File.exists?(Path.join([@store, "parsers", "python.language.json"]))
     end
 
     test "reports an unknown language" do
-      assert {:error, reason} = Lumis.Languages.cache(["not-a-language"], directory: tmp_dir())
+      assert {:error, reason} = Lumis.Languages.cache(["not-a-language"])
       assert reason =~ "not-a-language"
     end
   end
 
   describe "mix lumis.languages.cache" do
     test "writes the named parsers and prints their paths" do
-      directory = tmp_dir()
-
       output =
         capture_io(fn ->
           Mix.Task.reenable("lumis.languages.cache")
-          Mix.Task.run("lumis.languages.cache", ["--output", directory, "comment"])
+          Mix.Task.run("lumis.languages.cache", ["--no-compile", "comment"])
         end)
 
       assert output =~ "tree-sitter-comment-"
-      assert [path] = Path.wildcard(Path.join([directory, "parsers", "tree-sitter-comment-*"]))
-      assert File.exists?(path)
     end
 
     test "refuses to guess when given neither names nor --all" do
@@ -123,12 +160,5 @@ defmodule Lumis.LanguagesTest do
         Mix.Task.run("lumis.languages.cache", [])
       end
     end
-  end
-
-  defp tmp_dir do
-    dir = Path.join(System.tmp_dir!(), "lumis-cache-#{System.unique_integer([:positive])}")
-    File.mkdir_p!(dir)
-    on_exit(fn -> File.rm_rf(dir) end)
-    dir
   end
 end

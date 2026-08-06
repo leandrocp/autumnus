@@ -215,13 +215,11 @@ fn reject_reentrant_highlight(env: &Env) -> Result<()> {
 /// Read once, when the runtime is built.
 static STORE_PATHS: Mutex<StorePaths> = Mutex::new(StorePaths {
     data_dir: None,
-    wasm_path: None,
     consumed: false,
 });
 
 struct StorePaths {
     data_dir: Option<PathBuf>,
-    wasm_path: Option<PathBuf>,
     /// Set when the runtime read them, which it does exactly once.
     consumed: bool,
 }
@@ -248,21 +246,26 @@ fn shared_runtime() -> Result<&'static Arc<Runtime>> {
     SHARED_RUNTIME.as_ref().map_err(native_error)
 }
 
-/// Point the store at explicit directories, overriding `LUMIS_DATA_DIR` and
-/// `LUMIS_WASM_PATH`.
+/// Point the store at an explicit directory, overriding `LUMIS_DATA_DIR`.
 ///
 /// The runtime reads these once, when it is first used, so this returns `false`
 /// if that has already happened. Node sets a directory through the environment
 /// at any time; the addon cannot, and silently ignoring the difference is how a
 /// caller ends up writing to a directory it did not choose.
 #[napi(js_name = "configureStore")]
-pub fn configure_store(data_dir: Option<String>, wasm_path: Option<String>) -> bool {
+pub fn configure_store(data_dir: Option<String>) -> bool {
     let mut paths = STORE_PATHS.lock().expect("store path lock poisoned");
     if paths.consumed {
         return false;
     }
     paths.data_dir = data_dir.map(PathBuf::from);
-    paths.wasm_path = wasm_path.map(PathBuf::from);
+
+    let compile_cache = paths
+        .data_dir
+        .clone()
+        .or_else(|| std::env::var_os("LUMIS_DATA_DIR").map(PathBuf::from))
+        .unwrap_or_else(default_data_dir);
+    lumis_wasm_runtime::set_compile_cache_dir(compile_cache);
     true
 }
 
@@ -274,16 +277,8 @@ fn language_store(cache_dir: Option<PathBuf>) -> store::LanguageStore {
         .or_else(|| configured.data_dir.clone())
         .or_else(|| std::env::var_os("LUMIS_DATA_DIR").map(PathBuf::from))
         .unwrap_or_else(default_data_dir);
-    let source_dir = configured
-        .wasm_path
-        .clone()
-        .or_else(store::LanguageStore::source_dir_from_env);
-
     store::LanguageStore::new(
-        store::StoreConfig {
-            cache_dir,
-            source_dir,
-        },
+        store::StoreConfig { cache_dir },
         Box::new(store::HttpFetcher),
     )
 }

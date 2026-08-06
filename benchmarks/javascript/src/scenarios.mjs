@@ -124,7 +124,7 @@ async function prepareRuntime() {
     process.env.LUMIS_TEST_RUNTIME = "wasm";
   } else if (implementation === "lumis-js-node") {
     delete process.env.LUMIS_TEST_RUNTIME;
-    process.env.LUMIS_WASM_PATH = resolve(repoDir, "target/benchmarks/language-packages");
+    process.env.LUMIS_DATA_DIR = resolve(repoDir, "target/benchmarks/language-packages");
   }
 
   process.chdir(runtimeDir);

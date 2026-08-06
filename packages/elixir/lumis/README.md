@@ -61,7 +61,8 @@ user's request:
 :ok = Lumis.Languages.load(["elixir", "html", "javascript", "css"])
 ```
 
-For a host with no network access, download at build time instead:
+Better still, do it at image-build time so no request ever pays. A cold parser
+costs a download *and* a Wasmtime compile, and the compile is the larger half:
 
 ```sh
 mix lumis.languages.cache elixir html javascript css
@@ -72,16 +73,14 @@ Point it at a directory inside your image and the cache travels with the
 release. Wasmtime also persists compiled modules there, so a later VM start does
 not have to compile the same parser again.
 
-Both directories can be set in config instead:
+The directory can be set in config instead:
 
 ```elixir
-config :lumis,
-  data_dir: "/app/lumis",
-  wasm_path: "/app/parsers"
+config :lumis, data_dir: "/app/lumis"
 ```
 
-`:wasm_path` is read before the cache and never written to, for parsers you
-build or vendor yourself. See
+Parsers you build or vendor yourself go in the same directory as downloaded
+ones, so staging them at build time means a release never reaches the CDN. See
 [Elixir integration](https://lumis.sh/docs/usage/elixir-integration) for the
 whole picture.
 

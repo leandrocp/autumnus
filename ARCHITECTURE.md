@@ -198,10 +198,13 @@ not fail because one fenced block names something unpublished. An injected
 language that cannot be fetched leaves its content plain and the walk carries
 on. Only the root language failing is an error the caller sees.
 
-**Loading is cheap; downloading is not.** A load is 3-15 ms the first time and
-about 0.3 ms after, against a download measured in hundreds. That is why loading
-in the request path is fine and why `load` still exists: to move the *download*
-off a user's first request, not to gate anything.
+**A cold parser is expensive; a warm one is not.** It costs a download and then
+a Wasmtime compile, and the compile is the larger half: seven parsers already on
+disk take about 8 s to compile against 1.3 s once `compiled/` holds their
+compiled forms. Registering an already-compiled parser is 3-15 ms, and about
+0.3 ms after. That is why loading in the request path is fine once the store is
+warm, and why `load` still exists: to move both costs off a user's first
+request, not to gate anything.
 
 In Elixir it is cheaper still, because loading is global to the VM. One
 `Runtime` lives in the NIF, so the first process to need a language pays, and
@@ -217,16 +220,17 @@ Everything a runtime persists lives under one directory, named by
 `LUMIS_DATA_DIR`: `parsers/` for language packages and parser WASM, `themes/`
 for the CLI's custom themes, `compiled/` for Wasmtime's module cache. The CLI,
 Elixir and Node write the same filenames into `parsers/`, so one prepared
-directory serves all three, and `LUMIS_WASM_PATH` names a second directory that
-is read before the cache and never written to, for parsers you build or vendor
-yourself. Browsers use CacheStorage instead, having no filesystem. Parser cache
-keys contain the parser name, package version, and digest, so upgrades do not
-overwrite older verified assets. Cached metadata can be refreshed independently
-while stale validated metadata remains usable if the refresh fails.
+directory serves all three, whether the files were downloaded or staged there
+by a build step. Browsers use CacheStorage instead, having no filesystem. Parser
+cache keys contain the parser name, package version, and digest, so upgrades do
+not overwrite older verified assets. The catalog pins an exact package version
+per language, so a package already in the directory is the expected one and is
+never revalidated; a request therefore never waits on the network for something
+already on disk.
 
-### Preparing a cache instead of downloading
+### Filling the store at build time
 
-A host with no network access downloads at build time instead:
+Keeping both costs off the first request means paying them during the build:
 
 ```sh
 lumis parsers cache rust javascript      # CLI

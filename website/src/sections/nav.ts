@@ -1,6 +1,6 @@
 import { BURGER_SVG, CLOSE_SVG, GITHUB_SVG } from "../lib/utils";
 
-export function renderNav() {
+export function renderNav(home = "") {
   return `
     <nav class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg dark:bg-[#09090b]/80">
       <div class="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
@@ -9,11 +9,12 @@ export function renderNav() {
           Lumis
         </a>
         <div class="flex items-center gap-4 font-mono text-xs tracking-wider uppercase sm:gap-6">
-          <a href="#playground" class="hidden text-zinc-500 transition-colors hover:text-zinc-900 dark:hover:text-white sm:inline-block">Playground</a>
-          <a href="#quickstart" class="hidden text-zinc-500 transition-colors hover:text-zinc-900 dark:hover:text-white sm:inline-block">Quickstart</a>
-          <a href="#runtimes" class="hidden text-zinc-500 transition-colors hover:text-zinc-900 dark:hover:text-white sm:inline-block">Runtimes</a>
-          <a href="#integrations" class="hidden text-zinc-500 transition-colors hover:text-zinc-900 dark:hover:text-white sm:inline-block">Integrations</a>
-          <a href="#formatters" class="hidden text-zinc-500 transition-colors hover:text-zinc-900 dark:hover:text-white sm:inline-block">Formatters</a>
+          <a href="/comparison/" class="hidden text-zinc-500 transition-colors hover:text-zinc-900 dark:hover:text-white sm:inline-block">Comparison</a>
+          <a href="${home}#playground" class="hidden text-zinc-500 transition-colors hover:text-zinc-900 dark:hover:text-white sm:inline-block">Playground</a>
+          <a href="${home}#quickstart" class="hidden text-zinc-500 transition-colors hover:text-zinc-900 dark:hover:text-white sm:inline-block">Quickstart</a>
+          <a href="${home}#runtimes" class="hidden text-zinc-500 transition-colors hover:text-zinc-900 dark:hover:text-white sm:inline-block">Runtimes</a>
+          <a href="${home}#integrations" class="hidden text-zinc-500 transition-colors hover:text-zinc-900 dark:hover:text-white sm:inline-block">Integrations</a>
+          <a href="${home}#formatters" class="hidden text-zinc-500 transition-colors hover:text-zinc-900 dark:hover:text-white sm:inline-block">Formatters</a>
           <a href="/docs"
              class="hidden items-center border border-zinc-900 bg-zinc-900 px-3 py-1.5 text-white transition-colors hover:bg-white hover:text-zinc-900 dark:border-white dark:bg-white dark:text-zinc-900 dark:hover:bg-transparent dark:hover:text-white sm:inline-flex">
             Docs
@@ -31,11 +32,12 @@ export function renderNav() {
       <div class="mobile-menu hidden border-t border-zinc-200 bg-white/95 backdrop-blur-lg dark:border-zinc-800 dark:bg-[#09090b]/95 sm:hidden">
         <div class="mx-auto flex max-w-6xl flex-col gap-1 px-6 py-4 font-mono text-sm tracking-wider uppercase">
           <a href="/docs" class="mobile-menu-link mb-2 inline-flex w-fit items-center border border-zinc-900 bg-zinc-900 px-3 py-2 text-white transition-colors hover:bg-white hover:text-zinc-900 dark:border-white dark:bg-white dark:text-zinc-900 dark:hover:bg-transparent dark:hover:text-white">Docs</a>
-          <a href="#playground" class="mobile-menu-link block py-2 text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white">Playground</a>
-          <a href="#quickstart" class="mobile-menu-link block py-2 text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white">Quickstart</a>
-          <a href="#runtimes" class="mobile-menu-link block py-2 text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white">Runtimes</a>
-          <a href="#integrations" class="mobile-menu-link block py-2 text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white">Integrations</a>
-          <a href="#formatters" class="mobile-menu-link block py-2 text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white">Formatters</a>
+          <a href="/comparison/" class="mobile-menu-link block py-2 text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white">Comparison</a>
+          <a href="${home}#playground" class="mobile-menu-link block py-2 text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white">Playground</a>
+          <a href="${home}#quickstart" class="mobile-menu-link block py-2 text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white">Quickstart</a>
+          <a href="${home}#runtimes" class="mobile-menu-link block py-2 text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white">Runtimes</a>
+          <a href="${home}#integrations" class="mobile-menu-link block py-2 text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white">Integrations</a>
+          <a href="${home}#formatters" class="mobile-menu-link block py-2 text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white">Formatters</a>
         </div>
       </div>
     </nav>`;

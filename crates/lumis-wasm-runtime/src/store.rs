@@ -20,9 +20,6 @@ use crate::package::{
     is_safe_path_segment, is_valid_package_name, LanguagePackage, LanguagePackageError,
 };
 
-/// How long a cached `language.json` is trusted before it is refreshed.
-pub const PACKAGE_CACHE_TTL: Duration = Duration::from_secs(60 * 60);
-
 const REPLACE_ATTEMPTS: u32 = 20;
 const REPLACE_RETRY_DELAY: Duration = Duration::from_millis(5);
 
@@ -77,10 +74,24 @@ pub trait Fetcher: Send + Sync {
 #[cfg(feature = "wasm")]
 pub struct HttpFetcher;
 
+/// A download must not be able to stall a render, so every request is bounded.
+/// Highlighting reaches this code on the request path when a document names a
+/// language that is not on disk yet.
+#[cfg(feature = "wasm")]
+const FETCH_TIMEOUT: Duration = Duration::from_secs(30);
+
 #[cfg(feature = "wasm")]
 impl Fetcher for HttpFetcher {
     fn get(&self, url: &str) -> Result<Vec<u8>, String> {
-        ureq::get(url)
+        static AGENT: std::sync::OnceLock<ureq::Agent> = std::sync::OnceLock::new();
+        let agent = AGENT.get_or_init(|| {
+            ureq::Agent::config_builder()
+                .timeout_global(Some(FETCH_TIMEOUT))
+                .build()
+                .into()
+        });
+        agent
+            .get(url)
             .call()
             .map_err(|error| error.to_string())?
             .into_body()
@@ -100,11 +111,9 @@ impl Fetcher for NoNetwork {
 
 /// Where a store keeps and looks for assets.
 pub struct StoreConfig {
-    /// Directory holding cached `language.json` and parser files.
+    /// Directory holding `language.json` and parser files, both the ones this
+    /// store downloads and any staged into it ahead of time.
     pub cache_dir: PathBuf,
-    /// Consulted before the cache and never written to, for parsers a caller
-    /// builds or vendors. `LUMIS_WASM_PATH` sets it in every runtime.
-    pub source_dir: Option<PathBuf>,
 }
 
 /// Resolves language packages and parser bytes, caching both on disk.
@@ -124,18 +133,19 @@ impl LanguageStore {
         }
     }
 
-    /// Read `LUMIS_WASM_PATH`, a directory of pre-staged language packages.
-    #[must_use]
-    pub fn source_dir_from_env() -> Option<PathBuf> {
-        std::env::var_os("LUMIS_WASM_PATH").map(PathBuf::from)
-    }
-
     #[must_use]
     pub fn cache_dir(&self) -> &Path {
         &self.config.cache_dir
     }
 
-    /// The package for `package_name`, from memory, local source, cache, or the CDN.
+    /// The package for `package_name`, from memory, the store directory, or the CDN.
+    ///
+    /// A package already in the directory is authoritative and is never
+    /// revalidated, so a request never waits on the network for something
+    /// already on disk. That is what lets a build step stage packages ahead of
+    /// time and have the first request cost nothing; the price is that a
+    /// republished package is picked up by clearing the directory or upgrading
+    /// Lumis, not on its own.
     ///
     /// # Errors
     /// Fails when the package cannot be obtained from any source, or is invalid.
@@ -145,41 +155,28 @@ impl LanguageStore {
         }
 
         let path = self.package_path(package_name)?;
-        let package = (|| {
-            if let Some(package) = self.read_source_package(package_name)? {
-                return Ok(package);
-            }
-
-            let cached = read_package_file(&path, package_name);
-            if cache_is_fresh(&path, PACKAGE_CACHE_TTL) {
-                if let Some(package) = cached.as_ref() {
-                    return Ok(package.clone());
-                }
-            }
-
-            match self.fetch_package(package_name, &path) {
-                Ok(package) => Ok(package),
-                Err(error) => cached.ok_or(error),
-            }
-        })()?;
+        let pinned = crate::catalog::pinned_version(package_name);
+        let cached = read_package_file(&path, package_name);
+        let package = match (cached, pinned) {
+            (Some(package), Some(version)) if package.version == version => package,
+            (Some(package), None) => package,
+            (cached, _) => match self.fetch_package(package_name, &path) {
+                Ok(package) => package,
+                Err(error) => cached.ok_or(error)?,
+            },
+        };
 
         Ok(self.remember(package_name, package))
     }
 
-    /// The package from memory, a configured source directory, or the cache.
-    ///
-    /// Everything except the network, so a caller can tell what is available
-    /// offline.
+    /// The package from memory or the store directory, never the network, so a
+    /// caller can tell what is available without one.
     #[must_use]
     pub fn local_package(&self, package_name: &str) -> Option<Arc<LanguagePackage>> {
         if let Some(package) = self.memo(package_name) {
             return Some(package);
         }
-        let package = self
-            .read_source_package(package_name)
-            .ok()
-            .flatten()
-            .or_else(|| read_package_file(&self.package_path(package_name).ok()?, package_name))?;
+        let package = read_package_file(&self.package_path(package_name).ok()?, package_name)?;
         Some(self.remember(package_name, package))
     }
 
@@ -196,20 +193,11 @@ impl LanguageStore {
         self.fetch_parser(package, &path)
     }
 
-    /// Verified parser bytes from a configured source directory or the cache,
-    /// never the network. A file that fails verification is deleted rather than
-    /// returned.
+    /// Verified parser bytes from the store directory, never the network. A file
+    /// that fails verification is deleted rather than returned.
     #[must_use]
     pub fn local_parser(&self, package: &LanguagePackage) -> Option<Vec<u8>> {
-        self.source_parser(package)
-            .or_else(|| self.cached_parser(package))
-    }
-
-    fn source_parser(&self, package: &LanguagePackage) -> Option<Vec<u8>> {
-        package.validate().ok()?;
-        let source = self.source_asset(&parser_filename(package))?;
-        let bytes = std::fs::read(&source).ok()?;
-        package.verify_wasm(&bytes).ok().map(|()| bytes)
+        self.cached_parser(package)
     }
 
     /// Verified parser bytes from this store's own cache directory only.
@@ -261,12 +249,7 @@ impl LanguageStore {
         if force {
             self.refresh_parser(&package)?;
         } else if self.cached_parser(&package).is_none() {
-            match self.source_parser(&package) {
-                Some(bytes) => write_atomic(&path, &bytes)?,
-                None => {
-                    self.fetch_parser(&package, &path)?;
-                }
-            }
+            self.fetch_parser(&package, &path)?;
         }
 
         self.cache_package(&package)?;
@@ -353,56 +336,47 @@ impl LanguageStore {
         package
     }
 
-    fn source_asset(&self, filename: &str) -> Option<PathBuf> {
-        let path = self
-            .config
-            .source_dir
-            .as_ref()?
-            .join("parsers")
-            .join(filename);
-        path.is_file().then_some(path)
-    }
-
-    fn read_source_package(
-        &self,
-        package_name: &str,
-    ) -> Result<Option<LanguagePackage>, StoreError> {
-        let suffix = package_suffix(package_name)
-            .ok_or_else(|| StoreError::InvalidPackageName(package_name.to_string()))?;
-        let Some(source) = self.source_asset(&format!("{suffix}.language.json")) else {
-            return Ok(None);
-        };
-        let bytes = std::fs::read(&source).map_err(|error| {
-            StoreError::io(format!("could not read {}", source.display()), error)
-        })?;
-        parse_package(&bytes, package_name).map(Some)
-    }
-
     fn fetch_package(
         &self,
         package_name: &str,
         path: &Path,
     ) -> Result<LanguagePackage, StoreError> {
-        let bytes = self.fetch_from_cdn(
-            &format!("{package_name}@latest/language.json"),
-            &format!("language package {package_name}"),
-        )?;
+        let latest = || {
+            self.fetch_from_cdn(
+                &format!("{package_name}@latest/language.json"),
+                &format!("language package {package_name}"),
+            )
+        };
+        let bytes = match crate::catalog::pinned_version(package_name) {
+            Some(version) => match self.fetch_from_cdn(
+                &format!("{package_name}@{version}/language.json"),
+                &format!("language package {package_name}@{version}"),
+            ) {
+                Ok(bytes) => bytes,
+                // The pin existed when the catalog was generated, so reaching
+                // here means it was unpublished since. Falling back keeps the
+                // language working, but it is no longer the version other
+                // machines resolve, which is the whole point of pinning.
+                Err(pin_error) => {
+                    eprintln!(
+                        "lumis: {package_name}@{version} is unavailable ({pin_error}); \
+                         falling back to @latest, which may differ from other machines"
+                    );
+                    latest()?
+                }
+            },
+            None => latest()?,
+        };
         let package = parse_package(&bytes, package_name)?;
         write_atomic(path, &bytes)?;
         Ok(package)
     }
 
     fn fetch_parser(&self, package: &LanguagePackage, path: &Path) -> Result<Vec<u8>, StoreError> {
-        let bytes = if let Some(source) = self.source_asset(&parser_filename(package)) {
-            std::fs::read(&source).map_err(|error| {
-                StoreError::io(format!("could not read {}", source.display()), error)
-            })?
-        } else {
-            self.fetch_from_cdn(
-                &parser_path(package),
-                &format!("parser WASM {}@{}", package.package_name, package.version),
-            )?
-        };
+        let bytes = self.fetch_from_cdn(
+            &parser_path(package),
+            &format!("parser WASM {}@{}", package.package_name, package.version),
+        )?;
         package.verify_wasm(&bytes)?;
         write_atomic(path, &bytes)?;
         Ok(bytes)
@@ -458,13 +432,6 @@ fn parse_package(bytes: &[u8], package_name: &str) -> Result<LanguagePackage, St
 fn read_package_file(path: &Path, package_name: &str) -> Option<LanguagePackage> {
     let bytes = std::fs::read(path).ok()?;
     parse_package(&bytes, package_name).ok()
-}
-
-fn cache_is_fresh(path: &Path, ttl: Duration) -> bool {
-    std::fs::metadata(path)
-        .and_then(|metadata| metadata.modified())
-        .and_then(|modified| modified.elapsed().map_err(std::io::Error::other))
-        .is_ok_and(|elapsed| elapsed < ttl)
 }
 
 /// Replace `path` atomically, so a reader never sees a partial file.
@@ -571,7 +538,6 @@ mod tests {
         LanguageStore::new(
             StoreConfig {
                 cache_dir: dir.to_path_buf(),
-                source_dir: None,
             },
             fetcher,
         )
@@ -797,7 +763,6 @@ mod tests {
         let store = LanguageStore::new(
             StoreConfig {
                 cache_dir: root.path().join("cache"),
-                source_dir: Some(source_dir),
             },
             Box::new(NoNetwork),
         );
@@ -887,40 +852,22 @@ mod tests {
     /// prefers release-local `priv/wasm`, so a configured source must outrank a fresh
     /// cache here too. Otherwise the same inputs resolve differently per runtime.
     #[test]
-    fn a_configured_source_outranks_a_fresh_cache() {
+    fn a_cached_package_is_served_without_the_network() {
         let dir = tempdir();
-        let source = tempdir();
         let name = "@lumis-sh/wasm-json";
 
         let cached = package();
-        let store_a = make(dir.path(), Box::new(NoNetwork));
+        let store = make(dir.path(), Box::new(NoNetwork));
         write_atomic(
-            &store_a.package_path(name).unwrap(),
+            &store.package_path(name).unwrap(),
             &serde_json::to_vec(&cached).unwrap(),
         )
         .unwrap();
-        assert_eq!(store_a.package(name).unwrap().version, "1.2.3");
 
-        let mut from_source = package();
-        from_source.version = "from-source".into();
-        std::fs::create_dir_all(source.path().join("parsers")).unwrap();
-        std::fs::write(
-            source.path().join("parsers").join("json.language.json"),
-            serde_json::to_vec(&from_source).unwrap(),
-        )
-        .unwrap();
-
-        let store_b = LanguageStore::new(
-            StoreConfig {
-                cache_dir: dir.path().to_path_buf(),
-                source_dir: Some(source.path().to_path_buf()),
-            },
-            Box::new(NoNetwork),
-        );
         assert_eq!(
-            store_b.package(name).unwrap().version,
-            "from-source",
-            "a configured local source must win over a fresh cache"
+            store.package(name).unwrap().version,
+            "1.2.3",
+            "a package already on disk must not be revalidated"
         );
     }
 
@@ -1041,39 +988,32 @@ mod tests {
         );
     }
 
-    /// A parser staged in a source directory belongs in the cache too; a release
-    /// that runs `cache` must not still need that directory.
+    /// `lumis parsers cache` and `mix lumis.languages.cache` land here. A parser
+    /// already in the store is left alone, so the command is idempotent and
+    /// needs no network once the store holds what was asked for.
     #[test]
-    fn caching_copies_a_staged_parser_into_the_cache() {
-        let cache = tempdir();
-        let source = tempdir();
+    fn caching_a_language_already_in_the_store_needs_no_network() {
+        let dir = tempdir();
         let package = package();
-        std::fs::create_dir_all(source.path().join("parsers")).unwrap();
-        std::fs::write(
-            source.path().join("parsers").join("json.language.json"),
-            serde_json::to_vec(&package).unwrap(),
-        )
-        .unwrap();
-        std::fs::write(
-            source
-                .path()
-                .join("parsers")
-                .join(parser_filename(&package)),
-            WASM,
-        )
-        .unwrap();
 
-        let store = LanguageStore::new(
-            StoreConfig {
-                cache_dir: cache.path().to_path_buf(),
-                source_dir: Some(source.path().to_path_buf()),
-            },
-            Box::new(NoNetwork),
+        let store = make(dir.path(), Box::new(NoNetwork));
+        write_atomic(
+            &store.package_path("@lumis-sh/wasm-json").unwrap(),
+            &serde_json::to_vec(&package).unwrap(),
+        )
+        .unwrap();
+        write_atomic(&store.parser_path(&package).unwrap(), WASM).unwrap();
+
+        let written = store.cache_language("json", false).unwrap();
+        assert_eq!(std::fs::read(&written).unwrap(), WASM);
+
+        let reopened = make(dir.path(), Box::new(NoNetwork));
+        assert_eq!(reopened.parser(&package).unwrap(), WASM);
+        assert_eq!(
+            reopened.package("@lumis-sh/wasm-json").unwrap().version,
+            package.version,
+            "the store must stay self-sufficient"
         );
-        store.cache_language("json", false).unwrap();
-
-        let offline = make(cache.path(), Box::new(NoNetwork));
-        assert_eq!(offline.parser(&package).unwrap(), WASM);
     }
 
     fn tempdir() -> tempfile::TempDir {

@@ -179,9 +179,11 @@ run = "node benchmarks/scripts/prepare-showcase.mjs"
 sources = [
   "benchmarks/scripts/prepare-showcase.mjs",
   "benchmarks/webgpu_compute_reduce.html",
+  "benchmarks/ripgrep_searcher.rs",
 ]
 outputs = [
   "benchmarks/showcase/generated/assets/webgpu_compute_reduce.html",
+  "benchmarks/showcase/generated/assets/ripgrep_searcher.rs",
   "benchmarks/showcase/generated/assets/Dracula.tmTheme",
 ]
 
@@ -195,11 +197,18 @@ depends = [
 ]
 run = '''
 export BENCH_SHOWCASE_DIR="$MISE_CONFIG_ROOT/showcase/generated"
+export LUMIS_DATA_DIR="$MISE_CONFIG_ROOT/../target/benchmarks/cli/data"
 cargo run --manifest-path benchmarks/rust/Cargo.toml --bin showcase
-pnpm --filter @lumis-sh/benchmarks run showcase
+LUMIS_TEST_RUNTIME=wasm pnpm --filter @lumis-sh/benchmarks run showcase
+LUMIS_TEST_RUNTIME=native BENCH_SHOWCASE_LUMIS_ONLY=1 pnpm --filter @lumis-sh/benchmarks run showcase
 MIX_ENV=prod elixir benchmarks/elixir/showcase.exs
 node benchmarks/scripts/finish-showcase.mjs
 '''
+
+[tasks."showcase-publish"]
+description = "Copy the visual comparison into the website as static assets"
+depends = ["showcase"]
+run = "node benchmarks/scripts/publish-showcase.mjs"
 
 [tasks.build]
 description = "Build every benchmark implementation"
@@ -241,9 +250,19 @@ cargo clippy --manifest-path benchmarks/rust/Cargo.toml --all-targets -- -D warn
 pnpm --filter @lumis-sh/benchmarks run lint
 '''
 
+[tasks."sync-language-deps"]
+description = "Point the benchmark language packages at the versions the catalog pins"
+run = "node benchmarks/scripts/sync-language-deps.mjs"
+dir = "{{config_root}}/.."
+
+[tasks."check-language-deps"]
+description = "Verify the benchmark language packages match the catalog pins"
+run = "node benchmarks/scripts/sync-language-deps.mjs --check"
+dir = "{{config_root}}/.."
+
 [tasks.check]
 description = "Verify fixtures, formatting, lint, and optimized builds"
-depends = ["build", "lint"]
+depends = ["build", "lint", "check-language-deps"]
 
 [tasks.rust]
 description = "Run Criterion for Lumis Rust and syntect"

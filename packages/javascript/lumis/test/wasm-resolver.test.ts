@@ -72,6 +72,8 @@ describe("Wasm resolver", () => {
       id: "diff",
       aliases: [],
       packageName: "@lumis-sh/wasm-diff",
+      // Pinned by the catalog, so every runtime resolves the same parser.
+      version: expect.stringMatching(/^\d+\.\d+\.\d+$/),
     });
     expect(packageMetadata.parser).toEqual({
       name: "tree-sitter-diff",

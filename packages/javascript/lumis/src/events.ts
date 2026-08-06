@@ -1,4 +1,5 @@
 import type { Node, Point, QueryCapture, QueryMatch, Range } from "web-tree-sitter";
+import { LANGUAGES } from "./generated/languages-meta.js";
 import type { LoadedLanguage, QueryCaptureOffset } from "./types.js";
 
 interface RuntimeLookup {
@@ -26,6 +27,7 @@ interface LayerQueryCapture {
   nodeId: number;
   startByte: number;
   endByte: number;
+  isMissing: boolean;
   setProperties?: Record<string, string | null>;
 }
 
@@ -113,13 +115,28 @@ function buildUtf8OffsetMap(source: string): number[] {
 const warnedUnresolved = new Set<string>();
 
 /**
+ * Mirrors `catalog::find` in `lumis-wasm-runtime`, which gates the same warning
+ * on the Rust side.
+ */
+const catalogNames = new Set(
+  LANGUAGES.flatMap(({ id, aliases }) => [id, ...aliases]).map((name) => name.toLowerCase()),
+);
+
+/**
  * Say so when a document named a language that is not loaded.
  *
  * `web-tree-sitter` cannot fetch a parser inside a synchronous walk, so the
  * block stays plain. The native addon reports the same thing from Rust, so both
  * Node runtimes behave and sound identical.
+ *
+ * An injection query can name something that is not a language at all: html
+ * captures the raw `<script type=...>` value, so `type="module"` asks for
+ * "module" and `type="importmap"` for "importmap", each just before a more
+ * specific pattern injects javascript or json into the same block. Those blocks
+ * do highlight, so naming the discarded value would warn about correct output.
  */
 export function warnUnresolvedInjection(id: string): void {
+  if (!catalogNames.has(id.toLowerCase())) return;
   if (warnedUnresolved.has(id)) return;
   warnedUnresolved.add(id);
   console.warn(
@@ -247,6 +264,7 @@ function snapshotCapturesWithMatches(
       endByte: adjusted
         ? (maps.utf8Offsets[adjusted.endIndex] ?? nodeEndByte(capture.node, maps))
         : nodeEndByte(capture.node, maps),
+      isMissing: capture.node.isMissing,
       setProperties: capture.setProperties,
     });
   }
@@ -259,7 +277,7 @@ function resolveInjection(
   language: LoadedLanguage,
   maps: SourceMaps,
   parentLanguageName?: string,
-): { languageName?: string; ranges: Range[] } {
+): { languageName?: string; ranges: Range[]; combined: boolean } {
   let languageName: string | undefined;
   const contentCaptures: QueryCapture[] = [];
 
@@ -289,7 +307,7 @@ function resolveInjection(
     getCaptureRanges(capture, maps, includeChildren, offsets?.[capture.name]),
   );
 
-  return { languageName, ranges };
+  return { languageName, ranges, combined: "injection.combined" in setProperties };
 }
 
 function collectHighlightLayers(
@@ -339,6 +357,30 @@ function collectHighlightLayers(
       return layers;
     }
 
+    // `injection.combined` means every match of the pattern feeds one layer, not
+    // one layer each. Markdown injects each html tag separately, so without this
+    // `</h1>` is parsed on its own and never becomes a closing tag.
+    const combined = new Map<number, { languageName: string; ranges: Range[] }>();
+
+    const inject = (languageName: string, ranges: Range[]) => {
+      const injectedLanguage = runtime.getLoadedLanguage(languageName);
+      if (!injectedLanguage) {
+        warnUnresolvedInjection(languageName);
+        return;
+      }
+      layers.push(
+        ...collectHighlightLayers(
+          source,
+          maps,
+          runtime,
+          injectedLanguage,
+          depth + 1,
+          ranges,
+          language.definition.id,
+        ),
+      );
+    };
+
     for (const match of queryMatches) {
       if (match.patternIndex >= language.config.injectionPatternEnd) {
         continue;
@@ -349,22 +391,26 @@ function collectHighlightLayers(
         continue;
       }
 
-      const injectedLanguage = runtime.getLoadedLanguage(resolved.languageName);
-      if (!injectedLanguage) {
-        warnUnresolvedInjection(resolved.languageName);
+      if (!resolved.combined) {
+        inject(resolved.languageName, resolved.ranges);
         continue;
       }
 
-      const childLayers = collectHighlightLayers(
-        source,
-        maps,
-        runtime,
-        injectedLanguage,
-        depth + 1,
-        resolved.ranges,
-        language.definition.id,
-      );
-      layers.push(...childLayers);
+      const group = combined.get(match.patternIndex);
+      if (group) {
+        group.ranges.push(...resolved.ranges);
+      } else {
+        combined.set(match.patternIndex, {
+          languageName: resolved.languageName,
+          ranges: [...resolved.ranges],
+        });
+      }
+    }
+
+    for (const { languageName, ranges } of combined.values()) {
+      // Tree-sitter requires included ranges in ascending order.
+      ranges.sort((a, b) => a.startIndex - b.startIndex);
+      inject(languageName, ranges);
     }
 
     return layers;
@@ -875,9 +921,25 @@ function buildNestedEvents(inputLayers: HighlightLayer[], maps: SourceMaps): Hig
         continue;
       }
 
+      // A capture with no recognized highlight does not win the node.
+      // nvim-treesitter marks helper captures `@_name`, and Neovim skips them
+      // because they resolve to no highlight group. Letting one win here would
+      // blank the node and discard its match's other captures with it.
+      if (!layer.language.config.captureMetadata[following.name]?.highlightScope) {
+        continue;
+      }
+
       layer.removedMatches[capture.matchIndex] = 1;
       capture = following;
     }
+
+    // A MISSING node is synthesised by error recovery, spans no bytes, and so can
+    // only ever produce an empty span. Skip it: this runtime and the Rust one do
+    // not recover identically — given `write!(x, "y")`, the injected macro body
+    // parses to a `MISSING ";"` here and to an `ERROR` there — and highlighting
+    // the artefact would leak that disagreement into output the two are required
+    // to render identically.
+    if (capture.isMissing) return undefined;
 
     const scope = layer.language.config.captureMetadata[capture.name]?.highlightScope;
     if (definitionTarget) {

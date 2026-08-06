@@ -19,7 +19,7 @@ on:
       - "packages/javascript/lumis/test/query-patterns.test.ts"
       - "packages/javascript/lumis/test/unverified-parsers.json"
       - "fixtures/parsers/**"
-      - "packages/javascript/lumis/scripts/list-unverified-parsers.mjs"
+      - "packages/javascript/lumis/scripts/list-parsers.mjs"
       - "pnpm-lock.yaml"
       - "pnpm-workspace.yaml"
       - "mise.toml"
@@ -37,7 +37,7 @@ on:
       - "packages/javascript/lumis/test/query-patterns.test.ts"
       - "packages/javascript/lumis/test/unverified-parsers.json"
       - "fixtures/parsers/**"
-      - "packages/javascript/lumis/scripts/list-unverified-parsers.mjs"
+      - "packages/javascript/lumis/scripts/list-parsers.mjs"
       - "pnpm-lock.yaml"
       - "pnpm-workspace.yaml"
       - "mise.toml"
@@ -132,7 +132,7 @@ jobs:
           # Several languages share one parser, so the two lists differ in length.
           # Shard the parsers, then take the languages those parsers serve; sharding
           # both separately splits a language from its parser.
-          node scripts/list-unverified-parsers.mjs --pairs --all > /tmp/pairs.txt
+          node scripts/list-parsers.mjs --pairs > /tmp/pairs.txt
           cut -f2 /tmp/pairs.txt | sort -u > /tmp/parsers.txt
           awk -v s="$SHARD" -v n="$SHARDS" 'NR % n == s % n' /tmp/parsers.txt > /tmp/shard-parsers.txt
           awk 'NR == FNR { keep[$0]; next } ($2 in keep) { print $1 }' \
@@ -224,7 +224,7 @@ jobs:
         run: |
           set -euo pipefail
           cd packages/javascript/lumis
-          node scripts/list-unverified-parsers.mjs --pairs --all > /tmp/pairs.txt
+          node scripts/list-parsers.mjs --pairs > /tmp/pairs.txt
           cut -f2 /tmp/pairs.txt | sort -u > /tmp/parsers.txt
           awk -v s="$SHARD" -v n=4 'NR % n == s % n' /tmp/parsers.txt > /tmp/shard-parsers.txt
           awk 'NR == FNR { keep[$0]; next } ($2 in keep) { print $1 }' \

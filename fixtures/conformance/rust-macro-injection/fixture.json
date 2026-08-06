@@ -1,0 +1,491 @@
+{
+  "name": "rust-macro-injection",
+  "language": "rust",
+  "theme": "dracula",
+  "events": [
+    {
+      "type": "start",
+      "scope": "keyword.function",
+      "language": "rust"
+    },
+    {
+      "type": "source",
+      "start": 0,
+      "end": 2
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 2,
+      "end": 3
+    },
+    {
+      "type": "start",
+      "scope": "function",
+      "language": "rust"
+    },
+    {
+      "type": "source",
+      "start": 3,
+      "end": 11
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "rust"
+    },
+    {
+      "type": "source",
+      "start": 11,
+      "end": 12
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "variable.parameter",
+      "language": "rust"
+    },
+    {
+      "type": "source",
+      "start": 12,
+      "end": 15
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.delimiter",
+      "language": "rust"
+    },
+    {
+      "type": "source",
+      "start": 15,
+      "end": 16
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 16,
+      "end": 17
+    },
+    {
+      "type": "start",
+      "scope": "operator",
+      "language": "rust"
+    },
+    {
+      "type": "source",
+      "start": 17,
+      "end": 18
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "type",
+      "language": "rust"
+    },
+    {
+      "type": "source",
+      "start": 18,
+      "end": 24
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "rust"
+    },
+    {
+      "type": "source",
+      "start": 24,
+      "end": 25
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 25,
+      "end": 26
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.delimiter",
+      "language": "rust"
+    },
+    {
+      "type": "source",
+      "start": 26,
+      "end": 28
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 28,
+      "end": 29
+    },
+    {
+      "type": "start",
+      "scope": "type",
+      "language": "rust"
+    },
+    {
+      "type": "source",
+      "start": 29,
+      "end": 35
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 35,
+      "end": 36
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "rust"
+    },
+    {
+      "type": "source",
+      "start": 36,
+      "end": 37
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 37,
+      "end": 42
+    },
+    {
+      "type": "start",
+      "scope": "keyword.exception",
+      "language": "rust"
+    },
+    {
+      "type": "source",
+      "start": 42,
+      "end": 48
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "keyword.exception",
+      "language": "rust"
+    },
+    {
+      "type": "source",
+      "start": 48,
+      "end": 49
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "rust"
+    },
+    {
+      "type": "source",
+      "start": 49,
+      "end": 50
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "rust"
+    },
+    {
+      "type": "source",
+      "start": 50,
+      "end": 53
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.delimiter",
+      "language": "rust"
+    },
+    {
+      "type": "source",
+      "start": 53,
+      "end": 54
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "variable.member",
+      "language": "rust"
+    },
+    {
+      "type": "source",
+      "start": 54,
+      "end": 64
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "rust"
+    },
+    {
+      "type": "source",
+      "start": 64,
+      "end": 65
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.delimiter",
+      "language": "rust"
+    },
+    {
+      "type": "source",
+      "start": 65,
+      "end": 66
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 66,
+      "end": 71
+    },
+    {
+      "type": "start",
+      "scope": "keyword.exception",
+      "language": "rust"
+    },
+    {
+      "type": "source",
+      "start": 71,
+      "end": 77
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "keyword.exception",
+      "language": "rust"
+    },
+    {
+      "type": "source",
+      "start": 77,
+      "end": 78
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "rust"
+    },
+    {
+      "type": "source",
+      "start": 78,
+      "end": 79
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "string",
+      "language": "rust"
+    },
+    {
+      "type": "source",
+      "start": 79,
+      "end": 87
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.delimiter",
+      "language": "rust"
+    },
+    {
+      "type": "source",
+      "start": 87,
+      "end": 88
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 88,
+      "end": 89
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "rust"
+    },
+    {
+      "type": "source",
+      "start": 89,
+      "end": 92
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.delimiter",
+      "language": "rust"
+    },
+    {
+      "type": "source",
+      "start": 92,
+      "end": 93
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "variable.member",
+      "language": "rust"
+    },
+    {
+      "type": "source",
+      "start": 93,
+      "end": 97
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.delimiter",
+      "language": "rust"
+    },
+    {
+      "type": "source",
+      "start": 97,
+      "end": 98
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 98,
+      "end": 99
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "rust"
+    },
+    {
+      "type": "source",
+      "start": 99,
+      "end": 102
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.delimiter",
+      "language": "rust"
+    },
+    {
+      "type": "source",
+      "start": 102,
+      "end": 103
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "variable.member",
+      "language": "rust"
+    },
+    {
+      "type": "source",
+      "start": 103,
+      "end": 108
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "rust"
+    },
+    {
+      "type": "source",
+      "start": 108,
+      "end": 109
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 109,
+      "end": 110
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "rust"
+    },
+    {
+      "type": "source",
+      "start": 110,
+      "end": 111
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 111,
+      "end": 112
+    }
+  ]
+}

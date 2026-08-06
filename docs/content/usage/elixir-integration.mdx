@@ -75,46 +75,54 @@ to need a language pays for it and every process after it does not.
 
 ### Loading ahead of time
 
-Loading a parser takes 3-15 ms the first time and about 0.3 ms after;
-*downloading* one is the expensive part. Load at startup when you would rather
-not have a first request pay for it:
+A cold parser costs a download and then a Wasmtime compile, and the compile is
+the larger half: seven parsers already on disk take about 8 s to compile and
+1.3 s once the compiled forms are cached. Load at startup so a request never
+pays either:
 
 ```elixir title="lib/my_app/application.ex"
 :ok = Lumis.Languages.load(["markdown", "elixir", "json"])
-:ok = Lumis.Languages.load(:all)
+:ok = Lumis.Languages.load(:bundle_web)
 ```
 
-### Releases without network access
+A `:bundle_*` atom names the same languages as the `@lumis-sh/wasm-bundle-*` package
+of that name — `:bundle_web`, `:bundle_web_extra`, `:bundle_system`, `:bundle_backend`
+and `:bundle_full` — so a bundle means the same thing in every runtime.
+`Lumis.Languages.bundles/0` returns the membership.
+
+### Paying for parsers at build time, not on a request
 
 ```bash
 mix lumis.languages.cache elixir html javascript css
 mix lumis.languages.cache --all
 ```
 
-Parsers land under `LUMIS_DATA_DIR`, which defaults to the user data directory.
-The result is self-sufficient — parser bytes plus the metadata naming them — so
-pointing a container at it needs nothing else. `--force` replaces files that
-already verify, and `--output` writes somewhere other than `LUMIS_DATA_DIR`.
+Each parser is downloaded *and* loaded once, so Wasmtime writes its compiled
+form beside it. An image built this way starts serving without paying either
+cost, and a restart or a new pod does not pay it again.
 
-Wasmtime persists compiled modules under the same directory, so a later VM start
-does not recompile the same parser.
+Parsers land under `LUMIS_DATA_DIR`, which defaults to the user data directory.
+The result is self-sufficient — parser bytes, their metadata, and the compiled
+modules — so pointing a container at it needs nothing else. `--force` replaces
+files that already verify, and `--no-compile` skips the compile step. To write
+somewhere other than the default, set `LUMIS_DATA_DIR` or
+`config :lumis, data_dir:`; there is no second way to name that directory.
 
 ### Where parsers come from
 
-Each is taken from the first place that has it:
+One directory holds them all, and it is checked before the CDN. Parsers you
+build or vendor yourself go in the same place as downloaded ones, so a release
+that stages them at build time never reaches the network.
 
-1. `:wasm_path`, for parsers you build or vendor yourself
-2. the cache under `:data_dir`
-3. the CDN
-
-Both directories default to `LUMIS_WASM_PATH` and `LUMIS_DATA_DIR`, and both can
-be set in configuration instead, which is what a release usually wants:
+It defaults to `LUMIS_DATA_DIR`, and configuration takes precedence, which is
+what a release usually wants:
 
 ```elixir title="config/runtime.exs"
-config :lumis,
-  data_dir: "/app/lumis",
-  wasm_path: "/app/parsers"
+config :lumis, data_dir: "/app/lumis"
 ```
+
+See [WASM and CDN](/advanced/wasm-and-cdn#the-store-directory) for the layout and
+for how version pinning removes revalidation.
 
 Bytes are checked against the size and SHA-256 their package declares before
 use, and anything that fails is discarded rather than trusted, so a corrupted
@@ -132,9 +140,10 @@ lives in the shared Rust store:
 | Removed | Use instead |
 | --- | --- |
 | `config :lumis, :bundled_languages` | name the languages: `mix lumis.languages.cache elixir html`, or `--all` |
-| `config :lumis, :wasm_resolver` | `config :lumis, wasm_path: "/app/parsers"` |
-| `config :lumis, :language_package_resolver` | `config :lumis, wasm_path: "/app/parsers"` |
+| `config :lumis, :wasm_resolver` | `config :lumis, data_dir: "/app/lumis"` |
+| `config :lumis, :language_package_resolver` | `config :lumis, data_dir: "/app/lumis"` |
 | release-local `priv/wasm` | `config :lumis, data_dir: "/app/lumis"`, or `LUMIS_DATA_DIR` |
+| `config :lumis, :wasm_path` | one directory now: `config :lumis, data_dir:` |
 
 `mix lumis.languages.cache` takes language names or `--all` rather than reading
 configuration, matching `lumis parsers cache`.

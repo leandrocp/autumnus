@@ -107,8 +107,6 @@ describe("cacheLanguages", () => {
       env: {
         ...process.env,
         LUMIS_DATA_DIR: directory,
-        // Nothing may come from a staged tree; the point is the cache above.
-        LUMIS_WASM_PATH: "",
       },
       encoding: "utf8",
     });

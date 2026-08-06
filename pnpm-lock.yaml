@@ -14,6 +14,9 @@ importers:
       '@lumis-sh/themes':
         specifier: workspace:*
         version: link:../../packages/javascript/themes
+      '@lumis-sh/wasm-bash':
+        specifier: 0.26.3
+        version: 0.26.3
       '@lumis-sh/wasm-c':
         specifier: 0.26.1
         version: 0.26.1
@@ -26,12 +29,18 @@ importers:
       '@lumis-sh/wasm-diff':
         specifier: 0.26.1
         version: 0.26.1
+      '@lumis-sh/wasm-elixir':
+        specifier: 0.26.2
+        version: 0.26.2
       '@lumis-sh/wasm-go':
         specifier: 0.26.1
         version: 0.26.1
-      '@lumis-sh/wasm-html':
+      '@lumis-sh/wasm-heex':
         specifier: 0.26.1
         version: 0.26.1
+      '@lumis-sh/wasm-html':
+        specifier: 0.26.2
+        version: 0.26.2
       '@lumis-sh/wasm-java':
         specifier: 0.26.1
         version: 0.26.1
@@ -41,24 +50,33 @@ importers:
       '@lumis-sh/wasm-json':
         specifier: 0.26.2
         version: 0.26.2
+      '@lumis-sh/wasm-markdown':
+        specifier: 0.26.1
+        version: 0.26.1
+      '@lumis-sh/wasm-markdown_inline':
+        specifier: 0.26.1
+        version: 0.26.1
       '@lumis-sh/wasm-python':
-        specifier: 0.26.1
-        version: 0.26.1
+        specifier: 0.26.2
+        version: 0.26.2
       '@lumis-sh/wasm-ruby':
-        specifier: 0.26.1
-        version: 0.26.1
+        specifier: 0.26.2
+        version: 0.26.2
       '@lumis-sh/wasm-rust':
         specifier: 0.26.3
         version: 0.26.3
+      '@lumis-sh/wasm-tsx':
+        specifier: 0.26.1
+        version: 0.26.1
       highlight.js:
-        specifier: 11.11.1
+        specifier: latest
         version: 11.11.1
       mitata:
         specifier: 1.0.34
         version: 1.0.34
       shiki:
-        specifier: 4.3.1
-        version: 4.3.1
+        specifier: latest
+        version: 4.4.2
     devDependencies:
       oxfmt:
         specifier: ^0.43.0
@@ -1298,6 +1316,9 @@ packages:
   '@lumis-sh/wasm-bash@0.26.1':
     resolution: {integrity: sha512-Nvs8zJGsNzcXJl7KufZIy3xeGrjxynVs+rJnHRpW6NKJ1hmiGoCInLI5pnXIdWMGq0yyi8Pwvc3l8supXb7JHg==}
 
+  '@lumis-sh/wasm-bash@0.26.3':
+    resolution: {integrity: sha512-smDGqIH5MNGi5GwfkHVSOwNaMJf+HBKx3+zkGiwDF6QRXoVX+tWmkb5yiaEbyRcIbGVVwApUhomQCb/ZOHauGQ==}
+
   '@lumis-sh/wasm-bicep@0.26.0':
     resolution: {integrity: sha512-1B5aOKjUVcsbzDF1g5+uZPTmU3r07WfmB1DkuLARnLyphue90XIQZZvnfSy+ggVOpfsTSrZTtry2YA6Vl2/TVg==}
 
@@ -1361,6 +1382,9 @@ packages:
   '@lumis-sh/wasm-elixir@0.26.1':
     resolution: {integrity: sha512-HqlYSj3NUG+tBoQ9jvRkqLg40p+tIEQNOlhrm0DYVWEafVvIJglQOetKWiL5/kkHk5helEx3A5FMRaZjSm8CgQ==}
 
+  '@lumis-sh/wasm-elixir@0.26.2':
+    resolution: {integrity: sha512-y79aQzXlcPjV4ot1t72DfwdJUN1yCbwZLVbxTWBlL1u5zyyrIKy7dQ4KXbeyB4YMovLjUlPjPHtV7z0cLlDWCw==}
+
   '@lumis-sh/wasm-elm@0.26.0':
     resolution: {integrity: sha512-iy5lHXUaj9jthkbkG/D2yc3ArEtl2oQX0mMn8Uk8WSZ+GflvGg6zEIMGpVN0xLkpPLYLTVU1iqVa2O4r3OsjbA==}
 
@@ -1412,8 +1436,14 @@ packages:
   '@lumis-sh/wasm-heex@0.26.0':
     resolution: {integrity: sha512-PdZHQazYfKBmiAKaoVM3dXhP//EiAkK/DGZQTzt57/umi+FUXc+j0ivUnGGJTWYc7HFFTtFCmiCog6VwmocvTQ==}
 
+  '@lumis-sh/wasm-heex@0.26.1':
+    resolution: {integrity: sha512-PScHW0oUVtWqmNKL4H51gZIucEnqJ+oCKEiFmkDpbxIF6gQu0B7Zzi22+EFAiQerN8ts8MSWKCTdWAZr3QsOSA==}
+
   '@lumis-sh/wasm-html@0.26.1':
     resolution: {integrity: sha512-B4wvYmQdGprTRjjSYbt/p3g1Futa1H4GSCXVsatbDuRRkVoNc+Tix2qSDVKMaaaCAkzHtVYjZ7wtG6M8u1i5HQ==}
+
+  '@lumis-sh/wasm-html@0.26.2':
+    resolution: {integrity: sha512-mPYhxTu+DySYivfZ2ca2cavSTCiYiuEtyduvessupX7NMd3oSulB72xI9PY08I66vSlNEVIiwnRWvcy6sMFKWQ==}
 
   '@lumis-sh/wasm-http@0.26.0':
     resolution: {integrity: sha512-UKqkuTN5Yut/F2ivQE2M1Rh7T3NHKswQOaS1fWB8jhIgsTwf1HkvStUIDMCejt9hzuHttfigAvXZ703Tm7YPQw==}
@@ -1484,8 +1514,14 @@ packages:
   '@lumis-sh/wasm-markdown@0.26.0':
     resolution: {integrity: sha512-j3SgDlOktRGVAOq7jEvodBE4b42r8fmRp3Da9U7sbAI32mFvJVHjXEfVU6a63t0/yM9F3gGOAFUcggqxM7Xpow==}
 
+  '@lumis-sh/wasm-markdown@0.26.1':
+    resolution: {integrity: sha512-JFXyb+FdU89ZKDoFyKHZkeObGjeVevp6OI70JPHgZa0WDXmyoytUmav0Rs4LY0I1sGJvElloIP+tA6168HMX8A==}
+
   '@lumis-sh/wasm-markdown_inline@0.26.0':
     resolution: {integrity: sha512-W+m3XVcWsk1Fpts4L1pCX4S+YIAgbIObvzg0KNST0aKtghpqKxf2gMVJxR+IomZoGr0J6ey2kh2Ow50/nDsXmA==}
+
+  '@lumis-sh/wasm-markdown_inline@0.26.1':
+    resolution: {integrity: sha512-0lrHgeL7YWUpufEBQSJ0kFlNuc2ShpS3twUyADC0o8p8hMEoqvsSBlcKCVXs4VYhZGoJKNZsdjJ7C6LWTRt35Q==}
 
   '@lumis-sh/wasm-matlab@0.26.0':
     resolution: {integrity: sha512-gzxr7e3qvl1PRxpuKu/ZXqDXTMxFa265mgtV08xCE8wV2dkRfrdAAsP/Qcl2Xn9lp47eFC5mN011rNmtswCZRQ==}
@@ -1538,8 +1574,8 @@ packages:
   '@lumis-sh/wasm-python@0.26.0':
     resolution: {integrity: sha512-ltynaOG0TH8EvmEjsj4Za3VvIA3eKR3IZgr3owEf0ZRILYrJocP7vuPWv14zR/sB7DcBz6uZPmaFT/4ikg863g==}
 
-  '@lumis-sh/wasm-python@0.26.1':
-    resolution: {integrity: sha512-wmXkntGD9iPohhGOGxvKxBPYVPIbU89OQwiN4wO088SGpftBO100qTbmdjECQSUYk90XBSBWo5IrGWMvIfSDGA==}
+  '@lumis-sh/wasm-python@0.26.2':
+    resolution: {integrity: sha512-wevU3mGtXGWlBOkPL7fpM7MCvqjaP72mWmK3YbUDLNqRoZgRwIo9XC9UScFiMZWUQZ9QC9xZ6jlOUrRblwHyXA==}
 
   '@lumis-sh/wasm-qmljs@0.26.0':
     resolution: {integrity: sha512-uxDkbeWZcV4l75qIdP5KxJ6KEBgINGNIp15mtsz/xExFs7vceX62JyXyIqGq7aQ2GYZYquLFtZ0SohxZyw9Fuw==}
@@ -1558,6 +1594,9 @@ packages:
 
   '@lumis-sh/wasm-ruby@0.26.1':
     resolution: {integrity: sha512-FJoWjMJpiPtG1zx9inALZ400rzqeDkPwvhlr+igSByrWg/cZb+GVxRUUpOaN7vuGdPUaGE+gqoCjLAQtpamtTg==}
+
+  '@lumis-sh/wasm-ruby@0.26.2':
+    resolution: {integrity: sha512-PgrgNTPhgXIBrl4oJpL+HbmvHBC1HZRW9u5/zSz4t7+6KCJntsXLLBwliz2ZH/h+dc8T+hnhsFG6T7cPQnZWbQ==}
 
   '@lumis-sh/wasm-rust@0.26.2':
     resolution: {integrity: sha512-iguBPDz5RFq2Je7en6IXtiRJzvjKKT/9JZAWD+no/8dydpJZs+FTS9uJL6XI7gcI526ZuVnI69uI/TqSmDTlxA==}
@@ -2236,44 +2275,44 @@ packages:
   '@rushstack/ts-command-line@5.3.5':
     resolution: {integrity: sha512-ToJQu3+o6aEdDoApGrwb/RsbwDi/NSC7jIEaAezzWM470TRrsXfSHoYAm1eWkhh34xJ+kZxU1ZzKSHiOMlOFPA==}
 
-  '@shikijs/core@4.3.1':
-    resolution: {integrity: sha512-ANMDxuaPsNMdDC1m4vfvhlDmJweMwkE5XitTwrq2rWHx5jM+dlm4MmHt2PP6t0uejfR77SuhrhJ0zEijIF/uhA==}
+  '@shikijs/core@4.4.2':
+    resolution: {integrity: sha512-StyzbAyxg2/tBGf78gwbBkGyeQ73lf8UiJArFaQhTQIDqQOCKPCQFanvrs4/Yv3Yfyc+ONInJM6K+FMIf+P+kA==}
     engines: {node: '>=20'}
 
-  '@shikijs/engine-javascript@4.3.1':
-    resolution: {integrity: sha512-JBItcnPuYq7jVJdZo/vMj94r+szT7XEjHFX+mvFDGSEIbVAXAGyHAHzhbWzpGOwYidCZrErJLLgn2PVeiokHnQ==}
+  '@shikijs/engine-javascript@4.4.2':
+    resolution: {integrity: sha512-MnIkeqWdVPUWsxlx8gKLVCJFTsqrQJgpTPBPpQwaFeJ56lOnJxj5aN2LUFnfxUEcvOQuNocmbaMnVrCEln6rkw==}
     engines: {node: '>=20'}
 
   '@shikijs/engine-oniguruma@3.23.0':
     resolution: {integrity: sha512-1nWINwKXxKKLqPibT5f4pAFLej9oZzQTsby8942OTlsJzOBZ0MWKiwzMsd+jhzu8YPCHAswGnnN1YtQfirL35g==}
 
-  '@shikijs/engine-oniguruma@4.3.1':
-    resolution: {integrity: sha512-OXyNMzg0pews+msMj4cHeqT4xiYKKvbnn6VbdAXxfoFl3SSx4fJTc8FadECuc5/H9p3BzhNAoAUXKwAu9rWYhg==}
+  '@shikijs/engine-oniguruma@4.4.2':
+    resolution: {integrity: sha512-GLhowz1+jixjz+wiZ3wMnOn1jTxiFCGl2PkXufivbnwPHKuyw1AYqu5/hbWhZZ2oAb0NP05WUJhYeigY14drnw==}
     engines: {node: '>=20'}
 
   '@shikijs/langs@3.23.0':
     resolution: {integrity: sha512-2Ep4W3Re5aB1/62RSYQInK9mM3HsLeB91cHqznAJMuylqjzNVAVCMnNWRHFtcNHXsoNRayP9z1qj4Sq3nMqYXg==}
 
-  '@shikijs/langs@4.3.1':
-    resolution: {integrity: sha512-m0l9nsDqgBHvbZbk7A0/kXz/impK3uB/c6rAn6Gpg/uPtdZRQ+alsN/17MU5thb68XTj/4DxkZAotrM0GGSpDQ==}
+  '@shikijs/langs@4.4.2':
+    resolution: {integrity: sha512-8DfeusD+Zdv/eYIDdXyJTUnSMHt+aAWjAOCXV20HNGAHRlInXpG8wh421v6B91WOm9TFwRLN+b/LG5F2NAIojg==}
     engines: {node: '>=20'}
 
-  '@shikijs/primitive@4.3.1':
-    resolution: {integrity: sha512-CXQRQOYy1leqQ8ceTeJdmXv/bsUY++6QyLpXJ94LZAAYj5X2SKRdc5ipguv4NPyGVKItB2PPwUpRNe0Sjh5S1A==}
+  '@shikijs/primitive@4.4.2':
+    resolution: {integrity: sha512-l6fQQKsOMlz72n38fztmSgZ76MO6KSWuw8o+GJ+FhmqrpC9pIOJNQNXGgbb5yX2AwpzlEHwsaLPnk/8o4Fm+rA==}
     engines: {node: '>=20'}
 
   '@shikijs/themes@3.23.0':
     resolution: {integrity: sha512-5qySYa1ZgAT18HR/ypENL9cUSGOeI2x+4IvYJu4JgVJdizn6kG4ia5Q1jDEOi7gTbN4RbuYtmHh0W3eccOrjMA==}
 
-  '@shikijs/themes@4.3.1':
-    resolution: {integrity: sha512-dgpoJ4WqNi2yTmizQHBJ5zcX6j2lE6icN/0yt4l1kkf16jrY/pwPLoTb1ETsWMz0OBLf9ZNvwmxft+cH+N9qSA==}
+  '@shikijs/themes@4.4.2':
+    resolution: {integrity: sha512-H0CFoL07ddDC2Dd6EdrPYNkRhUR6YCkJlnuYFceYYUJJA5TIm2b5B33qqiDYryBExgbKMndFJPb2u1gTuqO37g==}
     engines: {node: '>=20'}
 
   '@shikijs/types@3.23.0':
     resolution: {integrity: sha512-3JZ5HXOZfYjsYSk0yPwBrkupyYSLpAE26Qc0HLghhZNGTZg/SKxXIIgoxOpmmeQP0RRSDJTk1/vPfw9tbw+jSQ==}
 
-  '@shikijs/types@4.3.1':
-    resolution: {integrity: sha512-CHFxE0jztBIZRHH6gxXE7DXUCFXjReEGxZ/j0rfSLGKZuwp2xBYycEP14875DSa9KLL/6700oxIq6oO6ef9K2g==}
+  '@shikijs/types@4.4.2':
+    resolution: {integrity: sha512-PFYitV4vpDr/iPCIhnHp+Q4ftic5N5VeNJ3KQ1O8gn3h2ar8qgwMAXF7tq4m1CWaMS60fV4VqF6vfnWH4F7vqQ==}
     engines: {node: '>=20'}
 
   '@shikijs/vscode-textmate@10.0.2':
@@ -2305,6 +2344,9 @@ packages:
 
   '@types/hast@3.0.4':
     resolution: {integrity: sha512-WPs+bbQw5aCj+x6laNGWLH3wviHtoCv/P3+otBhbOhJgG8qtpdAMlTCxLtsTWA7LH1Oh/bFCHsBn0TPS5m30EQ==}
+
+  '@types/hast@3.0.5':
+    resolution: {integrity: sha512-rp/ezSWaD1m44dPKICGhiskI13nVr7qTloFwDa/IYkhhf5nzwP+zIQcIJh3WIFSBOy/H1PzB40jPjMDksN4F+g==}
 
   '@types/linkify-it@5.0.0':
     resolution: {integrity: sha512-sVDA58zAw4eWAffKOaQH5/5j3XeayukzDk+ewSsnv3p4yJEZHCCzMDiZM8e0OUrRvmpGZ85jf4yDHkHsgBNr9Q==}
@@ -3120,8 +3162,8 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
-  shiki@4.3.1:
-    resolution: {integrity: sha512-oR+qDVi2OjX1tmDpyv+3KviX01KzO6Af+0NNnKnsp9491UEGz2YpxTuJboS/6VhYpTdqzmuJBuiTlrAWWJAssw==}
+  shiki@4.4.2:
+    resolution: {integrity: sha512-P8F/dFhRevaw2uSdeIYlq/5SXZNY85DPtmXQ947gD1Zj2JqO5AkNvVVBar0Me9JkFx3uzVud/qOtP5ek9NEQGA==}
     engines: {node: '>=20'}
 
   siginfo@2.0.0:
@@ -3754,6 +3796,8 @@ snapshots:
 
   '@lumis-sh/wasm-bash@0.26.1': {}
 
+  '@lumis-sh/wasm-bash@0.26.3': {}
+
   '@lumis-sh/wasm-bicep@0.26.0': {}
 
   '@lumis-sh/wasm-c@0.26.0': {}
@@ -3796,6 +3840,8 @@ snapshots:
 
   '@lumis-sh/wasm-elixir@0.26.1': {}
 
+  '@lumis-sh/wasm-elixir@0.26.2': {}
+
   '@lumis-sh/wasm-elm@0.26.0': {}
 
   '@lumis-sh/wasm-embedded-template@0.26.1': {}
@@ -3830,7 +3876,11 @@ snapshots:
 
   '@lumis-sh/wasm-heex@0.26.0': {}
 
+  '@lumis-sh/wasm-heex@0.26.1': {}
+
   '@lumis-sh/wasm-html@0.26.1': {}
+
+  '@lumis-sh/wasm-html@0.26.2': {}
 
   '@lumis-sh/wasm-http@0.26.0': {}
 
@@ -3878,7 +3928,11 @@ snapshots:
 
   '@lumis-sh/wasm-markdown@0.26.0': {}
 
+  '@lumis-sh/wasm-markdown@0.26.1': {}
+
   '@lumis-sh/wasm-markdown_inline@0.26.0': {}
+
+  '@lumis-sh/wasm-markdown_inline@0.26.1': {}
 
   '@lumis-sh/wasm-matlab@0.26.0': {}
 
@@ -3914,7 +3968,7 @@ snapshots:
 
   '@lumis-sh/wasm-python@0.26.0': {}
 
-  '@lumis-sh/wasm-python@0.26.1': {}
+  '@lumis-sh/wasm-python@0.26.2': {}
 
   '@lumis-sh/wasm-qmljs@0.26.0': {}
 
@@ -3927,6 +3981,8 @@ snapshots:
   '@lumis-sh/wasm-rst@0.26.0': {}
 
   '@lumis-sh/wasm-ruby@0.26.1': {}
+
+  '@lumis-sh/wasm-ruby@0.26.2': {}
 
   '@lumis-sh/wasm-rust@0.26.2': {}
 
@@ -4389,17 +4445,17 @@ snapshots:
     transitivePeerDependencies:
       - '@types/node'
 
-  '@shikijs/core@4.3.1':
+  '@shikijs/core@4.4.2':
     dependencies:
-      '@shikijs/primitive': 4.3.1
-      '@shikijs/types': 4.3.1
+      '@shikijs/primitive': 4.4.2
+      '@shikijs/types': 4.4.2
       '@shikijs/vscode-textmate': 10.0.2
-      '@types/hast': 3.0.4
+      '@types/hast': 3.0.5
       hast-util-to-html: 9.0.5
 
-  '@shikijs/engine-javascript@4.3.1':
+  '@shikijs/engine-javascript@4.4.2':
     dependencies:
-      '@shikijs/types': 4.3.1
+      '@shikijs/types': 4.4.2
       '@shikijs/vscode-textmate': 10.0.2
       oniguruma-to-es: 4.3.6
 
@@ -4408,42 +4464,42 @@ snapshots:
       '@shikijs/types': 3.23.0
       '@shikijs/vscode-textmate': 10.0.2
 
-  '@shikijs/engine-oniguruma@4.3.1':
+  '@shikijs/engine-oniguruma@4.4.2':
     dependencies:
-      '@shikijs/types': 4.3.1
+      '@shikijs/types': 4.4.2
       '@shikijs/vscode-textmate': 10.0.2
 
   '@shikijs/langs@3.23.0':
     dependencies:
       '@shikijs/types': 3.23.0
 
-  '@shikijs/langs@4.3.1':
+  '@shikijs/langs@4.4.2':
     dependencies:
-      '@shikijs/types': 4.3.1
+      '@shikijs/types': 4.4.2
 
-  '@shikijs/primitive@4.3.1':
+  '@shikijs/primitive@4.4.2':
     dependencies:
-      '@shikijs/types': 4.3.1
+      '@shikijs/types': 4.4.2
       '@shikijs/vscode-textmate': 10.0.2
-      '@types/hast': 3.0.4
+      '@types/hast': 3.0.5
 
   '@shikijs/themes@3.23.0':
     dependencies:
       '@shikijs/types': 3.23.0
 
-  '@shikijs/themes@4.3.1':
+  '@shikijs/themes@4.4.2':
     dependencies:
-      '@shikijs/types': 4.3.1
+      '@shikijs/types': 4.4.2
 
   '@shikijs/types@3.23.0':
     dependencies:
       '@shikijs/vscode-textmate': 10.0.2
-      '@types/hast': 3.0.4
+      '@types/hast': 3.0.5
 
-  '@shikijs/types@4.3.1':
+  '@shikijs/types@4.4.2':
     dependencies:
       '@shikijs/vscode-textmate': 10.0.2
-      '@types/hast': 3.0.4
+      '@types/hast': 3.0.5
 
   '@shikijs/vscode-textmate@10.0.2': {}
 
@@ -4474,6 +4530,10 @@ snapshots:
   '@types/estree@1.0.8': {}
 
   '@types/hast@3.0.4':
+    dependencies:
+      '@types/unist': 3.0.3
+
+  '@types/hast@3.0.5':
     dependencies:
       '@types/unist': 3.0.3
 
@@ -4818,7 +4878,7 @@ snapshots:
 
   hast-util-from-parse5@8.0.3:
     dependencies:
-      '@types/hast': 3.0.4
+      '@types/hast': 3.0.5
       '@types/unist': 3.0.3
       devlop: 1.1.0
       hastscript: 9.0.1
@@ -4829,11 +4889,11 @@ snapshots:
 
   hast-util-parse-selector@4.0.0:
     dependencies:
-      '@types/hast': 3.0.4
+      '@types/hast': 3.0.5
 
   hast-util-to-html@9.0.5:
     dependencies:
-      '@types/hast': 3.0.4
+      '@types/hast': 3.0.5
       '@types/unist': 3.0.3
       ccount: 2.0.1
       comma-separated-tokens: 2.0.3
@@ -4871,11 +4931,11 @@ snapshots:
 
   hast-util-whitespace@3.0.0:
     dependencies:
-      '@types/hast': 3.0.4
+      '@types/hast': 3.0.5
 
   hastscript@9.0.1:
     dependencies:
-      '@types/hast': 3.0.4
+      '@types/hast': 3.0.5
       comma-separated-tokens: 2.0.3
       hast-util-parse-selector: 4.0.0
       property-information: 7.1.0
@@ -5075,7 +5135,7 @@ snapshots:
   mdast-util-mdx-expression@2.0.1(supports-color@8.1.1):
     dependencies:
       '@types/estree-jsx': 1.0.5
-      '@types/hast': 3.0.4
+      '@types/hast': 3.0.5
       '@types/mdast': 4.0.4
       devlop: 1.1.0
       mdast-util-from-markdown: 2.0.3(supports-color@8.1.1)
@@ -5086,7 +5146,7 @@ snapshots:
   mdast-util-mdx-jsx@3.2.0(supports-color@8.1.1):
     dependencies:
       '@types/estree-jsx': 1.0.5
-      '@types/hast': 3.0.4
+      '@types/hast': 3.0.5
       '@types/mdast': 4.0.4
       '@types/unist': 3.0.3
       ccount: 2.0.1
@@ -5103,7 +5163,7 @@ snapshots:
   mdast-util-mdxjs-esm@2.0.1(supports-color@8.1.1):
     dependencies:
       '@types/estree-jsx': 1.0.5
-      '@types/hast': 3.0.4
+      '@types/hast': 3.0.5
       '@types/mdast': 4.0.4
       devlop: 1.1.0
       mdast-util-from-markdown: 2.0.3(supports-color@8.1.1)
@@ -5118,7 +5178,7 @@ snapshots:
 
   mdast-util-to-hast@13.2.1:
     dependencies:
-      '@types/hast': 3.0.4
+      '@types/hast': 3.0.5
       '@types/mdast': 4.0.4
       '@ungap/structured-clone': 1.3.3
       devlop: 1.1.0
@@ -5550,16 +5610,16 @@ snapshots:
 
   semver@7.7.4: {}
 
-  shiki@4.3.1:
+  shiki@4.4.2:
     dependencies:
-      '@shikijs/core': 4.3.1
-      '@shikijs/engine-javascript': 4.3.1
-      '@shikijs/engine-oniguruma': 4.3.1
-      '@shikijs/langs': 4.3.1
-      '@shikijs/themes': 4.3.1
-      '@shikijs/types': 4.3.1
+      '@shikijs/core': 4.4.2
+      '@shikijs/engine-javascript': 4.4.2
+      '@shikijs/engine-oniguruma': 4.4.2
+      '@shikijs/langs': 4.4.2
+      '@shikijs/themes': 4.4.2
+      '@shikijs/types': 4.4.2
       '@shikijs/vscode-textmate': 10.0.2
-      '@types/hast': 3.0.4
+      '@types/hast': 3.0.5
 
   siginfo@2.0.0: {}
 

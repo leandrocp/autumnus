@@ -75,7 +75,7 @@ enum Commands {
     StageWasm {
         name: String,
     },
-    /// Write the committed test parsers as a `LUMIS_WASM_PATH` tree.
+    /// Write the committed test parsers as a Lumis store directory.
     StageTestParsers {
         #[arg(default_value = "target/test-parsers")]
         out: String,
@@ -2090,8 +2090,16 @@ fn gen_language_catalog(check: bool) -> Result<()> {
         .iter()
         .map(|(id, _)| id.to_string())
         .collect::<Vec<_>>();
-    let output = render_language_catalog(&toml.parsers, &parser_order)?;
     let path = "crates/lumis-wasm-runtime/src/catalog.rs";
+    // Checking must not depend on the registry: CI asserts the catalog matches
+    // languages.toml, and drift against what npm actually publishes is a
+    // separate, deliberate check.
+    let versions = if check {
+        catalog_versions(&fs::read_to_string(path)?)
+    } else {
+        resolve_published_versions(&toml.parsers, &parser_order)?
+    };
+    let output = render_language_catalog(&toml.parsers, &parser_order, &toml.bundles, &versions)?;
 
     if check {
         let current = fs::read_to_string(path)
@@ -2107,15 +2115,76 @@ fn gen_language_catalog(check: bool) -> Result<()> {
     Ok(())
 }
 
+/// Versions already recorded in a generated catalog, keyed by package name.
+fn catalog_versions(source: &str) -> BTreeMap<String, String> {
+    let mut versions = BTreeMap::new();
+    let mut package_name = None;
+    for line in source.lines() {
+        let line = line.trim();
+        if let Some(rest) = line.strip_prefix("package_name: \"") {
+            package_name = rest.split('"').next().map(str::to_string);
+        } else if let Some(rest) = line.strip_prefix("version: \"") {
+            if let (Some(name), Some(version)) = (package_name.take(), rest.split('"').next()) {
+                versions.insert(name, version.to_string());
+            }
+        }
+    }
+    versions
+}
+
+/// Ask the registry what each language package currently publishes.
+///
+/// Pins are generated rather than hand-written so every one of them exists at
+/// generation time; the runtime's fallback to `@latest` then only fires for a
+/// version that was unpublished afterwards.
+fn resolve_published_versions(
+    parsers: &BTreeMap<String, ParserInfo>,
+    parser_order: &[String],
+) -> Result<BTreeMap<String, String>> {
+    let mut versions: BTreeMap<String, String> = BTreeMap::new();
+    for id in parser_order {
+        let info = parsers
+            .get(id)
+            .with_context(|| format!("missing parser metadata for '{id}'"))?;
+        let default_wasm_name = format!("tree-sitter-{id}");
+        let wasm_name = info.wasm_name.as_deref().unwrap_or(&default_wasm_name);
+        let package_name = format!("@lumis-sh/wasm-{}", wasm_package_suffix(wasm_name));
+        if versions.contains_key(&package_name) {
+            continue;
+        }
+
+        let output = Command::new("npm")
+            .args(["view", &package_name, "version"])
+            .output()
+            .with_context(|| format!("failed to run npm view for {package_name}"))?;
+        if !output.status.success() {
+            bail!(
+                "{package_name} is not published; the catalog cannot pin a version for it:\n{}",
+                String::from_utf8_lossy(&output.stderr).trim()
+            );
+        }
+        let version = String::from_utf8_lossy(&output.stdout).trim().to_string();
+        if version.is_empty() {
+            bail!("npm view returned no version for {package_name}");
+        }
+        eprintln!("  {package_name} {version}");
+        versions.insert(package_name, version);
+    }
+    Ok(versions)
+}
+
 fn render_language_catalog(
     parsers: &BTreeMap<String, ParserInfo>,
     parser_order: &[String],
+    bundles: &BTreeMap<String, BundleInfo>,
+    versions: &BTreeMap<String, String>,
 ) -> Result<String> {
     let mut lines = vec![
         "// Auto-generated from languages.toml by `mise run langs-gen-catalog`.".to_string(),
         "// Do not edit manually.".to_string(),
         String::new(),
         "define_catalog! {".to_string(),
+        "    languages: {".to_string(),
     ];
 
     for id in parser_order {
@@ -2132,14 +2201,41 @@ fn render_language_catalog(
             .collect::<Vec<_>>()
             .join(", ");
 
+        let version = versions.get(&package_name).with_context(|| {
+            format!("no published version resolved for {package_name}; run `mise run langs-gen-catalog`")
+        })?;
+
         lines.extend([
-            format!("    {id:?} => {{"),
-            format!("        aliases: [{aliases}],"),
-            format!("        package_name: {package_name:?}"),
-            "    },".to_string(),
+            format!("        {id:?} => {{"),
+            format!("            aliases: [{aliases}],"),
+            format!("            package_name: {package_name:?},"),
+            format!("            version: {version:?}"),
+            "        },".to_string(),
         ]);
     }
 
+    lines.push("    },".to_string());
+    lines.push("    bundles: {".to_string());
+
+    for (bundle_name, bundle) in bundles {
+        let members = match &bundle.parsers {
+            BundleParsers::List(names) => names.clone(),
+            BundleParsers::All(value) => {
+                if value != "all" {
+                    bail!("unsupported bundle parsers value for '{bundle_name}': {value}");
+                }
+                parser_order.to_vec()
+            }
+        };
+        let rendered = members
+            .iter()
+            .map(|name| format!("{name:?}"))
+            .collect::<Vec<_>>()
+            .join(", ");
+        lines.push(format!("        {bundle_name:?} => [{rendered}],"));
+    }
+
+    lines.push("    },".to_string());
     lines.push("}".to_string());
     lines.push(String::new());
     Ok(lines.join("\n"))
@@ -2755,7 +2851,15 @@ fn stage_test_parsers(out: &Path) -> Result<()> {
         let languages = packaged_languages(&toml, &wasm_name)?;
         let package = LanguagePackage {
             package_name: format!("@lumis-sh/wasm-{}", wasm_package_suffix(&wasm_name)),
-            version: "test".into(),
+            // The store serves a package from disk only when its version equals
+            // the catalog pin, so a staged fixture has to claim that version or
+            // every test would reach for the network and fall back.
+            version: lumis_wasm_runtime::catalog::pinned_version(&format!(
+                "@lumis-sh/wasm-{}",
+                wasm_package_suffix(&wasm_name)
+            ))
+            .unwrap_or("test")
+            .into(),
             definition_hash: language_definition_hash(&toml, &wasm_name, &languages)?,
             parser: ParserMetadata {
                 name: wasm_name.clone(),
@@ -3395,13 +3499,80 @@ mod tests {
             ),
         ]);
         let order = vec!["zeta".to_string(), "alpha".to_string()];
+        let bundles = BTreeMap::from([
+            (
+                "web".to_string(),
+                BundleInfo {
+                    parsers: BundleParsers::List(vec!["alpha".to_string()]),
+                },
+            ),
+            (
+                "full".to_string(),
+                BundleInfo {
+                    parsers: BundleParsers::All("all".to_string()),
+                },
+            ),
+        ]);
 
-        let catalog =
-            render_language_catalog(&parsers, &order).expect("catalog should be generated");
+        let catalog = render_language_catalog(&parsers, &order, &bundles)
+            .expect("catalog should be generated");
 
         assert!(catalog.find("\"zeta\"").unwrap() < catalog.find("\"alpha\"").unwrap());
         assert!(catalog.contains("package_name: \"@lumis-sh/wasm-shared\""));
         assert!(catalog.contains("aliases: [\"a\"]"));
+        // `parsers = "all"` expands to the catalog, in the same order.
+        assert!(catalog.contains("\"full\" => [\"zeta\", \"alpha\"]"));
+        assert!(catalog.contains("\"web\" => [\"alpha\"]"));
+    }
+
+    // Bundle membership is a cross-runtime promise: `@lumis-sh/wasm-bundle-web` and
+    // `Lumis.Languages.load(:bundle_web)` must name the same languages. Every runtime
+    // reads it from this one table, so the shipped catalog going stale is what would
+    // break that, and `gen-catalog --check` only runs where a Rust toolchain does.
+    #[test]
+    fn shipped_bundles_match_languages_toml() {
+        let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../languages.toml");
+        let text = fs::read_to_string(&path).expect("languages.toml should be readable");
+        let toml: LanguagesToml = toml::from_str(&text).expect("languages.toml should parse");
+        let document: toml_edit::DocumentMut = text.parse().expect("languages.toml should parse");
+        let order = document["parsers"]
+            .as_table()
+            .expect("languages.toml must contain a parsers table")
+            .iter()
+            .map(|(id, _)| id.to_string())
+            .collect::<Vec<_>>();
+
+        let expected = toml
+            .bundles
+            .iter()
+            .map(|(name, bundle)| {
+                let members = match &bundle.parsers {
+                    BundleParsers::All(_) => order.clone(),
+                    BundleParsers::List(list) => list.clone(),
+                };
+                (name.as_str(), members)
+            })
+            .collect::<BTreeMap<_, _>>();
+
+        let shipped = lumis_wasm_runtime::catalog::BUNDLES
+            .iter()
+            .map(|(name, members)| {
+                (
+                    *name,
+                    members.iter().map(|id| id.to_string()).collect::<Vec<_>>(),
+                )
+            })
+            .collect::<BTreeMap<_, _>>();
+
+        assert_eq!(shipped, expected, "run `mise run langs-gen-catalog`");
+        assert!(
+            shipped.contains_key("full"),
+            "bundles should include `full`"
+        );
+        assert!(
+            shipped["full"].len() > 100,
+            "`full` should be every language"
+        );
     }
 
     #[test]

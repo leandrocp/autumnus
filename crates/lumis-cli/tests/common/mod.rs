@@ -88,7 +88,12 @@ fn build_language_fixtures() -> PathBuf {
             .collect::<BTreeMap<_, _>>();
         let package = LanguagePackage {
             package_name: location.package_name.into(),
-            version: "test".into(),
+            // The store trusts a cached package only when its version equals the
+            // catalog pin, so a fixture claiming anything else sends every test
+            // to the network to be told otherwise.
+            version: lumis_wasm_runtime::catalog::pinned_version(location.package_name)
+                .unwrap_or("test")
+                .into(),
             definition_hash: sha256.clone(),
             parser: ParserMetadata {
                 name: stem.into(),
@@ -109,7 +114,13 @@ fn build_language_fixtures() -> PathBuf {
             serde_json::to_vec(&package).unwrap(),
         )
         .unwrap();
-        fs::write(parsers.join(format!("{stem}-test-{sha256}.wasm")), wasm).unwrap();
+        // The store derives this name from the package, so it has to be built
+        // the same way rather than assuming a version.
+        fs::write(
+            parsers.join(lumis_wasm_runtime::parser_filename(&package)),
+            wasm,
+        )
+        .unwrap();
     }
 
     destination

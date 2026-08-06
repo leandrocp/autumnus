@@ -54,7 +54,7 @@ export const nodeRuntime: RuntimeEnvironment = {
   },
 
   async readStagedAsset(filename) {
-    const root = process.env.LUMIS_WASM_PATH;
+    const root = process.env.LUMIS_DATA_DIR;
     if (!root) return undefined;
     const { join } = await import(nodePath);
     const { readFile } = await import(nodeFsPromises);

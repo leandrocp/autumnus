@@ -146,10 +146,25 @@ mkdir "$tmp_dir/lumis_nif"
 cp "$nif_dir/Cargo.toml" "$nif_dir/Cargo.lock" "$tmp_dir/lumis_nif"
 cp -R "$nif_dir/.cargo" "$nif_dir/src" "$tmp_dir/lumis_nif"
 cargo tree --manifest-path "$tmp_dir/lumis_nif/Cargo.toml" --locked --depth 0
+
+locked_wasmtime() {
+    awk '/^name = "wasmtime"$/ { getline; gsub(/[version ="]/, ""); print; exit }' "$1"
+}
+workspace_version="$(locked_wasmtime Cargo.lock)"
+nif_version="$(locked_wasmtime "$nif_dir/Cargo.lock")"
+
+if [ -z "$workspace_version" ] || [ "$workspace_version" != "$nif_version" ]; then
+    echo "wasmtime differs: workspace $workspace_version, packaged NIF $nif_version" >&2
+    echo "Compiled parser caches are keyed by the wasmtime version, so the CLI, the Node" >&2
+    echo "addon and the Elixir NIF would each compile and store their own copy instead of" >&2
+    echo "sharing one. Run: cargo update -p wasmtime --precise <version> in both." >&2
+    exit 1
+fi
+echo "wasmtime $workspace_version in both lockfiles"
 '''
 
 [tasks.'stage-test-parsers']
-description = "Lay the committed parser fixtures out as a LUMIS_WASM_PATH tree"
+description = "Lay the committed parser fixtures out as a Lumis store directory"
 run = "cargo run -q --manifest-path crates/dev/Cargo.toml -- stage-test-parsers target/test-parsers"
 
 [tasks.'test']
@@ -182,20 +197,24 @@ set -euo pipefail
 pnpm --filter @lumis-sh/lumis run build:native
 pnpm --filter @lumis-sh/lumis run build
 
-# The direct-addon tests need the staged Rust store. Resolver-precedence tests
-# deliberately do not: LUMIS_WASM_PATH is checked before a JavaScript resolver.
-# Separate processes make both prerequisites deterministic while running every
-# native-selected test exactly once.
-native_runtime_data_dir="$(mktemp -d)"
+# Each process gets its own copy of the staged store, so a suite that writes
+# into it cannot disturb the shared tree or another suite. The resolver
+# precedence tests deliberately start from an empty store instead.
+seeded_store() {
+    local dir
+    dir="$(mktemp -d)"
+    cp -R "$PWD/target/test-parsers/parsers" "$dir/"
+    echo "$dir"
+}
+native_runtime_data_dir="$(seeded_store)"
 native_suite_data_dir="$(mktemp -d)"
-wasm_suite_data_dir="$(mktemp -d)"
-trap 'rm -rf "$native_runtime_data_dir" "$native_suite_data_dir" "$wasm_suite_data_dir"' EXIT
+wasm_suite_data_dir="$(seeded_store)"
+downstream_data_dir="$(seeded_store)"
+trap 'rm -rf "$native_runtime_data_dir" "$native_suite_data_dir" "$wasm_suite_data_dir" "$downstream_data_dir"' EXIT
 LUMIS_TEST_RUNTIME=native \
-    LUMIS_WASM_PATH="$PWD/target/test-parsers" \
     LUMIS_DATA_DIR="$native_runtime_data_dir" \
     pnpm --filter @lumis-sh/lumis exec vitest run test/native-runtime.test.ts
-env -u LUMIS_WASM_PATH \
-    LUMIS_TEST_RUNTIME=native \
+LUMIS_TEST_RUNTIME=native \
     LUMIS_DATA_DIR="$native_suite_data_dir" \
     pnpm --filter @lumis-sh/lumis exec vitest run \
         --exclude test/conformance.test.ts \
@@ -206,14 +225,13 @@ env -u LUMIS_WASM_PATH \
 # The whole package suite under web-tree-sitter. vite.config.mjs defaults to
 # `wasm`, but keep the selection explicit so this gate cannot silently duplicate
 # the native run.
-env -u LUMIS_WASM_PATH \
-    LUMIS_TEST_RUNTIME=wasm \
+LUMIS_TEST_RUNTIME=wasm \
     LUMIS_DATA_DIR="$wasm_suite_data_dir" \
     pnpm --filter @lumis-sh/lumis run test
 
 # Downstream packages use the default Node runtime, which resolves parsers in
-# Rust against a staged tree rather than through a JavaScript resolver.
-LUMIS_WASM_PATH="$PWD/target/test-parsers" pnpm -r --if-present --filter '!@lumis-sh/lumis' test
+# Rust against the store rather than through a JavaScript resolver.
+LUMIS_DATA_DIR="$downstream_data_dir" pnpm -r --if-present --filter '!@lumis-sh/lumis' test
 '''
 
 [tasks.'test-queries']
@@ -237,7 +255,7 @@ echo ""
 echo "Building every parser from languages.toml..."
 # Run node directly: `pnpm exec` writes its unsupported-platform warnings for
 # the optional native packages to stdout, which would land in this list.
-(cd packages/javascript/lumis && node scripts/list-unverified-parsers.mjs --parsers --all) > /tmp/lumis-parsers.txt
+(cd packages/javascript/lumis && node scripts/list-parsers.mjs --parsers) > /tmp/lumis-parsers.txt
 while read -r parser; do
     [ -n "$parser" ] || continue
     [ -f "tmp/wasm/build/$parser.wasm" ] && continue
@@ -280,9 +298,11 @@ set -euo pipefail
 pnpm --filter @lumis-sh/themes run build
 pnpm --filter @lumis-sh/lumis run build:generate
 pnpm --filter @lumis-sh/lumis run build:native
+data_dir="$(mktemp -d)"
+trap 'rm -rf "$data_dir"' EXIT
+cp -R "$PWD/target/test-parsers/parsers" "$data_dir/"
 LUMIS_TEST_RUNTIME=native \
-    LUMIS_WASM_PATH="${LUMIS_WASM_PATH:-$PWD/target/test-parsers}" \
-    LUMIS_DATA_DIR="$(mktemp -d)" \
+    LUMIS_DATA_DIR="$data_dir" \
     pnpm --filter @lumis-sh/lumis run test:conformance
 '''
 
@@ -554,6 +574,38 @@ run = '''
 #!/usr/bin/env bash
 set -euo pipefail
 cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- gen-language-catalog --check
+'''
+
+[tasks.'langs-check-versions']
+description = "Verify the CDN serves the language.json each catalog pin names"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+pins="$(awk '/package_name: "/ { gsub(/.*package_name: "|",/, ""); p=$0 }
+             /version: "/ { gsub(/.*version: "|"/, ""); print p "@" $0 }' \
+           crates/lumis-wasm-runtime/src/catalog.rs)"
+total="$(echo "$pins" | wc -l | tr -d ' ')"
+
+served="$(echo "$pins" | xargs -P 16 -I{} sh -c \
+    'code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "https://cdn.jsdelivr.net/npm/{}/language.json" || echo 000); if [ "$code" = "200" ]; then echo {}; fi' \
+    | wc -l | tr -d ' ')"
+
+if [ "$served" -eq 0 ]; then
+    echo "0 of $total pinned packages serve language.json."
+    echo "Expected: the format this branch reads is not published yet. Every"
+    echo "published package still carries metadata in package.json's lumis key."
+    echo "This becomes a failure once wasm-release publishes any of them, so the"
+    echo "gap can only shrink."
+    exit 0
+fi
+
+if [ "$served" -lt "$total" ]; then
+    echo "$served of $total pinned packages serve language.json." >&2
+    echo "A partial republish means some runtimes resolve a language and others" >&2
+    echo "cannot. Finish publishing, or regenerate: mise run langs-gen-catalog" >&2
+    exit 1
+fi
+echo "the CDN serves all $total pinned packages"
 '''
 
 [tasks.'langs-update']

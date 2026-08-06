@@ -1,6 +1,6 @@
 `webgpu_compute_reduce.html` is a verbatim copy of a Three.js example, used
-unmodified as a fixture by the benchmarks and by the demos in
-`examples/wasm-runtimes/`.
+unmodified as a fixture by the benchmarks and as a document in the showcase
+comparison.
 
 Source:
 https://github.com/mrdoob/three.js/blob/6365c1a0af6a32ed45f99712197555fee2f4b24a/examples/webgpu_compute_reduce.html

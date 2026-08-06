@@ -2,6 +2,7 @@
   "ignorePatterns": [
     "**/dist/**",
     "**/vendored_parsers/**",
+    "benchmarks/shadcn_sidebar.tsx",
     "fixtures/**",
     "packages/elixir/lumis/examples/**/vendor/**",
     "packages/javascript/lumis/langs/**",
