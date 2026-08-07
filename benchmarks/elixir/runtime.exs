@@ -11,9 +11,12 @@ defmodule Lumis.BenchmarkRuntime do
       raise "run `mise run -C benchmarks prepare:languages` first, no parsers at #{packages}"
     end
 
+    # One store directory, so the prepared packages are what the runtime reads
+    # and where it writes compiled modules. Nothing in a timed run reaches the
+    # network as long as every language a scenario names is prepared.
+    #
     # After Application.start, so the NIF store is configured here rather than
     # from config; it is built lazily on first use, which has not happened yet.
-    true =
-      Lumis.Native.configure_store(Path.join(repo_dir, "target/benchmarks/lumis-data"), packages)
+    true = Lumis.Native.configure_store(packages)
   end
 end
