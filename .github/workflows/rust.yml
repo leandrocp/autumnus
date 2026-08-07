@@ -38,6 +38,8 @@ jobs:
     with:
       msrv: '1.91'
       manifest-path: 'crates/lumis/Cargo.toml'
+      test-stage: ${{ github.event_name == 'pull_request' && 'stable' || 'all' }}
+      stable-os-versions: ${{ github.event_name == 'pull_request' && '["ubuntu-22.04"]' || '["ubuntu-22.04", "windows-2022", "macos-14"]' }}
   test-lumis-build:
     if: >-
       ${{ github.event_name == 'workflow_dispatch' ||
@@ -47,6 +49,8 @@ jobs:
     with:
       msrv: '1.91'
       manifest-path: 'crates/lumis-build/Cargo.toml'
+      test-stage: ${{ github.event_name == 'pull_request' && 'stable' || 'all' }}
+      stable-os-versions: ${{ github.event_name == 'pull_request' && '["ubuntu-22.04"]' || '["ubuntu-22.04", "windows-2022", "macos-14"]' }}
   test-lumis-core:
     if: >-
       ${{ github.event_name == 'workflow_dispatch' ||
@@ -56,6 +60,8 @@ jobs:
     with:
       msrv: '1.91'
       manifest-path: 'crates/lumis-core/Cargo.toml'
+      test-stage: ${{ github.event_name == 'pull_request' && 'stable' || 'all' }}
+      stable-os-versions: ${{ github.event_name == 'pull_request' && '["ubuntu-22.04"]' || '["ubuntu-22.04", "windows-2022", "macos-14"]' }}
   test-lumis-cli:
     if: >-
       ${{ github.event_name == 'workflow_dispatch' ||
@@ -65,6 +71,8 @@ jobs:
     with:
       msrv: '1.91'
       manifest-path: 'crates/lumis-cli/Cargo.toml'
+      test-stage: ${{ github.event_name == 'pull_request' && 'stable' || 'all' }}
+      stable-os-versions: ${{ github.event_name == 'pull_request' && '["ubuntu-22.04"]' || '["ubuntu-22.04", "windows-2022", "macos-14"]' }}
   test-lumis-wasm-runtime:
     if: >-
       ${{ github.event_name == 'workflow_dispatch' ||
@@ -74,6 +82,8 @@ jobs:
     with:
       msrv: '1.91'
       manifest-path: 'crates/lumis-wasm-runtime/Cargo.toml'
+      test-stage: ${{ github.event_name == 'pull_request' && 'stable' || 'all' }}
+      stable-os-versions: ${{ github.event_name == 'pull_request' && '["ubuntu-22.04"]' || '["ubuntu-22.04", "windows-2022", "macos-14"]' }}
   check-language-catalog:
     if: >-
       ${{ github.event_name == 'workflow_dispatch' ||
