@@ -2808,20 +2808,32 @@ fn stage_wasm(name: &str) -> Result<()> {
         .replace("{definition_hash}", &definition_hash);
     fs::write(format!("{out}/package.json"), pkg)?;
 
-    let local = "tmp/wasm/local/parsers";
-    fs::create_dir_all(local)?;
+    // The publishable package carries the version it will be published as; the
+    // runtime copy carries the version the catalog pins. A store entry is only
+    // trusted when its version equals that pin, so stamping the next-publish
+    // version here would send every local run to the CDN for a version that does
+    // not exist yet, and only fall back after the request failed.
+    let store = "tmp/wasm/local";
+    let local = format!("{store}/parsers");
+    fs::create_dir_all(&local)?;
     let suffix = wasm_package_suffix(wasm_name);
-    fs::copy(
-        format!("{out}/lumis.json"),
+    let local_version = lumis_wasm_runtime::catalog::pinned_version(&pkg_name)
+        .unwrap_or(npm_version.as_str())
+        .to_string();
+    let mut local_package = language_package.clone();
+    local_package.version = local_version.clone();
+    fs::write(
         format!("{local}/{suffix}.lumis.json"),
+        serde_json::to_vec(&local_package)?,
     )?;
     fs::copy(
         &wasm_file,
-        format!("{local}/{wasm_name}-{npm_version}-{wasm_sha256}.wasm"),
+        format!("{local}/{wasm_name}-{local_version}-{wasm_sha256}.wasm"),
     )?;
 
     println!("Staged in {out}");
-    println!("Runtime-ready copy in {local}");
+    println!("Runtime-ready copy in {local} as {local_version}");
+    println!("Use it with: export LUMIS_DATA_DIR=$PWD/{store}");
     Ok(())
 }
 
