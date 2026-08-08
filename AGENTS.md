@@ -231,6 +231,12 @@ Docs, specs, and examples are not cleanup work for later. They are part of the f
 
 Prefer concrete explanations over marketing language. Show the real API. Keep examples runnable.
 
+One command per line in a shell block. `cd packages/elixir/lumis && LUMIS_BUILD=1 iex -S mix`
+reads as one step but is two, and a reader who wants only the second has to take
+the line apart. Better still, check whether the `cd` is needed at all: `node
+packages/javascript/lumis/test.mjs` runs from the repo root, because Node
+resolves imports from the file rather than the working directory.
+
 ### READMEs stay small, detail lives in the docs site
 
 READMEs are entry points, not manuals. Keep them small, direct, and targeted: the minimal usage to get started, then a link to the relevant page under `docs/content/`.

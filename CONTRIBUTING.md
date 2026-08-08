@@ -395,7 +395,8 @@ cargo run -p lumis-cli -- highlight -l elixir <<< 'def foo, do: "hello"'
 
 ```sh
 # Elixir
-cd packages/elixir/lumis && LUMIS_BUILD=1 iex -S mix
+cd packages/elixir/lumis
+LUMIS_BUILD=1 iex -S mix
 iex> Lumis.highlight!("def foo, do: \"hello\"", formatter: {:html_inline, language: "elixir", theme: "dracula"})
 ```
 
@@ -410,13 +411,16 @@ import elixir from "@lumis-sh/lumis/langs/elixir";
 import dracula from "@lumis-sh/themes/dracula";
 
 const highlighter = await createHighlighter({ languages: [elixir] });
-const html = highlighter.highlight('def foo, do: "hello"', htmlInline({ language: elixir, theme: dracula }));
+const html = highlighter.highlight(
+  'def foo, do: "hello"',
+  htmlInline({ language: elixir, theme: dracula }),
+);
 console.log(html);
 ```
 
 ```sh
 pnpm --filter @lumis-sh/lumis run build
-cd packages/javascript/lumis && node test.mjs
+node packages/javascript/lumis/test.mjs
 ```
 
 A browser cannot read `LUMIS_DATA_DIR`, so serve the staged directory instead
@@ -424,9 +428,12 @@ and point the resolvers at it. The dev server serves the package root, so a
 symlink puts the parsers on the same origin as the page:
 
 ```sh
-cd packages/javascript/lumis && ln -sfn ../../../../tmp/wasm/local/parsers .tmp/parsers
-pnpm --filter @lumis-sh/lumis run dev   # then open /test.html
+mkdir -p packages/javascript/lumis/.tmp
+ln -sfn ../../../../tmp/wasm/local/parsers packages/javascript/lumis/.tmp/parsers
+pnpm --filter @lumis-sh/lumis run dev
 ```
+
+Then open `/test.html` on the dev server.
 
 ```html
 <!-- packages/javascript/lumis/test.html -->
