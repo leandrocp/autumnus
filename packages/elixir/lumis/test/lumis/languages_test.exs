@@ -166,7 +166,7 @@ defmodule Lumis.LanguagesTest do
       output =
         capture_io(fn ->
           Mix.Task.reenable("lumis.languages.cache")
-          Mix.Task.run("lumis.languages.cache", ["--no-compile", "comment"])
+          Mix.Task.run("lumis.languages.cache", ["comment"])
         end)
 
       assert output =~ "tree-sitter-comment-"

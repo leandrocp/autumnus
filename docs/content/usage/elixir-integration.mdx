@@ -104,8 +104,8 @@ cost, and a restart or a new pod does not pay it again.
 Parsers land under `LUMIS_DATA_DIR`, which defaults to the user data directory.
 The result is self-sufficient — parser bytes, their metadata, and the compiled
 modules — so pointing a container at it needs nothing else. `--force` replaces
-files that already verify, and `--no-compile` skips the compile step. To write
-somewhere other than the default, set `LUMIS_DATA_DIR` or
+files that already verify. To write somewhere other than the default, set
+`LUMIS_DATA_DIR` or
 `config :lumis, data_dir:`; there is no second way to name that directory.
 
 ### Where parsers come from

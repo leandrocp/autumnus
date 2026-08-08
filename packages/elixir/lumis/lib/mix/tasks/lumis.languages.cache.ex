@@ -20,15 +20,14 @@ defmodule Mix.Tasks.Lumis.Languages.Cache do
   directory holding `parsers/`, not `parsers/` itself.
 
   Each parser is also loaded once, so Wasmtime writes its compiled form beside
-  it and the first request pays neither the download nor the compile. Pass
-  `--no-compile` to skip that.
+  it and the first request pays neither the download nor the compile.
   """
 
   use Mix.Task
 
   @shortdoc "Downloads Lumis parser WASMs ahead of time"
 
-  @switches [all: :boolean, force: :boolean, compile: :boolean]
+  @switches [all: :boolean, force: :boolean]
 
   @impl Mix.Task
   def run(arguments) do
@@ -42,7 +41,7 @@ defmodule Mix.Tasks.Lumis.Languages.Cache do
       {:error, reason} -> Mix.raise(reason)
     end
 
-    if Keyword.get(options, :compile, true), do: compile(names)
+    compile(names)
   end
 
   # Downloading is only half the first-request cost: Wasmtime still compiles each

@@ -248,8 +248,7 @@ runtime, so the two commands cannot disagree about what a prepared cache
 contains.
 
 Both then load each parser once, so Wasmtime writes `compiled/` beside them and
-an image ships the compile as well as the download. `--no-compile` skips that
-step in either.
+an image ships the compile as well as the download.
 
 **One prepared directory serves every runtime, including the compile.** Wasmtime
 keys its module cache on the compiler and its version, so a release build of the

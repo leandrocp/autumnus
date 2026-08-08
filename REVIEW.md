@@ -117,7 +117,10 @@ download. And the "a failure costs one block" rule now covers preloading, after
 M2.
 
 **Closed.** `lumis parsers cache` now loads each parser after downloading it, so
-both commands prepare the same thing; `--no-compile` opts out in either.
+both commands prepare the same thing. Neither takes a flag to skip it: a
+prepared directory that is missing half of what it is for has no use worth an
+option, and one runtime carrying a flag the other lacks is the divergence this
+was meant to close.
 
 That prompted the question of whether the directory is shared *across* runtimes,
 which it is. Measured: `lumis parsers cache elixir` with a release CLI, then
