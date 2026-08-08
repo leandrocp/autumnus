@@ -30,7 +30,7 @@ export async function dataDir(): Promise<string> {
   if (process.platform === "win32" && process.env.LOCALAPPDATA) {
     return join(process.env.LOCALAPPDATA, "lumis");
   }
-  const { homedir } = await import("node:os");
+  const { homedir } = await import(nodeOs);
   return process.platform === "darwin"
     ? join(homedir(), "Library", "Application Support", "lumis")
     : join(homedir(), ".local", "share", "lumis");

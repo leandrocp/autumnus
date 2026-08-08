@@ -1,9 +1,12 @@
 /**
- * `PACKAGE_CACHE_TTL_MS` is ported from `crates/lumis-wasm-runtime`;
- * `test/cache-timing.test.ts` holds the two together. Change it there first.
+ * None of these have a Rust counterpart, and `test/cache-timing.test.ts` is what
+ * keeps it that way.
  *
- * The lock timings have no Rust counterpart: the native store needs no lock,
- * while Node keeps one to avoid duplicate downloads.
+ * The Rust store pins an exact version per package, so a cached package is
+ * either that version and trustworthy or it is not and gets refetched; there is
+ * no TTL to agree with. `PACKAGE_CACHE_TTL_MS` applies only to a package the
+ * catalog does not pin. The lock timings are Node-only: the native store needs
+ * no lock, while Node keeps one to avoid duplicate downloads.
  */
 
 /** How long a cached `lumis.json` is trusted before it is refreshed. */
