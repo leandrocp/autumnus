@@ -42,7 +42,8 @@ only needed when reading stdin.
 
 Parsers download on demand into the data directory (`LUMIS_DATA_DIR`, otherwise
 the platform default) and are verified before use. `lumis parsers cache` fetches
-them ahead of time for a host with no network access.
+and compiles them ahead of time, and every Lumis runtime reads that same
+directory, so a cache prepared here also starts Elixir and Node warm.
 
 ## Documentation
 

@@ -247,6 +247,21 @@ Both go through `LanguageStore::cache_language`, which needs no Wasmtime
 runtime, so the two commands cannot disagree about what a prepared cache
 contains.
 
-They differ in one step past that. The Elixir task then loads each parser once,
-so Wasmtime writes `compiled/` beside them and an image ships the compile as
-well as the download; `--no-compile` skips it. The CLI stops at the download.
+Both then load each parser once, so Wasmtime writes `compiled/` beside them and
+an image ships the compile as well as the download. `--no-compile` skips that
+step in either.
+
+**One prepared directory serves every runtime, including the compile.** Wasmtime
+keys its module cache on the compiler and its version, so a release build of the
+CLI, the Elixir NIF and the Node addon all read and write the same
+`compiled/modules/` entries. Preparing a directory with `lumis parsers cache`
+and pointing Elixir at it costs 128 ms to load a parser against 294 ms with
+`compiled/` removed. What keeps that true is a single wasmtime version across
+the three; `mise run elixir-nif-lock-check` enforces it, because the Elixir NIF
+is the only one with a lockfile of its own.
+
+Debug builds deliberately do not share. Wasmtime adds the executable's mtime to
+the cache path when `debug_assertions` is on, so a rebuilt binary cannot read
+entries its predecessor wrote. Measuring cache sharing with `cargo run` and
+`LUMIS_BUILD=1 mix` therefore shows two namespaces and no reuse; that is the
+debug profile, not a divergence between runtimes.

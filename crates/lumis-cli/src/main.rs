@@ -229,6 +229,10 @@ enum ParsersCommands {
         /// Replace valid cached parsers
         #[arg(long)]
         force: bool,
+
+        /// Download only, leaving the Wasmtime compile to the first request
+        #[arg(long)]
+        no_compile: bool,
     },
 }
 
@@ -364,9 +368,10 @@ fn main() -> Result<()> {
                 languages,
                 all,
                 force,
+                no_compile,
             } => {
                 let reg = registry::Registry::new(data_dir)?;
-                cache_parsers(&reg, &languages, all, force, verbose)
+                cache_parsers(&reg, &languages, all, force, !no_compile, verbose)
             }
         },
     }
@@ -377,6 +382,7 @@ fn cache_parsers(
     languages: &[String],
     all: bool,
     force: bool,
+    compile: bool,
     verbose: bool,
 ) -> Result<()> {
     if all && !languages.is_empty() {
@@ -423,6 +429,22 @@ fn cache_parsers(
             "failed to cache {} parser(s)",
             errors.len()
         ));
+    }
+
+    // Downloading is the smaller half of a cold parser; the Wasmtime compile is
+    // the larger. Loading each one here writes it into `compiled/`, so a
+    // prepared directory carries both. `mix lumis.languages.cache` does the same.
+    if compile {
+        let mut compiled = 0;
+        for name in &names {
+            match reg.load_language(resolve_language_id(name)) {
+                Ok(()) => compiled += 1,
+                Err(error) => eprintln!("{name}: cached but not compiled ({error})"),
+            }
+        }
+        if verbose {
+            eprintln!("compiled {compiled} parser(s)");
+        }
     }
 
     Ok(())

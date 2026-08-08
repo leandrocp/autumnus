@@ -116,9 +116,21 @@ loads each parser so Wasmtime writes `compiled/`, and the CLI stops at the
 download. And the "a failure costs one block" rule now covers preloading, after
 M2.
 
-**Follow-up, not done here:** the CLI has no equivalent of the Elixir task's
-compile step, so a CLI-prepared image pays the Wasmtime compile on first use.
-Worth closing for parity, but it is a feature change rather than a review fix.
+**Closed.** `lumis parsers cache` now loads each parser after downloading it, so
+both commands prepare the same thing; `--no-compile` opts out in either.
+
+That prompted the question of whether the directory is shared *across* runtimes,
+which it is. Measured: `lumis parsers cache elixir` with a release CLI, then
+Elixir loading that language, 128 ms against 294 ms with `compiled/` removed.
+Wasmtime keys its module cache on the compiler and its version, and both wrote
+into the same `compiled/modules/wasmtime-` namespace.
+
+Debug builds do not share, and this is easy to mistake for a divergence. Wasmtime
+appends the executable's mtime to the cache path when `debug_assertions` is on,
+so `cargo run` and `LUMIS_BUILD=1 mix` produce two namespaces and no reuse. The
+first measurement here did exactly that and read as a bug for a while. Only the
+wasmtime version has to be held level, which `mise run elixir-nif-lock-check`
+already does; the Node addon is a workspace member with no lockfile of its own.
 
 ## One store directory, pinned package versions — 2026-08-06
 

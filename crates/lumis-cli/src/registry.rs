@@ -56,6 +56,11 @@ impl Registry {
         Ok(self.store().cache_language(language, force)?)
     }
 
+    /// Load `language`, so Wasmtime writes its compiled form beside the parser.
+    pub fn load_language(&self, language: &str) -> Result<()> {
+        Ok(self.runtime.load_named_language(language)?)
+    }
+
     pub fn is_cached(&self, language: &str) -> bool {
         self.local_package(language)
             .is_some_and(|package| self.store().cached_parser(&package).is_some())

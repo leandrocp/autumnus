@@ -207,9 +207,13 @@ lumis themes generate \
 
 ## `lumis parsers cache`
 
-Download exact, integrity-checked parser WASM files ahead of time. Highlighting
-downloads what it needs anyway, so this is to keep that cost off the first run,
-or to keep the download out of the first run.
+Download exact, integrity-checked parser WASM files ahead of time, and compile
+them. Highlighting does both anyway; this moves them off the first run.
+
+A cold parser costs a download and then a Wasmtime compile, and the compile is
+the larger half, so each parser is loaded once here and its compiled form is
+written beside it. `mix lumis.languages.cache` prepares the identical directory,
+and every runtime reads it: cache with the CLI, and Elixir or Node start warm.
 
 ```bash title="Selected parsers"
 lumis parsers cache rust javascript elixir
@@ -221,6 +225,10 @@ lumis parsers cache --all
 
 ```bash title="Replace valid cached parsers"
 lumis parsers cache rust javascript --force
+```
+
+```bash title="Download only, leaving the compile to the first request"
+lumis parsers cache rust javascript --no-compile
 ```
 
 ## Configuration

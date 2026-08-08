@@ -1062,6 +1062,51 @@ fn cache_parsers_already_cached_verbose() {
         .stderr(predicate::str::contains("tree-sitter-diff-"));
 }
 
+/// Downloading is the smaller half of a cold parser; the Wasmtime compile is the
+/// larger, and a prepared directory is meant to carry both. `mix
+/// lumis.languages.cache` does the same, so the two cannot prepare different
+/// things.
+#[test]
+fn cache_parsers_compiles_unless_told_not_to() {
+    // Building a runtime at all compiles Tree-sitter's own module, so the
+    // directory existing proves nothing. The parser adds an entry beside it.
+    fn cached_modules(store: &std::path::Path) -> usize {
+        let namespaces = match std::fs::read_dir(store.join("compiled").join("modules")) {
+            Ok(entries) => entries,
+            Err(_) => return 0,
+        };
+        namespaces
+            .filter_map(Result::ok)
+            .filter_map(|namespace| std::fs::read_dir(namespace.path()).ok())
+            .flat_map(|entries| entries.filter_map(Result::ok))
+            .filter(|entry| entry.path().extension().is_none())
+            .count()
+    }
+
+    let skipped = seeded_store();
+    cmd()
+        .arg("--data-dir")
+        .arg(skipped.path())
+        .args(["parsers", "cache", "--no-compile", "diff"])
+        .assert()
+        .success();
+
+    let compiled = seeded_store();
+    cmd()
+        .arg("--data-dir")
+        .arg(compiled.path())
+        .args(["parsers", "cache", "diff"])
+        .assert()
+        .success();
+
+    assert!(
+        cached_modules(compiled.path()) > cached_modules(skipped.path()),
+        "caching must compile the parser too, not just download it: {} vs {}",
+        cached_modules(compiled.path()),
+        cached_modules(skipped.path())
+    );
+}
+
 /// A store directory holding the committed fixtures, so `parsers cache` can be
 /// exercised without a download. Caching into an empty directory needs the
 /// network by construction; there is no second directory to copy from.
