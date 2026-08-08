@@ -13,7 +13,7 @@ JavaScript/TypeScript package for [Lumis](https://lumis.sh). Works in Node.js, B
 - **Language auto-detection** - File extension, shebang, and emacs-mode support
 - **Line highlighting** - Mark and style individual lines, with custom HTML wrappers
 - **Streaming-friendly** - Handles incomplete code
-- **Load parsers on demand** - Verified and cached, including injected languages
+- **Load parsers on demand** - Verified and cached, including injected languages on Node; browsers load those up front
 
 ## Install
 
