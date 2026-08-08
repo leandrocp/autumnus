@@ -5,7 +5,7 @@
 ] @comment 
 
 ((block_comment) @comment.documentation
-  (#lua-match? @comment.documentation "^\{[-]|^\{[^|]"))
+  (#match? @comment.documentation "^\\\\\\{[-]\\|\\^\\\\\\{[^|]"))
 
 ; Keywords
 ;---------

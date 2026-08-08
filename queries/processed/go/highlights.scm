@@ -46,11 +46,11 @@
 ; Constructors
 ((call_expression
   (identifier) @constructor)
-  (#lua-match? @constructor "^[nN]ew.+$"))
+  (#match? @constructor "^[nN]ew[\\s\\S]+$"))
 
 ((call_expression
   (identifier) @constructor)
-  (#lua-match? @constructor "^[mM]ake.+$"))
+  (#match? @constructor "^[mM]ake[\\s\\S]+$"))
 
 ; Operators
 [

@@ -29,6 +29,48 @@ Lumis should present one mental model everywhere. Public APIs across languages s
 
 The Rust implementation is the source of truth. When a cross-runtime API decision is unclear, follow Rust first and bring other runtimes into line with it instead of inventing runtime-specific behavior.
 
+### Reuse the Rust core instead of reimplementing it
+
+Shared behavior belongs in one Rust crate that every runtime consumes. A second implementation of the same logic in another language, or in another Rust crate, is a divergence that will drift.
+
+- Before writing logic in JavaScript, Elixir, the CLI, or a build script, check whether `crates/lumis-core`, `crates/lumis`, `crates/lumis-wasm-runtime`, or `crates/lumis-build` already owns it, and extend that crate instead.
+- Prefer moving work to generation time in Rust over duplicating it per runtime. Query preprocessing is the model: `crates/lumis-build` converts Lua patterns once, and every runtime then reads byte-identical `.scm` files.
+- When a runtime genuinely cannot call into Rust, such as the browser, the Rust crate still defines the behavior, and the port must be covered by a test that pins both against the same input.
+- Two copies of the same algorithm require a test that pins them to each other, and deleting one copy is better still. `definitionHash` was computed in both `crates/dev` and a Python release script until the script was ported into `crates/dev`; "the CI job has no Rust toolchain" is a workflow line to add, not a reason to reimplement.
+
+### Highlighting loads what a document needs, in one pass
+
+A parser is a WebAssembly module fetched from a registry and executed in the
+host process. Highlighting resolves, downloads, verifies and loads whatever a
+document turns out to name, including languages injected inside it, and caches
+them for every later request. Nothing has to be declared up front.
+
+Three rules hold that together, and a change that breaks any of them is wrong:
+
+- **One pass.** An injected language is loaded during the walk that discovered
+  it, not by highlighting the document twice or by scanning it first. That is
+  why `Runtime::highlight` takes a callback that can load: the walk descends
+  into the language it just fetched and finds whatever *that* contains, however
+  deep the nesting goes.
+- **A failure costs one block, not the document.** A thousand-line Markdown file
+  with one fenced block in an unpublished language still highlights; that block
+  stays plain. Only the root language failing is an error.
+- **One implementation.** `LanguageStore` resolves and caches; `Runtime` loads
+  and highlights. The CLI, the Elixir NIF and the Node addon all call them, so
+  none of them can drift.
+
+Browsers are the exception, and only because loading is asynchronous there:
+`web-tree-sitter` cannot fetch a parser inside a synchronous walk, so an
+injected language has to be loaded before the document mentioning it. Node uses
+the native addon precisely so it does not inherit that limit. Do not "fix" the
+browser by making the other runtimes match it.
+
+`ARCHITECTURE.md` has the full reasoning, including why pre-loading is an
+optimization rather than a requirement. A cold parser costs a download and then
+a Wasmtime compile, and the compile is the larger half: seven parsers already on
+disk take about 8 s to compile and 1.3 s once `compiled/` is warm. `load` exists
+to move both off the first request, not to gate anything.
+
 ### Route work through `mise`
 
 `mise.toml` is the control plane for this repository. It defines tasks without pinning runtime versions, so local commands use the developer's installed Rust, JavaScript, Elixir, and other toolchains.
@@ -71,11 +113,113 @@ Lumis is a Tree-sitter-based syntax highlighter. Language behavior must respect 
 - For cross-runtime features, define the behavior in Rust first, then align JavaScript, Elixir, browser, Java, and CLI behavior to the Rust implementation.
 - Do not replace language-specific query semantics with generic string scanning unless it is an explicit fallback for plaintext or unavailable parser/query data.
 
+### Neovim is the reference for query semantics
+
+Lumis queries are fetched from <https://github.com/nvim-treesitter/nvim-treesitter>, so those `.scm` files mean whatever Neovim's highlighting engine says they mean. Neovim, not Tree-sitter's documentation and not a plausible reading of the pattern, decides the intended behavior.
+
+- Before changing predicate handling, query preprocessing, or capture resolution, read the upstream implementation. Clone it locally: `git clone --depth 1 --filter=blob:none --sparse https://github.com/neovim/neovim.git "$(mktemp -d)/nvim"`, then `git sparse-checkout set runtime/lua/vim/treesitter`.
+- The predicate handlers live in `runtime/lua/vim/treesitter/query.lua`. Two of them are easy to conflate:
+  - `#lua-match?` is `string.find(node_text, pattern)`, so its argument is a **Lua 5.1 pattern**, matched unanchored unless it starts with `^`.
+  - `#match?` (aliased as `#vim-match?`) is `vim.regex('\v' .. pattern)`, a **Vim very-magic regex**. Lumis instead evaluates `#match?` with Tree-sitter's own implementation: the `regex` crate in Rust and `RegExp` in `web-tree-sitter`.
+- A Lua pattern is not a regex. `-` is the lazy `*` only after a pattern item, `^` anchors only at the start, `$` only at the end, `.` matches newlines, and `%d`/`%s`/`%w` are ASCII in the C locale. `crates/lumis-build` owns that translation; extend it rather than hand-editing generated queries.
+- Any translated pattern must be valid **and equivalent** in both the `regex` crate and JavaScript `RegExp` with no flags. The two disagree on nested character classes, `\d`/`\w`/`\s` width, and inline `(?i)` groups. `crates/lumis-build/tests/processed_queries.rs` and `packages/javascript/lumis/test/query-patterns.test.ts` enforce this over the whole corpus and must not be allowed to skip languages.
+- Settle a question about pattern semantics by running it, not by reasoning about it: `nvim --headless -c 'lua print(string.find(subject, pattern))' -c q`.
+- The converter stays faithful to Neovim even when upstream is wrong. Fix an authoring mistake in `queries/override/` or `queries/append/` instead, where it is visible in review, and say in a comment what upstream does and why it is wrong.
+
+### A test that cannot fail is worse than no test
+
+A test that skips silently reports the same green as a test that verified something. That is how the defects in `REVIEW.md` §1 shipped: the only per-language query check `return`ed early for 77 of 115 languages.
+
+- Never `return` or `continue` out of a test body to handle a missing prerequisite. Fail, or record the gap in a checked-in file that the test enforces.
+- A gap that genuinely cannot be closed yet gets an explicit waiver that can only shrink. The test must fail on an undeclared gap **and** on a waiver entry that is no longer needed. `packages/javascript/lumis/test/unverified-parsers.json` is the pattern.
+- Assert corpus size. `expect(patterns.length).toBeGreaterThan(200)` is what catches a discovery bug that silently finds nothing.
+- Prove a new guard fails: inject the defect it is meant to catch, watch it go red, then revert. A guard that has never failed has not been tested.
+- Do not let published artifacts gate correctness checks. Build what you need from the pinned source instead, as `mise run test-queries` does, otherwise coverage silently tracks the release cycle.
+
+### Comments are a last resort
+
+Do not narrate code. A comment is justified only when the code is genuinely hard to follow, or when it does something a reader would not expect and would otherwise "fix". Everything else should be carried by naming and structure.
+
+Worth keeping, because the behaviour is surprising:
+
+```rust
+// Windows refuses to replace a file another handle still has open.
+```
+
+```elixir
+# Rustler encodes `Result<(), String>` as `{:ok, {}}`, not `:ok`.
+```
+
+Not worth keeping, because the code already says it:
+
+```elixir
+# Read from the copy vendored in this repository, so the demo runs offline.
+@source_path Path.expand("../../../benchmarks/webgpu_compute_reduce.html", __DIR__)
+```
+
+Rationale that is about the change rather than the code belongs in the commit message. `mise.toml` takes no comments at all.
+
+### Formatting and linting are enforced everywhere
+
+Every file the repo authors is formatted and linted, including generated ones. `mise run fmt` formats every language, `mise run lint` checks them. Run those before pushing; CI only checks.
+
+There is no per-package path list. `fmt-js` is `oxfmt "**/*.{ts,tsx,mjs,cjs,js,jsx}"` from the repo root, so a new package, script, example or test directory is covered the day it is added, whether or not the file has been staged yet.
+
+**Generated files are not an exception.** A generator writes its output and then formats it, so regenerating and format-checking agree. If you add a generator, format what it emits.
+
+`.oxfmtrc.json` holds the only exclusions, and each needs a reason to be there:
+
+- vendored parsers and vendored site assets — not ours to restyle
+- `dist/` — bundler output, which the next build would rewrite anyway
+- `samples/` and `fixtures/` — corpora whose exact bytes are the test
+- `benchmarks/shadcn_sidebar.tsx` — a vendored third-party file the showcase pins by SHA-256, so
+  formatting it would break the pin. The other vendored showcase documents are not JavaScript and
+  never matched the glob
+- `packages/javascript/themes/themes/` — 246 modules holding one long `JSON.stringify` line each; formatting them costs 28k lines for no readability, since nobody reads generated theme data
+- `lumis/langs/`, `lumis/src/generated/`, `lumis/src/tree-sitter-wasm.ts` — build output that is never committed. oxfmt reads only the `.gitignore` in its working directory, so paths ignored by a nested one have to be named here.
+
+This replaced a per-package `fmt:check` that named `src/` only. Every `test/`, `scripts/` and `examples/` directory in the repo had therefore never been formatted, and nobody could tell, because the check was green. When adding a formatter or a linter, make the default "everything" and subtract; never name a directory and hope the list is maintained.
+
+`oxlint` runs with `--deny-warnings`, so a warning fails the build. Silence a genuinely intentional one at the line with `// oxlint-disable-next-line <rule> -- <why>`; do not let it sit in the output.
+
+### Validate workflow changes with `actionlint` before pushing
+
+Run `mise run lint-workflows` after **any** edit under `.github/workflows/`. It is also part of `mise run lint`, and CI runs it, but CI finding it costs a full round trip.
+
+This matters most for bulk edits. Rewriting action inputs with `sed` or a regex is exactly how a `with:` key gets separated from the block it belongs to:
+
+```yaml
+- uses: jdx/mise-action@v4
+    working_directory: benchmarks   # `with:` removed -> invalid YAML
+```
+
+That file no longer parses, and the failure surfaces as an unrelated-looking lint error rather than at the step you edited. Two rules follow:
+
+- A workflow edit is not done until `actionlint` passes.
+- When changing an action's inputs, check **every** call site rather than the one that prompted the change. Inputs differ per job — `install: true` may be droppable in one place while `install: false` and `working_directory` next door are load-bearing.
+
+Version pins in workflows deserve the same suspicion. `jdx/mise-action`'s `version:` input pins **mise itself**, not the action, and dropping it can break tool installs that the pinned mise handled.
+
 ### Keep Emscripten compatible with Tree-sitter
 
-Pin Emscripten to `4.0.15` for the Tree-sitter browser runtime. Emscripten 6 is currently incompatible with Tree-sitter side modules because their mutable `env.__stack_pointer` import is not supplied as the required `WebAssembly.Global`; see <https://github.com/tree-sitter/tree-sitter/issues/5037>.
+Emscripten is pinned once, as `LUMIS_EMSDK_VERSION` under `[env]` in the root `mise.toml`. The workflows read that value and install it with `setup-emsdk`. It is deliberately not a `[tools]` entry: mise's asdf `emsdk` plugin fails to install on Linux runners (`plugins/emsdk/bin/install exited with non-zero status`), which takes every job that runs `mise install` down with it.
 
-Do not upgrade Emscripten until that incompatibility is resolved upstream and Lumis verifies loading real Tree-sitter parser side modules in browser conformance tests.
+This failure looks like a toolchain problem and usually is not:
+
+```
+bad export type for 'tree_sitter_<lang>_external_scanner_create': undefined
+```
+
+A parser that triggers it **compiles cleanly** and only fails when something loads it, and only when the grammar has an external scanner. So a green build proves nothing — load the parser.
+
+Historically this was blamed on Emscripten (<https://github.com/tree-sitter/tree-sitter/issues/5037>). That is no longer reproducible with the pinned Tree-sitter CLI. Measured on `tree-sitter-hcl`, holding the toolchain fixed and varying only the grammar revision:
+
+| Grammar revision | emsdk 4.0.15 | emsdk 6.0.5 |
+| --- | --- | --- |
+| `636dbe70`, pinned in `languages.toml` | fails to load | fails to load |
+| `64ad6278`, what the published package ships | loads | loads |
+
+So the cause is a **stale grammar revision**, not the Emscripten version. When a scanner-bearing language fails to load, check whether `languages.toml` has fallen behind the revision the published package was built from before touching the toolchain.
 
 ## Documentation is part of the change
 
@@ -86,6 +230,12 @@ Docs, specs, and examples are not cleanup work for later. They are part of the f
 - If writing needs polish, use the available `humanizer` skill before finishing.
 
 Prefer concrete explanations over marketing language. Show the real API. Keep examples runnable.
+
+One command per line in a shell block. `cd packages/elixir/lumis && LUMIS_BUILD=1 iex -S mix`
+reads as one step but is two, and a reader who wants only the second has to take
+the line apart. Better still, check whether the `cd` is needed at all: `node
+packages/javascript/lumis/test.mjs` runs from the repo root, because Node
+resolves imports from the file rather than the working directory.
 
 ### READMEs stay small, detail lives in the docs site
 

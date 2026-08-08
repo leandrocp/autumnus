@@ -58,7 +58,7 @@ export function Example() {
 
 ## Hook
 
-Pass `highlighter` when you want to reuse one instance across multiple blocks or preload languages ahead of time.
+Pass `highlighter` when you want to reuse one instance across multiple blocks or load languages during setup.
 
 ```tsx
 import { useLumis } from '@lumis-sh/react'

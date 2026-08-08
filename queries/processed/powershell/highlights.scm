@@ -138,7 +138,7 @@
     "$true"))
 
 ((variable) @variable.builtin
-  (#lua-match? @variable.builtin "^$env:"))
+  (#match? @variable.builtin "^\\$env:"))
 
 (data_name
   (simple_name) @constant)
@@ -148,7 +148,7 @@
 ((program
   .
   (comment) @keyword.directive)
-  (#lua-match? @keyword.directive "^#!/"))
+  (#match? @keyword.directive "^#!/"))
 
 ; Booleans
 ;---------
@@ -326,4 +326,4 @@
 ((program
   .
   (comment) @keyword.directive )
-  (#lua-match? @keyword.directive "Encoding$"))
+  (#match? @keyword.directive "Encoding$"))

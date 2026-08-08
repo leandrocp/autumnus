@@ -3,10 +3,10 @@ dist/
 doc/
 playwright-report/
 test-results/
+.tmp/
 langs/
 themes/
 wasm/
-native/*.node
 !test/fixtures/wasm/
 !test/fixtures/wasm/*.wasm
 queries/

@@ -1,0 +1,5 @@
+[markup-heading-1-markdown]# Title
+[/markup-heading-1-markdown]
+[tag-delimiter-html]<[/tag-delimiter-html][tag-html]h1[/tag-html] [tag-attribute-html]align[/tag-attribute-html][operator-html]=[/operator-html][string-html]"center"[/string-html][tag-delimiter-html]>[/tag-delimiter-html]Lumis[tag-delimiter-html]</[/tag-delimiter-html][tag-html]h1[/tag-html][tag-delimiter-html]>[/tag-delimiter-html]
+
+[tag-delimiter-html]<[/tag-delimiter-html][tag-html]p[/tag-html][tag-delimiter-html]>[/tag-delimiter-html]Raw [tag-delimiter-html]<[/tag-delimiter-html][tag-html]b[/tag-html][tag-delimiter-html]>[/tag-delimiter-html][markup-strong-html]HTML[/markup-strong-html][tag-delimiter-html]</[/tag-delimiter-html][tag-html]b[/tag-html][tag-delimiter-html]>[/tag-delimiter-html] in Markdown.[tag-delimiter-html]</[/tag-delimiter-html][tag-html]p[/tag-html][tag-delimiter-html]>[/tag-delimiter-html]

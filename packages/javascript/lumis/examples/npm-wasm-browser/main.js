@@ -1,10 +1,10 @@
-import { createHighlighter, withWasm } from '@lumis-sh/lumis'
-import { htmlInline } from '@lumis-sh/lumis/formatters'
-import elixir from '@lumis-sh/lumis/langs/elixir'
-import githubLight from '@lumis-sh/themes/github_light'
-import elixirWasm from '@lumis-sh/wasm-elixir'
+import { createHighlighter, withWasm } from "@lumis-sh/lumis";
+import { htmlInline } from "@lumis-sh/lumis/formatters";
+import elixir from "@lumis-sh/lumis/langs/elixir";
+import githubLight from "@lumis-sh/themes/github_light";
+import elixirWasm from "@lumis-sh/wasm-elixir";
 
-const elixirFromNpm = withWasm(elixir, elixirWasm)
+const elixirFromNpm = withWasm(elixir, elixirWasm);
 
 const source = `defmodule Lumis.Release do
   def manifest(env) do
@@ -16,19 +16,19 @@ const source = `defmodule Lumis.Release do
     |> manifest()
     |> IO.inspect(label: "release")
   end
-end`
+end`;
 
-const output = document.querySelector('#output')
-const error = document.querySelector('#error')
+const output = document.querySelector("#output");
+const error = document.querySelector("#error");
 
 try {
-  const highlighter = await createHighlighter({ languages: [elixirFromNpm] })
+  const highlighter = await createHighlighter({ languages: [elixirFromNpm] });
   output.innerHTML = highlighter.highlight(
     source,
     htmlInline({ language: elixirFromNpm, theme: githubLight }),
-  )
+  );
 } catch (err) {
-  error.style.display = 'block'
-  error.textContent = err instanceof Error ? err.stack ?? err.message : String(err)
-  output.textContent = 'Failed to load the Elixir parser.'
+  error.style.display = "block";
+  error.textContent = err instanceof Error ? (err.stack ?? err.message) : String(err);
+  output.textContent = "Failed to load the Elixir parser.";
 }

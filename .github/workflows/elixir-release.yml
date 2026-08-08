@@ -21,6 +21,7 @@ permissions:
 
 jobs:
   nif-release:
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
     uses: leandrocp/github-actions/.github/workflows/nif-release.yml@main
     with:
       project-name: lumis_nif
@@ -30,7 +31,9 @@ jobs:
   hex-publish:
     name: Publish to Hex
     needs: nif-release
-    if: startsWith(inputs.tag || github.ref_name, 'hex-lumis/v')
+    if: >-
+      (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')) &&
+      startsWith(inputs.tag || github.ref_name, 'hex-lumis/v')
     runs-on: ubuntu-latest
     defaults:
       run:

@@ -14,6 +14,7 @@ on:
       - "crates/**"
       - "languages.toml"
       - "queries/**"
+      - "mise.toml"
       - ".github/workflows/rust.yml"
   pull_request:
     paths:
@@ -23,6 +24,7 @@ on:
       - "crates/**"
       - "languages.toml"
       - "queries/**"
+      - "mise.toml"
       - ".github/workflows/rust.yml"
   workflow_dispatch:
 
@@ -36,6 +38,8 @@ jobs:
     with:
       msrv: '1.91'
       manifest-path: 'crates/lumis/Cargo.toml'
+      test-stage: ${{ github.event_name == 'pull_request' && 'stable' || 'all' }}
+      stable-os-versions: ${{ github.event_name == 'pull_request' && '["ubuntu-22.04"]' || '["ubuntu-22.04", "windows-2022", "macos-14"]' }}
   test-lumis-build:
     if: >-
       ${{ github.event_name == 'workflow_dispatch' ||
@@ -45,6 +49,8 @@ jobs:
     with:
       msrv: '1.91'
       manifest-path: 'crates/lumis-build/Cargo.toml'
+      test-stage: ${{ github.event_name == 'pull_request' && 'stable' || 'all' }}
+      stable-os-versions: ${{ github.event_name == 'pull_request' && '["ubuntu-22.04"]' || '["ubuntu-22.04", "windows-2022", "macos-14"]' }}
   test-lumis-core:
     if: >-
       ${{ github.event_name == 'workflow_dispatch' ||
@@ -54,6 +60,8 @@ jobs:
     with:
       msrv: '1.91'
       manifest-path: 'crates/lumis-core/Cargo.toml'
+      test-stage: ${{ github.event_name == 'pull_request' && 'stable' || 'all' }}
+      stable-os-versions: ${{ github.event_name == 'pull_request' && '["ubuntu-22.04"]' || '["ubuntu-22.04", "windows-2022", "macos-14"]' }}
   test-lumis-cli:
     if: >-
       ${{ github.event_name == 'workflow_dispatch' ||
@@ -63,6 +71,8 @@ jobs:
     with:
       msrv: '1.91'
       manifest-path: 'crates/lumis-cli/Cargo.toml'
+      test-stage: ${{ github.event_name == 'pull_request' && 'stable' || 'all' }}
+      stable-os-versions: ${{ github.event_name == 'pull_request' && '["ubuntu-22.04"]' || '["ubuntu-22.04", "windows-2022", "macos-14"]' }}
   test-lumis-wasm-runtime:
     if: >-
       ${{ github.event_name == 'workflow_dispatch' ||
@@ -72,6 +82,25 @@ jobs:
     with:
       msrv: '1.91'
       manifest-path: 'crates/lumis-wasm-runtime/Cargo.toml'
+      test-stage: ${{ github.event_name == 'pull_request' && 'stable' || 'all' }}
+      stable-os-versions: ${{ github.event_name == 'pull_request' && '["ubuntu-22.04"]' || '["ubuntu-22.04", "windows-2022", "macos-14"]' }}
+  check-language-catalog:
+    if: >-
+      ${{ github.event_name == 'workflow_dispatch' ||
+          (github.event_name == 'pull_request' && github.head_ref != 'knope/release') ||
+          (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore: prepare releases')) }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: jdx/mise-action@v4.2.3
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "crates/dev -> target"
+          shared-key: language-catalog
+      - run: >-
+          cargo run --manifest-path crates/dev/Cargo.toml
+          --locked --no-default-features -- gen-language-catalog --check
   test-packaged-parsers:
     if: >-
       ${{ github.event_name == 'workflow_dispatch' ||

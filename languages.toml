@@ -273,7 +273,10 @@ emacs = ["fsharp"]
 
 [parsers.gleam]
 git = "https://github.com/gleam-lang/tree-sitter-gleam.git"
-rev = "2012f294baacf30e7a62414754021284377366c6"
+# Tag v1.1.0. Upstream still declares 1.0.0 in its Cargo.toml there, which is what
+# crates.io serves as tree-sitter-gleam 1.0.0, so `version` stays put: this only
+# moves the git pin up to the grammar the published crate was actually built from.
+rev = "dae1551a9911b24f41d876c23f2ab05ece0a9d4c"
 crate = "tree-sitter-gleam"
 version = "1.0.0"
 globs = ["*.gleam"]
@@ -311,7 +314,7 @@ shebang = ["runghc", "runhaskell", "runhugs"]
 
 [parsers.hcl]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-hcl.git"
-rev = "636dbe70301ecbab8f353c8c78b3406fe4f185f5"
+rev = "64ad62785d442eb4d45df3a1764962dafd5bc98b"
 crate = "tree-sitter-hcl"
 version = "1.1.0"
 variant = "HCL"
@@ -684,7 +687,7 @@ shebang = ["deno", "ts-node"]
 
 [parsers.typst]
 git = "https://github.com/uben0/tree-sitter-typst.git"
-rev = "13863ddcbaa7b68ee6221cea2e3143415e64aea4"
+rev = "46cf4ded12ee974a70bf8457263b67ad7ee0379d"
 crate = "codebook-tree-sitter-typst"
 version = "0.12.1"
 globs = ["*.typ", "*.typst"]
@@ -814,7 +817,7 @@ globs = ["*.kdl"]
 
 [parsers.luadoc]
 git = "https://github.com/tree-sitter-grammars/tree-sitter-luadoc.git"
-rev = "818acda56809f994274de64a42f97f509b3c0ad2"
+rev = "873612aadd3f684dd4e631bdf42ea8990c57634e"
 version = "1.1.0"
 display_name = "LuaDoc"
 
@@ -946,7 +949,7 @@ version = "0.13.0"
 
 [parsers.json5]
 git = "https://github.com/Joakker/tree-sitter-json5.git"
-rev = "8cb4114a4d7e5bab75d74466422e032de31d83df"
+rev = "aa630ef48903ab99e406a8acd2e2933077cc34e1"
 version = "0.1.0"
 variant = "JSON5"
 display_name = "JSON5"
@@ -1024,7 +1027,7 @@ shebang = ["guile", "scheme"]
 
 [parsers.solidity]
 git = "https://github.com/JoranHonig/tree-sitter-solidity.git"
-rev = "4e938a46c7030dd001bc99e1ac0f0c750ac98254"
+rev = "048fe686cb1fde267243739b8bdbec8fc3a55272"
 crate = "tree-sitter-solidity"
 version = "1.2.13"
 globs = ["*.sol"]

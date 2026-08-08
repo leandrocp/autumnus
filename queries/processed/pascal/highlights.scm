@@ -244,10 +244,10 @@
 (comment) @comment 
 
 ((comment) @comment.documentation
-  (#lua-match? @comment.documentation "^///[^/]"))
+  (#match? @comment.documentation "^///[^/]"))
 
 ((comment) @comment.documentation
-  (#lua-match? @comment.documentation "^///$"))
+  (#match? @comment.documentation "^///$"))
 
 ((comment) @comment.documentation
   .
@@ -466,20 +466,20 @@
 ; identifiers are shadowed by a local variable)
 (statement
   ((identifier) @keyword.return
-    (#lua-match? @keyword.return "^[eE][xX][iI][tT]$")))
+    (#match? @keyword.return "^[eE][xX][iI][tT]$")))
 
 (statement
   (exprCall
     entity: ((identifier) @keyword.return
-      (#lua-match? @keyword.return "^[eE][xX][iI][tT]$"))))
+      (#match? @keyword.return "^[eE][xX][iI][tT]$"))))
 
 (statement
   ((identifier) @keyword.repeat
-    (#lua-match? @keyword.repeat "^[bB][rR][eE][aA][kK]$")))
+    (#match? @keyword.repeat "^[bB][rR][eE][aA][kK]$")))
 
 (statement
   ((identifier) @keyword.repeat
-    (#lua-match? @keyword.repeat "^[cC][oO][nN][tT][iI][nN][uU][eE]$")))
+    (#match? @keyword.repeat "^[cC][oO][nN][tT][iI][nN][uU][eE]$")))
 
 ; -- Identifier type inference
 ; VERY QUESTIONABLE: Highlighting of identifiers based on spelling

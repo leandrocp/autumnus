@@ -10,6 +10,7 @@ use lumis_core::formatter::Formatter as CoreFormatter;
 use lumis_core::formatter::TerminalBackground;
 use lumis_core::languages::Language;
 use lumis_wasm_runtime::tree_sitter_highlight::ParsedLayer;
+use lumis_wasm_runtime::{HighlightOptions, HighlightOutput};
 use serde::Serialize;
 use std::fmt::Display;
 use std::fs;
@@ -213,30 +214,21 @@ enum ThemesCommands {
 
 #[derive(Subcommand)]
 enum ParsersCommands {
-    /// Download parser WASMs ahead of time
+    /// Cache parser WASMs so later runs skip the download
     #[command(
-        after_help = "Examples:\n  lumis parsers fetch rust javascript\n  lumis parsers fetch --all"
+        after_help = "Examples:\n  lumis parsers cache rust javascript\n  lumis parsers cache --all\n  lumis parsers cache rust --force\n  lumis --data-dir /app/lumis parsers cache rust"
     )]
-    Fetch {
-        /// Language names to download (e.g. rust javascript elixir)
+    Cache {
+        /// Language names to cache (e.g. rust javascript elixir)
         languages: Vec<String>,
 
-        /// Download all supported parsers
+        /// Cache all supported parsers
         #[arg(long)]
         all: bool,
-    },
 
-    /// Re-download parser WASMs to get the latest versions
-    #[command(
-        after_help = "Examples:\n  lumis parsers update rust javascript\n  lumis parsers update --all"
-    )]
-    Update {
-        /// Language names to update (e.g. rust javascript elixir)
-        languages: Vec<String>,
-
-        /// Update all cached parsers
+        /// Replace valid cached parsers
         #[arg(long)]
-        all: bool,
+        force: bool,
     },
 }
 
@@ -298,6 +290,7 @@ fn default_data_dir() -> PathBuf {
 fn main() -> Result<()> {
     let cli = Cli::parse();
     let data_dir = cli.data_dir.unwrap_or_else(default_data_dir);
+    lumis_wasm_runtime::set_compile_cache_dir(data_dir.clone());
     let config_path = cli.config.unwrap_or_else(config::default_path);
     let verbose = cli.verbose;
 
@@ -367,33 +360,35 @@ fn main() -> Result<()> {
             ),
         },
         Commands::Parsers { command } => match command {
-            ParsersCommands::Fetch { languages, all } => {
+            ParsersCommands::Cache {
+                languages,
+                all,
+                force,
+            } => {
                 let reg = registry::Registry::new(data_dir)?;
-                fetch_parsers(&reg, &languages, all, verbose)
-            }
-            ParsersCommands::Update { languages, all } => {
-                let reg = registry::Registry::new(data_dir)?;
-                update_parsers(&reg, &languages, all, verbose)
+                cache_parsers(&reg, &languages, all, force, verbose)
             }
         },
     }
 }
 
-fn fetch_parsers(
+fn cache_parsers(
     reg: &registry::Registry,
     languages: &[String],
     all: bool,
+    force: bool,
     verbose: bool,
 ) -> Result<()> {
+    if all && !languages.is_empty() {
+        return Err(anyhow::anyhow!("pass language names or --all, not both"));
+    }
+
     let names: Vec<&str> = if all {
-        registry::all_wasm_names()
-            .iter()
-            .map(|(qn, _)| *qn)
-            .collect()
+        registry::all_language_ids().collect()
     } else {
         if languages.is_empty() {
             return Err(anyhow::anyhow!(
-                "specify language names or use --all to download all parsers"
+                "specify language names or use --all to cache all parsers"
             ));
         }
         languages.iter().map(|s| s.as_str()).collect()
@@ -401,22 +396,18 @@ fn fetch_parsers(
 
     let mut errors = Vec::new();
     for name in &names {
-        let query_name = resolve_query_name(name);
-        let parser_path = reg.parser_path(query_name);
-        if reg.is_cached(query_name) {
-            if verbose {
-                eprintln!("{}: {}", name, parser_path.display());
-            }
-            continue;
-        }
-        match reg.download_parser(query_name) {
-            Ok(_) => {
-                if verbose {
+        let language_id = resolve_language_id(name);
+        let already_cached = !force && reg.is_cached(language_id);
+        match reg.cache_parser(language_id, force) {
+            Ok(path) => {
+                if verbose && already_cached {
+                    eprintln!("{}: {}", name, path.display());
+                } else if verbose {
                     eprintln!(
                         "{}: {} -> {}",
                         name,
-                        reg.parser_download_url(query_name),
-                        parser_path.display()
+                        reg.parser_download_url(language_id)?,
+                        path.display()
                     );
                 }
             }
@@ -429,85 +420,33 @@ fn fetch_parsers(
 
     if !errors.is_empty() {
         return Err(anyhow::anyhow!(
-            "failed to download {} parser(s)",
+            "failed to cache {} parser(s)",
             errors.len()
         ));
     }
 
-    Ok(())
-}
-
-fn update_parsers(
-    reg: &registry::Registry,
-    languages: &[String],
-    all: bool,
-    verbose: bool,
-) -> Result<()> {
-    let names: Vec<&str> = if all {
-        // When --all, only update parsers that are already cached
-        registry::all_wasm_names()
-            .iter()
-            .filter(|(qn, _)| reg.is_cached(qn))
-            .map(|(qn, _)| *qn)
-            .collect()
-    } else {
-        if languages.is_empty() {
-            return Err(anyhow::anyhow!(
-                "specify language names or use --all to update all cached parsers"
-            ));
-        }
-        languages.iter().map(|s| s.as_str()).collect()
-    };
-
-    if names.is_empty() {
-        if verbose {
-            eprintln!("No cached parsers to update.");
-        }
-        return Ok(());
-    }
-
-    let mut errors = Vec::new();
+    // Downloading is the smaller half of a cold parser; the Wasmtime compile is
+    // the larger. Loading each one here writes it into `compiled/`, so a
+    // prepared directory carries both. `mix lumis.languages.cache` does the same.
+    let mut compiled = 0;
     for name in &names {
-        let query_name = resolve_query_name(name);
-        let parser_path = reg.parser_path(query_name);
-        match reg.update_parser(query_name) {
-            Ok(_) => {
-                if verbose {
-                    eprintln!(
-                        "{}: {} -> {}",
-                        name,
-                        reg.parser_download_url(query_name),
-                        parser_path.display()
-                    );
-                }
-            }
-            Err(e) => {
-                eprintln!("{}: failed", name);
-                errors.push((*name, e));
-            }
+        match reg.load_language(resolve_language_id(name)) {
+            Ok(()) => compiled += 1,
+            Err(error) => eprintln!("{name}: cached but not compiled ({error})"),
         }
     }
-
-    if !errors.is_empty() {
-        return Err(anyhow::anyhow!(
-            "failed to update {} parser(s)",
-            errors.len()
-        ));
+    if verbose {
+        eprintln!("compiled {compiled} parser(s)");
     }
 
     Ok(())
 }
 
-/// Resolve a user-provided language name to the query name used internally.
-/// Tries Language::guess first (handles aliases), falls back to the input as-is.
-fn resolve_query_name(name: &str) -> &str {
-    // For fetch/update we just need the query name mapping.
-    // If the user passes a known language id, use the enum mapping.
-    // Otherwise pass through (the user might be using the query name directly).
+/// Resolve a user-provided language name to its stable package language ID.
+fn resolve_language_id(name: &str) -> &str {
     let lang = Language::guess(Some(name), "");
     if lang != Language::PlainText || name == "plaintext" {
-        // Return the static query name from the generated code
-        registry::language_to_query_name(lang)
+        lang.id_name()
     } else {
         name
     }
@@ -674,7 +613,7 @@ fn dump_language(lang: Language) -> Result<&'static str> {
         ));
     }
 
-    Ok(registry::language_to_query_name(lang))
+    Ok(lang.id_name())
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -747,7 +686,7 @@ fn dump_events(
     language: Option<String>,
 ) -> Result<()> {
     let (source, lang) = read_source(path, language)?;
-    let events = highlight_to_events(reg, &source, dump_language(lang)?)?
+    let events = highlight_to_events(reg, &source, dump_language(lang)?, false)?
         .into_iter()
         .map(|event| match event {
             HighlightEvent::Start {
@@ -1155,6 +1094,7 @@ fn dump_tree_lines(
                 ranges: vec![range],
                 depth: 0,
             }],
+            unresolved: Vec::new(),
         }
     };
     let resolved_highlights = if highlights {
@@ -1259,12 +1199,8 @@ fn do_highlight(
         return Ok(());
     }
 
-    let lang_name = registry::language_to_query_name(lang);
-    let mut events = highlight_to_events(reg, &source, lang_name)?;
-    if rainbow_brackets {
-        let ranges = reg.rainbow_ranges(lang_name, &source)?;
-        events = overlay_rainbow_ranges(&events, &ranges, lang.id_name());
-    }
+    let lang_name = lang.id_name();
+    let events = highlight_to_events(reg, &source, lang_name, rainbow_brackets)?;
 
     let parsed_highlight_lines = if let Some(lines_str) = highlight_lines {
         Some(parse_highlight_lines(&lines_str)?)
@@ -1287,68 +1223,6 @@ fn do_highlight(
         parsed_highlight_lines,
         verbose,
     )
-}
-
-fn overlay_rainbow_ranges(
-    events: &[HighlightEvent],
-    ranges: &[registry::RainbowRange],
-    language: &str,
-) -> Vec<HighlightEvent> {
-    let mut output = Vec::with_capacity(events.len() + ranges.len() * 3);
-    let mut range_index = 0usize;
-
-    for event in events {
-        match event {
-            HighlightEvent::Source { start, end } => {
-                let mut cursor = *start;
-
-                while range_index < ranges.len() && ranges[range_index].end <= *start {
-                    range_index += 1;
-                }
-
-                let mut next_index = range_index;
-                while next_index < ranges.len() {
-                    let range = &ranges[next_index];
-                    if range.start >= *end {
-                        break;
-                    }
-                    if range.start < *start || range.end > *end {
-                        next_index += 1;
-                        continue;
-                    }
-
-                    if cursor < range.start {
-                        output.push(HighlightEvent::Source {
-                            start: cursor,
-                            end: range.start,
-                        });
-                    }
-
-                    output.push(HighlightEvent::Start {
-                        scope_index: range.scope_index,
-                        language: language.to_string(),
-                    });
-                    output.push(HighlightEvent::Source {
-                        start: range.start,
-                        end: range.end,
-                    });
-                    output.push(HighlightEvent::End);
-                    cursor = range.end;
-                    next_index += 1;
-                }
-
-                if cursor < *end {
-                    output.push(HighlightEvent::Source {
-                        start: cursor,
-                        end: *end,
-                    });
-                }
-            }
-            other => output.push(other.clone()),
-        }
-    }
-
-    output
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -1653,89 +1527,40 @@ fn relative_to_current(path: &Path) -> PathBuf {
     path.into()
 }
 
-struct HighlightOutput {
-    events: Vec<HighlightEvent>,
-    layers: Vec<ParsedLayer>,
-}
-
 fn highlight_output(
     reg: &registry::Registry,
     source: &str,
     lang_name: &str,
-    record_parsed_layers: bool,
-    include_injections: bool,
+    layers: bool,
+    injections: bool,
 ) -> Result<HighlightOutput> {
-    let config = reg
-        .load_config(lang_name)?
-        .ok_or_else(|| anyhow::anyhow!("no config for language '{}'", lang_name))?;
-    // Leak configs to satisfy the 'static lifetime required by the highlight callback.
-    // Acceptable because the CLI process exits after highlighting.
-    let config = Box::leak(Box::new(config));
-    let mut injected_configs: std::collections::HashMap<
-        String,
-        &'static lumis_wasm_runtime::tree_sitter_highlight::HighlightConfiguration,
-    > = std::collections::HashMap::new();
-
-    let mut highlighter = lumis_wasm_runtime::tree_sitter_highlight::Highlighter::new();
-    highlighter.record_parsed_layers(record_parsed_layers);
-    let wasm_store = reg.new_wasm_store()?;
-    highlighter
-        .parser()
-        .set_wasm_store(wasm_store)
-        .map_err(|e| anyhow::anyhow!("failed to set wasm store: {:?}", e))?;
-
-    // Injected languages are loaded lazily and only if their parsers were cached already.
-    let events = highlighter
-        .highlight(config, source.as_bytes(), None, |injected| {
-            if !include_injections {
-                return None;
-            }
-            if !injected_configs.contains_key(injected) {
-                if let Ok(Some(cfg)) = reg.load_cached_config(injected) {
-                    injected_configs.insert(injected.to_string(), Box::leak(Box::new(cfg)));
-                }
-            }
-
-            injected_configs.get(injected).copied()
-        })
-        .map_err(|e| anyhow::anyhow!("highlight init failed: {:?}", e))?;
-
-    let mut core_events = Vec::new();
-
-    for event in events {
-        let event = event.map_err(|e| anyhow::anyhow!("highlight event error: {:?}", e))?;
-
-        match event {
-            lumis_wasm_runtime::tree_sitter_highlight::HighlightEvent::Source { start, end } => {
-                core_events.push(HighlightEvent::Source { start, end });
-            }
-            lumis_wasm_runtime::tree_sitter_highlight::HighlightEvent::HighlightStart {
-                highlight,
-                language,
-            } => {
-                core_events.push(HighlightEvent::Start {
-                    scope_index: highlight.0,
-                    language,
-                });
-            }
-            lumis_wasm_runtime::tree_sitter_highlight::HighlightEvent::HighlightEnd => {
-                core_events.push(HighlightEvent::End);
-            }
-        }
-    }
-
-    Ok(HighlightOutput {
-        events: core_events,
-        layers: highlighter.take_parsed_layers(),
-    })
+    reg.highlight(
+        source,
+        lang_name,
+        &HighlightOptions {
+            layers,
+            injections,
+            ..HighlightOptions::default()
+        },
+    )
 }
 
 fn highlight_to_events(
     reg: &registry::Registry,
     source: &str,
     lang_name: &str,
+    rainbow_brackets: bool,
 ) -> Result<Vec<HighlightEvent>> {
-    Ok(highlight_output(reg, source, lang_name, false, true)?.events)
+    Ok(reg
+        .highlight(
+            source,
+            lang_name,
+            &HighlightOptions {
+                rainbow_brackets,
+                ..HighlightOptions::default()
+            },
+        )?
+        .events)
 }
 
 #[cfg(test)]
@@ -1760,26 +1585,38 @@ mod tests {
     fn highlight_to_events_uses_cached_injection_parsers() {
         let dir = tempdir().unwrap();
         let reg = registry::Registry::new(dir.path().to_path_buf()).unwrap();
-        reg.download_parser("elixir").unwrap();
-        reg.download_parser("heex").unwrap();
+        reg.cache_test_language(
+            "html",
+            "html",
+            include_bytes!(
+                "../../../packages/javascript/lumis/test/fixtures/wasm/tree-sitter-html.wasm"
+            ),
+            include_str!("../../../queries/processed/html/highlights.scm"),
+            include_str!("../../../queries/processed/html/injections.scm"),
+            "",
+        );
+        reg.cache_test_language(
+            "javascript",
+            "javascript",
+            include_bytes!(
+                "../../../packages/javascript/lumis/test/fixtures/wasm/tree-sitter-javascript.wasm"
+            ),
+            include_str!("../../../queries/processed/javascript/highlights.scm"),
+            include_str!("../../../queries/processed/javascript/injections.scm"),
+            include_str!("../../../queries/processed/javascript/locals.scm"),
+        );
 
         let source = r#"
-defmodule MyAppWeb.CounterLive do
-  use MyAppWeb, :live_view
-
-  def render(assigns) do
-    ~H"""
-    <div>{@count}</div>
-    """
-  end
-end
+<script>
+  const count = 1
+</script>
 "#;
 
-        let events = highlight_to_events(&reg, source, "elixir").unwrap();
+        let events = highlight_to_events(&reg, source, "html", false).unwrap();
 
         assert!(events.iter().any(|event| matches!(
             event,
-            HighlightEvent::Start { language, .. } if language == "heex"
+            HighlightEvent::Start { language, .. } if language == "javascript"
         )));
     }
 

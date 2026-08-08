@@ -72,21 +72,16 @@ jobs:
           save-if: false
 
       - uses: jdx/mise-action@v4.2.3
-        with:
-          version: 2026.7.3
-          install: false
 
       - uses: pnpm/action-setup@v6
         with:
-          version: 10
+          version: 11.15.1
 
       - uses: actions/setup-node@v7
         with:
           node-version: "lts/*"
           cache: "pnpm"
           cache-dependency-path: pnpm-lock.yaml
-
-      - run: npm install -g tree-sitter-cli@0.26
 
       - name: Install JavaScript dependencies
         run: pnpm install --frozen-lockfile
@@ -106,8 +101,9 @@ jobs:
           mise run langs-fetch-vendored-parsers "$LANGUAGE"
           mise run langs-fetch-queries "$QUERY_NAME"
           mise run langs-preprocess-queries "$QUERY_NAME"
+          mise run langs-gen-catalog
           mise run docs-gen-languages-md
-          pnpm --filter @lumis-sh/lumis build:generate
+          pnpm --filter @lumis-sh/lumis run build:generate
 
       - name: Check for changes
         id: check-changes
@@ -123,6 +119,7 @@ jobs:
           LANGUAGE_CHANGES=$(git status --porcelain -- \
             crates/lumis/Cargo.toml \
             crates/lumis-core/Cargo.toml \
+            crates/lumis-wasm-runtime/src/catalog.rs \
             "crates/lumis/vendored_parsers/tree-sitter-$QUERY_NAME" \
             "queries/upstream/$QUERY_NAME" \
             "queries/processed/$QUERY_NAME")
@@ -156,6 +153,7 @@ jobs:
             packages/javascript/lumis/langs
             packages/javascript/lumis/bundles
             packages/javascript/lumis/src/generated
+            crates/lumis-wasm-runtime/src/catalog.rs
             packages/javascript/wasm-bundle-*
           commit-message: "feat: update lang ${{ matrix.language }}"
           title: "feat: update lang ${{ matrix.language }}"

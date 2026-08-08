@@ -61,7 +61,7 @@ jobs:
           ) }}
     name: Conformance (${{ matrix.name }})
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
@@ -72,11 +72,14 @@ jobs:
           - name: CLI
             task: test-conformance-cli
             rust: true
-          - name: JavaScript Wasm
-            task: test-conformance-javascript-wasm
-            node: true
-          - name: JavaScript native
+            build-parsers: true
+          - name: JavaScript (Node, Wasmtime)
             task: test-conformance-javascript-native
+            node: true
+            rust: true
+            build-parsers: true
+          - name: JavaScript (web-tree-sitter)
+            task: test-conformance-javascript-wasm
             node: true
             rust: true
           - name: Browser
@@ -87,6 +90,7 @@ jobs:
             task: test-conformance-elixir
             rust: true
             elixir: true
+            build-parsers: true
     steps:
       - uses: actions/checkout@v7
 
@@ -105,7 +109,7 @@ jobs:
       - uses: pnpm/action-setup@v6
         if: matrix.node
         with:
-          version: 10
+          version: 11.15.1
 
       - uses: actions/setup-node@v7
         if: matrix.node
@@ -116,7 +120,6 @@ jobs:
 
       - uses: jdx/mise-action@v4.2.3
         with:
-          version: 2026.7.3
           install: false
 
       - run: pnpm install --frozen-lockfile
@@ -126,7 +129,39 @@ jobs:
         if: matrix.elixir
         working-directory: packages/elixir/lumis
 
+      # The wasmtime runtimes read parsers from the store directory, so they
+      # can be pointed at parsers built here rather than at the committed
+      # fixtures. That is what proves a parser built from languages.toml renders
+      # byte-identically to the one the fixtures were generated with.
+      # mise-action runs with install: false here, so the parser toolchain has
+      # to be asked for explicitly. Emscripten is deliberately not installed:
+      # `tree-sitter build --wasm` compiles through its own WASI SDK, verified
+      # by building a scanner-bearing grammar with emcc absent from PATH.
+      - name: Install the Tree-sitter CLI
+        if: matrix.build-parsers
+        run: mise install tree-sitter
+
+      - name: Build and stage the parsers the corpus uses
+        if: matrix.build-parsers
+        id: parsers
+        run: |
+          set -euo pipefail
+          # The parsers the committed fixtures supply, which is the set the
+          # expected output was generated with. Deriving it from the fixtures'
+          # events instead would miss languages a document only attempts, such
+          # as the comment parser every Lua comment injects.
+          parsers=$(find packages/javascript/lumis/test/fixtures/wasm -name '*.wasm' \
+            -exec basename {} .wasm \; | sed 's/^tree-sitter-//' | sort)
+          echo "building: $(echo "$parsers" | tr '\n' ' ')"
+          for parser in $parsers; do
+            mise run wasm-build "$parser"
+            mise run wasm-stage "$parser"
+          done
+          echo "path=$PWD/tmp/wasm/local" >> "$GITHUB_OUTPUT"
+
       - run: mise run ${{ matrix.task }}
+        env:
+          LUMIS_DATA_DIR: ${{ steps.parsers.outputs.path }}
 
       - uses: actions/upload-artifact@v7
         if: failure() && matrix.browser

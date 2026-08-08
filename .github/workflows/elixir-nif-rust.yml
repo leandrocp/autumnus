@@ -61,6 +61,11 @@ jobs:
     with:
       manifest-path: 'packages/elixir/lumis/native/lumis_nif/Cargo.toml'
       msrv: '1.91'
+      # Stable only on a pull request. MSRV and nightly answer "does this still
+      # build for everyone we support", which is a release question, so they run
+      # on main where breaking it must not reach a tag.
+      test-stage: ${{ github.event_name == 'pull_request' && 'stable' || 'all' }}
+      stable-os-versions: ${{ github.event_name == 'pull_request' && '["ubuntu-22.04"]' || '["ubuntu-22.04", "windows-2022", "macos-14"]' }}
   lint:
     if: >-
       ${{ github.event_name == 'workflow_dispatch' ||
@@ -70,3 +75,15 @@ jobs:
     with:
       manifest-path: 'packages/elixir/lumis/native/lumis_nif/Cargo.toml'
       msrv: '1.91'
+
+  target-matrix:
+    name: Precompiled NIF target matrix
+    if: >-
+      ${{ github.event_name == 'workflow_dispatch' ||
+          (github.event_name == 'pull_request' && github.head_ref != 'knope/release') ||
+          (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore: prepare releases')) }}
+    uses: leandrocp/github-actions/.github/workflows/nif-release.yml@main
+    with:
+      project-name: lumis_nif
+      project-dir: packages/elixir/lumis/native/lumis_nif
+      working-directory: packages/elixir/lumis
