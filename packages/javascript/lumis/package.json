@@ -102,6 +102,7 @@
     "prepack": "pnpm run build"
   },
   "dependencies": {
+    "@noble/hashes": "2.3.0",
     "web-tree-sitter": "0.26.11"
   },
   "optionalDependencies": {
@@ -115,10 +116,10 @@
     "node": ">=18"
   },
   "devDependencies": {
-    "@microsoft/api-extractor": "^7.58.0",
     "@lumis-sh/themes": "workspace:*",
     "@lumis-sh/wasm-bundle-full": "workspace:*",
     "@lumis-sh/wasm-json": "0.26.2",
+    "@microsoft/api-extractor": "^7.58.0",
     "@playwright/test": "1.61.1",
     "@types/node": "^25.5.0",
     "oxfmt": "^0.43.0",

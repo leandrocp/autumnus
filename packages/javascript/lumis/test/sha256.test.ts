@@ -2,8 +2,8 @@
  * Pins the pure-JS SHA-256 to `crypto.subtle`, the implementation it stands in
  * for when a browser withholds `crypto.subtle` from a non-secure origin.
  */
+import { sha256 } from "@noble/hashes/sha2.js";
 import { describe, expect, it } from "vitest";
-import { sha256 } from "../src/core/sha256.js";
 
 const hex = (bytes: Uint8Array) =>
   Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");

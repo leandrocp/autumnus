@@ -3,7 +3,7 @@ import { PACKAGE_CACHE_TTL_MS } from "../cache-timing.js";
 import { PACKAGE_VERSIONS } from "../generated/package-versions.js";
 import { buildHighlightEvents } from "../events.js";
 import { LANGUAGES } from "../generated/languages-meta.js";
-import { sha256 } from "./sha256.js";
+import { sha256 } from "@noble/hashes/sha2.js";
 import { HIGHLIGHT_NAMES } from "../highlights.js";
 import type { RuntimeEnvironment } from "../runtime/runtime.js";
 import type {
