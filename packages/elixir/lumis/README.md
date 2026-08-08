@@ -24,8 +24,15 @@
   </a>
 </div>
 
-110+ languages, 250+ Neovim themes, HTML and terminal output. Incomplete or
-malformed code still highlights, which is what makes it usable for streaming.
+## Features
+
+- **110+ Tree-sitter languages** - Fast, accurate, and updated syntax parsing
+- **250+ built-in Neovim themes** - Updated and curated themes from the Neovim community
+- **Multiple outputs** - HTML (inline/linked), Terminal (ANSI), Multi-theme (light/dark), BBCode, and custom formatters
+- **Language auto-detection** - File extension, shebang, and emacs-mode support
+- **Line highlighting** - Mark and style individual lines, with custom HTML wrappers
+- **Streaming-friendly** - Handles incomplete code
+- **Parsers on demand** - Downloaded, verified by SHA-256, and cached, including languages injected inside a document
 
 ## Installation
 

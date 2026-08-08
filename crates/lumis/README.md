@@ -14,8 +14,15 @@
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-blue" alt="License"></a>
 </p>
 
-110+ languages, 250+ Neovim themes, HTML and terminal output. Incomplete code
-still highlights, which is what makes it usable for streaming.
+## Features
+
+- **110+ Tree-sitter languages** - Fast, accurate, and updated syntax parsing
+- **250+ built-in Neovim themes** - Updated and curated themes from the Neovim community
+- **Multiple outputs** - HTML (inline/linked), Terminal (ANSI), Multi-theme (light/dark), BBCode, and custom formatters
+- **Language auto-detection** - File extension, shebang, and emacs-mode support
+- **Line highlighting** - Mark and style individual lines, with custom HTML wrappers
+- **Streaming-friendly** - Handles incomplete code
+- **Feature-gated languages** - Compile in every language, a bundle, or just the ones you name
 
 ## Installation
 
