@@ -125,6 +125,26 @@ jobs:
           version: ${{ steps.emsdk.outputs.version }}
           actions-cache-folder: emsdk-cache
 
+      # Scoped per shard because each one builds a different slice of the
+      # corpus, so a shared key would let whichever job finished first decide
+      # what every other shard found in the cache.
+      - name: Cache built parsers
+        uses: actions/cache@v6
+        with:
+          path: tmp/wasm/build
+          key: wasm-parsers-${{ runner.os }}-queries-${{ matrix.shard }}-${{ hashFiles('languages.toml', 'mise.toml') }}
+          restore-keys: |
+            wasm-parsers-${{ runner.os }}-queries-${{ matrix.shard }}-
+            wasm-parsers-${{ runner.os }}-
+
+      - name: Cache the Tree-sitter WASI SDK
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/tree-sitter
+          key: ${{ runner.os }}-tree-sitter-cli-${{ hashFiles('mise.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-tree-sitter-cli-
+
       - name: Select this shard
         run: |
           set -euo pipefail

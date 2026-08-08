@@ -2250,6 +2250,8 @@ fn build_wasm(name: &str) -> Result<()> {
     fs::create_dir_all(&out_dir)?;
     fs::create_dir_all(&log_dir)?;
     let mut built_wasm_names = HashSet::new();
+    let toolchain = wasm_toolchain_id();
+    let rebuild = std::env::var("LUMIS_WASM_REBUILD").ok().as_deref() == Some("1");
 
     for (parser_name, info) in &toml.parsers {
         let Some(ref git) = info.git else { continue };
@@ -2266,6 +2268,18 @@ fn build_wasm(name: &str) -> Result<()> {
         }
 
         let wasm_file = out_dir.join(format!("{wasm_name}.wasm"));
+        let build_id_file = out_dir.join(format!("{wasm_name}.build-id"));
+        let build_id = wasm_build_id(git, rev, info.location.as_deref(), &toolchain);
+
+        if !rebuild
+            && wasm_file.exists()
+            && fs::read_to_string(&build_id_file).is_ok_and(|cached| cached == build_id)
+        {
+            println!("-> Reusing {wasm_name} built from {rev}");
+            continue;
+        }
+
+        let _ = fs::remove_file(&build_id_file);
 
         let clone_dir = format!("{tmp}/tree-sitter-{parser_name}");
         println!("-> Building WASM for {parser_name} ...");
@@ -2328,7 +2342,10 @@ fn build_wasm(name: &str) -> Result<()> {
         println!("* building wasm in {repo_dir}");
         println!("* build log: {}", build_log.display());
         match build_repo_wasm(&repo_dir, &wasm_file, &build_log) {
-            Ok(()) => println!("{wasm_path}"),
+            Ok(()) => {
+                fs::write(&build_id_file, &build_id)?;
+                println!("{wasm_path}");
+            }
             Err(_) => println!("  ERROR: failed to build {parser_name}"),
         }
 
@@ -2337,6 +2354,20 @@ fn build_wasm(name: &str) -> Result<()> {
 
     let _ = run_cmd_ok(&format!("rm -rf {tmp}"));
     Ok(())
+}
+
+/// Identifies the toolchain a `.wasm` was produced by. Emscripten is included
+/// even though `tree-sitter build --wasm` compiles through its own WASI SDK,
+/// because naming an input that turns out not to matter only rebuilds early,
+/// while omitting one that does matter reuses a stale parser.
+fn wasm_toolchain_id() -> String {
+    let tree_sitter = run_cmd("tree-sitter --version").unwrap_or_default();
+    let emsdk = std::env::var("LUMIS_EMSDK_VERSION").unwrap_or_default();
+    format!("{tree_sitter}\n{emsdk}")
+}
+
+fn wasm_build_id(git: &str, rev: &str, location: Option<&str>, toolchain: &str) -> String {
+    format!("{git}\n{rev}\n{}\n{toolchain}\n", location.unwrap_or(""))
 }
 
 fn build_repo_wasm(repo_dir: &str, wasm_file: &Path, build_log: &Path) -> Result<()> {
@@ -3176,6 +3207,35 @@ fn wasm_package_suffix(wasm_name: &str) -> &str {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn every_build_input_changes_the_build_id() {
+        let baseline = wasm_build_id("git://g", "rev1", Some("sub"), "ts\nem");
+
+        for (label, other) in [
+            (
+                "git",
+                wasm_build_id("git://other", "rev1", Some("sub"), "ts\nem"),
+            ),
+            (
+                "rev",
+                wasm_build_id("git://g", "rev2", Some("sub"), "ts\nem"),
+            ),
+            ("location", wasm_build_id("git://g", "rev1", None, "ts\nem")),
+            (
+                "toolchain",
+                wasm_build_id("git://g", "rev1", Some("sub"), "ts\nem2"),
+            ),
+        ] {
+            assert_ne!(baseline, other, "{label} must invalidate a cached parser");
+        }
+
+        assert_eq!(
+            baseline,
+            wasm_build_id("git://g", "rev1", Some("sub"), "ts\nem"),
+            "the same inputs must reuse a cached parser"
+        );
+    }
 
     fn published(hash: &str) -> Value {
         serde_json::json!({

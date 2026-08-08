@@ -141,6 +141,29 @@ jobs:
         if: matrix.build-parsers
         run: mise install tree-sitter
 
+      # A built parser is a pure function of its pinned revision and the
+      # toolchain, so `build-wasm` records both next to the `.wasm` and reuses
+      # any file whose recording still matches. That makes a stale restore safe:
+      # what the key no longer covers is rebuilt, not trusted.
+      - name: Cache built parsers
+        if: matrix.build-parsers
+        uses: actions/cache@v6
+        with:
+          path: tmp/wasm/build
+          key: wasm-parsers-${{ runner.os }}-conformance-${{ hashFiles('languages.toml', 'mise.toml') }}
+          restore-keys: |
+            wasm-parsers-${{ runner.os }}-conformance-
+            wasm-parsers-${{ runner.os }}-
+
+      - name: Cache the Tree-sitter WASI SDK
+        if: matrix.build-parsers
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/tree-sitter
+          key: ${{ runner.os }}-tree-sitter-cli-${{ hashFiles('mise.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-tree-sitter-cli-
+
       - name: Build and stage the parsers the corpus uses
         if: matrix.build-parsers
         id: parsers

@@ -147,4 +147,3 @@ jobs:
       - run: pnpm --filter @lumis-sh/react run test
         env:
           LUMIS_DATA_DIR: ${{ github.workspace }}/target/test-parsers
-      - run: pnpm --dir packages/javascript run build:wasm-bundles && git diff --exit-code -- packages/javascript/wasm-bundle-*

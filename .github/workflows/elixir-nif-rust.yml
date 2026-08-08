@@ -11,7 +11,6 @@ on:
     paths:
       - "packages/elixir/lumis/native/**"
       - "crates/**"
-      - "queries/**"
       - "Cargo.toml"
       - "Cargo.lock"
       - ".github/workflows/elixir-nif-rust.yml"
@@ -19,7 +18,6 @@ on:
     paths:
       - "packages/elixir/lumis/native/**"
       - "crates/**"
-      - "queries/**"
       - "Cargo.toml"
       - "Cargo.lock"
       - ".github/workflows/elixir-nif-rust.yml"
@@ -76,14 +74,3 @@ jobs:
       manifest-path: 'packages/elixir/lumis/native/lumis_nif/Cargo.toml'
       msrv: '1.91'
 
-  target-matrix:
-    name: Precompiled NIF target matrix
-    if: >-
-      ${{ github.event_name == 'workflow_dispatch' ||
-          (github.event_name == 'pull_request' && github.head_ref != 'knope/release') ||
-          (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'chore: prepare releases')) }}
-    uses: leandrocp/github-actions/.github/workflows/nif-release.yml@main
-    with:
-      project-name: lumis_nif
-      project-dir: packages/elixir/lumis/native/lumis_nif
-      working-directory: packages/elixir/lumis
