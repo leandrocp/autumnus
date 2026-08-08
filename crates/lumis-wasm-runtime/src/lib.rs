@@ -91,6 +91,6 @@ pub use runtime::{
 #[cfg(feature = "wasm")]
 pub use store::HttpFetcher;
 pub use store::{
-    package_suffix, parser_filename, write_atomic, Fetcher, LanguageStore, NoNetwork, StoreConfig,
-    StoreError,
+    package_suffix, parser_filename, set_warning_handler, write_atomic, Fetcher, LanguageStore,
+    NoNetwork, StoreConfig, StoreError,
 };

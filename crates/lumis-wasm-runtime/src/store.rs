@@ -47,6 +47,13 @@ pub enum StoreError {
         description: String,
         message: String,
     },
+    #[error("{package_name} is not in {} and could not be downloaded: {source}", directory.display())]
+    Unavailable {
+        package_name: String,
+        directory: PathBuf,
+        #[source]
+        source: Box<StoreError>,
+    },
     #[error(transparent)]
     Package(#[from] LanguagePackageError),
 }
@@ -109,6 +116,32 @@ impl Fetcher for NoNetwork {
     }
 }
 
+type WarningHandler = Box<dyn Fn(&str) + Send + Sync>;
+
+static WARNING_HANDLER: std::sync::OnceLock<WarningHandler> = std::sync::OnceLock::new();
+
+/// Send store warnings to `handler` instead of stderr.
+///
+/// A store runs inside a host process, and stderr is not always a safe place to
+/// write: bytes the Elixir NIF puts on fd 2 bypass Erlang's IO entirely and land
+/// in the middle of whatever IEx is drawing. Hosts route this to their own
+/// logger instead. The CLI owns its terminal and leaves the default.
+///
+/// The first handler set wins, so a host installs one before the first resolve.
+///
+/// # Errors
+/// Returns the handler unused when one is already installed.
+pub fn set_warning_handler(handler: WarningHandler) -> Result<(), WarningHandler> {
+    WARNING_HANDLER.set(handler)
+}
+
+fn warn(message: &str) {
+    match WARNING_HANDLER.get() {
+        Some(handler) => handler(message),
+        None => eprintln!("lumis: {message}"),
+    }
+}
+
 /// Where a store keeps and looks for assets.
 pub struct StoreConfig {
     /// Directory holding `lumis.json` and parser files, both the ones this
@@ -162,11 +195,29 @@ impl LanguageStore {
             (Some(package), None) => package,
             (cached, _) => match self.fetch_package(package_name, &path) {
                 Ok(package) => package,
-                Err(error) => cached.ok_or(error)?,
+                Err(error) => match cached {
+                    Some(package) => package,
+                    None => return Err(self.unavailable(package_name, error)),
+                },
             },
         };
 
         Ok(self.remember(package_name, package))
+    }
+
+    /// Naming the directory is the difference between "the registry is down" and
+    /// "the store is configured one level off"; the second is far more common and
+    /// indistinguishable from a bare fetch error. Anything other than a failed
+    /// download means the package *was* served and was wrong, so it is left alone.
+    fn unavailable(&self, package_name: &str, error: StoreError) -> StoreError {
+        match error {
+            fetch @ StoreError::Fetch { .. } => StoreError::Unavailable {
+                package_name: package_name.to_string(),
+                directory: self.config.cache_dir.join("parsers"),
+                source: Box::new(fetch),
+            },
+            other => other,
+        }
     }
 
     /// The package from memory or the store directory, never the network, so a
@@ -358,10 +409,10 @@ impl LanguageStore {
                 // language working, but it is no longer the version other
                 // machines resolve, which is the whole point of pinning.
                 Err(pin_error) => {
-                    eprintln!(
-                        "lumis: {package_name}@{version} is unavailable ({pin_error}); \
+                    warn(&format!(
+                        "{package_name}@{version} is unavailable ({pin_error}); \
                          falling back to @latest, which may differ from other machines"
-                    );
+                    ));
                     latest()?
                 }
             },
@@ -868,6 +919,49 @@ mod tests {
             store.package(name).unwrap().version,
             "1.2.3",
             "a package already on disk must not be revalidated"
+        );
+    }
+
+    /// A NIF writing to stderr lands in the middle of whatever IEx is drawing,
+    /// so the fallback warning has to be divertible.
+    #[test]
+    fn warnings_reach_the_installed_handler_instead_of_stderr() {
+        static CAPTURED: Mutex<Vec<String>> = Mutex::new(Vec::new());
+        set_warning_handler(Box::new(|message| {
+            CAPTURED.lock().unwrap().push(message.to_owned());
+        }))
+        .unwrap_or_else(|_| panic!("no other test installs a handler"));
+
+        let dir = tempdir();
+        let store = make(dir.path(), Box::new(NoNetwork));
+        let _ = store.package("@lumis-sh/wasm-json");
+
+        let captured = CAPTURED.lock().unwrap();
+        assert!(
+            captured
+                .iter()
+                .any(|message| message.contains("@lumis-sh/wasm-json@")
+                    && message.contains("falling back to @latest")),
+            "the pin fallback must be reported through the handler: {captured:?}"
+        );
+    }
+
+    #[test]
+    fn a_package_that_is_nowhere_reports_where_it_looked() {
+        let dir = tempdir();
+        let store = make(dir.path(), Box::new(NoNetwork));
+
+        let error = store
+            .package("@lumis-sh/wasm-json")
+            .unwrap_err()
+            .to_string();
+        assert!(
+            error.contains(&dir.path().join("parsers").display().to_string()),
+            "the error must name the directory it searched: {error}"
+        );
+        assert!(
+            error.contains("network access is disabled"),
+            "the error must keep the reason the download failed: {error}"
         );
     }
 
