@@ -50,10 +50,21 @@ defmodule Mix.Tasks.Lumis.Languages.Cache do
   # that into `compiled/` beside the parsers, so an image ships both.
   defp compile(names) do
     case Lumis.Languages.load(names) do
-      :ok -> Mix.shell().info("compiled #{length(names)} parser(s)")
-      {:error, reason} -> Mix.raise(reason)
+      :ok ->
+        Mix.shell().info("compiled #{length(names)} parser(s)")
+
+      {:error, failures} ->
+        Mix.raise("could not load: " <> format_failures(failures))
     end
   end
+
+  defp format_failures(failures) when is_map(failures) do
+    failures
+    |> Enum.sort()
+    |> Enum.map_join(", ", fn {name, reason} -> "#{name} (#{reason})" end)
+  end
+
+  defp format_failures(reason), do: to_string(reason)
 
   defp parse_arguments(arguments) do
     case OptionParser.parse(arguments, strict: @switches) do
@@ -64,7 +75,7 @@ defmodule Mix.Tasks.Lumis.Languages.Cache do
 
   defp languages(options, []) do
     if options[:all] do
-      Lumis.Languages.all_names()
+      Lumis.available_languages() |> Map.keys() |> Enum.sort()
     else
       Mix.raise("name the languages to cache, or pass --all")
     end

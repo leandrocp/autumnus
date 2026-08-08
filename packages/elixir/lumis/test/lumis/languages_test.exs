@@ -25,8 +25,28 @@ defmodule Lumis.LanguagesTest do
     assert {:error, :unknown_language} = Lumis.Languages.load("not-a-language")
   end
 
+  # `dockerfile` is staged but named nowhere else, so it is only in memory if
+  # this call put it there. Any language the rest of the suite touches would
+  # pass whether or not the list stopped early.
+  test "a failure in a list does not cost the languages after it" do
+    refute "dockerfile" in Lumis.loaded_languages()
+
+    assert {:error, failures} = Lumis.Languages.load(["not-a-language", "dockerfile"])
+    assert failures == %{"not-a-language" => :unknown_language}
+    assert "dockerfile" in Lumis.loaded_languages()
+  end
+
+  test "loaded_languages lists what is in memory, not the catalog" do
+    assert :ok = Lumis.Languages.load("json")
+    loaded = Lumis.loaded_languages()
+
+    assert "json" in loaded
+    assert loaded == Enum.sort(loaded)
+    assert length(loaded) < map_size(Lumis.available_languages())
+  end
+
   test "every catalog language is nameable" do
-    names = Lumis.Languages.all_names()
+    names = Map.keys(Lumis.available_languages())
     assert "elixir" in names
     assert length(names) > 100
   end

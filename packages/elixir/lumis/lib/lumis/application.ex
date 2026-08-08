@@ -11,19 +11,21 @@ defmodule Lumis.Application do
     Supervisor.start_link([], opts)
   end
 
-  # `mix release` copies each application's `priv/` into the release and the
-  # usual Dockerfile copies the release wholesale, so parsers staged here at
-  # build time reach production with nothing to configure and no extra COPY.
-  # `LUMIS_DATA_DIR` still wins when it is set, which is how a deployment shares
-  # one directory across nodes.
+  # `nil` hands the decision back to the NIF, which reads `LUMIS_DATA_DIR` and
+  # then falls back to the user data directory. Elixir only has to answer for
+  # the case neither of those covers.
   defp data_dir do
-    case Application.get_env(:lumis, :data_dir) do
-      nil -> if System.get_env("LUMIS_DATA_DIR"), do: nil, else: default_data_dir()
-      path -> Path.expand(path)
+    cond do
+      path = Application.get_env(:lumis, :data_dir) -> Path.expand(path)
+      System.get_env("LUMIS_DATA_DIR") -> nil
+      true -> priv_dir()
     end
   end
 
-  defp default_data_dir do
+  # `mix release` copies each application's `priv/` into the release and the
+  # usual Dockerfile copies the release wholesale, so parsers staged here at
+  # build time reach production with nothing to configure and no extra COPY.
+  defp priv_dir do
     case :code.priv_dir(:lumis) do
       {:error, _} -> nil
       priv -> Path.join(List.to_string(priv), "lumis")

@@ -41,8 +41,7 @@ defmodule Lumis.Languages do
 
   Highlighting loads on demand, so this is an optimization rather than a
   requirement: call it at startup to move the download off the first request.
-  Already-loaded languages return immediately. Loading stops at the first
-  failure and returns it.
+  Already-loaded languages return immediately.
 
       :ok = Lumis.Languages.load("elixir")
       :ok = Lumis.Languages.load(["elixir", :html])
@@ -55,20 +54,32 @@ defmodule Lumis.Languages do
 
   ## Failures
 
+  A list loads every name in it and reports the ones that failed, rather than
+  stopping at the first. One unpublished parser in a bundle should not cost the
+  rest, the same way one bad block does not cost a document.
+
+      {:error, %{"css" => :failed_to_load_parser}} = Lumis.Languages.load(["elixir", "css"])
+
     * `:unknown_language` — the name is not in the catalog
     * `:failed_to_load_parser` — it is, but its parser could not be obtained or verified
+    * `:unknown_bundle` — no bundle by that name
 
-  A bundle that does not exist returns `:unknown_bundle`.
   """
+  @type failure() :: :unknown_language | :failed_to_load_parser
   @spec load(bundle() | String.t() | atom() | [String.t() | atom()]) ::
-          :ok | {:error, :unknown_language | :failed_to_load_parser | :unknown_bundle}
+          :ok | {:error, :unknown_bundle | %{String.t() => failure()}}
   def load(names) when is_list(names) do
-    Enum.reduce_while(names, :ok, fn name, :ok ->
-      case load(name) do
-        :ok -> {:cont, :ok}
-        {:error, reason} -> {:halt, {:error, reason}}
-      end
-    end)
+    failures =
+      Enum.reduce(names, %{}, fn name, failures ->
+        case load(name) do
+          :ok -> failures
+          # A bundle named inside a list reports its own members, not itself.
+          {:error, nested} when is_map(nested) -> Map.merge(failures, nested)
+          {:error, reason} -> Map.put(failures, to_string(name), reason)
+        end
+      end)
+
+    if failures == %{}, do: :ok, else: {:error, failures}
   end
 
   def load(name) when is_atom(name) do
@@ -120,8 +131,10 @@ defmodule Lumis.Languages do
     force? = Keyword.get(options, :force, false)
 
     names
+    |> Enum.map(&to_string/1)
+    |> Enum.reject(&(&1 in @plaintext_names))
     |> Enum.reduce_while({:ok, []}, fn name, {:ok, paths} ->
-      case Native.cache_language_by_name(to_string(name), force?) do
+      case Native.cache_language_by_name(name, force?) do
         {:ok, path} -> {:cont, {:ok, [path | paths]}}
         {:error, reason} -> {:halt, {:error, reason}}
       end
@@ -131,10 +144,4 @@ defmodule Lumis.Languages do
       {:error, reason} -> {:error, reason}
     end
   end
-
-  @doc """
-  Every language id in the catalog, whether or not its parser is available.
-  """
-  @spec all_names() :: [String.t()]
-  def all_names, do: Enum.map(Native.language_package_refs(), & &1.id)
 end

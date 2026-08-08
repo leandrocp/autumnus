@@ -368,6 +368,13 @@ fn has_language(name: &str) -> bool {
 }
 
 #[rustler::nif]
+fn loaded_languages() -> Vec<String> {
+    executor()
+        .map(|executor| executor.runtime.loaded_languages())
+        .unwrap_or_default()
+}
+
+#[rustler::nif]
 fn language_package_refs() -> Vec<ExLanguagePackageRef<'static>> {
     catalog::LANGUAGES
         .iter()

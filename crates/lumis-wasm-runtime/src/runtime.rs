@@ -439,6 +439,18 @@ impl Runtime {
         self.loaded(name_or_alias).is_some()
     }
 
+    /// Ids of the languages resolved and held in memory, sorted.
+    ///
+    /// The complement of the catalog: what a host can highlight right now
+    /// without touching the network.
+    #[must_use]
+    pub fn loaded_languages(&self) -> Vec<String> {
+        let catalog = self.catalog.read().expect("language catalog lock poisoned");
+        let mut ids: Vec<String> = catalog.languages.keys().cloned().collect();
+        ids.sort();
+        ids
+    }
+
     pub fn configure_language(
         &self,
         name_or_alias: &str,
