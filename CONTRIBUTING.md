@@ -16,7 +16,7 @@ See `ARCHITECTURE.md` for how the crates, packages, website, and build pipeline 
   - [Updating parsers](#updating-parsers)
   - [Updating queries](#updating-queries)
   - [Building WASMs](#building-wasms)
-  - [Using a locally built parser](#using-a-locally-built-parser)
+  - [Running a runtime locally](#running-a-runtime-locally)
   - [Parsers in CI](#parsers-in-ci)
 - [Themes](#themes)
   - [Adding a new theme](#adding-a-new-theme)
@@ -370,27 +370,99 @@ mise run wasm-build {name}
 
 This requires `emcc` and `tree-sitter-cli`.
 
-### Using a locally built parser
+### Running a runtime locally
 
-A parser you have only built locally is not published, so every runtime looks it
-up on the CDN and fails with a 404. Stage it into a language package and point
-the store at it:
+Parsers download on demand, so a checkout needs no setup. You only need
+`LUMIS_DATA_DIR` for a parser you built yourself, which is not published and
+would 404 on the CDN:
 
 ```sh
-mise run wasm-build kdl
-mise run wasm-stage kdl
 export LUMIS_DATA_DIR=$PWD/tmp/wasm/local
 ```
 
-The CLI, Elixir and Node all read that directory before anything else, so
-`lumis highlight`, `Lumis.highlight/2` and `createHighlighter` now work,
-including when the parser is only reached as an injected language. Staging more
-languages adds to the same directory.
+```sh
+mise run wasm-build elixir
+mise run wasm-stage elixir
+```
 
-Tests use the same mechanism against the committed parser fixtures:
+Staging more languages adds to the same directory, and a parser there is used
+even when it is only reached as an injected language.
 
 ```sh
-mise run stage-test-parsers
+cargo run -p lumis-cli -- highlight packages/elixir/lumis/mix.exs
+cargo run -p lumis-cli -- highlight -l elixir <<< 'def foo, do: "hello"'
+```
+
+```sh
+# Elixir
+cd packages/elixir/lumis && LUMIS_BUILD=1 iex -S mix
+iex> Lumis.highlight!("def foo, do: \"hello\"", formatter: {:html_inline, language: "elixir", theme: "dracula"})
+```
+
+Node resolves `@lumis-sh/lumis` by its own name only from inside the package, so
+the script has to live there:
+
+```js
+// packages/javascript/lumis/test.mjs
+import { createHighlighter } from "@lumis-sh/lumis";
+import { htmlInline } from "@lumis-sh/lumis/formatters";
+import elixir from "@lumis-sh/lumis/langs/elixir";
+import dracula from "@lumis-sh/themes/dracula";
+
+const highlighter = await createHighlighter({ languages: [elixir] });
+const html = highlighter.highlight('def foo, do: "hello"', htmlInline({ language: elixir, theme: dracula }));
+console.log(html);
+```
+
+```sh
+pnpm --filter @lumis-sh/lumis run build
+cd packages/javascript/lumis && node test.mjs
+```
+
+A browser cannot read `LUMIS_DATA_DIR`, so serve the staged directory instead
+and point the resolvers at it. The dev server serves the package root, so a
+symlink puts the parsers on the same origin as the page:
+
+```sh
+cd packages/javascript/lumis && ln -sfn ../../../../tmp/wasm/local/parsers .tmp/parsers
+pnpm --filter @lumis-sh/lumis run dev   # then open /test.html
+```
+
+```html
+<!-- packages/javascript/lumis/test.html -->
+<div id="out"></div>
+<script type="module">
+  import { createHighlighter } from "@lumis-sh/lumis";
+  import { htmlInline } from "@lumis-sh/lumis/formatters";
+  import elixir from "@lumis-sh/lumis/langs/elixir";
+  import dracula from "@lumis-sh/themes/dracula";
+
+  const base = "/.tmp/parsers";
+  const highlighter = await createHighlighter({
+    languages: [elixir],
+    languagePackageResolver: (packageName) =>
+      `${base}/${packageName.replace("@lumis-sh/wasm-", "")}.lumis.json`,
+    wasmResolver: (_language, wasm) => `${base}/${wasm.name}-${wasm.version}-${wasm.sha256}.wasm`,
+  });
+
+  document.getElementById("out").innerHTML = highlighter.highlight(
+    'def foo, do: "hello"',
+    htmlInline({ language: elixir, theme: dracula }),
+  );
+</script>
+```
+
+Those URLs are the layout `mise run wasm-stage` writes: the package file is named
+after the package minus its scope, and the parser is content-addressed. Loading is
+asynchronous in a browser, so an injected language has to be named in `languages:`
+rather than discovered mid-document.
+
+After a change under `crates/`, rebuild the native artifact or the runtime keeps
+the old one and fails as if your change broke it:
+
+```sh
+mix compile --force                              # Elixir NIF
+pnpm --filter @lumis-sh/lumis run build:native   # Node addon
 ```
 
 #### WASM distribution
