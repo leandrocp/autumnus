@@ -86,7 +86,7 @@ The Markdown case is probably worth more than the HTML one that surfaced this.
 ## Proposed fix
 
 Strip the directive, keep the pattern. `strip_set_capture_patterns` becomes a function that removes
-`(#set! @…)` forms from within a pattern rather than removing the pattern that contains one.
+`(#set! @...)` forms from within a pattern rather than removing the pattern that contains one.
 
 Care is needed on two points:
 

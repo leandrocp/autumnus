@@ -105,7 +105,7 @@ export interface LanguageDefinition {
  *   packageName: '@lumis-sh/wasm-javascript',
  *   name: 'tree-sitter-javascript',
  *   version: '0.26.2',
- *   sha256: '…',
+ *   sha256: '...',
  *   size: 416499,
  * }
  * ```
@@ -370,7 +370,7 @@ export type HighlightIterFn = (
  *
  * While `format()` is running, `this.language` is set to the resolved language
  * after detection, so the formatter can render language-dependent output
- * (e.g. `<code class="language-…">`) without re-running detection.
+ * (e.g. `<code class="language-...">`) without re-running detection.
  *
  * ```ts
  * import { highlightIter, type Formatter } from '@lumis-sh/lumis'

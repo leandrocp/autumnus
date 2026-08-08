@@ -198,6 +198,10 @@ not fail because one fenced block names something unpublished. An injected
 language that cannot be fetched leaves its content plain and the walk carries
 on. Only the root language failing is an error the caller sees.
 
+Preloading follows the same rule: naming a list or a bundle loads everything in
+it and reports which names failed, rather than stopping at the first. One
+unpublished parser must not cost the rest.
+
 **A cold parser is expensive; a warm one is not.** It costs a download and then
 a Wasmtime compile, and the compile is the larger half: seven parsers already on
 disk take about 8 s to compile against 1.3 s once `compiled/` holds their
@@ -242,3 +246,7 @@ that names them — so pointing `LUMIS_DATA_DIR` at it is all a deployment needs
 Both go through `LanguageStore::cache_language`, which needs no Wasmtime
 runtime, so the two commands cannot disagree about what a prepared cache
 contains.
+
+They differ in one step past that. The Elixir task then loads each parser once,
+so Wasmtime writes `compiled/` beside them and an image ships the compile as
+well as the download; `--no-compile` skips it. The CLI stops at the download.

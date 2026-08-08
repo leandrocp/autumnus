@@ -4,6 +4,122 @@ Scope reviewed: PR #1099 against base `6cc5386a2b7248f3d279c9929db2d4897f51862d`
 below is dated and pinned to the revision it examined; verdicts are left as written at that revision
 rather than edited afterwards, so the record shows what was true when and what changed it.
 
+## Maintainer review before merge — 2026-08-08
+
+Raised by the maintainer reading the PR. Each item is worked one at a time and
+marked here when it lands. Findings that turn out to be wrong, or that I decide
+against, say so rather than being deleted.
+
+| # | Item | Status |
+| --- | --- | --- |
+| M1 | `application.ex` — tidy the data-directory resolution | DONE |
+| M2 | `Languages.load/1` on a list halts at the first failure | DONE |
+| M3 | Replace `Languages.all_names/0`, add `Lumis.loaded_languages/0` | DONE |
+| M4 | `test_helper.exs` is convoluted and `rm_rf!`s a configured path | DONE |
+| M5 | Elixir README `## Parser WASM` is too long to be read | DONE |
+| M6 | `sha256.ts` is a hand-written hash | DONE |
+| M7 | Re-examine `node-cache.ts` | DONE |
+| M8 | Replace the ellipsis character with three dots | DONE |
+| M9 | Every README: introduce, then link to the docs site | DONE |
+| M10 | Drop "The default export is a..." from the WASM README template | DONE |
+| M11 | `mise.toml` — pin Python in `[tools]` instead of `check_python311` | DONE |
+| M12 | README's Node and Elixir runtime paragraphs are too long | DONE |
+| M13 | Final `ARCHITECTURE.md` pass, after everything above | DONE |
+
+### M1 — `application.ex` data-directory resolution
+
+`data_dir/0` returns `nil` to mean two unrelated things: "the caller set
+`LUMIS_DATA_DIR`, let the NIF read it" and "there is no `priv` directory". The
+`if` inside a `case` clause reads as though the env var were being consulted,
+when it is only being tested for presence.
+
+### M2 — `load/1` on a list stops at the first failure
+
+`load(names)` uses `reduce_while` and halts, so one unavailable parser leaves
+every later language in the list unloaded. That contradicts the rule the rest of
+the system follows: a language that cannot be loaded costs its own block, not
+the whole document. Preloading a bundle should load whatever it can.
+
+Open question this forces: what does the return value become? `:ok` when
+nothing loaded is a lie.
+
+### M3 — `all_names/0` duplicates `Lumis.available_languages/0`
+
+`Lumis.available_languages/0` and `Lumis.available_themes/0` are the pair a
+caller expects; `Languages.all_names/0` is a third spelling of the first.
+Callers: `mix lumis.languages.cache` and one test. Add `Lumis.loaded_languages/0`
+for the complement — what is resolved and in memory right now — which the JS
+runtimes already expose internally as `loadedLanguages`.
+
+### M4 — `test_helper.exs`
+
+Copies the staged parser tree into a per-run temporary directory on every
+`mix test`, verifies the copy by counting `.wasm` files, and `File.rm_rf!`s the
+destination before and after. The destination comes from
+`Application.fetch_env!(:lumis, :data_dir)`, so a stray `config :lumis, data_dir:`
+in a dev machine's config would point that `rm_rf!` somewhere real.
+
+Copying once and leaving it costs a stale-parser risk, which is the thing to
+weigh.
+
+### M5 — Elixir README `## Parser WASM`
+
+38 lines covering auto-loading, VM-global loading, build-time caching,
+`LUMIS_DATA_DIR`, the compile cache, config, and vendored parsers. Belongs at
+`/docs/usage/elixir-integration`, which it already links to.
+
+### M6 — `sha256.ts`
+
+71 hand-written lines, used only when `crypto.subtle` is missing — browsers
+withhold it on non-secure origins. `test/sha256.test.ts` pins it against
+`crypto.subtle`. The package's only runtime dependency today is
+`web-tree-sitter`, so this trades a dependency against code we own.
+
+### M7 — `node-cache.ts`
+
+Advisory lock built from `open(..., "wx")`, a `{host, pid}` payload, a liveness
+check via `process.kill(pid, 0)`, and a staleness timer. Worth a second look at
+the lock lifecycle and at the `EEXIST`/`EPERM` rename fallback.
+
+### M8 — the ellipsis character should be three dots
+
+Four files outside generated output and vendored code: `QUERIES_REVIEW.md`,
+`REVIEW.md`, `website/src/sections/playground.ts`,
+`packages/javascript/lumis/src/types.ts`.
+
+### M9 — READMEs
+
+`crates/lumis` 429 lines, `packages/javascript/lumis` 321,
+`packages/elixir/lumis` 301, `crates/lumis-cli` 229. `AGENTS.md` already says
+READMEs are entry points and detail lives in `docs/content/`; these predate it.
+
+### M10 — WASM README template
+
+Drop the `URL`-default-export paragraph from
+`templates/wasm/README.md.template`.
+
+### M11 — `mise.toml` Python
+
+`check_python311` is a 15-line shell function that reports whether the ambient
+`python3` is new enough. `[tools]` can install one instead.
+
+### M12 — README runtime paragraphs
+
+The Node paragraph is six lines, the Elixir one five. Both say the right thing
+at the wrong length for a top-level README.
+
+### M13 — `ARCHITECTURE.md`
+
+Two corrections. It claimed `lumis parsers cache` and `mix lumis.languages.cache`
+"cannot disagree about what a prepared cache contains"; the Elixir task also
+loads each parser so Wasmtime writes `compiled/`, and the CLI stops at the
+download. And the "a failure costs one block" rule now covers preloading, after
+M2.
+
+**Follow-up, not done here:** the CLI has no equivalent of the Elixir task's
+compile step, so a CLI-prepared image pays the Wasmtime compile on first use.
+Worth closing for parity, but it is a feature change rather than a review fix.
+
 ## One store directory, pinned package versions — 2026-08-06
 
 In progress. This section is the design of record; the work below it is partly
@@ -27,7 +143,7 @@ COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/<otp_app> ./
 
 Measured in a real release, `Application.app_dir(:lumis, "priv")` resolves inside
 that copied tree, `mix release` copies `priv/` as a real directory rather than a
-symlink, `Code.ensure_loaded?(Mix.Project)` is false, and `Path.expand("_build/…")`
+symlink, `Code.ensure_loaded?(Mix.Project)` is false, and `Path.expand("_build/...")`
 is cwd-relative and never copied. So `priv` is the only placement that survives
 with no env var and no second `COPY`, and `_build` — the esbuild/tailwind
 convention — cannot work for something that runs in a release.
@@ -163,7 +279,7 @@ proven red before being kept.
 `@lumis-sh/wasm-bundle-*` packages publish, so a bundle means the same thing in every runtime. The
 reason is objective 3: `:all` was a fifth way to say "some languages" that no other runtime had.
 
-- `define_catalog!` now takes `languages: { … }, bundles: { … }` and exposes
+- `define_catalog!` now takes `languages: { ... }, bundles: { ... }` and exposes
   `pub static BUNDLES: &[(&str, &[&str])]`; `crates/dev` renders it from the `[bundles]` table in
   `languages.toml`, expanding `parsers = "all"` through the catalog's own order.
 - New NIF `language_bundles/0`; new `Lumis.Languages.bundles/0`; `load/1` accepts any `:bundle_*`
@@ -239,7 +355,7 @@ An earlier local run invoked `oxfmt` through `npx`, which resolved 0.62.0 rather
 0.43.0 and reformatted 22 files under `packages/javascript/rehype-lumis/`. All 22 were pure churn
 and were restored from `HEAD`. Two mattered beyond noise: `CHANGELOG.md` is `git-cliff` output that
 `AGENTS.md` forbids hand-editing, and `examples/*/output.html` are recorded example outputs whose
-`style="…;"` attributes were rewritten. The pinned formatter reports the whole tree clean.
+`style="...;"` attributes were rewritten. The pinned formatter reports the whole tree clean.
 
 ### Statements earlier in this document that this pass superseded
 
