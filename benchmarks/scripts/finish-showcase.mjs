@@ -3,6 +3,7 @@
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { createRequire } from "node:module";
 import { basename, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { showcaseImplementations } from "./implementations.mjs";
@@ -88,9 +89,15 @@ const lumisBinary = resolve(
 // different theme format. Some colour differences are therefore about the theme
 // rather than the parse, and the page has to say so rather than let a reader
 // assume otherwise.
-const benchmarkDependencies = JSON.parse(
-  await readFile(resolve(benchmarksDir, "javascript/package.json"), "utf8"),
-).dependencies;
+// The version that actually rendered, not the range that selected it. The
+// comparison libraries float, so a specifier here would publish "shiki latest"
+// and leave a reader unable to tell what was measured.
+const installedVersion = async (name) => {
+  const manifest = createRequire(import.meta.url).resolve(`${name}/package.json`, {
+    paths: [resolve(benchmarksDir, "javascript")],
+  });
+  return JSON.parse(await readFile(manifest, "utf8")).version;
+};
 const benchmarkCargo = await readFile(resolve(benchmarksDir, "rust/Cargo.toml"), "utf8");
 const crateVersion = (name) =>
   benchmarkCargo.match(new RegExp(`^${name} = "([^"]+)"`, "m"))?.[1] ?? "unknown";
@@ -104,11 +111,11 @@ const provenance = {
     theme: "dracula/sublime Dracula.tmTheme, pinned by SHA-256",
   },
   shiki: {
-    version: `shiki ${benchmarkDependencies.shiki}`,
+    version: `shiki ${await installedVersion("shiki")}`,
     theme: "Shiki's bundled dracula theme",
   },
   "highlight-js": {
-    version: `highlight.js ${benchmarkDependencies["highlight.js"]}`,
+    version: `highlight.js ${await installedVersion("highlight.js")}`,
     theme: "highlight.js styles/base16/dracula.css",
   },
 };
