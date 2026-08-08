@@ -58,7 +58,7 @@ and every process after it does not. Load ahead of time to keep that cost off a
 user's request:
 
 ```elixir
-:ok = Lumis.Languages.load(["elixir", "html", "javascript", "css"])
+Lumis.Languages.load(["elixir", "html", "javascript", "css"])
 ```
 
 Better still, do it at image-build time so no request ever pays. A cold parser

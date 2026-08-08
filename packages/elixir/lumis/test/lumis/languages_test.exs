@@ -22,8 +22,7 @@ defmodule Lumis.LanguagesTest do
   end
 
   test "reports an unknown language rather than loading nothing quietly" do
-    assert {:error, reason} = Lumis.Languages.load("not-a-language")
-    assert reason =~ "not-a-language"
+    assert {:error, :unknown_language} = Lumis.Languages.load("not-a-language")
   end
 
   test "every catalog language is nameable" do
@@ -70,8 +69,7 @@ defmodule Lumis.LanguagesTest do
       assert "html" in web
       assert length(Lumis.Languages.bundles()[:bundle_full]) > 100
 
-      assert {:error, reason} = Lumis.Languages.load(:bundle_nope)
-      assert reason =~ ":bundle_web"
+      assert {:error, :unknown_bundle} = Lumis.Languages.load(:bundle_nope)
     end
 
     defp bundle_atom(name), do: String.to_atom("bundle_" <> String.replace(name, "-", "_"))

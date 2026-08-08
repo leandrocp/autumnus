@@ -52,8 +52,16 @@ defmodule Lumis.Languages do
   package of that name, so every runtime means the same thing by it. `:bundle_full`
   is every language in the catalog, which is rarely what a deployment wants; prefer
   a narrower bundle, or name the languages a document can contain.
+
+  ## Failures
+
+    * `:unknown_language` — the name is not in the catalog
+    * `:failed_to_load_parser` — it is, but its parser could not be obtained or verified
+
+  A bundle that does not exist returns `:unknown_bundle`.
   """
-  @spec load(bundle() | String.t() | atom() | [String.t() | atom()]) :: :ok | {:error, term()}
+  @spec load(bundle() | String.t() | atom() | [String.t() | atom()]) ::
+          :ok | {:error, :unknown_language | :failed_to_load_parser | :unknown_bundle}
   def load(names) when is_list(names) do
     Enum.reduce_while(names, :ok, fn name, :ok ->
       case load(name) do
@@ -80,8 +88,7 @@ defmodule Lumis.Languages do
         load(names)
 
       :error ->
-        known = bundles() |> Map.keys() |> Enum.sort() |> Enum.map_join(", ", &inspect/1)
-        {:error, "unknown bundle #{inspect(bundle)}, expected one of: #{known}"}
+        {:error, :unknown_bundle}
     end
   end
 

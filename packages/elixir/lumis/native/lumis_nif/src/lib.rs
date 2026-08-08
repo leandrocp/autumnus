@@ -30,7 +30,7 @@ static EXECUTOR: Lazy<Result<WasmExecutor, String>> = Lazy::new(WasmExecutor::ne
 enum WasmJob {
     LoadNamed {
         name: String,
-        reply: mpsc::SyncSender<Result<(), String>>,
+        reply: mpsc::SyncSender<Result<(), RuntimeError>>,
     },
     CacheNamed {
         name: String,
@@ -45,6 +45,24 @@ enum WasmJob {
     },
 }
 
+/// Why a load failed, at the granularity Elixir matches on.
+///
+/// A caller decides between "I typed the name wrong" and "it could not be
+/// obtained"; the detail behind the second is not something a `case` can act on.
+enum LoadFailure {
+    UnknownLanguage,
+    Parser,
+}
+
+impl Encoder for LoadFailure {
+    fn encode<'a>(&self, env: Env<'a>) -> Term<'a> {
+        match self {
+            Self::UnknownLanguage => unknown_language().encode(env),
+            Self::Parser => failed_to_load_parser().encode(env),
+        }
+    }
+}
+
 /// Directories the store reads and writes, as `Lumis.Application` configured
 /// them. Elixir cannot set an OS environment variable the emulator's NIFs can
 /// see, so `config :lumis` arrives here instead.
@@ -54,6 +72,14 @@ struct StorePaths {
 }
 
 static STORE_PATHS: Lazy<RwLock<StorePaths>> = Lazy::new(|| RwLock::new(StorePaths::default()));
+
+/// Drop the store's warnings rather than let them reach stderr.
+///
+/// A NIF writing to fd 2 bypasses Erlang's IO entirely, so the bytes land in the
+/// middle of whatever IEx is drawing. The CLI keeps the default handler.
+fn silence_warnings() {
+    let _ = store::set_warning_handler(Box::new(|_| {}));
+}
 
 /// The same resolve, verify and cache path the CLI uses, pointed at the
 /// directories Lumis persists under.
@@ -146,17 +172,19 @@ impl WasmExecutor {
 
     /// Resolving a language does a TLS handshake, which needs far more stack
     /// than a BEAM dirty scheduler has; run it on the executor's own threads.
-    fn load_named_language(&self, name: &str) -> Result<(), String> {
+    fn load_named_language(&self, name: &str) -> Result<(), LoadFailure> {
         let (reply, result) = mpsc::sync_channel(1);
         self.sender
             .send(WasmJob::LoadNamed {
                 name: name.to_string(),
                 reply,
             })
-            .map_err(|_| "WASM executor is unavailable".to_string())?;
-        result
-            .recv()
-            .map_err(|_| "WASM executor stopped while loading the language".to_string())?
+            .map_err(|_| LoadFailure::Parser)?;
+        match result.recv().map_err(|_| LoadFailure::Parser)? {
+            Ok(()) => Ok(()),
+            Err(RuntimeError::LanguageNotLoaded(_)) => Err(LoadFailure::UnknownLanguage),
+            Err(_) => Err(LoadFailure::Parser),
+        }
     }
 
     fn cache_named_language(&self, name: &str, force: bool) -> Result<String, String> {
@@ -198,6 +226,8 @@ rustler::atoms! {
     ok,
     error,
     language_not_loaded,
+    unknown_language,
+    failed_to_load_parser,
 }
 
 rustler::init!("Elixir.Lumis.Native");
@@ -273,6 +303,7 @@ fn executor() -> Result<&'static WasmExecutor, String> {
 /// built. `Lumis.Application` calls this before anything can use it.
 #[rustler::nif]
 fn configure_store(data_dir: Option<String>) -> bool {
+    silence_warnings();
     if Lazy::get(&EXECUTOR).is_some() {
         return false;
     }
@@ -294,13 +325,12 @@ fn configure_store(data_dir: Option<String>) -> bool {
 /// both cache the same bytes in the same place under the same names.
 #[rustler::nif(schedule = "DirtyCpu")]
 fn load_language_by_name<'a>(env: Env<'a>, name: &str) -> Term<'a> {
-    let runtime = match executor() {
-        Ok(runtime) => runtime,
-        Err(message) => return (error(), message).encode(env),
-    };
-    match runtime.load_named_language(name) {
+    let result = executor()
+        .map_err(|_| LoadFailure::Parser)
+        .and_then(|runtime| runtime.load_named_language(name));
+    match result {
         Ok(()) => ok().encode(env),
-        Err(message) => (error(), message).encode(env),
+        Err(failure) => (error(), failure).encode(env),
     }
 }
 

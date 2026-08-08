@@ -230,10 +230,8 @@ impl Runtime {
     /// # Errors
     /// Fails when no store is attached, the name is unknown, or the package or
     /// parser cannot be obtained or verified.
-    pub fn load_named_language(&self, name: &str) -> Result<(), String> {
-        self.load_through_store(name)
-            .map(|_| ())
-            .map_err(|error| error.to_string())
+    pub fn load_named_language(&self, name: &str) -> Result<(), RuntimeError> {
+        self.load_through_store(name).map(|_| ())
     }
 
     /// Resolve, download and load `id` through the store, if one is attached.
