@@ -28,11 +28,12 @@
 
 - **110+ Tree-sitter languages** - Fast, accurate, and updated syntax parsing
 - **250+ built-in Neovim themes** - Updated and curated themes from the Neovim community
-- **Multiple outputs** - HTML (inline/linked), Terminal (ANSI), Multi-theme (light/dark), BBCode, and custom formatters
+- **Built-in formatters** - HTML (inline/linked), Terminal (ANSI), Multi-theme (light/dark), BBCode
+- **Custom formatters** - Build your own output
 - **Language auto-detection** - File extension, shebang, and emacs-mode support
 - **Line highlighting** - Mark and style individual lines, with custom HTML wrappers
 - **Streaming-friendly** - Handles incomplete code
-- **Parsers on demand** - Downloaded, verified by SHA-256, and cached, including languages injected inside a document
+- **Load parsers on demand** - Verified and cached, including injected languages
 
 ## Installation
 
