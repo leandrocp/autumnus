@@ -1647,9 +1647,26 @@ struct CrateDependency {
     publishable: bool,
 }
 
-fn tracked_cargo_manifests() -> Result<Vec<String>> {
+fn repository_root() -> Result<PathBuf> {
     let output = Command::new("git")
-        .args(["ls-files", "-z", "*Cargo.toml"])
+        .args(["rev-parse", "--show-toplevel"])
+        .output()
+        .context("failed to locate the repository root")?;
+    if !output.status.success() {
+        bail!("git rev-parse --show-toplevel failed; not inside a git repository");
+    }
+
+    Ok(PathBuf::from(
+        String::from_utf8_lossy(&output.stdout).trim(),
+    ))
+}
+
+/// Paths come back relative to the repository root rather than the working
+/// directory, so `CRATE_DEP_WAIVERS` matches wherever this is run from.
+fn tracked_cargo_manifests(root: &Path) -> Result<Vec<String>> {
+    let output = Command::new("git")
+        .current_dir(root)
+        .args(["ls-files", "--full-name", "-z", "*Cargo.toml"])
         .output()
         .context("failed to list tracked Cargo manifests")?;
     if !output.status.success() {
@@ -1702,28 +1719,49 @@ fn requirement_of(spec: &toml_edit::Item) -> Option<String> {
     }
 }
 
+/// `{ workspace = true }` carries no requirement of its own, and cargo rejects a
+/// `version` beside it. The `[workspace.dependencies]` entry it inherits from is
+/// itself visited, so the requirement is still checked once.
+fn inherits_from_workspace(spec: &toml_edit::Item) -> bool {
+    spec.get("workspace")
+        .and_then(|workspace| workspace.as_bool())
+        .unwrap_or(false)
+}
+
 struct Manifest {
     path: String,
+    file: PathBuf,
     document: toml_edit::DocumentMut,
     publishable: bool,
 }
 
+fn is_publishable(document: &toml_edit::DocumentMut) -> bool {
+    // A virtual manifest has no package to publish, so a requirement in one can
+    // never reach a registry.
+    let Some(package) = document.get("package") else {
+        return false;
+    };
+    package
+        .get("publish")
+        .and_then(|publish| publish.as_bool())
+        .unwrap_or(true)
+}
+
 fn read_manifests() -> Result<Vec<Manifest>> {
-    tracked_cargo_manifests()?
+    let root = repository_root()?;
+    tracked_cargo_manifests(&root)?
         .into_iter()
         .map(|path| {
+            let file = root.join(&path);
             let text =
-                fs::read_to_string(&path).with_context(|| format!("failed to read {path}"))?;
+                fs::read_to_string(&file).with_context(|| format!("failed to read {path}"))?;
             let document: toml_edit::DocumentMut = text
                 .parse()
                 .with_context(|| format!("failed to parse {path}"))?;
-            let publishable = document
-                .get("package")
-                .and_then(|package| package.get("publish"))
-                .and_then(|publish| publish.as_bool())
-                .unwrap_or(true);
+            let publishable = is_publishable(&document);
             Ok(Manifest {
                 path,
+                file,
                 document,
                 publishable,
             })
@@ -1761,6 +1799,9 @@ fn check_crate_deps(fix: bool) -> Result<()> {
         let path = manifest.path.clone();
         let publishable = manifest.publishable;
         for_each_dependency(manifest.document.as_table_mut(), &mut |name, spec| {
+            if inherits_from_workspace(spec) {
+                return;
+            }
             dependencies.push(CrateDependency {
                 manifest: path.clone(),
                 name: name.to_string(),
@@ -1797,49 +1838,67 @@ fn is_waived(manifest: &str, name: &str) -> bool {
 /// `cargo set-version` rewrites dependents it can reach through `path`. The
 /// Elixir NIF depends on `lumis-core` through the registry, so it is invisible
 /// to that pass and drifts on every release unless something else moves it.
+fn fix_manifest(
+    path: &str,
+    publishable: bool,
+    document: &mut toml_edit::DocumentMut,
+    versions: &BTreeMap<String, String>,
+) -> Vec<String> {
+    let mut changes = Vec::new();
+
+    for_each_dependency(document.as_table_mut(), &mut |name, spec| {
+        let Some(version) = versions.get(name) else {
+            return;
+        };
+        if is_waived(path, name) || inherits_from_workspace(spec) {
+            return;
+        }
+        let previous = requirement_of(spec);
+        // A path dependency in a crate that is never published has nothing to
+        // resolve a requirement against, so do not invent one.
+        if previous.is_none() && !publishable {
+            return;
+        }
+        if previous.as_deref() == Some(version.as_str()) {
+            return;
+        }
+
+        changes.push(format!(
+            "{path}: {name} {} -> {version}",
+            previous.as_deref().unwrap_or("no version")
+        ));
+
+        // Only the requirement moves. Replacing the whole entry would drop the
+        // `path`, `features` and `default-features` beside it.
+        match spec {
+            toml_edit::Item::Value(toml_edit::Value::InlineTable(entry)) => {
+                entry.insert("version", toml_edit::Value::from(version.clone()));
+                entry.fmt();
+            }
+            toml_edit::Item::Table(entry) => {
+                entry["version"] = toml_edit::value(version.clone());
+            }
+            _ => *spec = toml_edit::value(version.clone()),
+        }
+    });
+
+    changes
+}
+
 fn fix_crate_deps(manifests: &mut [Manifest], versions: &BTreeMap<String, String>) -> Result<()> {
     let mut changes = Vec::new();
 
     for manifest in manifests {
-        let path = manifest.path.clone();
-        let publishable = manifest.publishable;
-        let mut changed = false;
-
-        for_each_dependency(manifest.document.as_table_mut(), &mut |name, spec| {
-            let Some(version) = versions.get(name) else {
-                return;
-            };
-            if is_waived(&path, name) {
-                return;
-            }
-            let previous = requirement_of(spec);
-            // A path dependency in a crate that is never published has nothing
-            // to resolve a requirement against, so do not invent one.
-            if previous.is_none() && !publishable {
-                return;
-            }
-            if previous.as_deref() == Some(version.as_str()) {
-                return;
-            }
-
-            changes.push(format!(
-                "{path}: {name} {} -> {version}",
-                previous.as_deref().unwrap_or("no version")
-            ));
-            changed = true;
-
-            match spec {
-                toml_edit::Item::Value(toml_edit::Value::InlineTable(entry)) => {
-                    entry.insert("version", toml_edit::Value::from(version.clone()));
-                    entry.fmt();
-                }
-                _ => *spec = toml_edit::value(version.clone()),
-            }
-        });
-
-        if changed {
-            fs::write(&manifest.path, manifest.document.to_string())
+        let manifest_changes = fix_manifest(
+            &manifest.path,
+            manifest.publishable,
+            &mut manifest.document,
+            versions,
+        );
+        if !manifest_changes.is_empty() {
+            fs::write(&manifest.file, manifest.document.to_string())
                 .with_context(|| format!("failed to write {}", manifest.path))?;
+            changes.extend(manifest_changes);
         }
     }
 
@@ -3728,6 +3787,112 @@ mod crate_dep_tests {
         let reported = crate_dep_problems(&versions(), &dependencies, count).0;
         assert_eq!(reported.len(), 1);
         assert!(reported[0].contains("remove its waiver"), "{reported:?}");
+    }
+
+    fn fixed(manifest: &str) -> String {
+        let mut document: toml_edit::DocumentMut = manifest.parse().expect("valid manifest");
+        fix_manifest(
+            "crates/example/Cargo.toml",
+            true,
+            &mut document,
+            &versions(),
+        );
+        document.to_string()
+    }
+
+    fn collected(manifest: &str) -> Vec<(String, Option<String>)> {
+        let mut document: toml_edit::DocumentMut = manifest.parse().expect("valid manifest");
+        let mut found = Vec::new();
+        for_each_dependency(document.as_table_mut(), &mut |name, spec| {
+            found.push((name.to_string(), requirement_of(spec)));
+        });
+        found
+    }
+
+    #[test]
+    fn target_specific_and_renamed_dependencies_are_visited() {
+        let mut found = collected(
+            r#"
+[dependencies]
+lumis-core = { version = "2.0.0", features = ["all-languages"] }
+
+[target.'cfg(windows)'.dependencies]
+core-alias = { package = "lumis-core", version = "2.1.0" }
+
+[build-dependencies]
+lumis-build = "1.0.0"
+"#,
+        );
+        found.sort();
+
+        assert_eq!(
+            found,
+            vec![
+                ("lumis-build".to_string(), Some("1.0.0".to_string())),
+                ("lumis-core".to_string(), Some("2.0.0".to_string())),
+                // Reached only through `[target.'cfg(windows)'.dependencies]`,
+                // and named by `package = "lumis-core"` rather than its key.
+                ("lumis-core".to_string(), Some("2.1.0".to_string())),
+            ]
+        );
+    }
+
+    #[test]
+    fn a_dependency_table_keeps_its_other_fields() {
+        let fixed = fixed(
+            r#"
+[dependencies.lumis-core]
+path = "../lumis-core"
+version = "2"
+default-features = false
+features = ["lang-rust"]
+"#,
+        );
+
+        assert!(fixed.contains("version = \"2.3.0\""), "{fixed}");
+        assert!(fixed.contains("path = \"../lumis-core\""), "{fixed}");
+        assert!(fixed.contains("default-features = false"), "{fixed}");
+        assert!(fixed.contains("features = [\"lang-rust\"]"), "{fixed}");
+    }
+
+    #[test]
+    fn an_inline_table_keeps_its_other_fields() {
+        let fixed = fixed(
+            "[dependencies]\nlumis-core = { path = \"../lumis-core\", version = \"2\", features = [\"lang-rust\"] }\n",
+        );
+
+        assert!(fixed.contains("version = \"2.3.0\""), "{fixed}");
+        assert!(fixed.contains("path = \"../lumis-core\""), "{fixed}");
+        assert!(fixed.contains("features = [\"lang-rust\"]"), "{fixed}");
+    }
+
+    #[test]
+    fn a_string_requirement_stays_a_string() {
+        assert_eq!(
+            fixed("[dependencies]\nlumis-core = \"2\"\n"),
+            "[dependencies]\nlumis-core = \"2.3.0\"\n"
+        );
+    }
+
+    #[test]
+    fn a_workspace_inherited_dependency_is_left_alone() {
+        let manifest = "[dependencies]\nlumis-core = { workspace = true }\n";
+        assert_eq!(fixed(manifest), manifest);
+
+        let mut document: toml_edit::DocumentMut = manifest.parse().expect("valid manifest");
+        let mut inherited = Vec::new();
+        for_each_dependency(document.as_table_mut(), &mut |_, spec| {
+            inherited.push(inherits_from_workspace(spec));
+        });
+        assert_eq!(inherited, vec![true]);
+    }
+
+    #[test]
+    fn a_manifest_without_a_package_is_not_publishable() {
+        let document: toml_edit::DocumentMut = "[workspace]\nmembers = []\n"
+            .parse()
+            .expect("valid manifest");
+        assert!(!is_publishable(&document));
     }
 
     #[test]

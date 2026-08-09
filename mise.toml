@@ -1054,7 +1054,7 @@ esac
 case "$kind" in
     cargo)
         cargo set-version --manifest-path "$manifest" -p "$cargo_package" "$version"
-        cargo run --quiet --manifest-path crates/dev/Cargo.toml -- check-crate-deps --fix
+        mise run check-crate-deps --fix
         ;;
     npm)
         npm --prefix "$(dirname "$manifest")" version --no-git-tag-version "$version"

@@ -43,13 +43,17 @@ repository, spelled in full:
 lumis-core = { path = "../lumis-core", version = "2.3.0", default-features = false }
 ```
 
-Nothing built from this repository can tell you when that requirement goes
-stale. The workspace resolves the lumis crates through `path` entries and the
-root `[patch.crates-io]` table, so local builds, CI, and the Elixir and Node
-addons all compile against the working tree no matter what the requirement says.
-It takes effect only after the crate is on crates.io, and even then only for
-consumers whose `Cargo.lock` already holds an older version — a fresh resolve
-picks the newest match and looks fine.
+Almost nothing built from this repository can tell you when that requirement
+goes stale. Every crate that reaches a lumis crate through a `path` entry
+resolves it there, and the root `[patch.crates-io]` table redirects the rest, so
+local builds, CI, and the Elixir and Node addons compile against the working
+tree no matter what the requirement says. `crates/autumnus` is the one exception:
+it declares its own `[workspace]` and depends on `lumis` through the registry, so
+its requirement is the only one a build here actually resolves.
+
+For everything else the requirement takes effect only after the crate is on
+crates.io, and even then only for consumers whose `Cargo.lock` already holds an
+older version — a fresh resolve picks the newest match and looks fine.
 
 That is how [#1118](https://github.com/leandrocp/lumis/issues/1118) shipped.
 `lumis` 0.12.1 called `lumis_core::formatter::html::open_multi_themes_pre_tag`,
@@ -62,7 +66,7 @@ manual edit. Writing the requirement in full is what makes that work: the
 `cargo set-version` it already ran rewrites dependents only when the new version
 falls outside their requirement, and `"2"` absorbed every 2.x bump silently.
 
-```
+```text
 Upgrading lumis-core from 2.3.0 to 2.4.0
  Updating lumis's dependency from 2.3.0 to 2.4.0
  Updating lumis-cli's dependency from 2.3.0 to 2.4.0
@@ -75,9 +79,13 @@ Upgrading lumis-core from 2.3.0 to 2.4.0
 through the registry, so `release-prepare` follows up with
 `mise run check-crate-deps --fix`, which updates whatever is left:
 
-```
+```text
 packages/elixir/lumis/native/lumis_nif/Cargo.toml: lumis-core 2.3.0 -> 2.4.0
 ```
+
+Both passes edit manifests other than the one being released. Review everything
+`git status` reports and commit it with the release, not just the target
+package's `Cargo.toml` and `CHANGELOG.md`.
 
 `mise run check-crate-deps` reports the same drift instead of fixing it. It runs
 in `mise run lint`, as its own job in Rust CI, and again in `rust-release.yml`
