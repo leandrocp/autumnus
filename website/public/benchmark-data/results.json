@@ -1,0 +1,301 @@
+{
+  "schemaVersion": 1,
+  "metric": "total",
+  "timingBoundary": "runtime setup/load plus every highlight in the scenario; harness fixture reads excluded, CLI command file I/O included",
+  "system": {
+    "platform": "darwin",
+    "release": "25.5.0",
+    "architecture": "arm64",
+    "cpu": "Apple M1 Pro"
+  },
+  "scenarios": [
+    {
+      "id": "small-one-language",
+      "description": "Highlight one small Rust file.",
+      "inputBytes": 1410,
+      "fileCount": 1,
+      "languageCount": 1,
+      "results": [
+        {
+          "id": "lumis-rust",
+          "label": "Lumis Rust",
+          "lumis": true,
+          "totalNs": 933329.388095238,
+          "setupNs": null
+        },
+        {
+          "id": "lumis-js-node",
+          "label": "Lumis JavaScript (Node, Wasmtime)",
+          "lumis": true,
+          "totalNs": 1480541,
+          "setupNs": 50100624.99999998
+        },
+        {
+          "id": "lumis-js-wasm",
+          "label": "Lumis JavaScript (web-tree-sitter)",
+          "lumis": true,
+          "totalNs": 4856792,
+          "setupNs": 55962707.99999999
+        },
+        {
+          "id": "lumis-elixir",
+          "label": "Lumis Elixir",
+          "lumis": true,
+          "totalNs": 1425645.5,
+          "setupNs": null
+        },
+        {
+          "id": "lumis-cli",
+          "label": "Lumis CLI",
+          "lumis": true,
+          "totalNs": 54277457.78000001,
+          "setupNs": null
+        },
+        {
+          "id": "syntect",
+          "label": "syntect",
+          "lumis": false,
+          "totalNs": 5191494.411111111,
+          "setupNs": null
+        },
+        {
+          "id": "shiki",
+          "label": "Shiki",
+          "lumis": false,
+          "totalNs": 3524209,
+          "setupNs": 538290.9999999867
+        },
+        {
+          "id": "highlight-js",
+          "label": "highlight.js",
+          "lumis": false,
+          "totalNs": 520916,
+          "setupNs": 100250.00000000262
+        },
+        {
+          "id": "bat",
+          "label": "bat",
+          "lumis": false,
+          "totalNs": 13030749.280000007,
+          "setupNs": null
+        }
+      ]
+    },
+    {
+      "id": "large-one-language",
+      "description": "Highlight one generated 5 MiB Rust file.",
+      "inputBytes": 5243195,
+      "fileCount": 1,
+      "languageCount": 1,
+      "results": [
+        {
+          "id": "lumis-rust",
+          "label": "Lumis Rust",
+          "lumis": true,
+          "totalNs": 2159301354.5,
+          "setupNs": null
+        },
+        {
+          "id": "lumis-js-node",
+          "label": "Lumis JavaScript (Node, Wasmtime)",
+          "lumis": true,
+          "totalNs": 2845345834,
+          "setupNs": 50396707.99999976
+        },
+        {
+          "id": "lumis-js-wasm",
+          "label": "Lumis JavaScript (web-tree-sitter)",
+          "lumis": true,
+          "totalNs": 9062334916,
+          "setupNs": 56409333.00000142
+        },
+        {
+          "id": "lumis-elixir",
+          "label": "Lumis Elixir",
+          "lumis": true,
+          "totalNs": 2831865378.5,
+          "setupNs": null
+        },
+        {
+          "id": "lumis-cli",
+          "label": "Lumis CLI",
+          "lumis": true,
+          "totalNs": 2518486545.04,
+          "setupNs": null
+        },
+        {
+          "id": "syntect",
+          "label": "syntect",
+          "lumis": false,
+          "totalNs": 3634587229,
+          "setupNs": null
+        },
+        {
+          "id": "shiki",
+          "label": "Shiki",
+          "lumis": false,
+          "totalNs": 8836199916,
+          "setupNs": 426165.9999992844
+        },
+        {
+          "id": "highlight-js",
+          "label": "highlight.js",
+          "lumis": false,
+          "totalNs": 750527084,
+          "setupNs": 204125.00000009005
+        },
+        {
+          "id": "bat",
+          "label": "bat",
+          "lumis": false,
+          "totalNs": 5165881587.04,
+          "setupNs": null
+        }
+      ]
+    },
+    {
+      "id": "ten-files-one-language",
+      "description": "Highlight ten different small Rust files.",
+      "inputBytes": 5029,
+      "fileCount": 10,
+      "languageCount": 1,
+      "results": [
+        {
+          "id": "lumis-rust",
+          "label": "Lumis Rust",
+          "lumis": true,
+          "totalNs": 2581549.45,
+          "setupNs": null
+        },
+        {
+          "id": "lumis-js-node",
+          "label": "Lumis JavaScript (Node, Wasmtime)",
+          "lumis": true,
+          "totalNs": 4937000,
+          "setupNs": 49873125
+        },
+        {
+          "id": "lumis-js-wasm",
+          "label": "Lumis JavaScript (web-tree-sitter)",
+          "lumis": true,
+          "totalNs": 12788083,
+          "setupNs": 55722916.99999999
+        },
+        {
+          "id": "lumis-elixir",
+          "label": "Lumis Elixir",
+          "lumis": true,
+          "totalNs": 4170750,
+          "setupNs": null
+        },
+        {
+          "id": "lumis-cli",
+          "label": "Lumis CLI",
+          "lumis": true,
+          "totalNs": 599630198.7,
+          "setupNs": null
+        },
+        {
+          "id": "syntect",
+          "label": "syntect",
+          "lumis": false,
+          "totalNs": 7638535.146853147,
+          "setupNs": null
+        },
+        {
+          "id": "shiki",
+          "label": "Shiki",
+          "lumis": false,
+          "totalNs": 12429541,
+          "setupNs": 432792.0000000063
+        },
+        {
+          "id": "highlight-js",
+          "label": "highlight.js",
+          "lumis": false,
+          "totalNs": 1427667,
+          "setupNs": 81415.99999999726
+        },
+        {
+          "id": "bat",
+          "label": "bat",
+          "lumis": false,
+          "totalNs": 149419864.70000002,
+          "setupNs": null
+        }
+      ]
+    },
+    {
+      "id": "ten-files-ten-languages",
+      "description": "Highlight ten different small files, each in a different language.",
+      "inputBytes": 2508,
+      "fileCount": 10,
+      "languageCount": 10,
+      "results": [
+        {
+          "id": "lumis-rust",
+          "label": "Lumis Rust",
+          "lumis": true,
+          "totalNs": 2119158.5694444445,
+          "setupNs": null
+        },
+        {
+          "id": "lumis-js-node",
+          "label": "Lumis JavaScript (Node, Wasmtime)",
+          "lumis": true,
+          "totalNs": 3732708,
+          "setupNs": 245741999.99999997
+        },
+        {
+          "id": "lumis-js-wasm",
+          "label": "Lumis JavaScript (web-tree-sitter)",
+          "lumis": true,
+          "totalNs": 7629209,
+          "setupNs": 287010708
+        },
+        {
+          "id": "lumis-elixir",
+          "label": "Lumis Elixir",
+          "lumis": true,
+          "totalNs": 3107771,
+          "setupNs": null
+        },
+        {
+          "id": "lumis-cli",
+          "label": "Lumis CLI",
+          "lumis": true,
+          "totalNs": 335525015.2,
+          "setupNs": null
+        },
+        {
+          "id": "syntect",
+          "label": "syntect",
+          "lumis": false,
+          "totalNs": 22726694.333333336,
+          "setupNs": null
+        },
+        {
+          "id": "shiki",
+          "label": "Shiki",
+          "lumis": false,
+          "totalNs": 7394375,
+          "setupNs": 10311374.999999998
+        },
+        {
+          "id": "highlight-js",
+          "label": "highlight.js",
+          "lumis": false,
+          "totalNs": 1551875,
+          "setupNs": 416166.000000004
+        },
+        {
+          "id": "bat",
+          "label": "bat",
+          "lumis": false,
+          "totalNs": 132850244.19999999,
+          "setupNs": null
+        }
+      ]
+    }
+  ]
+}

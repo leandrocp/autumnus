@@ -359,7 +359,7 @@ export function renderShowcase() {
                 <div class="demo-output grid border-b border-zinc-200 dark:border-zinc-800 lg:border-r lg:border-b-0" data-demo="${demo.id}">
                   <p class="px-5 py-12 text-center font-mono text-xs text-zinc-400">Fetching parser…</p>
                 </div>
-                <div class="demo-code" data-demo="${demo.id}">
+                <div class="demo-code grid grid-rows-[auto_1fr]" data-demo="${demo.id}">
                   <div class="flex items-center justify-between border-b border-zinc-200 px-5 py-2 dark:border-zinc-800">
                     <span class="font-mono text-[11px] tracking-wider text-zinc-500 uppercase dark:text-zinc-400">The code that made it</span>
                     <button class="copy-install shrink-0 cursor-pointer text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white" aria-label="Copy to clipboard" data-copy="${encodeURIComponent(demo.code)}">${COPY_SVG}</button>

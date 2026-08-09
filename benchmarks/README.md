@@ -33,6 +33,24 @@ Wasm, Elixir, and CLI alongside Shiki, highlight.js, syntect, and bat. Its
 preparation step verifies SHA-256 hashes for both the fixture and syntect's
 official Dracula theme before rendering.
 
+It also counts the tokens each implementation coloured in each document, so
+the gallery can say how finely a file was resolved next to the output itself.
+
+## Publishing to the website
+
+The deploy workflow builds only `website/` and `docs/`, so it cannot run any
+of this. Both sets of numbers are committed, and these refresh them:
+
+```sh
+mise run -C benchmarks showcase-publish
+mise run -C benchmarks results-publish
+```
+
+`showcase-publish` writes the gallery and its token counts, and CI fails when
+the committed bytes stop matching. `results-publish` writes the timings below,
+which no check can verify because they are measurements; run it from a quiet
+machine or the site will quote whatever that machine was also doing.
+
 ## Package size
 
 Measured on Apple M1 Pro (arm64, darwin).
@@ -43,18 +61,18 @@ are not interchangeable distribution formats.
 
 | Tool | Measured artifact | Raw / unpacked | Download / gzip -9 |
 | --- | --- | ---: | ---: |
-| Lumis JavaScript (Node, Wasmtime) (runtime) | npm production closure including the platform addon; parsers load on demand | 16.07 MiB | 6.19 MiB |
-| Lumis JavaScript (Node, Wasmtime) (10 languages) | npm production closure including the platform addon, plus benchmark parsers | 28.50 MiB | 7.60 MiB |
-| Lumis JavaScript (web-tree-sitter) (runtime) | npm production closure without the platform addon; parsers load on demand | 5.82 MiB | 1.48 MiB |
-| Lumis JavaScript (web-tree-sitter) (1 language) | npm production closure plus Rust parser | 8.32 MiB | 1.74 MiB |
-| Lumis JavaScript (web-tree-sitter) (10 languages) | npm production closure plus benchmark parsers | 18.26 MiB | 2.89 MiB |
-| Shiki | npm production closure | 13.65 MiB | 2.66 MiB |
+| Lumis JavaScript (Node, Wasmtime) (runtime) | npm production closure including the platform addon; parsers load on demand | 16.95 MiB | 6.43 MiB |
+| Lumis JavaScript (Node, Wasmtime) (10 languages) | npm production closure including the platform addon, plus benchmark parsers | 29.43 MiB | 7.85 MiB |
+| Lumis JavaScript (web-tree-sitter) (runtime) | npm production closure without the platform addon; parsers load on demand | 6.54 MiB | 1.65 MiB |
+| Lumis JavaScript (web-tree-sitter) (1 language) | npm production closure plus Rust parser | 9.03 MiB | 1.91 MiB |
+| Lumis JavaScript (web-tree-sitter) (10 languages) | npm production closure plus benchmark parsers | 19.03 MiB | 3.06 MiB |
+| Shiki | npm production closure | 14.09 MiB | 2.71 MiB |
 | highlight.js | npm production closure | 5.18 MiB | 818.43 KiB |
-| Lumis Rust | stripped 10-language benchmark executable | 7.13 MiB | 1.43 MiB |
-| syntect | stripped default-syntax benchmark executable | 1.28 MiB | 756.50 KiB |
-| Lumis CLI | stripped release executable | 12.17 MiB | 5.03 MiB |
+| Lumis Rust | stripped 10-language benchmark executable | 12.03 MiB | 2.09 MiB |
+| syntect | stripped default-syntax benchmark executable | 1.28 MiB | 756.85 KiB |
+| Lumis CLI | stripped release executable | 12.23 MiB | 5.06 MiB |
 | bat | release executable | 5.54 MiB | 3.10 MiB |
-| Lumis Elixir | stripped release NIF shared library | 12.08 MiB | 4.95 MiB |
+| Lumis Elixir | stripped release NIF shared library | 12.16 MiB | 4.98 MiB |
 
 ## 1 small file for 1 language
 
@@ -62,15 +80,15 @@ Highlight one small Rust file.
 
 | Tool | Highlight | Setup |
 | --- | ---: | ---: |
-| highlight.js | 458.208 µs | 66.875 µs |
-| Lumis Rust | 762.453 µs | — |
-| Lumis JavaScript (Node, Wasmtime) | 1.170 ms | 594.250 µs |
-| Lumis Elixir | 1.179 ms | — |
-| Shiki | 3.301 ms | 358.916 µs |
-| Lumis JavaScript (web-tree-sitter) | 4.425 ms | 55.041 ms |
-| syntect | 5.081 ms | — |
-| bat | 12.955 ms | — |
-| Lumis CLI | 53.338 ms | — |
+| highlight.js | 520.916 µs | 100.250 µs |
+| Lumis Rust | 933.329 µs | — |
+| Lumis Elixir | 1.426 ms | — |
+| Lumis JavaScript (Node, Wasmtime) | 1.481 ms | 50.101 ms |
+| Shiki | 3.524 ms | 538.291 µs |
+| Lumis JavaScript (web-tree-sitter) | 4.857 ms | 55.963 ms |
+| syntect | 5.191 ms | — |
+| bat | 13.031 ms | — |
+| Lumis CLI | 54.277 ms | — |
 
 ## 1 big file for 1 language
 
@@ -78,15 +96,15 @@ Highlight one generated 5 MiB Rust file.
 
 | Tool | Highlight | Setup |
 | --- | ---: | ---: |
-| highlight.js | 689.556 ms | 186.292 µs |
-| Lumis Rust | 2.126 s | — |
-| Lumis CLI | 2.413 s | — |
-| Lumis Elixir | 2.688 s | — |
-| Lumis JavaScript (Node, Wasmtime) | 2.732 s | 747.375 µs |
-| syntect | 3.292 s | — |
-| bat | 4.929 s | — |
-| Lumis JavaScript (web-tree-sitter) | 7.446 s | 129.877 ms |
-| Shiki | 8.143 s | 418.042 µs |
+| highlight.js | 750.527 ms | 204.125 µs |
+| Lumis Rust | 2.159 s | — |
+| Lumis CLI | 2.518 s | — |
+| Lumis Elixir | 2.832 s | — |
+| Lumis JavaScript (Node, Wasmtime) | 2.845 s | 50.397 ms |
+| syntect | 3.635 s | — |
+| bat | 5.166 s | — |
+| Shiki | 8.836 s | 426.166 µs |
+| Lumis JavaScript (web-tree-sitter) | 9.062 s | 56.409 ms |
 
 ## 10 different files for 1 language
 
@@ -94,15 +112,15 @@ Highlight ten different small Rust files.
 
 | Tool | Highlight | Setup |
 | --- | ---: | ---: |
-| highlight.js | 1.260 ms | 81.667 µs |
-| Lumis Rust | 2.643 ms | — |
-| Lumis Elixir | 3.759 ms | — |
-| Lumis JavaScript (Node, Wasmtime) | 4.513 ms | 534.333 µs |
-| syntect | 7.172 ms | — |
-| Lumis JavaScript (web-tree-sitter) | 11.159 ms | 53.352 ms |
-| Shiki | 11.553 ms | 368.125 µs |
-| bat | 133.097 ms | — |
-| Lumis CLI | 567.182 ms | — |
+| highlight.js | 1.428 ms | 81.416 µs |
+| Lumis Rust | 2.582 ms | — |
+| Lumis Elixir | 4.171 ms | — |
+| Lumis JavaScript (Node, Wasmtime) | 4.937 ms | 49.873 ms |
+| syntect | 7.639 ms | — |
+| Shiki | 12.430 ms | 432.792 µs |
+| Lumis JavaScript (web-tree-sitter) | 12.788 ms | 55.723 ms |
+| bat | 149.420 ms | — |
+| Lumis CLI | 599.630 ms | — |
 
 ## 10 different files for 10 languages
 
@@ -110,12 +128,12 @@ Highlight ten different small files, each in a different language.
 
 | Tool | Highlight | Setup |
 | --- | ---: | ---: |
-| highlight.js | 1.392 ms | 356.000 µs |
-| Lumis Rust | 1.732 ms | — |
-| Lumis Elixir | 2.686 ms | — |
-| Lumis JavaScript (Node, Wasmtime) | 3.240 ms | 1.582 ms |
-| Lumis JavaScript (web-tree-sitter) | 6.700 ms | 263.829 ms |
-| Shiki | 6.994 ms | 8.985 ms |
-| syntect | 21.226 ms | — |
-| bat | 123.135 ms | — |
-| Lumis CLI | 307.943 ms | — |
+| highlight.js | 1.552 ms | 416.166 µs |
+| Lumis Rust | 2.119 ms | — |
+| Lumis Elixir | 3.108 ms | — |
+| Lumis JavaScript (Node, Wasmtime) | 3.733 ms | 245.742 ms |
+| Shiki | 7.394 ms | 10.311 ms |
+| Lumis JavaScript (web-tree-sitter) | 7.629 ms | 287.011 ms |
+| syntect | 22.727 ms | — |
+| bat | 132.850 ms | — |
+| Lumis CLI | 335.525 ms | — |
