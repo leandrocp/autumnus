@@ -277,11 +277,47 @@ describe("native runtime", () => {
   });
 
   it.runIf(binding)("leaves a document alone when an injected language is unavailable", () => {
-    const runtime = new binding!.NativeRuntime();
-    // `comment` is staged, `regex` is not, and markdown injects both.
-    const highlighted = runtime.highlightEvents("```regex\n[a-z]+\n```\n", "markdown", false);
+    const nativeDirectory = resolve(import.meta.dirname, "../native");
+    const addon = readdirSync(nativeDirectory).find(
+      (name) => name.startsWith("lumis-native.") && name.endsWith(".node"),
+    );
+    expect(addon).toBeDefined();
 
-    expect(highlighted.events.length).toBeGreaterThan(0);
+    // `comment` is staged and `regex` is not, but both are published, so a
+    // store that can reach the CDN resolves `regex` and reports nothing. Only
+    // an unreachable one makes "not staged" mean "unavailable"; the child
+    // process is what keeps the poisoned proxy out of every other test.
+    const result = spawnSync(
+      process.execPath,
+      [
+        "--input-type=commonjs",
+        "--eval",
+        `
+          const binding = require(process.argv[1]);
+          const runtime = new binding.NativeRuntime();
+          const highlighted = runtime.highlightEvents(process.argv[2], "markdown", false);
+          process.stdout.write(
+            JSON.stringify({
+              events: highlighted.events.length,
+              unresolved: highlighted.unresolved,
+            }),
+          );
+        `,
+        resolve(nativeDirectory, addon!),
+        "```regex\n[a-z]+\n```\n",
+      ],
+      {
+        encoding: "utf8",
+        env: { ...process.env, ALL_PROXY: "http://127.0.0.1:1", NO_PROXY: "", no_proxy: "" },
+        timeout: 30_000,
+      },
+    );
+
+    expect(result.error).toBeUndefined();
+    expect(result.status, result.stderr).toBe(0);
+
+    const highlighted = JSON.parse(result.stdout) as { events: number; unresolved: string[] };
+    expect(highlighted.events).toBeGreaterThan(0);
     // Reported rather than swallowed, so a caller that resolves parsers itself
     // can tell the difference between "no injection" and "could not load it".
     expect(highlighted.unresolved).toContain("regex");

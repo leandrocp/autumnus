@@ -597,6 +597,7 @@ set -euo pipefail
 mise run langs-fetch-vendored-parsers ${usage_name?}
 cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- cargo-update-dep ${usage_name?}
 cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- cargo-update-features
+mise run langs-sync-lockfiles
 mise run langs-gen-catalog
 mise run langs-fetch-queries ${usage_name?}
 mise run langs-preprocess-queries ${usage_name?}
@@ -702,6 +703,16 @@ set -euo pipefail
 cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- upgrade-parsers ${usage_name:-}
 cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- cargo-update-dep ${usage_name:-}
 cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- cargo-update-features
+mise run langs-sync-lockfiles
+'''
+
+[tasks.'langs-sync-lockfiles']
+description = "Re-resolve both lockfiles after a crate-backed parser version changes, so --locked builds still work"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+cargo metadata --format-version 1 >/dev/null
+cargo metadata --manifest-path crates/dev/Cargo.toml --format-version 1 >/dev/null
 '''
 
 [tasks.'langs-upgrade-queries']
