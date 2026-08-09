@@ -1741,10 +1741,17 @@ fn is_publishable(document: &toml_edit::DocumentMut) -> bool {
     let Some(package) = document.get("package") else {
         return false;
     };
-    package
-        .get("publish")
-        .and_then(|publish| publish.as_bool())
-        .unwrap_or(true)
+    let Some(publish) = package.get("publish") else {
+        return true;
+    };
+    if let Some(allowed) = publish.as_bool() {
+        return allowed;
+    }
+    // cargo: "`package.publish` must be set to `true` or a non-empty list in
+    // Cargo.toml to publish", so `publish = []` is another spelling of `false`.
+    publish
+        .as_array()
+        .is_none_or(|registries| !registries.is_empty())
 }
 
 fn read_manifests() -> Result<Vec<Manifest>> {
@@ -3887,12 +3894,31 @@ features = ["lang-rust"]
         assert_eq!(inherited, vec![true]);
     }
 
+    fn publishable(manifest: &str) -> bool {
+        is_publishable(&manifest.parse().expect("valid manifest"))
+    }
+
     #[test]
     fn a_manifest_without_a_package_is_not_publishable() {
-        let document: toml_edit::DocumentMut = "[workspace]\nmembers = []\n"
-            .parse()
-            .expect("valid manifest");
-        assert!(!is_publishable(&document));
+        assert!(!publishable("[workspace]\nmembers = []\n"));
+    }
+
+    #[test]
+    fn publish_decides_whether_a_requirement_can_reach_a_registry() {
+        assert!(publishable("[package]\nname = \"example\"\n"));
+        assert!(publishable(
+            "[package]\nname = \"example\"\npublish = true\n"
+        ));
+        assert!(!publishable(
+            "[package]\nname = \"example\"\npublish = false\n"
+        ));
+        // cargo rejects `cargo publish` for both of these.
+        assert!(!publishable(
+            "[package]\nname = \"example\"\npublish = []\n"
+        ));
+        assert!(publishable(
+            "[package]\nname = \"example\"\npublish = [\"crates-io\"]\n"
+        ));
     }
 
     #[test]
