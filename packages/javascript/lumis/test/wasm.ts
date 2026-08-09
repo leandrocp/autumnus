@@ -1,9 +1,37 @@
+import { createHash } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+import { join, resolve, sep } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import { parse as parseToml } from "smol-toml";
 
-import { configureWasmResolver } from "../src/index.js";
+import {
+  configureLanguagePackageResolver as configureDefaultLanguagePackageResolver,
+  configureWasmResolver as configureDefaultWasmResolver,
+} from "../src/index.js";
+import type {
+  LanguagePackage,
+  LanguagePackageResolver,
+  WasmResolver,
+} from "../src/core/languages.js";
 
-const fixturesRoot = new URL("./fixtures/wasm/", import.meta.url);
+const repositoryRoot = resolve(process.cwd(), "../../..");
+const fixturesRoot = pathToFileURL(
+  join(repositoryRoot, "packages/javascript/lumis/test/fixtures/wasm") + sep,
+);
+const packageDataUrls = new Map<string, string>();
+const packageMetadataCache = new Map<string, LanguagePackage>();
+const parserDefinitions = (
+  parseToml(readFileSync(join(repositoryRoot, "languages.toml"), "utf8")) as {
+    parsers: Record<
+      string,
+      {
+        aliases?: string[];
+        query_name?: string;
+        wasm_name?: string;
+      }
+    >;
+  }
+).parsers;
 
 export function ensureLocalWasm(language: string): URL {
   return ensureLocalParserWasm(language, `tree-sitter-${language}`);
@@ -19,12 +47,98 @@ export function ensureLocalParserWasm(language: string, parser: string): URL {
   return wasmUrl;
 }
 
-export function configureLocalWasmResolver(languages: string[]): void {
+interface ResolverConfiguration {
+  configureLanguagePackageResolver(resolver: LanguagePackageResolver): void;
+  configureWasmResolver(resolver: WasmResolver): void;
+}
+
+const defaultResolverConfiguration: ResolverConfiguration = {
+  configureLanguagePackageResolver: configureDefaultLanguagePackageResolver,
+  configureWasmResolver: configureDefaultWasmResolver,
+};
+
+export function configureLocalWasmResolver(
+  languages: string[],
+  configuration: ResolverConfiguration = defaultResolverConfiguration,
+  wasmResolver: WasmResolver = (language, wasm) => ensureLocalParserWasm(language, wasm.name),
+): void {
   for (const language of languages) {
     ensureLocalWasm(language);
   }
 
-  configureWasmResolver((_language, wasm) => new URL(`${wasm.name}.wasm`, fixturesRoot));
+  configuration.configureLanguagePackageResolver(localLanguagePackageResolver);
+  configuration.configureWasmResolver(wasmResolver);
+}
+
+export function localLanguagePackageResolver(packageName: string): string {
+  const cached = packageDataUrls.get(packageName);
+  if (cached) return cached;
+
+  const packageMetadata = localLanguagePackageMetadata(packageName);
+  const dataUrl = `data:application/json;base64,${Buffer.from(
+    JSON.stringify(packageMetadata),
+  ).toString("base64")}`;
+  packageDataUrls.set(packageName, dataUrl);
+  return dataUrl;
+}
+
+export function localLanguagePackageMetadata(packageName: string): LanguagePackage {
+  const cached = packageMetadataCache.get(packageName);
+  if (cached) return cached;
+
+  const packageLanguages = Object.entries(parserDefinitions).filter(([language, definition]) => {
+    const wasmName = definition.wasm_name ?? `tree-sitter-${language}`;
+    const suffix = wasmName.replace(/^tree-sitter-/, "");
+    return `@lumis-sh/wasm-${suffix}` === packageName;
+  });
+  if (packageLanguages.length === 0) {
+    throw new Error(`Unknown local language package: ${packageName}`);
+  }
+  const [parserId, parserDefinition] = packageLanguages[0];
+  const wasmName = parserDefinition.wasm_name ?? `tree-sitter-${parserId}`;
+  const wasm = readFileSync(fileURLToPath(ensureLocalParserWasm(parserId, wasmName)));
+  const query = (language: string, name: string): string => {
+    const queryName = parserDefinitions[language].query_name ?? language;
+    const path = join(repositoryRoot, "queries/processed", queryName, `${name}.scm`);
+    return existsSync(path) ? readFileSync(path, "utf8") : "";
+  };
+  const defaultBrackets = readFileSync(
+    join(repositoryRoot, "queries/processed/default/brackets.scm"),
+    "utf8",
+  );
+  const grammarNames = WebAssembly.Module.exports(new WebAssembly.Module(wasm))
+    .filter(({ kind, name }) => kind === "function" && name.startsWith("tree_sitter_"))
+    .map(({ name }) => name.slice("tree_sitter_".length))
+    .filter((name) => !name.startsWith("external_scanner_"));
+  if (grammarNames.length !== 1) {
+    throw new Error(`Expected one grammar export for ${language}: ${grammarNames.join(", ")}`);
+  }
+
+  const packageMetadata: LanguagePackage = {
+    packageName,
+    version: "test",
+    definitionHash: createHash("sha256").update(wasm).digest("hex"),
+    parser: {
+      name: wasmName,
+      grammarName: grammarNames[0],
+      sha256: createHash("sha256").update(wasm).digest("hex"),
+      size: wasm.byteLength,
+    },
+    languages: Object.fromEntries(
+      packageLanguages.map(([language, definition]) => [
+        language,
+        {
+          aliases: definition.aliases ?? [],
+          highlights: query(language, "highlights"),
+          injections: query(language, "injections"),
+          locals: query(language, "locals"),
+          brackets: query(language, "brackets") || defaultBrackets,
+        },
+      ]),
+    ),
+  };
+  packageMetadataCache.set(packageName, packageMetadata);
+  return packageMetadata;
 }
 
 export function ensureLocalParserWasmDataUrl(language: string, parser: string): string {

@@ -10,7 +10,7 @@ authors.workspace = true
 description = "Syntax Highlighter CLI powered by Tree-sitter and Neovim themes"
 keywords = ["lumis", "syntax-highlighter", "tree-sitter", "neovim", "cli"]
 categories = ["command-line-utilities", "text-processing"]
-include = ["/src/", "/themes/", "/build.rs", "/languages.toml", "/queries/", "/CHANGELOG.md", "/LICENSE"]
+include = ["/src/", "/themes/", "/build.rs", "/CHANGELOG.md", "/LICENSE"]
 
 [[bin]]
 name = "lumis"
@@ -30,7 +30,6 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 toml = "1.1"
 etcetera = "0.11"
-ureq = "3"
 tempfile = "3"
 terminal_size = "0.4"
 terminal-colorsaurus = "1.0.3"
@@ -38,12 +37,3 @@ terminal-colorsaurus = "1.0.3"
 [dev-dependencies]
 assert_cmd = "2"
 predicates = "3"
-
-[build-dependencies]
-proc-macro2 = "1"
-quote = "1"
-syn = { version = "2", features = ["full", "parsing"] }
-prettyplease = "0.2"
-toml = "1.1"
-serde = { version = "1", features = ["derive"] }
-lumis-build = { path = "../lumis-build", version = "1.0.0" }

@@ -1,178 +1,263 @@
-import { rmSync } from 'node:fs'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { ensureLocalParserWasm, ensureLocalWasm } from './wasm.js'
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { RuntimeWasmInput } from "../src/types.js";
+import {
+  ensureLocalParserWasm,
+  ensureLocalWasm,
+  localLanguagePackageMetadata,
+  localLanguagePackageResolver,
+} from "./wasm.js";
 
-const CACHE_DIR = 'node_modules/.cache/lumis'
+const CACHE_DIR = ".tmp/wasm-resolver-cache";
+process.env.LUMIS_DATA_DIR = CACHE_DIR;
 
-vi.mock('../src/native-binding.js', async (importOriginal) => {
-  const binding = await importOriginal<typeof import('../src/native-binding.js')>()
-  return process.env.LUMIS_TEST_RUNTIME === 'native'
-    ? binding
-    : { ...binding, loadNativeBinding: () => undefined }
-})
-
-beforeEach(() => {
+beforeEach(async () => {
   // Clear FS cache so the resolver is always called
-  try { rmSync(CACHE_DIR, { recursive: true }) } catch {}
-})
+  try {
+    rmSync(CACHE_DIR, { recursive: true });
+  } catch {}
+  const { configureLanguagePackageResolver } = await import("../src/index.js");
+  configureLanguagePackageResolver(localLanguagePackageResolver);
+});
 
 afterEach(() => {
-  vi.restoreAllMocks()
-  vi.resetModules()
-})
+  vi.restoreAllMocks();
+  vi.resetModules();
+});
 
-describe.skipIf(process.env.LUMIS_TEST_RUNTIME === 'native')('Wasm resolver', () => {
-  it('uses parser name and version in the default resolver', async () => {
-    const { default: diff } = await import('../langs/diff.ts')
+describe("Wasm resolver", () => {
+  it("rejects incomplete language package metadata", async () => {
+    const { parseLanguagePackage } = await import("../src/core/languages.js");
+    const packageName = "@lumis-sh/wasm-invalid";
+    const bytes = new TextEncoder().encode(
+      JSON.stringify({
+        packageName,
+        version: "0.26.0",
+        definitionHash: "definition",
+        parser: {
+          name: "tree-sitter-invalid",
+          grammarName: "invalid",
+          sha256: "digest",
+          size: 1,
+        },
+        languages: {
+          invalid: { aliases: [], highlights: 42 },
+        },
+      }),
+    );
 
-    expect(diff.wasm).toEqual({
-      packageName: '@lumis-sh/wasm-diff',
-      name: 'tree-sitter-diff',
-      version: expect.any(String),
-    })
-  })
+    expect(() => parseLanguagePackage(bytes, packageName)).toThrow(
+      "Invalid Lumis language package",
+    );
+  });
 
-  it('loads WasmRef bundles from file:// URLs in Node without fetch', async () => {
-    const { createHighlighter } = await import('../src/index.js')
-    const { htmlLinked } = await import('../src/formatters.js')
-    const { default: diff } = await import('../langs/diff.ts')
+  it("rejects language package metadata that escapes cache paths", async () => {
+    const { parseLanguagePackage } = await import("../src/core/languages.js");
+    const packageName = "@lumis-sh/wasm-diff";
+    const metadata = structuredClone(localLanguagePackageMetadata(packageName));
+    metadata.parser.name = "../tree-sitter-diff";
+
+    expect(() =>
+      parseLanguagePackage(new TextEncoder().encode(JSON.stringify(metadata)), packageName),
+    ).toThrow("Invalid Lumis language package");
+  });
+
+  it("keeps exact parser metadata in the language package", async () => {
+    const { default: diff } = await import("../langs/diff.ts");
+    const packageMetadata = localLanguagePackageMetadata(diff.packageName);
+
+    expect(diff).toEqual({
+      id: "diff",
+      aliases: [],
+      packageName: "@lumis-sh/wasm-diff",
+      // Pinned by the catalog, so every runtime resolves the same parser.
+      version: expect.stringMatching(/^\d+\.\d+\.\d+$/),
+    });
+    expect(packageMetadata.parser).toEqual({
+      name: "tree-sitter-diff",
+      grammarName: "diff",
+      sha256: expect.stringMatching(/^[0-9a-f]{64}$/),
+      size: expect.any(Number),
+    });
+  });
+
+  it("loads WasmRef bundles from file:// URLs in Node without fetch", async () => {
+    const { createHighlighter } = await import("../src/index.js");
+    const { htmlLinked } = await import("../src/formatters.js");
+    const { default: diff } = await import("../langs/diff.ts");
 
     const hl = await createHighlighter({
-      languages: [{ ...diff, wasm: ensureLocalWasm('diff') }],
+      languages: [{ ...diff, wasm: ensureLocalWasm("diff") }],
       wasmResolver: (language, wasm) => ensureLocalParserWasm(language, wasm.name),
-    })
+    });
 
-    const html = hl.highlight('- old\n+ new', htmlLinked({ language: diff }))
-    expect(html).toContain('class="language-diff"')
-  }, 30_000)
+    const html = hl.highlight("- old\n+ new", htmlLinked({ language: diff }));
+    expect(html).toContain('class="language-diff"');
+  }, 30_000);
 
-  it('supports withWasm for explicit runtime wasm inputs', async () => {
-    const { createHighlighter, withWasm } = await import('../src/index.js')
-    const { htmlLinked } = await import('../src/formatters.js')
-    const { default: diff } = await import('../langs/diff.ts')
+  it("supports withWasm for explicit runtime wasm inputs", async () => {
+    const { createHighlighter, withWasm } = await import("../src/index.js");
+    const { htmlLinked } = await import("../src/formatters.js");
+    const { default: diff } = await import("../langs/diff.ts");
 
-    const language = withWasm(diff, ensureLocalWasm('diff'))
+    const language = withWasm(diff, ensureLocalWasm("diff"));
     const hl = await createHighlighter({
       languages: [language],
       wasmResolver: (language, wasm) => ensureLocalParserWasm(language, wasm.name),
-    })
+    });
 
-    const html = hl.highlight('- old\n+ new', htmlLinked({ language }))
-    expect(html).toContain('class="language-diff"')
-  }, 30_000)
+    const html = hl.highlight("- old\n+ new", htmlLinked({ language }));
+    expect(html).toContain('class="language-diff"');
+  }, 30_000);
 
-  it('accepts wasmResolver in createHighlighter options', async () => {
-    const { createHighlighter } = await import('../src/index.js')
-    const { htmlLinked } = await import('../src/formatters.js')
-    const { default: diff } = await import('../langs/diff.ts')
+  it("accepts wasmResolver in createHighlighter options", async () => {
+    const { createHighlighter } = await import("../src/index.js");
+    const { htmlLinked } = await import("../src/formatters.js");
+    const { default: diff } = await import("../langs/diff.ts");
 
-    const resolver = (_language: string, wasm: { name: string }) => ensureLocalParserWasm(_language, wasm.name)
+    const resolver = (_language: string, wasm: { name: string }) =>
+      ensureLocalParserWasm(_language, wasm.name);
 
     const hl = await createHighlighter({
       languages: [diff],
       wasmResolver: resolver,
-    })
+    });
 
-    const html = hl.highlight('- old\n+ new', htmlLinked({ language: diff }))
-    expect(html).toContain('class="language-diff"')
-  }, 30_000)
+    const html = hl.highlight("- old\n+ new", htmlLinked({ language: diff }));
+    expect(html).toContain('class="language-diff"');
+  }, 30_000);
 
-  it('per-instance resolver is isolated from global resolver', async () => {
-    const { createHighlighter, configureWasmResolver } = await import('../src/index.js')
-    const { htmlLinked } = await import('../src/formatters.js')
-    const { default: diff } = await import('../langs/diff.ts')
+  it("shares verified parser bytes across highlighter instances", async () => {
+    const { createHighlighter } = await import("../src/index.js");
+    const { default: diff } = await import("../langs/diff.ts");
+    const resolver = vi.fn((language: string, wasm: { name: string }) =>
+      ensureLocalParserWasm(language, wasm.name),
+    );
 
-    const globalCalls: string[] = []
-    const instanceCalls: string[] = []
+    await createHighlighter({ languages: [diff], wasmResolver: resolver });
+    await createHighlighter({ languages: [diff], wasmResolver: resolver });
+
+    expect(resolver).toHaveBeenCalledTimes(1);
+  }, 30_000);
+
+  it("replaces a corrupted persistent cache entry", async () => {
+    const { createHighlighter } = await import("../src/index.js");
+    const { htmlLinked } = await import("../src/formatters.js");
+    const { default: diff } = await import("../langs/diff.ts");
+    const packageMetadata = localLanguagePackageMetadata(diff.packageName);
+    const key = `${packageMetadata.parser.name}-${packageMetadata.version}-${packageMetadata.parser.sha256}`;
+    const parsers = join(CACHE_DIR, "parsers");
+    const cacheFile = join(parsers, `${encodeURIComponent(key)}.wasm`);
+    mkdirSync(parsers, { recursive: true });
+    writeFileSync(cacheFile, new Uint8Array([0, 1, 2, 3]));
+
+    const hl = await createHighlighter({
+      languages: [diff],
+      wasmResolver: (language, wasm) => ensureLocalParserWasm(language, wasm.name),
+    });
+
+    expect(hl.highlight("- old\n+ new", htmlLinked({ language: diff }))).toContain(
+      'class="language-diff"',
+    );
+    expect(readFileSync(cacheFile).byteLength).toBe(packageMetadata.parser.size);
+  }, 30_000);
+
+  it("rejects parser bytes that do not match the exact package entry", async () => {
+    const { createHighlighter } = await import("../src/index.js");
+    const { default: diff } = await import("../langs/diff.ts");
+
+    await expect(
+      createHighlighter({
+        languages: [diff],
+        wasmResolver: (language) => ensureLocalParserWasm(language, "tree-sitter-html"),
+      }),
+    ).rejects.toThrow(/Invalid WASM (size|integrity)/);
+  }, 30_000);
+
+  it.each(["Uint8Array", "ArrayBuffer", "string", "URL", "Response"] as const)(
+    "verifies an explicit %s parser against the package entry",
+    async (kind) => {
+      const { createHighlighter } = await import("../src/index.js");
+      const { default: json } = await import("../langs/json.ts");
+      const url = ensureLocalWasm("markdown");
+      const bytes = new Uint8Array(readFileSync(url));
+      const inputs: Record<typeof kind, RuntimeWasmInput> = {
+        Uint8Array: bytes,
+        ArrayBuffer: bytes.buffer,
+        string: fileURLToPath(url),
+        URL: url,
+        Response: new Response(bytes),
+      };
+
+      await expect(
+        createHighlighter({ languages: [{ ...json, wasm: inputs[kind] }] }),
+      ).rejects.toThrow(/Invalid WASM (size|integrity)/);
+    },
+    30_000,
+  );
+
+  it("per-instance resolver is isolated from global resolver", async () => {
+    const { createHighlighter, configureWasmResolver } = await import("../src/index.js");
+    const { htmlLinked } = await import("../src/formatters.js");
+    const { default: diff } = await import("../langs/diff.ts");
+
+    const globalCalls: string[] = [];
+    const instanceCalls: string[] = [];
 
     configureWasmResolver((language, wasm) => {
-      globalCalls.push(language)
-      return ensureLocalParserWasm(language, wasm.name)
-    })
+      globalCalls.push(language);
+      return ensureLocalParserWasm(language, wasm.name);
+    });
 
     const hl = await createHighlighter({
       languages: [diff],
       wasmResolver: (language, wasm) => {
-        instanceCalls.push(language)
-        return ensureLocalParserWasm(language, wasm.name)
+        instanceCalls.push(language);
+        return ensureLocalParserWasm(language, wasm.name);
       },
-    })
+    });
 
-    const html = hl.highlight('- old\n+ new', htmlLinked({ language: diff }))
-    expect(html).toContain('class="language-diff"')
-    expect(instanceCalls.length).toBeGreaterThan(0)
-    expect(globalCalls).not.toContain('diff')
-  }, 30_000)
+    const html = hl.highlight("- old\n+ new", htmlLinked({ language: diff }));
+    expect(html).toContain('class="language-diff"');
+    expect(instanceCalls.length).toBeGreaterThan(0);
+    expect(globalCalls).not.toContain("diff");
+  }, 30_000);
 
-  it('global configureWasmResolver applies to createHighlighter without explicit resolver', async () => {
-    const { createHighlighter, configureWasmResolver } = await import('../src/index.js')
-    const { htmlLinked } = await import('../src/formatters.js')
-    const { default: diff } = await import('../langs/diff.ts')
+  it("global configureWasmResolver applies to createHighlighter without explicit resolver", async () => {
+    const { createHighlighter, configureWasmResolver } = await import("../src/index.js");
+    const { htmlLinked } = await import("../src/formatters.js");
+    const { default: diff } = await import("../langs/diff.ts");
 
-    const calls: string[] = []
+    const calls: string[] = [];
     configureWasmResolver((language, wasm) => {
-      calls.push(language)
-      return ensureLocalParserWasm(language, wasm.name)
-    })
+      calls.push(language);
+      return ensureLocalParserWasm(language, wasm.name);
+    });
 
-    const hl = await createHighlighter({ languages: [diff] })
-    const html = hl.highlight('- old\n+ new', htmlLinked({ language: diff }))
+    const hl = await createHighlighter({ languages: [diff] });
+    const html = hl.highlight("- old\n+ new", htmlLinked({ language: diff }));
 
-    expect(html).toContain('class="language-diff"')
-    expect(calls).toContain('diff')
-  }, 30_000)
+    expect(html).toContain('class="language-diff"');
+    expect(calls).toContain("diff");
+  }, 30_000);
 
-  it('configureWasmResolver called after createHighlighter affects highlighters without explicit resolver', async () => {
-    const { createHighlighter, configureWasmResolver } = await import('../src/index.js')
-    const { default: html } = await import('../langs/html.ts')
+  it("configureWasmResolver called after createHighlighter affects highlighters without explicit resolver", async () => {
+    const { createHighlighter, configureWasmResolver } = await import("../src/index.js");
+    const { default: html } = await import("../langs/html.ts");
 
-    configureWasmResolver((language, wasm) => ensureLocalParserWasm(language, wasm.name))
-    const hl = await createHighlighter()
+    configureWasmResolver((language, wasm) => ensureLocalParserWasm(language, wasm.name));
+    const hl = await createHighlighter();
 
-    const calls: string[] = []
+    const calls: string[] = [];
     configureWasmResolver((language, wasm) => {
-      calls.push(language)
-      return ensureLocalParserWasm(language, wasm.name)
-    })
+      calls.push(language);
+      return ensureLocalParserWasm(language, wasm.name);
+    });
 
-    await hl.loadLanguage(html)
+    await hl.loadLanguage(html);
 
-    expect(calls).toContain('html')
-  }, 30_000)
-})
-
-it.runIf(process.env.LUMIS_TEST_RUNTIME === 'native')(
-  'does not resolve parser Wasm in the native runtime',
-  async () => {
-    const { createHighlighter, configureWasmResolver } = await import('../src/index.js')
-    const { htmlLinked } = await import('../src/formatters.js')
-    const { default: diff } = await import('../langs/diff.ts')
-
-    configureWasmResolver(() => {
-      throw new Error('native runtime must not resolve parser Wasm')
-    })
-    const hl = await createHighlighter({ languages: [diff] })
-
-    expect(hl.highlight('- old\n+ new', htmlLinked({ language: diff }))).toContain(
-      'class="language-diff"',
-    )
-  },
-)
-
-it.runIf(process.env.LUMIS_TEST_RUNTIME === 'native')(
-  'rejects languages not compiled into the native runtime',
-  async () => {
-    const { createHighlighter } = await import('../src/index.js')
-    const { default: diff } = await import('../langs/diff.ts')
-    const custom = {
-      ...diff,
-      id: 'custom-diff',
-      aliases: [],
-      wasm: ensureLocalWasm('diff'),
-    }
-
-    await expect(createHighlighter({ languages: [custom] })).rejects.toThrow(
-      'The native runtime does not include language "custom-diff"',
-    )
-  },
-)
+    expect(calls).toContain("html");
+  }, 30_000);
+});

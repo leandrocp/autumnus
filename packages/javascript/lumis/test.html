@@ -1,0 +1,21 @@
+<!-- packages/javascript/lumis/test.html -->
+<div id="out"></div>
+<script type="module">
+  import { createHighlighter } from "@lumis-sh/lumis";
+  import { htmlInline } from "@lumis-sh/lumis/formatters";
+  import elixir from "@lumis-sh/lumis/langs/elixir";
+  import dracula from "@lumis-sh/themes/dracula";
+
+  const base = "/.tmp/parsers";
+  const highlighter = await createHighlighter({
+    languages: [elixir],
+    languagePackageResolver: (packageName) =>
+      `${base}/${packageName.replace("@lumis-sh/wasm-", "")}.lumis.json`,
+    wasmResolver: (_language, wasm) => `${base}/${wasm.name}-${wasm.version}-${wasm.sha256}.wasm`,
+  });
+
+  document.getElementById("out").innerHTML = highlighter.highlight(
+    'def foo, do: "hello"',
+    htmlInline({ language: elixir, theme: dracula }),
+  );
+</script>

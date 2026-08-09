@@ -1,0 +1,17 @@
+[markup-heading-1-markdown]# Report
+[/markup-heading-1-markdown]
+Inline [markup-raw-markdown_inline]`code`[/markup-raw-markdown_inline] and [markup-strong-markdown_inline]**bold**[/markup-strong-markdown_inline] text.
+
+[markup-raw-block-markdown][markup-raw-block-markdown]```[/markup-raw-block-markdown][label-markdown][label-markdown]python[/label-markdown][/label-markdown]
+[keyword-python][punctuation-special-markdown][/punctuation-special-markdown]def[/keyword-python] [function-python]total[/function-python]([variable-python]rows[/variable-python]):
+[punctuation-special-markdown][/punctuation-special-markdown]    [keyword-python]return[/keyword-python] [function-builtin-python]sum[/function-builtin-python]([variable-python]r[/variable-python]&#91;[string-python]"n"[/string-python]&#93; [keyword-python]for[/keyword-python] [variable-python]r[/variable-python] [operator-python]in[/operator-python] [variable-python]rows[/variable-python])
+[markup-raw-block-markdown][punctuation-special-markdown][/punctuation-special-markdown]```[/markup-raw-block-markdown]
+[/markup-raw-block-markdown]
+[markup-raw-block-markdown][markup-raw-block-markdown]```[/markup-raw-block-markdown][label-markdown][label-markdown]json[/label-markdown][/label-markdown]
+[punctuation-bracket-json][punctuation-special-markdown][/punctuation-special-markdown]{[/punctuation-bracket-json][property-json]"rows"[/property-json][punctuation-delimiter-json]:[/punctuation-delimiter-json] [punctuation-bracket-json]&#91;[/punctuation-bracket-json][punctuation-bracket-json]{[/punctuation-bracket-json][property-json]"n"[/property-json][punctuation-delimiter-json]:[/punctuation-delimiter-json] [number-json]1[/number-json][punctuation-bracket-json]}[/punctuation-bracket-json][punctuation-bracket-json]&#93;[/punctuation-bracket-json][punctuation-bracket-json]}[/punctuation-bracket-json]
+[markup-raw-block-markdown][punctuation-special-markdown][/punctuation-special-markdown]```[/markup-raw-block-markdown]
+[/markup-raw-block-markdown]
+[markup-raw-block-markdown][markup-raw-block-markdown]```[/markup-raw-block-markdown][label-markdown][label-markdown]css[/label-markdown][/label-markdown]
+[punctuation-delimiter-css][punctuation-special-markdown][/punctuation-special-markdown].[/punctuation-delimiter-css][type-css]total[/type-css][punctuation-delimiter-css]::[/punctuation-delimiter-css][attribute-css]after[/attribute-css] [punctuation-bracket-css]{[/punctuation-bracket-css] [property-css]content[/property-css][punctuation-delimiter-css]:[/punctuation-delimiter-css] [string-css]"%"[/string-css][punctuation-delimiter-css];[/punctuation-delimiter-css] [property-css]color[/property-css][punctuation-delimiter-css]:[/punctuation-delimiter-css] red[punctuation-delimiter-css];[/punctuation-delimiter-css] [punctuation-bracket-css]}[/punctuation-bracket-css]
+[markup-raw-block-markdown][punctuation-special-markdown][/punctuation-special-markdown]```[/markup-raw-block-markdown]
+[/markup-raw-block-markdown]

@@ -133,7 +133,7 @@
     (identifier) @type))
 
 ((identifier) @type
-  (#lua-match? @type "^[A-Z]"))
+  (#match? @type "^[A-Z]"))
 
 ((identifier) @type.builtin
   (#any-of? @type.builtin

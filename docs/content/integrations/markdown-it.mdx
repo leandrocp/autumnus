@@ -77,11 +77,11 @@ Use this when you want to reuse an existing highlighter.
 ## Options
 
 - `formatter` - required callback that receives the fence language and returns a Lumis formatter
-- `languages` - languages to register or preload before calling sync `md.render()`; accepts `Language` objects, bundles, and string refs when a bundle is also present
+- `languages` - languages to register or load during setup before calling sync `md.render()`; accepts `Language` objects, bundles, and string refs when a bundle is also present
 
 ## Behavior
 
 - overrides fenced code rendering
 - loads any language refs passed in `languages` during async setup
-- renders synchronously after setup, so preload the languages you expect to use
+- renders synchronously after setup, so load the languages you expect to use
 - falls back to the default fence renderer if highlighting fails and no fallback succeeds

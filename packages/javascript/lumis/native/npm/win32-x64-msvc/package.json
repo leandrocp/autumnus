@@ -6,6 +6,7 @@
   "repository": "github:leandrocp/lumis",
   "main": "lumis-native.win32-x64-msvc.node",
   "files": [
+    "LICENSE",
     "lumis-native.win32-x64-msvc.node"
   ],
   "os": [

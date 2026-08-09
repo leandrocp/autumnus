@@ -28,7 +28,7 @@
     },
     {
       "type": "start",
-      "scope": "punctuation.bracket",
+      "scope": "tag.delimiter",
       "language": "html"
     },
     {
@@ -54,7 +54,7 @@
     },
     {
       "type": "start",
-      "scope": "punctuation.bracket",
+      "scope": "tag.delimiter",
       "language": "html"
     },
     {
@@ -66,9 +66,17 @@
       "type": "end"
     },
     {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "javascript"
+    },
+    {
       "type": "source",
       "start": 10,
       "end": 12
+    },
+    {
+      "type": "end"
     },
     {
       "type": "start",
@@ -97,9 +105,17 @@
       "type": "end"
     },
     {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "javascript"
+    },
+    {
       "type": "source",
       "start": 14,
       "end": 16
+    },
+    {
+      "type": "end"
     },
     {
       "type": "start",
@@ -129,7 +145,7 @@
     },
     {
       "type": "start",
-      "scope": "punctuation.bracket",
+      "scope": "tag.delimiter",
       "language": "html"
     },
     {
@@ -155,7 +171,7 @@
     },
     {
       "type": "start",
-      "scope": "punctuation.bracket",
+      "scope": "tag.delimiter",
       "language": "html"
     },
     {

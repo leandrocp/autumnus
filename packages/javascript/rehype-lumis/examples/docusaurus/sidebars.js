@@ -1,3 +1,3 @@
 export default {
-  tutorialSidebar: ['intro'],
-}
+  tutorialSidebar: ["intro"],
+};

@@ -1,0 +1,187 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>Lumis local parsers</title>
+<style>
+  body {
+    font: 14px/1.5 ui-monospace, monospace;
+    background: #1a1b26;
+    color: #c0caf5;
+    margin: 0 auto;
+    padding: 2rem;
+    max-width: 60rem;
+  }
+  h2 { font-size: 14px; font-weight: 600; margin: 2rem 0 0.5rem; color: #7aa2f7; }
+  p { color: #565f89; }
+  pre.lumis { padding: 1rem; border-radius: 6px; overflow-x: auto; }
+  table td { padding: 0.1rem 1.5rem 0.1rem 0; }
+  table td:nth-child(n + 2) { text-align: right; font-variant-numeric: tabular-nums; }
+  .slow { color: #f7768e; }
+  .fast { color: #9ece6a; }
+</style>
+
+<h2>per language</h2>
+<p>Open the console for a timestamped log of every step.</p>
+<table id="timings">
+  <tr><td>language</td><td>package</td><td>wasm</td><td>compile</td><td>highlight</td><td>warm load</td></tr>
+</table>
+<div id="out"></div>
+
+<script type="module">
+  import { createHighlighter } from "@lumis-sh/lumis";
+  import { htmlInline } from "@lumis-sh/lumis/formatters";
+  import dracula from "@lumis-sh/themes/dracula";
+
+  // Static, because a bare specifier built from a template literal is not
+  // something the dev server can rewrite.
+  import css from "@lumis-sh/lumis/langs/css";
+  import elixir from "@lumis-sh/lumis/langs/elixir";
+  import html from "@lumis-sh/lumis/langs/html";
+  import javascript from "@lumis-sh/lumis/langs/javascript";
+  import json from "@lumis-sh/lumis/langs/json";
+  import markdown from "@lumis-sh/lumis/langs/markdown";
+  import markdownInline from "@lumis-sh/lumis/langs/markdown_inline";
+  import python from "@lumis-sh/lumis/langs/python";
+  import rust from "@lumis-sh/lumis/langs/rust";
+
+  const started = performance.now();
+  const at = () => `${(performance.now() - started).toFixed(1).padStart(8)} ms`;
+  const log = (step, detail = "") => console.log(`${at()}  ${step.padEnd(22)} ${detail}`);
+
+  // Network time is attributed by the browser, not guessed. Anything a step
+  // spends outside these entries is CPU: verifying bytes, compiling the module,
+  // compiling the queries.
+  const transfers = new Map();
+  new PerformanceObserver((list) => {
+    for (const entry of list.getEntries()) {
+      if (entry.name.includes("/.tmp/parsers/")) {
+        transfers.set(entry.name.split("/").pop(), entry.duration);
+      }
+    }
+  }).observe({ type: "resource", buffered: true });
+
+  const base = "/.tmp/parsers";
+  const resolvers = {
+    languagePackageResolver: (packageName) => {
+      const url = `${base}/${packageName.replace("@lumis-sh/wasm-", "")}.lumis.json`;
+      log("resolve package", url);
+      return url;
+    },
+    wasmResolver: (_language, wasm) => {
+      const url = `${base}/${wasm.name}-${wasm.version}-${wasm.sha256}.wasm`;
+      log("resolve wasm", `${url}  (${(wasm.size / 1024).toFixed(0)} KiB)`);
+      return url;
+    },
+  };
+
+  // Everything staged into tmp/wasm/local by `mise run wasm-stage`. Anything
+  // else 404s: the packages are not published in this format yet.
+  const langs = { elixir, javascript, html, css, json, markdown, rust, python };
+  const names = Object.keys(langs);
+
+  const samples = {
+    elixir: 'def greet(name), do: "hello #{name}"',
+    javascript: "const add = (a, b) => a + b;",
+    html: '<p class="x">hi</p>',
+    css: ".x { color: #ff79c6; }",
+    json: '{ "name": "lumis", "version": 1 }',
+    markdown: "# Title\n\nSome **bold** text.",
+    rust: 'fn main() { println!("hi"); }',
+    python: 'def greet(name):\n    return f"hello {name}"',
+  };
+
+  const timings = document.getElementById("timings");
+  const out = document.getElementById("out");
+  const ms = (value) => `${value.toFixed(value < 10 ? 2 : 0)} ms`;
+
+  const row = (cells, slowAt) => {
+    const tr = timings.insertRow();
+    for (const [index, cell] of cells.entries()) {
+      const td = tr.insertCell();
+      td.textContent = cell.text;
+      if (index === slowAt) td.className = cell.value > 200 ? "slow" : "fast";
+    }
+  };
+
+  // A highlighter per language, so each load is genuinely cold. Sharing one
+  // would make every language after the first look free.
+  for (const name of names) {
+    log("=== " + name, "");
+    transfers.clear();
+
+    // markdown injects markdown_inline into every paragraph, so it has to come
+    // along: a browser cannot fetch it mid-walk.
+    const needed = name === "markdown" ? [langs[name], markdownInline] : [langs[name]];
+    const loadStart = performance.now();
+    const highlighter = await createHighlighter({ languages: needed, ...resolvers });
+    const loadMs = performance.now() - loadStart;
+
+    await new Promise((resolve) => setTimeout(resolve, 0)); // let the observer flush
+    let packageMs = 0;
+    let wasmMs = 0;
+    for (const [file, duration] of transfers) {
+      if (file.endsWith(".json")) packageMs += duration;
+      else wasmMs += duration;
+    }
+    const compileMs = loadMs - packageMs - wasmMs;
+    log("fetch lumis.json", ms(packageMs));
+    log("fetch wasm", ms(wasmMs));
+    log("verify + compile", ms(compileMs));
+    log("load total", ms(loadMs));
+
+    const highlightStart = performance.now();
+    const rendered = highlighter.highlight(
+      samples[name],
+      htmlInline({ language: langs[name], theme: dracula }),
+    );
+    const highlightMs = performance.now() - highlightStart;
+    log("highlight", `${ms(highlightMs)}  (${samples[name].length} bytes)`);
+
+    const warmStart = performance.now();
+    await highlighter.loadLanguage(langs[name]);
+    const warmMs = performance.now() - warmStart;
+    log("load again", ms(warmMs));
+
+    row(
+      [
+        { text: name },
+        { text: ms(packageMs) },
+        { text: ms(wasmMs) },
+        { text: ms(compileMs), value: compileMs },
+        { text: ms(highlightMs) },
+        { text: ms(warmMs) },
+      ],
+      3,
+    );
+
+    const heading = document.createElement("h2");
+    heading.textContent = name;
+    out.append(heading);
+    const block = document.createElement("div");
+    block.innerHTML = rendered;
+    out.append(block);
+  }
+
+  // Injections have to be named up front in a browser: web-tree-sitter cannot
+  // fetch a parser inside the synchronous walk that discovers one.
+  log("=== injections", "html + css + javascript, all three loaded up front");
+  const injectedStart = performance.now();
+  const injected = await createHighlighter({
+    languages: [langs.html, langs.css, langs.javascript],
+    ...resolvers,
+  });
+  log("load 3 languages", ms(performance.now() - injectedStart));
+
+  const source = '<style>.x { color: red; }</style>\n<p class="x">hi</p>';
+  const injectedHighlightStart = performance.now();
+  const injectedHtml = injected.highlight(source, htmlInline({ language: langs.html, theme: dracula }));
+  log("highlight", ms(performance.now() - injectedHighlightStart));
+
+  const heading = document.createElement("h2");
+  heading.textContent = "html with injected css";
+  out.append(heading);
+  const block = document.createElement("div");
+  block.innerHTML = injectedHtml;
+  out.append(block);
+
+  log("done", `${names.length + 3} parsers loaded`);
+</script>

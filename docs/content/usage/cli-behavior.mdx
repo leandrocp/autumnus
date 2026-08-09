@@ -80,16 +80,28 @@ If terminal color detection is unavailable, Lumis renders without a theme. An ex
 
 ## Parser cache lifecycle
 
-The CLI stores parser WASM files under the data directory.
+Highlighting downloads, verifies and loads whatever a file turns out to need,
+including languages injected inside it, and caches them for every later run. A
+Markdown file with a fenced Rust block highlights that block; a language that
+cannot be fetched leaves its own block plain rather than failing the file.
 
-- first use may trigger a parser download
-- `lumis parsers fetch ...` downloads ahead of time
-- `lumis parsers update ...` refreshes cached parsers
+The CLI stores language-package metadata and integrity-verified parser WASM
+files under the data directory. It refreshes package metadata independently,
+then loads the exact parser version and matching queries named there. Parser
+filenames contain the package version and SHA-256 digest.
+
+- first use of a language downloads its parser
+- `lumis parsers cache ...` persists selected parsers ahead of time, so no run
+  pays for a download and the Wasmtime compile that follows it
+- `lumis parsers cache ... --force` replaces valid cached parsers
 
 ```bash
-lumis parsers fetch rust javascript elixir
-lumis parsers update rust
+lumis parsers cache rust javascript elixir
+lumis parsers cache rust --force
 ```
+
+Parsers you build or vendor yourself go in the same `parsers/` directory as
+downloaded ones; `lumis --data-dir <dir> parsers cache ...` writes that layout.
 
 ## Data directory
 
@@ -115,7 +127,7 @@ See [CLI Commands](/cli/commands#lumis-themes-generate) for theme generation fla
 
 Some formats depend on nested parsers. If embedded languages are missing from the cache, those nested regions cannot be fully highlighted.
 
-If you work with mixed-language content, prefetch all relevant parsers.
+If you work with mixed-language content, cache all relevant parsers.
 
 ## Verbose mode
 

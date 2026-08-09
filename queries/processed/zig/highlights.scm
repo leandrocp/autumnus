@@ -14,7 +14,7 @@
   type: (identifier) @type)
 
 ((identifier) @type
-  (#lua-match? @type "^[A-Z_][a-zA-Z0-9_]*"))
+  (#match? @type "^[A-Z_][a-zA-Z0-9_]*"))
 
 (variable_declaration
   (identifier) @type
@@ -33,7 +33,7 @@
 
 ; Constants
 ((identifier) @constant
-  (#lua-match? @constant "^[A-Z][A-Z_0-9]+$"))
+  (#match? @constant "^[A-Z][A-Z_0-9]+$"))
 
 [
   "null"
@@ -279,4 +279,4 @@
 (comment) @comment 
 
 ((comment) @comment.documentation
-  (#lua-match? @comment.documentation "^//!"))
+  (#match? @comment.documentation "^//!"))
