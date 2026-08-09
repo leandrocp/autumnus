@@ -2,7 +2,7 @@
 
 ```elixir
 Mix.install([
-  {:lumis, path: "/Users/leandro/code/leandrocp/lumis/trees/main/packages/elixir/lumis"}
+  {:lumis, "~> 0.3"}
 ])
 ```
 
