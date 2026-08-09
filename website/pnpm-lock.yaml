@@ -9,20 +9,20 @@ importers:
   .:
     dependencies:
       '@lumis-sh/lumis':
-        specifier: ^0.4.0
-        version: 0.4.0
+        specifier: ^0.6.1
+        version: 0.6.1
       '@lumis-sh/themes':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.2.2
+        version: 0.2.2
       '@lumis-sh/wasm-bundle-full':
-        specifier: ^0.0.6
-        version: 0.0.6(@lumis-sh/lumis@0.4.0)
+        specifier: ^0.1.0
+        version: 0.1.0(@lumis-sh/lumis@0.6.1)
       '@lumis-sh/wasm-html':
-        specifier: ^0.26.1
-        version: 0.26.1
+        specifier: ^0.26.3
+        version: 0.26.3
       '@lumis-sh/wasm-javascript':
-        specifier: ^0.26.1
-        version: 0.26.1
+        specifier: ^0.26.3
+        version: 0.26.3
       webgl-fluid-enhanced:
         specifier: ^0.8.0
         version: 0.8.0
@@ -220,12 +220,12 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@lumis-sh/lumis@0.4.0':
-    resolution: {integrity: sha512-1EOZYLYjD7fqySkrRozLzOQrn3SzRUv05jN5+59dRTxsZqLUoQLY/OMUXiT+M31mxDIRoGK2p2xQz1WITxvH0w==}
+  '@lumis-sh/lumis@0.6.1':
+    resolution: {integrity: sha512-4eug/y/a1m3r+E+aBSaPWwfQvScrcVtPtjLK8LR6UAsRSqDnogDdxQ8GNdyKxUBX2zX1i7Thp5whMEvSKQFTWg==}
     engines: {node: '>=18'}
 
-  '@lumis-sh/themes@0.1.0':
-    resolution: {integrity: sha512-l10RUxobHvRxA3xjxanpaXjaPcEZz+oSps12bIjN6m3OSd/xmTWCMZvgip73PHBvvpJ8x2p3k9smy2pGAv4ULA==}
+  '@lumis-sh/themes@0.2.2':
+    resolution: {integrity: sha512-GmE3uEvJZUgIEBU4+w7oe0blK53QGa7Dbj1woRe9AaIZKktkyeTEWJybKDbbfj4DhVaaR+wVo4JbfaYRhOpKbw==}
 
   '@lumis-sh/wasm-angular@0.26.0':
     resolution: {integrity: sha512-IE5LBu5+wzC7hXEszI1fAKO/6B9l7QV7vvfGTK4YmL36HYMVEnlN+uwEjtDPxTarTzUgYYvipfdT9FYHP8fJjQ==}
@@ -245,8 +245,8 @@ packages:
   '@lumis-sh/wasm-bicep@0.26.0':
     resolution: {integrity: sha512-1B5aOKjUVcsbzDF1g5+uZPTmU3r07WfmB1DkuLARnLyphue90XIQZZvnfSy+ggVOpfsTSrZTtry2YA6Vl2/TVg==}
 
-  '@lumis-sh/wasm-bundle-full@0.0.6':
-    resolution: {integrity: sha512-D/g3MD2l4Us0hABEU5UO+cFafXQp/8l0ckO/cYoBjVR85libcpf8gLUepG6TX6XOUIwTdgShDmujUbHTNVR7kA==}
+  '@lumis-sh/wasm-bundle-full@0.1.0':
+    resolution: {integrity: sha512-G24RfF+bQ6R0kQkLYifMMuxu/snTqns1qutUrubv1J1AJQv0cAlzY3eh9VQdjSrvAfvgepXHXB67BixNR4WF3g==}
     peerDependencies:
       '@lumis-sh/lumis': '>=0.0.1'
 
@@ -355,6 +355,9 @@ packages:
   '@lumis-sh/wasm-html@0.26.1':
     resolution: {integrity: sha512-B4wvYmQdGprTRjjSYbt/p3g1Futa1H4GSCXVsatbDuRRkVoNc+Tix2qSDVKMaaaCAkzHtVYjZ7wtG6M8u1i5HQ==}
 
+  '@lumis-sh/wasm-html@0.26.3':
+    resolution: {integrity: sha512-T3HixH6acdF6Dj5KuFSBmB9TGkOUSeoonTXPdMc+dK5AUC1M+e8RVRZzrreMs8dDTjbuGNsl9EcCpVtT1OU6Fw==}
+
   '@lumis-sh/wasm-http@0.26.0':
     resolution: {integrity: sha512-UKqkuTN5Yut/F2ivQE2M1Rh7T3NHKswQOaS1fWB8jhIgsTwf1HkvStUIDMCejt9hzuHttfigAvXZ703Tm7YPQw==}
 
@@ -372,6 +375,9 @@ packages:
 
   '@lumis-sh/wasm-javascript@0.26.1':
     resolution: {integrity: sha512-O7sEbhj77CXiSb0DdmmzSW/ggFjQrYUywDjg7O3m0X4J7SCALOqyOiAgsRv2rfA3oBXf1zBqCgrstiYf/opUfQ==}
+
+  '@lumis-sh/wasm-javascript@0.26.3':
+    resolution: {integrity: sha512-Dwzhb0CAQEZUwUI+oUfAdMGFiZ9Hra5VXqBX/5Yuop3LCRHvptF+oC7/a5qRD6n/2BBVIEmFI2sPtUJ2BQPV8w==}
 
   '@lumis-sh/wasm-jinja@0.26.2':
     resolution: {integrity: sha512-P3EXOVm2vEfGJ5KyXv4Ndr/+ZjgTjlQjJg3WhNzks7sXlM6zHSFuSw0td5fow0bbIKXunfc9yHVp1lOdBvXKWw==}
@@ -531,6 +537,9 @@ packages:
 
   '@lumis-sh/wasm-toml@0.26.0':
     resolution: {integrity: sha512-yeI5GYaZAJZvFSB2+rajLcYEt9YuMqjfCfz05m+zXX1NrbIrItxrPo9ykQVFX/s5f8tpGFx27tNjHZ19o4JVFw==}
+
+  '@lumis-sh/wasm-toon@0.26.2':
+    resolution: {integrity: sha512-F0Ogyc1qyUpy9ISuKbqxAyGoiIcqLaISaTwgyMjvweHHAvl2i5CP1JQaaZT6fNjQua9U4GdBz5XZyXJilc08wQ==}
 
   '@lumis-sh/wasm-tsx@0.26.1':
     resolution: {integrity: sha512-XD6wVR4NIEZ+l1IvHFJSVXz5Zvxr45W8rujM/LXE0wcsnFpb2uo2rbj8jqxfey5hq55d0XCmEUNabY11RITvXA==}
@@ -1363,11 +1372,11 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@lumis-sh/lumis@0.4.0':
+  '@lumis-sh/lumis@0.6.1':
     dependencies:
       web-tree-sitter: 0.26.8
 
-  '@lumis-sh/themes@0.1.0': {}
+  '@lumis-sh/themes@0.2.2': {}
 
   '@lumis-sh/wasm-angular@0.26.0': {}
 
@@ -1381,9 +1390,9 @@ snapshots:
 
   '@lumis-sh/wasm-bicep@0.26.0': {}
 
-  '@lumis-sh/wasm-bundle-full@0.0.6(@lumis-sh/lumis@0.4.0)':
+  '@lumis-sh/wasm-bundle-full@0.1.0(@lumis-sh/lumis@0.6.1)':
     dependencies:
-      '@lumis-sh/lumis': 0.4.0
+      '@lumis-sh/lumis': 0.6.1
       '@lumis-sh/wasm-angular': 0.26.0
       '@lumis-sh/wasm-arduino': 0.26.0
       '@lumis-sh/wasm-asm': 0.26.0
@@ -1484,6 +1493,7 @@ snapshots:
       '@lumis-sh/wasm-tcl': 0.26.0
       '@lumis-sh/wasm-terraform': 0.26.0
       '@lumis-sh/wasm-toml': 0.26.0
+      '@lumis-sh/wasm-toon': 0.26.2
       '@lumis-sh/wasm-tsx': 0.26.1
       '@lumis-sh/wasm-typescript': 0.26.1
       '@lumis-sh/wasm-typst': 0.26.0
@@ -1567,6 +1577,8 @@ snapshots:
 
   '@lumis-sh/wasm-html@0.26.1': {}
 
+  '@lumis-sh/wasm-html@0.26.3': {}
+
   '@lumis-sh/wasm-http@0.26.0': {}
 
   '@lumis-sh/wasm-iex@0.26.0': {}
@@ -1578,6 +1590,8 @@ snapshots:
   '@lumis-sh/wasm-javadoc@0.26.0': {}
 
   '@lumis-sh/wasm-javascript@0.26.1': {}
+
+  '@lumis-sh/wasm-javascript@0.26.3': {}
 
   '@lumis-sh/wasm-jinja@0.26.2': {}
 
@@ -1684,6 +1698,8 @@ snapshots:
   '@lumis-sh/wasm-terraform@0.26.0': {}
 
   '@lumis-sh/wasm-toml@0.26.0': {}
+
+  '@lumis-sh/wasm-toon@0.26.2': {}
 
   '@lumis-sh/wasm-tsx@0.26.1': {}
 

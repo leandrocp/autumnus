@@ -32,11 +32,11 @@ body {
   box-shadow: 0 0 0 1px light-dark(rgba(161, 161, 170, 0.35), rgba(161, 161, 170, 0.28));
 }
 
-.inspector-demo .line {
+.inspector-demo .l-line {
   @apply block px-[18px] py-1 min-h-[1.65em];
 }
 
-.inspector-demo .line[data-line]::before {
+.inspector-demo .l-line[data-line]::before {
   content: attr(data-line);
   @apply inline-block w-8 mr-4 select-none;
   color: light-dark(#7c87b8, #6272a4);

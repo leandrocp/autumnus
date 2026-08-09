@@ -1,2 +1,5 @@
 allowBuilds:
   esbuild: true
+minimumReleaseAgeExclude:
+  - "@lumis-sh/wasm-html@0.26.3"
+  - "@lumis-sh/wasm-javascript@0.26.3"
