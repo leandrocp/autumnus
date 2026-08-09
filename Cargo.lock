@@ -1434,7 +1434,7 @@ dependencies = [
  "serde_json",
  "smol_str",
  "streaming-iterator",
- "syn 2.0.119",
+ "syn 3.0.3",
  "termcolor",
  "thiserror 2.0.19",
  "toml 1.1.4+spec-1.1.0",
@@ -1551,7 +1551,7 @@ dependencies = [
  "regex",
  "serde",
  "serde_json",
- "syn 2.0.119",
+ "syn 3.0.3",
  "toml 1.1.4+spec-1.1.0",
  "v_htmlescape",
 ]

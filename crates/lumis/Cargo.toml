@@ -376,7 +376,7 @@ proc-macro2 = "1"
 quote = "1"
 rayon = "1"
 serde = { version = "1", features = ["derive"] }
-syn = { version = "2.0", features = ["full", "parsing"] }
+syn = { version = "3.0", features = ["full", "parsing"] }
 toml = "1.1"
 xz2 = "0.1"
 
