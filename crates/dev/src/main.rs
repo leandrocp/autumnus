@@ -1260,6 +1260,10 @@ fn has_local_override_query(lang: &str) -> bool {
         })
 }
 
+fn query_source_name<'a>(parser_name: &'a str, info: &'a ParserInfo) -> &'a str {
+    info.query_name.as_deref().unwrap_or(parser_name)
+}
+
 fn langs_list() -> Result<()> {
     let toml = read_languages_toml()?;
     for name in toml.parsers.keys() {
@@ -2010,10 +2014,11 @@ fn gen_languages_md() -> Result<()> {
             "[@lumis-sh/wasm-{wasm_suffix}](https://www.npmjs.com/package/@lumis-sh/wasm-{wasm_suffix})"
         );
 
-        let query_col = if has_local_override_query(lang) {
+        let query_source = query_source_name(lang, info);
+        let query_col = if has_local_override_query(query_source) {
             "local override".to_string()
         } else {
-            let qi = resolve_query_source(&toml.queries, lang);
+            let qi = resolve_query_source(&toml.queries, query_source);
             let query_repo_path = qi
                 .git
                 .trim_start_matches("https://github.com/")
@@ -3613,6 +3618,44 @@ mod tests {
         });
 
         let _ = fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn query_source_name_prefers_configured_query_name() {
+        let with_query_name: ParserInfo =
+            toml::from_str("query_name = \"nu\"").expect("parser info should parse");
+        let without_query_name: ParserInfo = toml::from_str("").expect("parser info should parse");
+
+        assert_eq!(query_source_name("nushell", &with_query_name), "nu");
+        assert_eq!(query_source_name("nushell", &without_query_name), "nushell");
+
+        let queries = BTreeMap::from([
+            (
+                "default".to_string(),
+                QueryInfo {
+                    git: "https://github.com/nvim-treesitter/nvim-treesitter.git".to_string(),
+                    rev: "default-rev".to_string(),
+                    path: None,
+                },
+            ),
+            (
+                "nu".to_string(),
+                QueryInfo {
+                    git: "https://github.com/nushell/tree-sitter-nu.git".to_string(),
+                    rev: "nu-rev".to_string(),
+                    path: None,
+                },
+            ),
+        ]);
+
+        assert_eq!(
+            resolve_query_source(&queries, query_source_name("nushell", &with_query_name)).rev,
+            "nu-rev"
+        );
+        assert_eq!(
+            resolve_query_source(&queries, query_source_name("nushell", &without_query_name)).rev,
+            "default-rev"
+        );
     }
 
     #[test]
