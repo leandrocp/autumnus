@@ -200,9 +200,30 @@ That file no longer parses, and the failure surfaces as an unrelated-looking lin
 
 Version pins in workflows deserve the same suspicion. `jdx/mise-action`'s `version:` input pins **mise itself**, not the action, and dropping it can break tool installs that the pinned mise handled.
 
-### Keep Emscripten compatible with Tree-sitter
+### Parser WASM is compiled by Tree-sitter's WASI SDK, not by Emscripten
 
-Emscripten is pinned once, as `LUMIS_EMSDK_VERSION` under `[env]` in the root `mise.toml`. The workflows read that value and install it with `setup-emsdk`. It is deliberately not a `[tools]` entry: mise's asdf `emsdk` plugin fails to install on Linux runners (`plugins/emsdk/bin/install exited with non-zero status`), which takes every job that runs `mise install` down with it.
+`tree-sitter build --wasm` used `emcc` through CLI 0.25. Since 0.26 it downloads its own `wasi-sdk` into `~/.cache/tree-sitter/wasi-sdk` and compiles with the clang inside it, so Emscripten is not on the parser build path at all and having `emcc` on `PATH` changes nothing about the artifact. The whole invocation, from `Loader::compile_parser_to_wasm`, is:
+
+```
+clang --target=wasm32-unknown-wasi -fPIC -shared -Os \
+  -Wl,--export=tree_sitter_<lang> -Wl,--allow-undefined -Wl,--no-entry \
+  -nostdlib -fno-exceptions -fvisibility=hidden -I . parser.c scanner.c
+```
+
+Those flags are hardcoded. `TREE_SITTER_WASI_SDK_PATH` selects a different SDK directory and is the only knob; there is no `CFLAGS` escape hatch, and the SDK version is pinned per CLI release (`crates/loader/wasi-sdk-version`), so bumping `tree-sitter` in `mise.toml` can silently change the compiler.
+
+**That clang's memory scales with `parser.c` size, and the largest grammars do not comfortably fit a 16 GB runner**, which is what `ubuntu-latest` gives a public repository. Peak RSS measured on an arm64 host, `-Os`, the flags above:
+
+| Grammar | `parser.c` | Peak RSS | Wall |
+| --- | --- | --- | --- |
+| `tree-sitter-llvm` | 6.0 MB | 8.6 GB | 7.6 min |
+| `tree-sitter-zsh` | 35.1 MB | 12.8 GB | 3.5 min |
+
+Nothing about the grammar predicts this better than the byte count of its generated `parser.c`, and `tree-sitter generate` output is stable across CLI patch releases, so a grammar that gets close stays close until upstream regenerates it. Lowering the optimization level does not buy headroom either — `tree-sitter-vim` peaks at 13.4 GB at `-O0` and 14.3 GB at `-O1` — so the cost is codegen for the one enormous `ts_lex` function, not the optimizer.
+
+When it does not fit, the kernel kills the runner service rather than clang, and the job reports `The runner has received a shutdown signal` with exit code 143 and no compiler diagnostic at all. That reads like a cancelled job. On a large grammar it is an OOM, and `wasm-release.yml` adds swap for exactly this reason.
+
+Emscripten is still pinned once, as `LUMIS_EMSDK_VERSION` under `[env]` in the root `mise.toml`, and some workflows still install it with `setup-emsdk`. It is deliberately not a `[tools]` entry: mise's asdf `emsdk` plugin fails to install on Linux runners (`plugins/emsdk/bin/install exited with non-zero status`), which takes every job that runs `mise install` down with it.
 
 This failure looks like a toolchain problem and usually is not:
 

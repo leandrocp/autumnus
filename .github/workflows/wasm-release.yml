@@ -89,7 +89,9 @@ jobs:
     needs: detect
     if: needs.detect.outputs.skip == 'false'
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # Compiling a grammar that spills into swap is slow, and a false timeout
+    # would read as the same failure this budget exists to survive.
+    timeout-minutes: 45
     permissions:
       contents: read
       id-token: write
@@ -138,7 +140,32 @@ jobs:
           version: ${{ steps.emsdk.outputs.version }}
           actions-cache-folder: emsdk-cache
 
-      - run: mise run wasm-publish-prepare "$PARSER"
+      # The WASI SDK clang behind `tree-sitter build --wasm` needs 9-15 GB on the
+      # largest grammars, which OOM-kills the whole runner on a 16 GB box and
+      # surfaces as exit code 143 with `The runner has received a shutdown
+      # signal`. Three of ~115 parsers need the swap, so nothing here may fail
+      # the other 112. `/mnt` already holds the image's own swapfile, hence the
+      # separate name.
+      - name: Add swap so the largest grammars can be compiled
+        continue-on-error: true
+        run: |
+          df -h /mnt
+          free -h
+          available=$(df --output=avail -BG /mnt | tail -1 | tr -dc '0-9')
+          size=$(( available > 40 ? 32 : available - 8 ))
+          if [ "$size" -lt 8 ]; then
+            echo "::warning::only ${available}G free on /mnt, skipping swap"
+            exit 0
+          fi
+          sudo fallocate -l "${size}G" /mnt/swapfile-lumis
+          sudo chmod 600 /mnt/swapfile-lumis
+          sudo mkswap /mnt/swapfile-lumis
+          sudo swapon /mnt/swapfile-lumis
+          free -h
+
+      # Peak RSS decides whether a grammar still fits, and the failure mode above
+      # reports no compiler diagnostic at all. `-v` covers the process tree.
+      - run: /usr/bin/time -v mise run wasm-publish-prepare "$PARSER"
         env:
           PARSER: ${{ matrix.parser }}
 
