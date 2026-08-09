@@ -204,7 +204,7 @@ Version pins in workflows deserve the same suspicion. `jdx/mise-action`'s `versi
 
 `tree-sitter build --wasm` used `emcc` through CLI 0.25. Since 0.26 it downloads its own `wasi-sdk` into `~/.cache/tree-sitter/wasi-sdk` and compiles with the clang inside it, so Emscripten is not on the parser build path at all and having `emcc` on `PATH` changes nothing about the artifact. The whole invocation, from `Loader::compile_parser_to_wasm`, is:
 
-```
+```sh
 clang --target=wasm32-unknown-wasi -fPIC -shared -Os \
   -Wl,--export=tree_sitter_<lang> -Wl,--allow-undefined -Wl,--no-entry \
   -nostdlib -fno-exceptions -fvisibility=hidden -I . parser.c scanner.c

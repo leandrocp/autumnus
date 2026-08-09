@@ -12,6 +12,7 @@ use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use std::time::Instant;
 use xz2::write::XzEncoder;
 
 #[derive(Parser)]
@@ -2340,21 +2341,34 @@ fn build_wasm(name: &str) -> Result<()> {
 }
 
 fn build_repo_wasm(repo_dir: &str, wasm_file: &Path, build_log: &Path) -> Result<()> {
-    let build_cmd = format!("tree-sitter build --wasm -o \"{}\"", wasm_file.display());
-    let shell_cmd = format!(
-        "{{ printf '[start] %s\n' \"$(date)\"; printf '[cmd] %s\n' '{}' ; {}; printf '[end] %s\n' \"$(date)\"; }} 2>&1 | tee \"{}\"",
-        build_cmd,
-        build_cmd,
-        build_log.display()
-    );
+    // Printed before the build rather than logged after it: a grammar large
+    // enough to exhaust the runner takes the process down with it, and this
+    // line is then the only evidence the build ever started.
+    println!("[cmd] tree-sitter build --wasm -o {}", wasm_file.display());
 
-    let status = Command::new("sh")
+    let started = Instant::now();
+    let output = Command::new("tree-sitter")
         .current_dir(repo_dir)
-        .arg("-c")
-        .arg(shell_cmd)
-        .status()
-        .with_context(|| format!("failed to build wasm in {repo_dir}"))?;
-    if !status.success() {
+        .args(["build", "--wasm", "-o"])
+        .arg(wasm_file)
+        .output()
+        .with_context(|| format!("failed to run tree-sitter build in {repo_dir}"))?;
+
+    let mut tail = String::from_utf8_lossy(&output.stdout).into_owned();
+    tail.push_str(&String::from_utf8_lossy(&output.stderr));
+    tail.push_str(&format!("[end] {:.1}s\n", started.elapsed().as_secs_f64()));
+
+    fs::write(
+        build_log,
+        format!(
+            "[cmd] tree-sitter build --wasm -o {}\n{tail}",
+            wasm_file.display()
+        ),
+    )
+    .with_context(|| format!("failed to write {}", build_log.display()))?;
+    print!("{tail}");
+
+    if !output.status.success() {
         bail!("tree-sitter build failed in {repo_dir}");
     }
 
@@ -3155,6 +3169,27 @@ mod tests {
     #[test]
     fn a_matching_package_needs_no_republish() {
         assert!(definition_matches(&published("abc"), "abc", "0.26"));
+    }
+
+    // This used to pass through `sh -c ... | tee`, whose exit status is `tee`'s.
+    // A failed build reported success and the caller printed the path of a wasm
+    // that was never written.
+    #[test]
+    fn a_failed_build_is_an_error() {
+        let dir = std::env::temp_dir().join(format!("lumis-build-fail-{}", std::process::id()));
+        fs::create_dir_all(&dir).unwrap();
+
+        let result = build_repo_wasm(
+            dir.to_str().unwrap(),
+            &dir.join("out.wasm"),
+            &dir.join("build.log"),
+        );
+
+        let _ = fs::remove_dir_all(&dir);
+        assert!(
+            result.is_err(),
+            "building a directory holding no grammar must fail"
+        );
     }
 
     #[test]

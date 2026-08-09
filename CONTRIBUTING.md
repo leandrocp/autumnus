@@ -368,7 +368,7 @@ mise run wasm-build
 mise run wasm-build {name}
 ```
 
-This requires only `tree-sitter-cli`, which brings its own WASI SDK and downloads it on first use. Emscripten is not involved.
+The compiler comes from `tree-sitter-cli`, which brings its own WASI SDK and downloads it on first use; Emscripten is not involved. You also need `git`, to fetch each grammar at the revision `languages.toml` pins, and `npm`, for the grammars whose parser is generated from `grammar.js`.
 
 ### Running a runtime locally
 
