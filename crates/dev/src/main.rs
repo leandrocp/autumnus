@@ -3093,6 +3093,8 @@ const REGISTRY_CONCURRENCY: usize = 16;
 
 const REGISTRY_ATTEMPTS: u32 = 3;
 
+const REGISTRY_TIMEOUT: Duration = Duration::from_secs(30);
+
 /// The `major.minor` series published packages are versioned within.
 ///
 /// Read from the `mise.toml` pin rather than the installed CLI, so this answers
@@ -3127,6 +3129,11 @@ fn supported_tree_sitter_series() -> Result<String> {
 
 /// The full packument carries every version's `package.json`, so one request
 /// answers what `npm view` needs one call per version to answer.
+///
+/// Unlike `npm view`, this reads npmjs.org rather than whatever registry npm is
+/// configured for. Both release workflows pin that host explicitly and every
+/// `@lumis-sh/wasm-*` package is public, so a mirror or private registry is out
+/// of scope here.
 fn fetch_packument(agent: &ureq::Agent, pkg: &str) -> Result<Option<Value>> {
     let url = format!("https://registry.npmjs.org/{pkg}");
     let mut last_error = None;
@@ -3135,11 +3142,14 @@ fn fetch_packument(agent: &ureq::Agent, pkg: &str) -> Result<Option<Value>> {
         if attempt > 0 {
             thread::sleep(Duration::from_millis(250 * u64::from(attempt)));
         }
-        match agent.get(&url).call() {
-            Ok(mut response) => {
-                let body = response.body_mut().read_to_string().with_context(|| {
-                    format!("failed to read the npm registry response for {pkg}")
-                })?;
+        // `call` returns once the headers arrive, so a reset or truncated body
+        // surfaces from the read and is just as transient as a failed connect.
+        let read = agent
+            .get(&url)
+            .call()
+            .and_then(|mut response| response.body_mut().read_to_string());
+        match read {
+            Ok(body) => {
                 let packument = serde_json::from_str(&body)
                     .with_context(|| format!("invalid packument for {pkg}"))?;
                 return Ok(Some(packument));
@@ -3156,7 +3166,10 @@ fn fetch_packument(agent: &ureq::Agent, pkg: &str) -> Result<Option<Value>> {
 /// Each request is almost entirely round trip, so the whole catalog is worth
 /// fetching at once. Results come back in the order the packages were given.
 fn fetch_packuments(packages: &[String]) -> Vec<Result<Option<Value>>> {
-    let agent = ureq::Agent::new_with_defaults();
+    let agent: ureq::Agent = ureq::Agent::config_builder()
+        .timeout_global(Some(REGISTRY_TIMEOUT))
+        .build()
+        .into();
     let next = AtomicUsize::new(0);
     let mut fetched: Vec<(usize, Result<Option<Value>>)> = thread::scope(|scope| {
         let workers: Vec<_> = (0..REGISTRY_CONCURRENCY.min(packages.len()))
@@ -3280,6 +3293,89 @@ fn wasm_package_suffix(wasm_name: &str) -> &str {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    const HASH: &str = "a4ee9c153c66f995d081895c3e57a0a4eed81ebb91f2320a0810bbf51c3598dc";
+
+    fn packument(versions: Value) -> Value {
+        json!({ "versions": versions })
+    }
+
+    fn marker(hash: &str, series: &str, format: u32) -> Value {
+        json!({
+            "lumis": {
+                "definitionHash": hash,
+                "treeSitter": series,
+                "formatVersion": format,
+            }
+        })
+    }
+
+    #[test]
+    fn a_published_version_carrying_the_definition_needs_no_republish() {
+        let packument = packument(json!({
+            "0.25.0": marker(HASH, "0.25", PACKAGE_FORMAT_VERSION),
+            "0.26.0": json!({ "lumis": { "rev": "18b0515", "treeSitter": "0.26" } }),
+            "0.26.1": marker(HASH, "0.26", PACKAGE_FORMAT_VERSION),
+        }));
+
+        assert!(published_for_definition(&packument, HASH, "0.26"));
+    }
+
+    #[test]
+    fn a_definition_published_only_outside_the_series_still_needs_publishing() {
+        let packument = packument(json!({
+            "0.25.0": marker(HASH, "0.25", PACKAGE_FORMAT_VERSION),
+        }));
+
+        assert!(!published_for_definition(&packument, HASH, "0.26"));
+    }
+
+    #[test]
+    fn a_neighbouring_series_is_not_a_prefix_match() {
+        let packument = packument(json!({
+            "0.260.0": marker(HASH, "0.26", PACKAGE_FORMAT_VERSION),
+        }));
+
+        assert!(!published_for_definition(&packument, HASH, "0.26"));
+    }
+
+    #[test]
+    fn every_stale_marker_needs_publishing() {
+        for (label, manifest) in [
+            ("no lumis key", json!({ "name": "@lumis-sh/wasm-rust" })),
+            (
+                "pre-v3 marker",
+                json!({ "lumis": { "rev": "18b0515", "treeSitter": "0.26" } }),
+            ),
+            (
+                "older format",
+                marker(HASH, "0.26", PACKAGE_FORMAT_VERSION - 1),
+            ),
+            (
+                "different definition",
+                marker("0000000000000000", "0.26", PACKAGE_FORMAT_VERSION),
+            ),
+            (
+                "series disagrees with the version",
+                marker(HASH, "0.25", PACKAGE_FORMAT_VERSION),
+            ),
+        ] {
+            let packument = packument(json!({ "0.26.0": manifest }));
+            assert!(
+                !published_for_definition(&packument, HASH, "0.26"),
+                "{label} must not count as published"
+            );
+        }
+    }
+
+    #[test]
+    fn a_packument_without_versions_needs_publishing() {
+        assert!(!published_for_definition(
+            &json!({ "dist-tags": { "latest": "0.26.1" } }),
+            HASH,
+            "0.26"
+        ));
+    }
 
     #[test]
     fn every_build_input_changes_the_build_id() {
