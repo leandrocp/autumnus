@@ -12,7 +12,9 @@ use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::process::Command;
-use std::time::Instant;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::thread;
+use std::time::{Duration, Instant};
 use xz2::write::XzEncoder;
 
 #[derive(Parser)]
@@ -2147,7 +2149,7 @@ fn resolve_published_versions(
     parsers: &BTreeMap<String, ParserInfo>,
     parser_order: &[String],
 ) -> Result<BTreeMap<String, String>> {
-    let mut versions: BTreeMap<String, String> = BTreeMap::new();
+    let mut packages: Vec<String> = Vec::new();
     for id in parser_order {
         let info = parsers
             .get(id)
@@ -2155,26 +2157,24 @@ fn resolve_published_versions(
         let default_wasm_name = format!("tree-sitter-{id}");
         let wasm_name = info.wasm_name.as_deref().unwrap_or(&default_wasm_name);
         let package_name = format!("@lumis-sh/wasm-{}", wasm_package_suffix(wasm_name));
-        if versions.contains_key(&package_name) {
-            continue;
+        if !packages.contains(&package_name) {
+            packages.push(package_name);
         }
+    }
 
-        let output = Command::new("npm")
-            .args(["view", &package_name, "version"])
-            .output()
-            .with_context(|| format!("failed to run npm view for {package_name}"))?;
-        if !output.status.success() {
-            bail!(
-                "{package_name} is not published; the catalog cannot pin a version for it:\n{}",
-                String::from_utf8_lossy(&output.stderr).trim()
-            );
-        }
-        let version = String::from_utf8_lossy(&output.stdout).trim().to_string();
-        if version.is_empty() {
-            bail!("npm view returned no version for {package_name}");
-        }
+    let mut versions: BTreeMap<String, String> = BTreeMap::new();
+    for (package_name, packument) in packages.iter().zip(fetch_packuments(&packages)) {
+        let version = packument?
+            .as_ref()
+            .and_then(|packument| packument.get("dist-tags"))
+            .and_then(|tags| tags.get("latest"))
+            .and_then(Value::as_str)
+            .map(ToOwned::to_owned)
+            .with_context(|| {
+                format!("{package_name} is not published; the catalog cannot pin a version for it")
+            })?;
         eprintln!("  {package_name} {version}");
-        versions.insert(package_name, version);
+        versions.insert(package_name.clone(), version);
     }
     Ok(versions)
 }
@@ -3101,6 +3101,12 @@ fn wasm_meta(name: &str) -> Result<()> {
 
 const PACKAGE_FORMAT_VERSION: u32 = 3;
 
+const REGISTRY_CONCURRENCY: usize = 16;
+
+const REGISTRY_ATTEMPTS: u32 = 3;
+
+const REGISTRY_TIMEOUT: Duration = Duration::from_secs(30);
+
 /// The `major.minor` series published packages are versioned within.
 ///
 /// Read from the `mise.toml` pin rather than the installed CLI, so this answers
@@ -3133,28 +3139,87 @@ fn supported_tree_sitter_series() -> Result<String> {
     Ok(format!("{}.{}", parts[0], parts[1]))
 }
 
-/// Whether some published version in the current series already carries this
-/// exact language definition.
-fn published_for_definition(pkg: &str, versions: &[String], expected: &str, series: &str) -> bool {
-    let prefix = format!("{series}.");
-    for version in versions.iter().filter(|v| v.starts_with(&prefix)) {
-        let Ok(output) = Command::new("npm")
-            .args(["view", &format!("{pkg}@{version}"), "lumis", "--json"])
-            .output()
-        else {
-            continue;
-        };
-        if !output.status.success() {
-            continue;
+/// The full packument carries every version's `package.json`, so one request
+/// answers what `npm view` needs one call per version to answer.
+///
+/// Unlike `npm view`, this reads npmjs.org rather than whatever registry npm is
+/// configured for. Both release workflows pin that host explicitly and every
+/// `@lumis-sh/wasm-*` package is public, so a mirror or private registry is out
+/// of scope here.
+fn fetch_packument(agent: &ureq::Agent, pkg: &str) -> Result<Option<Value>> {
+    let url = format!("https://registry.npmjs.org/{pkg}");
+    let mut last_error = None;
+
+    for attempt in 0..REGISTRY_ATTEMPTS {
+        if attempt > 0 {
+            thread::sleep(Duration::from_millis(250 * u64::from(attempt)));
         }
-        let Ok(meta) = serde_json::from_slice::<Value>(&output.stdout) else {
-            continue;
-        };
-        if definition_matches(&meta, expected, series) {
-            return true;
+        // `call` returns once the headers arrive, so a reset or truncated body
+        // surfaces from the read and is just as transient as a failed connect.
+        let read = agent
+            .get(&url)
+            .call()
+            .and_then(|mut response| response.body_mut().read_to_string());
+        match read {
+            Ok(body) => {
+                let packument = serde_json::from_str(&body)
+                    .with_context(|| format!("invalid packument for {pkg}"))?;
+                return Ok(Some(packument));
+            }
+            Err(ureq::Error::StatusCode(404)) => return Ok(None),
+            Err(err) => last_error = Some(err),
         }
     }
-    false
+
+    Err(last_error.expect("a failed attempt records its error"))
+        .with_context(|| format!("failed to query {pkg} on the npm registry"))
+}
+
+/// Each request is almost entirely round trip, so the whole catalog is worth
+/// fetching at once. Results come back in the order the packages were given.
+fn fetch_packuments(packages: &[String]) -> Vec<Result<Option<Value>>> {
+    let agent: ureq::Agent = ureq::Agent::config_builder()
+        .timeout_global(Some(REGISTRY_TIMEOUT))
+        .build()
+        .into();
+    let next = AtomicUsize::new(0);
+    let mut fetched: Vec<(usize, Result<Option<Value>>)> = thread::scope(|scope| {
+        let workers: Vec<_> = (0..REGISTRY_CONCURRENCY.min(packages.len()))
+            .map(|_| {
+                scope.spawn(|| {
+                    let mut done = Vec::new();
+                    loop {
+                        let index = next.fetch_add(1, Ordering::Relaxed);
+                        let Some(pkg) = packages.get(index) else {
+                            return done;
+                        };
+                        done.push((index, fetch_packument(&agent, pkg)));
+                    }
+                })
+            })
+            .collect();
+        workers
+            .into_iter()
+            .flat_map(|worker| worker.join().expect("npm registry worker panicked"))
+            .collect()
+    });
+    fetched.sort_by_key(|(index, _)| *index);
+    fetched.into_iter().map(|(_, result)| result).collect()
+}
+
+/// Whether some published version in the current series already carries this
+/// exact language definition.
+fn published_for_definition(packument: &Value, expected: &str, series: &str) -> bool {
+    let Some(versions) = packument.get("versions").and_then(Value::as_object) else {
+        return false;
+    };
+    let prefix = format!("{series}.");
+    versions.iter().any(|(version, manifest)| {
+        version.starts_with(&prefix)
+            && manifest
+                .get("lumis")
+                .is_some_and(|meta| definition_matches(meta, expected, series))
+    })
 }
 
 /// Packages published before the v3 format carry no `definitionHash`, so they
@@ -3191,7 +3256,7 @@ fn wasm_needed(filter: &str, force: &str) -> Result<()> {
         }
     }
 
-    let mut needed = Vec::new();
+    let mut candidates = Vec::new();
     let mut seen = HashSet::new();
     for (id, info) in &toml.parsers {
         let default_name = format!("tree-sitter-{id}");
@@ -3199,34 +3264,33 @@ fn wasm_needed(filter: &str, force: &str) -> Result<()> {
         if !wanted.is_empty() && !wanted.contains(id.as_str()) && !wanted.contains(wasm_name) {
             continue;
         }
-        if !seen.insert(wasm_name.to_string()) {
-            continue;
+        if seen.insert(wasm_name.to_string()) {
+            candidates.push(wasm_name.to_string());
         }
-        if force {
-            needed.push(wasm_name.to_string());
-            continue;
-        }
+    }
 
-        let pkg = format!("@lumis-sh/wasm-{}", wasm_package_suffix(wasm_name));
-        let output = Command::new("npm")
-            .args(["view", &pkg, "versions", "--json"])
-            .output();
-        let versions = match &output {
-            Ok(output) if output.status.success() => {
-                parse_npm_versions_json(&String::from_utf8_lossy(&output.stdout))
-                    .unwrap_or_default()
-            }
-            _ => {
-                needed.push(wasm_name.to_string());
-                continue;
-            }
-        };
+    if force {
+        println!("{}", candidates.join(" "));
+        return Ok(());
+    }
 
-        let languages = packaged_languages(&toml, wasm_name)?;
-        let expected = language_definition_hash(&toml, wasm_name, &languages)?;
-        if !published_for_definition(&pkg, &versions, &expected, &series) {
+    let mut checks = Vec::with_capacity(candidates.len());
+    for wasm_name in candidates {
+        let languages = packaged_languages(&toml, &wasm_name)?;
+        let expected = language_definition_hash(&toml, &wasm_name, &languages)?;
+        let pkg = format!("@lumis-sh/wasm-{}", wasm_package_suffix(&wasm_name));
+        checks.push((wasm_name, pkg, expected));
+    }
+
+    let packages: Vec<String> = checks.iter().map(|(_, pkg, _)| pkg.clone()).collect();
+
+    let mut needed = Vec::new();
+    for ((wasm_name, pkg, expected), packument) in checks.iter().zip(fetch_packuments(&packages)) {
+        let published = packument?
+            .is_some_and(|packument| published_for_definition(&packument, expected, &series));
+        if !published {
             eprintln!("Need to publish {pkg} for {expected}");
-            needed.push(wasm_name.to_string());
+            needed.push(wasm_name.clone());
         }
     }
 
@@ -3241,6 +3305,89 @@ fn wasm_package_suffix(wasm_name: &str) -> &str {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    const HASH: &str = "a4ee9c153c66f995d081895c3e57a0a4eed81ebb91f2320a0810bbf51c3598dc";
+
+    fn packument(versions: Value) -> Value {
+        json!({ "versions": versions })
+    }
+
+    fn marker(hash: &str, series: &str, format: u32) -> Value {
+        json!({
+            "lumis": {
+                "definitionHash": hash,
+                "treeSitter": series,
+                "formatVersion": format,
+            }
+        })
+    }
+
+    #[test]
+    fn a_published_version_carrying_the_definition_needs_no_republish() {
+        let packument = packument(json!({
+            "0.25.0": marker(HASH, "0.25", PACKAGE_FORMAT_VERSION),
+            "0.26.0": json!({ "lumis": { "rev": "18b0515", "treeSitter": "0.26" } }),
+            "0.26.1": marker(HASH, "0.26", PACKAGE_FORMAT_VERSION),
+        }));
+
+        assert!(published_for_definition(&packument, HASH, "0.26"));
+    }
+
+    #[test]
+    fn a_definition_published_only_outside_the_series_still_needs_publishing() {
+        let packument = packument(json!({
+            "0.25.0": marker(HASH, "0.25", PACKAGE_FORMAT_VERSION),
+        }));
+
+        assert!(!published_for_definition(&packument, HASH, "0.26"));
+    }
+
+    #[test]
+    fn a_neighbouring_series_is_not_a_prefix_match() {
+        let packument = packument(json!({
+            "0.260.0": marker(HASH, "0.26", PACKAGE_FORMAT_VERSION),
+        }));
+
+        assert!(!published_for_definition(&packument, HASH, "0.26"));
+    }
+
+    #[test]
+    fn every_stale_marker_needs_publishing() {
+        for (label, manifest) in [
+            ("no lumis key", json!({ "name": "@lumis-sh/wasm-rust" })),
+            (
+                "pre-v3 marker",
+                json!({ "lumis": { "rev": "18b0515", "treeSitter": "0.26" } }),
+            ),
+            (
+                "older format",
+                marker(HASH, "0.26", PACKAGE_FORMAT_VERSION - 1),
+            ),
+            (
+                "different definition",
+                marker("0000000000000000", "0.26", PACKAGE_FORMAT_VERSION),
+            ),
+            (
+                "series disagrees with the version",
+                marker(HASH, "0.25", PACKAGE_FORMAT_VERSION),
+            ),
+        ] {
+            let packument = packument(json!({ "0.26.0": manifest }));
+            assert!(
+                !published_for_definition(&packument, HASH, "0.26"),
+                "{label} must not count as published"
+            );
+        }
+    }
+
+    #[test]
+    fn a_packument_without_versions_needs_publishing() {
+        assert!(!published_for_definition(
+            &json!({ "dist-tags": { "latest": "0.26.1" } }),
+            HASH,
+            "0.26"
+        ));
+    }
 
     #[test]
     fn every_build_input_changes_the_build_id() {
