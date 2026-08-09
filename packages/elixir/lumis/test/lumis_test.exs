@@ -22,9 +22,10 @@ defmodule Lumis.LumisTest do
   describe "deprecated still works" do
     test "highlight" do
       capture_io(:stderr, fn ->
-        assert {:ok, hl} = Lumis.highlight("elixir", ":test")
+        assert {:ok, hl} = Lumis.highlight("elixir", ":test", theme: "onedark")
 
-        assert hl =~ ~s|<pre class="lumis"><code class="language-elixir"|
+        assert hl =~
+                 ~s|<pre class="lumis" style="color: #abb2bf; background-color: #282c34;"><code class="language-elixir"|
 
         assert {:ok, hl} = Lumis.highlight("elixir", ":test", theme: "dracula")
 
@@ -53,8 +54,8 @@ defmodule Lumis.LumisTest do
 
     test "highlight!" do
       capture_io(:stderr, fn ->
-        assert Lumis.highlight!("elixir", ":test") =~
-                 ~s|<pre class="lumis"><code class="language-elixir"|
+        assert Lumis.highlight!("elixir", ":test", theme: "onedark") =~
+                 ~s|<pre class="lumis" style="color: #abb2bf; background-color: #282c34;"><code class="language-elixir"|
 
         assert Lumis.highlight!("elixir", ":test", theme: "dracula") =~
                  ~s|<pre class="lumis" style="color: #f8f8f2; background-color: #282a36;"><code class="language-elixir"|
@@ -74,8 +75,12 @@ defmodule Lumis.LumisTest do
     test "inline_style option" do
       capture_io(:stderr, fn ->
         assert {:ok,
-                "<pre class=\"lumis\"><code class=\"language-elixir\" translate=\"no\" tabindex=\"0\"><div class=\"l-line\" data-line=\"1\"><span >:test</span>\n</div></code></pre>"} =
-                 Lumis.highlight(":test", language: "elixir", inline_style: true)
+                "<pre class=\"lumis\" style=\"color: #abb2bf; background-color: #282c34;\"><code class=\"language-elixir\" translate=\"no\" tabindex=\"0\"><div class=\"l-line\" data-line=\"1\"><span style=\"color: #e06c75;\">:test</span>\n</div></code></pre>"} =
+                 Lumis.highlight(":test",
+                   language: "elixir",
+                   theme: "onedark",
+                   inline_style: true
+                 )
       end)
     end
 
@@ -358,12 +363,12 @@ defmodule Lumis.LumisTest do
       assert_output(
         "defmodule Test do\n  @lang :elixir\nend",
         ~s"""
-        <pre class="lumis"><code class="language-elixir" translate="no" tabindex="0"><div class="l-line" data-line="1"><span >defmodule</span> <span >Test</span> <span >do</span>
-        </div><div class="l-line" data-line="2">  <span ><span >@<span ><span >lang <span >:elixir</span></span></span></span></span>
-        </div><div class="l-line" data-line="3"><span >end</span>
+        <pre class="lumis" style="color: #abb2bf; background-color: #282c34;"><code class="language-elixir" translate="no" tabindex="0"><div class="l-line" data-line="1"><span style="color: #c678dd;">defmodule</span> <span style="color: #e5c07b;">Test</span> <span style="color: #c678dd;">do</span>
+        </div><div class="l-line" data-line="2">  <span style="color: #56b6c2;"><span style="color: #d19a66;">@<span style="color: #61afef;"><span style="color: #d19a66;">lang <span style="color: #e06c75;">:elixir</span></span></span></span></span>
+        </div><div class="l-line" data-line="3"><span style="color: #c678dd;">end</span>
         </div></code></pre>
         """,
-        formatter: {:html_inline, language: "elixir"}
+        formatter: {:html_inline, language: "elixir", theme: "onedark"}
       )
     end
 
@@ -443,8 +448,8 @@ defmodule Lumis.LumisTest do
     test "with default opts" do
       assert_output(
         "defmodule Test do\n  @lang :elixir\nend",
-        "defmodule Test do\n  @lang :elixir\nend",
-        formatter: {:terminal, language: "elixir"}
+        "\e[0m\e[38;2;198;120;221mdefmodule\e[0m \e[0m\e[38;2;229;192;123mTest\e[0m \e[0m\e[38;2;198;120;221mdo\e[0m\n  \e[0m\e[38;2;209;154;102m@\e[0m\e[0m\e[38;2;209;154;102mlang \e[0m\e[0m\e[38;2;224;108;117m:elixir\e[0m\n\e[0m\e[38;2;198;120;221mend\e[0m",
+        formatter: {:terminal, language: "elixir", theme: "onedark"}
       )
     end
 
