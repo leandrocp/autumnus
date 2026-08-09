@@ -223,7 +223,11 @@ Nothing about the grammar predicts this better than the byte count of its genera
 
 When it does not fit, the kernel kills the runner service rather than clang, and the job reports `The runner has received a shutdown signal` with exit code 143 and no compiler diagnostic at all. That reads like a cancelled job. On a large grammar it is an OOM, and `wasm-release.yml` adds swap for exactly this reason.
 
-Because none of it runs any more, no part of this repository installs or pins Emscripten. `LUMIS_EMSDK_VERSION`, the `setup-emsdk` steps in `wasm-release.yml` and `queries.yml`, the `emcc` check in `mise run setup`, and the `EMSDK_PYTHON`/`EMCC_DEBUG` plumbing in `crates/dev` were all removed once the compiler moved; they had been installing a toolchain that nothing invoked. If you find yourself reaching for `emcc` to explain a WASM problem, check first that anything still calls it.
+Emscripten did not stop mattering, it stopped mattering *here*, and upstream draws the line precisely ([maxbrunsfeld on #4393](https://github.com/tree-sitter/tree-sitter/pull/4393#issuecomment-2831035549)): it is still required to build the Tree-sitter **web binding**, the JavaScript-to-WASM glue published as `web-tree-sitter`, and it is not required to compile **parsers**.
+
+Lumis sits on the far side of that line. It depends on `web-tree-sitter` from npm, embeds that package's prebuilt `web-tree-sitter.wasm` verbatim through `scripts/build-runtime-wasm.ts`, and edits the shipped bundle as text in `scripts/patch-web-tree-sitter-bundle.mjs`. Neither compiles anything. So no part of this repository installs or pins Emscripten: `LUMIS_EMSDK_VERSION`, the `setup-emsdk` steps in `wasm-release.yml` and `queries.yml`, the `emcc` check in `mise run setup`, and the `EMSDK_PYTHON`/`EMCC_DEBUG` plumbing in `crates/dev` were all removed once the compiler moved, having installed a toolchain nothing invoked.
+
+That changes the day Lumis builds `web-tree-sitter` from source instead of patching the published bundle. Until then, if you reach for `emcc` to explain a WASM problem, first check that anything still calls it.
 
 One failure in particular used to be blamed on Emscripten and is worth knowing on its own terms:
 
