@@ -200,11 +200,25 @@ That file no longer parses, and the failure surfaces as an unrelated-looking lin
 
 Version pins in workflows deserve the same suspicion. `jdx/mise-action`'s `version:` input pins **mise itself**, not the action, and dropping it can break tool installs that the pinned mise handled.
 
-### Keep Emscripten compatible with Tree-sitter
+### Parser WASM is compiled by Tree-sitter's WASI SDK, not by Emscripten
 
-Emscripten is pinned once, as `LUMIS_EMSDK_VERSION` under `[env]` in the root `mise.toml`. The workflows read that value and install it with `setup-emsdk`. It is deliberately not a `[tools]` entry: mise's asdf `emsdk` plugin fails to install on Linux runners (`plugins/emsdk/bin/install exited with non-zero status`), which takes every job that runs `mise install` down with it.
+`tree-sitter build --wasm` used `emcc` through CLI 0.25. Since 0.26 it downloads its own `wasi-sdk` into `~/.cache/tree-sitter/wasi-sdk` and compiles with the clang inside it, so Emscripten is not on the parser build path at all and having `emcc` on `PATH` changes nothing about the artifact. The whole invocation, from `Loader::compile_parser_to_wasm`, is:
 
-This failure looks like a toolchain problem and usually is not:
+```sh
+clang --target=wasm32-unknown-wasi -fPIC -shared -Os \
+  -Wl,--export=tree_sitter_<lang> -Wl,--allow-undefined -Wl,--no-entry \
+  -nostdlib -fno-exceptions -fvisibility=hidden -I . parser.c scanner.c
+```
+
+Those flags are hardcoded. `TREE_SITTER_WASI_SDK_PATH` selects a different SDK directory and is the only knob; there is no `CFLAGS` escape hatch, and the SDK version is pinned per CLI release (`crates/loader/wasi-sdk-version`), so bumping `tree-sitter` in `mise.toml` can silently change the compiler.
+
+Emscripten did not stop mattering, it stopped mattering *here*, and upstream draws the line precisely ([maxbrunsfeld on #4393](https://github.com/tree-sitter/tree-sitter/pull/4393#issuecomment-2831035549)): it is still required to build the Tree-sitter **web binding**, the JavaScript-to-WASM glue published as `web-tree-sitter`, and it is not required to compile **parsers**.
+
+Lumis sits on the far side of that line. It depends on `web-tree-sitter` from npm, embeds that package's prebuilt `web-tree-sitter.wasm` verbatim through `scripts/build-runtime-wasm.ts`, and edits the shipped bundle as text in `scripts/patch-web-tree-sitter-bundle.mjs`. Neither compiles anything. So no part of this repository installs or pins Emscripten: `LUMIS_EMSDK_VERSION`, the `setup-emsdk` steps in `wasm-release.yml` and `queries.yml`, the `emcc` check in `mise run setup`, and the `EMSDK_PYTHON`/`EMCC_DEBUG` plumbing in `crates/dev` were all removed once the compiler moved, having installed a toolchain nothing invoked.
+
+That changes the day Lumis builds `web-tree-sitter` from source instead of patching the published bundle. Until then, if you reach for `emcc` to explain a WASM problem, first check that anything still calls it.
+
+One failure in particular used to be blamed on Emscripten and is worth knowing on its own terms:
 
 ```
 bad export type for 'tree_sitter_<lang>_external_scanner_create': undefined
@@ -212,14 +226,14 @@ bad export type for 'tree_sitter_<lang>_external_scanner_create': undefined
 
 A parser that triggers it **compiles cleanly** and only fails when something loads it, and only when the grammar has an external scanner. So a green build proves nothing — load the parser.
 
-Historically this was blamed on Emscripten (<https://github.com/tree-sitter/tree-sitter/issues/5037>). That is no longer reproducible with the pinned Tree-sitter CLI. Measured on `tree-sitter-hcl`, holding the toolchain fixed and varying only the grammar revision:
+It was reported upstream as an Emscripten bug (<https://github.com/tree-sitter/tree-sitter/issues/5037>), and it is not one. Measured on `tree-sitter-hcl` back when Emscripten was still installed here, holding the toolchain fixed and varying only the grammar revision:
 
 | Grammar revision | emsdk 4.0.15 | emsdk 6.0.5 |
 | --- | --- | --- |
 | `636dbe70`, pinned in `languages.toml` | fails to load | fails to load |
 | `64ad6278`, what the published package ships | loads | loads |
 
-So the cause is a **stale grammar revision**, not the Emscripten version. When a scanner-bearing language fails to load, check whether `languages.toml` has fallen behind the revision the published package was built from before touching the toolchain.
+The revision moves the result and the toolchain does not, so the cause is a **stale grammar revision**. When a scanner-bearing language fails to load, check whether `languages.toml` has fallen behind the revision the published package was built from before suspecting the compiler.
 
 ## Documentation is part of the change
 

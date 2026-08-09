@@ -12,6 +12,7 @@ use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use std::time::Instant;
 use xz2::write::XzEncoder;
 
 #[derive(Parser)]
@@ -2365,14 +2366,13 @@ fn build_wasm(name: &str) -> Result<()> {
     Ok(())
 }
 
-/// Identifies the toolchain a `.wasm` was produced by. Emscripten is included
-/// even though `tree-sitter build --wasm` compiles through its own WASI SDK,
-/// because naming an input that turns out not to matter only rebuilds early,
-/// while omitting one that does matter reuses a stale parser.
+/// Identifies the toolchain a `.wasm` was produced by, which is the Tree-sitter
+/// CLI and nothing else. It compiles through a WASI SDK it downloads itself and
+/// pins per release, so its own version covers the compiler too. This used to
+/// name Emscripten as well, as a hedge against an input that might matter;
+/// nothing invokes `emcc` any more, so the hedge only recorded an empty string.
 fn wasm_toolchain_id() -> String {
-    let tree_sitter = run_cmd("tree-sitter --version").unwrap_or_default();
-    let emsdk = std::env::var("LUMIS_EMSDK_VERSION").unwrap_or_default();
-    format!("{tree_sitter}\n{emsdk}")
+    run_cmd("tree-sitter --version").unwrap_or_default()
 }
 
 fn wasm_build_id(
@@ -2396,58 +2396,50 @@ fn cached_parser_is_current(wasm_file: &Path, build_id_file: &Path, build_id: &s
 }
 
 fn build_repo_wasm(repo_dir: &str, wasm_file: &Path, build_log: &Path) -> Result<()> {
-    let verbose = std::env::var("LUMIS_WASM_VERBOSE").ok().as_deref() == Some("1");
-    let build_cmd = format!("tree-sitter build --wasm -o \"{}\"", wasm_file.display());
-    let shell_cmd = if verbose {
+    build_repo_wasm_with("tree-sitter", repo_dir, wasm_file, build_log)
+}
+
+/// Takes the compiler as an argument so a test can supply one whose exit status
+/// it chooses. Asserting on a missing `tree-sitter` instead would pass for the
+/// wrong reason on any machine without the CLI installed.
+fn build_repo_wasm_with(
+    tree_sitter: &str,
+    repo_dir: &str,
+    wasm_file: &Path,
+    build_log: &Path,
+) -> Result<()> {
+    // Printed before the build rather than logged after it: a grammar large
+    // enough to exhaust the runner takes the process down with it, and this
+    // line is then the only evidence the build ever started.
+    println!("[cmd] tree-sitter build --wasm -o {}", wasm_file.display());
+
+    let started = Instant::now();
+    let output = Command::new(tree_sitter)
+        .current_dir(repo_dir)
+        .args(["build", "--wasm", "-o"])
+        .arg(wasm_file)
+        .output()
+        .with_context(|| format!("failed to run tree-sitter build in {repo_dir}"))?;
+
+    let mut tail = String::from_utf8_lossy(&output.stdout).into_owned();
+    tail.push_str(&String::from_utf8_lossy(&output.stderr));
+    tail.push_str(&format!("[end] {:.1}s\n", started.elapsed().as_secs_f64()));
+
+    fs::write(
+        build_log,
         format!(
-            "{{ printf '[start] %s\n' \"$(date)\"; printf '[cmd] %s\n' '{}' ; EMCC_DEBUG=1 {}; printf '[end] %s\n' \"$(date)\"; }} 2>&1 | tee \"{}\"",
-            build_cmd,
-            build_cmd,
-            build_log.display()
-        )
-    } else {
-        format!(
-            "{{ printf '[start] %s\n' \"$(date)\"; printf '[cmd] %s\n' '{}' ; {}; printf '[end] %s\n' \"$(date)\"; }} 2>&1 | tee \"{}\"",
-            build_cmd,
-            build_cmd,
-            build_log.display()
-        )
-    };
+            "[cmd] tree-sitter build --wasm -o {}\n{tail}",
+            wasm_file.display()
+        ),
+    )
+    .with_context(|| format!("failed to write {}", build_log.display()))?;
+    print!("{tail}");
 
-    let mut cmd = Command::new("sh");
-    cmd.current_dir(repo_dir).arg("-c").arg(shell_cmd);
-
-    if let Some(python3) = resolve_python3_10_plus() {
-        cmd.env("EMSDK_PYTHON", &python3).env("PYTHON", python3);
-    }
-
-    let status = cmd
-        .status()
-        .with_context(|| format!("failed to build wasm in {repo_dir}"))?;
-    if !status.success() {
+    if !output.status.success() {
         bail!("tree-sitter build failed in {repo_dir}");
     }
 
     Ok(())
-}
-
-fn resolve_python3_10_plus() -> Option<String> {
-    let python3 = run_cmd("command -v python3").ok()?;
-    if python3.is_empty() {
-        return None;
-    }
-
-    let status = Command::new(&python3)
-        .arg("-c")
-        .arg("import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)")
-        .status()
-        .ok()?;
-
-    if status.success() {
-        Some(python3)
-    } else {
-        None
-    }
 }
 
 fn write_tree_sitter_json(
@@ -3323,6 +3315,55 @@ mod tests {
     #[test]
     fn a_matching_package_needs_no_republish() {
         assert!(definition_matches(&published("abc"), "abc", "0.26"));
+    }
+
+    /// A stub compiler that exits with `code`, so the test decides the status
+    /// `build_repo_wasm_with` has to react to.
+    #[cfg(unix)]
+    fn stub_tree_sitter(dir: &Path, code: i32) -> PathBuf {
+        use std::os::unix::fs::PermissionsExt as _;
+
+        let path = dir.join("tree-sitter-stub");
+        fs::write(
+            &path,
+            format!("#!/bin/sh\necho 'stub compiler' >&2\nexit {code}\n"),
+        )
+        .unwrap();
+        fs::set_permissions(&path, fs::Permissions::from_mode(0o755)).unwrap();
+        path
+    }
+
+    // This used to pass through `sh -c ... | tee`, whose exit status is `tee`'s.
+    // A failed build reported success and the caller printed the path of a wasm
+    // that was never written.
+    #[cfg(unix)]
+    #[test]
+    fn a_build_reports_the_compiler_exit_status() {
+        let dir = std::env::temp_dir().join(format!("lumis-build-status-{}", std::process::id()));
+        fs::create_dir_all(&dir).unwrap();
+        let log = dir.join("build.log");
+
+        let failed = build_repo_wasm_with(
+            stub_tree_sitter(&dir, 1).to_str().unwrap(),
+            dir.to_str().unwrap(),
+            &dir.join("out.wasm"),
+            &log,
+        );
+        assert!(failed.is_err(), "a nonzero exit status must be an error");
+        assert!(
+            fs::read_to_string(&log).unwrap().contains("stub compiler"),
+            "a failed build still has to leave its output in the log"
+        );
+
+        let succeeded = build_repo_wasm_with(
+            stub_tree_sitter(&dir, 0).to_str().unwrap(),
+            dir.to_str().unwrap(),
+            &dir.join("out.wasm"),
+            &log,
+        );
+
+        let _ = fs::remove_dir_all(&dir);
+        assert!(succeeded.is_ok(), "a zero exit status must succeed");
     }
 
     #[test]

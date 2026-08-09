@@ -128,16 +128,6 @@ jobs:
           node-version: "lts/*"
           registry-url: "https://registry.npmjs.org"
 
-
-      - name: Emscripten version from mise.toml
-        id: emsdk
-        run: echo "version=$(mise exec -- printenv LUMIS_EMSDK_VERSION)" >> "$GITHUB_OUTPUT"
-
-      - uses: mymindstorm/setup-emsdk@4528d102f7230f0e7b276855c01ea1159be0e984 # v16
-        with:
-          version: ${{ steps.emsdk.outputs.version }}
-          actions-cache-folder: emsdk-cache
-
       - run: mise run wasm-publish-prepare "$PARSER"
         env:
           PARSER: ${{ matrix.parser }}

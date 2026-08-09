@@ -115,16 +115,6 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
 
-
-      - name: Emscripten version from mise.toml
-        id: emsdk
-        run: echo "version=$(mise exec -- printenv LUMIS_EMSDK_VERSION)" >> "$GITHUB_OUTPUT"
-
-      - uses: mymindstorm/setup-emsdk@4528d102f7230f0e7b276855c01ea1159be0e984 # v16
-        with:
-          version: ${{ steps.emsdk.outputs.version }}
-          actions-cache-folder: emsdk-cache
-
       # Scoped per shard because each one builds a different slice of the
       # corpus, so a shared key would let whichever job finished first decide
       # what every other shard found in the cache.
