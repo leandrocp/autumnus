@@ -346,12 +346,13 @@ pub use crate::formatters::{
 /// # Examples
 ///
 /// ```rust
-/// use lumis::{highlight, HtmlInlineBuilder, languages::Language};
+/// use lumis::{highlight, HtmlInlineBuilder, languages::Language, themes};
 ///
 /// let code = r#"fn main() { println!("Hello!"); }"#;
 ///
 /// let formatter = HtmlInlineBuilder::new()
 ///     .language(Language::Rust)
+///     .theme(Some(themes::get("onedark").unwrap()))
 ///     .build()
 ///     .unwrap();
 ///
@@ -379,12 +380,13 @@ pub fn highlight<F: Formatter>(source: &str, formatter: F) -> String {
 /// # Examples
 ///
 /// ```rust,no_run
-/// use lumis::{write_highlight, HtmlInlineBuilder, languages::Language};
+/// use lumis::{write_highlight, HtmlInlineBuilder, languages::Language, themes};
 /// use std::fs::File;
 ///
 /// let code = "fn main() { }";
 /// let formatter = HtmlInlineBuilder::new()
 ///     .language(Language::Rust)
+///     .theme(Some(themes::get("onedark").unwrap()))
 ///     .build()
 ///     .unwrap();
 ///

@@ -22,7 +22,7 @@ defmodule Lumis.LumisTest do
   describe "deprecated still works" do
     test "highlight" do
       capture_io(:stderr, fn ->
-        assert {:ok, hl} = Lumis.highlight("elixir", ":test")
+        assert {:ok, hl} = Lumis.highlight("elixir", ":test", theme: "onedark")
 
         assert hl =~
                  ~s|<pre class="lumis" style="color: #abb2bf; background-color: #282c34;"><code class="language-elixir"|
@@ -54,7 +54,7 @@ defmodule Lumis.LumisTest do
 
     test "highlight!" do
       capture_io(:stderr, fn ->
-        assert Lumis.highlight!("elixir", ":test") =~
+        assert Lumis.highlight!("elixir", ":test", theme: "onedark") =~
                  ~s|<pre class="lumis" style="color: #abb2bf; background-color: #282c34;"><code class="language-elixir"|
 
         assert Lumis.highlight!("elixir", ":test", theme: "dracula") =~
@@ -76,7 +76,11 @@ defmodule Lumis.LumisTest do
       capture_io(:stderr, fn ->
         assert {:ok,
                 "<pre class=\"lumis\" style=\"color: #abb2bf; background-color: #282c34;\"><code class=\"language-elixir\" translate=\"no\" tabindex=\"0\"><div class=\"l-line\" data-line=\"1\"><span style=\"color: #e06c75;\">:test</span>\n</div></code></pre>"} =
-                 Lumis.highlight(":test", language: "elixir", inline_style: true)
+                 Lumis.highlight(":test",
+                   language: "elixir",
+                   theme: "onedark",
+                   inline_style: true
+                 )
       end)
     end
 
@@ -156,7 +160,7 @@ defmodule Lumis.LumisTest do
                language: nil,
                header: nil,
                italic: false,
-               theme: "onedark",
+               theme: nil,
                pre_class: nil,
                include_highlights: false,
                rainbow_brackets: false,
@@ -174,7 +178,7 @@ defmodule Lumis.LumisTest do
                [
                  language: nil,
                  italic: false,
-                 theme: "onedark",
+                 theme: nil,
                  pre_class: nil,
                  include_highlights: false,
                  rainbow_brackets: false,
@@ -210,7 +214,7 @@ defmodule Lumis.LumisTest do
       assert Keyword.equal?(
                [
                  language: nil,
-                 theme: "onedark",
+                 theme: nil,
                  background: nil,
                  width: nil,
                  rainbow_brackets: false
@@ -244,7 +248,9 @@ defmodule Lumis.LumisTest do
 
     test "terminal with language" do
       assert {:ok, result} =
-               Lumis.highlight(":test", formatter: {:terminal, language: "elixir"})
+               Lumis.highlight(":test",
+                 formatter: {:terminal, language: "elixir", theme: "onedark"}
+               )
 
       assert result =~ "\e[0m"
     end
@@ -362,7 +368,7 @@ defmodule Lumis.LumisTest do
         </div><div class="l-line" data-line="3"><span style="color: #c678dd;">end</span>
         </div></code></pre>
         """,
-        formatter: {:html_inline, language: "elixir"}
+        formatter: {:html_inline, language: "elixir", theme: "onedark"}
       )
     end
 
@@ -409,7 +415,7 @@ defmodule Lumis.LumisTest do
         </div><div class="l-line" data-line="3"><span data-highlight="keyword" style="color: #c678dd;">end</span>
         </div></code></pre>
         """,
-        formatter: {:html_inline, language: "elixir", include_highlights: true}
+        formatter: {:html_inline, language: "elixir", theme: "onedark", include_highlights: true}
       )
     end
   end
@@ -443,7 +449,7 @@ defmodule Lumis.LumisTest do
       assert_output(
         "defmodule Test do\n  @lang :elixir\nend",
         "\e[0m\e[38;2;198;120;221mdefmodule\e[0m \e[0m\e[38;2;229;192;123mTest\e[0m \e[0m\e[38;2;198;120;221mdo\e[0m\n  \e[0m\e[38;2;209;154;102m@\e[0m\e[0m\e[38;2;209;154;102mlang \e[0m\e[0m\e[38;2;224;108;117m:elixir\e[0m\n\e[0m\e[38;2;198;120;221mend\e[0m",
-        formatter: {:terminal, language: "elixir"}
+        formatter: {:terminal, language: "elixir", theme: "onedark"}
       )
     end
 
@@ -745,7 +751,8 @@ defmodule Lumis.LumisTest do
       result =
         Lumis.highlight!(
           "def test\n  puts 'hello'\nend",
-          formatter: {:html_inline, language: "ruby", highlight_lines: highlight_lines}
+          formatter:
+            {:html_inline, language: "ruby", theme: "onedark", highlight_lines: highlight_lines}
         )
 
       assert String.contains?(
@@ -1027,7 +1034,7 @@ defmodule Lumis.LumisTest do
                  rainbow_brackets: false,
                  italic: false,
                  pre_class: nil,
-                 theme: "onedark",
+                 theme: nil,
                  language: "elixir"
                ],
                formatter_opts
@@ -1046,7 +1053,7 @@ defmodule Lumis.LumisTest do
                  rainbow_brackets: false,
                  italic: false,
                  pre_class: nil,
-                 theme: "onedark",
+                 theme: nil,
                  language: nil
                ],
                formatter_opts
@@ -1085,7 +1092,7 @@ defmodule Lumis.LumisTest do
                       include_highlights: false,
                       italic: false,
                       pre_class: nil,
-                      theme: "onedark"
+                      theme: nil
                     ]},
                  theme: "dracula",
                  inline_style: true,
@@ -1112,7 +1119,7 @@ defmodule Lumis.LumisTest do
                  rainbow_brackets: false,
                  italic: false,
                  pre_class: nil,
-                 theme: "onedark"
+                 theme: nil
                ],
                formatter_opts
              )
@@ -1135,7 +1142,7 @@ defmodule Lumis.LumisTest do
                    rainbow_brackets: false,
                    italic: false,
                    pre_class: nil,
-                   theme: "onedark"
+                   theme: nil
                  ],
                  formatter_opts
                )
@@ -1188,7 +1195,7 @@ defmodule Lumis.LumisTest do
           formatter: {:html_inline, language: "rust"}
         )
 
-      assert %{language: "rust", formatter: {:html_inline, %{theme: {:string, "onedark"}}}} =
+      assert %{language: "rust", formatter: {:html_inline, %{theme: nil}}} =
                Lumis.rust_options!(options)
     end
 
@@ -1232,7 +1239,7 @@ defmodule Lumis.LumisTest do
                       include_highlights: false,
                       italic: false,
                       pre_class: "deprecated-class",
-                      theme: {:string, "onedark"}
+                      theme: nil
                     }}
                } = Lumis.rust_options!(options)
       end)
@@ -1408,7 +1415,7 @@ defmodule Lumis.LumisTest do
                     include_highlights: false,
                     italic: false,
                     pre_class: nil,
-                    theme: {:string, "onedark"}
+                    theme: nil
                   }}
              } = Lumis.rust_options!(options)
     end
@@ -1426,7 +1433,7 @@ defmodule Lumis.LumisTest do
                     include_highlights: false,
                     italic: false,
                     pre_class: nil,
-                    theme: {:string, "onedark"}
+                    theme: nil
                   }}
              } = Lumis.rust_options!(options)
     end

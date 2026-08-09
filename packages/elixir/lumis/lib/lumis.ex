@@ -9,8 +9,6 @@ defmodule Lumis do
   require Logger
   alias Lumis.Theme
 
-  @default_theme "onedark"
-
   @typedoc """
   A language name, filename, or path with extension.
 
@@ -151,6 +149,9 @@ defmodule Lumis do
 
       :html_inline
 
+  There is no default theme, so this emits `<span>` tags without any `style` attribute.
+  Pass `:theme` to get colors, or use `:html_linked` to style the output with a CSS file.
+
   ### Inline HTML formatter with custom options
 
       {:html_inline, theme: "onedark", pre_class: "example-01", include_highlights: true}
@@ -158,19 +159,19 @@ defmodule Lumis do
   ### HTML Inline: highlight specific lines
 
       # apply theme's `highlighted` style
-      {:html_inline, highlight_lines: %{lines: [2..4, 6], style: :theme}}
+      {:html_inline, theme: "onedark", highlight_lines: %{lines: [2..4, 6], style: :theme}}
 
       # style: :theme is the default
-      {:html_inline, highlight_lines: %{lines: [1, 2, 3]}}
+      {:html_inline, theme: "onedark", highlight_lines: %{lines: [1, 2, 3]}}
 
       # explicitly use theme style
-      {:html_inline, highlight_lines: %{lines: [1, 2, 3], style: :theme}}
+      {:html_inline, theme: "onedark", highlight_lines: %{lines: [1, 2, 3], style: :theme}}
 
       # overrides default style
-      {:html_inline, highlight_lines: %{lines: [1, 3..5, 8], style: "background-color: #fff3cd; border-left: 3px solid #ffc107;"}}
+      {:html_inline, theme: "onedark", highlight_lines: %{lines: [1, 3..5, 8], style: "background-color: #fff3cd; border-left: 3px solid #ffc107;"}}
 
       # with only class and no style
-      {:html_inline, highlight_lines: %{lines: [1, 2, 3], style: nil, class: "transition-colors duration-500 w-full inline-block bg-yellow-500"}}
+      {:html_inline, theme: "onedark", highlight_lines: %{lines: [1, 2, 3], style: nil, class: "transition-colors duration-500 w-full inline-block bg-yellow-500"}}
 
   ### HTML Linked: highlight specific lines
 
@@ -186,7 +187,7 @@ defmodule Lumis do
         open_tag: "<div class=\"code-header\"><span>file: app.ex</span>",
         close_tag: "</div>"
       }
-      {:html_inline, header: header}
+      {:html_inline, theme: "onedark", header: header}
 
   ### HTML Multi-Themes: Light/Dark mode support
 
@@ -279,7 +280,7 @@ defmodule Lumis do
     type: {:custom, Lumis, :formatter_type, []},
     type_spec: quote(do: Lumis.formatter()),
     type_doc: "`t:Lumis.formatter/0`",
-    default: {:html_inline, theme: "onedark"},
+    default: {:html_inline, []},
     doc: "Formatter to apply on the highlighted source code. See the type doc for more info."
   ]
 
@@ -327,7 +328,7 @@ defmodule Lumis do
   def formatter_type({:html_inline, options}) when is_list(options) do
     schema = [
       language: [type: {:or, [:string, nil]}, default: nil],
-      theme: [type: {:or, [{:struct, Lumis.Theme}, :string, nil]}, default: @default_theme],
+      theme: [type: {:or, [{:struct, Lumis.Theme}, :string, nil]}, default: nil],
       pre_class: [type: {:or, [:string, nil]}, default: nil],
       italic: [type: :boolean, default: false],
       include_highlights: [type: :boolean, default: false],
@@ -489,7 +490,7 @@ defmodule Lumis do
   def formatter_type({:terminal, options}) when is_list(options) do
     schema = [
       language: [type: {:or, [:string, nil]}, default: nil],
-      theme: [type: {:or, [{:struct, Lumis.Theme}, :string, nil]}, default: @default_theme],
+      theme: [type: {:or, [{:struct, Lumis.Theme}, :string, nil]}, default: nil],
       background: [type: {:or, [:string, {:in, [:theme]}, nil]}, default: nil],
       width: [type: {:or, [:pos_integer, nil]}, default: nil],
       rainbow_brackets: [type: :boolean, default: false]
@@ -893,7 +894,7 @@ defmodule Lumis do
   ## Examples
 
       iex> Lumis.validate_options!(formatter: {:html_inline, language: "elixir"})
-      [formatter: {:html_inline, [header: nil, highlight_lines: nil, include_highlights: false, italic: false, pre_class: nil, theme: "onedark", language: "elixir"]}]
+      [formatter: {:html_inline, [header: nil, highlight_lines: nil, include_highlights: false, italic: false, pre_class: nil, theme: nil, language: "elixir"]}]
 
       iex> Lumis.validate_options!(formatter: {:html_inline, theme: "dracula"})
       [formatter: {:html_inline, [theme: "dracula", ...]}]

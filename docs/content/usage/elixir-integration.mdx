@@ -18,11 +18,14 @@ keywords:
 Use [`highlight/2`](https://hexdocs.pm/lumis/Lumis.html#highlight/2) when invalid user input, formatter options, or language detection should stay in the normal control flow.
 
 ```elixir
-case Lumis.highlight(source, formatter: {:html_inline, language: "elixir"}) do
+case Lumis.highlight(source, formatter: {:html_inline, language: "elixir", theme: "github_light"}) do
   {:ok, html} -> html
   {:error, reason} -> handle_error(reason)
 end
 ```
+
+There is no default theme. Without `:theme`, `:html_inline` and `:terminal` emit
+uncolored output.
 
 `highlight/2` returns `{:ok, output}` or `{:error, reason}`.
 
@@ -31,7 +34,7 @@ end
 Use [`highlight!/2`](https://hexdocs.pm/lumis/Lumis.html#highlight!/2) when failures should raise immediately, such as in scripts, trusted internal code, or examples.
 
 ```elixir
-html = Lumis.highlight!(source, formatter: {:html_inline, language: "elixir"})
+html = Lumis.highlight!(source, formatter: {:html_inline, language: "elixir", theme: "github_light"})
 ```
 
 `highlight!/2` returns the highlighted output or raises.
@@ -64,7 +67,7 @@ Lumis.highlight!("""
 defmodule Demo do
 end
 ```
-""", formatter: {:html_inline, language: "markdown"})
+""", formatter: {:html_inline, language: "markdown", theme: "github_light"})
 ````
 
 A language that cannot be fetched leaves its own block plain rather than failing
@@ -163,7 +166,7 @@ See [`Lumis`](https://hexdocs.pm/lumis/Lumis.html) and [`Lumis.Theme`](https://h
 Highlighted HTML must be rendered as raw HTML in templates.
 
 ```elixir
-code = Lumis.highlight!(source, formatter: {:html_inline, language: "elixir"})
+code = Lumis.highlight!(source, formatter: {:html_inline, language: "elixir", theme: "github_light"})
 ```
 
 ```heex

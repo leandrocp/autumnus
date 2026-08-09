@@ -48,12 +48,13 @@ end
 ## Usage
 
 ```elixir
-iex> Lumis.highlight!("Atom.to_string(:elixir)", formatter: {:html_inline, language: "elixir"})
+iex> Lumis.highlight!("Atom.to_string(:elixir)", formatter: {:html_inline, language: "elixir", theme: "github_light"})
 ```
 
 The language is optional — Lumis detects it from the source, a filename, or a
-shebang. Themes are named: `theme: "github_light"`, or a `Lumis.Theme` struct
-built from your own JSON.
+shebang. The theme is optional too, but there is no default: without one,
+`:html_inline` emits spans with no colors. Themes are named:
+`theme: "github_light"`, or a `Lumis.Theme` struct built from your own JSON.
 
 Formatters decide the output: `:html_inline`, `:html_linked`,
 `:html_multi_themes`, `:terminal`, `:bbcode_scoped`, or your own.
