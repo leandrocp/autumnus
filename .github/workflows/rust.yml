@@ -15,6 +15,9 @@ on:
       - "languages.toml"
       - "queries/**"
       - "mise.toml"
+      - "benchmarks/rust/Cargo.toml"
+      - "packages/elixir/lumis/native/lumis_nif/Cargo.toml"
+      - "packages/javascript/lumis/native/Cargo.toml"
       - ".github/workflows/rust.yml"
   pull_request:
     paths:
@@ -25,6 +28,9 @@ on:
       - "languages.toml"
       - "queries/**"
       - "mise.toml"
+      - "benchmarks/rust/Cargo.toml"
+      - "packages/elixir/lumis/native/lumis_nif/Cargo.toml"
+      - "packages/javascript/lumis/native/Cargo.toml"
       - ".github/workflows/rust.yml"
   workflow_dispatch:
 
@@ -221,6 +227,14 @@ jobs:
           fi
 
           echo "All external Tree-sitter scanners use strict-aliasing-safe array headers."
+  crate-deps:
+    name: Crate dependency requirements
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: jdx/mise-action@7e36c90d9ab29c415a2384db3006f3ec8a8cc654 # v4.2.4
+      - run: mise run check-crate-deps
+
   lint:
     if: >-
       ${{ github.event_name == 'workflow_dispatch' ||

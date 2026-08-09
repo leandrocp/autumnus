@@ -366,6 +366,9 @@ mise run fmt-lua -- --check
 echo ""
 echo "Checking native package versions..."
 mise run check-native-versions
+echo ""
+echo "Checking crate dependency requirements..."
+mise run check-crate-deps
 '''
 
 [tasks.'check-native-versions']
@@ -374,6 +377,21 @@ run = '''
 #!/usr/bin/env bash
 set -euo pipefail
 node packages/javascript/scripts/check-native-versions.mjs
+'''
+
+[tasks.'check-crate-deps']
+description = "Check version requirements on lumis crates match the versions in this repository"
+usage = '''
+flag "--fix" help="Rewrite stale requirements instead of reporting them"
+'''
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+if [ "${usage_fix:-false}" = "true" ]; then
+    cargo run --quiet --manifest-path crates/dev/Cargo.toml -- check-crate-deps --fix
+else
+    cargo run --quiet --manifest-path crates/dev/Cargo.toml -- check-crate-deps
+fi
 '''
 
 [tasks.'fmt']
@@ -1036,6 +1054,7 @@ esac
 case "$kind" in
     cargo)
         cargo set-version --manifest-path "$manifest" -p "$cargo_package" "$version"
+        cargo run --quiet --manifest-path crates/dev/Cargo.toml -- check-crate-deps --fix
         ;;
     npm)
         npm --prefix "$(dirname "$manifest")" version --no-git-tag-version "$version"

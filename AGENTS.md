@@ -136,6 +136,17 @@ A test that skips silently reports the same green as a test that verified someth
 - Prove a new guard fails: inject the defect it is meant to catch, watch it go red, then revert. A guard that has never failed has not been tested.
 - Do not let published artifacts gate correctness checks. Build what you need from the pinned source instead, as `mise run test-queries` does, otherwise coverage silently tracks the release cycle.
 
+### What the workspace never resolves, it never checks
+
+The root `Cargo.toml` points `path` at every lumis crate and patches the rest through `[patch.crates-io]`. Every build in this repository therefore compiles against the working tree, and the `version` requirement sitting beside each `path` is inert until the crate reaches crates.io. Nothing local can be green or red about it.
+
+That is not a gap in the test suite, it is a gap in what a test *could* observe, so it needs a check that reads the manifests rather than builds them. `mise run check-crate-deps` requires each requirement to equal the depended-on crate's version in this repository, and runs in `mise run lint`, in Rust CI, and again before `cargo publish`. `mise run release-prepare` calls it with `--fix`, so releases stay in step without a checklist item.
+
+Two things this cost, both worth recognising elsewhere:
+
+- **A too-loose requirement disables the tooling that would maintain it.** `cargo set-version -p lumis-core 2.4.0` rewrites dependents whose requirement the new version falls outside. With `lumis-core = "2"` there was nothing to rewrite, so it stayed `"2"` across three minor releases until `lumis` called an API that `2.0.0` did not have ([#1118](https://github.com/leandrocp/lumis/issues/1118)). Spell requirements in full.
+- **A fresh resolve is not a reproduction.** The failure needed an existing `Cargo.lock`; a new project picked the newest match and worked. When a bug report says "fails on Windows" and the code has no target-specific path, reproduce the reporter's *resolution*, not their OS.
+
 ### Comments are a last resort
 
 Do not narrate code. A comment is justified only when the code is genuinely hard to follow, or when it does something a reader would not expect and would otherwise "fix". Everything else should be carried by naming and structure.
