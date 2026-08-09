@@ -10,8 +10,8 @@
 ((style_element
   (start_tag) @_no_type_lang
   (raw_text) @injection.content)
-  (#not-lua-match? @_no_type_lang "%slang%s*=")
-  (#not-lua-match? @_no_type_lang "%stype%s*=")
+  (#not-match? @_no_type_lang "[\\t-\\r ]lang[\\t-\\r ]*=")
+  (#not-match? @_no_type_lang "[\\t-\\r ]type[\\t-\\r ]*=")
   (#set! injection.language "css"))
 
 ((style_element
@@ -30,8 +30,8 @@
 ((script_element
   (start_tag) @_no_type_lang
   (raw_text) @injection.content)
-  (#not-lua-match? @_no_type_lang "%slang%s*=")
-  (#not-lua-match? @_no_type_lang "%stype%s*=")
+  (#not-match? @_no_type_lang "[\\t-\\r ]lang[\\t-\\r ]*=")
+  (#not-match? @_no_type_lang "[\\t-\\r ]type[\\t-\\r ]*=")
   (#set! injection.language "javascript"))
 
 ; <script type="foo/bar">
@@ -83,13 +83,13 @@
 ((attribute
   (quoted_attribute_value
     (attribute_value) @injection.content))
-  (#lua-match? @injection.content "%${")
+  (#match? @injection.content "\\$\\{")
   (#offset! @injection.content 0 2 0 -1)
   (#set! injection.language "javascript"))
 
 ((attribute
   (attribute_value) @injection.content)
-  (#lua-match? @injection.content "%${")
+  (#match? @injection.content "\\$\\{")
   (#offset! @injection.content 0 2 0 -2)
   (#set! injection.language "javascript"))
 
@@ -111,7 +111,7 @@
 ; <input type="checkbox" onchange="this.closest('form').elements.output.value = this.checked">
 (attribute
   (attribute_name) @_name
-  (#lua-match? @_name "^on[a-z]+$")
+  (#match? @_name "^on[a-z]+$")
   (quoted_attribute_value
     (attribute_value) @injection.content)
   (#set! injection.language "javascript"))

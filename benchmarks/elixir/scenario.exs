@@ -1,11 +1,28 @@
+repo_dir = Path.expand("../..", __DIR__)
+System.put_env("LUMIS_BUILD", "1")
+
+System.put_env(
+  "CARGO_PATCH_CRATES_IO_LUMIS_WASM_RUNTIME_PATH",
+  Path.join(repo_dir, "crates/lumis-wasm-runtime")
+)
+
+System.put_env(
+  "CARGO_PATCH_CRATES_IO_LUMIS_CORE_PATH",
+  Path.join(repo_dir, "crates/lumis-core")
+)
+
 Mix.install(
   [
-    {:lumis, "~> 0.6"},
+    {:lumis, path: Path.join(repo_dir, "packages/elixir/lumis")},
     {:benchee, "~> 1.5"},
-    {:benchee_json, "~> 1.0"}
+    {:benchee_json, "~> 1.0"},
+    {:rustler, "~> 0.38"}
   ],
   lockfile: Path.expand("mix.lock", __DIR__)
 )
+
+Code.require_file("runtime.exs", __DIR__)
+Lumis.BenchmarkRuntime.configure(repo_dir)
 
 defmodule Lumis.ScenarioBenchmark do
   def run do
@@ -79,12 +96,18 @@ defmodule Lumis.ScenarioBenchmark do
     Code.ensure_loaded!(Lumis.Native)
     available = Lumis.available_languages()
 
-    workload
-    |> Enum.map(&Map.fetch!(&1, "language"))
-    |> Enum.uniq()
-    |> Enum.each(fn language ->
+    languages =
+      workload
+      |> Enum.map(&Map.fetch!(&1, "language"))
+      |> Enum.uniq()
+
+    Enum.each(languages, fn language ->
       unless Map.has_key?(available, language), do: raise("Lumis Elixir is missing #{language}")
     end)
+
+    # Highlighting would load these anyway; doing it here keeps the download and
+    # the grammar compile out of the timed run.
+    :ok = Lumis.Languages.load(languages)
   end
 
   defp input_bytes(workload) do

@@ -3,6 +3,8 @@ import type {
   HighlightEvent,
   Language,
   LanguageBundle,
+  LanguageDefinition,
+  LoadableLanguage,
   LanguageInput,
   LanguageRef,
   LazyLanguage,
@@ -10,7 +12,8 @@ import type {
   Theme,
 } from "../types.js";
 import { PLAINTEXT_LANG_ID } from "../types.js";
-import type { RuntimeLike, WasmResolver } from "./languages.js";
+import type { LanguagePackageResolver, RuntimeLike, WasmResolver } from "./languages.js";
+import { normalizeLanguageName } from "./languages.js";
 import { getScopedThemeStyle } from "../formatter/html.js";
 import { LANGUAGE_LOADERS } from "../generated/language-loaders.js";
 import { guessLanguage } from "../guess-language.js";
@@ -18,12 +21,17 @@ import { builtinFormatterKind } from "./builtin-formatter.js";
 
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
+// Removed from the public API. Named here so an object still carrying one is
+// rejected at the boundary rather than loaded with the field quietly dropped.
+const LANGUAGE_QUERY_FIELDS = ["highlights", "injections", "locals", "brackets"] as const;
+const LANGUAGE_LOAD_FIELDS = ["packageName", ...LANGUAGE_QUERY_FIELDS, "wasm"] as const;
+const LANGUAGE_SHAPE_FIELDS = ["id", "aliases", ...LANGUAGE_LOAD_FIELDS] as const;
 
 function decodeSlice(sourceBytes: Uint8Array, startByte: number, endByte: number): string {
   return decoder.decode(sourceBytes.subarray(startByte, endByte));
 }
 
-/** A reusable highlighter with preloaded or lazily registered languages. */
+/** A reusable highlighter with loaded or lazily registered languages. */
 export interface Highlighter {
   /** Highlight source code synchronously. The language must already be loaded. */
   highlight(source: string, formatter: Formatter): string;
@@ -43,26 +51,28 @@ export interface Highlighter {
 }
 
 export interface HighlighterModuleFactory {
-  createRuntime(options?: { wasmResolver?: WasmResolver }): RuntimeLike;
+  createRuntime(options?: {
+    wasmResolver?: WasmResolver;
+    languagePackageResolver?: LanguagePackageResolver;
+  }): RuntimeLike;
   getDefaultRuntime(): RuntimeLike;
 }
 
 /** Options for {@link createHighlighter}. */
 export interface CreateHighlighterOptions {
-  /** Languages to preload or register lazily. */
+  /** Languages to load during setup or register lazily. */
   languages?: LanguageInput[];
   /** Optional resolver for external WASM assets. */
   wasmResolver?: WasmResolver;
+  /** Optional resolver for self-contained language package metadata. */
+  languagePackageResolver?: LanguagePackageResolver;
 }
 
 async function loadLanguageDefinition(runtime: RuntimeLike, language: Language): Promise<void> {
   await runtime.loadLanguage({
     definition: { id: language.id, aliases: language.aliases },
+    packageName: language.packageName,
     wasm: language.wasm,
-    highlights: language.highlights,
-    injections: language.injections,
-    locals: language.locals,
-    brackets: language.brackets,
   });
 }
 
@@ -74,11 +84,12 @@ function resolveRefId(ref: LanguageRef | undefined): string {
 }
 
 function isPlaintextRef(ref?: LanguageRef): boolean {
-  return resolveRefId(ref) === PLAINTEXT_LANG_ID;
+  return normalizeLanguageName(resolveRefId(ref)) === PLAINTEXT_LANG_ID;
 }
 
 function detectLanguageRef(source: string, ref?: LanguageRef): LanguageRef | string {
   if (ref && typeof ref !== "string") {
+    validateLanguageBoundary(ref);
     return ref;
   }
 
@@ -86,13 +97,13 @@ function detectLanguageRef(source: string, ref?: LanguageRef): LanguageRef | str
 }
 
 async function loadBuiltinLanguageById(id: string): Promise<Language | undefined> {
-  const loader = LANGUAGE_LOADERS[id];
+  const loader = LANGUAGE_LOADERS[normalizeLanguageName(id)];
   if (!loader) {
     return undefined;
   }
 
   const mod = await loader();
-  return mod.default;
+  return requireLoadableLanguage(mod.default, `Built-in language "${id}"`);
 }
 
 async function ensureLanguageLoaded(
@@ -100,6 +111,8 @@ async function ensureLanguageLoaded(
   ref: LanguageRef | string,
   lazyRegistry?: Map<string, LazyLanguage>,
 ): Promise<void> {
+  validateLanguageBoundary(ref);
+
   if (isPlaintextRef(ref)) {
     await runtime.loadPlaintext();
     return;
@@ -109,9 +122,11 @@ async function ensureLanguageLoaded(
     if (!runtime.getLoadedLanguage(ref.id)) {
       if (isLanguage(ref)) {
         await loadLanguageDefinition(runtime, ref);
-      } else {
-        const language = await ref();
+      } else if (isLazyLanguage(ref)) {
+        const language = requireLoadableLanguage(await ref(), `Lazy language "${ref.id}"`);
         await loadLanguageDefinition(runtime, language);
+      } else {
+        await ensureLanguageLoaded(runtime, ref.id, lazyRegistry);
       }
     }
     return;
@@ -122,9 +137,9 @@ async function ensureLanguageLoaded(
     return;
   }
 
-  const lazy = lazyRegistry?.get(languageId);
+  const lazy = lazyRegistry?.get(normalizeLanguageName(languageId));
   if (lazy) {
-    const language = await lazy();
+    const language = requireLoadableLanguage(await lazy(), `Lazy language "${lazy.id}"`);
     await loadLanguageDefinition(runtime, language);
     return;
   }
@@ -288,26 +303,92 @@ async function runFormatterAsync(
   return runFormatter(runtime, source, fmt, detectedRef);
 }
 
-/** Check if a value is a Language object (has highlights and wasm). */
-function isLanguage(value: unknown): value is Language {
+function isObjectLike(value: unknown): value is Record<string, unknown> {
+  return (typeof value === "object" && value !== null) || typeof value === "function";
+}
+
+function isLanguageLike(value: unknown): value is Record<string, unknown> {
+  return isObjectLike(value) && LANGUAGE_SHAPE_FIELDS.some((field) => field in value);
+}
+
+function isLanguageDefinition(value: unknown): value is LanguageDefinition {
+  if (!isObjectLike(value)) return false;
+  return (
+    typeof value.id === "string" &&
+    value.id.length > 0 &&
+    Array.isArray(value.aliases) &&
+    value.aliases.every((alias) => typeof alias === "string")
+  );
+}
+
+function hasLanguageLoadFields(value: object): boolean {
+  return LANGUAGE_LOAD_FIELDS.some((field) => field in value);
+}
+
+function hasLoadableLanguageShape(candidate: Language): candidate is LoadableLanguage {
+  if (candidate.id === PLAINTEXT_LANG_ID) return !hasLanguageLoadFields(candidate);
+  return (
+    typeof candidate.packageName === "string" &&
+    candidate.packageName.length > 0 &&
+    !LANGUAGE_QUERY_FIELDS.some((field) => field in candidate)
+  );
+}
+
+function malformedLanguageDefinition(): Error {
+  return new Error('Language definition has an invalid or missing "id" or "aliases".');
+}
+
+function incompleteLanguageDefinition(id: string): Error {
+  return new Error(`Language "${id}" has an incomplete or conflicting load definition.`);
+}
+
+function validateLanguageBoundary(value: unknown): void {
+  if (!isLanguageLike(value)) return;
+  if (!isLanguageDefinition(value)) throw malformedLanguageDefinition();
+
+  for (const field of LANGUAGE_QUERY_FIELDS) {
+    if (field in value && typeof value[field] !== "string") {
+      throw incompleteLanguageDefinition(value.id);
+    }
+  }
+
+  if (hasLanguageLoadFields(value) && !hasLoadableLanguageShape(value as Language)) {
+    throw incompleteLanguageDefinition(value.id);
+  }
+}
+
+/** Check if a value is a package handle or plaintext. */
+function isLanguage(value: unknown): value is LoadableLanguage {
+  validateLanguageBoundary(value);
   return (
     typeof value === "object" &&
     value !== null &&
-    "id" in value &&
-    "highlights" in value &&
-    "wasm" in value
+    isLanguageDefinition(value) &&
+    hasLoadableLanguageShape(value as Language)
   );
+}
+
+function requireLoadableLanguage(value: unknown, source: string): Language {
+  validateLanguageBoundary(value);
+  if (isLanguage(value)) return value;
+  if (isLanguageDefinition(value)) throw incompleteLanguageDefinition(value.id);
+  throw new Error(`${source} did not return a complete language definition.`);
+}
+
+function isLazyLanguage(value: unknown): value is LazyLanguage {
+  if (typeof value !== "function") return false;
+  validateLanguageBoundary(value);
+  return isLanguageDefinition(value);
 }
 
 /** Check if a value is a LanguageBundle (Record<string, LazyLanguage>). */
 function isLanguageBundle(value: unknown): value is LanguageBundle {
-  if (typeof value !== "object" || value === null) return false;
-  if ("id" in value || "highlights" in value || "default" in value) return false;
-  const keys = Object.keys(value);
-  const firstKey = keys[0];
-  return (
-    firstKey !== undefined && typeof (value as Record<string, unknown>)[firstKey] === "function"
-  );
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
+  if (LANGUAGE_SHAPE_FIELDS.some((field) => field in value) || "default" in value) {
+    return false;
+  }
+  const entries = Object.entries(value);
+  return entries.length > 0 && entries.every(([id, lazy]) => id.length > 0 && isLazyLanguage(lazy));
 }
 
 /** Resolve a single LanguageInput into Language(s), registering lazy ones. */
@@ -315,18 +396,37 @@ async function resolveInitialLanguage(
   input: LanguageInput,
   lazyRegistry: Map<string, LazyLanguage>,
 ): Promise<Language | undefined> {
+  validateLanguageBoundary(input);
+
   // Language object — load eagerly
   if (isLanguage(input)) {
     return input;
   }
 
+  if (isLazyLanguage(input)) {
+    return requireLoadableLanguage(await input(), `Lazy language "${input.id}"`);
+  }
+
+  if (isLanguageDefinition(input)) {
+    const lazy = lazyRegistry.get(normalizeLanguageName(input.id));
+    if (lazy) {
+      return requireLoadableLanguage(await lazy(), `Lazy language "${lazy.id}"`);
+    }
+
+    const builtin = await loadBuiltinLanguageById(input.id);
+    if (builtin) return builtin;
+
+    throw new Error(`Language "${input.id}" is not registered in any bundle.`);
+  }
+
   // LanguageBundle (Record<string, LazyLanguage>) — register all lazily
   if (isLanguageBundle(input)) {
     for (const [id, lazy] of Object.entries(input)) {
-      if (!lazyRegistry.has(id)) {
-        lazyRegistry.set(id, lazy);
+      const key = normalizeLanguageName(id);
+      if (!lazyRegistry.has(key)) {
+        lazyRegistry.set(key, lazy);
         for (const alias of lazy.aliases) {
-          lazyRegistry.set(alias, lazy);
+          lazyRegistry.set(normalizeLanguageName(alias), lazy);
         }
       }
     }
@@ -336,23 +436,25 @@ async function resolveInitialLanguage(
   // () => Promise<{ default: Language }> — lazy function
   if (typeof input === "function") {
     const mod = await input();
-    return mod.default;
+    return requireLoadableLanguage(mod.default, "Lazy language import");
   }
 
   // Promise<{ default: Language }> — eager dynamic import
   const mod = await input;
-  return mod.default;
+  return requireLoadableLanguage(mod.default, "Language import");
 }
 
 function registerLazyBundle(bundle: LanguageBundle, lazyRegistry: Map<string, LazyLanguage>): void {
   for (const [id, lazy] of Object.entries(bundle)) {
-    if (lazyRegistry.has(id)) {
+    validateLanguageBoundary(lazy);
+    const key = normalizeLanguageName(id);
+    if (lazyRegistry.has(key)) {
       continue;
     }
 
-    lazyRegistry.set(id, lazy);
+    lazyRegistry.set(key, lazy);
     for (const alias of lazy.aliases) {
-      lazyRegistry.set(alias, lazy);
+      lazyRegistry.set(normalizeLanguageName(alias), lazy);
     }
   }
 }
@@ -362,6 +464,8 @@ async function loadHighlighterLanguage(
   runtime: RuntimeLike,
   lazyRegistry: Map<string, LazyLanguage>,
 ): Promise<void> {
+  validateLanguageBoundary(input);
+
   const id = typeof input === "string" ? input : input.id;
   if (runtime.getLoadedLanguage(id)) {
     return;
@@ -373,9 +477,9 @@ async function loadHighlighterLanguage(
   }
 
   if (typeof input === "string") {
-    const lazy = lazyRegistry.get(input);
+    const lazy = lazyRegistry.get(normalizeLanguageName(input));
     if (lazy) {
-      const language = await lazy();
+      const language = requireLoadableLanguage(await lazy(), `Lazy language "${lazy.id}"`);
       await loadLanguageDefinition(runtime, language);
       return;
     }
@@ -389,8 +493,13 @@ async function loadHighlighterLanguage(
     return;
   }
 
-  const language = await input();
-  await loadLanguageDefinition(runtime, language);
+  if (isLazyLanguage(input)) {
+    const language = requireLoadableLanguage(await input(), `Lazy language "${input.id}"`);
+    await loadLanguageDefinition(runtime, language);
+    return;
+  }
+
+  await loadHighlighterLanguage(input.id, runtime, lazyRegistry);
 }
 
 function getRegisteredLanguageIds(
@@ -444,7 +553,10 @@ async function prepareRuntimeHighlight(
 export function createHighlighterModule(factory: HighlighterModuleFactory) {
   return {
     async createHighlighter(init: CreateHighlighterOptions = {}): Promise<Highlighter> {
-      const runtime = factory.createRuntime({ wasmResolver: init.wasmResolver });
+      const runtime = factory.createRuntime({
+        wasmResolver: init.wasmResolver,
+        languagePackageResolver: init.languagePackageResolver,
+      });
       await runtime.initParser();
 
       const lazyRegistry = new Map<string, LazyLanguage>();

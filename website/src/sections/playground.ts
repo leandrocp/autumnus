@@ -38,7 +38,7 @@ export function renderPlayground() {
         </div>
 
         <div class="mt-8 overflow-hidden border border-zinc-200 dark:border-zinc-800">
-          <div class="preview-content max-h-[50rem] overflow-y-auto [&_code]:font-mono"><div class="flex items-center justify-center py-24 font-mono text-xs text-zinc-400">Highlighting…</div></div>
+          <div class="preview-content max-h-[50rem] overflow-y-auto [&_code]:font-mono"><div class="flex items-center justify-center py-24 font-mono text-xs text-zinc-400">Highlighting...</div></div>
         </div>
       </div>
     </section>`;

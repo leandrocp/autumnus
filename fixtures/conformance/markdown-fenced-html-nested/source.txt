@@ -1,0 +1,5 @@
+# Page
+
+```html
+<section><style>.a { color: red; }</style><script>const n = 1</script></section>
+```

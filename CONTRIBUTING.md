@@ -16,6 +16,8 @@ See `ARCHITECTURE.md` for how the crates, packages, website, and build pipeline 
   - [Updating parsers](#updating-parsers)
   - [Updating queries](#updating-queries)
   - [Building WASMs](#building-wasms)
+  - [Running a runtime locally](#running-a-runtime-locally)
+  - [Parsers in CI](#parsers-in-ci)
 - [Themes](#themes)
   - [Adding a new theme](#adding-a-new-theme)
   - [Updating themes](#updating-themes)
@@ -38,6 +40,12 @@ Run the standard Rust, Elixir, and JavaScript test suites with:
 mise run test
 ```
 
+That builds the Node addon first and runs the whole `@lumis-sh/lumis` suite twice,
+once per runtime, because Node highlights through the addon by default and falls
+back to `web-tree-sitter` where none is built. It also stages parsers into
+`target/test-parsers` and points the dependent packages at them, so nothing in
+the suite depends on what is currently published to npm.
+
 Cross-runtime output compatibility and browser support have dedicated suites:
 
 ```sh
@@ -50,11 +58,15 @@ mise run test-conformance-browser
 ```sh
 mise run test-conformance-rust
 mise run test-conformance-cli
-mise run test-conformance-javascript-wasm
 mise run test-conformance-javascript-native
+mise run test-conformance-javascript-wasm
 mise run test-conformance-browser
 mise run test-conformance-elixir
 ```
+
+Node has two of them because it has two runtimes: the Wasmtime addon it uses by
+default, and `web-tree-sitter` where no addon is built. Both must produce the
+same bytes as Rust.
 
 The browser task installs the required Chromium, Firefox, and WebKit builds before running. CI runs these six tasks as independent parallel jobs.
 
@@ -65,7 +77,7 @@ Releases are prepared locally and published from tags.
 - Run `mise run release-needed` to list packages with non-chore path-scoped commits since their latest package tag.
 - Prepare each release with `mise run release-prepare <package> <version>`.
 - `mise run release-prepare` updates only the target package version file and prepends the next changelog entry.
-- If dependent manifests must move together, update them separately in the same release commit.
+- If dependent manifests must move together, update them separately in the same release commit. `npm-lumis` is the exception: it also bumps the native crate, the `@lumis-sh/lumis-native` selector and all five platform packages, because the release workflow publishes them under the same version first.
 - Maintainers commit the release prep changes, then push package tags such as `cargo-lumis-cli/v0.2.0`.
 - Pushing a package tag triggers the publish workflows.
 
@@ -73,7 +85,7 @@ Do not hand-edit release versions or changelog sections when `mise run release-p
 
 ## Benchmarks
 
-The suite under [`benchmarks/`](benchmarks/) runs four shared scenarios across Lumis Rust, Elixir, JavaScript native, JavaScript Wasm, and CLI, plus syntect, Shiki, and `bat`. It uses Criterion for Rust and syntect, Mitata for JavaScript and Shiki, Benchee for Elixir, and Hyperfine for the CLIs. mise installs the pinned toolchain and coordinates the runs.
+The suite under [`benchmarks/`](benchmarks/) runs four shared scenarios across Lumis Rust, Elixir, JavaScript Wasm, and CLI, plus syntect, Shiki, and `bat`. It uses Criterion for Rust and syntect, Mitata for JavaScript and Shiki, Benchee for Elixir, and Hyperfine for the CLIs. It also measures comparable package and release artifact sizes. mise installs the pinned toolchain and coordinates the runs.
 
 Run the complete suite with:
 
@@ -114,7 +126,7 @@ This updates:
 
 All language metadata lives in `languages.toml`. It is consumed by:
 
-- `crates/dev`: fetches vendored parsers, preprocesses queries, builds WASMs, and generates docs
+- `crates/dev`: fetches vendored parsers, preprocesses queries, builds WASMs, and generates the Rust package catalog and docs
 - `crates/lumis/build.rs`: reads `queries/processed/` to embed query constants, including Lua-to-Rust regex conversion
 - `crates/lumis-cli/build.rs`: reads `queries/processed/` to embed query constants
 - `crates/lumis-core/build.rs`: generates the `Language` enum and Rust detection metadata
@@ -127,20 +139,25 @@ Bundle definitions also live here under `[bundles.*]`.
 For Rust crates, bundle support is implemented as Cargo features such as `lang-bundle-web` and `lang-bundle-system`, which enable the related `lang-*` features transitively. The `lang-bundle-*` feature lists in `crates/lumis/Cargo.toml` and `crates/lumis-core/Cargo.toml` are generated from `languages.toml` by `mise run cargo-update-features`.
 
 - Keep one parser ID per line in bundle arrays for cleaner diffs.
-- After changing parser or bundle entries, sync Rust feature manifests and regenerate the checked-in JavaScript outputs:
+- After changing parser or bundle entries, sync the generated Rust and JavaScript outputs:
 
 ```sh
 mise run cargo-update-features
-pnpm --filter @lumis-sh/lumis build:generate
+mise run langs-gen-catalog
+pnpm --filter @lumis-sh/lumis run build:generate
 pnpm --dir packages/javascript run build:wasm-bundles
 ```
 
 This updates files such as:
 
+- `crates/lumis-wasm-runtime/src/catalog.rs`
 - `packages/javascript/lumis/langs/*.ts`
 - `packages/javascript/lumis/bundles/*.ts`
 - `packages/javascript/lumis/src/generated/*`
 - `packages/javascript/wasm-bundle-*/`
+
+Automated parser upgrades regenerate the Rust catalog. CI also runs
+`mise run langs-check-catalog` and rejects stale data.
 
 #### Parser entry fields
 
@@ -256,6 +273,7 @@ In `crates/lumis/Cargo.toml`:
 mise run langs-fetch-vendored-parsers {name}
 mise run cargo-update-dep {name}
 mise run cargo-update-features
+mise run langs-gen-catalog
 mise run langs-fetch-queries {name}
 ```
 
@@ -343,24 +361,175 @@ When a fetched upstream query needs to change, use one of these directories:
 
 ### Building WASMs
 
-WASMs are built in CI by the `wasm-release` workflow, but you can build them locally with emscripten:
+WASMs are built in CI by the `wasm-release` workflow, but you can build them locally:
 
 ```sh
 mise run wasm-build
 mise run wasm-build {name}
 ```
 
-This requires `emcc` and `tree-sitter-cli`.
+The compiler comes from `tree-sitter-cli`, which brings its own WASI SDK and downloads it on first use; Emscripten is not involved. You also need `git`, to fetch each grammar at the revision `languages.toml` pins, and `npm`, for the grammars whose parser is generated from `grammar.js`.
+
+### Running a runtime locally
+
+Parsers download on demand, so a checkout needs no setup. You only need
+`LUMIS_DATA_DIR` for a parser you built yourself, which is not published and
+would 404 on the CDN:
+
+```sh
+export LUMIS_DATA_DIR=$PWD/tmp/wasm/local
+```
+
+```sh
+mise run wasm-build elixir
+mise run wasm-stage elixir
+```
+
+Staging more languages adds to the same directory, and a parser there is used
+even when it is only reached as an injected language.
+
+```sh
+cargo run -p lumis-cli -- highlight packages/elixir/lumis/mix.exs
+cargo run -p lumis-cli -- highlight -l elixir <<< 'def foo, do: "hello"'
+```
+
+```sh
+# Elixir
+cd packages/elixir/lumis
+LUMIS_BUILD=1 iex -S mix
+iex> Lumis.highlight!("def foo, do: \"hello\"", formatter: {:html_inline, language: "elixir", theme: "dracula"})
+```
+
+Node resolves `@lumis-sh/lumis` by its own name only from inside the package, so
+the script has to live there:
+
+```js
+// packages/javascript/lumis/test.mjs
+import { createHighlighter } from "@lumis-sh/lumis";
+import { htmlInline } from "@lumis-sh/lumis/formatters";
+import elixir from "@lumis-sh/lumis/langs/elixir";
+import dracula from "@lumis-sh/themes/dracula";
+
+const highlighter = await createHighlighter({ languages: [elixir] });
+const html = highlighter.highlight(
+  'def foo, do: "hello"',
+  htmlInline({ language: elixir, theme: dracula }),
+);
+console.log(html);
+```
+
+```sh
+pnpm --filter @lumis-sh/lumis run build
+node packages/javascript/lumis/test.mjs
+```
+
+A browser cannot read `LUMIS_DATA_DIR`, so serve the staged directory instead
+and point the resolvers at it. The dev server serves the package root, so a
+symlink puts the parsers on the same origin as the page:
+
+```sh
+mkdir -p packages/javascript/lumis/.tmp
+ln -sfn ../../../../tmp/wasm/local/parsers packages/javascript/lumis/.tmp/parsers
+pnpm --filter @lumis-sh/lumis run dev
+```
+
+Then open `/test.html` on the dev server.
+
+```html
+<!-- packages/javascript/lumis/test.html -->
+<div id="out"></div>
+<script type="module">
+  import { createHighlighter } from "@lumis-sh/lumis";
+  import { htmlInline } from "@lumis-sh/lumis/formatters";
+  import elixir from "@lumis-sh/lumis/langs/elixir";
+  import dracula from "@lumis-sh/themes/dracula";
+
+  const base = "/.tmp/parsers";
+  const highlighter = await createHighlighter({
+    languages: [elixir],
+    languagePackageResolver: (packageName) =>
+      `${base}/${packageName.replace("@lumis-sh/wasm-", "")}.lumis.json`,
+    wasmResolver: (_language, wasm) => `${base}/${wasm.name}-${wasm.version}-${wasm.sha256}.wasm`,
+  });
+
+  document.getElementById("out").innerHTML = highlighter.highlight(
+    'def foo, do: "hello"',
+    htmlInline({ language: elixir, theme: dracula }),
+  );
+</script>
+```
+
+Those URLs are the layout `mise run wasm-stage` writes: the package file is named
+after the package minus its scope, and the parser is content-addressed. Loading is
+asynchronous in a browser, so an injected language has to be named in `languages:`
+rather than discovered mid-document.
+
+After a change under `crates/`, rebuild the native artifact or the runtime keeps
+the old one and fails as if your change broke it:
+
+```sh
+mix compile --force                              # Elixir NIF
+pnpm --filter @lumis-sh/lumis run build:native   # Node addon
+```
 
 #### WASM distribution
 
-Each grammar WASM is published as `@lumis-sh/wasm-{name}`.
+Each grammar is published as a self-contained `@lumis-sh/wasm-{name}` language
+package. It contains the parser WASM, matching processed queries, aliases,
+grammar metadata, byte length, and SHA-256. During staging, `crates/dev`
+generates `tmp/wasm/publish/{name}/lumis.json`; it is published with the
+package rather than checked in.
 
-`@lumis-sh/lumis` does not bundle parser WASMs. Language bundles contain a `WasmRef` (`packageName`, `name`, `version`) that is resolved at runtime by the WASM resolver. The default resolver fetches from jsDelivr. Use `configureWasmResolver()` to point to your own server.
+Runtime catalogs generated from `languages.toml` contain only stable IDs,
+aliases, and package names. JavaScript, CLI, and Elixir resolve the current
+`lumis.json`, cache it, then fetch the exact versioned parser named by that
+metadata and verify its bytes. Parser or query updates therefore publish only
+the affected language package, without a runtime release.
 
-`lumis-cli` also fetches parser WASMs on first use from unpkg and caches them in the data directory.
+CLI, Node and Elixir caches persist on disk under `LUMIS_DATA_DIR`, in the same
+layout, so one prepared directory serves all three; browsers use CacheStorage
+with an IndexedDB fallback. Local and benchmark execution should provide both
+`lumis.json` and its matching parser so queries and parser bytes remain
+atomic.
 
-The `wasm-release` workflow publishes packages automatically. It detects which parsers still need publishing with `scripts/wasm-needed.py` and builds and publishes them in parallel.
+#### Parsers in CI
+
+CI builds parsers from `languages.toml` rather than taking them from npm, so a
+revision bump is validated before it is published rather than after.
+
+- **Queries CI** builds 110 of the 113 parsers across 12 shards and compiles
+  every processed query for all 115 language definitions against the grammar its
+  language actually pins. Each shard runs in fresh batches of four selected
+  languages; the global `cannotCompile` check may load PHP as a fifth grammar,
+  so no process retains more than five. `llvm`, `vim` and `zsh` exceed a runner's
+  memory and are committed under `fixtures/parsers/` with their measured peak
+  RSS; a parser that cannot be built does not fail its shard, but falls back to
+  that copy and then to the published package.
+- **Conformance CI** builds the seventeen parsers the committed fixtures supply,
+  stages them with `wasm-stage`, and points `LUMIS_DATA_DIR` at the result, so
+  the CLI, Elixir and Node native suites render from parsers built in that run.
+- **JavaScript CI** runs the direct-addon store tests in their own process against
+  a seeded copy of that store, then runs the remaining native-selected tests
+  against an empty one before running the full Wasm-selected suite. The split is
+  intentional: a parser already in the store takes precedence over configured
+  JavaScript resolvers, so one process cannot honestly prove both paths.
+
+That parser set comes from the fixture filenames, not from the languages named
+in the fixtures' expected events. A document can attempt a language that never
+appears in its output — every Lua comment injects the `comment` parser — and
+leaving it out sends the runtime to the network mid-suite.
+
+Two files record what these checks cannot cover, and both may only shrink:
+
+- `fixtures/parsers/` holds a committed build for a grammar CI cannot compile.
+  `tree-sitter-vim` needs 18.3 GB of memory against a runner's 16 GB.
+- `unverified-parsers.json` has two lists: `languages`, which npm has fallen
+  behind on, and `cannotCompile`, for a language a built parser still cannot
+  check. `llvm` has no queries upstream; `php` traps while parsing its own
+  sample at the pinned revision, published package included. A test fails when
+  either entry starts working.
+
+The `wasm-release` workflow publishes packages automatically. It detects which parsers still need publishing with `mise run wasm-publish-needed`, which compares each published package's `definitionHash` against the one `crates/dev` computes from `languages.toml` and the processed queries, then builds and publishes the rest in parallel.
 
 ## Themes
 

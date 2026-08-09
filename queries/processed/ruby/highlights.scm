@@ -143,7 +143,7 @@
   (#any-of? @keyword.exception "raise" "fail" "catch" "throw"))
 
 ((constant) @type
-  (#not-lua-match? @type "^[A-Z0-9_]+$"))
+  (#not-match? @type "^[A-Z0-9_]+$"))
 
 [
   (self)
@@ -222,7 +222,7 @@
 ((program
   .
   (comment) @keyword.directive )
-  (#lua-match? @keyword.directive "^#!/"))
+  (#match? @keyword.directive "^#!/"))
 
 (program
   (comment)+ @comment.documentation

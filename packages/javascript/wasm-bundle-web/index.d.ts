@@ -1,4 +1,4 @@
-import type { RuntimeWasmBundle } from '@lumis-sh/lumis'
+import type { RuntimeWasmBundle } from "@lumis-sh/lumis";
 
-export declare const bundledWasms: RuntimeWasmBundle
-export default bundledWasms
+export declare const bundledWasms: RuntimeWasmBundle;
+export default bundledWasms;

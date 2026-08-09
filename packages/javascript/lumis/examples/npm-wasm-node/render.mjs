@@ -1,8 +1,8 @@
-import { writeFile } from 'node:fs/promises'
-import { createHighlighter } from '@lumis-sh/lumis'
-import { htmlInline } from '@lumis-sh/lumis/formatters'
-import elixir from '@lumis-sh/lumis/langs/elixir'
-import githubLight from '@lumis-sh/themes/github_light'
+import { writeFile } from "node:fs/promises";
+import { createHighlighter } from "@lumis-sh/lumis";
+import { htmlInline } from "@lumis-sh/lumis/formatters";
+import elixir from "@lumis-sh/lumis/langs/elixir";
+import githubLight from "@lumis-sh/themes/github_light";
 
 const source = `defmodule Lumis.Release do
   def manifest(env) do
@@ -14,13 +14,10 @@ const source = `defmodule Lumis.Release do
     |> manifest()
     |> IO.inspect(label: "release")
   end
-end`
+end`;
 
-const highlighter = await createHighlighter({ languages: [elixir] })
-const code = highlighter.highlight(
-  source,
-  htmlInline({ language: elixir, theme: githubLight }),
-)
+const highlighter = await createHighlighter({ languages: [elixir] });
+const code = highlighter.highlight(source, htmlInline({ language: elixir, theme: githubLight }));
 
 const html = `<!doctype html>
 <html lang="en">
@@ -42,7 +39,7 @@ const html = `<!doctype html>
     </main>
   </body>
 </html>
-`
+`;
 
-await writeFile(new URL('./output.html', import.meta.url), html)
-console.log('Wrote packages/javascript/lumis/examples/npm-wasm-node/output.html')
+await writeFile(new URL("./output.html", import.meta.url), html);
+console.log("Wrote packages/javascript/lumis/examples/npm-wasm-node/output.html");

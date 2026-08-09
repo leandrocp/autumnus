@@ -1,7 +1,8 @@
-import { copyFile, mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, isAbsolute, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { do_not_optimize, measure } from "mitata";
+import { implementations } from "../../scripts/implementations.mjs";
 
 const benchmarksDir = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const repoDir = resolve(benchmarksDir, "..");
@@ -19,7 +20,7 @@ if (!Number.isSafeInteger(minimumSamples) || minimumSamples < 2) {
 if (!Number.isFinite(measurementSeconds) || measurementSeconds <= 0) {
   throw new Error("BENCH_TIME_SECONDS must be positive");
 }
-if (!new Set(["lumis-js-native", "lumis-js-wasm", "shiki"]).has(implementation)) {
+if (!implementations.some(({ id, runner }) => id === implementation && runner === "mitata")) {
   throw new Error(`unknown JavaScript benchmark implementation: ${implementation}`);
 }
 
@@ -46,7 +47,12 @@ if (
 }
 
 await prepareRuntime();
-const adapter = implementation === "shiki" ? await loadShiki() : await loadLumis();
+const adapter =
+  implementation === "shiki"
+    ? await loadShiki()
+    : implementation === "highlight-js"
+      ? await loadHighlightJs()
+      : await loadLumis();
 const validationRuntime = await adapter.initialize();
 const outputBytes = adapter.render(validationRuntime, true);
 adapter.dispose(validationRuntime);
@@ -56,14 +62,20 @@ if (outputBytes <= scenario.inputBytes) {
 
 let result;
 const cleanup = () => {
-  if (result !== undefined) adapter.disposeResult(result);
   result = undefined;
   globalThis.gc?.();
 };
+// Setup is measured once and reported separately, never inside the loop. Lumis
+// keeps its parser catalog for the life of the process while web-tree-sitter
+// rebuilds one per highlighter, so timing setup per sample would compare how
+// each runtime caches rather than how fast either highlights.
+const setupStart = performance.now();
+const measuredRuntime = await adapter.initialize();
+const setupNanoseconds = (performance.now() - setupStart) * 1e6;
+
 const stats = await measure(
   async () => {
-    const runtime = await adapter.initialize();
-    result = { runtime, outputBytes: adapter.render(runtime) };
+    result = { runtime: measuredRuntime, outputBytes: adapter.render(measuredRuntime) };
     do_not_optimize(result.outputBytes);
   },
   {
@@ -77,6 +89,7 @@ const stats = await measure(
   },
 );
 cleanup();
+adapter.dispose(measuredRuntime);
 
 const { debug: _debug, ...serializableStats } = stats;
 const report = {
@@ -89,6 +102,7 @@ const report = {
   fileCount: scenario.fileCount,
   languageCount: scenario.languageCount,
   total: serializableStats,
+  setupNanoseconds,
 };
 const outputPath = isAbsolute(requestedOutput)
   ? requestedOutput
@@ -99,20 +113,47 @@ console.log(outputPath);
 
 async function prepareRuntime() {
   const runtimeDir = resolve(repoDir, "target/benchmarks/javascript-runtime");
-  const cacheDir = resolve(runtimeDir, "node_modules/.cache/lumis");
-  const diffWasm = fileURLToPath(import.meta.resolve("@lumis-sh/wasm-diff/tree-sitter-diff.wasm"));
-  await mkdir(cacheDir, { recursive: true });
-  await copyFile(diffWasm, resolve(cacheDir, "tree-sitter-diff-0.26.wasm"));
+  await mkdir(runtimeDir, { recursive: true });
+  process.env.LUMIS_DATA_DIR = resolve(runtimeDir, "wasm-cache");
+
+  // Which runtime `@lumis-sh/lumis` picks on Node. The addon is the default, so
+  // the Wasm row has to ask for the other one; the addon resolves parsers in
+  // Rust rather than through the JavaScript resolver the Wasm row configures,
+  // and reads them from the tree `prepare:languages` writes.
+  if (implementation === "lumis-js-wasm") {
+    process.env.LUMIS_TEST_RUNTIME = "wasm";
+  } else if (implementation === "lumis-js-node") {
+    delete process.env.LUMIS_TEST_RUNTIME;
+    process.env.LUMIS_DATA_DIR = resolve(repoDir, "target/benchmarks/language-packages");
+  }
+
   process.chdir(runtimeDir);
 }
 
 async function loadLumis() {
-  const [{ createHighlighter, withWasm }, { htmlInline }, { default: theme }] = await Promise.all([
+  const [lumis, { htmlInline }, { default: theme }] = await Promise.all([
     import("@lumis-sh/lumis"),
     import("@lumis-sh/lumis/formatters"),
     import("@lumis-sh/themes/github_dark"),
   ]);
-  const uniqueIds = [...new Set(scenario.files.map(({ language }) => language))];
+  const { createHighlighter, withWasm, runtimeKind } = lumis;
+
+  // Node picks the addon and falls back to Wasm silently, so a row that cannot
+  // confirm which one it measured would quietly report the other one's numbers.
+  const expected = implementation === "lumis-js-node" ? "native" : "wasm";
+  const actual = runtimeKind();
+  if (actual !== expected) {
+    throw new Error(`${implementation} needs the ${expected} runtime, got ${actual}`);
+  }
+  const uniqueIds = [...new Set(["comment", ...scenario.files.map(({ language }) => language)])];
+  const localPackages = JSON.parse(
+    await readFile(resolve(repoDir, "target/benchmarks/language-packages/index.json"), "utf8"),
+  );
+  const languagePackageResolver = (packageName) => {
+    const local = localPackages[packageName];
+    if (!local) throw new Error(`missing local language package ${packageName}`);
+    return pathToFileURL(local.metadataPath);
+  };
   const languages = Object.fromEntries(
     await Promise.all(
       uniqueIds.map(async (id) => {
@@ -127,7 +168,10 @@ async function loadLumis() {
 
   return {
     async initialize() {
-      const highlighter = await createHighlighter({ languages: Object.values(languages) });
+      const highlighter = await createHighlighter({
+        languages: Object.values(languages),
+        languagePackageResolver,
+      });
       const formatters = Object.fromEntries(
         Object.entries(languages).map(([id, language]) => [id, htmlInline({ language, theme })]),
       );
@@ -143,7 +187,6 @@ async function loadLumis() {
       return renderedBytes;
     },
     dispose() {},
-    disposeResult() {},
   };
 }
 
@@ -177,9 +220,41 @@ async function loadShiki() {
     dispose(highlighter) {
       highlighter.dispose();
     },
-    disposeResult(measured) {
-      measured.runtime.dispose();
+  };
+}
+
+async function loadHighlightJs() {
+  const { default: highlightJs } = await import("highlight.js/lib/core");
+  const languageNames = [...new Set(scenario.files.map(({ language }) => language))];
+  const languageModules = Object.fromEntries(
+    await Promise.all(
+      languageNames.map(async (language) => {
+        const moduleName = language === "html" ? "xml" : language;
+        const { default: definition } = await import(`highlight.js/lib/languages/${moduleName}`);
+        return [language, definition];
+      }),
+    ),
+  );
+
+  return {
+    async initialize() {
+      const highlighter = highlightJs.newInstance();
+      for (const [language, definition] of Object.entries(languageModules)) {
+        highlighter.registerLanguage(language, definition);
+      }
+      return highlighter;
     },
+    render(highlighter, validate = false) {
+      let renderedBytes = 0;
+      for (const file of scenario.files) {
+        const highlighted = highlighter.highlight(file.source, { language: file.language }).value;
+        const output = `<pre><code class="hljs language-${file.language}">${highlighted}</code></pre>`;
+        if (validate) assertHtml(output, file.source, implementation);
+        renderedBytes += Buffer.byteLength(output);
+      }
+      return renderedBytes;
+    },
+    dispose() {},
   };
 }
 

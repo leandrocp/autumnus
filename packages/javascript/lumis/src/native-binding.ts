@@ -6,16 +6,60 @@ export interface NativeFormatter {
   options: Record<string, unknown>;
 }
 
+export interface NativeLanguageSpec {
+  id: string;
+  aliases: string[];
+  /** Read from the parser's exports when omitted. */
+  grammarName?: string;
+  highlights: string;
+  injections?: string;
+  locals?: string;
+  brackets?: string;
+}
+
 interface NativeRuntimeInstance {
   loadLanguage(id: string): void;
-  highlightEvents(source: string, language: string, rainbowBrackets?: boolean): Uint8Array;
-  format(source: string, language: string, formatter: NativeFormatter): string;
-  formatAsync(source: string, language: string, formatter: NativeFormatter): Promise<string>;
+  loadLanguagePackage(
+    id: string,
+    expectedPackageName: string,
+    packageJson: string,
+    wasm: Uint8Array,
+  ): string;
+  loadInstalledLanguagePackage(
+    id: string,
+    expectedPackageName: string,
+    packageJson: string,
+    wasm: Uint8Array,
+  ): string;
+  loadLanguageDefinition(spec: NativeLanguageSpec, wasm: Uint8Array): string;
+  hasLanguage(id: string): boolean;
+  cacheLanguage(id: string, directory?: string, force?: boolean): string;
+  highlightEvents(
+    source: string,
+    language: string,
+    rainbowBrackets?: boolean,
+    packageResolver?: (packageName: string) => string | undefined,
+    wasmResolver?: (language: string, wasmJson: string) => string | undefined,
+  ): { events: Uint8Array; unresolved: string[] };
+  format(
+    source: string,
+    language: string,
+    formatter: NativeFormatter,
+    packageResolver?: (packageName: string) => string | undefined,
+    wasmResolver?: (language: string, wasmJson: string) => string | undefined,
+  ): { output: string; unresolved: string[] };
+  formatAsync(
+    source: string,
+    language: string,
+    formatter: NativeFormatter,
+  ): Promise<{ output: string; unresolved: string[] }>;
 }
 
 export interface NativeBinding {
   NativeRuntime: new () => NativeRuntimeInstance;
   runtimeKind(): string;
+  /** `false` once the runtime has read them, which it does on first use. */
+  configureStore(dataDir?: string): boolean;
 }
 
 let cachedBinding: NativeBinding | null | undefined;
@@ -40,21 +84,15 @@ function nativeTarget(): string | undefined {
   return undefined;
 }
 
-/** Load the platform addon without making native support a public API choice. */
-export function loadNativeBinding(): NativeBinding | undefined {
-  if (cachedBinding !== undefined) {
-    return cachedBinding ?? undefined;
-  }
-  if (process.env.LUMIS_TEST_RUNTIME === "wasm") {
-    cachedBinding = null;
-    return undefined;
-  }
-
+/**
+ * The platform addon, ignoring whether this process wants to use it.
+ *
+ * Separate from {@link loadNativeBinding} so a test can assert the addon works
+ * even in a run that has asked for the Wasm runtime.
+ */
+export function loadAddon(): NativeBinding | undefined {
   const target = nativeTarget();
-  if (!target) {
-    cachedBinding = null;
-    return undefined;
-  }
+  if (!target) return undefined;
 
   const require = createRequire(import.meta.url);
   const candidates = [
@@ -65,20 +103,32 @@ export function loadNativeBinding(): NativeBinding | undefined {
   for (const candidate of candidates) {
     try {
       const binding = require(candidate) as NativeBinding;
-      if (binding.runtimeKind?.() === "native") {
-        cachedBinding = binding;
-        return binding;
-      }
+      if (binding.runtimeKind?.() === "native") return binding;
     } catch {
-      // Missing or unloadable platform packages transparently use the WASM runtime.
+      // Missing or unloadable platform packages transparently use the Wasm runtime.
     }
   }
-
-  cachedBinding = null;
-  if (process.env.LUMIS_TEST_RUNTIME === "native") {
-    throw new Error(`Lumis native runtime is required but unavailable for ${target}`);
-  }
   return undefined;
+}
+
+/** Load the platform addon without making native support a public API choice. */
+export function loadNativeBinding(): NativeBinding | undefined {
+  if (cachedBinding !== undefined) {
+    return cachedBinding ?? undefined;
+  }
+  if (process.env.LUMIS_TEST_RUNTIME === "wasm") {
+    cachedBinding = null;
+    return undefined;
+  }
+
+  const binding = loadAddon();
+  cachedBinding = binding ?? null;
+  if (!binding && process.env.LUMIS_TEST_RUNTIME === "native") {
+    throw new Error(
+      `Lumis native runtime is required but unavailable for ${process.platform}-${process.arch}`,
+    );
+  }
+  return binding;
 }
 
 export type { NativeRuntimeInstance };

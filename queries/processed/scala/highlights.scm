@@ -66,11 +66,11 @@
 
 ((import_declaration
   path: (identifier) @type)
-  (#lua-match? @type "^[A-Z]"))
+  (#match? @type "^[A-Z]"))
 
 ((stable_identifier
   (identifier) @type)
-  (#lua-match? @type "^[A-Z]"))
+  (#match? @type "^[A-Z]"))
 
 (export_declaration
   path: (identifier) @module)
@@ -80,15 +80,15 @@
 
 ((export_declaration
   path: (identifier) @type)
-  (#lua-match? @type "^[A-Z]"))
+  (#match? @type "^[A-Z]"))
 
 ((stable_identifier
   (identifier) @type)
-  (#lua-match? @type "^[A-Z]"))
+  (#match? @type "^[A-Z]"))
 
 ((namespace_selectors
   (identifier) @type)
-  (#lua-match? @type "^[A-Z]"))
+  (#match? @type "^[A-Z]"))
 
 ; method invocation
 (call_expression
@@ -103,7 +103,7 @@
 
 ((call_expression
   function: (identifier) @constructor)
-  (#lua-match? @constructor "^[A-Z]"))
+  (#match? @constructor "^[A-Z]"))
 
 (generic_function
   function: (identifier) @function.call)
@@ -130,7 +130,7 @@
 
 (field_expression
   value: (identifier) @type
-  (#lua-match? @type "^[A-Z]"))
+  (#match? @type "^[A-Z]"))
 
 (infix_expression
   operator: (identifier) @operator)
@@ -283,7 +283,7 @@
 ] @comment 
 
 ((block_comment) @comment.documentation
-  (#lua-match? @comment.documentation "^/[*][*][^*].*[*]/$"))
+  (#match? @comment.documentation "^/[*][*][^*][\\s\\S]*[*]/$"))
 
 ; `case` is a conditional keyword in case_block
 (case_block
@@ -297,13 +297,13 @@
 (operator_identifier) @operator
 
 ((identifier) @type
-  (#lua-match? @type "^[A-Z]"))
+  (#match? @type "^[A-Z]"))
 
 ((identifier) @variable.builtin
-  (#lua-match? @variable.builtin "^this$"))
+  (#match? @variable.builtin "^this$"))
 
 ((identifier) @function.builtin
-  (#lua-match? @function.builtin "^super$"))
+  (#match? @function.builtin "^super$"))
 
 ; Scala CLI using directives
 (using_directive_key) @variable.parameter
