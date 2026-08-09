@@ -361,14 +361,14 @@ When a fetched upstream query needs to change, use one of these directories:
 
 ### Building WASMs
 
-WASMs are built in CI by the `wasm-release` workflow, but you can build them locally with emscripten:
+WASMs are built in CI by the `wasm-release` workflow, but you can build them locally:
 
 ```sh
 mise run wasm-build
 mise run wasm-build {name}
 ```
 
-This requires `emcc` and `tree-sitter-cli`.
+The compiler comes from `tree-sitter-cli`, which brings its own WASI SDK and downloads it on first use; Emscripten is not involved. You also need `git`, to fetch each grammar at the revision `languages.toml` pins, and `npm`, for the grammars whose parser is generated from `grammar.js`.
 
 ### Running a runtime locally
 
