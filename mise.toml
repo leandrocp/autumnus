@@ -780,7 +780,7 @@ run = '''
 #!/usr/bin/env bash
 set -euo pipefail
 mise run wasm-publish-prepare ${usage_parser?}
-wasm_name=$(cargo run -q -p dev -- wasm-meta ${usage_parser?} | grep '^wasm_name=' | cut -d= -f2)
+wasm_name=$(cargo run -q --manifest-path crates/dev/Cargo.toml -- wasm-meta ${usage_parser?} | grep '^wasm_name=' | cut -d= -f2)
 cd tmp/wasm/publish/$wasm_name && npm publish --access public
 '''
 
