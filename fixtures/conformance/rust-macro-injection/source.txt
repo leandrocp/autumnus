@@ -1,0 +1,4 @@
+fn describe(cfg: &Config) -> String {
+    assert!(cfg.multi_line);
+    format!("{}: {}", cfg.name, cfg.value)
+}

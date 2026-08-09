@@ -1,0 +1,16 @@
+# Report
+
+Inline `code` and **bold** text.
+
+```python
+def total(rows):
+    return sum(r["n"] for r in rows)
+```
+
+```json
+{"rows": [{"n": 1}]}
+```
+
+```css
+.total::after { content: "%"; color: red; }
+```

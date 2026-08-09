@@ -73,7 +73,8 @@ const file = await unified()
 - visits `pre > code` blocks in HAST
 - reads languages from `language-*` classes on the `<code>` or `<pre>` node, or from `data-language` / `language` properties
 - replaces each block with Lumis HTML output
-- loads detected languages on demand before rendering each block
+- loads whatever language a fence names, the same as every other runtime, so `languages` is a prefetch list rather than an allow-list
+- a fence naming a language that cannot be loaded leaves that block unhighlighted; the rest of the document still renders
 
 Use it in:
 

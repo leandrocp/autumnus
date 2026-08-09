@@ -272,7 +272,9 @@ defmodule Lumis.LumisTest do
                    Lumis.highlight(":test", formatter: {:html_inline, language: "elixir"})
         end)
 
-      assert warning == ""
+      # Not `== ""`: test files are compiled while async tests already run, so
+      # unrelated compiler diagnostics land on stderr depending on the seed.
+      refute warning =~ ":language option is deprecated"
     end
 
     test "formatter_type preserves language value" do

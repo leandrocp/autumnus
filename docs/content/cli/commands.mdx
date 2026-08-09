@@ -8,7 +8,7 @@ description: >-
 keywords:
   - lumis cli
   - themes generate
-  - parsers fetch
+  - parsers cache
   - highlight command
 ---
 
@@ -35,8 +35,7 @@ These flags work with any subcommand:
 | `lumis languages list` | List supported languages and file patterns |
 | `lumis themes list` | List built-in and local themes |
 | `lumis themes generate` | Generate a theme from a Neovim colorscheme repo |
-| `lumis parsers fetch` | Pre-download parser WASM files |
-| `lumis parsers update` | Refresh cached parser WASM files |
+| `lumis parsers cache` | Cache parser WASMs so later runs skip the download |
 
 ## `lumis highlight`
 
@@ -160,8 +159,8 @@ echo 'function increment() { count++; }' | lumis dump events -l svelte
 
 All dump commands accept an optional path and `--language` / `-l`. They read
 stdin when the path is omitted, using the same language detection behavior as
-`lumis highlight`. Parser WASMs are downloaded and cached on first use when
-needed.
+`lumis highlight`. Exact-version parser WASMs are verified and cached on first
+use when needed.
 
 ## `lumis languages list`
 
@@ -206,25 +205,26 @@ lumis themes generate \
   -o github-light.json
 ```
 
-## `lumis parsers fetch`
+## `lumis parsers cache`
 
-Pre-download parser WASM files so highlighting doesn't trigger downloads at runtime.
+Download exact, integrity-checked parser WASM files ahead of time, and compile
+them. Highlighting does both anyway; this moves them off the first run.
+
+A cold parser costs a download and then a Wasmtime compile, and the compile is
+the larger half, so each parser is loaded once here and its compiled form is
+written beside it. `mix lumis.languages.cache` prepares the identical directory,
+and every runtime reads it: cache with the CLI, and Elixir or Node start warm.
 
 ```bash title="Selected parsers"
-lumis parsers fetch rust javascript elixir
+lumis parsers cache rust javascript elixir
 ```
 
 ```bash title="All parsers"
-lumis parsers fetch --all
+lumis parsers cache --all
 ```
 
-## `lumis parsers update`
-
-Re-download parsers to get the latest versions.
-
-```bash
-lumis parsers update rust javascript
-lumis parsers update --all
+```bash title="Replace valid cached parsers"
+lumis parsers cache rust javascript --force
 ```
 
 ## Configuration
@@ -251,5 +251,5 @@ Override with `--data-dir` or `LUMIS_DATA_DIR`.
 
 Contents:
 
-- `parsers/` — cached Tree-sitter WASM files
+- `parsers/` — verified Tree-sitter WASM files keyed by version and SHA-256
 - `themes/` — custom theme JSON files (visible in `lumis themes list`)

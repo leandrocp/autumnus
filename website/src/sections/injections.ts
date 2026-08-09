@@ -1,6 +1,6 @@
 import { loadTheme } from "../data/themes";
 import { LANGUAGES_BY_ID } from "../data/languages";
-import { preloadLanguages, renderHighlightMultiTheme } from "../lib/highlighter";
+import { loadLanguages, renderHighlightMultiTheme } from "../lib/highlighter";
 
 const HTML_CSS_JS_SOURCE = `<section class="greeting-card">
   <style>
@@ -51,7 +51,7 @@ export function renderInjections() {
         <dl class="mt-12 grid gap-8 sm:grid-cols-3">
           <div class="border-l-2 border-zinc-200 py-1 pl-5 dark:border-zinc-800">
             <dt class="font-mono text-sm font-medium text-zinc-900 dark:text-white">Multi-level nesting</dt>
-            <dd class="mt-1 font-mono text-xs leading-relaxed text-zinc-500">Each injected language gets its own parser. No depth limits, no hacks.</dd>
+            <dd class="mt-1 font-mono text-xs leading-relaxed text-zinc-500">Each injected language gets its own parser, loaded during the pass that finds it. No depth limits, no second pass.</dd>
           </div>
           <div class="border-l-2 border-zinc-200 py-1 pl-5 dark:border-zinc-800">
             <dt class="font-mono text-sm font-medium text-zinc-900 dark:text-white">Language-aware scopes</dt>
@@ -67,7 +67,7 @@ export function renderInjections() {
 }
 
 export async function setupInjections(_root: HTMLElement) {
-  await preloadLanguages(["html", "css", "javascript"]);
+  await loadLanguages(["html", "css", "javascript"]);
 
   const [lightTheme, darkTheme] = await Promise.all([
     loadTheme("catppuccin_latte"),

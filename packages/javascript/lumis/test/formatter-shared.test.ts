@@ -38,7 +38,12 @@ import { sanitizeThemeName } from "../src/themes.js";
 import { hexToRgb, paint, rgbToAnsi, styleToAnsi, wrapWithAnsi } from "../src/formatter/ansi.js";
 import type { Language } from "../src/types.js";
 
-const jsonLang: Language = { id: "json", aliases: [], highlights: "", wasm: "json.wasm" };
+const jsonLang: Language = {
+  id: "json",
+  aliases: [],
+  highlights: "",
+  wasm: "json.wasm",
+};
 
 const theme = {
   name: "test",
@@ -79,9 +84,7 @@ describe("formatter shared helpers", () => {
   });
 
   it("escapes HTML entities without touching braces", () => {
-    expect(escape(`<tag attr='x'>&{"y"}`)).toBe(
-      "&lt;tag attr=&#39;x&#39;&gt;&amp;{&quot;y&quot;}",
-    );
+    expect(escape(`<tag attr='x'>&{"y"}`)).toBe("&lt;tag attr=&#39;x&#39;&gt;&amp;{&quot;y&quot;}");
   });
 
   it("escapes HTML attributes without touching braces", () => {
@@ -122,7 +125,7 @@ describe("formatter shared helpers", () => {
     expect(openPreTag({ preClass: "custom", theme })).toBe(
       '<pre class="lumis custom" style="color: #ffffff; background-color: #000000;">',
     );
-    expect(openCodeTag({ id: "json", aliases: [], highlights: "" })).toBe(
+    expect(openCodeTag({ id: "json", aliases: [] })).toBe(
       '<code class="language-json" translate="no" tabindex="0">',
     );
   });
@@ -237,7 +240,7 @@ describe("formatter shared helpers", () => {
     expect(new TextDecoder().decode(html)).toBe('<span class="string">a\n&lt;b&gt;</span>');
     expect(linesFromOffsets(html, offsets)).toEqual([
       '<span class="string">a\n',
-      '&lt;b&gt;</span>',
+      "&lt;b&gt;</span>",
     ]);
   });
 
@@ -249,7 +252,12 @@ describe("formatter shared helpers", () => {
   });
 
   it("generates span inline attrs with theme styling", () => {
-    const attrs = spanInlineAttrs({ scope: "string", language: "json", theme, includeHighlights: true });
+    const attrs = spanInlineAttrs({
+      scope: "string",
+      language: "json",
+      theme,
+      includeHighlights: true,
+    });
     expect(attrs["data-highlight"]).toBe("string");
     expect(attrs.style).toContain("color: #22ff22");
   });
@@ -284,13 +292,23 @@ describe("formatter shared helpers", () => {
 
   it("generates multi-themes span attrs with default theme", () => {
     const themes = { dracula: theme };
-    const attrs = spanMultiThemesAttrs({ scope: "string", language: "json", themes, defaultTheme: "dracula" });
+    const attrs = spanMultiThemesAttrs({
+      scope: "string",
+      language: "json",
+      themes,
+      defaultTheme: "dracula",
+    });
     expect(attrs.style).toContain("#22ff22");
   });
 
   it("wraps text in multi-themes span", () => {
     const themes = { dracula: theme };
-    const html = spanMultiThemes("x", { scope: "string", language: "json", themes, defaultTheme: "dracula" });
+    const html = spanMultiThemes("x", {
+      scope: "string",
+      language: "json",
+      themes,
+      defaultTheme: "dracula",
+    });
     expect(html).toContain("<span");
     expect(html).toContain("x");
   });

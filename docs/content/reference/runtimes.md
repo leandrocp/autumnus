@@ -21,11 +21,17 @@ keywords:
 | Rust | `lumis` | [docs.rs](https://docs.rs/lumis) |
 | Elixir | `lumis` | [HexDocs](https://hexdocs.pm/lumis) |
 | JavaScript | `@lumis-sh/lumis` | [npm](https://www.npmjs.com/package/@lumis-sh/lumis) |
-| Node.js native (opt-in) | `@lumis-sh/lumis-native` | [npm](https://www.npmjs.com/package/@lumis-sh/lumis-native) |
 | Browsers / CDN | `@lumis-sh/lumis` | [npm](https://www.npmjs.com/package/@lumis-sh/lumis) |
 | Java | `lumis4j` | [GitHub](https://github.com/roastedroot/lumis4j) |
 
-`@lumis-sh/lumis` covers JavaScript runtimes such as Node.js, Bun, and Deno, plus browser usage through bundlers or CDN imports. It loads parser WASM per language by default. On supported Node.js platforms, installing `@lumis-sh/lumis-native` opts into one larger native addon containing all supported parsers.
+`@lumis-sh/lumis` covers Node.js, Bun, Deno, and browsers. Node, the CLI and
+Elixir all run the same Wasmtime highlighting from `lumis-wasm-runtime`, so
+identical input produces identical output; browsers use `web-tree-sitter`.
+
+Every dynamic runtime loads exact, integrity-checked parser WASM per language
+rather than shipping an all-language binary, downloading what a document turns
+out to need and persisting verified assets across process restarts. Build-time
+cache commands move that download ahead of the first request.
 
 ## Themes
 
@@ -43,7 +49,11 @@ keywords:
 
 ## WASM language packages
 
-JavaScript parser grammars are also published as per-language WASM packages such as `@lumis-sh/wasm-rust`, `@lumis-sh/wasm-javascript`, and `@lumis-sh/wasm-elixir`.
+Dynamic parser grammars are published as self-contained language packages such
+as `@lumis-sh/wasm-rust`, `@lumis-sh/wasm-javascript`, and
+`@lumis-sh/wasm-elixir`. Each package keeps its parser, queries, aliases, and
+integrity metadata at one version so JavaScript, CLI, and Elixir load the same
+language definition.
 
 Preset bundle packages are also available, such as `@lumis-sh/wasm-bundle-web`, `@lumis-sh/wasm-bundle-web-extra`, `@lumis-sh/wasm-bundle-system`, and `@lumis-sh/wasm-bundle-backend`.
 

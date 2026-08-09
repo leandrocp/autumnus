@@ -4,13 +4,23 @@ import dracula from "../../themes/dist/json/dracula.json";
 import githubLight from "../../themes/dist/json/github_light.json";
 import javascript from "../../lumis/langs/javascript.ts";
 import json from "../../lumis/langs/json.ts";
+import { configureLocalWasmResolver } from "../../lumis/test/wasm.ts";
 import markdownItLumis, { fromHighlighter } from "../src/index.js";
-import { createHighlighter } from "@lumis-sh/lumis";
+import {
+  configureLanguagePackageResolver,
+  configureWasmResolver,
+  createHighlighter,
+} from "@lumis-sh/lumis";
 import { htmlInline, htmlLinked, htmlMultiThemes, terminal } from "@lumis-sh/lumis/formatters";
 import { bundledLanguages } from "@lumis-sh/lumis/bundles/web";
 
 const JS_SOURCE = "```javascript\nconst x = 1\n```";
 const JSON_SOURCE = '```json\n{"a": 1}\n```';
+
+configureLocalWasmResolver(["javascript", "json"], {
+  configureLanguagePackageResolver,
+  configureWasmResolver,
+});
 
 describe("markdown-it-lumis", () => {
   describe("htmlInline formatter", () => {
@@ -24,7 +34,9 @@ describe("markdown-it-lumis", () => {
 
       const html = md.render(JS_SOURCE);
 
-      expect(html).toMatch(/<pre class="lumis" style="color: #[0-9a-f]+; background-color: #[0-9a-f]+;">/);
+      expect(html).toMatch(
+        /<pre class="lumis" style="color: #[0-9a-f]+; background-color: #[0-9a-f]+;">/,
+      );
       expect(html).toMatch(/<code class="language-javascript"/);
       expect(html).toMatch(/<span style="color: #[0-9a-f]+;">const<\/span>/);
       expect(html).toMatch(/<span style="color: #[0-9a-f]+;">1<\/span>/);
@@ -101,6 +113,7 @@ describe("markdown-it-lumis", () => {
       const html = md.render(JS_SOURCE);
 
       // terminal output has ANSI codes, no HTML tags
+      // oxlint-disable-next-line no-control-regex -- matching ANSI escapes is the point
       expect(html).toMatch(/\u001b\[38;2;\d+;\d+;\d+m/);
       expect(html).toContain("\u001b[0m");
       expect(html).not.toContain("<pre");

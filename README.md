@@ -25,10 +25,13 @@
 
 - **110+ Tree-sitter languages** - Fast, accurate, and updated syntax parsing
 - **250+ built-in Neovim themes** - Updated and curated themes from the Neovim community
-- **6 runtimes** - CLI, Rust, Elixir, JavaScript, Browsers / CDN, Java
-- **Multiple outputs** - HTML (inline/linked), Terminal (ANSI), Multi-theme (light/dark), BBCode, and custom formatters
+- **6 runtimes, one API** - CLI, Rust, Elixir, JavaScript, Browsers / CDN, and Java, aligned in naming, options, and output
+- **Built-in formatters** - HTML (inline/linked), Terminal (ANSI), Multi-theme (light/dark), BBCode
+- **Custom formatters** - Build your own output
 - **Language auto-detection** - File extension, shebang, and emacs-mode support
+- **Line highlighting** - Mark and style individual lines, with custom HTML wrappers
 - **Streaming-friendly** - Handles incomplete code
+- **Load parsers on demand** - Verified and cached, including injected languages
 
 <table>
 <tr>
@@ -82,7 +85,9 @@ import dracula from '@lumis-sh/themes/dracula'
 const html = await highlight('const x = 1', htmlInline({ language: javascript, theme: dracula }))
 ```
 
-The default JavaScript install loads parser WASM per language on demand. For an opt-in native Node.js runtime containing all supported parsers, install `@lumis-sh/lumis-native` alongside `@lumis-sh/lumis`.
+Parsers download on demand, including languages injected inside a document.
+Browsers are the exception: loading is asynchronous there, so an injected
+language has to be loaded first. See [WASM and CDN](https://lumis.sh/docs/usage/wasm-and-cdn).
 
 ### [Browsers / CDN](https://www.npmjs.com/package/@lumis-sh/lumis)
 
@@ -102,6 +107,10 @@ const html = await highlight('const x = 1', htmlInline({ language: javascript, t
 ```elixir
 Lumis.highlight!("const x = 1", formatter: {:html_inline, language: "javascript", theme: "dracula"})
 ```
+
+Parsers download on demand and load once per VM. `Lumis.Languages.load/1` moves
+that off the first request; `mix lumis.languages.cache` bakes it into a release.
+See [Elixir integration](https://lumis.sh/docs/usage/elixir-integration).
 
 ### [Java](https://github.com/roastedroot/lumis4j)
 
@@ -131,7 +140,6 @@ System.out.println(result.string());
 | **Rust** | `cargo add lumis` | [crates.io/lumis](https://crates.io/crates/lumis) | [README.md](crates/lumis/README.md) &bull; [docs.rs](https://docs.rs/lumis) |
 | **Elixir** | `{:lumis, "~> 0.3"}` | [hex.pm/lumis](https://hex.pm/packages/lumis) | [README.md](packages/elixir/lumis/README.md) &bull; [hexdocs](https://hexdocs.pm/lumis) |
 | **JavaScript** | `npm install @lumis-sh/lumis` | [npmjs.com/@lumis-sh/lumis](https://www.npmjs.com/package/@lumis-sh/lumis) | [README.md](packages/javascript/lumis/README.md) |
-| **Node.js native (opt-in)** | `npm install @lumis-sh/lumis-native` | [npmjs.com/@lumis-sh/lumis-native](https://www.npmjs.com/package/@lumis-sh/lumis-native) | [README.md](packages/javascript/lumis/native/npm/meta/README.md) |
 | **Browsers / CDN** | `npm install @lumis-sh/lumis` | [npmjs.com/@lumis-sh/lumis](https://www.npmjs.com/package/@lumis-sh/lumis) | [README.md](packages/javascript/lumis/README.md) |
 | **Java** | `io.roastedroot:lumis4j:0.0.7` | [io.roastedroot/lumis4j](https://central.sonatype.com/artifact/io.roastedroot/lumis4j) | [README.md](https://github.com/roastedroot/lumis4j/blob/main/README.md) |
 

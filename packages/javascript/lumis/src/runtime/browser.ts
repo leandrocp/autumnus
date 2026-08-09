@@ -2,6 +2,123 @@ import type { RuntimeEnvironment } from "./runtime.js";
 import { createLanguagesModule } from "../core/languages.js";
 import treeSitterWasmBinary from "../tree-sitter-wasm.js";
 
+const WASM_CACHE_NAME = "lumis-wasm-v1";
+const WASM_DATABASE_NAME = "lumis-wasm-v1";
+const WASM_DATABASE_STORE = "parsers";
+const cacheLocks = new Map<string, Promise<unknown>>();
+let wasmCache: Promise<Cache | undefined> | undefined;
+let wasmDatabase: Promise<IDBDatabase | undefined> | undefined;
+let indexedDbPreferred: boolean | undefined;
+
+function cacheRequest(key: string): Request {
+  const origin = globalThis.location?.origin ?? "https://lumis.invalid";
+  return new Request(`${origin}/.lumis-cache/${encodeURIComponent(key)}`);
+}
+
+function openWasmCache(): Promise<Cache | undefined> {
+  if (!("caches" in globalThis)) return Promise.resolve(undefined);
+  return (wasmCache ??= globalThis.caches.open(WASM_CACHE_NAME).catch(() => undefined));
+}
+
+function prefersIndexedDb(): boolean {
+  if (indexedDbPreferred !== undefined) return indexedDbPreferred;
+  const userAgent = globalThis.navigator?.userAgent ?? "";
+  indexedDbPreferred =
+    /\bSafari\//.test(userAgent) && !/\b(?:Chrome|Chromium|CriOS|Edg|OPR)\//.test(userAgent);
+  return indexedDbPreferred;
+}
+
+async function openWasmDatabase(): Promise<IDBDatabase | undefined> {
+  if (!("indexedDB" in globalThis)) return undefined;
+  wasmDatabase ??= new Promise((resolve) => {
+    const request = globalThis.indexedDB.open(WASM_DATABASE_NAME, 1);
+    let settled = false;
+    const finish = (database: IDBDatabase | undefined) => {
+      if (settled) {
+        database?.close();
+        return;
+      }
+      settled = true;
+      resolve(database);
+    };
+    request.onupgradeneeded = () => {
+      if (!request.result.objectStoreNames.contains(WASM_DATABASE_STORE)) {
+        request.result.createObjectStore(WASM_DATABASE_STORE);
+      }
+    };
+    request.onsuccess = () => finish(request.result);
+    request.onerror = () => finish(undefined);
+    request.onblocked = () => finish(undefined);
+  });
+  return wasmDatabase;
+}
+
+function exactArrayBuffer(data: Uint8Array): ArrayBuffer {
+  return data.buffer instanceof ArrayBuffer &&
+    data.byteOffset === 0 &&
+    data.byteLength === data.buffer.byteLength
+    ? data.buffer
+    : data.slice().buffer;
+}
+
+async function readCacheStorage(key: string): Promise<Uint8Array | undefined> {
+  const cache = await openWasmCache();
+  if (!cache) return undefined;
+  try {
+    const response = await cache.match(cacheRequest(key));
+    return response ? new Uint8Array(await response.arrayBuffer()) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+async function writeCacheStorage(key: string, data: Uint8Array): Promise<boolean> {
+  const cache = await openWasmCache();
+  if (!cache) return false;
+  try {
+    await cache.put(
+      cacheRequest(key),
+      new Response(exactArrayBuffer(data), {
+        headers: {
+          "Content-Type": "application/wasm",
+          "Cache-Control": "public, max-age=31536000, immutable",
+        },
+      }),
+    );
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function readIndexedDb(key: string): Promise<Uint8Array | undefined> {
+  const database = await openWasmDatabase();
+  if (!database) return undefined;
+  return new Promise((resolve) => {
+    const request = database
+      .transaction(WASM_DATABASE_STORE, "readonly")
+      .objectStore(WASM_DATABASE_STORE)
+      .get(key);
+    request.onsuccess = () => {
+      const result = request.result;
+      resolve(result instanceof ArrayBuffer ? new Uint8Array(result) : undefined);
+    };
+    request.onerror = () => resolve(undefined);
+  });
+}
+
+async function writeIndexedDb(key: string, data: Uint8Array): Promise<boolean> {
+  const database = await openWasmDatabase();
+  if (!database) return false;
+  return new Promise((resolve) => {
+    const transaction = database.transaction(WASM_DATABASE_STORE, "readwrite");
+    transaction.objectStore(WASM_DATABASE_STORE).put(exactArrayBuffer(data), key);
+    transaction.oncomplete = () => resolve(true);
+    transaction.onerror = () => resolve(false);
+    transaction.onabort = () => resolve(false);
+  });
+}
+
 export const browserRuntime: RuntimeEnvironment = {
   async resolveWasm(wasm) {
     if (wasm instanceof URL) {
@@ -16,12 +133,31 @@ export const browserRuntime: RuntimeEnvironment = {
     return wasm;
   },
 
-  async readFsCache() {
-    return undefined;
+  async readFsCache(key) {
+    return prefersIndexedDb()
+      ? ((await readIndexedDb(key)) ?? readCacheStorage(key))
+      : ((await readCacheStorage(key)) ?? readIndexedDb(key));
   },
 
-  async writeFsCache() {
-    // browser runtime does not persist WASM to disk
+  async writeFsCache(key, data) {
+    if (prefersIndexedDb()) {
+      if (!(await writeIndexedDb(key, data))) await writeCacheStorage(key, data);
+    } else if (!(await writeCacheStorage(key, data))) {
+      await writeIndexedDb(key, data);
+    }
+  },
+
+  async withFsCacheLock(key, operation) {
+    const previous = cacheLocks.get(key);
+    const pending = (previous ?? Promise.resolve()).catch(() => undefined).then(operation);
+    cacheLocks.set(key, pending);
+    try {
+      return await pending;
+    } finally {
+      if (cacheLocks.get(key) === pending) {
+        cacheLocks.delete(key);
+      }
+    }
   },
 
   async readResolvedWasmFromDisk() {
@@ -51,6 +187,11 @@ export function createRuntime(...args: Parameters<typeof runtime.createRuntime>)
 /** {@inheritDoc node.configureWasmResolver} */
 export function configureWasmResolver(...args: Parameters<typeof runtime.configureWasmResolver>) {
   return runtime.configureWasmResolver(...args);
+}
+export function configureLanguagePackageResolver(
+  ...args: Parameters<typeof runtime.configureLanguagePackageResolver>
+) {
+  return runtime.configureLanguagePackageResolver(...args);
 }
 export function initParser(...args: Parameters<typeof runtime.initParser>) {
   return runtime.initParser(...args);

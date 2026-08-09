@@ -1,0 +1,341 @@
+{
+  "name": "markdown-inline-html",
+  "language": "markdown",
+  "theme": "dracula",
+  "events": [
+    {
+      "type": "start",
+      "scope": "markup.heading.1",
+      "language": "markdown"
+    },
+    {
+      "type": "source",
+      "start": 0,
+      "end": 8
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 8,
+      "end": 9
+    },
+    {
+      "type": "start",
+      "scope": "tag.delimiter",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 9,
+      "end": 10
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "tag",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 10,
+      "end": 12
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 12,
+      "end": 13
+    },
+    {
+      "type": "start",
+      "scope": "tag.attribute",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 13,
+      "end": 18
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "operator",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 18,
+      "end": 19
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "string",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 19,
+      "end": 27
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "tag.delimiter",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 27,
+      "end": 28
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 28,
+      "end": 33
+    },
+    {
+      "type": "start",
+      "scope": "tag.delimiter",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 33,
+      "end": 35
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "tag",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 35,
+      "end": 37
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "tag.delimiter",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 37,
+      "end": 38
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 38,
+      "end": 40
+    },
+    {
+      "type": "start",
+      "scope": "tag.delimiter",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 40,
+      "end": 41
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "tag",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 41,
+      "end": 42
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "tag.delimiter",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 42,
+      "end": 43
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 43,
+      "end": 47
+    },
+    {
+      "type": "start",
+      "scope": "tag.delimiter",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 47,
+      "end": 48
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "tag",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 48,
+      "end": 49
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "tag.delimiter",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 49,
+      "end": 50
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "markup.strong",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 50,
+      "end": 54
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "tag.delimiter",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 54,
+      "end": 56
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "tag",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 56,
+      "end": 57
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "tag.delimiter",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 57,
+      "end": 58
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 58,
+      "end": 71
+    },
+    {
+      "type": "start",
+      "scope": "tag.delimiter",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 71,
+      "end": 73
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "tag",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 73,
+      "end": 74
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "tag.delimiter",
+      "language": "html"
+    },
+    {
+      "type": "source",
+      "start": 74,
+      "end": 75
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 75,
+      "end": 76
+    }
+  ]
+}

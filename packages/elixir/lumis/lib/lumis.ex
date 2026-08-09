@@ -712,6 +712,23 @@ defmodule Lumis do
   def available_languages, do: Lumis.Native.available_languages()
 
   @doc """
+  Returns the ids of the languages loaded into this VM, sorted.
+
+  The complement of `available_languages/0`: what can be highlighted right now
+  without a download. Loading is global to the VM, so this is the same list in
+  every process.
+
+  ## Example
+
+      iex> Lumis.Languages.load("elixir")
+      iex> Lumis.loaded_languages()
+      ["elixir"]
+
+  """
+  @spec loaded_languages() :: [id :: String.t()]
+  def loaded_languages, do: Lumis.Native.loaded_languages()
+
+  @doc """
   Returns the list of all available themes.
 
   Use `Lumis.Theme.get/1` to get the actual theme struct.
@@ -846,8 +863,18 @@ defmodule Lumis do
       |> rust_options!()
 
     case Lumis.Native.highlight(source, options) do
-      {:error, error} -> raise Lumis.HighlightError, error: error
-      output -> output
+      {:error, {:language_not_loaded, language}} ->
+        raise Lumis.HighlightError,
+          error:
+            "language #{inspect(language)} could not be loaded. Cache it ahead of " <>
+              "time with `mix lumis.languages.cache #{language}` if this host has " <>
+              "no network access"
+
+      {:error, error} ->
+        raise Lumis.HighlightError, error: error
+
+      output ->
+        output
     end
   end
 

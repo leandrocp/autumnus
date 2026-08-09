@@ -1,8 +1,8 @@
-use lumis::formatters::{
+use lumis_core::formatter::{
     html_inline, html_linked, BBCodeScopedBuilder, Formatter, HtmlElement, HtmlInlineBuilder,
     HtmlLinkedBuilder, HtmlMultiThemesBuilder, TerminalBackground, TerminalBuilder,
 };
-use lumis::{languages::Language, themes};
+use lumis_core::{languages::Language, themes};
 use rustler::{NifMap, NifStruct, NifTaggedEnum, NifUnitEnum};
 use std::collections::HashMap;
 
@@ -112,7 +112,7 @@ fn convert_inline_style(
 }
 
 impl ExFormatterOption {
-    pub fn into_formatter(self, language: Language) -> Result<Box<dyn Formatter>, String> {
+    pub fn into_formatter(self, language: Language) -> Result<(Box<dyn Formatter>, bool), String> {
         match self {
             ExFormatterOption::HtmlInline {
                 theme,
@@ -142,13 +142,12 @@ impl ExFormatterOption {
                     .pre_class(pre_class)
                     .italic(italic)
                     .include_highlights(include_highlights)
-                    .rainbow_brackets(rainbow_brackets)
                     .highlight_lines(highlight_lines)
                     .header(header)
                     .build()
                     .map_err(|e| format!("HtmlInline builder error: {:?}", e))?;
 
-                Ok(Box::new(formatter))
+                Ok((Box::new(formatter), rainbow_brackets))
             }
             ExFormatterOption::HtmlLinked {
                 pre_class,
@@ -169,13 +168,12 @@ impl ExFormatterOption {
                 let formatter = HtmlLinkedBuilder::new()
                     .language(language)
                     .pre_class(pre_class)
-                    .rainbow_brackets(rainbow_brackets)
                     .highlight_lines(highlight_lines)
                     .header(header)
                     .build()
                     .map_err(|e| format!("HtmlLinked builder error: {:?}", e))?;
 
-                Ok(Box::new(formatter))
+                Ok((Box::new(formatter), rainbow_brackets))
             }
             ExFormatterOption::HtmlMultiThemes {
                 themes,
@@ -210,7 +208,6 @@ impl ExFormatterOption {
                     .pre_class(pre_class)
                     .italic(italic)
                     .include_highlights(include_highlights)
-                    .rainbow_brackets(rainbow_brackets)
                     .highlight_lines(highlight_lines)
                     .header(header);
 
@@ -222,7 +219,7 @@ impl ExFormatterOption {
                     .build()
                     .map_err(|e| format!("HtmlMultiThemes builder error: {:?}", e))?;
 
-                Ok(Box::new(formatter))
+                Ok((Box::new(formatter), rainbow_brackets))
             }
             ExFormatterOption::Terminal {
                 theme,
@@ -242,20 +239,18 @@ impl ExFormatterOption {
                     .theme(theme)
                     .background(background)
                     .width(width)
-                    .rainbow_brackets(rainbow_brackets)
                     .build()
                     .map_err(|e| format!("Terminal builder error: {:?}", e))?;
 
-                Ok(Box::new(formatter))
+                Ok((Box::new(formatter), rainbow_brackets))
             }
             ExFormatterOption::BbcodeScoped { rainbow_brackets } => {
                 let formatter = BBCodeScopedBuilder::new()
                     .language(language)
-                    .rainbow_brackets(rainbow_brackets)
                     .build()
                     .map_err(|e| format!("BBCode scoped builder error: {:?}", e))?;
 
-                Ok(Box::new(formatter))
+                Ok((Box::new(formatter), rainbow_brackets))
             }
         }
     }
