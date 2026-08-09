@@ -103,9 +103,12 @@ impl Registry {
         use lumis_wasm_runtime::{sha256_hex, write_atomic, PackagedLanguage, ParserMetadata};
 
         let location = catalog::find(id).unwrap();
+        // A cached package whose version is not the one this build pins is stale,
+        // so `LanguageStore::package` would refetch it and the seeded one would
+        // never be seen.
         let package = LanguagePackage {
             package_name: location.package_name.into(),
-            version: "test".into(),
+            version: location.version.into(),
             definition_hash: "test".into(),
             parser: ParserMetadata {
                 name: format!("tree-sitter-{grammar_name}"),
@@ -176,8 +179,11 @@ mod tests {
     #[test]
     fn parser_cache_is_content_addressed_and_verified() {
         let (_dir, registry) = cached_rust_registry();
+        let version = catalog::find("rust").unwrap().version;
         let path = registry.parser_path("rust").unwrap();
-        assert!(path.to_string_lossy().contains("tree-sitter-rust-test-"));
+        assert!(path
+            .to_string_lossy()
+            .contains(&format!("tree-sitter-rust-{version}-")));
         std::fs::write(&path, b"corrupt").unwrap();
         assert!(!registry.is_cached("rust"));
         assert!(!path.exists());
@@ -186,8 +192,9 @@ mod tests {
     #[test]
     fn package_url_is_exact_after_resolution() {
         let (_dir, registry) = cached_rust_registry();
+        let version = catalog::find("rust").unwrap().version;
         let url = registry.parser_download_url("rust").unwrap();
-        assert!(url.contains("@lumis-sh/wasm-rust@test/"));
+        assert!(url.contains(&format!("@lumis-sh/wasm-rust@{version}/")));
         assert!(!url.contains("@latest"));
     }
 }

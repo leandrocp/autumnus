@@ -142,6 +142,8 @@ jobs:
           token: ${{ secrets.CI_TOKEN }}
           add-paths: |
             languages.toml
+            Cargo.lock
+            crates/dev/Cargo.lock
             crates/lumis/Cargo.toml
             crates/lumis-core/Cargo.toml
             crates/lumis/vendored_parsers
