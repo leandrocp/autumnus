@@ -1,0 +1,82 @@
+name: WASM OOM probe
+
+# Temporary. Measures what the WASI SDK clang actually costs on a Linux runner
+# for the three grammars that OOM, and whether the swapfile added in
+# wasm-release.yml is enough. Builds only -- it never stages or publishes.
+# Delete this file before merging.
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [lp-wasm-oom]
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - parser: tree-sitter-zsh
+            swap: true
+          - parser: tree-sitter-vim
+            swap: true
+          - parser: tree-sitter-llvm
+            swap: true
+          - parser: tree-sitter-zsh
+            swap: false
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: jdx/mise-action@v4.2.3
+        with:
+          install: false
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "lts/*"
+
+      - run: mise install tree-sitter
+
+      - name: Add swap
+        if: matrix.swap
+        run: |
+          df -h /mnt
+          sudo fallocate -l 32G /mnt/swapfile-lumis
+          sudo chmod 600 /mnt/swapfile-lumis
+          sudo mkswap /mnt/swapfile-lumis
+          sudo swapon /mnt/swapfile-lumis
+          free -h
+
+      # `time -v` prints nothing if the runner is killed, so also stream memory
+      # every 15s: on a kill the trace is the only evidence that survives.
+      - name: Build ${{ matrix.parser }}
+        env:
+          PARSER: ${{ matrix.parser }}
+        run: |
+          ( while true; do
+              echo "[mem $(date -u +%H:%M:%S)] $(free -m | awk '/^Mem:/{printf "used=%sM avail=%sM", $3, $7} /^Swap:/{printf " swapused=%sM", $3}')"
+              sleep 15
+            done ) &
+          sampler=$!
+          trap 'kill $sampler 2>/dev/null || true' EXIT
+          /usr/bin/time -v mise run wasm-build "$PARSER"
+
+      - name: Report result
+        if: always()
+        env:
+          PARSER: ${{ matrix.parser }}
+        run: |
+          ls -l "tmp/wasm/build/$PARSER.wasm" || echo "no wasm produced"
+          free -h
