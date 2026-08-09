@@ -128,12 +128,7 @@ jobs:
           node-version: "lts/*"
           registry-url: "https://registry.npmjs.org"
 
-      # The three largest grammars OOM-kill the runner here; see AGENTS.md for
-      # the measurements and for why swap does not rescue them. `-v` reports
-      # peak RSS across the process tree, which is the only warning a parser
-      # gives before it crosses the limit -- the failure itself prints no
-      # compiler diagnostic at all.
-      - run: /usr/bin/time -v mise run wasm-publish-prepare "$PARSER"
+      - run: mise run wasm-publish-prepare "$PARSER"
         env:
           PARSER: ${{ matrix.parser }}
 
