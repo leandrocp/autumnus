@@ -3,7 +3,7 @@
 //! This example demonstrates using `Language::guess()` to detect the
 //! programming language from a file extension or source code content.
 
-use lumis::{highlight, languages::Language, HtmlInlineBuilder};
+use lumis::{highlight, languages::Language, themes, HtmlInlineBuilder};
 
 fn main() {
     let code = r#"#!/usr/bin/env python3
@@ -20,8 +20,11 @@ print(fibonacci(10))
     // The source code is used for shebang detection if no file extension matches.
     let lang = Language::guess(None, code);
 
+    let theme = themes::get("onedark").expect("onedark theme should be available");
+
     let formatter = HtmlInlineBuilder::new()
         .language(lang)
+        .theme(Some(theme))
         .build()
         .expect("Failed to build formatter");
 

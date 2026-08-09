@@ -8,11 +8,12 @@ description: Write highlighted output directly to a file in Rust.
 # Stream output to a file (Rust)
 
 ```rust
-use lumis::{write_highlight, HtmlInlineBuilder, languages::Language};
+use lumis::{write_highlight, HtmlInlineBuilder, languages::Language, themes};
 use std::fs::File;
 
 let formatter = HtmlInlineBuilder::new()
     .language(Language::Rust)
+    .theme(Some(themes::get("onedark").unwrap()))
     .build()
     .unwrap();
 
