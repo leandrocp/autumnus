@@ -223,9 +223,9 @@ Nothing about the grammar predicts this better than the byte count of its genera
 
 When it does not fit, the kernel kills the runner service rather than clang, and the job reports `The runner has received a shutdown signal` with exit code 143 and no compiler diagnostic at all. That reads like a cancelled job. On a large grammar it is an OOM, and `wasm-release.yml` adds swap for exactly this reason.
 
-Emscripten is still pinned once, as `LUMIS_EMSDK_VERSION` under `[env]` in the root `mise.toml`, and some workflows still install it with `setup-emsdk`. It is deliberately not a `[tools]` entry: mise's asdf `emsdk` plugin fails to install on Linux runners (`plugins/emsdk/bin/install exited with non-zero status`), which takes every job that runs `mise install` down with it.
+Because none of it runs any more, no part of this repository installs or pins Emscripten. `LUMIS_EMSDK_VERSION`, the `setup-emsdk` steps in `wasm-release.yml` and `queries.yml`, the `emcc` check in `mise run setup`, and the `EMSDK_PYTHON`/`EMCC_DEBUG` plumbing in `crates/dev` were all removed once the compiler moved; they had been installing a toolchain that nothing invoked. If you find yourself reaching for `emcc` to explain a WASM problem, check first that anything still calls it.
 
-This failure looks like a toolchain problem and usually is not:
+One failure in particular used to be blamed on Emscripten and is worth knowing on its own terms:
 
 ```
 bad export type for 'tree_sitter_<lang>_external_scanner_create': undefined
@@ -233,14 +233,14 @@ bad export type for 'tree_sitter_<lang>_external_scanner_create': undefined
 
 A parser that triggers it **compiles cleanly** and only fails when something loads it, and only when the grammar has an external scanner. So a green build proves nothing — load the parser.
 
-Historically this was blamed on Emscripten (<https://github.com/tree-sitter/tree-sitter/issues/5037>). That is no longer reproducible with the pinned Tree-sitter CLI. Measured on `tree-sitter-hcl`, holding the toolchain fixed and varying only the grammar revision:
+It was reported upstream as an Emscripten bug (<https://github.com/tree-sitter/tree-sitter/issues/5037>), and it is not one. Measured on `tree-sitter-hcl` back when Emscripten was still installed here, holding the toolchain fixed and varying only the grammar revision:
 
 | Grammar revision | emsdk 4.0.15 | emsdk 6.0.5 |
 | --- | --- | --- |
 | `636dbe70`, pinned in `languages.toml` | fails to load | fails to load |
 | `64ad6278`, what the published package ships | loads | loads |
 
-So the cause is a **stale grammar revision**, not the Emscripten version. When a scanner-bearing language fails to load, check whether `languages.toml` has fallen behind the revision the published package was built from before touching the toolchain.
+The revision moves the result and the toolchain does not, so the cause is a **stale grammar revision**. When a scanner-bearing language fails to load, check whether `languages.toml` has fallen behind the revision the published package was built from before suspecting the compiler.
 
 ## Documentation is part of the change
 

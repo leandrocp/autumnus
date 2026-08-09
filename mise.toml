@@ -4,9 +4,6 @@ python = "3.11"
 stylua = "2.5.2"
 tree-sitter = "0.26"
 
-[env]
-LUMIS_EMSDK_VERSION = "4.0.15"
-
 [tasks.'setup']
 description = "Install dependencies and check required tools"
 run = '''
@@ -69,7 +66,6 @@ echo ""
 
 echo "Checking optional tools..."
 check_tree_sitter_cli
-check_bin emcc "https://emscripten.org (needed for WASM builds)"
 check_bin git-cliff "https://git-cliff.org"
 check_bin nvim "https://neovim.io (needed for theme generation)"
 echo ""

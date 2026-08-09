@@ -361,14 +361,14 @@ When a fetched upstream query needs to change, use one of these directories:
 
 ### Building WASMs
 
-WASMs are built in CI by the `wasm-release` workflow, but you can build them locally with emscripten:
+WASMs are built in CI by the `wasm-release` workflow, but you can build them locally:
 
 ```sh
 mise run wasm-build
 mise run wasm-build {name}
 ```
 
-This requires `emcc` and `tree-sitter-cli`.
+This requires only `tree-sitter-cli`, which brings its own WASI SDK and downloads it on first use. Emscripten is not involved.
 
 ### Running a runtime locally
 

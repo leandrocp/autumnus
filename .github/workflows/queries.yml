@@ -115,16 +115,6 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
 
-
-      - name: Emscripten version from mise.toml
-        id: emsdk
-        run: echo "version=$(mise exec -- printenv LUMIS_EMSDK_VERSION)" >> "$GITHUB_OUTPUT"
-
-      - uses: mymindstorm/setup-emsdk@v16
-        with:
-          version: ${{ steps.emsdk.outputs.version }}
-          actions-cache-folder: emsdk-cache
-
       - name: Select this shard
         run: |
           set -euo pipefail

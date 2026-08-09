@@ -130,16 +130,6 @@ jobs:
           node-version: "lts/*"
           registry-url: "https://registry.npmjs.org"
 
-
-      - name: Emscripten version from mise.toml
-        id: emsdk
-        run: echo "version=$(mise exec -- printenv LUMIS_EMSDK_VERSION)" >> "$GITHUB_OUTPUT"
-
-      - uses: mymindstorm/setup-emsdk@v16
-        with:
-          version: ${{ steps.emsdk.outputs.version }}
-          actions-cache-folder: emsdk-cache
-
       # The WASI SDK clang behind `tree-sitter build --wasm` needs 9-15 GB on the
       # largest grammars, which OOM-kills the whole runner on a 16 GB box and
       # surfaces as exit code 143 with `The runner has received a shutdown

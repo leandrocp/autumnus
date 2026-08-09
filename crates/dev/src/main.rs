@@ -2340,32 +2340,18 @@ fn build_wasm(name: &str) -> Result<()> {
 }
 
 fn build_repo_wasm(repo_dir: &str, wasm_file: &Path, build_log: &Path) -> Result<()> {
-    let verbose = std::env::var("LUMIS_WASM_VERBOSE").ok().as_deref() == Some("1");
     let build_cmd = format!("tree-sitter build --wasm -o \"{}\"", wasm_file.display());
-    let shell_cmd = if verbose {
-        format!(
-            "{{ printf '[start] %s\n' \"$(date)\"; printf '[cmd] %s\n' '{}' ; EMCC_DEBUG=1 {}; printf '[end] %s\n' \"$(date)\"; }} 2>&1 | tee \"{}\"",
-            build_cmd,
-            build_cmd,
-            build_log.display()
-        )
-    } else {
-        format!(
-            "{{ printf '[start] %s\n' \"$(date)\"; printf '[cmd] %s\n' '{}' ; {}; printf '[end] %s\n' \"$(date)\"; }} 2>&1 | tee \"{}\"",
-            build_cmd,
-            build_cmd,
-            build_log.display()
-        )
-    };
+    let shell_cmd = format!(
+        "{{ printf '[start] %s\n' \"$(date)\"; printf '[cmd] %s\n' '{}' ; {}; printf '[end] %s\n' \"$(date)\"; }} 2>&1 | tee \"{}\"",
+        build_cmd,
+        build_cmd,
+        build_log.display()
+    );
 
-    let mut cmd = Command::new("sh");
-    cmd.current_dir(repo_dir).arg("-c").arg(shell_cmd);
-
-    if let Some(python3) = resolve_python3_10_plus() {
-        cmd.env("EMSDK_PYTHON", &python3).env("PYTHON", python3);
-    }
-
-    let status = cmd
+    let status = Command::new("sh")
+        .current_dir(repo_dir)
+        .arg("-c")
+        .arg(shell_cmd)
         .status()
         .with_context(|| format!("failed to build wasm in {repo_dir}"))?;
     if !status.success() {
@@ -2373,25 +2359,6 @@ fn build_repo_wasm(repo_dir: &str, wasm_file: &Path, build_log: &Path) -> Result
     }
 
     Ok(())
-}
-
-fn resolve_python3_10_plus() -> Option<String> {
-    let python3 = run_cmd("command -v python3").ok()?;
-    if python3.is_empty() {
-        return None;
-    }
-
-    let status = Command::new(&python3)
-        .arg("-c")
-        .arg("import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)")
-        .status()
-        .ok()?;
-
-    if status.success() {
-        Some(python3)
-    } else {
-        None
-    }
 }
 
 fn write_tree_sitter_json(
