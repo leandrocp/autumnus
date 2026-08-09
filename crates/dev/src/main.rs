@@ -14,7 +14,7 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::thread;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 use xz2::write::XzEncoder;
 
 #[derive(Parser)]
@@ -2149,7 +2149,7 @@ fn resolve_published_versions(
     parsers: &BTreeMap<String, ParserInfo>,
     parser_order: &[String],
 ) -> Result<BTreeMap<String, String>> {
-    let mut versions: BTreeMap<String, String> = BTreeMap::new();
+    let mut packages: Vec<String> = Vec::new();
     for id in parser_order {
         let info = parsers
             .get(id)
@@ -2157,26 +2157,24 @@ fn resolve_published_versions(
         let default_wasm_name = format!("tree-sitter-{id}");
         let wasm_name = info.wasm_name.as_deref().unwrap_or(&default_wasm_name);
         let package_name = format!("@lumis-sh/wasm-{}", wasm_package_suffix(wasm_name));
-        if versions.contains_key(&package_name) {
-            continue;
+        if !packages.contains(&package_name) {
+            packages.push(package_name);
         }
+    }
 
-        let output = Command::new("npm")
-            .args(["view", &package_name, "version"])
-            .output()
-            .with_context(|| format!("failed to run npm view for {package_name}"))?;
-        if !output.status.success() {
-            bail!(
-                "{package_name} is not published; the catalog cannot pin a version for it:\n{}",
-                String::from_utf8_lossy(&output.stderr).trim()
-            );
-        }
-        let version = String::from_utf8_lossy(&output.stdout).trim().to_string();
-        if version.is_empty() {
-            bail!("npm view returned no version for {package_name}");
-        }
+    let mut versions: BTreeMap<String, String> = BTreeMap::new();
+    for (package_name, packument) in packages.iter().zip(fetch_packuments(&packages)) {
+        let version = packument?
+            .as_ref()
+            .and_then(|packument| packument.get("dist-tags"))
+            .and_then(|tags| tags.get("latest"))
+            .and_then(Value::as_str)
+            .map(ToOwned::to_owned)
+            .with_context(|| {
+                format!("{package_name} is not published; the catalog cannot pin a version for it")
+            })?;
         eprintln!("  {package_name} {version}");
-        versions.insert(package_name, version);
+        versions.insert(package_name.clone(), version);
     }
     Ok(versions)
 }
@@ -3093,6 +3091,8 @@ const PACKAGE_FORMAT_VERSION: u32 = 3;
 
 const REGISTRY_CONCURRENCY: usize = 16;
 
+const REGISTRY_ATTEMPTS: u32 = 3;
+
 /// The `major.minor` series published packages are versioned within.
 ///
 /// Read from the `mise.toml` pin rather than the installed CLI, so this answers
@@ -3129,20 +3129,57 @@ fn supported_tree_sitter_series() -> Result<String> {
 /// answers what `npm view` needs one call per version to answer.
 fn fetch_packument(agent: &ureq::Agent, pkg: &str) -> Result<Option<Value>> {
     let url = format!("https://registry.npmjs.org/{pkg}");
-    let mut response = match agent.get(&url).call() {
-        Ok(response) => response,
-        Err(ureq::Error::StatusCode(404)) => return Ok(None),
-        Err(err) => {
-            return Err(err).with_context(|| format!("failed to query {pkg} on the npm registry"))
+    let mut last_error = None;
+
+    for attempt in 0..REGISTRY_ATTEMPTS {
+        if attempt > 0 {
+            thread::sleep(Duration::from_millis(250 * u64::from(attempt)));
         }
-    };
-    let body = response
-        .body_mut()
-        .read_to_string()
-        .with_context(|| format!("failed to read the npm registry response for {pkg}"))?;
-    let packument =
-        serde_json::from_str(&body).with_context(|| format!("invalid packument for {pkg}"))?;
-    Ok(Some(packument))
+        match agent.get(&url).call() {
+            Ok(mut response) => {
+                let body = response.body_mut().read_to_string().with_context(|| {
+                    format!("failed to read the npm registry response for {pkg}")
+                })?;
+                let packument = serde_json::from_str(&body)
+                    .with_context(|| format!("invalid packument for {pkg}"))?;
+                return Ok(Some(packument));
+            }
+            Err(ureq::Error::StatusCode(404)) => return Ok(None),
+            Err(err) => last_error = Some(err),
+        }
+    }
+
+    Err(last_error.expect("a failed attempt records its error"))
+        .with_context(|| format!("failed to query {pkg} on the npm registry"))
+}
+
+/// Each request is almost entirely round trip, so the whole catalog is worth
+/// fetching at once. Results come back in the order the packages were given.
+fn fetch_packuments(packages: &[String]) -> Vec<Result<Option<Value>>> {
+    let agent = ureq::Agent::new_with_defaults();
+    let next = AtomicUsize::new(0);
+    let mut fetched: Vec<(usize, Result<Option<Value>>)> = thread::scope(|scope| {
+        let workers: Vec<_> = (0..REGISTRY_CONCURRENCY.min(packages.len()))
+            .map(|_| {
+                scope.spawn(|| {
+                    let mut done = Vec::new();
+                    loop {
+                        let index = next.fetch_add(1, Ordering::Relaxed);
+                        let Some(pkg) = packages.get(index) else {
+                            return done;
+                        };
+                        done.push((index, fetch_packument(&agent, pkg)));
+                    }
+                })
+            })
+            .collect();
+        workers
+            .into_iter()
+            .flat_map(|worker| worker.join().expect("npm registry worker panicked"))
+            .collect()
+    });
+    fetched.sort_by_key(|(index, _)| *index);
+    fetched.into_iter().map(|(_, result)| result).collect()
 }
 
 /// Whether some published version in the current series already carries this
@@ -3220,39 +3257,13 @@ fn wasm_needed(filter: &str, force: &str) -> Result<()> {
         checks.push((wasm_name, pkg, expected));
     }
 
-    let agent = ureq::Agent::new_with_defaults();
-    let next = AtomicUsize::new(0);
-    let mut results: Vec<(usize, Result<bool>)> = thread::scope(|scope| {
-        let workers: Vec<_> = (0..REGISTRY_CONCURRENCY.min(checks.len()))
-            .map(|_| {
-                scope.spawn(|| {
-                    let mut done = Vec::new();
-                    loop {
-                        let index = next.fetch_add(1, Ordering::Relaxed);
-                        let Some((_, pkg, expected)) = checks.get(index) else {
-                            return done;
-                        };
-                        let published = fetch_packument(&agent, pkg).map(|packument| {
-                            packument.is_some_and(|packument| {
-                                published_for_definition(&packument, expected, &series)
-                            })
-                        });
-                        done.push((index, published));
-                    }
-                })
-            })
-            .collect();
-        workers
-            .into_iter()
-            .flat_map(|worker| worker.join().expect("npm registry worker panicked"))
-            .collect()
-    });
-    results.sort_by_key(|(index, _)| *index);
+    let packages: Vec<String> = checks.iter().map(|(_, pkg, _)| pkg.clone()).collect();
 
     let mut needed = Vec::new();
-    for (index, published) in results {
-        let (wasm_name, pkg, expected) = &checks[index];
-        if !published? {
+    for ((wasm_name, pkg, expected), packument) in checks.iter().zip(fetch_packuments(&packages)) {
+        let published = packument?
+            .is_some_and(|packument| published_for_definition(&packument, expected, &series));
+        if !published {
             eprintln!("Need to publish {pkg} for {expected}");
             needed.push(wasm_name.clone());
         }
