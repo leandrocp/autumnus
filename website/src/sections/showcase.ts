@@ -238,20 +238,31 @@ const output = hl.highlight(template, htmlMultiThemes({
   {
     id: "highlight-lines",
     title: "Highlight lines",
-    blurb: "Mark line ranges with the theme's own highlight background, a CSS string, or a class.",
+    blurb:
+      "Mark line ranges with a CSS string, a class of your own, or the theme's highlight colour.",
     tags: ["highlightLines", "Rust"],
     source: `${REPO}/packages/javascript/lumis/examples/highlight-lines.html`,
     code: `const html = hl.highlight(source, htmlMultiThemes({
   language: rust,
   themes: { light: latte, dark: frappe },
   defaultTheme: 'light-dark()',
-  highlightLines: { lines: [[3, 6]], style: 'theme' },
+  highlightLines: {
+    lines: [[3, 6]],
+    style: 'background: light-dark(#dce0e8, #414559)',
+  },
 }))`,
     async run() {
       const hl = await highlighterFor(rust);
       return hl.highlight(
         RUST_SOURCE,
-        themed(rust, { highlightLines: { lines: [[3, 6]], style: "theme" } }),
+        themed(rust, {
+          // `style: "theme"` is dropped when `defaultTheme` is `light-dark()`,
+          // so the two highlight colours are named here instead.
+          highlightLines: {
+            lines: [[3, 6]],
+            style: "background: light-dark(#dce0e8, #414559)",
+          },
+        }),
       );
     },
   },
@@ -578,15 +589,15 @@ export function renderShowcase() {
                 <p class="mt-2 max-w-3xl text-sm text-zinc-600 dark:text-zinc-400">${demo.blurb}</p>
               </header>
               <div class="grid lg:grid-cols-2">
-                <div class="demo-output grid border-b border-zinc-200 dark:border-zinc-800 lg:border-r lg:border-b-0" data-demo="${demo.id}">
-                  <p class="px-5 py-12 text-center font-mono text-xs text-zinc-400">Fetching parser…</p>
-                </div>
-                <div class="demo-code grid grid-rows-[auto_1fr]" data-demo="${demo.id}">
+                <div class="demo-code grid grid-rows-[auto_1fr] border-b border-zinc-200 dark:border-zinc-800 lg:border-r lg:border-b-0" data-demo="${demo.id}">
                   <div class="flex items-center justify-between border-b border-zinc-200 px-5 py-2 dark:border-zinc-800">
-                    <span class="font-mono text-[11px] tracking-wider text-zinc-500 uppercase dark:text-zinc-400">The code that made it</span>
+                    <span class="font-mono text-[11px] tracking-wider text-zinc-500 uppercase dark:text-zinc-400">The code</span>
                     <button class="copy-install shrink-0 cursor-pointer text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white" aria-label="Copy to clipboard" data-copy="${encodeURIComponent(demo.code)}">${COPY_SVG}</button>
                   </div>
                   <pre class="${PRE_CLASS} text-zinc-700 dark:text-zinc-300"><code>${escapeHtml(demo.code)}</code></pre>
+                </div>
+                <div class="demo-output grid" data-demo="${demo.id}">
+                  <p class="px-5 py-12 text-center font-mono text-xs text-zinc-400">Fetching parser…</p>
                 </div>
               </div>
               <footer class="border-t border-zinc-200 px-5 py-3 dark:border-zinc-800">
