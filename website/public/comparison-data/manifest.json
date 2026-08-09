@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "theme": {
     "name": "Dracula",
     "source": "https://github.com/dracula/sublime/blob/d490b57c08f3d110ff61a07ec6edcc1ed9e24a63/Dracula.tmTheme"
@@ -50,7 +50,13 @@
         "CSS",
         "JSON",
         "JavaScript"
-      ]
+      ],
+      "tokens": {
+        "lumis": 6701,
+        "syntect": 7079,
+        "shiki": 4812,
+        "highlight-js": 2019
+      }
     },
     {
       "id": "ripgrep",
@@ -62,7 +68,13 @@
       "bytes": 39771,
       "injections": [
         "Comment"
-      ]
+      ],
+      "tokens": {
+        "lumis": 5070,
+        "syntect": 3802,
+        "shiki": 3260,
+        "highlight-js": 1302
+      }
     },
     {
       "id": "phoenix",
@@ -76,7 +88,13 @@
         "HEEx",
         "Markdown",
         "Comment"
-      ]
+      ],
+      "tokens": {
+        "lumis": 4090,
+        "syntect": 1570,
+        "shiki": 2257,
+        "highlight-js": 500
+      }
     },
     {
       "id": "go",
@@ -88,7 +106,13 @@
       "bytes": 39143,
       "injections": [
         "Comment"
-      ]
+      ],
+      "tokens": {
+        "lumis": 6594,
+        "syntect": 6860,
+        "shiki": 4645,
+        "highlight-js": 1336
+      }
     },
     {
       "id": "readme",
@@ -104,7 +128,13 @@
         "Java",
         "JavaScript",
         "Rust"
-      ]
+      ],
+      "tokens": {
+        "lumis": 927,
+        "syntect": 661,
+        "shiki": 424,
+        "highlight-js": 255
+      }
     },
     {
       "id": "shadcn",
@@ -116,7 +146,13 @@
       "bytes": 21743,
       "injections": [
         "Comment"
-      ]
+      ],
+      "tokens": {
+        "lumis": 2529,
+        "syntect": 2684,
+        "shiki": 2501,
+        "highlight-js": 1259
+      }
     }
   ]
 }

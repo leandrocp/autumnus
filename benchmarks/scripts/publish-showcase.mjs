@@ -34,14 +34,16 @@ for (const document of manifest.documents) {
   }
 }
 
+const implementations = [
+  { id: "lumis", label: "Lumis", version: lumis[0].version, theme: lumis[0].theme },
+  ...others,
+];
+
 const published = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   theme: manifest.theme,
   lumisRuntimes: lumis.map((entry) => entry.label),
-  implementations: [
-    { id: "lumis", label: "Lumis", version: lumis[0].version, theme: lumis[0].theme },
-    ...others,
-  ],
+  implementations,
   documents: manifest.documents.map((document) => ({
     id: document.id,
     label: document.label,
@@ -51,6 +53,7 @@ const published = {
     lines: document.lines,
     bytes: document.bytes,
     injections: document.injections,
+    tokens: publishedTokens(document),
   })),
 };
 
@@ -80,3 +83,20 @@ console.log(
     `implementations (${lumis.length} Lumis runtimes verified identical) to ` +
     "website/public/comparison-data.",
 );
+
+// The Lumis runtimes were just proven byte-identical, so one of their counts
+// stands for all of them, the same way one of their outputs does.
+function publishedTokens(document) {
+  const tokens = {};
+  for (const { id, label } of implementations) {
+    const output = document.outputs.find(
+      (entry) => entry.id === (id === "lumis" ? lumis[0].id : id),
+    );
+    if (!output) continue;
+    if (!Number.isSafeInteger(output.tokens) || output.tokens <= 0) {
+      throw new Error(`${label} has no token count for ${document.id}; regenerate the showcase`);
+    }
+    tokens[id] = output.tokens;
+  }
+  return tokens;
+}

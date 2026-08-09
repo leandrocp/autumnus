@@ -1,3 +1,8 @@
 {
   // Explicit config file to stop oxfmt from trying to load vite.config.ts.
+  //
+  // `comparison-data` is written by `mise run -C benchmarks showcase-publish`
+  // and verified byte for byte by CI, so reformatting it here would make the
+  // committed assets permanently "stale" against the script that produces them.
+  "ignorePatterns": ["public/comparison-data/**", "public/benchmark-data/**"],
 }
