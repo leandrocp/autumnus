@@ -1,0 +1,887 @@
+{
+  "name": "markdown-fenced-languages",
+  "language": "markdown",
+  "theme": "dracula",
+  "events": [
+    {
+      "type": "start",
+      "scope": "markup.heading.1",
+      "language": "markdown"
+    },
+    {
+      "type": "source",
+      "start": 0,
+      "end": 9
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 9,
+      "end": 17
+    },
+    {
+      "type": "start",
+      "scope": "markup.raw",
+      "language": "markdown_inline"
+    },
+    {
+      "type": "source",
+      "start": 17,
+      "end": 23
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 23,
+      "end": 28
+    },
+    {
+      "type": "start",
+      "scope": "markup.strong",
+      "language": "markdown_inline"
+    },
+    {
+      "type": "source",
+      "start": 28,
+      "end": 36
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 36,
+      "end": 44
+    },
+    {
+      "type": "start",
+      "scope": "markup.raw.block",
+      "language": "markdown"
+    },
+    {
+      "type": "start",
+      "scope": "markup.raw.block",
+      "language": "markdown"
+    },
+    {
+      "type": "source",
+      "start": 44,
+      "end": 47
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "label",
+      "language": "markdown"
+    },
+    {
+      "type": "start",
+      "scope": "label",
+      "language": "markdown"
+    },
+    {
+      "type": "source",
+      "start": 47,
+      "end": 53
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 53,
+      "end": 54
+    },
+    {
+      "type": "start",
+      "scope": "keyword",
+      "language": "python"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "markdown"
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 54,
+      "end": 57
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 57,
+      "end": 58
+    },
+    {
+      "type": "start",
+      "scope": "function",
+      "language": "python"
+    },
+    {
+      "type": "source",
+      "start": 58,
+      "end": 63
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 63,
+      "end": 64
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "python"
+    },
+    {
+      "type": "source",
+      "start": 64,
+      "end": 68
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 68,
+      "end": 71
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "markdown"
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 71,
+      "end": 75
+    },
+    {
+      "type": "start",
+      "scope": "keyword",
+      "language": "python"
+    },
+    {
+      "type": "source",
+      "start": 75,
+      "end": 81
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 81,
+      "end": 82
+    },
+    {
+      "type": "start",
+      "scope": "function.builtin",
+      "language": "python"
+    },
+    {
+      "type": "source",
+      "start": 82,
+      "end": 85
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 85,
+      "end": 86
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "python"
+    },
+    {
+      "type": "source",
+      "start": 86,
+      "end": 87
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 87,
+      "end": 88
+    },
+    {
+      "type": "start",
+      "scope": "string",
+      "language": "python"
+    },
+    {
+      "type": "source",
+      "start": 88,
+      "end": 91
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 91,
+      "end": 93
+    },
+    {
+      "type": "start",
+      "scope": "keyword",
+      "language": "python"
+    },
+    {
+      "type": "source",
+      "start": 93,
+      "end": 96
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 96,
+      "end": 97
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "python"
+    },
+    {
+      "type": "source",
+      "start": 97,
+      "end": 98
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 98,
+      "end": 99
+    },
+    {
+      "type": "start",
+      "scope": "operator",
+      "language": "python"
+    },
+    {
+      "type": "source",
+      "start": 99,
+      "end": 101
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 101,
+      "end": 102
+    },
+    {
+      "type": "start",
+      "scope": "variable",
+      "language": "python"
+    },
+    {
+      "type": "source",
+      "start": 102,
+      "end": 106
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 106,
+      "end": 108
+    },
+    {
+      "type": "start",
+      "scope": "markup.raw.block",
+      "language": "markdown"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "markdown"
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 108,
+      "end": 111
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 111,
+      "end": 112
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 112,
+      "end": 113
+    },
+    {
+      "type": "start",
+      "scope": "markup.raw.block",
+      "language": "markdown"
+    },
+    {
+      "type": "start",
+      "scope": "markup.raw.block",
+      "language": "markdown"
+    },
+    {
+      "type": "source",
+      "start": 113,
+      "end": 116
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "label",
+      "language": "markdown"
+    },
+    {
+      "type": "start",
+      "scope": "label",
+      "language": "markdown"
+    },
+    {
+      "type": "source",
+      "start": 116,
+      "end": 120
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 120,
+      "end": 121
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "json"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "markdown"
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 121,
+      "end": 122
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "property",
+      "language": "json"
+    },
+    {
+      "type": "source",
+      "start": 122,
+      "end": 128
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.delimiter",
+      "language": "json"
+    },
+    {
+      "type": "source",
+      "start": 128,
+      "end": 129
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 129,
+      "end": 130
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "json"
+    },
+    {
+      "type": "source",
+      "start": 130,
+      "end": 131
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "json"
+    },
+    {
+      "type": "source",
+      "start": 131,
+      "end": 132
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "property",
+      "language": "json"
+    },
+    {
+      "type": "source",
+      "start": 132,
+      "end": 135
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.delimiter",
+      "language": "json"
+    },
+    {
+      "type": "source",
+      "start": 135,
+      "end": 136
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 136,
+      "end": 137
+    },
+    {
+      "type": "start",
+      "scope": "number",
+      "language": "json"
+    },
+    {
+      "type": "source",
+      "start": 137,
+      "end": 138
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "json"
+    },
+    {
+      "type": "source",
+      "start": 138,
+      "end": 139
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "json"
+    },
+    {
+      "type": "source",
+      "start": 139,
+      "end": 140
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "json"
+    },
+    {
+      "type": "source",
+      "start": 140,
+      "end": 141
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 141,
+      "end": 142
+    },
+    {
+      "type": "start",
+      "scope": "markup.raw.block",
+      "language": "markdown"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "markdown"
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 142,
+      "end": 145
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 145,
+      "end": 146
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 146,
+      "end": 147
+    },
+    {
+      "type": "start",
+      "scope": "markup.raw.block",
+      "language": "markdown"
+    },
+    {
+      "type": "start",
+      "scope": "markup.raw.block",
+      "language": "markdown"
+    },
+    {
+      "type": "source",
+      "start": 147,
+      "end": 150
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "label",
+      "language": "markdown"
+    },
+    {
+      "type": "start",
+      "scope": "label",
+      "language": "markdown"
+    },
+    {
+      "type": "source",
+      "start": 150,
+      "end": 153
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 153,
+      "end": 154
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.delimiter",
+      "language": "css"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "markdown"
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 154,
+      "end": 155
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "type",
+      "language": "css"
+    },
+    {
+      "type": "source",
+      "start": 155,
+      "end": 160
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.delimiter",
+      "language": "css"
+    },
+    {
+      "type": "source",
+      "start": 160,
+      "end": 162
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "attribute",
+      "language": "css"
+    },
+    {
+      "type": "source",
+      "start": 162,
+      "end": 167
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 167,
+      "end": 168
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "css"
+    },
+    {
+      "type": "source",
+      "start": 168,
+      "end": 169
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 169,
+      "end": 170
+    },
+    {
+      "type": "start",
+      "scope": "property",
+      "language": "css"
+    },
+    {
+      "type": "source",
+      "start": 170,
+      "end": 177
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.delimiter",
+      "language": "css"
+    },
+    {
+      "type": "source",
+      "start": 177,
+      "end": 178
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 178,
+      "end": 179
+    },
+    {
+      "type": "start",
+      "scope": "string",
+      "language": "css"
+    },
+    {
+      "type": "source",
+      "start": 179,
+      "end": 182
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.delimiter",
+      "language": "css"
+    },
+    {
+      "type": "source",
+      "start": 182,
+      "end": 183
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 183,
+      "end": 184
+    },
+    {
+      "type": "start",
+      "scope": "property",
+      "language": "css"
+    },
+    {
+      "type": "source",
+      "start": 184,
+      "end": 189
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.delimiter",
+      "language": "css"
+    },
+    {
+      "type": "source",
+      "start": 189,
+      "end": 190
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 190,
+      "end": 194
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.delimiter",
+      "language": "css"
+    },
+    {
+      "type": "source",
+      "start": 194,
+      "end": 195
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 195,
+      "end": 196
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.bracket",
+      "language": "css"
+    },
+    {
+      "type": "source",
+      "start": 196,
+      "end": 197
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 197,
+      "end": 198
+    },
+    {
+      "type": "start",
+      "scope": "markup.raw.block",
+      "language": "markdown"
+    },
+    {
+      "type": "start",
+      "scope": "punctuation.special",
+      "language": "markdown"
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 198,
+      "end": 201
+    },
+    {
+      "type": "end"
+    },
+    {
+      "type": "source",
+      "start": 201,
+      "end": 202
+    },
+    {
+      "type": "end"
+    }
+  ]
+}

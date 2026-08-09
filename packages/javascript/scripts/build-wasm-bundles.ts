@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { parse as parseToml } from "smol-toml";
@@ -24,23 +25,9 @@ interface LanguagesToml {
   bundles?: Record<string, BundleEntry>;
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
-}
-
-function isLanguagesToml(value: unknown): value is LanguagesToml {
-  if (!isRecord(value)) return false;
-  if (!isRecord(value.parsers)) return false;
-  return true;
-}
-
 function readLanguagesToml(): LanguagesToml {
   const text = fs.readFileSync(LANGUAGES_TOML, "utf-8");
-  const parsed = parseToml(text);
-  if (!isLanguagesToml(parsed)) {
-    throw new Error("Invalid languages.toml structure");
-  }
-  return parsed;
+  return parseToml(text) as unknown as LanguagesToml;
 }
 
 function treeSitterCompatRange(): string {
@@ -169,6 +156,7 @@ export default bundledWasms
     keywords: ["lumis-sh", "tree-sitter", "wasm", "bundle"],
     sideEffects: false,
     type: "module",
+    packageManager: "pnpm@11.15.1",
     exports: {
       ".": {
         types: "./index.d.ts",
@@ -223,6 +211,9 @@ const highlighter = await createHighlighter({ languages: [languages] })
   fs.writeFileSync(path.join(dir, "README.md"), readme);
   fs.writeFileSync(path.join(dir, "CHANGELOG.md"), existingChangelog ?? changelog);
 
+  execFileSync("oxfmt", [path.join(dir, "index.js"), path.join(dir, "index.d.ts")], {
+    stdio: "inherit",
+  });
   console.log(`  wasm bundle ${bundleName}: packages/javascript/wasm-bundle-${bundleName}`);
 }
 

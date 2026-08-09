@@ -38,14 +38,12 @@
     "dist",
     "README.md"
   ],
-  "packageManager": "pnpm@10.31.0",
+  "packageManager": "pnpm@11.15.1",
   "scripts": {
     "build": "node -e \"fs.rmSync('dist', { recursive: true, force: true })\" && tsc --project tsconfig.json",
-    "prelint": "pnpm --filter @lumis-sh/lumis build",
+    "prelint": "pnpm --filter @lumis-sh/lumis run build",
     "test": "vitest run",
-    "lint": "oxlint --type-aware src/",
-    "fmt": "oxfmt src/ test/ *.ts",
-    "fmt:check": "oxfmt --check src/ test/ *.ts",
+    "lint": "oxlint --type-aware --deny-warnings src/ test/",
     "prepack": "pnpm run build"
   },
   "dependencies": {

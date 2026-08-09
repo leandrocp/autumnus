@@ -1,3 +1,0 @@
-import { readFile } from 'node:fs/promises'
-const wasmBinary = await readFile(new URL('./{wasm_name}.wasm', import.meta.url))
-export default new Uint8Array(wasmBinary.buffer, wasmBinary.byteOffset, wasmBinary.byteLength)

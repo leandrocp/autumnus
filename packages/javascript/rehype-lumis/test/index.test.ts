@@ -4,8 +4,15 @@ import dracula from "../../themes/dist/json/dracula.json";
 import githubLight from "../../themes/dist/json/github_light.json";
 import javascript from "../../lumis/langs/javascript.ts";
 import json from "../../lumis/langs/json.ts";
+import { configureLocalWasmResolver } from "../../lumis/test/wasm.ts";
+import { configureLanguagePackageResolver, configureWasmResolver } from "@lumis-sh/lumis";
 import { htmlInline, htmlLinked, htmlMultiThemes, terminal } from "@lumis-sh/lumis/formatters";
 import rehypeLumis from "../src/index.js";
+
+configureLocalWasmResolver(["javascript", "json"], {
+  configureLanguagePackageResolver,
+  configureWasmResolver,
+});
 
 function codeBlockTree({
   code = "const answer = 42",
@@ -71,6 +78,37 @@ function assertSpansExist(tree: Root) {
 }
 
 describe("rehype-lumis", () => {
+  describe("fence languages the caller did not declare", () => {
+    it("loads what the document names, like every other runtime", async () => {
+      const transform = rehypeLumis({
+        formatter: (language) => htmlInline({ language, theme: dracula }),
+        languages: [javascript],
+      });
+      // The document asks for json; the caller only declared javascript.
+      const tree = codeBlockTree({ code: '{"a": 1}', codeClassName: ["language-json"] });
+
+      await transform(tree);
+
+      const pre = assertLumisPreElement(tree);
+      expect(pre).toBeDefined();
+      // Highlighted as json, not dropped to plain text.
+      expect(JSON.stringify(pre)).toContain("language-json");
+    });
+
+    it("costs one block, not the document, when the language cannot be loaded", async () => {
+      const transform = rehypeLumis({
+        formatter: (language) => htmlInline({ language, theme: dracula }),
+        languages: [javascript],
+      });
+      const tree = codeBlockTree({ codeClassName: ["language-no-such-language"] });
+
+      await transform(tree);
+
+      const pre = assertLumisPreElement(tree);
+      expect(pre).toBeDefined();
+    });
+  });
+
   describe("htmlInline formatter", () => {
     it("produces pre.lumis with inline styles and colored spans", async () => {
       const transform = rehypeLumis({

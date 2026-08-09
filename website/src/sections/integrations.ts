@@ -1,82 +1,74 @@
 const INTEGRATION_LINKS = [
   {
     name: "React",
-      links: [
-        { label: "Docs", href: "/docs/integrations/react" },
-        { label: "Package", href: "https://www.npmjs.com/package/@lumis-sh/react" },
-      ],
+    links: [
+      { label: "Docs", href: "/docs/integrations/react" },
+      { label: "Package", href: "https://www.npmjs.com/package/@lumis-sh/react" },
+    ],
   },
   {
     name: "react-markdown",
-      links: [
-        { label: "Docs", href: "/docs/integrations/react-markdown" },
-        { label: "Package", href: "https://www.npmjs.com/package/@lumis-sh/rehype-lumis" },
-      ],
+    links: [
+      { label: "Docs", href: "/docs/integrations/react-markdown" },
+      { label: "Package", href: "https://www.npmjs.com/package/@lumis-sh/rehype-lumis" },
+    ],
   },
   {
     name: "markdown-it",
-      links: [
-        { label: "Docs", href: "/docs/integrations/markdown-it" },
-        {
-          label: "Package",
-          href: "https://www.npmjs.com/package/@lumis-sh/markdown-it-lumis",
-        },
-      ],
+    links: [
+      { label: "Docs", href: "/docs/integrations/markdown-it" },
+      {
+        label: "Package",
+        href: "https://www.npmjs.com/package/@lumis-sh/markdown-it-lumis",
+      },
+    ],
   },
   {
     name: "Astro",
-      links: [
-        { label: "Docs", href: "/docs/integrations/astro" },
-        { label: "Package", href: "https://www.npmjs.com/package/@lumis-sh/rehype-lumis" },
-      ],
+    links: [
+      { label: "Docs", href: "/docs/integrations/astro" },
+      { label: "Package", href: "https://www.npmjs.com/package/@lumis-sh/rehype-lumis" },
+    ],
   },
   {
     name: "Nuxt",
-      links: [
-        { label: "Docs", href: "/docs/integrations/nuxt" },
-        { label: "Package", href: "https://www.npmjs.com/package/@lumis-sh/rehype-lumis" },
-      ],
+    links: [
+      { label: "Docs", href: "/docs/integrations/nuxt" },
+      { label: "Package", href: "https://www.npmjs.com/package/@lumis-sh/rehype-lumis" },
+    ],
   },
   {
     name: "Ratatui",
-      links: [
-        { label: "Docs", href: "/docs/integrations/ratatui" },
-      ],
+    links: [{ label: "Docs", href: "/docs/integrations/ratatui" }],
   },
   {
     name: "Nimble Publisher",
-      links: [
-        { label: "Docs", href: "/docs/integrations/nimble-publisher" },
-      ],
+    links: [{ label: "Docs", href: "/docs/integrations/nimble-publisher" }],
   },
   {
     name: "Tableau",
-      links: [
-        { label: "Docs", href: "/docs/integrations/tableau" },
-      ],
+    links: [{ label: "Docs", href: "/docs/integrations/tableau" }],
   },
   {
     name: "Docusaurus",
-      links: [
-        { label: "Docs", href: "/docs/integrations/docusaurus" },
-        { label: "Package", href: "https://www.npmjs.com/package/@lumis-sh/rehype-lumis" },
-      ],
+    links: [
+      { label: "Docs", href: "/docs/integrations/docusaurus" },
+      { label: "Package", href: "https://www.npmjs.com/package/@lumis-sh/rehype-lumis" },
+    ],
   },
   {
     name: "VitePress",
-      links: [
-        { label: "Docs", href: "/docs/integrations/vitepress" },
-        {
-          label: "Package",
-          href: "https://www.npmjs.com/package/@lumis-sh/markdown-it-lumis",
-        },
-      ],
+    links: [
+      { label: "Docs", href: "/docs/integrations/vitepress" },
+      {
+        label: "Package",
+        href: "https://www.npmjs.com/package/@lumis-sh/markdown-it-lumis",
+      },
+    ],
   },
   {
     name: "Build your own",
-      links: [
-        { label: "Docs", href: "/docs/formatters/custom" },
-      ],
+    links: [{ label: "Docs", href: "/docs/formatters/custom" }],
   },
 ] as const;
 

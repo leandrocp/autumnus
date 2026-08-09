@@ -101,13 +101,23 @@ export interface LanguageDefinition {
  * Pointer to a WASM parser binary on a CDN.
  *
  * ```ts
- * const ref: WasmRef = { packageName: '@lumis-sh/wasm-javascript', name: 'tree-sitter-javascript', version: '0.26' }
+ * const ref: WasmRef = {
+ *   packageName: '@lumis-sh/wasm-javascript',
+ *   name: 'tree-sitter-javascript',
+ *   version: '0.26.2',
+ *   sha256: '...',
+ *   size: 416499,
+ * }
  * ```
  */
 export interface WasmRef {
   packageName: string;
   name: string;
   version: string;
+  /** Lowercase SHA-256 of the exact parser bytes. */
+  sha256: string;
+  /** Exact parser size in bytes. */
+  size: number;
 }
 
 export type RuntimeWasmInput = Uint8Array | ArrayBuffer | string | URL | Response;
@@ -115,23 +125,21 @@ export type RuntimeWasmInput = Uint8Array | ArrayBuffer | string | URL | Respons
 export type RuntimeWasmBundle = Partial<Record<string, RuntimeWasmInput>>;
 
 /**
- * A language definition with Tree-sitter queries and a WASM parser reference.
+ * A language accepted by Lumis.
+ *
+ * Queries live in the package alongside the parser they were tested against, so
+ * this carries a package name rather than query text.
  *
  * ```ts
  * import javascript from '@lumis-sh/lumis/langs/javascript'
  * // javascript.id         → "javascript"
  * // javascript.aliases    → ["js", "jsx"]
- * // javascript.highlights → "(identifier) @variable ..."
+ * // javascript.packageName → "@lumis-sh/wasm-javascript"
  * ```
  */
-export interface Language {
-  id: string;
-  aliases: string[];
-  /** Tree-sitter highlight query (S-expression). */
-  highlights: string;
-  injections?: string;
-  locals?: string;
-  brackets?: string;
+export interface Language extends LanguageDefinition {
+  /** Independently released package containing the parser and matching queries. */
+  packageName?: string;
   /**
    * WASM parser source:
    * - `WasmRef` fetched from CDN (default for pre-built bundles)
@@ -139,8 +147,43 @@ export interface Language {
    * - `URL` fetched directly (`file://` works in Node.js)
    * - `string` treated as file path (Node.js) or URL (browser)
    */
-  wasm: WasmRef | RuntimeWasmInput;
+  wasm?: WasmRef | RuntimeWasmInput;
 }
+
+/**
+ * A handle to a published language package.
+ *
+ * Use `wasm` to override where the package's parser bytes come from. The bytes
+ * are still checked against the package's size and SHA-256 before loading.
+ */
+export interface LanguagePackageHandle extends LanguageDefinition {
+  packageName: string;
+  /**
+   * The published package version this build of Lumis expects. Requesting it by
+   * name rather than `@latest` is what makes every runtime resolve the same
+   * parser, and what lets a cached package be trusted without revalidating it.
+   */
+  version?: string;
+  /** Optional caller-selected source for the package's verified parser bytes. */
+  wasm?: WasmRef | RuntimeWasmInput;
+}
+
+export interface PlaintextLanguage extends LanguageDefinition {
+  id: "plaintext";
+}
+
+/**
+ * A language definition that contains everything the runtime needs to load it.
+ *
+ * Each variant declares only the fields it owns, so an object literal cannot
+ * pass a forbidden discriminator or load field as explicit `undefined`.
+ *
+ * Queries are not a variant. A parser and the queries written against it are
+ * released together inside a package, so a caller names the package and, at
+ * most, where its parser bytes come from. Supplying queries directly is a
+ * planned feature rather than a supported one; see `ARCHITECTURE.md`.
+ */
+export type LoadableLanguage = LanguagePackageHandle | PlaintextLanguage;
 
 /**
  * A lazy language handle from a bundle. Callable to load the full {@link Language}.
@@ -188,11 +231,11 @@ export type LanguageInput =
 /**
  * How formatters and `hl.highlight()` identify a language.
  *
- * - `Language` — the full language object
+ * - `LanguageDefinition` — a language object or identifier-only `{ id, aliases }`
  * - `LazyLanguage` — a handle from a bundle
  * - `string` — a language ID like `"javascript"`
  */
-export type LanguageRef = Language | LazyLanguage | string;
+export type LanguageRef = LanguageDefinition | LazyLanguage | string;
 
 export interface CaptureMetadata {
   highlightScope?: string;
@@ -204,6 +247,7 @@ export interface CaptureMetadata {
   isLocalReference: boolean;
 }
 
+/** Deltas from `(#offset! @capture start_row start_col end_row end_col)`. */
 export interface QueryCaptureOffset {
   startRow: number;
   startColumn: number;
@@ -217,7 +261,8 @@ export interface CompiledHighlightConfig {
   localsPatternEnd: number;
   captureMetadata: Record<string, CaptureMetadata>;
   nonLocalVariablePatterns: boolean[];
-  injectionOffsets: Array<Record<string, QueryCaptureOffset> | undefined>;
+  /** Per pattern index, the `#offset!` deltas keyed by capture name. */
+  captureOffsets: Array<Record<string, QueryCaptureOffset> | undefined>;
 }
 
 export interface CompiledBracketConfig {
@@ -325,7 +370,7 @@ export type HighlightIterFn = (
  *
  * While `format()` is running, `this.language` is set to the resolved language
  * after detection, so the formatter can render language-dependent output
- * (e.g. `<code class="language-…">`) without re-running detection.
+ * (e.g. `<code class="language-...">`) without re-running detection.
  *
  * ```ts
  * import { highlightIter, type Formatter } from '@lumis-sh/lumis'

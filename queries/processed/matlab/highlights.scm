@@ -114,7 +114,7 @@
   (identifier) @type)
 
 ((identifier) @type
-  (#lua-match? @type "^_*[A-Z][a-zA-Z0-9_]+$"))
+  (#match? @type "^_*[A-Z][a-zA-Z0-9_]+$"))
 
 ; Functions
 (function_definition
@@ -216,4 +216,4 @@
 (line_continuation) @punctuation.special
 
 ((comment) @keyword.directive
-  (#lua-match? @keyword.directive "^%%%% "))
+  (#match? @keyword.directive "^%% "))

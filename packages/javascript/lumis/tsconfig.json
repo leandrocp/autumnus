@@ -18,6 +18,6 @@
     "isolatedModules": true,
     "verbatimModuleSyntax": true
   },
-  "include": ["src/**/*.ts", "langs/**/*.ts", "bundles/**/*.ts"],
+  "include": ["src/**/*.ts", "langs/**/*.ts", "bundles/**/*.ts", "test/public-api-types.ts"],
   "exclude": ["node_modules", "dist", "scripts"]
 }

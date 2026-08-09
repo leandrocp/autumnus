@@ -2,7 +2,7 @@
 ((source_file
   .
   (comment) @keyword.directive )
-  (#lua-match? @keyword.directive "^#!/"))
+  (#match? @keyword.directive "^#!/"))
 
 [
   "use"
@@ -238,11 +238,11 @@
 
 ((varname) @variable.builtin
   ; highlights all the reserved ^ vars like ${^THINGS}
-  (#lua-match? @variable.builtin "%^"))
+  (#match? @variable.builtin "\\^"))
 
 ((varname) @variable.builtin
   ; highlights punc vars and also numeric only like $11
-  (#lua-match? @variable.builtin "^%A+$"))
+  (#match? @variable.builtin "^[^a-zA-Z]+$"))
 
 [
   (scalar)

@@ -1,28 +1,46 @@
 name: Benchmarks
 
 concurrency:
-  group: >-
-    ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
   contents: read
 
 on:
-  pull_request:
+  push:
+    branches: [main]
 
 jobs:
   benchmark:
-    name: Benchmark suite
+    name: Benchmark / ${{ matrix.label }}
     continue-on-error: true
     runs-on: ubuntu-24.04
     timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: Rust and syntect
+            task: rust
+            size_task: package-size:rust
+          - label: JavaScript and Shiki
+            task: javascript
+            size_task: package-size:javascript
+          - label: Elixir
+            task: elixir
+            size_task: package-size:elixir
+          - label: CLI and bat
+            task: cli
+            size_task: package-size:cli
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           persist-credentials: false
-      - uses: jdx/mise-action@v4.2.3
+      - uses: jdx/mise-action@9e7f7633ff6f6d6048a9418a68d48f288f50eb14 # v4.2.3
         with:
+          # Pinned: mise 2026.7.18 cannot install core:erlang/core:elixir on the
+          # runner, and benchmarks/mise.lock was produced by this version.
           version: 2026.7.3
           working_directory: benchmarks
           install_args: --locked
@@ -38,7 +56,88 @@ jobs:
           BENCH_SAMPLES: 3
           BENCH_WARMUP: 1
           BENCH_WARMUP_SECONDS: 0.1
-        run: mise run bench
+        run: mise run -C benchmarks ${{ matrix.task }}
+      - name: Measure JavaScript package sizes
+        if: matrix.task == 'javascript'
+        run: |
+          node_root="$(mise where node@24.18.0)"
+          pnpm_root="$(mise where pnpm@11.15.1)"
+          npm_modules="$node_root/lib/node_modules/npm/node_modules"
+          BENCH_NPM_TAR="$npm_modules/tar" BENCH_PNPM="$pnpm_root/pnpm" \
+            BENCH_PACKAGE_SIZE_GROUP=javascript \
+            "$node_root/bin/node" benchmarks/scripts/measure-package-sizes.mjs
+      - name: Measure native package sizes
+        if: matrix.task != 'javascript'
+        run: mise run -C benchmarks ${{ matrix.size_task }}
+      - name: Upload partial benchmark report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: lumis-benchmark-part-${{ matrix.task }}-${{ github.sha }}
+          path: target/benchmarks/runs/current
+          if-no-files-found: error
+          retention-days: 1
+
+  comparison:
+    name: Comparison assets are current
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          persist-credentials: false
+      - uses: jdx/mise-action@9e7f7633ff6f6d6048a9418a68d48f288f50eb14 # v4.2.3
+        with:
+          # Pinned: mise 2026.7.18 cannot install core:erlang/core:elixir on the
+          # runner, and benchmarks/mise.lock was produced by this version.
+          version: 2026.7.3
+          working_directory: benchmarks
+          install_args: --locked
+          cache: true
+      - uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32
+        with:
+          workspaces: |
+            .
+            benchmarks/rust
+      - name: Regenerate the published comparison
+        run: mise run -C benchmarks showcase-publish
+      - name: Fail if the committed assets are stale
+        run: |
+          if [ -n "$(git status --porcelain -- website/public/comparison-data)" ]; then
+            echo "website/public/comparison-data does not match what the code produces."
+            echo "The site serves these bytes verbatim, so run:"
+            echo "  mise run -C benchmarks showcase-publish"
+            echo "and commit the result."
+            git status --porcelain -- website/public/comparison-data
+            git --no-pager diff --stat -- website/public/comparison-data
+            exit 1
+          fi
+
+  report:
+    name: Benchmark suite
+    needs: benchmark
+    if: always()
+    continue-on-error: true
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 24.18.0
+      - name: Download partial benchmark reports
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          pattern: lumis-benchmark-part-*-${{ github.sha }}
+          path: target/benchmarks/runs/current
+          merge-multiple: true
+      - name: Merge and validate benchmark reports
+        run: |
+          node benchmarks/scripts/verify-fixtures.mjs
+          node benchmarks/scripts/merge-package-sizes.mjs
+          node benchmarks/scripts/merge-results.mjs
       - name: Publish benchmark values
         if: always()
         run: |

@@ -103,7 +103,7 @@
 (command
   argument: [
     (word) @variable.parameter
-    (#lua-match? @variable.parameter "^[-]")
+    (#match? @variable.parameter "^[-]")
   ])
 
 (command_substitution
@@ -144,7 +144,7 @@
     (concatenation
       (word))
   ] @variable.parameter
-  (#lua-match? @variable.parameter "^[-]"))
+  (#match? @variable.parameter "^[-]"))
 
 ; Strings
 [
@@ -204,4 +204,4 @@
 ((program
   .
   (comment) @keyword.directive )
-  (#lua-match? @keyword.directive "^#!/"))
+  (#match? @keyword.directive "^#!/"))

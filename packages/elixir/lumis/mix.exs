@@ -23,7 +23,8 @@ defmodule Lumis.MixProject do
 
   def application do
     [
-      extra_applications: [:logger]
+      extra_applications: [:logger],
+      mod: {Lumis.Application, []}
     ]
   end
 
@@ -101,6 +102,14 @@ defmodule Lumis.MixProject do
   defp aliases do
     [
       setup: ["deps.get", "compile"],
+      # TODO: stage from the committed fixtures only because the suite has no
+      # published parsers to fetch. Once it can download them, drop this and let
+      # the tests exercise the real registry path instead.
+      test: ["stage.test_parsers", "test"],
+      "stage.test_parsers": [
+        "cmd --cd ../../.. cargo run -q --manifest-path crates/dev/Cargo.toml -- " <>
+          "stage-test-parsers target/test-parsers"
+      ],
       quality: ["format.all", "lint.rust", "test.all"],
       "gen.checksum": "rustler_precompiled.download Lumis.Native --all --print",
       "format.all": ["format.rust", "format"],

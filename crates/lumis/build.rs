@@ -331,8 +331,7 @@ fn read_query_file(path: &Path) -> String {
         return String::new();
     }
 
-    let content = fs::read_to_string(path).expect("failed to read query file");
-    lumis_build::convert_lua_matches(&content)
+    fs::read_to_string(path).expect("failed to read query file")
 }
 
 fn read_query_file_with_default(path: &Path, default_path: &Path) -> String {

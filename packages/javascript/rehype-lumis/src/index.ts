@@ -73,11 +73,19 @@ async function renderBlock(
   language: string | undefined,
   formatter: (language: string | undefined) => Formatter,
 ): Promise<RootContent[]> {
-  if (language != null) {
-    await highlighter.loadLanguage(language);
+  // Every other runtime loads whatever a document names, and this plugin is not
+  // the place to invent a second rule. A fence naming something that cannot be
+  // loaded costs that block its highlighting, not the document its render.
+  let resolved = language;
+  if (resolved != null) {
+    try {
+      await highlighter.loadLanguage(resolved);
+    } catch {
+      resolved = undefined;
+    }
   }
 
-  const html = highlighter.highlight(code, formatter(language));
+  const html = highlighter.highlight(code, formatter(resolved));
 
   return parseFragment(html);
 }
