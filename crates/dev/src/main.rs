@@ -2251,6 +2251,8 @@ fn build_wasm(name: &str) -> Result<()> {
     fs::create_dir_all(&out_dir)?;
     fs::create_dir_all(&log_dir)?;
     let mut built_wasm_names = HashSet::new();
+    let toolchain = wasm_toolchain_id();
+    let rebuild = std::env::var("LUMIS_WASM_REBUILD").ok().as_deref() == Some("1");
 
     for (parser_name, info) in &toml.parsers {
         let Some(ref git) = info.git else { continue };
@@ -2267,6 +2269,27 @@ fn build_wasm(name: &str) -> Result<()> {
         }
 
         let wasm_file = out_dir.join(format!("{wasm_name}.wasm"));
+        let build_id_file = out_dir.join(format!("{wasm_name}.build-id"));
+        let build_id = wasm_build_id(
+            git,
+            rev,
+            info.location.as_deref(),
+            info.generate.unwrap_or(false),
+            &toolchain,
+        );
+
+        if !rebuild && cached_parser_is_current(&wasm_file, &build_id_file, &build_id) {
+            println!("-> Reusing {wasm_name} built from {rev}");
+            continue;
+        }
+
+        // A restored `.wasm` that this revision no longer describes has to go
+        // before the rebuild, not after it. `stage-wasm` and `test:queries`
+        // both take whatever file is present, so leaving the old one behind
+        // would let a parser that failed to build be staged, or have its
+        // queries checked against the grammar it replaced.
+        let _ = fs::remove_file(&build_id_file);
+        let _ = fs::remove_file(&wasm_file);
 
         let clone_dir = format!("{tmp}/tree-sitter-{parser_name}");
         println!("-> Building WASM for {parser_name} ...");
@@ -2329,7 +2352,10 @@ fn build_wasm(name: &str) -> Result<()> {
         println!("* building wasm in {repo_dir}");
         println!("* build log: {}", build_log.display());
         match build_repo_wasm(&repo_dir, &wasm_file, &build_log) {
-            Ok(()) => println!("{wasm_path}"),
+            Ok(()) => {
+                fs::write(&build_id_file, &build_id)?;
+                println!("{wasm_path}");
+            }
             Err(_) => println!("  ERROR: failed to build {parser_name}"),
         }
 
@@ -2338,6 +2364,35 @@ fn build_wasm(name: &str) -> Result<()> {
 
     let _ = run_cmd_ok(&format!("rm -rf {tmp}"));
     Ok(())
+}
+
+/// Identifies the toolchain a `.wasm` was produced by, which is the Tree-sitter
+/// CLI and nothing else. It compiles through a WASI SDK it downloads itself and
+/// pins per release, so its own version covers the compiler too. This used to
+/// name Emscripten as well, as a hedge against an input that might matter;
+/// nothing invokes `emcc` any more, so the hedge only recorded an empty string.
+fn wasm_toolchain_id() -> String {
+    run_cmd("tree-sitter --version").unwrap_or_default()
+}
+
+fn wasm_build_id(
+    git: &str,
+    rev: &str,
+    location: Option<&str>,
+    generate: bool,
+    toolchain: &str,
+) -> String {
+    format!(
+        "{git}\n{rev}\n{}\n{generate}\n{toolchain}\n",
+        location.unwrap_or("")
+    )
+}
+
+/// A recorded build id says the inputs still match; the magic number says the
+/// bytes survived being cached. Neither alone is enough to skip a build.
+fn cached_parser_is_current(wasm_file: &Path, build_id_file: &Path, build_id: &str) -> bool {
+    fs::read(wasm_file).is_ok_and(|bytes| bytes.starts_with(b"\0asm"))
+        && fs::read_to_string(build_id_file).is_ok_and(|cached| cached == build_id)
 }
 
 fn build_repo_wasm(repo_dir: &str, wasm_file: &Path, build_log: &Path) -> Result<()> {
@@ -3157,6 +3212,85 @@ fn wasm_package_suffix(wasm_name: &str) -> &str {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn every_build_input_changes_the_build_id() {
+        let baseline = wasm_build_id("git://g", "rev1", Some("sub"), false, "ts\nem");
+
+        for (label, other) in [
+            (
+                "git",
+                wasm_build_id("git://other", "rev1", Some("sub"), false, "ts\nem"),
+            ),
+            (
+                "rev",
+                wasm_build_id("git://g", "rev2", Some("sub"), false, "ts\nem"),
+            ),
+            (
+                "location",
+                wasm_build_id("git://g", "rev1", None, false, "ts\nem"),
+            ),
+            (
+                "generate",
+                wasm_build_id("git://g", "rev1", Some("sub"), true, "ts\nem"),
+            ),
+            (
+                "toolchain",
+                wasm_build_id("git://g", "rev1", Some("sub"), false, "ts\nem2"),
+            ),
+        ] {
+            assert_ne!(baseline, other, "{label} must invalidate a cached parser");
+        }
+
+        assert_eq!(
+            baseline,
+            wasm_build_id("git://g", "rev1", Some("sub"), false, "ts\nem"),
+            "the same inputs must reuse a cached parser"
+        );
+    }
+
+    #[test]
+    fn a_parser_is_reused_only_when_it_is_intact_and_current() {
+        let dir = PathBuf::from(tmpdir().unwrap());
+        let wasm = dir.join("tree-sitter-x.wasm");
+        let id_file = dir.join("tree-sitter-x.build-id");
+        let seed = |bytes: &[u8], id: &str| {
+            fs::write(&wasm, bytes).unwrap();
+            fs::write(&id_file, id).unwrap();
+        };
+
+        seed(b"\0asm\x01\0\0\0", "id-1");
+        assert!(
+            cached_parser_is_current(&wasm, &id_file, "id-1"),
+            "an intact parser recorded against these inputs is reusable"
+        );
+        assert!(
+            !cached_parser_is_current(&wasm, &id_file, "id-2"),
+            "a different build id must not be reused"
+        );
+
+        seed(b"corrupt", "id-1");
+        assert!(
+            !cached_parser_is_current(&wasm, &id_file, "id-1"),
+            "bytes that are not a wasm module must not be reused"
+        );
+
+        seed(b"\0asm\x01\0\0\0", "id-1");
+        fs::remove_file(&id_file).unwrap();
+        assert!(
+            !cached_parser_is_current(&wasm, &id_file, "id-1"),
+            "a parser with no recorded build id must not be reused"
+        );
+
+        fs::write(&id_file, "id-1").unwrap();
+        fs::remove_file(&wasm).unwrap();
+        assert!(
+            !cached_parser_is_current(&wasm, &id_file, "id-1"),
+            "a recorded build id without a parser must not be reused"
+        );
+
+        fs::remove_dir_all(&dir).unwrap();
+    }
 
     fn published(hash: &str) -> Value {
         serde_json::json!({
