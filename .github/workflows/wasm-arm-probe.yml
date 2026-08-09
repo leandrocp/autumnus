@@ -1,0 +1,96 @@
+name: WASM ARM probe
+
+# Temporary, delete when it has answered two questions:
+#
+#   1. Does an arm64 runner have enough memory to compile the three grammars
+#      that OOM on x86-64? Both are 16 GB, but an arm64 host measured 12.8 GB
+#      for tree-sitter-zsh where the x86-64 runner blew past 20 GB and died.
+#      That gap may be the architecture or it may have been macOS.
+#   2. If it does, is the artifact the same? Publishing from arm64 is only an
+#      option if the .wasm it produces is identical to the x86-64 one.
+#
+# Builds only. Never stages, never publishes.
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [lp-wasm-arm-probe]
+
+jobs:
+  memory:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 45
+
+    strategy:
+      fail-fast: false
+      matrix:
+        parser: [tree-sitter-zsh, tree-sitter-llvm, tree-sitter-vim]
+
+    steps:
+      - uses: actions/checkout@v7
+      - uses: jdx/mise-action@v4.2.3
+        with:
+          install: false
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "lts/*"
+      - run: mise install tree-sitter
+
+      - run: free -h && uname -m
+
+      # `time -v` prints nothing if the runner is killed, so also stream memory
+      # every 15s: on an OOM the trace is the only evidence that survives.
+      - name: Build ${{ matrix.parser }}
+        env:
+          PARSER: ${{ matrix.parser }}
+        run: |
+          ( while true; do
+              echo "[mem $(date -u +%H:%M:%S)] $(free -m | awk '/^Mem:/{printf "used=%sM avail=%sM", $3, $7} /^Swap:/{printf " swapused=%sM", $3}')"
+              sleep 15
+            done ) &
+          sampler=$!
+          trap 'kill $sampler 2>/dev/null || true' EXIT
+          /usr/bin/time -v mise run wasm-build "$PARSER"
+
+      - name: Report
+        if: always()
+        env:
+          PARSER: ${{ matrix.parser }}
+        run: |
+          ls -l "tmp/wasm/build/$PARSER.wasm" && sha256sum "tmp/wasm/build/$PARSER.wasm" \
+            || echo "no wasm produced"
+
+  # A parser small enough that both architectures finish it, so the hashes are
+  # comparable. If these differ, arm64 cannot publish what x86-64 publishes.
+  determinism:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v7
+      - uses: jdx/mise-action@v4.2.3
+        with:
+          install: false
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "lts/*"
+      - run: mise install tree-sitter
+
+      - run: mise run wasm-build tree-sitter-json
+
+      - name: Hash on ${{ matrix.os }}
+        run: |
+          uname -m
+          sha256sum tmp/wasm/build/tree-sitter-json.wasm
