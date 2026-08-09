@@ -6,7 +6,7 @@
 
 [queries.default]
 git = "https://github.com/nvim-treesitter/nvim-treesitter.git"
-rev = "7b6cc8949f9999c5ed91436cbe24aa5f99c42025"
+rev = "c9f9ed6c1892f629ea399f4ee7905f2686fa13f2"
 path = "runtime/queries"
 
 [queries.iex]
@@ -16,7 +16,7 @@ path = "queries"
 
 [queries.gleam]
 git = "https://github.com/gleam-lang/tree-sitter-gleam.git"
-rev = "c610c282ef73f830d80c1f0999dce8e83f024ef5"
+rev = "cefbd6863983b4df3214b7934bde5e9ca63d5b7f"
 path = "queries"
 
 [queries.make]
