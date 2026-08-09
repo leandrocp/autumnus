@@ -12,6 +12,8 @@ use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::thread;
 use std::time::Instant;
 use xz2::write::XzEncoder;
 
@@ -3089,6 +3091,8 @@ fn wasm_meta(name: &str) -> Result<()> {
 
 const PACKAGE_FORMAT_VERSION: u32 = 3;
 
+const REGISTRY_CONCURRENCY: usize = 16;
+
 /// The `major.minor` series published packages are versioned within.
 ///
 /// Read from the `mise.toml` pin rather than the installed CLI, so this answers
@@ -3121,28 +3125,39 @@ fn supported_tree_sitter_series() -> Result<String> {
     Ok(format!("{}.{}", parts[0], parts[1]))
 }
 
+/// The full packument carries every version's `package.json`, so one request
+/// answers what `npm view` needs one call per version to answer.
+fn fetch_packument(agent: &ureq::Agent, pkg: &str) -> Result<Option<Value>> {
+    let url = format!("https://registry.npmjs.org/{pkg}");
+    let mut response = match agent.get(&url).call() {
+        Ok(response) => response,
+        Err(ureq::Error::StatusCode(404)) => return Ok(None),
+        Err(err) => {
+            return Err(err).with_context(|| format!("failed to query {pkg} on the npm registry"))
+        }
+    };
+    let body = response
+        .body_mut()
+        .read_to_string()
+        .with_context(|| format!("failed to read the npm registry response for {pkg}"))?;
+    let packument =
+        serde_json::from_str(&body).with_context(|| format!("invalid packument for {pkg}"))?;
+    Ok(Some(packument))
+}
+
 /// Whether some published version in the current series already carries this
 /// exact language definition.
-fn published_for_definition(pkg: &str, versions: &[String], expected: &str, series: &str) -> bool {
+fn published_for_definition(packument: &Value, expected: &str, series: &str) -> bool {
+    let Some(versions) = packument.get("versions").and_then(Value::as_object) else {
+        return false;
+    };
     let prefix = format!("{series}.");
-    for version in versions.iter().filter(|v| v.starts_with(&prefix)) {
-        let Ok(output) = Command::new("npm")
-            .args(["view", &format!("{pkg}@{version}"), "lumis", "--json"])
-            .output()
-        else {
-            continue;
-        };
-        if !output.status.success() {
-            continue;
-        }
-        let Ok(meta) = serde_json::from_slice::<Value>(&output.stdout) else {
-            continue;
-        };
-        if definition_matches(&meta, expected, series) {
-            return true;
-        }
-    }
-    false
+    versions.iter().any(|(version, manifest)| {
+        version.starts_with(&prefix)
+            && manifest
+                .get("lumis")
+                .is_some_and(|meta| definition_matches(meta, expected, series))
+    })
 }
 
 /// Packages published before the v3 format carry no `definitionHash`, so they
@@ -3179,7 +3194,7 @@ fn wasm_needed(filter: &str, force: &str) -> Result<()> {
         }
     }
 
-    let mut needed = Vec::new();
+    let mut candidates = Vec::new();
     let mut seen = HashSet::new();
     for (id, info) in &toml.parsers {
         let default_name = format!("tree-sitter-{id}");
@@ -3187,34 +3202,59 @@ fn wasm_needed(filter: &str, force: &str) -> Result<()> {
         if !wanted.is_empty() && !wanted.contains(id.as_str()) && !wanted.contains(wasm_name) {
             continue;
         }
-        if !seen.insert(wasm_name.to_string()) {
-            continue;
+        if seen.insert(wasm_name.to_string()) {
+            candidates.push(wasm_name.to_string());
         }
-        if force {
-            needed.push(wasm_name.to_string());
-            continue;
-        }
+    }
 
-        let pkg = format!("@lumis-sh/wasm-{}", wasm_package_suffix(wasm_name));
-        let output = Command::new("npm")
-            .args(["view", &pkg, "versions", "--json"])
-            .output();
-        let versions = match &output {
-            Ok(output) if output.status.success() => {
-                parse_npm_versions_json(&String::from_utf8_lossy(&output.stdout))
-                    .unwrap_or_default()
-            }
-            _ => {
-                needed.push(wasm_name.to_string());
-                continue;
-            }
-        };
+    if force {
+        println!("{}", candidates.join(" "));
+        return Ok(());
+    }
 
-        let languages = packaged_languages(&toml, wasm_name)?;
-        let expected = language_definition_hash(&toml, wasm_name, &languages)?;
-        if !published_for_definition(&pkg, &versions, &expected, &series) {
+    let mut checks = Vec::with_capacity(candidates.len());
+    for wasm_name in candidates {
+        let languages = packaged_languages(&toml, &wasm_name)?;
+        let expected = language_definition_hash(&toml, &wasm_name, &languages)?;
+        let pkg = format!("@lumis-sh/wasm-{}", wasm_package_suffix(&wasm_name));
+        checks.push((wasm_name, pkg, expected));
+    }
+
+    let agent = ureq::Agent::new_with_defaults();
+    let next = AtomicUsize::new(0);
+    let mut results: Vec<(usize, Result<bool>)> = thread::scope(|scope| {
+        let workers: Vec<_> = (0..REGISTRY_CONCURRENCY.min(checks.len()))
+            .map(|_| {
+                scope.spawn(|| {
+                    let mut done = Vec::new();
+                    loop {
+                        let index = next.fetch_add(1, Ordering::Relaxed);
+                        let Some((_, pkg, expected)) = checks.get(index) else {
+                            return done;
+                        };
+                        let published = fetch_packument(&agent, pkg).map(|packument| {
+                            packument.is_some_and(|packument| {
+                                published_for_definition(&packument, expected, &series)
+                            })
+                        });
+                        done.push((index, published));
+                    }
+                })
+            })
+            .collect();
+        workers
+            .into_iter()
+            .flat_map(|worker| worker.join().expect("npm registry worker panicked"))
+            .collect()
+    });
+    results.sort_by_key(|(index, _)| *index);
+
+    let mut needed = Vec::new();
+    for (index, published) in results {
+        let (wasm_name, pkg, expected) = &checks[index];
+        if !published? {
             eprintln!("Need to publish {pkg} for {expected}");
-            needed.push(wasm_name.to_string());
+            needed.push(wasm_name.clone());
         }
     }
 
