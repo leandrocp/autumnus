@@ -212,16 +212,24 @@ clang --target=wasm32-unknown-wasi -fPIC -shared -Os \
 
 Those flags are hardcoded. `TREE_SITTER_WASI_SDK_PATH` selects a different SDK directory and is the only knob; there is no `CFLAGS` escape hatch, and the SDK version is pinned per CLI release (`crates/loader/wasi-sdk-version`), so bumping `tree-sitter` in `mise.toml` can silently change the compiler.
 
-**That clang's memory scales with `parser.c` size, and the largest grammars do not comfortably fit a 16 GB runner**, which is what `ubuntu-latest` gives a public repository. Peak RSS measured on an arm64 host, `-Os`, the flags above:
+**That clang's memory scales with `parser.c` size, and the three largest grammars cannot be built on a 16 GB runner at all**, which is what `ubuntu-latest` gives a public repository. `tree-sitter-llvm`, `tree-sitter-vim` and `tree-sitter-zsh` — 6.0 MB, 4.7 MB and 35.1 MB of generated `parser.c` — have failed every WASM Release run since 2026-07-30.
 
-| Grammar | `parser.c` | Peak RSS | Wall |
-| --- | --- | --- | --- |
-| `tree-sitter-llvm` | 6.0 MB | 8.6 GB | 7.6 min |
-| `tree-sitter-zsh` | 35.1 MB | 12.8 GB | 3.5 min |
+When it does not fit, the kernel kills the runner service rather than clang, so the job reports `The runner has received a shutdown signal` with exit code 143 and no compiler diagnostic at all. That reads like a cancelled job. On a large grammar it is an OOM.
 
-Nothing about the grammar predicts this better than the byte count of its generated `parser.c`, and `tree-sitter generate` output is stable across CLI patch releases, so a grammar that gets close stays close until upstream regenerates it. Lowering the optimization level does not buy headroom either — `tree-sitter-vim` peaks at 13.4 GB at `-O0` and 14.3 GB at `-O1` — so the cost is codegen for the one enormous `ts_lex` function, not the optimizer.
+Measure on Linux, not on a Mac. On arm64 all three complete, `tree-sitter-zsh` peaking at 12.8 GB; on an x86-64 runner the same source under the same flags exhausts 16 GB of RAM plus the image's own swapfile and dies at roughly 20 GB. Anything measured locally understates the runner by well over 2x.
 
-When it does not fit, the kernel kills the runner service rather than clang, and the job reports `The runner has received a shutdown signal` with exit code 143 and no compiler diagnostic at all. That reads like a cancelled job. On a large grammar it is an OOM, and `wasm-release.yml` adds swap for exactly this reason.
+Four things have been tried and none of them work, so do not spend the time again:
+
+| Attempt | Result |
+| --- | --- |
+| Lower the optimization level | `tree-sitter-vim` peaks at 13.4 GB at `-O0` and 14.3 GB at `-O1`, so `-Os` is not what costs the memory. Codegen for the one enormous `ts_lex` function is. |
+| Newer WASI SDK | v33 (clang 22.1.0) needs 12.5 GB where v29 (clang 21.1.4) needs 12.8, and takes 2.4x as long. Every 0.26.x pins v29; master is on v33. |
+| A leaner grammar revision | None of them grew. `tree-sitter-zsh` is byte-identical across the published and pinned revisions, `tree-sitter-llvm` differs by one byte across a 0.1.0 → 1.1.0 version jump, and `tree-sitter-vim` never changed revision. |
+| 32 GB of swap | Converts the OOM kill into a timeout. All three reach ~15.9 GB resident plus ~17.7 GB of swap, then thrash without finishing inside an hour. |
+
+What is left is more memory that is not swap, which means a runner larger than a personal account can have: GitHub's larger runners require an organization on Team or Enterprise Cloud, and so does Blacksmith. Budget for well over 32 GB, since the swap run passed 33 GB of anonymous memory without completing.
+
+Upstream considers this an LLVM problem and closed it (<https://github.com/tree-sitter/tree-sitter/issues/3496>) after trying the same flag space, back when Emscripten was still the compiler. Emscripten, notably, compiles these in about 0.4 GB — roughly thirty times less — so the conclusion recorded there no longer matches the toolchain.
 
 Emscripten did not stop mattering, it stopped mattering *here*, and upstream draws the line precisely ([maxbrunsfeld on #4393](https://github.com/tree-sitter/tree-sitter/pull/4393#issuecomment-2831035549)): it is still required to build the Tree-sitter **web binding**, the JavaScript-to-WASM glue published as `web-tree-sitter`, and it is not required to compile **parsers**.
 
