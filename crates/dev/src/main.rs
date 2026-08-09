@@ -2256,6 +2256,7 @@ fn build_wasm(name: &str) -> Result<()> {
     fs::create_dir_all(&out_dir)?;
     fs::create_dir_all(&log_dir)?;
     let mut built_wasm_names = HashSet::new();
+    let mut failed = Vec::new();
     let toolchain = wasm_toolchain_id();
     let rebuild = std::env::var("LUMIS_WASM_REBUILD").ok().as_deref() == Some("1");
 
@@ -2361,13 +2362,24 @@ fn build_wasm(name: &str) -> Result<()> {
                 fs::write(&build_id_file, &build_id)?;
                 println!("{wasm_path}");
             }
-            Err(_) => println!("  ERROR: failed to build {parser_name}"),
+            Err(_) => {
+                println!("  ERROR: failed to build {parser_name}");
+                failed.push(parser_name.clone());
+            }
         }
 
         let _ = run_cmd_ok(&format!("rm -rf {clone_dir}"));
     }
 
     let _ = run_cmd_ok(&format!("rm -rf {tmp}"));
+
+    // Reported once at the end rather than by returning early, so building the
+    // whole corpus still attempts every parser and names all the failures
+    // instead of stopping at the first.
+    if !failed.is_empty() {
+        bail!("failed to build: {}", failed.join(", "));
+    }
+
     Ok(())
 }
 
