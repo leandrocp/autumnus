@@ -4,10 +4,13 @@ import { createHighlighterModule } from "./core/highlighter.js";
 import { mapBundle } from "./bundle-helpers.js";
 import {
   availableLanguages,
+  configureLanguagePackageResolver,
   configureWasmResolver,
   createRuntime,
   getDefaultRuntime,
 } from "./runtime/node.js";
+
+export { runtimeKind } from "./runtime/node.js";
 
 export { highlightIter, highlightEvents } from "./core/highlighter.js";
 
@@ -17,7 +20,7 @@ const highlighter = createHighlighterModule({
 });
 
 /**
- * Create a reusable highlighter with preloaded languages.
+ * Create a reusable highlighter with languages loaded during setup.
  *
  * `createHighlighter` is async; the returned `hl.highlight()` is synchronous.
  *
@@ -107,7 +110,7 @@ export function withWasmBundle(
   });
 }
 
-export type { Highlighter } from "./core/highlighter.js";
+export type { CreateHighlighterOptions, Highlighter } from "./core/highlighter.js";
 export type {
   HighlightEvent,
   HighlightIterFn,
@@ -118,6 +121,10 @@ export type {
   HighlightRange,
   HighlightStyle,
   Language,
+  LanguageDefinition,
+  LanguagePackageHandle,
+  PlaintextLanguage,
+  LoadableLanguage,
   LanguageBundle,
   LanguageInput,
   LanguageRef,
@@ -129,6 +136,6 @@ export type {
   LanguageInfo,
   ThemeInfo,
 } from "./types.js";
-export { availableLanguages, configureWasmResolver };
-export type { WasmResolver } from "./core/languages.js";
+export { availableLanguages, configureLanguagePackageResolver, configureWasmResolver };
+export type { LanguagePackageResolver, WasmResolver } from "./core/languages.js";
 export { availableThemes, sanitizeThemeName } from "./themes.js";

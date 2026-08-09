@@ -1,0 +1,7 @@
+`lumis_readme.md` is a snapshot of this repository's own `README.md`, copied here
+so the showcase renders a pinned set of bytes rather than a file that changes
+underneath it. It carries seven fenced blocks across five languages, which is
+the reason it is in the comparison.
+
+Refresh it with `cp README.md benchmarks/lumis_readme.md` and update the SHA-256
+in `benchmarks/scripts/prepare-showcase.mjs`.

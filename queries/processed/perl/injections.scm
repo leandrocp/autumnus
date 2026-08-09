@@ -10,8 +10,8 @@
   (replacement) @injection.content
   (substitution_regexp_modifiers) @_modifiers)
   ; match if there's a single `e` in the modifiers list
-  (#lua-match? @_modifiers "e")
-  (#not-lua-match? @_modifiers "e.*e")
+  (#match? @_modifiers "e")
+  (#not-match? @_modifiers "e[\\s\\S]*e")
   (#set! injection.language "perl")
   (#set! injection.include-children))
 

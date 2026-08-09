@@ -1,3 +1,2 @@
-const wasmBase64 = "{base64_wasm}"
-const wasmBinary = Uint8Array.from(atob(wasmBase64), c => c.charCodeAt(0))
-export default wasmBinary
+const wasmUrl = new URL('./{wasm_name}.wasm', import.meta.url)
+export default wasmUrl

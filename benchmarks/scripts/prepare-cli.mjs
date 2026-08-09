@@ -2,7 +2,6 @@
 
 import { spawnSync } from "node:child_process";
 import { copyFile, mkdir, readFile, rm, writeFile } from "node:fs/promises";
-import { createRequire } from "node:module";
 import { basename, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -12,8 +11,11 @@ const cacheRoot = resolve(repoDir, "target/benchmarks/cli");
 const commandsDir = resolve(cacheRoot, "commands");
 const dataDir = resolve(cacheRoot, "data");
 const xdgCacheDir = resolve(cacheRoot, "xdg-cache");
-const benchmarkRequire = createRequire(resolve(benchmarksDir, "javascript/package.json"));
-const lumis = benchmarkRequire.resolve("@lumis-sh/cli-benchmark/bin/lumis");
+const lumis = resolve(
+  repoDir,
+  "target/benchmarks/rust-target/release",
+  process.platform === "win32" ? "lumis.exe" : "lumis",
+);
 const bat = findBat();
 const scenarioShell = findScenarioShell();
 
@@ -25,15 +27,22 @@ await mkdir(xdgCacheDir, { recursive: true });
 const manifest = JSON.parse(
   await readFile(resolve(repoDir, "target/benchmarks/fixtures/scenarios.json"), "utf8"),
 );
-const languages = [
-  ...new Set(manifest.scenarios.flatMap(({ files }) => files.map(({ language }) => language))),
-];
+const localPackages = JSON.parse(
+  await readFile(resolve(repoDir, "target/benchmarks/language-packages/index.json"), "utf8"),
+);
+const languages = [...new Set(Object.values(localPackages).map(({ language }) => language))];
 
 for (const language of languages) {
-  const wasmPath = benchmarkRequire.resolve(
-    `@lumis-sh/wasm-${language}/tree-sitter-${language}.wasm`,
+  const packageName = `@lumis-sh/wasm-${language}`;
+  const local = localPackages[packageName];
+  if (!local) throw new Error(`missing local language package ${packageName}`);
+  const metadata = JSON.parse(await readFile(local.metadataPath, "utf8"));
+  const parser = metadata.parser;
+  await copyFile(local.metadataPath, resolve(dataDir, "parsers", `${language}.lumis.json`));
+  await copyFile(
+    local.wasmPath,
+    resolve(dataDir, "parsers", `${parser.name}-${metadata.version}-${parser.sha256}.wasm`),
   );
-  await copyFile(wasmPath, resolve(dataDir, "parsers", `tree-sitter-${language}.wasm`));
 }
 
 const benchmarkEnv = {

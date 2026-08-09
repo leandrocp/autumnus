@@ -18,7 +18,7 @@
 ((program
   .
   (comment) @keyword.directive @nospell)
-  (#lua-match? @keyword.directive "^#!/"))
+  (#match? @keyword.directive "^#!/"))
 
 ; Operators
 [

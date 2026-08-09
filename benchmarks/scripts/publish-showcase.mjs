@@ -1,0 +1,82 @@
+#!/usr/bin/env node
+
+import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const benchmarksDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const generatedDir = resolve(benchmarksDir, "showcase/generated");
+const target = resolve(benchmarksDir, "../website/public/comparison-data");
+
+const manifest = JSON.parse(await readFile(resolve(generatedDir, "manifest.json"), "utf8"));
+const lumis = manifest.implementations.filter((entry) => entry.id.startsWith("lumis-"));
+const others = manifest.implementations.filter((entry) => !entry.id.startsWith("lumis-"));
+
+// Every Lumis runtime renders a document identically, so the site ships one copy
+// and says so, rather than five tabs of the same bytes and a third of the weight
+// again. Publishing asserts that rather than trusting it: if they ever diverge,
+// the page must not quietly present one of them as the answer.
+for (const document of manifest.documents) {
+  const fragments = await Promise.all(
+    lumis.map(async (entry) => ({
+      label: entry.label,
+      bytes: await readFile(resolve(generatedDir, "fragments", document.id, `${entry.id}.html`)),
+    })),
+  );
+  const [reference, ...rest] = fragments;
+  for (const other of rest) {
+    if (!other.bytes.equals(reference.bytes)) {
+      throw new Error(
+        `${other.label} and ${reference.label} disagree on ${document.id}; ` +
+          "the comparison cannot be published as a single Lumis output",
+      );
+    }
+  }
+}
+
+const published = {
+  schemaVersion: 1,
+  theme: manifest.theme,
+  lumisRuntimes: lumis.map((entry) => entry.label),
+  implementations: [
+    { id: "lumis", label: "Lumis", version: lumis[0].version, theme: lumis[0].theme },
+    ...others,
+  ],
+  documents: manifest.documents.map((document) => ({
+    id: document.id,
+    label: document.label,
+    language: document.language,
+    languageLabel: document.languageLabel,
+    source: document.source,
+    lines: document.lines,
+    bytes: document.bytes,
+    injections: document.injections,
+  })),
+};
+
+// The website is deployed by a workflow that builds only `website/` and `docs/`,
+// so it can never run the showcase itself: that needs Rust, Elixir, bat and every
+// parser. These bytes are therefore committed, and this is what refreshes them.
+await rm(target, { recursive: true, force: true });
+await mkdir(target, { recursive: true });
+await writeFile(resolve(target, "manifest.json"), `${JSON.stringify(published, null, 2)}\n`);
+
+for (const document of manifest.documents) {
+  await mkdir(resolve(target, document.id), { recursive: true });
+  await cp(
+    resolve(generatedDir, document.id, `${lumis[0].id}.html`),
+    resolve(target, document.id, "lumis.html"),
+  );
+  for (const entry of others) {
+    await cp(
+      resolve(generatedDir, document.id, `${entry.id}.html`),
+      resolve(target, document.id, `${entry.id}.html`),
+    );
+  }
+}
+
+console.log(
+  `Published ${published.documents.length} documents × ${published.implementations.length} ` +
+    `implementations (${lumis.length} Lumis runtimes verified identical) to ` +
+    "website/public/comparison-data.",
+);

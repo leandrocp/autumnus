@@ -28,7 +28,7 @@
     "CHANGELOG.md",
     "README.md"
   ],
-  "packageManager": "pnpm@10.31.0",
+  "packageManager": "pnpm@11.15.1",
   "scripts": {
     "postinstall": "node scripts/install.js",
     "test": "node scripts/test-shim.js"

@@ -6,6 +6,7 @@
   "repository": "github:leandrocp/lumis",
   "main": "lumis-native.darwin-x64.node",
   "files": [
+    "LICENSE",
     "lumis-native.darwin-x64.node"
   ],
   "os": [

@@ -89,8 +89,7 @@ describe("LanguageBundle type", () => {
   it("LazyLanguage entries are callable", async () => {
     const lang = await webBundle.json();
     expect(lang.id).toBe("json");
-    expect(lang.highlights).toBeTruthy();
-    expect(lang.wasm).toBeDefined();
+    expect(lang.packageName).toBe("@lumis-sh/wasm-json");
   });
 });
 

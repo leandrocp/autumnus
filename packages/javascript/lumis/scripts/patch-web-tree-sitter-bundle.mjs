@@ -11,22 +11,10 @@ for (const file of targets) {
   const filePath = path.join(distDir, file);
   let source = await readFile(filePath, "utf8");
 
-  source = source.replaceAll(
-    'import("fs/promises")',
-    'import("node:" + "fs/promises")',
-  );
-  source = source.replaceAll(
-    "import('fs/promises')",
-    'import("node:" + "fs/promises")',
-  );
-  source = source.replaceAll(
-    'import("module")',
-    'import("node:" + "module")',
-  );
-  source = source.replaceAll(
-    "import('module')",
-    'import("node:" + "module")',
-  );
+  source = source.replaceAll('import("fs/promises")', 'import("node:" + "fs/promises")');
+  source = source.replaceAll("import('fs/promises')", 'import("node:" + "fs/promises")');
+  source = source.replaceAll('import("module")', 'import("node:" + "module")');
+  source = source.replaceAll("import('module')", 'import("node:" + "module")');
   source = source.replaceAll(
     'new URL("web-tree-sitter.wasm", import.meta.url).href',
     '"web-tree-sitter.wasm"',

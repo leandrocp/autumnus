@@ -11,8 +11,8 @@ keywords:
   - injected languages
 ---
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
 
 # JavaScript
 
@@ -21,15 +21,12 @@ import TabItem from '@theme/TabItem';
 Use [`highlight()`](https://www.npmjs.com/package/@lumis-sh/lumis) when you just need one async highlight call and do not need to keep a highlighter instance around.
 
 ```ts
-import {highlight} from '@lumis-sh/lumis'
-import {htmlInline} from '@lumis-sh/lumis/formatters'
-import javascript from '@lumis-sh/lumis/langs/javascript'
-import dracula from '@lumis-sh/themes/dracula'
+import { highlight } from "@lumis-sh/lumis";
+import { htmlInline } from "@lumis-sh/lumis/formatters";
+import javascript from "@lumis-sh/lumis/langs/javascript";
+import dracula from "@lumis-sh/themes/dracula";
 
-const html = await highlight(
-  'const x = 1',
-  htmlInline({language: javascript, theme: dracula})
-)
+const html = await highlight("const x = 1", htmlInline({ language: javascript, theme: dracula }));
 ```
 
 `highlight()` uses a shared default runtime, so loaded languages and global WASM resolver changes are process-wide.
@@ -39,17 +36,14 @@ const html = await highlight(
 Use [`createHighlighter()`](https://www.npmjs.com/package/@lumis-sh/lumis) when you want instance isolation, explicit setup, lazy loading, or repeated synchronous `hl.highlight()` calls after initialization.
 
 ```ts
-import {createHighlighter} from '@lumis-sh/lumis'
-import {htmlInline} from '@lumis-sh/lumis/formatters'
-import javascript from '@lumis-sh/lumis/langs/javascript'
-import dracula from '@lumis-sh/themes/dracula'
+import { createHighlighter } from "@lumis-sh/lumis";
+import { htmlInline } from "@lumis-sh/lumis/formatters";
+import javascript from "@lumis-sh/lumis/langs/javascript";
+import dracula from "@lumis-sh/themes/dracula";
 
-const hl = await createHighlighter({languages: [javascript]})
+const hl = await createHighlighter({ languages: [javascript] });
 
-const html = hl.highlight(
-  'const x = 1',
-  htmlInline({language: javascript, theme: dracula})
-)
+const html = hl.highlight("const x = 1", htmlInline({ language: javascript, theme: dracula }));
 ```
 
 This creates an isolated highlighter unless you intentionally rely on the global resolver.
@@ -58,22 +52,22 @@ This creates an isolated highlighter unless you intentionally rely on the global
 
 Bundles register many languages lazily.
 
-| Bundle | Purpose |
-| --- | --- |
-| `@lumis-sh/lumis/bundles/web` | HTML, CSS, JS, TS, JSON, Markdown, SQL, Svelte, Vue, Astro, and other web-focused languages |
-| `@lumis-sh/lumis/bundles/web-extra` | framework and template languages that complement the web bundle |
-| `@lumis-sh/lumis/bundles/system` | C, C++, Rust, Go, Zig, LLVM, Make, CMake, and related system languages |
-| `@lumis-sh/lumis/bundles/backend` | popular backend languages plus common API, config, and infra formats |
-| `@lumis-sh/lumis/bundles/full` | all supported languages |
+| Bundle                              | Purpose                                                                                     |
+| ----------------------------------- | ------------------------------------------------------------------------------------------- |
+| `@lumis-sh/lumis/bundles/web`       | HTML, CSS, JS, TS, JSON, Markdown, SQL, Svelte, Vue, Astro, and other web-focused languages |
+| `@lumis-sh/lumis/bundles/web-extra` | framework and template languages that complement the web bundle                             |
+| `@lumis-sh/lumis/bundles/system`    | C, C++, Rust, Go, Zig, LLVM, Make, CMake, and related system languages                      |
+| `@lumis-sh/lumis/bundles/backend`   | popular backend languages plus common API, config, and infra formats                        |
+| `@lumis-sh/lumis/bundles/full`      | all supported languages                                                                     |
 
 ```ts
-import {createHighlighter} from '@lumis-sh/lumis'
-import {bundledLanguages} from '@lumis-sh/lumis/bundles/web'
+import { createHighlighter } from "@lumis-sh/lumis";
+import { bundledLanguages } from "@lumis-sh/lumis/bundles/web";
 
-const hl = await createHighlighter({languages: [bundledLanguages]})
+const hl = await createHighlighter({ languages: [bundledLanguages] });
 
-hl.registeredLanguages // registered, including lazy entries
-hl.languages // loaded right now, usually just plaintext at first
+hl.registeredLanguages; // registered, including lazy entries
+hl.languages; // loaded right now, usually just plaintext at first
 ```
 
 ## Lazy loading
@@ -81,19 +75,19 @@ hl.languages // loaded right now, usually just plaintext at first
 You can register a language now and load it only when needed.
 
 ```ts
-import {createHighlighter} from '@lumis-sh/lumis'
-import {htmlInline} from '@lumis-sh/lumis/formatters'
-import {bundledLanguages} from '@lumis-sh/lumis/bundles/web'
-import dracula from '@lumis-sh/themes/dracula'
+import { createHighlighter } from "@lumis-sh/lumis";
+import { htmlInline } from "@lumis-sh/lumis/formatters";
+import { bundledLanguages } from "@lumis-sh/lumis/bundles/web";
+import dracula from "@lumis-sh/themes/dracula";
 
-const hl = await createHighlighter({languages: [bundledLanguages]})
+const hl = await createHighlighter({ languages: [bundledLanguages] });
 
-await hl.loadLanguage(bundledLanguages.javascript)
+await hl.loadLanguage(bundledLanguages.javascript);
 
 const html = hl.highlight(
-  'const x = 1',
-  htmlInline({language: bundledLanguages.javascript, theme: dracula})
-)
+  "const x = 1",
+  htmlInline({ language: bundledLanguages.javascript, theme: dracula }),
+);
 ```
 
 `createHighlighter({ languages })` accepts:
@@ -105,20 +99,17 @@ const html = hl.highlight(
 
 ## Repeated highlighting
 
-Preload languages once with `createHighlighter()`, then call `hl.highlight()` synchronously for repeated work.
+Load languages once with `createHighlighter()`, then call `hl.highlight()` synchronously for repeated work.
 
 ```ts
-import {createHighlighter} from '@lumis-sh/lumis'
-import {htmlInline} from '@lumis-sh/lumis/formatters'
-import javascript from '@lumis-sh/lumis/langs/javascript'
-import dracula from '@lumis-sh/themes/dracula'
+import { createHighlighter } from "@lumis-sh/lumis";
+import { htmlInline } from "@lumis-sh/lumis/formatters";
+import javascript from "@lumis-sh/lumis/langs/javascript";
+import dracula from "@lumis-sh/themes/dracula";
 
-const hl = await createHighlighter({languages: [javascript]})
+const hl = await createHighlighter({ languages: [javascript] });
 
-const html = hl.highlight(
-  'const x = 1',
-  htmlInline({language: javascript, theme: dracula})
-)
+const html = hl.highlight("const x = 1", htmlInline({ language: javascript, theme: dracula }));
 ```
 
 ## Language references
@@ -126,9 +117,9 @@ const html = hl.highlight(
 These are equivalent at highlight time:
 
 ```ts
-htmlInline({language: json, theme})
-htmlInline({language: bundledLanguages.json, theme})
-htmlInline({language: 'json', theme})
+htmlInline({ language: json, theme });
+htmlInline({ language: bundledLanguages.json, theme });
+htmlInline({ language: "json", theme });
 ```
 
 ## Auto-detection and plaintext fallback
@@ -143,24 +134,10 @@ Detection methods:
 - Emacs mode lines
 
 ```ts
-const html = await highlight(source, htmlInline({theme: dracula}))
+const html = await highlight(source, htmlInline({ theme: dracula }));
 ```
 
 Useful when rendering user-provided content or pasted snippets.
-
-## Injected languages
-
-Lumis can highlight embedded languages such as HTML with CSS and JavaScript inside it.
-
-Important rule: load every participating language, not just the outer one.
-
-```ts
-const hl = await createHighlighter({languages: [html, css, javascript]})
-
-const htmlOutput = hl.highlight(source, htmlInline({language: html, theme: dracula}))
-```
-
-If nested languages are missing, Lumis cannot fully highlight those embedded regions.
 
 ## Metadata APIs
 
@@ -172,14 +149,74 @@ Useful for dropdowns, config validation, and docs tooling:
 
 ## Runtime notes
 
-- `@lumis-sh/lumis` uses `web-tree-sitter` and per-language parser WASM by default
-- install `@lumis-sh/lumis-native` to opt into the native Rust runtime on supported Node.js platforms; Lumis detects it automatically
-- the native addon contains all supported parsers and is much larger than the default per-language WASM setup
+- every runtime loads the same per-language parser WASM; what differs is the engine that runs it
+- on Node, `@lumis-sh/lumis` runs those parsers and the highlighting walk under Wasmtime in the same Rust code as the Lumis CLI and Elixir bindings; built-in formatters normally render there too, while custom formatters assemble events in JavaScript and an async call that may need a JavaScript resolver stays on the main thread
+- browsers, and any platform with no prebuilt addon, run them under the host's own WebAssembly through `web-tree-sitter`, and walk and format in JavaScript
+- the addon carries no parsers and downloads each on first use, so it costs about 4.7 MB of download on top of the Wasm runtime rather than one binary per language
 - the package uses conditional exports so Node and web-standard runtimes get the right entry point automatically
-- Node caches fetched parser WASM locally when possible
+- every language package contains matching queries plus an exact parser version, size, and SHA-256 digest
+- Node caches language-package metadata and verified parser WASM in the platform user cache directory; `LUMIS_DATA_DIR` overrides it
+- browsers persist package metadata and verified parser bytes in CacheStorage with an IndexedDB fallback
 - Node can also auto-load installed parser packages such as `@lumis-sh/wasm-elixir` or bundle packages such as `@lumis-sh/wasm-bundle-web`
+- ordinary Node highlighters share one Wasmtime runtime; a highlighter that supplies parser bytes, queries, or resolver callbacks gets an isolated Tree-sitter Wasm store so its definitions are released with that highlighter, while the Wasmtime engine and persistent caches remain shared
 - non-Node usage usually relies on remote parser assets unless you override the resolver, use `withWasm()` with a single npm parser package such as `@lumis-sh/wasm-json`, or use `withWasmBundle()` with a bundle package such as `@lumis-sh/wasm-bundle-web`
 - Bun and Deno are also supported
+
+## Injected languages
+
+On Node, highlighting loads a language injected inside a document during the
+same pass that finds it, so a Markdown file with a fenced Rust block highlights
+that block without Rust being named anywhere in your code. A language that
+cannot be fetched leaves its own block plain rather than failing the document,
+and Lumis warns once naming it.
+
+Configured [`configureLanguagePackageResolver()` and
+`configureWasmResolver()`](/advanced/wasm-and-cdn#override-the-resolver) callbacks
+participate in that same Node native path. They apply to a language first
+discovered mid-document as well as to the root language, without a preload or
+second pass.
+
+The native walk has to read a newly discovered resolver result synchronously.
+Local paths plus `file:`, `data:`, `http:`, and `https:` URLs work there. A URL
+owned by JavaScript itself, such as a `blob:` URL, cannot be opened from Rust;
+include that language in `createHighlighter({languages: [...]})` or call
+`loadLanguage()` first so JavaScript resolves it before the synchronous walk.
+
+In a browser, one-pass loading does not happen: loading is asynchronous there
+and cannot run inside a synchronous walk, so load every participating language
+yourself, or use a bundle such as `@lumis-sh/wasm-bundle-web`:
+
+```ts
+const hl = await createHighlighter({ languages: [html, css, javascript] });
+
+const htmlOutput = hl.highlight(source, htmlInline({ language: html, theme: dracula }));
+```
+
+See [Highlighting loads what a document needs](/advanced/wasm-and-cdn#highlighting-loads-what-a-document-needs).
+
+## Prepare parsers for deployment
+
+To keep the download and compile off a first request, populate a project or image-local cache
+before the application starts:
+
+```bash
+npx lumis-wasm-cache javascript html css --output ./wasm-cache
+LUMIS_DATA_DIR=./wasm-cache node app.mjs
+```
+
+The equivalent API is available from `@lumis-sh/lumis/cache`:
+
+```ts
+import { cacheLanguages } from "@lumis-sh/lumis/cache";
+
+await cacheLanguages(["javascript", "html", "css"], {
+  directory: "./wasm-cache",
+});
+```
+
+Both paths cache the current language package and verify its exact parser size
+plus SHA-256 before writing. A cached parser is served without a network
+request, so caching every language a deployment needs makes it self-contained.
 
 :::note Edge is not supported yet
 The portable JavaScript runtime uses `web-tree-sitter`, but Edge runtimes are not supported yet because of an upstream Tree-sitter limitation: [tree-sitter/tree-sitter#2160](https://github.com/tree-sitter/tree-sitter/issues/2160).

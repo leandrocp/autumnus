@@ -4,6 +4,7 @@ import { mapBundle } from "./bundle-helpers.js";
 import { createHighlighterModule } from "./core/highlighter.js";
 import {
   availableLanguages,
+  configureLanguagePackageResolver,
   configureWasmResolver,
   createRuntime,
   getDefaultRuntime,
@@ -47,7 +48,7 @@ export function withWasmBundle(
   });
 }
 
-export type { Highlighter } from "./core/highlighter.js";
+export type { CreateHighlighterOptions, Highlighter } from "./core/highlighter.js";
 export type {
   HighlightEvent,
   HighlightIterFn,
@@ -58,6 +59,10 @@ export type {
   HighlightRange,
   HighlightStyle,
   Language,
+  LanguageDefinition,
+  LanguagePackageHandle,
+  PlaintextLanguage,
+  LoadableLanguage,
   LanguageBundle,
   LanguageInput,
   LanguageRef,
@@ -69,6 +74,6 @@ export type {
   LanguageInfo,
   ThemeInfo,
 } from "./types.js";
-export { availableLanguages, configureWasmResolver };
-export type { WasmResolver } from "./core/languages.js";
+export { availableLanguages, configureLanguagePackageResolver, configureWasmResolver };
+export type { LanguagePackageResolver, WasmResolver } from "./core/languages.js";
 export { availableThemes, sanitizeThemeName } from "./themes.js";

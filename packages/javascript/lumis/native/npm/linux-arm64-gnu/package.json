@@ -6,6 +6,7 @@
   "repository": "github:leandrocp/lumis",
   "main": "lumis-native.linux-arm64-gnu.node",
   "files": [
+    "LICENSE",
     "lumis-native.linux-arm64-gnu.node"
   ],
   "os": [

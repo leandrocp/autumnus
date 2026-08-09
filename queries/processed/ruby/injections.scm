@@ -3,15 +3,15 @@
   (#set! injection.language "comment"))
 
 ((comment) @injection.content
-  (#lua-match? @injection.content "^#:")
+  (#match? @injection.content "^#:")
   (#set! injection.language "rbs"))
 
 ((comment) @injection.content
-  (#lua-match? @injection.content "^#%s+@rbs")
+  (#match? @injection.content "^#[\\t-\\r ]+@rbs")
   (#set! injection.language "rbs"))
 
 ((comment) @injection.content
-  (#lua-match? @injection.content "^#%s+|")
+  (#match? @injection.content "^#[\\t-\\r ]+\\|")
   (#set! injection.language "rbs"))
 
 (heredoc_body

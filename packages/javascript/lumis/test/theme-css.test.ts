@@ -78,10 +78,7 @@ html[data-theme="dark"] .l-tag-attribute {
   });
 
   it("matches the bundled stylesheet for the default config", () => {
-    const bundled = readFileSync(
-      require.resolve("@lumis-sh/themes/css/github_light"),
-      "utf-8",
-    );
+    const bundled = readFileSync(require.resolve("@lumis-sh/themes/css/github_light"), "utf-8");
 
     expect(buildCss(githubLight)).toBe(bundled);
   });

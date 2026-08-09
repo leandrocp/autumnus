@@ -1,2 +1,2 @@
-declare const wasmBinary: Uint8Array
-export default wasmBinary
+declare const wasmUrl: URL
+export default wasmUrl

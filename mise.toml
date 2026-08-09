@@ -1,4 +1,9 @@
-# Project task runner configuration. Runtime versions are intentionally not pinned.
+[tools]
+actionlint = "1.7.12"
+python = "3.11"
+stylua = "2.5.2"
+tree-sitter = "0.26"
+
 [tasks.'setup']
 description = "Install dependencies and check required tools"
 run = '''
@@ -15,33 +20,21 @@ check_bin() {
     fi
 }
 
-check_python310() {
-    if ! command -v python3 &>/dev/null; then
-        echo "  ✗ python3 -- Python 3.10+ is needed for WASM builds"
-        errors=$((errors + 1))
-        return
-    fi
-
-    local version
-    version="$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[:3])))')"
-
-    if python3 -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)'; then
-        echo "  ✓ python3 ($version)"
-    else
-        echo "  ✗ python3 ($version) -- Python 3.10+ is needed for WASM builds"
-        errors=$((errors + 1))
-    fi
-}
-
 check_tree_sitter_cli() {
-    if ! command -v tree-sitter &>/dev/null; then
-        echo "  ✗ tree-sitter -- tree-sitter-cli >= 0.26 is needed for WASM builds"
+    local binary mise_dir
+    mise_dir="$(mise where tree-sitter 2>/dev/null || true)"
+    if [[ -n "$mise_dir" && -x "$mise_dir/tree-sitter" ]]; then
+        binary="$mise_dir/tree-sitter"
+    elif command -v tree-sitter &>/dev/null; then
+        binary="tree-sitter"
+    else
+        echo "  ✗ tree-sitter -- run 'mise install', or tree-sitter-cli >= 0.26 for WASM builds"
         errors=$((errors + 1))
         return
     fi
 
     local version raw_version major minor
-    raw_version="$(tree-sitter --version 2>/dev/null)"
+    raw_version="$("$binary" --version 2>/dev/null)"
     version="${raw_version#tree-sitter }"
     version="${version%% *}"
 
@@ -68,14 +61,12 @@ check_bin node "https://nodejs.org"
 check_bin pnpm "https://pnpm.io/installation"
 check_bin mise "https://mise.jdx.dev/getting-started.html"
 check_bin mix "https://elixir-lang.org/install.html"
-check_bin stylua "cargo install stylua"
+check_bin stylua "run 'mise install'"
 echo ""
 
 echo "Checking optional tools..."
 check_tree_sitter_cli
-check_bin emcc "https://emscripten.org (needed for WASM builds)"
 check_bin git-cliff "https://git-cliff.org"
-check_python310
 check_bin nvim "https://neovim.io (needed for theme generation)"
 echo ""
 
@@ -105,11 +96,11 @@ mise run langs-preprocess-queries
 echo ""
 
 echo "Generating JS theme assets..."
-pnpm --filter @lumis-sh/themes build
+pnpm --filter @lumis-sh/themes run build
 echo ""
 
 echo "Generating JS language/runtime artifacts..."
-pnpm --filter @lumis-sh/lumis build:generate
+pnpm --filter @lumis-sh/lumis run build:generate
 pnpm --dir packages/javascript run build:wasm-bundles
 echo ""
 
@@ -133,10 +124,30 @@ mkdir "$tmp_dir/lumis_nif"
 cp "$nif_dir/Cargo.toml" "$nif_dir/Cargo.lock" "$tmp_dir/lumis_nif"
 cp -R "$nif_dir/.cargo" "$nif_dir/src" "$tmp_dir/lumis_nif"
 cargo tree --manifest-path "$tmp_dir/lumis_nif/Cargo.toml" --locked --depth 0
+
+locked_wasmtime() {
+    awk '/^name = "wasmtime"$/ { getline; gsub(/[version ="]/, ""); print; exit }' "$1"
+}
+workspace_version="$(locked_wasmtime Cargo.lock)"
+nif_version="$(locked_wasmtime "$nif_dir/Cargo.lock")"
+
+if [ -z "$workspace_version" ] || [ "$workspace_version" != "$nif_version" ]; then
+    echo "wasmtime differs: workspace $workspace_version, packaged NIF $nif_version" >&2
+    echo "Compiled parser caches are keyed by the wasmtime version, so the CLI, the Node" >&2
+    echo "addon and the Elixir NIF would each compile and store their own copy instead of" >&2
+    echo "sharing one. Run: cargo update -p wasmtime --precise <version> in both." >&2
+    exit 1
+fi
+echo "wasmtime $workspace_version in both lockfiles"
 '''
+
+[tasks.'stage-test-parsers']
+description = "Lay the committed parser fixtures out as a Lumis store directory"
+run = "cargo run -q --manifest-path crates/dev/Cargo.toml -- stage-test-parsers target/test-parsers"
 
 [tasks.'test']
 description = "Run all tests"
+depends = ["stage-test-parsers"]
 run = '''
 #!/usr/bin/env bash
 set -euo pipefail
@@ -144,11 +155,95 @@ echo "Running Rust tests..."
 cargo test --workspace
 echo ""
 echo "Running Elixir tests..."
-(cd packages/elixir/lumis && LUMIS_BUILD=1 mix test)
+mise run test-elixir
 echo ""
 echo "Running Javascript tests..."
-pnpm --filter @lumis-sh/lumis build
-pnpm -r --if-present test
+mise run test-javascript
+'''
+
+[tasks.'test-elixir']
+description = "Run the Elixir test suite"
+depends = ["stage-test-parsers"]
+run = "cd packages/elixir/lumis && LUMIS_BUILD=1 mix test"
+
+[tasks.'test-javascript']
+description = "Run the JavaScript test suites on both the native and Wasm runtimes"
+depends = ["stage-test-parsers"]
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+pnpm --filter @lumis-sh/lumis run build:native
+pnpm --filter @lumis-sh/lumis run build
+
+# Each process gets its own copy of the staged store, so a suite that writes
+# into it cannot disturb the shared tree or another suite. The resolver
+# precedence tests deliberately start from an empty store instead.
+seeded_store() {
+    local dir
+    dir="$(mktemp -d)"
+    cp -R "$PWD/target/test-parsers/parsers" "$dir/"
+    echo "$dir"
+}
+native_runtime_data_dir="$(seeded_store)"
+native_suite_data_dir="$(mktemp -d)"
+wasm_suite_data_dir="$(seeded_store)"
+downstream_data_dir="$(seeded_store)"
+trap 'rm -rf "$native_runtime_data_dir" "$native_suite_data_dir" "$wasm_suite_data_dir" "$downstream_data_dir"' EXIT
+LUMIS_TEST_RUNTIME=native \
+    LUMIS_DATA_DIR="$native_runtime_data_dir" \
+    pnpm --filter @lumis-sh/lumis exec vitest run test/native-runtime.test.ts
+LUMIS_TEST_RUNTIME=native \
+    LUMIS_DATA_DIR="$native_suite_data_dir" \
+    pnpm --filter @lumis-sh/lumis exec vitest run \
+        --exclude test/conformance.test.ts \
+        --exclude test/query-compile.test.ts \
+        --exclude 'test/browser/**' \
+        --exclude test/native-runtime.test.ts
+
+# The whole package suite under web-tree-sitter. vite.config.mjs defaults to
+# `wasm`, but keep the selection explicit so this gate cannot silently duplicate
+# the native run.
+LUMIS_TEST_RUNTIME=wasm \
+    LUMIS_DATA_DIR="$wasm_suite_data_dir" \
+    pnpm --filter @lumis-sh/lumis run test
+
+# Downstream packages use the default Node runtime, which resolves parsers in
+# Rust against the store rather than through a JavaScript resolver.
+LUMIS_DATA_DIR="$downstream_data_dir" pnpm -r --if-present --filter '!@lumis-sh/lumis' test
+'''
+
+[tasks.'test-queries']
+description = "Compile every processed query against a parser built from languages.toml"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Query validation must not depend on what is published to npm. Building every
+# parser from the pinned revisions gives complete, publication-independent
+# coverage, which empties the waiver in
+# packages/javascript/lumis/test/unverified-parsers.json.
+echo "Checking regex portability across the whole corpus..."
+cargo test -p lumis-build --test processed_queries
+pnpm --filter @lumis-sh/lumis exec vitest run test/query-patterns.test.ts
+echo ""
+
+# Every parser, from the revision languages.toml pins, which is what CI checks
+# the queries against. A parser already in tmp/wasm/build is left alone, so a
+# second run is quick; rm -rf tmp/wasm/build to rebuild from scratch.
+echo "Building every parser from languages.toml..."
+# Run node directly: `pnpm exec` writes its unsupported-platform warnings for
+# the optional native packages to stdout, which would land in this list.
+(cd packages/javascript/lumis && node scripts/list-parsers.mjs --parsers) > /tmp/lumis-parsers.txt
+while read -r parser; do
+    [ -n "$parser" ] || continue
+    [ -f "tmp/wasm/build/$parser.wasm" ] && continue
+    [ -f "fixtures/parsers/$parser.wasm" ] && continue
+    mise run wasm-build "$parser"
+done < /tmp/lumis-parsers.txt
+echo ""
+
+echo "Compiling every query against its pinned grammar..."
+LUMIS_QUERY_COVERAGE=complete pnpm --filter @lumis-sh/lumis run test:queries
 '''
 
 [tasks.'test-conformance']
@@ -158,8 +253,8 @@ run = '''
 set -euo pipefail
 mise run test-conformance-rust
 mise run test-conformance-cli
-mise run test-conformance-javascript-wasm
 mise run test-conformance-javascript-native
+mise run test-conformance-javascript-wasm
 mise run test-conformance-browser
 mise run test-conformance-elixir
 '''
@@ -172,25 +267,31 @@ run = "cargo test -p lumis --test formatter_conformance -- --ignored"
 description = "Run CLI conformance tests"
 run = "cargo test -p lumis-cli --test conformance -- --ignored"
 
-[tasks.'test-conformance-javascript-wasm']
-description = "Run JavaScript Wasm conformance tests"
+[tasks.'test-conformance-javascript-native']
+description = "Run JavaScript conformance on the Wasmtime addon, Node's default runtime"
+depends = ["stage-test-parsers"]
 run = '''
 #!/usr/bin/env bash
 set -euo pipefail
-pnpm --filter @lumis-sh/themes build
-pnpm --filter @lumis-sh/lumis build:generate
-LUMIS_TEST_RUNTIME=wasm pnpm --filter @lumis-sh/lumis test:conformance
+pnpm --filter @lumis-sh/themes run build
+pnpm --filter @lumis-sh/lumis run build:generate
+pnpm --filter @lumis-sh/lumis run build:native
+data_dir="$(mktemp -d)"
+trap 'rm -rf "$data_dir"' EXIT
+cp -R "$PWD/target/test-parsers/parsers" "$data_dir/"
+LUMIS_TEST_RUNTIME=native \
+    LUMIS_DATA_DIR="$data_dir" \
+    pnpm --filter @lumis-sh/lumis run test:conformance
 '''
 
-[tasks.'test-conformance-javascript-native']
-description = "Run JavaScript native conformance tests"
+[tasks.'test-conformance-javascript-wasm']
+description = "Run JavaScript conformance on web-tree-sitter, what browsers use"
 run = '''
 #!/usr/bin/env bash
 set -euo pipefail
-pnpm --filter @lumis-sh/themes build
-pnpm --filter @lumis-sh/lumis build:generate
-pnpm --filter @lumis-sh/lumis build:native
-LUMIS_TEST_RUNTIME=native pnpm --filter @lumis-sh/lumis test:conformance
+pnpm --filter @lumis-sh/themes run build
+pnpm --filter @lumis-sh/lumis run build:generate
+LUMIS_TEST_RUNTIME=wasm pnpm --filter @lumis-sh/lumis run test:conformance
 '''
 
 [tasks.'test-conformance-browser']
@@ -198,29 +299,46 @@ description = "Run JavaScript conformance tests in Chromium, Firefox, and WebKit
 run = '''
 #!/usr/bin/env bash
 set -euo pipefail
-pnpm --filter @lumis-sh/lumis build:generate
+pnpm --filter @lumis-sh/lumis run build:generate
 args=(install chromium firefox webkit)
 if [[ "${CI:-}" == "true" ]]; then
     args=(install --with-deps chromium firefox webkit)
 fi
 packages/javascript/lumis/node_modules/.bin/playwright "${args[@]}"
-pnpm --filter @lumis-sh/lumis test:conformance:browser
+pnpm --filter @lumis-sh/lumis run test:conformance:browser
 '''
 
 [tasks.'test-conformance-elixir']
 description = "Run Elixir conformance tests"
 run = "cd packages/elixir/lumis && LUMIS_BUILD=1 mix test --include conformance test/conformance_test.exs"
 
+[tasks.'lint-workflows']
+description = "Validate GitHub Actions workflows with actionlint"
+run = "actionlint -color"
+
+[tasks.'fmt-lua']
+description = "Format every Lua file"
+run = "stylua themes/ crates/lumis-cli/themes/"
+
+[tasks.'fmt-js']
+description = "Format every JavaScript and TypeScript file"
+run = 'packages/javascript/lumis/node_modules/.bin/oxfmt "**/*.{ts,tsx,mjs,cjs,js,jsx}"'
+
 [tasks.'lint']
 description = "Run all linters"
 run = '''
 #!/usr/bin/env bash
 set -euo pipefail
+echo "Running actionlint..."
+actionlint -color
+echo ""
 echo "Running Rust clippy..."
 cargo clippy --workspace --all-targets --all-features -- -D warnings
 echo ""
 echo "Running Rust fmt check..."
 cargo fmt --all -- --check
+cargo fmt --manifest-path crates/dev/Cargo.toml --check
+cargo fmt --manifest-path crates/autumnus/Cargo.toml --check
 echo ""
 echo "Running Elixir format check..."
 (cd packages/elixir/lumis && mix format --check-formatted)
@@ -231,17 +349,31 @@ echo "Running Elixir credo..."
 (cd packages/elixir/lumis && LUMIS_BUILD=1 mix credo)
 echo ""
 echo "Running JS fmt check..."
-pnpm --filter @lumis-sh/lumis fmt:check
-pnpm --filter @lumis-sh/themes fmt:check
+mise run fmt-js -- --check
 echo ""
 echo "Running JS lint..."
-pnpm --filter @lumis-sh/lumis lint
+pnpm --filter @lumis-sh/lumis run lint
+pnpm --filter @lumis-sh/markdown-it-lumis run lint
+pnpm --filter @lumis-sh/rehype-lumis run lint
+pnpm --filter @lumis-sh/react run lint
+pnpm --filter @lumis-sh/themes run lint
 echo ""
 echo "Running benchmark checks through mise..."
 mise run -C benchmarks lint
 echo ""
 echo "Running Lua fmt check..."
-stylua --check themes/
+mise run fmt-lua -- --check
+echo ""
+echo "Checking native package versions..."
+mise run check-native-versions
+'''
+
+[tasks.'check-native-versions']
+description = "Check the native addon packages are versioned in lockstep with @lumis-sh/lumis"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+node packages/javascript/scripts/check-native-versions.mjs
 '''
 
 [tasks.'fmt']
@@ -251,19 +383,20 @@ run = '''
 set -euo pipefail
 echo "Formatting Rust..."
 cargo fmt --all
+cargo fmt --manifest-path crates/dev/Cargo.toml
+cargo fmt --manifest-path crates/autumnus/Cargo.toml
 echo ""
 echo "Formatting Elixir..."
 (cd packages/elixir/lumis && mix format)
 echo ""
 echo "Formatting JS/TS..."
-pnpm --filter @lumis-sh/lumis fmt
-pnpm --filter @lumis-sh/themes fmt
+mise run fmt-js
 echo ""
 echo "Formatting benchmarks through mise..."
 mise run -C benchmarks format
 echo ""
 echo "Formatting Lua..."
-stylua themes/
+mise run fmt-lua
 '''
 
 [tasks.'bench-fixtures']
@@ -324,7 +457,7 @@ run = '''
 set -euo pipefail
 if [ ! -f packages/javascript/lumis/dist/bundles/full.js ]; then
     echo "Building @lumis-sh/lumis for website imports..."
-    pnpm --filter @lumis-sh/lumis build
+    pnpm --filter @lumis-sh/lumis run build
     echo ""
 fi
 (cd website && pnpm dev)
@@ -388,7 +521,7 @@ run = '''
 set -euo pipefail
 cargo doc --all-features --no-deps
 (cd packages/elixir/lumis && LUMIS_BUILD=1 mix docs)
-pnpm --filter @lumis-sh/lumis docs
+pnpm --filter @lumis-sh/lumis run docs
 echo ""
 echo "Docs generated:"
 echo "  lumis:           $(pwd)/target/doc/lumis/index.html"
@@ -405,6 +538,54 @@ set -euo pipefail
 cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- gen-languages-md
 '''
 
+[tasks.'langs-gen-catalog']
+description = "Generate the Rust language package catalog from languages.toml"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- gen-language-catalog
+'''
+
+[tasks.'langs-check-catalog']
+description = "Verify the Rust language package catalog matches languages.toml"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- gen-language-catalog --check
+'''
+
+[tasks.'langs-check-versions']
+description = "Verify the CDN serves the lumis.json each catalog pin names"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+pins="$(awk '/package_name: "/ { gsub(/.*package_name: "|",/, ""); p=$0 }
+             /version: "/ { gsub(/.*version: "|"/, ""); print p "@" $0 }' \
+           crates/lumis-wasm-runtime/src/catalog.rs)"
+total="$(echo "$pins" | wc -l | tr -d ' ')"
+
+served="$(echo "$pins" | xargs -P 16 -I{} sh -c \
+    'code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "https://cdn.jsdelivr.net/npm/{}/lumis.json" || echo 000); if [ "$code" = "200" ]; then echo {}; fi' \
+    | wc -l | tr -d ' ')"
+
+if [ "$served" -eq 0 ]; then
+    echo "0 of $total pinned packages serve lumis.json."
+    echo "Expected: the format this branch reads is not published yet. Every"
+    echo "published package still carries metadata in package.json's lumis key."
+    echo "This becomes a failure once wasm-release publishes any of them, so the"
+    echo "gap can only shrink."
+    exit 0
+fi
+
+if [ "$served" -lt "$total" ]; then
+    echo "$served of $total pinned packages serve lumis.json." >&2
+    echo "A partial republish means some runtimes resolve a language and others" >&2
+    echo "cannot. Finish publishing, or regenerate: mise run langs-gen-catalog" >&2
+    exit 1
+fi
+echo "the CDN serves all $total pinned packages"
+'''
+
 [tasks.'langs-update']
 description = "Update language parser, queries, and docs"
 usage = '''
@@ -416,6 +597,7 @@ set -euo pipefail
 mise run langs-fetch-vendored-parsers ${usage_name?}
 cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- cargo-update-dep ${usage_name?}
 cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- cargo-update-features
+mise run langs-gen-catalog
 mise run langs-fetch-queries ${usage_name?}
 mise run langs-preprocess-queries ${usage_name?}
 mise run docs-gen-languages-md
@@ -506,7 +688,7 @@ set -euo pipefail
 mise run langs-upgrade-parsers ${usage_name?}
 mise run langs-upgrade-queries ${usage_name?}
 mise run langs-update ${usage_name?}
-pnpm --filter @lumis-sh/lumis build:generate
+pnpm --filter @lumis-sh/lumis run build:generate
 '''
 
 [tasks.'langs-upgrade-parsers']
@@ -541,8 +723,16 @@ arg "[name]"
 run = '''
 #!/usr/bin/env bash
 set -euo pipefail
+export PATH="$(mise where tree-sitter):$PATH"
 cargo run --manifest-path crates/dev/Cargo.toml -- build-wasm ${usage_name:-}
 '''
+
+[tasks.'wasm-stage']
+description = "Stage a built parser WASM into a local language package"
+usage = '''
+arg "<name>"
+'''
+run = "cargo run --manifest-path crates/dev/Cargo.toml -- stage-wasm {{arg(name='name')}}"
 
 [tasks.'wasm-publish-needed']
 description = "List parsers whose current WASM packages still need publishing"
@@ -553,7 +743,8 @@ arg "[force]" default="false"
 run = '''
 #!/usr/bin/env bash
 set -euo pipefail
-python3 scripts/wasm-needed.py "${usage_parser:-}" "${usage_force?}"
+cargo run -q --manifest-path crates/dev/Cargo.toml --no-default-features -- \
+    wasm-needed "${usage_parser:-}" "${usage_force?}"
 '''
 
 [tasks.'wasm-publish-prepare']
@@ -564,6 +755,7 @@ arg "<parser>"
 run = '''
 #!/usr/bin/env bash
 set -euo pipefail
+export PATH="$(mise where tree-sitter):$PATH"
 mise run wasm-build ${usage_parser?}
 cargo run --manifest-path crates/dev/Cargo.toml -- stage-wasm ${usage_parser?}
 '''
@@ -578,7 +770,7 @@ run = '''
 set -euo pipefail
 mise run wasm-publish-prepare ${usage_parser?}
 wasm_name=$(cargo run -q -p dev -- wasm-meta ${usage_parser?} | grep '^wasm_name=' | cut -d= -f2)
-cd tmp/wasm-publish/$wasm_name && npm publish --access public
+cd tmp/wasm/publish/$wasm_name && npm publish --access public
 '''
 
 [tasks.'themes-extract-scopes']
@@ -614,8 +806,8 @@ else
 fi
 cargo run --manifest-path crates/dev/Cargo.toml -- filter-theme-updates "${usage_theme_name:-}"
 cargo run --manifest-path crates/dev/Cargo.toml -- sync-themes
-pnpm --filter @lumis-sh/themes build:themes
-pnpm --filter @lumis-sh/themes build:assets
+pnpm --filter @lumis-sh/themes run build:themes
+pnpm --filter @lumis-sh/themes run build:assets
 '''
 
 [tasks.'themes-list']

@@ -9,19 +9,19 @@ import { availableLanguages } from "../src/index.js";
 type LanguageModule = {
   id: string;
   aliases?: string[];
-  highlights?: string;
+  packageName?: string;
 };
 
 const repoRoot = fileURLToPath(new URL("../../../..", import.meta.url));
 const langsRoot = fileURLToPath(new URL("../langs/", import.meta.url));
 const samplesDir = join(repoRoot, "samples");
 
-const sampleBaseNameOverrides = new Map<string, string>([
-  ["ocaml_interface", "ocamlinterface"],
-]);
+const sampleBaseNameOverrides = new Map<string, string>([["ocaml_interface", "ocamlinterface"]]);
 
 const sampleFiles = new Map(
-  readdirRecursive(samplesDir).map((filePath) => [parse(filePath).name.toLowerCase(), filePath] as const),
+  readdirRecursive(samplesDir).map(
+    (filePath) => [parse(filePath).name.toLowerCase(), filePath] as const,
+  ),
 );
 
 function readdirRecursive(dir: string): string[] {
@@ -82,9 +82,16 @@ describe.skipIf(languageFixtures.length === 0)("all languages", () => {
     expect(sourceLanguageIds).toEqual(availableLanguageIds);
   });
 
-  it.each(languageFixtures)("loads $id and has a sample fixture", async ({ id, language, samplePath }) => {
-    expect(language.id).toBe(id);
-    expect(typeof language.highlights).toBe("string");
-    expect(existsSync(samplePath)).toBe(true);
-  });
+  it.each(languageFixtures)(
+    "loads $id and has a sample fixture",
+    async ({ id, language, samplePath }) => {
+      expect(language.id).toBe(id);
+      if (id === "plaintext") {
+        expect(language.packageName).toBeUndefined();
+      } else {
+        expect(typeof language.packageName).toBe("string");
+      }
+      expect(existsSync(samplePath)).toBe(true);
+    },
+  );
 });
