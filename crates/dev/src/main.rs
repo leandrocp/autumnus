@@ -2396,13 +2396,25 @@ fn cached_parser_is_current(wasm_file: &Path, build_id_file: &Path, build_id: &s
 }
 
 fn build_repo_wasm(repo_dir: &str, wasm_file: &Path, build_log: &Path) -> Result<()> {
+    build_repo_wasm_with("tree-sitter", repo_dir, wasm_file, build_log)
+}
+
+/// Takes the compiler as an argument so a test can supply one whose exit status
+/// it chooses. Asserting on a missing `tree-sitter` instead would pass for the
+/// wrong reason on any machine without the CLI installed.
+fn build_repo_wasm_with(
+    tree_sitter: &str,
+    repo_dir: &str,
+    wasm_file: &Path,
+    build_log: &Path,
+) -> Result<()> {
     // Printed before the build rather than logged after it: a grammar large
     // enough to exhaust the runner takes the process down with it, and this
     // line is then the only evidence the build ever started.
     println!("[cmd] tree-sitter build --wasm -o {}", wasm_file.display());
 
     let started = Instant::now();
-    let output = Command::new("tree-sitter")
+    let output = Command::new(tree_sitter)
         .current_dir(repo_dir)
         .args(["build", "--wasm", "-o"])
         .arg(wasm_file)
@@ -3305,25 +3317,53 @@ mod tests {
         assert!(definition_matches(&published("abc"), "abc", "0.26"));
     }
 
+    /// A stub compiler that exits with `code`, so the test decides the status
+    /// `build_repo_wasm_with` has to react to.
+    #[cfg(unix)]
+    fn stub_tree_sitter(dir: &Path, code: i32) -> PathBuf {
+        use std::os::unix::fs::PermissionsExt as _;
+
+        let path = dir.join("tree-sitter-stub");
+        fs::write(
+            &path,
+            format!("#!/bin/sh\necho 'stub compiler' >&2\nexit {code}\n"),
+        )
+        .unwrap();
+        fs::set_permissions(&path, fs::Permissions::from_mode(0o755)).unwrap();
+        path
+    }
+
     // This used to pass through `sh -c ... | tee`, whose exit status is `tee`'s.
     // A failed build reported success and the caller printed the path of a wasm
     // that was never written.
+    #[cfg(unix)]
     #[test]
-    fn a_failed_build_is_an_error() {
-        let dir = std::env::temp_dir().join(format!("lumis-build-fail-{}", std::process::id()));
+    fn a_build_reports_the_compiler_exit_status() {
+        let dir = std::env::temp_dir().join(format!("lumis-build-status-{}", std::process::id()));
         fs::create_dir_all(&dir).unwrap();
+        let log = dir.join("build.log");
 
-        let result = build_repo_wasm(
+        let failed = build_repo_wasm_with(
+            stub_tree_sitter(&dir, 1).to_str().unwrap(),
             dir.to_str().unwrap(),
             &dir.join("out.wasm"),
-            &dir.join("build.log"),
+            &log,
+        );
+        assert!(failed.is_err(), "a nonzero exit status must be an error");
+        assert!(
+            fs::read_to_string(&log).unwrap().contains("stub compiler"),
+            "a failed build still has to leave its output in the log"
+        );
+
+        let succeeded = build_repo_wasm_with(
+            stub_tree_sitter(&dir, 0).to_str().unwrap(),
+            dir.to_str().unwrap(),
+            &dir.join("out.wasm"),
+            &log,
         );
 
         let _ = fs::remove_dir_all(&dir);
-        assert!(
-            result.is_err(),
-            "building a directory holding no grammar must fail"
-        );
+        assert!(succeeded.is_ok(), "a zero exit status must succeed");
     }
 
     #[test]
