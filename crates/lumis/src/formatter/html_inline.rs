@@ -266,9 +266,36 @@ mod tests {
         let mut buffer = Vec::new();
         formatter.format(code, &mut buffer).unwrap();
         let result = String::from_utf8(buffer).unwrap();
-        let expected = r#"<pre class="lumis"><code class="language-elixir" translate="no" tabindex="0"><div class="l-line" data-line="1"><span ><span >@<span ><span >lang <span >:rust</span></span></span></span></span>
+        let expected = r#"<pre class="lumis"><code class="language-elixir" translate="no" tabindex="0"><div class="l-line" data-line="1"><span><span>@<span><span>lang <span>:rust</span></span></span></span></span>
 </div></code></pre>"#;
         assert_eq!(result, expected)
+    }
+
+    #[test]
+    fn test_unstyled_scope_opens_a_bare_span() {
+        let theme = themes::get("dracula").unwrap();
+        let code = "# *italic*";
+        let formatter = HtmlInline::new(
+            Language::Markdown,
+            Some(theme),
+            None,
+            false,
+            false,
+            None,
+            None,
+        );
+        let mut buffer = Vec::new();
+        formatter.format(code, &mut buffer).unwrap();
+        let result = String::from_utf8(buffer).unwrap();
+
+        assert!(
+            result.contains("<span>*italic*</span>"),
+            "a scope dracula does not define must open a bare `<span>`: {result}"
+        );
+        assert!(
+            !result.contains("<span >"),
+            "an attribute-less span must not carry a trailing space: {result}"
+        );
     }
 
     #[test]
@@ -472,10 +499,10 @@ mod tests {
         formatter.format(code, &mut buffer).unwrap();
         let result = String::from_utf8(buffer).unwrap();
 
-        let expected = r#"<pre class="lumis"><code class="language-rust" translate="no" tabindex="0"><div class="l-line custom-highlight" data-line="1"><span >fn</span> <span >main</span><span >(</span><span >)</span> <span >{</span>
-</div><div class="l-line" data-line="2">    <span >println</span><span >!</span><span >(</span><span >&quot;Hello, world!&quot;</span><span >)</span><span >;</span>
-</div><div class="l-line custom-highlight" data-line="3">    <span >let</span> <span >x</span> <span >=</span> <span >42</span><span >;</span>
-</div><div class="l-line" data-line="4"><span >}</span>
+        let expected = r#"<pre class="lumis"><code class="language-rust" translate="no" tabindex="0"><div class="l-line custom-highlight" data-line="1"><span>fn</span> <span>main</span><span>(</span><span>)</span> <span>{</span>
+</div><div class="l-line" data-line="2">    <span>println</span><span>!</span><span>(</span><span>&quot;Hello, world!&quot;</span><span>)</span><span>;</span>
+</div><div class="l-line custom-highlight" data-line="3">    <span>let</span> <span>x</span> <span>=</span> <span>42</span><span>;</span>
+</div><div class="l-line" data-line="4"><span>}</span>
 </div></code></pre>"#;
         assert_str_eq!(result, expected);
     }
@@ -528,7 +555,7 @@ mod tests {
         formatter.format(code, &mut buffer).unwrap();
         let result = String::from_utf8(buffer).unwrap();
 
-        let expected = r#"<section class="highlight" data-lang="rust"><pre class="lumis custom-class"><code class="language-rust" translate="no" tabindex="0"><div class="l-line" data-line="1"><span >fn</span> <span >main</span><span >(</span><span >)</span> <span >{</span> <span >}</span>
+        let expected = r#"<section class="highlight" data-lang="rust"><pre class="lumis custom-class"><code class="language-rust" translate="no" tabindex="0"><div class="l-line" data-line="1"><span>fn</span> <span>main</span><span>(</span><span>)</span> <span>{</span> <span>}</span>
 </div></code></pre></section>"#;
         assert_str_eq!(result, expected);
     }

@@ -1,0 +1,27 @@
+{
+  "name": "conformance_light",
+  "appearance": "light",
+  "revision": "conformance",
+  "highlights": {
+    "normal": {
+      "fg": "#111111",
+      "bg": "#ffffff"
+    },
+    "highlighted": {
+      "fg": "#123456",
+      "bg": "#e9ebf1"
+    },
+    "number": {
+      "fg": "#555555"
+    },
+    "property": {
+      "fg": "#333333"
+    },
+    "punctuation.bracket": {
+      "fg": "#222222"
+    },
+    "punctuation.delimiter": {
+      "fg": "#444444"
+    }
+  }
+}

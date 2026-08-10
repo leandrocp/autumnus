@@ -38,6 +38,15 @@ Shared behavior belongs in one Rust crate that every runtime consumes. A second 
 - When a runtime genuinely cannot call into Rust, such as the browser, the Rust crate still defines the behavior, and the port must be covered by a test that pins both against the same input.
 - Two copies of the same algorithm require a test that pins them to each other, and deleting one copy is better still. `definitionHash` was computed in both `crates/dev` and a Python release script until the script was ported into `crates/dev`; "the CI job has no Rust toolchain" is a workflow line to add, not a reason to reimplement.
 
+### Use the standard library and established packages
+
+Do not hand-roll infrastructure that a standard library or maintained crate/package already provides. This applies especially to version requirements, URL handling, HTTP behavior, archive formats, hashing, locking, serialization, and protocol parsing.
+
+- Check the standard library and existing workspace dependencies first.
+- If they do not cover the requirement, add a focused, established dependency instead of growing a local partial implementation.
+- Custom code is justified only when available libraries cannot express the required behavior. Document that gap and test the compatibility boundary.
+- Delegate package discovery and version-range resolution to the package registry and CDN. Lumis validates the resolved result and caches it; it does not implement another package manager.
+
 ### Highlighting loads what a document needs, in one pass
 
 A parser is a WebAssembly module fetched from a registry and executed in the
@@ -104,6 +113,10 @@ Rust is the reference implementation and must follow the Rust API Guidelines:
 
 Prefer guideline-compliant naming, error behavior, builder patterns, documentation, and trait usage. Do not introduce a Rust API shortcut that other runtimes cannot sensibly mirror.
 
+### Parse TypeScript boundaries into domain types
+
+`unknown` belongs at genuinely untrusted boundaries, not throughout the implementation. Do not widen a known structure to `Record<string, unknown>` or use assertions to make parsed JSON, TOML, dynamic imports, native data, or other external values look typed. Validate the input and construct a named or discriminated domain value before passing it inward. When another API already defines the shape, derive it with utilities such as `Parameters`, `ReturnType`, or `Pick` instead of recreating it as a generic property bag.
+
 ### Tree-sitter is the driver
 
 Lumis is a Tree-sitter-based syntax highlighter. Language behavior must respect Tree-sitter's design, mechanics, and query model rather than bypassing them with ad hoc text scanning.
@@ -135,6 +148,17 @@ A test that skips silently reports the same green as a test that verified someth
 - Assert corpus size. `expect(patterns.length).toBeGreaterThan(200)` is what catches a discovery bug that silently finds nothing.
 - Prove a new guard fails: inject the defect it is meant to catch, watch it go red, then revert. A guard that has never failed has not been tested.
 - Do not let published artifacts gate correctness checks. Build what you need from the pinned source instead, as `mise run test-queries` does, otherwise coverage silently tracks the release cycle.
+
+### What the workspace never resolves, it never checks
+
+The root `Cargo.toml` points `path` at every lumis crate and patches the rest through `[patch.crates-io]`. Nearly every build in this repository therefore compiles against the working tree, and the `version` requirement sitting beside each `path` is inert until the crate reaches crates.io. Nothing local can be green or red about it. The lone exception is `crates/autumnus`, which sits in its own workspace and depends on `lumis` through the registry.
+
+That is not a gap in the test suite, it is a gap in what a test *could* observe, so it needs a check that reads the manifests rather than builds them. `mise run check-crate-deps` requires each requirement to equal the depended-on crate's version in this repository, and runs in `mise run lint`, in Rust CI, and again before `cargo publish`. `mise run release-prepare` calls it with `--fix`, so releases stay in step without a checklist item.
+
+Two things this cost, both worth recognising elsewhere:
+
+- **A too-loose requirement disables the tooling that would maintain it.** `cargo set-version -p lumis-core 2.4.0` rewrites dependents whose requirement the new version falls outside. With `lumis-core = "2"` there was nothing to rewrite, so it stayed `"2"` across three minor releases until `lumis` called an API that `2.0.0` did not have ([#1118](https://github.com/leandrocp/lumis/issues/1118)). Spell requirements in full.
+- **A fresh resolve is not a reproduction.** The failure needed an existing `Cargo.lock`; a new project picked the newest match and worked. When a bug report says "fails on Windows" and the code has no target-specific path, reproduce the reporter's *resolution*, not their OS.
 
 ### Comments are a last resort
 

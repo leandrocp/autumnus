@@ -1,5 +1,6 @@
 import { LANGUAGES } from "../generated/languages-meta.js";
 import { LANGUAGE_LOADERS } from "../generated/language-loaders.js";
+import { LANGUAGE_PACKAGE_VERSION_RANGE } from "../generated/package-version-range.js";
 import type { NativeBinding, NativeFormatter, NativeRuntimeInstance } from "../native-binding.js";
 import type {
   Formatter,
@@ -9,7 +10,7 @@ import type {
   LoadedLanguage,
   WasmRef,
 } from "../types.js";
-import { builtinFormatterKind } from "./builtin-formatter.js";
+import { BUILTIN_FORMATTER, getBuiltinFormatter } from "./builtin-formatter.js";
 import { warnUnresolvedInjection } from "../events.js";
 import { decodeNativeEvents } from "./native-event-codec.js";
 import { PLAINTEXT_LANG_ID } from "../types.js";
@@ -34,8 +35,30 @@ const PLAINTEXT_ALIASES = ["text", "txt", "plain"];
 const CATALOG_LANGUAGE_IDS = new Set(LANGUAGES.map(({ id }) => normalizeLanguageName(id)));
 const encoder = new TextEncoder();
 
-function isWasmRef(wasm: NonNullable<LoadLanguageOptions["wasm"]>): wasm is WasmRef {
-  return typeof wasm === "object" && wasm !== null && "sha256" in wasm && "packageName" in wasm;
+function isWasmRef(wasm: unknown): wasm is WasmRef {
+  return (
+    typeof wasm === "object" &&
+    wasm !== null &&
+    "packageName" in wasm &&
+    typeof wasm.packageName === "string" &&
+    "name" in wasm &&
+    typeof wasm.name === "string" &&
+    "version" in wasm &&
+    typeof wasm.version === "string" &&
+    "sha256" in wasm &&
+    typeof wasm.sha256 === "string" &&
+    /^[0-9a-f]{64}$/.test(wasm.sha256) &&
+    "size" in wasm &&
+    typeof wasm.size === "number" &&
+    Number.isSafeInteger(wasm.size) &&
+    wasm.size > 0
+  );
+}
+
+function parseWasmRef(json: string): WasmRef {
+  const value: unknown = JSON.parse(json);
+  if (!isWasmRef(value)) throw new Error("native runtime returned invalid parser metadata");
+  return value;
 }
 
 type RuntimeWasmInput = Exclude<NonNullable<LoadLanguageOptions["wasm"]>, WasmRef>;
@@ -134,7 +157,7 @@ export function createNativeLanguagesModule(
       DEFAULT_LANGUAGE_PACKAGE_RESOLVER;
     resolverCallbackDepth += 1;
     try {
-      return resolverSource(resolver(packageName));
+      return resolverSource(resolver(packageName, LANGUAGE_PACKAGE_VERSION_RANGE));
     } finally {
       resolverCallbackDepth -= 1;
     }
@@ -149,7 +172,7 @@ export function createNativeLanguagesModule(
     const resolver = state.wasmResolver ?? globalWasmResolver ?? DEFAULT_RESOLVER;
     resolverCallbackDepth += 1;
     try {
-      return resolverSource(resolver(language, JSON.parse(wasmJson) as WasmRef));
+      return resolverSource(resolver(language, parseWasmRef(wasmJson)));
     } finally {
       resolverCallbackDepth -= 1;
     }
@@ -352,13 +375,13 @@ export function createNativeLanguagesModule(
       const id = opts.definition.id;
       if (!packageName) return undefined;
       try {
-        const module = (await import(
+        const module = await import(
           /* webpackIgnore: true */
           /* turbopackIgnore: true */
           /* @vite-ignore */
           packageName
-        )) as { default?: unknown };
-        const base = module.default;
+        );
+        const base: unknown = module.default;
         if (!(base instanceof URL) && typeof base !== "string") return undefined;
 
         const root = base instanceof URL ? base : new URL(base);
@@ -483,7 +506,8 @@ export function createNativeLanguagesModule(
       formatter: Formatter,
       canCallResolver: boolean,
     ): NativeFormatter | undefined {
-      const kind = builtinFormatterKind(formatter);
+      const builtin = getBuiltinFormatter(formatter);
+      const kind = builtin?.[BUILTIN_FORMATTER];
       // Rust names the `language-*` class from `lumis_core::Language`, which has
       // no variant for a language the caller defined. Highlighting still runs
       // natively; only the string assembly falls back to JavaScript, exactly as
@@ -499,15 +523,36 @@ export function createNativeLanguagesModule(
       ) {
         return undefined;
       }
-      const options = { ...formatter } as Record<string, unknown>;
-      delete options.format;
-      delete options.language;
-      delete options.rainbowBrackets;
-      return {
-        rainbowBrackets: formatter.rainbowBrackets,
-        kind,
-        options,
-      };
+      const rainbowBrackets = builtin.rainbowBrackets;
+      switch (kind) {
+        case "html-inline":
+          return {
+            rainbowBrackets,
+            kind,
+            options: {
+              theme: builtin.theme,
+              preClass: builtin.preClass,
+              italic: builtin.italic,
+              includeHighlights: builtin.includeHighlights,
+              highlightLines: builtin.highlightLines,
+              header: builtin.header,
+            },
+          };
+        case "html-linked":
+          return {
+            rainbowBrackets,
+            kind,
+            options: {
+              preClass: builtin.preClass,
+              highlightLines: builtin.highlightLines,
+              header: builtin.header,
+            },
+          };
+        case "bbcode-scoped":
+          return { rainbowBrackets, kind, options: null };
+        case "terminal":
+          return { rainbowBrackets, kind, options: { theme: builtin.theme } };
+      }
     }
   }
 

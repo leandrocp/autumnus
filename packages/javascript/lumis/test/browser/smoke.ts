@@ -7,8 +7,8 @@ import {
   terminal,
   type Formatter,
 } from "../../src/formatters.ts";
-import dracula from "../../../themes/themes/dracula.ts";
-import type { LanguageDefinition } from "../../src/types.ts";
+import { lowestCompatibleLanguagePackageVersion } from "../../src/core/languages.ts";
+import type { LanguageDefinition, Theme } from "../../src/types.ts";
 
 /**
  * The browser cannot load a parser during the walk that finds an injected
@@ -18,6 +18,13 @@ import type { LanguageDefinition } from "../../src/types.ts";
 const languageModules = import.meta.glob<{ default: LanguageDefinition }>("../../langs/*.ts", {
   eager: true,
 });
+const themeModules = import.meta.glob<{ default: Theme }>("../../../themes/themes/*.ts", {
+  eager: true,
+});
+const fixtureThemeModules = import.meta.glob<{ default: Theme }>(
+  "../../../../../fixtures/conformance-themes/*.json",
+  { eager: true },
+);
 const parserWasms = import.meta.glob<string>("../fixtures/wasm/*.wasm", {
   eager: true,
   query: "?url",
@@ -54,6 +61,12 @@ interface CorpusFixture {
   languages: string[];
   rainbowBrackets: boolean;
   source: string;
+  theme: string;
+  htmlMultiThemes?: {
+    themes: Record<string, string>;
+    defaultTheme: string;
+    highlightLines?: number[];
+  };
 }
 
 function loadCorpus(): CorpusFixture[] {
@@ -73,7 +86,9 @@ function loadCorpus(): CorpusFixture[] {
       }
       const parsed = JSON.parse(metadata) as {
         language: string;
+        theme: string;
         rainbowBrackets?: boolean;
+        htmlMultiThemes?: CorpusFixture["htmlMultiThemes"];
         events: { type: string; language?: string }[];
       };
       // Injection-only languages such as css are never a fixture's root, and
@@ -88,6 +103,8 @@ function loadCorpus(): CorpusFixture[] {
         languages: [...languages],
         rainbowBrackets: parsed.rainbowBrackets ?? false,
         source,
+        theme: parsed.theme,
+        htmlMultiThemes: parsed.htmlMultiThemes,
       };
     })
     .sort((a, b) => a.name.localeCompare(b.name));
@@ -142,6 +159,14 @@ declare global {
 function languageId(language: Formatter["language"]): string {
   if (typeof language === "string") return language;
   return language?.id ?? "";
+}
+
+function getTheme(id: string): Theme {
+  const module = [...Object.entries(themeModules), ...Object.entries(fixtureThemeModules)].find(
+    ([path]) => [`.ts`, `.json`].some((extension) => basename(path) === `${id}${extension}`),
+  );
+  if (!module) throw new Error(`no theme module for ${id}`);
+  return module[1].default;
 }
 
 async function run(): Promise<void> {
@@ -202,27 +227,35 @@ async function run(): Promise<void> {
     await highlighter.loadLanguage(definition);
   }
 
-  const render = ({ source, language, rainbowBrackets }: CorpusFixture): FixtureOutput => ({
-    htmlInline: highlighter.highlight(
-      source,
-      htmlInline({ language, theme: dracula, rainbowBrackets }),
-    ),
-    htmlLinked: highlighter.highlight(source, htmlLinked({ language, rainbowBrackets })),
-    htmlMultiThemes: highlighter.highlight(
-      source,
-      htmlMultiThemes({
-        language,
-        themes: { main: dracula },
-        defaultTheme: "main",
-        rainbowBrackets,
-      }),
-    ),
-    bbcodeScoped: highlighter.highlight(source, bbcodeScoped({ language, rainbowBrackets })),
-    terminal: highlighter.highlight(
-      source,
-      terminal({ language, theme: dracula, rainbowBrackets }),
-    ),
-  });
+  const render = (fixture: CorpusFixture): FixtureOutput => {
+    const { source, language, rainbowBrackets } = fixture;
+    const theme = getTheme(fixture.theme);
+    const config = fixture.htmlMultiThemes;
+    const formatterThemes = config
+      ? Object.fromEntries(
+          Object.entries(config.themes).map(([name, themeId]) => [name, getTheme(themeId)]),
+        )
+      : { main: theme };
+
+    return {
+      htmlInline: highlighter.highlight(source, htmlInline({ language, theme, rainbowBrackets })),
+      htmlLinked: highlighter.highlight(source, htmlLinked({ language, rainbowBrackets })),
+      htmlMultiThemes: highlighter.highlight(
+        source,
+        htmlMultiThemes({
+          language,
+          themes: formatterThemes,
+          defaultTheme: config?.defaultTheme ?? "main",
+          rainbowBrackets,
+          highlightLines: config?.highlightLines?.length
+            ? { lines: config.highlightLines, style: "theme" }
+            : undefined,
+        }),
+      ),
+      bbcodeScoped: highlighter.highlight(source, bbcodeScoped({ language, rainbowBrackets })),
+      terminal: highlighter.highlight(source, terminal({ language, theme, rainbowBrackets })),
+    };
+  };
 
   const fixtures: Record<string, FixtureOutput> = {};
   for (const fixture of corpus) {
@@ -274,21 +307,26 @@ async function run(): Promise<void> {
       let tokenCount = 0;
       let unicodeToken: CustomFormatterResult["unicodeToken"];
 
-      highlightIter(source, this.language, dracula, (text, language, range, scope, style) => {
-        tokenCount += 1;
-        tokenLanguages.add(language);
-        if (scope) tokenScopes.add(scope);
-        if (style) styledTokenCount += 1;
-        if (text.includes("😀")) {
-          unicodeToken = {
-            text,
-            language,
-            scope,
-            startByte: range.start,
-            endByte: range.end,
-          };
-        }
-      });
+      highlightIter(
+        source,
+        this.language,
+        getTheme("dracula"),
+        (text, language, range, scope, style) => {
+          tokenCount += 1;
+          tokenLanguages.add(language);
+          if (scope) tokenScopes.add(scope);
+          if (style) styledTokenCount += 1;
+          if (text.includes("😀")) {
+            unicodeToken = {
+              text,
+              language,
+              scope,
+              startByte: range.start,
+              endByte: range.end,
+            };
+          }
+        },
+      );
 
       return JSON.stringify({
         balancedEvents,
@@ -337,7 +375,7 @@ async function languagePackageDataUrl(
   ).join("");
   const metadata = JSON.stringify({
     packageName: `@lumis-sh/wasm-${parser}`,
-    version: "test",
+    version: lowestCompatibleLanguagePackageVersion(),
     definitionHash: sha256,
     parser: {
       name: `tree-sitter-${parser}`,

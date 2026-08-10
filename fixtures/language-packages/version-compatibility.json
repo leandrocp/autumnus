@@ -1,0 +1,12 @@
+{
+  "range": "0.26",
+  "lowestCompatible": "0.26.0",
+  "cases": [
+    { "version": "0.26.0", "compatible": true },
+    { "version": "0.26.999", "compatible": true },
+    { "version": "0.26.1-beta.1", "compatible": false },
+    { "version": "0.25.99", "compatible": false },
+    { "version": "0.27.0", "compatible": false },
+    { "version": "latest", "compatible": false }
+  ]
+}

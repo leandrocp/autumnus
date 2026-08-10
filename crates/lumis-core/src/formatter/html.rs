@@ -62,11 +62,7 @@ pub fn span_inline(
     let escaped = escape(text);
     let attrs = span_inline_attrs(language, scope, theme, italic, include_highlights);
 
-    if attrs.is_empty() {
-        escaped
-    } else {
-        format!("<span {}>{}</span>", attrs, escaped)
-    }
+    format!("{}{}</span>", open_span(&attrs), escaped)
 }
 
 /// Generate HTML attributes for a span with CSS class.
@@ -329,10 +325,6 @@ pub fn span_multi_themes(
 ) -> String {
     let escaped = escape(text);
 
-    if themes.is_empty() {
-        return escaped;
-    }
-
     let attrs = span_multi_themes_attrs(
         scope,
         language,
@@ -343,11 +335,7 @@ pub fn span_multi_themes(
         include_highlights,
     );
 
-    if attrs.is_empty() {
-        escaped
-    } else {
-        format!("<span {}>{}</span>", attrs, escaped)
-    }
+    format!("{}{}</span>", open_span(&attrs), escaped)
 }
 
 /// Escape text for safe HTML output.
@@ -466,9 +454,9 @@ fn multi_themes_pre_classes(
         classes.push(pre_class.to_string());
     }
 
-    for theme_name in themes.keys() {
-        classes.push(theme_name.clone());
-    }
+    let mut theme_names = themes.keys().cloned().collect::<Vec<_>>();
+    theme_names.sort();
+    classes.extend(theme_names);
 
     classes.join(" ")
 }
@@ -578,6 +566,14 @@ pub fn escape_fragment(text: &str) -> String {
     escape(text)
 }
 
+fn open_span(attrs: &str) -> String {
+    if attrs.is_empty() {
+        "<span>".to_string()
+    } else {
+        format!("<span {attrs}>")
+    }
+}
+
 /// Render highlight events into HTML lines, reopening active spans at line boundaries.
 pub fn render_lines_from_events<F>(
     source: &str,
@@ -597,7 +593,7 @@ where
                 language,
             } => {
                 let attrs = span_attrs(*scope_index, language);
-                append_fragment(&mut lines, &format!("<span {attrs}>"));
+                append_fragment(&mut lines, &open_span(&attrs));
                 stack.push((*scope_index, language.clone()));
             }
             crate::events::HighlightEvent::End => {
@@ -660,7 +656,7 @@ where
 {
     for (scope_index, language) in stack {
         let attrs = span_attrs(*scope_index, language);
-        append_fragment(lines, &format!("<span {attrs}>"));
+        append_fragment(lines, &open_span(&attrs));
     }
 }
 
@@ -687,9 +683,15 @@ where
                 scope_index,
                 language,
             } => {
-                html.extend_from_slice(b"<span ");
-                attribute_callback(*scope_index, language, &mut html);
-                html.push(b'>');
+                let mut attrs = Vec::new();
+                attribute_callback(*scope_index, language, &mut attrs);
+                if attrs.is_empty() {
+                    html.extend_from_slice(b"<span>");
+                } else {
+                    html.extend_from_slice(b"<span ");
+                    html.extend_from_slice(&attrs);
+                    html.push(b'>');
+                }
                 highlight_stack.push((*scope_index, language.clone()));
             }
             crate::events::HighlightEvent::End => {
@@ -788,6 +790,31 @@ mod tests {
     #[test]
     fn test_escape_empty_string() {
         assert_eq!(escape(""), "");
+    }
+
+    #[test]
+    fn test_span_inline_without_attributes() {
+        assert_eq!(
+            span_inline("<b>", None, "string", None, false, false),
+            "<span>&lt;b&gt;</span>"
+        );
+    }
+
+    #[test]
+    fn test_span_multi_themes_without_attributes() {
+        assert_eq!(
+            span_multi_themes(
+                "<b>",
+                "string",
+                None,
+                &std::collections::HashMap::new(),
+                None,
+                "--lumis",
+                false,
+                false,
+            ),
+            "<span>&lt;b&gt;</span>"
+        );
     }
 
     #[test]

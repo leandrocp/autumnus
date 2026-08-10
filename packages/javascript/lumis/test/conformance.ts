@@ -9,6 +9,7 @@ export interface ConformanceFixture {
   name: string;
   language: string;
   theme: string;
+  htmlMultiThemesOptions?: HtmlMultiThemesFixture;
   rainbowBrackets: boolean;
   events: SerializableHighlightEvent[];
   source: string;
@@ -19,10 +20,17 @@ export interface ConformanceFixture {
   terminal: string;
 }
 
+export interface HtmlMultiThemesFixture {
+  themes: Record<string, string>;
+  defaultTheme: string;
+  highlightLines?: number[];
+}
+
 interface FixtureMetadata {
   name: string;
   language: string;
   theme: string;
+  htmlMultiThemes?: HtmlMultiThemesFixture;
   rainbowBrackets?: boolean;
   events: SerializableHighlightEvent[];
 }
@@ -40,6 +48,7 @@ export function loadConformanceFixtures(): ConformanceFixture[] {
 
       return {
         ...metadata,
+        htmlMultiThemesOptions: metadata.htmlMultiThemes,
         rainbowBrackets: metadata.rainbowBrackets ?? false,
         source: readFileSync(new URL("source.txt", fixtureDir), "utf8"),
         htmlInline: readFileSync(new URL("html-inline.html", fixtureDir), "utf8"),

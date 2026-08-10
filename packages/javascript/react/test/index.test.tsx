@@ -83,7 +83,7 @@ function HookHarness({
     | Awaited<ReturnType<typeof createHighlighter>>
     | Promise<Awaited<ReturnType<typeof createHighlighter>>>;
 }) {
-  const { content, isLoading } = useLumis({
+  const { content, error, isLoading } = useLumis({
     children,
     formatter,
     highlighter,
@@ -91,6 +91,9 @@ function HookHarness({
 
   if (isLoading) {
     return <div data-state="loading" />;
+  }
+  if (error) {
+    return <div data-error={error.message} />;
   }
 
   return <>{content}</>;
@@ -289,6 +292,32 @@ describe("@lumis-sh/react", () => {
     await waitForHtml(container, 'class="lumis"');
     expect(container.innerHTML).toContain('class="lumis"');
     expect(container.innerHTML).toContain('class="language-javascript"');
+
+    await act(async () => {
+      root.unmount();
+    });
+  });
+
+  it("normalizes non-Error failures returned by useLumis", async () => {
+    const highlighter = Promise.reject<Awaited<ReturnType<typeof createHighlighter>>>("boom");
+    const container = document.createElement("div");
+    document.body.append(container);
+    const root = createRoot(container);
+
+    await act(async () => {
+      root.render(
+        <HookHarness
+          highlighter={highlighter}
+          formatter={htmlInline({ language: "javascript", theme: dracula })}
+        >
+          {SOURCE}
+        </HookHarness>,
+      );
+    });
+
+    expect(container.querySelector("[data-error]")?.getAttribute("data-error")).toBe(
+      "Failed to render code block",
+    );
 
     await act(async () => {
       root.unmount();

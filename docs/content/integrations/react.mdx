@@ -92,16 +92,19 @@ import githubLight from '@lumis-sh/themes/github_light'
 const highlighter = createHighlighter({languages: [bundledLanguages]})
 
 export function Example() {
-  const {content, isLoading} = useLumis({
+  const {content, error, isLoading} = useLumis({
     children: 'export const answer = 42',
     formatter: htmlInline({language: 'typescript', theme: githubLight}),
     highlighter,
   })
 
   if (isLoading) return <p>Loading syntax highlighter...</p>
+  if (error) return <p>{error.message}</p>
   return <>{content}</>
 }
 ```
+
+`error` is an `Error` when highlighting or language loading fails, and `undefined` otherwise.
 
 ## Server rendering
 

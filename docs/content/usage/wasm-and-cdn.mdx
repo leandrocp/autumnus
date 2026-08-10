@@ -121,7 +121,8 @@ the compiled forms travel with it and the first request pays neither cost.
 - `@lumis-sh/lumis` ships the JS API and embedded `web-tree-sitter` runtime WASM
 - dynamic languages are separate npm packages such as `@lumis-sh/wasm-rust`
 - each package contains its parser WASM, matching queries, aliases, and integrity metadata
-- runtime packages keep only a stable language-to-package catalog
+- runtime packages keep a stable language-to-package catalog and one compatible
+  range for the supported Tree-sitter series
 
 ## Where a language comes from
 
@@ -173,20 +174,26 @@ and takes precedence. The CLI takes `--data-dir`. Every runtime that runs
 natively — the CLI, the Elixir NIF and the Node addon — shares it, so a parser
 downloaded by one is already there for the others.
 
-### Versions are pinned, so nothing is revalidated
+### Compatible ranges resolve to an exact cache
 
-Each Lumis release records the exact package version it expects, and asks the
-CDN for that version rather than `@latest`. Two consequences worth relying on:
+Each dynamic Lumis runtime carries one npm range matching its supported
+Tree-sitter ABI series, such as `0.26`. On a cold cache, npm's CDN resolves
+`@lumis-sh/wasm-rust@0.26` to the newest compatible package. Lumis validates
+that exact version and stores its manifest.
 
-- **A request never waits on the network for something already on disk.** A
-  package in the directory is the pinned one, so there is nothing to check.
-- **Two machines render a document identically.** Under `@latest`, which parser
-  you got depended on when your cache was last refreshed.
+A compatible manifest already in the directory is an exact lock and is never
+revalidated during highlighting. This gives deployments two useful modes:
 
-Parser updates therefore arrive when you upgrade Lumis, not on their own. If a
-pinned version has been unpublished, Lumis warns and falls back to `@latest` so
-the language still works, but that machine is no longer guaranteed to match the
-others.
+- stage the cache during a build to make every instance use identical parser
+  and query bytes without request-time network access
+- run the cache command with `--force` to resolve the range again and adopt a
+  newer compatible language release without upgrading Lumis
+
+Different caches refreshed at different times can hold different compatible
+patch releases. Reproducibility therefore belongs to the prepared cache, while
+the range removes the need to release every runtime after a WASM package. A new
+Tree-sitter minor series changes the compatibility range and still requires a
+runtime release.
 
 ### Warming it at build time
 
@@ -211,11 +218,11 @@ trusted — so a corrupted directory repairs itself.
 
 ## Default JavaScript behavior
 
-Lumis first resolves the current `lumis.json` for a language package. This
+Lumis first resolves a compatible `lumis.json` for a language package. This
 manifest is generated while staging the package and published with it:
 
 ```text title="Language package metadata"
-https://cdn.jsdelivr.net/npm/@lumis-sh/wasm-<name>@latest/lumis.json
+https://cdn.jsdelivr.net/npm/@lumis-sh/wasm-<name>@0.26/lumis.json
 ```
 
 That metadata names an exact package version, parser filename, byte length, and
@@ -239,7 +246,7 @@ hierarchy:
 ```text
 installed or deployment-local language package
   -> persistent package-metadata cache
-  -> current package metadata
+  -> compatible-range package metadata
   -> installed or deployment-local parser
   -> persistent verified parser cache
   -> exact-version parser fallback
@@ -375,7 +382,8 @@ Override [`configureLanguagePackageResolver()` and `configureWasmResolver()`](ht
 import { configureLanguagePackageResolver, configureWasmResolver } from "@lumis-sh/lumis";
 
 configureLanguagePackageResolver(
-  (packageName) => `https://unpkg.com/${packageName}@latest/lumis.json`,
+  (packageName, versionRange) =>
+    `https://unpkg.com/${packageName}@${versionRange}/lumis.json`,
 );
 
 configureWasmResolver(
@@ -389,7 +397,7 @@ import rust from "@lumis-sh/lumis/langs/rust";
 
 const hl = await createHighlighter({
   languages: [rust],
-  languagePackageResolver: (packageName) =>
+  languagePackageResolver: (packageName, _versionRange) =>
     `/wasm/${encodeURIComponent(packageName)}/lumis.json`,
   wasmResolver: (_language, wasm) => `/wasm/${wasm.name}.wasm`,
 });

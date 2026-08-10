@@ -2,12 +2,12 @@
 
 macro_rules! define_catalog {
     (
+        package_version_range: $package_version_range:literal,
         languages: {
             $(
                 $id:literal => {
                     aliases: [$($alias:literal),* $(,)?],
-                    package_name: $package_name:literal,
-                    version: $version:literal
+                    package_name: $package_name:literal
                 }
             ),* $(,)?
         },
@@ -20,12 +20,10 @@ macro_rules! define_catalog {
             pub id: &'static str,
             pub aliases: &'static [&'static str],
             pub package_name: &'static str,
-            /// The published version this build of Lumis expects. Requesting it
-            /// by name rather than `@latest` is what makes two machines render
-            /// a document identically, and what lets a staged directory be
-            /// complete instead of merely current.
-            pub version: &'static str,
         }
+
+        /// npm range accepted by this runtime's Tree-sitter ABI.
+        pub const LANGUAGE_PACKAGE_VERSION_RANGE: &str = $package_version_range;
 
         pub static LANGUAGES: &[LanguagePackageRef] = &[
             $(
@@ -33,7 +31,6 @@ macro_rules! define_catalog {
                     id: $id,
                     aliases: &[$($alias),*],
                     package_name: $package_name,
-                    version: $version,
                 },
             )*
         ];
@@ -43,14 +40,6 @@ macro_rules! define_catalog {
         pub static BUNDLES: &[(&str, &[&str])] = &[
             $(($bundle, &[$($member),*]),)*
         ];
-
-        /// The version pinned for `package_name`, if the catalog knows it.
-        pub fn pinned_version(package_name: &str) -> Option<&'static str> {
-            LANGUAGES
-                .iter()
-                .find(|entry| entry.package_name == package_name)
-                .map(|entry| entry.version)
-        }
 
         pub fn find(name: &str) -> Option<&'static LanguagePackageRef> {
             LANGUAGES.iter().find(|entry| {
@@ -91,6 +80,6 @@ pub use runtime::{
 #[cfg(feature = "wasm")]
 pub use store::HttpFetcher;
 pub use store::{
-    package_suffix, parser_filename, set_warning_handler, write_atomic, Fetcher, LanguageStore,
-    NoNetwork, StoreConfig, StoreError,
+    lowest_compatible_package_version, package_suffix, parser_filename, write_atomic, Fetcher,
+    LanguageStore, NoNetwork, StoreConfig, StoreError,
 };

@@ -86,14 +86,15 @@ Markdown file with a fenced Rust block highlights that block; a language that
 cannot be fetched leaves its own block plain rather than failing the file.
 
 The CLI stores language-package metadata and integrity-verified parser WASM
-files under the data directory. It refreshes package metadata independently,
-then loads the exact parser version and matching queries named there. Parser
-filenames contain the package version and SHA-256 digest.
+files under the data directory. A cold cache resolves the runtime's compatible
+package range, then loads the exact parser version and matching queries named
+there. Parser filenames contain the package version and SHA-256 digest.
 
 - first use of a language downloads its parser
 - `lumis parsers cache ...` persists selected parsers ahead of time, so no run
   pays for a download and the Wasmtime compile that follows it
-- `lumis parsers cache ... --force` replaces valid cached parsers
+- `lumis parsers cache ... --force` resolves the package range again and
+  replaces valid cached parsers
 
 ```bash
 lumis parsers cache rust javascript elixir
@@ -112,8 +113,12 @@ Default location depends on the OS. Override it with:
 
 The data dir stores:
 
-- parser WASM files
+- language-package metadata, as `parsers/<name>.lumis.json`
+- parser WASM files, in the same `parsers/` directory
 - custom theme JSON files
+
+The metadata names the exact parser version, queries, and integrity digest, so a
+directory holding both is self-sufficient offline.
 
 ## Local custom themes
 

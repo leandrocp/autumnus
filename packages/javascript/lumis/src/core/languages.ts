@@ -1,8 +1,9 @@
 import type { Language, PredicateStep, Query as TreeSitterQuery } from "web-tree-sitter";
-import { PACKAGE_CACHE_TTL_MS } from "../cache-timing.js";
-import { PACKAGE_VERSIONS } from "../generated/package-versions.js";
+import satisfies from "semver/functions/satisfies.js";
+import minVersion from "semver/ranges/min-version.js";
 import { buildHighlightEvents } from "../events.js";
 import { LANGUAGES } from "../generated/languages-meta.js";
+import { LANGUAGE_PACKAGE_VERSION_RANGE } from "../generated/package-version-range.js";
 import { sha256 } from "@noble/hashes/sha2.js";
 import { HIGHLIGHT_NAMES } from "../highlights.js";
 import type { RuntimeEnvironment } from "../runtime/runtime.js";
@@ -22,8 +23,8 @@ import { PLAINTEXT_LANG_ID, type LanguageInfo } from "../types.js";
 export type WasmResolver = (language: string, wasm: WasmRef) => string | URL;
 export type LanguagePackageResolver = (
   packageName: string,
-  /** The version this build pins, when the catalog knows one. */
-  version?: string,
+  /** npm range compatible with this runtime's Tree-sitter ABI. */
+  versionRange: string,
 ) => string | URL;
 
 export interface PackagedLanguage {
@@ -39,7 +40,7 @@ export interface PackagedLanguage {
  * `LanguagePackage` in `crates/lumis-wasm-runtime/src/package.rs`.
  *
  * There is deliberately no `formatVersion` gate: runtimes resolve this document
- * from a floating tag, so the format is additive-only by contract and
+ * from a compatible range, so the format is additive-only by contract and
  * compatibility is decided by shape.
  */
 export interface LanguagePackage {
@@ -55,11 +56,6 @@ export interface LanguagePackage {
     size: number;
   };
   languages: Record<string, PackagedLanguage>;
-}
-
-interface CachedLanguagePackage {
-  checkedAt: number;
-  package: LanguagePackage;
 }
 
 export interface ResolvedLanguagePackage {
@@ -183,8 +179,10 @@ export const CDNS = ["https://cdn.jsdelivr.net/npm", "https://unpkg.com"] as con
 /** @internal */
 export const DEFAULT_RESOLVER: WasmResolver = (_language, wasm) =>
   `${CDNS[0]}/${wasm.packageName}@${wasm.version}/${wasm.name}.wasm`;
-export const DEFAULT_LANGUAGE_PACKAGE_RESOLVER: LanguagePackageResolver = (packageName, version) =>
-  `${CDNS[0]}/${packageName}@${version ?? "latest"}/lumis.json`;
+export const DEFAULT_LANGUAGE_PACKAGE_RESOLVER: LanguagePackageResolver = (
+  packageName,
+  versionRange,
+) => `${CDNS[0]}/${packageName}@${versionRange}/lumis.json`;
 
 /** Only used with the default resolver; a custom resolver names one location. */
 async function fetchFromCdns(primary: string, isDefault: boolean): Promise<Response> {
@@ -252,51 +250,11 @@ export function parseLanguagePackage(
   if (!hasValidRawJsonProfile(json)) {
     throw new Error(`Invalid Lumis language package: ${expectedPackageName}`);
   }
-  const parsed = JSON.parse(json) as unknown;
+  const parsed: unknown = JSON.parse(json);
   if (!hasOnlyUnicodeScalarStrings(parsed)) {
     throw new Error(`Invalid Lumis language package: ${expectedPackageName}`);
   }
-  const value = parsed as LanguagePackage;
-  const languages =
-    typeof value.languages === "object" &&
-    value.languages !== null &&
-    !Array.isArray(value.languages)
-      ? Object.values(value.languages)
-      : [];
-  if (
-    value.packageName !== expectedPackageName ||
-    !isValidPackageName(expectedPackageName) ||
-    typeof value.version !== "string" ||
-    !isSafePackagePathSegment(value.version) ||
-    typeof value.definitionHash !== "string" ||
-    value.definitionHash.length === 0 ||
-    typeof value.parser?.name !== "string" ||
-    !isSafePackagePathSegment(value.parser.name) ||
-    typeof value.parser?.grammarName !== "string" ||
-    value.parser.grammarName.length === 0 ||
-    (value.parser.upstreamVersion !== undefined &&
-      value.parser.upstreamVersion !== null &&
-      typeof value.parser.upstreamVersion !== "string") ||
-    (value.parser.revision !== undefined &&
-      value.parser.revision !== null &&
-      typeof value.parser.revision !== "string") ||
-    typeof value.parser?.sha256 !== "string" ||
-    !/^[0-9a-f]{64}$/.test(value.parser.sha256) ||
-    !Number.isSafeInteger(value.parser?.size) ||
-    value.parser.size <= 0 ||
-    languages.length === 0 ||
-    languages.some(
-      (language) =>
-        !Array.isArray(language.aliases) ||
-        language.aliases.some((alias) => typeof alias !== "string") ||
-        typeof language.highlights !== "string" ||
-        (language.injections !== undefined && typeof language.injections !== "string") ||
-        (language.locals !== undefined && typeof language.locals !== "string") ||
-        (language.brackets !== undefined && typeof language.brackets !== "string"),
-    )
-  ) {
-    throw new Error(`Invalid Lumis language package: ${expectedPackageName}`);
-  }
+  const value = parseLanguagePackageValue(parsed, expectedPackageName);
   const owners = new Map<string, string>();
   for (const [id, language] of Object.entries(value.languages)) {
     const owner = normalizeLanguageName(id);
@@ -312,9 +270,108 @@ export function parseLanguagePackage(
       owners.set(normalizeLanguageName(alias), owner);
     }
   }
-  if (value.parser.upstreamVersion === null) delete value.parser.upstreamVersion;
-  if (value.parser.revision === null) delete value.parser.revision;
   return value;
+}
+
+function invalidLanguagePackage(expectedPackageName: string): never {
+  throw new Error(`Invalid Lumis language package: ${expectedPackageName}`);
+}
+
+function requireObject(value: unknown, expectedPackageName: string): object {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return invalidLanguagePackage(expectedPackageName);
+  }
+  return value;
+}
+
+function property(value: object, key: string): unknown {
+  const result: unknown = Reflect.get(value, key);
+  return result;
+}
+
+function requireString(value: unknown, expectedPackageName: string): string {
+  return typeof value === "string" ? value : invalidLanguagePackage(expectedPackageName);
+}
+
+function optionalString(value: unknown, expectedPackageName: string): string | undefined {
+  if (value === undefined) return undefined;
+  return requireString(value, expectedPackageName);
+}
+
+function optionalNullableString(value: unknown, expectedPackageName: string): string | undefined {
+  if (value === undefined || value === null) return undefined;
+  return requireString(value, expectedPackageName);
+}
+
+function requireStringArray(value: unknown, expectedPackageName: string): string[] {
+  if (!Array.isArray(value)) return invalidLanguagePackage(expectedPackageName);
+  return value.map((entry) => requireString(entry, expectedPackageName));
+}
+
+function parsePackagedLanguage(value: unknown, expectedPackageName: string): PackagedLanguage {
+  const language = requireObject(value, expectedPackageName);
+  return {
+    aliases: requireStringArray(property(language, "aliases"), expectedPackageName),
+    highlights: requireString(property(language, "highlights"), expectedPackageName),
+    injections: optionalString(property(language, "injections"), expectedPackageName),
+    locals: optionalString(property(language, "locals"), expectedPackageName),
+    brackets: optionalString(property(language, "brackets"), expectedPackageName),
+  };
+}
+
+function parseLanguagePackageValue(value: unknown, expectedPackageName: string): LanguagePackage {
+  const packageValue = requireObject(value, expectedPackageName);
+  const packageName = requireString(property(packageValue, "packageName"), expectedPackageName);
+  const version = requireString(property(packageValue, "version"), expectedPackageName);
+  const definitionHash = requireString(
+    property(packageValue, "definitionHash"),
+    expectedPackageName,
+  );
+  const parserValue = requireObject(property(packageValue, "parser"), expectedPackageName);
+  const parserName = requireString(property(parserValue, "name"), expectedPackageName);
+  const grammarName = requireString(property(parserValue, "grammarName"), expectedPackageName);
+  const sha256 = requireString(property(parserValue, "sha256"), expectedPackageName);
+  const size = property(parserValue, "size");
+  const languagesValue = requireObject(property(packageValue, "languages"), expectedPackageName);
+
+  if (
+    packageName !== expectedPackageName ||
+    !isValidPackageName(expectedPackageName) ||
+    !isSafePackagePathSegment(version) ||
+    definitionHash.length === 0 ||
+    !isSafePackagePathSegment(parserName) ||
+    grammarName.length === 0 ||
+    !/^[0-9a-f]{64}$/.test(sha256) ||
+    typeof size !== "number" ||
+    !Number.isSafeInteger(size) ||
+    size <= 0
+  ) {
+    return invalidLanguagePackage(expectedPackageName);
+  }
+
+  const languages: Record<string, PackagedLanguage> = Object.create(null);
+  for (const id of Object.keys(languagesValue)) {
+    languages[id] = parsePackagedLanguage(property(languagesValue, id), expectedPackageName);
+  }
+  if (Object.keys(languages).length === 0) return invalidLanguagePackage(expectedPackageName);
+
+  return {
+    packageName,
+    version,
+    definitionHash,
+    parser: {
+      name: parserName,
+      grammarName,
+      upstreamVersion: optionalNullableString(
+        property(parserValue, "upstreamVersion"),
+        expectedPackageName,
+      ),
+      revision: optionalNullableString(property(parserValue, "revision"), expectedPackageName),
+      sha256,
+      size,
+    },
+    languages,
+  };
 }
 
 // JSON.parse discards overwritten members and turns 1e400 into Infinity, so
@@ -424,11 +481,34 @@ function isSafePackagePathSegment(value: string): boolean {
 }
 
 export function serializeLanguagePackageCache(packageMetadata: LanguagePackage): Uint8Array {
-  return encoder.encode(
-    JSON.stringify({
-      checkedAt: Date.now(),
-      package: packageMetadata,
-    } satisfies CachedLanguagePackage),
+  return encoder.encode(JSON.stringify(packageMetadata));
+}
+
+/** @internal */
+export function isCompatibleLanguagePackageVersion(version: string): boolean {
+  return satisfies(version, LANGUAGE_PACKAGE_VERSION_RANGE);
+}
+
+/**
+ * The lowest version {@link LANGUAGE_PACKAGE_VERSION_RANGE} accepts.
+ *
+ * Fixtures and staged packages need one concrete version the runtimes will
+ * serve. Deriving it from the range keeps them correct if the range ever stops
+ * being a bare `MAJOR.MINOR` series, which appending `.0` to it would not.
+ *
+ * @internal
+ */
+export function lowestCompatibleLanguagePackageVersion(): string {
+  const lowest = minVersion(LANGUAGE_PACKAGE_VERSION_RANGE);
+  if (!lowest) {
+    throw new Error(`no version satisfies the supported range ${LANGUAGE_PACKAGE_VERSION_RANGE}`);
+  }
+  return lowest.version;
+}
+
+function incompatiblePackageVersion(packageMetadata: LanguagePackage): Error {
+  return new Error(
+    `Language package ${packageMetadata.packageName}@${packageMetadata.version} does not satisfy the supported range ${LANGUAGE_PACKAGE_VERSION_RANGE}`,
   );
 }
 
@@ -846,26 +926,21 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
       return this.explicitResolver ?? configuredDefaultResolver;
     }
 
-    private pinnedVersion(packageName: string): string | undefined {
-      return PACKAGE_VERSIONS[packageName];
-    }
-
     private get languagePackageResolver(): LanguagePackageResolver {
       return this.explicitLanguagePackageResolver ?? configuredLanguagePackageResolver;
     }
 
+    private acceptsPackage(packageMetadata: LanguagePackage): boolean {
+      return isCompatibleLanguagePackageVersion(packageMetadata.version);
+    }
+
     private async readCachedLanguagePackage(
       packageName: string,
-    ): Promise<CachedLanguagePackage | undefined> {
+    ): Promise<LanguagePackage | undefined> {
       const bytes = await runtime.readFsCache(languagePackageCacheKey(packageName));
       if (!bytes) return undefined;
       try {
-        const cached = JSON.parse(decoder.decode(bytes)) as CachedLanguagePackage;
-        const serialized = encoder.encode(JSON.stringify(cached.package));
-        return {
-          checkedAt: cached.checkedAt,
-          package: parseLanguagePackage(serialized, packageName),
-        };
+        return parseLanguagePackage(bytes, packageName);
       } catch {
         return undefined;
       }
@@ -881,7 +956,7 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
           /* @vite-ignore */
           packageName
         );
-        const base = mod.default as unknown;
+        const base: unknown = mod.default;
         if (!(base instanceof URL) && typeof base !== "string") return undefined;
         const source = new URL("./lumis.json", base instanceof URL ? base : new URL(base));
         const disk = await runtime.readResolvedWasmFromDisk(source);
@@ -895,20 +970,34 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
     }
 
     private async fetchLanguagePackage(packageName: string): Promise<LanguagePackage> {
-      const source = this.languagePackageResolver(packageName, this.pinnedVersion(packageName));
+      const resolver = this.languagePackageResolver;
+      const source = resolver(packageName, LANGUAGE_PACKAGE_VERSION_RANGE);
       const disk = await runtime.readResolvedWasmFromDisk(source);
-      if (disk) return parseLanguagePackage(disk, packageName);
+      if (disk) {
+        const packageMetadata = parseLanguagePackage(disk, packageName);
+        if (this.acceptsPackage(packageMetadata)) return packageMetadata;
+        throw incompatiblePackageVersion(packageMetadata);
+      }
       const href = typeof source === "string" ? source : source.href;
       const response = await fetchFromCdns(
         href,
-        this.languagePackageResolver === DEFAULT_LANGUAGE_PACKAGE_RESOLVER,
+        resolver === DEFAULT_LANGUAGE_PACKAGE_RESOLVER,
       ).catch((error: Error) => {
         throw new Error(`could not download language package ${packageName}: ${error.message}`);
       });
-      return parseLanguagePackage(new Uint8Array(await response.arrayBuffer()), packageName);
+      const packageMetadata = parseLanguagePackage(
+        new Uint8Array(await response.arrayBuffer()),
+        packageName,
+      );
+      if (!this.acceptsPackage(packageMetadata)) throw incompatiblePackageVersion(packageMetadata);
+      return packageMetadata;
     }
 
     private async resolvePackage(packageName: string): Promise<LanguagePackage> {
+      // Every branch below either returns a package this runtime accepts or
+      // throws, so what the shared cache holds is already compatible. Rechecking
+      // it here would start a second load for the same name and leave two
+      // callers of one in-flight request with different results.
       const memory = this.sharedCache.packages.get(packageName);
       if (memory) return memory;
       const inFlight = this.sharedCache.packageLoads.get(packageName);
@@ -918,37 +1007,23 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
         const staged = await runtime.readStagedAsset?.(
           `${packageName.replace(/^@lumis-sh\/wasm-/, "")}.lumis.json`,
         );
-        if (staged) return parseLanguagePackage(staged, packageName);
+        if (staged) {
+          const packageMetadata = parseLanguagePackage(staged, packageName);
+          if (this.acceptsPackage(packageMetadata)) return packageMetadata;
+        }
 
         const installed = await this.loadInstalledLanguagePackage(packageName);
-        if (installed) return installed;
+        if (installed && this.acceptsPackage(installed)) return installed;
 
-        // A cached package that already is the pinned version cannot be stale,
-        // so it is served without asking the network. Only an unpinned package
-        // falls back to a time-based check, which is what the Rust store does.
         const cached = await this.readCachedLanguagePackage(packageName);
-        if (cached) {
-          const pinned = this.pinnedVersion(packageName);
-          if (
-            pinned
-              ? cached.package.version === pinned
-              : Date.now() - cached.checkedAt < PACKAGE_CACHE_TTL_MS
-          ) {
-            return cached.package;
-          }
-        }
+        if (cached && this.acceptsPackage(cached)) return cached;
 
-        try {
-          const packageMetadata = await this.fetchLanguagePackage(packageName);
-          await runtime.writeFsCache(
-            languagePackageCacheKey(packageName),
-            serializeLanguagePackageCache(packageMetadata),
-          );
-          return packageMetadata;
-        } catch (error) {
-          if (cached) return cached.package;
-          throw error;
-        }
+        const packageMetadata = await this.fetchLanguagePackage(packageName);
+        await runtime.writeFsCache(
+          languagePackageCacheKey(packageName),
+          serializeLanguagePackageCache(packageMetadata),
+        );
+        return packageMetadata;
       })().then((value) => {
         this.sharedCache.packages.set(packageName, value);
         return value;
@@ -977,7 +1052,7 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
           /* @vite-ignore */
           ref.packageName
         );
-        const input = mod.default as unknown;
+        const input: unknown = mod.default;
         if (
           input instanceof Uint8Array ||
           input instanceof ArrayBuffer ||

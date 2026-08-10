@@ -21,11 +21,20 @@ pub fn data_dir() -> PathBuf {
     DATA.get_or_init(|| {
         let path = std::env::temp_dir().join(format!("lumis-cli-data-{}", std::process::id()));
         let parsers = path.join("parsers");
+        let themes = path.join("themes");
         fs::create_dir_all(&parsers).unwrap();
+        fs::create_dir_all(&themes).unwrap();
         for entry in fs::read_dir(language_fixtures_dir().join("parsers")).unwrap() {
             let entry = entry.unwrap();
             if entry.file_type().unwrap().is_file() {
                 fs::copy(entry.path(), parsers.join(entry.file_name())).unwrap();
+            }
+        }
+        let repository = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
+        for entry in fs::read_dir(repository.join("fixtures/conformance-themes")).unwrap() {
+            let entry = entry.unwrap();
+            if entry.file_type().unwrap().is_file() {
+                fs::copy(entry.path(), themes.join(entry.file_name())).unwrap();
             }
         }
         path
@@ -88,12 +97,7 @@ fn build_language_fixtures() -> PathBuf {
             .collect::<BTreeMap<_, _>>();
         let package = LanguagePackage {
             package_name: location.package_name.into(),
-            // The store trusts a cached package only when its version equals the
-            // catalog pin, so a fixture claiming anything else sends every test
-            // to the network to be told otherwise.
-            version: lumis_wasm_runtime::catalog::pinned_version(location.package_name)
-                .unwrap_or("test")
-                .into(),
+            version: lumis_wasm_runtime::lowest_compatible_package_version(),
             definition_hash: sha256.clone(),
             parser: ParserMetadata {
                 name: stem.into(),

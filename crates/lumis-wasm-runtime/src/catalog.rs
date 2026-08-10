@@ -2,581 +2,467 @@
 // Do not edit manually.
 
 define_catalog! {
+    package_version_range: "0.26",
     languages: {
         "angular" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-angular",
-            version: "0.26.2"
+            package_name: "@lumis-sh/wasm-angular"
         },
         "asm" => {
             aliases: ["assembly"],
-            package_name: "@lumis-sh/wasm-asm",
-            version: "0.26.2"
+            package_name: "@lumis-sh/wasm-asm"
         },
         "astro" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-astro",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-astro"
         },
         "bash" => {
             aliases: ["sh"],
-            package_name: "@lumis-sh/wasm-bash",
-            version: "0.26.3"
+            package_name: "@lumis-sh/wasm-bash"
         },
         "c" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-c",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-c"
         },
         "caddy" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-caddy",
-            version: "0.26.2"
+            package_name: "@lumis-sh/wasm-caddy"
         },
         "clojure" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-clojure",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-clojure"
         },
         "cmake" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-cmake",
-            version: "0.26.2"
+            package_name: "@lumis-sh/wasm-cmake"
         },
         "comment" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-comment",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-comment"
         },
         "commonlisp" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-commonlisp",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-commonlisp"
         },
         "cpp" => {
             aliases: ["c++"],
-            package_name: "@lumis-sh/wasm-cpp",
-            version: "0.26.0"
+            package_name: "@lumis-sh/wasm-cpp"
         },
         "csharp" => {
             aliases: ["c#"],
-            package_name: "@lumis-sh/wasm-csharp",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-csharp"
         },
         "css" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-css",
-            version: "0.26.2"
+            package_name: "@lumis-sh/wasm-css"
         },
         "csv" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-csv",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-csv"
         },
         "dart" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-dart",
-            version: "0.26.2"
+            package_name: "@lumis-sh/wasm-dart"
         },
         "diff" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-diff",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-diff"
         },
         "dockerfile" => {
             aliases: ["docker"],
-            package_name: "@lumis-sh/wasm-dockerfile",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-dockerfile"
         },
         "eex" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-eex",
-            version: "0.26.0"
+            package_name: "@lumis-sh/wasm-eex"
         },
         "ejs" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-embedded-template",
-            version: "0.26.2"
+            package_name: "@lumis-sh/wasm-embedded-template"
         },
         "elixir" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-elixir",
-            version: "0.26.2"
+            package_name: "@lumis-sh/wasm-elixir"
         },
         "elm" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-elm",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-elm"
         },
         "erb" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-embedded-template",
-            version: "0.26.2"
+            package_name: "@lumis-sh/wasm-embedded-template"
         },
         "erlang" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-erlang",
-            version: "0.26.2"
+            package_name: "@lumis-sh/wasm-erlang"
         },
         "fish" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-fish",
-            version: "0.26.0"
+            package_name: "@lumis-sh/wasm-fish"
         },
         "fsharp" => {
             aliases: ["f#"],
-            package_name: "@lumis-sh/wasm-fsharp",
-            version: "0.26.4"
+            package_name: "@lumis-sh/wasm-fsharp"
         },
         "gleam" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-gleam",
-            version: "0.26.2"
+            package_name: "@lumis-sh/wasm-gleam"
         },
         "glimmer" => {
             aliases: ["ember", "handlebars"],
-            package_name: "@lumis-sh/wasm-glimmer",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-glimmer"
         },
         "go" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-go",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-go"
         },
         "graphql" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-graphql",
-            version: "0.26.0"
+            package_name: "@lumis-sh/wasm-graphql"
         },
         "haskell" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-haskell",
-            version: "0.26.0"
+            package_name: "@lumis-sh/wasm-haskell"
         },
         "hcl" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-hcl",
-            version: "0.26.2"
+            package_name: "@lumis-sh/wasm-hcl"
         },
         "heex" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-heex",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-heex"
         },
         "html" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-html",
-            version: "0.26.2"
+            package_name: "@lumis-sh/wasm-html"
         },
         "http" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-http",
-            version: "0.26.0"
+            package_name: "@lumis-sh/wasm-http"
         },
         "iex" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-iex",
-            version: "0.26.0"
+            package_name: "@lumis-sh/wasm-iex"
         },
         "ini" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-ini",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-ini"
         },
         "java" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-java",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-java"
         },
         "javascript" => {
             aliases: ["js", "jsx"],
-            package_name: "@lumis-sh/wasm-javascript",
-            version: "0.26.2"
+            package_name: "@lumis-sh/wasm-javascript"
         },
         "json" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-json",
-            version: "0.26.2"
+            package_name: "@lumis-sh/wasm-json"
         },
         "julia" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-julia",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-julia"
         },
         "kotlin" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-kotlin",
-            version: "0.26.3"
+            package_name: "@lumis-sh/wasm-kotlin"
         },
         "latex" => {
             aliases: ["tex"],
-            package_name: "@lumis-sh/wasm-latex",
-            version: "0.26.0"
+            package_name: "@lumis-sh/wasm-latex"
         },
         "liquid" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-liquid",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-liquid"
         },
         "llvm" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-llvm",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-llvm"
         },
         "lua" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-lua",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-lua"
         },
         "make" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-make",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-make"
         },
         "markdown" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-markdown",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-markdown"
         },
         "markdown_inline" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-markdown_inline",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-markdown_inline"
         },
         "mdx" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-markdown",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-markdown"
         },
         "nix" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-nix",
-            version: "0.26.0"
+            package_name: "@lumis-sh/wasm-nix"
         },
         "nushell" => {
             aliases: ["nu"],
-            package_name: "@lumis-sh/wasm-nushell",
-            version: "0.26.2"
+            package_name: "@lumis-sh/wasm-nushell"
         },
         "objc" => {
             aliases: ["objective-c"],
-            package_name: "@lumis-sh/wasm-objc",
-            version: "0.26.0"
+            package_name: "@lumis-sh/wasm-objc"
         },
         "ocaml" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-ocaml",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-ocaml"
         },
         "ocaml_interface" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-ocaml_interface",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-ocaml_interface"
         },
         "perl" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-perl",
-            version: "0.26.2"
+            package_name: "@lumis-sh/wasm-perl"
         },
         "php" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-php",
-            version: "0.26.2"
+            package_name: "@lumis-sh/wasm-php"
         },
         "powershell" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-powershell",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-powershell"
         },
         "protobuf" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-protobuf",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-protobuf"
         },
         "python" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-python",
-            version: "0.26.2"
+            package_name: "@lumis-sh/wasm-python"
         },
         "r" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-r",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-r"
         },
         "regex" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-regex",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-regex"
         },
         "ruby" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-ruby",
-            version: "0.26.2"
+            package_name: "@lumis-sh/wasm-ruby"
         },
         "rust" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-rust",
-            version: "0.26.3"
+            package_name: "@lumis-sh/wasm-rust"
         },
         "scala" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-scala",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-scala"
         },
         "scss" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-scss",
-            version: "0.26.0"
+            package_name: "@lumis-sh/wasm-scss"
         },
         "sql" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-sql",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-sql"
         },
         "surface" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-surface",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-surface"
         },
         "svelte" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-svelte",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-svelte"
         },
         "swift" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-swift",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-swift"
         },
         "toml" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-toml",
-            version: "0.26.0"
+            package_name: "@lumis-sh/wasm-toml"
         },
         "tsx" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-tsx",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-tsx"
         },
         "typescript" => {
             aliases: ["ts"],
-            package_name: "@lumis-sh/wasm-typescript",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-typescript"
         },
         "typst" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-typst",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-typst"
         },
         "vim" => {
             aliases: ["viml", "vimscript"],
-            package_name: "@lumis-sh/wasm-vim",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-vim"
         },
         "vue" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-vue",
-            version: "0.26.0"
+            package_name: "@lumis-sh/wasm-vue"
         },
         "wat" => {
             aliases: ["wasm", "webassembly"],
-            package_name: "@lumis-sh/wasm-wat",
-            version: "0.26.0"
+            package_name: "@lumis-sh/wasm-wat"
         },
         "xml" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-xml",
-            version: "0.26.2"
+            package_name: "@lumis-sh/wasm-xml"
         },
         "yaml" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-yaml",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-yaml"
         },
         "zig" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-zig",
-            version: "0.26.0"
+            package_name: "@lumis-sh/wasm-zig"
         },
         "arduino" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-arduino",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-arduino"
         },
         "bicep" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-bicep",
-            version: "0.26.0"
+            package_name: "@lumis-sh/wasm-bicep"
         },
         "dot" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-dot",
-            version: "0.26.0"
+            package_name: "@lumis-sh/wasm-dot"
         },
         "editorconfig" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-editorconfig",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-editorconfig"
         },
         "gitattributes" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-gitattributes",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-gitattributes"
         },
         "javadoc" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-javadoc",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-javadoc"
         },
         "jq" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-jq",
-            version: "0.26.0"
+            package_name: "@lumis-sh/wasm-jq"
         },
         "kdl" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-kdl",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-kdl"
         },
         "luadoc" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-luadoc",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-luadoc"
         },
         "nim" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-nim",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-nim"
         },
         "pascal" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-pascal",
-            version: "0.26.0"
+            package_name: "@lumis-sh/wasm-pascal"
         },
         "puppet" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-puppet",
-            version: "0.26.0"
+            package_name: "@lumis-sh/wasm-puppet"
         },
         "terraform" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-terraform",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-terraform"
         },
         "toon" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-toon",
-            version: "0.26.2"
+            package_name: "@lumis-sh/wasm-toon"
         },
         "wgsl" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-wgsl",
-            version: "0.26.0"
+            package_name: "@lumis-sh/wasm-wgsl"
         },
         "zsh" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-zsh",
-            version: "0.26.0"
+            package_name: "@lumis-sh/wasm-zsh"
         },
         "d" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-d",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-d"
         },
         "fortran" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-fortran",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-fortran"
         },
         "gitignore" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-gitignore",
-            version: "0.26.0"
+            package_name: "@lumis-sh/wasm-gitignore"
         },
         "glsl" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-glsl",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-glsl"
         },
         "jinja" => {
             aliases: ["jinja2"],
-            package_name: "@lumis-sh/wasm-jinja",
-            version: "0.26.4"
+            package_name: "@lumis-sh/wasm-jinja"
         },
         "jinja_inline" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-jinja_inline",
-            version: "0.26.3"
+            package_name: "@lumis-sh/wasm-jinja_inline"
         },
         "json5" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-json5",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-json5"
         },
         "just" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-just",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-just"
         },
         "matlab" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-matlab",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-matlab"
         },
         "mermaid" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-mermaid",
-            version: "0.26.0"
+            package_name: "@lumis-sh/wasm-mermaid"
         },
         "nginx" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-nginx",
-            version: "0.26.0"
+            package_name: "@lumis-sh/wasm-nginx"
         },
         "prisma" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-prisma",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-prisma"
         },
         "qmljs" => {
             aliases: ["qml"],
-            package_name: "@lumis-sh/wasm-qmljs",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-qmljs"
         },
         "racket" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-racket",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-racket"
         },
         "rst" => {
             aliases: ["restructuredtext"],
-            package_name: "@lumis-sh/wasm-rst",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-rst"
         },
         "scheme" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-scheme",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-scheme"
         },
         "solidity" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-solidity",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-solidity"
         },
         "systemverilog" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-systemverilog",
-            version: "0.26.2"
+            package_name: "@lumis-sh/wasm-systemverilog"
         },
         "tcl" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-tcl",
-            version: "0.26.0"
+            package_name: "@lumis-sh/wasm-tcl"
         },
         "vhdl" => {
             aliases: [],
-            package_name: "@lumis-sh/wasm-vhdl",
-            version: "0.26.1"
+            package_name: "@lumis-sh/wasm-vhdl"
         },
     },
     bundles: {

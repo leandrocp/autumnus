@@ -366,6 +366,9 @@ mise run fmt-lua -- --check
 echo ""
 echo "Checking native package versions..."
 mise run check-native-versions
+echo ""
+echo "Checking crate dependency requirements..."
+mise run check-crate-deps
 '''
 
 [tasks.'check-native-versions']
@@ -374,6 +377,21 @@ run = '''
 #!/usr/bin/env bash
 set -euo pipefail
 node packages/javascript/scripts/check-native-versions.mjs
+'''
+
+[tasks.'check-crate-deps']
+description = "Check version requirements on lumis crates match the versions in this repository"
+usage = '''
+flag "--fix" help="Rewrite stale requirements instead of reporting them"
+'''
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+if [ "${usage_fix:-false}" = "true" ]; then
+    cargo run --quiet --manifest-path crates/dev/Cargo.toml -- check-crate-deps --fix
+else
+    cargo run --quiet --manifest-path crates/dev/Cargo.toml -- check-crate-deps
+fi
 '''
 
 [tasks.'fmt']
@@ -552,38 +570,6 @@ run = '''
 #!/usr/bin/env bash
 set -euo pipefail
 cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- gen-language-catalog --check
-'''
-
-[tasks.'langs-check-versions']
-description = "Verify the CDN serves the lumis.json each catalog pin names"
-run = '''
-#!/usr/bin/env bash
-set -euo pipefail
-pins="$(awk '/package_name: "/ { gsub(/.*package_name: "|",/, ""); p=$0 }
-             /version: "/ { gsub(/.*version: "|"/, ""); print p "@" $0 }' \
-           crates/lumis-wasm-runtime/src/catalog.rs)"
-total="$(echo "$pins" | wc -l | tr -d ' ')"
-
-served="$(echo "$pins" | xargs -P 16 -I{} sh -c \
-    'code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "https://cdn.jsdelivr.net/npm/{}/lumis.json" || echo 000); if [ "$code" = "200" ]; then echo {}; fi' \
-    | wc -l | tr -d ' ')"
-
-if [ "$served" -eq 0 ]; then
-    echo "0 of $total pinned packages serve lumis.json."
-    echo "Expected: the format this branch reads is not published yet. Every"
-    echo "published package still carries metadata in package.json's lumis key."
-    echo "This becomes a failure once wasm-release publishes any of them, so the"
-    echo "gap can only shrink."
-    exit 0
-fi
-
-if [ "$served" -lt "$total" ]; then
-    echo "$served of $total pinned packages serve lumis.json." >&2
-    echo "A partial republish means some runtimes resolve a language and others" >&2
-    echo "cannot. Finish publishing, or regenerate: mise run langs-gen-catalog" >&2
-    exit 1
-fi
-echo "the CDN serves all $total pinned packages"
 '''
 
 [tasks.'langs-update']
@@ -780,7 +766,7 @@ run = '''
 #!/usr/bin/env bash
 set -euo pipefail
 mise run wasm-publish-prepare ${usage_parser?}
-wasm_name=$(cargo run -q -p dev -- wasm-meta ${usage_parser?} | grep '^wasm_name=' | cut -d= -f2)
+wasm_name=$(cargo run -q --manifest-path crates/dev/Cargo.toml -- wasm-meta ${usage_parser?} | grep '^wasm_name=' | cut -d= -f2)
 cd tmp/wasm/publish/$wasm_name && npm publish --access public
 '''
 
@@ -1036,6 +1022,7 @@ esac
 case "$kind" in
     cargo)
         cargo set-version --manifest-path "$manifest" -p "$cargo_package" "$version"
+        mise run check-crate-deps --fix
         ;;
     npm)
         npm --prefix "$(dirname "$manifest")" version --no-git-tag-version "$version"

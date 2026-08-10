@@ -1,5 +1,6 @@
 use assert_cmd::cargo::cargo_bin_cmd;
 use serde::Deserialize;
+use std::collections::BTreeMap;
 use std::fs;
 use std::path::PathBuf;
 
@@ -32,6 +33,17 @@ struct FixtureMetadata {
     theme: String,
     #[serde(default, rename = "rainbowBrackets")]
     rainbow_brackets: bool,
+    #[serde(default, rename = "htmlMultiThemes")]
+    html_multi_themes: Option<HtmlMultiThemesFixture>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct HtmlMultiThemesFixture {
+    themes: BTreeMap<String, String>,
+    default_theme: String,
+    #[serde(default)]
+    highlight_lines: Vec<usize>,
 }
 
 struct Fixture {
@@ -109,16 +121,38 @@ fn check_html_linked(fixture: &Fixture) {
 }
 
 fn check_html_multi_themes(fixture: &Fixture) {
-    let output = run_highlight_source(
-        fixture,
-        "html-multi-themes",
-        &[
-            "--themes",
-            &format!("main:{}", fixture.metadata.theme),
-            "--default-theme",
-            "main",
-        ],
-    );
+    let mut args = Vec::new();
+
+    if let Some(config) = &fixture.metadata.html_multi_themes {
+        for (name, theme) in &config.themes {
+            args.push("--themes".to_string());
+            args.push(format!("{name}:{theme}"));
+        }
+        args.push("--default-theme".to_string());
+        args.push(config.default_theme.clone());
+
+        if !config.highlight_lines.is_empty() {
+            args.push("--highlight-lines".to_string());
+            args.push(
+                config
+                    .highlight_lines
+                    .iter()
+                    .map(usize::to_string)
+                    .collect::<Vec<_>>()
+                    .join(","),
+            );
+        }
+    } else {
+        args.extend([
+            "--themes".to_string(),
+            format!("main:{}", fixture.metadata.theme),
+            "--default-theme".to_string(),
+            "main".to_string(),
+        ]);
+    }
+
+    let arg_refs = args.iter().map(String::as_str).collect::<Vec<_>>();
+    let output = run_highlight_source(fixture, "html-multi-themes", &arg_refs);
     assert_text_eq(&output, &fixture.html_multi_themes);
 }
 
