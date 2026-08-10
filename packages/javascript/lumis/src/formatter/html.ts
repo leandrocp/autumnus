@@ -315,15 +315,18 @@ export function closeTag(name: string): string {
 }
 
 /**
- * Open a `<span>` tag with the given attributes.
- *
+ * Open a `<span>` carrying the given attributes.
  * ```ts
  * openSpanTag({ class: 'l-keyword' })  // '<span class="l-keyword">'
+ * openSpanTag({})                      // '<span>'
  * ```
  */
 export function openSpanTag(attrs: HtmlAttrs = {}): string {
-  const renderedAttrs = attrsToString(attrs);
-  return renderedAttrs.length > 0 ? `<span ${renderedAttrs}>` : `<span >`;
+  return openSpan(attrsToString(attrs));
+}
+
+function openSpan(attrs: string): string {
+  return attrs.length > 0 ? `<span ${attrs}>` : "<span>";
 }
 
 /**
@@ -486,17 +489,16 @@ export function spanInlineAttrs(options: SpanInlineOptions): HtmlAttrs {
 
 /**
  * Render an inline-styled `<span>` for a token.
- *
  * ```ts
  * spanInline('const', { language: 'javascript', scope: 'keyword', theme: dracula })
  * // '<span style="color: #ff79c6;">const</span>'
+ *
+ * spanInline('const', { language: 'javascript', scope: 'keyword', theme: undefined })
+ * // '<span>const</span>'
  * ```
  */
 export function spanInline(text: string, options: SpanInlineOptions): string {
-  const escaped = escape(text);
-  const attrs = spanInlineAttrs(options);
-  const rendered = attrsToString(attrs);
-  return rendered.length > 0 ? `<span ${rendered}>${escaped}</span>` : escaped;
+  return `${openSpanTag(spanInlineAttrs(options))}${escape(text)}</span>`;
 }
 
 /**
@@ -670,14 +672,7 @@ function applyDefaultMultiTheme(
  */
 export function spanMultiThemes(text: string, options: SpanMultiThemesOptions): string {
   const escaped = escape(text);
-
-  if (Object.keys(options.themes).length === 0) {
-    return escaped;
-  }
-
-  const attrs = spanMultiThemesAttrs(options);
-  const rendered = attrsToString(attrs);
-  return rendered.length > 0 ? `<span ${rendered}>${escaped}</span>` : escaped;
+  return `${openSpanTag(spanMultiThemesAttrs(options))}${escaped}</span>`;
 }
 
 function pushThemeCssVars(
@@ -862,14 +857,21 @@ export function appendFragment(lines: string[], fragment: string): void {
   }
 }
 
+interface SpanStackEntry {
+  scope: string;
+  language: string;
+  emitted: boolean;
+}
+
 function closeOpenSpans(
   lines: string[],
-  stack: Array<{ scope: string; language: string }>,
+  stack: SpanStackEntry[],
   closeSpan: (span: HighlightSpan, style: HighlightStyle | undefined) => string,
   theme: Theme | undefined,
 ): void {
   for (let i = stack.length - 1; i >= 0; i -= 1) {
     const entry = stack[i]!;
+    if (!entry.emitted) continue;
     const style = getSpanStyle(theme, entry.scope, entry.language);
     appendFragment(lines, closeSpan(emptySpan(entry.scope, entry.language), style));
   }
@@ -877,11 +879,12 @@ function closeOpenSpans(
 
 function reopenSpans(
   lines: string[],
-  stack: Array<{ scope: string; language: string }>,
+  stack: SpanStackEntry[],
   openSpan: (span: HighlightSpan, style: HighlightStyle | undefined) => string,
   theme: Theme | undefined,
 ): void {
   for (const entry of stack) {
+    if (!entry.emitted) continue;
     const style = getSpanStyle(theme, entry.scope, entry.language);
     appendFragment(lines, openSpan(emptySpan(entry.scope, entry.language), style));
   }
@@ -890,7 +893,7 @@ function reopenSpans(
 function renderSourceEvent(
   lines: string[],
   text: string,
-  stack: Array<{ scope: string; language: string }>,
+  stack: SpanStackEntry[],
   formatText: (text: string) => string,
   openSpan: (span: HighlightSpan, style: HighlightStyle | undefined) => string,
   closeSpan: (span: HighlightSpan, style: HighlightStyle | undefined) => string,
@@ -930,20 +933,21 @@ export function formatHighlightIterLines(
   const sourceBytes = encodeSource(source);
   const lines = [""];
   let language = languageRef ? languageId(languageRef) : "plaintext";
-  const stack: Array<{ scope: string; language: string }> = [];
+  const stack: SpanStackEntry[] = [];
 
   for (const event of events) {
     if (event.type === "start") {
       const style = getSpanStyle(theme, event.scope, event.language);
       const span = emptySpan(event.scope, event.language);
-      appendFragment(lines, options.openSpan(span, style));
-      stack.push({ scope: event.scope, language: event.language });
+      const open = options.openSpan(span, style);
+      appendFragment(lines, open);
+      stack.push({ scope: event.scope, language: event.language, emitted: open.length > 0 });
       continue;
     }
 
     if (event.type === "end") {
       const top = stack.pop();
-      if (top) {
+      if (top?.emitted) {
         const style = getSpanStyle(theme, top.scope, top.language);
         const span = emptySpan(top.scope, top.language);
         appendFragment(lines, closeSpan(span, style));
@@ -962,8 +966,10 @@ export function formatHighlightIterLines(
     renderSourceEvent(lines, text, stack, formatText, options.openSpan, closeSpan, theme);
   }
 
-  while (stack.pop()) {
-    appendFragment(lines, closeSpan(emptySpan("", ""), undefined));
+  for (let entry = stack.pop(); entry; entry = stack.pop()) {
+    if (entry.emitted) {
+      appendFragment(lines, closeSpan(emptySpan("", ""), undefined));
+    }
   }
 
   return { lines, language };
@@ -983,10 +989,7 @@ export function renderLinesFromEvents(
   spanAttrs: (scope: string, language: string) => string,
 ): string[] {
   return formatHighlightIterLines(source, events, undefined, undefined, {
-    openSpan: (span) => {
-      const attrs = spanAttrs(span.scope, span.language);
-      return attrs.length > 0 ? `<span ${attrs}>` : "<span >";
-    },
+    openSpan: (span) => openSpan(spanAttrs(span.scope, span.language)),
   }).lines;
 }
 
@@ -1012,10 +1015,9 @@ export function renderEvents(
 
   for (const event of events) {
     if (event.type === "start") {
-      push("<span ");
-      attributeCallback(event.scope, event.language, html);
-      renderedLength = html.join("").length;
-      push(">");
+      const attrs: string[] = [];
+      attributeCallback(event.scope, event.language, attrs);
+      push(openSpan(attrs.join("")));
       continue;
     }
 

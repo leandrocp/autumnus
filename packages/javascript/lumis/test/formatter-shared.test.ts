@@ -117,6 +117,8 @@ describe("formatter shared helpers", () => {
     expect(closeCodeTag()).toBe("</code>");
     expect(closingTags()).toBe("</code></pre>");
     expect(openSpanTag({ class: "token" })).toBe('<span class="token">');
+    expect(openSpanTag()).toBe("<span>");
+    expect(openSpanTag({ class: undefined })).toBe("<span>");
     expect(openPreTag()).toBe('<pre class="lumis">');
     expect(openPreTag({ preClass: "custom" })).toBe('<pre class="lumis custom">');
     expect(openPreTag({ theme })).toBe(
@@ -204,6 +206,22 @@ describe("formatter shared helpers", () => {
     ]);
   });
 
+  it("keeps a deliberately omitted custom span balanced", () => {
+    const { lines } = formatHighlightIterLines(
+      "a\nb",
+      [
+        { type: "start", scope: "string", language: "json" },
+        { type: "source", startByte: 0, endByte: 3 },
+        { type: "end" },
+      ],
+      jsonLang,
+      undefined,
+      { openSpan: () => "" },
+    );
+
+    expect(lines).toEqual(["a", "b"]);
+  });
+
   it("escapes braces only through the framework helper", () => {
     expect(escapeBraces("fn() {}")).toBe("fn() &lbrace;&rbrace;");
     expect(escapeBraces("<div>{x}</div>")).toBe("<div>&lbrace;x&rbrace;</div>");
@@ -222,6 +240,51 @@ describe("formatter shared helpers", () => {
     );
 
     expect(lines).toEqual(['<span class="string">a</span>', '<span class="string">b</span>']);
+  });
+
+  it("opens a bare span for a scope whose attrs come out empty", () => {
+    const lines = renderLinesFromEvents(
+      "ab",
+      [
+        { type: "start", scope: "string", language: "json" },
+        { type: "source", startByte: 0, endByte: 1 },
+        { type: "start", scope: "unstyled", language: "json" },
+        { type: "source", startByte: 1, endByte: 2 },
+        { type: "end" },
+        { type: "end" },
+      ],
+      (scope) => (scope === "unstyled" ? "" : `class="${scope}"`),
+    );
+
+    expect(lines).toEqual(['<span class="string">a<span>b</span></span>']);
+  });
+
+  it("reopens a bare span across a newline", () => {
+    const lines = renderLinesFromEvents(
+      "a\nb",
+      [
+        { type: "start", scope: "unstyled", language: "json" },
+        { type: "source", startByte: 0, endByte: 3 },
+        { type: "end" },
+      ],
+      () => "",
+    );
+
+    expect(lines).toEqual(["<span>a</span>", "<span>b</span>"]);
+  });
+
+  it("opens a bare span in renderEvents when the callback writes nothing", () => {
+    const [html] = renderEvents(
+      "ab",
+      [
+        { type: "start", scope: "unstyled", language: "json" },
+        { type: "source", startByte: 0, endByte: 2 },
+        { type: "end" },
+      ],
+      () => {},
+    );
+
+    expect(new TextDecoder().decode(html)).toBe("<span>ab</span>");
   });
 
   it("renders event HTML and slices it back into lines", () => {
@@ -275,9 +338,9 @@ describe("formatter shared helpers", () => {
     expect(html).toContain("#22ff22");
   });
 
-  it("returns plain escaped text when no style matches", () => {
+  it("opens a bare span around escaped text when no style matches", () => {
     const html = spanInline("<b>", { language: "json", scope: "string" });
-    expect(html).toBe("&lt;b&gt;");
+    expect(html).toBe("<span>&lt;b&gt;</span>");
   });
 
   it("generates linked span attrs", () => {
@@ -313,9 +376,9 @@ describe("formatter shared helpers", () => {
     expect(html).toContain("x");
   });
 
-  it("returns plain text for multi-themes with empty themes", () => {
+  it("opens a bare multi-themes span with empty themes", () => {
     const html = spanMultiThemes("<b>", { scope: "string", language: "json", themes: {} });
-    expect(html).toBe("&lt;b&gt;");
+    expect(html).toBe("<span>&lt;b&gt;</span>");
   });
 });
 

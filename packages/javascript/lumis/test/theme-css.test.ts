@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
+import { sep } from "node:path";
 import { buildCss, type ThemeData } from "@lumis-sh/themes";
 import githubLight from "@lumis-sh/themes/github_light";
 import { describe, expect, it } from "vitest";
@@ -81,5 +82,23 @@ html[data-theme="dark"] .l-tag-attribute {
     const bundled = readFileSync(require.resolve("@lumis-sh/themes/css/github_light"), "utf-8");
 
     expect(buildCss(githubLight)).toBe(bundled);
+  });
+});
+
+// `./css/*` maps onto `./dist/css/*.css`, so it appends the extension itself and
+// the specifier every doc page shows, with one, resolved to `github_light.css.css`.
+// Both forms are mapped now, and this fails if either stops resolving or lands
+// on the wrong asset.
+describe("bundled asset specifiers", () => {
+  it.each([
+    ["@lumis-sh/themes/css/github_light.css", "dist/css/github_light.css"],
+    ["@lumis-sh/themes/css/github_light", "dist/css/github_light.css"],
+    ["@lumis-sh/themes/json/github_light.json", "dist/json/github_light.json"],
+    ["@lumis-sh/themes/json/github_light", "dist/json/github_light.json"],
+  ])("resolves %s", (specifier, target) => {
+    const resolved = require.resolve(specifier).replaceAll(sep, "/");
+
+    expect(resolved.endsWith(`/${target}`)).toBe(true);
+    expect(readFileSync(resolved, "utf-8").length).toBeGreaterThan(0);
   });
 });
