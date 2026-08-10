@@ -5,7 +5,7 @@ import treeSitterWasmBinary from "../tree-sitter-wasm.js";
 const WASM_CACHE_NAME = "lumis-wasm-v1";
 const WASM_DATABASE_NAME = "lumis-wasm-v1";
 const WASM_DATABASE_STORE = "parsers";
-const cacheLocks = new Map<string, Promise<unknown>>();
+const cacheLocks = new Map<string, Promise<void>>();
 let wasmCache: Promise<Cache | undefined> | undefined;
 let wasmDatabase: Promise<IDBDatabase | undefined> | undefined;
 let indexedDbPreferred: boolean | undefined;
@@ -150,11 +150,15 @@ export const browserRuntime: RuntimeEnvironment = {
   async withFsCacheLock(key, operation) {
     const previous = cacheLocks.get(key);
     const pending = (previous ?? Promise.resolve()).catch(() => undefined).then(operation);
-    cacheLocks.set(key, pending);
+    const lock = pending.then(
+      () => undefined,
+      () => undefined,
+    );
+    cacheLocks.set(key, lock);
     try {
       return await pending;
     } finally {
-      if (cacheLocks.get(key) === pending) {
+      if (cacheLocks.get(key) === lock) {
         cacheLocks.delete(key);
       }
     }

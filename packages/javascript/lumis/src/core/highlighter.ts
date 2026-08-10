@@ -303,16 +303,16 @@ async function runFormatterAsync(
   return runFormatter(runtime, source, fmt, detectedRef);
 }
 
-function isObjectLike(value: unknown): value is Record<string, unknown> {
+function isObjectLike(value: unknown): value is object {
   return (typeof value === "object" && value !== null) || typeof value === "function";
 }
 
-function isLanguageLike(value: unknown): value is Record<string, unknown> {
+function isLanguageLike(value: unknown): boolean {
   return isObjectLike(value) && LANGUAGE_SHAPE_FIELDS.some((field) => field in value);
 }
 
 function isLanguageDefinition(value: unknown): value is LanguageDefinition {
-  if (!isObjectLike(value)) return false;
+  if (!isObjectLike(value) || !("id" in value) || !("aliases" in value)) return false;
   return (
     typeof value.id === "string" &&
     value.id.length > 0 &&
@@ -347,7 +347,8 @@ function validateLanguageBoundary(value: unknown): void {
   if (!isLanguageDefinition(value)) throw malformedLanguageDefinition();
 
   for (const field of LANGUAGE_QUERY_FIELDS) {
-    if (field in value && typeof value[field] !== "string") {
+    const query: unknown = Reflect.get(value, field);
+    if (field in value && typeof query !== "string") {
       throw incompleteLanguageDefinition(value.id);
     }
   }

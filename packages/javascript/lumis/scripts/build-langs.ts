@@ -9,6 +9,7 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { parse as parseToml } from "smol-toml";
+import { parseLanguagesToml, type LanguagesToml } from "./languages-toml.js";
 
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../../../..");
 const OUT_DIR = path.resolve(import.meta.dirname, "../langs");
@@ -32,28 +33,9 @@ function pinnedVersions(): Map<string, string> {
   return versions;
 }
 
-interface ParserEntry {
-  aliases?: string[];
-  emacs?: string[];
-  shebang?: string[];
-  wasm_name?: string;
-  display_name?: string;
-  variant?: string;
-  globs?: string[];
-}
-
-interface BundleEntry {
-  parsers: string[] | "all";
-}
-
-interface LanguagesToml {
-  parsers: Record<string, ParserEntry>;
-  bundles?: Record<string, BundleEntry>;
-}
-
 function readLanguagesToml(): LanguagesToml {
   const text = fs.readFileSync(LANGUAGES_TOML, "utf-8");
-  return parseToml(text) as unknown as LanguagesToml;
+  return parseLanguagesToml(parseToml(text));
 }
 
 function main() {

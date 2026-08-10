@@ -252,51 +252,11 @@ export function parseLanguagePackage(
   if (!hasValidRawJsonProfile(json)) {
     throw new Error(`Invalid Lumis language package: ${expectedPackageName}`);
   }
-  const parsed = JSON.parse(json) as unknown;
+  const parsed: unknown = JSON.parse(json);
   if (!hasOnlyUnicodeScalarStrings(parsed)) {
     throw new Error(`Invalid Lumis language package: ${expectedPackageName}`);
   }
-  const value = parsed as LanguagePackage;
-  const languages =
-    typeof value.languages === "object" &&
-    value.languages !== null &&
-    !Array.isArray(value.languages)
-      ? Object.values(value.languages)
-      : [];
-  if (
-    value.packageName !== expectedPackageName ||
-    !isValidPackageName(expectedPackageName) ||
-    typeof value.version !== "string" ||
-    !isSafePackagePathSegment(value.version) ||
-    typeof value.definitionHash !== "string" ||
-    value.definitionHash.length === 0 ||
-    typeof value.parser?.name !== "string" ||
-    !isSafePackagePathSegment(value.parser.name) ||
-    typeof value.parser?.grammarName !== "string" ||
-    value.parser.grammarName.length === 0 ||
-    (value.parser.upstreamVersion !== undefined &&
-      value.parser.upstreamVersion !== null &&
-      typeof value.parser.upstreamVersion !== "string") ||
-    (value.parser.revision !== undefined &&
-      value.parser.revision !== null &&
-      typeof value.parser.revision !== "string") ||
-    typeof value.parser?.sha256 !== "string" ||
-    !/^[0-9a-f]{64}$/.test(value.parser.sha256) ||
-    !Number.isSafeInteger(value.parser?.size) ||
-    value.parser.size <= 0 ||
-    languages.length === 0 ||
-    languages.some(
-      (language) =>
-        !Array.isArray(language.aliases) ||
-        language.aliases.some((alias) => typeof alias !== "string") ||
-        typeof language.highlights !== "string" ||
-        (language.injections !== undefined && typeof language.injections !== "string") ||
-        (language.locals !== undefined && typeof language.locals !== "string") ||
-        (language.brackets !== undefined && typeof language.brackets !== "string"),
-    )
-  ) {
-    throw new Error(`Invalid Lumis language package: ${expectedPackageName}`);
-  }
+  const value = parseLanguagePackageValue(parsed, expectedPackageName);
   const owners = new Map<string, string>();
   for (const [id, language] of Object.entries(value.languages)) {
     const owner = normalizeLanguageName(id);
@@ -312,9 +272,108 @@ export function parseLanguagePackage(
       owners.set(normalizeLanguageName(alias), owner);
     }
   }
-  if (value.parser.upstreamVersion === null) delete value.parser.upstreamVersion;
-  if (value.parser.revision === null) delete value.parser.revision;
   return value;
+}
+
+function invalidLanguagePackage(expectedPackageName: string): never {
+  throw new Error(`Invalid Lumis language package: ${expectedPackageName}`);
+}
+
+function requireObject(value: unknown, expectedPackageName: string): object {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return invalidLanguagePackage(expectedPackageName);
+  }
+  return value;
+}
+
+function property(value: object, key: string): unknown {
+  const result: unknown = Reflect.get(value, key);
+  return result;
+}
+
+function requireString(value: unknown, expectedPackageName: string): string {
+  return typeof value === "string" ? value : invalidLanguagePackage(expectedPackageName);
+}
+
+function optionalString(value: unknown, expectedPackageName: string): string | undefined {
+  if (value === undefined) return undefined;
+  return requireString(value, expectedPackageName);
+}
+
+function optionalNullableString(value: unknown, expectedPackageName: string): string | undefined {
+  if (value === undefined || value === null) return undefined;
+  return requireString(value, expectedPackageName);
+}
+
+function requireStringArray(value: unknown, expectedPackageName: string): string[] {
+  if (!Array.isArray(value)) return invalidLanguagePackage(expectedPackageName);
+  return value.map((entry) => requireString(entry, expectedPackageName));
+}
+
+function parsePackagedLanguage(value: unknown, expectedPackageName: string): PackagedLanguage {
+  const language = requireObject(value, expectedPackageName);
+  return {
+    aliases: requireStringArray(property(language, "aliases"), expectedPackageName),
+    highlights: requireString(property(language, "highlights"), expectedPackageName),
+    injections: optionalString(property(language, "injections"), expectedPackageName),
+    locals: optionalString(property(language, "locals"), expectedPackageName),
+    brackets: optionalString(property(language, "brackets"), expectedPackageName),
+  };
+}
+
+function parseLanguagePackageValue(value: unknown, expectedPackageName: string): LanguagePackage {
+  const packageValue = requireObject(value, expectedPackageName);
+  const packageName = requireString(property(packageValue, "packageName"), expectedPackageName);
+  const version = requireString(property(packageValue, "version"), expectedPackageName);
+  const definitionHash = requireString(
+    property(packageValue, "definitionHash"),
+    expectedPackageName,
+  );
+  const parserValue = requireObject(property(packageValue, "parser"), expectedPackageName);
+  const parserName = requireString(property(parserValue, "name"), expectedPackageName);
+  const grammarName = requireString(property(parserValue, "grammarName"), expectedPackageName);
+  const sha256 = requireString(property(parserValue, "sha256"), expectedPackageName);
+  const size = property(parserValue, "size");
+  const languagesValue = requireObject(property(packageValue, "languages"), expectedPackageName);
+
+  if (
+    packageName !== expectedPackageName ||
+    !isValidPackageName(expectedPackageName) ||
+    !isSafePackagePathSegment(version) ||
+    definitionHash.length === 0 ||
+    !isSafePackagePathSegment(parserName) ||
+    grammarName.length === 0 ||
+    !/^[0-9a-f]{64}$/.test(sha256) ||
+    typeof size !== "number" ||
+    !Number.isSafeInteger(size) ||
+    size <= 0
+  ) {
+    return invalidLanguagePackage(expectedPackageName);
+  }
+
+  const languages: Record<string, PackagedLanguage> = Object.create(null);
+  for (const id of Object.keys(languagesValue)) {
+    languages[id] = parsePackagedLanguage(property(languagesValue, id), expectedPackageName);
+  }
+  if (Object.keys(languages).length === 0) return invalidLanguagePackage(expectedPackageName);
+
+  return {
+    packageName,
+    version,
+    definitionHash,
+    parser: {
+      name: parserName,
+      grammarName,
+      upstreamVersion: optionalNullableString(
+        property(parserValue, "upstreamVersion"),
+        expectedPackageName,
+      ),
+      revision: optionalNullableString(property(parserValue, "revision"), expectedPackageName),
+      sha256,
+      size,
+    },
+    languages,
+  };
 }
 
 // JSON.parse discards overwritten members and turns 1e400 into Infinity, so
@@ -860,10 +919,16 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
       const bytes = await runtime.readFsCache(languagePackageCacheKey(packageName));
       if (!bytes) return undefined;
       try {
-        const cached = JSON.parse(decoder.decode(bytes)) as CachedLanguagePackage;
-        const serialized = encoder.encode(JSON.stringify(cached.package));
+        const value: unknown = JSON.parse(decoder.decode(bytes));
+        const cached = requireObject(value, packageName);
+        const checkedAt = property(cached, "checkedAt");
+        const serializedPackage = JSON.stringify(property(cached, "package"));
+        if (typeof checkedAt !== "number" || !Number.isFinite(checkedAt) || !serializedPackage) {
+          return undefined;
+        }
+        const serialized = encoder.encode(serializedPackage);
         return {
-          checkedAt: cached.checkedAt,
+          checkedAt,
           package: parseLanguagePackage(serialized, packageName),
         };
       } catch {
@@ -881,7 +946,7 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
           /* @vite-ignore */
           packageName
         );
-        const base = mod.default as unknown;
+        const base: unknown = mod.default;
         if (!(base instanceof URL) && typeof base !== "string") return undefined;
         const source = new URL("./lumis.json", base instanceof URL ? base : new URL(base));
         const disk = await runtime.readResolvedWasmFromDisk(source);
@@ -977,7 +1042,7 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
           /* @vite-ignore */
           ref.packageName
         );
-        const input = mod.default as unknown;
+        const input: unknown = mod.default;
         if (
           input instanceof Uint8Array ||
           input instanceof ArrayBuffer ||
