@@ -15,13 +15,19 @@ export interface UseLumisOptions extends LumisOptions {}
 
 export interface UseLumisResult {
   content: ReactNode | null;
-  error: unknown;
+  error: Error | undefined;
   isLoading: boolean;
+}
+
+function normalizeError(error: unknown): Error {
+  return error instanceof Error
+    ? error
+    : new Error("Failed to render code block", { cause: error });
 }
 
 export function useLumis(options: UseLumisOptions): UseLumisResult {
   const [asyncContent, setAsyncContent] = useState<ReactNode>(undefined);
-  const [asyncError, setAsyncError] = useState<unknown>();
+  const [asyncError, setAsyncError] = useState<Error>();
   const highlighter = getHighlighter(options.highlighter);
 
   const syncState = useMemo(() => {
@@ -76,7 +82,7 @@ export function useLumis(options: UseLumisOptions): UseLumisResult {
 
       return {
         content: null,
-        error,
+        error: normalizeError(error),
         needsLoad: false,
       };
     }
@@ -102,7 +108,7 @@ export function useLumis(options: UseLumisOptions): UseLumisResult {
       })
       .catch((error) => {
         if (active) {
-          setAsyncError(error);
+          setAsyncError(normalizeError(error));
         }
       });
 

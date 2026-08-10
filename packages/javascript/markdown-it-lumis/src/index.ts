@@ -2,6 +2,7 @@ import type MarkdownIt from "markdown-it";
 import type {
   Highlighter,
   Language,
+  LanguageDefinition,
   LanguageInput,
   LanguageRef,
   LazyLanguage,
@@ -45,32 +46,43 @@ function splitLanguages(entries: Array<LanguageInput | LanguageRef>): {
       refs.push(entry);
       continue;
     }
-
-    inputs.push(entry as LanguageInput);
-    if (isLanguageRef(entry)) {
+    if (isLazyLanguage(entry)) {
+      inputs.push({ [entry.id]: entry });
       refs.push(entry);
+      continue;
     }
+    if (isLanguageDefinition(entry)) {
+      if (isLanguage(entry)) inputs.push(entry);
+      refs.push(entry);
+      continue;
+    }
+    inputs.push(entry);
   }
 
   return { inputs, refs };
 }
 
-function isLanguage(value: unknown): value is Language {
+function isLanguageDefinition(value: LanguageInput | LanguageRef): value is LanguageDefinition {
   return (
     typeof value === "object" &&
     value !== null &&
     "id" in value &&
-    "highlights" in value &&
-    "wasm" in value
+    typeof value.id === "string" &&
+    "aliases" in value &&
+    Array.isArray(value.aliases) &&
+    value.aliases.every((alias) => typeof alias === "string")
   );
 }
 
-function isLazyLanguage(value: unknown): value is LazyLanguage {
-  return typeof value === "function" && "id" in value && "aliases" in value;
+function isLanguage(value: LanguageInput | LanguageRef): value is Language {
+  return (
+    isLanguageDefinition(value) &&
+    (value.id === "plaintext" || ("packageName" in value && typeof value.packageName === "string"))
+  );
 }
 
-function isLanguageRef(value: unknown): value is LanguageRef {
-  return isLanguage(value) || isLazyLanguage(value);
+function isLazyLanguage(value: LanguageInput | LanguageRef): value is LazyLanguage {
+  return typeof value === "function" && "id" in value && "aliases" in value;
 }
 
 export function fromHighlighter(highlighter: Highlighter, options: MarkdownItLumisOptions) {

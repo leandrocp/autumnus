@@ -58,6 +58,17 @@ describe("markdown-it-lumis", () => {
 
       expect(html).toMatch(/<pre class="lumis my-pre"/);
     });
+
+    it("loads an identifier-only reference from a registered bundle", async () => {
+      const plugin = await markdownItLumis({
+        formatter: (language) => htmlInline({ language, theme: dracula }),
+        languages: [bundledLanguages, { id: "javascript", aliases: ["js"] }],
+      });
+      const md = new MarkdownIt();
+      md.use(plugin);
+
+      expect(md.render(JS_SOURCE)).toContain('class="language-javascript"');
+    });
   });
 
   describe("htmlLinked formatter", () => {

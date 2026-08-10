@@ -1,10 +1,30 @@
 import { createRequire } from "node:module";
+import type { HtmlInlineOptions, HtmlLinkedOptions, TerminalOptions } from "./types.js";
 
-export interface NativeFormatter {
+type NativeHtmlInlineOptions = Pick<
+  HtmlInlineOptions,
+  "theme" | "preClass" | "italic" | "includeHighlights" | "highlightLines" | "header"
+>;
+type NativeHtmlLinkedOptions = Pick<HtmlLinkedOptions, "preClass" | "highlightLines" | "header">;
+type NativeTerminalOptions = Pick<TerminalOptions, "theme">;
+
+interface NativeFormatterBase {
   rainbowBrackets?: boolean;
-  kind: string;
-  options: Record<string, unknown>;
 }
+
+export type NativeFormatter = NativeFormatterBase &
+  (
+    | {
+        kind: "html-inline";
+        options: NativeHtmlInlineOptions;
+      }
+    | {
+        kind: "html-linked";
+        options: NativeHtmlLinkedOptions;
+      }
+    | { kind: "bbcode-scoped"; options: null }
+    | { kind: "terminal"; options: NativeTerminalOptions }
+  );
 
 export interface NativeLanguageSpec {
   id: string;

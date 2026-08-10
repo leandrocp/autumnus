@@ -24,21 +24,28 @@ function splitLanguages(entries) {
       refs.push(entry);
       continue;
     }
-    inputs.push(entry);
-    if (isLanguageRef(entry)) {
+    if (isLazyLanguage(entry)) {
+      inputs.push({ [entry.id]: entry });
       refs.push(entry);
+      continue;
     }
+    if (isLanguageDefinition(entry)) {
+      if (isLanguage(entry)) inputs.push(entry);
+      refs.push(entry);
+      continue;
+    }
+    inputs.push(entry);
   }
   return { inputs, refs };
 }
+function isLanguageDefinition(value) {
+  return typeof value === "object" && value !== null && "id" in value && typeof value.id === "string" && "aliases" in value && Array.isArray(value.aliases) && value.aliases.every((alias) => typeof alias === "string");
+}
 function isLanguage(value) {
-  return typeof value === "object" && value !== null && "id" in value && "highlights" in value && "wasm" in value;
+  return isLanguageDefinition(value) && (value.id === "plaintext" || "packageName" in value && typeof value.packageName === "string");
 }
 function isLazyLanguage(value) {
   return typeof value === "function" && "id" in value && "aliases" in value;
-}
-function isLanguageRef(value) {
-  return isLanguage(value) || isLazyLanguage(value);
 }
 function fromHighlighter(highlighter, options) {
   return function installMarkdownItLumis(md) {

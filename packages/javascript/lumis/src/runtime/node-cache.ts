@@ -124,8 +124,20 @@ export function lockOwnerIsGone(owner: LockOwner | undefined, host: string): boo
 async function readLockOwner(lockPath: string): Promise<LockOwner | undefined> {
   const { readFile } = await import(nodeFsPromises);
   try {
-    const owner = JSON.parse(await readFile(lockPath, "utf8")) as LockOwner;
-    return typeof owner?.host === "string" && typeof owner?.pid === "number" ? owner : undefined;
+    const owner: unknown = JSON.parse(await readFile(lockPath, "utf8"));
+    if (
+      typeof owner !== "object" ||
+      owner === null ||
+      !("host" in owner) ||
+      typeof owner.host !== "string" ||
+      !("pid" in owner) ||
+      typeof owner.pid !== "number" ||
+      !Number.isInteger(owner.pid) ||
+      owner.pid <= 0
+    ) {
+      return undefined;
+    }
+    return { host: owner.host, pid: owner.pid };
   } catch {
     return undefined;
   }

@@ -2,32 +2,25 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { parse as parseToml } from "smol-toml";
+import {
+  parseLanguagesToml,
+  type BundleEntry,
+  type LanguagesToml,
+  type ParserEntry,
+} from "../lumis/scripts/languages-toml.js";
 
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../../..");
 const LANGUAGES_TOML = path.join(WORKSPACE_ROOT, "languages.toml");
 const LUMIS_PACKAGE_JSON = path.resolve(import.meta.dirname, "../lumis/package.json");
 const PACKAGES_DIR = path.join(WORKSPACE_ROOT, "packages", "javascript");
 
-interface ParserEntry {
-  wasm_name?: string;
-}
-
-interface BundleEntry {
-  parsers: string[] | "all";
-}
-
 interface BundlePackageJson {
   version?: string;
 }
 
-interface LanguagesToml {
-  parsers: Record<string, ParserEntry>;
-  bundles?: Record<string, BundleEntry>;
-}
-
 function readLanguagesToml(): LanguagesToml {
   const text = fs.readFileSync(LANGUAGES_TOML, "utf-8");
-  return parseToml(text) as unknown as LanguagesToml;
+  return parseLanguagesToml(parseToml(text));
 }
 
 function treeSitterCompatRange(): string {
