@@ -35,6 +35,27 @@ describe("languages.toml parsing", () => {
     ["parser entry", 'parsers.javascript = "javascript"', "parsers.javascript"],
     ["parser field", "[parsers.javascript]\naliases = [1]", "parsers.javascript.aliases"],
     ["bundle field", "[parsers.javascript]\n[bundles.web]\nparsers = true", "bundles.web.parsers"],
+    ["empty parser ID", '[parsers.""]', "parsers."],
+    ["dot-segment parser ID", '[parsers.".."]', "parsers..."],
+    ["slash in parser ID", '[parsers."../outside"]', "parsers.../outside"],
+    ["backslash in parser ID", "[parsers.'outside\\parser']", "parsers.outside\\parser"],
+    ["empty bundle name", '[parsers.javascript]\n[bundles.""]\nparsers = []', "bundles."],
+    ["dot-segment bundle name", '[parsers.javascript]\n[bundles."."]\nparsers = []', "bundles.."],
+    [
+      "slash in bundle name",
+      '[parsers.javascript]\n[bundles."web/extra"]\nparsers = []',
+      "bundles.web/extra",
+    ],
+    [
+      "backslash in bundle name",
+      "[parsers.javascript]\n[bundles.'web\\extra']\nparsers = []",
+      "bundles.web\\extra",
+    ],
+    [
+      "unknown bundle parser",
+      '[parsers.javascript]\n[bundles.web]\nparsers = ["missing"]',
+      "bundles.web.parsers",
+    ],
   ])("rejects an invalid %s", (_name, text, path) => {
     expect(() => parseLanguagesToml(parseToml(text))).toThrow(`Invalid languages.toml: ${path}`);
   });

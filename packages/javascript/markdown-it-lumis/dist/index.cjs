@@ -34,18 +34,24 @@ function splitLanguages(entries) {
       refs.push(entry);
       continue;
     }
+    if (hasLanguageMetadata(entry)) {
+      throw new TypeError("Invalid markdown-it-lumis language metadata");
+    }
     inputs.push(entry);
   }
   return { inputs, refs };
 }
 function isLanguageDefinition(value) {
-  return typeof value === "object" && value !== null && "id" in value && typeof value.id === "string" && "aliases" in value && Array.isArray(value.aliases) && value.aliases.every((alias) => typeof alias === "string");
+  return typeof value === "object" && value !== null && "id" in value && typeof value.id === "string" && value.id.length > 0 && "aliases" in value && Array.isArray(value.aliases) && value.aliases.every((alias) => typeof alias === "string");
 }
 function isLanguage(value) {
   return isLanguageDefinition(value) && (value.id === "plaintext" || "packageName" in value && typeof value.packageName === "string");
 }
 function isLazyLanguage(value) {
-  return typeof value === "function" && "id" in value && "aliases" in value;
+  return typeof value === "function" && "id" in value && typeof value.id === "string" && value.id.length > 0 && "aliases" in value && Array.isArray(value.aliases) && value.aliases.every((alias) => typeof alias === "string");
+}
+function hasLanguageMetadata(value) {
+  return (typeof value === "object" && value !== null || typeof value === "function") && ("id" in value || "aliases" in value);
 }
 function fromHighlighter(highlighter, options) {
   return function installMarkdownItLumis(md) {

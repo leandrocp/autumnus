@@ -23,6 +23,12 @@ function invalid(path: string): never {
   throw new Error(`Invalid languages.toml: ${path}`);
 }
 
+function requireSafeName(value: string, path: string): void {
+  if (value.length === 0 || value === "." || value === ".." || /[/\\]/.test(value)) {
+    invalid(path);
+  }
+}
+
 function requireTable(
   value: TomlValueWithoutBigInt | undefined,
   path: string,
@@ -87,13 +93,27 @@ function parseBundle(value: TomlValueWithoutBigInt, name: string): BundleEntry {
 export function parseLanguagesToml(document: TomlTableWithoutBigInt): LanguagesToml {
   const parserTable = requireTable(document.parsers, "parsers");
   const parsers = Object.fromEntries(
-    Object.entries(parserTable).map(([id, value]) => [id, parseParser(value, id)]),
+    Object.entries(parserTable).map(([id, value]) => {
+      requireSafeName(id, `parsers.${id}`);
+      return [id, parseParser(value, id)];
+    }),
   );
 
   if (document.bundles === undefined) return { parsers };
   const bundleTable = requireTable(document.bundles, "bundles");
   const bundles = Object.fromEntries(
-    Object.entries(bundleTable).map(([name, value]) => [name, parseBundle(value, name)]),
+    Object.entries(bundleTable).map(([name, value]) => {
+      const path = `bundles.${name}`;
+      requireSafeName(name, path);
+      const bundle = parseBundle(value, name);
+      if (
+        bundle.parsers !== "all" &&
+        bundle.parsers.some((id) => id !== "plaintext" && !Object.hasOwn(parsers, id))
+      ) {
+        return invalid(`${path}.parsers`);
+      }
+      return [name, bundle];
+    }),
   );
   return { parsers, bundles };
 }

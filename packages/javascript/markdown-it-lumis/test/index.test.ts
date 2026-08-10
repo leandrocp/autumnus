@@ -11,6 +11,7 @@ import {
   configureWasmResolver,
   createHighlighter,
 } from "@lumis-sh/lumis";
+import type { LanguageRef } from "@lumis-sh/lumis";
 import { htmlInline, htmlLinked, htmlMultiThemes, terminal } from "@lumis-sh/lumis/formatters";
 import { bundledLanguages } from "@lumis-sh/lumis/bundles/web";
 
@@ -67,7 +68,10 @@ describe("markdown-it-lumis", () => {
       const md = new MarkdownIt();
       md.use(plugin);
 
-      expect(md.render(JS_SOURCE)).toContain('class="language-javascript"');
+      const html = md.render(JS_SOURCE);
+
+      expect(html).toContain('class="language-javascript"');
+      expect(html).toMatch(/<span style="color: #[0-9a-f]+;">const<\/span>/);
     });
   });
 
@@ -133,6 +137,23 @@ describe("markdown-it-lumis", () => {
   });
 
   describe("language handling", () => {
+    it.each([
+      ["empty definition ID", { id: "", aliases: [] }],
+      ["non-string definition alias", { id: "javascript", aliases: [1] }],
+      ["empty lazy ID", Object.assign(async () => javascript, { id: "", aliases: [] })],
+      [
+        "non-string lazy alias",
+        Object.assign(async () => javascript, { id: "javascript", aliases: [1] }),
+      ],
+    ])("rejects %s at the adapter boundary", async (_name, language) => {
+      await expect(
+        markdownItLumis({
+          formatter: (name) => htmlInline({ language: name, theme: dracula }),
+          languages: [language as unknown as LanguageRef],
+        }),
+      ).rejects.toThrow("Invalid markdown-it-lumis language metadata");
+    });
+
     it("auto-detects unannotated fences", async () => {
       const plugin = await markdownItLumis({
         formatter: (language) => htmlInline({ language, theme: dracula }),

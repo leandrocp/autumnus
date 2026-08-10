@@ -56,6 +56,9 @@ function splitLanguages(entries: Array<LanguageInput | LanguageRef>): {
       refs.push(entry);
       continue;
     }
+    if (hasLanguageMetadata(entry)) {
+      throw new TypeError("Invalid markdown-it-lumis language metadata");
+    }
     inputs.push(entry);
   }
 
@@ -68,6 +71,7 @@ function isLanguageDefinition(value: LanguageInput | LanguageRef): value is Lang
     value !== null &&
     "id" in value &&
     typeof value.id === "string" &&
+    value.id.length > 0 &&
     "aliases" in value &&
     Array.isArray(value.aliases) &&
     value.aliases.every((alias) => typeof alias === "string")
@@ -82,7 +86,22 @@ function isLanguage(value: LanguageInput | LanguageRef): value is Language {
 }
 
 function isLazyLanguage(value: LanguageInput | LanguageRef): value is LazyLanguage {
-  return typeof value === "function" && "id" in value && "aliases" in value;
+  return (
+    typeof value === "function" &&
+    "id" in value &&
+    typeof value.id === "string" &&
+    value.id.length > 0 &&
+    "aliases" in value &&
+    Array.isArray(value.aliases) &&
+    value.aliases.every((alias) => typeof alias === "string")
+  );
+}
+
+function hasLanguageMetadata(value: LanguageInput | LanguageRef): boolean {
+  return (
+    ((typeof value === "object" && value !== null) || typeof value === "function") &&
+    ("id" in value || "aliases" in value)
+  );
 }
 
 export function fromHighlighter(highlighter: Highlighter, options: MarkdownItLumisOptions) {
