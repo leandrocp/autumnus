@@ -81,6 +81,54 @@ describe("cacheLanguages", () => {
     expect(packageResolver).toHaveBeenCalledOnce();
   });
 
+  // Mirrors `a_failed_forced_refresh_preserves_the_previous_offline_cache` in
+  // crates/lumis-wasm-runtime. `parsers/<suffix>.lumis.json` is the file the Rust
+  // store reads, so replacing it before its parser is cached breaks the CLI and
+  // Elixir too, not only this runtime.
+  it("preserves the previous offline cache when a forced refresh fails", async () => {
+    const directory = await temporaryDirectory();
+    const resolver = (language: string, wasm: { name: string }) =>
+      ensureLocalParserWasm(language, wasm.name);
+    const first = await cacheLanguages(["diff"], {
+      directory,
+      resolver,
+      languagePackageResolver: localLanguagePackageResolver,
+    });
+    const cachedVersion = first[0]!.wasm.version;
+    const shared = join(directory, "parsers", "diff.lumis.json");
+    expect(JSON.parse(readFileSync(shared, "utf8")).version).toBe(cachedVersion);
+
+    const newer = structuredClone(localLanguagePackageMetadata("@lumis-sh/wasm-diff"));
+    newer.version = "0.26.9999";
+    const dataUrl = `data:application/json;base64,${Buffer.from(JSON.stringify(newer)).toString(
+      "base64",
+    )}`;
+
+    await expect(
+      cacheLanguages(["diff"], {
+        directory,
+        force: true,
+        resolver: () => {
+          throw new Error("parser unavailable");
+        },
+        languagePackageResolver: () => dataUrl,
+      }),
+    ).rejects.toThrow("parser unavailable");
+
+    expect(JSON.parse(readFileSync(shared, "utf8")).version).toBe(cachedVersion);
+
+    const offline = await cacheLanguages(["diff"], {
+      directory,
+      resolver: () => {
+        throw new Error("the store must still be complete offline");
+      },
+      languagePackageResolver: () => {
+        throw new Error("the store must still be complete offline");
+      },
+    });
+    expect(offline[0]).toMatchObject({ language: "diff", downloaded: false });
+  });
+
   it("rejects an incompatible package returned by a custom resolver", async () => {
     const directory = await temporaryDirectory();
     const packageMetadata = structuredClone(localLanguagePackageMetadata("@lumis-sh/wasm-diff"));

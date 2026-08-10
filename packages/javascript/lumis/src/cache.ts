@@ -155,6 +155,7 @@ export async function cacheLanguages(
   const languages = await Promise.all([...names].map(loadLanguage));
   const seen = new Set<string>();
   const packages = new Map<string, LanguagePackage>();
+  const persisted = new Set<string>();
   const cached: CachedLanguage[] = [];
 
   for (const language of languages) {
@@ -178,12 +179,6 @@ export async function cacheLanguages(
       }
       packageMetadata ??= await fetchLanguagePackage(packageName, packageResolver);
       packages.set(packageName, packageMetadata);
-      await writeCachedWasm(
-        languagePackageCacheKey(packageName),
-        serializeLanguagePackageCache(packageMetadata),
-        directory,
-      );
-      await writeSharedLanguagePackage(packageName, packageMetadata, directory);
     }
     const packaged = packageMetadata.languages[language.id];
     if (!packaged) {
@@ -228,6 +223,19 @@ export async function cacheLanguages(
       },
       directory,
     );
+
+    // A manifest names a parser, so it is only writable once that parser is in
+    // the store. Replacing it first leaves a forced refresh that failed halfway
+    // pointing every runtime sharing this directory at bytes nothing holds.
+    if (!persisted.has(packageName)) {
+      persisted.add(packageName);
+      await writeCachedWasm(
+        languagePackageCacheKey(packageName),
+        serializeLanguagePackageCache(packageMetadata),
+        directory,
+      );
+      await writeSharedLanguagePackage(packageName, packageMetadata, directory);
+    }
 
     cached.push({ language: language.id, wasm: ref, ...result });
   }
