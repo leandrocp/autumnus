@@ -605,24 +605,34 @@ describe("htmlMultiThemes", () => {
     expect(html).toContain('style="color: #eeeeee; background-color: #44475a;"');
   });
 
-  // `style: "theme"` used to be dropped in `light-dark()` mode, so a marked line
-  // came back with no style at all and the option looked like it did nothing.
-  it("highlights lines in both colour schemes", () => {
+  function renderLightDarkHighlightedLine(
+    lightBackground: string | undefined,
+    darkBackground: string | undefined,
+  ): string {
     const light = {
       ...theme,
       highlights: {
         ...theme.highlights,
-        highlighted: { ...theme.highlights.highlighted, fg: "#111111" },
+        highlighted: {
+          ...theme.highlights.highlighted,
+          fg: "#111111",
+          bg: lightBackground,
+        },
       },
     };
     const dark = {
       ...draculaTheme,
       highlights: {
         ...draculaTheme.highlights,
-        highlighted: { ...draculaTheme.highlights.highlighted, fg: "#eeeeee" },
+        highlighted: {
+          ...draculaTheme.highlights.highlighted,
+          fg: "#eeeeee",
+          bg: darkBackground,
+        },
       },
     };
-    const html = hl.highlight(
+
+    return hl.highlight(
       '{"a": 1}',
       htmlMultiThemes({
         language: json,
@@ -631,7 +641,21 @@ describe("htmlMultiThemes", () => {
         highlightLines: { lines: [1], style: "theme" },
       }),
     );
+  }
+
+  it("highlights lines in both colour schemes", () => {
+    const html = renderLightDarkHighlightedLine("#2f334d", "#44475a");
+
     expect(html).toContain('style="background-color: light-dark(#2f334d, #44475a);"');
+  });
+
+  it.each([
+    ["light", undefined, "#44475a"],
+    ["dark", "#2f334d", undefined],
+  ])("does not style lines without the %s highlighted background", (_theme, lightBg, darkBg) => {
+    const html = renderLightDarkHighlightedLine(lightBg, darkBg);
+
+    expect(html).toContain('<div class="l-line" data-line="1">');
   });
 
   it("wraps output with header element", () => {

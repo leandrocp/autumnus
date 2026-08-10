@@ -378,16 +378,24 @@ mod tests {
         );
     }
 
-    fn render_highlighted_line(default_theme: DefaultTheme) -> String {
+    fn render_highlighted_line(
+        default_theme: DefaultTheme,
+        light_background: Option<&str>,
+        dark_background: Option<&str>,
+    ) -> String {
         use crate::formatter::html_inline::{HighlightLines, HighlightLinesStyle};
 
         let mut themes = HashMap::new();
         let mut light = crate::themes::get("catppuccin_latte").unwrap();
-        light.highlights.get_mut("highlighted").unwrap().fg = Some("#111111".to_string());
+        let light_highlighted = light.highlights.get_mut("highlighted").unwrap();
+        light_highlighted.fg = Some("#111111".to_string());
+        light_highlighted.bg = light_background.map(str::to_string);
         themes.insert("light".to_string(), light);
 
         let mut dark = crate::themes::get("catppuccin_mocha").unwrap();
-        dark.highlights.get_mut("highlighted").unwrap().fg = Some("#eeeeee".to_string());
+        let dark_highlighted = dark.highlights.get_mut("highlighted").unwrap();
+        dark_highlighted.fg = Some("#eeeeee".to_string());
+        dark_highlighted.bg = dark_background.map(str::to_string);
         themes.insert("dark".to_string(), dark);
 
         let formatter = HtmlMultiThemes::new(
@@ -422,21 +430,48 @@ mod tests {
             "wrong line: {line_tag}"
         );
 
-        attr_value(line_tag, "style").to_string()
+        line_tag.to_string()
     }
 
     #[test]
     fn theme_highlight_lines_follow_the_colour_scheme() {
+        let line_tag =
+            render_highlighted_line(DefaultTheme::LightDark, Some("#e9ebf1"), Some("#2a2b3c"));
         assert_eq!(
-            render_highlighted_line(DefaultTheme::LightDark),
+            attr_value(&line_tag, "style"),
             "background-color: light-dark(#e9ebf1, #2a2b3c);"
         );
     }
 
     #[test]
+    fn light_dark_theme_highlight_lines_require_a_light_background() {
+        let line_tag = render_highlighted_line(DefaultTheme::LightDark, None, Some("#2a2b3c"));
+
+        assert!(
+            !line_tag.contains(" style="),
+            "unexpected style: {line_tag}"
+        );
+    }
+
+    #[test]
+    fn light_dark_theme_highlight_lines_require_a_dark_background() {
+        let line_tag = render_highlighted_line(DefaultTheme::LightDark, Some("#e9ebf1"), None);
+
+        assert!(
+            !line_tag.contains(" style="),
+            "unexpected style: {line_tag}"
+        );
+    }
+
+    #[test]
     fn theme_highlight_lines_use_the_named_default_theme() {
+        let line_tag = render_highlighted_line(
+            DefaultTheme::Theme("dark".to_string()),
+            Some("#e9ebf1"),
+            Some("#2a2b3c"),
+        );
         assert_eq!(
-            render_highlighted_line(DefaultTheme::Theme("dark".to_string())),
+            attr_value(&line_tag, "style"),
             "color: #eeeeee; background-color: #2a2b3c;"
         );
     }
