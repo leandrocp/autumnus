@@ -1577,32 +1577,45 @@ fn compress_parsers(name: &str) -> Result<()> {
     Ok(())
 }
 
+/// Query sources a run named `name` may rewrite.
+///
+/// An empty name upgrades every source. A named one upgrades only its own
+/// entry: `queries.default` backs most of the corpus, so including it here
+/// would make a per-language run rewrite a revision every other language
+/// shares.
+fn queries_to_upgrade<'a>(
+    queries: &'a BTreeMap<String, QueryInfo>,
+    name: &str,
+) -> Vec<(&'a String, &'a QueryInfo)> {
+    queries
+        .iter()
+        .filter(|(query_name, _)| name.is_empty() || query_name.as_str() == name)
+        .collect()
+}
+
 fn upgrade_queries(name: &str) -> Result<()> {
     let mut doc = read_languages_toml_edit()?;
     let toml = read_languages_toml()?;
 
     let mut url_revs: BTreeMap<String, String> = BTreeMap::new();
-    for info in toml.queries.values() {
-        if !url_revs.contains_key(&info.git) {
-            let rev = git_ls_remote(&info.git)?;
-            println!("  {} -> {}", info.git, &rev[..12.min(rev.len())]);
-            url_revs.insert(info.git.clone(), rev);
-        }
-    }
+    for (query_name, info) in queries_to_upgrade(&toml.queries, name) {
+        let new_rev = match url_revs.get(&info.git) {
+            Some(rev) => rev.clone(),
+            None => {
+                let rev = git_ls_remote(&info.git)?;
+                println!("  {} -> {}", info.git, &rev[..12.min(rev.len())]);
+                url_revs.insert(info.git.clone(), rev.clone());
+                rev
+            }
+        };
 
-    for (query_name, info) in &toml.queries {
-        if !name.is_empty() && query_name != name && query_name != "default" {
-            continue;
-        }
-
-        let new_rev = &url_revs[&info.git];
-        if info.rev != *new_rev {
+        if info.rev != new_rev {
             println!(
                 "  {query_name}: {} -> {}",
                 &info.rev[..12.min(info.rev.len())],
                 &new_rev[..12.min(new_rev.len())]
             );
-            doc["queries"][query_name.as_str()]["rev"] = toml_edit::value(new_rev);
+            doc["queries"][query_name.as_str()]["rev"] = toml_edit::value(new_rev.as_str());
         }
     }
 
@@ -4162,6 +4175,53 @@ mod tests {
         );
 
         fs::remove_dir_all(&dir).unwrap();
+    }
+
+    fn query_sources() -> BTreeMap<String, QueryInfo> {
+        ["default", "python", "sql"]
+            .into_iter()
+            .map(|name| {
+                (
+                    name.to_string(),
+                    QueryInfo {
+                        git: format!("https://example.invalid/{name}.git"),
+                        rev: "0000000".to_string(),
+                        path: None,
+                    },
+                )
+            })
+            .collect()
+    }
+
+    fn selected(name: &str) -> Vec<String> {
+        queries_to_upgrade(&query_sources(), name)
+            .into_iter()
+            .map(|(query_name, _)| query_name.clone())
+            .collect()
+    }
+
+    #[test]
+    fn an_unscoped_upgrade_covers_every_query_source() {
+        assert_eq!(selected(""), ["default", "python", "sql"]);
+    }
+
+    #[test]
+    fn a_language_with_its_own_query_source_upgrades_only_that_source() {
+        assert_eq!(selected("python"), ["python"]);
+    }
+
+    /// Most languages read `queries.default`, and the weekly language update
+    /// runs one job per language. Letting a scoped run reach `default` opened
+    /// 115 pull requests carrying the same shared revision bump.
+    #[test]
+    fn a_language_backed_by_the_default_source_upgrades_nothing() {
+        assert!(selected("c").is_empty());
+        assert!(selected("rust").is_empty());
+    }
+
+    #[test]
+    fn the_default_source_is_still_upgradable_by_name() {
+        assert_eq!(selected("default"), ["default"]);
     }
 
     fn published(hash: &str) -> Value {
