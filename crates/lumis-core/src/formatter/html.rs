@@ -51,6 +51,9 @@ pub fn span_inline_attrs(
 }
 
 /// Generate an HTML `<span>` element with inline CSS styles.
+///
+/// A scope that resolves to no attributes still gets a bare `<span>`, matching
+/// the built-in formatters.
 pub fn span_inline(
     text: &str,
     language: Option<Language>,
@@ -62,11 +65,7 @@ pub fn span_inline(
     let escaped = escape(text);
     let attrs = span_inline_attrs(language, scope, theme, italic, include_highlights);
 
-    if attrs.is_empty() {
-        escaped
-    } else {
-        format!("<span {}>{}</span>", attrs, escaped)
-    }
+    format!("{}{}</span>", open_span(&attrs), escaped)
 }
 
 /// Generate HTML attributes for a span with CSS class.
@@ -329,10 +328,6 @@ pub fn span_multi_themes(
 ) -> String {
     let escaped = escape(text);
 
-    if themes.is_empty() {
-        return escaped;
-    }
-
     let attrs = span_multi_themes_attrs(
         scope,
         language,
@@ -343,11 +338,7 @@ pub fn span_multi_themes(
         include_highlights,
     );
 
-    if attrs.is_empty() {
-        escaped
-    } else {
-        format!("<span {}>{}</span>", attrs, escaped)
-    }
+    format!("{}{}</span>", open_span(&attrs), escaped)
 }
 
 /// Escape text for safe HTML output.
@@ -578,11 +569,15 @@ pub fn escape_fragment(text: &str) -> String {
     escape(text)
 }
 
+fn open_span(attrs: &str) -> String {
+    if attrs.is_empty() {
+        "<span>".to_string()
+    } else {
+        format!("<span {attrs}>")
+    }
+}
+
 /// Render highlight events into HTML lines, reopening active spans at line boundaries.
-///
-/// A scope whose attributes come out empty is not wrapped at all, matching
-/// [`span_inline`]. Such a span carries no class, style or data attribute, so
-/// nothing can select it and it only adds noise to the output.
 pub fn render_lines_from_events<F>(
     source: &str,
     events: &[crate::events::HighlightEvent],
@@ -592,7 +587,7 @@ where
     F: Fn(usize, &str) -> String,
 {
     let mut lines = vec![String::new()];
-    let mut stack: Vec<OpenSpan> = Vec::new();
+    let mut stack: Vec<(usize, String)> = Vec::new();
 
     for event in events {
         match event {
@@ -601,18 +596,11 @@ where
                 language,
             } => {
                 let attrs = span_attrs(*scope_index, language);
-                let emitted = !attrs.is_empty();
-                if emitted {
-                    append_fragment(&mut lines, &format!("<span {attrs}>"));
-                }
-                stack.push(OpenSpan {
-                    scope_index: *scope_index,
-                    language: language.clone(),
-                    emitted,
-                });
+                append_fragment(&mut lines, &open_span(&attrs));
+                stack.push((*scope_index, language.clone()));
             }
             crate::events::HighlightEvent::End => {
-                if stack.pop().is_some_and(|span| span.emitted) {
+                if stack.pop().is_some() {
                     append_fragment(&mut lines, "</span>");
                 }
             }
@@ -624,26 +612,19 @@ where
         }
     }
 
-    while let Some(span) = stack.pop() {
-        if span.emitted {
-            append_fragment(&mut lines, "</span>");
-        }
+    while stack.pop().is_some() {
+        append_fragment(&mut lines, "</span>");
     }
 
     lines
 }
 
-/// A span currently open on the render stack.
-struct OpenSpan {
-    scope_index: usize,
-    language: String,
-    /// False when the scope resolved to no attributes, so nothing was written
-    /// and there is no tag to close or reopen.
-    emitted: bool,
-}
-
-fn render_source_event<F>(lines: &mut Vec<String>, text: &str, stack: &[OpenSpan], span_attrs: &F)
-where
+fn render_source_event<F>(
+    lines: &mut Vec<String>,
+    text: &str,
+    stack: &[(usize, String)],
+    span_attrs: &F,
+) where
     F: Fn(usize, &str) -> String,
 {
     let mut remaining = text;
@@ -653,7 +634,7 @@ where
             Some(newline_index) => {
                 let fragment = &remaining[..newline_index];
                 append_fragment(lines, &escape_fragment(fragment));
-                close_open_spans(lines, stack);
+                close_open_spans(lines, stack.len());
                 lines.push(String::new());
                 reopen_spans(lines, stack, span_attrs);
                 remaining = &remaining[newline_index + 1..];
@@ -666,19 +647,19 @@ where
     }
 }
 
-fn close_open_spans(lines: &mut Vec<String>, stack: &[OpenSpan]) {
-    for _ in stack.iter().rev().filter(|span| span.emitted) {
+fn close_open_spans(lines: &mut Vec<String>, len: usize) {
+    for _ in 0..len {
         append_fragment(lines, "</span>");
     }
 }
 
-fn reopen_spans<F>(lines: &mut Vec<String>, stack: &[OpenSpan], span_attrs: &F)
+fn reopen_spans<F>(lines: &mut Vec<String>, stack: &[(usize, String)], span_attrs: &F)
 where
     F: Fn(usize, &str) -> String,
 {
-    for span in stack.iter().filter(|span| span.emitted) {
-        let attrs = span_attrs(span.scope_index, &span.language);
-        append_fragment(lines, &format!("<span {attrs}>"));
+    for (scope_index, language) in stack {
+        let attrs = span_attrs(*scope_index, language);
+        append_fragment(lines, &open_span(&attrs));
     }
 }
 
@@ -686,9 +667,6 @@ where
 ///
 /// This is a simplified version of the vendored HtmlRenderer that works with
 /// pre-computed `HighlightEvent` slices instead of tree-sitter iterators.
-///
-/// A scope for which `attribute_callback` writes nothing is not wrapped at all,
-/// matching [`render_lines_from_events`] and [`span_inline`].
 pub fn render_events<F>(
     source: &str,
     events: &[crate::events::HighlightEvent],
@@ -700,7 +678,7 @@ where
     let source = source.as_bytes();
     let mut html = Vec::new();
     let mut line_offsets = vec![0u32];
-    let mut highlight_stack: Vec<bool> = Vec::new();
+    let mut highlight_stack: Vec<(usize, String)> = Vec::new();
 
     for event in events {
         match event {
@@ -710,18 +688,18 @@ where
             } => {
                 let mut attrs = Vec::new();
                 attribute_callback(*scope_index, language, &mut attrs);
-                let emitted = !attrs.is_empty();
-                if emitted {
+                if attrs.is_empty() {
+                    html.extend_from_slice(b"<span>");
+                } else {
                     html.extend_from_slice(b"<span ");
                     html.extend_from_slice(&attrs);
                     html.push(b'>');
                 }
-                highlight_stack.push(emitted);
+                highlight_stack.push((*scope_index, language.clone()));
             }
             crate::events::HighlightEvent::End => {
-                if highlight_stack.pop().unwrap_or(false) {
-                    html.extend_from_slice(b"</span>");
-                }
+                html.extend_from_slice(b"</span>");
+                highlight_stack.pop();
             }
             crate::events::HighlightEvent::Source { start, end } => {
                 let s = (*start).min(source.len());
@@ -815,6 +793,31 @@ mod tests {
     #[test]
     fn test_escape_empty_string() {
         assert_eq!(escape(""), "");
+    }
+
+    #[test]
+    fn test_span_inline_without_attributes() {
+        assert_eq!(
+            span_inline("<b>", None, "string", None, false, false),
+            "<span>&lt;b&gt;</span>"
+        );
+    }
+
+    #[test]
+    fn test_span_multi_themes_without_attributes() {
+        assert_eq!(
+            span_multi_themes(
+                "<b>",
+                "string",
+                None,
+                &std::collections::HashMap::new(),
+                None,
+                "--lumis",
+                false,
+                false,
+            ),
+            "<span>&lt;b&gt;</span>"
+        );
     }
 
     #[test]

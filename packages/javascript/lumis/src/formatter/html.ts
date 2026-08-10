@@ -315,20 +315,22 @@ export function closeTag(name: string): string {
 }
 
 /**
- * Open a `<span>` tag with the given attributes.
+ * Open a `<span>` carrying the given attributes.
  *
- * Returns an empty string when there are no attributes, so a scope that
- * resolves to no style is not wrapped at all. See {@link spanInline}, which
- * returns the bare text in the same situation.
+ * A scope with no attributes still gets a bare `<span>`, so highlighted output
+ * is byte-identical everywhere Lumis runs.
  *
  * ```ts
  * openSpanTag({ class: 'l-keyword' })  // '<span class="l-keyword">'
- * openSpanTag({})                      // ''
+ * openSpanTag({})                      // '<span>'
  * ```
  */
 export function openSpanTag(attrs: HtmlAttrs = {}): string {
-  const renderedAttrs = attrsToString(attrs);
-  return renderedAttrs.length > 0 ? `<span ${renderedAttrs}>` : "";
+  return openSpan(attrsToString(attrs));
+}
+
+function openSpan(attrs: string): string {
+  return attrs.length > 0 ? `<span ${attrs}>` : "<span>";
 }
 
 /**
@@ -492,16 +494,19 @@ export function spanInlineAttrs(options: SpanInlineOptions): HtmlAttrs {
 /**
  * Render an inline-styled `<span>` for a token.
  *
+ * A scope that resolves to no style still gets a bare `<span>`, so a custom
+ * formatter built on this helper produces the same markup as the built-in ones.
+ *
  * ```ts
  * spanInline('const', { language: 'javascript', scope: 'keyword', theme: dracula })
  * // '<span style="color: #ff79c6;">const</span>'
+ *
+ * spanInline('const', { language: 'javascript', scope: 'keyword', theme: undefined })
+ * // '<span>const</span>'
  * ```
  */
 export function spanInline(text: string, options: SpanInlineOptions): string {
-  const escaped = escape(text);
-  const attrs = spanInlineAttrs(options);
-  const rendered = attrsToString(attrs);
-  return rendered.length > 0 ? `<span ${rendered}>${escaped}</span>` : escaped;
+  return `${openSpanTag(spanInlineAttrs(options))}${escape(text)}</span>`;
 }
 
 /**
@@ -675,14 +680,7 @@ function applyDefaultMultiTheme(
  */
 export function spanMultiThemes(text: string, options: SpanMultiThemesOptions): string {
   const escaped = escape(text);
-
-  if (Object.keys(options.themes).length === 0) {
-    return escaped;
-  }
-
-  const attrs = spanMultiThemesAttrs(options);
-  const rendered = attrsToString(attrs);
-  return rendered.length > 0 ? `<span ${rendered}>${escaped}</span>` : escaped;
+  return `${openSpanTag(spanMultiThemesAttrs(options))}${escaped}</span>`;
 }
 
 function pushThemeCssVars(
@@ -870,7 +868,6 @@ export function appendFragment(lines: string[], fragment: string): void {
 interface SpanStackEntry {
   scope: string;
   language: string;
-  /** False when `openSpan` produced nothing, so there is no tag to close or reopen. */
   emitted: boolean;
 }
 
@@ -952,11 +949,7 @@ export function formatHighlightIterLines(
       const span = emptySpan(event.scope, event.language);
       const open = options.openSpan(span, style);
       appendFragment(lines, open);
-      stack.push({
-        scope: event.scope,
-        language: event.language,
-        emitted: open.length > 0,
-      });
+      stack.push({ scope: event.scope, language: event.language, emitted: open.length > 0 });
       continue;
     }
 
@@ -993,8 +986,6 @@ export function formatHighlightIterLines(
 /**
  * Render highlight events into escaped HTML lines, reopening active spans across newlines.
  *
- * A scope for which `spanAttrs` returns nothing is not wrapped at all.
- *
  * ```ts
  * renderLinesFromEvents('a\nb', events, (scope) => `class="${scope}"`)
  * // ['<span class="...">a</span>', '<span class="...">b</span>']
@@ -1006,10 +997,7 @@ export function renderLinesFromEvents(
   spanAttrs: (scope: string, language: string) => string,
 ): string[] {
   return formatHighlightIterLines(source, events, undefined, undefined, {
-    openSpan: (span) => {
-      const attrs = spanAttrs(span.scope, span.language);
-      return attrs.length > 0 ? `<span ${attrs}>` : "";
-    },
+    openSpan: (span) => openSpan(spanAttrs(span.scope, span.language)),
   }).lines;
 }
 
@@ -1033,24 +1021,16 @@ export function renderEvents(
     renderedLength += fragment.length;
   };
 
-  const emittedStack: boolean[] = [];
-
   for (const event of events) {
     if (event.type === "start") {
       const attrs: string[] = [];
       attributeCallback(event.scope, event.language, attrs);
-      const rendered = attrs.join("");
-      emittedStack.push(rendered.length > 0);
-      if (rendered.length > 0) {
-        push(`<span ${rendered}>`);
-      }
+      push(openSpan(attrs.join("")));
       continue;
     }
 
     if (event.type === "end") {
-      if (emittedStack.pop()) {
-        push("</span>");
-      }
+      push("</span>");
       continue;
     }
 
