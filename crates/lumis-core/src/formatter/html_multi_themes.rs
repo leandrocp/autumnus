@@ -407,7 +407,7 @@ mod tests {
             false,
             false,
             Some(HighlightLines {
-                lines: vec![1..=1],
+                lines: std::iter::once(1..=1).collect(),
                 style: Some(HighlightLinesStyle::Theme),
                 class: None,
             }),
