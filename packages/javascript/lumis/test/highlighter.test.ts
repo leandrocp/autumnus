@@ -585,6 +585,34 @@ describe("htmlMultiThemes", () => {
     expect(html).toContain("data-highlight=");
   });
 
+  it("highlights lines with the default theme's own colour", () => {
+    const html = hl.highlight(
+      '{"a": 1}',
+      htmlMultiThemes({
+        language: json,
+        themes: { light: theme, dark: draculaTheme },
+        defaultTheme: "dark",
+        highlightLines: { lines: [1], style: "theme" },
+      }),
+    );
+    expect(html).toContain('style="background-color: #44475a;"');
+  });
+
+  // `style: "theme"` used to be dropped in `light-dark()` mode, so a marked line
+  // came back with no style at all and the option looked like it did nothing.
+  it("highlights lines in both colour schemes", () => {
+    const html = hl.highlight(
+      '{"a": 1}',
+      htmlMultiThemes({
+        language: json,
+        themes: { light: theme, dark: draculaTheme },
+        defaultTheme: "light-dark()",
+        highlightLines: { lines: [1], style: "theme" },
+      }),
+    );
+    expect(html).toContain('style="background-color: light-dark(#2f334d, #44475a);"');
+  });
+
   it("wraps output with header element", () => {
     const html = hl.highlight(
       '{"a": 1}',

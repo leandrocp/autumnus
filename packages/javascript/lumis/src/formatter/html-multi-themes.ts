@@ -104,12 +104,40 @@ function highlightLineStyle(
     return highlightLines.style;
   }
 
-  if (!formatter.defaultTheme || formatter.defaultTheme === "light-dark()") {
+  if (!formatter.defaultTheme) {
     return undefined;
+  }
+
+  if (formatter.defaultTheme === "light-dark()") {
+    return lightDarkHighlightStyle(formatter);
   }
 
   const style = getThemeStyle(formatter.themes[formatter.defaultTheme], "highlighted");
   return styleToCss(style, { italic: formatter.italic }) || undefined;
+}
+
+/**
+ * The `highlighted` scope of both themes, as `light-dark()` pairs, so a marked
+ * line follows the reader's colour scheme the way every token on it already
+ * does.
+ *
+ * Only the colours are carried over. Every bundled theme sets a background
+ * alone on this scope, and a weight or a decoration applied to a whole line is
+ * not what a highlight band means.
+ */
+function lightDarkHighlightStyle(formatter: HtmlMultiThemesFormatter): string | undefined {
+  const light = getThemeStyle(formatter.themes.light, "highlighted");
+  const dark = getThemeStyle(formatter.themes.dark, "highlighted");
+  const rules: string[] = [];
+
+  if (light?.fg && dark?.fg) {
+    rules.push(`color: light-dark(${light.fg}, ${dark.fg});`);
+  }
+  if (light?.bg && dark?.bg) {
+    rules.push(`background-color: light-dark(${light.bg}, ${dark.bg});`);
+  }
+
+  return rules.length > 0 ? rules.join(" ") : undefined;
 }
 
 function highlightLineClass(

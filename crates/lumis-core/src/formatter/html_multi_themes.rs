@@ -228,18 +228,42 @@ impl HtmlMultiThemes {
         let highlight_lines = self.highlight_lines.as_ref()?;
 
         match &highlight_lines.style {
-            Some(HighlightLinesStyle::Theme) => {
-                if let Some(DefaultTheme::Theme(default_name)) = &self.default_theme {
+            Some(HighlightLinesStyle::Theme) => match &self.default_theme {
+                Some(DefaultTheme::Theme(default_name)) => {
                     let theme = self.themes.get(default_name)?;
                     let highlighted_style = theme.get_style("highlighted")?;
                     Some(highlighted_style.css(self.italic, " "))
-                } else {
-                    None
                 }
-            }
+                Some(DefaultTheme::LightDark) => self.light_dark_highlight_style(),
+                None => None,
+            },
             Some(HighlightLinesStyle::Style(style_string)) => Some(style_string.clone()),
             None => None,
         }
+    }
+
+    /// The `highlighted` scope of both themes, as `light-dark()` pairs, so a
+    /// marked line follows the reader's colour scheme the way every token on it
+    /// already does.
+    ///
+    /// Only the colours are carried over. Every bundled theme sets a background
+    /// alone on this scope, and a weight or a decoration applied to a whole line
+    /// is not what a highlight band means.
+    fn light_dark_highlight_style(&self) -> Option<String> {
+        let light = self.themes.get("light")?.get_style("highlighted")?;
+        let dark = self.themes.get("dark")?.get_style("highlighted")?;
+        let mut rules = Vec::new();
+
+        if let (Some(light_fg), Some(dark_fg)) = (&light.fg, &dark.fg) {
+            rules.push(format!("color: light-dark({light_fg}, {dark_fg});"));
+        }
+        if let (Some(light_bg), Some(dark_bg)) = (&light.bg, &dark.bg) {
+            rules.push(format!(
+                "background-color: light-dark({light_bg}, {dark_bg});"
+            ));
+        }
+
+        (!rules.is_empty()).then(|| rules.join(" "))
     }
 
     fn span_attrs_from_index(&self, scope_index: usize, language: &str) -> String {
@@ -364,6 +388,70 @@ mod tests {
         assert_eq!(
             attr_value(pre_tag, "style"),
             "color: light-dark(#4c4f69, #cdd6f4); background-color: light-dark(#eff1f5, #1e1e2e);"
+        );
+    }
+
+    fn render_highlighted_line(default_theme: DefaultTheme) -> String {
+        use crate::formatter::html_inline::{HighlightLines, HighlightLinesStyle};
+
+        let mut themes = HashMap::new();
+        themes.insert(
+            "light".to_string(),
+            crate::themes::get("catppuccin_latte").unwrap(),
+        );
+        themes.insert(
+            "dark".to_string(),
+            crate::themes::get("catppuccin_mocha").unwrap(),
+        );
+
+        let formatter = HtmlMultiThemes::new(
+            Language::PlainText,
+            themes,
+            Some(default_theme),
+            "--lumis".to_string(),
+            None,
+            false,
+            false,
+            Some(HighlightLines {
+                lines: vec![1..=1],
+                style: Some(HighlightLinesStyle::Theme),
+                class: None,
+            }),
+            None,
+        );
+        let mut output = Vec::new();
+
+        formatter.render("one\ntwo", &[], &mut output).unwrap();
+
+        let html = String::from_utf8(output).unwrap();
+        let line_tag = html
+            .split_once("<div ")
+            .expect("missing first line")
+            .1
+            .split_once('>')
+            .expect("unterminated line tag")
+            .0;
+        assert!(
+            line_tag.contains(r#"data-line="1""#),
+            "wrong line: {line_tag}"
+        );
+
+        attr_value(line_tag, "style").to_string()
+    }
+
+    #[test]
+    fn theme_highlight_lines_follow_the_colour_scheme() {
+        assert_eq!(
+            render_highlighted_line(DefaultTheme::LightDark),
+            "background-color: light-dark(#e9ebf1, #2a2b3c);"
+        );
+    }
+
+    #[test]
+    fn theme_highlight_lines_use_the_named_default_theme() {
+        assert_eq!(
+            render_highlighted_line(DefaultTheme::Theme("dark".to_string())),
+            "background-color: #2a2b3c;"
         );
     }
 }
