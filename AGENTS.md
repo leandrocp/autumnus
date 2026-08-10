@@ -104,6 +104,10 @@ Rust is the reference implementation and must follow the Rust API Guidelines:
 
 Prefer guideline-compliant naming, error behavior, builder patterns, documentation, and trait usage. Do not introduce a Rust API shortcut that other runtimes cannot sensibly mirror.
 
+### Parse TypeScript boundaries into domain types
+
+`unknown` belongs at genuinely untrusted boundaries, not throughout the implementation. Do not widen a known structure to `Record<string, unknown>` or use assertions to make parsed JSON, TOML, dynamic imports, native data, or other external values look typed. Validate the input and construct a named or discriminated domain value before passing it inward. When another API already defines the shape, derive it with utilities such as `Parameters`, `ReturnType`, or `Pick` instead of recreating it as a generic property bag.
+
 ### Tree-sitter is the driver
 
 Lumis is a Tree-sitter-based syntax highlighter. Language behavior must respect Tree-sitter's design, mechanics, and query model rather than bypassing them with ad hoc text scanning.
