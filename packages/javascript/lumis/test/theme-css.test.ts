@@ -87,7 +87,8 @@ html[data-theme="dark"] .l-tag-attribute {
 
 // `./css/*` maps onto `./dist/css/*.css`, so it appends the extension itself and
 // the specifier every doc page shows, with one, resolved to `github_light.css.css`.
-// Both forms are mapped now, and this fails if either stops resolving.
+// Both forms are mapped now, and this fails if either stops resolving or lands
+// on the wrong asset.
 describe("bundled asset specifiers", () => {
   it.each([
     ["@lumis-sh/themes/css/github_light.css", "dist/css/github_light.css"],
