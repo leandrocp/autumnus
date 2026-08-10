@@ -304,12 +304,18 @@ impl LanguageStore {
 
     /// Write `package` into the cache, so a later run needs neither a source
     /// directory nor the network. A parser without its metadata is unusable.
+    ///
+    /// # Errors
+    /// Fails when the package is invalid, is outside the supported version
+    /// range, or cannot be written. Persisting a version [`Self::package`] would
+    /// go on to reject would leave the cache holding metadata nothing can read.
     pub fn cache_package(&self, package: &LanguagePackage) -> Result<(), StoreError> {
         let bytes = serde_json::to_vec(package).map_err(|error| StoreError::Io {
             context: format!("could not serialize {}", package.package_name),
             source: std::io::Error::other(error),
         })?;
         package.validate()?;
+        require_compatible_package_version(package)?;
         write_atomic(&self.package_path(&package.package_name)?, &bytes)
     }
 
@@ -977,6 +983,24 @@ mod tests {
             .unwrap_err()
             .to_string();
         assert!(error.contains("does not satisfy the supported range 0.26"));
+    }
+
+    /// Every metadata write goes through the same gate as every metadata read,
+    /// otherwise a direct `cache_package` could leave the directory holding a
+    /// version `package` and `local_package` then refuse to serve.
+    #[test]
+    fn an_incompatible_package_cannot_be_cached_directly() {
+        let dir = tempdir();
+        let store = make(dir.path(), Box::new(NoNetwork));
+        let mut incompatible = package();
+        incompatible.version = "0.27.0".into();
+
+        let error = store.cache_package(&incompatible).unwrap_err().to_string();
+        assert!(error.contains("does not satisfy the supported range 0.26"));
+        assert!(
+            !store.package_path("@lumis-sh/wasm-json").unwrap().exists(),
+            "the rejected manifest must not be persisted"
+        );
     }
 
     #[test]

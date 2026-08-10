@@ -8,7 +8,6 @@
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import minVersion from "semver/ranges/min-version.js";
 import { parse as parseToml } from "smol-toml";
 import { parseLanguagesToml, type LanguagesToml } from "./languages-toml.js";
 
@@ -18,33 +17,26 @@ const GENERATED_DIR = path.resolve(import.meta.dirname, "../src/generated");
 const BUNDLES_DIR = path.resolve(import.meta.dirname, "../bundles");
 
 const LANGUAGES_TOML = path.join(WORKSPACE_ROOT, "languages.toml");
-const MISE_TOML = path.join(WORKSPACE_ROOT, "mise.toml");
+const CATALOG_RS = path.join(WORKSPACE_ROOT, "crates/lumis-wasm-runtime/src/catalog.rs");
 
-interface MiseToml {
-  tools?: Record<string, unknown>;
-}
 function readLanguagesToml(): LanguagesToml {
   const text = fs.readFileSync(LANGUAGES_TOML, "utf-8");
   return parseLanguagesToml(parseToml(text));
 }
 
+// `mise run langs-gen-catalog` derives this from the Tree-sitter series pinned in
+// mise.toml and writes it into the generated Rust catalog. Reading it back keeps
+// one implementation rather than a second pin parser that could disagree about
+// which series a runtime supports.
 function languagePackageVersionRange(): string {
-  const text = fs.readFileSync(MISE_TOML, "utf-8");
-  const config = parseToml(text) as unknown as MiseToml;
-  const range = config.tools?.["tree-sitter"];
-  if (typeof range !== "string" || range.length === 0) {
-    throw new Error(`${MISE_TOML} must pin tree-sitter to a version string`);
+  const source = fs.readFileSync(CATALOG_RS, "utf-8");
+  const range = /package_version_range:\s*"([^"]+)"/.exec(source)?.[1];
+  if (!range) {
+    throw new Error(
+      `no package version range found in ${CATALOG_RS}; run mise run langs-gen-catalog`,
+    );
   }
-  let version;
-  try {
-    version = minVersion(range);
-  } catch {
-    version = null;
-  }
-  if (!version) {
-    throw new Error(`${MISE_TOML} must pin tree-sitter to a version such as "0.26"`);
-  }
-  return `${version.major}.${version.minor}`;
+  return range;
 }
 
 function main() {
