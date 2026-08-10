@@ -47,10 +47,9 @@ jobs:
           cargo build --manifest-path crates/dev/Cargo.toml
           --no-default-features
 
-  # The shared query revision and the catalog's registry pins belong to the
-  # whole corpus, not to any one language, so they are updated once here. Doing
-  # this inside the per-language matrix opened one pull request per language,
-  # each carrying the same repository-wide diff.
+  # The default query revision belongs to the whole corpus, not to any one
+  # language, so it is updated once here. Doing this inside the per-language
+  # matrix opened one pull request per language carrying the same diff.
   update-shared:
     needs: rust-cache
     runs-on: ubuntu-latest
@@ -72,28 +71,12 @@ jobs:
 
       - uses: jdx/mise-action@7e36c90d9ab29c415a2384db3006f3ec8a8cc654 # v4.2.4
 
-      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6
-        with:
-          version: 11.15.1
-
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
-        with:
-          node-version: "lts/*"
-          cache: "pnpm"
-          cache-dependency-path: pnpm-lock.yaml
-
-      - name: Install JavaScript dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Update shared queries and catalog pins
+      - name: Update default queries
         run: |
           set -euo pipefail
           mise run langs-upgrade-queries default
-          mise run langs-fetch-queries
-          mise run langs-preprocess-queries
-          mise run langs-gen-catalog
-          mise run docs-gen-languages-md
-          pnpm --filter @lumis-sh/lumis run build:generate
+          mise run langs-fetch-queries default
+          mise run langs-preprocess-queries default
           git status --short
 
       - name: Create Pull Request
@@ -107,18 +90,15 @@ jobs:
             queries/processed
             queries/override
             queries/append
-            crates/lumis-wasm-runtime/src/catalog.rs
-            packages/javascript/lumis/bundles
-            packages/javascript/wasm-bundle-*
-          commit-message: "feat: update shared queries and catalog pins"
-          title: "feat: update shared queries and catalog pins"
+          commit-message: "feat: update default queries"
+          title: "feat: update default queries"
           body: |
-            Automated PR for the metadata every language shares: the
-            `queries.default` revision and the catalog's published package pins.
+            Automated PR for the `queries.default` revision shared by the
+            language corpus.
 
             --
             This PR was created automatically by the update-langs workflow.
-          branch: update-langs-shared
+          branch: update-default-queries
           delete-branch: true
           base: main
 

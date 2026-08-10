@@ -124,7 +124,8 @@ defmodule Lumis.Languages do
 
   ## Options
 
-    * `:force` — download again even when a verified copy is already cached
+    * `:force` — resolve the compatible package range again and replace a
+      verified parser
   """
   @spec cache([String.t() | atom()], keyword()) :: {:ok, [String.t()]} | {:error, term()}
   def cache(names, options \\ []) when is_list(names) and is_list(options) do

@@ -13,6 +13,7 @@ import type {
   LanguagePackageResolver,
   WasmResolver,
 } from "../src/core/languages.js";
+import { LANGUAGE_PACKAGE_VERSION_RANGE } from "../src/generated/package-version-range.js";
 
 const repositoryRoot = resolve(process.cwd(), "../../..");
 const fixturesRoot = pathToFileURL(
@@ -116,7 +117,7 @@ export function localLanguagePackageMetadata(packageName: string): LanguagePacka
 
   const packageMetadata: LanguagePackage = {
     packageName,
-    version: "test",
+    version: `${LANGUAGE_PACKAGE_VERSION_RANGE}.0`,
     definitionHash: createHash("sha256").update(wasm).digest("hex"),
     parser: {
       name: wasmName,

@@ -1577,6 +1577,7 @@ name = "lumis-wasm-runtime"
 version = "0.1.0"
 dependencies = [
  "lumis-core",
+ "semver",
  "serde",
  "serde_json",
  "sha2 0.11.0",

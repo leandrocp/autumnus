@@ -1,6 +1,6 @@
 //! Resolve, verify and cache language packages and parser WASM on disk.
 //!
-//! Shared by the CLI and the Elixir NIF.
+//! Shared by the CLI, the Elixir NIF, and the Node addon.
 //!
 //! There is deliberately no file lock. Writes rename a uniquely named temporary
 //! into place and parser bytes are verified first, so concurrent writers converge
@@ -11,9 +11,10 @@
 
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, OnceLock};
 use std::time::Duration;
 
+use semver::{Version, VersionReq};
 use thiserror::Error;
 
 use crate::package::{
@@ -34,6 +35,14 @@ pub enum StoreError {
     InvalidPackageName(String),
     #[error("language package name mismatch: expected '{expected}', got '{actual}'")]
     PackageNameMismatch { expected: String, actual: String },
+    #[error(
+        "language package {package_name}@{actual} does not satisfy the supported range {required}"
+    )]
+    IncompatiblePackageVersion {
+        package_name: String,
+        actual: String,
+        required: &'static str,
+    },
     #[error("language package is not UTF-8 JSON")]
     NotUtf8,
     #[error("{context}: {source}")]
@@ -116,32 +125,6 @@ impl Fetcher for NoNetwork {
     }
 }
 
-type WarningHandler = Box<dyn Fn(&str) + Send + Sync>;
-
-static WARNING_HANDLER: std::sync::OnceLock<WarningHandler> = std::sync::OnceLock::new();
-
-/// Send store warnings to `handler` instead of stderr.
-///
-/// A store runs inside a host process, and stderr is not always a safe place to
-/// write: bytes the Elixir NIF puts on fd 2 bypass Erlang's IO entirely and land
-/// in the middle of whatever IEx is drawing. Hosts route this to their own
-/// logger instead. The CLI owns its terminal and leaves the default.
-///
-/// The first handler set wins, so a host installs one before the first resolve.
-///
-/// # Errors
-/// Returns the handler unused when one is already installed.
-pub fn set_warning_handler(handler: WarningHandler) -> Result<(), WarningHandler> {
-    WARNING_HANDLER.set(handler)
-}
-
-fn warn(message: &str) {
-    match WARNING_HANDLER.get() {
-        Some(handler) => handler(message),
-        None => eprintln!("lumis: {message}"),
-    }
-}
-
 /// Where a store keeps and looks for assets.
 pub struct StoreConfig {
     /// Directory holding `lumis.json` and parser files, both the ones this
@@ -173,12 +156,9 @@ impl LanguageStore {
 
     /// The package for `package_name`, from memory, the store directory, or the CDN.
     ///
-    /// A package already in the directory is authoritative and is never
-    /// revalidated, so a request never waits on the network for something
-    /// already on disk. That is what lets a build step stage packages ahead of
-    /// time and have the first request cost nothing; the price is that a
-    /// republished package is picked up by clearing the directory or upgrading
-    /// Lumis, not on its own.
+    /// A compatible package already in the directory is authoritative and is
+    /// never revalidated, so a request never waits on the network for something
+    /// already on disk. A forced cache refresh resolves the range again.
     ///
     /// # Errors
     /// Fails when the package cannot be obtained from any source, or is invalid.
@@ -188,20 +168,28 @@ impl LanguageStore {
         }
 
         let path = self.package_path(package_name)?;
-        let pinned = crate::catalog::pinned_version(package_name);
-        let cached = read_package_file(&path, package_name);
-        let package = match (cached, pinned) {
-            (Some(package), Some(version)) if package.version == version => package,
-            (Some(package), None) => package,
-            (cached, _) => match self.fetch_package(package_name, &path) {
-                Ok(package) => package,
-                Err(error) => match cached {
-                    Some(package) => package,
-                    None => return Err(self.unavailable(package_name, error)),
-                },
-            },
-        };
+        if let Some(package) =
+            read_package_file(&path, package_name).filter(package_version_is_compatible)
+        {
+            return Ok(self.remember(package_name, package));
+        }
 
+        let package = self
+            .fetch_package(package_name, &path)
+            .map_err(|error| self.unavailable(package_name, error))?;
+
+        Ok(self.remember(package_name, package))
+    }
+
+    /// Resolve the compatible package range again and replace cached metadata.
+    ///
+    /// # Errors
+    /// Fails when compatible package metadata cannot be fetched or validated.
+    pub fn refresh_package(&self, package_name: &str) -> Result<Arc<LanguagePackage>, StoreError> {
+        let path = self.package_path(package_name)?;
+        let package = self
+            .fetch_package(package_name, &path)
+            .map_err(|error| self.unavailable(package_name, error))?;
         Ok(self.remember(package_name, package))
     }
 
@@ -228,6 +216,9 @@ impl LanguageStore {
             return Some(package);
         }
         let package = read_package_file(&self.package_path(package_name).ok()?, package_name)?;
+        if !package_version_is_compatible(&package) {
+            return None;
+        }
         Some(self.remember(package_name, package))
     }
 
@@ -294,7 +285,11 @@ impl LanguageStore {
     pub fn cache_language(&self, name: &str, force: bool) -> Result<PathBuf, StoreError> {
         let location =
             crate::catalog::find(name).ok_or_else(|| StoreError::UnknownLanguage(name.into()))?;
-        let package = self.package(location.package_name)?;
+        let package = if force {
+            self.refresh_package(location.package_name)?
+        } else {
+            self.package(location.package_name)?
+        };
         let path = self.parser_path(&package)?;
 
         if force {
@@ -392,33 +387,13 @@ impl LanguageStore {
         package_name: &str,
         path: &Path,
     ) -> Result<LanguagePackage, StoreError> {
-        let latest = || {
-            self.fetch_from_cdn(
-                &format!("{package_name}@latest/lumis.json"),
-                &format!("language package {package_name}"),
-            )
-        };
-        let bytes = match crate::catalog::pinned_version(package_name) {
-            Some(version) => match self.fetch_from_cdn(
-                &format!("{package_name}@{version}/lumis.json"),
-                &format!("language package {package_name}@{version}"),
-            ) {
-                Ok(bytes) => bytes,
-                // The pin existed when the catalog was generated, so reaching
-                // here means it was unpublished since. Falling back keeps the
-                // language working, but it is no longer the version other
-                // machines resolve, which is the whole point of pinning.
-                Err(pin_error) => {
-                    warn(&format!(
-                        "{package_name}@{version} is unavailable ({pin_error}); \
-                         falling back to @latest, which may differ from other machines"
-                    ));
-                    latest()?
-                }
-            },
-            None => latest()?,
-        };
+        let range = crate::catalog::LANGUAGE_PACKAGE_VERSION_RANGE;
+        let bytes = self.fetch_from_cdn(
+            &format!("{package_name}@{range}/lumis.json"),
+            &format!("language package {package_name}@{range}"),
+        )?;
         let package = parse_package(&bytes, package_name)?;
+        require_compatible_package_version(&package)?;
         write_atomic(path, &bytes)?;
         Ok(package)
     }
@@ -485,6 +460,35 @@ fn read_package_file(path: &Path, package_name: &str) -> Option<LanguagePackage>
     parse_package(&bytes, package_name).ok()
 }
 
+fn package_version_is_compatible(package: &LanguagePackage) -> bool {
+    require_compatible_package_version(package).is_ok()
+}
+
+fn require_compatible_package_version(package: &LanguagePackage) -> Result<(), StoreError> {
+    static REQUIREMENT: OnceLock<VersionReq> = OnceLock::new();
+
+    let required = crate::catalog::LANGUAGE_PACKAGE_VERSION_RANGE;
+    let requirement = REQUIREMENT.get_or_init(|| {
+        VersionReq::parse(required)
+            .expect("the generated language package version range must be valid semver")
+    });
+    let version =
+        Version::parse(&package.version).map_err(|_| StoreError::IncompatiblePackageVersion {
+            package_name: package.package_name.clone(),
+            actual: package.version.clone(),
+            required,
+        })?;
+    if requirement.matches(&version) {
+        Ok(())
+    } else {
+        Err(StoreError::IncompatiblePackageVersion {
+            package_name: package.package_name.clone(),
+            actual: package.version.clone(),
+            required,
+        })
+    }
+}
+
 /// Replace `path` atomically, so a reader never sees a partial file.
 ///
 /// # Errors
@@ -537,11 +541,12 @@ mod tests {
 
     const WASM: &[u8] =
         include_bytes!("../../lumis-cli/tests/fixtures/parsers/tree-sitter-json.wasm");
+    const PACKAGE_VERSION: &str = "0.26.3";
 
     fn package() -> LanguagePackage {
         LanguagePackage {
             package_name: "@lumis-sh/wasm-json".into(),
-            version: "1.2.3".into(),
+            version: PACKAGE_VERSION.into(),
             definition_hash: "hash".into(),
             parser: ParserMetadata {
                 name: "tree-sitter-json".into(),
@@ -612,7 +617,9 @@ mod tests {
         let store = make(dir.path(), Box::new(NoNetwork));
         let error = store.parser(&package()).unwrap_err().to_string();
         assert!(
-            error.contains("parser WASM @lumis-sh/wasm-json@1.2.3"),
+            error.contains(&format!(
+                "parser WASM @lumis-sh/wasm-json@{PACKAGE_VERSION}"
+            )),
             "the error must name what failed: {error}"
         );
         assert_eq!(
@@ -625,7 +632,7 @@ mod tests {
     #[test]
     fn parser_filenames_are_content_addressed() {
         let name = parser_filename(&package());
-        assert!(name.starts_with("tree-sitter-json-1.2.3-"));
+        assert!(name.starts_with(&format!("tree-sitter-json-{PACKAGE_VERSION}-")));
         assert!(name.ends_with(".wasm"));
     }
 
@@ -850,7 +857,7 @@ mod tests {
     #[test]
     fn parser_url_pins_the_exact_version() {
         let url = LanguageStore::parser_url(&package()).unwrap();
-        assert!(url.contains("@lumis-sh/wasm-json@1.2.3/"));
+        assert!(url.contains(&format!("@lumis-sh/wasm-json@{PACKAGE_VERSION}/")));
         assert!(!url.contains("@latest"));
     }
 
@@ -917,33 +924,89 @@ mod tests {
 
         assert_eq!(
             store.package(name).unwrap().version,
-            "1.2.3",
+            PACKAGE_VERSION,
             "a package already on disk must not be revalidated"
         );
     }
 
-    /// A NIF writing to stderr lands in the middle of whatever IEx is drawing,
-    /// so the fallback warning has to be divertible.
     #[test]
-    fn warnings_reach_the_installed_handler_instead_of_stderr() {
-        static CAPTURED: Mutex<Vec<String>> = Mutex::new(Vec::new());
-        set_warning_handler(Box::new(|message| {
-            CAPTURED.lock().unwrap().push(message.to_owned());
-        }))
-        .unwrap_or_else(|_| panic!("no other test installs a handler"));
+    fn a_missing_package_resolves_the_supported_range() {
+        let urls = Arc::new(Mutex::new(Vec::new()));
+        struct Recording {
+            package: Vec<u8>,
+            urls: Arc<Mutex<Vec<String>>>,
+        }
+        impl Fetcher for Recording {
+            fn get(&self, url: &str) -> Result<Vec<u8>, String> {
+                self.urls.lock().unwrap().push(url.to_string());
+                Ok(self.package.clone())
+            }
+        }
 
         let dir = tempdir();
-        let store = make(dir.path(), Box::new(NoNetwork));
-        let _ = store.package("@lumis-sh/wasm-json");
-
-        let captured = CAPTURED.lock().unwrap();
-        assert!(
-            captured
-                .iter()
-                .any(|message| message.contains("@lumis-sh/wasm-json@")
-                    && message.contains("falling back to @latest")),
-            "the pin fallback must be reported through the handler: {captured:?}"
+        let store = make(
+            dir.path(),
+            Box::new(Recording {
+                package: serde_json::to_vec(&package()).unwrap(),
+                urls: Arc::clone(&urls),
+            }),
         );
+        store.package("@lumis-sh/wasm-json").unwrap();
+
+        let urls = urls.lock().unwrap();
+        assert_eq!(urls.len(), 1);
+        assert!(urls[0].contains(&format!(
+            "@lumis-sh/wasm-json@{}/lumis.json",
+            crate::catalog::LANGUAGE_PACKAGE_VERSION_RANGE
+        )));
+        assert!(!urls[0].contains("@latest"));
+    }
+
+    #[test]
+    fn an_incompatible_resolved_package_is_rejected() {
+        let dir = tempdir();
+        let mut incompatible = package();
+        incompatible.version = "0.27.0".into();
+        let store = make(
+            dir.path(),
+            Box::new(Canned(serde_json::to_vec(&incompatible).unwrap())),
+        );
+
+        let error = store
+            .package("@lumis-sh/wasm-json")
+            .unwrap_err()
+            .to_string();
+        assert!(error.contains("does not satisfy the supported range 0.26"));
+    }
+
+    #[test]
+    fn package_version_compatibility_matches_the_shared_corpus() {
+        #[derive(serde::Deserialize)]
+        struct Corpus {
+            range: String,
+            cases: Vec<Case>,
+        }
+        #[derive(serde::Deserialize)]
+        struct Case {
+            version: String,
+            compatible: bool,
+        }
+
+        let corpus: Corpus = serde_json::from_str(include_str!(
+            "../../../fixtures/language-packages/version-compatibility.json"
+        ))
+        .unwrap();
+        assert_eq!(corpus.range, crate::catalog::LANGUAGE_PACKAGE_VERSION_RANGE);
+        for case in corpus.cases {
+            let mut candidate = package();
+            candidate.version = case.version.clone();
+            assert_eq!(
+                package_version_is_compatible(&candidate),
+                case.compatible,
+                "version {}",
+                case.version
+            );
+        }
     }
 
     #[test]
@@ -1078,7 +1141,7 @@ mod tests {
         assert_eq!(offline.parser(&package).unwrap(), WASM);
         assert_eq!(
             offline.package("@lumis-sh/wasm-json").unwrap().version,
-            "1.2.3"
+            PACKAGE_VERSION
         );
     }
 
@@ -1107,6 +1170,47 @@ mod tests {
             reopened.package("@lumis-sh/wasm-json").unwrap().version,
             package.version,
             "the store must stay self-sufficient"
+        );
+    }
+
+    #[test]
+    fn forcing_a_cached_language_resolves_the_range_again() {
+        struct Serve {
+            package: Vec<u8>,
+        }
+        impl Fetcher for Serve {
+            fn get(&self, url: &str) -> Result<Vec<u8>, String> {
+                if url.ends_with(".wasm") {
+                    Ok(WASM.to_vec())
+                } else {
+                    Ok(self.package.clone())
+                }
+            }
+        }
+
+        let dir = tempdir();
+        let mut old = package();
+        old.version = "0.26.1".into();
+        let mut new = package();
+        new.version = "0.26.4".into();
+        let store = make(
+            dir.path(),
+            Box::new(Serve {
+                package: serde_json::to_vec(&new).unwrap(),
+            }),
+        );
+        write_atomic(
+            &store.package_path("@lumis-sh/wasm-json").unwrap(),
+            &serde_json::to_vec(&old).unwrap(),
+        )
+        .unwrap();
+        write_atomic(&store.parser_path(&old).unwrap(), WASM).unwrap();
+
+        let path = store.cache_language("json", true).unwrap();
+        assert!(path.to_string_lossy().contains("tree-sitter-json-0.26.4-"));
+        assert_eq!(
+            store.local_package("@lumis-sh/wasm-json").unwrap().version,
+            "0.26.4"
         );
     }
 

@@ -226,7 +226,7 @@ enum ParsersCommands {
         #[arg(long)]
         all: bool,
 
-        /// Replace valid cached parsers
+        /// Resolve compatible packages again and replace valid cached parsers
         #[arg(long)]
         force: bool,
     },

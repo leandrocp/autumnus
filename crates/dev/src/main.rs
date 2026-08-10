@@ -1396,7 +1396,6 @@ fn upgrade_parsers(name: &str) -> Result<()> {
     }
 
     write_languages_toml_edit(&doc)?;
-    gen_language_catalog(false)?;
     Ok(())
 }
 
@@ -2551,15 +2550,13 @@ fn gen_language_catalog(check: bool) -> Result<()> {
         .map(|(id, _)| id.to_string())
         .collect::<Vec<_>>();
     let path = "crates/lumis-wasm-runtime/src/catalog.rs";
-    // Checking must not depend on the registry: CI asserts the catalog matches
-    // languages.toml, and drift against what npm actually publishes is a
-    // separate, deliberate check.
-    let versions = if check {
-        catalog_versions(&fs::read_to_string(path)?)
-    } else {
-        resolve_published_versions(&toml.parsers, &parser_order)?
-    };
-    let output = render_language_catalog(&toml.parsers, &parser_order, &toml.bundles, &versions)?;
+    let package_version_range = supported_tree_sitter_series()?;
+    let output = render_language_catalog(
+        &toml.parsers,
+        &parser_order,
+        &toml.bundles,
+        &package_version_range,
+    )?;
 
     if check {
         let current = fs::read_to_string(path)
@@ -2575,73 +2572,18 @@ fn gen_language_catalog(check: bool) -> Result<()> {
     Ok(())
 }
 
-/// Versions already recorded in a generated catalog, keyed by package name.
-fn catalog_versions(source: &str) -> BTreeMap<String, String> {
-    let mut versions = BTreeMap::new();
-    let mut package_name = None;
-    for line in source.lines() {
-        let line = line.trim();
-        if let Some(rest) = line.strip_prefix("package_name: \"") {
-            package_name = rest.split('"').next().map(str::to_string);
-        } else if let Some(rest) = line.strip_prefix("version: \"") {
-            if let (Some(name), Some(version)) = (package_name.take(), rest.split('"').next()) {
-                versions.insert(name, version.to_string());
-            }
-        }
-    }
-    versions
-}
-
-/// Ask the registry what each language package currently publishes.
-///
-/// Pins are generated rather than hand-written so every one of them exists at
-/// generation time; the runtime's fallback to `@latest` then only fires for a
-/// version that was unpublished afterwards.
-fn resolve_published_versions(
-    parsers: &BTreeMap<String, ParserInfo>,
-    parser_order: &[String],
-) -> Result<BTreeMap<String, String>> {
-    let mut packages: Vec<String> = Vec::new();
-    for id in parser_order {
-        let info = parsers
-            .get(id)
-            .with_context(|| format!("missing parser metadata for '{id}'"))?;
-        let default_wasm_name = format!("tree-sitter-{id}");
-        let wasm_name = info.wasm_name.as_deref().unwrap_or(&default_wasm_name);
-        let package_name = format!("@lumis-sh/wasm-{}", wasm_package_suffix(wasm_name));
-        if !packages.contains(&package_name) {
-            packages.push(package_name);
-        }
-    }
-
-    let mut versions: BTreeMap<String, String> = BTreeMap::new();
-    for (package_name, packument) in packages.iter().zip(fetch_packuments(&packages)) {
-        let version = packument?
-            .as_ref()
-            .and_then(|packument| packument.get("dist-tags"))
-            .and_then(|tags| tags.get("latest"))
-            .and_then(Value::as_str)
-            .map(ToOwned::to_owned)
-            .with_context(|| {
-                format!("{package_name} is not published; the catalog cannot pin a version for it")
-            })?;
-        eprintln!("  {package_name} {version}");
-        versions.insert(package_name.clone(), version);
-    }
-    Ok(versions)
-}
-
 fn render_language_catalog(
     parsers: &BTreeMap<String, ParserInfo>,
     parser_order: &[String],
     bundles: &BTreeMap<String, BundleInfo>,
-    versions: &BTreeMap<String, String>,
+    package_version_range: &str,
 ) -> Result<String> {
     let mut lines = vec![
         "// Auto-generated from languages.toml by `mise run langs-gen-catalog`.".to_string(),
         "// Do not edit manually.".to_string(),
         String::new(),
         "define_catalog! {".to_string(),
+        format!("    package_version_range: {package_version_range:?},"),
         "    languages: {".to_string(),
     ];
 
@@ -2659,15 +2601,10 @@ fn render_language_catalog(
             .collect::<Vec<_>>()
             .join(", ");
 
-        let version = versions.get(&package_name).with_context(|| {
-            format!("no published version resolved for {package_name}; run `mise run langs-gen-catalog`")
-        })?;
-
         lines.extend([
             format!("        {id:?} => {{"),
             format!("            aliases: [{aliases}],"),
-            format!("            package_name: {package_name:?},"),
-            format!("            version: {version:?}"),
+            format!("            package_name: {package_name:?}"),
             "        },".to_string(),
         ]);
     }
@@ -3325,31 +3262,21 @@ fn stage_wasm(name: &str) -> Result<()> {
         .replace("{definition_hash}", &definition_hash);
     fs::write(format!("{out}/package.json"), pkg)?;
 
-    // The publishable package carries the version it will be published as; the
-    // runtime copy carries the version the catalog pins. A store entry is only
-    // trusted when its version equals that pin, so stamping the next-publish
-    // version here would send every local run to the CDN for a version that does
-    // not exist yet, and only fall back after the request failed.
     let store = "tmp/wasm/local";
     let local = format!("{store}/parsers");
     fs::create_dir_all(&local)?;
     let suffix = wasm_package_suffix(wasm_name);
-    let local_version = lumis_wasm_runtime::catalog::pinned_version(&pkg_name)
-        .unwrap_or(npm_version.as_str())
-        .to_string();
-    let mut local_package = language_package.clone();
-    local_package.version = local_version.clone();
     fs::write(
         format!("{local}/{suffix}.lumis.json"),
-        serde_json::to_vec(&local_package)?,
+        serde_json::to_vec(&language_package)?,
     )?;
     fs::copy(
         &wasm_file,
-        format!("{local}/{wasm_name}-{local_version}-{wasm_sha256}.wasm"),
+        format!("{local}/{wasm_name}-{npm_version}-{wasm_sha256}.wasm"),
     )?;
 
     println!("Staged in {out}");
-    println!("Runtime-ready copy in {local} as {local_version}");
+    println!("Runtime-ready copy in {local} as {npm_version}");
     println!("Use it with: export LUMIS_DATA_DIR=$PWD/{store}");
     Ok(())
 }
@@ -3361,6 +3288,7 @@ fn stage_test_parsers(out: &Path) -> Result<()> {
     const FIXTURES: &str = "packages/javascript/lumis/test/fixtures/wasm";
 
     let toml = read_languages_toml()?;
+    let fixture_version = format!("{}.0", supported_tree_sitter_series()?);
     let parsers = out.join("parsers");
     fs::create_dir_all(&parsers)?;
 
@@ -3380,15 +3308,7 @@ fn stage_test_parsers(out: &Path) -> Result<()> {
         let languages = packaged_languages(&toml, &wasm_name)?;
         let package = LanguagePackage {
             package_name: format!("@lumis-sh/wasm-{}", wasm_package_suffix(&wasm_name)),
-            // The store serves a package from disk only when its version equals
-            // the catalog pin, so a staged fixture has to claim that version or
-            // every test would reach for the network and fall back.
-            version: lumis_wasm_runtime::catalog::pinned_version(&format!(
-                "@lumis-sh/wasm-{}",
-                wasm_package_suffix(&wasm_name)
-            ))
-            .unwrap_or("test")
-            .into(),
+            version: fixture_version.clone(),
             definition_hash: language_definition_hash(&toml, &wasm_name, &languages)?,
             parser: ParserMetadata {
                 name: wasm_name.clone(),
@@ -3574,21 +3494,18 @@ fn supported_tree_sitter_series() -> Result<String> {
         .context("mise.toml does not pin tree-sitter")?;
     let pin = pin
         .as_str()
-        .map(ToOwned::to_owned)
-        .unwrap_or_else(|| pin.to_string());
-    let pin = pin.trim_matches(['^', '~', '=', 'v', '"']);
-    let parts: Vec<&str> = pin.split('.').collect();
-    if parts.len() < 2
-        || !parts[..2]
-            .iter()
-            .all(|p| p.chars().all(|c| c.is_ascii_digit()))
-    {
-        bail!(
+        .context("mise.toml's tree-sitter pin must be a version string such as \"0.26\"")?;
+    tree_sitter_series(pin)
+}
+
+fn tree_sitter_series(pin: &str) -> Result<String> {
+    let version = lenient_semver::parse(pin).map_err(|error| {
+        anyhow::anyhow!(
             "mise.toml pins tree-sitter = {pin:?}; it must be a version such as \"0.26\" so the \
-             published package series can be derived from it"
-        );
-    }
-    Ok(format!("{}.{}", parts[0], parts[1]))
+             published package series can be derived from it: {error}"
+        )
+    })?;
+    Ok(format!("{}.{}", version.major, version.minor))
 }
 
 /// The full packument carries every version's `package.json`, so one request
@@ -4660,12 +4577,7 @@ mod tests {
             ),
         ]);
 
-        let versions = BTreeMap::from([
-            ("@lumis-sh/wasm-alpha".to_string(), "1.2.3".to_string()),
-            ("@lumis-sh/wasm-shared".to_string(), "4.5.6".to_string()),
-        ]);
-
-        let catalog = render_language_catalog(&parsers, &order, &bundles, &versions)
+        let catalog = render_language_catalog(&parsers, &order, &bundles, "0.26")
             .expect("catalog should be generated");
 
         assert!(catalog.find("\"zeta\"").unwrap() < catalog.find("\"alpha\"").unwrap());
@@ -4674,9 +4586,16 @@ mod tests {
         // `parsers = "all"` expands to the catalog, in the same order.
         assert!(catalog.contains("\"full\" => [\"zeta\", \"alpha\"]"));
         assert!(catalog.contains("\"web\" => [\"alpha\"]"));
-        // A pin per package, so the runtime asks for a version rather than @latest.
-        assert!(catalog.contains("version: \"1.2.3\""));
-        assert!(catalog.contains("version: \"4.5.6\""));
+        assert!(catalog.contains("package_version_range: \"0.26\""));
+        assert!(!catalog.contains("version:"));
+    }
+
+    #[test]
+    fn tree_sitter_series_uses_semver_parsing() {
+        assert_eq!(tree_sitter_series("0.26").unwrap(), "0.26");
+        assert_eq!(tree_sitter_series("v0.26.11").unwrap(), "0.26");
+        assert!(tree_sitter_series("latest").is_err());
+        assert!(tree_sitter_series("not-a-version-0.26").is_err());
     }
 
     // Bundle membership is a cross-runtime promise: `@lumis-sh/wasm-bundle-web` and

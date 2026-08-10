@@ -98,10 +98,12 @@ CI uses `jdx/mise-action` with the same benchmark config. Every pull request run
 ## Dynamic language packages
 
 `languages.toml` is the repository source of truth. Generated runtime catalogs
-contain only stable language IDs, aliases, and npm package names. `crates/dev`
-generates the checked-in Rust catalog data, which `lumis-wasm-runtime` expands
-through a declarative macro. JavaScript generation owns only JavaScript runtime
-metadata.
+contain stable language IDs, aliases, and npm package names plus one
+Tree-sitter-compatible npm range for the whole catalog. `crates/dev` derives
+that range from the Tree-sitter series in `mise.toml` and generates the
+checked-in Rust catalog data, which `lumis-wasm-runtime` expands through a
+declarative macro. JavaScript generates the same range from the same source.
+There is no independently maintained version per language.
 
 Each `@lumis-sh/wasm-*` release is the independently versioned, atomic unit
 containing:
@@ -116,16 +118,17 @@ manifest is published inside the language package and is not checked in.
 
 Changing a parser or one of its queries publishes only that language package.
 It does not require a JavaScript, CLI, Rust, or Elixir runtime release unless
-the language-package format itself changes.
+the language-package format or supported Tree-sitter ABI series changes.
 
-Dynamic runtimes resolve and cache the current package metadata, then load the
-exact parser identified by that metadata:
+Dynamic runtimes ask npm CDNs to resolve the compatible range, validate the
+exact version returned in the package metadata, then load the exact parser that
+metadata identifies:
 
 ```text
-stable language catalog
+stable language catalog + compatible range
          |
          v
-installed/local language package -> persistent metadata cache -> current package metadata
+installed/local language package -> persistent exact metadata cache -> CDN range resolution
          |
          v
 installed/local parser -> persistent verified parser cache -> exact-version CDN parser
@@ -220,6 +223,15 @@ loaded before the document mentioning it. Node runs the native addon
 specifically so it does not inherit that limit, and falls back to
 `web-tree-sitter` only where no addon is built.
 
+The resolver itself follows the same ownership boundary. CLI, Elixir, and the
+default Node addon all call `lumis-wasm-runtime::LanguageStore`, so compatible
+version checks, exact manifest caching, integrity verification, and refresh
+semantics are one Rust implementation. The browser cannot call synchronous Rust
+from its asynchronous fetch path, so its small TypeScript adapter consumes the
+same generated range and uses npm's `semver` package for the same check. The
+portable Node fallback uses that browser implementation. Cross-runtime package
+fixtures pin both implementations to the same manifest contract.
+
 Everything a runtime persists lives under one directory, named by
 `LUMIS_DATA_DIR`: `parsers/` for language packages and parser WASM, `themes/`
 for the CLI's custom themes, `compiled/` for Wasmtime's module cache. The CLI,
@@ -227,10 +239,21 @@ Elixir and Node write the same filenames into `parsers/`, so one prepared
 directory serves all three, whether the files were downloaded or staged there
 by a build step. Browsers use CacheStorage instead, having no filesystem. Parser
 cache keys contain the parser name, package version, and digest, so upgrades do
-not overwrite older verified assets. The catalog pins an exact package version
-per language, so a package already in the directory is the expected one and is
-never revalidated; a request therefore never waits on the network for something
-already on disk.
+not overwrite older verified assets. A compatible package already in the
+directory is an exact lock and is never revalidated during highlighting; a
+request therefore never waits on the network for something already on disk.
+`parsers cache --force` and its Elixir and JavaScript equivalents explicitly
+resolve the range again, replace the cached manifest, then fetch the exact
+parser it names. Staging the directory makes deployments reproducible, while a
+new or explicitly refreshed cache adopts new compatible language releases
+without a runtime release.
+
+The range is the Tree-sitter ABI boundary, currently `0.26`, not a Lumis release
+train. npm and the CDN already implement SemVer selection, redirects, mirrors,
+and package publication; Lumis supplies the range and validates the returned
+manifest rather than recreating those package-manager responsibilities. Moving
+to a new Tree-sitter minor series changes the range and legitimately requires a
+runtime release. Publishing `@lumis-sh/wasm-rust@0.26.x` does not.
 
 ### Filling the store at build time
 

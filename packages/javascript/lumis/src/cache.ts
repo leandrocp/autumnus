@@ -2,6 +2,7 @@ import {
   cacheKey,
   DEFAULT_LANGUAGE_PACKAGE_RESOLVER,
   DEFAULT_RESOLVER,
+  isCompatibleLanguagePackageVersion,
   languagePackageCacheKey,
   parseLanguagePackage,
   serializeLanguagePackageCache,
@@ -12,6 +13,7 @@ import {
 } from "./core/languages.js";
 import { EXACT_LANGUAGE_MAP } from "./generated/language-detection.js";
 import { LANGUAGE_LOADERS } from "./generated/language-loaders.js";
+import { LANGUAGE_PACKAGE_VERSION_RANGE } from "./generated/package-version-range.js";
 import {
   readCachedWasm,
   isUrlString,
@@ -25,11 +27,11 @@ import type { Language, WasmRef } from "./types.js";
 export interface CacheLanguagesOptions {
   /** Destination containing verified, content-addressed parser files. */
   directory?: string;
-  /** Replace parser files even when the existing bytes pass integrity checks. */
+  /** Resolve the compatible package range again and replace verified parser files. */
   force?: boolean;
   /** Override the exact-version jsDelivr resolver. */
   resolver?: WasmResolver;
-  /** Override the latest language-package metadata resolver. */
+  /** Override the compatible-range language-package metadata resolver. */
   languagePackageResolver?: LanguagePackageResolver;
 }
 
@@ -80,24 +82,38 @@ async function fetchLanguagePackage(
   packageName: string,
   resolver: LanguagePackageResolver,
 ): Promise<LanguagePackage> {
-  const source = resolver(packageName);
+  const source = resolver(packageName, LANGUAGE_PACKAGE_VERSION_RANGE);
+  let packageMetadata: LanguagePackage;
   if (source instanceof URL ? source.protocol === "file:" : source.startsWith("file://")) {
     const { readFile } = await import("node:fs/promises");
     const { fileURLToPath } = await import("node:url");
     const url = source instanceof URL ? source : new URL(source);
-    return parseLanguagePackage(new Uint8Array(await readFile(fileURLToPath(url))), packageName);
-  }
-  if (typeof source === "string" && !isUrlString(source)) {
+    packageMetadata = parseLanguagePackage(
+      new Uint8Array(await readFile(fileURLToPath(url))),
+      packageName,
+    );
+  } else if (typeof source === "string" && !isUrlString(source)) {
     const { readFile } = await import("node:fs/promises");
-    return parseLanguagePackage(new Uint8Array(await readFile(source)), packageName);
-  }
-  const response = await fetch(typeof source === "string" ? source : source.href);
-  if (!response.ok) {
-    throw new Error(
-      `could not download language package ${packageName}: HTTP ${response.status} ${response.statusText}`,
+    packageMetadata = parseLanguagePackage(new Uint8Array(await readFile(source)), packageName);
+  } else {
+    const response = await fetch(typeof source === "string" ? source : source.href);
+    if (!response.ok) {
+      throw new Error(
+        `could not download language package ${packageName}: HTTP ${response.status} ${response.statusText}`,
+      );
+    }
+    packageMetadata = parseLanguagePackage(
+      new Uint8Array(await response.arrayBuffer()),
+      packageName,
     );
   }
-  return parseLanguagePackage(new Uint8Array(await response.arrayBuffer()), packageName);
+
+  if (!isCompatibleLanguagePackageVersion(packageMetadata.version)) {
+    throw new Error(
+      `Language package ${packageMetadata.packageName}@${packageMetadata.version} does not satisfy the supported range ${LANGUAGE_PACKAGE_VERSION_RANGE}`,
+    );
+  }
+  return packageMetadata;
 }
 
 /**
@@ -125,7 +141,7 @@ async function writeSharedLanguagePackage(
 }
 
 /**
- * Cache exact, integrity-pinned parser WASMs in a persistent directory.
+ * Resolve compatible packages and cache exact, integrity-pinned parser WASMs.
  *
  * Point `LUMIS_DATA_DIR` at the same directory in the deployed process.
  */
@@ -147,7 +163,20 @@ export async function cacheLanguages(
     const packageName = languagePackageName(language);
     let packageMetadata = packages.get(packageName);
     if (!packageMetadata) {
-      packageMetadata = await fetchLanguagePackage(packageName, packageResolver);
+      if (!options.force) {
+        const bytes = await readCachedWasm(languagePackageCacheKey(packageName), directory);
+        if (bytes) {
+          try {
+            const candidate = parseLanguagePackage(bytes, packageName);
+            if (isCompatibleLanguagePackageVersion(candidate.version)) {
+              packageMetadata = candidate;
+            }
+          } catch {
+            // Invalid metadata is replaced below.
+          }
+        }
+      }
+      packageMetadata ??= await fetchLanguagePackage(packageName, packageResolver);
       packages.set(packageName, packageMetadata);
       await writeCachedWasm(
         languagePackageCacheKey(packageName),

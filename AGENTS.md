@@ -38,6 +38,15 @@ Shared behavior belongs in one Rust crate that every runtime consumes. A second 
 - When a runtime genuinely cannot call into Rust, such as the browser, the Rust crate still defines the behavior, and the port must be covered by a test that pins both against the same input.
 - Two copies of the same algorithm require a test that pins them to each other, and deleting one copy is better still. `definitionHash` was computed in both `crates/dev` and a Python release script until the script was ported into `crates/dev`; "the CI job has no Rust toolchain" is a workflow line to add, not a reason to reimplement.
 
+### Use the standard library and established packages
+
+Do not hand-roll infrastructure that a standard library or maintained crate/package already provides. This applies especially to version requirements, URL handling, HTTP behavior, archive formats, hashing, locking, serialization, and protocol parsing.
+
+- Check the standard library and existing workspace dependencies first.
+- If they do not cover the requirement, add a focused, established dependency instead of growing a local partial implementation.
+- Custom code is justified only when available libraries cannot express the required behavior. Document that gap and test the compatibility boundary.
+- Delegate package discovery and version-range resolution to the package registry and CDN. Lumis validates the resolved result and caches it; it does not implement another package manager.
+
 ### Highlighting loads what a document needs, in one pass
 
 A parser is a WebAssembly module fetched from a registry and executed in the

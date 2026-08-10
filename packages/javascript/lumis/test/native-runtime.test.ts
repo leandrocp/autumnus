@@ -11,6 +11,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import { createNativeLanguagesModule } from "../src/core/native-languages.js";
+import { LANGUAGE_PACKAGE_VERSION_RANGE } from "../src/generated/package-version-range.js";
 import type { LanguagesModule, RuntimeLike } from "../src/core/languages.js";
 import type { NativeBinding, NativeRuntimeInstance } from "../src/native-binding.js";
 import type { LoadedLanguage } from "../src/types.js";
@@ -349,6 +350,10 @@ describe("native adapter routing", () => {
     expect(highlightEvents.mock.calls[0]!.slice(3)).toEqual([undefined, undefined]);
     expect(highlightEvents.mock.calls[1]![3]).toBeTypeOf("function");
     expect(highlightEvents.mock.calls[1]![4]).toBeTypeOf("function");
+    const packageResolver = highlightEvents.mock.calls[1]![3] as (packageName: string) => string;
+    expect(packageResolver("@lumis-sh/wasm-json")).toContain(
+      `@lumis-sh/wasm-json@${LANGUAGE_PACKAGE_VERSION_RANGE}/lumis.json`,
+    );
   });
 
   it("coalesces concurrent loads of the same definition", async () => {

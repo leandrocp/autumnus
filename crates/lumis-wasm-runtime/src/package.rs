@@ -8,9 +8,9 @@ use thiserror::Error;
 /// A language package as published inside `@lumis-sh/wasm-*`.
 ///
 /// There is deliberately **no `formatVersion` gate here**. Runtimes resolve this
-/// document from a floating tag, so a hard version equality check would break every
-/// already-deployed client the moment a new version was published, with no way to
-/// negotiate. Compatibility is decided by the document's shape instead: neither
+/// document from a compatible range, so a hard format equality check would break
+/// already-deployed clients when an additive package was published. Compatibility
+/// is decided by the document's shape instead: neither
 /// runtime rejects unknown fields, so additive changes are already safe, and a
 /// change that removes or renames a required field fails `validate` with a message
 /// naming the field.

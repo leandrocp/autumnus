@@ -97,12 +97,7 @@ fn build_language_fixtures() -> PathBuf {
             .collect::<BTreeMap<_, _>>();
         let package = LanguagePackage {
             package_name: location.package_name.into(),
-            // The store trusts a cached package only when its version equals the
-            // catalog pin, so a fixture claiming anything else sends every test
-            // to the network to be told otherwise.
-            version: lumis_wasm_runtime::catalog::pinned_version(location.package_name)
-                .unwrap_or("test")
-                .into(),
+            version: format!("{}.0", catalog::LANGUAGE_PACKAGE_VERSION_RANGE),
             definition_hash: sha256.clone(),
             parser: ParserMetadata {
                 name: stem.into(),

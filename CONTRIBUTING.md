@@ -157,8 +157,9 @@ This updates files such as:
 - `packages/javascript/lumis/src/generated/*`
 - `packages/javascript/wasm-bundle-*/`
 
-Automated parser upgrades regenerate the Rust catalog. CI also runs
-`mise run langs-check-catalog` and rejects stale data.
+Parser/query upgrades do not change runtime catalogs. Changes to language IDs,
+aliases, package assignments, bundles, or the Tree-sitter series do; CI runs
+`mise run langs-check-catalog` and rejects stale generated data.
 
 #### Parser entry fields
 
@@ -481,11 +482,19 @@ grammar metadata, byte length, and SHA-256. During staging, `crates/dev`
 generates `tmp/wasm/publish/{name}/lumis.json`; it is published with the
 package rather than checked in.
 
-Runtime catalogs generated from `languages.toml` contain only stable IDs,
-aliases, and package names. JavaScript, CLI, and Elixir resolve the current
-`lumis.json`, cache it, then fetch the exact versioned parser named by that
-metadata and verify its bytes. Parser or query updates therefore publish only
-the affected language package, without a runtime release.
+Runtime catalogs generated from `languages.toml` contain stable IDs, aliases,
+and package names. They also contain one compatible npm range derived from the
+Tree-sitter series in `mise.toml`; they do not pin every package independently.
+JavaScript, CLI, and Elixir ask the CDN to resolve that range, validate and cache
+the exact `lumis.json` returned, then fetch the exact versioned parser named by
+that metadata and verify its bytes. Parser or query updates within the supported
+series therefore publish only the affected language package, without a runtime
+release.
+
+A compatible cached manifest is an exact lock and normal highlighting never
+revalidates it. Use the runtime's forced cache command to resolve the range
+again. Changing the Tree-sitter minor series changes the compatibility range
+and does require runtime releases.
 
 CLI, Node and Elixir caches persist on disk under `LUMIS_DATA_DIR`, in the same
 layout, so one prepared directory serves all three; browsers use CacheStorage

@@ -13,7 +13,8 @@ defmodule Mix.Tasks.Lumis.Languages.Cache do
 
   Parsers land under `$LUMIS_DATA_DIR`, or wherever `config :lumis, data_dir:`
   points, and are verified against the size and SHA-256 in their language
-  package before being written. An existing valid file is left alone unless `--force` is given.
+  package before being written. An existing valid file is left alone unless
+  `--force` is given; forcing also resolves the compatible package range again.
 
   A directory written here is complete: point `LUMIS_DATA_DIR` at it, or set
   `config :lumis, data_dir:`, and nothing needs the network. It expects the

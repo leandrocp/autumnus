@@ -106,9 +106,9 @@ mix lumis.languages.cache markdown elixir json
 ```
 
 The store checks `:data_dir` and then the CDN. It defaults to `LUMIS_DATA_DIR`,
-and is also where Wasmtime persists compiled modules. Because the catalog pins
-an exact package version, anything already in that directory is served without
-revalidating it.
+and is also where Wasmtime persists compiled modules. A cold cache resolves the
+runtime's compatible package range; the exact package stored in that directory
+is then served without revalidating it.
 
 ## Formatters
 
