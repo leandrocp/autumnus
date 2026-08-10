@@ -13,6 +13,8 @@ on:
 jobs:
   generate-matrix:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       languages: ${{ steps.set-matrix.outputs.languages }}
     steps:
@@ -64,9 +66,10 @@ jobs:
   update-shared:
     needs: rust-cache
     runs-on: ubuntu-latest
+    # The branch and the pull request are pushed with CI_TOKEN, and checkout
+    # keeps no credentials, so GITHUB_TOKEN only ever reads this repository.
     permissions:
-      contents: write
-      pull-requests: write
+      contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -118,8 +121,7 @@ jobs:
     needs: [generate-matrix, rust-cache]
     runs-on: ubuntu-latest
     permissions:
-      contents: write
-      pull-requests: write
+      contents: read
     strategy:
       fail-fast: false
       matrix:
