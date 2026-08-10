@@ -242,28 +242,15 @@ impl HtmlMultiThemes {
         }
     }
 
-    /// The `highlighted` scope of both themes, as `light-dark()` pairs, so a
-    /// marked line follows the reader's colour scheme the way every token on it
-    /// already does.
-    ///
-    /// Only the colours are carried over. Every bundled theme sets a background
-    /// alone on this scope, and a weight or a decoration applied to a whole line
-    /// is not what a highlight band means.
     fn light_dark_highlight_style(&self) -> Option<String> {
         let light = self.themes.get("light")?.get_style("highlighted")?;
         let dark = self.themes.get("dark")?.get_style("highlighted")?;
-        let mut rules = Vec::new();
+        let light_bg = light.bg.as_ref()?;
+        let dark_bg = dark.bg.as_ref()?;
 
-        if let (Some(light_fg), Some(dark_fg)) = (&light.fg, &dark.fg) {
-            rules.push(format!("color: light-dark({light_fg}, {dark_fg});"));
-        }
-        if let (Some(light_bg), Some(dark_bg)) = (&light.bg, &dark.bg) {
-            rules.push(format!(
-                "background-color: light-dark({light_bg}, {dark_bg});"
-            ));
-        }
-
-        (!rules.is_empty()).then(|| rules.join(" "))
+        Some(format!(
+            "background-color: light-dark({light_bg}, {dark_bg});"
+        ))
     }
 
     fn span_attrs_from_index(&self, scope_index: usize, language: &str) -> String {
@@ -395,14 +382,13 @@ mod tests {
         use crate::formatter::html_inline::{HighlightLines, HighlightLinesStyle};
 
         let mut themes = HashMap::new();
-        themes.insert(
-            "light".to_string(),
-            crate::themes::get("catppuccin_latte").unwrap(),
-        );
-        themes.insert(
-            "dark".to_string(),
-            crate::themes::get("catppuccin_mocha").unwrap(),
-        );
+        let mut light = crate::themes::get("catppuccin_latte").unwrap();
+        light.highlights.get_mut("highlighted").unwrap().fg = Some("#111111".to_string());
+        themes.insert("light".to_string(), light);
+
+        let mut dark = crate::themes::get("catppuccin_mocha").unwrap();
+        dark.highlights.get_mut("highlighted").unwrap().fg = Some("#eeeeee".to_string());
+        themes.insert("dark".to_string(), dark);
 
         let formatter = HtmlMultiThemes::new(
             Language::PlainText,
@@ -451,7 +437,7 @@ mod tests {
     fn theme_highlight_lines_use_the_named_default_theme() {
         assert_eq!(
             render_highlighted_line(DefaultTheme::Theme("dark".to_string())),
-            "background-color: #2a2b3c;"
+            "color: #eeeeee; background-color: #2a2b3c;"
         );
     }
 }

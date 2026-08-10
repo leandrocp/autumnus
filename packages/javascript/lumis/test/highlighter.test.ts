@@ -586,26 +586,47 @@ describe("htmlMultiThemes", () => {
   });
 
   it("highlights lines with the default theme's own colour", () => {
+    const dark = {
+      ...draculaTheme,
+      highlights: {
+        ...draculaTheme.highlights,
+        highlighted: { ...draculaTheme.highlights.highlighted, fg: "#eeeeee" },
+      },
+    };
     const html = hl.highlight(
       '{"a": 1}',
       htmlMultiThemes({
         language: json,
-        themes: { light: theme, dark: draculaTheme },
+        themes: { light: theme, dark },
         defaultTheme: "dark",
         highlightLines: { lines: [1], style: "theme" },
       }),
     );
-    expect(html).toContain('style="background-color: #44475a;"');
+    expect(html).toContain('style="color: #eeeeee; background-color: #44475a;"');
   });
 
   // `style: "theme"` used to be dropped in `light-dark()` mode, so a marked line
   // came back with no style at all and the option looked like it did nothing.
   it("highlights lines in both colour schemes", () => {
+    const light = {
+      ...theme,
+      highlights: {
+        ...theme.highlights,
+        highlighted: { ...theme.highlights.highlighted, fg: "#111111" },
+      },
+    };
+    const dark = {
+      ...draculaTheme,
+      highlights: {
+        ...draculaTheme.highlights,
+        highlighted: { ...draculaTheme.highlights.highlighted, fg: "#eeeeee" },
+      },
+    };
     const html = hl.highlight(
       '{"a": 1}',
       htmlMultiThemes({
         language: json,
-        themes: { light: theme, dark: draculaTheme },
+        themes: { light, dark },
         defaultTheme: "light-dark()",
         highlightLines: { lines: [1], style: "theme" },
       }),
