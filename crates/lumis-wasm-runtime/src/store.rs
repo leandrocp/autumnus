@@ -285,16 +285,21 @@ impl LanguageStore {
     pub fn cache_language(&self, name: &str, force: bool) -> Result<PathBuf, StoreError> {
         let location =
             crate::catalog::find(name).ok_or_else(|| StoreError::UnknownLanguage(name.into()))?;
-        let package = if force {
-            self.refresh_package(location.package_name)?
-        } else {
-            self.package(location.package_name)?
-        };
-        let path = self.parser_path(&package)?;
 
         if force {
+            let (package, bytes) = self
+                .resolve_package(location.package_name)
+                .map_err(|error| self.unavailable(location.package_name, error))?;
+            let path = self.parser_path(&package)?;
             self.refresh_parser(&package)?;
-        } else if self.cached_parser(&package).is_none() {
+            write_atomic(&self.package_path(location.package_name)?, &bytes)?;
+            self.remember(location.package_name, package);
+            return Ok(path);
+        }
+
+        let package = self.package(location.package_name)?;
+        let path = self.parser_path(&package)?;
+        if self.cached_parser(&package).is_none() {
             self.fetch_parser(&package, &path)?;
         }
 
@@ -393,6 +398,15 @@ impl LanguageStore {
         package_name: &str,
         path: &Path,
     ) -> Result<LanguagePackage, StoreError> {
+        let (package, bytes) = self.resolve_package(package_name)?;
+        write_atomic(path, &bytes)?;
+        Ok(package)
+    }
+
+    fn resolve_package(
+        &self,
+        package_name: &str,
+    ) -> Result<(LanguagePackage, Vec<u8>), StoreError> {
         let range = crate::catalog::LANGUAGE_PACKAGE_VERSION_RANGE;
         let bytes = self.fetch_from_cdn(
             &format!("{package_name}@{range}/lumis.json"),
@@ -400,8 +414,7 @@ impl LanguageStore {
         )?;
         let package = parse_package(&bytes, package_name)?;
         require_compatible_package_version(&package)?;
-        write_atomic(path, &bytes)?;
-        Ok(package)
+        Ok((package, bytes))
     }
 
     fn fetch_parser(&self, package: &LanguagePackage, path: &Path) -> Result<Vec<u8>, StoreError> {
@@ -1236,6 +1249,57 @@ mod tests {
             store.local_package("@lumis-sh/wasm-json").unwrap().version,
             "0.26.4"
         );
+    }
+
+    #[test]
+    fn a_failed_forced_refresh_preserves_the_previous_offline_cache() {
+        struct FailParser {
+            package: Vec<u8>,
+        }
+        impl Fetcher for FailParser {
+            fn get(&self, url: &str) -> Result<Vec<u8>, String> {
+                if url.ends_with(".wasm") {
+                    Err("parser unavailable".into())
+                } else {
+                    Ok(self.package.clone())
+                }
+            }
+        }
+
+        let dir = tempdir();
+        let mut old = package();
+        old.version = "0.26.1".into();
+        let mut new = package();
+        new.version = "0.26.4".into();
+        let store = make(
+            dir.path(),
+            Box::new(FailParser {
+                package: serde_json::to_vec(&new).unwrap(),
+            }),
+        );
+        write_atomic(
+            &store.package_path("@lumis-sh/wasm-json").unwrap(),
+            &serde_json::to_vec(&old).unwrap(),
+        )
+        .unwrap();
+        write_atomic(&store.parser_path(&old).unwrap(), WASM).unwrap();
+        assert_eq!(
+            store.package("@lumis-sh/wasm-json").unwrap().version,
+            "0.26.1"
+        );
+
+        let error = store.cache_language("json", true).unwrap_err().to_string();
+        assert!(error.contains("parser unavailable"));
+        assert_eq!(
+            store.local_package("@lumis-sh/wasm-json").unwrap().version,
+            "0.26.1"
+        );
+        assert_eq!(store.local_parser(&old).unwrap(), WASM);
+
+        let offline = make(dir.path(), Box::new(NoNetwork));
+        let cached = offline.package("@lumis-sh/wasm-json").unwrap();
+        assert_eq!(cached.version, "0.26.1");
+        assert_eq!(offline.parser(&cached).unwrap(), WASM);
     }
 
     fn tempdir() -> tempfile::TempDir {

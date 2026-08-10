@@ -243,10 +243,11 @@ not overwrite older verified assets. A compatible package already in the
 directory is an exact lock and is never revalidated during highlighting; a
 request therefore never waits on the network for something already on disk.
 `parsers cache --force` and its Elixir and JavaScript equivalents explicitly
-resolve the range again, replace the cached manifest, then fetch the exact
-parser it names. Staging the directory makes deployments reproducible, while a
-new or explicitly refreshed cache adopts new compatible language releases
-without a runtime release.
+resolve the range again, fetch and verify the exact parser it names, then replace
+the cached manifest. A failed refresh therefore leaves the previous manifest and
+parser usable. Staging the directory makes deployments reproducible, while a new
+or explicitly refreshed cache adopts new compatible language releases without a
+runtime release.
 
 The range is the Tree-sitter ABI boundary, currently `0.26`, not a Lumis release
 train. npm and the CDN already implement SemVer selection, redirects, mirrors,
