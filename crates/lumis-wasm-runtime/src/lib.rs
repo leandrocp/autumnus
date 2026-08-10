@@ -80,6 +80,6 @@ pub use runtime::{
 #[cfg(feature = "wasm")]
 pub use store::HttpFetcher;
 pub use store::{
-    package_suffix, parser_filename, write_atomic, Fetcher, LanguageStore, NoNetwork, StoreConfig,
-    StoreError,
+    lowest_compatible_package_version, package_suffix, parser_filename, write_atomic, Fetcher,
+    LanguageStore, NoNetwork, StoreConfig, StoreError,
 };

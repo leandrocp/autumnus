@@ -8,12 +8,12 @@ import {
   configureLanguagePackageResolver as configureDefaultLanguagePackageResolver,
   configureWasmResolver as configureDefaultWasmResolver,
 } from "../src/index.js";
+import { lowestCompatibleLanguagePackageVersion } from "../src/core/languages.js";
 import type {
   LanguagePackage,
   LanguagePackageResolver,
   WasmResolver,
 } from "../src/core/languages.js";
-import { LANGUAGE_PACKAGE_VERSION_RANGE } from "../src/generated/package-version-range.js";
 
 const repositoryRoot = resolve(process.cwd(), "../../..");
 const fixturesRoot = pathToFileURL(
@@ -117,7 +117,7 @@ export function localLanguagePackageMetadata(packageName: string): LanguagePacka
 
   const packageMetadata: LanguagePackage = {
     packageName,
-    version: `${LANGUAGE_PACKAGE_VERSION_RANGE}.0`,
+    version: lowestCompatibleLanguagePackageVersion(),
     definitionHash: createHash("sha256").update(wasm).digest("hex"),
     parser: {
       name: wasmName,

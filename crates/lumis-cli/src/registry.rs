@@ -103,10 +103,9 @@ impl Registry {
         use lumis_wasm_runtime::{sha256_hex, write_atomic, PackagedLanguage, ParserMetadata};
 
         let location = catalog::find(id).unwrap();
-        let version = format!("{}.0", catalog::LANGUAGE_PACKAGE_VERSION_RANGE);
         let package = LanguagePackage {
             package_name: location.package_name.into(),
-            version,
+            version: lumis_wasm_runtime::lowest_compatible_package_version(),
             definition_hash: "test".into(),
             parser: ParserMetadata {
                 name: format!("tree-sitter-{grammar_name}"),
@@ -179,8 +178,8 @@ mod tests {
         let (_dir, registry) = cached_rust_registry();
         let path = registry.parser_path("rust").unwrap();
         assert!(path.to_string_lossy().contains(&format!(
-            "tree-sitter-rust-{}.0-",
-            catalog::LANGUAGE_PACKAGE_VERSION_RANGE
+            "tree-sitter-rust-{}-",
+            lumis_wasm_runtime::lowest_compatible_package_version()
         )));
         std::fs::write(&path, b"corrupt").unwrap();
         assert!(!registry.is_cached("rust"));
@@ -192,8 +191,8 @@ mod tests {
         let (_dir, registry) = cached_rust_registry();
         let url = registry.parser_download_url("rust").unwrap();
         assert!(url.contains(&format!(
-            "@lumis-sh/wasm-rust@{}.0/",
-            catalog::LANGUAGE_PACKAGE_VERSION_RANGE
+            "@lumis-sh/wasm-rust@{}/",
+            lumis_wasm_runtime::lowest_compatible_package_version()
         )));
         assert!(!url.contains("@latest"));
     }

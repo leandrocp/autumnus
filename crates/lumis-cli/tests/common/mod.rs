@@ -97,7 +97,7 @@ fn build_language_fixtures() -> PathBuf {
             .collect::<BTreeMap<_, _>>();
         let package = LanguagePackage {
             package_name: location.package_name.into(),
-            version: format!("{}.0", catalog::LANGUAGE_PACKAGE_VERSION_RANGE),
+            version: lumis_wasm_runtime::lowest_compatible_package_version(),
             definition_hash: sha256.clone(),
             parser: ParserMetadata {
                 name: stem.into(),

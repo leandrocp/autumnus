@@ -7,7 +7,7 @@ import {
   terminal,
   type Formatter,
 } from "../../src/formatters.ts";
-import { LANGUAGE_PACKAGE_VERSION_RANGE } from "../../src/generated/package-version-range.ts";
+import { lowestCompatibleLanguagePackageVersion } from "../../src/core/languages.ts";
 import type { LanguageDefinition, Theme } from "../../src/types.ts";
 
 /**
@@ -375,7 +375,7 @@ async function languagePackageDataUrl(
   ).join("");
   const metadata = JSON.stringify({
     packageName: `@lumis-sh/wasm-${parser}`,
-    version: `${LANGUAGE_PACKAGE_VERSION_RANGE}.0`,
+    version: lowestCompatibleLanguagePackageVersion(),
     definitionHash: sha256,
     parser: {
       name: `tree-sitter-${parser}`,

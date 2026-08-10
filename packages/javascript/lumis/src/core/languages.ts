@@ -1,5 +1,6 @@
 import type { Language, PredicateStep, Query as TreeSitterQuery } from "web-tree-sitter";
 import satisfies from "semver/functions/satisfies.js";
+import minVersion from "semver/ranges/min-version.js";
 import { buildHighlightEvents } from "../events.js";
 import { LANGUAGES } from "../generated/languages-meta.js";
 import { LANGUAGE_PACKAGE_VERSION_RANGE } from "../generated/package-version-range.js";
@@ -486,6 +487,23 @@ export function serializeLanguagePackageCache(packageMetadata: LanguagePackage):
 /** @internal */
 export function isCompatibleLanguagePackageVersion(version: string): boolean {
   return satisfies(version, LANGUAGE_PACKAGE_VERSION_RANGE);
+}
+
+/**
+ * The lowest version {@link LANGUAGE_PACKAGE_VERSION_RANGE} accepts.
+ *
+ * Fixtures and staged packages need one concrete version the runtimes will
+ * serve. Deriving it from the range keeps them correct if the range ever stops
+ * being a bare `MAJOR.MINOR` series, which appending `.0` to it would not.
+ *
+ * @internal
+ */
+export function lowestCompatibleLanguagePackageVersion(): string {
+  const lowest = minVersion(LANGUAGE_PACKAGE_VERSION_RANGE);
+  if (!lowest) {
+    throw new Error(`no version satisfies the supported range ${LANGUAGE_PACKAGE_VERSION_RANGE}`);
+  }
+  return lowest.version;
 }
 
 function incompatiblePackageVersion(packageMetadata: LanguagePackage): Error {

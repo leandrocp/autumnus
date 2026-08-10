@@ -3288,7 +3288,7 @@ fn stage_test_parsers(out: &Path) -> Result<()> {
     const FIXTURES: &str = "packages/javascript/lumis/test/fixtures/wasm";
 
     let toml = read_languages_toml()?;
-    let fixture_version = format!("{}.0", supported_tree_sitter_series()?);
+    let fixture_version = lumis_wasm_runtime::lowest_compatible_package_version();
     let parsers = out.join("parsers");
     fs::create_dir_all(&parsers)?;
 

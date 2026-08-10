@@ -471,14 +471,36 @@ fn package_version_is_compatible(package: &LanguagePackage) -> bool {
     require_compatible_package_version(package).is_ok()
 }
 
-fn require_compatible_package_version(package: &LanguagePackage) -> Result<(), StoreError> {
+fn requirement() -> &'static VersionReq {
     static REQUIREMENT: OnceLock<VersionReq> = OnceLock::new();
-
-    let required = crate::catalog::LANGUAGE_PACKAGE_VERSION_RANGE;
-    let requirement = REQUIREMENT.get_or_init(|| {
-        VersionReq::parse(required)
+    REQUIREMENT.get_or_init(|| {
+        VersionReq::parse(crate::catalog::LANGUAGE_PACKAGE_VERSION_RANGE)
             .expect("the generated language package version range must be valid semver")
-    });
+    })
+}
+
+/// The lowest version [`crate::catalog::LANGUAGE_PACKAGE_VERSION_RANGE`] accepts.
+///
+/// Fixtures and staged packages need one concrete version this store will serve.
+/// Deriving it from the range keeps them correct if the range ever stops being a
+/// bare `MAJOR.MINOR` series, which appending `.0` to it would not.
+#[must_use]
+pub fn lowest_compatible_package_version() -> String {
+    let comparator = requirement()
+        .comparators
+        .first()
+        .expect("the generated language package version range must bound something");
+    Version::new(
+        comparator.major,
+        comparator.minor.unwrap_or(0),
+        comparator.patch.unwrap_or(0),
+    )
+    .to_string()
+}
+
+fn require_compatible_package_version(package: &LanguagePackage) -> Result<(), StoreError> {
+    let required = crate::catalog::LANGUAGE_PACKAGE_VERSION_RANGE;
+    let requirement = requirement();
     let version =
         Version::parse(&package.version).map_err(|_| StoreError::IncompatiblePackageVersion {
             package_name: package.package_name.clone(),
@@ -1007,8 +1029,10 @@ mod tests {
     #[test]
     fn package_version_compatibility_matches_the_shared_corpus() {
         #[derive(serde::Deserialize)]
+        #[serde(rename_all = "camelCase")]
         struct Corpus {
             range: String,
+            lowest_compatible: String,
             cases: Vec<Case>,
         }
         #[derive(serde::Deserialize)]
@@ -1022,6 +1046,10 @@ mod tests {
         ))
         .unwrap();
         assert_eq!(corpus.range, crate::catalog::LANGUAGE_PACKAGE_VERSION_RANGE);
+        assert_eq!(
+            lowest_compatible_package_version(),
+            corpus.lowest_compatible
+        );
         for case in corpus.cases {
             let mut candidate = package();
             candidate.version = case.version.clone();
