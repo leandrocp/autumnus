@@ -333,7 +333,7 @@ for (const theme of [dracula, nord, githubLight, tokyonightMoon]) {
     blurb:
       "Tokens get scope class names, and the colours come from a stylesheet the browser can cache.",
     tags: ["htmlLinked", "CSS"],
-    source: "/themes/css-files",
+    source: "/docs/themes/css-files",
     codeLanguage: "html",
     code: `<link rel="stylesheet" media="(prefers-color-scheme: light)"
       href="https://cdn.jsdelivr.net/npm/@lumis-sh/themes/dist/css/catppuccin_latte.css">

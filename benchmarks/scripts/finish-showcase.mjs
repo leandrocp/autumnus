@@ -254,7 +254,12 @@ function run(command, args) {
 function countTokens(fragment, implementation) {
   let tokens = 0;
   for (const tag of fragment.match(/<span\b[^>]*>/gi) ?? []) {
-    if (/style="[^"]*\bcolor\s*:/i.test(tag) || /class="[^"]*\bhljs-/i.test(tag)) tokens += 1;
+    if (
+      /style=(?:"[^"]*|'[^']*)\bcolor\s*:/i.test(tag) ||
+      /class=(?:"[^"]*|'[^']*)\bhljs-/i.test(tag)
+    ) {
+      tokens += 1;
+    }
   }
   if (tokens === 0) throw new Error(`${implementation} produced no coloured tokens`);
   return tokens;

@@ -9,13 +9,6 @@ const BENCHMARKS = "/benchmark-data";
 const TIMED_SCENARIO = "small-one-language";
 const TIMED_LUMIS_RUNTIME = "lumis-rust";
 
-interface Timings {
-  scenarios: Array<{
-    id: string;
-    results: Array<{ id: string; totalNs: number }>;
-  }>;
-}
-
 interface ComparisonDocument {
   id: string;
   label: string;
@@ -186,21 +179,15 @@ export async function setupComparison(root: HTMLElement) {
   }
 
   // A build without the timing report still gets the gallery and the token
-  // counts, so a missing file is silence rather than an error.
+  // counts, so a missing or malformed file is silence rather than an error.
   async function loadTimings() {
-    const found = new Map<string, number>();
     try {
       const response = await fetch(`${BENCHMARKS}/results.json`);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const report = (await response.json()) as Timings;
-      const scenario = report.scenarios.find((entry) => entry.id === TIMED_SCENARIO);
-      for (const result of scenario?.results ?? []) {
-        found.set(result.id === TIMED_LUMIS_RUNTIME ? "lumis" : result.id, result.totalNs);
-      }
+      return readTimings(await response.json());
     } catch {
-      return found;
+      return new Map<string, number>();
     }
-    return found;
   }
 
   function paint(container: HTMLElement, selected: string) {
@@ -245,6 +232,39 @@ export async function setupComparison(root: HTMLElement) {
   paint(documentTabs, currentDocument.id);
   paint(implementationTabs, currentImplementation.id);
   show();
+}
+
+// The report is fetched, so nothing about its shape is known until it has been
+// checked. Anything unexpected throws and the caller drops the whole map, which
+// is why the map is built here rather than filled in by the caller: half a
+// report would put `NaN µs` under one output and nothing under the next.
+function readTimings(report: unknown): Map<string, number> {
+  if (!isObject(report) || !Array.isArray(report.scenarios)) {
+    throw new Error("timing report has no scenarios");
+  }
+  const scenario = report.scenarios.find((entry) => isObject(entry) && entry.id === TIMED_SCENARIO);
+  if (!isObject(scenario) || !Array.isArray(scenario.results)) {
+    throw new Error(`timing report has no ${TIMED_SCENARIO} results`);
+  }
+  const timings = new Map<string, number>();
+  for (const result of scenario.results) {
+    if (!isObject(result) || typeof result.id !== "string") {
+      throw new Error(`${TIMED_SCENARIO} has a result without an id`);
+    }
+    if (
+      typeof result.totalNs !== "number" ||
+      !Number.isFinite(result.totalNs) ||
+      result.totalNs <= 0
+    ) {
+      throw new Error(`${result.id} has no positive Total`);
+    }
+    timings.set(result.id === TIMED_LUMIS_RUNTIME ? "lumis" : result.id, result.totalNs);
+  }
+  return timings;
+}
+
+function isObject(value: unknown): value is { [key: string]: unknown } {
+  return typeof value === "object" && value !== null;
 }
 
 function formatDuration(ns: number) {

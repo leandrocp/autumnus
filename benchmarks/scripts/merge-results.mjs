@@ -51,7 +51,7 @@ const report = {
   schemaVersion: 1,
   metric: "total",
   timingBoundary:
-    "runtime setup/load plus every highlight in the scenario; harness fixture reads excluded, CLI command file I/O included",
+    "every highlight in the scenario, harness fixture reads excluded; building the highlighter is reported apart as setupNs, except for the CLI rows, where each sample is a whole command and carries process start and file I/O with it",
   results,
 };
 await mkdir(runDir, { recursive: true });

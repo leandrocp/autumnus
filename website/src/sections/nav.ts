@@ -25,12 +25,12 @@ export function renderNav(home = "") {
             ${GITHUB_SVG}
             <span class="hidden md:inline">GitHub</span>
           </a>
-          <button class="mobile-menu-toggle cursor-pointer text-zinc-900 dark:text-white md:hidden" aria-label="Toggle menu">
+          <button class="mobile-menu-toggle cursor-pointer text-zinc-900 dark:text-white lg:hidden" aria-label="Toggle menu">
             ${BURGER_SVG}
           </button>
         </div>
       </div>
-      <div class="mobile-menu hidden border-t border-zinc-200 bg-white/95 backdrop-blur-lg dark:border-zinc-800 dark:bg-[#09090b]/95 md:hidden">
+      <div class="mobile-menu hidden border-t border-zinc-200 bg-white/95 backdrop-blur-lg dark:border-zinc-800 dark:bg-[#09090b]/95 lg:hidden">
         <div class="mx-auto flex max-w-6xl flex-col gap-1 px-6 py-4 font-mono text-sm tracking-wider uppercase">
           <a href="/docs" class="mobile-menu-link mb-2 inline-flex w-fit items-center border border-zinc-900 bg-zinc-900 px-3 py-2 text-white transition-colors hover:bg-white hover:text-zinc-900 dark:border-white dark:bg-white dark:text-zinc-900 dark:hover:bg-transparent dark:hover:text-white">Docs</a>
           <a href="${home}#quickstart" class="mobile-menu-link block py-2 text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white">Quickstart</a>
