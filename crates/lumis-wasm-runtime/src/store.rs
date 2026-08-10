@@ -181,18 +181,6 @@ impl LanguageStore {
         Ok(self.remember(package_name, package))
     }
 
-    /// Resolve the compatible package range again and replace cached metadata.
-    ///
-    /// # Errors
-    /// Fails when compatible package metadata cannot be fetched or validated.
-    pub fn refresh_package(&self, package_name: &str) -> Result<Arc<LanguagePackage>, StoreError> {
-        let path = self.package_path(package_name)?;
-        let package = self
-            .fetch_package(package_name, &path)
-            .map_err(|error| self.unavailable(package_name, error))?;
-        Ok(self.remember(package_name, package))
-    }
-
     /// Naming the directory is the difference between "the registry is down" and
     /// "the store is configured one level off"; the second is far more common and
     /// indistinguishable from a bare fetch error. Anything other than a failed

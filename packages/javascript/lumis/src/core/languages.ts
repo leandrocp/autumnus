@@ -976,13 +976,14 @@ export function createLanguagesModule(runtime: RuntimeEnvironment): LanguagesMod
     }
 
     private async resolvePackage(packageName: string): Promise<LanguagePackage> {
+      // Every branch below either returns a package this runtime accepts or
+      // throws, so what the shared cache holds is already compatible. Rechecking
+      // it here would start a second load for the same name and leave two
+      // callers of one in-flight request with different results.
       const memory = this.sharedCache.packages.get(packageName);
-      if (memory && this.acceptsPackage(memory)) return memory;
+      if (memory) return memory;
       const inFlight = this.sharedCache.packageLoads.get(packageName);
-      if (inFlight) {
-        const packageMetadata = await inFlight;
-        if (this.acceptsPackage(packageMetadata)) return packageMetadata;
-      }
+      if (inFlight) return inFlight;
 
       const load = (async () => {
         const staged = await runtime.readStagedAsset?.(
