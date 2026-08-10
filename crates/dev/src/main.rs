@@ -199,6 +199,7 @@ fn render_conformance(
             themes,
             default_theme,
             rainbow_brackets,
+            vec![],
         )?
     );
     Ok(())
@@ -219,6 +220,16 @@ struct FixtureMetadata {
     language: String,
     theme: String,
     rainbow_brackets: bool,
+    html_multi_themes: Option<HtmlMultiThemesFixture>,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+struct HtmlMultiThemesFixture {
+    themes: BTreeMap<String, String>,
+    default_theme: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    highlight_lines: Vec<usize>,
 }
 
 fn is_false(value: &bool) -> bool {
@@ -234,6 +245,8 @@ struct FixtureFile {
     // Omitted from the JSON when false so non-rainbow fixtures stay unchanged.
     #[serde(default, skip_serializing_if = "is_false")]
     rainbow_brackets: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    html_multi_themes: Option<HtmlMultiThemesFixture>,
     #[serde(default)]
     events: Vec<SerializableHighlightEvent>,
 }
@@ -277,6 +290,14 @@ fn fixture_root() -> PathBuf {
     PathBuf::from("fixtures/conformance")
 }
 
+fn fixture_theme(name: &str) -> Result<lumis::themes::Theme> {
+    let path = PathBuf::from("fixtures/conformance-themes").join(format!("{name}.json"));
+    if path.is_file() {
+        return Ok(lumis::themes::from_file(path)?);
+    }
+    Ok(lumis::themes::get(name)?)
+}
+
 fn selected_fixture_dirs(name: &str) -> Result<Vec<PathBuf>> {
     let root = fixture_root();
     if name.is_empty() {
@@ -309,13 +330,14 @@ fn render_formatter_output(
     themes: Vec<String>,
     default_theme: Option<String>,
     rainbow_brackets: bool,
+    highlight_lines: Vec<usize>,
 ) -> Result<String> {
     let mut output = Vec::new();
 
     match formatter {
         "html-inline" => {
             let theme_name = theme.unwrap_or_else(|| "dracula".to_string());
-            let theme = lumis::themes::get(&theme_name)?;
+            let theme = fixture_theme(&theme_name)?;
             let formatter = lumis::HtmlInlineBuilder::new()
                 .language(language)
                 .theme(Some(theme))
@@ -342,7 +364,7 @@ fn render_formatter_output(
                 let (name, theme_id) = spec
                     .split_once(':')
                     .ok_or_else(|| anyhow::anyhow!("invalid theme spec '{}'", spec))?;
-                theme_map.insert(name.to_string(), lumis::themes::get(theme_id)?);
+                theme_map.insert(name.to_string(), fixture_theme(theme_id)?);
             }
 
             let mut builder = lumis::HtmlMultiThemesBuilder::new();
@@ -355,12 +377,23 @@ fn render_formatter_output(
                 builder.default_theme(default_theme);
             }
 
+            if !highlight_lines.is_empty() {
+                builder.highlight_lines(Some(lumis::formatters::html_inline::HighlightLines {
+                    lines: highlight_lines
+                        .into_iter()
+                        .map(|line| line..=line)
+                        .collect(),
+                    style: Some(lumis::formatters::html_inline::HighlightLinesStyle::Theme),
+                    class: None,
+                }));
+            }
+
             let formatter = builder.build().map_err(|e| anyhow::anyhow!("{e}"))?;
             formatter.format(source, &mut output)?;
         }
         "terminal" => {
             let theme_name = theme.unwrap_or_else(|| "dracula".to_string());
-            let theme = lumis::themes::get(&theme_name)?;
+            let theme = fixture_theme(&theme_name)?;
             let formatter = lumis::TerminalBuilder::new()
                 .language(language)
                 .theme(Some(theme))
@@ -389,14 +422,30 @@ fn fixture_outputs(
     theme: &str,
     name: &str,
     rainbow_brackets: bool,
+    html_multi_themes: Option<HtmlMultiThemesFixture>,
 ) -> Result<FixtureOutputs> {
     let events =
         highlight_events_with_options(source, language, HighlightOptions { rainbow_brackets })?;
+    let (multi_themes, multi_default_theme, multi_highlight_lines) = html_multi_themes
+        .as_ref()
+        .map(|config| {
+            (
+                config
+                    .themes
+                    .iter()
+                    .map(|(name, theme)| format!("{name}:{theme}"))
+                    .collect(),
+                config.default_theme.clone(),
+                config.highlight_lines.clone(),
+            )
+        })
+        .unwrap_or_else(|| (vec![format!("main:{theme}")], "main".to_string(), vec![]));
     let metadata = FixtureMetadata {
         name: name.to_string(),
         language: language.id_name().to_string(),
         theme: theme.to_string(),
         rainbow_brackets,
+        html_multi_themes,
     };
 
     Ok(FixtureOutputs {
@@ -410,6 +459,7 @@ fn fixture_outputs(
             vec![],
             None,
             rainbow_brackets,
+            vec![],
         )?,
         html_linked: render_formatter_output(
             source,
@@ -419,15 +469,17 @@ fn fixture_outputs(
             vec![],
             None,
             rainbow_brackets,
+            vec![],
         )?,
         html_multi_themes: render_formatter_output(
             source,
             language,
             "html-multi-themes",
             None,
-            vec![format!("main:{theme}")],
-            Some("main".to_string()),
+            multi_themes,
+            Some(multi_default_theme),
             rainbow_brackets,
+            multi_highlight_lines,
         )?,
         terminal: render_formatter_output(
             source,
@@ -437,6 +489,7 @@ fn fixture_outputs(
             vec![],
             None,
             rainbow_brackets,
+            vec![],
         )?,
         bbcode: render_formatter_output(
             source,
@@ -446,6 +499,7 @@ fn fixture_outputs(
             vec![],
             None,
             rainbow_brackets,
+            vec![],
         )?,
     })
 }
@@ -480,6 +534,7 @@ fn verify_conformance(name: &str) -> Result<()> {
             &stored.theme,
             &stored.name,
             stored.rainbow_brackets,
+            stored.html_multi_themes.clone(),
         )?;
 
         ensure_fixture_file_match(
@@ -490,6 +545,7 @@ fn verify_conformance(name: &str) -> Result<()> {
                 language: generated.metadata.language.clone(),
                 theme: generated.metadata.theme.clone(),
                 rainbow_brackets: generated.metadata.rainbow_brackets,
+                html_multi_themes: generated.metadata.html_multi_themes.clone(),
                 events: generated.events.clone(),
             },
         )?;
@@ -540,6 +596,7 @@ fn regen_conformance(name: &str) -> Result<()> {
             &stored.theme,
             &stored.name,
             stored.rainbow_brackets,
+            stored.html_multi_themes.clone(),
         )?;
 
         fs::write(
@@ -549,6 +606,7 @@ fn regen_conformance(name: &str) -> Result<()> {
                 language: generated.metadata.language,
                 theme: generated.metadata.theme,
                 rainbow_brackets: generated.metadata.rainbow_brackets,
+                html_multi_themes: generated.metadata.html_multi_themes,
                 events: generated.events,
             })? + "\n",
         )?;

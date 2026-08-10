@@ -79,8 +79,12 @@ function spanAttrs(span: HighlightSpan, formatter: HtmlMultiThemesFormatter): Ht
 
 function generatePreClasses(formatter: HtmlMultiThemesFormatter): string {
   return (
-    joinClasses("lumis", "lumis-themes", formatter.preClass, ...Object.keys(formatter.themes)) ??
-    "lumis lumis-themes"
+    joinClasses(
+      "lumis",
+      "lumis-themes",
+      formatter.preClass,
+      ...Object.keys(formatter.themes).sort(),
+    ) ?? "lumis lumis-themes"
   );
 }
 
@@ -105,12 +109,26 @@ function highlightLineStyle(
     return highlightLines.style;
   }
 
-  if (!formatter.defaultTheme || formatter.defaultTheme === "light-dark()") {
+  if (!formatter.defaultTheme) {
     return undefined;
+  }
+
+  if (formatter.defaultTheme === "light-dark()") {
+    return lightDarkHighlightStyle(formatter);
   }
 
   const style = getThemeStyle(formatter.themes[formatter.defaultTheme], "highlighted");
   return styleToCss(style, { italic: formatter.italic }) || undefined;
+}
+
+function lightDarkHighlightStyle(formatter: HtmlMultiThemesFormatter): string | undefined {
+  const light = getThemeStyle(formatter.themes.light, "highlighted");
+  const dark = getThemeStyle(formatter.themes.dark, "highlighted");
+  if (!light?.bg || !dark?.bg) {
+    return undefined;
+  }
+
+  return `background-color: light-dark(${light.bg}, ${dark.bg});`;
 }
 
 function highlightLineClass(

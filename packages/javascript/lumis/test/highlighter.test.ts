@@ -585,6 +585,79 @@ describe("htmlMultiThemes", () => {
     expect(html).toContain("data-highlight=");
   });
 
+  it("highlights lines with the default theme's own colour", () => {
+    const dark = {
+      ...draculaTheme,
+      highlights: {
+        ...draculaTheme.highlights,
+        highlighted: { ...draculaTheme.highlights.highlighted, fg: "#eeeeee" },
+      },
+    };
+    const html = hl.highlight(
+      '{"a": 1}',
+      htmlMultiThemes({
+        language: json,
+        themes: { light: theme, dark },
+        defaultTheme: "dark",
+        highlightLines: { lines: [1], style: "theme" },
+      }),
+    );
+    expect(html).toContain('style="color: #eeeeee; background-color: #44475a;"');
+  });
+
+  function renderLightDarkHighlightedLine(
+    lightBackground: string | undefined,
+    darkBackground: string | undefined,
+  ): string {
+    const light = {
+      ...theme,
+      highlights: {
+        ...theme.highlights,
+        highlighted: {
+          ...theme.highlights.highlighted,
+          fg: "#111111",
+          bg: lightBackground,
+        },
+      },
+    };
+    const dark = {
+      ...draculaTheme,
+      highlights: {
+        ...draculaTheme.highlights,
+        highlighted: {
+          ...draculaTheme.highlights.highlighted,
+          fg: "#eeeeee",
+          bg: darkBackground,
+        },
+      },
+    };
+
+    return hl.highlight(
+      '{"a": 1}',
+      htmlMultiThemes({
+        language: json,
+        themes: { light, dark },
+        defaultTheme: "light-dark()",
+        highlightLines: { lines: [1], style: "theme" },
+      }),
+    );
+  }
+
+  it("highlights lines in both colour schemes", () => {
+    const html = renderLightDarkHighlightedLine("#2f334d", "#44475a");
+
+    expect(html).toContain('style="background-color: light-dark(#2f334d, #44475a);"');
+  });
+
+  it.each([
+    ["light", undefined, "#44475a"],
+    ["dark", "#2f334d", undefined],
+  ])("does not style lines without the %s highlighted background", (_theme, lightBg, darkBg) => {
+    const html = renderLightDarkHighlightedLine(lightBg, darkBg);
+
+    expect(html).toContain('<div class="l-line" data-line="1">');
+  });
+
   it("wraps output with header element", () => {
     const html = hl.highlight(
       '{"a": 1}',
