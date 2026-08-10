@@ -316,10 +316,6 @@ export function closeTag(name: string): string {
 
 /**
  * Open a `<span>` carrying the given attributes.
- *
- * A scope with no attributes still gets a bare `<span>`, so highlighted output
- * is byte-identical everywhere Lumis runs.
- *
  * ```ts
  * openSpanTag({ class: 'l-keyword' })  // '<span class="l-keyword">'
  * openSpanTag({})                      // '<span>'
@@ -493,10 +489,6 @@ export function spanInlineAttrs(options: SpanInlineOptions): HtmlAttrs {
 
 /**
  * Render an inline-styled `<span>` for a token.
- *
- * A scope that resolves to no style still gets a bare `<span>`, so a custom
- * formatter built on this helper produces the same markup as the built-in ones.
- *
  * ```ts
  * spanInline('const', { language: 'javascript', scope: 'keyword', theme: dracula })
  * // '<span style="color: #ff79c6;">const</span>'

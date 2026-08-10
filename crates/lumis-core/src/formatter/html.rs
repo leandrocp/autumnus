@@ -51,9 +51,6 @@ pub fn span_inline_attrs(
 }
 
 /// Generate an HTML `<span>` element with inline CSS styles.
-///
-/// A scope that resolves to no attributes still gets a bare `<span>`, matching
-/// the built-in formatters.
 pub fn span_inline(
     text: &str,
     language: Option<Language>,
