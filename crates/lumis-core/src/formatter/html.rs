@@ -579,6 +579,10 @@ pub fn escape_fragment(text: &str) -> String {
 }
 
 /// Render highlight events into HTML lines, reopening active spans at line boundaries.
+///
+/// A scope whose attributes come out empty is not wrapped at all, matching
+/// [`span_inline`]. Such a span carries no class, style or data attribute, so
+/// nothing can select it and it only adds noise to the output.
 pub fn render_lines_from_events<F>(
     source: &str,
     events: &[crate::events::HighlightEvent],
@@ -588,7 +592,7 @@ where
     F: Fn(usize, &str) -> String,
 {
     let mut lines = vec![String::new()];
-    let mut stack: Vec<(usize, String)> = Vec::new();
+    let mut stack: Vec<OpenSpan> = Vec::new();
 
     for event in events {
         match event {
@@ -597,11 +601,18 @@ where
                 language,
             } => {
                 let attrs = span_attrs(*scope_index, language);
-                append_fragment(&mut lines, &format!("<span {attrs}>"));
-                stack.push((*scope_index, language.clone()));
+                let emitted = !attrs.is_empty();
+                if emitted {
+                    append_fragment(&mut lines, &format!("<span {attrs}>"));
+                }
+                stack.push(OpenSpan {
+                    scope_index: *scope_index,
+                    language: language.clone(),
+                    emitted,
+                });
             }
             crate::events::HighlightEvent::End => {
-                if stack.pop().is_some() {
+                if stack.pop().is_some_and(|span| span.emitted) {
                     append_fragment(&mut lines, "</span>");
                 }
             }
@@ -613,19 +624,26 @@ where
         }
     }
 
-    while stack.pop().is_some() {
-        append_fragment(&mut lines, "</span>");
+    while let Some(span) = stack.pop() {
+        if span.emitted {
+            append_fragment(&mut lines, "</span>");
+        }
     }
 
     lines
 }
 
-fn render_source_event<F>(
-    lines: &mut Vec<String>,
-    text: &str,
-    stack: &[(usize, String)],
-    span_attrs: &F,
-) where
+/// A span currently open on the render stack.
+struct OpenSpan {
+    scope_index: usize,
+    language: String,
+    /// False when the scope resolved to no attributes, so nothing was written
+    /// and there is no tag to close or reopen.
+    emitted: bool,
+}
+
+fn render_source_event<F>(lines: &mut Vec<String>, text: &str, stack: &[OpenSpan], span_attrs: &F)
+where
     F: Fn(usize, &str) -> String,
 {
     let mut remaining = text;
@@ -635,7 +653,7 @@ fn render_source_event<F>(
             Some(newline_index) => {
                 let fragment = &remaining[..newline_index];
                 append_fragment(lines, &escape_fragment(fragment));
-                close_open_spans(lines, stack.len());
+                close_open_spans(lines, stack);
                 lines.push(String::new());
                 reopen_spans(lines, stack, span_attrs);
                 remaining = &remaining[newline_index + 1..];
@@ -648,18 +666,18 @@ fn render_source_event<F>(
     }
 }
 
-fn close_open_spans(lines: &mut Vec<String>, len: usize) {
-    for _ in 0..len {
+fn close_open_spans(lines: &mut Vec<String>, stack: &[OpenSpan]) {
+    for _ in stack.iter().rev().filter(|span| span.emitted) {
         append_fragment(lines, "</span>");
     }
 }
 
-fn reopen_spans<F>(lines: &mut Vec<String>, stack: &[(usize, String)], span_attrs: &F)
+fn reopen_spans<F>(lines: &mut Vec<String>, stack: &[OpenSpan], span_attrs: &F)
 where
     F: Fn(usize, &str) -> String,
 {
-    for (scope_index, language) in stack {
-        let attrs = span_attrs(*scope_index, language);
+    for span in stack.iter().filter(|span| span.emitted) {
+        let attrs = span_attrs(span.scope_index, &span.language);
         append_fragment(lines, &format!("<span {attrs}>"));
     }
 }
@@ -668,6 +686,9 @@ where
 ///
 /// This is a simplified version of the vendored HtmlRenderer that works with
 /// pre-computed `HighlightEvent` slices instead of tree-sitter iterators.
+///
+/// A scope for which `attribute_callback` writes nothing is not wrapped at all,
+/// matching [`render_lines_from_events`] and [`span_inline`].
 pub fn render_events<F>(
     source: &str,
     events: &[crate::events::HighlightEvent],
@@ -679,7 +700,7 @@ where
     let source = source.as_bytes();
     let mut html = Vec::new();
     let mut line_offsets = vec![0u32];
-    let mut highlight_stack: Vec<(usize, String)> = Vec::new();
+    let mut highlight_stack: Vec<bool> = Vec::new();
 
     for event in events {
         match event {
@@ -687,14 +708,20 @@ where
                 scope_index,
                 language,
             } => {
-                html.extend_from_slice(b"<span ");
-                attribute_callback(*scope_index, language, &mut html);
-                html.push(b'>');
-                highlight_stack.push((*scope_index, language.clone()));
+                let mut attrs = Vec::new();
+                attribute_callback(*scope_index, language, &mut attrs);
+                let emitted = !attrs.is_empty();
+                if emitted {
+                    html.extend_from_slice(b"<span ");
+                    html.extend_from_slice(&attrs);
+                    html.push(b'>');
+                }
+                highlight_stack.push(emitted);
             }
             crate::events::HighlightEvent::End => {
-                html.extend_from_slice(b"</span>");
-                highlight_stack.pop();
+                if highlight_stack.pop().unwrap_or(false) {
+                    html.extend_from_slice(b"</span>");
+                }
             }
             crate::events::HighlightEvent::Source { start, end } => {
                 let s = (*start).min(source.len());

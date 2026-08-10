@@ -9,6 +9,7 @@ import {
   joinClasses,
   lineIsHighlighted,
   openCodeTag,
+  openSpanTag,
   openTag,
   spanMultiThemesAttrs,
   styleToCss,
@@ -140,7 +141,7 @@ export function formatHtmlMultiThemes(
 ): string {
   const theme = formatter.defaultTheme ? formatter.themes[formatter.defaultTheme] : undefined;
   const { lines } = formatHighlightIterLines(source, events, formatter.language, theme, {
-    openSpan: (span, _style) => openTag("span", spanAttrs(span, formatter)),
+    openSpan: (span, _style) => openSpanTag(spanAttrs(span, formatter)),
   });
 
   const pre = openTag("pre", {

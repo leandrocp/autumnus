@@ -317,13 +317,18 @@ export function closeTag(name: string): string {
 /**
  * Open a `<span>` tag with the given attributes.
  *
+ * Returns an empty string when there are no attributes, so a scope that
+ * resolves to no style is not wrapped at all. See {@link spanInline}, which
+ * returns the bare text in the same situation.
+ *
  * ```ts
  * openSpanTag({ class: 'l-keyword' })  // '<span class="l-keyword">'
+ * openSpanTag({})                      // ''
  * ```
  */
 export function openSpanTag(attrs: HtmlAttrs = {}): string {
   const renderedAttrs = attrsToString(attrs);
-  return renderedAttrs.length > 0 ? `<span ${renderedAttrs}>` : `<span >`;
+  return renderedAttrs.length > 0 ? `<span ${renderedAttrs}>` : "";
 }
 
 /**
@@ -862,14 +867,22 @@ export function appendFragment(lines: string[], fragment: string): void {
   }
 }
 
+interface SpanStackEntry {
+  scope: string;
+  language: string;
+  /** False when `openSpan` produced nothing, so there is no tag to close or reopen. */
+  emitted: boolean;
+}
+
 function closeOpenSpans(
   lines: string[],
-  stack: Array<{ scope: string; language: string }>,
+  stack: SpanStackEntry[],
   closeSpan: (span: HighlightSpan, style: HighlightStyle | undefined) => string,
   theme: Theme | undefined,
 ): void {
   for (let i = stack.length - 1; i >= 0; i -= 1) {
     const entry = stack[i]!;
+    if (!entry.emitted) continue;
     const style = getSpanStyle(theme, entry.scope, entry.language);
     appendFragment(lines, closeSpan(emptySpan(entry.scope, entry.language), style));
   }
@@ -877,11 +890,12 @@ function closeOpenSpans(
 
 function reopenSpans(
   lines: string[],
-  stack: Array<{ scope: string; language: string }>,
+  stack: SpanStackEntry[],
   openSpan: (span: HighlightSpan, style: HighlightStyle | undefined) => string,
   theme: Theme | undefined,
 ): void {
   for (const entry of stack) {
+    if (!entry.emitted) continue;
     const style = getSpanStyle(theme, entry.scope, entry.language);
     appendFragment(lines, openSpan(emptySpan(entry.scope, entry.language), style));
   }
@@ -890,7 +904,7 @@ function reopenSpans(
 function renderSourceEvent(
   lines: string[],
   text: string,
-  stack: Array<{ scope: string; language: string }>,
+  stack: SpanStackEntry[],
   formatText: (text: string) => string,
   openSpan: (span: HighlightSpan, style: HighlightStyle | undefined) => string,
   closeSpan: (span: HighlightSpan, style: HighlightStyle | undefined) => string,
@@ -930,20 +944,25 @@ export function formatHighlightIterLines(
   const sourceBytes = encodeSource(source);
   const lines = [""];
   let language = languageRef ? languageId(languageRef) : "plaintext";
-  const stack: Array<{ scope: string; language: string }> = [];
+  const stack: SpanStackEntry[] = [];
 
   for (const event of events) {
     if (event.type === "start") {
       const style = getSpanStyle(theme, event.scope, event.language);
       const span = emptySpan(event.scope, event.language);
-      appendFragment(lines, options.openSpan(span, style));
-      stack.push({ scope: event.scope, language: event.language });
+      const open = options.openSpan(span, style);
+      appendFragment(lines, open);
+      stack.push({
+        scope: event.scope,
+        language: event.language,
+        emitted: open.length > 0,
+      });
       continue;
     }
 
     if (event.type === "end") {
       const top = stack.pop();
-      if (top) {
+      if (top?.emitted) {
         const style = getSpanStyle(theme, top.scope, top.language);
         const span = emptySpan(top.scope, top.language);
         appendFragment(lines, closeSpan(span, style));
@@ -962,8 +981,10 @@ export function formatHighlightIterLines(
     renderSourceEvent(lines, text, stack, formatText, options.openSpan, closeSpan, theme);
   }
 
-  while (stack.pop()) {
-    appendFragment(lines, closeSpan(emptySpan("", ""), undefined));
+  for (let entry = stack.pop(); entry; entry = stack.pop()) {
+    if (entry.emitted) {
+      appendFragment(lines, closeSpan(emptySpan("", ""), undefined));
+    }
   }
 
   return { lines, language };
@@ -971,6 +992,8 @@ export function formatHighlightIterLines(
 
 /**
  * Render highlight events into escaped HTML lines, reopening active spans across newlines.
+ *
+ * A scope for which `spanAttrs` returns nothing is not wrapped at all.
  *
  * ```ts
  * renderLinesFromEvents('a\nb', events, (scope) => `class="${scope}"`)
@@ -985,7 +1008,7 @@ export function renderLinesFromEvents(
   return formatHighlightIterLines(source, events, undefined, undefined, {
     openSpan: (span) => {
       const attrs = spanAttrs(span.scope, span.language);
-      return attrs.length > 0 ? `<span ${attrs}>` : "<span >";
+      return attrs.length > 0 ? `<span ${attrs}>` : "";
     },
   }).lines;
 }
@@ -1010,17 +1033,24 @@ export function renderEvents(
     renderedLength += fragment.length;
   };
 
+  const emittedStack: boolean[] = [];
+
   for (const event of events) {
     if (event.type === "start") {
-      push("<span ");
-      attributeCallback(event.scope, event.language, html);
-      renderedLength = html.join("").length;
-      push(">");
+      const attrs: string[] = [];
+      attributeCallback(event.scope, event.language, attrs);
+      const rendered = attrs.join("");
+      emittedStack.push(rendered.length > 0);
+      if (rendered.length > 0) {
+        push(`<span ${rendered}>`);
+      }
       continue;
     }
 
     if (event.type === "end") {
-      push("</span>");
+      if (emittedStack.pop()) {
+        push("</span>");
+      }
       continue;
     }
 

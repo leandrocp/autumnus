@@ -117,6 +117,8 @@ describe("formatter shared helpers", () => {
     expect(closeCodeTag()).toBe("</code>");
     expect(closingTags()).toBe("</code></pre>");
     expect(openSpanTag({ class: "token" })).toBe('<span class="token">');
+    expect(openSpanTag()).toBe("");
+    expect(openSpanTag({ class: undefined })).toBe("");
     expect(openPreTag()).toBe('<pre class="lumis">');
     expect(openPreTag({ preClass: "custom" })).toBe('<pre class="lumis custom">');
     expect(openPreTag({ theme })).toBe(
@@ -222,6 +224,51 @@ describe("formatter shared helpers", () => {
     );
 
     expect(lines).toEqual(['<span class="string">a</span>', '<span class="string">b</span>']);
+  });
+
+  it("does not wrap a scope whose attrs come out empty", () => {
+    const lines = renderLinesFromEvents(
+      "ab",
+      [
+        { type: "start", scope: "string", language: "json" },
+        { type: "source", startByte: 0, endByte: 1 },
+        { type: "start", scope: "unstyled", language: "json" },
+        { type: "source", startByte: 1, endByte: 2 },
+        { type: "end" },
+        { type: "end" },
+      ],
+      (scope) => (scope === "unstyled" ? "" : `class="${scope}"`),
+    );
+
+    expect(lines).toEqual(['<span class="string">ab</span>']);
+  });
+
+  it("keeps tags balanced when a skipped span straddles a newline", () => {
+    const lines = renderLinesFromEvents(
+      "a\nb",
+      [
+        { type: "start", scope: "unstyled", language: "json" },
+        { type: "source", startByte: 0, endByte: 3 },
+        { type: "end" },
+      ],
+      () => "",
+    );
+
+    expect(lines).toEqual(["a", "b"]);
+  });
+
+  it("omits the span in renderEvents when the callback writes nothing", () => {
+    const [html] = renderEvents(
+      "ab",
+      [
+        { type: "start", scope: "unstyled", language: "json" },
+        { type: "source", startByte: 0, endByte: 2 },
+        { type: "end" },
+      ],
+      () => {},
+    );
+
+    expect(new TextDecoder().decode(html)).toBe("ab");
   });
 
   it("renders event HTML and slices it back into lines", () => {

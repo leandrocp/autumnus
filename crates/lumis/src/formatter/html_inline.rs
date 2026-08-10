@@ -266,9 +266,37 @@ mod tests {
         let mut buffer = Vec::new();
         formatter.format(code, &mut buffer).unwrap();
         let result = String::from_utf8(buffer).unwrap();
-        let expected = r#"<pre class="lumis"><code class="language-elixir" translate="no" tabindex="0"><div class="l-line" data-line="1"><span ><span >@<span ><span >lang <span >:rust</span></span></span></span></span>
+        let expected = r#"<pre class="lumis"><code class="language-elixir" translate="no" tabindex="0"><div class="l-line" data-line="1">@lang :rust
 </div></code></pre>"#;
         assert_eq!(result, expected)
+    }
+
+    #[test]
+    fn test_unstyled_scope_is_not_wrapped() {
+        let theme = themes::get("dracula").unwrap();
+        let code = "# *italic*";
+        let formatter = HtmlInline::new(
+            Language::Markdown,
+            Some(theme),
+            None,
+            false,
+            false,
+            None,
+            None,
+        );
+        let mut buffer = Vec::new();
+        formatter.format(code, &mut buffer).unwrap();
+        let result = String::from_utf8(buffer).unwrap();
+
+        assert!(
+            !result.contains("<span >"),
+            "a scope with no resolved style must not be wrapped: {result}"
+        );
+        assert_eq!(
+            result.matches("<span").count(),
+            result.matches("</span>").count(),
+            "open and close tags must stay balanced: {result}"
+        );
     }
 
     #[test]
@@ -472,10 +500,10 @@ mod tests {
         formatter.format(code, &mut buffer).unwrap();
         let result = String::from_utf8(buffer).unwrap();
 
-        let expected = r#"<pre class="lumis"><code class="language-rust" translate="no" tabindex="0"><div class="l-line custom-highlight" data-line="1"><span >fn</span> <span >main</span><span >(</span><span >)</span> <span >{</span>
-</div><div class="l-line" data-line="2">    <span >println</span><span >!</span><span >(</span><span >&quot;Hello, world!&quot;</span><span >)</span><span >;</span>
-</div><div class="l-line custom-highlight" data-line="3">    <span >let</span> <span >x</span> <span >=</span> <span >42</span><span >;</span>
-</div><div class="l-line" data-line="4"><span >}</span>
+        let expected = r#"<pre class="lumis"><code class="language-rust" translate="no" tabindex="0"><div class="l-line custom-highlight" data-line="1">fn main() {
+</div><div class="l-line" data-line="2">    println!(&quot;Hello, world!&quot;);
+</div><div class="l-line custom-highlight" data-line="3">    let x = 42;
+</div><div class="l-line" data-line="4">}
 </div></code></pre>"#;
         assert_str_eq!(result, expected);
     }
@@ -528,7 +556,7 @@ mod tests {
         formatter.format(code, &mut buffer).unwrap();
         let result = String::from_utf8(buffer).unwrap();
 
-        let expected = r#"<section class="highlight" data-lang="rust"><pre class="lumis custom-class"><code class="language-rust" translate="no" tabindex="0"><div class="l-line" data-line="1"><span >fn</span> <span >main</span><span >(</span><span >)</span> <span >{</span> <span >}</span>
+        let expected = r#"<section class="highlight" data-lang="rust"><pre class="lumis custom-class"><code class="language-rust" translate="no" tabindex="0"><div class="l-line" data-line="1">fn main() { }
 </div></code></pre></section>"#;
         assert_str_eq!(result, expected);
     }
