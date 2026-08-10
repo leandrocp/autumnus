@@ -454,9 +454,9 @@ fn multi_themes_pre_classes(
         classes.push(pre_class.to_string());
     }
 
-    for theme_name in themes.keys() {
-        classes.push(theme_name.clone());
-    }
+    let mut theme_names = themes.keys().cloned().collect::<Vec<_>>();
+    theme_names.sort();
+    classes.extend(theme_names);
 
     classes.join(" ")
 }

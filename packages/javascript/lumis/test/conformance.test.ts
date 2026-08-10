@@ -1,6 +1,8 @@
 import { beforeAll, describe, expect, it } from "vitest";
 
 import dracula from "../../themes/dist/json/dracula.json";
+import dark from "../../../../fixtures/conformance-themes/dark.json";
+import light from "../../../../fixtures/conformance-themes/light.json";
 import css from "../langs/css.ts";
 import html from "../langs/html.ts";
 import javascript from "../langs/javascript.ts";
@@ -26,7 +28,11 @@ import { loadConformanceFixtures } from "./conformance.js";
 import { configureLocalWasmResolver } from "./wasm.js";
 
 const conformanceFixtures = loadConformanceFixtures();
-const theme: Theme = dracula;
+const themes: Record<string, Theme> = {
+  dark,
+  dracula,
+  light,
+};
 
 const langBundles: Record<string, Language> = {
   json,
@@ -45,6 +51,12 @@ function getLanguage(id: string): Language {
   const language = langBundles[id];
   if (!language) throw new Error(`No bundle for language "${id}" in test setup`);
   return language;
+}
+
+function getTheme(id: string): Theme {
+  const theme = themes[id];
+  if (!theme) throw new Error(`No theme for "${id}" in test setup`);
+  return theme;
 }
 
 let highlighter: Highlighter;
@@ -77,7 +89,7 @@ describe.each(conformanceFixtures.map((f) => [f.name, f]))("%s", (_name, fixture
       fixture.source,
       htmlInline({
         language: getLanguage(fixture.language),
-        theme,
+        theme: getTheme(fixture.theme),
         rainbowBrackets: fixture.rainbowBrackets,
       }),
     );
@@ -96,13 +108,22 @@ describe.each(conformanceFixtures.map((f) => [f.name, f]))("%s", (_name, fixture
   });
 
   it("html-multi-themes", () => {
+    const config = fixture.htmlMultiThemesOptions;
+    const formatterThemes = config
+      ? Object.fromEntries(
+          Object.entries(config.themes).map(([name, theme]) => [name, getTheme(theme)]),
+        )
+      : { main: getTheme(fixture.theme) };
     const output = highlighter.highlight(
       fixture.source,
       htmlMultiThemes({
         language: getLanguage(fixture.language),
-        themes: { main: theme },
-        defaultTheme: "main",
+        themes: formatterThemes,
+        defaultTheme: config?.defaultTheme ?? "main",
         rainbowBrackets: fixture.rainbowBrackets,
+        highlightLines: config?.highlightLines?.length
+          ? { lines: config.highlightLines, style: "theme" }
+          : undefined,
       }),
     );
     expect(output).toBe(fixture.htmlMultiThemes);
@@ -124,7 +145,7 @@ describe.each(conformanceFixtures.map((f) => [f.name, f]))("%s", (_name, fixture
       fixture.source,
       terminal({
         language: getLanguage(fixture.language),
-        theme,
+        theme: getTheme(fixture.theme),
         rainbowBrackets: fixture.rainbowBrackets,
       }),
     );

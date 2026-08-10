@@ -79,8 +79,12 @@ function spanAttrs(span: HighlightSpan, formatter: HtmlMultiThemesFormatter): Ht
 
 function generatePreClasses(formatter: HtmlMultiThemesFormatter): string {
   return (
-    joinClasses("lumis", "lumis-themes", formatter.preClass, ...Object.keys(formatter.themes)) ??
-    "lumis lumis-themes"
+    joinClasses(
+      "lumis",
+      "lumis-themes",
+      formatter.preClass,
+      ...Object.keys(formatter.themes).sort(),
+    ) ?? "lumis lumis-themes"
   );
 }
 
