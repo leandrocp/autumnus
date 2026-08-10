@@ -35,6 +35,14 @@ use std::io::{self, Write};
 /// let span = html::span_inline("fn", Some(Language::Rust), "keyword", theme.as_ref(), false, true);
 /// assert_eq!(span, r#"<span data-highlight="keyword" style="color: #ff79c6;">fn</span>"#);
 /// ```
+///
+/// A scope that resolves to no attributes still gets a bare `<span>`:
+///
+/// ```rust
+/// use lumis::html;
+///
+/// assert_eq!(html::span_inline("fn", None, "keyword", None, false, false), "<span>fn</span>");
+/// ```
 pub fn span_inline(
     text: &str,
     language: Option<Language>,
@@ -43,14 +51,14 @@ pub fn span_inline(
     italic: bool,
     include_highlights: bool,
 ) -> String {
-    let escaped = escape(text);
-    let attrs = span_inline_attrs(language, scope, theme, italic, include_highlights);
-
-    if attrs.is_empty() {
-        escaped
-    } else {
-        format!("<span {}>{}</span>", attrs, escaped)
-    }
+    lumis_core::formatter::html::span_inline(
+        text,
+        language,
+        scope,
+        theme,
+        italic,
+        include_highlights,
+    )
 }
 
 /// Generate HTML attributes for a span with inline CSS styles.
@@ -487,13 +495,8 @@ pub fn span_multi_themes(
     italic: bool,
     include_highlights: bool,
 ) -> String {
-    let escaped = escape(text);
-
-    if themes.is_empty() {
-        return escaped;
-    }
-
-    let attrs = span_multi_themes_attrs(
+    lumis_core::formatter::html::span_multi_themes(
+        text,
         scope,
         language,
         themes,
@@ -501,13 +504,7 @@ pub fn span_multi_themes(
         css_variable_prefix,
         italic,
         include_highlights,
-    );
-
-    if attrs.is_empty() {
-        escaped
-    } else {
-        format!("<span {}>{}</span>", attrs, escaped)
-    }
+    )
 }
 
 /// Escape text for safe HTML output.
@@ -972,7 +969,22 @@ mod tests {
     #[test]
     fn test_span_inline_no_theme() {
         let result = span_inline("text", None, "text", None, false, false);
-        assert_str_eq!(result, "text");
+        assert_str_eq!(result, "<span>text</span>");
+    }
+
+    #[test]
+    fn test_span_multi_themes_no_theme() {
+        let result = span_multi_themes(
+            "<b>",
+            "text",
+            None,
+            &std::collections::HashMap::new(),
+            None,
+            "--lumis",
+            false,
+            false,
+        );
+        assert_str_eq!(result, "<span>&lt;b&gt;</span>");
     }
 
     #[test]
