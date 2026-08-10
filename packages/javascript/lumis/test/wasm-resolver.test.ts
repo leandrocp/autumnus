@@ -72,8 +72,6 @@ describe("Wasm resolver", () => {
       id: "diff",
       aliases: [],
       packageName: "@lumis-sh/wasm-diff",
-      // Pinned by the catalog, so every runtime resolves the same parser.
-      version: expect.stringMatching(/^\d+\.\d+\.\d+$/),
     });
     expect(packageMetadata.parser).toEqual({
       name: "tree-sitter-diff",
@@ -81,6 +79,36 @@ describe("Wasm resolver", () => {
       sha256: expect.stringMatching(/^[0-9a-f]{64}$/),
       size: expect.any(Number),
     });
+  });
+
+  it("resolves the shared compatible package range", async () => {
+    const { DEFAULT_LANGUAGE_PACKAGE_RESOLVER } = await import("../src/core/languages.js");
+    const { LANGUAGE_PACKAGE_VERSION_RANGE } =
+      await import("../src/generated/package-version-range.js");
+
+    expect(
+      DEFAULT_LANGUAGE_PACKAGE_RESOLVER("@lumis-sh/wasm-diff", LANGUAGE_PACKAGE_VERSION_RANGE),
+    ).toBe(
+      `https://cdn.jsdelivr.net/npm/@lumis-sh/wasm-diff@${LANGUAGE_PACKAGE_VERSION_RANGE}/lumis.json`,
+    );
+  });
+
+  it("rejects an incompatible package returned by a custom resolver", async () => {
+    const { createHighlighter } = await import("../src/index.js");
+    const { default: diff } = await import("../langs/diff.ts");
+    const packageMetadata = structuredClone(localLanguagePackageMetadata(diff.packageName));
+    packageMetadata.version = "0.27.0";
+    const dataUrl = `data:application/json;base64,${Buffer.from(
+      JSON.stringify(packageMetadata),
+    ).toString("base64")}`;
+
+    await expect(
+      createHighlighter({
+        languages: [diff],
+        languagePackageResolver: () => dataUrl,
+        wasmResolver: (language, wasm) => ensureLocalParserWasm(language, wasm.name),
+      }),
+    ).rejects.toThrow("does not satisfy the supported range");
   });
 
   it("loads WasmRef bundles from file:// URLs in Node without fetch", async () => {

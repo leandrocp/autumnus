@@ -1170,7 +1170,7 @@ fn cache_parsers_to_temp_dir_verbose() {
 }
 
 #[test]
-fn cache_parsers_force_replaces_existing_file() {
+fn cache_parsers_reuses_an_existing_file() {
     let tmp = seeded_store();
 
     // Cache once.
@@ -1181,7 +1181,7 @@ fn cache_parsers_force_replaces_existing_file() {
         .assert()
         .success();
 
-    // Then replace it.
+    // Then reuse it without a network request.
     cmd()
         .arg("-V")
         .arg("--data-dir")

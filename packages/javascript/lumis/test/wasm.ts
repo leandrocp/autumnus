@@ -8,6 +8,7 @@ import {
   configureLanguagePackageResolver as configureDefaultLanguagePackageResolver,
   configureWasmResolver as configureDefaultWasmResolver,
 } from "../src/index.js";
+import { lowestCompatibleLanguagePackageVersion } from "../src/core/languages.js";
 import type {
   LanguagePackage,
   LanguagePackageResolver,
@@ -116,7 +117,7 @@ export function localLanguagePackageMetadata(packageName: string): LanguagePacka
 
   const packageMetadata: LanguagePackage = {
     packageName,
-    version: "test",
+    version: lowestCompatibleLanguagePackageVersion(),
     definitionHash: createHash("sha256").update(wasm).digest("hex"),
     parser: {
       name: wasmName,

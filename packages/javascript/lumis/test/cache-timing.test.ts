@@ -16,10 +16,6 @@ describe("cache timings match the Rust runtime", () => {
     expect(source).toContain("const REPLACE_RETRY_DELAY");
   });
 
-  // The Rust store has no package TTL: the catalog pins an exact version, so a
-  // cached package is either that version and trustworthy, or it is not and gets
-  // refetched. Reintroducing one there without doing the same here would put the
-  // browser runtime back on a different freshness rule than every other runtime.
   it("has no package TTL to agree with", () => {
     expect(source).not.toContain("PACKAGE_CACHE_TTL");
   });

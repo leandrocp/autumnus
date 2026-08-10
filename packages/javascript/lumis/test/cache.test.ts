@@ -42,18 +42,108 @@ describe("cacheLanguages", () => {
     expect(first).toHaveLength(1);
     expect(first[0]).toMatchObject({ language: "diff", downloaded: true });
 
-    const unavailable = vi.fn(() => {
-      throw new Error("network resolver must not run");
+    const unavailableWasm = vi.fn(() => {
+      throw new Error("WASM resolver must not run");
+    });
+    const unavailablePackage = vi.fn(() => {
+      throw new Error("package resolver must not run");
     });
     const second = await cacheLanguages(["diff"], {
       directory,
-      resolver: unavailable,
-      languagePackageResolver: localLanguagePackageResolver,
+      resolver: unavailableWasm,
+      languagePackageResolver: unavailablePackage,
     });
 
     expect(second[0]).toMatchObject({ language: "diff", downloaded: false });
-    expect(unavailable).not.toHaveBeenCalled();
+    expect(unavailableWasm).not.toHaveBeenCalled();
+    expect(unavailablePackage).not.toHaveBeenCalled();
     expect(readFileSync(second[0]!.path).byteLength).toBeGreaterThan(0);
+  });
+
+  it("resolves package metadata again when forced", async () => {
+    const directory = await temporaryDirectory();
+    const resolver = (_language: string, wasm: { name: string }) =>
+      ensureLocalParserWasm(_language, wasm.name);
+    await cacheLanguages(["diff"], {
+      directory,
+      resolver,
+      languagePackageResolver: localLanguagePackageResolver,
+    });
+    const packageResolver = vi.fn(localLanguagePackageResolver);
+
+    await cacheLanguages(["diff"], {
+      directory,
+      force: true,
+      resolver,
+      languagePackageResolver: packageResolver,
+    });
+
+    expect(packageResolver).toHaveBeenCalledOnce();
+  });
+
+  // Mirrors `a_failed_forced_refresh_preserves_the_previous_offline_cache` in
+  // crates/lumis-wasm-runtime. `parsers/<suffix>.lumis.json` is the file the Rust
+  // store reads, so replacing it before its parser is cached breaks the CLI and
+  // Elixir too, not only this runtime.
+  it("preserves the previous offline cache when a forced refresh fails", async () => {
+    const directory = await temporaryDirectory();
+    const resolver = (language: string, wasm: { name: string }) =>
+      ensureLocalParserWasm(language, wasm.name);
+    const first = await cacheLanguages(["diff"], {
+      directory,
+      resolver,
+      languagePackageResolver: localLanguagePackageResolver,
+    });
+    const cachedVersion = first[0]!.wasm.version;
+    const shared = join(directory, "parsers", "diff.lumis.json");
+    expect(JSON.parse(readFileSync(shared, "utf8")).version).toBe(cachedVersion);
+
+    const newer = structuredClone(localLanguagePackageMetadata("@lumis-sh/wasm-diff"));
+    newer.version = "0.26.9999";
+    const dataUrl = `data:application/json;base64,${Buffer.from(JSON.stringify(newer)).toString(
+      "base64",
+    )}`;
+
+    await expect(
+      cacheLanguages(["diff"], {
+        directory,
+        force: true,
+        resolver: () => {
+          throw new Error("parser unavailable");
+        },
+        languagePackageResolver: () => dataUrl,
+      }),
+    ).rejects.toThrow("parser unavailable");
+
+    expect(JSON.parse(readFileSync(shared, "utf8")).version).toBe(cachedVersion);
+
+    const offline = await cacheLanguages(["diff"], {
+      directory,
+      resolver: () => {
+        throw new Error("the store must still be complete offline");
+      },
+      languagePackageResolver: () => {
+        throw new Error("the store must still be complete offline");
+      },
+    });
+    expect(offline[0]).toMatchObject({ language: "diff", downloaded: false });
+  });
+
+  it("rejects an incompatible package returned by a custom resolver", async () => {
+    const directory = await temporaryDirectory();
+    const packageMetadata = structuredClone(localLanguagePackageMetadata("@lumis-sh/wasm-diff"));
+    packageMetadata.version = "0.27.0";
+    const dataUrl = `data:application/json;base64,${Buffer.from(
+      JSON.stringify(packageMetadata),
+    ).toString("base64")}`;
+
+    await expect(
+      cacheLanguages(["diff"], {
+        directory,
+        resolver: (_language, wasm) => ensureLocalParserWasm(_language, wasm.name),
+        languagePackageResolver: () => dataUrl,
+      }),
+    ).rejects.toThrow("does not satisfy the supported range");
   });
 
   it("replaces corrupt persistent bytes", async () => {

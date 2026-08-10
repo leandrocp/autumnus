@@ -73,14 +73,6 @@ struct StorePaths {
 
 static STORE_PATHS: Lazy<RwLock<StorePaths>> = Lazy::new(|| RwLock::new(StorePaths::default()));
 
-/// Drop the store's warnings rather than let them reach stderr.
-///
-/// A NIF writing to fd 2 bypasses Erlang's IO entirely, so the bytes land in the
-/// middle of whatever IEx is drawing. The CLI keeps the default handler.
-fn silence_warnings() {
-    let _ = store::set_warning_handler(Box::new(|_| {}));
-}
-
 /// The same resolve, verify and cache path the CLI uses, pointed at the
 /// directories Lumis persists under.
 fn language_store(cache_dir: Option<std::path::PathBuf>) -> store::LanguageStore {
@@ -303,7 +295,6 @@ fn executor() -> Result<&'static WasmExecutor, String> {
 /// built. `Lumis.Application` calls this before anything can use it.
 #[rustler::nif]
 fn configure_store(data_dir: Option<String>) -> bool {
-    silence_warnings();
     if Lazy::get(&EXECUTOR).is_some() {
         return false;
     }

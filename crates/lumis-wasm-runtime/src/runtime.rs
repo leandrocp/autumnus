@@ -864,7 +864,7 @@ mod tests {
     fn json_package(wasm: &[u8]) -> crate::LanguagePackage {
         crate::LanguagePackage {
             package_name: "@lumis-sh/wasm-json".into(),
-            version: "1.0.0".into(),
+            version: "0.26.0".into(),
             definition_hash: "test".into(),
             parser: crate::ParserMetadata {
                 name: "tree-sitter-json".into(),

@@ -145,6 +145,13 @@ publishes only the affected language package; it does not require runtime
 package releases. `mise run wasm-publish-needed` compares the complete package
 definition with the package's small `package.json#lumis` release marker.
 
+Dynamic runtimes resolve every language package through the single compatible
+range derived from the Tree-sitter series in `mise.toml` (for example `0.26`).
+Do not release the runtimes after an ordinary `0.26.x` WASM release: new and
+explicitly refreshed caches adopt it through npm/CDN range resolution. A move
+to a new Tree-sitter minor series changes that range and does require releasing
+the dynamic runtimes.
+
 After changing language IDs, aliases, or parser package assignments in
 `languages.toml`, run `mise run langs-gen-catalog` and
 `pnpm --filter @lumis-sh/lumis run build:langs`, then commit the generated Rust

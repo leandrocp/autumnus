@@ -572,38 +572,6 @@ set -euo pipefail
 cargo run --manifest-path crates/dev/Cargo.toml --no-default-features -- gen-language-catalog --check
 '''
 
-[tasks.'langs-check-versions']
-description = "Verify the CDN serves the lumis.json each catalog pin names"
-run = '''
-#!/usr/bin/env bash
-set -euo pipefail
-pins="$(awk '/package_name: "/ { gsub(/.*package_name: "|",/, ""); p=$0 }
-             /version: "/ { gsub(/.*version: "|"/, ""); print p "@" $0 }' \
-           crates/lumis-wasm-runtime/src/catalog.rs)"
-total="$(echo "$pins" | wc -l | tr -d ' ')"
-
-served="$(echo "$pins" | xargs -P 16 -I{} sh -c \
-    'code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "https://cdn.jsdelivr.net/npm/{}/lumis.json" || echo 000); if [ "$code" = "200" ]; then echo {}; fi' \
-    | wc -l | tr -d ' ')"
-
-if [ "$served" -eq 0 ]; then
-    echo "0 of $total pinned packages serve lumis.json."
-    echo "Expected: the format this branch reads is not published yet. Every"
-    echo "published package still carries metadata in package.json's lumis key."
-    echo "This becomes a failure once wasm-release publishes any of them, so the"
-    echo "gap can only shrink."
-    exit 0
-fi
-
-if [ "$served" -lt "$total" ]; then
-    echo "$served of $total pinned packages serve lumis.json." >&2
-    echo "A partial republish means some runtimes resolve a language and others" >&2
-    echo "cannot. Finish publishing, or regenerate: mise run langs-gen-catalog" >&2
-    exit 1
-fi
-echo "the CDN serves all $total pinned packages"
-'''
-
 [tasks.'langs-update']
 description = "Update language parser, queries, and docs"
 usage = '''

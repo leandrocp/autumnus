@@ -158,12 +158,6 @@ export interface Language extends LanguageDefinition {
  */
 export interface LanguagePackageHandle extends LanguageDefinition {
   packageName: string;
-  /**
-   * The published package version this build of Lumis expects. Requesting it by
-   * name rather than `@latest` is what makes every runtime resolve the same
-   * parser, and what lets a cached package be trusted without revalidating it.
-   */
-  version?: string;
   /** Optional caller-selected source for the package's verified parser bytes. */
   wasm?: WasmRef | RuntimeWasmInput;
 }

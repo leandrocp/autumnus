@@ -9,7 +9,12 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { parseLanguagePackage } from "../src/core/languages.js";
+import {
+  isCompatibleLanguagePackageVersion,
+  lowestCompatibleLanguagePackageVersion,
+  parseLanguagePackage,
+} from "../src/core/languages.js";
+import { LANGUAGE_PACKAGE_VERSION_RANGE } from "../src/generated/package-version-range.js";
 
 const CORPUS = fileURLToPath(new URL("../../../../fixtures/language-packages", import.meta.url));
 
@@ -104,6 +109,27 @@ describe("shared language-package corpus", () => {
   ])("rejects the raw-profile violation %s", (name) => {
     const bytes = new Uint8Array(readFileSync(join(CORPUS, "invalid", `${name}.json`)));
     expect(() => parseLanguagePackage(bytes, declaredPackageName(bytes))).toThrow();
+  });
+});
+
+describe("shared language-package version range", () => {
+  const corpus = JSON.parse(readFileSync(join(CORPUS, "version-compatibility.json"), "utf8")) as {
+    range: string;
+    lowestCompatible: string;
+    cases: { version: string; compatible: boolean }[];
+  };
+
+  it("matches the generated runtime range", () => {
+    expect(LANGUAGE_PACKAGE_VERSION_RANGE).toBe(corpus.range);
+  });
+
+  it("derives the same lowest compatible version as the Rust store", () => {
+    expect(lowestCompatibleLanguagePackageVersion()).toBe(corpus.lowestCompatible);
+    expect(isCompatibleLanguagePackageVersion(corpus.lowestCompatible)).toBe(true);
+  });
+
+  it.each(corpus.cases)("classifies $version", ({ version, compatible }) => {
+    expect(isCompatibleLanguagePackageVersion(version)).toBe(compatible);
   });
 });
 

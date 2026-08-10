@@ -1,5 +1,6 @@
 import { LANGUAGES } from "../generated/languages-meta.js";
 import { LANGUAGE_LOADERS } from "../generated/language-loaders.js";
+import { LANGUAGE_PACKAGE_VERSION_RANGE } from "../generated/package-version-range.js";
 import type { NativeBinding, NativeFormatter, NativeRuntimeInstance } from "../native-binding.js";
 import type {
   Formatter,
@@ -156,7 +157,7 @@ export function createNativeLanguagesModule(
       DEFAULT_LANGUAGE_PACKAGE_RESOLVER;
     resolverCallbackDepth += 1;
     try {
-      return resolverSource(resolver(packageName));
+      return resolverSource(resolver(packageName, LANGUAGE_PACKAGE_VERSION_RANGE));
     } finally {
       resolverCallbackDepth -= 1;
     }

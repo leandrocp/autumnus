@@ -56,14 +56,17 @@ lumis highlight main.rs --formatter bbcode-scoped
 
 ## Parser availability
 
-Highlighting never downloads. `lumis parsers cache` stores exact-version parser
-WASM under content-addressed, integrity-checked names in the data directory, and
-highlighting uses only what is there.
+Highlighting downloads a missing compatible language package and parser on
+demand. `lumis parsers cache` moves that download and compilation ahead of the
+first highlight, storing exact-version parser WASM under content-addressed,
+integrity-checked names in the data directory.
 
-- a language that is not cached is an error, not a download
+- a missing root language is downloaded or returns an error if it cannot be fetched
 - `lumis parsers cache ...` persists selected parsers, `--all` takes every one
-- `lumis parsers cache ... --force` replaces valid cached parsers
-- languages injected inside a document need caching too, or they stay plain
+- `lumis parsers cache ... --force` resolves the compatible package range again
+  and replaces valid cached parsers
+- a missing injected language is downloaded during the highlighting walk; if it
+  cannot be fetched, only that block stays plain
 
 ```bash
 lumis parsers cache rust javascript elixir
