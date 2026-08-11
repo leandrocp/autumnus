@@ -82,11 +82,15 @@ jobs:
       # Rust links musl targets against a static CRT by default, which cannot
       # produce a loadable cdylib. Node on Alpine dlopens this, so the addon has
       # to resolve musl's libc at load time like every other shared object.
+      # The target-specific linkers keep that dynamic link on musl instead of
+      # sending it through the Ubuntu runner's glibc `cc`.
       - name: Build native runtime
         env:
           RUSTFLAGS: ${{ endsWith(matrix.target, '-musl') && '-C target-feature=-crt-static' || '' }}
           CC_x86_64_unknown_linux_musl: musl-gcc
           CC_aarch64_unknown_linux_musl: musl-gcc
+          CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER: musl-gcc
+          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER: musl-gcc
         run: >-
           cargo build --locked --release
           --target ${{ matrix.target }}

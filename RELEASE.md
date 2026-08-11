@@ -129,7 +129,7 @@ If multiple JS packages are part of the same release, use this order:
 
 After `npm-lumis` is published, the plugin packages, CLI package, and WASM bundle packages are independent. Keep the order above as the canonical release order.
 
-The `npm-lumis` workflow also publishes the five platform-specific `@lumis-sh/lumis-native-*` packages and then the `@lumis-sh/lumis-native` selector, before publishing `@lumis-sh/lumis` itself. All of them share the `npm-lumis` version and tag, and `mise run release-prepare npm-lumis <version>` bumps them together.
+The `npm-lumis` workflow also publishes all platform-specific `@lumis-sh/lumis-native-*` packages and then the `@lumis-sh/lumis-native` selector, before publishing `@lumis-sh/lumis` itself. All of them share the `npm-lumis` version and tag, and `mise run release-prepare npm-lumis <version>` bumps them together.
 
 That lockstep is not cosmetic. `@lumis-sh/lumis` depends on the platform packages with `workspace:*`, which pnpm replaces with the workspace version when it packs, so a main package bumped on its own would ship optional dependencies pointing at the previous release — and npm refuses to republish a version that already exists, so the workflow would fail before reaching the main package. `mise run lint` runs `mise run check-native-versions`, which fails if any of them drift.
 
@@ -217,4 +217,4 @@ mise run release-prepare cargo-lumis-cli 0.2.0
 
 If a release requires dependent manifests to move in lockstep, update those files separately and commit them with the release prep.
 
-`npm-lumis` is the one exception: it additionally bumps `native/Cargo.toml`, the `@lumis-sh/lumis-native` selector, and all five platform packages, because the release workflow publishes them under the same version before the main package. See [JavaScript packages](#javascript-packages).
+`npm-lumis` is the one exception: it additionally bumps `native/Cargo.toml`, the `@lumis-sh/lumis-native` selector, and all platform packages, because the release workflow publishes them under the same version before the main package. See [JavaScript packages](#javascript-packages).

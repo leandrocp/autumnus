@@ -29,18 +29,15 @@ process.env.LUMIS_DATA_DIR ??= existsSync(stagedParsers)
   ? stagedParsers
   : mkdtempSync(join(tmpdir(), "lumis-native-test-"));
 
-const { loadAddon } = await import("../src/native-binding.js");
+const { loadAddon, nativeTarget } = await import("../src/native-binding.js");
 
 // Asserted directly, so a run that selected the Wasm runtime still covers this.
 const binding = loadAddon();
-
-/** Every platform CI builds for. Elsewhere the Wasm runtime is the answer. */
-const PREBUILT = new Set(["darwin-arm64", "darwin-x64", "linux-x64", "linux-arm64", "win32-x64"]);
-const platform = `${process.platform}-${process.arch}`;
+const hasPrebuiltAddon = nativeTarget() !== undefined;
 
 describe("native runtime", () => {
   it("is present wherever an addon is built", () => {
-    if (!PREBUILT.has(platform)) {
+    if (!hasPrebuiltAddon) {
       expect(binding).toBeUndefined();
       return;
     }

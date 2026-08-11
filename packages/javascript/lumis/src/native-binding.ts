@@ -118,7 +118,7 @@ export function nativeTargetFor(
   return undefined;
 }
 
-function nativeTarget(): string | undefined {
+export function nativeTarget(): string | undefined {
   return nativeTargetFor(
     process.platform,
     process.arch,
