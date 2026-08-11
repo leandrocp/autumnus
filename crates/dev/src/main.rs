@@ -227,7 +227,9 @@ struct FixtureMetadata {
 #[serde(rename_all = "camelCase")]
 struct HtmlMultiThemesFixture {
     themes: BTreeMap<String, String>,
-    default_theme: String,
+    /// Absent means CSS-variables-only mode, which is its own rendering branch.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    default_theme: Option<String>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     highlight_lines: Vec<usize>,
 }
@@ -439,7 +441,7 @@ fn fixture_outputs(
                 config.highlight_lines.clone(),
             )
         })
-        .unwrap_or_else(|| (vec![format!("main:{theme}")], "main".to_string(), vec![]));
+        .unwrap_or_else(|| (vec![format!("main:{theme}")], Some("main".to_string()), vec![]));
     let metadata = FixtureMetadata {
         name: name.to_string(),
         language: language.id_name().to_string(),
@@ -477,7 +479,7 @@ fn fixture_outputs(
             "html-multi-themes",
             None,
             multi_themes,
-            Some(multi_default_theme),
+            multi_default_theme,
             rainbow_brackets,
             multi_highlight_lines,
         )?,

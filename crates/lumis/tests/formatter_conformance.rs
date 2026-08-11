@@ -29,7 +29,8 @@ struct FixtureMetadata {
 #[serde(rename_all = "camelCase")]
 struct HtmlMultiThemesFixture {
     themes: BTreeMap<String, String>,
-    default_theme: String,
+    #[serde(default)]
+    default_theme: Option<String>,
     #[serde(default)]
     highlight_lines: Vec<usize>,
 }
@@ -155,7 +156,9 @@ fn check_html_multi_themes(fixture: &Fixture) {
         for (name, theme) in &config.themes {
             map.insert(name.clone(), fixture_theme(theme));
         }
-        builder.default_theme(config.default_theme.clone());
+        if let Some(default_theme) = &config.default_theme {
+            builder.default_theme(default_theme.clone());
+        }
 
         if !config.highlight_lines.is_empty() {
             builder.highlight_lines(Some(lumis::formatters::html_inline::HighlightLines {

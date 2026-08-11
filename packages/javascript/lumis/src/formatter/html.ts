@@ -694,6 +694,16 @@ function pushThemeCssVars(
   cssVars.push(`${prefix}-${sanitized}-text-decoration:${textDecoration(style)};`);
 }
 
+/**
+ * Theme names in a stable order.
+ *
+ * Rust holds themes in a `HashMap` and sorts before emitting, so this has to
+ * sort rather than follow insertion order for the two to agree byte for byte.
+ */
+export function sortedThemeNames(themes: Record<string, unknown>): string[] {
+  return Object.keys(themes).sort();
+}
+
 export function appendThemeCssVars(
   cssVars: string[],
   prefix: string,
@@ -702,12 +712,12 @@ export function appendThemeCssVars(
   language: LanguageRef,
   excludeTheme?: string,
 ): void {
-  for (const [themeName, theme] of Object.entries(themes)) {
+  for (const themeName of sortedThemeNames(themes)) {
     if (themeName === excludeTheme) {
       continue;
     }
 
-    pushThemeCssVars(cssVars, prefix, themeName, scope, language, theme);
+    pushThemeCssVars(cssVars, prefix, themeName, scope, language, themes[themeName]);
   }
 }
 
@@ -717,13 +727,13 @@ export function buildNormalThemeVars(
   themes: Record<string, Theme>,
   excludeTheme?: string,
 ): void {
-  for (const [themeName, theme] of Object.entries(themes)) {
+  for (const themeName of sortedThemeNames(themes)) {
     if (themeName === excludeTheme) {
       continue;
     }
 
     const sanitized = sanitizeThemeName(themeName);
-    const style = getThemeStyle(theme, "normal");
+    const style = getThemeStyle(themes[themeName], "normal");
     if (style?.fg) styles.push(`${prefix}-${sanitized}:${style.fg};`);
     if (style?.bg) styles.push(`${prefix}-${sanitized}-bg:${style.bg};`);
   }

@@ -11,6 +11,7 @@ import {
   openCodeTag,
   openSpanTag,
   openTag,
+  sortedThemeNames,
   spanMultiThemesAttrs,
   styleToCss,
   wrapLine,
@@ -23,7 +24,8 @@ function buildNormalThemeVars(
   themes: Record<string, Theme>,
   excludeTheme?: string,
 ): void {
-  for (const [themeName, theme] of Object.entries(themes)) {
+  for (const themeName of sortedThemeNames(themes)) {
+    const theme = themes[themeName];
     if (themeName === excludeTheme) {
       continue;
     }
@@ -83,7 +85,7 @@ function generatePreClasses(formatter: HtmlMultiThemesFormatter): string {
       "lumis",
       "lumis-themes",
       formatter.preClass,
-      ...Object.keys(formatter.themes).sort(),
+      ...sortedThemeNames(formatter.themes),
     ) ?? "lumis lumis-themes"
   );
 }

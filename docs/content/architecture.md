@@ -66,7 +66,7 @@ Convert highlighted tokens into output:
 | --- | --- |
 | HTML Inline | `<span style="color: #e5c07b;">` |
 | HTML Linked | `<span class="l-keyword">` |
-| HTML Multi-Themes | `<span style="--lumis-light: #333; --lumis-dark: #ccc;">` |
+| HTML Multi-Themes | `<span style="--lumis-light:#333; --lumis-dark:#ccc;">` |
 | Terminal | ANSI escape codes |
 | BBCode Scoped | `[keyword-function]main[/keyword-function]` |
 

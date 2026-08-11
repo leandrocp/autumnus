@@ -62,9 +62,11 @@ defmodule Lumis.ConformanceTest do
           "defaultTheme" => "main"
         }
 
+    # Reverse-sorted on purpose: the formatter sorts theme names itself, so
+    # output must not depend on the order they were given in.
     themes =
       config["themes"]
-      |> Enum.sort()
+      |> Enum.sort(:desc)
       |> Enum.map(fn {name, theme} -> {String.to_atom(name), conformance_theme(theme)} end)
 
     highlight_lines =

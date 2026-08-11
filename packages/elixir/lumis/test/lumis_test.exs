@@ -480,7 +480,7 @@ defmodule Lumis.LumisTest do
     test "with basic dual theme support" do
       assert_contains(
         "defmodule Test do\nend",
-        ~s|--lumis-light-bg: #ffffff;|,
+        ~s|--lumis-light-bg:#ffffff;|,
         formatter:
           {:html_multi_themes,
            language: "elixir", themes: [light: "github_light", dark: "github_dark"]}
@@ -491,7 +491,7 @@ defmodule Lumis.LumisTest do
       assert_output(
         "test code",
         ~s"""
-        <pre class="lumis lumis-themes main" style="--lumis-main: #abb2bf; --lumis-main-bg: #282c34;"><code class="language-elixir" translate="no" tabindex="0"><div class="l-line" data-line="1"><span style="--lumis-main: #61afef; --lumis-main-font-style: normal; --lumis-main-font-weight: normal; --lumis-main-text-decoration: none;">test</span> <span style="--lumis-main: #e06c75; --lumis-main-font-style: normal; --lumis-main-font-weight: normal; --lumis-main-text-decoration: none;">code</span>
+        <pre class="lumis lumis-themes main" style="--lumis-main:#abb2bf; --lumis-main-bg:#282c34;"><code class="language-elixir" translate="no" tabindex="0"><div class="l-line" data-line="1"><span style="--lumis-main:#61afef; --lumis-main-font-style:normal; --lumis-main-font-weight:normal; --lumis-main-text-decoration:none;">test</span> <span style="--lumis-main:#e06c75; --lumis-main-font-style:normal; --lumis-main-font-weight:normal; --lumis-main-text-decoration:none;">code</span>
         </div></code></pre>
         """,
         formatter: {:html_multi_themes, language: "elixir", themes: [main: "onedark"]}
@@ -566,7 +566,7 @@ defmodule Lumis.LumisTest do
       assert_output(
         "test code",
         ~s"""
-        <pre class="lumis lumis-themes main" style="--lumis-main: #abb2bf; --lumis-main-bg: #282c34;"><code class="language-elixir" translate="no" tabindex="0"><div class="l-line" data-line="1"><span style="--lumis-main: #61afef; --lumis-main-font-style: normal; --lumis-main-font-weight: normal; --lumis-main-text-decoration: none;">test</span> <span style="--lumis-main: #e06c75; --lumis-main-font-style: normal; --lumis-main-font-weight: normal; --lumis-main-text-decoration: none;">code</span>
+        <pre class="lumis lumis-themes main" style="--lumis-main:#abb2bf; --lumis-main-bg:#282c34;"><code class="language-elixir" translate="no" tabindex="0"><div class="l-line" data-line="1"><span style="--lumis-main:#61afef; --lumis-main-font-style:normal; --lumis-main-font-weight:normal; --lumis-main-text-decoration:none;">test</span> <span style="--lumis-main:#e06c75; --lumis-main-font-style:normal; --lumis-main-font-weight:normal; --lumis-main-text-decoration:none;">code</span>
         </div></code></pre>
         """,
         formatter: {:html_multi_themes, language: "elixir", themes: [main: theme]}
@@ -578,7 +578,7 @@ defmodule Lumis.LumisTest do
 
       assert_contains(
         "test",
-        ~s|--lumis-light: #1f2328; --lumis-light-bg: #ffffff;|,
+        ~s|--lumis-light:#1f2328; --lumis-light-bg:#ffffff;|,
         formatter:
           {:html_multi_themes, language: "elixir", themes: [light: "github_light", dark: theme]}
       )

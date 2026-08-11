@@ -41,7 +41,8 @@ struct FixtureMetadata {
 #[serde(rename_all = "camelCase")]
 struct HtmlMultiThemesFixture {
     themes: BTreeMap<String, String>,
-    default_theme: String,
+    #[serde(default)]
+    default_theme: Option<String>,
     #[serde(default)]
     highlight_lines: Vec<usize>,
 }
@@ -124,12 +125,16 @@ fn check_html_multi_themes(fixture: &Fixture) {
     let mut args = Vec::new();
 
     if let Some(config) = &fixture.metadata.html_multi_themes {
-        for (name, theme) in &config.themes {
+        // Reversed on purpose: the formatter sorts theme names itself, so
+        // output must not depend on the order they were given in.
+        for (name, theme) in config.themes.iter().rev() {
             args.push("--themes".to_string());
             args.push(format!("{name}:{theme}"));
         }
-        args.push("--default-theme".to_string());
-        args.push(config.default_theme.clone());
+        if let Some(default_theme) = &config.default_theme {
+            args.push("--default-theme".to_string());
+            args.push(default_theme.clone());
+        }
 
         if !config.highlight_lines.is_empty() {
             args.push("--highlight-lines".to_string());

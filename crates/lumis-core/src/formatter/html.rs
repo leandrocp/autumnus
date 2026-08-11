@@ -3,7 +3,7 @@
 //! These helpers work with language names as strings, making them independent of tree-sitter.
 
 use crate::languages::Language;
-use crate::themes::{TextDecoration, Theme, UnderlineStyle};
+use crate::themes::{Style, TextDecoration, Theme, UnderlineStyle};
 use std::io::{self, Write};
 
 /// Generate HTML attributes for a span with inline CSS styles.
@@ -110,6 +110,81 @@ pub fn text_decoration(td: &TextDecoration) -> &'static str {
 }
 
 /// Generate HTML attributes for a span with CSS variables for multiple themes.
+/// Theme names in a stable order.
+///
+/// The map is unordered, so without this the emitted custom properties come out
+/// in a different order on every process. `<pre class="...">` already sorts.
+fn sorted_theme_names(themes: &std::collections::HashMap<String, Theme>) -> Vec<&str> {
+    let mut names: Vec<&str> = themes.keys().map(String::as_str).collect();
+    names.sort_unstable();
+    names
+}
+
+/// The default theme's colors are already inline, so only the style properties a
+/// sibling theme could override are emitted as variables.
+fn push_default_theme_css_vars(
+    css_vars: &mut Vec<String>,
+    css_variable_prefix: &str,
+    theme_name: &str,
+    style: &Style,
+) {
+    let sanitized = sanitize_theme_name(theme_name);
+
+    let font_style = if style.italic { "italic" } else { "normal" };
+    css_vars.push(format!(
+        "{}-{}-font-style:{};",
+        css_variable_prefix, sanitized, font_style
+    ));
+
+    let font_weight = if style.bold { "bold" } else { "normal" };
+    css_vars.push(format!(
+        "{}-{}-font-weight:{};",
+        css_variable_prefix, sanitized, font_weight
+    ));
+
+    css_vars.push(format!(
+        "{}-{}-text-decoration:{};",
+        css_variable_prefix,
+        sanitized,
+        text_decoration(&style.text_decoration)
+    ));
+}
+
+fn push_theme_css_vars(
+    css_vars: &mut Vec<String>,
+    css_variable_prefix: &str,
+    theme_name: &str,
+    style: &Style,
+) {
+    let sanitized = sanitize_theme_name(theme_name);
+
+    if let Some(fg) = &style.fg {
+        css_vars.push(format!("{}-{}:{};", css_variable_prefix, sanitized, fg));
+    }
+    if let Some(bg) = &style.bg {
+        css_vars.push(format!("{}-{}-bg:{};", css_variable_prefix, sanitized, bg));
+    }
+
+    let font_style = if style.italic { "italic" } else { "normal" };
+    css_vars.push(format!(
+        "{}-{}-font-style:{};",
+        css_variable_prefix, sanitized, font_style
+    ));
+
+    let font_weight = if style.bold { "bold" } else { "normal" };
+    css_vars.push(format!(
+        "{}-{}-font-weight:{};",
+        css_variable_prefix, sanitized, font_weight
+    ));
+
+    css_vars.push(format!(
+        "{}-{}-text-decoration:{};",
+        css_variable_prefix,
+        sanitized,
+        text_decoration(&style.text_decoration)
+    ));
+}
+
 #[allow(clippy::too_many_arguments)]
 pub fn span_multi_themes_attrs(
     scope: &str,
@@ -200,89 +275,27 @@ pub fn span_multi_themes_attrs(
                     inline_styles.push(format!("text-decoration:{};", td_css));
                 }
 
-                let sanitized = sanitize_theme_name(default_name);
-                let font_style = if style.italic { "italic" } else { "normal" };
-                css_vars.push(format!(
-                    "{}-{}-font-style:{};",
-                    css_variable_prefix, sanitized, font_style
-                ));
-
-                let font_weight = if style.bold { "bold" } else { "normal" };
-                css_vars.push(format!(
-                    "{}-{}-font-weight:{};",
-                    css_variable_prefix, sanitized, font_weight
-                ));
-
-                let text_dec = text_decoration(&style.text_decoration);
-                css_vars.push(format!(
-                    "{}-{}-text-decoration:{};",
-                    css_variable_prefix, sanitized, text_dec
-                ));
+                push_default_theme_css_vars(
+                    &mut css_vars,
+                    css_variable_prefix,
+                    default_name,
+                    style,
+                );
             }
 
-            for (theme_name, theme) in themes.iter() {
-                if theme_name != default_name {
-                    if let Some(style) = theme.get_style(&specialized_scope) {
-                        let sanitized = sanitize_theme_name(theme_name);
-
-                        if let Some(fg) = &style.fg {
-                            css_vars.push(format!("{}-{}:{};", css_variable_prefix, sanitized, fg));
-                        }
-                        if let Some(bg) = &style.bg {
-                            css_vars
-                                .push(format!("{}-{}-bg:{};", css_variable_prefix, sanitized, bg));
-                        }
-
-                        let font_style = if style.italic { "italic" } else { "normal" };
-                        css_vars.push(format!(
-                            "{}-{}-font-style:{};",
-                            css_variable_prefix, sanitized, font_style
-                        ));
-
-                        let font_weight = if style.bold { "bold" } else { "normal" };
-                        css_vars.push(format!(
-                            "{}-{}-font-weight:{};",
-                            css_variable_prefix, sanitized, font_weight
-                        ));
-
-                        let text_dec = text_decoration(&style.text_decoration);
-                        css_vars.push(format!(
-                            "{}-{}-text-decoration:{};",
-                            css_variable_prefix, sanitized, text_dec
-                        ));
-                    }
+            for theme_name in sorted_theme_names(themes) {
+                if theme_name == default_name {
+                    continue;
+                }
+                if let Some(style) = themes[theme_name].get_style(&specialized_scope) {
+                    push_theme_css_vars(&mut css_vars, css_variable_prefix, theme_name, style);
                 }
             }
         }
     } else {
-        for (theme_name, theme) in themes.iter() {
-            if let Some(style) = theme.get_style(&specialized_scope) {
-                let sanitized = sanitize_theme_name(theme_name);
-
-                if let Some(fg) = &style.fg {
-                    css_vars.push(format!("{}-{}: {};", css_variable_prefix, sanitized, fg));
-                }
-                if let Some(bg) = &style.bg {
-                    css_vars.push(format!("{}-{}-bg: {};", css_variable_prefix, sanitized, bg));
-                }
-
-                let font_style = if style.italic { "italic" } else { "normal" };
-                css_vars.push(format!(
-                    "{}-{}-font-style: {};",
-                    css_variable_prefix, sanitized, font_style
-                ));
-
-                let font_weight = if style.bold { "bold" } else { "normal" };
-                css_vars.push(format!(
-                    "{}-{}-font-weight: {};",
-                    css_variable_prefix, sanitized, font_weight
-                ));
-
-                let text_dec = text_decoration(&style.text_decoration);
-                css_vars.push(format!(
-                    "{}-{}-text-decoration: {};",
-                    css_variable_prefix, sanitized, text_dec
-                ));
+        for theme_name in sorted_theme_names(themes) {
+            if let Some(style) = themes[theme_name].get_style(&specialized_scope) {
+                push_theme_css_vars(&mut css_vars, css_variable_prefix, theme_name, style);
             }
         }
     }
@@ -340,19 +353,29 @@ pub fn span_multi_themes(
 
 /// Escape text for safe HTML output.
 pub fn escape(text: &str) -> String {
+    let bytes = text.as_bytes();
     let mut buf = String::with_capacity(text.len() + text.len() / 10);
+    let mut last = 0;
 
-    for c in text.chars() {
-        match c {
-            '&' => buf.push_str("&amp;"),
-            '<' => buf.push_str("&lt;"),
-            '>' => buf.push_str("&gt;"),
-            '"' => buf.push_str("&quot;"),
-            '\'' => buf.push_str("&#39;"),
-            _ => buf.push(c),
-        }
+    for (i, &b) in bytes.iter().enumerate() {
+        let replacement = match b {
+            b'&' => "&amp;",
+            b'<' => "&lt;",
+            b'>' => "&gt;",
+            b'"' => "&quot;",
+            b'\'' => "&#39;",
+            _ => continue,
+        };
+        buf.push_str(&text[last..i]);
+        buf.push_str(replacement);
+        last = i + 1;
     }
 
+    if last == 0 {
+        return text.to_string();
+    }
+
+    buf.push_str(&text[last..]);
     buf
 }
 
@@ -368,29 +391,21 @@ pub fn wrap_line(
     class_suffix: Option<&str>,
     style: Option<&str>,
 ) -> String {
-    let class_attr = if let Some(suffix) = class_suffix {
-        format!("l-line{}", suffix)
-    } else {
-        "l-line".to_string()
+    let class_attr = match class_suffix {
+        Some(suffix) => format!("l-line{}", suffix),
+        None => "l-line".to_string(),
     };
 
-    let style_attr = if let Some(s) = style {
-        format!(" style=\"{}\"", s)
-    } else {
-        String::new()
-    };
-
-    format!(
-        "<div class=\"{}\"{}data-line=\"{}\">{}</div>",
-        class_attr,
-        if style.is_some() {
-            format!("{} ", style_attr)
-        } else {
-            " ".to_string()
-        },
-        line_number,
-        content
-    )
+    match style {
+        Some(s) => format!(
+            "<div class=\"{}\" style=\"{}\" data-line=\"{}\">{}</div>",
+            class_attr, s, line_number, content
+        ),
+        None => format!(
+            "<div class=\"{}\" data-line=\"{}\">{}</div>",
+            class_attr, line_number, content
+        ),
+    }
 }
 
 /// Map tree-sitter scope to CSS class name.
@@ -454,11 +469,24 @@ fn multi_themes_pre_classes(
         classes.push(pre_class.to_string());
     }
 
-    let mut theme_names = themes.keys().cloned().collect::<Vec<_>>();
-    theme_names.sort();
-    classes.extend(theme_names);
+    classes.extend(sorted_theme_names(themes).into_iter().map(str::to_string));
 
     classes.join(" ")
+}
+
+fn push_normal_theme_vars(
+    styles: &mut Vec<String>,
+    css_variable_prefix: &str,
+    theme_name: &str,
+    theme: &Theme,
+) {
+    let sanitized = sanitize_theme_name(theme_name);
+    if let Some(fg) = theme.fg() {
+        styles.push(format!("{}-{}:{};", css_variable_prefix, sanitized, fg));
+    }
+    if let Some(bg) = theme.bg() {
+        styles.push(format!("{}-{}-bg:{};", css_variable_prefix, sanitized, bg));
+    }
 }
 
 fn multi_themes_pre_style(
@@ -493,27 +521,25 @@ fn multi_themes_pre_style(
                 }
             }
 
-            for (theme_name, theme) in themes {
+            for theme_name in sorted_theme_names(themes) {
                 if theme_name != default_name {
-                    let sanitized = sanitize_theme_name(theme_name);
-                    if let Some(fg) = theme.fg() {
-                        styles.push(format!("{}-{}:{};", css_variable_prefix, sanitized, fg));
-                    }
-                    if let Some(bg) = theme.bg() {
-                        styles.push(format!("{}-{}-bg:{};", css_variable_prefix, sanitized, bg));
-                    }
+                    push_normal_theme_vars(
+                        &mut styles,
+                        css_variable_prefix,
+                        theme_name,
+                        &themes[theme_name],
+                    );
                 }
             }
         }
         None => {
-            for (theme_name, theme) in themes {
-                let sanitized = sanitize_theme_name(theme_name);
-                if let Some(fg) = theme.fg() {
-                    styles.push(format!("{}-{}: {};", css_variable_prefix, sanitized, fg));
-                }
-                if let Some(bg) = theme.bg() {
-                    styles.push(format!("{}-{}-bg: {};", css_variable_prefix, sanitized, bg));
-                }
+            for theme_name in sorted_theme_names(themes) {
+                push_normal_theme_vars(
+                    &mut styles,
+                    css_variable_prefix,
+                    theme_name,
+                    &themes[theme_name],
+                );
             }
         }
     }
