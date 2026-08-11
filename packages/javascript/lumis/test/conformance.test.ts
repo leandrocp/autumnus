@@ -3,6 +3,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import dracula from "../../themes/dist/json/dracula.json";
 import dark from "../../../../fixtures/conformance-themes/dark.json";
 import light from "../../../../fixtures/conformance-themes/light.json";
+import mid from "../../../../fixtures/conformance-themes/mid.json";
 import css from "../langs/css.ts";
 import html from "../langs/html.ts";
 import javascript from "../langs/javascript.ts";
@@ -32,6 +33,7 @@ const themes: Record<string, Theme> = {
   dark,
   dracula,
   light,
+  mid,
 };
 
 const langBundles: Record<string, Language> = {
@@ -109,9 +111,14 @@ describe.each(conformanceFixtures.map((f) => [f.name, f]))("%s", (_name, fixture
 
   it("html-multi-themes", () => {
     const config = fixture.htmlMultiThemesOptions;
+    // Reversed on purpose. Rust holds themes in a `HashMap` and sorts before
+    // emitting, so output must not depend on the order the caller inserted
+    // them. Feeding them in already-sorted order would not prove that.
     const formatterThemes = config
       ? Object.fromEntries(
-          Object.entries(config.themes).map(([name, theme]) => [name, getTheme(theme)]),
+          Object.entries(config.themes)
+            .reverse()
+            .map(([name, theme]) => [name, getTheme(theme)]),
         )
       : { main: getTheme(fixture.theme) };
     const output = highlighter.highlight(
@@ -119,7 +126,7 @@ describe.each(conformanceFixtures.map((f) => [f.name, f]))("%s", (_name, fixture
       htmlMultiThemes({
         language: getLanguage(fixture.language),
         themes: formatterThemes,
-        defaultTheme: config?.defaultTheme ?? "main",
+        defaultTheme: config ? config.defaultTheme : "main",
         rainbowBrackets: fixture.rainbowBrackets,
         highlightLines: config?.highlightLines?.length
           ? { lines: config.highlightLines, style: "theme" }

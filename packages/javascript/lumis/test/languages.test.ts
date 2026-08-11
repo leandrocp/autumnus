@@ -89,7 +89,7 @@ describe("getLoadedLanguageIds", () => {
 });
 
 describe("loadPlaintext", () => {
-  it("loads parser-free plaintext", async () => {
+  it("does not load a parser for plaintext", async () => {
     await loadPlaintext();
     const loaded = getLoadedLanguage("plaintext");
     expect(loaded).toBeDefined();

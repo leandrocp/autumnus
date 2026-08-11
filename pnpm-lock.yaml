@@ -111,6 +111,9 @@ importers:
       '@noble/hashes':
         specifier: 2.3.0
         version: 2.3.0
+      pathe:
+        specifier: 2.0.3
+        version: 2.0.3
       semver:
         specifier: 7.8.5
         version: 7.8.5

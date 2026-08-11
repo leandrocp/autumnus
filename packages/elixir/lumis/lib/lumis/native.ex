@@ -60,6 +60,7 @@ defmodule Lumis.Native do
 
   def available_languages(), do: :erlang.nif_error(:nif_not_loaded)
   def available_themes(), do: :erlang.nif_error(:nif_not_loaded)
+  def available_theme_names(), do: :erlang.nif_error(:nif_not_loaded)
   def get_theme(_name), do: :erlang.nif_error(:nif_not_loaded)
   def build_theme_from_file(_path), do: :erlang.nif_error(:nif_not_loaded)
   def build_theme_from_json_string(_json_string), do: :erlang.nif_error(:nif_not_loaded)
@@ -72,6 +73,7 @@ defmodule Lumis.Native do
 
   def cache_language_by_name(_name, _force), do: :erlang.nif_error(:nif_not_loaded)
 
+  def guess_language(_name, _source), do: :erlang.nif_error(:nif_not_loaded)
   def has_language(_name), do: :erlang.nif_error(:nif_not_loaded)
   def loaded_languages(), do: :erlang.nif_error(:nif_not_loaded)
   def highlight(_source, _options), do: :erlang.nif_error(:nif_not_loaded)

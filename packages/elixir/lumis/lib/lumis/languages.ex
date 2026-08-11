@@ -83,24 +83,99 @@ defmodule Lumis.Languages do
   end
 
   def load(name) when is_atom(name) do
-    case Atom.to_string(name) do
-      "bundle_" <> _ -> load_bundle(name)
-      name -> load(name)
+    case bundle_members(name) do
+      {:ok, members} -> load(members)
+      :error -> {:error, :unknown_bundle}
+      :not_a_bundle -> load(Atom.to_string(name))
     end
   end
 
   def load(name) when is_binary(name) and name in @plaintext_names, do: :ok
 
-  def load(name) when is_binary(name), do: Native.load_language_by_name(name)
-
-  defp load_bundle(bundle) do
-    case Map.fetch(bundles(), bundle) do
-      {:ok, names} ->
-        load(names)
-
-      :error ->
-        {:error, :unknown_bundle}
+  def load(name) when is_binary(name) do
+    case bundle_members(name) do
+      {:ok, members} -> load(members)
+      :error -> {:error, :unknown_bundle}
+      :not_a_bundle -> Native.load_language_by_name(name)
     end
+  end
+
+  @bundle_prefixes ["bundle_", "bundle-"]
+
+  @doc false
+  # Compares normalized strings rather than `String.to_atom/1` on the caller's
+  # name: atoms are never garbage collected, so a name reaching this from a
+  # request would grow the atom table without bound.
+  def bundle_members(name) do
+    case name |> to_string() |> strip_bundle_prefix() do
+      nil -> :not_a_bundle
+      suffix -> find_bundle(normalize_bundle(suffix))
+    end
+  end
+
+  defp find_bundle(wanted) do
+    Enum.find_value(bundles(), :error, fn {bundle, members} ->
+      if bundle_key(bundle) == wanted, do: {:ok, members}
+    end)
+  end
+
+  defp bundle_key(bundle) do
+    bundle |> Atom.to_string() |> strip_bundle_prefix() |> normalize_bundle()
+  end
+
+  defp strip_bundle_prefix(string) do
+    downcased = String.downcase(string)
+
+    Enum.find_value(@bundle_prefixes, fn prefix ->
+      case String.split(downcased, prefix, parts: 2) do
+        ["", suffix] -> suffix
+        _ -> nil
+      end
+    end)
+  end
+
+  defp normalize_bundle(nil), do: nil
+  defp normalize_bundle(suffix), do: suffix |> String.downcase() |> String.replace("-", "_")
+
+  @doc false
+  def expand_bundles(names) do
+    names
+    |> Enum.reduce_while({:ok, []}, fn name, {:ok, acc} ->
+      case bundle_members(name) do
+        {:ok, members} -> {:cont, {:ok, Enum.reverse(members, acc)}}
+        :error -> {:halt, {:error, {:unknown_bundle, to_string(name)}}}
+        :not_a_bundle -> {:cont, {:ok, [to_string(name) | acc]}}
+      end
+    end)
+    |> case do
+      {:ok, reversed} -> {:ok, reversed |> Enum.reverse() |> Enum.uniq()}
+      error -> error
+    end
+  end
+
+  @doc """
+  Resolves a name, path or source to a language id, the way highlighting does.
+
+  `name` can be a language id, an alias, a file name or a path. When it does not
+  resolve, `source` is checked for an Emacs mode header, a shebang, an HTML
+  doctype or an XML declaration. Falls back to `"plaintext"`.
+
+  The counterpart of `Language::guess` in Rust and `guessLanguage()` in
+  JavaScript. `Lumis.highlight/2` already calls this when no language is given;
+  reach for it directly to label a snippet before deciding what to do with it.
+
+      "elixir" = Lumis.Languages.guess("lib/app.ex")
+      "bash" = Lumis.Languages.guess(nil, "#!/usr/bin/env bash")
+      "plaintext" = Lumis.Languages.guess(nil, "")
+
+  """
+  @spec guess(String.t() | atom() | nil, String.t()) :: String.t()
+  def guess(name, source \\ "")
+
+  def guess(nil, source) when is_binary(source), do: Native.guess_language(nil, source)
+
+  def guess(name, source) when is_binary(source) do
+    Native.guess_language(to_string(name), source)
   end
 
   @doc """
@@ -119,8 +194,9 @@ defmodule Lumis.Languages do
   @doc """
   Downloads and caches languages without loading them.
 
-  Returns the paths written. `mix lumis.languages.cache` is the entry point;
-  this is the API behind it.
+  Takes the same names `load/1` does, including `:bundle_*`. Returns the paths
+  written. `mix lumis.languages.cache` is the entry point; this is the API
+  behind it.
 
   ## Options
 
@@ -131,8 +207,13 @@ defmodule Lumis.Languages do
   def cache(names, options \\ []) when is_list(names) and is_list(options) do
     force? = Keyword.get(options, :force, false)
 
+    with {:ok, expanded} <- expand_bundles(names) do
+      do_cache(expanded, force?)
+    end
+  end
+
+  defp do_cache(names, force?) do
     names
-    |> Enum.map(&to_string/1)
     |> Enum.reject(&(&1 in @plaintext_names))
     |> Enum.reduce_while({:ok, []}, fn name, {:ok, paths} ->
       case Native.cache_language_by_name(name, force?) do

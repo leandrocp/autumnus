@@ -10,7 +10,10 @@ import {
   getDefaultRuntime,
 } from "./runtime/browser.js";
 
+export { runtimeKind } from "./runtime/browser.js";
+
 export { highlightIter, highlightEvents } from "./core/highlighter.js";
+export { guessLanguage } from "./guess-language.js";
 
 const highlighter = createHighlighterModule({
   createRuntime,

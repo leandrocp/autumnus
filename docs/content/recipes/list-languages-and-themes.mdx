@@ -10,14 +10,28 @@ import TabItem from '@theme/TabItem';
 
 # List languages and themes
 
+A language is the same record everywhere, sorted by id: `id`, `name`,
+`aliases`, `extensions`, `globs`, `emacsModes` and `shebangs`.
+
+Themes differ by what each runtime can return cheaply. Rust hands back the whole
+`Theme`, colours included, because they are already in the binary. Elixir and
+JavaScript return `name` and `appearance`, because sending every theme's
+highlights across the NIF or the wire would cost far more than the call is
+worth. Use `Theme.get` / `Lumis.Theme.get` to fetch one in full.
+
 <Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
   <TabItem value="javascript" label="JavaScript">
 
 ```js
 import {availableLanguages, availableThemes} from '@lumis-sh/lumis'
 
-console.log(availableLanguages())
-console.log(availableThemes())
+for (const language of availableLanguages()) {
+  console.log(language.id, language.name, language.extensions)
+}
+
+for (const theme of availableThemes()) {
+  console.log(theme.name, theme.appearance)
+}
 ```
 
   </TabItem>
@@ -26,8 +40,9 @@ console.log(availableThemes())
 ```rust
 use lumis::{languages::available_languages, themes};
 
-let languages = available_languages();
-println!("{}", languages.len());
+for language in available_languages() {
+    println!("{} {} {:?}", language.id, language.name, language.extensions);
+}
 
 for theme in themes::available_themes() {
     println!("{} {:?}", theme.name, theme.appearance);
@@ -38,9 +53,16 @@ for theme in themes::available_themes() {
   <TabItem value="elixir" label="Elixir">
 
 ```elixir
-Lumis.available_languages()
-Lumis.available_themes()
+for language <- Lumis.available_languages() do
+  IO.inspect({language.id, language.name, language.extensions})
+end
+
+for theme <- Lumis.available_themes() do
+  IO.inspect({theme.name, theme.appearance})
+end
 ```
+
+`Lumis.available_theme_names/0` returns just the names.
 
   </TabItem>
   <TabItem value="cli" label="CLI">

@@ -82,40 +82,13 @@ pub fn span_inline_attrs(
     italic: bool,
     include_highlights: bool,
 ) -> String {
-    let mut attrs = String::new();
-
-    if include_highlights {
-        attrs.push_str(&format!("data-highlight=\"{}\"", scope));
-    }
-
-    if let Some(theme) = theme {
-        let specialized_scope = if let Some(lang) = language {
-            format!("{}.{}", scope, lang.id_name())
-        } else {
-            scope.to_string()
-        };
-
-        if let Some(style) = theme.get_style(&specialized_scope) {
-            let has_decoration = style.text_decoration.underline != UnderlineStyle::None
-                || style.text_decoration.strikethrough;
-            if include_highlights
-                && (style.fg.is_some()
-                    || style.bg.is_some()
-                    || style.bold
-                    || (italic && style.italic)
-                    || has_decoration)
-            {
-                attrs.push(' ');
-            }
-
-            let css = style.css(italic, " ");
-            if !css.is_empty() {
-                attrs.push_str(&format!("style=\"{}\"", css));
-            }
-        }
-    }
-
-    attrs
+    lumis_core::formatter::html::span_inline_attrs(
+        language,
+        scope,
+        theme,
+        italic,
+        include_highlights,
+    )
 }
 
 /// Generate an HTML `<span>` element with CSS class.
@@ -137,9 +110,7 @@ pub fn span_inline_attrs(
 /// assert_eq!(span, r#"<span class="l-keyword-function">fn span</span>"#);
 /// ```
 pub fn span_linked(text: &str, scope: &str) -> String {
-    let escaped = escape(text);
-    let class = scope_to_class(scope);
-    format!("<span class=\"{}\">{}</span>", class, escaped)
+    lumis_core::formatter::html::span_linked(text, scope)
 }
 
 /// Generate HTML attributes for a span with CSS class.
@@ -156,8 +127,7 @@ pub fn span_linked(text: &str, scope: &str) -> String {
 /// assert_eq!(attrs, r#"class="l-keyword-function""#);
 /// ```
 pub fn span_linked_attrs(scope: &str) -> String {
-    let class = scope_to_class(scope);
-    format!("class=\"{}\"", class)
+    lumis_core::formatter::html::span_linked_attrs(scope)
 }
 
 /// Sanitize a theme name for use in CSS variable names.
@@ -173,18 +143,10 @@ pub fn span_linked_attrs(scope: &str) -> String {
 /// assert_eq!(html::sanitize_theme_name("my theme"), "my-theme");
 /// ```
 pub fn sanitize_theme_name(name: &str) -> String {
-    name.chars()
-        .map(|c| {
-            if c.is_alphanumeric() || c == '-' || c == '_' {
-                c
-            } else {
-                '-'
-            }
-        })
-        .collect()
+    lumis_core::formatter::html::sanitize_theme_name(name)
 }
 
-use crate::themes::{TextDecoration, UnderlineStyle};
+use crate::themes::TextDecoration;
 
 /// Get the CSS text-decoration value from a TextDecoration struct.
 ///
@@ -209,20 +171,7 @@ use crate::themes::{TextDecoration, UnderlineStyle};
 /// assert_eq!(html::text_decoration(&both), "underline line-through");
 /// ```
 pub fn text_decoration(td: &TextDecoration) -> &'static str {
-    match (td.underline, td.strikethrough) {
-        (UnderlineStyle::None, false) => "none",
-        (UnderlineStyle::None, true) => "line-through",
-        (UnderlineStyle::Solid, false) => "underline",
-        (UnderlineStyle::Solid, true) => "underline line-through",
-        (UnderlineStyle::Wavy, false) => "underline wavy",
-        (UnderlineStyle::Wavy, true) => "underline wavy line-through",
-        (UnderlineStyle::Double, false) => "underline double",
-        (UnderlineStyle::Double, true) => "underline double line-through",
-        (UnderlineStyle::Dotted, false) => "underline dotted",
-        (UnderlineStyle::Dotted, true) => "underline dotted line-through",
-        (UnderlineStyle::Dashed, false) => "underline dashed",
-        (UnderlineStyle::Dashed, true) => "underline dashed line-through",
-    }
+    lumis_core::formatter::html::text_decoration(td)
 }
 
 /// Generate HTML attributes for a span with CSS variables for multiple themes.
@@ -240,7 +189,7 @@ pub fn text_decoration(td: &TextDecoration) -> &'static str {
 /// theme_map.insert("dark".to_string(), themes::get("dracula").unwrap());
 ///
 /// let attrs = html::span_multi_themes_attrs("keyword", None, &theme_map, None, "--hl", false, false);
-/// assert_eq!(attrs, r#"style="--hl-dark: #ff79c6; --hl-dark-font-style: normal; --hl-dark-font-weight: normal; --hl-dark-text-decoration: none;""#);
+/// assert_eq!(attrs, r#"style="--hl-dark:#ff79c6; --hl-dark-font-style:normal; --hl-dark-font-weight:normal; --hl-dark-text-decoration:none;""#);
 /// ```
 pub fn span_multi_themes_attrs(
     scope: &str,
@@ -251,195 +200,15 @@ pub fn span_multi_themes_attrs(
     italic: bool,
     include_highlights: bool,
 ) -> String {
-    if themes.is_empty() {
-        return String::new();
-    }
-
-    let specialized_scope = if let Some(lang) = language {
-        format!("{}.{}", scope, lang.id_name())
-    } else {
-        scope.to_string()
-    };
-
-    let mut inline_styles = Vec::new();
-    let mut css_vars = Vec::new();
-
-    if let Some(default_name) = default_theme {
-        if default_name == "light-dark()" {
-            if let (Some(light_theme), Some(dark_theme)) = (themes.get("light"), themes.get("dark"))
-            {
-                if let (Some(light_style), Some(dark_style)) = (
-                    light_theme.get_style(&specialized_scope),
-                    dark_theme.get_style(&specialized_scope),
-                ) {
-                    if let (Some(light_fg), Some(dark_fg)) = (&light_style.fg, &dark_style.fg) {
-                        inline_styles
-                            .push(format!("color: light-dark({}, {});", light_fg, dark_fg));
-                    }
-                    if let (Some(light_bg), Some(dark_bg)) = (&light_style.bg, &dark_style.bg) {
-                        inline_styles.push(format!(
-                            "background-color: light-dark({}, {});",
-                            light_bg, dark_bg
-                        ));
-                    }
-                    let light_weight = if light_style.bold { "bold" } else { "normal" };
-                    let dark_weight = if dark_style.bold { "bold" } else { "normal" };
-                    inline_styles.push(format!(
-                        "font-weight: light-dark({}, {});",
-                        light_weight, dark_weight
-                    ));
-                    if italic {
-                        let light_style_val = if light_style.italic {
-                            "italic"
-                        } else {
-                            "normal"
-                        };
-                        let dark_style_val = if dark_style.italic {
-                            "italic"
-                        } else {
-                            "normal"
-                        };
-                        inline_styles.push(format!(
-                            "font-style: light-dark({}, {});",
-                            light_style_val, dark_style_val
-                        ));
-                    }
-                    let light_decoration = text_decoration(&light_style.text_decoration);
-                    let dark_decoration = text_decoration(&dark_style.text_decoration);
-                    inline_styles.push(format!(
-                        "text-decoration: light-dark({}, {});",
-                        light_decoration, dark_decoration
-                    ));
-                }
-            }
-        } else if let Some(default_theme_obj) = themes.get(default_name) {
-            if let Some(style) = default_theme_obj.get_style(&specialized_scope) {
-                if let Some(fg) = &style.fg {
-                    inline_styles.push(format!("color:{};", fg));
-                }
-                if let Some(bg) = &style.bg {
-                    inline_styles.push(format!("background-color:{};", bg));
-                }
-                if style.bold {
-                    inline_styles.push("font-weight:bold;".to_string());
-                }
-                if italic && style.italic {
-                    inline_styles.push("font-style:italic;".to_string());
-                }
-                let td_css = text_decoration(&style.text_decoration);
-                if td_css != "none" {
-                    inline_styles.push(format!("text-decoration:{};", td_css));
-                }
-
-                let sanitized = sanitize_theme_name(default_name);
-                let font_style = if style.italic { "italic" } else { "normal" };
-                css_vars.push(format!(
-                    "{}-{}-font-style:{};",
-                    css_variable_prefix, sanitized, font_style
-                ));
-
-                let font_weight = if style.bold { "bold" } else { "normal" };
-                css_vars.push(format!(
-                    "{}-{}-font-weight:{};",
-                    css_variable_prefix, sanitized, font_weight
-                ));
-
-                let text_dec = text_decoration(&style.text_decoration);
-                css_vars.push(format!(
-                    "{}-{}-text-decoration:{};",
-                    css_variable_prefix, sanitized, text_dec
-                ));
-            }
-
-            for (theme_name, theme) in themes.iter() {
-                if theme_name != default_name {
-                    if let Some(style) = theme.get_style(&specialized_scope) {
-                        let sanitized = sanitize_theme_name(theme_name);
-
-                        if let Some(fg) = &style.fg {
-                            css_vars.push(format!("{}-{}:{};", css_variable_prefix, sanitized, fg));
-                        }
-                        if let Some(bg) = &style.bg {
-                            css_vars
-                                .push(format!("{}-{}-bg:{};", css_variable_prefix, sanitized, bg));
-                        }
-
-                        let font_style = if style.italic { "italic" } else { "normal" };
-                        css_vars.push(format!(
-                            "{}-{}-font-style:{};",
-                            css_variable_prefix, sanitized, font_style
-                        ));
-
-                        let font_weight = if style.bold { "bold" } else { "normal" };
-                        css_vars.push(format!(
-                            "{}-{}-font-weight:{};",
-                            css_variable_prefix, sanitized, font_weight
-                        ));
-
-                        let text_dec = text_decoration(&style.text_decoration);
-                        css_vars.push(format!(
-                            "{}-{}-text-decoration:{};",
-                            css_variable_prefix, sanitized, text_dec
-                        ));
-                    }
-                }
-            }
-        }
-    } else {
-        for (theme_name, theme) in themes.iter() {
-            if let Some(style) = theme.get_style(&specialized_scope) {
-                let sanitized = sanitize_theme_name(theme_name);
-
-                if let Some(fg) = &style.fg {
-                    css_vars.push(format!("{}-{}: {};", css_variable_prefix, sanitized, fg));
-                }
-                if let Some(bg) = &style.bg {
-                    css_vars.push(format!("{}-{}-bg: {};", css_variable_prefix, sanitized, bg));
-                }
-
-                let font_style = if style.italic { "italic" } else { "normal" };
-                css_vars.push(format!(
-                    "{}-{}-font-style: {};",
-                    css_variable_prefix, sanitized, font_style
-                ));
-
-                let font_weight = if style.bold { "bold" } else { "normal" };
-                css_vars.push(format!(
-                    "{}-{}-font-weight: {};",
-                    css_variable_prefix, sanitized, font_weight
-                ));
-
-                let text_dec = text_decoration(&style.text_decoration);
-                css_vars.push(format!(
-                    "{}-{}-text-decoration: {};",
-                    css_variable_prefix, sanitized, text_dec
-                ));
-            }
-        }
-    }
-
-    if inline_styles.is_empty() && css_vars.is_empty() {
-        return String::new();
-    }
-
-    let mut attrs = String::new();
-    if include_highlights {
-        attrs.push_str(&format!("data-highlight=\"{}\" ", scope));
-    }
-
-    attrs.push_str("style=\"");
-    if !inline_styles.is_empty() {
-        attrs.push_str(&inline_styles.join(" "));
-    }
-    if !css_vars.is_empty() {
-        if !inline_styles.is_empty() {
-            attrs.push(' ');
-        }
-        attrs.push_str(&css_vars.join(" "));
-    }
-    attrs.push('"');
-
-    attrs
+    lumis_core::formatter::html::span_multi_themes_attrs(
+        scope,
+        language,
+        themes,
+        default_theme,
+        css_variable_prefix,
+        italic,
+        include_highlights,
+    )
 }
 
 /// Generate an HTML `<span>` element with CSS variables for multiple themes.
@@ -478,11 +247,11 @@ pub fn span_multi_themes_attrs(
 ///     false,
 ///     false,
 /// );
-/// assert_eq!(span, r#"<span style="--hl-dark: #ff79c6; --hl-dark-font-style: normal; --hl-dark-font-weight: normal; --hl-dark-text-decoration: none;">fn</span>"#);
+/// assert_eq!(span, r#"<span style="--hl-dark:#ff79c6; --hl-dark-font-style:normal; --hl-dark-font-weight:normal; --hl-dark-text-decoration:none;">fn</span>"#);
 ///
 /// // With data-highlight attribute
 /// let span = html::span_multi_themes("fn", "keyword", None, &theme_map, None, "--hl", false, true);
-/// assert_eq!(span, r#"<span data-highlight="keyword" style="--hl-dark: #ff79c6; --hl-dark-font-style: normal; --hl-dark-font-weight: normal; --hl-dark-text-decoration: none;">fn</span>"#);
+/// assert_eq!(span, r#"<span data-highlight="keyword" style="--hl-dark:#ff79c6; --hl-dark-font-style:normal; --hl-dark-font-weight:normal; --hl-dark-text-decoration:none;">fn</span>"#);
 /// ```
 #[allow(clippy::too_many_arguments)]
 pub fn span_multi_themes(
@@ -525,30 +294,7 @@ pub fn span_multi_themes(
 /// assert_eq!(html::escape("{code}"), "{code}");
 /// ```
 pub fn escape(text: &str) -> String {
-    let bytes = text.as_bytes();
-    let mut buf = String::with_capacity(text.len() + text.len() / 10);
-    let mut last = 0;
-
-    for (i, &b) in bytes.iter().enumerate() {
-        let replacement = match b {
-            b'&' => "&amp;",
-            b'<' => "&lt;",
-            b'>' => "&gt;",
-            b'"' => "&quot;",
-            b'\'' => "&#39;",
-            _ => continue,
-        };
-        buf.push_str(&text[last..i]);
-        buf.push_str(replacement);
-        last = i + 1;
-    }
-
-    if last == 0 {
-        return text.to_string();
-    }
-
-    buf.push_str(&text[last..]);
-    buf
+    lumis_core::formatter::html::escape(text)
 }
 
 /// Escape braces for framework compatibility.
@@ -565,7 +311,7 @@ pub fn escape(text: &str) -> String {
 /// assert_eq!(html::escape_braces("fn main() { }"), "fn main() &lbrace; &rbrace;");
 /// ```
 pub fn escape_braces(text: &str) -> String {
-    text.replace('{', "&lbrace;").replace('}', "&rbrace;")
+    lumis_core::formatter::html::escape_braces(text)
 }
 
 /// Wrap content in a line div with optional class and style attributes.
@@ -594,21 +340,7 @@ pub fn wrap_line(
     class_suffix: Option<&str>,
     style: Option<&str>,
 ) -> String {
-    let class_attr = match class_suffix {
-        Some(suffix) => format!("l-line{}", suffix),
-        None => "l-line".to_string(),
-    };
-
-    match style {
-        Some(s) => format!(
-            "<div class=\"{}\" style=\"{}\" data-line=\"{}\">{}</div>",
-            class_attr, s, line_number, content
-        ),
-        None => format!(
-            "<div class=\"{}\" data-line=\"{}\">{}</div>",
-            class_attr, line_number, content
-        ),
-    }
+    lumis_core::formatter::html::wrap_line(line_number, content, class_suffix, style)
 }
 
 /// Map tree-sitter scope to CSS class name.
@@ -625,12 +357,7 @@ pub fn wrap_line(
 /// assert_eq!(html::scope_to_class("function.method.call"), "l-function-method-call");
 /// ```
 pub fn scope_to_class(scope: &str) -> String {
-    lumis_core::highlights::HIGHLIGHT_NAMES
-        .iter()
-        .position(|&s| s == scope)
-        .and_then(|idx| lumis_core::highlights::CLASSES.get(idx))
-        .map(|class| format!("l-{class}"))
-        .unwrap_or_else(|| "l-text".to_string())
+    lumis_core::formatter::html::scope_to_class(scope)
 }
 
 /// Generate an opening `<pre>` tag with optional class and theme styles.
@@ -658,21 +385,7 @@ pub fn open_pre_tag(
     pre_class: Option<&str>,
     theme: Option<&Theme>,
 ) -> io::Result<()> {
-    let class = if let Some(pre_class) = pre_class {
-        format!("lumis {pre_class}")
-    } else {
-        "lumis".to_string()
-    };
-
-    write!(
-        output,
-        "<pre class=\"{}\"{}>",
-        class,
-        theme
-            .and_then(|theme| theme.pre_style(" "))
-            .map(|pre_style| format!(" style=\"{pre_style}\""))
-            .unwrap_or_default(),
-    )
+    lumis_core::formatter::html::open_pre_tag(output, pre_class, theme)
 }
 
 /// Generate an opening `<pre>` tag with classes and styles for multiple themes.
@@ -748,11 +461,7 @@ pub fn open_multi_themes_pre_tag(
 /// assert_eq!(String::from_utf8(output).unwrap(), r#"<code class="language-rust" translate="no" tabindex="0">"#);
 /// ```
 pub fn open_code_tag(output: &mut dyn Write, lang: &Language) -> io::Result<()> {
-    write!(
-        output,
-        "<code class=\"language-{}\" translate=\"no\" tabindex=\"0\">",
-        lang.id_name()
-    )
+    lumis_core::formatter::html::open_code_tag(output, lang)
 }
 
 /// Generate closing `</code>` tag.
@@ -771,7 +480,7 @@ pub fn open_code_tag(output: &mut dyn Write, lang: &Language) -> io::Result<()> 
 /// assert_eq!(String::from_utf8(output).unwrap(), "</code>");
 /// ```
 pub fn close_code_tag(output: &mut dyn Write) -> io::Result<()> {
-    output.write_all(b"</code>")
+    lumis_core::formatter::html::close_code_tag(output)
 }
 
 /// Generate closing `</pre>` tag.
@@ -790,7 +499,7 @@ pub fn close_code_tag(output: &mut dyn Write) -> io::Result<()> {
 /// assert_eq!(String::from_utf8(output).unwrap(), "</pre>");
 /// ```
 pub fn close_pre_tag(output: &mut dyn Write) -> io::Result<()> {
-    output.write_all(b"</pre>")
+    lumis_core::formatter::html::close_pre_tag(output)
 }
 
 /// Generate closing `</code></pre>` tags.
@@ -811,8 +520,7 @@ pub fn close_pre_tag(output: &mut dyn Write) -> io::Result<()> {
 /// assert_eq!(String::from_utf8(output).unwrap(), "</code></pre>");
 /// ```
 pub fn closing_tags(output: &mut dyn Write) -> io::Result<()> {
-    close_code_tag(output)?;
-    close_pre_tag(output)
+    lumis_core::formatter::html::closing_tags(output)
 }
 
 #[cfg(test)]

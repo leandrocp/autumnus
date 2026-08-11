@@ -19,6 +19,12 @@ describe("availableLanguages", () => {
     expect(ids).toContain("plaintext");
   });
 
+  it("is sorted by language ID", () => {
+    const ids = availableLanguages().map((language) => language.id);
+
+    expect(ids).toEqual([...ids].sort());
+  });
+
   it("has correct shape", () => {
     const js = availableLanguages().find((l) => l.id === "javascript")!;
     expect(js.name).toBe("JavaScript");
@@ -30,10 +36,25 @@ describe("availableLanguages", () => {
   it("plaintext has correct metadata", () => {
     const pt = availableLanguages().find((l) => l.id === "plaintext")!;
     expect(pt.name).toBe("Plain Text");
-    expect(pt.aliases).toContain("text");
-    expect(pt.aliases).toContain("txt");
+    expect(pt.aliases).toEqual(["text", "txt", "plain"]);
     expect(pt.extensions).toEqual([]);
-    expect(pt.emacsModes).toContain("text");
+    expect(pt.globs).toEqual([]);
+    expect(pt.emacsModes).toEqual(["fundamental", "text"]);
+    expect(pt.shebangs).toEqual([]);
+  });
+
+  it("returns fresh records and nested arrays", () => {
+    const first = availableLanguages();
+    const plaintext = first.find((language) => language.id === "plaintext")!;
+    plaintext.name = "mutated";
+    plaintext.aliases.push("mutated");
+    first.length = 0;
+
+    const next = availableLanguages();
+    const nextPlaintext = next.find((language) => language.id === "plaintext")!;
+    expect(nextPlaintext.name).toBe("Plain Text");
+    expect(nextPlaintext.aliases).not.toContain("mutated");
+    expect(next.length).toBeGreaterThan(0);
   });
 
   it("includes filename globs beyond extensions", () => {
@@ -80,5 +101,15 @@ describe("availableThemes", () => {
     ).length;
 
     expect(availableThemes()).toHaveLength(expectedCount);
+  });
+
+  it("returns fresh theme records", () => {
+    const first = availableThemes();
+    first[0]!.name = "mutated";
+    first.length = 0;
+
+    const next = availableThemes();
+    expect(next[0]!.name).not.toBe("mutated");
+    expect(next.length).toBeGreaterThan(0);
   });
 });

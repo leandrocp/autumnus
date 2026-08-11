@@ -8,11 +8,14 @@ mod tests {
 
     #[test]
     fn bundle_languages_are_available_alongside_direct_language_features() {
-        let languages = available_languages();
+        let ids: Vec<&str> = available_languages()
+            .iter()
+            .map(|language| language.id)
+            .collect();
 
-        assert!(languages.contains_key("html"));
-        assert!(languages.contains_key("javascript"));
-        assert!(languages.contains_key("rust"));
+        assert!(ids.contains(&"html"));
+        assert!(ids.contains(&"javascript"));
+        assert!(ids.contains(&"rust"));
     }
 
     #[test]

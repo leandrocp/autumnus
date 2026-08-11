@@ -172,12 +172,59 @@ Lumis.highlight!(
   </TabItem>
 </Tabs>
 
+## Class without an inline style
+
+Omitting the style uses the theme's `highlighted` style. To highlight by class
+alone, so a stylesheet or a utility framework owns the appearance, opt out of
+the inline style explicitly:
+
+<Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
+  <TabItem value="javascript" label="JavaScript">
+
+```js
+htmlInline({
+  language: javascript,
+  theme: dracula,
+  highlightLines: {lines: [2], style: null, class: 'bg-yellow-500'},
+})
+```
+
+`null` opts out; leaving `style` off entirely still uses the theme.
+
+  </TabItem>
+  <TabItem value="rust" label="Rust">
+
+```rust
+HighlightLines {
+    lines: vec![2..=2],
+    style: None,
+    class: Some("bg-yellow-500".to_string()),
+}
+```
+
+  </TabItem>
+  <TabItem value="elixir" label="Elixir">
+
+```elixir
+{:html_inline, highlight_lines: %{lines: [2], style: nil, class: "bg-yellow-500"}}
+```
+
+  </TabItem>
+  <TabItem value="cli" label="CLI">
+
+```bash
+lumis highlight -f html-inline -h 2 --highlight-lines-style none --highlight-lines-class bg-yellow-500 app.js
+```
+
+  </TabItem>
+</Tabs>
+
 ## What changes between formatters
 
 | Formatter | Highlight style |
 | --- | --- |
-| HTML Inline | theme style or custom inline CSS |
+| HTML Inline | theme style, custom inline CSS, or class only |
 | HTML Linked | CSS class names |
-| HTML Multi-Themes | theme style or custom inline CSS |
+| HTML Multi-Themes | theme style, custom inline CSS, or class only |
 | Terminal | no line highlight styling |
 | BBCode Scoped | no line highlight styling |

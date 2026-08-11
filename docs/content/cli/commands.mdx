@@ -58,7 +58,17 @@ echo 'const x = 1' | lumis highlight -l javascript --formatter html-inline --the
 | `--themes <key:theme>` | | Theme pair for multi-themes (repeatable, e.g., `--themes light:github_light --themes dark:github_dark`) |
 | `--default-theme <id>` | | Which `--themes` entry gets inline styles |
 | `--css-variable-prefix <prefix>` | | Prefix for CSS custom properties (default: `--lumis`) |
+| `--pre-class <class>` | | CSS class appended to the wrapping `<pre>` tag |
+| `--italic` | | Apply italic styles from the theme |
+| `--include-highlights` | | Add `data-highlight` attributes naming each scope |
+| `--header-open <tag>` | | Opening tag wrapped around the output (requires `--header-close`) |
+| `--header-close <tag>` | | Closing tag wrapped around the output (requires `--header-open`) |
 | `--highlight-lines <lines>` | `-h` | Lines to highlight (e.g., `1,3-5,10`) |
+| `--highlight-lines-class <class>` | | CSS class added to highlighted lines |
+| `--highlight-lines-style <style>` | | `theme` (default), `none`, or raw CSS |
+| `--background <bg>` | `-b` | Terminal fallback background: `theme`, a hex color, or omit to inherit |
+| `--width <n>` | `-w` | Terminal render width for background padding, or `auto` |
+| `--rainbow-brackets` | | Render nested brackets using rainbow bracket scopes |
 
 ### Examples
 
@@ -218,6 +228,14 @@ and every runtime reads it: cache with the CLI, and Elixir or Node start warm.
 ```bash title="Selected parsers"
 lumis parsers cache rust javascript elixir
 ```
+
+```bash title="A bundle"
+lumis parsers cache bundle-web
+```
+
+The `bundle-*` names cover the same languages as the matching
+`@lumis-sh/wasm-bundle-*` package, and `Lumis.Languages.cache/2` and
+`lumis-wasm-cache` accept them too.
 
 ```bash title="All parsers"
 lumis parsers cache --all

@@ -69,6 +69,32 @@ Node has two of them because it has two runtimes: the Wasmtime addon it uses by
 default, and `web-tree-sitter` where no addon is built. Both must produce the
 same bytes as Rust.
 
+### The formatter option manifest
+
+Conformance pins what the formatters **output**. `fixtures/formatter-options.json`
+pins what they **accept**, which conformance cannot see: a Rust builder can grow
+a field and ship while Elixir, JavaScript and the CLI silently lack it. That is
+how `rainbow_brackets` reached four runtimes and no options table, and how
+JavaScript's `terminal` went without `background` and `width`.
+
+Each implementation in this repository has a test that reads the manifest:
+
+| Runtime | Test | How it checks |
+| --- | --- | --- |
+| Rust | `crates/lumis/tests/formatter_options.rs` | calls every setter by name, so a missing one fails to compile |
+| CLI | `crates/lumis-cli/tests/formatter_options.rs` | reads `lumis highlight --help`, so it sees the flags clap parses |
+| Elixir | `packages/elixir/lumis/test/formatter_options_test.exs` | reads the keys off the NimbleOptions schema |
+| JavaScript | `packages/javascript/lumis/test/formatter-options.test.ts` | `Required<Options>` literals, so a missing field fails type-aware lint |
+
+These are the four implementations in this repository. Java is part of the
+same parity target, but its implementation lives in `lumis4j`; D26 in
+`API_DRIFT.md` tracks making that repository consume this contract too.
+
+Adding a formatter option means adding it to the manifest first and watching
+four runtimes go red. `waived` is the escape hatch for something a runtime
+genuinely cannot offer; the tests fail on a waiver that is no longer needed, so
+it can only shrink. It is currently empty.
+
 The browser task installs the required Chromium, Firefox, and WebKit builds before running. CI runs these six tasks as independent parallel jobs.
 
 ## Releases

@@ -131,14 +131,14 @@ fn languages() {
     let mut always_entries = Vec::new();
     let mut gated_entries = Vec::new();
 
-    // PlainText is always hardcoded (no parser entry in languages.toml)
+    // PlainText is always available and has no parser entry in languages.toml.
     always_entries.push(
         r#"        PlainText {
             id: "plaintext",
             name: "Plain Text",
-            from_str: [],
+            from_str: ["plaintext", "text", "txt", "plain"],
             globs: [],
-            emacs: [],
+            emacs: ["fundamental", "text"],
             shebang: []
         }"#
         .to_string(),

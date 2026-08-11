@@ -1,7 +1,7 @@
 import type { HighlightEvent, HighlightSpan, HtmlMultiThemesFormatter, Theme } from "../types.js";
-import { sanitizeThemeName } from "../themes.js";
 import {
   type HtmlAttrs,
+  buildNormalThemeVars,
   closingTags,
   formatHighlightIterLines,
   getHighlightLineClass,
@@ -11,29 +11,12 @@ import {
   openCodeTag,
   openSpanTag,
   openTag,
+  sortedThemeNames,
   spanMultiThemesAttrs,
   styleToCss,
   wrapLine,
   wrapWithHeader,
 } from "./html.js";
-
-function buildNormalThemeVars(
-  styles: string[],
-  prefix: string,
-  themes: Record<string, Theme>,
-  excludeTheme?: string,
-): void {
-  for (const [themeName, theme] of Object.entries(themes)) {
-    if (themeName === excludeTheme) {
-      continue;
-    }
-
-    const sanitized = sanitizeThemeName(themeName);
-    const style = getThemeStyle(theme, "normal");
-    if (style?.fg) styles.push(`${prefix}-${sanitized}:${style.fg};`);
-    if (style?.bg) styles.push(`${prefix}-${sanitized}-bg:${style.bg};`);
-  }
-}
 
 function buildPreThemeStyle(options: {
   themes: Record<string, Theme>;
@@ -83,7 +66,7 @@ function generatePreClasses(formatter: HtmlMultiThemesFormatter): string {
       "lumis",
       "lumis-themes",
       formatter.preClass,
-      ...Object.keys(formatter.themes).sort(),
+      ...sortedThemeNames(formatter.themes),
     ) ?? "lumis lumis-themes"
   );
 }
@@ -102,6 +85,12 @@ function highlightLineStyle(
 ): string | undefined {
   const highlightLines = formatter.highlightLines;
   if (!lineIsHighlighted(highlightLines?.lines, lineNumber)) {
+    return undefined;
+  }
+
+  // Explicit `null` opts out of the inline style entirely, leaving the class to
+  // do the highlighting. Absent still means the theme's `highlighted` style.
+  if (highlightLines?.style === null) {
     return undefined;
   }
 

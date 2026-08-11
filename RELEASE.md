@@ -91,6 +91,17 @@ package's `Cargo.toml` and `CHANGELOG.md`.
 in `mise run lint`, as its own job in Rust CI, and again in `rust-release.yml`
 before `cargo publish`.
 
+`test-packaged-parsers` packages `lumis` and builds the extracted tarball, and
+it resolves the sibling lumis crates to the tarballs built beside it rather than
+to crates.io. Publish order releases `lumis-core`, `lumis-build` and
+`lumis-wasm-runtime` before `lumis`, so a published `lumis` never meets an older
+published `lumis-core`. Resolving from the registry tested that combination
+anyway, which made the job fail for every change that adds core API and passes
+it through `lumis` — a compile error nothing in the pull request could fix.
+Packaging the set together keeps what the job is for, that the tarball builds
+and its parsers work outside the workspace, and leaves requirement staleness to
+`check-crate-deps`, which is the check that can actually see it.
+
 ## Publish order
 
 Publish dependency packages before the packages that consume them.

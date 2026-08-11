@@ -1,4 +1,5 @@
 import { THEMES } from "./generated/themes-meta.js";
+import { cloneThemeInfo } from "./catalog-metadata.js";
 import type { ThemeInfo } from "./types.js";
 
 /**
@@ -11,7 +12,7 @@ import type { ThemeInfo } from "./types.js";
  * ```
  */
 export function availableThemes(): ThemeInfo[] {
-  return THEMES;
+  return THEMES.map(cloneThemeInfo);
 }
 
 /**

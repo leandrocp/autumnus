@@ -823,15 +823,79 @@ fn highlight_source_diff_html_inline() {
 }
 
 #[test]
+fn highlight_source_html_inline_routes_parity_options() {
+    cmd()
+        .arg("--data-dir")
+        .arg(fixtures_dir())
+        .args([
+            "highlight",
+            "-l",
+            "diff",
+            "-f",
+            "html-inline",
+            "-t",
+            "dracula",
+            "--pre-class",
+            "custom",
+            "--italic",
+            "--include-highlights",
+            "--header-open",
+            "<figure>",
+            "--header-close",
+            "</figure>",
+            "-h",
+            "1",
+            "--highlight-lines-class",
+            "selected",
+            "--highlight-lines-style",
+            "none",
+        ])
+        .write_stdin(DIFF_SNIPPET)
+        .assert()
+        .success()
+        .stdout(predicate::str::starts_with(
+            "<figure><pre class=\"lumis custom\"",
+        ))
+        .stdout(predicate::str::contains(
+            "<div class=\"l-line selected\" data-line=\"1\"><span",
+        ))
+        .stdout(predicate::str::contains("data-highlight=\""))
+        .stdout(predicate::str::contains("font-style: italic;"))
+        .stdout(predicate::str::ends_with("</code></pre></figure>"));
+}
+
+#[test]
 fn highlight_source_diff_html_linked() {
     cmd()
         .arg("--data-dir")
         .arg(fixtures_dir())
-        .args(["highlight", "-l", "diff", "-f", "html-linked"])
+        .args([
+            "highlight",
+            "-l",
+            "diff",
+            "-f",
+            "html-linked",
+            "--pre-class",
+            "custom",
+            "--header-open",
+            "<figure>",
+            "--header-close",
+            "</figure>",
+            "-h",
+            "1",
+            "--highlight-lines-class",
+            "selected",
+        ])
         .write_stdin(DIFF_SNIPPET)
         .assert()
         .success()
-        .stdout(predicate::str::contains("<pre"));
+        .stdout(predicate::str::starts_with(
+            "<figure><pre class=\"lumis custom\"",
+        ))
+        .stdout(predicate::str::contains(
+            "<div class=\"l-line selected\" data-line=\"1\">",
+        ))
+        .stdout(predicate::str::ends_with("</code></pre></figure>"));
 }
 
 #[test]
@@ -885,15 +949,34 @@ fn highlight_source_diff_html_multi_themes_with_all_options() {
             "--default-theme",
             "main",
             "--css-variable-prefix=--demo",
+            "--pre-class",
+            "custom",
+            "--italic",
+            "--include-highlights",
+            "--header-open",
+            "<figure>",
+            "--header-close",
+            "</figure>",
             "-h",
             "2",
+            "--highlight-lines-class",
+            "selected",
+            "--highlight-lines-style",
+            "none",
         ])
         .write_stdin(DIFF_SNIPPET)
         .assert()
         .success()
-        .stdout(predicate::str::contains("class=\"lumis lumis-themes"))
+        .stdout(predicate::str::starts_with(
+            "<figure><pre class=\"lumis lumis-themes custom ",
+        ))
         .stdout(predicate::str::contains("--demo-alt"))
-        .stdout(predicate::str::contains("data-line=\"2\""));
+        .stdout(predicate::str::contains(
+            "<div class=\"l-line selected\" data-line=\"2\"><span",
+        ))
+        .stdout(predicate::str::contains("data-highlight=\""))
+        .stdout(predicate::str::contains("font-style:"))
+        .stdout(predicate::str::ends_with("</code></pre></figure>"));
 }
 
 #[test]
@@ -1023,8 +1106,17 @@ fn cache_parsers_no_args_fails() {
         .assert()
         .failure()
         .stderr(predicate::str::contains(
-            "specify language names or use --all",
+            "specify language names, a bundle such as bundle-web, or --all",
         ));
+}
+
+#[test]
+fn cache_parsers_rejects_an_unknown_bundle() {
+    cmd()
+        .args(["parsers", "cache", "bundle-nope"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("unknown bundle 'bundle-nope'"));
 }
 
 #[test]
@@ -1062,10 +1154,25 @@ fn cache_parsers_already_cached_verbose() {
         .stderr(predicate::str::contains("tree-sitter-diff-"));
 }
 
-/// Downloading is the smaller half of a cold parser; the Wasmtime compile is the
-/// larger, and a prepared directory is meant to carry both. `mix
-/// lumis.languages.cache` does the same, so the two cannot prepare different
-/// things.
+#[test]
+fn cache_parsers_skips_plaintext_aliases() {
+    let tmp = tempfile::tempdir().unwrap();
+
+    cmd()
+        .arg("--data-dir")
+        .arg(tmp.path())
+        .arg("-V")
+        .args(["parsers", "cache", "plaintext", "text", "txt", "plain"])
+        .assert()
+        .success()
+        .stderr(predicate::str::contains("compiled 0 parser(s)"));
+
+    assert!(fs::read_dir(tmp.path().join("parsers"))
+        .unwrap()
+        .next()
+        .is_none());
+}
+
 /// Downloading is the smaller half of a cold parser; the Wasmtime compile is the
 /// larger, and a prepared directory is meant to carry both. `mix
 /// lumis.languages.cache` does the same, so the two cannot prepare different

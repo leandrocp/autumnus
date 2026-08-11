@@ -101,10 +101,10 @@ static DEFAULT_STYLE: LazyLock<Arc<Style>> = LazyLock::new(|| Arc::new(Style::de
 
 /// Options that influence which highlight events are produced.
 ///
-/// Exposed for conformance tooling; not part of the stable public API.
-#[doc(hidden)]
+/// The counterpart of JavaScript's second argument to `highlightEvents()`.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct HighlightOptions {
+    /// Emit `punctuation.bracket.rainbow.N` scopes around bracket pairs.
     pub rainbow_brackets: bool,
 }
 
@@ -400,7 +400,33 @@ where
     Ok(())
 }
 
-#[doc(hidden)]
+/// Highlight `source` into nested open/close events.
+///
+/// The lower-level counterpart of [`highlight_iter`]: a `Start` opens a scope,
+/// `Source` events carry byte ranges, and `End` closes it, with parent scopes
+/// staying open across children. Custom formatters that need the nesting rather
+/// than a flat token stream consume these.
+///
+/// [`HighlightEvent::scope`] resolves a `Start` to its scope name, which is
+/// what JavaScript's `highlightEvents()` carries directly.
+///
+/// # Examples
+///
+/// ```rust
+/// # #[cfg(feature = "lang-rust")] {
+/// use lumis::{highlight::highlight_events, languages::Language};
+/// use lumis::events::HighlightEvent;
+///
+/// let events = highlight_events("let x = 1;", Language::Rust).unwrap();
+///
+/// let first_scope = events.iter().find_map(|event| match event {
+///     HighlightEvent::Start { .. } => event.scope(),
+///     _ => None,
+/// });
+///
+/// assert_eq!(first_scope, Some("keyword"));
+/// # }
+/// ```
 pub fn highlight_events(
     source: &str,
     language: Language,
@@ -408,7 +434,9 @@ pub fn highlight_events(
     highlight_events_with_options(source, language, HighlightOptions::default())
 }
 
-#[doc(hidden)]
+/// Highlight `source` into nested open/close events, with options.
+///
+/// See [`highlight_events`].
 pub fn highlight_events_with_options(
     source: &str,
     language: Language,

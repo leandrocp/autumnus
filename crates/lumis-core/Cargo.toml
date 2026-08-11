@@ -268,6 +268,7 @@ glob = "0.3"
 regex = "1"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+typed-path = "0.12"
 v_htmlescape = "0.17"
 
 [build-dependencies]

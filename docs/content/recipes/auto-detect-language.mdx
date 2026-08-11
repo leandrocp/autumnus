@@ -42,3 +42,40 @@ lumis highlight main.rs
 
   </TabItem>
 </Tabs>
+
+## Resolving the id without highlighting
+
+Highlighting detects the language for you. To ask what a snippet is before
+deciding what to do with it, call the detector directly. It returns the same id
+highlighting would have used, falling back to `plaintext`.
+
+<Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
+  <TabItem value="javascript" label="JavaScript">
+
+```js
+import {guessLanguage} from '@lumis-sh/lumis'
+
+guessLanguage('lib/app.ex')                      // "elixir"
+guessLanguage(undefined, '#!/usr/bin/env bash')  // "bash"
+```
+
+  </TabItem>
+  <TabItem value="rust" label="Rust">
+
+```rust
+use lumis::languages::Language;
+
+assert_eq!(Language::guess(Some("lib/app.ex"), ""), Language::Elixir);
+assert_eq!(Language::guess(None, "#!/usr/bin/env bash"), Language::Bash);
+```
+
+  </TabItem>
+  <TabItem value="elixir" label="Elixir">
+
+```elixir
+Lumis.Languages.guess("lib/app.ex")
+Lumis.Languages.guess(nil, "#!/usr/bin/env bash")
+```
+
+  </TabItem>
+</Tabs>

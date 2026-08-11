@@ -8,6 +8,7 @@ defmodule Mix.Tasks.Lumis.Languages.Cache do
   with no network at all is then a side effect rather than the point.
 
       mix lumis.languages.cache elixir html javascript css
+      mix lumis.languages.cache bundle_web
       mix lumis.languages.cache --all
       mix lumis.languages.cache --force elixir
 
@@ -35,15 +36,28 @@ defmodule Mix.Tasks.Lumis.Languages.Cache do
     Mix.Task.run("app.start")
     {options, languages} = parse_arguments(arguments)
 
-    names = languages(options, languages)
+    # Expanded here rather than left to `cache/2` so a bundle reports how many
+    # parsers it actually covers, and an unknown one fails before downloading.
+    names = options |> languages(languages) |> expand!()
 
     case Lumis.Languages.cache(names, cache_options(options)) do
       {:ok, paths} -> Enum.each(paths, fn path -> Mix.shell().info(path) end)
-      {:error, reason} -> Mix.raise(reason)
+      {:error, reason} -> Mix.raise(format_reason(reason))
     end
 
     compile(names)
   end
+
+  defp expand!(names) do
+    case Lumis.Languages.expand_bundles(names) do
+      {:ok, expanded} -> expanded
+      {:error, reason} -> Mix.raise(format_reason(reason))
+    end
+  end
+
+  defp format_reason({:unknown_bundle, name}), do: "unknown bundle #{inspect(name)}"
+  defp format_reason(reason) when is_binary(reason), do: reason
+  defp format_reason(reason), do: inspect(reason)
 
   # Downloading is only half the first-request cost: Wasmtime still compiles each
   # parser to native code, which is the larger half. Loading them here writes
@@ -75,9 +89,9 @@ defmodule Mix.Tasks.Lumis.Languages.Cache do
 
   defp languages(options, []) do
     if options[:all] do
-      Lumis.available_languages() |> Map.keys() |> Enum.sort()
+      Lumis.available_languages() |> Enum.map(& &1.id) |> Enum.sort()
     else
-      Mix.raise("name the languages to cache, or pass --all")
+      Mix.raise("name the languages to cache, a bundle such as bundle_web, or pass --all")
     end
   end
 
