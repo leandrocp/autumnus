@@ -164,7 +164,9 @@ mise run test-javascript
 [tasks.'test-elixir']
 description = "Run the Elixir test suite"
 depends = ["stage-test-parsers"]
-run = "cd packages/elixir/lumis && LUMIS_BUILD=1 mix test"
+dir = "{{config_root}}/packages/elixir/lumis"
+env = { LUMIS_BUILD = "1" }
+run = "mix test"
 
 [tasks.'test-javascript']
 description = "Run the JavaScript test suites on both the native and Wasm runtimes"
@@ -310,7 +312,21 @@ pnpm --filter @lumis-sh/lumis run test:conformance:browser
 
 [tasks.'test-conformance-elixir']
 description = "Run Elixir conformance tests"
-run = "cd packages/elixir/lumis && LUMIS_BUILD=1 mix test --include conformance test/conformance_test.exs"
+dir = "{{config_root}}/packages/elixir/lumis"
+env = { LUMIS_BUILD = "1" }
+run = "mix test --include conformance test/conformance_test.exs"
+
+[tasks.'lint-elixir']
+description = "Check Elixir formatting, compile warnings, and credo"
+dir = "{{config_root}}/packages/elixir/lumis"
+env = { LUMIS_BUILD = "1" }
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+mix format --check-formatted
+mix compile --warnings-as-errors
+mix credo
+'''
 
 [tasks.'lint-workflows']
 description = "Validate GitHub Actions workflows with actionlint"
@@ -340,13 +356,8 @@ cargo fmt --all -- --check
 cargo fmt --manifest-path crates/dev/Cargo.toml --check
 cargo fmt --manifest-path crates/autumnus/Cargo.toml --check
 echo ""
-echo "Running Elixir format check..."
-(cd packages/elixir/lumis && mix format --check-formatted)
-echo ""
-echo "Running Elixir compile warnings..."
-(cd packages/elixir/lumis && LUMIS_BUILD=1 mix compile --warnings-as-errors)
-echo "Running Elixir credo..."
-(cd packages/elixir/lumis && LUMIS_BUILD=1 mix credo)
+echo "Running Elixir checks..."
+mise run lint-elixir
 echo ""
 echo "Running JS fmt check..."
 mise run fmt-js -- --check
@@ -532,13 +543,19 @@ set -euo pipefail
 cargo run --manifest-path crates/dev/Cargo.toml --features lumis-all-languages -- regen-conformance ${usage_name:-}
 '''
 
+[tasks.'docs-elixir']
+description = "Generate the Elixir package documentation"
+dir = "{{config_root}}/packages/elixir/lumis"
+env = { LUMIS_BUILD = "1" }
+run = "mix docs"
+
 [tasks.'docs']
 description = "Generate documentation for all crates and packages"
 run = '''
 #!/usr/bin/env bash
 set -euo pipefail
 cargo doc --all-features --no-deps
-(cd packages/elixir/lumis && LUMIS_BUILD=1 mix docs)
+mise run docs-elixir
 pnpm --filter @lumis-sh/lumis run docs
 echo ""
 echo "Docs generated:"
