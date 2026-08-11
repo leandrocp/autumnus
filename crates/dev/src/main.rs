@@ -441,7 +441,13 @@ fn fixture_outputs(
                 config.highlight_lines.clone(),
             )
         })
-        .unwrap_or_else(|| (vec![format!("main:{theme}")], Some("main".to_string()), vec![]));
+        .unwrap_or_else(|| {
+            (
+                vec![format!("main:{theme}")],
+                Some("main".to_string()),
+                vec![],
+            )
+        });
     let metadata = FixtureMetadata {
         name: name.to_string(),
         language: language.id_name().to_string(),
