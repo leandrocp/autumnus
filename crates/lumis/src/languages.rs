@@ -61,17 +61,21 @@
 //! assert_eq!(Language::Rust.name(), "Rust");
 //! assert_eq!(Language::CSharp.name(), "C#");
 //!
-//! // Get all supported languages
+//! // Get all supported languages, sorted by id
 //! let languages = available_languages();
-//! assert!(languages.contains_key("rust"));
-//! assert!(languages.contains_key("elixir"));
 //!
-//! let (name, extensions) = &languages["rust"];
-//! assert_eq!(name, "Rust");
-//! assert!(extensions.contains(&"*.rs".to_string()));
+//! let rust = languages.iter().find(|language| language.id == "rust").unwrap();
+//! assert_eq!(rust.name, "Rust");
+//! assert!(rust.extensions.contains(&"*.rs"));
+//! assert!(rust.globs.contains(&"*.rs"));
+//!
+//! // Aliases, Emacs modes and shebangs are part of the same record
+//! let bash = languages.iter().find(|language| language.id == "bash").unwrap();
+//! assert!(bash.aliases.contains(&"sh"));
+//! assert!(bash.shebangs.contains(&"bash"));
 //! ```
 //!
-pub use lumis_core::languages::{available_languages, Language, LanguageParseError};
+pub use lumis_core::languages::{available_languages, Language, LanguageInfo, LanguageParseError};
 
 use lumis_core::highlights::HIGHLIGHT_NAMES;
 use lumis_wasm_runtime::tree_sitter_highlight::HighlightConfiguration;
@@ -2116,7 +2120,7 @@ mod tests {
                 id.parse::<Language>()
                     .unwrap_or_else(|_| panic!("unknown language id: {id}"))
             };
-            let sample_file = sample_file_for_language_id(&id)
+            let sample_file = sample_file_for_language_id(id)
                 .unwrap_or_else(|| panic!("missing sample for language id: {id}"));
 
             assert_language_sample_highlights(language, language.name(), &sample_file);

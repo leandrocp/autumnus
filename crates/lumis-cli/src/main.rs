@@ -59,7 +59,7 @@ enum Commands {
     #[command(
         after_help = "Examples:\n  lumis highlight main.rs\n  lumis highlight -l javascript main.txt\n  lumis highlight -f html-inline -t dracula main.rs\n  lumis highlight -b theme -w 120 main.rs\n  lumis highlight --background '#282a36' --width 120 main.rs\n  lumis highlight -h 1,3-5 lib.rs\n  cat main.rs | lumis highlight -l rust\n  echo 'fn main() {}' | lumis highlight -l rust"
     )]
-    Highlight(HighlightArgs),
+    Highlight(Box<HighlightArgs>),
 
     /// Dump Tree-sitter parsing and highlighting output
     Dump {
@@ -330,7 +330,7 @@ fn main() -> Result<()> {
             let config = config::Config::load(&config_path)?;
             let reg = registry::Registry::new(data_dir)?;
             args.theme = args.theme.or(config.highlight.theme);
-            do_highlight(&reg, args, verbose)
+            do_highlight(&reg, *args, verbose)
         }
         Commands::Dump { command } => {
             let reg = registry::Registry::new(data_dir)?;

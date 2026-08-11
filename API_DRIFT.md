@@ -17,8 +17,8 @@ cannot share, with the reason recorded).
 
 | # | Drift | Runtimes | Status |
 | --- | --- | --- | --- |
-| D1 | `html_multi_themes` emits `--prefix-name: value;` with no default theme and `--prefix-name:value;` with one; JavaScript never emits the space | Rust, CLI, Elixir vs JavaScript | open |
-| D2 | `html_multi_themes` iterates `HashMap<String, Theme>`, so CSS variable order is randomized per process and disagrees with JavaScript's insertion order | Rust, CLI, Elixir vs JavaScript | open |
+| D1 | `html_multi_themes` emits `--prefix-name: value;` with no default theme and `--prefix-name:value;` with one; JavaScript never emits the space | Rust, CLI, Elixir vs JavaScript | fixed |
+| D2 | `html_multi_themes` iterates `HashMap<String, Theme>`, so CSS variable order is randomized per process and disagrees with JavaScript's insertion order | Rust, CLI, Elixir vs JavaScript | fixed |
 
 **D1.** Rust is inconsistent with itself: the named-default branch already emits
 the unspaced form, and so does JavaScript in every branch. The single spaced
@@ -39,12 +39,12 @@ that.
 
 | # | Drift | Runtimes | Status |
 | --- | --- | --- | --- |
-| D3 | `terminal` has no `background` or `width` | JavaScript | open |
-| D4 | `highlightLines` cannot express "class, no inline style" | JavaScript | open |
-| D5 | `html_multi_themes` accepts empty themes, an unknown `defaultTheme`, and `light-dark()` without `light`/`dark` themes | JavaScript | open |
-| D6 | `highlight` has no `--pre-class`, `--italic`, `--include-highlights`, `--header`, and `--highlight-lines` takes no class or style | CLI | open |
-| D7 | `:bundle_*` names work in `Languages.load/1` but not `Languages.cache/2`, the mix task, `cacheLanguages`, `lumis-wasm-cache`, or `lumis parsers cache` | Elixir, JavaScript, CLI | open |
-| D8 | `guessLanguage` is implemented but not exported; `sanitizeThemeName` is not in `formatters/html`; `runtimeKind` is missing from the browser entry | JavaScript | open |
+| D3 | `terminal` has no `background` or `width` | JavaScript | fixed |
+| D4 | `highlightLines` cannot express "class, no inline style" | JavaScript | fixed |
+| D5 | `html_multi_themes` accepts empty themes, an unknown `defaultTheme`, and `light-dark()` without `light`/`dark` themes | JavaScript | fixed |
+| D6 | `highlight` has no `--pre-class`, `--italic`, `--include-highlights`, `--header`, and `--highlight-lines` takes no class or style | CLI | fixed |
+| D7 | `:bundle_*` names work in `Languages.load/1` but not `Languages.cache/2`, the mix task, `cacheLanguages`, `lumis-wasm-cache`, or `lumis parsers cache` | Elixir, JavaScript, CLI | fixed |
+| D8 | `guessLanguage` is implemented but not exported; `sanitizeThemeName` is not in `formatters/html`; `runtimeKind` is missing from the browser entry | JavaScript | fixed |
 
 **D4.** Rust models this as `Option<HighlightLinesStyle>` where `None` means no
 style, and Elixir documents `style: nil` for exactly this. JavaScript types it
@@ -60,11 +60,11 @@ no formatter object, so it needs the checks at call time.
 
 | # | Drift | Runtimes | Status |
 | --- | --- | --- | --- |
-| D9 | `available_languages` returns a tuple map (Rust, Elixir) or a record array with five extra fields (JavaScript) | all | open |
-| D10 | `available_themes` returns full themes (Rust), names (Elixir), or `{name, appearance}` (JavaScript) | all | open |
-| D11 | `highlight/2` is spec'd `{:ok, _}` and raises on every error path, so `highlight!/2` is the same function | Elixir | open |
+| D9 | `available_languages` returns a tuple map (Rust, Elixir) or a record array with five extra fields (JavaScript) | all | fixed |
+| D10 | `available_themes` returns full themes (Rust), names (Elixir), or `{name, appearance}` (JavaScript) | all | fixed |
+| D11 | `highlight/2` is spec'd `{:ok, _}` and raises on every error path, so `highlight!/2` is the same function | Elixir | fixed |
 | D12 | `Highlighter` names a per-language token iterator in Rust and a language registry in JavaScript | Rust vs JavaScript | accepted |
-| D13 | `HighlightEvent` and `highlightEvents` are documented public API in JavaScript and `#[doc(hidden)]` in Rust, with a different payload (`scope_index` vs `scope`) | Rust vs JavaScript | open |
+| D13 | `HighlightEvent` and `highlightEvents` are documented public API in JavaScript and `#[doc(hidden)]` in Rust, with a different payload (`scope_index` vs `scope`) | Rust vs JavaScript | fixed |
 
 **D9/D10.** Rust is the reference but has the weakest shape here — positional
 tuples and, for themes, an iterator of whole themes that Elixir and JavaScript
@@ -76,19 +76,25 @@ deprecated rather than removed, matching how `.lang()` → `.language()` and
 collision that has never confused a caller in practice: the two never appear in
 the same program. Recorded so the next reader does not "fix" one into the other.
 
+**D13.** Rust's events are public and documented now, rather than
+`#[doc(hidden)]` "exposed for conformance tooling". The payloads stay different
+— Rust keeps `scope_index` because resolving a name per event costs more than
+the formatters need — and `HighlightEvent::scope()` returns the name JavaScript
+carries directly, so a custom formatter reads the same value in both.
+
 ## Documentation
 
 | # | Drift | Runtimes | Status |
 | --- | --- | --- | --- |
-| D14 | `rainbow_brackets` is implemented on all five formatters everywhere and appears in no docs option table, no Elixir `@type formatter` variant, and no Elixir `@typedoc` option list | all | open |
-| D15 | `css_variable_prefix` is missing from the Rust row of the `html_multi_themes` options table | docs | open |
+| D14 | `rainbow_brackets` is implemented on all five formatters everywhere and appears in no docs option table, no Elixir `@type formatter` variant, and no Elixir `@typedoc` option list | all | fixed |
+| D15 | `css_variable_prefix` is missing from the Rust row of the `html_multi_themes` options table | docs | fixed |
 
 ## Structural
 
 | # | Drift | Status |
 | --- | --- | --- |
-| D16 | `crates/lumis/src/formatter/html.rs` re-declares 15 of the 18 public functions in `crates/lumis-core/src/formatter/html.rs`, including a 199-line byte-identical `span_multi_themes_attrs`, while the function directly below it delegates | open |
-| D17 | Nothing checks the option surface across runtimes. Conformance pins output for `language`, `theme` and `rainbowBrackets` only; `runtime-parity.test.ts` compares Node native against wasm inside JavaScript | open |
+| D16 | `crates/lumis/src/formatter/html.rs` re-declares 15 of the 18 public functions in `crates/lumis-core/src/formatter/html.rs`, including a 199-line byte-identical `span_multi_themes_attrs`, while the function directly below it delegates | fixed |
+| D17 | Nothing checks the option surface across runtimes. Conformance pins output for `language`, `theme` and `rainbowBrackets` only; `runtime-parity.test.ts` compares Node native against wasm inside JavaScript | fixed |
 
 **D16** is where both D1 and D2 live, in two copies. It is fixed first so the
 output fixes are written once.

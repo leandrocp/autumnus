@@ -214,6 +214,13 @@ await cacheLanguages(["javascript", "html", "css"], {
 });
 ```
 
+Both accept `bundle-*` names as well, covering the same languages as the
+matching `@lumis-sh/wasm-bundle-*` package:
+
+```bash
+npx lumis-wasm-cache bundle-web --output ./wasm-cache
+```
+
 Both paths resolve the runtime's compatible package range, then cache the exact
 manifest and verify its parser size plus SHA-256 before writing. A cached parser
 is served without a network request, so caching every language a deployment

@@ -25,3 +25,32 @@ pub enum HighlightEvent {
     /// A highlight scope ends.
     End,
 }
+
+impl HighlightEvent {
+    /// The scope name a `Start` opens, e.g. `keyword.function`.
+    ///
+    /// JavaScript's `HighlightEvent` carries the name directly; Rust carries an
+    /// index into [`HIGHLIGHT_NAMES`](crate::highlights::HIGHLIGHT_NAMES)
+    /// because resolving it per event costs more than the formatters need. This
+    /// resolves it, so a custom formatter reads the same value in both.
+    ///
+    /// Returns `None` for `Source` and `End`.
+    pub fn scope(&self) -> Option<&'static str> {
+        match self {
+            Self::Start { scope_index, .. } => {
+                Some(crate::highlights::HIGHLIGHT_NAMES[*scope_index])
+            }
+            Self::Source { .. } | Self::End => None,
+        }
+    }
+
+    /// The language a `Start` belongs to, e.g. `rust`.
+    ///
+    /// Returns `None` for `Source` and `End`.
+    pub fn language(&self) -> Option<&str> {
+        match self {
+            Self::Start { language, .. } => Some(language),
+            Self::Source { .. } | Self::End => None,
+        }
+    }
+}

@@ -1,0 +1,231 @@
+//! Rust's half of the cross-runtime formatter option check.
+//!
+//! `fixtures/formatter-options.json` lists the options every runtime must
+//! accept. Rust cannot reflect on builder setters at runtime, so the check has
+//! two halves:
+//!
+//! - `every_manifest_option_has_a_builder_setter` calls every setter by name.
+//!   An option added to the manifest that Rust lacks fails to **compile**.
+//! - `manifest_matches_the_setters_exercised_here` reads the manifest and
+//!   requires it to name exactly the options exercised above, so a setter added
+//!   to Rust without a manifest entry fails too.
+//!
+//! Together they pin the manifest and the builders to each other in both
+//! directions.
+
+use lumis::formatters::html_inline::{HighlightLines, HighlightLinesStyle};
+use lumis::formatters::HtmlElement;
+use lumis::{
+    languages::Language, themes, BBCodeScopedBuilder, HtmlInlineBuilder, HtmlLinkedBuilder,
+    HtmlMultiThemesBuilder, TerminalBackground, TerminalBuilder,
+};
+use serde::Deserialize;
+use std::collections::{BTreeMap, BTreeSet, HashMap};
+use std::fs;
+use std::path::PathBuf;
+
+#[derive(Debug, Deserialize)]
+struct Manifest {
+    formatters: BTreeMap<String, FormatterEntry>,
+    waived: BTreeMap<String, serde_json::Value>,
+}
+
+#[derive(Debug, Deserialize)]
+struct FormatterEntry {
+    options: Vec<OptionEntry>,
+}
+
+#[derive(Debug, Deserialize)]
+struct OptionEntry {
+    name: String,
+}
+
+fn manifest() -> Manifest {
+    let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../../fixtures/formatter-options.json")
+        .canonicalize()
+        .expect("formatter-options.json is reachable");
+    serde_json::from_str(&fs::read_to_string(path).expect("read formatter-options.json"))
+        .expect("parse formatter-options.json")
+}
+
+fn theme() -> themes::Theme {
+    themes::get("dracula").expect("dracula is built in")
+}
+
+fn highlight_lines() -> HighlightLines {
+    HighlightLines {
+        lines: vec![1..=1],
+        style: Some(HighlightLinesStyle::Theme),
+        class: Some("active".to_string()),
+    }
+}
+
+fn header() -> HtmlElement {
+    HtmlElement {
+        open_tag: "<figure>".to_string(),
+        close_tag: "</figure>".to_string(),
+    }
+}
+
+/// Every option in the manifest, named once per formatter. Adding an option to
+/// the manifest without adding it here fails
+/// `manifest_matches_the_setters_exercised_here`; adding it here without a Rust
+/// setter fails to compile.
+fn exercised_options() -> BTreeMap<&'static str, BTreeSet<&'static str>> {
+    let mut exercised: BTreeMap<&'static str, BTreeSet<&'static str>> = BTreeMap::new();
+
+    HtmlInlineBuilder::new()
+        .language(Language::Rust)
+        .theme(Some(theme()))
+        .pre_class(Some("code".to_string()))
+        .italic(true)
+        .include_highlights(true)
+        .rainbow_brackets(true)
+        .highlight_lines(Some(highlight_lines()))
+        .header(Some(header()))
+        .build()
+        .expect("html_inline builds");
+    exercised.insert(
+        "html_inline",
+        [
+            "language",
+            "theme",
+            "pre_class",
+            "italic",
+            "include_highlights",
+            "rainbow_brackets",
+            "highlight_lines",
+            "header",
+        ]
+        .into(),
+    );
+
+    HtmlLinkedBuilder::new()
+        .language(Language::Rust)
+        .pre_class(Some("code".to_string()))
+        .rainbow_brackets(true)
+        .highlight_lines(Some(lumis::formatters::html_linked::HighlightLines {
+            lines: vec![1..=1],
+            class: "active".to_string(),
+        }))
+        .header(Some(header()))
+        .build()
+        .expect("html_linked builds");
+    exercised.insert(
+        "html_linked",
+        [
+            "language",
+            "pre_class",
+            "rainbow_brackets",
+            "highlight_lines",
+            "header",
+        ]
+        .into(),
+    );
+
+    let mut themes_map = HashMap::new();
+    themes_map.insert("light".to_string(), theme());
+    HtmlMultiThemesBuilder::new()
+        .language(Language::Rust)
+        .themes(themes_map)
+        .default_theme("light")
+        .css_variable_prefix("--lumis")
+        .pre_class(Some("code".to_string()))
+        .italic(true)
+        .include_highlights(true)
+        .rainbow_brackets(true)
+        .highlight_lines(Some(highlight_lines()))
+        .header(Some(header()))
+        .build()
+        .expect("html_multi_themes builds");
+    exercised.insert(
+        "html_multi_themes",
+        [
+            "language",
+            "themes",
+            "default_theme",
+            "css_variable_prefix",
+            "pre_class",
+            "italic",
+            "include_highlights",
+            "rainbow_brackets",
+            "highlight_lines",
+            "header",
+        ]
+        .into(),
+    );
+
+    TerminalBuilder::new()
+        .language(Language::Rust)
+        .theme(Some(theme()))
+        .background(TerminalBackground::Theme)
+        .width(Some(120))
+        .rainbow_brackets(true)
+        .build()
+        .expect("terminal builds");
+    exercised.insert(
+        "terminal",
+        [
+            "language",
+            "theme",
+            "background",
+            "width",
+            "rainbow_brackets",
+        ]
+        .into(),
+    );
+
+    BBCodeScopedBuilder::new()
+        .language(Language::Rust)
+        .rainbow_brackets(true)
+        .build()
+        .expect("bbcode_scoped builds");
+    exercised.insert("bbcode_scoped", ["language", "rainbow_brackets"].into());
+
+    exercised
+}
+
+#[test]
+fn every_manifest_option_has_a_builder_setter() {
+    // The setters run here; reaching this line means they all exist and build.
+    let exercised = exercised_options();
+    assert_eq!(exercised.len(), 5, "all five formatters are covered");
+}
+
+#[test]
+fn manifest_matches_the_setters_exercised_here() {
+    let manifest = manifest();
+    let exercised = exercised_options();
+
+    assert_eq!(
+        manifest.formatters.keys().collect::<Vec<_>>(),
+        exercised.keys().collect::<Vec<_>>(),
+        "manifest and Rust disagree about which formatters exist"
+    );
+
+    for (formatter, entry) in &manifest.formatters {
+        let expected: BTreeSet<&str> = entry.options.iter().map(|o| o.name.as_str()).collect();
+        let actual = &exercised[formatter.as_str()];
+
+        assert_eq!(
+            &expected, actual,
+            "{formatter}: manifest options and Rust builder setters disagree"
+        );
+    }
+}
+
+#[test]
+fn no_waiver_outlives_its_reason() {
+    let manifest = manifest();
+    let waivers: Vec<&String> = manifest
+        .waived
+        .keys()
+        .filter(|key| !key.starts_with('$'))
+        .collect();
+
+    assert!(
+        waivers.is_empty(),
+        "every runtime offers every option; drop these waivers: {waivers:?}"
+    );
+}

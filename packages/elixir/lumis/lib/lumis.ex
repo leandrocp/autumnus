@@ -110,6 +110,7 @@ defmodule Lumis do
       - `:pre_class` (`t:String.t/0` - default: `nil`) - the CSS class to append into the wrapping `<pre>` tag.
       - `:italic` (`t:boolean/0` - default: `false`) - enable italic style for the highlighted code.
       - `:include_highlights` (`t:boolean/0` - default: `false`) - include the highlight scope name in a `data-highlight` attribute. Useful for debugging.
+      - `:rainbow_brackets` (`t:boolean/0` - default: `false`) - render nested brackets with rainbow bracket scopes.
       - `:highlight_lines` (`t:html_inline_highlight_lines/0` - default: `nil`) - highlight specific lines either using the theme `highlighted` style or with custom CSS styling.
       - `:header` (`t:header/0` - default: `nil`) - wrap the highlighted code with custom open and close HTML tags.
 
@@ -117,6 +118,7 @@ defmodule Lumis do
 
       - `:language` (`t:language/0` - default: `nil`) - the language used by the formatter. When omitted, Lumis tries to auto-detect it from the source.
       - `:pre_class` (`t:String.t/0` - default: `nil`) - the CSS class to append into the wrapping `<pre>` tag.
+      - `:rainbow_brackets` (`t:boolean/0` - default: `false`) - render nested brackets with rainbow bracket scopes.
       - `:highlight_lines` (`t:html_linked_highlight_lines/0` - default: `nil`) - highlight specific lines either using the `l-highlighted` class from themes or with a custom CSS class.
       - `:header` (`t:header/0` - default: `nil`) - wrap the highlighted code with custom open and close HTML tags.
 
@@ -129,6 +131,7 @@ defmodule Lumis do
       - `:pre_class` (`t:String.t/0` - default: `nil`) - the CSS class to append into the wrapping `<pre>` tag.
       - `:italic` (`t:boolean/0` - default: `false`) - enable italic style for the highlighted code.
       - `:include_highlights` (`t:boolean/0` - default: `false`) - include the highlight scope name in a `data-highlight` attribute.
+      - `:rainbow_brackets` (`t:boolean/0` - default: `false`) - render nested brackets with rainbow bracket scopes.
       - `:highlight_lines` (`t:html_inline_highlight_lines/0` - default: `nil`) - highlight specific lines (same as html_inline).
       - `:header` (`t:header/0` - default: `nil`) - wrap the highlighted code with custom open and close HTML tags.
 
@@ -138,10 +141,12 @@ defmodule Lumis do
       - `:theme` (`t:theme/0` - default: `nil`) - the theme to apply styles on the highlighted source code.
       - `:background` (`:theme | t:String.t/0 | nil` - default: `nil`) - fallback background behavior: `nil` inherits the output background, `:theme` uses the theme's normal background color, and a string uses that color.
       - `:width` (`pos_integer() | nil` - default: `nil`) - pad each rendered terminal line to the given width. This is most useful with `:background`.
+      - `:rainbow_brackets` (`t:boolean/0` - default: `false`) - render nested brackets with rainbow bracket scopes.
 
   * `bbcode_scoped`:
 
       - `:language` (`t:language/0` - default: `nil`) - available when passed as `{:bbcode_scoped, ...}`.
+      - `:rainbow_brackets` (`t:boolean/0` - default: `false`) - render nested brackets with rainbow bracket scopes.
 
   ## Examples
 
@@ -241,6 +246,7 @@ defmodule Lumis do
                pre_class: String.t(),
                italic: boolean(),
                include_highlights: boolean(),
+               rainbow_brackets: boolean(),
                highlight_lines: html_inline_highlight_lines(),
                header: header()
              ]}
@@ -249,6 +255,7 @@ defmodule Lumis do
              [
                language: language(),
                pre_class: String.t(),
+               rainbow_brackets: boolean(),
                highlight_lines: html_linked_highlight_lines(),
                header: header()
              ]}
@@ -262,6 +269,7 @@ defmodule Lumis do
                pre_class: String.t(),
                italic: boolean(),
                include_highlights: boolean(),
+               rainbow_brackets: boolean(),
                highlight_lines: html_inline_highlight_lines(),
                header: header()
              ]}
@@ -271,10 +279,11 @@ defmodule Lumis do
                language: language(),
                theme: theme(),
                background: :theme | String.t() | nil,
-               width: pos_integer() | nil
+               width: pos_integer() | nil,
+               rainbow_brackets: boolean()
              ]}
           | :bbcode_scoped
-          | {:bbcode_scoped, [language: language()]}
+          | {:bbcode_scoped, [language: language(), rainbow_brackets: boolean()]}
 
   @formatter_schema [
     type: {:custom, Lumis, :formatter_type, []},
