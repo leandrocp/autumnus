@@ -3,10 +3,10 @@
   "metric": "total",
   "timingBoundary": "every highlight in the scenario, harness fixture reads excluded; building the highlighter is reported apart as setupNs, except for the CLI rows, where each sample is a whole command and carries process start and file I/O with it",
   "system": {
-    "platform": "darwin",
-    "release": "25.5.0",
-    "architecture": "arm64",
-    "cpu": "Apple M1 Pro"
+    "platform": "linux",
+    "release": "6.17.0-1020-azure",
+    "architecture": "x64",
+    "cpu": "AMD EPYC 7763 64-Core Processor"
   },
   "scenarios": [
     {
@@ -20,63 +20,63 @@
           "id": "lumis-rust",
           "label": "Lumis Rust",
           "lumis": true,
-          "totalNs": 933329.388095238,
+          "totalNs": 1330892.6232142858,
           "setupNs": null
         },
         {
           "id": "lumis-js-node",
           "label": "Lumis JavaScript (Node, Wasmtime)",
           "lumis": true,
-          "totalNs": 1480541,
-          "setupNs": 50100624.99999998
+          "totalNs": 2134282,
+          "setupNs": 79871249.00000003
         },
         {
           "id": "lumis-js-wasm",
           "label": "Lumis JavaScript (web-tree-sitter)",
           "lumis": true,
-          "totalNs": 4856792,
-          "setupNs": 55962707.99999999
+          "totalNs": 8636602,
+          "setupNs": 80821410.99999996
         },
         {
           "id": "lumis-elixir",
           "label": "Lumis Elixir",
           "lumis": true,
-          "totalNs": 1425645.5,
+          "totalNs": 2072597,
           "setupNs": null
         },
         {
           "id": "lumis-cli",
           "label": "Lumis CLI",
           "lumis": true,
-          "totalNs": 54277457.78000001,
+          "totalNs": 96955920.60000001,
           "setupNs": null
         },
         {
           "id": "syntect",
           "label": "syntect",
           "lumis": false,
-          "totalNs": 5191494.411111111,
+          "totalNs": 5132443.375,
           "setupNs": null
         },
         {
           "id": "shiki",
           "label": "Shiki",
           "lumis": false,
-          "totalNs": 3524209,
-          "setupNs": 538290.9999999867
+          "totalNs": 6129204,
+          "setupNs": 1410061.000000013
         },
         {
           "id": "highlight-js",
           "label": "highlight.js",
           "lumis": false,
-          "totalNs": 520916,
-          "setupNs": 100250.00000000262
+          "totalNs": 943390,
+          "setupNs": 199963.0000000039
         },
         {
           "id": "bat",
           "label": "bat",
           "lumis": false,
-          "totalNs": 13030749.280000007,
+          "totalNs": 32954538.1,
           "setupNs": null
         }
       ]
@@ -92,63 +92,63 @@
           "id": "lumis-rust",
           "label": "Lumis Rust",
           "lumis": true,
-          "totalNs": 2159301354.5,
+          "totalNs": 2939386323,
           "setupNs": null
         },
         {
           "id": "lumis-js-node",
           "label": "Lumis JavaScript (Node, Wasmtime)",
           "lumis": true,
-          "totalNs": 2845345834,
-          "setupNs": 50396707.99999976
+          "totalNs": 3461180330,
+          "setupNs": 80230600.99999975
         },
         {
           "id": "lumis-js-wasm",
           "label": "Lumis JavaScript (web-tree-sitter)",
           "lumis": true,
-          "totalNs": 9062334916,
-          "setupNs": 56409333.00000142
+          "totalNs": 15786630238,
+          "setupNs": 78352906.00000007
         },
         {
           "id": "lumis-elixir",
           "label": "Lumis Elixir",
           "lumis": true,
-          "totalNs": 2831865378.5,
+          "totalNs": 3473284350,
           "setupNs": null
         },
         {
           "id": "lumis-cli",
           "label": "Lumis CLI",
           "lumis": true,
-          "totalNs": 2518486545.04,
+          "totalNs": 3169456649.04,
           "setupNs": null
         },
         {
           "id": "syntect",
           "label": "syntect",
           "lumis": false,
-          "totalNs": 3634587229,
+          "totalNs": 4240806039.5,
           "setupNs": null
         },
         {
           "id": "shiki",
           "label": "Shiki",
           "lumis": false,
-          "totalNs": 8836199916,
-          "setupNs": 426165.9999992844
+          "totalNs": 12695465173,
+          "setupNs": 687792.9999991466
         },
         {
           "id": "highlight-js",
           "label": "highlight.js",
           "lumis": false,
-          "totalNs": 750527084,
-          "setupNs": 204125.00000009005
+          "totalNs": 1302474784,
+          "setupNs": 308955.9999998528
         },
         {
           "id": "bat",
           "label": "bat",
           "lumis": false,
-          "totalNs": 5165881587.04,
+          "totalNs": 8159150087.039999,
           "setupNs": null
         }
       ]
@@ -164,63 +164,63 @@
           "id": "lumis-rust",
           "label": "Lumis Rust",
           "lumis": true,
-          "totalNs": 2581549.45,
+          "totalNs": 3619138.463333333,
           "setupNs": null
         },
         {
           "id": "lumis-js-node",
           "label": "Lumis JavaScript (Node, Wasmtime)",
           "lumis": true,
-          "totalNs": 4937000,
-          "setupNs": 49873125
+          "totalNs": 7638761,
+          "setupNs": 83313071.00000001
         },
         {
           "id": "lumis-js-wasm",
           "label": "Lumis JavaScript (web-tree-sitter)",
           "lumis": true,
-          "totalNs": 12788083,
-          "setupNs": 55722916.99999999
+          "totalNs": 22737007.999999523,
+          "setupNs": 76499011
         },
         {
           "id": "lumis-elixir",
           "label": "Lumis Elixir",
           "lumis": true,
-          "totalNs": 4170750,
+          "totalNs": 6451993,
           "setupNs": null
         },
         {
           "id": "lumis-cli",
           "label": "Lumis CLI",
           "lumis": true,
-          "totalNs": 599630198.7,
+          "totalNs": 949660464.1800001,
           "setupNs": null
         },
         {
           "id": "syntect",
           "label": "syntect",
           "lumis": false,
-          "totalNs": 7638535.146853147,
+          "totalNs": 8550370.13095238,
           "setupNs": null
         },
         {
           "id": "shiki",
           "label": "Shiki",
           "lumis": false,
-          "totalNs": 12429541,
-          "setupNs": 432792.0000000063
+          "totalNs": 20365682,
+          "setupNs": 872276.9999999969
         },
         {
           "id": "highlight-js",
           "label": "highlight.js",
           "lumis": false,
-          "totalNs": 1427667,
-          "setupNs": 81415.99999999726
+          "totalNs": 2510373,
+          "setupNs": 157984.99999999648
         },
         {
           "id": "bat",
           "label": "bat",
           "lumis": false,
-          "totalNs": 149419864.70000002,
+          "totalNs": 290669944.18,
           "setupNs": null
         }
       ]
@@ -236,63 +236,63 @@
           "id": "lumis-rust",
           "label": "Lumis Rust",
           "lumis": true,
-          "totalNs": 2119158.5694444445,
+          "totalNs": 2712425.773809524,
           "setupNs": null
         },
         {
           "id": "lumis-js-node",
           "label": "Lumis JavaScript (Node, Wasmtime)",
           "lumis": true,
-          "totalNs": 3732708,
-          "setupNs": 245741999.99999997
+          "totalNs": 6125768.000000238,
+          "setupNs": 383979616.00000006
         },
         {
           "id": "lumis-js-wasm",
           "label": "Lumis JavaScript (web-tree-sitter)",
           "lumis": true,
-          "totalNs": 7629209,
-          "setupNs": 287010708
+          "totalNs": 13202981,
+          "setupNs": 430437668.00000006
         },
         {
           "id": "lumis-elixir",
           "label": "Lumis Elixir",
           "lumis": true,
-          "totalNs": 3107771,
+          "totalNs": 5234973.5,
           "setupNs": null
         },
         {
           "id": "lumis-cli",
           "label": "Lumis CLI",
           "lumis": true,
-          "totalNs": 335525015.2,
+          "totalNs": 483598717.1,
           "setupNs": null
         },
         {
           "id": "syntect",
           "label": "syntect",
           "lumis": false,
-          "totalNs": 22726694.333333336,
+          "totalNs": 22992940.0375,
           "setupNs": null
         },
         {
           "id": "shiki",
           "label": "Shiki",
           "lumis": false,
-          "totalNs": 7394375,
-          "setupNs": 10311374.999999998
+          "totalNs": 13284462,
+          "setupNs": 23741469.999999937
         },
         {
           "id": "highlight-js",
           "label": "highlight.js",
           "lumis": false,
-          "totalNs": 1551875,
-          "setupNs": 416166.000000004
+          "totalNs": 2752164,
+          "setupNs": 768143.0000000091
         },
         {
           "id": "bat",
           "label": "bat",
           "lumis": false,
-          "totalNs": 132850244.19999999,
+          "totalNs": 224772085.6,
           "setupNs": null
         }
       ]
