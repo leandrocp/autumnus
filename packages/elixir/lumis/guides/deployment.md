@@ -19,5 +19,6 @@ versions already in the cache.
 
 By default, the task writes parser metadata, verified WASM, and compiled modules
 to Lumis's `priv/lumis` directory. `mix release` includes that directory
-automatically. If you set `LUMIS_DATA_DIR` or `config :lumis, data_dir:`, copy
-that directory into the image and use the same path at runtime.
+automatically. If you set `config :lumis, data_dir: "/app/lumis"`, use an
+absolute path, copy that directory into the image, and keep the same
+configuration at runtime.
