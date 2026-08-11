@@ -698,12 +698,7 @@ defmodule Lumis do
   @spec default_options() :: options()
   def default_options, do: validate_options!([])
 
-  @typedoc """
-  What Lumis knows about one language.
-
-  The same record every runtime returns, so listing languages reads the same
-  way in Elixir, Rust and JavaScript.
-  """
+  @typedoc "What Lumis knows about one language."
   @type language_info :: %{
           id: String.t(),
           name: String.t(),

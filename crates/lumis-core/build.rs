@@ -243,23 +243,6 @@ fn themes() {
         pub fn available_themes() -> impl Iterator<Item = &'static Theme> {
             ALL_THEMES.iter().copied()
         }
-
-        /// Name and appearance of every built-in theme, sorted by name.
-        ///
-        /// Elixir's `Lumis.available_themes/0` and JavaScript's
-        /// `availableThemes()` return this same record. Use
-        /// [`available_themes`] when the whole theme is wanted.
-        pub fn available_theme_info() -> Vec<ThemeInfo> {
-            let mut themes: Vec<ThemeInfo> = ALL_THEMES
-                .iter()
-                .map(|theme| ThemeInfo {
-                    name: theme.name.as_str(),
-                    appearance: theme.appearance,
-                })
-                .collect();
-            themes.sort_unstable_by_key(|theme| theme.name);
-            themes
-        }
     };
 
     fs::write(dest_path, output.to_string()).unwrap();

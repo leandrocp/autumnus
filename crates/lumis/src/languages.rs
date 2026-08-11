@@ -2408,7 +2408,7 @@ mod tests {
     #[test]
     fn test_available_languages() {
         let languages = available_languages();
-        assert!(languages.len() > 100, "catalog looks truncated");
+        assert!(!languages.is_empty(), "catalog looks empty");
 
         for language in &languages {
             assert!(!language.id.is_empty());
@@ -2425,23 +2425,31 @@ mod tests {
             );
         }
 
-        let rust = languages
-            .iter()
-            .find(|language| language.id == "rust")
-            .expect("rust is in the catalog");
-        assert_eq!(rust.name, "Rust");
-        assert!(rust.globs.contains(&"*.rs"));
+        // The catalog is feature-gated, so anything asserting a specific
+        // language declares the feature that compiles it in.
+        #[cfg(feature = "lang-rust")]
+        {
+            let rust = languages
+                .iter()
+                .find(|language| language.id == "rust")
+                .expect("lang-rust is enabled");
+            assert_eq!(rust.name, "Rust");
+            assert!(rust.globs.contains(&"*.rs"));
+        }
 
-        let bash = languages
-            .iter()
-            .find(|language| language.id == "bash")
-            .expect("bash is in the catalog");
-        assert!(bash.aliases.contains(&"sh"));
-        assert!(bash.shebangs.contains(&"bash"));
-        assert!(bash.globs.contains(&"PKGBUILD"));
-        assert!(
-            !bash.extensions.contains(&"PKGBUILD"),
-            "extensions must exclude non-extension globs"
-        );
+        #[cfg(feature = "lang-bash")]
+        {
+            let bash = languages
+                .iter()
+                .find(|language| language.id == "bash")
+                .expect("lang-bash is enabled");
+            assert!(bash.aliases.contains(&"sh"));
+            assert!(bash.shebangs.contains(&"bash"));
+            assert!(bash.globs.contains(&"PKGBUILD"));
+            assert!(
+                !bash.extensions.contains(&"PKGBUILD"),
+                "extensions must exclude non-extension globs"
+            );
+        }
     }
 }

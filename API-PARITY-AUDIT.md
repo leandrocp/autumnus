@@ -1,5 +1,11 @@
 # API parity audit
 
+> **Historical.** This is the scan that opened the work, written before any of
+> it was fixed, and it describes the code as it stood then. Line numbers, code
+> quotes and "Fix:" notes are all pre-fix. `API_DRIFT.md` is the live tracker
+> and says what was decided and where each fix landed; read that first. This
+> file is kept for the evidence behind each finding.
+
 Scan of the public surface of every runtime against Rust, the reference
 implementation. Rust = `crates/lumis`, CLI = `crates/lumis-cli`, Elixir =
 `packages/elixir/lumis`, JavaScript = `packages/javascript/lumis` (Node addon and
@@ -108,7 +114,7 @@ value a JavaScript caller can pass to get the class without the style.
 `--width`, `--themes`, `--default-theme`, `--css-variable-prefix`,
 `--highlight-lines`, `--rainbow-brackets`
 (`crates/lumis-cli/src/main.rs:58-105`). It has no `--pre-class`, `--italic`,
-`--include-highlights`, or `--header`, all of which the other three runtimes
+`--include-highlights`, or `--header`, all of which the other runtimes
 support on `html_inline` and `html_multi_themes` (and `--pre-class` / `--header`
 on `html_linked` too). `--highlight-lines` also takes only line numbers — no
 class or style, which the library API exposes on every other runtime.
@@ -145,7 +151,7 @@ different mental models for the same option.
 
 ## 3. Shape and naming drift
 
-### 3.1 `available_languages` returns three different things
+### 3.1 `available_languages` returns a different shape per runtime
 
 | Runtime | Return |
 |---|---|
@@ -157,7 +163,7 @@ JavaScript returns a list of records with five fields Rust and Elixir do not
 expose at all. Rust returns a positional tuple, which is the weakest of the three
 shapes and is what Elixir copied.
 
-### 3.2 `available_themes` returns three different things
+### 3.2 `available_themes` returns a different shape per runtime
 
 | Runtime | Return |
 |---|---|

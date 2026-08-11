@@ -77,12 +77,16 @@ Lumis.highlight!(code)
 ### Discovering Available Languages
 
 ```elixir
-# Get all available languages
+# Get all available languages, sorted by id
 languages = Lumis.available_languages()
-# Returns: %{"elixir" => {"Elixir", ["*.ex", "*.exs"]}, ...}
+# Returns: [%{id: "elixir", name: "Elixir", aliases: [], extensions: ["*.ex", "*.exs"],
+#            globs: ["*.ex", "*.exs"], emacs_modes: ["elixir"], shebangs: ["elixir"]}, ...]
 
 # Check if a language is supported
-Map.has_key?(Lumis.available_languages(), "elixir")
+Enum.any?(Lumis.available_languages(), &(&1.id == "elixir"))
+
+# Or resolve a name, path or source the way highlighting does
+"elixir" = Lumis.Languages.guess("lib/app.ex")
 ```
 
 ### Parser Loading
@@ -319,9 +323,13 @@ Available options for `:bbcode_scoped`:
 ### Using Themes
 
 ```elixir
-# List all available themes
+# List all available themes, sorted by name
 themes = Lumis.available_themes()
-# Returns: ["onedark", "github_light", "dracula", ...]
+# Returns: [%{name: "dracula", appearance: "dark"}, ...]
+
+# Or just the names
+names = Lumis.available_theme_names()
+# Returns: ["adwaita_dark", "adwaita_light", ...]
 
 # Use a theme by name
 Lumis.highlight!(code,
@@ -685,10 +693,10 @@ highlight_lines: %{lines: [1, 2]}
 html = Lumis.highlight!(source, opts)
 
 # Get all available languages
-%{} = Lumis.available_languages()
+[%{id: _} | _] = Lumis.available_languages()
 
 # Get all available themes
-[] = Lumis.available_themes()
+[%{name: _, appearance: _} | _] = Lumis.available_themes()
 
 # Validate options
 opts = Lumis.validate_options!(opts)

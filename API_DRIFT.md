@@ -21,7 +21,7 @@ cannot share, with the reason recorded).
 | D2 | `html_multi_themes` iterates `HashMap<String, Theme>`, so CSS variable order is randomized per process and disagrees with JavaScript's insertion order | Rust, CLI, Elixir vs JavaScript | fixed |
 
 **D1.** Rust is inconsistent with itself: the named-default branch already emits
-the unspaced form, and so does JavaScript in every branch. The single spaced
+the unspaced form, and so does JavaScript in every branch. The single-spaced
 branch is the outlier, so Rust moves. Elixir's assertions in
 `packages/elixir/lumis/test/lumis_test.exs` pin the spaced form and move with it.
 
@@ -71,15 +71,25 @@ is unchanged across fifty unknown names.
 | --- | --- | --- | --- |
 | D9 | `available_languages` returns a tuple map (Rust, Elixir) or a record array with five extra fields (JavaScript) | all | fixed |
 | D10 | `available_themes` returns full themes (Rust), names (Elixir), or `{name, appearance}` (JavaScript) | all | fixed |
+| D19 | `available_themes` named two different returns after D10: whole themes in Rust, a summary elsewhere, with a Rust-only `available_theme_info()` bolted on | Rust vs Elixir, JavaScript | fixed |
 | D11 | `highlight/2` is spec'd `{:ok, _}` and raises on every error path, so `highlight!/2` is the same function | Elixir | fixed |
 | D12 | `Highlighter` names a per-language token iterator in Rust and a language registry in JavaScript | Rust vs JavaScript | accepted |
 | D13 | `HighlightEvent` and `highlightEvents` are documented public API in JavaScript and `#[doc(hidden)]` in Rust, with a different payload (`scope_index` vs `scope`) | Rust vs JavaScript | fixed |
 
-**D9/D10.** Rust is the reference but has the weakest shape here — positional
-tuples and, for themes, an iterator of whole themes that Elixir and JavaScript
-cannot mirror cheaply. Rust gets named record types and the old accessors are
-deprecated rather than removed, matching how `.lang()` → `.language()` and
-`formatter` → `formatters` were handled.
+**D9.** Rust is the reference but had the weakest shape here — a map of
+positional tuples, which Elixir copied. Rust gets a named `LanguageInfo` record
+and the old accessor is deprecated rather than removed, matching how `.lang()` →
+`.language()` and `formatter` → `formatters` were handled. `LanguageInfo` exists
+because `Language` is a fieldless enum: the metadata has to come from somewhere.
+
+**D10/D19.** The first pass gave Rust an `available_theme_info()` beside the
+existing `available_themes()`, which left one name meaning two things and added a
+`ThemeInfo` type only Rust had. Both are gone. `Theme` already carries `name` and
+`appearance`, so Rust's `available_themes()` answers the cross-runtime question
+natively and returns a superset; Elixir and JavaScript return the summary because
+sending every theme's highlights across the NIF or the wire costs far more than
+the call is worth. That asymmetry follows from the data model rather than from
+drift, so it is recorded below rather than "fixed" into uniformity.
 
 **D12 — accepted.** Renaming either side breaks a published API to remove a
 collision that has never confused a caller in practice: the two never appear in
@@ -112,6 +122,38 @@ output fixes are written once.
 each runtime asserts against, so adding an option to a Rust builder fails Elixir,
 JavaScript and the CLI until they catch up. Conformance fixtures cover output;
 the manifest covers surface. Neither substitutes for the other.
+
+## What counts as drift, and what does not
+
+Parity is about the **concept** a caller reaches for and the **shape** of what
+comes back. Spelling is whatever the host language spells it.
+
+Not drift, and not worth a tracker entry:
+
+- **Case convention.** `pre_class` / `preClass` / `--pre-class` are one option.
+- **Where the name hangs.** Detection is `Language::guess` in Rust, an
+  associated function on the type it returns; `Lumis.Languages.guess/2` in
+  Elixir, a function in the languages module; `guessLanguage()` in JavaScript,
+  which has no namespace to hang it on and so carries the noun in the name. Each
+  is the idiomatic placement for its language, and all three read as "guess the
+  language". Forcing one spelling would make two of them unidiomatic.
+- **Container types.** A Rust `HashMap`, an Elixir map and a JavaScript object
+  are the same idea. So are a Rust tuple struct and a JavaScript object literal.
+- **Arity and overloads.** Elixir has `highlight/2` and `highlight!/2` where
+  Rust has one function returning `Result`; Rust takes `Option<&str>` where
+  JavaScript takes an optional argument.
+- **Richer returns where a runtime can afford them.** See D10/D19: Rust's
+  `available_themes()` yields whole themes because they are already in the
+  binary; the dynamic runtimes return a summary because the boundary is not
+  free.
+
+Drift, and tracked above:
+
+- A concept one runtime can express and another cannot at all (D3, D4, D6).
+- The same name meaning materially different things (D19).
+- The same call returning shapes a caller cannot write one mental model against
+  (D9).
+- Validation, defaults or error behaviour that differ (D5, D11).
 
 ## Accepted differences
 

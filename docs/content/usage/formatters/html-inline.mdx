@@ -144,7 +144,9 @@ Lumis.highlight!(
   </TabItem>
   <TabItem value="cli" label="CLI">
 
-The CLI does not expose `preClass` or `includeHighlights` for HTML Inline output.
+```bash
+lumis highlight app.js -f html-inline -t dracula --pre-class my-code --include-highlights
+```
 
   </TabItem>
 </Tabs>
@@ -206,7 +208,11 @@ Custom HTML wrappers are not currently exposed by `lumis4j`.
   </TabItem>
   <TabItem value="cli" label="CLI">
 
-Custom HTML wrappers are not available in the CLI formatter.
+```bash
+lumis highlight app.js -f html-inline --header-open '<figure>' --header-close '</figure>'
+```
+
+The two go together; clap rejects one without the other.
 
   </TabItem>
 </Tabs>

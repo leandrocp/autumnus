@@ -10,9 +10,14 @@ import TabItem from '@theme/TabItem';
 
 # List languages and themes
 
-Every runtime returns the same two records, sorted: a language carries
-`id`, `name`, `aliases`, `extensions`, `globs`, `emacsModes` and `shebangs`; a
-theme carries `name` and `appearance`.
+A language is the same record everywhere, sorted by id: `id`, `name`,
+`aliases`, `extensions`, `globs`, `emacsModes` and `shebangs`.
+
+Themes differ by what each runtime can return cheaply. Rust hands back the whole
+`Theme`, colours included, because they are already in the binary. Elixir and
+JavaScript return `name` and `appearance`, because sending every theme's
+highlights across the NIF or the wire would cost far more than the call is
+worth. Use `Theme.get` / `Lumis.Theme.get` to fetch one in full.
 
 <Tabs groupId="runtime" queryString="lang" defaultValue="javascript">
   <TabItem value="javascript" label="JavaScript">
@@ -39,13 +44,10 @@ for language in available_languages() {
     println!("{} {} {:?}", language.id, language.name, language.extensions);
 }
 
-for theme in themes::available_theme_info() {
+for theme in themes::available_themes() {
     println!("{} {:?}", theme.name, theme.appearance);
 }
 ```
-
-`themes::available_themes()` returns the whole `Theme`, including its
-highlights, when the colors are wanted rather than just the name.
 
   </TabItem>
   <TabItem value="elixir" label="Elixir">

@@ -12,6 +12,11 @@
 //!
 //! Together they pin the manifest and the builders to each other in both
 //! directions.
+//!
+//! Gated on `lang-rust` because the builders take a `Language`, and the catalog
+//! is feature-gated. The option surface does not vary per language, so one
+//! compiled-in language is enough to exercise every setter.
+#![cfg(feature = "lang-rust")]
 
 use lumis::formatters::html_inline::{HighlightLines, HighlightLinesStyle};
 use lumis::formatters::HtmlElement;

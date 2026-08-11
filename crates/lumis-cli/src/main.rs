@@ -148,11 +148,11 @@ struct HighlightArgs {
     highlight_lines: Option<String>,
 
     /// CSS class added to highlighted lines
-    #[arg(long)]
+    #[arg(long, requires = "highlight_lines")]
     highlight_lines_class: Option<String>,
 
     /// Style for highlighted lines: `theme`, `none`, or raw CSS [default: theme]
-    #[arg(long)]
+    #[arg(long, requires = "highlight_lines")]
     highlight_lines_style: Option<String>,
 
     /// Render nested brackets using rainbow bracket scopes
@@ -397,8 +397,7 @@ fn cache_parsers(
                 "specify language names, a bundle such as bundle-web, or --all"
             ));
         }
-        lumis_wasm_runtime::catalog::expand_bundles(languages.iter().map(String::as_str))
-            .map_err(|unknown| anyhow::anyhow!("unknown bundle '{}'", unknown))?
+        lumis_wasm_runtime::catalog::expand_bundles(languages.iter().map(String::as_str))?
     };
     let names: Vec<&str> = expanded.iter().map(String::as_str).collect();
 

@@ -1,7 +1,7 @@
 import type { HighlightEvent, HighlightSpan, HtmlMultiThemesFormatter, Theme } from "../types.js";
-import { sanitizeThemeName } from "../themes.js";
 import {
   type HtmlAttrs,
+  buildNormalThemeVars,
   closingTags,
   formatHighlightIterLines,
   getHighlightLineClass,
@@ -17,25 +17,6 @@ import {
   wrapLine,
   wrapWithHeader,
 } from "./html.js";
-
-function buildNormalThemeVars(
-  styles: string[],
-  prefix: string,
-  themes: Record<string, Theme>,
-  excludeTheme?: string,
-): void {
-  for (const themeName of sortedThemeNames(themes)) {
-    const theme = themes[themeName];
-    if (themeName === excludeTheme) {
-      continue;
-    }
-
-    const sanitized = sanitizeThemeName(themeName);
-    const style = getThemeStyle(theme, "normal");
-    if (style?.fg) styles.push(`${prefix}-${sanitized}:${style.fg};`);
-    if (style?.bg) styles.push(`${prefix}-${sanitized}-bg:${style.bg};`);
-  }
-}
 
 function buildPreThemeStyle(options: {
   themes: Record<string, Theme>;

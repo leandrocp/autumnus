@@ -703,12 +703,27 @@ function pushThemeCssVars(
  * Rust holds themes in a `HashMap` and sorts before emitting, so this has to
  * sort rather than follow insertion order for the two to agree byte for byte.
  *
+ * `Array.prototype.sort` orders by UTF-16 code unit, which puts astral
+ * characters before U+E000..U+FFFF; Rust orders `&str` by UTF-8 byte, which
+ * puts them after. Comparing the encoded bytes is what makes the two agree.
+ *
  * Exported for the multi-themes formatter next door, not for callers; Rust
  * keeps its counterpart private.
  * @internal
  */
 export function sortedThemeNames(themes: Record<string, unknown>): string[] {
-  return Object.keys(themes).sort();
+  const encoder = new TextEncoder();
+
+  return Object.keys(themes).sort((left, right) => {
+    const a = encoder.encode(left);
+    const b = encoder.encode(right);
+
+    for (let i = 0; i < Math.min(a.length, b.length); i += 1) {
+      if (a[i] !== b[i]) return a[i]! - b[i]!;
+    }
+
+    return a.length - b.length;
+  });
 }
 
 export function appendThemeCssVars(

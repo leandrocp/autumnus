@@ -107,6 +107,13 @@ macro_rules! define_languages {
             }
 
             /// Alternative names this language answers to, without its id.
+            ///
+            /// ```
+            /// # #[cfg(feature = "lang-bash")] {
+            /// use lumis_core::languages::Language;
+            /// assert!(Language::Bash.aliases().contains(&"sh"));
+            /// # }
+            /// ```
             pub fn aliases(&self) -> &'static [&'static str] {
                 let all: &'static [&'static str] = match self {
                     $(
@@ -126,6 +133,13 @@ macro_rules! define_languages {
             }
 
             /// File name patterns this language claims, e.g. `*.rs`.
+            ///
+            /// ```
+            /// # #[cfg(feature = "lang-bash")] {
+            /// use lumis_core::languages::Language;
+            /// assert!(Language::Bash.globs().contains(&"PKGBUILD"));
+            /// # }
+            /// ```
             pub fn globs(&self) -> &'static [&'static str] {
                 match self {
                     $(
@@ -139,6 +153,13 @@ macro_rules! define_languages {
             }
 
             /// Emacs `mode:` names that select this language.
+            ///
+            /// ```
+            /// # #[cfg(feature = "lang-bash")] {
+            /// use lumis_core::languages::Language;
+            /// assert!(Language::Bash.emacs_modes().contains(&"sh"));
+            /// # }
+            /// ```
             pub fn emacs_modes(&self) -> &'static [&'static str] {
                 match self {
                     $(
@@ -152,6 +173,13 @@ macro_rules! define_languages {
             }
 
             /// Interpreter names in a shebang line that select this language.
+            ///
+            /// ```
+            /// # #[cfg(feature = "lang-bash")] {
+            /// use lumis_core::languages::Language;
+            /// assert!(Language::Bash.shebangs().contains(&"bash"));
+            /// # }
+            /// ```
             pub fn shebangs(&self) -> &'static [&'static str] {
                 match self {
                     $(
@@ -165,6 +193,14 @@ macro_rules! define_languages {
             }
 
             /// The globs that name a bare file extension, e.g. `*.rs`.
+            ///
+            /// ```
+            /// # #[cfg(feature = "lang-bash")] {
+            /// use lumis_core::languages::Language;
+            /// // `PKGBUILD` is a glob but not an extension.
+            /// assert!(!Language::Bash.extensions().contains(&"PKGBUILD"));
+            /// # }
+            /// ```
             pub fn extensions(&self) -> Vec<&'static str> {
                 self.globs()
                     .iter()
@@ -174,6 +210,13 @@ macro_rules! define_languages {
             }
 
             /// Everything the catalog knows about this language.
+            ///
+            /// ```
+            /// # #[cfg(feature = "lang-rust")] {
+            /// use lumis_core::languages::Language;
+            /// assert_eq!(Language::Rust.info().name, "Rust");
+            /// # }
+            /// ```
             pub fn info(&self) -> LanguageInfo {
                 LanguageInfo {
                     id: self.id_name(),
@@ -328,9 +371,22 @@ macro_rules! define_languages {
 
 /// What Lumis knows about one language.
 ///
-/// Every runtime returns this same shape, so "list the languages" is one
-/// program everywhere rather than three.
-#[derive(Clone, Debug, PartialEq, Eq)]
+/// Every runtime returns this same shape.
+///
+/// # Examples
+///
+/// ```
+/// # #[cfg(feature = "lang-rust")] {
+/// use lumis_core::languages::Language;
+///
+/// let info = Language::Rust.info();
+///
+/// assert_eq!(info.id, "rust");
+/// assert_eq!(info.name, "Rust");
+/// assert!(info.globs.contains(&"*.rs"));
+/// # }
+/// ```
+#[derive(Clone, Debug, PartialEq, Eq, Hash, serde::Serialize)]
 pub struct LanguageInfo {
     /// Stable identifier, e.g. `rust`.
     pub id: &'static str,

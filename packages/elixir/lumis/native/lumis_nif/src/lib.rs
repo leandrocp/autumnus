@@ -268,10 +268,10 @@ pub struct ExThemeInfo<'a> {
     pub appearance: &'a str,
 }
 
-impl From<themes::ThemeInfo> for ExThemeInfo<'static> {
-    fn from(theme: themes::ThemeInfo) -> Self {
+impl From<&'static themes::Theme> for ExThemeInfo<'static> {
+    fn from(theme: &'static themes::Theme) -> Self {
         Self {
-            name: theme.name,
+            name: theme.name.as_str(),
             appearance: match theme.appearance {
                 themes::Appearance::Light => "light",
                 themes::Appearance::Dark => "dark",
@@ -394,7 +394,10 @@ fn cache_named_language(runtime: &Runtime, name: &str, force: bool) -> Result<St
         .map_err(|error| error.to_string())
 }
 
-#[rustler::nif]
+/// Dirty because the source is caller-supplied and unbounded: detection runs
+/// regexes over it, so a large document would hold a normal scheduler past the
+/// 1 ms budget.
+#[rustler::nif(schedule = "DirtyCpu")]
 fn guess_language(name: Option<&str>, source: &str) -> &'static str {
     languages::Language::guess(name, source).id_name()
 }
@@ -439,10 +442,12 @@ fn available_languages() -> Vec<ExLanguageInfo<'static>> {
 
 #[rustler::nif]
 fn available_themes() -> Vec<ExThemeInfo<'static>> {
-    themes::available_theme_info()
-        .into_iter()
-        .map(ExThemeInfo::from)
-        .collect()
+    // Rust's `available_themes` yields whole themes, which carry more than the
+    // wire needs; the summary is built here rather than shipping 246 of them.
+    let mut summaries: Vec<ExThemeInfo<'static>> =
+        themes::available_themes().map(ExThemeInfo::from).collect();
+    summaries.sort_unstable_by_key(|theme| theme.name);
+    summaries
 }
 
 #[rustler::nif]

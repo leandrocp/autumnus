@@ -124,8 +124,10 @@ defmodule Lumis.Languages do
   end
 
   defp strip_bundle_prefix(string) do
+    downcased = String.downcase(string)
+
     Enum.find_value(@bundle_prefixes, fn prefix ->
-      case String.split(string, prefix, parts: 2) do
+      case String.split(downcased, prefix, parts: 2) do
         ["", suffix] -> suffix
         _ -> nil
       end
